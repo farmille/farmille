@@ -1,49 +1,61 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 
 from app.auth.jwt import get_user_id, get_user_role
 from app.dependencies import get_current_user
+from app.models.schemas import RegisterRolePayload
 from app.services.supabase import get_supabase_admin
 
 router = APIRouter()
 
-VALID_ROLES = {"farmer", "maker", "ja_staff", "researcher"}
+ALLOWED_SIGNUP_ROLES = {"farmer", "maker"}
 
 
-class RegisterRoleRequest(BaseModel):
-    role: str
+def _error(status_code: int, code: str) -> JSONResponse:
+    return JSONResponse(status_code=status_code, content={"ok": False, "error": code})
 
 
 @router.post("/register-role")
 async def register_role(
-    body: RegisterRoleRequest,
+    payload: RegisterRolePayload,
     user: dict = Depends(get_current_user),
 ):
-    """オンボーディング時にロールを付与する。"""
-    if body.role not in VALID_ROLES:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid role. Must be one of: {VALID_ROLES}",
-        )
+    """オンボーディング時にロールを付与する。
 
+    順序:
+      1. app_metadata.role を更新 (Supabase Admin)
+      2. public.users.role を更新
+    2. が失敗した場合は 1. を `unassigned` に戻す手動ロールバック。
+    """
     user_id = get_user_id(user)
-    current_role = get_user_role(user)
+    existing_role = get_user_role(user)
 
-    if current_role != "unassigned":
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Role is already assigned",
+    if existing_role and existing_role != "unassigned":
+        return _error(409, "role_already_assigned")
+
+    if payload.role not in ALLOWED_SIGNUP_ROLES:
+        return _error(400, "invalid_role")
+
+    admin = get_supabase_admin()
+
+    try:
+        admin.auth.admin.update_user_by_id(
+            user_id,
+            {"app_metadata": {"role": payload.role}},
         )
+    except Exception:
+        return _error(500, "failed_to_update_auth_metadata")
 
-    supabase = get_supabase_admin()
+    try:
+        admin.table("users").update({"role": payload.role}).eq("id", user_id).execute()
+    except Exception:
+        try:
+            admin.auth.admin.update_user_by_id(
+                user_id,
+                {"app_metadata": {"role": "unassigned"}},
+            )
+        except Exception:
+            pass
+        return _error(500, "failed_to_update_users_table")
 
-    # 1. app_metadata.role に書き込み（Admin権限）
-    supabase.auth.admin.update_user_by_id(
-        user_id,
-        {"app_metadata": {"role": body.role}},
-    )
-
-    # 2. public.users.role を UPDATE
-    supabase.table("users").update({"role": body.role}).eq("id", user_id).execute()
-
-    return {"message": "Role assigned", "role": body.role}
+    return {"ok": True, "role": payload.role}
