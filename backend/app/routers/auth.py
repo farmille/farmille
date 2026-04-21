@@ -39,6 +39,8 @@ async def register_role(
     admin = get_supabase_admin()
 
     try:
+        # GoTrue は app_metadata をトップレベルで shallow-merge するため、
+        # `provider` / `providers` 等の既存キーは保持される (2026-04-21 実機検証済)
         admin.auth.admin.update_user_by_id(
             user_id,
             {"app_metadata": {"role": payload.role}},
