@@ -500,4 +500,77 @@ Supabase は 2024 年後半以降、新規プロジェクトの JWT 署名方式
 - ADR-0005「JWT 検証は JWKS 経由 ES256 を第一、HS256 はフォールバック」の起票 (v1 ローンチ後の負債返済枠)
 - JWKS のネットワーク障害時の挙動 (現状は起動時 1 回 HTTP GET、失敗時は以降の全リクエストが 401)。v1.5 以降で httpx 非同期化 + リトライ検討
 
+---
 
+## 8. 2026-04-21 運用整備: shallow-merge 検証 / git 運用正常化
+
+### 8.1 GoTrue `app_metadata` shallow-merge 実機検証
+
+register-role の実装は `admin.auth.admin.update_user_by_id(id, {"app_metadata": {"role": ...}})` で top-level の部分更新を行うが、これが既存の `provider` / `providers` キーを消さないかを実機で確認した。
+
+検証手順:
+1. バックエンド shell で `get_supabase_admin().auth.admin.list_users()` を実行
+2. オンボーディング済みユーザー (farmer / maker) の `app_metadata` を目視確認
+
+結果: `{provider: "email", providers: ["email"], role: "farmer"}` が共存していた。GoTrue は `app_metadata` をトップレベルで shallow-merge する挙動が確認できたため、`register-role` の現実装は安全。
+
+今後のメモ: より深い (2階層以上) の部分更新が必要になった場合は、既存値をサーバー側で一度 read してからマージし直す必要がある。register-role の範囲では `role` 1 階層しか触らないため問題なし。
+
+### 8.2 Git ワークフロー正常化
+
+問題: Phase 1-5 と JWKS 修正を `main` ブランチ直接 commit で進めてしまい、PR レビューを経ない運用になっていた。
+
+対応:
+1. `feat/auth-flow-v1` ブランチを `origin/main` の先頭から切り直し
+2. `main` 上の先行 commit (`1af2117..6a3adcf`) を cherry-pick で `feat/auth-flow-v1` に retrofit
+3. `main` を `git reset --hard origin/main` で公開状態に戻す (Ryoga 承認済み)
+4. `feat/auth-flow-v1` を `origin` に push し、PR 作成 URL を取得
+
+今後のルール (docs/git-workflow.md に詳細):
+- `main` への直接 commit は禁止
+- 機能単位で `feat/<topic>` ブランチを切って作業 → PR 経由でマージ
+- コミットメッセージは Conventional Commits (`feat:` / `fix:` / `docs:` / `chore:` / `refactor:` 等)
+
+### 8.3 ブランチ戦略の整理
+
+現時点の運用は「GitHub Flow」準拠:
+- 長期ブランチは `main` のみ
+- 機能開発は `feat/<topic>` を切って作業し、完了後 PR → squash merge または rebase merge で `main` へ
+- リリースは `main` から Vercel / Railway が自動デプロイ (現時点では未セットアップ / 手動)
+
+`develop` / `release/*` 等の長期ブランチは運用しない (v1 段階ではスケールに不要)。
+
+---
+
+## 9. 2026-04-21 成果物一覧
+
+### 9.1 コード (feat/auth-flow-v1)
+
+| Commit | 種類 | 内容 |
+|---|---|---|
+| `1af2117` | feat | register-role を仕様書通りに整備 (rollback 付き) |
+| `2b69301` | feat | roles.ts / server helpers / server actions / proxy.ts |
+| `de93ccf` | feat | signup / login / OAuth callback ページ |
+| `6a3adcf` | feat | home / onboarding ページ + role recovery form |
+| `6f4b1fa` | fix | ES256 / JWKS 署名検証に対応 |
+| `7b1440c` | docs | setup-log §1-7 に実装ログ追記 |
+| `b61e75e` | docs | GoTrue shallow-merge コメント追加 |
+
+### 9.2 ドキュメント
+
+| Path | 種類 | 内容 |
+|---|---|---|
+| `docs/specs/auth-flow.md` | 仕様書 | Phase 1-5 の実装の正。`middleware.ts` → `proxy.ts` の Next.js 16 差分を注記 |
+| `docs/setup-log.md` §1-10 | 実装ログ | 今日ここまでの実施ログ (このファイル) |
+| `docs/decisions/0002-reviews-insert-role-scope.md` | ADR | 既存 (レビュー投稿権限の4ロール統一) |
+| `docs/decisions/0003-storage-rls-path-enforcement.md` | ADR | 既存 (Storage RLS の path-based enforcement) |
+| `docs/git-workflow.md` | 運用規約 | ブランチ戦略・PR 運用・コミット規約 |
+| `.claude/handoff/main-to-reviewer-prompt.md` | 運用 | Phase 完了時の Reviewer ハンドオフテンプレ |
+
+### 9.3 未追跡の負債 (Phase 6 以降 / v1 ローンチ後)
+
+- ADR-0005: JWT 検証戦略 (JWKS/ES256 優先 + HS256 フォールバック)
+- 手動 E2E 検証 (仕様書 §11.5.5 の ja_staff / researcher については Studio 経由でしか作成できないため、実機ロール付与→アクセステストが未完)
+- Vercel / Railway 自動デプロイのセットアップ
+- `gh` CLI のインストール (PR 作成・レビュー返信を CLI 化)
+- auth 系ページへの design-tokens 反映

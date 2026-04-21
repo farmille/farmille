@@ -12,6 +12,7 @@
 | [decisions/](./decisions/) | ADR（アーキテクチャ意思決定記録） |
 | [specs/](./specs/) | 個別機能の実装仕様書（実装の唯一の正として扱う） |
 | [discussions/](./discussions/) | 判断保留事項・他AIへの相談文書 |
+| [reviews/](./reviews/) | Reviewer Claude への/からのハンドオフ文・指摘記録 |
 
 ## 外部ドキュメント（Google Docs）
 
