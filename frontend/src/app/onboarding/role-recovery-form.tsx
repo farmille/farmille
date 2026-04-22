@@ -34,7 +34,7 @@ export function RoleRecoveryForm({ initialError }: { initialError?: string }) {
         return;
       }
 
-      router.replace("/home");
+      router.replace("/onboarding");
       router.refresh();
     });
   };
