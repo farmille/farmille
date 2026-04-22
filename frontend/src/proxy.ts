@@ -46,7 +46,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (user && isGuestOnly) {
-    const dest = role === "unassigned" || role === null ? "/onboarding" : "/home";
+    const dest = role === "unassigned" ? "/onboarding" : "/home";
     return NextResponse.redirect(new URL(dest, request.url));
   }
 
