@@ -2,13 +2,12 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from app.auth.jwt import get_user_id, get_user_role
+from app.auth.roles import SIGNUP_ROLES
 from app.dependencies import get_current_user
 from app.models.schemas import RegisterRolePayload
 from app.services.supabase import get_supabase_admin
 
 router = APIRouter()
-
-ALLOWED_SIGNUP_ROLES = {"farmer", "maker"}
 
 
 def _error(status_code: int, code: str) -> JSONResponse:
@@ -33,7 +32,7 @@ async def register_role(
     if existing_role and existing_role != "unassigned":
         return _error(409, "role_already_assigned")
 
-    if payload.role not in ALLOWED_SIGNUP_ROLES:
+    if payload.role not in SIGNUP_ROLES:
         return _error(400, "invalid_role")
 
     admin = get_supabase_admin()

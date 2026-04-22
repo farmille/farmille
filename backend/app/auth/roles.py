@@ -4,6 +4,9 @@ from app.dependencies import get_current_user
 from app.auth.jwt import get_user_role
 
 
+SIGNUP_ROLES: set[str] = {"farmer", "maker"}
+
+
 class RoleChecker:
     """ロールベースのアクセス制御。"""
 
