@@ -48,7 +48,9 @@ async def register_role(
         return _error(500, "failed_to_update_auth_metadata")
 
     try:
-        admin.table("users").update({"role": payload.role}).eq("id", user_id).execute()
+        res = admin.table("users").update({"role": payload.role}).eq("id", user_id).execute()
+        if not res.data:
+            raise Exception("public.users row not found")
     except Exception:
         try:
             admin.auth.admin.update_user_by_id(
