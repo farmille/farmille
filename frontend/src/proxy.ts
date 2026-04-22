@@ -54,15 +54,6 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/onboarding", request.url));
   }
 
-  if (
-    user &&
-    role &&
-    role !== "unassigned" &&
-    pathname.startsWith("/onboarding")
-  ) {
-    return NextResponse.redirect(new URL("/home", request.url));
-  }
-
   return response;
 }
 
