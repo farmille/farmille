@@ -2,8 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-
-export type SignUpRole = "farmer" | "maker";
+import { isSignUpRole } from "@/lib/auth/roles";
 
 export type ActionResult =
   | { ok: true }
@@ -15,7 +14,7 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
   const email = formData.get("email");
   const password = formData.get("password");
 
-  if (role !== "farmer" && role !== "maker") {
+  if (!isSignUpRole(role)) {
     return { ok: false, error: "属性を選択してください" };
   }
   if (typeof name !== "string" || name.trim().length === 0 || name.length > 50) {

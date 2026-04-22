@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isSignUpRole } from "@/lib/auth/roles";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -19,12 +20,9 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const intendedRole = data.user?.user_metadata?.intended_role as
-    | "farmer"
-    | "maker"
-    | undefined;
+  const intendedRole = data.user?.user_metadata?.intended_role as unknown;
 
-  if (intendedRole === "farmer" || intendedRole === "maker") {
+  if (isSignUpRole(intendedRole)) {
     const completeRes = await fetch(`${origin}/api/auth/complete-signup`, {
       method: "POST",
       headers: {

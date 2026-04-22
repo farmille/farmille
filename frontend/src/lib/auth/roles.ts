@@ -5,6 +5,11 @@ export const ALL_ASSIGNED_ROLES = [
   ...MAKER_ROLES,
 ] as const;
 
+export const SIGNUP_ROLES = ["farmer", "maker"] as const;
+export type SignUpRole = (typeof SIGNUP_ROLES)[number];
+export const isSignUpRole = (v: unknown): v is SignUpRole =>
+  typeof v === "string" && (SIGNUP_ROLES as readonly string[]).includes(v);
+
 export type AssignedRole = (typeof ALL_ASSIGNED_ROLES)[number];
 export type Role = AssignedRole | "unassigned";
 

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { isSignUpRole } from "@/lib/auth/roles";
 
 export function RoleRecoveryForm({ initialError }: { initialError?: string }) {
   const router = useRouter();
@@ -11,7 +12,7 @@ export function RoleRecoveryForm({ initialError }: { initialError?: string }) {
   const handleSubmit = (formData: FormData) => {
     setError(null);
     const role = formData.get("role");
-    if (role !== "farmer" && role !== "maker") {
+    if (!isSignUpRole(role)) {
       setError("属性を選択してください");
       return;
     }

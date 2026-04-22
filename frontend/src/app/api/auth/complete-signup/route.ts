@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isSignUpRole } from "@/lib/auth/roles";
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (body.role !== "farmer" && body.role !== "maker") {
+  if (!isSignUpRole(body.role)) {
     return NextResponse.json(
       { ok: false, error: "invalid_role" },
       { status: 400 },
