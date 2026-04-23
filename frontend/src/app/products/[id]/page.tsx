@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getUser, getRole } from "@/lib/auth/server";
@@ -116,16 +117,20 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
         <section className="grid md:grid-cols-2 gap-8">
           <div className="space-y-3">
-            <div className="aspect-[4/3] rounded-md border border-border bg-muted flex items-center justify-center text-muted-foreground">
+            <div className="relative aspect-[4/3] rounded-md border border-border bg-muted overflow-hidden">
               {heroImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={heroImage.url}
                   alt={product.name}
-                  className="w-full h-full object-cover rounded-md"
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
                 />
               ) : (
-                <span>No Image</span>
+                <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                  No Image
+                </div>
               )}
             </div>
             {subImages.length > 0 && (
@@ -133,13 +138,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 {subImages.map((img) => (
                   <div
                     key={img.url}
-                    className="aspect-square rounded-sm border border-border bg-muted overflow-hidden"
+                    className="relative aspect-square rounded-sm border border-border bg-muted overflow-hidden"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       src={img.url}
                       alt=""
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 768px) 33vw, 16vw"
+                      className="object-cover"
                     />
                   </div>
                 ))}

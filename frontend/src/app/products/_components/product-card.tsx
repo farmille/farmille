@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export type Product = {
   id: string;
@@ -17,16 +18,19 @@ export function ProductCard({ product }: { product: Product }) {
       href={`/products/${product.id}`}
       className="group block rounded-md border border-border bg-card overflow-hidden hover:shadow-sm transition-shadow"
     >
-      <div className="aspect-[4/3] bg-muted flex items-center justify-center text-muted-foreground text-sm">
+      <div className="relative aspect-[4/3] bg-muted overflow-hidden">
         {product.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={product.image_url}
             alt={product.name}
-            className="w-full h-full object-cover"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
           />
         ) : (
-          <span>No Image</span>
+          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
+            No Image
+          </div>
         )}
       </div>
       <div className="p-4 space-y-2">

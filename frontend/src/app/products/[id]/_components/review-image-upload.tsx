@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import Image from "next/image";
 import { X, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -111,11 +112,13 @@ export function ReviewImageUpload({ files, onChange, disabled }: Props) {
                 key={`${f.name}-${idx}`}
                 className="relative aspect-square rounded-sm border border-border overflow-hidden bg-muted"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={url}
                   alt={f.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  unoptimized
+                  sizes="(max-width: 640px) 33vw, 20vw"
+                  className="object-cover"
                 />
                 <Button
                   type="button"
