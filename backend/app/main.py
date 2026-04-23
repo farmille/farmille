@@ -2,7 +2,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, health, products, reviews
+from app.routers import (
+    auth,
+    crops,
+    health,
+    onboarding,
+    product_types,
+    products,
+    reviews,
+)
 
 app = FastAPI(
     title="Farmille API",
@@ -20,5 +28,8 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(auth.router, prefix="/v1/auth", tags=["auth"])
+app.include_router(onboarding.router, prefix="/v1/onboarding", tags=["onboarding"])
+app.include_router(crops.router, prefix="/v1/crops", tags=["crops"])
+app.include_router(product_types.router, prefix="/v1/product-types", tags=["product-types"])
 app.include_router(products.router, prefix="/v1/products", tags=["products"])
 app.include_router(reviews.router, prefix="/v1/reviews", tags=["reviews"])
