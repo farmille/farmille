@@ -1,9 +1,180 @@
-from fastapi import APIRouter
+from uuid import UUID
+
+from fastapi import APIRouter, HTTPException, Query
+
+from app.services.supabase import get_supabase_admin
 
 router = APIRouter()
 
 
-@router.get("/")
-async def list_products():
-    """資材一覧を返す（未実装スケルトン）。"""
-    return {"products": [], "message": "Not implemented yet"}
+def _representative_image(images: list[dict] | None) -> str | None:
+    """product_images から order 昇順で先頭の url を代表画像として返す。"""
+    if not images:
+        return None
+    sorted_images = sorted(images, key=lambda x: x.get("order", 0))
+    return sorted_images[0].get("url")
+
+
+def _flatten_product(row: dict) -> dict:
+    """Supabase JOIN レスポンスをフロント向けの平坦な形に整形(一覧用)。
+
+    products × users(maker_name) × product_types(type_id/name) ×
+    product_images(代表画像) を 1 オブジェクトにまとめる。
+    """
+    maker = row.get("users") or {}
+    product_type = row.get("product_types") or {}
+    return {
+        "id": row["id"],
+        "name": row["name"],
+        "maker_id": row.get("maker_id"),
+        "maker_name": maker.get("name"),
+        "type_id": product_type.get("id"),
+        "type_name": product_type.get("name"),
+        "image_url": _representative_image(row.get("product_images")),
+        "created_at": row.get("created_at"),
+    }
+
+
+def _flatten_product_detail(row: dict) -> dict:
+    """詳細用の平坦化。一覧の項目に加え、画像配列・効果タグ・対象作目・認証を含める。"""
+    maker = row.get("users") or {}
+    product_type = row.get("product_types") or {}
+
+    images = sorted(row.get("product_images") or [], key=lambda x: x.get("order", 0))
+
+    benefits = []
+    for rel in row.get("product_benefit_relations") or []:
+        b = rel.get("product_benefits")
+        if b:
+            benefits.append({"id": b["id"], "category": b.get("category"), "name": b["name"]})
+
+    crops = []
+    for rel in row.get("product_crops") or []:
+        c = rel.get("crops")
+        if c:
+            crops.append({"id": c["id"], "name": c["name"]})
+
+    certifications = []
+    for rel in row.get("product_certifications") or []:
+        cert = rel.get("certifications")
+        if cert:
+            certifications.append({"id": cert["id"], "name": cert["name"]})
+
+    return {
+        "id": row["id"],
+        "name": row["name"],
+        "maker_id": row.get("maker_id"),
+        "maker_name": maker.get("name"),
+        "type_id": product_type.get("id"),
+        "type_name": product_type.get("name"),
+        "general_purpose": row.get("general_purpose"),
+        "primary_compound": row.get("primary_compound"),
+        "mode_of_action": row.get("mode_of_action"),
+        "commercial_status": row.get("commercial_status"),
+        "label_url": row.get("label_url"),
+        "sds_url": row.get("sds_url"),
+        "created_at": row.get("created_at"),
+        "images": [{"url": img["url"], "order": img.get("order", 0)} for img in images],
+        "benefits": benefits,
+        "crops": crops,
+        "certifications": certifications,
+    }
+
+
+@router.get("")
+async def list_products(
+    type_id: str | None = Query(default=None),
+    crop_id: str | None = Query(default=None),
+):
+    """資材一覧。`type_id` / `crop_id` の AND 絞り込み対応。
+
+    レスポンス: { products: [{ id, name, maker_id, maker_name,
+                              type_id, type_name, image_url, created_at }] }
+    認証不要(LP / ゲスト閲覧前提)。
+    """
+    admin = get_supabase_admin()
+
+    # crop_id 指定時は product_crops から該当 product_id を先に取得して
+    # IN 句で絞り込む(Supabase nested filter 構文を避けて確実に動かす)
+    product_ids: list[str] | None = None
+    if crop_id:
+        pc_res = (
+            admin.table("product_crops")
+            .select("product_id")
+            .eq("crop_id", crop_id)
+            .execute()
+        )
+        product_ids = [r["product_id"] for r in (pc_res.data or [])]
+        if not product_ids:
+            return {"products": []}
+
+    query = admin.table("products").select(
+        'id, name, maker_id, created_at, '
+        'users(name), '
+        'product_types(id, name), '
+        'product_images(url, "order")'
+    )
+    if type_id:
+        query = query.eq("product_type_id", type_id)
+    if product_ids is not None:
+        query = query.in_("id", product_ids)
+    res = query.order("created_at", desc=True).execute()
+    products = [_flatten_product(row) for row in (res.data or [])]
+    return {"products": products}
+
+
+@router.get("/{product_id}/reviews")
+async def list_product_reviews(product_id: UUID):
+    """指定資材のレビュー一覧。投稿日 desc。認証不要(全員閲覧可)。
+
+    レスポンス: { reviews: [{ id, user_id, user_name, rating, body, created_at }] }
+    不正な UUID は FastAPI が 422 を返す。
+    """
+    admin = get_supabase_admin()
+    res = (
+        admin.table("reviews")
+        .select("id, user_id, rating, body, created_at, users(name)")
+        .eq("product_id", str(product_id))
+        .order("created_at", desc=True)
+        .execute()
+    )
+    reviews = []
+    for r in res.data or []:
+        u = r.get("users") or {}
+        reviews.append({
+            "id": r["id"],
+            "user_id": r["user_id"],
+            "user_name": u.get("name"),
+            "rating": r["rating"],
+            "body": r["body"],
+            "created_at": r["created_at"],
+        })
+    return {"reviews": reviews}
+
+
+@router.get("/{product_id}")
+async def get_product(product_id: UUID):
+    """資材詳細。maker / type / images(全件) / benefits / crops / certifications を JOIN 展開。
+
+    レビューは別エンドポイント /v1/products/{product_id}/reviews で取得する。
+    認証不要。存在しない id は 404、不正な UUID は FastAPI が 422 を返す。
+    """
+    admin = get_supabase_admin()
+    res = (
+        admin.table("products")
+        .select(
+            'id, name, maker_id, general_purpose, primary_compound, mode_of_action, '
+            'commercial_status, label_url, sds_url, created_at, '
+            'users(name), '
+            'product_types(id, name), '
+            'product_images(url, "order"), '
+            'product_benefit_relations(product_benefits(id, category, name)), '
+            'product_crops(crops(id, name)), '
+            'product_certifications(certifications(id, name))'
+        )
+        .eq("id", str(product_id))
+        .execute()
+    )
+    if not res.data:
+        raise HTTPException(status_code=404, detail="product_not_found")
+    return _flatten_product_detail(res.data[0])
