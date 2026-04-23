@@ -61,7 +61,7 @@
   --color-success: hsl(var(--success));
   --color-warning: hsl(var(--warning));
   --color-error: hsl(var(--error));
-  --font-sans: "Noto Sans JP", "Inter", sans-serif;
+  --font-sans: var(--font-noto-sans-jp), var(--font-inter), sans-serif;
 }
 
 @layer base {
@@ -71,7 +71,7 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: "Noto Sans JP", "Inter", sans-serif;
+    font-family: var(--font-noto-sans-jp), var(--font-inter), sans-serif;
     font-feature-settings: "palt" 1, "kern" 1, "tnum" 1;
   }
 }

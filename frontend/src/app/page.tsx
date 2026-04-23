@@ -1,65 +1,101 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <header className="border-b border-border bg-card">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link
+            href="/"
+            className="text-2xl font-semibold tracking-tight text-foreground"
+          >
+            Farmille
+          </Link>
+          <nav className="flex items-center gap-4 text-sm">
+            <Link
+              href="/products"
+              className="text-foreground hover:text-primary"
+            >
+              資材一覧
+            </Link>
+            <Link
+              href="/login"
+              className="text-foreground hover:text-primary"
+            >
+              ログイン
+            </Link>
+            <Button asChild size="sm">
+              <Link href="/signup">新規登録</Link>
+            </Button>
+          </nav>
+        </div>
+      </header>
+
+      <section className="flex-1 flex items-center justify-center bg-background py-20">
+        <div className="max-w-3xl mx-auto px-6 text-center space-y-8">
+          <h1 className="text-5xl font-semibold tracking-tight text-foreground leading-tight">
+            農家が選ぶ、
+            <br />
+            本当に効く BS 資材を見つけよう
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            Farmille は、生物・微生物農業資材(BS資材)の現場レビューが集まるプラットフォームです。
+            農家・JA 普及員・研究者の声から、自分の圃場に合った資材を選べます。
           </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild size="lg">
+              <Link href="/products">資材を見る</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/signup">レビューを投稿する</Link>
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section className="bg-muted py-16">
+        <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-foreground">
+              現場のリアルな声
+            </h2>
+            <p className="text-base text-muted-foreground leading-relaxed">
+              実際に使った農家の評価とコメントを、作目・地域・施用時期と紐付けて閲覧できます。
+            </p>
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-foreground">
+              JBSA 効果タグで比較
+            </h2>
+            <p className="text-base text-muted-foreground leading-relaxed">
+              メーカー申告の推奨効果と、農家が実感した効果を並べて比較。資材選びの判断材料に。
+            </p>
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-foreground">
+              専門家もユーザー
+            </h2>
+            <p className="text-base text-muted-foreground leading-relaxed">
+              JA 普及員・研究者も投稿・閲覧する場。プロの視点と現場の視点が交わります。
+            </p>
+          </div>
         </div>
-      </main>
+      </section>
+
+      <footer className="border-t border-border bg-card py-8">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <p>© 2026 Farmille</p>
+          <nav className="flex items-center gap-4">
+            <Link href="/login" className="hover:text-primary">
+              ログイン
+            </Link>
+            <Link href="/signup" className="hover:text-primary">
+              新規登録
+            </Link>
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }
