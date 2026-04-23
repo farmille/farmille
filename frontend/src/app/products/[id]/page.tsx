@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { getUser, getRole } from "@/lib/auth/server";
+import { ReviewForm } from "./_components/review-form";
 
 type ProductDetail = {
   id: string;
@@ -55,9 +57,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
     throw new Error("API_URL not configured");
   }
 
-  const [productRes, reviewsRes] = await Promise.all([
+  const [productRes, reviewsRes, user, role] = await Promise.all([
     fetch(`${apiUrl}/v1/products/${id}`, { cache: "no-store" }),
     fetch(`${apiUrl}/v1/products/${id}/reviews`, { cache: "no-store" }),
+    getUser(),
+    getRole(),
   ]);
 
   if (productRes.status === 404) {
@@ -212,6 +216,38 @@ export default async function ProductDetailPage({ params }: PageProps) {
             items={product.certifications.map((c) => c.name)}
             emptyText="認証の登録なし"
           />
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            レビューを投稿
+          </h2>
+          {!user ? (
+            <div className="rounded-md border border-border bg-card p-6 text-center space-y-3">
+              <p className="text-foreground">
+                レビューを投稿するにはログインが必要です。
+              </p>
+              <Button asChild>
+                <Link href={`/login?next=/products/${product.id}`}>
+                  ログインしてレビューを投稿する
+                </Link>
+              </Button>
+            </div>
+          ) : role === "farmer" ? (
+            reviews.some((r) => r.user_id === user.id) ? (
+              <p className="rounded-md border border-border bg-card p-6 text-center text-muted-foreground">
+                この資材には既にレビューを投稿済みです。
+              </p>
+            ) : (
+              <ReviewForm productId={product.id} />
+            )
+          ) : (
+            <p className="rounded-md border border-border bg-card p-6 text-center text-muted-foreground">
+              このロール(
+              {role ?? "unassigned"}
+              )ではレビュー投稿できません。
+            </p>
+          )}
         </section>
 
         <section className="space-y-4">
