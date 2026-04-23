@@ -15,11 +15,27 @@ def _representative_image(images: list[dict] | None) -> str | None:
     return sorted_images[0].get("url")
 
 
+def _maker_display_name(maker: dict) -> str | None:
+    """maker の表示名を決定する。maker_profiles.company_name 優先、
+    無ければ users.name にフォールバック。
+
+    Supabase の 1:1 join は dict で返る想定だが、1:N 形式で list で
+    返るケースも観測されうるため両対応。"""
+    raw = maker.get("maker_profiles")
+    if isinstance(raw, list):
+        profile = raw[0] if raw else {}
+    elif isinstance(raw, dict):
+        profile = raw
+    else:
+        profile = {}
+    return profile.get("company_name") or maker.get("name")
+
+
 def _flatten_product(row: dict) -> dict:
     """Supabase JOIN レスポンスをフロント向けの平坦な形に整形(一覧用)。
 
-    products × users(maker_name) × product_types(type_id/name) ×
-    product_images(代表画像) を 1 オブジェクトにまとめる。
+    products × users(name, maker_profiles(company_name)) ×
+    product_types(type_id/name) × product_images(代表画像) を 1 オブジェクトに。
     """
     maker = row.get("users") or {}
     product_type = row.get("product_types") or {}
@@ -27,7 +43,7 @@ def _flatten_product(row: dict) -> dict:
         "id": row["id"],
         "name": row["name"],
         "maker_id": row.get("maker_id"),
-        "maker_name": maker.get("name"),
+        "maker_name": _maker_display_name(maker),
         "type_id": product_type.get("id"),
         "type_name": product_type.get("name"),
         "image_url": _representative_image(row.get("product_images")),
@@ -64,7 +80,7 @@ def _flatten_product_detail(row: dict) -> dict:
         "id": row["id"],
         "name": row["name"],
         "maker_id": row.get("maker_id"),
-        "maker_name": maker.get("name"),
+        "maker_name": _maker_display_name(maker),
         "type_id": product_type.get("id"),
         "type_name": product_type.get("name"),
         "general_purpose": row.get("general_purpose"),
@@ -110,7 +126,7 @@ async def list_products(
 
     query = admin.table("products").select(
         'id, name, maker_id, created_at, '
-        'users(name), '
+        'users(name, maker_profiles(company_name)), '
         'product_types(id, name), '
         'product_images(url, "order")'
     )
@@ -165,7 +181,7 @@ async def get_product(product_id: UUID):
         .select(
             'id, name, maker_id, general_purpose, primary_compound, mode_of_action, '
             'commercial_status, label_url, sds_url, created_at, '
-            'users(name), '
+            'users(name, maker_profiles(company_name)), '
             'product_types(id, name), '
             'product_images(url, "order"), '
             'product_benefit_relations(product_benefits(id, category, name)), '
