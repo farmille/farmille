@@ -241,13 +241,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </Button>
             </div>
           ) : role === "farmer" ? (
-            reviews.some((r) => r.user_id === user.id) ? (
-              <p className="rounded-md border border-border bg-card p-6 text-center text-muted-foreground">
-                この資材には既にレビューを投稿済みです。
-              </p>
-            ) : (
-              <ReviewForm productId={product.id} />
-            )
+            <ReviewForm productId={product.id} />
           ) : (
             <p className="rounded-md border border-border bg-card p-6 text-center text-muted-foreground">
               このロール(
