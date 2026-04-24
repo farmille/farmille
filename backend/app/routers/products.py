@@ -444,9 +444,15 @@ async def update_product(
         admin.table("product_certifications").delete().eq(
             "product_id", str(product_id)
         ).execute()
-        admin.table("product_images").delete().eq(
-            "product_id", str(product_id)
-        ).execute()
+
+        # 画像は明示的な操作 (order 指定 or remove_paths 指定) がある時だけ
+        # 全置換する。どちらも空の payload では product_images を一切触らない
+        # (Phase 9 互換の「画像無関係な部分編集」セマンティクスを保持)。
+        touching_images = bool(payload.order) or bool(payload.remove_paths)
+        if touching_images:
+            admin.table("product_images").delete().eq(
+                "product_id", str(product_id)
+            ).execute()
 
         if payload.benefit_ids:
             admin.table("product_benefit_relations").insert(
@@ -475,7 +481,7 @@ async def update_product(
                     for cid in payload.certification_ids
                 ]
             ).execute()
-        if payload.order:
+        if touching_images and payload.order:
             admin.table("product_images").insert(
                 [
                     {
