@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getUser, getRole } from "@/lib/auth/server";
 import { ReviewForm } from "./_components/review-form";
+import { MyReviewRow } from "./_components/my-review-row";
 
 type ProductDetail = {
   id: string;
@@ -271,30 +272,44 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </p>
           ) : (
             <ul className="space-y-3">
-              {reviews.map((r) => (
-                <li
-                  key={r.id}
-                  className="rounded-md border border-border bg-card p-4 space-y-2"
-                >
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-medium text-foreground">
-                      {r.user_name ?? "匿名ユーザー"}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDate(r.created_at)}
-                    </span>
-                  </div>
-                  <div className="text-sm text-foreground">
-                    {"★".repeat(r.rating)}
-                    <span className="text-muted-foreground">
-                      {"★".repeat(5 - r.rating)}
-                    </span>
-                  </div>
-                  <p className="text-base text-foreground whitespace-pre-wrap">
-                    {r.body}
-                  </p>
-                </li>
-              ))}
+              {reviews.map((r) =>
+                user && r.user_id === user.id ? (
+                  <MyReviewRow
+                    key={r.id}
+                    productId={product.id}
+                    review={{
+                      id: r.id,
+                      user_name: r.user_name,
+                      rating: r.rating,
+                      body: r.body,
+                      created_at: r.created_at,
+                    }}
+                  />
+                ) : (
+                  <li
+                    key={r.id}
+                    className="rounded-md border border-border bg-card p-4 space-y-2"
+                  >
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="font-medium text-foreground">
+                        {r.user_name ?? "匿名ユーザー"}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(r.created_at)}
+                      </span>
+                    </div>
+                    <div className="text-sm text-foreground">
+                      {"★".repeat(r.rating)}
+                      <span className="text-muted-foreground">
+                        {"★".repeat(5 - r.rating)}
+                      </span>
+                    </div>
+                    <p className="text-base text-foreground whitespace-pre-wrap">
+                      {r.body}
+                    </p>
+                  </li>
+                ),
+              )}
             </ul>
           )}
         </section>

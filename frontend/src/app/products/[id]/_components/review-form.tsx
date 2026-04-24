@@ -13,8 +13,19 @@ import { ReviewImageUpload } from "./review-image-upload";
 const BODY_MAX = 2000;
 const BODY_MIN = 1;
 
+type Mode = "create" | "edit";
+
+type InitialValues = {
+  reviewId: string;
+  rating: number;
+  body: string;
+};
+
 type Props = {
   productId: string;
+  mode?: Mode;
+  initialValues?: InitialValues;
+  onCancel?: () => void;
 };
 
 type ErrorCode =
@@ -23,6 +34,8 @@ type ErrorCode =
   | "forbidden"
   | "review_already_exists"
   | "image_upload_failed"
+  | "review_not_found"
+  | "not_owner"
   | "unknown";
 
 function errorMessage(code: ErrorCode): string {
@@ -32,21 +45,31 @@ function errorMessage(code: ErrorCode): string {
     case "unauthorized":
       return "ログインが必要です";
     case "forbidden":
+    case "not_owner":
       return "この操作を行う権限がありません";
     case "review_already_exists":
       return "この資材には既にレビューを投稿済みです";
+    case "review_not_found":
+      return "対象のレビューが見つかりませんでした";
     case "image_upload_failed":
       return "画像のアップロードに失敗しました。時間をおいて再度お試しください";
     default:
-      return "投稿に失敗しました。時間をおいて再度お試しください";
+      return "保存に失敗しました。時間をおいて再度お試しください";
   }
 }
 
-export function ReviewForm({ productId }: Props) {
+export function ReviewForm({
+  productId,
+  mode = "create",
+  initialValues,
+  onCancel,
+}: Props) {
   const router = useRouter();
-  const [rating, setRating] = useState(0);
+  const isEdit = mode === "edit" && initialValues !== undefined;
+
+  const [rating, setRating] = useState(isEdit ? initialValues!.rating : 0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [body, setBody] = useState("");
+  const [body, setBody] = useState(isEdit ? initialValues!.body : "");
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null);
@@ -61,7 +84,6 @@ export function ReviewForm({ productId }: Props) {
     reviewId: string,
   ) {
     for (const [idx, file] of files.entries()) {
-      // 同名衝突回避のため idx をプレフィックス。RLS は {uid}/* を強制するのみ
       const path = `${userId}/${reviewId}/${idx}_${file.name}`;
       const { error } = await supabase.storage
         .from("review-images")
@@ -76,10 +98,29 @@ export function ReviewForm({ productId }: Props) {
     setSubmitting(true);
     setErrorCode(null);
 
-    const reviewId = crypto.randomUUID();
-    const supabase = createClient();
-
     try {
+      if (isEdit) {
+        const res = await fetch(`/api/reviews/${initialValues!.reviewId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rating, body }),
+        });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as {
+            error?: string;
+          };
+          setErrorCode(mapStatus(res.status, data.error));
+          setSubmitting(false);
+          return;
+        }
+        router.refresh();
+        onCancel?.();
+        return;
+      }
+
+      const reviewId = crypto.randomUUID();
+      const supabase = createClient();
+
       if (files.length > 0) {
         const {
           data: { user },
@@ -113,17 +154,7 @@ export function ReviewForm({ productId }: Props) {
         const data = (await res.json().catch(() => ({}))) as {
           error?: string;
         };
-        if (res.status === 409) {
-          setErrorCode("review_already_exists");
-        } else if (res.status === 401) {
-          setErrorCode("unauthorized");
-        } else if (res.status === 403) {
-          setErrorCode("forbidden");
-        } else if (res.status === 400 || res.status === 422) {
-          setErrorCode("invalid_body");
-        } else {
-          setErrorCode((data.error as ErrorCode) ?? "unknown");
-        }
+        setErrorCode(mapStatus(res.status, data.error));
         setSubmitting(false);
         return;
       }
@@ -207,14 +238,16 @@ export function ReviewForm({ productId }: Props) {
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label>画像(任意)</Label>
-        <ReviewImageUpload
-          files={files}
-          onChange={setFiles}
-          disabled={submitting}
-        />
-      </div>
+      {!isEdit && (
+        <div className="space-y-2">
+          <Label>画像(任意)</Label>
+          <ReviewImageUpload
+            files={files}
+            onChange={setFiles}
+            disabled={submitting}
+          />
+        </div>
+      )}
 
       {errorCode && (
         <p className="text-sm text-destructive" role="alert">
@@ -222,11 +255,36 @@ export function ReviewForm({ productId }: Props) {
         </p>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        {isEdit && onCancel && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={submitting}
+          >
+            キャンセル
+          </Button>
+        )}
         <Button type="submit" disabled={!canSubmit || submitting}>
-          {submitting ? "投稿中…" : "レビューを投稿"}
+          {submitting
+            ? isEdit
+              ? "更新中…"
+              : "投稿中…"
+            : isEdit
+              ? "更新"
+              : "レビューを投稿"}
         </Button>
       </div>
     </form>
   );
+}
+
+function mapStatus(status: number, error?: string): ErrorCode {
+  if (status === 409) return "review_already_exists";
+  if (status === 401) return "unauthorized";
+  if (status === 403) return "forbidden";
+  if (status === 404) return "review_not_found";
+  if (status === 400 || status === 422) return "invalid_body";
+  return (error as ErrorCode) ?? "unknown";
 }
