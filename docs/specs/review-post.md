@@ -35,58 +35,25 @@
 
 - **reviews テーブルへの INSERT は BFF 経由**（`POST /v1/products/{id}/reviews`）
 - **画像アップロードのみ Supabase Storage 直叩き許容**（skill §1.3 例外 2「写真アップロード」）
-  1. フロント: クライアント側で Supabase Storage の `review-images` バケットにアップロード
-  2. アップロード完了後、返された public URL をメモリ保持
-  3. BFF への POST body に `image_urls: [url1, url2, ...]` として送信
-  4. BFF が reviews テーブルと review_images テーブルに同一処理で INSERT
-- RLS の path enforcement（`{auth.uid}/{review_id}/{filename}`）を守る必要があるが、**review_id は投稿前には存在しない**。回避策は下記 §5 で定義
+  1. フロントで `crypto.randomUUID()` により `review_id` を先発行（§5.1 案 B）
+  2. `review-images` バケットに `{uid}/{review_id}/{filename}` のパスでアップロード
+  3. BFF に `review_id` + rating + body を POST（画像 URL は送らない。画像と review は Storage パスのみで紐づく）
+  4. BFF は `reviews` に 1 行 INSERT。画像メタデータテーブルは存在しないため BFF は画像に関与しない（ADR-0003）
+- RLS path enforcement（`{auth.uid}/{review_id}/{filename}`）は Storage RLS で強制されるため、上記 1-2 を守れば通る
 
 ---
 
 ## 3. DB スキーマ変更
 
-本 Phase で必要な migration 2 本:
+本 Phase で必要な migration は 1 本（Storage RLS のみ）。**画像メタデータ用の中間テーブル `review_images` は作らない**（ADR-0003 維持）。画像と review は Storage のパス命名規約 `{uid}/{review_id}/{filename}` のみで紐づける。
 
-### 3.1 新規: `review_images` テーブル
-
-`product_images` と同設計で追加:
-
-```sql
--- supabase/migrations/YYYYMMDDHHMMSS_review_images_table.sql
-
-CREATE TABLE review_images (
-  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  review_id  uuid NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
-  url        text NOT NULL,
-  "order"    int  NOT NULL DEFAULT 0
-);
-
-CREATE INDEX review_images_review_id_idx ON review_images(review_id);
-
--- RLS: reviews と同様、投稿者本人のみ INSERT/DELETE、誰でも SELECT
-ALTER TABLE review_images ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "review_images_select_all" ON review_images
-  FOR SELECT TO anon, authenticated USING (true);
-
-CREATE POLICY "review_images_insert_owner" ON review_images
-  FOR INSERT TO authenticated WITH CHECK (
-    review_id IN (SELECT id FROM reviews WHERE user_id = auth.uid())
-  );
-
-CREATE POLICY "review_images_delete_owner" ON review_images
-  FOR DELETE TO authenticated USING (
-    review_id IN (SELECT id FROM reviews WHERE user_id = auth.uid())
-  );
-```
-
-### 3.2 既存 draft commit: `20260420000000_review_images_rls.sql`
+### 3.1 既存 draft commit: `20260420000000_review_images_rls.sql`
 
 Storage RLS（バケット `review-images` のポリシー）。**このファイルは既に未追跡で存在する**。Phase 7 冒頭で `git add` + commit する。
 
 既に dev 環境に apply 済か要確認（`supabase db push --linked` で冪等に確認）。
 
-### 3.3 変更しない RLS
+### 3.2 変更しない RLS
 
 reviews テーブルの既存 RLS (`reviews_insert_farmer`) は **farmer のみ許可**のまま維持。spec v1 では farmer 限定でリリース。ADR-0002 (`docs/decisions/0002-reviews-insert-role-scope.md`、現在未追跡 draft) は v1.5 以降の検討として保留。
 
@@ -104,9 +71,9 @@ POST /v1/products/{product_id}/reviews
 権限: farmer のみ（require_role("farmer")）
 Payload:
   {
+    "review_id": str (uuid, 必須),  // フロントで crypto.randomUUID() 発行（§5.1 案 B）
     "rating": int (1-5, 必須),
-    "body": str (1-2000 文字, 必須),
-    "image_urls": list[str] (0-5 件, 任意)
+    "body": str (1-2000 文字, 必須)
   }
 Response 201:
   { "ok": true, "review_id": "uuid" }
@@ -117,24 +84,13 @@ Response 403 / 401 / 422:
 ```
 
 処理順序:
-1. `reviews` に 1 行 INSERT → review_id を取得
-2. `image_urls` が空でなければ `review_images` に bulk INSERT（order は配列順）
-3. 2 で失敗した場合は 1 をロールバック（整合性担保）
+1. payload の `review_id` を id として `reviews` に 1 行 INSERT（`INSERT INTO reviews (id, user_id, product_id, rating, body) VALUES (...)`）
+2. UNIQUE(user_id, product_id) 違反 → 409
+3. 画像は BFF を経由しない（フロントが Storage に直接アップロード済み。BFF は DB にメタデータを保存しないため `image_urls` を受け取らない）
 
 ### 4.2 既存変更: `GET /v1/products/{product_id}/reviews`
 
-レスポンスに画像を含める:
-
-```python
-# select 追加
-.select(
-    "id, user_id, rating, body, created_at, "
-    "users(name, maker_profiles(company_name)), "
-    "review_images(url, \"order\")"
-)
-```
-
-flatten 側で `images: [{ url, order }]` を返す。
+Phase 7 では既存実装を変更しない（画像は一覧に表示しない）。画像表示が必要になった時点で ADR を起票し、`supabase-py` の Storage `list({uid}/{review_id}/)` か、BFF で `review_id` から算出した URL を返す方式を検討する（v1.5+ スコープ）。
 
 ---
 
@@ -161,20 +117,17 @@ const userId = session.user.id;
 
 for (const [idx, file] of files.entries()) {
   const path = `${userId}/${reviewId}/${idx}_${file.name}`;
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from("review-images")
     .upload(path, file, { upsert: false });
   if (error) throw error;
-  const { data: publicUrl } = supabase.storage
-    .from("review-images")
-    .getPublicUrl(path);
-  imageUrls.push(publicUrl.publicUrl);
+  // BFF には URL を送らない。Storage パス `{uid}/{review_id}/` で紐づく
 }
 
-// その後 BFF に POST
+// その後 BFF に POST（image_urls は送らない。Storage パスで紐づく）
 fetch(`/api/reviews`, {
   method: "POST",
-  body: JSON.stringify({ product_id, review_id: reviewId, rating, body, image_urls: imageUrls }),
+  body: JSON.stringify({ product_id, review_id: reviewId, rating, body }),
 });
 ```
 
@@ -210,12 +163,13 @@ fetch(`/api/reviews`, {
 ## 7. 受け入れ条件
 
 ### 7.1 API 動作
-- [ ] farmer で `POST /v1/products/{id}/reviews` 成功 → reviews テーブルに 1 行、review_images に画像数分の行が作成
+- [ ] farmer で `POST /v1/products/{id}/reviews` 成功 → reviews テーブルに 1 行（id は payload の `review_id`）作成
+- [ ] アップロードした画像が Supabase Storage の `review-images/{uid}/{review_id}/` 配下に存在
 - [ ] maker / unassigned / 他 role で 403
 - [ ] 未ログインで 401
 - [ ] 同一 farmer が同 product に 2 回投稿 → 409
 - [ ] rating が 1-5 範囲外 or body 空で 422
-- [ ] image_urls が 6 件以上で 422
+- [ ] フロントが画像 6 件以上を選択した場合、アップロード前にクライアント側で弾く（UI 制約）
 
 ### 7.2 UI 動作
 - [ ] `/products/[id]` の farmer ログイン時に投稿フォーム表示
@@ -249,15 +203,15 @@ fetch(`/api/reviews`, {
 ## 9. 触るファイル（予想）
 
 ### 新規
-- `supabase/migrations/YYYYMMDDHHMMSS_review_images_table.sql`（§3.1）
-- `backend/app/routers/reviews.py` 置換は**しない**（POST は products.py に置く）
 - `frontend/src/app/products/[id]/_components/review-form.tsx`
 - `frontend/src/app/products/[id]/_components/review-image-upload.tsx`
 - `frontend/src/app/api/reviews/route.ts`（BFF proxy）
 
+※ `backend/app/routers/reviews.py` は**作らない**。POST は `products.py` に配置（Phase 6 の `GET /v1/products/{id}/reviews` と同居）。
+
 ### 既存修正
 - `supabase/migrations/20260420000000_review_images_rls.sql`（未追跡 draft を git add + commit）
-- `backend/app/routers/products.py`（POST 追加 + GET レスポンスに images 追加）
+- `backend/app/routers/products.py`（POST `/reviews` を追加。GET は Phase 7 で変更しない）
 - `backend/app/models/schemas.py`（`ReviewCreatePayload` 追加）
 - `frontend/src/app/products/[id]/page.tsx`（フォーム埋め込み + 認証判定）
 - （必要なら）`frontend/next.config.ts` の `images.remotePatterns` に Supabase Storage ドメインを追加
@@ -267,8 +221,8 @@ fetch(`/api/reviews`, {
 ## 10. 設計上の注意
 
 - **reviews の UNIQUE (user_id, product_id)**: 同一 farmer が同 product に複数投稿できない制約が既にある。409 で返す明示的ハンドリングが必要
-- **画像削除のタイミング**: v1 では投稿後の削除 UI を出さない。アップロードしたが投稿失敗した画像は Storage に残存する（orphan）。v1.5 で cron or BFF で掃除を検討
-- **BFF のトランザクション**: supabase-py は単発 REST なので、reviews INSERT と review_images INSERT は厳密には非 atomic。失敗時のロールバックは手動（Phase 5 onboarding の user_crops 全削除→INSERT パターンと同型）
+- **画像 orphan の扱い**: ADR-0003 維持により中間テーブルが無く、投稿失敗時に Storage にアップロード済みの画像は `{uid}/{review_id}/` 配下に残る。v1 ではクリーンアップ実装なし。v1.5 で cron or 投稿失敗時のクライアント側 Storage delete を検討
+- **BFF のトランザクション**: Phase 7 の BFF は `reviews` INSERT 1 本のみ（中間テーブル無し）。失敗時のロールバックは不要
 
 ---
 
@@ -276,10 +230,11 @@ fetch(`/api/reviews`, {
 
 実装完了後、`.claude/handoff/templates/worker-to-reviewer.md` に従ってハンドオフ文を生成。**Ryoga が「ハンドオフ出して」と明示するまで出さない**。
 
-## 12. Ryoga 判断依頼事項
+## 12. Ryoga 判断（確定済）
 
-- Q1: 画像 path 制約の回避案（§5.1）は案 B（フロントで review_id を先に発行）で OK か
-- Q2: ADR-0002 (`docs/decisions/0002-reviews-insert-role-scope.md`) の未追跡 draft を、ja_staff/researcher も reviews 投稿可に拡張するなら Phase 7 に含めるか、v1.5 送りにするか
+- Q1: 画像 path 制約の回避案 → **案 B 確定**（フロントで `crypto.randomUUID()` 発行、Storage path と POST body 両方に使う）
+- Q2: ADR-0002 の 3ロール拡張 → **v1.5 送り確定**。Phase 7 では `reviews_insert_farmer` のまま維持。ADR-0002 は Phase 7 では commit しない
+- 中間テーブル `review_images` → **作らない確定**（ADR-0003 維持。画像と review は Storage パスで紐づく）
 
 ---
 

@@ -1,7 +1,11 @@
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import JSONResponse
 
+from app.auth.jwt import get_user_id
+from app.dependencies import require_role
+from app.models.schemas import ProductCreatePayload, ReviewCreatePayload
 from app.services.supabase import get_supabase_admin
 
 router = APIRouter()
@@ -97,6 +101,108 @@ def _flatten_product_detail(row: dict) -> dict:
     }
 
 
+@router.post("", status_code=201)
+async def create_product(
+    payload: ProductCreatePayload,
+    user: dict = require_role("maker"),
+):
+    """maker による資材登録。
+
+    maker_id は payload ではなく JWT の sub を強制採用 (書き換え攻撃防止)。
+    products INSERT 成功後に関連テーブルを順次 INSERT。途中失敗時は
+    products 行を削除し CASCADE で関連を清掃する (supabase-py は単発 REST の
+    ため手動ロールバック)。
+    画像は §5.1 の方針で path を rename せず public URL を product_images に保存。
+    """
+    maker_id = get_user_id(user)
+    admin = get_supabase_admin()
+
+    try:
+        prod_res = (
+            admin.table("products")
+            .insert(
+                {
+                    "maker_id": maker_id,
+                    "product_type_id": str(payload.product_type_id),
+                    "name": payload.name,
+                    "general_purpose": payload.general_purpose,
+                    "primary_compound": payload.primary_compound,
+                    "mode_of_action": payload.mode_of_action,
+                    "commercial_status": payload.commercial_status,
+                    "label_url": payload.label_url,
+                    "sds_url": payload.sds_url,
+                }
+            )
+            .execute()
+        )
+    except Exception:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": "failed_to_create_product"},
+        )
+
+    if not prod_res.data:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": "failed_to_create_product"},
+        )
+
+    product_id = prod_res.data[0]["id"]
+
+    def _rollback():
+        try:
+            admin.table("products").delete().eq("id", product_id).execute()
+        except Exception:
+            pass
+
+    try:
+        if payload.image_urls:
+            admin.table("product_images").insert(
+                [
+                    {"product_id": product_id, "url": url, "order": idx}
+                    for idx, url in enumerate(payload.image_urls)
+                ]
+            ).execute()
+
+        if payload.benefit_ids:
+            admin.table("product_benefit_relations").insert(
+                [
+                    {
+                        "product_id": product_id,
+                        "product_benefit_id": str(bid),
+                    }
+                    for bid in payload.benefit_ids
+                ]
+            ).execute()
+
+        if payload.crop_ids:
+            admin.table("product_crops").insert(
+                [
+                    {"product_id": product_id, "crop_id": str(cid)}
+                    for cid in payload.crop_ids
+                ]
+            ).execute()
+
+        if payload.certification_ids:
+            admin.table("product_certifications").insert(
+                [
+                    {
+                        "product_id": product_id,
+                        "certification_id": str(cid),
+                    }
+                    for cid in payload.certification_ids
+                ]
+            ).execute()
+    except Exception:
+        _rollback()
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": "failed_to_attach_relations"},
+        )
+
+    return {"ok": True, "product_id": product_id}
+
+
 @router.get("")
 async def list_products(
     type_id: str | None = Query(default=None),
@@ -137,6 +243,61 @@ async def list_products(
     res = query.order("created_at", desc=True).execute()
     products = [_flatten_product(row) for row in (res.data or [])]
     return {"products": products}
+
+
+@router.post("/{product_id}/reviews", status_code=201)
+async def create_product_review(
+    product_id: UUID,
+    payload: ReviewCreatePayload,
+    user: dict = require_role("farmer"),
+):
+    """farmer によるレビュー投稿。
+
+    id は payload.review_id を採用(フロントで crypto.randomUUID() 発行、
+    画像 Storage パス {uid}/{review_id}/ と同期させるため)。
+    UNIQUE(user_id, product_id) 違反は 409 で返す。
+    画像メタデータは ADR-0003 により DB では保持しない。
+    """
+    user_id = get_user_id(user)
+    admin = get_supabase_admin()
+
+    existing = (
+        admin.table("reviews")
+        .select("id")
+        .eq("user_id", user_id)
+        .eq("product_id", str(product_id))
+        .limit(1)
+        .execute()
+    )
+    if existing.data:
+        return JSONResponse(
+            status_code=409,
+            content={"ok": False, "error": "review_already_exists"},
+        )
+
+    try:
+        admin.table("reviews").insert(
+            {
+                "id": str(payload.review_id),
+                "user_id": user_id,
+                "product_id": str(product_id),
+                "rating": payload.rating,
+                "body": payload.body,
+            }
+        ).execute()
+    except Exception as exc:
+        msg = str(exc).lower()
+        if "23505" in msg or "duplicate key" in msg or "unique" in msg:
+            return JSONResponse(
+                status_code=409,
+                content={"ok": False, "error": "review_already_exists"},
+            )
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": "failed_to_create_review"},
+        )
+
+    return {"ok": True, "review_id": str(payload.review_id)}
 
 
 @router.get("/{product_id}/reviews")

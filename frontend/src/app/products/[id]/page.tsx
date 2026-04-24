@@ -1,6 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { getUser, getRole } from "@/lib/auth/server";
+import { ReviewForm } from "./_components/review-form";
 
 type ProductDetail = {
   id: string;
@@ -55,9 +58,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
     throw new Error("API_URL not configured");
   }
 
-  const [productRes, reviewsRes] = await Promise.all([
+  const [productRes, reviewsRes, user, role] = await Promise.all([
     fetch(`${apiUrl}/v1/products/${id}`, { cache: "no-store" }),
     fetch(`${apiUrl}/v1/products/${id}/reviews`, { cache: "no-store" }),
+    getUser(),
+    getRole(),
   ]);
 
   if (productRes.status === 404) {
@@ -112,16 +117,20 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
         <section className="grid md:grid-cols-2 gap-8">
           <div className="space-y-3">
-            <div className="aspect-[4/3] rounded-md border border-border bg-muted flex items-center justify-center text-muted-foreground">
+            <div className="relative aspect-[4/3] rounded-md border border-border bg-muted overflow-hidden">
               {heroImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={heroImage.url}
                   alt={product.name}
-                  className="w-full h-full object-cover rounded-md"
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
                 />
               ) : (
-                <span>No Image</span>
+                <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                  No Image
+                </div>
               )}
             </div>
             {subImages.length > 0 && (
@@ -129,13 +138,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 {subImages.map((img) => (
                   <div
                     key={img.url}
-                    className="aspect-square rounded-sm border border-border bg-muted overflow-hidden"
+                    className="relative aspect-square rounded-sm border border-border bg-muted overflow-hidden"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       src={img.url}
                       alt=""
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 768px) 33vw, 16vw"
+                      className="object-cover"
                     />
                   </div>
                 ))}
@@ -212,6 +222,38 @@ export default async function ProductDetailPage({ params }: PageProps) {
             items={product.certifications.map((c) => c.name)}
             emptyText="認証の登録なし"
           />
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+            レビューを投稿
+          </h2>
+          {!user ? (
+            <div className="rounded-md border border-border bg-card p-6 text-center space-y-3">
+              <p className="text-foreground">
+                レビューを投稿するにはログインが必要です。
+              </p>
+              <Button asChild>
+                <Link href={`/login?next=/products/${product.id}`}>
+                  ログインしてレビューを投稿する
+                </Link>
+              </Button>
+            </div>
+          ) : role === "farmer" ? (
+            reviews.some((r) => r.user_id === user.id) ? (
+              <p className="rounded-md border border-border bg-card p-6 text-center text-muted-foreground">
+                この資材には既にレビューを投稿済みです。
+              </p>
+            ) : (
+              <ReviewForm productId={product.id} />
+            )
+          ) : (
+            <p className="rounded-md border border-border bg-card p-6 text-center text-muted-foreground">
+              このロール(
+              {role ?? "unassigned"}
+              )ではレビュー投稿できません。
+            </p>
+          )}
         </section>
 
         <section className="space-y-4">
