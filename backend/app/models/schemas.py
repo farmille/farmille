@@ -58,3 +58,25 @@ class ProductCreatePayload(BaseModel):
     crop_ids: list[UUID] = Field(default_factory=list, max_length=50)
     certification_ids: list[UUID] = Field(default_factory=list, max_length=10)
     image_urls: list[str] = Field(default_factory=list, max_length=5)
+
+
+class ReviewUpdatePayload(BaseModel):
+    rating: int = Field(ge=1, le=5)
+    body: str = Field(min_length=1, max_length=2000)
+
+
+class ProductUpdatePayload(BaseModel):
+    """画像編集は Phase 10 送り (docs/specs/image-edit-and-launch-ready.md)。
+    本 Phase では ProductCreatePayload から image_urls を除外した同形。"""
+
+    name: str = Field(min_length=1, max_length=100)
+    product_type_id: UUID
+    general_purpose: str | None = Field(default=None, max_length=500)
+    primary_compound: str | None = Field(default=None, max_length=200)
+    mode_of_action: str | None = Field(default=None, max_length=500)
+    commercial_status: str | None = Field(default=None, max_length=50)
+    label_url: str | None = Field(default=None, max_length=500)
+    sds_url: str | None = Field(default=None, max_length=500)
+    benefit_ids: list[UUID] = Field(default_factory=list, max_length=25)
+    crop_ids: list[UUID] = Field(default_factory=list, max_length=50)
+    certification_ids: list[UUID] = Field(default_factory=list, max_length=10)

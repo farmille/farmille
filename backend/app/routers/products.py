@@ -1,11 +1,15 @@
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Response
 from fastapi.responses import JSONResponse
 
 from app.auth.jwt import get_user_id
 from app.dependencies import require_role
-from app.models.schemas import ProductCreatePayload, ReviewCreatePayload
+from app.models.schemas import (
+    ProductCreatePayload,
+    ProductUpdatePayload,
+    ReviewCreatePayload,
+)
 from app.services.supabase import get_supabase_admin
 
 router = APIRouter()
@@ -355,3 +359,144 @@ async def get_product(product_id: UUID):
     if not res.data:
         raise HTTPException(status_code=404, detail="product_not_found")
     return _flatten_product_detail(res.data[0])
+
+
+def _fetch_product_owner(admin, product_id: UUID) -> str | None:
+    res = (
+        admin.table("products")
+        .select("maker_id")
+        .eq("id", str(product_id))
+        .limit(1)
+        .execute()
+    )
+    if not res.data:
+        return None
+    return res.data[0]["maker_id"]
+
+
+@router.put("/{product_id}")
+async def update_product(
+    product_id: UUID,
+    payload: ProductUpdatePayload,
+    user: dict = require_role("maker"),
+):
+    """資材編集。自社 (maker_id = JWT.sub) のみ許可。
+
+    strategy: 基本フィールドを UPDATE、関連 3 テーブル (benefit/crop/certification) は
+    product_id スコープで全削除 → 再 INSERT。画像は本 Phase では触らない (Phase 10 / v1.5)。
+    関連 INSERT 失敗時はロールバックせず 500 を返し、ユーザー再送信に委ねる (spec §10.1)。
+    """
+    maker_id = get_user_id(user)
+    admin = get_supabase_admin()
+
+    owner = _fetch_product_owner(admin, product_id)
+    if owner is None:
+        return JSONResponse(
+            status_code=404,
+            content={"ok": False, "error": "product_not_found"},
+        )
+    if owner != maker_id:
+        return JSONResponse(
+            status_code=403,
+            content={"ok": False, "error": "not_owner"},
+        )
+
+    try:
+        admin.table("products").update(
+            {
+                "product_type_id": str(payload.product_type_id),
+                "name": payload.name,
+                "general_purpose": payload.general_purpose,
+                "primary_compound": payload.primary_compound,
+                "mode_of_action": payload.mode_of_action,
+                "commercial_status": payload.commercial_status,
+                "label_url": payload.label_url,
+                "sds_url": payload.sds_url,
+            }
+        ).eq("id", str(product_id)).execute()
+    except Exception:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": "failed_to_update_product"},
+        )
+
+    try:
+        admin.table("product_benefit_relations").delete().eq(
+            "product_id", str(product_id)
+        ).execute()
+        admin.table("product_crops").delete().eq(
+            "product_id", str(product_id)
+        ).execute()
+        admin.table("product_certifications").delete().eq(
+            "product_id", str(product_id)
+        ).execute()
+
+        if payload.benefit_ids:
+            admin.table("product_benefit_relations").insert(
+                [
+                    {
+                        "product_id": str(product_id),
+                        "product_benefit_id": str(bid),
+                    }
+                    for bid in payload.benefit_ids
+                ]
+            ).execute()
+        if payload.crop_ids:
+            admin.table("product_crops").insert(
+                [
+                    {"product_id": str(product_id), "crop_id": str(cid)}
+                    for cid in payload.crop_ids
+                ]
+            ).execute()
+        if payload.certification_ids:
+            admin.table("product_certifications").insert(
+                [
+                    {
+                        "product_id": str(product_id),
+                        "certification_id": str(cid),
+                    }
+                    for cid in payload.certification_ids
+                ]
+            ).execute()
+    except Exception:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": "failed_to_update_relations"},
+        )
+
+    return {"ok": True}
+
+
+@router.delete("/{product_id}", status_code=204)
+async def delete_product(
+    product_id: UUID,
+    user: dict = require_role("maker"),
+):
+    """資材削除。自社のみ許可。
+    FK ON DELETE CASCADE により関連テーブル (product_images /
+    product_benefit_relations / product_crops / product_certifications /
+    reviews) も自動削除される。Storage 画像は v1 では残存許容。"""
+    maker_id = get_user_id(user)
+    admin = get_supabase_admin()
+
+    owner = _fetch_product_owner(admin, product_id)
+    if owner is None:
+        return JSONResponse(
+            status_code=404,
+            content={"ok": False, "error": "product_not_found"},
+        )
+    if owner != maker_id:
+        return JSONResponse(
+            status_code=403,
+            content={"ok": False, "error": "not_owner"},
+        )
+
+    try:
+        admin.table("products").delete().eq("id", str(product_id)).execute()
+    except Exception:
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": "failed_to_delete_product"},
+        )
+
+    return Response(status_code=204)
