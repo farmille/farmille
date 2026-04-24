@@ -1,7 +1,10 @@
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, Response
 from fastapi.responses import JSONResponse
+
+logger = logging.getLogger(__name__)
 
 from app.auth.jwt import get_user_id
 from app.dependencies import require_role
@@ -534,10 +537,15 @@ async def delete_product(
 
     try:
         admin.table("products").delete().eq("id", str(product_id)).execute()
-    except Exception:
+    except Exception as exc:
+        logger.exception("failed to delete product %s", product_id)
         return JSONResponse(
             status_code=500,
-            content={"ok": False, "error": "failed_to_delete_product"},
+            content={
+                "ok": False,
+                "error": "failed_to_delete_product",
+                "detail": str(exc),
+            },
         )
 
     return Response(status_code=204)
