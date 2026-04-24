@@ -26,6 +26,22 @@ type Benefit = {
 };
 type Certification = { id: string; name: string };
 
+type Mode = "create" | "edit";
+
+type InitialValues = {
+  name: string;
+  productTypeId: string;
+  generalPurpose: string;
+  primaryCompound: string;
+  modeOfAction: string;
+  commercialStatus: string;
+  labelUrl: string;
+  sdsUrl: string;
+  benefitIds: string[];
+  cropIds: string[];
+  certificationIds: string[];
+};
+
 type Props = {
   productTypes: ProductType[];
   benefits: Benefit[];
@@ -33,6 +49,9 @@ type Props = {
   crops: Crop[];
   categoriesL1: CategoryL1[];
   categoriesL2: CategoryL2[];
+  mode?: Mode;
+  productId?: string;
+  initialValues?: InitialValues;
 };
 
 const COMMERCIAL_STATUS_OPTIONS = [
@@ -46,6 +65,8 @@ type ErrorCode =
   | "unauthorized"
   | "forbidden"
   | "image_upload_failed"
+  | "not_owner"
+  | "product_not_found"
   | "unknown";
 
 function errorMessage(code: ErrorCode): string {
@@ -55,11 +76,14 @@ function errorMessage(code: ErrorCode): string {
     case "unauthorized":
       return "ログインが必要です";
     case "forbidden":
+    case "not_owner":
       return "この操作を行う権限がありません";
+    case "product_not_found":
+      return "対象の資材が見つかりませんでした";
     case "image_upload_failed":
       return "画像のアップロードに失敗しました。時間をおいて再度お試しください";
     default:
-      return "登録に失敗しました。時間をおいて再度お試しください";
+      return "保存に失敗しました。時間をおいて再度お試しください";
   }
 }
 
@@ -70,23 +94,44 @@ export function ProductForm({
   crops,
   categoriesL1,
   categoriesL2,
+  mode = "create",
+  productId,
+  initialValues,
 }: Props) {
   const router = useRouter();
+  const isEdit = mode === "edit" && productId !== undefined;
 
-  const [name, setName] = useState("");
-  const [productTypeId, setProductTypeId] = useState("");
-  const [generalPurpose, setGeneralPurpose] = useState("");
-  const [primaryCompound, setPrimaryCompound] = useState("");
-  const [modeOfAction, setModeOfAction] = useState("");
-  const [commercialStatus, setCommercialStatus] = useState("");
-  const [labelUrl, setLabelUrl] = useState("");
-  const [sdsUrl, setSdsUrl] = useState("");
-  const [benefitIds, setBenefitIds] = useState<string[]>([]);
-  const [cropIds, setCropIds] = useState<string[]>([]);
-  const [certificationIds, setCertificationIds] = useState<string[]>([]);
+  const [name, setName] = useState(initialValues?.name ?? "");
+  const [productTypeId, setProductTypeId] = useState(
+    initialValues?.productTypeId ?? "",
+  );
+  const [generalPurpose, setGeneralPurpose] = useState(
+    initialValues?.generalPurpose ?? "",
+  );
+  const [primaryCompound, setPrimaryCompound] = useState(
+    initialValues?.primaryCompound ?? "",
+  );
+  const [modeOfAction, setModeOfAction] = useState(
+    initialValues?.modeOfAction ?? "",
+  );
+  const [commercialStatus, setCommercialStatus] = useState(
+    initialValues?.commercialStatus ?? "",
+  );
+  const [labelUrl, setLabelUrl] = useState(initialValues?.labelUrl ?? "");
+  const [sdsUrl, setSdsUrl] = useState(initialValues?.sdsUrl ?? "");
+  const [benefitIds, setBenefitIds] = useState<string[]>(
+    initialValues?.benefitIds ?? [],
+  );
+  const [cropIds, setCropIds] = useState<string[]>(
+    initialValues?.cropIds ?? [],
+  );
+  const [certificationIds, setCertificationIds] = useState<string[]>(
+    initialValues?.certificationIds ?? [],
+  );
   const [files, setFiles] = useState<File[]>([]);
 
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -147,8 +192,41 @@ export function ProductForm({
     setSubmitting(true);
     const supabase = createClient();
 
-    let imageUrls: string[] = [];
+    const commonFields = {
+      name: trimmedName,
+      product_type_id: productTypeId,
+      general_purpose: generalPurpose || null,
+      primary_compound: primaryCompound || null,
+      mode_of_action: modeOfAction || null,
+      commercial_status: commercialStatus || null,
+      label_url: labelUrl || null,
+      sds_url: sdsUrl || null,
+      benefit_ids: benefitIds,
+      crop_ids: cropIds,
+      certification_ids: certificationIds,
+    };
+
     try {
+      if (isEdit) {
+        const res = await fetch(`/api/products/${productId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(commonFields),
+        });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as {
+            error?: string;
+          };
+          setErrorCode(mapStatus(res.status, data.error));
+          setSubmitting(false);
+          return;
+        }
+        router.push("/maker/products");
+        router.refresh();
+        return;
+      }
+
+      let imageUrls: string[] = [];
       if (files.length > 0) {
         const {
           data: { user },
@@ -171,17 +249,7 @@ export function ProductForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: trimmedName,
-          product_type_id: productTypeId,
-          general_purpose: generalPurpose || null,
-          primary_compound: primaryCompound || null,
-          mode_of_action: modeOfAction || null,
-          commercial_status: commercialStatus || null,
-          label_url: labelUrl || null,
-          sds_url: sdsUrl || null,
-          benefit_ids: benefitIds,
-          crop_ids: cropIds,
-          certification_ids: certificationIds,
+          ...commonFields,
           image_urls: imageUrls,
         }),
       });
@@ -190,11 +258,7 @@ export function ProductForm({
         const data = (await res.json().catch(() => ({}))) as {
           error?: string;
         };
-        if (res.status === 401) setErrorCode("unauthorized");
-        else if (res.status === 403) setErrorCode("forbidden");
-        else if (res.status === 400 || res.status === 422)
-          setErrorCode("invalid_body");
-        else setErrorCode((data.error as ErrorCode) ?? "unknown");
+        setErrorCode(mapStatus(res.status, data.error));
         setSubmitting(false);
         return;
       }
@@ -204,6 +268,34 @@ export function ProductForm({
     } catch {
       setErrorCode("unknown");
       setSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!isEdit || deleting) return;
+    const ok = window.confirm(
+      "この資材を削除しますか？関連するレビュー・画像も削除されます。",
+    );
+    if (!ok) return;
+    setDeleting(true);
+    setErrorCode(null);
+    try {
+      const res = await fetch(`/api/products/${productId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok && res.status !== 204) {
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        setErrorCode(mapStatus(res.status, data.error));
+        setDeleting(false);
+        return;
+      }
+      router.push("/maker/products");
+      router.refresh();
+    } catch {
+      setErrorCode("unknown");
+      setDeleting(false);
     }
   }
 
@@ -375,20 +467,54 @@ export function ProductForm({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>画像(任意、最大 5 枚)</Label>
-        <ProductImageUpload
-          files={files}
-          onChange={setFiles}
-          disabled={submitting}
-        />
-      </div>
+      {!isEdit && (
+        <div className="space-y-2">
+          <Label>画像(任意、最大 5 枚)</Label>
+          <ProductImageUpload
+            files={files}
+            onChange={setFiles}
+            disabled={submitting}
+          />
+        </div>
+      )}
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={submitting}>
-          {submitting ? "登録中…" : "資材を登録"}
+      {isEdit && (
+        <p className="text-xs text-muted-foreground">
+          画像の編集は v1 では対応していません。テキスト情報のみ更新できます。
+        </p>
+      )}
+
+      <div className="flex items-center justify-between gap-2">
+        {isEdit ? (
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={submitting || deleting}
+          >
+            {deleting ? "削除中…" : "この資材を削除"}
+          </Button>
+        ) : (
+          <span />
+        )}
+        <Button type="submit" disabled={submitting || deleting}>
+          {submitting
+            ? isEdit
+              ? "更新中…"
+              : "登録中…"
+            : isEdit
+              ? "変更を保存"
+              : "資材を登録"}
         </Button>
       </div>
     </form>
   );
+}
+
+function mapStatus(status: number, error?: string): ErrorCode {
+  if (status === 401) return "unauthorized";
+  if (status === 403) return "forbidden";
+  if (status === 404) return "product_not_found";
+  if (status === 400 || status === 422) return "invalid_body";
+  return (error as ErrorCode) ?? "unknown";
 }

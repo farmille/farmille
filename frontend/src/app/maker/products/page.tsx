@@ -100,8 +100,13 @@ export default async function MakerProductsPage() {
                 created_at: p.created_at,
               };
               return (
-                <li key={p.id}>
+                <li key={p.id} className="space-y-2">
                   <ProductCard product={cardProduct} />
+                  <div className="flex justify-end">
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/products/${p.id}/edit`}>編集</Link>
+                    </Button>
+                  </div>
                 </li>
               );
             })}
