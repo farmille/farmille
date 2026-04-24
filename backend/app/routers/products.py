@@ -10,6 +10,7 @@ from app.models.schemas import (
     ProductUpdatePayload,
     ReviewCreatePayload,
 )
+from app.routers._image_path import validate_product_image_path
 from app.services.supabase import get_supabase_admin
 
 router = APIRouter()
@@ -382,9 +383,15 @@ async def update_product(
 ):
     """資材編集。自社 (maker_id = JWT.sub) のみ許可。
 
-    strategy: 基本フィールドを UPDATE、関連 3 テーブル (benefit/crop/certification) は
-    product_id スコープで全削除 → 再 INSERT。画像は本 Phase では触らない (Phase 10 / v1.5)。
-    関連 INSERT 失敗時はロールバックせず 500 を返し、ユーザー再送信に委ねる (spec §10.1)。
+    strategy: 基本フィールドを UPDATE、関連 3 テーブル (benefit/crop/certification) と
+    product_images は product_id スコープで全削除 → 再 INSERT。
+    関連 INSERT 失敗時はロールバックせず 500 を返し、ユーザー再送信に委ねる
+    (spec §10.1 / Phase 10 spec §4.2)。
+
+    Phase 10:
+    - payload.remove_paths の path prefix validation → 1 つでも不正なら 400 全体拒否
+    - payload.order の配列順で product_images を全削除 → 再 INSERT (order 列 = index)
+    - Storage の既存画像削除は DB 更新後に best-effort (spec §11.2)
     """
     maker_id = get_user_id(user)
     admin = get_supabase_admin()
@@ -400,6 +407,13 @@ async def update_product(
             status_code=403,
             content={"ok": False, "error": "not_owner"},
         )
+
+    for path in payload.remove_paths:
+        if not validate_product_image_path(path, maker_id):
+            return JSONResponse(
+                status_code=400,
+                content={"ok": False, "error": "invalid_image_path"},
+            )
 
     try:
         admin.table("products").update(
@@ -430,6 +444,9 @@ async def update_product(
         admin.table("product_certifications").delete().eq(
             "product_id", str(product_id)
         ).execute()
+        admin.table("product_images").delete().eq(
+            "product_id", str(product_id)
+        ).execute()
 
         if payload.benefit_ids:
             admin.table("product_benefit_relations").insert(
@@ -458,11 +475,29 @@ async def update_product(
                     for cid in payload.certification_ids
                 ]
             ).execute()
+        if payload.order:
+            admin.table("product_images").insert(
+                [
+                    {
+                        "product_id": str(product_id),
+                        "url": item.url,
+                        "order": idx,
+                    }
+                    for idx, item in enumerate(payload.order)
+                ]
+            ).execute()
     except Exception:
         return JSONResponse(
             status_code=500,
             content={"ok": False, "error": "failed_to_update_relations"},
         )
+
+    if payload.remove_paths:
+        try:
+            admin.storage.from_("product-images").remove(payload.remove_paths)
+        except Exception:
+            # spec §11.2: remove 失敗は best-effort、DB 更新は既に成功
+            pass
 
     return {"ok": True}
 

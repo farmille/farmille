@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from app.auth.jwt import get_user_id
 from app.dependencies import get_current_user
 from app.models.schemas import ReviewUpdatePayload
+from app.routers._image_path import validate_review_image_path
 from app.services.supabase import get_supabase_admin
 
 router = APIRouter()
@@ -30,7 +31,13 @@ async def update_review(
     payload: ReviewUpdatePayload,
     user: dict = Depends(get_current_user),
 ):
-    """レビュー編集。投稿者本人のみ許可。他人の review_id は 403。"""
+    """レビュー編集。投稿者本人のみ許可。他人の review_id は 403。
+
+    Phase 10: payload.remove_paths が指定された場合、path prefix validation
+    (`{user_id}/{review_id}/...`) を全要素について確認し、1 つでも不正なら
+    400 invalid_image_path で全体拒否 (skill §3.2 原子性)。検証通過後に
+    reviews UPDATE → Storage remove の順で実行 (spec §11.1 DB 先削除方針)。
+    """
     user_id = get_user_id(user)
     admin = get_supabase_admin()
 
@@ -46,6 +53,13 @@ async def update_review(
             content={"ok": False, "error": "not_owner"},
         )
 
+    for path in payload.remove_paths:
+        if not validate_review_image_path(path, user_id, str(review_id)):
+            return JSONResponse(
+                status_code=400,
+                content={"ok": False, "error": "invalid_image_path"},
+            )
+
     try:
         admin.table("reviews").update(
             {"rating": payload.rating, "body": payload.body}
@@ -55,6 +69,14 @@ async def update_review(
             status_code=500,
             content={"ok": False, "error": "failed_to_update_review"},
         )
+
+    if payload.remove_paths:
+        try:
+            admin.storage.from_("review-images").remove(payload.remove_paths)
+        except Exception:
+            # spec §11.2: remove 失敗は best-effort、ログ残すのみで UI には返さない
+            # DB 更新は既に成功しているため 200 で返す
+            pass
 
     return {"ok": True}
 
