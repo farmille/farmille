@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
 import { ReviewForm } from "./review-form";
 
 type Review = {
@@ -11,6 +12,11 @@ type Review = {
   rating: number;
   body: string;
   created_at: string;
+};
+
+type ExistingImage = {
+  url: string;
+  path: string;
 };
 
 type Props = {
@@ -29,8 +35,43 @@ function formatDate(iso: string | null): string {
 export function MyReviewRow({ productId, review }: Props) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
+  const [loadingImages, setLoadingImages] = useState(false);
+  const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function startEditing() {
+    setError(null);
+    setLoadingImages(true);
+    const supabase = createClient();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const folder = `${user.id}/${review.id}`;
+        const { data: files } = await supabase.storage
+          .from("review-images")
+          .list(folder);
+        const images: ExistingImage[] = (files ?? [])
+          .filter((f) => f.name && !f.name.startsWith("."))
+          .map((f) => {
+            const path = `${folder}/${f.name}`;
+            const { data } = supabase.storage
+              .from("review-images")
+              .getPublicUrl(path);
+            return { url: data.publicUrl, path };
+          });
+        setExistingImages(images);
+      }
+    } catch {
+      // 取得失敗時は画像なしで編集モードに入る
+      setExistingImages([]);
+    } finally {
+      setLoadingImages(false);
+      setEditing(true);
+    }
+  }
 
   async function handleDelete() {
     if (deleting) return;
@@ -64,8 +105,12 @@ export function MyReviewRow({ productId, review }: Props) {
             reviewId: review.id,
             rating: review.rating,
             body: review.body,
+            existingImages,
           }}
-          onCancel={() => setEditing(false)}
+          onCancel={() => {
+            setEditing(false);
+            setExistingImages([]);
+          }}
         />
       </li>
     );
@@ -103,10 +148,10 @@ export function MyReviewRow({ productId, review }: Props) {
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => setEditing(true)}
-          disabled={deleting}
+          onClick={startEditing}
+          disabled={deleting || loadingImages}
         >
-          編集
+          {loadingImages ? "読み込み中…" : "編集"}
         </Button>
         <Button
           type="button"

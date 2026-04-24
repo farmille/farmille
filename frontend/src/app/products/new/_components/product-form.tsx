@@ -15,7 +15,10 @@ import {
   type Crop,
 } from "@/app/onboarding/farmer/_components/crop-picker";
 import { TagMultiSelect, type TagItem } from "./tag-multi-select";
-import { ProductImageUpload } from "./product-image-upload";
+import {
+  ProductImageUpload,
+  type ExistingProductImage,
+} from "./product-image-upload";
 
 type ProductType = { id: string; name: string };
 type Benefit = {
@@ -40,6 +43,7 @@ type InitialValues = {
   benefitIds: string[];
   cropIds: string[];
   certificationIds: string[];
+  existingImages?: ExistingProductImage[];
 };
 
 type Props = {
@@ -129,11 +133,21 @@ export function ProductForm({
     initialValues?.certificationIds ?? [],
   );
   const [files, setFiles] = useState<File[]>([]);
+  const [existingOrder, setExistingOrder] = useState<ExistingProductImage[]>(
+    initialValues?.existingImages ?? [],
+  );
+  const [removedPaths, setRemovedPaths] = useState<string[]>([]);
 
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const toggleRemoveExisting = (path: string) => {
+    setRemovedPaths((prev) =>
+      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path],
+    );
+  };
 
   const benefitItems: TagItem[] = benefits.map((b) => ({
     id: b.id,
@@ -208,10 +222,41 @@ export function ProductForm({
 
     try {
       if (isEdit) {
+        let newUploadedUrls: string[] = [];
+        if (files.length > 0) {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          if (!user) {
+            setErrorCode("unauthorized");
+            setSubmitting(false);
+            return;
+          }
+          try {
+            newUploadedUrls = await uploadImages(supabase, user.id);
+          } catch {
+            setErrorCode("image_upload_failed");
+            setSubmitting(false);
+            return;
+          }
+        }
+
+        const keptExisting = existingOrder.filter(
+          (img) => !removedPaths.includes(img.path),
+        );
+        const order = [
+          ...keptExisting.map((img) => ({ url: img.url, existing: true })),
+          ...newUploadedUrls.map((url) => ({ url, existing: false })),
+        ];
+
         const res = await fetch(`/api/products/${productId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(commonFields),
+          body: JSON.stringify({
+            ...commonFields,
+            remove_paths: removedPaths,
+            order,
+          }),
         });
         if (!res.ok) {
           const data = (await res.json().catch(() => ({}))) as {
@@ -467,22 +512,23 @@ export function ProductForm({
         />
       </div>
 
-      {!isEdit && (
-        <div className="space-y-2">
-          <Label>画像(任意、最大 5 枚)</Label>
-          <ProductImageUpload
-            files={files}
-            onChange={setFiles}
-            disabled={submitting}
-          />
-        </div>
-      )}
-
-      {isEdit && (
-        <p className="text-xs text-muted-foreground">
-          画像の編集は v1 では対応していません。テキスト情報のみ更新できます。
-        </p>
-      )}
+      <div className="space-y-2">
+        <Label>画像(任意、既存を含め最大 5 枚)</Label>
+        <ProductImageUpload
+          files={files}
+          onChange={setFiles}
+          disabled={submitting}
+          existingImages={isEdit ? existingOrder : []}
+          onExistingOrderChange={isEdit ? setExistingOrder : undefined}
+          removedPaths={removedPaths}
+          onToggleRemove={isEdit ? toggleRemoveExisting : undefined}
+        />
+        {isEdit && (
+          <p className="text-xs text-muted-foreground">
+            既存画像の削除は送信後に元に戻せません。並び順は矢印ボタンで変更できます。
+          </p>
+        )}
+      </div>
 
       <div className="flex items-center justify-between gap-2">
         {isEdit ? (

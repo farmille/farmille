@@ -15,10 +15,16 @@ const BODY_MIN = 1;
 
 type Mode = "create" | "edit";
 
+type ExistingImage = {
+  url: string;
+  path: string;
+};
+
 type InitialValues = {
   reviewId: string;
   rating: number;
   body: string;
+  existingImages?: ExistingImage[];
 };
 
 type Props = {
@@ -71,8 +77,17 @@ export function ReviewForm({
   const [hoverRating, setHoverRating] = useState(0);
   const [body, setBody] = useState(isEdit ? initialValues!.body : "");
   const [files, setFiles] = useState<File[]>([]);
+  const [removedPaths, setRemovedPaths] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null);
+
+  const existingImages = isEdit ? (initialValues!.existingImages ?? []) : [];
+
+  const toggleRemove = (path: string) => {
+    setRemovedPaths((prev) =>
+      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path],
+    );
+  };
 
   const bodyLen = body.length;
   const canSubmit =
@@ -100,10 +115,38 @@ export function ReviewForm({
 
     try {
       if (isEdit) {
-        const res = await fetch(`/api/reviews/${initialValues!.reviewId}`, {
+        const reviewId = initialValues!.reviewId;
+        const supabase = createClient();
+
+        if (files.length > 0) {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          if (!user) {
+            setErrorCode("unauthorized");
+            setSubmitting(false);
+            return;
+          }
+          const nonce = crypto.randomUUID();
+          try {
+            for (const [idx, file] of files.entries()) {
+              const path = `${user.id}/${reviewId}/${nonce}_${idx}_${file.name}`;
+              const { error } = await supabase.storage
+                .from("review-images")
+                .upload(path, file, { upsert: false });
+              if (error) throw error;
+            }
+          } catch {
+            setErrorCode("image_upload_failed");
+            setSubmitting(false);
+            return;
+          }
+        }
+
+        const res = await fetch(`/api/reviews/${reviewId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rating, body }),
+          body: JSON.stringify({ rating, body, remove_paths: removedPaths }),
         });
         if (!res.ok) {
           const data = (await res.json().catch(() => ({}))) as {
@@ -113,6 +156,8 @@ export function ReviewForm({
           setSubmitting(false);
           return;
         }
+        setFiles([]);
+        setRemovedPaths([]);
         router.refresh();
         onCancel?.();
         return;
@@ -238,16 +283,17 @@ export function ReviewForm({
         </p>
       </div>
 
-      {!isEdit && (
-        <div className="space-y-2">
-          <Label>画像(任意)</Label>
-          <ReviewImageUpload
-            files={files}
-            onChange={setFiles}
-            disabled={submitting}
-          />
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label>画像(任意)</Label>
+        <ReviewImageUpload
+          files={files}
+          onChange={setFiles}
+          disabled={submitting}
+          existingImages={existingImages}
+          removedPaths={removedPaths}
+          onToggleRemove={isEdit ? toggleRemove : undefined}
+        />
+      </div>
 
       {errorCode && (
         <p className="text-sm text-destructive" role="alert">
