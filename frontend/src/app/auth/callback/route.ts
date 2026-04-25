@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   const intendedRole = data.user?.user_metadata?.intended_role as unknown;
+  const next = url.searchParams.get("next");
 
   if (isSignUpRole(intendedRole)) {
     const completeRes = await fetch(`${origin}/api/auth/complete-signup`, {
@@ -45,6 +46,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(
       new URL(`/onboarding/${intendedRole}`, origin),
     );
+  }
+
+  // password recovery 等で next= が付いている場合はその path に着地
+  // 相対 path のみ許容（外部 URL への redirect は禁止）
+  if (next && next.startsWith("/") && !next.startsWith("//")) {
+    return NextResponse.redirect(new URL(next, origin));
   }
 
   // intended_role が読み取れない場合のみ /onboarding（ロール選択フォーム）にフォールバック

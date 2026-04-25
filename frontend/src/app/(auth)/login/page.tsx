@@ -78,6 +78,15 @@ export default function LoginPage() {
       </form>
 
       <p className="text-sm text-zinc-600 text-center">
+        <Link
+          href="/password-reset"
+          className="font-medium text-zinc-900 underline"
+        >
+          パスワードをお忘れですか？
+        </Link>
+      </p>
+
+      <p className="text-sm text-zinc-600 text-center">
         アカウントをお持ちでない方は{" "}
         <Link href="/signup" className="font-medium text-zinc-900 underline">
           新規登録
