@@ -198,7 +198,8 @@ cron 設定: Supabase Dashboard > Database > Cron（`pg_cron`）or Edge Function
 ## 10. 関連 Phase / ドキュメント
 
 - `docs/specs/launch-polish.md` §5: Phase 11a maker 空状態 CTA（v1 で実装済の静的 UI）
-- `docs/specs/post-launch-hardening.md` §11 Q6: Phase 12c の静的 farmer プロフィール prompt（保留中、Q6=A 採用時に起票）
+- `docs/specs/phase-12c-farmer-profile.md`: Phase 12c の静的 farmer プロフィール prompt（保留中、Q6=A 採用時に起票。本 Phase 13 が動的版に相当）
+- `docs/specs/post-launch-hardening.md`: Phase 12 全体の索引（12a/12b/12c 分割案）
 - `docs/decisions/0005-jwt-verification-strategy.md`: JWT 検証方針（Edge Functions でも適用）
 - `docs/decisions/0007-storage-rls-audit.md`: Storage RLS 一覧（Phase 12a で起票予定、保留中）
 - アナリティクス結果（launch 後 2 週間分）: 条件設計の根拠データ
