@@ -4,8 +4,15 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getUser, getRole } from "@/lib/auth/server";
+import { createClient } from "@/lib/supabase/server";
 import { ReviewForm } from "./_components/review-form";
+import { ReviewWithProfileGate } from "./_components/review-with-profile-gate";
 import { MyReviewRow } from "./_components/my-review-row";
+import type {
+  CategoryL1,
+  CategoryL2,
+  Crop,
+} from "@/app/onboarding/farmer/_components/crop-picker";
 
 type ProductDetail = {
   id: string;
@@ -113,6 +120,35 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const avg = averageRating(reviews);
   const heroImage = product.images[0] ?? null;
   const subImages = product.images.slice(1, 4);
+
+  // Phase 12c: farmer のレビュー投稿 gate
+  type CropsMaster = {
+    crops: Crop[];
+    categories_l1: CategoryL1[];
+    categories_l2: CategoryL2[];
+  };
+  let profileComplete = false;
+  let cropsMaster: CropsMaster | null = null;
+  if (user && role === "farmer") {
+    const supabase = await createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session) {
+      const headers = { Authorization: `Bearer ${session.access_token}` };
+      const [statusRes, cropsRes] = await Promise.all([
+        fetch(`${apiUrl}/v1/onboarding/status`, { headers, cache: "no-store" }),
+        fetch(`${apiUrl}/v1/onboarding/crops`, { headers, cache: "no-store" }),
+      ]);
+      if (statusRes.ok) {
+        const status = (await statusRes.json()) as { has_profile?: boolean };
+        profileComplete = Boolean(status.has_profile);
+      }
+      if (cropsRes.ok) {
+        cropsMaster = (await cropsRes.json()) as CropsMaster;
+      }
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -272,7 +308,17 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </Button>
             </div>
           ) : role === "farmer" ? (
-            <ReviewForm productId={product.id} />
+            cropsMaster ? (
+              <ReviewWithProfileGate
+                productId={product.id}
+                initialProfileComplete={profileComplete}
+                crops={cropsMaster.crops}
+                categoriesL1={cropsMaster.categories_l1}
+                categoriesL2={cropsMaster.categories_l2}
+              />
+            ) : (
+              <ReviewForm productId={product.id} />
+            )
           ) : (
             <p className="rounded-md border border-border bg-card p-6 text-center text-muted-foreground">
               このロール(
