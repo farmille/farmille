@@ -37,7 +37,16 @@ export async function GET(request: NextRequest) {
         new URL("/onboarding?recover=1", origin),
       );
     }
+
+    // register-role 成功 → intended_role が確定しているので
+    // /onboarding/{role} に直接着地させ、再選択フォームを経由させない。
+    // /onboarding/{role} ページは FastAPI /v1/onboarding/status で role を
+    // DB から取得するため、JWT cookie の鮮度に依存しない。
+    return NextResponse.redirect(
+      new URL(`/onboarding/${intendedRole}`, origin),
+    );
   }
 
+  // intended_role が読み取れない場合のみ /onboarding（ロール選択フォーム）にフォールバック
   return NextResponse.redirect(new URL("/onboarding", origin));
 }

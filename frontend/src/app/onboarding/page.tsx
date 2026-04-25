@@ -16,6 +16,9 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
 
   const role = await getRole();
 
+  // 通常フロー（signup → callback → /onboarding/{role} 直行）では
+  // 本ページに到達しない。intended_role が読み取れなかった場合や
+  // complete-signup 失敗時の recover=1 フォールバック用に残す。
   if (role === "farmer") {
     redirect("/onboarding/farmer");
   }
