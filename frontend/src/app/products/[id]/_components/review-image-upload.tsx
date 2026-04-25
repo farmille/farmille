@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const MAX_FILES = 5;
-const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_MIME = [
   "image/jpeg",
   "image/png",
@@ -55,7 +55,7 @@ export function ReviewImageUpload({
           continue;
         }
         if (f.size > MAX_SIZE_BYTES) {
-          setError("画像 1 枚あたり 5MB までです");
+          setError("画像 1 枚あたり 10MB までです");
           continue;
         }
         accepted.push(f);
@@ -119,7 +119,7 @@ export function ReviewImageUpload({
           画像をドラッグ&ドロップ、またはクリックで選択
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          JPEG / PNG / WebP、1 枚あたり最大 5MB、最大 {MAX_FILES} 枚
+          JPEG / PNG / WebP、1 枚あたり最大 10MB、最大 {MAX_FILES} 枚
         </p>
       </div>
 
