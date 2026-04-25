@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 export type CropNode = { id: string; name: string };
 export type L2Node = { id: string; name: string; children: CropNode[] };
@@ -59,6 +60,9 @@ export function CropCascadeFilter({ tree, selectedCropId }: Props) {
   );
 
   const updateUrl = (cropId: string | null) => {
+    if (cropId) {
+      trackEvent({ name: "filter_apply", params: { filter_type: "crop" } });
+    }
     const params = new URLSearchParams(searchParams.toString());
     if (cropId) {
       params.set("crop_id", cropId);

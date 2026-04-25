@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import { ReviewImageUpload } from "./review-image-upload";
 
 const BODY_MAX = 2000;
@@ -212,6 +213,7 @@ export function ReviewForm({
         return;
       }
 
+      trackEvent({ name: "review_submit", params: { product_id: productId } });
       setRating(0);
       setBody("");
       setFiles([]);

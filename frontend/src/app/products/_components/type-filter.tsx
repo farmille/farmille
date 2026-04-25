@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useTransition } from "react";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 type ProductType = { id: string; name: string };
 
@@ -17,6 +18,9 @@ export function TypeFilter({ types, selectedTypeId }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const select = (typeId: string | null) => {
+    if (typeId) {
+      trackEvent({ name: "filter_apply", params: { filter_type: "type" } });
+    }
     startTransition(() => {
       const params = new URLSearchParams();
       if (typeId) params.set("type_id", typeId);

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import {
   CropPicker,
   type CategoryL1,
@@ -316,6 +317,10 @@ export function ProductForm({
         return;
       }
 
+      trackEvent({
+        name: "product_create",
+        params: { product_type_id: productTypeId },
+      });
       router.push("/maker/products");
       router.refresh();
     } catch {
