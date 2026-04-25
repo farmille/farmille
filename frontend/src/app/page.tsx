@@ -1,5 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "Farmille — 農家が選ぶ BS 資材レビュー",
+  },
+  description:
+    "農家・JA 普及員・研究者が BS 資材(生物・微生物農業資材)のリアルな使用感を共有するプラットフォーム。作目・効果タグ・認証で資材を比較できます。",
+  openGraph: {
+    title: "Farmille — 農家が選ぶ BS 資材レビュー",
+    description:
+      "農家・JA 普及員・研究者が BS 資材(生物・微生物農業資材)のリアルな使用感を共有するプラットフォーム。",
+    url: "/",
+  },
+};
 
 export default function HomePage() {
   return (
