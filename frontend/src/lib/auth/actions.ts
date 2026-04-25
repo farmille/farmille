@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isSignUpRole } from "@/lib/auth/roles";
+import { isMakerRole, isReviewerRole, isSignUpRole } from "@/lib/auth/roles";
 
 export type ActionResult =
   | { ok: true }
@@ -84,7 +84,13 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   const role = user?.app_metadata?.role as string | undefined;
 
-  redirect(role && role !== "unassigned" ? "/home" : "/onboarding");
+  if (isMakerRole(role)) {
+    redirect("/maker/products");
+  }
+  if (isReviewerRole(role)) {
+    redirect("/products");
+  }
+  redirect("/onboarding");
 }
 
 export async function signOut(): Promise<void> {
