@@ -5,7 +5,9 @@ export type AnalyticsEvent =
   | { name: "sign_up_complete"; params: { role: string } }
   | { name: "review_submit"; params: { product_id: string } }
   | { name: "product_create"; params: { product_type_id: string } }
-  | { name: "filter_apply"; params: { filter_type: "type" | "crop" } };
+  | { name: "filter_apply"; params: { filter_type: "type" | "crop" } }
+  | { name: "profile_gate_shown"; params: { product_id: string } }
+  | { name: "profile_gate_completed"; params: { product_id: string } };
 
 // page_view は @next/third-parties の GoogleAnalytics が自動発火するため
 // 上記 union には含めない

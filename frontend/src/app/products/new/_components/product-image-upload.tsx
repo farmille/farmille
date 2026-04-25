@@ -2,47 +2,63 @@
 
 import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
-import { X, ImagePlus, ChevronUp, ChevronDown } from "lucide-react";
+import { X, ImagePlus } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const MAX_FILES = 5;
-const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_MIME = ["image/jpeg", "image/png", "image/webp"];
 
-export type ExistingProductImage = {
-  url: string;
-  path: string;
-};
+export type ProductImageItem =
+  | {
+      id: string;
+      kind: "existing";
+      url: string;
+      path: string;
+    }
+  | {
+      id: string;
+      kind: "new";
+      url: string;
+      file: File;
+    };
 
 type Props = {
-  files: File[];
-  onChange: (files: File[]) => void;
+  items: ProductImageItem[];
+  onItemsChange: (items: ProductImageItem[]) => void;
   disabled?: boolean;
-  /** 編集モードでの既存画像 (順序は表示順と一致) */
-  existingImages?: ExistingProductImage[];
-  onExistingOrderChange?: (images: ExistingProductImage[]) => void;
-  removedPaths?: string[];
-  onToggleRemove?: (path: string) => void;
 };
 
-export function ProductImageUpload({
-  files,
-  onChange,
-  disabled,
-  existingImages = [],
-  onExistingOrderChange,
-  removedPaths = [],
-  onToggleRemove,
-}: Props) {
+export function ProductImageUpload({ items, onItemsChange, disabled }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const keptExistingCount = existingImages.filter(
-    (img) => !removedPaths.includes(img.path),
-  ).length;
-  const remaining = Math.max(0, MAX_FILES - keptExistingCount);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
+    }),
+  );
+
+  const remaining = Math.max(0, MAX_FILES - items.length);
 
   const addFiles = useCallback(
     (incoming: File[]) => {
@@ -54,39 +70,43 @@ export function ProductImageUpload({
           continue;
         }
         if (f.size > MAX_SIZE_BYTES) {
-          setError("画像 1 枚あたり 5MB までです");
+          setError("画像 1 枚あたり 10MB までです");
           continue;
         }
         accepted.push(f);
       }
-      const next = [...files, ...accepted].slice(0, remaining);
-      if (files.length + accepted.length > remaining) {
-        setError(
-          `画像は既存を含め最大 ${MAX_FILES} 枚までです (残り ${remaining} 枚)`,
-        );
+      const truncated = accepted.slice(0, remaining);
+      if (accepted.length > remaining) {
+        setError(`画像は最大 ${MAX_FILES} 枚までです (残り ${remaining} 枚)`);
       }
-      onChange(next);
+      const newItems: ProductImageItem[] = truncated.map((file) => ({
+        id: crypto.randomUUID(),
+        kind: "new",
+        url: URL.createObjectURL(file),
+        file,
+      }));
+      onItemsChange([...items, ...newItems]);
     },
-    [files, onChange, remaining],
+    [items, onItemsChange, remaining],
   );
 
   const removeAt = useCallback(
-    (idx: number) => {
-      onChange(files.filter((_, i) => i !== idx));
+    (id: string) => {
+      onItemsChange(items.filter((it) => it.id !== id));
     },
-    [files, onChange],
+    [items, onItemsChange],
   );
 
-  const moveExisting = useCallback(
-    (idx: number, delta: -1 | 1) => {
-      if (!onExistingOrderChange) return;
-      const next = [...existingImages];
-      const target = idx + delta;
-      if (target < 0 || target >= next.length) return;
-      [next[idx], next[target]] = [next[target], next[idx]];
-      onExistingOrderChange(next);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+      const oldIndex = items.findIndex((it) => it.id === active.id);
+      const newIndex = items.findIndex((it) => it.id === over.id);
+      if (oldIndex < 0 || newIndex < 0) return;
+      onItemsChange(arrayMove(items, oldIndex, newIndex));
     },
-    [existingImages, onExistingOrderChange],
+    [items, onItemsChange],
   );
 
   return (
@@ -130,123 +150,95 @@ export function ProductImageUpload({
           画像をドラッグ&ドロップ、またはクリックで選択
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          JPEG / PNG / WebP、1 枚あたり最大 5MB、最大 {MAX_FILES} 枚
+          JPEG / PNG / WebP、1 枚あたり最大 10MB、最大 {MAX_FILES} 枚
         </p>
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {(existingImages.length > 0 || files.length > 0) && (
-        <ul className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-          {existingImages.map((img, idx) => {
-            const marked = removedPaths.includes(img.path);
-            const canMoveUp = idx > 0 && !marked;
-            const canMoveDown = idx < existingImages.length - 1 && !marked;
-            return (
-              <li
-                key={img.path}
-                className={cn(
-                  "relative aspect-square rounded-sm border border-border overflow-hidden bg-muted",
-                  marked && "opacity-40",
-                )}
-              >
-                <Image
-                  src={img.url}
-                  alt=""
-                  fill
-                  sizes="(max-width: 640px) 33vw, 20vw"
-                  className="object-cover"
-                />
-                {marked && (
-                  <span className="absolute bottom-1 left-1 rounded-sm bg-destructive px-1 py-0.5 text-xs text-destructive-foreground">
-                    削除予定
-                  </span>
-                )}
-                {onToggleRemove && (
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant={marked ? "outline" : "destructive"}
-                    className="absolute top-1 right-1 h-6 w-6"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleRemove(img.path);
-                    }}
-                    disabled={disabled}
-                    aria-label={marked ? "削除を取り消す" : "この画像を削除"}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                )}
-                {onExistingOrderChange && !marked && (
-                  <div className="absolute bottom-1 right-1 flex gap-0.5">
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="outline"
-                      className="h-6 w-6 bg-background/80"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        moveExisting(idx, -1);
-                      }}
-                      disabled={disabled || !canMoveUp}
-                      aria-label="前に移動"
-                    >
-                      <ChevronUp className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="outline"
-                      className="h-6 w-6 bg-background/80"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        moveExisting(idx, 1);
-                      }}
-                      disabled={disabled || !canMoveDown}
-                      aria-label="後ろに移動"
-                    >
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-          {files.map((f, idx) => {
-            const url = URL.createObjectURL(f);
-            return (
-              <li
-                key={`${f.name}-${idx}`}
-                className="relative aspect-square rounded-sm border border-border overflow-hidden bg-muted"
-              >
-                <Image
-                  src={url}
-                  alt={f.name}
-                  fill
-                  unoptimized
-                  sizes="(max-width: 640px) 33vw, 20vw"
-                  className="object-cover"
-                />
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="destructive"
-                  className="absolute top-1 right-1 h-6 w-6"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeAt(idx);
-                  }}
+      {items.length > 0 && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={items.map((it) => it.id)}
+            strategy={rectSortingStrategy}
+          >
+            <ul className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              {items.map((item) => (
+                <SortableThumbnail
+                  key={item.id}
+                  item={item}
                   disabled={disabled}
-                  aria-label="画像を削除"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </li>
-            );
-          })}
-        </ul>
+                  onRemove={() => removeAt(item.id)}
+                />
+              ))}
+            </ul>
+          </SortableContext>
+        </DndContext>
+      )}
+
+      {items.length > 1 && (
+        <p className="text-xs text-muted-foreground">
+          サムネイルをドラッグして並び替えできます。先頭が代表画像になります。
+        </p>
       )}
     </div>
+  );
+}
+
+function SortableThumbnail({
+  item,
+  disabled,
+  onRemove,
+}: {
+  item: ProductImageItem;
+  disabled?: boolean;
+  onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: item.id, disabled });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : undefined,
+  };
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className="relative aspect-square rounded-sm border border-border overflow-hidden bg-muted touch-none"
+      {...attributes}
+      {...listeners}
+    >
+      <Image
+        src={item.url}
+        alt=""
+        fill
+        unoptimized={item.kind === "new"}
+        sizes="(max-width: 640px) 33vw, 20vw"
+        className="object-cover pointer-events-none"
+      />
+      <Button
+        type="button"
+        size="icon"
+        variant="destructive"
+        className="absolute top-1 right-1 h-6 w-6"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onRemove();
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        disabled={disabled}
+        aria-label="画像を削除"
+      >
+        <X className="h-3 w-3" />
+      </Button>
+    </li>
   );
 }

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { getSession, getUser } from "@/lib/auth/server";
+import { getUser } from "@/lib/auth/server";
+import { createClient } from "@/lib/supabase/server";
 import { landingPathForRole } from "@/lib/auth/landing";
 import { MakerForm } from "./_components/maker-form";
 
@@ -11,7 +12,10 @@ export default async function OnboardingMakerPage() {
     redirect("/login");
   }
 
-  const session = await getSession();
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   if (!session) {
     redirect("/login");
   }

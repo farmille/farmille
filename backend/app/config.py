@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     environment: str = "development"
 
-    model_config = {"env_file": ".env"}
+    model_config = {"env_file": ".env", "extra": "ignore"}
 
 
 settings = Settings()

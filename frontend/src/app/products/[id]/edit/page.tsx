@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { getRole, getSession, getUser } from "@/lib/auth/server";
+import { getRole, getUser } from "@/lib/auth/server";
+import { createClient } from "@/lib/supabase/server";
 import { landingPathForRole } from "@/lib/auth/landing";
 import { ProductForm } from "@/app/products/new/_components/product-form";
 import { publicUrlToPath } from "@/lib/supabase/paths";
@@ -58,7 +59,10 @@ export default async function ProductEditPage({ params }: PageProps) {
     redirect(landingPathForRole(role));
   }
 
-  const session = await getSession();
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   if (!session) {
     redirect(`/login?next=/products/${id}/edit`);
   }

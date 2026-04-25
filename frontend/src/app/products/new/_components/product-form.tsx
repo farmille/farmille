@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,10 @@ import {
 import { TagMultiSelect, type TagItem } from "./tag-multi-select";
 import {
   ProductImageUpload,
-  type ExistingProductImage,
+  type ProductImageItem,
 } from "./product-image-upload";
+
+export type ExistingProductImage = { url: string; path: string };
 
 type ProductType = { id: string; name: string };
 type Benefit = {
@@ -133,22 +135,22 @@ export function ProductForm({
   const [certificationIds, setCertificationIds] = useState<string[]>(
     initialValues?.certificationIds ?? [],
   );
-  const [files, setFiles] = useState<File[]>([]);
-  const [existingOrder, setExistingOrder] = useState<ExistingProductImage[]>(
-    initialValues?.existingImages ?? [],
+  const [items, setItems] = useState<ProductImageItem[]>(() =>
+    (initialValues?.existingImages ?? []).map((img) => ({
+      id: img.path,
+      kind: "existing" as const,
+      url: img.url,
+      path: img.path,
+    })),
   );
-  const [removedPaths, setRemovedPaths] = useState<string[]>([]);
+  const originalExistingPaths = useRef(
+    (initialValues?.existingImages ?? []).map((img) => img.path),
+  );
 
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  const toggleRemoveExisting = (path: string) => {
-    setRemovedPaths((prev) =>
-      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path],
-    );
-  };
 
   const benefitItems: TagItem[] = benefits.map((b) => ({
     id: b.id,
@@ -160,24 +162,27 @@ export function ProductForm({
     name: c.name,
   }));
 
-  async function uploadImages(
+  async function uploadNewImages(
     supabase: ReturnType<typeof createClient>,
     userId: string,
-  ): Promise<string[]> {
+  ): Promise<Map<string, string>> {
     const nonce = crypto.randomUUID();
-    const urls: string[] = [];
-    for (const [idx, file] of files.entries()) {
-      const path = `${userId}/pending/${nonce}_${idx}_${file.name}`;
+    const map = new Map<string, string>();
+    let idx = 0;
+    for (const item of items) {
+      if (item.kind !== "new") continue;
+      const path = `${userId}/pending/${nonce}_${idx}_${item.file.name}`;
       const { error } = await supabase.storage
         .from("product-images")
-        .upload(path, file, { upsert: false });
+        .upload(path, item.file, { upsert: false });
       if (error) throw error;
       const { data } = supabase.storage
         .from("product-images")
         .getPublicUrl(path);
-      urls.push(data.publicUrl);
+      map.set(item.id, data.publicUrl);
+      idx++;
     }
-    return urls;
+    return map;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -223,8 +228,9 @@ export function ProductForm({
 
     try {
       if (isEdit) {
-        let newUploadedUrls: string[] = [];
-        if (files.length > 0) {
+        const hasNew = items.some((it) => it.kind === "new");
+        let newUrlMap = new Map<string, string>();
+        if (hasNew) {
           const {
             data: { user },
           } = await supabase.auth.getUser();
@@ -234,7 +240,7 @@ export function ProductForm({
             return;
           }
           try {
-            newUploadedUrls = await uploadImages(supabase, user.id);
+            newUrlMap = await uploadNewImages(supabase, user.id);
           } catch {
             setErrorCode("image_upload_failed");
             setSubmitting(false);
@@ -242,13 +248,17 @@ export function ProductForm({
           }
         }
 
-        const keptExisting = existingOrder.filter(
-          (img) => !removedPaths.includes(img.path),
+        const order = items.map((it) =>
+          it.kind === "existing"
+            ? { url: it.url, existing: true }
+            : { url: newUrlMap.get(it.id) ?? "", existing: false },
         );
-        const order = [
-          ...keptExisting.map((img) => ({ url: img.url, existing: true })),
-          ...newUploadedUrls.map((url) => ({ url, existing: false })),
-        ];
+        const remainingPaths = items
+          .filter((it) => it.kind === "existing")
+          .map((it) => it.path);
+        const removedPaths = originalExistingPaths.current.filter(
+          (p) => !remainingPaths.includes(p),
+        );
 
         const res = await fetch(`/api/products/${productId}`, {
           method: "PUT",
@@ -277,7 +287,8 @@ export function ProductForm({
       }
 
       let imageUrls: string[] = [];
-      if (files.length > 0) {
+      const hasNew = items.some((it) => it.kind === "new");
+      if (hasNew) {
         const {
           data: { user },
         } = await supabase.auth.getUser();
@@ -286,13 +297,17 @@ export function ProductForm({
           setSubmitting(false);
           return;
         }
+        let urlMap = new Map<string, string>();
         try {
-          imageUrls = await uploadImages(supabase, user.id);
+          urlMap = await uploadNewImages(supabase, user.id);
         } catch {
           setErrorCode("image_upload_failed");
           setSubmitting(false);
           return;
         }
+        imageUrls = items.map((it) =>
+          it.kind === "existing" ? it.url : urlMap.get(it.id) ?? "",
+        );
       }
 
       const res = await fetch("/api/products", {
@@ -532,17 +547,13 @@ export function ProductForm({
       <div className="space-y-2">
         <Label>画像(任意、既存を含め最大 5 枚)</Label>
         <ProductImageUpload
-          files={files}
-          onChange={setFiles}
+          items={items}
+          onItemsChange={setItems}
           disabled={submitting}
-          existingImages={isEdit ? existingOrder : []}
-          onExistingOrderChange={isEdit ? setExistingOrder : undefined}
-          removedPaths={removedPaths}
-          onToggleRemove={isEdit ? toggleRemoveExisting : undefined}
         />
         {isEdit && (
           <p className="text-xs text-muted-foreground">
-            既存画像の削除は送信後に元に戻せません。並び順は矢印ボタンで変更できます。
+            既存画像を削除して保存すると元に戻せません。
           </p>
         )}
       </div>

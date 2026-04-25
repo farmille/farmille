@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { getRole, getSession, getUser } from "@/lib/auth/server";
+import { getRole, getUser } from "@/lib/auth/server";
+import { createClient } from "@/lib/supabase/server";
 import { landingPathForRole } from "@/lib/auth/landing";
 import { ProductCard, type Product } from "@/app/products/_components/product-card";
 
@@ -25,7 +26,10 @@ export default async function MakerProductsPage() {
     redirect(landingPathForRole(role));
   }
 
-  const session = await getSession();
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   if (!session) {
     redirect("/login?next=/maker/products");
   }

@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getRole, getUser } from "@/lib/auth/server";
 import { TypeFilter } from "./_components/type-filter";
 import { ProductCard, type Product } from "./_components/product-card";
 import {
   CropCascadeFilter,
   type L1Node,
 } from "./_components/crop-cascade-filter";
+
+const REVIEWER_ROLES = new Set(["farmer", "researcher", "ja_staff"]);
 
 export const metadata: Metadata = {
   title: "資材一覧",
@@ -48,6 +51,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   if (!apiUrl) {
     throw new Error("API_URL not configured");
   }
+
+  const user = await getUser();
+  const role = user ? await getRole(user) : null;
+  const isReviewer = role !== null && REVIEWER_ROLES.has(role);
 
   const productsQuery = new URLSearchParams();
   if (typeId) productsQuery.set("type_id", typeId);
@@ -106,12 +113,31 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             <Link href="/products" className="text-foreground hover:text-primary">
               資材一覧
             </Link>
-            <Link href="/login" className="text-foreground hover:text-primary">
-              ログイン
-            </Link>
-            <Button asChild size="sm">
-              <Link href="/signup">新規登録</Link>
-            </Button>
+            {isReviewer && (
+              <Link
+                href="/me/reviews"
+                className="text-foreground hover:text-primary"
+              >
+                自分のレビュー
+              </Link>
+            )}
+            {user ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/home">ホーム</Link>
+              </Button>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-foreground hover:text-primary"
+                >
+                  ログイン
+                </Link>
+                <Button asChild size="sm">
+                  <Link href="/signup">新規登録</Link>
+                </Button>
+              </>
+            )}
           </nav>
         </div>
       </header>
