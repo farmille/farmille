@@ -312,14 +312,13 @@ export function ReviewForm({
             キャンセル
           </Button>
         )}
-        <Button type="submit" disabled={!canSubmit || submitting}>
-          {submitting
-            ? isEdit
-              ? "更新中…"
-              : "投稿中…"
-            : isEdit
-              ? "更新"
-              : "レビューを投稿"}
+        <Button
+          type="submit"
+          loading={submitting}
+          loadingText={isEdit ? "更新中…" : "投稿中…"}
+          disabled={!canSubmit}
+        >
+          {isEdit ? "更新" : "レビューを投稿"}
         </Button>
       </div>
     </form>

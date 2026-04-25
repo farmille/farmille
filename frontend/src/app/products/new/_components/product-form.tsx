@@ -543,14 +543,13 @@ export function ProductForm({
         ) : (
           <span />
         )}
-        <Button type="submit" disabled={submitting || deleting}>
-          {submitting
-            ? isEdit
-              ? "更新中…"
-              : "登録中…"
-            : isEdit
-              ? "変更を保存"
-              : "資材を登録"}
+        <Button
+          type="submit"
+          loading={submitting}
+          loadingText={isEdit ? "更新中…" : "登録中…"}
+          disabled={deleting}
+        >
+          {isEdit ? "変更を保存" : "資材を登録"}
         </Button>
       </div>
     </form>

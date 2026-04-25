@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { signUp } from "@/lib/auth/actions";
 
 export default function SignupPage() {
@@ -137,8 +138,11 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={isPending}
-          className="w-full rounded bg-zinc-900 py-2.5 text-base font-medium text-white hover:bg-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full inline-flex items-center justify-center gap-2 rounded bg-zinc-900 py-2.5 text-base font-medium text-white hover:bg-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed"
         >
+          {isPending && (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          )}
           {isPending ? "送信中..." : "登録する"}
         </button>
       </form>
