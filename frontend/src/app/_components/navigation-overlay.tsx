@@ -12,6 +12,15 @@ export function NavigationOverlay() {
   const isNavigating =
     pendingPathname !== null && pendingPathname !== pathname;
 
+  // pathname 変化で pendingPathname を clear する（forward nav 完了 / back button /
+  // bfcache restore すべてで stale state を残さない）。これが無いと back button で
+  // 戻った先で `pendingPathname !== pathname` が再び true になり overlay が出っぱなしになる。
+  useEffect(() => {
+    // 外部 prop (pathname) 変化に対する derived state 同期パターン。
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPendingPathname(null);
+  }, [pathname]);
+
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       // primary button のみ、修飾キー併用は新タブ等のため対象外
