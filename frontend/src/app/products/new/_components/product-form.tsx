@@ -258,6 +258,10 @@ export function ProductForm({
             order,
           }),
         });
+        if (res.status === 401) {
+          router.push("/login?expired=1");
+          return;
+        }
         if (!res.ok) {
           const data = (await res.json().catch(() => ({}))) as {
             error?: string;
@@ -299,6 +303,10 @@ export function ProductForm({
         }),
       });
 
+      if (res.status === 401) {
+        router.push("/login?expired=1");
+        return;
+      }
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as {
           error?: string;
@@ -328,6 +336,10 @@ export function ProductForm({
       const res = await fetch(`/api/products/${productId}`, {
         method: "DELETE",
       });
+      if (res.status === 401) {
+        router.push("/login?expired=1");
+        return;
+      }
       if (!res.ok && res.status !== 204) {
         const data = (await res.json().catch(() => ({}))) as {
           error?: string;

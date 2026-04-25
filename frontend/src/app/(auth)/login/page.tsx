@@ -2,10 +2,15 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth/actions";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const expired = searchParams.get("expired") === "1";
+  const reset = searchParams.get("reset") === "1";
+
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -22,6 +27,23 @@ export default function LoginPage() {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-zinc-900">ログイン</h2>
+
+      {expired && (
+        <div
+          role="status"
+          className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+        >
+          セッションが切れました。再度ログインしてください。
+        </div>
+      )}
+      {reset && (
+        <div
+          role="status"
+          className="rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+        >
+          パスワードを更新しました。新しいパスワードでログインしてください。
+        </div>
+      )}
 
       <form action={handleSubmit} className="space-y-5">
         <div className="space-y-2">

@@ -83,6 +83,10 @@ export function MyReviewRow({ productId, review }: Props) {
       const res = await fetch(`/api/reviews/${review.id}`, {
         method: "DELETE",
       });
+      if (res.status === 401) {
+        router.push("/login?expired=1");
+        return;
+      }
       if (!res.ok && res.status !== 204) {
         setError("削除に失敗しました。時間をおいて再度お試しください");
         setDeleting(false);

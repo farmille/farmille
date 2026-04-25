@@ -148,6 +148,10 @@ export function ReviewForm({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rating, body, remove_paths: removedPaths }),
         });
+        if (res.status === 401) {
+          router.push("/login?expired=1");
+          return;
+        }
         if (!res.ok) {
           const data = (await res.json().catch(() => ({}))) as {
             error?: string;
@@ -195,6 +199,10 @@ export function ReviewForm({
         }),
       });
 
+      if (res.status === 401) {
+        router.push("/login?expired=1");
+        return;
+      }
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as {
           error?: string;
