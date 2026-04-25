@@ -338,4 +338,67 @@ Phase 11c リリース後、本番（https://farmille.vercel.app）で `<Link>` 
 
 ---
 
+## 12. 2026-04-26 hotfix #2: back button で overlay が永続表示される bug
+
+### 12.1 症状
+
+PR #14 hotfix リリース後、`<Link>` 遷移直後にブラウザの戻るボタンを押すと、戻り先で overlay が消えなくなる症状が発覚。次の forward navigation まで画面が操作不能。
+
+再現手順（https://farmille.vercel.app）:
+1. `/products` を開く
+2. ヘッダーの「自分のレビュー」または資材カードから `/products/[id]` に遷移
+3. 遷移先で overlay が一瞬出て消える（正常）
+4. ブラウザの戻るボタンを押す
+5. `/products` に戻るが overlay が出続ける（bug）
+
+### 12.2 原因
+
+`navigation-overlay.tsx` の derived state パターン:
+
+```tsx
+const isNavigating = pendingPathname !== null && pendingPathname !== pathname;
+```
+
+タイムライン:
+1. 初期: `pathname = "/products"`、`pendingPathname = null`
+2. クリック: `setPendingPathname("/me/reviews")`、overlay 表示
+3. 遷移完了: `pathname = "/me/reviews"`、derived `isNavigating = false`、overlay 非表示。**ただし `pendingPathname` は `"/me/reviews"` のまま残存**
+4. back button: `pathname = "/products"`、`pendingPathname = "/me/reviews"`（stale）→ derived `isNavigating = true` → overlay 復活
+
+`NavigationOverlay` は `app/layout.tsx` に常設のため component 再マウントは起きず、stale state が永続。
+
+PR #14 で worker が「`react-hooks/set-state-in-effect` lint 警告回避」を理由に「2 useEffect 構造（spec 提示）」を「1 useEffect + derived state」に変更したのが原因。derived state は pathname の単方向参照のみで、`pendingPathname` の双方向同期 mechanism が無かった。
+
+### 12.3 修正
+
+pathname 変化を useEffect で監視し `setPendingPathname(null)` で reset:
+
+```tsx
+useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  setPendingPathname(null);
+}, [pathname]);
+```
+
+`react-hooks/set-state-in-effect` lint 警告は外部 prop (pathname) 変化に対する derived state 同期パターンには適用対象外。React 公式推奨パターン。`eslint-disable-next-line` で限定抑制し、コメントで根拠記載。
+
+修正後:
+- forward nav: click → `setPendingPathname(target)` → overlay 表示 → 遷移完了で pathname 変化 → useEffect 発火 → `setPendingPathname(null)` → overlay 非表示
+- back nav: pathname 変化 → useEffect 発火 → `setPendingPathname(null)`（既に null でも no-op）→ overlay 非表示
+- bfcache restore: 同じく pathname 変化検知で reset
+
+### 12.4 受け入れ条件（追加）
+
+- [ ] `/products` → `/me/reviews` 遷移後、back button で `/products` に戻ると overlay が出ない
+- [ ] `/products` → `/products/[id]` 遷移後、back button で `/products` に戻ると overlay が出ない
+- [ ] `/maker/products` 等 reviewer 系以外でも back button で overlay が出ない
+- [ ] 任意の forward → back の往復で overlay が永続化しない
+- [ ] forward navigation 中の overlay 表示は引き続き機能（§11.6 既存条件 regression なし）
+
+### 12.5 commit
+
+`fix(ui): clear pending pathname on pathname change to fix back-button overlay persistence`
+
+---
+
 **以上**
