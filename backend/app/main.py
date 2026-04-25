@@ -1,5 +1,10 @@
+import os
+
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
 
 from app.config import settings
 from app.routers import (
@@ -14,6 +19,15 @@ from app.routers import (
     products,
     reviews,
 )
+
+_sentry_dsn = os.getenv("SENTRY_DSN")
+if settings.environment == "production" and _sentry_dsn:
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+        integrations=[StarletteIntegration(), FastApiIntegration()],
+    )
 
 app = FastAPI(
     title="Farmille API",

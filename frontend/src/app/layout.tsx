@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_JP } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
+
+const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const isProduction = process.env.NODE_ENV === "production";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -32,6 +36,9 @@ export default function RootLayout({
       className={`${notoSansJP.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
+      {isProduction && gaMeasurementId ? (
+        <GoogleAnalytics gaId={gaMeasurementId} />
+      ) : null}
     </html>
   );
 }
