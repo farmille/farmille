@@ -283,4 +283,59 @@ export default function Loading() {
 
 ---
 
+## 11. 2026-04-26 hotfix: prefetch suspense gap
+
+Phase 11c リリース後、本番（https://farmille.vercel.app）で `<Link>` クリック時に overlay が出ないケースが多数あることが判明。原因と対策:
+
+### 11.1 原因
+
+- Next.js は `<Link>` 周辺を prefetch して RSC payload をクライアントメモリにキャッシュする
+- prefetch hit 時の `<Link>` クリックは Server Component を suspend しないため、`app/loading.tsx` (Suspense fallback) が発火しない
+- しかし体感 1-2 秒の待機は依然存在する（hydration + 画像ダウンロード等の post-fetch コスト）
+- `loading.tsx` は Suspense でしか掴めず、本番の主要遷移パスをカバーできない
+
+### 11.2 対策: document click listener + derived pendingPathname
+
+新規 client component `frontend/src/app/_components/navigation-overlay.tsx` を `app/layout.tsx` の `<body>` 末尾に常設。
+
+実装方針:
+- `document.addEventListener("click", ...)` で全ての `<a>` クリックを bubble phase で捕捉（event delegation、全 `<Link>` の置換不要）
+- 同一 origin / 内部 path / target=_self / 修飾キー無し / 同一 path 以外への遷移時のみ overlay 表示
+- `usePathname()` の値変化で derived state (`pendingPathname !== pathname`) として overlay 自動非表示
+- `app/loading.tsx` は維持。Server Action redirect / `useRouter().push` / 真の slow fetch では引き続き Suspense fallback が機能
+
+### 11.3 同一 path クリックの扱い
+
+ヘッダーロゴ等で現在 path と同じ URL をクリックすると pathname 変化が起きないため overlay が消えなくなる risk。click 時に `url.pathname === pathname` なら最初から overlay を出さないことで回避。
+
+### 11.4 既存 `loading.tsx` との二重発火
+
+両者とも同視覚（`bg-white/60 backdrop-blur-sm` + 中央スピナー、`z-50`）で重なっても破綻しない。`pendingPathname` 一致で overlay が消えた後に Suspense fallback が出るパターンも視覚連続。
+
+### 11.5 React 19 StrictMode 二重発火
+
+`useEffect` の dev mode 二重実行は `addEventListener` / `removeEventListener` の cleanup 対称性で副作用なし。production では 1 回。
+
+### 11.6 受け入れ条件（追加）
+
+- [ ] 本番（Vercel）で `<Link href="/products">` クリック → ネットワーク throttle 無しでも overlay が瞬時に表示
+- [ ] 遷移先到着で overlay が消える（pathname 変化検知）
+- [ ] 外部リンク / `target="_blank"` / `download` / Cmd+クリック等で overlay 出ない
+- [ ] アンカーリンク（`#section`）で overlay 出ない
+- [ ] 同一 path クリック（`/` → `/` 等）で overlay 出ない（出っぱなし防止）
+- [ ] フィルタ操作（searchParams 変更）で overlay 出ない（pathname 同一）
+- [ ] Server Action `redirect()` / `router.push()` 経路は既存 `loading.tsx` Suspense fallback でカバー（regression なし）
+
+### 11.7 触らないファイル（再掲）
+
+- `frontend/src/app/loading.tsx`（維持）
+- `frontend/src/components/ui/button.tsx`（Phase 11a Button loading prop 維持）
+- 各 `<Link>`（event delegation でカバーするため置換不要）
+
+### 11.8 commit
+
+`fix(ui): show navigation overlay on link click to bypass prefetch suspense gap`
+
+---
+
 **以上**
