@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession, getUser } from "@/lib/auth/server";
+import { landingPathForRole } from "@/lib/auth/landing";
 import { MakerForm } from "./_components/maker-form";
 
 type StatusResponse = { role: string | null; has_profile: boolean };
@@ -35,7 +36,7 @@ export default async function OnboardingMakerPage() {
     redirect("/onboarding");
   }
   if (status.role !== "maker") {
-    redirect("/home");
+    redirect(landingPathForRole(status.role));
   }
   if (status.has_profile) {
     redirect("/onboarding/complete");

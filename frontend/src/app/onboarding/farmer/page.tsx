@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession, getUser } from "@/lib/auth/server";
+import { landingPathForRole } from "@/lib/auth/landing";
 import { FarmerForm } from "./_components/farmer-form";
 import type {
   CategoryL1,
@@ -53,7 +54,7 @@ export default async function OnboardingFarmerPage() {
     redirect("/onboarding");
   }
   if (status.role !== "farmer") {
-    redirect("/home");
+    redirect(landingPathForRole(status.role));
   }
   if (status.has_profile) {
     redirect("/onboarding/complete");

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getRole, getUser } from "@/lib/auth/server";
+import { landingPathForRole } from "@/lib/auth/landing";
 import { signOut } from "@/lib/auth/actions";
 import { RoleRecoveryForm } from "./role-recovery-form";
 
@@ -26,7 +27,7 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
     redirect("/onboarding/maker");
   }
   if (role === "ja_staff" || role === "researcher") {
-    redirect("/home");
+    redirect(landingPathForRole(role));
   }
 
   const params = (await searchParams) ?? {};
