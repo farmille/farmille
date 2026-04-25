@@ -8,10 +8,14 @@ type RouteContext = {
 async function getAuth() {
   const supabase = await createClient();
   const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError || !user) return null;
+  const {
     data: { session },
-    error,
   } = await supabase.auth.getSession();
-  if (error || !session) return null;
+  if (!session) return null;
   return session;
 }
 

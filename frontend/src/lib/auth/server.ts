@@ -4,8 +4,9 @@ import type { Role } from "@/lib/auth/roles";
 import type { User } from "@supabase/supabase-js";
 
 // 同一リクエスト内で memoize（React 19 cache）。Server Component / Server Action /
-// Route Handler 共通で動作。1 リクエスト中に getUser / getRole / getSession を
-// 重複呼び出ししても Supabase Auth Server への HTTP は 1 往復に集約される。
+// Route Handler 共通で動作。getUser は Supabase Auth Server に問い合わせて JWT
+// 署名検証する（getSession の cookie cache では検証されない）。access_token が
+// 必要な箇所では呼び出し側で別途 supabase.auth.getSession() を呼ぶ。
 export const getUser = cache(async (): Promise<User | null> => {
   const supabase = await createClient();
   const {
@@ -21,11 +22,3 @@ export async function getRole(user?: User | null): Promise<Role | null> {
   if (!u) return null;
   return (u.app_metadata?.role ?? null) as Role | null;
 }
-
-export const getSession = cache(async () => {
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  return session;
-});
