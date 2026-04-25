@@ -58,7 +58,7 @@
 | パス | 種別 | 変更内容 | 権限 |
 |---|---|---|---|
 | `/onboarding/complete` | Server | ロールに応じて「はじめる」ボタンのリンク先を動的に決定（maker → `/maker/products`、reviewer 系 → `/products`）。ページ自体は表示維持（祝意 UI）| 全員 |
-| `/home` | Server | **薄い redirect ラッパ化に確定**（§4.1 / Q5 推奨案）。role を見て `/products` or `/maker/products` に server redirect する 1 行の page。既存リンク・OAuth callback 互換のため削除しない | 全員 |
+| `/home` | - | **Phase 11b で完全削除**（ADR-0006 §決定）。既存 `redirect("/home")` 8 箇所と `<Link href="/home">` 1 箇所を `getDefaultLandingForRole(role)` helper 経由に書き換え | - |
 | `/products` | Server | OGP / meta tags のみ追加（nudge バナーは Phase 12 progressive onboarding に統合のため本 Phase 対象外）| 全員閲覧 |
 | `/maker/products` | Server | 資材 0 件時の空状態 CTA を「最初の資材を登録しましょう」ボタン付きに拡張 | maker |
 | `/(auth)/login` | Client | 「パスワードをお忘れですか？」リンクを追加、セッション切れ toast 表示 | 全員 |
@@ -131,29 +131,45 @@ Ryoga 判断 Q1 で確定（§10）。
 
 ## 4. 認証 UX 整備（§0.1 必達 3-5）
 
-### 4.1 onboarding 完了後リダイレクト
+### 4.1 onboarding 完了後リダイレクト + `/home` bypass
+
+**ADR 参照**: 本節の決定は `docs/decisions/0006-url-namespace-policy.md` で確立した URL 名前空間 3 層分類（`/maker/*` / `/me/*` / root）に基づく。`/home` はどの層にも属さない孤児 URL のため最終的に削除。**Phase 11b ホットフィックスでは内部遷移 bypass のみ実施**（`/home` 自体は外部リンク互換のため薄ラッパとして残置、削除は Phase 12）。
 
 現状参照:
 - `frontend/src/app/onboarding/complete/page.tsx`: server component、`getUser()` ベース、「はじめる」ボタンが `/home` への `<Link>`
 - `frontend/src/app/home/page.tsx`: server で auth + role 取得 → reviewer / maker 別の placeholder 画面（L52-64 の role 別文言）
-- frontend 内に `redirect("/home")` が **8 箇所**存在（Q5 で残置決定なら影響なし、廃止なら全箇所書き換え必要）:
+- frontend 内に `redirect("/home")` が **8 箇所** + `<Link href="/home">` が **1 箇所**存在（全箇所書き換え対象）:
   - `products/new/page.tsx:33` / `products/[id]/edit/page.tsx:57, 98` / `maker/products/page.tsx:24`
   - `onboarding/farmer/page.tsx:56` / `onboarding/maker/page.tsx:38` / `onboarding/page.tsx:26`
   - `lib/auth/actions.ts:87`（signup 完了 → role 別 redirect）
+  - `maker/products/page.tsx:58`（header の `<Link href="/home">ホーム</Link>`）
 
-変更（Q5 推奨案 = 薄い redirect ラッパ化を前提）:
-- `/onboarding/complete` の「はじめる」ボタンの `<Link href>` を、サーバー側でロールを見て決定:
-  - `maker` → `/maker/products`
-  - `farmer` / `researcher` / `ja_staff` → `/products`
-  - `unassigned` → `/onboarding`（既存ロジック維持）
-  - ページ自体（祝意 UI）は維持。auto-redirect はしない（ユーザーが「はじめる」を能動的に押す体験を保つ）
-- `frontend/src/app/home/page.tsx` を **薄い server redirect 1 ファイル**に置き換え:
-  ```tsx
-  // role を取得 → maker なら /maker/products、reviewer 系なら /products、unassigned なら /onboarding
-  // 未ログインなら /login
-  ```
-  既存 `redirect("/home")` 呼び出し 8 箇所はそのまま残してよい（`/home` で 1 ホップ吸収）。**ただし新規コードでは role 別の直接 redirect を推奨**（`lib/auth/actions.ts:87` のみ本 Phase で role 別直接 redirect に置換、その他は Phase 12 でクリーンアップ）
-- 旧 placeholder 文言（L52-64）は削除（各ランディングページの空状態 CTA が役割を引き継ぐ）
+#### 4.1.1 新規 helper: `frontend/src/lib/auth/landing.ts`
+
+ADR-0006 §決定 で確定した「ロール別デフォルト着地」を集約（Phase 11b ホットフィックスで実装済）:
+
+```typescript
+import { isMakerRole, isReviewerRole } from "./roles";
+
+export function landingPathForRole(role: string | null | undefined): string {
+  if (isMakerRole(role)) return "/maker/products";
+  if (isReviewerRole(role)) return "/products";
+  return "/onboarding"; // unassigned 含む
+}
+```
+
+#### 4.1.2 `/home` 削除と全箇所置換
+
+- `frontend/src/app/home/page.tsx` を **完全削除**（薄ラッパ案は ADR-0006 §Alternatives B で却下済み）
+- 上記 8 箇所の `redirect("/home")` を `redirect(getDefaultLandingForRole(role))` に書き換え
+  - 各箇所は既に `getRole()` を呼んでいるか、role を取得できる文脈にある（書き換えに追加 fetch 不要）
+- `maker/products/page.tsx:58` の `<Link href="/home">ホーム</Link>` は **header から削除**（maker は既に `/maker/products` に居るため「ホーム」リンクが自分自身を指す状態になり無意味）
+
+#### 4.1.3 `/onboarding/complete` の「はじめる」ボタン
+
+- 「はじめる」ボタンの `<Link href>` を、サーバー側で `getDefaultLandingForRole(role)` から決定
+- ページ自体（祝意 UI）は維持。auto-redirect はしない（ユーザーが「はじめる」を能動的に押す体験を保つ）
+- 旧 `/home` の placeholder 文言（L52-64）は `/home` 削除と同時に消滅
 
 ### 4.2 パスワードリセット UI
 
@@ -308,8 +324,10 @@ Supabase Auth の `resetPasswordForEmail` + `updateUser` を使う標準フロ�
 - `frontend/src/app/(auth)/password-reset/page.tsx` + `_components/password-reset-form.tsx`
 - `frontend/src/app/(auth)/password-update/page.tsx` + `_components/password-update-form.tsx`
 - `frontend/src/lib/analytics/{index.ts,events.ts}`
+- `frontend/src/lib/auth/landing.ts`（**新設**、ADR-0006 §決定 / §4.1.1、`getDefaultLandingForRole(role)` helper）
 - `docs/email-templates/confirm-signup.{html,txt}`
 - `docs/email-templates/reset-password.{html,txt}`
+- `docs/decisions/0006-url-namespace-policy.md`（**Phase 11 検討中に新設、本 spec 着手前に既に commit 想定**）
 - `public/og-lp.png`（Ryoga 素材受領後）
 
 ### 既存修正
@@ -319,16 +337,31 @@ Supabase Auth の `resetPasswordForEmail` + `updateUser` を使う標準フロ�
 - `frontend/src/app/page.tsx`（`generateMetadata`）
 - `frontend/src/app/products/page.tsx`（`generateMetadata` のみ。nudge は Phase 12 送り）
 - `frontend/src/app/products/[id]/page.tsx`（`generateMetadata` 動的）
-- `frontend/src/app/maker/products/page.tsx`（空状態 CTA 拡張）
-- `frontend/src/app/onboarding/complete/page.tsx`（role 別「はじめる」ボタンリンク先決定）
-- `frontend/src/app/home/page.tsx`（薄い server redirect ラッパ化、Q5 確定後）
-- `frontend/src/lib/auth/actions.ts`（L87 の `/home` を role 別の直接 redirect に置換。残り 7 箇所の `redirect("/home")` は `/home` ラッパ経由で吸収するため Phase 11 では触らない）
+- `frontend/src/app/maker/products/page.tsx`（空状態 CTA 拡張 + L24 redirect 書き換え + L58 `<Link href="/home">` 削除）
+- `frontend/src/app/onboarding/complete/page.tsx`（「はじめる」ボタン href を `getDefaultLandingForRole(role)` 経由に）
+- `frontend/src/lib/auth/actions.ts:87`（signIn の `/home` を `getDefaultLandingForRole(role)` 経由に置換）
 - `frontend/src/app/(auth)/login/page.tsx`（「パスワードをお忘れですか？」リンク + expired toast）
 - `frontend/src/components/ui/button.tsx`（`loading` / `loadingText` prop 追加）
 - `frontend/src/app/(auth)/signup/page.tsx` / `onboarding/farmer/_components/farmer-form.tsx` / `onboarding/maker/_components/maker-form.tsx` / `products/[id]/_components/review-form.tsx` / `products/new/_components/product-form.tsx`（送信ボタンの `loading` 対応）
 - `frontend/next.config.ts`（Sentry plugin wrap）
 - `frontend/package.json` / `backend/pyproject.toml`（依存追加: `@sentry/nextjs` / `sentry-sdk[fastapi]` / `next/third-parties`）
 - `frontend/.env.example` / `backend/.env.example`（環境変数追加）
+
+#### `/home` 削除に伴う一括書き換え（§4.1.2、ADR-0006）
+
+以下 6 箇所で `redirect("/home")` を helper 経由に変更（既に role 取得文脈にあるため追加 fetch 不要）:
+
+- `frontend/src/app/products/new/page.tsx:33`
+- `frontend/src/app/products/[id]/edit/page.tsx:57, 98`
+- `frontend/src/app/onboarding/farmer/page.tsx:56`
+- `frontend/src/app/onboarding/maker/page.tsx:38`
+- `frontend/src/app/onboarding/page.tsx:26`
+
+farmer-form / maker-form の `handleSkip = () => router.replace("/home")` も書き換え必要（client component のため `getDefaultLandingForRole` を直接使えない → server で URL を解決して props で渡すか、`/onboarding` 直行 fallback で対応。worker 判断）
+
+#### 削除
+
+- `frontend/src/app/home/page.tsx`（**完全削除**、ADR-0006 §決定）
 
 ---
 
@@ -408,11 +441,12 @@ Supabase Auth の `resetPasswordForEmail` + `updateUser` を使う標準フロ�
 - 本番では `https://farmille.jp/password-update`（確定前は Ryoga 環境に合わせて `.env` で切替）
 - Supabase Auth の **Allow List** に追加が必要（Ryoga Dashboard 作業）
 
-### 12.4 `/home` 廃止の互換性
+### 12.4 `/home` 完全削除の根拠と注意
 
-- 既存 OAuth の redirect URL が `/home` を指しているか要確認（`backend/app/routers/auth.py` の OAuth callback、grep 結果は 0 件で実質影響なし）
-- frontend 内の `redirect("/home")` は **8 箇所**残存（§4.1 一覧参照）。本 Phase では `lib/auth/actions.ts:87` のみ書き換え、残り 7 箇所は `/home` 薄ラッパ経由で 1 ホップ吸収する方針（Phase 12 でクリーンアップ）
-- **Q5 で「廃止」を選んだ場合は、本 Phase の触るファイルに 7 箇所追加 + 工数 +0.5 日**になる旨 worker / Ryoga で合意してから着手
+- ADR-0006 §決定 で確定。理由は URL 名前空間 3 層分類（`/maker/*` / `/me/*` / root）のいずれにも属さない孤児 URL のため
+- 既存 OAuth の redirect URL が `/home` を指していないか要確認（`backend/app/routers/auth.py` の OAuth callback、grep 結果は 0 件で実質影響なし）
+- frontend 内の `redirect("/home")` 8 箇所 + `<Link href="/home">` 1 箇所を本 Phase で **全箇所書き換え**（§4.1.2）
+- 本 Phase 工数 +0.5 日（`/home` 薄ラッパ案からの差分）、ただし Phase 12 で再度同じファイルに触らずに済むためトータル工数は変わらない
 
 ### 12.5 nudge / progressive onboarding（Phase 12 送り）
 
@@ -433,8 +467,9 @@ Supabase Auth の `resetPasswordForEmail` + `updateUser` を使う標準フロ�
 ### 確定済（2026-04-25）
 
 - **Q3**: farmer プロフィール「完了」判定 → **本 Phase からは外す**。Phase 12 progressive onboarding（レビュー投稿時にプロフィール必須化）に統合
-- **Q5**: `/home` → **薄い redirect ラッパとして残す**（`lib/auth/actions.ts:87` のみ Phase 11 で role 別直接 redirect に置換、残り 7 箇所は Phase 12 でクリーンアップ）
+- **Q5**: `/home` → **Phase 11b で完全削除**（ADR-0006 §決定）。8 箇所の `redirect("/home")` + 1 箇所の `<Link href="/home">` を一括で `getDefaultLandingForRole(role)` helper 経由に置換
 - **Q7**: ja_staff / researcher の nudge → **Phase 12 progressive onboarding に統合**（本 Phase 対象外）
+- **Q8（新規）**: URL 名前空間ポリシー → ADR-0006 で 3 層分類（`/maker/*` / `/me/*` / root）を確立。今後の URL 設計判断はこれに従う
 
 ### 未確定
 
@@ -470,31 +505,34 @@ Supabase Auth の `resetPasswordForEmail` + `updateUser` を使う標準フロ�
 
 **工数目安**: 半日 + 半日 + 半日 + 1-2h = **約 1.5 日**
 
-### 14.2 Phase 11b: 認証 UX
+### 14.2 Phase 11b: 認証 UX + `/home` 削除
 
 **ブランチ**: `feat/launch-polish-2-auth-ux`（11a merge 後 main から派生）
-**目的**: 認証まわりの不便解消（password reset / session expire / role 別着地）
+**目的**: 認証まわりの不便解消（password reset / session expire / role 別着地）+ `/home` 完全削除
 
 **含む**:
-- §4.1 onboarding 完了後 role 別リダイレクト + `/home` ラッパ化
+- §4.1 onboarding 完了後 role 別リダイレクト + `getDefaultLandingForRole` helper 新設 + `/home` 完全削除（8 箇所 redirect + 1 箇所 Link 書き換え）
 - §4.2 password reset / update UI
 - §4.3 session expire 検知 + toast
 
-**commit 構成**（3 commits）:
+**commit 構成**（4 commits）:
 ```
-1. feat(auth): post-onboarding role-based redirect and /home wrapper
-2. feat(auth): password reset and update flow
-3. feat(auth): session expire detection and login toast
+1. refactor(auth): introduce getDefaultLandingForRole helper and replace /home redirects
+2. feat(auth): post-onboarding role-based landing (onboarding/complete + signIn)
+3. feat(auth): password reset and update flow
+4. feat(auth): session expire detection and login toast
 ```
 
-**工数目安**: 1-2h + 半日 + 半日 = **約 1 日**
+commit 1 と 2 を分けるのは ADR-0006 reviewer の追跡しやすさのため（helper 導入と既存 `/home` 削除が 1 commit、新規 onboarding redirect が別 commit）。
+
+**工数目安**: 半日（commit 1）+ 1-2h（commit 2）+ 半日（commit 3）+ 半日（commit 4）= **約 1.5 日**
 
 ### 14.3 全体工数
 
 - Phase 11a: 約 1.5 日
-- Phase 11b: 約 1 日
+- Phase 11b: 約 1.5 日（`/home` 完全削除込み、+0.5 日が ADR-0006 採用に伴う追加）
 - 検証 / Ryoga 手動: 半日 × 2
-- **合計: 約 3 日**（11a / 11b の並列化は不可、11a merge → main 安定 → 11b 派生の順序）
+- **合計: 約 3.5 日**（11a / 11b の並列化は不可、11a merge → main 安定 → 11b 派生の順序）
 
 ### 14.4 Ryoga 事前作業（11a 着手前に揃えたい）
 

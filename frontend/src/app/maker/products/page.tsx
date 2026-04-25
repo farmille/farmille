@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getRole, getSession, getUser } from "@/lib/auth/server";
+import { landingPathForRole } from "@/lib/auth/landing";
 import { ProductCard, type Product } from "@/app/products/_components/product-card";
 
 type MakerProduct = {
@@ -21,7 +22,7 @@ export default async function MakerProductsPage() {
   }
   const role = await getRole();
   if (role !== "maker") {
-    redirect("/home");
+    redirect(landingPathForRole(role));
   }
 
   const session = await getSession();

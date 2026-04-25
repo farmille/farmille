@@ -1,13 +1,22 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { getUser } from "@/lib/auth/server";
+import { getRole, getUser } from "@/lib/auth/server";
+import { isMakerRole, isReviewerRole } from "@/lib/auth/roles";
 
 export default async function OnboardingCompletePage() {
   const user = await getUser();
   if (!user) {
     redirect("/login");
   }
+
+  const role = await getRole();
+  // role 別の着地先（maker → 自社資材、reviewer 系 → 資材一覧、未確定 → onboarding）
+  const startPath = isMakerRole(role)
+    ? "/maker/products"
+    : isReviewerRole(role)
+      ? "/products"
+      : "/onboarding";
 
   const name = (user.user_metadata?.name as string | undefined) ?? "";
 
@@ -28,7 +37,7 @@ export default async function OnboardingCompletePage() {
           さっそく Farmille を使い始めましょう。
         </p>
         <Button asChild className="w-full">
-          <Link href="/home">はじめる</Link>
+          <Link href={startPath}>はじめる</Link>
         </Button>
       </div>
     </div>

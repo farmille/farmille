@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSignUpRole } from "@/lib/auth/roles";
+import { landingPathForRole } from "@/lib/auth/landing";
 
 export type ActionResult =
   | { ok: true }
@@ -84,11 +85,59 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   const role = user?.app_metadata?.role as string | undefined;
 
-  redirect(role && role !== "unassigned" ? "/home" : "/onboarding");
+  redirect(landingPathForRole(role));
 }
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
+}
+
+export async function requestPasswordReset(
+  formData: FormData,
+): Promise<ActionResult> {
+  const email = formData.get("email");
+  if (typeof email !== "string" || !email.includes("@")) {
+    return { ok: false, error: "正しいメールアドレスを入力してください" };
+  }
+
+  const supabase = await createClient();
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?next=/password-update`,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true };
+}
+
+export async function updatePassword(
+  formData: FormData,
+): Promise<ActionResult> {
+  const password = formData.get("password");
+  if (typeof password !== "string" || password.length < 6) {
+    return { ok: false, error: "パスワードは6文字以上で入力してください" };
+  }
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "セッションが切れました。再度メール内リンクを開いてください" };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true };
 }

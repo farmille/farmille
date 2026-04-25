@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PREFECTURES } from "@/lib/data/prefectures";
+import { trackEvent } from "@/lib/analytics";
 import {
   CropPicker,
   type CategoryL1,
@@ -76,6 +77,10 @@ export function FarmerForm({ crops, categoriesL1, categoriesL2 }: Props) {
         }),
       });
 
+      if (res.status === 401) {
+        router.push("/login?expired=1");
+        return;
+      }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setError(
@@ -86,6 +91,7 @@ export function FarmerForm({ crops, categoriesL1, categoriesL2 }: Props) {
         return;
       }
 
+      trackEvent({ name: "sign_up_complete", params: { role: "farmer" } });
       router.replace("/onboarding/complete");
     });
   };

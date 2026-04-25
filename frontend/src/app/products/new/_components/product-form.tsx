@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import {
   CropPicker,
   type CategoryL1,
@@ -258,6 +259,10 @@ export function ProductForm({
             order,
           }),
         });
+        if (res.status === 401) {
+          router.push("/login?expired=1");
+          return;
+        }
         if (!res.ok) {
           const data = (await res.json().catch(() => ({}))) as {
             error?: string;
@@ -299,6 +304,10 @@ export function ProductForm({
         }),
       });
 
+      if (res.status === 401) {
+        router.push("/login?expired=1");
+        return;
+      }
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as {
           error?: string;
@@ -308,6 +317,10 @@ export function ProductForm({
         return;
       }
 
+      trackEvent({
+        name: "product_create",
+        params: { product_type_id: productTypeId },
+      });
       router.push("/maker/products");
       router.refresh();
     } catch {
@@ -328,6 +341,10 @@ export function ProductForm({
       const res = await fetch(`/api/products/${productId}`, {
         method: "DELETE",
       });
+      if (res.status === 401) {
+        router.push("/login?expired=1");
+        return;
+      }
       if (!res.ok && res.status !== 204) {
         const data = (await res.json().catch(() => ({}))) as {
           error?: string;

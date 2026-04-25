@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PREFECTURES } from "@/lib/data/prefectures";
+import { trackEvent } from "@/lib/analytics";
 
 export function MakerForm() {
   const router = useRouter();
@@ -48,6 +49,10 @@ export function MakerForm() {
         }),
       });
 
+      if (res.status === 401) {
+        router.push("/login?expired=1");
+        return;
+      }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setError(
@@ -58,6 +63,7 @@ export function MakerForm() {
         return;
       }
 
+      trackEvent({ name: "sign_up_complete", params: { role: "maker" } });
       router.replace("/onboarding/complete");
     });
   };

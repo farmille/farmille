@@ -1,9 +1,37 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth/actions";
+
+function LoginBanners() {
+  const searchParams = useSearchParams();
+  const expired = searchParams.get("expired") === "1";
+  const reset = searchParams.get("reset") === "1";
+
+  return (
+    <>
+      {expired && (
+        <div
+          role="status"
+          className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+        >
+          セッションが切れました。再度ログインしてください。
+        </div>
+      )}
+      {reset && (
+        <div
+          role="status"
+          className="rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+        >
+          パスワードを更新しました。新しいパスワードでログインしてください。
+        </div>
+      )}
+    </>
+  );
+}
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +50,10 @@ export default function LoginPage() {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-zinc-900">ログイン</h2>
+
+      <Suspense fallback={null}>
+        <LoginBanners />
+      </Suspense>
 
       <form action={handleSubmit} className="space-y-5">
         <div className="space-y-2">
@@ -76,6 +108,15 @@ export default function LoginPage() {
           {isPending ? "ログイン中..." : "ログイン"}
         </button>
       </form>
+
+      <p className="text-sm text-zinc-600 text-center">
+        <Link
+          href="/password-reset"
+          className="font-medium text-zinc-900 underline"
+        >
+          パスワードをお忘れですか？
+        </Link>
+      </p>
 
       <p className="text-sm text-zinc-600 text-center">
         アカウントをお持ちでない方は{" "}

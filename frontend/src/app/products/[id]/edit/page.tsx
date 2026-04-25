@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getRole, getSession, getUser } from "@/lib/auth/server";
+import { landingPathForRole } from "@/lib/auth/landing";
 import { ProductForm } from "@/app/products/new/_components/product-form";
 import { publicUrlToPath } from "@/lib/supabase/paths";
 import type {
@@ -54,7 +55,7 @@ export default async function ProductEditPage({ params }: PageProps) {
   }
   const role = await getRole();
   if (role !== "maker") {
-    redirect("/home");
+    redirect(landingPathForRole(role));
   }
 
   const session = await getSession();
@@ -95,7 +96,8 @@ export default async function ProductEditPage({ params }: PageProps) {
 
   const product = (await productRes.json()) as ProductDetail;
   if (product.maker_id !== user.id) {
-    redirect("/home");
+    // 他社 maker の資材を編集しようとした場合: 自分の資材一覧に戻す
+    redirect(landingPathForRole(role));
   }
 
   const { product_types: productTypes } = (await typesRes.json()) as {
