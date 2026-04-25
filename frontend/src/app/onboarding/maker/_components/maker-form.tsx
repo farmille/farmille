@@ -132,8 +132,13 @@ export function MakerForm() {
       )}
 
       <div className="flex flex-col gap-3">
-        <Button type="submit" disabled={isPending} className="w-full">
-          {isPending ? "処理中..." : "登録する"}
+        <Button
+          type="submit"
+          loading={isPending}
+          loadingText="処理中..."
+          className="w-full"
+        >
+          登録する
         </Button>
         <Button
           type="button"

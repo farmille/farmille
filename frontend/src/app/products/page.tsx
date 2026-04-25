@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { TypeFilter } from "./_components/type-filter";
@@ -6,6 +7,18 @@ import {
   CropCascadeFilter,
   type L1Node,
 } from "./_components/crop-cascade-filter";
+
+export const metadata: Metadata = {
+  title: "資材一覧",
+  description:
+    "BS 資材(生物・微生物農業資材)を作目・タイプ別に探せます。農家のレビュー付き。",
+  openGraph: {
+    title: "資材一覧 | Farmille",
+    description:
+      "BS 資材(生物・微生物農業資材)を作目・タイプ別に探せます。農家のレビュー付き。",
+    url: "/products",
+  },
+};
 
 type ProductType = { id: string; name: string };
 type ProductsResponse = { products: Product[] };

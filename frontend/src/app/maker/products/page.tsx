@@ -79,9 +79,14 @@ export default async function MakerProductsPage() {
 
         {products.length === 0 ? (
           <div className="rounded-md border border-border bg-card p-10 text-center space-y-4">
-            <p className="text-foreground">
-              まだ資材を登録していません。
-            </p>
+            <div className="space-y-2">
+              <p className="text-lg font-medium text-foreground">
+                まだ資材が登録されていません。
+              </p>
+              <p className="text-sm text-muted-foreground">
+                最初の資材を登録して、農家からのレビューを受け取りましょう。
+              </p>
+            </div>
             <Button asChild>
               <Link href="/products/new">最初の資材を登録する</Link>
             </Button>

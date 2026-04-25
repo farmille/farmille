@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -49,6 +50,36 @@ function averageRating(reviews: Review[]): number | null {
   if (reviews.length === 0) return null;
   const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
   return Math.round((sum / reviews.length) * 10) / 10;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const apiUrl = process.env.API_URL;
+  if (!apiUrl) return {};
+
+  const res = await fetch(`${apiUrl}/v1/products/${id}`, { cache: "no-store" });
+  if (!res.ok) return {};
+
+  const product = (await res.json()) as ProductDetail;
+  const heroImage = product.images[0]?.url;
+  const description = [
+    product.maker_name,
+    product.type_name,
+    product.general_purpose,
+  ]
+    .filter(Boolean)
+    .join(" / ") || `${product.name} の詳細とレビュー`;
+
+  return {
+    title: product.name,
+    description,
+    openGraph: {
+      title: `${product.name} | Farmille`,
+      description,
+      url: `/products/${id}`,
+      ...(heroImage ? { images: [heroImage] } : {}),
+    },
+  };
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
