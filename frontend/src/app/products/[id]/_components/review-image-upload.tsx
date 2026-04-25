@@ -14,16 +14,36 @@ const ACCEPTED_MIME = [
   "image/webp",
 ];
 
+export type ExistingImage = {
+  url: string;
+  path: string;
+};
+
 type Props = {
   files: File[];
   onChange: (files: File[]) => void;
   disabled?: boolean;
+  existingImages?: ExistingImage[];
+  removedPaths?: string[];
+  onToggleRemove?: (path: string) => void;
 };
 
-export function ReviewImageUpload({ files, onChange, disabled }: Props) {
+export function ReviewImageUpload({
+  files,
+  onChange,
+  disabled,
+  existingImages = [],
+  removedPaths = [],
+  onToggleRemove,
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const keptExistingCount = existingImages.filter(
+    (img) => !removedPaths.includes(img.path),
+  ).length;
+  const remaining = Math.max(0, MAX_FILES - keptExistingCount);
 
   const addFiles = useCallback(
     (incoming: File[]) => {
@@ -40,13 +60,15 @@ export function ReviewImageUpload({ files, onChange, disabled }: Props) {
         }
         accepted.push(f);
       }
-      const next = [...files, ...accepted].slice(0, MAX_FILES);
-      if (files.length + accepted.length > MAX_FILES) {
-        setError(`画像は最大 ${MAX_FILES} 枚までです`);
+      const next = [...files, ...accepted].slice(0, remaining);
+      if (files.length + accepted.length > remaining) {
+        setError(
+          `画像は既存を含め最大 ${MAX_FILES} 枚までです (残り ${remaining} 枚)`,
+        );
       }
       onChange(next);
     },
-    [files, onChange],
+    [files, onChange, remaining],
   );
 
   const removeAt = useCallback(
@@ -103,8 +125,49 @@ export function ReviewImageUpload({ files, onChange, disabled }: Props) {
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {files.length > 0 && (
+      {(existingImages.length > 0 || files.length > 0) && (
         <ul className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+          {existingImages.map((img) => {
+            const marked = removedPaths.includes(img.path);
+            return (
+              <li
+                key={img.path}
+                className={cn(
+                  "relative aspect-square rounded-sm border border-border overflow-hidden bg-muted",
+                  marked && "opacity-40",
+                )}
+              >
+                <Image
+                  src={img.url}
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 33vw, 20vw"
+                  className="object-cover"
+                />
+                {marked && (
+                  <span className="absolute bottom-1 left-1 rounded-sm bg-destructive px-1 py-0.5 text-xs text-destructive-foreground">
+                    削除予定
+                  </span>
+                )}
+                {onToggleRemove && (
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant={marked ? "outline" : "destructive"}
+                    className="absolute top-1 right-1 h-6 w-6"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleRemove(img.path);
+                    }}
+                    disabled={disabled}
+                    aria-label={marked ? "削除を取り消す" : "この画像を削除"}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </li>
+            );
+          })}
           {files.map((f, idx) => {
             const url = URL.createObjectURL(f);
             return (

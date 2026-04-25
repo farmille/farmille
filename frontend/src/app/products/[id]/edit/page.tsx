@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getRole, getSession, getUser } from "@/lib/auth/server";
 import { ProductForm } from "@/app/products/new/_components/product-form";
+import { publicUrlToPath } from "@/lib/supabase/paths";
 import type {
   CategoryL1,
   CategoryL2,
@@ -34,6 +35,7 @@ type ProductDetail = {
   commercial_status: string | null;
   label_url: string | null;
   sds_url: string | null;
+  images: Array<{ url: string; order: number }>;
   benefits: Array<{ id: string; name: string }>;
   crops: Array<{ id: string; name: string }>;
   certifications: Array<{ id: string; name: string }>;
@@ -150,7 +152,7 @@ export default async function ProductEditPage({ params }: PageProps) {
           </h1>
           <p className="text-sm text-muted-foreground">
             基本情報と効果タグ・対象作目・認証を更新できます。
-            画像編集は v1 では対応していません。
+            既存画像の削除・並び替え + 新規追加に対応しています(最大 5 枚)。
           </p>
         </div>
 
@@ -175,6 +177,12 @@ export default async function ProductEditPage({ params }: PageProps) {
             benefitIds: product.benefits.map((b) => b.id),
             cropIds: product.crops.map((c) => c.id),
             certificationIds: product.certifications.map((c) => c.id),
+            existingImages: product.images
+              .map((img) => {
+                const path = publicUrlToPath(img.url, "product-images");
+                return path ? { url: img.url, path } : null;
+              })
+              .filter((x): x is { url: string; path: string } => x !== null),
           }}
         />
       </main>

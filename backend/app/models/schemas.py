@@ -63,11 +63,19 @@ class ProductCreatePayload(BaseModel):
 class ReviewUpdatePayload(BaseModel):
     rating: int = Field(ge=1, le=5)
     body: str = Field(min_length=1, max_length=2000)
+    remove_paths: list[str] = Field(default_factory=list, max_length=5)
+
+
+class ProductImageOrderItem(BaseModel):
+    url: str = Field(min_length=1, max_length=500)
+    existing: bool
 
 
 class ProductUpdatePayload(BaseModel):
-    """画像編集は Phase 10 送り (docs/specs/image-edit-and-launch-ready.md)。
-    本 Phase では ProductCreatePayload から image_urls を除外した同形。"""
+    """Phase 10 から画像編集対応。
+    order: 最終表示順序。existing=true は既存 URL 維持、false は新規追加 URL (既に
+    Storage に upload 済み前提)。実装は全削除 → 再 INSERT (spec §4.2)。
+    remove_paths: Storage から消す既存画像の path 配列。"""
 
     name: str = Field(min_length=1, max_length=100)
     product_type_id: UUID
@@ -80,3 +88,5 @@ class ProductUpdatePayload(BaseModel):
     benefit_ids: list[UUID] = Field(default_factory=list, max_length=25)
     crop_ids: list[UUID] = Field(default_factory=list, max_length=50)
     certification_ids: list[UUID] = Field(default_factory=list, max_length=10)
+    remove_paths: list[str] = Field(default_factory=list, max_length=5)
+    order: list[ProductImageOrderItem] = Field(default_factory=list, max_length=5)
