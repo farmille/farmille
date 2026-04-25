@@ -412,6 +412,18 @@ farmer-form / maker-form の `handleSkip = () => router.replace("/home")` も書
 
 - [ ] `grep -rn "supabase\.\(from\|rpc\)(" frontend/src` 0 件維持
 - [ ] password reset / update は Supabase Auth SDK（`supabase.auth.resetPasswordForEmail` / `supabase.auth.updateUser`）を使用 — これらは `auth.*` であり skill §1.3 の `from()` / `rpc()` 禁止対象外（既存 signup / login と同パターン、新規例外ではない）
+- frontend の Storage 操作は `upload` / `getPublicUrl` のみ（DB メタデータ管理は BFF）
+
+#### 11.7.1 例外: `supabase.storage.list()` の許容範囲（Phase 12a 追記）
+
+`my-review-row.tsx` のレビュー画像表示で `supabase.storage.from("review-images").list({uid}/{review_id}/)` を直接呼んでいる箇所は、以下の理由で **例外として許容** する（ADR-0007 §3 参照）:
+
+- `review_images` テーブルが ADR-0003 で意図的に未導入（画像メタデータは Storage path のみで表現）
+- 代替の BFF endpoint を新設すると Storage list ↔ DB メタデータの二重管理が発生し、ADR-0003 の方針に反する
+- RLS `review_images_select_all` で SELECT は全員許容のため、frontend 直叩きでもセキュリティ上の差は無い
+- 対象は `my-review-row.tsx` のみ。他の画像表示は upstream API レスポンスに含まれる URL を使う方針を維持
+
+将来 `review_images` テーブルを新設する場合（v2.0 候補）は本例外条項を撤廃する。
 
 ### 11.8 ビルド / 検証
 
