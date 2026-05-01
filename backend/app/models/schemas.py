@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
@@ -90,3 +91,47 @@ class ProductUpdatePayload(BaseModel):
     certification_ids: list[UUID] = Field(default_factory=list, max_length=10)
     remove_paths: list[str] = Field(default_factory=list, max_length=5)
     order: list[ProductImageOrderItem] = Field(default_factory=list, max_length=5)
+
+
+# ---- Phase 15: Articles (spec §5.3) ----
+
+ArticleCategory = Literal["monthly_report", "weekly_report", "featured", "column"]
+
+
+class ArticleListItem(BaseModel):
+    id: UUID
+    slug: str
+    title: str
+    category: ArticleCategory
+    hero_image_url: str | None
+    published_at: datetime
+    excerpt: str
+
+
+class ArticleListResponse(BaseModel):
+    articles: list[ArticleListItem]
+
+
+class ArticleAuthor(BaseModel):
+    id: UUID
+    name: str
+
+
+class ArticleRelatedProduct(BaseModel):
+    id: UUID
+    name: str
+    maker_name: str | None
+    image_url: str | None
+    position: int = Field(ge=0)
+
+
+class ArticleDetailResponse(BaseModel):
+    id: UUID
+    slug: str
+    title: str
+    body_md: str
+    category: ArticleCategory
+    hero_image_url: str | None
+    author: ArticleAuthor | None
+    published_at: datetime
+    related_products: list[ArticleRelatedProduct]

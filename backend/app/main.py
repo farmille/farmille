@@ -8,6 +8,7 @@ from sentry_sdk.integrations.starlette import StarletteIntegration
 
 from app.config import settings
 from app.routers import (
+    articles,
     auth,
     certifications,
     crops,
@@ -52,6 +53,7 @@ app.include_router(product_types.router, prefix="/v1/product-types", tags=["prod
 app.include_router(product_benefits.router, prefix="/v1/product-benefits", tags=["product-benefits"])
 app.include_router(certifications.router, prefix="/v1/certifications", tags=["certifications"])
 app.include_router(products.router, prefix="/v1/products", tags=["products"])
+app.include_router(articles.router, prefix="/v1/articles", tags=["articles"])
 app.include_router(maker.router, prefix="/v1/maker", tags=["maker"])
 app.include_router(me.router, prefix="/v1/me", tags=["me"])
 app.include_router(reviews.router, prefix="/v1/reviews", tags=["reviews"])
