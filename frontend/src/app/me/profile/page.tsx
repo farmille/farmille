@@ -9,14 +9,14 @@ import { ProfileCard, type MeProfile } from "./_components/profile-card";
 // Phase 19 /me/profile (本人ビュー、farmer ロール限定)。
 // アクセス制御は spec §6.1 / §1.1 の通り:
 //   - 未ログイン → /login?next=/me/profile
-//   - maker → /maker/products (Phase 17 未着工のため maker 着地 path に倣う)
+//   - maker → /maker/profile (spec §6.1 / §10.4、Phase 17 PR で /maker/profile を実装済)
 //   - unassigned → /onboarding
 //   - ja_staff / researcher → 403 + 案内 (本 page で expressly レンダ)
 //   - profile_not_found (onboarding 未完了 farmer) → onboarding 案内
 // 公開プロフ /u/{username} は spec §13 で対象外、本 page は本人専用。
 
 const ONBOARDING_PATH = "/onboarding";
-const MAKER_LANDING = "/maker/products";
+const MAKER_LANDING = "/maker/profile";
 
 export default async function MyProfilePage() {
   const user = await getUser();

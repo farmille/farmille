@@ -12,7 +12,7 @@ import { ProfileForm } from "./_components/profile-form";
 // アクセス制御は /me/profile と同条件 (spec §6.2)。
 
 const ONBOARDING_PATH = "/onboarding";
-const MAKER_LANDING = "/maker/products";
+const MAKER_LANDING = "/maker/profile";
 
 export default async function MyProfileEditPage() {
   const user = await getUser();
