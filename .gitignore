@@ -30,3 +30,11 @@ supabase/.temp/
 
 # Claude
 .claude/
+
+# GSD planning state (local)
+.planning/
+
+# Local handoff / scratch (untracked, manual one-off SQL)
+tmp_*.sql
+function_document.md
+meeting_document.md
