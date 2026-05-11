@@ -137,7 +137,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
   let cropsMaster: CropsMaster | null = null;
   // Phase 16: reviewer 系ログイン時のみ自分のお気に入り状態を取得
   let existingFavorite: ExistingFavorite | null = null;
-  if (user && (role === "farmer" || isReviewerRole(role))) {
+  // isReviewerRole already includes "farmer" (REVIEWER_ROLES), no need for redundant check.
+  if (user && isReviewerRole(role)) {
     const supabase = await createClient();
     const {
       data: { session },
