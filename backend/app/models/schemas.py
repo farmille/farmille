@@ -1,4 +1,5 @@
-from typing import Literal
+from datetime import datetime
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -90,3 +91,54 @@ class ProductUpdatePayload(BaseModel):
     certification_ids: list[UUID] = Field(default_factory=list, max_length=10)
     remove_paths: list[str] = Field(default_factory=list, max_length=5)
     order: list[ProductImageOrderItem] = Field(default_factory=list, max_length=5)
+
+
+# === Phase 17: manufacturers (public) + maker profile (self) ===
+
+
+class ManufacturerListItem(BaseModel):
+    id: UUID
+    company_name: str
+    prefecture: str | None
+    city: str | None
+    product_count: int = Field(ge=0)
+
+
+class ManufacturerListResponse(BaseModel):
+    manufacturers: list[ManufacturerListItem]
+
+
+class ManufacturerProduct(BaseModel):
+    id: UUID
+    name: str
+    type_name: str | None
+    image_url: str | None
+    created_at: datetime
+
+
+class ManufacturerDetailResponse(BaseModel):
+    id: UUID
+    company_name: str
+    prefecture: str | None
+    city: str | None
+    note: str | None
+    products: list[ManufacturerProduct]
+
+
+class MakerProfileResponse(BaseModel):
+    user_id: UUID
+    company_name: str
+    prefecture: str | None
+    city: str | None
+    note: str | None
+
+
+class MakerProfileUpdatePayload(BaseModel):
+    """Self-edit payload for `/v1/maker/profile`. `user_id` is taken from the
+    JWT (`auth.uid()`) on the BFF and is NEVER read from the body (spec §3,
+    SKILL §3.2 write-attack hardening)."""
+
+    company_name: Annotated[str, Field(min_length=1, max_length=100)]
+    prefecture: Annotated[str | None, Field(default=None, max_length=20)] = None
+    city: Annotated[str | None, Field(default=None, max_length=50)] = None
+    note: Annotated[str | None, Field(default=None, max_length=1000)] = None
