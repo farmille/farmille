@@ -299,6 +299,29 @@ def test_home_invalid_limits_return_422(client, home_module, param, bad_value):
     assert res.status_code == 422
 
 
+@pytest.mark.parametrize(
+    "param,max_value",
+    [
+        ("featured_limit", 20),
+        ("articles_limit", 12),
+        ("banners_limit", 10),
+    ],
+)
+def test_home_max_limits_accepted(client, home_module, param, max_value):
+    """spec §5.1: Pydantic `le=` は <= なので max ちょうどは 200 を期待."""
+    admin = home_module({"featured_products": [], "articles": [], "home_banners": []})
+    res = client.get("/v1/home", params={param: max_value})
+    assert res.status_code == 200
+    table_for_param = {
+        "featured_limit": "featured_products",
+        "articles_limit": "articles",
+        "banners_limit": "home_banners",
+    }
+    table = table_for_param[param]
+    limit_calls = [c for c in admin.queries[table].calls if c[0] == "limit"]
+    assert limit_calls and limit_calls[-1][1][0] == max_value
+
+
 def test_home_does_not_require_auth(client, home_module):
     """spec §3.2 公開 GET は未ログインで叩ける."""
     home_module({"featured_products": [], "articles": [], "home_banners": []})

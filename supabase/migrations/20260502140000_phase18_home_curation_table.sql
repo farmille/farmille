@@ -28,9 +28,11 @@ CREATE TABLE featured_products (
 CREATE INDEX featured_products_product_id_idx
   ON featured_products (product_id);
 
--- 一覧表示の主たる検索キー: 表示対象期間 + 並び順
-CREATE INDEX featured_products_displayed_at_sort_order_idx
-  ON featured_products (displayed_at DESC, sort_order ASC);
+-- 一覧表示の主たる検索キー: spec §5.1 の ORDER BY と一致させる
+-- ORDER BY = `sort_order ASC, displayed_at DESC` なので、index も同順にしないと
+-- PostgreSQL は index を sort 用に活用できない（複合 index は左側プレフィックス一致）。
+CREATE INDEX featured_products_sort_order_displayed_at_idx
+  ON featured_products (sort_order ASC, displayed_at DESC);
 
 -- ─────────────────────────────────────────────────────────
 -- home_banners: ホームバナー（自社記事 / キャンペーン告知）
@@ -48,7 +50,9 @@ CREATE TABLE home_banners (
   created_at   timestamptz NOT NULL DEFAULT now()
 );
 
--- 公開判定 + 並び順用の部分 index（NULL は対象外）
-CREATE INDEX home_banners_displayed_at_sort_order_idx
-  ON home_banners (displayed_at DESC NULLS LAST, sort_order ASC)
+-- 公開判定 + 並び順用の部分 index（NULL は対象外）。
+-- ORDER BY と同順にしないと sort 用に活用できないため
+-- (sort_order ASC, displayed_at DESC) で並べる（spec §5.1 と一致）。
+CREATE INDEX home_banners_sort_order_displayed_at_idx
+  ON home_banners (sort_order ASC, displayed_at DESC NULLS LAST)
   WHERE displayed_at IS NOT NULL;
