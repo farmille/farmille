@@ -78,10 +78,13 @@ export default async function ProductEditPage({ params }: PageProps) {
 
   const [productRes, typesRes, benefitsRes, certsRes, cropsRes] =
     await Promise.all([
+      // 編集対象の products 行は所有権チェック + 最新値を見せたいので都度フェッチ
       fetch(`${apiUrl}/v1/products/${id}`, { cache: "no-store" }),
-      fetch(`${apiUrl}/v1/product-types`, { cache: "no-store" }),
-      fetch(`${apiUrl}/v1/product-benefits`, { cache: "no-store" }),
-      fetch(`${apiUrl}/v1/certifications`, { cache: "no-store" }),
+      // マスタ系は 1h cache で SSR 時間短縮
+      fetch(`${apiUrl}/v1/product-types`, { next: { revalidate: 3600 } }),
+      fetch(`${apiUrl}/v1/product-benefits`, { next: { revalidate: 3600 } }),
+      fetch(`${apiUrl}/v1/certifications`, { next: { revalidate: 3600 } }),
+      // /v1/onboarding/crops は JWT 必須のため no-store 維持（products/new と同方針）
       fetch(`${apiUrl}/v1/onboarding/crops`, {
         headers: authHeaders,
         cache: "no-store",

@@ -53,9 +53,12 @@ export default async function ProductNewPage() {
   };
 
   const [typesRes, benefitsRes, certsRes, cropsRes] = await Promise.all([
-    fetch(`${apiUrl}/v1/product-types`, { cache: "no-store" }),
-    fetch(`${apiUrl}/v1/product-benefits`, { cache: "no-store" }),
-    fetch(`${apiUrl}/v1/certifications`, { cache: "no-store" }),
+    // マスタ系（運用画面で月単位で更新される程度）は 1h cache で Server Component 時間を短縮
+    fetch(`${apiUrl}/v1/product-types`, { next: { revalidate: 3600 } }),
+    fetch(`${apiUrl}/v1/product-benefits`, { next: { revalidate: 3600 } }),
+    fetch(`${apiUrl}/v1/certifications`, { next: { revalidate: 3600 } }),
+    // /v1/onboarding/crops は JWT 必須なので fetch cache key に Authorization が
+    // 混ざりやすく安全側で no-store のまま（ユーザー固有データではないが auth 任意化されるまで保留）
     fetch(`${apiUrl}/v1/onboarding/crops`, {
       headers: authHeaders,
       cache: "no-store",
