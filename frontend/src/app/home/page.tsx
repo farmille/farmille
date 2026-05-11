@@ -30,6 +30,10 @@ export const metadata: Metadata = {
   },
 };
 
+// auth ガード + BFF fetch を行うため static prerender 不可。`/` と同じ理由で
+// 明示的に動的レンダリング。
+export const dynamic = "force-dynamic";
+
 export default async function LoggedInHomePage() {
   const user = await getUser();
   if (!user) {

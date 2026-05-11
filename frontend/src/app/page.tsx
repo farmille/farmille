@@ -11,6 +11,11 @@ import { fetchHomeContent } from "@/app/_components/fetch-home";
 // hero（HeroSection、未ログイン専用）+ コンテンツ部分（HomeContent、`/home` と共有）
 // で構成。ヘッダーはログイン CTA を出す。
 // 認証ガードはここでは行わない（公開ページ）。`/home` 側で role を判定する。
+//
+// `force-dynamic`: BFF (`/v1/home`) を毎リクエスト叩くため static prerender 不可。
+// `cache: "no-store"` の fetch だけでは Next.js が build 時に prerender を試みて
+// `API_URL` 未設定で失敗する。明示的に動的レンダリングを宣言する。
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
