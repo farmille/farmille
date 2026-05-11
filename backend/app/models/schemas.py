@@ -135,3 +135,36 @@ class ArticleDetailResponse(BaseModel):
     author: ArticleAuthor | None
     published_at: datetime
     related_products: list[ArticleRelatedProduct]
+
+
+# ---- Phase 16: My Materials / Favorites (spec §5.5) ----
+
+FavoriteKind = Literal["favorite", "candidate"]
+
+
+class FavoriteCreatePayload(BaseModel):
+    product_id: UUID
+    kind: FavoriteKind
+
+
+class FavoriteKindUpdatePayload(BaseModel):
+    kind: FavoriteKind
+
+
+class FavoriteProduct(BaseModel):
+    id: UUID
+    name: str
+    maker_name: str | None
+    image_url: str | None
+    type_name: str | None
+
+
+class FavoriteListItem(BaseModel):
+    id: UUID
+    kind: FavoriteKind
+    created_at: datetime
+    product: FavoriteProduct
+
+
+class FavoriteListResponse(BaseModel):
+    favorites: list[FavoriteListItem]
