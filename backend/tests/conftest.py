@@ -278,9 +278,28 @@ class FakeSupabase:
 
 @pytest.fixture
 def fake_supabase(monkeypatch) -> FakeSupabase:
-    """get_supabase_admin を in-memory fake に差し替える."""
+    """get_supabase_admin を in-memory fake に差し替える.
+
+    各 router が `from app.services.supabase import get_supabase_admin`
+    で名前束縛しているため、router モジュール側の binding も差し替える
+    必要がある。Phase 16 で触る router を網羅し、Phase 17 以降の他 router
+    も同様に追記する想定。
+    """
     fake = FakeSupabase()
     monkeypatch.setattr(supabase_module, "get_supabase_admin", lambda: fake)
+
+    # 各 router 側の名前束縛を差し替える (import 時に評価済みのため)
+    from app.routers import (  # noqa: PLC0415 - test only
+        articles as articles_mod,
+        me as me_mod,
+        me_favorites as me_favorites_mod,
+        products as products_mod,
+    )
+
+    for mod in (articles_mod, me_mod, me_favorites_mod, products_mod):
+        if hasattr(mod, "get_supabase_admin"):
+            monkeypatch.setattr(mod, "get_supabase_admin", lambda: fake)
+
     return fake
 
 
