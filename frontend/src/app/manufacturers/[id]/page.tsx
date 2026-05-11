@@ -141,7 +141,8 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
                 };
                 return (
                   <li key={p.id}>
-                    <ProductCard product={cardProduct} />
+                    {/* spec §6.2: メーカー詳細ページ内では company_name 重複表示を避ける */}
+                    <ProductCard product={cardProduct} hideMakerName />
                   </li>
                 );
               })}
