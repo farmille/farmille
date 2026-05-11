@@ -12,6 +12,7 @@ from app.routers import (
     certifications,
     crops,
     health,
+    home,
     maker,
     me,
     onboarding,
@@ -55,3 +56,4 @@ app.include_router(products.router, prefix="/v1/products", tags=["products"])
 app.include_router(maker.router, prefix="/v1/maker", tags=["maker"])
 app.include_router(me.router, prefix="/v1/me", tags=["me"])
 app.include_router(reviews.router, prefix="/v1/reviews", tags=["reviews"])
+app.include_router(home.router, prefix="/v1/home", tags=["home"])

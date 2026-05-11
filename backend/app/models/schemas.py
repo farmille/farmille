@@ -1,7 +1,12 @@
+from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+
+# Phase 15 articles のカテゴリ enum を Phase 18 home でも再利用する。
+# DB CHECK 制約と一致（articles.category）
+ArticleCategory = Literal["monthly_report", "weekly_report", "featured", "column"]
 
 
 class UserResponse(BaseModel):
@@ -90,3 +95,55 @@ class ProductUpdatePayload(BaseModel):
     certification_ids: list[UUID] = Field(default_factory=list, max_length=10)
     remove_paths: list[str] = Field(default_factory=list, max_length=5)
     order: list[ProductImageOrderItem] = Field(default_factory=list, max_length=5)
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Phase 18: ホーム集約 (`GET /v1/home`)
+# spec docs/specs/home.md §5.2
+# ─────────────────────────────────────────────────────────────────────
+
+
+class FeaturedProductInner(BaseModel):
+    """注目資材の中身。products + maker + 代表画像 + type を平坦化したもの。"""
+
+    id: UUID
+    name: str
+    maker_name: str | None
+    image_url: str | None
+    type_name: str | None
+
+
+class FeaturedProductItem(BaseModel):
+    """featured_products 1 行 + 紐付く product を内包。"""
+
+    id: UUID  # featured_products.id（products.id ではない）
+    sort_order: int = Field(ge=0)
+    product: FeaturedProductInner
+
+
+class HomeArticleItem(BaseModel):
+    """ホームに出す最新記事カード分の最小列。Phase 15 の list 形と同等。"""
+
+    id: UUID
+    slug: str
+    title: str
+    category: ArticleCategory
+    hero_image_url: str | None
+    published_at: datetime
+    excerpt: str
+
+
+class HomeBannerItem(BaseModel):
+    id: UUID
+    title: str
+    image_url: str
+    link_url: str
+    sort_order: int = Field(ge=0)
+
+
+class HomeResponse(BaseModel):
+    """`GET /v1/home` の集約 response（3 系統を 1 つにまとめる）。"""
+
+    featured_products: list[FeaturedProductItem]
+    latest_articles: list[HomeArticleItem]
+    banners: list[HomeBannerItem]
