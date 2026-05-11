@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -54,7 +54,8 @@ describe("AvatarUpload", () => {
     await user.upload(input, oversize);
     expect(uploadMock).not.toHaveBeenCalled();
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent("2MB");
+    // handlePick is async; wait for the alert paragraph to be rendered.
+    expect(await screen.findByRole("alert")).toHaveTextContent("2MB");
   });
 
   it("rejects unsupported mime types", async () => {
@@ -68,14 +69,18 @@ describe("AvatarUpload", () => {
         onChange={onChange}
       />,
     );
+    void user; // user-event respects the `accept` attribute and would silently
+    // reject the gif before the component's onChange fires; use fireEvent
+    // instead so we can verify the component's own MIME guard explicitly.
     const gif = new File([new Uint8Array(10)], "x.gif", { type: "image/gif" });
     const input = document.querySelector(
       'input[type="file"]',
     ) as HTMLInputElement;
-    await user.upload(input, gif);
+    Object.defineProperty(input, "files", { value: [gif], configurable: true });
+    fireEvent.change(input);
     expect(uploadMock).not.toHaveBeenCalled();
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent("WebP");
+    expect(await screen.findByRole("alert")).toHaveTextContent("WebP");
   });
 
   it("uploads accepted png and reports the public URL", async () => {
