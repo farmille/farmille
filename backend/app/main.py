@@ -14,6 +14,7 @@ from app.routers import (
     health,
     maker,
     me,
+    me_profile,
     onboarding,
     product_benefits,
     product_types,
@@ -54,4 +55,5 @@ app.include_router(certifications.router, prefix="/v1/certifications", tags=["ce
 app.include_router(products.router, prefix="/v1/products", tags=["products"])
 app.include_router(maker.router, prefix="/v1/maker", tags=["maker"])
 app.include_router(me.router, prefix="/v1/me", tags=["me"])
+app.include_router(me_profile.router, prefix="/v1/me", tags=["me-profile"])
 app.include_router(reviews.router, prefix="/v1/reviews", tags=["reviews"])

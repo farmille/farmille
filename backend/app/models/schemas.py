@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -69,6 +69,40 @@ class ReviewUpdatePayload(BaseModel):
 class ProductImageOrderItem(BaseModel):
     url: str = Field(min_length=1, max_length=500)
     existing: bool
+
+
+class MeProfileResponse(BaseModel):
+    """GET /v1/me/profile レスポンス (Phase 19、farmer ロール限定)。
+
+    `name` は users.name (氏名)、`display_name` は SNS 用の任意表示名 (NULL 可)。
+    spec §5.1 に整合。
+    """
+
+    user_id: UUID
+    name: str
+    display_name: str | None = None
+    bio: str | None = None
+    avatar_url: str | None = None
+    prefecture: str
+    city: str
+    field_size: float | None = None
+    note: str | None = None
+
+
+class MeProfileUpdatePayload(BaseModel):
+    """PUT /v1/me/profile ペイロード (Phase 19、farmer ロール限定)。
+
+    user_id は受け取らない (BFF が auth.uid() で強制、書き換え攻撃防止 §5.3)。
+    各 max_length は farmer_profiles の CHECK 制約と一致させる (§4.1)。
+    """
+
+    display_name: Annotated[str | None, Field(default=None, max_length=50)]
+    bio: Annotated[str | None, Field(default=None, max_length=500)]
+    avatar_url: Annotated[str | None, Field(default=None, max_length=2000)]
+    prefecture: Annotated[str, Field(min_length=1, max_length=20)]
+    city: Annotated[str, Field(min_length=1, max_length=50)]
+    field_size: Annotated[float | None, Field(default=None, ge=0)]
+    note: Annotated[str | None, Field(default=None, max_length=1000)]
 
 
 class ProductUpdatePayload(BaseModel):
