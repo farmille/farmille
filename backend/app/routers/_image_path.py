@@ -38,3 +38,20 @@ def validate_product_image_path(path: str, user_id: str) -> bool:
         and parts[0] == user_id
         and ".." not in parts
     )
+
+
+def validate_avatar_path(path: str, user_id: str) -> bool:
+    """avatars バケットの path が ``{user_id}/avatar/...`` 配下かを検証。
+
+    Storage RLS (`avatars_insert_farmer` / `avatars_update_owner`) は第 1 / 第 2
+    階層を強制するが、BFF でも同じ検査を行うことで第一防御を担う (skill §1.3)。
+    traversal 文字列 ``..`` を含む path はセグメント検証後に拒否。
+    Phase 19 で追加 (docs/specs/farmer-profile.md §5.4)。
+    """
+    parts = path.split("/")
+    return (
+        len(parts) >= 3
+        and parts[0] == user_id
+        and parts[1] == "avatar"
+        and ".." not in parts
+    )

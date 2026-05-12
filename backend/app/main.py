@@ -13,11 +13,13 @@ from app.routers import (
     certifications,
     crops,
     health,
+    home,
     maker,
     maker_profile,
     manufacturers,
     me,
     me_favorites,
+    me_profile,
     onboarding,
     product_benefits,
     product_types,
@@ -68,4 +70,6 @@ app.include_router(me.router, prefix="/v1/me", tags=["me"])
 app.include_router(
     me_favorites.router, prefix="/v1/me/favorites", tags=["me-favorites"]
 )
+app.include_router(me_profile.router, prefix="/v1/me", tags=["me-profile"])
 app.include_router(reviews.router, prefix="/v1/reviews", tags=["reviews"])
+app.include_router(home.router, prefix="/v1/home", tags=["home"])

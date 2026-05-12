@@ -34,6 +34,21 @@ Phase 12a で `getSession()` → `getUser()` 置換による JWT 署名検証を
 | UPDATE | `product_images_update_owner` | authenticated | bucket = `product-images` AND owner = `auth.uid()` AND path 第 1 階層 = `auth.uid()` |
 | DELETE | `product_images_delete_owner` | authenticated | bucket = `product-images` AND owner = `auth.uid()` |
 
+#### 1.3 `avatars` バケット（migration `20260502150001`、Phase 19）
+
+| 操作 | ポリシー名 | 対象 role | 条件 |
+|---|---|---|---|
+| INSERT | `avatars_insert_farmer` | authenticated | bucket = `avatars` AND `app_metadata.role` = `farmer` AND path 第 1 階層 = `auth.uid()` AND path 第 2 階層 = `'avatar'` |
+| SELECT | `avatars_select_all` | authenticated, anon | bucket = `avatars` |
+| UPDATE | `avatars_update_owner` | authenticated | bucket = `avatars` AND owner = `auth.uid()` AND path 第 1 階層 = `auth.uid()` AND path 第 2 階層 = `'avatar'` |
+| DELETE | `avatars_delete_owner` | authenticated | bucket = `avatars` AND owner = `auth.uid()` |
+
+**バケット運用（Ryoga が Supabase Studio で事前作成）**:
+- public read / file_size_limit `2MB`（プロフィール写真は軽量で十分）/ MIME `image/jpeg, image/png, image/webp`
+- INSERT は **farmer ロール限定**（ja_staff / researcher / maker は本機能対象外、Phase 19 §1.1 / §13）
+- path 強制: `{auth.uid}/avatar/{filename}`（第 2 階層 `'avatar'` 固定で、別 path への混在を防ぐ）
+- BFF が旧 avatar の `storage.remove()` を担当（フロントから remove は呼ばない、Phase 10 既存方針踏襲）
+
 ### 2. 二重防御構造
 
 ```
