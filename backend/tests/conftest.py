@@ -1,326 +1,226 @@
-"""Phase 16 test scaffolding.
+"""Shared pytest fixtures for backend tests.
 
-- FastAPI TestClient + JWT mock fixtures
-- Supabase admin client は in-memory fake に差し替え
-  (実 Supabase に接続せず、router のロジック分岐を検証する)
-
-Phase 17 と並列で整備するため、本 conftest は **将来の追加 fixture が
-他 router にも適用できる構造** にしておく (例: fake_supabase は articles
-など他 router でも再利用可能)。
+Strategy:
+- We avoid hitting real Supabase by injecting a fake admin client via FastAPI
+  dependency overrides on `app.services.supabase.get_supabase_admin`.
+- JWT verification is bypassed by overriding `app.dependencies.get_current_user`
+  for endpoints that require auth. The fixture lets each test specify the user
+  payload (sub / app_metadata.role).
+- Settings env vars are populated with dummy values so `Settings()` does not
+  raise on import.
 """
 
 from __future__ import annotations
 
 import os
-import sys
-from pathlib import Path
-from typing import Any, Callable
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass, field
+from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 
-# backend/ を sys.path に追加 (uv run pytest 時に backend/app を解決させる)
-BACKEND_ROOT = Path(__file__).resolve().parent.parent
-if str(BACKEND_ROOT) not in sys.path:
-    sys.path.insert(0, str(BACKEND_ROOT))
-
-# 設定値が必須のため、テストモジュール import より先にダミーをセット
+# Ensure pydantic-settings does not blow up when the app module is imported.
 os.environ.setdefault("SUPABASE_URL", "http://localhost:54321")
-os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key")
-os.environ.setdefault("SUPABASE_JWT_SECRET", "test-jwt-secret")
+os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "dummy-service-role-key")
+os.environ.setdefault("SUPABASE_JWT_SECRET", "dummy-jwt-secret")
+os.environ.setdefault("CORS_ORIGINS", "http://localhost:3000")
 os.environ.setdefault("ENVIRONMENT", "development")
 
-from fastapi.testclient import TestClient  # noqa: E402
 
-from app.auth import jwt as jwt_module  # noqa: E402
-from app.dependencies import get_current_user  # noqa: E402
-from app.main import app  # noqa: E402
-from app.services import supabase as supabase_module  # noqa: E402
+@dataclass
+class FakeQuery:
+    """Chainable fake Supabase query builder.
+
+    Records the table name + each method invocation so tests can assert the
+    BFF called Supabase with the expected arguments. `.execute()` returns a
+    pre-set response that the test installs via `FakeSupabaseAdmin.set_response`.
+    """
+
+    table_name: str
+    parent: "FakeSupabaseAdmin"
+    calls: list[tuple[str, tuple[Any, ...], dict[str, Any]]] = field(default_factory=list)
+
+    def _record(self, name: str, *args: Any, **kwargs: Any) -> "FakeQuery":
+        self.calls.append((name, args, kwargs))
+        return self
+
+    # Read-side
+    def select(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("select", *args, **kwargs)
+
+    def eq(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("eq", *args, **kwargs)
+
+    def in_(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("in_", *args, **kwargs)
+
+    def order(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("order", *args, **kwargs)
+
+    def limit(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("limit", *args, **kwargs)
+
+    # Write-side
+    def insert(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("insert", *args, **kwargs)
+
+    def update(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("update", *args, **kwargs)
+
+    def upsert(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("upsert", *args, **kwargs)
+
+    def delete(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("delete", *args, **kwargs)
+
+    def execute(self) -> Any:
+        # Resolve the response based on the recorded operations on this table.
+        response = self.parent.resolve_response(self.table_name, self.calls)
+        # Track the executed query for assertions.
+        self.parent.executed.append(
+            {
+                "table": self.table_name,
+                "calls": list(self.calls),
+            }
+        )
+        return response
 
 
-# ----- JWT fixtures -----
+class FakeSupabaseResponse:
+    """Mimic supabase-py response object."""
+
+    def __init__(self, data: Any) -> None:
+        self.data = data
 
 
-def _build_payload(
-    *, sub: str, role: str | None, aud: str = "authenticated"
-) -> dict[str, Any]:
-    payload: dict[str, Any] = {"sub": sub, "aud": aud}
-    if role is not None:
-        payload["app_metadata"] = {"role": role}
-    else:
-        payload["app_metadata"] = {}
+class FakeSupabaseAdmin:
+    """Drop-in replacement for `get_supabase_admin()`.
+
+    Tests configure expected responses by table name and (optionally) by the
+    chained operation type (e.g. (table, "update")). The first matching pattern
+    wins.
+    """
+
+    def __init__(self) -> None:
+        # key: (table_name, op or "*"). value: data to return on .execute()
+        self._responses: dict[tuple[str, str], Any] = {}
+        self.executed: list[dict[str, Any]] = []
+
+    def set_response(self, table: str, data: Any, *, op: str = "*") -> None:
+        self._responses[(table, op)] = data
+
+    def resolve_response(
+        self, table: str, calls: list[tuple[str, tuple[Any, ...], dict[str, Any]]]
+    ) -> FakeSupabaseResponse:
+        # Find the dominant op (insert/update/upsert/delete/select).
+        op_priority = ("insert", "update", "upsert", "delete", "select")
+        op_seen: str | None = None
+        for name, _, _ in calls:
+            if name in op_priority:
+                op_seen = name
+                break
+        if op_seen and (table, op_seen) in self._responses:
+            return FakeSupabaseResponse(self._responses[(table, op_seen)])
+        if (table, "*") in self._responses:
+            return FakeSupabaseResponse(self._responses[(table, "*")])
+        return FakeSupabaseResponse([])
+
+    def table(self, name: str) -> FakeQuery:
+        return FakeQuery(name, self)
+
+
+@pytest.fixture()
+def fake_admin() -> FakeSupabaseAdmin:
+    return FakeSupabaseAdmin()
+
+
+@pytest.fixture()
+def app_with_overrides(fake_admin: FakeSupabaseAdmin):
+    """Yield the FastAPI app with `get_supabase_admin` overridden.
+
+    Auth overrides are applied per-test through `override_user` fixture.
+    """
+    from app.main import app
+    from app.services.supabase import get_supabase_admin
+
+    app.dependency_overrides[get_supabase_admin] = lambda: fake_admin
+    yield app
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def client(app_with_overrides) -> Iterator[Any]:
+    """FastAPI TestClient bound to the override-equipped app."""
+    from fastapi.testclient import TestClient
+
+    with TestClient(app_with_overrides) as c:
+        yield c
+
+
+@pytest.fixture()
+def override_user(app_with_overrides) -> Callable[[dict[str, Any]], None]:
+    """Install a fake `get_current_user` returning the given JWT payload.
+
+    Usage:
+        override_user({"sub": "user-1", "app_metadata": {"role": "maker"}})
+    """
+    from app.dependencies import get_current_user
+
+    def _install(payload: dict[str, Any]) -> None:
+        app_with_overrides.dependency_overrides[get_current_user] = lambda: payload
+
+    return _install
+
+
+@pytest.fixture()
+def maker_user(override_user) -> dict[str, Any]:
+    payload = {"sub": "11111111-1111-1111-1111-111111111111", "app_metadata": {"role": "maker"}}
+    override_user(payload)
     return payload
 
 
-@pytest.fixture
-def make_jwt_user() -> Callable[..., dict[str, Any]]:
-    """テスト用に固定 sub / role を持つ JWT payload dict を生成する factory."""
-
-    def _make(
-        sub: str = "00000000-0000-0000-0000-000000000001",
-        role: str | None = "farmer",
-    ) -> dict[str, Any]:
-        return _build_payload(sub=sub, role=role)
-
-    return _make
+@pytest.fixture()
+def farmer_user(override_user) -> dict[str, Any]:
+    payload = {"sub": "22222222-2222-2222-2222-222222222222", "app_metadata": {"role": "farmer"}}
+    override_user(payload)
+    return payload
 
 
-@pytest.fixture
-def auth_override(make_jwt_user):
-    """get_current_user dependency を payload で上書きする helper.
-
-    使い方:
-        with auth_override(role="farmer", sub="..."):
-            client.post(...)
-    """
-    from contextlib import contextmanager
-
-    @contextmanager
-    def _override(
-        role: str | None = "farmer",
-        sub: str = "00000000-0000-0000-0000-000000000001",
-    ):
-        payload = make_jwt_user(sub=sub, role=role)
-
-        def _fake_get_current_user() -> dict[str, Any]:
-            return payload
-
-        app.dependency_overrides[get_current_user] = _fake_get_current_user
-        try:
-            yield payload
-        finally:
-            app.dependency_overrides.pop(get_current_user, None)
-
-    return _override
+@pytest.fixture()
+def unassigned_user(override_user) -> dict[str, Any]:
+    payload = {"sub": "33333333-3333-3333-3333-333333333333", "app_metadata": {"role": "unassigned"}}
+    override_user(payload)
+    return payload
 
 
-# ----- Supabase fake -----
+@pytest.fixture()
+def patch_admin_in_router(monkeypatch: pytest.MonkeyPatch, fake_admin: FakeSupabaseAdmin):
+    """Helper to patch `get_supabase_admin` inside a router module path.
 
-
-class FakeQuery:
-    """supabase-py の query chain を最小限模倣する in-memory ドライバ.
-
-    Phase 16 のお気に入り CRUD で使う API のみを実装:
-      .select / .insert / .update / .delete / .eq / .order / .limit /
-      .range / .single / .execute / .in_
-
-    各 router が必要に応じて拡張する想定。テスト本体で
-    `fake_supabase.set_table(...)` を呼んでデータを差し込み、
-    `fake_supabase.fail_next("23505 duplicate key value")` 等で
-    失敗注入も可能。
+    Some routers import `get_supabase_admin` directly; FastAPI dependency
+    override only catches `Depends(...)` injections. For those, monkeypatch the
+    module attribute.
     """
 
-    def __init__(self, parent: "FakeSupabase", table: str):
-        self._parent = parent
-        self._table = table
-        self._select_cols: str | None = None
-        self._filters: list[tuple[str, str, Any]] = []
-        self._order: tuple[str, bool] | None = None
-        self._limit: int | None = None
-        self._range: tuple[int, int] | None = None
-        self._action: str | None = None
-        self._payload: Any = None
-        self._count_mode: str | None = None
-        self._in: tuple[str, list[Any]] | None = None
+    def _apply(module_path: str) -> None:
+        monkeypatch.setattr(
+            f"{module_path}.get_supabase_admin", lambda: fake_admin
+        )
 
-    def select(self, cols: str = "*", count: str | None = None) -> "FakeQuery":
-        self._select_cols = cols
-        self._action = self._action or "select"
-        self._count_mode = count
-        return self
-
-    def insert(self, payload: Any) -> "FakeQuery":
-        self._action = "insert"
-        self._payload = payload
-        return self
-
-    def update(self, payload: Any) -> "FakeQuery":
-        self._action = "update"
-        self._payload = payload
-        return self
-
-    def delete(self) -> "FakeQuery":
-        self._action = "delete"
-        return self
-
-    def eq(self, col: str, val: Any) -> "FakeQuery":
-        self._filters.append((col, "eq", val))
-        return self
-
-    def in_(self, col: str, vals: list[Any]) -> "FakeQuery":
-        self._in = (col, vals)
-        return self
-
-    def order(self, col: str, desc: bool = False) -> "FakeQuery":
-        self._order = (col, desc)
-        return self
-
-    def limit(self, n: int) -> "FakeQuery":
-        self._limit = n
-        return self
-
-    def range(self, start: int, end: int) -> "FakeQuery":
-        self._range = (start, end)
-        return self
-
-    def single(self) -> "FakeQuery":
-        self._limit = 1
-        return self
-
-    def execute(self):  # noqa: D401 - mimic supabase-py
-        return self._parent._execute(self)
+    return _apply
 
 
-class _FakeResponse:
-    def __init__(self, data: list[dict[str, Any]] | None, count: int | None = None):
-        self.data = data
-        self.count = count
-
-
-class FakeSupabase:
-    """テスト全体で共有する in-memory Supabase admin スタブ."""
-
-    def __init__(self) -> None:
-        self._tables: dict[str, list[dict[str, Any]]] = {}
-        self._fail_messages: list[str] = []
-
-    # ---- helpers -------------------------------------------------
-
-    def set_table(self, name: str, rows: list[dict[str, Any]]) -> None:
-        self._tables[name] = [dict(r) for r in rows]
-
-    def get_table(self, name: str) -> list[dict[str, Any]]:
-        return self._tables.setdefault(name, [])
-
-    def fail_next(self, message: str) -> None:
-        """次の execute() を例外で失敗させる (UNIQUE 違反シミュレーションなど)."""
-        self._fail_messages.append(message)
-
-    # ---- supabase-py 互換 API ------------------------------------
-
-    def table(self, name: str) -> FakeQuery:
-        return FakeQuery(self, name)
-
-    # ---- 内部 -----------------------------------------------------
-
-    def _execute(self, q: FakeQuery) -> _FakeResponse:
-        if self._fail_messages:
-            msg = self._fail_messages.pop(0)
-            raise RuntimeError(msg)
-
-        rows = self.get_table(q._table)
-
-        def _match(row: dict[str, Any]) -> bool:
-            for col, _, val in q._filters:
-                if str(row.get(col)) != str(val):
-                    return False
-            if q._in is not None:
-                col, vals = q._in
-                if row.get(col) not in vals:
-                    return False
-            return True
-
-        if q._action == "insert":
-            payload = q._payload
-            new_rows = payload if isinstance(payload, list) else [payload]
-            inserted: list[dict[str, Any]] = []
-            for r in new_rows:
-                # UNIQUE 制約模倣: テストで明示的に fail_next で表現するが、
-                # user_favorites は (user_id, product_id) UNIQUE を簡易チェック
-                if q._table == "user_favorites":
-                    for existing in rows:
-                        if (
-                            existing.get("user_id") == r.get("user_id")
-                            and existing.get("product_id") == r.get("product_id")
-                        ):
-                            raise RuntimeError(
-                                "23505 duplicate key value violates unique constraint"
-                            )
-                full = dict(r)
-                full.setdefault("id", f"fav-{len(rows) + len(inserted) + 1}")
-                full.setdefault("created_at", "2026-05-11T00:00:00+00:00")
-                full.setdefault("updated_at", "2026-05-11T00:00:00+00:00")
-                rows.append(full)
-                inserted.append(full)
-            return _FakeResponse(data=inserted)
-
-        if q._action == "update":
-            updated = []
-            for row in rows:
-                if _match(row):
-                    row.update(q._payload)
-                    row["updated_at"] = "2026-05-11T01:00:00+00:00"
-                    updated.append(row)
-            return _FakeResponse(data=updated)
-
-        if q._action == "delete":
-            kept: list[dict[str, Any]] = []
-            removed: list[dict[str, Any]] = []
-            for row in rows:
-                if _match(row):
-                    removed.append(row)
-                else:
-                    kept.append(row)
-            self._tables[q._table] = kept
-            return _FakeResponse(data=removed)
-
-        # select
-        matched = [row for row in rows if _match(row)]
-        if q._order is not None:
-            col, desc = q._order
-            matched.sort(key=lambda r: (r.get(col) or ""), reverse=desc)
-        if q._range is not None:
-            start, end = q._range
-            matched = matched[start : end + 1]
-        if q._limit is not None:
-            matched = matched[: q._limit]
-        return _FakeResponse(data=matched, count=len(matched))
-
-
-@pytest.fixture
-def fake_supabase(monkeypatch) -> FakeSupabase:
-    """get_supabase_admin を in-memory fake に差し替える.
-
-    各 router が `from app.services.supabase import get_supabase_admin`
-    で名前束縛しているため、router モジュール側の binding も差し替える
-    必要がある。Phase 16 で触る router を網羅し、Phase 17 以降の他 router
-    も同様に追記する想定。
-    """
-    fake = FakeSupabase()
-    monkeypatch.setattr(supabase_module, "get_supabase_admin", lambda: fake)
-
-    # 各 router 側の名前束縛を差し替える (import 時に評価済みのため)
-    from app.routers import (  # noqa: PLC0415 - test only
-        articles as articles_mod,
-        me as me_mod,
-        me_favorites as me_favorites_mod,
-        products as products_mod,
-    )
-
-    for mod in (articles_mod, me_mod, me_favorites_mod, products_mod):
-        if hasattr(mod, "get_supabase_admin"):
-            monkeypatch.setattr(mod, "get_supabase_admin", lambda: fake)
-
-    return fake
-
-
-# ----- TestClient -----
-
-
-@pytest.fixture
-def client() -> TestClient:
-    return TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def _stub_jwks(monkeypatch):
-    """verify_jwt が外部 JWKS を取りに行かないよう常に None 返却にする.
-
-    auth_override 経由の dependency 上書きを使うテストでは verify_jwt は
-    呼ばれないが、Authorization header 無しでの 401 検証など素通りパスでも
-    安全に動かすためのガード。
-    """
-
-    def _stub(_token: str) -> None:
-        return None
-
-    monkeypatch.setattr(jwt_module, "verify_jwt", _stub)
+__all__ = [
+    "FakeSupabaseAdmin",
+    "FakeSupabaseResponse",
+    "MagicMock",
+    "fake_admin",
+    "client",
+    "app_with_overrides",
+    "override_user",
+    "maker_user",
+    "farmer_user",
+    "unassigned_user",
+    "patch_admin_in_router",
+]

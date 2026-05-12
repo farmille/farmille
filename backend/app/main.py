@@ -14,6 +14,8 @@ from app.routers import (
     crops,
     health,
     maker,
+    maker_profile,
+    manufacturers,
     me,
     me_favorites,
     onboarding,
@@ -56,6 +58,12 @@ app.include_router(certifications.router, prefix="/v1/certifications", tags=["ce
 app.include_router(products.router, prefix="/v1/products", tags=["products"])
 app.include_router(articles.router, prefix="/v1/articles", tags=["articles"])
 app.include_router(maker.router, prefix="/v1/maker", tags=["maker"])
+app.include_router(
+    maker_profile.router, prefix="/v1/maker", tags=["maker-profile"]
+)
+app.include_router(
+    manufacturers.router, prefix="/v1/manufacturers", tags=["manufacturers"]
+)
 app.include_router(me.router, prefix="/v1/me", tags=["me"])
 app.include_router(
     me_favorites.router, prefix="/v1/me/favorites", tags=["me-favorites"]

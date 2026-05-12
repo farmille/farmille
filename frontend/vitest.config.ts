@@ -2,10 +2,10 @@ import path from "node:path";
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
-// Phase 16 で導入した vitest セットアップ。
-// - happy-dom で React Testing Library を高速に回す
-// - tsconfig.json の paths "@/*" を Vite alias に手動写像する
-//   (vite-tsconfig-paths plugin は新規依存追加を避けるため不採用)
+// 統合 branch: Phase 16/17/18/19 の vitest 設定をまとめたもの。
+// - happy-dom で React Testing Library を回す
+// - "@/..." alias は tsconfig.json の paths を手動写像 (新規 plugin 不要)
+// - テストは src 配下のあらゆる *.test/*.spec.{ts,tsx} と __tests__ 配下を拾う
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -17,8 +17,13 @@ export default defineConfig({
     environment: "happy-dom",
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
-    include: ["src/**/*.test.{ts,tsx}", "src/__tests__/**/*.{test,spec}.{ts,tsx}"],
+    include: [
+      "src/**/*.{test,spec}.{ts,tsx}",
+      "src/**/__tests__/**/*.{ts,tsx}",
+      "src/__tests__/**/*.{test,spec}.{ts,tsx}",
+    ],
     exclude: ["node_modules", ".next"],
+    css: false,
     passWithNoTests: true,
   },
 });

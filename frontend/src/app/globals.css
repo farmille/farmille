@@ -35,6 +35,30 @@
     --success: 120 39% 59%;
     --warning: 45 100% 50%;
     --error: 0 84% 60%;
+
+    /* === Phase 17+: design-tokens v2 (farmille.com) ===
+       New UI built from Phase 17 onward should reference these directly.
+       Existing Tailwind shorthand (bg-primary, --primary above) keeps
+       working unchanged. */
+    --green-primary: #2d7a4f;
+    --green-light:   #3a9963;
+    --green-dark:    #1e5c3a;
+    --green-subtle:  #e8f5ee;
+    --green-glow:    rgba(45, 122, 79, 0.1);
+
+    --radius-sm:   8px;
+    --radius-md:  12px;
+    --radius-lg:  20px;
+    --radius-xl:  28px;
+    --radius-full: 9999px;
+
+    --transition-fast:   0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
   }
 }
 
