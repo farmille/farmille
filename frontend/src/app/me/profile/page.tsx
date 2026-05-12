@@ -71,7 +71,6 @@ export default async function MyProfilePage() {
   if (res.status === 404) {
     return (
       <div className="min-h-screen flex flex-col bg-background text-foreground">
-        <Header />
         <main className="flex-1 max-w-3xl mx-auto px-6 py-10 w-full space-y-6">
           <MeNav pathnameOverride="/me/profile" />
           <div className="rounded-md border border-border bg-card p-10 text-center space-y-4">
@@ -99,7 +98,6 @@ export default async function MyProfilePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <Header />
       <main className="flex-1 max-w-3xl mx-auto px-6 py-10 w-full space-y-6">
         <MeNav pathnameOverride="/me/profile" />
         <ProfileCard profile={profile} />
@@ -113,28 +111,3 @@ export default async function MyProfilePage() {
   );
 }
 
-function Header() {
-  return (
-    <header className="border-b border-border bg-card">
-      <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link
-          href="/"
-          className="text-2xl font-semibold tracking-tight text-foreground"
-        >
-          Farmille
-        </Link>
-        <nav className="flex items-center gap-4 text-sm">
-          <Link
-            href="/products"
-            className="text-foreground hover:text-primary"
-          >
-            資材一覧
-          </Link>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/home">ホーム</Link>
-          </Button>
-        </nav>
-      </div>
-    </header>
-  );
-}

@@ -51,25 +51,6 @@ export default async function MakerProductsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-2xl font-semibold tracking-tight text-foreground"
-          >
-            Farmille
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/home" className="text-foreground hover:text-primary">
-              ホーム
-            </Link>
-            <Button asChild size="sm">
-              <Link href="/products/new">新規登録</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
-
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full space-y-8">
         <div className="flex items-baseline justify-between">
           <div className="space-y-1">

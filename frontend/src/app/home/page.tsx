@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { getRole, getUser } from "@/lib/auth/server";
 import { isAssignedRole } from "@/lib/auth/roles";
 import { HomeContent } from "@/app/_components/home-content";
@@ -48,34 +47,6 @@ export default async function LoggedInHomePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/home"
-            className="text-2xl font-semibold tracking-tight text-foreground"
-          >
-            Farmille
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/products" className="text-foreground hover:text-primary">
-              資材一覧
-            </Link>
-            <Link href="/articles" className="text-foreground hover:text-primary">
-              記事
-            </Link>
-            <span
-              className="hidden sm:inline-flex items-center gap-2 rounded-sm bg-muted px-2 py-1 text-xs text-muted-foreground"
-              aria-label={`ログイン中のロール: ${role}`}
-            >
-              {role}
-            </span>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/me/profile">マイページ</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
-
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full">
         <HomeContent {...data} />
       </main>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Noto_Sans_JP } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { NavigationOverlay } from "@/app/_components/navigation-overlay";
+import { SiteHeader } from "@/components/site-header/site-header";
 import "./globals.css";
 
 const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -51,6 +52,7 @@ export default function RootLayout({
       className={`${notoSansJP.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <SiteHeader />
         {children}
         <NavigationOverlay />
       </body>

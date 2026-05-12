@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { getRole, getUser } from "@/lib/auth/server";
 import { createClient } from "@/lib/supabase/server";
 import { MeNav } from "../_components/me-nav";
@@ -68,21 +66,7 @@ export default async function MyProfileEditPage() {
   const profile = (await res.json()) as MeProfile;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-2xl font-semibold tracking-tight text-foreground"
-          >
-            Farmille
-          </Link>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/me/profile">プロフィールに戻る</Link>
-          </Button>
-        </div>
-      </header>
-      <main className="flex-1 max-w-3xl mx-auto px-6 py-10 w-full space-y-6">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">      <main className="flex-1 max-w-3xl mx-auto px-6 py-10 w-full space-y-6">
         <MeNav pathnameOverride="/me/profile" />
         <h1 className="text-2xl font-semibold tracking-tight">
           プロフィール編集
