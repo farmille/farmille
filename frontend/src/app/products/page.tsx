@@ -65,9 +65,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     : `${apiUrl}/v1/products`;
 
   const [productsRes, typesRes, treeRes] = await Promise.all([
+    // 商品一覧はユーザー操作（type / crop フィルタ）で結果が変わるため都度フェッチ
     fetch(productsUrl, { cache: "no-store" }),
-    fetch(`${apiUrl}/v1/product-types`, { cache: "no-store" }),
-    fetch(`${apiUrl}/v1/crops/tree`, { cache: "no-store" }),
+    // 以下はマスタデータ。運用画面以外では時間単位で更新されないので 1h cache。
+    // dev / prod とも次回以降の SSR で再 fetch が走らず application-code 時間が短縮される。
+    fetch(`${apiUrl}/v1/product-types`, { next: { revalidate: 3600 } }),
+    fetch(`${apiUrl}/v1/crops/tree`, { next: { revalidate: 3600 } }),
   ]);
 
   if (!productsRes.ok) {
