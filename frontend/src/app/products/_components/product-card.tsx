@@ -12,7 +12,16 @@ export type Product = {
   created_at: string | null;
 };
 
-export function ProductCard({ product }: { product: Product }) {
+export type ProductCardProps = {
+  product: Product;
+  /**
+   * メーカー詳細ページのように、親セクションでメーカー名を出す場面で
+   * カードごとの再表示を避けるためのフラグ。Phase 17 spec §6.2 参照。
+   */
+  hideMakerName?: boolean;
+};
+
+export function ProductCard({ product, hideMakerName = false }: ProductCardProps) {
   return (
     <Link
       href={`/products/${product.id}`}
@@ -42,9 +51,11 @@ export function ProductCard({ product }: { product: Product }) {
         <h3 className="text-base font-semibold text-foreground group-hover:text-primary line-clamp-2">
           {product.name}
         </h3>
-        <p className="text-sm text-muted-foreground line-clamp-1">
-          {product.maker_name ?? "メーカー不明"}
-        </p>
+        {!hideMakerName && (
+          <p className="text-sm text-muted-foreground line-clamp-1">
+            {product.maker_name ?? "メーカー不明"}
+          </p>
+        )}
       </div>
     </Link>
   );

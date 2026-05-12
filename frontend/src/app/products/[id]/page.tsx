@@ -8,6 +8,12 @@ import { createClient } from "@/lib/supabase/server";
 import { ReviewForm } from "./_components/review-form";
 import { ReviewWithProfileGate } from "./_components/review-with-profile-gate";
 import { MyReviewRow } from "./_components/my-review-row";
+import {
+  FavoriteButton,
+  type ExistingFavorite,
+  type FavoriteKind,
+} from "./_components/favorite-button";
+import { isReviewerRole } from "@/lib/auth/roles";
 import type {
   CategoryL1,
   CategoryL2,
@@ -129,23 +135,59 @@ export default async function ProductDetailPage({ params }: PageProps) {
   };
   let profileComplete = false;
   let cropsMaster: CropsMaster | null = null;
-  if (user && role === "farmer") {
+  // Phase 16: reviewer 系ログイン時のみ自分のお気に入り状態を取得
+  let existingFavorite: ExistingFavorite | null = null;
+  // isReviewerRole already includes "farmer" (REVIEWER_ROLES), no need for redundant check.
+  if (user && isReviewerRole(role)) {
     const supabase = await createClient();
     const {
       data: { session },
     } = await supabase.auth.getSession();
     if (session) {
       const headers = { Authorization: `Bearer ${session.access_token}` };
-      const [statusRes, cropsRes] = await Promise.all([
-        fetch(`${apiUrl}/v1/onboarding/status`, { headers, cache: "no-store" }),
-        fetch(`${apiUrl}/v1/onboarding/crops`, { headers, cache: "no-store" }),
-      ]);
-      if (statusRes.ok) {
-        const status = (await statusRes.json()) as { has_profile?: boolean };
-        profileComplete = Boolean(status.has_profile);
+      const fetches: Promise<Response>[] = [
+        fetch(`${apiUrl}/v1/me/favorites?limit=200`, {
+          headers,
+          cache: "no-store",
+        }),
+      ];
+      if (role === "farmer") {
+        fetches.push(
+          fetch(`${apiUrl}/v1/onboarding/status`, {
+            headers,
+            cache: "no-store",
+          }),
+        );
+        fetches.push(
+          fetch(`${apiUrl}/v1/onboarding/crops`, {
+            headers,
+            cache: "no-store",
+          }),
+        );
       }
-      if (cropsRes.ok) {
-        cropsMaster = (await cropsRes.json()) as CropsMaster;
+      const results = await Promise.all(fetches);
+      const favRes = results[0];
+      if (favRes.ok) {
+        const { favorites } = (await favRes.json()) as {
+          favorites: Array<{
+            id: string;
+            kind: FavoriteKind;
+            product: { id: string | null };
+          }>;
+        };
+        const hit = favorites.find((f) => f.product.id === product.id);
+        existingFavorite = hit ? { id: hit.id, kind: hit.kind } : null;
+      }
+      if (role === "farmer") {
+        const statusRes = results[1];
+        const cropsRes = results[2];
+        if (statusRes.ok) {
+          const status = (await statusRes.json()) as { has_profile?: boolean };
+          profileComplete = Boolean(status.has_profile);
+        }
+        if (cropsRes.ok) {
+          cropsMaster = (await cropsRes.json()) as CropsMaster;
+        }
       }
     }
   }
@@ -263,6 +305,17 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 </Button>
               )}
             </div>
+
+            <FavoriteButton
+              productId={product.id}
+              mode={
+                !user
+                  ? { kind: "anon" }
+                  : isReviewerRole(role)
+                    ? { kind: "reviewer", existing: existingFavorite }
+                    : { kind: "non-reviewer", role: role ?? null }
+              }
+            />
           </div>
         </section>
 

@@ -1,12 +1,11 @@
+import path from "node:path";
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
-import path from "node:path";
 
-// Phase 18 で導入。Next.js / React Server Component の Server-only コードは
-// 直接インポートしてもテストし辛いため、本構成では:
-//  - 純粋な component (BannerCard / HomeContent 等) を vitest + happy-dom で render
-//  - Page (Server Component) は redirect ロジックを部分関数として import / test
-// next 専用 API（next/navigation 等）は test 内で vi.mock() する。
+// 統合 branch: Phase 16/17/18/19 の vitest 設定をまとめたもの。
+// - happy-dom で React Testing Library を回す
+// - "@/..." alias は tsconfig.json の paths を手動写像 (新規 plugin 不要)
+// - テストは src 配下のあらゆる *.test/*.spec.{ts,tsx} と __tests__ 配下を拾う
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -17,7 +16,14 @@ export default defineConfig({
   test: {
     environment: "happy-dom",
     globals: true,
-    include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./vitest.setup.ts"],
+    include: [
+      "src/**/*.{test,spec}.{ts,tsx}",
+      "src/**/__tests__/**/*.{ts,tsx}",
+      "src/__tests__/**/*.{test,spec}.{ts,tsx}",
+    ],
+    exclude: ["node_modules", ".next"],
+    css: false,
+    passWithNoTests: true,
   },
 });
