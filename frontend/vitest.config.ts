@@ -2,11 +2,10 @@ import path from "node:path";
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
-// Phase 19: vitest scaffolding for component-level tests.
-// - happy-dom (lighter than jsdom) for React Testing Library
-// - "@/..." alias mirrors tsconfig paths so component imports resolve
-// - test files live next to the component (`*.test.tsx`) or under
-//   `src/**/__tests__/`
+// 統合 branch: Phase 16/17/18/19 の vitest 設定をまとめたもの。
+// - happy-dom で React Testing Library を回す
+// - "@/..." alias は tsconfig.json の paths を手動写像 (新規 plugin 不要)
+// - テストは src 配下のあらゆる *.test/*.spec.{ts,tsx} と __tests__ 配下を拾う
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -21,7 +20,10 @@ export default defineConfig({
     include: [
       "src/**/*.{test,spec}.{ts,tsx}",
       "src/**/__tests__/**/*.{ts,tsx}",
+      "src/__tests__/**/*.{test,spec}.{ts,tsx}",
     ],
+    exclude: ["node_modules", ".next"],
     css: false,
+    passWithNoTests: true,
   },
 });

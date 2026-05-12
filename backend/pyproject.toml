@@ -13,21 +13,22 @@ dependencies = [
     "sentry-sdk[fastapi]>=2.58.0",
 ]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "ruff>=0.6.0",
     "mypy>=1.11.0",
     "pytest>=8.0.0",
-    "pytest-asyncio>=0.23.0",
+    "pytest-asyncio>=0.24.0",
 ]
 
 [tool.pytest.ini_options]
-# Phase 19: pytest scaffolding for /v1/me/profile (and future endpoints).
-# - testpaths: backend/tests/ をデフォルトの検索 root にする
-# - asyncio_mode: 既存 router は同期 (admin SDK は同期 client) のため
-#   "auto" にせず明示的にマーカーを使う方針 ("strict")
-# - pythonpath: app/ を import 起点にする (既存 backend/ レイアウト準拠)
 testpaths = ["tests"]
-asyncio_mode = "strict"
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
 pythonpath = ["."]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
 addopts = "-ra"
