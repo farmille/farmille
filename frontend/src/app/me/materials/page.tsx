@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { getRole, getUser } from "@/lib/auth/server";
 import { landingPathForRole } from "@/lib/auth/landing";
 import { isReviewerRole } from "@/lib/auth/roles";
@@ -85,34 +84,6 @@ export default async function MyMaterialsPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-2xl font-semibold tracking-tight text-foreground"
-          >
-            Farmille
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link
-              href="/products"
-              className="text-foreground hover:text-primary"
-            >
-              資材一覧
-            </Link>
-            <Link
-              href="/me/reviews"
-              className="text-foreground hover:text-primary"
-            >
-              自分のレビュー
-            </Link>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/home">ホーム</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
-
       <main className="flex-1 max-w-4xl mx-auto px-6 py-10 w-full space-y-6">
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">マイ資材</h1>

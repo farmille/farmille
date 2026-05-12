@@ -194,28 +194,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-2xl font-semibold tracking-tight text-foreground"
-          >
-            Farmille
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/products" className="text-foreground hover:text-primary">
-              資材一覧
-            </Link>
-            <Link href="/login" className="text-foreground hover:text-primary">
-              ログイン
-            </Link>
-            <Button asChild size="sm">
-              <Link href="/signup">新規登録</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
-
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full space-y-10">
         <nav className="text-sm text-muted-foreground" aria-label="パンくず">
           <Link href="/products" className="hover:text-primary">

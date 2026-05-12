@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { getRole, getUser } from "@/lib/auth/server";
 import { TypeFilter } from "./_components/type-filter";
 import { ProductCard, type Product } from "./_components/product-card";
 import {
@@ -9,7 +7,6 @@ import {
   type L1Node,
 } from "./_components/crop-cascade-filter";
 
-const REVIEWER_ROLES = new Set(["farmer", "researcher", "ja_staff"]);
 
 export const metadata: Metadata = {
   title: "資材一覧",
@@ -51,10 +48,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   if (!apiUrl) {
     throw new Error("API_URL not configured");
   }
-
-  const user = await getUser();
-  const role = user ? await getRole(user) : null;
-  const isReviewer = role !== null && REVIEWER_ROLES.has(role);
 
   const productsQuery = new URLSearchParams();
   if (typeId) productsQuery.set("type_id", typeId);
@@ -104,47 +97,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-2xl font-semibold tracking-tight text-foreground"
-          >
-            Farmille
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/products" className="text-foreground hover:text-primary">
-              資材一覧
-            </Link>
-            {isReviewer && (
-              <Link
-                href="/me/reviews"
-                className="text-foreground hover:text-primary"
-              >
-                自分のレビュー
-              </Link>
-            )}
-            {user ? (
-              <Button asChild variant="outline" size="sm">
-                <Link href="/home">ホーム</Link>
-              </Button>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-foreground hover:text-primary"
-                >
-                  ログイン
-                </Link>
-                <Button asChild size="sm">
-                  <Link href="/signup">新規登録</Link>
-                </Button>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
-
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full space-y-8">
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">

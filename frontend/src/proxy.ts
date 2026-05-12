@@ -6,8 +6,13 @@ const PROTECTED_PATHS = ["/home", "/onboarding"];
 const GUEST_ONLY_PATHS = ["/login", "/signup"];
 
 export async function proxy(request: NextRequest) {
+  // SiteHeader (Server Component) が pathname を参照できるよう、リクエストヘッダに転送する。
+  // Next.js は server-side で pathname を直接取れないため、proxy で `x-pathname` を付ける。
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+
   let response = NextResponse.next({
-    request: { headers: request.headers },
+    request: { headers: requestHeaders },
   });
 
   const supabase = createServerClient(
@@ -22,7 +27,9 @@ export async function proxy(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          response = NextResponse.next({ request });
+          response = NextResponse.next({
+            request: { headers: requestHeaders },
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );

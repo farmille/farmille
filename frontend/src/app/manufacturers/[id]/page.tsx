@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductCard, type Product } from "@/app/products/_components/product-card";
 
@@ -75,28 +74,6 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-2xl font-semibold tracking-tight text-foreground"
-          >
-            Farmille
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link
-              href="/manufacturers"
-              className="text-foreground hover:text-primary"
-            >
-              メーカー一覧
-            </Link>
-            <Link href="/products" className="text-foreground hover:text-primary">
-              資材一覧
-            </Link>
-          </nav>
-        </div>
-      </header>
-
       <main className="flex-1 max-w-6xl mx-auto px-6 py-16 w-full space-y-12">
         <section className="space-y-4">
           <h1 className="text-4xl font-extrabold tracking-tight text-foreground">

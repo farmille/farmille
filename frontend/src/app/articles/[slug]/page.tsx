@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { getRole, getUser } from "@/lib/auth/server";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import {
   ARTICLE_CATEGORY_LABEL,
@@ -14,7 +12,6 @@ import {
   type RelatedProduct,
 } from "../_components/related-product-card";
 
-const REVIEWER_ROLES = new Set(["farmer", "researcher", "ja_staff"]);
 
 type ArticleAuthor = { id: string; name: string };
 
@@ -84,62 +81,15 @@ export async function generateMetadata({
 export default async function ArticleDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const [article, user] = await Promise.all([fetchArticle(slug), getUser()]);
+  const article = await fetchArticle(slug);
   if (!article) {
     notFound();
   }
-
-  const role = user ? await getRole(user) : null;
-  const isReviewer = role !== null && REVIEWER_ROLES.has(role);
 
   const bodyHtml = await renderMarkdownToHtml(article.body_md);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-2xl font-semibold tracking-tight text-foreground"
-          >
-            Farmille
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/products" className="text-foreground hover:text-primary">
-              資材一覧
-            </Link>
-            <Link href="/articles" className="text-foreground hover:text-primary">
-              記事一覧
-            </Link>
-            {isReviewer && (
-              <Link
-                href="/me/reviews"
-                className="text-foreground hover:text-primary"
-              >
-                自分のレビュー
-              </Link>
-            )}
-            {user ? (
-              <Button asChild variant="outline" size="sm">
-                <Link href="/home">ホーム</Link>
-              </Button>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-foreground hover:text-primary"
-                >
-                  ログイン
-                </Link>
-                <Button asChild size="sm">
-                  <Link href="/signup">新規登録</Link>
-                </Button>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
-
       <main className="flex-1 max-w-3xl mx-auto px-6 py-10 w-full space-y-8">
         <nav className="text-sm text-muted-foreground" aria-label="パンくず">
           <Link href="/articles" className="hover:text-primary">
