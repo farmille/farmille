@@ -4,6 +4,10 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+# Phase 15 articles のカテゴリ enum を Phase 18 home でも再利用する。
+# DB CHECK 制約と一致（articles.category）
+ArticleCategory = Literal["monthly_report", "weekly_report", "featured", "column"]
+
 
 class UserResponse(BaseModel):
     id: str
@@ -72,6 +76,40 @@ class ProductImageOrderItem(BaseModel):
     existing: bool
 
 
+class MeProfileResponse(BaseModel):
+    """GET /v1/me/profile レスポンス (Phase 19、farmer ロール限定)。
+
+    `name` は users.name (氏名)、`display_name` は SNS 用の任意表示名 (NULL 可)。
+    spec §5.1 に整合。
+    """
+
+    user_id: UUID
+    name: str
+    display_name: str | None = None
+    bio: str | None = None
+    avatar_url: str | None = None
+    prefecture: str
+    city: str
+    field_size: float | None = None
+    note: str | None = None
+
+
+class MeProfileUpdatePayload(BaseModel):
+    """PUT /v1/me/profile ペイロード (Phase 19、farmer ロール限定)。
+
+    user_id は受け取らない (BFF が auth.uid() で強制、書き換え攻撃防止 §5.3)。
+    各 max_length は farmer_profiles の CHECK 制約と一致させる (§4.1)。
+    """
+
+    display_name: Annotated[str | None, Field(default=None, max_length=50)]
+    bio: Annotated[str | None, Field(default=None, max_length=500)]
+    avatar_url: Annotated[str | None, Field(default=None, max_length=2000)]
+    prefecture: Annotated[str, Field(min_length=1, max_length=20)]
+    city: Annotated[str, Field(min_length=1, max_length=50)]
+    field_size: Annotated[float | None, Field(default=None, ge=0)]
+    note: Annotated[str | None, Field(default=None, max_length=1000)]
+
+
 class ProductUpdatePayload(BaseModel):
     """Phase 10 から画像編集対応。
     order: 最終表示順序。existing=true は既存 URL 維持、false は新規追加 URL (既に
@@ -91,6 +129,50 @@ class ProductUpdatePayload(BaseModel):
     certification_ids: list[UUID] = Field(default_factory=list, max_length=10)
     remove_paths: list[str] = Field(default_factory=list, max_length=5)
     order: list[ProductImageOrderItem] = Field(default_factory=list, max_length=5)
+
+
+# ---- Phase 15: Articles (spec §5.3) ----
+
+ArticleCategory = Literal["monthly_report", "weekly_report", "featured", "column"]
+
+
+class ArticleListItem(BaseModel):
+    id: UUID
+    slug: str
+    title: str
+    category: ArticleCategory
+    hero_image_url: str | None
+    published_at: datetime
+    excerpt: str
+
+
+class ArticleListResponse(BaseModel):
+    articles: list[ArticleListItem]
+
+
+class ArticleAuthor(BaseModel):
+    id: UUID
+    name: str
+
+
+class ArticleRelatedProduct(BaseModel):
+    id: UUID
+    name: str
+    maker_name: str | None
+    image_url: str | None
+    position: int = Field(ge=0)
+
+
+class ArticleDetailResponse(BaseModel):
+    id: UUID
+    slug: str
+    title: str
+    body_md: str
+    category: ArticleCategory
+    hero_image_url: str | None
+    author: ArticleAuthor | None
+    published_at: datetime
+    related_products: list[ArticleRelatedProduct]
 
 
 # === Phase 17: manufacturers (public) + maker profile (self) ===
@@ -142,3 +224,88 @@ class MakerProfileUpdatePayload(BaseModel):
     prefecture: Annotated[str | None, Field(default=None, max_length=20)] = None
     city: Annotated[str | None, Field(default=None, max_length=50)] = None
     note: Annotated[str | None, Field(default=None, max_length=1000)] = None
+
+
+# ---- Phase 16: My Materials / Favorites (spec §5.5) ----
+
+FavoriteKind = Literal["favorite", "candidate"]
+
+
+class FavoriteCreatePayload(BaseModel):
+    product_id: UUID
+    kind: FavoriteKind
+
+
+class FavoriteKindUpdatePayload(BaseModel):
+    kind: FavoriteKind
+
+
+class FavoriteProduct(BaseModel):
+    id: UUID
+    name: str
+    maker_name: str | None
+    image_url: str | None
+    type_name: str | None
+
+
+class FavoriteListItem(BaseModel):
+    id: UUID
+    kind: FavoriteKind
+    created_at: datetime
+    product: FavoriteProduct
+
+
+class FavoriteListResponse(BaseModel):
+    favorites: list[FavoriteListItem]
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Phase 18: ホーム集約 (`GET /v1/home`)
+# spec docs/specs/home.md §5.2
+# ─────────────────────────────────────────────────────────────────────
+
+
+class FeaturedProductInner(BaseModel):
+    """注目資材の中身。products + maker + 代表画像 + type を平坦化したもの。"""
+
+    id: UUID
+    name: str
+    maker_name: str | None
+    image_url: str | None
+    type_name: str | None
+
+
+class FeaturedProductItem(BaseModel):
+    """featured_products 1 行 + 紐付く product を内包。"""
+
+    id: UUID  # featured_products.id（products.id ではない）
+    sort_order: int = Field(ge=0)
+    product: FeaturedProductInner
+
+
+class HomeArticleItem(BaseModel):
+    """ホームに出す最新記事カード分の最小列。Phase 15 の list 形と同等。"""
+
+    id: UUID
+    slug: str
+    title: str
+    category: ArticleCategory
+    hero_image_url: str | None
+    published_at: datetime
+    excerpt: str
+
+
+class HomeBannerItem(BaseModel):
+    id: UUID
+    title: str
+    image_url: str
+    link_url: str
+    sort_order: int = Field(ge=0)
+
+
+class HomeResponse(BaseModel):
+    """`GET /v1/home` の集約 response（3 系統を 1 つにまとめる）。"""
+
+    featured_products: list[FeaturedProductItem]
+    latest_articles: list[HomeArticleItem]
+    banners: list[HomeBannerItem]
