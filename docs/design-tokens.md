@@ -1,234 +1,246 @@
-# Farmille デザインドック
+# Farmille デザインドック v2
+
+> **改訂方針**: 公式コーポレートサイト [farmille.com](https://farmille.com/) の実装値に揃える。v1（SmartHR/freee 風の控えめ路線）から、**モダンで余白豊か・大きめタイポ・大きめ角丸・springy なインタラクション**の路線へ転換。
+
+---
+
+## 0. 適用範囲と移行方針
+
+- 本 v2 は **Phase 17 以降の新規 UI** で全面採用。既存ページ（/products / /home / /onboarding 等）は globals.css の CSS 変数を更新することで自動的に色味が追従する
+- 既存 UI の細部（角丸サイズ・hero タイポ・カード余白）まで揃える「リフレッシュ phase」は Phase 17–19 完了後に別 phase で検討
+- v1 で禁止していた `rounded-xl` 以上は **本 v2 で解禁**（farmille.com が `--radius-lg: 20px` / `--radius-xl: 28px` を多用しているため）
 
 ## 1. デザイン原則
 
-1.  **信頼性と専門性**: 農業分野の専門家が安心して利用できる、堅実で信頼感のあるデザインを追求します。
-2.  **普遍的な使いやすさ**: 20代から60代以上の幅広い年齢層の農家が直感的に操作でき、迷うことなく情報にアクセスできるインターフェースを提供します。
-3.  **目に優しく洗練された体験**: 長時間の利用でも疲労を感じさせない、落ち着いた配色と適切な情報密度により、洗練されたユーザー体験を実現します。
+1. **信頼性と専門性** — 農業分野の専門家が安心して利用できる、堅実な情報設計
+2. **普遍的な使いやすさ** — 20代〜60代以上の幅広い農家が直感的に操作できる
+3. **モダンで余白豊かな体験** — 詰め込まず、写真・コピー・余白で「現代的なプロダクト」感を出す
+4. **農業の一次情報を前面に** — 圃場写真・農家の顔写真・実データを主役にし、UI は引き立て役
 
 ## 2. カラーパレット
 
-メインカラーは「緑」を基調とし、安っぽさを排除した深みのあるトーンを選定します。日本の農家が朝5時に見ても目に優しいよう、彩度を抑えつつも視認性を確保します。SmartHRやfreeeのような信頼感のある配色を参考に、プロフェッショナルな印象を与えます。
+メインカラーは **深く落ち着いた緑**（`#2d7a4f`）。背景は純白基調、テキストは Tailwind gray スケールに整合。
 
-| 用途 | Tailwind クラス名 | Hex値 | 根拠・使用用途 |
+| 用途 | Tailwind / CSS 変数 | Hex 値 | 使用箇所 |
 | :--- | :--- | :--- | :--- |
-| **ベースカラー** | | | |
-| 背景（メイン） | `bg-background` | `#F8F8F8` | クリーンで視認性の高い背景色。白飛びを防ぎ、目に優しいトーン。 |
-| 背景（サブ） | `bg-muted` | `#F0F0F0` | カードやセクションの背景に使い、情報の区切りを明確にする。 |
-| テキスト（メイン） | `text-foreground` | `#333333` | 可読性を最優先した濃いグレー。黒に近いが、目に刺激を与えない。 |
-| テキスト（サブ） | `text-muted-foreground` | `#666666` | 補助的な情報やキャプションに。メインテキストとのコントラストを保つ。 |
-| ボーダー | `border` | `#DDDDDD` | 要素の区切りや入力フィールドの境界線に。主張しすぎず、視認性を確保。 |
-| **プライマリカラー** | | | |
-| プライマリ（メイン） | `bg-primary` | `#3A7F5C` | Farmilleのブランドを象徴する深みのある緑。ボタン、リンク、アクティブな要素に。信頼感と自然を表現。 |
-| プライマリ（ホバー） | `bg-primary-hover` | `#2E6B4D` | プライマリカラーのホバー状態。インタラクションを明確にする。 |
-| プライマリ（テキスト） | `text-primary` | `#3A7F5C` | プライマリカラーのテキスト。強調したい見出しやアイコンに。 |
-| **セマンティックカラー** | | | |
-| 成功 | `bg-success` | `#4CAF50` | 成功メッセージ、完了ステータスに。視覚的にポジティブな印象を与える。 |
-| 警告 | `bg-warning` | `#FFC107` | 警告メッセージ、注意喚起に。視認性が高く、緊急性を伝える。 |
-| エラー | `bg-error` | `#F44336` | エラーメッセージ、危険な操作に。明確に問題があることを示す。 |
+| **緑系（ブランド）** | | | |
+| プライマリ | `--green-primary` / `bg-primary` | `#2d7a4f` | CTA / アクティブ要素 / リンク |
+| プライマリ（ライト） | `--green-light` | `#3a9963` | hover アクセント・ハイライト |
+| プライマリ（ダーク） | `--green-dark` | `#1e5c3a` | アクティブ／押下状態 |
+| プライマリ（サブトル） | `--green-subtle` | `#e8f5ee` | 緑タグ背景・選択中行 |
+| プライマリ（グロー） | `--green-glow` | `rgba(45, 122, 79, 0.1)` | focus ring・hover shadow tint |
+| **背景** | | | |
+| ページ背景 | `--bg` / `bg-background` | `#ffffff` | body 背景 |
+| カード背景 | `--card` | `#f8f9fa` | カード・パネル |
+| カード hover | `--card-hover` | `#f0f2f5` | hover 時のカード |
+| **ボーダー** | | | |
+| 標準ボーダー | `--border` / `border` | `#e5e7eb` | 入力欄・カード境界 |
+| ボーダー hover | `--border-hover` | `#d1d5db` | hover 時の強調 |
+| **テキスト** | | | |
+| プライマリ | `--text-primary` / `text-foreground` | `#111827` | 見出し・本文の主要部 |
+| セカンダリ | `--text-secondary` / `text-muted-foreground` | `#4b5563` | 説明文・サブテキスト |
+| ミュート | `--text-muted` | `#9ca3af` | キャプション・disabled |
+| 緑の上の文字 | `--text-on-green` | `#ffffff` | primary ボタンのラベル |
+| **セマンティック** | | | |
+| 成功 | `bg-success` | `#16a34a` | 成功トースト・完了表示 |
+| 警告 | `bg-warning` | `#f59e0b` | 注意喚起バッジ |
+| エラー | `bg-error` | `#dc2626` | エラー表示・destructive ボタン |
+
+> v1 → v2 の差分: primary が `#3A7F5C` → `#2d7a4f`（より深く青寄り）、背景が `#F8F8F8` → `#ffffff`（純白）、テキストが `#333333` → `#111827`（Tailwind gray-900）に。
 
 ## 3. タイポグラフィ
 
-読みやすさと視認性を最優先し、特に日本語フォントは幅広い年齢層に受け入れられるものを選定します。欧文フォントはモダンで洗練された印象を与えつつ、日本語フォントとの調和を重視します。
+- **欧文**: `Inter` (Google Fonts)
+- **日本語**: `Noto Sans JP` (Google Fonts)
+- font-stack: `"Noto Sans JP", "Inter", sans-serif`
 
--   **欧文フォント**: `Inter` (Google Fonts) - モダンで視認性が高く、Webでの利用に最適。
--   **日本語フォント**: `Noto Sans JP` (Google Fonts) - ウェイトが豊富で、可読性が高く、プロフェッショナルな印象を与える。
+farmille.com は **hero タイトルが非常に大きく重い**（68px / 900）。本文は読みやすさ重視で 15–16px。
 
-### スケール
-
-| 用途 | Tailwind クラス名 | px値 (ベース16px) | 根拠 |
-| :--- | :--- | :--- | :--- |
-| 見出し1 | `text-5xl` | `48px` | ページの主要なタイトル。視覚的なインパクトと階層の最上位を示す。 |
-| 見出し2 | `text-4xl` | `36px` | セクションタイトル。情報の区切りを明確にし、読み進めやすくする。 |
-| 見出し3 | `text-3xl` | `30px` | サブセクションタイトル。情報の整理と視認性を両立。 |
-| 見出し4 | `text-2xl` | `24px` | カードタイトルや小見出し。情報ブロックの開始を示す。 |
-| 本文（大） | `text-lg` | `18px` | 読みやすい本文。特に高齢のユーザーにも配慮したサイズ。 |
-| 本文（中） | `text-base` | `16px` | 標準的な本文。情報密度と可読性のバランス。 |
-| 本文（小） | `text-sm` | `14px` | 補助的な情報や詳細。情報量を確保しつつ、メインコンテンツを邪魔しない。 |
-| キャプション | `text-xs` | `12px` | 著作権表示、注釈など。最小限の視認性を保ちつつ、目立たせない。 |
+| 用途 | Tailwind 目安 | 実値 | weight | line-height | letter-spacing |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Hero（ランディング h1） | `text-6xl` 相当 | 68px | 900 | 1.25 (≒85px) | -0.02em |
+| 大見出し（h1） | `text-4xl` | 36px | 800 | 1.4 | -0.02em |
+| セクション見出し（h2） | `text-3xl` | 30px | 800 | 1.4 | -0.01em |
+| サブ見出し（h3） | `text-xl` | 20px | 700 | 1.7 | normal |
+| 小見出し（h4） | `text-lg` | 18px | 700 | 1.6 | normal |
+| 本文（標準） | `text-base` | 16px | 400 | 1.7 | normal |
+| 本文（密度高） | `text-[15px]` | 15px | 400 | 2.0 (≒30px) | normal |
+| 補助テキスト | `text-sm` | 14px | 400 | 1.6 | normal |
+| キャプション | `text-xs` | 12px | 400 | 1.5 | normal |
 
 ### font-feature-settings
-
-日本語の約物（句読点など）のぶら下がり処理や、数字の等幅処理を適用し、より美しい組版を実現します。
 
 ```css
 font-feature-settings: "palt" 1, "kern" 1, "tnum" 1;
 ```
 
+日本語の約物詰め（palt）、欧文のカーニング（kern）、等幅数字（tnum）。
+
 ## 4. スペーシング
 
-Tailwind CSSのrem値をベースに、モバイルファーストの原則に基づき、タップしやすい適切な余白と情報密度を両立させます。食べログのような「詰め込みすぎず、ゆとりと確実性」を重視し、視覚的なノイズを減らします。
+Tailwind の標準スケールを採用。**farmille.com は余白を大きめに取る**ため、セクション間は `py-16` 〜 `py-24` をデフォルトに。
 
-**採用するTailwind値（rem基準）**
+採用値（rem 基準）:
 
--   `0` (`0px`) - 要素間の密着
--   `px` (`1px`) - 細い線、最小の区切り
--   `0.5` (`2px`) - アイコンとテキストの微調整
--   `1` (`4px`) - 小さな要素間の余白
--   `2` (`8px`) - ボタンのパディング、リストアイテムの垂直方向の余白
--   `3` (`12px`) - カード内の要素間隔
--   `4` (`16px`) - 標準的なパディング、セクション間の最小余白
--   `5` (`20px`) - 中程度のパディング、要素間の区切り
--   `6` (`24px`) - セクション間の標準余白、主要な要素のパディング
--   `8` (`32px`) - 大きなセクション間の余白、主要な見出し下の余白
--   `10` (`40px`) - ページセクション間の余白
--   `12` (`48px`) - ページセクション間の大きな余白
--   `16` (`64px`) - ページトップやフッターの余白
+- `0` (0px)
+- `0.5` (2px) — アイコン微調整
+- `1` (4px)
+- `2` (8px) — リスト垂直余白
+- `3` (12px) — カード内要素間
+- `4` (16px) — 標準パディング
+- `5` (20px)
+- `6` (24px) — セクション内ブロック間
+- `8` (32px)
+- `10` (40px)
+- `12` (48px) — フッター内余白
+- `16` (64px) — セクション間（モバイル）
+- `20` (80px)
+- `24` (96px) — セクション間（デスクトップ）
 
-**禁止値**: 上記以外の値は原則として使用しません。特に`7`, `9`, `11`などの奇数や、`13`以上の大きな値は、デザインの一貫性を損なうため使用を禁止します。
+奇数値（7/9/11）と未定義の大きい値は使わない（一貫性維持）。
 
 ## 5. Border Radius
 
-AgListのような「ポップすぎる」印象を避けるため、控えめで洗練された角丸を採用します。SmartHRやfreeeのような信頼感のあるデザインを参考に、柔らかさを保ちつつも堅実な印象を与えます。
+v1 で禁止していた `rounded-xl` 以上を **解禁**。farmille.com は丸みを柔らかさの表現として積極利用。
 
--   `rounded-none` (`0px`) - 角丸なし
--   `rounded-sm` (`2px`) - 微細な角丸（入力フィールド、小さなタグ）
--   `rounded` (`4px`) - 標準的な角丸（ボタン、カード）
--   `rounded-md` (`6px`) - やや大きめの角丸（モーダル、画像）
--   `rounded-lg` (`8px`) - 大きめの角丸（主要なコンテナ、ヒーローセクション）
+| 名前 | CSS 変数 | 値 | 用途 |
+| :--- | :--- | :--- | :--- |
+| sm | `--radius-sm` | 8px | 入力欄・小タグ・小ボタン |
+| md | `--radius-md` | 12px | 標準ボタン・チップ・小カード |
+| lg | `--radius-lg` | 20px | カード・モーダル・パネル |
+| xl | `--radius-xl` | 28px | ヒーロー画像・大カード・コンテナ |
+| full | `--radius-full` | 9999px | アバター・ピル型ボタン・タグ |
 
-**禁止値**: `rounded-xl`以上の大きな角丸は、カジュアルすぎる印象を与えるため使用を禁止します。
+> v1 では「rounded-xl 以上禁止」だったが、farmille.com 公式が `28px` を使っているため**解禁**。ただし「無闇に最大値を使わない」原則は維持。サイズは要素の物理サイズに比例させる（小要素 = sm、大コンテナ = xl）。
 
 ## 6. Shadow
 
-要素の浮き出しや階層を示すために、控えめで自然なシャドウを採用します。Linearのような洗練された印象を参考に、視覚的なノイズを最小限に抑えつつ、インタラクションのヒントを提供します。
+控えめだが、要素の階層を明確に。3 段階を許容。
 
--   **使用段階**: 2段階まで
-    1.  **sm**: ホバー時や選択時の微細な浮き出し（例: ボタン、カードのホバー）
-    2.  **md**: 要素の階層を示すためのシャドウ（例: ドロップダウンメニュー、モーダル）
+```css
+--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+--shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+```
 
-**禁止事項**: `lg`以上の強いシャドウや、複数のシャドウを重ねることは、デザインの複雑性を増し、視覚的なノイズとなるため禁止します。
+- **sm**: ボタン hover、カード hover の微浮き
+- **md**: ドロップダウン、ポップオーバー、トースト
+- **lg**: モーダル、注目カード（hero など）
 
-## 7. コンポーネント方針
+複数 shadow の重ねがけは禁止。`xl` 以上は使わない。
 
-### shadcn/ui との付き合い方
+## 7. トランジション / アニメーション
 
-shadcn/uiをベースとして、開発速度と品質の安定性を確保します。ただし、Farmilleのブランドガイドラインに沿って、以下の調整を行います。
+farmille.com は「**spring 系の柔らかい動き**」を採用。3 段階を定義。
 
--   **カラー**: 本デザインドックで定義されたカラーパレットを適用します。
--   **タイポグラフィ**: 本デザインドックで定義されたフォントとスケールを適用します。
--   **スペーシング・角丸・シャドウ**: 本デザインドックで定義された値を適用します。
--   **基本コンポーネント**: `Button`, `Input`, `Card`, `Dialog`, `DropdownMenu`など、基本的なUI要素はshadcn/uiのものを積極的に採用し、上記デザイン原則に沿ってカスタマイズします。
+```css
+--transition-fast:   0.2s cubic-bezier(0.4, 0, 0.2, 1);    /* hover, focus */
+--transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);    /* modal, drawer */
+--transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* CTA、注目要素 */
+```
 
-### 独自variant追加の可否
+- 標準 hover: `transition: all var(--transition-fast)`
+- モーダル開閉: `var(--transition-smooth)`
+- 重要 CTA・成功フィードバック: `var(--transition-spring)`（少し弾む）
 
-必要に応じて、shadcn/uiの既存コンポーネントにFarmille独自のvariantを追加することを許可します。ただし、以下の条件を満たす必要があります。
-
--   **明確な目的**: 既存のvariantでは表現できない、特定のユースケースや状態を解決するために必要であること。
--   **再利用性**: 複数の箇所で再利用可能であり、汎用性があること。
--   **ドキュメント化**: 追加したvariantは、デザインドックまたは別途コンポーネントドキュメントに明確に定義し、チーム内で共有すること。
+過剰なアニメーションは引き続き禁止。「派手」より「軽やか」。
 
 ## 8. アイコン
 
-### ライブラリ
+- **ライブラリ**: `lucide-react`（v1 から継続）
+- **サイズ**: 16 / 20 / 24 / 32px
+- **色**: 原則 `currentColor` でテキスト色に追従。プライマリ強調時のみ `text-primary`
 
-`Lucide React` を採用します。モダンで視認性が高く、カスタマイズ性に優れているため、Farmilleの洗練されたデザインに調和します。
+## 9. コンポーネント方針（shadcn/ui）
 
-### サイズルール
+shadcn/ui をベースにし、本ドックの値で**初期化**する:
 
-アイコンのサイズは、以下のルールに基づき、視認性と一貫性を保ちます。
+- 色: `globals.css` の CSS 変数を本ドックの 16進値から HSL に変換して上書き
+- 角丸: `--radius: 12px`（shadcn デフォルト）に揃える
+- フォント: `tailwind.config` で `fontFamily.sans` を Noto Sans JP + Inter に
+- ボタンの primary: `bg-primary text-white hover:bg-[var(--green-dark)] transition-[var(--transition-fast)]`
 
--   `16px` (sm): インラインテキスト、小さなリストアイテム
--   `20px` (md): 標準的なボタン、ナビゲーションメニュー
--   `24px` (lg): 主要なアクションボタン、セクションタイトル横
--   `32px` (xl): ヒーローセクション、特徴的な機能アイコン
+独自 variant の追加条件（v1 から継続）:
+- 明確な目的 / 再利用性 / ドキュメント化
 
-## 9. 禁止事項
+## 10. 禁止事項（v2 改訂版）
 
-Farmilleのデザインにおいて、以下の要素は「日本人の農家さんが信頼してもらえるようなもの」という目標に反するため、厳に禁止します。
+1. **高彩度な原色の多用** — 鮮やかすぎる緑/黄色/ピンク等で「子供っぽい/カジュアルすぎる」印象を作らない
+2. **読みにくいフォント** — 装飾性の高いフォントは避ける。本文は必ず Noto Sans JP / Inter
+3. **手書き風・ポップなイラスト** — シンプルなフラットイラストか、写真主体で
+4. **過剰なアニメーション** — `var(--transition-spring)` でも 0.6s 以内に収める
+5. **コントラストの低い配色** — テキスト/背景は WCAG AA 以上（4.5:1）を死守
+6. **不統一なスペーシング** — §4 の採用値以外は使わない
+7. **複雑なシャドウ** — `xl` 以上、複数 shadow の重ねがけは禁止
+8. **情報過多なレイアウト** — 1 画面に詰め込まず、余白で呼吸させる
+9. **`rounded-xl` 以上の根拠なき多用** — v2 で解禁したが「全要素で xl」は禁止。要素サイズに比例させる
 
-1.  **高彩度な原色の多用**: AgListのような明るすぎる緑や黄色など、目に刺激が強く、安っぽく見える配色は使用しない。
-2.  **過度な角丸**: `rounded-xl`以上の大きな角丸は、カジュアルすぎる印象を与えるため使用しない。
-3.  **手書き風・ポップなイラスト**: 親しみやすさを超えて、子供っぽい印象を与えるイラストは使用しない。イラストを使用する場合は、シンプルで洗練されたフラットデザインを基調とする。
-4.  **過剰なアニメーション・トランジション**: ページの読み込み速度を低下させ、ユーザーの集中を妨げるような派手な動きは使用しない。必要な場合は、控えめでスムーズなものに限定する。
-5.  **読みにくいフォント**: 装飾性の高いフォントや、細すぎる・太すぎるフォントは使用しない。特に本文では、可読性を最優先する。
-6.  **情報過多なレイアウト**: 1画面に情報を詰め込みすぎず、適切な余白とグルーピングにより、視覚的な整理を徹底する。食べログのような情報密度を目指す場合でも、視覚的な階層を明確にする。
-7.  **コントラストの低い配色**: テキストと背景のコントラストが低い配色は、視認性を損なうため使用しない。特に高齢のユーザーに配慮する。
-8.  **不統一なスペーシング**: 定義されたスペーシングルール以外の値は使用しない。要素間の余白に一貫性を持たせる。
-9.  **安易なグラデーション**: 不必要なグラデーションは、デザインの品位を損なうため使用しない。使用する場合は、非常に控えめで自然なものに限定する。
-10. **複雑なシャドウ**: `lg`以上の強いシャドウや、複数のシャドウを重ねることは、視覚的なノイズとなるため使用しない。
-
-## 10. CSS変数定義 (shadcn/ui globals.css 形式)
+## 11. CSS 変数定義（globals.css 雛形）
 
 ```css
 @layer base {
   :root {
-    --background: 220 14.3% 95.9%; /* #F8F8F8 */
-    --foreground: 220 8.9% 10.8%;  /* #333333 */
+    /* === Brand === */
+    --green-primary: #2d7a4f;
+    --green-light:   #3a9963;
+    --green-dark:    #1e5c3a;
+    --green-subtle:  #e8f5ee;
+    --green-glow:    rgba(45, 122, 79, 0.1);
 
-    --muted: 220 14.3% 97.9%;      /* #F0F0F0 */
-    --muted-foreground: 220 8.9% 39.2%; /* #666666 */
+    /* === Surface === */
+    --bg:           #ffffff;
+    --card:         #f8f9fa;
+    --card-hover:   #f0f2f5;
+    --border:       #e5e7eb;
+    --border-hover: #d1d5db;
 
+    /* === Text === */
+    --text-primary:   #111827;
+    --text-secondary: #4b5563;
+    --text-muted:     #9ca3af;
+    --text-on-green:  #ffffff;
+
+    /* === Radius === */
+    --radius-sm:   8px;
+    --radius-md:  12px;
+    --radius-lg:  20px;
+    --radius-xl:  28px;
+    --radius-full: 9999px;
+
+    /* === Transition === */
+    --transition-fast:   0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* === Shadow === */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+
+    /* === shadcn/ui ブリッジ（HSL 表記、shadcn パターンと互換） === */
+    --background: 0 0% 100%;
+    --foreground: 220 13% 9%;        /* #111827 */
+    --muted: 210 14% 97%;            /* #f8f9fa */
+    --muted-foreground: 220 9% 35%;  /* #4b5563 */
+    --card-h: 0 0% 100%;
+    --card-foreground: 220 13% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-
-    --border: 220 14.3% 89.9%;     /* #DDDDDD */
-    --input: 220 14.3% 89.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
-
-    --primary: 150 40% 36%;       /* #3A7F5C */
-    --primary-foreground: 210 20% 98%; /* 白に近い色 */
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-
-    --ring: 224.3 76.3% 48%;
-
-    --radius: 0.5rem; /* 8px */
-
-    /* Semantic Colors */
-    --success: 120 39% 59%;       /* #4CAF50 */
-    --warning: 45 100% 50%;       /* #FFC107 */
-    --error: 0 84% 60%;           /* #F44336 */
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 20% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --popover: 217.2 32.6% 17.5%;
-    --popover-foreground: 210 20% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --card: 217.2 32.6% 17.5%;
-    --card-foreground: 210 20% 98%;
-
-    --primary: 150 40% 36%;       /* #3A7F5C */
-    --primary-foreground: 210 20% 98%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 20% 98%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 20% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-
-    --ring: 217.2 32.6% 17.5%;
-
-    /* Semantic Colors (Dark Mode Adjustments) */
-    --success: 120 39% 45%;       /* #388E3C */
-    --warning: 45 100% 40%;       /* #FFA000 */
-    --error: 0 84% 50%;           /* #D32F2F */
+    --popover-foreground: 220 13% 9%;
+    --primary: 148 47% 33%;          /* #2d7a4f */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 14% 97%;
+    --secondary-foreground: 220 13% 9%;
+    --accent: 145 47% 93%;           /* #e8f5ee */
+    --accent-foreground: 148 50% 24%;/* #1e5c3a */
+    --destructive: 0 72% 51%;        /* #dc2626 */
+    --destructive-foreground: 0 0% 100%;
+    --ring: 148 47% 33%;
+    --radius: 0.75rem;               /* 12px */
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground;
     font-family: 'Noto Sans JP', 'Inter', sans-serif;
@@ -237,114 +249,22 @@ Farmilleのデザインにおいて、以下の要素は「日本人の農家さ
 }
 ```
 
-## 11. 色見本HTML
+## 12. 適用チェックリスト（Phase 17 以降の新規 UI）
 
-以下のHTMLファイルをブラウザで開くことで、定義されたカラーパレットを視覚的に確認できます。CDNからTailwind CSSを読み込んでいるため、単一ファイルで動作します。
+実装時に通すチェック:
 
-```html
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farmille Color Palette Preview</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style type="text/tailwindcss">
-        @layer base {
-            :root {
-                --background: 220 14.3% 95.9%;
-                --foreground: 220 8.9% 10.8%;
-                --muted: 220 14.3% 97.9%;
-                --muted-foreground: 220 8.9% 39.2%;
-                --primary: 150 40% 36%;
-                --primary-foreground: 210 20% 98%;
-                --border: 220 14.3% 89.9%;
-                --success: 120 39% 59%;
-                --warning: 45 100% 50%;
-                --error: 0 84% 60%;
-            }
-            body {
-                @apply bg-background text-foreground;
-                font-family: sans-serif;
-            }
-        }
-    </style>
-</head>
-<body class="p-8">
-    <h1 class="text-3xl font-bold mb-8">Farmille Color Palette Preview</h1>
+- [ ] 色: §2 の CSS 変数のみを使用（直書き hex 禁止）
+- [ ] タイポ: §3 のスケールに合致するクラスを使用
+- [ ] 余白: §4 の採用値のみ（奇数 / 未定義値禁止）
+- [ ] 角丸: §5 の 5 段階のみ
+- [ ] シャドウ: §6 の 3 段階のみ
+- [ ] トランジション: §7 の 3 段階のみ
+- [ ] フォント: Noto Sans JP / Inter（他フォント混入禁止）
+- [ ] WCAG AA: 主要テキスト/背景のコントラスト 4.5:1 以上
+- [ ] mobile-first: 小画面でも詰まらない、tap target 最低 44px
 
-    <div class="mb-8">
-        <h2 class="text-2xl font-semibold mb-4">Base Colors</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="p-4 rounded shadow bg-background border border-border">
-                <div class="w-full h-24 bg-background border border-border mb-2"></div>
-                <p class="font-semibold">Background</p>
-                <p class="text-sm text-muted-foreground">`--background` #F8F8F8</p>
-            </div>
-            <div class="p-4 rounded shadow bg-muted border border-border">
-                <div class="w-full h-24 bg-muted border border-border mb-2"></div>
-                <p class="font-semibold">Muted Background</p>
-                <p class="text-sm text-muted-foreground">`--muted` #F0F0F0</p>
-            </div>
-            <div class="p-4 rounded shadow bg-white border border-border">
-                <div class="w-full h-24 bg-white border border-border mb-2"></div>
-                <p class="font-semibold">White (for contrast)</p>
-                <p class="text-sm text-muted-foreground">`#FFFFFF`</p>
-            </div>
-            <div class="p-4 rounded shadow bg-background border border-border">
-                <div class="w-full h-24 bg-foreground mb-2"></div>
-                <p class="font-semibold">Foreground Text</p>
-                <p class="text-sm text-muted-foreground">`--foreground` #333333</p>
-            </div>
-            <div class="p-4 rounded shadow bg-background border border-border">
-                <div class="w-full h-24 bg-muted-foreground mb-2"></div>
-                <p class="font-semibold">Muted Foreground Text</p>
-                <p class="text-sm text-muted-foreground">`--muted-foreground` #666666</p>
-            </div>
-            <div class="p-4 rounded shadow bg-background border border-border">
-                <div class="w-full h-24 bg-border mb-2"></div>
-                <p class="font-semibold">Border</p>
-                <p class="text-sm text-muted-foreground">`--border` #DDDDDD</p>
-            </div>
-        </div>
-    </div>
+---
 
-    <div class="mb-8">
-        <h2 class="text-2xl font-semibold mb-4">Primary Colors</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 rounded shadow bg-primary text-primary-foreground">
-                <div class="w-full h-24 bg-primary mb-2"></div>
-                <p class="font-semibold">Primary</p>
-                <p class="text-sm">`--primary` #3A7F5C</p>
-            </div>
-            <div class="p-4 rounded shadow bg-primary-foreground text-foreground border border-border">
-                <div class="w-full h-24 bg-primary-foreground border border-border mb-2"></div>
-                <p class="font-semibold">Primary Foreground</p>
-                <p class="text-sm text-muted-foreground">`--primary-foreground` #F2F2F2 (approx)</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="mb-8">
-        <h2 class="text-2xl font-semibold mb-4">Semantic Colors</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="p-4 rounded shadow bg-success text-white">
-                <div class="w-full h-24 bg-success mb-2"></div>
-                <p class="font-semibold">Success</p>
-                <p class="text-sm">`--success` #4CAF50</p>
-            </div>
-            <div class="p-4 rounded shadow bg-warning text-foreground">
-                <div class="w-full h-24 bg-warning mb-2"></div>
-                <p class="font-semibold">Warning</p>
-                <p class="text-sm text-muted-foreground">`--warning` #FFC107</p>
-            </div>
-            <div class="p-4 rounded shadow bg-error text-white">
-                <div class="w-full h-24 bg-error mb-2"></div>
-                <p class="font-semibold">Error</p>
-                <p class="text-sm">`--error` #F44336</p>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
-```
+**改訂履歴**:
+- v1 (2026-04-XX): SmartHR/freee 風、控えめ路線（廃止）
+- v2 (2026-05-11): farmille.com 公式サイト準拠、モダン余白豊か路線（本版）
