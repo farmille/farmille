@@ -96,19 +96,20 @@ async def list_pending_makers(
         admin.table("users")
         .select(
             "id, name, created_at, "
-            "maker_profiles(company_name, prefecture, city, note)"
+            "maker_profiles(company_name, prefecture, city, note)",
+            count="exact",
         )
         .eq("role", "maker")
         .eq("status", "pending_review")
         .order("created_at", desc=False)
-        .limit(limit)
+        .range(offset, offset + limit - 1)
         .execute()
     )
     rows = users_res.data or []
-    paginated = rows[offset : offset + limit]
+    total = users_res.count or 0
 
     items: list[PendingMakerItem] = []
-    for r in paginated:
+    for r in rows:
         profile = _maker_profile(r)
         email = ""
         try:
@@ -132,7 +133,7 @@ async def list_pending_makers(
             )
         )
 
-    return PendingMakersResponse(makers=items, total=len(rows))
+    return PendingMakersResponse(makers=items, total=total)
 
 
 def _fetch_maker_status(admin: Any, user_id: UUID) -> tuple[str | None, str | None]:

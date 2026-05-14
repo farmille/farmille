@@ -129,11 +129,61 @@ class TestSummary:
 # ─── GET /v1/admin/makers/pending ──────────────────────────────────────
 
 
+def _attach_pending_users_table(admin, all_rows: list[dict[str, Any]]) -> None:
+    """supabase-py の `count="exact"` + `.range(offset, offset+limit-1)` を模擬。
+
+    `.range(start, end)` の引数を q.calls から取り出して slice し、`count` には
+    全件数 (len(all_rows)) を入れた response を返す。`set_response` は
+    `count` 属性を持たないため、`.range` を使う endpoint には本ヘルパを使う。
+    """
+    original_table = admin.table
+
+    def _table(name: str):
+        q = original_table(name)
+
+        def _execute():
+            class _Resp:
+                pass
+
+            resp = _Resp()
+            resp.data = []
+            resp.count = 0
+            if name == "users":
+                range_call = next((c for c in q.calls if c[0] == "range"), None)
+                if range_call is not None:
+                    start, end = range_call[1][0], range_call[1][1]
+                    resp.data = all_rows[start : end + 1]
+                else:
+                    resp.data = list(all_rows)
+                resp.count = len(all_rows)
+            admin.executed.append({"table": name, "calls": list(q.calls)})
+            return resp
+
+        q.execute = _execute
+        return q
+
+    admin.table = _table  # type: ignore[method-assign]
+
+
+def _pending_row(user_id: str, company: str) -> dict[str, Any]:
+    return {
+        "id": user_id,
+        "name": f"Maker {company}",
+        "created_at": "2026-05-10T00:00:00Z",
+        "maker_profiles": {
+            "company_name": company,
+            "prefecture": "北海道",
+            "city": "札幌市",
+            "note": None,
+        },
+    }
+
+
 class TestPendingMakers:
     def test_returns_pending_rows(self, client, patch_router_admin, admin_user):
         admin = patch_router_admin
-        admin.set_response(
-            "users",
+        _attach_pending_users_table(
+            admin,
             [
                 {
                     "id": MAKER_ID,
@@ -166,7 +216,7 @@ class TestPendingMakers:
         self, client, patch_router_admin, admin_user
     ):
         admin = patch_router_admin
-        admin.set_response("users", [])
+        _attach_pending_users_table(admin, [])
         client.get("/v1/admin/makers/pending")
         users_query = next(q for q in admin.executed if q["table"] == "users")
         eq_calls = [c for c in users_query["calls"] if c[0] == "eq"]
@@ -180,6 +230,51 @@ class TestPendingMakers:
         assert res.status_code == 422
         res = client.get("/v1/admin/makers/pending?limit=101")
         assert res.status_code == 422
+
+    def test_returns_correct_total_when_offset_zero(
+        self, client, patch_router_admin, admin_user
+    ):
+        """`count="exact"` の total が limit でキャップされず全件数を返すこと。"""
+        admin = patch_router_admin
+        all_rows = [
+            _pending_row(f"00000000-0000-0000-0000-00000000000{i}", f"Co{i}")
+            for i in range(5)
+        ]
+        _attach_pending_users_table(admin, all_rows)
+        admin.auth.admin.get_user_by_id = MagicMock(
+            return_value=SimpleNamespace(user=SimpleNamespace(email="m@example.com"))
+        )
+
+        res = client.get("/v1/admin/makers/pending?limit=2&offset=0")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["total"] == 5
+        assert len(body["makers"]) == 2
+
+    def test_returns_correct_rows_when_offset_nonzero(
+        self, client, patch_router_admin, admin_user
+    ):
+        """offset>0 で 0 行返却にならず、対応するページ分が返ること。"""
+        admin = patch_router_admin
+        all_rows = [
+            _pending_row(f"00000000-0000-0000-0000-00000000000{i}", f"Co{i}")
+            for i in range(5)
+        ]
+        _attach_pending_users_table(admin, all_rows)
+        admin.auth.admin.get_user_by_id = MagicMock(
+            return_value=SimpleNamespace(user=SimpleNamespace(email="m@example.com"))
+        )
+
+        res = client.get("/v1/admin/makers/pending?limit=2&offset=1")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["total"] == 5
+        assert len(body["makers"]) == 2
+        users_query = next(
+            q for q in admin.executed if q["table"] == "users"
+        )
+        range_calls = [c for c in users_query["calls"] if c[0] == "range"]
+        assert range_calls and range_calls[0][1] == (1, 2)
 
 
 # ─── POST /v1/admin/makers/{id}/approve ────────────────────────────────
@@ -517,3 +612,4 @@ class TestPublicFilters:
         res = client.get("/v1/home")
         assert res.status_code == 200
         assert res.json()["featured_products"] == []
+
