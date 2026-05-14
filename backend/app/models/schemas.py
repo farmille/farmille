@@ -309,3 +309,42 @@ class HomeResponse(BaseModel):
     featured_products: list[FeaturedProductItem]
     latest_articles: list[HomeArticleItem]
     banners: list[HomeBannerItem]
+
+
+# ─────────────────────────────────────────────────────────────────────
+# ADR-0009 / spec maker-approval-admin §5.8: admin BFF schemas
+# ─────────────────────────────────────────────────────────────────────
+
+
+class AdminSummaryResponse(BaseModel):
+    pending_makers_count: int = Field(ge=0)
+    active_makers_count: int = Field(ge=0)
+    rejected_makers_count: int = Field(ge=0)
+    total_users_count: int = Field(ge=0)
+
+
+class PendingMakerItem(BaseModel):
+    user_id: UUID
+    name: str
+    email: str
+    company_name: str | None
+    prefecture: str | None
+    city: str | None
+    note: str | None
+    created_at: datetime
+
+
+class PendingMakersResponse(BaseModel):
+    makers: list[PendingMakerItem]
+    total: int = Field(ge=0)
+
+
+class RejectMakerPayload(BaseModel):
+    reason: Annotated[str | None, Field(default=None, max_length=1000)] = None
+
+
+AdminAssignableRole = Literal["admin", "ja_staff", "researcher"]
+
+
+class AdminRoleAssignPayload(BaseModel):
+    role: AdminAssignableRole
