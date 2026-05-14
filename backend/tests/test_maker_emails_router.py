@@ -639,6 +639,27 @@ class TestPatchCampaign:
             )
         assert res.status_code == 403
 
+    def test_segment_type_only_patch_returns_422(
+        self, client, em_admin, override_user
+    ):
+        # segment_type 単独更新は DB 整合性が壊れる (古い filter が残る)
+        # ため 422 で拒否する (ADR-0010 Sprint 3 hotfix)。
+        em_admin.set_table(
+            "maker_email_campaigns",
+            [_campaign_row(status="draft", segment_type="favorite_followers")],
+            op="select",
+        )
+        with override_user(role="maker", sub=MAKER_A):
+            res = client.patch(
+                f"/v1/maker/emails/campaigns/{CAMPAIGN_A}",
+                json={"segment_type": "specific_users"},
+            )
+        assert res.status_code == 422
+        assert res.json()["detail"]["code"] == "invalid_segment_filter"
+        # update が走っていないこと (整合性破壊の防止)
+        updates = em_admin.captured_updates.get("maker_email_campaigns", [])
+        assert updates == []
+
 
 class TestDeleteCampaign:
     def test_deletes_draft(self, client, em_admin, override_user):

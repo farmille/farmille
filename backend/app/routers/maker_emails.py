@@ -359,6 +359,12 @@ async def update_campaign(
     if not diff:
         return {"ok": True, "id": str(campaign_id)}
 
+    # segment_type を更新する場合は segment_filter も同送必須。
+    # 単独更新を許すと DB 上で discriminator と filter 中身が剥離し、
+    # 送信時に integrity error を起こす (DOA 違反, SPEC §3.3)。
+    if "segment_type" in diff and payload.segment_filter is None:
+        raise _http_error(422, "invalid_segment_filter")
+
     # segment_type / segment_filter の discriminator 整合性検査
     new_segment_type = diff.get("segment_type") or current.get("segment_type")
     new_filter_obj = payload.segment_filter
