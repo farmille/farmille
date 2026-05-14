@@ -472,3 +472,158 @@ class MakerEventRegistrationsResponse(BaseModel):
     registrations: list[MakerEventRegistration]
     active_count: int = Field(ge=0)
     cancelled_count: int = Field(ge=0)
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Events v1 (Sprint 3: 暗黙フォロワー API)
+# spec docs/specs/events-v1.md §5.4 + §9 Sprint 3
+# ─────────────────────────────────────────────────────────────────────
+
+
+class FollowedMaker(BaseModel):
+    """GET /v1/me/followed-makers の 1 行 (SPEC §5.4)。
+
+    user_favorites.kind='favorite' で自分が保存している製品の
+    maker (user) を distinct で返す。display_name は
+    maker_profiles.company_name 優先、無ければ users.name フォールバック。
+    """
+
+    user_id: UUID
+    display_name: str
+
+
+class FollowedMakersResponse(BaseModel):
+    """暗黙フォロワー (自分が favorite した製品の maker 集合) のレスポンス。"""
+
+    manufacturer_ids: list[UUID]
+    manufacturers: list[FollowedMaker]
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Events v1 (Sprint 3: maker_email_campaigns)
+# spec docs/specs/events-v1.md §4.4 / §5.3 / §9 Sprint 3
+# Ryoga 確定:
+#   C6 favorite_followers は kind='favorite' のみ
+#   C7 send pre-flight で recipient 0 件は 422
+#   C9 event_past_attendees は自社 event のみ
+#   C10 specific_users は最大 1000 件
+# ─────────────────────────────────────────────────────────────────────
+
+
+CampaignSegmentType = Literal[
+    "favorite_followers", "event_past_attendees", "specific_users"
+]
+
+CampaignStatus = Literal["draft", "queued", "sent", "failed"]
+
+
+class FavoriteFollowersFilter(BaseModel):
+    """segment_type='favorite_followers' の segment_filter (SPEC §4.4)。
+
+    追加の絞り込みフィールドは持たない (自社製品を favorite した reviewer 全員)。
+    """
+
+    segment_type: Literal["favorite_followers"]
+
+
+class EventPastAttendeesFilter(BaseModel):
+    """segment_type='event_past_attendees' の segment_filter (SPEC §4.4)。
+
+    event_id は **自社主催 event** のみ受理 (Ryoga C9)。
+    BFF send 時に host_user_id=JWT.sub を再検証する。
+    """
+
+    segment_type: Literal["event_past_attendees"]
+    event_id: UUID
+
+
+class SpecificUsersFilter(BaseModel):
+    """segment_type='specific_users' の segment_filter (SPEC §4.4)。
+
+    Ryoga C10: 最大 1000 件。1 件以上必須。
+    """
+
+    segment_type: Literal["specific_users"]
+    user_ids: list[UUID] = Field(min_length=1, max_length=1000)
+
+
+SegmentFilter = Annotated[
+    FavoriteFollowersFilter | EventPastAttendeesFilter | SpecificUsersFilter,
+    Field(discriminator="segment_type"),
+]
+
+
+class MakerEmailCampaignCreatePayload(BaseModel):
+    """POST /v1/maker/emails/campaigns のペイロード (SPEC §5.3.2)。
+
+    maker_user_id / status は payload では受け取らず BFF 側で
+    JWT.sub と 'draft' に強制する (書き換え攻撃防止 + DOA)。
+    segment_type と segment_filter.segment_type の不一致は Pydantic
+    discriminator バリデーションで自動的に弾かれる。
+    """
+
+    subject: str = Field(min_length=1, max_length=200)
+    body: str = Field(min_length=1, max_length=20000)
+    segment_type: CampaignSegmentType
+    segment_filter: SegmentFilter
+
+
+class MakerEmailCampaignUpdatePayload(BaseModel):
+    """PATCH /v1/maker/emails/campaigns/{id} のペイロード (SPEC §5.3.3)。
+
+    status='draft' の campaign のみ編集可能 (BFF 側で第一防御)。
+    """
+
+    subject: str | None = Field(default=None, min_length=1, max_length=200)
+    body: str | None = Field(default=None, min_length=1, max_length=20000)
+    segment_type: CampaignSegmentType | None = None
+    segment_filter: SegmentFilter | None = None
+
+
+class MakerEmailCampaignListItem(BaseModel):
+    """GET /v1/maker/emails/campaigns の 1 行 (SPEC §5.3.1)。"""
+
+    id: UUID
+    subject: str
+    segment_type: CampaignSegmentType
+    status: CampaignStatus
+    recipient_count: int = Field(ge=0)
+    created_at: datetime
+    queued_at: datetime | None = None
+    sent_at: datetime | None = None
+
+
+class MakerEmailCampaignListResponse(BaseModel):
+    campaigns: list[MakerEmailCampaignListItem]
+
+
+class MakerEmailCampaignDetailResponse(BaseModel):
+    """GET /v1/maker/emails/campaigns/{id} (SPEC §5.3)。
+
+    segment_filter は jsonb のまま透過させる (UI 側で discriminator 読み)。
+    """
+
+    id: UUID
+    maker_user_id: UUID
+    subject: str
+    body: str
+    segment_type: CampaignSegmentType
+    segment_filter: dict
+    status: CampaignStatus
+    recipient_count: int = Field(ge=0)
+    queued_at: datetime | None = None
+    sent_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class MakerEmailCampaignSendResponse(BaseModel):
+    """POST /v1/maker/emails/campaigns/{id}/send (SPEC §5.3.4)。
+
+    実送信はせず status='queued' に遷移するのみ。recipient_count は
+    送信予定件数 (BFF 計算)。
+    """
+
+    ok: bool
+    status: CampaignStatus
+    recipient_count: int = Field(ge=0)
