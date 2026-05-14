@@ -309,3 +309,55 @@ class HomeResponse(BaseModel):
     featured_products: list[FeaturedProductItem]
     latest_articles: list[HomeArticleItem]
     banners: list[HomeBannerItem]
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Events v1 (Sprint 1: 公開閲覧 + reviewer 申込)
+# spec docs/specs/events-v1.md §5
+# ─────────────────────────────────────────────────────────────────────
+
+EventStatus = Literal["draft", "published", "cancelled"]
+EventHostType = Literal["maker", "admin"]
+
+
+class EventHost(BaseModel):
+    """events 一覧 / 詳細に埋め込む host サマリ。Sprint 1 では prefecture / city は
+    list レスポンスでは省略し、詳細でのみ返す (SPEC §5.1)。"""
+
+    user_id: UUID
+    display_name: str
+    host_type: EventHostType
+    prefecture: str | None = None
+    city: str | None = None
+
+
+class EventListItem(BaseModel):
+    id: UUID
+    title: str
+    host: EventHost
+    starts_at: datetime
+    ends_at: datetime
+    venue: str | None = None
+    online_url: str | None = None
+    capacity: int | None = None
+    status: EventStatus
+    active_registration_count: int = Field(ge=0)
+
+
+class EventListResponse(BaseModel):
+    events: list[EventListItem]
+
+
+class EventDetailResponse(BaseModel):
+    id: UUID
+    title: str
+    body: str
+    host: EventHost
+    venue: str | None = None
+    online_url: str | None = None
+    starts_at: datetime
+    ends_at: datetime
+    capacity: int | None = None
+    status: EventStatus
+    active_registration_count: int = Field(ge=0)
+    is_full: bool

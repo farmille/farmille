@@ -12,6 +12,7 @@ from app.routers import (
     auth,
     certifications,
     crops,
+    events,
     health,
     home,
     maker,
@@ -73,3 +74,4 @@ app.include_router(
 app.include_router(me_profile.router, prefix="/v1/me", tags=["me-profile"])
 app.include_router(reviews.router, prefix="/v1/reviews", tags=["reviews"])
 app.include_router(home.router, prefix="/v1/home", tags=["home"])
+app.include_router(events.router, prefix="/v1/events", tags=["events"])
