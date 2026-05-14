@@ -361,3 +361,114 @@ class EventDetailResponse(BaseModel):
     status: EventStatus
     active_registration_count: int = Field(ge=0)
     is_full: bool
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Events v1 (Sprint 2: maker CRUD + 申込者一覧)
+# spec docs/specs/events-v1.md §5.2 + §9 Sprint 2
+# ─────────────────────────────────────────────────────────────────────
+
+# URL の前方一致を ^https?:// に限定する pattern（DB CHECK と一致）。
+_HTTP_URL_PATTERN = r"^https?://"
+
+
+class MakerEventCreateRequest(BaseModel):
+    """POST /v1/maker/events のペイロード (SPEC §5.2.2)。
+
+    host_user_id / host_type は payload では受け取らず BFF 側で
+    JWT.sub と 'maker' に強制する (書き換え攻撃防止)。
+    starts_at / ends_at の前後関係や venue/online_url の片方必須は
+    BFF ハンドラ内で検査する (DB CHECK と二層防御)。
+    """
+
+    title: str = Field(min_length=1, max_length=200)
+    body: str = Field(min_length=1, max_length=20000)
+    venue: str | None = Field(default=None, min_length=1, max_length=200)
+    online_url: str | None = Field(
+        default=None, min_length=1, max_length=500, pattern=_HTTP_URL_PATTERN
+    )
+    starts_at: datetime
+    ends_at: datetime
+    capacity: int | None = Field(default=None, gt=0)
+    status: EventStatus = "draft"
+
+
+class MakerEventUpdateRequest(BaseModel):
+    """PATCH /v1/maker/events/{id} のペイロード (SPEC §5.2.2)。
+
+    全フィールドが任意 (部分更新)。値を明示的に NULL にしたい場合は明示的に
+    null を送る (Pydantic v2 のデフォルトはフィールド未指定でも default=None と
+    区別できないため、最低限の v1 セマンティクスとして capacity/venue/online_url
+    の null クリアは「明示的に null を送る」運用とする。SPEC §5.2.2 にも整合)。
+    """
+
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    body: str | None = Field(default=None, min_length=1, max_length=20000)
+    venue: str | None = Field(default=None, max_length=200)
+    online_url: str | None = Field(
+        default=None, max_length=500, pattern=_HTTP_URL_PATTERN
+    )
+    starts_at: datetime | None = None
+    ends_at: datetime | None = None
+    capacity: int | None = Field(default=None, gt=0)
+    status: EventStatus | None = None
+
+
+class MakerEventListItem(BaseModel):
+    """GET /v1/maker/events 一覧の 1 行 (SPEC §5.2.1)。"""
+
+    id: UUID
+    title: str
+    starts_at: datetime
+    ends_at: datetime
+    venue: str | None = None
+    online_url: str | None = None
+    capacity: int | None = None
+    status: EventStatus
+    active_registration_count: int = Field(ge=0)
+    created_at: datetime
+
+
+class MakerEventListResponse(BaseModel):
+    events: list[MakerEventListItem]
+
+
+class MakerEventDetailResponse(BaseModel):
+    """GET /v1/maker/events/{id} レスポンス (SPEC §5.2.2)。
+
+    host は自分自身なので最小限 (id / host_type) のみ。
+    public 用 EventDetailResponse は status='published' 限定だが、
+    こちらは draft / cancelled も含めて owner にだけ返す。
+    """
+
+    id: UUID
+    title: str
+    body: str
+    host_user_id: UUID
+    host_type: EventHostType
+    venue: str | None = None
+    online_url: str | None = None
+    starts_at: datetime
+    ends_at: datetime
+    capacity: int | None = None
+    status: EventStatus
+    active_registration_count: int = Field(ge=0)
+    created_at: datetime
+    updated_at: datetime
+
+
+class MakerEventRegistration(BaseModel):
+    """GET /v1/maker/events/{id}/registrations の 1 行 (SPEC §5.2.3)。"""
+
+    id: UUID
+    user_id: UUID
+    display_name: str | None = None
+    role: str
+    registered_at: datetime
+    cancelled_at: datetime | None = None
+
+
+class MakerEventRegistrationsResponse(BaseModel):
+    registrations: list[MakerEventRegistration]
+    active_count: int = Field(ge=0)
+    cancelled_count: int = Field(ge=0)
