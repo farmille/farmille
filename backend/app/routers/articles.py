@@ -167,7 +167,7 @@ async def get_article(
         admin.table("article_products")
         .select(
             "position, products(id, name, "
-            "users(name, maker_profiles(company_name)), "
+            "users(name, status, maker_profiles(company_name)), "
             'product_images(url, "order"))'
         )
         .eq("article_id", article["id"])
@@ -182,6 +182,9 @@ async def get_article(
             # 念のため: FK CASCADE で通常は発生しないが、防御的にスキップ
             continue
         maker = _coerce_one(product.get("users"))
+        # ADR-0009: 非 active メーカー所有の関連製品は公開しない。
+        if maker.get("status") != "active":
+            continue
         related_products.append(
             {
                 "id": product["id"],

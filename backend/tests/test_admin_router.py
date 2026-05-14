@@ -613,3 +613,152 @@ class TestPublicFilters:
         assert res.status_code == 200
         assert res.json()["featured_products"] == []
 
+    def test_articles_related_products_skip_non_active_maker(
+        self, client, monkeypatch
+    ):
+        """ADR-0009 §1.1: pending メーカー所有 product は記事 related_products から消える。"""
+        import app.routers.articles as mod
+
+        class _Q:
+            def __init__(self, data: Any) -> None:
+                self.data = data
+                self.not_ = self
+
+            def _noop(self, *a, **kw):
+                return self
+
+            select = _noop
+            eq = _noop
+            lte = _noop
+            order = _noop
+            limit = _noop
+            is_ = _noop
+
+            def execute(self):
+                r = MagicMock()
+                r.data = self.data
+                return r
+
+        article_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        article_row = {
+            "id": article_id,
+            "slug": "hidden-maker-article",
+            "title": "Hidden Maker",
+            "body_md": "# body",
+            "category": "knowledge",
+            "hero_image_url": None,
+            "author_user_id": None,
+            "published_at": "2026-05-10T00:00:00Z",
+            "users": None,
+        }
+        rel_rows = [
+            {
+                "position": 0,
+                "products": {
+                    "id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+                    "name": "Hidden Pending Product",
+                    "users": {
+                        "name": "Pending Maker",
+                        "status": "pending_review",
+                        "maker_profiles": {"company_name": "Pending Co"},
+                    },
+                    "product_images": [],
+                },
+            },
+            {
+                "position": 1,
+                "products": {
+                    "id": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+                    "name": "Visible Active Product",
+                    "users": {
+                        "name": "Active Maker",
+                        "status": "active",
+                        "maker_profiles": {"company_name": "Active Co"},
+                    },
+                    "product_images": [],
+                },
+            },
+        ]
+
+        def _table_factory(name: str):
+            if name == "articles":
+                return _Q([article_row])
+            if name == "article_products":
+                return _Q(rel_rows)
+            return _Q([])
+
+        stub = SimpleNamespace(table=_table_factory)
+        monkeypatch.setattr(mod, "get_supabase_admin", lambda: stub)
+        res = client.get("/v1/articles/hidden-maker-article")
+        assert res.status_code == 200
+        body = res.json()
+        names = [p["name"] for p in body["related_products"]]
+        assert "Hidden Pending Product" not in names
+        assert names == ["Visible Active Product"]
+
+    @pytest.mark.parametrize("bad_status", ["pending_review", "rejected", "frozen"])
+    def test_articles_related_products_filter_all_non_active_statuses(
+        self, client, monkeypatch, bad_status
+    ):
+        """pending / rejected / frozen いずれも公開 related_products に出さない。"""
+        import app.routers.articles as mod
+
+        class _Q:
+            def __init__(self, data: Any) -> None:
+                self.data = data
+                self.not_ = self
+
+            def _noop(self, *a, **kw):
+                return self
+
+            select = _noop
+            eq = _noop
+            lte = _noop
+            order = _noop
+            limit = _noop
+            is_ = _noop
+
+            def execute(self):
+                r = MagicMock()
+                r.data = self.data
+                return r
+
+        article_row = {
+            "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "slug": "any-article",
+            "title": "Any",
+            "body_md": "body",
+            "category": "knowledge",
+            "hero_image_url": None,
+            "author_user_id": None,
+            "published_at": "2026-05-10T00:00:00Z",
+            "users": None,
+        }
+        rel_rows = [
+            {
+                "position": 0,
+                "products": {
+                    "id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+                    "name": "Should Be Hidden",
+                    "users": {
+                        "name": "Bad Maker",
+                        "status": bad_status,
+                        "maker_profiles": {"company_name": "Bad Co"},
+                    },
+                    "product_images": [],
+                },
+            }
+        ]
+
+        def _table_factory(name: str):
+            if name == "articles":
+                return _Q([article_row])
+            if name == "article_products":
+                return _Q(rel_rows)
+            return _Q([])
+
+        stub = SimpleNamespace(table=_table_factory)
+        monkeypatch.setattr(mod, "get_supabase_admin", lambda: stub)
+        res = client.get("/v1/articles/any-article")
+        assert res.status_code == 200
+        assert res.json()["related_products"] == []
