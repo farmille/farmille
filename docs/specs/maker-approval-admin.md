@@ -774,4 +774,24 @@ ADR-0009 / ワークショップ §A1〜A5 / §M5 で議論されたが、本 sp
 
 ---
 
+## 19. Sprint 完了時の Ryoga 確定回答（参考）
+
+Sprint 1 着手前に確定:
+- §4.3 migration 3: **作らない**。BFF フィルタで第一防御
+- §5.6 pending_review 書き込み: **onboarding 側**
+- §7.3 初期 admin bootstrap: **Supabase Studio 手動 UPDATE**
+- §10.2 dev DB 既存 maker: **DEFAULT 'active' で backfill、削除しない**
+- §5.5 ロール昇格 API: **admin/ja_staff/researcher のみ**
+
+Sprint 2 内 hotfix:
+- pagination: `.range(offset, offset+limit-1)` + `count="exact"` に修正
+- articles.py: related_products に post-filter 追加
+
+Sprint 4 引継ぎ:
+- gen:types は user 手動（dev DB push 後）
+- admin.ts は gen:types 後に DB 由来部分を Pick で組み立て直す（v1.5+）
+- onboard_maker 二段書き込みロールバック不在は known issue として受入、公開フィルタで二重防御
+
+---
+
 **以上**
