@@ -16,7 +16,7 @@ export default async function AdminLayout({
     redirect("/login?next=/admin");
   }
   const role = await getRole(user);
-  if (role !== ("admin" as typeof role)) {
+  if (role !== "admin") {
     redirect("/login?next=/admin");
   }
 
