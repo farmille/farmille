@@ -860,3 +860,35 @@ v1.5+ で要望が出たら articles の markdown レンダラを共有する形
 ---
 
 **以上**
+
+---
+
+## 20. Sprint 4 closure: 確定事項と申し送り
+
+### 20.1 Sprint 3 hotfix での仕様確定
+- PATCH `/v1/maker/emails/campaigns/{id}`: `segment_type` 単独更新は 422 `invalid_segment_filter` で拒否（filter 同送必須）
+- `/v1/me/followed-makers`: ロール不問（SPEC §3.2 / §5.4 通り、reviewer 限定にしない）
+
+### 20.2 統一エラーコード追加
+本 ADR で新規追加した code:
+- `no_recipients` (422) — campaigns send の pre-flight でセグメント実体が空
+- `event_not_owner` (403) — 他社主催 event への操作試行
+
+### 20.3 状態遷移
+- events: `draft → published → cancelled`、`cancelled → published` 復活可（PATCH 経由）
+- event_registrations: 申込 → cancelled_at 設定、再申込不可（v1）
+- maker_email_campaigns: `draft (編集/削除可) → queued → (sent | failed)`、queued 以降は PATCH/DELETE/send が 409
+
+### 20.4 datetime TZ
+- v1 は JST 表示 / UTC 保存。frontend `datetime-local` はブラウザ TZ 依存、運営は日本国内環境前提。海外運用は v1.5+ で検討
+
+### 20.5 display_name フォールバック
+- `/v1/maker/events/{id}/registrations` は v1 では `users.name` のみで縮退（SPEC §1.2 縮退ライン許容）
+- 拡張先候補（farmer_profiles / ja_profiles / researcher_profiles）に display_name 相当カラムが存在しないため、v1.5+ で導入時に拡張
+
+### 20.6 v1.5+ 送り
+- `/admin/events/new` 本実装（admin role マージ後）
+- 実メール送信（Resend / SendGrid 等の選定、ADR-0011 範囲）
+- 講演会本文の markdown 化
+- カレンダー連携 / 録画ホスティング
+- 申込キャンセル待ち / 自動リマインダー
