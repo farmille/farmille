@@ -16,11 +16,13 @@ from app.routers import (
     health,
     home,
     maker,
+    maker_emails,
     maker_events,
     maker_profile,
     manufacturers,
     me,
     me_favorites,
+    me_followed_makers,
     me_profile,
     onboarding,
     product_benefits,
@@ -78,4 +80,12 @@ app.include_router(home.router, prefix="/v1/home", tags=["home"])
 app.include_router(events.router, prefix="/v1/events", tags=["events"])
 app.include_router(
     maker_events.router, prefix="/v1/maker/events", tags=["maker-events"]
+)
+app.include_router(
+    maker_emails.router, prefix="/v1/maker/emails", tags=["maker-emails"]
+)
+app.include_router(
+    me_followed_makers.router,
+    prefix="/v1/me/followed-makers",
+    tags=["me-followed-makers"],
 )
