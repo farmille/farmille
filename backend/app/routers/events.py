@@ -22,6 +22,7 @@ Sprint 1 範囲:
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -388,7 +389,7 @@ async def cancel_registration(
 ):
     """自分の申込を cancel (SPEC §5.1)。
 
-    物理削除せず cancelled_at = now() を立てる (履歴保持、§5.1)。
+    物理削除せず cancelled_at = UTC now を立てる (履歴保持、§5.1)。
     - 該当行なし or 既に cancelled → 404 not_registered
     - 他人の申込は所有者でないため SELECT で見えず 404
       (RLS 第二防御も同じ動作になる)
@@ -417,8 +418,11 @@ async def cancel_registration(
         )
 
     try:
+        # PostgREST 経由の UPDATE では "now()" 文字列は SQL 関数として展開されず
+        # timestamptz の不正入力になるため、Python 側で確定値を生成する。
+        cancelled_at_iso = datetime.now(timezone.utc).isoformat()
         admin.table("event_registrations").update(
-            {"cancelled_at": "now()"}
+            {"cancelled_at": cancelled_at_iso}
         ).eq("id", row["id"]).execute()
     except Exception as exc:  # noqa: BLE001
         logger.exception(

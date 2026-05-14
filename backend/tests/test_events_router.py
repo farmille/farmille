@@ -19,6 +19,7 @@ cancelled_at IS NULL aggregation, etc.).
 from __future__ import annotations
 
 from contextlib import contextmanager
+from datetime import datetime
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -567,6 +568,14 @@ class TestCancelRegistration:
         assert res.status_code == 204
         updates = events_admin.captured_updates.get("event_registrations", [])
         assert updates and "cancelled_at" in updates[0]
+        # cancelled_at は PostgREST に渡す前に Python 側で ISO 8601 文字列に
+        # 確定済みであること (literal "now()" は timestamptz の不正入力)。
+        cancelled_at = updates[0]["cancelled_at"]
+        assert isinstance(cancelled_at, str)
+        assert cancelled_at != "now()"
+        # ISO 8601 として parse 可能 (tz 付き)
+        parsed = datetime.fromisoformat(cancelled_at)
+        assert parsed.tzinfo is not None
 
     def test_no_registration_returns_404(
         self, client, events_admin, override_user
