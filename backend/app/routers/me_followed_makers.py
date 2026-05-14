@@ -19,10 +19,10 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.auth.jwt import get_user_id
-from app.dependencies import require_role
+from app.dependencies import get_current_user
 from app.models.schemas import FollowedMaker, FollowedMakersResponse
 from app.services.supabase import get_supabase_admin
 
@@ -30,9 +30,9 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# 全 reviewer ロール限定。maker / unassigned は自社製品を favorite に
-# 入れる経路がそもそも無いため、本 endpoint を開ける必要がない。
-REVIEWER_ROLES = ("farmer", "researcher", "ja_staff")
+# SPEC §3.2 / §5.4: 全ロール許可。maker が自社製品を favorite するケースも
+# ありうるので role guard は付けない (ADR-0010 Sprint 3 hotfix)。
+# favorite 0 件のロールは自然に空配列が返る。
 
 
 def _coerce_one(rel: dict | list | None) -> dict:
@@ -56,7 +56,7 @@ def _maker_display_name(maker: dict) -> str:
 
 @router.get("", response_model=FollowedMakersResponse)
 async def list_followed_makers(
-    user: dict = require_role(*REVIEWER_ROLES),
+    user: dict = Depends(get_current_user),
 ) -> FollowedMakersResponse:
     """自分が favorite した製品の maker 集合 (SPEC §5.4)。
 

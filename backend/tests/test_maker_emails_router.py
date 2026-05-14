@@ -1070,16 +1070,26 @@ class TestFollowedMakers:
         res = client.get("/v1/me/followed-makers")
         assert res.status_code in (401, 403)
 
-    def test_maker_role_returns_403(self, client, em_admin, override_user):
-        # SPEC §5.4 解釈: 暗黙フォローは reviewer のものなので maker は 403
+    def test_maker_role_returns_200_with_empty_list(
+        self, client, em_admin, override_user
+    ):
+        # SPEC §3.2 / §5.4: ロール不問。maker が自社製品を favorite する
+        # ケースもありうるので 403 にせず、favorite 0 件なら空配列を返す
+        # (ADR-0010 Sprint 3 hotfix)。
+        em_admin.set_table("user_favorites", [], op="select")
         with override_user(role="maker", sub=MAKER_A):
             res = client.get("/v1/me/followed-makers")
-        assert res.status_code == 403
+        assert res.status_code == 200, res.text
+        assert res.json() == {"manufacturer_ids": [], "manufacturers": []}
 
-    def test_unassigned_returns_403(self, client, em_admin, override_user):
+    def test_unassigned_returns_200_with_empty_list(
+        self, client, em_admin, override_user
+    ):
+        em_admin.set_table("user_favorites", [], op="select")
         with override_user(role="unassigned", sub="x"):
             res = client.get("/v1/me/followed-makers")
-        assert res.status_code == 403
+        assert res.status_code == 200, res.text
+        assert res.json() == {"manufacturer_ids": [], "manufacturers": []}
 
     def test_farmer_with_no_favorites_returns_empty(
         self, client, em_admin, override_user
