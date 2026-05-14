@@ -61,10 +61,12 @@ async def list_manufacturers(
 
     # users + maker_profiles (inner join via Supabase nested select; rows where
     # maker_profiles is null are filtered out below).
+    # ADR-0009: pending_review / rejected / frozen の maker は公開系で非表示。
     users_res = (
         admin.table("users")
         .select("id, created_at, maker_profiles(company_name, prefecture, city)")
         .eq("role", "maker")
+        .eq("status", "active")
         .order("created_at", desc=True)
         .limit(limit)
         .execute()
@@ -114,7 +116,7 @@ async def get_manufacturer(manufacturer_id: UUID) -> ManufacturerDetailResponse:
 
     user_res = (
         admin.table("users")
-        .select("id, role, maker_profiles(company_name, prefecture, city, note)")
+        .select("id, role, status, maker_profiles(company_name, prefecture, city, note)")
         .eq("id", str(manufacturer_id))
         .limit(1)
         .execute()
@@ -124,6 +126,8 @@ async def get_manufacturer(manufacturer_id: UUID) -> ManufacturerDetailResponse:
         raise HTTPException(status_code=404, detail="manufacturer_not_found")
     user_row = rows[0]
     if user_row.get("role") != "maker":
+        raise HTTPException(status_code=404, detail="manufacturer_not_found")
+    if user_row.get("status") != "active":
         raise HTTPException(status_code=404, detail="manufacturer_not_found")
 
     profile = _profile_dict(user_row)

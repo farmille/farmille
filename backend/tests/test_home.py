@@ -110,6 +110,7 @@ def test_home_returns_all_three_series(client, home_module):
                         "name": "微生物資材 A",
                         "users": {
                             "name": "山田太郎",
+                            "status": "active",
                             "maker_profiles": {"company_name": "ACME Bio"},
                         },
                         "product_types": {"id": "t", "name": "BS資材"},
@@ -178,7 +179,11 @@ def test_home_falls_back_to_user_name_when_company_name_missing(client, home_mod
                         "id": "22222222-2222-2222-2222-222222222222",
                         "name": "資材 B",
                         # company_name 空、users.name にフォールバック
-                        "users": {"name": "山田太郎", "maker_profiles": {}},
+                        "users": {
+                            "name": "山田太郎",
+                            "status": "active",
+                            "maker_profiles": {},
+                        },
                         "product_types": {"id": "t", "name": "肥料"},
                         "product_images": [],
                     },
@@ -209,6 +214,7 @@ def test_home_handles_maker_profiles_as_list(client, home_module):
                         "name": "資材 C",
                         "users": {
                             "name": "佐藤",
+                            "status": "active",
                             "maker_profiles": [{"company_name": "Beta Corp"}],
                         },
                         "product_types": None,

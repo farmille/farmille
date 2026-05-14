@@ -240,7 +240,7 @@ async def list_products(
 
     query = admin.table("products").select(
         'id, name, maker_id, created_at, '
-        'users(name, maker_profiles(company_name)), '
+        'users(name, status, maker_profiles(company_name)), '
         'product_types(id, name), '
         'product_images(url, "order")'
     )
@@ -249,7 +249,11 @@ async def list_products(
     if product_ids is not None:
         query = query.in_("id", product_ids)
     res = query.order("created_at", desc=True).execute()
-    products = [_flatten_product(row) for row in (res.data or [])]
+    # ADR-0009: 非 active メーカー (pending_review / rejected / frozen) 所有の
+    # 製品は公開一覧に出さない。Supabase の foreign-table フィルタは join 側を
+    # 絞るのみで親 row を除外しないため、Python 側で post-filter する。
+    active_rows = [r for r in (res.data or []) if (r.get("users") or {}).get("status") == "active"]
+    products = [_flatten_product(row) for row in active_rows]
     return {"products": products}
 
 
@@ -350,7 +354,7 @@ async def get_product(product_id: UUID):
         .select(
             'id, name, maker_id, general_purpose, primary_compound, mode_of_action, '
             'commercial_status, label_url, sds_url, created_at, '
-            'users(name, maker_profiles(company_name)), '
+            'users(name, status, maker_profiles(company_name)), '
             'product_types(id, name), '
             'product_images(url, "order"), '
             'product_benefit_relations(product_benefits(id, category, name)), '
@@ -362,7 +366,11 @@ async def get_product(product_id: UUID):
     )
     if not res.data:
         raise HTTPException(status_code=404, detail="product_not_found")
-    return _flatten_product_detail(res.data[0])
+    row = res.data[0]
+    # ADR-0009: 非 active メーカー所有の製品は公開詳細から 404 として隠す。
+    if (row.get("users") or {}).get("status") != "active":
+        raise HTTPException(status_code=404, detail="product_not_found")
+    return _flatten_product_detail(row)
 
 
 def _fetch_product_owner(admin, product_id: UUID) -> str | None:
