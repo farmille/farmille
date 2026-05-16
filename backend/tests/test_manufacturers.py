@@ -158,6 +158,7 @@ class TestGetManufacturer:
                 {
                     "id": USER_ID_1,
                     "role": "maker",
+                    "status": "active",
                     "maker_profiles": {
                         "company_name": "Acme Bio",
                         "prefecture": "北海道",
@@ -244,6 +245,7 @@ class TestGetManufacturer:
                 {
                     "id": USER_ID_1,
                     "role": "maker",
+                    "status": "active",
                     "maker_profiles": {
                         "company_name": "Acme Bio",
                         "prefecture": None,

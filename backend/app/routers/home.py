@@ -84,7 +84,7 @@ def _fetch_featured_products(limit: int) -> list[FeaturedProductItem]:
         .select(
             "id, sort_order, displayed_at, "
             "products(id, name, "
-            "users(name, maker_profiles(company_name)), "
+            "users(name, status, maker_profiles(company_name)), "
             'product_types(id, name), '
             'product_images(url, "order"))'
         )
@@ -102,6 +102,9 @@ def _fetch_featured_products(limit: int) -> list[FeaturedProductItem]:
             # 防御的: FK CASCADE で通常起きないが念のため skip
             continue
         maker = product.get("users") or {}
+        # ADR-0009: 非 active メーカー所有の featured 行は公開しない。
+        if maker.get("status") != "active":
+            continue
         product_type = product.get("product_types") or {}
         items.append(
             FeaturedProductItem(

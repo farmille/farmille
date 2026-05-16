@@ -121,7 +121,13 @@ async def onboard_maker(
     payload: MakerOnboardingPayload,
     user: dict = require_role("maker"),
 ):
-    """maker のオンボーディング完了処理。maker_profiles の upsert のみ。"""
+    """maker のオンボーディング完了処理。
+
+    順序:
+      1. maker_profiles を upsert (on_conflict=user_id)
+      2. users.status を 'pending_review' に上書き (運営承認待ち、ADR-0009 §2.1 / spec §5.6)
+    既存ユーザーは migration で DEFAULT 'active' が付与されているため、本 UPDATE で承認待ちへ反転する。
+    """
     user_id = get_user_id(user)
     admin = get_supabase_admin()
 
@@ -138,5 +144,10 @@ async def onboard_maker(
         ).execute()
     except Exception:
         return _error(500, "failed_to_upsert_maker_profile")
+
+    try:
+        admin.table("users").update({"status": "pending_review"}).eq("id", user_id).execute()
+    except Exception:
+        return _error(500, "failed_to_mark_maker_pending_review")
 
     return {"ok": True}

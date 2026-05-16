@@ -1211,3 +1211,22 @@ PR #4 description test plan より:
 
 ### Ryoga 判断依頼(spec §7.2 / §9 ⇔ §8 矛盾、PR #4 known risks より)
 - skill `SKILL.md` §5 解消注記が `.claude/` gitignored のため commit 不可。worker ローカルには反映済、個人間で non-deterministic。判断: (a) local only / (b) gitignore 見直し / (c) docs/skills/ にミラー
+
+---
+
+## 初期 admin bootstrap（ADR-0009）
+
+ADR-0009 §2.2 「アドミンのパブリックサインアップ経路は作らない」「既存ユーザーを手動昇格のみ」に従い、
+初期 admin は Supabase Studio で手動 UPDATE する。
+
+### 手順
+1. 対象ユーザーが既に通常ユーザーとして登録済みであること（farmer/maker/ja_staff/researcher のいずれか）
+2. Supabase Studio → Authentication → Users → 対象ユーザー選択 → User App Metadata で `role: "admin"` に書き換え
+3. SQL Editor で `UPDATE public.users SET role='admin' WHERE id='{user_id}';` 実行
+4. 対象ユーザーがログアウト → 再ログインで `/admin` にアクセス可能
+
+### v1 初期昇格対象（ADR-0009 §5）
+- 共同創業者 3 名: 酒井涼雅（Ryoga）/ 奥田朗盛 / 根本
+
+### 2FA（v1.5+）
+v1 では 2FA は実装しない。運営内パスワード強度ポリシー + メールドメイン制限で耐える（SPEC §10.1）。

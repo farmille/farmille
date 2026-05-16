@@ -61,6 +61,9 @@ class FakeQuery:
     def limit(self, *args: Any, **kwargs: Any) -> "FakeQuery":
         return self._record("limit", *args, **kwargs)
 
+    def range(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("range", *args, **kwargs)
+
     # Write-side
     def insert(self, *args: Any, **kwargs: Any) -> "FakeQuery":
         return self._record("insert", *args, **kwargs)
