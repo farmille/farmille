@@ -21,7 +21,22 @@ TARGET_ID = "33333333-3333-3333-3333-333333333333"
 
 @pytest.fixture()
 def admin_user(override_user) -> dict[str, Any]:
-    payload = {"sub": ADMIN_USER_ID, "app_metadata": {"role": "admin"}}
+    payload = {
+        "sub": ADMIN_USER_ID,
+        "app_metadata": {"role": "admin"},
+        "aal": "aal2",
+    }
+    override_user(payload)
+    return payload
+
+
+@pytest.fixture()
+def admin_user_aal1(override_user) -> dict[str, Any]:
+    payload = {
+        "sub": ADMIN_USER_ID,
+        "app_metadata": {"role": "admin"},
+        "aal": "aal1",
+    }
     override_user(payload)
     return payload
 
@@ -78,6 +93,61 @@ class TestGuard:
             f"/v1/admin/users/{TARGET_ID}/role", json={"role": "admin"}
         )
         assert res.status_code == 403
+
+
+# ─── ADR-0011 §2.4: AAL2 enforcement for admin role ───────────────────
+
+
+class TestAAL2Enforcement:
+    """AAL1 admin の JWT は 401 `aal_insufficient` で reject される (ADR-0011)。"""
+
+    def test_summary_rejects_aal1_admin(
+        self, client, patch_router_admin, admin_user_aal1
+    ):
+        res = client.get("/v1/admin/summary")
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+    def test_pending_makers_rejects_aal1_admin(
+        self, client, patch_router_admin, admin_user_aal1
+    ):
+        res = client.get("/v1/admin/makers/pending")
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+    def test_approve_rejects_aal1_admin(
+        self, client, patch_router_admin, admin_user_aal1
+    ):
+        res = client.post(f"/v1/admin/makers/{MAKER_ID}/approve")
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+    def test_reject_rejects_aal1_admin(
+        self, client, patch_router_admin, admin_user_aal1
+    ):
+        res = client.post(
+            f"/v1/admin/makers/{MAKER_ID}/reject", json={"reason": None}
+        )
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+    def test_role_assign_rejects_aal1_admin(
+        self, client, patch_router_admin, admin_user_aal1
+    ):
+        res = client.post(
+            f"/v1/admin/users/{TARGET_ID}/role", json={"role": "admin"}
+        )
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+    def test_missing_aal_claim_treated_as_aal1(
+        self, client, patch_router_admin, override_user
+    ):
+        """aal claim 欠落の JWT も AAL1 扱いで reject される (jwt.py:get_user_aal)。"""
+        override_user({"sub": ADMIN_USER_ID, "app_metadata": {"role": "admin"}})
+        res = client.get("/v1/admin/summary")
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
 
 
 # ─── GET /v1/admin/summary ─────────────────────────────────────────────
