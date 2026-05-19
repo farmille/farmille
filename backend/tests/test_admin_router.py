@@ -95,11 +95,11 @@ class TestGuard:
         assert res.status_code == 403
 
 
-# ─── ADR-0011 §2.4: AAL2 enforcement for admin role ───────────────────
+# ─── ADR-0012 §2.4: AAL2 enforcement for admin role ───────────────────
 
 
 class TestAAL2Enforcement:
-    """AAL1 admin の JWT は 401 `aal_insufficient` で reject される (ADR-0011)。"""
+    """AAL1 admin の JWT は 401 `aal_insufficient` で reject される (ADR-0012)。"""
 
     def test_summary_rejects_aal1_admin(
         self, client, patch_router_admin, admin_user_aal1

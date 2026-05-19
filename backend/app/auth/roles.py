@@ -6,7 +6,7 @@ from app.auth.jwt import get_user_aal, get_user_role
 
 SIGNUP_ROLES: set[str] = {"farmer", "maker"}
 
-# ADR-0011 §2.2: AAL2 必須ロール。admin は MFA enrollment + challenge 完了を要求。
+# ADR-0012 §2.2: AAL2 必須ロール。admin は MFA enrollment + challenge 完了を要求。
 AAL2_REQUIRED_ROLES: frozenset[str] = frozenset({"admin"})
 
 

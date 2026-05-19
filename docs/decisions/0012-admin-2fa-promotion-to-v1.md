@@ -1,4 +1,4 @@
-# ADR-0011: Admin 2FA を v1 必達に繰り上げ
+# ADR-0012: Admin 2FA を v1 必達に繰り上げ
 
 **Status**: Accepted
 **作成日**: 2026-05-19

@@ -7,7 +7,7 @@
 **前提 ADR**: `docs/decisions/0009-maker-approval-flow-and-admin-panel.md`（v1 スコープ反転 = アドミン画面が v1 入り）
 **関連 ADR**:
 - `docs/decisions/0002-reviews-insert-role-scope.md`（二層ロール構造）
-- `docs/decisions/0011-admin-2fa-promotion-to-v1.md`（2FA を v1 必達に繰り上げ、ADR-0009 §2.3 / 本 spec §1.3 を Supersede）
+- `docs/decisions/0012-admin-2fa-promotion-to-v1.md`（2FA を v1 必達に繰り上げ、ADR-0009 §2.3 / 本 spec §1.3 を Supersede）
 
 ---
 
@@ -38,7 +38,7 @@
 - 承認 / 却下 API（`/v1/admin/makers/{user_id}/approve` / `/reject`）で `users.status` が `active` / `rejected` に遷移する
 - ロール昇格 API（`POST /v1/admin/users/{user_id}/role`）が admin のみアクセス可能、引数として `unassigned` → `admin` の昇格を実行できる
 - `/admin` ダッシュボード + B2-B7 サブ画面が**骨組みだけ存在**（リンクと「準備中」プレースホルダ、内部実装は次 phase）
-- **TOTP 2FA enrollment + admin AAL2 強制**（ADR-0011 で v1 必達に繰り上げ）
+- **TOTP 2FA enrollment + admin AAL2 強制**（ADR-0012 で v1 必達に繰り上げ）
   - `/admin/*` 配下は AAL2 必須、AAL1 admin は `/mfa/setup`（factor 未登録）or `/mfa/challenge`（factor 既登録）にリダイレクト
   - `supabase.auth.mfa.enroll({factorType:'totp'})` で TOTP enrollment、verify code で factor 確定 + AAL2 化
   - backend `require_role("admin")` は JWT `aal` claim を判定し、AAL1 は 401 `aal_insufficient` で reject
@@ -411,13 +411,13 @@ class AdminRoleAssignPayload(BaseModel):
 
 - Server Component
 - 中央に「準備中（v1 では SQL 直対応）」プレースホルダ
-- 関連 ADR / ワークショップへのリンク（例: B7 banners → ADR-0011 + workshop §A2）
+- 関連 ADR / ワークショップへのリンク（例: B7 banners → ADR-0012 + workshop §A2）
 - B3 articles / B4 featured-products / B7 banners → 関連 spec（`docs/specs/articles.md` / `docs/specs/home.md`）へのリンク
 - B6 users / B2 reports → 関連 ADR-0010（仮）へのリンク
 
 これらは「画面が存在する」ことだけが受け入れ条件で、機能実装は v1.5+。
 
-### 6.5 2FA enforcement（v1 必達、ADR-0011 で繰り上げ）
+### 6.5 2FA enforcement（v1 必達、ADR-0012 で繰り上げ）
 
 `/admin/layout.tsx` Server Component で AAL を判定し、AAL1 admin を MFA フローに誘導する。
 
@@ -436,7 +436,7 @@ AAL 判定は `supabase.auth.mfa.getAuthenticatorAssuranceLevel()` の `currentL
 - `/mfa/setup` (Client Component): `supabase.auth.mfa.enroll({factorType:'totp'})` で QR + secret 取得 → 6 桁 verify code 入力 → `mfa.verify({factorId, challengeId, code})` で AAL2 化 → `next` クエリの path にリダイレクト
 - `/mfa/challenge` (Client Component): `supabase.auth.mfa.listFactors()` で verified factor 取得 → `mfa.challengeAndVerify({factorId, code})` で AAL2 化 → `next` リダイレクト
 
-**コード上に「2FA TODO」のような注釈は残さない**（既存規約踏襲）。実装根拠は本 § / ADR-0011 から辿る。
+**コード上に「2FA TODO」のような注釈は残さない**（既存規約踏襲）。実装根拠は本 § / ADR-0012 から辿る。
 
 ---
 
@@ -597,15 +597,15 @@ generator が 1 sprint ずつ完結できる粒度に分解する。**4 sprint**
 
 ## 10. リスク / 既知の制約
 
-### 10.1 2FA は v1 必達（ADR-0011 で繰り上げ確定）
+### 10.1 2FA は v1 必達（ADR-0012 で繰り上げ確定）
 
-ADR-0011 で 2FA は **v1 必達** に繰り上げ確定（2026-05-19）。実装範囲は本 spec §1.1 + §6.5 で定義済。
+ADR-0012 で 2FA は **v1 必達** に繰り上げ確定（2026-05-19）。実装範囲は本 spec §1.1 + §6.5 で定義済。
 
 - factor 種別: **TOTP のみ**（Supabase Auth MFA）
 - 強制対象: **admin ロールのみ**（他 role は任意 enroll 可能）
 - AAL2 強制: frontend `/admin/layout.tsx` + backend `require_role("admin")` の双方で判定
 - factor 紛失時 recovery: v1 は Supabase ダッシュボードで SQL 直対応（recovery UI は v1.5+）
-- backup codes / WebAuthn / SMS factor: v1.5+ で再評価（ADR-0011 §2.5 参照）
+- backup codes / WebAuthn / SMS factor: v1.5+ で再評価（ADR-0012 §2.5 参照）
 
 ### 10.2 既存 maker の backfill 戦略
 
@@ -716,7 +716,7 @@ Sprint 単位の受入基準を一覧化（evaluator チェック用）。
 - `frontend/src/app/admin/featured-products/page.tsx`（骨組み）
 - `frontend/src/app/admin/banners/page.tsx`（骨組み）
 
-### 新規（2FA / ADR-0011 で追加）
+### 新規（2FA / ADR-0012 で追加）
 - `frontend/src/app/(auth)/mfa/setup/page.tsx`（TOTP enrollment、§6.5）
 - `frontend/src/app/(auth)/mfa/setup/_components/totp-enroll-form.tsx`（Client Island、QR + verify）
 - `frontend/src/app/(auth)/mfa/challenge/page.tsx`（factor 既登録の challenge、§6.5）
@@ -733,13 +733,13 @@ Sprint 単位の受入基準を一覧化（evaluator チェック用）。
 - `frontend/src/types/database.ts`（`pnpm gen:types` で自動再生成、コミット必須）
 - `docs/setup-log.md`（運用ドキュメント、初期 admin ブートストラップ手順追加）
 
-### 既存修正（2FA / ADR-0011 で追加）
-- `backend/app/auth/jwt.py`（`get_user_aal(payload)` accessor 追加、ADR-0011 §2.4）
+### 既存修正（2FA / ADR-0012 で追加）
+- `backend/app/auth/jwt.py`（`get_user_aal(payload)` accessor 追加、ADR-0012 §2.4）
 - `backend/app/auth/roles.py`（`RoleChecker` に AAL2 enforcement 追加、admin role 時のみ AAL2 必須）
 - `backend/tests/test_admin_router.py`（AAL1 admin → 401 `aal_insufficient` ケース追加）
 - `frontend/src/app/admin/layout.tsx`（AAL2 判定 → `/mfa/setup` or `/mfa/challenge` リダイレクト、§6.5）
 - `frontend/src/lib/auth/actions.ts`（`signIn` 完了後、admin の AAL1 を MFA フローに誘導）
-- `docs/qa/uat-adr-0009-0010-0011.md`（2FA UAT 項目追加）
+- `docs/qa/uat-adr-0012-admin-2fa.md`（2FA UAT 新規、ADR-0012 専用）
 
 ---
 
@@ -754,7 +754,7 @@ Sprint 単位の受入基準を一覧化（evaluator チェック用）。
 | 5 | フロント直叩き | `/admin/*` から Supabase 直叩き禁止。BFF `/v1/admin/*` のみ |
 | 6 | RLS を第一防御 | 第一防御は `require_role("admin")` BFF ガード。RLS は service_role 経由運用で第二防御に徹する |
 | 7 | 変更履歴を本文に | 本 spec に「旧版では」「以前は SQL 直で…」等の時系列記述なし |
-| 8 | 注釈メモ | TODO / FIXME を本 spec / 実装コードに残さない（実装根拠は §6.5 / §10.1 / ADR-0011 から辿る） |
+| 8 | 注釈メモ | TODO / FIXME を本 spec / 実装コードに残さない（実装根拠は §6.5 / §10.1 / ADR-0012 から辿る） |
 | 9 | ついで実装 | B5 通報処理 / B8 注目の資材編集 / B9 記事編集は §1.3 で明示除外 |
 | 10 | 未採用技術前提 | recovery UI / Backup codes / WebAuthn / SMS factor / 監査テーブル等を前提とした実装なし（v1.5+） |
 
@@ -810,8 +810,8 @@ ADR-0009 / ワークショップ §A1〜A5 / §M5 で議論されたが、本 sp
 | 通報キュー画面（B5、Reddit Mod Queue 風） | A1 ワークショップで未確定、SKILL §1.4 確定 v1 アウト | 通報ボタン UI の有無は別 spec / ADR で議論 |
 | 注目の資材編集 UI（B8） | A2 ワークショップで「SQL 運用で十分」確定 | `featured_products` への SQL 直挿入 |
 | 記事編集 UI（B9） | A3 ワークショップで「Git PR + markdown」確定 | `articles` への migration 投入 |
-| `/admin/login` 専用ログイン | v1 では既存 `/login` + admin ロール guard で十分（ADR-0011 §2.5） | 既存 `/login` + admin ロール guard + AAL2 enforcement |
-| TOTP recovery UI / Backup codes / WebAuthn / SMS factor | ADR-0011 §2.5 で v1.5+ 確定 | v1 は TOTP のみ + Supabase ダッシュボード SQL 直 recovery |
+| `/admin/login` 専用ログイン | v1 では既存 `/login` + admin ロール guard で十分（ADR-0012 §2.5） | 既存 `/login` + admin ロール guard + AAL2 enforcement |
+| TOTP recovery UI / Backup codes / WebAuthn / SMS factor | ADR-0012 §2.5 で v1.5+ 確定 | v1 は TOTP のみ + Supabase ダッシュボード SQL 直 recovery |
 | `maker_approval_logs` 監査テーブル | DOA 「事実のみ」原則、v1 規模で過剰 | Supabase ダッシュボード + Git PR |
 | 承認 / 却下時メーカー宛自動通知メール | 縮退ライン、v1.5+ | 運営手動 info@ メール送信 |
 | メーカー再申請フロー（rejected → pending_review） | v1 で運用ニーズ低い | SQL 直で `rejected → pending_review` に戻す手動運用 |
