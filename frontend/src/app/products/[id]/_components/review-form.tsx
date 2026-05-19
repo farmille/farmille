@@ -100,7 +100,7 @@ export function ReviewForm({
     reviewId: string,
   ) {
     for (const [idx, file] of files.entries()) {
-      const path = `${userId}/${reviewId}/${idx}_${file.name}`;
+      const path = `${userId}/${reviewId}/${idx}_${sanitizeStorageFileName(file.name)}`;
       const { error } = await supabase.storage
         .from("review-images")
         .upload(path, file, { upsert: false });
@@ -131,7 +131,7 @@ export function ReviewForm({
           const nonce = crypto.randomUUID();
           try {
             for (const [idx, file] of files.entries()) {
-              const path = `${user.id}/${reviewId}/${nonce}_${idx}_${file.name}`;
+              const path = `${user.id}/${reviewId}/${nonce}_${idx}_${sanitizeStorageFileName(file.name)}`;
               const { error } = await supabase.storage
                 .from("review-images")
                 .upload(path, file, { upsert: false });
@@ -342,4 +342,11 @@ function mapStatus(status: number, error?: string): ErrorCode {
   if (status === 404) return "review_not_found";
   if (status === 400 || status === 422) return "invalid_body";
   return (error as ErrorCode) ?? "unknown";
+}
+
+function sanitizeStorageFileName(name: string): string {
+  const lastDot = name.lastIndexOf(".");
+  const rawExt = lastDot > 0 ? name.slice(lastDot + 1) : "";
+  const ext = rawExt.replace(/[^a-zA-Z0-9]/g, "").toLowerCase().slice(0, 8);
+  return ext ? `file.${ext}` : "file";
 }

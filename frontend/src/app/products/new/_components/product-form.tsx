@@ -171,7 +171,7 @@ export function ProductForm({
     let idx = 0;
     for (const item of items) {
       if (item.kind !== "new") continue;
-      const path = `${userId}/pending/${nonce}_${idx}_${item.file.name}`;
+      const path = `${userId}/pending/${nonce}_${idx}_${sanitizeStorageFileName(item.file.name)}`;
       const { error } = await supabase.storage
         .from("product-images")
         .upload(path, item.file, { upsert: false });
@@ -590,4 +590,11 @@ function mapStatus(status: number, error?: string): ErrorCode {
   if (status === 404) return "product_not_found";
   if (status === 400 || status === 422) return "invalid_body";
   return (error as ErrorCode) ?? "unknown";
+}
+
+function sanitizeStorageFileName(name: string): string {
+  const lastDot = name.lastIndexOf(".");
+  const rawExt = lastDot > 0 ? name.slice(lastDot + 1) : "";
+  const ext = rawExt.replace(/[^a-zA-Z0-9]/g, "").toLowerCase().slice(0, 8);
+  return ext ? `file.${ext}` : "file";
 }
