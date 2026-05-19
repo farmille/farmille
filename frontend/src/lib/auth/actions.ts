@@ -85,6 +85,16 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   const role = user?.app_metadata?.role as string | undefined;
 
+  // ADR-0012 §2.3: admin は MFA 完了まで /admin に着地させない
+  if (role === "admin") {
+    const { data: factors } = await supabase.auth.mfa.listFactors();
+    const verifiedTotp = factors?.totp.find((f) => f.status === "verified");
+    const target = verifiedTotp
+      ? `/mfa/challenge?next=${encodeURIComponent("/admin")}`
+      : `/mfa/setup?next=${encodeURIComponent("/admin")}`;
+    redirect(target);
+  }
+
   redirect(landingPathForRole(role));
 }
 

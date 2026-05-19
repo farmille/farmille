@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getRole, getUser } from "@/lib/auth/server";
+import { createClient } from "@/lib/supabase/server";
 
-// spec §6.1 / §7.1: admin layout は Server Component で role guard を行う。
-// 未ログイン / 非 admin はすべて /login?next=... へリダイレクト (spec §1.1)。
-// 2FA は v1.5+ (spec §10.1)、本 layout には実装上の目印を残さない。
+// spec §6.1 / §6.5 / §7.1: admin layout は Server Component で role + AAL2 guard。
+// 未ログイン / 非 admin → /login?next=/admin
+// AAL1 admin → factor の有無で /mfa/setup or /mfa/challenge に分岐 (ADR-0012 §2.3)
 
 export default async function AdminLayout({
   children,
@@ -18,6 +19,18 @@ export default async function AdminLayout({
   const role = await getRole(user);
   if (role !== "admin") {
     redirect("/login?next=/admin");
+  }
+
+  const supabase = await createClient();
+  const { data: aal } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== "aal2") {
+    const { data: factors } = await supabase.auth.mfa.listFactors();
+    const verifiedTotp = factors?.totp.find((f) => f.status === "verified");
+    const target = verifiedTotp
+      ? `/mfa/challenge?next=${encodeURIComponent("/admin")}`
+      : `/mfa/setup?next=${encodeURIComponent("/admin")}`;
+    redirect(target);
   }
 
   return (
