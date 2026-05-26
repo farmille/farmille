@@ -215,9 +215,16 @@ async def create_product(
 async def list_products(
     type_id: str | None = Query(default=None),
     crop_id: str | None = Query(default=None),
+    q: str | None = Query(
+        default=None,
+        description="部分一致検索 (name + product_name_jp、case-insensitive)",
+        max_length=100,
+    ),
 ):
-    """資材一覧。`type_id` / `crop_id` の AND 絞り込み対応。
+    """資材一覧。`type_id` / `crop_id` / `q` の AND 絞り込み対応。
 
+    `q` は name と product_name_jp の OR-ILIKE。カンマは PostgREST の `or` 文法
+    で予約文字なので除去してから渡す。
     レスポンス: { products: [{ id, name, maker_id, maker_name,
                               type_id, type_name, image_url, created_at }] }
     認証不要(LP / ゲスト閲覧前提)。
@@ -248,6 +255,14 @@ async def list_products(
         query = query.eq("product_type_id", type_id)
     if product_ids is not None:
         query = query.in_("id", product_ids)
+    if q:
+        # PostgREST `or` 文法で name + product_name_jp の OR-ILIKE。
+        # カンマは or 文法の区切り文字なので含む検索は v1 サポート外で除去。
+        like = q.strip().replace(",", "")
+        if like:
+            query = query.or_(
+                f"name.ilike.%{like}%,product_name_jp.ilike.%{like}%"
+            )
     res = query.order("created_at", desc=True).execute()
     # ADR-0009: 非 active メーカー (pending_review / rejected / frozen) 所有の
     # 製品は公開一覧に出さない。Supabase の foreign-table フィルタは join 側を
