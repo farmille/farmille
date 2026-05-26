@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Building2 } from "lucide-react";
 import {
   ManufacturerCard,
   type Manufacturer,
 } from "./_components/manufacturer-card";
+import { SiteFooter } from "@/components/site-footer/site-footer";
 
 export const metadata: Metadata = {
   title: "メーカー一覧",
@@ -116,19 +116,7 @@ export default async function ManufacturersPage() {
         )}
       </main>
 
-      <footer className="border-t border-border bg-card py-8 mt-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-          <nav className="flex items-center gap-4">
-            <Link href="/login" className="hover:text-[var(--green-primary)]">
-              ログイン
-            </Link>
-            <Link href="/signup" className="hover:text-[var(--green-primary)]">
-              新規登録
-            </Link>
-          </nav>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

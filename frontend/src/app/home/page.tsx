@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getRole, getUser } from "@/lib/auth/server";
 import { isAssignedRole } from "@/lib/auth/roles";
 import { HomeContent } from "@/app/_components/home-content";
 import { fetchHomeContent } from "@/app/_components/fetch-home";
+import { SiteFooter } from "@/components/site-footer/site-footer";
 
 // Phase 18: `/home` をログイン済ユーザのコンテンツ閲覧入口として実装。
 // ADR-0008 で再定義（Phase 11b で残置されていた redirect 薄ラッパは本実装で置換）。
@@ -51,19 +51,7 @@ export default async function LoggedInHomePage() {
         <HomeContent {...data} />
       </main>
 
-      <footer className="border-t border-border bg-card py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-          <nav className="flex items-center gap-4">
-            <Link href="/products" className="hover:text-primary">
-              資材一覧
-            </Link>
-            <Link href="/articles" className="hover:text-primary">
-              記事
-            </Link>
-          </nav>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

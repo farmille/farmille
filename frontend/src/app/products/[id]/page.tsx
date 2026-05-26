@@ -26,6 +26,7 @@ import {
   type FavoriteKind,
 } from "./_components/favorite-button";
 import { isReviewerRole } from "@/lib/auth/roles";
+import { SiteFooter } from "@/components/site-footer/site-footer";
 import type {
   CategoryL1,
   CategoryL2,
@@ -531,19 +532,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         </section>
       </main>
 
-      <footer className="border-t border-border bg-card py-8 mt-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-          <nav className="flex items-center gap-4">
-            <Link href="/login" className="hover:text-[var(--green-primary)]">
-              ログイン
-            </Link>
-            <Link href="/signup" className="hover:text-[var(--green-primary)]">
-              新規登録
-            </Link>
-          </nav>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
