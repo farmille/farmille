@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, ArrowRight, Sprout } from "lucide-react";
 import { BannerCard, type Banner } from "./banner-card";
 import {
   FeaturedProductsSection,
@@ -30,17 +30,41 @@ export type HomeContentProps = {
 };
 
 function SearchBar() {
+  // AgList 風 pill 検索バー。実検索は v1.5+、現状は /products へのリンクのみ。
   return (
-    <div className="rounded-md border border-border bg-card p-4">
-      <Link
-        href="/products"
-        className="flex items-center gap-3 rounded border border-border bg-background px-4 py-3 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-        aria-label="資材を検索"
+    <Link
+      href="/products"
+      aria-label="資材を検索"
+      className="group flex items-center gap-3 border border-border bg-card px-5 py-4 text-sm transition-colors hover:border-[var(--green-primary)]"
+      style={{
+        borderRadius: "var(--radius-full)",
+        boxShadow: "var(--shadow-sm)",
+      }}
+    >
+      <span
+        className="inline-flex h-9 w-9 items-center justify-center"
+        style={{
+          backgroundColor: "var(--green-subtle)",
+          borderRadius: "var(--radius-full)",
+        }}
+        aria-hidden
       >
-        <Search className="h-5 w-5" aria-hidden="true" />
-        <span>資材を検索（作目 / タイプ / 効果から探す）</span>
-      </Link>
-    </div>
+        <Search className="h-4 w-4 text-[var(--green-primary)]" />
+      </span>
+      <span className="flex-1 text-muted-foreground">
+        資材を検索 (作目 / タイプ / 効果から探す)
+      </span>
+      <span
+        className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--green-primary)] group-hover:text-[var(--green-dark)]"
+        style={{ transition: "var(--transition-fast)" }}
+      >
+        探す
+        <ArrowRight
+          className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+          aria-hidden="true"
+        />
+      </span>
+    </Link>
   );
 }
 
@@ -62,8 +86,28 @@ function BannersSection({ banners }: { banners: Banner[] }) {
 
 function EmptyHomeFallback() {
   return (
-    <div className="rounded-md border border-border bg-card p-10 text-center space-y-3">
-      <p className="text-lg font-medium text-foreground">
+    <div
+      className="border border-border bg-card p-12 text-center space-y-4"
+      style={{
+        borderRadius: "var(--radius-lg)",
+        boxShadow: "var(--shadow-sm)",
+      }}
+    >
+      <div className="flex justify-center">
+        <span
+          className="inline-flex items-center justify-center h-14 w-14"
+          style={{
+            backgroundColor: "var(--green-subtle)",
+            borderRadius: "var(--radius-full)",
+          }}
+        >
+          <Sprout
+            className="h-7 w-7 text-[var(--green-primary)]"
+            aria-hidden="true"
+          />
+        </span>
+      </div>
+      <p className="text-lg font-semibold text-foreground">
         まだ表示できるコンテンツがありません
       </p>
       <p className="text-sm text-muted-foreground">
