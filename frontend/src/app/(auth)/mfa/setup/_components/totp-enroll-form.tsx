@@ -114,18 +114,18 @@ export function TotpEnrollForm({ next }: { next: string }) {
     );
   }
 
-  const qrSrc = `data:image/svg+xml;utf-8,${encodeURIComponent(state.qrCodeSvg)}`;
-
   return (
     <div className="space-y-5">
       <div className="flex justify-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={qrSrc}
-          alt="TOTP QR code"
-          width={192}
-          height={192}
-          className="border border-zinc-200 rounded"
+        {/* Supabase returns qr_code as inline SVG markup with its own
+            width / height / viewBox. Render it raw inside a white box
+            and force a sensible size with !important so the embedded
+            attributes don't clip the quiet zone. */}
+        <div
+          role="img"
+          aria-label="TOTP QR code"
+          className="bg-white p-4 rounded border border-zinc-200 inline-block [&>svg]:!block [&>svg]:!w-56 [&>svg]:!h-56 [&>svg]:!max-w-none"
+          dangerouslySetInnerHTML={{ __html: state.qrCodeSvg }}
         />
       </div>
       <div className="space-y-1">
