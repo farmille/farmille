@@ -6,6 +6,7 @@ import {
   CropCascadeFilter,
   type L1Node,
 } from "./_components/crop-cascade-filter";
+import { ProductsSearchBar } from "./_components/products-search-bar";
 import { SiteFooter } from "@/components/site-footer/site-footer";
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ type ProductTypesResponse = { product_types: ProductType[] };
 type CropsTreeResponse = { tree: L1Node[] };
 
 type PageProps = {
-  searchParams?: Promise<{ type_id?: string; crop_id?: string }>;
+  searchParams?: Promise<{ type_id?: string; crop_id?: string; q?: string }>;
 };
 
 function findCropName(tree: L1Node[], cropId: string): string | null {
@@ -43,6 +44,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const typeId = params.type_id ?? null;
   const cropId = params.crop_id ?? null;
+  // 検索キーワードは backend `Query(max_length=100)` に揃えてここでも 100 文字でカット。
+  const q = (params.q ?? "").trim().slice(0, 100);
 
   const apiUrl = process.env.API_URL;
   if (!apiUrl) {
@@ -52,6 +55,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const productsQuery = new URLSearchParams();
   if (typeId) productsQuery.set("type_id", typeId);
   if (cropId) productsQuery.set("crop_id", cropId);
+  if (q) productsQuery.set("q", q);
   const productsQs = productsQuery.toString();
   const productsUrl = productsQs
     ? `${apiUrl}/v1/products?${productsQs}`
@@ -82,9 +86,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     ? (productTypes.find((t) => t.id === typeId) ?? null)
     : null;
   const selectedCropName = cropId ? findCropName(tree, cropId) : null;
-  const isFiltered = typeId !== null || cropId !== null;
+  const isFiltered = typeId !== null || cropId !== null || q.length > 0;
 
   const activeFilterChips: string[] = [];
+  if (q) activeFilterChips.push(`キーワード: ${q}`);
   if (selectedType) activeFilterChips.push(`タイプ: ${selectedType.name}`);
   if (selectedCropName) activeFilterChips.push(`作目: ${selectedCropName}`);
 
@@ -152,8 +157,11 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         </div>
       </header>
 
-      <main className="flex-1 max-w-6xl mx-auto px-6 py-12 w-full space-y-8">
-        {/* フィルタ panel — sits between hero and grid as a calm card */}
+      <main className="flex-1 max-w-6xl mx-auto px-6 py-12 w-full space-y-6">
+        {/* 検索バー — AgList /products の search 相当。q を URL に反映。 */}
+        <ProductsSearchBar initialQuery={q} />
+
+        {/* フィルタ panel — sits between search and grid as a calm card */}
         <section
           aria-label="フィルタ"
           className="space-y-5 border border-border bg-card p-5 md:p-6"
@@ -179,6 +187,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             isFiltered={isFiltered}
             typeName={selectedType?.name ?? null}
             cropName={selectedCropName}
+            keyword={q || null}
           />
         ) : (
           <section aria-label="資材一覧">
@@ -200,12 +209,15 @@ function EmptyState({
   isFiltered,
   typeName,
   cropName,
+  keyword,
 }: {
   isFiltered: boolean;
   typeName: string | null;
   cropName: string | null;
+  keyword: string | null;
 }) {
   const filterLabels: string[] = [];
+  if (keyword) filterLabels.push(`キーワード「${keyword}」`);
   if (typeName) filterLabels.push(`タイプ「${typeName}」`);
   if (cropName) filterLabels.push(`作目「${cropName}」`);
 

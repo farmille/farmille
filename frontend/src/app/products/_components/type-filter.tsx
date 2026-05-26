@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
@@ -13,10 +13,12 @@ type Props = {
 };
 
 // design-tokens v2: pill-style filter chips. Selected = solid green,
-// unselected = soft green-subtle background.
+// unselected = soft green-subtle background. Preserves other URL params
+// (q / crop_id) when toggling so search and crop filters survive.
 export function TypeFilter({ types, selectedTypeId }: Props) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const select = (typeId: string | null) => {
@@ -24,8 +26,12 @@ export function TypeFilter({ types, selectedTypeId }: Props) {
       trackEvent({ name: "filter_apply", params: { filter_type: "type" } });
     }
     startTransition(() => {
-      const params = new URLSearchParams();
-      if (typeId) params.set("type_id", typeId);
+      const params = new URLSearchParams(searchParams.toString());
+      if (typeId) {
+        params.set("type_id", typeId);
+      } else {
+        params.delete("type_id");
+      }
       const qs = params.toString();
       router.push(qs ? `${pathname}?${qs}` : pathname);
     });
