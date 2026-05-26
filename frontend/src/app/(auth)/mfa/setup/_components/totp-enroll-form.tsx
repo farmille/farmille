@@ -5,6 +5,30 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
+// Map known GoTrue enroll failure modes to actionable user-facing copy.
+// Falls back to generic message if the error doesn't match. We surface
+// the raw message in a small dev hint for non-prod builds.
+function mapEnrollError(error: { message?: string; name?: string } | null): string {
+  const raw = error?.message ?? "";
+  const lower = raw.toLowerCase();
+  if (lower.includes("site url") && lower.includes("improperly formatted")) {
+    return "Supabase プロジェクトの Site URL 設定が不正です。Dashboard → Authentication → URL Configuration を確認してください (scheme 必須、末尾 / なし)。";
+  }
+  if (lower.includes("mfa") && lower.includes("disabled")) {
+    return "このプロジェクトでは MFA TOTP が無効化されています。Dashboard → Authentication → MFA で TOTP を有効化してください。";
+  }
+  if (lower.includes("over_request_rate_limit") || lower.includes("rate limit")) {
+    return "リクエストが多すぎます。数十秒ほど待ってから再度お試しください。";
+  }
+  if (lower.includes("aal") && lower.includes("required")) {
+    return "セッション状態が要件を満たしていません。一度サインアウトして再度ログインしてください。";
+  }
+  if (process.env.NODE_ENV !== "production" && raw) {
+    return `2段階認証の登録に失敗しました (詳細: ${raw})`;
+  }
+  return "2段階認証の登録に失敗しました。時間をおいて再度お試しください。";
+}
+
 type EnrollState =
   | { status: "loading" }
   | {
@@ -51,7 +75,7 @@ export function TotpEnrollForm({ next }: { next: string }) {
       if (error || !data) {
         setState({
           status: "error",
-          message: "2段階認証の登録に失敗しました。時間をおいて再度お試しください。",
+          message: mapEnrollError(error),
         });
         return;
       }
