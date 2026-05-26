@@ -22,6 +22,8 @@ from fastapi.responses import JSONResponse
 
 from app.dependencies import require_role
 from app.models.schemas import (
+    AdminMakerOption,
+    AdminMakersResponse,
     AdminRoleAssignPayload,
     AdminSummaryResponse,
     PendingMakerItem,
@@ -56,10 +58,10 @@ def _maker_profile(row: dict[str, Any]) -> dict[str, Any]:
 async def get_admin_summary(
     _user: dict = require_role("admin"),
 ) -> AdminSummaryResponse:
-    """admin ダッシュボード初期表示用サマリ (spec §5.1)。"""
+    """admin ダッシュボード初期表示用サマリ (spec §5.1 + admin-aglist v2 §3.4)。"""
     admin = get_supabase_admin()
 
-    def _count(table: str, filters: list[tuple[str, str]]) -> int:
+    def _count(table: str, filters: list[tuple[str, Any]]) -> int:
         query = admin.table(table).select("id")
         for col, val in filters:
             query = query.eq(col, val)
@@ -71,11 +73,17 @@ async def get_admin_summary(
     rejected = _count("users", [("role", "maker"), ("status", "rejected")])
     total = _count("users", [])
 
+    # admin-aglist-alignment-v2.md §3.4: products カード追加
+    products_total = _count("products", [])
+    products_public_total = _count("products", [("is_public", True)])
+
     return AdminSummaryResponse(
         pending_makers_count=pending,
         active_makers_count=active,
         rejected_makers_count=rejected,
         total_users_count=total,
+        products_total=products_total,
+        products_public_total=products_public_total,
     )
 
 
@@ -134,6 +142,44 @@ async def list_pending_makers(
         )
 
     return PendingMakersResponse(makers=items, total=total)
+
+
+@router.get("/makers", response_model=AdminMakersResponse)
+async def list_makers(
+    status: str = Query(
+        default="active",
+        description="フィルタする maker の status (active / pending_review / rejected)",
+    ),
+    _user: dict = require_role("admin"),
+) -> AdminMakersResponse:
+    """`role='maker' AND status=<filter>` の一覧 (spec admin-aglist-alignment-v2 §2.2)。
+
+    F3 編集画面の maker_id ドロップダウン用。company_name は maker_profiles から、
+    フォールバックは users.name。
+    """
+    admin = get_supabase_admin()
+    res = (
+        admin.table("users")
+        .select(
+            "id, name, maker_profiles(company_name)",
+        )
+        .eq("role", "maker")
+        .eq("status", status)
+        .order("name", desc=False)
+        .execute()
+    )
+    rows = res.data or []
+    items: list[AdminMakerOption] = []
+    for r in rows:
+        profile = _maker_profile(r)
+        items.append(
+            AdminMakerOption(
+                user_id=r["id"],
+                name=r.get("name") or "",
+                company_name=profile.get("company_name"),
+            )
+        )
+    return AdminMakersResponse(makers=items)
 
 
 def _fetch_maker_status(admin: Any, user_id: UUID) -> tuple[str | None, str | None]:

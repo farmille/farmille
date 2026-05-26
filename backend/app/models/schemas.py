@@ -321,6 +321,9 @@ class AdminSummaryResponse(BaseModel):
     active_makers_count: int = Field(ge=0)
     rejected_makers_count: int = Field(ge=0)
     total_users_count: int = Field(ge=0)
+    # admin-aglist-alignment-v2.md §3.4: products カード追加
+    products_total: int = Field(ge=0, default=0)
+    products_public_total: int = Field(ge=0, default=0)
 
 
 class PendingMakerItem(BaseModel):
@@ -348,3 +351,187 @@ AdminAssignableRole = Literal["admin", "ja_staff", "researcher"]
 
 class AdminRoleAssignPayload(BaseModel):
     role: AdminAssignableRole
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Spec: admin-aglist-alignment-v2.md §3.1 / §3.2 / §3.4 / §2.2
+# admin products / makers (active) BFF schemas
+# ─────────────────────────────────────────────────────────────────────
+
+
+class AdminMakerOption(BaseModel):
+    """`/v1/admin/makers?status=active` の各要素 (§2.2 ドロップダウン用)。"""
+
+    user_id: UUID
+    name: str
+    company_name: str | None = None
+
+
+class AdminMakersResponse(BaseModel):
+    makers: list[AdminMakerOption]
+
+
+class AdminProductListItem(BaseModel):
+    """`/v1/admin/products` 一覧用 (§3.1)。"""
+
+    id: UUID
+    name: str
+    product_name_jp: str | None = None
+    maker_id: UUID | None = None
+    maker_name: str | None = None
+    product_type_id: UUID | None = None
+    product_type_name: str | None = None
+    commercial_status: str | None = None
+    is_public: bool
+    confidence: str | None = None
+    thumbnail_url: str | None = None
+    updated_at: datetime
+    created_at: datetime
+
+
+class AdminProductListResponse(BaseModel):
+    products: list[AdminProductListItem]
+    total: int = Field(ge=0)
+    page: int = Field(ge=1)
+    per_page: int = Field(ge=1)
+
+
+class AdminProductImageItem(BaseModel):
+    id: UUID
+    url: str
+    order: int
+    source_page_url: str | None = None
+    alt_text: str | None = None
+    image_type: str | None = None
+    is_primary: bool = False
+    rights_note: str | None = None
+    confidence: str | None = None
+
+
+class AdminProductRecipeItem(BaseModel):
+    """`product_application_recipes` 1 行 (§3.2 read-only 表示用)。"""
+
+    id: UUID
+    crop_category: str | None = None
+    crop_name: str | None = None
+    cultivation_type: str | None = None
+    application_method: str | None = None
+    application_timing: str | None = None
+    growth_stage: str | None = None
+    dilution_rate: str | None = None
+    dose_raw_text: str | None = None
+    dose_amount: float | None = None
+    dose_unit: str | None = None
+    dose_basis: str | None = None
+    solution_amount: str | None = None
+    original_liquid_equivalent: str | None = None
+    max_dose_raw_text: str | None = None
+    max_dose_amount: float | None = None
+    max_dose_unit: str | None = None
+    usage_notes: str | None = None
+    precautions_specific: str | None = None
+    confidence: str | None = None
+    sort_order: int = 0
+
+
+class AdminProductRelationItem(BaseModel):
+    id: UUID
+    name: str
+    category: str | None = None  # benefits の category 用
+
+
+class AdminProductDetailResponse(BaseModel):
+    """`/v1/admin/products/{id}` 詳細 (§3.2 編集プリフィル用)。"""
+
+    id: UUID
+    name: str
+    product_name_jp: str | None = None
+    maker_id: UUID | None = None
+    maker_name: str | None = None
+    product_type_id: UUID | None = None
+    product_type_name: str | None = None
+    commercial_status: str | None = None
+    is_public: bool
+    general_purpose: str | None = None
+    primary_compound: str | None = None
+    mode_of_action: str | None = None
+    technology_action: str | None = None
+    disease_pest_info: str | None = None
+    expected_effects_official: str | None = None
+    expected_effects_farmille: str | None = None
+    usage_summary: str | None = None
+    precautions: str | None = None
+    storage_shelf_life: str | None = None
+    notes: str | None = None
+    confidence: str | None = None
+    fertilizer_registered: bool | None = None
+    pesticide_registered: bool | None = None
+    label_url: str | None = None
+    sds_url: str | None = None
+    crops: list[AdminProductRelationItem] = Field(default_factory=list)
+    certifications: list[AdminProductRelationItem] = Field(default_factory=list)
+    benefits: list[AdminProductRelationItem] = Field(default_factory=list)
+    images: list[AdminProductImageItem] = Field(default_factory=list)
+    recipes: list[AdminProductRecipeItem] = Field(default_factory=list)
+    created_at: datetime
+    updated_at: datetime
+
+
+class AdminProductImageInput(BaseModel):
+    """v1 は外部 URL 直入力のみ (§1.7 / §6 R4)。Storage 経由は v1.5+。"""
+
+    url: str = Field(min_length=1, max_length=2000)
+    order: int = Field(ge=0)
+    source_page_url: Annotated[str | None, Field(default=None, max_length=2000)] = None
+    alt_text: Annotated[str | None, Field(default=None, max_length=500)] = None
+    image_type: Literal[
+        "product_packaging", "product_logo", "application_scene", "other"
+    ] | None = None
+    is_primary: bool = False
+    rights_note: Annotated[str | None, Field(default=None, max_length=500)] = None
+    confidence: Annotated[str | None, Field(default=None, max_length=20)] = None
+
+
+class AdminProductUpdatePayload(BaseModel):
+    """`PUT /v1/admin/products/{id}` ペイロード (§3.2)。
+
+    関連は v1 必達 3 種 (crops + certifications + benefits) を delete-then-insert。
+    confidence は read-only (UI 側で disable、§3.2 / Q-D)。BFF 側は受け取った値で
+    保存する (admin 内部運用上、SQL 直で書き換えるユースケースに備える)。
+
+    画像は v1 では外部 URL 直入力のみ。images が None なら product_images を
+    一切触らない (既存 spec products.py L462 と同じ部分編集セマンティクス)。
+    """
+
+    name: Annotated[str, Field(min_length=1, max_length=200)]
+    product_name_jp: Annotated[str | None, Field(default=None, max_length=200)] = None
+    product_type_id: UUID | None = None
+    commercial_status: Annotated[str | None, Field(default=None, max_length=50)] = None
+    is_public: bool = False
+    general_purpose: Annotated[str | None, Field(default=None, max_length=2000)] = None
+    primary_compound: Annotated[str | None, Field(default=None, max_length=500)] = None
+    mode_of_action: Annotated[str | None, Field(default=None, max_length=2000)] = None
+    technology_action: Annotated[str | None, Field(default=None, max_length=2000)] = None
+    disease_pest_info: Annotated[str | None, Field(default=None, max_length=2000)] = None
+    expected_effects_official: Annotated[
+        str | None, Field(default=None, max_length=4000)
+    ] = None
+    expected_effects_farmille: Annotated[
+        str | None, Field(default=None, max_length=2000)
+    ] = None
+    usage_summary: Annotated[str | None, Field(default=None, max_length=4000)] = None
+    precautions: Annotated[str | None, Field(default=None, max_length=4000)] = None
+    storage_shelf_life: Annotated[str | None, Field(default=None, max_length=500)] = None
+    notes: Annotated[str | None, Field(default=None, max_length=2000)] = None
+    confidence: Annotated[str | None, Field(default=None, max_length=20)] = None
+    fertilizer_registered: bool | None = None
+    pesticide_registered: bool | None = None
+    label_url: Annotated[str | None, Field(default=None, max_length=500)] = None
+    sds_url: Annotated[str | None, Field(default=None, max_length=500)] = None
+    crop_ids: list[UUID] = Field(default_factory=list, max_length=100)
+    certification_ids: list[UUID] = Field(default_factory=list, max_length=20)
+    benefit_ids: list[UUID] = Field(default_factory=list, max_length=25)
+    images: list[AdminProductImageInput] | None = None
+
+
+# §3.4 products カウントは AdminSummaryResponse に直接追加 (上記参照)。
