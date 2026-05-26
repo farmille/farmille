@@ -12,6 +12,8 @@ type Props = {
   selectedTypeId: string | null;
 };
 
+// design-tokens v2: pill-style filter chips. Selected = solid green,
+// unselected = soft green-subtle background.
 export function TypeFilter({ types, selectedTypeId }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -29,41 +31,62 @@ export function TypeFilter({ types, selectedTypeId }: Props) {
     });
   };
 
-  const baseBtn =
-    "rounded-sm border px-4 py-2 text-sm font-medium transition-colors";
-  const activeBtn = "bg-primary text-primary-foreground border-primary";
-  const inactiveBtn =
-    "bg-card text-foreground border-border hover:bg-muted";
-
   return (
     <div
       className={cn(
-        "flex flex-wrap gap-2",
+        "flex flex-wrap items-center gap-2",
         isPending && "opacity-60 pointer-events-none",
       )}
       role="group"
       aria-label="製品タイプフィルタ"
     >
-      <button
-        type="button"
+      <span className="text-xs font-medium text-muted-foreground pr-1">
+        タイプ:
+      </span>
+      <PillButton
+        active={selectedTypeId === null}
         onClick={() => select(null)}
-        className={cn(baseBtn, selectedTypeId === null ? activeBtn : inactiveBtn)}
-      >
-        すべて
-      </button>
+        label="すべて"
+      />
       {types.map((t) => (
-        <button
+        <PillButton
           key={t.id}
-          type="button"
+          active={selectedTypeId === t.id}
           onClick={() => select(t.id)}
-          className={cn(
-            baseBtn,
-            selectedTypeId === t.id ? activeBtn : inactiveBtn,
-          )}
-        >
-          {t.name}
-        </button>
+          label={t.name}
+        />
       ))}
     </div>
+  );
+}
+
+function PillButton({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="px-4 py-1.5 text-sm font-medium"
+      style={{
+        borderRadius: "var(--radius-full)",
+        transition: "var(--transition-fast)",
+        backgroundColor: active
+          ? "var(--green-primary)"
+          : "var(--green-subtle)",
+        color: active ? "#ffffff" : "var(--green-dark)",
+        border: active
+          ? "1px solid var(--green-primary)"
+          : "1px solid transparent",
+      }}
+    >
+      {label}
+    </button>
   );
 }
