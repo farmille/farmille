@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  Building2,
+  MapPin,
+  Package,
+  ChevronRight,
+  Sprout,
+} from "lucide-react";
 import { ProductCard, type Product } from "@/app/products/_components/product-card";
+import { SiteFooter } from "@/components/site-footer/site-footer";
 
 type ManufacturerProduct = {
   id: string;
@@ -71,40 +80,142 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
   }
 
   const location = formatLocation(manufacturer.prefecture, manufacturer.city);
+  const initial = manufacturer.company_name.trim().slice(0, 1) || "?";
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <main className="flex-1 max-w-6xl mx-auto px-6 py-16 w-full space-y-12">
-        <section className="space-y-4">
-          <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
-            {manufacturer.company_name}
-          </h1>
-          {location ? (
-            <p className="text-base text-muted-foreground">{location}</p>
-          ) : null}
-          {manufacturer.note ? (
-            <p className="text-base text-foreground leading-relaxed whitespace-pre-wrap">
-              {manufacturer.note}
-            </p>
-          ) : null}
-        </section>
+      {/* Breadcrumb bar */}
+      <div className="border-b border-border bg-card">
+        <div className="max-w-6xl mx-auto px-6 py-3 text-sm text-muted-foreground">
+          <nav aria-label="パンくず" className="flex items-center gap-1.5">
+            <Link
+              href="/manufacturers"
+              className="hover:text-[var(--green-primary)]"
+            >
+              メーカー一覧
+            </Link>
+            <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="text-foreground line-clamp-1">
+              {manufacturer.company_name}
+            </span>
+          </nav>
+        </div>
+      </div>
 
-        <section className="space-y-6">
-          <h2 className="text-3xl font-extrabold tracking-tight text-foreground">
-            自社製品一覧
-          </h2>
+      {/* Hero band — AgList /manufacturer/<slug> 風 */}
+      <header
+        className="border-b border-border"
+        style={{ backgroundColor: "var(--green-subtle)" }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-16 md:py-20 grid md:grid-cols-[auto_1fr] gap-6 md:gap-10 items-start">
+          {/* Logo placeholder tile */}
+          <div
+            className="flex h-28 w-28 md:h-32 md:w-32 items-center justify-center"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.8)",
+              borderRadius: "var(--radius-lg)",
+              boxShadow: "var(--shadow-sm)",
+            }}
+            aria-hidden
+          >
+            <span
+              className="text-5xl md:text-6xl font-extrabold"
+              style={{
+                color: "var(--green-dark)",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {initial}
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.7)",
+                color: "var(--green-dark)",
+                borderRadius: "var(--radius-full)",
+              }}
+            >
+              <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
+              メーカー
+            </div>
+            <h1
+              className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground"
+              style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
+            >
+              {manufacturer.company_name}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              {location && (
+                <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                  <MapPin className="h-4 w-4" aria-hidden="true" />
+                  {location}
+                </span>
+              )}
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium"
+                style={{
+                  backgroundColor: "var(--green-primary)",
+                  color: "#ffffff",
+                  borderRadius: "var(--radius-full)",
+                }}
+              >
+                <Package className="h-3.5 w-3.5" aria-hidden="true" />
+                資材 {manufacturer.products.length} 件
+              </span>
+            </div>
+
+            {manufacturer.note && (
+              <p className="text-base text-foreground leading-relaxed whitespace-pre-wrap max-w-3xl">
+                {manufacturer.note}
+              </p>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 max-w-6xl mx-auto px-6 py-12 w-full space-y-8">
+        <section className="space-y-5">
+          <div className="flex items-baseline justify-between border-b border-border pb-3">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">
+              登録資材
+            </h2>
+            <span className="text-sm text-muted-foreground">
+              {manufacturer.products.length} 件
+            </span>
+          </div>
 
           {manufacturer.products.length === 0 ? (
             <div
-              className="border border-border bg-card p-10 text-center"
-              style={{ borderRadius: "var(--radius-lg)" }}
+              className="border border-border bg-card p-12 text-center space-y-3"
+              style={{
+                borderRadius: "var(--radius-lg)",
+                boxShadow: "var(--shadow-sm)",
+              }}
             >
+              <div className="flex justify-center">
+                <span
+                  className="inline-flex items-center justify-center h-14 w-14"
+                  style={{
+                    backgroundColor: "var(--green-subtle)",
+                    borderRadius: "var(--radius-full)",
+                  }}
+                >
+                  <Sprout
+                    className="h-7 w-7 text-[var(--green-primary)]"
+                    aria-hidden="true"
+                  />
+                </span>
+              </div>
               <p className="text-base text-muted-foreground">
                 登録されている資材はまだありません。
               </p>
             </div>
           ) : (
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {manufacturer.products.map((p) => {
                 const cardProduct: Product = {
                   id: p.id,
@@ -117,7 +228,7 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
                   created_at: p.created_at,
                 };
                 return (
-                  <li key={p.id}>
+                  <li key={p.id} className="h-full">
                     {/* spec §6.2: メーカー詳細ページ内では company_name 重複表示を避ける */}
                     <ProductCard product={cardProduct} hideMakerName />
                   </li>
@@ -128,11 +239,7 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
         </section>
       </main>
 
-      <footer className="border-t border-border bg-card py-8">
-        <div className="max-w-6xl mx-auto px-6 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
