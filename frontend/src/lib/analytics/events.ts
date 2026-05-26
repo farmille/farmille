@@ -5,7 +5,10 @@ export type AnalyticsEvent =
   | { name: "sign_up_complete"; params: { role: string } }
   | { name: "review_submit"; params: { product_id: string } }
   | { name: "product_create"; params: { product_type_id: string } }
-  | { name: "filter_apply"; params: { filter_type: "type" | "crop" } }
+  | {
+      name: "filter_apply";
+      params: { filter_type: "type" | "crop" | "search" };
+    }
   | { name: "profile_gate_shown"; params: { product_id: string } }
   | { name: "profile_gate_completed"; params: { product_id: string } };
 
