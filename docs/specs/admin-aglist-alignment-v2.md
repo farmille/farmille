@@ -132,7 +132,7 @@ AgList sitemap + OG メタから判明した構造:
   | サムネ | × | product_images で `is_primary=true` の URL / 無ければ design-tokens の placeholder spec 参照 |
   | 名前 (name) | ✓ | 太字 + 詳細リンク |
   | 和名 (product_name_jp) | × | 1 行 truncate |
-  | メーカー | ✓ | maker_profiles.brand_name（§2.2） |
+  | メーカー | ✓ | maker_profiles.company_name（§2.2） |
   | 製品種別 | × | product_types.name |
   | 公開 | × | `is_public` バッジ（公開/非公開） |
   | 認証 | × | バッジ群 |
@@ -458,7 +458,7 @@ CREATE INDEX idx_product_images_primary
 F3 編集画面の maker_id select の選択肢は:
 - BFF `/v1/admin/makers?status=active` から取得（既存 `manufacturers_public.py` ではなく admin endpoint）
 - フィルタ条件: `users.role='maker' AND users.status='active'`
-- 表示: `maker_profiles.brand_name`（無ければ `users.name`）
+- 表示: `maker_profiles.company_name`（無ければ `users.name`）— v1 spec の `brand_name` は誤記、実 schema は `company_name`
 - **v1 必達: `GET /v1/admin/makers?status=active` を新規追加実装**（既存 `backend/app/routers/admin.py` には `/v1/admin/makers/pending` のみで status filter 対応 endpoint は未実装、grep 検証済み）。§12 「既存修正」の admin.py 行に明記
 
 ### 2.3 メーカー名 normalize 関数（evaluator §2.3 改善）
@@ -470,13 +470,13 @@ def normalize_maker_name(name: str) -> str:
     # 1. 全角 → 半角（英数字 / スペース）
     name = unicodedata.normalize('NFKC', name)
     # 2. 「株式会社X」「（株）X」「X(株)」「X株式会社」を正規化
-    #    → 一律「X」に揃える（DB 側 brand_name の表記揺れと吸収するため）
+    #    → 一律「X」に揃える（DB 側 company_name の表記揺れを吸収するため）
     name = re.sub(r'(株式会社|（株）|\(株\))', '', name)
     # 3. 末尾 / 先頭の空白除去
     return name.strip()
 ```
 
-- 正規化後の文字列 + DB の `brand_name` の **両方を normalize して照合**（DB 側に揺れがあれば事前に Supabase Studio で正規化）
+- 正規化後の文字列 + DB の `company_name` の **両方を normalize して照合**（DB 側に揺れがあれば事前に Supabase Studio で正規化）
 - 照合失敗（unmatched）行は seed 生成時に WARN + skip_log.md に積む
 
 ---
