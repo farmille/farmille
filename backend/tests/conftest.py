@@ -55,6 +55,9 @@ class FakeQuery:
     def in_(self, *args: Any, **kwargs: Any) -> "FakeQuery":
         return self._record("in_", *args, **kwargs)
 
+    def or_(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("or_", *args, **kwargs)
+
     def order(self, *args: Any, **kwargs: Any) -> "FakeQuery":
         return self._record("order", *args, **kwargs)
 

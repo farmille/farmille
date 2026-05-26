@@ -155,12 +155,17 @@ class TestAAL2Enforcement:
 
 class TestSummary:
     def test_returns_counts(self, client, patch_router_admin, admin_user):
+        """spec admin-aglist-alignment-v2.md §3.4 で products_total /
+        products_public_total が追加されたため、_count は 6 回呼ばれる
+        (users x 4, products x 2)。"""
         admin = patch_router_admin
         responses = [
             [{"id": "p1"}, {"id": "p2"}, {"id": "p3"}],
             [{"id": "a1"}, {"id": "a2"}],
             [{"id": "r1"}],
             [{"id": "u1"}, {"id": "u2"}, {"id": "u3"}, {"id": "u4"}, {"id": "u5"}],
+            [],  # products_total (空でも fields は付く)
+            [],  # products_public_total
         ]
         call_idx = {"i": 0}
         original_table = admin.table
@@ -193,6 +198,8 @@ class TestSummary:
             "active_makers_count": 2,
             "rejected_makers_count": 1,
             "total_users_count": 5,
+            "products_total": 0,
+            "products_public_total": 0,
         }
 
 
