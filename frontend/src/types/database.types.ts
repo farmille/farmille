@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       article_products: {
@@ -601,6 +576,95 @@ export type Database = {
         }
         Relationships: []
       }
+      product_application_recipes: {
+        Row: {
+          application_method: string | null
+          application_timing: string | null
+          confidence: string | null
+          created_at: string
+          crop_category: string | null
+          crop_name: string | null
+          cultivation_type: string | null
+          dilution_rate: string | null
+          dose_amount: number | null
+          dose_basis: string | null
+          dose_raw_text: string | null
+          dose_unit: string | null
+          growth_stage: string | null
+          id: string
+          max_dose_amount: number | null
+          max_dose_raw_text: string | null
+          max_dose_unit: string | null
+          original_liquid_equivalent: string | null
+          precautions_specific: string | null
+          product_id: string
+          solution_amount: string | null
+          sort_order: number
+          updated_at: string
+          usage_notes: string | null
+        }
+        Insert: {
+          application_method?: string | null
+          application_timing?: string | null
+          confidence?: string | null
+          created_at?: string
+          crop_category?: string | null
+          crop_name?: string | null
+          cultivation_type?: string | null
+          dilution_rate?: string | null
+          dose_amount?: number | null
+          dose_basis?: string | null
+          dose_raw_text?: string | null
+          dose_unit?: string | null
+          growth_stage?: string | null
+          id?: string
+          max_dose_amount?: number | null
+          max_dose_raw_text?: string | null
+          max_dose_unit?: string | null
+          original_liquid_equivalent?: string | null
+          precautions_specific?: string | null
+          product_id: string
+          solution_amount?: string | null
+          sort_order?: number
+          updated_at?: string
+          usage_notes?: string | null
+        }
+        Update: {
+          application_method?: string | null
+          application_timing?: string | null
+          confidence?: string | null
+          created_at?: string
+          crop_category?: string | null
+          crop_name?: string | null
+          cultivation_type?: string | null
+          dilution_rate?: string | null
+          dose_amount?: number | null
+          dose_basis?: string | null
+          dose_raw_text?: string | null
+          dose_unit?: string | null
+          growth_stage?: string | null
+          id?: string
+          max_dose_amount?: number | null
+          max_dose_raw_text?: string | null
+          max_dose_unit?: string | null
+          original_liquid_equivalent?: string | null
+          precautions_specific?: string | null
+          product_id?: string
+          solution_amount?: string | null
+          sort_order?: number
+          updated_at?: string
+          usage_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_application_recipes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_application_window_relations: {
         Row: {
           application_window_id: string
@@ -813,21 +877,39 @@ export type Database = {
       }
       product_images: {
         Row: {
+          alt_text: string | null
+          confidence: string | null
           id: string
+          image_type: string | null
+          is_primary: boolean
           order: number
           product_id: string
+          rights_note: string | null
+          source_page_url: string | null
           url: string
         }
         Insert: {
+          alt_text?: string | null
+          confidence?: string | null
           id?: string
+          image_type?: string | null
+          is_primary?: boolean
           order?: number
           product_id: string
+          rights_note?: string | null
+          source_page_url?: string | null
           url: string
         }
         Update: {
+          alt_text?: string | null
+          confidence?: string | null
           id?: string
+          image_type?: string | null
+          is_primary?: boolean
           order?: number
           product_id?: string
+          rights_note?: string | null
+          source_page_url?: string | null
           url?: string
         }
         Relationships: [
@@ -932,54 +1014,87 @@ export type Database = {
       products: {
         Row: {
           commercial_status: string | null
+          confidence: string | null
           created_at: string
+          disease_pest_info: string | null
+          expected_effects_farmille: string | null
+          expected_effects_official: string | null
           fertilizer_registered: boolean | null
           general_purpose: string | null
           id: string
+          is_public: boolean
           is_screened: boolean | null
           label_url: string | null
           maker_id: string
           mode_of_action: string | null
           name: string
+          notes: string | null
           pesticide_registered: boolean | null
+          precautions: string | null
           primary_compound: string | null
+          product_name_jp: string | null
           product_type_id: string
           sds_url: string | null
+          storage_shelf_life: string | null
+          technology_action: string | null
           updated_at: string
+          usage_summary: string | null
         }
         Insert: {
           commercial_status?: string | null
+          confidence?: string | null
           created_at?: string
+          disease_pest_info?: string | null
+          expected_effects_farmille?: string | null
+          expected_effects_official?: string | null
           fertilizer_registered?: boolean | null
           general_purpose?: string | null
           id?: string
+          is_public?: boolean
           is_screened?: boolean | null
           label_url?: string | null
           maker_id: string
           mode_of_action?: string | null
           name: string
+          notes?: string | null
           pesticide_registered?: boolean | null
+          precautions?: string | null
           primary_compound?: string | null
+          product_name_jp?: string | null
           product_type_id: string
           sds_url?: string | null
+          storage_shelf_life?: string | null
+          technology_action?: string | null
           updated_at?: string
+          usage_summary?: string | null
         }
         Update: {
           commercial_status?: string | null
+          confidence?: string | null
           created_at?: string
+          disease_pest_info?: string | null
+          expected_effects_farmille?: string | null
+          expected_effects_official?: string | null
           fertilizer_registered?: boolean | null
           general_purpose?: string | null
           id?: string
+          is_public?: boolean
           is_screened?: boolean | null
           label_url?: string | null
           maker_id?: string
           mode_of_action?: string | null
           name?: string
+          notes?: string | null
           pesticide_registered?: boolean | null
+          precautions?: string | null
           primary_compound?: string | null
+          product_name_jp?: string | null
           product_type_id?: string
           sds_url?: string | null
+          storage_shelf_life?: string | null
+          technology_action?: string | null
           updated_at?: string
+          usage_summary?: string | null
         }
         Relationships: [
           {
@@ -1437,9 +1552,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
