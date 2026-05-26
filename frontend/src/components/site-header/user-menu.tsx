@@ -15,6 +15,11 @@ type Props = {
   role: string | null;
   isReviewer: boolean;
   isMaker: boolean;
+  /**
+   * SiteHeader が dark 背景のときは trigger を透明 + 白枠に切り替える。
+   * Popover content は常に白背景なのでそちらは不変。
+   */
+  onDarkHeader?: boolean;
 };
 
 // ログイン時のヘッダー右側。アバター (色付き円 + イニシャル) + プルダウンメニュー。
@@ -51,6 +56,7 @@ export function SiteHeaderUserMenu({
   role,
   isReviewer,
   isMaker,
+  onDarkHeader = false,
 }: Props) {
   // Popover の open 状態は Radix が制御する。menu リンクは router 遷移なので
   // 自前で close する必要があるが、Server Action の signOut は遷移を伴うため OK。
@@ -64,7 +70,16 @@ export function SiteHeaderUserMenu({
         <button
           type="button"
           aria-label={`ユーザーメニュー (${displayName})`}
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-2 py-1 text-sm text-foreground transition-colors hover:border-primary hover:bg-muted"
+          className={
+            onDarkHeader
+              ? "inline-flex items-center gap-2 rounded-full border px-2 py-1 text-sm text-white transition-colors hover:bg-white/10"
+              : "inline-flex items-center gap-2 rounded-full border border-border bg-background px-2 py-1 text-sm text-foreground transition-colors hover:border-primary hover:bg-muted"
+          }
+          style={
+            onDarkHeader
+              ? { borderColor: "rgba(255,255,255,0.25)" }
+              : undefined
+          }
         >
           <span
             aria-hidden
@@ -75,7 +90,14 @@ export function SiteHeaderUserMenu({
           <span className="hidden max-w-[100px] truncate sm:inline-block">
             {displayName}
           </span>
-          <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden />
+          <ChevronDown
+            className={
+              onDarkHeader
+                ? "h-4 w-4 text-white/80"
+                : "h-4 w-4 text-muted-foreground"
+            }
+            aria-hidden
+          />
         </button>
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} className="w-56 p-1">
