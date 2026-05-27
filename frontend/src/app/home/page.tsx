@@ -4,7 +4,6 @@ import { getRole, getUser } from "@/lib/auth/server";
 import { isAssignedRole } from "@/lib/auth/roles";
 import { HomeContent } from "@/app/_components/home-content";
 import { fetchHomeContent } from "@/app/_components/fetch-home";
-import { SiteFooter } from "@/components/site-footer/site-footer";
 
 // Phase 18: `/home` をログイン済ユーザのコンテンツ閲覧入口として実装。
 // ADR-0008 で再定義（Phase 11b で残置されていた redirect 薄ラッパは本実装で置換）。
@@ -50,8 +49,6 @@ export default async function LoggedInHomePage() {
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full">
         <HomeContent {...data} />
       </main>
-
-      <SiteFooter />
     </div>
   );
 }

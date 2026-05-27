@@ -104,12 +104,6 @@ export default async function MakerProductsPage() {
           </ul>
         )}
       </main>
-
-      <footer className="border-t border-border bg-card py-8">
-        <div className="max-w-6xl mx-auto px-6 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-        </div>
-      </footer>
     </div>
   );
 }

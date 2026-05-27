@@ -4,7 +4,6 @@ import {
   ManufacturerCard,
   type Manufacturer,
 } from "./_components/manufacturer-card";
-import { SiteFooter } from "@/components/site-footer/site-footer";
 
 export const metadata: Metadata = {
   title: "メーカー一覧",
@@ -36,8 +35,9 @@ export default async function ManufacturersPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      {/* AgList-inspired hero */}
-      <header
+      {/* AgList-inspired hero — <section> to avoid double <header>. */}
+      <section
+        aria-label="ページヘッダー"
         className="border-b border-border"
         style={{ backgroundColor: "var(--green-subtle)" }}
       >
@@ -45,7 +45,7 @@ export default async function ManufacturersPage() {
           <div
             className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold"
             style={{
-              backgroundColor: "rgba(255,255,255,0.7)",
+              backgroundColor: "var(--overlay-on-light-soft)",
               color: "var(--green-dark)",
               borderRadius: "var(--radius-full)",
             }}
@@ -54,7 +54,7 @@ export default async function ManufacturersPage() {
             メーカーディレクトリ
           </div>
           <h1
-            className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground"
+            className="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground"
             style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
           >
             メーカー一覧
@@ -68,7 +68,7 @@ export default async function ManufacturersPage() {
               className="inline-flex items-center px-4 py-1.5 text-sm font-medium"
               style={{
                 backgroundColor: "var(--green-primary)",
-                color: "#ffffff",
+                color: "var(--text-on-green)",
                 borderRadius: "var(--radius-full)",
               }}
             >
@@ -76,7 +76,7 @@ export default async function ManufacturersPage() {
             </span>
           </div>
         </div>
-      </header>
+      </section>
 
       <main className="flex-1 max-w-6xl mx-auto px-6 py-12 w-full space-y-8">
         {manufacturers.length === 0 ? (
@@ -115,8 +115,6 @@ export default async function ManufacturersPage() {
           </ul>
         )}
       </main>
-
-      <SiteFooter />
     </div>
   );
 }

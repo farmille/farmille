@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { Sprout } from "lucide-react";
 
@@ -5,9 +6,19 @@ import { Sprout } from "lucide-react";
 // 上段: ブランド + リソース / カタログ / アカウント の 3 列
 // 下段: © と二次リンク (現状は最小)
 //
-// Server Component の前提 (lib/auth は使わない、role に依存しない)。
-// 認証必須ページ (例: /admin) は固有 footer を持っていれば本コンポーネントを
-// 採用しなくてよい。共通 public ページが対象。
+// Server Component。app/layout.tsx に 1 箇所マウントし、pathname を見て
+// HIDDEN_PATH_PREFIXES に該当するときだけ null を返す (SiteHeader と同じ責務分離)。
+// 認証 / オンボーディング系 + /admin (固有 footer を持つ) は非表示。
+
+const HIDDEN_PATH_PREFIXES = [
+  "/login",
+  "/signup",
+  "/password-reset",
+  "/password-update",
+  "/auth/", // /auth/callback など
+  "/onboarding",
+  "/admin", // 自前 footer を持つ
+];
 
 type FooterLink = { href: string; label: string };
 
@@ -26,7 +37,12 @@ const ACCOUNT_LINKS: FooterLink[] = [
   { href: "/signup", label: "新規登録" },
 ];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const path = (await headers()).get("x-pathname") ?? "/";
+  if (HIDDEN_PATH_PREFIXES.some((p) => path.startsWith(p))) {
+    return null;
+  }
+
   return (
     <footer className="mt-12 border-t border-border bg-card">
       <div className="max-w-6xl mx-auto px-6 py-12 grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
@@ -61,7 +77,7 @@ export function SiteFooter() {
       <div className="border-t border-border">
         <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>© 2026 Farmille</p>
-          <p className="text-[11px]">
+          <p className="text-xs">
             Made for Japanese ag biologicals community
           </p>
         </div>

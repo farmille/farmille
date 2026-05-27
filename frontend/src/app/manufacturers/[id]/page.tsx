@@ -9,7 +9,6 @@ import {
   Sprout,
 } from "lucide-react";
 import { ProductCard, type Product } from "@/app/products/_components/product-card";
-import { SiteFooter } from "@/components/site-footer/site-footer";
 
 type ManufacturerProduct = {
   id: string;
@@ -102,8 +101,9 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Hero band — AgList /manufacturer/<slug> 風 */}
-      <header
+      {/* Hero band — AgList /manufacturer/<slug> 風。<section> to avoid double <header>. */}
+      <section
+        aria-label="ページヘッダー"
         className="border-b border-border"
         style={{ backgroundColor: "var(--green-subtle)" }}
       >
@@ -112,7 +112,7 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
           <div
             className="flex h-28 w-28 md:h-32 md:w-32 items-center justify-center"
             style={{
-              backgroundColor: "rgba(255,255,255,0.8)",
+              backgroundColor: "var(--overlay-on-light-strong)",
               borderRadius: "var(--radius-lg)",
               boxShadow: "var(--shadow-sm)",
             }}
@@ -133,7 +133,7 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
             <div
               className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold"
               style={{
-                backgroundColor: "rgba(255,255,255,0.7)",
+                backgroundColor: "var(--overlay-on-light-soft)",
                 color: "var(--green-dark)",
                 borderRadius: "var(--radius-full)",
               }}
@@ -142,7 +142,7 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
               メーカー
             </div>
             <h1
-              className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground"
+              className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground"
               style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
             >
               {manufacturer.company_name}
@@ -159,7 +159,7 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
                 className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium"
                 style={{
                   backgroundColor: "var(--green-primary)",
-                  color: "#ffffff",
+                  color: "var(--text-on-green)",
                   borderRadius: "var(--radius-full)",
                 }}
               >
@@ -175,7 +175,7 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
             )}
           </div>
         </div>
-      </header>
+      </section>
 
       <main className="flex-1 max-w-6xl mx-auto px-6 py-12 w-full space-y-8">
         <section className="space-y-5">
@@ -238,8 +238,6 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
           )}
         </section>
       </main>
-
-      <SiteFooter />
     </div>
   );
 }

@@ -35,15 +35,16 @@ export function ManufacturerCard({
         boxShadow: "var(--shadow-sm)",
       }}
     >
-      {/* Logo placeholder tile (square) */}
+      {/* Logo placeholder tile — aspect-[4/3] to align with ProductCard grid rhythm
+          while leaving room for long company names below the tile. */}
       <div
-        className="flex aspect-[5/3] items-center justify-center"
+        className="flex aspect-[4/3] items-center justify-center"
         style={{ backgroundColor: "var(--green-subtle)" }}
       >
         <span
           className="inline-flex h-20 w-20 items-center justify-center text-3xl font-extrabold"
           style={{
-            backgroundColor: "rgba(255,255,255,0.8)",
+            backgroundColor: "var(--overlay-on-light-strong)",
             color: "var(--green-dark)",
             borderRadius: "var(--radius-full)",
             letterSpacing: "-0.02em",

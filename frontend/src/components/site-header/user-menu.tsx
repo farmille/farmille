@@ -77,7 +77,7 @@ export function SiteHeaderUserMenu({
           }
           style={
             onDarkHeader
-              ? { borderColor: "rgba(255,255,255,0.25)" }
+              ? { borderColor: "var(--overlay-on-dark-strong)" }
               : undefined
           }
         >

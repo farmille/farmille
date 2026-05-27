@@ -371,6 +371,28 @@ class AdminMakersResponse(BaseModel):
     makers: list[AdminMakerOption]
 
 
+class AdminUserListItem(BaseModel):
+    """`/v1/admin/users` 一覧用 (B6 MVP)。
+
+    auth.users から email を、public.users から id/role/name/status/created_at を取得。
+    BFF が join して返す (frontend は database.types を引き直さず手書き型を見る前提)。
+    """
+
+    user_id: UUID
+    email: str | None = None
+    name: str
+    role: str
+    status: str
+    created_at: datetime
+
+
+class AdminUserListResponse(BaseModel):
+    users: list[AdminUserListItem]
+    total: int = Field(ge=0)
+    page: int = Field(ge=1)
+    per_page: int = Field(ge=1, le=100)
+
+
 class AdminProductListItem(BaseModel):
     """`/v1/admin/products` 一覧用 (§3.1)。"""
 
@@ -379,6 +401,8 @@ class AdminProductListItem(BaseModel):
     product_name_jp: str | None = None
     maker_id: UUID | None = None
     maker_name: str | None = None
+    # users.status (ADR-0009 整合)。F1 一覧で active 以外を可視化するため。
+    maker_status: str | None = None
     product_type_id: UUID | None = None
     product_type_name: str | None = None
     commercial_status: str | None = None

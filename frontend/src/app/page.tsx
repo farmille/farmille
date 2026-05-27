@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { HeroSection } from "@/app/_components/hero-section";
 import { HomeContent } from "@/app/_components/home-content";
 import { fetchHomeContent } from "@/app/_components/fetch-home";
-import { SiteFooter } from "@/components/site-footer/site-footer";
 
 // Phase 18: 未ログイン向け `/`。
 // spec docs/specs/home.md §2 / §6.1 / ADR-0008
@@ -40,8 +39,6 @@ export default async function LandingPage() {
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full">
         <HomeContent {...data} />
       </main>
-
-      <SiteFooter />
     </div>
   );
 }

@@ -109,12 +109,6 @@ export default async function MyReviewsPage({ searchParams }: PageProps) {
           </nav>
         )}
       </main>
-
-      <footer className="border-t border-border bg-card py-8">
-        <div className="max-w-4xl mx-auto px-6 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-        </div>
-      </footer>
     </div>
   );
 }

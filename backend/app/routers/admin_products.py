@@ -176,6 +176,9 @@ async def list_admin_products(
                 product_name_jp=r.get("product_name_jp"),
                 maker_id=r.get("maker_id"),
                 maker_name=_maker_display_name(users_row),
+                # users.status を一覧に出して admin が active/pending/frozen を一目で
+                # 識別できるようにする (ADR-0009 整合、spec 改善推奨 4.2)。
+                maker_status=users_row.get("status"),
                 product_type_id=ptype.get("id"),
                 product_type_name=ptype.get("name"),
                 commercial_status=r.get("commercial_status"),
@@ -445,48 +448,89 @@ async def update_admin_product(
         logger.exception("failed to update admin product %s", product_id)
         return _error(500, "failed_to_update_product")
 
-    # 2. v1 必達 3 種 relation を delete-then-insert
-    try:
-        admin.table("product_crops").delete().eq(
-            "product_id", str(product_id)
-        ).execute()
-        admin.table("product_certifications").delete().eq(
-            "product_id", str(product_id)
-        ).execute()
-        admin.table("product_benefit_relations").delete().eq(
-            "product_id", str(product_id)
-        ).execute()
+    # 2. v1 必達 3 種 relation を delete-then-insert。
+    # spec §6 R3 (admin は 3 名 / 低頻度 / 手動 retry 可能) で部分失敗を許容するが、
+    # 「どの relation で fail したか」を error code + ログに残し UAT / 運用で
+    # 原因切り分けを即座に行えるようにする (reviewer 改善推奨 4.1)。
+    # v1.5+ F-FU11 で PostgREST RPC transaction に置換する前提。
+    relation_steps: list[tuple[str, callable]] = [
+        (
+            "crops",
+            lambda: (
+                admin.table("product_crops")
+                .delete()
+                .eq("product_id", str(product_id))
+                .execute(),
+                admin.table("product_crops")
+                .insert(
+                    [
+                        {"product_id": str(product_id), "crop_id": str(cid)}
+                        for cid in payload.crop_ids
+                    ]
+                )
+                .execute()
+                if payload.crop_ids
+                else None,
+            ),
+        ),
+        (
+            "certifications",
+            lambda: (
+                admin.table("product_certifications")
+                .delete()
+                .eq("product_id", str(product_id))
+                .execute(),
+                admin.table("product_certifications")
+                .insert(
+                    [
+                        {
+                            "product_id": str(product_id),
+                            "certification_id": str(cid),
+                        }
+                        for cid in payload.certification_ids
+                    ]
+                )
+                .execute()
+                if payload.certification_ids
+                else None,
+            ),
+        ),
+        (
+            "benefits",
+            lambda: (
+                admin.table("product_benefit_relations")
+                .delete()
+                .eq("product_id", str(product_id))
+                .execute(),
+                admin.table("product_benefit_relations")
+                .insert(
+                    [
+                        {
+                            "product_id": str(product_id),
+                            "product_benefit_id": str(bid),
+                        }
+                        for bid in payload.benefit_ids
+                    ]
+                )
+                .execute()
+                if payload.benefit_ids
+                else None,
+            ),
+        ),
+    ]
 
-        if payload.crop_ids:
-            admin.table("product_crops").insert(
-                [
-                    {"product_id": str(product_id), "crop_id": str(cid)}
-                    for cid in payload.crop_ids
-                ]
-            ).execute()
-        if payload.certification_ids:
-            admin.table("product_certifications").insert(
-                [
-                    {
-                        "product_id": str(product_id),
-                        "certification_id": str(cid),
-                    }
-                    for cid in payload.certification_ids
-                ]
-            ).execute()
-        if payload.benefit_ids:
-            admin.table("product_benefit_relations").insert(
-                [
-                    {
-                        "product_id": str(product_id),
-                        "product_benefit_id": str(bid),
-                    }
-                    for bid in payload.benefit_ids
-                ]
-            ).execute()
-    except Exception:
-        logger.exception("failed to update admin product relations %s", product_id)
-        return _error(500, "failed_to_update_relations")
+    for relation_name, step in relation_steps:
+        try:
+            step()
+        except Exception:
+            logger.exception(
+                "failed to update admin product relation %s for product %s",
+                relation_name,
+                product_id,
+            )
+            return _error(
+                500, f"failed_to_update_relations:{relation_name}"
+            )
 
     # 3. 画像 (payload.images が None なら一切触らない、部分編集)
     if payload.images is not None:

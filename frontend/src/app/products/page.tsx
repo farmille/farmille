@@ -7,7 +7,6 @@ import {
   type L1Node,
 } from "./_components/crop-cascade-filter";
 import { ProductsSearchBar } from "./_components/products-search-bar";
-import { SiteFooter } from "@/components/site-footer/site-footer";
 
 export const metadata: Metadata = {
   title: "資材一覧",
@@ -96,8 +95,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* AgList-inspired hero — large title against a soft green tint, key
-          subtitle, and at-a-glance count. */}
-      <header
+          subtitle, and at-a-glance count. <section> not <header> to avoid
+          nesting a second <header> inside the global SiteHeader. */}
+      <section
+        aria-label="ページヘッダー"
         className="border-b border-border"
         style={{ backgroundColor: "var(--green-subtle)" }}
       >
@@ -105,7 +106,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           <div
             className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold"
             style={{
-              backgroundColor: "rgba(255,255,255,0.7)",
+              backgroundColor: "var(--overlay-on-light-soft)",
               color: "var(--green-dark)",
               borderRadius: "var(--radius-full)",
             }}
@@ -114,7 +115,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             BS 資材データベース
           </div>
           <h1
-            className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground"
+            className="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground"
             style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
           >
             資材一覧
@@ -128,7 +129,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
               className="inline-flex items-center px-4 py-1.5 text-sm font-medium"
               style={{
                 backgroundColor: "var(--green-primary)",
-                color: "#ffffff",
+                color: "var(--text-on-green)",
                 borderRadius: "var(--radius-full)",
               }}
             >
@@ -144,7 +145,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                     key={c}
                     className="inline-flex items-center px-3 py-1 text-xs font-medium text-foreground"
                     style={{
-                      backgroundColor: "rgba(255,255,255,0.7)",
+                      backgroundColor: "var(--overlay-on-light-soft)",
                       borderRadius: "var(--radius-full)",
                     }}
                   >
@@ -155,7 +156,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             )}
           </div>
         </div>
-      </header>
+      </section>
 
       <main className="flex-1 max-w-6xl mx-auto px-6 py-12 w-full space-y-6">
         {/* 検索バー — AgList /products の search 相当。q を URL に反映。 */}
@@ -174,7 +175,14 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
             <span className="text-sm font-semibold">絞り込み</span>
           </div>
-          <TypeFilter types={productTypes} selectedTypeId={typeId} />
+          {/* TypeFilter は実質意味のあるタイプ (active=true) が 2 件以上ある
+              ときだけ表示。現状 product_types master は BS資材 のみ active で
+              「すべて / BS資材」の二択になり UX 上ノイズになるため非表示。
+              将来 農薬 / 肥料 / 土壌改良材 が active になれば自動復活する。
+              `is_active=true` 行は backend `/v1/product-types` で絞り済。 */}
+          {productTypes.length > 1 && (
+            <TypeFilter types={productTypes} selectedTypeId={typeId} />
+          )}
           <CropCascadeFilter
             key={cropId ?? "none"}
             tree={tree}
@@ -199,8 +207,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </section>
         )}
       </main>
-
-      <SiteFooter />
     </div>
   );
 }

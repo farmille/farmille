@@ -26,7 +26,6 @@ import {
   type FavoriteKind,
 } from "./_components/favorite-button";
 import { isReviewerRole } from "@/lib/auth/roles";
-import { SiteFooter } from "@/components/site-footer/site-footer";
 import type {
   CategoryL1,
   CategoryL2,
@@ -233,7 +232,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             )}
 
             <h1
-              className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground"
+              className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground"
               style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
             >
               {product.name}
@@ -324,7 +323,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   <span
                     className="inline-flex items-center justify-center h-16 w-16"
                     style={{
-                      backgroundColor: "rgba(255,255,255,0.6)",
+                      backgroundColor: "var(--overlay-on-light-soft)",
                       borderRadius: "var(--radius-full)",
                     }}
                   >
@@ -531,8 +530,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
           )}
         </section>
       </main>
-
-      <SiteFooter />
     </div>
   );
 }

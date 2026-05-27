@@ -61,6 +61,7 @@ biz lead 奥田さんへの確認待ち中だが、Ryoga 判断で以下を **�
 | 1.9 | DOA 違反（10 項目を general_purpose 1 列に押し込めれば充足と暗黙仮定） | products に 10 列追加 migration を v1 必達として §4 / §5 で明記 | DOA 哲学準拠 |
 | 1.10 | スコープが 2 日に収まらない（F1-F6 全機能 + 9 relation + CSV import UI） | F1, F3, F4, F5, F6 のみ。F2 / CSV import UI / 残 5 relation（prefectures + composition_types + science_technologies + application_methods + application_windows）+ product_images の drag-and-drop を Follow-ups push | スプリント現実主義（Q-R1 で target_crops は crops に統合） |
 | 2.x | 改善推奨（メーカードロップダウン / メーカー名 normalize / index / リスク追加 / UAT 追加 / gen:types DoD） | 全反映（§2.2 / §3.3 / §4.2 / §6 / §8 / §5） | evaluator 推奨 |
+| 3.1 | public 側 `/products`, `/product/[slug]`, `/manufacturers`, `/manufacturer/[id]` の AgList 化を §7 F-FU2 で v1.5+ に push | **v1 取り込みへ訂正**。SiteHeader / SiteFooter / hero band / 4-col grid / search bar / 詳細ページ AgList 寄せまで v1 範囲。§7 F-FU2 を取り消し、§1.1 に F7 として新設、§1.2 から除外 | 2026-05-27 spec 漏れ訂正（v1 spec 起案時に biz lead 奥田さん Q2「AgList トーンに寄せる」を §7 F-FU2 へ誤分類していた。実装と並行して §1.1 F7 に位置付け直し、polish + extend を本来の v1 スコープとして反映） |
 
 ---
 
@@ -76,6 +77,7 @@ biz lead 奥田さんへの確認待ち中だが、Ryoga 判断で以下を **�
 | F4 | products 投入（seed migration 経路） | 未実装 | ✅ **v1 必達**（CSV import UI は v1.5+） |
 | F5 | `/admin`（ダッシュボード） | 実装済（B1 のみ機能） | ✅ products カード追加 + 件数表示 |
 | F6 | `/admin/layout.tsx`（サイドバー） | 実装済 | ✅ 「資材マスタ」追加 |
+| F7 | public 側 AgList 寄せ（SiteHeader/Footer + `/products` + `/products/[id]` + `/manufacturers` + `/manufacturers/[id]` + 拡張ページ `/articles` + `/articles/[slug]` + `/products/new` + `/me/profile` + `/maker/profile`） | 実装済（feat/admin-aglist-v2 で polish 中） | ✅ **v1 必達**（元 §7 F-FU2 から繰り上げ、§0.2 #3.1） |
 
 ### 1.2 非スコープ（v1 で着手しない）
 
@@ -83,12 +85,13 @@ biz lead 奥田さんへの確認待ち中だが、Ryoga 判断で以下を **�
 - `/admin/products/import` の UI 経路（§7 Follow-ups F-FU4）
 - 削除機能 + soft delete（§7 Follow-ups F-FU7）
 - メーカーマスタの新規作成 UI（既存 ADR-0009 承認フロー経由のみ。本 spec で導線は作らない）
-- public 側 `/products` の AgList 化（§7 Follow-ups F-FU2）
 - products 以外のマスタ（categories / certifications / periods）メンテ UI
 - レビュー × products の関連管理（既存）
 - Storage 直 upload UI（§7 Follow-ups F-FU5）
 - products に `slug` 追加（§7 Follow-ups F-FU3、public 化フェーズで）
 - product_sources / product_review_flags テーブル投入（§7 Follow-ups F-FU9 / F-FU10）
+- public AgList の pixel-perfect な完全再現（§0.1 Q2 維持。トーン寄せ + 情報項目セットまでが v1、細部ピクセル一致は不要）
+- inline `style={{ borderRadius: "var(--radius-lg)" }}` を Tailwind config の `borderRadius.lg` 経由に集約するリファクタ（§7 Follow-ups F-FU14、視覚同値で v1.5+）
 
 ## 2. AgList 参照（IA / 主要画面）
 
@@ -497,6 +500,8 @@ def normalize_maker_name(name: str) -> str:
 - [ ] サイドバー「資材マスタ」リンクと dashboard 件数カード（`products_total` / `products_public_total`）が表示される
 - [ ] `pnpm tsc --noEmit` / `pnpm lint` clean、`pnpm build` exit 0
 - [ ] backend `uv run pytest` clean（admin/products router の最低 happy + AAL1 → 401 `aal_insufficient` テスト）
+- [ ] **F7 public AgList**: SiteHeader（深緑 + Sprout）/ SiteFooter（4-col + © bar、layout.tsx 集約 + HIDDEN_PATH_PREFIXES）/ `/products` 一覧（hero band + 4-col grid + search bar + URL `?q=` 永続化）/ `/products/[id]` 詳細（hero + 2-col image + 2-col 詳細表 + tag chip 群）/ `/manufacturers` 一覧 + 詳細 / `/articles` + `/articles/[slug]` / `/products/new` / `/me/profile` / `/maker/profile` まで AgList トーン適用済（pixel-perfect は §1.2 で除外）
+- [ ] **F7 デザイントークン規約**: `rgba(255,255,255,X)` は `--overlay-on-{dark,light}-{soft,strong}` 4 token に集約、`#ffffff` 直書きなし、`text-[11px]` 等 §3 スケール外サイズなし、interactive 要素全てに `focus-visible:ring-*` 付与（WCAG 2.4.7）
 - [ ] §8 UAT を Ryoga が手動 pass
 - [ ] **依存セキュリティ**: `pnpm audit --audit-level=high` と `uvx pip-audit` を PR open 前に実行、high+ がブロック判定（新規パッケージ追加は openpyxl くらいで軽い扱い）
 - [ ] PR が main にマージされ、Vercel + Railway の prod デプロイが SUCCESS
@@ -544,7 +549,7 @@ def normalize_maker_name(name: str) -> str:
 | # | 項目 | 由来 |
 |---|---|---|
 | F-FU1 | Railway backend region を asia-southeast1（Singapore）→ asia-northeast1（Tokyo）に移行 | v1 spec §7-F-FU1 継承 |
-| F-FU2 | public 側 `/products`, `/product/[slug]` の AgList 化（SSR + SEO） | v1 spec §7-F-FU2 継承 |
+| ~~F-FU2~~ | ~~public 側 `/products`, `/product/[slug]` の AgList 化（SSR + SEO）~~ → **2026-05-27 v1 取り込みへ昇格、§1.1 F7 / §0.2 #3.1 参照** | v1 spec §7-F-FU2 → v1 |
 | F-FU3 | products に `slug` カラム追加 + 一意制約 + 自動生成 | v1 spec §7-F-FU3 継承 |
 | F-FU4 | CSV import の BFF UI（`POST /v1/admin/products/import`）+ diff preview | v2 §0.1 Q-A / Q-C push |
 | F-FU5 | image upload UI（admin の Storage path 整備とセット） | v2 §6 R4 push |
@@ -556,6 +561,7 @@ def normalize_maker_name(name: str) -> str:
 | F-FU11 | PostgREST RPC で BEGIN/COMMIT を 1 個書く transaction 設計 | v2 §6 R3 push |
 | F-FU12 | 残 5 relation の編集 UI（prefectures / composition_types / science_technologies / application_methods / application_windows）+ product_images drag-and-drop | v2 §1.2 push |
 | F-FU13 | seed migration の ADR 化（accountable な投入経路の標準化） | v2 §0.1 Q-C push |
+| F-FU14 | inline `borderRadius: var(--radius-lg)` を Tailwind config の `borderRadius.lg` に集約 + globals.css の shadcn ブリッジ整合 | 2026-05-27 §1.2 push（規模 15 ファイル + tailwind.config、視覚同値のためスピード優先で延期） |
 
 ---
 

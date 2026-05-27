@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Form from "next/form";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -141,10 +142,14 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
         </p>
       </header>
 
-      {/* 検索 + フィルタ (URL クエリで GET 反映、Server Component に再フェッチさせる) */}
-      <form
-        method="get"
+      {/* 検索 + フィルタ。
+          Next.js 16 `<Form scroll={false}>` で client-side navigation + scroll
+          位置保持 (Material 3 + Nielsen Norman の「コンテキスト維持」原則)。
+          progressive enhancement あり、JS 無効時も通常 GET form として機能。
+          各 input/select に focus-visible:ring-2 を付与し WCAG 2.4.7 対応。 */}
+      <Form
         action="/admin/products"
+        scroll={false}
         className="grid grid-cols-1 md:grid-cols-6 gap-3 rounded-md border border-border bg-card p-4"
       >
         <label className="md:col-span-2 space-y-1">
@@ -156,7 +161,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
             name="q"
             defaultValue={q}
             placeholder="例: バチルス"
-            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            className="w-full rounded border border-border bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:border-[var(--green-primary)] focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-1"
             maxLength={100}
           />
         </label>
@@ -166,7 +171,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
           <select
             name="maker_id"
             defaultValue={makerId}
-            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            className="w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:border-[var(--green-primary)] focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-1"
           >
             <option value="">すべて</option>
             {makers.map((m) => (
@@ -182,7 +187,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
           <select
             name="is_public"
             defaultValue={isPublic === undefined ? "" : String(isPublic)}
-            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            className="w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:border-[var(--green-primary)] focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-1"
           >
             <option value="">すべて</option>
             <option value="true">公開のみ</option>
@@ -195,7 +200,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
           <select
             name="commercial_status"
             defaultValue={commercialStatus}
-            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            className="w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:border-[var(--green-primary)] focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-1"
           >
             <option value="">すべて</option>
             {COMMERCIAL_STATUS_OPTIONS.map((s) => (
@@ -211,7 +216,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
           <select
             name="confidence"
             defaultValue={confidence}
-            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            className="w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:border-[var(--green-primary)] focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-1"
           >
             <option value="">すべて</option>
             {CONFIDENCE_OPTIONS.map((c) => (
@@ -225,18 +230,18 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
         <div className="md:col-span-6 flex flex-wrap gap-2">
           <button
             type="submit"
-            className="rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+            className="rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2"
           >
             絞り込む
           </button>
           <Link
             href="/admin/products"
-            className="rounded border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
+            className="rounded border border-border px-4 py-2 text-sm text-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2"
           >
             クリア
           </Link>
         </div>
-      </form>
+      </Form>
 
       <p className="text-sm text-muted-foreground">
         全 {total} 件中 {rangeStart}–{rangeEnd} を表示 / page {page} / {totalPages}
@@ -296,7 +301,10 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                     {p.product_name_jp ?? "—"}
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">
-                    {p.maker_name ?? "—"}
+                    <div className="flex items-center gap-2">
+                      <span>{p.maker_name ?? "—"}</span>
+                      <MakerStatusBadge status={p.maker_status} />
+                    </div>
                   </td>
                   <td className="px-3 py-2">
                     <PublishBadge isPublic={p.is_public} />
@@ -357,6 +365,42 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
         </nav>
       ) : null}
     </div>
+  );
+}
+
+// maker (users.status) を一目で識別するためのバッジ。
+// active のときは何も出さない (デフォルト想定、ノイズ削減)。
+// それ以外の状態を視覚的に強調し admin が問題のあるメーカーの product を
+// 即座に発見できるようにする (ADR-0009 整合、spec 改善推奨 4.2)。
+function MakerStatusBadge({
+  status,
+}: {
+  status: import("@/types/admin").MakerAccountStatus | null;
+}) {
+  if (!status || status === "active") return null;
+  const labelMap: Record<string, { label: string; cls: string }> = {
+    pending_review: {
+      label: "承認待ち",
+      cls: "bg-amber-500/15 text-amber-700 border-amber-500/30",
+    },
+    rejected: {
+      label: "却下",
+      cls: "bg-rose-500/15 text-rose-700 border-rose-500/30",
+    },
+    frozen: {
+      label: "凍結",
+      cls: "bg-slate-500/15 text-slate-700 border-slate-500/30",
+    },
+  };
+  const entry = labelMap[status];
+  if (!entry) return null;
+  return (
+    <span
+      className={`inline-block rounded border px-1.5 py-0.5 text-xs ${entry.cls}`}
+      title={`maker status: ${status}`}
+    >
+      {entry.label}
+    </span>
   );
 }
 

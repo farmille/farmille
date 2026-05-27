@@ -59,6 +59,15 @@
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
     --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+
+    /* === White overlays (AgList-style frosted layers) ===
+       Use these instead of raw rgba(255,255,255,X) so alpha values stay
+       consistent across pages. Two contexts: dark hero (header) vs light
+       hero (--green-subtle band). */
+    --overlay-on-dark-soft:   rgba(255, 255, 255, 0.12); /* separators / subtle tiles on --green-dark */
+    --overlay-on-dark-strong: rgba(255, 255, 255, 0.25); /* outline pill borders on --green-dark */
+    --overlay-on-light-soft:   rgba(255, 255, 255, 0.7); /* chips / frosted badges on --green-subtle */
+    --overlay-on-light-strong: rgba(255, 255, 255, 0.8); /* logo placeholders / hero tiles on --green-subtle */
   }
 }
 

@@ -31,11 +31,13 @@ export type HomeContentProps = {
 
 function SearchBar() {
   // AgList 風 pill 検索バー。実検索は v1.5+、現状は /products へのリンクのみ。
+  // Material 3 pattern: hover / focus 共に container 側で border-color を強調、
+  // 内側の Search アイコン (緑 subtle 円) は変えない。
   return (
     <Link
       href="/products"
       aria-label="資材を検索"
-      className="group flex items-center gap-3 border border-border bg-card px-5 py-4 text-sm transition-colors hover:border-[var(--green-primary)]"
+      className="group flex items-center gap-3 border border-border bg-card px-5 py-4 text-sm transition-colors hover:border-[var(--green-primary)] focus:outline-none focus-visible:border-[var(--green-primary)] focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2"
       style={{
         borderRadius: "var(--radius-full)",
         boxShadow: "var(--shadow-sm)",

@@ -64,7 +64,7 @@ export function ProductCard({ product, hideMakerName = false }: ProductCardProps
         {product.type_name && (
           <div className="flex flex-wrap gap-1.5">
             <span
-              className="inline-flex items-center px-3 py-1 text-[11px] font-medium"
+              className="inline-flex items-center px-3 py-1 text-xs font-medium"
               style={{
                 backgroundColor: "var(--green-subtle)",
                 color: "var(--green-dark)",

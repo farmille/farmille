@@ -26,6 +26,8 @@ from app.models.schemas import (
     AdminMakersResponse,
     AdminRoleAssignPayload,
     AdminSummaryResponse,
+    AdminUserListItem,
+    AdminUserListResponse,
     PendingMakerItem,
     PendingMakersResponse,
     RejectMakerPayload,
@@ -230,16 +232,27 @@ async def reject_maker(
 ):
     """pending_review なメーカーを rejected に遷移 (spec §5.4)。
 
-    `reason` は v1 では DB に保存しない (監査ログテーブル v1 アウト、spec §1.3)。
-    受け取りはするが破棄する。
+    `reason` の運用ログ記録 (v1 範囲):
+    - DB 保存は v1.5+ F-FU6 (products audit log と統合した maker_review_log) に push
+    - v1 では `logger.info("maker_rejected ...")` で Railway / journald にログ出力し、
+      audit trail として grep 可能 (migration 不要、users / maker_profiles 列汚染なし)
+    - reason text は最大 1000 文字 (RejectMakerPayload で制約済)
     """
-    _ = payload
     admin = get_supabase_admin()
     role, status = _fetch_maker_status(admin, user_id)
     if role is None or role != "maker":
         return _error(404, "maker_not_found")
     if status != "pending_review":
         return _error(409, "maker_not_pending")
+
+    actor_id = _user.get("sub") or _user.get("id") or "<unknown-admin>"
+    reason_text = (payload.reason or "").strip() or "<no-reason-provided>"
+    logger.info(
+        "maker_rejected user_id=%s actor=%s reason=%r",
+        user_id,
+        actor_id,
+        reason_text,
+    )
 
     try:
         admin.table("users").update({"status": "rejected"}).eq(
@@ -250,6 +263,77 @@ async def reject_maker(
         return _error(500, "failed_to_reject_maker")
 
     return {"ok": True, "user_id": str(user_id), "status": "rejected"}
+
+
+@router.get("/users", response_model=AdminUserListResponse)
+async def list_admin_users(
+    _user: dict = require_role("admin"),
+    q: str | None = Query(default=None, description="name + email の部分一致"),
+    role: str | None = Query(default=None, description="role 完全一致"),
+    status: str | None = Query(default=None, description="status 完全一致"),
+    page: int = Query(default=1, ge=1),
+    per_page: int = Query(default=50, ge=1, le=100),
+) -> AdminUserListResponse:
+    """B6 admin users 一覧 (spec maker-approval-admin.md §5.5、ADR-0009 整合)。
+
+    - public.users から id / role / name / status / created_at を取得
+    - auth.users から email を取得 (admin auth API 経由)
+    - フィルタ: role / status / q (name + email 部分一致)
+    - ソート: created_at DESC, id DESC
+    - pagination: per_page = 50 デフォルト、max 100
+
+    v1 では UI で role 変更のみ。frozen toggle / 削除は SQL 直 (v1.5+ で UI 化)。
+    """
+    admin = get_supabase_admin()
+
+    query = admin.table("users").select(
+        "id, role, name, status, created_at", count="exact"
+    )
+    if role:
+        query = query.eq("role", role)
+    if status:
+        query = query.eq("status", status)
+    if q:
+        like = q.replace(",", "")
+        query = query.ilike("name", f"%{like}%")
+        # auth.users.email との OR は PostgREST では難しいため、name のみ frontend で対応。
+        # email 検索が必要になれば v1.5+ で別 endpoint or full-text 化を検討。
+
+    query = query.order("created_at", desc=True).order("id", desc=True)
+
+    start = (page - 1) * per_page
+    end = start + per_page - 1
+    query = query.range(start, end)
+
+    res = query.execute()
+    rows = res.data or []
+    total = getattr(res, "count", None) or 0
+
+    # auth.users から email を 1 件ずつ取りに行く (admin auth API)。
+    # N+1 を避けるため per_page=50 で抑える。
+    items: list[AdminUserListItem] = []
+    for r in rows:
+        user_id = r["id"]
+        email: str | None = None
+        try:
+            auth_user = admin.auth.admin.get_user_by_id(str(user_id))
+            email = getattr(auth_user.user, "email", None) if auth_user else None
+        except Exception:
+            logger.warning("failed to fetch auth email for %s", user_id)
+        items.append(
+            AdminUserListItem(
+                user_id=user_id,
+                email=email,
+                name=r.get("name") or "",
+                role=r.get("role") or "unassigned",
+                status=r.get("status") or "active",
+                created_at=r["created_at"],
+            )
+        )
+
+    return AdminUserListResponse(
+        users=items, total=total, page=page, per_page=per_page
+    )
 
 
 @router.post("/users/{user_id}/role")

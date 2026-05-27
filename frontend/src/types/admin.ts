@@ -48,12 +48,56 @@ export interface AdminMakersResponse {
   makers: AdminMakerOption[];
 }
 
+// B6 admin users 一覧 (spec maker-approval-admin.md §5.5)
+export interface AdminUserListItem {
+  user_id: string;
+  email: string | null;
+  name: string;
+  role: UserRole;
+  status: UserAccountStatus;
+  created_at: string;
+}
+
+export interface AdminUserListResponse {
+  users: AdminUserListItem[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+// /v1/admin/users/{id}/role POST payload。
+// 既存 backend POST endpoint は ASSIGNABLE_ROLES = admin / ja_staff / researcher のみ受け付ける。
+export type AdminAssignableRole = "admin" | "ja_staff" | "researcher";
+
+// DB CHECK 制約 (supabase/migrations/20260514100001_users_status.sql) と一致。
+// status は users 全員 (role を問わず) に付与される列、4 値のみ。
+export type UserAccountStatus =
+  | "active"
+  | "pending_review"
+  | "rejected"
+  | "frozen";
+
+// admin / ja_staff / researcher / unassigned を含む全 role。
+// DB CHECK は farmer / maker / ja_staff / researcher / admin / unassigned。
+export type UserRole =
+  | "admin"
+  | "farmer"
+  | "maker"
+  | "ja_staff"
+  | "researcher"
+  | "unassigned";
+
+// 既存 admin/products F1 で利用する maker 限定の status 表示用 alias。
+export type MakerAccountStatus = UserAccountStatus;
+
 export interface AdminProductListItem {
   id: string;
   name: string;
   product_name_jp: string | null;
   maker_id: string | null;
   maker_name: string | null;
+  // users.status (ADR-0009 整合)。F1 一覧で active 以外を可視化するため。
+  maker_status: MakerAccountStatus | null;
   product_type_id: string | null;
   product_type_name: string | null;
   commercial_status: string | null;

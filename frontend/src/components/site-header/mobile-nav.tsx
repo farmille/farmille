@@ -39,8 +39,8 @@ export function SiteHeaderMobileNav({
         aria-label={open ? "メニューを閉じる" : "メニューを開く"}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-white transition-colors hover:bg-white/10 md:hidden"
-        style={{ border: "1px solid rgba(255,255,255,0.25)" }}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-dark)] md:hidden"
+        style={{ border: "1px solid var(--overlay-on-dark-strong)" }}
       >
         {open ? (
           <X className="h-5 w-5" aria-hidden />

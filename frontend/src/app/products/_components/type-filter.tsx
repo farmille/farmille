@@ -33,7 +33,8 @@ export function TypeFilter({ types, selectedTypeId }: Props) {
         params.delete("type_id");
       }
       const qs = params.toString();
-      router.push(qs ? `${pathname}?${qs}` : pathname);
+      // scroll: false — 既出のスクロール位置を保持してコンテキストを失わない
+      router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     });
   };
 
@@ -79,14 +80,14 @@ function PillButton({
     <button
       type="button"
       onClick={onClick}
-      className="px-4 py-1.5 text-sm font-medium"
+      className="px-4 py-1.5 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2"
       style={{
         borderRadius: "var(--radius-full)",
         transition: "var(--transition-fast)",
         backgroundColor: active
           ? "var(--green-primary)"
           : "var(--green-subtle)",
-        color: active ? "#ffffff" : "var(--green-dark)",
+        color: active ? "var(--text-on-green)" : "var(--green-dark)",
         border: active
           ? "1px solid var(--green-primary)"
           : "1px solid transparent",

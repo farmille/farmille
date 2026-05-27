@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // spec §6.3: B1 承認 / 却下 Client Island。BFF を Next.js API route
 // (/api/admin/makers/[id]/{approve,reject}) 経由で叩き、成功時に
 // router.refresh() で Server Component を再フェッチさせる。
 // Supabase SDK の直叩きは禁止 (spec §16.3)。
+//
+// UX (今日改善):
+//   - 操作直後は inline success banner で「承認 / 却下しました」を 2 秒表示してから
+//     router.refresh() (Material 3 Snackbar 相当、ライブラリ非依存)
+//   - 却下理由は backend `logger.info` で audit trail (v1.5+ F-FU6 で DB 化)
 
 type Busy = null | "approve" | "reject";
+type Success = null | "approved" | "rejected";
+
+const SUCCESS_BANNER_MS = 2000;
 
 export function MakerActionButtons({
   userId,
@@ -23,6 +32,17 @@ export function MakerActionButtons({
   const [error, setError] = useState<string | null>(null);
   const [confirmReject, setConfirmReject] = useState(false);
   const [reason, setReason] = useState("");
+  const [success, setSuccess] = useState<Success>(null);
+
+  // success banner を 2 秒表示してから router.refresh() で行が消える流れ。
+  // refresh が先に走ると banner が消えてしまうため、setTimeout で順次。
+  useEffect(() => {
+    if (!success) return;
+    const t = setTimeout(() => {
+      router.refresh();
+    }, SUCCESS_BANNER_MS);
+    return () => clearTimeout(t);
+  }, [success, router]);
 
   async function approve() {
     if (busy) return;
@@ -47,7 +67,7 @@ export function MakerActionButtons({
         setBusy(null);
         return;
       }
-      router.refresh();
+      setSuccess("approved");
     } catch {
       setError("承認に失敗しました (ネットワーク)");
       setBusy(null);
@@ -76,11 +96,28 @@ export function MakerActionButtons({
         setBusy(null);
         return;
       }
-      router.refresh();
+      setSuccess("rejected");
     } catch {
       setError("却下に失敗しました (ネットワーク)");
       setBusy(null);
     }
+  }
+
+  if (success) {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="inline-flex items-center gap-2 rounded border border-[var(--green-primary)] bg-[var(--green-subtle)] px-3 py-2 text-sm text-[var(--green-dark)]"
+      >
+        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+        <span>
+          {success === "approved"
+            ? `「${companyName}」を承認しました`
+            : `「${companyName}」を却下しました`}
+        </span>
+      </div>
+    );
   }
 
   if (confirmReject) {
@@ -91,7 +128,7 @@ export function MakerActionButtons({
         </p>
         <label className="block space-y-1">
           <span className="text-xs text-muted-foreground">
-            却下理由 (任意、v1 では DB 保存しません)
+            却下理由 (任意、運用ログに記録されます。DB 保存は v1.5+ F-FU6 で対応)
           </span>
           <textarea
             value={reason}

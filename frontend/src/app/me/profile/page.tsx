@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getRole, getUser } from "@/lib/auth/server";
 import { createClient } from "@/lib/supabase/server";
@@ -18,6 +19,38 @@ import { ProfileCard, type MeProfile } from "./_components/profile-card";
 const ONBOARDING_PATH = "/onboarding";
 const MAKER_LANDING = "/maker/profile";
 
+// AgList-inspired hero band shared by all states (success / 404 / 403).
+function ProfileHero({ subtitle }: { subtitle: string }) {
+  return (
+    <section
+      aria-label="ページヘッダー"
+      className="border-b border-border"
+      style={{ backgroundColor: "var(--green-subtle)" }}
+    >
+      <div className="max-w-3xl mx-auto px-6 py-12 md:py-16 space-y-4">
+        <div
+          className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold"
+          style={{
+            backgroundColor: "var(--overlay-on-light-soft)",
+            color: "var(--green-dark)",
+            borderRadius: "var(--radius-full)",
+          }}
+        >
+          <User className="h-3.5 w-3.5" aria-hidden="true" />
+          マイページ
+        </div>
+        <h1
+          className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground"
+          style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
+        >
+          プロフィール
+        </h1>
+        <p className="text-base text-muted-foreground max-w-2xl">{subtitle}</p>
+      </div>
+    </section>
+  );
+}
+
 export default async function MyProfilePage() {
   const user = await getUser();
   if (!user) {
@@ -34,19 +67,14 @@ export default async function MyProfilePage() {
 
   if (role !== "farmer") {
     return (
-      <main className="max-w-3xl mx-auto px-6 py-10 space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          プロフィール
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          v1 ではプロフィール画面は farmer ロールのみ対応しています。
-          ja_staff / researcher 向けのプロフィール表示は今後の phase で
-          検討します。
-        </p>
-        <Button asChild variant="outline">
-          <Link href="/me/reviews">自分のレビューを見る</Link>
-        </Button>
-      </main>
+      <div className="min-h-screen flex flex-col bg-background text-foreground">
+        <ProfileHero subtitle="v1 ではプロフィール画面は farmer ロールのみ対応しています。ja_staff / researcher 向けのプロフィール表示は今後の phase で検討します。" />
+        <main className="flex-1 max-w-3xl mx-auto px-6 py-10 w-full">
+          <Button asChild variant="outline">
+            <Link href="/me/reviews">自分のレビューを見る</Link>
+          </Button>
+        </main>
+      </div>
     );
   }
 
@@ -71,10 +99,17 @@ export default async function MyProfilePage() {
   if (res.status === 404) {
     return (
       <div className="min-h-screen flex flex-col bg-background text-foreground">
+        <ProfileHero subtitle="まずはプロフィールを設定してください。都道府県・市町村・主な作目を登録すると、レビューの投稿やプロフィール公開ができるようになります。" />
         <main className="flex-1 max-w-3xl mx-auto px-6 py-10 w-full space-y-6">
           <MeNav pathnameOverride="/me/profile" />
-          <div className="rounded-md border border-border bg-card p-10 text-center space-y-4">
-            <h2 className="text-lg font-medium">
+          <div
+            className="border border-border bg-card p-10 text-center space-y-4"
+            style={{
+              borderRadius: "var(--radius-lg)",
+              boxShadow: "var(--shadow-sm)",
+            }}
+          >
+            <h2 className="text-lg font-semibold text-foreground">
               まずはプロフィールを設定してください
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -98,16 +133,11 @@ export default async function MyProfilePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <ProfileHero subtitle="登録した都道府県・市町村・主な作目と、これまでのレビュー活動を確認できます。" />
       <main className="flex-1 max-w-3xl mx-auto px-6 py-10 w-full space-y-6">
         <MeNav pathnameOverride="/me/profile" />
         <ProfileCard profile={profile} />
       </main>
-      <footer className="border-t border-border bg-card py-8">
-        <div className="max-w-3xl mx-auto px-6 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-        </div>
-      </footer>
     </div>
   );
 }
-

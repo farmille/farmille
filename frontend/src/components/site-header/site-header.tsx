@@ -63,21 +63,20 @@ export async function SiteHeader() {
       className="sticky top-0 z-40 w-full border-b backdrop-blur-md"
       style={{
         backgroundColor: "var(--green-dark)",
-        borderColor: "rgba(255,255,255,0.12)",
-        color: "#ffffff",
+        borderColor: "var(--overlay-on-dark-soft)",
+        color: "var(--text-on-green)",
       }}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-5 px-4 sm:px-6">
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 text-lg font-semibold tracking-tight text-white transition-opacity hover:opacity-80"
-          aria-label="Farmille ホーム"
+          className="flex items-center gap-2 rounded-md text-lg font-semibold tracking-tight text-white transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-dark)]"
         >
           <span
             className="inline-flex h-8 w-8 items-center justify-center"
             style={{
-              backgroundColor: "rgba(255,255,255,0.12)",
+              backgroundColor: "var(--overlay-on-dark-soft)",
               borderRadius: "var(--radius-full)",
             }}
             aria-hidden
@@ -96,7 +95,7 @@ export async function SiteHeader() {
             <Link
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-white/90 transition-colors hover:text-white"
+              className="rounded-md text-sm font-medium text-white/90 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-dark)]"
             >
               {l.label}
             </Link>
@@ -109,10 +108,10 @@ export async function SiteHeader() {
           <Link
             href="/products"
             aria-label="資材を検索"
-            className="hidden h-9 items-center gap-1.5 px-3 text-sm text-white/90 transition-colors hover:bg-white/10 hover:text-white md:flex"
+            className="hidden h-9 items-center gap-1.5 px-3 text-sm text-white/90 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-dark)] md:flex"
             style={{
               borderRadius: "var(--radius-full)",
-              border: "1px solid rgba(255,255,255,0.25)",
+              border: "1px solid var(--overlay-on-dark-strong)",
             }}
           >
             <Search className="h-4 w-4" aria-hidden />
@@ -133,15 +132,15 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/login"
-                className="hidden text-sm font-medium text-white/90 transition-colors hover:text-white sm:inline-flex"
+                className="hidden rounded-md text-sm font-medium text-white/90 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-dark)] sm:inline-flex"
               >
                 ログイン
               </Link>
               <Link
                 href="/signup"
-                className="inline-flex items-center px-4 py-1.5 text-sm font-semibold transition-opacity hover:opacity-90"
+                className="inline-flex items-center px-4 py-1.5 text-sm font-semibold transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-dark)]"
                 style={{
-                  backgroundColor: "#ffffff",
+                  backgroundColor: "var(--text-on-green)",
                   color: "var(--green-dark)",
                   borderRadius: "var(--radius-full)",
                 }}

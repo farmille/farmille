@@ -71,7 +71,8 @@ export function CropCascadeFilter({ tree, selectedCropId }: Props) {
     }
     const qs = params.toString();
     startTransition(() => {
-      router.push(qs ? `${pathname}?${qs}` : pathname);
+      // scroll: false — フィルタ操作後にユーザーがいた縦位置を保持
+      router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     });
   };
 

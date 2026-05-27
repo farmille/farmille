@@ -525,7 +525,7 @@ export function ProductEditForm({
                   alt={img.alt_text ?? ""}
                   className="w-full aspect-square object-cover rounded"
                 />
-                <p className="text-[10px] text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {img.image_type ?? "—"}
                   {img.is_primary ? " · primary" : ""}
                 </p>
@@ -673,7 +673,7 @@ function RelationGroupedMultiSelect({
     <div className="space-y-3">
       {groups.map((g) => (
         <div key={g.category} className="space-y-1">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">
             {g.category}
           </p>
           <RelationMultiSelect
