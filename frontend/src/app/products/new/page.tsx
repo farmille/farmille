@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Sprout } from "lucide-react";
 import { getRole, getUser } from "@/lib/auth/server";
 import { createClient } from "@/lib/supabase/server";
 import { landingPathForRole } from "@/lib/auth/landing";
@@ -89,17 +90,38 @@ export default async function ProductNewPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <main className="flex-1 max-w-4xl mx-auto px-6 py-10 w-full space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">
+      {/* AgList-inspired hero band (maker registration entry point). */}
+      <section
+        aria-label="ページヘッダー"
+        className="border-b border-border"
+        style={{ backgroundColor: "var(--green-subtle)" }}
+      >
+        <div className="max-w-4xl mx-auto px-6 py-12 md:py-16 space-y-4">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold"
+            style={{
+              backgroundColor: "var(--overlay-on-light-soft)",
+              color: "var(--green-dark)",
+              borderRadius: "var(--radius-full)",
+            }}
+          >
+            <Sprout className="h-3.5 w-3.5" aria-hidden="true" />
+            メーカー機能
+          </div>
+          <h1
+            className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground"
+            style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
+          >
             資材を登録
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground max-w-2xl">
             基本情報と任意の効果タグ・対象作目・認証・画像を登録できます。
             必須項目は製品名とタイプのみです。
           </p>
         </div>
+      </section>
 
+      <main className="flex-1 max-w-4xl mx-auto px-6 py-10 w-full">
         <ProductForm
           productTypes={productTypes}
           benefits={benefits}
@@ -109,12 +131,6 @@ export default async function ProductNewPage() {
           categoriesL2={cropsData.categories_l2}
         />
       </main>
-
-      <footer className="border-t border-border bg-card py-8">
-        <div className="max-w-4xl mx-auto px-6 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-        </div>
-      </footer>
     </div>
   );
 }

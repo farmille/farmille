@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Sprout, SlidersHorizontal } from "lucide-react";
 import { TypeFilter } from "./_components/type-filter";
 import { ProductCard, type Product } from "./_components/product-card";
 import {
   CropCascadeFilter,
   type L1Node,
 } from "./_components/crop-cascade-filter";
-
+import { ProductsSearchBar } from "./_components/products-search-bar";
 
 export const metadata: Metadata = {
   title: "資材一覧",
@@ -26,7 +26,7 @@ type ProductTypesResponse = { product_types: ProductType[] };
 type CropsTreeResponse = { tree: L1Node[] };
 
 type PageProps = {
-  searchParams?: Promise<{ type_id?: string; crop_id?: string }>;
+  searchParams?: Promise<{ type_id?: string; crop_id?: string; q?: string }>;
 };
 
 function findCropName(tree: L1Node[], cropId: string): string | null {
@@ -43,6 +43,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const typeId = params.type_id ?? null;
   const cropId = params.crop_id ?? null;
+  // 検索キーワードは backend `Query(max_length=100)` に揃えてここでも 100 文字でカット。
+  const q = (params.q ?? "").trim().slice(0, 100);
 
   const apiUrl = process.env.API_URL;
   if (!apiUrl) {
@@ -52,16 +54,14 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const productsQuery = new URLSearchParams();
   if (typeId) productsQuery.set("type_id", typeId);
   if (cropId) productsQuery.set("crop_id", cropId);
+  if (q) productsQuery.set("q", q);
   const productsQs = productsQuery.toString();
   const productsUrl = productsQs
     ? `${apiUrl}/v1/products?${productsQs}`
     : `${apiUrl}/v1/products`;
 
   const [productsRes, typesRes, treeRes] = await Promise.all([
-    // 商品一覧はユーザー操作（type / crop フィルタ）で結果が変わるため都度フェッチ
     fetch(productsUrl, { cache: "no-store" }),
-    // 以下はマスタデータ。運用画面以外では時間単位で更新されないので 1h cache。
-    // dev / prod とも次回以降の SSR で再 fetch が走らず application-code 時間が短縮される。
     fetch(`${apiUrl}/v1/product-types`, { next: { revalidate: 3600 } }),
     fetch(`${apiUrl}/v1/crops/tree`, { next: { revalidate: 3600 } }),
   ]);
@@ -82,66 +82,131 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const { tree } = (await treeRes.json()) as CropsTreeResponse;
 
   const selectedType = typeId
-    ? productTypes.find((t) => t.id === typeId) ?? null
+    ? (productTypes.find((t) => t.id === typeId) ?? null)
     : null;
   const selectedCropName = cropId ? findCropName(tree, cropId) : null;
-  const isFiltered = typeId !== null || cropId !== null;
+  const isFiltered = typeId !== null || cropId !== null || q.length > 0;
 
-  const headerSubtitle = (() => {
-    const parts: string[] = [];
-    if (selectedType) parts.push(`タイプ「${selectedType.name}」`);
-    if (selectedCropName) parts.push(`作目「${selectedCropName}」`);
-    if (parts.length === 0) return "登録されている全ての資材";
-    return `${parts.join(" / ")}で絞り込み中`;
-  })();
+  const activeFilterChips: string[] = [];
+  if (q) activeFilterChips.push(`キーワード: ${q}`);
+  if (selectedType) activeFilterChips.push(`タイプ: ${selectedType.name}`);
+  if (selectedCropName) activeFilterChips.push(`作目: ${selectedCropName}`);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+      {/* AgList-inspired hero — large title against a soft green tint, key
+          subtitle, and at-a-glance count. <section> not <header> to avoid
+          nesting a second <header> inside the global SiteHeader. */}
+      <section
+        aria-label="ページヘッダー"
+        className="border-b border-border"
+        style={{ backgroundColor: "var(--green-subtle)" }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-16 md:py-20 space-y-5">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold"
+            style={{
+              backgroundColor: "var(--overlay-on-light-soft)",
+              color: "var(--green-dark)",
+              borderRadius: "var(--radius-full)",
+            }}
+          >
+            <Sprout className="h-3.5 w-3.5" aria-hidden="true" />
+            BS 資材データベース
+          </div>
+          <h1
+            className="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground"
+            style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
+          >
             資材一覧
           </h1>
-          <p className="text-base text-muted-foreground">{headerSubtitle}</p>
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+            生物・微生物農業資材 (BS資材) を作目・タイプ別に探せます。
+            農家・JA 普及員・研究者によるレビューで意思決定をサポート。
+          </p>
+          <div className="flex items-center gap-3 pt-2">
+            <span
+              className="inline-flex items-center px-4 py-1.5 text-sm font-medium"
+              style={{
+                backgroundColor: "var(--green-primary)",
+                color: "var(--text-on-green)",
+                borderRadius: "var(--radius-full)",
+              }}
+            >
+              {products.length} 件
+            </span>
+            {activeFilterChips.length > 0 && (
+              <>
+                <span className="text-xs text-muted-foreground">
+                  絞り込み中:
+                </span>
+                {activeFilterChips.map((c) => (
+                  <span
+                    key={c}
+                    className="inline-flex items-center px-3 py-1 text-xs font-medium text-foreground"
+                    style={{
+                      backgroundColor: "var(--overlay-on-light-soft)",
+                      borderRadius: "var(--radius-full)",
+                    }}
+                  >
+                    {c}
+                  </span>
+                ))}
+              </>
+            )}
+          </div>
         </div>
+      </section>
 
-        <div className="space-y-4">
-          <TypeFilter types={productTypes} selectedTypeId={typeId} />
+      <main className="flex-1 max-w-6xl mx-auto px-6 py-12 w-full space-y-6">
+        {/* 検索バー — AgList /products の search 相当。q を URL に反映。 */}
+        <ProductsSearchBar initialQuery={q} />
+
+        {/* フィルタ panel — sits between search and grid as a calm card */}
+        <section
+          aria-label="フィルタ"
+          className="space-y-5 border border-border bg-card p-5 md:p-6"
+          style={{
+            borderRadius: "var(--radius-lg)",
+            boxShadow: "var(--shadow-sm)",
+          }}
+        >
+          <div className="flex items-center gap-2 text-foreground">
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+            <span className="text-sm font-semibold">絞り込み</span>
+          </div>
+          {/* TypeFilter は実質意味のあるタイプ (active=true) が 2 件以上ある
+              ときだけ表示。現状 product_types master は BS資材 のみ active で
+              「すべて / BS資材」の二択になり UX 上ノイズになるため非表示。
+              将来 農薬 / 肥料 / 土壌改良材 が active になれば自動復活する。
+              `is_active=true` 行は backend `/v1/product-types` で絞り済。 */}
+          {productTypes.length > 1 && (
+            <TypeFilter types={productTypes} selectedTypeId={typeId} />
+          )}
           <CropCascadeFilter
             key={cropId ?? "none"}
             tree={tree}
             selectedCropId={cropId}
           />
-        </div>
+        </section>
 
         {products.length === 0 ? (
           <EmptyState
             isFiltered={isFiltered}
             typeName={selectedType?.name ?? null}
             cropName={selectedCropName}
+            keyword={q || null}
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {products.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
+          <section aria-label="資材一覧">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {products.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </section>
         )}
       </main>
-
-      <footer className="border-t border-border bg-card py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-          <nav className="flex items-center gap-4">
-            <Link href="/login" className="hover:text-primary">
-              ログイン
-            </Link>
-            <Link href="/signup" className="hover:text-primary">
-              新規登録
-            </Link>
-          </nav>
-        </div>
-      </footer>
     </div>
   );
 }
@@ -150,18 +215,41 @@ function EmptyState({
   isFiltered,
   typeName,
   cropName,
+  keyword,
 }: {
   isFiltered: boolean;
   typeName: string | null;
   cropName: string | null;
+  keyword: string | null;
 }) {
   const filterLabels: string[] = [];
+  if (keyword) filterLabels.push(`キーワード「${keyword}」`);
   if (typeName) filterLabels.push(`タイプ「${typeName}」`);
   if (cropName) filterLabels.push(`作目「${cropName}」`);
 
   return (
-    <div className="rounded-md border border-border bg-card p-10 text-center space-y-3">
-      <p className="text-lg font-medium text-foreground">
+    <div
+      className="border border-border bg-card p-12 text-center space-y-3"
+      style={{
+        borderRadius: "var(--radius-lg)",
+        boxShadow: "var(--shadow-sm)",
+      }}
+    >
+      <div className="flex justify-center">
+        <span
+          className="inline-flex items-center justify-center h-14 w-14"
+          style={{
+            backgroundColor: "var(--green-subtle)",
+            borderRadius: "var(--radius-full)",
+          }}
+        >
+          <Sprout
+            className="h-7 w-7 text-[var(--green-primary)]"
+            aria-hidden="true"
+          />
+        </span>
+      </div>
+      <p className="text-lg font-semibold text-foreground">
         {isFiltered && filterLabels.length > 0
           ? `${filterLabels.join(" / ")}に該当する資材は見つかりませんでした`
           : "資材データがまだ登録されていません"}

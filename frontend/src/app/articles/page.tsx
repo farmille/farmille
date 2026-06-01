@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BookOpen } from "lucide-react";
 import {
   ArticleCard,
   type ArticleCategory,
@@ -64,21 +64,75 @@ export default async function ArticlesPage({ searchParams }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+      {/* AgList-inspired hero — soft green band matching /products + /manufacturers. */}
+      <section
+        aria-label="ページヘッダー"
+        className="border-b border-border"
+        style={{ backgroundColor: "var(--green-subtle)" }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-16 md:py-20 space-y-5">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold"
+            style={{
+              backgroundColor: "var(--overlay-on-light-soft)",
+              color: "var(--green-dark)",
+              borderRadius: "var(--radius-full)",
+            }}
+          >
+            <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+            編集部レポート
+          </div>
+          <h1
+            className="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground"
+            style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
+          >
             記事一覧
           </h1>
-          <p className="text-base text-muted-foreground">
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
             Farmille 編集部による週次〜月次レポート・特集・コラム。
+            BS 資材の最新動向と農家の声をまとめてお届けします。
           </p>
+          <div className="flex items-center gap-3 pt-2">
+            <span
+              className="inline-flex items-center px-4 py-1.5 text-sm font-medium"
+              style={{
+                backgroundColor: "var(--green-primary)",
+                color: "var(--text-on-green)",
+                borderRadius: "var(--radius-full)",
+              }}
+            >
+              {articles.length} 件
+            </span>
+          </div>
         </div>
+      </section>
 
+      <main className="flex-1 max-w-6xl mx-auto px-6 py-12 w-full space-y-6">
         <CategoryTabs selectedCategory={category} />
 
         {articles.length === 0 ? (
-          <div className="rounded-md border border-border bg-card p-10 text-center space-y-2">
-            <p className="text-lg font-medium text-foreground">
+          <div
+            className="border border-border bg-card p-12 text-center space-y-3"
+            style={{
+              borderRadius: "var(--radius-lg)",
+              boxShadow: "var(--shadow-sm)",
+            }}
+          >
+            <div className="flex justify-center">
+              <span
+                className="inline-flex items-center justify-center h-14 w-14"
+                style={{
+                  backgroundColor: "var(--green-subtle)",
+                  borderRadius: "var(--radius-full)",
+                }}
+              >
+                <BookOpen
+                  className="h-7 w-7 text-[var(--green-primary)]"
+                  aria-hidden="true"
+                />
+              </span>
+            </div>
+            <p className="text-lg font-semibold text-foreground">
               まだ記事がありません
             </p>
             <p className="text-sm text-muted-foreground">
@@ -88,27 +142,15 @@ export default async function ArticlesPage({ searchParams }: PageProps) {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {articles.map((a) => (
-              <ArticleCard key={a.id} article={a} />
-            ))}
-          </div>
+          <section aria-label="記事一覧">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {articles.map((a) => (
+                <ArticleCard key={a.id} article={a} />
+              ))}
+            </div>
+          </section>
         )}
       </main>
-
-      <footer className="border-t border-border bg-card py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-          <nav className="flex items-center gap-4">
-            <Link href="/login" className="hover:text-primary">
-              ログイン
-            </Link>
-            <Link href="/signup" className="hover:text-primary">
-              新規登録
-            </Link>
-          </nav>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
@@ -12,9 +12,13 @@ type Props = {
   selectedTypeId: string | null;
 };
 
+// design-tokens v2: pill-style filter chips. Selected = solid green,
+// unselected = soft green-subtle background. Preserves other URL params
+// (q / crop_id) when toggling so search and crop filters survive.
 export function TypeFilter({ types, selectedTypeId }: Props) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const select = (typeId: string | null) => {
@@ -22,48 +26,74 @@ export function TypeFilter({ types, selectedTypeId }: Props) {
       trackEvent({ name: "filter_apply", params: { filter_type: "type" } });
     }
     startTransition(() => {
-      const params = new URLSearchParams();
-      if (typeId) params.set("type_id", typeId);
+      const params = new URLSearchParams(searchParams.toString());
+      if (typeId) {
+        params.set("type_id", typeId);
+      } else {
+        params.delete("type_id");
+      }
       const qs = params.toString();
-      router.push(qs ? `${pathname}?${qs}` : pathname);
+      // scroll: false — 既出のスクロール位置を保持してコンテキストを失わない
+      router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     });
   };
-
-  const baseBtn =
-    "rounded-sm border px-4 py-2 text-sm font-medium transition-colors";
-  const activeBtn = "bg-primary text-primary-foreground border-primary";
-  const inactiveBtn =
-    "bg-card text-foreground border-border hover:bg-muted";
 
   return (
     <div
       className={cn(
-        "flex flex-wrap gap-2",
+        "flex flex-wrap items-center gap-2",
         isPending && "opacity-60 pointer-events-none",
       )}
       role="group"
       aria-label="製品タイプフィルタ"
     >
-      <button
-        type="button"
+      <span className="text-xs font-medium text-muted-foreground pr-1">
+        タイプ:
+      </span>
+      <PillButton
+        active={selectedTypeId === null}
         onClick={() => select(null)}
-        className={cn(baseBtn, selectedTypeId === null ? activeBtn : inactiveBtn)}
-      >
-        すべて
-      </button>
+        label="すべて"
+      />
       {types.map((t) => (
-        <button
+        <PillButton
           key={t.id}
-          type="button"
+          active={selectedTypeId === t.id}
           onClick={() => select(t.id)}
-          className={cn(
-            baseBtn,
-            selectedTypeId === t.id ? activeBtn : inactiveBtn,
-          )}
-        >
-          {t.name}
-        </button>
+          label={t.name}
+        />
       ))}
     </div>
+  );
+}
+
+function PillButton({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="px-4 py-1.5 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2"
+      style={{
+        borderRadius: "var(--radius-full)",
+        transition: "var(--transition-fast)",
+        backgroundColor: active
+          ? "var(--green-primary)"
+          : "var(--green-subtle)",
+        color: active ? "var(--text-on-green)" : "var(--green-dark)",
+        border: active
+          ? "1px solid var(--green-primary)"
+          : "1px solid transparent",
+      }}
+    >
+      {label}
+    </button>
   );
 }

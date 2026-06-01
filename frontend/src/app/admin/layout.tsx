@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getRole, getUser } from "@/lib/auth/server";
+import { createClient } from "@/lib/supabase/server";
 
-// spec §6.1 / §7.1: admin layout は Server Component で role guard を行う。
-// 未ログイン / 非 admin はすべて /login?next=... へリダイレクト (spec §1.1)。
-// 2FA は v1.5+ (spec §10.1)、本 layout には実装上の目印を残さない。
+// spec §6.1 / §6.5 / §7.1: admin layout は Server Component で role + AAL2 guard。
+// 未ログイン / 非 admin → /login?next=/admin
+// AAL1 admin → factor の有無で /mfa/setup or /mfa/challenge に分岐 (ADR-0012 §2.3)
 
 export default async function AdminLayout({
   children,
@@ -20,6 +21,18 @@ export default async function AdminLayout({
     redirect("/login?next=/admin");
   }
 
+  const supabase = await createClient();
+  const { data: aal } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== "aal2") {
+    const { data: factors } = await supabase.auth.mfa.listFactors();
+    const verifiedTotp = factors?.totp.find((f) => f.status === "verified");
+    const target = verifiedTotp
+      ? `/mfa/challenge?next=${encodeURIComponent("/admin")}`
+      : `/mfa/setup?next=${encodeURIComponent("/admin")}`;
+    redirect(target);
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <div className="flex-1 w-full max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8">
@@ -29,6 +42,7 @@ export default async function AdminLayout({
           </p>
           <AdminNavLink href="/admin" label="ダッシュボード" />
           <AdminNavLink href="/admin/makers" label="メーカー承認" />
+          <AdminNavLink href="/admin/products" label="資材マスタ" />
           <AdminNavLink href="/admin/users" label="ユーザー管理" />
           <AdminNavLink href="/admin/reports" label="通報管理" />
           <AdminNavLink href="/admin/articles" label="記事管理" />

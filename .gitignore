@@ -38,3 +38,12 @@ supabase/.temp/
 tmp_*.sql
 function_document.md
 meeting_document.md
+
+# BS資材 master Excel (binary, used by backend/scripts/excel_to_seed_sql.py to
+# produce supabase/migrations/<ts>_seed_products_from_ryosei_export.sql).
+# Track via setup-log instead of committing the .xlsm.
+Farmille_BS_materials_DB_template_detailed_prompt.xlsm
+
+# Playwright MCP traces / console logs / screenshots — reference material only.
+.playwright-mcp/
+aglist-*.png

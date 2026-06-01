@@ -77,3 +77,12 @@ def get_user_role(payload: dict) -> str:
     """JWTペイロードからロールを取得。"""
     app_metadata = payload.get("app_metadata", {})
     return app_metadata.get("role", "unassigned")
+
+
+def get_user_aal(payload: dict) -> str:
+    """JWT ペイロードから Authenticator Assurance Level を取得 (ADR-0012 §2.4)。
+
+    Supabase Auth は MFA 通過済セッションで ``aal: 'aal2'`` を発行する。未 enroll
+    または factor challenge 未完了は ``aal: 'aal1'``。claim 欠落は ``aal1`` 扱い。
+    """
+    return payload.get("aal") or "aal1"

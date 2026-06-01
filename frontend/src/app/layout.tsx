@@ -3,6 +3,7 @@ import { Inter, Noto_Sans_JP } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { NavigationOverlay } from "@/app/_components/navigation-overlay";
 import { SiteHeader } from "@/components/site-header/site-header";
+import { SiteFooter } from "@/components/site-footer/site-footer";
 import "./globals.css";
 
 const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -54,6 +55,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <SiteHeader />
         {children}
+        <SiteFooter />
         <NavigationOverlay />
       </body>
       {isProduction && gaMeasurementId ? (

@@ -1,24 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
+// グローバルなページ遷移 overlay。
+//
+// 重要な UX 設計判断 — Material 3 progress indicator + Nielsen Norman の
+// 0.1s/1s/10s 閾値に従い、遷移が **300ms 未満** で完了する場合は spinner を
+// 一切表示しない。これにより:
+//   - ローカル backend の高速遷移 (50-200ms) は overlay フラッシュなしに
+//     完了し、「動きが軽い」体感を維持
+//   - 遅延 (Supabase round-trip + JOIN 等で 500ms+) のときだけ overlay が
+//     現れ、ユーザーに「処理中」を伝える
+//
+// 参考:
+//   - Material 3 Progress indicators (https://m3.material.io/components/progress-indicators)
+//   - Nielsen Norman: Response Times — 0.1s = instant, 1s = uninterrupted flow,
+//     10s = need progress feedback
+//
+// 仕組み:
+//   1. <a> click 時に setTimeout 300ms で「まだ navigate 中なら」 overlay を出す
+//   2. pathname 変化 (= 遷移完了) で timeout を cancel + overlay を消す
+//   3. 同一 path / 修飾キー / 外部 URL は対象外
+const NAVIGATION_OVERLAY_DELAY_MS = 300;
+
 export function NavigationOverlay() {
   const pathname = usePathname();
-  const [pendingPathname, setPendingPathname] = useState<string | null>(null);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 遷移先に到達すると pendingPathname === pathname になり overlay が消える（derived）
-  const isNavigating =
-    pendingPathname !== null && pendingPathname !== pathname;
-
-  // pathname 変化で pendingPathname を clear する（forward nav 完了 / back button /
-  // bfcache restore すべてで stale state を残さない）。これが無いと back button で
-  // 戻った先で `pendingPathname !== pathname` が再び true になり overlay が出っぱなしになる。
+  // pathname 変化 = 遷移完了。pending timeout を canceled、overlay も非表示に。
+  // back button / bfcache restore でも同じ経路を通る。
+  // 外部 prop (pathname) 変化に対する derived state リセットパターンのため
+  // set-state-in-effect を意図的に許可。
   useEffect(() => {
-    // 外部 prop (pathname) 変化に対する derived state 同期パターン。
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPendingPathname(null);
+    setShowOverlay(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -55,14 +77,26 @@ export function NavigationOverlay() {
       const url = new URL(anchor.href, window.location.origin);
       if (url.pathname === pathname) return;
 
-      setPendingPathname(url.pathname);
+      // 既存 timeout は cancel してから新規 setup (連続クリック対応)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        setShowOverlay(true);
+        timeoutRef.current = null;
+      }, NAVIGATION_OVERLAY_DELAY_MS);
     };
 
     document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
+    return () => {
+      document.removeEventListener("click", handleClick);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [pathname]);
 
-  if (!isNavigating) return null;
+  if (!showOverlay) return null;
 
   return (
     <div

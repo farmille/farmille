@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Building2 } from "lucide-react";
 import { getRole, getUser } from "@/lib/auth/server";
 import { createClient } from "@/lib/supabase/server";
 import { landingPathForRole } from "@/lib/auth/landing";
@@ -62,16 +63,37 @@ export default async function MakerProfilePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <main className="flex-1 max-w-2xl mx-auto px-6 py-16 w-full space-y-8">
-        <div className="space-y-3">
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+      {/* AgList-inspired hero band — surfaces the company brand context. */}
+      <section
+        aria-label="ページヘッダー"
+        className="border-b border-border"
+        style={{ backgroundColor: "var(--green-subtle)" }}
+      >
+        <div className="max-w-2xl mx-auto px-6 py-12 md:py-16 space-y-4">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold"
+            style={{
+              backgroundColor: "var(--overlay-on-light-soft)",
+              color: "var(--green-dark)",
+              borderRadius: "var(--radius-full)",
+            }}
+          >
+            <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
+            メーカー機能
+          </div>
+          <h1
+            className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground"
+            style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
+          >
             企業プロフィール編集
           </h1>
-          <p className="text-base text-muted-foreground">
+          <p className="text-base text-muted-foreground max-w-xl">
             ここで編集した内容は公開ページ (/manufacturers) に反映されます。
           </p>
         </div>
+      </section>
 
+      <main className="flex-1 max-w-2xl mx-auto px-6 py-12 w-full">
         <div
           className="border border-border bg-card p-8"
           style={{
@@ -82,12 +104,6 @@ export default async function MakerProfilePage() {
           <ProfileForm initial={initial} />
         </div>
       </main>
-
-      <footer className="border-t border-border bg-card py-8">
-        <div className="max-w-6xl mx-auto px-6 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-        </div>
-      </footer>
     </div>
   );
 }

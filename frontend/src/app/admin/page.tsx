@@ -54,6 +54,14 @@ export default async function AdminDashboardPage() {
         <StatCard label="承認済メーカー" value={summary.active_makers_count} />
         <StatCard label="却下メーカー" value={summary.rejected_makers_count} />
         <StatCard label="総ユーザー" value={summary.total_users_count} />
+        <StatCard
+          label="資材マスタ (総数)"
+          value={summary.products_total}
+        />
+        <StatCard
+          label="資材マスタ (公開中)"
+          value={summary.products_public_total}
+        />
       </section>
 
       <section aria-label="サブ画面" className="space-y-3">
@@ -63,6 +71,12 @@ export default async function AdminDashboardPage() {
             href="/admin/makers"
             title="メーカー承認 (B1)"
             description="新規メーカー登録の承認・却下を行います。"
+            ready
+          />
+          <SubpageCard
+            href="/admin/products"
+            title="資材マスタ"
+            description="BS 資材 (products) の業務管理。検索 / 編集 / 公開フラグ切替。"
             ready
           />
           <SubpageCard

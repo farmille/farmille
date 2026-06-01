@@ -39,7 +39,8 @@ export function SiteHeaderMobileNav({
         aria-label={open ? "メニューを閉じる" : "メニューを開く"}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-foreground transition-colors hover:bg-muted md:hidden"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-dark)] md:hidden"
+        style={{ border: "1px solid var(--overlay-on-dark-strong)" }}
       >
         {open ? (
           <X className="h-5 w-5" aria-hidden />
@@ -54,12 +55,12 @@ export function SiteHeaderMobileNav({
           <div
             aria-hidden
             onClick={close}
-            className="fixed inset-0 top-14 z-40 bg-foreground/30 md:hidden"
+            className="fixed inset-0 top-16 z-40 bg-foreground/30 md:hidden"
           />
           {/* ドロワー */}
           <nav
             aria-label="モバイル メニュー"
-            className="fixed inset-x-0 top-14 z-50 border-b border-border bg-card p-4 shadow-lg md:hidden"
+            className="fixed inset-x-0 top-16 z-50 border-b border-border bg-card p-4 shadow-lg md:hidden"
           >
             <ul className="space-y-1">
               {NAV_LINKS.map((l) => (

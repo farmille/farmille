@@ -55,6 +55,17 @@ class FakeQuery:
     def in_(self, *args: Any, **kwargs: Any) -> "FakeQuery":
         return self._record("in_", *args, **kwargs)
 
+    def or_(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("or_", *args, **kwargs)
+
+    def is_(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("is_", *args, **kwargs)
+
+    @property
+    def not_(self) -> "FakeQuery":
+        # supabase-py の `.not_.is_("col", "null")` チェーンを記録器として受ける。
+        return self
+
     def order(self, *args: Any, **kwargs: Any) -> "FakeQuery":
         return self._record("order", *args, **kwargs)
 

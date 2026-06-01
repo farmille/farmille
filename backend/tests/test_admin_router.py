@@ -21,7 +21,22 @@ TARGET_ID = "33333333-3333-3333-3333-333333333333"
 
 @pytest.fixture()
 def admin_user(override_user) -> dict[str, Any]:
-    payload = {"sub": ADMIN_USER_ID, "app_metadata": {"role": "admin"}}
+    payload = {
+        "sub": ADMIN_USER_ID,
+        "app_metadata": {"role": "admin"},
+        "aal": "aal2",
+    }
+    override_user(payload)
+    return payload
+
+
+@pytest.fixture()
+def admin_user_aal1(override_user) -> dict[str, Any]:
+    payload = {
+        "sub": ADMIN_USER_ID,
+        "app_metadata": {"role": "admin"},
+        "aal": "aal1",
+    }
     override_user(payload)
     return payload
 
@@ -80,17 +95,77 @@ class TestGuard:
         assert res.status_code == 403
 
 
+# ─── ADR-0012 §2.4: AAL2 enforcement for admin role ───────────────────
+
+
+class TestAAL2Enforcement:
+    """AAL1 admin の JWT は 401 `aal_insufficient` で reject される (ADR-0012)。"""
+
+    def test_summary_rejects_aal1_admin(
+        self, client, patch_router_admin, admin_user_aal1
+    ):
+        res = client.get("/v1/admin/summary")
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+    def test_pending_makers_rejects_aal1_admin(
+        self, client, patch_router_admin, admin_user_aal1
+    ):
+        res = client.get("/v1/admin/makers/pending")
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+    def test_approve_rejects_aal1_admin(
+        self, client, patch_router_admin, admin_user_aal1
+    ):
+        res = client.post(f"/v1/admin/makers/{MAKER_ID}/approve")
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+    def test_reject_rejects_aal1_admin(
+        self, client, patch_router_admin, admin_user_aal1
+    ):
+        res = client.post(
+            f"/v1/admin/makers/{MAKER_ID}/reject", json={"reason": None}
+        )
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+    def test_role_assign_rejects_aal1_admin(
+        self, client, patch_router_admin, admin_user_aal1
+    ):
+        res = client.post(
+            f"/v1/admin/users/{TARGET_ID}/role", json={"role": "admin"}
+        )
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+    def test_missing_aal_claim_treated_as_aal1(
+        self, client, patch_router_admin, override_user
+    ):
+        """aal claim 欠落の JWT も AAL1 扱いで reject される (jwt.py:get_user_aal)。"""
+        override_user({"sub": ADMIN_USER_ID, "app_metadata": {"role": "admin"}})
+        res = client.get("/v1/admin/summary")
+        assert res.status_code == 401
+        assert res.json()["detail"] == "aal_insufficient"
+
+
 # ─── GET /v1/admin/summary ─────────────────────────────────────────────
 
 
 class TestSummary:
     def test_returns_counts(self, client, patch_router_admin, admin_user):
+        """spec admin-aglist-alignment-v2.md §3.4 で products_total /
+        products_public_total が追加されたため、_count は 6 回呼ばれる
+        (users x 4, products x 2)。"""
         admin = patch_router_admin
         responses = [
             [{"id": "p1"}, {"id": "p2"}, {"id": "p3"}],
             [{"id": "a1"}, {"id": "a2"}],
             [{"id": "r1"}],
             [{"id": "u1"}, {"id": "u2"}, {"id": "u3"}, {"id": "u4"}, {"id": "u5"}],
+            [],  # products_total (空でも fields は付く)
+            [],  # products_public_total
         ]
         call_idx = {"i": 0}
         original_table = admin.table
@@ -123,6 +198,8 @@ class TestSummary:
             "active_makers_count": 2,
             "rejected_makers_count": 1,
             "total_users_count": 5,
+            "products_total": 0,
+            "products_public_total": 0,
         }
 
 
@@ -374,7 +451,7 @@ class TestApprove:
         store.attach(admin)
         res = client.post(f"/v1/admin/makers/{MAKER_ID}/approve")
         assert res.status_code == 409
-        assert res.json()["error"] == "maker_not_pending"
+        assert res.json()["error"] == "already_active"
 
 
 # ─── POST /v1/admin/makers/{id}/reject ─────────────────────────────────
@@ -577,6 +654,7 @@ class TestPublicFilters:
             order = _noop
             limit = _noop
             is_ = _noop
+            eq = _noop
 
             def execute(self):
                 r = MagicMock()
@@ -584,24 +662,20 @@ class TestPublicFilters:
                 return r
 
         def _table_factory(_self, name: str):
-            if name == "featured_products":
+            if name == "products":
                 return _Q(
                     [
                         {
-                            "id": "11111111-1111-1111-1111-111111111111",
-                            "sort_order": 0,
-                            "displayed_at": "2026-05-10T00:00:00Z",
-                            "products": {
-                                "id": "22222222-2222-2222-2222-222222222222",
-                                "name": "Hidden",
-                                "users": {
-                                    "name": "Pending Maker",
-                                    "status": "pending_review",
-                                    "maker_profiles": {"company_name": "Pending Co"},
-                                },
-                                "product_types": None,
-                                "product_images": [],
+                            "id": "22222222-2222-2222-2222-222222222222",
+                            "name": "Hidden",
+                            "updated_at": "2026-05-10T00:00:00Z",
+                            "users": {
+                                "name": "Pending Maker",
+                                "status": "pending_review",
+                                "maker_profiles": {"company_name": "Pending Co"},
                             },
+                            "product_types": None,
+                            "product_images": [],
                         }
                     ]
                 )
@@ -762,3 +836,112 @@ class TestPublicFilters:
         res = client.get("/v1/articles/any-article")
         assert res.status_code == 200
         assert res.json()["related_products"] == []
+
+
+# ─── freeze / unfreeze / soft-delete (2026-06-01 soft-delete + self/admin ガード) ───
+
+
+class TestModeration:
+    """destructive モデレーション操作の契約。soft-delete は users 行を残し
+    deleted_at + status='frozen' + auth ban をセットする (ハード削除しない)。"""
+
+    def test_delete_soft_deletes_not_hard(
+        self, client, patch_router_admin, admin_user
+    ):
+        admin = patch_router_admin
+        admin.set_response("users", [{"id": TARGET_ID, "role": "farmer"}], op="select")
+        res = client.post(f"/v1/admin/users/{TARGET_ID}/delete")
+        assert res.status_code == 200
+        assert res.json() == {"ok": True, "user_id": TARGET_ID}
+        # ハード削除 (auth.users 物理削除) は呼ばれない
+        admin.auth.admin.delete_user.assert_not_called()
+        # deleted_at + status='frozen' を含む users update が発行される
+        update_payloads = [
+            c[1][0]
+            for q in admin.executed
+            if q["table"] == "users"
+            for c in q["calls"]
+            if c[0] == "update"
+        ]
+        assert update_payloads, "expected a users update (soft delete)"
+        assert update_payloads[-1].get("deleted_at")
+        assert update_payloads[-1].get("status") == "frozen"
+        # login 禁止のため auth ban が呼ばれる
+        admin.auth.admin.update_user_by_id.assert_called_once()
+
+    def test_delete_self_blocked(self, client, patch_router_admin, admin_user):
+        res = client.post(f"/v1/admin/users/{ADMIN_USER_ID}/delete")
+        assert res.status_code == 400
+        assert res.json()["error"] == "cannot_delete_self"
+        patch_router_admin.auth.admin.delete_user.assert_not_called()
+
+    def test_delete_admin_target_blocked(
+        self, client, patch_router_admin, admin_user
+    ):
+        admin = patch_router_admin
+        admin.set_response("users", [{"id": TARGET_ID, "role": "admin"}], op="select")
+        res = client.post(f"/v1/admin/users/{TARGET_ID}/delete")
+        assert res.status_code == 403
+        assert res.json()["error"] == "cannot_delete_admin"
+
+    def test_delete_missing_returns_404(self, client, patch_router_admin, admin_user):
+        admin = patch_router_admin
+        admin.set_response("users", [], op="select")
+        res = client.post(f"/v1/admin/users/{TARGET_ID}/delete")
+        assert res.status_code == 404
+        assert res.json()["error"] == "user_not_found"
+
+    def test_delete_forbids_non_admin(self, client, patch_router_admin, farmer_user):
+        res = client.post(f"/v1/admin/users/{TARGET_ID}/delete")
+        assert res.status_code == 403
+
+    def test_freeze_self_blocked(self, client, patch_router_admin, admin_user):
+        res = client.post(f"/v1/admin/users/{ADMIN_USER_ID}/freeze")
+        assert res.status_code == 400
+        assert res.json()["error"] == "cannot_modify_self"
+
+    def test_freeze_admin_target_blocked(
+        self, client, patch_router_admin, admin_user
+    ):
+        admin = patch_router_admin
+        admin.set_response(
+            "users", [{"status": "active", "role": "admin"}], op="select"
+        )
+        res = client.post(f"/v1/admin/users/{TARGET_ID}/freeze")
+        assert res.status_code == 403
+        assert res.json()["error"] == "cannot_freeze_admin"
+
+    def test_freeze_active_user_succeeds(
+        self, client, patch_router_admin, admin_user
+    ):
+        admin = patch_router_admin
+        admin.set_response(
+            "users", [{"status": "active", "role": "farmer"}], op="select"
+        )
+        res = client.post(f"/v1/admin/users/{TARGET_ID}/freeze")
+        assert res.status_code == 200
+        assert res.json()["status"] == "frozen"
+
+    def test_unfreeze_deleted_user_blocked(
+        self, client, patch_router_admin, admin_user
+    ):
+        admin = patch_router_admin
+        admin.set_response(
+            "users",
+            [{"status": "frozen", "deleted_at": "2026-06-01T00:00:00Z"}],
+            op="select",
+        )
+        res = client.post(f"/v1/admin/users/{TARGET_ID}/unfreeze")
+        assert res.status_code == 409
+        assert res.json()["error"] == "user_deleted"
+
+    def test_unfreeze_frozen_user_succeeds(
+        self, client, patch_router_admin, admin_user
+    ):
+        admin = patch_router_admin
+        admin.set_response(
+            "users", [{"status": "frozen", "deleted_at": None}], op="select"
+        )
+        res = client.post(f"/v1/admin/users/{TARGET_ID}/unfreeze")
+        assert res.status_code == 200
+        assert res.json()["status"] == "active"

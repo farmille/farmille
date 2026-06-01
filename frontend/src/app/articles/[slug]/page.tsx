@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { BookOpen, ChevronRight } from "lucide-react";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import {
   ARTICLE_CATEGORY_LABEL,
@@ -90,46 +91,79 @@ export default async function ArticleDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <main className="flex-1 max-w-3xl mx-auto px-6 py-10 w-full space-y-8">
-        <nav className="text-sm text-muted-foreground" aria-label="パンくず">
-          <Link href="/articles" className="hover:text-primary">
-            記事一覧
-          </Link>
-          <span className="mx-2">›</span>
-          <span className="text-foreground line-clamp-1">{article.title}</span>
-        </nav>
+      {/* Breadcrumb bar — AgList-style */}
+      <div className="border-b border-border bg-card">
+        <div className="max-w-6xl mx-auto px-6 py-3 text-sm text-muted-foreground">
+          <nav aria-label="パンくず" className="flex items-center gap-1.5">
+            <Link
+              href="/articles"
+              className="hover:text-[var(--green-primary)]"
+            >
+              記事一覧
+            </Link>
+            <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="text-foreground line-clamp-1">{article.title}</span>
+          </nav>
+        </div>
+      </div>
 
+      {/* Hero band — soft green tint, large title, byline + date */}
+      <section
+        aria-label="ページヘッダー"
+        className="border-b border-border"
+        style={{ backgroundColor: "var(--green-subtle)" }}
+      >
+        <div className="max-w-3xl mx-auto px-6 py-12 md:py-16 space-y-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold"
+              style={{
+                backgroundColor: "var(--overlay-on-light-soft)",
+                color: "var(--green-dark)",
+                borderRadius: "var(--radius-full)",
+              }}
+            >
+              <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+              {ARTICLE_CATEGORY_LABEL[article.category]}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {formatDate(article.published_at)}
+            </span>
+          </div>
+          <h1
+            className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground"
+            style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
+          >
+            {article.title}
+          </h1>
+          {article.author && (
+            <p className="text-sm text-muted-foreground">
+              著者: {article.author.name}
+            </p>
+          )}
+        </div>
+      </section>
+
+      <main className="flex-1 max-w-3xl mx-auto px-6 py-10 w-full space-y-10">
         <article className="space-y-6">
-          <header className="space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="inline-block rounded-sm bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                {ARTICLE_CATEGORY_LABEL[article.category]}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {formatDate(article.published_at)}
-              </span>
+          {article.hero_image_url && (
+            <div
+              className="relative aspect-[16/9] border border-border bg-[var(--green-subtle)] overflow-hidden"
+              style={{
+                borderRadius: "var(--radius-lg)",
+                boxShadow: "var(--shadow-sm)",
+              }}
+            >
+              <Image
+                src={article.hero_image_url}
+                alt={article.title}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="object-cover"
+              />
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-              {article.title}
-            </h1>
-            {article.author && (
-              <p className="text-sm text-muted-foreground">
-                著者: {article.author.name}
-              </p>
-            )}
-            {article.hero_image_url && (
-              <div className="relative aspect-[16/9] rounded-md border border-border bg-muted overflow-hidden">
-                <Image
-                  src={article.hero_image_url}
-                  alt={article.title}
-                  fill
-                  priority
-                  sizes="(max-width: 768px) 100vw, 768px"
-                  className="object-cover"
-                />
-              </div>
-            )}
-          </header>
+          )}
 
           {/*
            * 本文は Server Component 内で remark/rehype サニタイズ済 HTML 文字列
@@ -142,11 +176,16 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         </article>
 
         {article.related_products.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-              関連製品
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <section className="space-y-5">
+            <div className="flex items-baseline justify-between border-b border-border pb-3">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                関連製品
+              </h2>
+              <span className="text-sm text-muted-foreground">
+                {article.related_products.length} 件
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {article.related_products.map((p) => (
                 <RelatedProductCard key={p.id} product={p} />
               ))}
@@ -154,20 +193,6 @@ export default async function ArticleDetailPage({ params }: PageProps) {
           </section>
         )}
       </main>
-
-      <footer className="border-t border-border bg-card py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2026 Farmille</p>
-          <nav className="flex items-center gap-4">
-            <Link href="/login" className="hover:text-primary">
-              ログイン
-            </Link>
-            <Link href="/signup" className="hover:text-primary">
-              新規登録
-            </Link>
-          </nav>
-        </div>
-      </footer>
     </div>
   );
 }

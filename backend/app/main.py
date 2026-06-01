@@ -9,6 +9,8 @@ from sentry_sdk.integrations.starlette import StarletteIntegration
 from app.config import settings
 from app.routers import (
     admin,
+    admin_products,
+    admin_reports,
     articles,
     auth,
     certifications,
@@ -25,6 +27,7 @@ from app.routers import (
     product_benefits,
     product_types,
     products,
+    reports,
     reviews,
 )
 
@@ -45,7 +48,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins.split(","),
+    allow_origins=[o.strip() for o in settings.cors_origins.split(",") if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -74,4 +77,11 @@ app.include_router(
 app.include_router(me_profile.router, prefix="/v1/me", tags=["me-profile"])
 app.include_router(reviews.router, prefix="/v1/reviews", tags=["reviews"])
 app.include_router(home.router, prefix="/v1/home", tags=["home"])
+app.include_router(reports.router, prefix="/v1/reports", tags=["reports"])
 app.include_router(admin.router, prefix="/v1/admin", tags=["admin"])
+app.include_router(
+    admin_products.router, prefix="/v1/admin/products", tags=["admin-products"]
+)
+app.include_router(
+    admin_reports.router, prefix="/v1/admin/reports", tags=["admin-reports"]
+)

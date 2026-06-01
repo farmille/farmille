@@ -215,9 +215,16 @@ async def create_product(
 async def list_products(
     type_id: str | None = Query(default=None),
     crop_id: str | None = Query(default=None),
+    q: str | None = Query(
+        default=None,
+        description="部分一致検索 (name + product_name_jp、case-insensitive)",
+        max_length=100,
+    ),
 ):
-    """資材一覧。`type_id` / `crop_id` の AND 絞り込み対応。
+    """資材一覧。`type_id` / `crop_id` / `q` の AND 絞り込み対応。
 
+    `q` は name と product_name_jp の OR-ILIKE。カンマは PostgREST の `or` 文法
+    で予約文字なので除去してから渡す。
     レスポンス: { products: [{ id, name, maker_id, maker_name,
                               type_id, type_name, image_url, created_at }] }
     認証不要(LP / ゲスト閲覧前提)。
@@ -244,10 +251,25 @@ async def list_products(
         'product_types(id, name), '
         'product_images(url, "order")'
     )
+    # 2026-05-27: ソフト削除済 product は公開リストから除外
+    query = query.is_("deleted_at", "null")
+    # 2026-05-27 hotfix: is_public=false は公開リストから除外 (admin の編集画面で
+    # 非公開保存しても列挙されていた pre-existing bug を修正)。
+    query = query.eq("is_public", True)
     if type_id:
         query = query.eq("product_type_id", type_id)
     if product_ids is not None:
         query = query.in_("id", product_ids)
+    if q:
+        # PostgREST `or` 文法で name + product_name_jp の OR-ILIKE。
+        # or()/ilike の filter 文法に効く文字 (`,` 区切り / `()` グループ化 / `*`
+        # wildcard) を除去し filter-injection 面を塞ぐ。SQL injection ではないが
+        # 400 やマッチ範囲の意図せぬ拡大を防ぐため v1 では検索対象外とする。
+        like = q.strip().translate({ord(c): None for c in ",()*"})
+        if like:
+            query = query.or_(
+                f"name.ilike.%{like}%,product_name_jp.ilike.%{like}%"
+            )
     res = query.order("created_at", desc=True).execute()
     # ADR-0009: 非 active メーカー (pending_review / rejected / frozen) 所有の
     # 製品は公開一覧に出さない。Supabase の foreign-table フィルタは join 側を
@@ -322,14 +344,21 @@ async def list_product_reviews(product_id: UUID):
     admin = get_supabase_admin()
     res = (
         admin.table("reviews")
-        .select("id, user_id, rating, body, created_at, users(name)")
+        .select("id, user_id, rating, body, created_at, users(name, status, deleted_at)")
         .eq("product_id", str(product_id))
         .order("created_at", desc=True)
         .execute()
     )
+    # 2026-06-01: 凍結 (status != "active") / ソフト削除 (deleted_at) 済ユーザーの
+    # レビューは公開フィードから除外する。freeze_user は users.status のみ更新して
+    # review 行は残すため、著者状態を見ないと凍結した荒らしの氏名・本文・評価が
+    # 公開され続け、モデレーションの「公開ページから消える」約束と矛盾していた。
+    # service_role で読むため RLS の第二防御も効かず、ここでの除外が唯一のゲート。
     reviews = []
     for r in res.data or []:
         u = r.get("users") or {}
+        if u.get("status") != "active" or u.get("deleted_at") is not None:
+            continue
         reviews.append({
             "id": r["id"],
             "user_id": r["user_id"],
@@ -353,7 +382,7 @@ async def get_product(product_id: UUID):
         admin.table("products")
         .select(
             'id, name, maker_id, general_purpose, primary_compound, mode_of_action, '
-            'commercial_status, label_url, sds_url, created_at, '
+            'commercial_status, label_url, sds_url, is_public, deleted_at, created_at, '
             'users(name, status, maker_profiles(company_name)), '
             'product_types(id, name), '
             'product_images(url, "order"), '
@@ -369,6 +398,11 @@ async def get_product(product_id: UUID):
     row = res.data[0]
     # ADR-0009: 非 active メーカー所有の製品は公開詳細から 404 として隠す。
     if (row.get("users") or {}).get("status") != "active":
+        raise HTTPException(status_code=404, detail="product_not_found")
+    # 2026-05-27 hotfix: is_public=false / ソフト削除済は公開詳細からも 404 で隠す
+    if not row.get("is_public"):
+        raise HTTPException(status_code=404, detail="product_not_found")
+    if row.get("deleted_at"):
         raise HTTPException(status_code=404, detail="product_not_found")
     return _flatten_product_detail(row)
 
@@ -545,15 +579,13 @@ async def delete_product(
 
     try:
         admin.table("products").delete().eq("id", str(product_id)).execute()
-    except Exception as exc:
+    except Exception:
         logger.exception("failed to delete product %s", product_id)
+        # DB エラー文字列 (str(exc)) はクライアントに返さない (内部情報漏洩防止)。
+        # 詳細はサーバ側 logger.exception にのみ残す。
         return JSONResponse(
             status_code=500,
-            content={
-                "ok": False,
-                "error": "failed_to_delete_product",
-                "detail": str(exc),
-            },
+            content={"ok": False, "error": "failed_to_delete_product"},
         )
 
     return Response(status_code=204)

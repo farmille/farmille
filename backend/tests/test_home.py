@@ -50,6 +50,9 @@ class _FluentQuery:
     def is_(self, *a, **kw):
         return self._record("is_", *a, **kw)
 
+    def eq(self, *a, **kw):
+        return self._record("eq", *a, **kw)
+
     def execute(self) -> MagicMock:
         result = MagicMock()
         result.data = self.data
@@ -100,24 +103,20 @@ def test_home_empty_returns_200_with_empty_arrays(client, home_module):
 def test_home_returns_all_three_series(client, home_module):
     admin = home_module(
         {
-            "featured_products": [
+            "products": [
                 {
-                    "id": "11111111-1111-1111-1111-111111111111",
-                    "sort_order": 0,
-                    "displayed_at": "2026-05-10T00:00:00Z",
-                    "products": {
-                        "id": "22222222-2222-2222-2222-222222222222",
-                        "name": "微生物資材 A",
-                        "users": {
-                            "name": "山田太郎",
-                            "status": "active",
-                            "maker_profiles": {"company_name": "ACME Bio"},
-                        },
-                        "product_types": {"id": "t", "name": "BS資材"},
-                        "product_images": [
-                            {"url": "https://example.supabase.co/o/a.png", "order": 0}
-                        ],
+                    "id": "22222222-2222-2222-2222-222222222222",
+                    "name": "微生物資材 A",
+                    "updated_at": "2026-05-10T00:00:00Z",
+                    "users": {
+                        "name": "山田太郎",
+                        "status": "active",
+                        "maker_profiles": {"company_name": "ACME Bio"},
                     },
+                    "product_types": {"id": "t", "name": "BS資材"},
+                    "product_images": [
+                        {"url": "https://example.supabase.co/o/a.png", "order": 0}
+                    ],
                 }
             ],
             "articles": [
@@ -158,9 +157,10 @@ def test_home_returns_all_three_series(client, home_module):
     assert len(body["banners"]) == 1
     assert body["banners"][0]["link_url"] == "https://example.com/news"
 
-    # spec §5.1: featured_products / home_banners は displayed_at <= now() で絞る
-    fp_calls = [c[0] for c in admin.queries["featured_products"].calls]
-    assert "lte" in fp_calls  # displayed_at <= now()
+    # 2026-05-27: featured は products.updated_at DESC + is_public/deleted_at で絞る
+    fp_calls = [c[0] for c in admin.queries["products"].calls]
+    assert "eq" in fp_calls  # is_public = true
+    assert "is_" in fp_calls  # deleted_at IS NULL
     # articles は published_at NOT NULL かつ <= now()
     art_calls = [c[0] for c in admin.queries["articles"].calls]
     assert "is_" in art_calls  # not_.is_("published_at", "null")
@@ -170,23 +170,19 @@ def test_home_returns_all_three_series(client, home_module):
 def test_home_falls_back_to_user_name_when_company_name_missing(client, home_module):
     home_module(
         {
-            "featured_products": [
+            "products": [
                 {
-                    "id": "11111111-1111-1111-1111-111111111111",
-                    "sort_order": 1,
-                    "displayed_at": "2026-05-10T00:00:00Z",
-                    "products": {
-                        "id": "22222222-2222-2222-2222-222222222222",
-                        "name": "資材 B",
-                        # company_name 空、users.name にフォールバック
-                        "users": {
-                            "name": "山田太郎",
-                            "status": "active",
-                            "maker_profiles": {},
-                        },
-                        "product_types": {"id": "t", "name": "肥料"},
-                        "product_images": [],
+                    "id": "22222222-2222-2222-2222-222222222222",
+                    "name": "資材 B",
+                    "updated_at": "2026-05-10T00:00:00Z",
+                    # company_name 空、users.name にフォールバック
+                    "users": {
+                        "name": "山田太郎",
+                        "status": "active",
+                        "maker_profiles": {},
                     },
+                    "product_types": {"id": "t", "name": "肥料"},
+                    "product_images": [],
                 }
             ],
             "articles": [],
@@ -204,22 +200,18 @@ def test_home_handles_maker_profiles_as_list(client, home_module):
     """Supabase の 1:1 join が list[dict] で返ってきても受ける (spec §10.x で吸収)."""
     home_module(
         {
-            "featured_products": [
+            "products": [
                 {
-                    "id": "11111111-1111-1111-1111-111111111111",
-                    "sort_order": 0,
-                    "displayed_at": "2026-05-10T00:00:00Z",
-                    "products": {
-                        "id": "22222222-2222-2222-2222-222222222222",
-                        "name": "資材 C",
-                        "users": {
-                            "name": "佐藤",
-                            "status": "active",
-                            "maker_profiles": [{"company_name": "Beta Corp"}],
-                        },
-                        "product_types": None,
-                        "product_images": None,
+                    "id": "22222222-2222-2222-2222-222222222222",
+                    "name": "資材 C",
+                    "updated_at": "2026-05-10T00:00:00Z",
+                    "users": {
+                        "name": "佐藤",
+                        "status": "active",
+                        "maker_profiles": [{"company_name": "Beta Corp"}],
                     },
+                    "product_types": None,
+                    "product_images": None,
                 }
             ],
             "articles": [],
@@ -234,15 +226,15 @@ def test_home_handles_maker_profiles_as_list(client, home_module):
 
 
 def test_home_skips_featured_when_product_missing(client, home_module):
-    """FK CASCADE で通常起きないが防御的に: products が無い行はスキップ."""
+    """maker (users) が無い / 非 active な product 行は防御的にスキップ."""
     home_module(
         {
-            "featured_products": [
+            "products": [
                 {
-                    "id": "11111111-1111-1111-1111-111111111111",
-                    "sort_order": 0,
-                    "displayed_at": "2026-05-10T00:00:00Z",
-                    "products": None,
+                    "id": "22222222-2222-2222-2222-222222222222",
+                    "name": "Orphan",
+                    "updated_at": "2026-05-10T00:00:00Z",
+                    "users": None,
                 }
             ],
             "articles": [],
@@ -258,12 +250,11 @@ def test_home_skips_featured_when_product_missing(client, home_module):
 
 
 def test_home_default_limits_apply(client, home_module):
-    admin = home_module({"featured_products": [], "articles": [], "home_banners": []})
+    admin = home_module({"products": [], "articles": [], "home_banners": []})
     res = client.get("/v1/home")
     assert res.status_code == 200
-    # default: featured=8, articles=6, banners=3 → limit が呼ばれて引数で渡る
+    # articles / banners は limit を直接 Supabase に渡す (default: articles=6, banners=3)
     for table, expected in [
-        ("featured_products", 8),
         ("articles", 6),
         ("home_banners", 3),
     ]:
@@ -271,21 +262,26 @@ def test_home_default_limits_apply(client, home_module):
         assert limit_calls and limit_calls[-1][1][0] == expected, (
             f"{table}: expected default limit {expected}"
         )
+    # featured は active-maker post-filter で減る分を見越し limit 以上を fetch する
+    # (fetch_limit = max(limit*2, limit+4))。default featured=8。
+    fp_limit_calls = [c for c in admin.queries["products"].calls if c[0] == "limit"]
+    assert fp_limit_calls and fp_limit_calls[-1][1][0] >= 8
 
 
 def test_home_custom_limits_pass_through(client, home_module):
-    admin = home_module({"featured_products": [], "articles": [], "home_banners": []})
+    admin = home_module({"products": [], "articles": [], "home_banners": []})
     res = client.get(
         "/v1/home", params={"featured_limit": 5, "articles_limit": 4, "banners_limit": 2}
     )
     assert res.status_code == 200
     for table, expected in [
-        ("featured_products", 5),
         ("articles", 4),
         ("home_banners", 2),
     ]:
         limit_calls = [c for c in admin.queries[table].calls if c[0] == "limit"]
         assert limit_calls and limit_calls[-1][1][0] == expected
+    fp_limit_calls = [c for c in admin.queries["products"].calls if c[0] == "limit"]
+    assert fp_limit_calls and fp_limit_calls[-1][1][0] >= 5
 
 
 @pytest.mark.parametrize(
@@ -315,17 +311,22 @@ def test_home_invalid_limits_return_422(client, home_module, param, bad_value):
 )
 def test_home_max_limits_accepted(client, home_module, param, max_value):
     """spec §5.1: Pydantic `le=` は <= なので max ちょうどは 200 を期待."""
-    admin = home_module({"featured_products": [], "articles": [], "home_banners": []})
+    admin = home_module({"products": [], "articles": [], "home_banners": []})
     res = client.get("/v1/home", params={param: max_value})
     assert res.status_code == 200
     table_for_param = {
-        "featured_limit": "featured_products",
+        "featured_limit": "products",
         "articles_limit": "articles",
         "banners_limit": "home_banners",
     }
     table = table_for_param[param]
     limit_calls = [c for c in admin.queries[table].calls if c[0] == "limit"]
-    assert limit_calls and limit_calls[-1][1][0] == max_value
+    assert limit_calls
+    if param == "featured_limit":
+        # active-maker post-filter で減る分を見越し max 以上を fetch
+        assert limit_calls[-1][1][0] >= max_value
+    else:
+        assert limit_calls[-1][1][0] == max_value
 
 
 def test_home_does_not_require_auth(client, home_module):
