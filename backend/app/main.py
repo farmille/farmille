@@ -9,6 +9,7 @@ from sentry_sdk.integrations.starlette import StarletteIntegration
 from app.config import settings
 from app.routers import (
     admin,
+    admin_articles,
     admin_products,
     admin_reports,
     articles,
@@ -84,4 +85,7 @@ app.include_router(
 )
 app.include_router(
     admin_reports.router, prefix="/v1/admin/reports", tags=["admin-reports"]
+)
+app.include_router(
+    admin_articles.router, prefix="/v1/admin/articles", tags=["admin-articles"]
 )
