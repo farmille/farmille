@@ -12,7 +12,9 @@ import { createClient } from "@/lib/supabase/server";
 export async function proxyToBackend(
   upstreamPath: string,
   options: {
-    method: "POST" | "PUT" | "DELETE" | "PATCH";
+    // 2026-06-02 (Admin Articles CMS): GET を追加。read 系 proxy route handler でも
+    // admin+AAL2 を BFF で再検証してから FastAPI に転送するため。
+    method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
     body?: unknown;
     /** admin role + AAL2 を要求するか。既定で /v1/admin/* を自動 admin 扱い。 */
     requireAdmin?: boolean;
@@ -30,6 +32,9 @@ export async function proxyToBackend(
   }
 
   // /v1/admin/* は role + AAL2 をここでも弾く (非 admin の /v1/reports 等は対象外)。
+  // ⚠️ 申し送り (PR#33 evaluator §4.3): GET 拡張により、将来 /v1/admin/ 以外の path で
+  //    GET proxy を書くと requireAdmin が false=「ログイン済のみ」で素通る。非 admin path の
+  //    GET proxy を足すときは requireAdmin を明示するか、認可方針を必ず設計すること。
   const requireAdmin =
     options.requireAdmin ?? upstreamPath.startsWith("/v1/admin/");
   if (requireAdmin) {
@@ -67,13 +72,21 @@ export async function proxyToBackend(
     );
   }
 
+  // GET は body / Content-Type を付けない (一部サーバーが GET+body を 400 にするため)。
+  const isGet = options.method === "GET";
   const upstream = await fetch(`${apiUrl}${upstreamPath}`, {
     method: options.method,
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-      "Content-Type": "application/json",
-    },
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    headers: isGet
+      ? { Authorization: `Bearer ${session.access_token}` }
+      : {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+    body:
+      !isGet && options.body !== undefined
+        ? JSON.stringify(options.body)
+        : undefined,
+    cache: "no-store",
   });
 
   const respBody = await upstream.json().catch(() => ({}));

@@ -636,3 +636,103 @@ class AdminProductUpdatePayload(BaseModel):
 
 
 # §3.4 products カウントは AdminSummaryResponse に直接追加 (上記参照)。
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Admin Articles CMS (ADR-0014 / docs/drafts/admin-articles-cms-spec.md)
+# 全 endpoint は require_role("admin") + AAL2、service_role 経由 (BFF 第一防御)。
+# articles テーブルの CHECK 制約 (migration 20260502120000) と各 Field 制約を一致させる:
+#   slug    : ^[a-z0-9]+(-[a-z0-9]+)*$ かつ length 3..80
+#   title   : length 1..200
+#   body_md : length 1..50000
+#   category: monthly_report / weekly_report / featured / column
+# ─────────────────────────────────────────────────────────────────────
+
+# slug の DB CHECK 制約 (articles.slug) と同一の正規表現。
+ARTICLE_SLUG_PATTERN = r"^[a-z0-9]+(-[a-z0-9]+)*$"
+
+
+class AdminArticleListItem(BaseModel):
+    """`GET /v1/admin/articles` 一覧の 1 行 (下書き含む全件)。
+
+    公開系 ArticleListItem と違い published_at は NULL を許容 (下書き)、excerpt は
+    一覧では返さない (一覧用途では不要、編集画面で body_md を別取得)。
+    """
+
+    id: UUID
+    slug: str
+    title: str
+    category: ArticleCategory
+    hero_image_url: str | None = None
+    published_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class AdminArticleListResponse(BaseModel):
+    articles: list[AdminArticleListItem]
+    total: int = Field(ge=0)
+    page: int = Field(ge=1)
+    per_page: int = Field(ge=1, le=100)
+
+
+class AdminArticleDetail(BaseModel):
+    """`GET /v1/admin/articles/{id}` 詳細 (編集プリフィル用、body_md 含む全列)。"""
+
+    id: UUID
+    slug: str
+    title: str
+    body_md: str
+    category: ArticleCategory
+    hero_image_url: str | None = None
+    author_user_id: UUID | None = None
+    published_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class AdminArticleCreate(BaseModel):
+    """`POST /v1/admin/articles` ペイロード。
+
+    author_user_id は受け取らない (BFF が auth.uid() で強制、書き換え攻撃防止。
+    既存 MeProfileUpdatePayload / MakerProfileUpdatePayload と同方針)。
+    extra="forbid" で未知キーを 422 弾き (PATCH と同じ厳格さ)。
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    slug: Annotated[
+        str, Field(min_length=3, max_length=80, pattern=ARTICLE_SLUG_PATTERN)
+    ]
+    title: Annotated[str, Field(min_length=1, max_length=200)]
+    body_md: Annotated[str, Field(min_length=1, max_length=50000)]
+    category: ArticleCategory
+    hero_image_url: Annotated[str | None, Field(default=None, max_length=2000)] = None
+    # set で即時公開、None (省略) で下書き。datetime 指定で予約 (公開判定は read 側で <= now())。
+    published_at: datetime | None = None
+
+
+class AdminArticlePatch(BaseModel):
+    """`PATCH /v1/admin/articles/{id}` 部分更新ペイロード (全 optional)。
+
+    published_at は「キーを送るかどうか」と「値が null か」を区別する必要がある:
+      - キー省略           → published_at を変更しない
+      - published_at=null  → 非公開化 (下書きに戻す)
+      - published_at=<dt>  → その時刻で公開 / 予約
+    Pydantic では「未送信」を model_fields_set で判定する (router 側参照)。
+    extra="forbid" で未知キーを 422。
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    slug: Annotated[
+        str | None,
+        Field(default=None, min_length=3, max_length=80, pattern=ARTICLE_SLUG_PATTERN),
+    ] = None
+    title: Annotated[str | None, Field(default=None, min_length=1, max_length=200)] = None
+    body_md: Annotated[
+        str | None, Field(default=None, min_length=1, max_length=50000)
+    ] = None
+    category: ArticleCategory | None = None
+    hero_image_url: Annotated[str | None, Field(default=None, max_length=2000)] = None
+    published_at: datetime | None = None

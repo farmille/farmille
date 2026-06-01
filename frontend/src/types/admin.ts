@@ -269,6 +269,70 @@ export interface AdminProductUpdatePayload {
   images?: AdminProductImageInput[] | null;
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Admin Articles CMS (ADR-0014 / docs/drafts/admin-articles-cms-spec.md)
+// 手書き型 (gen:types 適用後も admin BFF レスポンスは本ファイルで型付けする方針)。
+// ─────────────────────────────────────────────────────────────────────
+
+// articles.category の DB CHECK 制約 (migration 20260502120000) と一致。
+export type ArticleCategory =
+  | "monthly_report"
+  | "weekly_report"
+  | "featured"
+  | "column";
+
+export interface AdminArticleListItem {
+  id: string;
+  slug: string;
+  title: string;
+  category: ArticleCategory;
+  hero_image_url: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminArticleListResponse {
+  articles: AdminArticleListItem[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export interface AdminArticleDetail {
+  id: string;
+  slug: string;
+  title: string;
+  body_md: string;
+  category: ArticleCategory;
+  hero_image_url: string | null;
+  author_user_id: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// POST /api/admin/articles payload (作成)。author_user_id は backend が JWT から強制。
+export interface AdminArticleCreatePayload {
+  slug: string;
+  title: string;
+  body_md: string;
+  category: ArticleCategory;
+  hero_image_url?: string | null;
+  published_at?: string | null;
+}
+
+// PATCH /api/admin/articles/{id} payload (部分更新、全 optional)。
+// published_at は null で「非公開化」、キー省略で「変更なし」を表す (backend と整合)。
+export interface AdminArticlePatchPayload {
+  slug?: string;
+  title?: string;
+  body_md?: string;
+  category?: ArticleCategory;
+  hero_image_url?: string | null;
+  published_at?: string | null;
+}
+
 // 共通マスタ (既存 /v1/crops/tree などのレスポンス)。
 export interface CropNode {
   id: string;
