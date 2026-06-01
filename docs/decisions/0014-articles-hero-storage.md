@@ -99,6 +99,19 @@ articles-hero/{article_id}/{uuid}.{ext}
 「作成後に正規 path へ rename」を検討）。`_new/` 配下も同 RLS（admin + AAL2）で保護されるため
 セキュリティ差は無い。編集画面では確定済 `article_id` を第 1 階層に使う。
 
+なお、hero を選択後に**作成を中断**（キャンセル / バリデーション離脱）した場合、アップロード済の
+`_new/{uuid}` は確実に孤児化する。§2.4 の孤児 GC バッチ（v1.5+）は `{article_id}/` 孤児だけでなく
+**`_new/` 孤児も対象に含める**（public バケットだが参照する記事が無いため実害は容量のみ）。
+
+### 2.6 記事行の削除セマンティクス（hard delete）
+
+記事行は **hard delete**。`articles` テーブルに `deleted_at` 列を持たない既存設計を踏襲する
+（`user_reports` 等が soft delete を採るのと対照的だが、記事は監査ログ性が低く、**公開取り消しは
+`published_at = NULL` で可逆**に行えるため、完全削除のみを hard とする）。削除 UI
+（`article-delete-button.tsx`）は confirm で「公開ページから消え・復元不可」を明示。関連
+`article_products` は FK CASCADE で連動削除（migration `20260502120000`）。soft delete 化が必要に
+なった場合（v2 候補）は別 migration で `deleted_at` 列 + 公開読み経路のフィルタを追加する。
+
 ## 3. 採用しなかった代替案
 
 ### A. URL 直入力（却下）

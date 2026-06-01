@@ -49,6 +49,22 @@ Phase 12a で `getSession()` → `getUser()` 置換による JWT 署名検証を
 - path 強制: `{auth.uid}/avatar/{filename}`（第 2 階層 `'avatar'` 固定で、別 path への混在を防ぐ）
 - BFF が旧 avatar の `storage.remove()` を担当（フロントから remove は呼ばない、Phase 10 既存方針踏襲）
 
+#### 1.4 `articles-hero` バケット（migration `20260602000000`、Admin Articles CMS / ADR-0014）
+
+| 操作 | ポリシー名 | 対象 role | 条件 |
+|---|---|---|---|
+| SELECT | `articles_hero_select_all` | authenticated, anon | bucket = `articles-hero` |
+| INSERT | `articles_hero_insert_admin` | authenticated | bucket = `articles-hero` AND `app_metadata.role` = `admin` AND `aal` = `aal2` |
+| UPDATE | `articles_hero_update_admin` | authenticated | bucket = `articles-hero` AND `app_metadata.role` = `admin` AND `aal` = `aal2` |
+| DELETE | `articles_hero_delete_admin` | authenticated | bucket = `articles-hero` AND `app_metadata.role` = `admin` AND `aal` = `aal2` |
+
+**バケット運用（migration で宣言的に作成、ADR-0014 §2.1）**:
+- public read / file_size_limit `5MB` / MIME `image/jpeg, image/png, image/webp`
+- **他バケットと異なり owner = `auth.uid()` を強制しない**（admin 3 名の共同所有のため。個人スコープではなく role + AAL2 で書き込みを絞る、ADR-0014 §2.3）
+- **本一覧で初の AAL2 強制 storage RLS**（ADR-0012 の admin AAL2 必須を Storage 第二防御にも適用。AAL1 admin トークンの upload を RLS で拒否）
+- path 規約 `articles-hero/{article_id}/{uuid}`（新規作成時の暫定は `_new/{uuid}`、ADR-0014 §2.5）
+- DELETE で Storage オブジェクトは連動削除しない（記事行のみ削除・孤児は GC バッチ v1.5+、ADR-0014 §2.4）
+
 ### 2. 二重防御構造
 
 ```

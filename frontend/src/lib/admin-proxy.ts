@@ -32,6 +32,9 @@ export async function proxyToBackend(
   }
 
   // /v1/admin/* は role + AAL2 をここでも弾く (非 admin の /v1/reports 等は対象外)。
+  // ⚠️ 申し送り (PR#33 evaluator §4.3): GET 拡張により、将来 /v1/admin/ 以外の path で
+  //    GET proxy を書くと requireAdmin が false=「ログイン済のみ」で素通る。非 admin path の
+  //    GET proxy を足すときは requireAdmin を明示するか、認可方針を必ず設計すること。
   const requireAdmin =
     options.requireAdmin ?? upstreamPath.startsWith("/v1/admin/");
   if (requireAdmin) {
