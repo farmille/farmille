@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       article_products: {
@@ -195,101 +220,6 @@ export type Database = {
           },
         ]
       }
-      event_registrations: {
-        Row: {
-          cancelled_at: string | null
-          event_id: string
-          id: string
-          registered_at: string
-          user_id: string
-        }
-        Insert: {
-          cancelled_at?: string | null
-          event_id: string
-          id?: string
-          registered_at?: string
-          user_id: string
-        }
-        Update: {
-          cancelled_at?: string | null
-          event_id?: string
-          id?: string
-          registered_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "event_registrations_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_registrations_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      events: {
-        Row: {
-          body: string
-          capacity: number | null
-          created_at: string
-          ends_at: string
-          host_type: string
-          host_user_id: string
-          id: string
-          online_url: string | null
-          starts_at: string
-          status: string
-          title: string
-          updated_at: string
-          venue: string | null
-        }
-        Insert: {
-          body: string
-          capacity?: number | null
-          created_at?: string
-          ends_at: string
-          host_type: string
-          host_user_id: string
-          id?: string
-          online_url?: string | null
-          starts_at: string
-          status?: string
-          title: string
-          updated_at?: string
-          venue?: string | null
-        }
-        Update: {
-          body?: string
-          capacity?: number | null
-          created_at?: string
-          ends_at?: string
-          host_type?: string
-          host_user_id?: string
-          id?: string
-          online_url?: string | null
-          starts_at?: string
-          status?: string
-          title?: string
-          updated_at?: string
-          venue?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "events_host_user_id_fkey"
-            columns: ["host_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       farmer_profiles: {
         Row: {
           avatar_url: string | null
@@ -420,59 +350,6 @@ export type Database = {
             foreignKeyName: "ja_profiles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      maker_email_campaigns: {
-        Row: {
-          body: string
-          created_at: string
-          id: string
-          maker_user_id: string
-          queued_at: string | null
-          recipient_count: number
-          segment_filter: Json
-          segment_type: string
-          sent_at: string | null
-          status: string
-          subject: string
-          updated_at: string
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          id?: string
-          maker_user_id: string
-          queued_at?: string | null
-          recipient_count?: number
-          segment_filter?: Json
-          segment_type: string
-          sent_at?: string | null
-          status?: string
-          subject: string
-          updated_at?: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          id?: string
-          maker_user_id?: string
-          queued_at?: string | null
-          recipient_count?: number
-          segment_filter?: Json
-          segment_type?: string
-          sent_at?: string | null
-          status?: string
-          subject?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "maker_email_campaigns_maker_user_id_fkey"
-            columns: ["maker_user_id"]
-            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1016,6 +893,7 @@ export type Database = {
           commercial_status: string | null
           confidence: string | null
           created_at: string
+          deleted_at: string | null
           disease_pest_info: string | null
           expected_effects_farmille: string | null
           expected_effects_official: string | null
@@ -1044,6 +922,7 @@ export type Database = {
           commercial_status?: string | null
           confidence?: string | null
           created_at?: string
+          deleted_at?: string | null
           disease_pest_info?: string | null
           expected_effects_farmille?: string | null
           expected_effects_official?: string | null
@@ -1072,6 +951,7 @@ export type Database = {
           commercial_status?: string | null
           confidence?: string | null
           created_at?: string
+          deleted_at?: string | null
           disease_pest_info?: string | null
           expected_effects_farmille?: string | null
           expected_effects_official?: string | null
@@ -1394,9 +1274,71 @@ export type Database = {
           },
         ]
       }
+      user_reports: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          reason: string
+          reporter_user_id: string | null
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          target_user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_user_id?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_user_id?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_reports_reporter_user_id_fkey"
+            columns: ["reporter_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reports_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string
+          deleted_at: string | null
           id: string
           name: string
           role: string
@@ -1404,6 +1346,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
           id: string
           name: string
           role: string
@@ -1411,6 +1354,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
           id?: string
           name?: string
           role?: string
@@ -1552,6 +1496,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
