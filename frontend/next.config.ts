@@ -2,6 +2,28 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // アプリ層セキュリティヘッダ (SEC-02)。strict CSP は Sentry/GA/inline を壊しうるため
+  // v1 では nosniff / clickjacking / HSTS / referrer / permissions に限定。CSP は別途。
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
@@ -11,6 +33,12 @@ const nextConfig: NextConfig = {
       },
       // demo データで使っているプレースホルダサービス。本番前に実画像に差し替えて削除する
       { protocol: "https", hostname: "placehold.co" },
+      // seed (Ryosei populated Excel) で参照する公式メーカー CDN / コーポレートサイト
+      { protocol: "https", hostname: "multisite-assets.icl-growingsolutions.com" },
+      { protocol: "https", hostname: "d2bu5vyg1irlw4.cloudfront.net" },
+      { protocol: "https", hostname: "www.aichi-steel.co.jp" },
+      // articles の hero 画像で使う Unsplash (dev デモ用、admin UI 完成後に Supabase Storage に移行)
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
 };

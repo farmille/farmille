@@ -14,12 +14,14 @@ service_role 経由のため RLS は第二防御に徹する。
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 
+from app.auth.jwt import get_user_id
 from app.dependencies import require_role
 from app.models.schemas import (
     AdminMakerOption,
@@ -205,13 +207,19 @@ async def approve_maker(
     user_id: UUID,
     _user: dict = require_role("admin"),
 ):
-    """pending_review なメーカーを active に遷移 (spec §5.3)。"""
+    """メーカーを **公開** (status='active') に遷移。
+
+    2026-05-27 変更: 元 status を問わず (pending_review / rejected 含む) active に遷移可。
+    公開/非公開トグルの「公開」側として動作。冪等 (既に active なら 409)。
+    """
     admin = get_supabase_admin()
     role, status = _fetch_maker_status(admin, user_id)
     if role is None or role != "maker":
         return _error(404, "maker_not_found")
-    if status != "pending_review":
-        return _error(409, "maker_not_pending")
+    if status == "active":
+        return _error(409, "already_active")
+    if status == "frozen":
+        return _error(409, "maker_frozen")  # 凍結中は別途解凍が必要
 
     try:
         admin.table("users").update({"status": "active"}).eq(
@@ -224,33 +232,62 @@ async def approve_maker(
     return {"ok": True, "user_id": str(user_id), "status": "active"}
 
 
+@router.post("/makers/{user_id}/unpublish")
+async def unpublish_maker(
+    user_id: UUID,
+    _user: dict = require_role("admin"),
+):
+    """メーカーを **非公開** (status='pending_review') に戻す。
+
+    2026-05-27 新規: 公開済 maker を一時的に非公開へ。signup 直後の状態と同じ。
+    公開/非公開トグルの「非公開」側。reject (永久的取り下げ) とは別物。
+    """
+    admin = get_supabase_admin()
+    role, status = _fetch_maker_status(admin, user_id)
+    if role is None or role != "maker":
+        return _error(404, "maker_not_found")
+    if status == "pending_review":
+        return _error(409, "already_pending")
+    if status == "frozen":
+        return _error(409, "maker_frozen")
+
+    try:
+        admin.table("users").update({"status": "pending_review"}).eq(
+            "id", str(user_id)
+        ).execute()
+    except Exception:
+        logger.exception("failed to unpublish maker %s", user_id)
+        return _error(500, "failed_to_unpublish_maker")
+
+    return {"ok": True, "user_id": str(user_id), "status": "pending_review"}
+
+
 @router.post("/makers/{user_id}/reject")
 async def reject_maker(
     user_id: UUID,
     payload: RejectMakerPayload,
     _user: dict = require_role("admin"),
 ):
-    """pending_review なメーカーを rejected に遷移 (spec §5.4)。
+    """メーカーを **取り下げ** (status='rejected') に遷移。spam / 規約違反向け。
 
-    `reason` の運用ログ記録 (v1 範囲):
-    - DB 保存は v1.5+ F-FU6 (products audit log と統合した maker_review_log) に push
-    - v1 では `logger.info("maker_rejected ...")` で Railway / journald にログ出力し、
-      audit trail として grep 可能 (migration 不要、users / maker_profiles 列汚染なし)
-    - reason text は最大 1000 文字 (RejectMakerPayload で制約済)
+    2026-05-27 変更: 元 status を問わず rejected に遷移可。reason はログ出力 (DB 保存は v1.5+)。
     """
     admin = get_supabase_admin()
     role, status = _fetch_maker_status(admin, user_id)
     if role is None or role != "maker":
         return _error(404, "maker_not_found")
-    if status != "pending_review":
-        return _error(409, "maker_not_pending")
+    if status == "rejected":
+        return _error(409, "already_rejected")
+    if status == "frozen":
+        return _error(409, "maker_frozen")
 
     actor_id = _user.get("sub") or _user.get("id") or "<unknown-admin>"
     reason_text = (payload.reason or "").strip() or "<no-reason-provided>"
     logger.info(
-        "maker_rejected user_id=%s actor=%s reason=%r",
+        "maker_rejected user_id=%s actor=%s prev_status=%s reason=%r",
         user_id,
         actor_id,
+        status,
         reason_text,
     )
 
@@ -263,6 +300,60 @@ async def reject_maker(
         return _error(500, "failed_to_reject_maker")
 
     return {"ok": True, "user_id": str(user_id), "status": "rejected"}
+
+
+@router.get("/makers/list")
+async def list_all_makers(
+    _user: dict = require_role("admin"),
+    status: str | None = Query(
+        default=None,
+        description="active / pending_review / rejected / frozen / null (全件)",
+    ),
+):
+    """admin/makers 画面用、全 status の maker をフル情報で返す。
+
+    2026-05-27 新規。既存 `/makers/pending` は pending_review しか返さなかったため、
+    3 状態トグル UI には不十分だった。
+    """
+    admin = get_supabase_admin()
+    query = (
+        admin.table("users")
+        .select(
+            "id, name, status, created_at, "
+            "maker_profiles(company_name, prefecture, city, note)"
+        )
+        .eq("role", "maker")
+    )
+    if status:
+        query = query.eq("status", status)
+    res = query.order("created_at", desc=False).execute()
+    rows = res.data or []
+
+    items: list[dict[str, Any]] = []
+    for r in rows:
+        profile = _maker_profile(r)
+        # email は admin.auth で 1 件取り
+        email: str | None = None
+        try:
+            au = admin.auth.admin.get_user_by_id(str(r["id"]))
+            email = getattr(au.user, "email", None) if au else None
+        except Exception:
+            pass
+        items.append(
+            {
+                "user_id": r["id"],
+                "name": r.get("name") or "",
+                "email": email,
+                "status": r.get("status"),
+                "created_at": r["created_at"],
+                "company_name": profile.get("company_name"),
+                "prefecture": profile.get("prefecture"),
+                "city": profile.get("city"),
+                "note": profile.get("note"),
+            }
+        )
+
+    return {"makers": items, "total": len(items)}
 
 
 @router.get("/users", response_model=AdminUserListResponse)
@@ -287,8 +378,10 @@ async def list_admin_users(
     admin = get_supabase_admin()
 
     query = admin.table("users").select(
-        "id, role, name, status, created_at", count="exact"
+        "id, role, name, status, created_at, deleted_at", count="exact"
     )
+    # 2026-05-27: 削除済はデフォルト除外 (?include_deleted=true で見せる将来余地)
+    query = query.is_("deleted_at", "null")
     if role:
         query = query.eq("role", role)
     if status:
@@ -309,6 +402,24 @@ async def list_admin_users(
     rows = res.data or []
     total = getattr(res, "count", None) or 0
 
+    # 2026-05-27: pending 通報数を 1 query でまとめ取り (N+1 回避)
+    report_counts: dict[str, int] = {}
+    if rows:
+        ids = [r["id"] for r in rows]
+        try:
+            rep_res = (
+                admin.table("user_reports")
+                .select("target_user_id")
+                .in_("target_user_id", ids)
+                .eq("status", "pending")
+                .execute()
+            )
+            for row in rep_res.data or []:
+                tid = row["target_user_id"]
+                report_counts[tid] = report_counts.get(tid, 0) + 1
+        except Exception:
+            logger.warning("failed to aggregate report counts")
+
     # auth.users から email を 1 件ずつ取りに行く (admin auth API)。
     # N+1 を避けるため per_page=50 で抑える。
     items: list[AdminUserListItem] = []
@@ -328,6 +439,8 @@ async def list_admin_users(
                 role=r.get("role") or "unassigned",
                 status=r.get("status") or "active",
                 created_at=r["created_at"],
+                pending_report_count=report_counts.get(user_id, 0),
+                is_deleted=r.get("deleted_at") is not None,
             )
         )
 
@@ -403,3 +516,159 @@ async def assign_user_role(
         return _error(500, "failed_to_update_users_table")
 
     return {"ok": True, "user_id": str(user_id), "role": payload.role}
+
+
+# ─────────────────────────────────────────────────────────────────────
+# 2026-05-27: freeze / soft-delete (B6 完成、ADR-0009 + status enum 拡張なし)
+# ─────────────────────────────────────────────────────────────────────
+
+
+@router.post("/users/{user_id}/freeze")
+async def freeze_user(
+    user_id: UUID,
+    _user: dict = require_role("admin"),
+):
+    """user.status を active → frozen に切替 + auth.users を ban して login 禁止。
+
+    2026-05-27 修正: 旧実装は public.users.status='frozen' しか触らず
+    auth.users 側は無傷で login が通る不具合 → ban_duration を併用して
+    既存 refresh token も失効させる。既存 access token は最大 1hr で expire。
+
+    frozen 状態のユーザーは:
+      - login 不可 (ban_duration が GoTrue 側で permanent 扱い)
+      - 公開 /v1/products / /v1/manufacturers から消える (ADR-0009 既存実装)
+      - /v1/admin/users では引き続き表示し、admin が「凍結解除」できる
+    """
+    admin = get_supabase_admin()
+    # self / admin ガード: 自分や他 admin の凍結による全 admin ロックアウトを防ぐ
+    if str(user_id) == get_user_id(_user):
+        return _error(400, "cannot_modify_self")
+    cur = (
+        admin.table("users")
+        .select("status, role")
+        .eq("id", str(user_id))
+        .limit(1)
+        .execute()
+    )
+    rows = cur.data or []
+    if not rows:
+        return _error(404, "user_not_found")
+    if rows[0].get("role") == "admin":
+        return _error(403, "cannot_freeze_admin")
+    if rows[0]["status"] == "frozen":
+        return _error(409, "already_frozen")
+    try:
+        admin.table("users").update({"status": "frozen"}).eq("id", str(user_id)).execute()
+    except Exception:
+        logger.exception("failed to freeze user %s", user_id)
+        return _error(500, "failed_to_freeze_user")
+
+    # 2026-05-27 fix: auth.users 側も ban して login 禁止
+    try:
+        admin.auth.admin.update_user_by_id(
+            str(user_id),
+            {"ban_duration": "876000h"},  # ~100 years、unfreeze で "none" 戻し
+        )
+    except Exception:
+        logger.exception("failed to ban auth user %s on freeze", user_id)
+        # public.users.status は更新済。auth ban 失敗は warn だが return は ok
+        # (UAT で発覚しやすい、prod では retry ジョブで救う想定)
+
+    return {"ok": True, "user_id": str(user_id), "status": "frozen"}
+
+
+@router.post("/users/{user_id}/unfreeze")
+async def unfreeze_user(
+    user_id: UUID,
+    _user: dict = require_role("admin"),
+):
+    """user.status を frozen → active に戻す + auth ban 解除。"""
+    admin = get_supabase_admin()
+    cur = (
+        admin.table("users")
+        .select("status, deleted_at")
+        .eq("id", str(user_id))
+        .limit(1)
+        .execute()
+    )
+    rows = cur.data or []
+    if not rows:
+        return _error(404, "user_not_found")
+    # 削除済 (deleted_at) アカウントは解凍で復活させない
+    if rows[0].get("deleted_at") is not None:
+        return _error(409, "user_deleted")
+    if rows[0]["status"] != "frozen":
+        return _error(409, "not_frozen")
+    try:
+        admin.table("users").update({"status": "active"}).eq("id", str(user_id)).execute()
+    except Exception:
+        logger.exception("failed to unfreeze user %s", user_id)
+        return _error(500, "failed_to_unfreeze_user")
+
+    # 2026-05-27 fix: ban 解除
+    try:
+        admin.auth.admin.update_user_by_id(
+            str(user_id),
+            {"ban_duration": "none"},
+        )
+    except Exception:
+        logger.exception("failed to unban auth user %s on unfreeze", user_id)
+
+    return {"ok": True, "user_id": str(user_id), "status": "active"}
+
+
+@router.post("/users/{user_id}/delete")
+async def delete_user_account(
+    user_id: UUID,
+    _user: dict = require_role("admin"),
+):
+    """**ソフト削除 (ban + 非表示)**: users.deleted_at をセットし status='frozen' + auth ban。
+
+    2026-06-01 設計確定 (デプロイ前レビュー): user_reports を監査ログとして保持する
+    migration 設計に合わせ、ハード削除 (auth.users 物理削除 + CASCADE) をやめてソフト削除に
+    統一する。users 行を残すことで:
+      - user_reports (通報監査ログ) が FK CASCADE で消えない
+      - status='frozen' により既存 ADR-0009 の公開フィルタ (products / get_product /
+        manufacturers / home / reviews) からそのまま除外される
+      - deleted_at が「単なる凍結」と「削除」を区別 (admin list は deleted_at で除外、
+        /unfreeze は deleted_at が立っていれば復活を拒否)
+      - auth.users は ban して login 禁止 (freeze と同じ ban_duration)
+
+    凍結 (`/freeze`) との違い: 削除は deleted_at が立ち復活できない。GDPR 的な完全消去
+    (PII erasure) が要る場合は別経路 (fast-follow)。復元 UI は v1 非対応。
+    """
+    admin = get_supabase_admin()
+    uid = str(user_id)
+
+    # self / admin ガード: 自分や他 admin の不可逆操作 (ロックアウト/監査喪失) を防ぐ
+    if uid == get_user_id(_user):
+        return _error(400, "cannot_delete_self")
+
+    cur = admin.table("users").select("id, role").eq("id", uid).limit(1).execute()
+    rows = cur.data or []
+    if not rows:
+        return _error(404, "user_not_found")
+    if rows[0].get("role") == "admin":
+        return _error(403, "cannot_delete_admin")
+
+    # ソフト削除: users 行は残し deleted_at + status='frozen' をマーク。
+    # reviews / products は物理削除せず、上記公開フィルタで非表示にする。
+    try:
+        admin.table("users").update(
+            {
+                "deleted_at": datetime.now(timezone.utc).isoformat(),
+                "status": "frozen",
+            }
+        ).eq("id", uid).execute()
+    except Exception:
+        logger.exception("failed to soft-delete user %s", uid)
+        return _error(500, "delete_failed")
+
+    # auth.users を ban して login 禁止 (freeze と同じ手法、既存 token も refresh 失効)
+    try:
+        admin.auth.admin.update_user_by_id(uid, {"ban_duration": "876000h"})
+    except Exception:
+        logger.exception("failed to ban auth user %s on delete", uid)
+        # deleted_at/status は更新済。ban 失敗は warn (prod では retry ジョブ想定)
+
+    return {"ok": True, "user_id": uid}

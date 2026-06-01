@@ -9,6 +9,7 @@ import type {
   UserRole,
 } from "@/types/admin";
 import { RoleChangeAction } from "./_components/role-change-action";
+import { UserModerationActions } from "./_components/user-moderation-actions";
 
 export const metadata: Metadata = {
   title: "ユーザー管理",
@@ -16,7 +17,8 @@ export const metadata: Metadata = {
 };
 
 // B6 MVP (spec maker-approval-admin §5.5、ADR-0009)。
-// - SSR で /v1/admin/users を取得 (admin BFF + AAL2 必須、layout.tsx 側 guard 通過済)
+// - SSR で /v1/admin/users を取得。権威ゲートは FastAPI /v1/admin/* の require_role("admin")
+//   + AAL2。layout.tsx は UI guard のみ (通過を理由に backend チェックを緩めない)
 // - role 変更は Client Island RoleChangeAction を行ごとに配置
 //   (backend は ASSIGNABLE_ROLES = admin / ja_staff / researcher のみ)
 // - status 変更 (frozen toggle) は v1.5+ に push (今日は閲覧 + role 変更のみ)
@@ -92,6 +94,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   if (!session) {
     redirect("/login?next=/admin/users");
   }
+  const currentUserId = session.user.id;
 
   const apiUrl = process.env.API_URL;
   if (!apiUrl) {
@@ -133,7 +136,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">ユーザー管理</h1>
         <p className="text-sm text-muted-foreground">
-          Farmille ユーザーの一覧と role 変更。凍結 / 削除は v1.5+ で UI 化予定 (現状 SQL 直)。
+          Farmille ユーザーの一覧と role 変更、凍結 / 削除、通報件数の確認。
         </p>
       </header>
 
@@ -224,8 +227,9 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                 <th className="px-3 py-2">email</th>
                 <th className="px-3 py-2">role</th>
                 <th className="px-3 py-2">status</th>
+                <th className="px-3 py-2">通報</th>
                 <th className="px-3 py-2">登録日</th>
-                <th className="px-3 py-2 w-72">操作 (role 変更)</th>
+                <th className="px-3 py-2 w-80">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -246,15 +250,26 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                   <td className="px-3 py-2">
                     <StatusBadge status={u.status} />
                   </td>
+                  <td className="px-3 py-2">
+                    <ReportCountBadge count={u.pending_report_count} />
+                  </td>
                   <td className="px-3 py-2 text-muted-foreground">
                     {formatDate(u.created_at)}
                   </td>
                   <td className="px-3 py-2">
-                    <RoleChangeAction
-                      userId={u.user_id}
-                      displayName={u.name || u.email || u.user_id}
-                      currentRole={u.role}
-                    />
+                    <div className="flex flex-col gap-1.5">
+                      <RoleChangeAction
+                        userId={u.user_id}
+                        displayName={u.name || u.email || u.user_id}
+                        currentRole={u.role}
+                      />
+                      <UserModerationActions
+                        userId={u.user_id}
+                        displayName={u.name || u.email || u.user_id}
+                        currentStatus={u.status}
+                        isSelf={u.user_id === currentUserId}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -316,6 +331,21 @@ function RoleBadge({ role }: { role: UserRole }) {
     <span className={`inline-block rounded border px-2 py-0.5 text-xs ${cls}`}>
       {role}
     </span>
+  );
+}
+
+function ReportCountBadge({ count }: { count: number }) {
+  if (count <= 0) {
+    return <span className="text-xs text-muted-foreground">—</span>;
+  }
+  return (
+    <Link
+      href={`/admin/reports?status=pending`}
+      className="inline-block rounded border border-rose-500/40 bg-rose-500/15 px-2 py-0.5 text-xs font-medium text-rose-700 hover:bg-rose-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/40"
+      aria-label={`未処理通報 ${count} 件`}
+    >
+      通報 {count}
+    </Link>
   );
 }
 

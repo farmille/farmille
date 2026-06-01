@@ -2,30 +2,35 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, EyeOff, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// spec §6.3: B1 承認 / 却下 Client Island。BFF を Next.js API route
-// (/api/admin/makers/[id]/{approve,reject}) 経由で叩き、成功時に
-// router.refresh() で Server Component を再フェッチさせる。
-// Supabase SDK の直叩きは禁止 (spec §16.3)。
+// 2026-05-27 改修: 3 状態トグル (公開 / 非公開 / 取り下げ)。
+// - 公開 (approve)    : status → active     (公開ページに表示、出品可能)
+// - 非公開 (unpublish) : status → pending_review (一時 hide、再 toggle 可)
+// - 取り下げ (reject)  : status → rejected   (spam / 規約違反、reason ログ)
 //
-// UX (今日改善):
-//   - 操作直後は inline success banner で「承認 / 却下しました」を 2 秒表示してから
-//     router.refresh() (Material 3 Snackbar 相当、ライブラリ非依存)
-//   - 却下理由は backend `logger.info` で audit trail (v1.5+ F-FU6 で DB 化)
+// row の現 status に応じて押せるボタンが変わる:
+//   active        : [非公開] [取り下げ]
+//   pending_review: [公開]  [取り下げ]
+//   rejected      : [公開]
+//   frozen        : 凍結中バッジのみ (admin/users で解凍)
 
-type Busy = null | "approve" | "reject";
-type Success = null | "approved" | "rejected";
+type MakerStatus = "active" | "pending_review" | "rejected" | "frozen";
+type Variant = "publish" | "unpublish" | "reject";
+type Busy = null | Variant;
+type Success = null | Variant;
 
-const SUCCESS_BANNER_MS = 2000;
+const SUCCESS_BANNER_MS = 1500;
 
 export function MakerActionButtons({
   userId,
   companyName,
+  currentStatus,
 }: {
   userId: string;
   companyName: string;
+  currentStatus: MakerStatus;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState<Busy>(null);
@@ -34,24 +39,20 @@ export function MakerActionButtons({
   const [reason, setReason] = useState("");
   const [success, setSuccess] = useState<Success>(null);
 
-  // success banner を 2 秒表示してから router.refresh() で行が消える流れ。
-  // refresh が先に走ると banner が消えてしまうため、setTimeout で順次。
   useEffect(() => {
     if (!success) return;
-    const t = setTimeout(() => {
-      router.refresh();
-    }, SUCCESS_BANNER_MS);
+    const t = setTimeout(() => router.refresh(), SUCCESS_BANNER_MS);
     return () => clearTimeout(t);
   }, [success, router]);
 
-  async function approve() {
+  async function callPublish() {
     if (busy) return;
     if (
-      !window.confirm(`「${companyName}」を承認しますか? 公開系に表示されます。`)
+      !window.confirm(`「${companyName}」を公開します。\n公開ページの /manufacturers に表示され、出品も可能になります。よろしいですか?`)
     ) {
       return;
     }
-    setBusy("approve");
+    setBusy("publish");
     setError(null);
     try {
       const res = await fetch(
@@ -60,21 +61,45 @@ export function MakerActionButtons({
       );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        setError(
-          messageFromError(body?.error, "承認に失敗しました") +
-            (res.status === 409 ? " (すでに処理済みの可能性)" : ""),
-        );
+        setError(messageFor(body?.error, "公開に失敗しました"));
         setBusy(null);
         return;
       }
-      setSuccess("approved");
+      setSuccess("publish");
     } catch {
-      setError("承認に失敗しました (ネットワーク)");
+      setError("公開に失敗しました (ネットワーク)");
       setBusy(null);
     }
   }
 
-  async function reject() {
+  async function callUnpublish() {
+    if (busy) return;
+    if (
+      !window.confirm(`「${companyName}」を非公開にします。\n公開ページから消えますが、本人 login や凍結ではありません。再度「公開」で復帰可能。よろしいですか?`)
+    ) {
+      return;
+    }
+    setBusy("unpublish");
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/makers/${encodeURIComponent(userId)}/unpublish`,
+        { method: "POST" },
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setError(messageFor(body?.error, "非公開に失敗しました"));
+        setBusy(null);
+        return;
+      }
+      setSuccess("unpublish");
+    } catch {
+      setError("非公開に失敗しました (ネットワーク)");
+      setBusy(null);
+    }
+  }
+
+  async function callReject() {
     if (busy) return;
     setBusy("reject");
     setError(null);
@@ -89,21 +114,24 @@ export function MakerActionButtons({
       );
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        setError(
-          messageFromError(body?.error, "却下に失敗しました") +
-            (res.status === 409 ? " (すでに処理済みの可能性)" : ""),
-        );
+        setError(messageFor(body?.error, "取り下げに失敗しました"));
         setBusy(null);
         return;
       }
-      setSuccess("rejected");
+      setSuccess("reject");
     } catch {
-      setError("却下に失敗しました (ネットワーク)");
+      setError("取り下げに失敗しました (ネットワーク)");
       setBusy(null);
     }
   }
 
   if (success) {
+    const label =
+      success === "publish"
+        ? "公開しました"
+        : success === "unpublish"
+          ? "非公開にしました"
+          : "取り下げました";
     return (
       <div
         role="status"
@@ -111,12 +139,16 @@ export function MakerActionButtons({
         className="inline-flex items-center gap-2 rounded border border-[var(--green-primary)] bg-[var(--green-subtle)] px-3 py-2 text-sm text-[var(--green-dark)]"
       >
         <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-        <span>
-          {success === "approved"
-            ? `「${companyName}」を承認しました`
-            : `「${companyName}」を却下しました`}
-        </span>
+        <span>「{companyName}」を{label}</span>
       </div>
+    );
+  }
+
+  if (currentStatus === "frozen") {
+    return (
+      <span className="text-xs text-muted-foreground italic">
+        凍結中 (admin/users で解凍)
+      </span>
     );
   }
 
@@ -124,11 +156,11 @@ export function MakerActionButtons({
     return (
       <div className="rounded border border-border bg-muted/30 p-4 space-y-3">
         <p className="text-sm font-medium text-foreground">
-          「{companyName}」を却下します
+          「{companyName}」を取り下げます (rejected)
         </p>
         <label className="block space-y-1">
           <span className="text-xs text-muted-foreground">
-            却下理由 (任意、運用ログに記録されます。DB 保存は v1.5+ F-FU6 で対応)
+            取り下げ理由 (任意、運用ログに記録されます)
           </span>
           <textarea
             value={reason}
@@ -136,7 +168,7 @@ export function MakerActionButtons({
             rows={3}
             maxLength={1000}
             className="w-full rounded border border-border bg-background p-2 text-sm"
-            placeholder="例: 申請内容に不備があり再申請をお願いしています"
+            placeholder="例: 申請内容が規約違反"
           />
         </label>
         <div className="flex flex-wrap gap-2">
@@ -144,10 +176,10 @@ export function MakerActionButtons({
             type="button"
             variant="destructive"
             size="sm"
-            onClick={reject}
+            onClick={callReject}
             disabled={busy !== null}
           >
-            {busy === "reject" ? "却下中…" : "却下を確定"}
+            {busy === "reject" ? "処理中…" : "取り下げを確定"}
           </Button>
           <Button
             type="button"
@@ -171,25 +203,49 @@ export function MakerActionButtons({
     );
   }
 
+  // status に応じて押せるボタンを出し分け
+  const canPublish = currentStatus !== "active";
+  const canUnpublish = currentStatus === "active";
+  const canReject = currentStatus !== "rejected";
+
   return (
     <div className="flex flex-wrap gap-2 items-center pt-1">
-      <Button
-        type="button"
-        size="sm"
-        onClick={approve}
-        disabled={busy !== null}
-      >
-        {busy === "approve" ? "承認中…" : "承認"}
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => setConfirmReject(true)}
-        disabled={busy !== null}
-      >
-        却下
-      </Button>
+      {canPublish ? (
+        <Button
+          type="button"
+          size="sm"
+          onClick={callPublish}
+          disabled={busy !== null}
+        >
+          {busy === "publish" ? "公開中…" : "公開"}
+        </Button>
+      ) : null}
+      {canUnpublish ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={callUnpublish}
+          disabled={busy !== null}
+          className="gap-1"
+        >
+          <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
+          {busy === "unpublish" ? "非公開化中…" : "非公開にする"}
+        </Button>
+      ) : null}
+      {canReject ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setConfirmReject(true)}
+          disabled={busy !== null}
+          className="gap-1 text-destructive border-destructive/40 hover:bg-destructive/10"
+        >
+          <Ban className="h-3.5 w-3.5" aria-hidden="true" />
+          取り下げ
+        </Button>
+      ) : null}
       {error ? (
         <p className="text-sm text-destructive ml-2" role="alert">
           {error}
@@ -199,13 +255,19 @@ export function MakerActionButtons({
   );
 }
 
-function messageFromError(code: unknown, fallback: string): string {
+function messageFor(code: unknown, fallback: string): string {
   if (typeof code !== "string") return fallback;
   switch (code) {
     case "maker_not_found":
       return "対象メーカーが見つかりません";
-    case "maker_not_pending":
-      return "すでに処理済みのメーカーです";
+    case "already_active":
+      return "すでに公開状態です";
+    case "already_pending":
+      return "すでに非公開状態です";
+    case "already_rejected":
+      return "すでに取り下げ済です";
+    case "maker_frozen":
+      return "凍結中のメーカーには操作できません (先に解凍)";
     case "not_admin":
       return "権限がありません";
     case "unauthorized":

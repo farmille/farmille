@@ -34,7 +34,7 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <HeroSection />
+      <HeroSection articles={data.articles} />
 
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full">
         <HomeContent {...data} />

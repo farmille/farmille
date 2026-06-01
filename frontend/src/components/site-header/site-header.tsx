@@ -22,7 +22,10 @@ const HIDDEN_PATH_PREFIXES = [
   "/password-reset",
   "/password-update",
   "/auth/", // /auth/callback など
-  "/onboarding",
+  // 2026-05-27: /onboarding は除外。signup → 即 /onboarding/{role} 着地に変えた結果、
+  // ヘッダー消失で「ログアウトされた?」のような違和感が出てた。ログイン済 user には
+  // 通常ヘッダーが見える方が自然。各 page の inline <h1>Farmille</h1> は冗長になるが
+  // 害は無いので残置 (後日 cleanup)。
 ];
 
 const NAV_LINKS = [

@@ -130,6 +130,8 @@ async def list_admin_products(
         "product_images(url, \"order\", is_primary)"
     )
     query = admin.table("products").select(select_cols, count="exact")
+    # 2026-05-27: ソフト削除を除外 (admin でも復元 UI が無い v1 では見せない)
+    query = query.is_("deleted_at", "null")
 
     # フィルタ
     if maker_id is not None:
@@ -148,7 +150,7 @@ async def list_admin_products(
         # PostgREST の or() で ilike 連結。引数はカンマ区切り。
         # 引用符 escape は PostgREST 流儀: `,` を含む値は `"` で囲む。
         # name + product_name_jp 部分一致 (case-insensitive)
-        like = q.replace(",", "")  # カンマ含む検索は v1 サポート外
+        like = q.translate({ord(c): None for c in ",()*"})  # or()/ilike filter 文法文字を除去
         query = query.or_(
             f"name.ilike.%{like}%,product_name_jp.ilike.%{like}%"
         )
@@ -563,5 +565,49 @@ async def update_admin_product(
         except Exception:
             logger.exception("failed to update admin product images %s", product_id)
             return _error(500, "failed_to_update_images")
+
+    return {"ok": True, "product_id": str(product_id)}
+
+
+# ─────────────────────────────────────────────────────────────────────
+# DELETE /v1/admin/products/{id}   ソフト削除 (2026-05-27 追加)
+# ─────────────────────────────────────────────────────────────────────
+
+
+@router.delete("/{product_id}")
+async def soft_delete_admin_product(
+    product_id: UUID,
+    _user: dict = require_role("admin"),
+):
+    """products.deleted_at = now() に設定。
+
+    関連 reviews / product_images / product_crops 等は CASCADE を避けるため残置
+    (復元可能、一覧フィルタでは見えなくなる)。is_public=false 状態の柔軟な hide と
+    区別する: is_public は maker / admin 何れも編集可、deleted_at は admin only。
+    """
+    from datetime import datetime, timezone
+
+    admin = get_supabase_admin()
+    if not _exists_product(admin, product_id):
+        return _error(404, "product_not_found")
+
+    cur = (
+        admin.table("products")
+        .select("deleted_at")
+        .eq("id", str(product_id))
+        .limit(1)
+        .execute()
+    )
+    rows = cur.data or []
+    if rows and rows[0].get("deleted_at"):
+        return _error(409, "already_deleted")
+
+    try:
+        admin.table("products").update(
+            {"deleted_at": datetime.now(timezone.utc).isoformat()}
+        ).eq("id", str(product_id)).execute()
+    except Exception:
+        logger.exception("failed to soft-delete product %s", product_id)
+        return _error(500, "failed_to_delete_product")
 
     return {"ok": True, "product_id": str(product_id)}

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # Phase 15 articles のカテゴリ enum を Phase 18 home でも再利用する。
 # DB CHECK 制約と一致（articles.category）
@@ -372,10 +372,11 @@ class AdminMakersResponse(BaseModel):
 
 
 class AdminUserListItem(BaseModel):
-    """`/v1/admin/users` 一覧用 (B6 MVP)。
+    """`/v1/admin/users` 一覧用 (B6 MVP + 2026-05-27 拡張)。
 
     auth.users から email を、public.users から id/role/name/status/created_at を取得。
     BFF が join して返す (frontend は database.types を引き直さず手書き型を見る前提)。
+    2026-05-27 追加: pending 通報件数 / 削除済フラグ。
     """
 
     user_id: UUID
@@ -384,6 +385,8 @@ class AdminUserListItem(BaseModel):
     role: str
     status: str
     created_at: datetime
+    pending_report_count: int = Field(default=0, ge=0)
+    is_deleted: bool = False
 
 
 class AdminUserListResponse(BaseModel):
@@ -391,6 +394,80 @@ class AdminUserListResponse(BaseModel):
     total: int = Field(ge=0)
     page: int = Field(ge=1)
     per_page: int = Field(ge=1, le=100)
+
+
+# ─────────────────────────────────────────────────────────────────────
+# user_reports (2026-05-27 通報機能)
+# ─────────────────────────────────────────────────────────────────────
+
+
+REPORT_REASONS = ("spam", "abuse", "impersonation", "inappropriate", "other")
+REPORT_RESOLUTIONS = ("resolved", "spam", "dismissed")
+
+
+class ReportCreatePayload(BaseModel):
+    """POST /v1/reports — ログイン済 user による通報。"""
+
+    model_config = ConfigDict(extra="forbid")
+
+    target_user_id: UUID
+    reason: str = Field(min_length=1, max_length=32)
+    body: str | None = Field(default=None, max_length=2000)
+
+    @field_validator("body")
+    @classmethod
+    def _blank_body_to_none(cls, v: str | None) -> str | None:
+        # 空 / 空白のみは DB CHECK (length 1..2000) 違反で 500 になるため None 正規化。
+        if v is not None and v.strip() == "":
+            return None
+        return v
+
+
+class AdminReportItem(BaseModel):
+    """GET /v1/admin/reports 行。"""
+
+    id: UUID
+    reporter_user_id: UUID | None
+    reporter_name: str | None
+    target_user_id: UUID
+    target_name: str | None
+    reason: str
+    body: str | None
+    status: str
+    created_at: datetime
+    resolved_at: datetime | None
+    resolved_by: UUID | None
+    resolution_note: str | None
+
+
+class AdminReportListResponse(BaseModel):
+    reports: list[AdminReportItem]
+    total: int = Field(ge=0)
+    page: int = Field(ge=1)
+    per_page: int = Field(ge=1, le=100)
+
+
+class AdminReportResolvePayload(BaseModel):
+    """POST /v1/admin/reports/{id}/resolve — 解決 / spam / dismiss。"""
+
+    model_config = ConfigDict(extra="forbid")
+
+    resolution: str = Field(min_length=1, max_length=16)
+    note: str | None = Field(default=None, max_length=2000)
+
+    @field_validator("note")
+    @classmethod
+    def _blank_note_to_none(cls, v: str | None) -> str | None:
+        # 空 / 空白のみは DB CHECK 違反で 500 になるため None 正規化。
+        if v is not None and v.strip() == "":
+            return None
+        return v
+
+
+class AdminUserActionPayload(BaseModel):
+    """POST /v1/admin/users/{id}/freeze や /soft-delete の note 用。"""
+
+    note: str | None = Field(default=None, max_length=500)
 
 
 class AdminProductListItem(BaseModel):

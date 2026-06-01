@@ -75,41 +75,49 @@ def _representative_image(images: list[dict] | None) -> str | None:
 def _fetch_featured_products(limit: int) -> list[FeaturedProductItem]:
     """注目の資材を取得。
 
-    spec §5.1: displayed_at <= now() で絞り、sort_order ASC, displayed_at DESC で limit 件。
-    products を join して 平坦化（products.py の _flatten_product と同パターン）。
+    2026-05-27 変更: spec §5.1 の `featured_products` 手動キュレ参照をやめて
+    `products` の updated_at DESC を直接返す方式に置換。デモ要件「最近更新された
+    資材を出す」に合わせ、admin による featured curation 運用 (spec §1.3) を保留する。
+    spec/ADR 反映は post-demo (別 PR)。
+
+    フィルタ:
+      - products.is_public = true
+      - products.maker.users.status = 'active' (ADR-0009: 非 active maker 除外)
+    並び:
+      - products.updated_at DESC (LIMIT で取り過ぎないよう Supabase 側で打ち切り)
     """
     admin = get_supabase_admin()
+    # ADR-0009 post-filter 用に少し多めに fetch (active maker 除外で減るため)
+    fetch_limit = max(limit * 2, limit + 4)
     res = (
-        admin.table("featured_products")
+        admin.table("products")
         .select(
-            "id, sort_order, displayed_at, "
-            "products(id, name, "
+            "id, name, updated_at, "
             "users(name, status, maker_profiles(company_name)), "
-            'product_types(id, name), '
-            'product_images(url, "order"))'
+            "product_types(id, name), "
+            'product_images(url, "order")'
         )
-        .lte("displayed_at", "now()")
-        .order("sort_order", desc=False)
-        .order("displayed_at", desc=True)
-        .limit(limit)
+        .eq("is_public", True)
+        .is_("deleted_at", "null")
+        .order("updated_at", desc=True)
+        .limit(fetch_limit)
         .execute()
     )
 
     items: list[FeaturedProductItem] = []
-    for row in res.data or []:
-        product = row.get("products") or {}
-        if not product:
-            # 防御的: FK CASCADE で通常起きないが念のため skip
-            continue
+    for product in res.data or []:
         maker = product.get("users") or {}
-        # ADR-0009: 非 active メーカー所有の featured 行は公開しない。
         if maker.get("status") != "active":
             continue
         product_type = product.get("product_types") or {}
         items.append(
             FeaturedProductItem(
-                id=row["id"],
-                sort_order=row.get("sort_order", 0),
+                # featured_products テーブルを参照しなくなったので id は product.id を流用。
+                # 既存 schema (FeaturedProductItem.id = featured row id) の互換のため、
+                # フロントは id をキーにしか使わず unique なら何でも良い (home-content の
+                # map key 用途のみ)。
+                id=product["id"],
+                sort_order=0,
                 product=FeaturedProductInner(
                     id=product["id"],
                     name=product["name"],
@@ -119,6 +127,8 @@ def _fetch_featured_products(limit: int) -> list[FeaturedProductItem]:
                 ),
             )
         )
+        if len(items) >= limit:
+            break
     return items
 
 

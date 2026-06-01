@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Search, ArrowRight, Sprout } from "lucide-react";
-import { BannerCard, type Banner } from "./banner-card";
+import { ArrowRight, Sprout } from "lucide-react";
+import type { Banner } from "./banner-card";
 import {
   FeaturedProductsSection,
   type FeaturedProduct,
@@ -11,17 +11,20 @@ import {
   type HomeArticle,
 } from "./latest-articles-section";
 
-// Phase 18: `/` と `/home` で共有する home コンテンツ Server Component。
+// Phase 18 / 2026-05-27 demo polish:
+// `/` と `/home` で共有する home コンテンツ Server Component。
 // spec docs/specs/home.md §6.3 / ADR-0008
 //
-// 検索バーは v1 では `/products` への単純リンク。クエリ転送（?q=...）は v1.5+
-// （spec §11.2 worker 判断可、§13 アイハーブ風レイアウト最終形は §5.2.14 待ち）。
+// 投資家デモ向け改修:
+//   - お知らせバナー (BannersSection) は撤去。`banners` prop は型として残し、
+//     /v1/home の banners も fetch し続けるが描画はしない（breaking change 回避）。
+//   - 旧 SearchBar（入力風 pill）は CTA ボタン「資材一覧を見る」に変更
+//     （検索ボックスと誤認される、という user フィードバック）。
 //
 // 0 件時の UI 崩れ防止は spec §1.1 / §9.2:
-//   - banners 0 件 → セクション非表示
 //   - featured 0 件 → セクション非表示
 //   - articles 0 件 → セクション非表示
-// 全部 0 でも検索バー + フォールバック文言で空ページ回避。
+// 全部 0 でも CTA + フォールバック文言で空ページ回避。
 
 export type HomeContentProps = {
   banners: Banner[];
@@ -29,60 +32,19 @@ export type HomeContentProps = {
   articles: HomeArticle[];
 };
 
-function SearchBar() {
-  // AgList 風 pill 検索バー。実検索は v1.5+、現状は /products へのリンクのみ。
-  // Material 3 pattern: hover / focus 共に container 側で border-color を強調、
-  // 内側の Search アイコン (緑 subtle 円) は変えない。
+function ProductsCta() {
+  // 旧「資材を検索」pill → 「資材一覧を見る」CTA ボタンに変更。
+  // 検索ボックス誤認問題（user feedback）の解消。`Button asChild` + `<Link>` 既存パターン。
   return (
-    <Link
-      href="/products"
-      aria-label="資材を検索"
-      className="group flex items-center gap-3 border border-border bg-card px-5 py-4 text-sm transition-colors hover:border-[var(--green-primary)] focus:outline-none focus-visible:border-[var(--green-primary)] focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2"
-      style={{
-        borderRadius: "var(--radius-full)",
-        boxShadow: "var(--shadow-sm)",
-      }}
-    >
-      <span
-        className="inline-flex h-9 w-9 items-center justify-center"
-        style={{
-          backgroundColor: "var(--green-subtle)",
-          borderRadius: "var(--radius-full)",
-        }}
-        aria-hidden
-      >
-        <Search className="h-4 w-4 text-[var(--green-primary)]" />
-      </span>
-      <span className="flex-1 text-muted-foreground">
-        資材を検索 (作目 / タイプ / 効果から探す)
-      </span>
-      <span
-        className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--green-primary)] group-hover:text-[var(--green-dark)]"
-        style={{ transition: "var(--transition-fast)" }}
-      >
-        探す
-        <ArrowRight
-          className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-          aria-hidden="true"
-        />
-      </span>
-    </Link>
-  );
-}
-
-function BannersSection({ banners }: { banners: Banner[] }) {
-  // 縮退ライン（spec §1.2）: 0 件時は表示せず、UI 崩れない
-  if (banners.length === 0) return null;
-  return (
-    <section aria-label="お知らせ" className="space-y-4">
-      <div className="overflow-x-auto snap-x snap-mandatory -mx-6 px-6">
-        <div className="flex gap-4 pb-2">
-          {banners.map((b) => (
-            <BannerCard key={b.id} banner={b} />
-          ))}
-        </div>
-      </div>
-    </section>
+    <div className="flex justify-center sm:justify-start">
+      <Button asChild size="lg">
+        <Link href="/products" aria-label="資材一覧を見る">
+          <Sprout className="h-5 w-5" aria-hidden="true" />
+          資材一覧を見る
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
+      </Button>
+    </div>
   );
 }
 
@@ -123,17 +85,15 @@ function EmptyHomeFallback() {
 }
 
 export function HomeContent({
-  banners,
+  banners: _banners,
   featured,
   articles,
 }: HomeContentProps) {
-  const allEmpty =
-    banners.length === 0 && featured.length === 0 && articles.length === 0;
+  const allEmpty = featured.length === 0 && articles.length === 0;
 
   return (
     <div className="space-y-10">
-      <SearchBar />
-      <BannersSection banners={banners} />
+      <ProductsCta />
       <FeaturedProductsSection items={featured} />
       <LatestArticlesSection items={articles} />
       {allEmpty ? <EmptyHomeFallback /> : null}

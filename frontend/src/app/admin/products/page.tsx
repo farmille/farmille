@@ -7,6 +7,7 @@ import type {
   AdminMakersResponse,
   AdminProductListResponse,
 } from "@/types/admin";
+import { ProductDeleteButton } from "./_components/product-delete-button";
 
 export const metadata: Metadata = {
   title: "資材マスタ",
@@ -15,7 +16,8 @@ export const metadata: Metadata = {
 
 // spec admin-aglist-alignment-v2.md §3.1: 資材マスタ一覧。
 // /v1/admin/products を SSR 取得し、検索 / フィルタ / pagination を URL クエリで保持する。
-// role guard は layout.tsx 側で通過済 (spec §6.1)。
+// 権威ゲートはデータ取得先の FastAPI 側 (/v1/admin/* は require_role("admin") + AAL2 を
+// 独立に強制)。layout.tsx は UI guard のみ — layout 通過を理由に backend チェックを緩めない。
 // 新規作成 UI は v1 非対応 (F2 は §7 F-FU8)。
 
 const PER_PAGE = 20;
@@ -268,7 +270,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                 <th className="px-3 py-2">公開</th>
                 <th className="px-3 py-2">confidence</th>
                 <th className="px-3 py-2">更新日</th>
-                <th className="px-3 py-2 w-20">操作</th>
+                <th className="px-3 py-2 w-36">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -316,12 +318,18 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                     {formatDate(p.updated_at)}
                   </td>
                   <td className="px-3 py-2">
-                    <Link
-                      href={`/admin/products/${encodeURIComponent(p.id)}`}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      編集
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/admin/products/${encodeURIComponent(p.id)}`}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        編集
+                      </Link>
+                      <ProductDeleteButton
+                        productId={p.id}
+                        productName={p.name}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -339,7 +347,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
             href={pageHref(Math.max(1, page - 1))}
             aria-disabled={page <= 1}
             className={
-              "rounded border border-border px-3 py-1 text-sm " +
+              "rounded border border-border px-3 py-1 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2 " +
               (page <= 1
                 ? "pointer-events-none opacity-50"
                 : "hover:bg-muted")
@@ -354,7 +362,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
             href={pageHref(Math.min(totalPages, page + 1))}
             aria-disabled={page >= totalPages}
             className={
-              "rounded border border-border px-3 py-1 text-sm " +
+              "rounded border border-border px-3 py-1 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2 " +
               (page >= totalPages
                 ? "pointer-events-none opacity-50"
                 : "hover:bg-muted")

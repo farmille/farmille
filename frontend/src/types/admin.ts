@@ -56,10 +56,43 @@ export interface AdminUserListItem {
   role: UserRole;
   status: UserAccountStatus;
   created_at: string;
+  pending_report_count: number;
+  is_deleted: boolean;
 }
 
 export interface AdminUserListResponse {
   users: AdminUserListItem[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+export type ReportReason =
+  | "spam"
+  | "abuse"
+  | "impersonation"
+  | "inappropriate"
+  | "other";
+
+export type ReportStatus = "pending" | "resolved" | "spam" | "dismissed";
+
+export interface AdminReportItem {
+  id: string;
+  reporter_user_id: string | null;
+  reporter_name: string | null;
+  target_user_id: string;
+  target_name: string | null;
+  reason: ReportReason;
+  body: string | null;
+  status: ReportStatus;
+  created_at: string;
+  resolved_at: string | null;
+  resolved_by: string | null;
+  resolution_note: string | null;
+}
+
+export interface AdminReportListResponse {
+  reports: AdminReportItem[];
   total: number;
   page: number;
   per_page: number;

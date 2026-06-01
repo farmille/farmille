@@ -104,8 +104,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+// UUID v4 形式チェック (FastAPI 側で 422 になる前にここで弾く)。
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default async function ProductDetailPage({ params }: PageProps) {
   const { id } = await params;
+
+  // 2026-05-27 hotfix: `/products/admin` のような non-UUID パスは即 404。
+  // FastAPI の 422 が page-level Error で落ちて投資家デモが死ぬ事故防止。
+  if (!UUID_RE.test(id)) {
+    notFound();
+  }
 
   const apiUrl = process.env.API_URL;
   if (!apiUrl) {
@@ -119,13 +128,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
     getRole(),
   ]);
 
-  if (productRes.status === 404) {
+  // 404 / 422 (id 不正) は同じ「見つからない」UX で揃える。
+  if (productRes.status === 404 || productRes.status === 422) {
     notFound();
   }
   if (!productRes.ok) {
     throw new Error(`Failed to fetch product: ${productRes.status}`);
   }
-  if (!reviewsRes.ok) {
+  if (!reviewsRes.ok && reviewsRes.status !== 422) {
     throw new Error(`Failed to fetch reviews: ${reviewsRes.status}`);
   }
 
@@ -523,6 +533,17 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     <p className="text-base text-foreground whitespace-pre-wrap leading-relaxed">
                       {r.body}
                     </p>
+                    {user && r.user_id !== user.id ? (
+                      <div className="pt-1 text-right">
+                        <Link
+                          href={`/report/user/${encodeURIComponent(r.user_id)}?from=/products/${encodeURIComponent(product.id)}`}
+                          className="text-xs text-muted-foreground hover:text-destructive underline-offset-4 hover:underline"
+                          aria-label={`このレビューを投稿した ${r.user_name ?? "ユーザー"} を通報`}
+                        >
+                          このユーザーを通報
+                        </Link>
+                      </div>
+                    ) : null}
                   </li>
                 ),
               )}

@@ -67,6 +67,7 @@ async def list_manufacturers(
         .select("id, created_at, maker_profiles(company_name, prefecture, city)")
         .eq("role", "maker")
         .eq("status", "active")
+        .is_("deleted_at", "null")
         .order("created_at", desc=True)
         .limit(limit)
         .execute()
@@ -81,11 +82,18 @@ async def list_manufacturers(
             eligible.append({"row": r, "profile": profile})
 
     # Aggregate product counts in one query.
+    # 2026-05-27 hotfix: 公開製品数のみカウント (is_public=true、未ソフト削除)。
+    # 以前は admin が is_public=false にしても件数が下がらず誤解の元だった。
     counts: dict[str, int] = {}
     if eligible:
         ids = [item["row"]["id"] for item in eligible]
         prod_res = (
-            admin.table("products").select("id, maker_id").in_("maker_id", ids).execute()
+            admin.table("products")
+            .select("id, maker_id")
+            .in_("maker_id", ids)
+            .eq("is_public", True)
+            .is_("deleted_at", "null")
+            .execute()
         )
         for p in prod_res.data or []:
             mid = p.get("maker_id")
@@ -116,7 +124,10 @@ async def get_manufacturer(manufacturer_id: UUID) -> ManufacturerDetailResponse:
 
     user_res = (
         admin.table("users")
-        .select("id, role, status, maker_profiles(company_name, prefecture, city, note)")
+        .select(
+            "id, role, status, deleted_at, "
+            "maker_profiles(company_name, prefecture, city, note)"
+        )
         .eq("id", str(manufacturer_id))
         .limit(1)
         .execute()
@@ -128,6 +139,8 @@ async def get_manufacturer(manufacturer_id: UUID) -> ManufacturerDetailResponse:
     if user_row.get("role") != "maker":
         raise HTTPException(status_code=404, detail="manufacturer_not_found")
     if user_row.get("status") != "active":
+        raise HTTPException(status_code=404, detail="manufacturer_not_found")
+    if user_row.get("deleted_at") is not None:
         raise HTTPException(status_code=404, detail="manufacturer_not_found")
 
     profile = _profile_dict(user_row)
@@ -142,6 +155,9 @@ async def get_manufacturer(manufacturer_id: UUID) -> ManufacturerDetailResponse:
             'product_images(url, "order")'
         )
         .eq("maker_id", str(manufacturer_id))
+        # 2026-05-27 hotfix: メーカー詳細ページからも非公開 / 削除済を隠す
+        .eq("is_public", True)
+        .is_("deleted_at", "null")
         .order("created_at", desc=True)
         .execute()
     )
