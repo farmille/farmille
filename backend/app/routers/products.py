@@ -63,12 +63,36 @@ def _flatten_product(row: dict) -> dict:
     }
 
 
+_SOURCE_RANK_ORDER = {"S": 0, "A": 1, "B": 2, "C": 3}
+
+
+def _sorted_sources(sources: list[dict] | None) -> list[dict]:
+    """product_sources を rank (S > A > B > C > NULL)、同 rank 内は
+    公式製品ページ優先で並べる。先頭が代表リンク (フロントのキャプション用)。"""
+    def sort_key(s: dict) -> tuple[int, int]:
+        rank = _SOURCE_RANK_ORDER.get(s.get("rank") or "", len(_SOURCE_RANK_ORDER))
+        type_priority = 0 if s.get("source_type") == "公式製品ページ" else 1
+        return (rank, type_priority)
+
+    return sorted(sources or [], key=sort_key)
+
+
 def _flatten_product_detail(row: dict) -> dict:
     """詳細用の平坦化。一覧の項目に加え、画像配列・効果タグ・対象作目・認証を含める。"""
     maker = row.get("users") or {}
     product_type = row.get("product_types") or {}
 
     images = sorted(row.get("product_images") or [], key=lambda x: x.get("order", 0))
+
+    sources = [
+        {
+            "source_type": s.get("source_type"),
+            "title": s.get("title"),
+            "url": s["url"],
+            "rank": s.get("rank"),
+        }
+        for s in _sorted_sources(row.get("product_sources"))
+    ]
 
     benefits = []
     for rel in row.get("product_benefit_relations") or []:
@@ -102,7 +126,15 @@ def _flatten_product_detail(row: dict) -> dict:
         "label_url": row.get("label_url"),
         "sds_url": row.get("sds_url"),
         "created_at": row.get("created_at"),
-        "images": [{"url": img["url"], "order": img.get("order", 0)} for img in images],
+        "images": [
+            {
+                "url": img["url"],
+                "order": img.get("order", 0),
+                "source_page_url": img.get("source_page_url"),
+            }
+            for img in images
+        ],
+        "sources": sources,
         "benefits": benefits,
         "crops": crops,
         "certifications": certifications,
@@ -385,7 +417,8 @@ async def get_product(product_id: UUID):
             'commercial_status, label_url, sds_url, is_public, deleted_at, created_at, '
             'users(name, status, maker_profiles(company_name)), '
             'product_types(id, name), '
-            'product_images(url, "order"), '
+            'product_images(url, "order", source_page_url), '
+            'product_sources(source_type, title, url, rank), '
             'product_benefit_relations(product_benefits(id, category, name)), '
             'product_crops(crops(id, name)), '
             'product_certifications(certifications(id, name))'

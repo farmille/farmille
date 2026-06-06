@@ -870,6 +870,50 @@ export type Database = {
           },
         ]
       }
+      product_sources: {
+        Row: {
+          created_at: string
+          extracted_date: string | null
+          id: string
+          notes: string | null
+          product_id: string
+          rank: string | null
+          source_type: string
+          title: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          extracted_date?: string | null
+          id?: string
+          notes?: string | null
+          product_id: string
+          rank?: string | null
+          source_type: string
+          title?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          extracted_date?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string
+          rank?: string | null
+          source_type?: string
+          title?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_sources_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_types: {
         Row: {
           id: string

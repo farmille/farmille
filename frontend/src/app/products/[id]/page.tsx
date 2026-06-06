@@ -13,6 +13,7 @@ import {
   FileText,
   ChevronRight,
   Star,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getUser, getRole } from "@/lib/auth/server";
@@ -46,7 +47,17 @@ type ProductDetail = {
   label_url: string | null;
   sds_url: string | null;
   created_at: string | null;
-  images: Array<{ url: string; order: number }>;
+  images: Array<{
+    url: string;
+    order: number;
+    source_page_url: string | null;
+  }>;
+  sources: Array<{
+    source_type: string | null;
+    title: string | null;
+    url: string;
+    rank: string | null;
+  }>;
   benefits: Array<{ id: string; category: string | null; name: string }>;
   crops: Array<{ id: string; name: string }>;
   certifications: Array<{ id: string; name: string }>;
@@ -145,6 +156,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const avg = averageRating(reviews);
   const heroImage = product.images[0] ?? null;
   const subImages = product.images.slice(1, 4);
+
+  // 出典リンク: 画像があれば画像自身の出典ページを優先、無ければ
+  // product_sources の代表 (backend が rank S > A > B > C / 公式製品ページ優先で
+  // ソート済みの先頭)。ホットリンク画像の著作権上の出典明示 + 該当 BS 資材かの
+  // 最終確認導線 (2026-06-06 Ryoga 確定)。
+  const sourceUrl =
+    heroImage?.source_page_url ?? product.sources?.[0]?.url ?? null;
 
   type CropsMaster = {
     crops: Crop[];
@@ -345,6 +363,21 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 </div>
               )}
             </div>
+            {sourceUrl && (
+              <p className="text-xs text-muted-foreground text-center">
+                <a
+                  href={sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 hover:text-[var(--green-primary)] underline-offset-4 hover:underline"
+                >
+                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                  {heroImage
+                    ? "画像出典: メーカー公式サイトで確認"
+                    : "メーカー公式サイトで製品を確認"}
+                </a>
+              </p>
+            )}
             {subImages.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {subImages.map((img) => (
