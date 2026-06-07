@@ -6,7 +6,8 @@ from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
-from app.auth.jwt import get_user_id
+from app.auth.jwt import get_user_id, get_user_role
+from app.config import settings
 from app.dependencies import require_role
 from app.models.schemas import (
     ProductCreatePayload,
@@ -144,17 +145,28 @@ def _flatten_product_detail(row: dict) -> dict:
 @router.post("", status_code=201)
 async def create_product(
     payload: ProductCreatePayload,
-    user: dict = require_role("maker"),
+    user: dict = require_role("maker", "admin"),
 ):
-    """maker による資材登録。
+    """maker / admin による資材登録。
 
     maker_id は payload ではなく JWT の sub を強制採用 (書き換え攻撃防止)。
+    admin の場合は「Farmille として」登録するため、Farmille 公式 maker
+    ハウスアカウント (settings.farmille_maker_user_id) に紐づける
+    (2026-06-07 Ryoga 確定)。
     products INSERT 成功後に関連テーブルを順次 INSERT。途中失敗時は
     products 行を削除し CASCADE で関連を清掃する (supabase-py は単発 REST の
     ため手動ロールバック)。
     画像は §5.1 の方針で path を rename せず public URL を product_images に保存。
     """
-    maker_id = get_user_id(user)
+    if get_user_role(user) == "admin":
+        if not settings.farmille_maker_user_id:
+            return JSONResponse(
+                status_code=503,
+                content={"ok": False, "error": "farmille_maker_not_configured"},
+            )
+        maker_id = settings.farmille_maker_user_id
+    else:
+        maker_id = get_user_id(user)
     admin = get_supabase_admin()
 
     try:
@@ -315,9 +327,10 @@ async def list_products(
 async def create_product_review(
     product_id: UUID,
     payload: ReviewCreatePayload,
-    user: dict = require_role("farmer"),
+    user: dict = require_role("farmer", "admin"),
 ):
-    """farmer によるレビュー投稿。
+    """farmer / admin によるレビュー投稿。
+    admin は運営として投稿できる (表示名は users.name、2026-06-07 Ryoga 確定)。
 
     id は payload.review_id を採用(フロントで crypto.randomUUID() 発行、
     画像 Storage パス {uid}/{review_id}/ と同期させるため)。

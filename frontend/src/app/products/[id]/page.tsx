@@ -556,6 +556,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
             ) : (
               <ReviewForm productId={product.id} />
             )
+          ) : role === "admin" ? (
+            // 2026-06-07: admin は運営としてレビュー投稿可 (プロフィールゲートなし)
+            <ReviewForm productId={product.id} />
           ) : (
             <p
               className="border border-border bg-card p-6 text-center text-muted-foreground"
