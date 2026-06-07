@@ -14,6 +14,22 @@ import { ReviewImageUpload } from "./review-image-upload";
 const BODY_MAX = 2000;
 const BODY_MIN = 1;
 
+// 2026-06-07 根本さん/奥田さん指示: 理想的なレビュー例を入力欄に提示する。
+// 作物・使用時期・使い方・体感した変化を含み、断定表現を避けた感想ベースのお手本。
+const IDEAL_REVIEW_EXAMPLE =
+  "トマト（ハウス栽培）で、定植後から2週間おきに灌水と合わせて使いました。" +
+  "1ヶ月ほどで根張りがしっかりしてきて、高温が続いた時期も葉のしおれが" +
+  "少なかったように感じます。収量への影響はまだ分かりませんが、株の勢いが" +
+  "安定したので来季も続けて使ってみる予定です。";
+
+const BODY_PLACEHOLDER =
+  "作物・使用時期・使い方・感じた変化を書くと、他の生産者の参考になります";
+
+// 農薬的効能の断定表現が無いことの確認文（必須チェック）。
+const PESTICIDE_CONFIRM_TEXT =
+  "このレビューには、病害虫の防除・殺菌・殺虫・農薬の代替など、" +
+  "農薬的な効果を断定する表現を含めていません";
+
 type Mode = "create" | "edit";
 
 type ExistingImage = {
@@ -81,6 +97,8 @@ export function ReviewForm({
   const [removedPaths, setRemovedPaths] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null);
+  // 投稿・更新とも毎回明示的にチェックさせる（デフォルト false）
+  const [pesticideConfirmed, setPesticideConfirmed] = useState(false);
 
   const existingImages = isEdit ? (initialValues!.existingImages ?? []) : [];
 
@@ -92,7 +110,11 @@ export function ReviewForm({
 
   const bodyLen = body.length;
   const canSubmit =
-    rating >= 1 && rating <= 5 && bodyLen >= BODY_MIN && bodyLen <= BODY_MAX;
+    rating >= 1 &&
+    rating <= 5 &&
+    bodyLen >= BODY_MIN &&
+    bodyLen <= BODY_MAX &&
+    pesticideConfirmed;
 
   async function uploadImages(
     supabase: ReturnType<typeof createClient>,
@@ -217,6 +239,7 @@ export function ReviewForm({
       setRating(0);
       setBody("");
       setFiles([]);
+      setPesticideConfirmed(false);
       router.refresh();
     } catch {
       setErrorCode("unknown");
@@ -272,11 +295,22 @@ export function ReviewForm({
 
       <div className="space-y-2">
         <Label htmlFor="review-body">本文</Label>
+        <div
+          className="rounded-md border border-border bg-[var(--green-subtle)] p-3 text-sm"
+          style={{ color: "var(--green-dark)" }}
+        >
+          <p className="font-semibold mb-1">良いレビューの例</p>
+          <p className="leading-relaxed">{IDEAL_REVIEW_EXAMPLE}</p>
+          <p className="mt-1.5 text-xs opacity-80">
+            作物・使用時期・使い方・感じた変化が入っていると参考になります。
+            効果は「〜のように感じた」など体感ベースで書くのがおすすめです。
+          </p>
+        </div>
         <Textarea
           id="review-body"
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="使用感・効果・散布条件などを共有してください"
+          placeholder={BODY_PLACEHOLDER}
           rows={6}
           disabled={submitting}
           maxLength={BODY_MAX}
@@ -303,6 +337,26 @@ export function ReviewForm({
           removedPaths={removedPaths}
           onToggleRemove={isEdit ? toggleRemove : undefined}
         />
+      </div>
+
+      <div className="flex items-start gap-2.5 rounded-md border border-border bg-background p-3">
+        <input
+          id="pesticide-confirm"
+          type="checkbox"
+          checked={pesticideConfirmed}
+          onChange={(e) => setPesticideConfirmed(e.target.checked)}
+          disabled={submitting}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--green-primary)] disabled:cursor-not-allowed"
+        />
+        <label
+          htmlFor="pesticide-confirm"
+          className="text-sm text-foreground leading-relaxed cursor-pointer"
+        >
+          {PESTICIDE_CONFIRM_TEXT}
+          <span className="text-destructive ml-1" aria-hidden="true">
+            *
+          </span>
+        </label>
       </div>
 
       {errorCode && (
