@@ -29,8 +29,10 @@ export default async function ProductNewPage() {
   if (!user) {
     redirect("/login?next=/products/new");
   }
+  // 2026-06-07: admin も「Farmille として」製品登録できる (backend 側で
+  // maker_id が Farmille 公式アカウントに振られる)。
   const role = await getRole();
-  if (role !== "maker") {
+  if (role !== "maker" && role !== "admin") {
     redirect(landingPathForRole(role));
   }
 
