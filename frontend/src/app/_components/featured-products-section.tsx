@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { PRODUCT_IMAGES_ENABLED } from "@/lib/flags";
 
 // Phase 18: 注目の資材セクション
 // spec docs/specs/home.md §6.1 / §6.4
@@ -29,7 +30,7 @@ function FeaturedProductCard({ product }: { product: FeaturedProductInner }) {
       className="group block w-60 shrink-0 snap-start rounded-md border border-border bg-card overflow-hidden hover:shadow-sm transition-shadow"
     >
       <div className="relative aspect-[4/3] bg-muted overflow-hidden">
-        {product.image_url ? (
+        {PRODUCT_IMAGES_ENABLED && product.image_url ? (
           <Image
             src={product.image_url}
             alt={product.name}
@@ -39,7 +40,7 @@ function FeaturedProductCard({ product }: { product: FeaturedProductInner }) {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
-            No Image
+            画像準備中
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { PRODUCT_IMAGES_ENABLED } from "@/lib/flags";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -91,7 +92,7 @@ export function FavoriteCard({ item }: Props) {
 
   return (
     <li className="rounded-lg border border-border bg-card p-4 flex gap-4">
-      {item.product.image_url ? (
+      {PRODUCT_IMAGES_ENABLED && item.product.image_url ? (
         <Image
           src={item.product.image_url}
           alt={item.product.name ?? ""}

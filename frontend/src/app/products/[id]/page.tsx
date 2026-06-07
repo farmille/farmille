@@ -27,6 +27,7 @@ import {
   type FavoriteKind,
 } from "./_components/favorite-button";
 import { isReviewerRole } from "@/lib/auth/roles";
+import { PRODUCT_IMAGES_ENABLED } from "@/lib/flags";
 import type {
   CategoryL1,
   CategoryL2,
@@ -86,6 +87,40 @@ function averageRating(reviews: Review[]): number | null {
   if (reviews.length === 0) return null;
   const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
   return Math.round((sum / reviews.length) * 10) / 10;
+}
+
+// ─── 出典・公式情報ボタン（2026-06-07 根本さん指示） ───
+// Farmille は公式情報の転載サイトではなく「公開情報を整理し、公式情報への
+// 導線を提供する」サイトとして見せる。公式製品ページがあればメインボタン、
+// カタログPDF / オンラインショップ / SDS はサブボタン。全て別タブで開き、
+// iframe 埋め込み・PDF の自社配信はしない。
+type OfficialLink = { label: string; url: string; main: boolean };
+
+function buildOfficialLinks(product: ProductDetail): OfficialLink[] {
+  const sources = product.sources ?? [];
+  // backend が rank S>A>B>C / 公式製品ページ優先でソート済みのため先頭一致で最良を取る
+  const first = (types: string[]): string | null =>
+    sources.find((s) => s.source_type && types.includes(s.source_type))?.url ??
+    null;
+
+  const links: OfficialLink[] = [];
+  const officialPage = first(["公式製品ページ"]);
+  if (officialPage) {
+    links.push({ label: "メーカー公式ページを見る", url: officialPage, main: true });
+  }
+  const catalog = first(["公式カタログ", "公式PDF"]) ?? product.label_url;
+  if (catalog) {
+    links.push({ label: "公式カタログPDFを見る", url: catalog, main: false });
+  }
+  const shop = first(["公式販売ページ"]);
+  if (shop) {
+    links.push({ label: "公式オンラインショップを見る", url: shop, main: false });
+  }
+  const sds = first(["公式SDS", "公式技術資料"]) ?? product.sds_url;
+  if (sds) {
+    links.push({ label: "SDS・技術資料を見る", url: sds, main: false });
+  }
+  return links;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -163,6 +198,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   // 最終確認導線 (2026-06-06 Ryoga 確定)。
   const sourceUrl =
     heroImage?.source_page_url ?? product.sources?.[0]?.url ?? null;
+  const officialLinks = buildOfficialLinks(product);
 
   type CropsMaster = {
     crops: Crop[];
@@ -245,20 +281,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
       </div>
 
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full space-y-12">
-        {/* HERO: 2-col text + image (AgList /product/<slug> 風) */}
+        {/* HERO: 商品名 → メーカー名 → カテゴリ → 公式情報ボタン → 画像エリア
+            (2026-06-07 根本さん指示の表示順。概要は下の資材詳細セクションで表示) */}
         <section className="grid md:grid-cols-[1fr_minmax(0,420px)] gap-8 items-start">
           <div className="space-y-5">
-            {product.type_name && (
-              <div className="flex flex-wrap gap-2">
-                <PillBadge>{product.type_name}</PillBadge>
-                {product.commercial_status && (
-                  <PillBadge variant="outline">
-                    {commercialStatusLabel(product.commercial_status)}
-                  </PillBadge>
-                )}
-              </div>
-            )}
-
             <h1
               className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground"
               style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
@@ -269,6 +295,17 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <p className="text-base text-muted-foreground">
               {product.maker_name ?? "メーカー不明"}
             </p>
+
+            {product.type_name && (
+              <div className="flex flex-wrap gap-2">
+                <PillBadge>{product.type_name}</PillBadge>
+                {product.commercial_status && (
+                  <PillBadge variant="outline">
+                    {commercialStatusLabel(product.commercial_status)}
+                  </PillBadge>
+                )}
+              </div>
+            )}
 
             {avg !== null && (
               <div className="inline-flex items-center gap-2 text-sm text-foreground">
@@ -283,39 +320,40 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {product.general_purpose && (
-              <p className="text-base text-foreground whitespace-pre-wrap leading-relaxed">
-                {product.general_purpose}
-              </p>
+            {/* 出典・公式情報: 公式ページはメインボタン、他はサブボタン。全て別タブ */}
+            {officialLinks.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-3">
+                  {officialLinks.map((link) => (
+                    <Button
+                      key={link.label}
+                      asChild
+                      variant={link.main ? "default" : "outline"}
+                      size={link.main ? "default" : "sm"}
+                    >
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5"
+                      >
+                        {link.main ? (
+                          <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                        ) : (
+                          <FileText className="h-4 w-4" aria-hidden="true" />
+                        )}
+                        {link.label}
+                      </a>
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  製品の最新情報・正式な使用方法は、必ずメーカー公式情報をご確認ください。
+                </p>
+              </div>
             )}
 
             <div className="flex flex-wrap gap-3 pt-1">
-              {product.label_url && (
-                <Button asChild variant="outline" size="sm">
-                  <a
-                    href={product.label_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5"
-                  >
-                    <FileText className="h-4 w-4" aria-hidden="true" />
-                    ラベル (PDF)
-                  </a>
-                </Button>
-              )}
-              {product.sds_url && (
-                <Button asChild variant="outline" size="sm">
-                  <a
-                    href={product.sds_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5"
-                  >
-                    <FileText className="h-4 w-4" aria-hidden="true" />
-                    SDS (PDF)
-                  </a>
-                </Button>
-              )}
               <FavoriteButton
                 productId={product.id}
                 mode={
@@ -337,7 +375,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 boxShadow: "var(--shadow-sm)",
               }}
             >
-              {heroImage ? (
+              {PRODUCT_IMAGES_ENABLED && heroImage ? (
                 <Image
                   src={heroImage.url}
                   alt={product.name}
@@ -347,7 +385,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   className="object-cover"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                   <span
                     className="inline-flex items-center justify-center h-16 w-16"
                     style={{
@@ -359,6 +397,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       className="h-8 w-8 text-[var(--green-primary)]"
                       aria-hidden="true"
                     />
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    画像準備中
                   </span>
                 </div>
               )}
@@ -372,13 +413,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   className="inline-flex items-center gap-1 hover:text-[var(--green-primary)] underline-offset-4 hover:underline"
                 >
                   <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                  {heroImage
-                    ? "画像出典: メーカー公式サイトで確認"
-                    : "メーカー公式サイトで製品を確認"}
+                  製品画像はメーカー公式サイトでご確認ください
                 </a>
               </p>
             )}
-            {subImages.length > 0 && (
+            {PRODUCT_IMAGES_ENABLED && subImages.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {subImages.map((img) => (
                   <div
@@ -449,7 +488,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <section aria-label="タグ" className="space-y-6">
           <TagGroup
             icon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
-            label="JBSA 効果タグ (メーカー申告)"
+            label="効果分類（JBSA基準・メーカー申告）"
             items={product.benefits.map((b) =>
               b.category ? `${b.category} / ${b.name}` : b.name,
             )}
@@ -467,6 +506,20 @@ export default async function ProductDetailPage({ params }: PageProps) {
             items={product.certifications.map((c) => c.name)}
             emptyText="認証の登録なし"
           />
+        </section>
+
+        {/* 共通注記（全商品共通・2026-06-07 根本さん指示） */}
+        <section aria-label="掲載情報について">
+          <p
+            className="border border-border bg-card p-4 text-xs text-muted-foreground leading-relaxed"
+            style={{ borderRadius: "var(--radius-lg)" }}
+          >
+            掲載されている製品情報は、メーカー公式サイト等の公開情報をもとに
+            Farmille が独自に整理・分類したものです。Farmille
+            は各メーカーの公式サイトではありません。効果分類・販売状況・対象作物・
+            使用方法を含む製品の最新情報、正式な使用方法、適用条件については、
+            必ずメーカー公式情報をご確認ください。
+          </p>
         </section>
 
         {/* レビュー投稿 — 既存ロジックを継承 */}
@@ -520,16 +573,25 @@ export default async function ProductDetailPage({ params }: PageProps) {
               レビュー
             </h2>
             <span className="text-sm text-muted-foreground">
-              {reviews.length} 件
+              {reviews.length === 0 ? "レビュー募集中" : `${reviews.length} 件`}
             </span>
           </div>
+          {/* レビュー免責（2026-06-07 奥田さん指示）: 感想ベースであることを明示 */}
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            レビューは個々の生産者の使用環境における感想であり、効果を保証する
+            ものではありません。使用にあたっては必ずメーカー公式情報をご確認ください。
+          </p>
           {reviews.length === 0 ? (
-            <p
-              className="border border-border bg-card p-8 text-center text-muted-foreground"
+            <div
+              className="border border-border bg-card p-8 text-center space-y-2"
               style={{ borderRadius: "var(--radius-lg)" }}
             >
-              この資材にはまだレビューがありません。
-            </p>
+              <p className="font-semibold text-foreground">レビュー募集中</p>
+              <p className="text-sm text-muted-foreground">
+                この製品の使用経験がある方は、作物・使用時期・感じた変化を
+                ぜひ共有してください。
+              </p>
+            </div>
           ) : (
             <ul className="space-y-3">
               {reviews.map((r) =>

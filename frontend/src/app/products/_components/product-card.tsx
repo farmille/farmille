@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { PRODUCT_IMAGES_ENABLED } from "@/lib/flags";
 import { ArrowRight } from "lucide-react";
 
 export type Product = {
@@ -37,7 +38,7 @@ export function ProductCard({ product, hideMakerName = false }: ProductCardProps
       }}
     >
       <div className="relative aspect-square bg-[var(--green-subtle)] overflow-hidden">
-        {product.image_url ? (
+        {PRODUCT_IMAGES_ENABLED && product.image_url ? (
           <Image
             src={product.image_url}
             alt={product.name}
@@ -54,7 +55,7 @@ export function ProductCard({ product, hideMakerName = false }: ProductCardProps
                 color: "var(--green-dark)",
               }}
             >
-              No Image
+              画像準備中
             </span>
           </div>
         )}

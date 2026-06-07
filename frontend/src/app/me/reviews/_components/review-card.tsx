@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { PRODUCT_IMAGES_ENABLED } from "@/lib/flags";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +18,7 @@ export type MyReview = {
 export function ReviewCard({ review }: { review: MyReview }) {
   return (
     <li className="rounded-md border border-border bg-card p-4 flex gap-4">
-      {review.product_image_url ? (
+      {PRODUCT_IMAGES_ENABLED && review.product_image_url ? (
         <Image
           src={review.product_image_url}
           alt={review.product_name ?? ""}
