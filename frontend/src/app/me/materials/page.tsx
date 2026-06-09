@@ -7,14 +7,13 @@ import { isReviewerRole } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
 import { type FavoriteItem } from "./_components/favorite-card";
 import { FavoritesTab } from "./_components/favorites-tab";
-import { RequestsPlaceholder } from "./_components/requests-placeholder";
 
 export const metadata: Metadata = {
   title: "マイ資材",
   description: "お気に入り資材と候補資材を管理する個人ページ",
 };
 
-const VALID_TABS = ["favorite", "candidate", "requests"] as const;
+const VALID_TABS = ["favorite", "candidate"] as const;
 type TabKey = (typeof VALID_TABS)[number];
 
 type FavoritesResponse = { favorites: FavoriteItem[] };
@@ -57,8 +56,6 @@ export default async function MyMaterialsPage({ searchParams }: PageProps) {
     throw new Error("API_URL not configured");
   }
 
-  // spec §6.1: requests タブは API 呼び出しゼロ (§13)。
-  // favorite / candidate タブのみ実 fetch。
   let favoriteItems: FavoriteItem[] = [];
   let candidateItems: FavoriteItem[] = [];
 
@@ -98,7 +95,6 @@ export default async function MyMaterialsPage({ searchParams }: PageProps) {
         >
           <TabLink current={tab} target="favorite" label="お気に入り" />
           <TabLink current={tab} target="candidate" label="候補" />
-          <TabLink current={tab} target="requests" label="問い合わせ履歴" />
         </nav>
 
         {tab === "favorite" && (
@@ -115,7 +111,6 @@ export default async function MyMaterialsPage({ searchParams }: PageProps) {
             emptyHelpText="購入や試用を検討中の資材を「候補」に追加すると、ここに集まります。"
           />
         )}
-        {tab === "requests" && <RequestsPlaceholder />}
       </main>
     </div>
   );
