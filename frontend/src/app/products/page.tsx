@@ -3,6 +3,7 @@ import { Sprout, SlidersHorizontal } from "lucide-react";
 import { TypeFilter } from "./_components/type-filter";
 import { ProductCard, type Product } from "./_components/product-card";
 import { ProductsSearchBar } from "./_components/products-search-bar";
+import { PRODUCT_IMAGES_ENABLED } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "資材一覧",
@@ -60,6 +61,14 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const { products } = (await productsRes.json()) as ProductsResponse;
   const { product_types: productTypes } =
     (await typesRes.json()) as ProductTypesResponse;
+
+  // 2026-06-09 根本さん指示: /products は画像があるものを上位表示する。
+  // Array.sort は安定ソートのため、画像有無のグループ内では backend の
+  // 並び (created_at desc) がそのまま保たれる。画像を非表示にしている間
+  // (フラグ false) は並べ替えても見た目が変わらないので true の時だけ適用。
+  if (PRODUCT_IMAGES_ENABLED) {
+    products.sort((a, b) => (b.image_url ? 1 : 0) - (a.image_url ? 1 : 0));
+  }
 
   const selectedType = typeId
     ? (productTypes.find((t) => t.id === typeId) ?? null)
