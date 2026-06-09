@@ -2,20 +2,16 @@ import type { Metadata } from "next";
 import { Sprout, SlidersHorizontal } from "lucide-react";
 import { TypeFilter } from "./_components/type-filter";
 import { ProductCard, type Product } from "./_components/product-card";
-import {
-  CropCascadeFilter,
-  type L1Node,
-} from "./_components/crop-cascade-filter";
 import { ProductsSearchBar } from "./_components/products-search-bar";
 
 export const metadata: Metadata = {
   title: "資材一覧",
   description:
-    "BS 資材(生物・微生物農業資材)を作目・タイプ別に探せます。農家のレビュー付き。",
+    "BS 資材(生物・微生物農業資材)をタイプ別に探せます。農家のレビュー付き。",
   openGraph: {
     title: "資材一覧 | Farmille",
     description:
-      "BS 資材(生物・微生物農業資材)を作目・タイプ別に探せます。農家のレビュー付き。",
+      "BS 資材(生物・微生物農業資材)をタイプ別に探せます。農家のレビュー付き。",
     url: "/products",
   },
 };
@@ -23,26 +19,14 @@ export const metadata: Metadata = {
 type ProductType = { id: string; name: string };
 type ProductsResponse = { products: Product[] };
 type ProductTypesResponse = { product_types: ProductType[] };
-type CropsTreeResponse = { tree: L1Node[] };
 
 type PageProps = {
-  searchParams?: Promise<{ type_id?: string; crop_id?: string; q?: string }>;
+  searchParams?: Promise<{ type_id?: string; q?: string }>;
 };
-
-function findCropName(tree: L1Node[], cropId: string): string | null {
-  for (const l1 of tree) {
-    for (const l2 of l1.children) {
-      const c = l2.children.find((x) => x.id === cropId);
-      if (c) return c.name;
-    }
-  }
-  return null;
-}
 
 export default async function ProductsPage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const typeId = params.type_id ?? null;
-  const cropId = params.crop_id ?? null;
   // 検索キーワードは backend `Query(max_length=100)` に揃えてここでも 100 文字でカット。
   const q = (params.q ?? "").trim().slice(0, 100);
 
@@ -53,17 +37,17 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
   const productsQuery = new URLSearchParams();
   if (typeId) productsQuery.set("type_id", typeId);
-  if (cropId) productsQuery.set("crop_id", cropId);
   if (q) productsQuery.set("q", q);
   const productsQs = productsQuery.toString();
   const productsUrl = productsQs
     ? `${apiUrl}/v1/products?${productsQs}`
     : `${apiUrl}/v1/products`;
 
-  const [productsRes, typesRes, treeRes] = await Promise.all([
+  // 2026-06-10 根本さん指示: 作目での絞り込みは現状データが揃わず使えないため削除。
+  // backend は引き続き crop_id を受け付ける（既存リンク互換）が、UI からは外す。
+  const [productsRes, typesRes] = await Promise.all([
     fetch(productsUrl, { cache: "no-store" }),
     fetch(`${apiUrl}/v1/product-types`, { next: { revalidate: 3600 } }),
-    fetch(`${apiUrl}/v1/crops/tree`, { next: { revalidate: 3600 } }),
   ]);
 
   if (!productsRes.ok) {
@@ -72,25 +56,24 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   if (!typesRes.ok) {
     throw new Error(`Failed to fetch product types: ${typesRes.status}`);
   }
-  if (!treeRes.ok) {
-    throw new Error(`Failed to fetch crops tree: ${treeRes.status}`);
-  }
 
   const { products } = (await productsRes.json()) as ProductsResponse;
   const { product_types: productTypes } =
     (await typesRes.json()) as ProductTypesResponse;
-  const { tree } = (await treeRes.json()) as CropsTreeResponse;
 
   const selectedType = typeId
     ? (productTypes.find((t) => t.id === typeId) ?? null)
     : null;
-  const selectedCropName = cropId ? findCropName(tree, cropId) : null;
-  const isFiltered = typeId !== null || cropId !== null || q.length > 0;
+  const isFiltered = typeId !== null || q.length > 0;
 
   const activeFilterChips: string[] = [];
   if (q) activeFilterChips.push(`キーワード: ${q}`);
   if (selectedType) activeFilterChips.push(`タイプ: ${selectedType.name}`);
-  if (selectedCropName) activeFilterChips.push(`作目: ${selectedCropName}`);
+
+  // タイプフィルタは active なタイプが 2 件以上ある時だけ意味を持つ。現状は
+  // BS資材のみ active のため非表示。作目フィルタ撤去後にこれも無いと「絞り込み」
+  // パネルが空箱になるので、表示すべきフィルタが無い時はパネルごと出さない。
+  const showFilterPanel = productTypes.length > 1;
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -121,7 +104,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             資材一覧
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
-            生物・微生物農業資材 (BS資材) を作目・タイプ別に探せます。
+            生物・微生物農業資材 (BS資材) を探せます。
             農家・JA 普及員・研究者によるレビューで意思決定をサポート。
           </p>
           <div className="flex items-center gap-3 pt-2">
@@ -159,42 +142,32 @@ export default async function ProductsPage({ searchParams }: PageProps) {
       </section>
 
       <main className="flex-1 max-w-6xl mx-auto px-6 py-12 w-full space-y-6">
-        {/* 検索バー — AgList /products の search 相当。q を URL に反映。 */}
+        {/* 検索バー — AgList /products の search 相当。q を URL に反映。
+            資材名・和名に加えて製造元(販売元含む)でも引けるよう backend を拡張済。 */}
         <ProductsSearchBar initialQuery={q} />
 
-        {/* フィルタ panel — sits between search and grid as a calm card */}
-        <section
-          aria-label="フィルタ"
-          className="space-y-5 border border-border bg-card p-5 md:p-6"
-          style={{
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-sm)",
-          }}
-        >
-          <div className="flex items-center gap-2 text-foreground">
-            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-            <span className="text-sm font-semibold">絞り込み</span>
-          </div>
-          {/* TypeFilter は実質意味のあるタイプ (active=true) が 2 件以上ある
-              ときだけ表示。現状 product_types master は BS資材 のみ active で
-              「すべて / BS資材」の二択になり UX 上ノイズになるため非表示。
-              将来 農薬 / 肥料 / 土壌改良材 が active になれば自動復活する。
-              `is_active=true` 行は backend `/v1/product-types` で絞り済。 */}
-          {productTypes.length > 1 && (
+        {/* フィルタ panel — 表示すべきフィルタがある時だけ出す */}
+        {showFilterPanel && (
+          <section
+            aria-label="フィルタ"
+            className="space-y-5 border border-border bg-card p-5 md:p-6"
+            style={{
+              borderRadius: "var(--radius-lg)",
+              boxShadow: "var(--shadow-sm)",
+            }}
+          >
+            <div className="flex items-center gap-2 text-foreground">
+              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+              <span className="text-sm font-semibold">絞り込み</span>
+            </div>
             <TypeFilter types={productTypes} selectedTypeId={typeId} />
-          )}
-          <CropCascadeFilter
-            key={cropId ?? "none"}
-            tree={tree}
-            selectedCropId={cropId}
-          />
-        </section>
+          </section>
+        )}
 
         {products.length === 0 ? (
           <EmptyState
             isFiltered={isFiltered}
             typeName={selectedType?.name ?? null}
-            cropName={selectedCropName}
             keyword={q || null}
           />
         ) : (
@@ -214,18 +187,15 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 function EmptyState({
   isFiltered,
   typeName,
-  cropName,
   keyword,
 }: {
   isFiltered: boolean;
   typeName: string | null;
-  cropName: string | null;
   keyword: string | null;
 }) {
   const filterLabels: string[] = [];
   if (keyword) filterLabels.push(`キーワード「${keyword}」`);
   if (typeName) filterLabels.push(`タイプ「${typeName}」`);
-  if (cropName) filterLabels.push(`作目「${cropName}」`);
 
   return (
     <div

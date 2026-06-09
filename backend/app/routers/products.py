@@ -305,15 +305,38 @@ async def list_products(
     if product_ids is not None:
         query = query.in_("id", product_ids)
     if q:
-        # PostgREST `or` 文法で name + product_name_jp の OR-ILIKE。
+        # PostgREST `or` 文法で name + product_name_jp + 製造元(maker) の OR-ILIKE。
         # or()/ilike の filter 文法に効く文字 (`,` 区切り / `()` グループ化 / `*`
         # wildcard) を除去し filter-injection 面を塞ぐ。SQL injection ではないが
         # 400 やマッチ範囲の意図せぬ拡大を防ぐため v1 では検索対象外とする。
         like = q.strip().translate({ord(c): None for c in ",()*"})
         if like:
-            query = query.or_(
-                f"name.ilike.%{like}%,product_name_jp.ilike.%{like}%"
+            # 2026-06-10 根本さん指示: 製造元(販売元含む)でも検索できるようにする。
+            # maker 表示名 = maker_profiles.company_name 優先 / users.name fallback の
+            # 両方を引き当て、該当 maker_id を OR 句に in.() で合流させる。
+            maker_ids: set[str] = set()
+            mp_res = (
+                admin.table("maker_profiles")
+                .select("user_id")
+                .ilike("company_name", f"%{like}%")
+                .execute()
             )
+            maker_ids.update(r["user_id"] for r in (mp_res.data or []))
+            u_res = (
+                admin.table("users")
+                .select("id")
+                .eq("role", "maker")
+                .ilike("name", f"%{like}%")
+                .execute()
+            )
+            maker_ids.update(r["id"] for r in (u_res.data or []))
+
+            or_parts = [f"name.ilike.%{like}%", f"product_name_jp.ilike.%{like}%"]
+            if maker_ids:
+                # maker_id は UUID のみで PostgREST in.() のメタ文字を含まないため
+                # そのまま結合してよい。
+                or_parts.append(f"maker_id.in.({','.join(sorted(maker_ids))})")
+            query = query.or_(",".join(or_parts))
     res = query.order("created_at", desc=True).execute()
     # ADR-0009: 非 active メーカー (pending_review / rejected / frozen) 所有の
     # 製品は公開一覧に出さない。Supabase の foreign-table フィルタは join 側を

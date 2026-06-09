@@ -61,6 +61,9 @@ class FakeQuery:
     def is_(self, *args: Any, **kwargs: Any) -> "FakeQuery":
         return self._record("is_", *args, **kwargs)
 
+    def ilike(self, *args: Any, **kwargs: Any) -> "FakeQuery":
+        return self._record("ilike", *args, **kwargs)
+
     @property
     def not_(self) -> "FakeQuery":
         # supabase-py の `.not_.is_("col", "null")` チェーンを記録器として受ける。

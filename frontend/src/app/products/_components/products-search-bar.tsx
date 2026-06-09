@@ -83,8 +83,8 @@ export function ProductsSearchBar({ initialQuery }: Props) {
         name="q"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="資材名・和名から検索"
-        aria-label="資材名・和名"
+        placeholder="資材名・製造元から検索"
+        aria-label="資材名・製造元"
         maxLength={100}
         className="flex-1 min-w-0 bg-transparent px-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
       />

@@ -478,7 +478,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             />
             <DetailRow
               icon={<Sparkles className="h-4 w-4" />}
-              label="メーカー"
+              label="製造元"
               value={product.maker_name}
             />
           </dl>
@@ -516,11 +516,22 @@ export default async function ProductDetailPage({ params }: PageProps) {
           >
             掲載されている製品情報は、メーカー公式サイト等の公開情報をもとに
             Farmille が独自に整理・分類したものです。Farmille
-            は各メーカーの公式サイトではありません。効果分類・販売状況・対象作物・
+            は各メーカーの公式サイトではありません。なお「製造元」は製品の製造元を
+            示しますが、製品によっては販売元・輸入元を記載している場合があります。
+            効果分類・販売状況・対象作物・
             使用方法を含む製品の最新情報、正式な使用方法、適用条件については、
             必ずメーカー公式情報をご確認ください。
           </p>
         </section>
+
+        {/* 2026-06-10 根本さん指示: Google フォームによるレビュー受付を併設予定。
+            根本さんからフォームの埋め込みURLを受領したら、以下を有効化する:
+              import { GoogleFormReviewEmbed } from "@/components/google-form-review-embed";
+              ...（このコメントの位置で）<GoogleFormReviewEmbed />
+            URL は src/components/google-form-review-embed.tsx の
+            GOOGLE_FORM_EMBED_URL にセットする。現状は現行のサイト内レビューフォームを
+            そのまま維持（＝コメントアウトで現状キープ）。 */}
+        {/* <GoogleFormReviewEmbed /> */}
 
         {/* レビュー投稿 — 既存ロジックを継承 */}
         <section className="space-y-4">
