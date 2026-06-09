@@ -48,7 +48,7 @@ export function HeroSection({ articles }: { articles: HomeArticle[] }) {
               JBSA 効果タグで比較
             </h2>
             <p className="text-base text-muted-foreground leading-relaxed">
-              メーカー申告の推奨効果と、農家が実感した効果を並べて比較。資材選びの判断材料に。
+              製造元申告の推奨効果と、農家が実感した効果を並べて比較。資材選びの判断材料に。
             </p>
           </div>
           <div className="space-y-3">

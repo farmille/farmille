@@ -20,7 +20,7 @@ type Props = {
 const NAV_LINKS = [
   { href: "/products", label: "資材" },
   { href: "/articles", label: "記事" },
-  { href: "/manufacturers", label: "メーカー" },
+  { href: "/manufacturers", label: "製造元" },
 ];
 
 export function SiteHeaderMobileNav({

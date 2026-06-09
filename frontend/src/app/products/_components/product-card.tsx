@@ -17,7 +17,7 @@ export type Product = {
 export type ProductCardProps = {
   product: Product;
   /**
-   * メーカー詳細ページのように、親セクションでメーカー名を出す場面で
+   * 製造元詳細ページのように、親セクションで製造元名を出す場面で
    * カードごとの再表示を避けるためのフラグ。Phase 17 spec §6.2 参照。
    */
   hideMakerName?: boolean;
@@ -86,7 +86,7 @@ export function ProductCard({ product, hideMakerName = false }: ProductCardProps
 
         {!hideMakerName && (
           <p className="text-sm text-muted-foreground line-clamp-1">
-            {product.maker_name ?? "メーカー不明"}
+            {product.maker_name ?? "製造元不明"}
           </p>
         )}
 

@@ -81,7 +81,7 @@ export function RelatedProductCard({ product }: { product: RelatedProduct }) {
         </h3>
 
         <p className="text-xs text-muted-foreground line-clamp-1">
-          {product.maker_name ?? "メーカー不明"}
+          {product.maker_name ?? "製造元不明"}
         </p>
 
         <div className="mt-auto pt-2">

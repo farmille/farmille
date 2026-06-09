@@ -13,7 +13,7 @@ function formatLocation(prefecture: string | null, city: string | null): string 
   return [prefecture, city].filter(Boolean).join(" ").trim();
 }
 
-// 2026-06-10 根本さん指示: メーカーのロゴ（公式サイト由来の画像）は出さず、社名
+// 2026-06-10 根本さん指示: 製造元のロゴ（公式サイト由来の画像）は出さず、社名
 // ベースで整って見えるテキスト主体のカードにする。以前は社名の先頭1文字を大きな
 // タイルに表示していたが「（雪」のような崩れた見た目になるため撤去した。
 export function ManufacturerCard({

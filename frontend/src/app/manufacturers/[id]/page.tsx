@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const m = await fetchManufacturer(id).catch(() => null);
   if (!m) {
-    return { title: "メーカー詳細" };
+    return { title: "製造元詳細" };
   }
   return {
     title: m.company_name,
@@ -91,7 +91,7 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
               href="/manufacturers"
               className="hover:text-[var(--green-primary)]"
             >
-              メーカー一覧
+              製造元一覧
             </Link>
             <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
             <span className="text-foreground line-clamp-1">
@@ -139,7 +139,7 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
               }}
             >
               <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
-              メーカー
+              製造元
             </div>
             <h1
               className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground"
@@ -229,7 +229,7 @@ export default async function ManufacturerDetailPage({ params }: PageProps) {
                 };
                 return (
                   <li key={p.id} className="h-full">
-                    {/* spec §6.2: メーカー詳細ページ内では company_name 重複表示を避ける */}
+                    {/* spec §6.2: 製造元詳細ページ内では company_name 重複表示を避ける */}
                     <ProductCard product={cardProduct} hideMakerName />
                   </li>
                 );

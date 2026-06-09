@@ -107,7 +107,7 @@ function buildOfficialLinks(product: ProductDetail): OfficialLink[] {
   const links: OfficialLink[] = [];
   const officialPage = first(["公式製品ページ"]);
   if (officialPage) {
-    links.push({ label: "メーカー公式ページを見る", url: officialPage, main: true });
+    links.push({ label: "製造元公式ページを見る", url: officialPage, main: true });
   }
   const catalog = first(["公式カタログ", "公式PDF"]) ?? product.label_url;
   if (catalog) {
@@ -282,7 +282,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       </div>
 
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full space-y-12">
-        {/* HERO: 商品名 → メーカー名 → カテゴリ → 公式情報ボタン → 画像エリア
+        {/* HERO: 商品名 → 製造元名 → カテゴリ → 公式情報ボタン → 画像エリア
             (2026-06-07 根本さん指示の表示順。概要は下の資材詳細セクションで表示) */}
         <section className="grid md:grid-cols-[1fr_minmax(0,420px)] gap-8 items-start">
           <div className="space-y-5">
@@ -294,7 +294,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </h1>
 
             <p className="text-base text-muted-foreground">
-              {product.maker_name ?? "メーカー不明"}
+              {product.maker_name ?? "製造元不明"}
             </p>
 
             {product.type_name && (
@@ -349,7 +349,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  製品の最新情報・正式な使用方法は、必ずメーカー公式情報をご確認ください。
+                  製品の最新情報・正式な使用方法は、必ず製造元公式情報をご確認ください。
                 </p>
               </div>
             )}
@@ -414,7 +414,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   className="inline-flex items-center gap-1 hover:text-[var(--green-primary)] underline-offset-4 hover:underline"
                 >
                   <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                  製品画像はメーカー公式サイトでご確認ください
+                  製品画像は製造元公式サイトでご確認ください
                 </a>
               </p>
             )}
@@ -479,7 +479,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             />
             <DetailRow
               icon={<Sparkles className="h-4 w-4" />}
-              label="製造元"
+              label="製造元（※一部、販売元を含みます）"
               value={product.maker_name}
             />
           </dl>
@@ -489,7 +489,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <section aria-label="タグ" className="space-y-6">
           <TagGroup
             icon={<Sparkles className="h-4 w-4" aria-hidden="true" />}
-            label="効果分類（JBSA基準・メーカー申告）"
+            label="効果分類（JBSA基準・製造元申告）"
             items={product.benefits.map((b) =>
               b.category ? `${b.category} / ${b.name}` : b.name,
             )}
@@ -515,13 +515,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
             className="border border-border bg-card p-4 text-xs text-muted-foreground leading-relaxed"
             style={{ borderRadius: "var(--radius-lg)" }}
           >
-            掲載されている製品情報は、メーカー公式サイト等の公開情報をもとに
+            掲載されている製品情報は、製造元公式サイト等の公開情報をもとに
             Farmille が独自に整理・分類したものです。Farmille
-            は各メーカーの公式サイトではありません。なお「製造元」は製品の製造元を
+            は各製造元の公式サイトではありません。なお「製造元」は製品の製造元を
             示しますが、製品によっては販売元・輸入元を記載している場合があります。
             効果分類・販売状況・対象作物・
             使用方法を含む製品の最新情報、正式な使用方法、適用条件については、
-            必ずメーカー公式情報をご確認ください。
+            必ず製造元公式情報をご確認ください。
           </p>
         </section>
 
@@ -592,7 +592,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           {/* レビュー免責（2026-06-07 奥田さん指示）: 感想ベースであることを明示 */}
           <p className="text-xs text-muted-foreground leading-relaxed">
             レビューは個々の生産者の使用環境における感想であり、効果を保証する
-            ものではありません。使用にあたっては必ずメーカー公式情報をご確認ください。
+            ものではありません。使用にあたっては必ず製造元公式情報をご確認ください。
           </p>
           {reviews.length === 0 ? (
             <div

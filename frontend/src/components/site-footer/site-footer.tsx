@@ -24,12 +24,12 @@ type FooterLink = { href: string; label: string };
 
 const RESOURCE_LINKS: FooterLink[] = [
   { href: "/articles", label: "記事" },
-  { href: "/manufacturers", label: "メーカー一覧" },
+  { href: "/manufacturers", label: "製造元一覧" },
 ];
 
 const CATALOG_LINKS: FooterLink[] = [
   { href: "/products", label: "資材を探す" },
-  { href: "/manufacturers", label: "メーカーを探す" },
+  { href: "/manufacturers", label: "製造元を探す" },
 ];
 
 const ACCOUNT_LINKS: FooterLink[] = [
@@ -65,7 +65,7 @@ export async function SiteFooter() {
           </Link>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
             BS資材 (生物・微生物農業資材) の農家レビュー・データベース。
-            農家・JA・研究者・メーカーをつなぐプラットフォーム。
+            農家・JA・研究者・製造元をつなぐプラットフォーム。
           </p>
         </div>
 

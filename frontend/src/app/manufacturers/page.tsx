@@ -6,13 +6,13 @@ import {
 } from "./_components/manufacturer-card";
 
 export const metadata: Metadata = {
-  title: "メーカー一覧",
+  title: "製造元一覧",
   description:
-    "Farmille に登録されている BS 資材メーカー(企業)の公開一覧。各社の所在地と登録資材数が一覧できます。",
+    "Farmille に登録されている BS 資材製造元(企業)の公開一覧。各社の所在地と登録資材数が一覧できます。",
   openGraph: {
-    title: "メーカー一覧 | Farmille",
+    title: "製造元一覧 | Farmille",
     description:
-      "Farmille に登録されている BS 資材メーカー(企業)の公開一覧。",
+      "Farmille に登録されている BS 資材製造元(企業)の公開一覧。",
     url: "/manufacturers",
   },
 };
@@ -51,13 +51,13 @@ export default async function ManufacturersPage() {
             }}
           >
             <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
-            メーカーディレクトリ
+            製造元ディレクトリ
           </div>
           <h1
             className="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground"
             style={{ letterSpacing: "-0.02em", lineHeight: 1.2 }}
           >
-            メーカー一覧
+            製造元一覧
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
             BS 資材を製造・販売する各社を一覧できます。クリックすると、
@@ -102,7 +102,7 @@ export default async function ManufacturersPage() {
               </span>
             </div>
             <p className="text-base text-muted-foreground">
-              メーカーがまだ登録されていません。
+              製造元がまだ登録されていません。
             </p>
           </div>
         ) : (

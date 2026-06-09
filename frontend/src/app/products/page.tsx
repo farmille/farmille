@@ -114,7 +114,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
             生物・微生物農業資材 (BS資材) を探せます。
-            微生物・アミノ酸・海藻・腐植酸など多様なタイプの資材を、メーカー横断で掲載。
+            微生物・アミノ酸・海藻・腐植酸など多様なタイプの資材を、製造元横断で掲載。
             農家・JA 普及員・研究者によるレビューで意思決定をサポート。
           </p>
           <div className="flex items-center gap-3 pt-2">
@@ -238,7 +238,7 @@ function EmptyState({
       <p className="text-sm text-muted-foreground">
         {isFiltered
           ? "別の条件で絞り込むか、フィルタをクリアしてすべての資材を表示してください。"
-          : "メーカーによる資材登録をお待ちください。"}
+          : "製造元による資材登録をお待ちください。"}
       </p>
     </div>
   );

@@ -54,7 +54,7 @@ function FeaturedProductCard({ product }: { product: FeaturedProductInner }) {
           {product.name}
         </h3>
         <p className="text-sm text-muted-foreground line-clamp-1">
-          {product.maker_name ?? "メーカー不明"}
+          {product.maker_name ?? "製造元不明"}
         </p>
       </div>
     </Link>
