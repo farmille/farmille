@@ -21,9 +21,10 @@
 // 注意: 既存のサイト内レビュー投稿フロー（/products/[id] のレビューフォーム）は
 //   そのまま残す。本コンポーネントは併設の Google フォーム導線用。
 
-// ← 根本さんから受領後にここへ貼る。
-//   例: "https://docs.google.com/forms/d/e/XXXXXXXX/viewform?embedded=true"
-const GOOGLE_FORM_EMBED_URL: string = "";
+// 2026-06-10 根本さん提供フォーム（埋め込み用 = viewform?embedded=true）。
+// 差し替えるときはここを更新するだけ。空文字に戻すと何も描画しない。
+const GOOGLE_FORM_EMBED_URL: string =
+  "https://docs.google.com/forms/d/e/1FAIpQLSdZbNt8vdzB_9c8MYKNk676y0cJKP4Fo-RohRkV0A-iucVNVw/viewform?embedded=true";
 
 export function GoogleFormReviewEmbed() {
   // URL 未設定: 現状維持のため何も表示しない。
@@ -48,7 +49,7 @@ export function GoogleFormReviewEmbed() {
           src={GOOGLE_FORM_EMBED_URL}
           title="Farmille レビュー投稿フォーム"
           className="w-full"
-          style={{ height: 1400, border: 0 }}
+          style={{ height: 1800, border: 0 }}
           loading="lazy"
         >
           読み込んでいます…

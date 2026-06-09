@@ -8,3 +8,9 @@
 // 「画像がないと未完成感がある」ためデモ当日用に true へ戻す。中長期は自社撮影/
 // メーカー提供画像へ差し替える方針は不変。再度伏せる場合は false に戻すだけで足りる。
 export const PRODUCT_IMAGES_ENABLED = true;
+
+// 2026-06-10 根本さん指示: レビュー投稿を Google フォームに一本化する（ログイン不要で
+// 誰でも投稿可）。製品ページの「レビューを投稿」欄を Google フォーム埋め込みに切替える。
+// false に戻すと従来のサイト内フォーム（ログイン+farmer権限+プロフィール必須）が復活する。
+// 埋め込み URL は src/components/google-form-review-embed.tsx を参照。
+export const REVIEW_VIA_GOOGLE_FORM = true;

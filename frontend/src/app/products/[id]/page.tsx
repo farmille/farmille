@@ -27,7 +27,8 @@ import {
   type FavoriteKind,
 } from "./_components/favorite-button";
 import { isReviewerRole } from "@/lib/auth/roles";
-import { PRODUCT_IMAGES_ENABLED } from "@/lib/flags";
+import { PRODUCT_IMAGES_ENABLED, REVIEW_VIA_GOOGLE_FORM } from "@/lib/flags";
+import { GoogleFormReviewEmbed } from "@/components/google-form-review-embed";
 import type {
   CategoryL1,
   CategoryL2,
@@ -524,16 +525,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </p>
         </section>
 
-        {/* 2026-06-10 根本さん指示: Google フォームによるレビュー受付を併設予定。
-            根本さんからフォームの埋め込みURLを受領したら、以下を有効化する:
-              import { GoogleFormReviewEmbed } from "@/components/google-form-review-embed";
-              ...（このコメントの位置で）<GoogleFormReviewEmbed />
-            URL は src/components/google-form-review-embed.tsx の
-            GOOGLE_FORM_EMBED_URL にセットする。現状は現行のサイト内レビューフォームを
-            そのまま維持（＝コメントアウトで現状キープ）。 */}
-        {/* <GoogleFormReviewEmbed /> */}
+        {/* レビュー投稿: 2026-06-10 根本さん指示で Google フォームに一本化（ログイン不要で
+            誰でも投稿可）。現行のサイト内フォーム（ログイン+farmer権限+プロフィール必須）は
+            REVIEW_VIA_GOOGLE_FORM を false に戻せば即復活する（下の節に温存）。
+            レビュー一覧は従来どおり下に表示。 */}
+        {REVIEW_VIA_GOOGLE_FORM && <GoogleFormReviewEmbed />}
 
-        {/* レビュー投稿 — 既存ロジックを継承 */}
+        {!REVIEW_VIA_GOOGLE_FORM && (
         <section className="space-y-4">
           <h2 className="text-2xl font-bold tracking-tight text-foreground border-b border-border pb-3">
             レビューを投稿
@@ -579,6 +577,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </p>
           )}
         </section>
+        )}
 
         {/* レビュー一覧 */}
         <section className="space-y-4">
