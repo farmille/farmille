@@ -114,6 +114,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
             生物・微生物農業資材 (BS資材) を探せます。
+            微生物・アミノ酸・海藻・腐植酸など多様なタイプの資材を、メーカー横断で掲載。
             農家・JA 普及員・研究者によるレビューで意思決定をサポート。
           </p>
           <div className="flex items-center gap-3 pt-2">
@@ -181,7 +182,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           />
         ) : (
           <section aria-label="資材一覧">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {/* モバイルは横2列(=grid-cols-2)で見やすく。タブレット以上は従来どおり */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
               {products.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
