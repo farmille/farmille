@@ -156,7 +156,9 @@ gh pr create --web        # または GitHub の Web で作成
 1. **共有 dev バックエンドの構築**: `bash backend/deploy-dev.sh`
    （Cloud Run `farmille-api-dev`、dev Supabase 参照、`min-instances 0`）。
    発行された URL を 1Password と本 doc §4 に記載。
-2. **1Password 共有 Vault** に dev 用 `frontend/.env.local` 値一式を登録し、引き継ぎ者へアクセス付与。
+2. **dev 用 `frontend/.env.local` の値一式**を引き継ぎ者へ共有する。
+   テンプレートは [docs/handoff-credentials-template.md](handoff-credentials-template.md)。
+   本人だけに限定共有した Google Doc にコピーして埋める（高機密が無いため可）か、1Password 共有 Vault を使う。
 3. **GitHub**: リポジトリへ招待、`main` のブランチ保護を有効化（PR 必須 / frontend status check 必須 /
    Code Owner レビュー必須 / 会話解決必須）。CTO 単独運用の間は **administrators バイパスのみ許可**
    （自分の sensitive PR を merge できるように。reviewer 増員後に禁止）。"Automatically delete head branches" を ON。
