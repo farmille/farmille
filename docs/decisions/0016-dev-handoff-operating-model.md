@@ -21,16 +21,22 @@ v1 本番公開済み（2026-06-01）。今後、**軽微な UX 改善・文言�
 
 ## 決定
 
-### 1. 最小権限の dev アクセス（フロントのみ・secret を渡さない）
-- 引き継ぎ者は **frontend のみローカル起動**し、`API_URL` を**共有 dev バックエンド**に向ける。
-- `API_URL` は frontend で**サーバー側専用**（Server Components / Route Handler proxy、`NEXT_PUBLIC_` 無し）
-  に使われ、ブラウザに露出しない。よってブラウザ→FastAPI 直叩きは存在せず、引き継ぎ者に
-  **`SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_JWT_SECRET` を渡さない**。これらは dev バックエンド
-  （Cloud Run）内にのみ存在する。
-- 引き継ぎ者が持つのは dev の `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  （anon key は公開前提・RLS で保護）/ dev `API_URL` のみ。
-- 共有 dev バックエンドは **Cloud Run `farmille-api-dev`**（`backend/deploy-dev.sh`、dev Supabase
-  `chgrudbattvmcjxhaskh` を参照、`min-instances 0`）として CTO が一度立てる前提作業とする。
+### 1. dev アクセス（ハイブリッド: フロントのみ既定 + 任意でフルローカル、機密度で経路分離）
+- **既定（最小構成）**: 引き継ぎ者は **frontend のみローカル起動**し、`API_URL` を**共有 dev バックエンド**に
+  向ける。`API_URL` は frontend で**サーバー側専用**（Server Components / Route Handler proxy、`NEXT_PUBLIC_` 無し）
+  に使われブラウザに露出しないため、この構成では backend secret を一切持たずに作業が完結する。
+  必要なのは dev の `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`（anon key は公開前提・
+  RLS で保護）/ dev `API_URL` のみ。
+- **任意（フルローカル）**: 引き継ぎ者が backend もローカルで動かせるよう、**dev backend secret
+  （`SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_JWT_SECRET`）を渡す**。ただし
+  **dev サンドボックス限定**で、**prod の secret は決して渡さない**。
+- **機密度で受け渡し経路を分離**:
+  - frontend の低機密セット（dev anon key 等）→ **本人限定共有の Google Doc**（高機密が無いため可）。
+  - backend の高機密 secret（service_role / JWT。service_role は **RLS を全バイパス**）→ **1Password 共有 Vault**
+    のみ。キャッシュ/索引され得る Google Doc には載せない。
+- **共有 dev バックエンド（Cloud Run `farmille-api-dev`、`backend/deploy-dev.sh`、dev Supabase
+  `chgrudbattvmcjxhaskh`、`min-instances 0`）はフルローカル採用後も維持する** —
+  Vercel Preview はローカル backend に到達できないため、Preview のデータ系ページに共有 dev API が要る。
 
 ### 2. 本番フリーズ = プロセス凍結（merge 保留）
 - フリーズ期間中、PR の**レビュー・approve までは通常通り**行うが、**`main` への merge を保留**する。
@@ -64,8 +70,9 @@ v1 本番公開済み（2026-06-01）。今後、**軽微な UX 改善・文言�
   静的ページ。ただし BFF 原則（frontend から `supabase.from/rpc` 禁止）を維持する。
 
 ## 理由
-1. `API_URL` がサーバー側専用である事実により、秘密情報ゼロでも引き継ぎ者の作業は完結する
-   （ブラウザ CORS も不要）。blast radius を最小化できる。
+1. `API_URL` がサーバー側専用である事実により、**既定構成では秘密情報ゼロ**で引き継ぎ者の作業が完結する
+   （ブラウザ CORS も不要）。フルローカルで渡す secret も **dev 限定**で prod に影響せず、
+   機密度に応じた経路分離（低機密=Google Doc / 高機密=1Password）で blast radius を抑える。
 2. backend が手動デプロイである以上、本番自動導線は Vercel(`main`) のみ。merge 保留という
    最小の人手ゲートで「本番に出さない」を完全に担保でき、可逆。
 3. frontend が既に green であるため、引き継ぎ者の典型 PR（文言）は blocking CI を**通過**する。
@@ -76,10 +83,11 @@ v1 本番公開済み（2026-06-01）。今後、**軽微な UX 改善・文言�
 | リスク | 対策 |
 |---|---|
 | フリーズ中に誤って `main` merge | ブランチ保護 + PR テンプレに「フリーズ中: merge 保留」明記。merge 権限は CTO に限定 |
-| 共有 dev バックエンド未構築だとフロントのデータ系ページが描画不可（BFF 原則で直叩き不可） | `backend/deploy-dev.sh` を CTO が一度実行し、URL を 1Password と onboarding doc に記載 |
+| 共有 dev バックエンド未構築だとフロント/Preview のデータ系ページが描画不可（BFF 原則で直叩き不可） | `backend/deploy-dev.sh` を CTO が一度実行し、URL を 1Password / onboarding doc / Vercel Preview env に記載。フルローカル採用後も Preview 用に維持 |
 | backend CI が advisory のまま放置され腐敗が蓄積 | 別 PR で ruff 7件 + test drift 26件を解消し、`continue-on-error` を外して required へ昇格 |
-| anon key 流出懸念 | anon key は公開前提（RLS が第二防御）。service_role / JWT secret のみ厳格管理 |
-| 秘密情報の受け渡し経路の散逸 | 受け渡しは **1Password 共有 Vault** に一本化。Slack/平文での共有禁止 |
+| anon key 流出懸念 | anon key は公開前提（RLS が第二防御）。低機密として Google Doc 可 |
+| dev service_role / JWT を引き継ぎ者が保持（フルローカル時） | dev サンドボックス限定・**prod とは別 secret**。配布は **1Password のみ**（Google Doc 不可）、退任時に共有解除、必要なら dev キーをローテート。prod の service_role / JWT は決して渡さない |
+| 秘密情報の受け渡し経路の散逸 | 機密度で分離: 低機密=本人限定 Google Doc / 高機密(service_role・JWT)=**1Password 共有 Vault**。Slack/平文での共有禁止 |
 
 ## 次回見直しタイミング
 - 本番フリーズ解除時（リリースゲート確定時）に「2. プロセス凍結」を解除し、merge 運用へ戻す。

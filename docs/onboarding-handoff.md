@@ -10,8 +10,8 @@
 
 ## 0. 結論（最初に押さえる 5 点）
 
-1. **frontend だけローカルで動かす**。backend はローカルに立てない（共有 dev API を使う）。
-2. **秘密情報は最小限**。`service_role` / `JWT secret` は渡されない・必要ない。
+1. **既定は frontend だけローカルで動かす**（共有 dev API を使う）。必要なら backend もローカルで動かせる（任意・§3）。
+2. **秘密は機密度で経路が違う**。frontend の値（dev anon key 等・低機密）は本人限定の Google Doc から。backend をローカルで動かす場合のみ dev の `service_role` / `JWT secret` を **1Password** で受け取る（**dev 限定・prod は不可**）。
 3. つなぐのは **dev 環境**（本番 Supabase / 本番 API には触れない）。
 4. **`main` に直接 push しない**。作業ブランチ → PR → Vercel Preview で確認 → レビュー。
 5. いまは **本番フリーズ中**。PR は作って良いが **merge は CTO が保留**する（承認まではOK）。
@@ -23,7 +23,7 @@
 | 層 | dev（あなたが触る） | prod（触らない） |
 |---|---|---|
 | Supabase | `chgrudbattvmcjxhaskh` | `sajxnypkbybuzsqdguaa` |
-| Backend | Cloud Run `farmille-api-dev`（共有） | Cloud Run `farmille-api`（手動デプロイ） |
+| Backend | 共有 Cloud Run `farmille-api-dev`（既定）/ ローカル `localhost:8000`（任意） | Cloud Run `farmille-api`（手動デプロイ） |
 | Frontend | ローカル `localhost:3000` / Vercel Preview | Vercel 本番（`farmille.com`） |
 
 - frontend は **BFF 原則**で Supabase を直接叩かない。データは必ず backend(`API_URL`/FastAPI)経由で取得する。
@@ -36,9 +36,10 @@
 
 - Node.js 22+ / pnpm 10+
 - Git, GitHub アカウント（リポジトリへの招待を CTO に依頼）
-- **1Password の共有 Vault へのアクセス**（dev 用の値はここから取得。Slack や平文では渡さない）
+- frontend の dev 値（本人限定共有の Google Doc から受領）
+- （backend もローカルで動かす場合のみ）**Python 3.12 / uv**、および **1Password 共有 Vault**（dev の `service_role` / `JWT secret` をここから取得。Slack や平文では渡さない）
 
-> backend を動かす場合に必要な Python / uv / Docker は、文言・UX 修正では**不要**。
+> 文言・UX 修正だけなら backend をローカルに立てる必要はなく、§3 の frontend のみで十分。
 
 ---
 
@@ -51,7 +52,7 @@ cd farmille
 
 # 2. frontend の env を用意
 cp frontend/.env.example frontend/.env.local
-#    → frontend/.env.local を 1Password「farmille-dev / frontend」の値で埋める（§4）
+#    → frontend/.env.local を 本人限定共有の Google Doc（frontend の dev 値）で埋める（§4）
 
 # 3. 依存インストール & 起動（frontend だけ）
 cd frontend
@@ -67,11 +68,34 @@ pnpm dev          # http://localhost:3000
   共有 dev API への接続まで通っている。
 - データ系ページで `API_URL not configured` / fetch エラーが出る場合は §7 を参照。
 
+### （任意）backend もローカルで動かす場合
+
+文言・UX 修正には不要だが、フルスタックで触りたい場合のみ:
+
+```bash
+# 1. backend の env を用意
+cp backend/.env.example backend/.env
+#    → backend/.env の SUPABASE_SERVICE_ROLE_KEY / SUPABASE_JWT_SECRET を
+#      1Password「farmille-dev / backend」の値で埋める（残りは .env.example の dev 既定でOK）
+
+# 2. 起動（リポジトリ直下。backend+frontend を同時起動）
+make dev          # backend :8000 / frontend :3000
+
+# 3. frontend をローカル backend に向ける
+#    frontend/.env.local の API_URL=http://localhost:8000 に変更（共有 dev API の代わり）
+```
+
+> ⚠ `service_role` は dev DB の **RLS を全バイパス**し、`JWT secret` は dev ユーザーの
+> トークンを偽造できる強い鍵（**dev 限定**）。`.env` はコミット禁止（`.gitignore` 済）、
+> 他所に転記しない。**prod の値は受け取らない・要求しない**。
+> なお Vercel Preview は共有 dev API を使う（ローカル backend には到達しない）。
+
 ---
 
 ## 4. 環境変数（`frontend/.env.local`）
 
-実値は **1Password 共有 Vault** から取得して埋める。リポジトリにはコミットしない（`.gitignore` 済）。
+frontend の dev 値は **本人限定共有の Google Doc**（または 1Password）から取得して埋める。
+リポジトリにはコミットしない（`.gitignore` 済）。
 
 | 変数 | 値（dev） | 備考 |
 |---|---|---|
@@ -82,8 +106,9 @@ pnpm dev          # http://localhost:3000
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | 空でよい | ローカルは計測しない |
 | `NEXT_PUBLIC_SENTRY_DSN` | 空でよい | 空なら Sentry init をスキップ |
 
-> **渡されない＝必要ない**もの: `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET`。
-> これらは dev backend（Cloud Run）内にのみ存在する。あなたのローカルには置かない。
+> `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_JWT_SECRET` は **この Google Doc には載らない**。
+> frontend のみの作業では不要（共有 dev backend 内にのみ存在）。backend をローカルで動かす場合のみ、
+> **1Password** から dev の値を受け取って `backend/.env` に入れる（§3 の任意手順・**dev 限定**）。
 
 ---
 
@@ -141,7 +166,7 @@ gh pr create --web        # または GitHub の Web で作成
 
 | 症状 | 対処 |
 |---|---|
-| データ系ページで `API_URL not configured` | `frontend/.env.local` の `API_URL` が空。1Password の共有 dev API URL を設定し再起動 |
+| データ系ページで `API_URL not configured` | `frontend/.env.local` の `API_URL` が空。Google Doc の 共有 dev API URL を設定し再起動 |
 | データは出ないが画面枠は出る | 共有 dev API が一時停止/未構築の可能性。CTO に dev API（`farmille-api-dev`）の稼働を確認 |
 | 型エラー（`Database` 型が古い） | DB 変更を含む作業はそもそも対象外。発生したら CTO に連携（`pnpm gen:types` は CTO 側で実行） |
 | 認証メールが届かない | dev は確認スキップ設定（`SIGNUP_REQUIRE_EMAIL_CONFIRM=false`）。届かない前提で進めてよい |
@@ -156,9 +181,9 @@ gh pr create --web        # または GitHub の Web で作成
 1. **共有 dev バックエンドの構築**: `bash backend/deploy-dev.sh`
    （Cloud Run `farmille-api-dev`、dev Supabase 参照、`min-instances 0`）。
    発行された URL を 1Password と本 doc §4 に記載。
-2. **dev 用 `frontend/.env.local` の値一式**を引き継ぎ者へ共有する。
-   テンプレートは [docs/handoff-credentials-template.md](handoff-credentials-template.md)。
-   本人だけに限定共有した Google Doc にコピーして埋める（高機密が無いため可）か、1Password 共有 Vault を使う。
+2. **dev の値を引き継ぎ者へ共有する**（テンプレ: [docs/handoff-credentials-template.md](handoff-credentials-template.md)）。機密度で経路を分ける:
+   - frontend の低機密セット（`frontend/.env.local`：dev anon key 等）→ **本人だけに限定共有した Google Doc**。
+   - （フルローカルを許可する場合）backend の高機密 secret（dev `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_JWT_SECRET`）→ **1Password 共有 Vault**。**Google Doc には載せない**。
 3. **GitHub**: リポジトリへ招待、`main` のブランチ保護を有効化（PR 必須 / frontend status check 必須 /
    Code Owner レビュー必須 / 会話解決必須）。CTO 単独運用の間は **administrators バイパスのみ許可**
    （自分の sensitive PR を merge できるように。reviewer 増員後に禁止）。"Automatically delete head branches" を ON。

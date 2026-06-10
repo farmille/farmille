@@ -7,18 +7,18 @@
 
 ---
 
-## 0. 最初に：渡す“秘密”はほぼ無い
+## 0. 最初に：機密度で受け渡し経路を分ける
 
-引き継ぎ者は **frontend のみローカル起動**で、データは共有 dev API 経由（`API_URL` は frontend の
-**サーバー側専用**でブラウザに出ない）。よって渡すのは下の最小セットだけ：
-
-- `NEXT_PUBLIC_SUPABASE_URL`（非機密）
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`（**公開前提**の鍵。ブラウザに必ず出るもので、RLS が保護。低機密）
-- `API_URL`（共有 dev Cloud Run の URL。非機密。`backend/deploy-dev.sh` 実行後に確定）
-- 残りは空 or 固定値
-
-**渡さない・Doc に載せない（高機密）**: `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_JWT_SECRET` /
-本番（prod）の値すべて。これらは dev backend（Cloud Run）内と 1Password にのみ存在させる。
+- **frontend の値（低機密）→ 本人限定共有の Google Doc**。引き継ぎ者は既定で frontend のみ起動し、
+  データは共有 dev API 経由（`API_URL` は frontend のサーバー側専用でブラウザに出ない）。
+  - `NEXT_PUBLIC_SUPABASE_URL`（非機密）
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`（**公開前提**の鍵・ブラウザに必ず出る・RLS が保護・低機密）
+  - `API_URL`（共有 dev Cloud Run の URL・非機密・`backend/deploy-dev.sh` 実行後に確定）
+  - 残りは空 or 固定値
+- **backend の値（高機密）→ 1Password のみ**。backend をローカルで動かす場合だけ渡す（§1b）。
+  - `SUPABASE_SERVICE_ROLE_KEY`（**RLS を全バイパス**）/ `SUPABASE_JWT_SECRET`（トークン偽造可）。
+  - **dev サンドボックス限定**。**Google Doc には絶対に載せない。**
+- **prod（`sajxnypkbybuzsqdguaa`）の値は一切渡さない。**
 
 ---
 
@@ -47,6 +47,28 @@ NEXT_PUBLIC_SENTRY_DSN=
 
 ---
 
+## 1b. backend/.env（dev・フルローカル時のみ・1Password 経由）
+
+backend をローカルで動かす場合だけ。`service_role` / `JWT secret` は **1Password から受領**し、
+**この Doc / Google Doc には絶対に載せない**。残りは `.env.example` の dev 既定でよい。
+
+| 変数 | 値 | 機密度 | 取得元 |
+|---|---|---|---|
+| `SUPABASE_URL` | `https://chgrudbattvmcjxhaskh.supabase.co` | 非機密 | 固定（dev） |
+| `SUPABASE_SERVICE_ROLE_KEY` | `<1Password から>` | **高（RLS 全バイパス）** | 1Password「farmille-dev / backend」 |
+| `SUPABASE_JWT_SECRET` | `<1Password から>` | **高（トークン偽造）** | 1Password「farmille-dev / backend」 |
+| `CORS_ORIGINS` | `http://localhost:3000` | 非機密 | 固定 |
+| `ENVIRONMENT` | `development` | 非機密 | 固定 |
+| `SIGNUP_REQUIRE_EMAIL_CONFIRM` | `false` | 非機密 | dev 既定 |
+| `FARMILLE_MAKER_USER_ID` | `46e7a39a-a1a4-4e3c-ba30-2d3f77bcf233` | 低（dev house account の id） | 固定（dev） |
+| `SENTRY_DSN` | （空でよい） | — | ローカルは未送信 |
+
+> ローカル backend を使う時は `frontend/.env.local` の `API_URL=http://localhost:8000` に変更する。
+> ⚠ `service_role` / `JWT secret` は **dev 限定**の強い鍵。`backend/.env` はコミット禁止（`.gitignore` 済）・
+> 他所に転記しない。**prod の値は受け取らない・要求しない**。
+
+---
+
 ## 2. アカウント・アクセス権の付与（Doc にチェックリストとして）
 
 | 対象 | 付与内容 | 方法 | 必須？ |
@@ -55,7 +77,7 @@ NEXT_PUBLIC_SENTRY_DSN=
 | 共有 dev API | `API_URL` の URL を伝えるだけ | この Doc の §1 | 必須 |
 | Supabase dev ダッシュボード | （任意）テーブル確認用に閲覧権 | Supabase org → Members（dev プロジェクトのみ） | 任意 |
 | Vercel | （任意）自分の Preview を見たい場合のみ | Vercel Team へ招待 | 任意 |
-| 1Password | （任意）将来 secret が増えた時の共有 Vault | Vault 共有 | 任意 |
+| 1Password | dev backend secret（service_role / JWT）の共有 Vault | Vault 共有 | フルローカル時 必須 |
 
 > Supabase は **dev プロジェクト（`chgrudbattvmcjxhaskh`）のみ**。prod（`sajxnypkbybuzsqdguaa`）には招待しない。
 
