@@ -22,4 +22,8 @@
 ```
 
 ## 一覧
+> この索引は非網羅。全 ADR は本ディレクトリの `NNNN-*.md` を直接参照のこと。
 - [ADR-0001: バックエンドホスティングにRailwayを採用する](./0001-railway-adoption.md)
+- [ADR-0013: バックエンドを Railway から GCP Cloud Run へ移行する](./0013-gcp-cloud-run-migration.md)
+- [ADR-0015: product_sources テーブル（出典リンクの正規化保持）](./0015-product-sources-table.md)
+- [ADR-0016: 開発引き継ぎ運用モデル（最小権限 dev / 本番フリーズ / CI 導入）](./0016-dev-handoff-operating-model.md)

@@ -7,7 +7,7 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 - **Frontend**: Next.js 15 / TypeScript / Tailwind CSS 4
 - **Backend**: FastAPI / Python 3.12
 - **DB/Auth/Storage**: Supabase (PostgreSQL)
-- **Deploy**: Vercel (frontend) / Railway (backend)
+- **Deploy**: Vercel (frontend) / GCP Cloud Run (backend, ADR-0013)
 
 ## セットアップ
 
@@ -30,7 +30,8 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
    ```bash
    cp frontend/.env.example frontend/.env.local
    cp backend/.env.example backend/.env
-   # 各ファイルに実際の値を設定（SlackでSupabase認証情報を受け取る）
+   # 各ファイルに実際の値を設定（dev の値は 1Password 共有 Vault から取得）
+   # 軽微な UX / 文言修正のみなら frontend だけでよい → docs/onboarding-handoff.md
    ```
 
 3. 依存関係インストール＆起動
@@ -55,11 +56,12 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 ### 環境変数変更時
 1. `.env.example` を更新（git管理）
 2. ローカルの `.env` / `.env.local` も手動で更新
-3. 本番環境変数はRailway/Vercelダッシュボードで更新
+3. 本番環境変数は Vercel ダッシュボード（frontend）/ Cloud Run の `deploy-prod.sh`・Secret Manager（backend）で更新
 
 ### デプロイ
-- フロント: `main` ブランチへのpushで自動デプロイ（Vercel）
-- バック: `main` ブランチへのpushで自動デプロイ（Railway）
+- フロント: `main` への merge で自動デプロイ（Vercel 本番）。`feat/*` 等は Preview URL を自動生成。
+- バック: GCP **Cloud Run** へ `bash backend/deploy-prod.sh` で**手動**デプロイ（ADR-0013、`main` push では自動デプロイされない）。
+- **本番フリーズ中は `main` に merge しない**（ADR-0016 / docs/git-workflow.md §10）。
 
 ## Supabase Storage 設定（手動）
 
@@ -75,9 +77,10 @@ Supabaseダッシュボードで以下を設定すること：
 
 ## トラブルシューティング
 
-### Railwayでビルドが失敗する
+### Cloud Run でビルド / デプロイが失敗する
 1. ローカルで `docker build -t farmille-backend ./backend` が通るか確認
-2. `railway.toml` の `builder = "DOCKERFILE"` が指定されているか確認
+2. `gcloud` の認証・プロジェクト・region（`asia-northeast1`）を確認（`backend/deploy-prod.sh`）
+3. Apple Silicon からのビルドはアーキ不一致に注意（`--platform linux/amd64` か Cloud Build、ADR-0013）
 
 ### 型エラーが出る
 1. `cd frontend && pnpm gen:types` でDB型を最新化

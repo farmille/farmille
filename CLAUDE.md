@@ -6,7 +6,7 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 
 ## 技術スタック
 - Frontend: Next.js 15 / TypeScript / Tailwind CSS 4 / Vercel
-- Backend: FastAPI / Python 3.12 / uv / Railway
+- Backend: FastAPI / Python 3.12 / uv / GCP Cloud Run（ADR-0013）
 - DB/Auth/Storage: Supabase (PostgreSQL)
 
 ## 設計哲学（最重要）
@@ -76,7 +76,7 @@ grep -rn "RAILWAY_" backend/ frontend/src
 - `gh dependabot alerts list`（GitHub Dependabot を有効化済の場合）
 - backend: `uvx safety check`（PyUp 系 DB 照合、pip-audit と相補）
 
-なお `npm audit` は使わない（pnpm に揃える）。CI 化は v1.5+ で GitHub Actions に組み込む（現状はローカル実行）。
+なお `npm audit` は使わない（pnpm に揃える）。CI は GitHub Actions 導入済（ADR-0016 / `.github/workflows/`）: frontend（`lint` / `tsc --noEmit` / `vitest`）を**必須チェック**、backend（`ruff check app` / `pytest`）と依存 audit（`pnpm audit` / `pip-audit`）は当面 **advisory**。required への昇格は backend の既存腐敗（ruff 7 件 / test fixture drift 26 件）解消後。
 
 ## 4ロール権限体系
 - `farmer`: レビュー投稿・写真アップロード
@@ -87,9 +87,11 @@ grep -rn "RAILWAY_" backend/ frontend/src
 
 ## ディレクトリ規約
 - `frontend/` : Next.js（Vercelデプロイ）
-- `backend/` : FastAPI（Railwayデプロイ）
+- `backend/` : FastAPI（GCP Cloud Run デプロイ、ADR-0013）
 - `supabase/migrations/` : DBマイグレーション
 - `docs/decisions/` : ADR（アーキテクチャ意思決定記録）
 
 ## 重要な意思決定はADRを参照
 `docs/decisions/` 配下のドキュメントを参照すること。
+引き継ぎ・ローカル開発・本番フリーズの運用は `docs/onboarding-handoff.md` /
+`docs/git-workflow.md` / [ADR-0016](docs/decisions/0016-dev-handoff-operating-model.md)。

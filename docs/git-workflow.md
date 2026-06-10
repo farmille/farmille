@@ -115,7 +115,7 @@ docs: update architecture.md with 4-role diagram
 | ドキュメントのみ | 任意（セルフmerge可） |
 | 初期スキャフォールディング | 不要（履歴に残るだけ無駄） |
 
-**`main` への直接 push は、Vercel/Railway 連携後は厳禁。** 誤 push が即本番デプロイに繋がる。
+**`main` への直接 push は厳禁（Vercel 連携済）。** 誤 push が即本番フロントデプロイに繋がる。
 
 ### PR タイトル / 本文
 
@@ -151,32 +151,39 @@ docs: update architecture.md with 4-role diagram
 - **マージ方式:** **Squash and merge** を基本とする（main の履歴を論理変更単位で綺麗に保つ）
 - **マージ後:** ブランチは削除（GitHub の "Automatically delete head branches" を有効化）
 
-### ブランチ保護ルール（GitHub 設定、チーム化時に有効化）
+### ブランチ保護ルール（`main`、ADR-0016 で有効化）
 
-以下を `main` に適用することを推奨:
+引き継ぎ開発フェーズに入ったため、以下を `main` に適用する:
 
-- [ ] Require a pull request before merging
-- [ ] Require approvals (1名以上)
-- [ ] Require status checks to pass before merging
-- [ ] Require conversation resolution before merging
-- [ ] Do not allow bypassing the above settings
+- [x] Require a pull request before merging
+- [x] Require approvals（1 名以上）
+- [x] Require review from Code Owners（`.github/CODEOWNERS` の sensitive パス）
+- [x] Require status checks to pass before merging（必須: `frontend (lint / typecheck / test)`）
+- [x] Require conversation resolution before merging
+- [ ] Do not allow bypassing — **CTO 単独運用の間は administrators バイパスを許可**（CTO が自分の sensitive PR を merge できるようにするため）。新規 dev は非管理者なので PR・承認・CODEOWNERS で完全にゲートされる。reviewer 増員後にバイパス禁止へ。
+
+PR テンプレ（`.github/PULL_REQUEST_TEMPLATE.md`）と CI（`.github/workflows/`）も同 ADR で導入済み。
+backend の status check は当面 advisory（既存腐敗のため、ADR-0016）。
 
 ---
 
 ## 4. デプロイとの相互作用
 
-### Vercel (フロント) / Railway (バック) の自動デプロイ
+### Vercel (フロント) / Cloud Run (バック) のデプロイ
 
-| ブランチ | Vercel | Railway |
+| ブランチ | Vercel (frontend) | Cloud Run (backend) |
 |---|---|---|
-| `main` | Production に自動デプロイ | Production に自動デプロイ |
-| `feat/*` 等 | Preview URL を自動生成 | デプロイ**されない**（Railway は main のみ） |
+| `main` | Production に自動デプロイ | **自動デプロイなし**。`bash backend/deploy-prod.sh` で手動（ADR-0013） |
+| `feat/*` 等 | Preview URL を自動生成 | デプロイされない |
 | PR | Preview URL が PR に自動コメント | — |
+
+> 注: `railway.toml` は ADR-0013 で退役済み。backend は Cloud Run（`asia-northeast1`）で手動デプロイ。
+> 本番への自動導線は **Vercel(`main` merge) のみ**である点が、本番フリーズ運用（§10）の前提。
 
 ### 事故を防ぐために
 
 1. **main への push は merge 経由のみ**。`git push origin main` を手動実行しない
-2. **env var の変更は .env.example の PR と Vercel/Railway ダッシュボードの手動更新をセットで**行う
+2. **env var の変更は .env.example の PR と、Vercel（frontend）/ Cloud Run `deploy-prod.sh`・Secret Manager（backend）の手動更新をセットで**行う
 3. **DBスキーマ変更** は migration ファイル追加 → PR → merge 後に `supabase db push` を手動実行（自動化しない）
 4. **破壊的変更**（RLS変更、カラム削除、ロール変更）は Slack で事前告知
 
@@ -325,4 +332,19 @@ git revert <revert-commit>  # revertをrevertする
 
 ---
 
-**最終更新**: 2026-04-17
+## 10. 本番フリーズ運用（ADR-0016）
+
+**本番に更新を出せない期間**は、PR の作成・レビュー・approve までは通常通り行い、
+**`main` への merge を保留**する（プロセス凍結）。
+
+- 本番への自動導線は **`main` への merge（Vercel 本番デプロイ）のみ**。merge しなければ本番に出ない。
+- backend は元々 `main` push で自動デプロイされない（Cloud Run 手動、§4）。
+- フリーズ中の merge 可否は **CTO 判断**。解除後にまとめて merge する。
+- PR テンプレの「本番フリーズ確認」チェックで意図を明示する。
+
+引き継ぎ者向けの実務フロー・環境変数・「触らない」一覧は
+[docs/onboarding-handoff.md](onboarding-handoff.md) を参照。
+
+---
+
+**最終更新**: 2026-06-10（ADR-0016: ブランチ保護有効化 / Cloud Run 反映 / 本番フリーズ §10 追加）
