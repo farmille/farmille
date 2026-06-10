@@ -1,0 +1,34 @@
+# Farmille CODEOWNERS — DOA 中核 / インフラ / ポリシーは CTO(@3or1Ryoga) 必須レビュー。
+# 背景: ADR-0016（開発引き継ぎ運用モデル）。
+#
+# 意図的にリポジトリ全体は owner にしていない。軽微な frontend 文言/UX PR は通常レビューで回し、
+# DB・認証・検索・レビュー投稿・CI・ADR・env 契約など「触らない」領域だけを構造的に固める。
+# branch protection の "Require review from Code Owners" と併用すること。
+
+# --- DB スキーマ / RLS / SQL ---
+/supabase/                      @3or1Ryoga
+**/*.sql                        @3or1Ryoga
+
+# --- Backend アプリ本体（認証 / レビュー投稿 / 検索 / BFF ロジック） ---
+/backend/app/                   @3or1Ryoga
+
+# --- デプロイ / インフラ script & env 契約 ---
+/backend/deploy-prod.sh         @3or1Ryoga
+/backend/deploy-dev.sh          @3or1Ryoga
+/backend/gcp-*.sh               @3or1Ryoga
+/backend/railway.toml           @3or1Ryoga
+/backend/.env.example           @3or1Ryoga
+/frontend/.env.example          @3or1Ryoga
+/frontend/vercel.json           @3or1Ryoga
+
+# --- CI / リポジトリポリシー / 意思決定 ---
+/.github/                       @3or1Ryoga
+/docs/decisions/                @3or1Ryoga
+/CLAUDE.md                      @3or1Ryoga
+
+# --- frontend 認証 / 管理サーフェス（サーバー側 auth・admin proxy を含む。onboarding §6 の約束と一致） ---
+/frontend/src/lib/auth/          @3or1Ryoga
+/frontend/src/lib/admin-proxy.ts @3or1Ryoga
+/frontend/src/app/auth/          @3or1Ryoga
+/frontend/src/app/api/auth/      @3or1Ryoga
+/frontend/src/app/api/admin/     @3or1Ryoga

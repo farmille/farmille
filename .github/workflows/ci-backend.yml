@@ -1,0 +1,51 @@
+name: CI (backend)
+
+# backend は変更時のみ実行（path-filter）。現状 main に既存の腐敗があるため advisory:
+#   - ruff: app に 7 件（未使用 import / import 位置）
+#   - pytest: fixture drift で 26 件（test_me_favorites の旧 fixture 名 / test_me_profile の定数ズレ。
+#             いずれも製品コードのバグではない）
+# これらを別 PR で解消後、continue-on-error を外し branch protection の required へ昇格する（ADR-0016）。
+#
+# ⚠ 昇格時の注意: この job は path-filter（backend/** 変更時のみ実行）のため、このまま required check に
+#   設定すると frontend のみの PR で永久 pending → merge 不能になる。required へ昇格する際は
+#   path-filter を外して全 PR で実行させる（frontend job が path-filter 無しなのと同じ理由）。
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/ci-backend.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/ci-backend.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-backend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend (ruff / pytest) [advisory]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: uv sync
+      - name: Ruff (app)
+        run: uv run ruff check app
+        continue-on-error: true
+      - name: Pytest
+        run: uv run pytest
+        continue-on-error: true

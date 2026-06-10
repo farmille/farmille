@@ -1,0 +1,65 @@
+name: CI
+
+# frontend の lint / 型 / test を全 PR で必須チェックする（現状 green）。
+# backend は別ワークフロー（ci-backend.yml, path-filter, advisory）。背景は ADR-0016。
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: frontend (lint / typecheck / test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+      - name: Test
+        run: pnpm exec vitest run
+
+  audit:
+    name: dependency audit (advisory)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # CLAUDE.md 上 critical/high は本来ブロック対象。CI 化初期は pre-existing 切り分けのため
+      # advisory（continue-on-error）。high+ が出たら issue 起票 → 別 PR で固定する。
+      - name: pnpm audit (high+)
+        working-directory: frontend
+        run: pnpm audit --audit-level=high
+        continue-on-error: true
+      - name: pip-audit
+        working-directory: backend
+        run: uvx pip-audit
+        continue-on-error: true
