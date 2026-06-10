@@ -25,8 +25,9 @@ out/
 .DS_Store
 Thumbs.db
 
-# Supabase
-supabase/.temp/
+# Supabase CLI 一時ファイル（どの階層でも無視。backend/supabase/.temp/ に prod ref が
+# 紛れ込んで誤コミットされるのを防ぐ — ADR-0016）
+.temp/
 
 # Claude
 .claude/
