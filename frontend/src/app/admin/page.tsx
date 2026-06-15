@@ -50,21 +50,40 @@ export default async function AdminDashboardPage() {
         aria-label="集計"
         className="grid grid-cols-2 md:grid-cols-4 gap-4"
       >
-        <StatCard label="保留中メーカー" value={summary.pending_makers_count} />
-        <StatCard label="承認済メーカー" value={summary.active_makers_count} />
-        <StatCard label="却下メーカー" value={summary.rejected_makers_count} />
-        <StatCard label="総ユーザー" value={summary.total_users_count} />
+        <StatCard
+          label="保留中メーカー"
+          value={summary.pending_makers_count}
+          href="/admin/makers?status=pending_review"
+        />
+        <StatCard
+          label="承認済メーカー"
+          value={summary.active_makers_count}
+          href="/admin/makers?status=active"
+        />
+        <StatCard
+          label="却下メーカー"
+          value={summary.rejected_makers_count}
+          href="/admin/makers?status=rejected"
+        />
+        <StatCard
+          label="総ユーザー"
+          value={summary.total_users_count}
+          href="/admin/users"
+        />
         <StatCard
           label="資材マスタ (総数)"
           value={summary.products_total}
+          href="/admin/products"
         />
         <StatCard
           label="資材マスタ (公開中)"
           value={summary.products_public_total}
+          href="/admin/products?is_public=true"
         />
         <StatCard
           label="承認待ちレビュー"
           value={summary.pending_reviews_count}
+          href="/admin/reviews?status=pending"
         />
       </section>
 
@@ -86,7 +105,8 @@ export default async function AdminDashboardPage() {
           <SubpageCard
             href="/admin/users"
             title="ユーザー管理 (B6)"
-            description="ロール昇格・凍結などのユーザー操作。準備中。"
+            description="ロール昇格・凍結などのユーザー操作。"
+            ready
           />
           <SubpageCard
             href="/admin/reviews"
@@ -97,12 +117,14 @@ export default async function AdminDashboardPage() {
           <SubpageCard
             href="/admin/reports"
             title="通報管理 (B2)"
-            description="ユーザーからの通報キュー。準備中。"
+            description="ユーザーからの通報キュー。"
+            ready
           />
           <SubpageCard
             href="/admin/articles"
             title="記事管理 (B3)"
-            description="お知らせ・コラム記事の編集。準備中。"
+            description="お知らせ・コラム記事の編集。"
+            ready
           />
           <SubpageCard
             href="/admin/featured-products"
@@ -120,11 +142,37 @@ export default async function AdminDashboardPage() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-md border border-border bg-card p-4 space-y-1">
+function StatCard({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: number;
+  href?: string;
+}) {
+  const body = (
+    <>
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="text-2xl font-semibold tracking-tight">{value}</p>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        aria-label={`${label}の一覧を見る`}
+        className="block rounded-md border border-border bg-card p-4 space-y-1 hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2"
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="rounded-md border border-border bg-card p-4 space-y-1">
+      {body}
     </div>
   );
 }
