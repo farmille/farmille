@@ -40,6 +40,7 @@ type ProductDetail = {
   name: string;
   maker_id: string | null;
   maker_name: string | null;
+  is_public?: boolean | null;
   type_id: string | null;
   type_name: string | null;
   general_purpose: string | null;
@@ -168,8 +169,21 @@ export default async function ProductDetailPage({ params }: PageProps) {
     throw new Error("API_URL not configured");
   }
 
+  // ログイン中ならトークンを付けて取得 → 自社の未公開(承認待ち)資材は owner/admin に限り
+  // backend が返す (2026-06-15)。匿名は従来どおり公開済みのみ。
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const productHeaders = session
+    ? { Authorization: `Bearer ${session.access_token}` }
+    : undefined;
+
   const [productRes, reviewsRes, user, role] = await Promise.all([
-    fetch(`${apiUrl}/v1/products/${id}`, { cache: "no-store" }),
+    fetch(`${apiUrl}/v1/products/${id}`, {
+      cache: "no-store",
+      headers: productHeaders,
+    }),
     fetch(`${apiUrl}/v1/products/${id}/reviews`, { cache: "no-store" }),
     getUser(),
     getRole(),
@@ -282,6 +296,16 @@ export default async function ProductDetailPage({ params }: PageProps) {
       </div>
 
       <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full space-y-12">
+        {/* 未公開(承認待ち)の自社資材を owner/admin が見ている時の注意バナー (2026-06-15)。
+            匿名/他者はそもそも 404 なのでここに到達しない。 */}
+        {product.is_public === false && (
+          <div
+            role="status"
+            className="rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-800"
+          >
+            このページは<strong>未公開（承認待ち）</strong>です。運営の承認後に一般公開されます。現在は出品メーカーと運営のみが閲覧できます。
+          </div>
+        )}
         {/* HERO: 商品名 → 製造元名 → カテゴリ → 公式情報ボタン → 画像エリア
             (2026-06-07 根本さん指示の表示順。概要は下の資材詳細セクションで表示) */}
         <section className="grid md:grid-cols-[1fr_minmax(0,420px)] gap-8 items-start">

@@ -118,7 +118,7 @@ export default async function ProductNewPage() {
           </h1>
           <p className="text-base text-muted-foreground max-w-2xl">
             基本情報と任意の効果タグ・対象作目・認証・画像を登録できます。
-            必須項目は製品名とタイプのみです。
+            必須項目は製品名のみです。
           </p>
         </div>
       </section>

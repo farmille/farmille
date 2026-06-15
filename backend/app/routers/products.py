@@ -1,14 +1,14 @@
 import logging
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
 from app.auth.jwt import get_user_id, get_user_role
 from app.config import settings
-from app.dependencies import require_role
+from app.dependencies import get_optional_user, require_role
 from app.models.schemas import (
     ProductCreatePayload,
     ProductUpdatePayload,
@@ -126,6 +126,8 @@ def _flatten_product_detail(row: dict) -> dict:
         "commercial_status": row.get("commercial_status"),
         "label_url": row.get("label_url"),
         "sds_url": row.get("sds_url"),
+        # owner/admin が承認待ちか判断できるよう公開状態も返す (2026-06-15)。
+        "is_public": row.get("is_public"),
         "created_at": row.get("created_at"),
         "images": [
             {
@@ -466,11 +468,18 @@ async def list_product_reviews(product_id: UUID):
 
 
 @router.get("/{product_id}")
-async def get_product(product_id: UUID):
+async def get_product(
+    product_id: UUID,
+    user: dict | None = Depends(get_optional_user),
+):
     """資材詳細。maker / type / images(全件) / benefits / crops / certifications を JOIN 展開。
 
     レビューは別エンドポイント /v1/products/{product_id}/reviews で取得する。
-    認証不要。存在しない id は 404、不正な UUID は FastAPI が 422 を返す。
+    認証は任意。存在しない id は 404、不正な UUID は FastAPI が 422 を返す。
+
+    2026-06-15: 自社メーカー(owner) と admin は、未公開(承認待ち is_public=false)・
+    メーカー未承認の自分の資材も閲覧できる (トークンがあれば判定)。匿名/他者は従来どおり
+    公開済み + active メーカーのみ。
     """
     admin = get_supabase_admin()
     res = (
@@ -492,14 +501,23 @@ async def get_product(product_id: UUID):
     if not res.data:
         raise HTTPException(status_code=404, detail="product_not_found")
     row = res.data[0]
-    # ADR-0009: 非 active メーカー所有の製品は公開詳細から 404 として隠す。
-    if (row.get("users") or {}).get("status") != "active":
-        raise HTTPException(status_code=404, detail="product_not_found")
-    # 2026-05-27 hotfix: is_public=false / ソフト削除済は公開詳細からも 404 で隠す
-    if not row.get("is_public"):
-        raise HTTPException(status_code=404, detail="product_not_found")
+    # ソフト削除済は誰に対しても 404 (owner/admin でも復元導線は別)。
     if row.get("deleted_at"):
         raise HTTPException(status_code=404, detail="product_not_found")
+
+    # owner(自社メーカー) / admin は公開ゲートを免除し、自分の未公開資材を閲覧可。
+    viewer_id = get_user_id(user) if user else None
+    viewer_role = get_user_role(user) if user else None
+    privileged = viewer_role == "admin" or (
+        viewer_id is not None and viewer_id == row.get("maker_id")
+    )
+    if not privileged:
+        # ADR-0009: 非 active メーカー所有の製品は公開詳細から 404 として隠す。
+        if (row.get("users") or {}).get("status") != "active":
+            raise HTTPException(status_code=404, detail="product_not_found")
+        # 2026-05-27 hotfix: is_public=false は公開詳細から 404 で隠す。
+        if not row.get("is_public"):
+            raise HTTPException(status_code=404, detail="product_not_found")
     return _flatten_product_detail(row)
 
 
