@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import Link from "next/link";
-import { Search, Sprout } from "lucide-react";
+import { Sprout } from "lucide-react";
 import { getRole, getUser } from "@/lib/auth/server";
 import { isMakerRole, isReviewerRole } from "@/lib/auth/roles";
 import { SiteHeaderUserMenu } from "./user-menu";
@@ -107,20 +107,6 @@ export async function SiteHeader() {
 
         {/* Right side */}
         <div className="ml-auto flex items-center gap-2">
-          {/* 検索 (v1 は /products リンクのみ、クエリ転送は v1.5+) */}
-          <Link
-            href="/products"
-            aria-label="資材を検索"
-            className="hidden h-9 items-center gap-1.5 px-3 text-sm text-white/90 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--green-dark)] md:flex"
-            style={{
-              borderRadius: "var(--radius-full)",
-              border: "1px solid var(--overlay-on-dark-strong)",
-            }}
-          >
-            <Search className="h-4 w-4" aria-hidden />
-            <span>検索</span>
-          </Link>
-
           {/* Auth CTAs */}
           {user ? (
             <SiteHeaderUserMenu

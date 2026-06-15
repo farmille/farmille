@@ -24,9 +24,12 @@ type Props = {
 
 // ログイン時のヘッダー右側。アバター (色付き円 + イニシャル) + プルダウンメニュー。
 // menu の中身は role 別:
-//   - reviewer: プロフィール / 自分のレビュー / マイ資材 / ログアウト
-//   - maker:    自社プロフィール / 自社資材 / 新規資材登録 / ログアウト
-//   - unassigned: オンボーディング / ログアウト
+//   - reviewer: 登録情報を変える / 自分のレビュー / マイ資材 / ログアウト
+//   - maker:    登録情報を変える / 自社資材 / 新規資材登録 / ログアウト
+//   - admin:    管理者ページに行く / ログアウト
+//   - unassigned: オンボーディングを完了させる / ログアウト
+// ※ 先頭の主アクションは状態で文言を出し分ける (2026-06-15 奥田さん指示):
+//   admin=管理者ページ / オンボ済み=登録情報を変える / 未オンボ=オンボーディングを完了させる。
 
 function MenuLink({
   href,
@@ -114,7 +117,7 @@ export function SiteHeaderUserMenu({
             <>
               <MenuLink
                 href="/me/profile"
-                label="プロフィール"
+                label="登録情報を変える"
                 onClose={close}
               />
               <MenuLink
@@ -133,7 +136,7 @@ export function SiteHeaderUserMenu({
             <>
               <MenuLink
                 href="/maker/profile"
-                label="自社プロフィール"
+                label="登録情報を変える"
                 onClose={close}
               />
               <MenuLink
@@ -148,13 +151,21 @@ export function SiteHeaderUserMenu({
               />
             </>
           )}
-          {!isReviewer && !isMaker && (
-            <MenuLink
-              href="/onboarding"
-              label="オンボーディングを完了する"
-              onClose={close}
-            />
-          )}
+          {!isReviewer &&
+            !isMaker &&
+            (role === "admin" ? (
+              <MenuLink
+                href="/admin"
+                label="管理者ページに行く"
+                onClose={close}
+              />
+            ) : (
+              <MenuLink
+                href="/onboarding"
+                label="オンボーディングを完了させる"
+                onClose={close}
+              />
+            ))}
           {/* 全ロール共通: アカウント設定 (パスワード変更等) — 2026-06-13 */}
           <MenuLink
             href="/settings"
