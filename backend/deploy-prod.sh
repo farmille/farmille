@@ -10,5 +10,5 @@ gcloud run deploy farmille-api \
   --region asia-northeast1 \
   --allow-unauthenticated \
   --min-instances 1 \
-  --set-env-vars "ENVIRONMENT=production,SIGNUP_REQUIRE_EMAIL_CONFIRM=true,SUPABASE_URL=https://sajxnypkbybuzsqdguaa.supabase.co,CORS_ORIGINS=https://farmille.vercel.app,FARMILLE_MAKER_USER_ID=64f02946-f5f2-443b-ad8d-8647a2effd59" \
+  --set-env-vars "^|^ENVIRONMENT=production|SIGNUP_REQUIRE_EMAIL_CONFIRM=false|SUPABASE_URL=https://sajxnypkbybuzsqdguaa.supabase.co|CORS_ORIGINS=https://farmille.vercel.app,https://www.farmille.com,https://farmille.com|FARMILLE_MAKER_USER_ID=64f02946-f5f2-443b-ad8d-8647a2effd59" \
   --set-secrets "SUPABASE_SERVICE_ROLE_KEY=supabase-service-role-key:latest,SUPABASE_JWT_SECRET=supabase-jwt-secret:latest"

@@ -56,6 +56,7 @@ type ErrorCode =
   | "unauthorized"
   | "forbidden"
   | "review_already_exists"
+  | "review_pending"
   | "image_upload_failed"
   | "review_not_found"
   | "not_owner"
@@ -72,6 +73,8 @@ function errorMessage(code: ErrorCode): string {
       return "この操作を行う権限がありません";
     case "review_already_exists":
       return "この資材には既にレビューを投稿済みです";
+    case "review_pending":
+      return "投稿済みのレビューは承認待ちです。公開まで少しお待ちください";
     case "review_not_found":
       return "対象のレビューが見つかりませんでした";
     case "image_upload_failed":
@@ -97,6 +100,9 @@ export function ReviewForm({
   const [removedPaths, setRemovedPaths] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [errorCode, setErrorCode] = useState<ErrorCode | null>(null);
+  // レビュー承認フロー (2026-06-13): 新規投稿は pending で着地し即時公開されない。
+  // 投稿後に何も起きないと「投稿できたか不安」になるため成功パネルを出す。
+  const [submitted, setSubmitted] = useState(false);
   // 投稿・更新とも毎回明示的にチェックさせる（デフォルト false）
   const [pesticideConfirmed, setPesticideConfirmed] = useState(false);
 
@@ -240,12 +246,31 @@ export function ReviewForm({
       setBody("");
       setFiles([]);
       setPesticideConfirmed(false);
+      setSubmitted(true);
       router.refresh();
     } catch {
       setErrorCode("unknown");
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (submitted && !isEdit) {
+    return (
+      <div
+        className="rounded-md border border-border bg-card p-6 text-center space-y-2"
+        role="status"
+        aria-live="polite"
+      >
+        <p className="text-lg font-semibold text-foreground">
+          レビューを投稿しました
+        </p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          ご協力ありがとうございます。投稿内容は運営の承認後に公開されます。
+          公開まで少しお時間をいただく場合があります。
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -390,7 +415,9 @@ export function ReviewForm({
 }
 
 function mapStatus(status: number, error?: string): ErrorCode {
-  if (status === 409) return "review_already_exists";
+  if (status === 409) {
+    return error === "review_pending" ? "review_pending" : "review_already_exists";
+  }
   if (status === 401) return "unauthorized";
   if (status === 403) return "forbidden";
   if (status === 404) return "review_not_found";

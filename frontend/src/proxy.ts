@@ -48,17 +48,32 @@ export async function proxy(request: NextRequest) {
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
   const isGuestOnly = GUEST_ONLY_PATHS.some((p) => pathname.startsWith(p));
 
+  // 2026-06-13 ログイン間欠不具合の修正:
+  // supabase.auth.getUser() がトークンを更新すると setAll が `response` に新しい
+  // Set-Cookie を載せる。ところが従来はリダイレクト時に素の NextResponse.redirect を
+  // 返しており、その更新後 cookie を引き継いでいなかった。Supabase の refresh token は
+  // 単回使用(回転)なので、更新後 cookie を落とすと次回リクエストで回転前トークンが使われ
+  // 401 → セッション切れ＝「ログインが毎回事故る」系の典型原因になる。
+  // リダイレクト応答にも必ず `response` の cookie を複製して引き継ぐ。
+  const redirectTo = (path: string) => {
+    const redirectRes = NextResponse.redirect(new URL(path, request.url));
+    response.cookies.getAll().forEach((cookie) => {
+      redirectRes.cookies.set(cookie);
+    });
+    return redirectRes;
+  };
+
   if (!user && isProtected) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return redirectTo("/login");
   }
 
   if (user && isGuestOnly) {
     const dest = role === "unassigned" ? "/onboarding" : "/home";
-    return NextResponse.redirect(new URL(dest, request.url));
+    return redirectTo(dest);
   }
 
   if (user && role === "unassigned" && pathname.startsWith("/home")) {
-    return NextResponse.redirect(new URL("/onboarding", request.url));
+    return redirectTo("/onboarding");
   }
 
   return response;

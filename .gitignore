@@ -41,9 +41,20 @@ meeting_document.md
 
 # BS資材 master Excel (binary, used by backend/scripts/excel_to_seed_sql.py to
 # produce supabase/migrations/<ts>_seed_products_from_ryosei_export.sql).
-# Track via setup-log instead of committing the .xlsm.
-Farmille_BS_materials_DB_template_detailed_prompt.xlsm
+# Track via setup-log instead of committing the workbook. 2026-06-15: broadened from the
+# single .xlsm name to all workbooks — *_complete.xlsx (381製品/84社 の proprietary master)
+# が旧 exact-name ルールをすり抜け `git add -A` で混入する状態だった。
+*.xlsm
+*.xlsx
 
 # Playwright MCP traces / console logs / screenshots — reference material only.
 .playwright-mcp/
 aglist-*.png
+
+# 本番 PII / 運用スクラッチ (2026-06-15 deploy-readiness レビュー指摘)。
+# docs/drafts/ には本番 import の PII (maker→email→本番 auth user_id UUID マッピング、
+# 本番 admin email を列挙する SQL 等) が、backend/gcp-*.sh には本番 GCP project ref が含まれる。
+# 秘密値のハードコードは無いが本番識別子を公開リポに載せないため無視する。
+# 個別に追跡したい安全な draft は `git add -f <path>` で明示追加すること。
+docs/drafts/
+backend/gcp-*.sh

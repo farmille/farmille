@@ -44,6 +44,7 @@ export default async function AdminLayout({
           <AdminNavLink href="/admin/makers" label="メーカー承認" />
           <AdminNavLink href="/admin/products" label="資材マスタ" />
           <AdminNavLink href="/admin/users" label="ユーザー管理" />
+          <AdminNavLink href="/admin/reviews" label="レビュー承認" />
           <AdminNavLink href="/admin/reports" label="通報管理" />
           <AdminNavLink href="/admin/articles" label="記事管理" />
           <AdminNavLink

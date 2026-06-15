@@ -81,6 +81,9 @@ async def get_admin_summary(
     products_total = _count("products", [])
     products_public_total = _count("products", [("is_public", True)])
 
+    # レビュー承認フロー (2026-06-13): 承認待ちレビュー件数
+    pending_reviews = _count("reviews", [("status", "pending")])
+
     return AdminSummaryResponse(
         pending_makers_count=pending,
         active_makers_count=active,
@@ -88,6 +91,7 @@ async def get_admin_summary(
         total_users_count=total,
         products_total=products_total,
         products_public_total=products_public_total,
+        pending_reviews_count=pending_reviews,
     )
 
 

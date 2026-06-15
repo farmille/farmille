@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { safeNextPath } from "@/lib/auth/safe-next";
 import { TotpEnrollForm } from "./_components/totp-enroll-form";
 
 export const metadata: Metadata = {
   title: "2段階認証の設定",
 };
-
-function safeNext(next: string | undefined): string {
-  if (typeof next !== "string") return "/admin";
-  if (!next.startsWith("/") || next.startsWith("//")) return "/admin";
-  return next;
-}
 
 export default async function MfaSetupPage({
   searchParams,
@@ -19,7 +14,8 @@ export default async function MfaSetupPage({
   searchParams?: Promise<{ next?: string }>;
 }) {
   const params = (await searchParams) ?? {};
-  const next = safeNext(params.next);
+  // open-redirect 対策は共通 safeNextPath に集約 (2026-06-15)。不正/未指定は /admin。
+  const next = safeNextPath(params.next) ?? "/admin";
 
   const supabase = await createClient();
 

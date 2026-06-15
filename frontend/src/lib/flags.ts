@@ -13,4 +13,9 @@ export const PRODUCT_IMAGES_ENABLED = true;
 // 誰でも投稿可）。製品ページの「レビューを投稿」欄を Google フォーム埋め込みに切替える。
 // false に戻すと従来のサイト内フォーム（ログイン+farmer権限+プロフィール必須）が復活する。
 // 埋め込み URL は src/components/google-form-review-embed.tsx を参照。
-export const REVIEW_VIA_GOOGLE_FORM = true;
+//
+// 2026-06-13 奥田さん指示 (6-15 定例): レビュー承認フロー導入のためサイト内フォームに戻す。
+// 投稿レビューは DB に保存され status='pending' で着地 → admin/reviews で承認 → 公開。
+// Google フォーム投稿は DB に入らず承認キューに乗らないため、承認運用とは両立しない。
+// true に戻すと承認フローは無効化される（埋め込みは下節に温存）。
+export const REVIEW_VIA_GOOGLE_FORM = false;

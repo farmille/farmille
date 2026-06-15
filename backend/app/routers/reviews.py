@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Response
 from fastapi.responses import JSONResponse
 
-from app.auth.jwt import get_user_id
+from app.auth.jwt import get_user_id, get_user_role
 from app.dependencies import get_current_user
 from app.models.schemas import ReviewUpdatePayload
 from app.routers._image_path import validate_review_image_path
@@ -60,10 +60,20 @@ async def update_review(
                 content={"ok": False, "error": "invalid_image_path"},
             )
 
+    update_fields: dict = {"rating": payload.rating, "body": payload.body}
+    # レビュー承認フロー (2026-06-13): 編集は再審査。承認後に本文を差し替える
+    # モデレーション回避を防ぐため、farmer の編集は status を pending に戻し承認痕跡を
+    # クリアする。admin の運営投稿は信頼済みとして approved を維持する。
+    if get_user_role(user) != "admin":
+        update_fields["status"] = "pending"
+        update_fields["approved_by"] = None
+        update_fields["approved_at"] = None
+        update_fields["rejection_reason"] = None
+
     try:
-        admin.table("reviews").update(
-            {"rating": payload.rating, "body": payload.body}
-        ).eq("id", str(review_id)).execute()
+        admin.table("reviews").update(update_fields).eq(
+            "id", str(review_id)
+        ).execute()
     except Exception:
         return JSONResponse(
             status_code=500,

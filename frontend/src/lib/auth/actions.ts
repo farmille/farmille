@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSignUpRole } from "@/lib/auth/roles";
 import { landingPathForRole } from "@/lib/auth/landing";
+import { safeNextPath } from "@/lib/auth/safe-next";
 
 export type ActionResult =
   | { ok: true }
@@ -79,6 +80,7 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
 export async function signIn(formData: FormData): Promise<ActionResult> {
   const email = formData.get("email");
   const password = formData.get("password");
+  const next = safeNextPath(formData.get("next"));
 
   if (typeof email !== "string" || typeof password !== "string") {
     return { ok: false, error: "メールアドレスとパスワードを入力してください" };
@@ -114,17 +116,20 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   const role = user?.app_metadata?.role as string | undefined;
 
-  // ADR-0012 §2.3: admin は MFA 完了まで /admin に着地させない
+  // ADR-0012 §2.3: admin は MFA 完了まで /admin に着地させない。
+  // ?next= があれば MFA 完了後の戻り先として引き継ぐ (なければ /admin)。
   if (role === "admin") {
     const { data: factors } = await supabase.auth.mfa.listFactors();
     const verifiedTotp = factors?.totp.find((f) => f.status === "verified");
+    const dest = next ?? "/admin";
     const target = verifiedTotp
-      ? `/mfa/challenge?next=${encodeURIComponent("/admin")}`
-      : `/mfa/setup?next=${encodeURIComponent("/admin")}`;
+      ? `/mfa/challenge?next=${encodeURIComponent(dest)}`
+      : `/mfa/setup?next=${encodeURIComponent(dest)}`;
     redirect(target);
   }
 
-  redirect(landingPathForRole(role));
+  // ?next= があれば元の画面へ戻す。なければ role 別ホーム。
+  redirect(next ?? landingPathForRole(role));
 }
 
 export async function signOut(): Promise<void> {
@@ -176,6 +181,64 @@ export async function updatePassword(
 
   if (error) {
     return { ok: false, error: error.message };
+  }
+
+  return { ok: true };
+}
+
+// ログイン中のユーザーがマイページ (/settings) からパスワードを変更する用 (2026-06-13)。
+// パスワードリセット (メールリンク) と違い、現在のパスワードでの再認証を必須にする。
+// セッションだけで変更できると、放置端末や盗まれた cookie で勝手に変更されうるため
+// (security review S1)。updatePassword はリセット導線専用なので別アクションに分ける。
+export async function changePassword(
+  formData: FormData,
+): Promise<ActionResult> {
+  const currentPassword = formData.get("current_password");
+  const password = formData.get("password");
+
+  if (typeof currentPassword !== "string" || currentPassword.length === 0) {
+    return { ok: false, error: "現在のパスワードを入力してください" };
+  }
+  if (typeof password !== "string" || password.length < 6) {
+    return { ok: false, error: "新しいパスワードは6文字以上で入力してください" };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || !user.email) {
+    return { ok: false, error: "セッションが切れました。再度ログインしてください" };
+  }
+
+  // 現在のパスワードで再認証 (本人確認)。誤りなら更新しない。
+  const { error: reauthError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  });
+  if (reauthError) {
+    return { ok: false, error: "現在のパスワードが正しくありません" };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes("different from the old") || msg.includes("should be different")) {
+      return {
+        ok: false,
+        error: "新しいパスワードは現在のものと異なるものを設定してください",
+      };
+    }
+    if (msg.includes("reauthentication") || msg.includes("reauthenticate")) {
+      return {
+        ok: false,
+        error: "再認証が必要です。一度ログインし直してから変更してください",
+      };
+    }
+    return {
+      ok: false,
+      error: "パスワードの変更に失敗しました。時間をおいて再度お試しください",
+    };
   }
 
   return { ok: true };

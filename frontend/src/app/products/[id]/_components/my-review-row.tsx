@@ -136,7 +136,7 @@ export function MyReviewRow({ productId, review }: Props) {
       <div className="text-sm text-foreground">
         {"★".repeat(review.rating)}
         <span className="text-muted-foreground">
-          {"★".repeat(5 - review.rating)}
+          {"☆".repeat(5 - review.rating)}
         </span>
       </div>
       <p className="text-base text-foreground whitespace-pre-wrap">
