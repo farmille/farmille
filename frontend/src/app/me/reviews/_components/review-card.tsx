@@ -11,6 +11,9 @@ export type MyReview = {
   product_image_url: string | null;
   rating: number;
   body: string;
+  // レビュー承認フロー (2026-06-13): 自分のレビューの公開状態。
+  status?: "pending" | "approved" | "rejected" | null;
+  rejection_reason?: string | null;
   created_at: string | null;
   updated_at: string | null;
 };
@@ -48,6 +51,10 @@ export function ReviewCard({ review }: { review: MyReview }) {
         )}
         <div className="flex items-center gap-2">
           <span className="text-sm">★ {review.rating}</span>
+          <ReviewStatusBadge
+            status={review.status}
+            rejectionReason={review.rejection_reason}
+          />
         </div>
         <p className="text-sm whitespace-pre-wrap line-clamp-3">
           {review.body}
@@ -64,4 +71,35 @@ export function ReviewCard({ review }: { review: MyReview }) {
       </div>
     </li>
   );
+}
+
+function ReviewStatusBadge({
+  status,
+  rejectionReason,
+}: {
+  status?: "pending" | "approved" | "rejected" | null;
+  rejectionReason?: string | null;
+}) {
+  if (status === "pending") {
+    return (
+      <span
+        className="inline-block rounded border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 text-xs text-amber-700"
+        title="運営の承認後に公開されます"
+      >
+        承認待ち
+      </span>
+    );
+  }
+  if (status === "rejected") {
+    return (
+      <span
+        className="inline-block rounded border border-slate-500/30 bg-slate-500/15 px-2 py-0.5 text-xs text-slate-700"
+        title={rejectionReason ?? "このレビューは公開されませんでした"}
+      >
+        非公開（却下）
+      </span>
+    );
+  }
+  // approved / 不明: バッジなし（公開中）
+  return null;
 }

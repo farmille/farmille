@@ -62,6 +62,10 @@ export default async function AdminDashboardPage() {
           label="資材マスタ (公開中)"
           value={summary.products_public_total}
         />
+        <StatCard
+          label="承認待ちレビュー"
+          value={summary.pending_reviews_count}
+        />
       </section>
 
       <section aria-label="サブ画面" className="space-y-3">
@@ -83,6 +87,12 @@ export default async function AdminDashboardPage() {
             href="/admin/users"
             title="ユーザー管理 (B6)"
             description="ロール昇格・凍結などのユーザー操作。準備中。"
+          />
+          <SubpageCard
+            href="/admin/reviews"
+            title="レビュー承認"
+            description="生産者が投稿したレビューの承認・却下キュー。承認で公開、却下で非公開。"
+            ready
           />
           <SubpageCard
             href="/admin/reports"

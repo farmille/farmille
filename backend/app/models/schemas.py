@@ -324,6 +324,8 @@ class AdminSummaryResponse(BaseModel):
     # admin-aglist-alignment-v2.md §3.4: products カード追加
     products_total: int = Field(ge=0, default=0)
     products_public_total: int = Field(ge=0, default=0)
+    # レビュー承認フロー (2026-06-13): 承認待ちレビュー件数カード
+    pending_reviews_count: int = Field(ge=0, default=0)
 
 
 class PendingMakerItem(BaseModel):
@@ -468,6 +470,54 @@ class AdminUserActionPayload(BaseModel):
     """POST /v1/admin/users/{id}/freeze や /soft-delete の note 用。"""
 
     note: str | None = Field(default=None, max_length=500)
+
+
+# ─────────────────────────────────────────────────────────────────────
+# レビュー承認フロー (2026-06-13 / 奥田さん指示 6-15 定例)
+# reviews.status: pending → approved / rejected
+# ─────────────────────────────────────────────────────────────────────
+
+
+REVIEW_MODERATION_STATUSES = ("pending", "approved", "rejected")
+
+
+class AdminReviewItem(BaseModel):
+    """GET /v1/admin/reviews 行。承認待ちキュー + 履歴表示用。"""
+
+    id: UUID
+    product_id: UUID
+    product_name: str | None
+    user_id: UUID
+    user_name: str | None
+    rating: int
+    body: str
+    status: str
+    created_at: datetime
+    approved_by: UUID | None
+    approved_at: datetime | None
+    rejection_reason: str | None
+
+
+class AdminReviewListResponse(BaseModel):
+    reviews: list[AdminReviewItem]
+    total: int = Field(ge=0)
+    page: int = Field(ge=1)
+    per_page: int = Field(ge=1, le=100)
+
+
+class AdminReviewRejectPayload(BaseModel):
+    """POST /v1/admin/reviews/{id}/reject — 却下理由 (任意)。"""
+
+    model_config = ConfigDict(extra="forbid")
+
+    reason: str | None = Field(default=None, max_length=2000)
+
+    @field_validator("reason")
+    @classmethod
+    def _blank_reason_to_none(cls, v: str | None) -> str | None:
+        if v is not None and v.strip() == "":
+            return None
+        return v
 
 
 class AdminProductListItem(BaseModel):

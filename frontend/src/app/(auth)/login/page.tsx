@@ -6,6 +6,14 @@ import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth/actions";
 
+// ログイン後の戻り先 (?next=) をフォームに同送する hidden field (2026-06-15)。
+// useSearchParams は Suspense 必須のため独立コンポーネントに切り出す。
+// 値の検証 (open-redirect 防止) は signIn 側 safeNextPath で行う。
+function NextHiddenField() {
+  const next = useSearchParams().get("next");
+  return next ? <input type="hidden" name="next" value={next} /> : null;
+}
+
 function LoginBanners() {
   const searchParams = useSearchParams();
   const expired = searchParams.get("expired") === "1";
@@ -56,6 +64,9 @@ export default function LoginPage() {
       </Suspense>
 
       <form action={handleSubmit} className="space-y-5">
+        <Suspense fallback={null}>
+          <NextHiddenField />
+        </Suspense>
         <div className="space-y-2">
           <label
             htmlFor="email"

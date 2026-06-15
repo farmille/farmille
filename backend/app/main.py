@@ -12,6 +12,7 @@ from app.routers import (
     admin_articles,
     admin_products,
     admin_reports,
+    admin_reviews,
     articles,
     auth,
     certifications,
@@ -85,6 +86,9 @@ app.include_router(
 )
 app.include_router(
     admin_reports.router, prefix="/v1/admin/reports", tags=["admin-reports"]
+)
+app.include_router(
+    admin_reviews.router, prefix="/v1/admin/reviews", tags=["admin-reviews"]
 )
 app.include_router(
     admin_articles.router, prefix="/v1/admin/articles", tags=["admin-articles"]

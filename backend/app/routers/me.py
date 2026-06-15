@@ -39,6 +39,10 @@ def _flatten_review(row: dict) -> dict:
         "product_image_url": _representative_image(product.get("product_images")),
         "rating": row.get("rating"),
         "body": row.get("body"),
+        # レビュー承認フロー (2026-06-13): 自分のレビューが pending/rejected か分かるよう
+        # status を返す。/me/reviews で承認待ち・却下バッジを出すため。
+        "status": row.get("status"),
+        "rejection_reason": row.get("rejection_reason"),
         "created_at": row.get("created_at"),
         "updated_at": row.get("updated_at"),
     }
@@ -64,7 +68,8 @@ async def list_my_reviews(
     res = (
         admin.table("reviews")
         .select(
-            'id, product_id, rating, body, created_at, updated_at, '
+            'id, product_id, rating, body, status, rejection_reason, '
+            'created_at, updated_at, '
             'products(name, users(name, maker_profiles(company_name)), '
             'product_images(url, "order"))',
             count="exact",

@@ -155,6 +155,12 @@ export function SiteHeaderUserMenu({
               onClose={close}
             />
           )}
+          {/* 全ロール共通: アカウント設定 (パスワード変更等) — 2026-06-13 */}
+          <MenuLink
+            href="/settings"
+            label="アカウント設定"
+            onClose={close}
+          />
         </ul>
         <div className="border-t border-border pt-1">
           <form action={signOut}>

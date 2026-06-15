@@ -365,17 +365,35 @@ async def create_product_review(
 
     existing = (
         admin.table("reviews")
-        .select("id")
+        .select("id, status")
         .eq("user_id", user_id)
         .eq("product_id", str(product_id))
         .limit(1)
         .execute()
     )
     if existing.data:
-        return JSONResponse(
-            status_code=409,
-            content={"ok": False, "error": "review_already_exists"},
-        )
+        cur = existing.data[0]
+        cur_status = cur.get("status")
+        if cur_status == "rejected":
+            # レビュー承認フロー (2026-06-13): 却下済は再投稿を許可する。
+            # 画像 Storage パスを新しい review_id に同期させるため、UPDATE ではなく
+            # 古い却下 row を消して新規投稿として作り直す (古い画像は best-effort 放置)。
+            admin.table("reviews").delete().eq("id", cur["id"]).execute()
+        elif cur_status == "pending":
+            # 既に承認待ち。「既に投稿済み」だと公開されない理由が伝わらないため別コード。
+            return JSONResponse(
+                status_code=409,
+                content={"ok": False, "error": "review_pending"},
+            )
+        else:  # approved (公開済 — 編集導線へ誘導)
+            return JSONResponse(
+                status_code=409,
+                content={"ok": False, "error": "review_already_exists"},
+            )
+
+    # farmer 投稿は 'pending' (admin 承認まで非公開)。
+    # admin の運営投稿 (Farmille 公式アカウント) は信頼済みとして即 'approved'。
+    status = "approved" if get_user_role(user) == "admin" else "pending"
 
     try:
         admin.table("reviews").insert(
@@ -385,6 +403,7 @@ async def create_product_review(
                 "product_id": str(product_id),
                 "rating": payload.rating,
                 "body": payload.body,
+                "status": status,
             }
         ).execute()
     except Exception as exc:
@@ -412,8 +431,16 @@ async def list_product_reviews(product_id: UUID):
     admin = get_supabase_admin()
     res = (
         admin.table("reviews")
-        .select("id, user_id, rating, body, created_at, users(name, status, deleted_at)")
+        # 2026-06-13: reviews に approved_by(→users) FK が増え users 埋め込みが曖昧に
+        # なったため、著者は user_id FK の制約名でヒントする (reviews_user_id_fkey)。
+        .select(
+            "id, user_id, rating, body, created_at, "
+            "users!reviews_user_id_fkey(name, status, deleted_at)"
+        )
         .eq("product_id", str(product_id))
+        # レビュー承認フロー (2026-06-13): 公開ページは承認済のみ表示。
+        # pending(承認待ち) / rejected(却下) は admin/reviews でのみ可視。
+        .eq("status", "approved")
         .order("created_at", desc=True)
         .execute()
     )

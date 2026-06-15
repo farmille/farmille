@@ -10,6 +10,8 @@ export interface AdminSummary {
   // admin-aglist-alignment-v2.md §3.4
   products_total: number;
   products_public_total: number;
+  // レビュー承認フロー (2026-06-13): 承認待ちレビュー件数
+  pending_reviews_count: number;
 }
 
 export interface PendingMaker {
@@ -93,6 +95,35 @@ export interface AdminReportItem {
 
 export interface AdminReportListResponse {
   reports: AdminReportItem[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// レビュー承認フロー (2026-06-13 / 奥田さん指示 6-15 定例)
+// reviews.status: pending → approved / rejected
+// ─────────────────────────────────────────────────────────────────────
+
+export type ReviewModerationStatus = "pending" | "approved" | "rejected";
+
+export interface AdminReviewItem {
+  id: string;
+  product_id: string;
+  product_name: string | null;
+  user_id: string;
+  user_name: string | null;
+  rating: number;
+  body: string;
+  status: ReviewModerationStatus;
+  created_at: string;
+  approved_by: string | null;
+  approved_at: string | null;
+  rejection_reason: string | null;
+}
+
+export interface AdminReviewListResponse {
+  reviews: AdminReviewItem[];
   total: number;
   page: number;
   per_page: number;

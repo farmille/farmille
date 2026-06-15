@@ -12,6 +12,8 @@ export const ME_NAV_ITEMS: ReadonlyArray<{ href: string; label: string }> = [
   { href: "/me/profile", label: "プロフィール" },
   { href: "/me/reviews", label: "レビュー" },
   { href: "/me/materials", label: "マイ資材" },
+  // 2026-06-13: 全ロール共通のアカウント設定 (パスワード変更等)。
+  { href: "/settings", label: "アカウント設定" },
 ];
 
 type Props = {
