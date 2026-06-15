@@ -109,9 +109,13 @@ export function ProductForm({
   const isEdit = mode === "edit" && productId !== undefined;
 
   const [name, setName] = useState(initialValues?.name ?? "");
-  const [productTypeId, setProductTypeId] = useState(
-    initialValues?.productTypeId ?? "",
-  );
+  // タイプは現状すべて BS資材 のため選択 UI を廃止 (2026-06-15 奥田さん指示)。
+  // 既存値があれば踏襲、無ければ master から BS資材 を解決、保険で先頭 type を採用する。
+  const productTypeId =
+    initialValues?.productTypeId ||
+    productTypes.find((t) => t.name.includes("BS"))?.id ||
+    productTypes[0]?.id ||
+    "";
   const [generalPurpose, setGeneralPurpose] = useState(
     initialValues?.generalPurpose ?? "",
   );
@@ -196,7 +200,6 @@ export function ProductForm({
     if (!trimmedName) errs.name = "製品名を入力してください";
     else if (trimmedName.length > 100)
       errs.name = "製品名は 100 文字以内で入力してください";
-    if (!productTypeId) errs.product_type_id = "タイプを選択してください";
     if (generalPurpose.length > 500)
       errs.general_purpose = "一般用途は 500 文字以内で入力してください";
     if (primaryCompound.length > 200)
@@ -398,33 +401,6 @@ export function ProductForm({
         />
         {fieldErrors.name && (
           <p className="text-sm text-destructive">{fieldErrors.name}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="product_type_id">
-          タイプ <span className="text-destructive">*</span>
-        </Label>
-        <select
-          id="product_type_id"
-          value={productTypeId}
-          onChange={(e) => setProductTypeId(e.target.value)}
-          disabled={submitting}
-          className={cn(
-            "flex h-11 w-full rounded-sm border border-input bg-background px-3 py-2 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50",
-          )}
-        >
-          <option value="">選択してください</option>
-          {productTypes.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
-        {fieldErrors.product_type_id && (
-          <p className="text-sm text-destructive">
-            {fieldErrors.product_type_id}
-          </p>
         )}
       </div>
 

@@ -77,8 +77,12 @@ export default async function ProductEditPage({ params }: PageProps) {
 
   const [productRes, typesRes, benefitsRes, certsRes, cropsRes] =
     await Promise.all([
-      // 編集対象の products 行は所有権チェック + 最新値を見せたいので都度フェッチ
-      fetch(`${apiUrl}/v1/products/${id}`, { cache: "no-store" }),
+      // 編集対象の products 行は所有権チェック + 最新値を見せたいので都度フェッチ。
+      // 未公開(承認待ち)の自社資材も編集できるよう token を付ける (2026-06-15)。
+      fetch(`${apiUrl}/v1/products/${id}`, {
+        headers: authHeaders,
+        cache: "no-store",
+      }),
       // マスタ系は 1h cache で SSR 時間短縮
       fetch(`${apiUrl}/v1/product-types`, { next: { revalidate: 3600 } }),
       fetch(`${apiUrl}/v1/product-benefits`, { next: { revalidate: 3600 } }),
