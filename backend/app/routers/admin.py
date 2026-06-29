@@ -34,6 +34,7 @@ from app.models.schemas import (
     PendingMakersResponse,
     RejectMakerPayload,
 )
+from app.routers._sorting import resolve_sort
 from app.services.supabase import get_supabase_admin
 
 logger = logging.getLogger(__name__)
@@ -360,12 +361,28 @@ async def list_all_makers(
     return {"makers": items, "total": len(items)}
 
 
+# 列ヘッダソート (2026-06-29): frontend のキー → users テーブルのスカラー列。
+# email は auth.users から別取得してマージするため DB ソート不可 (非対応)。
+_USER_SORTS = {
+    "name": "name",
+    "role": "role",
+    "status": "status",
+    "created_at": "created_at",
+}
+
+
 @router.get("/users", response_model=AdminUserListResponse)
 async def list_admin_users(
     _user: dict = require_role("admin"),
     q: str | None = Query(default=None, description="name + email の部分一致"),
     role: str | None = Query(default=None, description="role 完全一致"),
     status: str | None = Query(default=None, description="status 完全一致"),
+    sort: str | None = Query(
+        default=None, description="name / role / status / created_at"
+    ),
+    direction: str | None = Query(
+        default="desc", alias="dir", description="asc / desc"
+    ),
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=50, ge=1, le=100),
 ) -> AdminUserListResponse:
@@ -374,7 +391,8 @@ async def list_admin_users(
     - public.users から id / role / name / status / created_at を取得
     - auth.users から email を取得 (admin auth API 経由)
     - フィルタ: role / status / q (name + email 部分一致)
-    - ソート: created_at DESC, id DESC
+    - ソート: 列ヘッダ (name / role / status / created_at)、既定は created_at DESC, id DESC
+      (email は auth.users マージ列なので DB ソート非対応)
     - pagination: per_page = 50 デフォルト、max 100
 
     v1 では UI で role 変更のみ。frozen toggle / 削除は SQL 直 (v1.5+ で UI 化)。
@@ -396,7 +414,8 @@ async def list_admin_users(
         # auth.users.email との OR は PostgREST では難しいため、name のみ frontend で対応。
         # email 検索が必要になれば v1.5+ で別 endpoint or full-text 化を検討。
 
-    query = query.order("created_at", desc=True).order("id", desc=True)
+    col, desc = resolve_sort(sort, direction, _USER_SORTS, default_key="created_at")
+    query = query.order(col, desc=desc).order("id", desc=desc)
 
     start = (page - 1) * per_page
     end = start + per_page - 1

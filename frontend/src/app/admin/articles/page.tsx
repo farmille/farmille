@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { AdminArticleListResponse, ArticleCategory } from "@/types/admin";
 import { ArticleDeleteButton } from "./_components/article-delete-button";
+import { SortableHeader, type SortDir } from "../_components/sortable-header";
 
 export const metadata: Metadata = {
   title: "記事管理",
@@ -27,7 +28,7 @@ const CATEGORY_LABEL: Record<ArticleCategory, string> = {
 };
 
 type PageProps = {
-  searchParams?: Promise<{ page?: string }>;
+  searchParams?: Promise<{ page?: string; sort?: string; dir?: string }>;
 };
 
 function parsePage(raw: string | undefined): number {
@@ -77,7 +78,12 @@ function publishState(publishedAt: string | null): {
 
 export default async function AdminArticlesPage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
+  const sort = params.sort ?? null;
+  const dir: SortDir = params.dir === "asc" ? "asc" : "desc";
   const page = parsePage(params.page);
+  // SortableHeader に渡す温存パラメータ (sort/dir/page を除く)。
+  // articles 一覧はフィルタ無し (page のみ) なので温存対象は無し。
+  const sortParams: Record<string, string> = {};
 
   const supabase = await createClient();
   const {
@@ -93,6 +99,8 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
   }
 
   const qs = new URLSearchParams();
+  if (sort) qs.set("sort", sort);
+  qs.set("dir", dir);
   qs.set("page", String(page));
   qs.set("per_page", String(PER_PAGE));
 
@@ -110,6 +118,14 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
   const totalPages = Math.max(1, Math.ceil(total / per_page));
   const rangeStart = total === 0 ? 0 : (page - 1) * per_page + 1;
   const rangeEnd = Math.min(page * per_page, total);
+
+  function pageHref(targetPage: number): string {
+    const next = new URLSearchParams();
+    if (sort) next.set("sort", sort);
+    next.set("dir", dir);
+    next.set("page", String(targetPage));
+    return `/admin/articles?${next.toString()}`;
+  }
 
   return (
     <div className="space-y-6">
@@ -149,10 +165,34 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
             <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 w-20">hero</th>
-                <th className="px-3 py-2">タイトル / slug</th>
-                <th className="px-3 py-2 w-20">カテゴリ</th>
+                <SortableHeader
+                  label="タイトル / slug"
+                  columnKey="title"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/articles"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
+                <SortableHeader
+                  label="カテゴリ"
+                  columnKey="category"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/articles"
+                  params={sortParams}
+                  className="px-3 py-2 w-20"
+                />
                 <th className="px-3 py-2 w-24">状態</th>
-                <th className="px-3 py-2 w-40">公開日時</th>
+                <SortableHeader
+                  label="公開日時"
+                  columnKey="published_at"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/articles"
+                  params={sortParams}
+                  className="px-3 py-2 w-40"
+                />
                 <th className="px-3 py-2 w-28">操作</th>
               </tr>
             </thead>
@@ -225,7 +265,7 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
           className="flex items-center justify-between"
         >
           <Link
-            href={`/admin/articles?page=${Math.max(1, page - 1)}`}
+            href={pageHref(Math.max(1, page - 1))}
             aria-disabled={page <= 1}
             className={
               "rounded border border-border px-3 py-1 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2 " +
@@ -238,7 +278,7 @@ export default async function AdminArticlesPage({ searchParams }: PageProps) {
             page {page} / {totalPages}
           </span>
           <Link
-            href={`/admin/articles?page=${Math.min(totalPages, page + 1)}`}
+            href={pageHref(Math.min(totalPages, page + 1))}
             aria-disabled={page >= totalPages}
             className={
               "rounded border border-border px-3 py-1 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--green-primary)] focus-visible:ring-offset-2 " +

@@ -12,7 +12,7 @@ import logging
 from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 
 from app.auth.jwt import get_user_id
@@ -23,10 +23,18 @@ from app.models.schemas import (
     AdminReportListResponse,
     AdminReportResolvePayload,
 )
+from app.routers._sorting import resolve_sort
 from app.services.supabase import get_supabase_admin
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# 列ヘッダソート (2026-06-29): frontend のキー → user_reports テーブルのスカラー列。
+# 結合列 (通報者名/対象名) や計算列は v1 では非対応。
+_REPORT_SORTS = {
+    "created_at": "created_at",
+    "status": "status",
+}
 
 
 def _error(status_code: int, code: str) -> JSONResponse:
@@ -37,6 +45,8 @@ def _error(status_code: int, code: str) -> JSONResponse:
 async def list_admin_reports(
     _user: dict = require_role("admin"),
     status: str | None = Query(default=None, description="pending / resolved / spam / dismissed"),
+    sort: str | None = Query(default=None, description="created_at / status"),
+    direction: str | None = Query(default="desc", alias="dir", description="asc / desc"),
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=50, ge=1, le=100),
 ) -> AdminReportListResponse:
@@ -49,7 +59,8 @@ async def list_admin_reports(
     )
     if status:
         query = query.eq("status", status)
-    query = query.order("created_at", desc=True)
+    col, desc = resolve_sort(sort, direction, _REPORT_SORTS, default_key="created_at")
+    query = query.order(col, desc=desc).order("id", desc=desc)
 
     start = (page - 1) * per_page
     end = start + per_page - 1

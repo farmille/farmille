@@ -29,10 +29,19 @@ from app.models.schemas import (
     AdminReviewListResponse,
     AdminReviewRejectPayload,
 )
+from app.routers._sorting import resolve_sort
 from app.services.supabase import get_supabase_admin
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# 列ヘッダソート (2026-06-29): frontend のキー → reviews テーブルのスカラー列。
+# 結合列 (資材名/投稿者名) は v1 では非対応。
+_REVIEW_SORTS = {
+    "created_at": "created_at",
+    "rating": "rating",
+    "status": "status",
+}
 
 
 def _error(status_code: int, code: str) -> JSONResponse:
@@ -56,10 +65,20 @@ async def list_admin_reviews(
     status: str | None = Query(
         default="pending", description="pending / approved / rejected / 空=すべて"
     ),
+    sort: str | None = Query(
+        default=None, description="created_at / rating / status"
+    ),
+    direction: str | None = Query(
+        default="desc", alias="dir", description="asc / desc"
+    ),
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=50, ge=1, le=100),
 ) -> AdminReviewListResponse:
-    """既定は status='pending' (承認待ちキュー)。created_at ASC (先入れ先出し)。"""
+    """既定は status='pending' (承認待ちキュー)、created_at desc (最新が上)。
+
+    列ヘッダソート対応 (created_at / rating / status)。古い順 (FIFO) で承認待ちを
+    捌きたいときは dir=asc に切り替える。
+    """
     admin = get_supabase_admin()
 
     # reviews→users は user_id と approved_by の 2 本 FK があるため、投稿者名は
@@ -72,8 +91,8 @@ async def list_admin_reviews(
     )
     if status:
         query = query.eq("status", status)
-    # 承認待ちは古い順に処理したい。承認/却下済の閲覧時も同順で安定。
-    query = query.order("created_at", desc=False)
+    col, desc = resolve_sort(sort, direction, _REVIEW_SORTS, default_key="created_at")
+    query = query.order(col, desc=desc).order("id", desc=desc)
 
     start = (page - 1) * per_page
     end = start + per_page - 1
@@ -192,3 +211,122 @@ async def reject_review(
     if err is not None:
         return err
     return {"ok": True, "review_id": str(review_id), "status": "rejected"}
+
+
+@router.post("/{review_id}/unpublish")
+async def unpublish_review(
+    review_id: UUID,
+    payload: AdminReviewRejectPayload,
+    _user: dict = require_role("admin"),
+):
+    """非公開化 (stage1 / 2026-06-29): pending|approved → rejected。
+
+    reject との違いは「既に公開済 (approved) のレビューも取り下げられる」こと。
+    _set_status は pending 限定なので公開後の取り下げ導線が無かった。物理削除では
+    なく status を rejected にするだけなので可逆 (再 approve で復活可)。
+    既に rejected のものは 409 (冪等寄り、二重操作の clobber 防止)。
+    """
+    admin = get_supabase_admin()
+
+    cur = (
+        admin.table("reviews")
+        .select("id, status")
+        .eq("id", str(review_id))
+        .limit(1)
+        .execute()
+    )
+    rows = cur.data or []
+    if not rows:
+        return _error(404, "review_not_found")
+    if rows[0]["status"] == "rejected":
+        return _error(409, "already_rejected")
+
+    try:
+        # UPDATE 自体も status in (pending, approved) を条件にして原子化し、
+        # 2 admin 同時操作での後勝ち clobber を防ぐ。0 件更新 = 既に他者が処理 → 409。
+        res = (
+            admin.table("reviews")
+            .update(
+                {
+                    "status": "rejected",
+                    "approved_by": get_user_id(_user),
+                    "approved_at": datetime.now(timezone.utc).isoformat(),
+                    "rejection_reason": payload.reason or "管理者により非公開化",
+                }
+            )
+            .eq("id", str(review_id))
+            .in_("status", ["pending", "approved"])
+            .execute()
+        )
+    except Exception:
+        logger.exception("failed to unpublish review %s", review_id)
+        return _error(500, "failed_to_unpublish_review")
+
+    if not (res.data or []):
+        return _error(409, "already_rejected")
+
+    return {"ok": True, "review_id": str(review_id), "status": "rejected"}
+
+
+def _remove_review_images(admin, user_id: str, review_id: str) -> None:
+    """ハード削除時に Storage `review-images/{user_id}/{review_id}/` を回収する。
+    best-effort: 失敗してもログのみ (行削除は既に確定しているため)。"""
+    folder = f"{user_id}/{review_id}"
+    try:
+        entries = admin.storage.from_("review-images").list(folder)
+    except Exception:
+        logger.warning(
+            "failed to list review images for delete %s", review_id, exc_info=True
+        )
+        return
+    paths = [
+        f"{folder}/{e['name']}"
+        for e in (entries or [])
+        if isinstance(e, dict) and e.get("name") and not e["name"].startswith(".")
+    ]
+    if not paths:
+        return
+    try:
+        admin.storage.from_("review-images").remove(paths)
+    except Exception:
+        logger.warning(
+            "failed to remove review images for %s", review_id, exc_info=True
+        )
+
+
+@router.delete("/{review_id}", status_code=204)
+async def delete_review_admin(
+    review_id: UUID,
+    _user: dict = require_role("admin"),
+):
+    """ハード削除 (stage1 / 2026-06-29): レビュー行を物理削除する。
+
+    reject/unpublish (非公開化) と違い復元不可。中間テーブル
+    (review_crops / review_benefit_relations / review_point_relations /
+    review_period_relations) は ON DELETE CASCADE で自動削除。レビューに紐づく
+    監査ログ (user_reports は user 単位) は無く CASCADE 破壊の懸念なし。
+    Storage 画像は行削除後に best-effort で回収する。
+    """
+    admin = get_supabase_admin()
+
+    cur = (
+        admin.table("reviews")
+        .select("id, user_id")
+        .eq("id", str(review_id))
+        .limit(1)
+        .execute()
+    )
+    rows = cur.data or []
+    if not rows:
+        return _error(404, "review_not_found")
+    owner_id = rows[0]["user_id"]
+
+    try:
+        admin.table("reviews").delete().eq("id", str(review_id)).execute()
+    except Exception:
+        logger.exception("failed to hard-delete review %s", review_id)
+        return _error(500, "failed_to_delete_review")
+
+    # 行削除が確定してから Storage を回収 (失敗は best-effort、204 を返す)。
+    _remove_review_images(admin, owner_id, str(review_id))
+    return None
