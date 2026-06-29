@@ -8,6 +8,11 @@ import type {
   ReviewModerationStatus,
 } from "@/types/admin";
 import { ReviewModerationAction } from "./_components/review-moderation-action";
+import { ReviewAdminActions } from "./_components/review-admin-actions";
+import {
+  SortableHeader,
+  type SortDir,
+} from "../_components/sortable-header";
 
 export const metadata: Metadata = {
   title: "レビュー承認",
@@ -30,6 +35,8 @@ type PageProps = {
   searchParams?: Promise<{
     status?: string;
     page?: string;
+    sort?: string;
+    dir?: string;
   }>;
 };
 
@@ -62,7 +69,11 @@ function formatDateTime(iso: string | null): string {
 export default async function AdminReviewsPage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const status = params.status === undefined ? "pending" : params.status;
+  const sort = params.sort ?? null;
+  const dir: SortDir = params.dir === "asc" ? "asc" : "desc";
   const page = parsePage(params.page);
+  // SortableHeader に渡す温存パラメータ (sort/dir/page を除く)。
+  const sortParams: Record<string, string> = status ? { status } : {};
 
   const supabase = await createClient();
   const {
@@ -79,6 +90,8 @@ export default async function AdminReviewsPage({ searchParams }: PageProps) {
 
   const qs = new URLSearchParams();
   if (status) qs.set("status", status);
+  if (sort) qs.set("sort", sort);
+  qs.set("dir", dir);
   qs.set("page", String(page));
   qs.set("per_page", String(PER_PAGE));
 
@@ -99,6 +112,8 @@ export default async function AdminReviewsPage({ searchParams }: PageProps) {
   function pageHref(targetPage: number): string {
     const next = new URLSearchParams();
     if (status) next.set("status", status);
+    if (sort) next.set("sort", sort);
+    next.set("dir", dir);
     next.set("page", String(targetPage));
     return `/admin/reviews?${next.toString()}`;
   }
@@ -169,12 +184,36 @@ export default async function AdminReviewsPage({ searchParams }: PageProps) {
           <table className="w-full min-w-[1000px] text-sm">
             <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="px-3 py-2">投稿日時</th>
+                <SortableHeader
+                  label="投稿日時"
+                  columnKey="created_at"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/reviews"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
                 <th className="px-3 py-2">資材</th>
                 <th className="px-3 py-2">投稿者</th>
-                <th className="px-3 py-2">評価</th>
+                <SortableHeader
+                  label="評価"
+                  columnKey="rating"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/reviews"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
                 <th className="px-3 py-2 max-w-[360px]">本文</th>
-                <th className="px-3 py-2">status</th>
+                <SortableHeader
+                  label="status"
+                  columnKey="status"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/reviews"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
                 <th className="px-3 py-2 w-48">処理</th>
               </tr>
             </thead>
@@ -222,19 +261,22 @@ export default async function AdminReviewsPage({ searchParams }: PageProps) {
                     <StatusBadge status={r.status} />
                   </td>
                   <td className="px-3 py-2">
-                    {r.status === "pending" ? (
-                      <ReviewModerationAction
-                        reviewId={r.id}
-                        productName={r.product_name}
-                      />
-                    ) : (
-                      <div className="text-xs text-muted-foreground">
-                        <p>処理日時: {formatDateTime(r.approved_at)}</p>
-                        {r.rejection_reason ? (
-                          <p className="mt-1 italic">「{r.rejection_reason}」</p>
-                        ) : null}
-                      </div>
-                    )}
+                    <div className="space-y-2">
+                      {r.status === "pending" ? (
+                        <ReviewModerationAction
+                          reviewId={r.id}
+                          productName={r.product_name}
+                        />
+                      ) : (
+                        <div className="text-xs text-muted-foreground">
+                          <p>処理日時: {formatDateTime(r.approved_at)}</p>
+                          {r.rejection_reason ? (
+                            <p className="mt-1 italic">「{r.rejection_reason}」</p>
+                          ) : null}
+                        </div>
+                      )}
+                      <ReviewAdminActions reviewId={r.id} status={r.status} />
+                    </div>
                   </td>
                 </tr>
               ))}

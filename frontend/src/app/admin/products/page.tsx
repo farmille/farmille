@@ -8,6 +8,10 @@ import type {
   AdminProductListResponse,
 } from "@/types/admin";
 import { ProductDeleteButton } from "./_components/product-delete-button";
+import {
+  SortableHeader,
+  type SortDir,
+} from "../_components/sortable-header";
 
 export const metadata: Metadata = {
   title: "資材マスタ",
@@ -33,6 +37,8 @@ type PageProps = {
     is_public?: string;
     commercial_status?: string;
     confidence?: string;
+    sort?: string;
+    dir?: string;
   }>;
 };
 
@@ -73,6 +79,15 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
   const isPublic = parseIsPublic(params.is_public);
   const commercialStatus = params.commercial_status?.trim() ?? "";
   const confidence = params.confidence?.trim() ?? "";
+  const sort = params.sort ?? null;
+  const dir: SortDir = params.dir === "asc" ? "asc" : "desc";
+  // SortableHeader に渡す温存パラメータ (sort/dir/page を除く現在のフィルタ)。
+  const sortParams: Record<string, string> = {};
+  if (q) sortParams.q = q;
+  if (makerId) sortParams.maker_id = makerId;
+  if (isPublic !== undefined) sortParams.is_public = String(isPublic);
+  if (commercialStatus) sortParams.commercial_status = commercialStatus;
+  if (confidence) sortParams.confidence = confidence;
 
   const supabase = await createClient();
   const {
@@ -93,6 +108,8 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
   if (isPublic !== undefined) qs.set("is_public", String(isPublic));
   if (commercialStatus) qs.set("commercial_status", commercialStatus);
   if (confidence) qs.set("confidence", confidence);
+  if (sort) qs.set("sort", sort);
+  qs.set("dir", dir);
   qs.set("page", String(page));
   qs.set("per_page", String(PER_PAGE));
 
@@ -131,6 +148,8 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
     if (isPublic !== undefined) next.set("is_public", String(isPublic));
     if (commercialStatus) next.set("commercial_status", commercialStatus);
     if (confidence) next.set("confidence", confidence);
+    if (sort) next.set("sort", sort);
+    next.set("dir", dir);
     next.set("page", String(targetPage));
     return `/admin/products?${next.toString()}`;
   }
@@ -274,12 +293,52 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
             <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 w-16">サムネ</th>
-                <th className="px-3 py-2">名前</th>
-                <th className="px-3 py-2">和名</th>
+                <SortableHeader
+                  label="名前"
+                  columnKey="name"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/products"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
+                <SortableHeader
+                  label="和名"
+                  columnKey="product_name_jp"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/products"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
                 <th className="px-3 py-2">メーカー</th>
-                <th className="px-3 py-2">公開</th>
-                <th className="px-3 py-2">confidence</th>
-                <th className="px-3 py-2">更新日</th>
+                <SortableHeader
+                  label="公開"
+                  columnKey="is_public"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/products"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
+                <SortableHeader
+                  label="confidence"
+                  columnKey="confidence"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/products"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
+                <SortableHeader
+                  label="更新日"
+                  columnKey="updated_at"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/products"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
                 <th className="px-3 py-2 w-36">操作</th>
               </tr>
             </thead>

@@ -21,13 +21,18 @@ import { createClient } from "@/lib/supabase/server";
 import { ReviewForm } from "./_components/review-form";
 import { ReviewWithProfileGate } from "./_components/review-with-profile-gate";
 import { MyReviewRow } from "./_components/my-review-row";
+import { ReviewImageGrid } from "./_components/review-image-grid";
 import {
   FavoriteButton,
   type ExistingFavorite,
   type FavoriteKind,
 } from "./_components/favorite-button";
 import { isReviewerRole } from "@/lib/auth/roles";
-import { PRODUCT_IMAGES_ENABLED, REVIEW_VIA_GOOGLE_FORM } from "@/lib/flags";
+import {
+  PRODUCT_IMAGES_ENABLED,
+  REVIEW_VIA_GOOGLE_FORM,
+  REVIEW_IMAGES_ENABLED,
+} from "@/lib/flags";
 import { GoogleFormReviewEmbed } from "@/components/google-form-review-embed";
 import type {
   CategoryL1,
@@ -73,6 +78,7 @@ type Review = {
   rating: number;
   body: string;
   created_at: string;
+  images?: string[];
 };
 
 type PageProps = {
@@ -642,6 +648,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       rating: r.rating,
                       body: r.body,
                       created_at: r.created_at,
+                      images: REVIEW_IMAGES_ENABLED ? r.images : undefined,
                     }}
                   />
                 ) : (
@@ -665,6 +672,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     <p className="text-base text-foreground whitespace-pre-wrap leading-relaxed">
                       {r.body}
                     </p>
+                    {REVIEW_IMAGES_ENABLED && (
+                      <ReviewImageGrid images={r.images} />
+                    )}
                     {user && r.user_id !== user.id ? (
                       <div className="pt-1 text-right">
                         <Link

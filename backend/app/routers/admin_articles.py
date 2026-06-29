@@ -31,11 +31,21 @@ from app.models.schemas import (
     AdminArticleListResponse,
     AdminArticlePatch,
 )
+from app.routers._sorting import resolve_sort
 from app.services.supabase import get_supabase_admin
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+# 列ヘッダソート (2026-06-29): frontend のキー → articles テーブルのスカラー列。
+# 状態 (公開/予約/下書き) は published_at 由来の導出表示で列が無いため非対応。
+_ARTICLE_SORTS = {
+    "title": "title",
+    "category": "category",
+    "published_at": "published_at",
+    "created_at": "created_at",
+}
 
 
 def _error(status_code: int, code: str) -> JSONResponse:
@@ -50,13 +60,20 @@ def _error(status_code: int, code: str) -> JSONResponse:
 @router.get("", response_model=AdminArticleListResponse)
 async def list_admin_articles(
     _user: dict = require_role("admin"),
+    sort: str | None = Query(
+        default=None, description="title / category / published_at / created_at"
+    ),
+    direction: str | None = Query(
+        default="desc", alias="dir", description="asc / desc"
+    ),
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=50, ge=1, le=100),
 ) -> AdminArticleListResponse:
     """admin articles 一覧。
 
     公開系 (articles.py) と違い published_at が NULL の下書きも含めて全件返す。
-    並び順は (created_at DESC, id DESC) で安定化 (新規作成順、下書きも先頭に出る)。
+    既定は (created_at DESC, id DESC) で安定化 (最新が上、下書きも先頭に出る)。
+    列ヘッダソート対応 (title / category / published_at / created_at)。
     """
     admin = get_supabase_admin()
 
@@ -64,7 +81,8 @@ async def list_admin_articles(
         "id, slug, title, category, hero_image_url, published_at, created_at, updated_at",
         count="exact",
     )
-    query = query.order("created_at", desc=True).order("id", desc=True)
+    col, desc = resolve_sort(sort, direction, _ARTICLE_SORTS, default_key="created_at")
+    query = query.order(col, desc=desc).order("id", desc=desc)
 
     start = (page - 1) * per_page
     end = start + per_page - 1

@@ -36,11 +36,23 @@ from app.models.schemas import (
     AdminProductRelationItem,
     AdminProductUpdatePayload,
 )
+from app.routers._sorting import resolve_sort
 from app.services.supabase import get_supabase_admin
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+# 列ヘッダソート (2026-06-29): frontend のキー → products テーブルのスカラー列。
+# 結合列 (サムネ/メーカー) は v1 では非対応。
+_PRODUCT_SORTS = {
+    "name": "name",
+    "product_name_jp": "product_name_jp",
+    "is_public": "is_public",
+    "confidence": "confidence",
+    "updated_at": "updated_at",
+    "created_at": "created_at",
+}
 
 
 def _maker_profile(row: dict[str, Any]) -> dict[str, Any]:
@@ -110,6 +122,13 @@ async def list_admin_products(
     commercial_status: str | None = Query(default=None),
     is_public: bool | None = Query(default=None),
     confidence: str | None = Query(default=None),
+    sort: str | None = Query(
+        default=None,
+        description="name / product_name_jp / is_public / confidence / updated_at",
+    ),
+    direction: str | None = Query(
+        default="desc", alias="dir", description="asc / desc"
+    ),
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=20, ge=1, le=100),
 ) -> AdminProductListResponse:
@@ -155,8 +174,9 @@ async def list_admin_products(
             f"name.ilike.%{like}%,product_name_jp.ilike.%{like}%"
         )
 
-    # ソート (updated_at DESC, id DESC で安定化、spec §3.1)
-    query = query.order("updated_at", desc=True).order("id", desc=True)
+    # ソート (列ヘッダクリック対応、既定は updated_at DESC, id DESC で安定化、spec §3.1)
+    col, desc = resolve_sort(sort, direction, _PRODUCT_SORTS, default_key="updated_at")
+    query = query.order(col, desc=desc).order("id", desc=desc)
 
     # pagination (PostgREST .range(start, end) は inclusive)
     start = (page - 1) * per_page

@@ -9,6 +9,7 @@ import type {
   ReportStatus,
 } from "@/types/admin";
 import { ResolveAction } from "./_components/resolve-action";
+import { SortableHeader, type SortDir } from "../_components/sortable-header";
 
 export const metadata: Metadata = {
   title: "通報管理",
@@ -40,6 +41,8 @@ type PageProps = {
   searchParams?: Promise<{
     status?: string;
     page?: string;
+    sort?: string;
+    dir?: string;
   }>;
 };
 
@@ -72,7 +75,11 @@ function formatDateTime(iso: string | null): string {
 export default async function AdminReportsPage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const status = params.status === undefined ? "pending" : params.status;
+  const sort = params.sort ?? null;
+  const dir: SortDir = params.dir === "asc" ? "asc" : "desc";
   const page = parsePage(params.page);
+  // SortableHeader に渡す温存パラメータ (sort/dir/page を除く)。
+  const sortParams: Record<string, string> = status ? { status } : {};
 
   const supabase = await createClient();
   const {
@@ -89,6 +96,8 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
 
   const qs = new URLSearchParams();
   if (status) qs.set("status", status);
+  if (sort) qs.set("sort", sort);
+  qs.set("dir", dir);
   qs.set("page", String(page));
   qs.set("per_page", String(PER_PAGE));
 
@@ -109,6 +118,8 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
   function pageHref(targetPage: number): string {
     const next = new URLSearchParams();
     if (status) next.set("status", status);
+    if (sort) next.set("sort", sort);
+    next.set("dir", dir);
     next.set("page", String(targetPage));
     return `/admin/reports?${next.toString()}`;
   }
@@ -173,12 +184,28 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
           <table className="w-full min-w-[1000px] text-sm">
             <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="px-3 py-2">受付日時</th>
+                <SortableHeader
+                  label="受付日時"
+                  columnKey="created_at"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/reports"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
                 <th className="px-3 py-2">通報者</th>
                 <th className="px-3 py-2">対象</th>
                 <th className="px-3 py-2">理由</th>
                 <th className="px-3 py-2 max-w-[320px]">内容</th>
-                <th className="px-3 py-2">status</th>
+                <SortableHeader
+                  label="status"
+                  columnKey="status"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/reports"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
                 <th className="px-3 py-2 w-72">処理</th>
               </tr>
             </thead>

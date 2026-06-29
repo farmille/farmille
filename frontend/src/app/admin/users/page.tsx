@@ -10,6 +10,7 @@ import type {
 } from "@/types/admin";
 import { RoleChangeAction } from "./_components/role-change-action";
 import { UserModerationActions } from "./_components/user-moderation-actions";
+import { SortableHeader, type SortDir } from "../_components/sortable-header";
 
 export const metadata: Metadata = {
   title: "ユーザー管理",
@@ -54,6 +55,8 @@ type PageProps = {
     role?: string;
     status?: string;
     page?: string;
+    sort?: string;
+    dir?: string;
   }>;
 };
 
@@ -85,7 +88,14 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   const q = params.q?.trim() ?? "";
   const roleFilter = params.role?.trim() ?? "";
   const statusFilter = params.status?.trim() ?? "";
+  const sort = params.sort ?? null;
+  const dir: SortDir = params.dir === "asc" ? "asc" : "desc";
   const page = parsePage(params.page);
+  // SortableHeader に渡す温存パラメータ (sort/dir/page を除く)。
+  const sortParams: Record<string, string> = {};
+  if (q) sortParams.q = q;
+  if (roleFilter) sortParams.role = roleFilter;
+  if (statusFilter) sortParams.status = statusFilter;
 
   const supabase = await createClient();
   const {
@@ -105,6 +115,8 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
   if (q) qs.set("q", q);
   if (roleFilter) qs.set("role", roleFilter);
   if (statusFilter) qs.set("status", statusFilter);
+  if (sort) qs.set("sort", sort);
+  qs.set("dir", dir);
   qs.set("page", String(page));
   qs.set("per_page", String(PER_PAGE));
 
@@ -127,6 +139,8 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
     if (q) next.set("q", q);
     if (roleFilter) next.set("role", roleFilter);
     if (statusFilter) next.set("status", statusFilter);
+    if (sort) next.set("sort", sort);
+    next.set("dir", dir);
     next.set("page", String(targetPage));
     return `/admin/users?${next.toString()}`;
   }
@@ -223,12 +237,44 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
           <table className="w-full min-w-[900px] text-sm">
             <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="px-3 py-2">名前</th>
+                <SortableHeader
+                  label="名前"
+                  columnKey="name"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/users"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
                 <th className="px-3 py-2">email</th>
-                <th className="px-3 py-2">role</th>
-                <th className="px-3 py-2">status</th>
+                <SortableHeader
+                  label="role"
+                  columnKey="role"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/users"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
+                <SortableHeader
+                  label="status"
+                  columnKey="status"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/users"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
                 <th className="px-3 py-2">通報</th>
-                <th className="px-3 py-2">登録日</th>
+                <SortableHeader
+                  label="登録日"
+                  columnKey="created_at"
+                  currentSort={sort}
+                  currentDir={dir}
+                  basePath="/admin/users"
+                  params={sortParams}
+                  className="px-3 py-2"
+                />
                 <th className="px-3 py-2 w-80">操作</th>
               </tr>
             </thead>
