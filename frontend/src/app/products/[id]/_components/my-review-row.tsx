@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { ReviewForm } from "./review-form";
+import { ReviewImageGrid } from "./review-image-grid";
 
 type Review = {
   id: string;
@@ -12,6 +13,7 @@ type Review = {
   rating: number;
   body: string;
   created_at: string;
+  images?: string[];
 };
 
 type ExistingImage = {
@@ -142,6 +144,7 @@ export function MyReviewRow({ productId, review }: Props) {
       <p className="text-base text-foreground whitespace-pre-wrap">
         {review.body}
       </p>
+      <ReviewImageGrid images={review.images} />
       {error && (
         <p className="text-sm text-destructive" role="alert">
           {error}

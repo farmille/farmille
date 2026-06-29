@@ -19,3 +19,10 @@ export const PRODUCT_IMAGES_ENABLED = true;
 // Google フォーム投稿は DB に入らず承認キューに乗らないため、承認運用とは両立しない。
 // true に戻すと承認フローは無効化される（埋め込みは下節に温存）。
 export const REVIEW_VIA_GOOGLE_FORM = false;
+
+// 2026-06-29 (stage1): レビューに添付された画像を公開ページのレビュー一覧に表示する。
+// 画像は生産者自身が撮影した UGC（圃場・施用結果など）で、メーカー商品画像
+// （PRODUCT_IMAGES_ENABLED）とは別物・コンプラリスクは低い。万一の取り下げに備え
+// 商品画像と同様のキルスイッチを設けておく。false にすると本文・評価は残したまま
+// 画像だけ非表示になる。
+export const REVIEW_IMAGES_ENABLED = true;
