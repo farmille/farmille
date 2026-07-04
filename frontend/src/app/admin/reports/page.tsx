@@ -79,7 +79,10 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
   const dir: SortDir = params.dir === "asc" ? "asc" : "desc";
   const page = parsePage(params.page);
   // SortableHeader に渡す温存パラメータ (sort/dir/page を除く)。
-  const sortParams: Record<string, string> = status ? { status } : {};
+  // 「すべて」は `?status=` (空文字) で表現されるため、URL に明示されていれば
+  // 空文字でも温存する (落とすと既定の pending ビューに戻ってしまう)。
+  const sortParams: Record<string, string> =
+    params.status !== undefined ? { status } : {};
 
   const supabase = await createClient();
   const {
@@ -117,7 +120,8 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
 
   function pageHref(targetPage: number): string {
     const next = new URLSearchParams();
-    if (status) next.set("status", status);
+    // 「すべて」(?status=) も温存する (sortParams と同じ理由)。
+    if (params.status !== undefined) next.set("status", status);
     if (sort) next.set("sort", sort);
     next.set("dir", dir);
     next.set("page", String(targetPage));

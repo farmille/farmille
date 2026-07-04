@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     # 未設定の場合、admin の製品登録は 503 farmille_maker_not_configured を返す。
     farmille_maker_user_id: str | None = None
 
+    # 2026-07-04: レビュー画像 (UGC) の公開 API 供給の kill switch。
+    # frontend の REVIEW_IMAGES_ENABLED (lib/flags.ts) は「表示」のみを止め、
+    # GET /v1/products/{id}/reviews は URL を返し続けるため、コンプラ取り下げ時に
+    # backend でも止められるようにする (BFF 第一防御の思想)。False で images が
+    # 常に [] になり Storage list も走らない。両フラグは揃えて運用する。
+    review_images_enabled: bool = True
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 
