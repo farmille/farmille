@@ -27,6 +27,9 @@ Thumbs.db
 
 # Supabase
 supabase/.temp/
+# CLI キャッシュはどの階層でも無視 (backend/supabase/.temp/ の pooler-url は
+# DB 接続文字列を含むため commit 厳禁。2026-07-04)
+**/supabase/.temp/
 
 # Claude
 .claude/
