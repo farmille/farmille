@@ -377,6 +377,18 @@ backend はスキーマにハード依存する（例：`reviews.status` カラ�
 12. **backend テスト腐敗（要確認）** — メモリ時点で pytest fixture drift 26 件 + ruff 7 件の負債。
     解消後に backend CI を required へ昇格予定。最新状況は `uv run pytest` / `uv run ruff check .` で確認。
 
+13. **Cloud Build へのシークレット・アップロード（2026-07-04 発見・修正済）** — `deploy-prod.sh` は
+    `cd backend && gcloud run deploy --source .` で起動するため、gcloud は `backend/.gitignore`（キャッシュ類
+    しか除外しない）だけを参照し、**backend/ 配下の `.env`（本番/dev の service_role key・JWT secret を含む
+    実シークレット）・`.venv/`・`supabase/.temp/`（project ref/token）・`scripts/*.py`・`create-prod-users.sh`
+    （本番投入 PII）を Cloud Build のソースバケット（`gs://farmille-production_cloudbuild`）にアップロードして
+    いた**（5758 ファイル）。イメージ自体はクリーン（`Dockerfile` が `app/` のみ COPY）だが、ビルドの一時
+    アップロードに機密が乗っていた。**`backend/.gcloudignore`（アローリスト方式）を追加して修正済**
+    （PR #46。アップロードは 42 ファイルに減少、機密 0 件。`gcloud meta list-files-for-upload .` で検証可）。
+    - ⚠️ **未対応の follow-up**：過去のデプロイで `.env` の値が繰り返しバケットに上がっていた事実があるため、
+      厳密には **Supabase service_role key / JWT secret のローテーション**を検討する（同一 prod プロジェクト・
+      アクセス制御下なので外部公開ではないが、最小権限運用としては rotate が望ましい）。判断は根本さん / 後任と相談。
+
 ---
 
 ## 10. 進行中・未了の作業
@@ -401,6 +413,10 @@ backend はスキーマにハード依存する（例：`reviews.status` カラ�
 - 削除意味論 hard/soft の確定（§9-2）。
 - crops マスタ整備（§9-3、v1.5 fast-follow）。
 - backend テスト腐敗の解消 → backend CI を required 化（§9-12）。
+- **Supabase service_role key / JWT secret のローテーション検討**（§9-13。過去のデプロイで `.env` が
+  Cloud Build バケットに繰り返し上がっていたため。`.gcloudignore` で今後は防止済だが、過去分の rotate は別判断）。
+- レビュー非公開化の DOA 負債（`status=rejected` に「却下」と「公開後取り下げ」が潰し込まれ区別不能）→
+  `unpublished` status 追加 or moderation-events テーブルを DOA レビュー（migration 要。stage1 レビューで判明）。
 - CTO 前提作業：dev backend（Cloud Run `farmille-api-dev`）の常設 + URL を 1Password / Vercel Preview env に反映、
   GitHub branch protection 有効化（ADR-0016 / PR #38）。
 - SMTP（Resend 等）+ DNS 設定で認証メール不達を解消（§9-7）。
