@@ -28,11 +28,7 @@ import {
   type FavoriteKind,
 } from "./_components/favorite-button";
 import { isReviewerRole } from "@/lib/auth/roles";
-import {
-  PRODUCT_IMAGES_ENABLED,
-  REVIEW_VIA_GOOGLE_FORM,
-  REVIEW_IMAGES_ENABLED,
-} from "@/lib/flags";
+import { PRODUCT_IMAGES_ENABLED, REVIEW_VIA_GOOGLE_FORM } from "@/lib/flags";
 import { GoogleFormReviewEmbed } from "@/components/google-form-review-embed";
 import type {
   CategoryL1,
@@ -648,7 +644,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       rating: r.rating,
                       body: r.body,
                       created_at: r.created_at,
-                      images: REVIEW_IMAGES_ENABLED ? r.images : undefined,
+                      images: r.images,
                     }}
                   />
                 ) : (
@@ -672,9 +668,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     <p className="text-base text-foreground whitespace-pre-wrap leading-relaxed">
                       {r.body}
                     </p>
-                    {REVIEW_IMAGES_ENABLED && (
-                      <ReviewImageGrid images={r.images} />
-                    )}
+                    {/* kill switch (REVIEW_IMAGES_ENABLED) は ReviewImageGrid 内で一元判定 */}
+                    <ReviewImageGrid images={r.images} />
                     {user && r.user_id !== user.id ? (
                       <div className="pt-1 text-right">
                         <Link

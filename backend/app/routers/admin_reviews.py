@@ -29,6 +29,7 @@ from app.models.schemas import (
     AdminReviewListResponse,
     AdminReviewRejectPayload,
 )
+from app.routers._review_images import remove_review_images
 from app.routers._sorting import resolve_sort
 from app.services.supabase import get_supabase_admin
 
@@ -228,22 +229,10 @@ async def unpublish_review(
     """
     admin = get_supabase_admin()
 
-    cur = (
-        admin.table("reviews")
-        .select("id, status")
-        .eq("id", str(review_id))
-        .limit(1)
-        .execute()
-    )
-    rows = cur.data or []
-    if not rows:
-        return _error(404, "review_not_found")
-    if rows[0]["status"] == "rejected":
-        return _error(409, "already_rejected")
-
     try:
-        # UPDATE 自体も status in (pending, approved) を条件にして原子化し、
-        # 2 admin 同時操作での後勝ち clobber を防ぐ。0 件更新 = 既に他者が処理 → 409。
+        # UPDATE 自体を status in (pending, approved) 条件で原子化し、2 admin 同時
+        # 操作での後勝ち clobber を防ぐ。事前 SELECT はせず happy path は 1 round trip
+        # (0 件更新のときだけ 404 / 409 の切り分けに SELECT する)。
         res = (
             admin.table("reviews")
             .update(
@@ -263,35 +252,19 @@ async def unpublish_review(
         return _error(500, "failed_to_unpublish_review")
 
     if not (res.data or []):
+        # 0 件更新 = 行が無い (404) or 既に rejected (409) の切り分け。
+        cur = (
+            admin.table("reviews")
+            .select("id")
+            .eq("id", str(review_id))
+            .limit(1)
+            .execute()
+        )
+        if not (cur.data or []):
+            return _error(404, "review_not_found")
         return _error(409, "already_rejected")
 
     return {"ok": True, "review_id": str(review_id), "status": "rejected"}
-
-
-def _remove_review_images(admin, user_id: str, review_id: str) -> None:
-    """ハード削除時に Storage `review-images/{user_id}/{review_id}/` を回収する。
-    best-effort: 失敗してもログのみ (行削除は既に確定しているため)。"""
-    folder = f"{user_id}/{review_id}"
-    try:
-        entries = admin.storage.from_("review-images").list(folder)
-    except Exception:
-        logger.warning(
-            "failed to list review images for delete %s", review_id, exc_info=True
-        )
-        return
-    paths = [
-        f"{folder}/{e['name']}"
-        for e in (entries or [])
-        if isinstance(e, dict) and e.get("name") and not e["name"].startswith(".")
-    ]
-    if not paths:
-        return
-    try:
-        admin.storage.from_("review-images").remove(paths)
-    except Exception:
-        logger.warning(
-            "failed to remove review images for %s", review_id, exc_info=True
-        )
 
 
 @router.delete("/{review_id}", status_code=204)
@@ -309,24 +282,18 @@ async def delete_review_admin(
     """
     admin = get_supabase_admin()
 
-    cur = (
-        admin.table("reviews")
-        .select("id, user_id")
-        .eq("id", str(review_id))
-        .limit(1)
-        .execute()
-    )
-    rows = cur.data or []
-    if not rows:
-        return _error(404, "review_not_found")
-    owner_id = rows[0]["user_id"]
-
     try:
-        admin.table("reviews").delete().eq("id", str(review_id)).execute()
+        # postgrest の delete は既定 returning=representation なので、削除行から
+        # user_id (Storage フォルダ解決用) を得つつ 1 round trip で存在判定も行う。
+        res = admin.table("reviews").delete().eq("id", str(review_id)).execute()
     except Exception:
         logger.exception("failed to hard-delete review %s", review_id)
         return _error(500, "failed_to_delete_review")
 
+    rows = res.data or []
+    if not rows:
+        return _error(404, "review_not_found")
+
     # 行削除が確定してから Storage を回収 (失敗は best-effort、204 を返す)。
-    _remove_review_images(admin, owner_id, str(review_id))
+    remove_review_images(admin, rows[0]["user_id"], str(review_id))
     return None

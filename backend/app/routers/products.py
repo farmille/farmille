@@ -1,10 +1,9 @@
+import asyncio
 import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.responses import JSONResponse
-
-logger = logging.getLogger(__name__)
 
 from app.auth.jwt import get_user_id, get_user_role
 from app.config import settings
@@ -15,7 +14,10 @@ from app.models.schemas import (
     ReviewCreatePayload,
 )
 from app.routers._image_path import validate_product_image_path
+from app.routers._review_images import list_review_image_urls
 from app.services.supabase import get_supabase_admin
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -423,42 +425,6 @@ async def create_product_review(
     return {"ok": True, "review_id": str(payload.review_id)}
 
 
-REVIEW_IMAGES_BUCKET = "review-images"
-
-
-def _list_review_images(admin, user_id: str, review_id: str) -> list[str]:
-    """Storage `review-images/{user_id}/{review_id}/` を list し public URL 配列を返す。
-
-    ADR-0003: レビュー画像は DB に保持せず Storage のパス規約 (`{uid}/{review_id}/`)
-    のみで管理するため、公開表示時にここで解決する。`review-images` は public bucket
-    (review_images_select_all で anon SELECT 可) なので get_public_url で直リンクできる。
-    list 失敗・空フォルダは空配列を返し、表示を壊さない (best-effort)。
-    """
-    folder = f"{user_id}/{review_id}"
-    try:
-        entries = admin.storage.from_(REVIEW_IMAGES_BUCKET).list(folder)
-    except Exception:
-        logger.warning("failed to list review images for %s", review_id, exc_info=True)
-        return []
-    # 安定した並びにするため name でソート (.emptyFolderPlaceholder 等の dotfile は除外)。
-    names = sorted(
-        e["name"]
-        for e in (entries or [])
-        if isinstance(e, dict) and e.get("name") and not e["name"].startswith(".")
-    )
-    urls: list[str] = []
-    for name in names:
-        try:
-            url = admin.storage.from_(REVIEW_IMAGES_BUCKET).get_public_url(
-                f"{folder}/{name}"
-            )
-        except Exception:
-            continue
-        if url:
-            urls.append(url)
-    return urls
-
-
 @router.get("/{product_id}/reviews")
 async def list_product_reviews(product_id: UUID):
     """指定資材のレビュー一覧。投稿日 desc。認証不要(全員閲覧可)。
@@ -501,9 +467,21 @@ async def list_product_reviews(product_id: UUID):
             "rating": r["rating"],
             "body": r["body"],
             "created_at": r["created_at"],
-            # ADR-0003: 画像は DB に持たないので Storage 規約パスから読み取り時に解決。
-            "images": _list_review_images(admin, r["user_id"], r["id"]),
+            "images": [],
         })
+    # ADR-0003: 画像は DB に持たないので Storage 規約パスから読み取り時に解決。
+    # - review_images_enabled=False (コンプラ kill switch) のときは Storage を触らず
+    #   空配列のまま返す (frontend の表示フラグだけだと公開 API が URL を出し続ける)。
+    # - sync Supabase client を async ハンドラ内で直列に呼ぶと event loop 全体を
+    #   塞ぐため、to_thread + gather で並列化 (N+1 自体の解消は spec §6 の
+    #   image_paths 永続化を待つ)。
+    if settings.review_images_enabled and reviews:
+        images_per_review = await asyncio.gather(*[
+            asyncio.to_thread(list_review_image_urls, admin, rv["user_id"], rv["id"])
+            for rv in reviews
+        ])
+        for rv, urls in zip(reviews, images_per_review):
+            rv["images"] = urls
     return {"reviews": reviews}
 
 
