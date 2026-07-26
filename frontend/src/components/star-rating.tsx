@@ -76,7 +76,7 @@ export function StarRating(props: StarRatingProps) {
               key={n}
               type="button"
               role="radio"
-              aria-checked={on}
+              aria-checked={n === value}
               aria-label={`${n}`}
               className={cx(inputStar, !on && inputStarOff)}
               onClick={() => props.onChange(n)}

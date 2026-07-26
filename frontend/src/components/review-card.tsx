@@ -1,7 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { cva, css, cx } from "../../styled-system/css";
 import { ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "./icons";
+import { ReviewOwnerActions } from "./review-owner-actions";
 import { StarRating } from "./star-rating";
 
 const cardRecipe = cva({
@@ -65,6 +67,9 @@ export type ReviewCardProps = {
   rating: number;
   helpfulCount: number;
   body: string;
+  reviewId?: string;
+  materialId?: string;
+  canManage?: boolean;
   /** 資材名を付ける場合（ホームの新着など） */
   materialName?: string;
   photoCount?: number;
@@ -88,6 +93,9 @@ export function ReviewCard({
   rating,
   helpfulCount,
   body,
+  reviewId,
+  materialId,
+  canManage = false,
   materialName,
   photoCount = 0,
   photos = [],
@@ -174,10 +182,13 @@ export function ReviewCard({
         >
           {photos.length > 0
             ? photos.map((photo) => (
-                <img
+                <Image
                   key={photo.id}
                   src={photo.src}
                   alt={photo.alt}
+                  width={72}
+                  height={72}
+                  unoptimized
                   className={css({
                     w: "18",
                     h: "18",
@@ -220,6 +231,9 @@ export function ReviewCard({
           <span>参考になった</span>
           {helpfulCount}
         </span>
+        {canManage && reviewId !== undefined && materialId !== undefined ? (
+          <ReviewOwnerActions reviewId={reviewId} materialId={materialId} />
+        ) : null}
       </div>
     </article>
   );

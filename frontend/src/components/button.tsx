@@ -29,11 +29,10 @@ const buttonRecipe = cva({
         color: "brand.primary",
         borderColor: "border.strong",
       },
-      // 危険操作。専用 red トークン未定義のため amber（accent.warn）で近似。要トークン追加は報告参照。
       danger: {
-        bg: "amber.soft",
-        color: "accent.warn",
-        borderColor: "accent.warn",
+        bg: "accent.dangerSoft",
+        color: "accent.danger",
+        borderColor: "accent.danger",
       },
     },
     size: {

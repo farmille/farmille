@@ -8,6 +8,7 @@ import type { Database } from "@/types/database.types";
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 type ReviewPhotoRow = Database["public"]["Tables"]["review_photos"]["Row"];
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
+type ProfileCropRow = Database["public"]["Tables"]["profile_crops"]["Row"];
 type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
@@ -15,6 +16,7 @@ type ReviewFields = Pick<
   ReviewRow,
   | "id"
   | "material_id"
+  | "author_user_id"
   | "rating"
   | "body"
   | "crop_id"
@@ -36,6 +38,26 @@ export type ReviewListItem = ReviewFields & {
   helpfulCount: number;
 };
 
+export type ReviewCropOption = Pick<CropRow, "id" | "name"> & {
+  fromProfile: boolean;
+};
+
+export type ReviewEditorData = Pick<
+  ReviewRow,
+  | "id"
+  | "material_id"
+  | "author_user_id"
+  | "rating"
+  | "body"
+  | "crop_id"
+  | "has_control_plot"
+  | "purchase_channel"
+  | "pesticide_ack"
+  | "status"
+> & {
+  photos: ReviewPhoto[];
+};
+
 export type ReviewSort = "newest" | "helpful" | "rating";
 
 type ReviewQueryRow = ReviewFields & {
@@ -49,6 +71,7 @@ type ReviewOrderRow = Pick<ReviewRow, "id" | "created_at">;
 const REVIEW_SELECT = `
   id,
   material_id,
+  author_user_id,
   rating,
   body,
   crop_id,
@@ -359,5 +382,117 @@ export async function listReviewsByMaterial(
     perPage: DEFAULT_PER_PAGE,
     total: count,
     totalPages: Math.ceil(count / DEFAULT_PER_PAGE),
+  });
+}
+
+/** レビュー作目候補。プロフィールに登録した主な作目を先頭にする。 */
+export async function listReviewCropOptions(userId: string): Promise<Result<ReviewCropOption[]>> {
+  const supabase = await createServerSupabase();
+  const [cropsResult, profileCropsResult] = await Promise.all([
+    supabase.from("crops").select("id, name").order("sort_order").order("name"),
+    supabase.from("profile_crops").select("crop_id").eq("user_id", userId),
+  ]);
+
+  if (cropsResult.error !== null || profileCropsResult.error !== null) {
+    reportQueryError("レビュー作目候補の取得に失敗", {
+      cropsError: cropsResult.error,
+      profileCropsError: profileCropsResult.error,
+    });
+    return fail("internal");
+  }
+
+  const profileCropRows: Pick<ProfileCropRow, "crop_id">[] = profileCropsResult.data;
+  const profileCropIds = new Set(profileCropRows.map(({ crop_id }) => crop_id));
+  const rows: Pick<CropRow, "id" | "name">[] = cropsResult.data;
+
+  return succeed(
+    rows
+      .map((crop) => ({ ...crop, fromProfile: profileCropIds.has(crop.id) }))
+      .toSorted(
+        (left, right) =>
+          Number(right.fromProfile) - Number(left.fromProfile) ||
+          left.name.localeCompare(right.name, "ja") ||
+          left.id.localeCompare(right.id),
+      ),
+  );
+}
+
+/** 同じ一般ユーザーが同一資材へ投稿済みかを確認する。 */
+export async function findOwnReviewIdByMaterial(
+  materialId: string,
+  userId: string,
+): Promise<Result<string | null>> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("id")
+    .eq("material_id", materialId)
+    .eq("author_user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error !== null) {
+    reportQueryError("投稿済みレビューの確認に失敗", error);
+    return fail("internal");
+  }
+
+  return succeed(data?.id ?? null);
+}
+
+/** 編集フォーム用。所有者と資材 ID を server 層で一致確認する。 */
+export async function getReviewForEdit(
+  materialId: string,
+  reviewId: string,
+  userId: string,
+): Promise<Result<ReviewEditorData>> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(
+      `
+        id,
+        material_id,
+        author_user_id,
+        rating,
+        body,
+        crop_id,
+        has_control_plot,
+        purchase_channel,
+        pesticide_ack,
+        status,
+        photos:review_photos (
+          id,
+          url,
+          caption,
+          sort_order
+        )
+      `,
+    )
+    .eq("id", reviewId)
+    .maybeSingle();
+
+  if (error !== null) {
+    reportQueryError("編集対象レビューの取得に失敗", error);
+    return fail("internal");
+  }
+
+  if (data === null) {
+    return fail("not_found");
+  }
+
+  const review: ReviewEditorData = data;
+
+  if (review.material_id !== materialId || review.author_user_id !== userId) {
+    return fail("forbidden");
+  }
+
+  if (review.status !== "published") {
+    return fail("forbidden");
+  }
+
+  return succeed({
+    ...review,
+    photos: review.photos.toSorted(byPhotoOrder),
   });
 }
