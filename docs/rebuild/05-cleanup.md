@@ -42,8 +42,8 @@
 
 ## 3. 第2弾削除（T-53。資材マスタ移行の検証完了後）
 
-- supabase/migrations/ の旧28ファイル（v2 系 migration 適用と旧テーブル DROP の完了後）
-- tools/migration/legacy/
+- tools/migration/legacy/migrations-v1/ の旧 migration 27ファイル（T-01 で supabase/migrations/ から退避済み。v2 migration との同居を避けるため第1弾に前倒しした。v2 系 migration 適用と旧テーブル DROP の完了後に削除）
+- tools/migration/legacy/（旧 migration と資材移行スクリプト一式をまとめて削除）
 - リポジトリ外（T-53 runbook に含める）：Cloud Run サービス `farmille-api`・Secret Manager の supabase-service-role-key／supabase-jwt-secret・GCP プロジェクトの課金停止・Vercel の cron 設定
 
 ## 4. 完了条件
