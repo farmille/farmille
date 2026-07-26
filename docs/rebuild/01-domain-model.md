@@ -169,7 +169,7 @@ erDiagram
 | content_reports | admin と本人 | ログイン済み全員 | admin |
 | questions / answers | 全員 | （Phase 2 で解放。v1 は INSERT ポリシーなし＝deny） | 同左 |
 
-- 公開プロフィール・出品者ページは**ビュー（security invoker）で公開カラムだけを晒す**。「収集する情報と表示する情報の分離」（要件定義の設計思想）を DB 層で保証する
+- 公開プロフィール・出品者ページは**ビューで公開カラムだけを晒す**。「収集する情報と表示する情報の分離」（要件定義の設計思想）を DB 層で保証する。実装上の確定（2026-07-26・T-11）：`public_profiles` は **security definer（invoker=false・SELECT のみ grant）**。invoker だと「実テーブルは本人のみ」と「公開カラムを全員に」が両立しないため、standpoint・非公開 prefecture の秘匿を優先した。`public_sellers` は invoker=true＋contact_* のカラム権限剥奪で両立
 - 第一防御（Next.js のサーバー側・`src/server/`）はこの表と同じ判定をアプリ層でも行う。RLS はあくまで保険
 
 ## 6. 状態遷移
