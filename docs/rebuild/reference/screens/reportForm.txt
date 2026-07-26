@@ -1,0 +1,211 @@
+S.reportForm = () => appbar('使用結果入力') + `
+  <div class="body">
+    <div class="field"><label>対象資材</label>
+      <div class="card target"><div class="t-ic">${SEED}</div>
+        <div style="flex:1"><div class="t-name">Skeepon</div><div class="muted" style="font-size:12px">〇〇株式会社（公式）</div></div>
+        <span class="hint-pill">自動</span></div></div>
+
+    <div class="field"><label>使用作物 <span class="badge badge-req">必須</span></label>
+      <div class="ts-box"><span class="ts-ic">${SEARCH_ICON}</span>
+        <input id="cropInput" class="ts-input" placeholder="作物名を入力（例：みかん、デコポン）" autocomplete="off"></div>
+      <div id="cropChips" class="ts-chips"></div>
+      <div id="cropPanel" class="ts-panel"></div></div>
+
+    <div id="cropTabs" style="margin-top:16px" hidden></div>
+
+    <div id="cropScoped">
+    <div class="form-sec"><span class="no">1</span><h3>使ってみて、どうでしたか？</h3><span class="sub">まずは結果から</span></div>
+
+    <div class="field"><label>使用後に観察した変化 <span class="badge badge-req">必須</span></label>
+      <div class="fguide">いつ頃から・どこに・どんな変化があったかを、あなたの言葉で。明確な変化が見られなかった場合も、そのまま記入してください。</div>
+      <textarea class="textarea big" placeholder="例）2回目の使用から数日後、使用前と比べて午後の葉の萎れがやや軽くなったように感じました。葉色や樹勢も比較的維持されているように見えましたが、収量や果実品質への影響までは確認できませんでした。"></textarea></div>
+
+    <div class="field"><label>マイナス・良くなかった点（薬害など） <span class="badge badge-opt">任意</span></label>
+      <div class="fguide">薬害、生育の悪化、作業負担の増加などがあれば入力してください。</div>
+      <textarea class="textarea" placeholder="例）特になし／散布直後に葉先が白くなったが数日で回復した　など"></textarea></div>
+
+    
+    <div class="form-sec"><span class="no">2</span><h3>くわしい条件を教えてください</h3><span class="sub">タップ中心・次回からは自動入力されます</span></div>
+
+    <div class="field"><label>使用目的 <span class="badge badge-req">必須</span></label>
+      <div class="fguide">この資材に期待した効果を選んでください（複数選択できます）。</div>
+      <div class="fguide eff-h">吸収・光合成</div>
+      <div class="tag-cloud">
+        <span class="qchip tagtoggle">養分吸収の改善</span><span class="qchip tagtoggle">水分吸収の改善</span><span class="qchip tagtoggle">酸素の供給効率の改善</span>
+        <span class="qchip tagtoggle">CO2の供給効率の改善</span><span class="qchip tagtoggle">養分の利用効率の改善</span><span class="qchip tagtoggle">光合成改善</span>
+      </div>
+      <div class="fguide eff-h">環境ストレス耐性</div>
+      <div class="tag-cloud">
+        <span class="qchip tagtoggle on">耐暑性改善</span><span class="qchip tagtoggle">耐寒性改善</span><span class="qchip tagtoggle">耐乾燥性改善</span>
+        <span class="qchip tagtoggle">湿害からの回復改善</span><span class="qchip tagtoggle">低照度下での生育改善</span><span class="qchip tagtoggle">塩害耐性改善</span>
+        <span class="qchip tagtoggle">遮光効果</span><span class="qchip tagtoggle">耐霜性改善</span><span class="qchip tagtoggle">環境ストレス耐性を高める</span>
+      </div>
+      <div class="fguide eff-h">収量・品質</div>
+      <div class="tag-cloud">
+        <span class="qchip tagtoggle">収量改善</span><span class="qchip tagtoggle">秀品率の改善</span><span class="qchip tagtoggle">有用成分（栄養成分・機能性成分）の改善</span>
+        <span class="qchip tagtoggle">糖度増加</span>
+      </div>
+      <div class="fguide eff-h">生育・回復</div>
+      <div class="tag-cloud">
+        <span class="qchip tagtoggle">細胞壁の強化</span><span class="qchip tagtoggle">樹勢改善</span><span class="qchip tagtoggle">成り疲れ改善</span>
+        <span class="qchip tagtoggle">外部損傷の修復</span><span class="qchip tagtoggle on">しおれ軽減</span><span class="qchip tagtoggle">根圏の有用微生物の活性化</span>
+      </div>
+      <input class="input" style="margin-top:11px" placeholder="補足（任意）例）灌水量を変えずに樹勢を維持したかった"></div>
+
+    
+    <div class="cond-h">圃場・作物の情報（どこで・何を育てているか）</div>
+
+    <div class="field"><label>地域 <span class="badge badge-req">必須</span></label>
+      <select class="input">${prefOptions('千葉県')}</select></div>
+
+    <div class="field"><label>圃場名 <span class="badge badge-opt">任意</span></label>
+      <input class="input" placeholder="例）〇〇農園 第2ハウス"></div>
+
+    <div class="field"><label>品種 <span class="badge badge-opt">任意</span></label>
+      <input class="input" placeholder="例）アイコ"></div>
+
+    <div class="field"><label>定植時期 <span class="badge badge-opt">任意</span></label>
+      <div class="fguide">おおよその日付でOKです（「ごろ」として表示されます）。</div>
+      <div id="teishokuChips" class="ts-chips"></div>
+      <div id="teishokuCal" class="cal"></div></div>
+
+    <div class="field"><label>栽培区分 <span class="badge badge-req">必須</span></label>
+      <div class="method-radios" id="cultRadios">
+        <label class="radio" data-group="cult" data-cult="roji"><span class="ring"></span> 露地栽培</label>
+        <label class="radio on" data-group="cult" data-cult="shisetsu"><span class="ring"></span> 施設栽培</label>
+        <label class="radio" data-group="cult" data-cult="other"><span class="ring"></span> その他</label>
+      </div></div>
+
+    <div class="field"><label>栽培の特徴・使用技術 <span class="badge badge-opt">任意</span></label>
+      <div class="fguide">当てはまるものをすべて選択してください。</div>
+      <div class="tag-cloud" id="cultTags"></div></div>
+
+    <div class="field"><label>生育ステージ <span class="badge badge-req">必須</span></label>
+      <div class="fguide" id="stageGuide">使用したときの段階をタップしてください。</div>
+      <div class="stage-list" id="stageList"></div>
+      <input class="input" style="margin-top:9px" placeholder="補足（任意）例）第4〜6花房を収穫中"></div>
+
+    <div class="field">
+      <label class="check-toggle" id="kikoToggle"><span class="cbox"></span> 当時の気候・圃場の状況を詳しく書く<span class="badge badge-opt" style="margin-left:auto">任意</span></label>
+      <div id="kikoPanel" class="harvest-panel" hidden>
+        <div class="field"><textarea class="textarea big" placeholder="例）晴天が続き、日中のハウス内温度が35℃を超える日が増えていました。午後になると葉が萎れる株が見られました。"></textarea></div>
+      </div>
+    </div>
+
+    
+    <div class="cond-h">使い方（何をどうやったか）</div>
+
+    <div class="field"><label>処理日 <span class="badge badge-req">必須</span></label>
+      <div class="fguide">資材を処理した日をカレンダーから選んでください（複数選択できます）。</div>
+      <div id="dateChips" class="ts-chips"></div>
+      <div id="calendar" class="cal"></div></div>
+
+    <div class="field"><label>使用方法 <span class="badge badge-req">必須</span></label>
+      <div class="fguide">どの方法で使用しましたか？（選ぶと入力欄が切り替わります）</div>
+      <div class="method-radios" id="methodRadios">
+        <label class="radio on" data-m="spray"><span class="ring"></span> 葉・茎・果実に散布</label>
+        <label class="radio" data-m="soil"><span class="ring"></span> 根・土壌・培地に施用</label>
+        <label class="radio" data-m="seed"><span class="ring"></span> 種子・苗に処理</label>
+        <label class="radio" data-m="other"><span class="ring"></span> その他・複数の方法</label>
+      </div>
+    </div>
+
+    <div class="method-panel" id="panel-spray">
+      <div class="field"><label>希釈倍率・濃度 <span class="badge badge-req">必須</span></label>
+        <div class="amount-row"><input class="input" placeholder="例）1000"><select class="input unit"><option>倍</option><option>mL/L</option><option>g/L</option></select></div></div>
+      <div class="field"><label>散布量 <span class="badge badge-opt">任意</span></label>
+        <div class="fguide">わかる範囲でOKです。</div>
+        <div class="amount-row"><input class="input" placeholder="例）100"><select class="input unit"><option>L/10a</option><option>mL/株</option><option>g/10a</option><option>g/m²</option></select></div></div>
+      <div class="field"><label>散布した範囲（処理区の大きさ） <span class="badge badge-opt">任意</span></label>
+        <input class="input" placeholder="例）ハウス1棟のうち約100株（約1a）。隣に未処理区あり"></div>
+    </div>
+    <div class="method-panel" id="panel-soil" hidden>
+      <div class="field"><label>施用方法 <span class="badge badge-req">必須</span></label>
+        <select class="input"><option>株元に灌注</option><option>点滴灌水で投入</option><option>土壌に散布・混和</option><option>培地・養液に投入</option><option>その他</option></select></div>
+      <div class="field"><label>希釈倍率・濃度 <span class="badge badge-opt">液体の場合はご記入ください</span></label>
+        <div class="amount-row"><input class="input" placeholder="例）500"><select class="input unit"><option>倍</option><option>mL/L</option><option>g/L</option></select></div></div>
+      <div class="field"><label>施用量 <span class="badge badge-opt">任意</span></label>
+        <div class="fguide">わかる範囲でOKです。</div>
+        <div class="amount-row"><input class="input" placeholder="例）200"><select class="input unit"><option>mL/株</option><option>L/10a</option><option>kg/10a</option><option>mL/L養液</option></select></div></div>
+      <div class="field"><label>施用した範囲（処理区の大きさ） <span class="badge badge-opt">任意</span></label>
+        <input class="input" placeholder="例）ハウス1棟のうち約100株（約1a）"></div>
+    </div>
+    <div class="method-panel" id="panel-seed" hidden>
+      <div class="field"><label>処理方法 <span class="badge badge-req">必須</span></label>
+        <select class="input"><option>種子を液に浸漬</option><option>種子に塗布・コーティング</option><option>苗・根を液に浸漬</option><option>育苗箱・セルトレイに処理</option><option>その他</option></select></div>
+      <div class="field"><label>希釈倍率・濃度 <span class="badge badge-opt">液体の場合はご記入ください</span></label>
+        <div class="amount-row"><input class="input" placeholder="例）500"><select class="input unit"><option>倍</option><option>mL/L</option><option>g/L</option></select></div></div>
+      <div class="field"><label>処理した量・時間 <span class="badge badge-opt">任意</span></label>
+        <div class="fguide">わかる範囲でOKです。</div>
+        <div class="amount-row"><input class="input" placeholder="例）1"><select class="input unit"><option>kg種子</option><option>苗（本）</option><option>育苗箱（箱）</option></select></div>
+        <input class="input" style="margin-top:8px" placeholder="例）30分浸漬。種子1kgあたり10mL"></div>
+    </div>
+    <div class="method-panel" id="panel-other" hidden>
+      <div class="field"><label>処理した対象・方法・量 <span class="badge badge-req">必須</span></label>
+        <div class="fguide">複数の方法を併用した場合もこちらにご記入ください。</div>
+        <textarea class="textarea big" placeholder="例）葉面散布と株元灌注を併用。散布は1000倍で7日おき、灌注は定植時に200mL/株。"></textarea></div>
+    </div>
+
+    <div class="field">
+      <label class="check-toggle" id="hikakuToggle"><span class="cbox"></span> 比較区（資材を使っていない区画）がある<span class="badge badge-opt" style="margin-left:auto">任意</span></label>
+      <div id="hikakuPanel" class="harvest-panel" hidden>
+        <div class="field"><label>比較区で他のBS資材を使っていますか <span class="badge badge-opt">任意</span></label>
+          <select class="input"><option>使っていない</option><option>使っている</option></select>
+          <input class="input" style="margin-top:8px" placeholder="使っている場合は資材名　例）△△液肥"></div>
+        <div class="field"><label>同時に使っているもの <span class="badge badge-opt">任意</span></label>
+          <div class="fguide">肥料・農薬・土壌改良材など、この資材と同時に使っているものがあれば入力してください。</div>
+          <input class="input" placeholder="例）液肥〇〇（週1回）、殺菌剤△△"></div>
+        <div class="field"><label>BS資材以外の条件差 <span class="badge badge-opt">任意</span></label>
+          <div class="fguide">試験区と比較区で、前作・肥料・農薬など資材以外に違う条件があれば入力してください。</div>
+          <input class="input" placeholder="例）なし（前作・肥料・農薬は同条件）"></div>
+        <div class="field"><label>調査した株数 <span class="badge badge-opt">任意</span></label>
+          <div class="amount-row"><input class="input" placeholder="例）10"><select class="input unit"><option>株</option><option>本</option><option>果</option></select></div></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="check-toggle" id="harvestToggle"><span class="cbox"></span> 定量データを取得している（収量・糖度・草丈など）</label>
+      <div id="harvestPanel" class="harvest-panel" hidden>
+        <div class="field"><label>調査時期 <span class="badge badge-opt">任意</span></label>
+          <input class="input" placeholder="例）2026年7月中旬〜8月上旬"></div>
+        <div class="field"><label>調査結果（数値） <span class="badge badge-opt">任意</span></label>
+          <div class="fguide">収量、糖度、草丈、秀品率など、確認した数値を入力してください。比較区との比較があるとなお助かります。詳細な数字はFarmille編集部がグラフにさせていただきます。</div>
+          <textarea class="textarea big" placeholder="例）処理区・未処理区それぞれ10株を調査。可販果率は処理区◯%／未処理区◯%。1株あたり収量は処理区◯g／未処理区◯g。裂果数は…"></textarea></div>
+      </div>
+    </div>
+    
+    </div><!-- /cropScoped -->
+
+    <div class="form-sec"><span class="no">3</span><h3>写真・動画</h3><span class="sub">できるだけ追加</span></div>
+
+    <div class="field">
+      <div class="fguide">使用区／未使用区の比較や、散布時の様子が特に参考になります。それぞれの写真・動画を、<b>完成した記事のどのセクションに表示するか</b>を選べます。動画は1本・3分までアップロードできます。</div>
+      <div class="photo-grid">
+        <div class="photo-item"><div class="ph">${IMGP}</div>
+          <select class="input attach-sel"><option>表示先：観察した変化</option><option>表示先：冒頭（カバー）</option><option>表示先：使用方法</option><option>表示先：収穫調査</option><option>表示先：まとめ・感想</option></select>
+          <input class="input photo-cap" placeholder="説明：使用区の株全体"></div>
+        <div class="photo-item"><div class="ph">${IMGP}</div>
+          <select class="input attach-sel"><option>表示先：観察した変化</option><option>表示先：冒頭（カバー）</option><option>表示先：使用方法</option><option>表示先：収穫調査</option><option>表示先：まとめ・感想</option></select>
+          <input class="input photo-cap" placeholder="説明：未使用区（比較用）"></div>
+        <div class="photo-item"><div class="ph">${IMGP}<span class="playb">▶</span></div>
+          <select class="input attach-sel"><option>表示先：使用方法</option><option>表示先：冒頭（カバー）</option><option>表示先：観察した変化</option><option>表示先：収穫調査</option><option>表示先：まとめ・感想</option></select>
+          <input class="input photo-cap" placeholder="説明：散布の様子（動画 0:42）"></div>
+        <div class="photo-add">＋<br>写真 / 動画を追加</div>
+      </div></div>
+
+    <div class="form-sec"><span class="no">4</span><h3>まとめ・感想</h3></div>
+
+    <div class="field"><label>全体をまとめてひとこと <span class="badge badge-req">必須</span></label>
+      <textarea class="textarea big" placeholder="例）劇的な変化は確認できませんでしたが、暑い時期の萎れや樹勢低下を抑える補助としては一定の可能性を感じました。次回は定植後の早い時期から使用し、使用区と未使用区を分けて比較したいと思います。"></textarea></div>
+
+    
+    <label class="consent" data-consent><span class="cbox"></span>
+      <span>この使用結果には、病害虫の防除・殺菌・殺虫・農薬の代替など、農薬的な効果を断定する表現を含めていません <span class="req-star">*</span></span></label>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" data-go="done">レポートを投稿する</button>
+      <div class="draft">下書き保存</div>
+    </div>
+  </div>`;
+
+/* ---- 使用結果レポート記事 ---- */

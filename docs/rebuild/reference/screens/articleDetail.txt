@@ -1,0 +1,24 @@
+S.articleDetail = () => appbar('', {share:true}) + `
+  <div class="body">
+    <h1 class="art-title">高温期のSkeepon活用ガイド</h1>
+    <div class="byline">
+      <div class="org-logo" style="width:32px;height:32px;font-size:13px;border-radius:9px" data-go="seller">〇</div>
+      <span style="font-weight:700;color:var(--ink)" data-go="seller">〇〇株式会社</span>${CHECK}
+      <span class="type-label">メーカー</span><span class="muted" style="font-size:12px">2026年6月18日</span>
+    </div>
+    <div class="figure"><div class="fimg wide">${IMGP}</div></div>
+    <div class="a-body" style="margin-top:16px">
+      <p>気温が35℃を超える日が続く高温期は、トマトの樹勢低下や萎れが起きやすくなります。この記事では、高温期におけるSkeeponの効果的な使い方を、現場での実例とあわせて紹介します。</p>
+      <p>ポイントは「散布のタイミング」です。日中の高温時を避け、早朝または夕方の気温が下がる時間帯に、1,000倍希釈で灌水と合わせて施用してください。</p>
+      <p>また、高温期は7〜10日間隔での定期的な使用をおすすめします。生育ステージに合わせた使い方の詳細は、公式カタログも参照してください。</p>
+    </div>
+    <h3 class="a-h3">この記事で紹介した資材</h3>
+    <div class="card ref" data-go="material"><div class="t-ic">${SEED}</div>
+      <div><div class="t-name">Skeepon</div><div class="muted" style="font-size:12px">〇〇株式会社（公式） ${stars(4)}</div></div>
+      <span class="cev">${CHEV}</span></div>
+    <div class="rc-foot" style="margin-top:16px">
+      <button class="helpful-btn">${THUMB}<span class="hb-label">参考になった</span>12</button>${vc(96)}
+    </div>
+  </div>`;
+
+/* ---- 公開プロフィール（他のユーザーから見た画面） ---- */

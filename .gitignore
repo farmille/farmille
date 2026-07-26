@@ -61,3 +61,18 @@ aglist-*.png
 # 個別に追跡したい安全な draft は `git add -f <path>` で明示追加すること。
 docs/drafts/
 backend/gcp-*.sh
+.claude/skills/open-knowledge/
+.cursor/skills/open-knowledge/
+.codex/skills/open-knowledge/
+.github/skills/open-knowledge/
+.opencode/skills/open-knowledge/
+.pi/skills/open-knowledge/
+
+# ローカルのエージェントツール状態 (commit しない)
+.codex/
+.cursor/
+.pi/
+.ok/
+.okignore
+.mcp.json
+opencode.json

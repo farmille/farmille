@@ -1,25 +1,28 @@
 # Farmille プロジェクト方針
 
+> **刷新中（2026-07-26〜）**：アプリを全面的に作り直している。
+> **設計の正は [`docs/rebuild/`](docs/rebuild/00-overview.md)**。本ファイルの以下の記述は旧実装（試作）向けであり、刷新の進行に伴って置き換わる。新規の実装判断は必ず docs/rebuild を参照すること。
+
 ## このプロジェクトについて
 BS資材（生物・微生物農業資材）の農家レビュープラットフォーム。
 ターゲット：農家・JA普及員・農学者・メーカー。
 
-## 技術スタック
-- Frontend: Next.js 15 / TypeScript / Tailwind CSS 4 / Vercel
-- Backend: FastAPI / Python 3.12 / uv / Railway
+## 技術スタック（刷新後）
+- Next.js 16 / TypeScript / Panda CSS / Vercel（フロント兼バックエンド）
 - DB/Auth/Storage: Supabase (PostgreSQL)
+- FastAPI・Cloud Run・Python スタックは廃止（docs/rebuild/03-architecture.md）
 
 ## 設計哲学（最重要）
 **DOA（Data-Oriented Architecture）を最優先する。**
 - データモデルは技術負債を一切作らない
 - 正規化・スケーラビリティを妥協しない
-- UIはバイブコーディングで爆速。ただしデータ設計の決定を覆すUIは作らない
+- UI もデータ層と同じ品質基準で作る（型安全・fail fast・トークン経由・実画面での検証）。データ設計の決定を覆す UI は作らない
 
 ## コーディング規約
-- Railway固有の環境変数（`RAILWAY_*`）をコード上で参照しない
 - DBスキーマ変更後は `pnpm gen:types` で型を再生成する（詳細は §「型生成」）
-- 環境変数は `pydantic-settings` (backend) / `process.env` (frontend) 経由で読む
-- 認証チェックは BFF（FastAPI）で第一防御、RLSで第二防御
+- 環境変数は `src/env.ts` の1箇所で検証してから使う。既定値でのフォールバックを書かない
+- 認証チェックは Next.js のサーバー側（`src/server/`）で第一防御、RLSで第二防御
+- UI・クライアントコンポーネントから `supabase.from()` を直接呼ばない（`auth.*` / `storage.*` は可）
 
 ## 型生成（`pnpm gen:types`）
 

@@ -1,0 +1,42 @@
+S.home = () => appbar('', {home:true}) + `
+  <div class="hero-m">
+    <h1>農業の未来を、みんなの知恵で。</h1>
+    <p class="lead">BS資材の、農家による口コミ・データベース。</p>
+  </div>
+  <div class="body" style="padding-top:12px">
+    <div class="ts-box"><span class="ts-ic">${SEARCH_ICON}</span>
+      <input id="homeInput" class="ts-input" placeholder="作物・悩み・資材名を入力" autocomplete="off"></div>
+    <div id="homeChips" class="ts-chips"></div>
+    <div id="homePanel" class="ts-panel"></div>
+
+    <div class="sec-h" style="margin-top:26px"><h2>注目のBS資材</h2><a class="link-more" data-go="search">探す →</a></div>
+    <div class="prod-scroll">
+      ${MATERIALS.slice(0,3).map(m=>`<div class="prod-card" data-go="material"><div class="img" style="background:#fff;padding:8px">${bottleImg()}</div><div class="info">
+        <div class="nm">${m.name}</div>
+        <div class="muted" style="font-size:10px;margin-top:2px">${m.maker} ${m.official?CHECK:''}</div>
+        <div class="rt">${'★'.repeat(Math.round(m.score))}${'☆'.repeat(5-Math.round(m.score))} <span class="muted tnum" style="font-size:10px">${m.revs}件</span></div>
+      </div></div>`).join('')}
+    </div>
+
+    <div class="sec-h"><h2>新着記事（使用結果レポート）</h2><a class="link-more" data-go="articles">記事を読む →</a></div>
+    <div class="report-scroll">
+      ${reportCard('Skeepon 使用結果レポート','しおさい農園','ミニトマト','used',24,210)}
+      ${reportCard('Skeepon 使用結果レポート','たなか農園','ミニトマト','apply',8,96)}
+      ${reportCard('ボンバルディア 使用結果レポート','いちご屋A','いちご','harvest',15,142)}
+      ${reportCard('サンシェード液 使用結果レポート','のはら農園','ミニトマト','unused',6,58)}
+    </div>
+
+    <div class="sec-h"><h2>新着の口コミ</h2><a class="link-more" data-go="material" data-anchor="sec-reviews">口コミを読む →</a></div>
+    <div class="stack">
+      ${reviewCard('やまちゃん農園','ミニトマト',4,12,'高温期でも草勢が保てました。散布もしやすい。',120,'Skeepon')}
+      ${reviewCard('のはら農園','いちご',5,9,'定植後の初期生育が明らかに良くなりました。',120,'ボンバルディア')}
+    </div>
+
+    <div class="home-cta">
+      <h3>あなたの一言が、次の農家の判断材料になる。</h3>
+      <p>匿名で参加OK。実名・所属の公開は不要です。</p>
+      <button class="btn" data-go="signup">無料で登録する</button>
+    </div>
+  </div>`;
+
+/* ---- BS資材検索 ---- */

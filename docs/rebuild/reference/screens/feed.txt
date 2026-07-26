@@ -1,0 +1,38 @@
+S.feed = () => `
+  <div class="feed-topbar"><button class="ic" data-nav-back>${BACK}</button><span class="ft-ttl">フィード</span></div>
+  <div class="feed-wrap" id="feedWrap">${FEED_ITEMS.map(feedItem).join('')}</div>`;
+function bindCarousels(scope) {
+  scope.querySelectorAll('.fp-carousel').forEach(c => {
+    if (c._bound) return; c._bound = true;
+    const dots = c.parentElement.querySelector('.fp-dots');
+    if (!dots) return;
+    c.addEventListener('scroll', () => {
+      const i = Math.round(c.scrollLeft / c.clientWidth);
+      [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i));
+    });
+  });
+}
+function initFeed() {
+  const w = document.getElementById('feedWrap'); if (!w) return;
+  bindCarousels(w);
+  const syncVideos = () => {
+    const wr = w.getBoundingClientRect();
+    w.querySelectorAll('video').forEach(v => {
+      const r = v.getBoundingClientRect();
+      const visible = r.top < wr.bottom - wr.height/3 && r.bottom > wr.top + wr.height/3;
+      if (visible) { v.play().catch(()=>{}); } else { v.pause(); }
+    });
+  };
+  let loops = 1;
+  w.addEventListener('scroll', () => {
+    if (loops < 30 && w.scrollTop + w.clientHeight > w.scrollHeight - w.clientHeight) {
+      loops++;
+      w.insertAdjacentHTML('beforeend', FEED_ITEMS.map(feedItem).join(''));
+      bindCarousels(w);
+    }
+    syncVideos();
+  });
+  syncVideos();
+}
+
+/* =============== navigation =============== */
