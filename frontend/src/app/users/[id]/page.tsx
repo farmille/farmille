@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { AppBar, SectionHeading, StatCard } from "@/components";
+import { createPageMetadata } from "@/lib/seo";
 import { isPrefectureCode, PREFECTURES } from "@/lib/prefectures";
 import { errorMessageJa } from "@/server/errors";
 import { getPublicProfilePage, type PublicProfilePageData } from "@/server/queries/public-profiles";
@@ -75,20 +76,16 @@ type UserPageProps = {
 export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
   const { id } = await params;
   const { profile } = await loadProfileOrNotFound(id);
-  const title = `${profile.handle}｜Farmille`;
   const description =
     profile.bio ?? `${profile.handle}さんのレビューと使用レポートを確認できます。`;
 
-  return {
-    title,
+  return createPageMetadata({
+    title: profile.handle,
     description,
-    openGraph: {
-      type: "profile",
-      title,
-      description,
-      ...(profile.avatarUrl === null ? {} : { images: [{ url: profile.avatarUrl }] }),
-    },
-  };
+    path: `/users/${profile.userId}`,
+    type: "profile",
+    ...(profile.avatarUrl === null ? {} : { imageUrls: [profile.avatarUrl] }),
+  });
 }
 
 export default async function UserPage({ params }: UserPageProps) {

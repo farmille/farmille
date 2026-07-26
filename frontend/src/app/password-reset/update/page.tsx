@@ -4,10 +4,12 @@ import Link from "next/link";
 import { UpdatePasswordForm } from "@/app/password-reset/update/update-password-form";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { formActionsStyle, FormMessage, ghostButtonStyle } from "@/components/auth/fields";
+import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 
 export const metadata: Metadata = {
-  title: "新しいパスワードの設定 | Farmille",
+  title: "新しいパスワードの設定",
+  robots: NO_INDEX_ROBOTS,
 };
 
 export default async function UpdatePasswordPage() {

@@ -8,6 +8,7 @@ import { OfficialCheckIcon, ThumbIcon } from "@/components/icons";
 import { formatDateJa } from "@/components/format-date";
 import { sellerTypeLabel } from "@/components/seller-type-label";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
+import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { getPublishedArticle } from "@/server/queries/articles";
@@ -51,14 +52,23 @@ async function loadArticle(id: string) {
   return result.data;
 }
 
+function articleDescription(title: string, sellerName: string): string {
+  return `${sellerName}による記事「${title}」`;
+}
+
 export async function generateMetadata({ params }: ArticleDetailPageProps): Promise<Metadata> {
   const { id } = await params;
   const article = await loadArticle(id);
+  const sellerName = article.seller.official_name ?? "出品者";
 
-  return {
-    title: `${article.title} | Farmille`,
-    description: `${article.seller.official_name ?? "出品者"}による記事「${article.title}」`,
-  };
+  return createPageMetadata({
+    title: article.title,
+    description: articleDescription(article.title, sellerName),
+    path: `/articles/${article.id}`,
+    type: "article",
+    publishedTime: article.publishedAt,
+    ...(article.heroImageUrl === null ? {} : { imageUrls: [article.heroImageUrl] }),
+  });
 }
 
 export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
@@ -78,9 +88,27 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
 
   const sellerName = article.seller.official_name ?? "出品者";
   const sellerInitial = sellerName.charAt(0);
+  const articleJsonLd = createArticleJsonLd({
+    id: article.id,
+    route: "articles",
+    headline: article.title,
+    description: articleDescription(article.title, sellerName),
+    datePublished: article.publishedAt,
+    author: {
+      type: "Organization",
+      name: sellerName,
+      path: `/sellers/${article.seller.id}`,
+    },
+    imageUrls: article.heroImageUrl === null ? [] : [article.heroImageUrl],
+    articleSection: "記事",
+  });
 
   return (
     <div className={shell}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
+      />
       <AppBar title="" backHref="/articles" shareHref={`/articles/${article.id}`} />
       <main className={main}>
         <h1

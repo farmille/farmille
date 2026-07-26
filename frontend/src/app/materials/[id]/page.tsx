@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { buttonRecipe, EmptyState, FabBar, ReportCard, SectionHeading } from "@/components";
+import { createProductJsonLd, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import {
   getReviewRatingDistribution,
@@ -19,7 +20,11 @@ import { MaterialPageShell } from "./_components/page-shell";
 import { RatingSummary } from "./_components/rating-summary";
 import { ReviewList } from "./_components/review-list";
 import { toggleSavedMaterialAction } from "./actions";
-import { loadMaterialOrNotFound, materialMetadata } from "./material-page-data";
+import {
+  loadMaterialOrNotFound,
+  materialDescription,
+  materialMetadata,
+} from "./material-page-data";
 import { unwrapQueryResult } from "./query-result";
 
 type MaterialPageProps = {
@@ -91,9 +96,22 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
   const toggleAction = isGeneralUser
     ? toggleSavedMaterialAction.bind(null, material.id)
     : undefined;
+  const productJsonLd = createProductJsonLd({
+    id: material.id,
+    name: material.name,
+    manufacturerName: material.manufacturer_name,
+    description: materialDescription(material),
+    imageUrls: material.images.map((image) => image.url),
+    averageRating: material.avg_rating,
+    reviewCount: material.review_count,
+  });
 
   return (
     <MaterialPageShell title={material.name} backHref="/" hasFab>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(productJsonLd) }}
+      />
       <MaterialHero
         material={material}
         saved={saved}

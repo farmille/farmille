@@ -4,10 +4,12 @@ import { LoginForm } from "@/app/login/login-form";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { FormMessage } from "@/components/auth/fields";
 import { safeNextPath } from "@/lib/auth/safe-next";
+import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 
 export const metadata: Metadata = {
-  title: "ログイン | Farmille",
+  title: "ログイン",
+  robots: NO_INDEX_ROBOTS,
 };
 
 function noticeOf(error: string | undefined): string | null {

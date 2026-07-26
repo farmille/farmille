@@ -6,12 +6,14 @@ import { notFound } from "next/navigation";
 import { AppBar, FabBar, MaterialRefCard, MetricBars } from "@/components";
 import { CheckIcon, ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "@/components/icons";
 import { formatDateJa } from "@/components/format-date";
-import { prefectureName } from "./prefecture-name";
+import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { getPublishedUsageReport } from "@/server/queries/usage-reports";
 import { recordViewEvent } from "@/server/queries/view-events";
 import { css } from "../../../../styled-system/css";
+
+import { prefectureName } from "./prefecture-name";
 
 type ReportDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -67,14 +69,24 @@ async function loadReport(id: string) {
   return result.data;
 }
 
+function reportDescription(authorHandle: string, materialName: string): string {
+  return `${authorHandle}さんの${materialName}に関する使用レポート`;
+}
+
 export async function generateMetadata({ params }: ReportDetailPageProps): Promise<Metadata> {
   const { id } = await params;
   const report = await loadReport(id);
 
-  return {
-    title: `${report.title} | Farmille`,
-    description: `${report.author.handle}さんの${report.material.name}に関する使用レポート`,
-  };
+  return createPageMetadata({
+    title: report.title,
+    description: reportDescription(report.author.handle, report.material.name),
+    path: `/reports/${report.id}`,
+    type: "article",
+    publishedTime: report.publishedAt,
+    imageUrls: report.media
+      .filter((media) => media.mediaType === "photo")
+      .map((media) => media.url),
+  });
 }
 
 function MediaFigure({
@@ -193,9 +205,33 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   });
 
   const materialPath = `/materials/${report.material.id}`;
+  const reportJsonLd = createArticleJsonLd({
+    id: report.id,
+    route: "reports",
+    headline: report.title,
+    description: reportDescription(report.author.handle, report.material.name),
+    datePublished: report.publishedAt,
+    author: {
+      type: "Person",
+      name: report.author.handle,
+      path: `/users/${report.author.userId}`,
+    },
+    imageUrls: report.media
+      .filter((media) => media.mediaType === "photo")
+      .map((media) => media.url),
+    articleSection: "使用レポート",
+    about: {
+      id: report.material.id,
+      name: report.material.name,
+    },
+  });
 
   return (
     <div className={shell}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(reportJsonLd) }}
+      />
       <AppBar title="" backHref="/articles" shareHref={`/reports/${report.id}`} />
       <main className={main}>
         <h1

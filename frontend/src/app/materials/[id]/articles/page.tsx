@@ -45,6 +45,7 @@ export async function generateMetadata({ params }: MaterialArticlesPageProps): P
   return materialMetadata(material, {
     titleSuffix: "の記事・使用レポート",
     description: `${material.name}に紐づく記事と使用レポートを一覧で確認できます。`,
+    pathSuffix: "/articles",
   });
 }
 
