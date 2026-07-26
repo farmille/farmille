@@ -76,3 +76,4 @@ backend/gcp-*.sh
 .okignore
 .mcp.json
 opencode.json
+output/
