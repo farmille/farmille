@@ -7,1402 +7,1426 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
-      article_products: {
+      answers: {
+        Row: {
+          author_seller_id: string | null
+          author_user_id: string | null
+          body: string
+          created_at: string
+          id: string
+          question_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_seller_id?: string | null
+          author_user_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          question_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_seller_id?: string | null
+          author_user_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_author_seller_id_fkey"
+            columns: ["author_seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_author_seller_id_fkey"
+            columns: ["author_seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "answers_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_materials: {
         Row: {
           article_id: string
           created_at: string
           id: string
-          position: number
-          product_id: string
+          material_id: string
+          updated_at: string
         }
         Insert: {
           article_id: string
           created_at?: string
           id?: string
-          position?: number
-          product_id: string
+          material_id: string
+          updated_at?: string
         }
         Update: {
           article_id?: string
           created_at?: string
           id?: string
-          position?: number
-          product_id?: string
+          material_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "article_products_article_id_fkey"
+            foreignKeyName: "article_materials_article_id_fkey"
             columns: ["article_id"]
             isOneToOne: false
             referencedRelation: "articles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "article_products_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: "article_materials_material_id_fkey"
+            columns: ["material_id"]
             isOneToOne: false
-            referencedRelation: "products"
+            referencedRelation: "materials"
             referencedColumns: ["id"]
           },
         ]
       }
       articles: {
         Row: {
-          author_user_id: string | null
-          body_md: string
-          category: string
+          body: string
           created_at: string
           hero_image_url: string | null
           id: string
           published_at: string | null
-          slug: string
+          seller_id: string
+          status: string
           title: string
           updated_at: string
         }
         Insert: {
-          author_user_id?: string | null
-          body_md: string
-          category: string
+          body: string
           created_at?: string
           hero_image_url?: string | null
           id?: string
           published_at?: string | null
-          slug: string
+          seller_id: string
+          status?: string
           title: string
           updated_at?: string
         }
         Update: {
-          author_user_id?: string | null
-          body_md?: string
-          category?: string
-          created_at?: string
-          hero_image_url?: string | null
-          id?: string
-          published_at?: string | null
-          slug?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "articles_author_user_id_fkey"
-            columns: ["author_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      certifications: {
-        Row: {
-          id: string
-          name: string
-        }
-        Insert: {
-          id?: string
-          name: string
-        }
-        Update: {
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
-      crop_categories_l1: {
-        Row: {
-          id: string
-          name: string
-        }
-        Insert: {
-          id?: string
-          name: string
-        }
-        Update: {
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
-      crop_categories_l2: {
-        Row: {
-          crop_categories_l1_id: string
-          id: string
-          name: string
-        }
-        Insert: {
-          crop_categories_l1_id: string
-          id?: string
-          name: string
-        }
-        Update: {
-          crop_categories_l1_id?: string
-          id?: string
-          name?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "crop_categories_l2_crop_categories_l1_id_fkey"
-            columns: ["crop_categories_l1_id"]
-            isOneToOne: false
-            referencedRelation: "crop_categories_l1"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      crops: {
-        Row: {
-          created_by: string | null
-          crop_categories_l2_id: string
-          id: string
-          name: string
-          status: string
-        }
-        Insert: {
-          created_by?: string | null
-          crop_categories_l2_id: string
-          id?: string
-          name: string
-          status?: string
-        }
-        Update: {
-          created_by?: string | null
-          crop_categories_l2_id?: string
-          id?: string
-          name?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "crops_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "crops_crop_categories_l2_id_fkey"
-            columns: ["crop_categories_l2_id"]
-            isOneToOne: false
-            referencedRelation: "crop_categories_l2"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      farmer_profiles: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          city: string
-          display_name: string | null
-          field_size: number | null
-          note: string | null
-          prefecture: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          city: string
-          display_name?: string | null
-          field_size?: number | null
-          note?: string | null
-          prefecture: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          city?: string
-          display_name?: string | null
-          field_size?: number | null
-          note?: string | null
-          prefecture?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "farmer_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      featured_products: {
-        Row: {
-          created_at: string
-          displayed_at: string
-          id: string
-          product_id: string
-          sort_order: number
-        }
-        Insert: {
-          created_at?: string
-          displayed_at?: string
-          id?: string
-          product_id: string
-          sort_order?: number
-        }
-        Update: {
-          created_at?: string
-          displayed_at?: string
-          id?: string
-          product_id?: string
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "featured_products_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: true
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      home_banners: {
-        Row: {
-          created_at: string
-          displayed_at: string | null
-          id: string
-          image_url: string
-          link_url: string
-          sort_order: number
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          displayed_at?: string | null
-          id?: string
-          image_url: string
-          link_url: string
-          sort_order?: number
-          title: string
-        }
-        Update: {
-          created_at?: string
-          displayed_at?: string | null
-          id?: string
-          image_url?: string
-          link_url?: string
-          sort_order?: number
-          title?: string
-        }
-        Relationships: []
-      }
-      ja_profiles: {
-        Row: {
-          city: string | null
-          organization_name: string
-          prefecture: string | null
-          user_id: string
-        }
-        Insert: {
-          city?: string | null
-          organization_name: string
-          prefecture?: string | null
-          user_id: string
-        }
-        Update: {
-          city?: string | null
-          organization_name?: string
-          prefecture?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ja_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      maker_profiles: {
-        Row: {
-          city: string | null
-          company_name: string
-          note: string | null
-          prefecture: string | null
-          user_id: string
-        }
-        Insert: {
-          city?: string | null
-          company_name: string
-          note?: string | null
-          prefecture?: string | null
-          user_id: string
-        }
-        Update: {
-          city?: string | null
-          company_name?: string
-          note?: string | null
-          prefecture?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "maker_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      periods: {
-        Row: {
-          id: string
-          month: number
-          period: string
-        }
-        Insert: {
-          id?: string
-          month: number
-          period: string
-        }
-        Update: {
-          id?: string
-          month?: number
-          period?: string
-        }
-        Relationships: []
-      }
-      product_application_method_relations: {
-        Row: {
-          application_method_id: string
-          product_id: string
-        }
-        Insert: {
-          application_method_id: string
-          product_id: string
-        }
-        Update: {
-          application_method_id?: string
-          product_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_application_method_relations_application_method_id_fkey"
-            columns: ["application_method_id"]
-            isOneToOne: false
-            referencedRelation: "product_application_methods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_application_method_relations_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_application_methods: {
-        Row: {
-          id: string
-          is_active: boolean
-          name: string
-        }
-        Insert: {
-          id?: string
-          is_active?: boolean
-          name: string
-        }
-        Update: {
-          id?: string
-          is_active?: boolean
-          name?: string
-        }
-        Relationships: []
-      }
-      product_application_recipes: {
-        Row: {
-          application_method: string | null
-          application_timing: string | null
-          confidence: string | null
-          created_at: string
-          crop_category: string | null
-          crop_name: string | null
-          cultivation_type: string | null
-          dilution_rate: string | null
-          dose_amount: number | null
-          dose_basis: string | null
-          dose_raw_text: string | null
-          dose_unit: string | null
-          growth_stage: string | null
-          id: string
-          max_dose_amount: number | null
-          max_dose_raw_text: string | null
-          max_dose_unit: string | null
-          original_liquid_equivalent: string | null
-          precautions_specific: string | null
-          product_id: string
-          solution_amount: string | null
-          sort_order: number
-          updated_at: string
-          usage_notes: string | null
-        }
-        Insert: {
-          application_method?: string | null
-          application_timing?: string | null
-          confidence?: string | null
-          created_at?: string
-          crop_category?: string | null
-          crop_name?: string | null
-          cultivation_type?: string | null
-          dilution_rate?: string | null
-          dose_amount?: number | null
-          dose_basis?: string | null
-          dose_raw_text?: string | null
-          dose_unit?: string | null
-          growth_stage?: string | null
-          id?: string
-          max_dose_amount?: number | null
-          max_dose_raw_text?: string | null
-          max_dose_unit?: string | null
-          original_liquid_equivalent?: string | null
-          precautions_specific?: string | null
-          product_id: string
-          solution_amount?: string | null
-          sort_order?: number
-          updated_at?: string
-          usage_notes?: string | null
-        }
-        Update: {
-          application_method?: string | null
-          application_timing?: string | null
-          confidence?: string | null
-          created_at?: string
-          crop_category?: string | null
-          crop_name?: string | null
-          cultivation_type?: string | null
-          dilution_rate?: string | null
-          dose_amount?: number | null
-          dose_basis?: string | null
-          dose_raw_text?: string | null
-          dose_unit?: string | null
-          growth_stage?: string | null
-          id?: string
-          max_dose_amount?: number | null
-          max_dose_raw_text?: string | null
-          max_dose_unit?: string | null
-          original_liquid_equivalent?: string | null
-          precautions_specific?: string | null
-          product_id?: string
-          solution_amount?: string | null
-          sort_order?: number
-          updated_at?: string
-          usage_notes?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_application_recipes_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_application_window_relations: {
-        Row: {
-          application_window_id: string
-          product_id: string
-        }
-        Insert: {
-          application_window_id: string
-          product_id: string
-        }
-        Update: {
-          application_window_id?: string
-          product_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_application_window_relations_application_window_id_fkey"
-            columns: ["application_window_id"]
-            isOneToOne: false
-            referencedRelation: "product_application_windows"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_application_window_relations_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_application_windows: {
-        Row: {
-          id: string
-          is_active: boolean
-          name: string
-        }
-        Insert: {
-          id?: string
-          is_active?: boolean
-          name: string
-        }
-        Update: {
-          id?: string
-          is_active?: boolean
-          name?: string
-        }
-        Relationships: []
-      }
-      product_benefit_relations: {
-        Row: {
-          product_benefit_id: string
-          product_id: string
-        }
-        Insert: {
-          product_benefit_id: string
-          product_id: string
-        }
-        Update: {
-          product_benefit_id?: string
-          product_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_benefit_relations_product_benefit_id_fkey"
-            columns: ["product_benefit_id"]
-            isOneToOne: false
-            referencedRelation: "product_benefits"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_benefit_relations_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_benefits: {
-        Row: {
-          category: string
-          id: string
-          name: string
-          sort_order: number
-          version: string
-        }
-        Insert: {
-          category: string
-          id?: string
-          name: string
-          sort_order?: number
-          version?: string
-        }
-        Update: {
-          category?: string
-          id?: string
-          name?: string
-          sort_order?: number
-          version?: string
-        }
-        Relationships: []
-      }
-      product_certifications: {
-        Row: {
-          certification_id: string
-          product_id: string
-        }
-        Insert: {
-          certification_id: string
-          product_id: string
-        }
-        Update: {
-          certification_id?: string
-          product_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_certifications_certification_id_fkey"
-            columns: ["certification_id"]
-            isOneToOne: false
-            referencedRelation: "certifications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_certifications_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_composition_type_relations: {
-        Row: {
-          composition_type_id: string
-          product_id: string
-        }
-        Insert: {
-          composition_type_id: string
-          product_id: string
-        }
-        Update: {
-          composition_type_id?: string
-          product_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_composition_type_relations_composition_type_id_fkey"
-            columns: ["composition_type_id"]
-            isOneToOne: false
-            referencedRelation: "product_composition_types"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_composition_type_relations_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_composition_types: {
-        Row: {
-          id: string
-          is_active: boolean
-          name: string
-        }
-        Insert: {
-          id?: string
-          is_active?: boolean
-          name: string
-        }
-        Update: {
-          id?: string
-          is_active?: boolean
-          name?: string
-        }
-        Relationships: []
-      }
-      product_crops: {
-        Row: {
-          crop_id: string
-          product_id: string
-        }
-        Insert: {
-          crop_id: string
-          product_id: string
-        }
-        Update: {
-          crop_id?: string
-          product_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_crops_crop_id_fkey"
-            columns: ["crop_id"]
-            isOneToOne: false
-            referencedRelation: "crops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_crops_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_images: {
-        Row: {
-          alt_text: string | null
-          confidence: string | null
-          id: string
-          image_type: string | null
-          is_primary: boolean
-          order: number
-          product_id: string
-          rights_note: string | null
-          source_page_url: string | null
-          url: string
-        }
-        Insert: {
-          alt_text?: string | null
-          confidence?: string | null
-          id?: string
-          image_type?: string | null
-          is_primary?: boolean
-          order?: number
-          product_id: string
-          rights_note?: string | null
-          source_page_url?: string | null
-          url: string
-        }
-        Update: {
-          alt_text?: string | null
-          confidence?: string | null
-          id?: string
-          image_type?: string | null
-          is_primary?: boolean
-          order?: number
-          product_id?: string
-          rights_note?: string | null
-          source_page_url?: string | null
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_images_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_prefectures: {
-        Row: {
-          prefecture_code: string
-          product_id: string
-        }
-        Insert: {
-          prefecture_code: string
-          product_id: string
-        }
-        Update: {
-          prefecture_code?: string
-          product_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_prefectures_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_science_technologies: {
-        Row: {
-          id: string
-          is_active: boolean
-          name: string
-        }
-        Insert: {
-          id?: string
-          is_active?: boolean
-          name: string
-        }
-        Update: {
-          id?: string
-          is_active?: boolean
-          name?: string
-        }
-        Relationships: []
-      }
-      product_science_technology_relations: {
-        Row: {
-          product_id: string
-          science_technology_id: string
-        }
-        Insert: {
-          product_id: string
-          science_technology_id: string
-        }
-        Update: {
-          product_id?: string
-          science_technology_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_science_technology_relations_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_science_technology_relations_science_technology_id_fkey"
-            columns: ["science_technology_id"]
-            isOneToOne: false
-            referencedRelation: "product_science_technologies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_sources: {
-        Row: {
-          created_at: string
-          extracted_date: string | null
-          id: string
-          notes: string | null
-          product_id: string
-          rank: string | null
-          source_type: string
-          title: string | null
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          extracted_date?: string | null
-          id?: string
-          notes?: string | null
-          product_id: string
-          rank?: string | null
-          source_type: string
-          title?: string | null
-          url: string
-        }
-        Update: {
-          created_at?: string
-          extracted_date?: string | null
-          id?: string
-          notes?: string | null
-          product_id?: string
-          rank?: string | null
-          source_type?: string
-          title?: string | null
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_sources_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_types: {
-        Row: {
-          id: string
-          is_active: boolean
-          name: string
-        }
-        Insert: {
-          id?: string
-          is_active?: boolean
-          name: string
-        }
-        Update: {
-          id?: string
-          is_active?: boolean
-          name?: string
-        }
-        Relationships: []
-      }
-      products: {
-        Row: {
-          commercial_status: string | null
-          confidence: string | null
-          created_at: string
-          deleted_at: string | null
-          disease_pest_info: string | null
-          expected_effects_farmille: string | null
-          expected_effects_official: string | null
-          fertilizer_registered: boolean | null
-          general_purpose: string | null
-          id: string
-          is_public: boolean
-          is_screened: boolean | null
-          label_url: string | null
-          maker_id: string
-          mode_of_action: string | null
-          name: string
-          notes: string | null
-          pesticide_registered: boolean | null
-          precautions: string | null
-          primary_compound: string | null
-          product_name_jp: string | null
-          product_type_id: string
-          sds_url: string | null
-          storage_shelf_life: string | null
-          technology_action: string | null
-          updated_at: string
-          usage_summary: string | null
-        }
-        Insert: {
-          commercial_status?: string | null
-          confidence?: string | null
-          created_at?: string
-          deleted_at?: string | null
-          disease_pest_info?: string | null
-          expected_effects_farmille?: string | null
-          expected_effects_official?: string | null
-          fertilizer_registered?: boolean | null
-          general_purpose?: string | null
-          id?: string
-          is_public?: boolean
-          is_screened?: boolean | null
-          label_url?: string | null
-          maker_id: string
-          mode_of_action?: string | null
-          name: string
-          notes?: string | null
-          pesticide_registered?: boolean | null
-          precautions?: string | null
-          primary_compound?: string | null
-          product_name_jp?: string | null
-          product_type_id: string
-          sds_url?: string | null
-          storage_shelf_life?: string | null
-          technology_action?: string | null
-          updated_at?: string
-          usage_summary?: string | null
-        }
-        Update: {
-          commercial_status?: string | null
-          confidence?: string | null
-          created_at?: string
-          deleted_at?: string | null
-          disease_pest_info?: string | null
-          expected_effects_farmille?: string | null
-          expected_effects_official?: string | null
-          fertilizer_registered?: boolean | null
-          general_purpose?: string | null
-          id?: string
-          is_public?: boolean
-          is_screened?: boolean | null
-          label_url?: string | null
-          maker_id?: string
-          mode_of_action?: string | null
-          name?: string
-          notes?: string | null
-          pesticide_registered?: boolean | null
-          precautions?: string | null
-          primary_compound?: string | null
-          product_name_jp?: string | null
-          product_type_id?: string
-          sds_url?: string | null
-          storage_shelf_life?: string | null
-          technology_action?: string | null
-          updated_at?: string
-          usage_summary?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "products_maker_id_fkey"
-            columns: ["maker_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "products_product_type_id_fkey"
-            columns: ["product_type_id"]
-            isOneToOne: false
-            referencedRelation: "product_types"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      researcher_profiles: {
-        Row: {
-          organization_name: string
-          specialty: string | null
-          user_id: string
-        }
-        Insert: {
-          organization_name: string
-          specialty?: string | null
-          user_id: string
-        }
-        Update: {
-          organization_name?: string
-          specialty?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "researcher_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      review_benefit_relations: {
-        Row: {
-          product_benefit_id: string
-          review_id: string
-        }
-        Insert: {
-          product_benefit_id: string
-          review_id: string
-        }
-        Update: {
-          product_benefit_id?: string
-          review_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "review_benefit_relations_product_benefit_id_fkey"
-            columns: ["product_benefit_id"]
-            isOneToOne: false
-            referencedRelation: "product_benefits"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "review_benefit_relations_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "reviews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      review_crops: {
-        Row: {
-          crop_id: string
-          review_id: string
-        }
-        Insert: {
-          crop_id: string
-          review_id: string
-        }
-        Update: {
-          crop_id?: string
-          review_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "review_crops_crop_id_fkey"
-            columns: ["crop_id"]
-            isOneToOne: false
-            referencedRelation: "crops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "review_crops_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "reviews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      review_period_relations: {
-        Row: {
-          period_id: string
-          review_id: string
-        }
-        Insert: {
-          period_id: string
-          review_id: string
-        }
-        Update: {
-          period_id?: string
-          review_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "review_period_relations_period_id_fkey"
-            columns: ["period_id"]
-            isOneToOne: false
-            referencedRelation: "periods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "review_period_relations_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "reviews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      review_point_relations: {
-        Row: {
-          review_id: string
-          review_point_id: string
-        }
-        Insert: {
-          review_id: string
-          review_point_id: string
-        }
-        Update: {
-          review_id?: string
-          review_point_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "review_point_relations_review_id_fkey"
-            columns: ["review_id"]
-            isOneToOne: false
-            referencedRelation: "reviews"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "review_point_relations_review_point_id_fkey"
-            columns: ["review_point_id"]
-            isOneToOne: false
-            referencedRelation: "review_points"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      review_points: {
-        Row: {
-          id: string
-          is_active: boolean
-          name: string
-        }
-        Insert: {
-          id?: string
-          is_active?: boolean
-          name: string
-        }
-        Update: {
-          id?: string
-          is_active?: boolean
-          name?: string
-        }
-        Relationships: []
-      }
-      reviews: {
-        Row: {
-          approved_at: string | null
-          approved_by: string | null
-          body: string
-          created_at: string
-          id: string
-          product_id: string
-          rating: number
-          rejection_reason: string | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by?: string | null
-          body: string
-          created_at?: string
-          id?: string
-          product_id: string
-          rating: number
-          rejection_reason?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by?: string | null
           body?: string
           created_at?: string
+          hero_image_url?: string | null
           id?: string
-          product_id?: string
-          rating?: number
-          rejection_reason?: string | null
+          published_at?: string | null
+          seller_id?: string
           status?: string
+          title?: string
           updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "reviews_approved_by_fkey"
-            columns: ["approved_by"]
+            foreignKeyName: "articles_seller_id_fkey"
+            columns: ["seller_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "public_sellers"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "reviews_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: "articles_seller_id_fkey"
+            columns: ["seller_id"]
             isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "seller_accounts"
             referencedColumns: ["id"]
           },
         ]
       }
-      user_crops: {
+      content_reports: {
         Row: {
-          crop_id: string
-          user_id: string
-        }
-        Insert: {
-          crop_id: string
-          user_id: string
-        }
-        Update: {
-          crop_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_crops_crop_id_fkey"
-            columns: ["crop_id"]
-            isOneToOne: false
-            referencedRelation: "crops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_crops_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_favorites: {
-        Row: {
-          created_at: string
-          id: string
-          kind: string
-          product_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          kind: string
-          product_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          kind?: string
-          product_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_favorites_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_favorites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_reports: {
-        Row: {
-          body: string | null
           created_at: string
           id: string
           reason: string
-          reporter_user_id: string | null
-          resolution_note: string | null
+          reporter_user_id: string
           resolved_at: string | null
           resolved_by: string | null
           status: string
-          target_user_id: string
+          target_id: string
+          target_type: string
+          updated_at: string
         }
         Insert: {
-          body?: string | null
           created_at?: string
           id?: string
           reason: string
-          reporter_user_id?: string | null
-          resolution_note?: string | null
+          reporter_user_id: string
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
-          target_user_id: string
+          target_id: string
+          target_type: string
+          updated_at?: string
         }
         Update: {
-          body?: string | null
           created_at?: string
           id?: string
           reason?: string
-          reporter_user_id?: string | null
-          resolution_note?: string | null
+          reporter_user_id?: string
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
-          target_user_id?: string
+          target_id?: string
+          target_type?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "user_reports_reporter_user_id_fkey"
+            foreignKeyName: "content_reports_reporter_user_id_fkey"
             columns: ["reporter_user_id"]
             isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
           {
-            foreignKeyName: "user_reports_resolved_by_fkey"
-            columns: ["resolved_by"]
+            foreignKeyName: "content_reports_reporter_user_id_fkey"
+            columns: ["reporter_user_id"]
             isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
           },
+        ]
+      }
+      crop_groups: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crops: {
+        Row: {
+          aliases: string[]
+          created_at: string
+          group_id: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          aliases?: string[]
+          created_at?: string
+          group_id: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          aliases?: string[]
+          created_at?: string
+          group_id?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: "user_reports_target_user_id_fkey"
-            columns: ["target_user_id"]
+            foreignKeyName: "crops_group_id_fkey"
+            columns: ["group_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "crop_groups"
             referencedColumns: ["id"]
           },
         ]
       }
-      users: {
+      helpful_votes: {
         Row: {
           created_at: string
-          deleted_at: string | null
           id: string
-          name: string
-          role: string
-          status: string
+          target_id: string
+          target_type: string
+          updated_at: string
+          user_id: string
         }
         Insert: {
           created_at?: string
-          deleted_at?: string | null
-          id: string
-          name: string
-          role: string
-          status?: string
+          id?: string
+          target_id: string
+          target_type: string
+          updated_at?: string
+          user_id: string
         }
         Update: {
           created_at?: string
-          deleted_at?: string | null
           id?: string
-          name?: string
-          role?: string
+          target_id?: string
+          target_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "helpful_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "helpful_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      material_edit_requests: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          request_text: string
+          seller_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          request_text: string
+          seller_id: string
           status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          request_text?: string
+          seller_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_edit_requests_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_edit_requests_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_edit_requests_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_evidences: {
+        Row: {
+          created_at: string
+          evidence_type: string
+          external_url: string | null
+          file_url: string | null
+          id: string
+          material_id: string
+          meta: Json | null
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          evidence_type: string
+          external_url?: string | null
+          file_url?: string | null
+          id?: string
+          material_id: string
+          meta?: Json | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          evidence_type?: string
+          external_url?: string | null
+          file_url?: string | null
+          id?: string
+          material_id?: string
+          meta?: Json | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_evidences_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_type: string | null
+          material_id: string
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_type?: string | null
+          material_id: string
+          sort_order?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_type?: string | null
+          material_id?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_images_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_sources: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          note: string | null
+          source_type: string | null
+          source_url: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          note?: string | null
+          source_type?: string | null
+          source_url: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          note?: string | null
+          source_type?: string | null
+          source_url?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_sources_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_tags: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          tag_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          tag_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          tag_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_tags_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      materials: {
+        Row: {
+          avg_rating: number | null
+          catalog_url: string | null
+          control_plot_ratio: number | null
+          created_at: string
+          description: string | null
+          general_use: string | null
+          id: string
+          ingredients: string | null
+          jbsa_class: string | null
+          manufacturer_name: string
+          mechanism: string | null
+          name: string
+          official_url: string | null
+          price_range: string | null
+          product_type: string | null
+          review_count: number
+          sales_status: string | null
+          seller_id: string | null
+          updated_at: string
+          usage_text: string | null
+        }
+        Insert: {
+          avg_rating?: number | null
+          catalog_url?: string | null
+          control_plot_ratio?: number | null
+          created_at?: string
+          description?: string | null
+          general_use?: string | null
+          id?: string
+          ingredients?: string | null
+          jbsa_class?: string | null
+          manufacturer_name: string
+          mechanism?: string | null
+          name: string
+          official_url?: string | null
+          price_range?: string | null
+          product_type?: string | null
+          review_count?: number
+          sales_status?: string | null
+          seller_id?: string | null
+          updated_at?: string
+          usage_text?: string | null
+        }
+        Update: {
+          avg_rating?: number | null
+          catalog_url?: string | null
+          control_plot_ratio?: number | null
+          created_at?: string
+          description?: string | null
+          general_use?: string | null
+          id?: string
+          ingredients?: string | null
+          jbsa_class?: string | null
+          manufacturer_name?: string
+          mechanism?: string | null
+          name?: string
+          official_url?: string | null
+          price_range?: string | null
+          product_type?: string | null
+          review_count?: number
+          sales_status?: string | null
+          seller_id?: string | null
+          updated_at?: string
+          usage_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_crops: {
+        Row: {
+          created_at: string
+          crop_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crop_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crop_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_crops_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_crops_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profile_crops_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          affiliation: string | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          cultivation_styles: string[] | null
+          handle: string
+          prefecture_code: number
+          prefecture_public: boolean
+          sns_url: string | null
+          standpoint: string
+          updated_at: string
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          affiliation?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          cultivation_styles?: string[] | null
+          handle: string
+          prefecture_code: number
+          prefecture_public?: boolean
+          sns_url?: string | null
+          standpoint: string
+          updated_at?: string
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          affiliation?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          cultivation_styles?: string[] | null
+          handle?: string
+          prefecture_code?: number
+          prefecture_public?: boolean
+          sns_url?: string | null
+          standpoint?: string
+          updated_at?: string
+          user_id?: string
+          website_url?: string | null
         }
         Relationships: []
       }
+      questions: {
+        Row: {
+          author_user_id: string
+          body: string
+          created_at: string
+          id: string
+          material_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_user_id: string
+          body: string
+          created_at?: string
+          id?: string
+          material_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_user_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          material_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "questions_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "questions_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          review_id: string
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          review_id: string
+          sort_order?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          review_id?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_photos_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          author_user_id: string
+          body: string
+          created_at: string
+          crop_id: string
+          has_control_plot: boolean | null
+          id: string
+          is_provided_sample: boolean
+          material_id: string
+          pesticide_ack: boolean
+          purchase_channel: string | null
+          rating: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          author_user_id: string
+          body: string
+          created_at?: string
+          crop_id: string
+          has_control_plot?: boolean | null
+          id?: string
+          is_provided_sample?: boolean
+          material_id: string
+          pesticide_ack: boolean
+          purchase_channel?: string | null
+          rating: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          author_user_id?: string
+          body?: string
+          created_at?: string
+          crop_id?: string
+          has_control_plot?: boolean | null
+          id?: string
+          is_provided_sample?: boolean
+          material_id?: string
+          pesticide_ack?: boolean
+          purchase_channel?: string | null
+          rating?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "reviews_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "reviews_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_materials: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_materials_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_materials_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "saved_materials_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      seller_accounts: {
+        Row: {
+          approved_at: string | null
+          auth_user_id: string | null
+          contact_email: string
+          contact_name: string
+          created_at: string
+          id: string
+          invite_code: string | null
+          location: string
+          login_id: string
+          logo_url: string | null
+          official_name: string
+          profile_text: string | null
+          region_scope: string
+          seller_type: string
+          status: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          auth_user_id?: string | null
+          contact_email: string
+          contact_name: string
+          created_at?: string
+          id?: string
+          invite_code?: string | null
+          location: string
+          login_id: string
+          logo_url?: string | null
+          official_name: string
+          profile_text?: string | null
+          region_scope: string
+          seller_type: string
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          auth_user_id?: string | null
+          contact_email?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          invite_code?: string | null
+          location?: string
+          login_id?: string
+          logo_url?: string | null
+          official_name?: string
+          profile_text?: string | null
+          region_scope?: string
+          seller_type?: string
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      usage_report_applications: {
+        Row: {
+          applied_on: string | null
+          created_at: string
+          detail: string | null
+          id: string
+          method: string | null
+          sort_order: number
+          updated_at: string
+          usage_report_id: string
+        }
+        Insert: {
+          applied_on?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          method?: string | null
+          sort_order?: number
+          updated_at?: string
+          usage_report_id: string
+        }
+        Update: {
+          applied_on?: string | null
+          created_at?: string
+          detail?: string | null
+          id?: string
+          method?: string | null
+          sort_order?: number
+          updated_at?: string
+          usage_report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_applications_usage_report_id_fkey"
+            columns: ["usage_report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_report_media: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          media_type: string
+          placement: string | null
+          sort_order: number
+          updated_at: string
+          url: string
+          usage_report_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type: string
+          placement?: string | null
+          sort_order?: number
+          updated_at?: string
+          url: string
+          usage_report_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type?: string
+          placement?: string | null
+          sort_order?: number
+          updated_at?: string
+          url?: string
+          usage_report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_media_usage_report_id_fkey"
+            columns: ["usage_report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_report_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metric_name: string
+          sort_order: number
+          treated_value: number | null
+          unit: string | null
+          untreated_value: number | null
+          updated_at: string
+          usage_report_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_name: string
+          sort_order?: number
+          treated_value?: number | null
+          unit?: string | null
+          untreated_value?: number | null
+          updated_at?: string
+          usage_report_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_name?: string
+          sort_order?: number
+          treated_value?: number | null
+          unit?: string | null
+          untreated_value?: number | null
+          updated_at?: string
+          usage_report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_metrics_usage_report_id_fkey"
+            columns: ["usage_report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_reports: {
+        Row: {
+          author_user_id: string
+          climate_note: string | null
+          created_at: string
+          crop_id: string
+          cultivation_tags: string[]
+          cultivation_type: string | null
+          editor_note: string | null
+          field_name: string | null
+          growth_stage: string | null
+          id: string
+          is_provided_sample: boolean
+          material_id: string
+          negative_note: string | null
+          observed_change: string
+          pesticide_ack: boolean
+          planting_date: string | null
+          prefecture_code: number | null
+          published_at: string | null
+          purpose_note: string | null
+          purpose_tags: string[]
+          status: string
+          summary: string
+          title: string | null
+          updated_at: string
+          variety: string | null
+        }
+        Insert: {
+          author_user_id: string
+          climate_note?: string | null
+          created_at?: string
+          crop_id: string
+          cultivation_tags?: string[]
+          cultivation_type?: string | null
+          editor_note?: string | null
+          field_name?: string | null
+          growth_stage?: string | null
+          id?: string
+          is_provided_sample?: boolean
+          material_id: string
+          negative_note?: string | null
+          observed_change: string
+          pesticide_ack: boolean
+          planting_date?: string | null
+          prefecture_code?: number | null
+          published_at?: string | null
+          purpose_note?: string | null
+          purpose_tags?: string[]
+          status?: string
+          summary: string
+          title?: string | null
+          updated_at?: string
+          variety?: string | null
+        }
+        Update: {
+          author_user_id?: string
+          climate_note?: string | null
+          created_at?: string
+          crop_id?: string
+          cultivation_tags?: string[]
+          cultivation_type?: string | null
+          editor_note?: string | null
+          field_name?: string | null
+          growth_stage?: string | null
+          id?: string
+          is_provided_sample?: boolean
+          material_id?: string
+          negative_note?: string | null
+          observed_change?: string
+          pesticide_ack?: boolean
+          planting_date?: string | null
+          prefecture_code?: number | null
+          published_at?: string | null
+          purpose_note?: string | null
+          purpose_tags?: string[]
+          status?: string
+          summary?: string
+          title?: string | null
+          updated_at?: string
+          variety?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_reports_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "usage_reports_author_user_id_fkey"
+            columns: ["author_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "usage_reports_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_reports_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      view_events: {
+        Row: {
+          created_at: string
+          id: string
+          target_id: string
+          target_type: string
+          updated_at: string
+          viewer_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          target_id: string
+          target_type: string
+          updated_at?: string
+          viewer_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          target_id?: string
+          target_type?: string
+          updated_at?: string
+          viewer_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "view_events_viewer_user_id_fkey"
+            columns: ["viewer_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "view_events_viewer_user_id_fkey"
+            columns: ["viewer_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      helpful_counts: {
+        Row: {
+          helpful_count: number | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Relationships: []
+      }
+      public_profiles: {
+        Row: {
+          affiliation: string | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          cultivation_styles: string[] | null
+          handle: string | null
+          prefecture_code: number | null
+          prefecture_public: boolean | null
+          sns_url: string | null
+          user_id: string | null
+          website_url: string | null
+        }
+        Insert: {
+          affiliation?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          cultivation_styles?: string[] | null
+          handle?: string | null
+          prefecture_code?: never
+          prefecture_public?: boolean | null
+          sns_url?: string | null
+          user_id?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          affiliation?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          cultivation_styles?: string[] | null
+          handle?: string | null
+          prefecture_code?: never
+          prefecture_public?: boolean | null
+          sns_url?: string | null
+          user_id?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      public_sellers: {
+        Row: {
+          approved_at: string | null
+          created_at: string | null
+          id: string | null
+          location: string | null
+          login_id: string | null
+          logo_url: string | null
+          official_name: string | null
+          profile_text: string | null
+          region_scope: string | null
+          seller_type: string | null
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          created_at?: string | null
+          id?: string | null
+          location?: string | null
+          login_id?: string | null
+          logo_url?: string | null
+          official_name?: string | null
+          profile_text?: string | null
+          region_scope?: string | null
+          seller_type?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          created_at?: string | null
+          id?: string | null
+          location?: string | null
+          login_id?: string | null
+          logo_url?: string | null
+          official_name?: string | null
+          profile_text?: string | null
+          region_scope?: string | null
+          seller_type?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      view_counts_daily: {
+        Row: {
+          target_id: string | null
+          target_type: string | null
+          view_count: number | null
+          view_date: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
@@ -1534,7 +1558,11 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
 } as const
+
