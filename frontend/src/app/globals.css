@@ -1,5 +1,9 @@
 @layer reset, base, tokens, recipes, utilities;
 
 body {
-  font-family: var(--font-noto-sans-jp), sans-serif;
+  /* fonts.sans → next/font の --font-noto-sans-jp に接続済み */
+  font-family: var(--fonts-sans);
+  background: var(--colors-surface-page);
+  color: var(--colors-text-default);
+  -webkit-font-smoothing: antialiased;
 }
