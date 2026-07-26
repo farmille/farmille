@@ -36,6 +36,8 @@ pnpm dev
 
 `pnpm install` の完了後に Panda CSS のコード生成が自動で実行されます。生成物は `styled-system/` に出力され、Git の管理対象には含まれません。
 
+`gen:types` の生成物は fmt と lint の対象外です。
+
 ## 検証
 
 変更を提出する前に、次のコマンドをすべて実行します。
