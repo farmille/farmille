@@ -15,11 +15,14 @@ import { errorMessageJa } from "@/server/errors";
 import { listContentFeed, type ContentFeedFilter } from "@/server/queries/content-feed";
 import { css } from "../../../styled-system/css";
 
-export const metadata: Metadata = createPageMetadata({
-  title: "記事を読む",
-  description: "農家の使用レポートとメーカー・JA・専門家の記事を探せます。",
-  path: "/articles",
-});
+// NEXT_PUBLIC_SITE_URL の評価をモジュール読み込み時ではなく使用時に遅延させる（layout.tsx と同じ理由）。
+export async function generateMetadata(): Promise<Metadata> {
+  return createPageMetadata({
+    title: "記事を読む",
+    description: "農家の使用レポートとメーカー・JA・専門家の記事を探せます。",
+    path: "/articles",
+  });
+}
 
 type ArticlesPageProps = {
   searchParams: Promise<{ q?: string; type?: string; page?: string }>;

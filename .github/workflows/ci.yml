@@ -50,3 +50,6 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          # CI 用の公開ダミー値。コード側にフォールバックは置かない方針のため CI 設定で与える。
+          NEXT_PUBLIC_SITE_URL: "http://localhost:3000"

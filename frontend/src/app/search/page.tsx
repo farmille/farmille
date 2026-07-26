@@ -20,11 +20,14 @@ import {
 } from "@/server/queries/tags";
 import { css } from "../../../styled-system/css";
 
-export const metadata: Metadata = createPageMetadata({
-  title: "農業資材を探す",
-  description: "目的や作物、メーカーなどの条件から農業資材を検索できます。",
-  path: "/search",
-});
+// NEXT_PUBLIC_SITE_URL の評価をモジュール読み込み時ではなく使用時に遅延させる（layout.tsx と同じ理由）。
+export async function generateMetadata(): Promise<Metadata> {
+  return createPageMetadata({
+    title: "農業資材を探す",
+    description: "目的や作物、メーカーなどの条件から農業資材を検索できます。",
+    path: "/search",
+  });
+}
 
 const shell = css({
   minH: "100dvh",
