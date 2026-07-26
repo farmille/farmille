@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { cva, css, cx } from "../../styled-system/css";
 import { ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "./icons";
 import { StarRating } from "./star-rating";
@@ -57,6 +59,8 @@ const avatar = css({
 
 export type ReviewCardProps = {
   handle: string;
+  authorHref?: string;
+  avatarSrc?: string;
   crop: string;
   rating: number;
   helpfulCount: number;
@@ -64,6 +68,11 @@ export type ReviewCardProps = {
   /** 資材名を付ける場合（ホームの新着など） */
   materialName?: string;
   photoCount?: number;
+  photos?: ReadonlyArray<{
+    id: string;
+    src: string;
+    alt: string;
+  }>;
   className?: string;
 };
 
@@ -73,14 +82,35 @@ export type ReviewCardProps = {
  */
 export function ReviewCard({
   handle,
+  authorHref,
+  avatarSrc,
   crop,
   rating,
   helpfulCount,
   body,
   materialName,
   photoCount = 0,
+  photos = [],
   className,
 }: ReviewCardProps) {
+  const author = (
+    <>
+      <span className={avatar}>
+        {avatarSrc ? (
+          <img
+            src={avatarSrc}
+            alt=""
+            className={css({ w: "100%", h: "100%", objectFit: "cover", borderRadius: "pill" })}
+          />
+        ) : (
+          <PersonIcon size={16} />
+        )}
+      </span>
+      <span className={css({ fontWeight: "700", fontSize: "sm" })}>{handle}</span>
+    </>
+  );
+  const displayedPhotoCount = photos.length > 0 ? photos.length : photoCount;
+
   return (
     <article className={cx(cardRecipe(), className)}>
       {materialName ? (
@@ -89,10 +119,24 @@ export function ReviewCard({
         </div>
       ) : null}
       <div className={css({ display: "flex", alignItems: "center", gap: "2" })}>
-        <div className={avatar}>
-          <PersonIcon size={16} />
-        </div>
-        <span className={css({ fontWeight: "700", fontSize: "sm" })}>{handle}</span>
+        {authorHref ? (
+          <Link
+            href={authorHref}
+            className={css({
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "2",
+              color: "inherit",
+              textDecoration: "none",
+            })}
+          >
+            {author}
+          </Link>
+        ) : (
+          <span className={css({ display: "inline-flex", alignItems: "center", gap: "2" })}>
+            {author}
+          </span>
+        )}
       </div>
       <div className={css({ display: "flex", alignItems: "center", gap: "2", mt: "2" })}>
         <StarRating value={rating} />
@@ -119,7 +163,7 @@ export function ReviewCard({
         <span className={cropChip}>{crop}</span>
       </div>
       <p className={css({ fontSize: "sm", color: "text.muted", lineHeight: "1.65" })}>{body}</p>
-      {photoCount > 0 ? (
+      {displayedPhotoCount > 0 ? (
         <div
           className={css({
             display: "flex",
@@ -128,23 +172,38 @@ export function ReviewCard({
             overflowX: "auto",
           })}
         >
-          {Array.from({ length: photoCount }).map((_, i) => (
-            <div
-              key={i}
-              className={css({
-                w: "70px",
-                h: "70px",
-                borderRadius: "button",
-                bg: "green.soft2",
-                display: "grid",
-                placeItems: "center",
-                flexShrink: "0",
-                color: "brand.primary",
-              })}
-            >
-              <ImagePlaceholderIcon size={20} />
-            </div>
-          ))}
+          {photos.length > 0
+            ? photos.map((photo) => (
+                <img
+                  key={photo.id}
+                  src={photo.src}
+                  alt={photo.alt}
+                  className={css({
+                    w: "18",
+                    h: "18",
+                    borderRadius: "button",
+                    objectFit: "cover",
+                    flexShrink: "0",
+                  })}
+                />
+              ))
+            : Array.from({ length: photoCount }).map((_, index) => (
+                <div
+                  key={index}
+                  className={css({
+                    w: "18",
+                    h: "18",
+                    borderRadius: "button",
+                    bg: "green.soft2",
+                    display: "grid",
+                    placeItems: "center",
+                    flexShrink: "0",
+                    color: "brand.primary",
+                  })}
+                >
+                  <ImagePlaceholderIcon size={20} />
+                </div>
+              ))}
         </div>
       ) : null}
       <div

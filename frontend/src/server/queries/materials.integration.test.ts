@@ -27,7 +27,7 @@ describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
       createServerSupabase: async () => localClient,
     }));
 
-    const { listMaterials } = await import("@/server/queries/materials");
+    const { getMaterial, listMaterials } = await import("@/server/queries/materials");
     const result = await listMaterials({ page: 1 });
 
     expect(result.ok).toBe(true);
@@ -35,6 +35,14 @@ describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
     if (result.ok) {
       expect(result.data.page).toBe(1);
       expect(result.data.total).toBeGreaterThanOrEqual(0);
+
+      const firstMaterial = result.data.items[0];
+
+      if (firstMaterial !== undefined) {
+        const detail = await getMaterial(firstMaterial.id);
+
+        expect(detail.ok).toBe(true);
+      }
     }
   });
 });

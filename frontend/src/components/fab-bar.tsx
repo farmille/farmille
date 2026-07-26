@@ -4,7 +4,6 @@ import { buttonRecipe } from "./button";
 
 const fabBarRecipe = cva({
   base: {
-    position: "absolute",
     left: "3",
     right: "3",
     bottom: "3",
@@ -19,6 +18,21 @@ const fabBarRecipe = cva({
     borderRadius: "card",
     boxShadow: "shadow.lift",
     p: "2",
+  },
+  variants: {
+    placement: {
+      container: {
+        position: "absolute",
+      },
+      viewport: {
+        position: "fixed",
+        maxW: "md",
+        mx: "auto",
+      },
+    },
+  },
+  defaultVariants: {
+    placement: "container",
   },
 });
 
@@ -43,6 +57,7 @@ const reviewLink = css({
 type FabBarProps = {
   reportHref?: string;
   reviewHref?: string;
+  placement?: "container" | "viewport";
   className?: string;
 };
 
@@ -53,10 +68,11 @@ type FabBarProps = {
 export function FabBar({
   reportHref = "/reports/new",
   reviewHref = "/reviews/new",
+  placement = "container",
   className,
 }: FabBarProps) {
   return (
-    <div className={cx(fabBarRecipe(), className)}>
+    <div className={cx(fabBarRecipe({ placement }), className)}>
       <Link href={reportHref} className={cx(buttonRecipe({ variant: "primary" }), reportLink)}>
         使用レポートを書く
       </Link>
