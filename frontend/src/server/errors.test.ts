@@ -12,6 +12,14 @@ describe("errorMessageJa", () => {
       "conflict",
       "aal2_required",
       "internal",
+      // 認証（T-13）
+      "handle_taken",
+      "email_unavailable",
+      "invalid_credentials",
+      "seller_invalid_credentials",
+      "weak_password",
+      "rate_limited",
+      "expired_link",
     ];
 
     expect(Object.keys(errorMessageJa)).toEqual(codes);

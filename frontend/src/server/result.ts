@@ -20,6 +20,13 @@ const errorStatus = {
   conflict: 409,
   aal2_required: 403,
   internal: 500,
+  handle_taken: 409,
+  email_unavailable: 409,
+  invalid_credentials: 401,
+  seller_invalid_credentials: 401,
+  weak_password: 400,
+  rate_limited: 429,
+  expired_link: 400,
 } satisfies Record<ErrorCode, number>;
 
 export function succeed<T>(data: T): Success<T> {

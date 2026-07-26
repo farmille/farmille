@@ -5,7 +5,7 @@ export default function Home() {
     <main>
       <h1
         className={css({
-          color: "green.700",
+          color: "brand.primary",
           fontSize: "2xl",
           fontWeight: "bold",
         })}
