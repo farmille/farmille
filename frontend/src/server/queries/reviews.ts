@@ -235,6 +235,70 @@ async function listByHelpfulCount(
   });
 }
 
+export type RecentReviewItem = ReviewListItem & {
+  materialName: string;
+};
+
+/** ホームの新着レビュー。published のみ・新しい順。 */
+export async function listRecentReviews({
+  limit,
+}: {
+  limit: number;
+}): Promise<Result<RecentReviewItem[]>> {
+  if (!Number.isInteger(limit) || limit < 1) {
+    throw new RangeError("limit は1以上の整数で指定してください。");
+  }
+
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(
+      `
+      ${REVIEW_SELECT},
+      material:materials!reviews_material_id_fkey (
+        name
+      )
+    `,
+    )
+    .eq("status", "published")
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: true })
+    .limit(limit);
+
+  if (error !== null) {
+    reportQueryError("新着レビューの取得に失敗", error);
+    return fail("internal");
+  }
+
+  type RecentRow = ReviewQueryRow & { material: { name: string } | null };
+  const rows: RecentRow[] = data;
+  const helpfulCounts = await getHelpfulCounts(
+    supabase,
+    rows.map(({ id }) => id),
+  );
+
+  if (!helpfulCounts.ok) {
+    return helpfulCounts;
+  }
+
+  const items: RecentReviewItem[] = [];
+
+  for (const row of rows) {
+    if (row.material === null) {
+      reportQueryError("新着レビューに資材名が無い", { reviewId: row.id });
+      return fail("internal");
+    }
+
+    const { material, ...review } = row;
+    items.push({
+      ...toReviewListItem(review, helpfulCounts.data),
+      materialName: material.name,
+    });
+  }
+
+  return succeed(items);
+}
+
 export async function listReviewsByMaterial(
   materialId: string,
   {

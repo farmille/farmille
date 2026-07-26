@@ -2,10 +2,7 @@
 
 import { cva, css, cx, type RecipeVariantProps } from "../../styled-system/css";
 
-/**
- * TAG_CATS の色相。トークン化済みの範囲で近似する。
- * 正確な色相（concern #D97A2B 等）はトークン追加が必要（最終報告に列挙）。
- */
+/** UI 上のタグ分類。DB の `condition` は `cond` に正規化する。 */
 export type TagCategory = "crop" | "concern" | "effect" | "cond" | "type" | "maker" | "name";
 
 export const TAG_CATEGORY_LABELS: Record<TagCategory, string> = {
@@ -17,6 +14,24 @@ export const TAG_CATEGORY_LABELS: Record<TagCategory, string> = {
   maker: "メーカー",
   name: "製品名",
 };
+
+/** DB / モックの category 文字列を TagChip 用に正規化する。 */
+export function toTagChipCategory(category: string): TagCategory {
+  if (category === "condition") return "cond";
+  if (
+    category === "crop" ||
+    category === "concern" ||
+    category === "effect" ||
+    category === "cond" ||
+    category === "type" ||
+    category === "maker" ||
+    category === "name"
+  ) {
+    return category;
+  }
+
+  throw new Error(`未対応のタグ分類です: ${category}`);
+}
 
 const chipRecipe = cva({
   base: {
@@ -61,14 +76,14 @@ const chipRecipe = cva({
         borderColor: "brand.primary/30",
       },
       concern: {
-        bg: "amber.soft",
-        color: "accent.warn",
-        borderColor: "accent.warn/30",
+        bg: "tag.concern/12",
+        color: "tag.concern",
+        borderColor: "tag.concern/35",
       },
       effect: {
-        bg: "green.soft2",
-        color: "brand.primaryDeep",
-        borderColor: "brand.primary/30",
+        bg: "tag.effect/12",
+        color: "tag.effect",
+        borderColor: "tag.effect/35",
       },
       cond: {
         bg: "brand.soft",
@@ -76,9 +91,9 @@ const chipRecipe = cva({
         borderColor: "accent.official/30",
       },
       type: {
-        bg: "surface.page",
-        color: "text.muted",
-        borderColor: "border.strong",
+        bg: "tag.type/12",
+        color: "tag.type",
+        borderColor: "tag.type/35",
       },
       maker: {
         bg: "surface.page",
@@ -86,9 +101,9 @@ const chipRecipe = cva({
         borderColor: "border.default",
       },
       name: {
-        bg: "amber.soft",
-        color: "text.muted",
-        borderColor: "border.strong",
+        bg: "tag.name/12",
+        color: "tag.name",
+        borderColor: "tag.name/35",
       },
     },
     selectedOn: {

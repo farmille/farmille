@@ -33,6 +33,17 @@ export default defineConfig({
           DEFAULT: { value: "#E7E5DE" },
           strong: { value: "#D8D6CD" },
         },
+        // タグ分類色（モック TAG_CATS）と危険操作色（T-22）
+        tag: {
+          concern: { value: "#D97A2B" },
+          effect: { value: "#1F9E95" },
+          type: { value: "#8B7BC0" },
+          name: { value: "#C0705F" },
+        },
+        danger: {
+          DEFAULT: { value: "#C0392B" },
+          soft: { value: "#FDECEC" },
+        },
       },
       shadows: {
         // boxShadow: "shadow" / "shadow.lift"
@@ -94,6 +105,8 @@ export default defineConfig({
           official: { value: "{colors.blue}" },
           star: { value: "{colors.star}" },
           warn: { value: "{colors.amber}" },
+          danger: { value: "{colors.danger}" },
+          dangerSoft: { value: "{colors.danger.soft}" },
         },
       },
     },

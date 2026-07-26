@@ -23,7 +23,10 @@ type MaterialListFields = Pick<
   | "avg_rating"
   | "control_plot_ratio"
   | "created_at"
+  | "description"
 >;
+
+export type MaterialSort = "reviews" | "rating" | "newest";
 
 type MaterialDetailFields = Pick<
   MaterialRow,
@@ -154,9 +157,17 @@ async function findMatchingMaterialIds(
 
 export async function listMaterials({
   tagIds,
+  makerNames,
+  materialNames,
+  sort = "reviews",
   page,
 }: {
   tagIds?: string[];
+  /** メーカー名での絞り込み（同一分類 OR）。タグではなく materials 由来。 */
+  makerNames?: string[];
+  /** 製品名での絞り込み（同一分類 OR）。タグではなく materials 由来。 */
+  materialNames?: string[];
+  sort?: MaterialSort;
   page: number;
 }): Promise<Result<Paginated<MaterialListItem>>> {
   const { from, to } = pageRange(page);
@@ -177,10 +188,11 @@ export async function listMaterials({
     });
   }
 
-  let query = supabase
-    .from("materials")
-    .select(
-      `
+  const makers = [...new Set(makerNames ?? [])];
+  const names = [...new Set(materialNames ?? [])];
+
+  let query = supabase.from("materials").select(
+    `
         id,
         name,
         manufacturer_name,
@@ -192,6 +204,7 @@ export async function listMaterials({
         avg_rating,
         control_plot_ratio,
         created_at,
+        description,
         material_images (
           id,
           url,
@@ -207,17 +220,34 @@ export async function listMaterials({
           )
         )
       `,
-      { count: "exact" },
-    )
-    .order("review_count", { ascending: false })
-    .order("id", { ascending: true })
-    .range(from, to);
+    { count: "exact" },
+  );
 
   if (materialFilter.data !== null) {
     query = query.in("id", materialFilter.data);
   }
 
-  const { data, error, count } = await query;
+  if (makers.length > 0) {
+    query = query.in("manufacturer_name", makers);
+  }
+
+  if (names.length > 0) {
+    query = query.in("name", names);
+  }
+
+  // 並び替え。同点は id で安定化。
+  if (sort === "rating") {
+    query = query
+      .order("avg_rating", { ascending: false, nullsFirst: false })
+      .order("review_count", { ascending: false })
+      .order("id", { ascending: true });
+  } else if (sort === "newest") {
+    query = query.order("created_at", { ascending: false }).order("id", { ascending: true });
+  } else {
+    query = query.order("review_count", { ascending: false }).order("id", { ascending: true });
+  }
+
+  const { data, error, count } = await query.range(from, to);
 
   if (error !== null) {
     reportQueryError("資材一覧の取得に失敗", error);
@@ -225,7 +255,13 @@ export async function listMaterials({
   }
 
   if (count === null) {
-    reportQueryError("資材一覧の総件数が返されなかった", { page, tagIds });
+    reportQueryError("資材一覧の総件数が返されなかった", {
+      page,
+      tagIds,
+      makerNames: makers,
+      materialNames: names,
+      sort,
+    });
     return fail("internal");
   }
 

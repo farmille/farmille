@@ -21,7 +21,7 @@ export type { ArticleCardProps } from "./article-card";
 export { ArtMini } from "./art-mini";
 export type { ArtMiniProps } from "./art-mini";
 
-export { TagChip, TAG_CATEGORY_LABELS } from "./tag-chip";
+export { TagChip, TAG_CATEGORY_LABELS, toTagChipCategory } from "./tag-chip";
 export type { TagCategory } from "./tag-chip";
 
 export { StarRating } from "./star-rating";
