@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getSessionUser } from "@/server/auth";
 import { cva, css } from "../../styled-system/css";
 import { ArticlesNavIcon, HomeNavIcon, MeNavIcon, PlusIcon, SearchIcon } from "./icons";
 
@@ -90,7 +91,10 @@ const ITEMS: Array<{
 ];
 
 /** 5枠 BottomNav。中央は丸型＋投稿。現在地ハイライト。 */
-export function BottomNav({ active }: BottomNavProps) {
+export async function BottomNav({ active }: BottomNavProps) {
+  const session = await getSessionUser();
+  const showPost = session === null || session.accountType === "general";
+
   return (
     <nav className={navRecipe()} aria-label="メインナビ">
       {ITEMS.slice(0, 2).map(({ id, href, label, Icon }) => (
@@ -104,11 +108,13 @@ export function BottomNav({ active }: BottomNavProps) {
           <span>{label}</span>
         </Link>
       ))}
-      <div className={postSlot}>
-        <Link href="/post" className={plusButton} aria-label="投稿する">
-          <PlusIcon />
-        </Link>
-      </div>
+      {showPost ? (
+        <div className={postSlot}>
+          <Link href="/post" className={plusButton} aria-label="投稿する">
+            <PlusIcon />
+          </Link>
+        </div>
+      ) : null}
       {ITEMS.slice(2).map(({ id, href, label, Icon }) => (
         <Link
           key={id}

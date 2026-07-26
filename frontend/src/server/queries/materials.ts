@@ -56,6 +56,11 @@ export type MaterialListItem = MaterialListFields & {
   tags: MaterialTag[];
 };
 
+export type PostingMaterial = Pick<
+  MaterialRow,
+  "id" | "name" | "manufacturer_name" | "review_count" | "avg_rating" | "seller_id"
+>;
+
 export type MaterialDetail = MaterialDetailFields & {
   images: MaterialImage[];
   evidences: MaterialEvidence[];
@@ -360,4 +365,79 @@ export async function getMaterial(id: string): Promise<Result<MaterialDetail>> {
     evidences: material_evidences.toSorted(bySortOrder),
     tags: materialTags(tagRelations),
   });
+}
+
+const POSTING_MATERIAL_LIMIT = 20;
+const POSTING_QUERY_MAX_LENGTH = 100;
+
+function escapeLikePattern(value: string): string {
+  return value.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_");
+}
+
+function byPostingPriority(left: PostingMaterial, right: PostingMaterial): number {
+  return (
+    right.review_count - left.review_count ||
+    left.name.localeCompare(right.name, "ja") ||
+    left.id.localeCompare(right.id)
+  );
+}
+
+/**
+ * 投稿先選択用の軽量検索。
+ * 資材名とメーカー名をそれぞれ部分一致で検索する。
+ */
+export async function searchPostingMaterials(query: string): Promise<Result<PostingMaterial[]>> {
+  const normalizedQuery = query.trim();
+  const select = "id, name, manufacturer_name, review_count, avg_rating, seller_id" as const;
+
+  if (normalizedQuery.length > POSTING_QUERY_MAX_LENGTH) {
+    return fail("invalid_body");
+  }
+
+  const supabase = await createServerSupabase();
+
+  if (normalizedQuery.length === 0) {
+    const { data, error } = await supabase
+      .from("materials")
+      .select(select)
+      .order("review_count", { ascending: false })
+      .order("name", { ascending: true })
+      .limit(POSTING_MATERIAL_LIMIT);
+
+    if (error !== null) {
+      reportQueryError("投稿先候補の取得に失敗", error);
+      return fail("internal");
+    }
+
+    const rows: PostingMaterial[] = data;
+    return succeed(rows);
+  }
+
+  const pattern = `%${escapeLikePattern(normalizedQuery)}%`;
+  const [nameResult, manufacturerResult] = await Promise.all([
+    supabase.from("materials").select(select).ilike("name", pattern).limit(POSTING_MATERIAL_LIMIT),
+    supabase
+      .from("materials")
+      .select(select)
+      .ilike("manufacturer_name", pattern)
+      .limit(POSTING_MATERIAL_LIMIT),
+  ]);
+
+  if (nameResult.error !== null || manufacturerResult.error !== null) {
+    reportQueryError("投稿先の部分一致検索に失敗", {
+      nameError: nameResult.error,
+      manufacturerError: manufacturerResult.error,
+    });
+    return fail("internal");
+  }
+
+  const materialsById = new Map<string, PostingMaterial>();
+
+  for (const material of [...nameResult.data, ...manufacturerResult.data]) {
+    materialsById.set(material.id, material);
+  }
+
+  return succeed(
+    [...materialsById.values()].toSorted(byPostingPriority).slice(0, POSTING_MATERIAL_LIMIT),
+  );
 }

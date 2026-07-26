@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { getSessionUser } from "@/server/auth";
 import { cva, css, cx } from "../../styled-system/css";
 import { buttonRecipe } from "./button";
+import { ReviewCompletionToast } from "./review-completion-toast";
 
 const fabBarRecipe = cva({
   base: {
@@ -65,20 +67,29 @@ type FabBarProps = {
  * 資材詳細等の固定 CTA バー。
  * 文言は D8：「使用レポートを書く」「レビューを書く」。
  */
-export function FabBar({
+export async function FabBar({
   reportHref = "/reports/new",
   reviewHref = "/reviews/new",
   placement = "container",
   className,
 }: FabBarProps) {
+  const session = await getSessionUser();
+
+  if (session !== null && session.accountType !== "general") {
+    return null;
+  }
+
   return (
-    <div className={cx(fabBarRecipe({ placement }), className)}>
-      <Link href={reportHref} className={cx(buttonRecipe({ variant: "primary" }), reportLink)}>
-        使用レポートを書く
-      </Link>
-      <Link href={reviewHref} className={cx(buttonRecipe({ variant: "ghost" }), reviewLink)}>
-        レビューを書く
-      </Link>
-    </div>
+    <>
+      <ReviewCompletionToast />
+      <div className={cx(fabBarRecipe({ placement }), className)}>
+        <Link href={reportHref} className={cx(buttonRecipe({ variant: "primary" }), reportLink)}>
+          使用レポートを書く
+        </Link>
+        <Link href={reviewHref} className={cx(buttonRecipe({ variant: "ghost" }), reviewLink)}>
+          レビューを書く
+        </Link>
+      </div>
+    </>
   );
 }

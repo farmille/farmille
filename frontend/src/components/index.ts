@@ -57,3 +57,4 @@ export { ArticlesToolbar } from "./articles-toolbar";
 
 export { sellerTypeLabel } from "./seller-type-label";
 export { formatDateJa } from "./format-date";
+export { FormPageShell } from "./form-page-shell";
