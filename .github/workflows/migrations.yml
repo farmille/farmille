@@ -1,0 +1,51 @@
+name: Migration check
+
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/**"
+
+permissions:
+  contents: read
+
+jobs:
+  detect_config:
+    name: Detect Supabase configuration
+    runs-on: ubuntu-latest
+    outputs:
+      config_exists: ${{ steps.config.outputs.exists }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Detect supabase/config.toml
+        id: config
+        shell: bash
+        run: |
+          if [[ -f supabase/config.toml ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  migration:
+    name: Reset local Supabase database
+    needs: detect_config
+    if: needs.detect_config.outputs.config_exists == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Start local Supabase
+        run: npx --yes supabase@latest start
+
+      - name: Reset local Supabase database
+        run: npx --yes supabase@latest db reset
