@@ -9,9 +9,11 @@ import {
   linkRowStyle,
   textLinkStyle,
 } from "@/components/auth/fields";
+import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "登録完了 | Farmille",
+  title: "登録完了",
+  robots: NO_INDEX_ROBOTS,
 };
 
 export default async function SignupDonePage({

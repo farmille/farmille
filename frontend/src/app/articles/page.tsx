@@ -10,14 +10,16 @@ import {
   ReportCard,
 } from "@/components";
 import { sellerTypeLabel } from "@/components/seller-type-label";
+import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { listContentFeed, type ContentFeedFilter } from "@/server/queries/content-feed";
 import { css } from "../../../styled-system/css";
 
-export const metadata: Metadata = {
-  title: "記事を読む | Farmille",
+export const metadata: Metadata = createPageMetadata({
+  title: "記事を読む",
   description: "農家の使用レポートとメーカー・JA・専門家の記事を探せます。",
-};
+  path: "/articles",
+});
 
 type ArticlesPageProps = {
   searchParams: Promise<{ q?: string; type?: string; page?: string }>;

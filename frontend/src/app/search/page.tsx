@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import { AppBar, BottomNav, EmptyState, MaterialCard } from "@/components";
 import { SearchSortSelect } from "@/components/search/search-sort-select";
 import { TagSearchBox } from "@/components/search/tag-search-box";
@@ -7,6 +9,7 @@ import {
   parseTagsQuery,
   resolveSelectedTags,
 } from "@/components/search/tag-selection";
+import { createPageMetadata } from "@/lib/seo";
 import { listMaterials } from "@/server/queries/materials";
 import {
   listSearchSuggestions,
@@ -16,6 +19,12 @@ import {
   SEASONAL_TAG_PAIRS,
 } from "@/server/queries/tags";
 import { css } from "../../../styled-system/css";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "農業資材を探す",
+  description: "目的や作物、メーカーなどの条件から農業資材を検索できます。",
+  path: "/search",
+});
 
 const shell = css({
   minH: "100dvh",

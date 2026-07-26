@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Button, Select } from "@/components";
+import { createReviewListJsonLd, serializeJsonLd } from "@/lib/seo";
 import { listReviewsByMaterial } from "@/server/queries/reviews";
 import { css } from "../../../../../styled-system/css";
 
@@ -36,6 +37,7 @@ export async function generateMetadata({ params }: MaterialReviewsPageProps): Pr
   return materialMetadata(material, {
     titleSuffix: "のレビュー",
     description: `${material.name}を使った農家のレビューを一覧で確認できます。`,
+    pathSuffix: "/reviews",
   });
 }
 
@@ -48,6 +50,20 @@ export default async function MaterialReviewsPage({
   const { sort, page } = parseReviewSearchParams(requestedSearchParams);
   const reviews = unwrapQueryResult(await listReviewsByMaterial(id, { sort, page }));
   const materialPath = `/materials/${material.id}`;
+  const reviewListJsonLd =
+    page === 1
+      ? createReviewListJsonLd({
+          materialId: material.id,
+          materialName: material.name,
+          reviews: reviews.items.slice(0, 10).map((review) => ({
+            id: review.id,
+            rating: review.rating,
+            body: review.body,
+            createdAt: review.created_at,
+            authorName: review.author?.handle ?? "退会したユーザー",
+          })),
+        })
+      : null;
   const hrefForPage = (targetPage: number): string => {
     const query = new URLSearchParams({
       sort,
@@ -59,6 +75,12 @@ export default async function MaterialReviewsPage({
 
   return (
     <MaterialPageShell title={`${material.name}のレビュー`} backHref={materialPath}>
+      {reviewListJsonLd === null ? null : (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(reviewListJsonLd) }}
+        />
+      )}
       <section className={materialSummary} aria-labelledby="reviews-page-heading">
         <h1
           id="reviews-page-heading"

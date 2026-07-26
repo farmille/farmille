@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
+
+import { createRootMetadata } from "@/lib/seo";
+
 import "./globals.css";
 
 const notoSansJp = Noto_Sans_JP({
@@ -7,10 +10,7 @@ const notoSansJp = Noto_Sans_JP({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Farmille",
-  description: "農業資材のレビューを共有するプラットフォーム",
-};
+export const metadata: Metadata = createRootMetadata();
 
 export default function RootLayout({
   children,

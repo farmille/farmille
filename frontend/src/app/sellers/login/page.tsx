@@ -3,9 +3,11 @@ import type { Metadata } from "next";
 import { SellerLoginForm } from "@/app/sellers/login/seller-login-form";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { safeNextPath } from "@/lib/auth/safe-next";
+import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "出品者ログイン | Farmille",
+  title: "出品者ログイン",
+  robots: NO_INDEX_ROBOTS,
 };
 
 export default async function SellerLoginPage({

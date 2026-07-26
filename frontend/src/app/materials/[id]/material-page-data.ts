@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
+import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { getMaterial, type MaterialDetail } from "@/server/queries/materials";
 import type { Result } from "@/server/result";
@@ -34,27 +35,25 @@ export async function loadMaterialOrNotFound(id: string): Promise<MaterialDetail
   return result.data;
 }
 
+export function materialDescription(material: MaterialDetail): string {
+  return (
+    material.description ??
+    `${material.name}の製品情報、使用レポート、農家のレビューを確認できます。`
+  );
+}
+
 export function materialMetadata(
   material: MaterialDetail,
-  options: { titleSuffix?: string; description?: string } = {},
+  options: { titleSuffix?: string; description?: string; pathSuffix?: string } = {},
 ): Metadata {
-  const title = options.titleSuffix
-    ? `${material.name}${options.titleSuffix}｜Farmille`
-    : `${material.name}｜Farmille`;
-  const description =
-    options.description ??
-    material.description ??
-    `${material.name}の製品情報、使用レポート、農家のレビューを確認できます。`;
+  const title = options.titleSuffix ? `${material.name}${options.titleSuffix}` : material.name;
+  const description = options.description ?? materialDescription(material);
   const primaryImage = material.images[0]?.url;
 
-  return {
+  return createPageMetadata({
     title,
     description,
-    openGraph: {
-      type: "website",
-      title,
-      description,
-      ...(primaryImage === undefined ? {} : { images: [{ url: primaryImage }] }),
-    },
-  };
+    path: `/materials/${material.id}${options.pathSuffix ?? ""}`,
+    ...(primaryImage === undefined ? {} : { imageUrls: [primaryImage] }),
+  });
 }

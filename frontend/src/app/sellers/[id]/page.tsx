@@ -5,6 +5,7 @@ import { cache } from "react";
 
 import { AppBar, ArtMini, EmptyState, MaterialCard, SectionHeading, StatCard } from "@/components";
 import { ArticlesNavIcon } from "@/components/icons";
+import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { getPublicSellerPage, type PublicSellerPageData } from "@/server/queries/public-sellers";
 import type { Result } from "@/server/result";
@@ -103,20 +104,15 @@ type SellerPageProps = {
 export async function generateMetadata({ params }: SellerPageProps): Promise<Metadata> {
   const { id } = await params;
   const { seller } = await loadSellerOrNotFound(id);
-  const title = `${seller.officialName}｜Farmille`;
   const description =
     seller.profileText ?? `${seller.officialName}の掲載資材と投稿記事を確認できます。`;
 
-  return {
-    title,
+  return createPageMetadata({
+    title: seller.officialName,
     description,
-    openGraph: {
-      type: "website",
-      title,
-      description,
-      ...(seller.logoUrl === null ? {} : { images: [{ url: seller.logoUrl }] }),
-    },
-  };
+    path: `/sellers/${seller.id}`,
+    ...(seller.logoUrl === null ? {} : { imageUrls: [seller.logoUrl] }),
+  });
 }
 
 export default async function SellerPage({ params }: SellerPageProps) {

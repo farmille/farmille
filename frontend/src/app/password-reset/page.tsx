@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 
 import { PasswordResetForm } from "@/app/password-reset/password-reset-form";
 import { AuthScreen } from "@/components/auth/auth-screen";
+import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "パスワード再設定 | Farmille",
+  title: "パスワード再設定",
+  robots: NO_INDEX_ROBOTS,
 };
 
 export default function PasswordResetPage() {
