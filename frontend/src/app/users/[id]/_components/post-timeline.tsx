@@ -1,0 +1,83 @@
+import Link from "next/link";
+
+import { EmptyState, ReportCard, ReviewCard } from "@/components";
+import type { PublicProfilePageData, PublicProfilePost } from "@/server/queries/public-profiles";
+import { css } from "../../../../../styled-system/css";
+
+const stack = css({
+  display: "flex",
+  flexDirection: "column",
+  gap: "2.5",
+});
+
+const reviewDestination = css({
+  display: "inline-flex",
+  mt: "2",
+  color: "brand.primary",
+  fontSize: "sm",
+  fontWeight: "700",
+  textDecoration: "none",
+});
+
+type PostTimelineProps = {
+  profile: PublicProfilePageData["profile"];
+  posts: readonly PublicProfilePost[];
+};
+
+export function PostTimeline({ profile, posts }: PostTimelineProps) {
+  if (posts.length === 0) {
+    return (
+      <EmptyState
+        title="公開中の投稿はまだありません"
+        description="レビューや使用レポートが公開されると、ここに表示されます。"
+      />
+    );
+  }
+
+  const authorHref = `/users/${profile.userId}`;
+
+  return (
+    <div className={stack}>
+      {posts.map((post) =>
+        post.kind === "review" ? (
+          <article key={`review-${post.id}`}>
+            <ReviewCard
+              handle={profile.handle}
+              authorHref={authorHref}
+              avatarSrc={profile.avatarUrl ?? undefined}
+              crop={post.cropName}
+              rating={post.rating}
+              helpfulCount={post.helpfulCount}
+              body={post.body}
+              materialName={post.materialName}
+              photos={post.photos.map((photo) => ({
+                id: photo.id,
+                src: photo.url,
+                alt: photo.alt,
+              }))}
+            />
+            <Link
+              href={`/materials/${post.materialId}#review-${post.id}`}
+              className={reviewDestination}
+            >
+              資材詳細でこのレビューを見る →
+            </Link>
+          </article>
+        ) : (
+          <ReportCard
+            key={`usage-report-${post.id}`}
+            title={post.title}
+            author={profile.handle}
+            authorHref={authorHref}
+            avatarSrc={profile.avatarUrl ?? undefined}
+            crop={post.cropName}
+            helpfulCount={post.helpfulCount}
+            coverSrc={post.coverUrl ?? undefined}
+            href={`/reports/${post.id}`}
+            layout="list"
+          />
+        ),
+      )}
+    </div>
+  );
+}

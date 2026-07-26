@@ -113,6 +113,8 @@ const helpfulBtn = cva({
 export type ReportCardProps = {
   title: string;
   author: string;
+  authorHref?: string;
+  avatarSrc?: string;
   crop: string;
   helpfulCount: number;
   viewCount?: number;
@@ -126,6 +128,8 @@ export type ReportCardProps = {
 export function ReportCard({
   title,
   author,
+  authorHref,
+  avatarSrc,
   crop,
   helpfulCount,
   viewCount,
@@ -135,22 +139,64 @@ export function ReportCard({
   className,
 }: ReportCardProps) {
   const compact = layout === "scroll" || layout === "grid";
-
-  return (
-    <Link href={href} className={cx(cardRecipe({ layout }), className)}>
-      <div className={coverRecipe({ layout })}>
-        {coverSrc ? (
+  const authorContent = (
+    <>
+      <span
+        className={css({
+          w: compact ? "18px" : "26px",
+          h: compact ? "18px" : "26px",
+          borderRadius: "pill",
+          bg: "brand.soft",
+          display: "grid",
+          placeItems: "center",
+          color: "brand.primary",
+          flexShrink: "0",
+          overflow: "hidden",
+        })}
+      >
+        {avatarSrc ? (
           <img
-            src={coverSrc}
+            src={avatarSrc}
             alt=""
             className={css({ w: "100%", h: "100%", objectFit: "cover" })}
           />
         ) : (
-          <ImagePlaceholderIcon />
+          <PersonIcon size={compact ? 10 : 14} />
         )}
-      </div>
+      </span>
+      <span>{author}</span>
+    </>
+  );
+
+  return (
+    <article className={cx(cardRecipe({ layout }), className)}>
+      <Link
+        href={href}
+        aria-label={title}
+        className={css({ display: "block", color: "inherit", textDecoration: "none" })}
+      >
+        <div className={coverRecipe({ layout })}>
+          {coverSrc ? (
+            <img
+              src={coverSrc}
+              alt=""
+              className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+            />
+          ) : (
+            <ImagePlaceholderIcon />
+          )}
+        </div>
+      </Link>
       <div className={bodyRecipe({ layout })}>
-        <div className={titleRecipe({ layout })}>{title}</div>
+        <Link
+          href={href}
+          className={cx(
+            titleRecipe({ layout }),
+            css({ display: "block", color: "inherit", textDecoration: "none" }),
+          )}
+        >
+          {title}
+        </Link>
         <div
           className={css({
             display: "flex",
@@ -162,21 +208,30 @@ export function ReportCard({
             flexWrap: "wrap",
           })}
         >
-          <span
-            className={css({
-              w: compact ? "18px" : "26px",
-              h: compact ? "18px" : "26px",
-              borderRadius: "pill",
-              bg: "brand.soft",
-              display: "grid",
-              placeItems: "center",
-              color: "brand.primary",
-              flexShrink: "0",
-            })}
-          >
-            <PersonIcon size={compact ? 10 : 14} />
-          </span>
-          {author}
+          {authorHref ? (
+            <Link
+              href={authorHref}
+              className={css({
+                display: "inline-flex",
+                alignItems: "center",
+                gap: compact ? "1" : "1.5",
+                color: "inherit",
+                textDecoration: "none",
+              })}
+            >
+              {authorContent}
+            </Link>
+          ) : (
+            <span
+              className={css({
+                display: "inline-flex",
+                alignItems: "center",
+                gap: compact ? "1" : "1.5",
+              })}
+            >
+              {authorContent}
+            </span>
+          )}
           {!compact ? (
             <span
               className={css({
@@ -213,6 +268,6 @@ export function ReportCard({
           ) : null}
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
