@@ -13,6 +13,8 @@ cp .env.example .env.local
 
 `.env.local` の必須項目を、利用する Supabase プロジェクトと公開サイトの値に置き換えてください。`SUPABASE_SERVICE_ROLE_KEY` はサーバー専用であり、ブラウザへ公開してはいけません。
 
+`pnpm dev` / `pnpm build` には `NEXT_PUBLIC_SITE_URL`（OGP・sitemap・robots の絶対 URL 生成に使用）が必須です。`src/env.ts` が fail fast のため、未設定のまま実行するとエラーになります。
+
 開発サーバーは次のコマンドで起動します。
 
 ```bash

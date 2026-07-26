@@ -10,7 +10,12 @@ const notoSansJp = Noto_Sans_JP({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = createRootMetadata();
+// NEXT_PUBLIC_SITE_URL の評価をモジュール読み込み時ではなく使用時に遅延させる。
+// ルートレイアウトは全ページから読み込まれるため、モジュール直下で評価すると
+// ビルドの page data collection で env 未設定エラーが全ページに波及する。
+export async function generateMetadata(): Promise<Metadata> {
+  return createRootMetadata();
+}
 
 export default function RootLayout({
   children,

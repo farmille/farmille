@@ -4,6 +4,12 @@ import { absoluteUrl } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { listSitemapEntries, type SitemapEntry } from "@/server/queries/sitemap";
 
+// sitemap.xml は既定でキャッシュされ、ビルド時に一度だけ静的生成される
+// （Next.js のキャッシュ規約）。資材・記事・レビューは常時追加されるため、
+// ビルド時点の DB スナップショットで固定させず、リクエスト毎に最新化する。
+// 副次効果として、ビルド時に Supabase への疎通が不要になる（CI で env 未設定でも失敗しない）。
+export const dynamic = "force-dynamic";
+
 function dynamicUrls(
   entries: readonly SitemapEntry[],
   pathFor: (id: string) => string,
