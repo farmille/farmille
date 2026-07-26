@@ -244,3 +244,22 @@ export function ImagePlaceholderIcon({ size = 24, className, ...rest }: IconProp
     </svg>
   );
 }
+
+/** 農薬非断定の同意・コンプライアンス注記用チェック。 */
+export function CheckIcon({ size = 16, className, ...rest }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      className={className}
+      aria-hidden
+      {...rest}
+    >
+      <path d="M5 12.5l5 5L20 7" />
+    </svg>
+  );
+}
