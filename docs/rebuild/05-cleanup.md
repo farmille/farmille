@@ -9,7 +9,7 @@
 | docs/handoff/onboarding.md の §9（既知の地雷・secret 事故記録・ローテーション未実施） | docs/ops/security-notes.md（要点を抽出して新規作成） | ローテーションは未実施のまま。刷新と無関係に有効な運用記録 |
 | docs/handoff/access-checklist.md | docs/ops/access-checklist.md | 権限棚卸しは継続利用 |
 | docs/email-templates/ | 残置（docs/email-templates/ のまま） | Supabase Auth のメールテンプレートはスキーマ非依存で v2 でも使う |
-| backend/scripts/excel_to_seed_sql.py・excel_to_sources_sql.py・validate_excel_for_prod.py・rehost_product_images.py・fetch_og_images.py・run_sql_via_mgmt_api.py・configure_supabase_smtp.py・create_farmille_maker.py・gen_maker_setup.py | tools/migration/legacy/ | 資材マスタ移行（T-12）の参照実装・メーカー名正規化ロジックの正。移行完了後に tools/migration/legacy/ ごと削除してよい |
+| backend/scripts/excel_to_seed_sql.py・excel_to_sources_sql.py・validate_excel_for_prod.py・rehost_product_images.py・fetch_og_images.py・run_sql_via_mgmt_api.py・configure_supabase_smtp.py・create_farmille_maker.py・gen_maker_setup.py・prod_import_2026_06_09.py・prod_import_sources_2026-06-09.py | tools/migration/legacy/ | 資材マスタ移行（T-12）の参照実装・メーカー名正規化ロジックの正。移行完了後に tools/migration/legacy/ ごと削除してよい |
 
 ## 2. 第1弾削除（M0・T-01。移設完了後）
 

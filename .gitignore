@@ -42,7 +42,7 @@ tmp_*.sql
 function_document.md
 meeting_document.md
 
-# BS資材 master Excel (binary, used by backend/scripts/excel_to_seed_sql.py to
+# BS資材 master Excel (binary, used by tools/migration/legacy/excel_to_seed_sql.py to
 # produce supabase/migrations/<ts>_seed_products_from_ryosei_export.sql).
 # Track via setup-log instead of committing the workbook. 2026-06-15: broadened from the
 # single .xlsm name to all workbooks — *_complete.xlsx (381製品/84社 の proprietary master)

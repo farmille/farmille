@@ -72,7 +72,7 @@ farmille/
 │   └── .oxlintrc.json / eslint.config.mjs / oxfmt 設定
 ├── supabase/
 │   ├── config.toml
-│   └── migrations/      # v2 系のみ（旧28本は削除）
+│   └── migrations/      # v2 系のみ（旧27本は tools/migration/legacy/migrations-v1/ へ退避済み）
 ├── tools/migration/     # 資材マスタ移行スクリプト（一次実行）
 ├── docs/
 │   ├── rebuild/         # 本設計（正）＋ reference/ ＋ tasks/

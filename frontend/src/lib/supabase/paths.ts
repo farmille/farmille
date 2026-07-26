@@ -9,8 +9,6 @@
  *
  * skill §3.2 バリデーション原則: BFF 側の `_image_path.py` と対で、フロントでも
  * 取れた path を送信前に最低限チェックできるようにする。
- *
- * 参照: docs/specs/image-edit-and-launch-ready.md §5.3 / §11.3
  */
 export function publicUrlToPath(publicUrl: string, bucket: string): string | null {
   try {
