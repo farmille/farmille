@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Farmille frontend
 
-## Getting Started
+Farmille の Web アプリケーションです。Next.js 16、TypeScript、Panda CSS を使用します。
 
-First, run the development server:
+## セットアップ
+
+依存関係をインストールし、環境変数のひな型をコピーします。
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env.local` の必須項目を、利用する Supabase プロジェクトと公開サイトの値に置き換えてください。`SUPABASE_SERVICE_ROLE_KEY` はサーバー専用であり、ブラウザへ公開してはいけません。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+開発サーバーは次のコマンドで起動します。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm dev
+```
 
-## Learn More
+## スクリプト
 
-To learn more about Next.js, take a look at the following resources:
+| コマンド             | 用途                                        |
+| -------------------- | ------------------------------------------- |
+| `pnpm dev`           | 開発サーバーを起動する                      |
+| `pnpm build`         | 本番用にビルドする                          |
+| `pnpm start`         | ビルド済みアプリを起動する                  |
+| `pnpm lint`          | oxlint と ESLint を実行する                 |
+| `pnpm format`        | oxfmt でファイルを整形する                  |
+| `pnpm format:check`  | oxfmt による整形差分の有無を確認する        |
+| `pnpm check`         | lint、型検査、テストをまとめて実行する      |
+| `pnpm test`          | Vitest を監視モードで実行する               |
+| `pnpm gen:types`     | 接続先の Supabase から型定義を生成する      |
+| `pnpm gen:types:dev` | linked 状態の Supabase から型定義を生成する |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`pnpm install` の完了後に Panda CSS のコード生成が自動で実行されます。生成物は `styled-system/` に出力され、Git の管理対象には含まれません。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 検証
 
-## Deploy on Vercel
+変更を提出する前に、次のコマンドをすべて実行します。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm install
+pnpm lint
+pnpm format:check
+pnpm exec tsc --noEmit
+pnpm exec vitest run
+pnpm build
+pnpm audit --audit-level=high
+```
