@@ -1,0 +1,37 @@
+import { cva, cx, type RecipeVariantProps } from "../../styled-system/css";
+
+const inputRecipe = cva({
+  base: {
+    w: "100%",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "border.strong",
+    bg: "surface.card",
+    color: "text.default",
+    borderRadius: "input",
+    px: "3",
+    py: "2.5",
+    fontSize: "md",
+    fontFamily: "sans",
+    _placeholder: { color: "text.subtle" },
+    _focus: {
+      outlineWidth: "2px",
+      outlineStyle: "solid",
+      outlineColor: "brand.soft",
+      borderColor: "brand.primary",
+    },
+  },
+});
+
+export type InputVariants = RecipeVariantProps<typeof inputRecipe>;
+
+type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> & {
+  className?: string;
+};
+
+/** 単行テキスト入力（モック .input）。 */
+export function Input({ className, ...rest }: InputProps) {
+  return <input className={cx(inputRecipe(), className)} {...rest} />;
+}
+
+export { inputRecipe };
