@@ -29,15 +29,9 @@ vi.mock("next/image", () => ({
 
 // next/link は <a> に降ろす
 vi.mock("next/link", () => ({
-  default: (
-    props: { href: string; children: React.ReactNode } & Record<string, unknown>,
-  ) => {
+  default: (props: { href: string; children: React.ReactNode } & Record<string, unknown>) => {
     const { href, children, ...rest } = props;
-    return React.createElement(
-      "a",
-      { href, ...rest },
-      children as React.ReactNode,
-    );
+    return React.createElement("a", { href, ...rest }, children as React.ReactNode);
   },
 }));
 

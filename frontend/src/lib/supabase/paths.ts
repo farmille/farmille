@@ -12,10 +12,7 @@
  *
  * 参照: docs/specs/image-edit-and-launch-ready.md §5.3 / §11.3
  */
-export function publicUrlToPath(
-  publicUrl: string,
-  bucket: string,
-): string | null {
+export function publicUrlToPath(publicUrl: string, bucket: string): string | null {
   try {
     const url = new URL(publicUrl);
     if (!url.hostname.endsWith(".supabase.co")) return null;
