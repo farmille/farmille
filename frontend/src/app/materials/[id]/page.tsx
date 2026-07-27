@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { buttonRecipe, EmptyState, FabBar, ReportCard, SectionHeading } from "@/components";
+import { buttonRecipe, EmptyState, ReportCard, SectionHeading } from "@/components";
+import { FabBar } from "@/components/fab-bar";
 import { createProductJsonLd, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import {

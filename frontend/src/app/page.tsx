@@ -1,13 +1,7 @@
 import Link from "next/link";
 
-import {
-  AppBar,
-  BottomNav,
-  MaterialCard,
-  ReportCard,
-  ReviewCard,
-  SectionHeading,
-} from "@/components";
+import { AppBar, MaterialCard, ReportCard, ReviewCard, SectionHeading } from "@/components";
+import { BottomNav } from "@/components/bottom-nav";
 import { TagSearchBox } from "@/components/search/tag-search-box";
 import { getSessionUser } from "@/server/auth";
 import { listMaterials } from "@/server/queries/materials";

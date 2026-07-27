@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { AppBar, BottomNav } from "@/components";
+import { AppBar } from "@/components";
+import { BottomNav } from "@/components/bottom-nav";
 import { errorMessageJa } from "@/server/errors";
 import { listMaterialsForCompare } from "@/server/queries/saved-materials";
 import { css } from "../../../../../styled-system/css";

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { AppBar, BottomNav, StatCard } from "@/components";
+import { AppBar, StatCard } from "@/components";
+import { BottomNav } from "@/components/bottom-nav";
 import { isPrefectureCode, PREFECTURES } from "@/lib/prefectures";
 import { errorMessageJa } from "@/server/errors";
 import { getMyPageData } from "@/server/queries/me-page";

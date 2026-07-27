@@ -1,6 +1,8 @@
 import { cva, css, cx } from "../../../../../../styled-system/css";
 import { CheckIcon } from "@/components/icons";
 
+export { SectionHeading } from "@/components/section-heading";
+
 export const formStyles = {
   field: css({ mt: "5" }),
   firstField: css({ mt: "0" }),
@@ -55,40 +57,6 @@ const badge = cva({
       false: { bg: "surface.page", color: "text.subtle" },
     },
   },
-});
-
-const section = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "2",
-  mt: "7.5",
-  pt: "5",
-  borderTopWidth: "1px",
-  borderTopStyle: "solid",
-  borderTopColor: "border.default",
-});
-
-const sectionFirst = css({ mt: "1.5", pt: "3.5", borderTopWidth: "0" });
-
-const sectionNumber = css({
-  w: "5.5",
-  h: "5.5",
-  borderRadius: "pill",
-  bg: "brand.primary",
-  color: "surface.card",
-  display: "grid",
-  placeItems: "center",
-  flexShrink: "0",
-  fontSize: "xs",
-  fontWeight: "800",
-});
-
-const sectionTitle = css({ m: "0", fontSize: "lg", fontWeight: "700" });
-const sectionSub = css({
-  ml: "auto",
-  fontSize: "xs",
-  color: "text.subtle",
-  textAlign: "right",
 });
 
 const fieldError = css({
@@ -242,26 +210,6 @@ export function FieldLabel({
       {children}
       <span className={badge({ required: required === true })}>{required ? "必須" : "任意"}</span>
     </label>
-  );
-}
-
-export function SectionHeading({
-  number,
-  title,
-  sub,
-  first = false,
-}: {
-  number: string;
-  title: string;
-  sub?: string;
-  first?: boolean;
-}) {
-  return (
-    <div className={cx(section, first && sectionFirst)}>
-      <span className={sectionNumber}>{number}</span>
-      <h2 className={sectionTitle}>{title}</h2>
-      {sub ? <span className={sectionSub}>{sub}</span> : null}
-    </div>
   );
 }
 

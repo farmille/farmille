@@ -4,11 +4,11 @@ import {
   AppBar,
   ArticleCard,
   ArticlesToolbar,
-  BottomNav,
   EmptyState,
   Pagination,
   ReportCard,
 } from "@/components";
+import { BottomNav } from "@/components/bottom-nav";
 import { sellerTypeLabel } from "@/components/seller-type-label";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";

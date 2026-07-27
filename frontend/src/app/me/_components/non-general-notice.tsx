@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { AppBar, BottomNav } from "@/components";
+import { AppBar } from "@/components";
+import { BottomNav } from "@/components/bottom-nav";
 import type { AccountType } from "@/server/auth";
 import { css } from "../../../../styled-system/css";
 

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
 import { Button, Select } from "@/components";
+import { Pagination } from "@/components/pagination";
 import { createReviewListJsonLd, serializeJsonLd } from "@/lib/seo";
 import { listReviewsByMaterial } from "@/server/queries/reviews";
 import { css } from "../../../../../styled-system/css";
 
 import { MaterialPageShell } from "../_components/page-shell";
-import { Pagination } from "../_components/pagination";
 import { ReviewList } from "../_components/review-list";
 import { loadMaterialOrNotFound, materialMetadata } from "../material-page-data";
 import { unwrapQueryResult } from "../query-result";
