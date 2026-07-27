@@ -20,6 +20,8 @@ describe("errorMessageJa", () => {
       "weak_password",
       "rate_limited",
       "expired_link",
+      // 通報（T-34）
+      "already_reported",
     ];
 
     expect(Object.keys(errorMessageJa)).toEqual(codes);

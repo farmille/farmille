@@ -1,8 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { toggleHelpfulAction } from "@/server/actions/helpful";
+import { createReportAction } from "@/server/actions/reports";
+import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 import { cva, css, cx } from "../../styled-system/css";
 import { ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "./icons";
+import { ReportDialog } from "./report-dialog";
 import { ReviewOwnerActions } from "./review-owner-actions";
 import { StarRating } from "./star-rating";
 
@@ -48,6 +52,16 @@ const helpfulBtn = css({
   cursor: "default",
 });
 
+const helpfulBtnInteractive = css({
+  cursor: "pointer",
+});
+
+const helpfulBtnActive = css({
+  bg: "brand.soft",
+  color: "brand.primaryDeep",
+  borderColor: "brand.primary",
+});
+
 const avatar = css({
   w: "30px",
   h: "30px",
@@ -70,6 +84,13 @@ export type ReviewCardProps = {
   reviewId?: string;
   materialId?: string;
   canManage?: boolean;
+  /**
+   * 閲覧者の「参考になった」押下状態。reviewId があり canManage が false のときだけ
+   * 押せるボタンとして表示する（自分のレビューは押せない・T-34）。
+   */
+  helpfulVoted?: boolean;
+  /** ログイン誘導・revalidatePath の対象パス（未指定時は資材詳細ページにフォールバック）。 */
+  currentPath?: string;
   /** 資材名を付ける場合（ホームの新着など） */
   materialName?: string;
   photoCount?: number;
@@ -96,11 +117,15 @@ export function ReviewCard({
   reviewId,
   materialId,
   canManage = false,
+  helpfulVoted = false,
+  currentPath,
   materialName,
   photoCount = 0,
   photos = [],
   className,
 }: ReviewCardProps) {
+  const interactive = reviewId !== undefined && !canManage;
+  const resolvedPath = currentPath ?? (materialId !== undefined ? `/materials/${materialId}` : "/");
   const author = (
     <>
       <span className={avatar}>
@@ -226,13 +251,33 @@ export function ReviewCard({
           mt: "2.5",
         })}
       >
-        <span className={helpfulBtn}>
-          <ThumbIcon />
-          <span>参考になった</span>
-          {helpfulCount}
-        </span>
+        {interactive ? (
+          <form action={toggleHelpfulAction.bind(null, "review", reviewId, resolvedPath)}>
+            <button
+              type="submit"
+              aria-pressed={helpfulVoted}
+              className={cx(helpfulBtn, helpfulBtnInteractive, helpfulVoted && helpfulBtnActive)}
+            >
+              <ThumbIcon />
+              <span>参考になった</span>
+              {helpfulCount}
+            </button>
+          </form>
+        ) : (
+          <span className={helpfulBtn}>
+            <ThumbIcon />
+            <span>参考になった</span>
+            {helpfulCount}
+          </span>
+        )}
         {canManage && reviewId !== undefined && materialId !== undefined ? (
           <ReviewOwnerActions reviewId={reviewId} materialId={materialId} />
+        ) : interactive && reviewId !== undefined ? (
+          <ReportDialog
+            action={createReportAction.bind(null, "review", reviewId, resolvedPath)}
+            reasonOptions={REPORT_REASON_OPTIONS}
+            title="このレビューを通報する"
+          />
         ) : null}
       </div>
     </article>

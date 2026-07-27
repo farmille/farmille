@@ -27,6 +27,7 @@ const errorStatus = {
   weak_password: 400,
   rate_limited: 429,
   expired_link: 400,
+  already_reported: 409,
 } satisfies Record<ErrorCode, number>;
 
 export function succeed<T>(data: T): Success<T> {

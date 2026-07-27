@@ -7,12 +7,18 @@ import { AppBar, MaterialRefCard, MetricBars } from "@/components";
 import { FabBar } from "@/components/fab-bar";
 import { CheckIcon, ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "@/components/icons";
 import { formatDateJa } from "@/components/format-date";
+import { ReportDialog } from "@/components/report-dialog";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
+import { toggleHelpfulAction } from "@/server/actions/helpful";
+import { createReportAction } from "@/server/actions/reports";
 import { errorMessageJa } from "@/server/errors";
+import { isHelpfulVotedByViewer } from "@/server/queries/helpful";
+import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublishedUsageReport } from "@/server/queries/usage-reports";
 import { recordViewEvent } from "@/server/queries/view-events";
-import { css } from "../../../../styled-system/css";
+import { createServerSupabase } from "@/server/supabase";
+import { css, cx } from "../../../../styled-system/css";
 
 import { prefectureName } from "./prefecture-name";
 
@@ -50,6 +56,30 @@ const bodyText = css({
   color: "text.muted",
   lineHeight: "1.75",
   whiteSpace: "pre-wrap",
+});
+
+const helpfulPillStatic = css({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "1.5",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  bg: "surface.card",
+  color: "text.muted",
+  borderRadius: "pill",
+  px: "3",
+  py: "1.5",
+  fontSize: "sm",
+  fontVariantNumeric: "tabular-nums",
+});
+
+const helpfulPillInteractive = css({ cursor: "pointer" });
+
+const helpfulPillActive = css({
+  bg: "brand.soft",
+  color: "brand.primaryDeep",
+  borderColor: "brand.primary",
 });
 
 async function loadReport(id: string) {
@@ -151,12 +181,24 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   const { id } = await params;
   const report = await loadReport(id);
   const session = await getSessionUser();
+  const viewerUserId = session?.accountType === "general" ? session.userId : null;
+  const isOwnPost = viewerUserId !== null && viewerUserId === report.author.userId;
+  const helpfulVotedResult = await isHelpfulVotedByViewer(viewerUserId, "usage_report", report.id);
+
+  if (!helpfulVotedResult.ok) {
+    throw new Error(errorMessageJa[helpfulVotedResult.error]);
+  }
+
+  const helpfulVoted = !isOwnPost && helpfulVotedResult.data;
+  // after() の中では cookies() が使えないため、Supabase クライアントは先に作る。
+  const viewEventSupabase = await createServerSupabase();
 
   after(async () => {
     await recordViewEvent({
       targetType: "usage_report",
       targetId: report.id,
-      viewerUserId: session?.accountType === "general" ? session.userId : null,
+      viewerUserId,
+      supabase: viewEventSupabase,
     });
   });
 
@@ -486,31 +528,55 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
             color: "text.subtle",
           })}
         >
-          <span
-            className={css({
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "1.5",
-              borderWidth: "1px",
-              borderStyle: "solid",
-              borderColor: "border.strong",
-              bg: "surface.card",
-              color: "text.muted",
-              borderRadius: "pill",
-              px: "3",
-              py: "1.5",
-              fontSize: "sm",
-              fontVariantNumeric: "tabular-nums",
-            })}
-          >
-            <ThumbIcon />
-            <span>参考になった</span>
-            {report.helpfulCount}
-          </span>
+          {!isOwnPost ? (
+            <form
+              action={toggleHelpfulAction.bind(
+                null,
+                "usage_report",
+                report.id,
+                `/reports/${report.id}`,
+              )}
+            >
+              <button
+                type="submit"
+                aria-pressed={helpfulVoted}
+                className={cx(
+                  helpfulPillStatic,
+                  helpfulPillInteractive,
+                  helpfulVoted && helpfulPillActive,
+                )}
+              >
+                <ThumbIcon />
+                <span>参考になった</span>
+                {report.helpfulCount}
+              </button>
+            </form>
+          ) : (
+            <span className={helpfulPillStatic}>
+              <ThumbIcon />
+              <span>参考になった</span>
+              {report.helpfulCount}
+            </span>
+          )}
           <span className={css({ fontVariantNumeric: "tabular-nums" })}>
             {report.viewCount} 回閲覧
           </span>
         </div>
+
+        {!isOwnPost ? (
+          <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>
+            <ReportDialog
+              action={createReportAction.bind(
+                null,
+                "usage_report",
+                report.id,
+                `/reports/${report.id}`,
+              )}
+              reasonOptions={REPORT_REASON_OPTIONS}
+              title="この使用レポートを通報する"
+            />
+          </div>
+        ) : null}
       </main>
 
       <FabBar

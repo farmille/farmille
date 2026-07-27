@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Button, Select } from "@/components";
 import { Pagination } from "@/components/pagination";
 import { createReviewListJsonLd, serializeJsonLd } from "@/lib/seo";
+import { getSessionUser } from "@/server/auth";
 import { listReviewsByMaterial } from "@/server/queries/reviews";
 import { css } from "../../../../../styled-system/css";
 
@@ -45,11 +46,17 @@ export default async function MaterialReviewsPage({
   params,
   searchParams,
 }: MaterialReviewsPageProps) {
-  const [{ id }, requestedSearchParams] = await Promise.all([params, searchParams]);
+  const [{ id }, requestedSearchParams, session] = await Promise.all([
+    params,
+    searchParams,
+    getSessionUser(),
+  ]);
   const material = await loadMaterialOrNotFound(id);
   const { sort, page } = parseReviewSearchParams(requestedSearchParams);
-  const reviews = unwrapQueryResult(await listReviewsByMaterial(id, { sort, page }));
+  const viewerUserId = session?.accountType === "general" ? session.userId : null;
+  const reviews = unwrapQueryResult(await listReviewsByMaterial(id, { sort, page, viewerUserId }));
   const materialPath = `/materials/${material.id}`;
+  const reviewsPath = `${materialPath}/reviews`;
   const reviewListJsonLd =
     page === 1
       ? createReviewListJsonLd({
@@ -144,6 +151,7 @@ export default async function MaterialReviewsPage({
       <ReviewList
         reviews={reviews.items}
         emptyDescription="この資材には、公開中のレビューがまだありません。"
+        currentPath={reviewsPath}
       />
       <Pagination page={page} totalPages={reviews.totalPages} hrefForPage={hrefForPage} />
     </MaterialPageShell>

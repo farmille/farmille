@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { after } from "next/server";
 
 import { buttonRecipe, EmptyState, ReportCard, SectionHeading } from "@/components";
 import { FabBar } from "@/components/fab-bar";
@@ -12,6 +13,8 @@ import {
 } from "@/server/queries/material-content";
 import { isMaterialSaved } from "@/server/queries/saved-materials";
 import { listReviewsByMaterial } from "@/server/queries/reviews";
+import { recordViewEvent } from "@/server/queries/view-events";
+import { createServerSupabase } from "@/server/supabase";
 import { css, cx } from "../../../../styled-system/css";
 
 import { EvidenceList } from "./_components/evidence-list";
@@ -77,20 +80,32 @@ export async function generateMetadata({ params }: MaterialPageProps): Promise<M
 export default async function MaterialPage({ params }: MaterialPageProps) {
   const { id } = await params;
   const material = await loadMaterialOrNotFound(id);
-  const [reportsResult, articlesResult, reviewsResult, distributionResult, sessionUser] =
-    await Promise.all([
-      listPublishedUsageReportsByMaterial(id, { limit: 3 }),
-      listPublishedArticlesByMaterial(id),
-      listReviewsByMaterial(id, { sort: "newest", page: 1 }),
-      getReviewRatingDistribution(id),
-      getSessionUser(),
-    ]);
+  const sessionUser = await getSessionUser();
+  const isGeneralUser = sessionUser?.accountType === "general";
+  const viewerUserId = isGeneralUser ? sessionUser.userId : null;
+  // after() の中では cookies() が使えないため、Supabase クライアントは先に作る。
+  const viewEventSupabase = await createServerSupabase();
+
+  after(async () => {
+    await recordViewEvent({
+      targetType: "material",
+      targetId: material.id,
+      viewerUserId,
+      supabase: viewEventSupabase,
+    });
+  });
+
+  const [reportsResult, articlesResult, reviewsResult, distributionResult] = await Promise.all([
+    listPublishedUsageReportsByMaterial(id, { limit: 3 }),
+    listPublishedArticlesByMaterial(id),
+    listReviewsByMaterial(id, { sort: "newest", page: 1, viewerUserId }),
+    getReviewRatingDistribution(id),
+  ]);
   const reports = unwrapQueryResult(reportsResult);
   const articles = unwrapQueryResult(articlesResult);
   const reviews = unwrapQueryResult(reviewsResult);
   const distribution = unwrapQueryResult(distributionResult);
   const materialPath = `/materials/${material.id}`;
-  const isGeneralUser = sessionUser?.accountType === "general";
   const saved = isGeneralUser
     ? unwrapQueryResult(await isMaterialSaved(material.id, sessionUser.userId))
     : null;
@@ -242,7 +257,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
           href={`${materialPath}/reviews`}
           linkLabel={`レビューをすべて見る（${reviews.total}件）`}
         />
-        <ReviewList reviews={reviews.items.slice(0, 3)} />
+        <ReviewList reviews={reviews.items.slice(0, 3)} currentPath={materialPath} />
       </section>
 
       <FabBar

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { getViewerHelpfulVotes } from "@/server/queries/helpful";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
@@ -46,6 +47,8 @@ export type PublicProfilePost =
       rating: number;
       body: string;
       helpfulCount: number;
+      /** 閲覧者がこのレビューに「参考になった」を押しているか。 */
+      helpfulVotedByViewer: boolean;
       photos: ReadonlyArray<{
         id: string;
         url: string;
@@ -132,7 +135,10 @@ async function getHelpfulCounts(
 }
 
 /** 一般ユーザーの公開プロフィールと公開済み投稿だけを取得する。 */
-export async function getPublicProfilePage(id: string): Promise<Result<PublicProfilePageData>> {
+export async function getPublicProfilePage(
+  id: string,
+  viewerUserId: string | null = null,
+): Promise<Result<PublicProfilePageData>> {
   const supabase = await createServerSupabase();
   const { data: profileData, error: profileError } = await supabase
     .from("public_profiles")
@@ -280,6 +286,16 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
     return reportHelpful;
   }
 
+  const votedReviewIds = await getViewerHelpfulVotes(
+    viewerUserId,
+    "review",
+    reviewRows.map(({ id: reviewId }) => reviewId),
+  );
+
+  if (!votedReviewIds.ok) {
+    return votedReviewIds;
+  }
+
   const crops: Array<{ id: string; name: string; sortOrder: number }> = [];
 
   for (const relation of cropRows) {
@@ -313,6 +329,7 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
       rating: review.rating,
       body: review.body,
       helpfulCount: reviewHelpful.data.get(review.id) ?? 0,
+      helpfulVotedByViewer: votedReviewIds.data.has(review.id),
       photos: review.photos.toSorted(bySortOrder).map((photo) => ({
         id: photo.id,
         url: photo.url,
