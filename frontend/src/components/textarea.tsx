@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { cva, cx, type RecipeVariantProps } from "../../styled-system/css";
 
 const textareaRecipe = cva({
@@ -43,8 +44,11 @@ type TextareaProps = TextareaVariants &
   };
 
 /** 複数行入力（モック .textarea）。 */
-export function Textarea({ size, className, ...rest }: TextareaProps) {
-  return <textarea className={cx(textareaRecipe({ size }), className)} {...rest} />;
-}
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
+  { size, className, ...rest },
+  ref,
+) {
+  return <textarea className={cx(textareaRecipe({ size }), className)} ref={ref} {...rest} />;
+});
 
 export { textareaRecipe };

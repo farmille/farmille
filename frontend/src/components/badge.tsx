@@ -41,6 +41,14 @@ const badgeRecipe = cva({
         color: "brand.primaryDeep",
         borderColor: "transparent",
       },
+      draft: {
+        fontSize: "2xs",
+        px: "2",
+        py: "0.5",
+        bg: "surface.page",
+        color: "text.muted",
+        borderColor: "border.default",
+      },
       optional: {
         fontSize: "2xs",
         px: "2",

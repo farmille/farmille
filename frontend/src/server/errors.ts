@@ -50,4 +50,9 @@ export const sellerDashboardMessageJa = {
   evidenceAdded: "エビデンスを追加しました。",
   evidenceDeleted: "エビデンスを削除しました。",
   editRequestSubmitted: "分類変更を申請しました。",
+  articleDraftSaved: "下書きを保存しました。",
+  articlePublished: "記事を公開しました。",
+  articleUnpublished: "記事を非公開にしました。",
+  articleDeleted: "記事を削除しました。",
+  articleUpdated: "記事を更新しました。",
 } as const;
