@@ -37,6 +37,18 @@ const menuLinkStyle = css({
   _hover: { textDecoration: "underline" },
 });
 
+const statLinkStyle = css({
+  display: "block",
+  color: "inherit",
+  textDecoration: "none",
+  borderRadius: "button",
+  _focusVisible: {
+    outlineWidth: "2px",
+    outlineStyle: "solid",
+    outlineColor: "brand.primary",
+  },
+});
+
 const MENU_ITEMS = [
   {
     href: "/admin/sellers",
@@ -74,15 +86,18 @@ export default async function AdminHomePage() {
       <Panel note="対応待ちの件数" title="いま見るべきもの">
         <div className={statGridStyle}>
           <StatCard label="審査中の出品者" value={summary.data.appliedSellerCount} />
-          <StatCard label="未処理の通報" value={summary.data.openReportCount} />
-          <StatCard label="確認待ちの使用レポート" value={summary.data.pendingUsageReportCount} />
+          <Link aria-label="未処理の通報を見る" className={statLinkStyle} href="/admin/reports">
+            <StatCard label="未処理の通報" value={summary.data.openReportCount} />
+          </Link>
+          <Link
+            aria-label="確認待ちの使用レポートを見る"
+            className={statLinkStyle}
+            href="/admin/usage-reports"
+          >
+            <StatCard label="確認待ちの使用レポート" value={summary.data.pendingUsageReportCount} />
+          </Link>
           <StatCard label="未処理の分類変更申請" value={summary.data.openEditRequestCount} />
         </div>
-        <p className={css({ mt: "3" })}>
-          <span className={adminInlineNoteStyle}>
-            通報処理と使用レポートの編集局は別タスク（T-45）で実装する。ここでは件数のみ表示する。
-          </span>
-        </p>
       </Panel>
 
       <Panel title="機能">

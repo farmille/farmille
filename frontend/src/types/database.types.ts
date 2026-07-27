@@ -965,6 +965,7 @@ export type Database = {
           official_name: string
           profile_text: string | null
           region_scope: string
+          rejected_reason: string | null
           seller_type: string
           status: string
           updated_at: string
@@ -984,6 +985,7 @@ export type Database = {
           official_name: string
           profile_text?: string | null
           region_scope: string
+          rejected_reason?: string | null
           seller_type: string
           status?: string
           updated_at?: string
@@ -1003,6 +1005,7 @@ export type Database = {
           official_name?: string
           profile_text?: string | null
           region_scope?: string
+          rejected_reason?: string | null
           seller_type?: string
           status?: string
           updated_at?: string
