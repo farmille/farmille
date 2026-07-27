@@ -1,8 +1,89 @@
+import { COMPARE_MATERIAL_LIMITS } from "@/lib/compare-limits";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
+import type { Database } from "@/types/database.types";
+
+export { COMPARE_MATERIAL_LIMITS } from "@/lib/compare-limits";
+
+type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+type MaterialImageRow = Database["public"]["Tables"]["material_images"]["Row"];
+type TagRow = Database["public"]["Tables"]["tags"]["Row"];
+
+type MaterialImage = Pick<MaterialImageRow, "id" | "url" | "image_type" | "sort_order">;
+type MaterialTag = Pick<TagRow, "id" | "name" | "category" | "sort_order">;
+
+type SavedMaterialQueryRow = {
+  id: string;
+  created_at: string;
+  material:
+    | (Pick<
+        MaterialRow,
+        | "id"
+        | "name"
+        | "manufacturer_name"
+        | "product_type"
+        | "price_range"
+        | "review_count"
+        | "avg_rating"
+        | "control_plot_ratio"
+        | "seller_id"
+        | "description"
+      > & {
+        material_images: MaterialImage[];
+        material_tags: Array<{ tags: MaterialTag | null }>;
+      })
+    | null;
+};
+
+export type SavedMaterialItem = {
+  savedId: string;
+  savedAt: string;
+  materialId: string;
+  name: string;
+  manufacturerName: string;
+  productType: string | null;
+  priceRange: string | null;
+  reviewCount: number;
+  avgRating: number | null;
+  controlPlotRatio: number | null;
+  official: boolean;
+  description: string | null;
+  primaryImageUrl: string | null;
+  tags: ReadonlyArray<{ id: string; name: string; category: string }>;
+};
+
+export type CompareMaterialItem = {
+  id: string;
+  name: string;
+  manufacturerName: string;
+  avgRating: number | null;
+  reviewCount: number;
+  controlPlotRatio: number | null;
+  productType: string | null;
+  priceRange: string | null;
+  tags: ReadonlyArray<{ id: string; name: string; category: string }>;
+};
 
 function reportQueryError(operation: string, error: unknown): void {
   console.error(`[server/queries/saved-materials] ${operation}`, error);
+}
+
+function bySortOrder(
+  left: { id: string; sort_order: number },
+  right: { id: string; sort_order: number },
+): number {
+  return left.sort_order - right.sort_order || left.id.localeCompare(right.id);
+}
+
+function mapTags(
+  relations: Array<{ tags: MaterialTag | null }>,
+): Array<{ id: string; name: string; category: string }> {
+  return relations
+    .flatMap(({ tags }) => (tags === null ? [] : [tags]))
+    .toSorted(
+      (left, right) => left.category.localeCompare(right.category) || bySortOrder(left, right),
+    )
+    .map(({ id, name, category }) => ({ id, name, category }));
 }
 
 export async function isMaterialSaved(
@@ -83,4 +164,210 @@ export async function toggleSavedMaterial(
   }
 
   return succeed(true);
+}
+
+/** 検討リスト一覧。新しい保存から順。 */
+export async function listSavedMaterials(
+  userId: string,
+  options?: { limit?: number },
+): Promise<Result<readonly SavedMaterialItem[]>> {
+  const supabase = await createServerSupabase();
+  let query = supabase
+    .from("saved_materials")
+    .select(
+      `
+        id,
+        created_at,
+        material:materials!saved_materials_material_id_fkey (
+          id,
+          name,
+          manufacturer_name,
+          product_type,
+          price_range,
+          review_count,
+          avg_rating,
+          control_plot_ratio,
+          seller_id,
+          description,
+          material_images (
+            id,
+            url,
+            image_type,
+            sort_order
+          ),
+          material_tags (
+            tags (
+              id,
+              name,
+              category,
+              sort_order
+            )
+          )
+        )
+      `,
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: true });
+
+  if (options?.limit !== undefined) {
+    query = query.limit(options.limit);
+  }
+
+  const { data, error } = await query;
+
+  if (error !== null) {
+    reportQueryError("検討リストの取得に失敗", error);
+    return fail("internal");
+  }
+
+  const rows: SavedMaterialQueryRow[] = data;
+  const items: SavedMaterialItem[] = [];
+
+  for (const row of rows) {
+    if (row.material === null) {
+      reportQueryError("検討リストの資材関連が欠落", { savedId: row.id });
+      return fail("internal");
+    }
+
+    const images = row.material.material_images.toSorted(bySortOrder);
+
+    items.push({
+      savedId: row.id,
+      savedAt: row.created_at,
+      materialId: row.material.id,
+      name: row.material.name,
+      manufacturerName: row.material.manufacturer_name,
+      productType: row.material.product_type,
+      priceRange: row.material.price_range,
+      reviewCount: row.material.review_count,
+      avgRating: row.material.avg_rating,
+      controlPlotRatio: row.material.control_plot_ratio,
+      official: row.material.seller_id !== null,
+      description: row.material.description,
+      primaryImageUrl: images[0]?.url ?? null,
+      tags: mapTags(row.material.material_tags),
+    });
+  }
+
+  return succeed(items);
+}
+
+/** 検討リストから1件解除する。 */
+export async function unsaveMaterial(materialId: string, userId: string): Promise<Result<null>> {
+  const supabase = await createServerSupabase();
+  const { error } = await supabase
+    .from("saved_materials")
+    .delete()
+    .eq("material_id", materialId)
+    .eq("user_id", userId);
+
+  if (error !== null) {
+    reportQueryError("検討リストの解除に失敗", error);
+    return fail("internal");
+  }
+
+  return succeed(null);
+}
+
+/**
+ * 比較表用に選択資材を取得する。
+ * 件数が 2〜4 以外、または未保存の資材が含まれる場合は invalid_body。
+ */
+export async function listMaterialsForCompare(
+  userId: string,
+  materialIds: readonly string[],
+): Promise<Result<readonly CompareMaterialItem[]>> {
+  const uniqueIds = [...new Set(materialIds)];
+
+  if (
+    uniqueIds.length < COMPARE_MATERIAL_LIMITS.min ||
+    uniqueIds.length > COMPARE_MATERIAL_LIMITS.max
+  ) {
+    return fail("invalid_body");
+  }
+
+  const supabase = await createServerSupabase();
+  const { data: savedRows, error: savedError } = await supabase
+    .from("saved_materials")
+    .select("material_id")
+    .eq("user_id", userId)
+    .in("material_id", uniqueIds);
+
+  if (savedError !== null) {
+    reportQueryError("比較対象の保存確認に失敗", savedError);
+    return fail("internal");
+  }
+
+  if (savedRows.length !== uniqueIds.length) {
+    return fail("invalid_body");
+  }
+
+  const { data, error } = await supabase
+    .from("materials")
+    .select(
+      `
+        id,
+        name,
+        manufacturer_name,
+        product_type,
+        price_range,
+        review_count,
+        avg_rating,
+        control_plot_ratio,
+        material_tags (
+          tags (
+            id,
+            name,
+            category,
+            sort_order
+          )
+        )
+      `,
+    )
+    .in("id", uniqueIds);
+
+  if (error !== null) {
+    reportQueryError("比較資材の取得に失敗", error);
+    return fail("internal");
+  }
+
+  type CompareQueryRow = Pick<
+    MaterialRow,
+    | "id"
+    | "name"
+    | "manufacturer_name"
+    | "product_type"
+    | "price_range"
+    | "review_count"
+    | "avg_rating"
+    | "control_plot_ratio"
+  > & {
+    material_tags: Array<{ tags: MaterialTag | null }>;
+  };
+
+  const rows: CompareQueryRow[] = data;
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  const items: CompareMaterialItem[] = [];
+
+  for (const id of uniqueIds) {
+    const row = byId.get(id);
+    if (row === undefined) {
+      return fail("not_found");
+    }
+
+    items.push({
+      id: row.id,
+      name: row.name,
+      manufacturerName: row.manufacturer_name,
+      avgRating: row.avg_rating,
+      reviewCount: row.review_count,
+      controlPlotRatio: row.control_plot_ratio,
+      productType: row.product_type,
+      priceRange: row.price_range,
+      tags: mapTags(row.material_tags),
+    });
+  }
+
+  return succeed(items);
 }
