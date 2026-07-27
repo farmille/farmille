@@ -50,6 +50,9 @@ export { MaterialRefCard } from "./material-ref-card";
 
 export { ArticlesToolbar } from "./articles-toolbar";
 
+export { DataTable } from "./data-table";
+export type { DataTableColumn } from "./data-table";
+
 export { sellerTypeLabel } from "./seller-type-label";
 export { formatDateJa } from "./format-date";
 export { FormPageShell } from "./form-page-shell";
