@@ -28,6 +28,8 @@ const errorStatus = {
   rate_limited: 429,
   expired_link: 400,
   already_reported: 409,
+  login_id_taken: 409,
+  invalid_invite_code: 400,
 } satisfies Record<ErrorCode, number>;
 
 export function succeed<T>(data: T): Success<T> {
