@@ -15,7 +15,10 @@ export type ErrorCode =
   | "rate_limited"
   | "expired_link"
   // 通報（T-34）
-  | "already_reported";
+  | "already_reported"
+  // 出品者申請（T-41）
+  | "login_id_taken"
+  | "invalid_invite_code";
 
 // 機能固有のエラーコードは、利用箇所と表示文言を同時に追加する。
 export const errorMessageJa = {
@@ -37,6 +40,8 @@ export const errorMessageJa = {
   rate_limited: "リクエストが多すぎます。しばらく待ってから再度お試しください。",
   expired_link: "リンクが無効か、有効期限が切れています。もう一度やり直してください。",
   already_reported: "この投稿はすでに通報済みで、対応中です。",
+  login_id_taken: "このログイン ID はすでに使われています。別の ID を指定してください。",
+  invalid_invite_code: "招待コードが正しくありません。",
 } satisfies Record<ErrorCode, string>;
 
 /** 出品者ダッシュボードの Server Action が返す成功文言。 */

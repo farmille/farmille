@@ -22,6 +22,9 @@ describe("errorMessageJa", () => {
       "expired_link",
       // 通報（T-34）
       "already_reported",
+      // 出品者申請（T-41）
+      "login_id_taken",
+      "invalid_invite_code",
     ];
 
     expect(Object.keys(errorMessageJa)).toEqual(codes);
