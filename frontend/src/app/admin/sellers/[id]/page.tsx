@@ -63,6 +63,7 @@ function internalItems(seller: SellerDetail): DescriptionItem[] {
     { term: "担当者名", value: seller.contact_name },
     { term: "連絡先メール", value: seller.contact_email },
     { term: "招待コード", value: <OptionalValue value={seller.invite_code} /> },
+    { term: "却下理由", value: <OptionalValue value={seller.rejected_reason} /> },
     { term: "状態", value: statusLabel(seller.status) },
     { term: "申請日時", value: formatDateJa(seller.created_at) },
     {

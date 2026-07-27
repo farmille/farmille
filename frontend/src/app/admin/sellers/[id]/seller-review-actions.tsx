@@ -9,7 +9,7 @@ import {
 } from "@/app/admin/_components/admin-ui";
 import { initialSellerActionState } from "@/app/admin/_lib/action-state";
 import { sellerOperationAction } from "@/app/admin/sellers/[id]/actions";
-import { Button } from "@/components";
+import { Button, Textarea } from "@/components";
 import { FormMessage } from "@/components/auth/fields";
 import { css } from "../../../../../styled-system/css";
 
@@ -37,6 +37,22 @@ const credentialLabelStyle = css({
   color: "brand.primaryDeep",
 });
 
+const confirmationStyle = css({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "stretch",
+  gap: "2.5",
+});
+
+const fieldLabelStyle = css({
+  display: "flex",
+  flexDirection: "column",
+  gap: "1.5",
+  fontSize: "sm",
+  fontWeight: "700",
+  color: "text.muted",
+});
+
 type Operation = "approve" | "reject" | "suspend" | "reinstate" | "invite";
 
 /** 取り消せない操作は一度だけ確認を挟む（却下・凍結）。 */
@@ -62,11 +78,15 @@ export function SellerReviewActions({
     initialSellerActionState,
   );
   const [confirming, setConfirming] = useState<"reject" | "suspend" | null>(null);
+  const [rejectedReason, setRejectedReason] = useState("");
 
   const submit = (operation: Operation): void => {
     const formData = new FormData();
     formData.set("sellerId", sellerId);
     formData.set("operation", operation);
+    if (operation === "reject") {
+      formData.set("rejectedReason", rejectedReason);
+    }
     setConfirming(null);
     startTransition(() => {
       formAction(formData);
@@ -145,19 +165,34 @@ export function SellerReviewActions({
           </Button>
         </div>
       ) : (
-        <div className={adminActionsStyle}>
+        <div className={confirmationStyle}>
           <p className={adminInlineNoteStyle}>{confirmation.note}</p>
-          <Button
-            disabled={pending}
-            onClick={() => submit(confirming ?? "reject")}
-            size="sm"
-            variant="danger"
-          >
-            {confirmation.label}
-          </Button>
-          <Button onClick={() => setConfirming(null)} size="sm" variant="ghost">
-            やめる
-          </Button>
+          {confirming === "reject" ? (
+            <label className={fieldLabelStyle}>
+              却下理由
+              <Textarea
+                autoFocus
+                name="rejectedReason"
+                onChange={(event) => setRejectedReason(event.target.value)}
+                placeholder="申請者へ伝える判断理由を入力"
+                required
+                value={rejectedReason}
+              />
+            </label>
+          ) : null}
+          <div className={adminActionsStyle}>
+            <Button
+              disabled={pending || (confirming === "reject" && rejectedReason.trim().length === 0)}
+              onClick={() => submit(confirming ?? "reject")}
+              size="sm"
+              variant="danger"
+            >
+              {confirmation.label}
+            </Button>
+            <Button onClick={() => setConfirming(null)} size="sm" variant="ghost">
+              やめる
+            </Button>
+          </div>
         </div>
       )}
     </div>

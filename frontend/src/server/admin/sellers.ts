@@ -155,9 +155,15 @@ export async function approveSellerApplication(
   });
 }
 
-/** 却下（01 §6 applied → rejected）。 */
-export async function rejectSellerApplication(sellerId: string): Promise<Result<null>> {
-  return updateSellerStatus(sellerId, "rejected", ["applied"], "却下");
+/** 却下理由を内部記録へ残して、01 §6 applied → rejected へ進める。 */
+export async function rejectSellerApplication(
+  sellerId: string,
+  rejectedReason: string,
+): Promise<Result<null>> {
+  const normalizedReason = rejectedReason.trim();
+  if (normalizedReason.length === 0) return fail("invalid_body");
+
+  return updateSellerStatus(sellerId, "rejected", ["applied"], "却下", normalizedReason);
 }
 
 /** 凍結（01 §6 運用中の凍結）。共有ログインは残すが、出品者ログインは status で弾かれる。 */
@@ -175,6 +181,7 @@ async function updateSellerStatus(
   nextStatus: SellerStatus,
   allowedCurrentStatuses: SellerStatus[],
   operationLabel: string,
+  rejectedReason?: string,
 ): Promise<Result<null>> {
   return withAdmin(async ({ supabase }) => {
     // approved へ戻す場合も approved_at の NOT NULL 制約を満たす必要がある。
@@ -201,6 +208,7 @@ async function updateSellerStatus(
           nextStatus === "approved"
             ? (seller.approved_at ?? new Date().toISOString())
             : seller.approved_at,
+        ...(nextStatus === "rejected" ? { rejected_reason: rejectedReason } : {}),
       })
       .eq("id", sellerId)
       .in("status", allowedCurrentStatuses)

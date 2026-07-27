@@ -35,12 +35,13 @@ export async function sellerOperationAction(
 ): Promise<SellerActionState> {
   const sellerId = formData.get("sellerId");
   const operation = formData.get("operation");
+  const rejectedReason = formData.get("rejectedReason");
 
   if (typeof sellerId !== "string" || sellerId.length === 0 || !isSellerOperation(operation)) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 
-  const result = await runSellerOperation(operation, sellerId);
+  const result = await runSellerOperation(operation, sellerId, rejectedReason);
 
   if (!result.ok) {
     return { status: "error", message: sellerErrorMessage(result.error) };
@@ -56,6 +57,7 @@ export async function sellerOperationAction(
 async function runSellerOperation(
   operation: SellerOperation,
   sellerId: string,
+  rejectedReason: FormDataEntryValue | null,
 ): Promise<{ ok: true; state: SellerActionState } | { ok: false; error: ErrorCode }> {
   if (operation === "approve") {
     const result = await approveSellerApplication(sellerId);
@@ -74,7 +76,11 @@ async function runSellerOperation(
   }
 
   if (operation === "reject") {
-    const result = await rejectSellerApplication(sellerId);
+    if (typeof rejectedReason !== "string") {
+      return { ok: false, error: "invalid_body" };
+    }
+
+    const result = await rejectSellerApplication(sellerId, rejectedReason);
 
     return result.ok
       ? { ok: true, state: { status: "done", message: "申請を却下しました。" } }
