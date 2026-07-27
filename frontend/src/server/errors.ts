@@ -38,3 +38,11 @@ export const errorMessageJa = {
   expired_link: "リンクが無効か、有効期限が切れています。もう一度やり直してください。",
   already_reported: "この投稿はすでに通報済みで、対応中です。",
 } satisfies Record<ErrorCode, string>;
+
+/** 出品者ダッシュボードの Server Action が返す成功文言。 */
+export const sellerDashboardMessageJa = {
+  primaryInformationSaved: "一次情報を保存しました。",
+  evidenceAdded: "エビデンスを追加しました。",
+  evidenceDeleted: "エビデンスを削除しました。",
+  editRequestSubmitted: "分類変更を申請しました。",
+} as const;
