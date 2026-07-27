@@ -6,14 +6,20 @@ import { notFound } from "next/navigation";
 import { AppBar, Badge, MaterialRefCard } from "@/components";
 import { OfficialCheckIcon, ThumbIcon } from "@/components/icons";
 import { formatDateJa } from "@/components/format-date";
+import { ReportDialog } from "@/components/report-dialog";
 import { sellerTypeLabel } from "@/components/seller-type-label";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
+import { toggleHelpfulAction } from "@/server/actions/helpful";
+import { createReportAction } from "@/server/actions/reports";
 import { errorMessageJa } from "@/server/errors";
+import { isHelpfulVotedByViewer } from "@/server/queries/helpful";
+import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublishedArticle } from "@/server/queries/articles";
 import { recordViewEvent } from "@/server/queries/view-events";
-import { css } from "../../../../styled-system/css";
+import { createServerSupabase } from "@/server/supabase";
+import { css, cx } from "../../../../styled-system/css";
 
 type ArticleDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -32,6 +38,31 @@ const shell = css({
 const main = css({
   px: "3.5",
   py: "4",
+});
+
+const helpfulPillStatic = css({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "1.5",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  bg: "surface.card",
+  color: "text.muted",
+  borderRadius: "pill",
+  px: "3",
+  py: "1.5",
+  fontSize: "sm",
+  whiteSpace: "nowrap",
+  fontVariantNumeric: "tabular-nums",
+});
+
+const helpfulPillInteractive = css({ cursor: "pointer" });
+
+const helpfulPillActive = css({
+  bg: "brand.soft",
+  color: "brand.primaryDeep",
+  borderColor: "brand.primary",
 });
 
 async function loadArticle(id: string) {
@@ -75,14 +106,25 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
   const { id } = await params;
   const article = await loadArticle(id);
   const session = await getSessionUser();
+  const viewerUserId = session?.accountType === "general" ? session.userId : null;
   const bodyHtml = await renderMarkdownToHtml(article.body);
+  const helpfulVotedResult = await isHelpfulVotedByViewer(viewerUserId, "article", article.id);
+
+  if (!helpfulVotedResult.ok) {
+    throw new Error(errorMessageJa[helpfulVotedResult.error]);
+  }
+
+  const helpfulVoted = helpfulVotedResult.data;
+  // after() の中では cookies() が使えないため、Supabase クライアントは先に作る。
+  const viewEventSupabase = await createServerSupabase();
 
   // 閲覧記録は表示をブロックしない（失敗しても画面は出す）。
   after(async () => {
     await recordViewEvent({
       targetType: "article",
       targetId: article.id,
-      viewerUserId: session?.accountType === "general" ? session.userId : null,
+      viewerUserId,
+      supabase: viewEventSupabase,
     });
   });
 
@@ -259,30 +301,39 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
             color: "text.subtle",
           })}
         >
-          <span
-            className={css({
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "1.5",
-              borderWidth: "1px",
-              borderStyle: "solid",
-              borderColor: "border.strong",
-              bg: "surface.card",
-              color: "text.muted",
-              borderRadius: "pill",
-              px: "3",
-              py: "1.5",
-              fontSize: "sm",
-              fontVariantNumeric: "tabular-nums",
-            })}
+          <form
+            action={toggleHelpfulAction.bind(
+              null,
+              "article",
+              article.id,
+              `/articles/${article.id}`,
+            )}
           >
-            <ThumbIcon />
-            <span>参考になった</span>
-            {article.helpfulCount}
-          </span>
+            <button
+              type="submit"
+              aria-pressed={helpfulVoted}
+              className={cx(
+                helpfulPillStatic,
+                helpfulPillInteractive,
+                helpfulVoted && helpfulPillActive,
+              )}
+            >
+              <ThumbIcon />
+              <span>参考になった</span>
+              {article.helpfulCount}
+            </button>
+          </form>
           <span className={css({ fontVariantNumeric: "tabular-nums" })}>
             {article.viewCount} 回閲覧
           </span>
+        </div>
+
+        <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>
+          <ReportDialog
+            action={createReportAction.bind(null, "article", article.id, `/articles/${article.id}`)}
+            reasonOptions={REPORT_REASON_OPTIONS}
+            title="この記事を通報する"
+          />
         </div>
       </main>
     </div>

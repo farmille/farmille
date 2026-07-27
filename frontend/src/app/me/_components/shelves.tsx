@@ -218,6 +218,9 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
             item.kind === "review" ? (
               <article key={`helpful-review-${item.id}`}>
                 <ReviewCard
+                  reviewId={item.id}
+                  helpfulVoted
+                  currentPath="/me"
                   handle={item.authorHandle}
                   authorHref={item.authorUserId ? `/users/${item.authorUserId}` : undefined}
                   crop={item.cropName}

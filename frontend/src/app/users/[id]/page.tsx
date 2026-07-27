@@ -5,9 +5,13 @@ import { cache } from "react";
 import { AppBar, SectionHeading, StatCard } from "@/components";
 import { createPageMetadata } from "@/lib/seo";
 import { isPrefectureCode, PREFECTURES } from "@/lib/prefectures";
+import { getSessionUser } from "@/server/auth";
+import { createReportAction } from "@/server/actions/reports";
 import { errorMessageJa } from "@/server/errors";
+import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublicProfilePage, type PublicProfilePageData } from "@/server/queries/public-profiles";
 import type { Result } from "@/server/result";
+import { ReportDialog } from "@/components/report-dialog";
 import { css } from "../../../../styled-system/css";
 
 import { PostTimeline } from "./_components/post-timeline";
@@ -35,16 +39,21 @@ const statRow = css({
   mt: "3.5",
 });
 
-const getCachedProfilePage = cache(async (id: string): Promise<Result<PublicProfilePageData>> => {
-  if (!UUID_PATTERN.test(id)) {
-    return { ok: false, error: "not_found" };
-  }
+const getCachedProfilePage = cache(
+  async (id: string, viewerUserId: string | null): Promise<Result<PublicProfilePageData>> => {
+    if (!UUID_PATTERN.test(id)) {
+      return { ok: false, error: "not_found" };
+    }
 
-  return getPublicProfilePage(id);
-});
+    return getPublicProfilePage(id, viewerUserId);
+  },
+);
 
-async function loadProfileOrNotFound(id: string): Promise<PublicProfilePageData> {
-  const result = await getCachedProfilePage(id);
+async function loadProfileOrNotFound(
+  id: string,
+  viewerUserId: string | null = null,
+): Promise<PublicProfilePageData> {
+  const result = await getCachedProfilePage(id, viewerUserId);
 
   if (!result.ok) {
     if (result.error === "not_found") {
@@ -90,7 +99,10 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
 
 export default async function UserPage({ params }: UserPageProps) {
   const { id } = await params;
-  const data = await loadProfileOrNotFound(id);
+  const session = await getSessionUser();
+  const viewerUserId = session?.accountType === "general" ? session.userId : null;
+  const data = await loadProfileOrNotFound(id, viewerUserId);
+  const isOwnProfile = viewerUserId !== null && viewerUserId === data.profile.userId;
 
   return (
     <div className={shell}>
@@ -101,6 +113,16 @@ export default async function UserPage({ params }: UserPageProps) {
           prefectureName={prefectureName(data.profile.prefectureCode)}
         />
 
+        {isOwnProfile ? null : (
+          <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>
+            <ReportDialog
+              action={createReportAction.bind(null, "profile", data.profile.userId, `/users/${id}`)}
+              reasonOptions={REPORT_REASON_OPTIONS}
+              title={`${data.profile.handle}さんを通報する`}
+            />
+          </div>
+        )}
+
         <div className={statRow}>
           <StatCard value={data.reviewCount} label="レビュー" />
           <StatCard value={data.helpfulCount} label="参考になった" />
@@ -108,7 +130,7 @@ export default async function UserPage({ params }: UserPageProps) {
 
         <section aria-labelledby="profile-posts-heading">
           <SectionHeading title={<span id="profile-posts-heading">これまでの投稿</span>} />
-          <PostTimeline profile={data.profile} posts={data.posts} />
+          <PostTimeline profile={data.profile} posts={data.posts} viewerUserId={viewerUserId} />
         </section>
       </main>
     </div>

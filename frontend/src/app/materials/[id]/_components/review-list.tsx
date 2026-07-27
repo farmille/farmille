@@ -6,9 +6,11 @@ import { css } from "../../../../../styled-system/css";
 type ReviewListProps = {
   reviews: ReviewListItem[];
   emptyDescription?: string;
+  /** ログイン誘導・revalidatePath の対象パス（省略時は資材詳細ページ）。 */
+  currentPath?: string;
 };
 
-export async function ReviewList({ reviews, emptyDescription }: ReviewListProps) {
+export async function ReviewList({ reviews, emptyDescription, currentPath }: ReviewListProps) {
   if (reviews.length === 0) {
     return (
       <EmptyState
@@ -30,6 +32,8 @@ export async function ReviewList({ reviews, emptyDescription }: ReviewListProps)
             canManage={
               session?.accountType === "general" && session.userId === review.author_user_id
             }
+            helpfulVoted={review.helpfulVotedByViewer}
+            currentPath={currentPath}
             handle={review.author?.handle ?? "退会したユーザー"}
             authorHref={review.author?.user_id ? `/users/${review.author.user_id}` : undefined}
             avatarSrc={review.author?.avatar_url ?? undefined}

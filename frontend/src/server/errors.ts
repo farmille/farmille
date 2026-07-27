@@ -13,7 +13,9 @@ export type ErrorCode =
   | "seller_invalid_credentials"
   | "weak_password"
   | "rate_limited"
-  | "expired_link";
+  | "expired_link"
+  // 通報（T-34）
+  | "already_reported";
 
 // 機能固有のエラーコードは、利用箇所と表示文言を同時に追加する。
 export const errorMessageJa = {
@@ -34,4 +36,5 @@ export const errorMessageJa = {
   weak_password: "パスワードは8文字以上で入力してください。",
   rate_limited: "リクエストが多すぎます。しばらく待ってから再度お試しください。",
   expired_link: "リンクが無効か、有効期限が切れています。もう一度やり直してください。",
+  already_reported: "この投稿はすでに通報済みで、対応中です。",
 } satisfies Record<ErrorCode, string>;

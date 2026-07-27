@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { getViewerHelpfulVotes } from "@/server/queries/helpful";
 import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
@@ -36,6 +37,8 @@ export type ReviewListItem = ReviewFields & {
   crop: ReviewCrop | null;
   photos: ReviewPhoto[];
   helpfulCount: number;
+  /** 閲覧者（ログイン中の一般ユーザー）がこのレビューに「参考になった」を押しているか。 */
+  helpfulVotedByViewer: boolean;
 };
 
 export type ReviewCropOption = Pick<CropRow, "id" | "name"> & {
@@ -172,11 +175,13 @@ async function getHelpfulCounts(
 function toReviewListItem(
   review: ReviewQueryRow,
   helpfulCounts: Map<string, number>,
+  votedIds: ReadonlySet<string>,
 ): ReviewListItem {
   return {
     ...review,
     photos: review.photos.toSorted(byPhotoOrder),
     helpfulCount: helpfulCounts.get(review.id) ?? 0,
+    helpfulVotedByViewer: votedIds.has(review.id),
   };
 }
 
@@ -185,6 +190,7 @@ async function listByHelpfulCount(
   materialId: string,
   page: number,
   range: { from: number; to: number },
+  viewerUserId: string | null,
 ): Promise<Result<Paginated<ReviewListItem>>> {
   const reviewOrder = await listPublishedReviewOrder(supabase, materialId);
 
@@ -236,6 +242,12 @@ async function listByHelpfulCount(
 
   const reviews: ReviewQueryRow[] = data;
   const reviewById = new Map(reviews.map((review) => [review.id, review]));
+  const votedIds = await getViewerHelpfulVotes(viewerUserId, "review", pageReviewIds);
+
+  if (!votedIds.ok) {
+    return votedIds;
+  }
+
   const items: ReviewListItem[] = [];
 
   for (const reviewId of pageReviewIds) {
@@ -246,7 +258,7 @@ async function listByHelpfulCount(
       return fail("internal");
     }
 
-    items.push(toReviewListItem(review, helpfulCounts.data));
+    items.push(toReviewListItem(review, helpfulCounts.data, votedIds.data));
   }
 
   return succeed({
@@ -314,7 +326,7 @@ export async function listRecentReviews({
 
     const { material, ...review } = row;
     items.push({
-      ...toReviewListItem(review, helpfulCounts.data),
+      ...toReviewListItem(review, helpfulCounts.data, new Set()),
       materialName: material.name,
     });
   }
@@ -327,16 +339,19 @@ export async function listReviewsByMaterial(
   {
     sort,
     page,
+    viewerUserId = null,
   }: {
     sort: ReviewSort;
     page: number;
+    /** 「参考になった」の押下状態を出す一般ユーザーの user_id。未ログインは null。 */
+    viewerUserId?: string | null;
   },
 ): Promise<Result<Paginated<ReviewListItem>>> {
   const { from, to } = pageRange(page);
   const supabase = await createServerSupabase();
 
   if (sort === "helpful") {
-    return listByHelpfulCount(supabase, materialId, page, { from, to });
+    return listByHelpfulCount(supabase, materialId, page, { from, to }, viewerUserId);
   }
 
   let query = supabase
@@ -376,8 +391,18 @@ export async function listReviewsByMaterial(
     return helpfulCounts;
   }
 
+  const votedIds = await getViewerHelpfulVotes(
+    viewerUserId,
+    "review",
+    reviews.map(({ id }) => id),
+  );
+
+  if (!votedIds.ok) {
+    return votedIds;
+  }
+
   return succeed({
-    items: reviews.map((review) => toReviewListItem(review, helpfulCounts.data)),
+    items: reviews.map((review) => toReviewListItem(review, helpfulCounts.data, votedIds.data)),
     page,
     perPage: DEFAULT_PER_PAGE,
     total: count,

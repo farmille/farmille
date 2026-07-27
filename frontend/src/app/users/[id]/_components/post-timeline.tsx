@@ -22,9 +22,11 @@ const reviewDestination = css({
 type PostTimelineProps = {
   profile: PublicProfilePageData["profile"];
   posts: readonly PublicProfilePost[];
+  /** ログイン中の一般ユーザーの user_id。未ログインは null。 */
+  viewerUserId?: string | null;
 };
 
-export function PostTimeline({ profile, posts }: PostTimelineProps) {
+export function PostTimeline({ profile, posts, viewerUserId = null }: PostTimelineProps) {
   if (posts.length === 0) {
     return (
       <EmptyState
@@ -35,6 +37,10 @@ export function PostTimeline({ profile, posts }: PostTimelineProps) {
   }
 
   const authorHref = `/users/${profile.userId}`;
+  // プロフィール本人が自分の公開プロフィールを見ている場合は、
+  // 自分の投稿に「参考になった」「通報する」を出さない（materialId は渡さないため
+  // 編集・削除ボタンも表示されない）。
+  const isOwnReview = viewerUserId !== null && viewerUserId === profile.userId;
 
   return (
     <div className={stack}>
@@ -42,6 +48,10 @@ export function PostTimeline({ profile, posts }: PostTimelineProps) {
         post.kind === "review" ? (
           <article key={`review-${post.id}`}>
             <ReviewCard
+              reviewId={post.id}
+              canManage={isOwnReview}
+              helpfulVoted={post.helpfulVotedByViewer}
+              currentPath={authorHref}
               handle={profile.handle}
               authorHref={authorHref}
               avatarSrc={profile.avatarUrl ?? undefined}
