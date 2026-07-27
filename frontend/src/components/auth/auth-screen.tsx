@@ -18,10 +18,10 @@ const appBarStyle = css({
   zIndex: "10",
   display: "flex",
   alignItems: "center",
-  gap: "10px",
-  px: "14px",
-  pt: "16px",
-  pb: "11px",
+  gap: "2.5",
+  px: "3.5",
+  pt: "4",
+  pb: "calc(var(--spacing-2\\.5) + var(--spacing-0\\.5) / 2)",
   bg: "surface.panel",
   borderBottomWidth: "1px",
   borderBottomStyle: "solid",
@@ -37,16 +37,16 @@ const titleStyle = css({
 });
 
 const bodyStyle = css({
-  px: "16px",
-  pt: "16px",
-  pb: "40px",
+  px: "4",
+  pt: "4",
+  pb: "10",
 });
 
 const leadStyle = css({
   fontSize: "sm",
   color: "text.subtle",
   lineHeight: "1.6",
-  mb: "18px",
+  mb: "4.5",
 });
 
 export function AuthScreen({

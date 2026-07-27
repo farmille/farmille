@@ -3,10 +3,10 @@ import type { ReactNode } from "react";
 import { css } from "../../../styled-system/css";
 
 // モックの .field / .input / .radio / .toggle / .warn-note / .badge 相当。
-// 値はすべて Panda のトークン経由（余白は T-03 の判断で px 直書き）。
+// 値はすべて Panda のトークン経由。
 
 const fieldStyle = css({
-  mt: "20px",
+  mt: "5",
   _first: { mt: "0" },
 });
 
@@ -14,8 +14,8 @@ const labelRowStyle = css({
   display: "flex",
   alignItems: "center",
   flexWrap: "wrap",
-  gap: "8px",
-  mb: "6px",
+  gap: "2",
+  mb: "1.5",
   fontSize: "md",
   fontWeight: "700",
 });
@@ -23,8 +23,8 @@ const labelRowStyle = css({
 const badgeBaseStyle = {
   fontSize: "2xs",
   fontWeight: "700",
-  px: "7px",
-  py: "1px",
+  px: "calc(var(--spacing-1\\.5) + var(--spacing-0\\.5) / 2)",
+  py: "calc(var(--spacing-0\\.5) / 2)",
   rounded: "pill",
 } as const;
 
@@ -47,7 +47,7 @@ const guideStyle = css({
   fontSize: "sm",
   color: "text.muted",
   lineHeight: "1.55",
-  mt: "6px",
+  mt: "1.5",
 });
 
 const errorTextStyle = css({
@@ -55,7 +55,7 @@ const errorTextStyle = css({
   color: "accent.warn",
   fontWeight: "700",
   lineHeight: "1.55",
-  mt: "6px",
+  mt: "1.5",
 });
 
 export const controlStyle = css({
@@ -66,8 +66,8 @@ export const controlStyle = css({
   borderStyle: "solid",
   borderColor: "border.strong",
   rounded: "input",
-  px: "13px",
-  py: "11px",
+  px: "calc(var(--spacing-3) + var(--spacing-0\\.5) / 2)",
+  py: "calc(var(--spacing-2\\.5) + var(--spacing-0\\.5) / 2)",
   fontSize: "md",
   fontFamily: "sans",
   _placeholder: { color: "text.subtle" },
@@ -115,20 +115,20 @@ export function Field({
 const radioListStyle = css({
   display: "flex",
   flexDirection: "column",
-  gap: "8px",
+  gap: "2",
 });
 
 const radioCardStyle = css({
   display: "flex",
   alignItems: "center",
-  gap: "10px",
+  gap: "2.5",
   bg: "surface.card",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
   rounded: "input",
-  px: "13px",
-  py: "12px",
+  px: "calc(var(--spacing-3) + var(--spacing-0\\.5) / 2)",
+  py: "3",
   fontSize: "md",
   cursor: "pointer",
   // チェック状態は :has で表現し、クライアント状態を持たない
@@ -191,8 +191,8 @@ export function RadioCards({
 const toggleStyle = css({
   display: "inline-flex",
   alignItems: "center",
-  gap: "8px",
-  mt: "8px",
+  gap: "2",
+  mt: "2",
   fontSize: "sm",
   color: "text.muted",
   cursor: "pointer",
@@ -211,8 +211,8 @@ const switchStyle = css({
   _after: {
     content: '""',
     position: "absolute",
-    top: "2px",
-    left: "2px",
+    top: "0.5",
+    left: "0.5",
     w: "16px",
     h: "16px",
     rounded: "pill",
@@ -221,7 +221,7 @@ const switchStyle = css({
   },
   _checked: {
     bg: "brand.primary",
-    _after: { left: "16px" },
+    _after: { left: "4" },
   },
   _focusVisible: {
     outlineWidth: "2px",
@@ -249,16 +249,16 @@ export function SwitchToggle({
 
 const noteStyle = css({
   display: "flex",
-  gap: "8px",
-  mt: "8px",
+  gap: "2",
+  mt: "2",
   bg: "amber.soft",
   color: "accent.warn",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
   rounded: "card",
-  px: "12px",
-  py: "10px",
+  px: "3",
+  py: "2.5",
   fontSize: "xs",
   lineHeight: "1.5",
 });
@@ -268,15 +268,15 @@ export function NoteBox({ children }: { children: ReactNode }) {
 }
 
 const hintStyle = css({
-  mt: "8px",
+  mt: "2",
   bg: "surface.page",
   color: "text.muted",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
   rounded: "card",
-  px: "12px",
-  py: "10px",
+  px: "3",
+  py: "2.5",
   fontSize: "xs",
   lineHeight: "1.5",
 });
@@ -287,8 +287,8 @@ export function HintBox({ children }: { children: ReactNode }) {
 
 const messageBaseStyle = {
   rounded: "card",
-  px: "12px",
-  py: "11px",
+  px: "3",
+  py: "calc(var(--spacing-2\\.5) + var(--spacing-0\\.5) / 2)",
   fontSize: "sm",
   lineHeight: "1.6",
   borderWidth: "1px",
@@ -321,8 +321,8 @@ export function FormMessage({ tone, children }: { tone: "error" | "info"; childr
 export const formActionsStyle = css({
   display: "flex",
   flexDirection: "column",
-  gap: "10px",
-  mt: "24px",
+  gap: "2.5",
+  mt: "6",
 });
 
 export const primaryButtonStyle = css({
@@ -330,7 +330,7 @@ export const primaryButtonStyle = css({
   bg: "brand.primary",
   color: "white",
   rounded: "button",
-  py: "13px",
+  py: "calc(var(--spacing-3) + var(--spacing-0\\.5) / 2)",
   fontSize: "md",
   fontWeight: "700",
   fontFamily: "sans",
@@ -347,7 +347,7 @@ export const ghostButtonStyle = css({
   bg: "surface.card",
   color: "brand.primary",
   rounded: "button",
-  py: "13px",
+  py: "calc(var(--spacing-3) + var(--spacing-0\\.5) / 2)",
   fontSize: "md",
   fontWeight: "700",
   fontFamily: "sans",
@@ -370,7 +370,7 @@ export const textLinkStyle = css({
 export const linkRowStyle = css({
   display: "flex",
   flexDirection: "column",
-  gap: "10px",
-  mt: "20px",
+  gap: "2.5",
+  mt: "5",
   textAlign: "center",
 });

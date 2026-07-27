@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-import { AppBar, BottomNav, EmptyState, MaterialCard } from "@/components";
+import { AppBar, EmptyState, MaterialCard } from "@/components";
+import { BottomNav } from "@/components/bottom-nav";
 import { SearchSortSelect } from "@/components/search/search-sort-select";
 import { TagSearchBox } from "@/components/search/tag-search-box";
 import {

@@ -3,7 +3,8 @@ import Link from "next/link";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
 
-import { AppBar, FabBar, MaterialRefCard, MetricBars } from "@/components";
+import { AppBar, MaterialRefCard, MetricBars } from "@/components";
+import { FabBar } from "@/components/fab-bar";
 import { CheckIcon, ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "@/components/icons";
 import { formatDateJa } from "@/components/format-date";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";

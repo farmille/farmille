@@ -1,4 +1,5 @@
-import { AppBar, BottomNav } from "@/components";
+import { AppBar } from "@/components";
+import { BottomNav } from "@/components/bottom-nav";
 import { errorMessageJa } from "@/server/errors";
 import { listCropOptions } from "@/server/queries/crops";
 import { getOwnProfile } from "@/server/queries/profiles";

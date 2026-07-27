@@ -5,10 +5,8 @@ import {
   ArtMini,
   ArticleCard,
   Badge,
-  BottomNav,
   Button,
   EmptyState,
-  FabBar,
   Input,
   MaterialCard,
   ReportCard,
@@ -20,6 +18,8 @@ import {
   TagChip,
   Textarea,
 } from "@/components";
+import { BottomNav } from "@/components/bottom-nav";
+import { FabBar } from "@/components/fab-bar";
 import { UiKitInteractiveDemos } from "./interactive";
 
 const page = css({

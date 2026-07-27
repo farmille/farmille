@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { AppBar, BottomNav, EmptyState } from "@/components";
+import { AppBar, EmptyState } from "@/components";
+import { BottomNav } from "@/components/bottom-nav";
 import { css } from "../../../../../styled-system/css";
 
 const shell = css({
