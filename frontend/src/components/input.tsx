@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { cva, cx, type RecipeVariantProps } from "../../styled-system/css";
 
 const inputRecipe = cva({
@@ -30,8 +31,11 @@ type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> & {
 };
 
 /** 単行テキスト入力（モック .input）。 */
-export function Input({ className, ...rest }: InputProps) {
-  return <input className={cx(inputRecipe(), className)} {...rest} />;
-}
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  { className, ...rest },
+  ref,
+) {
+  return <input className={cx(inputRecipe(), className)} ref={ref} {...rest} />;
+});
 
 export { inputRecipe };

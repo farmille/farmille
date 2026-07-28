@@ -35,6 +35,8 @@ export type { BadgeVariants } from "./badge";
 export { Button, buttonRecipe } from "./button";
 export type { ButtonVariants } from "./button";
 
+export { ConfirmDialog } from "./confirm-dialog";
+
 export { Input } from "./input";
 export { Textarea } from "./textarea";
 export { Select } from "./select";
