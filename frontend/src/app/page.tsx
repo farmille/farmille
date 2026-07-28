@@ -161,7 +161,7 @@ export default async function HomePage() {
           <SectionHeading title="注目のBS資材" href="/search" linkLabel="探す →" />
           {featured.length > 0 ? (
             <div className={scrollRow}>
-              {featured.map((material) => (
+              {featured.map((material, index) => (
                 <MaterialCard
                   key={material.id}
                   variant="scroll"
@@ -172,6 +172,7 @@ export default async function HomePage() {
                   official={material.seller_id !== null}
                   imageSrc={material.primaryImage?.url}
                   href={`/materials/${material.id}`}
+                  preload={index === 0}
                 />
               ))}
             </div>

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 
 import { toggleHelpfulAction } from "@/server/actions/helpful";
@@ -130,10 +130,13 @@ export function ReviewCard({
     <>
       <span className={avatar}>
         {avatarSrc ? (
-          <img
-            src={avatarSrc}
+          <Image
             alt=""
             className={css({ w: "100%", h: "100%", objectFit: "cover", borderRadius: "pill" })}
+            height={30}
+            sizes="30px"
+            src={avatarSrc}
+            width={30}
           />
         ) : (
           <PersonIcon size={16} />

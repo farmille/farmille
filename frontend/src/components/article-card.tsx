@@ -1,3 +1,4 @@
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { Badge } from "./badge";
@@ -74,10 +75,13 @@ export function ArticleCard({
     <Link href={href} className={cx(cardRecipe(), className)}>
       <div className={cover}>
         {coverSrc ? (
-          <img
-            src={coverSrc}
+          <Image
             alt=""
             className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+            height={360}
+            sizes="(max-width: 768px) 50vw, 384px"
+            src={coverSrc}
+            width={640}
           />
         ) : (
           <ImagePlaceholderIcon />

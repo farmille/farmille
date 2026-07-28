@@ -1,3 +1,4 @@
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 
 import { Badge, buttonRecipe } from "@/components";
@@ -136,10 +137,13 @@ export function ProfileCard({ profile, prefectureName }: ProfileCardProps) {
     <section className={card} aria-labelledby="me-handle">
       <div className={avatar}>
         {profile.avatarUrl ? (
-          <img
-            src={profile.avatarUrl}
+          <Image
             alt=""
             className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+            height={70}
+            sizes="70px"
+            src={profile.avatarUrl}
+            width={70}
           />
         ) : (
           <PersonIcon size={32} />

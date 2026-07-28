@@ -1,3 +1,4 @@
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 
 import { Badge, StarRating } from "@/components";
@@ -68,10 +69,14 @@ export function MaterialHero({
       <div className={css({ display: "flex", gap: "3.5", alignItems: "center" })}>
         <div className={imageBox}>
           {primaryImage ? (
-            <img
-              src={primaryImage.url}
+            <Image
               alt={material.name}
               className={css({ w: "100%", h: "100%", objectFit: "contain" })}
+              height={112}
+              preload
+              sizes="96px"
+              src={primaryImage.url}
+              width={96}
             />
           ) : (
             <ImagePlaceholderIcon size={28} />
@@ -126,6 +131,7 @@ export function MaterialHero({
         })}
       >
         <SaveControl
+          materialId={material.id}
           materialPath={`/materials/${material.id}`}
           saved={saved}
           toggleAction={toggleAction}

@@ -1,3 +1,5 @@
+import { OptimizedImage as Image } from "@/components/optimized-image";
+
 import { PersonIcon } from "@/components/icons";
 import type { PublicProfilePageData } from "@/server/queries/public-profiles";
 import { css } from "../../../../../styled-system/css";
@@ -137,10 +139,13 @@ export function ProfileHeader({ profile, prefectureName }: ProfileHeaderProps) {
     <section className={card} aria-labelledby="profile-handle">
       <div className={avatar}>
         {profile.avatarUrl ? (
-          <img
-            src={profile.avatarUrl}
+          <Image
             alt=""
             className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+            height={70}
+            sizes="70px"
+            src={profile.avatarUrl}
+            width={70}
           />
         ) : (
           <PersonIcon size={32} />

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -230,7 +231,14 @@ export default async function AdminUsageReportDetailPage({
             {data.media.map((media) => (
               <figure className={css({ m: "0" })} key={media.id}>
                 {media.mediaType === "photo" ? (
-                  <img alt={media.caption ?? ""} className={mediaStyle} src={media.url} />
+                  <Image
+                    alt={media.caption ?? ""}
+                    className={mediaStyle}
+                    height={480}
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    src={media.url}
+                    width={640}
+                  />
                 ) : (
                   <video className={mediaStyle} controls src={media.url} />
                 )}

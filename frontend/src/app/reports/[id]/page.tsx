@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
@@ -146,10 +147,12 @@ function MediaFigure({
         })}
       >
         {mediaType === "photo" ? (
-          <img
-            src={url}
+          <Image
             alt={caption ?? ""}
             className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+            fill
+            sizes={wide ? "(max-width: 768px) 100vw, 768px" : "(max-width: 768px) 100vw, 640px"}
+            src={url}
           />
         ) : (
           <>
@@ -322,10 +325,13 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               })}
             >
               {report.author.avatarUrl ? (
-                <img
-                  src={report.author.avatarUrl}
+                <Image
                   alt=""
                   className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+                  height={32}
+                  sizes="32px"
+                  src={report.author.avatarUrl}
+                  width={32}
                 />
               ) : (
                 <PersonIcon size={16} />
@@ -441,16 +447,19 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               <figure key={photo.id} className={css({ m: "0" })}>
                 <div
                   className={css({
+                    position: "relative",
                     aspectRatio: "3/4",
                     borderRadius: "button",
                     overflow: "hidden",
                     bg: "green.soft2",
                   })}
                 >
-                  <img
-                    src={photo.url}
+                  <Image
                     alt={photo.caption ?? ""}
                     className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+                    fill
+                    sizes="(max-width: 768px) 50vw, 320px"
+                    src={photo.url}
                   />
                 </div>
                 {photo.caption ? (

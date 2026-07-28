@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
@@ -186,8 +187,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
             })}
           >
             {article.seller.logo_url ? (
-              <img
-                src={article.seller.logo_url}
+              <Image
                 alt=""
                 className={css({
                   w: "32px",
@@ -195,6 +195,10 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
                   borderRadius: "button",
                   objectFit: "cover",
                 })}
+                height={32}
+                sizes="32px"
+                src={article.seller.logo_url}
+                width={32}
               />
             ) : (
               <span
@@ -229,8 +233,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
               bg: "green.soft2",
             })}
           >
-            <img
-              src={article.heroImageUrl}
+            <Image
               alt=""
               className={css({
                 w: "100%",
@@ -238,6 +241,11 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
                 aspectRatio: "16/9",
                 objectFit: "cover",
               })}
+              height={360}
+              preload
+              sizes="(max-width: 768px) 100vw, 768px"
+              src={article.heroImageUrl}
+              width={640}
             />
           </div>
         ) : null}

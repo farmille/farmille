@@ -1,3 +1,4 @@
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { Badge } from "./badge";
@@ -56,10 +57,13 @@ export function ArtMini({
     <Link href={href} className={cx(rowRecipe(), className)}>
       <div className={thumb}>
         {thumbSrc ? (
-          <img
-            src={thumbSrc}
+          <Image
             alt=""
             className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+            height={52}
+            sizes="70px"
+            src={thumbSrc}
+            width={70}
           />
         ) : (
           <ImagePlaceholderIcon size={20} />

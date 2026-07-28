@@ -22,6 +22,7 @@ import { MaterialDetailTable } from "./_components/detail-table";
 import { MaterialHero } from "./_components/material-hero";
 import { MaterialPageShell } from "./_components/page-shell";
 import { RatingSummary } from "./_components/rating-summary";
+import { ReviewAnalytics } from "./_components/review-analytics";
 import { ReviewList } from "./_components/review-list";
 import { toggleSavedMaterialAction } from "./actions";
 import {
@@ -33,6 +34,7 @@ import { unwrapQueryResult } from "./query-result";
 
 type MaterialPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ review?: string | string[] }>;
 };
 
 const externalLinks = css({
@@ -77,8 +79,8 @@ export async function generateMetadata({ params }: MaterialPageProps): Promise<M
   return materialMetadata(material);
 }
 
-export default async function MaterialPage({ params }: MaterialPageProps) {
-  const { id } = await params;
+export default async function MaterialPage({ params, searchParams }: MaterialPageProps) {
+  const [{ id }, query] = await Promise.all([params, searchParams]);
   const material = await loadMaterialOrNotFound(id);
   const sessionUser = await getSessionUser();
   const isGeneralUser = sessionUser?.accountType === "general";
@@ -124,6 +126,7 @@ export default async function MaterialPage({ params }: MaterialPageProps) {
 
   return (
     <MaterialPageShell title={material.name} backHref="/" hasFab>
+      <ReviewAnalytics materialId={material.id} submitted={query.review === "posted"} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(productJsonLd) }}
