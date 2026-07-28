@@ -97,6 +97,16 @@ jobs:
             echo "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3007"
           } >> "$GITHUB_ENV"
 
+      - name: Seed material master
+        working-directory: .
+        shell: bash
+        # E2E は資材が存在する前提（検索・検討リスト・使用レポート）。
+        # migration のシードはタグと作物マスタだけなので資材を別途投入する。
+        run: |
+          eval "$(npx --yes supabase@latest status -o env)"
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f tools/migration/materials-v2-seed.sql
+          psql "$DB_URL" -tAc "select 'materials: ' || count(*) from materials"
+
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 
