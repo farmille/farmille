@@ -5,6 +5,8 @@ import { toggleHelpfulAction } from "@/server/actions/helpful";
 import { createReportAction } from "@/server/actions/reports";
 import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 import { cva, css, cx } from "../../styled-system/css";
+import { HelpfulButton } from "./helpful-button";
+import { helpfulPillRecipe } from "./helpful-pill";
 import { ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "./icons";
 import { ReportDialog } from "./report-dialog";
 import { ReviewOwnerActions } from "./review-owner-actions";
@@ -31,35 +33,6 @@ const cropChip = css({
   color: "brand.primaryDeep",
   fontWeight: "600",
   whiteSpace: "nowrap",
-});
-
-const helpfulBtn = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1.5",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  bg: "surface.card",
-  color: "text.muted",
-  borderRadius: "pill",
-  px: "3",
-  py: "1.5",
-  fontSize: "sm",
-  whiteSpace: "nowrap",
-  fontVariantNumeric: "tabular-nums",
-  flexShrink: "0",
-  cursor: "default",
-});
-
-const helpfulBtnInteractive = css({
-  cursor: "pointer",
-});
-
-const helpfulBtnActive = css({
-  bg: "brand.soft",
-  color: "brand.primaryDeep",
-  borderColor: "brand.primary",
 });
 
 const avatar = css({
@@ -255,19 +228,14 @@ export function ReviewCard({
         })}
       >
         {interactive ? (
-          <form action={toggleHelpfulAction.bind(null, "review", reviewId, resolvedPath)}>
-            <button
-              type="submit"
-              aria-pressed={helpfulVoted}
-              className={cx(helpfulBtn, helpfulBtnInteractive, helpfulVoted && helpfulBtnActive)}
-            >
-              <ThumbIcon />
-              <span>参考になった</span>
-              {helpfulCount}
-            </button>
-          </form>
+          <HelpfulButton
+            action={toggleHelpfulAction.bind(null, "review", reviewId, resolvedPath)}
+            count={helpfulCount}
+            layout="card"
+            voted={helpfulVoted}
+          />
         ) : (
-          <span className={helpfulBtn}>
+          <span className={helpfulPillRecipe({ layout: "card" })}>
             <ThumbIcon />
             <span>参考になった</span>
             {helpfulCount}

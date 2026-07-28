@@ -352,6 +352,16 @@ export async function reviewByAuthor(authorUserId: string): Promise<Review | nul
   return rows[0] ?? null;
 }
 
+/** 指定ユーザーが押した「参考になった」の件数。 */
+export async function helpfulVoteCount(userId: string): Promise<number> {
+  const params = new URLSearchParams({
+    select: "id",
+    user_id: `eq.${userId}`,
+  });
+  const rows = await restSelect<{ id: string }>("helpful_votes", params);
+  return rows.length;
+}
+
 export async function createPendingUsageReport(input: {
   materialId: string;
   authorUserId: string;

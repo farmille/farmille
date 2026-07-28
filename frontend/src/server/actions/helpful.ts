@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireGeneralUser } from "@/server/auth";
@@ -10,17 +9,24 @@ import {
   toggleHelpfulVote,
   type HelpfulTargetType,
 } from "@/server/mutations/helpful";
+import { getHelpfulCount } from "@/server/queries/helpful";
+
+export type HelpfulState = {
+  voted: boolean;
+  count: number;
+};
 
 /**
  * 「参考になった」のトグル。未ログインはログイン誘導、自分の投稿は server 側で拒否する（T-34）。
- * カードは `<form action={toggleHelpfulAction.bind(null, targetType, targetId, currentPath)}>` で使う。
+ * 押下状態と件数は戻り値で返し、HelpfulButton がその値を描画する。
  */
 export async function toggleHelpfulAction(
   targetType: HelpfulTargetType,
   targetId: string,
   currentPath: string,
+  _previous: HelpfulState,
   _formData: FormData,
-): Promise<void> {
+): Promise<HelpfulState> {
   if (!isHelpfulTargetType(targetType)) {
     throw new Error(errorMessageJa.invalid_body);
   }
@@ -40,5 +46,11 @@ export async function toggleHelpfulAction(
     throw new Error(errorMessageJa[result.error]);
   }
 
-  revalidatePath(currentPath);
+  const count = await getHelpfulCount(targetType, targetId);
+
+  if (!count.ok) {
+    throw new Error(errorMessageJa[count.error]);
+  }
+
+  return { voted: result.data.voted, count: count.data };
 }

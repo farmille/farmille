@@ -5,7 +5,8 @@ import { after } from "next/server";
 import { notFound } from "next/navigation";
 
 import { AppBar, Badge, MaterialRefCard } from "@/components";
-import { OfficialCheckIcon, ThumbIcon } from "@/components/icons";
+import { HelpfulButton } from "@/components/helpful-button";
+import { OfficialCheckIcon } from "@/components/icons";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/report-dialog";
 import { sellerTypeLabel } from "@/components/seller-type-label";
@@ -20,7 +21,7 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublishedArticle } from "@/server/queries/articles";
 import { recordViewEvent } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
-import { css, cx } from "../../../../styled-system/css";
+import { css } from "../../../../styled-system/css";
 
 type ArticleDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -39,31 +40,6 @@ const shell = css({
 const main = css({
   px: "3.5",
   py: "4",
-});
-
-const helpfulPillStatic = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1.5",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  bg: "surface.card",
-  color: "text.muted",
-  borderRadius: "pill",
-  px: "3",
-  py: "1.5",
-  fontSize: "sm",
-  whiteSpace: "nowrap",
-  fontVariantNumeric: "tabular-nums",
-});
-
-const helpfulPillInteractive = css({ cursor: "pointer" });
-
-const helpfulPillActive = css({
-  bg: "brand.soft",
-  color: "brand.primaryDeep",
-  borderColor: "brand.primary",
 });
 
 async function loadArticle(id: string) {
@@ -309,28 +285,17 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
             color: "text.subtle",
           })}
         >
-          <form
+          <HelpfulButton
             action={toggleHelpfulAction.bind(
               null,
               "article",
               article.id,
               `/articles/${article.id}`,
             )}
-          >
-            <button
-              type="submit"
-              aria-pressed={helpfulVoted}
-              className={cx(
-                helpfulPillStatic,
-                helpfulPillInteractive,
-                helpfulVoted && helpfulPillActive,
-              )}
-            >
-              <ThumbIcon />
-              <span>参考になった</span>
-              {article.helpfulCount}
-            </button>
-          </form>
+            count={article.helpfulCount}
+            layout="card"
+            voted={helpfulVoted}
+          />
           <span className={css({ fontVariantNumeric: "tabular-nums" })}>
             {article.viewCount} 回閲覧
           </span>

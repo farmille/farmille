@@ -65,6 +65,9 @@ export type { SurfaceCardVariants } from "./surface-card";
 export { DataList } from "./data-list";
 export type { DataListRow } from "./data-list";
 
+export { HelpfulButton } from "./helpful-button";
+export { helpfulPillRecipe } from "./helpful-pill";
+
 export { FormMessage } from "./form-message";
 export { PendingButton } from "./pending-button";
 export { TextLink } from "./text-link";

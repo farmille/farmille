@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useActionState } from "react";
 
 import { buttonRecipe } from "@/components";
 import { trackMaterialSaved } from "@/lib/analytics/events";
 import { css, cx } from "../../../../../styled-system/css";
+import type { SaveControlState } from "../actions";
 
 const saveForm = css({
   display: "flex",
@@ -14,13 +16,39 @@ const saveButton = css({
   flex: "1",
 });
 
+type ToggleAction = (previous: SaveControlState, formData: FormData) => Promise<SaveControlState>;
+
 type SaveControlProps = {
   materialId: string;
   materialPath: string;
   saved: boolean | null;
-  toggleAction?: (formData: FormData) => Promise<void>;
+  toggleAction?: ToggleAction;
   unavailable?: boolean;
 };
+
+function SaveToggleForm({
+  materialId,
+  saved,
+  toggleAction,
+}: {
+  materialId: string;
+  saved: boolean;
+  toggleAction: ToggleAction;
+}) {
+  const [state, formAction] = useActionState(toggleAction, { saved });
+
+  return (
+    <form action={formAction} className={saveForm}>
+      <button
+        type="submit"
+        onClick={state.saved ? undefined : () => trackMaterialSaved(materialId)}
+        className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}
+      >
+        {state.saved ? "保存済み（解除する）" : "検討リストに保存"}
+      </button>
+    </form>
+  );
+}
 
 export function SaveControl({
   materialId,
@@ -50,20 +78,5 @@ export function SaveControl({
     );
   }
 
-  return (
-    <form
-      action={async (formData) => {
-        await toggleAction(formData);
-        if (!saved) trackMaterialSaved(materialId);
-      }}
-      className={saveForm}
-    >
-      <button
-        type="submit"
-        className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}
-      >
-        {saved ? "保存済み（解除する）" : "検討リストに保存"}
-      </button>
-    </form>
-  );
+  return <SaveToggleForm materialId={materialId} saved={saved} toggleAction={toggleAction} />;
 }
