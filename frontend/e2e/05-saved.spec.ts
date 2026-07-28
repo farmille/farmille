@@ -1,0 +1,39 @@
+import { expect, test } from "@playwright/test";
+
+import { createGeneralUser, deleteAuthUsersByEmail, listSeedMaterials } from "./support/test-data";
+import { loginGeneral } from "./support/ui";
+
+test("検討リスト保存、マイページ一覧、比較表", async ({ page }) => {
+  const user = await createGeneralUser("saved");
+  const materials = (await listSeedMaterials()).slice(0, 2);
+
+  if (materials.length !== 2) {
+    throw new Error("比較テスト用のシード資材が不足しています。");
+  }
+
+  try {
+    await loginGeneral(page, user);
+
+    for (const material of materials) {
+      await page.goto(`/materials/${material.id}`);
+      await page.getByRole("button", { name: "検討リストに保存" }).click();
+      await expect(page.getByRole("button", { name: "保存済み（解除する）" })).toBeVisible();
+    }
+
+    await page.goto("/me/saved");
+    for (const material of materials) {
+      const materialLink = page.getByRole("link", { name: new RegExp(material.name) });
+      await expect(materialLink).toBeVisible();
+      await materialLink.locator("..").getByRole("checkbox", { name: "比較に含める" }).check();
+    }
+
+    await page.getByRole("button", { name: "比較する" }).click();
+    await expect(page).toHaveURL(/\/me\/saved\/compare\?/);
+    await expect(page.getByRole("table")).toBeVisible();
+    for (const material of materials) {
+      await expect(page.getByText(material.name, { exact: true })).toBeVisible();
+    }
+  } finally {
+    await deleteAuthUsersByEmail(user.email);
+  }
+});
