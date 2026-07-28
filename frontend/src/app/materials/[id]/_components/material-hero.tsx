@@ -6,6 +6,7 @@ import { ImagePlaceholderIcon } from "@/components/icons";
 import type { MaterialDetail } from "@/server/queries/materials";
 import { css } from "../../../../../styled-system/css";
 
+import type { SaveControlState } from "../actions";
 import { SaveControl } from "./save-control";
 
 const heroCard = css({
@@ -45,7 +46,7 @@ const manufacturerStyle = css({
 type MaterialHeroProps = {
   material: MaterialDetail;
   saved: boolean | null;
-  toggleAction?: (formData: FormData) => Promise<void>;
+  toggleAction?: (previous: SaveControlState, formData: FormData) => Promise<SaveControlState>;
   saveUnavailable?: boolean;
 };
 

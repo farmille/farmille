@@ -7,7 +7,7 @@ export default function NotFound() {
     <FormPageShell backHref="/" title="ページが見つかりません">
       <SurfaceCard
         description="指定されたページは存在しないか、移動した可能性があります。"
-        title="お探しのページを表示できません"
+        title="ページが見つかりません"
       >
         <Link className={buttonRecipe({ variant: "ghost" })} href="/">
           ホームへ戻る
