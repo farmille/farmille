@@ -2,8 +2,10 @@ import { expect, test } from "@playwright/test";
 
 import {
   createGeneralUser,
+  createReview,
   deleteAuthUsersByEmail,
   getMaterial,
+  helpfulVoteCount,
   listSeedMaterials,
   reviewByAuthor,
 } from "./support/test-data";
@@ -57,5 +59,52 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
       .toBe(material.review_count);
   } finally {
     await deleteAuthUsersByEmail(user.email);
+  }
+});
+
+test("資材詳細でレビューの参考になったを押すと、その場でカウントが増減する", async ({ page }) => {
+  const author = await createGeneralUser("helpful-author");
+  const viewer = await createGeneralUser("helpful-viewer");
+  const material = (await listSeedMaterials())[0];
+
+  if (material === undefined) {
+    throw new Error("レビュー対象のシード資材が見つかりません。");
+  }
+
+  const body = `E2E参考になったレビュー_${author.id}`;
+
+  try {
+    await createReview({
+      materialId: material.id,
+      authorUserId: author.id,
+      rating: 4,
+      body,
+    });
+
+    await loginGeneral(page, viewer);
+    await page.goto(`/materials/${material.id}`);
+
+    const helpful = page
+      .getByRole("article")
+      .filter({ hasText: body })
+      .getByRole("button", { name: /参考になった/ });
+
+    await expect(helpful).toHaveText("参考になった0");
+    await expect(helpful).toHaveAttribute("aria-pressed", "false");
+
+    await helpful.click();
+
+    await expect(helpful).toHaveText("参考になった1");
+    await expect(helpful).toHaveAttribute("aria-pressed", "true");
+    await expect.poll(async () => await helpfulVoteCount(viewer.id)).toBe(1);
+
+    await helpful.click();
+
+    await expect(helpful).toHaveText("参考になった0");
+    await expect(helpful).toHaveAttribute("aria-pressed", "false");
+    await expect.poll(async () => await helpfulVoteCount(viewer.id)).toBe(0);
+  } finally {
+    await deleteAuthUsersByEmail(author.email);
+    await deleteAuthUsersByEmail(viewer.email);
   }
 });

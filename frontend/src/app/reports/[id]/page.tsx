@@ -6,6 +6,8 @@ import { notFound } from "next/navigation";
 
 import { AppBar, MaterialRefCard, MetricBars } from "@/components";
 import { FabBar } from "@/components/fab-bar";
+import { HelpfulButton } from "@/components/helpful-button";
+import { helpfulPillRecipe } from "@/components/helpful-pill";
 import { CheckIcon, ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "@/components/icons";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/report-dialog";
@@ -19,7 +21,7 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublishedUsageReport } from "@/server/queries/usage-reports";
 import { recordViewEvent } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
-import { css, cx } from "../../../../styled-system/css";
+import { css } from "../../../../styled-system/css";
 
 import { prefectureName } from "./prefecture-name";
 
@@ -57,30 +59,6 @@ const bodyText = css({
   color: "text.muted",
   lineHeight: "1.75",
   whiteSpace: "pre-wrap",
-});
-
-const helpfulPillStatic = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1.5",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  bg: "surface.card",
-  color: "text.muted",
-  borderRadius: "pill",
-  px: "3",
-  py: "1.5",
-  fontSize: "sm",
-  fontVariantNumeric: "tabular-nums",
-});
-
-const helpfulPillInteractive = css({ cursor: "pointer" });
-
-const helpfulPillActive = css({
-  bg: "brand.soft",
-  color: "brand.primaryDeep",
-  borderColor: "brand.primary",
 });
 
 async function loadReport(id: string) {
@@ -538,30 +516,18 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           })}
         >
           {!isOwnPost ? (
-            <form
+            <HelpfulButton
               action={toggleHelpfulAction.bind(
                 null,
                 "usage_report",
                 report.id,
                 `/reports/${report.id}`,
               )}
-            >
-              <button
-                type="submit"
-                aria-pressed={helpfulVoted}
-                className={cx(
-                  helpfulPillStatic,
-                  helpfulPillInteractive,
-                  helpfulVoted && helpfulPillActive,
-                )}
-              >
-                <ThumbIcon />
-                <span>参考になった</span>
-                {report.helpfulCount}
-              </button>
-            </form>
+              count={report.helpfulCount}
+              voted={helpfulVoted}
+            />
           ) : (
-            <span className={helpfulPillStatic}>
+            <span className={helpfulPillRecipe()}>
               <ThumbIcon />
               <span>参考になった</span>
               {report.helpfulCount}

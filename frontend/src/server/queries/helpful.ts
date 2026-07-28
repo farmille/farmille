@@ -46,6 +46,36 @@ export async function getViewerHelpfulVotes(
   return succeed(votedIds);
 }
 
+/** 単一対象の「参考になった」件数。集計行が無い対象は0件。 */
+export async function getHelpfulCount(
+  targetType: HelpfulTargetType,
+  targetId: string,
+): Promise<Result<number>> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("helpful_counts")
+    .select("helpful_count")
+    .eq("target_type", targetType)
+    .eq("target_id", targetId)
+    .maybeSingle();
+
+  if (error !== null) {
+    reportQueryError("参考になった件数の取得に失敗", { targetType, error });
+    return fail("internal");
+  }
+
+  if (data === null) {
+    return succeed(0);
+  }
+
+  if (data.helpful_count === null) {
+    reportQueryError("参考になった件数にNULLが含まれる", { targetType, targetId });
+    return fail("internal");
+  }
+
+  return succeed(data.helpful_count);
+}
+
 /** 単一対象について、閲覧者が「参考になった」を押しているかどうか。 */
 export async function isHelpfulVotedByViewer(
   userId: string | null,
