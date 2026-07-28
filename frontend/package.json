@@ -12,6 +12,7 @@
     "format:check": "oxfmt --check",
     "check": "pnpm lint && pnpm exec tsc --noEmit && pnpm exec vitest run",
     "test": "vitest",
+    "test:e2e": "playwright test",
     "gen:types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/database.types.ts",
     "gen:types:dev": "npx supabase gen types typescript --linked > src/types/database.types.ts"
   },
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@pandacss/dev": "~1.11.5",
+    "@playwright/test": "1.62.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.5.2",
@@ -46,6 +48,7 @@
     "eslint-config-next": "16.2.11",
     "eslint-plugin-oxlint": "^1.75.0",
     "happy-dom": "^20.8.9",
+    "otpauth": "9.5.1",
     "oxfmt": "0.60.0",
     "oxlint": "^1.75.0",
     "oxlint-tsgolint": "^7.0.2001",

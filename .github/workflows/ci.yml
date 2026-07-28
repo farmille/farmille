@@ -53,3 +53,52 @@ jobs:
         env:
           # CI 用の公開ダミー値。コード側にフォールバックは置かない方針のため CI 設定で与える。
           NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start local Supabase
+        working-directory: .
+        run: npx --yes supabase@latest start
+
+      - name: Export local Supabase environment
+        working-directory: .
+        shell: bash
+        run: |
+          eval "$(npx --yes supabase@latest status -o env)"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            echo "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3007"
+          } >> "$GITHUB_ENV"
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright E2E
+        run: pnpm exec playwright test
