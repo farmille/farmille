@@ -21,6 +21,8 @@ import {
 } from "@/server/queries/tags";
 import { css } from "../../../styled-system/css";
 
+import { SearchAnalytics } from "./_components/search-analytics";
+
 // NEXT_PUBLIC_SITE_URL の評価をモジュール読み込み時ではなく使用時に遅延させる（layout.tsx と同じ理由）。
 export async function generateMetadata(): Promise<Metadata> {
   return createPageMetadata({
@@ -152,6 +154,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className={shell}>
+      <SearchAnalytics filterCount={selected.length} resultCount={total} sort={sort} />
       <AppBar title="BS資材を探す" backHref="/" />
       <main className={main}>
         <TagSearchBox
@@ -189,7 +192,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
         {items.length > 0 ? (
           <div className={stack}>
-            {items.map((material) => (
+            {items.map((material, index) => (
               <MaterialCard
                 key={material.id}
                 variant="list"
@@ -201,6 +204,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 imageSrc={material.primaryImage?.url}
                 description={material.description ?? undefined}
                 href={`/materials/${material.id}`}
+                preload={index === 0}
               />
             ))}
           </div>

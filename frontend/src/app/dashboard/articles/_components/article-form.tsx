@@ -1,6 +1,7 @@
 "use client";
 
 import { createBrowserClient } from "@supabase/ssr";
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -346,7 +347,7 @@ export function ArticleForm({
           />
           {heroImageUrl.length === 0 ? null : (
             <div className={css({ mt: "3", display: "flex", flexDirection: "column", gap: "2" })}>
-              <img
+              <Image
                 alt=""
                 className={css({
                   w: "100%",
@@ -357,7 +358,10 @@ export function ArticleForm({
                   borderStyle: "solid",
                   borderColor: "border.default",
                 })}
+                height={360}
+                sizes="(max-width: 768px) 100vw, 768px"
                 src={heroImageUrl}
+                width={640}
               />
               <Button
                 disabled={busy}

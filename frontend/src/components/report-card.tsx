@@ -1,3 +1,4 @@
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "./icons";
@@ -155,10 +156,13 @@ export function ReportCard({
         })}
       >
         {avatarSrc ? (
-          <img
-            src={avatarSrc}
+          <Image
             alt=""
             className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+            height={26}
+            sizes={compact ? "18px" : "26px"}
+            src={avatarSrc}
+            width={26}
           />
         ) : (
           <PersonIcon size={compact ? 10 : 14} />
@@ -177,10 +181,19 @@ export function ReportCard({
       >
         <div className={coverRecipe({ layout })}>
           {coverSrc ? (
-            <img
-              src={coverSrc}
+            <Image
               alt=""
               className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+              height={480}
+              sizes={
+                layout === "scroll"
+                  ? "54vw"
+                  : layout === "grid"
+                    ? "(max-width: 768px) 50vw"
+                    : "(max-width: 768px) 100vw, 768px"
+              }
+              src={coverSrc}
+              width={640}
             />
           ) : (
             <ImagePlaceholderIcon />

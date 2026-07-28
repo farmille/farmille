@@ -1,6 +1,7 @@
 "use client";
 
 import { createBrowserClient } from "@supabase/ssr";
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import { useMemo, useState, useTransition } from "react";
 
 import { css } from "../../../../../../styled-system/css";
@@ -11,6 +12,7 @@ import {
 import { Button } from "@/components/button";
 import { LeafIcon, OfficialCheckIcon } from "@/components/icons";
 import { Textarea } from "@/components/textarea";
+import { trackUsageReportSubmitted } from "@/lib/analytics/events";
 import type {
   CropOption,
   SubmittedUsageReport,
@@ -276,6 +278,7 @@ export function ReportForm({
     setGlobalErrorMessage(undefined);
     setMessage(result.message);
     if (result.status === "pending") {
+      trackUsageReportSubmitted(material.id, result.reportIds.length);
       setSubmitted(
         result.reportIds.map((id, index) => ({
           id,
@@ -327,7 +330,14 @@ export function ReportForm({
         <div className={targetCard}>
           <div className={targetImage}>
             {material.imageUrl ? (
-              <img className={targetImageContent} src={material.imageUrl} alt="" />
+              <Image
+                alt=""
+                className={targetImageContent}
+                height={44}
+                sizes="44px"
+                src={material.imageUrl}
+                width={44}
+              />
             ) : (
               <LeafIcon size={28} />
             )}

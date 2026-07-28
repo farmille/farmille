@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components";
+import { trackMaterialSaved } from "@/lib/analytics/events";
 import { css, cx } from "../../../../../styled-system/css";
 
 const saveForm = css({
@@ -12,6 +15,7 @@ const saveButton = css({
 });
 
 type SaveControlProps = {
+  materialId: string;
   materialPath: string;
   saved: boolean | null;
   toggleAction?: (formData: FormData) => Promise<void>;
@@ -19,6 +23,7 @@ type SaveControlProps = {
 };
 
 export function SaveControl({
+  materialId,
   materialPath,
   saved,
   toggleAction,
@@ -46,7 +51,13 @@ export function SaveControl({
   }
 
   return (
-    <form action={toggleAction} className={saveForm}>
+    <form
+      action={async (formData) => {
+        await toggleAction(formData);
+        if (!saved) trackMaterialSaved(materialId);
+      }}
+      className={saveForm}
+    >
       <button
         type="submit"
         className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}

@@ -1,7 +1,7 @@
 "use client";
 
 import { createBrowserClient } from "@supabase/ssr";
-import Image from "next/image";
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 import { startTransition, useActionState, useEffect, useMemo, useState } from "react";
 

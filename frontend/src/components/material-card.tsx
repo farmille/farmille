@@ -1,3 +1,4 @@
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { ChevronIcon, ImagePlaceholderIcon, OfficialCheckIcon } from "./icons";
@@ -72,18 +73,36 @@ export type MaterialCardProps = {
   imageAlt?: string;
   /** 横スクロール用（prod-card）／一覧用（mat-card） */
   variant?: "scroll" | "list";
+  preload?: boolean;
   className?: string;
 };
 
-function MaterialImage({ src, alt, className }: { src?: string; alt: string; className: string }) {
-  if (src) {
-    return (
-      <img src={src} alt={alt} className={css({ w: "100%", h: "100%", objectFit: "contain" })} />
-    );
-  }
+function MaterialImage({
+  src,
+  alt,
+  className,
+  preload,
+}: {
+  src?: string;
+  alt: string;
+  className: string;
+  preload: boolean;
+}) {
   return (
     <div className={className}>
-      <ImagePlaceholderIcon />
+      {src ? (
+        <Image
+          alt={alt}
+          className={css({ w: "100%", h: "100%", objectFit: "contain" })}
+          height={450}
+          preload={preload}
+          sizes="150px"
+          src={src}
+          width={600}
+        />
+      ) : (
+        <ImagePlaceholderIcon />
+      )}
     </div>
   );
 }
@@ -101,6 +120,7 @@ export function MaterialCard({
   imageSrc,
   imageAlt,
   variant = "list",
+  preload = false,
   className,
 }: MaterialCardProps) {
   const alt = imageAlt ?? name;
@@ -109,7 +129,7 @@ export function MaterialCard({
     return (
       <Link href={href} className={cx(scrollCard(), className)}>
         <div className={css({ bg: "surface.card", p: "2" })}>
-          <MaterialImage src={imageSrc} alt={alt} className={imgBox} />
+          <MaterialImage src={imageSrc} alt={alt} className={imgBox} preload={preload} />
         </div>
         <div className={css({ px: "2.5", py: "2.5" })}>
           <div className={css({ fontSize: "sm", fontWeight: "700" })}>{name}</div>
@@ -151,10 +171,14 @@ export function MaterialCard({
     <Link href={href} className={cx(listCard(), className)}>
       <div className={listImg}>
         {imageSrc ? (
-          <img
-            src={imageSrc}
+          <Image
             alt={alt}
             className={css({ w: "100%", h: "100%", objectFit: "contain" })}
+            height={62}
+            preload={preload}
+            sizes="62px"
+            src={imageSrc}
+            width={62}
           />
         ) : (
           <ImagePlaceholderIcon />

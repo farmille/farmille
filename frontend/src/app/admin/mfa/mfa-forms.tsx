@@ -1,5 +1,6 @@
 "use client";
 
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import { useActionState } from "react";
 
 import { initialMfaEnrollState } from "@/app/admin/_lib/action-state";
@@ -89,11 +90,14 @@ export function AdminMfaForms({
         <p className={adminInlineNoteStyle}>
           認証アプリで次の QR コードを読み取り、表示された6桁を入力してください。
         </p>
-        {/* Supabase が返す SVG の data URI。最適化対象にならないため img で描画する。 */}
-        <img
+        {/* Supabase が返す SVG の data URI は、画像最適化を通さずに描画する。 */}
+        <Image
           alt="TOTP 登録用の QR コード"
           className={qrStyle}
+          height={180}
           src={enrollState.enrollment.qrCode}
+          unoptimized
+          width={180}
         />
         <p className={adminInlineNoteStyle}>QR を読み取れない場合は次のキーを手入力します。</p>
         <span className={adminCodeStyle}>{enrollState.enrollment.secret}</span>

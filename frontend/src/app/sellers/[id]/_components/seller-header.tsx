@@ -1,3 +1,5 @@
+import { OptimizedImage as Image } from "@/components/optimized-image";
+
 import { OfficialCheckIcon } from "@/components/icons";
 import type { PublicSellerPageData } from "@/server/queries/public-sellers";
 import { css } from "../../../../../styled-system/css";
@@ -88,10 +90,13 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
     <section className={card} aria-labelledby="seller-name">
       <div className={logo}>
         {seller.logoUrl ? (
-          <img
-            src={seller.logoUrl}
+          <Image
             alt=""
             className={css({ w: "100%", h: "100%", objectFit: "cover" })}
+            height={56}
+            sizes="56px"
+            src={seller.logoUrl}
+            width={56}
           />
         ) : (
           fallbackLogo

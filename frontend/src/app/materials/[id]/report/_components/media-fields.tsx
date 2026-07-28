@@ -1,5 +1,6 @@
 "use client";
 
+import { OptimizedImage as Image } from "@/components/optimized-image";
 import { useEffect, useState } from "react";
 
 import { css } from "../../../../../../styled-system/css";
@@ -137,7 +138,9 @@ function LocalMediaPreview({
   if (mediaType === "video") {
     return <video className={previewMedia} src={previewUrl} controls muted playsInline />;
   }
-  return <img className={previewMedia} src={previewUrl} alt={caption} />;
+  return (
+    <Image alt={caption} className={previewMedia} fill sizes="50vw" src={previewUrl} unoptimized />
+  );
 }
 
 function MediaPreview({ item }: { item: ReportMediaDraft }) {
@@ -148,7 +151,7 @@ function MediaPreview({ item }: { item: ReportMediaDraft }) {
   if (item.mediaType === "video") {
     return <video className={previewMedia} src={item.url} controls muted playsInline />;
   }
-  return <img className={previewMedia} src={item.url} alt={item.caption} />;
+  return <Image alt={item.caption} className={previewMedia} fill sizes="50vw" src={item.url} />;
 }
 
 export function MediaFields({

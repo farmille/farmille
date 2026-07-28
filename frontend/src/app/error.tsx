@@ -1,18 +1,19 @@
 "use client";
 
+import { ErrorPage } from "@/app/_components/error-page";
+
 type ErrorProps = {
   error: Error & { digest?: string };
   unstable_retry: () => void;
 };
 
-export default function Error({ unstable_retry }: ErrorProps) {
+export default function Error({ error, unstable_retry }: ErrorProps) {
   return (
-    <main>
-      <h1>エラーが発生しました</h1>
-      <p>時間をおいて、もう一度お試しください。</p>
-      <button type="button" onClick={unstable_retry}>
-        もう一度試す
-      </button>
-    </main>
+    <ErrorPage
+      description="時間をおいてから、もう一度お試しください。"
+      error={error}
+      onRetry={unstable_retry}
+      title="ページを表示できませんでした"
+    />
   );
 }
