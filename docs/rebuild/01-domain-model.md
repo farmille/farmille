@@ -14,6 +14,8 @@ OOUI の結論を踏襲する：**資材＝情報の倉庫（全関係のハブ�
 
 ## 2. ER 図
 
+> 本節の図は概念設計時の簡略版。**実装準拠の完全な ER 図（全26テーブル・全列）は [06-diagrams.md](06-diagrams.md) §1** を参照。
+
 ```mermaid
 erDiagram
     auth_users ||--o| profiles : "一般ユーザー(1:1)"

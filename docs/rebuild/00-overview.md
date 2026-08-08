@@ -12,6 +12,7 @@
 | [03-architecture.md](03-architecture.md) | 技術構成（Next.js 集約・実装規約・Panda CSS・oxlint/oxfmt・OpenSpec） |
 | [04-implementation-plan.md](04-implementation-plan.md) | マイルストーン・タスク分割・モデル委譲の実務 |
 | [05-cleanup.md](05-cleanup.md) | 現行リポジトリの削除・残存リスト |
+| [06-diagrams.md](06-diagrams.md) | 実装準拠の ER 図・シーケンス図・画面遷移図（Mermaid） |
 
 ## 1. なぜ刷新するか
 
