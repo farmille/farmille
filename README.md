@@ -1,6 +1,6 @@
 # Farmille
 
-Farmille は、BS資材（生物・微生物農業資材）を農家が評価し、使用経験を共有するレビュープラットフォームです。
+Farmille は、BS資材（生物・微生物農業資材）を農家が評価し、使用経験を共有するレビュープラットフォームです。Next.js 16、TypeScript、Panda CSS を使用し、画面とサーバー処理を1つのアプリにまとめています。
 
 ## 設計資料
 
@@ -8,23 +8,41 @@ Farmille は、BS資材（生物・微生物農業資材）を農家が評価し
 
 ## セットアップ
 
-アプリ本体は `frontend/` にあります。
+Node.js 24 と pnpm 11 を使用します。リポジトリのルートで依存関係をインストールし、環境変数のひな型をコピーします。
 
 ```bash
-cd frontend
 pnpm install
 cp .env.example .env.local
 ```
 
-`frontend/.env.local` の各項目に利用する環境の値を設定し、開発サーバーを起動します。
+`.env.local` の必須項目を、利用する Supabase プロジェクトと公開サイトの値に置き換えてください。`SUPABASE_SECRET_KEY` はサーバー専用であり、ブラウザへ公開してはいけません。
+
+`pnpm dev` と `pnpm build` には、OGP・sitemap・robots の絶対 URL 生成に使う `NEXT_PUBLIC_SITE_URL` が必須です。未設定の場合は `src/env.ts` がエラーを返します。
 
 ```bash
 pnpm dev
 ```
 
-## 検証
+バックエンド用の別プロセスはありません。画面は `src/app/`、ドメインロジックと Supabase アクセスは `src/server/` にあります。
 
-`frontend/` で次のコマンドを実行します。
+## スクリプト
+
+| コマンド             | 用途                                        |
+| -------------------- | ------------------------------------------- |
+| `pnpm dev`           | 開発サーバーを起動する                      |
+| `pnpm build`         | 本番用にビルドする                          |
+| `pnpm start`         | ビルド済みアプリを起動する                  |
+| `pnpm lint`          | oxlint と ESLint を実行する                 |
+| `pnpm format`        | oxfmt でファイルを整形する                  |
+| `pnpm format:check`  | oxfmt による整形差分の有無を確認する        |
+| `pnpm check`         | lint、型検査、テストをまとめて実行する      |
+| `pnpm test`          | Vitest を監視モードで実行する               |
+| `pnpm gen:types`     | 接続先の Supabase から型定義を生成する      |
+| `pnpm gen:types:dev` | linked 状態の Supabase から型定義を生成する |
+
+`pnpm install` の完了後に Panda CSS のコード生成が自動で実行されます。生成物は `styled-system/` に出力され、Git の管理対象には含まれません。`gen:types` の生成物は format と lint の対象外です。
+
+## 検証
 
 ```bash
 pnpm lint
@@ -32,18 +50,18 @@ pnpm format:check
 pnpm exec tsc --noEmit
 pnpm exec vitest run
 pnpm build
+pnpm audit --audit-level=high
 ```
 
 ## ディレクトリ構成
 
 ```text
 farmille/
-├── frontend/            # Next.js 16 のアプリ本体
-│   ├── src/app/         # ルーティング
-│   ├── src/server/      # ドメインロジックと Supabase アクセス
-│   ├── src/components/  # Panda recipes を使う共通 UI
-│   ├── panda.config.ts
-│   └── .oxlintrc.json / eslint.config.mjs / oxfmt 設定
+├── src/
+│   ├── app/             # ルーティングと画面
+│   ├── server/          # ドメインロジックと Supabase アクセス
+│   └── components/      # Panda recipes を使う共通 UI
+├── e2e/                 # Playwright E2E
 ├── supabase/
 │   ├── config.toml
 │   └── migrations/      # v2 系の migration
@@ -51,5 +69,7 @@ farmille/
 ├── docs/
 │   ├── rebuild/         # 設計資料、入力資料、タスク指示書
 │   └── ops/             # 運用記録
+├── panda.config.ts
+├── package.json
 └── .github/workflows/   # CI
 ```

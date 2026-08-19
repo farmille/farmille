@@ -1,6 +1,6 @@
 # T-54 最終品質判定用エビデンス（実装 vs モック）
 
-生成日：2026-07-28。取得条件：`frontend` 本番ビルド（`next build` → `next start -p 3009`）、ローカル Supabase（127.0.0.1:54321）、Chromium 375×812（フルページ、`/materials/[id]/report/new` のみ上部のみ）。モックは `docs/rebuild/reference/mockup-sp-19screens.html` を file:// で開き、`go('<screenId>', true)` で画面チップを切り替えて撮影。
+生成日：2026-07-28。取得条件：リポジトリ直下にあるアプリの本番ビルド（`next build` → `next start -p 3009`）、ローカル Supabase（127.0.0.1:54321）、Chromium 375×812（フルページ、`/materials/[id]/report/new` のみ上部のみ）。モックは `docs/rebuild/reference/mockup-sp-19screens.html` を file:// で開き、`go('<screenId>', true)` で画面チップを切り替えて撮影。
 
 検証データ：一般ユーザー1（`T54検証太郎_t54final`）・出品者1（承認済み・`demo-maker`、既存シード再利用）・公開レビュー2（アクティビオ検証）・公開使用レポート1（既存シード再利用）・公開記事1（既存シード再利用）。作成/再利用の詳細は本ファイル末尾「検証データ」を参照。
 

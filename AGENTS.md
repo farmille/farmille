@@ -54,10 +54,11 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 - **エラー表示**：例外を握り潰さない。404・403・500 をユーザーに意味の伝わる日本語で出し分ける（`error.tsx`・`not-found.tsx` を必ず置く）
 - **完了の定義**：型チェックと lint が通っただけでは完了としない。**375px の実画面で対象フローを操作し、スクリーンショットを添えて初めて完了**
 - **共通化**：同じ UI パターンを3回書く前に共通コンポーネント化する。ページ内に長大なインライン JSX と業務ロジックを同居させない
+- **ファイル名**：独自コンポーネントの `.tsx` ファイル名は PascalCase にする（例：`ProfileEditForm.tsx`）。Storybook は `ProfileEditForm.stories.tsx` とする。`page.tsx`・`layout.tsx`・`error.tsx`・`not-found.tsx` など、App Router の予約ファイルだけは小文字のままにする
 
 構造規約（同 §2・§6）：
 
-- `frontend/src/server/` がドメインロジックと Supabase アクセスの唯一の置き場。`SUPABASE_SERVICE_ROLE_KEY` はここからのみ参照する
+- `src/server/` がドメインロジックと Supabase アクセスの唯一の置き場。`SUPABASE_SECRET_KEY` はここからのみ参照する
 - UI・クライアントコンポーネントから `supabase.from()` を直接呼ばない（`auth.*`／`storage.*` のクライアント利用のみ可）
 - Route Handlers（`src/app/api/`）はフォーム POST・Webhook・外部から叩かれるものだけに絞る。画面内の読み取りは Server Components から `src/server/` を直接呼ぶ
 - 環境変数は `src/env.ts` の1箇所で起動時に検証する。ホスティング固有の環境変数をコードで参照しない（ポータビリティ予算）
@@ -66,7 +67,7 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 
 ## 型生成（`pnpm gen:types`）
 
-Supabase の DB スキーマから TypeScript 型定義（`frontend/src/types/database.types.ts`）を再生成するコマンド。
+Supabase の DB スキーマから TypeScript 型定義（`src/types/database.types.ts`）を再生成するコマンド。
 
 **実行タイミング**：
 
@@ -81,7 +82,7 @@ migration を含む PR には必ず `pnpm gen:types` の差分を含める。
 ## 検証コマンド
 
 ```bash
-cd frontend && pnpm lint && pnpm format:check && pnpm exec tsc --noEmit && pnpm exec vitest run && pnpm build
+pnpm lint && pnpm format:check && pnpm exec tsc --noEmit && pnpm exec vitest run && pnpm build
 ```
 
 これが緑になっても完了ではない（実装規約の「完了の定義」を参照）。
@@ -91,7 +92,6 @@ cd frontend && pnpm lint && pnpm format:check && pnpm exec tsc --noEmit && pnpm 
 着手時・PR 作成時に実行する。
 
 ```bash
-cd frontend
 pnpm audit --audit-level=high                  # high 以上の既知脆弱性を抽出
 pnpm audit --json | jq '.advisories'           # 詳細を JSON で
 pnpm outdated                                   # major upgrade 候補の把握
@@ -106,11 +106,11 @@ pnpm outdated                                   # major upgrade 候補の把握
 **手動 grep 監査（補助）**：
 
 ```bash
-# サーバー専用の値がクライアント側へ漏れていないか（src/server 以外は 0 件）
-grep -rn "SUPABASE_SERVICE_ROLE\|SERVICE_KEY\|JWT_SECRET" frontend/src --exclude-dir=server
+# サーバー専用の値がクライアント側へ漏れていないか（定義元の src/env.ts と src/server 以外は 0 件）
+grep -rn "SUPABASE_SECRET_KEY\|SERVICE_KEY\|JWT_SECRET" src --exclude-dir=server --exclude=env.ts
 
 # 二層防御の原則違反（0 件。auth.* / storage.* は許容）
-grep -rn "supabase\.\(from\|rpc\)(" frontend/src --exclude-dir=server
+grep -rn "supabase\.\(from\|rpc\)(" src --exclude-dir=server
 ```
 
 `npm audit` は使わない（pnpm に揃える）。月次で `gh dependabot alerts list` を確認する。CI（GitHub Actions）では lint・format・typecheck・test・build を回す。
@@ -119,16 +119,16 @@ grep -rn "supabase\.\(from\|rpc\)(" frontend/src --exclude-dir=server
 
 `docs/rebuild/03-architecture.md` §7 の目標形。
 
-- `frontend/` : アプリ本体（Next.js 16）。単一スタックなので「フロントだけ」の意味ではない。Vercel のプロジェクト設定を引き継ぐため名称は変えない
-  - `src/app/` : ルーティングと画面
-  - `src/server/` : ドメインロジック・Supabase アクセス
-  - `src/components/` : 共通 UI（Panda recipes）。`styled-system/` は gitignore し CI で codegen
-- `supabase/migrations/` : v2 系 migration のみ（`config.toml` も併せてコミットする）
-- `tools/migration/` : 資材マスタ移行スクリプト。`legacy/` は旧実装の参照実装と退避した旧 migration で、移行検証の完了後に T-53 でまとめて削除する
-- `docs/rebuild/` : 設計の正（`reference/` に入力資料、`tasks/` にタスク指示書）
-- `docs/ops/` : 運用記録（`security-notes.md`・`access-checklist.md`）
-- `docs/email-templates/` : Supabase Auth のメールテンプレート（スキーマ非依存で v2 でも使う）
-- `.github/workflows/` : CI
+- リポジトリ直下：Next.js 16 の設定・依存関係・実行コマンド
+- `src/app/`：ルーティングと画面
+- `src/server/`：ドメインロジック・Supabase アクセス
+- `src/components/`：共通 UI（Panda recipes）。`styled-system/` は gitignore し CI で codegen
+- `supabase/migrations/`：v2 系 migration のみ（`config.toml` も併せてコミットする）
+- `tools/migration/`：資材マスタ移行スクリプト。`legacy/` は旧実装の参照実装と退避した旧 migration で、移行検証の完了後に T-53 でまとめて削除する
+- `docs/rebuild/`：設計の正（`reference/` に入力資料、`tasks/` にタスク指示書）
+- `docs/ops/`：運用記録（`security-notes.md`・`access-checklist.md`）
+- `docs/email-templates/`：Supabase Auth のメールテンプレート（スキーマ非依存で v2 でも使う）
+- `.github/workflows/`：CI
 
 ## 質問すべき条件（迷ったら止まる）
 

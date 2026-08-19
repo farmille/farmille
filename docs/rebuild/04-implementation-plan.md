@@ -122,7 +122,6 @@
 ## 4. 検証ゲート（全 PR 共通）
 
 ```bash
-cd frontend
 pnpm lint          # oxlint && eslint .
 pnpm format:check  # oxfmt --check
 pnpm exec tsc --noEmit

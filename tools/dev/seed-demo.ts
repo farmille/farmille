@@ -4,7 +4,7 @@
 // 接続先がローカルのホストでない場合は何もせず異常終了する。
 //
 // 使い方:
-//   node --env-file=frontend/.env.local tools/dev/seed-demo.ts
+//   node --env-file=.env.local tools/dev/seed-demo.ts
 //
 // 画面検証用のデータ（審査待ちの申請・編集局待ちのレポート・未処理の通報）は
 // tools/dev/seed-demo.sql を psql で流す。両方を実行すると全画面が空でない状態になる。
@@ -44,11 +44,11 @@ function assertLocalSupabase(rawUrl: string): URL {
 const supabaseUrl = assertLocalSupabase(
   requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
 ).origin;
-const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+const secretKey = requireEnv("SUPABASE_SECRET_KEY");
 
 const authHeaders = {
-  apikey: serviceRoleKey,
-  Authorization: `Bearer ${serviceRoleKey}`,
+  apikey: secretKey,
+  Authorization: `Bearer ${secretKey}`,
   "Content-Type": "application/json",
 };
 

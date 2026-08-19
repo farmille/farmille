@@ -1,10 +1,11 @@
 # 02 画面設計 — 一覧・遷移・モック監査の反映
 
-前提：スマホ版モックアップ（[reference/mockup-sp-19screens.html](reference/mockup-sp-19screens.html)）が見た目の正。本書はモックを URL ルーティング・データ駆動の実アプリに落とすための差分と、監査で見つかった欠落画面の補完を定義する。スマホ表示（375px 基準）最優先、レスポンシブは従。
+前提：スマホ版モックアップ（[reference/mockup-sp-19screens.html](reference/mockup-sp-19screens.html)）が375px表示の見た目の正。本書はモックを URL ルーティング・データ駆動の実アプリに落とすための差分と、監査で見つかった欠落画面の補完を定義する。スマホ表示を最優先しつつ、PCでは同じ部品を引き伸ばさず、画面幅に合う情報設計へ切り替える。
 
 ## 1. 情報設計の原則
 
-- 下部ナビ5枠：**ホーム／探す／＋投稿／記事／マイページ**（モック準拠）。＋は投稿先選択（資材を確定してからレビュー／使用レポートに分岐）
+- `lg` 未満の下部ナビ5枠：**ホーム／探す／＋投稿／記事／マイページ**（モック準拠）。＋は投稿先選択（資材を確定してからレビュー／使用レポートに分岐）
+- `lg` 以上は下部ナビを表示せず、ロゴ・既存の主要導線・投稿・アカウント導線を持つPCヘッダーへ置き換える。公開画面と出品者ワークスペースは別の chrome を使い、同じヘッダーへ条件を詰め込まない
 - 資材詳細＝倉庫：エビデンス・レビュー・使用レポート抜粋・関連記事を**埋め込み**で同居させ、ページ内スクロールで確かめられる。独立画面が要るのは使用レポートと記事のみ
 - モックは画面 ID しか渡さない静的プロトタイプ。実装ではすべての詳細画面が**レコード ID を URL で受ける**（/materials/[id] 等）。モックの「全カードが同一詳細に飛ぶ」「タイトルの Skeepon 固定」はプロトタイプの簡略化であり、仕様ではない
 
@@ -119,6 +120,16 @@ flowchart TD
 
 出品者・運営系は独立の導線（`/sellers/login` → `/dashboard`、`/admin/*`）で、一般側のナビには混ぜない。
 
+### 3.1 レスポンシブ契約
+
+| 画面幅 | chrome | コレクションと本文 |
+|---|---|---|
+| 375px 基準 | Mobile AppBar＋画面下固定 BottomNav | 資材・使用レポートは横レール、フォームは全幅 |
+| 768px〜1023px | モバイル側の chrome を維持 | 内容に応じて2〜3列化してよい。ナビの切り替え点とは独立に判断する |
+| 1024px 以上（`lg`） | Desktop Site Header。出品者は専用 Workspace Header | 横レールをグリッドへ置換し、一覧・詳細・フォームごとの上限幅を適用する |
+
+公開画面のモバイル用とPC用の chrome は両方をSSRし、Pandaのレスポンシブ `display` で相互排他にする。JSによる画面幅判定は使わない。詳細本文の可読幅と一覧の列数は、chromeの切り替えとは別に決める。
+
 ## 4. モック監査の結論と反映（実装者は必ず読むこと）
 
 3資料（要件定義・OOUI・モック）の突き合わせで見つかった主要な不整合と、その解決。ここに書いた解決が正であり、モックの該当箇所より優先する。
@@ -151,15 +162,17 @@ flowchart TD
 | blue（公式マーク） | #1976D2 |
 | star | #F5A623 |
 | amber / amber.soft（警告） | #B26A00 / #FFF4E0 |
-| bg / panel / card | #F5F4EF / #FAFAF7 / #FFFFFF |
+| bg / panel / card | #F8F8F5 / #FAFAF7 / #FFFFFF |
 | ink / ink2 / ink3 | #1E231F / #4C534D / #7C837D |
 | line / line.strong | #E7E5DE / #D8D6CD |
 | shadow | 0 1px 2px rgba(30,35,31,.05), 0 4px 14px rgba(30,35,31,.06) |
 | shadow.lift | 0 8px 30px rgba(30,35,31,.16) |
 | フォント | Noto Sans JP 系スタック（-apple-system, Hiragino Kaku Gothic ProN, Hiragino Sans, Noto Sans JP, Yu Gothic, Meiryo） |
 | 角丸 | pill=999px／card=14px／button=12px／input=11px |
+| 画像比率 | square=1：1／landscape=4：3／wide=16：9／portrait=3：4。画像枠に適用し、画像は `cover` または `contain` で収める |
 | タイポ | 21/20/17-19/16/14-14.5/12-13/9.5-11px の8段 |
 | 余白 | 8px 刻み基調（6/8/10/12/16） |
+| 上限幅 | card.materialMobile=9.375rem／card.material=15rem／dialog=24rem／auth=26.875rem／content.form=44rem／content.reading=48rem／content.medium=56rem／content.workspace=60rem／content.wide=75rem |
 
 生値の直書きは禁止し、すべて Panda の tokens / semanticTokens を経由する（03 §3・§8）。モックの `--phone:44px`（フォン枠の角丸）はプロトタイプの外枠用なので移植しない。
 

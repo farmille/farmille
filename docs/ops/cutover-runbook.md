@@ -40,7 +40,7 @@
 | `<PROD_DB_PASSWORD>` | 本番 DB パスワード | 1Password。無ければ Project Settings → Database → Reset database password で再設定する（⚠️ 既存接続が切れる。旧 Cloud Run が生きている間は影響を確認してから） |
 | `<GCP_PROJECT>` | GCP プロジェクト ID | `farmille-production`（access-checklist.md #5） |
 | `<CLOUD_RUN_REGION>` | Cloud Run のリージョン | `asia-northeast1` と推定（旧 `tools/migration/legacy/prod_import_2026_06_09.py` の Cloud Run URL より）。**要確認**：`gcloud run services list` の出力で確定する |
-| `<VERCEL_PROJECT>` | Vercel のプロジェクト名 | Vercel ダッシュボード → Projects。`frontend/` を Root Directory に持つプロジェクト |
+| `<VERCEL_PROJECT>` | Vercel のプロジェクト名 | Vercel ダッシュボード → Projects。リポジトリルートを Root Directory に持つプロジェクト |
 | `<SITE_URL>` | 本番の公開 URL | Vercel → Settings → Domains。`https://farmille.com` を想定（access-checklist.md #6）。**要確認**：apex か `www` か、正規化の向き |
 | `<REPO_ROOT>` | ローカルのリポジトリ本体 | `/Users/shun/Documents/farmille/farmille` |
 
@@ -64,7 +64,7 @@ psql --version
 
 # Node / pnpm（資材変換スクリプトとアプリのビルド）
 node --version                      # 24 系（CI と揃える）
-pnpm --version                      # 10 系
+pnpm --version                      # 11 系
 ```
 
 ### 0.3 権限
@@ -81,7 +81,7 @@ pnpm --version                      # 10 系
 
 - [ ] **旧ユーザー・旧レビューを破棄してよいか**の最終確認（D1 で決定済みだが、実データを消す前に関係者へ再周知する）
 - [ ] **商品画像の表示可否**（security-notes.md §3。無許諾転載に見えるリスクがあり v1 で判断が揺れた）。根本さんの最新判断を確認する
-- [ ] **要確認**：`frontend/next.config.ts` の `images.remotePatterns` に残っている `placehold.co` と `images.unsplash.com`（デモ用の記載あり）を本番前に外すか。外す場合は §4 の前に別 PR で対応する
+- [ ] **要確認**：`next.config.ts` の `images.remotePatterns` に残っている `placehold.co` と `images.unsplash.com`（デモ用の記載あり）を本番前に外すか。外す場合は §4 の前に別 PR で対応する
 - [ ] **要確認**：本番 Supabase の SMTP が未設定のままでよいか（security-notes.md §3）。未設定だと signup 確認メールとパスワードリセットが不達になりうる。一般ユーザーの新規登録を切替直後から受け付けるなら、Resend 等の SMTP ＋ SPF/DKIM 設定を**先に**済ませる
 
 ---
@@ -297,7 +297,7 @@ curl -s "https://<PROD_PROJECT_REF>.supabase.co/auth/v1/.well-known/jwks.json" |
 
 **操作**
 
-1. Vercel → `<VERCEL_PROJECT>` → Settings → Environment Variables → **Preview** スコープに、§2.1 の新キーを入れる（`NEXT_PUBLIC_SUPABASE_ANON_KEY` に publishable、`SUPABASE_SERVICE_ROLE_KEY` に secret）。
+1. Vercel → `<VERCEL_PROJECT>` → Settings → Environment Variables → **Preview** スコープに、§2.1 の新キーを入れる（`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` に publishable、`SUPABASE_SECRET_KEY` に secret）。
 2. `rebuild/m0` の Preview デプロイを開く。
 
 **検証**：Preview で資材一覧が表示され、ログイン画面が 500 にならないこと。
@@ -672,8 +672,8 @@ Vercel → `<VERCEL_PROJECT>` → Settings → Environment Variables → **Produ
 | 変数名 | 値 | 取得元 | 備考 |
 |---|---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://<PROD_PROJECT_REF>.supabase.co` | Supabase → Project Settings → API | 公開値 |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `sb_publishable_…` | §2.1 で作成 | **新 API キーを入れる。旧 anon（JWT 形式）は入れない** |
-| `SUPABASE_SERVICE_ROLE_KEY` | `sb_secret_…` | §2.1 で作成・1Password | サーバー専用。`NEXT_PUBLIC_` を付けない |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` | §2.1 で作成 | **新 API キーを入れる。旧 anon（JWT 形式）は入れない** |
+| `SUPABASE_SECRET_KEY` | `sb_secret_…` | §2.1 で作成・1Password | サーバー専用。`NEXT_PUBLIC_` を付けない |
 | `NEXT_PUBLIC_SITE_URL` | `<SITE_URL>` | Vercel → Settings → Domains | 末尾スラッシュ無し。OGP・メールのリンクに効く |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | `G-…` | GA4 の管理画面 → データストリーム | 未設定なら GA4 を送らない実装（T-52） |
 | `NEXT_PUBLIC_SENTRY_DSN` | Sentry の DSN | Sentry → Project Settings → Client Keys | 未設定だと SDK を初期化しない（`sentry.server.config.ts`） |
@@ -683,7 +683,7 @@ Vercel → `<VERCEL_PROJECT>` → Settings → Environment Variables → **Produ
 
 削除するもの：
 
-- 旧 Cloud Run の API ベース URL を指す変数（`API_URL` / `NEXT_PUBLIC_API_URL` 等）。**要確認**：実際の変数名は Vercel の一覧で確認する。v2 のコードは `frontend/src/env.ts` に無い変数を一切読まないため、残しても害は無いが、混乱を避けるため消す
+- 旧 Cloud Run の API ベース URL を指す変数（`API_URL` / `NEXT_PUBLIC_API_URL` 等）。**要確認**：実際の変数名は Vercel の一覧で確認する。v2 のコードは `src/env.ts` に無い変数を一切読まないため、残しても害は無いが、混乱を避けるため消す
 - その他、旧アプリだけが読んでいた変数
 
 **検証**
@@ -693,7 +693,7 @@ Vercel → `<VERCEL_PROJECT>` → Settings → Environment Variables → **Produ
 vercel env ls production
 ```
 
-- `frontend/src/env.ts` が要求する `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`・`NEXT_PUBLIC_SITE_URL`・`SUPABASE_SERVICE_ROLE_KEY` の4つが Production に揃っていること（**fail fast 実装なので1つでも欠けると実行時に例外になる**）
+- `src/env.ts` が要求する `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`・`NEXT_PUBLIC_SITE_URL`・`SUPABASE_SECRET_KEY` の4つが Production に揃っていること（**fail fast 実装なので1つでも欠けると実行時に例外になる**）
 
 **ロールバック**：変数を旧値に戻す（旧値を控えておく）。再デプロイが要る。
 
@@ -708,30 +708,29 @@ git switch rebuild/m0
 git status                       # クリーンであること
 
 # CI と同じゲートを手元でも一度通す
-cd frontend
 pnpm install --frozen-lockfile
 pnpm lint
 pnpm format:check
 pnpm exec tsc --noEmit
 pnpm exec vitest run
 pnpm build
-cd ..
 ```
 
-- PR を作ってマージする（05 §4「削除は必ず PR で行い、差分一覧を人間が確認してからマージする」）。GitHub Actions の CI（`ci.yml` の frontend ジョブと e2e ジョブ）が green であることを確認してからマージ
+- マージ前に Vercel の Settings → Build and Deployment → Root Directory をリポジトリルートに変更して保存する。旧ディレクトリは存在しないため、この設定を更新しないまま次のデプロイを始めない
+- PR を作ってマージする（05 §4「削除は必ず PR で行い、差分一覧を人間が確認してからマージする」）。GitHub Actions の CI（`ci.yml` の app ジョブと e2e ジョブ）が green であることを確認してからマージ
 - マージ後、Vercel が `main` の Production デプロイを自動で開始する
 
 **検証**
 
 - Vercel → Deployments で Production が Ready になること
 - ビルドログに `Sentry` のソースマップ upload 成功が出ていること（`SENTRY_AUTH_TOKEN` が効いている証拠）
-- Vercel → Settings → **Cron Jobs が空**であること（旧 keep-alive の cron が消えていること。`frontend/vercel.json` に cron 定義が無いため、デプロイで消える）
+- Vercel → Settings → **Cron Jobs が空**であること（旧 keep-alive の cron が消えていること。`vercel.json` に cron 定義が無いため、デプロイで消える）
 
 **ロールバック**：Vercel の Instant Rollback で直前の Production デプロイに戻せる。ただし旧デプロイは旧スキーマ前提なので、DB を戻さない限り動かない（§6 参照）。
 
 ### 4.3 ドメイン・DNS の確認
 
-新旧で **Vercel プロジェクトは同一**（`frontend/` を Root Directory に持つ既存プロジェクトを引き継ぐ。03 §7）。したがって**通常は DNS 変更は不要**で、確認だけで済む。
+新旧で **Vercel プロジェクトは同一**（リポジトリルートを Root Directory に持つ既存プロジェクトを引き継ぐ。03 §7）。したがって**通常は DNS 変更は不要**で、確認だけで済む。
 
 **操作・検証**
 
@@ -761,7 +760,7 @@ curl -sI "https://<SITE_URL>/" | head -12    # 200 と HSTS ヘッダが返る�
 
 ### 4.5 本番の動作確認チェックリスト（E2E 8フローの手動版）
 
-`frontend/e2e/` の8フロー（T-51）を本番相手に手で通す。**本番にデータが残る**ので、作った検証データは最後に消す。admin 承認・通報処理のように不可逆に近いものは、捨てアカウント・捨て資材で行う。
+`e2e/` の8フロー（T-51）を本番相手に手で通す。**本番にデータが残る**ので、作った検証データは最後に消す。admin 承認・通報処理のように不可逆に近いものは、捨てアカウント・捨て資材で行う。
 
 375px 相当（スマホ表示が最優先。D13）で確認する。
 
@@ -834,7 +833,7 @@ gcloud storage rm --recursive "gs://farmille-production_cloudbuild/**"
 ```
 
 - **要確認**：バージョニングが有効だと `rm` で古い世代が残る。`gcloud storage ls -a gs://…` で世代を確認し、残っていれば `--all-versions` 相当の削除を行う
-- **要確認**：ビルドログ用の別バケット（`gs://<プロジェクト番号>.cloudbuild-logs.googleusercontent.com` 等）や Artifact Registry のイメージ（`cloud-run-source-deploy` リポジトリ）も残っている可能性がある。`gcloud storage ls` と `gcloud artifacts repositories list` で棚卸しし、不要なら消す。イメージ自体は `Dockerfile` が `app/` のみ COPY するためクリーンだが、課金対象として残る
+- **要確認**：ビルドログ用の別バケット（`gs://<プロジェクト番号>.cloudbuild-logs.googleusercontent.com` 等）や Artifact Registry のイメージ（`cloud-run-source-deploy` リポジトリ）も残っている可能性がある。`gcloud storage ls` と `gcloud artifacts repositories list` で棚卸しし、不要なら消す。イメージ自体は `Dockerfile` が `backend/app/` のみ COPY するためクリーンだが、課金対象として残る
 
 **検証**
 

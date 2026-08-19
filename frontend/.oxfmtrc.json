@@ -1,9 +1,0 @@
-{
-  "ignorePatterns": [
-    "AGENTS.md",
-    ".next/**",
-    "styled-system/**",
-    "node_modules/**",
-    "src/types/database.types.ts"
-  ]
-}

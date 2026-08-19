@@ -5,8 +5,8 @@
 // `supabase start` で立ち上げたインスタンスに対してのみ使う。接続先がローカルの
 // ホストでない場合は何もせず異常終了する（下の assertLocalSupabase）。
 //
-// 使い方（frontend/.env.local の値をそのまま使う）:
-//   node --env-file=frontend/.env.local tools/dev/create-local-admin.ts <email> [password]
+// 使い方（.env.local の値をそのまま使う）：
+//   node --env-file=.env.local tools/dev/create-local-admin.ts <email> [password]
 //
 // password を省略した場合は安全な乱数で生成して一度だけ表示する。
 // 既に同じメールのユーザーが居る場合は app_metadata.account_type='admin' を付け直す
@@ -68,15 +68,15 @@ function generatePassword(): string {
 
 async function callAuthAdmin(
   baseUrl: URL,
-  serviceRoleKey: string,
+  secretKey: string,
   path: string,
   init: { method: string; body?: unknown },
 ): Promise<unknown> {
   const response = await fetch(new URL(`/auth/v1/admin${path}`, baseUrl), {
     method: init.method,
     headers: {
-      apikey: serviceRoleKey,
-      Authorization: `Bearer ${serviceRoleKey}`,
+      apikey: secretKey,
+      Authorization: `Bearer ${secretKey}`,
       "Content-Type": "application/json",
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
@@ -93,12 +93,12 @@ async function callAuthAdmin(
 
 async function findUserByEmail(
   baseUrl: URL,
-  serviceRoleKey: string,
+  secretKey: string,
   email: string,
 ): Promise<AuthUser | null> {
   const payload = await callAuthAdmin(
     baseUrl,
-    serviceRoleKey,
+    secretKey,
     `/users?page=1&per_page=1000`,
     { method: "GET" },
   );
@@ -118,18 +118,18 @@ async function main(): Promise<void> {
   if (email === undefined || email.length === 0) {
     throw new Error(
       "メールアドレスを指定してください: " +
-        "node --env-file=frontend/.env.local tools/dev/create-local-admin.ts <email> [password]",
+        "node --env-file=.env.local tools/dev/create-local-admin.ts <email> [password]",
     );
   }
 
   const baseUrl = assertLocalSupabase(requireEnv("NEXT_PUBLIC_SUPABASE_URL"));
-  const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+  const secretKey = requireEnv("SUPABASE_SECRET_KEY");
   const password = passwordArg ?? generatePassword();
 
-  const existing = await findUserByEmail(baseUrl, serviceRoleKey, email);
+  const existing = await findUserByEmail(baseUrl, secretKey, email);
 
   if (existing === null) {
-    const created = (await callAuthAdmin(baseUrl, serviceRoleKey, "/users", {
+    const created = (await callAuthAdmin(baseUrl, secretKey, "/users", {
       method: "POST",
       body: {
         email,
@@ -142,7 +142,7 @@ async function main(): Promise<void> {
     console.info(`admin を作成しました: ${email} (user_id=${created.id})`);
     console.info(`パスワード: ${password}`);
   } else {
-    await callAuthAdmin(baseUrl, serviceRoleKey, `/users/${existing.id}`, {
+    await callAuthAdmin(baseUrl, secretKey, `/users/${existing.id}`, {
       method: "PUT",
       body: { app_metadata: { ...existing.app_metadata, account_type: "admin" } },
     });

@@ -29,7 +29,7 @@
 - farmille_setup_instructions.md（初期構築の歴史文書）
 - Makefile（新 pnpm スクリプト体系に置換。必要なら M0 で新規作成）
 
-**frontend（T-02 の再初期化で一掃）**
+**アプリ本体（現在はリポジトリ直下。T-02 の再初期化で一掃）**
 - src/ 配下の旧実装全部・public/ の create-next-app 残骸 svg・Tailwind 関連設定
 - 依存整理：tailwindcss・@tailwindcss/postcss・tailwind-merge・clsx・@radix-ui/react-dialog を削除。@dnd-kit・cmdk・class-variance-authority・@radix-ui/* は新 UI で使うものだけ残す（既定は削除、必要になった時点で再追加）
 - 残す依存：next・react・@supabase/ssr・@supabase/supabase-js・@sentry/nextjs・@next/third-parties・lucide-react・remark/rehype 系（記事の Markdown 描画）
@@ -37,7 +37,7 @@
 - vercel.json の cron 定義（keep-alive）を削除（Cloud Run のコールドスタート対策だったため不要になる）
 
 **backend（§1 のスクリプト移設が済み次第、ディレクトリごと削除）**
-- backend/ 全体：app/（FastAPI ルーター22本）・tests/・Dockerfile・railway.toml・deploy-prod.sh・create-prod-users.sh・pyproject.toml・uv.lock・.gcloudignore。Next.js 集約が確定しているため（D2）、残す理由がない
+- backend/ 全体：`backend/app/`（FastAPI ルーター22本）・tests/・Dockerfile・railway.toml・deploy-prod.sh・create-prod-users.sh・pyproject.toml・uv.lock・.gcloudignore。Next.js 集約が確定しているため（D2）、残す理由がない
 - 削除前の確認：資材マスタ移行（T-12）に必要なスクリプトが tools/migration/legacy/ へ移設済みであること
 
 ## 3. 第2弾削除（T-53。資材マスタ移行の検証完了後）

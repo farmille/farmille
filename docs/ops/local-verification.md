@@ -7,11 +7,11 @@
 ```bash
 cd /Users/shun/Documents/farmille/farmille
 npx supabase start -x studio,analytics,vector,edge-runtime,functions,inbucket,imgproxy,realtime
-cd frontend && pnpm dev
+pnpm dev
 ```
 
 - Docker のディスクに余裕がある場合は `-x` 以下を外して Studio 込みで起動してよい
-- `frontend/.env.local` はローカル既定値で作成済み（gitignore 対象）。値がずれたら `npx supabase status` の `ANON_KEY` / `SERVICE_ROLE_KEY` と突き合わせる
+- `.env.local` はローカル既定値で作成済み（gitignore 対象）。値がずれたら `npx supabase status` の `ANON_KEY` / `SERVICE_ROLE_KEY` と突き合わせる
 - ブラウザで http://localhost:3000 。**スマホ幅（375px）で見るのが正**（Chrome DevTools のデバイスツールバー → iPhone SE 等）
 
 ## 2. データを入れ直したいとき
@@ -21,7 +21,7 @@ cd frontend && pnpm dev
 npx supabase db reset
 PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -f tools/migration/materials-v2-seed.sql
 PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -f tools/dev/seed-demo.sql
-node --env-file=frontend/.env.local tools/dev/seed-demo.ts   # デモアカウントのパスワードを揃える
+node --env-file=.env.local tools/dev/seed-demo.ts   # デモアカウントのパスワードを揃える
 ```
 
 ## 3. ログイン情報（ローカル専用）

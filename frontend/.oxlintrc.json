@@ -1,8 +1,0 @@
-{
-  "plugins": ["eslint", "react", "unicorn", "typescript", "nextjs", "oxc"],
-  "options": {
-    "typeAware": true,
-    "typeCheck": true
-  },
-  "ignorePatterns": [".next/", "styled-system/", "node_modules/", "src/types/database.types.ts"]
-}

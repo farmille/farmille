@@ -16,7 +16,7 @@
 - `.venv/`・`supabase/.temp/`（project ref／access token）
 - `scripts/*.py`・`create-prod-users.sh`（本番投入 PII）
 
-イメージ自体はクリーン（`Dockerfile` が `app/` のみ COPY）で、機密が乗っていたのはビルドの一時アップロード。`backend/.gcloudignore`（アローリスト方式）を追加して修正済（PR #46。アップロードは 42 ファイル・機密 0 件に減少。`gcloud meta list-files-for-upload .` で検証可）。
+イメージ自体はクリーン（`Dockerfile` が `backend/app/` のみ COPY）で、機密が乗っていたのはビルドの一時アップロード。`backend/.gcloudignore`（アローリスト方式）を追加して修正済（PR #46。アップロードは 42 ファイル・機密 0 件に減少。`gcloud meta list-files-for-upload .` で検証可）。
 
 刷新で `backend/` を削除し Cloud Run を廃止するため、このアップロード経路自体は消滅する。ただし過去に上がった分は残るので §2 の後処理が必要。
 

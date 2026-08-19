@@ -20,6 +20,7 @@ Route Handlers と Server Components が第一防御（認証・認可・入力�
 - `src/server/` … ドメインロジックと Supabase アクセスの唯一の置き場。`service_role` キーはここからのみ参照する。**UI・クライアントコンポーネントからの直接 `supabase.from()` は禁止**（`auth.*`・`storage.*` のクライアント利用のみ可）
 - Route Handlers（`src/app/api/`）は、フォーム POST・Webhook・外部から叩かれる必要があるものだけに絞る。画面内の読み取りは Server Components から直接 `src/server/` を呼ぶ（プロキシ層を作らない）
 - `src/components/` … 共通 UI。`styled-system/`（Panda 生成物）は gitignore し CI で codegen
+- 独自コンポーネントの `.tsx` ファイル名は PascalCase にする（例：`ProfileEditForm.tsx`）。Storybook は元の名前を保って `ProfileEditForm.stories.tsx` とする。`page.tsx`・`layout.tsx`・`error.tsx`・`not-found.tsx` など、App Router が定める予約ファイルだけは小文字のままにする
 - エラー形式は D9（`{ok: false, error: code}`）で統一。エラーコード → 日本語文言の辞書を1箇所に置く
 - 将来 API を切り出す必要が出た場合に備え、`src/server/` は Next.js 固有 API（`cookies()` 等）への依存を入口の薄い層だけに閉じる
 
@@ -54,7 +55,7 @@ Route Handlers と Server Components が第一防御（認証・認可・入力�
 
 ## 6. 環境・デプロイ・運用
 
-- 環境変数（最小集合）：`NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`・`SUPABASE_SERVICE_ROLE_KEY`（サーバー専用）・`NEXT_PUBLIC_SITE_URL`・`NEXT_PUBLIC_GA_MEASUREMENT_ID`・`NEXT_PUBLIC_SENTRY_DSN`・`SENTRY_AUTH_TOKEN`。**silent fallback 禁止**：必須変数は起動時検証（`src/env.ts` の1箇所で fail fast）
+- 環境変数（最小集合）：`NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`・`SUPABASE_SECRET_KEY`（サーバー専用）・`NEXT_PUBLIC_SITE_URL`・`NEXT_PUBLIC_GA_MEASUREMENT_ID`・`NEXT_PUBLIC_SENTRY_DSN`・`SENTRY_AUTH_TOKEN`。**silent fallback 禁止**：必須変数は起動時検証（`src/env.ts` の1箇所で fail fast）
 - Supabase：`supabase init` を実施して `supabase/config.toml` をコミット（現行未実施）。migration 運用規約＝「適用済みファイルの編集禁止・修正は新規ファイル・PR に `pnpm gen:types` の差分を含める・リリース前に `supabase db diff --linked`」
 - Storage バケット（新設計）：`avatars`／`material-images`／`review-photos`／`report-media`／`article-images`。パス規約は `{所有者id}/…` とし、RLS でパスを強制する（旧設計の方式を踏襲）
 - **引き継ぐ運用課題（人間の作業・最優先）**：2026-07-04 の Cloud Build への secret 誤アップロード事故後、**service_role キーと JWT secret のローテーションが未実施のまま**（docs/ops/security-notes.md に記録と手順を移設）。現在の Supabase では legacy の anon／service_role／JWT secret を**その場で再生成することはできず**、新 API キー（`sb_publishable_…`／`sb_secret_…`）と JWT Signing Keys へ移行したうえで旧キーを無効化する手順になる。刷新でキーの利用者が Vercel だけになるため、**新アプリを最初から新キーで構築し、Cloud Run 廃止と同時に旧キーを無効化する**のが最も手戻りが少ない
@@ -64,12 +65,11 @@ Route Handlers と Server Components が第一防御（認証・認可・入力�
 
 ```
 farmille/
-├── frontend/            # Next.js 16（名称は現行維持。Vercel 設定を引き継ぐ）
-│   ├── src/app/         # ルーティング（02 §2）
-│   ├── src/server/      # ドメインロジック・Supabase アクセス
-│   ├── src/components/  # 共通 UI（Panda recipes）
-│   ├── panda.config.ts
-│   └── .oxlintrc.json / eslint.config.mjs / oxfmt 設定
+├── src/
+│   ├── app/             # ルーティング（02 §2）
+│   ├── server/          # ドメインロジック・Supabase アクセス
+│   └── components/      # 共通 UI（Panda recipes）
+├── e2e/                 # Playwright E2E
 ├── supabase/
 │   ├── config.toml
 │   └── migrations/      # v2 系のみ（旧27本は tools/migration/legacy/migrations-v1/ へ退避済み）
@@ -77,12 +77,14 @@ farmille/
 ├── docs/
 │   ├── rebuild/         # 本設計（正）＋ reference/ ＋ tasks/
 │   └── ops/             # 運用記録（secret ローテーション・アクセス棚卸し）
+├── package.json
+├── panda.config.ts
 └── .github/workflows/   # CI（lint・typecheck・test・build）
 ```
 
-backend/ は資材マスタ移行に必要なスクリプトを tools/ へ移設したうえで削除する（05 参照）。単一スタックになるため、`frontend/` という名前は「アプリ本体」の意味に読み替える（改名はしない。Vercel のプロジェクト設定・ビルドパスを引き継ぐため）。
+旧 `backend/` は、資材マスタ移行に必要なスクリプトを `tools/` へ移設したうえで削除済み（05 参照）。Next.js の画面とサーバー処理はリポジトリ直下に集約し、Vercel の Root Directory もリポジトリルートにする。
 
-## 8. フロントエンド実装規約（D13）
+## 8. アプリ実装規約（D13）
 
 旧方針の「UI はバイブコーディングで爆速」という規約は廃止する。データ層と同じ品質基準を UI にも適用する。
 
