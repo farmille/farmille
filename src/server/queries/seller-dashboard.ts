@@ -84,7 +84,7 @@ type SellerMaterialQueryRow = SellerMaterialFields & {
   material_tags: MaterialTagRelation[];
 };
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/seller-dashboard] ${operation}`, error);
 }
 

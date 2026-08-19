@@ -1,18 +1,13 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-const supabaseMocks = vi.hoisted(() => ({
-  createServerSupabase: vi.fn(),
-}));
-
-vi.mock("@/server/supabase", () => supabaseMocks);
+import { describe, expect, it, vi } from "vitest";
 
 import {
-  createContentReport,
+  createContentReportWithSupabase,
   isReportReasonCode,
   isReportTargetType,
   REPORT_REASON_OPTIONS,
   REPORT_TARGET_TYPES,
 } from "@/server/mutations/reports";
+import { createServerSupabase } from "@/server/supabase";
 
 const reporterUserId = "11111111-1111-4111-8111-111111111111";
 
@@ -36,20 +31,20 @@ describe("isReportReasonCode", () => {
 });
 
 describe("createContentReport", () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("UUID形式でないtargetIdはDBに触れずnot_foundを返す", async () => {
-    const result = await createContentReport({
-      reporterUserId,
-      targetType: "review",
-      targetId: "not-a-uuid",
-      reasonCode: "spam",
-      detail: null,
-    });
+    const createSupabase = vi.fn<typeof createServerSupabase>();
+    const result = await createContentReportWithSupabase(
+      {
+        reporterUserId,
+        targetType: "review",
+        targetId: "not-a-uuid",
+        reasonCode: "spam",
+        detail: null,
+      },
+      createSupabase,
+    );
 
     expect(result).toEqual({ ok: false, error: "not_found" });
-    expect(supabaseMocks.createServerSupabase).not.toHaveBeenCalled();
+    expect(createSupabase).not.toHaveBeenCalled();
   });
 });

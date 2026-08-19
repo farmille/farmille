@@ -7,6 +7,7 @@ import { useRef, useState, useTransition, type FormEvent } from "react";
 import { Button, DataList, FormMessage, Input, Select, SurfaceCard, TextLink } from "@/components";
 import { Field } from "@/components/auth/Fields";
 import { clientEnv } from "@/env";
+import { formDataString } from "@/lib/validation";
 import { errorMessageJa } from "@/server/errors";
 import type { SellerMaterialEvidence } from "@/server/queries/seller-dashboard";
 import type { Database } from "@/types/database.types";
@@ -16,18 +17,26 @@ import { initialSellerFormState, sellerFieldErrors, type SellerFormState } from 
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
-const fileExtensionByType = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-} as const;
+const fileExtensionByType = new Map([
+  ["image/jpeg", "jpg"],
+  ["image/png", "png"],
+  ["image/webp", "webp"],
+]);
 
-const evidenceTypeLabel: Record<string, string> = {
-  sds: "SDS",
-  paper: "論文",
-  trial: "試験結果",
-  leaflet: "チラシ",
-};
+const EVIDENCE_TYPE_PRESENTATIONS = [
+  { value: "sds", label: "SDS" },
+  { value: "paper", label: "論文" },
+  { value: "trial", label: "試験結果" },
+  { value: "leaflet", label: "チラシ" },
+] as const;
+
+function evidenceTypeLabel(value: string): string {
+  const presentation = EVIDENCE_TYPE_PRESENTATIONS.find((candidate) => candidate.value === value);
+  if (presentation === undefined) {
+    throw new Error(`未対応のエビデンス種別です：${value}`);
+  }
+  return presentation.label;
+}
 
 const formLayout = css({
   display: "flex",
@@ -86,21 +95,22 @@ export function EvidenceManager({ sellerId, materialId, evidences }: EvidenceMan
   function handleAdd(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const title = formData.get("title");
-    const externalUrl = formData.get("externalUrl");
+    const title = formDataString(formData.get("title"));
+    const externalUrl = formDataString(formData.get("externalUrl"));
     const file = formData.get("file");
     const hasFile = file instanceof File && file.size > 0;
-    const hasExternalUrl = typeof externalUrl === "string" && externalUrl.trim().length > 0;
+    const hasExternalUrl = externalUrl !== null && externalUrl.trim().length > 0;
+    const fileExtension = hasFile ? fileExtensionByType.get(file.type) : undefined;
     const validationErrors: Record<string, string> = {};
 
-    if (typeof title !== "string" || title.trim().length === 0) {
+    if (title === null || title.trim().length === 0) {
       validationErrors.title = "タイトルを入力してください。";
     }
     if (hasFile === hasExternalUrl) {
       validationErrors.source = "ファイルまたは外部URLのどちらか一方を指定してください。";
     }
     if (hasFile) {
-      if (!(file.type in fileExtensionByType)) {
+      if (fileExtension === undefined) {
         validationErrors.file = "JPEG、PNG、WebPのいずれかを選択してください。";
       } else if (file.size > MAX_FILE_BYTES) {
         validationErrors.file = "ファイルは5MB以下にしてください。";
@@ -119,9 +129,8 @@ export function EvidenceManager({ sellerId, materialId, evidences }: EvidenceMan
       );
       let storagePath: string | null = null;
 
-      if (hasFile) {
-        const extension = fileExtensionByType[file.type as keyof typeof fileExtensionByType];
-        storagePath = `${sellerId}/${materialId}/evidences/${crypto.randomUUID()}.${extension}`;
+      if (hasFile && fileExtension !== undefined) {
+        storagePath = `${sellerId}/${materialId}/evidences/${crypto.randomUUID()}.${fileExtension}`;
         const { error } = await supabase.storage.from("material-images").upload(storagePath, file, {
           contentType: file.type,
           upsert: false,
@@ -237,7 +246,7 @@ export function EvidenceManager({ sellerId, materialId, evidences }: EvidenceMan
                 rows={[
                   {
                     label: "種類",
-                    value: evidenceTypeLabel[evidence.evidence_type] ?? evidence.evidence_type,
+                    value: evidenceTypeLabel(evidence.evidence_type),
                   },
                   {
                     label: "参照先",

@@ -14,7 +14,7 @@ export type SitemapEntries = {
   users: SitemapEntry[];
 };
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/sitemap] ${operation}`, error);
 }
 

@@ -1,16 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { getMaterialWithSupabase, listMaterialsWithSupabase } from "@/server/queries/materials";
 import type { Database } from "@/types/database.types";
 
 const localSupabaseUrl = process.env.SUPABASE_LOCAL_URL;
 
 describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
-  afterEach(() => {
-    vi.doUnmock("@/server/supabase");
-    vi.resetModules();
-  });
-
   it("ローカルDBから公開資材一覧を取得できる", async () => {
     const localPublishableKey =
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -24,12 +20,7 @@ describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
     }
 
     const localClient = createClient<Database>(localSupabaseUrl, localPublishableKey);
-    vi.doMock("@/server/supabase", () => ({
-      createServerSupabase: async () => localClient,
-    }));
-
-    const { getMaterial, listMaterials } = await import("@/server/queries/materials");
-    const result = await listMaterials({ page: 1 });
+    const result = await listMaterialsWithSupabase(localClient, { page: 1 });
 
     expect(result.ok).toBe(true);
 
@@ -40,7 +31,7 @@ describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
       const firstMaterial = result.data.items[0];
 
       if (firstMaterial !== undefined) {
-        const detail = await getMaterial(firstMaterial.id);
+        const detail = await getMaterialWithSupabase(localClient, firstMaterial.id);
 
         expect(detail.ok).toBe(true);
       }

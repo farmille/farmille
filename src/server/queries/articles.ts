@@ -39,7 +39,7 @@ export type PublishedArticleDetail = {
   viewCount: number;
 };
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/articles] ${operation}`, error);
 }
 

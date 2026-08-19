@@ -61,7 +61,7 @@ type ReportFeedRow = Pick<UsageReportRow, "id" | "title" | "published_at" | "mat
 
 const FEED_FETCH_LIMIT = 1_000;
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/content-feed] ${operation}`, error);
 }
 

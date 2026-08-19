@@ -9,8 +9,8 @@ import { createServerSupabase } from "@/server/supabase";
 // パスワード再設定・メール確認のリンクから戻ってくる OTP 種別だけを受け付ける。
 const EMAIL_OTP_TYPES = ["signup", "invite", "magiclink", "recovery", "email_change", "email"];
 
-export function isEmailOtpType(value: unknown): value is EmailOtpType {
-  return typeof value === "string" && EMAIL_OTP_TYPES.includes(value);
+export function isEmailOtpType(value: string | null): value is EmailOtpType {
+  return value !== null && EMAIL_OTP_TYPES.some((type) => type === value);
 }
 
 /** 一般ログイン（02 §2 `/login`）。account_type は問わない（admin もここから入る）。 */

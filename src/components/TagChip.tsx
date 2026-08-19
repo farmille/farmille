@@ -5,7 +5,7 @@ import { cva, css, cx, type RecipeVariantProps } from "../../styled-system/css";
 /** UI 上のタグ分類。DB の `condition` は `cond` に正規化する。 */
 export type TagCategory = "crop" | "concern" | "effect" | "cond" | "type" | "maker" | "name";
 
-export const TAG_CATEGORY_LABELS: Record<TagCategory, string> = {
+export const TAG_CATEGORY_LABELS = {
   crop: "作物",
   concern: "悩み",
   effect: "効果",
@@ -13,7 +13,7 @@ export const TAG_CATEGORY_LABELS: Record<TagCategory, string> = {
   type: "資材タイプ",
   maker: "メーカー",
   name: "製品名",
-};
+} satisfies Record<TagCategory, string>;
 
 /** DB / モックの category 文字列を TagChip 用に正規化する。 */
 export function toTagChipCategory(category: string): TagCategory {

@@ -8,10 +8,9 @@ export type Paginated<T> = {
   totalPages: number;
 };
 
-export function pageRange(
-  page: number,
-  perPage: number = DEFAULT_PER_PAGE,
-): { from: number; to: number } {
+export type PageRange = { from: number; to: number };
+
+export function pageRange(page: number, perPage: number = DEFAULT_PER_PAGE): PageRange {
   if (!Number.isInteger(page) || page < 1) {
     throw new RangeError("page は1以上の整数で指定してください。");
   }

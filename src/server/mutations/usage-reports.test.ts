@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
+import * as v from "valibot";
 
 import { validateUsageReportSubmission } from "@/server/mutations/usage-reports";
-import { createBlankCropReport, type UsageReportFormPayload } from "@/server/usage-reports/model";
+import {
+  createBlankCropReport,
+  UsageReportActionResultSchema,
+  type UsageReportFormPayload,
+} from "@/server/usage-reports/model";
 
 function validPayload(): UsageReportFormPayload {
   const crop = createBlankCropReport("crop-id");
@@ -38,5 +43,34 @@ describe("使用レポート提出時の必須検証", () => {
       "crop-id.applicationDates": "処理日を1日以上選択してください。",
       pesticideAck: "内容を確認し、同意にチェックを入れてください。",
     });
+  });
+});
+
+describe("使用レポート Action Result", () => {
+  it("成功結果をスキーマどおりに検証する", () => {
+    expect(
+      v.parse(UsageReportActionResultSchema, {
+        ok: true,
+        status: "pending",
+        reportIds: ["00000000-0000-4000-8000-000000001001"],
+        message: "使用レポートを提出しました。",
+      }),
+    ).toEqual({
+      ok: true,
+      status: "pending",
+      reportIds: ["00000000-0000-4000-8000-000000001001"],
+      message: "使用レポートを提出しました。",
+    });
+  });
+
+  it("不正なレポート ID を拒否する", () => {
+    expect(() =>
+      v.parse(UsageReportActionResultSchema, {
+        ok: true,
+        status: "draft",
+        reportIds: ["invalid"],
+        message: "下書きを保存しました。",
+      }),
+    ).toThrow();
   });
 });

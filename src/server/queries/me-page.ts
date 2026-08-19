@@ -35,6 +35,24 @@ type HelpfulVoteRow = {
   created_at: string;
 };
 
+type HelpfulReviewDetail = {
+  id: string;
+  material_id: string;
+  rating: number;
+  body: string;
+  crop: Pick<CropRow, "id" | "name"> | null;
+  material: Pick<MaterialRow, "id" | "name"> | null;
+  author: Pick<PublicProfileRow, "user_id" | "handle"> | null;
+};
+
+type HelpfulReportDetail = {
+  id: string;
+  title: string | null;
+  crop: Pick<CropRow, "id" | "name"> | null;
+  material: Pick<MaterialRow, "id" | "name"> | null;
+  author: Pick<PublicProfileRow, "user_id" | "handle"> | null;
+};
+
 export type OwnPostItem =
   | {
       kind: "review";
@@ -95,7 +113,7 @@ export type MyPageData = {
 const IN_FILTER_CHUNK_SIZE = 100;
 const SHELF_LIMIT = 8;
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/me-page] ${operation}`, error);
 }
 
@@ -304,10 +322,12 @@ async function listHelpfulItems(
   const reportIds = votes
     .filter((vote) => vote.target_type === "usage_report")
     .map((v) => v.target_id);
+  const emptyReviews: HelpfulReviewDetail[] = [];
+  const emptyReports: HelpfulReportDetail[] = [];
 
   const [reviewsResult, reportsResult, reviewHelpful, reportHelpful] = await Promise.all([
     reviewIds.length === 0
-      ? Promise.resolve({ data: [], error: null })
+      ? Promise.resolve({ data: emptyReviews, error: null })
       : supabase
           .from("reviews")
           .select(
@@ -327,7 +347,7 @@ async function listHelpfulItems(
           .in("id", reviewIds)
           .eq("status", "published"),
     reportIds.length === 0
-      ? Promise.resolve({ data: [], error: null })
+      ? Promise.resolve({ data: emptyReports, error: null })
       : supabase
           .from("usage_reports")
           .select(
@@ -361,26 +381,8 @@ async function listHelpfulItems(
   if (!reviewHelpful.ok) return reviewHelpful;
   if (!reportHelpful.ok) return reportHelpful;
 
-  type ReviewDetail = {
-    id: string;
-    material_id: string;
-    rating: number;
-    body: string;
-    crop: Pick<CropRow, "id" | "name"> | null;
-    material: Pick<MaterialRow, "id" | "name"> | null;
-    author: Pick<PublicProfileRow, "user_id" | "handle"> | null;
-  };
-
-  type ReportDetail = {
-    id: string;
-    title: string | null;
-    crop: Pick<CropRow, "id" | "name"> | null;
-    material: Pick<MaterialRow, "id" | "name"> | null;
-    author: Pick<PublicProfileRow, "user_id" | "handle"> | null;
-  };
-
-  const reviewsById = new Map((reviewsResult.data as ReviewDetail[]).map((row) => [row.id, row]));
-  const reportsById = new Map((reportsResult.data as ReportDetail[]).map((row) => [row.id, row]));
+  const reviewsById = new Map(reviewsResult.data.map((row) => [row.id, row]));
+  const reportsById = new Map(reportsResult.data.map((row) => [row.id, row]));
   const items: HelpfulItem[] = [];
 
   for (const vote of votes) {

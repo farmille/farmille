@@ -1,5 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import * as v from "valibot";
 
+import { formDataString } from "@/lib/validation";
 import type { ErrorCode } from "@/server/errors";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
@@ -43,26 +45,27 @@ function errorCodeForMutation(error: { code?: string }): ErrorCode {
   }
 }
 
-function reportMutationError(operation: string, error: unknown): void {
+function reportMutationError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/mutations/articles] ${operation}`, error);
 }
 
 function optionalText(
-  value: unknown,
+  value: FormDataEntryValue | null,
   field: string,
   fieldErrors: Record<string, string>,
 ): string | null {
-  if (typeof value !== "string") {
+  const parsed = formDataString(value);
+  if (parsed === null) {
     fieldErrors[field] = "入力内容を確認してください。";
     return null;
   }
 
-  const normalized = value.trim();
+  const normalized = parsed.trim();
   return normalized.length === 0 ? null : normalized;
 }
 
 function requiredText(
-  value: unknown,
+  value: FormDataEntryValue | null,
   field: string,
   emptyMessage: string,
   fieldErrors: Record<string, string>,
@@ -87,47 +90,35 @@ function isArticleStatus(value: string): value is ArticleStatus {
   return value === "draft" || value === "published";
 }
 
-function parseMaterialIds(value: unknown, fieldErrors: Record<string, string>): string[] {
-  if (value === null || value === undefined || value === "") {
+const MaterialIdsSchema = v.array(v.pipe(v.string(), v.regex(UUID_RE)));
+
+function parseMaterialIds(
+  value: FormDataEntryValue | null,
+  fieldErrors: Record<string, string>,
+): string[] {
+  const serialized = formDataString(value);
+  if (serialized === null || serialized.length === 0) {
     return [];
   }
 
-  let raw: unknown;
-  if (typeof value === "string") {
-    try {
-      raw = JSON.parse(value);
-    } catch {
-      fieldErrors.materialIds = "紐づけ資材の形式が正しくありません。";
-      return [];
-    }
-  } else {
-    raw = value;
-  }
-
-  if (!Array.isArray(raw)) {
+  try {
+    const result = v.safeParse(MaterialIdsSchema, JSON.parse(serialized));
+    if (result.success) return [...new Set(result.output)];
+    fieldErrors.materialIds = "紐づけ資材の形式が正しくありません。";
+    return [];
+  } catch {
     fieldErrors.materialIds = "紐づけ資材の形式が正しくありません。";
     return [];
   }
-
-  const ids: string[] = [];
-  for (const item of raw) {
-    if (typeof item !== "string" || !UUID_RE.test(item)) {
-      fieldErrors.materialIds = "紐づけ資材の形式が正しくありません。";
-      return [];
-    }
-    ids.push(item);
-  }
-
-  return [...new Set(ids)];
 }
 
 /** タイトル・本文必須。hero と資材は任意。公開時も同じ必須項目。 */
 export function validateArticleInput(input: {
-  title: unknown;
-  body: unknown;
-  heroImageUrl: unknown;
-  status: unknown;
-  materialIds: unknown;
+  title: FormDataEntryValue | null;
+  body: FormDataEntryValue | null;
+  heroImageUrl: FormDataEntryValue | null;
+  status: FormDataEntryValue | null;
+  materialIds: FormDataEntryValue | null;
 }): InputValidation<ArticleInput> {
   const fieldErrors: Record<string, string> = {};
   const title = requiredText(input.title, "title", "タイトルを入力してください。", fieldErrors);
@@ -135,7 +126,7 @@ export function validateArticleInput(input: {
   const heroImageUrl = optionalText(input.heroImageUrl, "heroImageUrl", fieldErrors);
   const materialIds = parseMaterialIds(input.materialIds, fieldErrors);
 
-  const statusRaw = typeof input.status === "string" ? input.status : "";
+  const statusRaw = formDataString(input.status) ?? "";
   const status = isArticleStatus(statusRaw) ? statusRaw : null;
   if (status === null) {
     fieldErrors.status = "公開状態を選択してください。";

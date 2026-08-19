@@ -13,7 +13,7 @@ export const REPORT_TARGET_TYPES = ["review", "usage_report", "article", "profil
 export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number];
 
 export function isReportTargetType(value: string): value is ReportTargetType {
-  return (REPORT_TARGET_TYPES as readonly string[]).includes(value);
+  return REPORT_TARGET_TYPES.some((type) => type === value);
 }
 
 function reasonLabel(code: ReportReasonCode): string {
@@ -26,7 +26,7 @@ function reasonLabel(code: ReportReasonCode): string {
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function reportMutationError(operation: string, error: unknown): void {
+function reportMutationError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/mutations/reports] ${operation}`, error);
 }
 
@@ -113,11 +113,18 @@ export type CreateContentReportInput = {
 export async function createContentReport(
   input: CreateContentReportInput,
 ): Promise<Result<{ reportId: string }>> {
+  return createContentReportWithSupabase(input, createServerSupabase);
+}
+
+export async function createContentReportWithSupabase(
+  input: CreateContentReportInput,
+  createSupabase: typeof createServerSupabase,
+): Promise<Result<{ reportId: string }>> {
   const { reporterUserId, targetType, targetId, reasonCode, detail } = input;
 
   if (!UUID_PATTERN.test(targetId)) return fail("not_found");
 
-  const supabase = await createServerSupabase();
+  const supabase = await createSupabase();
   const target = await assertReportTarget(supabase, targetType, targetId);
   if (!target.ok) return target;
 

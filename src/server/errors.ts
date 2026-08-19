@@ -1,24 +1,30 @@
-export type ErrorCode =
-  | "unauthorized"
-  | "forbidden"
-  | "not_found"
-  | "invalid_body"
-  | "conflict"
-  | "aal2_required"
-  | "internal"
+import * as v from "valibot";
+
+export const ERROR_CODES = [
+  "unauthorized",
+  "forbidden",
+  "not_found",
+  "invalid_body",
+  "conflict",
+  "aal2_required",
+  "internal",
   // 認証（T-13）
-  | "handle_taken"
-  | "email_unavailable"
-  | "invalid_credentials"
-  | "seller_invalid_credentials"
-  | "weak_password"
-  | "rate_limited"
-  | "expired_link"
+  "handle_taken",
+  "email_unavailable",
+  "invalid_credentials",
+  "seller_invalid_credentials",
+  "weak_password",
+  "rate_limited",
+  "expired_link",
   // 通報（T-34）
-  | "already_reported"
+  "already_reported",
   // 出品者申請（T-41）
-  | "login_id_taken"
-  | "invalid_invite_code";
+  "login_id_taken",
+  "invalid_invite_code",
+] as const;
+
+export const ErrorCodeSchema = v.picklist(ERROR_CODES);
+export type ErrorCode = v.InferOutput<typeof ErrorCodeSchema>;
 
 // 機能固有のエラーコードは、利用箇所と表示文言を同時に追加する。
 export const errorMessageJa = {

@@ -56,13 +56,13 @@ const fieldLabelStyle = css({
 type Operation = "approve" | "reject" | "suspend" | "reinstate" | "invite";
 
 /** 取り消せない操作は一度だけ確認を挟む（却下・凍結）。 */
-const CONFIRM_MESSAGES: Record<"reject" | "suspend", { note: string; label: string }> = {
+const CONFIRM_MESSAGES = {
   reject: { note: "この申請を却下します。取り消せません。", label: "却下する" },
   suspend: {
     note: "このアカウントを凍結します。出品者はログインできなくなります。",
     label: "凍結する",
   },
-};
+} satisfies Record<"reject" | "suspend", { note: string; label: string }>;
 
 export function SellerReviewActions({
   sellerId,

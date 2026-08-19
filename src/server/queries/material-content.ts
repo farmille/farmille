@@ -82,7 +82,7 @@ export type ReviewRatingDistribution = {
 const IN_FILTER_CHUNK_SIZE = 100;
 const POSTGREST_PAGE_SIZE = 1_000;
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/material-content] ${operation}`, error);
 }
 
@@ -154,9 +154,20 @@ async function getContentCounts(
   return succeed({ helpfulById, viewsById });
 }
 
+export type PublishedUsageReportOptions = { limit?: number };
+
 export async function listPublishedUsageReportsByMaterial(
   materialId: string,
-  options: { limit?: number } = {},
+  options: PublishedUsageReportOptions = {},
+): Promise<Result<MaterialContentList<PublishedUsageReport>>> {
+  const supabase = await createServerSupabase();
+  return listPublishedUsageReportsByMaterialWithSupabase(supabase, materialId, options);
+}
+
+export async function listPublishedUsageReportsByMaterialWithSupabase(
+  supabase: SupabaseClient<Database>,
+  materialId: string,
+  options: PublishedUsageReportOptions = {},
 ): Promise<Result<MaterialContentList<PublishedUsageReport>>> {
   const { limit } = options;
 
@@ -164,7 +175,6 @@ export async function listPublishedUsageReportsByMaterial(
     throw new RangeError("limit は1以上の整数で指定してください。");
   }
 
-  const supabase = await createServerSupabase();
   let query = supabase
     .from("usage_reports")
     .select(
@@ -244,6 +254,13 @@ export async function listPublishedArticlesByMaterial(
   materialId: string,
 ): Promise<Result<MaterialContentList<PublishedMaterialArticle>>> {
   const supabase = await createServerSupabase();
+  return listPublishedArticlesByMaterialWithSupabase(supabase, materialId);
+}
+
+export async function listPublishedArticlesByMaterialWithSupabase(
+  supabase: SupabaseClient<Database>,
+  materialId: string,
+): Promise<Result<MaterialContentList<PublishedMaterialArticle>>> {
   const { data, error, count } = await supabase
     .from("article_materials")
     .select(
@@ -315,6 +332,13 @@ export async function getReviewRatingDistribution(
   materialId: string,
 ): Promise<Result<ReviewRatingDistribution>> {
   const supabase = await createServerSupabase();
+  return getReviewRatingDistributionWithSupabase(supabase, materialId);
+}
+
+export async function getReviewRatingDistributionWithSupabase(
+  supabase: SupabaseClient<Database>,
+  materialId: string,
+): Promise<Result<ReviewRatingDistribution>> {
   const counts = new Map<number, number>([
     [1, 0],
     [2, 0],

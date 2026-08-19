@@ -10,6 +10,7 @@ export const STANDPOINTS = [
 
 export type Standpoint = (typeof STANDPOINTS)[number]["value"];
 
-export function isStandpoint(value: unknown): value is Standpoint {
+export function isStandpoint(value: string | null): value is Standpoint {
+  if (value === null) return false;
   return STANDPOINTS.some((standpoint) => standpoint.value === value);
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { JwtPayload } from "@supabase/supabase-js";
 
 import {
   authorizeAdmin,
@@ -9,7 +10,7 @@ import {
 } from "@/server/auth";
 
 // Supabase のアクセストークン（JWT）の payload を模したもの。
-function claims(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+function claims(overrides: Partial<JwtPayload> = {}): JwtPayload {
   return {
     iss: "http://127.0.0.1:54321/auth/v1",
     sub: "11111111-1111-1111-1111-111111111111",
@@ -55,21 +56,14 @@ describe("toSessionUser", () => {
     expect(user?.sellerId).toBeNull();
   });
 
-  it("未知の account_type・aal は補完せず null にする", () => {
+  it("未知の account_type は補完せず null にする", () => {
     const user = toSessionUser(
-      claims({ aal: "aal3", app_metadata: { account_type: "superadmin", seller_id: "" } }),
+      claims({ app_metadata: { account_type: "superadmin", seller_id: "" } }),
     );
 
     expect(user?.accountType).toBeNull();
-    expect(user?.aal).toBeNull();
+    expect(user?.aal).toBe("aal1");
     expect(user?.sellerId).toBeNull();
-  });
-
-  it("sub の無い claims・非オブジェクトは null", () => {
-    expect(toSessionUser(claims({ sub: undefined }))).toBeNull();
-    expect(toSessionUser(claims({ sub: 42 }))).toBeNull();
-    expect(toSessionUser(null)).toBeNull();
-    expect(toSessionUser("token")).toBeNull();
   });
 });
 

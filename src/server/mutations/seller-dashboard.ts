@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import * as v from "valibot";
 
 import type { ErrorCode } from "@/server/errors";
+import { formDataString } from "@/lib/validation";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database, Json } from "@/types/database.types";
@@ -43,16 +45,17 @@ export type EvidenceInput = {
 };
 
 function optionalText(
-  value: unknown,
+  value: FormDataEntryValue | null,
   field: string,
   fieldErrors: Record<string, string>,
 ): string | null {
-  if (typeof value !== "string") {
+  const parsed = formDataString(value);
+  if (parsed === null) {
     fieldErrors[field] = "入力内容を確認してください。";
     return null;
   }
 
-  const normalized = value.trim();
+  const normalized = parsed.trim();
   return normalized.length === 0 ? null : normalized;
 }
 
@@ -67,14 +70,14 @@ function validHttpUrl(value: string): boolean {
 
 /** 一次情報層の8カラムだけを正規化する。分類・検索層は入力型にも含めない。 */
 export function validatePrimaryInformation(input: {
-  description: unknown;
-  general_use: unknown;
-  ingredients: unknown;
-  mechanism: unknown;
-  usage_text: unknown;
-  price_range: unknown;
-  official_url: unknown;
-  catalog_url: unknown;
+  description: FormDataEntryValue | null;
+  general_use: FormDataEntryValue | null;
+  ingredients: FormDataEntryValue | null;
+  mechanism: FormDataEntryValue | null;
+  usage_text: FormDataEntryValue | null;
+  price_range: FormDataEntryValue | null;
+  official_url: FormDataEntryValue | null;
+  catalog_url: FormDataEntryValue | null;
 }): InputValidation<PrimaryInformationUpdate> {
   const fieldErrors: Record<string, string> = {};
   const normalized: PrimaryInformationUpdate = {
@@ -114,25 +117,38 @@ function storagePathForMaterial(path: string, sellerId: string, materialId: stri
   return /^[0-9a-f-]{36}\.(?:jpe?g|png|webp)$/.test(objectName);
 }
 
+function evidenceSource(
+  externalUrl: string | null,
+  storagePath: string | null,
+): EvidenceInput["source"] | null {
+  if (externalUrl !== null && storagePath === null) {
+    return { kind: "external", externalUrl };
+  }
+  if (externalUrl === null && storagePath !== null) {
+    return { kind: "storage", storagePath };
+  }
+  return null;
+}
+
 /** エビデンスは外部URLか、本人フォルダへアップロード済みの画像を1つだけ受け取る。 */
 export function validateEvidenceInput(
   input: {
-    evidenceType: unknown;
-    title: unknown;
-    externalUrl: unknown;
-    storagePath: unknown;
+    evidenceType: FormDataEntryValue | null;
+    title: FormDataEntryValue | null;
+    externalUrl: FormDataEntryValue | null;
+    storagePath: FormDataEntryValue | null;
   },
   sellerId: string,
   materialId: string,
 ): InputValidation<EvidenceInput> {
   const fieldErrors: Record<string, string> = {};
+  const evidenceTypeValue = formDataString(input.evidenceType);
   const evidenceType =
-    typeof input.evidenceType === "string" && isEvidenceType(input.evidenceType)
-      ? input.evidenceType
-      : null;
+    evidenceTypeValue !== null && isEvidenceType(evidenceTypeValue) ? evidenceTypeValue : null;
   const title = optionalText(input.title, "title", fieldErrors);
   const externalUrl = optionalText(input.externalUrl, "externalUrl", fieldErrors);
   const storagePath = optionalText(input.storagePath, "storagePath", fieldErrors);
+  const source = evidenceSource(externalUrl, storagePath);
 
   if (evidenceType === null) {
     fieldErrors.evidenceType = "エビデンスの種類を選択してください。";
@@ -141,7 +157,7 @@ export function validateEvidenceInput(
     fieldErrors.title = "タイトルを入力してください。";
   }
 
-  if ((externalUrl === null) === (storagePath === null)) {
+  if (source === null) {
     fieldErrors.source = "ファイルまたは外部URLのどちらか一方を指定してください。";
   }
   if (externalUrl !== null && !validHttpUrl(externalUrl)) {
@@ -151,7 +167,12 @@ export function validateEvidenceInput(
     fieldErrors.storagePath = "アップロード先を確認してください。";
   }
 
-  if (Object.keys(fieldErrors).length > 0 || evidenceType === null || title === null) {
+  if (
+    Object.keys(fieldErrors).length > 0 ||
+    evidenceType === null ||
+    title === null ||
+    source === null
+  ) {
     return { ok: false, fieldErrors };
   }
 
@@ -160,23 +181,21 @@ export function validateEvidenceInput(
     input: {
       evidenceType,
       title,
-      source:
-        externalUrl !== null
-          ? { kind: "external", externalUrl }
-          : { kind: "storage", storagePath: storagePath as string },
+      source,
     },
   };
 }
 
-export function validateEditRequestText(value: unknown): InputValidation<string> {
-  if (typeof value !== "string" || value.trim().length === 0) {
+export function validateEditRequestText(value: FormDataEntryValue | null): InputValidation<string> {
+  const text = formDataString(value);
+  if (text === null || text.trim().length === 0) {
     return {
       ok: false,
       fieldErrors: { requestText: "変更してほしい内容と理由を入力してください。" },
     };
   }
 
-  return { ok: true, input: value.trim() };
+  return { ok: true, input: text.trim() };
 }
 
 function errorCodeForMutation(error: { code?: string }): ErrorCode {
@@ -193,7 +212,7 @@ function errorCodeForMutation(error: { code?: string }): ErrorCode {
   }
 }
 
-function reportMutationError(operation: string, error: unknown): void {
+function reportMutationError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/mutations/seller-dashboard] ${operation}`, error);
 }
 
@@ -282,10 +301,8 @@ export async function createSellerMaterialEvidence(
 }
 
 function storagePathFromMeta(meta: Json | null): string | null {
-  if (meta === null || typeof meta !== "object" || Array.isArray(meta)) return null;
-
-  const path = meta.storage_path;
-  return typeof path === "string" ? path : null;
+  const result = v.safeParse(v.object({ storage_path: v.string() }), meta);
+  return result.success ? result.output.storage_path : null;
 }
 
 /** 本人セッションのクライアントでエビデンス行と管理対象ファイルを削除する。 */

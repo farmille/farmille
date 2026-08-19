@@ -54,6 +54,6 @@ export function materialMetadata(
     title,
     description,
     path: `/materials/${material.id}${options.pathSuffix ?? ""}`,
-    ...(primaryImage === undefined ? {} : { imageUrls: [primaryImage] }),
+    imageUrls: primaryImage === undefined ? undefined : [primaryImage],
   });
 }

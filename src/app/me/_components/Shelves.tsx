@@ -41,10 +41,14 @@ const statusRow = css({
   mb: "2",
 });
 
-function usageReportStatusLabel(status: OwnPostItem & { kind: "usage_report" }): {
+type UsageReportStatusPresentation = {
   label: string;
   variant: "optional" | "required" | "published";
-} {
+};
+
+function usageReportStatusLabel(
+  status: OwnPostItem & { kind: "usage_report" },
+): UsageReportStatusPresentation {
   switch (status.status) {
     case "draft":
       return { label: "下書き", variant: "optional" };

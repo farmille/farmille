@@ -4,6 +4,7 @@ import remarkRehype from "remark-rehype";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
 import type { Root, Element, RootContent, ElementContent } from "hast";
+import * as v from "valibot";
 
 /**
  * 記事本文の markdown を Server Component から呼び出して
@@ -45,7 +46,8 @@ function isAllowedImageSrc(src: string): boolean {
 function stripDisallowedImgSrc(node: Root | Element): void {
   if (node.type === "element" && node.tagName === "img") {
     const src = node.properties?.src;
-    if (typeof src === "string" && !isAllowedImageSrc(src)) {
+    const srcResult = v.safeParse(v.string(), src);
+    if (srcResult.success && !isAllowedImageSrc(srcResult.output)) {
       delete node.properties.src;
     }
   }

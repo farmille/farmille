@@ -9,13 +9,17 @@
 // 画面検証用のデータ（審査待ちの申請・編集局待ちのレポート・未処理の通報）は
 // tools/dev/seed-demo.sql を psql で流す。両方を実行すると全画面が空でない状態になる。
 
+import * as v from "valibot";
+
 const DEMO_PASSWORD = "Farmille#Local2026";
 
-type AuthUser = {
-  id: string;
-  email?: string;
-  app_metadata?: Record<string, unknown>;
-};
+const AuthUserSchema = v.object({
+  id: v.string(),
+  email: v.optional(v.string()),
+  app_metadata: v.optional(v.object({ account_type: v.optional(v.string()) })),
+});
+const AuthUserListSchema = v.object({ users: v.array(AuthUserSchema) });
+type AuthUser = v.InferOutput<typeof AuthUserSchema>;
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -61,8 +65,11 @@ async function listUsers(): Promise<AuthUser[]> {
     throw new Error(`ユーザー一覧の取得に失敗しました: ${res.status}`);
   }
 
-  const body = (await res.json()) as { users?: AuthUser[] };
-  return body.users ?? [];
+  const result = v.safeParse(AuthUserListSchema, await res.json());
+  if (!result.success) {
+    throw new Error(`ユーザー一覧の形式が不正です：${v.summarize(result.issues)}`);
+  }
+  return result.output.users;
 }
 
 async function setPassword(userId: string, password: string): Promise<void> {

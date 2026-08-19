@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import type { AuthFormState } from "@/lib/auth/form-state";
+import type { AuthFormState, AuthFormValues } from "@/lib/auth/form-state";
+import { formDataString, formDataStrings } from "@/lib/validation";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 import { requireGeneralUser } from "@/server/auth";
 import { PROFILE_FIELD_LIMITS } from "@/lib/profile-field-limits";
@@ -24,8 +25,8 @@ function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string
   }
 }
 
-function submittedValues(formData: FormData): Record<string, string> {
-  const values: Record<string, string> = {};
+function submittedValues(formData: FormData): AuthFormValues {
+  const values: AuthFormValues = {};
 
   for (const name of [
     "handle",
@@ -36,20 +37,16 @@ function submittedValues(formData: FormData): Record<string, string> {
     "websiteUrl",
     "snsUrl",
   ]) {
-    const value = formData.get(name);
-    if (typeof value === "string") values[name] = value;
+    const value = formDataString(formData.get(name));
+    if (value !== null) values[name] = value;
   }
 
-  const cropIds = formData
-    .getAll("cropIds")
-    .filter((value): value is string => typeof value === "string");
+  const cropIds = formDataStrings(formData.getAll("cropIds"));
   if (cropIds.length > 0) {
     values.cropIds = cropIds.join(",");
   }
 
-  const styles = formData
-    .getAll("cultivationStyles")
-    .filter((value): value is string => typeof value === "string");
+  const styles = formDataStrings(formData.getAll("cultivationStyles"));
   if (styles.length > 0) {
     values.cultivationStyles = styles.join(",");
   }

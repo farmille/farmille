@@ -2,6 +2,7 @@
 
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import type { AuthFormState } from "@/lib/auth/form-state";
+import { formDataString } from "@/lib/validation";
 import { updatePassword } from "@/server/accounts/session";
 import { errorMessageJa } from "@/server/errors";
 
@@ -9,10 +10,10 @@ export async function updatePasswordAction(
   _previousState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const password = formData.get("password");
-  const confirmation = formData.get("passwordConfirmation");
+  const password = formDataString(formData.get("password"));
+  const confirmation = formDataString(formData.get("passwordConfirmation"));
 
-  if (typeof password !== "string" || typeof confirmation !== "string") {
+  if (password === null || confirmation === null) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 

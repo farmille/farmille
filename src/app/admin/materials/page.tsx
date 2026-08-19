@@ -66,7 +66,7 @@ export default async function AdminMaterialsPage({
   await requireAdminPage("/admin/materials");
 
   const { q } = await searchParams;
-  const keyword = typeof q === "string" ? q : "";
+  const keyword = q ?? "";
   const materials = await listAdminMaterials(keyword);
 
   if (!materials.ok) {

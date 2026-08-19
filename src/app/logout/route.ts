@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import * as v from "valibot";
 
 import { sameOriginUrl } from "@/lib/http/request-url";
 import { signOut } from "@/server/accounts/session";
@@ -27,12 +28,12 @@ function isSameOrigin(request: NextRequest): boolean {
  */
 export async function POST(request: NextRequest): Promise<Response> {
   if (!isSameOrigin(request)) {
-    return toResponse(fail("forbidden"));
+    return toResponse(fail("forbidden"), v.null());
   }
 
   const result = await signOut();
 
-  if (!result.ok) return toResponse(result);
+  if (!result.ok) return toResponse(result, v.null());
 
   return NextResponse.redirect(sameOriginUrl(request, "/"), { status: 303 });
 }

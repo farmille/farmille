@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import type { SellerActionState } from "@/app/admin/_lib/action-state";
+import { formDataString } from "@/lib/validation";
 import {
   approveSellerApplication,
   issueSellerInviteCode,
@@ -15,8 +16,8 @@ import { errorMessageJa, type ErrorCode } from "@/server/errors";
 const SELLER_OPERATIONS = ["approve", "reject", "suspend", "reinstate", "invite"] as const;
 type SellerOperation = (typeof SELLER_OPERATIONS)[number];
 
-function isSellerOperation(value: unknown): value is SellerOperation {
-  return (SELLER_OPERATIONS as readonly unknown[]).includes(value);
+function isSellerOperation(value: string | null): value is SellerOperation {
+  return value !== null && SELLER_OPERATIONS.some((operation) => operation === value);
 }
 
 /** 状態遷移の競合（すでに承認済み・却下済み等）は conflict で返る。 */
@@ -33,11 +34,11 @@ export async function sellerOperationAction(
   _previousState: SellerActionState,
   formData: FormData,
 ): Promise<SellerActionState> {
-  const sellerId = formData.get("sellerId");
-  const operation = formData.get("operation");
+  const sellerId = formDataString(formData.get("sellerId"));
+  const operation = formDataString(formData.get("operation"));
   const rejectedReason = formData.get("rejectedReason");
 
-  if (typeof sellerId !== "string" || sellerId.length === 0 || !isSellerOperation(operation)) {
+  if (sellerId === null || sellerId.length === 0 || !isSellerOperation(operation)) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 
@@ -76,11 +77,12 @@ async function runSellerOperation(
   }
 
   if (operation === "reject") {
-    if (typeof rejectedReason !== "string") {
+    const reason = formDataString(rejectedReason);
+    if (reason === null) {
       return { ok: false, error: "invalid_body" };
     }
 
-    const result = await rejectSellerApplication(sellerId, rejectedReason);
+    const result = await rejectSellerApplication(sellerId, reason);
 
     return result.ok
       ? { ok: true, state: { status: "done", message: "申請を却下しました。" } }

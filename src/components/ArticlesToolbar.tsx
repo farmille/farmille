@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import { css } from "../../styled-system/css";
+import { formDataString } from "@/lib/validation";
 import { FilterPills, type FilterPillOption } from "./FilterPills";
 import { SearchIcon } from "./Icons";
 
@@ -64,8 +65,7 @@ export function ArticlesToolbar({ filter, q }: ArticlesToolbarProps) {
         onSubmit={(event) => {
           event.preventDefault();
           const formData = new FormData(event.currentTarget);
-          const rawQ = formData.get("q");
-          const nextQ = typeof rawQ === "string" ? rawQ : "";
+          const nextQ = formDataString(formData.get("q")) ?? "";
           router.push(buildHref({ q: nextQ }));
         }}
       >

@@ -37,10 +37,12 @@ const historyLayout = css({
   gap: "3",
 });
 
-function requestStatus(status: string): {
+type RequestStatusPresentation = {
   label: string;
   variant: "required" | "published" | "optional";
-} {
+};
+
+function requestStatus(status: string): RequestStatusPresentation {
   switch (status) {
     case "open":
       return { label: "受付中", variant: "required" };

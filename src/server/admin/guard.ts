@@ -40,7 +40,11 @@ export async function requireAdminAccount(): Promise<Result<{ userId: string }>>
 }
 
 /** admin 系のクエリ・更新で握り潰しを避けるための共通ログ。 */
-export function reportAdminError(scope: string, operation: string, error: unknown): void {
+export function reportAdminError<ErrorValue>(
+  scope: string,
+  operation: string,
+  error: ErrorValue,
+): void {
   console.error(`[server/admin/${scope}] ${operation}`, error);
 }
 

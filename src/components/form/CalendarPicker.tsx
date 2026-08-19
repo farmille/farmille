@@ -118,7 +118,9 @@ const emptyMessage = css({ fontSize: "sm", color: "text.subtle" });
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
-function monthParts(value: string): { year: number; month: number } {
+type MonthParts = { year: number; month: number };
+
+function monthParts(value: string): MonthParts {
   const [year, month] = value.split("-").map(Number);
   if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
     throw new Error("カレンダーの初期月が不正です。");

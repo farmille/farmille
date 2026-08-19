@@ -35,7 +35,8 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "styled-system/**/*.ts",
-    "storybook-tests/**/*.ts"
+    "storybook-tests/**/*.ts",
+    "tools/dev/**/*.ts"
   ],
-  "exclude": ["node_modules", "docs", "output", "supabase", "tools"]
+  "exclude": ["node_modules", "docs", "output", "supabase", "tools/migration", "tools/oxlint"]
 }

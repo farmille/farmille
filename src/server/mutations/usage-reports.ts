@@ -1,3 +1,5 @@
+import * as v from "valibot";
+
 import { clientEnv } from "@/env";
 import { createServerSupabase } from "@/server/supabase";
 import {
@@ -10,7 +12,6 @@ import {
   APPLICATION_METHODS,
   CULTIVATION_FEATURES,
   CULTIVATION_TYPES,
-  MEDIA_PLACEMENTS,
   PURPOSE_OPTIONS,
   STAGE_SETS,
   stageSetForGroup,
@@ -19,6 +20,7 @@ import {
   type UsageReportActionResult,
   type UsageReportFieldErrors,
   type UsageReportFormPayload,
+  UsageReportFormPayloadSchema,
 } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
@@ -35,11 +37,6 @@ type ExistingReport = {
   status: string;
 };
 
-const MAX_CROPS = 12;
-const MAX_MEDIA = 20;
-const MAX_METRICS_PER_CROP = 20;
-const MAX_APPLICATION_DATES = 50;
-const MAX_TEXT_LENGTH = 20_000;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const ALL_STAGES: ReadonlySet<string> = new Set(Object.values(STAGE_SETS).flat());
 const ALL_CULTIVATION_FEATURES: ReadonlySet<string> = new Set(CULTIVATION_FEATURES.all);
@@ -50,148 +47,8 @@ const CULTIVATION_TYPE_SET: ReadonlySet<string> = new Set(
 const APPLICATION_METHOD_SET: ReadonlySet<string> = new Set(
   APPLICATION_METHODS.map(({ value }) => value),
 );
-const MEDIA_PLACEMENT_SET: ReadonlySet<string> = new Set(
-  MEDIA_PLACEMENTS.map(({ value }) => value),
-);
-
-const CROP_STRING_KEYS = [
-  "cropId",
-  "observedChange",
-  "negativeNote",
-  "purposeNote",
-  "prefectureCode",
-  "fieldName",
-  "variety",
-  "plantingDate",
-  "cultivationType",
-  "growthStage",
-  "growthStageNote",
-  "climateNote",
-  "applicationMethod",
-  "sprayDilutionValue",
-  "sprayDilutionUnit",
-  "sprayAmountValue",
-  "sprayAmountUnit",
-  "sprayArea",
-  "soilMethod",
-  "soilDilutionValue",
-  "soilDilutionUnit",
-  "soilAmountValue",
-  "soilAmountUnit",
-  "soilArea",
-  "seedMethod",
-  "seedDilutionValue",
-  "seedDilutionUnit",
-  "seedAmountValue",
-  "seedAmountUnit",
-  "seedDurationNote",
-  "otherMethodDetail",
-  "researchPeriod",
-] as const;
-
-const COMPARISON_STRING_KEYS = [
-  "otherBsUse",
-  "otherBsName",
-  "simultaneousInputs",
-  "otherConditionDifference",
-  "sampleCount",
-  "sampleUnit",
-] as const;
-
-const METRIC_STRING_KEYS = ["key", "metricName", "untreatedValue", "treatedValue", "unit"] as const;
-
-function mutationError(operation: string, error: unknown): void {
+function mutationError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/mutations/usage-reports] ${operation}`, error);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function hasStringKeys<T extends readonly string[]>(
-  value: Record<string, unknown>,
-  keys: T,
-): boolean {
-  return keys.every(
-    (key) => typeof value[key] === "string" && value[key].length <= MAX_TEXT_LENGTH,
-  );
-}
-
-function isStringArray(value: unknown, maxLength: number): value is string[] {
-  return (
-    Array.isArray(value) &&
-    value.length <= maxLength &&
-    value.every((item) => typeof item === "string" && item.length <= MAX_TEXT_LENGTH)
-  );
-}
-
-function isMetricInput(value: unknown): boolean {
-  return isRecord(value) && hasStringKeys(value, METRIC_STRING_KEYS);
-}
-
-function isComparisonInput(value: unknown): boolean {
-  return (
-    isRecord(value) &&
-    typeof value.enabled === "boolean" &&
-    hasStringKeys(value, COMPARISON_STRING_KEYS)
-  );
-}
-
-function isCropReportInput(value: unknown): value is CropReportInput {
-  return (
-    isRecord(value) &&
-    hasStringKeys(value, CROP_STRING_KEYS) &&
-    typeof value.climateEnabled === "boolean" &&
-    typeof value.metricsEnabled === "boolean" &&
-    isStringArray(value.purposeTags, PURPOSE_OPTIONS.length) &&
-    isStringArray(value.cultivationTags, CULTIVATION_FEATURES.all.length) &&
-    isStringArray(value.applicationDates, MAX_APPLICATION_DATES) &&
-    isComparisonInput(value.comparison) &&
-    Array.isArray(value.metrics) &&
-    value.metrics.length <= MAX_METRICS_PER_CROP &&
-    value.metrics.every(isMetricInput)
-  );
-}
-
-function isReportMediaInput(value: unknown): value is ReportMediaInput {
-  return (
-    isRecord(value) &&
-    typeof value.key === "string" &&
-    value.key.length <= 200 &&
-    typeof value.url === "string" &&
-    value.url.length <= 2_000 &&
-    (value.mediaType === "photo" || value.mediaType === "video") &&
-    typeof value.placement === "string" &&
-    MEDIA_PLACEMENT_SET.has(value.placement) &&
-    typeof value.caption === "string" &&
-    value.caption.length <= MAX_TEXT_LENGTH
-  );
-}
-
-function decodePayload(value: unknown): UsageReportFormPayload | null {
-  if (!isRecord(value)) return null;
-  if (
-    !Array.isArray(value.cropReports) ||
-    value.cropReports.length > MAX_CROPS ||
-    !value.cropReports.every(isCropReportInput)
-  ) {
-    return null;
-  }
-  if (
-    !Array.isArray(value.media) ||
-    value.media.length > MAX_MEDIA ||
-    !value.media.every(isReportMediaInput)
-  ) {
-    return null;
-  }
-  if (
-    typeof value.summary !== "string" ||
-    value.summary.length > MAX_TEXT_LENGTH ||
-    typeof value.pesticideAck !== "boolean"
-  ) {
-    return null;
-  }
-  return value as UsageReportFormPayload;
 }
 
 function isValidDate(value: string): boolean {
@@ -509,15 +366,16 @@ export async function mutateUsageReports({
   materialId: string;
   userId: string;
   mode: MutationMode;
-  payload: unknown;
+  payload: UsageReportFormPayload;
 }): Promise<UsageReportActionResult> {
-  const payload = decodePayload(rawPayload);
-  if (payload === null) {
+  const payloadResult = v.safeParse(UsageReportFormPayloadSchema, rawPayload);
+  if (!payloadResult.success) {
     return validationFailure(
       "入力内容を読み取れませんでした。ページを再読み込みしてください。",
       {},
     );
   }
+  const payload = payloadResult.output;
   if (payload.cropReports.length === 0) {
     return validationFailure("作物を1つ以上選択してください。", {
       crops: "作物を1つ以上選択してください。",

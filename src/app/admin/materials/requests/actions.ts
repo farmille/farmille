@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import type { AdminActionState } from "@/app/admin/_lib/action-state";
+import { formDataString } from "@/lib/validation";
 import { isEditRequestStatus, resolveMaterialEditRequest } from "@/server/admin/materials";
 import { errorMessageJa } from "@/server/errors";
 
@@ -11,11 +12,11 @@ export async function resolveEditRequestAction(
   _previousState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
-  const requestId = formData.get("requestId");
-  const nextStatus = formData.get("nextStatus");
+  const requestId = formDataString(formData.get("requestId"));
+  const nextStatus = formDataString(formData.get("nextStatus"));
 
   if (
-    typeof requestId !== "string" ||
+    requestId === null ||
     requestId.length === 0 ||
     !isEditRequestStatus(nextStatus) ||
     nextStatus === "open"

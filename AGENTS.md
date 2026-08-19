@@ -48,6 +48,9 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 正は `docs/rebuild/03-architecture.md` §8（要約）。
 
 - **型**：`any` を書かない。DB・API の戻り値は `database.types.ts` から派生させ、ページごとに手書きの重複型を作らない
+- **境界の検証**：`response.json()`・`JSON.parse()`・フォーム入力など、実行時まで内容を保証できない値は Valibot のスキーマで検証し、`InferOutput` で型を導出する。`as`、`JsonObject`、`Record<string, unknown>`、手書きの `typeof` 判定で型の根拠を作らない
+- **anti-slop**：全ルールを `error` のまま適用する。違反は実コードの型と境界設計を直して解消し、ルールの無効化・警告化、ignore の追加、disable コメント、広い型への言い換えで回避しない
+- **vendored lint**：`tools/oxlint/` は lint 実装の取り込み先として扱い、診断を通す目的で内部実装を編集しない。`tools/oxlint/anti-slop/` は [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop) の commit `6d538555cb151d4121ed51a27db81890eacf8ae9` を取り込んだもの。更新時は upstream の差分をそのまま取り込み、ルールの変更が必要ならアプリ側の修正で対応できない根拠を先に示す
 - **スタイル**：色・余白・角丸・タイポの生値をコンポーネントに直書きしない。すべて Panda のトークン経由。条件分岐は recipe の variant として列挙し、実行時に決まる動的値をスタイルへ渡さない
 - **状態とデータ取得**：取得は Server Components、変更は Server Actions か Route Handlers に寄せる。クライアント側の状態は入力フォームとトグルに限る
 - **fail fast**：環境変数・必須パラメータが無い場合はフォールバックせずエラーにする。`?? "http://localhost:3000"` のような既定値を書かない

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import type { AdminActionState } from "@/app/admin/_lib/action-state";
+import { formDataString } from "@/lib/validation";
 import {
   isUsageReportEditorialOperation,
   updateUsageReportEditorial,
@@ -10,8 +11,7 @@ import {
 import { errorMessageJa } from "@/server/errors";
 
 function formText(formData: FormData, name: string): string | null {
-  const value = formData.get(name);
-  return typeof value === "string" ? value : null;
+  return formDataString(formData.get(name));
 }
 
 /** pending 使用レポートの調整保存・公開・差し戻し。 */
@@ -20,7 +20,7 @@ export async function updateUsageReportEditorialAction(
   formData: FormData,
 ): Promise<AdminActionState> {
   const reportId = formText(formData, "reportId");
-  const operation = formData.get("operation");
+  const operation = formText(formData, "operation");
   const title = formText(formData, "title");
   const observedChange = formText(formData, "observedChange");
   const negativeNote = formText(formData, "negativeNote");

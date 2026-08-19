@@ -78,7 +78,7 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
     path: `/articles/${article.id}`,
     type: "article",
     publishedTime: article.publishedAt,
-    ...(article.heroImageUrl === null ? {} : { imageUrls: [article.heroImageUrl] }),
+    imageUrls: article.heroImageUrl === null ? undefined : [article.heroImageUrl],
   });
 }
 

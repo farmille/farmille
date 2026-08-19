@@ -12,6 +12,10 @@
 //   2. As a backstop, run it through the URL parser and confirm it resolves to the base origin.
 //
 // Returns a same-site relative path (with ?query/#hash). null when unsafe -> caller falls back.
+import * as v from "valibot";
+
+const SafePathSchema = v.string();
+
 function hasUnsafeChar(s: string): boolean {
   for (let i = 0; i < s.length; i++) {
     const c = s.charCodeAt(i);
@@ -22,8 +26,10 @@ function hasUnsafeChar(s: string): boolean {
   return false;
 }
 
-export function safeNextPath(raw: unknown): string | null {
-  if (typeof raw !== "string" || raw.length === 0) return null;
+export function safeNextPath(input: FormDataEntryValue | number | null | undefined): string | null {
+  const result = v.safeParse(SafePathSchema, input);
+  if (!result.success || result.output.length === 0) return null;
+  const raw = result.output;
   if (hasUnsafeChar(raw)) return null;
   if (!raw.startsWith("/") || raw.startsWith("//")) return null;
   // Reject the auth pages themselves to avoid redirect loops.

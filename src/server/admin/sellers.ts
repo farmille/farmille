@@ -10,15 +10,15 @@ type SellerRow = Database["public"]["Tables"]["seller_accounts"]["Row"];
 export const SELLER_STATUSES = ["applied", "approved", "rejected", "suspended"] as const;
 export type SellerStatus = (typeof SELLER_STATUSES)[number];
 
-export const SELLER_STATUS_LABELS: Record<SellerStatus, string> = {
+export const SELLER_STATUS_LABELS = {
   applied: "審査中",
   approved: "承認済み",
   rejected: "却下",
   suspended: "凍結中",
-};
+} satisfies Record<SellerStatus, string>;
 
-export function isSellerStatus(value: unknown): value is SellerStatus {
-  return (SELLER_STATUSES as readonly unknown[]).includes(value);
+export function isSellerStatus(value: string | null | undefined): value is SellerStatus {
+  return value !== null && SELLER_STATUSES.some((status) => status === value);
 }
 
 export type SellerListItem = Pick<
@@ -37,7 +37,7 @@ export type SellerCredentials = {
   password: string;
 };
 
-function reportError(operation: string, error: unknown): void {
+function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
   reportAdminError("sellers", operation, error);
 }
 
@@ -200,16 +200,18 @@ async function updateSellerStatus(
       return fail("conflict");
     }
 
+    const update: Database["public"]["Tables"]["seller_accounts"]["Update"] = {
+      status: nextStatus,
+      approved_at:
+        nextStatus === "approved"
+          ? (seller.approved_at ?? new Date().toISOString())
+          : seller.approved_at,
+    };
+    if (nextStatus === "rejected") update.rejected_reason = rejectedReason;
+
     const { data, error } = await supabase
       .from("seller_accounts")
-      .update({
-        status: nextStatus,
-        approved_at:
-          nextStatus === "approved"
-            ? (seller.approved_at ?? new Date().toISOString())
-            : seller.approved_at,
-        ...(nextStatus === "rejected" ? { rejected_reason: rejectedReason } : {}),
-      })
+      .update(update)
       .eq("id", sellerId)
       .in("status", allowedCurrentStatuses)
       .select("id");

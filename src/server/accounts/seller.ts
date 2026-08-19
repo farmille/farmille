@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { EMAIL_PATTERN } from "@/lib/auth/account-rules";
 import { isRegionScope } from "@/lib/region-scopes";
 import { isSellerType, type SellerType } from "@/lib/seller-types";
+import { trimmedFormDataString } from "@/lib/validation";
 import { toErrorCode } from "@/server/accounts/auth-errors";
 import { fail, succeed, type Result } from "@/server/result";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
@@ -72,10 +73,6 @@ export function syntheticSellerEmail(loginId: string): string | null {
   return `${normalized}@${SELLER_EMAIL_DOMAIN}`;
 }
 
-function toTrimmedString(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
-}
-
 /** 公式サイト URL。空は任意として null、入力ありは http(s) のみ許可。 */
 function normalizeWebsiteUrl(raw: string): { ok: true; value: string | null } | { ok: false } {
   if (raw.length === 0) return { ok: true, value: null };
@@ -95,31 +92,32 @@ function normalizeWebsiteUrl(raw: string): { ok: true; value: string | null } | 
  * 出品者申請フォームの入力検証（パスワードは扱わない。承認時に発行＝T-44）。
  */
 export function validateSellerApply(raw: {
-  officialName: unknown;
-  sellerType: unknown;
-  loginId: unknown;
-  contactEmail: unknown;
-  contactName: unknown;
-  location: unknown;
-  regionScope: unknown;
-  websiteUrl: unknown;
-  inviteCode: unknown;
+  officialName: FormDataEntryValue | null;
+  sellerType: FormDataEntryValue | null;
+  loginId: FormDataEntryValue | null;
+  contactEmail: FormDataEntryValue | null;
+  contactName: FormDataEntryValue | null;
+  location: FormDataEntryValue | null;
+  regionScope: FormDataEntryValue | null;
+  websiteUrl: FormDataEntryValue | null;
+  inviteCode: FormDataEntryValue | null;
 }): SellerApplyValidation {
   const fieldErrors: SellerApplyFieldErrors = {};
 
-  const officialName = toTrimmedString(raw.officialName);
+  const officialName = trimmedFormDataString(raw.officialName);
   if (officialName.length === 0) {
     fieldErrors.officialName = "正式名称を入力してください。";
   } else if (officialName.length > OFFICIAL_NAME_MAX) {
     fieldErrors.officialName = `正式名称は${OFFICIAL_NAME_MAX}文字以内で入力してください。`;
   }
 
-  const sellerTypeRaw = toTrimmedString(raw.sellerType);
-  if (!isSellerType(sellerTypeRaw)) {
+  const sellerTypeRaw = trimmedFormDataString(raw.sellerType);
+  const sellerType = isSellerType(sellerTypeRaw) ? sellerTypeRaw : null;
+  if (sellerType === null) {
     fieldErrors.sellerType = "種別を選択してください。";
   }
 
-  const loginId = toTrimmedString(raw.loginId).toLowerCase();
+  const loginId = trimmedFormDataString(raw.loginId).toLowerCase();
   if (loginId.length === 0) {
     fieldErrors.loginId = "ログイン ID を入力してください。";
   } else if (!LOGIN_ID_PATTERN.test(loginId)) {
@@ -127,44 +125,44 @@ export function validateSellerApply(raw: {
       "ログイン ID は半角英小文字・数字と . _ - のみ、3〜31文字で入力してください。";
   }
 
-  const contactEmail = toTrimmedString(raw.contactEmail);
+  const contactEmail = trimmedFormDataString(raw.contactEmail);
   if (contactEmail.length === 0) {
     fieldErrors.contactEmail = "連絡先メールアドレスを入力してください。";
   } else if (!EMAIL_PATTERN.test(contactEmail)) {
     fieldErrors.contactEmail = "メールアドレスの形式が正しくありません。";
   }
 
-  const contactName = toTrimmedString(raw.contactName);
+  const contactName = trimmedFormDataString(raw.contactName);
   if (contactName.length === 0) {
     fieldErrors.contactName = "ご担当者名を入力してください。";
   } else if (contactName.length > CONTACT_NAME_MAX) {
     fieldErrors.contactName = `ご担当者名は${CONTACT_NAME_MAX}文字以内で入力してください。`;
   }
 
-  const location = toTrimmedString(raw.location);
+  const location = trimmedFormDataString(raw.location);
   if (location.length === 0) {
     fieldErrors.location = "所在地を入力してください。";
   } else if (location.length > LOCATION_MAX) {
     fieldErrors.location = `所在地は${LOCATION_MAX}文字以内で入力してください。`;
   }
 
-  const regionScope = toTrimmedString(raw.regionScope);
+  const regionScope = trimmedFormDataString(raw.regionScope);
   if (!isRegionScope(regionScope)) {
     fieldErrors.regionScope = "主な地域を選択してください。";
   }
 
-  const websiteRaw = toTrimmedString(raw.websiteUrl);
+  const websiteRaw = trimmedFormDataString(raw.websiteUrl);
   const websiteUrl = normalizeWebsiteUrl(websiteRaw);
   if (!websiteUrl.ok) {
     fieldErrors.websiteUrl = "公式サイト URL は https:// から始まる形式で入力してください。";
   }
 
-  const inviteRaw = toTrimmedString(raw.inviteCode);
+  const inviteRaw = trimmedFormDataString(raw.inviteCode);
   if (inviteRaw.length > INVITE_CODE_MAX) {
     fieldErrors.inviteCode = `招待コードは${INVITE_CODE_MAX}文字以内で入力してください。`;
   }
 
-  if (Object.keys(fieldErrors).length > 0) {
+  if (Object.keys(fieldErrors).length > 0 || sellerType === null) {
     return { ok: false, fieldErrors };
   }
 
@@ -172,7 +170,7 @@ export function validateSellerApply(raw: {
     ok: true,
     input: {
       officialName,
-      sellerType: sellerTypeRaw as SellerType,
+      sellerType,
       loginId,
       contactEmail,
       contactName,

@@ -7,7 +7,7 @@ import type { Database } from "@/types/database.types";
 /** view_events.target_type のうち詳細画面で記録する種別。 */
 type ViewTargetType = "article" | "usage_report" | "material";
 
-function reportViewError(operation: string, error: unknown): void {
+function reportViewError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/view-events] ${operation}`, error);
 }
 

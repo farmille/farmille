@@ -1,16 +1,23 @@
-import type { ErrorCode } from "@/server/errors";
+import * as v from "valibot";
 
-type Success<T> = {
-  ok: true;
-  data: T;
-};
+import { ErrorCodeSchema, type ErrorCode } from "@/server/errors";
 
-type Failure = {
-  ok: false;
-  error: ErrorCode;
-};
+function successSchema<TSchema extends v.GenericSchema>(dataSchema: TSchema) {
+  return v.strictObject({ ok: v.literal(true), data: dataSchema });
+}
 
-export type Result<T> = Success<T> | Failure;
+export const FailureSchema = v.strictObject({
+  ok: v.literal(false),
+  error: ErrorCodeSchema,
+});
+type Failure = v.InferOutput<typeof FailureSchema>;
+
+export function resultSchema<TSchema extends v.GenericSchema>(dataSchema: TSchema) {
+  return v.variant("ok", [successSchema(dataSchema), FailureSchema]);
+}
+
+type Success<T> = v.InferOutput<ReturnType<typeof successSchema<v.GenericSchema<T>>>>;
+export type Result<T> = v.InferOutput<ReturnType<typeof resultSchema<v.GenericSchema<T>>>>;
 
 const errorStatus = {
   unauthorized: 401,
@@ -40,8 +47,16 @@ export function fail(code: ErrorCode): Failure {
   return { ok: false, error: code };
 }
 
-export function toResponse<T>(result: Result<T>, status?: number): Response {
+export function toResponse<TSchema extends v.GenericSchema>(
+  result: Result<v.InferOutput<TSchema>>,
+  dataSchema: TSchema,
+  status?: number,
+): Response {
+  const parsed = v.safeParse(resultSchema(dataSchema), result);
+  if (!parsed.success) {
+    throw new Error(`HTTPレスポンスが Result 契約に一致しません：${v.summarize(parsed.issues)}`);
+  }
   const responseStatus = status ?? (result.ok ? 200 : errorStatus[result.error]);
 
-  return Response.json(result, { status: responseStatus });
+  return Response.json(parsed.output, { status: responseStatus });
 }

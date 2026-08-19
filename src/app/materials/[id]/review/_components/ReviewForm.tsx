@@ -42,8 +42,7 @@ type ReviewFormValues = {
   photos: ReviewPhoto[];
 };
 
-type ReviewFormProps = {
-  mode: "create" | "edit";
+type ReviewFormBaseProps = {
   material: {
     id: string;
     name: string;
@@ -52,10 +51,11 @@ type ReviewFormProps = {
   userId: string;
   crops: ReviewCropOption[];
   initialValues: ReviewFormValues;
-  reviewId?: string;
   profileCropDefaulted?: boolean;
   existingReviewNotice?: boolean;
 };
+type ReviewFormProps = ReviewFormBaseProps &
+  ({ mode: "create"; reviewId?: never } | { mode: "edit"; reviewId: string });
 
 const initialActionState: ReviewActionState = { status: "idle" };
 
@@ -126,10 +126,6 @@ export function ReviewForm({
   profileCropDefaulted = false,
   existingReviewNotice = false,
 }: ReviewFormProps) {
-  if (mode === "edit" && reviewId === undefined) {
-    throw new Error("編集フォームにはレビュー ID が必要です。");
-  }
-
   const supabase = useMemo(
     () => createBrowserClient<Database>(clientEnv.supabaseUrl, clientEnv.supabasePublishableKey),
     [],
@@ -137,7 +133,7 @@ export function ReviewForm({
   const action =
     mode === "create"
       ? createReviewAction.bind(null, material.id)
-      : updateReviewAction.bind(null, material.id, reviewId as string);
+      : updateReviewAction.bind(null, material.id, reviewId);
   const [state, formAction, actionPending] = useActionState(action, initialActionState);
   const [rating, setRating] = useState(initialValues.rating);
   const [pesticideAck, setPesticideAck] = useState(initialValues.pesticideAck);

@@ -124,16 +124,16 @@ const searchResultButton = css({
   _last: { borderBottomWidth: "0" },
 });
 
-type ArticleFormProps = {
+type ArticleFormBaseProps = {
   sellerId: string;
-  mode: "create" | "edit";
-  articleId?: string;
   initialTitle?: string;
   initialBody?: string;
   initialHeroImageUrl?: string | null;
   initialStatus?: "draft" | "published";
   initialMaterials?: SellerArticleMaterial[];
 };
+type ArticleFormProps = ArticleFormBaseProps &
+  ({ mode: "create"; articleId?: never } | { mode: "edit"; articleId: string });
 
 function isImageFile(file: File): file is File & { type: keyof typeof fileExtensionByType } {
   return file.type in fileExtensionByType;
@@ -166,7 +166,7 @@ export function ArticleForm({
   const [searchPending, startSearch] = useTransition();
 
   const boundAction =
-    mode === "create" ? createArticleAction : updateArticleAction.bind(null, articleId as string);
+    mode === "create" ? createArticleAction : updateArticleAction.bind(null, articleId);
 
   const [state, formAction, pending] = useActionState<SellerArticleFormState, FormData>(
     boundAction,
@@ -298,7 +298,7 @@ export function ArticleForm({
     if (statusInputRef.current !== null) {
       statusInputRef.current.value = status;
     }
-    const form = document.getElementById("article-editor-form") as HTMLFormElement | null;
+    const form = document.querySelector<HTMLFormElement>("#article-editor-form");
     form?.requestSubmit();
   }
 
@@ -385,7 +385,9 @@ export function ArticleForm({
         >
           <FilterPills
             aria-label="本文エディタ"
-            onChange={(value) => setEditorTab(value as "write" | "preview")}
+            onChange={(value) => {
+              if (value === "write" || value === "preview") setEditorTab(value);
+            }}
             options={[
               { value: "write", label: "編集" },
               { value: "preview", label: "プレビュー" },

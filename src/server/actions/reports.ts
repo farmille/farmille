@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
+import { formDataString } from "@/lib/validation";
 import {
   createContentReport,
   isReportReasonCode,
@@ -31,10 +32,10 @@ export async function createReportAction(
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 
-  const reasonCodeValue = formData.get("reasonCode");
-  const detailValue = formData.get("detail");
+  const reasonCodeValue = formDataString(formData.get("reasonCode"));
+  const detailValue = formDataString(formData.get("detail"));
 
-  if (typeof reasonCodeValue !== "string" || !isReportReasonCode(reasonCodeValue)) {
+  if (reasonCodeValue === null || !isReportReasonCode(reasonCodeValue)) {
     return { status: "error", message: "通報理由を選択してください。" };
   }
 
@@ -52,7 +53,7 @@ export async function createReportAction(
     targetType,
     targetId,
     reasonCode: reasonCodeValue,
-    detail: typeof detailValue === "string" ? detailValue : null,
+    detail: detailValue,
   });
 
   if (!result.ok) {

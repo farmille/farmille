@@ -16,7 +16,7 @@ const base = {
   priceRange: "",
   officialUrl: "",
   catalogUrl: "",
-  tagIds: [] as unknown,
+  tagIds: [],
 };
 
 describe("validateMaterialInput", () => {
@@ -63,19 +63,20 @@ describe("validateMaterialInput", () => {
     expect(result.fieldErrors.catalogUrl).toBeDefined();
   });
 
-  it("タグ ID は文字列だけを拾い、重複はそのまま渡す（保存側で一意化する）", () => {
-    const result = validateMaterialInput({ ...base, tagIds: ["a", 1, "b", null] });
+  it("タグ ID の重複は保存側で一意化するためそのまま渡す", () => {
+    const result = validateMaterialInput({ ...base, tagIds: ["a", "a", "b"] });
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.input.tagIds).toEqual(["a", "b"]);
+    expect(result.input.tagIds).toEqual(["a", "a", "b"]);
   });
 
-  it("tagIds が配列でなければ空にする", () => {
-    const result = validateMaterialInput({ ...base, tagIds: "a" });
+  it("タグ ID にファイルが混入したら入力エラーにする", () => {
+    const result = validateMaterialInput({
+      ...base,
+      tagIds: [new File(["invalid"], "invalid.txt")],
+    });
 
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.input.tagIds).toEqual([]);
+    expect(result.ok).toBe(false);
   });
 });

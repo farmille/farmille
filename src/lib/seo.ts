@@ -17,10 +17,6 @@ type PageMetadataOptions = {
   publishedTime?: string;
 };
 
-type JsonPrimitive = boolean | number | string | null;
-type JsonValue = JsonPrimitive | JsonObject | readonly JsonValue[];
-type JsonObject = { readonly [key: string]: JsonValue };
-
 type ProductJsonLdInput = {
   id: string;
   name: string;
@@ -63,6 +59,68 @@ type ArticleJsonLdInput = {
     name: string;
   };
 };
+
+type AggregateRatingJsonLd = {
+  "@type": "AggregateRating";
+  ratingValue: number;
+  reviewCount: number;
+  bestRating: 5;
+  worstRating: 1;
+};
+
+export type ProductJsonLd = {
+  "@context": "https://schema.org";
+  "@type": "Product";
+  "@id": string;
+  url: string;
+  name: string;
+  description: string;
+  brand: { "@type": "Organization"; name: string };
+  image?: string[];
+  aggregateRating?: AggregateRatingJsonLd;
+};
+
+export type ReviewListJsonLd = {
+  "@context": "https://schema.org";
+  "@type": "ItemList";
+  numberOfItems: number;
+  itemListElement: Array<{
+    "@type": "ListItem";
+    position: number;
+    item: {
+      "@type": "Review";
+      "@id": string;
+      name: string;
+      reviewBody: string;
+      datePublished: string;
+      author: { "@type": "Person"; name: string };
+      itemReviewed: { "@type": "Product"; "@id": string; name: string };
+      reviewRating: {
+        "@type": "Rating";
+        ratingValue: number;
+        bestRating: 5;
+        worstRating: 1;
+      };
+    };
+  }>;
+};
+
+export type ArticleJsonLd = {
+  "@context": "https://schema.org";
+  "@type": "Article";
+  "@id": string;
+  mainEntityOfPage: string;
+  headline: string;
+  description: string;
+  datePublished: string;
+  articleSection: string;
+  author: { "@type": "Organization" | "Person"; name: string; url: string };
+  publisher: { "@type": "Organization"; name: string; url: string };
+  image?: string[];
+  about?: { "@type": "Product"; "@id": string; name: string };
+};
+
+export type JsonLdDocument = ProductJsonLd | ReviewListJsonLd | ArticleJsonLd;
 
 export const NO_INDEX_ROBOTS: NonNullable<Metadata["robots"]> = {
   index: false,
@@ -154,7 +212,7 @@ export function createPageMetadata({
       ? {
           ...commonOpenGraph,
           type,
-          ...(publishedTime === undefined ? {} : { publishedTime }),
+          publishedTime,
         }
       : {
           ...commonOpenGraph,
@@ -185,9 +243,9 @@ export function createProductJsonLd({
   imageUrls,
   averageRating,
   reviewCount,
-}: ProductJsonLdInput): JsonObject {
+}: ProductJsonLdInput): ProductJsonLd {
   const productUrl = absoluteUrl(`/materials/${id}`);
-  const aggregateRating =
+  const aggregateRating: AggregateRatingJsonLd | undefined =
     reviewCount > 0 && averageRating !== null
       ? {
           "@type": "AggregateRating",
@@ -198,7 +256,7 @@ export function createProductJsonLd({
         }
       : undefined;
 
-  return {
+  const document: ProductJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     "@id": `${productUrl}#product`,
@@ -209,16 +267,21 @@ export function createProductJsonLd({
       "@type": "Organization",
       name: manufacturerName,
     },
-    ...(imageUrls.length === 0 ? {} : { image: imageUrls.map((url) => absoluteUrl(url)) }),
-    ...(aggregateRating === undefined ? {} : { aggregateRating }),
   };
+  if (imageUrls.length > 0) {
+    document.image = imageUrls.map((url) => absoluteUrl(url));
+  }
+  if (aggregateRating !== undefined) {
+    document.aggregateRating = aggregateRating;
+  }
+  return document;
 }
 
 export function createReviewListJsonLd({
   materialId,
   materialName,
   reviews,
-}: ReviewListJsonLdInput): JsonObject {
+}: ReviewListJsonLdInput): ReviewListJsonLd {
   const productUrl = absoluteUrl(`/materials/${materialId}`);
 
   return {
@@ -264,10 +327,10 @@ export function createArticleJsonLd({
   imageUrls,
   articleSection,
   about,
-}: ArticleJsonLdInput): JsonObject {
+}: ArticleJsonLdInput): ArticleJsonLd {
   const articleUrl = absoluteUrl(`/${route}/${id}`);
 
-  return {
+  const document: ArticleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     "@id": `${articleUrl}#article`,
@@ -286,21 +349,22 @@ export function createArticleJsonLd({
       name: SITE_NAME,
       url: absoluteUrl("/"),
     },
-    ...(imageUrls.length === 0 ? {} : { image: imageUrls.map((url) => absoluteUrl(url)) }),
-    ...(about === undefined
-      ? {}
-      : {
-          about: {
-            "@type": "Product",
-            "@id": `${absoluteUrl(`/materials/${about.id}`)}#product`,
-            name: about.name,
-          },
-        }),
   };
+  if (imageUrls.length > 0) {
+    document.image = imageUrls.map((url) => absoluteUrl(url));
+  }
+  if (about !== undefined) {
+    document.about = {
+      "@type": "Product",
+      "@id": `${absoluteUrl(`/materials/${about.id}`)}#product`,
+      name: about.name,
+    };
+  }
+  return document;
 }
 
 // JSON-LD 内の文字列が script 要素を閉じないよう、HTML が解釈する文字を Unicode 化する。
-export function serializeJsonLd(value: JsonObject): string {
+export function serializeJsonLd(value: JsonLdDocument): string {
   return JSON.stringify(value)
     .replace(/&/g, "\\u0026")
     .replace(/</g, "\\u003c")

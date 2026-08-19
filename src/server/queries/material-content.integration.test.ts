@@ -1,16 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import {
+  getReviewRatingDistributionWithSupabase,
+  listPublishedArticlesByMaterialWithSupabase,
+  listPublishedUsageReportsByMaterialWithSupabase,
+} from "@/server/queries/material-content";
 import type { Database } from "@/types/database.types";
 
 const localSupabaseUrl = process.env.SUPABASE_LOCAL_URL;
 
 describe.skipIf(localSupabaseUrl === undefined)("資材関連コンテンツ統合", () => {
-  afterEach(() => {
-    vi.doUnmock("@/server/supabase");
-    vi.resetModules();
-  });
-
   it("ローカルDBからレビュー分布・使用レポート・記事を取得できる", async () => {
     const localPublishableKey =
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -37,19 +37,10 @@ describe.skipIf(localSupabaseUrl === undefined)("資材関連コンテンツ統�
       throw new Error("検証対象の資材がありません。");
     }
 
-    vi.doMock("@/server/supabase", () => ({
-      createServerSupabase: async () => localClient,
-    }));
-
-    const {
-      getReviewRatingDistribution,
-      listPublishedArticlesByMaterial,
-      listPublishedUsageReportsByMaterial,
-    } = await import("@/server/queries/material-content");
     const [distribution, reports, articles] = await Promise.all([
-      getReviewRatingDistribution(material.id),
-      listPublishedUsageReportsByMaterial(material.id, { limit: 3 }),
-      listPublishedArticlesByMaterial(material.id),
+      getReviewRatingDistributionWithSupabase(localClient, material.id),
+      listPublishedUsageReportsByMaterialWithSupabase(localClient, material.id, { limit: 3 }),
+      listPublishedArticlesByMaterialWithSupabase(localClient, material.id),
     ]);
 
     expect(distribution).toEqual({

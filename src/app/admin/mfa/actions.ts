@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { MfaEnrollState } from "@/app/admin/_lib/action-state";
 import type { AuthFormState } from "@/lib/auth/form-state";
 import { safeNextPath } from "@/lib/auth/safe-next";
+import { formDataString } from "@/lib/validation";
 import { startAdminTotpEnrollment, verifyAdminTotpCode } from "@/server/admin/mfa";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 
@@ -40,14 +41,14 @@ export async function verifyTotpCodeAction(
   _previousState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const factorId = formData.get("factorId");
-  const code = formData.get("code");
+  const factorId = formDataString(formData.get("factorId"));
+  const code = formDataString(formData.get("code")) ?? "";
 
-  if (typeof factorId !== "string" || factorId.length === 0) {
+  if (factorId === null || factorId.length === 0) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 
-  const result = await verifyAdminTotpCode(factorId, typeof code === "string" ? code : "");
+  const result = await verifyAdminTotpCode(factorId, code);
 
   if (!result.ok) {
     return { status: "error", message: mfaErrorMessage(result.error) };

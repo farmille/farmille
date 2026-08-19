@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import type { AdminActionState } from "@/app/admin/_lib/action-state";
+import { formDataString, trimmedFormDataString } from "@/lib/validation";
 import {
   createCrop,
   createTag,
@@ -20,22 +21,19 @@ function refresh(): void {
 }
 
 function toName(formData: FormData): string {
-  const name = formData.get("name");
-
-  return typeof name === "string" ? name.trim() : "";
+  return trimmedFormDataString(formData.get("name"));
 }
 
 function toSortOrder(formData: FormData): number {
-  const raw = formData.get("sortOrder");
-  const parsed = Number.parseInt(typeof raw === "string" ? raw : "", 10);
+  const parsed = Number.parseInt(formDataString(formData.get("sortOrder")) ?? "", 10);
 
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
 /** 表記ゆれ辞書はカンマ・読点・改行のいずれでも区切れるようにする。 */
 function toAliases(formData: FormData): string[] {
-  const raw = formData.get("aliases");
-  if (typeof raw !== "string") return [];
+  const raw = formDataString(formData.get("aliases"));
+  if (raw === null) return [];
 
   return [
     ...new Set(
@@ -55,9 +53,9 @@ export async function tagOperationAction(
   _previousState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
-  const operation = formData.get("operation");
-  const tagId = formData.get("tagId");
-  const category = formData.get("category");
+  const operation = formDataString(formData.get("operation"));
+  const tagId = formDataString(formData.get("tagId"));
+  const category = formDataString(formData.get("category"));
 
   if (operation === "create") {
     if (!isTagCategory(category)) {
@@ -80,7 +78,7 @@ export async function tagOperationAction(
     return { status: "done", message: `タグ「${name}」を追加しました。` };
   }
 
-  if (typeof tagId !== "string" || tagId.length === 0) {
+  if (tagId === null || tagId.length === 0) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 
@@ -127,12 +125,12 @@ export async function cropOperationAction(
   _previousState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
-  const operation = formData.get("operation");
-  const cropId = formData.get("cropId");
+  const operation = formDataString(formData.get("operation"));
+  const cropId = formDataString(formData.get("cropId"));
 
   if (operation === "create") {
-    const groupId = formData.get("groupId");
-    if (typeof groupId !== "string" || groupId.length === 0) {
+    const groupId = formDataString(formData.get("groupId"));
+    if (groupId === null || groupId.length === 0) {
       return { status: "error", message: "作物群を選んでください。" };
     }
     const name = toName(formData);
@@ -157,7 +155,7 @@ export async function cropOperationAction(
     return { status: "done", message: `作物「${name}」を追加しました。` };
   }
 
-  if (typeof cropId !== "string" || cropId.length === 0) {
+  if (cropId === null || cropId.length === 0) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 

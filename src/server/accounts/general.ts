@@ -9,6 +9,7 @@ import {
 } from "@/lib/auth/account-rules";
 import { isPrefectureCode } from "@/lib/prefectures";
 import { isStandpoint, type Standpoint } from "@/lib/standpoints";
+import { formDataString, trimmedFormDataString } from "@/lib/validation";
 import { toErrorCode } from "@/server/accounts/auth-errors";
 import { fail, succeed, type Result } from "@/server/result";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
@@ -35,47 +36,43 @@ export type GeneralSignupResult = {
   signedIn: boolean;
 };
 
-function toTrimmedString(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
-}
-
 export function validateGeneralSignup(raw: {
-  handle: unknown;
-  email: unknown;
-  password: unknown;
-  prefectureCode: unknown;
-  prefecturePublic: unknown;
-  standpoint: unknown;
+  handle: FormDataEntryValue | null;
+  email: FormDataEntryValue | null;
+  password: FormDataEntryValue | null;
+  prefectureCode: FormDataEntryValue | null;
+  prefecturePublic: FormDataEntryValue | boolean | null;
+  standpoint: FormDataEntryValue | null;
 }): GeneralSignupValidation {
   const fieldErrors: GeneralSignupFieldErrors = {};
 
-  const handle = toTrimmedString(raw.handle);
+  const handle = trimmedFormDataString(raw.handle);
   if (handle.length === 0) {
     fieldErrors.handle = "ハンドルネームを入力してください。";
   } else if (handle.length > HANDLE_MAX_LENGTH) {
     fieldErrors.handle = `ハンドルネームは${HANDLE_MAX_LENGTH}文字以内で入力してください。`;
   }
 
-  const email = toTrimmedString(raw.email);
+  const email = trimmedFormDataString(raw.email);
   if (email.length === 0) {
     fieldErrors.email = "メールアドレスを入力してください。";
   } else if (!EMAIL_PATTERN.test(email)) {
     fieldErrors.email = "メールアドレスの形式が正しくありません。";
   }
 
-  const password = typeof raw.password === "string" ? raw.password : "";
+  const password = formDataString(raw.password) ?? "";
   if (password.length < PASSWORD_MIN_LENGTH) {
     fieldErrors.password = `パスワードは${PASSWORD_MIN_LENGTH}文字以上で入力してください。`;
   } else if (password.length > PASSWORD_MAX_LENGTH) {
     fieldErrors.password = `パスワードは${PASSWORD_MAX_LENGTH}文字以内で入力してください。`;
   }
 
-  const prefectureCode = Number(toTrimmedString(raw.prefectureCode));
+  const prefectureCode = Number(trimmedFormDataString(raw.prefectureCode));
   if (!isPrefectureCode(prefectureCode)) {
     fieldErrors.prefectureCode = "都道府県を選択してください。";
   }
 
-  const standpoint = raw.standpoint;
+  const standpoint = formDataString(raw.standpoint);
   if (!isStandpoint(standpoint)) {
     fieldErrors.standpoint = "あなたの立場を選択してください。";
 

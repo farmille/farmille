@@ -16,12 +16,22 @@
 // /admin/mfa へ誘導される（01 §4 の AAL2 必須）。
 
 import { randomBytes } from "node:crypto";
+import * as v from "valibot";
 
-type AuthUser = {
-  id: string;
-  email?: string;
-  app_metadata?: Record<string, unknown>;
-};
+const AuthUserSchema = v.object({
+  id: v.string(),
+  email: v.optional(v.string()),
+});
+const AuthUserListSchema = v.object({ users: v.array(AuthUserSchema) });
+type AuthUser = v.InferOutput<typeof AuthUserSchema>;
+type AuthAdminRequestBody =
+  | Readonly<{
+      email: string;
+      password: string;
+      email_confirm: true;
+      app_metadata: Readonly<{ account_type: "admin" }>;
+    }>
+  | Readonly<{ app_metadata: Readonly<{ account_type: "admin" }> }>;
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -66,29 +76,38 @@ function generatePassword(): string {
   return chars.join("");
 }
 
-async function callAuthAdmin(
+async function callAuthAdmin<TSchema extends v.GenericSchema>(
+  schema: TSchema,
   baseUrl: URL,
   secretKey: string,
   path: string,
-  init: { method: string; body?: unknown },
-): Promise<unknown> {
-  const response = await fetch(new URL(`/auth/v1/admin${path}`, baseUrl), {
-    method: init.method,
+  method: "GET" | "POST" | "PUT",
+  body?: AuthAdminRequestBody,
+): Promise<v.InferOutput<TSchema>> {
+  const requestInit: RequestInit = {
+    method,
     headers: {
       apikey: secretKey,
       Authorization: `Bearer ${secretKey}`,
       "Content-Type": "application/json",
     },
-    body: init.body === undefined ? undefined : JSON.stringify(init.body),
-  });
+  };
+  if (body !== undefined) requestInit.body = JSON.stringify(body);
 
-  const payload: unknown = await response.json();
+  const response = await fetch(new URL(`/auth/v1/admin${path}`, baseUrl), requestInit);
+  const responseText = await response.text();
 
   if (!response.ok) {
-    throw new Error(`Auth Admin API ${init.method} ${path} が失敗しました: ${JSON.stringify(payload)}`);
+    throw new Error(`Auth Admin API ${method} ${path} が失敗しました：${responseText}`);
   }
 
-  return payload;
+  const result = v.safeParse(schema, JSON.parse(responseText));
+  if (!result.success) {
+    throw new Error(
+      `Auth Admin API ${method} ${path} のレスポンス形式が不正です：${v.summarize(result.issues)}`,
+    );
+  }
+  return result.output;
 }
 
 async function findUserByEmail(
@@ -97,19 +116,13 @@ async function findUserByEmail(
   email: string,
 ): Promise<AuthUser | null> {
   const payload = await callAuthAdmin(
+    AuthUserListSchema,
     baseUrl,
     secretKey,
     `/users?page=1&per_page=1000`,
-    { method: "GET" },
+    "GET",
   );
-
-  if (typeof payload !== "object" || payload === null || !("users" in payload)) {
-    throw new Error("Auth Admin API のユーザー一覧の形式が想定と異なります。");
-  }
-
-  const users = (payload as { users: AuthUser[] }).users;
-
-  return users.find((user) => user.email === email) ?? null;
+  return payload.users.find((user) => user.email === email) ?? null;
 }
 
 async function main(): Promise<void> {
@@ -129,23 +142,31 @@ async function main(): Promise<void> {
   const existing = await findUserByEmail(baseUrl, secretKey, email);
 
   if (existing === null) {
-    const created = (await callAuthAdmin(baseUrl, secretKey, "/users", {
-      method: "POST",
-      body: {
+    const created = await callAuthAdmin(
+      AuthUserSchema,
+      baseUrl,
+      secretKey,
+      "/users",
+      "POST",
+      {
         email,
         password,
         email_confirm: true,
         app_metadata: { account_type: "admin" },
       },
-    })) as AuthUser;
+    );
 
     console.info(`admin を作成しました: ${email} (user_id=${created.id})`);
     console.info(`パスワード: ${password}`);
   } else {
-    await callAuthAdmin(baseUrl, secretKey, `/users/${existing.id}`, {
-      method: "PUT",
-      body: { app_metadata: { ...existing.app_metadata, account_type: "admin" } },
-    });
+    await callAuthAdmin(
+      AuthUserSchema,
+      baseUrl,
+      secretKey,
+      `/users/${existing.id}`,
+      "PUT",
+      { app_metadata: { account_type: "admin" } },
+    );
 
     console.info(`既存ユーザーに admin を付与しました: ${email} (user_id=${existing.id})`);
     console.info("パスワードは変更していません。");

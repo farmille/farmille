@@ -1,16 +1,9 @@
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 
 import { OfficialCheckIcon } from "@/components/Icons";
+import { SELLER_TYPES } from "@/lib/seller-types";
 import type { PublicSellerPageData } from "@/server/queries/public-sellers";
 import { css } from "../../../../../styled-system/css";
-
-const SELLER_TYPE_LABELS: Readonly<Record<string, string>> = {
-  maker: "メーカー",
-  ja: "JA",
-  farm_corp: "農業法人",
-  expert: "専門家",
-  other: "その他",
-};
 
 const card = css({
   display: "flex",
@@ -70,13 +63,13 @@ function checkedExternalUrl(value: string): string {
 }
 
 export function sellerTypeLabel(value: string): string {
-  const label = SELLER_TYPE_LABELS[value];
+  const sellerType = SELLER_TYPES.find((candidate) => candidate.value === value);
 
-  if (label === undefined) {
+  if (sellerType === undefined) {
     throw new Error(`未対応の出品者種別です：${value}`);
   }
 
-  return label;
+  return sellerType.label;
 }
 
 type SellerHeaderProps = {

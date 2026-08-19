@@ -15,5 +15,5 @@ export const CULTIVATION_STYLES = [
 export type CultivationStyle = (typeof CULTIVATION_STYLES)[number];
 
 export function isCultivationStyle(value: string): value is CultivationStyle {
-  return (CULTIVATION_STYLES as readonly string[]).includes(value);
+  return CULTIVATION_STYLES.some((style) => style === value);
 }

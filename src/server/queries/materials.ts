@@ -84,7 +84,7 @@ type MaterialDetailQueryRow = MaterialDetailFields & {
 
 type MaterialFilterResult = Result<string[] | null>;
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/materials] ${operation}`, error);
 }
 
@@ -160,13 +160,7 @@ async function findMatchingMaterialIds(
   );
 }
 
-export async function listMaterials({
-  tagIds,
-  makerNames,
-  materialNames,
-  sort = "reviews",
-  page,
-}: {
+export type ListMaterialsOptions = {
   tagIds?: string[];
   /** メーカー名での絞り込み（同一分類 OR）。タグではなく materials 由来。 */
   makerNames?: string[];
@@ -174,9 +168,20 @@ export async function listMaterials({
   materialNames?: string[];
   sort?: MaterialSort;
   page: number;
-}): Promise<Result<Paginated<MaterialListItem>>> {
-  const { from, to } = pageRange(page);
+};
+
+export async function listMaterials(
+  options: ListMaterialsOptions,
+): Promise<Result<Paginated<MaterialListItem>>> {
   const supabase = await createServerSupabase();
+  return listMaterialsWithSupabase(supabase, options);
+}
+
+export async function listMaterialsWithSupabase(
+  supabase: SupabaseClient<Database>,
+  { tagIds, makerNames, materialNames, sort = "reviews", page }: ListMaterialsOptions,
+): Promise<Result<Paginated<MaterialListItem>>> {
+  const { from, to } = pageRange(page);
   const materialFilter = await findMatchingMaterialIds(supabase, tagIds);
 
   if (!materialFilter.ok) {
@@ -291,6 +296,13 @@ export async function listMaterials({
 
 export async function getMaterial(id: string): Promise<Result<MaterialDetail>> {
   const supabase = await createServerSupabase();
+  return getMaterialWithSupabase(supabase, id);
+}
+
+export async function getMaterialWithSupabase(
+  supabase: SupabaseClient<Database>,
+  id: string,
+): Promise<Result<MaterialDetail>> {
   const { data, error } = await supabase
     .from("materials")
     .select(

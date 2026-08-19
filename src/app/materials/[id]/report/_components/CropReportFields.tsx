@@ -671,7 +671,12 @@ function ComparisonFields({
         <FieldLabel>比較区で他のBS資材を使っていますか</FieldLabel>
         <Select
           value={comparison.otherBsUse}
-          onChange={(event) => update({ otherBsUse: event.target.value as "" | "no" | "yes" })}
+          onChange={(event) => {
+            const value = event.target.value;
+            if (value === "" || value === "no" || value === "yes") {
+              update({ otherBsUse: value });
+            }
+          }}
         >
           <option value="">選択してください</option>
           <option value="no">使っていない</option>

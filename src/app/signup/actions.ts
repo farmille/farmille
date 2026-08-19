@@ -2,7 +2,8 @@
 
 import { redirect } from "next/navigation";
 
-import type { AuthFormState } from "@/lib/auth/form-state";
+import type { AuthFormState, AuthFormValues } from "@/lib/auth/form-state";
+import { formDataString } from "@/lib/validation";
 import { registerGeneralUser, validateGeneralSignup } from "@/server/accounts/general";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 
@@ -20,12 +21,12 @@ function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string
 }
 
 /** 再入力の手間を減らすため、パスワード以外の入力値を返す。 */
-function submittedValues(formData: FormData): Record<string, string> {
-  const values: Record<string, string> = {};
+function submittedValues(formData: FormData): AuthFormValues {
+  const values: AuthFormValues = {};
 
   for (const name of ["handle", "email", "prefectureCode", "prefecturePublic", "standpoint"]) {
-    const value = formData.get(name);
-    if (typeof value === "string") values[name] = value;
+    const value = formDataString(formData.get(name));
+    if (value !== null) values[name] = value;
   }
 
   return values;

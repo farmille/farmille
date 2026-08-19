@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import type { AdminActionState } from "@/app/admin/_lib/action-state";
+import { formDataString } from "@/lib/validation";
 import { processContentReport } from "@/server/admin/reports";
 import { errorMessageJa } from "@/server/errors";
 
@@ -11,11 +12,11 @@ export async function processContentReportAction(
   _previousState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
-  const reportId = formData.get("reportId");
-  const nextStatus = formData.get("nextStatus");
+  const reportId = formDataString(formData.get("reportId"));
+  const nextStatus = formDataString(formData.get("nextStatus"));
 
   if (
-    typeof reportId !== "string" ||
+    reportId === null ||
     reportId.length === 0 ||
     (nextStatus !== "resolved" && nextStatus !== "dismissed")
   ) {

@@ -13,11 +13,11 @@ type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
 export const EDITORIAL_REPORT_STATUSES = ["pending", "published", "declined"] as const;
 export type EditorialReportStatus = (typeof EDITORIAL_REPORT_STATUSES)[number];
 
-export const EDITORIAL_REPORT_STATUS_LABELS: Record<EditorialReportStatus, string> = {
+export const EDITORIAL_REPORT_STATUS_LABELS = {
   pending: "確認待ち",
   published: "公開済み",
   declined: "差し戻し",
-};
+} satisfies Record<EditorialReportStatus, string>;
 
 type PendingReportQueryRow = Pick<UsageReportRow, "id" | "title" | "status" | "created_at"> & {
   author: Pick<ProfileRow, "user_id" | "handle"> | null;
@@ -104,18 +104,18 @@ export type UsageReportEditorialInput = {
 
 export type UsageReportEditorialOperation = "save" | "publish" | "decline";
 
-function reportError(operation: string, error: unknown): void {
+function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
   reportAdminError("usage-reports", operation, error);
 }
 
 export function isUsageReportEditorialOperation(
-  value: unknown,
+  value: string | null,
 ): value is UsageReportEditorialOperation {
   return value === "save" || value === "publish" || value === "decline";
 }
 
-function isEditorialReportStatus(value: unknown): value is EditorialReportStatus {
-  return (EDITORIAL_REPORT_STATUSES as readonly unknown[]).includes(value);
+function isEditorialReportStatus(value: string): value is EditorialReportStatus {
+  return EDITORIAL_REPORT_STATUSES.some((status) => status === value);
 }
 
 function optionalText(value: string): string | null {
@@ -342,11 +342,15 @@ export async function updateUsageReportEditorial(
       negative_note: optionalText(input.negativeNote),
       summary,
       editor_note: editorNote,
-      ...(operation === "publish"
-        ? { status: "published", published_at: new Date().toISOString() }
-        : {}),
-      ...(operation === "decline" ? { status: "declined", published_at: null } : {}),
     };
+    if (operation === "publish") {
+      update.status = "published";
+      update.published_at = new Date().toISOString();
+    }
+    if (operation === "decline") {
+      update.status = "declined";
+      update.published_at = null;
+    }
 
     const { data, error } = await supabase
       .from("usage_reports")

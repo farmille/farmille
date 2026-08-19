@@ -1,6 +1,7 @@
 import path from "node:path";
 import { expect, test } from "@playwright/test";
 import type { APIRequestContext, Page, TestInfo } from "@playwright/test";
+import * as v from "valibot";
 
 const VIEWPORT_WIDTHS = [320, 360, 375, 390, 414, 480, 640, 768, 900, 1024, 1280, 1440] as const;
 const VIEWPORT_HEIGHT = 1000;
@@ -21,15 +22,29 @@ const REPRESENTATIVE_STORY_IDS = [
   "app-me-shelves--all-sections",
 ] as const;
 
-type StoryIndexEntry = {
-  id: string;
-  name: string;
-  title: string;
-  type: "story" | "docs";
-};
+const StoryIndexEntrySchema = v.object({
+  id: v.string(),
+  name: v.string(),
+  title: v.string(),
+  type: v.picklist(["story", "docs"]),
+});
+const StoryIndexSchema = v.object({
+  entries: v.record(v.string(), StoryIndexEntrySchema),
+});
+type StoryIndexEntry = v.InferOutput<typeof StoryIndexEntrySchema>;
 
-type StoryIndex = {
-  entries: Record<string, StoryIndexEntry>;
+type OverflowDetails = {
+  viewportWidth: number;
+  documentWidth: number;
+  overflowBy: number;
+  offenders: Array<{
+    tag: string;
+    className: string;
+    text: string;
+    left: number;
+    right: number;
+    width: number;
+  }>;
 };
 
 type ResponsiveFailure = {
@@ -37,15 +52,19 @@ type ResponsiveFailure = {
   storyTitle: string;
   width: number;
   reason: string;
-  details?: unknown;
+  details?: string | OverflowDetails;
 };
 
 async function fetchSortedStories(request: APIRequestContext): Promise<StoryIndexEntry[]> {
   const indexResponse = await request.get("/index.json");
   expect(indexResponse.ok(), "Storybook の index.json を取得できること").toBe(true);
 
-  const index = (await indexResponse.json()) as StoryIndex;
-  return Object.values(index.entries)
+  const result = v.safeParse(StoryIndexSchema, await indexResponse.json());
+  if (!result.success) {
+    throw new Error(`Storybook の index.json が不正です：${v.summarize(result.issues)}`);
+  }
+
+  return Object.values(result.output.entries)
     .filter((entry) => entry.type === "story")
     .toSorted((left, right) => (left.id < right.id ? -1 : left.id > right.id ? 1 : 0));
 }

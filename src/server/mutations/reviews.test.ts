@@ -1,21 +1,12 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-const authMocks = vi.hoisted(() => ({
-  requireGeneralUser: vi.fn(),
-}));
-
-const supabaseMocks = vi.hoisted(() => ({
-  createServerSupabase: vi.fn(),
-}));
-
-vi.mock("@/server/auth", () => authMocks);
-vi.mock("@/server/supabase", () => supabaseMocks);
+import { describe, expect, it, vi } from "vitest";
 
 import {
-  createReview,
+  createReviewWithDependencies,
   type ReviewMutationInput,
   validateReviewFormData,
 } from "@/server/mutations/reviews";
+import { requireGeneralUser } from "@/server/auth";
+import { createServerSupabase } from "@/server/supabase";
 
 const materialId = "11111111-1111-4111-8111-111111111111";
 const cropId = "22222222-2222-4222-8222-222222222222";
@@ -97,12 +88,10 @@ describe("validateReviewFormData", () => {
 });
 
 describe("createReview", () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("出品者セッションを DB 操作前に拒否する", async () => {
-    authMocks.requireGeneralUser.mockResolvedValue({ ok: false, error: "forbidden" });
+    const authenticate = vi.fn<typeof requireGeneralUser>();
+    const createSupabase = vi.fn<typeof createServerSupabase>();
+    authenticate.mockResolvedValue({ ok: false, error: "forbidden" });
     const input: ReviewMutationInput = {
       materialId,
       cropId,
@@ -114,7 +103,9 @@ describe("createReview", () => {
       newPhotos: [],
     };
 
-    await expect(createReview(input)).resolves.toEqual({ ok: false, error: "forbidden" });
-    expect(supabaseMocks.createServerSupabase).not.toHaveBeenCalled();
+    await expect(
+      createReviewWithDependencies(input, authenticate, createSupabase),
+    ).resolves.toEqual({ ok: false, error: "forbidden" });
+    expect(createSupabase).not.toHaveBeenCalled();
   });
 });

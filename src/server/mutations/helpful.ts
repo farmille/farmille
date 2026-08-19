@@ -12,7 +12,7 @@ export const HELPFUL_TARGET_TYPES = ["review", "usage_report", "article"] as con
 export type HelpfulTargetType = (typeof HELPFUL_TARGET_TYPES)[number];
 
 export function isHelpfulTargetType(value: string): value is HelpfulTargetType {
-  return (HELPFUL_TARGET_TYPES as readonly string[]).includes(value);
+  return HELPFUL_TARGET_TYPES.some((type) => type === value);
 }
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -20,7 +20,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3
 /** PostgreSQL の unique_violation。同時押下などの競合検知に使う。 */
 const UNIQUE_VIOLATION = "23505";
 
-function reportMutationError(operation: string, error: unknown): void {
+function reportMutationError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/mutations/helpful] ${operation}`, error);
 }
 
@@ -89,9 +89,18 @@ export async function toggleHelpfulVote(
   targetId: string,
   userId: string,
 ): Promise<Result<{ voted: boolean }>> {
+  return toggleHelpfulVoteWithSupabase(targetType, targetId, userId, createServerSupabase);
+}
+
+export async function toggleHelpfulVoteWithSupabase(
+  targetType: HelpfulTargetType,
+  targetId: string,
+  userId: string,
+  createSupabase: typeof createServerSupabase,
+): Promise<Result<{ voted: boolean }>> {
   if (!UUID_PATTERN.test(targetId)) return fail("not_found");
 
-  const supabase = await createServerSupabase();
+  const supabase = await createSupabase();
   const target = await assertHelpfulTarget(supabase, targetType, targetId, userId);
   if (!target.ok) return target;
 

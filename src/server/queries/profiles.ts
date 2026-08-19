@@ -1,9 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import * as v from "valibot";
 
 import { HANDLE_MAX_LENGTH } from "@/lib/auth/account-rules";
 import { isCultivationStyle, type CultivationStyle } from "@/lib/cultivation-styles";
 import { isPrefectureCode } from "@/lib/prefectures";
 import { PROFILE_FIELD_LIMITS } from "@/lib/profile-field-limits";
+import { trimmedFormDataString } from "@/lib/validation";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
@@ -64,16 +66,24 @@ export type ProfileUpdateValidation =
 
 const AVATAR_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/profiles] ${operation}`, error);
 }
 
-function toTrimmedString(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
+type ProfileTextInput = FormDataEntryValue | null;
+type ProfileListInput = FormDataEntryValue | readonly FormDataEntryValue[] | null;
+
+const ProfileStringListSchema = v.union([v.string(), v.array(v.string()), v.null()]);
+
+function parseProfileStringList(value: ProfileListInput): string[] | null {
+  const result = v.safeParse(ProfileStringListSchema, value);
+  if (!result.success) return null;
+  if (result.output === null) return [];
+  return Array.isArray(result.output) ? result.output : [result.output];
 }
 
-function parseOptionalHttpUrl(value: unknown, label: string): Result<string | null> {
-  const text = toTrimmedString(value);
+function parseOptionalHttpUrl(value: ProfileTextInput): Result<string | null> {
+  const text = trimmedFormDataString(value);
   if (text.length === 0) return succeed(null);
 
   try {
@@ -83,7 +93,6 @@ function parseOptionalHttpUrl(value: unknown, label: string): Result<string | nu
     }
     return succeed(url.toString());
   } catch {
-    void label;
     return fail("invalid_body");
   }
 }
@@ -211,48 +220,44 @@ export async function getOwnProfile(userId: string): Promise<Result<OwnProfile>>
 }
 
 export function validateProfileUpdate(raw: {
-  handle: unknown;
-  prefectureCode: unknown;
-  prefecturePublic: unknown;
-  bio: unknown;
-  cultivationStyles: unknown;
-  affiliation: unknown;
-  websiteUrl: unknown;
-  snsUrl: unknown;
-  cropIds: unknown;
+  handle: ProfileTextInput;
+  prefectureCode: ProfileTextInput;
+  prefecturePublic: FormDataEntryValue | boolean | null;
+  bio: ProfileTextInput;
+  cultivationStyles: ProfileListInput;
+  affiliation: ProfileTextInput;
+  websiteUrl: ProfileTextInput;
+  snsUrl: ProfileTextInput;
+  cropIds: ProfileListInput;
 }): ProfileUpdateValidation {
   const fieldErrors: ProfileUpdateFieldErrors = {};
 
-  const handle = toTrimmedString(raw.handle);
+  const handle = trimmedFormDataString(raw.handle);
   if (handle.length === 0) {
     fieldErrors.handle = "ハンドルネームを入力してください。";
   } else if (handle.length > HANDLE_MAX_LENGTH) {
     fieldErrors.handle = `ハンドルネームは${HANDLE_MAX_LENGTH}文字以内で入力してください。`;
   }
 
-  const prefectureCode = Number(toTrimmedString(raw.prefectureCode));
+  const prefectureCode = Number(trimmedFormDataString(raw.prefectureCode));
   if (!isPrefectureCode(prefectureCode)) {
     fieldErrors.prefectureCode = "都道府県を選択してください。";
   }
 
-  const bioText = toTrimmedString(raw.bio);
+  const bioText = trimmedFormDataString(raw.bio);
   if (bioText.length > PROFILE_FIELD_LIMITS.bio) {
     fieldErrors.bio = `一言プロフィールは${PROFILE_FIELD_LIMITS.bio}文字以内で入力してください。`;
   }
 
-  const affiliationText = toTrimmedString(raw.affiliation);
+  const affiliationText = trimmedFormDataString(raw.affiliation);
   if (affiliationText.length > PROFILE_FIELD_LIMITS.affiliation) {
     fieldErrors.affiliation = `所属は${PROFILE_FIELD_LIMITS.affiliation}文字以内で入力してください。`;
   }
 
-  const rawStyles = Array.isArray(raw.cultivationStyles)
-    ? raw.cultivationStyles
-    : typeof raw.cultivationStyles === "string"
-      ? [raw.cultivationStyles]
-      : [];
+  const rawStyles = parseProfileStringList(raw.cultivationStyles);
   const cultivationStyles: CultivationStyle[] = [];
-  for (const style of rawStyles) {
-    if (typeof style !== "string" || !isCultivationStyle(style)) {
+  for (const style of rawStyles ?? []) {
+    if (!isCultivationStyle(style)) {
       fieldErrors.cultivationStyles = "栽培形態の選択が正しくありません。";
       break;
     }
@@ -260,31 +265,33 @@ export function validateProfileUpdate(raw: {
       cultivationStyles.push(style);
     }
   }
+  if (rawStyles === null) {
+    fieldErrors.cultivationStyles = "栽培形態の選択が正しくありません。";
+  }
 
-  const websiteResult = parseOptionalHttpUrl(raw.websiteUrl, "ウェブサイト");
+  const websiteResult = parseOptionalHttpUrl(raw.websiteUrl);
   if (!websiteResult.ok) {
     fieldErrors.websiteUrl = "ウェブサイトは http(s) のURLで入力してください。";
   }
 
-  const snsResult = parseOptionalHttpUrl(raw.snsUrl, "SNS");
+  const snsResult = parseOptionalHttpUrl(raw.snsUrl);
   if (!snsResult.ok) {
     fieldErrors.snsUrl = "SNSは http(s) のURLで入力してください。";
   }
 
-  const rawCropIds = Array.isArray(raw.cropIds)
-    ? raw.cropIds
-    : typeof raw.cropIds === "string"
-      ? [raw.cropIds]
-      : [];
+  const rawCropIds = parseProfileStringList(raw.cropIds);
   const cropIds: string[] = [];
-  for (const cropId of rawCropIds) {
-    if (typeof cropId !== "string" || cropId.length === 0) {
+  for (const cropId of rawCropIds ?? []) {
+    if (cropId.length === 0) {
       fieldErrors.cropIds = "主な作目の選択が正しくありません。";
       break;
     }
     if (!cropIds.includes(cropId)) {
       cropIds.push(cropId);
     }
+  }
+  if (rawCropIds === null) {
+    fieldErrors.cropIds = "主な作目の選択が正しくありません。";
   }
 
   if (Object.keys(fieldErrors).length > 0) {

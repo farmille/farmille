@@ -2,13 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import * as v from "valibot";
 
+import { formDataString } from "@/lib/validation";
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import {
   createReview,
   deleteReview,
   type ExistingReviewPhotoInput,
+  NewReviewPhotoSchema,
   removeReviewPhotoUploads,
   updateReview,
   validateReviewFormData,
@@ -26,36 +29,28 @@ export type ReviewActionState =
     };
 
 function uploadedPhotoPaths(formData: FormData): string[] {
-  const value = formData.get("newPhotos");
-  if (typeof value !== "string" || value.length === 0) return [];
-
-  let parsed: unknown;
+  const value = formDataString(formData.get("newPhotos"));
+  if (value === null || value.length === 0) return [];
 
   try {
-    parsed = JSON.parse(value);
+    const result = v.safeParse(v.array(NewReviewPhotoSchema), JSON.parse(value));
+    return result.success ? result.output.map((photo) => photo.path) : [];
   } catch {
     return [];
   }
-
-  if (!Array.isArray(parsed)) return [];
-
-  return parsed.flatMap((photo) => {
-    if (typeof photo !== "object" || photo === null || !("path" in photo)) return [];
-    return typeof photo.path === "string" ? [photo.path] : [];
-  });
 }
 
 function existingPhotoInputs(formData: FormData): ExistingReviewPhotoInput[] | null {
-  const ids = formData.getAll("existingPhotoId");
-  const removedIds = new Set(
-    formData.getAll("removePhotoId").filter((value): value is string => typeof value === "string"),
-  );
+  const idsResult = v.safeParse(v.array(v.string()), formData.getAll("existingPhotoId"));
+  const removedIdsResult = v.safeParse(v.array(v.string()), formData.getAll("removePhotoId"));
+  if (!idsResult.success || !removedIdsResult.success) return null;
+
+  const removedIds = new Set(removedIdsResult.output);
   const photos: ExistingReviewPhotoInput[] = [];
 
-  for (const value of ids) {
-    if (typeof value !== "string") return null;
-    const caption = formData.get(`existingPhotoCaption-${value}`);
-    if (typeof caption !== "string") return null;
+  for (const value of idsResult.output) {
+    const caption = formDataString(formData.get(`existingPhotoCaption-${value}`));
+    if (caption === null) return null;
 
     const trimmedCaption = caption.trim();
     photos.push({
@@ -73,12 +68,13 @@ function errorState(
   cleanupPaths: string[],
   fieldErrors?: ReviewFieldErrors,
 ): ReviewActionState {
-  return {
+  const state: Extract<ReviewActionState, { status: "error" }> = {
     status: "error",
     message,
-    ...(fieldErrors === undefined ? {} : { fieldErrors }),
-    ...(cleanupPaths.length === 0 ? {} : { cleanupPaths }),
   };
+  if (fieldErrors !== undefined) state.fieldErrors = fieldErrors;
+  if (cleanupPaths.length > 0) state.cleanupPaths = cleanupPaths;
+  return state;
 }
 
 export async function createReviewAction(

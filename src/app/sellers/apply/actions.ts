@@ -2,7 +2,8 @@
 
 import { redirect } from "next/navigation";
 
-import type { AuthFormState } from "@/lib/auth/form-state";
+import type { AuthFormState, AuthFormValues } from "@/lib/auth/form-state";
+import { formDataString } from "@/lib/validation";
 import { applySellerAccount, validateSellerApply } from "@/server/accounts/seller";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 
@@ -18,8 +19,8 @@ function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string
 }
 
 /** 再入力用。パスワード欄は無いので全項目を返す。 */
-function submittedValues(formData: FormData): Record<string, string> {
-  const values: Record<string, string> = {};
+function submittedValues(formData: FormData): AuthFormValues {
+  const values: AuthFormValues = {};
   const names = [
     "officialName",
     "sellerType",
@@ -33,8 +34,8 @@ function submittedValues(formData: FormData): Record<string, string> {
   ] as const;
 
   for (const name of names) {
-    const value = formData.get(name);
-    if (typeof value === "string") values[name] = value;
+    const value = formDataString(formData.get(name));
+    if (value !== null) values[name] = value;
   }
 
   return values;

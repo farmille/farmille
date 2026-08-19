@@ -14,11 +14,11 @@ type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
 export const CONTENT_REPORT_STATUSES = ["open", "resolved", "dismissed"] as const;
 export type ContentReportStatus = (typeof CONTENT_REPORT_STATUSES)[number];
 
-export const CONTENT_REPORT_STATUS_LABELS: Record<ContentReportStatus, string> = {
+export const CONTENT_REPORT_STATUS_LABELS = {
   open: "未処理",
   resolved: "解決済み",
   dismissed: "却下",
-};
+} satisfies Record<ContentReportStatus, string>;
 
 export const CONTENT_REPORT_TARGET_TYPES = [
   "review",
@@ -29,13 +29,13 @@ export const CONTENT_REPORT_TARGET_TYPES = [
 ] as const;
 export type ContentReportTargetType = (typeof CONTENT_REPORT_TARGET_TYPES)[number];
 
-export const CONTENT_REPORT_TARGET_LABELS: Record<ContentReportTargetType, string> = {
+export const CONTENT_REPORT_TARGET_LABELS = {
   review: "レビュー",
   usage_report: "使用レポート",
   article: "記事",
   profile: "プロフィール",
   material: "資材",
-};
+} satisfies Record<ContentReportTargetType, string>;
 
 type ReportQueryRow = Pick<
   ContentReportRow,
@@ -83,16 +83,16 @@ type TargetChange =
     }
   | { type: "article"; targetId: string; previousStatus: string; changedStatus: "draft" };
 
-function reportError(operation: string, error: unknown): void {
+function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
   reportAdminError("reports", operation, error);
 }
 
-export function isContentReportStatus(value: unknown): value is ContentReportStatus {
-  return (CONTENT_REPORT_STATUSES as readonly unknown[]).includes(value);
+export function isContentReportStatus(value: string | undefined): value is ContentReportStatus {
+  return value !== undefined && CONTENT_REPORT_STATUSES.some((status) => status === value);
 }
 
-function isContentReportTargetType(value: unknown): value is ContentReportTargetType {
-  return (CONTENT_REPORT_TARGET_TYPES as readonly unknown[]).includes(value);
+function isContentReportTargetType(value: string): value is ContentReportTargetType {
+  return CONTENT_REPORT_TARGET_TYPES.some((type) => type === value);
 }
 
 function targetKey(type: ContentReportTargetType, id: string): string {
@@ -448,27 +448,24 @@ async function rollbackTarget(
   supabase: SupabaseClient<Database>,
   change: TargetChange,
 ): Promise<void> {
-  let error: unknown = null;
-
-  if (change.type === "review") {
-    ({ error } = await supabase
-      .from("reviews")
-      .update({ status: change.previousStatus })
-      .eq("id", change.targetId)
-      .eq("status", change.changedStatus));
-  } else if (change.type === "usage_report") {
-    ({ error } = await supabase
-      .from("usage_reports")
-      .update({ status: change.previousStatus })
-      .eq("id", change.targetId)
-      .eq("status", change.changedStatus));
-  } else {
-    ({ error } = await supabase
-      .from("articles")
-      .update({ status: change.previousStatus })
-      .eq("id", change.targetId)
-      .eq("status", change.changedStatus));
-  }
+  const { error } =
+    change.type === "review"
+      ? await supabase
+          .from("reviews")
+          .update({ status: change.previousStatus })
+          .eq("id", change.targetId)
+          .eq("status", change.changedStatus)
+      : change.type === "usage_report"
+        ? await supabase
+            .from("usage_reports")
+            .update({ status: change.previousStatus })
+            .eq("id", change.targetId)
+            .eq("status", change.changedStatus)
+        : await supabase
+            .from("articles")
+            .update({ status: change.previousStatus })
+            .eq("id", change.targetId)
+            .eq("status", change.changedStatus);
 
   if (error !== null) reportError("通報対象の非公開化の巻き戻しに失敗", { change, error });
 }

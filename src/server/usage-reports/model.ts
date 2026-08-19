@@ -1,3 +1,5 @@
+import * as v from "valibot";
+
 export const PURPOSE_GROUPS = [
   {
     label: "吸収・光合成",
@@ -114,23 +116,23 @@ export const STAGE_SETS = {
 
 export type StageSetKey = keyof typeof STAGE_SETS;
 
-const GROUP_STAGE_SET: Record<string, StageSetKey> = {
-  なす科果菜類: "fruit_vegetable",
-  うり類: "fruit_vegetable",
-  ベリー類等の小粒果実類: "fruit_vegetable",
-  あぶらな科野菜: "leaf_vegetable",
-  葉菜類: "leaf_vegetable",
-  根菜類: "root_vegetable",
-  いも類: "root_vegetable",
-  鱗茎類: "root_vegetable",
-  かんきつ類: "fruit_tree",
-  仁果類: "fruit_tree",
-  核果類: "fruit_tree",
-  穀類: "grain",
-};
+const GROUP_STAGE_SET = new Map<string, StageSetKey>([
+  ["なす科果菜類", "fruit_vegetable"],
+  ["うり類", "fruit_vegetable"],
+  ["ベリー類等の小粒果実類", "fruit_vegetable"],
+  ["あぶらな科野菜", "leaf_vegetable"],
+  ["葉菜類", "leaf_vegetable"],
+  ["根菜類", "root_vegetable"],
+  ["いも類", "root_vegetable"],
+  ["鱗茎類", "root_vegetable"],
+  ["かんきつ類", "fruit_tree"],
+  ["仁果類", "fruit_tree"],
+  ["核果類", "fruit_tree"],
+  ["穀類", "grain"],
+]);
 
 export function stageSetForGroup(groupName: string): readonly string[] {
-  return STAGE_SETS[GROUP_STAGE_SET[groupName] ?? "fruit_vegetable"];
+  return STAGE_SETS[GROUP_STAGE_SET.get(groupName) ?? "fruit_vegetable"];
 }
 
 export const APPLICATION_METHODS = [
@@ -153,95 +155,107 @@ export const MEDIA_PLACEMENTS = [
 export type MediaPlacement = (typeof MEDIA_PLACEMENTS)[number]["value"];
 export type ReportMediaType = "photo" | "video";
 
-export type ComparisonInput = {
-  enabled: boolean;
-  otherBsUse: "" | "no" | "yes";
-  otherBsName: string;
-  simultaneousInputs: string;
-  otherConditionDifference: string;
-  sampleCount: string;
-  sampleUnit: string;
-};
+const ReportTextSchema = v.pipe(v.string(), v.maxLength(20_000));
+const ReportTextArraySchema = v.pipe(v.array(ReportTextSchema), v.maxLength(50));
 
-export type MetricInput = {
-  key: string;
-  metricName: string;
-  untreatedValue: string;
-  treatedValue: string;
-  unit: string;
-};
+export const ComparisonInputSchema = v.strictObject({
+  enabled: v.boolean(),
+  otherBsUse: v.picklist(["", "no", "yes"]),
+  otherBsName: ReportTextSchema,
+  simultaneousInputs: ReportTextSchema,
+  otherConditionDifference: ReportTextSchema,
+  sampleCount: ReportTextSchema,
+  sampleUnit: ReportTextSchema,
+});
 
-export type CropReportInput = {
-  cropId: string;
-  observedChange: string;
-  negativeNote: string;
-  purposeTags: string[];
-  purposeNote: string;
-  prefectureCode: string;
-  fieldName: string;
-  variety: string;
-  plantingDate: string;
-  cultivationType: CultivationType | "";
-  cultivationTags: string[];
-  growthStage: string;
-  growthStageNote: string;
-  climateEnabled: boolean;
-  climateNote: string;
-  applicationDates: string[];
-  applicationMethod: ApplicationMethod | "";
-  sprayDilutionValue: string;
-  sprayDilutionUnit: string;
-  sprayAmountValue: string;
-  sprayAmountUnit: string;
-  sprayArea: string;
-  soilMethod: string;
-  soilDilutionValue: string;
-  soilDilutionUnit: string;
-  soilAmountValue: string;
-  soilAmountUnit: string;
-  soilArea: string;
-  seedMethod: string;
-  seedDilutionValue: string;
-  seedDilutionUnit: string;
-  seedAmountValue: string;
-  seedAmountUnit: string;
-  seedDurationNote: string;
-  otherMethodDetail: string;
-  comparison: ComparisonInput;
-  metricsEnabled: boolean;
-  researchPeriod: string;
-  metrics: MetricInput[];
-};
+export const MetricInputSchema = v.strictObject({
+  key: ReportTextSchema,
+  metricName: ReportTextSchema,
+  untreatedValue: ReportTextSchema,
+  treatedValue: ReportTextSchema,
+  unit: ReportTextSchema,
+});
 
-export type ReportMediaInput = {
-  key: string;
-  url: string;
-  mediaType: ReportMediaType;
-  placement: MediaPlacement;
-  caption: string;
-};
+export const CropReportInputSchema = v.strictObject({
+  cropId: ReportTextSchema,
+  observedChange: ReportTextSchema,
+  negativeNote: ReportTextSchema,
+  purposeTags: v.pipe(v.array(ReportTextSchema), v.maxLength(PURPOSE_OPTIONS.length)),
+  purposeNote: ReportTextSchema,
+  prefectureCode: ReportTextSchema,
+  fieldName: ReportTextSchema,
+  variety: ReportTextSchema,
+  plantingDate: ReportTextSchema,
+  cultivationType: v.picklist(["", "open_field", "facility", "other"]),
+  cultivationTags: v.pipe(v.array(ReportTextSchema), v.maxLength(CULTIVATION_FEATURES.all.length)),
+  growthStage: ReportTextSchema,
+  growthStageNote: ReportTextSchema,
+  climateEnabled: v.boolean(),
+  climateNote: ReportTextSchema,
+  applicationDates: ReportTextArraySchema,
+  applicationMethod: v.picklist(["", "spray", "soil", "seed", "other"]),
+  sprayDilutionValue: ReportTextSchema,
+  sprayDilutionUnit: ReportTextSchema,
+  sprayAmountValue: ReportTextSchema,
+  sprayAmountUnit: ReportTextSchema,
+  sprayArea: ReportTextSchema,
+  soilMethod: ReportTextSchema,
+  soilDilutionValue: ReportTextSchema,
+  soilDilutionUnit: ReportTextSchema,
+  soilAmountValue: ReportTextSchema,
+  soilAmountUnit: ReportTextSchema,
+  soilArea: ReportTextSchema,
+  seedMethod: ReportTextSchema,
+  seedDilutionValue: ReportTextSchema,
+  seedDilutionUnit: ReportTextSchema,
+  seedAmountValue: ReportTextSchema,
+  seedAmountUnit: ReportTextSchema,
+  seedDurationNote: ReportTextSchema,
+  otherMethodDetail: ReportTextSchema,
+  comparison: ComparisonInputSchema,
+  metricsEnabled: v.boolean(),
+  researchPeriod: ReportTextSchema,
+  metrics: v.pipe(v.array(MetricInputSchema), v.maxLength(20)),
+});
 
-export type UsageReportFormPayload = {
-  cropReports: CropReportInput[];
-  media: ReportMediaInput[];
-  summary: string;
-  pesticideAck: boolean;
-};
+export const ReportMediaInputSchema = v.strictObject({
+  key: v.pipe(v.string(), v.maxLength(200)),
+  url: v.pipe(v.string(), v.maxLength(2_000)),
+  mediaType: v.picklist(["photo", "video"]),
+  placement: v.picklist(["observation", "cover", "method", "harvest", "summary"]),
+  caption: ReportTextSchema,
+});
 
-export type UsageReportFieldErrors = Record<string, string>;
+export const UsageReportFormPayloadSchema = v.strictObject({
+  cropReports: v.pipe(v.array(CropReportInputSchema), v.maxLength(12)),
+  media: v.pipe(v.array(ReportMediaInputSchema), v.maxLength(20)),
+  summary: ReportTextSchema,
+  pesticideAck: v.boolean(),
+});
 
-export type UsageReportActionResult =
-  | {
-      ok: true;
-      status: "draft" | "pending";
-      reportIds: string[];
-      message: string;
-    }
-  | {
-      ok: false;
-      message: string;
-      fieldErrors: UsageReportFieldErrors;
-    };
+export type ComparisonInput = v.InferOutput<typeof ComparisonInputSchema>;
+export type MetricInput = v.InferOutput<typeof MetricInputSchema>;
+export type CropReportInput = v.InferOutput<typeof CropReportInputSchema>;
+export type ReportMediaInput = v.InferOutput<typeof ReportMediaInputSchema>;
+export type UsageReportFormPayload = v.InferOutput<typeof UsageReportFormPayloadSchema>;
+
+export const UsageReportFieldErrorsSchema = v.record(v.string(), v.string());
+export const UsageReportActionResultSchema = v.variant("ok", [
+  v.strictObject({
+    ok: v.literal(true),
+    status: v.picklist(["draft", "pending"]),
+    reportIds: v.array(v.pipe(v.string(), v.uuid())),
+    message: v.string(),
+  }),
+  v.strictObject({
+    ok: v.literal(false),
+    message: v.string(),
+    fieldErrors: UsageReportFieldErrorsSchema,
+  }),
+]);
+
+export type UsageReportFieldErrors = v.InferOutput<typeof UsageReportFieldErrorsSchema>;
+export type UsageReportActionResult = v.InferOutput<typeof UsageReportActionResultSchema>;
 
 export function createBlankMetric(): MetricInput {
   return {

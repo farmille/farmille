@@ -3,13 +3,8 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { css } from "../../styled-system/css";
 import * as Icons from "./Icons";
 
-type IconComponent = typeof Icons.LeafIcon;
-
-// icons.tsx の全 export をアイコン関数として動的に列挙する（手動列挙しない）。
-// 将来アイコン以外の export が混ざった場合に備え、関数であるものだけに絞る。
-const iconEntries: [string, IconComponent][] = Object.entries(Icons).filter(
-  (entry): entry is [string, IconComponent] => typeof entry[1] === "function",
-);
+// Icons.tsx はアイコンコンポーネントだけを export するモジュールとして扱う。
+const iconEntries = Object.entries(Icons);
 
 const grid = css({
   display: "flex",

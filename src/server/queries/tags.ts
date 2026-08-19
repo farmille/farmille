@@ -28,7 +28,7 @@ export const SEASONAL_TAG_PAIRS: ReadonlyArray<{ category: TagCategoryDb; name: 
   { category: "condition", name: "ハウス栽培" },
 ];
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/tags] ${operation}`, error);
 }
 

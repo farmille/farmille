@@ -44,9 +44,7 @@ export function SellerApplyForm() {
   const fieldErrors = fieldErrorsOf(state);
   const values = submittedValuesOf(state);
   const hadInvite =
-    state.status === "error" &&
-    typeof values.inviteCode === "string" &&
-    values.inviteCode.length > 0;
+    state.status === "error" && values.inviteCode !== undefined && values.inviteCode.length > 0;
   const [inviteOpen, setInviteOpen] = useState(hadInvite);
 
   // エラー後の再表示で select の defaultValue を効かせるため、送信値ごとに form を載せ替える。

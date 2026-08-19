@@ -1,3 +1,5 @@
+import * as v from "valibot";
+import { trimmedFormDataString } from "@/lib/validation";
 import { isUniqueViolation, reportAdminError, withAdmin } from "@/server/admin/guard";
 import { fail, succeed, type Result } from "@/server/result";
 import type { Database } from "@/types/database.types";
@@ -74,42 +76,38 @@ export type MaterialEditRequestItem = {
 export const EDIT_REQUEST_STATUSES = ["open", "done", "declined"] as const;
 export type EditRequestStatus = (typeof EDIT_REQUEST_STATUSES)[number];
 
-export const EDIT_REQUEST_STATUS_LABELS: Record<EditRequestStatus, string> = {
+export const EDIT_REQUEST_STATUS_LABELS = {
   open: "未処理",
   done: "対応済み",
   declined: "見送り",
-};
+} satisfies Record<EditRequestStatus, string>;
 
-export function isEditRequestStatus(value: unknown): value is EditRequestStatus {
-  return (EDIT_REQUEST_STATUSES as readonly unknown[]).includes(value);
+export function isEditRequestStatus(value: string | null | undefined): value is EditRequestStatus {
+  return value !== null && EDIT_REQUEST_STATUSES.some((status) => status === value);
 }
 
-function reportError(operation: string, error: unknown): void {
+function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
   reportAdminError("materials", operation, error);
 }
 
 export type MaterialFieldErrors = Partial<
-  Record<"name" | "manufacturerName" | "officialUrl" | "catalogUrl", string>
+  Record<"name" | "manufacturerName" | "officialUrl" | "catalogUrl" | "tagIds", string>
 >;
 
 export type MaterialValidation =
   | { ok: true; input: MaterialInput }
   | { ok: false; fieldErrors: MaterialFieldErrors };
 
-function toTrimmedString(value: unknown): string {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function toOptionalText(value: unknown): string | null {
-  const text = toTrimmedString(value);
+function toOptionalText(value: FormDataEntryValue | null): string | null {
+  const text = trimmedFormDataString(value);
 
   return text.length === 0 ? null : text;
 }
 
 type UrlParse = { ok: true; value: string | null } | { ok: false };
 
-function toOptionalHttpUrl(value: unknown): UrlParse {
-  const text = toTrimmedString(value);
+function toOptionalHttpUrl(value: FormDataEntryValue | null): UrlParse {
+  const text = trimmedFormDataString(value);
   if (text.length === 0) return { ok: true, value: null };
 
   try {
@@ -124,24 +122,24 @@ function toOptionalHttpUrl(value: unknown): UrlParse {
 
 /** フォーム入力の検証。分類・検索層の name / manufacturer_name だけが必須。 */
 export function validateMaterialInput(raw: {
-  name: unknown;
-  manufacturerName: unknown;
-  productType: unknown;
-  jbsaClass: unknown;
-  salesStatus: unknown;
-  description: unknown;
-  generalUse: unknown;
-  ingredients: unknown;
-  mechanism: unknown;
-  usageText: unknown;
-  priceRange: unknown;
-  officialUrl: unknown;
-  catalogUrl: unknown;
-  tagIds: unknown;
+  name: FormDataEntryValue | null;
+  manufacturerName: FormDataEntryValue | null;
+  productType: FormDataEntryValue | null;
+  jbsaClass: FormDataEntryValue | null;
+  salesStatus: FormDataEntryValue | null;
+  description: FormDataEntryValue | null;
+  generalUse: FormDataEntryValue | null;
+  ingredients: FormDataEntryValue | null;
+  mechanism: FormDataEntryValue | null;
+  usageText: FormDataEntryValue | null;
+  priceRange: FormDataEntryValue | null;
+  officialUrl: FormDataEntryValue | null;
+  catalogUrl: FormDataEntryValue | null;
+  tagIds: readonly FormDataEntryValue[];
 }): MaterialValidation {
   const fieldErrors: MaterialFieldErrors = {};
-  const name = toTrimmedString(raw.name);
-  const manufacturerName = toTrimmedString(raw.manufacturerName);
+  const name = trimmedFormDataString(raw.name);
+  const manufacturerName = trimmedFormDataString(raw.manufacturerName);
 
   if (name.length === 0) fieldErrors.name = "資材名を入力してください。";
   if (manufacturerName.length === 0) {
@@ -153,8 +151,12 @@ export function validateMaterialInput(raw: {
 
   if (!officialUrl.ok) fieldErrors.officialUrl = "http(s) の URL で入力してください。";
   if (!catalogUrl.ok) fieldErrors.catalogUrl = "http(s) の URL で入力してください。";
+  const tagIdsResult = v.safeParse(v.array(v.string()), raw.tagIds);
+  if (!tagIdsResult.success) fieldErrors.tagIds = "タグの選択内容が正しくありません。";
 
-  if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors };
+  if (Object.keys(fieldErrors).length > 0 || !tagIdsResult.success) {
+    return { ok: false, fieldErrors };
+  }
 
   return {
     ok: true,
@@ -172,9 +174,7 @@ export function validateMaterialInput(raw: {
       priceRange: toOptionalText(raw.priceRange),
       officialUrl: officialUrl.ok ? officialUrl.value : null,
       catalogUrl: catalogUrl.ok ? catalogUrl.value : null,
-      tagIds: Array.isArray(raw.tagIds)
-        ? raw.tagIds.filter((value): value is string => typeof value === "string")
-        : [],
+      tagIds: tagIdsResult.output,
     },
   };
 }

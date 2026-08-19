@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+import type { JwtPayload } from "@supabase/supabase-js";
 
 import type {
   AccountType,
@@ -24,7 +25,7 @@ export const getAccountType = fn(async (): Promise<AccountType | null> => null).
   "getAccountType",
 );
 
-export const toSessionUser = fn((_claims: unknown): SessionUser | null => null).mockName(
+export const toSessionUser = fn((_claims: JwtPayload): SessionUser | null => null).mockName(
   "toSessionUser",
 );
 

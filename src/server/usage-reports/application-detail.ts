@@ -130,10 +130,12 @@ export function growthStageValue(stage: string, note: string): string | null {
     : `${trimmedStage}\n${GROWTH_STAGE_NOTE_PREFIX}${trimmedNote}`;
 }
 
-export function parseGrowthStage(value: string | null): {
+export type ParsedGrowthStage = {
   growthStage: string;
   growthStageNote: string;
-} {
+};
+
+export function parseGrowthStage(value: string | null): ParsedGrowthStage {
   if (value === null) return { growthStage: "", growthStageNote: "" };
   const marker = `\n${GROWTH_STAGE_NOTE_PREFIX}`;
   const markerIndex = value.indexOf(marker);

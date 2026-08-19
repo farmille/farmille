@@ -24,7 +24,7 @@ export default async function PostPage({ searchParams }: PostPageProps) {
   }
 
   const requested = await searchParams;
-  const query = typeof requested.q === "string" ? requested.q.trim() : "";
+  const query = Array.isArray(requested.q) ? "" : (requested.q?.trim() ?? "");
   const result = await searchPostingMaterials(query);
 
   if (!result.ok) {

@@ -2,6 +2,7 @@
 
 import Image, { type ImageProps } from "next/image";
 import { useState } from "react";
+import * as v from "valibot";
 import { cva, cx } from "../../styled-system/css";
 
 const DIRECT_IMAGE_HOSTS = new Set([
@@ -21,14 +22,23 @@ const imageVisibility = cva({
 });
 
 function sourceKey(src: ImageProps["src"]): string {
-  if (typeof src === "string") return src;
-  return "src" in src ? src.src : src.default.src;
+  const textResult = v.safeParse(v.string(), src);
+  if (textResult.success) return textResult.output;
+
+  const directResult = v.safeParse(v.object({ src: v.string() }), src);
+  if (directResult.success) return directResult.output.src;
+
+  const requiredResult = v.safeParse(v.object({ default: v.object({ src: v.string() }) }), src);
+  if (requiredResult.success) return requiredResult.output.default.src;
+
+  throw new Error("画像ソースの形式が不正です。");
 }
 
 function mustSkipOptimization(src: ImageProps["src"]): boolean {
-  if (typeof src !== "string" || !src.startsWith("https://")) return false;
+  const result = v.safeParse(v.string(), src);
+  if (!result.success || !result.output.startsWith("https://")) return false;
 
-  return DIRECT_IMAGE_HOSTS.has(new URL(src).hostname);
+  return DIRECT_IMAGE_HOSTS.has(new URL(result.output).hostname);
 }
 
 /**

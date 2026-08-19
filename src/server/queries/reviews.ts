@@ -101,7 +101,7 @@ const REVIEW_SELECT = `
 const POSTGREST_PAGE_SIZE = 1_000;
 const IN_FILTER_CHUNK_SIZE = 100;
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/reviews] ${operation}`, error);
 }
 

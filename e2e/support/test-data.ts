@@ -1,11 +1,34 @@
-type AuthUser = {
-  id: string;
-  email?: string;
-};
+import * as v from "valibot";
 
-type AuthUserList = {
-  users: AuthUser[];
-};
+import type { Database } from "@/types/database.types";
+
+type MaterialSelection = Pick<
+  Database["public"]["Tables"]["materials"]["Row"],
+  "avg_rating" | "id" | "manufacturer_name" | "name" | "review_count" | "seller_id"
+>;
+type ReviewSelection = Pick<
+  Database["public"]["Tables"]["reviews"]["Row"],
+  "author_user_id" | "body" | "id" | "material_id" | "rating" | "status"
+>;
+type UsageReportSelection = Pick<
+  Database["public"]["Tables"]["usage_reports"]["Row"],
+  "author_user_id" | "id" | "material_id" | "status" | "title"
+>;
+type TagSelection = Pick<Database["public"]["Tables"]["tags"]["Row"], "category" | "id" | "name">;
+type ProfileReference = Pick<Database["public"]["Tables"]["profiles"]["Row"], "user_id">;
+type CropSelection = Pick<Database["public"]["Tables"]["crops"]["Row"], "id" | "name">;
+type SellerAccountReference = Pick<
+  Database["public"]["Tables"]["seller_accounts"]["Row"],
+  "auth_user_id" | "id"
+>;
+
+const UuidSchema = v.pipe(v.string(), v.uuid());
+const AuthUserSchema = v.object({
+  id: UuidSchema,
+  email: v.optional(v.string()),
+});
+const AuthUserListSchema = v.object({ users: v.array(AuthUserSchema) });
+type AuthUser = v.InferOutput<typeof AuthUserSchema>;
 
 export type GeneralUser = {
   id: string;
@@ -22,37 +45,54 @@ export type SellerAccount = {
   officialName: string;
 };
 
-export type Material = {
-  id: string;
-  name: string;
-  manufacturer_name: string;
-  review_count: number;
-  avg_rating: number | null;
-  seller_id: string | null;
-};
+const MaterialSchema = v.object({
+  id: UuidSchema,
+  name: v.string(),
+  manufacturer_name: v.string(),
+  review_count: v.number(),
+  avg_rating: v.nullable(v.number()),
+  seller_id: v.nullable(UuidSchema),
+}) satisfies v.GenericSchema<MaterialSelection>;
+const ReviewSchema = v.object({
+  id: UuidSchema,
+  material_id: UuidSchema,
+  author_user_id: UuidSchema,
+  rating: v.number(),
+  body: v.string(),
+  status: v.string(),
+}) satisfies v.GenericSchema<ReviewSelection>;
+const UsageReportSchema = v.object({
+  id: UuidSchema,
+  material_id: UuidSchema,
+  author_user_id: UuidSchema,
+  title: v.nullable(v.string()),
+  status: v.string(),
+}) satisfies v.GenericSchema<UsageReportSelection>;
+const TagSchema = v.object({
+  id: UuidSchema,
+  name: v.string(),
+  category: v.string(),
+}) satisfies v.GenericSchema<TagSelection>;
+const IdSchema = v.object({ id: UuidSchema });
+const ProfileReferenceSchema = v.object({
+  user_id: UuidSchema,
+}) satisfies v.GenericSchema<ProfileReference>;
+const CropSchema = v.object({
+  id: UuidSchema,
+  name: v.string(),
+}) satisfies v.GenericSchema<CropSelection>;
+const SellerAccountReferenceSchema = v.object({
+  id: UuidSchema,
+  auth_user_id: v.nullable(UuidSchema),
+}) satisfies v.GenericSchema<SellerAccountReference>;
 
-export type Review = {
-  id: string;
-  material_id: string;
-  author_user_id: string;
-  rating: number;
-  body: string;
-  status: string;
-};
+export type Material = v.InferOutput<typeof MaterialSchema>;
+export type Review = v.InferOutput<typeof ReviewSchema>;
+export type UsageReport = v.InferOutput<typeof UsageReportSchema>;
+export type Tag = v.InferOutput<typeof TagSchema>;
 
-export type UsageReport = {
-  id: string;
-  material_id: string;
-  author_user_id: string;
-  title: string | null;
-  status: string;
-};
-
-export type Tag = {
-  id: string;
-  name: string;
-  category: string;
-};
+type RestInsertTable = "materials" | "profiles" | "reviews" | "seller_accounts" | "usage_reports";
+type RestInsertBody<Table extends RestInsertTable> = Database["public"]["Tables"][Table]["Insert"];
 
 const GENERAL_PASSWORD = "Farmille-E2E-General-2026!";
 const SELLER_PASSWORD = "Farmille-E2E-Seller-2026!";
@@ -98,9 +138,17 @@ async function checkedFetch(path: string, init?: RequestInit): Promise<Response>
   return response;
 }
 
-async function jsonRequest<T>(path: string, init?: RequestInit): Promise<T> {
+async function jsonRequest<TSchema extends v.GenericSchema>(
+  schema: TSchema,
+  path: string,
+  init?: RequestInit,
+): Promise<v.InferOutput<TSchema>> {
   const response = await checkedFetch(path, init);
-  return (await response.json()) as T;
+  const result = v.safeParse(schema, await response.json());
+  if (!result.success) {
+    throw new Error(`${path} のレスポンス形式が不正です：${v.summarize(result.issues)}`);
+  }
+  return result.output;
 }
 
 function restPath(table: string, params?: URLSearchParams): string {
@@ -108,12 +156,20 @@ function restPath(table: string, params?: URLSearchParams): string {
   return `/rest/v1/${table}${query === undefined || query.length === 0 ? "" : `?${query}`}`;
 }
 
-async function restSelect<T>(table: string, params: URLSearchParams): Promise<T[]> {
-  return jsonRequest<T[]>(restPath(table, params));
+async function restSelect<TSchema extends v.GenericSchema>(
+  rowSchema: TSchema,
+  table: string,
+  params: URLSearchParams,
+): Promise<Array<v.InferOutput<TSchema>>> {
+  return jsonRequest(v.array(rowSchema), restPath(table, params));
 }
 
-async function restInsert<T>(table: string, body: object): Promise<T> {
-  const rows = await jsonRequest<T[]>(restPath(table), {
+async function restInsert<TSchema extends v.GenericSchema, Table extends RestInsertTable>(
+  rowSchema: TSchema,
+  table: Table,
+  body: RestInsertBody<Table>,
+): Promise<v.InferOutput<TSchema>> {
+  const rows = await jsonRequest(v.array(rowSchema), restPath(table), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -131,7 +187,10 @@ async function restInsert<T>(table: string, body: object): Promise<T> {
 }
 
 async function authUsersByEmail(email: string): Promise<AuthUser[]> {
-  const payload = await jsonRequest<AuthUserList>("/auth/v1/admin/users?page=1&per_page=1000");
+  const payload = await jsonRequest(
+    AuthUserListSchema,
+    "/auth/v1/admin/users?page=1&per_page=1000",
+  );
   return payload.users.filter((user) => user.email === email);
 }
 
@@ -142,7 +201,10 @@ export async function cleanupOwnedE2eData(): Promise<void> {
   const sellerParams = new URLSearchParams({ login_id: `like.${E2E_TOKEN_PREFIX}*` });
   await checkedFetch(restPath("seller_accounts", sellerParams), { method: "DELETE" });
 
-  const payload = await jsonRequest<AuthUserList>("/auth/v1/admin/users?page=1&per_page=1000");
+  const payload = await jsonRequest(
+    AuthUserListSchema,
+    "/auth/v1/admin/users?page=1&per_page=1000",
+  );
   const ownedUsers = payload.users.filter((user) => user.email?.startsWith(E2E_TOKEN_PREFIX));
 
   for (const user of ownedUsers) {
@@ -169,7 +231,7 @@ async function createAuthUser(
 ): Promise<AuthUser> {
   await deleteAuthUsersByEmail(email);
 
-  return jsonRequest<AuthUser>("/auth/v1/admin/users", {
+  return jsonRequest(AuthUserSchema, "/auth/v1/admin/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -192,7 +254,7 @@ export async function createGeneralUser(prefix: string): Promise<GeneralUser> {
   const handle = `E2E_${token}`.slice(0, 30);
   const authUser = await createAuthUser(email, GENERAL_PASSWORD, "general");
 
-  await restInsert("profiles", {
+  await restInsert(ProfileReferenceSchema, "profiles", {
     user_id: authUser.id,
     handle,
     prefecture_code: 13,
@@ -213,7 +275,7 @@ export async function createApprovedSeller(prefix: string): Promise<SellerAccoun
   const email = `${loginId}@sellers.farmille.internal`;
   const officialName = `E2E ${loginId}株式会社`;
   const authUser = await createAuthUser(email, SELLER_PASSWORD, "seller");
-  const seller = await restInsert<{ id: string }>("seller_accounts", {
+  const seller = await restInsert(IdSchema, "seller_accounts", {
     auth_user_id: authUser.id,
     official_name: officialName,
     seller_type: "maker",
@@ -248,10 +310,7 @@ export async function cleanupSellerByLoginId(loginId: string): Promise<void> {
     select: "id,auth_user_id",
     login_id: `eq.${loginId}`,
   });
-  const sellers = await restSelect<{ id: string; auth_user_id: string | null }>(
-    "seller_accounts",
-    params,
-  );
+  const sellers = await restSelect(SellerAccountReferenceSchema, "seller_accounts", params);
 
   for (const seller of sellers) {
     const deleteParams = new URLSearchParams({ id: `eq.${seller.id}` });
@@ -268,7 +327,7 @@ export async function createMaterial(
 ): Promise<Material> {
   const token = uniqueToken(prefix);
 
-  return restInsert<Material>("materials", {
+  return restInsert(MaterialSchema, "materials", {
     name: `E2E資材_${token}`,
     manufacturer_name: `E2Eメーカー_${token}`,
     product_type: "E2E",
@@ -289,7 +348,7 @@ export async function listSeedMaterials(): Promise<Material[]> {
     order: "name.asc",
     limit: "20",
   });
-  return restSelect<Material>("materials", params);
+  return restSelect(MaterialSchema, "materials", params);
 }
 
 export async function getMaterial(materialId: string): Promise<Material> {
@@ -297,7 +356,7 @@ export async function getMaterial(materialId: string): Promise<Material> {
     select: "id,name,manufacturer_name,review_count,avg_rating,seller_id",
     id: `eq.${materialId}`,
   });
-  const rows = await restSelect<Material>("materials", params);
+  const rows = await restSelect(MaterialSchema, "materials", params);
   const material = rows[0];
 
   if (material === undefined) {
@@ -307,13 +366,13 @@ export async function getMaterial(materialId: string): Promise<Material> {
   return material;
 }
 
-export async function firstCrop(): Promise<{ id: string; name: string }> {
+export async function firstCrop(): Promise<v.InferOutput<typeof CropSchema>> {
   const params = new URLSearchParams({
     select: "id,name",
     name: "eq.トマト",
     limit: "1",
   });
-  const rows = await restSelect<{ id: string; name: string }>("crops", params);
+  const rows = await restSelect(CropSchema, "crops", params);
   const crop = rows[0];
 
   if (crop === undefined) {
@@ -331,7 +390,7 @@ export async function createReview(input: {
 }): Promise<Review> {
   const crop = await firstCrop();
 
-  return restInsert<Review>("reviews", {
+  return restInsert(ReviewSchema, "reviews", {
     material_id: input.materialId,
     author_user_id: input.authorUserId,
     rating: input.rating,
@@ -348,7 +407,7 @@ export async function reviewByAuthor(authorUserId: string): Promise<Review | nul
     author_user_id: `eq.${authorUserId}`,
     limit: "1",
   });
-  const rows = await restSelect<Review>("reviews", params);
+  const rows = await restSelect(ReviewSchema, "reviews", params);
   return rows[0] ?? null;
 }
 
@@ -358,7 +417,7 @@ export async function helpfulVoteCount(userId: string): Promise<number> {
     select: "id",
     user_id: `eq.${userId}`,
   });
-  const rows = await restSelect<{ id: string }>("helpful_votes", params);
+  const rows = await restSelect(IdSchema, "helpful_votes", params);
   return rows.length;
 }
 
@@ -369,7 +428,7 @@ export async function createPendingUsageReport(input: {
 }): Promise<UsageReport> {
   const crop = await firstCrop();
 
-  return restInsert<UsageReport>("usage_reports", {
+  return restInsert(UsageReportSchema, "usage_reports", {
     material_id: input.materialId,
     author_user_id: input.authorUserId,
     title: input.title,
@@ -393,7 +452,7 @@ export async function usageReportByAuthor(authorUserId: string): Promise<UsageRe
     order: "created_at.desc",
     limit: "1",
   });
-  const rows = await restSelect<UsageReport>("usage_reports", params);
+  const rows = await restSelect(UsageReportSchema, "usage_reports", params);
   return rows[0] ?? null;
 }
 
@@ -402,5 +461,5 @@ export async function tagsByNames(names: string[]): Promise<Tag[]> {
     select: "id,name,category",
     name: `in.(${names.join(",")})`,
   });
-  return restSelect<Tag>("tags", params);
+  return restSelect(TagSchema, "tags", params);
 }

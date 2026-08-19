@@ -6,7 +6,7 @@ type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 
 export type CropOption = Pick<CropRow, "id" | "name" | "group_id" | "sort_order">;
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/crops] ${operation}`, error);
 }
 

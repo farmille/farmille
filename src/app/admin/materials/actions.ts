@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import type { MaterialFormState, MaterialFormValues } from "@/app/admin/_lib/action-state";
+import { formDataString, formDataStrings } from "@/lib/validation";
 import {
   createMaterial,
   setMaterialSeller,
@@ -41,13 +42,13 @@ function submittedValues(formData: FormData): MaterialFormValues {
   const fields: Record<string, string> = {};
 
   for (const field of TEXT_FIELDS) {
-    const value = formData.get(field);
-    if (typeof value === "string") fields[field] = value;
+    const value = formDataString(formData.get(field));
+    if (value !== null) fields[field] = value;
   }
 
   return {
     fields,
-    tagIds: formData.getAll("tagIds").filter((value): value is string => typeof value === "string"),
+    tagIds: formDataStrings(formData.getAll("tagIds")),
   };
 }
 
@@ -104,9 +105,9 @@ export async function updateMaterialAction(
   _previousState: MaterialFormState,
   formData: FormData,
 ): Promise<MaterialFormState> {
-  const materialId = formData.get("materialId");
+  const materialId = formDataString(formData.get("materialId"));
 
-  if (typeof materialId !== "string" || materialId.length === 0) {
+  if (materialId === null || materialId.length === 0) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 
@@ -143,14 +144,14 @@ export async function setMaterialSellerAction(
   _previousState: MaterialFormState,
   formData: FormData,
 ): Promise<MaterialFormState> {
-  const materialId = formData.get("materialId");
-  const sellerId = formData.get("sellerId");
+  const materialId = formDataString(formData.get("materialId"));
+  const sellerId = formDataString(formData.get("sellerId"));
 
-  if (typeof materialId !== "string" || materialId.length === 0) {
+  if (materialId === null || materialId.length === 0) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 
-  const nextSellerId = typeof sellerId === "string" && sellerId.length > 0 ? sellerId : null;
+  const nextSellerId = sellerId !== null && sellerId.length > 0 ? sellerId : null;
   const result = await setMaterialSeller(materialId, nextSellerId);
 
   if (!result.ok) {

@@ -35,7 +35,7 @@ type RecentReportQueryRow = Pick<
   media: Pick<MediaRow, "url" | "media_type" | "sort_order">[];
 };
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/usage-reports] ${operation}`, error);
 }
 

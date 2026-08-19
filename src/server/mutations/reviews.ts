@@ -1,5 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import * as v from "valibot";
 
+import { formDataString, trimmedFormDataString } from "@/lib/validation";
 import { requireGeneralUser } from "@/server/auth";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
@@ -12,10 +14,12 @@ type ReviewPhotoInsert = Database["public"]["Tables"]["review_photos"]["Insert"]
 export const PURCHASE_CHANNELS = ["ja", "home_center", "ec", "direct", "other"] as const;
 export type PurchaseChannel = (typeof PURCHASE_CHANNELS)[number];
 
-export type NewReviewPhoto = {
-  path: string;
-  caption: string | null;
-};
+const PurchaseChannelSchema = v.picklist(PURCHASE_CHANNELS);
+
+export function purchaseChannelFromDatabase(value: string | null): PurchaseChannel | null {
+  const result = v.safeParse(PurchaseChannelSchema, value);
+  return result.success ? result.output : null;
+}
 
 export type ExistingReviewPhotoInput = {
   id: string;
@@ -47,70 +51,44 @@ const REVIEW_PHOTO_PATH_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/[0-9a-f-]+\.(?:jpg|png|webp)$/i;
 const REVIEW_PHOTO_PUBLIC_MARKER = "/storage/v1/object/public/review-photos/";
 
-function reportMutationError(operation: string, error: unknown): void {
+export const NewReviewPhotoSchema = v.strictObject({
+  path: v.pipe(v.string(), v.regex(REVIEW_PHOTO_PATH_PATTERN)),
+  caption: v.pipe(
+    v.nullable(v.string()),
+    v.transform((caption) => {
+      if (caption === null) return null;
+      const trimmed = caption.trim();
+      return trimmed.length === 0 ? null : trimmed;
+    }),
+  ),
+});
+export type NewReviewPhoto = v.InferOutput<typeof NewReviewPhotoSchema>;
+
+function reportMutationError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/mutations/reviews] ${operation}`, error);
 }
 
-function toTrimmedString(value: FormDataEntryValue | null): string {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function toNullableTrimmedString(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
-}
-
-function isPurchaseChannel(value: string): value is PurchaseChannel {
-  return PURCHASE_CHANNELS.some((channel) => channel === value);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
 function parseNewPhotos(value: FormDataEntryValue | null): NewReviewPhoto[] | null {
-  if (typeof value !== "string" || value.length === 0) return [];
-
-  let parsed: unknown;
+  const serialized = formDataString(value);
+  if (serialized === null || serialized.length === 0) return [];
 
   try {
-    parsed = JSON.parse(value);
+    const result = v.safeParse(v.array(NewReviewPhotoSchema), JSON.parse(serialized));
+    return result.success ? result.output : null;
   } catch {
     return null;
   }
-
-  if (!Array.isArray(parsed)) return null;
-
-  const photos: NewReviewPhoto[] = [];
-
-  for (const photo of parsed) {
-    if (!isRecord(photo)) return null;
-    const path = photo.path;
-    const caption = photo.caption;
-
-    if (
-      typeof path !== "string" ||
-      !REVIEW_PHOTO_PATH_PATTERN.test(path) ||
-      (caption !== null && typeof caption !== "string")
-    ) {
-      return null;
-    }
-
-    photos.push({ path, caption: toNullableTrimmedString(caption) });
-  }
-
-  return photos;
 }
 
 /** FormData を DB 型に変換する。必須同意は false を許容しない。 */
 export function validateReviewFormData(formData: FormData): ReviewValidation {
   const fieldErrors: ReviewFieldErrors = {};
-  const cropId = toTrimmedString(formData.get("cropId"));
-  const ratingValue = toTrimmedString(formData.get("rating"));
+  const cropId = trimmedFormDataString(formData.get("cropId"));
+  const ratingValue = trimmedFormDataString(formData.get("rating"));
   const rating = Number(ratingValue);
-  const body = toTrimmedString(formData.get("body"));
-  const purchaseChannelValue = toTrimmedString(formData.get("purchaseChannel"));
+  const body = trimmedFormDataString(formData.get("body"));
+  const purchaseChannelValue = trimmedFormDataString(formData.get("purchaseChannel"));
+  const purchaseChannelResult = v.safeParse(PurchaseChannelSchema, purchaseChannelValue);
   const pesticideAck = formData.get("pesticideAck") === "on";
   const newPhotos = parseNewPhotos(formData.get("newPhotos"));
 
@@ -123,7 +101,7 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
   if (body.length === 0) {
     fieldErrors.body = "レビュー本文を入力してください。";
   }
-  if (purchaseChannelValue.length > 0 && !isPurchaseChannel(purchaseChannelValue)) {
+  if (purchaseChannelValue.length > 0 && !purchaseChannelResult.success) {
     fieldErrors.purchaseChannel = "購入場所を選び直してください。";
   }
   if (!pesticideAck) {
@@ -143,8 +121,7 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
       cropId,
       rating,
       body,
-      purchaseChannel:
-        purchaseChannelValue.length === 0 ? null : (purchaseChannelValue as PurchaseChannel),
+      purchaseChannel: purchaseChannelResult.success ? purchaseChannelResult.output : null,
       hasControlPlot: formData.get("hasControlPlot") === "on",
       pesticideAck: true,
       newPhotos,
@@ -242,11 +219,19 @@ export async function removeReviewPhotoUploads(paths: string[]): Promise<void> {
 export async function createReview(
   input: ReviewMutationInput,
 ): Promise<Result<{ reviewId: string }>> {
-  const session = await requireGeneralUser();
+  return createReviewWithDependencies(input, requireGeneralUser, createServerSupabase);
+}
+
+export async function createReviewWithDependencies(
+  input: ReviewMutationInput,
+  authenticate: typeof requireGeneralUser,
+  createSupabase: typeof createServerSupabase,
+): Promise<Result<{ reviewId: string }>> {
+  const session = await authenticate();
   if (!session.ok) return session;
   if (!UUID_PATTERN.test(input.materialId)) return fail("not_found");
 
-  const supabase = await createServerSupabase();
+  const supabase = await createSupabase();
   const references = await validateReferences(supabase, input.materialId, input.cropId);
   if (!references.ok) return references;
 

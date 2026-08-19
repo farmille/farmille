@@ -23,7 +23,7 @@ export type TotpEnrollment = {
   uri: string;
 };
 
-function reportError(operation: string, error: unknown): void {
+function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
   reportAdminError("mfa", operation, error);
 }
 

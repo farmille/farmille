@@ -64,7 +64,7 @@ export type CompareMaterialItem = {
   tags: ReadonlyArray<{ id: string; name: string; category: string }>;
 };
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/saved-materials] ${operation}`, error);
 }
 

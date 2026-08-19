@@ -4,7 +4,7 @@ import { createServerSupabase } from "@/server/supabase";
 
 const IN_FILTER_CHUNK_SIZE = 100;
 
-function reportQueryError(operation: string, error: unknown): void {
+function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/helpful] ${operation}`, error);
 }
 

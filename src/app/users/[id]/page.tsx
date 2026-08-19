@@ -98,7 +98,7 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
     description,
     path: `/users/${profile.userId}`,
     type: "profile",
-    ...(profile.avatarUrl === null ? {} : { imageUrls: [profile.avatarUrl] }),
+    imageUrls: profile.avatarUrl === null ? undefined : [profile.avatarUrl],
   });
 }
 

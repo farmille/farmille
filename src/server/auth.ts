@@ -1,4 +1,6 @@
 import { cache } from "react";
+import type { JwtPayload } from "@supabase/supabase-js";
+import * as v from "valibot";
 
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
@@ -31,37 +33,39 @@ export type AdminSession = {
   userId: string;
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function toAccountType(value: unknown): AccountType | null {
-  return ACCOUNT_TYPES.find((accountType) => accountType === value) ?? null;
-}
-
-function toAal(value: unknown): AuthenticatorAssuranceLevel | null {
-  if (value === "aal1" || value === "aal2") return value;
-  return null;
-}
+const SessionClaimsSchema = v.object({
+  sub: v.pipe(v.string(), v.minLength(1)),
+  aal: v.string(),
+  app_metadata: v.optional(
+    v.object({
+      account_type: v.optional(v.string()),
+      seller_id: v.optional(v.string()),
+    }),
+  ),
+});
+const AccountTypeSchema = v.picklist(ACCOUNT_TYPES);
+const AssuranceLevelSchema = v.picklist(["aal1", "aal2"]);
 
 /**
  * アクセストークン（JWT）の claims を SessionUser に変換する。
  * 想定外の形の claim は補完せず null にして、判定側で弾けるようにする。
  */
-export function toSessionUser(claims: unknown): SessionUser | null {
-  if (!isRecord(claims)) return null;
+export function toSessionUser(claims: JwtPayload): SessionUser | null {
+  const claimsResult = v.safeParse(SessionClaimsSchema, claims);
+  if (!claimsResult.success) return null;
 
-  const userId = claims.sub;
-  if (typeof userId !== "string" || userId.length === 0) return null;
-
-  const appMetadata = isRecord(claims.app_metadata) ? claims.app_metadata : null;
-  const sellerId = appMetadata?.seller_id;
+  const accountTypeResult = v.safeParse(
+    AccountTypeSchema,
+    claimsResult.output.app_metadata?.account_type,
+  );
+  const assuranceLevelResult = v.safeParse(AssuranceLevelSchema, claimsResult.output.aal);
+  const sellerId = claimsResult.output.app_metadata?.seller_id?.trim() ?? "";
 
   return {
-    userId,
-    accountType: toAccountType(appMetadata?.account_type),
-    sellerId: typeof sellerId === "string" && sellerId.length > 0 ? sellerId : null,
-    aal: toAal(claims.aal),
+    userId: claimsResult.output.sub,
+    accountType: accountTypeResult.success ? accountTypeResult.output : null,
+    sellerId: sellerId.length > 0 ? sellerId : null,
+    aal: assuranceLevelResult.success ? assuranceLevelResult.output : null,
   };
 }
 

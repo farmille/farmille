@@ -12,12 +12,20 @@ const evidenceCard = css({
   overflow: "hidden",
 });
 
-const evidenceTypeLabel = {
-  sds: "SDS",
-  paper: "論文",
-  trial: "試験結果",
-  leaflet: "資料",
-} as const;
+const EVIDENCE_TYPE_PRESENTATIONS = [
+  { value: "sds", label: "SDS" },
+  { value: "paper", label: "論文" },
+  { value: "trial", label: "試験結果" },
+  { value: "leaflet", label: "資料" },
+] as const;
+
+function evidenceTypeLabel(value: string): string {
+  const presentation = EVIDENCE_TYPE_PRESENTATIONS.find((candidate) => candidate.value === value);
+  if (presentation === undefined) {
+    throw new Error(`未対応のエビデンス種別です：${value}`);
+  }
+  return presentation.label;
+}
 
 function evidenceHref(evidence: MaterialEvidence): string | null {
   const href = evidence.file_url ?? evidence.external_url;
@@ -46,8 +54,7 @@ function EvidenceRows({ evidences }: { evidences: MaterialEvidence[] }) {
               {evidence.title}
             </span>
             <span className={css({ fontSize: "xs", color: "text.subtle" })}>
-              {evidenceTypeLabel[evidence.evidence_type as keyof typeof evidenceTypeLabel] ??
-                evidence.evidence_type}
+              {evidenceTypeLabel(evidence.evidence_type)}
             </span>
           </>
         );

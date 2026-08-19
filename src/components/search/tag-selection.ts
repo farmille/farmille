@@ -32,6 +32,11 @@ function toUiTagCategory(category: string): TagCategory {
 }
 
 export type MaterialSortParam = "reviews" | "rating" | "newest";
+export type ParsedTagsQuery = {
+  tagIds: string[];
+  makerNames: string[];
+  materialNames: string[];
+};
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -51,11 +56,7 @@ export function encodeTagsQuery(tags: SelectedSearchTag[]): string {
     .join(",");
 }
 
-export function parseTagsQuery(raw: string | undefined): {
-  tagIds: string[];
-  makerNames: string[];
-  materialNames: string[];
-} {
+export function parseTagsQuery(raw: string | undefined): ParsedTagsQuery {
   if (raw === undefined || raw.trim().length === 0) {
     return { tagIds: [], makerNames: [], materialNames: [] };
   }

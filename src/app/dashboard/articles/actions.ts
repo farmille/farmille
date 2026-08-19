@@ -63,10 +63,6 @@ async function materialIdsForArticle(articleId: string): Promise<string[]> {
   return data.map((row) => row.material_id);
 }
 
-function parseMaterialIdsFromForm(formData: FormData): unknown {
-  return formData.get("materialIds");
-}
-
 export async function createArticleAction(
   _previousState: SellerArticleFormState,
   formData: FormData,
@@ -79,7 +75,7 @@ export async function createArticleAction(
     body: formData.get("body"),
     heroImageUrl: formData.get("heroImageUrl"),
     status: formData.get("status"),
-    materialIds: parseMaterialIdsFromForm(formData),
+    materialIds: formData.get("materialIds"),
   });
 
   if (!validation.ok) {
@@ -116,7 +112,7 @@ export async function updateArticleAction(
     body: formData.get("body"),
     heroImageUrl: formData.get("heroImageUrl"),
     status: formData.get("status"),
-    materialIds: parseMaterialIdsFromForm(formData),
+    materialIds: formData.get("materialIds"),
   });
 
   if (!validation.ok) {

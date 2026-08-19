@@ -1,16 +1,11 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-const supabaseMocks = vi.hoisted(() => ({
-  createServerSupabase: vi.fn(),
-}));
-
-vi.mock("@/server/supabase", () => supabaseMocks);
+import { describe, expect, it, vi } from "vitest";
 
 import {
   HELPFUL_TARGET_TYPES,
   isHelpfulTargetType,
-  toggleHelpfulVote,
+  toggleHelpfulVoteWithSupabase,
 } from "@/server/mutations/helpful";
+import { createServerSupabase } from "@/server/supabase";
 
 const userId = "11111111-1111-4111-8111-111111111111";
 
@@ -26,14 +21,16 @@ describe("isHelpfulTargetType", () => {
 });
 
 describe("toggleHelpfulVote", () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("UUID形式でないtargetIdはDBに触れずnot_foundを返す", async () => {
-    const result = await toggleHelpfulVote("review", "not-a-uuid", userId);
+    const createSupabase = vi.fn<typeof createServerSupabase>();
+    const result = await toggleHelpfulVoteWithSupabase(
+      "review",
+      "not-a-uuid",
+      userId,
+      createSupabase,
+    );
 
     expect(result).toEqual({ ok: false, error: "not_found" });
-    expect(supabaseMocks.createServerSupabase).not.toHaveBeenCalled();
+    expect(createSupabase).not.toHaveBeenCalled();
   });
 });

@@ -116,7 +116,7 @@ export async function generateMetadata({ params }: SellerPageProps): Promise<Met
     title: seller.officialName,
     description,
     path: `/sellers/${seller.id}`,
-    ...(seller.logoUrl === null ? {} : { imageUrls: [seller.logoUrl] }),
+    imageUrls: seller.logoUrl === null ? undefined : [seller.logoUrl],
   });
 }
 

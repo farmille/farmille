@@ -12,8 +12,8 @@ type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 export const TAG_CATEGORIES = ["crop", "concern", "effect", "condition", "type"] as const;
 export type TagCategoryValue = (typeof TAG_CATEGORIES)[number];
 
-export function isTagCategory(value: unknown): value is TagCategoryValue {
-  return (TAG_CATEGORIES as readonly unknown[]).includes(value);
+export function isTagCategory(value: string | null): value is TagCategoryValue {
+  return value !== null && TAG_CATEGORIES.some((category) => category === value);
 }
 
 export type AdminTagItem = Pick<TagRow, "id" | "name" | "category" | "sort_order"> & {
@@ -32,7 +32,7 @@ export type CropGroupOption = {
   name: string;
 };
 
-function reportError(operation: string, error: unknown): void {
+function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
   reportAdminError("tags", operation, error);
 }
 

@@ -244,11 +244,14 @@ export function MediaFields({
                 className={mediaSelect}
                 value={item.placement}
                 aria-label="記事での表示先"
-                onChange={(event) =>
-                  updateItem(item.key, {
-                    placement: event.target.value as ReportMediaDraft["placement"],
-                  })
-                }
+                onChange={(event) => {
+                  const placement = MEDIA_PLACEMENTS.find(
+                    (candidate) => candidate.value === event.target.value,
+                  );
+                  if (placement !== undefined) {
+                    updateItem(item.key, { placement: placement.value });
+                  }
+                }}
               >
                 {MEDIA_PLACEMENTS.map((placement) => (
                   <option key={placement.value} value={placement.value}>
