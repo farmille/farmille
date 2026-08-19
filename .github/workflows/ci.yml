@@ -87,6 +87,11 @@ jobs:
       - name: Build Storybook
         run: pnpm build-storybook
 
+      - name: Select Ubuntu package mirror
+        run: |
+          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+          grep -Fq 'https://archive.ubuntu.com/ubuntu/' /etc/apt/apt-mirrors.txt
+
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 
@@ -154,6 +159,11 @@ jobs:
           eval "$(npx --yes supabase@latest status -o env)"
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f tools/migration/materials-v2-seed.sql
           psql "$DB_URL" -tAc "select 'materials: ' || count(*) from materials"
+
+      - name: Select Ubuntu package mirror
+        run: |
+          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+          grep -Fq 'https://archive.ubuntu.com/ubuntu/' /etc/apt/apt-mirrors.txt
 
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
