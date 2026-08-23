@@ -64,6 +64,9 @@ const listImg = css({
   color: "brand.primary",
 });
 
+/** 通常画像と読み込み失敗時のプレースホルダーを同じグリッドセルに重ねる。 */
+const imageLayer = css({ gridArea: "1 / 1" });
+
 export type MaterialCardProps = {
   name: string;
   maker: string;
@@ -94,17 +97,19 @@ function MaterialImage({
 }) {
   return (
     <div className={className} data-ui="material-card-image">
-      <ImagePlaceholderIcon />
+      <ImagePlaceholderIcon className={imageLayer} />
       {src ? (
         <Image
           alt={alt}
-          className={css({
-            gridArea: "1 / 1",
-            display: "block",
-            w: "100%",
-            h: "100%",
-            objectFit: "contain",
-          })}
+          className={cx(
+            imageLayer,
+            css({
+              display: "block",
+              w: "100%",
+              h: "100%",
+              objectFit: "contain",
+            }),
+          )}
           height={450}
           preload={preload}
           sizes="(max-width: 1023px) 150px, 240px"
@@ -189,17 +194,19 @@ export function MaterialCard({
       data-variant="list"
     >
       <div className={listImg} data-ui="material-card-image">
-        <ImagePlaceholderIcon />
+        <ImagePlaceholderIcon className={imageLayer} />
         {imageSrc ? (
           <Image
             alt={alt}
-            className={css({
-              gridArea: "1 / 1",
-              display: "block",
-              w: "100%",
-              h: "100%",
-              objectFit: "contain",
-            })}
+            className={cx(
+              imageLayer,
+              css({
+                display: "block",
+                w: "100%",
+                h: "100%",
+                objectFit: "contain",
+              }),
+            )}
             height={62}
             preload={preload}
             sizes="62px"

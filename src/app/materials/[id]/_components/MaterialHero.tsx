@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Badge, StarRating } from "@/components";
 import { ImagePlaceholderIcon } from "@/components/Icons";
 import type { MaterialDetail } from "@/server/queries/materials";
-import { css } from "../../../../../styled-system/css";
+import { css, cx } from "../../../../../styled-system/css";
 
 import type { SaveControlState } from "../actions";
 import { SaveControl } from "./SaveControl";
@@ -33,6 +33,9 @@ const imageBox = css({
   overflow: "hidden",
   color: "brand.primary",
 });
+
+/** 通常画像と読み込み失敗時のプレースホルダーを同じグリッドセルに重ねる。 */
+const imageLayer = css({ gridArea: "1 / 1" });
 
 const manufacturerStyle = css({
   mt: "1",
@@ -79,25 +82,27 @@ export function MaterialHero({
   return (
     <section className={heroCard} aria-labelledby="material-name">
       <div className={css({ display: "flex", gap: "3.5", alignItems: "center" })}>
-        <div className={imageBox}>
+        <div className={imageBox} data-ui="material-hero-image">
+          <ImagePlaceholderIcon className={imageLayer} size={28} />
           {primaryImage ? (
             <Image
               alt={material.name}
-              className={css({
-                display: "block",
-                w: "100%",
-                h: "100%",
-                objectFit: "contain",
-              })}
+              className={cx(
+                imageLayer,
+                css({
+                  display: "block",
+                  w: "100%",
+                  h: "100%",
+                  objectFit: "contain",
+                }),
+              )}
               height={118}
               preload
               sizes="118px"
               src={primaryImage.url}
               width={118}
             />
-          ) : (
-            <ImagePlaceholderIcon size={28} />
-          )}
+          ) : null}
         </div>
         <div className={css({ flex: "1", minW: "0" })}>
           <h1 id="material-name" className={css({ m: "0", fontSize: "2xl", fontWeight: "700" })}>

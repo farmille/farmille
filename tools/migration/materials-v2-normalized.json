@@ -5,7 +5,9 @@
     "source_product_rows": 15,
     "duplicate_product_rows": 1,
     "unique_materials": 14,
-    "product_images": 13,
+    "source_product_images": 13,
+    "excluded_product_images": 3,
+    "product_images": 10,
     "application_recipes": 98,
     "material_product_type_links": 14,
     "material_crop_links": 7,
@@ -21,6 +23,26 @@
         7
       ],
       "handling": "旧SQLとv2の一意キーに従い、後の行で統合"
+    }
+  ],
+  "excluded_images": [
+    {
+      "name": "BIOZ Onyx Permanent",
+      "manufacturer_name": "ICL JAPAN",
+      "url": "https://multisite-assets.icl-growingsolutions.com/wp-content/uploads/sites/41/2023/06/01130543/ICL-Bioz-Japan_Onyx-Permanent.png",
+      "reason": "取得不能を確認済みの外部画像URL"
+    },
+    {
+      "name": "モーニングエース",
+      "manufacturer_name": "アグロ カネショウ",
+      "url": "https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_80.png",
+      "reason": "取得不能を確認済みの外部画像URL"
+    },
+    {
+      "name": "ハイタック-C",
+      "manufacturer_name": "アグロ カネショウ",
+      "url": "https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_77.png",
+      "reason": "取得不能を確認済みの外部画像URL"
     }
   ],
   "missing_classification_mappings": [
@@ -648,7 +670,7 @@
     {
       "target": "material_images.url",
       "source": "product_images.url",
-      "status": "mapped"
+      "status": "mapped_after_known_broken_url_filter"
     },
     {
       "target": "material_images.image_type",
@@ -2582,25 +2604,7 @@
       "target_crops": [],
       "effects": [],
       "search_tags": [],
-      "images": [
-        {
-          "url": "https://multisite-assets.icl-growingsolutions.com/wp-content/uploads/sites/41/2023/06/01130543/ICL-Bioz-Japan_Onyx-Permanent.png",
-          "image_type": "package",
-          "sort_order": 0,
-          "legacy": {
-            "name": "BIOZ Onyx Permanent",
-            "manufacturer_name": "ICL JAPAN",
-            "url": "https://multisite-assets.icl-growingsolutions.com/wp-content/uploads/sites/41/2023/06/01130543/ICL-Bioz-Japan_Onyx-Permanent.png",
-            "order": 0,
-            "source_page_url": "https://icl-growingsolutions.com/ja-jp/agriculture/products/bioz-onyx-permanent/",
-            "alt_text": "BIOZ Onyx Permanent 1L商品画像",
-            "image_type": "product_packaging",
-            "is_primary": true,
-            "rights_note": "公式サイト掲載画像。利用時は権利確認が必要",
-            "confidence": "高"
-          }
-        }
-      ],
+      "images": [],
       "recipes": [
         {
           "name": "BIOZ Onyx Permanent",
@@ -3209,25 +3213,7 @@
       ],
       "effects": [],
       "search_tags": [],
-      "images": [
-        {
-          "url": "https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_77.png",
-          "image_type": "package",
-          "sort_order": 0,
-          "legacy": {
-            "name": "ハイタック-C",
-            "manufacturer_name": "アグロ カネショウ",
-            "url": "https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_77.png",
-            "order": 0,
-            "source_page_url": "https://www.agrokanesho.co.jp/product/view/77",
-            "alt_text": "ハイタック-C 1kg商品画像",
-            "image_type": "product_packaging",
-            "is_primary": true,
-            "rights_note": "公式サイト掲載画像。利用時は権利確認が必要",
-            "confidence": "高"
-          }
-        }
-      ],
+      "images": [],
       "recipes": [
         {
           "name": "ハイタック-C",
@@ -3540,25 +3526,7 @@
       "target_crops": [],
       "effects": [],
       "search_tags": [],
-      "images": [
-        {
-          "url": "https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_80.png",
-          "image_type": "package",
-          "sort_order": 0,
-          "legacy": {
-            "name": "モーニングエース",
-            "manufacturer_name": "アグロ カネショウ",
-            "url": "https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_80.png",
-            "order": 0,
-            "source_page_url": "https://www.agrokanesho.co.jp/product/view/80",
-            "alt_text": "モーニングエース 500g商品画像",
-            "image_type": "product_packaging",
-            "is_primary": true,
-            "rights_note": "公式サイト掲載画像。利用時は権利確認が必要",
-            "confidence": "高"
-          }
-        }
-      ],
+      "images": [],
       "recipes": [
         {
           "name": "モーニングエース",

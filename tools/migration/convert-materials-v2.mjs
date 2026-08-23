@@ -104,7 +104,7 @@ export const FIELD_MAPPINGS = [
   {
     target: "material_images.url",
     source: "product_images.url",
-    status: "mapped",
+    status: "mapped_after_known_broken_url_filter",
   },
   {
     target: "material_images.image_type",
@@ -160,6 +160,13 @@ const IMAGE_TYPE_MAP = new Map([
   ["package", "package"],
   ["logo", "logo"],
   ["usage_scene", "usage_scene"],
+]);
+
+/** 取得不能を確認済みで、転載せず無効データとして除外する画像URL。 */
+export const KNOWN_BROKEN_IMAGE_URLS = new Set([
+  "https://multisite-assets.icl-growingsolutions.com/wp-content/uploads/sites/41/2023/06/01130543/ICL-Bioz-Japan_Onyx-Permanent.png",
+  "https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_77.png",
+  "https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_80.png",
 ]);
 
 function materialKey(name, manufacturerName) {
@@ -857,6 +864,14 @@ export function normalizeDataset(rawDataset, seededTags) {
   );
   const missingClassificationMap = new Map();
   const missingImageTypes = new Set();
+  const excludedImages = rawDataset.images
+    .filter((image) => KNOWN_BROKEN_IMAGE_URLS.has(image.url))
+    .map((image) => ({
+      name: image.name,
+      manufacturer_name: image.manufacturer_name,
+      url: image.url,
+      reason: "取得不能を確認済みの外部画像URL",
+    }));
   const materials = [];
 
   function recordMissingClassification(sourceKind, sourceValue, product) {
@@ -876,6 +891,7 @@ export function normalizeDataset(rawDataset, seededTags) {
     );
     const images = rawDataset.images
       .filter((image) => materialKey(image.name, image.manufacturer_name) === key)
+      .filter((image) => !KNOWN_BROKEN_IMAGE_URLS.has(image.url))
       .map((image) => ({
         url: image.url,
         image_type: mapImageType(image.image_type, missingImageTypes),
@@ -990,7 +1006,12 @@ export function normalizeDataset(rawDataset, seededTags) {
       source_product_rows: rawDataset.sourceProducts.length,
       duplicate_product_rows: rawDataset.sourceProducts.length - productByKey.size,
       unique_materials: materials.length,
-      product_images: rawDataset.images.length,
+      source_product_images: rawDataset.images.length,
+      excluded_product_images: excludedImages.length,
+      product_images: materials.reduce(
+        (total, material) => total + material.images.length,
+        0,
+      ),
       application_recipes: rawDataset.recipes.length,
       material_product_type_links: materials.reduce(
         (total, material) => total + material.product_types.length,
@@ -1010,6 +1031,7 @@ export function normalizeDataset(rawDataset, seededTags) {
       ),
     },
     duplicate_products: duplicateProducts,
+    excluded_images: excludedImages,
     missing_classification_mappings: missingClassificationMappings,
     unmapped_image_types: toSortedArray(missingImageTypes),
     field_mappings: FIELD_MAPPINGS,
@@ -1038,9 +1060,29 @@ export function validateNormalized(normalized) {
     "資材件数が一致しません",
   );
   assert.equal(
+    normalized.counts.source_product_images,
+    normalized.counts.product_images + normalized.counts.excluded_product_images,
+    "入力画像件数と投入・除外件数の合計が一致しません",
+  );
+  assert.equal(
+    normalized.counts.excluded_product_images,
+    normalized.excluded_images.length,
+    "除外画像件数が一致しません",
+  );
+  assert.ok(
+    normalized.excluded_images.every((image) => KNOWN_BROKEN_IMAGE_URLS.has(image.url)),
+    "除外対象外の画像URLが含まれています",
+  );
+  assert.equal(
     normalized.counts.product_images,
     normalized.materials.reduce((total, material) => total + material.images.length, 0),
     "画像件数が一致しません",
+  );
+  assert.ok(
+    normalized.materials.every((material) =>
+      material.images.every((image) => !KNOWN_BROKEN_IMAGE_URLS.has(image.url)),
+    ),
+    "取得不能な既知の画像URLが投入対象に残っています",
   );
   assert.equal(
     normalized.counts.application_recipes,
@@ -1301,7 +1343,9 @@ join public.materials material
 -- 生成元：tools/migration/convert-materials-v2.mjs
 -- 入力行：${normalized.counts.source_product_rows}
 -- 一意資材：${normalized.counts.unique_materials}
--- 画像：${normalized.counts.product_images}
+-- 入力画像：${normalized.counts.source_product_images}
+-- 除外画像：${normalized.counts.excluded_product_images}
+-- 投入画像：${normalized.counts.product_images}
 -- 施用レシピ：${normalized.counts.application_recipes}（usage_textへ集約済み）
 -- =============================================================================
 
@@ -1493,6 +1537,8 @@ $farmille_verify$;
 select
   ${normalized.counts.source_product_rows}::integer as source_product_rows,
   ${normalized.counts.duplicate_product_rows}::integer as duplicate_product_rows,
+  ${normalized.counts.source_product_images}::integer as source_product_images,
+  ${normalized.counts.excluded_product_images}::integer as excluded_product_images,
   (select count(*) from pg_temp._farmille_material_seed_keys)::integer
     as expected_unique_materials,
   (
@@ -1606,6 +1652,7 @@ export function createReport(normalized) {
   return {
     counts: normalized.counts,
     duplicate_products: normalized.duplicate_products,
+    excluded_images: normalized.excluded_images,
     field_mappings: normalized.field_mappings,
     missing_classification_mappings: normalized.missing_classification_mappings,
     needs_review_fields: normalized.needs_review_fields,

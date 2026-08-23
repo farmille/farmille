@@ -3,7 +3,9 @@
 -- 生成元：tools/migration/convert-materials-v2.mjs
 -- 入力行：15
 -- 一意資材：14
--- 画像：13
+-- 入力画像：13
+-- 除外画像：3
+-- 投入画像：10
 -- 施用レシピ：98（usage_textへ集約済み）
 -- =============================================================================
 
@@ -316,10 +318,7 @@ from (
   ('BIOZ Nephrite', 'ICL JAPAN', 'https://multisite-assets.icl-growingsolutions.com/wp-content/uploads/sites/41/2023/06/30050420/ICL-Bioz-International-Nephrite.png', 'package', 0),
   ('BIOZ Nephrite', 'ICL JAPAN', 'https://multisite-assets.icl-growingsolutions.com/wp-content/uploads/sites/41/2023/06/30050420/ICL-Bioz-International-Nephrite.png', 'package', 1),
   ('BIOZ Onyx Annual', 'ICL JAPAN', 'https://multisite-assets.icl-growingsolutions.com/wp-content/uploads/sites/41/2023/06/13110200/ICL-Bioz-Japan_Onyx-Annual.png', 'package', 0),
-  ('BIOZ Onyx Permanent', 'ICL JAPAN', 'https://multisite-assets.icl-growingsolutions.com/wp-content/uploads/sites/41/2023/06/01130543/ICL-Bioz-Japan_Onyx-Permanent.png', 'package', 0),
   ('BIOZ Sunstone', 'ICL JAPAN', 'https://multisite-assets.icl-growingsolutions.com/wp-content/uploads/sites/41/2023/06/13094325/ICL-Bioz-Japan_Sunstone.png', 'package', 0),
-  ('ハイタック-C', 'アグロ カネショウ', 'https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_77.png', 'package', 0),
-  ('モーニングエース', 'アグロ カネショウ', 'https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_80.png', 'package', 0),
   ('鉄力あくあF10', '愛知製鋼', 'https://www.aichi-steel.co.jp/sp_info/SPINFO/TetsuRiki-Agri/images/product_tetsuriki_aqua_f10.jpg', 'package', 0),
   ('鉄力あぐりB10', '愛知製鋼', 'https://www.aichi-steel.co.jp/sp_info/SPINFO/TetsuRiki-Agri/images/product_tetsuriki_agri_b10.jpg', 'package', 0),
   ('鉄力あぐりB12', '愛知製鋼', 'https://www.aichi-steel.co.jp/sp_info/SPINFO/TetsuRiki-Agri/images/product_tetsuriki_agri_b12.jpg', 'package', 0)
@@ -390,9 +389,9 @@ begin
     raise exception '資材件数が一致しません：期待=%、実際=%',
       14, actual_materials;
   end if;
-  if actual_images <> 13 then
+  if actual_images <> 10 then
     raise exception '画像件数が一致しません：期待=%、実際=%',
-      13, actual_images;
+      10, actual_images;
   end if;
   if actual_product_type_links <> 14 then
     raise exception '製品タイプ関連件数が一致しません：期待=%、実際=%',
@@ -420,6 +419,8 @@ $farmille_verify$;
 select
   15::integer as source_product_rows,
   1::integer as duplicate_product_rows,
+  13::integer as source_product_images,
+  3::integer as excluded_product_images,
   (select count(*) from pg_temp._farmille_material_seed_keys)::integer
     as expected_unique_materials,
   (
@@ -429,7 +430,7 @@ select
       on material.name = seed_key.name
      and material.manufacturer_name = seed_key.manufacturer_name
   )::integer as actual_unique_materials,
-  13::integer as expected_images,
+  10::integer as expected_images,
   (
     select count(*)
     from public.material_images material_image

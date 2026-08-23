@@ -5,6 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  KNOWN_BROKEN_IMAGE_URLS,
   normalizeDataset,
   parseCsv,
   parseLegacySeedSql,
@@ -36,7 +37,9 @@ test("旧seed SQLから全レコードを欠落なく抽出する", () => {
     source_product_rows: 15,
     duplicate_product_rows: 1,
     unique_materials: 14,
-    product_images: 13,
+    source_product_images: 13,
+    excluded_product_images: 3,
+    product_images: 10,
     application_recipes: 98,
     material_product_type_links: 14,
     material_crop_links: 7,
@@ -51,6 +54,15 @@ test("旧seed SQLから全レコードを欠落なく抽出する", () => {
       handling: "旧SQLとv2の一意キーに従い、後の行で統合",
     },
   ]);
+  assert.deepEqual(
+    normalized.excluded_images.map((image) => image.url).toSorted(),
+    [...KNOWN_BROKEN_IMAGE_URLS].toSorted(),
+  );
+  assert.ok(
+    normalized.materials.every((material) =>
+      material.images.every((image) => !KNOWN_BROKEN_IMAGE_URLS.has(image.url)),
+    ),
+  );
 });
 
 test("一次情報、施用レシピ、画像enum、正規化分類をv2へ変換する", () => {
@@ -79,6 +91,9 @@ test("生成SQLは再実行可能なupsertと関連データ置換を含む", ()
   assert.match(sql, /insert into public\.product_types/);
   assert.match(sql, /insert into public\.material_product_types/);
   assert.match(sql, /delete from public\.material_images/);
+  for (const url of KNOWN_BROKEN_IMAGE_URLS) {
+    assert.ok(!sql.includes(url));
+  }
   assert.match(sql, /raise exception '資材件数が一致しません/);
   assert.match(sql, /source_product_rows/);
   assert.match(sql, /commit;/);

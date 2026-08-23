@@ -4,7 +4,7 @@
 
 ## 現在の開発シード
 
-入力は [`legacy/migrations-v1/20260526000003_seed_products_from_ryosei_export.sql`](legacy/migrations-v1/20260526000003_seed_products_from_ryosei_export.sql) である。この SQL から資材15行、画像13件、施用レシピ98件を抽出する。
+入力は [`legacy/migrations-v1/20260526000003_seed_products_from_ryosei_export.sql`](legacy/migrations-v1/20260526000003_seed_products_from_ryosei_export.sql) である。この SQL から資材15行、画像13件、施用レシピ98件を抽出する。画像13件のうち、取得不能を確認済みの外部URL3件は無効データとして除外し、10件を投入する。
 
 資材15行のうち、`BIOZ Nephrite／ICL JAPAN` の2行は同じ旧 upsert キーを持つ。旧 SQL は後の行で前の行を更新し、v2 にも `name, manufacturer_name` の一意制約があるため、投入後は14資材になる。変換時に製品名やメーカー名を加工せず、中間 JSON に入力15行と重複情報を残す。
 
@@ -92,7 +92,7 @@ node tools/migration/convert-materials-v2.mjs \
 | `materials.official_url` | 対応値なし | `NULL` |
 | `materials.catalog_url` | 対応値なし | `NULL` |
 | `materials.seller_id` | 対応値なし | 全件 `NULL` |
-| `material_images.url` | `product_images.url` | そのまま |
+| `material_images.url` | `product_images.url` | 取得不能を確認済みの外部URL3件を除外し、それ以外はそのまま |
 | `material_images.image_type` | `product_images.image_type` | `product_packaging` → `package`、`product_logo` → `logo`、`application_scene` → `usage_scene`、`other` → `other` |
 | `material_images.sort_order` | `product_images.order` | そのまま |
 
