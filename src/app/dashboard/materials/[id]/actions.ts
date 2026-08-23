@@ -52,7 +52,7 @@ export async function updatePrimaryInformationAction(
   const validation = validatePrimaryInformation({
     description: formData.get("description"),
     general_use: formData.get("general_use"),
-    ingredients: formData.get("ingredients"),
+    main_components: formData.get("main_components"),
     mechanism: formData.get("mechanism"),
     usage_text: formData.get("usage_text"),
     price_range: formData.get("price_range"),

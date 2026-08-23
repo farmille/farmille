@@ -9,11 +9,10 @@ import {
 } from "@/app/admin/_components/AdminUI";
 import { initialMaterialFormState } from "@/app/admin/_lib/action-state";
 import { createMaterialAction, updateMaterialAction } from "@/app/admin/materials/actions";
-import { TAG_CATEGORY_LABELS, toTagChipCategory } from "@/components";
 import { controlStyle, Field, FormMessage } from "@/components/auth/Fields";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import type { AdminMaterialDetail } from "@/server/admin/materials";
-import type { AdminTagItem } from "@/server/admin/tags";
+import type { ClassificationOptions } from "@/server/queries/classifications";
 import { css } from "../../../../../styled-system/css";
 
 const formStyle = css({
@@ -55,23 +54,51 @@ const chipLabelStyle = css({
   },
 });
 
-const tagCategoryStyle = css({
+const classificationGroupStyle = css({
   display: "flex",
   flexDirection: "column",
   gap: "1.5",
   mb: "3",
 });
 
-const tagCategoryNameStyle = css({
+const classificationGroupNameStyle = css({
   fontSize: "sm",
   fontWeight: "700",
   color: "text.subtle",
 });
 
 type MaterialFormProps = {
+  classifications: ClassificationOptions;
   material: AdminMaterialDetail | null;
-  tags: AdminTagItem[];
 };
+
+type CheckboxOption = { id: string; name: string };
+
+function CheckboxGroup({
+  name,
+  options,
+  selectedIds,
+}: {
+  name: string;
+  options: CheckboxOption[];
+  selectedIds: ReadonlySet<string>;
+}) {
+  return (
+    <div className={chipGridStyle}>
+      {options.map((option) => (
+        <label className={chipLabelStyle} key={option.id}>
+          <input
+            defaultChecked={selectedIds.has(option.id)}
+            name={name}
+            type="checkbox"
+            value={option.id}
+          />
+          {option.name}
+        </label>
+      ))}
+    </div>
+  );
+}
 
 function TextField({
   defaultValue,
@@ -133,7 +160,7 @@ function TextAreaField({
 }
 
 /** 資材の登録・編集フォーム。admin は分類・検索層と一次情報層の両方を編集できる（01 §3）。 */
-export function MaterialForm({ material, tags }: MaterialFormProps) {
+export function MaterialForm({ classifications, material }: MaterialFormProps) {
   const isEdit = material !== null;
   const [state, formAction] = useActionState(
     isEdit ? updateMaterialAction : createMaterialAction,
@@ -144,8 +171,16 @@ export function MaterialForm({ material, tags }: MaterialFormProps) {
   const submitted = state.status === "error" ? state.values : undefined;
   const valueOf = (field: string, stored: string | null | undefined): string =>
     submitted?.fields[field] ?? stored ?? "";
-  const selectedTagIds = new Set(submitted?.tagIds ?? material?.tagIds ?? []);
-  const categories = [...new Set(tags.map((tag) => tag.category))];
+  const selectedCropIds = new Set(submitted?.cropIds ?? material?.cropIds ?? []);
+  const selectedEffectIds = new Set(submitted?.effectIds ?? material?.effectIds ?? []);
+  const selectedIngredientCategoryIds = new Set(
+    submitted?.ingredientCategoryIds ?? material?.ingredientCategoryIds ?? [],
+  );
+  const selectedIngredientIds = new Set(submitted?.ingredientIds ?? material?.ingredientIds ?? []);
+  const selectedProductTypeIds = new Set(
+    submitted?.productTypeIds ?? material?.productTypeIds ?? [],
+  );
+  const selectedSearchTagIds = new Set(submitted?.searchTagIds ?? material?.searchTagIds ?? []);
 
   return (
     <form action={formAction} className={formStyle} noValidate>
@@ -170,17 +205,26 @@ export function MaterialForm({ material, tags }: MaterialFormProps) {
           name="manufacturerName"
           required
         />
-        <TextField
-          defaultValue={valueOf("productType", material?.product_type)}
-          label="種別"
-          name="productType"
-        />
-        <TextField
-          defaultValue={valueOf("jbsaClass", material?.jbsa_class)}
-          guide="JBSA の効果分類。"
-          label="効果分類"
-          name="jbsaClass"
-        />
+        <Field
+          error={fieldErrors.compositionTypeId}
+          htmlFor="compositionTypeId"
+          label="組成タイプ"
+          requirement="optional"
+        >
+          <select
+            className={controlStyle}
+            defaultValue={valueOf("compositionTypeId", material?.composition_type_id)}
+            id="compositionTypeId"
+            name="compositionTypeId"
+          >
+            <option value="">未設定</option>
+            {classifications.compositionTypes.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.name}
+              </option>
+            ))}
+          </select>
+        </Field>
         <TextField
           defaultValue={valueOf("salesStatus", material?.sales_status)}
           label="販売状況"
@@ -188,34 +232,86 @@ export function MaterialForm({ material, tags }: MaterialFormProps) {
         />
       </div>
 
-      <Field label="タグ" requirement="optional">
+      <Field error={fieldErrors.classifications} label="効果" requirement="optional">
         <div>
-          {categories.map((category) => (
-            <div className={tagCategoryStyle} key={category}>
-              <span className={tagCategoryNameStyle}>
-                {TAG_CATEGORY_LABELS[toTagChipCategory(category)]}
-              </span>
-              <div className={chipGridStyle}>
-                {tags
-                  .filter((tag) => tag.category === category)
-                  .map((tag) => (
-                    <label className={chipLabelStyle} key={tag.id}>
-                      <input
-                        defaultChecked={selectedTagIds.has(tag.id)}
-                        name="tagIds"
-                        type="checkbox"
-                        value={tag.id}
-                      />
-                      {tag.name}
-                    </label>
-                  ))}
-              </div>
+          {classifications.effectCategories.map((category) => (
+            <div className={classificationGroupStyle} key={category.id}>
+              <span className={classificationGroupNameStyle}>{category.name}</span>
+              <CheckboxGroup
+                name="effectIds"
+                options={classifications.effects.filter(
+                  (effect) => effect.categoryId === category.id,
+                )}
+                selectedIds={selectedEffectIds}
+              />
             </div>
           ))}
-          {tags.length === 0 ? (
-            <p className={adminInlineNoteStyle}>
-              タグが登録されていません。タグ・作物マスタから追加してください。
-            </p>
+        </div>
+      </Field>
+
+      <Field label="対象作物（Farmille正規化）" requirement="optional">
+        <div>
+          {[...new Set(classifications.crops.map((crop) => crop.groupId))].map((groupId) => {
+            const crops = classifications.crops.filter((crop) => crop.groupId === groupId);
+            return (
+              <div className={classificationGroupStyle} key={groupId}>
+                <span className={classificationGroupNameStyle}>{crops[0]?.groupName}</span>
+                <CheckboxGroup name="cropIds" options={crops} selectedIds={selectedCropIds} />
+              </div>
+            );
+          })}
+        </div>
+      </Field>
+
+      <Field label="JBSA材料分類" requirement="optional">
+        <CheckboxGroup
+          name="ingredientCategoryIds"
+          options={classifications.ingredientCategories}
+          selectedIds={selectedIngredientCategoryIds}
+        />
+      </Field>
+
+      <Field label="個別材料" requirement="optional">
+        <div>
+          {classifications.ingredientCategories.map((category) => (
+            <div className={classificationGroupStyle} key={category.id}>
+              <span className={classificationGroupNameStyle}>{category.name}</span>
+              <CheckboxGroup
+                name="ingredientIds"
+                options={classifications.ingredients.filter(
+                  (ingredient) => ingredient.categoryId === category.id,
+                )}
+                selectedIds={selectedIngredientIds}
+              />
+            </div>
+          ))}
+        </div>
+      </Field>
+
+      <Field label="製品タイプ（メーカー分類）" requirement="optional">
+        <CheckboxGroup
+          name="productTypeIds"
+          options={classifications.productTypes}
+          selectedIds={selectedProductTypeIds}
+        />
+      </Field>
+
+      <Field label="検索補助タグ" requirement="optional">
+        <div>
+          {["concern", "condition"].map((category) => (
+            <div className={classificationGroupStyle} key={category}>
+              <span className={classificationGroupNameStyle}>
+                {category === "concern" ? "悩み" : "条件・使い方"}
+              </span>
+              <CheckboxGroup
+                name="searchTagIds"
+                options={classifications.searchTags.filter((tag) => tag.category === category)}
+                selectedIds={selectedSearchTagIds}
+              />
+            </div>
+          ))}
+          {classifications.searchTags.length === 0 ? (
+            <p className={adminInlineNoteStyle}>検索補助タグが登録されていません。</p>
           ) : null}
         </div>
       </Field>
@@ -235,9 +331,9 @@ export function MaterialForm({ material, tags }: MaterialFormProps) {
       />
       <div className={adminFieldGridStyle}>
         <TextField
-          defaultValue={valueOf("ingredients", material?.ingredients)}
+          defaultValue={valueOf("mainComponents", material?.main_components)}
           label="主成分"
-          name="ingredients"
+          name="mainComponents"
         />
         <TextField
           defaultValue={valueOf("mechanism", material?.mechanism)}

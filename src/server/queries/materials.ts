@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import type { SearchFilterCategory, SearchFilterRef } from "@/lib/material-search";
 import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
+import { listClassificationOptionsWithSupabase } from "@/server/queries/classifications";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
@@ -8,15 +10,12 @@ import type { Database } from "@/types/database.types";
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 type MaterialImageRow = Database["public"]["Tables"]["material_images"]["Row"];
 type MaterialEvidenceRow = Database["public"]["Tables"]["material_evidences"]["Row"];
-type TagRow = Database["public"]["Tables"]["tags"]["Row"];
 
 type MaterialListFields = Pick<
   MaterialRow,
   | "id"
   | "name"
   | "manufacturer_name"
-  | "product_type"
-  | "jbsa_class"
   | "sales_status"
   | "seller_id"
   | "review_count"
@@ -31,9 +30,9 @@ export type MaterialSort = "reviews" | "rating" | "newest";
 type MaterialDetailFields = Pick<
   MaterialRow,
   | keyof MaterialListFields
-  | "description"
+  | "composition_type_id"
   | "general_use"
-  | "ingredients"
+  | "main_components"
   | "mechanism"
   | "usage_text"
   | "price_range"
@@ -46,14 +45,47 @@ export type MaterialImage = Pick<MaterialImageRow, "id" | "url" | "image_type" |
 
 export type MaterialEvidence = Pick<
   MaterialEvidenceRow,
-  "id" | "evidence_type" | "title" | "file_url" | "external_url" | "meta" | "sort_order"
+  | "id"
+  | "evidence_type"
+  | "title"
+  | "file_url"
+  | "external_url"
+  | "meta"
+  | "sort_order"
+  | "created_at"
 >;
 
-export type MaterialTag = Pick<TagRow, "id" | "name" | "category" | "sort_order">;
+export type MaterialClassification = {
+  id: string;
+  name: string;
+  sort_order: number;
+};
+
+export type MaterialEffect = MaterialClassification & {
+  categoryId: string;
+  categoryName: string;
+  categorySortOrder: number;
+};
+
+export type MaterialTargetCrop = MaterialClassification & {
+  groupId: string;
+  groupName: string;
+  groupSortOrder: number;
+  sourceName: string;
+};
+
+export type MaterialIngredient = MaterialClassification & {
+  categoryId: string;
+  categoryName: string;
+  categorySortOrder: number;
+};
+
+export type MaterialSearchTag = MaterialClassification & {
+  category: string;
+};
 
 export type MaterialListItem = MaterialListFields & {
   primaryImage: MaterialImage | null;
-  tags: MaterialTag[];
 };
 
 export type PostingMaterial = Pick<
@@ -62,27 +94,19 @@ export type PostingMaterial = Pick<
 >;
 
 export type MaterialDetail = MaterialDetailFields & {
+  compositionType: MaterialClassification | null;
+  effects: MaterialEffect[];
   images: MaterialImage[];
   evidences: MaterialEvidence[];
-  tags: MaterialTag[];
-};
-
-type MaterialTagRelation = {
-  tags: MaterialTag | null;
-};
-
-type MaterialListQueryRow = MaterialListFields & {
-  material_images: MaterialImage[];
-  material_tags: MaterialTagRelation[];
-};
-
-type MaterialDetailQueryRow = MaterialDetailFields & {
-  material_images: MaterialImage[];
-  material_evidences: MaterialEvidence[];
-  material_tags: MaterialTagRelation[];
+  ingredientCategories: MaterialClassification[];
+  ingredients: MaterialIngredient[];
+  productTypes: MaterialClassification[];
+  searchTags: MaterialSearchTag[];
+  targetCrops: MaterialTargetCrop[];
 };
 
 type MaterialFilterResult = Result<string[] | null>;
+type CategoryMaterialResult = Result<Set<string>>;
 
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/materials] ${operation}`, error);
@@ -95,73 +119,144 @@ function bySortOrder(
   return left.sort_order - right.sort_order || left.id.localeCompare(right.id);
 }
 
-function materialTags(relations: MaterialTagRelation[]): MaterialTag[] {
-  return relations
-    .flatMap(({ tags }) => (tags === null ? [] : [tags]))
-    .sort((left, right) => left.category.localeCompare(right.category) || bySortOrder(left, right));
+function invalidFilterIds(requestedIds: string[], actualIds: string[]): boolean {
+  const actual = new Set(actualIds);
+  return requestedIds.some((id) => !actual.has(id));
+}
+
+async function findCategoryMaterialIds(
+  supabase: SupabaseClient<Database>,
+  category: SearchFilterCategory,
+  ids: string[],
+): Promise<CategoryMaterialResult> {
+  if (category === "crop") {
+    const [masters, relations] = await Promise.all([
+      supabase.from("crops").select("id").in("id", ids),
+      supabase.from("material_crops").select("material_id").in("crop_id", ids),
+    ]);
+    if (masters.error !== null || relations.error !== null) {
+      reportQueryError("対象作物による絞り込みに失敗", {
+        masterError: masters.error,
+        relationError: relations.error,
+      });
+      return fail("internal");
+    }
+    if (
+      invalidFilterIds(
+        ids,
+        masters.data.map(({ id }) => id),
+      )
+    )
+      return fail("invalid_body");
+    return succeed(new Set(relations.data.map(({ material_id }) => material_id)));
+  }
+
+  if (category === "effect") {
+    const [masters, relations] = await Promise.all([
+      supabase.from("effects").select("id").in("id", ids),
+      supabase.from("material_effects").select("material_id").in("effect_id", ids),
+    ]);
+    if (masters.error !== null || relations.error !== null) {
+      reportQueryError("効果による絞り込みに失敗", {
+        masterError: masters.error,
+        relationError: relations.error,
+      });
+      return fail("internal");
+    }
+    if (
+      invalidFilterIds(
+        ids,
+        masters.data.map(({ id }) => id),
+      )
+    )
+      return fail("invalid_body");
+    return succeed(new Set(relations.data.map(({ material_id }) => material_id)));
+  }
+
+  if (category === "type") {
+    const [masters, relations] = await Promise.all([
+      supabase.from("product_types").select("id").in("id", ids),
+      supabase.from("material_product_types").select("material_id").in("product_type_id", ids),
+    ]);
+    if (masters.error !== null || relations.error !== null) {
+      reportQueryError("製品タイプによる絞り込みに失敗", {
+        masterError: masters.error,
+        relationError: relations.error,
+      });
+      return fail("internal");
+    }
+    if (
+      invalidFilterIds(
+        ids,
+        masters.data.map(({ id }) => id),
+      )
+    )
+      return fail("invalid_body");
+    return succeed(new Set(relations.data.map(({ material_id }) => material_id)));
+  }
+
+  const [masters, relations] = await Promise.all([
+    supabase.from("search_tags").select("id").eq("category", category).in("id", ids),
+    supabase.from("material_search_tags").select("material_id").in("search_tag_id", ids),
+  ]);
+  if (masters.error !== null || relations.error !== null) {
+    reportQueryError("検索タグによる絞り込みに失敗", {
+      masterError: masters.error,
+      relationError: relations.error,
+    });
+    return fail("internal");
+  }
+  if (
+    invalidFilterIds(
+      ids,
+      masters.data.map(({ id }) => id),
+    )
+  )
+    return fail("invalid_body");
+  return succeed(new Set(relations.data.map(({ material_id }) => material_id)));
 }
 
 async function findMatchingMaterialIds(
   supabase: SupabaseClient<Database>,
-  requestedTagIds: string[] | undefined,
+  requestedFilters: readonly SearchFilterRef[] | undefined,
 ): Promise<MaterialFilterResult> {
-  const tagIds = [...new Set(requestedTagIds ?? [])];
+  const uniqueFilters = new Map<string, SearchFilterRef>();
+  for (const filter of requestedFilters ?? []) {
+    uniqueFilters.set(`${filter.category}:${filter.id}`, filter);
+  }
+  if (uniqueFilters.size === 0) return succeed(null);
 
-  if (tagIds.length === 0) {
-    return succeed(null);
+  const idsByCategory = new Map<SearchFilterCategory, string[]>();
+  for (const filter of uniqueFilters.values()) {
+    const ids = idsByCategory.get(filter.category) ?? [];
+    ids.push(filter.id);
+    idsByCategory.set(filter.category, ids);
   }
 
-  const { data: tags, error: tagsError } = await supabase
-    .from("tags")
-    .select("id, category")
-    .in("id", tagIds);
+  const categoryResults = await Promise.all(
+    [...idsByCategory].map(([category, ids]) => findCategoryMaterialIds(supabase, category, ids)),
+  );
+  let intersection: Set<string> | null = null;
 
-  if (tagsError !== null) {
-    reportQueryError("タグ分類の取得に失敗", tagsError);
-    return fail("internal");
-  }
-
-  if (tags.length !== tagIds.length) {
-    return fail("invalid_body");
-  }
-
-  const categoryByTagId = new Map(tags.map((tag) => [tag.id, tag.category]));
-  const requiredCategories = new Set(tags.map((tag) => tag.category));
-  const { data: relations, error: relationsError } = await supabase
-    .from("material_tags")
-    .select("material_id, tag_id")
-    .in("tag_id", tagIds);
-
-  if (relationsError !== null) {
-    reportQueryError("資材タグの取得に失敗", relationsError);
-    return fail("internal");
-  }
-
-  const matchedCategoriesByMaterial = new Map<string, Set<string>>();
-
-  for (const relation of relations) {
-    const category = categoryByTagId.get(relation.tag_id);
-
-    if (category === undefined) {
-      reportQueryError("取得した資材タグに未要求のタグが含まれる", relation);
-      return fail("internal");
+  for (const result of categoryResults) {
+    if (!result.ok) return result;
+    if (intersection === null) {
+      intersection = new Set(result.data);
+      continue;
     }
 
-    const matchedCategories =
-      matchedCategoriesByMaterial.get(relation.material_id) ?? new Set<string>();
-    matchedCategories.add(category);
-    matchedCategoriesByMaterial.set(relation.material_id, matchedCategories);
+    const nextIntersection = new Set<string>();
+    for (const materialId of intersection) {
+      if (result.data.has(materialId)) nextIntersection.add(materialId);
+    }
+    intersection = nextIntersection;
   }
 
-  return succeed(
-    [...matchedCategoriesByMaterial]
-      .filter(([, categories]) => categories.size === requiredCategories.size)
-      .map(([materialId]) => materialId),
-  );
+  return succeed(intersection === null ? [] : [...intersection]);
 }
 
 export type ListMaterialsOptions = {
-  tagIds?: string[];
+  filters?: readonly SearchFilterRef[];
   /** メーカー名での絞り込み（同一分類 OR）。タグではなく materials 由来。 */
   makerNames?: string[];
   /** 製品名での絞り込み（同一分類 OR）。タグではなく materials 由来。 */
@@ -179,10 +274,10 @@ export async function listMaterials(
 
 export async function listMaterialsWithSupabase(
   supabase: SupabaseClient<Database>,
-  { tagIds, makerNames, materialNames, sort = "reviews", page }: ListMaterialsOptions,
+  { filters, makerNames, materialNames, sort = "reviews", page }: ListMaterialsOptions,
 ): Promise<Result<Paginated<MaterialListItem>>> {
   const { from, to } = pageRange(page);
-  const materialFilter = await findMatchingMaterialIds(supabase, tagIds);
+  const materialFilter = await findMatchingMaterialIds(supabase, filters);
 
   if (!materialFilter.ok) {
     return materialFilter;
@@ -206,29 +301,13 @@ export async function listMaterialsWithSupabase(
         id,
         name,
         manufacturer_name,
-        product_type,
-        jbsa_class,
         sales_status,
         seller_id,
         review_count,
         avg_rating,
         control_plot_ratio,
         created_at,
-        description,
-        material_images (
-          id,
-          url,
-          image_type,
-          sort_order
-        ),
-        material_tags (
-          tags (
-            id,
-            name,
-            category,
-            sort_order
-          )
-        )
+        description
       `,
     { count: "exact" },
   );
@@ -267,7 +346,7 @@ export async function listMaterialsWithSupabase(
   if (count === null) {
     reportQueryError("資材一覧の総件数が返されなかった", {
       page,
-      tagIds,
+      filters,
       makerNames: makers,
       materialNames: names,
       sort,
@@ -275,18 +354,32 @@ export async function listMaterialsWithSupabase(
     return fail("internal");
   }
 
-  const rows: MaterialListQueryRow[] = data;
+  const materialIds = data.map(({ id }) => id);
+  const imageResult =
+    materialIds.length === 0
+      ? { data: [], error: null }
+      : await supabase
+          .from("material_images")
+          .select("id, material_id, url, image_type, sort_order")
+          .in("material_id", materialIds);
+
+  if (imageResult.error !== null) {
+    reportQueryError("資材一覧画像の取得に失敗", imageResult.error);
+    return fail("internal");
+  }
+
+  const imagesByMaterial = new Map<string, MaterialImage[]>();
+  for (const { material_id, ...image } of imageResult.data) {
+    const images = imagesByMaterial.get(material_id) ?? [];
+    images.push(image);
+    imagesByMaterial.set(material_id, images);
+  }
 
   return succeed({
-    items: rows.map(({ material_images, material_tags: tagRelations, ...material }) => {
-      const images = material_images.toSorted(bySortOrder);
-
-      return {
-        ...material,
-        primaryImage: images[0] ?? null,
-        tags: materialTags(tagRelations),
-      };
-    }),
+    items: data.map((material) => ({
+      ...material,
+      primaryImage: (imagesByMaterial.get(material.id) ?? []).toSorted(bySortOrder)[0] ?? null,
+    })),
     page,
     perPage: DEFAULT_PER_PAGE,
     total: count,
@@ -310,8 +403,6 @@ export async function getMaterialWithSupabase(
         id,
         name,
         manufacturer_name,
-        product_type,
-        jbsa_class,
         sales_status,
         seller_id,
         review_count,
@@ -319,37 +410,15 @@ export async function getMaterialWithSupabase(
         control_plot_ratio,
         created_at,
         description,
+        composition_type_id,
         general_use,
-        ingredients,
+        main_components,
         mechanism,
         usage_text,
         price_range,
         official_url,
         catalog_url,
-        updated_at,
-        material_images (
-          id,
-          url,
-          image_type,
-          sort_order
-        ),
-        material_evidences (
-          id,
-          evidence_type,
-          title,
-          file_url,
-          external_url,
-          meta,
-          sort_order
-        ),
-        material_tags (
-          tags (
-            id,
-            name,
-            category,
-            sort_order
-          )
-        )
+        updated_at
       `,
     )
     .eq("id", id)
@@ -364,18 +433,181 @@ export async function getMaterialWithSupabase(
     return fail("not_found");
   }
 
-  const {
-    material_images,
-    material_evidences,
-    material_tags: tagRelations,
-    ...material
-  }: MaterialDetailQueryRow = data;
+  const [
+    imagesResult,
+    evidencesResult,
+    effectsResult,
+    cropsResult,
+    ingredientCategoriesResult,
+    ingredientsResult,
+    productTypesResult,
+    searchTagsResult,
+    optionsResult,
+  ] = await Promise.all([
+    supabase
+      .from("material_images")
+      .select("id, url, image_type, sort_order")
+      .eq("material_id", id),
+    supabase
+      .from("material_evidences")
+      .select("id, evidence_type, title, file_url, external_url, meta, sort_order, created_at")
+      .eq("material_id", id),
+    supabase.from("material_effects").select("effect_id").eq("material_id", id),
+    supabase
+      .from("material_crops")
+      .select("crop_id, source_name, sort_order")
+      .eq("material_id", id),
+    supabase
+      .from("material_ingredient_categories")
+      .select("ingredient_category_id")
+      .eq("material_id", id),
+    supabase.from("material_ingredients").select("ingredient_id").eq("material_id", id),
+    supabase.from("material_product_types").select("product_type_id").eq("material_id", id),
+    supabase.from("material_search_tags").select("search_tag_id").eq("material_id", id),
+    listClassificationOptionsWithSupabase(supabase),
+  ]);
+
+  const relationError =
+    imagesResult.error ??
+    evidencesResult.error ??
+    effectsResult.error ??
+    cropsResult.error ??
+    ingredientCategoriesResult.error ??
+    ingredientsResult.error ??
+    productTypesResult.error ??
+    searchTagsResult.error;
+  if (relationError !== null) {
+    reportQueryError("資材分類の取得に失敗", relationError);
+    return fail("internal");
+  }
+  if (!optionsResult.ok) return optionsResult;
+
+  const images = imagesResult.data;
+  const evidences = evidencesResult.data;
+  const effectRelations = effectsResult.data;
+  const cropRelations = cropsResult.data;
+  const ingredientCategoryRelations = ingredientCategoriesResult.data;
+  const ingredientRelations = ingredientsResult.data;
+  const productTypeRelations = productTypesResult.data;
+  const searchTagRelations = searchTagsResult.data;
+  if (
+    images === null ||
+    evidences === null ||
+    effectRelations === null ||
+    cropRelations === null ||
+    ingredientCategoryRelations === null ||
+    ingredientRelations === null ||
+    productTypeRelations === null ||
+    searchTagRelations === null
+  ) {
+    reportQueryError("資材分類の応答にデータが無い", { materialId: id });
+    return fail("internal");
+  }
+
+  const compositionType =
+    data.composition_type_id === null
+      ? null
+      : (optionsResult.data.compositionTypes.find(
+          ({ id: compositionTypeId }) => compositionTypeId === data.composition_type_id,
+        ) ?? null);
+  if (data.composition_type_id !== null && compositionType === null) {
+    reportQueryError("資材に対応する組成タイプが無い", data);
+    return fail("internal");
+  }
+
+  const effectById = new Map(optionsResult.data.effects.map((effect) => [effect.id, effect]));
+  const cropById = new Map(optionsResult.data.crops.map((crop) => [crop.id, crop]));
+  const ingredientCategoryById = new Map(
+    optionsResult.data.ingredientCategories.map((category) => [category.id, category]),
+  );
+  const ingredientById = new Map(
+    optionsResult.data.ingredients.map((ingredient) => [ingredient.id, ingredient]),
+  );
+  const productTypeById = new Map(
+    optionsResult.data.productTypes.map((productType) => [productType.id, productType]),
+  );
+  const searchTagById = new Map(
+    optionsResult.data.searchTags.map((searchTag) => [searchTag.id, searchTag]),
+  );
+  const effects: MaterialEffect[] = [];
+  const targetCrops: MaterialTargetCrop[] = [];
+  const ingredientCategories: MaterialClassification[] = [];
+  const ingredients: MaterialIngredient[] = [];
+  const productTypes: MaterialClassification[] = [];
+  const searchTags: MaterialSearchTag[] = [];
+
+  for (const relation of effectRelations) {
+    const effect = effectById.get(relation.effect_id);
+    if (effect === undefined) {
+      reportQueryError("資材に対応する効果が無い", relation);
+      return fail("internal");
+    }
+    effects.push(effect);
+  }
+  for (const relation of cropRelations) {
+    const crop = cropById.get(relation.crop_id);
+    if (crop === undefined) {
+      reportQueryError("資材に対応する対象作物が無い", relation);
+      return fail("internal");
+    }
+    targetCrops.push({
+      ...crop,
+      sort_order: relation.sort_order,
+      sourceName: relation.source_name,
+    });
+  }
+  for (const relation of ingredientCategoryRelations) {
+    const ingredientCategory = ingredientCategoryById.get(relation.ingredient_category_id);
+    if (ingredientCategory === undefined) {
+      reportQueryError("資材に対応する材料分類が無い", relation);
+      return fail("internal");
+    }
+    ingredientCategories.push(ingredientCategory);
+  }
+  for (const relation of ingredientRelations) {
+    const ingredient = ingredientById.get(relation.ingredient_id);
+    if (ingredient === undefined) {
+      reportQueryError("資材に対応する個別材料が無い", relation);
+      return fail("internal");
+    }
+    ingredients.push(ingredient);
+  }
+  for (const relation of productTypeRelations) {
+    const productType = productTypeById.get(relation.product_type_id);
+    if (productType === undefined) {
+      reportQueryError("資材に対応する製品タイプが無い", relation);
+      return fail("internal");
+    }
+    productTypes.push(productType);
+  }
+  for (const relation of searchTagRelations) {
+    const searchTag = searchTagById.get(relation.search_tag_id);
+    if (searchTag === undefined) {
+      reportQueryError("資材に対応する検索タグが無い", relation);
+      return fail("internal");
+    }
+    searchTags.push(searchTag);
+  }
 
   return succeed({
-    ...material,
-    images: material_images.toSorted(bySortOrder),
-    evidences: material_evidences.toSorted(bySortOrder),
-    tags: materialTags(tagRelations),
+    ...data,
+    compositionType,
+    effects: effects.toSorted(
+      (left, right) => left.categorySortOrder - right.categorySortOrder || bySortOrder(left, right),
+    ),
+    images: images.toSorted(bySortOrder),
+    evidences: evidences.toSorted(bySortOrder),
+    ingredientCategories: ingredientCategories.toSorted(bySortOrder),
+    ingredients: ingredients.toSorted(
+      (left, right) => left.categorySortOrder - right.categorySortOrder || bySortOrder(left, right),
+    ),
+    productTypes: productTypes.toSorted(bySortOrder),
+    searchTags: searchTags.toSorted(
+      (left, right) => left.category.localeCompare(right.category) || bySortOrder(left, right),
+    ),
+    targetCrops: targetCrops.toSorted(
+      (left, right) => left.groupSortOrder - right.groupSortOrder || bySortOrder(left, right),
+    ),
   });
 }
 

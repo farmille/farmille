@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ReviewForm } from "./ReviewForm";
 
 const initialValues = {
-  cropId: "crop-tomato",
+  cropIds: ["crop-tomato", "crop-pepper"],
   rating: 4,
   body: "定植後の根の動きがよく、株ごとの生育差が小さくなりました。",
   purchaseChannel: "direct" as const,
@@ -24,11 +24,22 @@ const meta = {
     },
     userId: "00000000-0000-4000-8000-000000000901",
     crops: [
-      { id: "crop-tomato", name: "トマト", fromProfile: true },
-      { id: "crop-pepper", name: "ピーマン", fromProfile: false },
+      {
+        id: "crop-tomato",
+        name: "トマト",
+        aliases: ["ミニトマト"],
+        groupName: "なす科果菜類",
+        fromProfile: true,
+      },
+      {
+        id: "crop-pepper",
+        name: "ピーマン",
+        aliases: ["パプリカ"],
+        groupName: "なす科果菜類",
+        fromProfile: false,
+      },
     ],
     initialValues,
-    profileCropDefaulted: true,
   },
 } satisfies Meta<typeof ReviewForm>;
 
@@ -48,7 +59,7 @@ export const Edit: Story = {
 export const Blank: Story = {
   args: {
     initialValues: {
-      cropId: "",
+      cropIds: [],
       rating: 0,
       body: "",
       purchaseChannel: null,
@@ -56,6 +67,5 @@ export const Blank: Story = {
       pesticideAck: false,
       photos: [],
     },
-    profileCropDefaulted: false,
   },
 };

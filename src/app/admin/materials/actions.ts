@@ -24,12 +24,11 @@ function materialErrorMessage(code: ErrorCode): string {
 const TEXT_FIELDS = [
   "name",
   "manufacturerName",
-  "productType",
-  "jbsaClass",
+  "compositionTypeId",
   "salesStatus",
   "description",
   "generalUse",
-  "ingredients",
+  "mainComponents",
   "mechanism",
   "usageText",
   "priceRange",
@@ -48,7 +47,12 @@ function submittedValues(formData: FormData): MaterialFormValues {
 
   return {
     fields,
-    tagIds: formDataStrings(formData.getAll("tagIds")),
+    cropIds: formDataStrings(formData.getAll("cropIds")),
+    effectIds: formDataStrings(formData.getAll("effectIds")),
+    ingredientCategoryIds: formDataStrings(formData.getAll("ingredientCategoryIds")),
+    ingredientIds: formDataStrings(formData.getAll("ingredientIds")),
+    productTypeIds: formDataStrings(formData.getAll("productTypeIds")),
+    searchTagIds: formDataStrings(formData.getAll("searchTagIds")),
   };
 }
 
@@ -56,18 +60,22 @@ function readInput(formData: FormData) {
   return {
     name: formData.get("name"),
     manufacturerName: formData.get("manufacturerName"),
-    productType: formData.get("productType"),
-    jbsaClass: formData.get("jbsaClass"),
+    compositionTypeId: formData.get("compositionTypeId"),
     salesStatus: formData.get("salesStatus"),
     description: formData.get("description"),
     generalUse: formData.get("generalUse"),
-    ingredients: formData.get("ingredients"),
+    mainComponents: formData.get("mainComponents"),
     mechanism: formData.get("mechanism"),
     usageText: formData.get("usageText"),
     priceRange: formData.get("priceRange"),
     officialUrl: formData.get("officialUrl"),
     catalogUrl: formData.get("catalogUrl"),
-    tagIds: formData.getAll("tagIds"),
+    cropIds: formData.getAll("cropIds"),
+    effectIds: formData.getAll("effectIds"),
+    ingredientCategoryIds: formData.getAll("ingredientCategoryIds"),
+    ingredientIds: formData.getAll("ingredientIds"),
+    productTypeIds: formData.getAll("productTypeIds"),
+    searchTagIds: formData.getAll("searchTagIds"),
   };
 }
 

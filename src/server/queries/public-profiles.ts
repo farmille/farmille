@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getViewerHelpfulVotes } from "@/server/queries/helpful";
 import { fail, succeed, type Result } from "@/server/result";
+import { reviewCropLabel, type ReviewCropRelation } from "@/server/reviews/crop-relations";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
@@ -22,7 +23,7 @@ type ProfileReviewQueryRow = Pick<
   ReviewRow,
   "id" | "material_id" | "rating" | "body" | "created_at"
 > & {
-  crop: Pick<CropRow, "id" | "name"> | null;
+  cropRelations: ReviewCropRelation[];
   material: Pick<MaterialRow, "id" | "name"> | null;
   photos: Pick<ReviewPhotoRow, "id" | "url" | "caption" | "sort_order">[];
 };
@@ -197,9 +198,12 @@ export async function getPublicProfilePage(
           rating,
           body,
           created_at,
-          crop:crops!reviews_crop_id_fkey (
-            id,
-            name
+          cropRelations:review_crops (
+            sort_order,
+            crop:crops!review_crops_crop_id_fkey (
+              id,
+              name
+            )
           ),
           material:materials!reviews_material_id_fkey (
             id,
@@ -314,7 +318,9 @@ export async function getPublicProfilePage(
   const posts: PublicProfilePost[] = [];
 
   for (const review of reviewRows) {
-    if (review.crop === null || review.material === null) {
+    const cropName = reviewCropLabel(review.cropRelations);
+
+    if (cropName === null || review.material === null) {
       reportQueryError("公開レビューの関連データが欠落", { reviewId: review.id });
       return fail("internal");
     }
@@ -325,7 +331,7 @@ export async function getPublicProfilePage(
       createdAt: review.created_at,
       materialId: review.material_id,
       materialName: review.material.name,
-      cropName: review.crop.name,
+      cropName,
       rating: review.rating,
       body: review.body,
       helpfulCount: reviewHelpful.data.get(review.id) ?? 0,

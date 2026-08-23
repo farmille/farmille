@@ -41,8 +41,6 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
     redirect(`${materialPath}/review/${existingResult.data}/edit?existing=1`);
   }
 
-  const profileCrop = cropsResult.data.find(({ fromProfile }) => fromProfile);
-
   return (
     <FormPageShell
       chrome="public"
@@ -59,9 +57,8 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
         }}
         userId={session.data.userId}
         crops={cropsResult.data}
-        profileCropDefaulted={profileCrop !== undefined}
         initialValues={{
-          cropId: profileCrop?.id ?? "",
+          cropIds: [],
           rating: 0,
           body: "",
           purchaseChannel: null,

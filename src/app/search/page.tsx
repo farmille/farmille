@@ -2,23 +2,23 @@ import type { Metadata } from "next";
 
 import { AppBar, EmptyState, MaterialCard } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
+import { MaterialSearchBox } from "@/components/search/MaterialSearchBox";
 import { SearchSortSelect } from "@/components/search/SearchSortSelect";
-import { TagSearchBox } from "@/components/search/TagSearchBox";
 import {
   formatLogicHint,
+  parseFiltersQuery,
   parseSortParam,
-  parseTagsQuery,
-  resolveSelectedTags,
-} from "@/components/search/tag-selection";
+  resolveSelectedFilters,
+} from "@/components/search/search-selection";
 import { createPageMetadata } from "@/lib/seo";
 import { listMaterials } from "@/server/queries/materials";
 import {
+  listSearchFiltersByPairs,
+  listSearchFiltersByRefs,
   listSearchSuggestions,
-  listTagsByIds,
-  listTagsByPairs,
-  POPULAR_TAG_PAIRS,
-  SEASONAL_TAG_PAIRS,
-} from "@/server/queries/tags";
+  POPULAR_FILTER_PAIRS,
+  SEASONAL_FILTER_PAIRS,
+} from "@/server/queries/classifications";
 import { css } from "../../../styled-system/css";
 
 import { SearchAnalytics } from "./_components/SearchAnalytics";
@@ -114,19 +114,19 @@ function SearchPageHeading() {
 }
 
 type SearchPageProps = {
-  searchParams: Promise<{ tags?: string; sort?: string }>;
+  searchParams: Promise<{ filters?: string; sort?: string }>;
 };
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const sort = parseSortParam(params.sort);
 
-  let tagIds: string[] = [];
+  let filters = [];
   let makerNames: string[] = [];
   let materialNames: string[] = [];
 
   try {
-    ({ tagIds, makerNames, materialNames } = parseTagsQuery(params.tags));
+    ({ filters, makerNames, materialNames } = parseFiltersQuery(params.filters));
   } catch {
     return (
       <div className={shell}>
@@ -135,7 +135,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <SearchPageHeading />
           <EmptyState
             title="検索条件が正しくありません"
-            description="URL の tags パラメータを確認するか、条件を選び直してください。"
+            description="URL の filters パラメータを確認するか、条件を選び直してください。"
           />
         </main>
         <BottomNav active="search" />
@@ -143,10 +143,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     );
   }
 
-  const [tagsResult, popularResult, seasonalResult, catalogResult] = await Promise.all([
-    listTagsByIds(tagIds),
-    listTagsByPairs(POPULAR_TAG_PAIRS),
-    listTagsByPairs(SEASONAL_TAG_PAIRS),
+  const [filtersResult, popularResult, seasonalResult, catalogResult] = await Promise.all([
+    listSearchFiltersByRefs(filters),
+    listSearchFiltersByPairs(POPULAR_FILTER_PAIRS),
+    listSearchFiltersByPairs(SEASONAL_FILTER_PAIRS),
     listSearchSuggestions(),
   ]);
 
@@ -154,14 +154,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     throw new Error("タグ候補の取得に失敗しました。");
   }
 
-  if (!tagsResult.ok) {
+  if (!filtersResult.ok) {
     return (
       <div className={shell}>
         <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" />
         <main className={main}>
           <SearchPageHeading />
           <EmptyState
-            title="指定されたタグが見つかりません"
+            title="指定された検索条件が見つかりません"
             description="条件を選び直して、もう一度検索してください。"
           />
         </main>
@@ -170,15 +170,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     );
   }
 
-  const selected = resolveSelectedTags({
-    tagIds,
+  const selected = resolveSelectedFilters({
+    filters: filtersResult.data,
     makerNames,
     materialNames,
-    tagsById: new Map(tagsResult.data.map((tag) => [tag.id, tag])),
   });
 
   const materialsResult = await listMaterials({
-    tagIds: tagIds.length > 0 ? tagIds : undefined,
+    filters: filters.length > 0 ? filters : undefined,
     makerNames: makerNames.length > 0 ? makerNames : undefined,
     materialNames: materialNames.length > 0 ? materialNames : undefined,
     sort,
@@ -198,8 +197,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" />
       <main className={main}>
         <SearchPageHeading />
-        <TagSearchBox
-          variant="search"
+        <MaterialSearchBox
           selected={selected}
           sort={sort}
           popular={popularResult.data}
@@ -252,7 +250,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         ) : (
           <EmptyState
             title="条件に合う資材が見つかりませんでした"
-            description="タグの組み合わせを変えるか、条件を減らして再度お試しください。"
+            description="分類の組み合わせを変えるか、条件を減らして再度お試しください。"
           />
         )}
       </main>

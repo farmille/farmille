@@ -1,4 +1,7 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { COMPARE_MATERIAL_LIMITS } from "@/lib/compare-limits";
+import { getMaterialWithSupabase } from "@/server/queries/materials";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
@@ -7,10 +10,8 @@ export { COMPARE_MATERIAL_LIMITS } from "@/lib/compare-limits";
 
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 type MaterialImageRow = Database["public"]["Tables"]["material_images"]["Row"];
-type TagRow = Database["public"]["Tables"]["tags"]["Row"];
 
 type MaterialImage = Pick<MaterialImageRow, "id" | "url" | "image_type" | "sort_order">;
-type MaterialTag = Pick<TagRow, "id" | "name" | "category" | "sort_order">;
 
 type SavedMaterialQueryRow = {
   id: string;
@@ -21,7 +22,6 @@ type SavedMaterialQueryRow = {
         | "id"
         | "name"
         | "manufacturer_name"
-        | "product_type"
         | "price_range"
         | "review_count"
         | "avg_rating"
@@ -30,7 +30,6 @@ type SavedMaterialQueryRow = {
         | "description"
       > & {
         material_images: MaterialImage[];
-        material_tags: Array<{ tags: MaterialTag | null }>;
       })
     | null;
 };
@@ -49,7 +48,6 @@ export type SavedMaterialItem = {
   official: boolean;
   description: string | null;
   primaryImageUrl: string | null;
-  tags: ReadonlyArray<{ id: string; name: string; category: string }>;
 };
 
 export type CompareMaterialItem = {
@@ -75,15 +73,45 @@ function bySortOrder(
   return left.sort_order - right.sort_order || left.id.localeCompare(right.id);
 }
 
-function mapTags(
-  relations: Array<{ tags: MaterialTag | null }>,
-): Array<{ id: string; name: string; category: string }> {
-  return relations
-    .flatMap(({ tags }) => (tags === null ? [] : [tags]))
-    .toSorted(
-      (left, right) => left.category.localeCompare(right.category) || bySortOrder(left, right),
+async function loadProductTypeNames(
+  supabase: SupabaseClient<Database>,
+  materialIds: string[],
+): Promise<Result<Map<string, string>>> {
+  if (materialIds.length === 0) return succeed(new Map());
+
+  const { data, error } = await supabase
+    .from("material_product_types")
+    .select(
+      "material_id, product_type:product_types!material_product_types_product_type_id_fkey(name, sort_order)",
     )
-    .map(({ id, name, category }) => ({ id, name, category }));
+    .in("material_id", materialIds);
+  if (error !== null || data === null) {
+    reportQueryError("製品タイプの取得に失敗", error);
+    return fail("internal");
+  }
+
+  const itemsByMaterial = new Map<string, Array<{ name: string; sort_order: number }>>();
+  for (const relation of data) {
+    if (relation.product_type === null) {
+      reportQueryError("製品タイプの参照先が無い", relation);
+      return fail("internal");
+    }
+    const items = itemsByMaterial.get(relation.material_id) ?? [];
+    items.push(relation.product_type);
+    itemsByMaterial.set(relation.material_id, items);
+  }
+
+  return succeed(
+    new Map(
+      [...itemsByMaterial].map(([materialId, items]) => [
+        materialId,
+        items
+          .toSorted((left, right) => left.sort_order - right.sort_order)
+          .map(({ name }) => name)
+          .join("、"),
+      ]),
+    ),
+  );
 }
 
 export async function isMaterialSaved(
@@ -182,7 +210,6 @@ export async function listSavedMaterials(
           id,
           name,
           manufacturer_name,
-          product_type,
           price_range,
           review_count,
           avg_rating,
@@ -194,14 +221,6 @@ export async function listSavedMaterials(
             url,
             image_type,
             sort_order
-          ),
-          material_tags (
-            tags (
-              id,
-              name,
-              category,
-              sort_order
-            )
           )
         )
       `,
@@ -222,6 +241,11 @@ export async function listSavedMaterials(
   }
 
   const rows: SavedMaterialQueryRow[] = data;
+  const productTypes = await loadProductTypeNames(
+    supabase,
+    rows.flatMap(({ material }) => (material === null ? [] : [material.id])),
+  );
+  if (!productTypes.ok) return productTypes;
   const items: SavedMaterialItem[] = [];
 
   for (const row of rows) {
@@ -238,7 +262,7 @@ export async function listSavedMaterials(
       materialId: row.material.id,
       name: row.material.name,
       manufacturerName: row.material.manufacturer_name,
-      productType: row.material.product_type,
+      productType: productTypes.data.get(row.material.id) ?? null,
       priceRange: row.material.price_range,
       reviewCount: row.material.review_count,
       avgRating: row.material.avg_rating,
@@ -246,7 +270,6 @@ export async function listSavedMaterials(
       official: row.material.seller_id !== null,
       description: row.material.description,
       primaryImageUrl: images[0]?.url ?? null,
-      tags: mapTags(row.material.material_tags),
     });
   }
 
@@ -310,19 +333,10 @@ export async function listMaterialsForCompare(
         id,
         name,
         manufacturer_name,
-        product_type,
         price_range,
         review_count,
         avg_rating,
-        control_plot_ratio,
-        material_tags (
-          tags (
-            id,
-            name,
-            category,
-            sort_order
-          )
-        )
+        control_plot_ratio
       `,
     )
     .in("id", uniqueIds);
@@ -337,17 +351,21 @@ export async function listMaterialsForCompare(
     | "id"
     | "name"
     | "manufacturer_name"
-    | "product_type"
     | "price_range"
     | "review_count"
     | "avg_rating"
     | "control_plot_ratio"
-  > & {
-    material_tags: Array<{ tags: MaterialTag | null }>;
-  };
+  >;
 
   const rows: CompareQueryRow[] = data;
   const byId = new Map(rows.map((row) => [row.id, row]));
+  const detailResults = await Promise.all(
+    uniqueIds.map((materialId) => getMaterialWithSupabase(supabase, materialId)),
+  );
+  const detailById = new Map(
+    detailResults.flatMap((result) => (result.ok ? [[result.data.id, result.data] as const] : [])),
+  );
+  if (detailResults.some((result) => !result.ok)) return fail("internal");
   const items: CompareMaterialItem[] = [];
 
   for (const id of uniqueIds) {
@@ -355,6 +373,14 @@ export async function listMaterialsForCompare(
     if (row === undefined) {
       return fail("not_found");
     }
+    const detail = detailById.get(id);
+    if (detail === undefined) return fail("not_found");
+    const tags = [
+      ...detail.effects.map(({ id, name }) => ({ id, name, category: "effect" })),
+      ...detail.targetCrops.map(({ id, name }) => ({ id, name, category: "crop" })),
+      ...detail.productTypes.map(({ id, name }) => ({ id, name, category: "type" })),
+      ...detail.searchTags.map(({ id, name, category }) => ({ id, name, category })),
+    ];
 
     items.push({
       id: row.id,
@@ -363,9 +389,12 @@ export async function listMaterialsForCompare(
       avgRating: row.avg_rating,
       reviewCount: row.review_count,
       controlPlotRatio: row.control_plot_ratio,
-      productType: row.product_type,
+      productType:
+        detail.productTypes.length === 0
+          ? null
+          : detail.productTypes.map(({ name }) => name).join("、"),
       priceRange: row.price_range,
-      tags: mapTags(row.material_tags),
+      tags,
     });
   }
 

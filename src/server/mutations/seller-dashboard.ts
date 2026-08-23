@@ -12,7 +12,7 @@ type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 export const PRIMARY_INFORMATION_FIELDS = [
   "description",
   "general_use",
-  "ingredients",
+  "main_components",
   "mechanism",
   "usage_text",
   "price_range",
@@ -72,7 +72,7 @@ function validHttpUrl(value: string): boolean {
 export function validatePrimaryInformation(input: {
   description: FormDataEntryValue | null;
   general_use: FormDataEntryValue | null;
-  ingredients: FormDataEntryValue | null;
+  main_components: FormDataEntryValue | null;
   mechanism: FormDataEntryValue | null;
   usage_text: FormDataEntryValue | null;
   price_range: FormDataEntryValue | null;
@@ -83,7 +83,7 @@ export function validatePrimaryInformation(input: {
   const normalized: PrimaryInformationUpdate = {
     description: optionalText(input.description, "description", fieldErrors),
     general_use: optionalText(input.general_use, "general_use", fieldErrors),
-    ingredients: optionalText(input.ingredients, "ingredients", fieldErrors),
+    main_components: optionalText(input.main_components, "main_components", fieldErrors),
     mechanism: optionalText(input.mechanism, "mechanism", fieldErrors),
     usage_text: optionalText(input.usage_text, "usage_text", fieldErrors),
     price_range: optionalText(input.price_range, "price_range", fieldErrors),

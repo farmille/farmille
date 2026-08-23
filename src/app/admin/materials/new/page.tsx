@@ -4,8 +4,8 @@ import { AdminShell } from "@/app/admin/_components/AdminShell";
 import { Panel } from "@/app/admin/_components/AdminUI";
 import { requireAdminPage } from "@/app/admin/_lib/access";
 import { MaterialForm } from "@/app/admin/materials/_components/MaterialForm";
-import { listAdminTags } from "@/server/admin/tags";
 import { errorMessageJa } from "@/server/errors";
+import { listClassificationOptions } from "@/server/queries/classifications";
 
 export const metadata: Metadata = {
   title: "資材の新規登録",
@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 export default async function AdminMaterialNewPage() {
   await requireAdminPage("/admin/materials/new");
 
-  const tags = await listAdminTags();
+  const classifications = await listClassificationOptions();
 
-  if (!tags.ok) {
-    throw new Error(errorMessageJa[tags.error]);
+  if (!classifications.ok) {
+    throw new Error(errorMessageJa[classifications.error]);
   }
 
   return (
@@ -28,7 +28,7 @@ export default async function AdminMaterialNewPage() {
       title="資材の新規登録"
     >
       <Panel title="登録内容">
-        <MaterialForm material={null} tags={tags.data} />
+        <MaterialForm classifications={classifications.data} material={null} />
       </Panel>
     </AdminShell>
   );

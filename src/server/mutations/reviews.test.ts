@@ -10,10 +10,12 @@ import { createServerSupabase } from "@/server/supabase";
 
 const materialId = "11111111-1111-4111-8111-111111111111";
 const cropId = "22222222-2222-4222-8222-222222222222";
+const secondCropId = "55555555-5555-4555-8555-555555555555";
 
 function validFormData(): FormData {
   const formData = new FormData();
-  formData.set("cropId", cropId);
+  formData.append("cropIds", cropId);
+  formData.append("cropIds", secondCropId);
   formData.set("rating", "4");
   formData.set("body", "定植後に使用し、葉の状態を継続して観察しました。");
   formData.set("purchaseChannel", "ja");
@@ -38,7 +40,7 @@ describe("validateReviewFormData", () => {
     expect(result).toEqual({
       ok: true,
       input: {
-        cropId,
+        cropIds: [cropId, secondCropId],
         rating: 4,
         body: "定植後に使用し、葉の状態を継続して観察しました。",
         purchaseChannel: "ja",
@@ -67,7 +69,8 @@ describe("validateReviewFormData", () => {
 
   it("星・本文・作目・購入場所・写真パスを server 側で検証する", () => {
     const formData = validFormData();
-    formData.set("cropId", "not-a-uuid");
+    formData.delete("cropIds");
+    formData.append("cropIds", "not-a-uuid");
     formData.set("rating", "6");
     formData.set("body", "   ");
     formData.set("purchaseChannel", "public-marketplace");
@@ -77,12 +80,22 @@ describe("validateReviewFormData", () => {
     expect(result).toMatchObject({
       ok: false,
       fieldErrors: {
-        cropId: expect.any(String),
+        cropIds: expect.any(String),
         rating: expect.any(String),
         body: expect.any(String),
         purchaseChannel: expect.any(String),
         photos: expect.any(String),
       },
+    });
+  });
+
+  it("同じ作目の重複送信を拒否する", () => {
+    const formData = validFormData();
+    formData.append("cropIds", cropId);
+
+    expect(validateReviewFormData(formData)).toMatchObject({
+      ok: false,
+      fieldErrors: { cropIds: expect.any(String) },
     });
   });
 });
@@ -94,7 +107,7 @@ describe("createReview", () => {
     authenticate.mockResolvedValue({ ok: false, error: "forbidden" });
     const input: ReviewMutationInput = {
       materialId,
-      cropId,
+      cropIds: [cropId, secondCropId],
       rating: 5,
       body: "使用後の状態を記録しました。",
       purchaseChannel: null,

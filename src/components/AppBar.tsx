@@ -85,7 +85,7 @@ const desktopHeaderInner = css({
   px: "5",
   display: "flex",
   alignItems: "center",
-  gap: "5",
+  gap: "3",
 });
 
 const desktopBrand = css({
@@ -103,19 +103,59 @@ const desktopBrandName = css({
   fontWeight: "800",
 });
 
-const catchCopy = css({
-  display: "none",
-  color: "text.subtle",
-  fontSize: "xs",
-  whiteSpace: "nowrap",
-  xl: { display: "block" },
-});
-
 const desktopNav = css({
   display: "flex",
   alignItems: "center",
   gap: "1",
   ml: "auto",
+});
+
+const desktopPublicActions = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "1.5",
+  flexShrink: "0",
+});
+
+const desktopSearch = css({
+  minH: "42px",
+  minW: "0",
+  flex: "1",
+  maxW: "480px",
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  px: "3",
+  bg: "surface.card",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  borderRadius: "button",
+  color: "text.subtle",
+  textDecoration: "none",
+  _hover: { borderColor: "brand.primary" },
+  _focusVisible: {
+    outlineWidth: "2px",
+    outlineStyle: "solid",
+    outlineColor: "brand.primary",
+    outlineOffset: "2px",
+  },
+});
+
+const desktopSearchLabel = css({
+  flex: "1",
+  minW: "0",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  fontSize: "sm",
+});
+
+const desktopSearchAction = css({
+  color: "brand.primaryDeep",
+  fontSize: "xs",
+  fontWeight: "700",
+  whiteSpace: "nowrap",
 });
 
 const desktopNavLink = cva({
@@ -252,16 +292,6 @@ type AppBarBackProps = AppBarBaseProps & {
 
 export type AppBarProps = AppBarHomeProps | AppBarBackProps;
 
-const PUBLIC_NAV_ITEMS: ReadonlyArray<{
-  id: Exclude<AppBarActive, "post" | "me">;
-  href: string;
-  label: string;
-}> = [
-  { id: "home", href: "/", label: "ホーム" },
-  { id: "search", href: "/search", label: "資材を探す" },
-  { id: "articles", href: "/articles", label: "記事を読む" },
-];
-
 function MobileAppBar(props: AppBarProps) {
   if (props.variant === "home") {
     return (
@@ -304,29 +334,38 @@ function DesktopSiteHeader({ active }: { active?: AppBarActive }) {
           <LeafIcon size={25} />
           <span className={desktopBrandName}>Farmille</span>
         </Link>
-        <span className={catchCopy}>農業の未来を、みんなの知恵で。</span>
-        <nav className={desktopNav} aria-label="PCメインナビ">
-          {PUBLIC_NAV_ITEMS.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={desktopNavLink({ active: active === item.id })}
-              aria-current={active === item.id ? "page" : undefined}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <Link href="/post" className={desktopAction({ emphasis: "primary" })}>
-          投稿する
+        <Link
+          href="/articles?type=report"
+          className={desktopNavLink({ active: active === "articles" })}
+          aria-current={active === "articles" ? "page" : undefined}
+        >
+          使用レポート一覧
         </Link>
         <Link
-          href="/me"
-          className={desktopAction({ emphasis: "secondary" })}
-          aria-current={active === "me" ? "page" : undefined}
+          href="/search"
+          className={desktopSearch}
+          aria-current={active === "search" ? "page" : undefined}
         >
-          アカウント
+          <SearchIcon size={17} />
+          <span className={desktopSearchLabel}>資材を検索（作物・悩み・資材名から）</span>
+          <span className={desktopSearchAction}>検索へ →</span>
         </Link>
+        <nav className={desktopPublicActions} aria-label="PCメインナビ">
+          <Link
+            href="/post"
+            className={desktopAction({ emphasis: "primary" })}
+            aria-current={active === "post" ? "page" : undefined}
+          >
+            ＋ 投稿
+          </Link>
+          <Link
+            href="/me"
+            className={desktopAction({ emphasis: "secondary" })}
+            aria-current={active === "me" ? "page" : undefined}
+          >
+            マイページ
+          </Link>
+        </nav>
       </div>
     </header>
   );

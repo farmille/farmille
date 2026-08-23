@@ -99,7 +99,7 @@ async function loadSellerOrNotFound(id: string): Promise<PublicSellerPageData> {
 }
 
 function sellerMaterialsHref(officialName: string): string {
-  return `/search?tags=maker:${encodeURIComponent(officialName)}`;
+  return `/search?filters=maker:${encodeURIComponent(officialName)}`;
 }
 
 type SellerPageProps = {

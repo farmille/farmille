@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       answers: {
@@ -190,6 +165,30 @@ export type Database = {
           },
         ]
       }
+      composition_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       content_reports: {
         Row: {
           created_at: string
@@ -306,6 +305,65 @@ export type Database = {
           },
         ]
       }
+      effect_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      effects: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "effects_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "effect_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helpful_votes: {
         Row: {
           created_at: string
@@ -345,6 +403,110 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      ingredient_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ingredients: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingredients_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "ingredient_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_crops: {
+        Row: {
+          created_at: string
+          crop_id: string
+          id: string
+          material_id: string
+          sort_order: number
+          source_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          crop_id: string
+          id?: string
+          material_id: string
+          sort_order?: number
+          source_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          crop_id?: string
+          id?: string
+          material_id?: string
+          sort_order?: number
+          source_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_crops_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_crops_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -396,6 +558,45 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_effects: {
+        Row: {
+          created_at: string
+          effect_id: string
+          id: string
+          material_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          effect_id: string
+          id?: string
+          material_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          effect_id?: string
+          id?: string
+          material_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_effects_effect_id_fkey"
+            columns: ["effect_id"]
+            isOneToOne: false
+            referencedRelation: "effects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_effects_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
             referencedColumns: ["id"]
           },
         ]
@@ -485,6 +686,162 @@ export type Database = {
           },
         ]
       }
+      material_ingredient_categories: {
+        Row: {
+          created_at: string
+          id: string
+          ingredient_category_id: string
+          material_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ingredient_category_id: string
+          material_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ingredient_category_id?: string
+          material_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_ingredient_categories_ingredient_category_id_fkey"
+            columns: ["ingredient_category_id"]
+            isOneToOne: false
+            referencedRelation: "ingredient_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_ingredient_categories_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_ingredients: {
+        Row: {
+          created_at: string
+          id: string
+          ingredient_id: string
+          material_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ingredient_id: string
+          material_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ingredient_id?: string
+          material_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_ingredients_ingredient_id_fkey"
+            columns: ["ingredient_id"]
+            isOneToOne: false
+            referencedRelation: "ingredients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_ingredients_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_product_types: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          product_type_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          product_type_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          product_type_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_product_types_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_product_types_product_type_id_fkey"
+            columns: ["product_type_id"]
+            isOneToOne: false
+            referencedRelation: "product_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_search_tags: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          search_tag_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          search_tag_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          search_tag_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_search_tags_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_search_tags_search_tag_id_fkey"
+            columns: ["search_tag_id"]
+            isOneToOne: false
+            referencedRelation: "search_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       material_sources: {
         Row: {
           created_at: string
@@ -523,62 +880,22 @@ export type Database = {
           },
         ]
       }
-      material_tags: {
-        Row: {
-          created_at: string
-          id: string
-          material_id: string
-          tag_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          material_id: string
-          tag_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          material_id?: string
-          tag_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "material_tags_material_id_fkey"
-            columns: ["material_id"]
-            isOneToOne: false
-            referencedRelation: "materials"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "material_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       materials: {
         Row: {
           avg_rating: number | null
           catalog_url: string | null
+          composition_type_id: string | null
           control_plot_ratio: number | null
           created_at: string
           description: string | null
           general_use: string | null
           id: string
-          ingredients: string | null
-          jbsa_class: string | null
+          main_components: string | null
           manufacturer_name: string
           mechanism: string | null
           name: string
           official_url: string | null
           price_range: string | null
-          product_type: string | null
           review_count: number
           sales_status: string | null
           seller_id: string | null
@@ -588,19 +905,18 @@ export type Database = {
         Insert: {
           avg_rating?: number | null
           catalog_url?: string | null
+          composition_type_id?: string | null
           control_plot_ratio?: number | null
           created_at?: string
           description?: string | null
           general_use?: string | null
           id?: string
-          ingredients?: string | null
-          jbsa_class?: string | null
+          main_components?: string | null
           manufacturer_name: string
           mechanism?: string | null
           name: string
           official_url?: string | null
           price_range?: string | null
-          product_type?: string | null
           review_count?: number
           sales_status?: string | null
           seller_id?: string | null
@@ -610,19 +926,18 @@ export type Database = {
         Update: {
           avg_rating?: number | null
           catalog_url?: string | null
+          composition_type_id?: string | null
           control_plot_ratio?: number | null
           created_at?: string
           description?: string | null
           general_use?: string | null
           id?: string
-          ingredients?: string | null
-          jbsa_class?: string | null
+          main_components?: string | null
           manufacturer_name?: string
           mechanism?: string | null
           name?: string
           official_url?: string | null
           price_range?: string | null
-          product_type?: string | null
           review_count?: number
           sales_status?: string | null
           seller_id?: string | null
@@ -630,6 +945,13 @@ export type Database = {
           usage_text?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "materials_composition_type_id_fkey"
+            columns: ["composition_type_id"]
+            isOneToOne: false
+            referencedRelation: "composition_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "materials_seller_id_fkey"
             columns: ["seller_id"]
@@ -645,6 +967,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      product_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       profile_crops: {
         Row: {
@@ -789,6 +1135,48 @@ export type Database = {
           },
         ]
       }
+      review_crops: {
+        Row: {
+          created_at: string
+          crop_id: string
+          id: string
+          review_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          crop_id: string
+          id?: string
+          review_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          crop_id?: string
+          id?: string
+          review_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_crops_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_crops_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_photos: {
         Row: {
           caption: string | null
@@ -832,7 +1220,6 @@ export type Database = {
           author_user_id: string
           body: string
           created_at: string
-          crop_id: string
           has_control_plot: boolean | null
           id: string
           is_provided_sample: boolean
@@ -847,7 +1234,6 @@ export type Database = {
           author_user_id: string
           body: string
           created_at?: string
-          crop_id: string
           has_control_plot?: boolean | null
           id?: string
           is_provided_sample?: boolean
@@ -862,7 +1248,6 @@ export type Database = {
           author_user_id?: string
           body?: string
           created_at?: string
-          crop_id?: string
           has_control_plot?: boolean | null
           id?: string
           is_provided_sample?: boolean
@@ -887,13 +1272,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "reviews_crop_id_fkey"
-            columns: ["crop_id"]
-            isOneToOne: false
-            referencedRelation: "crops"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "reviews_material_id_fkey"
@@ -949,6 +1327,33 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      search_tags: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       seller_accounts: {
         Row: {
@@ -1010,33 +1415,6 @@ export type Database = {
           status?: string
           updated_at?: string
           website_url?: string | null
-        }
-        Relationships: []
-      }
-      tags: {
-        Row: {
-          category: string
-          created_at: string
-          id: string
-          name: string
-          sort_order: number
-          updated_at: string
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          id?: string
-          name: string
-          sort_order?: number
-          updated_at?: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          id?: string
-          name?: string
-          sort_order?: number
-          updated_at?: string
         }
         Relationships: []
       }
@@ -1432,7 +1810,33 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      create_review_with_crops: {
+        Args: {
+          p_author_user_id: string
+          p_body: string
+          p_crop_ids: string[]
+          p_has_control_plot: boolean
+          p_material_id: string
+          p_pesticide_ack: boolean
+          p_purchase_channel?: string
+          p_rating: number
+        }
+        Returns: string
+      }
+      update_review_with_crops: {
+        Args: {
+          p_author_user_id: string
+          p_body: string
+          p_crop_ids: string[]
+          p_has_control_plot: boolean
+          p_material_id: string
+          p_pesticide_ack: boolean
+          p_purchase_channel?: string
+          p_rating: number
+          p_review_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
@@ -1561,9 +1965,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },

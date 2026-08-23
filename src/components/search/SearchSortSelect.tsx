@@ -5,10 +5,14 @@ import { useTransition } from "react";
 
 import { Select } from "@/components/Select";
 import { css } from "../../../styled-system/css";
-import { buildSearchHref, type MaterialSortParam, type SelectedSearchTag } from "./tag-selection";
+import {
+  buildSearchHref,
+  type MaterialSortParam,
+  type SelectedSearchFilter,
+} from "./search-selection";
 
 type SearchSortSelectProps = {
-  selected: SelectedSearchTag[];
+  selected: SelectedSearchFilter[];
   sort: MaterialSortParam;
 };
 
@@ -36,7 +40,7 @@ export function SearchSortSelect({ selected, sort }: SearchSortSelectProps) {
           throw new Error(`未対応の並び替えです: ${next}`);
         }
         startTransition(() => {
-          router.push(buildSearchHref({ tags: selected, sort: next }));
+          router.push(buildSearchHref({ filters: selected, sort: next }));
         });
       }}
     >

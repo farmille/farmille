@@ -28,7 +28,12 @@ export const initialSellerActionState: SellerActionState = { status: "idle" };
  */
 export type MaterialFormValues = {
   fields: Record<string, string>;
-  tagIds: string[];
+  cropIds: string[];
+  effectIds: string[];
+  ingredientCategoryIds: string[];
+  ingredientIds: string[];
+  productTypeIds: string[];
+  searchTagIds: string[];
 };
 
 /** 資材フォーム。項目単位のエラーと送信値を返す。 */

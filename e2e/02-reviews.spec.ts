@@ -8,6 +8,7 @@ import {
   helpfulVoteCount,
   listSeedMaterials,
   reviewByAuthor,
+  reviewCropNames,
 } from "./support/test-data";
 import { loginGeneral } from "./support/ui";
 
@@ -25,7 +26,11 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
   try {
     await loginGeneral(page, user);
     await page.goto(`/materials/${material.id}/review/new`);
-    await page.getByLabel("作目").selectOption({ label: "トマト" });
+    const cropSearch = page.getByRole("textbox", { name: "作目" });
+    await cropSearch.fill("トマト");
+    await page.getByRole("button", { name: "トマトを選択", exact: true }).click();
+    await cropSearch.fill("ミニトマト");
+    await page.getByRole("button", { name: "ミニトマトを選択", exact: true }).click();
     await page.getByRole("radio", { name: "4", exact: true }).check();
     await page.getByLabel("レビュー本文").fill(body);
     await page.getByRole("checkbox", { name: /このレビューには、病害虫の防除/ }).check();
@@ -33,13 +38,29 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
 
     await expect(page).toHaveURL(new RegExp(`/materials/${material.id}\\?review=posted`));
     await expect(page.getByText(body, { exact: true })).toBeVisible();
+    await expect(page.getByText("トマト・ミニトマト", { exact: true })).toBeVisible();
     await expect
       .poll(async () => (await getMaterial(material.id)).review_count)
       .toBe(material.review_count + 1);
     await expect.poll(async () => (await getMaterial(material.id)).avg_rating).toBe(4);
 
+    const createdReview = await reviewByAuthor(user.id);
+    if (createdReview === null) throw new Error("投稿したレビューが見つかりません。");
+    await expect
+      .poll(async () => await reviewCropNames(createdReview.id))
+      .toEqual(["トマト", "ミニトマト"]);
+
+    for (const path of ["/", "/me", `/users/${user.id}`]) {
+      await page.goto(path);
+      await expect(page.getByText(body, { exact: true })).toBeVisible();
+      await expect(page.getByText("トマト・ミニトマト", { exact: true })).toBeVisible();
+    }
+
+    await page.goto(`/materials/${material.id}`);
     const reviewCard = page.getByRole("article").filter({ hasText: body });
     await reviewCard.getByRole("link", { name: "編集" }).click();
+    await expect(page.getByRole("button", { name: "トマトを削除", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "ミニトマトを削除", exact: true })).toBeVisible();
     await page.getByRole("radio", { name: "5", exact: true }).check();
     await page.getByLabel("レビュー本文").fill(updatedBody);
     await page.getByRole("button", { name: "変更を保存する" }).click();

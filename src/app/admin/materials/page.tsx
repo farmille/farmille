@@ -48,7 +48,11 @@ const columns: DataTableColumn<AdminMaterialListItem>[] = [
     ),
   },
   { key: "manufacturer_name", header: "メーカー名", cell: (row) => row.manufacturer_name },
-  { key: "product_type", header: "種別", cell: (row) => row.product_type ?? "—" },
+  {
+    key: "product_types",
+    header: "製品タイプ",
+    cell: (row) => (row.productTypeNames.length === 0 ? "—" : row.productTypeNames.join("、")),
+  },
   { key: "sales_status", header: "販売状況", cell: (row) => row.sales_status ?? "—" },
   {
     key: "claim",

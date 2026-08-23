@@ -206,11 +206,11 @@ insert into public.materials (
   id,
   name,
   manufacturer_name,
-  product_type,
+  composition_type_id,
   sales_status,
   description,
   general_use,
-  ingredients,
+  main_components,
   mechanism,
   usage_text,
   seller_id
@@ -218,7 +218,7 @@ insert into public.materials (
   '11111111-1111-4111-8111-111111111111',
   'アクティビオ検証',
   'デモ株式会社',
-  'バイオスティミュラント',
+  (select id from public.composition_types where name = '混合系'),
   '公式ページ掲載',
   '高温期の樹勢維持を支援する検証用資材。',
   '施設園芸の高温対策',
@@ -227,6 +227,43 @@ insert into public.materials (
   '1,000倍希釈で葉面散布または灌水施用。',
   '33333333-3333-4333-8333-333333333333'
 );
+
+insert into public.material_effects (material_id, effect_id)
+select '11111111-1111-4111-8111-111111111111', effects.id
+from public.effects
+where effects.name in ('耐暑性改善', '樹勢改善', 'しおれ軽減');
+
+insert into public.material_crops (material_id, crop_id, source_name, sort_order)
+select
+  '11111111-1111-4111-8111-111111111111',
+  crops.id,
+  'ミニトマト',
+  1
+from public.crops
+where crops.name = 'ミニトマト';
+
+insert into public.material_ingredient_categories (material_id, ingredient_category_id)
+select '11111111-1111-4111-8111-111111111111', categories.id
+from public.ingredient_categories categories
+where categories.name in (
+  '海藻、海藻抽出物',
+  'アミノ酸、ペプチド、タンパク質加水分解物'
+);
+
+insert into public.material_ingredients (material_id, ingredient_id)
+select '11111111-1111-4111-8111-111111111111', ingredients.id
+from public.ingredients
+where ingredients.name in ('海藻抽出物', 'アミノ酸');
+
+insert into public.material_product_types (material_id, product_type_id)
+select '11111111-1111-4111-8111-111111111111', product_types.id
+from public.product_types
+where product_types.name in ('バイオスティミュラント', '液体肥料');
+
+insert into public.material_search_tags (material_id, search_tag_id)
+select '11111111-1111-4111-8111-111111111111', search_tags.id
+from public.search_tags
+where search_tags.name in ('高温対策', '施設園芸');
 
 insert into public.usage_reports (
   id,

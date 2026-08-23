@@ -3,9 +3,10 @@ import { expect, test } from "@playwright/test";
 import {
   createGeneralUser,
   createReview,
+  cropsByNames,
   deleteAuthUsersByEmail,
   listSeedMaterials,
-  tagsByNames,
+  productTypesByNames,
 } from "./support/test-data";
 
 test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷移", async ({ page }) => {
@@ -43,22 +44,26 @@ test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷�
       body: `E2E並び替えC_${authors[2].id}`,
     });
 
-    const tags = await tagsByNames(["いちご", "水稲", "バイオスティミュラント"]);
-    const byName = new Map(tags.map((tag) => [tag.name, tag]));
-    const strawberry = byName.get("いちご");
-    const rice = byName.get("水稲");
-    const biostimulant = byName.get("バイオスティミュラント");
+    const [crops, productTypes] = await Promise.all([
+      cropsByNames(["いちご", "水稲"]),
+      productTypesByNames(["バイオスティミュラント"]),
+    ]);
+    const cropsByName = new Map(crops.map((crop) => [crop.name, crop]));
+    const productTypesByName = new Map(productTypes.map((type) => [type.name, type]));
+    const strawberry = cropsByName.get("いちご");
+    const rice = cropsByName.get("水稲");
+    const biostimulant = productTypesByName.get("バイオスティミュラント");
 
     if (strawberry === undefined || rice === undefined || biostimulant === undefined) {
-      throw new Error("検索テスト用のシードタグが見つかりません。");
+      throw new Error("検索テスト用の分類マスタが見つかりません。");
     }
 
-    await page.goto(`/search?tags=${strawberry.id},${rice.id}`);
+    await page.goto(`/search?filters=crop:${strawberry.id},crop:${rice.id}`);
     await expect(page.getByText("いちご または 水稲", { exact: true })).toBeVisible();
     await expect(page.getByText("Actibio X EVO53", { exact: true })).toBeVisible();
     await expect(page.getByText("ハイタック-C", { exact: true })).toBeVisible();
 
-    await page.goto(`/search?tags=${strawberry.id},${biostimulant.id}`);
+    await page.goto(`/search?filters=crop:${strawberry.id},type:${biostimulant.id}`);
     await expect(
       page.getByText("いちご かつ バイオスティミュラント", { exact: true }),
     ).toBeVisible();

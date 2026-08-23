@@ -64,7 +64,7 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
         reviewId={review.id}
         existingReviewNotice={requestedSearchParams.existing === "1"}
         initialValues={{
-          cropId: review.crop_id,
+          cropIds: review.cropIds,
           rating: review.rating,
           body: review.body,
           purchaseChannel: purchaseChannelFromDatabase(review.purchase_channel),

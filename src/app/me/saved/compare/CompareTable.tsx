@@ -139,7 +139,7 @@ export function CompareTable({ materials }: CompareTableProps) {
       render: (material) => material.productType ?? "—",
     },
     {
-      label: "主なタグ",
+      label: "主な分類",
       render: (material) =>
         material.tags.length === 0 ? (
           "—"

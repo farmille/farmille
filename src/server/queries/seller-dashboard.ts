@@ -1,12 +1,11 @@
 import { fail, succeed, type Result } from "@/server/result";
+import { getMaterialWithSupabase, type MaterialDetail } from "@/server/queries/materials";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type SellerAccountRow = Database["public"]["Tables"]["seller_accounts"]["Row"];
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
-type MaterialEvidenceRow = Database["public"]["Tables"]["material_evidences"]["Row"];
 type MaterialEditRequestRow = Database["public"]["Tables"]["material_edit_requests"]["Row"];
-type TagRow = Database["public"]["Tables"]["tags"]["Row"];
 
 type DashboardSeller = Pick<
   SellerAccountRow,
@@ -35,35 +34,9 @@ export type SellerDashboardData = {
   materials: DashboardMaterial[];
 };
 
-export type SellerMaterialTag = Pick<TagRow, "id" | "name" | "category" | "sort_order">;
+export type SellerMaterialEvidence = MaterialDetail["evidences"][number];
 
-export type SellerMaterialEvidence = Pick<
-  MaterialEvidenceRow,
-  "id" | "evidence_type" | "title" | "file_url" | "external_url" | "sort_order" | "created_at"
->;
-
-type SellerMaterialFields = Pick<
-  MaterialRow,
-  | "id"
-  | "name"
-  | "manufacturer_name"
-  | "product_type"
-  | "jbsa_class"
-  | "sales_status"
-  | "description"
-  | "general_use"
-  | "ingredients"
-  | "mechanism"
-  | "usage_text"
-  | "price_range"
-  | "official_url"
-  | "catalog_url"
->;
-
-export type SellerMaterialDetail = SellerMaterialFields & {
-  tags: SellerMaterialTag[];
-  evidences: SellerMaterialEvidence[];
-};
+export type SellerMaterialDetail = MaterialDetail;
 
 export type SellerEditRequest = Pick<
   MaterialEditRequestRow,
@@ -75,24 +48,8 @@ export type SellerMaterialPageData = {
   editRequests: SellerEditRequest[];
 };
 
-type MaterialTagRelation = {
-  tags: SellerMaterialTag | null;
-};
-
-type SellerMaterialQueryRow = SellerMaterialFields & {
-  material_evidences: SellerMaterialEvidence[];
-  material_tags: MaterialTagRelation[];
-};
-
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/seller-dashboard] ${operation}`, error);
-}
-
-function bySortOrder(
-  left: { id: string; sort_order: number },
-  right: { id: string; sort_order: number },
-): number {
-  return left.sort_order - right.sort_order || left.id.localeCompare(right.id);
 }
 
 /**
@@ -164,46 +121,7 @@ export async function getSellerMaterialPageData(
 ): Promise<Result<SellerMaterialPageData>> {
   const supabase = await createServerSupabase();
   const [materialResult, requestsResult] = await Promise.all([
-    supabase
-      .from("materials")
-      .select(
-        `
-          id,
-          name,
-          manufacturer_name,
-          product_type,
-          jbsa_class,
-          sales_status,
-          description,
-          general_use,
-          ingredients,
-          mechanism,
-          usage_text,
-          price_range,
-          official_url,
-          catalog_url,
-          material_evidences (
-            id,
-            evidence_type,
-            title,
-            file_url,
-            external_url,
-            sort_order,
-            created_at
-          ),
-          material_tags (
-            tags (
-              id,
-              name,
-              category,
-              sort_order
-            )
-          )
-        `,
-      )
-      .eq("id", materialId)
-      .eq("seller_id", sellerId)
-      .maybeSingle(),
+    getMaterialWithSupabase(supabase, materialId),
     supabase
       .from("material_edit_requests")
       .select("id, request_text, status, created_at, updated_at")
@@ -213,34 +131,18 @@ export async function getSellerMaterialPageData(
       .order("id", { ascending: true }),
   ]);
 
-  if (materialResult.error !== null) {
-    reportQueryError("自社資材の取得に失敗", materialResult.error);
-    return fail("internal");
-  }
-
-  if (materialResult.data === null) {
-    return fail("not_found");
-  }
+  if (!materialResult.ok) return materialResult;
+  if (materialResult.data.seller_id !== sellerId) return fail("not_found");
 
   if (requestsResult.error !== null) {
     reportQueryError("分類変更申請履歴の取得に失敗", requestsResult.error);
     return fail("internal");
   }
 
-  const { material_evidences, material_tags, ...materialFields }: SellerMaterialQueryRow =
-    materialResult.data;
   const editRequests: SellerEditRequest[] = requestsResult.data;
 
   return succeed({
-    material: {
-      ...materialFields,
-      evidences: material_evidences.toSorted(bySortOrder),
-      tags: material_tags
-        .flatMap(({ tags }) => (tags === null ? [] : [tags]))
-        .toSorted(
-          (left, right) => left.category.localeCompare(right.category) || bySortOrder(left, right),
-        ),
-    },
+    material: materialResult.data,
     editRequests,
   });
 }

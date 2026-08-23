@@ -9,16 +9,10 @@ import {
   SectionHeading,
 } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
-import { TagSearchBox } from "@/components/search/TagSearchBox";
+import { HomeSearchEntry } from "@/components/search/HomeSearchEntry";
 import { getSessionUser } from "@/server/auth";
 import { listMaterials } from "@/server/queries/materials";
 import { listRecentReviews } from "@/server/queries/reviews";
-import {
-  listSearchSuggestions,
-  listTagsByPairs,
-  POPULAR_TAG_PAIRS,
-  SEASONAL_TAG_PAIRS,
-} from "@/server/queries/tags";
 import { listRecentUsageReports } from "@/server/queries/usage-reports";
 import { css } from "../../styled-system/css";
 
@@ -119,22 +113,11 @@ const reviewLink = css({
 });
 
 export default async function HomePage() {
-  const [
-    session,
-    featuredResult,
-    reportsResult,
-    reviewsResult,
-    popularResult,
-    seasonalResult,
-    catalogResult,
-  ] = await Promise.all([
+  const [session, featuredResult, reportsResult, reviewsResult] = await Promise.all([
     getSessionUser(),
     listMaterials({ page: 1, sort: "reviews" }),
     listRecentUsageReports({ limit: 4 }),
     listRecentReviews({ limit: 2 }),
-    listTagsByPairs(POPULAR_TAG_PAIRS),
-    listTagsByPairs(SEASONAL_TAG_PAIRS),
-    listSearchSuggestions(),
   ]);
 
   if (!featuredResult.ok) {
@@ -146,10 +129,6 @@ export default async function HomePage() {
   if (!reviewsResult.ok) {
     throw new Error(`新着レビューの取得に失敗しました: ${reviewsResult.error}`);
   }
-  if (!popularResult.ok || !seasonalResult.ok || !catalogResult.ok) {
-    throw new Error("タグ候補の取得に失敗しました。");
-  }
-
   const featured = featuredResult.data.items.slice(0, 3);
   const reports = reportsResult.data;
   const reviews = reviewsResult.data;
@@ -179,15 +158,7 @@ export default async function HomePage() {
         </div>
 
         <div className={body}>
-          <TagSearchBox
-            variant="home"
-            selected={[]}
-            sort="reviews"
-            popular={popularResult.data}
-            seasonal={seasonalResult.data}
-            catalog={catalogResult.data}
-            placeholder="作物・悩み・資材名を入力"
-          />
+          <HomeSearchEntry />
 
           <SectionHeading title="注目のBS資材" href="/search" linkLabel="探す →" />
           {featured.length > 0 ? (
@@ -248,7 +219,7 @@ export default async function HomePage() {
                 >
                   <ReviewCard
                     handle={review.author?.handle ?? "匿名"}
-                    crop={review.crop?.name ?? "作物未設定"}
+                    crop={review.crops.map(({ name }) => name).join("・")}
                     rating={review.rating}
                     helpfulCount={review.helpfulCount}
                     body={review.body}

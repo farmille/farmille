@@ -3,36 +3,34 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
-import { TagChip, TAG_CATEGORY_LABELS, type TagCategory } from "@/components/TagChip";
 import { SearchIcon } from "@/components/Icons";
-import type { TagListItem } from "@/server/queries/tags";
+import { TagChip, TAG_CATEGORY_LABELS, type TagCategory } from "@/components/TagChip";
+import type { SearchFilterItem } from "@/lib/material-search";
 import { css } from "../../../styled-system/css";
 import {
   buildSearchHref,
-  selectedTagCategory,
-  selectedTagKey,
-  tagListItemToSelected,
+  searchFilterItemToSelected,
+  selectedFilterCategory,
+  selectedFilterKey,
   type MaterialSortParam,
-  type SelectedSearchTag,
-} from "./tag-selection";
+  type SelectedSearchFilter,
+} from "./search-selection";
 
-type TagSearchBoxProps = {
-  selected: SelectedSearchTag[];
+type MaterialSearchBoxProps = {
+  selected: SelectedSearchFilter[];
   sort: MaterialSortParam;
-  popular: TagListItem[];
-  seasonal: TagListItem[];
+  popular: SearchFilterItem[];
+  seasonal: SearchFilterItem[];
   catalog: {
-    tags: TagListItem[];
+    filters: SearchFilterItem[];
     makers: string[];
     materialNames: string[];
   };
-  /** home では選択変更で /search へ遷移。search では同一ページのクエリを更新。 */
-  variant: "home" | "search";
   placeholder?: string;
 };
 
 type Suggestion =
-  | { kind: "tag"; tag: TagListItem }
+  | { kind: "filter"; filter: SearchFilterItem }
   | { kind: "maker"; name: string }
   | { kind: "name"; name: string };
 
@@ -74,7 +72,7 @@ const chipsRow = css({
   mt: "2.5",
 });
 
-const clearBtn = css({
+const clearButton = css({
   borderWidth: "0",
   bg: "transparent",
   color: "text.subtle",
@@ -115,13 +113,13 @@ const panelTitle = css({
   fontWeight: "700",
 });
 
-const sugChips = css({
+const suggestionChips = css({
   display: "flex",
   flexWrap: "wrap",
   gap: "2",
 });
 
-const sugRow = css({
+const suggestionRow = css({
   display: "flex",
   alignItems: "center",
   gap: "2.5",
@@ -139,7 +137,7 @@ const sugRow = css({
   _hover: { bg: "green.soft2" },
 });
 
-const catLabel = css({
+const categoryLabel = css({
   fontSize: "2xs",
   px: "1.5",
   py: "0.5",
@@ -176,118 +174,107 @@ function categoryAccentClass(category: TagCategory): string {
   }
 }
 
-function toSelected(suggestion: Suggestion): SelectedSearchTag {
-  if (suggestion.kind === "tag") return tagListItemToSelected(suggestion.tag);
+function toSelected(suggestion: Suggestion): SelectedSearchFilter {
+  if (suggestion.kind === "filter") return searchFilterItemToSelected(suggestion.filter);
   if (suggestion.kind === "maker") return { kind: "maker", name: suggestion.name };
   return { kind: "name", name: suggestion.name };
 }
 
 function suggestionKey(suggestion: Suggestion): string {
-  return selectedTagKey(toSelected(suggestion));
+  return selectedFilterKey(toSelected(suggestion));
 }
 
-export function TagSearchBox({
+export function MaterialSearchBox({
   selected,
   sort,
   popular,
   seasonal,
   catalog,
-  variant,
-  placeholder = "作物・悩み・資材名を入力",
-}: TagSearchBoxProps) {
+  placeholder = "作物・悩み・資材名を入力してください",
+}: MaterialSearchBoxProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [isPending, startTransition] = useTransition();
+  const selectedKeys = useMemo(() => new Set(selected.map(selectedFilterKey)), [selected]);
 
-  const selectedKeys = useMemo(() => new Set(selected.map(selectedTagKey)), [selected]);
-
-  const navigate = (nextTags: SelectedSearchTag[], nextSort: MaterialSortParam = sort) => {
-    const href = buildSearchHref({ tags: nextTags, sort: nextSort });
-    startTransition(() => {
-      router.push(href);
-    });
+  const navigate = (nextFilters: SelectedSearchFilter[]) => {
+    const href = buildSearchHref({ filters: nextFilters, sort });
+    startTransition(() => router.push(href));
   };
 
   const addSuggestion = (suggestion: Suggestion) => {
     const next = toSelected(suggestion);
-    if (selectedKeys.has(selectedTagKey(next))) return;
+    if (selectedKeys.has(selectedFilterKey(next))) return;
     setQuery("");
     navigate([...selected, next]);
   };
 
-  const removeAt = (index: number) => {
-    navigate(selected.filter((_, i) => i !== index));
-  };
-
-  const clearAll = () => {
-    navigate([]);
-  };
-
   const filteredSuggestions = useMemo((): Suggestion[] => {
-    const q = query.trim().toLowerCase();
-    if (q.length === 0) return [];
+    const normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.length === 0) return [];
 
-    const out: Suggestion[] = [];
+    const suggestions: Suggestion[] = [];
 
-    for (const tag of catalog.tags) {
-      if (selectedKeys.has(`tag:${tag.id}`)) continue;
-      if (tag.name.toLowerCase().includes(q)) {
-        out.push({ kind: "tag", tag });
+    for (const filter of catalog.filters) {
+      if (selectedKeys.has(`${filter.category}:${filter.id}`)) continue;
+      const names = [filter.name, ...filter.aliases];
+      if (names.some((name) => name.toLowerCase().includes(normalizedQuery))) {
+        suggestions.push({ kind: "filter", filter });
       }
-      if (out.length >= 8) return out;
+      if (suggestions.length >= 8) return suggestions;
     }
 
     for (const name of catalog.materialNames) {
       if (selectedKeys.has(`name:${name}`)) continue;
-      if (name.toLowerCase().includes(q)) {
-        out.push({ kind: "name", name });
-      }
-      if (out.length >= 8) return out;
+      if (name.toLowerCase().includes(normalizedQuery)) suggestions.push({ kind: "name", name });
+      if (suggestions.length >= 8) return suggestions;
     }
 
-    for (const maker of catalog.makers) {
-      if (selectedKeys.has(`maker:${maker}`)) continue;
-      if (maker.toLowerCase().includes(q)) {
-        out.push({ kind: "maker", name: maker });
-      }
-      if (out.length >= 8) return out;
+    for (const name of catalog.makers) {
+      if (selectedKeys.has(`maker:${name}`)) continue;
+      if (name.toLowerCase().includes(normalizedQuery)) suggestions.push({ kind: "maker", name });
+      if (suggestions.length >= 8) return suggestions;
     }
 
-    return out;
+    return suggestions;
   }, [catalog, query, selectedKeys]);
 
-  const popularAvailable = popular.filter((tag) => !selectedKeys.has(`tag:${tag.id}`));
-  const seasonalAvailable = seasonal.filter((tag) => !selectedKeys.has(`tag:${tag.id}`));
+  const popularAvailable = popular.filter(
+    (filter) => !selectedKeys.has(`${filter.category}:${filter.id}`),
+  );
+  const seasonalAvailable = seasonal.filter(
+    (filter) => !selectedKeys.has(`${filter.category}:${filter.id}`),
+  );
   const showDefaultPanel = query.trim().length === 0;
 
   return (
-    <div aria-busy={isPending || undefined} data-variant={variant}>
+    <div aria-busy={isPending || undefined}>
       <div className={box}>
         <span className={css({ color: "text.subtle", display: "flex" })}>
           <SearchIcon />
         </span>
         <input
-          className={inputClass}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder}
+          aria-label="資材の検索条件"
           autoComplete="off"
-          aria-label="タグ検索"
+          className={inputClass}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={placeholder}
+          value={query}
         />
       </div>
 
       {selected.length > 0 ? (
         <div className={chipsRow}>
-          {selected.map((tag, index) => (
+          {selected.map((filter, index) => (
             <TagChip
-              key={selectedTagKey(tag)}
-              label={tag.name}
-              category={selectedTagCategory(tag)}
               appearance="selected"
-              onRemove={() => removeAt(index)}
+              category={selectedFilterCategory(filter)}
+              key={selectedFilterKey(filter)}
+              label={filter.name}
+              onRemove={() => navigate(selected.filter((_, itemIndex) => itemIndex !== index))}
             />
           ))}
-          <button type="button" className={clearBtn} onClick={clearAll}>
+          <button className={clearButton} onClick={() => navigate([])} type="button">
             すべて解除
           </button>
         </div>
@@ -297,27 +284,27 @@ export function TagSearchBox({
         {showDefaultPanel ? (
           <>
             <div className={panelGroup}>
-              <h5 className={panelTitle}>よく探されている条件</h5>
-              <div className={sugChips}>
-                {popularAvailable.map((tag) => (
+              <h2 className={panelTitle}>よく探されている条件</h2>
+              <div className={suggestionChips}>
+                {popularAvailable.map((filter) => (
                   <TagChip
-                    key={tag.id}
-                    label={tag.name}
                     appearance="suggestion"
-                    onClick={() => addSuggestion({ kind: "tag", tag })}
+                    key={`${filter.category}:${filter.id}`}
+                    label={filter.name}
+                    onClick={() => addSuggestion({ kind: "filter", filter })}
                   />
                 ))}
               </div>
             </div>
             <div className={panelGroup}>
-              <h5 className={panelTitle}>今の時期におすすめ</h5>
-              <div className={sugChips}>
-                {seasonalAvailable.map((tag) => (
+              <h2 className={panelTitle}>今の時期におすすめ</h2>
+              <div className={suggestionChips}>
+                {seasonalAvailable.map((filter) => (
                   <TagChip
-                    key={tag.id}
-                    label={tag.name}
                     appearance="suggestion"
-                    onClick={() => addSuggestion({ kind: "tag", tag })}
+                    key={`${filter.category}:${filter.id}`}
+                    label={filter.name}
+                    onClick={() => addSuggestion({ kind: "filter", filter })}
                   />
                 ))}
               </div>
@@ -327,15 +314,15 @@ export function TagSearchBox({
           <div className={panelGroup}>
             {filteredSuggestions.map((suggestion) => {
               const selectedLike = toSelected(suggestion);
-              const category = selectedTagCategory(selectedLike);
+              const category = selectedFilterCategory(selectedLike);
               return (
                 <button
+                  className={suggestionRow}
                   key={suggestionKey(suggestion)}
-                  type="button"
-                  className={sugRow}
                   onClick={() => addSuggestion(suggestion)}
+                  type="button"
                 >
-                  <span className={`${catLabel} ${categoryAccentClass(category)}`}>
+                  <span className={`${categoryLabel} ${categoryAccentClass(category)}`}>
                     {TAG_CATEGORY_LABELS[category]}
                   </span>
                   <span>{selectedLike.name}</span>

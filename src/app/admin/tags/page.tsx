@@ -14,7 +14,7 @@ import { errorMessageJa } from "@/server/errors";
 import { css } from "../../../../styled-system/css";
 
 export const metadata: Metadata = {
-  title: "タグ・作物マスタ",
+  title: "検索タグ・作物マスタ",
 };
 
 const listStyle = css({
@@ -39,10 +39,10 @@ export default async function AdminTagsPage() {
     <AdminShell
       backHref="/admin"
       backLabel="← 運営管理ホーム"
-      description="検索の分類は Farmille が所有する（01 §3）。メーカー名・製品名はタグにしない。"
-      title="タグ・作物マスタ"
+      description="検索補助タグと対象作物は Farmille が所有する（01 §3）。効果などの専用分類は資材フォームで選択する。"
+      title="検索タグ・作物マスタ"
     >
-      <Panel note={`${tags.data.length} 件。使用中のタグは削除できない。`} title="タグ">
+      <Panel note={`${tags.data.length} 件。使用中のタグは削除できない。`} title="検索補助タグ">
         <TagCreateForm categories={[...TAG_CATEGORIES]} />
         <div className={listStyle}>
           {tags.data.map((tag) => (
@@ -50,12 +50,12 @@ export default async function AdminTagsPage() {
           ))}
         </div>
         {tags.data.length === 0 ? (
-          <p className={adminInlineNoteStyle}>タグがまだ登録されていません。</p>
+          <p className={adminInlineNoteStyle}>検索補助タグがまだ登録されていません。</p>
         ) : null}
       </Panel>
 
       <Panel
-        note={`${crops.data.length} 件。レビュー・使用レポート・プロフィールから参照される。`}
+        note={`${crops.data.length} 件。資材・レビュー・使用レポート・プロフィールから参照される。`}
         title="作物マスタ"
       >
         <CropCreateForm groups={groups.data} />

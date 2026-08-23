@@ -2,14 +2,14 @@ import { isUniqueViolation, reportAdminError, withAdmin } from "@/server/admin/g
 import { fail, succeed, type Result } from "@/server/result";
 import type { Database } from "@/types/database.types";
 
-type TagRow = Database["public"]["Tables"]["tags"]["Row"];
+type TagRow = Database["public"]["Tables"]["search_tags"]["Row"];
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 
 /**
- * tags.category（01 §3）。メーカー名・製品名はタグにしない。
+ * search_tags.category（01 §3）。作物・効果・製品タイプは専用マスタで管理する。
  * 表示ラベルはキットの TAG_CATEGORY_LABELS（toTagChipCategory で正規化）を使う。
  */
-export const TAG_CATEGORIES = ["crop", "concern", "effect", "condition", "type"] as const;
+export const TAG_CATEGORIES = ["concern", "condition"] as const;
 export type TagCategoryValue = (typeof TAG_CATEGORIES)[number];
 
 export function isTagCategory(value: string | null): value is TagCategoryValue {
@@ -17,7 +17,7 @@ export function isTagCategory(value: string | null): value is TagCategoryValue {
 }
 
 export type AdminTagItem = Pick<TagRow, "id" | "name" | "category" | "sort_order"> & {
-  /** material_tags からの参照数。1 件以上なら削除できない。 */
+  /** material_search_tags からの参照数。1 件以上なら削除できない。 */
   usageCount: number;
 };
 
@@ -51,12 +51,12 @@ export async function listAdminTags(): Promise<Result<AdminTagItem[]>> {
   return withAdmin(async ({ supabase }) => {
     const [tagsResult, usageResult] = await Promise.all([
       supabase
-        .from("tags")
+        .from("search_tags")
         .select("id, name, category, sort_order")
         .order("category", { ascending: true })
         .order("sort_order", { ascending: true })
         .order("name", { ascending: true }),
-      supabase.from("material_tags").select("tag_id"),
+      supabase.from("material_search_tags").select("search_tag_id"),
     ]);
 
     if (tagsResult.error !== null) {
@@ -68,7 +68,7 @@ export async function listAdminTags(): Promise<Result<AdminTagItem[]>> {
       return fail("internal");
     }
 
-    const usage = countBy(usageResult.data.map((row) => row.tag_id));
+    const usage = countBy(usageResult.data.map((row) => row.search_tag_id));
 
     return succeed(tagsResult.data.map((tag) => ({ ...tag, usageCount: usage.get(tag.id) ?? 0 })));
   });
@@ -81,7 +81,7 @@ export async function createTag(input: {
 }): Promise<Result<{ id: string }>> {
   return withAdmin(async ({ supabase }) => {
     const { data, error } = await supabase
-      .from("tags")
+      .from("search_tags")
       .insert({ name: input.name, category: input.category, sort_order: input.sortOrder })
       .select("id")
       .single();
@@ -103,7 +103,7 @@ export async function renameTag(
 ): Promise<Result<null>> {
   return withAdmin(async ({ supabase }) => {
     const { data, error } = await supabase
-      .from("tags")
+      .from("search_tags")
       .update({ name: input.name, sort_order: input.sortOrder })
       .eq("id", tagId)
       .select("id");
@@ -120,15 +120,14 @@ export async function renameTag(
 }
 
 /**
- * タグの削除。使用中（material_tags から参照あり）は削除しない。
- * material_tags は ON DELETE CASCADE なので、DB 側では止まらない。ここで止める。
+ * タグの削除。使用中（material_search_tags から参照あり）は削除しない。
  */
 export async function deleteTag(tagId: string): Promise<Result<null>> {
   return withAdmin(async ({ supabase }) => {
     const { count, error: countError } = await supabase
-      .from("material_tags")
+      .from("material_search_tags")
       .select("id", { count: "exact", head: true })
-      .eq("tag_id", tagId);
+      .eq("search_tag_id", tagId);
 
     if (countError !== null) {
       reportError("タグ参照数の確認に失敗", countError);
@@ -136,7 +135,11 @@ export async function deleteTag(tagId: string): Promise<Result<null>> {
     }
     if ((count ?? 0) > 0) return fail("conflict");
 
-    const { data, error } = await supabase.from("tags").delete().eq("id", tagId).select("id");
+    const { data, error } = await supabase
+      .from("search_tags")
+      .delete()
+      .eq("id", tagId)
+      .select("id");
 
     if (error !== null) {
       reportError("タグの削除に失敗", error);
@@ -167,25 +170,33 @@ export async function listCropGroups(): Promise<Result<CropGroupOption[]>> {
 
 export async function listAdminCrops(): Promise<Result<AdminCropItem[]>> {
   return withAdmin(async ({ supabase }) => {
-    const [cropsResult, groupsResult, reviewsResult, reportsResult, profileCropsResult] =
-      await Promise.all([
-        supabase
-          .from("crops")
-          .select("id, name, aliases, sort_order, group_id")
-          .order("sort_order", { ascending: true })
-          .order("name", { ascending: true }),
-        supabase.from("crop_groups").select("id, name"),
-        supabase.from("reviews").select("crop_id"),
-        supabase.from("usage_reports").select("crop_id"),
-        supabase.from("profile_crops").select("crop_id"),
-      ]);
+    const [
+      cropsResult,
+      groupsResult,
+      reviewsResult,
+      reportsResult,
+      profileCropsResult,
+      materialCropsResult,
+    ] = await Promise.all([
+      supabase
+        .from("crops")
+        .select("id, name, aliases, sort_order, group_id")
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true }),
+      supabase.from("crop_groups").select("id, name"),
+      supabase.from("review_crops").select("crop_id"),
+      supabase.from("usage_reports").select("crop_id"),
+      supabase.from("profile_crops").select("crop_id"),
+      supabase.from("material_crops").select("crop_id"),
+    ]);
 
     if (
       cropsResult.error !== null ||
       groupsResult.error !== null ||
       reviewsResult.error !== null ||
       reportsResult.error !== null ||
-      profileCropsResult.error !== null
+      profileCropsResult.error !== null ||
+      materialCropsResult.error !== null
     ) {
       reportError(
         "作物マスタの取得に失敗",
@@ -193,7 +204,8 @@ export async function listAdminCrops(): Promise<Result<AdminCropItem[]>> {
           groupsResult.error ??
           reviewsResult.error ??
           reportsResult.error ??
-          profileCropsResult.error,
+          profileCropsResult.error ??
+          materialCropsResult.error,
       );
 
       return fail("internal");
@@ -204,6 +216,7 @@ export async function listAdminCrops(): Promise<Result<AdminCropItem[]>> {
       ...reviewsResult.data.map((row) => row.crop_id),
       ...reportsResult.data.map((row) => row.crop_id),
       ...profileCropsResult.data.map((row) => row.crop_id),
+      ...materialCropsResult.data.map((row) => row.crop_id),
     ]);
 
     return succeed(
@@ -274,8 +287,11 @@ export async function renameCrop(
  */
 export async function deleteCrop(cropId: string): Promise<Result<null>> {
   return withAdmin(async ({ supabase }) => {
-    const [reviews, reports, profileCrops] = await Promise.all([
-      supabase.from("reviews").select("id", { count: "exact", head: true }).eq("crop_id", cropId),
+    const [reviews, reports, profileCrops, materialCrops] = await Promise.all([
+      supabase
+        .from("review_crops")
+        .select("id", { count: "exact", head: true })
+        .eq("crop_id", cropId),
       supabase
         .from("usage_reports")
         .select("id", { count: "exact", head: true })
@@ -284,16 +300,24 @@ export async function deleteCrop(cropId: string): Promise<Result<null>> {
         .from("profile_crops")
         .select("id", { count: "exact", head: true })
         .eq("crop_id", cropId),
+      supabase
+        .from("material_crops")
+        .select("id", { count: "exact", head: true })
+        .eq("crop_id", cropId),
     ]);
 
-    const failed = reviews.error ?? reports.error ?? profileCrops.error;
+    const failed = reviews.error ?? reports.error ?? profileCrops.error ?? materialCrops.error;
 
     if (failed !== null) {
       reportError("作物の参照数の確認に失敗", failed);
       return fail("internal");
     }
 
-    const usageCount = (reviews.count ?? 0) + (reports.count ?? 0) + (profileCrops.count ?? 0);
+    const usageCount =
+      (reviews.count ?? 0) +
+      (reports.count ?? 0) +
+      (profileCrops.count ?? 0) +
+      (materialCrops.count ?? 0);
     if (usageCount > 0) return fail("conflict");
 
     const { data, error } = await supabase.from("crops").delete().eq("id", cropId).select("id");

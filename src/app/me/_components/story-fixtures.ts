@@ -68,10 +68,6 @@ export const savedMaterials = [
     official: true,
     description: "土壌環境を整えるための微生物資材です。",
     primaryImageUrl: null,
-    tags: [
-      { id: "tag-1", name: "発根促進", category: "effect" },
-      { id: "tag-2", name: "微生物資材", category: "type" },
-    ],
   },
   {
     savedId: "saved-2",
@@ -87,7 +83,6 @@ export const savedMaterials = [
     official: false,
     description: null,
     primaryImageUrl: null,
-    tags: [{ id: "tag-3", name: "活着促進", category: "effect" }],
   },
   {
     savedId: "saved-3",
@@ -103,7 +98,6 @@ export const savedMaterials = [
     official: true,
     description: "生育中期の葉面散布に使う資材です。",
     primaryImageUrl: null,
-    tags: [{ id: "tag-4", name: "葉面散布", category: "method" }],
   },
 ] satisfies SavedMaterialItem[];
 
@@ -119,6 +113,10 @@ export const compareMaterials = savedMaterials.map(
   }) => ({
     id,
     ...material,
+    tags:
+      material.productType === null
+        ? []
+        : [{ id: `${id}-type`, name: material.productType, category: "type" }],
   }),
 ) satisfies CompareMaterialItem[];
 

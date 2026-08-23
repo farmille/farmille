@@ -10,8 +10,7 @@ type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 export const CLASSIFICATION_FIELDS = [
   "name",
   "manufacturer_name",
-  "product_type",
-  "jbsa_class",
+  "composition_type_id",
   "sales_status",
 ] as const;
 
@@ -19,7 +18,7 @@ export const CLASSIFICATION_FIELDS = [
 export const PRIMARY_INFO_FIELDS = [
   "description",
   "general_use",
-  "ingredients",
+  "main_components",
   "mechanism",
   "usage_text",
   "price_range",
@@ -30,35 +29,39 @@ export const PRIMARY_INFO_FIELDS = [
 export type MaterialInput = {
   name: string;
   manufacturerName: string;
-  productType: string | null;
-  jbsaClass: string | null;
+  compositionTypeId: string | null;
   salesStatus: string | null;
   description: string | null;
   generalUse: string | null;
-  ingredients: string | null;
+  mainComponents: string | null;
   mechanism: string | null;
   usageText: string | null;
   priceRange: string | null;
   officialUrl: string | null;
   catalogUrl: string | null;
-  tagIds: string[];
+  cropIds: string[];
+  effectIds: string[];
+  ingredientCategoryIds: string[];
+  ingredientIds: string[];
+  productTypeIds: string[];
+  searchTagIds: string[];
 };
 
 export type AdminMaterialListItem = Pick<
   MaterialRow,
-  | "id"
-  | "name"
-  | "manufacturer_name"
-  | "product_type"
-  | "sales_status"
-  | "seller_id"
-  | "review_count"
+  "id" | "name" | "manufacturer_name" | "sales_status" | "seller_id" | "review_count"
 > & {
+  productTypeNames: string[];
   sellerName: string | null;
 };
 
 export type AdminMaterialDetail = MaterialRow & {
-  tagIds: string[];
+  cropIds: string[];
+  effectIds: string[];
+  ingredientCategoryIds: string[];
+  ingredientIds: string[];
+  productTypeIds: string[];
+  searchTagIds: string[];
   sellerName: string | null;
 };
 
@@ -91,7 +94,15 @@ function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
 }
 
 export type MaterialFieldErrors = Partial<
-  Record<"name" | "manufacturerName" | "officialUrl" | "catalogUrl" | "tagIds", string>
+  Record<
+    | "name"
+    | "manufacturerName"
+    | "officialUrl"
+    | "catalogUrl"
+    | "compositionTypeId"
+    | "classifications",
+    string
+  >
 >;
 
 export type MaterialValidation =
@@ -124,18 +135,22 @@ function toOptionalHttpUrl(value: FormDataEntryValue | null): UrlParse {
 export function validateMaterialInput(raw: {
   name: FormDataEntryValue | null;
   manufacturerName: FormDataEntryValue | null;
-  productType: FormDataEntryValue | null;
-  jbsaClass: FormDataEntryValue | null;
+  compositionTypeId: FormDataEntryValue | null;
   salesStatus: FormDataEntryValue | null;
   description: FormDataEntryValue | null;
   generalUse: FormDataEntryValue | null;
-  ingredients: FormDataEntryValue | null;
+  mainComponents: FormDataEntryValue | null;
   mechanism: FormDataEntryValue | null;
   usageText: FormDataEntryValue | null;
   priceRange: FormDataEntryValue | null;
   officialUrl: FormDataEntryValue | null;
   catalogUrl: FormDataEntryValue | null;
-  tagIds: readonly FormDataEntryValue[];
+  cropIds: readonly FormDataEntryValue[];
+  effectIds: readonly FormDataEntryValue[];
+  ingredientCategoryIds: readonly FormDataEntryValue[];
+  ingredientIds: readonly FormDataEntryValue[];
+  productTypeIds: readonly FormDataEntryValue[];
+  searchTagIds: readonly FormDataEntryValue[];
 }): MaterialValidation {
   const fieldErrors: MaterialFieldErrors = {};
   const name = trimmedFormDataString(raw.name);
@@ -151,10 +166,44 @@ export function validateMaterialInput(raw: {
 
   if (!officialUrl.ok) fieldErrors.officialUrl = "http(s) の URL で入力してください。";
   if (!catalogUrl.ok) fieldErrors.catalogUrl = "http(s) の URL で入力してください。";
-  const tagIdsResult = v.safeParse(v.array(v.string()), raw.tagIds);
-  if (!tagIdsResult.success) fieldErrors.tagIds = "タグの選択内容が正しくありません。";
+  const compositionTypeIdText = trimmedFormDataString(raw.compositionTypeId);
+  const compositionTypeIdResult = v.safeParse(
+    v.union([v.literal(""), v.pipe(v.string(), v.uuid())]),
+    compositionTypeIdText,
+  );
+  if (!compositionTypeIdResult.success) {
+    fieldErrors.compositionTypeId = "組成タイプの選択内容が正しくありません。";
+  }
 
-  if (Object.keys(fieldErrors).length > 0 || !tagIdsResult.success) {
+  const idListSchema = v.array(v.pipe(v.string(), v.uuid()));
+  const cropIdsResult = v.safeParse(idListSchema, raw.cropIds);
+  const effectIdsResult = v.safeParse(idListSchema, raw.effectIds);
+  const ingredientCategoryIdsResult = v.safeParse(idListSchema, raw.ingredientCategoryIds);
+  const ingredientIdsResult = v.safeParse(idListSchema, raw.ingredientIds);
+  const productTypeIdsResult = v.safeParse(idListSchema, raw.productTypeIds);
+  const searchTagIdsResult = v.safeParse(idListSchema, raw.searchTagIds);
+  const classificationResults = [
+    cropIdsResult,
+    effectIdsResult,
+    ingredientCategoryIdsResult,
+    ingredientIdsResult,
+    productTypeIdsResult,
+    searchTagIdsResult,
+  ];
+  if (classificationResults.some((result) => !result.success)) {
+    fieldErrors.classifications = "分類の選択内容が正しくありません。";
+  }
+
+  if (
+    Object.keys(fieldErrors).length > 0 ||
+    !compositionTypeIdResult.success ||
+    !cropIdsResult.success ||
+    !effectIdsResult.success ||
+    !ingredientCategoryIdsResult.success ||
+    !ingredientIdsResult.success ||
+    !productTypeIdsResult.success ||
+    !searchTagIdsResult.success
+  ) {
     return { ok: false, fieldErrors };
   }
 
@@ -163,32 +212,36 @@ export function validateMaterialInput(raw: {
     input: {
       name,
       manufacturerName,
-      productType: toOptionalText(raw.productType),
-      jbsaClass: toOptionalText(raw.jbsaClass),
+      compositionTypeId:
+        compositionTypeIdResult.output.length === 0 ? null : compositionTypeIdResult.output,
       salesStatus: toOptionalText(raw.salesStatus),
       description: toOptionalText(raw.description),
       generalUse: toOptionalText(raw.generalUse),
-      ingredients: toOptionalText(raw.ingredients),
+      mainComponents: toOptionalText(raw.mainComponents),
       mechanism: toOptionalText(raw.mechanism),
       usageText: toOptionalText(raw.usageText),
       priceRange: toOptionalText(raw.priceRange),
       officialUrl: officialUrl.ok ? officialUrl.value : null,
       catalogUrl: catalogUrl.ok ? catalogUrl.value : null,
-      tagIds: tagIdsResult.output,
+      cropIds: cropIdsResult.output,
+      effectIds: effectIdsResult.output,
+      ingredientCategoryIds: ingredientCategoryIdsResult.output,
+      ingredientIds: ingredientIdsResult.output,
+      productTypeIds: productTypeIdsResult.output,
+      searchTagIds: searchTagIdsResult.output,
     },
   };
 }
 
-function toRow(input: MaterialInput) {
+function toRow(input: MaterialInput): Database["public"]["Tables"]["materials"]["Insert"] {
   return {
     name: input.name,
     manufacturer_name: input.manufacturerName,
-    product_type: input.productType,
-    jbsa_class: input.jbsaClass,
+    composition_type_id: input.compositionTypeId,
     sales_status: input.salesStatus,
     description: input.description,
     general_use: input.generalUse,
-    ingredients: input.ingredients,
+    main_components: input.mainComponents,
     mechanism: input.mechanism,
     usage_text: input.usageText,
     price_range: input.priceRange,
@@ -202,7 +255,7 @@ export async function listAdminMaterials(query: string): Promise<Result<AdminMat
     const keyword = query.trim();
     const base = supabase
       .from("materials")
-      .select("id, name, manufacturer_name, product_type, sales_status, seller_id, review_count")
+      .select("id, name, manufacturer_name, sales_status, seller_id, review_count")
       .order("created_at", { ascending: false })
       .limit(200);
     const { data, error } =
@@ -215,15 +268,40 @@ export async function listAdminMaterials(query: string): Promise<Result<AdminMat
       return fail("internal");
     }
 
-    const sellerNames = await loadSellerNames(
-      data.map((row) => row.seller_id).filter((id): id is string => id !== null),
-    );
+    const materialIds = data.map(({ id }) => id);
+    const [sellerNames, productTypeResult] = await Promise.all([
+      loadSellerNames(data.map((row) => row.seller_id).filter((id): id is string => id !== null)),
+      materialIds.length === 0
+        ? Promise.resolve({ data: [], error: null })
+        : supabase
+            .from("material_product_types")
+            .select(
+              "material_id, product_type:product_types!material_product_types_product_type_id_fkey(name)",
+            )
+            .in("material_id", materialIds),
+    ]);
 
     if (!sellerNames.ok) return sellerNames;
+    if (productTypeResult.error !== null || productTypeResult.data === null) {
+      reportError("資材の製品タイプ取得に失敗", productTypeResult.error);
+      return fail("internal");
+    }
+
+    const productTypeNamesByMaterial = new Map<string, string[]>();
+    for (const relation of productTypeResult.data) {
+      if (relation.product_type === null) {
+        reportError("製品タイプの参照先が無い", relation);
+        return fail("internal");
+      }
+      const names = productTypeNamesByMaterial.get(relation.material_id) ?? [];
+      names.push(relation.product_type.name);
+      productTypeNamesByMaterial.set(relation.material_id, names);
+    }
 
     return succeed(
       data.map((row) => ({
         ...row,
+        productTypeNames: productTypeNamesByMaterial.get(row.id) ?? [],
         sellerName: row.seller_id === null ? null : (sellerNames.data.get(row.seller_id) ?? null),
       })),
     );
@@ -252,9 +330,28 @@ async function loadSellerNames(sellerIds: string[]): Promise<Result<Map<string, 
 
 export async function getAdminMaterial(materialId: string): Promise<Result<AdminMaterialDetail>> {
   return withAdmin(async ({ supabase }) => {
-    const [materialResult, tagResult] = await Promise.all([
+    const [
+      materialResult,
+      cropResult,
+      effectResult,
+      ingredientCategoryResult,
+      ingredientResult,
+      productTypeResult,
+      searchTagResult,
+    ] = await Promise.all([
       supabase.from("materials").select("*").eq("id", materialId).maybeSingle(),
-      supabase.from("material_tags").select("tag_id").eq("material_id", materialId),
+      supabase.from("material_crops").select("crop_id").eq("material_id", materialId),
+      supabase.from("material_effects").select("effect_id").eq("material_id", materialId),
+      supabase
+        .from("material_ingredient_categories")
+        .select("ingredient_category_id")
+        .eq("material_id", materialId),
+      supabase.from("material_ingredients").select("ingredient_id").eq("material_id", materialId),
+      supabase
+        .from("material_product_types")
+        .select("product_type_id")
+        .eq("material_id", materialId),
+      supabase.from("material_search_tags").select("search_tag_id").eq("material_id", materialId),
     ]);
 
     if (materialResult.error !== null) {
@@ -262,8 +359,32 @@ export async function getAdminMaterial(materialId: string): Promise<Result<Admin
       return fail("internal");
     }
     if (materialResult.data === null) return fail("not_found");
-    if (tagResult.error !== null) {
-      reportError("資材のタグ取得に失敗", tagResult.error);
+    const relationError =
+      cropResult.error ??
+      effectResult.error ??
+      ingredientCategoryResult.error ??
+      ingredientResult.error ??
+      productTypeResult.error ??
+      searchTagResult.error;
+    if (relationError !== null) {
+      reportError("資材の分類取得に失敗", relationError);
+      return fail("internal");
+    }
+    const cropRelations = cropResult.data;
+    const effectRelations = effectResult.data;
+    const ingredientCategoryRelations = ingredientCategoryResult.data;
+    const ingredientRelations = ingredientResult.data;
+    const productTypeRelations = productTypeResult.data;
+    const searchTagRelations = searchTagResult.data;
+    if (
+      cropRelations === null ||
+      effectRelations === null ||
+      ingredientCategoryRelations === null ||
+      ingredientRelations === null ||
+      productTypeRelations === null ||
+      searchTagRelations === null
+    ) {
+      reportError("資材分類の応答にデータが無い", { materialId });
       return fail("internal");
     }
 
@@ -274,7 +395,12 @@ export async function getAdminMaterial(materialId: string): Promise<Result<Admin
 
     return succeed({
       ...materialResult.data,
-      tagIds: tagResult.data.map((row) => row.tag_id),
+      cropIds: cropRelations.map((row) => row.crop_id),
+      effectIds: effectRelations.map((row) => row.effect_id),
+      ingredientCategoryIds: ingredientCategoryRelations.map((row) => row.ingredient_category_id),
+      ingredientIds: ingredientRelations.map((row) => row.ingredient_id),
+      productTypeIds: productTypeRelations.map((row) => row.product_type_id),
+      searchTagIds: searchTagRelations.map((row) => row.search_tag_id),
       sellerName: sellerId === null ? null : (sellerNames.data.get(sellerId) ?? null),
     });
   });
@@ -295,8 +421,8 @@ export async function createMaterial(input: MaterialInput): Promise<Result<{ id:
       return fail("internal");
     }
 
-    const tags = await replaceMaterialTags(data.id, input.tagIds);
-    if (!tags.ok) return tags;
+    const classifications = await replaceMaterialClassifications(data.id, input);
+    if (!classifications.ok) return classifications;
 
     return succeed({ id: data.id });
   });
@@ -321,31 +447,104 @@ export async function updateMaterial(
     }
     if (data.length === 0) return fail("not_found");
 
-    return replaceMaterialTags(materialId, input.tagIds);
+    return replaceMaterialClassifications(materialId, input);
   });
 }
 
-async function replaceMaterialTags(materialId: string, tagIds: string[]): Promise<Result<null>> {
+async function replaceMaterialClassifications(
+  materialId: string,
+  input: MaterialInput,
+): Promise<Result<null>> {
   return withAdmin(async ({ supabase }) => {
-    const nextTagIds = [...new Set(tagIds)];
-    const { error: deleteError } = await supabase
-      .from("material_tags")
-      .delete()
-      .eq("material_id", materialId);
+    const cropIds = [...new Set(input.cropIds)];
+    const cropResult =
+      cropIds.length === 0
+        ? { data: [], error: null }
+        : await supabase.from("crops").select("id, name").in("id", cropIds);
+    if (cropResult.error !== null || cropResult.data === null) {
+      reportError("対象作物名の取得に失敗", cropResult.error);
+      return fail("internal");
+    }
+    if (cropResult.data.length !== cropIds.length) return fail("invalid_body");
+    const cropNameById = new Map(cropResult.data.map((crop) => [crop.id, crop.name]));
+    const cropRelations: Database["public"]["Tables"]["material_crops"]["Insert"][] = [];
+    for (const [index, cropId] of cropIds.entries()) {
+      const sourceName = cropNameById.get(cropId);
+      if (sourceName === undefined) return fail("invalid_body");
+      cropRelations.push({
+        material_id: materialId,
+        crop_id: cropId,
+        source_name: sourceName,
+        sort_order: index,
+      });
+    }
 
+    const deleteResults = await Promise.all([
+      supabase.from("material_crops").delete().eq("material_id", materialId),
+      supabase.from("material_effects").delete().eq("material_id", materialId),
+      supabase.from("material_ingredient_categories").delete().eq("material_id", materialId),
+      supabase.from("material_ingredients").delete().eq("material_id", materialId),
+      supabase.from("material_product_types").delete().eq("material_id", materialId),
+      supabase.from("material_search_tags").delete().eq("material_id", materialId),
+    ]);
+    const deleteError = deleteResults.find(({ error }) => error !== null)?.error ?? null;
     if (deleteError !== null) {
-      reportError("既存タグの削除に失敗", deleteError);
+      reportError("既存分類の削除に失敗", deleteError);
       return fail("internal");
     }
 
-    if (nextTagIds.length === 0) return succeed(null);
-
-    const { error: insertError } = await supabase
-      .from("material_tags")
-      .insert(nextTagIds.map((tagId) => ({ material_id: materialId, tag_id: tagId })));
-
+    const effectIds = [...new Set(input.effectIds)];
+    const ingredientCategoryIds = [...new Set(input.ingredientCategoryIds)];
+    const ingredientIds = [...new Set(input.ingredientIds)];
+    const productTypeIds = [...new Set(input.productTypeIds)];
+    const searchTagIds = [...new Set(input.searchTagIds)];
+    const insertResults = await Promise.all([
+      cropIds.length === 0
+        ? Promise.resolve({ error: null })
+        : supabase.from("material_crops").insert(cropRelations),
+      effectIds.length === 0
+        ? Promise.resolve({ error: null })
+        : supabase
+            .from("material_effects")
+            .insert(
+              effectIds.map((effectId) => ({ material_id: materialId, effect_id: effectId })),
+            ),
+      ingredientCategoryIds.length === 0
+        ? Promise.resolve({ error: null })
+        : supabase.from("material_ingredient_categories").insert(
+            ingredientCategoryIds.map((ingredientCategoryId) => ({
+              material_id: materialId,
+              ingredient_category_id: ingredientCategoryId,
+            })),
+          ),
+      ingredientIds.length === 0
+        ? Promise.resolve({ error: null })
+        : supabase.from("material_ingredients").insert(
+            ingredientIds.map((ingredientId) => ({
+              material_id: materialId,
+              ingredient_id: ingredientId,
+            })),
+          ),
+      productTypeIds.length === 0
+        ? Promise.resolve({ error: null })
+        : supabase.from("material_product_types").insert(
+            productTypeIds.map((productTypeId) => ({
+              material_id: materialId,
+              product_type_id: productTypeId,
+            })),
+          ),
+      searchTagIds.length === 0
+        ? Promise.resolve({ error: null })
+        : supabase.from("material_search_tags").insert(
+            searchTagIds.map((searchTagId) => ({
+              material_id: materialId,
+              search_tag_id: searchTagId,
+            })),
+          ),
+    ]);
+    const insertError = insertResults.find(({ error }) => error !== null)?.error ?? null;
     if (insertError !== null) {
-      reportError("タグの付け替えに失敗", insertError);
+      reportError("分類の付け替えに失敗", insertError);
       return fail("internal");
     }
 

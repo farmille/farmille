@@ -1,6 +1,6 @@
 # 06 図解 — ER 図・シーケンス図・画面遷移図
 
-生成元：`supabase/migrations/` 全10本と `src/` の実装（2026-07-28・ブランチ rebuild/m0）。設計書（01・02）の図は概念設計時の簡略版であり、**実装と食い違う場合は本書が正**。スキーマ・ルーティング・主要フローを変更する PR は本書の該当図も更新すること。
+生成元：`supabase/migrations/` 全14本と `src/` の実装（2026-08-23・ブランチ rebuild/m0）。設計書（01・02）の図は概念設計時の簡略版であり、**実装と食い違う場合は本書が正**。スキーマ・ルーティング・主要フローを変更する PR は本書の該当図も更新すること。
 
 GitHub 上でそのまま Mermaid がレンダリングされる。閲覧用のスタンドアロン版（同一ソースから生成）：https://claude.ai/code/artifact/cbd39abf-0d38-4b1e-92c5-38d943f1765f
 
@@ -12,7 +12,7 @@ GitHub 上でそのまま Mermaid がレンダリングされる。閲覧用の�
 
 ## 1. ER 図
 
-26 テーブル。読みやすさのため「全体俯瞰」＋ドメイン別 4 枚に分割する。列はすべて実物どおり（`created_at`／`updated_at` は全テーブルにあるため各図では省略）。点線＝ポリモーフィック参照（FK 制約なし・`target_type`＋`target_id`）。
+38 テーブル。読みやすさのため「全体俯瞰」＋ドメイン別 4 枚に分割する。列はすべて実物どおり（`created_at`／`updated_at` は全テーブルにあるため各図では省略）。点線＝ポリモーフィック参照（FK 制約なし・`target_type`＋`target_id`）。
 
 ### 1.1 全体俯瞰
 
@@ -29,8 +29,21 @@ erDiagram
     seller_accounts ||--o{ articles : "著者"
     seller_accounts ||--o{ material_edit_requests : "申請"
 
-    materials ||--o{ material_tags : ""
-    tags ||--o{ material_tags : ""
+    composition_types ||--o{ materials : "組成"
+    materials ||--o{ material_effects : ""
+    effects ||--o{ material_effects : ""
+    effect_categories ||--o{ effects : ""
+    materials ||--o{ material_crops : ""
+    crops ||--o{ material_crops : ""
+    materials ||--o{ material_search_tags : ""
+    search_tags ||--o{ material_search_tags : ""
+    materials ||--o{ material_ingredient_categories : ""
+    ingredient_categories ||--o{ material_ingredient_categories : ""
+    materials ||--o{ material_ingredients : ""
+    ingredients ||--o{ material_ingredients : ""
+    ingredient_categories ||--o{ ingredients : ""
+    materials ||--o{ material_product_types : ""
+    product_types ||--o{ material_product_types : ""
     materials ||--o{ material_images : ""
     materials ||--o{ material_evidences : ""
     materials ||--o{ material_sources : ""
@@ -46,7 +59,8 @@ erDiagram
     profiles ||--o{ saved_materials : "検討リスト"
     profiles ||--o{ helpful_votes : "参考になった"
     profiles ||--o{ content_reports : "通報"
-    crops ||--o{ reviews : "作目"
+    reviews ||--|{ review_crops : "作目（1件以上）"
+    crops ||--o{ review_crops : ""
     crops ||--o{ usage_reports : "作目"
 
     reviews ||--o{ review_photos : ""
@@ -136,12 +150,11 @@ erDiagram
         uuid id PK
         text name "NOT NULL・分類層=Farmille"
         text manufacturer_name "NOT NULL・分類層"
-        text product_type "分類層"
-        text jbsa_class "分類層"
+        uuid composition_type_id FK "composition_types・RESTRICT・分類層"
         text sales_status "分類層"
         text description "一次情報層=出品者編集可"
         text general_use "一次情報層"
-        text ingredients "一次情報層"
+        text main_components "一次情報層・主成分原文"
         text mechanism "一次情報層"
         text usage_text "一次情報層"
         text price_range "一次情報層"
@@ -152,16 +165,75 @@ erDiagram
         numeric avg_rating "集計・1〜5・0件はNULL"
         numeric control_plot_ratio "集計・対照区あり率"
     }
-    tags {
+    effect_categories {
         uuid id PK
-        text name "NOT NULL"
-        text category "NOT NULL・crop/concern/effect/condition/type"
-        integer sort_order
+        text name UK "NOT NULL"
+        integer sort_order "NOT NULL"
     }
-    material_tags {
+    effects {
+        uuid id PK
+        uuid category_id FK "effect_categories・RESTRICT"
+        text name "NOT NULL"
+        integer sort_order "NOT NULL"
+    }
+    material_effects {
         uuid id PK
         uuid material_id FK "CASCADE"
-        uuid tag_id FK "CASCADE"
+        uuid effect_id FK "RESTRICT"
+    }
+    material_crops {
+        uuid id PK
+        uuid material_id FK "CASCADE"
+        uuid crop_id FK "crops・RESTRICT"
+        text source_name "メーカー資料の記載名・NOT NULL"
+        integer sort_order "NOT NULL"
+    }
+    ingredient_categories {
+        uuid id PK
+        text name UK "NOT NULL・JBSA材料分類"
+        integer sort_order "NOT NULL"
+    }
+    ingredients {
+        uuid id PK
+        uuid category_id FK "ingredient_categories・RESTRICT"
+        text name "NOT NULL・個別材料"
+        integer sort_order "NOT NULL"
+    }
+    material_ingredient_categories {
+        uuid id PK
+        uuid material_id FK "CASCADE"
+        uuid ingredient_category_id FK "RESTRICT"
+    }
+    material_ingredients {
+        uuid id PK
+        uuid material_id FK "CASCADE"
+        uuid ingredient_id FK "RESTRICT"
+    }
+    composition_types {
+        uuid id PK
+        text name UK "NOT NULL"
+        integer sort_order "NOT NULL"
+    }
+    product_types {
+        uuid id PK
+        text name UK "NOT NULL・メーカー分類"
+        integer sort_order "NOT NULL"
+    }
+    material_product_types {
+        uuid id PK
+        uuid material_id FK "CASCADE"
+        uuid product_type_id FK "RESTRICT"
+    }
+    search_tags {
+        uuid id PK
+        text name "NOT NULL"
+        text category "NOT NULL・concern/condition"
+        integer sort_order "NOT NULL"
+    }
+    material_search_tags {
+        uuid id PK
+        uuid material_id FK "CASCADE"
+        uuid search_tag_id FK "CASCADE"
     }
     material_images {
         uuid id PK
@@ -199,8 +271,21 @@ erDiagram
     }
 
     seller_accounts ||--o{ materials : "claim"
-    materials ||--o{ material_tags : ""
-    tags ||--o{ material_tags : ""
+    composition_types ||--o{ materials : "組成タイプ"
+    effect_categories ||--o{ effects : "効果大分類"
+    effects ||--o{ material_effects : ""
+    materials ||--o{ material_effects : "個別効果"
+    crops ||--o{ material_crops : "Farmille正規化"
+    materials ||--o{ material_crops : "対象作物"
+    ingredient_categories ||--o{ ingredients : "所属"
+    ingredient_categories ||--o{ material_ingredient_categories : ""
+    materials ||--o{ material_ingredient_categories : "JBSA材料分類"
+    ingredients ||--o{ material_ingredients : ""
+    materials ||--o{ material_ingredients : "個別材料"
+    product_types ||--o{ material_product_types : ""
+    materials ||--o{ material_product_types : "製品タイプ"
+    search_tags ||--o{ material_search_tags : ""
+    materials ||--o{ material_search_tags : "発見語"
     materials ||--o{ material_images : ""
     materials ||--o{ material_evidences : ""
     materials ||--o{ material_sources : ""
@@ -208,7 +293,7 @@ erDiagram
     seller_accounts ||--o{ material_edit_requests : ""
 ```
 
-補足：`materials` は `(name, manufacturer_name)` UNIQUE。分類層＋集計＋`seller_id` はトリガー `enforce_material_column_scope` で保護され、出品者は一次情報層のみ更新できる（admin と service_role は素通り）。
+補足：`materials` は `(name, manufacturer_name)` UNIQUE。同一分類内の検索条件は OR、分類間は AND。効果大分類と作物群は表示用に導出し、資材との直接関連を重複保存しない。分類層＋集計＋`seller_id` はトリガー `enforce_material_column_scope` で保護され、出品者は一次情報層のみ更新できる（admin と service_role は素通り）。
 
 ### 1.4 投稿とリアクション
 
@@ -220,12 +305,17 @@ erDiagram
         uuid author_user_id FK "profiles・CASCADE"
         smallint rating "NOT NULL・1〜5"
         text body "NOT NULL"
-        uuid crop_id FK "crops・RESTRICT"
         boolean has_control_plot "対照区の有無・任意"
         text purchase_channel "ja/home_center/ec/direct/other・内部"
         boolean pesticide_ack "NOT NULL・true必須（CHECK）"
         boolean is_provided_sample "NOT NULL・default false"
         text status "NOT NULL・published/hidden"
+    }
+    review_crops {
+        uuid id PK
+        uuid review_id FK "reviews・CASCADE"
+        uuid crop_id FK "crops・RESTRICT"
+        integer sort_order "NOT NULL"
     }
     review_photos {
         uuid id PK
@@ -313,6 +403,8 @@ erDiagram
         timestamptz resolved_at "open ⇔ NULL（CHECK）"
     }
 
+    reviews ||--|{ review_crops : "1件以上"
+    crops ||--o{ review_crops : ""
     reviews ||--o{ review_photos : ""
     usage_reports ||--o{ usage_report_applications : ""
     usage_reports ||--o{ usage_report_media : ""
@@ -325,7 +417,7 @@ erDiagram
     view_events }o..o{ usage_reports : "対象"
 ```
 
-補足：`saved_materials` は `(user_id, material_id)` UNIQUE、`helpful_votes` は `(user_id, target_type, target_id)` UNIQUE。`view_events` は追記専用（UPDATE/DELETE 権限を剥奪）。`reviews` の INSERT/UPDATE/DELETE で集計トリガーが `materials.review_count / avg_rating / control_plot_ratio` を再計算する。
+補足：`review_crops` は `(review_id, crop_id)` UNIQUEで、遅延制約トリガーがレビューごとの0件を拒否する。`saved_materials` は `(user_id, material_id)` UNIQUE、`helpful_votes` は `(user_id, target_type, target_id)` UNIQUE。`view_events` は追記専用（UPDATE/DELETE 権限を剥奪）。`reviews` の INSERT/UPDATE/DELETE で集計トリガーが `materials.review_count / avg_rating / control_plot_ratio` を再計算する。
 
 ### 1.5 記事・Q&A（Phase 2 先行スキーマ）
 
@@ -496,14 +588,14 @@ sequenceDiagram
     participant D as DB
 
     B->>ST: 写真を review-photos/{user_id}/ へ直接アップロード
-    B->>S: createReviewAction（星・本文・作目・同意・写真パス）
+    B->>S: createReviewAction（星・本文・複数作目・同意・写真パス）
     S->>S: requireGeneralUser・入力検証（農薬同意 false は拒否）
     S->>D: materials/crops の存在確認・同資材への重複投稿検査
     alt 既に自分のレビューあり
         S->>ST: 直前アップロード写真を削除
         S-->>B: redirect 編集画面（?existing=1）
     end
-    S->>D: reviews INSERT（status='published'）
+    S->>D: RPCでreviews＋review_cropsを原子的にINSERT（status='published'）
     S->>D: review_photos INSERT（失敗時は reviews を削除してロールバック）
     Note over D: トリガーが materials の review_count / avg_rating / 対照区あり率を再計算
     S-->>B: redirect 資材詳細 #reviews-heading（投稿完了トースト）
@@ -638,7 +730,7 @@ flowchart TD
     AREQ["分類変更申請 …/requests"]
     AREP["通報処理 /admin/reports"]
     AUR["編集局 /admin/usage-reports → [id]"]
-    ATAG["タグ・作物 /admin/tags"]
+    ATAG["検索タグ・作物 /admin/tags"]
 
     LOGIN -->|"admin・AAL1"| MFA
     MFA -->|"TOTP 検証 → AAL2"| ADMIN

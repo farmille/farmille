@@ -90,7 +90,7 @@ const NAV_ITEMS = [
   { href: "/admin", label: "ホーム" },
   { href: "/admin/sellers", label: "出品者審査" },
   { href: "/admin/materials", label: "資材" },
-  { href: "/admin/tags", label: "タグ・作物" },
+  { href: "/admin/tags", label: "検索タグ・作物" },
 ] as const;
 
 export function AdminShell({

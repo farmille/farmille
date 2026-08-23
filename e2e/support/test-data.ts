@@ -14,9 +14,12 @@ type UsageReportSelection = Pick<
   Database["public"]["Tables"]["usage_reports"]["Row"],
   "author_user_id" | "id" | "material_id" | "status" | "title"
 >;
-type TagSelection = Pick<Database["public"]["Tables"]["tags"]["Row"], "category" | "id" | "name">;
 type ProfileReference = Pick<Database["public"]["Tables"]["profiles"]["Row"], "user_id">;
 type CropSelection = Pick<Database["public"]["Tables"]["crops"]["Row"], "id" | "name">;
+type ProductTypeSelection = Pick<
+  Database["public"]["Tables"]["product_types"]["Row"],
+  "id" | "name"
+>;
 type SellerAccountReference = Pick<
   Database["public"]["Tables"]["seller_accounts"]["Row"],
   "auth_user_id" | "id"
@@ -68,11 +71,6 @@ const UsageReportSchema = v.object({
   title: v.nullable(v.string()),
   status: v.string(),
 }) satisfies v.GenericSchema<UsageReportSelection>;
-const TagSchema = v.object({
-  id: UuidSchema,
-  name: v.string(),
-  category: v.string(),
-}) satisfies v.GenericSchema<TagSelection>;
 const IdSchema = v.object({ id: UuidSchema });
 const ProfileReferenceSchema = v.object({
   user_id: UuidSchema,
@@ -81,6 +79,14 @@ const CropSchema = v.object({
   id: UuidSchema,
   name: v.string(),
 }) satisfies v.GenericSchema<CropSelection>;
+const ReviewCropNameRelationSchema = v.object({
+  sort_order: v.number(),
+  crop: v.object({ name: v.string() }),
+});
+const ProductTypeSchema = v.object({
+  id: UuidSchema,
+  name: v.string(),
+}) satisfies v.GenericSchema<ProductTypeSelection>;
 const SellerAccountReferenceSchema = v.object({
   id: UuidSchema,
   auth_user_id: v.nullable(UuidSchema),
@@ -89,7 +95,6 @@ const SellerAccountReferenceSchema = v.object({
 export type Material = v.InferOutput<typeof MaterialSchema>;
 export type Review = v.InferOutput<typeof ReviewSchema>;
 export type UsageReport = v.InferOutput<typeof UsageReportSchema>;
-export type Tag = v.InferOutput<typeof TagSchema>;
 
 type RestInsertTable = "materials" | "profiles" | "reviews" | "seller_accounts" | "usage_reports";
 type RestInsertBody<Table extends RestInsertTable> = Database["public"]["Tables"][Table]["Insert"];
@@ -330,7 +335,6 @@ export async function createMaterial(
   return restInsert(MaterialSchema, "materials", {
     name: `E2E資材_${token}`,
     manufacturer_name: `E2Eメーカー_${token}`,
-    product_type: "E2E",
     sales_status: "販売中",
     seller_id: sellerId,
   });
@@ -389,16 +393,32 @@ export async function createReview(input: {
   body: string;
 }): Promise<Review> {
   const crop = await firstCrop();
-
-  return restInsert(ReviewSchema, "reviews", {
-    material_id: input.materialId,
-    author_user_id: input.authorUserId,
-    rating: input.rating,
-    body: input.body,
-    crop_id: crop.id,
-    pesticide_ack: true,
-    status: "published",
+  const reviewId = await jsonRequest(UuidSchema, "/rest/v1/rpc/create_review_with_crops", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      p_material_id: input.materialId,
+      p_author_user_id: input.authorUserId,
+      p_rating: input.rating,
+      p_body: input.body,
+      p_crop_ids: [crop.id],
+      p_has_control_plot: false,
+      p_purchase_channel: null,
+      p_pesticide_ack: true,
+    }),
   });
+  const params = new URLSearchParams({
+    select: "id,material_id,author_user_id,rating,body,status",
+    id: `eq.${reviewId}`,
+  });
+  const rows = await restSelect(ReviewSchema, "reviews", params);
+  const review = rows[0];
+
+  if (review === undefined) {
+    throw new Error(`作成したレビュー ${reviewId} が見つかりません。`);
+  }
+
+  return review;
 }
 
 export async function reviewByAuthor(authorUserId: string): Promise<Review | null> {
@@ -409,6 +429,16 @@ export async function reviewByAuthor(authorUserId: string): Promise<Review | nul
   });
   const rows = await restSelect(ReviewSchema, "reviews", params);
   return rows[0] ?? null;
+}
+
+export async function reviewCropNames(reviewId: string): Promise<string[]> {
+  const params = new URLSearchParams({
+    select: "sort_order,crop:crops!review_crops_crop_id_fkey(name)",
+    review_id: `eq.${reviewId}`,
+    order: "sort_order.asc",
+  });
+  const rows = await restSelect(ReviewCropNameRelationSchema, "review_crops", params);
+  return rows.map(({ crop }) => crop.name);
 }
 
 /** 指定ユーザーが押した「参考になった」の件数。 */
@@ -456,10 +486,20 @@ export async function usageReportByAuthor(authorUserId: string): Promise<UsageRe
   return rows[0] ?? null;
 }
 
-export async function tagsByNames(names: string[]): Promise<Tag[]> {
+export async function cropsByNames(names: string[]): Promise<v.InferOutput<typeof CropSchema>[]> {
   const params = new URLSearchParams({
-    select: "id,name,category",
+    select: "id,name",
     name: `in.(${names.join(",")})`,
   });
-  return restSelect(TagSchema, "tags", params);
+  return restSelect(CropSchema, "crops", params);
+}
+
+export async function productTypesByNames(
+  names: string[],
+): Promise<v.InferOutput<typeof ProductTypeSchema>[]> {
+  const params = new URLSearchParams({
+    select: "id,name",
+    name: `in.(${names.join(",")})`,
+  });
+  return restSelect(ProductTypeSchema, "product_types", params);
 }

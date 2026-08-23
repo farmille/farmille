@@ -37,7 +37,7 @@ export async function ReviewList({ reviews, emptyDescription, currentPath }: Rev
             handle={review.author?.handle ?? "退会したユーザー"}
             authorHref={review.author?.user_id ? `/users/${review.author.user_id}` : undefined}
             avatarSrc={review.author?.avatar_url ?? undefined}
-            crop={review.crop?.name ?? "作目情報なし"}
+            crop={review.crops.map(({ name }) => name).join("・")}
             rating={review.rating}
             helpfulCount={review.helpfulCount}
             body={review.body}

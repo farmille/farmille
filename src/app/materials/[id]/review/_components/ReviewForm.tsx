@@ -23,6 +23,8 @@ import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
 import type { Database } from "@/types/database.types";
 import { css } from "../../../../../../styled-system/css";
 
+import { ReviewCropPicker } from "./ReviewCropPicker";
+
 const REVIEW_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 const REVIEW_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
@@ -33,7 +35,7 @@ type PendingPhoto = {
 };
 
 type ReviewFormValues = {
-  cropId: string;
+  cropIds: string[];
   rating: number;
   body: string;
   purchaseChannel: PurchaseChannel | null;
@@ -51,7 +53,6 @@ type ReviewFormBaseProps = {
   userId: string;
   crops: ReviewCropOption[];
   initialValues: ReviewFormValues;
-  profileCropDefaulted?: boolean;
   existingReviewNotice?: boolean;
 };
 type ReviewFormProps = ReviewFormBaseProps &
@@ -123,7 +124,6 @@ export function ReviewForm({
   crops,
   initialValues,
   reviewId,
-  profileCropDefaulted = false,
   existingReviewNotice = false,
 }: ReviewFormProps) {
   const supabase = useMemo(
@@ -135,6 +135,7 @@ export function ReviewForm({
       ? createReviewAction.bind(null, material.id)
       : updateReviewAction.bind(null, material.id, reviewId);
   const [state, formAction, actionPending] = useActionState(action, initialActionState);
+  const [selectedCropIds, setSelectedCropIds] = useState(initialValues.cropIds);
   const [rating, setRating] = useState(initialValues.rating);
   const [pesticideAck, setPesticideAck] = useState(initialValues.pesticideAck);
   const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>([]);
@@ -257,25 +258,23 @@ export function ReviewForm({
       <div className={field}>
         <label className={label} htmlFor="review-crop">
           作目 <Badge variant="required">必須</Badge>
-          {profileCropDefaulted ? (
-            <span className={css({ fontSize: "xs", color: "text.muted", fontWeight: "400" })}>
-              プロフィールから自動入力
-            </span>
-          ) : null}
+          <span className={css({ fontSize: "xs", color: "text.muted", fontWeight: "400" })}>
+            複数選択できます
+          </span>
         </label>
-        <Select id="review-crop" name="cropId" defaultValue={initialValues.cropId} required>
-          <option value="" disabled>
-            作目を選択してください
-          </option>
-          {crops.map((crop) => (
-            <option key={crop.id} value={crop.id}>
-              {crop.name}
-            </option>
-          ))}
-        </Select>
-        {fieldErrors?.cropId === undefined ? null : (
-          <p className={fieldError}>{fieldErrors.cropId}</p>
-        )}
+        <ReviewCropPicker
+          crops={crops}
+          selectedCropIds={selectedCropIds}
+          error={fieldErrors?.cropIds}
+          onAdd={(cropId) =>
+            setSelectedCropIds((current) =>
+              current.includes(cropId) ? current : [...current, cropId],
+            )
+          }
+          onRemove={(cropId) =>
+            setSelectedCropIds((current) => current.filter((id) => id !== cropId))
+          }
+        />
       </div>
 
       <div className={field}>

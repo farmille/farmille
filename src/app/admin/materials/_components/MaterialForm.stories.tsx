@@ -1,26 +1,71 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import type { AdminMaterialDetail } from "@/server/admin/materials";
-import type { AdminTagItem } from "@/server/admin/tags";
+import type { ClassificationOptions } from "@/server/queries/classifications";
 
 import { MaterialForm } from "./MaterialForm";
 
-const tags: AdminTagItem[] = [
-  { id: "tag-crop", name: "トマト", category: "crop", sort_order: 10, usageCount: 12 },
-  { id: "tag-effect", name: "発根促進", category: "effect", sort_order: 20, usageCount: 4 },
-  { id: "tag-type", name: "微生物資材", category: "type", sort_order: 30, usageCount: 8 },
-];
+const classifications: ClassificationOptions = {
+  compositionTypes: [{ id: "00000000-0000-4000-8000-000000000301", name: "液体", sort_order: 10 }],
+  crops: [
+    {
+      id: "00000000-0000-4000-8000-000000000302",
+      name: "トマト",
+      aliases: [],
+      sort_order: 10,
+      groupId: "00000000-0000-4000-8000-000000000303",
+      groupName: "果菜類",
+      groupSortOrder: 10,
+    },
+  ],
+  effectCategories: [
+    { id: "00000000-0000-4000-8000-000000000304", name: "その他", sort_order: 40 },
+  ],
+  effects: [
+    {
+      id: "00000000-0000-4000-8000-000000000305",
+      name: "樹勢改善",
+      sort_order: 10,
+      categoryId: "00000000-0000-4000-8000-000000000304",
+      categoryName: "その他",
+      categorySortOrder: 40,
+    },
+  ],
+  ingredientCategories: [
+    { id: "00000000-0000-4000-8000-000000000306", name: "微生物資材", sort_order: 10 },
+  ],
+  ingredients: [
+    {
+      id: "00000000-0000-4000-8000-000000000307",
+      name: "バチルス属菌",
+      sort_order: 10,
+      categoryId: "00000000-0000-4000-8000-000000000306",
+      categoryName: "微生物資材",
+      categorySortOrder: 10,
+    },
+  ],
+  productTypes: [
+    { id: "00000000-0000-4000-8000-000000000308", name: "微生物資材", sort_order: 10 },
+  ],
+  searchTags: [
+    {
+      id: "00000000-0000-4000-8000-000000000309",
+      name: "根張り改善",
+      category: "concern",
+      sort_order: 10,
+    },
+  ],
+};
 
 const material: AdminMaterialDetail = {
   id: "00000000-0000-4000-8000-000000000101",
   name: "土づくり微生物資材",
   manufacturer_name: "グリーンバイオ株式会社",
-  product_type: "微生物資材",
-  jbsa_class: "土壌改良",
+  composition_type_id: "00000000-0000-4000-8000-000000000301",
   sales_status: "販売中",
   description: "土壌環境を整えるための微生物資材です。",
   general_use: "定植前の土づくりに使用します。",
-  ingredients: "バチルス属菌",
+  main_components: "バチルス属菌",
   mechanism: "有用微生物の定着を支援します。",
   usage_text: "10aあたり1kgを均一に散布します。",
   price_range: "5,000〜8,000円",
@@ -32,25 +77,42 @@ const material: AdminMaterialDetail = {
   seller_id: "00000000-0000-4000-8000-000000000201",
   created_at: "2026-07-01T00:00:00.000Z",
   updated_at: "2026-08-01T00:00:00.000Z",
-  tagIds: ["tag-crop", "tag-type"],
+  cropIds: ["00000000-0000-4000-8000-000000000302"],
+  effectIds: ["00000000-0000-4000-8000-000000000305"],
+  ingredientCategoryIds: ["00000000-0000-4000-8000-000000000306"],
+  ingredientIds: ["00000000-0000-4000-8000-000000000307"],
+  productTypeIds: ["00000000-0000-4000-8000-000000000308"],
+  searchTagIds: ["00000000-0000-4000-8000-000000000309"],
   sellerName: "グリーンバイオ株式会社",
 };
 
 const meta = {
   title: "App/Admin/Materials/MaterialForm",
   component: MaterialForm,
-  args: { material, tags },
+  args: { classifications, material },
 } satisfies Meta<typeof MaterialForm>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Edit: Story = {};
+export const Edit: Story = { args: { classifications, material } };
 
 export const Create: Story = {
-  args: { material: null },
+  args: { classifications, material: null },
 };
 
-export const WithoutTags: Story = {
-  args: { tags: [] },
+export const WithoutClassifications: Story = {
+  args: {
+    classifications: {
+      compositionTypes: [],
+      crops: [],
+      effectCategories: [],
+      effects: [],
+      ingredientCategories: [],
+      ingredients: [],
+      productTypes: [],
+      searchTags: [],
+    },
+    material,
+  },
 };

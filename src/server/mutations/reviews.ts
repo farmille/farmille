@@ -7,9 +7,10 @@ import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
-type ReviewInsert = Database["public"]["Tables"]["reviews"]["Insert"];
 type ReviewPhotoRow = Database["public"]["Tables"]["review_photos"]["Row"];
 type ReviewPhotoInsert = Database["public"]["Tables"]["review_photos"]["Insert"];
+type CreateReviewRpcArgs = Database["public"]["Functions"]["create_review_with_crops"]["Args"];
+type UpdateReviewRpcArgs = Database["public"]["Functions"]["update_review_with_crops"]["Args"];
 
 export const PURCHASE_CHANNELS = ["ja", "home_center", "ec", "direct", "other"] as const;
 export type PurchaseChannel = (typeof PURCHASE_CHANNELS)[number];
@@ -29,7 +30,7 @@ export type ExistingReviewPhotoInput = {
 
 export type ReviewMutationInput = {
   materialId: string;
-  cropId: string;
+  cropIds: string[];
   rating: number;
   body: string;
   purchaseChannel: PurchaseChannel | null;
@@ -39,7 +40,7 @@ export type ReviewMutationInput = {
 };
 
 export type ReviewFieldErrors = Partial<
-  Record<"cropId" | "rating" | "body" | "purchaseChannel" | "pesticideAck" | "photos", string>
+  Record<"cropIds" | "rating" | "body" | "purchaseChannel" | "pesticideAck" | "photos", string>
 >;
 
 export type ReviewValidation =
@@ -47,6 +48,11 @@ export type ReviewValidation =
   | { ok: false; fieldErrors: ReviewFieldErrors };
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ReviewCropIdsSchema = v.pipe(
+  v.array(v.pipe(v.string(), v.uuid())),
+  v.minLength(1),
+  v.check((cropIds) => new Set(cropIds).size === cropIds.length),
+);
 const REVIEW_PHOTO_PATH_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/[0-9a-f-]+\.(?:jpg|png|webp)$/i;
 const REVIEW_PHOTO_PUBLIC_MARKER = "/storage/v1/object/public/review-photos/";
@@ -83,7 +89,7 @@ function parseNewPhotos(value: FormDataEntryValue | null): NewReviewPhoto[] | nu
 /** FormData を DB 型に変換する。必須同意は false を許容しない。 */
 export function validateReviewFormData(formData: FormData): ReviewValidation {
   const fieldErrors: ReviewFieldErrors = {};
-  const cropId = trimmedFormDataString(formData.get("cropId"));
+  const cropIdsResult = v.safeParse(ReviewCropIdsSchema, formData.getAll("cropIds"));
   const ratingValue = trimmedFormDataString(formData.get("rating"));
   const rating = Number(ratingValue);
   const body = trimmedFormDataString(formData.get("body"));
@@ -92,8 +98,8 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
   const pesticideAck = formData.get("pesticideAck") === "on";
   const newPhotos = parseNewPhotos(formData.get("newPhotos"));
 
-  if (!UUID_PATTERN.test(cropId)) {
-    fieldErrors.cropId = "作目を選択してください。";
+  if (!cropIdsResult.success) {
+    fieldErrors.cropIds = "作物を1つ以上選んでください。";
   }
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     fieldErrors.rating = "星を1〜5から選択してください。";
@@ -111,14 +117,14 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
     fieldErrors.photos = "写真情報が正しくありません。もう一度選択してください。";
   }
 
-  if (Object.keys(fieldErrors).length > 0 || newPhotos === null) {
+  if (Object.keys(fieldErrors).length > 0 || newPhotos === null || !cropIdsResult.success) {
     return { ok: false, fieldErrors };
   }
 
   return {
     ok: true,
     input: {
-      cropId,
+      cropIds: cropIdsResult.output,
       rating,
       body,
       purchaseChannel: purchaseChannelResult.success ? purchaseChannelResult.output : null,
@@ -142,11 +148,21 @@ function publicPhotoUrl(
 async function validateReferences(
   supabase: SupabaseClient<Database>,
   materialId: string,
-  cropId: string,
+  cropIds: string[],
 ): Promise<Result<null>> {
+  const uniqueCropIds = [...new Set(cropIds)];
+
+  if (
+    uniqueCropIds.length === 0 ||
+    uniqueCropIds.length !== cropIds.length ||
+    uniqueCropIds.some((cropId) => !UUID_PATTERN.test(cropId))
+  ) {
+    return fail("invalid_body");
+  }
+
   const [materialResult, cropResult] = await Promise.all([
     supabase.from("materials").select("id").eq("id", materialId).maybeSingle(),
-    supabase.from("crops").select("id").eq("id", cropId).maybeSingle(),
+    supabase.from("crops").select("id").in("id", uniqueCropIds),
   ]);
 
   if (materialResult.error !== null || cropResult.error !== null) {
@@ -158,7 +174,7 @@ async function validateReferences(
   }
 
   if (materialResult.data === null) return fail("not_found");
-  if (cropResult.data === null) return fail("invalid_body");
+  if (cropResult.data.length !== uniqueCropIds.length) return fail("invalid_body");
 
   return succeed(null);
 }
@@ -232,7 +248,7 @@ export async function createReviewWithDependencies(
   if (!UUID_PATTERN.test(input.materialId)) return fail("not_found");
 
   const supabase = await createSupabase();
-  const references = await validateReferences(supabase, input.materialId, input.cropId);
+  const references = await validateReferences(supabase, input.materialId, input.cropIds);
   if (!references.ok) return references;
 
   const { data: existing, error: existingError } = await supabase
@@ -249,33 +265,32 @@ export async function createReviewWithDependencies(
   }
   if (existing !== null) return fail("conflict");
 
-  const reviewInsert: ReviewInsert = {
-    material_id: input.materialId,
-    author_user_id: session.data.userId,
-    crop_id: input.cropId,
-    rating: input.rating,
-    body: input.body,
-    purchase_channel: input.purchaseChannel,
-    has_control_plot: input.hasControlPlot,
-    pesticide_ack: input.pesticideAck,
-    is_provided_sample: false,
-    status: "published",
+  const rpcInput: CreateReviewRpcArgs = {
+    p_material_id: input.materialId,
+    p_author_user_id: session.data.userId,
+    p_rating: input.rating,
+    p_body: input.body,
+    p_crop_ids: input.cropIds,
+    p_has_control_plot: input.hasControlPlot,
+    p_pesticide_ack: input.pesticideAck,
   };
-  const { data: review, error: reviewError } = await supabase
-    .from("reviews")
-    .insert(reviewInsert)
-    .select("id")
-    .single();
+  if (input.purchaseChannel !== null) {
+    rpcInput.p_purchase_channel = input.purchaseChannel;
+  }
+  const { data: reviewId, error: reviewError } = await supabase.rpc(
+    "create_review_with_crops",
+    rpcInput,
+  );
 
-  if (reviewError !== null) {
+  if (reviewError !== null || reviewId === null) {
     reportMutationError("レビューの作成に失敗", reviewError);
     return fail("internal");
   }
 
-  const photoRows = buildPhotoRows(supabase, review.id, session.data.userId, input.newPhotos);
+  const photoRows = buildPhotoRows(supabase, reviewId, session.data.userId, input.newPhotos);
 
   if (!photoRows.ok) {
-    await supabase.from("reviews").delete().eq("id", review.id);
+    await supabase.from("reviews").delete().eq("id", reviewId);
     return photoRows;
   }
 
@@ -284,7 +299,7 @@ export async function createReviewWithDependencies(
 
     if (photoError !== null) {
       reportMutationError("レビュー写真行の作成に失敗", photoError);
-      const { error: rollbackError } = await supabase.from("reviews").delete().eq("id", review.id);
+      const { error: rollbackError } = await supabase.from("reviews").delete().eq("id", reviewId);
       if (rollbackError !== null) {
         reportMutationError("レビュー作成のロールバックに失敗", rollbackError);
       }
@@ -292,7 +307,7 @@ export async function createReviewWithDependencies(
     }
   }
 
-  return succeed({ reviewId: review.id });
+  return succeed({ reviewId });
 }
 
 function storagePathFromPublicUrl(url: string, userId: string): string | null {
@@ -341,7 +356,7 @@ export async function updateReview(
   }
 
   const supabase = await createServerSupabase();
-  const references = await validateReferences(supabase, input.materialId, input.cropId);
+  const references = await validateReferences(supabase, input.materialId, input.cropIds);
   if (!references.ok) return references;
 
   const { data: review, error: reviewError } = await supabase
@@ -402,20 +417,25 @@ export async function updateReview(
   );
   if (!newPhotoRows.ok) return newPhotoRows;
 
-  const { error: updateError } = await supabase
-    .from("reviews")
-    .update({
-      crop_id: input.cropId,
-      rating: input.rating,
-      body: input.body,
-      purchase_channel: input.purchaseChannel,
-      has_control_plot: input.hasControlPlot,
-      pesticide_ack: input.pesticideAck,
-    })
-    .eq("id", reviewId)
-    .eq("author_user_id", session.data.userId);
+  const rpcInput: UpdateReviewRpcArgs = {
+    p_review_id: reviewId,
+    p_material_id: input.materialId,
+    p_author_user_id: session.data.userId,
+    p_rating: input.rating,
+    p_body: input.body,
+    p_crop_ids: input.cropIds,
+    p_has_control_plot: input.hasControlPlot,
+    p_pesticide_ack: input.pesticideAck,
+  };
+  if (input.purchaseChannel !== null) {
+    rpcInput.p_purchase_channel = input.purchaseChannel;
+  }
+  const { data: updatedReviewId, error: updateError } = await supabase.rpc(
+    "update_review_with_crops",
+    rpcInput,
+  );
 
-  if (updateError !== null) {
+  if (updateError !== null || updatedReviewId !== reviewId) {
     reportMutationError("レビューの更新に失敗", updateError);
     return fail("internal");
   }

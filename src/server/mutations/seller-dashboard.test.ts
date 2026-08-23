@@ -14,7 +14,7 @@ describe("validatePrimaryInformation", () => {
     const result = validatePrimaryInformation({
       description: "  紹介文  ",
       general_use: "",
-      ingredients: "菌体",
+      main_components: "菌体",
       mechanism: "作用機序",
       usage_text: "希釈して使用",
       price_range: "1,000円前後",
@@ -29,7 +29,7 @@ describe("validatePrimaryInformation", () => {
     expect(Object.keys(result.input)).toEqual([
       "description",
       "general_use",
-      "ingredients",
+      "main_components",
       "mechanism",
       "usage_text",
       "price_range",
@@ -42,7 +42,7 @@ describe("validatePrimaryInformation", () => {
     const result = validatePrimaryInformation({
       description: "",
       general_use: "",
-      ingredients: "",
+      main_components: "",
       mechanism: "",
       usage_text: "",
       price_range: "",

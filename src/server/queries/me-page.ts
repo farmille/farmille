@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getOwnProfile, type OwnProfile } from "@/server/queries/profiles";
 import { listSavedMaterials, type SavedMaterialItem } from "@/server/queries/saved-materials";
 import { fail, succeed, type Result } from "@/server/result";
+import { reviewCropLabel, type ReviewCropRelation } from "@/server/reviews/crop-relations";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
@@ -17,7 +18,7 @@ type OwnReviewQueryRow = Pick<
   ReviewRow,
   "id" | "material_id" | "rating" | "body" | "created_at"
 > & {
-  crop: Pick<CropRow, "id" | "name"> | null;
+  cropRelations: ReviewCropRelation[];
   material: Pick<MaterialRow, "id" | "name"> | null;
 };
 
@@ -40,7 +41,7 @@ type HelpfulReviewDetail = {
   material_id: string;
   rating: number;
   body: string;
-  crop: Pick<CropRow, "id" | "name"> | null;
+  cropRelations: ReviewCropRelation[];
   material: Pick<MaterialRow, "id" | "name"> | null;
   author: Pick<PublicProfileRow, "user_id" | "handle"> | null;
 };
@@ -172,9 +173,12 @@ async function listOwnPosts(
           rating,
           body,
           created_at,
-          crop:crops!reviews_crop_id_fkey (
-            id,
-            name
+          cropRelations:review_crops (
+            sort_order,
+            crop:crops!review_crops_crop_id_fkey (
+              id,
+              name
+            )
           ),
           material:materials!reviews_material_id_fkey (
             id,
@@ -242,7 +246,9 @@ async function listOwnPosts(
   const posts: OwnPostItem[] = [];
 
   for (const review of reviewRows) {
-    if (review.crop === null || review.material === null) {
+    const cropName = reviewCropLabel(review.cropRelations);
+
+    if (cropName === null || review.material === null) {
       reportQueryError("自分のレビューの関連データが欠落", { reviewId: review.id });
       return fail("internal");
     }
@@ -253,7 +259,7 @@ async function listOwnPosts(
       createdAt: review.created_at,
       materialId: review.material_id,
       materialName: review.material.name,
-      cropName: review.crop.name,
+      cropName,
       rating: review.rating,
       body: review.body,
       helpfulCount: reviewHelpful.data.get(review.id) ?? 0,
@@ -336,7 +342,10 @@ async function listHelpfulItems(
               material_id,
               rating,
               body,
-              crop:crops!reviews_crop_id_fkey ( id, name ),
+              cropRelations:review_crops (
+                sort_order,
+                crop:crops!review_crops_crop_id_fkey ( id, name )
+              ),
               material:materials!reviews_material_id_fkey ( id, name ),
               author:public_profiles!reviews_author_user_id_fkey (
                 user_id,
@@ -388,7 +397,8 @@ async function listHelpfulItems(
   for (const vote of votes) {
     if (vote.target_type === "review") {
       const review = reviewsById.get(vote.target_id);
-      if (review === undefined || review.crop === null || review.material === null) {
+      const cropName = review === undefined ? null : reviewCropLabel(review.cropRelations);
+      if (review === undefined || cropName === null || review.material === null) {
         continue;
       }
 
@@ -397,7 +407,7 @@ async function listHelpfulItems(
         id: review.id,
         materialId: review.material_id,
         materialName: review.material.name,
-        cropName: review.crop.name,
+        cropName,
         rating: review.rating,
         body: review.body,
         authorHandle: review.author?.handle ?? "不明な投稿者",

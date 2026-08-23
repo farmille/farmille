@@ -6,10 +6,8 @@ import {
   EmptyState,
   FormPageShell,
   SurfaceCard,
-  TagChip,
   TextLink,
   formatDateJa,
-  toTagChipCategory,
 } from "@/components";
 import { SellerAccessDenied } from "../../_components/AccessDenied";
 import { requireSeller } from "@/server/auth";
@@ -23,12 +21,6 @@ const pageStack = css({
   display: "flex",
   flexDirection: "column",
   gap: "6",
-});
-
-const tagLayout = css({
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "1.5",
 });
 
 const historyLayout = css({
@@ -53,6 +45,10 @@ function requestStatus(status: string): RequestStatusPresentation {
     default:
       throw new Error(`未対応の分類変更申請ステータスです：${status}`);
   }
+}
+
+function namesOrNull(items: ReadonlyArray<{ name: string }>): string | null {
+  return items.length === 0 ? null : items.map(({ name }) => name).join("、");
 }
 
 export default async function SellerMaterialPage({ params }: { params: Promise<{ id: string }> }) {
@@ -114,31 +110,30 @@ export default async function SellerMaterialPage({ params }: { params: Promise<{
             rows={[
               { label: "資材名", value: material.name },
               { label: "メーカー名", value: material.manufacturer_name },
-              { label: "資材タイプ", value: material.product_type },
-              { label: "効果分類", value: material.jbsa_class },
+              { label: "組成タイプ", value: material.compositionType?.name ?? null },
+              { label: "効果", value: namesOrNull(material.effects) },
+              {
+                label: "対象作物（メーカー表記）",
+                value:
+                  material.targetCrops.length === 0
+                    ? null
+                    : material.targetCrops.map(({ sourceName }) => sourceName).join("、"),
+              },
+              { label: "対象作物（Farmille正規化）", value: namesOrNull(material.targetCrops) },
+              { label: "JBSA材料分類", value: namesOrNull(material.ingredientCategories) },
+              { label: "個別材料", value: namesOrNull(material.ingredients) },
+              { label: "製品タイプ", value: namesOrNull(material.productTypes) },
               { label: "販売状態", value: material.sales_status },
               {
-                label: "タグ",
-                value:
-                  material.tags.length === 0 ? null : (
-                    <div className={tagLayout}>
-                      {material.tags.map((tag) => (
-                        <TagChip
-                          appearance="plain"
-                          category={toTagChipCategory(tag.category)}
-                          key={tag.id}
-                          label={tag.name}
-                        />
-                      ))}
-                    </div>
-                  ),
+                label: "検索補助タグ",
+                value: namesOrNull(material.searchTags),
               },
             ]}
           />
         </SurfaceCard>
 
         <SurfaceCard
-          description="資材名、メーカー名、資材タイプ、効果分類、販売状態、タグの変更は運営が確認します。"
+          description="資材名、メーカー名、各分類、販売状態、検索補助タグの変更は運営が確認します。"
           title="分類変更を申請"
         >
           <EditRequestForm materialId={material.id} />

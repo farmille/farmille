@@ -10,8 +10,8 @@ import { MaterialForm } from "@/app/admin/materials/_components/MaterialForm";
 import { FormMessage } from "@/components/auth/Fields";
 import { getAdminMaterial } from "@/server/admin/materials";
 import { listClaimableSellers } from "@/server/admin/sellers";
-import { listAdminTags } from "@/server/admin/tags";
 import { errorMessageJa } from "@/server/errors";
+import { listClassificationOptions } from "@/server/queries/classifications";
 import { css } from "../../../../../styled-system/css";
 
 export const metadata: Metadata = {
@@ -35,9 +35,9 @@ export default async function AdminMaterialDetailPage({
 
   await requireAdminPage(`/admin/materials/${id}`);
 
-  const [material, tags, sellers, { created }] = await Promise.all([
+  const [material, classifications, sellers, { created }] = await Promise.all([
     getAdminMaterial(id),
-    listAdminTags(),
+    listClassificationOptions(),
     listClaimableSellers(),
     searchParams,
   ]);
@@ -46,7 +46,7 @@ export default async function AdminMaterialDetailPage({
     if (material.error === "not_found") notFound();
     throw new Error(errorMessageJa[material.error]);
   }
-  if (!tags.ok) throw new Error(errorMessageJa[tags.error]);
+  if (!classifications.ok) throw new Error(errorMessageJa[classifications.error]);
   if (!sellers.ok) throw new Error(errorMessageJa[sellers.error]);
 
   return (
@@ -74,7 +74,7 @@ export default async function AdminMaterialDetailPage({
       </Panel>
 
       <Panel note="admin は分類・検索層と一次情報層の両方を編集できる。" title="資材情報">
-        <MaterialForm material={material.data} tags={tags.data} />
+        <MaterialForm classifications={classifications.data} material={material.data} />
       </Panel>
 
       <Panel title="関連">

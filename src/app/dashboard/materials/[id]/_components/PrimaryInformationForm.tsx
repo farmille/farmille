@@ -57,15 +57,15 @@ export function PrimaryInformationForm({ material }: PrimaryInformationFormProps
         />
       </Field>
       <Field
-        error={fieldErrors.ingredients}
-        htmlFor="ingredients"
+        error={fieldErrors.main_components}
+        htmlFor="main_components"
         label="主成分"
         requirement="optional"
       >
         <Textarea
-          defaultValue={material.ingredients ?? ""}
-          id="ingredients"
-          name="ingredients"
+          defaultValue={material.main_components ?? ""}
+          id="main_components"
+          name="main_components"
           placeholder="主な成分や菌株"
         />
       </Field>

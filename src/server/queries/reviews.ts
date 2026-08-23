@@ -3,12 +3,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getViewerHelpfulVotes } from "@/server/queries/helpful";
 import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
+import { orderedReviewCrops, type ReviewCropRelation } from "@/server/reviews/crop-relations";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 type ReviewPhotoRow = Database["public"]["Tables"]["review_photos"]["Row"];
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
+type CropGroupRow = Database["public"]["Tables"]["crop_groups"]["Row"];
 type ProfileCropRow = Database["public"]["Tables"]["profile_crops"]["Row"];
 type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
@@ -20,7 +22,6 @@ type ReviewFields = Pick<
   | "author_user_id"
   | "rating"
   | "body"
-  | "crop_id"
   | "has_control_plot"
   | "is_provided_sample"
   | "created_at"
@@ -34,14 +35,15 @@ export type ReviewPhoto = Pick<ReviewPhotoRow, "id" | "url" | "caption" | "sort_
 
 export type ReviewListItem = ReviewFields & {
   author: ReviewAuthor | null;
-  crop: ReviewCrop | null;
+  crops: ReviewCrop[];
   photos: ReviewPhoto[];
   helpfulCount: number;
   /** 閲覧者（ログイン中の一般ユーザー）がこのレビューに「参考になった」を押しているか。 */
   helpfulVotedByViewer: boolean;
 };
 
-export type ReviewCropOption = Pick<CropRow, "id" | "name"> & {
+export type ReviewCropOption = Pick<CropRow, "id" | "name" | "aliases"> & {
+  groupName: string;
   fromProfile: boolean;
 };
 
@@ -52,12 +54,12 @@ export type ReviewEditorData = Pick<
   | "author_user_id"
   | "rating"
   | "body"
-  | "crop_id"
   | "has_control_plot"
   | "purchase_channel"
   | "pesticide_ack"
   | "status"
 > & {
+  cropIds: string[];
   photos: ReviewPhoto[];
 };
 
@@ -65,8 +67,12 @@ export type ReviewSort = "newest" | "helpful" | "rating";
 
 type ReviewQueryRow = ReviewFields & {
   author: ReviewAuthor | null;
-  crop: ReviewCrop | null;
+  cropRelations: ReviewCropRelation[];
   photos: ReviewPhoto[];
+};
+
+type ReviewCropOptionQueryRow = Pick<CropRow, "id" | "name" | "aliases" | "sort_order"> & {
+  group: Pick<CropGroupRow, "name" | "sort_order"> | null;
 };
 
 type ReviewOrderRow = Pick<ReviewRow, "id" | "created_at">;
@@ -77,7 +83,6 @@ const REVIEW_SELECT = `
   author_user_id,
   rating,
   body,
-  crop_id,
   has_control_plot,
   is_provided_sample,
   created_at,
@@ -86,9 +91,12 @@ const REVIEW_SELECT = `
     handle,
     avatar_url
   ),
-  crop:crops!reviews_crop_id_fkey (
-    id,
-    name
+  cropRelations:review_crops (
+    sort_order,
+    crop:crops!review_crops_crop_id_fkey (
+      id,
+      name
+    )
   ),
   photos:review_photos (
     id,
@@ -176,10 +184,19 @@ function toReviewListItem(
   review: ReviewQueryRow,
   helpfulCounts: Map<string, number>,
   votedIds: ReadonlySet<string>,
-): ReviewListItem {
+): ReviewListItem | null {
+  const { cropRelations, photos, ...fields } = review;
+  const crops = orderedReviewCrops(cropRelations);
+
+  if (crops === null) {
+    reportQueryError("レビューの作目関連が欠落", { reviewId: review.id });
+    return null;
+  }
+
   return {
-    ...review,
-    photos: review.photos.toSorted(byPhotoOrder),
+    ...fields,
+    crops,
+    photos: photos.toSorted(byPhotoOrder),
     helpfulCount: helpfulCounts.get(review.id) ?? 0,
     helpfulVotedByViewer: votedIds.has(review.id),
   };
@@ -258,7 +275,9 @@ async function listByHelpfulCount(
       return fail("internal");
     }
 
-    items.push(toReviewListItem(review, helpfulCounts.data, votedIds.data));
+    const item = toReviewListItem(review, helpfulCounts.data, votedIds.data);
+    if (item === null) return fail("internal");
+    items.push(item);
   }
 
   return succeed({
@@ -325,8 +344,11 @@ export async function listRecentReviews({
     }
 
     const { material, ...review } = row;
+    const item = toReviewListItem(review, helpfulCounts.data, new Set());
+    if (item === null) return fail("internal");
+
     items.push({
-      ...toReviewListItem(review, helpfulCounts.data, new Set()),
+      ...item,
       materialName: material.name,
     });
   }
@@ -401,8 +423,15 @@ export async function listReviewsByMaterial(
     return votedIds;
   }
 
+  const items: ReviewListItem[] = [];
+  for (const review of reviews) {
+    const item = toReviewListItem(review, helpfulCounts.data, votedIds.data);
+    if (item === null) return fail("internal");
+    items.push(item);
+  }
+
   return succeed({
-    items: reviews.map((review) => toReviewListItem(review, helpfulCounts.data, votedIds.data)),
+    items,
     page,
     perPage: DEFAULT_PER_PAGE,
     total: count,
@@ -414,7 +443,22 @@ export async function listReviewsByMaterial(
 export async function listReviewCropOptions(userId: string): Promise<Result<ReviewCropOption[]>> {
   const supabase = await createServerSupabase();
   const [cropsResult, profileCropsResult] = await Promise.all([
-    supabase.from("crops").select("id, name").order("sort_order").order("name"),
+    supabase
+      .from("crops")
+      .select(
+        `
+          id,
+          name,
+          aliases,
+          sort_order,
+          group:crop_groups!crops_group_id_fkey (
+            name,
+            sort_order
+          )
+        `,
+      )
+      .order("sort_order")
+      .order("name"),
     supabase.from("profile_crops").select("crop_id").eq("user_id", userId),
   ]);
 
@@ -428,17 +472,45 @@ export async function listReviewCropOptions(userId: string): Promise<Result<Revi
 
   const profileCropRows: Pick<ProfileCropRow, "crop_id">[] = profileCropsResult.data;
   const profileCropIds = new Set(profileCropRows.map(({ crop_id }) => crop_id));
-  const rows: Pick<CropRow, "id" | "name">[] = cropsResult.data;
+  const rows: ReviewCropOptionQueryRow[] = cropsResult.data;
+
+  if (rows.some(({ group }) => group === null)) {
+    reportQueryError("レビュー作目候補の作物群が欠落", rows);
+    return fail("internal");
+  }
 
   return succeed(
     rows
-      .map((crop) => ({ ...crop, fromProfile: profileCropIds.has(crop.id) }))
+      .flatMap((crop) =>
+        crop.group === null
+          ? []
+          : [
+              {
+                id: crop.id,
+                name: crop.name,
+                aliases: crop.aliases,
+                groupName: crop.group.name,
+                groupSortOrder: crop.group.sort_order,
+                cropSortOrder: crop.sort_order,
+                fromProfile: profileCropIds.has(crop.id),
+              },
+            ],
+      )
       .toSorted(
         (left, right) =>
           Number(right.fromProfile) - Number(left.fromProfile) ||
+          left.groupSortOrder - right.groupSortOrder ||
+          left.cropSortOrder - right.cropSortOrder ||
           left.name.localeCompare(right.name, "ja") ||
           left.id.localeCompare(right.id),
-      ),
+      )
+      .map(({ id, name, aliases, groupName, fromProfile }) => ({
+        id,
+        name,
+        aliases,
+        groupName,
+        fromProfile,
+      })),
   );
 }
 
@@ -481,11 +553,17 @@ export async function getReviewForEdit(
         author_user_id,
         rating,
         body,
-        crop_id,
         has_control_plot,
         purchase_channel,
         pesticide_ack,
         status,
+        cropRelations:review_crops (
+          sort_order,
+          crop:crops!review_crops_crop_id_fkey (
+            id,
+            name
+          )
+        ),
         photos:review_photos (
           id,
           url,
@@ -506,7 +584,14 @@ export async function getReviewForEdit(
     return fail("not_found");
   }
 
-  const review: ReviewEditorData = data;
+  const { cropRelations, ...review } = data;
+  const typedCropRelations: ReviewCropRelation[] = cropRelations;
+  const crops = orderedReviewCrops(typedCropRelations);
+
+  if (crops === null) {
+    reportQueryError("編集対象レビューの作目関連が欠落", { reviewId });
+    return fail("internal");
+  }
 
   if (review.material_id !== materialId || review.author_user_id !== userId) {
     return fail("forbidden");
@@ -518,6 +603,7 @@ export async function getReviewForEdit(
 
   return succeed({
     ...review,
+    cropIds: crops.map(({ id: cropId }) => cropId),
     photos: review.photos.toSorted(byPhotoOrder),
   });
 }

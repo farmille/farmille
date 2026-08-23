@@ -18,17 +18,23 @@ const tableCard = css({
 });
 
 export function MaterialDetailTable({ material }: { material: MaterialDetail }) {
-  const targetCrops = material.tags
-    .filter(({ category }) => category === "crop")
-    .map(({ name }) => name)
-    .join("・");
+  const names = (items: ReadonlyArray<{ name: string }>): string | null =>
+    items.length === 0 ? null : items.map(({ name }) => name).join("・");
+  const manufacturerCrops =
+    material.targetCrops.length === 0
+      ? null
+      : material.targetCrops.map(({ sourceName }) => sourceName).join("・");
   const rows: DetailRow[] = [
     { label: "一般用途", value: material.general_use },
-    { label: "製品タイプ", value: material.product_type },
-    { label: "主成分", value: material.ingredients },
+    { label: "組成タイプ", value: material.compositionType?.name ?? null },
+    { label: "製品タイプ（メーカー分類）", value: names(material.productTypes) },
+    { label: "主成分", value: material.main_components },
+    { label: "JBSA材料分類", value: names(material.ingredientCategories) },
+    { label: "個別材料", value: names(material.ingredients) },
     { label: "作用機序", value: material.mechanism },
-    { label: "効果分類（JBSA基準・製造元申告）", value: material.jbsa_class },
-    { label: "対象作目", value: targetCrops.length > 0 ? targetCrops : null },
+    { label: "効果", value: names(material.effects) },
+    { label: "対象作物（メーカー表記）", value: manufacturerCrops },
+    { label: "対象作物（Farmille正規化）", value: names(material.targetCrops) },
     { label: "販売状況", value: material.sales_status },
     { label: "製造元", value: material.manufacturer_name },
   ];

@@ -5,18 +5,22 @@ import { validateMaterialInput } from "@/server/admin/materials";
 const base = {
   name: "テスト資材",
   manufacturerName: "テスト製薬",
-  productType: "",
-  jbsaClass: "",
+  compositionTypeId: "",
   salesStatus: "",
   description: "",
   generalUse: "",
-  ingredients: "",
+  mainComponents: "",
   mechanism: "",
   usageText: "",
   priceRange: "",
   officialUrl: "",
   catalogUrl: "",
-  tagIds: [],
+  cropIds: [],
+  effectIds: [],
+  ingredientCategoryIds: [],
+  ingredientIds: [],
+  productTypeIds: [],
+  searchTagIds: [],
 };
 
 describe("validateMaterialInput", () => {
@@ -30,11 +34,11 @@ describe("validateMaterialInput", () => {
   });
 
   it("空の任意項目は null にする（空文字を保存しない）", () => {
-    const result = validateMaterialInput({ ...base, productType: "   ", description: "" });
+    const result = validateMaterialInput({ ...base, compositionTypeId: "", description: "" });
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.input.productType).toBeNull();
+    expect(result.input.compositionTypeId).toBeNull();
     expect(result.input.description).toBeNull();
   });
 
@@ -63,18 +67,19 @@ describe("validateMaterialInput", () => {
     expect(result.fieldErrors.catalogUrl).toBeDefined();
   });
 
-  it("タグ ID の重複は保存側で一意化するためそのまま渡す", () => {
-    const result = validateMaterialInput({ ...base, tagIds: ["a", "a", "b"] });
+  it("分類 ID の重複は保存側で一意化するためそのまま渡す", () => {
+    const cropId = "11111111-1111-4111-8111-111111111111";
+    const result = validateMaterialInput({ ...base, cropIds: [cropId, cropId] });
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.input.tagIds).toEqual(["a", "a", "b"]);
+    expect(result.input.cropIds).toEqual([cropId, cropId]);
   });
 
-  it("タグ ID にファイルが混入したら入力エラーにする", () => {
+  it("分類 ID にファイルが混入したら入力エラーにする", () => {
     const result = validateMaterialInput({
       ...base,
-      tagIds: [new File(["invalid"], "invalid.txt")],
+      cropIds: [new File(["invalid"], "invalid.txt")],
     });
 
     expect(result.ok).toBe(false);

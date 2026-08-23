@@ -8,7 +8,7 @@ OOUI の結論を踏襲する：**資材＝情報の倉庫（全関係のハブ�
 
 - メインオブジェクト：資材・レビュー・使用レポート・ユーザー（一般／出品者）
 - コレクション：検討リスト（保存した資材）・参考になったの一覧
-- 分類：タグ（Farmille 所有）・作物マスタ
+- 分類：効果・対象作物・材料・組成タイプ・製品タイプの各マスタと、悩み・栽培条件の検索タグ（Farmille 所有）
 - Phase 2 スキーマ先行：質問・回答
 - レビューと使用レポートは**別テーブル**（作成フォーム・表示・状態管理がまるごと違うため。OOUI の判断どおり）
 
@@ -36,7 +36,15 @@ erDiagram
     materials ||--o{ material_images : ""
     materials ||--o{ material_evidences : "SDS/論文/チラシ"
     materials ||--o{ material_sources : "出典"
-    materials }o--o{ tags : "分類(material_tags)"
+    materials }o--o{ effects : "効果(material_effects)"
+    effects }o--|| effect_categories : "大分類"
+    materials }o--o{ crops : "対象作物(material_crops)"
+    materials }o--o{ search_tags : "発見語(material_search_tags)"
+    materials }o--o{ ingredient_categories : "JBSA材料分類"
+    materials }o--o{ ingredients : "個別材料"
+    ingredients }o--|| ingredient_categories : "所属分類"
+    materials }o--o{ product_types : "メーカー表記"
+    materials }o--o| composition_types : "組成"
     materials }o--o{ articles : "関連(article_materials)"
     materials ||--o{ saved_materials : "保存される"
     materials ||--o{ questions : "Phase2"
@@ -84,8 +92,8 @@ erDiagram
 ### 資材（2層構造）
 
 **materials**
-- 分類・検索層（**Farmille のみ編集可**）：`name`・`manufacturer_name` text NOT NULL（マスタ由来の表示名。未 claim でも表示する）・`product_type` ・`jbsa_class`（効果分類）・`sales_status`・タグ（material_tags）
-- 一次情報層（**claim 済み出品者が編集可**）：`description`（紹介文）・`general_use`（一般用途）・`ingredients`（主成分）・`mechanism`（作用機序）・`usage_text`（使い方）・`price_range`・`official_url`・`catalog_url`
+- 分類・検索層（**Farmille のみ編集可**）：`name`・`manufacturer_name` text NOT NULL（マスタ由来の表示名。未 claim でも表示する）・`sales_status`・`composition_type_id`、および効果・対象作物・材料分類・個別材料・製品タイプ・検索タグの各関連テーブル
+- 一次情報層（**claim 済み出品者が編集可**）：`description`（紹介文）・`general_use`（一般用途）・`main_components`（主な成分の原文）・`mechanism`（作用機序）・`usage_text`（使い方）・`price_range`・`official_url`・`catalog_url`
 - 状態：`seller_id` uuid NULL FK → seller_accounts（NULL＝未 claim。値あり＝claim 済み）
 - 集計（トリガーまたはビューで自動）：`review_count`・`avg_rating`・`control_plot_ratio`（対照区ありレビュー率＝確からしさ指標）
 - 層の割当はこの表が正（監査 A-8 の解決）。「メーカー確認済み」バッジ＝ `seller_id IS NOT NULL`
@@ -97,16 +105,24 @@ erDiagram
 
 ### 分類（Farmille 所有）
 
-**tags**（`name`・`category` CHECK IN ('crop','concern','effect','condition','type')。メーカー名・製品名の検索候補はタグではなく materials/seller_accounts から動的生成）
-**material_tags**（material_id, tag_id）
-**crop_groups**・**crops**（`name`・`group_id`・`aliases` text[]。モックの12群・約45作物＋表記ゆれ辞書を初期シードにする）
+分類は検索表示の都合で1つの汎用タグ表へ押し込まず、意味と更新単位ごとに正規化する。メーカー名・資材名の検索候補は `materials` から動的生成する。
+
+- **effect_categories**（効果大分類：`name`・`sort_order`）
+- **effects**（個別効果：`category_id`・`name`・`sort_order`）／**material_effects**（`material_id`・`effect_id`）。公開デモの4大分類・25個別効果を初期値とする
+- **crop_groups**・**crops**（`name`・`group_id`・`aliases` text[]）／**material_crops**（`material_id`・`crop_id`・`source_name`・`sort_order`）。`source_name` はメーカー資料の記載名、作物群は `crops.group_id` から導出する
+- **ingredient_categories**（JBSA材料分類）・**ingredients**（`category_id`・`name`）／**material_ingredient_categories**・**material_ingredients**。材料分類と個別材料を別の事実として保持する
+- **composition_types**（単一系・混合系など）を `materials.composition_type_id` から参照する
+- **product_types**／**material_product_types**。メーカー資料に複数の製品タイプが記載される場合を多対多で保持する
+- **search_tags**（`category` CHECK IN ('concern','condition')）／**material_search_tags**。悩み・栽培条件など利用者の発見語だけを扱い、効果・作物・材料・製品タイプの正規化マスタと混在させない
+
+検索は同一分類内を OR、分類間を AND とする。効果大分類と作物群は表示上のグループであり、資材との直接関連を重複保存しない。
 
 ### 投稿
 
 **reviews**
 - `material_id`・`author_user_id`（FK → profiles）
 - `rating` smallint NOT NULL CHECK 1〜5・`body` text NOT NULL
-- `crop_id` uuid NOT NULL FK → crops（作目。必須）
+- **review_crops**（`review_id`・`crop_id`・`sort_order`・UNIQUE(review_id, crop_id)）。作目は1件以上必須で、1レビューに複数選択できる。親レビューと関連行は RPC で原子的に保存し、遅延制約トリガーでも0件を拒否する
 - `has_control_plot` boolean NULL（対照区の有無。任意・確からしさ指標の分子）
 - `purchase_channel` text NULL CHECK IN ('ja','home_center','ec','direct','other')（D7：内部専用・非表示）
 - `pesticide_ack` boolean NOT NULL（農薬的効果を断定しない旨の同意。**false なら投稿不可**）
@@ -163,7 +179,7 @@ erDiagram
 | seller_accounts | 全員（approved のみ。contact_* は内部カラムのため公開ビューから除外） | anon（申請） | 本人（approved 後の profile 系カラムのみ）・admin |
 | materials | 全員 | admin | admin（全カラム）・claim 済み seller（一次情報層カラムのみ。**カラム分離はビュー＋RPC または列単位トリガーで強制**） |
 | material_evidences / images / sources | 全員 | seller（自社資材のみ）・admin | 同左 |
-| tags / crops | 全員 | admin | admin |
+| 分類マスタ・作物マスタ・資材との分類関連 | 全員 | admin | admin |
 | reviews | 全員（published のみ） | account_type='general' かつ本人 | 本人・admin |
 | usage_reports | published は全員・draft/pending は本人と admin | general かつ本人 | 本人（draft のみ）・admin（全状態） |
 | saved_materials / helpful_votes | 本人 | 本人（要ログイン） | 本人 |
@@ -194,7 +210,7 @@ erDiagram
 ## 8. 資材マスタ移行（D1）
 
 - 移行元：現行 `products`（294件）・`product_images`・`product_sources`・`product_application_recipes`・`maker_profiles.company_name`・`product_types`
-- 移行先：`materials`（`manufacturer_name` ← maker_profiles.company_name。**seller_id は全件 NULL＝未 claim で開始**）・`material_images`・`material_sources`・タグ初期値（現行の crop/benefit 紐づけから変換）
+- 移行先：`materials`（`manufacturer_name` ← maker_profiles.company_name。**seller_id は全件 NULL＝未 claim で開始**）・`material_images`・`material_sources`・`material_crops`・`material_effects`・`material_product_types`（現行の crop／benefit／product_type 紐づけから変換）
 - 施用レシピ（application_recipes）は `materials.usage_text` へ整形して集約（構造化テーブルとしては持ち越さない。将来必要になれば出典から再構築）
 - 手順：旧スキーマの対象テーブルを CSV/JSON にエクスポート → 変換スクリプト（tools/migration/）→ 新スキーマへ INSERT → 件数・サンプル照合。旧テーブル群は移行検証完了後に DROP
 - 現行の一次スクリプト（backend/scripts/excel_to_seed_sql.py ほか）はメーカー名正規化ロジックの参照実装として利用する
