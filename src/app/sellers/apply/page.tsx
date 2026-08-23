@@ -6,8 +6,9 @@ import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { css } from "../../../../styled-system/css";
 
 export const metadata: Metadata = {
-  title: "出品者アカウントの申請",
-  description: "出品者アカウントの申請フォームです。審査のうえ、通常3営業日以内にご連絡します。",
+  title: "メーカー・出品者アカウントの申請",
+  description:
+    "メーカー・出品者アカウントの申請フォームです。審査のうえ、通常3営業日以内にご連絡します。",
   robots: NO_INDEX_ROBOTS,
 };
 
@@ -18,11 +19,27 @@ const leadStyle = css({
   mb: "4.5",
 });
 
-export default function SellerApplyPage() {
+type SellerApplyPageProps = {
+  searchParams: Promise<{ from?: string | string[] }>;
+};
+
+/** 任意URLは受け取らず、既知の入口だけを安全な戻り先へ対応させる。 */
+function backHrefFor(source: string | string[] | undefined): "/me" | "/signup" {
+  return source === "me" ? "/me" : "/signup";
+}
+
+export default async function SellerApplyPage({ searchParams }: SellerApplyPageProps) {
+  const { from } = await searchParams;
+
   return (
-    <FormPageShell chrome="public" active="me" backHref="/me" title="出品者アカウントの申請">
+    <FormPageShell
+      chrome="public"
+      active="me"
+      backHref={backHrefFor(from)}
+      title="メーカー・出品者アカウントの申請"
+    >
       <p className={leadStyle}>
-        審査のうえ、通常3営業日以内にご連絡します。資材の掲載がなくても、記事や回答での情報発信にご利用いただけます。
+        メーカー・JA・農業法人・専門家などの組織用アカウントです。審査のうえ、通常3営業日以内にご連絡します。
       </p>
       <SellerApplyForm />
     </FormPageShell>

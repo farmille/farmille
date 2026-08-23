@@ -11,7 +11,7 @@ const SELLER_PROTECTED_PREFIXES = ["/dashboard"];
 const ADMIN_PROTECTED_PREFIXES = ["/admin"];
 
 /** ログイン済みなら見せない画面。完了画面（/signup/done 等）は対象外にする。 */
-const GUEST_ONLY_PATHS = ["/login", "/signup"];
+const GUEST_ONLY_PATHS = ["/login", "/signup", "/signup/general"];
 
 export const GENERAL_LOGIN_PATH = "/login";
 export const SELLER_LOGIN_PATH = "/sellers/login";

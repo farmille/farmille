@@ -1,37 +1,60 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { TOTP } from "otpauth";
 
 import type { E2eAdminAccount } from "./admin-accounts";
 import type { GeneralUser, SellerAccount } from "./test-data";
 
+const COLD_NAVIGATION_TIMEOUT_MS = 30_000;
+
+/** SSR直後の未hydration要素をクリックせず、Reactが操作を処理できる状態を待つ。 */
+async function waitForReactHydration(locator: Locator): Promise<void> {
+  await expect
+    .poll(
+      async () =>
+        locator.evaluate((element) =>
+          Object.keys(element).some((key) => key.startsWith("__reactProps$")),
+        ),
+      { timeout: COLD_NAVIGATION_TIMEOUT_MS },
+    )
+    .toBe(true);
+}
+
 export async function signupGeneral(
   page: Page,
   input: { handle: string; email: string; password: string },
 ): Promise<void> {
-  await page.goto("/signup");
+  await page.goto("/signup/general");
   await page.getByLabel("ハンドルネーム").fill(input.handle);
   await page.getByLabel("メールアドレス").fill(input.email);
   await page.getByLabel("パスワード").fill(input.password);
   await page.getByLabel("都道府県").selectOption("13");
   await page.getByRole("radio", { name: "農家" }).check();
-  await page.getByRole("button", { name: "登録する" }).click();
+  const submitButton = page.getByRole("button", { name: "登録する" });
+  await waitForReactHydration(submitButton);
+  await submitButton.click();
 }
 
 export async function loginGeneral(page: Page, user: GeneralUser, next = "/"): Promise<void> {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
   await page.getByLabel("メールアドレス").fill(user.email);
   await page.getByLabel("パスワード").fill(user.password);
-  await page.getByRole("button", { name: "ログインする" }).click();
+  const submitButton = page.getByRole("button", { name: "ログインする" });
+  await waitForReactHydration(submitButton);
+  await submitButton.click();
   const expectedPathname = new URL(next, "http://127.0.0.1:3007").pathname;
-  await expect(page).toHaveURL((url) => url.pathname === expectedPathname);
+  await expect(page).toHaveURL((url) => url.pathname === expectedPathname, {
+    timeout: COLD_NAVIGATION_TIMEOUT_MS,
+  });
 }
 
 export async function loginSeller(page: Page, seller: SellerAccount): Promise<void> {
   await page.goto("/sellers/login");
   await page.getByLabel("ログインID").fill(seller.loginId);
   await page.getByLabel("パスワード").fill(seller.password);
-  await page.getByRole("button", { name: "ログインする" }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  const submitButton = page.getByRole("button", { name: "ログインする" });
+  await waitForReactHydration(submitButton);
+  await submitButton.click();
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: COLD_NAVIGATION_TIMEOUT_MS });
 }
 
 export async function loginAdminAndEnrollMfa(
@@ -42,10 +65,14 @@ export async function loginAdminAndEnrollMfa(
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
   await page.getByLabel("メールアドレス").fill(admin.email);
   await page.getByLabel("パスワード").fill(admin.password);
-  await page.getByRole("button", { name: "ログインする" }).click();
-  await expect(page).toHaveURL(/\/admin\/mfa\?/);
+  const loginButton = page.getByRole("button", { name: "ログインする" });
+  await waitForReactHydration(loginButton);
+  await loginButton.click();
+  await expect(page).toHaveURL(/\/admin\/mfa\?/, { timeout: COLD_NAVIGATION_TIMEOUT_MS });
 
-  await page.getByRole("button", { name: "登録を始める" }).click();
+  const enrollmentButton = page.getByRole("button", { name: "登録を始める" });
+  await waitForReactHydration(enrollmentButton);
+  await enrollmentButton.click();
   const secretLocator = page
     .locator("span")
     .filter({ hasText: /^[A-Z2-7]+$/ })
@@ -64,9 +91,13 @@ export async function loginAdminAndEnrollMfa(
   }).generate();
 
   await page.getByLabel("認証コード").fill(code);
-  await page.getByRole("button", { name: "登録を完了する" }).click();
+  const verificationButton = page.getByRole("button", { name: "登録を完了する" });
+  await waitForReactHydration(verificationButton);
+  await verificationButton.click();
   const expectedPathname = new URL(next, "http://127.0.0.1:3007").pathname;
-  await expect(page).toHaveURL((url) => url.pathname === expectedPathname);
+  await expect(page).toHaveURL((url) => url.pathname === expectedPathname, {
+    timeout: COLD_NAVIGATION_TIMEOUT_MS,
+  });
 }
 
 export async function fillUsageReportForSubmission(page: Page): Promise<void> {

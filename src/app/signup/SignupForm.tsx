@@ -119,7 +119,14 @@ export function SignupForm() {
 
       <Field error={fieldErrors.standpoint} label="あなたの立場" requirement="required">
         <RadioCards defaultValue={values.standpoint} name="standpoint" options={STANDPOINTS} />
-        <NoteBox>この情報は公開されません。サービス改善のためにのみ使用します。</NoteBox>
+        <NoteBox>
+          この情報は公開されません。メーカー関係者を選んでも、作成されるのは個人用アカウントです。
+          組織用アカウントは
+          <Link className={textLinkStyle} href="/sellers/apply">
+            メーカー・出品者申請
+          </Link>
+          をご利用ください。
+        </NoteBox>
       </Field>
 
       <Field label="アイコン画像" requirement="optional">
@@ -132,7 +139,10 @@ export function SignupForm() {
 
       <div className={linkRowStyle}>
         <Link className={textLinkStyle} href="/login">
-          すでにアカウントをお持ちの方はログイン
+          すでに一般ユーザーアカウントをお持ちの方はログイン
+        </Link>
+        <Link className={textLinkStyle} href="/signup">
+          登録方法を選び直す
         </Link>
       </div>
     </form>

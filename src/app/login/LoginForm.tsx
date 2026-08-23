@@ -58,7 +58,7 @@ export function LoginForm({ next }: { next: string | null }) {
           パスワードをお忘れの方
         </Link>
         <Link className={textLinkStyle} href="/signup">
-          アカウントをお持ちでない方は新規登録
+          アカウントをお持ちでない方は登録方法を選ぶ
         </Link>
         <Link className={textLinkStyle} href="/sellers/login">
           出品者の方のログイン

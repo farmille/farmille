@@ -21,13 +21,13 @@ export function AccountActions() {
         </Button>
       </form>
       <Link
-        href="/sellers/apply"
+        href="/sellers/apply?from=me"
         className={cx(
           buttonRecipe({ variant: "ghost", size: "md" }),
           css({ display: "flex", textAlign: "center" }),
         )}
       >
-        出品者の方はこちら
+        メーカー・出品者アカウントを申請
       </Link>
     </div>
   );

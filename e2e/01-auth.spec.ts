@@ -11,12 +11,33 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
   const password = "Farmille-E2E-Signup-2026!";
 
   try {
+    await page.goto("/signup");
+    await expect(page.getByRole("heading", { name: "アカウントを作成" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "一般ユーザー登録へ" })).toHaveAttribute(
+      "href",
+      "/signup/general",
+    );
+    await expect(page.getByRole("link", { name: "メーカー・出品者申請へ" })).toHaveAttribute(
+      "href",
+      "/sellers/apply",
+    );
+
     await signupGeneral(page, { handle, email, password });
     await expect(page).toHaveURL(/\/signup\/done$/);
     await expect(page.getByRole("heading", { name: "登録が完了しました" })).toBeVisible();
 
     await page.goto("/me");
     await expect(page.getByText(handle, { exact: true })).toBeVisible();
+    const sellerApplyLink = page.getByRole("link", {
+      name: "メーカー・出品者アカウントを申請",
+    });
+    await expect(sellerApplyLink).toHaveAttribute("href", "/sellers/apply?from=me");
+    await sellerApplyLink.click();
+    await expect(page).toHaveURL(/\/sellers\/apply\?from=me$/);
+    const backLink = page.getByRole("link", { name: "戻る" });
+    await expect(backLink).toHaveAttribute("href", "/me");
+    await backLink.click();
+    await expect(page).toHaveURL(/\/me$/);
     await page.getByRole("button", { name: "ログアウト" }).click();
     await expect(page).toHaveURL("/");
 
@@ -33,7 +54,7 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await expect(
       page.getByRole("alert").filter({ hasText: "このハンドルネームはすでに使われています。" }),
     ).toHaveCount(2);
-    await expect(page).toHaveURL(/\/signup$/);
+    await expect(page).toHaveURL(/\/signup\/general$/);
   } finally {
     await deleteAuthUsersByEmail(email);
     await deleteAuthUsersByEmail(duplicateEmail);
@@ -61,6 +82,18 @@ test("未ログインの保護ページと safe-next の回帰", async ({ page }
 
     await page.context().clearCookies();
     await loginGeneral(page, user, "/me");
+
+    await page.goto("/dashboard");
+    await expect(
+      page.getByRole("heading", { name: "出品者アカウントでログインしてください" }),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "出品者ログインへ" })).toHaveAttribute(
+      "href",
+      "/sellers/login",
+    );
+
+    await page.goto("/admin");
+    await expect(page.getByRole("heading", { name: "ページが見つかりません" })).toBeVisible();
   } finally {
     await deleteAuthUsersByEmail(user.email);
   }

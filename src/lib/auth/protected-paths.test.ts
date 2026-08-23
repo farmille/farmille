@@ -47,9 +47,10 @@ describe("decideAuthRedirect", () => {
     );
   });
 
-  it("ログイン済みで /login・/signup を開いたらホームへ送る", () => {
+  it("ログイン済みでログイン・登録画面を開いたらホームへ送る", () => {
     expect(decideAuthRedirect("/login", "/login?next=%2Fme", true)).toBe("/");
     expect(decideAuthRedirect("/signup", "/signup", true)).toBe("/");
+    expect(decideAuthRedirect("/signup/general", "/signup/general", true)).toBe("/");
   });
 
   it("登録完了画面はログイン済みでも表示させる", () => {
