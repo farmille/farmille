@@ -38,7 +38,10 @@ test("旧seed SQLから全レコードを欠落なく抽出する", () => {
     unique_materials: 14,
     product_images: 13,
     application_recipes: 98,
-    material_tag_links: 16,
+    material_product_type_links: 14,
+    material_crop_links: 7,
+    material_effect_links: 0,
+    material_search_tag_links: 0,
   });
   assert.deepEqual(normalized.duplicate_products, [
     {
@@ -50,28 +53,31 @@ test("旧seed SQLから全レコードを欠落なく抽出する", () => {
   ]);
 });
 
-test("一次情報、施用レシピ、画像enum、T-11タグをv2へ変換する", () => {
+test("一次情報、施用レシピ、画像enum、正規化分類をv2へ変換する", () => {
   const normalized = loadNormalized();
   const material = normalized.materials.find((candidate) => candidate.name === "BIOZ Moonstone");
 
   assert.ok(material);
   assert.equal(material.manufacturer_name, "ICL JAPAN");
-  assert.equal(material.product_type, "バイオスティミュラント");
+  assert.equal(material.main_components, material.legacy.primary_compound);
   assert.equal(material.seller_id, null);
   assert.match(material.usage_text, /^概要：/);
   assert.match(material.usage_text, /・作物：水稲／目的：.+／使い方：/);
   assert.equal(material.images[0].image_type, "package");
-  assert.ok(
-    material.tags.some((tag) => tag.category === "type" && tag.name === "バイオスティミュラント"),
-  );
-  assert.ok(material.tags.some((tag) => tag.category === "crop" && tag.name === "水稲"));
+  assert.deepEqual(material.product_types, [
+    { name: "バイオスティミュラント", source_value: "バイオスティミュラント" },
+  ]);
+  assert.ok(material.target_crops.some((crop) => crop.name === "水稲"));
 });
 
 test("生成SQLは再実行可能なupsertと関連データ置換を含む", () => {
   const sql = renderSeedSql(loadNormalized());
 
   assert.match(sql, /on conflict \(name, manufacturer_name\) do update set/);
-  assert.match(sql, /delete from public\.material_tags/);
+  assert.match(sql, /delete from public\.material_product_types/);
+  assert.match(sql, /delete from public\.material_crops/);
+  assert.match(sql, /insert into public\.product_types/);
+  assert.match(sql, /insert into public\.material_product_types/);
   assert.match(sql, /delete from public\.material_images/);
   assert.match(sql, /raise exception '資材件数が一致しません/);
   assert.match(sql, /source_product_rows/);
@@ -125,5 +131,8 @@ test("JSON／CSVテーブルdumpは外部キーからメーカーと関連デー
 
   assert.equal(normalized.materials[0].manufacturer_name, "メーカーA");
   assert.equal(normalized.materials[0].images[0].image_type, "package");
+  assert.deepEqual(normalized.materials[0].product_types, [
+    { name: "微生物資材", source_value: "微生物資材" },
+  ]);
   assert.match(normalized.materials[0].usage_text, /・作物：水稲/);
 });

@@ -1,6 +1,6 @@
 # 資材マスタ v2 変換パイプライン
 
-旧スキーマの資材データを中間 JSON に正規化し、v2 の `materials`、`material_images`、`material_tags` に投入する SQL を生成する。変換は Node.js の標準機能だけで動作し、外部パッケージを使わない。
+旧スキーマの資材データを中間 JSON に正規化し、v2 の `materials`、`material_images`、`material_product_types`、`material_crops` などへ投入する SQL を生成する。変換は Node.js の標準機能だけで動作し、外部パッケージを使わない。
 
 ## 現在の開発シード
 
@@ -10,9 +10,9 @@
 
 生成物は次の3ファイルである。
 
-- `materials-v2-normalized.json`：入力値、変換値、画像、施用レシピ、タグ対応、重複情報を保持する中間データ
-- `materials-v2-seed.sql`：v2 のローカル開発シード。再実行時は資材を upsert し、対象資材の画像とタグを入れ直す
-- `materials-v2-report.json`：件数、旧→新カラム対応、タグ対応の欠落、要確認フィールド、5件の突合結果
+- `materials-v2-normalized.json`：入力値、変換値、画像、施用レシピ、正規化分類、重複情報を保持する中間データ
+- `materials-v2-seed.sql`：v2 のローカル開発シード。再実行時は資材を upsert し、対象資材の画像と分類関連を入れ直す
+- `materials-v2-report.json`：件数、旧→新カラム対応、分類対応の欠落、要確認フィールド、5件の突合結果
 
 ## 生成と静的検証
 
@@ -80,12 +80,12 @@ node tools/migration/convert-materials-v2.mjs \
 |---|---|---|
 | `materials.name` | `products.name` | そのまま |
 | `materials.manufacturer_name` | `maker_profiles.company_name` | そのまま |
-| `materials.product_type` | `product_types.name` | そのまま。旧 SQL の `COALESCE` は先頭の元分類を採用 |
-| `materials.jbsa_class` | 対応値なし | `NULL` |
+| `material_product_types.product_type_id` | `product_types.name` | 元の名称を `product_types` へ登録し、資材との関連を作成 |
+| `material_crops.crop_id` | `product_crops`、`crops.name` | 作物名が `crops.name` と完全一致する場合だけ関連を作成 |
 | `materials.sales_status` | `products.commercial_status` | そのまま |
 | `materials.description` | `products.expected_effects_official` | そのまま |
 | `materials.general_use` | `products.general_purpose` | そのまま |
-| `materials.ingredients` | `products.primary_compound` | そのまま |
+| `materials.main_components` | `products.primary_compound` | メーカー資料の原文をそのまま保持 |
 | `materials.mechanism` | `products.mode_of_action` | そのまま |
 | `materials.usage_text` | `products.usage_summary`、`product_application_recipes` | 概要と「作物／目的／使い方」の箇条書きに集約 |
 | `materials.price_range` | 対応値なし | `NULL` |
@@ -96,7 +96,7 @@ node tools/migration/convert-materials-v2.mjs \
 | `material_images.image_type` | `product_images.image_type` | `product_packaging` → `package`、`product_logo` → `logo`、`application_scene` → `usage_scene`、`other` → `other` |
 | `material_images.sort_order` | `product_images.order` | そのまま |
 
-旧 `product_type` は `materials.product_type` に保存したうえで、T-11 の `tags` に同名の `type` タグがある場合だけ `material_tags` に紐づける。旧作物と旧効果も、T-11 の `crop`、`concern`、`effect` タグに同名の値がある場合だけ紐づける。表記ゆれや類義語を推測して変換しない。対応しない値は `materials-v2-report.json` の `missing_tag_mappings` に列挙する。
+旧 `product_type` は名称を保ったまま `product_types` へ登録し、`material_product_types` に関連を作る。旧作物は `crops.name` と完全一致する場合だけ `material_crops` に紐づけ、メーカー記載名を `source_name` に残す。旧効果と検索補助タグも完全一致だけを採用し、表記ゆれや類義語を推測しない。対応しない値は `materials-v2-report.json` の `missing_classification_mappings` に列挙する。
 
 ## 要確認フィールド
 

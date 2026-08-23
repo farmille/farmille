@@ -42,14 +42,14 @@ export const FIELD_MAPPINGS = [
     status: "mapped",
   },
   {
-    target: "materials.product_type",
+    target: "material_product_types.product_type_id",
     source: "products.product_type_id → product_types.name",
     status: "mapped",
   },
   {
-    target: "materials.jbsa_class",
-    source: null,
-    status: "null",
+    target: "material_crops.crop_id",
+    source: "product_crops → crops.name",
+    status: "mapped_by_exact_name",
   },
   {
     target: "materials.sales_status",
@@ -67,7 +67,7 @@ export const FIELD_MAPPINGS = [
     status: "mapped",
   },
   {
-    target: "materials.ingredients",
+    target: "materials.main_components",
     source: "products.primary_compound",
     status: "mapped",
   },
@@ -845,9 +845,6 @@ export function normalizeDataset(rawDataset, seededTags) {
     productByKey.set(key, product);
   }
 
-  const tagsByCategoryAndName = new Map(
-    seededTags.map((tag) => [`${tag.category}\u0000${tag.name}`, tag]),
-  );
   const tagsByName = new Map();
   for (const tag of seededTags) {
     const values = tagsByName.get(tag.name) ?? [];
@@ -855,36 +852,22 @@ export function normalizeDataset(rawDataset, seededTags) {
     tagsByName.set(tag.name, values);
   }
 
-  const missingTagMap = new Map();
+  const knownCropNames = new Set(
+    seededTags.filter((tag) => tag.category === "crop").map((tag) => tag.name),
+  );
+  const missingClassificationMap = new Map();
   const missingImageTypes = new Set();
   const materials = [];
 
-  function recordMissingTag(sourceKind, sourceValue, product) {
+  function recordMissingClassification(sourceKind, sourceValue, product) {
     const key = `${sourceKind}\u0000${sourceValue}`;
-    const entry = missingTagMap.get(key) ?? {
+    const entry = missingClassificationMap.get(key) ?? {
       source_kind: sourceKind,
       source_value: sourceValue,
       affected_materials: new Set(),
     };
     entry.affected_materials.add(`${product.legacy.name}／${product.manufacturer_name}`);
-    missingTagMap.set(key, entry);
-  }
-
-  function mapExactTag(sourceKind, sourceValue, category, product, tags) {
-    if (!nonEmpty(sourceValue)) {
-      return;
-    }
-    const tag = tagsByCategoryAndName.get(`${category}\u0000${sourceValue}`);
-    if (tag) {
-      tags.set(`${tag.category}\u0000${tag.name}`, {
-        category: tag.category,
-        name: tag.name,
-        source_kind: sourceKind,
-        source_value: sourceValue,
-      });
-    } else {
-      recordMissingTag(sourceKind, sourceValue, product);
-    }
+    missingClassificationMap.set(key, entry);
   }
 
   for (const [key, product] of productByKey) {
@@ -901,25 +884,44 @@ export function normalizeDataset(rawDataset, seededTags) {
       }))
       .sort((left, right) => left.sort_order - right.sort_order);
 
-    const tags = new Map();
-    mapExactTag("product_type", product.product_type, "type", product, tags);
-    for (const cropName of rawDataset.cropRelations.get(key) ?? []) {
-      mapExactTag("crop", cropName, "crop", product, tags);
-    }
+    const productTypes = nonEmpty(product.product_type)
+      ? [{ name: product.product_type, source_value: product.product_type }]
+      : [];
+    const targetCrops = [...new Set(rawDataset.cropRelations.get(key) ?? [])].flatMap(
+      (cropName, index) => {
+        if (knownCropNames.has(cropName)) {
+          return [{
+          name: cropName,
+          source_name: cropName,
+          sort_order: index,
+          }];
+        }
+        recordMissingClassification("crop", cropName, product);
+        return [];
+      },
+    );
+    const effects = new Map();
+    const searchTags = new Map();
     for (const benefitName of rawDataset.benefitRelations.get(key) ?? []) {
       const matchingBenefitTags = (tagsByName.get(benefitName) ?? []).filter(
-        (tag) => tag.category === "concern" || tag.category === "effect",
+        (tag) =>
+          tag.category === "concern" ||
+          tag.category === "condition" ||
+          tag.category === "effect",
       );
       if (matchingBenefitTags.length === 0) {
-        recordMissingTag("benefit", benefitName, product);
+        recordMissingClassification("benefit", benefitName, product);
       } else {
         for (const tag of matchingBenefitTags) {
-          tags.set(`${tag.category}\u0000${tag.name}`, {
-            category: tag.category,
-            name: tag.name,
-            source_kind: "benefit",
-            source_value: benefitName,
-          });
+          const relation = { name: tag.name, source_value: benefitName };
+          if (tag.category === "effect") {
+            effects.set(tag.name, relation);
+          } else {
+            searchTags.set(`${tag.category}\u0000${tag.name}`, {
+              ...relation,
+              category: tag.category,
+            });
+          }
         }
       }
     }
@@ -928,23 +930,21 @@ export function normalizeDataset(rawDataset, seededTags) {
       source_rows: duplicateIndexes.get(key) ?? [product.source_row],
       name: product.legacy.name,
       manufacturer_name: product.manufacturer_name,
-      product_type: product.product_type,
-      jbsa_class: null,
       sales_status: product.legacy.commercial_status ?? null,
       description: product.legacy.expected_effects_official ?? null,
       general_use: product.legacy.general_purpose ?? null,
-      ingredients: product.legacy.primary_compound ?? null,
+      main_components: product.legacy.primary_compound ?? null,
       mechanism: product.legacy.mode_of_action ?? null,
       usage_text: formatUsageText(product, recipes),
       price_range: null,
       official_url: null,
       catalog_url: null,
       seller_id: null,
-      tags: [...tags.values()].sort((left, right) =>
-        `${left.category}\u0000${left.name}`.localeCompare(
-          `${right.category}\u0000${right.name}`,
-          "ja",
-        ),
+      product_types: productTypes,
+      target_crops: targetCrops,
+      effects: [...effects.values()].sort((left, right) => left.name.localeCompare(right.name, "ja")),
+      search_tags: [...searchTags.values()].sort((left, right) =>
+        `${left.category}\u0000${left.name}`.localeCompare(`${right.category}\u0000${right.name}`, "ja"),
       ),
       images,
       recipes: [...recipes].sort(
@@ -970,7 +970,7 @@ export function normalizeDataset(rawDataset, seededTags) {
       handling: "旧SQLとv2の一意キーに従い、後の行で統合",
     };
   });
-  const missingTagMappings = [...missingTagMap.values()]
+  const missingClassificationMappings = [...missingClassificationMap.values()]
     .map((entry) => ({
       source_kind: entry.source_kind,
       source_value: entry.source_value,
@@ -983,9 +983,8 @@ export function normalizeDataset(rawDataset, seededTags) {
       ),
     );
 
-  const tagLinkCount = materials.reduce((total, material) => total + material.tags.length, 0);
   const normalized = {
-    format_version: 1,
+    format_version: 2,
     source: rawDataset.source,
     counts: {
       source_product_rows: rawDataset.sourceProducts.length,
@@ -993,10 +992,25 @@ export function normalizeDataset(rawDataset, seededTags) {
       unique_materials: materials.length,
       product_images: rawDataset.images.length,
       application_recipes: rawDataset.recipes.length,
-      material_tag_links: tagLinkCount,
+      material_product_type_links: materials.reduce(
+        (total, material) => total + material.product_types.length,
+        0,
+      ),
+      material_crop_links: materials.reduce(
+        (total, material) => total + material.target_crops.length,
+        0,
+      ),
+      material_effect_links: materials.reduce(
+        (total, material) => total + material.effects.length,
+        0,
+      ),
+      material_search_tag_links: materials.reduce(
+        (total, material) => total + material.search_tags.length,
+        0,
+      ),
     },
     duplicate_products: duplicateProducts,
-    missing_tag_mappings: missingTagMappings,
+    missing_classification_mappings: missingClassificationMappings,
     unmapped_image_types: toSortedArray(missingImageTypes),
     field_mappings: FIELD_MAPPINGS,
     needs_review_fields: NEEDS_REVIEW_FIELDS,
@@ -1032,6 +1046,26 @@ export function validateNormalized(normalized) {
     normalized.counts.application_recipes,
     normalized.materials.reduce((total, material) => total + material.recipes.length, 0),
     "施用レシピ件数が一致しません",
+  );
+  assert.equal(
+    normalized.counts.material_product_type_links,
+    normalized.materials.reduce((total, material) => total + material.product_types.length, 0),
+    "製品タイプ関連件数が一致しません",
+  );
+  assert.equal(
+    normalized.counts.material_crop_links,
+    normalized.materials.reduce((total, material) => total + material.target_crops.length, 0),
+    "対象作物関連件数が一致しません",
+  );
+  assert.equal(
+    normalized.counts.material_effect_links,
+    normalized.materials.reduce((total, material) => total + material.effects.length, 0),
+    "効果関連件数が一致しません",
+  );
+  assert.equal(
+    normalized.counts.material_search_tag_links,
+    normalized.materials.reduce((total, material) => total + material.search_tags.length, 0),
+    "検索補助タグ関連件数が一致しません",
   );
   const keys = normalized.materials.map((material) =>
     materialKey(material.name, material.manufacturer_name),
@@ -1074,12 +1108,10 @@ export function renderSeedSql(normalized) {
   const materialColumns = [
     "name",
     "manufacturer_name",
-    "product_type",
-    "jbsa_class",
     "sales_status",
     "description",
     "general_use",
-    "ingredients",
+    "main_components",
     "mechanism",
     "usage_text",
     "price_range",
@@ -1094,8 +1126,36 @@ export function renderSeedSql(normalized) {
     material.name,
     material.manufacturer_name,
   ]);
-  const tagRows = normalized.materials.flatMap((material) =>
-    material.tags.map((tag) => [material.name, material.manufacturer_name, tag.category, tag.name]),
+  const productTypeRows = normalized.materials.flatMap((material) =>
+    material.product_types.map((productType) => [
+      material.name,
+      material.manufacturer_name,
+      productType.name,
+    ]),
+  );
+  const cropRows = normalized.materials.flatMap((material) =>
+    material.target_crops.map((crop) => [
+      material.name,
+      material.manufacturer_name,
+      crop.name,
+      crop.source_name,
+      crop.sort_order,
+    ]),
+  );
+  const effectRows = normalized.materials.flatMap((material) =>
+    material.effects.map((effect) => [
+      material.name,
+      material.manufacturer_name,
+      effect.name,
+    ]),
+  );
+  const searchTagRows = normalized.materials.flatMap((material) =>
+    material.search_tags.map((tag) => [
+      material.name,
+      material.manufacturer_name,
+      tag.category,
+      tag.name,
+    ]),
   );
   const imageRows = normalized.materials.flatMap((material) =>
     material.images.map((image) => [
@@ -1107,39 +1167,118 @@ export function renderSeedSql(normalized) {
     ]),
   );
 
-  const tagInsert =
-    tagRows.length === 0
-      ? "-- 対応するT-11タグはありません。\n"
-      : `insert into pg_temp._farmille_material_seed_tags
-  (name, manufacturer_name, category, tag_name)
+  const productTypeInsert =
+    productTypeRows.length === 0
+      ? "-- 移行対象の製品タイプはありません。\n"
+      : `insert into pg_temp._farmille_material_seed_product_types
+  (name, manufacturer_name, product_type_name)
 values
-${renderValues(tagRows)};
+${renderValues(productTypeRows)};
+
+insert into public.product_types (name, sort_order)
+select distinct seed_type.product_type_name, 100
+from pg_temp._farmille_material_seed_product_types seed_type
+on conflict (name) do nothing;
+
+insert into public.material_product_types (material_id, product_type_id)
+select material.id, product_type.id
+from pg_temp._farmille_material_seed_product_types seed_type
+join public.materials material
+  on material.name = seed_type.name
+ and material.manufacturer_name = seed_type.manufacturer_name
+join public.product_types product_type on product_type.name = seed_type.product_type_name
+on conflict (material_id, product_type_id) do nothing;
+`;
+
+  const cropInsert =
+    cropRows.length === 0
+      ? "-- 移行対象の作物はありません。\n"
+      : `insert into pg_temp._farmille_material_seed_crops
+  (name, manufacturer_name, crop_name, source_name, sort_order)
+values
+${renderValues(cropRows)};
 
 do $farmille_seed$
 begin
   if exists (
     select 1
-    from pg_temp._farmille_material_seed_tags seed_tag
-    left join public.tags tag
-      on tag.category = seed_tag.category
-     and tag.name = seed_tag.tag_name
-    where tag.id is null
+    from pg_temp._farmille_material_seed_crops seed_crop
+    left join public.crops crop on crop.name = seed_crop.crop_name
+    where crop.id is null
   ) then
-    raise exception 'T-11のtagsに必要なタグがありません';
+    raise exception 'cropsに必要な作物がありません';
   end if;
 end
 $farmille_seed$;
 
-insert into public.material_tags (material_id, tag_id)
-select material.id, tag.id
-from pg_temp._farmille_material_seed_tags seed_tag
+insert into public.material_crops (material_id, crop_id, source_name, sort_order)
+select material.id, crop.id, seed_crop.source_name, seed_crop.sort_order
+from pg_temp._farmille_material_seed_crops seed_crop
+join public.materials material
+  on material.name = seed_crop.name
+ and material.manufacturer_name = seed_crop.manufacturer_name
+join public.crops crop on crop.name = seed_crop.crop_name
+on conflict (material_id, crop_id) do update set
+  source_name = excluded.source_name,
+  sort_order = excluded.sort_order,
+  updated_at = now();
+`;
+
+  const effectInsert =
+    effectRows.length === 0
+      ? "-- 移行対象の効果はありません。\n"
+      : `insert into pg_temp._farmille_material_seed_effects
+  (name, manufacturer_name, effect_name)
+values
+${renderValues(effectRows)};
+
+do $farmille_seed$
+begin
+  if exists (
+    select 1
+    from pg_temp._farmille_material_seed_effects seed_effect
+    left join public.effects effect on effect.name = seed_effect.effect_name
+    group by seed_effect.name, seed_effect.manufacturer_name, seed_effect.effect_name
+    having count(effect.id) <> 1
+  ) then
+    raise exception 'effectsに一意に対応できない効果があります';
+  end if;
+end
+$farmille_seed$;
+
+insert into public.material_effects (material_id, effect_id)
+select material.id, effect.id
+from pg_temp._farmille_material_seed_effects seed_effect
+join public.materials material
+  on material.name = seed_effect.name
+ and material.manufacturer_name = seed_effect.manufacturer_name
+join public.effects effect on effect.name = seed_effect.effect_name
+on conflict (material_id, effect_id) do nothing;
+`;
+
+  const searchTagInsert =
+    searchTagRows.length === 0
+      ? "-- 移行対象の検索補助タグはありません。\n"
+      : `insert into pg_temp._farmille_material_seed_search_tags
+  (name, manufacturer_name, category, tag_name)
+values
+${renderValues(searchTagRows)};
+
+insert into public.search_tags (category, name, sort_order)
+select distinct seed_tag.category, seed_tag.tag_name, 100
+from pg_temp._farmille_material_seed_search_tags seed_tag
+on conflict (category, name) do nothing;
+
+insert into public.material_search_tags (material_id, search_tag_id)
+select material.id, search_tag.id
+from pg_temp._farmille_material_seed_search_tags seed_tag
 join public.materials material
   on material.name = seed_tag.name
  and material.manufacturer_name = seed_tag.manufacturer_name
-join public.tags tag
-  on tag.category = seed_tag.category
- and tag.name = seed_tag.tag_name
-on conflict (material_id, tag_id) do nothing;
+join public.search_tags search_tag
+  on search_tag.category = seed_tag.category
+ and search_tag.name = seed_tag.tag_name
+on conflict (material_id, search_tag_id) do nothing;
 `;
 
   const imageInsert =
@@ -1184,12 +1323,10 @@ insert into public.materials (
 values
 ${renderValues(materialRows)}
 on conflict (name, manufacturer_name) do update set
-  product_type = excluded.product_type,
-  jbsa_class = excluded.jbsa_class,
   sales_status = excluded.sales_status,
   description = excluded.description,
   general_use = excluded.general_use,
-  ingredients = excluded.ingredients,
+  main_components = excluded.main_components,
   mechanism = excluded.mechanism,
   usage_text = excluded.usage_text,
   price_range = excluded.price_range,
@@ -1198,21 +1335,65 @@ on conflict (name, manufacturer_name) do update set
   seller_id = excluded.seller_id,
   updated_at = now();
 
-create temporary table _farmille_material_seed_tags (
+create temporary table _farmille_material_seed_product_types (
   name text not null,
   manufacturer_name text not null,
-  category text not null,
+  product_type_name text not null,
+  primary key (name, manufacturer_name, product_type_name)
+) on commit drop;
+
+create temporary table _farmille_material_seed_crops (
+  name text not null,
+  manufacturer_name text not null,
+  crop_name text not null,
+  source_name text not null,
+  sort_order integer not null,
+  primary key (name, manufacturer_name, crop_name)
+) on commit drop;
+
+create temporary table _farmille_material_seed_effects (
+  name text not null,
+  manufacturer_name text not null,
+  effect_name text not null,
+  primary key (name, manufacturer_name, effect_name)
+) on commit drop;
+
+create temporary table _farmille_material_seed_search_tags (
+  name text not null,
+  manufacturer_name text not null,
+  category text not null check (category in ('concern', 'condition')),
   tag_name text not null,
   primary key (name, manufacturer_name, category, tag_name)
 ) on commit drop;
 
-delete from public.material_tags material_tag
+delete from public.material_product_types relation
 using public.materials material, pg_temp._farmille_material_seed_keys seed_key
-where material_tag.material_id = material.id
+where relation.material_id = material.id
   and material.name = seed_key.name
   and material.manufacturer_name = seed_key.manufacturer_name;
 
-${tagInsert}
+delete from public.material_crops relation
+using public.materials material, pg_temp._farmille_material_seed_keys seed_key
+where relation.material_id = material.id
+  and material.name = seed_key.name
+  and material.manufacturer_name = seed_key.manufacturer_name;
+
+delete from public.material_effects relation
+using public.materials material, pg_temp._farmille_material_seed_keys seed_key
+where relation.material_id = material.id
+  and material.name = seed_key.name
+  and material.manufacturer_name = seed_key.manufacturer_name;
+
+delete from public.material_search_tags relation
+using public.materials material, pg_temp._farmille_material_seed_keys seed_key
+where relation.material_id = material.id
+  and material.name = seed_key.name
+  and material.manufacturer_name = seed_key.manufacturer_name;
+
+${productTypeInsert}
+${cropInsert}
+${effectInsert}
+${searchTagInsert}
 delete from public.material_images material_image
 using public.materials material, pg_temp._farmille_material_seed_keys seed_key
 where material_image.material_id = material.id
@@ -1224,7 +1405,10 @@ do $farmille_verify$
 declare
   actual_materials integer;
   actual_images integer;
-  actual_tag_links integer;
+  actual_product_type_links integer;
+  actual_crop_links integer;
+  actual_effect_links integer;
+  actual_search_tag_links integer;
   actual_recipes integer;
 begin
   select count(*) into actual_materials
@@ -1240,9 +1424,30 @@ begin
     on material.name = seed_key.name
    and material.manufacturer_name = seed_key.manufacturer_name;
 
-  select count(*) into actual_tag_links
-  from public.material_tags material_tag
-  join public.materials material on material.id = material_tag.material_id
+  select count(*) into actual_product_type_links
+  from public.material_product_types relation
+  join public.materials material on material.id = relation.material_id
+  join pg_temp._farmille_material_seed_keys seed_key
+    on material.name = seed_key.name
+   and material.manufacturer_name = seed_key.manufacturer_name;
+
+  select count(*) into actual_crop_links
+  from public.material_crops relation
+  join public.materials material on material.id = relation.material_id
+  join pg_temp._farmille_material_seed_keys seed_key
+    on material.name = seed_key.name
+   and material.manufacturer_name = seed_key.manufacturer_name;
+
+  select count(*) into actual_effect_links
+  from public.material_effects relation
+  join public.materials material on material.id = relation.material_id
+  join pg_temp._farmille_material_seed_keys seed_key
+    on material.name = seed_key.name
+   and material.manufacturer_name = seed_key.manufacturer_name;
+
+  select count(*) into actual_search_tag_links
+  from public.material_search_tags relation
+  join public.materials material on material.id = relation.material_id
   join pg_temp._farmille_material_seed_keys seed_key
     on material.name = seed_key.name
    and material.manufacturer_name = seed_key.manufacturer_name;
@@ -1262,9 +1467,21 @@ begin
     raise exception '画像件数が一致しません：期待=%、実際=%',
       ${normalized.counts.product_images}, actual_images;
   end if;
-  if actual_tag_links <> ${normalized.counts.material_tag_links} then
-    raise exception 'タグ件数が一致しません：期待=%、実際=%',
-      ${normalized.counts.material_tag_links}, actual_tag_links;
+  if actual_product_type_links <> ${normalized.counts.material_product_type_links} then
+    raise exception '製品タイプ関連件数が一致しません：期待=%、実際=%',
+      ${normalized.counts.material_product_type_links}, actual_product_type_links;
+  end if;
+  if actual_crop_links <> ${normalized.counts.material_crop_links} then
+    raise exception '対象作物関連件数が一致しません：期待=%、実際=%',
+      ${normalized.counts.material_crop_links}, actual_crop_links;
+  end if;
+  if actual_effect_links <> ${normalized.counts.material_effect_links} then
+    raise exception '効果関連件数が一致しません：期待=%、実際=%',
+      ${normalized.counts.material_effect_links}, actual_effect_links;
+  end if;
+  if actual_search_tag_links <> ${normalized.counts.material_search_tag_links} then
+    raise exception '検索補助タグ関連件数が一致しません：期待=%、実際=%',
+      ${normalized.counts.material_search_tag_links}, actual_search_tag_links;
   end if;
   if actual_recipes <> ${normalized.counts.application_recipes} then
     raise exception '施用レシピ集約件数が一致しません：期待=%、実際=%',
@@ -1294,15 +1511,42 @@ select
       on material.name = seed_key.name
      and material.manufacturer_name = seed_key.manufacturer_name
   )::integer as actual_images,
-  ${normalized.counts.material_tag_links}::integer as expected_tag_links,
+  ${normalized.counts.material_product_type_links}::integer as expected_product_type_links,
   (
     select count(*)
-    from public.material_tags material_tag
-    join public.materials material on material.id = material_tag.material_id
+    from public.material_product_types relation
+    join public.materials material on material.id = relation.material_id
     join pg_temp._farmille_material_seed_keys seed_key
       on material.name = seed_key.name
      and material.manufacturer_name = seed_key.manufacturer_name
-  )::integer as actual_tag_links,
+  )::integer as actual_product_type_links,
+  ${normalized.counts.material_crop_links}::integer as expected_crop_links,
+  (
+    select count(*)
+    from public.material_crops relation
+    join public.materials material on material.id = relation.material_id
+    join pg_temp._farmille_material_seed_keys seed_key
+      on material.name = seed_key.name
+     and material.manufacturer_name = seed_key.manufacturer_name
+  )::integer as actual_crop_links,
+  ${normalized.counts.material_effect_links}::integer as expected_effect_links,
+  (
+    select count(*)
+    from public.material_effects relation
+    join public.materials material on material.id = relation.material_id
+    join pg_temp._farmille_material_seed_keys seed_key
+      on material.name = seed_key.name
+     and material.manufacturer_name = seed_key.manufacturer_name
+  )::integer as actual_effect_links,
+  ${normalized.counts.material_search_tag_links}::integer as expected_search_tag_links,
+  (
+    select count(*)
+    from public.material_search_tags relation
+    join public.materials material on material.id = relation.material_id
+    join pg_temp._farmille_material_seed_keys seed_key
+      on material.name = seed_key.name
+     and material.manufacturer_name = seed_key.manufacturer_name
+  )::integer as actual_search_tag_links,
   ${normalized.counts.application_recipes}::integer as expected_recipes,
   (
     select coalesce(sum(regexp_count(coalesce(material.usage_text, ''), '・作物：')), 0)
@@ -1334,7 +1578,7 @@ export function createReport(normalized) {
         manufacturer_name: material.manufacturer_name,
       },
       source: {
-        product_type: material.product_type,
+        product_type: material.product_types[0]?.source_value ?? null,
         commercial_status: material.legacy.commercial_status ?? null,
         expected_effects_official: material.legacy.expected_effects_official ?? null,
         general_purpose: material.legacy.general_purpose ?? null,
@@ -1345,15 +1589,17 @@ export function createReport(normalized) {
         recipe_count: material.recipes.length,
       },
       target: {
-        product_type: material.product_type,
+        product_types: material.product_types.map((productType) => productType.name),
         sales_status: material.sales_status,
         description: material.description,
         general_use: material.general_use,
-        ingredients: material.ingredients,
+        main_components: material.main_components,
         mechanism: material.mechanism,
         usage_text: material.usage_text,
         image_count: material.images.length,
-        tag_count: material.tags.length,
+        target_crop_count: material.target_crops.length,
+        effect_count: material.effects.length,
+        search_tag_count: material.search_tags.length,
       },
     };
   });
@@ -1361,7 +1607,7 @@ export function createReport(normalized) {
     counts: normalized.counts,
     duplicate_products: normalized.duplicate_products,
     field_mappings: normalized.field_mappings,
-    missing_tag_mappings: normalized.missing_tag_mappings,
+    missing_classification_mappings: normalized.missing_classification_mappings,
     needs_review_fields: normalized.needs_review_fields,
     unmapped_image_types: normalized.unmapped_image_types,
     sample_comparisons: sampleComparisons,
