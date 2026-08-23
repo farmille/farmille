@@ -40,6 +40,7 @@ export type { ButtonVariants } from "./Button";
 export { ConfirmDialog } from "./ConfirmDialog";
 
 export { Input } from "./Input";
+export { FileInput } from "./FileInput";
 export { Textarea } from "./Textarea";
 export { Select } from "./Select";
 

@@ -7,7 +7,7 @@ type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 
 /**
  * search_tags.category（01 §3）。作物・効果・製品タイプは専用マスタで管理する。
- * 表示ラベルはキットの TAG_CATEGORY_LABELS（toTagChipCategory で正規化）を使う。
+ * 表示ラベルは共通の TAG_CATEGORY_LABELS（toTagChipCategory で正規化）を使う。
  */
 export const TAG_CATEGORIES = ["concern", "condition"] as const;
 export type TagCategoryValue = (typeof TAG_CATEGORIES)[number];

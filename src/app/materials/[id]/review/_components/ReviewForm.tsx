@@ -13,6 +13,7 @@ import {
 import { FormMessage, SwitchToggle } from "@/components/auth/Fields";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
+import { FileInput } from "@/components/FileInput";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 import { StarRating } from "@/components/StarRating";
@@ -385,8 +386,7 @@ export function ReviewForm({
           </div>
         )}
 
-        <Input
-          type="file"
+        <FileInput
           accept="image/jpeg,image/png,image/webp"
           multiple
           aria-label="レビュー写真を追加"

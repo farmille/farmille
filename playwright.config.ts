@@ -40,7 +40,7 @@ export default defineConfig({
   reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : [["list"]],
   use: {
     baseURL: BASE_URL,
-    trace: "on-first-retry",
+    trace: "retain-on-failure-and-retries",
     screenshot: "on",
     video: "retain-on-failure",
   },

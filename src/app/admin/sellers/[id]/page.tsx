@@ -103,10 +103,10 @@ export default async function AdminSellerDetailPage({
     <AdminShell
       backHref="/admin/sellers"
       backLabel="← 出品者審査"
-      description={`状態: ${statusLabel(seller.data.status)}`}
+      description={`状態：${statusLabel(seller.data.status)}`}
       title={seller.data.official_name}
     >
-      <Panel note="承認すると合成メールで共有ログインを発行する（01 §4）。" title="審査">
+      <Panel note="承認すると、申請したログインIDで共有ログインを発行します。" title="審査">
         <SellerReviewActions
           inviteCode={seller.data.invite_code}
           sellerId={seller.data.id}

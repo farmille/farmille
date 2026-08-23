@@ -323,7 +323,7 @@ export function ReportForm({
   }
 
   if (submitted !== null) {
-    return <ReportSubmitted materialId={material.id} reports={submitted} justSubmitted />;
+    return <ReportSubmitted materialId={material.id} reports={submitted} />;
   }
 
   return (

@@ -155,6 +155,24 @@ export const MEDIA_PLACEMENTS = [
 export type MediaPlacement = (typeof MEDIA_PLACEMENTS)[number]["value"];
 export type ReportMediaType = "photo" | "video";
 
+const STORED_MEDIA_PLACEMENTS = [
+  ...MEDIA_PLACEMENTS,
+  { value: "treated", label: "処理区" },
+  { value: "untreated", label: "対照区" },
+] as const;
+
+/** 保存済みの配置コードを運営画面向けの表示名へ変換する。 */
+export function mediaPlacementLabel(placement: string | null): string | null {
+  if (placement === null) return null;
+
+  const option = STORED_MEDIA_PLACEMENTS.find(({ value }) => value === placement);
+  if (option === undefined) {
+    throw new Error(`未対応のメディア配置です：${placement}`);
+  }
+
+  return option.label;
+}
+
 const ReportTextSchema = v.pipe(v.string(), v.maxLength(20_000));
 const ReportTextArraySchema = v.pipe(v.array(ReportTextSchema), v.maxLength(50));
 

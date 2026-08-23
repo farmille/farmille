@@ -16,6 +16,7 @@ import {
 
 import {
   Button,
+  FileInput,
   FilterPills,
   FormMessage,
   Input,
@@ -337,13 +338,13 @@ export function ArticleForm({
           label="ヒーロー画像"
           requirement="optional"
         >
-          <Input
+          <FileInput
             accept="image/jpeg,image/png,image/webp"
+            disabled={busy}
             id="article-hero"
             onChange={(event) => {
               void handleHeroChange(event);
             }}
-            type="file"
           />
           {heroImageUrl.length === 0 ? null : (
             <div className={css({ mt: "3", display: "flex", flexDirection: "column", gap: "2" })}>
@@ -473,34 +474,6 @@ export function ArticleForm({
             ))}
           </div>
         </Field>
-
-        {state.status === "idle" ? null : (
-          <FormMessage status={state.status === "error" ? "error" : "success"}>
-            {state.message}
-            {state.status === "success" &&
-            state.published === true &&
-            state.articleId !== undefined ? (
-              <>
-                {" "}
-                <TextLink href={`/articles/${state.articleId}`}>公開ページを確認</TextLink>
-              </>
-            ) : null}
-          </FormMessage>
-        )}
-
-        <div className={actionsRow}>
-          <Button
-            disabled={busy}
-            onClick={() => submitWithStatus("draft")}
-            type="button"
-            variant="ghost"
-          >
-            {busy ? "処理中…" : "下書き保存"}
-          </Button>
-          <Button disabled={busy} onClick={() => submitWithStatus("published")} type="button">
-            {busy ? "処理中…" : "公開する"}
-          </Button>
-        </div>
       </form>
 
       <form className={formLayout} onSubmit={handleMaterialSearch}>
@@ -533,6 +506,34 @@ export function ArticleForm({
           </div>
         )}
       </form>
+
+      {state.status === "idle" ? null : (
+        <FormMessage status={state.status === "error" ? "error" : "success"}>
+          {state.message}
+          {state.status === "success" &&
+          state.published === true &&
+          state.articleId !== undefined ? (
+            <>
+              {" "}
+              <TextLink href={`/articles/${state.articleId}`}>公開ページを確認</TextLink>
+            </>
+          ) : null}
+        </FormMessage>
+      )}
+
+      <div className={actionsRow}>
+        <Button
+          disabled={busy}
+          onClick={() => submitWithStatus("draft")}
+          type="button"
+          variant="ghost"
+        >
+          {busy ? "処理中…" : "下書き保存"}
+        </Button>
+        <Button disabled={busy} onClick={() => submitWithStatus("published")} type="button">
+          {busy ? "処理中…" : "公開する"}
+        </Button>
+      </div>
 
       <Link className={buttonRecipe({ variant: "ghost" })} href="/dashboard/articles">
         一覧に戻る

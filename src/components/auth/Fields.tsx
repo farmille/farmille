@@ -248,8 +248,7 @@ export function SwitchToggle({
 }
 
 const noteStyle = css({
-  display: "flex",
-  gap: "2",
+  display: "block",
   mt: "2",
   bg: "amber.soft",
   color: "accent.warn",

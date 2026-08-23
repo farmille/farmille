@@ -48,7 +48,11 @@ export async function sellerOperationAction(
     return { status: "error", message: sellerErrorMessage(result.error) };
   }
 
-  revalidatePath(`/admin/sellers/${sellerId}`);
+  // 初期パスワードは再取得できないため、承認時は現在の詳細画面を再描画せず、
+  // Server Action の戻り値を確実に画面へ残す。
+  if (operation !== "approve") {
+    revalidatePath(`/admin/sellers/${sellerId}`);
+  }
   revalidatePath("/admin/sellers");
   revalidatePath("/admin");
 

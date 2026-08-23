@@ -79,7 +79,7 @@ export default async function AdminSellersPage({
     <AdminShell
       backHref="/admin"
       backLabel="← 運営管理ホーム"
-      description="申請の確認から共有ログインの発行までを行う（01 §6 applied → approved / rejected）。"
+      description="出品者申請を確認し、承認したアカウントに共有ログインを発行します。"
       title="出品者審査"
     >
       <Panel note={`${sellers.data.length} 件`} title="申請・アカウント一覧">
@@ -102,7 +102,7 @@ export default async function AdminSellersPage({
           rows={sellers.data}
         />
         <p className={css({ mt: "2", fontSize: "sm", color: "text.subtle" })}>
-          状態の内訳: {SELLER_STATUSES.map((value) => SELLER_STATUS_LABELS[value]).join(" / ")}
+          状態の内訳：{SELLER_STATUSES.map((value) => SELLER_STATUS_LABELS[value]).join("／")}
         </p>
       </Panel>
     </AdminShell>

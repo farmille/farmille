@@ -1,6 +1,7 @@
 import type { AuthError } from "@supabase/supabase-js";
 
 import { requireAdminAccount, reportAdminError } from "@/server/admin/guard";
+import { normalizeTotpQrCodeSource } from "@/server/admin/mfa-qr";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 
@@ -113,9 +114,15 @@ export async function startAdminTotpEnrollment(): Promise<Result<TotpEnrollment>
 
   if (error !== null) return fail(toMfaErrorCode(error, "TOTP の登録開始"));
 
+  const qrCode = normalizeTotpQrCodeSource(data.totp.qr_code);
+  if (qrCode === null) {
+    reportError("TOTP の登録開始", "Supabase Auth が不正な QR コード形式を返しました");
+    return fail("internal");
+  }
+
   return succeed({
     factorId: data.id,
-    qrCode: data.totp.qr_code,
+    qrCode,
     secret: data.totp.secret,
     uri: data.totp.uri,
   });

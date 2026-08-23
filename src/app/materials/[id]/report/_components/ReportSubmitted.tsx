@@ -85,20 +85,16 @@ const link = css({
 export function ReportSubmitted({
   materialId,
   reports,
-  justSubmitted = false,
 }: {
   materialId: string;
   reports: SubmittedUsageReport[];
-  justSubmitted?: boolean;
 }) {
   return (
     <main className={shell}>
       <div className={icon}>
         <CheckIcon size={34} />
       </div>
-      <h1 className={title}>
-        {justSubmitted ? "レポートを提出しました" : "レポートは提出済みです"}
-      </h1>
+      <h1 className={title}>レポートは提出済みです</h1>
       <p className={description}>
         編集部で確認後に公開されます。
         <br />

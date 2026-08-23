@@ -1,37 +1,10 @@
 "use client";
 
+import { TAG_CATEGORY_LABELS, type TagCategory } from "@/lib/tag-categories";
 import { cva, css, cx, type RecipeVariantProps } from "../../styled-system/css";
 
-/** UI 上のタグ分類。DB の `condition` は `cond` に正規化する。 */
-export type TagCategory = "crop" | "concern" | "effect" | "cond" | "type" | "maker" | "name";
-
-export const TAG_CATEGORY_LABELS = {
-  crop: "作物",
-  concern: "悩み",
-  effect: "効果",
-  cond: "栽培条件",
-  type: "資材タイプ",
-  maker: "メーカー",
-  name: "製品名",
-} satisfies Record<TagCategory, string>;
-
-/** DB / モックの category 文字列を TagChip 用に正規化する。 */
-export function toTagChipCategory(category: string): TagCategory {
-  if (category === "condition") return "cond";
-  if (
-    category === "crop" ||
-    category === "concern" ||
-    category === "effect" ||
-    category === "cond" ||
-    category === "type" ||
-    category === "maker" ||
-    category === "name"
-  ) {
-    return category;
-  }
-
-  throw new Error(`未対応のタグ分類です: ${category}`);
-}
+export { TAG_CATEGORY_LABELS, toTagChipCategory } from "@/lib/tag-categories";
+export type { TagCategory } from "@/lib/tag-categories";
 
 const chipRecipe = cva({
   base: {

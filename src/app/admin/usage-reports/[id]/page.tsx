@@ -21,6 +21,8 @@ import {
   type UsageReportEditorialDetail,
 } from "@/server/admin/usage-reports";
 import { errorMessageJa } from "@/server/errors";
+import { cultivationTypeDisplayLabel } from "@/server/usage-reports/application-detail";
+import { mediaPlacementLabel } from "@/server/usage-reports/model";
 import { css } from "../../../../../styled-system/css";
 
 export const metadata: Metadata = {
@@ -115,7 +117,10 @@ function environmentItems(report: UsageReportEditorialDetail): DescriptionItem[]
           formatDateJa(report.plantingDate)
         ),
     },
-    { term: "栽培形態", value: <OptionalValue value={report.cultivationType} /> },
+    {
+      term: "栽培形態",
+      value: <OptionalValue value={cultivationTypeDisplayLabel(report.cultivationType)} />,
+    },
     {
       term: "栽培タグ",
       value:
@@ -243,7 +248,9 @@ export default async function AdminUsageReportDetailPage({
                   <video className={mediaStyle} controls src={media.url} />
                 )}
                 <figcaption className={captionStyle}>
-                  {media.placement === null ? "配置未設定" : `配置：${media.placement}`}
+                  {media.placement === null
+                    ? "配置未設定"
+                    : `配置：${mediaPlacementLabel(media.placement)}`}
                   {media.caption === null ? "" : `／${media.caption}`}
                 </figcaption>
               </figure>

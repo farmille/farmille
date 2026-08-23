@@ -33,10 +33,21 @@ test("出品者の一次情報編集、公開反映、記事作成、公開、�
     await page
       .getByLabel("本文（Markdown）")
       .fill("## E2E本文\n\n公開反映を確認する記事本文です。");
-    await page.getByLabel("資材を検索して追加").fill("sellercontent");
+    const materialSearch = page.getByLabel("資材を検索して追加");
+    const publishButton = page.getByRole("button", { name: "公開する" });
+    const [materialSearchBox, publishButtonBox] = await Promise.all([
+      materialSearch.boundingBox(),
+      publishButton.boundingBox(),
+    ]);
+    if (materialSearchBox === null || publishButtonBox === null) {
+      throw new Error("記事フォームの資材検索または公開ボタンが表示されていません。");
+    }
+    expect(materialSearchBox.y).toBeLessThan(publishButtonBox.y);
+
+    await materialSearch.fill("sellercontent");
     await page.getByRole("button", { name: "検索", exact: true }).click();
     await page.getByRole("button", { name: new RegExp(material.name) }).click();
-    await page.getByRole("button", { name: "公開する" }).click();
+    await publishButton.click();
 
     await expect(page).toHaveURL(/\/articles\/[0-9a-f-]+$/);
     await expect(page.getByRole("heading", { name: articleTitle })).toBeVisible();

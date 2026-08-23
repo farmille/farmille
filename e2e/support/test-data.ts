@@ -24,6 +24,14 @@ type SellerAccountReference = Pick<
   Database["public"]["Tables"]["seller_accounts"]["Row"],
   "auth_user_id" | "id"
 >;
+type SellerApprovalState = Pick<
+  Database["public"]["Tables"]["seller_accounts"]["Row"],
+  "auth_user_id" | "status"
+>;
+type ContentReportState = Pick<
+  Database["public"]["Tables"]["content_reports"]["Row"],
+  "reporter_user_id" | "status" | "target_id" | "target_type"
+>;
 
 const UuidSchema = v.pipe(v.string(), v.uuid());
 const AuthUserSchema = v.object({
@@ -91,10 +99,22 @@ const SellerAccountReferenceSchema = v.object({
   id: UuidSchema,
   auth_user_id: v.nullable(UuidSchema),
 }) satisfies v.GenericSchema<SellerAccountReference>;
+const SellerApprovalStateSchema = v.object({
+  auth_user_id: v.nullable(UuidSchema),
+  status: v.string(),
+}) satisfies v.GenericSchema<SellerApprovalState>;
+const ContentReportStateSchema = v.object({
+  reporter_user_id: UuidSchema,
+  status: v.string(),
+  target_id: UuidSchema,
+  target_type: v.string(),
+}) satisfies v.GenericSchema<ContentReportState>;
 
 export type Material = v.InferOutput<typeof MaterialSchema>;
 export type Review = v.InferOutput<typeof ReviewSchema>;
 export type UsageReport = v.InferOutput<typeof UsageReportSchema>;
+export type SellerApproval = v.InferOutput<typeof SellerApprovalStateSchema>;
+export type ContentReport = v.InferOutput<typeof ContentReportStateSchema>;
 
 type RestInsertTable = "materials" | "profiles" | "reviews" | "seller_accounts" | "usage_reports";
 type RestInsertBody<Table extends RestInsertTable> = Database["public"]["Tables"][Table]["Insert"];
@@ -326,6 +346,16 @@ export async function cleanupSellerByLoginId(loginId: string): Promise<void> {
   }
 }
 
+export async function sellerApprovalByLoginId(loginId: string): Promise<SellerApproval | null> {
+  const params = new URLSearchParams({
+    select: "auth_user_id,status",
+    login_id: `eq.${loginId}`,
+    limit: "1",
+  });
+  const sellers = await restSelect(SellerApprovalStateSchema, "seller_accounts", params);
+  return sellers[0] ?? null;
+}
+
 export async function createMaterial(
   prefix: string,
   sellerId: string | null = null,
@@ -431,6 +461,23 @@ export async function reviewByAuthor(authorUserId: string): Promise<Review | nul
   return rows[0] ?? null;
 }
 
+export async function contentReportByTarget(
+  reporterUserId: string,
+  targetType: string,
+  targetId: string,
+): Promise<ContentReport | null> {
+  const params = new URLSearchParams({
+    select: "reporter_user_id,status,target_id,target_type",
+    reporter_user_id: `eq.${reporterUserId}`,
+    target_type: `eq.${targetType}`,
+    target_id: `eq.${targetId}`,
+    order: "created_at.desc",
+    limit: "1",
+  });
+  const reports = await restSelect(ContentReportStateSchema, "content_reports", params);
+  return reports[0] ?? null;
+}
+
 export async function reviewCropNames(reviewId: string): Promise<string[]> {
   const params = new URLSearchParams({
     select: "sort_order,crop:crops!review_crops_crop_id_fkey(name)",
@@ -466,7 +513,7 @@ export async function createPendingUsageReport(input: {
     crop_id: crop.id,
     purpose_tags: ["樹勢改善"],
     prefecture_code: 13,
-    cultivation_type: "open_field",
+    cultivation_type: "露地栽培",
     cultivation_tags: ["土耕"],
     growth_stage: "栄養生長期",
     observed_change: "E2E 編集局確認用の観察結果",

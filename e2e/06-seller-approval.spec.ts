@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { E2E_ADMIN_ACCOUNTS } from "./support/admin-accounts";
-import { cleanupSellerByLoginId, uniqueToken } from "./support/test-data";
+import { cleanupSellerByLoginId, sellerApprovalByLoginId, uniqueToken } from "./support/test-data";
 import { loginAdminAndEnrollMfa } from "./support/ui";
 
 test("@smoke 出品者申請、admin 承認と MFA、共有ログイン、ダッシュボード", async ({ page }) => {
@@ -27,7 +27,22 @@ test("@smoke 出品者申請、admin 承認と MFA、共有ログイン、ダッ
     );
     await page.getByRole("link", { name: officialName }).click();
     await page.getByRole("button", { name: "承認して共有ログインを発行" }).click();
-    await expect(page.getByText("共有ログインを発行しました。")).toBeVisible();
+    await expect
+      .poll(
+        async () => {
+          const approval = await sellerApprovalByLoginId(loginId);
+          return approval?.status === "approved" && approval.auth_user_id !== null;
+        },
+        { timeout: 30_000 },
+      )
+      .toBe(true);
+    await expect(page.getByText("共有ログインを発行しました。")).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page.getByText("状態：承認済み", { exact: true })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page.getByText(/^発行済み（.+）$/)).toBeVisible({ timeout: 30_000 });
 
     const loginIdBlock = page.getByText("ログインID", { exact: true }).locator("..");
     const passwordBlock = page.getByText("初期パスワード", { exact: true }).locator("..");
@@ -48,6 +63,17 @@ test("@smoke 出品者申請、admin 承認と MFA、共有ログイン、ダッ
     await expect(page).toHaveURL(/\/dashboard$/);
     await expect(page.getByRole("heading", { name: officialName })).toBeVisible();
     await expect(page.getByText("承認済み", { exact: true })).toBeVisible();
+
+    await page.goto("/post");
+    await expect(page).toHaveURL(/\/post$/);
+    await expect(page.getByRole("heading", { name: "一般ユーザー向けの画面です" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "出品者ダッシュボードへ" })).toHaveAttribute(
+      "href",
+      "/dashboard",
+    );
+
+    await page.goto("/admin");
+    await expect(page.getByRole("heading", { name: "ページが見つかりません" })).toBeVisible();
   } finally {
     await cleanupSellerByLoginId(loginId);
   }

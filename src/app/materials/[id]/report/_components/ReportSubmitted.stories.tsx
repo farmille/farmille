@@ -23,15 +23,10 @@ const meta = {
   args: {
     materialId: "00000000-0000-4000-8000-000000000101",
     reports,
-    justSubmitted: true,
   },
 } satisfies Meta<typeof ReportSubmitted>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const JustSubmitted: Story = {};
-
-export const AlreadySubmitted: Story = {
-  args: { justSubmitted: false },
-};
+export const Default: Story = {};

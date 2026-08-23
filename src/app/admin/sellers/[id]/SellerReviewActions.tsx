@@ -1,6 +1,7 @@
 "use client";
 
-import { startTransition, useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
+import { startTransition, useActionState, useEffect, useState } from "react";
 
 import {
   adminActionsStyle,
@@ -73,12 +74,21 @@ export function SellerReviewActions({
   status: string;
   inviteCode: string | null;
 }) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(
     sellerOperationAction,
     initialSellerActionState,
   );
   const [confirming, setConfirming] = useState<"reject" | "suspend" | null>(null);
   const [rejectedReason, setRejectedReason] = useState("");
+  const [submitting, setSubmitting] = useState<Operation | null>(null);
+
+  useEffect(() => {
+    if (state.status === "approved") {
+      // RSCだけを更新するため、初期パスワードを持つClient stateは保持される。
+      router.refresh();
+    }
+  }, [router, state.status]);
 
   const submit = (operation: Operation): void => {
     const formData = new FormData();
@@ -87,6 +97,7 @@ export function SellerReviewActions({
     if (operation === "reject") {
       formData.set("rejectedReason", rejectedReason);
     }
+    setSubmitting(operation);
     setConfirming(null);
     startTransition(() => {
       formAction(formData);
@@ -128,12 +139,14 @@ export function SellerReviewActions({
         </div>
       ) : null}
 
-      {confirmation === null ? (
+      {state.status === "approved" ? null : confirmation === null ? (
         <div className={adminActionsStyle}>
           {status === "applied" ? (
             <>
               <Button disabled={pending} onClick={() => submit("approve")} size="sm">
-                承認して共有ログインを発行
+                {pending && submitting === "approve"
+                  ? "共有ログインを発行中…"
+                  : "承認して共有ログインを発行"}
               </Button>
               <Button
                 disabled={pending}

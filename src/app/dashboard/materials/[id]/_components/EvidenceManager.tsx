@@ -4,7 +4,16 @@ import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition, type FormEvent } from "react";
 
-import { Button, DataList, FormMessage, Input, Select, SurfaceCard, TextLink } from "@/components";
+import {
+  Button,
+  DataList,
+  FileInput,
+  FormMessage,
+  Input,
+  Select,
+  SurfaceCard,
+  TextLink,
+} from "@/components";
 import { Field } from "@/components/auth/Fields";
 import { clientEnv } from "@/env";
 import { formDataString } from "@/lib/validation";
@@ -209,12 +218,7 @@ export function EvidenceManager({ sellerId, materialId, evidences }: EvidenceMan
           label="ファイル"
           requirement="optional"
         >
-          <Input
-            accept="image/jpeg,image/png,image/webp"
-            id="evidenceFile"
-            name="file"
-            type="file"
-          />
+          <FileInput accept="image/jpeg,image/png,image/webp" id="evidenceFile" name="file" />
         </Field>
         <Field
           error={fieldErrors.externalUrl ?? fieldErrors.source}

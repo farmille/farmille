@@ -16,9 +16,10 @@ test("使用レポートの下書き保存、提出、pending の公開側 404",
     throw new Error("使用レポート対象のシード資材が見つかりません。");
   }
 
+  const reportPath = `/materials/${material.id}/report/new`;
+
   try {
-    await loginGeneral(page, user);
-    await page.goto(`/materials/${material.id}/report/new`);
+    await loginGeneral(page, user, reportPath);
     await page.getByLabel("使用作物").fill("トマト");
     await page
       .getByRole("button", { name: /なす科果菜類.*トマト/ })
@@ -30,9 +31,12 @@ test("使用レポートの下書き保存、提出、pending の公開側 404",
 
     await fillUsageReportForSubmission(page);
     await page.getByRole("button", { name: "レポートを投稿する" }).click();
+    await expect.poll(async () => (await usageReportByAuthor(user.id))?.status).toBe("pending");
     await expect(page.getByRole("heading", { name: "レポートは提出済みです" })).toBeVisible();
 
-    await expect.poll(async () => (await usageReportByAuthor(user.id))?.status).toBe("pending");
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "レポートは提出済みです" })).toBeVisible();
+
     const pending = await usageReportByAuthor(user.id);
     if (pending === null) {
       throw new Error("提出した使用レポートを取得できませんでした。");

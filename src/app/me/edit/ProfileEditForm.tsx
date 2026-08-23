@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { FileInput } from "@/components";
 import {
   controlStyle,
   Field,
@@ -80,13 +81,7 @@ export function ProfileEditForm({ profile, crops }: ProfileEditFormProps) {
         label="アバター"
         requirement="optional"
       >
-        <input
-          accept="image/jpeg,image/png,image/webp"
-          className={controlStyle}
-          id="avatar"
-          name="avatar"
-          type="file"
-        />
+        <FileInput accept="image/jpeg,image/png,image/webp" id="avatar" name="avatar" />
       </Field>
 
       <Field

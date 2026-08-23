@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 
 import { FormPageShell } from "@/components";
-import { requireGeneralUser } from "@/server/auth";
+import { getSessionUser, requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { searchPostingMaterials } from "@/server/queries/materials";
 
 import { MaterialPicker } from "./MaterialPicker";
+import { PostAccessDenied } from "./PostAccessDenied";
 
 type PostPageProps = {
   searchParams: Promise<{ q?: string | string[] }>;
@@ -19,8 +20,12 @@ export default async function PostPage({ searchParams }: PostPageProps) {
       redirect("/login?next=%2Fpost");
     }
 
-    // 出品者・運営には一般ユーザー向け投稿画面を見せない。
-    redirect("/");
+    if (session.error === "forbidden") {
+      const user = await getSessionUser();
+      return <PostAccessDenied accountType={user?.accountType ?? null} />;
+    }
+
+    throw new Error(errorMessageJa[session.error]);
   }
 
   const requested = await searchParams;
