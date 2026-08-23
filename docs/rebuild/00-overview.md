@@ -13,6 +13,7 @@
 | [04-implementation-plan.md](04-implementation-plan.md) | マイルストーン・タスク分割・モデル委譲の実務 |
 | [05-cleanup.md](05-cleanup.md) | 現行リポジトリの削除・残存リスト |
 | [06-diagrams.md](06-diagrams.md) | 実装準拠の ER 図・シーケンス図・画面遷移図（Mermaid） |
+| [07-account-screen-flow.md](07-account-screen-flow.md) | 実画面スクリーンショットによるアカウント別画面遷移図 |
 
 ## 1. なぜ刷新するか
 

@@ -1,6 +1,6 @@
 # 06 図解 — ER 図・シーケンス図・画面遷移図
 
-生成元：`supabase/migrations/` 全14本と `src/` の実装（2026-08-23・ブランチ rebuild/m0）。設計書（01・02）の図は概念設計時の簡略版であり、**実装と食い違う場合は本書が正**。スキーマ・ルーティング・主要フローを変更する PR は本書の該当図も更新すること。
+生成元：`supabase/migrations/` 全15本と `src/` の実装（2026-08-24・ブランチ rebuild/m0）。設計書（01・02）の図は概念設計時の簡略版であり、**実装と食い違う場合は本書が正**。スキーマ・ルーティング・主要フローを変更する PR は本書の該当図も更新すること。
 
 GitHub 上でそのまま Mermaid がレンダリングされる。閲覧用のスタンドアロン版（同一ソースから生成）：https://claude.ai/code/artifact/cbd39abf-0d38-4b1e-92c5-38d943f1765f
 
@@ -488,6 +488,7 @@ sequenceDiagram
     participant A as Auth
     participant D as DB
 
+    Note over B: /signup で一般ユーザーを選び /signup/general へ遷移
     B->>S: signupAction（handle・email・password・都道府県・立場）
     S->>D: profiles を handle で検索（重複検査）
     alt handle 重複
@@ -633,6 +634,8 @@ sequenceDiagram
 
 凡例：実線＝リンク／リダイレクト。`login?next=` への誘導は「🔒」で略記（未ログイン時）。BottomNav（ホーム・探す・＋投稿・記事・マイページ）は公開＋一般側の全画面に共通なので個別エッジは省略。
 
+認証とアカウント作成の分岐は、実画面スクリーンショットを使った [07-account-screen-flow.md](07-account-screen-flow.md) も併せて参照する。
+
 ### 3.1 公開＋一般ユーザー
 
 ```mermaid
@@ -651,7 +654,9 @@ flowchart TD
     end
     subgraph auth["認証"]
         LOGIN["ログイン /login"]
-        SIGNUP["新規登録 /signup"]
+        SIGNUP["登録方法選択 /signup"]
+        GSIGNUP["一般登録 /signup/general"]
+        APPLY["メーカー・出品者申請 /sellers/apply"]
         RESET["再設定 /password-reset"]
         SLOGIN["出品者ログイン /sellers/login"]
     end
@@ -681,13 +686,15 @@ flowchart TD
 
     LOGIN --> SIGNUP & RESET & SLOGIN
     LOGIN -->|"成功 → next または /"| HOME
-    SIGNUP -->|"完了"| HOME
+    SIGNUP -->|"個人用"| GSIGNUP
+    SIGNUP -->|"組織用・審査あり"| APPLY
+    GSIGNUP -->|"完了"| HOME
     POST --> RNEW & UNEW
     RNEW -->|"完了 → レビュー欄アンカー"| MAT
     RNEW -->|"投稿済みなら"| REDIT
     UNEW -->|"提出 → 編集部確認の案内"| MAT
     ME --> MEEDIT & SAVED & PROF & POST
-    ME -->|"出品者の方はこちら"| APPLY["出品者申請 /sellers/apply"]
+    ME -->|"メーカー・出品者アカウントを申請"| APPLY
     ME -->|"ログアウト POST /logout"| HOME
     SAVED --> COMP & MAT
 ```
@@ -696,6 +703,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
+    SIGNUP["登録方法選択 /signup"]
     APPLY["出品者申請 /sellers/apply（公開）"]
     DONE["受付完了 /sellers/apply/done"]
     SLOGIN["出品者ログイン /sellers/login"]
@@ -707,6 +715,7 @@ flowchart TD
     PUBMAT["公開側 資材詳細"]
     PUBART["公開側 記事詳細"]
 
+    SIGNUP -->|"組織用・審査あり"| APPLY
     APPLY -->|"申請 INSERT（status=applied）"| DONE
     Note1["承認は admin 側（図 2.3）。発行された ID/PW でログイン"]
     DONE -.-> Note1
@@ -747,7 +756,8 @@ flowchart TD
 
 | 領域 | 一次防御 | 挙動 |
 |---|---|---|
-| `/me` `/post` | proxy＋ページ内 | 未ログイン→`/login?next=`。出品者・admin が `/me` を開くと画面内で各ダッシュボードへ案内 |
+| `/signup` `/signup/general` | proxy | ログイン済み→`/`。一般登録と組織用申請を入力前に分岐 |
+| `/me` `/post` | proxy＋ページ内 | 未ログイン→`/login?next=`。出品者・admin が開くと、URLを維持して各管理画面への案内を表示 |
 | `/dashboard` | proxy＋`requireSeller` | 未ログイン→`/sellers/login?next=`。非出品者は画面内で拒否表示 |
 | `/admin` | `requireAdminPage` | 未ログイン→`/login`。AAL1 の admin→`/admin/mfa`。admin 以外→**404**（存在を明かさない） |
 | 通報・削除確認 | — | ページ遷移ではなくモーダル（`<dialog>`）。通報はレビュー・レポート・記事・プロフィールの4箇所 |
