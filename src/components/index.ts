@@ -58,7 +58,6 @@ export { ArticlesToolbar } from "./ArticlesToolbar";
 export { DataTable } from "./DataTable";
 export type { DataTableColumn } from "./DataTable";
 
-export { sellerTypeLabel } from "./seller-type-label";
 export { formatDateJa } from "./format-date";
 export { FormPageShell } from "./FormPageShell";
 

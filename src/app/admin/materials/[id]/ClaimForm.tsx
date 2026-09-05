@@ -40,9 +40,9 @@ export function ClaimForm({
       {state.status === "done" ? <FormMessage tone="info">{state.message}</FormMessage> : null}
       <input name="materialId" type="hidden" value={materialId} />
       <Field
-        guide="承認済みの出品者だけを選べます。未 claim に戻すと「メーカー確認済み」バッジは外れます。"
+        guide="承認済みのメーカーだけを選べます。claim だけではメーカー確認済み表示は付きません。"
         htmlFor="sellerId"
-        label="claim 元の出品者"
+        label="claim 元のメーカー"
         requirement="optional"
       >
         {/* 更新後に再検証された claim 先を確実に反映させるため、値が変わったら作り直す。 */}

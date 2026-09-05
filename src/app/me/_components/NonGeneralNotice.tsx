@@ -46,11 +46,11 @@ type NonGeneralNoticeProps = {
   accountType: AccountType | null;
 };
 
-/** 出品者・運営が /me に来たときの誘導。 */
+/** メーカー・運営が /me に来たときの誘導。 */
 export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
   const destination =
     accountType === "seller"
-      ? { href: "/dashboard", label: "出品者ダッシュボードへ" }
+      ? { href: "/dashboard", label: "メーカーダッシュボードへ" }
       : accountType === "admin"
         ? { href: "/admin/sellers", label: "運営管理へ" }
         : null;
@@ -72,7 +72,7 @@ export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
               lineHeight: "1.7",
             })}
           >
-            マイページ・プロフィール編集・検討リストは一般ユーザー専用です。出品者や運営の作業はそれぞれのダッシュボードから行ってください。
+            マイページ・プロフィール編集・検討リストは一般ユーザー専用です。メーカーや運営の作業は、それぞれのダッシュボードから行ってください。
           </p>
           {destination !== null ? (
             <Link href={destination.href} className={linkStyle}>

@@ -5,7 +5,7 @@ import type { SellerCredentials } from "@/server/admin/sellers";
 // Server Action の戻り値（useActionState の state）。
 // "use server" ファイルは async 関数しか export できないため、型と初期値はここに置く。
 
-/** 単純な実行結果だけを返す操作（タグ・作物マスタ、分類変更申請）。 */
+/** 単純な実行結果だけを返す操作（タグ・作物マスタ、資材変更申請）。 */
 export type AdminActionState =
   | { status: "idle" }
   | { status: "error"; message: string }
@@ -13,7 +13,7 @@ export type AdminActionState =
 
 export const initialAdminActionState: AdminActionState = { status: "idle" };
 
-/** 出品者審査。承認と招待コード発行は一度だけ表示する値を持ち帰る。 */
+/** メーカー審査。承認と招待コード発行は一度だけ表示する値を持ち帰る。 */
 export type SellerActionState =
   | AdminActionState
   /** 発行した共有ログイン。パスワードは保存していないので、この表示が唯一の受け渡し機会。 */

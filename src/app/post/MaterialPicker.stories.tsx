@@ -10,7 +10,7 @@ const materials = [
     manufacturer_name: "グリーンバイオ株式会社",
     review_count: 18,
     avg_rating: 4.3,
-    seller_id: "seller-1",
+    manufacturer_verified_at: "2026-08-01T00:00:00.000Z",
   },
   {
     id: "material-2",
@@ -18,7 +18,7 @@ const materials = [
     manufacturer_name: "ファーム技研",
     review_count: 9,
     avg_rating: 3.8,
-    seller_id: null,
+    manufacturer_verified_at: null,
   },
 ] satisfies PostingMaterial[];
 

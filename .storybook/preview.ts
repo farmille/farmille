@@ -17,6 +17,7 @@ sb.mock(import("../src/app/admin/sellers/[id]/actions.ts"));
 sb.mock(import("../src/app/admin/tags/actions.ts"));
 sb.mock(import("../src/app/admin/usage-reports/[id]/actions.ts"));
 sb.mock(import("../src/app/dashboard/articles/actions.ts"));
+sb.mock(import("../src/app/dashboard/materials/actions.ts"));
 sb.mock(import("../src/app/dashboard/materials/[id]/actions.ts"));
 sb.mock(import("../src/app/login/actions.ts"));
 sb.mock(import("../src/app/materials/[id]/actions.ts"));

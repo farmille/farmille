@@ -22,7 +22,11 @@ function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): voi
 export async function listSitemapEntries(): Promise<Result<SitemapEntries>> {
   const supabase = createAdminSupabase();
   const [materials, articles, reports, sellers, users] = await Promise.all([
-    supabase.from("materials").select("id, updated_at").order("id", { ascending: true }),
+    supabase
+      .from("materials")
+      .select("id, updated_at")
+      .eq("publication_status", "published")
+      .order("id", { ascending: true }),
     supabase
       .from("articles")
       .select("id, updated_at")
@@ -54,7 +58,7 @@ export async function listSitemapEntries(): Promise<Result<SitemapEntries>> {
     return fail("internal");
   }
   if (sellers.error !== null) {
-    reportQueryError("出品者一覧の取得に失敗", sellers.error);
+    reportQueryError("メーカー一覧の取得に失敗", sellers.error);
     return fail("internal");
   }
   if (users.error !== null) {

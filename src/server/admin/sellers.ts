@@ -23,7 +23,7 @@ export function isSellerStatus(value: string | null | undefined): value is Selle
 
 export type SellerListItem = Pick<
   SellerRow,
-  "id" | "official_name" | "seller_type" | "login_id" | "status" | "created_at" | "approved_at"
+  "id" | "official_name" | "login_id" | "status" | "created_at" | "approved_at"
 >;
 
 /** 詳細は内部項目（contact_*）も含む。admin 画面以外へは渡さない。 */
@@ -41,7 +41,7 @@ function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
   reportAdminError("sellers", operation, error);
 }
 
-const LIST_COLUMNS = "id, official_name, seller_type, login_id, status, created_at, approved_at";
+const LIST_COLUMNS = "id, official_name, login_id, status, created_at, approved_at";
 
 export async function listSellers(status: SellerStatus | "all"): Promise<Result<SellerListItem[]>> {
   return withAdmin(async ({ supabase }) => {
@@ -52,7 +52,7 @@ export async function listSellers(status: SellerStatus | "all"): Promise<Result<
     );
 
     if (error !== null) {
-      reportError("出品者一覧の取得に失敗", error);
+      reportError("メーカー一覧の取得に失敗", error);
       return fail("internal");
     }
 
@@ -71,7 +71,7 @@ export async function getSellerDetail(sellerId: string): Promise<Result<SellerDe
     ]);
 
     if (sellerResult.error !== null) {
-      reportError("出品者詳細の取得に失敗", sellerResult.error);
+      reportError("メーカー詳細の取得に失敗", sellerResult.error);
       return fail("internal");
     }
     if (sellerResult.data === null) return fail("not_found");
@@ -86,7 +86,7 @@ export async function getSellerDetail(sellerId: string): Promise<Result<SellerDe
 }
 
 /**
- * 出品者申請の承認（01 §6 applied → approved）。
+ * メーカー申請の承認（01 §6 applied → approved）。
  *   1. 合成メール `{login_id}@sellers.farmille.internal` で Auth ユーザーを作成
  *   2. app_metadata に account_type='seller'・seller_id を付与
  *   3. seller_accounts を approved・approved_at・auth_user_id へ更新
@@ -166,7 +166,7 @@ export async function rejectSellerApplication(
   return updateSellerStatus(sellerId, "rejected", ["applied"], "却下", normalizedReason);
 }
 
-/** 凍結（01 §6 運用中の凍結）。共有ログインは残すが、出品者ログインは status で弾かれる。 */
+/** 凍結（01 §6 運用中の凍結）。共有ログインは残すが、メーカーログインは status で弾かれる。 */
 export async function suspendSellerAccount(sellerId: string): Promise<Result<null>> {
   return updateSellerStatus(sellerId, "suspended", ["approved"], "凍結");
 }

@@ -13,11 +13,11 @@ export default function SellerNotFound() {
         fontFamily: "sans",
       })}
     >
-      <AppBar chrome="public" active="search" title="出品者が見つかりません" backHref="/" />
+      <AppBar chrome="public" active="search" title="メーカーが見つかりません" backHref="/" />
       <main className={css({ px: "4", py: "4" })}>
         <EmptyState
-          title="出品者が見つかりません"
-          description="指定された出品者は存在しないか、現在公開されていません。"
+          title="メーカーが見つかりません"
+          description="指定されたメーカーは存在しないか、現在公開されていません。"
           className={css({ minH: "60dvh" })}
         >
           <Link

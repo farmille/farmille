@@ -49,7 +49,7 @@ type ArticleFields = Pick<
   "id" | "title" | "hero_image_url" | "published_at" | "seller_id"
 >;
 
-type ArticleSeller = Pick<PublicSellerRow, "id" | "official_name" | "seller_type">;
+type ArticleSeller = Pick<PublicSellerRow, "id" | "official_name">;
 
 type ArticleQueryRow = ArticleFields & {
   seller: ArticleSeller | null;
@@ -274,8 +274,7 @@ export async function listPublishedArticlesByMaterialWithSupabase(
           seller_id,
           seller:public_sellers!articles_seller_id_fkey (
             id,
-            official_name,
-            seller_type
+            official_name
           )
         )
       `,

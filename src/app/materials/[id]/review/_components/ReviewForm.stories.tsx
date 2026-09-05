@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ReviewForm } from "./ReviewForm";
 
 const initialValues = {
-  cropIds: ["crop-tomato", "crop-pepper"],
+  cropIds: ["crop-tomato"],
   rating: 4,
   body: "定植後の根の動きがよく、株ごとの生育差が小さくなりました。",
   purchaseChannel: "direct" as const,
@@ -29,14 +29,12 @@ const meta = {
         name: "トマト",
         aliases: ["ミニトマト"],
         groupName: "なす科果菜類",
-        fromProfile: true,
       },
       {
         id: "crop-pepper",
         name: "ピーマン",
         aliases: ["パプリカ"],
         groupName: "なす科果菜類",
-        fromProfile: false,
       },
     ],
     initialValues,

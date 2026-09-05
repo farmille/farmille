@@ -1,7 +1,6 @@
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 
 import { OfficialCheckIcon } from "@/components/Icons";
-import { SELLER_TYPES } from "@/lib/seller-types";
 import type { PublicSellerPageData } from "@/server/queries/public-sellers";
 import { css } from "../../../../../styled-system/css";
 
@@ -56,20 +55,10 @@ function checkedExternalUrl(value: string): string {
   const url = new URL(value);
 
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new Error("出品者の公式サイトURLはHTTPまたはHTTPSで指定してください。");
+    throw new Error("メーカーの公式サイトURLはHTTPまたはHTTPSで指定してください。");
   }
 
   return url.toString();
-}
-
-export function sellerTypeLabel(value: string): string {
-  const sellerType = SELLER_TYPES.find((candidate) => candidate.value === value);
-
-  if (sellerType === undefined) {
-    throw new Error(`未対応の出品者種別です：${value}`);
-  }
-
-  return sellerType.label;
 }
 
 type SellerHeaderProps = {
@@ -77,7 +66,7 @@ type SellerHeaderProps = {
 };
 
 export function SellerHeader({ seller }: SellerHeaderProps) {
-  const fallbackLogo = seller.sellerType === "ja" ? "JA" : seller.officialName.charAt(0);
+  const fallbackLogo = seller.officialName.charAt(0);
 
   return (
     <section className={card} aria-labelledby="seller-name">
@@ -114,7 +103,7 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
           </h1>
           <OfficialCheckIcon size={16} className={css({ color: "accent.official" })} />
         </div>
-        <span className={typeLabel}>{sellerTypeLabel(seller.sellerType)}</span>
+        <span className={typeLabel}>メーカー</span>
         {seller.profileText ? (
           <p
             className={css({

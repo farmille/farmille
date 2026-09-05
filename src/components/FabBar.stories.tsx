@@ -71,9 +71,9 @@ export const GeneralLoggedIn: Story = {
   },
 };
 
-// 出品者ログイン時はコンポーネントが null を返すため、何も描画されない（空のキャンバスが正）。
+// メーカーログイン時はコンポーネントが null を返すため、何も描画されない（空のキャンバスが正）。
 export const SellerReturnsNull: Story = {
-  name: "SellerReturnsNull（出品者ログイン時は null を返し非表示）",
+  name: "SellerReturnsNull（メーカーログイン時は null を返し非表示）",
   beforeEach: () => {
     mocked(getSessionUser).mockResolvedValue({
       userId: "user-2",

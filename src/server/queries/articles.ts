@@ -10,11 +10,11 @@ type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
 type ViewCountRow = Database["public"]["Views"]["view_counts_daily"]["Row"];
 
-type ArticleSeller = Pick<PublicSellerRow, "id" | "official_name" | "seller_type" | "logo_url">;
+type ArticleSeller = Pick<PublicSellerRow, "id" | "official_name" | "logo_url">;
 
 type ArticleMaterial = Pick<
   MaterialRow,
-  "id" | "name" | "manufacturer_name" | "avg_rating" | "seller_id"
+  "id" | "name" | "manufacturer_name" | "avg_rating" | "manufacturer_verified_at"
 >;
 
 type ArticleDetailQueryRow = Pick<
@@ -120,7 +120,6 @@ export async function getPublishedArticle(
       seller:public_sellers!articles_seller_id_fkey (
         id,
         official_name,
-        seller_type,
         logo_url
       ),
       article_materials (
@@ -129,7 +128,7 @@ export async function getPublishedArticle(
           name,
           manufacturer_name,
           avg_rating,
-          seller_id
+          manufacturer_verified_at
         )
       )
     `,
@@ -155,7 +154,7 @@ export async function getPublishedArticle(
   }
 
   if (row.seller === null) {
-    reportQueryError("記事の出品者情報が欠落", { id: row.id });
+    reportQueryError("記事のメーカー情報が欠落", { id: row.id });
     return fail("internal");
   }
 

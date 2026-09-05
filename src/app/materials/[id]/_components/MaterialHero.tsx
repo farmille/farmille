@@ -73,7 +73,11 @@ export function MaterialHero({
   const primaryImage = material.images[0];
   const manufacturer = material.seller_id ? (
     <Link href={`/sellers/${material.seller_id}`} className={manufacturerStyle}>
-      <Badge variant="official">{material.manufacturer_name} 公式</Badge>
+      {material.manufacturer_verified_at === null ? (
+        material.manufacturer_name
+      ) : (
+        <Badge variant="official">{material.manufacturer_name} メーカー確認済み</Badge>
+      )}
     </Link>
   ) : (
     <span className={manufacturerStyle}>{material.manufacturer_name}</span>

@@ -5,7 +5,7 @@ import * as v from "valibot";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 
-// 01 §4: 一般ユーザー / 出品者 / 運営。JWT の app_metadata.account_type が正。
+// 01 §4：一般ユーザー／メーカー／運営。JWT の app_metadata.account_type が正。
 export const ACCOUNT_TYPES = ["general", "seller", "admin"] as const;
 
 export type AccountType = (typeof ACCOUNT_TYPES)[number];
@@ -79,7 +79,7 @@ export function authorizeGeneralUser(user: SessionUser | null): Result<GeneralSe
 export function authorizeSeller(user: SessionUser | null): Result<SellerSession> {
   if (user === null) return fail("unauthorized");
   if (user.accountType !== "seller") return fail("forbidden");
-  // seller_id が無い JWT は出品者として扱わない（承認処理の取りこぼし検知）。
+  // seller_id が無い JWT はメーカーとして扱わない（承認処理の取りこぼし検知）。
   if (user.sellerId === null) return fail("forbidden");
 
   return succeed({ userId: user.userId, sellerId: user.sellerId });

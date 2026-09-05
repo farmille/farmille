@@ -18,6 +18,8 @@ type MaterialListFields = Pick<
   | "manufacturer_name"
   | "sales_status"
   | "seller_id"
+  | "manufacturer_verified_at"
+  | "publication_status"
   | "review_count"
   | "avg_rating"
   | "control_plot_ratio"
@@ -38,6 +40,8 @@ type MaterialDetailFields = Pick<
   | "price_range"
   | "official_url"
   | "catalog_url"
+  | "archived_at"
+  | "manufacturer_verification_method"
   | "updated_at"
 >;
 
@@ -90,7 +94,7 @@ export type MaterialListItem = MaterialListFields & {
 
 export type PostingMaterial = Pick<
   MaterialRow,
-  "id" | "name" | "manufacturer_name" | "review_count" | "avg_rating" | "seller_id"
+  "id" | "name" | "manufacturer_name" | "review_count" | "avg_rating" | "manufacturer_verified_at"
 >;
 
 export type MaterialDetail = MaterialDetailFields & {
@@ -296,21 +300,26 @@ export async function listMaterialsWithSupabase(
   const makers = [...new Set(makerNames ?? [])];
   const names = [...new Set(materialNames ?? [])];
 
-  let query = supabase.from("materials").select(
-    `
+  let query = supabase
+    .from("materials")
+    .select(
+      `
         id,
         name,
         manufacturer_name,
         sales_status,
         seller_id,
+        manufacturer_verified_at,
+        publication_status,
         review_count,
         avg_rating,
         control_plot_ratio,
         created_at,
         description
       `,
-    { count: "exact" },
-  );
+      { count: "exact" },
+    )
+    .eq("publication_status", "published");
 
   if (materialFilter.data !== null) {
     query = query.in("id", materialFilter.data);
@@ -405,6 +414,8 @@ export async function getMaterialWithSupabase(
         manufacturer_name,
         sales_status,
         seller_id,
+        manufacturer_verified_at,
+        publication_status,
         review_count,
         avg_rating,
         control_plot_ratio,
@@ -418,6 +429,8 @@ export async function getMaterialWithSupabase(
         price_range,
         official_url,
         catalog_url,
+        archived_at,
+        manufacturer_verification_method,
         updated_at
       `,
     )
@@ -632,7 +645,8 @@ function byPostingPriority(left: PostingMaterial, right: PostingMaterial): numbe
  */
 export async function searchPostingMaterials(query: string): Promise<Result<PostingMaterial[]>> {
   const normalizedQuery = query.trim();
-  const select = "id, name, manufacturer_name, review_count, avg_rating, seller_id" as const;
+  const select =
+    "id, name, manufacturer_name, review_count, avg_rating, manufacturer_verified_at" as const;
 
   if (normalizedQuery.length > POSTING_QUERY_MAX_LENGTH) {
     return fail("invalid_body");
@@ -644,6 +658,7 @@ export async function searchPostingMaterials(query: string): Promise<Result<Post
     const { data, error } = await supabase
       .from("materials")
       .select(select)
+      .eq("publication_status", "published")
       .order("review_count", { ascending: false })
       .order("name", { ascending: true })
       .limit(POSTING_MATERIAL_LIMIT);
@@ -659,10 +674,16 @@ export async function searchPostingMaterials(query: string): Promise<Result<Post
 
   const pattern = `%${escapeLikePattern(normalizedQuery)}%`;
   const [nameResult, manufacturerResult] = await Promise.all([
-    supabase.from("materials").select(select).ilike("name", pattern).limit(POSTING_MATERIAL_LIMIT),
     supabase
       .from("materials")
       .select(select)
+      .eq("publication_status", "published")
+      .ilike("name", pattern)
+      .limit(POSTING_MATERIAL_LIMIT),
+    supabase
+      .from("materials")
+      .select(select)
+      .eq("publication_status", "published")
       .ilike("manufacturer_name", pattern)
       .limit(POSTING_MATERIAL_LIMIT),
   ]);

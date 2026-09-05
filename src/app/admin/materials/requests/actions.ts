@@ -1,46 +1,51 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import type { AdminActionState } from "@/app/admin/_lib/action-state";
 import { formDataString } from "@/lib/validation";
-import { isEditRequestStatus, resolveMaterialEditRequest } from "@/server/admin/materials";
+import {
+  approveMaterialChangeRequest,
+  rejectMaterialChangeRequest,
+} from "@/server/admin/material-change-requests";
 import { errorMessageJa } from "@/server/errors";
 
-/** 分類変更申請の処理（open → done / declined）。 */
-export async function resolveEditRequestAction(
+export async function resolveMaterialChangeRequestAction(
   _previousState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
-  const requestId = formDataString(formData.get("requestId"));
-  const nextStatus = formDataString(formData.get("nextStatus"));
+  const requestId = formDataString(formData.get("requestId"))?.trim() ?? "";
+  const decision = formDataString(formData.get("decision"));
+  const reviewNote = formDataString(formData.get("reviewNote"))?.trim() ?? "";
 
-  if (
-    requestId === null ||
-    requestId.length === 0 ||
-    !isEditRequestStatus(nextStatus) ||
-    nextStatus === "open"
-  ) {
+  if (requestId.length === 0 || (decision !== "approve" && decision !== "reject")) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
+  if (decision === "reject" && reviewNote.length === 0) {
+    return { status: "error", message: "却下理由を入力してください。" };
+  }
 
-  const result = await resolveMaterialEditRequest(requestId, nextStatus);
+  const result =
+    decision === "approve"
+      ? await approveMaterialChangeRequest(requestId, reviewNote)
+      : await rejectMaterialChangeRequest(requestId, reviewNote);
 
   if (!result.ok) {
     return {
       status: "error",
       message:
         result.error === "conflict"
-          ? "この申請はすでに処理済みです。画面を再読み込みしてください。"
+          ? "申請は処理済みか、申請後に公開内容が変更されています。画面を再読み込みしてください。"
           : errorMessageJa[result.error],
     };
   }
 
-  revalidatePath("/admin/materials/requests");
   revalidatePath("/admin");
+  revalidatePath("/admin/materials");
+  revalidatePath("/admin/materials/requests");
+  revalidatePath(`/admin/materials/requests/${requestId}`);
+  revalidatePath("/dashboard/materials");
 
-  return {
-    status: "done",
-    message: nextStatus === "done" ? "対応済みにしました。" : "見送りにしました。",
-  };
+  redirect(`/admin/materials/requests/${requestId}?resolved=${decision}`);
 }

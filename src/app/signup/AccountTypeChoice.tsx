@@ -27,7 +27,7 @@ const detailsStyle = css({
   lineHeight: "1.65",
 });
 
-/** 個人用と組織用を入力前に分け、異なる審査・ログイン方式を明示する。 */
+/** 一般ユーザーとメーカーを入力前に分け、異なる審査・ログイン方式を明示する。 */
 export function AccountTypeChoice() {
   return (
     <>
@@ -44,15 +44,15 @@ export function AccountTypeChoice() {
         </SurfaceCard>
 
         <SurfaceCard
-          description="メーカー・JA・農業法人・専門家として、製品情報や記事を管理できます。"
-          title="メーカー・出品者として申請"
+          description="自社の農業資材情報や記事を管理する、メーカー専用アカウントです。"
+          title="メーカーとして申請"
         >
-          <span className={accountTypeStyle}>組織用アカウント</span>
+          <span className={accountTypeStyle}>メーカー用アカウント</span>
           <p className={detailsStyle}>
             ログインIDを申請します。運営の審査後にログイン情報を発行します。
           </p>
-          <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/sellers/apply">
-            メーカー・出品者申請へ
+          <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/sellers">
+            メーカー向けページへ
           </Link>
         </SurfaceCard>
       </div>
@@ -62,7 +62,7 @@ export function AccountTypeChoice() {
           一般ユーザーの方はログイン
         </Link>
         <Link className={textLinkStyle} href="/sellers/login">
-          メーカー・出品者の方はログイン
+          メーカーの方はログイン
         </Link>
       </div>
     </>

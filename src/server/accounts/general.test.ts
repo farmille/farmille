@@ -6,13 +6,11 @@ const validRaw = {
   handle: "農家の山田",
   email: "farmer@example.com",
   password: "farmille-pass",
-  prefectureCode: "8",
-  prefecturePublic: "on",
   standpoint: "farmer",
 };
 
 describe("validateGeneralSignup", () => {
-  it("6項目が揃っていれば型付きの入力に変換する", () => {
+  it("必須項目が揃っていれば型付きの入力に変換する", () => {
     const result = validateGeneralSignup(validRaw);
 
     expect(result).toEqual({
@@ -21,17 +19,9 @@ describe("validateGeneralSignup", () => {
         handle: "農家の山田",
         email: "farmer@example.com",
         password: "farmille-pass",
-        prefectureCode: 8,
-        prefecturePublic: true,
         standpoint: "farmer",
       },
     });
-  });
-
-  it("公開トグル未送信は「公開しない」として扱う", () => {
-    const result = validateGeneralSignup({ ...validRaw, prefecturePublic: null });
-
-    expect(result.ok && result.input.prefecturePublic).toBe(false);
   });
 
   it("ハンドルネームは前後の空白を除き、空と31文字以上を弾く", () => {
@@ -57,28 +47,21 @@ describe("validateGeneralSignup", () => {
     });
   });
 
-  it("都道府県コードは 1〜47 のみ受け付ける", () => {
-    expect(validateGeneralSignup({ ...validRaw, prefectureCode: "0" })).toMatchObject({
-      ok: false,
-    });
-    expect(validateGeneralSignup({ ...validRaw, prefectureCode: "48" })).toMatchObject({
-      ok: false,
-    });
-    expect(validateGeneralSignup({ ...validRaw, prefectureCode: "" })).toMatchObject({ ok: false });
-    expect(validateGeneralSignup({ ...validRaw, prefectureCode: "47" })).toMatchObject({
-      ok: true,
-      input: { prefectureCode: 47 },
-    });
-  });
+  it("立場は一般ユーザー向けの4択だけを受け付ける", () => {
+    for (const standpoint of ["farmer", "ja", "expert", "other"]) {
+      expect(validateGeneralSignup({ ...validRaw, standpoint })).toMatchObject({
+        ok: true,
+        input: { standpoint },
+      });
+    }
 
-  it("立場は 5 択のみ受け付ける", () => {
-    expect(validateGeneralSignup({ ...validRaw, standpoint: "researcher" })).toMatchObject({
-      ok: false,
-    });
-    expect(validateGeneralSignup({ ...validRaw, standpoint: null })).toMatchObject({ ok: false });
     expect(validateGeneralSignup({ ...validRaw, standpoint: "maker_related" })).toMatchObject({
-      ok: true,
-      input: { standpoint: "maker_related" },
+      ok: false,
+      fieldErrors: { standpoint: "あなたの立場を選択してください。" },
+    });
+    expect(validateGeneralSignup({ ...validRaw, standpoint: null })).toMatchObject({
+      ok: false,
+      fieldErrors: { standpoint: "あなたの立場を選択してください。" },
     });
   });
 
@@ -88,11 +71,17 @@ describe("validateGeneralSignup", () => {
       handle: "",
       email: "invalid",
       password: "x",
+      standpoint: null,
     });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(Object.keys(result.fieldErrors).sort()).toEqual(["email", "handle", "password"]);
+      expect(Object.keys(result.fieldErrors).sort()).toEqual([
+        "email",
+        "handle",
+        "password",
+        "standpoint",
+      ]);
     }
   });
 });

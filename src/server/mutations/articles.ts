@@ -178,7 +178,11 @@ async function ensureMaterialsExist(
 ): Promise<Result<null>> {
   if (materialIds.length === 0) return succeed(null);
 
-  const { data, error } = await supabase.from("materials").select("id").in("id", materialIds);
+  const { data, error } = await supabase
+    .from("materials")
+    .select("id")
+    .eq("publication_status", "published")
+    .in("id", materialIds);
 
   if (error !== null) {
     reportMutationError("紐づけ資材の存在確認に失敗", error);

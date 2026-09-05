@@ -15,15 +15,11 @@ type UsageReportMediaRow = Database["public"]["Tables"]["usage_report_media"]["R
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
-type ProfileCropQueryRow = {
-  crop: Pick<CropRow, "id" | "name" | "sort_order"> | null;
-};
-
 type ProfileReviewQueryRow = Pick<
   ReviewRow,
   "id" | "material_id" | "rating" | "body" | "created_at"
 > & {
-  cropRelations: ReviewCropRelation[];
+  cropRelations: ReviewCropRelation | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
   photos: Pick<ReviewPhotoRow, "id" | "url" | "caption" | "sort_order">[];
 };
@@ -71,16 +67,6 @@ export type PublicProfilePageData = {
     userId: string;
     handle: string;
     avatarUrl: string | null;
-    bio: string | null;
-    cultivationStyles: readonly string[];
-    affiliation: string | null;
-    websiteUrl: string | null;
-    snsUrl: string | null;
-    prefectureCode: number | null;
-    crops: ReadonlyArray<{
-      id: string;
-      name: string;
-    }>;
   };
   reviewCount: number;
   helpfulCount: number;
@@ -143,9 +129,7 @@ export async function getPublicProfilePage(
   const supabase = await createServerSupabase();
   const { data: profileData, error: profileError } = await supabase
     .from("public_profiles")
-    .select(
-      "user_id, handle, avatar_url, bio, cultivation_styles, affiliation, website_url, sns_url, prefecture_code",
-    )
+    .select("user_id, handle, avatar_url")
     .eq("user_id", id)
     .maybeSingle();
 
@@ -158,37 +142,14 @@ export async function getPublicProfilePage(
     return fail("not_found");
   }
 
-  const profile: Pick<
-    PublicProfileRow,
-    | "user_id"
-    | "handle"
-    | "avatar_url"
-    | "bio"
-    | "cultivation_styles"
-    | "affiliation"
-    | "website_url"
-    | "sns_url"
-    | "prefecture_code"
-  > = profileData;
+  const profile: Pick<PublicProfileRow, "user_id" | "handle" | "avatar_url"> = profileData;
 
   if (profile.user_id === null || profile.handle === null) {
     reportQueryError("公開プロフィールの必須項目が欠落", { id });
     return fail("internal");
   }
 
-  const [cropsResult, reviewsResult, reportsResult] = await Promise.all([
-    supabase
-      .from("profile_crops")
-      .select(
-        `
-          crop:crops!profile_crops_crop_id_fkey (
-            id,
-            name,
-            sort_order
-          )
-        `,
-      )
-      .eq("user_id", profile.user_id),
+  const [reviewsResult, reportsResult] = await Promise.all([
     supabase
       .from("reviews")
       .select(
@@ -251,11 +212,6 @@ export async function getPublicProfilePage(
       .order("id", { ascending: true }),
   ]);
 
-  if (cropsResult.error !== null) {
-    reportQueryError("主な作目の取得に失敗", cropsResult.error);
-    return fail("internal");
-  }
-
   if (reviewsResult.error !== null) {
     reportQueryError("公開レビューの取得に失敗", reviewsResult.error);
     return fail("internal");
@@ -266,7 +222,6 @@ export async function getPublicProfilePage(
     return fail("internal");
   }
 
-  const cropRows: ProfileCropQueryRow[] = cropsResult.data;
   const reviewRows: ProfileReviewQueryRow[] = reviewsResult.data;
   const reportRows: ProfileReportQueryRow[] = reportsResult.data;
   const [reviewHelpful, reportHelpful] = await Promise.all([
@@ -298,21 +253,6 @@ export async function getPublicProfilePage(
 
   if (!votedReviewIds.ok) {
     return votedReviewIds;
-  }
-
-  const crops: Array<{ id: string; name: string; sortOrder: number }> = [];
-
-  for (const relation of cropRows) {
-    if (relation.crop === null) {
-      reportQueryError("主な作目の関連データが欠落", { id });
-      return fail("internal");
-    }
-
-    crops.push({
-      id: relation.crop.id,
-      name: relation.crop.name,
-      sortOrder: relation.crop.sort_order,
-    });
   }
 
   const posts: PublicProfilePost[] = [];
@@ -381,17 +321,6 @@ export async function getPublicProfilePage(
       userId: profile.user_id,
       handle: profile.handle,
       avatarUrl: profile.avatar_url,
-      bio: profile.bio,
-      cultivationStyles: profile.cultivation_styles ?? [],
-      affiliation: profile.affiliation,
-      websiteUrl: profile.website_url,
-      snsUrl: profile.sns_url,
-      prefectureCode: profile.prefecture_code,
-      crops: crops
-        .toSorted(
-          (left, right) => left.sortOrder - right.sortOrder || left.id.localeCompare(right.id),
-        )
-        .map(({ id: cropId, name }) => ({ id: cropId, name })),
     },
     reviewCount: reviewRows.length,
     helpfulCount,

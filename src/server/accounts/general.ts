@@ -7,7 +7,6 @@ import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
 } from "@/lib/auth/account-rules";
-import { isPrefectureCode } from "@/lib/prefectures";
 import { isStandpoint, type Standpoint } from "@/lib/standpoints";
 import { formDataString, trimmedFormDataString } from "@/lib/validation";
 import { toErrorCode } from "@/server/accounts/auth-errors";
@@ -19,8 +18,6 @@ export type GeneralSignupInput = {
   handle: string;
   email: string;
   password: string;
-  prefectureCode: number;
-  prefecturePublic: boolean;
   standpoint: Standpoint;
 };
 
@@ -40,8 +37,6 @@ export function validateGeneralSignup(raw: {
   handle: FormDataEntryValue | null;
   email: FormDataEntryValue | null;
   password: FormDataEntryValue | null;
-  prefectureCode: FormDataEntryValue | null;
-  prefecturePublic: FormDataEntryValue | boolean | null;
   standpoint: FormDataEntryValue | null;
 }): GeneralSignupValidation {
   const fieldErrors: GeneralSignupFieldErrors = {};
@@ -67,11 +62,6 @@ export function validateGeneralSignup(raw: {
     fieldErrors.password = `パスワードは${PASSWORD_MAX_LENGTH}文字以内で入力してください。`;
   }
 
-  const prefectureCode = Number(trimmedFormDataString(raw.prefectureCode));
-  if (!isPrefectureCode(prefectureCode)) {
-    fieldErrors.prefectureCode = "都道府県を選択してください。";
-  }
-
   const standpoint = formDataString(raw.standpoint);
   if (!isStandpoint(standpoint)) {
     fieldErrors.standpoint = "あなたの立場を選択してください。";
@@ -89,9 +79,6 @@ export function validateGeneralSignup(raw: {
       handle,
       email,
       password,
-      prefectureCode,
-      // チェックボックス（初期 ON）。未送信は「公開しない」を選んだ状態。
-      prefecturePublic: raw.prefecturePublic === "on" || raw.prefecturePublic === true,
       standpoint,
     },
   };
@@ -179,8 +166,6 @@ export async function registerGeneralUser(
   const { error: profileError } = await admin.from("profiles").insert({
     user_id: user.id,
     handle: input.handle,
-    prefecture_code: input.prefectureCode,
-    prefecture_public: input.prefecturePublic,
     standpoint: input.standpoint,
   });
 

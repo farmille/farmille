@@ -171,7 +171,7 @@ export default async function HomePage() {
                   maker={material.manufacturer_name}
                   rating={material.avg_rating ?? 0}
                   reviewCount={material.review_count}
-                  official={material.seller_id !== null}
+                  official={material.manufacturer_verified_at !== null}
                   imageSrc={material.primaryImage?.url}
                   href={`/materials/${material.id}`}
                   preload={index === 0}

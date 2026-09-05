@@ -9,7 +9,6 @@ import {
   ReportCard,
 } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
-import { sellerTypeLabel } from "@/components/seller-type-label";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { listContentFeed, type ContentFeedFilter } from "@/server/queries/content-feed";
@@ -19,7 +18,7 @@ import { css } from "../../../styled-system/css";
 export async function generateMetadata(): Promise<Metadata> {
   return createPageMetadata({
     title: "記事を読む",
-    description: "農家の使用レポートとメーカー・JA・専門家の記事を探せます。",
+    description: "農家の使用レポートとメーカーの記事を探せます。",
     path: "/articles",
   });
 }
@@ -151,7 +150,7 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
                     key={`article-${item.id}`}
                     title={item.title}
                     organization={item.organization}
-                    typeLabel={sellerTypeLabel(item.sellerType)}
+                    typeLabel="メーカー"
                     helpfulCount={item.helpfulCount}
                     viewCount={item.viewCount}
                     href={`/articles/${item.id}`}

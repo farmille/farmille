@@ -1,15 +1,16 @@
 import { expect, test } from "@playwright/test";
 
-import { createGeneralUser, deleteAuthUsersByEmail, listSeedMaterials } from "./support/test-data";
+import {
+  createGeneralUser,
+  createMaterial,
+  deleteAuthUsersByEmail,
+  deleteMaterial,
+} from "./support/test-data";
 import { loginGeneral } from "./support/ui";
 
 test("検討リスト保存、マイページ一覧、比較表", async ({ page }) => {
   const user = await createGeneralUser("saved");
-  const materials = (await listSeedMaterials()).slice(0, 2);
-
-  if (materials.length !== 2) {
-    throw new Error("比較テスト用のシード資材が不足しています。");
-  }
+  const materials = await Promise.all([createMaterial("saved-a"), createMaterial("saved-b")]);
 
   try {
     await loginGeneral(page, user);
@@ -35,5 +36,8 @@ test("検討リスト保存、マイページ一覧、比較表", async ({ page 
     }
   } finally {
     await deleteAuthUsersByEmail(user.email);
+    for (const material of materials) {
+      await deleteMaterial(material.id);
+    }
   }
 });

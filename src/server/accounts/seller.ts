@@ -2,14 +2,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { EMAIL_PATTERN } from "@/lib/auth/account-rules";
 import { isRegionScope } from "@/lib/region-scopes";
-import { isSellerType, type SellerType } from "@/lib/seller-types";
 import { trimmedFormDataString } from "@/lib/validation";
 import { toErrorCode } from "@/server/accounts/auth-errors";
 import { fail, succeed, type Result } from "@/server/result";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
-/** 出品者の共有ログインに使う合成メールのドメイン（01 §4）。クライアントには出さない。 */
+/** メーカーの共有ログインに使う合成メールのドメイン（01 §4）。クライアントには出さない。 */
 export const SELLER_EMAIL_DOMAIN = "sellers.farmille.internal";
 
 // seller_accounts.login_id の CHECK 制約（migration 20260726121216）と同じ形。
@@ -27,7 +26,6 @@ export type SellerSignInResult = {
 
 export type SellerApplyInput = {
   officialName: string;
-  sellerType: SellerType;
   loginId: string;
   contactEmail: string;
   contactName: string;
@@ -40,7 +38,6 @@ export type SellerApplyInput = {
 export type SellerApplyFieldErrors = Partial<
   Record<
     | "officialName"
-    | "sellerType"
     | "loginId"
     | "contactEmail"
     | "contactName"
@@ -89,11 +86,10 @@ function normalizeWebsiteUrl(raw: string): { ok: true; value: string | null } | 
 }
 
 /**
- * 出品者申請フォームの入力検証（パスワードは扱わない。承認時に発行＝T-44）。
+ * メーカー申請フォームの入力検証（パスワードは扱わない。承認時に発行＝T-44）。
  */
 export function validateSellerApply(raw: {
   officialName: FormDataEntryValue | null;
-  sellerType: FormDataEntryValue | null;
   loginId: FormDataEntryValue | null;
   contactEmail: FormDataEntryValue | null;
   contactName: FormDataEntryValue | null;
@@ -109,12 +105,6 @@ export function validateSellerApply(raw: {
     fieldErrors.officialName = "正式名称を入力してください。";
   } else if (officialName.length > OFFICIAL_NAME_MAX) {
     fieldErrors.officialName = `正式名称は${OFFICIAL_NAME_MAX}文字以内で入力してください。`;
-  }
-
-  const sellerTypeRaw = trimmedFormDataString(raw.sellerType);
-  const sellerType = isSellerType(sellerTypeRaw) ? sellerTypeRaw : null;
-  if (sellerType === null) {
-    fieldErrors.sellerType = "種別を選択してください。";
   }
 
   const loginId = trimmedFormDataString(raw.loginId).toLowerCase();
@@ -162,7 +152,7 @@ export function validateSellerApply(raw: {
     fieldErrors.inviteCode = `招待コードは${INVITE_CODE_MAX}文字以内で入力してください。`;
   }
 
-  if (Object.keys(fieldErrors).length > 0 || sellerType === null) {
+  if (Object.keys(fieldErrors).length > 0) {
     return { ok: false, fieldErrors };
   }
 
@@ -170,7 +160,6 @@ export function validateSellerApply(raw: {
     ok: true,
     input: {
       officialName,
-      sellerType,
       loginId,
       contactEmail,
       contactName,
@@ -231,7 +220,7 @@ async function resolveInviteCode(
 }
 
 /**
- * 出品者申請（02 §2 `/sellers/apply`）。
+ * メーカー申請（02 §2 `/sellers/apply`）。
  * Auth ユーザーは作らない。status=applied で INSERT し、承認は T-44。
  */
 export async function applySellerAccount(
@@ -255,7 +244,6 @@ export async function applySellerAccount(
   const supabase = await createServerSupabase();
   const { error } = await supabase.from("seller_accounts").insert({
     official_name: input.officialName,
-    seller_type: input.sellerType,
     login_id: input.loginId,
     contact_email: input.contactEmail,
     contact_name: input.contactName,
@@ -281,7 +269,7 @@ export async function applySellerAccount(
 }
 
 /**
- * 出品者ログイン（02 §2 `/sellers/login`）。
+ * メーカーログイン（02 §2 `/sellers/login`）。
  * ログイン ID → seller_accounts（approved かつ共有ログイン発行済み）→ 合成メールで認証。
  * どの段階で落ちても同じエラーコードを返し、ID とパスワードのどちらが誤りかを推測させない。
  */

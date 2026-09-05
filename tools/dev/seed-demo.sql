@@ -8,19 +8,19 @@
 --
 -- 何度実行しても同じ状態になる（既にあれば作らない）。
 -- 補うもの:
---   - 審査待ちの出品者申請 1件（/admin/sellers）
+--   - 審査待ちのメーカー申請 1件（/admin/sellers）
 --   - 編集局待ちの使用レポート 1件（/admin/usage-reports）
 --   - 未処理の通報 1件（/admin/reports）
 
 begin;
 
--- 1. 審査待ちの出品者申請
+-- 1. 審査待ちのメーカー申請
 insert into seller_accounts (
-  official_name, seller_type, login_id, contact_email, contact_name,
+  official_name, login_id, contact_email, contact_name,
   location, region_scope, website_url, profile_text, status
 )
 select
-  'デモ農材工業株式会社', 'maker', 'demo-applicant',
+  'デモ農材工業株式会社', 'demo-applicant',
   'apply@example.com', '申請 太郎',
   '静岡県静岡市', '全国', 'https://example.com',
   '審査画面の確認用に用意した申請です。', 'applied'

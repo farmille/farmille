@@ -146,7 +146,7 @@ export const SubmitError: Story = {
 
 export const LongTitle: Story = {
   args: {
-    title: "出品者アカウントの新規申請（法人・個人事業主向け）",
-    lead: "出品者アカウントは審査制です。承認までに2〜3営業日かかります。",
+    title: "メーカーアカウントの新規申請",
+    lead: "メーカーアカウントは審査制です。承認までに2〜3営業日かかります。",
   },
 };

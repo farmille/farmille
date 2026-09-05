@@ -12,7 +12,6 @@ import {
   TextLink,
   buttonRecipe,
   formatDateJa,
-  sellerTypeLabel,
 } from "@/components";
 import { SellerAccessDenied } from "./_components/AccessDenied";
 import { requireSeller } from "@/server/auth";
@@ -34,7 +33,7 @@ const itemStack = css({
 function checkedExternalUrl(value: string): string {
   const url = new URL(value);
   if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw new Error("出品者の公式サイトURLはHTTPまたはHTTPSで指定してください。");
+    throw new Error("メーカーの公式サイトURLはHTTPまたはHTTPSで指定してください。");
   }
 
   return url.toString();
@@ -54,21 +53,20 @@ export default async function DashboardPage() {
   const result = await getSellerDashboardData(session.data.sellerId);
   if (!result.ok) {
     if (result.error === "forbidden") return <SellerAccessDenied />;
-    throw new Error("出品者ダッシュボードの取得に失敗しました。");
+    throw new Error("メーカーダッシュボードの取得に失敗しました。");
   }
 
   const { seller, materials } = result.data;
 
   return (
-    <FormPageShell chrome="seller" backHref="/" title="出品者ダッシュボード">
+    <FormPageShell chrome="seller" backHref="/" title="メーカーダッシュボード">
       <div className={pageStack}>
         <SurfaceCard
-          description={seller.profile_text ?? "組織情報は公開出品者ページにも表示されます。"}
+          description={seller.profile_text ?? "会社情報は公開メーカーページにも表示されます。"}
           title={seller.official_name}
         >
           <DataList
             rows={[
-              { label: "種別", value: sellerTypeLabel(seller.seller_type) },
               { label: "所在地", value: seller.location },
               { label: "対応地域", value: seller.region_scope },
               {
@@ -108,13 +106,22 @@ export default async function DashboardPage() {
           />
         </SurfaceCard>
 
+        <SurfaceCard
+          description="資材の新規登録、情報変更、掲載終了、承認状況の確認を行います。"
+          title="資材管理"
+        >
+          <Link className={buttonRecipe()} href="/dashboard/materials">
+            資材管理を開く
+          </Link>
+        </SurfaceCard>
+
         <section aria-label="自社資材">
           <SectionHeading first title="自社資材" />
           {materials.length === 0 ? (
             <SurfaceCard>
               <EmptyState
-                title="claim済みの資材はありません"
-                description="資材の掲載を希望する場合は運営にご連絡ください"
+                title="公開中の自社資材はありません"
+                description="資材管理から新規登録を申請できます"
               />
             </SurfaceCard>
           ) : (
@@ -123,10 +130,14 @@ export default async function DashboardPage() {
                 <MaterialRefCard
                   avgRating={material.avg_rating}
                   href={`/dashboard/materials/${material.id}`}
-                  isOfficial
+                  isOfficial={material.manufacturer_verified_at !== null}
                   key={material.id}
                   manufacturerName={material.manufacturer_name}
-                  name={material.name}
+                  name={
+                    material.publication_status === "archived"
+                      ? `${material.name}（掲載終了）`
+                      : material.name
+                  }
                 />
               ))}
             </div>

@@ -31,7 +31,7 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
   const material = await loadMaterialOrNotFound(id);
   const [reviewResult, cropsResult] = await Promise.all([
     getReviewForEdit(id, reviewId, session.data.userId),
-    listReviewCropOptions(session.data.userId),
+    listReviewCropOptions(),
   ]);
 
   if (!reviewResult.ok) {

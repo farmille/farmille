@@ -28,7 +28,7 @@ describe("isProtectedPath", () => {
 });
 
 describe("loginPathFor", () => {
-  it("出品者ダッシュボードは出品者ログインへ、その他は一般ログインへ送る", () => {
+  it("メーカーダッシュボードはメーカーログインへ、その他は一般ログインへ送る", () => {
     expect(loginPathFor("/dashboard")).toBe("/sellers/login");
     expect(loginPathFor("/dashboard/materials/abc")).toBe("/sellers/login");
     expect(loginPathFor("/me")).toBe("/login");

@@ -11,15 +11,12 @@ import {
   formActionsStyle,
   HintBox,
   linkRowStyle,
-  NoteBox,
   RadioCards,
-  SwitchToggle,
   textLinkStyle,
 } from "@/components/auth/Fields";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { HANDLE_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
-import { PREFECTURES } from "@/lib/prefectures";
 import { STANDPOINTS } from "@/lib/standpoints";
 
 export function SignupForm() {
@@ -89,44 +86,12 @@ export function SignupForm() {
       </Field>
 
       <Field
-        error={fieldErrors.prefectureCode}
-        htmlFor="prefectureCode"
-        label="都道府県"
+        error={fieldErrors.standpoint}
+        guide="この情報は公開プロフィールや投稿には表示されません。"
+        label="あなたの立場"
         requirement="required"
       >
-        <select
-          className={controlStyle}
-          defaultValue={values.prefectureCode ?? ""}
-          id="prefectureCode"
-          name="prefectureCode"
-          required
-        >
-          <option disabled value="">
-            選択してください
-          </option>
-          {PREFECTURES.map((prefecture) => (
-            <option key={prefecture.code} value={prefecture.code}>
-              {prefecture.name}
-            </option>
-          ))}
-        </select>
-        <SwitchToggle
-          defaultChecked={state.status === "error" ? values.prefecturePublic === "on" : true}
-          label="プロフィールに公開する"
-          name="prefecturePublic"
-        />
-      </Field>
-
-      <Field error={fieldErrors.standpoint} label="あなたの立場" requirement="required">
         <RadioCards defaultValue={values.standpoint} name="standpoint" options={STANDPOINTS} />
-        <NoteBox>
-          この情報は公開されません。メーカー関係者を選んでも、作成されるのは個人用アカウントです。
-          組織用アカウントは
-          <Link className={textLinkStyle} href="/sellers/apply">
-            メーカー・出品者申請
-          </Link>
-          をご利用ください。
-        </NoteBox>
       </Field>
 
       <Field label="アイコン画像" requirement="optional">

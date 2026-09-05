@@ -18,7 +18,7 @@ export const ERROR_CODES = [
   "expired_link",
   // 通報（T-34）
   "already_reported",
-  // 出品者申請（T-41）
+  // メーカー申請（T-41）
   "login_id_taken",
   "invalid_invite_code",
 ] as const;
@@ -50,12 +50,8 @@ export const errorMessageJa = {
   invalid_invite_code: "招待コードが正しくありません。",
 } satisfies Record<ErrorCode, string>;
 
-/** 出品者ダッシュボードの Server Action が返す成功文言。 */
+/** メーカーダッシュボードの Server Action が返す成功文言。 */
 export const sellerDashboardMessageJa = {
-  primaryInformationSaved: "一次情報を保存しました。",
-  evidenceAdded: "エビデンスを追加しました。",
-  evidenceDeleted: "エビデンスを削除しました。",
-  editRequestSubmitted: "分類変更を申請しました。",
   articleDraftSaved: "下書きを保存しました。",
   articlePublished: "記事を公開しました。",
   articleUnpublished: "記事を非公開にしました。",

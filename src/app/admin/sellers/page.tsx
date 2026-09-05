@@ -5,7 +5,7 @@ import { AdminShell } from "@/app/admin/_components/AdminShell";
 import { Panel } from "@/app/admin/_components/AdminUI";
 import { QueryFilter } from "@/app/admin/_components/QueryFilter";
 import { requireAdminPage } from "@/app/admin/_lib/access";
-import { DataTable, formatDateJa, sellerTypeLabel, type DataTableColumn } from "@/components";
+import { DataTable, formatDateJa, type DataTableColumn } from "@/components";
 import {
   isSellerStatus,
   listSellers,
@@ -17,7 +17,7 @@ import { errorMessageJa } from "@/server/errors";
 import { css } from "../../../../styled-system/css";
 
 export const metadata: Metadata = {
-  title: "出品者審査",
+  title: "メーカー審査",
 };
 
 const linkStyle = css({
@@ -45,7 +45,6 @@ const columns: DataTableColumn<SellerListItem>[] = [
       </Link>
     ),
   },
-  { key: "seller_type", header: "種別", cell: (row) => sellerTypeLabel(row.seller_type) },
   { key: "login_id", header: "ログインID", cell: (row) => row.login_id },
   {
     key: "status",
@@ -79,8 +78,8 @@ export default async function AdminSellersPage({
     <AdminShell
       backHref="/admin"
       backLabel="← 運営管理ホーム"
-      description="出品者申請を確認し、承認したアカウントに共有ログインを発行します。"
-      title="出品者審査"
+      description="メーカー申請を確認し、承認したアカウントに共有ログインを発行します。"
+      title="メーカー審査"
     >
       <Panel note={`${sellers.data.length} 件`} title="申請・アカウント一覧">
         <div className={css({ mb: "3" })}>
@@ -96,7 +95,7 @@ export default async function AdminSellersPage({
           emptyMessage={
             selected === "applied"
               ? "審査中の申請はありません。"
-              : "この状態の出品者アカウントはありません。"
+              : "この状態のメーカーアカウントはありません。"
           }
           rowKey={(row) => row.id}
           rows={sellers.data}

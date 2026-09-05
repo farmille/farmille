@@ -5,7 +5,7 @@ export type AdminSummary = {
   appliedSellerCount: number;
   openReportCount: number;
   pendingUsageReportCount: number;
-  openEditRequestCount: number;
+  pendingMaterialChangeCount: number;
 };
 
 /** `/admin` トップのサマリー。件数だけを数える（head: true で行は転送しない）。 */
@@ -16,7 +16,7 @@ export async function getAdminSummary(): Promise<Result<AdminSummary>> {
       supabase.from("seller_accounts").select("id", countOf).eq("status", "applied"),
       supabase.from("content_reports").select("id", countOf).eq("status", "open"),
       supabase.from("usage_reports").select("id", countOf).eq("status", "pending"),
-      supabase.from("material_edit_requests").select("id", countOf).eq("status", "open"),
+      supabase.from("material_change_requests").select("id", countOf).eq("status", "pending"),
     ]);
 
     const failed = sellers.error ?? reports.error ?? usageReports.error ?? editRequests.error;
@@ -30,7 +30,7 @@ export async function getAdminSummary(): Promise<Result<AdminSummary>> {
       appliedSellerCount: sellers.count ?? 0,
       openReportCount: reports.count ?? 0,
       pendingUsageReportCount: usageReports.count ?? 0,
-      openEditRequestCount: editRequests.count ?? 0,
+      pendingMaterialChangeCount: editRequests.count ?? 0,
     });
   });
 }

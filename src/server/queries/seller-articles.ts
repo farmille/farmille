@@ -137,6 +137,7 @@ export async function searchMaterialsForArticleLink(
   const { data, error } = await supabase
     .from("materials")
     .select("id, name, manufacturer_name")
+    .eq("publication_status", "published")
     .or(`name.ilike.%${safe}%,manufacturer_name.ilike.%${safe}%`)
     .order("name", { ascending: true })
     .order("id", { ascending: true })

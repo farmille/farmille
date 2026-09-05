@@ -1,12 +1,13 @@
 # 01 ドメインモデル・DB 設計
 
-前提：[00-overview.md](00-overview.md) の決定事項 D1・D3・D5〜D8。DB は Supabase（PostgreSQL）。migration は SQL（`supabase/migrations/` を全面リセットして v2 系を新規作成）。適用済み migration の編集は禁止、修正は常に新規ファイルで行う。
+前提：[00-overview.md](00-overview.md) の決定事項 D1・D3・D6〜D8・D15〜D17。DB は Supabase（PostgreSQL）。migration は SQL（`supabase/migrations/` を全面リセットして v2 系を新規作成）。適用済み migration の編集は禁止、修正は常に新規ファイルで行う。
 
 ## 1. オブジェクトの全体像
 
-OOUI の結論を踏襲する：**資材＝情報の倉庫（全関係のハブ）**。供給は2系統（一般ユーザーの投稿＝匿名の本音、出品者の一次情報＝実名の公式）で、分類・検索層だけは Farmille が所有して中立性を構造に埋め込む。
+OOUI の結論を踏襲する：**資材＝情報の倉庫（全関係のハブ）**。供給は2系統（一般ユーザーの投稿＝匿名の本音、メーカーの一次情報＝実名の公式）で、分類・検索層だけは Farmille が所有して中立性を構造に埋め込む。
 
-- メインオブジェクト：資材・レビュー・使用レポート・ユーザー（一般／出品者）
+- メインオブジェクト：資材・レビュー・使用レポート・一般ユーザー・メーカー
+- 付随する取引オブジェクト：資材変更申請（メーカーの追加・変更・掲載終了を運営が審査する履歴）
 - コレクション：検討リスト（保存した資材）・参考になったの一覧
 - 分類：効果・対象作物・材料・組成タイプ・製品タイプの各マスタと、悩み・栽培条件の検索タグ（Farmille 所有）
 - Phase 2 スキーマ先行：質問・回答
@@ -14,7 +15,7 @@ OOUI の結論を踏襲する：**資材＝情報の倉庫（全関係のハブ�
 
 ## 2. ER 図
 
-> 本節の図は概念設計時の簡略版。**実装準拠の完全な ER 図（全26テーブル・全列）は [06-diagrams.md](06-diagrams.md) §1** を参照。
+> 本節の図は概念設計時の簡略版。**実装準拠の完全な ER 図は [06-diagrams.md](06-diagrams.md) §1** を参照。
 
 ```mermaid
 erDiagram
@@ -26,9 +27,8 @@ erDiagram
     profiles ||--o{ saved_materials : "保存"
     profiles ||--o{ helpful_votes : "押下"
     profiles ||--o{ content_reports : "通報"
-    profiles }o--o{ crops : "主な作目(profile_crops)"
-
     seller_accounts ||--o{ materials : "claim済み資材"
+    seller_accounts ||--o{ material_change_requests : "提出"
     seller_accounts ||--o{ articles : "記事投稿"
 
     materials ||--o{ reviews : "対象"
@@ -36,6 +36,7 @@ erDiagram
     materials ||--o{ material_images : ""
     materials ||--o{ material_evidences : "SDS/論文/チラシ"
     materials ||--o{ material_sources : "出典"
+    materials ||--o{ material_change_requests : "対象"
     materials }o--o{ effects : "効果(material_effects)"
     effects }o--|| effect_categories : "大分類"
     materials }o--o{ crops : "対象作物(material_crops)"
@@ -49,6 +50,8 @@ erDiagram
     materials ||--o{ saved_materials : "保存される"
     materials ||--o{ questions : "Phase2"
 
+    reviews ||--|| review_crops : "対象作目1件"
+    crops ||--o{ review_crops : "選択される"
     reviews ||--o{ review_photos : ""
     usage_reports ||--o{ usage_report_media : "写真/動画"
     usage_reports ||--o{ usage_report_metrics : "収穫調査"
@@ -67,20 +70,14 @@ erDiagram
 **profiles**（一般ユーザー。auth.users と 1:1）
 - `user_id` uuid PK・FK → auth.users
 - `handle` text NOT NULL UNIQUE（ハンドルネーム）
-- `prefecture_code` smallint NOT NULL（JIS X 0401。1〜47）
-- `prefecture_public` boolean NOT NULL default true
-- `standpoint` text NOT NULL CHECK IN ('farmer','ja','maker_related','expert','other')（立場。**内部専用・どの画面にも表示しない**。信頼スコア・ステマ検知用）
+- `standpoint` text NOT NULL CHECK IN ('farmer','ja','expert','other')。登録時に必須で収集する内部属性。公開ビューや投稿には出さない
 - `avatar_url` text NULL
-- `bio` text NULL（一言プロフィール）
-- `cultivation_styles` text[] NULL（栽培形態。'施設園芸' 等の選択式）
-- `affiliation` text NULL（所属団体名。D5：プロフィール画面のみ表示・投稿カードには出さない）
-- `website_url` text NULL・`sns_url` text NULL（モック準拠の外部リンク・任意）
-- 主な作目は `profile_crops`（user_id, crop_id）の m2m
+- `created_at`・`updated_at`
+- D16 により、地域・主な作目・栽培形態・所属・一言・外部リンクは保持しない。`profile_crops` も廃止する
 
-**seller_accounts**（出品者組織。申請〜承認〜運用を1テーブルの status で管理）
+**seller_accounts**（メーカーアカウント。申請〜承認〜運用を1テーブルの status で管理）
 - `auth_user_id` uuid NULL UNIQUE FK → auth.users（承認時に共有ログインを発行して紐付け。申請中は NULL）
-- `official_name` text NOT NULL（正式名称）
-- `seller_type` text NOT NULL CHECK IN ('maker','ja','farm_corp','expert','other')
+- `official_name` text NOT NULL（メーカーの正式名称）
 - `login_id` text NOT NULL UNIQUE（表示・管理用。認証は合成メール方式 → §5）
 - `contact_email` text NOT NULL（内部のみ）・`contact_name` text NOT NULL（内部のみ）
 - `location` text NOT NULL（本社・主な拠点）
@@ -93,15 +90,31 @@ erDiagram
 
 **materials**
 - 分類・検索層（**Farmille のみ編集可**）：`name`・`manufacturer_name` text NOT NULL（マスタ由来の表示名。未 claim でも表示する）・`sales_status`・`composition_type_id`、および効果・対象作物・材料分類・個別材料・製品タイプ・検索タグの各関連テーブル
-- 一次情報層（**claim 済み出品者が編集可**）：`description`（紹介文）・`general_use`（一般用途）・`main_components`（主な成分の原文）・`mechanism`（作用機序）・`usage_text`（使い方）・`price_range`・`official_url`・`catalog_url`
-- 状態：`seller_id` uuid NULL FK → seller_accounts（NULL＝未 claim。値あり＝claim 済み）
+- 一次情報層：`description`（紹介文）・`general_use`（一般用途）・`main_components`（主な成分の原文）・`mechanism`（作用機序）・`usage_text`（使い方）・`price_range`・`official_url`・`catalog_url`。メーカーは正本を直接更新せず、`material_change_requests` の承認を介して反映する
+- 所有関係：`seller_id` uuid NULL FK → seller_accounts（NULL＝未 claim。値あり＝自社資材として申請可能）。claim だけでは確認済みにならない
+- 掲載状態：`publication_status` CHECK IN ('published','archived') default 'published'・`archived_at`。掲載終了でもレビュー等を保持し、検索と新規投稿の対象から外す
+- 内容版：`content_revision` integer NOT NULL default 1。申請時点の版と承認時点の版を照合し、古い正本への変更を適用しない
+- メーカー確認状態：`manufacturer_verified_at`・`manufacturer_verified_by_seller_id`・`manufacturer_verification_method` CHECK IN ('confirmed_existing','submitted_create','submitted_update')。公開マークは `manufacturer_verified_at IS NOT NULL` を条件とする
 - 集計（トリガーまたはビューで自動）：`review_count`・`avg_rating`・`control_plot_ratio`（対照区ありレビュー率＝確からしさ指標）
-- 層の割当はこの表が正（監査 A-8 の解決）。「メーカー確認済み」バッジ＝ `seller_id IS NOT NULL`
+- 層の割当と承認境界はこの表および [08-material-governance-ooui.md](08-material-governance-ooui.md) が正
 
 **material_images**（`material_id`・`url`・`image_type`・`sort_order`）
-**material_evidences**（`material_id`・`evidence_type` CHECK IN ('sds','paper','trial','leaflet')・`title`・`file_url` または `external_url`・`meta`。一次情報層＝出品者編集可）
+**material_evidences**（`material_id`・`evidence_type` CHECK IN ('sds','paper','trial','leaflet')・`title`・`file_url` または `external_url`・`meta`。一次情報層＝メーカー編集可）
 **material_sources**（出典。現行 product_sources の思想を引き継ぐ：`material_id`・`source_url`・`source_type`・`note`）
-**material_edit_requests**（分類変更申請：`material_id`・`seller_id`・`request_text`・`status` CHECK IN ('open','done','declined')）
+
+**material_change_requests**（メーカーの資材変更申請）
+- `seller_id`・`material_id` NULL（追加申請では対象正本がまだ無い）・`result_material_id` NULL
+- `change_type` CHECK IN ('create','update','archive')
+- `status` CHECK IN ('pending','approved','rejected','cancelled')
+- `reason`・`base_content_revision`・`manufacturer_confirmed_at`
+- 審査：`reviewed_by`・`reviewed_at`・`review_note`
+- 同一資材の `pending` は1件だけ。メーカー本人は pending を取消可能
+
+**material_change_request_details**（追加・変更申請の資材スナップショット。資材の分類・一次情報カラムを正規化して保持）
+
+**material_change_request_crops**・**material_change_request_effects**・**material_change_request_ingredient_categories**・**material_change_request_ingredients**・**material_change_request_product_types**・**material_change_request_search_tags**（提案された分類関係）
+
+**material_change_request_evidences**（提案されたエビデンス全体。`source_evidence_id` で現行行との対応を保持し、追加・除外を差分表示できる）
 
 ### 分類（Farmille 所有）
 
@@ -122,7 +135,7 @@ erDiagram
 **reviews**
 - `material_id`・`author_user_id`（FK → profiles）
 - `rating` smallint NOT NULL CHECK 1〜5・`body` text NOT NULL
-- **review_crops**（`review_id`・`crop_id`・`sort_order`・UNIQUE(review_id, crop_id)）。作目は1件以上必須で、1レビューに複数選択できる。親レビューと関連行は RPC で原子的に保存し、遅延制約トリガーでも0件を拒否する
+- **review_crops**（`review_id` UNIQUE・`crop_id`）。作目は1件必須で、1レビューにつき1作目だけを保存する。親レビューと関連行は RPC で原子的に保存し、遅延制約トリガーでも0件を拒否する
 - `has_control_plot` boolean NULL（対照区の有無。任意・確からしさ指標の分子）
 - `purchase_channel` text NULL CHECK IN ('ja','home_center','ec','direct','other')（D7：内部専用・非表示）
 - `pesticide_ack` boolean NOT NULL（農薬的効果を断定しない旨の同意。**false なら投稿不可**）
@@ -165,7 +178,7 @@ erDiagram
 ## 4. 認証設計
 
 - **一般ユーザー**：Supabase Auth のメール＋パスワード。`app_metadata.account_type = 'general'`
-- **出品者**：ログイン ID＋パスワード（メールと分離・MVP は組織共有）。実装は**合成メール方式**：`{login_id}@sellers.farmille.internal` を auth.users の email にして通常のパスワード認証を使う。ログイン画面は ID 入力を受け、Next.js のサーバー側（`src/server/`）で合成メールに変換する（クライアントに合成メールを露出しない）。`app_metadata.account_type = 'seller'`、`app_metadata.seller_id = <seller_accounts.id>`。承認処理（admin）がこの auth ユーザーを Admin API で作成する
+- **メーカー**：ログイン ID＋パスワード（メールと分離・MVP は会社共有）。実装は**合成メール方式**：`{login_id}@sellers.farmille.internal` を auth.users の email にして通常のパスワード認証を使う。ログイン画面は ID 入力を受け、Next.js のサーバー側（`src/server/`）で合成メールに変換する（クライアントに合成メールを露出しない）。内部識別子として `app_metadata.account_type = 'seller'`、`app_metadata.seller_id = <seller_accounts.id>` を維持する。承認処理（admin）がこの auth ユーザーを Admin API で作成する
 - **admin**：`app_metadata.account_type = 'admin'`。**AAL2（MFA/TOTP）必須**を旧設計から踏襲。admin 系画面・API は role と AAL の両方を検証する
 - Phase 2 のメンバー個別ログインに備え、権限判定はすべて `seller_id` 経由で行う（auth_user_id 直接参照を業務テーブルに持ち込まない）
 
@@ -175,10 +188,11 @@ erDiagram
 
 | テーブル | SELECT | INSERT | UPDATE / DELETE |
 |---|---|---|---|
-| profiles | 全員（standpoint・非公開 prefecture は**公開ビュー経由**でのみ読ませ、実テーブルは本人のみ） | 本人 | 本人 |
+| profiles | 全員（ハンドル・アバター・登録日時だけを**公開ビュー経由**で読ませ、実テーブルは本人と admin のみ） | 本人 | 本人 |
 | seller_accounts | 全員（approved のみ。contact_* は内部カラムのため公開ビューから除外） | anon（申請） | 本人（approved 後の profile 系カラムのみ）・admin |
-| materials | 全員 | admin | admin（全カラム）・claim 済み seller（一次情報層カラムのみ。**カラム分離はビュー＋RPC または列単位トリガーで強制**） |
-| material_evidences / images / sources | 全員 | seller（自社資材のみ）・admin | 同左 |
+| materials | 全員（掲載終了は直接URLから履歴を参照可） | admin | admin のみ。seller は資材変更申請RPCと確認RPCだけを実行 |
+| material_evidences / images / sources | 全員 | admin | admin。seller の追加・除外は資材変更申請の提案スナップショットへ保存 |
+| material_change_requests と提案子テーブル | 本人 seller・admin | seller（自社資材または新規追加） | seller は pending の取消だけ・admin は承認／却下 |
 | 分類マスタ・作物マスタ・資材との分類関連 | 全員 | admin | admin |
 | reviews | 全員（published のみ） | account_type='general' かつ本人 | 本人・admin |
 | usage_reports | published は全員・draft/pending は本人と admin | general かつ本人 | 本人（draft のみ）・admin（全状態） |
@@ -187,22 +201,26 @@ erDiagram
 | content_reports | admin と本人 | ログイン済み全員 | admin |
 | questions / answers | 全員 | （Phase 2 で解放。v1 は INSERT ポリシーなし＝deny） | 同左 |
 
-- 公開プロフィール・出品者ページは**ビューで公開カラムだけを晒す**。「収集する情報と表示する情報の分離」（要件定義の設計思想）を DB 層で保証する。実装上の確定（2026-07-26・T-11）：`public_profiles` は **security definer（invoker=false・SELECT のみ grant）**。invoker だと「実テーブルは本人のみ」と「公開カラムを全員に」が両立しないため、standpoint・非公開 prefecture の秘匿を優先した。`public_sellers` は invoker=true＋contact_* のカラム権限剥奪で両立
+- 一般ユーザーページ・メーカーページは**ビューで公開カラムだけを返す**。`public_profiles` は security definer（invoker=false・SELECT のみ grant）で、ハンドル・アバター・登録日時以外を返さない。`public_sellers` は invoker=true＋contact_* のカラム権限剥奪で内部情報を守る
 - 第一防御（Next.js のサーバー側・`src/server/`）はこの表と同じ判定をアプリ層でも行う。RLS はあくまで保険
 
 ## 6. 状態遷移
 
-**資材 claim**：`未claim（seller_id NULL）` →（出品者が申し出・運営が確認＝admin 操作）→ `claim済み`。v1 の claim 成立処理は admin 画面から手動で行う（自動ハンドシェイクは作らない）
+**資材 claim**：`未claim（seller_id NULL）` →（メーカーが申し出・運営が確認＝admin 操作）→ `claim済み`。claim は自社資材として申請できる所有関係であり、「メーカー確認済み」とは別状態にする
+
+**資材変更申請**：メーカー提出で `pending` → 運営が `approved` ／ `rejected`。提出メーカーは pending を `cancelled` にできる。追加・変更・エビデンス変更は承認RPCで正本・分類・エビデンスを原子的に反映する。掲載終了の承認は資材を `archived` にし、物理削除しない
+
+**メーカー確認**：claim済みメーカーが「掲載内容を確認」を実行、または追加・変更申請を提出すると資材単位の確認事実を記録する。追加申請は承認によって資材正本が作られた時点からマークを表示する。claim の紐づけだけでは確認済みにしない
 
 **使用レポート**：`draft`（本人編集可）→ 提出 → `pending`（編集局が調整。本人は閲覧のみ）→ `published` ／ `declined`。レビューは即時公開なので状態を持たない（`published`/`hidden` のみ）
 
-**出品者アカウント**：`applied` →（審査）→ `approved`（共有ログイン発行）／ `rejected`。運用中の凍結は `suspended`
+**メーカーアカウント**：`applied` →（審査）→ `approved`（共有ログイン発行）／ `rejected`。運用中の凍結は `suspended`
 
 ## 7. 信頼スコアのための初期フック（不可視・算出は Phase 2）
 
 要件定義の調査結論（食べログ型の不可視影響度を初期から DB に仕込む）に対応する収集項目：
 
-- `profiles.standpoint`（立場・非表示）・`profiles.created_at`（新規アカウントの票を効かせない判定用）
+- `profiles.created_at`（新規アカウントの票を効かせない判定用）
 - `reviews.purchase_channel`・`reviews.has_control_plot`・`reviews.is_provided_sample`
 - `helpful_votes` の個票（誰が押したか）・`view_events` の生ログ
 - 算出式・重み付けは v1 では実装しない。集計はすべて生データから再計算可能な形で持つ

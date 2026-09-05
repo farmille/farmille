@@ -148,7 +148,7 @@ type UsageReportDetailQueryRow = UsageReportRow & {
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<
     MaterialRow,
-    "id" | "name" | "manufacturer_name" | "seller_id" | "avg_rating"
+    "id" | "name" | "manufacturer_name" | "manufacturer_verified_at" | "avg_rating"
   > | null;
   media: Pick<MediaRow, "id" | "url" | "media_type" | "caption" | "placement" | "sort_order">[];
   applications: Pick<ApplicationRow, "id" | "applied_on" | "method" | "detail" | "sort_order">[];
@@ -301,7 +301,7 @@ export async function getPublishedUsageReport(
         id,
         name,
         manufacturer_name,
-        seller_id,
+        manufacturer_verified_at,
         avg_rating
       ),
       media:usage_report_media (
@@ -412,7 +412,7 @@ export async function getPublishedUsageReport(
       id: row.material.id,
       name: row.material.name,
       manufacturerName: row.material.manufacturer_name,
-      isOfficial: row.material.seller_id !== null,
+      isOfficial: row.material.manufacturer_verified_at !== null,
       avgRating: row.material.avg_rating,
     },
     media,

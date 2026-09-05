@@ -14,7 +14,6 @@ import { SubmitButton } from "@/components/auth/SubmitButton";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 import { PREFECTURES } from "@/lib/prefectures";
 import { REGION_BLOCKS } from "@/lib/region-scopes";
-import { SELLER_TYPES } from "@/lib/seller-types";
 import { css } from "../../../../styled-system/css";
 
 const inviteToggleRow = css({
@@ -48,8 +47,7 @@ export function SellerApplyForm() {
   const [inviteOpen, setInviteOpen] = useState(hadInvite);
 
   // エラー後の再表示で select の defaultValue を効かせるため、送信値ごとに form を載せ替える。
-  const formKey =
-    state.status === "error" ? `error:${values.loginId ?? ""}:${values.sellerType ?? ""}` : "idle";
+  const formKey = state.status === "error" ? `error:${values.loginId ?? ""}` : "idle";
 
   return (
     <form action={formAction} key={formKey} noValidate>
@@ -58,7 +56,7 @@ export function SellerApplyForm() {
       <Field
         error={fieldErrors.officialName}
         htmlFor="officialName"
-        label="正式名称（法人名・組織名）"
+        label="メーカー名（法人名）"
         requirement="required"
       >
         <input
@@ -71,30 +69,6 @@ export function SellerApplyForm() {
           required
           type="text"
         />
-      </Field>
-
-      <Field
-        error={fieldErrors.sellerType}
-        htmlFor="sellerType"
-        label="種別"
-        requirement="required"
-      >
-        <select
-          className={controlStyle}
-          defaultValue={values.sellerType ?? ""}
-          id="sellerType"
-          name="sellerType"
-          required
-        >
-          <option disabled value="">
-            選択してください
-          </option>
-          {SELLER_TYPES.map((entry) => (
-            <option key={entry.value} value={entry.value}>
-              {entry.label}
-            </option>
-          ))}
-        </select>
       </Field>
 
       <Field

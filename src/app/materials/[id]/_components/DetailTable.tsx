@@ -57,7 +57,9 @@ export function MaterialDetailTable({ material }: { material: MaterialDetail }) 
         >
           資材詳細
         </h2>
-        {material.seller_id ? <Badge variant="official">メーカー確認済み</Badge> : null}
+        {material.manufacturer_verified_at !== null ? (
+          <Badge variant="official">メーカー確認済み</Badge>
+        ) : null}
       </div>
       <dl className={tableCard}>
         {rows.map((row, index) => (

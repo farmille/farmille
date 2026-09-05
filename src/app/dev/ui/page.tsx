@@ -237,7 +237,11 @@ export default function UiKitPage() {
             helpfulCount={18}
             viewCount={320}
           />
-          <ArtMini title="JA 管内での導入事例まとめ" organization="〇〇JA" typeLabel="JA" />
+          <ArtMini
+            title="露地栽培での導入事例まとめ"
+            organization="〇〇バイオ株式会社"
+            typeLabel="メーカー"
+          />
         </div>
       </section>
 

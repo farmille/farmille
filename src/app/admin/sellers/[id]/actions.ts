@@ -23,7 +23,7 @@ function isSellerOperation(value: string | null): value is SellerOperation {
 /** 状態遷移の競合（すでに承認済み・却下済み等）は conflict で返る。 */
 function sellerErrorMessage(code: ErrorCode): string {
   if (code === "conflict") {
-    return "この出品者はすでに別の状態へ変わっています。画面を再読み込みして確認してください。";
+    return "このメーカーはすでに別の状態へ変わっています。画面を再読み込みして確認してください。";
   }
 
   return errorMessageJa[code];
@@ -99,7 +99,7 @@ async function runSellerOperation(
     return result.ok
       ? {
           ok: true,
-          state: { status: "done", message: "凍結しました。出品者ログインはできなくなります。" },
+          state: { status: "done", message: "凍結しました。メーカーログインはできなくなります。" },
         }
       : { ok: false, error: result.error };
   }

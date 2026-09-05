@@ -2,19 +2,16 @@ import { expect, test } from "@playwright/test";
 
 import {
   createGeneralUser,
+  createMaterial,
   deleteAuthUsersByEmail,
-  listSeedMaterials,
+  deleteMaterial,
   usageReportByAuthor,
 } from "./support/test-data";
 import { fillUsageReportForSubmission, loginGeneral } from "./support/ui";
 
 test("使用レポートの下書き保存、提出、pending の公開側 404", async ({ page }) => {
   const user = await createGeneralUser("usage");
-  const material = (await listSeedMaterials())[1];
-
-  if (material === undefined) {
-    throw new Error("使用レポート対象のシード資材が見つかりません。");
-  }
+  const material = await createMaterial("usage");
 
   const reportPath = `/materials/${material.id}/report/new`;
 
@@ -48,5 +45,6 @@ test("使用レポートの下書き保存、提出、pending の公開側 404",
     await expect(page.getByRole("heading", { name: "ページが見つかりません" })).toBeVisible();
   } finally {
     await deleteAuthUsersByEmail(user.email);
+    await deleteMaterial(material.id);
   }
 });

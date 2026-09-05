@@ -12,7 +12,7 @@ type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
 type SellerMaterialQueryRow = Pick<
   MaterialRow,
-  "id" | "name" | "manufacturer_name" | "avg_rating" | "review_count"
+  "id" | "name" | "manufacturer_name" | "avg_rating" | "review_count" | "manufacturer_verified_at"
 > & {
   material_images: Pick<MaterialImageRow, "id" | "url" | "sort_order">[];
 };
@@ -23,7 +23,6 @@ export type PublicSellerPageData = {
   seller: {
     id: string;
     officialName: string;
-    sellerType: string;
     regionScope: string;
     websiteUrl: string | null;
     logoUrl: string | null;
@@ -36,6 +35,7 @@ export type PublicSellerPageData = {
     manufacturerName: string;
     averageRating: number | null;
     reviewCount: number;
+    manufacturerVerified: boolean;
     imageUrl: string | null;
   }>;
   helpfulCount: number;
@@ -95,17 +95,17 @@ async function getArticleHelpfulCount(
   return succeed(total);
 }
 
-/** 承認済み出品者の公開ページに必要な情報だけを取得する。 */
+/** 承認済みメーカーの公開ページに必要な情報だけを取得する。 */
 export async function getPublicSellerPage(id: string): Promise<Result<PublicSellerPageData>> {
   const supabase = await createServerSupabase();
   const { data: sellerData, error: sellerError } = await supabase
     .from("public_sellers")
-    .select("id, official_name, seller_type, region_scope, website_url, logo_url, profile_text")
+    .select("id, official_name, region_scope, website_url, logo_url, profile_text")
     .eq("id", id)
     .maybeSingle();
 
   if (sellerError !== null) {
-    reportQueryError("公開出品者の取得に失敗", sellerError);
+    reportQueryError("公開メーカーの取得に失敗", sellerError);
     return fail("internal");
   }
 
@@ -115,22 +115,11 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
 
   const seller: Pick<
     PublicSellerRow,
-    | "id"
-    | "official_name"
-    | "seller_type"
-    | "region_scope"
-    | "website_url"
-    | "logo_url"
-    | "profile_text"
+    "id" | "official_name" | "region_scope" | "website_url" | "logo_url" | "profile_text"
   > = sellerData;
 
-  if (
-    seller.id === null ||
-    seller.official_name === null ||
-    seller.seller_type === null ||
-    seller.region_scope === null
-  ) {
-    reportQueryError("公開出品者の必須項目が欠落", { id });
+  if (seller.id === null || seller.official_name === null || seller.region_scope === null) {
+    reportQueryError("公開メーカーの必須項目が欠落", { id });
     return fail("internal");
   }
 
@@ -144,6 +133,7 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
           manufacturer_name,
           avg_rating,
           review_count,
+          manufacturer_verified_at,
           material_images (
             id,
             url,
@@ -153,6 +143,7 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
         { count: "exact" },
       )
       .eq("seller_id", seller.id)
+      .eq("publication_status", "published")
       .order("review_count", { ascending: false })
       .order("id", { ascending: true })
       .limit(MATERIAL_PREVIEW_LIMIT),
@@ -211,7 +202,6 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
     seller: {
       id: seller.id,
       officialName: seller.official_name,
-      sellerType: seller.seller_type,
       regionScope: seller.region_scope,
       websiteUrl: seller.website_url,
       logoUrl: seller.logo_url,
@@ -224,6 +214,7 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
       manufacturerName: material.manufacturer_name,
       averageRating: material.avg_rating,
       reviewCount: material.review_count,
+      manufacturerVerified: material.manufacturer_verified_at !== null,
       imageUrl: images.toSorted(byImageOrder)[0]?.url ?? null,
     })),
     helpfulCount: helpfulCount.data,

@@ -61,7 +61,7 @@ export function LoginForm({ next }: { next: string | null }) {
           アカウントをお持ちでない方は登録方法を選ぶ
         </Link>
         <Link className={textLinkStyle} href="/sellers/login">
-          出品者の方のログイン
+          メーカーの方のログイン
         </Link>
       </div>
     </form>

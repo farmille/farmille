@@ -1,6 +1,6 @@
 # 06 図解 — ER 図・シーケンス図・画面遷移図
 
-生成元：`supabase/migrations/` 全15本と `src/` の実装（2026-08-24・ブランチ rebuild/m0）。設計書（01・02）の図は概念設計時の簡略版であり、**実装と食い違う場合は本書が正**。スキーマ・ルーティング・主要フローを変更する PR は本書の該当図も更新すること。
+生成元：`supabase/migrations/` 全21本と `src/` の実装（2026-09-04・ブランチ rebuild/m0）。設計の正は [01-domain-model.md](01-domain-model.md)、[02-screens.md](02-screens.md)、[08-material-governance-ooui.md](08-material-governance-ooui.md) とし、本書は実装全体を横断する図解として同期する。スキーマ・ルーティング・主要フローを変更する際は本書の該当図も更新する。
 
 GitHub 上でそのまま Mermaid がレンダリングされる。閲覧用のスタンドアロン版（同一ソースから生成）：https://claude.ai/code/artifact/cbd39abf-0d38-4b1e-92c5-38d943f1765f
 
@@ -12,7 +12,7 @@ GitHub 上でそのまま Mermaid がレンダリングされる。閲覧用の�
 
 ## 1. ER 図
 
-38 テーブル。読みやすさのため「全体俯瞰」＋ドメイン別 4 枚に分割する。列はすべて実物どおり（`created_at`／`updated_at` は全テーブルにあるため各図では省略）。点線＝ポリモーフィック参照（FK 制約なし・`target_type`＋`target_id`）。
+45 テーブル。読みやすさのため「全体俯瞰」＋ドメイン別 4 枚に分割する。`created_at`／`updated_at` は各図では省略する。点線はポリモーフィック参照（FK 制約なし・`target_type`＋`target_id`）を示す。
 
 ### 1.1 全体俯瞰
 
@@ -21,13 +21,11 @@ erDiagram
     auth_users ||--o| profiles : "一般ユーザー 1:1"
     auth_users ||--o| seller_accounts : "共有ログイン 1:0..1"
 
-    profiles ||--o{ profile_crops : ""
     crop_groups ||--o{ crops : ""
-    crops ||--o{ profile_crops : ""
 
     seller_accounts ||--o{ materials : "claim（NULL=未claim）"
     seller_accounts ||--o{ articles : "著者"
-    seller_accounts ||--o{ material_edit_requests : "申請"
+    seller_accounts ||--o{ material_change_requests : "申請"
 
     composition_types ||--o{ materials : "組成"
     materials ||--o{ material_effects : ""
@@ -47,7 +45,9 @@ erDiagram
     materials ||--o{ material_images : ""
     materials ||--o{ material_evidences : ""
     materials ||--o{ material_sources : ""
-    materials ||--o{ material_edit_requests : ""
+    materials ||--o{ material_change_requests : "対象"
+    material_change_requests ||--o| material_change_request_details : "提案内容"
+    material_change_requests ||--o{ material_change_request_evidences : "提案エビデンス"
     materials ||--o{ reviews : ""
     materials ||--o{ usage_reports : ""
     materials ||--o{ saved_materials : ""
@@ -59,7 +59,7 @@ erDiagram
     profiles ||--o{ saved_materials : "検討リスト"
     profiles ||--o{ helpful_votes : "参考になった"
     profiles ||--o{ content_reports : "通報"
-    reviews ||--|{ review_crops : "作目（1件以上）"
+    reviews ||--|| review_crops : "作目（1件）"
     crops ||--o{ review_crops : ""
     crops ||--o{ usage_reports : "作目"
 
@@ -87,21 +87,13 @@ erDiagram
     profiles {
         uuid user_id PK, FK "auth.users.id・CASCADE"
         text handle UK "1〜30文字"
-        smallint prefecture_code "NOT NULL・1〜47"
-        boolean prefecture_public "NOT NULL・default true"
-        text standpoint "NOT NULL・farmer/ja/maker_related/expert/other・内部専用"
         text avatar_url
-        text bio
-        text_array cultivation_styles
-        text affiliation "所属バッジ・任意"
-        text website_url
-        text sns_url
+        text standpoint "内部専用・farmer/ja/expert/other"
     }
     seller_accounts {
         uuid id PK
         uuid auth_user_id FK, UK "auth.users.id・SET NULL・承認時に発行"
         text official_name "NOT NULL"
-        text seller_type "NOT NULL・maker/ja/farm_corp/expert/other"
         text login_id UK "NOT NULL・^[a-z0-9][a-z0-9._-]{2,30}$"
         text contact_email "NOT NULL・内部のみ"
         text contact_name "NOT NULL・内部のみ"
@@ -115,32 +107,11 @@ erDiagram
         text invite_code "招待コード"
         text rejected_reason "却下理由・内部のみ"
     }
-    crop_groups {
-        uuid id PK
-        text name UK "NOT NULL"
-        integer sort_order "NOT NULL"
-    }
-    crops {
-        uuid id PK
-        uuid group_id FK "crop_groups.id・RESTRICT"
-        text name UK "NOT NULL"
-        text_array aliases "表記ゆれ"
-        integer sort_order "NOT NULL"
-    }
-    profile_crops {
-        uuid id PK
-        uuid user_id FK "profiles・CASCADE"
-        uuid crop_id FK "crops・RESTRICT"
-    }
-
     auth_users ||--o| profiles : "1:1"
     auth_users ||--o| seller_accounts : "共有ログイン"
-    profiles ||--o{ profile_crops : "主な作目"
-    crops ||--o{ profile_crops : ""
-    crop_groups ||--o{ crops : ""
 ```
 
-補足：`profile_crops` は `(user_id, crop_id)` UNIQUE。
+補足：一般ユーザーの `profiles` は投稿者識別用のハンドルとアバターに加え、内部専用の立場を4択で保持する。立場は公開ビューや投稿に出さず、地域・栽培情報・所属などの属性は持たない。
 
 ### 1.3 資材と分類（2層所有）
 
@@ -152,15 +123,21 @@ erDiagram
         text manufacturer_name "NOT NULL・分類層"
         uuid composition_type_id FK "composition_types・RESTRICT・分類層"
         text sales_status "分類層"
-        text description "一次情報層=出品者編集可"
-        text general_use "一次情報層"
-        text main_components "一次情報層・主成分原文"
-        text mechanism "一次情報層"
-        text usage_text "一次情報層"
-        text price_range "一次情報層"
-        text official_url "一次情報層"
-        text catalog_url "一次情報層"
+        text description "承認済み正本・紹介文"
+        text general_use "承認済み正本・一般用途"
+        text main_components "承認済み正本・主成分原文"
+        text mechanism "承認済み正本・作用機序"
+        text usage_text "承認済み正本・使い方"
+        text price_range "承認済み正本"
+        text official_url "承認済み正本"
+        text catalog_url "承認済み正本"
         uuid seller_id FK "seller_accounts・SET NULL・NULL=未claim"
+        text publication_status "published/archived"
+        timestamptz archived_at "掲載終了日時"
+        integer content_revision "承認済み正本の版"
+        timestamptz manufacturer_verified_at "メーカー確認日時"
+        uuid manufacturer_verified_by_seller_id FK "確認したメーカー"
+        text manufacturer_verification_method "確認経路"
         integer review_count "集計・トリガー更新"
         numeric avg_rating "集計・1〜5・0件はNULL"
         numeric control_plot_ratio "集計・対照区あり率"
@@ -259,12 +236,43 @@ erDiagram
         text source_type
         text note
     }
-    material_edit_requests {
+    material_change_requests {
         uuid id PK
-        uuid material_id FK "CASCADE"
         uuid seller_id FK "CASCADE・申請者"
-        text request_text "NOT NULL"
-        text status "NOT NULL・open/done/declined"
+        uuid material_id FK "RESTRICT・追加申請はNULL"
+        uuid result_material_id FK "RESTRICT・承認後の資材"
+        text change_type "create/update/archive"
+        text status "pending/approved/rejected/cancelled"
+        integer base_content_revision "競合検査用"
+        text reason "申請理由"
+        timestamptz manufacturer_confirmed_at "メーカー関与日時"
+        uuid reviewed_by FK "auth.users・審査者"
+        timestamptz reviewed_at
+        text review_note
+    }
+    material_change_request_details {
+        uuid request_id PK, FK "CASCADE"
+        text name "提案スナップショット"
+        text manufacturer_name
+        uuid composition_type_id FK
+        text sales_status
+        text description
+        text general_use
+        text main_components
+        text mechanism
+        text usage_text
+        text price_range
+        text official_url
+        text catalog_url
+    }
+    material_change_request_evidences {
+        uuid id PK
+        uuid request_id FK "CASCADE"
+        uuid source_evidence_id FK "現行行との対応"
+        text evidence_type
+        text title
+        text file_url
+        text external_url
     }
     seller_accounts {
         uuid id PK
@@ -289,11 +297,13 @@ erDiagram
     materials ||--o{ material_images : ""
     materials ||--o{ material_evidences : ""
     materials ||--o{ material_sources : ""
-    materials ||--o{ material_edit_requests : ""
-    seller_accounts ||--o{ material_edit_requests : ""
+    materials ||--o{ material_change_requests : "対象"
+    seller_accounts ||--o{ material_change_requests : "提出"
+    material_change_requests ||--o| material_change_request_details : "提案正本"
+    material_change_requests ||--o{ material_change_request_evidences : "提案エビデンス"
 ```
 
-補足：`materials` は `(name, manufacturer_name)` UNIQUE。同一分類内の検索条件は OR、分類間は AND。効果大分類と作物群は表示用に導出し、資材との直接関連を重複保存しない。分類層＋集計＋`seller_id` はトリガー `enforce_material_column_scope` で保護され、出品者は一次情報層のみ更新できる（admin と service_role は素通り）。
+補足：`materials` は運営承認済みの正本で、`(name, manufacturer_name)` UNIQUE。メーカーは正本を直接更新せず、追加・変更・掲載終了を `material_change_requests` へ提出する。運営が承認したときだけ、提案スナップショットと分類・エビデンスの子テーブルを正本へ原子的に反映する。運営は申請を介さず任意メーカーの資材を直接登録できる。claim は操作権、`manufacturer_verified_at` はメーカー関与の事実であり、別の状態として扱う。提案分類の6関連テーブルは [01-domain-model.md](01-domain-model.md) §3 と [08-material-governance-ooui.md](08-material-governance-ooui.md) §4 を参照する。
 
 ### 1.4 投稿とリアクション
 
@@ -403,7 +413,7 @@ erDiagram
         timestamptz resolved_at "open ⇔ NULL（CHECK）"
     }
 
-    reviews ||--|{ review_crops : "1件以上"
+    reviews ||--|| review_crops : "1件"
     crops ||--o{ review_crops : ""
     reviews ||--o{ review_photos : ""
     usage_reports ||--o{ usage_report_applications : ""
@@ -417,7 +427,7 @@ erDiagram
     view_events }o..o{ usage_reports : "対象"
 ```
 
-補足：`review_crops` は `(review_id, crop_id)` UNIQUEで、遅延制約トリガーがレビューごとの0件を拒否する。`saved_materials` は `(user_id, material_id)` UNIQUE、`helpful_votes` は `(user_id, target_type, target_id)` UNIQUE。`view_events` は追記専用（UPDATE/DELETE 権限を剥奪）。`reviews` の INSERT/UPDATE/DELETE で集計トリガーが `materials.review_count / avg_rating / control_plot_ratio` を再計算する。
+補足：`review_crops.review_id` は UNIQUEで、1レビューにつき作目を1件だけ保持する。遅延制約トリガーが0件も拒否する。`saved_materials` は `(user_id, material_id)` UNIQUE、`helpful_votes` は `(user_id, target_type, target_id)` UNIQUE。`view_events` は追記専用（UPDATE／DELETE 権限を剥奪）。`reviews` の INSERT／UPDATE／DELETE で集計トリガーが `materials.review_count`、`avg_rating`、`control_plot_ratio` を再計算する。
 
 ### 1.5 記事・Q&A（Phase 2 先行スキーマ）
 
@@ -459,8 +469,8 @@ erDiagram
 
 | ビュー | 権限 | 内容 |
 |---|---|---|
-| `public_profiles` | definer・SELECT のみ | profiles の公開列のみ（standpoint・非公開 prefecture を遮断） |
-| `public_sellers` | invoker＋列 GRANT | approved の seller のみ・contact_*／invite_code／rejected_reason を遮断 |
+| `public_profiles` | definer・SELECT のみ | profiles のハンドル・アバター・登録日時だけを返す |
+| `public_sellers` | invoker＋列 GRANT | approved のメーカーのみ・contact_*／invite_code／rejected_reason を遮断 |
 | `helpful_counts` | definer・SELECT のみ | helpful_votes の件数集計（個票は本人のみ） |
 | `view_counts_daily` | definer・SELECT のみ | view_events の JST 日次集計（生ログは admin のみ） |
 
@@ -469,8 +479,8 @@ erDiagram
 | avatars | 2MB | 一般本人 `{user_id}/…` |
 | review-photos | 5MB | 一般本人 |
 | report-media | 50MB（動画可） | 一般本人 |
-| material-images | 5MB | 出品者 `{seller_id}/…`・admin |
-| article-images | 5MB | 出品者・admin |
+| material-images | 5MB | メーカー `{seller_id}/…`・admin |
+| article-images | 5MB | メーカー・admin |
 
 ---
 
@@ -489,7 +499,7 @@ sequenceDiagram
     participant D as DB
 
     Note over B: /signup で一般ユーザーを選び /signup/general へ遷移
-    B->>S: signupAction（handle・email・password・都道府県・立場）
+    B->>S: signupAction（handle・email・password・standpoint）
     S->>D: profiles を handle で検索（重複検査）
     alt handle 重複
         S-->>B: handle_taken（フィールドエラー）
@@ -497,7 +507,7 @@ sequenceDiagram
     S->>A: signUp（email・password）
     Note over A: identities が空 = 既存メール → email_unavailable
     S->>A: admin.updateUserById（app_metadata.account_type='general'）
-    S->>D: profiles INSERT（handle・prefecture・standpoint）
+    S->>D: profiles INSERT（handle・standpoint）
     alt 途中で失敗
         S->>A: admin.deleteUser（auth ユーザーを補償削除）
         S-->>B: エラー（中途半端な状態を残さない）
@@ -506,7 +516,7 @@ sequenceDiagram
     S-->>B: redirect /signup/done（メール確認要なら ?confirm=1）
 ```
 
-### 2.2 出品者ログイン（共有 ID・合成メール方式）
+### 2.2 メーカーログイン（共有 ID・合成メール方式）
 
 ```mermaid
 sequenceDiagram
@@ -527,7 +537,7 @@ sequenceDiagram
     S-->>B: redirect /dashboard（または safeNext）
 ```
 
-### 2.3 出品者申請 → admin 承認
+### 2.3 メーカー申請 → admin 承認
 
 ```mermaid
 sequenceDiagram
@@ -589,14 +599,14 @@ sequenceDiagram
     participant D as DB
 
     B->>ST: 写真を review-photos/{user_id}/ へ直接アップロード
-    B->>S: createReviewAction（星・本文・複数作目・同意・写真パス）
+    B->>S: createReviewAction（星・本文・単一作目・同意・写真パス）
     S->>S: requireGeneralUser・入力検証（農薬同意 false は拒否）
     S->>D: materials/crops の存在確認・同資材への重複投稿検査
     alt 既に自分のレビューあり
         S->>ST: 直前アップロード写真を削除
         S-->>B: redirect 編集画面（?existing=1）
     end
-    S->>D: RPCでreviews＋review_cropsを原子的にINSERT（status='published'）
+    S->>D: RPCでreviews＋review_crops 1行を原子的にINSERT（status='published'）
     S->>D: review_photos INSERT（失敗時は reviews を削除してロールバック）
     Note over D: トリガーが materials の review_count / avg_rating / 対照区あり率を再計算
     S-->>B: redirect 資材詳細 #reviews-heading（投稿完了トースト）
@@ -628,9 +638,44 @@ sequenceDiagram
     S-->>AD: 一覧・公開側・投稿者マイページを revalidate
 ```
 
+### 2.7 資材の共同管理（メーカー申請＋運営承認）
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant M as メーカー
+    participant S as Server Action
+    participant D as DB
+    participant A as 運営（AAL2）
+    participant P as 公開画面
+
+    alt 運営が先に資材を登録
+        A->>S: 任意メーカー名で資材を登録
+        S->>D: materialsへ正本を直接INSERT
+        Note over D: claim前・メーカー未確認でも公開可能
+    end
+    alt 初期データが正しい
+        M->>S: この情報を確認済みにする
+        S->>D: manufacturer_verified_atを即時記録
+        D-->>P: メーカー確認済みマークを表示
+    else 追加・変更・掲載終了を依頼
+        M->>S: 資材変更申請を提出
+        S->>D: material_change_requestsと提案子テーブルを原子的に保存
+        Note over P: pending中は承認済み正本を維持
+        A->>S: 現行正本と提案内容を比較して承認または却下
+        alt 承認
+            S->>D: content_revisionを照合し、正本へ原子的に反映
+            D-->>P: 公開内容を更新
+        else 却下
+            S->>D: rejectedと理由を記録
+            D-->>M: 申請詳細で理由を表示
+        end
+    end
+```
+
 ---
 
-## 3. 画面遷移図
+## 3. 主要導線の画面遷移図
 
 凡例：実線＝リンク／リダイレクト。`login?next=` への誘導は「🔒」で略記（未ログイン時）。BottomNav（ホーム・探す・＋投稿・記事・マイページ）は公開＋一般側の全画面に共通なので個別エッジは省略。
 
@@ -649,16 +694,17 @@ flowchart TD
         REP["使用レポート /reports/[id]"]
         ARTS["記事一覧 /articles"]
         ARTD["記事詳細 /articles/[id]"]
-        SELLER["出品者ページ /sellers/[id]"]
-        PROF["公開プロフィール /users/[id]"]
+        SELLER["メーカーページ /sellers/[id]"]
+        PROF["一般ユーザーページ /users/[id]"]
     end
     subgraph auth["認証"]
         LOGIN["ログイン /login"]
         SIGNUP["登録方法選択 /signup"]
         GSIGNUP["一般登録 /signup/general"]
-        APPLY["メーカー・出品者申請 /sellers/apply"]
+        SELLERLP["メーカー向けLP /sellers"]
+        APPLY["メーカー申請 /sellers/apply"]
         RESET["再設定 /password-reset"]
-        SLOGIN["出品者ログイン /sellers/login"]
+        SLOGIN["メーカーログイン /sellers/login"]
     end
     subgraph me["一般ユーザー（🔒）"]
         POST["投稿する /post"]
@@ -666,7 +712,7 @@ flowchart TD
         REDIT["レビュー編集 …/review/[id]/edit"]
         UNEW["使用レポート投稿 …/report/new"]
         ME["マイページ /me"]
-        MEEDIT["プロフィール編集 /me/edit"]
+        MEEDIT["表示情報編集 /me/edit"]
         SAVED["検討リスト /me/saved"]
         COMP["資材比較 …/compare"]
     end
@@ -687,41 +733,51 @@ flowchart TD
     LOGIN --> SIGNUP & RESET & SLOGIN
     LOGIN -->|"成功 → next または /"| HOME
     SIGNUP -->|"個人用"| GSIGNUP
-    SIGNUP -->|"組織用・審査あり"| APPLY
+    SIGNUP -->|"メーカー・審査あり"| SELLERLP
+    SELLERLP --> APPLY & SLOGIN
     GSIGNUP -->|"完了"| HOME
     POST --> RNEW & UNEW
     RNEW -->|"完了 → レビュー欄アンカー"| MAT
     RNEW -->|"投稿済みなら"| REDIT
     UNEW -->|"提出 → 編集部確認の案内"| MAT
     ME --> MEEDIT & SAVED & PROF & POST
-    ME -->|"メーカー・出品者アカウントを申請"| APPLY
+    ME -->|"メーカーアカウントを申請"| SELLERLP
     ME -->|"ログアウト POST /logout"| HOME
     SAVED --> COMP & MAT
 ```
 
-### 3.2 出品者
+### 3.2 メーカー
 
 ```mermaid
 flowchart TD
     SIGNUP["登録方法選択 /signup"]
-    APPLY["出品者申請 /sellers/apply（公開）"]
+    SELLERLP["メーカー向けLP /sellers"]
+    APPLY["メーカー申請 /sellers/apply（公開）"]
     DONE["受付完了 /sellers/apply/done"]
-    SLOGIN["出品者ログイン /sellers/login"]
+    SLOGIN["メーカーログイン /sellers/login"]
     DASH["ダッシュボード /dashboard 🔒seller"]
-    DMAT["一次情報編集 /dashboard/materials/[id]"]
+    DMATS["自社資材 /dashboard/materials"]
+    DMNEW["資材追加申請 …/new"]
+    DMAT["自社資材詳細 …/[id]"]
+    DMREQ["資材変更申請 …/requests/[id]"]
     DARTS["記事管理 /dashboard/articles"]
     DANEW["記事作成 …/new"]
     DAEDIT["記事編集 …/[id]/edit"]
     PUBMAT["公開側 資材詳細"]
     PUBART["公開側 記事詳細"]
 
-    SIGNUP -->|"組織用・審査あり"| APPLY
+    SIGNUP -->|"メーカー・審査あり"| SELLERLP
+    SELLERLP --> APPLY & SLOGIN
     APPLY -->|"申請 INSERT（status=applied）"| DONE
     Note1["承認は admin 側（図 2.3）。発行された ID/PW でログイン"]
     DONE -.-> Note1
     SLOGIN -->|"成功"| DASH
-    DASH --> DMAT & DARTS
+    DASH --> DMATS & DARTS
+    DMATS --> DMNEW & DMAT & DMREQ
+    DMNEW -->|"追加申請"| DMREQ
+    DMAT -->|"変更・掲載終了申請"| DMREQ
     DMAT -->|"公開ページを確認"| PUBMAT
+    DMREQ -->|"承認後の公開資材"| PUBMAT
     DARTS --> DANEW & DAEDIT
     DANEW -->|"公開して保存"| PUBART
     DAEDIT -->|"公開ページを確認"| PUBART
@@ -734,9 +790,9 @@ flowchart TD
     LOGIN["ログイン /login"]
     MFA["2要素認証 /admin/mfa"]
     ADMIN["運営管理ホーム /admin"]
-    ASEL["出品者審査 /admin/sellers → [id]"]
+    ASEL["メーカー審査 /admin/sellers → [id]"]
     AMAT["資材管理 /admin/materials → new / [id]"]
-    AREQ["分類変更申請 …/requests"]
+    AREQ["資材変更申請 /admin/materials/requests → [id]"]
     AREP["通報処理 /admin/reports"]
     AUR["編集局 /admin/usage-reports → [id]"]
     ATAG["検索タグ・作物 /admin/tags"]
@@ -746,7 +802,7 @@ flowchart TD
     ADMIN --> ASEL & AMAT & ATAG
     ADMIN -->|"件数カード"| AREP & AUR
     AMAT --> AREQ
-    ASEL -->|"公開ページ確認"| PSELLER["公開側 出品者ページ"]
+    ASEL -->|"公開ページ確認"| PSELLER["公開側 メーカーページ"]
     AMAT -->|"公開ページ確認"| PMAT["公開側 資材詳細"]
     AUR -->|"公開ページ確認"| PREP["公開側 使用レポート"]
     AREP -->|"通報者"| PUSER["公開側 プロフィール"]
@@ -756,8 +812,159 @@ flowchart TD
 
 | 領域 | 一次防御 | 挙動 |
 |---|---|---|
-| `/signup` `/signup/general` | proxy | ログイン済み→`/`。一般登録と組織用申請を入力前に分岐 |
-| `/me` `/post` | proxy＋ページ内 | 未ログイン→`/login?next=`。出品者・admin が開くと、URLを維持して各管理画面への案内を表示 |
-| `/dashboard` | proxy＋`requireSeller` | 未ログイン→`/sellers/login?next=`。非出品者は画面内で拒否表示 |
+| `/signup` `/signup/general` | proxy | ログイン済み→`/`。一般登録とメーカー向けLPを入力前に分岐 |
+| `/sellers` | 公開 | メーカー向けの対象条件・機能・承認フローを示し、申請またはログインへ分岐 |
+| `/me` `/post` | proxy＋ページ内 | 未ログイン→`/login?next=`。メーカー・admin が開くと、URLを維持して各管理画面への案内を表示 |
+| `/dashboard` | proxy＋`requireSeller` | 未ログイン→`/sellers/login?next=`。メーカー以外は画面内で拒否表示 |
 | `/admin` | `requireAdminPage` | 未ログイン→`/login`。AAL1 の admin→`/admin/mfa`。admin 以外→**404**（存在を明かさない） |
 | 通報・削除確認 | — | ページ遷移ではなくモーダル（`<dialog>`）。通報はレビュー・レポート・記事・プロフィールの4箇所 |
+
+## 4. 全画面を含む実装ルート図
+
+§3は主要タスクの読みやすさを優先した図である。本節は `src/app/**/page.tsx` を機械的に照合し、開発専用画面を含む全51画面をノードとして示す。矢印は画面内リンク、フォーム完了後のリダイレクト、または権限境界からの誘導を表す。共通ヘッダーと下部ナビから繰り返し到達する矢印は省略する。
+
+### 4.1 公開・認証・一般ユーザー
+
+```mermaid
+flowchart LR
+    HOME["ホーム<br/>/"]
+    SEARCH["資材検索<br/>/search"]
+    MATERIAL["資材詳細<br/>/materials/[id]"]
+    REVIEWS["レビュー一覧<br/>/materials/[id]/reviews"]
+    MATART["関連記事<br/>/materials/[id]/articles"]
+    REPORT["使用レポート<br/>/reports/[id]"]
+    ARTICLES["記事一覧<br/>/articles"]
+    ARTICLE["記事詳細<br/>/articles/[id]"]
+    SELLER["メーカー公開ページ<br/>/sellers/[id]"]
+    USER["一般ユーザーページ<br/>/users/[id]"]
+
+    SIGNUP["登録方法選択<br/>/signup"]
+    GENERAL_SIGNUP["一般登録<br/>/signup/general"]
+    SIGNUP_DONE["一般登録完了<br/>/signup/done"]
+    LOGIN["一般・運営ログイン<br/>/login"]
+    RESET["パスワード再設定<br/>/password-reset"]
+    RESET_UPDATE["新パスワード設定<br/>/password-reset/update"]
+    SELLER_LP["メーカー向けLP<br/>/sellers"]
+    SELLER_APPLY["メーカー申請<br/>/sellers/apply"]
+    SELLER_APPLY_DONE["申請受付完了<br/>/sellers/apply/done"]
+    SELLER_LOGIN["メーカーログイン<br/>/sellers/login"]
+
+    POST["投稿先選択<br/>/post"]
+    REVIEW_NEW["レビュー投稿<br/>/materials/[id]/review/new"]
+    REVIEW_EDIT["レビュー編集<br/>/materials/[id]/review/[reviewId]/edit"]
+    REPORT_NEW["使用レポート投稿<br/>/materials/[id]/report/new"]
+    ME["マイページ<br/>/me"]
+    ME_EDIT["表示情報編集<br/>/me/edit"]
+    SAVED["検討リスト<br/>/me/saved"]
+    COMPARE["資材比較<br/>/me/saved/compare"]
+    DEV_TOKENS["トークン確認<br/>/dev/tokens"]
+    DEV_UI["UIカタログ<br/>/dev/ui"]
+
+    HOME --> SEARCH & MATERIAL & REPORT & ARTICLES & SIGNUP
+    SEARCH --> MATERIAL
+    MATERIAL --> REVIEWS & MATART & REPORT & SELLER
+    MATERIAL -->|"要一般ログイン"| REVIEW_NEW & REPORT_NEW
+    REVIEWS --> REVIEW_EDIT
+    MATART --> ARTICLE & REPORT
+    ARTICLES --> ARTICLE & REPORT
+    ARTICLE --> SELLER & MATERIAL
+    REPORT --> USER & MATERIAL
+    SELLER --> MATERIAL & ARTICLE
+    USER --> MATERIAL & REPORT
+
+    SIGNUP -->|"個人"| GENERAL_SIGNUP
+    GENERAL_SIGNUP --> SIGNUP_DONE
+    SIGNUP_DONE --> HOME
+    SIGNUP -->|"メーカー"| SELLER_LP
+    SELLER_LP --> SELLER_APPLY & SELLER_LOGIN
+    SELLER_APPLY --> SELLER_APPLY_DONE
+    SELLER_APPLY_DONE --> SELLER_LOGIN
+    LOGIN --> RESET
+    RESET -->|"メールリンク"| RESET_UPDATE
+    RESET_UPDATE --> LOGIN
+    LOGIN -->|"一般"| ME
+    LOGIN -->|"メーカーはこちら"| SELLER_LOGIN
+    HOME --> POST & ME
+    POST --> REVIEW_NEW & REPORT_NEW
+    REVIEW_NEW --> MATERIAL
+    REVIEW_NEW -->|"投稿済み"| REVIEW_EDIT
+    REVIEW_EDIT --> MATERIAL
+    REPORT_NEW --> ME
+    ME --> ME_EDIT & SAVED & USER & POST & SELLER_LP
+    SAVED --> COMPARE & MATERIAL
+    COMPARE --> MATERIAL
+    DEV_TOKENS -. "開発時のみ" .-> DEV_UI
+```
+
+### 4.2 メーカー・運営
+
+```mermaid
+flowchart LR
+    SELLER_LP["メーカー向けLP<br/>/sellers"]
+    SELLER_LOGIN["メーカーログイン<br/>/sellers/login"]
+    DASHBOARD["メーカーホーム<br/>/dashboard"]
+    SELLER_MATERIALS["自社資材<br/>/dashboard/materials"]
+    SELLER_MATERIAL_NEW["資材追加申請<br/>/dashboard/materials/new"]
+    SELLER_MATERIAL["自社資材詳細<br/>/dashboard/materials/[id]"]
+    SELLER_REQUEST["資材変更申請<br/>/dashboard/materials/requests/[id]"]
+    SELLER_ARTICLES["記事管理<br/>/dashboard/articles"]
+    SELLER_ARTICLE_NEW["記事作成<br/>/dashboard/articles/new"]
+    SELLER_ARTICLE_EDIT["記事編集<br/>/dashboard/articles/[id]/edit"]
+
+    LOGIN["運営ログイン<br/>/login"]
+    MFA["2要素認証<br/>/admin/mfa"]
+    ADMIN["運営管理ホーム<br/>/admin"]
+    ADMIN_SELLERS["メーカー審査<br/>/admin/sellers"]
+    ADMIN_SELLER["メーカー審査詳細<br/>/admin/sellers/[id]"]
+    ADMIN_MATERIALS["資材管理<br/>/admin/materials"]
+    ADMIN_MATERIAL_NEW["資材直接登録<br/>/admin/materials/new"]
+    ADMIN_MATERIAL["資材正本編集<br/>/admin/materials/[id]"]
+    ADMIN_REQUESTS["資材変更申請<br/>/admin/materials/requests"]
+    ADMIN_REQUEST["申請審査<br/>/admin/materials/requests/[id]"]
+    ADMIN_TAGS["タグ・作物管理<br/>/admin/tags"]
+    ADMIN_REPORTS["通報処理<br/>/admin/reports"]
+    ADMIN_USAGE["使用レポート編集局<br/>/admin/usage-reports"]
+    ADMIN_USAGE_DETAIL["使用レポート編集<br/>/admin/usage-reports/[id]"]
+
+    PUBLIC_MATERIAL["公開資材<br/>/materials/[id]"]
+    PUBLIC_ARTICLE["公開記事<br/>/articles/[id]"]
+    PUBLIC_SELLER["公開メーカー<br/>/sellers/[id]"]
+    PUBLIC_REPORT["公開使用レポート<br/>/reports/[id]"]
+
+    SELLER_LP --> SELLER_LOGIN
+    SELLER_LOGIN --> DASHBOARD
+    DASHBOARD --> SELLER_MATERIALS & SELLER_ARTICLES
+    SELLER_MATERIALS --> SELLER_MATERIAL_NEW & SELLER_MATERIAL & SELLER_REQUEST
+    SELLER_MATERIAL_NEW -->|"追加申請"| SELLER_REQUEST
+    SELLER_MATERIAL -->|"変更・掲載終了申請"| SELLER_REQUEST
+    SELLER_MATERIAL -->|"初期データ確認"| PUBLIC_MATERIAL
+    SELLER_REQUEST -->|"承認後"| PUBLIC_MATERIAL
+    SELLER_ARTICLES --> SELLER_ARTICLE_NEW & SELLER_ARTICLE_EDIT
+    SELLER_ARTICLE_NEW --> PUBLIC_ARTICLE
+    SELLER_ARTICLE_EDIT --> PUBLIC_ARTICLE
+
+    LOGIN -->|"admin・AAL1"| MFA
+    MFA --> ADMIN
+    ADMIN --> ADMIN_SELLERS & ADMIN_MATERIALS & ADMIN_REQUESTS & ADMIN_TAGS & ADMIN_REPORTS & ADMIN_USAGE
+    ADMIN_SELLERS --> ADMIN_SELLER
+    ADMIN_SELLER --> PUBLIC_SELLER
+    ADMIN_MATERIALS --> ADMIN_MATERIAL_NEW & ADMIN_MATERIAL & ADMIN_REQUESTS
+    ADMIN_MATERIAL_NEW --> PUBLIC_MATERIAL
+    ADMIN_MATERIAL --> PUBLIC_MATERIAL
+    ADMIN_REQUESTS --> ADMIN_REQUEST
+    ADMIN_REQUEST -->|"承認・却下"| SELLER_REQUEST
+    ADMIN_REQUEST -->|"承認"| PUBLIC_MATERIAL
+    ADMIN_USAGE --> ADMIN_USAGE_DETAIL
+    ADMIN_USAGE_DETAIL --> PUBLIC_REPORT
+```
+
+### 4.3 画面以外のApp Router入口
+
+| 入口 | 種別 | 役割 |
+|---|---|---|
+| `/auth/confirm` | Route Handler | 一般ユーザーのメール確認後にセッションを確立して遷移 |
+| `/logout` | Route Handler | セッション破棄後にホームへ遷移 |
+| `/sitemap.xml` | メタデータルート | 公開対象の資材・記事・メーカー等を検索エンジンへ通知 |
+| `/robots.txt` | メタデータルート | クロール方針を返す |
+| `/opengraph-image` | メタデータルート | 共通OG画像を返す |
+| `not-found.tsx`・`error.tsx` | 共通状態画面 | 404と取得失敗を、各領域で意味の伝わる日本語に分ける |

@@ -116,7 +116,14 @@ export type UsageReport = v.InferOutput<typeof UsageReportSchema>;
 export type SellerApproval = v.InferOutput<typeof SellerApprovalStateSchema>;
 export type ContentReport = v.InferOutput<typeof ContentReportStateSchema>;
 
-type RestInsertTable = "materials" | "profiles" | "reviews" | "seller_accounts" | "usage_reports";
+type RestInsertTable =
+  | "material_crops"
+  | "material_product_types"
+  | "materials"
+  | "profiles"
+  | "reviews"
+  | "seller_accounts"
+  | "usage_reports";
 type RestInsertBody<Table extends RestInsertTable> = Database["public"]["Tables"][Table]["Insert"];
 
 const GENERAL_PASSWORD = "Farmille-E2E-General-2026!";
@@ -220,6 +227,20 @@ async function authUsersByEmail(email: string): Promise<AuthUser[]> {
 }
 
 export async function cleanupOwnedE2eData(): Promise<void> {
+  const sellerLookupParams = new URLSearchParams({
+    select: "id,auth_user_id",
+    login_id: `like.${E2E_TOKEN_PREFIX}*`,
+  });
+  const sellers = await restSelect(
+    SellerAccountReferenceSchema,
+    "seller_accounts",
+    sellerLookupParams,
+  );
+  for (const seller of sellers) {
+    const requestParams = new URLSearchParams({ seller_id: `eq.${seller.id}` });
+    await checkedFetch(restPath("material_change_requests", requestParams), { method: "DELETE" });
+  }
+
   const materialParams = new URLSearchParams({ name: `like.E2E資材_${E2E_TOKEN_PREFIX}*` });
   await checkedFetch(restPath("materials", materialParams), { method: "DELETE" });
 
@@ -282,8 +303,6 @@ export async function createGeneralUser(prefix: string): Promise<GeneralUser> {
   await restInsert(ProfileReferenceSchema, "profiles", {
     user_id: authUser.id,
     handle,
-    prefecture_code: 13,
-    prefecture_public: true,
     standpoint: "farmer",
   });
 
@@ -303,7 +322,6 @@ export async function createApprovedSeller(prefix: string): Promise<SellerAccoun
   const seller = await restInsert(IdSchema, "seller_accounts", {
     auth_user_id: authUser.id,
     official_name: officialName,
-    seller_type: "maker",
     login_id: loginId,
     contact_email: `${loginId}@example.test`,
     contact_name: "E2E 担当者",
@@ -338,6 +356,8 @@ export async function cleanupSellerByLoginId(loginId: string): Promise<void> {
   const sellers = await restSelect(SellerAccountReferenceSchema, "seller_accounts", params);
 
   for (const seller of sellers) {
+    const requestParams = new URLSearchParams({ seller_id: `eq.${seller.id}` });
+    await checkedFetch(restPath("material_change_requests", requestParams), { method: "DELETE" });
     const deleteParams = new URLSearchParams({ id: `eq.${seller.id}` });
     await checkedFetch(restPath("seller_accounts", deleteParams), { method: "DELETE" });
     if (seller.auth_user_id !== null) {
@@ -371,18 +391,38 @@ export async function createMaterial(
 }
 
 export async function deleteMaterial(materialId: string): Promise<void> {
+  const targetRequestParams = new URLSearchParams({ material_id: `eq.${materialId}` });
+  await checkedFetch(restPath("material_change_requests", targetRequestParams), {
+    method: "DELETE",
+  });
+  const resultRequestParams = new URLSearchParams({ result_material_id: `eq.${materialId}` });
+  await checkedFetch(restPath("material_change_requests", resultRequestParams), {
+    method: "DELETE",
+  });
   const params = new URLSearchParams({ id: `eq.${materialId}` });
   await checkedFetch(restPath("materials", params), { method: "DELETE" });
 }
 
-export async function listSeedMaterials(): Promise<Material[]> {
-  const params = new URLSearchParams({
-    select: "id,name,manufacturer_name,review_count,avg_rating,seller_id",
-    name: "not.like.E2E資材_%",
-    order: "name.asc",
-    limit: "20",
-  });
-  return restSelect(MaterialSchema, "materials", params);
+export async function addMaterialClassifications(
+  materialId: string,
+  input: { cropIds?: readonly string[]; productTypeIds?: readonly string[] },
+): Promise<void> {
+  await Promise.all([
+    ...(input.cropIds ?? []).map((cropId, sortOrder) =>
+      restInsert(IdSchema, "material_crops", {
+        material_id: materialId,
+        crop_id: cropId,
+        source_name: "E2E対象作物",
+        sort_order: sortOrder,
+      }),
+    ),
+    ...(input.productTypeIds ?? []).map((productTypeId) =>
+      restInsert(IdSchema, "material_product_types", {
+        material_id: materialId,
+        product_type_id: productTypeId,
+      }),
+    ),
+  ]);
 }
 
 export async function getMaterial(materialId: string): Promise<Material> {

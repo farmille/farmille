@@ -188,7 +188,7 @@ export function EvidenceManager({ sellerId, materialId, evidences }: EvidenceMan
   }
 
   return (
-    <SurfaceCard description="SDS、試験結果、論文、チラシを追加できます。" title="エビデンス管理">
+    <SurfaceCard description="追加・削除は運営の承認後に公開されます。" title="エビデンス変更">
       <form className={formLayout} onSubmit={handleAdd} ref={formRef}>
         <Field
           error={fieldErrors.evidenceType}
@@ -238,7 +238,7 @@ export function EvidenceManager({ sellerId, materialId, evidences }: EvidenceMan
           <FormMessage status={state.status}>{state.message}</FormMessage>
         )}
         <Button disabled={pending} type="submit">
-          {pending ? "処理中…" : "エビデンスを追加"}
+          {pending ? "申請中…" : "エビデンス追加を申請"}
         </Button>
       </form>
 
@@ -270,7 +270,7 @@ export function EvidenceManager({ sellerId, materialId, evidences }: EvidenceMan
                   type="button"
                   variant="danger"
                 >
-                  削除
+                  削除を申請
                 </Button>
               </div>
             </SurfaceCard>

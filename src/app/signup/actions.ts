@@ -24,7 +24,7 @@ function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string
 function submittedValues(formData: FormData): AuthFormValues {
   const values: AuthFormValues = {};
 
-  for (const name of ["handle", "email", "prefectureCode", "prefecturePublic", "standpoint"]) {
+  for (const name of ["handle", "email", "standpoint"]) {
     const value = formDataString(formData.get(name));
     if (value !== null) values[name] = value;
   }
@@ -40,8 +40,6 @@ export async function signupAction(
     handle: formData.get("handle"),
     email: formData.get("email"),
     password: formData.get("password"),
-    prefectureCode: formData.get("prefectureCode"),
-    prefecturePublic: formData.get("prefecturePublic"),
     standpoint: formData.get("standpoint"),
   });
 

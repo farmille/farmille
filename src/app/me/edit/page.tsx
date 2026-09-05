@@ -1,7 +1,6 @@
 import { AppBar } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { errorMessageJa } from "@/server/errors";
-import { listCropOptions } from "@/server/queries/crops";
 import { getOwnProfile } from "@/server/queries/profiles";
 import { css } from "../../../../styled-system/css";
 
@@ -37,24 +36,17 @@ export default async function MeEditPage() {
     return <NonGeneralNotice accountType={access.accountType} />;
   }
 
-  const [profileResult, cropsResult] = await Promise.all([
-    getOwnProfile(access.session.userId),
-    listCropOptions(),
-  ]);
+  const profileResult = await getOwnProfile(access.session.userId);
 
   if (!profileResult.ok) {
     throw new Error(errorMessageJa[profileResult.error]);
   }
 
-  if (!cropsResult.ok) {
-    throw new Error(errorMessageJa[cropsResult.error]);
-  }
-
   return (
     <div className={shell}>
-      <AppBar chrome="public" active="me" title="プロフィール編集" backHref="/me" />
+      <AppBar chrome="public" active="me" title="表示情報編集" backHref="/me" />
       <main className={body}>
-        <ProfileEditForm profile={profileResult.data} crops={cropsResult.data} />
+        <ProfileEditForm profile={profileResult.data} />
       </main>
       <BottomNav active="me" />
     </div>

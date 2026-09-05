@@ -391,19 +391,22 @@ function DesktopContextBar(props: AppBarBackProps) {
 }
 
 function DesktopSellerHeader(props: AppBarProps) {
-  const title = props.variant === "home" ? "出品者ダッシュボード" : (props.title ?? "");
+  const title = props.variant === "home" ? "メーカーダッシュボード" : (props.title ?? "");
 
   return (
     <header className={desktopHeader} data-ui="desktop-seller-header">
       <div className={desktopHeaderInner}>
         <Link href="/dashboard" className={desktopBrand}>
           <LeafIcon size={25} />
-          <span className={desktopBrandName}>Farmille 出品者</span>
+          <span className={desktopBrandName}>Farmille メーカー</span>
         </Link>
         <span className={workspaceTitle}>{title}</span>
-        <nav className={desktopNav} aria-label="出品者ナビ">
+        <nav className={desktopNav} aria-label="メーカーナビ">
           <Link href="/dashboard" className={desktopNavLink()}>
             ホーム
+          </Link>
+          <Link href="/dashboard/materials" className={desktopNavLink()}>
+            資材管理
           </Link>
           <Link href="/dashboard/articles" className={desktopNavLink()}>
             記事管理

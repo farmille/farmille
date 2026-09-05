@@ -6,7 +6,7 @@ import { safeNextPath } from "@/lib/auth/safe-next";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "出品者ログイン",
+  title: "メーカーログイン",
   robots: NO_INDEX_ROBOTS,
 };
 
@@ -19,8 +19,8 @@ export default async function SellerLoginPage({
 
   return (
     <AuthScreen
-      lead="承認済みの出品者アカウントのログインIDでサインインします。"
-      title="出品者ログイン"
+      lead="承認済みのメーカーアカウントのログインIDでサインインします。"
+      title="メーカーログイン"
     >
       <SellerLoginForm next={safeNextPath(next)} />
     </AuthScreen>

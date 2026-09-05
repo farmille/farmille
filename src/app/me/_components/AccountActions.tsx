@@ -11,7 +11,7 @@ const wrap = css({
   pb: "4",
 });
 
-/** ログアウトと出品者申請への導線。 */
+/** ログアウトとメーカー申請への導線。 */
 export function AccountActions() {
   return (
     <div className={wrap}>
@@ -21,13 +21,13 @@ export function AccountActions() {
         </Button>
       </form>
       <Link
-        href="/sellers/apply?from=me"
+        href="/sellers?from=me"
         className={cx(
           buttonRecipe({ variant: "ghost", size: "md" }),
           css({ display: "flex", textAlign: "center" }),
         )}
       >
-        メーカー・出品者アカウントを申請
+        メーカーアカウントを申請
       </Link>
     </div>
   );

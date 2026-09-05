@@ -20,6 +20,7 @@ const REPRESENTATIVE_STORY_IDS = [
   "app-materials-reviewlist--default",
   "app-me-saved-comparetable--three-materials",
   "app-me-shelves--all-sections",
+  "app-sellers-manufacturerlanding--default",
 ] as const;
 
 const StoryIndexEntrySchema = v.object({

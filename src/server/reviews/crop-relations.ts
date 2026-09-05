@@ -8,24 +8,13 @@ export type ReviewCropRelation = {
   crop: ReviewCropSummary | null;
 };
 
-/** 関連行を保存順へ戻す。0件や参照欠損はDB不整合としてnullを返す。 */
+/** 1件の関連行を表示用配列へ変換する。欠損はDB不整合としてnullを返す。 */
 export function orderedReviewCrops(
-  relations: readonly ReviewCropRelation[],
+  relation: ReviewCropRelation | null,
 ): ReviewCropSummary[] | null {
-  if (relations.length === 0 || relations.some(({ crop }) => crop === null)) {
-    return null;
-  }
-
-  return relations
-    .toSorted(
-      (left, right) =>
-        left.sort_order - right.sort_order ||
-        (left.crop?.id ?? "").localeCompare(right.crop?.id ?? ""),
-    )
-    .flatMap(({ crop }) => (crop === null ? [] : [crop]));
+  return relation?.crop === null || relation?.crop === undefined ? null : [relation.crop];
 }
 
-export function reviewCropLabel(relations: readonly ReviewCropRelation[]): string | null {
-  const crops = orderedReviewCrops(relations);
-  return crops === null ? null : crops.map(({ name }) => name).join("・");
+export function reviewCropLabel(relation: ReviewCropRelation | null): string | null {
+  return relation?.crop?.name ?? null;
 }

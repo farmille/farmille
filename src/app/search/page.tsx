@@ -239,7 +239,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 maker={material.manufacturer_name}
                 rating={material.avg_rating ?? 0}
                 reviewCount={material.review_count}
-                official={material.seller_id !== null}
+                official={material.manufacturer_verified_at !== null}
                 imageSrc={material.primaryImage?.url}
                 description={material.description ?? undefined}
                 href={`/materials/${material.id}`}

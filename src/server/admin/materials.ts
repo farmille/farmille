@@ -1,8 +1,14 @@
-import * as v from "valibot";
-import { trimmedFormDataString } from "@/lib/validation";
 import { isUniqueViolation, reportAdminError, withAdmin } from "@/server/admin/guard";
+import { materialInputToRow, type MaterialInput } from "@/server/material-input";
 import { fail, succeed, type Result } from "@/server/result";
 import type { Database } from "@/types/database.types";
+
+export {
+  type MaterialFieldErrors,
+  type MaterialInput,
+  type MaterialValidation,
+  validateMaterialInput,
+} from "@/server/material-input";
 
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 
@@ -14,7 +20,7 @@ export const CLASSIFICATION_FIELDS = [
   "sales_status",
 ] as const;
 
-/** 一次情報層（claim 済み出品者も編集可・01 §3）。admin は種まきの初期値を入れられる。 */
+/** 一次情報層（claim 済みメーカーも編集可・01 §3）。admin は種まきの初期値を入れられる。 */
 export const PRIMARY_INFO_FIELDS = [
   "description",
   "general_use",
@@ -26,30 +32,16 @@ export const PRIMARY_INFO_FIELDS = [
   "catalog_url",
 ] as const;
 
-export type MaterialInput = {
-  name: string;
-  manufacturerName: string;
-  compositionTypeId: string | null;
-  salesStatus: string | null;
-  description: string | null;
-  generalUse: string | null;
-  mainComponents: string | null;
-  mechanism: string | null;
-  usageText: string | null;
-  priceRange: string | null;
-  officialUrl: string | null;
-  catalogUrl: string | null;
-  cropIds: string[];
-  effectIds: string[];
-  ingredientCategoryIds: string[];
-  ingredientIds: string[];
-  productTypeIds: string[];
-  searchTagIds: string[];
-};
-
 export type AdminMaterialListItem = Pick<
   MaterialRow,
-  "id" | "name" | "manufacturer_name" | "sales_status" | "seller_id" | "review_count"
+  | "id"
+  | "name"
+  | "manufacturer_name"
+  | "sales_status"
+  | "seller_id"
+  | "review_count"
+  | "publication_status"
+  | "manufacturer_verified_at"
 > & {
   productTypeNames: string[];
   sellerName: string | null;
@@ -65,189 +57,8 @@ export type AdminMaterialDetail = MaterialRow & {
   sellerName: string | null;
 };
 
-export type MaterialEditRequestItem = {
-  id: string;
-  materialId: string;
-  materialName: string;
-  sellerId: string;
-  sellerName: string;
-  requestText: string;
-  status: string;
-  createdAt: string;
-};
-
-export const EDIT_REQUEST_STATUSES = ["open", "done", "declined"] as const;
-export type EditRequestStatus = (typeof EDIT_REQUEST_STATUSES)[number];
-
-export const EDIT_REQUEST_STATUS_LABELS = {
-  open: "未処理",
-  done: "対応済み",
-  declined: "見送り",
-} satisfies Record<EditRequestStatus, string>;
-
-export function isEditRequestStatus(value: string | null | undefined): value is EditRequestStatus {
-  return value !== null && EDIT_REQUEST_STATUSES.some((status) => status === value);
-}
-
 function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
   reportAdminError("materials", operation, error);
-}
-
-export type MaterialFieldErrors = Partial<
-  Record<
-    | "name"
-    | "manufacturerName"
-    | "officialUrl"
-    | "catalogUrl"
-    | "compositionTypeId"
-    | "classifications",
-    string
-  >
->;
-
-export type MaterialValidation =
-  | { ok: true; input: MaterialInput }
-  | { ok: false; fieldErrors: MaterialFieldErrors };
-
-function toOptionalText(value: FormDataEntryValue | null): string | null {
-  const text = trimmedFormDataString(value);
-
-  return text.length === 0 ? null : text;
-}
-
-type UrlParse = { ok: true; value: string | null } | { ok: false };
-
-function toOptionalHttpUrl(value: FormDataEntryValue | null): UrlParse {
-  const text = trimmedFormDataString(value);
-  if (text.length === 0) return { ok: true, value: null };
-
-  try {
-    const url = new URL(text);
-    if (url.protocol !== "http:" && url.protocol !== "https:") return { ok: false };
-
-    return { ok: true, value: url.toString() };
-  } catch {
-    return { ok: false };
-  }
-}
-
-/** フォーム入力の検証。分類・検索層の name / manufacturer_name だけが必須。 */
-export function validateMaterialInput(raw: {
-  name: FormDataEntryValue | null;
-  manufacturerName: FormDataEntryValue | null;
-  compositionTypeId: FormDataEntryValue | null;
-  salesStatus: FormDataEntryValue | null;
-  description: FormDataEntryValue | null;
-  generalUse: FormDataEntryValue | null;
-  mainComponents: FormDataEntryValue | null;
-  mechanism: FormDataEntryValue | null;
-  usageText: FormDataEntryValue | null;
-  priceRange: FormDataEntryValue | null;
-  officialUrl: FormDataEntryValue | null;
-  catalogUrl: FormDataEntryValue | null;
-  cropIds: readonly FormDataEntryValue[];
-  effectIds: readonly FormDataEntryValue[];
-  ingredientCategoryIds: readonly FormDataEntryValue[];
-  ingredientIds: readonly FormDataEntryValue[];
-  productTypeIds: readonly FormDataEntryValue[];
-  searchTagIds: readonly FormDataEntryValue[];
-}): MaterialValidation {
-  const fieldErrors: MaterialFieldErrors = {};
-  const name = trimmedFormDataString(raw.name);
-  const manufacturerName = trimmedFormDataString(raw.manufacturerName);
-
-  if (name.length === 0) fieldErrors.name = "資材名を入力してください。";
-  if (manufacturerName.length === 0) {
-    fieldErrors.manufacturerName = "メーカー名を入力してください。";
-  }
-
-  const officialUrl = toOptionalHttpUrl(raw.officialUrl);
-  const catalogUrl = toOptionalHttpUrl(raw.catalogUrl);
-
-  if (!officialUrl.ok) fieldErrors.officialUrl = "http(s) の URL で入力してください。";
-  if (!catalogUrl.ok) fieldErrors.catalogUrl = "http(s) の URL で入力してください。";
-  const compositionTypeIdText = trimmedFormDataString(raw.compositionTypeId);
-  const compositionTypeIdResult = v.safeParse(
-    v.union([v.literal(""), v.pipe(v.string(), v.uuid())]),
-    compositionTypeIdText,
-  );
-  if (!compositionTypeIdResult.success) {
-    fieldErrors.compositionTypeId = "組成タイプの選択内容が正しくありません。";
-  }
-
-  const idListSchema = v.array(v.pipe(v.string(), v.uuid()));
-  const cropIdsResult = v.safeParse(idListSchema, raw.cropIds);
-  const effectIdsResult = v.safeParse(idListSchema, raw.effectIds);
-  const ingredientCategoryIdsResult = v.safeParse(idListSchema, raw.ingredientCategoryIds);
-  const ingredientIdsResult = v.safeParse(idListSchema, raw.ingredientIds);
-  const productTypeIdsResult = v.safeParse(idListSchema, raw.productTypeIds);
-  const searchTagIdsResult = v.safeParse(idListSchema, raw.searchTagIds);
-  const classificationResults = [
-    cropIdsResult,
-    effectIdsResult,
-    ingredientCategoryIdsResult,
-    ingredientIdsResult,
-    productTypeIdsResult,
-    searchTagIdsResult,
-  ];
-  if (classificationResults.some((result) => !result.success)) {
-    fieldErrors.classifications = "分類の選択内容が正しくありません。";
-  }
-
-  if (
-    Object.keys(fieldErrors).length > 0 ||
-    !compositionTypeIdResult.success ||
-    !cropIdsResult.success ||
-    !effectIdsResult.success ||
-    !ingredientCategoryIdsResult.success ||
-    !ingredientIdsResult.success ||
-    !productTypeIdsResult.success ||
-    !searchTagIdsResult.success
-  ) {
-    return { ok: false, fieldErrors };
-  }
-
-  return {
-    ok: true,
-    input: {
-      name,
-      manufacturerName,
-      compositionTypeId:
-        compositionTypeIdResult.output.length === 0 ? null : compositionTypeIdResult.output,
-      salesStatus: toOptionalText(raw.salesStatus),
-      description: toOptionalText(raw.description),
-      generalUse: toOptionalText(raw.generalUse),
-      mainComponents: toOptionalText(raw.mainComponents),
-      mechanism: toOptionalText(raw.mechanism),
-      usageText: toOptionalText(raw.usageText),
-      priceRange: toOptionalText(raw.priceRange),
-      officialUrl: officialUrl.ok ? officialUrl.value : null,
-      catalogUrl: catalogUrl.ok ? catalogUrl.value : null,
-      cropIds: cropIdsResult.output,
-      effectIds: effectIdsResult.output,
-      ingredientCategoryIds: ingredientCategoryIdsResult.output,
-      ingredientIds: ingredientIdsResult.output,
-      productTypeIds: productTypeIdsResult.output,
-      searchTagIds: searchTagIdsResult.output,
-    },
-  };
-}
-
-function toRow(input: MaterialInput): Database["public"]["Tables"]["materials"]["Insert"] {
-  return {
-    name: input.name,
-    manufacturer_name: input.manufacturerName,
-    composition_type_id: input.compositionTypeId,
-    sales_status: input.salesStatus,
-    description: input.description,
-    general_use: input.generalUse,
-    main_components: input.mainComponents,
-    mechanism: input.mechanism,
-    usage_text: input.usageText,
-    price_range: input.priceRange,
-    official_url: input.officialUrl,
-    catalog_url: input.catalogUrl,
-  };
 }
 
 export async function listAdminMaterials(query: string): Promise<Result<AdminMaterialListItem[]>> {
@@ -255,7 +66,9 @@ export async function listAdminMaterials(query: string): Promise<Result<AdminMat
     const keyword = query.trim();
     const base = supabase
       .from("materials")
-      .select("id, name, manufacturer_name, sales_status, seller_id, review_count")
+      .select(
+        "id, name, manufacturer_name, sales_status, seller_id, review_count, publication_status, manufacturer_verified_at",
+      )
       .order("created_at", { ascending: false })
       .limit(200);
     const { data, error } =
@@ -320,7 +133,7 @@ async function loadSellerNames(sellerIds: string[]): Promise<Result<Map<string, 
       .in("id", ids);
 
     if (error !== null) {
-      reportError("claim 元の出品者名の取得に失敗", error);
+      reportError("claim 元のメーカー名の取得に失敗", error);
       return fail("internal");
     }
 
@@ -411,7 +224,7 @@ export async function createMaterial(input: MaterialInput): Promise<Result<{ id:
   return withAdmin(async ({ supabase }) => {
     const { data, error } = await supabase
       .from("materials")
-      .insert(toRow(input))
+      .insert(materialInputToRow(input))
       .select("id")
       .single();
 
@@ -434,9 +247,21 @@ export async function updateMaterial(
   input: MaterialInput,
 ): Promise<Result<null>> {
   return withAdmin(async ({ supabase }) => {
+    const { data: current, error: currentError } = await supabase
+      .from("materials")
+      .select("content_revision")
+      .eq("id", materialId)
+      .maybeSingle();
+
+    if (currentError !== null) {
+      reportError("資材のリビジョン取得に失敗", currentError);
+      return fail("internal");
+    }
+    if (current === null) return fail("not_found");
+
     const { data, error } = await supabase
       .from("materials")
-      .update(toRow(input))
+      .update({ ...materialInputToRow(input), content_revision: current.content_revision + 1 })
       .eq("id", materialId)
       .select("id");
 
@@ -569,7 +394,7 @@ export async function setMaterialSeller(
         .maybeSingle();
 
       if (error !== null) {
-        reportError("claim 先出品者の確認に失敗", error);
+        reportError("claim 先メーカーの確認に失敗", error);
         return fail("internal");
       }
       if (seller === null) return fail("not_found");
@@ -579,7 +404,12 @@ export async function setMaterialSeller(
 
     const { data, error } = await supabase
       .from("materials")
-      .update({ seller_id: sellerId })
+      .update({
+        seller_id: sellerId,
+        manufacturer_verified_at: null,
+        manufacturer_verified_by_seller_id: null,
+        manufacturer_verification_method: null,
+      })
       .eq("id", materialId)
       .select("id");
 
@@ -593,79 +423,35 @@ export async function setMaterialSeller(
   });
 }
 
-/** 分類変更申請の一覧（01 §3 material_edit_requests）。 */
-export async function listMaterialEditRequests(
-  status: EditRequestStatus | "all",
-): Promise<Result<MaterialEditRequestItem[]>> {
-  return withAdmin(async ({ supabase }) => {
-    const base = supabase
-      .from("material_edit_requests")
-      .select("id, material_id, seller_id, request_text, status, created_at")
-      .order("created_at", { ascending: false });
-    const { data, error } = await (status === "all" ? base : base.eq("status", status));
-
-    if (error !== null) {
-      reportError("分類変更申請の取得に失敗", error);
-      return fail("internal");
-    }
-    if (data.length === 0) return succeed([]);
-
-    const [materialsResult, sellersResult] = await Promise.all([
-      supabase
-        .from("materials")
-        .select("id, name")
-        .in("id", [...new Set(data.map((row) => row.material_id))]),
-      supabase
-        .from("seller_accounts")
-        .select("id, official_name")
-        .in("id", [...new Set(data.map((row) => row.seller_id))]),
-    ]);
-
-    if (materialsResult.error !== null || sellersResult.error !== null) {
-      reportError(
-        "分類変更申請の関連レコード取得に失敗",
-        materialsResult.error ?? sellersResult.error,
-      );
-      return fail("internal");
-    }
-
-    const materialNames = new Map(materialsResult.data.map((row) => [row.id, row.name]));
-    const sellerNames = new Map(sellersResult.data.map((row) => [row.id, row.official_name]));
-
-    return succeed(
-      data.map((row) => ({
-        id: row.id,
-        materialId: row.material_id,
-        materialName: materialNames.get(row.material_id) ?? "（削除済みの資材）",
-        sellerId: row.seller_id,
-        sellerName: sellerNames.get(row.seller_id) ?? "（削除済みの出品者）",
-        requestText: row.request_text,
-        status: row.status,
-        createdAt: row.created_at,
-      })),
-    );
-  });
-}
-
-/** 分類変更申請の処理（open → done / declined）。 */
-export async function resolveMaterialEditRequest(
-  requestId: string,
-  nextStatus: Exclude<EditRequestStatus, "open">,
+/** 運営による公開状態の直接変更。掲載終了でも行と投稿履歴は保持する。 */
+export async function setMaterialPublicationStatus(
+  materialId: string,
+  status: "published" | "archived",
 ): Promise<Result<null>> {
   return withAdmin(async ({ supabase }) => {
-    const { data, error } = await supabase
-      .from("material_edit_requests")
-      .update({ status: nextStatus })
-      .eq("id", requestId)
-      .eq("status", "open")
-      .select("id");
-
-    if (error !== null) {
-      reportError("分類変更申請の処理に失敗", error);
+    const { data: material, error: loadError } = await supabase
+      .from("materials")
+      .select("content_revision")
+      .eq("id", materialId)
+      .maybeSingle();
+    if (loadError !== null) {
+      reportError("資材公開状態の取得に失敗", loadError);
       return fail("internal");
     }
-    if (data.length === 0) return fail("conflict");
+    if (material === null) return fail("not_found");
 
+    const { error } = await supabase
+      .from("materials")
+      .update({
+        publication_status: status,
+        archived_at: status === "archived" ? new Date().toISOString() : null,
+        content_revision: material.content_revision + 1,
+      })
+      .eq("id", materialId);
+    if (error !== null) {
+      reportError("資材公開状態の更新に失敗", error);
+      return fail("internal");
+    }
     return succeed(null);
   });
 }

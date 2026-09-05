@@ -6,25 +6,10 @@ import { publicProfile } from "./story-fixtures";
 const meta = {
   title: "App/Users/ProfileHeader",
   component: ProfileHeader,
-  args: { profile: publicProfile, prefectureName: "東京都" },
+  args: { profile: publicProfile },
 } satisfies Meta<typeof ProfileHeader>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Complete: Story = {};
-
-export const Minimal: Story = {
-  args: {
-    profile: {
-      ...publicProfile,
-      bio: null,
-      cultivationStyles: [],
-      affiliation: null,
-      websiteUrl: null,
-      snsUrl: null,
-      crops: [],
-    },
-    prefectureName: null,
-  },
-};
+export const Default: Story = {};

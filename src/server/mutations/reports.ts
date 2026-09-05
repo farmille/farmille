@@ -32,7 +32,7 @@ function reportMutationError<ErrorValue>(operation: string, error: ErrorValue): 
 
 /**
  * 通報対象が存在するかを確認する。存在すれば投稿者（一般ユーザーの場合のみ）を返し、
- * 自演通報の判定に使う。記事の投稿者は出品者のため null。
+ * 自演通報の判定に使う。記事の投稿者はメーカーのため null。
  */
 async function assertReportTarget(
   supabase: SupabaseClient<Database>,

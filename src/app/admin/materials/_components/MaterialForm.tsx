@@ -317,7 +317,7 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
       </Field>
 
       <p className={groupTitleStyle}>
-        一次情報層（claim 済み出品者が編集する。ここでは初期値を入れる）
+        一次情報層（claim 済みメーカーが編集する。ここでは初期値を入れる）
       </p>
       <TextAreaField
         defaultValue={valueOf("description", material?.description)}

@@ -4,7 +4,6 @@ import { cache } from "react";
 
 import { AppBar, SectionHeading, StatCard } from "@/components";
 import { createPageMetadata } from "@/lib/seo";
-import { isPrefectureCode, PREFECTURES } from "@/lib/prefectures";
 import { getSessionUser } from "@/server/auth";
 import { createReportAction } from "@/server/actions/reports";
 import { errorMessageJa } from "@/server/errors";
@@ -71,18 +70,6 @@ async function loadProfileOrNotFound(
   return result.data;
 }
 
-function prefectureName(code: number | null): string | null {
-  if (code === null) {
-    return null;
-  }
-
-  if (!isPrefectureCode(code)) {
-    throw new Error(`未対応の都道府県コードです：${code}`);
-  }
-
-  return PREFECTURES[code - 1].name;
-}
-
 type UserPageProps = {
   params: Promise<{ id: string }>;
 };
@@ -90,8 +77,7 @@ type UserPageProps = {
 export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
   const { id } = await params;
   const { profile } = await loadProfileOrNotFound(id);
-  const description =
-    profile.bio ?? `${profile.handle}さんのレビューと使用レポートを確認できます。`;
+  const description = `${profile.handle}さんのレビューと使用レポートを確認できます。`;
 
   return createPageMetadata({
     title: profile.handle,
@@ -113,10 +99,7 @@ export default async function UserPage({ params }: UserPageProps) {
     <div className={shell}>
       <AppBar chrome="public" title={data.profile.handle} backHref="/" />
       <main className={body}>
-        <ProfileHeader
-          profile={data.profile}
-          prefectureName={prefectureName(data.profile.prefectureCode)}
-        />
+        <ProfileHeader profile={data.profile} />
 
         {isOwnProfile ? null : (
           <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>

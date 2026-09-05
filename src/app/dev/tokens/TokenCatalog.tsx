@@ -1,871 +1,491 @@
+import type { ReactNode } from "react";
+
+import { semanticTokens, tokens } from "@/theme/tokens";
+
 import { css } from "../../../../styled-system/css";
 
-type Swatch = {
-  token: string;
-  value: string;
-  /** 静的抽出されるよう、各見本でリテラルの css() を渡す */
-  paintClass: string;
+type TokenLeaf = {
+  readonly value: string;
 };
 
-// 表示用の実値ラベル。色面のクラスは下でリテラル token 参照として生成する。
-const colorSwatches: Swatch[] = [
-  {
-    token: "green",
-    value: "#2E7D32",
-    paintClass: css({
-      bg: "green",
-      color: "card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "green.deep",
-    value: "#1B5E20",
-    paintClass: css({
-      bg: "green.deep",
-      color: "card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "green.soft",
-    value: "#E8F5E9",
-    paintClass: css({
-      bg: "green.soft",
-      color: "green.deep",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "green.soft2",
-    value: "#F1F8F2",
-    paintClass: css({
-      bg: "green.soft2",
-      color: "ink",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "blue",
-    value: "#1976D2",
-    paintClass: css({
-      bg: "blue",
-      color: "card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "star",
-    value: "#F5A623",
-    paintClass: css({
-      bg: "star",
-      color: "ink",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "amber",
-    value: "#B26A00",
-    paintClass: css({
-      bg: "amber",
-      color: "card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "amber.soft",
-    value: "#FFF4E0",
-    paintClass: css({
-      bg: "amber.soft",
-      color: "amber",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "bg",
-    value: "#F5F4EF",
-    paintClass: css({
-      bg: "bg",
-      color: "ink",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "panel",
-    value: "#FAFAF7",
-    paintClass: css({
-      bg: "panel",
-      color: "ink",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "card",
-    value: "#FFFFFF",
-    paintClass: css({
-      bg: "card",
-      color: "ink",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "ink",
-    value: "#1E231F",
-    paintClass: css({
-      bg: "ink",
-      color: "card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "ink2",
-    value: "#4C534D",
-    paintClass: css({
-      bg: "ink2",
-      color: "card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "ink3",
-    value: "#7C837D",
-    paintClass: css({
-      bg: "ink3",
-      color: "card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "line",
-    value: "#E7E5DE",
-    paintClass: css({
-      bg: "line",
-      color: "ink",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "line.strong",
-    value: "#D8D6CD",
-    paintClass: css({
-      bg: "line.strong",
-      color: "ink",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-];
+type TokenBranch = {
+  readonly [name: string]: TokenBranch | TokenLeaf;
+};
 
-const semanticSwatches: Swatch[] = [
-  {
-    token: "brand.primary",
-    value: "→ green",
-    paintClass: css({
-      bg: "brand.primary",
-      color: "surface.card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "brand.primaryDeep",
-    value: "→ green.deep",
-    paintClass: css({
-      bg: "brand.primaryDeep",
-      color: "surface.card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "brand.soft",
-    value: "→ green.soft",
-    paintClass: css({
-      bg: "brand.soft",
-      color: "brand.primaryDeep",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "text.default",
-    value: "→ ink",
-    paintClass: css({
-      bg: "text.default",
-      color: "surface.card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "text.muted",
-    value: "→ ink2",
-    paintClass: css({
-      bg: "text.muted",
-      color: "surface.card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "text.subtle",
-    value: "→ ink3",
-    paintClass: css({
-      bg: "text.subtle",
-      color: "surface.card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "surface.page",
-    value: "→ bg",
-    paintClass: css({
-      bg: "surface.page",
-      color: "text.default",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "surface.panel",
-    value: "→ panel",
-    paintClass: css({
-      bg: "surface.panel",
-      color: "text.default",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "surface.card",
-    value: "→ card",
-    paintClass: css({
-      bg: "surface.card",
-      color: "text.default",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "border.default",
-    value: "→ line",
-    paintClass: css({
-      bg: "border.default",
-      color: "text.default",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "border.strong",
-    value: "→ line.strong",
-    paintClass: css({
-      bg: "border.strong",
-      color: "text.default",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "accent.official",
-    value: "→ blue",
-    paintClass: css({
-      bg: "accent.official",
-      color: "surface.card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "accent.star",
-    value: "→ star",
-    paintClass: css({
-      bg: "accent.star",
-      color: "text.default",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-  {
-    token: "accent.warn",
-    value: "→ amber",
-    paintClass: css({
-      bg: "accent.warn",
-      color: "surface.card",
-      h: "56px",
-      display: "flex",
-      alignItems: "flex-end",
-      px: "2.5",
-      py: "2",
-      fontSize: "2xs",
-      fontWeight: "700",
-    }),
-  },
-];
+type DisplayToken = {
+  name: string;
+  value: string;
+};
 
-const page = css({
-  minH: "100vh",
+type ColorDisplayToken = DisplayToken & {
+  color: string;
+  reference?: string;
+};
+
+function isTokenLeaf(node: TokenBranch | TokenLeaf): node is TokenLeaf {
+  return Object.hasOwn(node, "value");
+}
+
+/** Panda と同じ DEFAULT 規則で、入れ子の定義を表示用のドット記法へ展開する。 */
+function flattenTokenBranch(branch: TokenBranch, prefix = ""): DisplayToken[] {
+  return Object.entries(branch).flatMap(([segment, node]) => {
+    const name =
+      segment === "DEFAULT" ? prefix : prefix.length === 0 ? segment : `${prefix}.${segment}`;
+
+    if (isTokenLeaf(node)) {
+      return [{ name, value: node.value }];
+    }
+
+    return flattenTokenBranch(node, name);
+  });
+}
+
+const primitiveColorTokens = flattenTokenBranch(tokens.colors);
+
+function resolveSemanticColor(token: DisplayToken): ColorDisplayToken {
+  const match = /^\{colors\.([A-Za-z0-9.]+)\}$/u.exec(token.value);
+  const reference = match?.[1];
+
+  if (reference === undefined) {
+    throw new Error(`セマンティックカラー「${token.name}」の参照形式が不正です。`);
+  }
+
+  const primitive = primitiveColorTokens.find((candidate) => candidate.name === reference);
+
+  if (primitive === undefined) {
+    throw new Error(
+      `セマンティックカラー「${token.name}」の参照先「${reference}」が存在しません。`,
+    );
+  }
+
+  return { ...token, color: primitive.value, reference };
+}
+
+const primitiveColors = primitiveColorTokens.map((token) => ({
+  ...token,
+  color: token.value,
+}));
+const semanticColors = flattenTokenBranch(semanticTokens.colors).map(resolveSemanticColor);
+const fontSizes = flattenTokenBranch(tokens.fontSizes);
+const fontWeights = flattenTokenBranch(tokens.fontWeights);
+const lineHeights = flattenTokenBranch(tokens.lineHeights);
+const spacing = flattenTokenBranch(tokens.spacing).toSorted(
+  (left, right) => Number.parseFloat(left.value) - Number.parseFloat(right.value),
+);
+const radii = flattenTokenBranch(tokens.radii);
+const shadows = flattenTokenBranch(tokens.shadows);
+const sizes = flattenTokenBranch(tokens.sizes);
+const aspectRatios = flattenTokenBranch(tokens.aspectRatios);
+
+const frame = css({
+  minH: "100%",
   bg: "surface.page",
   color: "text.default",
   fontFamily: "sans",
-  px: "4",
-  py: "6",
-  maxW: "480px",
+  maxW: "content.wide",
   mx: "auto",
+  px: { base: "4", md: "8" },
+  py: { base: "6", md: "10" },
 });
 
-const section = css({ mt: "8" });
-
-const sectionTitle = css({
-  fontSize: "lg",
-  fontWeight: "700",
-  mb: "3",
-  color: "text.default",
+const titleStyle = css({
+  m: "0",
+  fontSize: "3xl",
+  fontWeight: "bold",
+  letterSpacing: "0.01em",
 });
 
-const sectionLead = css({
-  fontSize: "sm",
+const subtitleStyle = css({
+  mt: "2",
+  mb: "0",
   color: "text.muted",
-  mb: "4",
-  lineHeight: "1.6",
+  fontSize: "sm",
+  lineHeight: "relaxed",
 });
 
-const grid = css({
+const sectionStyle = css({ mt: "8" });
+
+const sectionTitleStyle = css({
+  m: "0",
+  color: "text.default",
+  fontSize: "lg",
+  fontWeight: "bold",
+});
+
+const sectionLeadStyle = css({
+  mt: "1.5",
+  mb: "4",
+  color: "text.muted",
+  fontSize: "sm",
+  lineHeight: "relaxed",
+});
+
+const swatchGrid = css({
   display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: "2.5",
+  gridTemplateColumns: { base: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
+  gap: { base: "2.5", md: "4" },
 });
 
 const swatchCard = css({
+  overflow: "hidden",
   borderWidth: "1px",
   borderColor: "border.default",
   borderRadius: "card",
-  overflow: "hidden",
   bg: "surface.card",
   boxShadow: "shadow",
 });
 
+const swatchPaint = css({
+  aspectRatio: "image.landscape",
+  borderBottomWidth: "1px",
+  borderBottomColor: "border.default",
+});
+
 const swatchMeta = css({
+  display: "grid",
+  gap: "0.5",
   px: "2.5",
   py: "2",
-  fontSize: "2xs",
   color: "text.subtle",
-  lineHeight: "1.45",
+  fontSize: "2xs",
+  lineHeight: "normal",
 });
 
-const swatchName = css({
-  display: "block",
+const tokenNameStyle = css({
+  overflowWrap: "anywhere",
   color: "text.default",
-  fontWeight: "700",
+  fontFamily: "sans",
   fontSize: "xs",
-  mb: "0.5",
+  fontWeight: "bold",
 });
 
-const typeRow = css({
-  display: "flex",
-  alignItems: "baseline",
-  justifyContent: "space-between",
+const tokenTable = css({
+  borderTopWidth: "1px",
+  borderTopColor: "border.default",
+});
+
+const tokenRow = css({
+  display: "grid",
+  gridTemplateColumns: {
+    base: "minmax(5.5rem, 0.4fr) minmax(0, 1fr)",
+    md: "12rem minmax(0, 1fr)",
+  },
+  alignItems: "center",
   gap: "3",
+  minH: "12",
   py: "2.5",
   borderBottomWidth: "1px",
   borderBottomColor: "border.default",
 });
 
-const typeMeta = css({
-  fontSize: "2xs",
+const tokenValueStyle = css({
+  mt: "1",
+  overflowWrap: "anywhere",
   color: "text.subtle",
-  flexShrink: 0,
+  fontSize: "2xs",
   fontVariantNumeric: "tabular-nums",
+  lineHeight: "normal",
 });
 
-const radiusRow = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "3",
-  py: "3",
-  borderBottomWidth: "1px",
-  borderBottomColor: "border.default",
+const typeSample = css({
+  color: "text.default",
+  fontWeight: "semibold",
 });
 
-const samples = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "3",
-});
-
-const chip = css({
-  display: "inline-flex",
-  alignItems: "center",
-  alignSelf: "flex-start",
-  fontSize: "xs",
-  px: "2.5",
-  py: "0.5",
+const spacingTrack = css({
+  h: "4",
+  overflow: "hidden",
   borderRadius: "pill",
   bg: "brand.soft",
-  color: "brand.primaryDeep",
-  fontWeight: "600",
 });
 
-const sampleCard = css({
-  bg: "surface.card",
+const spacingBar = css({
+  h: "full",
+  bg: "brand.primary",
+});
+
+const radiusSample = css({
+  w: "16",
+  h: "12",
+  borderWidth: "1px",
+  borderColor: "brand.primary",
+  bg: "brand.soft",
+});
+
+const elevationSample = css({
+  w: "20",
+  h: "12",
   borderWidth: "1px",
   borderColor: "border.default",
   borderRadius: "card",
-  boxShadow: "shadow",
-  p: "4",
-});
-
-const sampleCardTitle = css({
-  fontSize: "md",
-  fontWeight: "700",
-  mb: "1",
-});
-
-const sampleCardBody = css({
-  fontSize: "sm",
-  color: "text.muted",
-  lineHeight: "1.65",
-});
-
-const btnPrimary = css({
-  display: "block",
-  w: "100%",
-  borderRadius: "button",
-  px: "4",
-  py: "3",
-  fontSize: "md",
-  fontWeight: "700",
-  bg: "brand.primary",
-  color: "surface.card",
-  borderWidth: "1px",
-  borderColor: "transparent",
-  textAlign: "center",
-});
-
-const btnGhost = css({
-  display: "block",
-  w: "100%",
-  borderRadius: "button",
-  px: "4",
-  py: "3",
-  fontSize: "md",
-  fontWeight: "700",
   bg: "surface.card",
-  color: "brand.primary",
-  borderWidth: "1px",
-  borderColor: "border.strong",
-  textAlign: "center",
 });
 
-const warnBanner = css({
-  mt: "3",
-  p: "3",
+const sizeTrack = css({
+  h: "8",
+  overflow: "hidden",
   borderRadius: "input",
-  bg: "amber.soft",
-  color: "accent.warn",
-  fontSize: "sm",
-  fontWeight: "600",
+  bg: "brand.soft",
+});
+
+const sizeBar = css({
+  h: "full",
+  bg: "brand.primary",
+});
+
+const ratioSample = css({
+  w: "24",
+  maxW: "full",
   borderWidth: "1px",
-  borderColor: "accent.warn",
+  borderColor: "brand.primary",
+  borderRadius: "input",
+  bg: "brand.soft",
 });
 
-const official = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1",
-  color: "accent.official",
-  fontSize: "sm",
-  fontWeight: "600",
-  mt: "2",
+const catalog = css({
+  display: "grid",
+  gap: "6",
+  bg: "surface.page",
 });
 
-const starRow = css({
-  color: "accent.star",
-  fontSize: "sm",
-  letterSpacing: "1px",
-  mt: "2",
-});
+type TokenDocFrameProps = {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+};
 
-function SwatchGrid({ items }: { items: Swatch[] }) {
+function TokenDocFrame({ title, subtitle, children }: TokenDocFrameProps) {
   return (
-    <div className={grid}>
+    <main className={frame}>
+      <h1 className={titleStyle}>{title}</h1>
+      <p className={subtitleStyle}>{subtitle}</p>
+      {children}
+    </main>
+  );
+}
+
+type TokenSectionProps = {
+  title: string;
+  lead: string;
+  children: ReactNode;
+};
+
+function TokenSection({ title, lead, children }: TokenSectionProps) {
+  return (
+    <section className={sectionStyle}>
+      <h2 className={sectionTitleStyle}>{title}</h2>
+      <p className={sectionLeadStyle}>{lead}</p>
+      {children}
+    </section>
+  );
+}
+
+type TokenRowProps = {
+  token: DisplayToken;
+  children: ReactNode;
+};
+
+function TokenRow({ token, children }: TokenRowProps) {
+  return (
+    <div className={tokenRow}>
+      <code className={tokenNameStyle}>{token.name}</code>
+      <div>
+        {children}
+        <div className={tokenValueStyle}>{token.value}</div>
+      </div>
+    </div>
+  );
+}
+
+type ColorGridProps = {
+  items: ColorDisplayToken[];
+};
+
+function ColorGrid({ items }: ColorGridProps) {
+  return (
+    <div className={swatchGrid}>
       {items.map((item) => (
-        <div key={item.token} className={swatchCard}>
-          <div className={item.paintClass}>{item.value}</div>
+        <article key={item.name} className={swatchCard}>
+          <div
+            aria-label={`${item.name} の色見本`}
+            className={swatchPaint}
+            role="img"
+            style={{ backgroundColor: item.color }}
+          />
           <div className={swatchMeta}>
-            <span className={swatchName}>{item.token}</span>
-            {item.value}
+            <code className={tokenNameStyle}>{item.name}</code>
+            <span>{item.reference === undefined ? item.value : `→ ${item.reference}`}</span>
+            {item.reference === undefined ? null : <span>{item.color}</span>}
           </div>
-        </div>
+        </article>
       ))}
     </div>
   );
 }
 
+export function ColorTokens() {
+  return (
+    <TokenDocFrame
+      title="Colors"
+      subtitle="プリミティブカラー。用途を持つ UI ではセマンティックカラーを優先する。"
+    >
+      <TokenSection title="Palette" lead="Panda の設定が参照する実値を一覧する。">
+        <ColorGrid items={primitiveColors} />
+      </TokenSection>
+    </TokenDocFrame>
+  );
+}
+
+export function SemanticColorTokens() {
+  return (
+    <TokenDocFrame
+      title="Semantic Colors"
+      subtitle="brand・text・surface・border・accent の用途別カラー。"
+    >
+      <TokenSection title="Aliases" lead="参照先と解決後の色を同時に確認できる。">
+        <ColorGrid items={semanticColors} />
+      </TokenSection>
+    </TokenDocFrame>
+  );
+}
+
+export function TypographyTokens() {
+  return (
+    <TokenDocFrame title="Typography" subtitle="Noto Sans JP を基準にしたサイズ・ウェイト・行高。">
+      <TokenSection title="Font size" lead="日本語本文で実際の大きさと字面を確認する。">
+        <div className={tokenTable}>
+          {fontSizes.map((token) => (
+            <TokenRow key={token.name} token={token}>
+              <span className={typeSample} style={{ fontSize: token.value }}>
+                畑の状態を記録する
+              </span>
+            </TokenRow>
+          ))}
+        </div>
+      </TokenSection>
+
+      <TokenSection title="Font weight" lead="同じサイズで太さの差を比較する。">
+        <div className={tokenTable}>
+          {fontWeights.map((token) => (
+            <TokenRow key={token.name} token={token}>
+              <span style={{ fontWeight: Number(token.value) }}>Farmille 農業資材レビュー</span>
+            </TokenRow>
+          ))}
+        </div>
+      </TokenSection>
+
+      <TokenSection title="Line height" lead="2行の本文で行間を比較する。">
+        <div className={tokenTable}>
+          {lineHeights.map((token) => (
+            <TokenRow key={token.name} token={token}>
+              <span style={{ lineHeight: token.value }}>
+                使用した資材の特徴を記録する。
+                <br />
+                次の栽培で比較できる形に残す。
+              </span>
+            </TokenRow>
+          ))}
+        </div>
+      </TokenSection>
+    </TokenDocFrame>
+  );
+}
+
+export function SpacingTokens() {
+  return (
+    <TokenDocFrame title="Spacing" subtitle="8px 刻みを基調にした Panda の余白スケール。">
+      <TokenSection title="Scale" lead="長い値は表示領域の幅で止め、実値を併記する。">
+        <div className={tokenTable}>
+          {spacing.map((token) => (
+            <TokenRow key={token.name} token={token}>
+              <div className={spacingTrack}>
+                <div className={spacingBar} style={{ maxWidth: "100%", width: token.value }} />
+              </div>
+            </TokenRow>
+          ))}
+        </div>
+      </TokenSection>
+    </TokenDocFrame>
+  );
+}
+
+export function RadiusTokens() {
+  return (
+    <TokenDocFrame title="Radius" subtitle="用途別に固定した角丸。">
+      <TokenSection title="Scale" lead="同じ矩形に適用して輪郭を比較する。">
+        <div className={tokenTable}>
+          {radii.map((token) => (
+            <TokenRow key={token.name} token={token}>
+              <div className={radiusSample} style={{ borderRadius: token.value }} />
+            </TokenRow>
+          ))}
+        </div>
+      </TokenSection>
+    </TokenDocFrame>
+  );
+}
+
+export function ElevationTokens() {
+  return (
+    <TokenDocFrame title="Elevation" subtitle="カードと浮遊要素に使う影。">
+      <TokenSection title="Shadow" lead="surface.card と組み合わせた見え方を確認する。">
+        <div className={tokenTable}>
+          {shadows.map((token) => (
+            <TokenRow key={token.name} token={token}>
+              <div className={elevationSample} style={{ boxShadow: token.value }} />
+            </TokenRow>
+          ))}
+        </div>
+      </TokenSection>
+    </TokenDocFrame>
+  );
+}
+
+export function SizeTokens() {
+  return (
+    <TokenDocFrame title="Sizes" subtitle="カード・ダイアログ・読み物などの用途別上限幅。">
+      <TokenSection title="Max width" lead="表示領域より長い値は右端で止め、実値を併記する。">
+        <div className={tokenTable}>
+          {sizes.map((token) => (
+            <TokenRow key={token.name} token={token}>
+              <div className={sizeTrack}>
+                <div className={sizeBar} style={{ maxWidth: "100%", width: token.value }} />
+              </div>
+            </TokenRow>
+          ))}
+        </div>
+      </TokenSection>
+    </TokenDocFrame>
+  );
+}
+
+export function AspectRatioTokens() {
+  return (
+    <TokenDocFrame title="Aspect Ratios" subtitle="画像枠の用途別アスペクト比。">
+      <TokenSection title="Image" lead="同じ幅に適用して縦横比を比較する。">
+        <div className={tokenTable}>
+          {aspectRatios.map((token) => (
+            <TokenRow key={token.name} token={token}>
+              <div className={ratioSample} style={{ aspectRatio: token.value }} />
+            </TokenRow>
+          ))}
+        </div>
+      </TokenSection>
+    </TokenDocFrame>
+  );
+}
+
 export function TokenCatalog() {
   return (
-    <main className={page}>
-      <h1 className={css({ fontSize: "3xl", fontWeight: "800", letterSpacing: "0.01em" })}>
-        Design Tokens
-      </h1>
-      <p className={css({ fontSize: "sm", color: "text.muted", mt: "2", lineHeight: "1.6" })}>
-        docs/rebuild/02-screens.md §5 準拠。ライトテーマのみ。
-      </p>
-
-      <section className={section}>
-        <h2 className={sectionTitle}>Colors</h2>
-        <p className={sectionLead}>生トークン（colors.*）。色面はトークン参照、ラベルは実値。</p>
-        <SwatchGrid items={colorSwatches} />
-      </section>
-
-      <section className={section}>
-        <h2 className={sectionTitle}>Semantic Colors</h2>
-        <p className={sectionLead}>brand / text / surface / border / accent。</p>
-        <SwatchGrid items={semanticSwatches} />
-      </section>
-
-      <section className={section}>
-        <h2 className={sectionTitle}>Typography</h2>
-        <p className={sectionLead}>fontSizes 8段（2xs〜3xl）＋ fonts.sans。</p>
-        <div className={typeRow}>
-          <span className={css({ fontSize: "2xs", color: "text.default", fontWeight: "600" })}>
-            あいう農資材 2xs
-          </span>
-          <span className={typeMeta}>2xs · 9.5px</span>
-        </div>
-        <div className={typeRow}>
-          <span className={css({ fontSize: "xs", color: "text.default", fontWeight: "600" })}>
-            あいう農資材 xs
-          </span>
-          <span className={typeMeta}>xs · 11px</span>
-        </div>
-        <div className={typeRow}>
-          <span className={css({ fontSize: "sm", color: "text.default", fontWeight: "600" })}>
-            あいう農資材 sm
-          </span>
-          <span className={typeMeta}>sm · 12px</span>
-        </div>
-        <div className={typeRow}>
-          <span className={css({ fontSize: "md", color: "text.default", fontWeight: "600" })}>
-            あいう農資材 md
-          </span>
-          <span className={typeMeta}>md · 14px</span>
-        </div>
-        <div className={typeRow}>
-          <span className={css({ fontSize: "lg", color: "text.default", fontWeight: "600" })}>
-            あいう農資材 lg
-          </span>
-          <span className={typeMeta}>lg · 16px</span>
-        </div>
-        <div className={typeRow}>
-          <span className={css({ fontSize: "xl", color: "text.default", fontWeight: "600" })}>
-            あいう農資材 xl
-          </span>
-          <span className={typeMeta}>xl · 18px</span>
-        </div>
-        <div className={typeRow}>
-          <span className={css({ fontSize: "2xl", color: "text.default", fontWeight: "600" })}>
-            あいう農資材 2xl
-          </span>
-          <span className={typeMeta}>2xl · 20px</span>
-        </div>
-        <div className={typeRow}>
-          <span className={css({ fontSize: "3xl", color: "text.default", fontWeight: "600" })}>
-            あいう農資材 3xl
-          </span>
-          <span className={typeMeta}>3xl · 21px</span>
-        </div>
-      </section>
-
-      <section className={section}>
-        <h2 className={sectionTitle}>Radii</h2>
-        <p className={sectionLead}>pill / card / button / input。</p>
-        <div className={radiusRow}>
-          <div
-            className={css({
-              w: "72px",
-              h: "48px",
-              bg: "brand.soft",
-              borderWidth: "1px",
-              borderColor: "brand.primary",
-              flexShrink: 0,
-              borderRadius: "pill",
-            })}
-          />
-          <div>
-            <div className={css({ fontSize: "sm", fontWeight: "700" })}>pill</div>
-            <div className={css({ fontSize: "2xs", color: "text.subtle" })}>999px</div>
-          </div>
-        </div>
-        <div className={radiusRow}>
-          <div
-            className={css({
-              w: "72px",
-              h: "48px",
-              bg: "brand.soft",
-              borderWidth: "1px",
-              borderColor: "brand.primary",
-              flexShrink: 0,
-              borderRadius: "card",
-            })}
-          />
-          <div>
-            <div className={css({ fontSize: "sm", fontWeight: "700" })}>card</div>
-            <div className={css({ fontSize: "2xs", color: "text.subtle" })}>14px</div>
-          </div>
-        </div>
-        <div className={radiusRow}>
-          <div
-            className={css({
-              w: "72px",
-              h: "48px",
-              bg: "brand.soft",
-              borderWidth: "1px",
-              borderColor: "brand.primary",
-              flexShrink: 0,
-              borderRadius: "button",
-            })}
-          />
-          <div>
-            <div className={css({ fontSize: "sm", fontWeight: "700" })}>button</div>
-            <div className={css({ fontSize: "2xs", color: "text.subtle" })}>12px</div>
-          </div>
-        </div>
-        <div className={radiusRow}>
-          <div
-            className={css({
-              w: "72px",
-              h: "48px",
-              bg: "brand.soft",
-              borderWidth: "1px",
-              borderColor: "brand.primary",
-              flexShrink: 0,
-              borderRadius: "input",
-            })}
-          />
-          <div>
-            <div className={css({ fontSize: "sm", fontWeight: "700" })}>input</div>
-            <div className={css({ fontSize: "2xs", color: "text.subtle" })}>11px</div>
-          </div>
-        </div>
-      </section>
-
-      <section className={section}>
-        <h2 className={sectionTitle}>Shadows</h2>
-        <p className={sectionLead}>shadow / shadow.lift。</p>
-        <div
-          className={css({
-            bg: "surface.card",
-            borderWidth: "1px",
-            borderColor: "border.default",
-            borderRadius: "card",
-            p: "4",
-            mb: "3",
-            boxShadow: "shadow",
-          })}
-        >
-          <div className={css({ fontSize: "sm", fontWeight: "700" })}>shadow</div>
-          <div className={css({ fontSize: "2xs", color: "text.subtle", mt: "1" })}>
-            0 1px 2px rgba(30,35,31,.05), 0 4px 14px rgba(30,35,31,.06)
-          </div>
-        </div>
-        <div
-          className={css({
-            bg: "surface.card",
-            borderWidth: "1px",
-            borderColor: "border.default",
-            borderRadius: "card",
-            p: "4",
-            boxShadow: "shadow.lift",
-          })}
-        >
-          <div className={css({ fontSize: "sm", fontWeight: "700" })}>shadow.lift</div>
-          <div className={css({ fontSize: "2xs", color: "text.subtle", mt: "1" })}>
-            0 8px 30px rgba(30,35,31,.16)
-          </div>
-        </div>
-      </section>
-
-      <section className={section}>
-        <h2 className={sectionTitle}>Samples</h2>
-        <p className={sectionLead}>チップ・カード・ボタンの素朴な組み合わせ。</p>
-        <div className={samples}>
-          <span className={chip}>微生物資材</span>
-          <div className={sampleCard}>
-            <div className={sampleCardTitle}>サンプル資材カード</div>
-            <p className={sampleCardBody}>
-              セマンティックトークン（surface.card / text.muted / border.default /
-              shadow）で組んだカード。
-            </p>
-            <div className={starRow}>★★★★☆ 4.2</div>
-            <div className={official}>公式マーク（accent.official）</div>
-            <div className={warnBanner}>警告色（amber.soft + accent.warn）</div>
-          </div>
-          <div className={btnPrimary}>プライマリボタン</div>
-          <div className={btnGhost}>ゴーストボタン</div>
-        </div>
-      </section>
-    </main>
+    <div className={catalog}>
+      <ColorTokens />
+      <SemanticColorTokens />
+      <TypographyTokens />
+      <SpacingTokens />
+      <RadiusTokens />
+      <ElevationTokens />
+      <SizeTokens />
+      <AspectRatioTokens />
+    </div>
   );
 }

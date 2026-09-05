@@ -39,8 +39,8 @@ export const NotOfficial: Story = {
 
 export const JaOrganization: Story = {
   args: {
-    organization: "〇〇JA",
-    typeLabel: "JA",
+    organization: "〇〇バイオ株式会社",
+    typeLabel: "メーカー",
   },
 };
 

@@ -6,7 +6,7 @@ import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "アカウント登録",
-  description: "一般ユーザーとメーカー・出品者から、利用方法に合う登録方法を選びます。",
+  description: "一般ユーザーとメーカーから、利用方法に合う登録方法を選びます。",
   robots: NO_INDEX_ROBOTS,
 };
 

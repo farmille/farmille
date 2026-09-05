@@ -5,18 +5,7 @@ import type { CompareMaterialItem, SavedMaterialItem } from "@/server/queries/sa
 export const ownProfile = {
   userId: "00000000-0000-4000-8000-000000000301",
   handle: "緑の畑",
-  prefectureCode: 13,
-  prefecturePublic: true,
   avatarUrl: null,
-  bio: "東京都でトマトと葉物野菜を育てています。資材選びの記録を共有します。",
-  cultivationStyles: ["施設園芸", "土耕栽培"],
-  affiliation: "東村山生産組合",
-  websiteUrl: "https://example.com/farm",
-  snsUrl: "https://example.com/farm/social",
-  crops: [
-    { id: "crop-tomato", name: "トマト" },
-    { id: "crop-spinach", name: "ほうれん草" },
-  ],
 } satisfies OwnProfile;
 
 export const ownPosts = [

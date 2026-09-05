@@ -4,7 +4,7 @@
 /** 要ログイン。一般ユーザーの画面（02 §2「要ログイン」）。 */
 const GENERAL_PROTECTED_PREFIXES = ["/me", "/post"];
 
-/** 要ログイン。出品者ダッシュボード（02 §2「出品者ダッシュボード」）。 */
+/** 要ログイン。メーカーダッシュボード（02 §2「メーカーダッシュボード」）。 */
 const SELLER_PROTECTED_PREFIXES = ["/dashboard"];
 
 /** 要ログイン。運営管理（AAL2 の判定は requireAdmin が行う）。 */

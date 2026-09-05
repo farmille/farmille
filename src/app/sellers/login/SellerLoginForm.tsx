@@ -61,8 +61,8 @@ export function SellerLoginForm({ next }: { next: string | null }) {
       </div>
 
       <div className={linkRowStyle}>
-        <Link className={textLinkStyle} href="/sellers/apply">
-          メーカー・出品者アカウントをお持ちでない方は申請
+        <Link className={textLinkStyle} href="/sellers">
+          メーカーアカウントをお持ちでない方
         </Link>
         <Link className={textLinkStyle} href="/login">
           一般ユーザーの方のログイン

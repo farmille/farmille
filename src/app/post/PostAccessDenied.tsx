@@ -6,7 +6,7 @@ import type { AccountType } from "@/server/auth";
 export function PostAccessDenied({ accountType }: { accountType: AccountType | null }) {
   const destination =
     accountType === "seller"
-      ? { href: "/dashboard", label: "出品者ダッシュボードへ" }
+      ? { href: "/dashboard", label: "メーカーダッシュボードへ" }
       : accountType === "admin"
         ? { href: "/admin", label: "運営管理へ" }
         : null;
@@ -14,7 +14,7 @@ export function PostAccessDenied({ accountType }: { accountType: AccountType | n
   return (
     <FormPageShell active="post" backHref="/" chrome="public" title="投稿する">
       <SurfaceCard
-        description="レビューと使用レポートの投稿は一般ユーザー専用です。出品者や運営の作業は、それぞれの管理画面から行ってください。"
+        description="レビューと使用レポートの投稿は一般ユーザー専用です。メーカーや運営の作業は、それぞれの管理画面から行ってください。"
         title="一般ユーザー向けの画面です"
       >
         {destination === null ? null : (

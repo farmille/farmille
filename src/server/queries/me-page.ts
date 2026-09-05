@@ -18,7 +18,7 @@ type OwnReviewQueryRow = Pick<
   ReviewRow,
   "id" | "material_id" | "rating" | "body" | "created_at"
 > & {
-  cropRelations: ReviewCropRelation[];
+  cropRelations: ReviewCropRelation | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
 };
 
@@ -41,7 +41,7 @@ type HelpfulReviewDetail = {
   material_id: string;
   rating: number;
   body: string;
-  cropRelations: ReviewCropRelation[];
+  cropRelations: ReviewCropRelation | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
   author: Pick<PublicProfileRow, "user_id" | "handle"> | null;
 };

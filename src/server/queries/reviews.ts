@@ -11,7 +11,6 @@ type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 type ReviewPhotoRow = Database["public"]["Tables"]["review_photos"]["Row"];
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 type CropGroupRow = Database["public"]["Tables"]["crop_groups"]["Row"];
-type ProfileCropRow = Database["public"]["Tables"]["profile_crops"]["Row"];
 type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
@@ -44,7 +43,6 @@ export type ReviewListItem = ReviewFields & {
 
 export type ReviewCropOption = Pick<CropRow, "id" | "name" | "aliases"> & {
   groupName: string;
-  fromProfile: boolean;
 };
 
 export type ReviewEditorData = Pick<
@@ -67,7 +65,7 @@ export type ReviewSort = "newest" | "helpful" | "rating";
 
 type ReviewQueryRow = ReviewFields & {
   author: ReviewAuthor | null;
-  cropRelations: ReviewCropRelation[];
+  cropRelations: ReviewCropRelation | null;
   photos: ReviewPhoto[];
 };
 
@@ -439,40 +437,32 @@ export async function listReviewsByMaterial(
   });
 }
 
-/** レビュー作目候補。プロフィールに登録した主な作目を先頭にする。 */
-export async function listReviewCropOptions(userId: string): Promise<Result<ReviewCropOption[]>> {
+/** レビュー作目候補を作物群・作物の表示順で返す。 */
+export async function listReviewCropOptions(): Promise<Result<ReviewCropOption[]>> {
   const supabase = await createServerSupabase();
-  const [cropsResult, profileCropsResult] = await Promise.all([
-    supabase
-      .from("crops")
-      .select(
-        `
-          id,
+  const { data, error } = await supabase
+    .from("crops")
+    .select(
+      `
+        id,
+        name,
+        aliases,
+        sort_order,
+        group:crop_groups!crops_group_id_fkey (
           name,
-          aliases,
-          sort_order,
-          group:crop_groups!crops_group_id_fkey (
-            name,
-            sort_order
-          )
-        `,
-      )
-      .order("sort_order")
-      .order("name"),
-    supabase.from("profile_crops").select("crop_id").eq("user_id", userId),
-  ]);
+          sort_order
+        )
+      `,
+    )
+    .order("sort_order")
+    .order("name");
 
-  if (cropsResult.error !== null || profileCropsResult.error !== null) {
-    reportQueryError("レビュー作目候補の取得に失敗", {
-      cropsError: cropsResult.error,
-      profileCropsError: profileCropsResult.error,
-    });
+  if (error !== null) {
+    reportQueryError("レビュー作目候補の取得に失敗", error);
     return fail("internal");
   }
 
-  const profileCropRows: Pick<ProfileCropRow, "crop_id">[] = profileCropsResult.data;
-  const profileCropIds = new Set(profileCropRows.map(({ crop_id }) => crop_id));
-  const rows: ReviewCropOptionQueryRow[] = cropsResult.data;
+  const rows: ReviewCropOptionQueryRow[] = data;
 
   if (rows.some(({ group }) => group === null)) {
     reportQueryError("レビュー作目候補の作物群が欠落", rows);
@@ -492,24 +482,21 @@ export async function listReviewCropOptions(userId: string): Promise<Result<Revi
                 groupName: crop.group.name,
                 groupSortOrder: crop.group.sort_order,
                 cropSortOrder: crop.sort_order,
-                fromProfile: profileCropIds.has(crop.id),
               },
             ],
       )
       .toSorted(
         (left, right) =>
-          Number(right.fromProfile) - Number(left.fromProfile) ||
           left.groupSortOrder - right.groupSortOrder ||
           left.cropSortOrder - right.cropSortOrder ||
           left.name.localeCompare(right.name, "ja") ||
           left.id.localeCompare(right.id),
       )
-      .map(({ id, name, aliases, groupName, fromProfile }) => ({
+      .map(({ id, name, aliases, groupName }) => ({
         id,
         name,
         aliases,
         groupName,
-        fromProfile,
       })),
   );
 }
@@ -585,7 +572,7 @@ export async function getReviewForEdit(
   }
 
   const { cropRelations, ...review } = data;
-  const typedCropRelations: ReviewCropRelation[] = cropRelations;
+  const typedCropRelations: ReviewCropRelation | null = cropRelations;
   const crops = orderedReviewCrops(typedCropRelations);
 
   if (crops === null) {

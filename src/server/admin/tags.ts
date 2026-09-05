@@ -170,32 +170,24 @@ export async function listCropGroups(): Promise<Result<CropGroupOption[]>> {
 
 export async function listAdminCrops(): Promise<Result<AdminCropItem[]>> {
   return withAdmin(async ({ supabase }) => {
-    const [
-      cropsResult,
-      groupsResult,
-      reviewsResult,
-      reportsResult,
-      profileCropsResult,
-      materialCropsResult,
-    ] = await Promise.all([
-      supabase
-        .from("crops")
-        .select("id, name, aliases, sort_order, group_id")
-        .order("sort_order", { ascending: true })
-        .order("name", { ascending: true }),
-      supabase.from("crop_groups").select("id, name"),
-      supabase.from("review_crops").select("crop_id"),
-      supabase.from("usage_reports").select("crop_id"),
-      supabase.from("profile_crops").select("crop_id"),
-      supabase.from("material_crops").select("crop_id"),
-    ]);
+    const [cropsResult, groupsResult, reviewsResult, reportsResult, materialCropsResult] =
+      await Promise.all([
+        supabase
+          .from("crops")
+          .select("id, name, aliases, sort_order, group_id")
+          .order("sort_order", { ascending: true })
+          .order("name", { ascending: true }),
+        supabase.from("crop_groups").select("id, name"),
+        supabase.from("review_crops").select("crop_id"),
+        supabase.from("usage_reports").select("crop_id"),
+        supabase.from("material_crops").select("crop_id"),
+      ]);
 
     if (
       cropsResult.error !== null ||
       groupsResult.error !== null ||
       reviewsResult.error !== null ||
       reportsResult.error !== null ||
-      profileCropsResult.error !== null ||
       materialCropsResult.error !== null
     ) {
       reportError(
@@ -204,7 +196,6 @@ export async function listAdminCrops(): Promise<Result<AdminCropItem[]>> {
           groupsResult.error ??
           reviewsResult.error ??
           reportsResult.error ??
-          profileCropsResult.error ??
           materialCropsResult.error,
       );
 
@@ -215,7 +206,6 @@ export async function listAdminCrops(): Promise<Result<AdminCropItem[]>> {
     const usage = countBy([
       ...reviewsResult.data.map((row) => row.crop_id),
       ...reportsResult.data.map((row) => row.crop_id),
-      ...profileCropsResult.data.map((row) => row.crop_id),
       ...materialCropsResult.data.map((row) => row.crop_id),
     ]);
 
@@ -287,7 +277,7 @@ export async function renameCrop(
  */
 export async function deleteCrop(cropId: string): Promise<Result<null>> {
   return withAdmin(async ({ supabase }) => {
-    const [reviews, reports, profileCrops, materialCrops] = await Promise.all([
+    const [reviews, reports, materialCrops] = await Promise.all([
       supabase
         .from("review_crops")
         .select("id", { count: "exact", head: true })
@@ -297,27 +287,19 @@ export async function deleteCrop(cropId: string): Promise<Result<null>> {
         .select("id", { count: "exact", head: true })
         .eq("crop_id", cropId),
       supabase
-        .from("profile_crops")
-        .select("id", { count: "exact", head: true })
-        .eq("crop_id", cropId),
-      supabase
         .from("material_crops")
         .select("id", { count: "exact", head: true })
         .eq("crop_id", cropId),
     ]);
 
-    const failed = reviews.error ?? reports.error ?? profileCrops.error ?? materialCrops.error;
+    const failed = reviews.error ?? reports.error ?? materialCrops.error;
 
     if (failed !== null) {
       reportError("作物の参照数の確認に失敗", failed);
       return fail("internal");
     }
 
-    const usageCount =
-      (reviews.count ?? 0) +
-      (reports.count ?? 0) +
-      (profileCrops.count ?? 0) +
-      (materialCrops.count ?? 0);
+    const usageCount = (reviews.count ?? 0) + (reports.count ?? 0) + (materialCrops.count ?? 0);
     if (usageCount > 0) return fail("conflict");
 
     const { data, error } = await supabase.from("crops").delete().eq("id", cropId).select("id");

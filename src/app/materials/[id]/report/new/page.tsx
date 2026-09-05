@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { css } from "../../../../../../styled-system/css";
 import { AppBar } from "@/components/AppBar";
@@ -61,6 +61,7 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
   if (!formDataResult.ok) {
     throw new Error(errorMessageJa[formDataResult.error]);
   }
+  if (material.publication_status !== "published") notFound();
 
   const formData = formDataResult.data;
   return (
@@ -80,7 +81,7 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
               id: material.id,
               name: material.name,
               manufacturerName: material.manufacturer_name,
-              isOfficial: material.seller_id !== null,
+              isOfficial: material.manufacturer_verified_at !== null,
               imageUrl: material.images[0]?.url ?? null,
             }}
             userId={session.data.userId}

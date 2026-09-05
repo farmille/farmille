@@ -44,7 +44,6 @@ describe("LOGIN_ID_PATTERN", () => {
 describe("validateSellerApply", () => {
   const valid = {
     officialName: "デモ株式会社",
-    sellerType: "maker",
     loginId: "demo-apply-01",
     contactEmail: "contact@example.com",
     contactName: "担当 太郎",

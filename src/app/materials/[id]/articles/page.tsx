@@ -22,23 +22,6 @@ const cardGrid = css({
   md: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
 });
 
-function sellerTypeLabel(sellerType: string | null | undefined): string {
-  switch (sellerType) {
-    case "maker":
-      return "メーカー";
-    case "ja":
-      return "JA";
-    case "farm_corp":
-      return "農業法人";
-    case "expert":
-      return "専門家";
-    case "other":
-      return "その他";
-    default:
-      return "出品者";
-  }
-}
-
 export async function generateMetadata({ params }: MaterialArticlesPageProps): Promise<Metadata> {
   const { id } = await params;
   const material = await loadMaterialOrNotFound(id);
@@ -76,7 +59,7 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
           lineHeight: "1.65",
         })}
       >
-        この資材に紐づく、農家の使用レポートとメーカー・JA・専門家による記事です。
+        この資材に紐づく、農家の使用レポートとメーカーによる記事です。
       </p>
 
       {isEmpty ? (
@@ -128,7 +111,7 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
               <SectionHeading
                 title={
                   <span id="material-articles-heading">
-                    メーカー・JA等の記事
+                    メーカーの記事
                     <span
                       className={css({
                         ml: "2",
@@ -147,8 +130,8 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
                   <ArticleCard
                     key={article.id}
                     title={article.title}
-                    organization={article.seller?.official_name ?? "出品者情報なし"}
-                    typeLabel={sellerTypeLabel(article.seller?.seller_type)}
+                    organization={article.seller?.official_name ?? "メーカー情報なし"}
+                    typeLabel="メーカー"
                     helpfulCount={article.helpfulCount}
                     viewCount={article.viewCount}
                     href={`/articles/${article.id}`}

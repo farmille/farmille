@@ -345,7 +345,11 @@ export async function listSearchSuggestions(): Promise<
   const supabase = await createServerSupabase();
   const [filtersResult, materialsResult] = await Promise.all([
     listSearchFilters(),
-    supabase.from("materials").select("name, manufacturer_name").order("name", { ascending: true }),
+    supabase
+      .from("materials")
+      .select("name, manufacturer_name")
+      .eq("publication_status", "published")
+      .order("name", { ascending: true }),
   ]);
 
   if (!filtersResult.ok) return filtersResult;

@@ -9,21 +9,18 @@ const crops = [
     name: "トマト",
     aliases: ["大玉トマト"],
     groupName: "なす科果菜類",
-    fromProfile: true,
   },
   {
     id: "crop-mini-tomato",
     name: "ミニトマト",
     aliases: ["プチトマト"],
     groupName: "なす科果菜類",
-    fromProfile: true,
   },
   {
     id: "crop-cucumber",
     name: "きゅうり",
     aliases: [],
     groupName: "うり類",
-    fromProfile: false,
   },
 ];
 

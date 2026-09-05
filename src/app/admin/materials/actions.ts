@@ -8,6 +8,7 @@ import { formDataString, formDataStrings } from "@/lib/validation";
 import {
   createMaterial,
   setMaterialSeller,
+  setMaterialPublicationStatus,
   updateMaterial,
   validateMaterialInput,
 } from "@/server/admin/materials";
@@ -19,6 +20,28 @@ function materialErrorMessage(code: ErrorCode): string {
   }
 
   return errorMessageJa[code];
+}
+
+export async function setMaterialPublicationStatusAction(
+  _previousState: MaterialFormState,
+  formData: FormData,
+): Promise<MaterialFormState> {
+  const materialId = formDataString(formData.get("materialId"))?.trim() ?? "";
+  const status = formDataString(formData.get("publicationStatus"));
+  if (materialId.length === 0 || (status !== "published" && status !== "archived")) {
+    return { status: "error", message: errorMessageJa.invalid_body };
+  }
+
+  const result = await setMaterialPublicationStatus(materialId, status);
+  if (!result.ok) return { status: "error", message: errorMessageJa[result.error] };
+
+  revalidatePath(`/admin/materials/${materialId}`);
+  revalidatePath("/admin/materials");
+  revalidatePath(`/materials/${materialId}`);
+  return {
+    status: "done",
+    message: status === "published" ? "資材を公開状態へ戻しました。" : "資材を掲載終了にしました。",
+  };
 }
 
 const TEXT_FIELDS = [
@@ -166,7 +189,7 @@ export async function setMaterialSellerAction(
     if (result.error === "conflict") {
       return {
         status: "error",
-        message: "承認済みの出品者にだけ claim を紐づけられます。",
+        message: "承認済みのメーカーにだけ claim を紐づけられます。",
       };
     }
 
@@ -181,7 +204,7 @@ export async function setMaterialSellerAction(
     status: "done",
     message:
       nextSellerId === null
-        ? "claim を解除しました。メーカー確認済みバッジは外れます。"
-        : "claim を紐づけました。公開側にメーカー確認済みバッジが出ます。",
+        ? "claim を解除し、メーカー確認状態をリセットしました。"
+        : "claim を紐づけました。メーカーが情報を確認するまで確認済み表示は付きません。",
   };
 }

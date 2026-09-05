@@ -7,6 +7,7 @@ import { Panel, adminInlineNoteStyle } from "@/app/admin/_components/AdminUI";
 import { requireAdminPage } from "@/app/admin/_lib/access";
 import { ClaimForm } from "@/app/admin/materials/[id]/ClaimForm";
 import { MaterialForm } from "@/app/admin/materials/_components/MaterialForm";
+import { PublicationStatusForm } from "@/app/admin/materials/[id]/PublicationStatusForm";
 import { FormMessage } from "@/components/auth/Fields";
 import { getAdminMaterial } from "@/server/admin/materials";
 import { listClaimableSellers } from "@/server/admin/sellers";
@@ -61,8 +62,8 @@ export default async function AdminMaterialDetailPage({
       <Panel
         note={
           material.data.sellerName === null
-            ? "未 claim（メーカー確認済みバッジなし）"
-            : `claim 済み：${material.data.sellerName}`
+            ? "未 claim"
+            : `claim 済み：${material.data.sellerName}／メーカー確認：${material.data.manufacturer_verified_at === null ? "未確認" : "確認済み"}`
         }
         title="claim 紐づけ"
       >
@@ -70,6 +71,13 @@ export default async function AdminMaterialDetailPage({
           currentSellerId={material.data.seller_id}
           materialId={material.data.id}
           sellers={sellers.data}
+        />
+      </Panel>
+
+      <Panel title="公開状態">
+        <PublicationStatusForm
+          materialId={material.data.id}
+          status={material.data.publication_status}
         />
       </Panel>
 

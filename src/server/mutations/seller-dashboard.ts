@@ -1,11 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import * as v from "valibot";
-
 import type { ErrorCode } from "@/server/errors";
 import { formDataString } from "@/lib/validation";
+import type { MaterialInput } from "@/server/material-input";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
-import type { Database, Json } from "@/types/database.types";
+import type { Database } from "@/types/database.types";
 
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 
@@ -203,7 +202,10 @@ function errorCodeForMutation(error: { code?: string }): ErrorCode {
     case "42501":
       return "forbidden";
     case "23505":
+    case "40001":
       return "conflict";
+    case "P0002":
+      return "not_found";
     case "23514":
     case "22P02":
       return "invalid_body";
@@ -236,30 +238,110 @@ async function ensureOwnedMaterial(
   return data === null ? fail("not_found") : succeed(null);
 }
 
-/** 本人セッションのクライアントで一次情報層だけを更新する。 */
-export async function updateSellerMaterialPrimaryInformation(
-  sellerId: string,
-  materialId: string,
-  input: PrimaryInformationUpdate,
-): Promise<Result<null>> {
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase
-    .from("materials")
-    .update(input)
-    .eq("id", materialId)
-    .eq("seller_id", sellerId)
-    .select("id")
-    .maybeSingle();
-
-  if (error !== null) {
-    reportMutationError("一次情報の更新に失敗", error);
-    return fail(errorCodeForMutation(error));
-  }
-
-  return data === null ? fail("not_found") : succeed(null);
+function materialRpcParameters(input: MaterialInput, reason: string) {
+  return {
+    p_name: input.name,
+    p_composition_type_id: input.compositionTypeId ?? "",
+    p_sales_status: input.salesStatus ?? "",
+    p_description: input.description ?? "",
+    p_general_use: input.generalUse ?? "",
+    p_main_components: input.mainComponents ?? "",
+    p_mechanism: input.mechanism ?? "",
+    p_usage_text: input.usageText ?? "",
+    p_price_range: input.priceRange ?? "",
+    p_official_url: input.officialUrl ?? "",
+    p_catalog_url: input.catalogUrl ?? "",
+    p_crop_ids: input.cropIds,
+    p_effect_ids: input.effectIds,
+    p_ingredient_category_ids: input.ingredientCategoryIds,
+    p_ingredient_ids: input.ingredientIds,
+    p_product_type_ids: input.productTypeIds,
+    p_search_tag_ids: input.searchTagIds,
+    p_reason: reason,
+  };
 }
 
-/** 本人セッションのクライアントでエビデンス行を追加する。 */
+/** メーカーによる新規資材を、公開せず承認待ちスナップショットとして保存する。 */
+export async function submitSellerMaterialCreateRequest(
+  input: MaterialInput,
+  reason: string,
+): Promise<Result<{ requestId: string }>> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase.rpc(
+    "submit_material_create_change",
+    materialRpcParameters(input, reason),
+  );
+
+  if (error !== null) {
+    reportMutationError("資材新規登録申請に失敗", error);
+    return fail(errorCodeForMutation(error));
+  }
+  return succeed({ requestId: data });
+}
+
+/** メーカーによる公開資材の変更を、承認待ちスナップショットとして保存する。 */
+export async function submitSellerMaterialUpdateRequest(
+  materialId: string,
+  input: MaterialInput,
+  reason: string,
+): Promise<Result<{ requestId: string }>> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase.rpc("submit_material_update_change", {
+    p_material_id: materialId,
+    ...materialRpcParameters(input, reason),
+  });
+
+  if (error !== null) {
+    reportMutationError("資材情報変更申請に失敗", error);
+    return fail(errorCodeForMutation(error));
+  }
+  return succeed({ requestId: data });
+}
+
+export async function submitSellerMaterialArchiveRequest(
+  materialId: string,
+  reason: string,
+): Promise<Result<{ requestId: string }>> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase.rpc("submit_material_archive_request", {
+    p_material_id: materialId,
+    p_reason: reason,
+  });
+
+  if (error !== null) {
+    reportMutationError("資材掲載終了申請に失敗", error);
+    return fail(errorCodeForMutation(error));
+  }
+  return succeed({ requestId: data });
+}
+
+export async function confirmSellerMaterialInformation(materialId: string): Promise<Result<null>> {
+  const supabase = await createServerSupabase();
+  const { error } = await supabase.rpc("confirm_material_information", {
+    p_material_id: materialId,
+  });
+
+  if (error !== null) {
+    reportMutationError("資材情報のメーカー確認に失敗", error);
+    return fail(errorCodeForMutation(error));
+  }
+  return succeed(null);
+}
+
+export async function cancelSellerMaterialChangeRequest(requestId: string): Promise<Result<null>> {
+  const supabase = await createServerSupabase();
+  const { error } = await supabase.rpc("cancel_material_change_request", {
+    p_request_id: requestId,
+  });
+
+  if (error !== null) {
+    reportMutationError("資材変更申請の取消に失敗", error);
+    return fail(errorCodeForMutation(error));
+  }
+  return succeed(null);
+}
+
+/** エビデンス追加も公開行へ直接書かず、資材変更申請として保存する。 */
 export async function createSellerMaterialEvidence(
   sellerId: string,
   materialId: string,
@@ -274,13 +356,13 @@ export async function createSellerMaterialEvidence(
     storagePath === null
       ? null
       : supabase.storage.from("material-images").getPublicUrl(storagePath).data.publicUrl;
-  const { error } = await supabase.from("material_evidences").insert({
-    material_id: materialId,
-    evidence_type: input.evidenceType,
-    title: input.title,
-    file_url: fileUrl,
-    external_url: input.source.kind === "external" ? input.source.externalUrl : null,
-    meta: storagePath === null ? null : { storage_path: storagePath },
+  const { error } = await supabase.rpc("submit_material_evidence_add_request", {
+    p_material_id: materialId,
+    p_evidence_type: input.evidenceType,
+    p_title: input.title,
+    p_file_url: fileUrl ?? "",
+    p_external_url: input.source.kind === "external" ? input.source.externalUrl : "",
+    p_meta: storagePath === null ? null : { storage_path: storagePath },
   });
 
   if (error === null) {
@@ -300,12 +382,7 @@ export async function createSellerMaterialEvidence(
   return fail(errorCodeForMutation(error));
 }
 
-function storagePathFromMeta(meta: Json | null): string | null {
-  const result = v.safeParse(v.object({ storage_path: v.string() }), meta);
-  return result.success ? result.output.storage_path : null;
-}
-
-/** 本人セッションのクライアントでエビデンス行と管理対象ファイルを削除する。 */
+/** エビデンス削除も、承認されるまでは公開行と保存ファイルを保持する。 */
 export async function deleteSellerMaterialEvidence(
   sellerId: string,
   materialId: string,
@@ -317,7 +394,7 @@ export async function deleteSellerMaterialEvidence(
 
   const { data: evidence, error: evidenceError } = await supabase
     .from("material_evidences")
-    .select("id, meta")
+    .select("id")
     .eq("id", evidenceId)
     .eq("material_id", materialId)
     .maybeSingle();
@@ -328,64 +405,14 @@ export async function deleteSellerMaterialEvidence(
   }
   if (evidence === null) return fail("not_found");
 
-  const storagePath = storagePathFromMeta(evidence.meta);
-  if (storagePath !== null && !storagePathForMaterial(storagePath, sellerId, materialId)) {
-    reportMutationError("エビデンスの保存先が所有者規約に違反", {
-      sellerId,
-      materialId,
-      evidenceId,
-    });
-    return fail("internal");
-  }
-
-  const { data: deleted, error: deleteError } = await supabase
-    .from("material_evidences")
-    .delete()
-    .eq("id", evidenceId)
-    .eq("material_id", materialId)
-    .select("id")
-    .maybeSingle();
+  const { error: deleteError } = await supabase.rpc("submit_material_evidence_remove_request", {
+    p_material_id: materialId,
+    p_evidence_id: evidence.id,
+  });
 
   if (deleteError !== null) {
     reportMutationError("エビデンスの削除に失敗", deleteError);
     return fail(errorCodeForMutation(deleteError));
   }
-  if (deleted === null) return fail("not_found");
-
-  if (storagePath !== null) {
-    const { error: storageError } = await supabase.storage
-      .from("material-images")
-      .remove([storagePath]);
-    if (storageError !== null) {
-      // DB を表示の正とし、孤立ファイルの回収失敗は監視ログへ残す。
-      reportMutationError("削除済みエビデンスのファイル回収に失敗", storageError);
-    }
-  }
-
-  return succeed(null);
-}
-
-/** 分類・検索層には触れず、本人名義の変更申請を追加する。 */
-export async function createSellerMaterialEditRequest(
-  sellerId: string,
-  materialId: string,
-  requestText: string,
-): Promise<Result<null>> {
-  const supabase = await createServerSupabase();
-  const ownership = await ensureOwnedMaterial(supabase, sellerId, materialId);
-  if (!ownership.ok) return ownership;
-
-  const { error } = await supabase.from("material_edit_requests").insert({
-    material_id: materialId,
-    seller_id: sellerId,
-    request_text: requestText,
-    status: "open",
-  });
-
-  if (error !== null) {
-    reportMutationError("分類変更申請の追加に失敗", error);
-    return fail(errorCodeForMutation(error));
-  }
-
   return succeed(null);
 }

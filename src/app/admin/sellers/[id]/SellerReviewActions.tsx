@@ -60,7 +60,7 @@ type Operation = "approve" | "reject" | "suspend" | "reinstate" | "invite";
 const CONFIRM_MESSAGES = {
   reject: { note: "この申請を却下します。取り消せません。", label: "却下する" },
   suspend: {
-    note: "このアカウントを凍結します。出品者はログインできなくなります。",
+    note: "このアカウントを凍結します。メーカーはログインできなくなります。",
     label: "凍結する",
   },
 } satisfies Record<"reject" | "suspend", { note: string; label: string }>;

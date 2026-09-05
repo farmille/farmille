@@ -15,7 +15,6 @@ const secondCropId = "55555555-5555-4555-8555-555555555555";
 function validFormData(): FormData {
   const formData = new FormData();
   formData.append("cropIds", cropId);
-  formData.append("cropIds", secondCropId);
   formData.set("rating", "4");
   formData.set("body", "定植後に使用し、葉の状態を継続して観察しました。");
   formData.set("purchaseChannel", "ja");
@@ -40,7 +39,7 @@ describe("validateReviewFormData", () => {
     expect(result).toEqual({
       ok: true,
       input: {
-        cropIds: [cropId, secondCropId],
+        cropIds: [cropId],
         rating: 4,
         body: "定植後に使用し、葉の状態を継続して観察しました。",
         purchaseChannel: "ja",
@@ -89,9 +88,9 @@ describe("validateReviewFormData", () => {
     });
   });
 
-  it("同じ作目の重複送信を拒否する", () => {
+  it("複数作目の送信を拒否する", () => {
     const formData = validFormData();
-    formData.append("cropIds", cropId);
+    formData.append("cropIds", secondCropId);
 
     expect(validateReviewFormData(formData)).toMatchObject({
       ok: false,
@@ -101,13 +100,13 @@ describe("validateReviewFormData", () => {
 });
 
 describe("createReview", () => {
-  it("出品者セッションを DB 操作前に拒否する", async () => {
+  it("メーカーセッションを DB 操作前に拒否する", async () => {
     const authenticate = vi.fn<typeof requireGeneralUser>();
     const createSupabase = vi.fn<typeof createServerSupabase>();
     authenticate.mockResolvedValue({ ok: false, error: "forbidden" });
     const input: ReviewMutationInput = {
       materialId,
-      cropIds: [cropId, secondCropId],
+      cropIds: [cropId],
       rating: 5,
       body: "使用後の状態を記録しました。",
       purchaseChannel: null,

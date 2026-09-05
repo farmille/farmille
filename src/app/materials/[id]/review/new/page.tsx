@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { FormPageShell } from "@/components";
 import { requireGeneralUser } from "@/server/auth";
@@ -26,8 +26,9 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
   }
 
   const material = await loadMaterialOrNotFound(id);
+  if (material.publication_status !== "published") notFound();
   const [cropsResult, existingResult] = await Promise.all([
-    listReviewCropOptions(session.data.userId),
+    listReviewCropOptions(),
     findOwnReviewIdByMaterial(id, session.data.userId),
   ]);
 

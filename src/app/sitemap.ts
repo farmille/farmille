@@ -45,6 +45,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.8,
     },
+    {
+      url: absoluteUrl("/sellers"),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
     ...dynamicUrls(materials, (id) => `/materials/${id}`),
     ...dynamicUrls(materials, (id) => `/materials/${id}/reviews`),
     ...dynamicUrls(materials, (id) => `/materials/${id}/articles`),

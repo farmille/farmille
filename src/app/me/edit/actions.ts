@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import type { AuthFormState, AuthFormValues } from "@/lib/auth/form-state";
-import { formDataString, formDataStrings } from "@/lib/validation";
+import { AVATAR_MAX_BYTES } from "@/lib/avatar-rules";
+import { formDataString } from "@/lib/validation";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 import { requireGeneralUser } from "@/server/auth";
-import { PROFILE_FIELD_LIMITS } from "@/lib/profile-field-limits";
 import {
   updateOwnProfile,
   uploadOwnAvatar,
@@ -28,27 +28,9 @@ function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string
 function submittedValues(formData: FormData): AuthFormValues {
   const values: AuthFormValues = {};
 
-  for (const name of [
-    "handle",
-    "prefectureCode",
-    "prefecturePublic",
-    "bio",
-    "affiliation",
-    "websiteUrl",
-    "snsUrl",
-  ]) {
+  for (const name of ["handle"]) {
     const value = formDataString(formData.get(name));
     if (value !== null) values[name] = value;
-  }
-
-  const cropIds = formDataStrings(formData.getAll("cropIds"));
-  if (cropIds.length > 0) {
-    values.cropIds = cropIds.join(",");
-  }
-
-  const styles = formDataStrings(formData.getAll("cultivationStyles"));
-  if (styles.length > 0) {
-    values.cultivationStyles = styles.join(",");
   }
 
   return values;
@@ -74,14 +56,6 @@ export async function updateProfileAction(
 
   const validation = validateProfileUpdate({
     handle: formData.get("handle"),
-    prefectureCode: formData.get("prefectureCode"),
-    prefecturePublic: formData.get("prefecturePublic"),
-    bio: formData.get("bio"),
-    cultivationStyles: formData.getAll("cultivationStyles"),
-    affiliation: formData.get("affiliation"),
-    websiteUrl: formData.get("websiteUrl"),
-    snsUrl: formData.get("snsUrl"),
-    cropIds: formData.getAll("cropIds"),
   });
 
   if (!validation.ok) {
@@ -95,7 +69,7 @@ export async function updateProfileAction(
 
   const avatar = formData.get("avatar");
   if (avatar instanceof File && avatar.size > 0) {
-    if (avatar.size > PROFILE_FIELD_LIMITS.avatarMaxBytes) {
+    if (avatar.size > AVATAR_MAX_BYTES) {
       return {
         status: "error",
         message: errorMessageJa.invalid_body,

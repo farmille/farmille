@@ -114,7 +114,7 @@ export const SwitchToggleOff: Story = {
 };
 
 export const Note: Story = {
-  render: () => <NoteBox>出品者アカウントは審査制です。承認までに2〜3営業日かかります。</NoteBox>,
+  render: () => <NoteBox>メーカーアカウントは審査制です。承認までに2〜3営業日かかります。</NoteBox>,
 };
 
 export const Hint: Story = {

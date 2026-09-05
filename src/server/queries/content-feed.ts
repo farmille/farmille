@@ -25,7 +25,6 @@ export type ContentFeedArticleItem = {
   viewCount: number;
   coverUrl: string | null;
   organization: string;
-  sellerType: string;
 };
 
 export type ContentFeedReportItem = {
@@ -49,7 +48,7 @@ type FeedKey = {
 };
 
 type ArticleFeedRow = Pick<ArticleRow, "id" | "title" | "hero_image_url" | "published_at"> & {
-  seller: Pick<PublicSellerRow, "official_name" | "seller_type"> | null;
+  seller: Pick<PublicSellerRow, "official_name"> | null;
 };
 
 type ReportFeedRow = Pick<UsageReportRow, "id" | "title" | "published_at" | "material_id"> & {
@@ -147,8 +146,7 @@ async function fetchPublishedArticles(
       hero_image_url,
       published_at,
       seller:public_sellers!articles_seller_id_fkey (
-        official_name,
-        seller_type
+        official_name
       )
     `,
     )
@@ -223,8 +221,8 @@ function toArticleItem(
     return fail("internal");
   }
 
-  if (row.seller?.official_name == null || row.seller.seller_type == null) {
-    reportQueryError("記事の出品者情報が欠落", { id: row.id });
+  if (row.seller?.official_name == null) {
+    reportQueryError("記事のメーカー情報が欠落", { id: row.id });
     return fail("internal");
   }
 
@@ -237,7 +235,6 @@ function toArticleItem(
     viewCount,
     coverUrl: row.hero_image_url,
     organization: row.seller.official_name,
-    sellerType: row.seller.seller_type,
   });
 }
 

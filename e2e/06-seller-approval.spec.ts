@@ -1,17 +1,43 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 import { E2E_ADMIN_ACCOUNTS } from "./support/admin-accounts";
 import { cleanupSellerByLoginId, sellerApprovalByLoginId, uniqueToken } from "./support/test-data";
 import { loginAdminAndEnrollMfa } from "./support/ui";
 
-test("@smoke 出品者申請、admin 承認と MFA、共有ログイン、ダッシュボード", async ({ page }) => {
+async function captureAccountScreen(page: Page, filename: string): Promise<void> {
+  if (process.env.CAPTURE_ACCOUNT_FLOW !== "1") return;
+
+  await page.screenshot({
+    path: `docs/rebuild/assets/account-flow/screens/${filename}`,
+    fullPage: true,
+  });
+}
+
+test("@smoke メーカー申請、admin 承認と MFA、共有ログイン、ダッシュボード", async ({ page }) => {
   const loginId = uniqueToken("seller").slice(0, 30);
-  const officialName = `E2E申請_${loginId}株式会社`;
+  const officialName = `E2Eメーカー${loginId.slice(-6)}株式会社`;
 
   try {
-    await page.goto("/sellers/apply");
-    await page.getByLabel("正式名称（法人名・組織名）").fill(officialName);
-    await page.getByLabel("種別").selectOption("maker");
+    await page.goto("/sellers");
+    await expect(
+      page.getByRole("heading", { name: "自社資材の情報を、正確に届ける。" }),
+    ).toBeVisible();
+    await expect(page.getByText("利用できるのは、農業資材を製造するメーカーです。")).toBeVisible();
+    await expect(page.getByRole("link", { name: "ログイン", exact: true })).toHaveAttribute(
+      "href",
+      "/sellers/login",
+    );
+    await expect(
+      page.getByRole("link", { name: "アカウントをお持ちの方はログイン" }),
+    ).toBeVisible();
+    await captureAccountScreen(page, "33-manufacturer-landing.png");
+    await page.getByRole("link", { name: "メーカーアカウントを申請" }).click();
+    await expect(page).toHaveURL(/\/sellers\/apply$/);
+    await expect(page.getByRole("link", { name: "戻る" })).toHaveAttribute("href", "/sellers");
+    await captureAccountScreen(page, "03-seller-apply.png");
+    await page.getByLabel("メーカー名（法人名）").fill(officialName);
+    await expect(page.getByLabel("種別")).toHaveCount(0);
+    await expect(page.getByText(/JA|農業法人|専門家/)).toHaveCount(0);
     await page.getByLabel("ご希望のログインID").fill(loginId);
     await page.getByLabel("連絡先メールアドレス").fill(`${loginId}@example.test`);
     await page.getByLabel("ご担当者名").fill("E2E 申請担当");
@@ -19,13 +45,17 @@ test("@smoke 出品者申請、admin 承認と MFA、共有ログイン、ダッ
     await page.getByLabel("主な地域").selectOption("全国");
     await page.getByRole("button", { name: "申請する" }).click();
     await expect(page.getByRole("heading", { name: "申請を受け付けました" })).toBeVisible();
+    await captureAccountScreen(page, "04-seller-apply-done.png");
 
+    await page.setViewportSize({ width: 1280, height: 900 });
     await loginAdminAndEnrollMfa(
       page,
       E2E_ADMIN_ACCOUNTS.sellerApproval,
       "/admin/sellers?status=applied",
     );
+    await captureAccountScreen(page, "11-admin-sellers-list.png");
     await page.getByRole("link", { name: officialName }).click();
+    await captureAccountScreen(page, "12-admin-seller-detail.png");
     await page.getByRole("button", { name: "承認して共有ログインを発行" }).click();
     await expect
       .poll(
@@ -55,7 +85,9 @@ test("@smoke 出品者申請、admin 承認と MFA、共有ログイン、ダッ
 
     expect(issuedLoginId).toBe(loginId);
     await page.context().clearCookies();
+    await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/sellers/login");
+    await captureAccountScreen(page, "05-seller-login.png");
     await page.getByLabel("ログインID").fill(issuedLoginId);
     await page.getByLabel("パスワード").fill(issuedPassword);
     await page.getByRole("button", { name: "ログインする" }).click();
@@ -63,11 +95,12 @@ test("@smoke 出品者申請、admin 承認と MFA、共有ログイン、ダッ
     await expect(page).toHaveURL(/\/dashboard$/);
     await expect(page.getByRole("heading", { name: officialName })).toBeVisible();
     await expect(page.getByText("承認済み", { exact: true })).toBeVisible();
+    await captureAccountScreen(page, "10-dashboard.png");
 
     await page.goto("/post");
     await expect(page).toHaveURL(/\/post$/);
     await expect(page.getByRole("heading", { name: "一般ユーザー向けの画面です" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "出品者ダッシュボードへ" })).toHaveAttribute(
+    await expect(page.getByRole("link", { name: "メーカーダッシュボードへ" })).toHaveAttribute(
       "href",
       "/dashboard",
     );

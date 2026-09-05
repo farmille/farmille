@@ -31,8 +31,8 @@ node --env-file=.env.local tools/dev/seed-demo.ts   # デモアカウントの�
 | 役割 | 入口 | ID |
 |---|---|---|
 | 一般ユーザー | `/login` | `shiosai@example.com` |
-| 出品者（メーカー） | `/sellers/login` | ログイン ID `demo-maker` |
-| 出品者（JA） | `/sellers/login` | ログイン ID `demo-ja` |
+| メーカー1 | `/sellers/login` | ログイン ID `demo-maker` |
+| メーカー2 | `/sellers/login` | ログイン ID `demo-bio` |
 | 運営 | `/login` → `/admin` | `admin@example.com` |
 
 運営は初回に2要素認証（TOTP）の登録が必要。`/admin` へアクセスすると登録画面へ誘導されるので、認証アプリ（1Password・Google Authenticator 等）で QR を読み取って6桁を入力する。登録済みの状態を捨ててやり直すときは次を実行する。
@@ -55,16 +55,16 @@ PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres \
 | 関連記事 | 資材詳細の「その他の記事」 |
 | 使用レポート | `/reports/55555555-5555-4555-8555-555555555555` |
 | 記事一覧・詳細 | `/articles` |
-| 出品者ページ | `/sellers/33333333-3333-4333-8333-333333333333` |
+| メーカーページ | `/sellers/33333333-3333-4333-8333-333333333333` |
 | 公開プロフィール | `/users/22222222-2222-4222-8222-222222222222` |
 | 登録・ログイン | `/signup`・`/login`・`/password-reset` |
-| 出品者申請 | `/sellers/apply` |
+| メーカー申請 | `/sellers/apply` |
 
 **一般ユーザー（`shiosai@example.com`）**：マイページ `/me`（自分の投稿・検討リスト・参考になった の3棚）／プロフィール編集 `/me/edit`／検討リスト `/me/saved` → 比較 `/me/saved/compare`／投稿 `/post` → レビュー・使用レポート
 
-**出品者（`demo-maker`）**：ダッシュボード `/dashboard` → 自社資材の一次情報編集・エビデンス・分類変更申請／記事管理 `/dashboard/articles`
+**メーカー（`demo-maker`）**：ダッシュボード `/dashboard` → 自社資材の確認・追加／変更／掲載終了申請・エビデンス管理／記事管理 `/dashboard/articles`
 
-**運営（`admin@example.com`＋TOTP）**：`/admin`／出品者審査 `/admin/sellers`（審査中1件）／資材 `/admin/materials`／タグ `/admin/tags`／通報 `/admin/reports`（未処理1件）／編集局 `/admin/usage-reports`（確認待ち1件）
+**運営（`admin@example.com`＋TOTP）**：`/admin`／メーカー審査 `/admin/sellers`（審査中1件）／資材 `/admin/materials`／タグ `/admin/tags`／通報 `/admin/reports`（未処理1件）／編集局 `/admin/usage-reports`（確認待ち1件）
 
 ## 5. 通した方がよいフロー
 
@@ -72,7 +72,7 @@ PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres \
 2. 一般ユーザーでレビュー投稿 → 資材詳細の評価・件数が変わる → 編集 → 削除で戻る
 3. 使用レポートを下書き保存 → 提出 → 運営の編集局で公開 → `/reports/[id]` に出る
 4. `/sellers/apply` から申請 → 運営が承認 → 発行された ID とパスワードで `/sellers/login`
-5. 出品者で一次情報を編集 → 公開側の資材詳細に反映される
+5. メーカーで資材変更を申請 → 運営が承認 → 公開側の資材詳細に反映される
 6. レビューを通報 → 運営が対応 → 対象が公開側から消える
 
 ## 6. 既知の挙動

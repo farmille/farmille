@@ -260,18 +260,14 @@ export function ReviewForm({
         <label className={label} htmlFor="review-crop">
           作目 <Badge variant="required">必須</Badge>
           <span className={css({ fontSize: "xs", color: "text.muted", fontWeight: "400" })}>
-            複数選択できます
+            1つ選択してください
           </span>
         </label>
         <ReviewCropPicker
           crops={crops}
           selectedCropIds={selectedCropIds}
           error={fieldErrors?.cropIds}
-          onAdd={(cropId) =>
-            setSelectedCropIds((current) =>
-              current.includes(cropId) ? current : [...current, cropId],
-            )
-          }
+          onAdd={(cropId) => setSelectedCropIds([cropId])}
           onRemove={(cropId) =>
             setSelectedCropIds((current) => current.filter((id) => id !== cropId))
           }

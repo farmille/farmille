@@ -26,7 +26,7 @@ type SavedMaterialQueryRow = {
         | "review_count"
         | "avg_rating"
         | "control_plot_ratio"
-        | "seller_id"
+        | "manufacturer_verified_at"
         | "description"
       > & {
         material_images: MaterialImage[];
@@ -214,7 +214,7 @@ export async function listSavedMaterials(
           review_count,
           avg_rating,
           control_plot_ratio,
-          seller_id,
+          manufacturer_verified_at,
           description,
           material_images (
             id,
@@ -267,7 +267,7 @@ export async function listSavedMaterials(
       reviewCount: row.material.review_count,
       avgRating: row.material.avg_rating,
       controlPlotRatio: row.material.control_plot_ratio,
-      official: row.material.seller_id !== null,
+      official: row.material.manufacturer_verified_at !== null,
       description: row.material.description,
       primaryImageUrl: images[0]?.url ?? null,
     });

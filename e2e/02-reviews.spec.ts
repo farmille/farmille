@@ -2,11 +2,12 @@ import { expect, test } from "@playwright/test";
 
 import {
   createGeneralUser,
+  createMaterial,
   createReview,
   deleteAuthUsersByEmail,
+  deleteMaterial,
   getMaterial,
   helpfulVoteCount,
-  listSeedMaterials,
   reviewByAuthor,
   reviewCropNames,
 } from "./support/test-data";
@@ -14,11 +15,7 @@ import { loginGeneral } from "./support/ui";
 
 test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page }) => {
   const user = await createGeneralUser("review");
-  const material = (await listSeedMaterials())[0];
-
-  if (material === undefined) {
-    throw new Error("レビュー対象のシード資材が見つかりません。");
-  }
+  const material = await createMaterial("review");
 
   const body = `E2Eレビュー_${user.id}`;
   const updatedBody = `${body}_更新済み`;
@@ -37,8 +34,9 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
     await page.getByRole("button", { name: "投稿する" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/materials/${material.id}\\?review=posted`));
-    await expect(page.getByText(body, { exact: true })).toBeVisible();
-    await expect(page.getByText("トマト・ミニトマト", { exact: true })).toBeVisible();
+    const postedCard = page.getByRole("article").filter({ hasText: body });
+    await expect(postedCard.getByText(body, { exact: true })).toBeVisible();
+    await expect(postedCard.getByText("ミニトマト", { exact: true })).toBeVisible();
     await expect
       .poll(async () => (await getMaterial(material.id)).review_count)
       .toBe(material.review_count + 1);
@@ -46,21 +44,20 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
 
     const createdReview = await reviewByAuthor(user.id);
     if (createdReview === null) throw new Error("投稿したレビューが見つかりません。");
-    await expect
-      .poll(async () => await reviewCropNames(createdReview.id))
-      .toEqual(["トマト", "ミニトマト"]);
+    await expect.poll(async () => await reviewCropNames(createdReview.id)).toEqual(["ミニトマト"]);
 
     for (const path of ["/", "/me", `/users/${user.id}`]) {
       await page.goto(path);
-      await expect(page.getByText(body, { exact: true })).toBeVisible();
-      await expect(page.getByText("トマト・ミニトマト", { exact: true })).toBeVisible();
+      const reviewCard = page.getByRole("article").filter({ hasText: body });
+      await expect(reviewCard.getByText(body, { exact: true })).toBeVisible();
+      await expect(reviewCard.getByText("ミニトマト", { exact: true })).toBeVisible();
     }
 
     await page.goto(`/materials/${material.id}`);
     const reviewCard = page.getByRole("article").filter({ hasText: body });
     await reviewCard.getByRole("link", { name: "編集" }).click();
-    await expect(page.getByRole("button", { name: "トマトを削除", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "ミニトマトを削除", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "トマトを削除", exact: true })).toHaveCount(0);
     await page.getByRole("radio", { name: "5", exact: true }).check();
     await page.getByLabel("レビュー本文").fill(updatedBody);
     await page.getByRole("button", { name: "変更を保存する" }).click();
@@ -80,17 +77,14 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
       .toBe(material.review_count);
   } finally {
     await deleteAuthUsersByEmail(user.email);
+    await deleteMaterial(material.id);
   }
 });
 
 test("資材詳細でレビューの参考になったを押すと、その場でカウントが増減する", async ({ page }) => {
   const author = await createGeneralUser("helpful-author");
   const viewer = await createGeneralUser("helpful-viewer");
-  const material = (await listSeedMaterials())[0];
-
-  if (material === undefined) {
-    throw new Error("レビュー対象のシード資材が見つかりません。");
-  }
+  const material = await createMaterial("helpful");
 
   const body = `E2E参考になったレビュー_${author.id}`;
 
@@ -127,5 +121,6 @@ test("資材詳細でレビューの参考になったを押すと、その場�
   } finally {
     await deleteAuthUsersByEmail(author.email);
     await deleteAuthUsersByEmail(viewer.email);
+    await deleteMaterial(material.id);
   }
 });

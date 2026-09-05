@@ -9,12 +9,12 @@ begin;
 -- 固定 UUID（画面確認・スクリーンショット用）
 -- user / seller / material / report / article
 -- 22222222-... 一般ユーザー（しおさい農園）
--- 33333333-... メーカー出品者
--- 44444444-... JA 出品者（seller_type=ja でも /sellers/[id] へリンクできることを確認）
+-- 33333333-... メーカーアカウント
+-- 44444444-... 掲載資材0件のメーカーアカウント
 -- 11111111-... 検証用資材
 -- 55555555-... published 使用レポート
 -- 66666666-... published 記事（メーカー）
--- 88888888-... published 記事（JA）
+-- 88888888-... published 記事（メーカー・掲載資材0件）
 -- 77777777-... draft 使用レポート（公開側は notFound）
 
 -- auth.users（profiles / seller の FK 用。ローカル専用パスワード）
@@ -74,7 +74,7 @@ insert into auth.users (
     '44444444-4444-4444-8444-444444444444',
     'authenticated',
     'authenticated',
-    'demo-ja@sellers.farmille.internal',
+    'demo-bio@sellers.farmille.internal',
     crypt('password123', gen_salt('bf')),
     now(),
     '{"provider":"email","providers":["email"],"account_type":"seller","seller_id":"44444444-4444-4444-8444-444444444444"}'::jsonb,
@@ -130,7 +130,7 @@ insert into auth.identities (
     '44444444-4444-4444-8444-444444444444',
     jsonb_build_object(
       'sub', '44444444-4444-4444-8444-444444444444',
-      'email', 'demo-ja@sellers.farmille.internal',
+      'email', 'demo-bio@sellers.farmille.internal',
       'email_verified', true
     ),
     'email',
@@ -143,24 +143,17 @@ insert into auth.identities (
 insert into public.profiles (
   user_id,
   handle,
-  prefecture_code,
-  prefecture_public,
-  standpoint,
-  bio
+  standpoint
 ) values (
   '22222222-2222-4222-8222-222222222222',
   'しおさい農園',
-  12,
-  true,
-  'farmer',
-  '千葉でミニトマトを育てています。'
+  'farmer'
 );
 
 insert into public.seller_accounts (
   id,
   auth_user_id,
   official_name,
-  seller_type,
   login_id,
   contact_email,
   contact_name,
@@ -175,7 +168,6 @@ insert into public.seller_accounts (
     '33333333-3333-4333-8333-333333333333',
     '33333333-3333-4333-8333-333333333333',
     'デモ株式会社',
-    'maker',
     'demo-maker',
     'contact@demo-maker.example',
     '山田太郎',
@@ -189,15 +181,14 @@ insert into public.seller_accounts (
   (
     '44444444-4444-4444-8444-444444444444',
     '44444444-4444-4444-8444-444444444444',
-    'デモ農業協同組合',
-    'ja',
-    'demo-ja',
-    'contact@demo-ja.example',
+    'デモバイオ株式会社',
+    'demo-bio',
+    'contact@demo-bio.example',
     '佐藤花子',
     '千葉県',
     '千葉県',
-    'https://example.com/demo-ja',
-    '地域の栽培支援を行っています。',
+    'https://example.com/demo-bio',
+    '施設園芸向けの農業資材を開発しています。',
     'approved',
     now()
   );
@@ -463,8 +454,8 @@ insert into public.articles (
     '88888888-8888-4888-8888-888888888888',
     '44444444-4444-4444-8444-444444444444',
     'いちご栽培における高温対策の実証結果',
-    E'JAとしての実証ほ場での観察結果をまとめました。\n\n高温期の樹勢維持には、資材単体だけでなく、遮光と灌水の見直しが重要です。アクティビオ検証は補助的な手段として位置づけています。',
-    'https://placehold.co/960x540/fce4ec/c2185b?text=ja-article',
+    E'メーカーの試験ほ場で得られた観察結果をまとめました。\n\n高温期の樹勢維持には、資材単体だけでなく、遮光と灌水の見直しが重要です。アクティビオ検証は補助的な手段として位置づけています。',
+    'https://placehold.co/960x540/fce4ec/c2185b?text=maker-article',
     'published',
     '2026-05-20T09:00:00+09:00'
   );

@@ -14,7 +14,7 @@ export default function DashboardError({ error, unstable_retry }: DashboardError
       chrome="seller"
       error={error}
       onRetry={unstable_retry}
-      pageTitle="出品者ダッシュボード"
+      pageTitle="メーカーダッシュボード"
       title="ダッシュボードを表示できませんでした"
     />
   );

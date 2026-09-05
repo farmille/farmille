@@ -107,9 +107,9 @@ export const GeneralLoggedIn: Story = {
   },
 };
 
-// 出品者ログイン時は中央の投稿ボタンが非表示になり、4タブだけが並ぶ。
+// メーカーログイン時は中央の投稿ボタンが非表示になり、4タブだけが並ぶ。
 export const SellerLoggedIn: Story = {
-  name: "SellerLoggedIn（出品者ログイン・投稿ボタン非表示）",
+  name: "SellerLoggedIn（メーカーログイン・投稿ボタン非表示）",
   beforeEach: () => {
     mocked(getSessionUser).mockResolvedValue({
       userId: "user-2",

@@ -26,7 +26,7 @@ function reportMutationError<ErrorValue>(operation: string, error: ErrorValue): 
 
 /**
  * 対象が published で存在すること・自分の投稿でないことを確認する。
- * 記事の投稿者は出品者（profiles を持たない）のため自演確認は行わない。
+ * 記事の投稿者はメーカー（profiles を持たない）のため自演確認は行わない。
  */
 async function assertHelpfulTarget(
   supabase: SupabaseClient<Database>,

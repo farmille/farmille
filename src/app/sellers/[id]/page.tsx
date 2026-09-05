@@ -19,7 +19,7 @@ import { getPublicSellerPage, type PublicSellerPageData } from "@/server/queries
 import type { Result } from "@/server/result";
 import { css } from "../../../../styled-system/css";
 
-import { SellerHeader, sellerTypeLabel } from "./_components/SellerHeader";
+import { SellerHeader } from "./_components/SellerHeader";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -126,7 +126,6 @@ export default async function SellerPage({ params }: SellerPageProps) {
   const { seller, materials, articles } = data;
   const materialsHref = sellerMaterialsHref(seller.officialName);
   const showAllMaterials = data.materialCount > 3;
-  const typeLabel = sellerTypeLabel(seller.sellerType);
 
   return (
     <div className={shell}>
@@ -155,7 +154,7 @@ export default async function SellerPage({ params }: SellerPageProps) {
                   maker={material.manufacturerName}
                   rating={material.averageRating ?? 0}
                   reviewCount={material.reviewCount}
-                  official
+                  official={material.manufacturerVerified}
                   imageSrc={material.imageUrl ?? undefined}
                   href={`/materials/${material.id}`}
                 />
@@ -193,7 +192,7 @@ export default async function SellerPage({ params }: SellerPageProps) {
                   key={article.id}
                   title={article.title}
                   organization={seller.officialName}
-                  typeLabel={typeLabel}
+                  typeLabel="メーカー"
                   thumbSrc={article.heroImageUrl ?? undefined}
                   href={`/articles/${article.id}`}
                 />

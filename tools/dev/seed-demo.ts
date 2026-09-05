@@ -114,8 +114,8 @@ async function main(): Promise<void> {
 
   console.log(`\nパスワード: ${DEMO_PASSWORD}`);
   console.log("  一般ユーザー   : shiosai@example.com");
-  console.log("  出品者(メーカー): ログインID demo-maker");
-  console.log("  出品者(JA)     : ログインID demo-ja");
+  console.log("  メーカー1       : ログインID demo-maker");
+  console.log("  メーカー2       : ログインID demo-bio");
   console.log("  運営           : admin@example.com（/admin で TOTP 登録）");
 }
 

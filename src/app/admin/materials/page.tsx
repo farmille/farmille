@@ -55,9 +55,19 @@ const columns: DataTableColumn<AdminMaterialListItem>[] = [
   },
   { key: "sales_status", header: "販売状況", cell: (row) => row.sales_status ?? "—" },
   {
+    key: "publication_status",
+    header: "公開状態",
+    cell: (row) => (row.publication_status === "published" ? "公開中" : "掲載終了"),
+  },
+  {
     key: "claim",
     header: "claim",
     cell: (row) => (row.sellerName === null ? "未 claim" : row.sellerName),
+  },
+  {
+    key: "verified",
+    header: "メーカー確認",
+    cell: (row) => (row.manufacturer_verified_at === null ? "未確認" : "確認済み"),
   },
   { key: "review_count", header: "レビュー", align: "end", cell: (row) => row.review_count },
 ];
@@ -91,7 +101,7 @@ export default async function AdminMaterialsPage({
           </Link>
           <Link href="/admin/materials/requests">
             <Button size="sm" variant="ghost">
-              分類変更申請を処理
+              資材変更申請を処理
             </Button>
           </Link>
         </div>
@@ -120,7 +130,8 @@ export default async function AdminMaterialsPage({
         />
         <p className={css({ mt: "2" })}>
           <span className={adminInlineNoteStyle}>
-            claim 済み（seller_id あり）の資材は公開側で「メーカー確認済み」バッジが付く。
+            claim
+            は編集主体との紐づけ。メーカー確認済み表示は、メーカーが初期情報を確認するか変更申請を行った資材だけに付く。
           </span>
         </p>
       </Panel>

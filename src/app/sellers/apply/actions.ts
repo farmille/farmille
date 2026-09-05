@@ -23,7 +23,6 @@ function submittedValues(formData: FormData): AuthFormValues {
   const values: AuthFormValues = {};
   const names = [
     "officialName",
-    "sellerType",
     "loginId",
     "contactEmail",
     "contactName",
@@ -47,7 +46,6 @@ export async function sellerApplyAction(
 ): Promise<AuthFormState> {
   const validation = validateSellerApply({
     officialName: formData.get("officialName"),
-    sellerType: formData.get("sellerType"),
     loginId: formData.get("loginId"),
     contactEmail: formData.get("contactEmail"),
     contactName: formData.get("contactName"),

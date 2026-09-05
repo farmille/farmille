@@ -52,7 +52,7 @@ const statLinkStyle = css({
 const MENU_ITEMS = [
   {
     href: "/admin/sellers",
-    label: "出品者審査",
+    label: "メーカー審査",
     description: "申請の確認・承認（共有ログイン発行）・却下・凍結・招待コード発行。",
   },
   {
@@ -62,8 +62,8 @@ const MENU_ITEMS = [
   },
   {
     href: "/admin/materials/requests",
-    label: "分類変更申請",
-    description: "出品者から届いた分類・検索層の変更依頼を処理する。",
+    label: "資材変更申請",
+    description: "メーカーから届いた新規登録・情報変更・掲載終了申請を確認する。",
   },
   {
     href: "/admin/tags",
@@ -85,7 +85,7 @@ export default async function AdminHomePage() {
     <AdminShell description="運営が扱う審査・登録・分類管理の入口。" title="運営管理">
       <Panel note="対応待ちの件数" title="いま見るべきもの">
         <div className={statGridStyle}>
-          <StatCard label="審査中の出品者" value={summary.data.appliedSellerCount} />
+          <StatCard label="審査中のメーカー" value={summary.data.appliedSellerCount} />
           <Link aria-label="未処理の通報を見る" className={statLinkStyle} href="/admin/reports">
             <StatCard label="未処理の通報" value={summary.data.openReportCount} />
           </Link>
@@ -96,7 +96,13 @@ export default async function AdminHomePage() {
           >
             <StatCard label="確認待ちの使用レポート" value={summary.data.pendingUsageReportCount} />
           </Link>
-          <StatCard label="未処理の分類変更申請" value={summary.data.openEditRequestCount} />
+          <Link
+            aria-label="承認待ちの資材変更申請を見る"
+            className={statLinkStyle}
+            href="/admin/materials/requests"
+          >
+            <StatCard label="承認待ちの資材変更" value={summary.data.pendingMaterialChangeCount} />
+          </Link>
         </div>
       </Panel>
 

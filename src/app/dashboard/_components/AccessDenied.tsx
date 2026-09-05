@@ -4,13 +4,13 @@ import { FormPageShell, SurfaceCard, buttonRecipe } from "@/components";
 
 export function SellerAccessDenied({ backHref = "/" }: { backHref?: string }) {
   return (
-    <FormPageShell chrome="seller" backHref={backHref} title="出品者ダッシュボード">
+    <FormPageShell chrome="seller" backHref={backHref} title="メーカーダッシュボード">
       <SurfaceCard
-        description="この画面を利用するには、承認済みの出品者アカウントが必要です。"
-        title="出品者アカウントでログインしてください"
+        description="この画面を利用するには、承認済みのメーカーアカウントが必要です。"
+        title="メーカーアカウントでログインしてください"
       >
         <Link className={buttonRecipe()} href="/sellers/login">
-          出品者ログインへ
+          メーカーログインへ
         </Link>
       </SurfaceCard>
     </FormPageShell>

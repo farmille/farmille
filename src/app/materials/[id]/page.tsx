@@ -62,6 +62,19 @@ const disclaimer = css({
   lineHeight: "1.65",
 });
 
+const archivedNotice = css({
+  mt: "3",
+  p: "3",
+  borderRadius: "button",
+  bg: "surface.subtle",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  color: "text.muted",
+  fontSize: "sm",
+  lineHeight: "1.6",
+});
+
 function checkedExternalUrl(value: string, label: string): string {
   const url = new URL(value);
 
@@ -125,7 +138,11 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
   });
 
   return (
-    <MaterialPageShell title={material.name} backHref="/" hasFab>
+    <MaterialPageShell
+      title={material.name}
+      backHref="/"
+      hasFab={material.publication_status === "published"}
+    >
       <ReviewAnalytics materialId={material.id} submitted={query.review === "posted"} />
       <script
         type="application/ld+json"
@@ -137,6 +154,12 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
         toggleAction={toggleAction}
         saveUnavailable={sessionUser !== null && !isGeneralUser}
       />
+
+      {material.publication_status === "archived" ? (
+        <p className={archivedNotice}>
+          この資材は掲載を終了しています。過去の情報と投稿は参照できますが、新しいレビューや使用レポートは投稿できません。
+        </p>
+      ) : null}
 
       {material.official_url || material.catalog_url ? (
         <div className={externalLinks}>
@@ -235,7 +258,7 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
             href={`${materialPath}/articles`}
             className={cx(buttonRecipe({ variant: "ghost", size: "md" }), css({ mt: "3" }))}
           >
-            その他の記事（メーカー・JA等） {articles.total}件
+            メーカーの記事 {articles.total}件
           </Link>
         ) : null}
       </section>
@@ -273,11 +296,13 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
         <ReviewList reviews={reviews.items.slice(0, 3)} currentPath={materialPath} />
       </section>
 
-      <FabBar
-        reportHref={`${materialPath}/report/new`}
-        reviewHref={`${materialPath}/review/new`}
-        placement="viewport"
-      />
+      {material.publication_status === "published" ? (
+        <FabBar
+          reportHref={`${materialPath}/report/new`}
+          reviewHref={`${materialPath}/review/new`}
+          placement="viewport"
+        />
+      ) : null}
     </MaterialPageShell>
   );
 }

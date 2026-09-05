@@ -176,24 +176,16 @@ export function ReviewCropPicker({
   const cropById = useMemo(() => new Map(crops.map((crop) => [crop.id, crop])), [crops]);
   const normalizedQuery = query.trim().toLocaleLowerCase("ja");
   const unselected = crops.filter((crop) => !selected.has(crop.id));
-  const profileSuggestions = unselected.filter(({ fromProfile }) => fromProfile);
-  const suggestions = (
-    normalizedQuery.length === 0 && profileSuggestions.length > 0
-      ? profileSuggestions
-      : unselected.filter(
-          (crop) =>
-            normalizedQuery.length === 0 ||
-            crop.name.toLocaleLowerCase("ja").includes(normalizedQuery) ||
-            crop.groupName.toLocaleLowerCase("ja").includes(normalizedQuery) ||
-            crop.aliases.some((alias) => alias.toLocaleLowerCase("ja").includes(normalizedQuery)),
-        )
-  ).slice(0, 9);
-  const heading =
-    normalizedQuery.length > 0
-      ? "検索結果"
-      : profileSuggestions.length > 0
-        ? "設定したことのある作目"
-        : "作物の候補";
+  const suggestions = unselected
+    .filter(
+      (crop) =>
+        normalizedQuery.length === 0 ||
+        crop.name.toLocaleLowerCase("ja").includes(normalizedQuery) ||
+        crop.groupName.toLocaleLowerCase("ja").includes(normalizedQuery) ||
+        crop.aliases.some((alias) => alias.toLocaleLowerCase("ja").includes(normalizedQuery)),
+    )
+    .slice(0, 9);
+  const heading = normalizedQuery.length > 0 ? "検索結果" : "作物の候補";
 
   return (
     <>
@@ -234,7 +226,7 @@ export function ReviewCropPicker({
             );
           })
         ) : error === undefined ? (
-          <p className={emptySelection}>作物を1つ以上選んでください。</p>
+          <p className={emptySelection}>作目を1つ選んでください。</p>
         ) : (
           <p role="alert" className={selectionError}>
             {error}

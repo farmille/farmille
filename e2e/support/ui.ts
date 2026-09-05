@@ -27,8 +27,7 @@ export async function signupGeneral(
   await page.getByLabel("ハンドルネーム").fill(input.handle);
   await page.getByLabel("メールアドレス").fill(input.email);
   await page.getByLabel("パスワード").fill(input.password);
-  await page.getByLabel("都道府県").selectOption("13");
-  await page.getByRole("radio", { name: "農家" }).check();
+  await page.getByRole("radio", { name: "農家", exact: true }).check();
   const submitButton = page.getByRole("button", { name: "登録する" });
   await waitForReactHydration(submitButton);
   await submitButton.click();

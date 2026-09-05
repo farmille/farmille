@@ -9,7 +9,6 @@ import { HelpfulButton } from "@/components/HelpfulButton";
 import { OfficialCheckIcon } from "@/components/Icons";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
-import { sellerTypeLabel } from "@/components/seller-type-label";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
@@ -70,7 +69,7 @@ function articleDescription(title: string, sellerName: string): string {
 export async function generateMetadata({ params }: ArticleDetailPageProps): Promise<Metadata> {
   const { id } = await params;
   const article = await loadArticle(id);
-  const sellerName = article.seller.official_name ?? "出品者";
+  const sellerName = article.seller.official_name ?? "メーカー";
 
   return createPageMetadata({
     title: article.title,
@@ -108,7 +107,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
     });
   });
 
-  const sellerName = article.seller.official_name ?? "出品者";
+  const sellerName = article.seller.official_name ?? "メーカー";
   const sellerInitial = sellerName.charAt(0);
   const articleJsonLd = createArticleJsonLd({
     id: article.id,
@@ -206,7 +205,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
             <span className={css({ fontWeight: "700", color: "text.default" })}>{sellerName}</span>
             <OfficialCheckIcon size={14} className={css({ color: "accent.official" })} />
           </Link>
-          <Badge variant="type">{sellerTypeLabel(article.seller.seller_type ?? "other")}</Badge>
+          <Badge variant="type">メーカー</Badge>
           <span className={css({ fontSize: "xs" })}>{formatDateJa(article.publishedAt)}</span>
         </div>
 
@@ -278,7 +277,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
                   href={`/materials/${material.id}`}
                   name={material.name}
                   manufacturerName={material.manufacturer_name}
-                  isOfficial={material.seller_id !== null}
+                  isOfficial={material.manufacturer_verified_at !== null}
                   avgRating={material.avg_rating}
                 />
               ))}

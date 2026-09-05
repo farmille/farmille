@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { AppBar, StatCard } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
-import { isPrefectureCode, PREFECTURES } from "@/lib/prefectures";
 import { errorMessageJa } from "@/server/errors";
 import { getMyPageData } from "@/server/queries/me-page";
 import { css } from "../../../styled-system/css";
@@ -41,14 +40,6 @@ const statRow = css({
   mt: "3.5",
 });
 
-function prefectureName(code: number): string {
-  if (!isPrefectureCode(code)) {
-    throw new Error(`未対応の都道府県コードです：${code}`);
-  }
-
-  return PREFECTURES[code - 1].name;
-}
-
 export default async function MePage() {
   const access = await resolveMeAccess("/me");
 
@@ -68,10 +59,7 @@ export default async function MePage() {
     <div className={shell}>
       <AppBar chrome="public" active="me" title="マイページ" />
       <main className={body}>
-        <ProfileCard
-          profile={data.profile}
-          prefectureName={prefectureName(data.profile.prefectureCode)}
-        />
+        <ProfileCard profile={data.profile} />
 
         <div className={statRow}>
           <StatCard value={data.reviewCount} label="レビュー" />

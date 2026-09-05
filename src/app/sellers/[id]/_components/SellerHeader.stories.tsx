@@ -6,7 +6,6 @@ import { SellerHeader } from "./SellerHeader";
 const seller = {
   id: "seller-1",
   officialName: "グリーンバイオ株式会社",
-  sellerType: "maker",
   regionScope: "全国",
   websiteUrl: "https://example.com/green-bio",
   logoUrl: null,
@@ -24,8 +23,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Maker: Story = {};
 
-export const JaWithoutProfile: Story = {
+export const WithoutProfile: Story = {
   args: {
-    seller: { ...seller, officialName: "JAみのり", sellerType: "ja", profileText: null },
+    seller: { ...seller, officialName: "みのりバイオ株式会社", profileText: null },
   },
 };

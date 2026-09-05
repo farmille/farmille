@@ -25,7 +25,7 @@ function randomString(alphabet: string, length: number): string {
   return chars.join("");
 }
 
-/** 出品者の共有ログインの初期パスワード。生成値は承認直後に一度だけ画面へ出す。 */
+/** メーカーの共有ログインの初期パスワード。生成値は承認直後に一度だけ画面へ出す。 */
 export function generateInitialPassword(): string {
   return randomString(PASSWORD_ALPHABET, PASSWORD_LENGTH);
 }

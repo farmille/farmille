@@ -405,7 +405,7 @@ export async function mutateUsageReports({
   const supabase = await createServerSupabase();
   const cropIds = payload.cropReports.map(({ cropId }) => cropId);
   const [materialResult, cropsResult, existingResult] = await Promise.all([
-    supabase.from("materials").select("id").eq("id", materialId).maybeSingle(),
+    supabase.from("materials").select("id, publication_status").eq("id", materialId).maybeSingle(),
     supabase.from("crops").select("id, crop_groups!crops_group_id_fkey (name)").in("id", cropIds),
     supabase
       .from("usage_reports")
@@ -429,6 +429,9 @@ export async function mutateUsageReports({
   }
   if (materialResult.data === null) {
     return validationFailure("対象資材が見つかりません。", {});
+  }
+  if (materialResult.data.publication_status !== "published") {
+    return validationFailure("掲載終了した資材には使用レポートを投稿できません。", {});
   }
   if (cropsResult.data.length !== new Set(cropIds).size) {
     return validationFailure("選択した作物が見つかりません。", {
