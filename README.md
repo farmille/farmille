@@ -1,89 +1,75 @@
 # Farmille
 
-BS資材（生物・微生物農業資材）の農家レビュープラットフォーム
+Farmille は、BS資材（生物・微生物農業資材）を農家が評価し、使用経験を共有するレビュープラットフォームです。Next.js 16、TypeScript、Panda CSS を使用し、画面とサーバー処理を1つのアプリにまとめています。
 
-## 技術スタック
+## 設計資料
 
-- **Frontend**: Next.js 15 / TypeScript / Tailwind CSS 4
-- **Backend**: FastAPI / Python 3.12
-- **DB/Auth/Storage**: Supabase (PostgreSQL)
-- **Deploy**: Vercel (frontend) / Railway (backend)
+設計の正は [`docs/rebuild/`](docs/rebuild/00-overview.md) です。実装や運用に関する判断では、このディレクトリの設計資料を参照してください。
 
 ## セットアップ
 
-### 前提条件
-- Node.js 22+
-- pnpm 10+
-- Python 3.12+
-- uv
-- Docker（バックエンドのビルド確認用）
+Node.js 24 と pnpm 11 を使用します。リポジトリのルートで依存関係をインストールし、環境変数のひな型をコピーします。
 
-### 手順
-
-1. リポジトリをクローン
-   ```bash
-   git clone https://github.com/farmille/farmille.git
-   cd farmille
-   ```
-
-2. 環境変数を設定
-   ```bash
-   cp frontend/.env.example frontend/.env.local
-   cp backend/.env.example backend/.env
-   # 各ファイルに実際の値を設定（SlackでSupabase認証情報を受け取る）
-   ```
-
-3. 依存関係インストール＆起動
-   ```bash
-   make setup
-   make dev
-   ```
-
-4. 確認
-   - フロントエンド: http://localhost:3000
-   - FastAPI Docs: http://localhost:8000/docs
-   - ヘルスチェック: http://localhost:8000/health
-
-## 開発フロー
-
-### DBスキーマ変更時
-1. `supabase/migrations/` に新しいマイグレーションファイルを追加
-2. `supabase db push` で farmille-dev に適用
-3. `cd frontend && pnpm gen:types` で型を再生成
-4. 型ファイルの差分をコミット
-
-### 環境変数変更時
-1. `.env.example` を更新（git管理）
-2. ローカルの `.env` / `.env.local` も手動で更新
-3. 本番環境変数はRailway/Vercelダッシュボードで更新
-
-### デプロイ
-- フロント: `main` ブランチへのpushで自動デプロイ（Vercel）
-- バック: `main` ブランチへのpushで自動デプロイ（Railway）
-
-## Supabase Storage 設定（手動）
-
-Supabaseダッシュボードで以下を設定すること：
-
-1. Storage → New Bucket → `review-images` を作成（Public bucket）
-2. バケット設定:
-   - ファイルサイズ上限: 5MB
-   - 許可するMIMEタイプ: `image/jpeg`, `image/png`, `image/webp`
-3. RLSポリシー:
-   - アップロード: `app_metadata.role IN ('farmer', 'ja_staff', 'researcher')`
-   - 閲覧: 全員（`anon` + `authenticated`）
-
-## トラブルシューティング
-
-### Railwayでビルドが失敗する
-1. ローカルで `docker build -t farmille-backend ./backend` が通るか確認
-2. `railway.toml` の `builder = "DOCKERFILE"` が指定されているか確認
-
-### 型エラーが出る
-1. `cd frontend && pnpm gen:types` でDB型を最新化
-2. それでも解消しない場合はマイグレーションファイルを確認
-
-### dev サーバーが停止しない
 ```bash
-make stop
+pnpm install
+cp .env.example .env.local
+```
+
+`.env.local` の必須項目を、利用する Supabase プロジェクトと公開サイトの値に置き換えてください。`SUPABASE_SECRET_KEY` はサーバー専用であり、ブラウザへ公開してはいけません。
+
+`pnpm dev` と `pnpm build` には、OGP・sitemap・robots の絶対 URL 生成に使う `NEXT_PUBLIC_SITE_URL` が必須です。未設定の場合は `src/env.ts` がエラーを返します。
+
+```bash
+pnpm dev
+```
+
+バックエンド用の別プロセスはありません。画面は `src/app/`、ドメインロジックと Supabase アクセスは `src/server/` にあります。
+
+## スクリプト
+
+| コマンド             | 用途                                        |
+| -------------------- | ------------------------------------------- |
+| `pnpm dev`           | 開発サーバーを起動する                      |
+| `pnpm build`         | 本番用にビルドする                          |
+| `pnpm start`         | ビルド済みアプリを起動する                  |
+| `pnpm lint`          | oxlint と ESLint を実行する                 |
+| `pnpm format`        | oxfmt でファイルを整形する                  |
+| `pnpm format:check`  | oxfmt による整形差分の有無を確認する        |
+| `pnpm check`         | lint、型検査、テストをまとめて実行する      |
+| `pnpm test`          | Vitest を監視モードで実行する               |
+| `pnpm gen:types`     | 接続先の Supabase から型定義を生成する      |
+| `pnpm gen:types:dev` | linked 状態の Supabase から型定義を生成する |
+
+`pnpm install` の完了後に Panda CSS のコード生成が自動で実行されます。生成物は `styled-system/` に出力され、Git の管理対象には含まれません。`gen:types` の生成物は format と lint の対象外です。
+
+## 検証
+
+```bash
+pnpm lint
+pnpm format:check
+pnpm exec tsc --noEmit
+pnpm exec vitest run
+pnpm build
+pnpm audit --audit-level=high
+```
+
+## ディレクトリ構成
+
+```text
+farmille/
+├── src/
+│   ├── app/             # ルーティングと画面
+│   ├── server/          # ドメインロジックと Supabase アクセス
+│   └── components/      # Panda recipes を使う共通 UI
+├── e2e/                 # Playwright E2E
+├── supabase/
+│   ├── config.toml
+│   └── migrations/      # v2 系の migration
+├── tools/migration/     # 資材マスタ移行スクリプト
+├── docs/
+│   ├── rebuild/         # 設計資料、入力資料、タスク指示書
+│   └── ops/             # 運用記録
+├── panda.config.ts
+├── package.json
+└── .github/workflows/   # CI
 ```

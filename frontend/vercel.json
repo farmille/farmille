@@ -1,9 +1,0 @@
-{
-  "regions": ["hnd1"],
-  "crons": [
-    {
-      "path": "/api/cron/keep-alive",
-      "schedule": "*/5 * * * *"
-    }
-  ]
-}

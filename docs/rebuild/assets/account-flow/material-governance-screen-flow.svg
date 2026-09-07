@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="4600" height="2760" viewBox="0 0 4600 2760" role="img" aria-labelledby="title desc">
+  <title id="title">Farmille 資材情報の共同管理フロー</title>
+  <desc id="desc">運営による先行登録、メーカーによる確認・変更・追加・掲載終了と、運営承認後の公開までを実画面で示す。</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#1e231f" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#2e7d32"/>
+    </marker>
+    <marker id="arrow-admin" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#a65d00"/>
+    </marker>
+    <style>
+      text { font-family: "Noto Sans CJK JP", "Hiragino Sans", sans-serif; }
+      .title { font-size: 54px; font-weight: 800; fill: #1e231f; }
+      .subtitle { font-size: 23px; fill: #59605b; }
+      .lane { font-size: 28px; font-weight: 800; fill: #ffffff; }
+      .route { font-family: monospace; font-size: 18px; font-weight: 800; fill: #1e231f; }
+      .name { font-size: 18px; font-weight: 700; fill: #59605b; }
+      .label { font-size: 19px; font-weight: 700; fill: #303632; paint-order: stroke; stroke: #f8f8f5; stroke-width: 8px; stroke-linejoin: round; }
+      .note { font-size: 20px; font-weight: 600; fill: #4c534d; }
+    </style>
+  </defs>
+
+  <rect width="4600" height="2760" fill="#f8f8f5"/>
+  <text class="title" x="70" y="74">Farmille 資材情報の共同管理フロー</text>
+  <text class="subtitle" x="70" y="116">2026-08-27 のローカル本番ビルド。メーカー操作は承認待ちになり、運営承認後だけ公開正本へ反映される。</text>
+
+  <!-- lane backgrounds -->
+  <rect x="50" y="150" width="4500" height="570" rx="34" fill="#fffaf0" stroke="#e4bd84" stroke-width="3"/>
+  <rect x="78" y="172" width="380" height="48" rx="24" fill="#a65d00"/>
+  <text class="lane" x="268" y="205" text-anchor="middle">運営が先に登録</text>
+
+  <rect x="50" y="750" width="4500" height="570" rx="34" fill="#f0f6fb" stroke="#b7cee0" stroke-width="3"/>
+  <rect x="78" y="772" width="410" height="48" rx="24" fill="#245f8f"/>
+  <text class="lane" x="283" y="805" text-anchor="middle">メーカーが情報を変更</text>
+
+  <rect x="50" y="1350" width="4500" height="570" rx="34" fill="#f0f8f1" stroke="#b9dabb" stroke-width="3"/>
+  <rect x="78" y="1372" width="380" height="48" rx="24" fill="#2e7d32"/>
+  <text class="lane" x="268" y="1405" text-anchor="middle">メーカーが新規追加</text>
+
+  <rect x="50" y="1950" width="4500" height="570" rx="34" fill="#fff5f3" stroke="#e2b0aa" stroke-width="3"/>
+  <rect x="78" y="1972" width="380" height="48" rx="24" fill="#9d2e25"/>
+  <text class="lane" x="268" y="2005" text-anchor="middle">メーカーが掲載終了</text>
+
+  <!-- row 1 arrows -->
+  <path d="M880 455 H1030" fill="none" stroke="#a65d00" stroke-width="7" marker-end="url(#arrow-admin)"/>
+  <text class="label" x="955" y="430" text-anchor="middle">直接公開</text>
+  <path d="M1910 455 H2060" fill="none" stroke="#2e7d32" stroke-width="7" stroke-dasharray="13 10" marker-end="url(#arrow)"/>
+  <text class="label" x="1985" y="430" text-anchor="middle">claim・連絡</text>
+  <path d="M2940 455 H3090" fill="none" stroke="#2e7d32" stroke-width="7" marker-end="url(#arrow)"/>
+  <text class="label" x="3015" y="430" text-anchor="middle">内容を確認</text>
+
+  <!-- row 2 arrows -->
+  <path d="M780 1055 H930" fill="none" stroke="#245f8f" stroke-width="7" marker-end="url(#arrow)"/>
+  <text class="label" x="855" y="1030" text-anchor="middle">資材を選択</text>
+  <path d="M1660 1055 H1810" fill="none" stroke="#245f8f" stroke-width="7" marker-end="url(#arrow)"/>
+  <text class="label" x="1735" y="1030" text-anchor="middle">変更申請</text>
+  <path d="M2540 1055 H2690" fill="none" stroke="#a65d00" stroke-width="7" marker-end="url(#arrow-admin)"/>
+  <text class="label" x="2615" y="1030" text-anchor="middle">運営へ</text>
+  <path d="M3420 1055 H3570" fill="none" stroke="#2e7d32" stroke-width="7" marker-end="url(#arrow)"/>
+  <text class="label" x="3495" y="1030" text-anchor="middle">承認・反映</text>
+
+  <!-- row 3 arrows -->
+  <path d="M780 1655 H930" fill="none" stroke="#245f8f" stroke-width="7" marker-end="url(#arrow)"/>
+  <text class="label" x="855" y="1630" text-anchor="middle">新規登録</text>
+  <path d="M1660 1655 H1810" fill="none" stroke="#245f8f" stroke-width="7" marker-end="url(#arrow)"/>
+  <text class="label" x="1735" y="1630" text-anchor="middle">提出</text>
+  <path d="M2540 1655 H2690" fill="none" stroke="#a65d00" stroke-width="7" marker-end="url(#arrow-admin)"/>
+  <text class="label" x="2615" y="1630" text-anchor="middle">内容比較</text>
+  <path d="M3420 1655 H3570" fill="none" stroke="#2e7d32" stroke-width="7" marker-end="url(#arrow)"/>
+  <text class="label" x="3495" y="1630" text-anchor="middle">承認・公開</text>
+
+  <!-- row 4 arrows -->
+  <path d="M880 2255 H1030" fill="none" stroke="#9d2e25" stroke-width="7" marker-end="url(#arrow)"/>
+  <text class="label" x="955" y="2230" text-anchor="middle">掲載終了申請</text>
+  <path d="M1910 2255 H2060" fill="none" stroke="#a65d00" stroke-width="7" marker-end="url(#arrow-admin)"/>
+  <text class="label" x="1985" y="2230" text-anchor="middle">運営へ</text>
+  <path d="M2940 2255 H3090" fill="none" stroke="#9d2e25" stroke-width="7" marker-end="url(#arrow)"/>
+  <text class="label" x="3015" y="2230" text-anchor="middle">承認</text>
+
+  <!-- cards row 1 -->
+  <g filter="url(#shadow)"><rect x="160" y="235" width="720" height="450" rx="22" fill="#fff" stroke="#d9a153" stroke-width="4"/><text class="route" x="182" y="267">/admin/materials/new</text><text class="name" x="182" y="292">運営が任意メーカーの資材を直接登録</text><image x="160" y="310" width="720" height="375" xlink:href="screens/26-admin-material-new.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="1030" y="235" width="880" height="450" rx="22" fill="#fff" stroke="#d8d6cd" stroke-width="4"/><text class="route" x="1052" y="267">/materials/[id]</text><text class="name" x="1052" y="292">公開済み・メーカー未確認</text><image x="1030" y="310" width="880" height="375" xlink:href="screens/27-public-material-unverified.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="2060" y="235" width="880" height="450" rx="22" fill="#fff" stroke="#7daaca" stroke-width="4"/><text class="route" x="2082" y="267">/dashboard/materials/[id]</text><text class="name" x="2082" y="292">初期データを確認</text><image x="2060" y="310" width="880" height="375" xlink:href="screens/29-seller-material-confirm.png" preserveAspectRatio="xMidYMid slice"/></g>
+  <g filter="url(#shadow)"><rect x="3090" y="235" width="1300" height="450" rx="22" fill="#fff" stroke="#8fc492" stroke-width="4"/><text class="route" x="3112" y="267">/materials/[id]</text><text class="name" x="3112" y="292">メーカー確認済みマークを表示</text><image x="3090" y="310" width="1300" height="375" xlink:href="screens/15-public-material-verified.png" preserveAspectRatio="xMidYMin slice"/></g>
+
+  <!-- cards row 2 -->
+  <g filter="url(#shadow)"><rect x="80" y="835" width="700" height="450" rx="22" fill="#fff" stroke="#7daaca" stroke-width="4"/><text class="route" x="102" y="867">/dashboard/materials</text><text class="name" x="102" y="892">自社資材コレクション</text><image x="80" y="910" width="700" height="375" xlink:href="screens/13-seller-materials.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="930" y="835" width="730" height="450" rx="22" fill="#fff" stroke="#7daaca" stroke-width="4"/><text class="route" x="952" y="867">/dashboard/materials/[id]</text><text class="name" x="952" y="892">公開正本を基に編集</text><image x="930" y="910" width="730" height="375" xlink:href="screens/31-seller-material-edit.png" preserveAspectRatio="xMidYMid slice"/></g>
+  <g filter="url(#shadow)"><rect x="1810" y="835" width="730" height="450" rx="22" fill="#fff" stroke="#7daaca" stroke-width="4"/><text class="route" x="1832" y="867">/dashboard/materials/requests/[id]</text><text class="name" x="1832" y="892">承認待ち・公開正本は未変更</text><image x="1810" y="910" width="730" height="375" xlink:href="screens/16-seller-update-request.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="2690" y="835" width="730" height="450" rx="22" fill="#fff" stroke="#d9a153" stroke-width="4"/><text class="route" x="2712" y="867">/admin/materials/requests/[id]</text><text class="name" x="2712" y="892">現行正本と提案内容を比較</text><image x="2690" y="910" width="730" height="375" xlink:href="screens/17-admin-update-request.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="3570" y="835" width="900" height="450" rx="22" fill="#fff" stroke="#8fc492" stroke-width="4"/><text class="route" x="3592" y="867">/materials/[id]</text><text class="name" x="3592" y="892">承認済み内容を公開</text><image x="3570" y="910" width="900" height="375" xlink:href="screens/15-public-material-verified.png" preserveAspectRatio="xMidYMin slice"/></g>
+
+  <!-- cards row 3 -->
+  <g filter="url(#shadow)"><rect x="80" y="1435" width="700" height="450" rx="22" fill="#fff" stroke="#7daaca" stroke-width="4"/><text class="route" x="102" y="1467">/dashboard/materials</text><text class="name" x="102" y="1492">資材を新規登録</text><image x="80" y="1510" width="700" height="375" xlink:href="screens/13-seller-materials.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="930" y="1435" width="730" height="450" rx="22" fill="#fff" stroke="#7daaca" stroke-width="4"/><text class="route" x="952" y="1467">/dashboard/materials/new</text><text class="name" x="952" y="1492">全情報を入力</text><image x="930" y="1510" width="730" height="375" xlink:href="screens/18-seller-material-new.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="1810" y="1435" width="730" height="450" rx="22" fill="#fff" stroke="#7daaca" stroke-width="4"/><text class="route" x="1832" y="1467">/dashboard/materials/requests/[id]</text><text class="name" x="1832" y="1492">正本を作らず承認待ち</text><image x="1810" y="1510" width="730" height="375" xlink:href="screens/19-seller-create-request.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="2690" y="1435" width="730" height="450" rx="22" fill="#fff" stroke="#d9a153" stroke-width="4"/><text class="route" x="2712" y="1467">/admin/materials/requests/[id]</text><text class="name" x="2712" y="1492">追加申請を審査</text><image x="2690" y="1510" width="730" height="375" xlink:href="screens/21-admin-create-request.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="3570" y="1435" width="900" height="450" rx="22" fill="#fff" stroke="#8fc492" stroke-width="4"/><text class="route" x="3592" y="1467">/materials/[id]</text><text class="name" x="3592" y="1492">承認時に正本を作成・確認済み表示</text><image x="3570" y="1510" width="900" height="375" xlink:href="screens/22-public-created-material.png" preserveAspectRatio="xMidYMin slice"/></g>
+
+  <!-- cards row 4 -->
+  <g filter="url(#shadow)"><rect x="160" y="2035" width="720" height="450" rx="22" fill="#fff" stroke="#7daaca" stroke-width="4"/><text class="route" x="182" y="2067">/dashboard/materials/[id]</text><text class="name" x="182" y="2092">削除ではなく掲載終了を選択</text><image x="160" y="2110" width="720" height="375" xlink:href="screens/30-seller-archive-form.png" preserveAspectRatio="xMidYMid slice"/></g>
+  <g filter="url(#shadow)"><rect x="1030" y="2035" width="880" height="450" rx="22" fill="#fff" stroke="#9d2e25" stroke-width="4"/><text class="route" x="1052" y="2067">/dashboard/materials/requests/[id]</text><text class="name" x="1052" y="2092">掲載終了理由を保持</text><image x="1030" y="2110" width="880" height="375" xlink:href="screens/23-seller-archive-request.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="2060" y="2035" width="880" height="450" rx="22" fill="#fff" stroke="#d9a153" stroke-width="4"/><text class="route" x="2082" y="2067">/admin/materials/requests/[id]</text><text class="name" x="2082" y="2092">掲載終了申請を承認</text><image x="2060" y="2110" width="880" height="375" xlink:href="screens/28-admin-archive-request.png" preserveAspectRatio="xMidYMin slice"/></g>
+  <g filter="url(#shadow)"><rect x="3090" y="2035" width="1300" height="450" rx="22" fill="#fff" stroke="#9d2e25" stroke-width="4"/><text class="route" x="3112" y="2067">/materials/[id]</text><text class="name" x="3112" y="2092">履歴を残し、検索と新規投稿から除外</text><image x="3090" y="2110" width="1300" height="375" xlink:href="screens/24-public-archived-material.png" preserveAspectRatio="xMidYMin slice"/></g>
+
+  <rect x="50" y="2550" width="4500" height="155" rx="26" fill="#ffffff" stroke="#d8d6cd" stroke-width="3"/>
+  <text class="note" x="82" y="2598">● claim はメーカーが自社資材を操作できる関係を表し、確認済みマークとは分離する。</text>
+  <text class="note" x="82" y="2642">● メーカー確認済みになるのは、初期データの確認、変更申請の提出、または追加申請の承認時。申請中の提案内容は公開しない。</text>
+  <text class="note" x="82" y="2686">● 掲載終了後もレビュー・使用レポート・直接URLは保持し、新規投稿と検索結果だけから外す。</text>
+</svg>

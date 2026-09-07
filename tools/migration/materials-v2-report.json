@@ -1,0 +1,878 @@
+{
+  "counts": {
+    "source_product_rows": 15,
+    "duplicate_product_rows": 1,
+    "unique_materials": 14,
+    "source_product_images": 13,
+    "excluded_product_images": 3,
+    "product_images": 10,
+    "application_recipes": 98,
+    "material_product_type_links": 14,
+    "material_crop_links": 7,
+    "material_effect_links": 0,
+    "material_search_tag_links": 0
+  },
+  "duplicate_products": [
+    {
+      "name": "BIOZ Nephrite",
+      "manufacturer_name": "ICL JAPAN",
+      "source_rows": [
+        6,
+        7
+      ],
+      "handling": "旧SQLとv2の一意キーに従い、後の行で統合"
+    }
+  ],
+  "excluded_images": [
+    {
+      "name": "BIOZ Onyx Permanent",
+      "manufacturer_name": "ICL JAPAN",
+      "url": "https://multisite-assets.icl-growingsolutions.com/wp-content/uploads/sites/41/2023/06/01130543/ICL-Bioz-Japan_Onyx-Permanent.png",
+      "reason": "取得不能を確認済みの外部画像URL"
+    },
+    {
+      "name": "モーニングエース",
+      "manufacturer_name": "アグロ カネショウ",
+      "url": "https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_80.png",
+      "reason": "取得不能を確認済みの外部画像URL"
+    },
+    {
+      "name": "ハイタック-C",
+      "manufacturer_name": "アグロ カネショウ",
+      "url": "https://d2bu5vyg1irlw4.cloudfront.net/img/items/20180418_77.png",
+      "reason": "取得不能を確認済みの外部画像URL"
+    }
+  ],
+  "field_mappings": [
+    {
+      "target": "materials.name",
+      "source": "products.name",
+      "status": "mapped"
+    },
+    {
+      "target": "materials.manufacturer_name",
+      "source": "maker_profiles.company_name",
+      "status": "mapped"
+    },
+    {
+      "target": "material_product_types.product_type_id",
+      "source": "products.product_type_id → product_types.name",
+      "status": "mapped"
+    },
+    {
+      "target": "material_crops.crop_id",
+      "source": "product_crops → crops.name",
+      "status": "mapped_by_exact_name"
+    },
+    {
+      "target": "materials.sales_status",
+      "source": "products.commercial_status",
+      "status": "mapped"
+    },
+    {
+      "target": "materials.description",
+      "source": "products.expected_effects_official",
+      "status": "mapped"
+    },
+    {
+      "target": "materials.general_use",
+      "source": "products.general_purpose",
+      "status": "mapped"
+    },
+    {
+      "target": "materials.main_components",
+      "source": "products.primary_compound",
+      "status": "mapped"
+    },
+    {
+      "target": "materials.mechanism",
+      "source": "products.mode_of_action",
+      "status": "mapped"
+    },
+    {
+      "target": "materials.usage_text",
+      "source": "products.usage_summary ＋ product_application_recipes",
+      "status": "mapped"
+    },
+    {
+      "target": "materials.price_range",
+      "source": null,
+      "status": "null"
+    },
+    {
+      "target": "materials.official_url",
+      "source": null,
+      "status": "null"
+    },
+    {
+      "target": "materials.catalog_url",
+      "source": null,
+      "status": "null"
+    },
+    {
+      "target": "materials.seller_id",
+      "source": null,
+      "status": "null"
+    },
+    {
+      "target": "material_images.url",
+      "source": "product_images.url",
+      "status": "mapped_after_known_broken_url_filter"
+    },
+    {
+      "target": "material_images.image_type",
+      "source": "product_images.image_type",
+      "status": "mapped_with_enum_conversion"
+    },
+    {
+      "target": "material_images.sort_order",
+      "source": "product_images.order",
+      "status": "mapped"
+    }
+  ],
+  "missing_classification_mappings": [
+    {
+      "source_kind": "benefit",
+      "source_value": "塩害耐性改善",
+      "affected_materials": [
+        "BIOZ Onyx Annual／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "外部損傷の修復",
+      "affected_materials": [
+        "BIOZ Moonstone／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "環境ストレス耐性を高める",
+      "affected_materials": [
+        "BIOZ Moonstone／ICL JAPAN",
+        "BIOZ Onyx Annual／ICL JAPAN",
+        "BIOZ Sunstone／ICL JAPAN",
+        "ハイタック-C／アグロ カネショウ",
+        "モーニングエース／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "光合成改善",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "ハイタック-C／アグロ カネショウ",
+        "モーニングエース／アグロ カネショウ",
+        "鉄力あくあF10／愛知製鋼",
+        "鉄力あぐりB10／愛知製鋼",
+        "鉄力あぐりB12／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "根圏の有用微生物の活性化",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "細胞壁の強化",
+      "affected_materials": [
+        "BIOZ Onyx Annual／ICL JAPAN",
+        "ハイタック-C／アグロ カネショウ",
+        "モーニングエース／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "樹勢改善",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN",
+        "BIOZ Nephrite／ICL JAPAN",
+        "BIOZ Sunstone／ICL JAPAN",
+        "BIOZ Topaz／ICL JAPAN",
+        "モーニングエース／アグロ カネショウ",
+        "鉄力あくあF10／愛知製鋼",
+        "鉄力あぐりB10／愛知製鋼",
+        "鉄力あぐりB12／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "収量改善",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "Actijump／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN",
+        "BIOZ Nephrite／ICL JAPAN",
+        "BIOZ Onyx Annual／ICL JAPAN",
+        "BIOZ Onyx Permanent／ICL JAPAN",
+        "BIOZ Sunstone／ICL JAPAN",
+        "BIOZ Topaz／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "秀品率の改善",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "BIOZ Onyx Annual／ICL JAPAN",
+        "BIOZ Onyx Permanent／ICL JAPAN",
+        "ハイタック-C／アグロ カネショウ",
+        "モーニングエース／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "水分吸収の改善",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "成り疲れ改善",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "耐乾燥性改善",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "BIOZ Sunstone／ICL JAPAN",
+        "BIOZ Topaz／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "耐寒性改善",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "耐暑性改善",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN",
+        "BIOZ Onyx Annual／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "糖度増加",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "モーニングエース／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "養分の利用効率の改善",
+      "affected_materials": [
+        "Actijump／ICL JAPAN",
+        "BIOZ Diamond／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN",
+        "BIOZ Nephrite／ICL JAPAN",
+        "BIOZ Onyx Annual／ICL JAPAN",
+        "BIOZ Onyx Permanent／ICL JAPAN",
+        "BIOZ Sunstone／ICL JAPAN",
+        "BIOZ Topaz／ICL JAPAN",
+        "ハイタック-C／アグロ カネショウ",
+        "モーニングエース／アグロ カネショウ",
+        "鉄力あくあF10／愛知製鋼",
+        "鉄力あぐりB10／愛知製鋼",
+        "鉄力あぐりB12／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "benefit",
+      "source_value": "養分吸収の改善",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "Actijump／ICL JAPAN",
+        "BIOZ Diamond／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN",
+        "BIOZ Nephrite／ICL JAPAN",
+        "BIOZ Topaz／ICL JAPAN",
+        "ハイタック-C／アグロ カネショウ",
+        "鉄力あくあF10／愛知製鋼",
+        "鉄力あぐりB10／愛知製鋼",
+        "鉄力あぐりB12／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "イチゴ",
+      "affected_materials": [
+        "鉄力あぐりB12／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "おうとう",
+      "affected_materials": [
+        "ハイタック-C／アグロ カネショウ",
+        "モーニングエース／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "かき",
+      "affected_materials": [
+        "モーニングエース／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "かんきつ",
+      "affected_materials": [
+        "ハイタック-C／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "キャベツ",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "ハイタック-C／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "キュウリ",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "サトウキビ",
+      "affected_materials": [
+        "BIOZ Moonstone／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "その他の野菜",
+      "affected_materials": [
+        "BIOZ Moonstone／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "その他豆類",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN",
+        "BIOZ Nephrite／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "ダイズ",
+      "affected_materials": [
+        "BIOZ Onyx Annual／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "ダイズ・豆類",
+      "affected_materials": [
+        "BIOZ Nephrite／ICL JAPAN",
+        "BIOZ Topaz／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "トウモロコシ",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN",
+        "BIOZ Nephrite／ICL JAPAN",
+        "BIOZ Sunstone／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "トマト",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "BIOZ Diamond／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN",
+        "ハイタック-C／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "なし",
+      "affected_materials": [
+        "ハイタック-C／アグロ カネショウ",
+        "モーニングエース／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "ナス",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "にんにく",
+      "affected_materials": [
+        "ハイタック-C／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "ねぎ",
+      "affected_materials": [
+        "ハイタック-C／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "はくさい",
+      "affected_materials": [
+        "ハイタック-C／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "ばれいしょ",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "ピーマン",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "ぶどう",
+      "affected_materials": [
+        "モーニングエース／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "マンゴー",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "みかん",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "もも",
+      "affected_materials": [
+        "モーニングエース／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "りんご",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "ハイタック-C／アグロ カネショウ",
+        "モーニングエース／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "レタス",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "ハイタック-C／アグロ カネショウ"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "果菜類",
+      "affected_materials": [
+        "鉄力あくあF10／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "果樹・樹木",
+      "affected_materials": [
+        "鉄力あぐりB12／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "果樹類",
+      "affected_materials": [
+        "BIOZ Onyx Permanent／ICL JAPAN",
+        "鉄力あくあF10／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "花き",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "花弁類",
+      "affected_materials": [
+        "鉄力あくあF10／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "花卉類",
+      "affected_materials": [
+        "鉄力あくあF10／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "柑橘類",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "玉ねぎ",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "根菜類",
+      "affected_materials": [
+        "鉄力あくあF10／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "作物全般",
+      "affected_materials": [
+        "BIOZ Moonstone／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "小麦",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "BIOZ Diamond／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN",
+        "BIOZ Nephrite／ICL JAPAN",
+        "BIOZ Onyx Annual／ICL JAPAN",
+        "BIOZ Sunstone／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "植物全般",
+      "affected_materials": [
+        "鉄力あくあF10／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "生育期間が短い葉菜類や育苗",
+      "affected_materials": [
+        "鉄力あぐりB10／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "生育期間が長い果菜類や果樹",
+      "affected_materials": [
+        "鉄力あぐりB12／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "大豆",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN",
+        "Actijump／ICL JAPAN",
+        "BIOZ Diamond／ICL JAPAN",
+        "BIOZ Moonstone／ICL JAPAN",
+        "BIOZ Nephrite／ICL JAPAN",
+        "BIOZ Topaz／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "大豆及び豆類",
+      "affected_materials": [
+        "BIOZ Topaz／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "大麦",
+      "affected_materials": [
+        "BIOZ Diamond／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "茶",
+      "affected_materials": [
+        "Actibio X EVO53／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "豆類",
+      "affected_materials": [
+        "BIOZ Moonstone／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "馬鈴薯",
+      "affected_materials": [
+        "BIOZ Moonstone／ICL JAPAN",
+        "BIOZ Onyx Permanent／ICL JAPAN"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "野菜・花卉",
+      "affected_materials": [
+        "鉄力あぐりB10／愛知製鋼",
+        "鉄力あぐりB12／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "葉菜類",
+      "affected_materials": [
+        "鉄力あくあF10／愛知製鋼"
+      ]
+    },
+    {
+      "source_kind": "crop",
+      "source_value": "落花生",
+      "affected_materials": [
+        "BIOZ Moonstone／ICL JAPAN"
+      ]
+    }
+  ],
+  "needs_review_fields": [
+    {
+      "source": "product_sources",
+      "possible_target": "material_sources",
+      "handling": "リモート取得後に追補",
+      "reason": "リポジトリ内に元データがない"
+    },
+    {
+      "source": "products.label_url",
+      "possible_target": "materials.catalog_url",
+      "handling": "NULL",
+      "reason": "旧 label がカタログを指すとは一意に決まらない"
+    },
+    {
+      "source": "products.sds_url",
+      "possible_target": "material_evidences または material_sources",
+      "handling": "未投入",
+      "reason": "本タスクでは material_sources と material_evidences を投入しない"
+    },
+    {
+      "source": "products.technology_action／disease_pest_info／expected_effects_farmille／precautions／storage_shelf_life／notes",
+      "possible_target": null,
+      "handling": "未投入",
+      "reason": "v2 に一意な対応先カラムがない"
+    },
+    {
+      "source": "product_images.source_page_url",
+      "possible_target": "materials.official_url",
+      "handling": "NULL",
+      "reason": "画像の出典ページが資材の公式ページとは一意に決まらない"
+    }
+  ],
+  "unmapped_image_types": [],
+  "sample_comparisons": [
+    {
+      "key": {
+        "name": "Actibio X EVO53",
+        "manufacturer_name": "ICL JAPAN"
+      },
+      "source": {
+        "product_type": "バイオスティミュラント",
+        "commercial_status": "公式ページ掲載",
+        "expected_effects_official": "低温・乾燥・高温などの環境ストレスに対する耐性の向上、根群発達の促進、初期生育の確保、登熟の向上、品質（糖度・秀品率）の改善、成り疲れの軽減",
+        "general_purpose": "作物の環境ストレス耐性の向上および品質・収量の改善",
+        "primary_compound": "海藻抽出物、アミノ酸（プロリン、グリシンベタインなど）、微量要素（ホウ素、亜鉛、マンガンなど）",
+        "mode_of_action": "細胞内浸透圧の維持、光合成効率の維持、酵素活性の促進",
+        "usage_summary": "作物の生育ステージ（定植後、開花前、肥大期など）に合わせて、500倍から1000倍に希釈して葉面散布または灌水施用する。",
+        "image_count": 0,
+        "recipe_count": 6
+      },
+      "target": {
+        "product_types": [
+          "バイオスティミュラント"
+        ],
+        "sales_status": "公式ページ掲載",
+        "description": "低温・乾燥・高温などの環境ストレスに対する耐性の向上、根群発達の促進、初期生育の確保、登熟の向上、品質（糖度・秀品率）の改善、成り疲れの軽減",
+        "general_use": "作物の環境ストレス耐性の向上および品質・収量の改善",
+        "main_components": "海藻抽出物、アミノ酸（プロリン、グリシンベタインなど）、微量要素（ホウ素、亜鉛、マンガンなど）",
+        "mechanism": "細胞内浸透圧の維持、光合成効率の維持、酵素活性の促進",
+        "usage_text": "概要：作物の生育ステージ（定植後、開花前、肥大期など）に合わせて、500倍から1000倍に希釈して葉面散布または灌水施用する。\n・作物：トマト、きゅうり、なすなど／目的：作物の環境ストレス耐性の向上および品質・収量の改善／使い方：栽培：施設、露地、方法：葉面散布、時期：定植後、開花前、着果期、肥大期、生育段階：育苗期、栄養成長期、生殖成長期、肥大期、希釈：800倍から1000倍、施用量：100-150ml/10a、散布液量：100-150L、原液換算：不明、上限：明記なし、補足：7-14日間隔で定期散布すると効果的です。、注意：高温時の散布を避け、葉裏にもよくかかるように散布してください。\n・作物：トマト、きゅうり、なすなど／目的：作物の環境ストレス耐性の向上および品質・収量の改善／使い方：栽培：施設、方法：灌注処理、時期：定植直後、生育盛期、生育段階：定植期、栄養成長期、希釈：原液、施用量：1-2L/10a、散布液量：灌水設備等で適宜希釈、原液換算：不明、上限：明記なし、補足：点滴灌水や株元灌注にて施用。根群の発達を促します。、注意：過湿にならないよう、通常の灌水管理に合わせて施用してください。\n・作物：レタス、キャベツ、ほうれん草など／目的：作物の環境ストレス耐性の向上および品質・収量の改善／使い方：栽培：露地、施設、方法：葉面散布、時期：定植後、生育初期、結球前・肥大期、生育段階：栄養成長期、希釈：800倍から1000倍、施用量：100-150ml/10a、散布液量：100-150L、原液換算：不明、上限：明記なし、補足：生育を均一にし、霜害や低温による生育遅延を軽減します。、注意：結球内部に液がたまらないよう、均一に散布してください。\n・作物：大根、にんじん、玉ねぎなど／目的：作物の環境ストレス耐性の向上および品質・収量の改善／使い方：栽培：露地、方法：葉面散布、時期：本葉展開期、肥大初期、肥大盛期、生育段階：栄養成長期、肥大期、希釈：500倍から800倍、施用量：150-200ml/10a、散布液量：100-150L、原液換算：不明、上限：明記なし、補足：根部の肥大を促進し、秀品率を向上させます。、注意：生育後半の過剰施用は、チッソ効きすぎによる品質低下を招く恐れがあるため注意。\n・作物：りんご、みかん、ぶどうなど／目的：作物の環境ストレス耐性の向上および品質・収量の改善／使い方：栽培：露地、方法：葉面散布、時期：発芽期、開花前、落花後、果実肥大期、生育段階：発芽期、開花期、肥大期、希釈：1000倍、施用量：200-300ml/10a、散布液量：200-300L、原液換算：不明、上限：明記なし、補足：着果の安定、果実の肥大促進、糖度・着色の向上に貢献します。、注意：収穫間際の散布は、果実に汚れが残る可能性を考慮し、避けてください。\n・作物：水稲／目的：作物の環境ストレス耐性の向上および品質・収量の改善／使い方：栽培：移植、直播、方法：葉面散布、時期：分げつ期、出穂前、登熟期、生育段階：分げつ期、生殖成長期、登熟期、希釈：500倍から800倍、施用量：100-150ml/10a、散布液量：80-120L、原液換算：不明、上限：明記なし、補足：初期の有効分げつ確保および高温・低温時の登熟歩合向上。、注意：カメムシ防除などの農薬混用時は、混用適合性を事前に確認してください。",
+        "image_count": 0,
+        "target_crop_count": 3,
+        "effect_count": 0,
+        "search_tag_count": 0
+      }
+    },
+    {
+      "key": {
+        "name": "BIOZ Moonstone",
+        "manufacturer_name": "ICL JAPAN"
+      },
+      "source": {
+        "product_type": "バイオスティミュラント",
+        "commercial_status": "公式ページ掲載",
+        "expected_effects_official": "ムーンストーンは、作物全般が対象の葉面散布肥料で、17種類の必須アミノ酸に加え、9種類の栄養素を配合しています。グルタミン酸（分析例として20,000 ppm）とアスパラギン酸（分析例として4,000 ppm）を豊富に含み、速やかに植物の反応が見えます。アミノ酸及び微量要素の働きにより、非生物的ストレス（高温、低温、風水害、ひょうによる葉の損傷、農薬による葉焼け）からの回復を早めます。水稲・小麦・トウモロコシ・馬鈴薯など多岐にわたる作物の高収量を実現します。作物の新陳代謝を促進、作物体内の栄養吸収と転流速度を向上、夏場の高温からの回復促進、農薬による葉の薬害低減、花や果実の着実性を向上",
+        "general_purpose": "非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する",
+        "primary_compound": "17種類の必須アミノ酸、9種類の栄養素、窒素、リン酸、カリウム、硫黄、ホウ素、銅、マンガン、モリブデン、亜鉛、有機体炭素、グルタミン酸 分析例20,000ppm、アスパラギン酸 分析例4,000ppm、保証成分 6-1-1、0.1MnO、0.1B2O3",
+        "mode_of_action": "17種類の必須アミノ酸と9種類の栄養素による葉面からの補給により、作物の新陳代謝、栄養吸収、転流、非生物的ストレス後の回復を支援する",
+        "usage_summary": "推奨施用量は希釈倍率基準ではなく単位面積あたりの投下量100～200ml/10aが基準。ムーンストーン希釈液単独または農薬資材との混合希釈液をブームスプレイヤーにて葉面散布する。",
+        "image_count": 1,
+        "recipe_count": 13
+      },
+      "target": {
+        "product_types": [
+          "バイオスティミュラント"
+        ],
+        "sales_status": "公式ページ掲載",
+        "description": "ムーンストーンは、作物全般が対象の葉面散布肥料で、17種類の必須アミノ酸に加え、9種類の栄養素を配合しています。グルタミン酸（分析例として20,000 ppm）とアスパラギン酸（分析例として4,000 ppm）を豊富に含み、速やかに植物の反応が見えます。アミノ酸及び微量要素の働きにより、非生物的ストレス（高温、低温、風水害、ひょうによる葉の損傷、農薬による葉焼け）からの回復を早めます。水稲・小麦・トウモロコシ・馬鈴薯など多岐にわたる作物の高収量を実現します。作物の新陳代謝を促進、作物体内の栄養吸収と転流速度を向上、夏場の高温からの回復促進、農薬による葉の薬害低減、花や果実の着実性を向上",
+        "general_use": "非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する",
+        "main_components": "17種類の必須アミノ酸、9種類の栄養素、窒素、リン酸、カリウム、硫黄、ホウ素、銅、マンガン、モリブデン、亜鉛、有機体炭素、グルタミン酸 分析例20,000ppm、アスパラギン酸 分析例4,000ppm、保証成分 6-1-1、0.1MnO、0.1B2O3",
+        "mechanism": "17種類の必須アミノ酸と9種類の栄養素による葉面からの補給により、作物の新陳代謝、栄養吸収、転流、非生物的ストレス後の回復を支援する",
+        "usage_text": "概要：推奨施用量は希釈倍率基準ではなく単位面積あたりの投下量100～200ml/10aが基準。ムーンストーン希釈液単独または農薬資材との混合希釈液をブームスプレイヤーにて葉面散布する。\n・作物：サトウキビ／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：不明、方法：葉面散布、時期：干ばつ抵抗時、栄養生長期、生育段階：干ばつ抵抗時、栄養生長期、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：不明、原液換算：100-200ml/10a、上限：200 ml/10a、補足：干ばつ抵抗時、栄養生長期に施用。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：水稲／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：不明、方法：葉面散布、時期：栄養生長期、幼穂形成期～出穂初期、生育段階：栄養生長期、幼穂形成期、出穂初期、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：殺虫剤（カメムシ・ウンカ類、水稲）混用時は60～150L/10a、殺菌剤（いもち病、水稲）混用時は60～150L/10aまたは25L/10a（少量散布）、混用資材なしの場合は6-25L/10a、原液換算：100-200ml/10a、上限：200 ml/10a、補足：2回施用。栄養生長期、幼穂形成期～出穂初期に施用する。、注意：単独葉面散布の場合は少量散布6L~/10aが可能で、展着剤の使用を推奨。農薬資材との混合時は希釈倍率を混用農薬資材に合わせる。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：トウモロコシ／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：不明、方法：葉面散布、時期：栄養生長期、幼穂形成期～出穂初期、生育段階：栄養生長期、幼穂形成期、出穂初期、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：不明、原液換算：100-200ml/10a、上限：200 ml/10a、補足：2回施用。栄養生長期、幼穂形成期～出穂初期に施用する。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：小麦／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：不明、方法：葉面散布、時期：栄養生長期、幼穂形成期～出穂初期、生育段階：栄養生長期、幼穂形成期、出穂初期、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：殺菌剤（赤かび病、小麦）混用時は60～150L/10a、原液換算：100-200ml/10a、上限：200 ml/10a、補足：2回施用。栄養生長期、幼穂形成期～出穂初期に施用する。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：馬鈴薯／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：不明、方法：葉面散布、時期：栄養生長期、塊茎形成期、塊茎肥大期、生育段階：栄養生長期、塊茎形成期、塊茎肥大期、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 ml/10a、散布液量：不明、原液換算：100ml/10a、上限：100 ml/10a、補足：3回施用。栄養生長期、塊茎形成期、塊茎肥大期に施用する。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：玉ねぎ／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：移植、方法：葉面散布、時期：移植後30日目、結球後、生育段階：移植後、結球後、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：不明、原液換算：100-200ml/10a、上限：200 ml/10a、補足：2回施用。移植後30日目、結球後に施用する。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：柑橘類／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：不明、方法：葉面散布、時期：開花期、果実肥大期、生育段階：開花期、果実肥大期、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：不明、原液換算：100-200ml/10a、上限：200 ml/10a、補足：2回施用。開花期、果実肥大期に施用する。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：大豆／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：不明、方法：葉面散布、時期：栄養生長期（V4）、子実肥大期、生育段階：栄養生長期、子実肥大期、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：不明、原液換算：100-200ml/10a、上限：200 ml/10a、補足：2回施用。栄養生長期（V4）、子実肥大期に施用する。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：豆類／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：不明、方法：葉面散布、時期：栄養生長期（V4）、子実肥大期、生育段階：栄養生長期、子実肥大期、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：不明、原液換算：100-200ml/10a、上限：200 ml/10a、補足：2回施用。栄養生長期（V4）、子実肥大期に施用する。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：落花生／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：不明、方法：葉面散布、時期：栄養生長期（V4）、子実肥大期、生育段階：栄養生長期、子実肥大期、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：不明、原液換算：100-200ml/10a、上限：200 ml/10a、補足：2回施用。栄養生長期（V4）、子実肥大期に施用する。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：トマト／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：移植、方法：葉面散布、時期：移植後20日目から15日間隔、生育段階：移植後、生育期間中、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：不明、原液換算：100-200ml/10a、上限：200 ml/10a、補足：3-5回施用。移植後20日目から施用し、15日間隔で繰り返し施用する。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：その他の野菜／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：移植、方法：葉面散布、時期：移植後20日目から15日間隔、生育段階：移植後、生育期間中、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：100 - 200 ml/10a、散布液量：不明、原液換算：100-200ml/10a、上限：200 ml/10a、補足：3-5回施用。移植後20日目から施用し、15日間隔で繰り返し施用する。、注意：タンク投入前にボトルをよく振って使用。農薬資材との混合時はボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。\n・作物：薬害および非生物ストレス後／目的：非生物的ストレスからの回復を早め、作物の新陳代謝、栄養吸収、転流、着花・着果を支援する／使い方：栽培：不明、方法：葉面散布、時期：薬害症状の発現後すぐ、ストレス発生直後～3日後、生育段階：薬害発生後、非生物ストレス後、希釈：希釈倍率基準ではなく単位面積あたりの投下量、施用量：150 - 200 ml/10a、散布液量：不明、原液換算：150-200ml/10a、上限：200 ml/10a、補足：薬害症状の発現後すぐに施用する。PDFではストレス発生直後～3日後に散布と記載。、注意：農薬資材との混合時は希釈倍率を混用農薬資材に合わせる。初めてタンク内で混合する前にボトルテストを行う。石灰硫黄合剤、銅剤との混用を避ける。",
+        "image_count": 1,
+        "target_crop_count": 1,
+        "effect_count": 0,
+        "search_tag_count": 0
+      }
+    },
+    {
+      "key": {
+        "name": "BIOZ Sunstone",
+        "manufacturer_name": "ICL JAPAN"
+      },
+      "source": {
+        "product_type": "バイオスティミュラント",
+        "commercial_status": "公式ページ掲載",
+        "expected_effects_official": "サンストーンは、イネ科作物向けの種子処理剤（バイオスティミュラント）で、発根後の生育促進及び生理活性を促します。「種子の活力発現」、「根の発達促進」、「ストレス耐性の向上」という3つの作用をもたらし、高収量実現のスターターとして、期待できます。種子の活力発現を促し、作物の初期生育をより均等化。根の発達を促進。ストレス耐性の向上。",
+        "general_purpose": "イネ科作物向けの種子処理により、種子の活力発現、根の発達促進、ストレス耐性向上を目的とする",
+        "primary_compound": "カリウム、モリブデン、亜鉛、その他海藻エキス（アスコフィルム・ノドサム）含有",
+        "mode_of_action": "種子処理によって種子の活力発現、根の発達促進、ストレス耐性の向上という3つの作用をもたらす",
+        "usage_summary": "基本は種子処理。種子1kgに対する必要量を計算し、流動する種子に噴霧して塗抹処理し、処理後に十分乾燥させる。水稲（乾田直播）は1ml/種子1kg、10倍希釈。小麦は1.5ml/種子1kg、5倍希釈。トウモロコシは10ml/10aで希釈倍率は問い合わせ。",
+        "image_count": 1,
+        "recipe_count": 5
+      },
+      "target": {
+        "product_types": [
+          "バイオスティミュラント"
+        ],
+        "sales_status": "公式ページ掲載",
+        "description": "サンストーンは、イネ科作物向けの種子処理剤（バイオスティミュラント）で、発根後の生育促進及び生理活性を促します。「種子の活力発現」、「根の発達促進」、「ストレス耐性の向上」という3つの作用をもたらし、高収量実現のスターターとして、期待できます。種子の活力発現を促し、作物の初期生育をより均等化。根の発達を促進。ストレス耐性の向上。",
+        "general_use": "イネ科作物向けの種子処理により、種子の活力発現、根の発達促進、ストレス耐性向上を目的とする",
+        "main_components": "カリウム、モリブデン、亜鉛、その他海藻エキス（アスコフィルム・ノドサム）含有",
+        "mechanism": "種子処理によって種子の活力発現、根の発達促進、ストレス耐性の向上という3つの作用をもたらす",
+        "usage_text": "概要：基本は種子処理。種子1kgに対する必要量を計算し、流動する種子に噴霧して塗抹処理し、処理後に十分乾燥させる。水稲（乾田直播）は1ml/種子1kg、10倍希釈。小麦は1.5ml/種子1kg、5倍希釈。トウモロコシは10ml/10aで希釈倍率は問い合わせ。\n・作物：水稲／目的：イネ科作物向けの種子処理により、種子の活力発現、根の発達促進、ストレス耐性向上を目的とする／使い方：栽培：乾田直播、方法：種子処理、塗抹処理、時期：播種直前、生育段階：播種前、希釈：10倍、施用量：1 ml/種子1kg、散布液量：不明、原液換算：1ml/種子1kg、上限：明記なし、補足：種子1kgに対する必要量を計算し、計量品をミキサー等にかけ、流動する種子に噴霧することで塗抹処理する。塗抹後、平らな場所に新聞紙等を広げ、種子を十分に乾かす。、注意：薬剤とタンクミックスしない。微生物資材とタンクミックスする場合は塩素を含まない水で希釈。塗抹剤の殺虫・殺菌剤と併用する場合は塗抹前に十分混ぜる。塗抹後の種子は5～20℃で保管し、およそ3週間以内に播種。\n・作物：小麦／目的：イネ科作物向けの種子処理により、種子の活力発現、根の発達促進、ストレス耐性向上を目的とする／使い方：栽培：不明、方法：種子処理、塗抹処理、時期：播種直前、生育段階：播種前、希釈：5倍、施用量：1.5 ml/種子1kg、散布液量：不明、原液換算：1.5ml/種子1kg、上限：明記なし、補足：種子1kgに対する必要量を計算し、計量品をミキサー等にかけ、流動する種子に噴霧することで塗抹処理する。塗抹後、平らな場所に新聞紙等を広げ、種子を十分に乾かす。、注意：薬剤とタンクミックスしない。微生物資材とタンクミックスする場合は塩素を含まない水で希釈。塗抹剤の殺虫・殺菌剤と併用する場合は塗抹前に十分混ぜる。塗抹後の種子は5～20℃で保管し、およそ3週間以内に播種。\n・作物：トウモロコシ／目的：イネ科作物向けの種子処理により、種子の活力発現、根の発達促進、ストレス耐性向上を目的とする／使い方：栽培：不明、方法：種子処理、塗抹処理、時期：播種直前、生育段階：播種前、希釈：お問合せください、施用量：10ml/10a、散布液量：不明、原液換算：10ml/10a、上限：明記なし、補足：トウモロコシで単位面積当たりの播種量が少ない場合は、種子1kgあたりの塗抹量が相対的に多くなり、より長い時間を乾燥に要する。施用量は10ml/10a。、注意：薬剤とタンクミックスしない。微生物資材とタンクミックスする場合は塩素を含まない水で希釈。トウモロコシの推奨希釈倍率は公式ページで「お問合せください」と記載。塗抹後の種子は5～20℃で保管し、およそ3週間以内に播種。\n・作物：水稲（乾田直播）、小麦／目的：イネ科作物向けの種子処理により、種子の活力発現、根の発達促進、ストレス耐性向上を目的とする／使い方：栽培：不明、方法：種子処理、塗抹処理、時期：播種直前、生育段階：播種前、希釈：5～10倍程度、施用量：単独塗抹の場合は、粉の吸水性を考慮し、5～10倍程度に水で希釈して塗抹することもできます、散布液量：不明、原液換算：不明、上限：明記なし、補足：単独塗抹の場合の補足。水稲と小麦の施用量早見表あり。水稲は1ml/種子1kg、小麦は1.5ml/種子1kg。、注意：単独塗抹の場合は粉の吸水性を考慮する。塗抹後の種子は5～20℃で保管し、およそ3週間以内に播種。\n・作物：トウモロコシ／目的：イネ科作物向けの種子処理により、種子の活力発現、根の発達促進、ストレス耐性向上を目的とする／使い方：栽培：不明、方法：植溝内土壌散布、時期：播種時、生育段階：播種時、希釈：200～250倍、施用量：種子処理の代わりに、播種時の植溝内土壌散布も可能。施用量：20ml/10a、希釈倍率：200～250倍、散布水量：4～5L/10a、散布液量：4～5L/10a、原液換算：20ml/10a、上限：明記なし、補足：種子処理の代替として播種時の植溝内土壌散布も可能。、注意：公式PDFの補足記載。Webページの施用量表ではトウモロコシは種子処理10ml/10a、お問合せくださいと記載されているため、植溝内土壌散布の扱いは要確認。",
+        "image_count": 1,
+        "target_crop_count": 1,
+        "effect_count": 0,
+        "search_tag_count": 0
+      }
+    },
+    {
+      "key": {
+        "name": "モーニングエース",
+        "manufacturer_name": "アグロ カネショウ"
+      },
+      "source": {
+        "product_type": "機能性液肥",
+        "commercial_status": "公式ページ掲載",
+        "expected_effects_official": "コリンと海藻抽出物、アミノ酸をバランスよく配合した葉面散布肥料です。光合成を促進し、細胞膜も強化するため、糖度向上による果実の着色向上、また日持ち向上が期待できます。海藻抽出物とタウリンの働きで着色促進。コリンは光合成の活性化や発根を促す作用があり、果実の肥大や着色、糖度などの品質向上が期待できます。海藻抽出物は糖度や日持ち向上、食味・食感の改善など、作物品質の向上が期待されます。また、環境ストレスによって低下した樹勢の回復も期待できます。",
+        "general_purpose": "果樹の着色促進、品質向上、糖度向上、日持ち向上を目的とする葉面散布用の機能性液肥",
+        "primary_compound": "保証成分量（％）：N2.0、P7.0、K1.0、B0.50、効果発現促進材：Ca0.31、その他成分：コリン、海藻抽出物、タウリン、窒素全量を含有する原料：りん酸コリン、タウリン、海藻抽出物",
+        "mode_of_action": "コリンは細胞膜を構成する成分の一つとして知られ、植物体内への浸透移行性に優れ、光合成の活性化や発根を促す作用があり、果実の肥大や着色、糖度などの品質向上が期待できる。海藻抽出物にはミネラル、アミノ酸、ビタミンなどが含まれ、糖度や日持ち向上、食味・食感の改善、環境ストレスで低下した樹勢の回復が期待できる",
+        "usage_summary": "500～600倍に希釈して樹全体に散布する。作物・品種により使用時期が異なり、りんご早生・中生は収穫15～20日前、りんご晩生種・なし・かきは収穫30～40日前、おうとうは着色初期および収穫7日前、ももは収穫15～30日前、ぶどうはとび玉の入った頃に使用する。",
+        "image_count": 0,
+        "recipe_count": 7
+      },
+      "target": {
+        "product_types": [
+          "機能性液肥"
+        ],
+        "sales_status": "公式ページ掲載",
+        "description": "コリンと海藻抽出物、アミノ酸をバランスよく配合した葉面散布肥料です。光合成を促進し、細胞膜も強化するため、糖度向上による果実の着色向上、また日持ち向上が期待できます。海藻抽出物とタウリンの働きで着色促進。コリンは光合成の活性化や発根を促す作用があり、果実の肥大や着色、糖度などの品質向上が期待できます。海藻抽出物は糖度や日持ち向上、食味・食感の改善など、作物品質の向上が期待されます。また、環境ストレスによって低下した樹勢の回復も期待できます。",
+        "general_use": "果樹の着色促進、品質向上、糖度向上、日持ち向上を目的とする葉面散布用の機能性液肥",
+        "main_components": "保証成分量（％）：N2.0、P7.0、K1.0、B0.50、効果発現促進材：Ca0.31、その他成分：コリン、海藻抽出物、タウリン、窒素全量を含有する原料：りん酸コリン、タウリン、海藻抽出物",
+        "mechanism": "コリンは細胞膜を構成する成分の一つとして知られ、植物体内への浸透移行性に優れ、光合成の活性化や発根を促す作用があり、果実の肥大や着色、糖度などの品質向上が期待できる。海藻抽出物にはミネラル、アミノ酸、ビタミンなどが含まれ、糖度や日持ち向上、食味・食感の改善、環境ストレスで低下した樹勢の回復が期待できる",
+        "usage_text": "概要：500～600倍に希釈して樹全体に散布する。作物・品種により使用時期が異なり、りんご早生・中生は収穫15～20日前、りんご晩生種・なし・かきは収穫30～40日前、おうとうは着色初期および収穫7日前、ももは収穫15～30日前、ぶどうはとび玉の入った頃に使用する。\n・作物：りんご（早生、中生）／目的：果樹の着色促進、品質向上、糖度向上、日持ち向上を目的とする葉面散布用の機能性液肥／使い方：栽培：不明、方法：葉面散布、時期：収穫の15～20日前、生育段階：収穫前、希釈：500～600倍、施用量：500～600倍に希釈して樹全体に散布する、散布液量：不明、原液換算：不明、上限：明記なし、補足：肥効は着色促進、品質向上。、注意：海藻由来の沈殿がみられることがあるが、品質上問題ない。眼に入らないように注意。皮ふに付着した場合は石けんでよく洗い落とす。\n・作物：りんご（ふじなど晩生種）／目的：果樹の着色促進、品質向上、糖度向上、日持ち向上を目的とする葉面散布用の機能性液肥／使い方：栽培：不明、方法：葉面散布、時期：収穫の30～40日前、生育段階：収穫前、希釈：500～600倍、施用量：500～600倍に希釈して樹全体に散布する、散布液量：不明、原液換算：不明、上限：明記なし、補足：肥効は着色促進、品質向上。、注意：海藻由来の沈殿がみられることがあるが、品質上問題ない。眼に入らないように注意。皮ふに付着した場合は石けんでよく洗い落とす。\n・作物：おうとう／目的：果樹の着色促進、品質向上、糖度向上、日持ち向上を目的とする葉面散布用の機能性液肥／使い方：栽培：不明、方法：葉面散布、時期：着色初期および収穫の7日前、生育段階：着色初期、収穫前、希釈：500～600倍、施用量：500～600倍に希釈して樹全体に散布する、散布液量：不明、原液換算：不明、上限：明記なし、補足：肥効は着色促進、品質向上。、注意：海藻由来の沈殿がみられることがあるが、品質上問題ない。眼に入らないように注意。皮ふに付着した場合は石けんでよく洗い落とす。\n・作物：なし／目的：果樹の着色促進、品質向上、糖度向上、日持ち向上を目的とする葉面散布用の機能性液肥／使い方：栽培：不明、方法：葉面散布、時期：収穫の30～40日前、生育段階：収穫前、希釈：500～600倍、施用量：500～600倍に希釈して樹全体に散布する、散布液量：不明、原液換算：不明、上限：明記なし、補足：肥効は品質向上。、注意：海藻由来の沈殿がみられることがあるが、品質上問題ない。眼に入らないように注意。皮ふに付着した場合は石けんでよく洗い落とす。\n・作物：もも／目的：果樹の着色促進、品質向上、糖度向上、日持ち向上を目的とする葉面散布用の機能性液肥／使い方：栽培：不明、方法：葉面散布、時期：収穫の15～30日前、生育段階：収穫前、希釈：500～600倍、施用量：500～600倍に希釈して樹全体に散布する、散布液量：不明、原液換算：不明、上限：明記なし、補足：肥効は着色促進、品質向上。、注意：海藻由来の沈殿がみられることがあるが、品質上問題ない。眼に入らないように注意。皮ふに付着した場合は石けんでよく洗い落とす。\n・作物：ぶどう／目的：果樹の着色促進、品質向上、糖度向上、日持ち向上を目的とする葉面散布用の機能性液肥／使い方：栽培：不明、方法：葉面散布、時期：とび玉の入った頃（水まわり期、着色初期）、生育段階：水まわり期、着色初期、希釈：500～600倍、施用量：500～600倍に希釈して樹全体に散布する、散布液量：不明、原液換算：不明、上限：明記なし、補足：肥効は着色促進、品質向上。、注意：海藻由来の沈殿がみられることがあるが、品質上問題ない。眼に入らないように注意。皮ふに付着した場合は石けんでよく洗い落とす。\n・作物：かき／目的：果樹の着色促進、品質向上、糖度向上、日持ち向上を目的とする葉面散布用の機能性液肥／使い方：栽培：不明、方法：葉面散布、時期：収穫の30～40日前、生育段階：収穫前、希釈：500～600倍、施用量：500～600倍に希釈して樹全体に散布する、散布液量：不明、原液換算：不明、上限：明記なし、補足：肥効は着色促進、品質向上。、注意：海藻由来の沈殿がみられることがあるが、品質上問題ない。眼に入らないように注意。皮ふに付着した場合は石けんでよく洗い落とす。",
+        "image_count": 0,
+        "target_crop_count": 0,
+        "effect_count": 0,
+        "search_tag_count": 0
+      }
+    },
+    {
+      "key": {
+        "name": "鉄力あぐりB12",
+        "manufacturer_name": "愛知製鋼"
+      },
+      "source": {
+        "product_type": "粒状資材",
+        "commercial_status": "公式ページ掲載",
+        "expected_effects_official": "3～5mmの粒で撒きやすい。使い続けても土壌蓄積がない。肥料成分が無く、肥料設計を変えずに使える。根に当たっても害がでにくく、局所施肥ができる。葉色改善による光合成促進、根張り強化による活着促進・生育促進、代謝正常化による生育維持。",
+        "general_purpose": "栽培期間が長い果菜類や果樹などに2価鉄を供給し、葉色改善、根張り強化、生育促進を支援する",
+        "primary_compound": "FeO（酸化第一鉄）、有機物、公式PDFではFeO、有機酸",
+        "mode_of_action": "FeO由来の2価鉄供給により、葉色改善、根張り強化、花芽充実、生育改善を促す",
+        "usage_summary": "培土等への混合、圃場への全面散布、条まき、イチゴの株元施用、元肥との施用、果樹の元肥・追肥時の根本散布に使用。公式ページでは培土1Lあたり1g、圃場へ1反あたり50kg～100kgまたは1m2あたり50～100g、果樹などは1m未満100～200g/本、1m以上200～300g/本を標準施用量として記載。公式PDFでは果樹・樹木の樹高別施用量を0.5m以下50g/本、0.5～1m100g/本、1m以上100～200g/本と記載。",
+        "image_count": 1,
+        "recipe_count": 8
+      },
+      "target": {
+        "product_types": [
+          "粒状資材"
+        ],
+        "sales_status": "公式ページ掲載",
+        "description": "3～5mmの粒で撒きやすい。使い続けても土壌蓄積がない。肥料成分が無く、肥料設計を変えずに使える。根に当たっても害がでにくく、局所施肥ができる。葉色改善による光合成促進、根張り強化による活着促進・生育促進、代謝正常化による生育維持。",
+        "general_use": "栽培期間が長い果菜類や果樹などに2価鉄を供給し、葉色改善、根張り強化、生育促進を支援する",
+        "main_components": "FeO（酸化第一鉄）、有機物、公式PDFではFeO、有機酸",
+        "mechanism": "FeO由来の2価鉄供給により、葉色改善、根張り強化、花芽充実、生育改善を促す",
+        "usage_text": "概要：培土等への混合、圃場への全面散布、条まき、イチゴの株元施用、元肥との施用、果樹の元肥・追肥時の根本散布に使用。公式ページでは培土1Lあたり1g、圃場へ1反あたり50kg～100kgまたは1m2あたり50～100g、果樹などは1m未満100～200g/本、1m以上200～300g/本を標準施用量として記載。公式PDFでは果樹・樹木の樹高別施用量を0.5m以下50g/本、0.5～1m100g/本、1m以上100～200g/本と記載。\n・作物：野菜・花卉／目的：栽培期間が長い果菜類や果樹などに2価鉄を供給し、葉色改善、根張り強化、生育促進を支援する／使い方：栽培：不明、方法：全面散布、時期：播種前、定植前、生育段階：播種前、定植前、希釈：原体、施用量：公式ページ：1m2当たり50～100g、PDF：全面散布50g/m2、散布液量：不明、原液換算：不明、上限：公式ページ：1m2当たり50～100g、補足：播種・定植前に施用し、軽く混合する。、注意：栽培法・作物により施用量は変わるため、状況に応じて調整。WebとPDFで標準施用量に差分あり。\n・作物：野菜・花卉／目的：栽培期間が長い果菜類や果樹などに2価鉄を供給し、葉色改善、根張り強化、生育促進を支援する／使い方：栽培：不明、方法：条まき、時期：播種前、定植前、生育段階：播種前、定植前、希釈：原体、施用量：PDF：条まき20～50g/m2、散布液量：不明、原液換算：不明、上限：50g/m2、補足：播種・定植前に筋蒔きし、軽く混合する。、注意：栽培法・作物により施用量は変わるため、状況に応じて調整。\n・作物：苗／目的：栽培期間が長い果菜類や果樹などに2価鉄を供給し、葉色改善、根張り強化、生育促進を支援する／使い方：栽培：育苗、方法：培土混合、時期：播種前、定植前、生育段階：育苗期、希釈：原体、施用量：公式ページ：培土1L当たり1gを混合、PDF：0.5～2g/土壌1L、散布液量：不明、原液換算：不明、上限：2g/土壌1L、補足：培土に混合し、セルトレイ、ポットなどに詰めてから播種もしくは定植する。、注意：WebとPDFで標準施用量に差分あり。\n・作物：不明／目的：栽培期間が長い果菜類や果樹などに2価鉄を供給し、葉色改善、根張り強化、生育促進を支援する／使い方：栽培：圃場、方法：土壌施用、元肥同時施用、時期：播種前、定植前、元肥時、生育段階：播種前、定植前、希釈：原体、施用量：公式ページ：1反当たり50kg～100kg、散布液量：不明、原液換算：不明、上限：100kg/1反、補足：元肥と共に1反当たり50～100kgを施用。、注意：栽培法・作物により施用量は変わるため、状況に応じて調整。\n・作物：イチゴ／目的：栽培期間が長い果菜類や果樹などに2価鉄を供給し、葉色改善、根張り強化、生育促進を支援する／使い方：栽培：不明、方法：筋まき、株元施用、時期：定植前、生育段階：定植前、希釈：原体、施用量：イチゴの場合、1株当たり2gを筋蒔きした後に定植、散布液量：不明、原液換算：不明、上限：明記なし、補足：イチゴの具体的使用例。、注意：栽培法・作物により施用量は変わるため、状況に応じて調整。\n・作物：果樹・樹木／目的：栽培期間が長い果菜類や果樹などに2価鉄を供給し、葉色改善、根張り強化、生育促進を支援する／使い方：栽培：樹高0.5m以下、方法：根本散布、時期：元肥時、追肥時、生育段階：生育期間中、希釈：原体、施用量：PDF：樹高0.5m以下 50g/本、散布液量：不明、原液換算：不明、上限：50g/本、補足：果樹の元肥、追肥時に標準施用量を一緒に施用。、注意：公式ページでは1m未満の樹木100～200g/本と記載があり、PDFと差分あり。\n・作物：果樹・樹木／目的：栽培期間が長い果菜類や果樹などに2価鉄を供給し、葉色改善、根張り強化、生育促進を支援する／使い方：栽培：樹高0.5m～1m、方法：根本散布、時期：元肥時、追肥時、生育段階：生育期間中、希釈：原体、施用量：PDF：樹高0.5m～1m 100g/本、散布液量：不明、原液換算：不明、上限：100g/本、補足：果樹の元肥、追肥時に標準施用量を一緒に施用。、注意：公式ページでは1m未満の樹木100～200g/本と記載があり、PDFと差分あり。\n・作物：果樹・樹木／目的：栽培期間が長い果菜類や果樹などに2価鉄を供給し、葉色改善、根張り強化、生育促進を支援する／使い方：栽培：樹高1m以上、方法：根本散布、時期：元肥時、追肥時、生育段階：生育期間中、希釈：原体、施用量：公式ページ：1m以上の樹木200～300g/本、PDF：樹高1m以上100～200g/本、散布液量：不明、原液換算：不明、上限：公式ページ：1m以上の樹木200～300g/本、補足：果樹の元肥、追肥時に標準施用量を一緒に施用。、注意：WebとPDFで標準施用量に差分あり。",
+        "image_count": 1,
+        "target_crop_count": 0,
+        "effect_count": 0,
+        "search_tag_count": 0
+      }
+    }
+  ]
+}

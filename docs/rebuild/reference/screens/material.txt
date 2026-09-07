@@ -1,0 +1,77 @@
+S.material = () => appbar('Skeepon', {share:true}) + `
+  <div class="body">
+    <div class="card mat-hero">
+      <div class="mat-hero-img">${bottleImg()}</div>
+      <div style="flex:1;min-width:0">
+        <h2 style="font-size:19px">Skeepon</h2>
+        <div class="official" style="margin-top:4px" data-go="seller">〇〇株式会社 ${CHECK} 公式</div>
+        <div class="rating-hero"><span class="sc tnum">4.2</span><div>${stars(4)}<div class="muted" style="font-size:10.5px">農家の口コミ 32件</div></div></div>
+      </div>
+    </div>
+    <div class="hero-links" style="padding:0 3px">
+      <a>${EXT} 製造元公式ページを見る</a>
+      <a>${DOC} 公式カタログPDFを見る</a>
+    </div>
+    <div class="disclaimer">掲載情報は、製造元公式サイト等の公開情報をもとに Farmille が独自に整理・分類したものです。最新・正式な使用方法は必ず製造元公式情報をご確認ください。</div>
+
+    <div class="sec-h"><h2>資材詳細</h2><span class="verified-badge">${CHECK} メーカー確認済み</span></div>
+    <div class="card">
+      ${dRow('一般用途','高温期の草勢維持を目的としたバイオスティミュラント資材。施設園芸のミニトマト・いちごを中心に、灌水時の株元施用で使用。')}
+      ${dRow('製品タイプ','バイオスティミュラント')}
+      ${dRow('主成分','保証成分量：アミノ酸・海藻抽出エキス 等')}
+      ${dRow('作用機序','高温ストレス下での水分保持・生育の安定をねらう。詳細は製造元公式情報を参照。')}
+      ${dRow('効果分類（JBSA基準・製造元申告）','生育の安定 ／ 高温ストレス耐性')}
+      ${dRow('対象作目','ミニトマト・いちご・露地野菜')}
+      ${dRow('販売状況','公式ページ掲載')}
+      ${dRow('製造元','〇〇株式会社')}
+    </div>
+
+    <div class="sec-h"><h2>安全データシート（SDS）</h2><span class="set-by">製造元が設定</span></div>
+    <div class="card">${fileRow('安全データシート（SDS）','2026年4月改訂 ・ PDF 1.2MB')}</div>
+
+    <div class="sec-h"><h2>試験結果・論文データ</h2><span class="set-by">製造元が設定</span></div>
+    <div class="card">
+      ${fileRow('高温期のミニトマトにおける草勢維持効果の検証','〇〇大学 農学部 ・ 2025 ・ PDF')}
+      ${fileRow('バイオスティミュラント施用が果実品質に与える影響','△△農業試験場 ・ 2024 ・ 外部リンク', true)}
+    </div>
+
+    <div class="sec-h"><h2>使用結果レポート <span class="muted tnum" style="font-size:12px">3件</span></h2><a class="link-more" data-go="articles">すべて見る →</a></div>
+    <div class="report-scroll">
+      ${reportCard('Skeepon 使用結果レポート','しおさい農園','ミニトマト','used',24,210)}
+      ${reportCard('Skeepon 使用結果レポート','たなか農園','ミニトマト','apply',8,96)}
+      ${reportCard('Skeepon 使用結果レポート','いちご屋A','いちご','harvest',15,142)}
+    </div>
+    <button class="btn btn-ghost" style="margin-top:10px" data-go="materialArticles">その他の記事（メーカー・JA等） 2件</button>
+
+    <div class="sec-h"><h2>口コミサマリー</h2></div>
+    <div class="card rating-summary">
+      <div style="text-align:center"><div class="big tnum">4.2</div>${stars(4)}<div class="muted" style="font-size:10px">32件</div></div>
+      <div class="bars">${barRow(5,62)}${barRow(4,25)}${barRow(3,9)}${barRow(2,3)}${barRow(1,1)}</div>
+    </div>
+
+    <div class="sec-h" id="sec-reviews"><h2>口コミ <span class="muted tnum" style="font-size:12px">32件</span></h2>
+      <select class="input" style="width:auto;padding:7px 11px;font-size:12px"><option>新着順</option><option>参考になった順</option><option>星の高い順</option></select></div>
+    <div class="stack">
+      ${reviewCard('やまちゃん農園','ミニトマト',4,12,'定植後から定期的に使用しています。葉の色つやが良くなり、草勢が安定しました。収穫量も増えてきて、品質も良好です。',128,null,0)}
+      ${reviewCard('トマト好き','ミニトマト',4,9,'葉の展開が良くなり、樹全体のバランスが整いました。病害の発生も少なく、管理がしやすかったです。',94,null,0)}
+      ${reviewCard('いちご屋A','いちご',4,7,'定植後の活着がスムーズで、根張りが良くなった実感があります。果色も良く、収穫後の日持ちも向上しました。',71,null,0)}
+    </div>
+    <div style="text-align:center;margin-top:14px"><button class="btn btn-ghost btn-sm">口コミをすべて見る（32件）</button></div>
+
+    <div class="sec-h"><h2>Q&amp;A <span class="muted tnum" style="font-size:12px">6件</span></h2><a class="link-more" data-go="qa">すべて見る →</a></div>
+    ${qaItem('高温期（35℃以上）でも効果はありますか？','やまちゃん農園','高温期でも一定の効果が確認されています。散布は気温が下がる早朝・夕方を推奨します。',8)}
+  </div>`;
+
+function qaItem(q, who, a, help, extra = '') {
+  return `<div class="qa-item">
+    <div class="qa-q"><span class="qa-marker">Q</span><div><div class="ans-name">${q}</div>
+      <div class="byline" style="margin-top:4px;font-size:11px"><div class="avatar xs">${PERSON}</div>${who}</div></div></div>
+    <div class="qa-a"><span class="qa-marker a">A</span><div>
+      <div class="ans-name">〇〇株式会社 ${CHECK} <span class="official-badge">公式回答</span></div>
+      <div class="qa-text">${a}</div>
+      <div class="helpful" style="margin-top:7px">${THUMB} 参考になった ${help}</div></div></div>
+    ${extra}
+  </div>`;
+}
+
+/* ---- Q&A ---- */

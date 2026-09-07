@@ -1,0 +1,19 @@
+S.articles = () => appbar('記事を読む') + `
+  <div class="body">
+    <div class="ts-box" style="margin-bottom:12px"><span class="ts-ic">${SEARCH_ICON}</span>
+      <input class="ts-input" placeholder="記事を検索"></div>
+    <div class="filter-row" id="artFilter">
+      <span class="fpill on" data-f="all">すべて</span><span class="fpill" data-f="report">使用結果レポート</span><span class="fpill" data-f="other">その他の記事</span>
+    </div>
+    <div class="report-grid" id="artGrid" style="margin-top:12px">
+      ${reportCard('Skeepon 使用結果レポート','しおさい農園','ミニトマト','used',24,210)}
+      ${reportCard('Skeepon 使用結果レポート','たなか農園','ミニトマト','apply',8,96)}
+      ${reportCard('ボンバルディア 使用結果レポート','いちご屋A','いちご','harvest',15,142)}
+      ${reportCard('サンシェード液 使用結果レポート','のはら農園','ミニトマト','unused',6,58)}
+      ${orgArticleCard('いちご栽培における高温対策の実証結果','〇〇JA','JA',9,84)}
+      ${orgArticleCard('高温期のSkeepon活用ガイド','〇〇株式会社','メーカー',12,96)}
+      ${orgArticleCard('微生物資材の選び方と土壌診断の基礎','農研コンサル','専門家',7,63)}
+    </div>
+  </div>`;
+
+/* ---- 資材のその他の記事（使用結果レポート以外） ---- */

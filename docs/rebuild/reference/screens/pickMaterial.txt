@@ -1,0 +1,15 @@
+S.pickMaterial = () => appbar('投稿する') + `
+  <div class="body" style="padding-bottom:190px">
+    <p class="muted" style="font-size:13px;margin-bottom:12px">どの資材について書きますか？</p>
+    <div class="ts-box"><span class="ts-ic">${SEARCH_ICON}</span>
+      <input id="pickInput" class="ts-input" placeholder="資材名・メーカー名で検索" autocomplete="off"></div>
+    <div class="stack" id="pickList" style="margin-top:12px"></div>
+    <div class="hint-pill" style="margin-top:14px">資材ページの「書く」ボタンからも投稿できます</div>
+  </div>
+  <div class="pick-footer" id="pickFooter" hidden>
+    <div class="pf-name"><span class="t-ic" style="width:34px;height:34px">${SEED}</span><span id="pfName"></span></div>
+    <button class="btn btn-primary" data-go="reportForm">使用結果を入力</button>
+    <button class="btn btn-ghost" data-go="reviewForm">口コミを書く</button>
+  </div>`;
+
+/* ---- 記事詳細（メーカー/JA記事） ---- */

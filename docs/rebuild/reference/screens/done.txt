@@ -1,0 +1,73 @@
+S.done = () => appbar('') + `
+  <div class="done-wrap">
+    <div class="done-check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-11"/></svg></div>
+    <h2>投稿しました</h2>
+    <p>ご協力ありがとうございます。<br>あなたの投稿が、次の農家の判断材料になります。</p>
+    <div class="done-actions">
+      <button class="btn btn-primary" data-go="reportArticle">投稿を見る</button>
+      <button class="btn btn-ghost" data-go="home">ホームへ戻る</button>
+    </div>
+  </div>`;
+
+/* ---- フィード（口コミ・使用結果レポート・記事のメディアを縦スワイプ） ---- */
+/* media: RPHOTOのキー（''なら差し替え用スロット表示）。生成した動画/画像はここに差し込む */
+const FEED_ITEMS = [
+  { photos:['tomato1','tomato2'], author:'しおさい農園', tag:'ミニトマト', kind:'使用結果レポート',
+    title:'夏の萎れ、Skeeponでどこまで変わる？',
+    text:'2回目の使用から数日後、午後の葉の萎れが使用前よりやや軽くなったように感じました。上部の葉が比較的立っており、夕方まで樹勢を維持している株が増えた印象です。薬害や生育不良は見られませんでした。',
+    go:'reportArticle', help:24, views:210 },
+  { photos:['berry1','berry2'], author:'いちごマン', tag:'いちご', kind:'使用結果レポート',
+    title:'いちごの定植後、活着を安定させたい',
+    text:'高設ベンチのいちごに散布して観察中。定植後の活着がスムーズで、花芽の付きも安定している印象です。収穫期に向けて、未処理のベンチと比べながら継続して記録します。',
+    go:'reportArticle', help:11, views:87 },
+  { photos:['cuke1','cuke2','cuke3'], author:'みどり菜園', tag:'きゅうり', kind:'使用結果レポート',
+    title:'きゅうり、7日おき散布で樹勢キープ',
+    text:'梅雨明け後の高温でも葉のしおれが少なく、収穫サイズの揃いが良くなった気がします。散布はいつもの作業と同じ流れでできるので、手間はほぼ増えていません。',
+    go:'reportArticle', help:9, views:74 },
+  { vid:'spray', author:'たなか農園', tag:'ミニトマト', kind:'使用結果レポート',
+    title:'散布は、いつもの灌水に混ぜるだけ',
+    text:'1,000倍に希釈して約10日間隔で3回。特別な機械は不要で、通常の灌水作業に追加するだけなので負担は感じませんでした。処理はハウス1棟のうち約100株です。',
+    go:'reportArticle', help:8, views:96 },
+  { photos:['harvest','unused'], author:'いちご屋A', tag:'いちご', kind:'定量データ',
+    title:'可販果率 82% vs 74%。数字で見る差',
+    text:'処理区・未処理区それぞれ10株を調査。可販果率は処理区82%・未処理区74%、1株あたり収量は2.1kg対1.9kg。裂果の発生は処理区の方が少ない傾向でした。グラフはFarmille編集部が作成しています。',
+    go:'reportArticle', help:15, views:142 },
+  { media:'', video:true, author:'〇〇株式会社', official:true, tag:'メーカー', kind:'記事',
+    title:'高温期のSkeepon活用ガイド',
+    text:'散布は早朝・夕方の涼しい時間帯に。7〜10日間隔での定期使用がおすすめです。生育ステージに合わせた使い方と、灌水量を変えないための工夫を解説します。',
+    go:'articleDetail', help:12, views:96 },
+];
+const feedRail = f => `
+    <div class="feed-rail">
+      <button class="fr-item">${THUMB}<span>${f.help}</span></button>
+      <button class="fr-item">${EYE}<span>${f.views}</span></button>
+      <button class="fr-item">${SHARE}</button>
+    </div>`;
+const feedInfo = f => `
+    <div class="feed-info">
+      <div class="fi-author"><span class="avatar" style="width:26px;height:26px">${PERSON}</span>${f.author}${f.official ? ' '+CHECK : ''}<span class="chip" style="font-size:10px">${f.tag}</span><span class="feed-kind">${f.kind}</span></div>
+      <div class="fi-title">${f.title}</div>
+      <div class="fi-text">${f.text}</div>
+      <button class="btn btn-primary fi-btn" data-go="${f.go}">詳細を見る →</button>
+    </div>`;
+const feedItem = f => f.photos ? `
+  <div class="feed-item fi-photo">
+    <div class="feed-grad"></div>
+    <div class="fp-mid">
+      <div class="fp-carousel">${f.photos.map(k => `<div class="fp-slide">${RPHOTO[k] ? `<img src="${RPHOTO[k]}" alt="">` : `<div class="feed-slot">画像スロット<span>生成メディアに差し替え予定</span></div>`}</div>`).join('')}</div>
+      ${f.photos.length > 1 ? `<div class="fp-dots">${f.photos.map((_, i) => `<span class="${i===0?'on':''}"></span>`).join('')}</div>` : ''}
+    </div>
+    ${feedRail(f)}
+    ${feedInfo(f)}
+  </div>` : `
+  <div class="feed-item">
+    <div class="feed-media">${f.vid && RVIDEO[f.vid]
+      ? `<video src="${RVIDEO[f.vid]}" autoplay muted loop playsinline></video>`
+      : f.media && RPHOTO[f.media]
+      ? `<img src="${RPHOTO[f.media]}" alt="">`
+      : `<div class="feed-slot">動画 / 画像スロット<span>生成したメディアに差し替え予定</span></div>`}</div>
+    <div class="feed-grad"></div>
+    ${f.video ? `<span class="playb feed-play">▶</span>` : ''}
+    ${feedRail(f)}
+    ${feedInfo(f)}
+  </div>`;

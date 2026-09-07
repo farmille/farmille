@@ -1,0 +1,21 @@
+{
+  "ignorePatterns": [
+    "AGENTS.md",
+    ".claude/**",
+    ".codex/**",
+    ".cursor/**",
+    ".github/**",
+    ".next/**",
+    ".ok/**",
+    ".pi/**",
+    ".planning/**",
+    ".playwright-mcp/**",
+    "docs/**",
+    "output/**",
+    "supabase/**",
+    "styled-system/**",
+    "node_modules/**",
+    "tools/**",
+    "src/types/database.types.ts"
+  ]
+}

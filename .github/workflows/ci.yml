@@ -1,0 +1,172 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  app:
+    name: Application quality gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.21.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: Test
+        run: pnpm exec vitest run
+
+      - name: Build
+        run: pnpm build
+        env:
+          # CI 用の公開ダミー値。コード側にフォールバックは置かない方針のため CI 設定で与える。
+          NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
+
+  storybook:
+    name: Storybook and responsive checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.21.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit high severity vulnerabilities
+        run: pnpm audit --audit-level=high
+
+      - name: Check patched Storybook dependency
+        run: pnpm check:security-patches
+
+      - name: Check Story coverage
+        run: pnpm check:stories
+
+      - name: Build Storybook
+        run: pnpm build-storybook
+
+      - name: Select Ubuntu package mirror
+        run: |
+          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+          grep -Fq 'https://archive.ubuntu.com/ubuntu/' /etc/apt/apt-mirrors.txt
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Check responsive layouts
+        run: pnpm test:storybook:responsive
+
+      - name: Upload responsive check artifacts
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: storybook-responsive-report
+          path: |
+            playwright-report
+            test-results
+            output/playwright/storybook-responsive
+          retention-days: 14
+          if-no-files-found: ignore
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.21.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start local Supabase
+        working-directory: .
+        run: npx --yes supabase@latest start
+
+      - name: Export local Supabase environment
+        working-directory: .
+        shell: bash
+        run: |
+          eval "$(npx --yes supabase@latest status -o env)"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY"
+            echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE_KEY"
+            echo "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3007"
+          } >> "$GITHUB_ENV"
+
+      - name: Seed material master
+        working-directory: .
+        shell: bash
+        # E2E は資材が存在する前提（検索・検討リスト・使用レポート）。
+        # migration のシードはタグと作物マスタだけなので資材を別途投入する。
+        run: |
+          eval "$(npx --yes supabase@latest status -o env)"
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f tools/migration/materials-v2-seed.sql
+          psql "$DB_URL" -tAc "select 'materials: ' || count(*) from materials"
+
+      - name: Select Ubuntu package mirror
+        run: |
+          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+          grep -Fq 'https://archive.ubuntu.com/ubuntu/' /etc/apt/apt-mirrors.txt
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright E2E
+        run: pnpm exec playwright test

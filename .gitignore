@@ -7,13 +7,33 @@ __pycache__/
 
 # Node
 node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 .next/
 out/
+build/
+coverage/
+styled-system/
+storybook-static/
+test-results/
+playwright-report/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+*storybook.log
 
 # 環境変数
-.env
-.env.local
-.env.*.local
+.env*
+!.env.example
 
 # IDE
 .vscode/
@@ -27,8 +47,7 @@ Thumbs.db
 
 # Supabase
 supabase/.temp/
-# CLI キャッシュはどの階層でも無視 (backend/supabase/.temp/ の pooler-url は
-# DB 接続文字列を含むため commit 厳禁。2026-07-04)
+# CLI キャッシュはどの階層でも無視する。pooler-url は DB 接続文字列を含むため commit しない。
 **/supabase/.temp/
 
 # Claude
@@ -42,7 +61,7 @@ tmp_*.sql
 function_document.md
 meeting_document.md
 
-# BS資材 master Excel (binary, used by backend/scripts/excel_to_seed_sql.py to
+# BS資材 master Excel (binary, used by tools/migration/legacy/excel_to_seed_sql.py to
 # produce supabase/migrations/<ts>_seed_products_from_ryosei_export.sql).
 # Track via setup-log instead of committing the workbook. 2026-06-15: broadened from the
 # single .xlsm name to all workbooks — *_complete.xlsx (381製品/84社 の proprietary master)
@@ -55,9 +74,24 @@ meeting_document.md
 aglist-*.png
 
 # 本番 PII / 運用スクラッチ (2026-06-15 deploy-readiness レビュー指摘)。
-# docs/drafts/ には本番 import の PII (maker→email→本番 auth user_id UUID マッピング、
-# 本番 admin email を列挙する SQL 等) が、backend/gcp-*.sh には本番 GCP project ref が含まれる。
+# docs/drafts/ には本番 import の PII（maker→email→本番 auth user_id UUID マッピング、
+# 本番 admin email を列挙する SQL 等）が含まれる。
 # 秘密値のハードコードは無いが本番識別子を公開リポに載せないため無視する。
 # 個別に追跡したい安全な draft は `git add -f <path>` で明示追加すること。
 docs/drafts/
-backend/gcp-*.sh
+.claude/skills/open-knowledge/
+.cursor/skills/open-knowledge/
+.codex/skills/open-knowledge/
+.github/skills/open-knowledge/
+.opencode/skills/open-knowledge/
+.pi/skills/open-knowledge/
+
+# ローカルのエージェントツール状態 (commit しない)
+.codex/
+.cursor/
+.pi/
+.ok/
+.okignore
+.mcp.json
+opencode.json
+output/
