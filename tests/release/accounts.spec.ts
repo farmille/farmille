@@ -157,7 +157,9 @@ test("一般・メーカー・運営の本番フローと承認後の非公開�
     await expect(adminPage.getByText("申請を承認して公開内容へ反映しました。")).toBeVisible();
     await page.context().clearCookies();
     await page.goto(`/materials/${materialId}`);
-    await expect(page.getByText("資材が見つかりません", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("main").getByText("資材が見つかりません", { exact: true }),
+    ).toBeVisible();
     for (const width of [375, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       for (const path of ["/", "/search", "/articles", "/sellers", "/signup", "/login"]) {

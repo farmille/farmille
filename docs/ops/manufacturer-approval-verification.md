@@ -20,15 +20,29 @@
 - 依存監査：low 3件、moderate 7件、既存パッチ対象のhigh 2件がignoreされている。image-sizeパッチのCommonJS・ESM検証は成功。
 - DB差分：`supabase db diff --local --schema public,app` は実行成功。ただし既存オブジェクトの権限・default privilegesの差分があり、無差分ではない。今回追加したテーブル・列・関数の定義差分は出ていない。
 
-## 本番・Previewの未確認事項
+## 本番・Previewの切替
 
-本番の接続先は `sajxnypkbybuzsqdguaa.supabase.co`。公開キーによる `materials` の読み取りは404となり、`public.materials` がスキーマキャッシュに存在しないと返った。本番は新スキーマへの切替前であり、今回の追加migrationだけでは切替できない。
+本番の接続先は `sajxnypkbybuzsqdguaa.supabase.co`。2026-09-08に旧スキーマを保管し、26件のmigrationと資材マスタ移行を適用した。資材382件を照合した。
 
 Supabase CLIで参照できるアカウントと、本番プロジェクトの管理アカウントは異なる。ブラウザで本番管理画面へログインし、SQL Editorで移行と復旧のロールバック検証に成功した。
 
 Previewの既存接続先 `chgrudbattvmcjxhaskh.supabase.co` はDNS解決で `ENOTFOUND`。`rebuild/m0` だけの環境変数を本番DBへ変更した。他ブランチの設定は変更していない。
 
-本番DBへの書き込み、本番マージ、デプロイ後の本番E2Eは未実施。ローカルのスクリーンショットを本番の検証結果として扱わない。
+PR #49をmainへマージした。本番確認で紹介文の表示漏れを検出し、`0f681e9` で修正した。Vercel Productionの `dpl_FMf7Dr9MCWfJQNEAXmFw97QQLKQU` がReadyとなり、`https://www.farmille.com` への割り当てを確認した。
+
+スキーマの列381件、制約196件、関数36件、ポリシー142件、RLS設定46件はローカルと一致した。SQLの空白とコメントを除いて照合したもので、所有者・default privilegesの一致を示すものではない。CLIの認証先が異なるため、`supabase db diff --linked` は未実行。
+
+Previewの自動E2EはVercelのログイン保護で中断した。保護は解除せず、認証済みブラウザで実画面を確認した。ローカルの画面遷移図と本番の検証結果は区別して記録する。
+
+## 本番E2E
+
+本番専用E2Eは1件成功した。一般のログイン・プロフィール・運営画面へのアクセス拒否、メーカー申請、運営のMFA、既存メーカーとの紐づけ承認、メーカーのログイン、運営による後続資材の自動紐づけ、紹介文の変更承認、掲載終了承認、未ログインの閲覧制限を確認した。公開6ページを375px・1280pxで開き、HTTP 200と横はみ出しがないことを確認した。検証専用データは申請履歴から順に削除した。
+
+本番で撮影した認証後の画面：
+
+- [一般ユーザーのSP表示](assets/20260908-production/general-sp.png)
+- [運営によるメーカー紐づけのPC表示](assets/20260908-production/admin-link-pc.png)
+- [メーカーのSP表示](assets/20260908-production/manufacturer-sp.png)
 
 ## 移行前の照合
 
