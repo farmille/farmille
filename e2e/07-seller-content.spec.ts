@@ -1,9 +1,13 @@
 import { expect, type Page, test } from "@playwright/test";
+import { captureScreenFlow } from "./support/screen-flow";
 
 import { E2E_ADMIN_ACCOUNTS } from "./support/admin-accounts";
 import {
   cleanupSellerByLoginId,
   createApprovedSeller,
+  createGeneralUser,
+  createReview,
+  deleteAuthUsersByEmail,
   deleteMaterial,
   uniqueToken,
 } from "./support/test-data";
@@ -23,14 +27,13 @@ function adminMaterialIdFromUrl(url: string): string {
 
 async function captureScreen(page: Page, filename: string, fullPage = true): Promise<void> {
   if (process.env.CAPTURE_SCREEN_FLOW !== "1") return;
-  await page.screenshot({
-    path: `docs/rebuild/assets/account-flow/screens/${filename}`,
-    fullPage,
-  });
+  await expect(page.getByText("読み込んでいます", { exact: true })).toHaveCount(0);
+  await captureScreenFlow(page, filename, fullPage);
 }
 
 test("メーカーの資材追加・変更・掲載終了は運営承認後に反映される", async ({ browser, page }) => {
   const seller = await createApprovedSeller("content");
+  const reviewer = await createGeneralUser("archive-reviewer");
   const adminSeedMaterialName = `E2E資材_${uniqueToken("adminseed")}`;
   const description = `E2E一次情報_${uniqueToken("description")}`;
   const generalUse = `E2E一般用途_${uniqueToken("generaluse")}`;
@@ -139,6 +142,12 @@ test("メーカーの資材追加・変更・掲載終了は運営承認後に�
     await expect(page.getByRole("heading", { name: newMaterialName })).toBeVisible();
     await expect(page.getByText("メーカー確認済み", { exact: true }).first()).toBeVisible();
     await captureScreen(page, "22-public-created-material.png");
+    await createReview({
+      materialId: createdMaterialId,
+      authorUserId: reviewer.id,
+      rating: 4,
+      body: "非公開後もデータを保持するレビュー",
+    });
 
     await page.goto(`/dashboard/materials/${createdMaterialId}`);
     await page.getByLabel("掲載終了理由").scrollIntoViewIfNeeded();
@@ -159,6 +168,23 @@ test("メーカーの資材追加・変更・掲載終了は運営承認後に�
     await expect(page.getByRole("link", { name: "レビューを書く" })).toHaveCount(0);
     await captureScreen(page, "24-public-archived-material.png");
 
+    const publicPage = await browser.newPage();
+    try {
+      await publicPage.goto(`/materials/${createdMaterialId}`);
+      await expect(
+        publicPage.getByRole("main").getByText("資材が見つかりません", { exact: true }),
+      ).toBeVisible();
+      await publicPage.goto("/");
+      await expect(
+        publicPage.getByText("ページを表示できませんでした", { exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        publicPage.getByText("非公開後もデータを保持するレビュー", { exact: true }),
+      ).toHaveCount(0);
+    } finally {
+      await publicPage.close();
+    }
+
     await page.goto(`/search?filters=name:${encodeURIComponent(newMaterialName)}`);
     await expect(page.getByText("条件に合う資材が見つかりませんでした")).toBeVisible();
   } finally {
@@ -166,5 +192,6 @@ test("メーカーの資材追加・変更・掲載終了は運営承認後に�
     if (createdMaterialId !== null) await deleteMaterial(createdMaterialId);
     if (adminSeedMaterialId !== null) await deleteMaterial(adminSeedMaterialId);
     await cleanupSellerByLoginId(seller.loginId);
+    await deleteAuthUsersByEmail(reviewer.email);
   }
 });

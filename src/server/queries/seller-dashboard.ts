@@ -13,6 +13,7 @@ type DashboardSeller = Pick<
   SellerAccountRow,
   | "id"
   | "official_name"
+  | "manufacturer_name"
   | "login_id"
   | "contact_email"
   | "contact_name"
@@ -96,6 +97,7 @@ export async function getSellerDashboardData(
         `
           id,
           official_name,
+          manufacturer_name,
           login_id,
           contact_email,
           contact_name,

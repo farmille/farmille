@@ -1,3 +1,5 @@
+import * as v from "valibot";
+
 import { syntheticSellerEmail } from "@/server/accounts/seller";
 import { isUniqueViolation, reportAdminError, withAdmin } from "@/server/admin/guard";
 import { generateInitialPassword, generateInviteCode } from "@/server/admin/secrets";
@@ -94,7 +96,14 @@ export async function getSellerDetail(sellerId: string): Promise<Result<SellerDe
  */
 export async function approveSellerApplication(
   sellerId: string,
+  manufacturerName: string,
+  createManufacturer: boolean,
 ): Promise<Result<SellerCredentials>> {
+  const name = v.safeParse(
+    v.pipe(v.string(), v.minLength(1), v.maxLength(300)),
+    createManufacturer ? manufacturerName.trim() : manufacturerName,
+  );
+  if (!name.success) return fail("invalid_body");
   return withAdmin(async ({ supabase }) => {
     const { data: seller, error } = await supabase
       .from("seller_accounts")
@@ -129,29 +138,37 @@ export async function approveSellerApplication(
       return fail(createError.code === "email_exists" ? "conflict" : "internal");
     }
 
-    const { data: updated, error: updateError } = await supabase
-      .from("seller_accounts")
-      .update({
-        status: "approved",
-        approved_at: new Date().toISOString(),
-        auth_user_id: created.user.id,
-      })
-      .eq("id", seller.id)
-      .eq("status", "applied")
-      .select("id");
+    const { error: updateError } = await supabase.rpc("approve_seller_with_manufacturer", {
+      p_seller_id: seller.id,
+      p_auth_user_id: created.user.id,
+      p_manufacturer_name: name.output,
+      p_create_manufacturer: createManufacturer,
+    });
 
-    if (updateError !== null || updated.length === 0) {
+    if (updateError !== null) {
       const { error: rollbackError } = await supabase.auth.admin.deleteUser(created.user.id);
 
       if (rollbackError !== null) {
         reportError("承認の巻き戻し（Auth ユーザー削除）に失敗", rollbackError);
       }
-      reportError("承認の反映に失敗", updateError ?? "更新対象が 0 件でした");
+      reportError("承認の反映に失敗", updateError);
 
-      return fail(updateError === null ? "conflict" : "internal");
+      return fail(isUniqueViolation(updateError) ? "conflict" : "internal");
     }
 
     return succeed({ loginId: seller.login_id, password });
+  });
+}
+
+/** 審査で選べるメーカー名。別アカウントへの紐づけはDBでも一意制約を適用する。 */
+export async function listManufacturerNames(): Promise<Result<string[]>> {
+  return withAdmin(async ({ supabase }) => {
+    const { data, error } = await supabase.from("manufacturers").select("name").order("name");
+    if (error !== null) {
+      reportError("メーカー候補の取得に失敗", error);
+      return fail("internal");
+    }
+    return succeed(data.map(({ name }) => name));
   });
 }
 

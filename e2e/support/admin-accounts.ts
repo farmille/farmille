@@ -4,6 +4,14 @@ export type E2eAdminAccount = {
 };
 
 export const E2E_ADMIN_ACCOUNTS = {
+  sellerNewApproval: {
+    email: "e2e-admin-seller-new@farmille.local",
+    password: "Farmille-E2E-Admin-Seller-New-2026!",
+  },
+  screenInventory: {
+    email: "e2e-admin-screens@farmille.local",
+    password: "Farmille-E2E-Admin-Screens-2026!",
+  },
   sellerApproval: {
     email: "e2e-admin-seller@farmille.local",
     password: "Farmille-E2E-Admin-Seller-2026!",

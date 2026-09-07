@@ -92,7 +92,8 @@ erDiagram
 - 分類・検索層（**Farmille のみ編集可**）：`name`・`manufacturer_name` text NOT NULL（マスタ由来の表示名。未 claim でも表示する）・`sales_status`・`composition_type_id`、および効果・対象作物・材料分類・個別材料・製品タイプ・検索タグの各関連テーブル
 - 一次情報層：`description`（紹介文）・`general_use`（一般用途）・`main_components`（主な成分の原文）・`mechanism`（作用機序）・`usage_text`（使い方）・`price_range`・`official_url`・`catalog_url`。メーカーは正本を直接更新せず、`material_change_requests` の承認を介して反映する
 - 所有関係：`seller_id` uuid NULL FK → seller_accounts（NULL＝未 claim。値あり＝自社資材として申請可能）。claim だけでは確認済みにならない
-- 掲載状態：`publication_status` CHECK IN ('published','archived') default 'published'・`archived_at`。掲載終了でもレビュー等を保持し、検索と新規投稿の対象から外す
+- 掲載状態：`publication_status` CHECK IN ('published','archived') default 'published'・`archived_at`。掲載終了でもレビュー等を保持する。非公開資材は一般ユーザー・未ログインには詳細も表示せず、担当メーカーと運営だけが資材を参照する
+- メーカーマスタ：`manufacturers.name` を自然キーとし、`materials.manufacturer_name` が外部参照する。`seller_accounts.manufacturer_name` はNULL許容・一意の外部参照で、承認時に設定する。承認処理は既存資材のclaimと同一トランザクションで反映する（09）
 - 内容版：`content_revision` integer NOT NULL default 1。申請時点の版と承認時点の版を照合し、古い正本への変更を適用しない
 - メーカー確認状態：`manufacturer_verified_at`・`manufacturer_verified_by_seller_id`・`manufacturer_verification_method` CHECK IN ('confirmed_existing','submitted_create','submitted_update')。公開マークは `manufacturer_verified_at IS NOT NULL` を条件とする
 - 集計（トリガーまたはビューで自動）：`review_count`・`avg_rating`・`control_plot_ratio`（対照区ありレビュー率＝確からしさ指標）
@@ -190,7 +191,7 @@ erDiagram
 |---|---|---|---|
 | profiles | 全員（ハンドル・アバター・登録日時だけを**公開ビュー経由**で読ませ、実テーブルは本人と admin のみ） | 本人 | 本人 |
 | seller_accounts | 全員（approved のみ。contact_* は内部カラムのため公開ビューから除外） | anon（申請） | 本人（approved 後の profile 系カラムのみ）・admin |
-| materials | 全員（掲載終了は直接URLから履歴を参照可） | admin | admin のみ。seller は資材変更申請RPCと確認RPCだけを実行 |
+| materials | 公開中は全員。非公開は担当メーカーとadmin | admin | admin のみ。seller は資材変更申請RPCと確認RPCだけを実行 |
 | material_evidences / images / sources | 全員 | admin | admin。seller の追加・除外は資材変更申請の提案スナップショットへ保存 |
 | material_change_requests と提案子テーブル | 本人 seller・admin | seller（自社資材または新規追加） | seller は pending の取消だけ・admin は承認／却下 |
 | 分類マスタ・作物マスタ・資材との分類関連 | 全員 | admin | admin |

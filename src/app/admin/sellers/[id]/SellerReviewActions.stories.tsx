@@ -9,6 +9,7 @@ const meta = {
     sellerId: "00000000-0000-4000-8000-000000000201",
     status: "applied",
     inviteCode: null,
+    manufacturerNames: ["しおさい資材株式会社", "北杜バイオ株式会社"],
   },
 } satisfies Meta<typeof SellerReviewActions>;
 

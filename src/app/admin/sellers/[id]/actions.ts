@@ -23,7 +23,7 @@ function isSellerOperation(value: string | null): value is SellerOperation {
 /** 状態遷移の競合（すでに承認済み・却下済み等）は conflict で返る。 */
 function sellerErrorMessage(code: ErrorCode): string {
   if (code === "conflict") {
-    return "このメーカーはすでに別の状態へ変わっています。画面を再読み込みして確認してください。";
+    return "申請は審査済みか、指定メーカーまたは資材が別アカウントに紐づいています。新規追加の場合は既存メーカーとの名称重複も確認してください。";
   }
 
   return errorMessageJa[code];
@@ -42,7 +42,7 @@ export async function sellerOperationAction(
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 
-  const result = await runSellerOperation(operation, sellerId, rejectedReason);
+  const result = await runSellerOperation(operation, sellerId, rejectedReason, formData);
 
   if (!result.ok) {
     return { status: "error", message: sellerErrorMessage(result.error) };
@@ -63,9 +63,16 @@ async function runSellerOperation(
   operation: SellerOperation,
   sellerId: string,
   rejectedReason: FormDataEntryValue | null,
+  formData: FormData,
 ): Promise<{ ok: true; state: SellerActionState } | { ok: false; error: ErrorCode }> {
   if (operation === "approve") {
-    const result = await approveSellerApplication(sellerId);
+    const manufacturerName = formDataString(formData.get("manufacturerName"));
+    if (manufacturerName === null) return { ok: false, error: "invalid_body" };
+    const result = await approveSellerApplication(
+      sellerId,
+      manufacturerName,
+      formData.get("createManufacturer") === "true",
+    );
 
     return result.ok
       ? { ok: true, state: { status: "approved", credentials: result.data } }

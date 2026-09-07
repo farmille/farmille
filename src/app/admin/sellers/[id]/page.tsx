@@ -15,6 +15,7 @@ import { SellerReviewActions } from "@/app/admin/sellers/[id]/SellerReviewAction
 import { formatDateJa } from "@/components";
 import {
   getSellerDetail,
+  listManufacturerNames,
   isSellerStatus,
   SELLER_STATUS_LABELS,
   type SellerDetail,
@@ -79,6 +80,7 @@ function internalItems(seller: SellerDetail): DescriptionItem[] {
       value: seller.auth_user_id === null ? "未発行" : `発行済み（${seller.auth_user_id}）`,
     },
     { term: "claim 済み資材", value: `${seller.materialCount} 件` },
+    { term: "資材マスタのメーカー", value: <OptionalValue value={seller.manufacturer_name} /> },
   ];
 }
 
@@ -91,7 +93,8 @@ export default async function AdminSellerDetailPage({
 
   await requireAdminPage(`/admin/sellers/${id}`);
 
-  const seller = await getSellerDetail(id);
+  const [seller, manufacturers] = await Promise.all([getSellerDetail(id), listManufacturerNames()]);
+  if (!manufacturers.ok) throw new Error(errorMessageJa[manufacturers.error]);
 
   if (!seller.ok) {
     if (seller.error === "not_found") notFound();
@@ -110,6 +113,7 @@ export default async function AdminSellerDetailPage({
         title="審査"
       >
         <SellerReviewActions
+          manufacturerNames={manufacturers.data}
           inviteCode={seller.data.invite_code}
           sellerId={seller.data.id}
           status={seller.data.status}

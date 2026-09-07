@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { captureScreenFlow } from "./support/screen-flow";
 
 import { createGeneralUser, deleteAuthUsersByEmail, uniqueToken } from "./support/test-data";
 import { loginGeneral, signupGeneral } from "./support/ui";
@@ -6,10 +7,7 @@ import { loginGeneral, signupGeneral } from "./support/ui";
 async function captureAccountScreen(page: Page, filename: string): Promise<void> {
   if (process.env.CAPTURE_ACCOUNT_FLOW !== "1") return;
 
-  await page.screenshot({
-    path: `docs/rebuild/assets/account-flow/screens/${filename}`,
-    fullPage: true,
-  });
+  await captureScreenFlow(page, filename);
 }
 
 test("@smoke 一般登録、ログイン、ログアウトとハンドル重複エラー", async ({ page }) => {

@@ -70,7 +70,7 @@ export default async function SellerMaterialPage({ params }: { params: Promise<{
                 label: "公開状態",
                 value: (
                   <Badge variant={isArchived ? "optional" : "published"}>
-                    {isArchived ? "掲載終了" : "公開中"}
+                    {isArchived ? "非公開" : "公開中"}
                   </Badge>
                 ),
               },
@@ -126,8 +126,8 @@ export default async function SellerMaterialPage({ params }: { params: Promise<{
 
         {pendingRequest === null && !isArchived ? (
           <SurfaceCard
-            description="資材データ自体は削除せず、検索と新規投稿の対象から外します。運営の承認後に反映されます。"
-            title="掲載を終了"
+            description="運営の承認後、一般ユーザーは資材の検索・詳細閲覧・新規投稿ができなくなります。データは削除せず、メーカーと運営が引き続き確認できます。"
+            title="資材を非公開にする"
           >
             <ArchiveMaterialForm materialId={material.id} />
           </SurfaceCard>

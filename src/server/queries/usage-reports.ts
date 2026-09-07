@@ -64,7 +64,7 @@ export async function listRecentUsageReports({
       crop:crops!usage_reports_crop_id_fkey (
         name
       ),
-      material:materials!usage_reports_material_id_fkey (
+      material:materials!usage_reports_material_id_fkey!inner (
         name
       ),
       media:usage_report_media (
@@ -297,7 +297,7 @@ export async function getPublishedUsageReport(
         id,
         name
       ),
-      material:materials!usage_reports_material_id_fkey (
+      material:materials!usage_reports_material_id_fkey!inner (
         id,
         name,
         manufacturer_name,

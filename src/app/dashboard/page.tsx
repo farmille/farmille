@@ -67,6 +67,7 @@ export default async function DashboardPage() {
         >
           <DataList
             rows={[
+              { label: "資材マスタのメーカー", value: seller.manufacturer_name },
               { label: "所在地", value: seller.location },
               { label: "対応地域", value: seller.region_scope },
               {

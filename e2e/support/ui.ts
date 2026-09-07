@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
+import { captureScreenFlow } from "./screen-flow";
 import { TOTP } from "otpauth";
 
 import type { E2eAdminAccount } from "./admin-accounts";
@@ -70,6 +71,9 @@ export async function loginAdminAndEnrollMfa(
   await expect(page).toHaveURL(/\/admin\/mfa\?/, { timeout: COLD_NAVIGATION_TIMEOUT_MS });
 
   const enrollmentButton = page.getByRole("button", { name: "登録を始める" });
+  if (process.env.CAPTURE_SCREEN_FLOW === "1") {
+    await captureScreenFlow(page, "60-admin-mfa.png");
+  }
   await waitForReactHydration(enrollmentButton);
   await enrollmentButton.click();
   const secretLocator = page

@@ -188,7 +188,7 @@ async function fetchPublishedReports(
       crop:crops!usage_reports_crop_id_fkey (
         name
       ),
-      material:materials!usage_reports_material_id_fkey (
+      material:materials!usage_reports_material_id_fkey!inner (
         name
       ),
       media:usage_report_media (

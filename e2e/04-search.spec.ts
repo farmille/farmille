@@ -75,7 +75,9 @@ test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷�
     await expect(page.getByText(ratingHigh.name, { exact: true })).toBeVisible();
     await expect(page.getByText(reviewHeavy.name, { exact: true })).toHaveCount(0);
 
-    await page.goto("/search?sort=reviews");
+    await page.goto(
+      `/search?sort=reviews&filters=${encodeURIComponent(`name:${reviewHeavy.name},name:${ratingHigh.name}`)}`,
+    );
     const resultLinks = page.locator('main a[href^="/materials/"]');
     await expect(resultLinks.first()).toContainText(reviewHeavy.name);
 

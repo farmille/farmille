@@ -307,7 +307,7 @@ export async function listRecentReviews({
     .select(
       `
       ${REVIEW_SELECT},
-      material:materials!reviews_material_id_fkey (
+      material:materials!reviews_material_id_fkey!inner (
         name
       )
     `,

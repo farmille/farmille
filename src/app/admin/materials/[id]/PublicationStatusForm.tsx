@@ -28,7 +28,7 @@ export function PublicationStatusForm({
     <form action={formAction} className={formStyle}>
       <input name="materialId" type="hidden" value={materialId} />
       <Field
-        guide="掲載終了にしても資材ページと過去の投稿は残ります。"
+        guide="掲載終了にすると一般ユーザーには資材が表示されなくなります。データは保持され、担当メーカーと運営は引き続き確認できます。"
         htmlFor="publicationStatus"
         label="公開状態"
         requirement="required"

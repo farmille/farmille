@@ -379,12 +379,13 @@ export async function sellerApprovalByLoginId(loginId: string): Promise<SellerAp
 export async function createMaterial(
   prefix: string,
   sellerId: string | null = null,
+  manufacturerName?: string,
 ): Promise<Material> {
   const token = uniqueToken(prefix);
 
   return restInsert(MaterialSchema, "materials", {
     name: `E2E資材_${token}`,
-    manufacturer_name: `E2Eメーカー_${token}`,
+    manufacturer_name: manufacturerName ?? `E2Eメーカー_${token}`,
     sales_status: "販売中",
     seller_id: sellerId,
   });

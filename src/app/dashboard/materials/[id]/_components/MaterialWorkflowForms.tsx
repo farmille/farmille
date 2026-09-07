@@ -43,7 +43,7 @@ export function ArchiveMaterialForm({ materialId }: { materialId: string }) {
     <form action={formAction} className={formStyle}>
       <Field
         error={errors.reason}
-        guide="公開ページと過去のレビューは残り、新規投稿と検索対象から外れます。"
+        guide="運営の承認後、一般ユーザーには資材が表示されなくなります。資材と過去の投稿データは保持されます。"
         htmlFor="archiveReason"
         label="掲載終了理由"
         requirement="required"

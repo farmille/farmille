@@ -40,7 +40,9 @@ export default async function SellerMaterialNewPage() {
         <SurfaceCard>
           <MaterialChangeForm
             classifications={classifications.data}
-            manufacturerName={dashboard.data.seller.official_name}
+            manufacturerName={
+              dashboard.data.seller.manufacturer_name ?? dashboard.data.seller.official_name
+            }
             material={null}
           />
         </SurfaceCard>
