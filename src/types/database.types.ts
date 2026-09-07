@@ -490,6 +490,21 @@ export type Database = {
           },
         ]
       }
+      manufacturers: {
+        Row: {
+          created_at: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+        }
+        Relationships: []
+      }
       material_change_request_crops: {
         Row: {
           created_at: string
@@ -1390,6 +1405,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "materials_manufacturer_name_fkey"
+            columns: ["manufacturer_name"]
+            isOneToOne: false
+            referencedRelation: "manufacturers"
+            referencedColumns: ["name"]
+          },
+          {
             foreignKeyName: "materials_manufacturer_verified_by_seller_id_fkey"
             columns: ["manufacturer_verified_by_seller_id"]
             isOneToOne: false
@@ -1751,6 +1773,7 @@ export type Database = {
           location: string
           login_id: string
           logo_url: string | null
+          manufacturer_name: string | null
           official_name: string
           profile_text: string | null
           region_scope: string
@@ -1770,6 +1793,7 @@ export type Database = {
           location: string
           login_id: string
           logo_url?: string | null
+          manufacturer_name?: string | null
           official_name: string
           profile_text?: string | null
           region_scope: string
@@ -1789,6 +1813,7 @@ export type Database = {
           location?: string
           login_id?: string
           logo_url?: string | null
+          manufacturer_name?: string | null
           official_name?: string
           profile_text?: string | null
           region_scope?: string
@@ -1797,7 +1822,15 @@ export type Database = {
           updated_at?: string
           website_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "seller_accounts_manufacturer_name_fkey"
+            columns: ["manufacturer_name"]
+            isOneToOne: true
+            referencedRelation: "manufacturers"
+            referencedColumns: ["name"]
+          },
+        ]
       }
       usage_report_applications: {
         Row: {
@@ -2174,6 +2207,15 @@ export type Database = {
           p_reviewed_by_user_id: string
         }
         Returns: string
+      }
+      approve_seller_with_manufacturer: {
+        Args: {
+          p_auth_user_id: string
+          p_create_manufacturer: boolean
+          p_manufacturer_name: string
+          p_seller_id: string
+        }
+        Returns: undefined
       }
       cancel_material_change_request: {
         Args: { p_request_id: string }
