@@ -192,6 +192,19 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
       </p>
 
       <MaterialDetailTable material={material} />
+      {material.description ? (
+        <section aria-labelledby="material-description-heading">
+          <h2
+            id="material-description-heading"
+            className={css({ fontSize: "lg", fontWeight: "bold", mb: "3" })}
+          >
+            資材の紹介
+          </h2>
+          <p className={css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere" })}>
+            {material.description}
+          </p>
+        </section>
+      ) : null}
       <EvidenceList evidences={material.evidences} />
 
       <section aria-labelledby="usage-reports-heading">

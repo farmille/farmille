@@ -19,6 +19,8 @@ export default defineConfig({
     baseURL,
     viewport: { width: 375, height: 812 },
     browserName: "chromium",
+    actionTimeout: 30_000,
+    navigationTimeout: 30_000,
     trace: "off",
     screenshot: "off",
     video: "off",

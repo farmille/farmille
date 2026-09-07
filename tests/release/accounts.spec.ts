@@ -35,6 +35,13 @@ test("一般・メーカー・運営の本番フローと承認後の非公開�
     viewport: { width: 1280, height: 900 },
   });
   const adminPage = await adminContext.newPage();
+  await page.goto("/login");
+  if (new URL(page.url()).origin !== new URL(String(testInfo.project.use.baseURL)).origin) {
+    await adminContext.close();
+    throw new Error(
+      "検証対象へのアクセスが外部の認証画面に転送されました。テストデータは作成していません。",
+    );
+  }
   const preflight = await db.from("materials").select("id").limit(1);
   if (preflight.error || preflight.data.length === 0) {
     await adminContext.close();
@@ -168,6 +175,10 @@ test("一般・メーカー・運営の本番フローと承認後の非公開�
     failures.push(error);
   } finally {
     await adminContext.close();
+    if (sellerId) {
+      const requests = await db.from("material_change_requests").delete().eq("seller_id", sellerId);
+      if (requests.error) failures.push(new Error("検証用の資材申請履歴の片付けに失敗しました"));
+    }
     for (const id of [materialId, futureMaterialId]) {
       const result = await db
         .from("materials")
