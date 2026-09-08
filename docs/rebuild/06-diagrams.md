@@ -821,7 +821,7 @@ flowchart TD
 
 ## 4. 全画面を含む実装ルート図
 
-§3は主要タスクの読みやすさを優先した図である。本節は `src/app/**/page.tsx` を機械的に照合し、開発専用画面を含む全51画面をノードとして示す。矢印は画面内リンク、フォーム完了後のリダイレクト、または権限境界からの誘導を表す。共通ヘッダーと下部ナビから繰り返し到達する矢印は省略する。
+§3は主要タスクの読みやすさを優先した図である。本節は `src/app/**/page.tsx` を機械的に照合し、開発専用画面を含む全53画面をノードとして示す。矢印は画面内リンク、フォーム完了後のリダイレクト、または権限境界からの誘導を表す。共通ヘッダーと下部ナビから繰り返し到達する矢印は省略する。
 
 ### 4.1 公開・認証・一般ユーザー
 
@@ -844,6 +844,8 @@ flowchart LR
     LOGIN["一般・運営ログイン<br/>/login"]
     RESET["パスワード再設定<br/>/password-reset"]
     RESET_UPDATE["新パスワード設定<br/>/password-reset/update"]
+    PASSWORD["パスワード変更<br/>/account/password"]
+    SELLER_RESET["メーカー再設定メール<br/>/sellers/password-reset"]
     SELLER_LP["メーカー向けLP<br/>/sellers"]
     SELLER_APPLY["メーカー申請<br/>/sellers/apply"]
     SELLER_APPLY_DONE["申請受付完了<br/>/sellers/apply/done"]
@@ -882,6 +884,11 @@ flowchart LR
     LOGIN --> RESET
     RESET -->|"メールリンク"| RESET_UPDATE
     RESET_UPDATE --> LOGIN
+    RESET_UPDATE --> SELLER_LOGIN
+    SELLER_LOGIN --> SELLER_RESET
+    SELLER_RESET -->|"連絡先のメールリンク"| RESET_UPDATE
+    ME --> PASSWORD
+    PASSWORD -->|"変更後に再ログイン"| LOGIN
     LOGIN -->|"一般"| ME
     LOGIN -->|"メーカーはこちら"| SELLER_LOGIN
     HOME --> POST & ME
@@ -934,6 +941,10 @@ flowchart LR
     SELLER_LP --> SELLER_LOGIN
     SELLER_LOGIN --> DASHBOARD
     DASHBOARD --> SELLER_MATERIALS & SELLER_ARTICLES
+    DASHBOARD --> PASSWORD["パスワード変更<br/>/account/password"]
+    PASSWORD -->|"メーカー"| SELLER_LOGIN
+    PASSWORD -->|"運営"| LOGIN
+    ADMIN -->|"AAL2必須"| PASSWORD
     SELLER_MATERIALS --> SELLER_MATERIAL_NEW & SELLER_MATERIAL & SELLER_REQUEST
     SELLER_MATERIAL_NEW -->|"追加申請"| SELLER_REQUEST
     SELLER_MATERIAL -->|"変更・掲載終了申請"| SELLER_REQUEST

@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/password-reset/:path*",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
     ];
   },
   images: {

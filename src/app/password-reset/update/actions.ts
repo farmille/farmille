@@ -33,10 +33,20 @@ export async function updatePasswordAction(
     };
   }
 
-  const result = await updatePassword(password);
+  const result = await updatePassword(
+    password,
+    formDataString(formData.get("tokenHash")) ?? "",
+    formDataString(formData.get("code")) ?? "",
+  );
 
   if (!result.ok) {
-    return { status: "error", message: errorMessageJa[result.error] };
+    return {
+      status: "error",
+      message:
+        result.error === "aal2_required"
+          ? "認証アプリに表示された最新の6桁のコードを入力して、もう一度送信してください。"
+          : errorMessageJa[result.error],
+    };
   }
 
   return { status: "done", message: "パスワードを変更しました。" };

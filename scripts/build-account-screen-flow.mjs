@@ -33,6 +33,8 @@ const screens = [
   ["/search", "資材検索", "34-search"],
   ["/articles", "記事・使用レポート一覧", "35-articles"],
   ["/password-reset", "再設定メールの送信", "36-password-reset"],
+  ["/account/password", "現在のパスワードから変更", "62-password-change-general"],
+  ["/sellers/password-reset", "メーカーの再設定メール送信", "63-seller-password-reset"],
   ["/materials/[id]", "公開資材詳細", "37-material"],
   ["/materials/[id]/reviews", "資材のレビュー一覧", "38-reviews"],
   ["/materials/[id]/articles", "資材の関連記事", "39-material-articles"],
@@ -74,6 +76,7 @@ const groups = [
         ["/signup", "/signup/general", "/signup/done", "/login", "/me"],
       ],
       ["プロフィールと検討リスト", ["/me", "/me/edit"]],
+      ["現在のパスワードから変更し、再ログイン", ["/me", "/account/password", "/login"]],
       ["保存した資材を比較", ["/me", "/me/saved", "/me/saved/compare"]],
       [
         "資材を選んでレビュー投稿。投稿後は資材詳細から自分のレビューを編集",
@@ -112,6 +115,14 @@ const groups = [
         ["/admin/sellers/[id]", "/sellers/login", "/dashboard"],
       ],
       [
+        "共有アカウントのパスワードを変更し、再ログイン",
+        ["/dashboard", "/account/password", "/sellers/login"],
+      ],
+      [
+        "パスワードを忘れたとき（登録済み連絡先に届くメールを経由）",
+        ["/sellers/login", "/sellers/password-reset", "/password-reset/update", "/sellers/login"],
+      ],
+      [
         "既存資材を確認・編集・非公開申請",
         [
           "/dashboard",
@@ -145,6 +156,11 @@ const groups = [
     "運営アカウントは2要素認証が必須。資材の正本とメーカー申請の承認を管理する。",
     [
       ["運営としてログイン", ["/login", "/admin/mfa", "/admin"]],
+      ["2要素認証済みの状態でパスワードを変更", ["/admin", "/account/password", "/login"]],
+      [
+        "メールと認証アプリでパスワードを再設定",
+        ["/login", "/password-reset", "/password-reset/update", "/login", "/admin/mfa"],
+      ],
       [
         "メーカー審査：既存メーカーを選択。候補がなければ同じ画面で追加",
         ["/admin", "/admin/sellers", "/admin/sellers/[id]"],
@@ -187,10 +203,14 @@ const missing = pages("src/app").filter(
 if (missing.length) throw new Error(`資料にない画面：${missing.join(", ")}`);
 const escape = (value) =>
   value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
-function card(path) {
+function card(path, account) {
   const screen = screenMap.get(path);
   if (!screen) throw new Error(`画面が未定義：${path}`);
-  const [, label, file] = screen;
+  const [, label, defaultFile] = screen;
+  const file =
+    path === "/account/password"
+      ? `62-password-change-${account === "manufacturer" ? "seller" : account}`
+      : defaultFile;
   if (!existsSync(`${root}/screens/${file}.png`)) throw new Error(`未撮影：${file}`);
   if (!existsSync(`${root}/screens/pc/${file}.png`)) throw new Error(`PC未撮影：${file}`);
   return `<figure><div class="captures"><a href="screens/${file}.png" target="_blank" rel="noopener"><span>SP・375px</span><img src="screens/${file}.png" alt="${escape(label)}のSP実画面" loading="lazy"></a><a href="screens/pc/${file}.png" target="_blank" rel="noopener"><span>PC・1280px</span><img src="screens/pc/${file}.png" alt="${escape(label)}のPC実画面" loading="lazy"></a></div><figcaption><strong>${label}</strong><small>${escape(path)}</small></figcaption></figure>`;
@@ -200,7 +220,7 @@ const arrow =
 const body = groups
   .map(
     ([id, title, note, flows]) =>
-      `<section id="${id}"><h2>${title}</h2><p>${note}</p>${flows.map(([label, paths]) => `<article><h3>${label}</h3><div class="flow">${paths.map(card).join(arrow)}</div></article>`).join("")}</section>`,
+      `<section id="${id}"><h2>${title}</h2><p>${note}</p>${flows.map(([label, paths]) => `<article><h3>${label}</h3><div class="flow">${paths.map((path) => card(path, id)).join(arrow)}</div></article>`).join("")}</section>`,
   )
   .join("");
 writeFileSync(

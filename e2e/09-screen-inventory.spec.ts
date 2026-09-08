@@ -60,7 +60,6 @@ test("アカウント別の画面一覧を撮影する", async ({ page }) => {
       ["/me/saved", "42-saved"],
       ["/me/saved/compare", "43-compare"],
       ["/post", "44-post"],
-      ["/password-reset/update", "45-password-update"],
       [`/materials/${unreviewedMaterial.id}/review/new`, "46-review-new"],
       [`/materials/${material.id}/review/${review.id}/edit`, "47-review-edit"],
       [`/materials/${material.id}/report/new`, "48-report-new"],

@@ -18,6 +18,6 @@ export async function requestPasswordResetAction(
   return {
     status: "done",
     message:
-      "再設定用のメールを送信しました。メール内のリンクから新しいパスワードを設定してください。",
+      "登録情報が一致する場合、再設定用のメールが届きます。メール内のリンクから新しいパスワードを設定してください。",
   };
 }

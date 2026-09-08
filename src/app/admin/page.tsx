@@ -51,6 +51,11 @@ const statLinkStyle = css({
 
 const MENU_ITEMS = [
   {
+    href: "/account/password",
+    label: "パスワードを変更",
+    description: "現在のパスワードを確認し、新しいパスワードに変更する。",
+  },
+  {
     href: "/admin/sellers",
     label: "メーカー審査",
     description: "申請の確認・承認（共有ログイン発行）・却下・凍結・招待コード発行。",

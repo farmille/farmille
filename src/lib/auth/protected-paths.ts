@@ -2,7 +2,7 @@
 // ここではログイン済みかどうかだけを見る。ロール判定は src/server/auth.ts が行う（第一防御）。
 
 /** 要ログイン。一般ユーザーの画面（02 §2「要ログイン」）。 */
-const GENERAL_PROTECTED_PREFIXES = ["/me", "/post"];
+const GENERAL_PROTECTED_PREFIXES = ["/me", "/post", "/account"];
 
 /** 要ログイン。メーカーダッシュボード（02 §2「メーカーダッシュボード」）。 */
 const SELLER_PROTECTED_PREFIXES = ["/dashboard"];

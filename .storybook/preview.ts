@@ -26,6 +26,8 @@ sb.mock(import("../src/app/materials/[id]/review/actions.ts"));
 sb.mock(import("../src/app/me/edit/actions.ts"));
 sb.mock(import("../src/app/me/saved/actions.ts"));
 sb.mock(import("../src/app/password-reset/actions.ts"));
+sb.mock(import("../src/app/account/password/actions.ts"));
+sb.mock(import("../src/app/sellers/password-reset/actions.ts"));
 sb.mock(import("../src/app/password-reset/update/actions.ts"));
 sb.mock(import("../src/app/sellers/apply/actions.ts"));
 sb.mock(import("../src/app/sellers/login/actions.ts"));

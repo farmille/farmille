@@ -17,7 +17,7 @@ import { SubmitButton } from "@/components/auth/SubmitButton";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState } from "@/lib/auth/form-state";
 
-export function UpdatePasswordForm() {
+export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
   const [state, formAction] = useActionState(updatePasswordAction, initialAuthFormState);
   const fieldErrors = fieldErrorsOf(state);
 
@@ -26,8 +26,11 @@ export function UpdatePasswordForm() {
       <>
         <FormMessage tone="info">{state.message}</FormMessage>
         <div className={formActionsStyle}>
-          <Link className={ghostButtonStyle} href="/">
-            ホームへ
+          <Link className={ghostButtonStyle} href="/login">
+            一般・運営のログインへ
+          </Link>
+          <Link className={ghostButtonStyle} href="/sellers/login">
+            メーカーのログインへ
           </Link>
         </div>
       </>
@@ -36,6 +39,7 @@ export function UpdatePasswordForm() {
 
   return (
     <form action={formAction} noValidate>
+      <input type="hidden" name="tokenHash" value={tokenHash} />
       {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
 
       <Field
@@ -75,13 +79,30 @@ export function UpdatePasswordForm() {
         />
       </Field>
 
+      <Field
+        htmlFor="code"
+        label="2要素認証コード"
+        guide="運営など、2要素認証を設定している方は、認証アプリの6桁のコードを入力してください。"
+      >
+        <input
+          className={controlStyle}
+          id="code"
+          name="code"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+        />
+      </Field>
       <div className={formActionsStyle}>
         <SubmitButton label="パスワードを変更する" pendingLabel="変更中…" />
       </div>
 
       <div className={linkRowStyle}>
         <Link className={textLinkStyle} href="/login">
-          ログイン画面へ戻る
+          一般・運営のログインへ
+        </Link>
+        <Link className={textLinkStyle} href="/sellers/login">
+          メーカーのログインへ
         </Link>
       </div>
     </form>

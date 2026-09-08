@@ -5,6 +5,7 @@ import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rul
 import { toErrorCode } from "@/server/accounts/auth-errors";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
+import { clearRecoverySession, openRecoverySession } from "./recovery-session";
 
 // パスワード再設定・メール確認のリンクから戻ってくる OTP 種別だけを受け付ける。
 const EMAIL_OTP_TYPES = ["signup", "invite", "magiclink", "recovery", "email_change", "email"];
@@ -57,16 +58,43 @@ export async function requestPasswordReset(email: string): Promise<Result<null>>
   return succeed(null);
 }
 
-/** 再設定リンクで確立したセッションに対して新しいパスワードを設定する。 */
-export async function updatePassword(password: string): Promise<Result<null>> {
+/** 再設定トークンを検証し、その本人のパスワードを変更する。 */
+export async function updatePassword(
+  password: string,
+  tokenHash: string,
+  code: string,
+): Promise<Result<null>> {
   if (password.length < PASSWORD_MIN_LENGTH || password.length > PASSWORD_MAX_LENGTH) {
     return fail("weak_password");
   }
 
-  const supabase = await createServerSupabase();
+  if (!/^[a-zA-Z0-9_-]{32,256}$/.test(tokenHash)) return fail("expired_link");
+  // 通常ログインからの呼び出しでは変更させず、送信時に使い捨てトークンを消費する。
+  const recovery = await openRecoverySession(tokenHash);
+  if (!recovery.ok) return recovery;
+  const supabase = recovery.data;
+  const factors = await supabase.auth.mfa.listFactors();
+  if (factors.error) return fail(toErrorCode(factors.error, "recoveryFactors"));
+  const factor = factors.data.totp.find((item) => item.status === "verified");
+  if (factor) {
+    if (!/^\d{6}$/.test(code)) return fail("aal2_required");
+    const verified = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
+    if (verified.error) {
+      if (["mfa_verification_failed", "mfa_challenge_expired"].includes(verified.error.code ?? ""))
+        return fail("aal2_required");
+      return fail(toErrorCode(verified.error, "recoveryMfa"));
+    }
+  }
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error !== null) return fail(toErrorCode(error, "updatePassword"));
+
+  const signedOut = await supabase.auth.signOut({ scope: "global" });
+  if (signedOut.error) return fail(toErrorCode(signedOut.error, "signOutAfterRecovery"));
+  await clearRecoverySession();
+  const browserSession = await createServerSupabase();
+  const closed = await browserSession.auth.signOut({ scope: "local" });
+  if (closed.error) return fail(toErrorCode(closed.error, "closeRecoveryBrowserSession"));
 
   return succeed(null);
 }
