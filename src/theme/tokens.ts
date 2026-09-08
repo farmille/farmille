@@ -19,8 +19,8 @@ export const tokens = {
       DEFAULT: { value: "#B26A00" },
       soft: { value: "#FFF4E0" },
     },
-    bg: { value: "#F8F8F5" },
-    panel: { value: "#FAFAF7" },
+    bg: { value: "#FCFCFB" },
+    panel: { value: "#FDFDFC" },
     card: { value: "#FFFFFF" },
     // ink 3段（本文 / 副文 / 補助）
     ink: { value: "#1E231F" },
@@ -76,12 +76,22 @@ export const tokens = {
     xl: { value: "18px" },
     "2xl": { value: "20px" },
     "3xl": { value: "21px" },
+    display: { value: "38px" },
+    // ホームのヒーロー見出し専用（ゴシックMB101 L）。通常UIの8段とは別枠で持つ
+    hero: {
+      DEFAULT: { value: "28px" },
+      lg: { value: "64px" },
+    },
   },
-  // next/font が layout で渡す CSS 変数へ接続（フォールバックは 02 §5 のスタック）
+  // 公式npmパッケージをlayoutで読み込む（フォールバックは02 §5のスタック）
   fonts: {
+    // Adobe Fonts の Farmille Web プロジェクトで配信するゴシックMB101 L（weight 300）
+    gothicMb101: {
+      value: '"a-otf-gothic-mb101-pr6n", var(--fonts-sans)',
+    },
     sans: {
       value:
-        'var(--font-noto-sans-jp), -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif',
+        '"Gen Interface JP", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif',
     },
   },
   // preset-panda の数値 spacing を明示し、既定色を復活させず余白スケールだけを維持する
@@ -149,6 +159,17 @@ export const tokens = {
     bold: { value: "700" },
     extrabold: { value: "800" },
     black: { value: "900" },
+  },
+  // モーション。UIの標準カーブと、要素ごとの継続時間を1か所に持つ
+  easings: {
+    out: { value: "cubic-bezier(0.23, 1, 0.32, 1)" },
+    // トーストだけUI標準より柔らかいカーブにする
+    soft: { value: "ease" },
+  },
+  durations: {
+    fast: { value: "160ms" },
+    dialog: { value: "250ms" },
+    toast: { value: "400ms" },
   },
   lineHeights: {
     none: { value: "1" },

@@ -351,7 +351,10 @@ export function SemanticColorTokens() {
 
 export function TypographyTokens() {
   return (
-    <TokenDocFrame title="Typography" subtitle="Noto Sans JP を基準にしたサイズ・ウェイト・行高。">
+    <TokenDocFrame
+      title="Typography"
+      subtitle="Gen Interface JP を基準にしたサイズ・ウェイト・行高。"
+    >
       <TokenSection title="Font size" lead="日本語本文で実際の大きさと字面を確認する。">
         <div className={tokenTable}>
           {fontSizes.map((token) => (

@@ -31,6 +31,10 @@ const mainWidthRecipe = cva({
 const materialShellRecipe = cva({
   base: {
     position: "relative",
+    // 資材詳細の倉庫レイアウト。見出しの mt に頼ると section の first-child で潰れる。
+    display: "flex",
+    flexDirection: "column",
+    gap: "8",
   },
   variants: {
     hasFab: {

@@ -1,6 +1,11 @@
 import type { Preview } from "@storybook/nextjs-vite";
 import { sb } from "storybook/test";
 
+import "gen-interface-jp/400.css";
+import "gen-interface-jp/500.css";
+import "gen-interface-jp/600.css";
+import "gen-interface-jp/700.css";
+import "gen-interface-jp/800.css";
 import "../src/app/globals.css";
 
 // Supabase・next/headers に依存する server モジュールを __mocks__ 配下の実装へ差し替える

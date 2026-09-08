@@ -42,7 +42,6 @@ const externalLinks = css({
   flexDirection: "column",
   gap: "2",
   px: "1",
-  mt: "3",
 });
 
 const externalLink = css({
@@ -53,7 +52,7 @@ const externalLink = css({
 });
 
 const disclaimer = css({
-  mt: "3",
+  m: "0",
   p: "3",
   borderRadius: "button",
   bg: "surface.page",
@@ -63,7 +62,7 @@ const disclaimer = css({
 });
 
 const archivedNotice = css({
-  mt: "3",
+  m: "0",
   p: "3",
   borderRadius: "button",
   bg: "surface.subtle",

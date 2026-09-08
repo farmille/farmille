@@ -1,9 +1,44 @@
 @layer reset, base, tokens, recipes, utilities;
 
 body {
-  /* fonts.sans → next/font の --font-noto-sans-jp に接続済み */
+  /* fonts.sans → Gen Interface JP とシステムフォントのスタック */
   font-family: var(--fonts-sans);
   background: var(--colors-surface-page);
   color: var(--colors-text-default);
   -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  /*
+   * 押下フィードバック。押せる要素すべてに同じ手応えを返す。
+   * 1日に何度も触る要素なので、知覚遅延を作らない範囲（0.98・160ms）に留める。
+   * transform は inline 要素に効かないため、本文中のテキストリンクは縮まず、
+   * ボタン・カード・ピルのようにブロック整形される要素だけが反応する。
+   */
+  button,
+  summary,
+  a[href],
+  [role="tab"] {
+    transition-property: transform, background-color, border-color, color, opacity;
+    transition-duration: var(--durations-fast);
+    transition-timing-function: var(--easings-out);
+  }
+
+  button:not(:disabled):active,
+  summary:active,
+  a[href]:active,
+  [role="tab"]:not([aria-disabled="true"]):active {
+    transform: scale(0.98);
+  }
+
+  /* 視覚過敏の設定では動かさず、不透明度で押下を示す */
+  @media (prefers-reduced-motion: reduce) {
+    button:not(:disabled):active,
+    summary:active,
+    a[href]:active,
+    [role="tab"]:not([aria-disabled="true"]):active {
+      transform: none;
+      opacity: 0.72;
+    }
+  }
 }

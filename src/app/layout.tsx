@@ -1,15 +1,27 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
-import { Noto_Sans_JP } from "next/font/google";
+import Script from "next/script";
 
 import { createRootMetadata } from "@/lib/seo";
 
+import "gen-interface-jp/400.css";
+import "gen-interface-jp/500.css";
+import "gen-interface-jp/600.css";
+import "gen-interface-jp/700.css";
+import "gen-interface-jp/800.css";
 import "./globals.css";
 
-const notoSansJp = Noto_Sans_JP({
-  variable: "--font-noto-sans-jp",
-  subsets: ["latin"],
-});
+// Adobe Fontsの日本語フォント用ローダー。Hydration後に実行し、Typekitのclass追加とReactの照合を競合させない。
+const adobeFontsLoader = String.raw`
+  (function(d) {
+    var config = {
+      kitId: 'wpa8wvf',
+      scriptTimeout: 3000,
+      async: true
+    },
+    h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+  })(document);
+`;
 
 // NEXT_PUBLIC_SITE_URL の評価をモジュール読み込み時ではなく使用時に遅延させる。
 // ルートレイアウトは全ページから読み込まれるため、モジュール直下で評価すると
@@ -26,8 +38,11 @@ export default function RootLayout({
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 
   return (
-    <html lang="ja" className={notoSansJp.variable}>
+    <html lang="ja">
       <body>{children}</body>
+      <Script id="adobe-fonts" strategy="afterInteractive">
+        {adobeFontsLoader}
+      </Script>
       {gaMeasurementId ? <GoogleAnalytics gaId={gaMeasurementId} /> : null}
     </html>
   );

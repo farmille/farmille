@@ -47,20 +47,22 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
 
   return (
     <MaterialPageShell title={`${material.name}の記事`} backHref={materialPath}>
-      <h1 className={css({ m: "0", fontSize: "xl", fontWeight: "700" })}>
-        {material.name} の記事・使用レポート
-      </h1>
-      <p
-        className={css({
-          m: "0",
-          mt: "2",
-          color: "text.muted",
-          fontSize: "sm",
-          lineHeight: "1.65",
-        })}
-      >
-        この資材に紐づく、農家の使用レポートとメーカーによる記事です。
-      </p>
+      <header>
+        <h1 className={css({ m: "0", fontSize: "xl", fontWeight: "700" })}>
+          {material.name} の記事・使用レポート
+        </h1>
+        <p
+          className={css({
+            m: "0",
+            mt: "2",
+            color: "text.muted",
+            fontSize: "sm",
+            lineHeight: "1.65",
+          })}
+        >
+          この資材に紐づく、農家の使用レポートとメーカーによる記事です。
+        </p>
+      </header>
 
       {isEmpty ? (
         <EmptyState

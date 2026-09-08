@@ -11,6 +11,7 @@
 --   - 審査待ちのメーカー申請 1件（/admin/sellers）
 --   - 編集局待ちの使用レポート 1件（/admin/usage-reports）
 --   - 未処理の通報 1件（/admin/reports）
+-- 公開ホームの表示データは seed-home-demo.sql で投入する。
 
 begin;
 
