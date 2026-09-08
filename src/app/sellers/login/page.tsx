@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { SellerLoginForm } from "@/app/sellers/login/SellerLoginForm";
 import { AuthScreen } from "@/components/auth/AuthScreen";
+import { FormMessage } from "@/components/auth/Fields";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
@@ -13,15 +14,20 @@ export const metadata: Metadata = {
 export default async function SellerLoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; password?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, password } = await searchParams;
 
   return (
     <AuthScreen
       lead="承認済みのメーカーアカウントのログインIDでサインインします。"
       title="メーカーログイン"
     >
+      {password === "changed" ? (
+        <FormMessage tone="info">
+          パスワードを変更しました。新しいパスワードでログインしてください。
+        </FormMessage>
+      ) : null}
       <SellerLoginForm next={safeNextPath(next)} />
     </AuthScreen>
   );

@@ -35,3 +35,10 @@ export function createAdminSupabase(): SupabaseClient<Database> {
     },
   });
 }
+
+/** パスワード照合用。ブラウザのセッションとMFA状態を書き換えない。 */
+export function createIsolatedAuthClient(): SupabaseClient<Database> {
+  return createClient<Database>(clientEnv.supabaseUrl, clientEnv.supabasePublishableKey, {
+    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
+  });
+}

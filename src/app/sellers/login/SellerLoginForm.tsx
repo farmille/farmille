@@ -61,6 +61,9 @@ export function SellerLoginForm({ next }: { next: string | null }) {
       </div>
 
       <div className={linkRowStyle}>
+        <Link className={textLinkStyle} href="/sellers/password-reset">
+          パスワードをお忘れの方
+        </Link>
         <Link className={textLinkStyle} href="/sellers">
           メーカーアカウントをお持ちでない方
         </Link>

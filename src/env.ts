@@ -24,6 +24,23 @@ export const clientEnv = {
 
 // secret key はサーバー層からだけ参照する。
 export const serverEnv = {
+  get smtpUrl(): string {
+    const value = requireEnv("SMTP_URL", process.env.SMTP_URL);
+    const url = new URL(value);
+    if (
+      url.protocol !== "smtps:" &&
+      !(url.protocol === "smtp:" && ["127.0.0.1", "localhost"].includes(url.hostname))
+    ) {
+      throw new Error("SMTP_URLはTLS接続を指定してください。平文SMTPはローカル検証に限ります。");
+    }
+    return value;
+  },
+  get mailFrom(): string {
+    return requireEnv("MAIL_FROM", process.env.MAIL_FROM);
+  },
+  get authEmailHookSecret(): string {
+    return requireEnv("AUTH_EMAIL_HOOK_SECRET", process.env.AUTH_EMAIL_HOOK_SECRET);
+  },
   get supabaseSecretKey(): string {
     return requireEnv(
       "SUPABASE_SECRET_KEY",

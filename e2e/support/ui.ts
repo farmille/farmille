@@ -61,7 +61,7 @@ export async function loginAdminAndEnrollMfa(
   page: Page,
   admin: E2eAdminAccount,
   next: string,
-): Promise<void> {
+): Promise<string> {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
   await page.getByLabel("メールアドレス").fill(admin.email);
   await page.getByLabel("パスワード").fill(admin.password);
@@ -101,6 +101,7 @@ export async function loginAdminAndEnrollMfa(
   await expect(page).toHaveURL((url) => url.pathname === expectedPathname, {
     timeout: COLD_NAVIGATION_TIMEOUT_MS,
   });
+  return secret;
 }
 
 export async function fillUsageReportForSubmission(page: Page): Promise<void> {

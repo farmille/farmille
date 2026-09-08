@@ -21,14 +21,19 @@ function noticeOf(error: string | undefined): string | null {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; password?: string }>;
 }) {
-  const { next, error } = await searchParams;
+  const { next, error, password } = await searchParams;
   const notice = noticeOf(error);
 
   return (
     <AuthScreen lead="登録済みのメールアドレスでログインします。" title="ログイン">
       {notice === null ? null : <FormMessage tone="error">{notice}</FormMessage>}
+      {password === "changed" ? (
+        <FormMessage tone="info">
+          パスワードを変更しました。新しいパスワードでログインしてください。
+        </FormMessage>
+      ) : null}
       <LoginForm next={safeNextPath(next)} />
     </AuthScreen>
   );

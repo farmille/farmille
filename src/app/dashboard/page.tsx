@@ -155,6 +155,9 @@ export default async function DashboardPage() {
         </SurfaceCard>
 
         <SurfaceCard title="アカウント">
+          <Link className={buttonRecipe({ variant: "ghost" })} href="/account/password">
+            パスワードを変更
+          </Link>
           <form action="/logout" method="post">
             <Button type="submit" variant="ghost">
               ログアウト
