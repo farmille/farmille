@@ -14,8 +14,6 @@ const buttonRecipe = cva({
     cursor: "pointer",
     textDecoration: "none",
     lineHeight: "1.3",
-    transitionProperty: "background-color, border-color, color",
-    transitionDuration: "0.15s",
   },
   variants: {
     variant: {

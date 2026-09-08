@@ -47,7 +47,6 @@ export function MaterialDetailTable({ material }: { material: MaterialDetail }) 
           alignItems: "center",
           justifyContent: "space-between",
           gap: "2",
-          mt: "6",
           mb: "2.5",
         })}
       >

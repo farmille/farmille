@@ -5,6 +5,7 @@ import { useRef } from "react";
 
 import { deleteReviewAction } from "@/app/materials/[id]/review/actions";
 import { buttonRecipe } from "@/components/Button";
+import { dialogPanel } from "@/components/dialog-panel";
 import { css, cx } from "../../styled-system/css";
 
 type ReviewOwnerActionsProps = {
@@ -35,19 +36,7 @@ export function ReviewOwnerActions({ materialId, reviewId }: ReviewOwnerActionsP
       <dialog
         ref={dialogRef}
         aria-labelledby={`delete-review-title-${reviewId}`}
-        className={css({
-          maxW: "dialog",
-          w: "100%",
-          p: "4",
-          bg: "surface.card",
-          color: "text.default",
-          borderWidth: "1px",
-          borderStyle: "solid",
-          borderColor: "border.default",
-          borderRadius: "card",
-          boxShadow: "shadow.lift",
-          "&::backdrop": { bg: "ink/45" },
-        })}
+        className={dialogPanel}
       >
         <h2
           id={`delete-review-title-${reviewId}`}

@@ -3,21 +3,8 @@
 import { useId, useRef, type ReactNode } from "react";
 
 import { buttonRecipe } from "@/components/Button";
+import { dialogPanel } from "@/components/dialog-panel";
 import { css, cx } from "../../styled-system/css";
-
-const dialogStyle = css({
-  maxW: "dialog",
-  w: "100%",
-  p: "4",
-  bg: "surface.card",
-  color: "text.default",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "card",
-  boxShadow: "shadow.lift",
-  "&::backdrop": { bg: "ink/45" },
-});
 
 type ConfirmDialogProps = {
   title: string;
@@ -65,7 +52,7 @@ export function ConfirmDialog({
         {triggerLabel}
       </button>
 
-      <dialog ref={dialogRef} aria-labelledby={titleId} className={dialogStyle}>
+      <dialog ref={dialogRef} aria-labelledby={titleId} className={dialogPanel}>
         <h2 id={titleId} className={css({ m: "0", fontSize: "lg", fontWeight: "700" })}>
           {title}
         </h2>

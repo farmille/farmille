@@ -3,6 +3,7 @@
 import { useActionState, useId, useRef } from "react";
 
 import { buttonRecipe } from "@/components/Button";
+import { dialogPanel } from "@/components/dialog-panel";
 import { Select } from "@/components/Select";
 import { Textarea } from "@/components/Textarea";
 import type { ReportActionState } from "@/server/actions/reports";
@@ -22,20 +23,6 @@ const trigger = css({
   cursor: "pointer",
   px: "1",
   py: "1",
-});
-
-const dialogStyle = css({
-  maxW: "dialog",
-  w: "100%",
-  p: "4",
-  bg: "surface.card",
-  color: "text.default",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "card",
-  boxShadow: "shadow.lift",
-  "&::backdrop": { bg: "ink/45" },
 });
 
 const field = css({
@@ -83,7 +70,7 @@ export function ReportDialog({
         {triggerLabel}
       </button>
 
-      <dialog ref={dialogRef} aria-labelledby={titleId} className={dialogStyle}>
+      <dialog ref={dialogRef} aria-labelledby={titleId} className={dialogPanel}>
         {state.status === "success" ? (
           <>
             <h2 id={titleId} className={css({ m: "0", fontSize: "lg", fontWeight: "700" })}>

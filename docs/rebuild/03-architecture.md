@@ -29,7 +29,7 @@ Route Handlers と Server Components が第一防御（認証・認可・入力�
 調査結果（2026-07 時点）：`@pandacss/dev` 1.11.4。Turbopack＋PostCSS の HMR 問題は解消済みで、Next.js 16 では `postcss.config.js` に `@pandacss/dev/postcss` を足すだけでよい。RSC はビルド時 CSS 生成のため特別対応不要（スタイル目的の `"use client"` 不要）。
 
 - セットアップ：`pnpm add -D @pandacss/dev postcss` → `panda init --postcss`。`prepare` スクリプトに `panda codegen`。`tsconfig.json` の include に `styled-system` を追加
-- トークン：02 §5 の表を `theme.tokens` ＋ `theme.semanticTokens` に定義。**ライトのみ。`_dark` 条件・`prefers-color-scheme` 分岐・テーマ切替 UI は作らない**（D12）。フォントは `next/font` の `Noto_Sans_JP` を CSS 変数で渡し、`<html>` 側に className を付与
+- トークン：02 §5 の表を `theme.tokens` ＋ `theme.semanticTokens` に定義。**ライトのみ。`_dark` 条件・`prefers-color-scheme` 分岐・テーマ切替 UI は作らない**（D12）。フォントは `gen-interface-jp` 0.8.0 の400／500／600／700／800をルートレイアウトから読み込み、`fonts.sans` に接続
 - コンポーネントは recipe（cva）／slotRecipe でバリアント管理。**実行時に決まる動的値をスタイルへ直接渡さない**（静的解析で生成漏れになる）。色分岐はすべて variant として列挙する
 - 注意：`panda.config.ts` 変更後は codegen 手動再実行が必要。CI では codegen → tsc の順
 

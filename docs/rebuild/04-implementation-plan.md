@@ -20,7 +20,7 @@
 |---|---|---|
 | T-01 | リポジトリ掃除：05 の削除リスト実行・docs/ops/ への移設・ルート AGENTS.md（実体）と CLAUDE.md（`@AGENTS.md` の1行）を新体制の内容へ全面書き換え | Opus 5 |
 | T-02 | アプリ再初期化：旧 src/ 一掃・Panda CSS 導入・oxlint/oxfmt/ESLint ハイブリッド設定・`src/env.ts`（fail fast）・`src/server/` の器・vitest 維持 | Sol |
-| T-03 | デザイントークン実装：02 §5 を panda.config.ts に定義（**ライトのみ**）・`next/font` の Noto Sans JP 設定・スタイルガイドページ（/dev/tokens、本番ビルド除外） | Grok |
+| T-03 | デザイントークン実装：02 §5 を panda.config.ts に定義（**ライトのみ**）・Gen Interface JP 設定・スタイルガイドページ（/dev/tokens、本番ビルド除外） | Grok |
 | T-04 | CI：GitHub Actions（oxlint＋eslint／oxfmt --check／tsc／vitest／build。migration 差分があれば gen:types 差分チェック） | Sol |
 | T-05 | OpenSpec 限定導入（`openspec init --tools claude,cursor,codex`）と運用手順1枚 | Opus 5 |
 | T-06 | 【人間】Supabase の鍵移行とローテーション（新 API キー＋JWT Signing Keys へ移行 → 新アプリは新キーで構築 → Cloud Run 廃止時に旧キー無効化）・Cloud Build ソースバケットに残る旧アップロードの削除・Supabase CLI アクセストークンの再発行・Vercel 環境変数整備 | Shun |

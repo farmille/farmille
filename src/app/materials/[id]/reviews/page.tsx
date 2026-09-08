@@ -117,8 +117,6 @@ export default async function MaterialReviewsPage({
           alignItems: "end",
           justifyContent: "space-between",
           gap: "3",
-          mt: "5",
-          mb: "3",
         })}
       >
         <p

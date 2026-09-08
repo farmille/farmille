@@ -15,7 +15,7 @@
 
 | ルート | 画面 | モック対応 | 備考 |
 |---|---|---|---|
-| `/` | ホーム | home | 検索画面へ進む単一の検索入口・注目資材・新着使用レポート・新着レビュー・登録 CTA。候補や条件チップは展開しない |
+| `/` | ホーム | home | ヒーローは白地に見出し・リード文・写真を余白で置き、下に検索入口を敷く。以下に注目資材・新着使用レポート・新着レビュー・登録 CTA を並べる。検索画面へ進む単一の検索入口とし、候補や条件チップは展開しない |
 | `/search` | 資材検索 | search | 効果・作物・製品タイプ・悩み・栽培条件の選択（同一分類 OR・分類間 AND）・並び替え（レビュー数／評価／新着を実装） |
 | `/materials/[id]` | 資材詳細 | material | Q&A 区画は**非表示**（Phase 2）。保存トグル・対照区あり率・レビュー全件への導線・メーカー確認済み状態を表示。掲載終了時は履歴を残し、新規投稿導線を出さない |
 | `/materials/[id]/reviews` | レビュー全件一覧 | （新規） | モックの「すべて見る（32件）」行き止まりの解消。並び替え付き |
@@ -148,6 +148,7 @@ flowchart TD
 - モバイルヘッダーは左にFarmilleロゴ、右に検索アイコンを置き、検索アイコンは `/search` へ遷移する
 - PCヘッダーはFarmilleロゴ、使用レポート一覧、資材検索入口、投稿、マイページの順に常設する。使用レポート一覧は `/articles?type=report` へ遷移する
 - ホームの検索入口は「資材を検索する（作物・悩み・資材名から）」と「検索へ →」を1つのリンクとして扱い、クリック領域全体を `/search` へ接続する
+- ヒーローは写真を背景に敷かず、見出しの隣（PC）／下（SP）に置く。書体はゴシックMB101 L のみで、weight 300 以外を指定して合成太字を出さない。見出しとリード文の改行は文節で区切り、語中で折り返させない
 - 入力候補、選択済み条件、0件表示、読み込み、取得エラーは `/search` が担当する。ホームは検索データを取得せず、入口が利用できる状態だけを持つ
 
 ## 4. モック監査の結論と反映（実装者は必ず読むこと）
@@ -182,17 +183,22 @@ flowchart TD
 | blue（公式マーク） | #1976D2 |
 | star | #F5A623 |
 | amber / amber.soft（警告） | #B26A00 / #FFF4E0 |
-| bg / panel / card | #F8F8F5 / #FAFAF7 / #FFFFFF |
+| bg / panel / card | #FCFCFB / #FDFDFC / #FFFFFF |
 | ink / ink2 / ink3 | #1E231F / #4C534D / #7C837D |
 | line / line.strong | #E7E5DE / #D8D6CD |
 | shadow | 0 1px 2px rgba(30,35,31,.05), 0 4px 14px rgba(30,35,31,.06) |
 | shadow.lift | 0 8px 30px rgba(30,35,31,.16) |
-| フォント | Noto Sans JP 系スタック（-apple-system, Hiragino Kaku Gothic ProN, Hiragino Sans, Noto Sans JP, Yu Gothic, Meiryo） |
+| easings.out / easings.soft | cubic-bezier(0.23, 1, 0.32, 1)／ease。UI標準の入退場カーブと、トースト用の柔らかいカーブ |
+| durations.fast / dialog / toast | 160ms／250ms／400ms。押下と色の遷移／モーダル／トーストの継続時間 |
+| fonts.gothicMb101 | Adobe Fonts の `a-otf-gothic-mb101-pr6n`（ゴシックMB101 Pr6N L・weight 300 のみ）。ホームのヒーローだけで使う |
+| フォント | Gen Interface JP（400／500／600／700／800）。フォールバックは -apple-system, BlinkMacSystemFont, Hiragino Kaku Gothic ProN, Hiragino Sans, Noto Sans JP, Yu Gothic, Meiryo |
 | 角丸 | pill=999px／card=14px／button=12px／input=11px |
 | 画像比率 | square=1：1／landscape=4：3／wide=16：9／portrait=3：4。画像枠に適用し、画像は `cover` または `contain` で収める |
-| タイポ | 21/20/17-19/16/14-14.5/12-13/9.5-11px の8段 |
+| タイポ | 通常UIは21/20/17-19/16/14-14.5/12-13/9.5-11px の8段。ホームのヒーロー見出しだけ別枠で hero=28px／hero.lg=64px |
 | 余白 | 8px 刻み基調（6/8/10/12/16） |
 | 上限幅 | card.materialMobile=9.375rem／card.material=15rem／dialog=24rem／auth=26.875rem／content.form=44rem／content.reading=48rem／content.medium=56rem／content.workspace=60rem／content.wide=75rem |
+
+モーションは4か所だけに置く。**押下フィードバック**（押せる要素すべて。`transform: scale(0.98)`・160ms。`src/app/globals.css` の base レイヤに1か所で定義し、inline のテキストリンクには効かせない）、**モーダルの入退場**（`@starting-style` ＋ `transition-behavior: allow-discrete`。パネルと `::backdrop` の不透明度を揃える）、**トーストの入退場**（上端から出て同じ上端へ戻る）、**「参考になった」の状態遷移**（色の補間）。それ以外は足さない。ホームのヒーロー入場・一覧のスタッガー・下部ナビのタブ切替は、頻度が高く演出が遅延に変わるため実装しない。すべて `prefers-reduced-motion: reduce` で動きを止め、不透明度に置き換える。
 
 生値の直書きは禁止し、すべて Panda の tokens / semanticTokens を経由する（03 §3・§8）。モックの `--phone:44px`（フォン枠の角丸）はプロトタイプの外枠用なので移植しない。
 

@@ -6,8 +6,8 @@
 // 使い方:
 //   node --env-file=.env.local tools/dev/seed-demo.ts
 //
-// 画面検証用のデータ（審査待ちの申請・編集局待ちのレポート・未処理の通報）は
-// tools/dev/seed-demo.sql を psql で流す。両方を実行すると全画面が空でない状態になる。
+// 公開ホームの表示データは tools/dev/seed-home-demo.sql、運営画面の確認データは
+// tools/dev/seed-demo.sql を psql で流す。3つを実行すると全画面が空でない状態になる。
 
 import * as v from "valibot";
 

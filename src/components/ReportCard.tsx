@@ -121,6 +121,7 @@ export type ReportCardProps = {
   href?: string;
   coverSrc?: string;
   layout?: "scroll" | "grid" | "list";
+  preload?: boolean;
   className?: string;
 };
 
@@ -136,6 +137,7 @@ export function ReportCard({
   href = "#",
   coverSrc,
   layout = "list",
+  preload = false,
   className,
 }: ReportCardProps) {
   const compact = layout === "scroll" || layout === "grid";
@@ -194,6 +196,7 @@ export function ReportCard({
                 objectFit: "cover",
               })}
               height={480}
+              preload={preload}
               sizes={
                 layout === "scroll"
                   ? "(max-width: 1023px) 54vw, 280px"
