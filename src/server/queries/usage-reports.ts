@@ -21,13 +21,16 @@ export type RecentUsageReportItem = {
   helpfulCount: number;
   coverUrl: string | null;
   authorHandle: string;
+  authorUserId: string;
   cropName: string;
   materialName: string;
+  materialId: string;
+  summary: string;
 };
 
 type RecentReportQueryRow = Pick<
   UsageReportRow,
-  "id" | "title" | "published_at" | "material_id"
+  "id" | "title" | "published_at" | "material_id" | "summary" | "author_user_id"
 > & {
   author: Pick<PublicProfileRow, "handle"> | null;
   crop: Pick<CropRow, "name"> | null;
@@ -42,15 +45,18 @@ function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): voi
 /** ホームの新着使用レポート。published のみ。0件なら空配列。 */
 export async function listRecentUsageReports({
   limit,
+  ids,
 }: {
   limit: number;
+  ids?: string[];
 }): Promise<Result<RecentUsageReportItem[]>> {
   if (!Number.isInteger(limit) || limit < 1) {
     throw new RangeError("limit は1以上の整数で指定してください。");
   }
 
   const supabase = await createServerSupabase();
-  const { data, error } = await supabase
+  if (ids?.length === 0) return succeed([]);
+  let query = supabase
     .from("usage_reports")
     .select(
       `
@@ -58,6 +64,8 @@ export async function listRecentUsageReports({
       title,
       published_at,
       material_id,
+      summary,
+      author_user_id,
       author:public_profiles!usage_reports_author_user_id_fkey (
         handle
       ),
@@ -78,6 +86,9 @@ export async function listRecentUsageReports({
     .order("published_at", { ascending: false })
     .order("id", { ascending: true })
     .limit(limit);
+
+  if (ids !== undefined) query = query.in("id", ids);
+  const { data, error } = await query;
 
   if (error !== null) {
     reportQueryError("新着使用レポートの取得に失敗", error);
@@ -135,12 +146,17 @@ export async function listRecentUsageReports({
       helpfulCount: helpfulById.get(row.id) ?? 0,
       coverUrl: cover?.url ?? null,
       authorHandle: row.author.handle,
+      authorUserId: row.author_user_id,
       cropName: row.crop.name,
       materialName: row.material.name,
+      materialId: row.material_id,
+      summary: row.summary,
     });
   }
 
-  return succeed(items);
+  return succeed(
+    ids === undefined ? items : items.toSorted((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)),
+  );
 }
 
 type UsageReportDetailQueryRow = UsageReportRow & {

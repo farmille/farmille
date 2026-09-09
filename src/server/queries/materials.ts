@@ -260,6 +260,7 @@ async function findMatchingMaterialIds(
 }
 
 export type ListMaterialsOptions = {
+  ids?: string[];
   filters?: readonly SearchFilterRef[];
   /** メーカー名での絞り込み（同一分類 OR）。タグではなく materials 由来。 */
   makerNames?: string[];
@@ -278,7 +279,7 @@ export async function listMaterials(
 
 export async function listMaterialsWithSupabase(
   supabase: SupabaseClient<Database>,
-  { filters, makerNames, materialNames, sort = "reviews", page }: ListMaterialsOptions,
+  { filters, makerNames, materialNames, ids, sort = "reviews", page }: ListMaterialsOptions,
 ): Promise<Result<Paginated<MaterialListItem>>> {
   const { from, to } = pageRange(page);
   const materialFilter = await findMatchingMaterialIds(supabase, filters);
@@ -324,6 +325,8 @@ export async function listMaterialsWithSupabase(
   if (materialFilter.data !== null) {
     query = query.in("id", materialFilter.data);
   }
+
+  if (ids !== undefined) query = query.in("id", ids);
 
   if (makers.length > 0) {
     query = query.in("manufacturer_name", makers);

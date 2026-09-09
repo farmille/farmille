@@ -48,6 +48,13 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
 
     for (const path of ["/", "/me", `/users/${user.id}`]) {
       await page.goto(path);
+      if (path === "/") {
+        await page
+          .getByRole("navigation", { name: "レビューの表示順", exact: true })
+          .getByRole("link", { name: "新着順", exact: true })
+          .click();
+        await expect(page).toHaveURL(/reviews=newest#home-reviews$/);
+      }
       const reviewCard = page.getByRole("article").filter({ hasText: body });
       await expect(reviewCard.getByText(body, { exact: true })).toBeVisible();
       await expect(reviewCard.getByText("ミニトマト", { exact: true })).toBeVisible();

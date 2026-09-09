@@ -1,5 +1,7 @@
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
+import { HelpfulButton } from "./HelpfulButton";
+import { toggleHelpfulAction } from "@/server/actions/helpful";
 import { cva, css, cx } from "../../styled-system/css";
 import { ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "./Icons";
 
@@ -118,6 +120,12 @@ export type ReportCardProps = {
   crop: string;
   helpfulCount: number;
   viewCount?: number;
+  summary?: string;
+  materialName?: string;
+  materialHref?: string;
+  reportId?: string;
+  helpfulVoted?: boolean;
+  currentPath?: string;
   href?: string;
   coverSrc?: string;
   layout?: "scroll" | "grid" | "list";
@@ -134,6 +142,12 @@ export function ReportCard({
   crop,
   helpfulCount,
   viewCount,
+  summary,
+  materialName,
+  materialHref,
+  reportId,
+  helpfulVoted = false,
+  currentPath,
   href = "#",
   coverSrc,
   layout = "list",
@@ -222,6 +236,18 @@ export function ReportCard({
         >
           {title}
         </Link>
+        {summary ? (
+          <p
+            className={css({
+              fontSize: "sm",
+              color: "text.muted",
+              lineClamp: 3,
+              lineHeight: "relaxed",
+            })}
+          >
+            {summary}
+          </p>
+        ) : null}
         <div
           className={css({
             display: "flex",
@@ -285,11 +311,20 @@ export function ReportCard({
             mt: compact ? "1.5" : "2",
           })}
         >
-          <span className={helpfulBtn({ layout })}>
-            <ThumbIcon size={compact ? 11 : 14} />
-            {!compact ? <span>参考になった</span> : null}
-            {helpfulCount}
-          </span>
+          {reportId !== undefined && currentPath !== undefined ? (
+            <HelpfulButton
+              action={toggleHelpfulAction.bind(null, "usage_report", reportId, currentPath)}
+              count={helpfulCount}
+              voted={helpfulVoted}
+              layout="card"
+            />
+          ) : (
+            <span className={helpfulBtn({ layout })}>
+              <ThumbIcon size={compact ? 11 : 14} />
+              {!compact ? <span>参考になった</span> : null}
+              {helpfulCount}
+            </span>
+          )}
           {viewCount !== undefined ? (
             <span
               className={css({
@@ -303,6 +338,23 @@ export function ReportCard({
           ) : null}
         </div>
       </div>
+      {materialName && materialHref ? (
+        <Link
+          href={materialHref}
+          className={css({
+            display: "block",
+            borderTopWidth: "1px",
+            borderColor: "border.default",
+            p: "3",
+            fontSize: "sm",
+            fontWeight: "700",
+            color: "brand.primaryDeep",
+            textDecoration: "none",
+          })}
+        >
+          {materialName} →
+        </Link>
+      ) : null}
     </article>
   );
 }

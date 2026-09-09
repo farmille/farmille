@@ -1,4 +1,5 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import * as v from "valibot";
 
 import { FormPageShell } from "@/components";
 import { getSessionUser, requireGeneralUser } from "@/server/auth";
@@ -9,15 +10,21 @@ import { MaterialPicker } from "./MaterialPicker";
 import { PostAccessDenied } from "./PostAccessDenied";
 
 type PostPageProps = {
-  searchParams: Promise<{ q?: string | string[] }>;
+  searchParams: Promise<{ q?: string | string[]; type?: string | string[] }>;
 };
 
 export default async function PostPage({ searchParams }: PostPageProps) {
+  const requested = await searchParams;
+  const typeResult = v.safeParse(v.optional(v.picklist(["report", "review"])), requested.type);
+  if (!typeResult.success) notFound();
+  const postType = typeResult.output;
   const session = await requireGeneralUser();
 
   if (!session.ok) {
     if (session.error === "unauthorized") {
-      redirect("/login?next=%2Fpost");
+      redirect(
+        `/login?next=${encodeURIComponent(postType === undefined ? "/post" : `/post?type=${postType}`)}`,
+      );
     }
 
     if (session.error === "forbidden") {
@@ -28,7 +35,6 @@ export default async function PostPage({ searchParams }: PostPageProps) {
     throw new Error(errorMessageJa[session.error]);
   }
 
-  const requested = await searchParams;
   const query = Array.isArray(requested.q) ? "" : (requested.q?.trim() ?? "");
   const result = await searchPostingMaterials(query);
 
@@ -38,7 +44,7 @@ export default async function PostPage({ searchParams }: PostPageProps) {
 
   return (
     <FormPageShell chrome="public" active="post" title="投稿する" backHref="/" hasFixedFooter>
-      <MaterialPicker materials={result.data} query={query} />
+      <MaterialPicker materials={result.data} query={query} postType={postType} />
     </FormPageShell>
   );
 }

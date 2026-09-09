@@ -36,9 +36,10 @@ const materialButton = cva({
 type MaterialPickerProps = {
   materials: PostingMaterial[];
   query: string;
+  postType?: "report" | "review";
 };
 
-export function MaterialPicker({ materials, query }: MaterialPickerProps) {
+export function MaterialPicker({ materials, query, postType }: MaterialPickerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = materials.find(({ id }) => id === selectedId) ?? null;
 
@@ -49,6 +50,7 @@ export function MaterialPicker({ materials, query }: MaterialPickerProps) {
       </p>
 
       <form method="get" className={css({ display: "flex", gap: "2" })}>
+        {postType !== undefined ? <input type="hidden" name="type" value={postType} /> : null}
         <Input
           type="search"
           name="q"
@@ -188,43 +190,47 @@ export function MaterialPicker({ materials, query }: MaterialPickerProps) {
           >
             {selected.name}
           </p>
-          <Link
-            href={`/materials/${selected.id}/report/new`}
-            className={css({
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              py: "3",
-              borderRadius: "button",
-              bg: "brand.primary",
-              color: "surface.card",
-              fontSize: "md",
-              fontWeight: "700",
-              textDecoration: "none",
-            })}
-          >
-            使用レポートを書く
-          </Link>
-          <Link
-            href={`/materials/${selected.id}/review/new`}
-            className={css({
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              py: "3",
-              borderRadius: "button",
-              bg: "surface.card",
-              color: "brand.primary",
-              borderWidth: "1px",
-              borderStyle: "solid",
-              borderColor: "border.strong",
-              fontSize: "md",
-              fontWeight: "700",
-              textDecoration: "none",
-            })}
-          >
-            レビューを書く
-          </Link>
+          {postType !== "review" ? (
+            <Link
+              href={`/materials/${selected.id}/report/new`}
+              className={css({
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                py: "3",
+                borderRadius: "button",
+                bg: "brand.primary",
+                color: "surface.card",
+                fontSize: "md",
+                fontWeight: "700",
+                textDecoration: "none",
+              })}
+            >
+              使用レポートを書く
+            </Link>
+          ) : null}
+          {postType !== "report" ? (
+            <Link
+              href={`/materials/${selected.id}/review/new`}
+              className={css({
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                py: "3",
+                borderRadius: "button",
+                bg: "surface.card",
+                color: "brand.primary",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "border.strong",
+                fontSize: "md",
+                fontWeight: "700",
+                textDecoration: "none",
+              })}
+            >
+              レビューを書く
+            </Link>
+          ) : null}
         </div>
       )}
     </>

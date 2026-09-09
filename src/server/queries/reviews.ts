@@ -294,15 +294,20 @@ export type RecentReviewItem = ReviewListItem & {
 /** ホームの新着レビュー。published のみ・新しい順。 */
 export async function listRecentReviews({
   limit,
+  ids,
+  viewerUserId = null,
 }: {
   limit: number;
+  ids?: string[];
+  viewerUserId?: string | null;
 }): Promise<Result<RecentReviewItem[]>> {
   if (!Number.isInteger(limit) || limit < 1) {
     throw new RangeError("limit は1以上の整数で指定してください。");
   }
 
   const supabase = await createServerSupabase();
-  const { data, error } = await supabase
+  if (ids?.length === 0) return succeed([]);
+  let query = supabase
     .from("reviews")
     .select(
       `
@@ -316,6 +321,9 @@ export async function listRecentReviews({
     .order("created_at", { ascending: false })
     .order("id", { ascending: true })
     .limit(limit);
+
+  if (ids !== undefined) query = query.in("id", ids);
+  const { data, error } = await query;
 
   if (error !== null) {
     reportQueryError("新着レビューの取得に失敗", error);
@@ -334,6 +342,12 @@ export async function listRecentReviews({
   }
 
   const items: RecentReviewItem[] = [];
+  const votedIds = await getViewerHelpfulVotes(
+    viewerUserId,
+    "review",
+    rows.map((row) => row.id),
+  );
+  if (!votedIds.ok) return votedIds;
 
   for (const row of rows) {
     if (row.material === null) {
@@ -342,7 +356,7 @@ export async function listRecentReviews({
     }
 
     const { material, ...review } = row;
-    const item = toReviewListItem(review, helpfulCounts.data, new Set());
+    const item = toReviewListItem(review, helpfulCounts.data, votedIds.data);
     if (item === null) return fail("internal");
 
     items.push({
@@ -351,7 +365,9 @@ export async function listRecentReviews({
     });
   }
 
-  return succeed(items);
+  return succeed(
+    ids === undefined ? items : items.toSorted((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)),
+  );
 }
 
 export async function listReviewsByMaterial(
