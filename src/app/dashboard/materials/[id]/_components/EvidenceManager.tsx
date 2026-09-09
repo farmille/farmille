@@ -1,6 +1,6 @@
 "use client";
 
-import { createBrowserClient } from "@supabase/ssr";
+import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition, type FormEvent } from "react";
 
@@ -15,11 +15,9 @@ import {
   TextLink,
 } from "@/components";
 import { Field } from "@/components/auth/Fields";
-import { clientEnv } from "@/env";
 import { formDataString } from "@/lib/validation";
 import { errorMessageJa } from "@/server/errors";
 import type { SellerMaterialEvidence } from "@/server/queries/seller-dashboard";
-import type { Database } from "@/types/database.types";
 import { css } from "../../../../../../styled-system/css";
 import { addEvidenceAction, deleteEvidenceAction } from "../actions";
 import { initialSellerFormState, sellerFieldErrors, type SellerFormState } from "./form-state";
@@ -132,10 +130,7 @@ export function EvidenceManager({ sellerId, materialId, evidences }: EvidenceMan
     }
 
     startTransition(async () => {
-      const supabase = createBrowserClient<Database>(
-        clientEnv.supabaseUrl,
-        clientEnv.supabasePublishableKey,
-      );
+      const supabase = createAuthBrowserClient();
       let storagePath: string | null = null;
 
       if (hasFile && fileExtension !== undefined) {

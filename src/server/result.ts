@@ -20,6 +20,8 @@ type Success<T> = v.InferOutput<ReturnType<typeof successSchema<v.GenericSchema<
 export type Result<T> = v.InferOutput<ReturnType<typeof resultSchema<v.GenericSchema<T>>>>;
 
 const errorStatus = {
+  passkey_failed: 400,
+  passkey_unavailable: 503,
   unauthorized: 401,
   forbidden: 403,
   not_found: 404,

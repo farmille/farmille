@@ -1,6 +1,6 @@
 "use client";
 
-import { createBrowserClient } from "@supabase/ssr";
+import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -25,11 +25,9 @@ import {
   buttonRecipe,
 } from "@/components";
 import { Field } from "@/components/auth/Fields";
-import { clientEnv } from "@/env";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { errorMessageJa } from "@/server/errors";
 import type { SellerArticleMaterial } from "@/server/queries/seller-articles";
-import type { Database } from "@/types/database.types";
 import { css, cx } from "../../../../../styled-system/css";
 import { createArticleAction, searchMaterialsAction, updateArticleAction } from "../actions";
 import {
@@ -205,10 +203,7 @@ export function ArticleForm({
     // Storage RLS は第1階層を seller_id で判定する（migration コメント・ポリシー準拠）。
     const extension = fileExtensionByType[file.type];
     const storagePath = `${sellerId}/${crypto.randomUUID()}.${extension}`;
-    const supabase = createBrowserClient<Database>(
-      clientEnv.supabaseUrl,
-      clientEnv.supabasePublishableKey,
-    );
+    const supabase = createAuthBrowserClient();
     const { error } = await supabase.storage.from("article-images").upload(storagePath, file, {
       contentType: file.type,
       upsert: false,

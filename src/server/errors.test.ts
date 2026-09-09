@@ -5,6 +5,8 @@ import { errorMessageJa, type ErrorCode } from "@/server/errors";
 describe("errorMessageJa", () => {
   it("すべてのエラーコードに日本語文言を持つ", () => {
     const codes: ErrorCode[] = [
+      "passkey_failed",
+      "passkey_unavailable",
       "unauthorized",
       "forbidden",
       "not_found",

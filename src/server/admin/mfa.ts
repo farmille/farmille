@@ -1,12 +1,14 @@
 import type { AuthError } from "@supabase/supabase-js";
+import * as v from "valibot";
 
 import { requireAdminAccount, reportAdminError } from "@/server/admin/guard";
 import { normalizeTotpQrCodeSource } from "@/server/admin/mfa-qr";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 
-/** admin の MFA（TOTP）は 01 §4 の AAL2 必須要件を満たすための唯一の手段。 */
+/** 運営の追加認証に使う認証アプリの登録名。 */
 const FRIENDLY_NAME = "farmille-admin";
+const AssuranceLevelSchema = v.nullable(v.picklist(["aal1", "aal2"]));
 
 export type AdminMfaState = {
   /** 検証済みの TOTP factor。ある場合はコード入力（challenge）だけで AAL2 に上がる。 */
@@ -76,8 +78,8 @@ export async function getAdminMfaState(): Promise<Result<AdminMfaState>> {
 
   return succeed({
     verifiedFactorId: verified?.id ?? null,
-    currentLevel: aal.data.currentLevel,
-    nextLevel: aal.data.nextLevel,
+    currentLevel: v.parse(AssuranceLevelSchema, aal.data.currentLevel),
+    nextLevel: v.parse(AssuranceLevelSchema, aal.data.nextLevel),
   });
 }
 
@@ -101,7 +103,7 @@ export async function startAdminTotpEnrollment(): Promise<Result<TotpEnrollment>
   if (verified !== undefined) return fail("conflict");
 
   for (const factor of factors.data.all) {
-    if (factor.status !== "unverified") continue;
+    if (factor.factor_type !== "totp" || factor.status !== "unverified") continue;
 
     const { error } = await supabase.auth.mfa.unenroll({ factorId: factor.id });
     if (error !== null) return fail(toMfaErrorCode(error, "未検証 factor の破棄"));

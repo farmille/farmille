@@ -38,11 +38,7 @@ export default async function AdminMfaPage({
 
   return (
     <AdminShell
-      description={
-        registered
-          ? "運営管理を開くには認証アプリのコードが必要です。"
-          : "運営アカウントは2要素認証（TOTP）の登録が必要です。"
-      }
+      description="運営管理を開くには認証アプリでの2要素認証が必要です。パスキーでログインした場合も認証コードを入力してください。"
       title={registered ? "2要素認証" : "2要素認証の登録"}
     >
       <Panel title={registered ? "認証コードの入力" : "認証アプリの登録"}>

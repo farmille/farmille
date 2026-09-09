@@ -15,6 +15,9 @@ const wrap = css({
 export function AccountActions() {
   return (
     <div className={wrap}>
+      <Link className={buttonRecipe({ variant: "ghost" })} href="/account/passkeys">
+        パスキーを管理
+      </Link>
       <Link className={buttonRecipe({ variant: "ghost" })} href="/account/password">
         パスワードを変更
       </Link>
