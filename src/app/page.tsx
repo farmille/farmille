@@ -141,7 +141,17 @@ export default async function HomePage({
                     className={css({
                       display: "grid",
                       gap: "3",
-                      md: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+                      gridAutoFlow: "column",
+                      gridAutoColumns: "85%",
+                      overflowX: "auto",
+                      scrollSnapType: "x mandatory",
+                      pb: "4",
+                      "& > *": { scrollSnapAlign: "start" },
+                      md: {
+                        gridAutoFlow: "row",
+                        gridAutoColumns: "auto",
+                        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                      },
                     })}
                   >
                     {reportsResult.data.map((report) => (
@@ -179,7 +189,17 @@ export default async function HomePage({
                     className={css({
                       display: "grid",
                       gap: "3",
-                      md: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
+                      gridAutoFlow: "column",
+                      gridAutoColumns: "85%",
+                      overflowX: "auto",
+                      scrollSnapType: "x mandatory",
+                      pb: "4",
+                      "& > *": { scrollSnapAlign: "start" },
+                      md: {
+                        gridAutoFlow: "row",
+                        gridAutoColumns: "auto",
+                        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                      },
                       lg: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))" },
                     })}
                   >
