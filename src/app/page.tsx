@@ -1,308 +1,241 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import * as v from "valibot";
 
-import {
-  AppBar,
-  MaterialCard,
-  MaterialCardRail,
-  ReportCard,
-  ReviewCard,
-  SectionHeading,
-} from "@/components";
+import { AppBar, MaterialCard, ReportCard, ReviewCard, SectionHeading } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { getSessionUser } from "@/server/auth";
-import { listMaterials } from "@/server/queries/materials";
+import { listHomeMaterials } from "@/server/queries/home-materials";
 import { listRecentReviews } from "@/server/queries/reviews";
 import { listRecentUsageReports } from "@/server/queries/usage-reports";
 import { css } from "../../styled-system/css";
 import { HomeHero } from "./_components/HomeHero";
+import { HomeInvitations } from "./_components/HomeInvitations";
+import { HomeFooter } from "./_components/HomeFooter";
+import { HomeFeedOrder } from "./_components/HomeFeedOrder";
+import { homeFeedIds } from "@/server/queries/home-order";
+import { getViewerHelpfulVotes } from "@/server/queries/helpful";
 
-const shell = css({
-  minH: "100dvh",
-  display: "flex",
-  flexDirection: "column",
-  bg: "surface.page",
-  color: "text.default",
-  fontFamily: "sans",
-});
-
-const main = css({
-  flex: "1",
-  pb: "4",
-  lg: { pb: "16" },
-});
-
-const body = css({
-  w: "100%",
-  maxW: "content.wide",
-  mx: "auto",
-  px: "4",
-  pt: "6",
-  md: { px: "5" },
-  lg: { pt: "10" },
-});
-
-/** 各節を同じ間隔で積む。見出しの `_first` が効くよう、節ごとに包む。 */
-const sections = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "8",
-  lg: { gap: "12" },
-});
-
-const materialGrid = css({
-  lg: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-    gap: "3.5",
-  },
-});
-
-const materialCard = css({
-  lg: { w: "100%" },
-});
-
-const reportRail = css({
-  display: "grid",
-  gridAutoFlow: "column",
-  gridAutoColumns: "54%",
-  gap: "2.5",
-  overflowX: "auto",
-  scrollSnapType: "x mandatory",
-  pb: "1.5",
-  scrollbarWidth: "none",
-  "&::-webkit-scrollbar": { display: "none" },
-  lg: {
-    gridAutoFlow: "row",
-    gridAutoColumns: "auto",
-    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-    gap: "3.5",
-    overflowX: "visible",
-    scrollSnapType: "none",
-    pb: "0",
-  },
-});
-
-const stack = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "2.5",
-  lg: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "3.5",
-    alignItems: "start",
-  },
-});
-
-const cta = css({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: "4",
-  bgGradient: "to-br",
-  gradientFrom: "brand.primaryDeep",
-  gradientTo: "brand.primary",
+const empty = css({
+  p: "5",
+  borderWidth: "1px",
+  borderColor: "border.default",
   borderRadius: "card",
-  boxShadow: "shadow.lift",
-  px: "5",
-  py: "7",
-  textAlign: "center",
-  color: "surface.card",
-  lg: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: "6",
-    px: "9",
-    py: "8",
-    textAlign: "left",
-  },
-});
-
-const ctaTitle = css({
-  m: "0",
-  fontSize: "lg",
-  fontWeight: "700",
-  lineHeight: "relaxed",
-  textWrap: "balance",
-  lg: { fontSize: "2xl" },
-});
-
-/** 日本語が語中で折り返さないよう、文節ごとに inline-block で区切る。 */
-const phrase = css({
-  display: "inline-block",
-});
-
-const ctaLead = css({
-  mt: "1.5",
-  mb: "0",
-  color: "surface.card/88",
-  fontSize: "xs",
-  lineHeight: "relaxed",
-  lg: { fontSize: "md" },
-});
-
-const ctaButton = css({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  minH: "48px",
-  w: "100%",
-  flexShrink: "0",
   bg: "surface.card",
-  color: "brand.primaryDeep",
-  borderRadius: "button",
-  boxShadow: "shadow",
-  px: "5",
-  fontWeight: "700",
-  fontSize: "md",
-  textDecoration: "none",
-  lg: { w: "auto", px: "7" },
-});
-
-const reviewLink = css({
-  textDecoration: "none",
-  color: "inherit",
-  display: "block",
-  borderRadius: "card",
-  _focusVisible: {
-    outlineWidth: "2px",
-    outlineStyle: "solid",
-    outlineColor: "brand.primary",
-    outlineOffset: "2px",
-  },
-});
-
-const emptyNote = css({
-  m: "0",
-  fontSize: "sm",
   color: "text.subtle",
+  fontSize: "md",
+});
+const section = css({ display: "flex", flexDirection: "column", gap: "4" });
+const feedTitle = css({ m: "0", fontSize: "lg", fontWeight: "700", scrollMarginTop: "20" });
+
+const homeParams = v.object({
+  reports: v.optional(v.picklist(["newest", "helpful"]), "newest"),
+  reviews: v.optional(v.picklist(["newest", "helpful"]), "helpful"),
 });
 
-export default async function HomePage() {
-  const [session, featuredResult, reportsResult, reviewsResult] = await Promise.all([
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reports?: string | string[]; reviews?: string | string[] }>;
+}) {
+  const parsed = v.safeParse(homeParams, await searchParams);
+  if (!parsed.success) notFound();
+  const reportSort = parsed.output.reports;
+  const reviewSort = parsed.output.reviews;
+  const [session, materialsResult, reportIds, reviewIds] = await Promise.all([
     getSessionUser(),
-    listMaterials({ page: 1, sort: "reviews" }),
-    listRecentUsageReports({ limit: 4 }),
-    listRecentReviews({ limit: 4 }),
+    listHomeMaterials(),
+    homeFeedIds("usage_report", reportSort, 3),
+    homeFeedIds("review", reviewSort, 4),
   ]);
-
-  if (!featuredResult.ok) {
-    throw new Error(`注目資材の取得に失敗しました: ${featuredResult.error}`);
-  }
-  if (!reportsResult.ok) {
-    throw new Error(`新着使用レポートの取得に失敗しました: ${reportsResult.error}`);
-  }
-  if (!reviewsResult.ok) {
-    throw new Error(`新着レビューの取得に失敗しました: ${reviewsResult.error}`);
-  }
-  const featured = featuredResult.data.items.slice(0, 8);
-  const reports = reportsResult.data;
-  const reviews = reviewsResult.data;
-  const showSignupCta = session === null;
+  const [reportsResult, reviewsResult, reportVotes] = await Promise.all([
+    listRecentUsageReports({ limit: 3, ids: reportIds }),
+    listRecentReviews({
+      limit: 4,
+      ids: reviewIds,
+      viewerUserId: session?.accountType === "general" ? session.userId : null,
+    }),
+    getViewerHelpfulVotes(
+      session?.accountType === "general" ? session.userId : null,
+      "usage_report",
+      reportIds,
+    ),
+  ]);
+  if (!reportVotes.ok) throw new Error("使用レポートの投票状態を取得できませんでした。");
+  if (!reportsResult.ok)
+    throw new Error("使用レポートの取得に失敗しました：" + reportsResult.error);
+  if (!reviewsResult.ok) throw new Error("レビューの取得に失敗しました：" + reviewsResult.error);
 
   return (
-    <div className={shell}>
+    <div
+      className={css({
+        minH: "100dvh",
+        bg: "surface.page",
+        color: "text.default",
+        fontFamily: "sans",
+      })}
+    >
       <AppBar chrome="public" active="home" variant="home" />
-      <main className={main}>
+      <main>
         <HomeHero />
-
-        <div className={body}>
-          <div className={sections}>
-            <section>
-              <SectionHeading title="注目のBS資材" href="/search" linkLabel="探す →" />
-              {featured.length > 0 ? (
-                <MaterialCardRail className={materialGrid}>
-                  {featured.map((material, index) => (
-                    <MaterialCard
-                      key={material.id}
-                      className={materialCard}
-                      variant="scroll"
-                      name={material.name}
-                      maker={material.manufacturer_name}
-                      rating={material.avg_rating ?? 0}
-                      reviewCount={material.review_count}
-                      official={material.manufacturer_verified_at !== null}
-                      imageSrc={material.primaryImage?.url}
-                      href={`/materials/${material.id}`}
-                      preload={index === 0}
-                    />
-                  ))}
-                </MaterialCardRail>
-              ) : (
-                <p className={emptyNote}>表示できる資材がまだありません。</p>
-              )}
-            </section>
-
-            {reports.length > 0 ? (
-              <section>
-                <SectionHeading
-                  title="新着の使用レポート"
-                  href="/articles"
-                  linkLabel="記事を読む →"
-                />
-                <div className={reportRail}>
-                  {reports.map((report, index) => (
-                    <ReportCard
-                      key={report.id}
-                      layout="scroll"
-                      title={report.title}
-                      author={report.authorHandle}
-                      crop={report.cropName}
-                      helpfulCount={report.helpfulCount}
-                      coverSrc={report.coverUrl ?? undefined}
-                      href={`/reports/${report.id}`}
-                      preload={index === 0}
-                    />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            <section>
-              <SectionHeading title="新着レビュー" href="/search" linkLabel="レビューを読む →" />
-              {reviews.length > 0 ? (
-                <div className={stack}>
-                  {reviews.map((review) => (
-                    <Link
-                      key={review.id}
-                      href={`/materials/${review.material_id}#sec-reviews`}
-                      className={reviewLink}
-                    >
-                      <ReviewCard
-                        handle={review.author?.handle ?? "匿名"}
-                        crop={review.crops.map(({ name }) => name).join("・")}
-                        rating={review.rating}
-                        helpfulCount={review.helpfulCount}
-                        body={review.body}
-                        materialName={review.materialName}
-                        photoCount={review.photos.length}
-                      />
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <p className={emptyNote}>まだ公開中のレビューはありません。</p>
-              )}
-            </section>
-
-            {showSignupCta ? (
-              <div className={cta}>
-                <div>
-                  <h2 className={ctaTitle}>
-                    <span className={phrase}>あなたの一言が、</span>
-                    <span className={phrase}>次の農家の判断材料になる。</span>
-                  </h2>
-                  <p className={ctaLead}>
-                    <span className={phrase}>匿名で参加OK。</span>
-                    <span className={phrase}>実名・所属の公開は不要です。</span>
-                  </p>
-                </div>
-                <Link href="/signup" className={ctaButton}>
-                  無料で登録する
-                </Link>
+        <div
+          className={css({
+            maxW: "content.wide",
+            mx: "auto",
+            px: "4",
+            pt: "8",
+            lg: { px: "5", pt: "10" },
+          })}
+        >
+          <div className={css({ display: "flex", flexDirection: "column", gap: "12" })}>
+            <section aria-label="掲載資材一覧">
+              <SectionHeading title="掲載資材一覧" href="/search" linkLabel="すべて見る →" />
+              <div
+                className={css({
+                  display: "flex",
+                  gap: "3",
+                  overflowX: "auto",
+                  scrollSnapType: "x mandatory",
+                  pb: "4",
+                })}
+              >
+                {materialsResult.map((material) => (
+                  <MaterialCard
+                    key={material.id}
+                    variant="scroll"
+                    name={material.name}
+                    maker={material.manufacturer_name}
+                    rating={material.avg_rating ?? 0}
+                    reviewCount={material.review_count}
+                    articleCount={material.reportCount}
+                    savedCount={material.savedCount}
+                    categories={material.categories}
+                    official={material.manufacturer_verified_at !== null}
+                    imageSrc={material.primaryImage?.url}
+                    href={`/materials/${material.id}`}
+                  />
+                ))}
               </div>
-            ) : null}
+              {materialsResult.length === 0 ? (
+                <p className={empty}>表示できる資材がまだありません。</p>
+              ) : (
+                <p className={css({ fontSize: "xs", color: "text.subtle" })}>
+                  ※ 表示順はランダムです（広告・優先枠ではありません）。
+                </p>
+              )}
+            </section>
+            <section className={section} aria-labelledby="producer-voices">
+              <h2
+                id="producer-voices"
+                className={css({ m: "0", fontSize: "2xl", fontWeight: "700" })}
+              >
+                生産者の声
+              </h2>
+              <section className={section} aria-labelledby="home-reports">
+                <h3 id="home-reports" className={feedTitle}>
+                  使用レポート
+                </h3>
+                <HomeFeedOrder target="reports" reportSort={reportSort} reviewSort={reviewSort} />
+                {reportsResult.data.length > 0 ? (
+                  <div
+                    className={css({
+                      display: "grid",
+                      gap: "3",
+                      md: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+                    })}
+                  >
+                    {reportsResult.data.map((report) => (
+                      <ReportCard
+                        key={report.id}
+                        layout="list"
+                        title={report.title}
+                        summary={report.summary}
+                        reportId={session?.userId === report.authorUserId ? undefined : report.id}
+                        helpfulVoted={reportVotes.data.has(report.id)}
+                        currentPath={`/?reports=${reportSort}&reviews=${reviewSort}`}
+                        materialName={report.materialName}
+                        materialHref={`/materials/${report.materialId}`}
+                        author={report.authorHandle}
+                        crop={report.cropName}
+                        helpfulCount={report.helpfulCount}
+                        coverSrc={report.coverUrl ?? undefined}
+                        href={`/reports/${report.id}`}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className={empty}>
+                    まだ公開中の使用レポートはありません。投稿は運営の確認後に公開されます。
+                  </p>
+                )}
+              </section>
+              <section className={section} aria-labelledby="home-reviews">
+                <h3 id="home-reviews" className={feedTitle}>
+                  レビュー
+                </h3>
+                <HomeFeedOrder target="reviews" reportSort={reportSort} reviewSort={reviewSort} />
+                {reviewsResult.data.length > 0 ? (
+                  <div
+                    className={css({
+                      display: "grid",
+                      gap: "3",
+                      md: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
+                      lg: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))" },
+                    })}
+                  >
+                    {reviewsResult.data.map((review) => (
+                      <div
+                        key={review.id}
+                        className={css({
+                          bg: "surface.card",
+                          borderWidth: "1px",
+                          borderColor: "border.default",
+                          borderRadius: "card",
+                          boxShadow: "shadow",
+                          display: "flex",
+                          flexDirection: "column",
+                          overflow: "hidden",
+                        })}
+                      >
+                        <ReviewCard
+                          className={css({ borderWidth: "0", boxShadow: "none", flex: "1" })}
+                          handle={review.author?.handle ?? "匿名"}
+                          crop={review.crops.map((crop) => crop.name).join("・")}
+                          rating={review.rating}
+                          helpfulCount={review.helpfulCount}
+                          reviewId={
+                            session?.userId === review.author_user_id ? undefined : review.id
+                          }
+                          materialId={review.material_id}
+                          helpfulVoted={review.helpfulVotedByViewer}
+                          currentPath={`/?reports=${reportSort}&reviews=${reviewSort}`}
+                          body={review.body}
+                        />
+                        <Link
+                          href={`/materials/${review.material_id}/reviews`}
+                          className={css({
+                            display: "block",
+                            p: "3",
+                            fontSize: "sm",
+                            color: "brand.primaryDeep",
+                            textDecoration: "none",
+                          })}
+                        >
+                          {review.materialName} →
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={empty}>
+                    まだ公開中のレビューはありません。資材を使った感想を共有してください。
+                  </p>
+                )}
+              </section>
+            </section>
+            <HomeInvitations showSignup={session === null} />
           </div>
+          <HomeFooter />
         </div>
       </main>
       <BottomNav active="home" />

@@ -73,6 +73,8 @@ export type MaterialCardProps = {
   rating: number;
   reviewCount: number;
   articleCount?: number;
+  savedCount?: number;
+  categories?: string[];
   description?: string;
   official?: boolean;
   href?: string;
@@ -128,6 +130,8 @@ export function MaterialCard({
   rating,
   reviewCount,
   articleCount,
+  savedCount,
+  categories,
   description,
   official = false,
   href = "#",
@@ -181,6 +185,31 @@ export function MaterialCard({
               {reviewCount}件
             </span>
           </div>
+          {articleCount !== undefined ? (
+            <p className={css({ fontSize: "xs", color: "text.subtle", mt: "2" })}>
+              使用レポート {articleCount}件
+              {savedCount !== undefined ? ` ・ 検討リスト ${savedCount}件` : ""}
+            </p>
+          ) : null}
+          {categories ? (
+            <div className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}>
+              {categories.map((name) => (
+                <span
+                  key={name}
+                  className={css({
+                    fontSize: "2xs",
+                    px: "2",
+                    py: "1",
+                    bg: "brand.soft",
+                    color: "brand.primaryDeep",
+                    borderRadius: "pill",
+                  })}
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
       </Link>
     );
