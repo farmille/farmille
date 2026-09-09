@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { SellerLoginForm } from "@/app/sellers/login/SellerLoginForm";
+import { PasskeyLogin } from "@/components/auth/PasskeyLogin";
 import { AuthScreen } from "@/components/auth/AuthScreen";
 import { FormMessage } from "@/components/auth/Fields";
 import { safeNextPath } from "@/lib/auth/safe-next";
@@ -29,6 +30,7 @@ export default async function SellerLoginPage({
         </FormMessage>
       ) : null}
       <SellerLoginForm next={safeNextPath(next)} />
+      <PasskeyLogin next={safeNextPath(next) ?? "/dashboard"} />
     </AuthScreen>
   );
 }

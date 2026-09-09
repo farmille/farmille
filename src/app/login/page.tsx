@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { LoginForm } from "@/app/login/LoginForm";
+import { PasskeyLogin } from "@/components/auth/PasskeyLogin";
 import { AuthScreen } from "@/components/auth/AuthScreen";
 import { FormMessage } from "@/components/auth/Fields";
 import { safeNextPath } from "@/lib/auth/safe-next";
@@ -35,6 +36,7 @@ export default async function LoginPage({
         </FormMessage>
       ) : null}
       <LoginForm next={safeNextPath(next)} />
+      <PasskeyLogin next={safeNextPath(next)} />
     </AuthScreen>
   );
 }

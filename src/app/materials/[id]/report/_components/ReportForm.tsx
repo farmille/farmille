@@ -1,6 +1,6 @@
 "use client";
 
-import { createBrowserClient } from "@supabase/ssr";
+import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { useMemo, useState, useTransition } from "react";
 
@@ -24,7 +24,6 @@ import {
   type UsageReportFieldErrors,
   type UsageReportFormPayload,
 } from "@/server/usage-reports/model";
-import type { Database } from "@/types/database.types";
 
 import { CropPicker } from "./CropPicker";
 import { CropReportFields } from "./CropReportFields";
@@ -125,23 +124,6 @@ const globalError = css({
   lineHeight: "1.55",
 });
 
-function requirePublicEnv(name: string, value: string | undefined): string {
-  if (value === undefined || value.length === 0) {
-    throw new Error(`必須の環境変数 ${name} が設定されていません。`);
-  }
-  return value;
-}
-
-function reportStorageClient() {
-  return createBrowserClient<Database>(
-    requirePublicEnv("NEXT_PUBLIC_SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL),
-    requirePublicEnv(
-      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    ),
-  );
-}
-
 function extensionFor(file: File): string {
   switch (file.type) {
     case "image/jpeg":
@@ -227,7 +209,7 @@ export function ReportForm({
 
   async function uploadMedia(items: ReportMediaDraft[]): Promise<ReportMediaDraft[]> {
     if (items.every(({ file }) => file === null)) return items;
-    const supabase = reportStorageClient();
+    const supabase = createAuthBrowserClient();
     const uploaded = [...items];
 
     for (const [index, item] of items.entries()) {

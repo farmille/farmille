@@ -16,6 +16,8 @@ export const ERROR_CODES = [
   "weak_password",
   "rate_limited",
   "expired_link",
+  "passkey_failed",
+  "passkey_unavailable",
   // 通報（T-34）
   "already_reported",
   // メーカー申請（T-41）
@@ -28,6 +30,10 @@ export type ErrorCode = v.InferOutput<typeof ErrorCodeSchema>;
 
 // 機能固有のエラーコードは、利用箇所と表示文言を同時に追加する。
 export const errorMessageJa = {
+  passkey_failed:
+    "パスキーの操作を完了できませんでした。登録済みのパスキーを選んで再度お試しください。認証の有効期限が切れた場合は再ログインしてください。",
+  passkey_unavailable:
+    "パスキー認証を利用できません。対応ブラウザで再度お試しいただくか、パスワード・認証アプリを利用してください。",
   unauthorized: "ログインが必要です。",
   forbidden: "この操作を行う権限がありません。",
   not_found: "対象のデータが見つかりません。",

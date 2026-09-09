@@ -51,6 +51,11 @@ const statLinkStyle = css({
 
 const MENU_ITEMS = [
   {
+    href: "/account/passkeys",
+    label: "パスキーを管理",
+    description: "ログインに使うパスキーの登録・削除。",
+  },
+  {
     href: "/account/password",
     label: "パスワードを変更",
     description: "現在のパスワードを確認し、新しいパスワードに変更する。",

@@ -9,6 +9,7 @@ export async function createServerSupabase(): Promise<SupabaseClient<Database>> 
   const cookieStore = await cookies();
 
   return createServerClient<Database>(clientEnv.supabaseUrl, clientEnv.supabasePublishableKey, {
+    auth: { experimental: { passkey: true } },
     cookies: {
       getAll() {
         return cookieStore.getAll();

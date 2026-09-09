@@ -180,7 +180,8 @@ erDiagram
 
 - **一般ユーザー**：Supabase Auth のメール＋パスワード。`app_metadata.account_type = 'general'`
 - **メーカー**：ログイン ID＋パスワード（メールと分離・MVP は会社共有）。実装は**合成メール方式**：`{login_id}@sellers.farmille.internal` を auth.users の email にして通常のパスワード認証を使う。ログイン画面は ID 入力を受け、Next.js のサーバー側（`src/server/`）で合成メールに変換する（クライアントに合成メールを露出しない）。内部識別子として `app_metadata.account_type = 'seller'`、`app_metadata.seller_id = <seller_accounts.id>` を維持する。承認処理（admin）がこの auth ユーザーを Admin API で作成する
-- **admin**：`app_metadata.account_type = 'admin'`。**AAL2（MFA/TOTP）必須**を旧設計から踏襲。admin 系画面・API は role と AAL の両方を検証する
+- **admin**：`app_metadata.account_type = 'admin'`。**AAL2（認証アプリによるTOTP）必須**。admin系画面・APIはroleとAALの両方を検証する。パスキーによるログイン後も認証アプリでの追加認証を要求する
+- **パスキー**：一般・メーカー・運営が任意で登録してログインに使える。登録・削除はログイン済みのアカウント設定で行い、運営はAAL2を要求する。秘密鍵は端末が管理し、公開鍵はSupabase Authが管理する。パスワードによるログインも維持する
 - Phase 2 のメンバー個別ログインに備え、権限判定はすべて `seller_id` 経由で行う（auth_user_id 直接参照を業務テーブルに持ち込まない）
 
 ## 5. RLS 設計（第二防御）

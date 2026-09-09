@@ -1,6 +1,6 @@
 "use client";
 
-import { createBrowserClient } from "@supabase/ssr";
+import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { startTransition, useActionState, useEffect, useMemo, useState } from "react";
@@ -18,10 +18,8 @@ import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 import { StarRating } from "@/components/StarRating";
 import { Textarea } from "@/components/Textarea";
-import { clientEnv } from "@/env";
 import type { PurchaseChannel } from "@/server/mutations/reviews";
 import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
-import type { Database } from "@/types/database.types";
 import { css } from "../../../../../../styled-system/css";
 
 import { ReviewCropPicker } from "./ReviewCropPicker";
@@ -127,10 +125,7 @@ export function ReviewForm({
   reviewId,
   existingReviewNotice = false,
 }: ReviewFormProps) {
-  const supabase = useMemo(
-    () => createBrowserClient<Database>(clientEnv.supabaseUrl, clientEnv.supabasePublishableKey),
-    [],
-  );
+  const supabase = useMemo(() => createAuthBrowserClient(), []);
   const action =
     mode === "create"
       ? createReviewAction.bind(null, material.id)

@@ -155,6 +155,9 @@ export default async function DashboardPage() {
         </SurfaceCard>
 
         <SurfaceCard title="アカウント">
+          <Link className={buttonRecipe({ variant: "ghost" })} href="/account/passkeys">
+            パスキーを管理
+          </Link>
           <Link className={buttonRecipe({ variant: "ghost" })} href="/account/password">
             パスワードを変更
           </Link>
