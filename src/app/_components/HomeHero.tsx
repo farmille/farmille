@@ -14,13 +14,9 @@ const hero = css({
   borderBottomColor: "border.default",
   fontFamily: "gothicMb101",
   fontWeight: "light",
-  pt: "12",
+  pt: "0",
   pb: "12",
   tab: {
-    pt: "16",
-    pb: "16",
-  },
-  pc: {
     display: "flex",
     alignItems: "center",
     minH: "700px",
@@ -29,14 +25,17 @@ const hero = css({
   },
 });
 
+/** SP は見出しと写真を同じセルに重ねる。PC は通常のブロック配置で、写真は section 基準の全幅。 */
 const inner = css({
   position: "relative",
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr)",
   w: "100%",
   maxW: "content.wide",
   mx: "auto",
   px: "5",
-  pc: {
-    // 写真の基準を section にしてビューポート右端まで伸ばす
+  tab: {
+    display: "block",
     position: "static",
     px: "8",
     py: "24",
@@ -46,8 +45,10 @@ const inner = css({
 const intro = css({
   position: "relative",
   zIndex: "1",
-  mb: "-12",
-  pc: { mb: "0" },
+  gridArea: "1 / 1",
+  alignSelf: "start",
+  pt: "8",
+  tab: { pt: "0" },
 });
 
 const label = css({
@@ -55,10 +56,10 @@ const label = css({
   alignItems: "center",
   gap: "3",
   m: "0",
-  color: "text.subtle",
+  color: "surface.card/90",
   fontSize: "2xs",
   letterSpacing: "0.24em",
-  tab: { fontSize: "xs" },
+  tab: { fontSize: "xs", color: "surface.card" },
   _before: {
     content: '""',
     display: "block",
@@ -72,34 +73,46 @@ const label = css({
 const title = css({
   m: "0",
   mt: "6",
+  color: "surface.card",
   fontSize: "hero",
   fontWeight: "light",
   lineHeight: "relaxed",
   letterSpacing: "0.08em",
-  pc: {
+  tab: {
     mt: "8",
+    fontSize: "hero.md",
+  },
+  pc: {
     fontSize: "hero.lg",
   },
 });
 
-/** SP は全幅で下に敷き、PC は右側に大きく置く。角丸は付けず、文字と重なる側を背景色へ溶かす。 */
+/** SP は左右いっぱいの正方形で見出しの下地になり、PC は全幅に敷く。角丸は付けない。 */
 const figure = css({
   position: "relative",
+  gridArea: "1 / 1",
+  overflow: "hidden",
   mx: "-5",
   aspectRatio: "image.square",
   bg: "surface.panel",
-  tab: { aspectRatio: "image.landscape" },
-  pc: {
+  tab: {
     position: "absolute",
-    top: "0",
-    right: "0",
-    bottom: "0",
-    left: "auto",
-    w: "64%",
+    inset: "0",
+    w: "auto",
     h: "auto",
     m: "0",
     aspectRatio: "auto",
   },
+});
+
+/** SP は枠より背を高くして下端に揃え、上端の空（白く飛ぶ部分）を枠外へ出す。PC は枠いっぱい。 */
+const photoFrame = css({
+  position: "absolute",
+  left: "0",
+  right: "0",
+  bottom: "0",
+  h: "140%",
+  tab: { top: "0", h: "auto" },
 });
 
 const photo = css({
@@ -107,36 +120,34 @@ const photo = css({
   objectPosition: "center 58%",
 });
 
-const fade = css({
+/**
+ * 白文字の下地。SP は上端から、PC は左端から見出しの範囲までを一定に暗くし、
+ * そこから smoothstep（両端の傾きが 0 の S 字）で抜く。境目が線として見えないよう
+ * 直線ではなく 9 段のストップで曲線に近づける。
+ */
+const scrim = css({
   position: "absolute",
-  top: "0",
-  left: "0",
-  right: "0",
-  h: "24%",
+  inset: "0",
   pointerEvents: "none",
-  bgGradient: "to-b",
-  gradientFrom: "surface.page",
-  gradientTo: "surface.page/0",
-  pc: {
-    bottom: "0",
-    right: "auto",
-    w: "32%",
-    h: "auto",
-    bgGradient: "to-r",
+  bgImage:
+    "linear-gradient(to bottom, color-mix(in srgb, {colors.ink} 50%, transparent) 0%, color-mix(in srgb, {colors.ink} 50%, transparent) 26%, color-mix(in srgb, {colors.ink} 48.3%, transparent) 34%, color-mix(in srgb, {colors.ink} 43.7%, transparent) 41%, color-mix(in srgb, {colors.ink} 37.0%, transparent) 49%, color-mix(in srgb, {colors.ink} 29.1%, transparent) 56%, color-mix(in srgb, {colors.ink} 20.9%, transparent) 64%, color-mix(in srgb, {colors.ink} 13.0%, transparent) 71%, color-mix(in srgb, {colors.ink} 6.3%, transparent) 79%, color-mix(in srgb, {colors.ink} 1.7%, transparent) 86%, color-mix(in srgb, {colors.ink} 0.0%, transparent) 94%)",
+  tab: {
+    bgImage:
+      "linear-gradient(to right, color-mix(in srgb, {colors.ink} 46%, transparent) 0%, color-mix(in srgb, {colors.ink} 46%, transparent) 30%, color-mix(in srgb, {colors.ink} 44.4%, transparent) 36%, color-mix(in srgb, {colors.ink} 40.2%, transparent) 43%, color-mix(in srgb, {colors.ink} 34.1%, transparent) 49%, color-mix(in srgb, {colors.ink} 26.8%, transparent) 56%, color-mix(in srgb, {colors.ink} 19.2%, transparent) 62%, color-mix(in srgb, {colors.ink} 11.9%, transparent) 69%, color-mix(in srgb, {colors.ink} 5.8%, transparent) 75%, color-mix(in srgb, {colors.ink} 1.6%, transparent) 82%, color-mix(in srgb, {colors.ink} 0.0%, transparent) 88%)",
   },
 });
 
 const lead = css({
   position: "relative",
   zIndex: "1",
+  gridArea: "2 / 1",
   mt: "8",
   mb: "0",
   color: "text.muted",
   fontSize: "sm",
   lineHeight: "loose",
   letterSpacing: "0.06em",
-  tab: { fontSize: "md" },
-  pc: { maxW: "480px" },
+  tab: { fontSize: "md", maxW: "480px", color: "surface.card/90" },
 });
 
 /** 日本語が語中で折り返さないよう、文節ごとに inline-block で区切る。 */
@@ -144,13 +155,23 @@ const phrase = css({
   display: "inline-block",
 });
 
+/** 写真の内側に置く。SP は下辺に寄せて全幅、PC は写真の右下に浮かせる。 */
 const search = css({
-  position: "relative",
-  zIndex: "1",
-  mt: "8",
+  position: "absolute",
+  left: "5",
+  right: "5",
+  bottom: "5",
+  tab: {
+    left: "8",
+    right: "8",
+    bottom: "8%",
+    w: "auto",
+  },
   pc: {
-    mt: "12",
-    maxW: "content.form",
+    left: "auto",
+    right: "8%",
+    bottom: "12%",
+    w: "min(540px, 58%)",
   },
 });
 
@@ -170,16 +191,21 @@ export function HomeHero() {
         </div>
 
         <div className={figure}>
-          <Image
-            alt=""
-            className={photo}
-            fill
-            placeholder="blur"
-            priority
-            sizes="(min-width: 1024px) 64vw, 100vw"
-            src={heroPhoto}
-          />
-          <div aria-hidden className={fade} />
+          <div className={photoFrame}>
+            <Image
+              alt=""
+              className={photo}
+              fill
+              placeholder="blur"
+              priority
+              sizes="100vw"
+              src={heroPhoto}
+            />
+          </div>
+          <div aria-hidden className={scrim} />
+          <div className={search}>
+            <HomeSearchEntry />
+          </div>
         </div>
 
         <p className={lead}>
@@ -187,10 +213,6 @@ export function HomeHero() {
           <span className={phrase}>実際に使った人のレビュー・使用レポートを、</span>
           <span className={phrase}>ひとつの場所で比べられます。</span>
         </p>
-
-        <div className={search}>
-          <HomeSearchEntry />
-        </div>
       </div>
     </section>
   );

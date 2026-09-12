@@ -1,3 +1,5 @@
+import * as v from "valibot";
+
 import type { TagCategory } from "@/components/TagChip";
 import {
   isSearchFilterCategory,
@@ -82,6 +84,13 @@ export function parseFiltersQuery(raw: string | undefined): ParsedSearchQuery {
   }
 
   return { filters, makerNames, materialNames };
+}
+
+const queryParamSchema = v.optional(v.pipe(v.string(), v.trim()), "");
+
+/** URL の q を入力欄の初期値にする。未指定は空文字、前後の空白は除く。同名パラメータの重複（配列）は不正として例外にする。 */
+export function parseQueryParam(raw: string | string[] | undefined): string {
+  return v.parse(queryParamSchema, raw);
 }
 
 export function parseSortParam(raw: string | undefined): MaterialSortParam {

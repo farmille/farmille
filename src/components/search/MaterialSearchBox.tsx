@@ -17,6 +17,8 @@ import {
 } from "./search-selection";
 
 type MaterialSearchBoxProps = {
+  /** URL の q。着地直後から候補を出すための入力欄の初期値。 */
+  initialQuery: string;
   selected: SelectedSearchFilter[];
   sort: MaterialSortParam;
   popular: SearchFilterItem[];
@@ -185,6 +187,7 @@ function suggestionKey(suggestion: Suggestion): string {
 }
 
 export function MaterialSearchBox({
+  initialQuery,
   selected,
   sort,
   popular,
@@ -193,7 +196,7 @@ export function MaterialSearchBox({
   placeholder = "作物・悩み・資材名を入力してください",
 }: MaterialSearchBoxProps) {
   const router = useRouter();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [isPending, startTransition] = useTransition();
   const selectedKeys = useMemo(() => new Set(selected.map(selectedFilterKey)), [selected]);
 

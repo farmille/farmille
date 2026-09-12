@@ -7,6 +7,7 @@ import { SearchSortSelect } from "@/components/search/SearchSortSelect";
 import {
   formatLogicHint,
   parseFiltersQuery,
+  parseQueryParam,
   parseSortParam,
   resolveSelectedFilters,
 } from "@/components/search/search-selection";
@@ -113,7 +114,7 @@ function SearchPageHeading() {
 }
 
 type SearchPageProps = {
-  searchParams: Promise<{ filters?: string; sort?: string }>;
+  searchParams: Promise<{ filters?: string; sort?: string; q?: string | string[] }>;
 };
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
@@ -123,18 +124,20 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   let filters = [];
   let makerNames: string[] = [];
   let materialNames: string[] = [];
+  let initialQuery = "";
 
   try {
     ({ filters, makerNames, materialNames } = parseFiltersQuery(params.filters));
+    initialQuery = parseQueryParam(params.q);
   } catch {
     return (
       <div className={shell}>
-        <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" />
+        <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery} />
         <main className={main}>
           <SearchPageHeading />
           <EmptyState
             title="検索条件が正しくありません"
-            description="URL の filters パラメータを確認するか、条件を選び直してください。"
+            description="URL の検索パラメータを確認するか、条件を選び直してください。"
           />
         </main>
         <BottomNav active="search" />
@@ -156,7 +159,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (!filtersResult.ok) {
     return (
       <div className={shell}>
-        <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" />
+        <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery} />
         <main className={main}>
           <SearchPageHeading />
           <EmptyState
@@ -193,10 +196,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <div className={shell}>
       <SearchAnalytics filterCount={selected.length} resultCount={total} sort={sort} />
-      <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" />
+      <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery} />
       <main className={main}>
         <SearchPageHeading />
         <MaterialSearchBox
+          key={initialQuery}
+          initialQuery={initialQuery}
           selected={selected}
           sort={sort}
           popular={popularResult.data}

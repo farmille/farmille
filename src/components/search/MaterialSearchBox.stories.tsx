@@ -76,6 +76,7 @@ const meta = {
   title: "Components/Search/MaterialSearchBox",
   component: MaterialSearchBox,
   args: {
+    initialQuery: "",
     selected: [],
     sort: "reviews",
     popular,
@@ -91,6 +92,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const WithSelected: Story = { args: { selected } };
+
+// URL の q 付きで着地した直後。入力欄に初期値が入り、候補パネルがすでに開いている。
+export const WithInitialQuery: Story = { args: { initialQuery: "トマト" } };
 
 export const Suggesting: Story = {
   play: async ({ canvasElement }) => {

@@ -49,6 +49,10 @@ export const tokens = {
         value: "0 1px 2px rgba(30,35,31,.05), 0 4px 14px rgba(30,35,31,.06)",
       },
       lift: { value: "0 8px 30px rgba(30,35,31,.16)" },
+      // 写真の上に置く半透明の面。上辺の内側ハイライトでガラスの厚みを出す
+      glass: {
+        value: "inset 0 1px 0 rgba(255,255,255,.65), 0 10px 32px rgba(30,35,31,.18)",
+      },
     },
   },
   radii: {
@@ -80,6 +84,7 @@ export const tokens = {
     // ホームのヒーロー見出し専用（ゴシックMB101 L）。通常UIの8段とは別枠で持つ
     hero: {
       DEFAULT: { value: "28px" },
+      md: { value: "44px" },
       lg: { value: "64px" },
     },
   },

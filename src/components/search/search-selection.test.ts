@@ -4,6 +4,7 @@ import {
   encodeFiltersQuery,
   formatLogicHint,
   parseFiltersQuery,
+  parseQueryParam,
   parseSortParam,
   type SelectedSearchFilter,
 } from "./search-selection";
@@ -38,6 +39,15 @@ describe("search-selection", () => {
     expect(() => parseFiltersQuery("11111111-1111-1111-1111-111111111111")).toThrow(
       "不正な filters クエリ",
     );
+  });
+
+  it("q は未指定なら空文字、前後の空白は落とす", () => {
+    expect(parseQueryParam(undefined)).toBe("");
+    expect(parseQueryParam("  トマト ")).toBe("トマト");
+  });
+
+  it("配列の q は受け付けない", () => {
+    expect(() => parseQueryParam(["a", "b"])).toThrow();
   });
 
   it("未指定の sort は reviews にする", () => {

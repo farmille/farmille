@@ -1,3 +1,4 @@
+import Form from "next/form";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { Icon } from "@/components/Icon";
@@ -126,29 +127,37 @@ const desktopSearch = css({
   alignItems: "center",
   gap: "2",
   px: "3",
+  m: "0",
   bg: "surface.card",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.strong",
   borderRadius: "button",
   color: "text.subtle",
-  textDecoration: "none",
   _hover: { borderColor: "brand.primary" },
-  _focusVisible: {
+  // 送信ボタンのフォーカスでは枠を出さず、入力欄のときだけ検索画面と同じ焦点表現にする
+  "&:has(input:focus-visible)": {
+    borderColor: "brand.primary",
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
-    outlineOffset: "2px",
+    outlineColor: "brand.soft",
   },
 });
 
-const desktopSearchLabel = css({
+const desktopSearchInput = css({
   flex: "1",
   minW: "0",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  fontSize: "sm",
+  bg: "transparent",
+  borderWidth: "0",
+  outline: "none",
+  p: "0",
+  fontFamily: "sans",
+  fontSize: "md",
+  color: "text.default",
+  appearance: "none",
+  _placeholder: { color: "text.subtle" },
+  "&::-webkit-search-cancel-button": { display: "none" },
+  "&::-webkit-search-decoration": { display: "none" },
 });
 
 const desktopSearchAction = css({
@@ -156,6 +165,17 @@ const desktopSearchAction = css({
   fontSize: "xs",
   fontWeight: "700",
   whiteSpace: "nowrap",
+  bg: "transparent",
+  borderWidth: "0",
+  p: "0",
+  cursor: "pointer",
+  fontFamily: "sans",
+  _focusVisible: {
+    outlineWidth: "2px",
+    outlineStyle: "solid",
+    outlineColor: "brand.primary",
+    outlineOffset: "2px",
+  },
 });
 
 const desktopNavLink = cva({
@@ -275,6 +295,8 @@ export type AppBarActive = "home" | "search" | "post" | "articles" | "me";
 type AppBarBaseProps = {
   chrome: AppChrome;
   active?: AppBarActive;
+  /** PC ヘッダーの検索入力欄の初期値。`/search` が現在の q を渡す。未指定なら空。 */
+  searchQuery?: string;
 };
 
 type AppBarHomeProps = AppBarBaseProps & {
@@ -326,7 +348,13 @@ function MobileAppBar(props: AppBarProps) {
   );
 }
 
-function DesktopSiteHeader({ active }: { active?: AppBarActive }) {
+function DesktopSiteHeader({
+  active,
+  searchQuery,
+}: {
+  active?: AppBarActive;
+  searchQuery?: string;
+}) {
   return (
     <header className={desktopHeader} data-ui="desktop-site-header">
       <div className={desktopHeaderInner}>
@@ -341,15 +369,24 @@ function DesktopSiteHeader({ active }: { active?: AppBarActive }) {
         >
           使用レポート一覧
         </Link>
-        <Link
-          href="/search"
-          className={desktopSearch}
-          aria-current={active === "search" ? "page" : undefined}
-        >
+        <Form action="/search" aria-label="ヘッダー検索" className={desktopSearch} role="search">
           <Icon name="search" size="sm" />
-          <span className={desktopSearchLabel}>資材を検索（作物・悩み・資材名から）</span>
-          <span className={desktopSearchAction}>検索へ →</span>
-        </Link>
+          <input
+            // q が変わったとき（同じ画面での再送信や履歴の前後移動）に入力欄を作り直して反映する
+            key={searchQuery}
+            aria-label="資材を検索"
+            autoComplete="off"
+            className={desktopSearchInput}
+            defaultValue={searchQuery}
+            enterKeyHint="search"
+            name="q"
+            placeholder="作物・悩み・資材名から資材を検索"
+            type="search"
+          />
+          <button className={desktopSearchAction} type="submit">
+            検索
+          </button>
+        </Form>
         <nav className={desktopPublicActions} aria-label="PCメインナビ">
           <Link
             href="/post"
@@ -427,7 +464,7 @@ export function AppBar(props: AppBarProps) {
       <MobileAppBar {...props} />
       {props.chrome === "public" ? (
         <>
-          <DesktopSiteHeader active={props.active} />
+          <DesktopSiteHeader active={props.active} searchQuery={props.searchQuery} />
           {props.variant === "home" ? null : <DesktopContextBar {...props} />}
         </>
       ) : (
