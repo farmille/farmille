@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { SkeletonList } from "@/components/SkeletonList";
 import type { Metadata } from "next";
 
 import {
@@ -108,6 +110,35 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
   const q = params.q ?? "";
   const page = parsePage(params.page);
 
+  return (
+    <div className={shell}>
+      <AppBar chrome="public" active="articles" title="記事を読む" backHref="/" />
+      <main className={main}>
+        <h1 className={pageTitle}>記事を読む</h1>
+        <ArticlesToolbar filter={filter} q={q} />
+
+        <Suspense
+          key={`${filter}:${q}:${page}`}
+          fallback={<SkeletonList variant="articles" label="記事を読み込んでいます" />}
+        >
+          <ArticleResults filter={filter} q={q} page={page} />
+        </Suspense>
+      </main>
+      <BottomNav active="articles" />
+    </div>
+  );
+}
+
+// 検索操作を残したまま、記事の取得が終わり次第結果だけを表示する。
+async function ArticleResults({
+  filter,
+  q,
+  page,
+}: {
+  filter: ContentFeedFilter;
+  q: string;
+  page: number;
+}) {
   const result = await listContentFeed({ filter, q, page });
 
   if (!result.ok) {
@@ -117,56 +148,49 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
   const feed = result.data;
 
   return (
-    <div className={shell}>
-      <AppBar chrome="public" active="articles" title="記事を読む" backHref="/" />
-      <main className={main}>
-        <h1 className={pageTitle}>記事を読む</h1>
-        <ArticlesToolbar filter={filter} q={q} />
-
-        {feed.items.length === 0 ? (
-          <EmptyState
-            title="該当する記事・使用レポートがありません"
-            description="検索条件やフィルタを変えて、もう一度探してみてください。"
+    <>
+      {feed.items.length === 0 ? (
+        <EmptyState
+          title="該当する記事・使用レポートがありません"
+          description="検索条件やフィルタを変えて、もう一度探してみてください。"
+        />
+      ) : (
+        <>
+          <div className={cardGrid}>
+            {feed.items.map((item) =>
+              item.kind === "report" ? (
+                <ReportCard
+                  key={`report-${item.id}`}
+                  title={item.title}
+                  author={item.authorHandle}
+                  crop={item.cropName}
+                  helpfulCount={item.helpfulCount}
+                  viewCount={item.viewCount}
+                  href={`/reports/${item.id}`}
+                  coverSrc={item.coverUrl ?? undefined}
+                  layout="grid"
+                />
+              ) : (
+                <ArticleCard
+                  key={`article-${item.id}`}
+                  title={item.title}
+                  organization={item.organization}
+                  typeLabel="メーカー"
+                  helpfulCount={item.helpfulCount}
+                  viewCount={item.viewCount}
+                  href={`/articles/${item.id}`}
+                  coverSrc={item.coverUrl ?? undefined}
+                />
+              ),
+            )}
+          </div>
+          <Pagination
+            page={feed.page}
+            totalPages={feed.totalPages}
+            hrefForPage={(nextPage) => hrefForPage(nextPage, filter, q)}
           />
-        ) : (
-          <>
-            <div className={cardGrid}>
-              {feed.items.map((item) =>
-                item.kind === "report" ? (
-                  <ReportCard
-                    key={`report-${item.id}`}
-                    title={item.title}
-                    author={item.authorHandle}
-                    crop={item.cropName}
-                    helpfulCount={item.helpfulCount}
-                    viewCount={item.viewCount}
-                    href={`/reports/${item.id}`}
-                    coverSrc={item.coverUrl ?? undefined}
-                    layout="grid"
-                  />
-                ) : (
-                  <ArticleCard
-                    key={`article-${item.id}`}
-                    title={item.title}
-                    organization={item.organization}
-                    typeLabel="メーカー"
-                    helpfulCount={item.helpfulCount}
-                    viewCount={item.viewCount}
-                    href={`/articles/${item.id}`}
-                    coverSrc={item.coverUrl ?? undefined}
-                  />
-                ),
-              )}
-            </div>
-            <Pagination
-              page={feed.page}
-              totalPages={feed.totalPages}
-              hrefForPage={(nextPage) => hrefForPage(nextPage, filter, q)}
-            />
-          </>
-        )}
-      </main>
-      <BottomNav active="articles" />
-    </div>
+        </>
+      )}
+    </>
   );
 }

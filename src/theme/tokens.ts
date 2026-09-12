@@ -149,6 +149,16 @@ export const tokens = {
       sm: { value: "96px" },
       md: { value: "120px" },
     },
+    skeleton: {
+      materialHero: { value: "118px" },
+      text: { value: "16px" },
+      short: { value: "12px" },
+      title: { value: "24px" },
+      avatar: { value: "32px" },
+      thumbnail: { value: "62px" },
+      control: { value: "44px" },
+      count: { value: "96px" },
+    },
     // 共通 Icon の寸法。画面では size variant から指定する。
     icon: {
       "2xs": { value: "12px" },
@@ -190,6 +200,7 @@ export const tokens = {
     // トーストだけUI標準より柔らかいカーブにする
     soft: { value: "ease" },
   },
+  animations: { skeletonPulse: { value: "skeleton-pulse 1.6s ease-in-out infinite" } },
   durations: {
     fast: { value: "160ms" },
     dialog: { value: "250ms" },

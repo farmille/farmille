@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { SearchResultsSkeleton } from "@/components/SkeletonList";
 import type { Metadata } from "next";
 
 import { AppBar, EmptyState, MaterialCard } from "@/components";
@@ -132,7 +134,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   } catch {
     return (
       <div className={shell}>
-        <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery} />
+        <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" />
         <main className={main}>
           <SearchPageHeading />
           <EmptyState
@@ -159,7 +161,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (!filtersResult.ok) {
     return (
       <div className={shell}>
-        <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery} />
+        <AppBar
+          chrome="public"
+          active="search"
+          title="BS資材を探す"
+          backHref="/"
+          searchQuery={initialQuery}
+        />
         <main className={main}>
           <SearchPageHeading />
           <EmptyState
@@ -178,28 +186,21 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     materialNames,
   });
 
-  const materialsResult = await listMaterials({
-    filters: filters.length > 0 ? filters : undefined,
-    makerNames: makerNames.length > 0 ? makerNames : undefined,
-    materialNames: materialNames.length > 0 ? materialNames : undefined,
-    sort,
-    page: 1,
-  });
-
-  if (!materialsResult.ok) {
-    throw new Error(`資材検索に失敗しました: ${materialsResult.error}`);
-  }
-
-  const { items, total } = materialsResult.data;
   const logic = formatLogicHint(selected);
 
   return (
     <div className={shell}>
-      <SearchAnalytics filterCount={selected.length} resultCount={total} sort={sort} />
-      <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery} />
+      <AppBar
+        chrome="public"
+        active="search"
+        title="BS資材を探す"
+        backHref="/"
+        searchQuery={initialQuery}
+      />
       <main className={main}>
         <SearchPageHeading />
         <MaterialSearchBox
+          // q が変わるたびに入力欄を作り直す（同じ画面のヘッダーから再送信したときに初期値を反映するため）
           key={initialQuery}
           initialQuery={initialQuery}
           selected={selected}
@@ -216,49 +217,100 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </p>
         ) : null}
 
-        <div className={resultHeader}>
-          <span className={css({ fontSize: "sm", color: "text.muted" })}>
-            該当{" "}
-            <b
-              className={css({
-                color: "text.default",
-                fontVariantNumeric: "tabular-nums",
-                fontWeight: "700",
-              })}
-            >
-              {total}
-            </b>{" "}
-            件
-          </span>
-          <SearchSortSelect selected={selected} sort={sort} />
-        </div>
-
-        {items.length > 0 ? (
-          <div className={stack}>
-            {items.map((material, index) => (
-              <MaterialCard
-                key={material.id}
-                variant="list"
-                name={material.name}
-                maker={material.manufacturer_name}
-                rating={material.avg_rating ?? 0}
-                reviewCount={material.review_count}
-                official={material.manufacturer_verified_at !== null}
-                imageSrc={material.primaryImage?.url}
-                description={material.description ?? undefined}
-                href={`/materials/${material.id}`}
-                preload={index === 0}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="条件に合う資材が見つかりませんでした"
-            description="分類の組み合わせを変えるか、条件を減らして再度お試しください。"
+        <Suspense
+          key={JSON.stringify([filters, makerNames, materialNames, sort])}
+          fallback={
+            <SearchResultsSkeleton
+              controls={<SearchSortSelect selected={selected} sort={sort} />}
+            />
+          }
+        >
+          <SearchResults
+            filters={filters}
+            makerNames={makerNames}
+            materialNames={materialNames}
+            sort={sort}
+            selected={selected}
           />
-        )}
+        </Suspense>
       </main>
       <BottomNav active="search" />
     </div>
+  );
+}
+
+// 検索候補は操作可能なまま、検索件数とカードをまとめて更新する。
+async function SearchResults({
+  filters,
+  makerNames,
+  materialNames,
+  sort,
+  selected,
+}: {
+  filters: NonNullable<Parameters<typeof listMaterials>[0]["filters"]>;
+  makerNames: string[];
+  materialNames: string[];
+  sort: ReturnType<typeof parseSortParam>;
+  selected: ReturnType<typeof resolveSelectedFilters>;
+}) {
+  const materialsResult = await listMaterials({
+    filters: filters.length > 0 ? filters : undefined,
+    makerNames: makerNames.length > 0 ? makerNames : undefined,
+    materialNames: materialNames.length > 0 ? materialNames : undefined,
+    sort,
+    page: 1,
+  });
+
+  if (!materialsResult.ok) {
+    throw new Error(`資材検索に失敗しました: ${materialsResult.error}`);
+  }
+
+  const { items, total } = materialsResult.data;
+
+  return (
+    <>
+      <SearchAnalytics filterCount={selected.length} resultCount={total} sort={sort} />
+      <div className={resultHeader}>
+        <span className={css({ fontSize: "sm", color: "text.muted" })}>
+          該当{" "}
+          <b
+            className={css({
+              color: "text.default",
+              fontVariantNumeric: "tabular-nums",
+              fontWeight: "700",
+            })}
+          >
+            {total}
+          </b>{" "}
+          件
+        </span>
+        <SearchSortSelect selected={selected} sort={sort} />
+      </div>
+
+      {items.length > 0 ? (
+        <div className={stack}>
+          {items.map((material, index) => (
+            <MaterialCard
+              key={material.id}
+              variant="list"
+              name={material.name}
+              maker={material.manufacturer_name}
+              rating={material.avg_rating ?? 0}
+              reviewCount={material.review_count}
+              official={material.manufacturer_verified_at !== null}
+              imageSrc={material.primaryImage?.url}
+              description={material.description ?? undefined}
+              href={`/materials/${material.id}`}
+              preload={index === 0}
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="条件に合う資材が見つかりませんでした"
+          description="分類の組み合わせを変えるか、条件を減らして再度お試しください。"
+        />
+      )}
+    </>
   );
 }

@@ -12,6 +12,9 @@ export default defineConfig({
     breakpoints: { tab: "768px", pc: "1024px" },
     tokens,
     semanticTokens,
+    extend: {
+      keyframes: { "skeleton-pulse": { "0%, 100%": { opacity: "1" }, "50%": { opacity: "0.5" } } },
+    },
   },
   outdir: "styled-system",
 });

@@ -1,5 +1,5 @@
-import { LoadingPage } from "@/app/_components/LoadingPage";
+import { ReadingPageSkeleton } from "@/app/_components/ReadingPageSkeleton";
 
 export default function ReportLoading() {
-  return <LoadingPage backHref="/articles" title="使用レポート" />;
+  return <ReadingPageSkeleton title="使用レポート" variant="report" />;
 }
