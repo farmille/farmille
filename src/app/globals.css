@@ -16,6 +16,22 @@ h2 {
 }
 
 @layer base {
+  :root {
+    --corner-superellipse: 1.4;
+  }
+
+  /* 角丸を持つ要素と疑似要素の角を滑らかにつなぐ。 */
+  :where(*),
+  :where(*)::before,
+  :where(*)::after {
+    corner-shape: superellipse(var(--corner-superellipse));
+  }
+
+  /* 円・ピル形は通常の円弧を保つ。 */
+  .bdr_pill {
+    corner-shape: round;
+  }
+
   /*
    * 押下フィードバック。押せる要素すべてに同じ手応えを返す。
    * 1日に何度も触る要素なので、知覚遅延を作らない範囲（0.98・160ms）に留める。
