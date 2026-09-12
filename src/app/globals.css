@@ -8,6 +8,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ヒーロー以外のh1・h2はDNP秀英角ゴシック金 Std Bで統一する。 */
+h1,
+h2 {
+  font-family: var(--fonts-shuei-gothic-kin);
+  font-weight: var(--font-weights-semibold);
+}
+
 @layer base {
   /*
    * 押下フィードバック。押せる要素すべてに同じ手応えを返す。

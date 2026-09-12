@@ -65,7 +65,7 @@ export function HomeFooter() {
         </div>
         {groups.map((group) => (
           <nav key={group.title} aria-label={group.title}>
-            <h2
+            <h1
               className={css({
                 m: "0",
                 mb: "3",
@@ -75,7 +75,7 @@ export function HomeFooter() {
               })}
             >
               {group.title}
-            </h2>
+            </h1>
             <ul
               className={css({
                 listStyle: "none",

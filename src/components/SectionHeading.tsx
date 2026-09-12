@@ -44,6 +44,7 @@ const headingRecipe = cva({
 });
 
 type SectionHeadingProps = {
+  as?: "h1" | "h2";
   title: React.ReactNode;
   href?: string;
   linkLabel?: string;
@@ -55,6 +56,7 @@ type SectionHeadingProps = {
 
 /** 見出しと一覧へのリンク。 */
 export function SectionHeading({
+  as: Heading = "h2",
   title,
   href,
   linkLabel = "すべて見る",
@@ -90,7 +92,7 @@ export function SectionHeading({
           {number}
         </span>
       ) : null}
-      <h2 className={css({ fontSize: "lg", fontWeight: "700", m: "0" })}>{title}</h2>
+      <Heading className={css({ fontSize: "lg", fontWeight: "700", m: "0" })}>{title}</Heading>
       {numbered && sub ? (
         <span
           className={css({

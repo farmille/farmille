@@ -93,7 +93,7 @@ export default async function HomePage({
         >
           <div className={css({ display: "flex", flexDirection: "column", gap: "12" })}>
             <section aria-label="掲載資材一覧">
-              <SectionHeading title="掲載資材一覧" href="/search" linkLabel="すべて見る →" />
+              <SectionHeading as="h1" title="掲載資材一覧" href="/search" linkLabel="すべて見る →" />
               <div
                 className={css({
                   display: "flex",
@@ -129,16 +129,16 @@ export default async function HomePage({
               )}
             </section>
             <section className={section} aria-labelledby="producer-voices">
-              <h2
+              <h1
                 id="producer-voices"
                 className={css({ m: "0", fontSize: "2xl", fontWeight: "700" })}
               >
                 生産者の声
-              </h2>
+              </h1>
               <section className={section} aria-labelledby="home-reports">
-                <h3 id="home-reports" className={feedTitle}>
+                <h2 id="home-reports" className={feedTitle}>
                   使用レポート
-                </h3>
+                </h2>
                 <HomeFeedOrder target="reports" reportSort={reportSort} reviewSort={reviewSort} />
                 {reportsResult.data.length > 0 ? (
                   <div
@@ -184,9 +184,9 @@ export default async function HomePage({
                 )}
               </section>
               <section className={section} aria-labelledby="home-reviews">
-                <h3 id="home-reviews" className={feedTitle}>
+                <h2 id="home-reviews" className={feedTitle}>
                   レビュー
-                </h3>
+                </h2>
                 <HomeFeedOrder target="reviews" reportSort={reportSort} reviewSort={reviewSort} />
                 {reviewsResult.data.length > 0 ? (
                   <div

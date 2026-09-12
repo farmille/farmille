@@ -85,6 +85,10 @@ export const tokens = {
   },
   // 公式npmパッケージをlayoutで読み込む（フォールバックは02 §5のスタック）
   fonts: {
+    // Adobe Fonts の DNP秀英角ゴシック金 Std B（weight 600）
+    shueiGothicKin: {
+      value: '"dnp-shuei-gothic-kin-std", var(--fonts-sans)',
+    },
     // Adobe Fonts の Farmille Web プロジェクトで配信するゴシックMB101 L（weight 300）
     gothicMb101: {
       value: '"a-otf-gothic-mb101-pr6n", var(--fonts-sans)',

@@ -160,13 +160,13 @@ export function HomeHero() {
       <div className={inner}>
         <div className={intro}>
           <p className={label}>FARMILLE / 農家のためのBS資材データベース</p>
-          <h1 className={title} id="home-heading">
+          <p className={title} id="home-heading">
             BS資材を、
             <br />
             作物と悩みから
             <br />
             見つける。
-          </h1>
+          </p>
         </div>
 
         <div className={figure}>

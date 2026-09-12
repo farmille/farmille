@@ -29,9 +29,9 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
   return (
     <>
       <section className={panel} aria-labelledby="share-experience-title">
-        <h2 id="share-experience-title" className={title}>
+        <h1 id="share-experience-title" className={title}>
           実際に使った体験を共有し、1人で何年もかかっていた試験を、1年で。
-        </h2>
+        </h1>
         <div className={copy}>
           <p>
             資材の種類は増えていますが、自分の畑で結果が出るかどうかは、使ってみるまで分かりません。
@@ -59,9 +59,9 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
           })}
           aria-labelledby="signup-invitation-title"
         >
-          <h2 id="signup-invitation-title" className={title}>
+          <h1 id="signup-invitation-title" className={title}>
             会員登録して、あなたの体験を共有してください
-          </h2>
+          </h1>
           <div className={copy}>
             <p>
               <strong>登録は無料です。</strong>
@@ -110,9 +110,9 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
         aria-labelledby="manufacturer-invitation-title"
       >
         <div>
-          <h2 id="manufacturer-invitation-title" className={title}>
+          <h1 id="manufacturer-invitation-title" className={title}>
             バイオスティミュラント・関連資材メーカー様へ
-          </h2>
+          </h1>
           <div className={copy}>
             <p>自社の資材情報の掲載・編集を申請できます。運営の承認後に公開情報へ反映されます。</p>
             <p>生産者が資材を比較するために、詳細な情報を掲載してください。</p>
