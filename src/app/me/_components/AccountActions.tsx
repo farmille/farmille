@@ -12,9 +12,14 @@ const wrap = css({
 });
 
 /** ログアウトとメーカー申請への導線。 */
-export function AccountActions() {
+export function AccountActions({ admin = false }: { admin?: boolean }) {
   return (
     <div className={wrap}>
+      {admin ? (
+        <Link className={buttonRecipe({ variant: "ghost" })} href="/admin">
+          運営管理へ
+        </Link>
+      ) : null}
       <Link className={buttonRecipe({ variant: "ghost" })} href="/account/passkeys">
         パスキーを管理
       </Link>
@@ -26,15 +31,17 @@ export function AccountActions() {
           ログアウト
         </Button>
       </form>
-      <Link
-        href="/sellers?from=me"
-        className={cx(
-          buttonRecipe({ variant: "ghost", size: "md" }),
-          css({ display: "flex", textAlign: "center" }),
-        )}
-      >
-        メーカーアカウントを申請
-      </Link>
+      {!admin ? (
+        <Link
+          href="/sellers?from=me"
+          className={cx(
+            buttonRecipe({ variant: "ghost", size: "md" }),
+            css({ display: "flex", textAlign: "center" }),
+          )}
+        >
+          メーカーアカウントを申請
+        </Link>
+      ) : null}
     </div>
   );
 }

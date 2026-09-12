@@ -1,3 +1,4 @@
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import { EmptyState, ReviewCard } from "@/components";
 import { getSessionUser } from "@/server/auth";
 import type { ReviewListItem } from "@/server/queries/reviews";
@@ -30,7 +31,9 @@ export async function ReviewList({ reviews, emptyDescription, currentPath }: Rev
             reviewId={review.id}
             materialId={review.material_id}
             canManage={
-              session?.accountType === "general" && session.userId === review.author_user_id
+              session !== null &&
+              canUseGeneralFeatures(session.accountType) &&
+              session.userId === review.author_user_id
             }
             helpfulVoted={review.helpfulVotedByViewer}
             currentPath={currentPath}

@@ -1,9 +1,11 @@
 import { cache } from "react";
+import { redirect } from "next/navigation";
 import type { JwtPayload } from "@supabase/supabase-js";
 import * as v from "valibot";
 
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 
 // 01 §4：一般ユーザー／メーカー／運営。JWT の app_metadata.account_type が正。
 export const ACCOUNT_TYPES = ["general", "seller", "admin"] as const;
@@ -71,7 +73,7 @@ export function toSessionUser(claims: JwtPayload): SessionUser | null {
 
 export function authorizeGeneralUser(user: SessionUser | null): Result<GeneralSession> {
   if (user === null) return fail("unauthorized");
-  if (user.accountType !== "general") return fail("forbidden");
+  if (!canUseGeneralFeatures(user.accountType)) return fail("forbidden");
 
   return succeed({ userId: user.userId });
 }
@@ -116,7 +118,22 @@ export async function getAccountType(): Promise<AccountType | null> {
 }
 
 export async function requireGeneralUser(): Promise<Result<GeneralSession>> {
-  return authorizeGeneralUser(await getSessionUser());
+  const user = await getSessionUser();
+  const result = authorizeGeneralUser(user);
+  if (!result.ok || user?.accountType !== "admin") return result;
+
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("user_id")
+    .eq("user_id", result.data.userId)
+    .maybeSingle();
+  if (error !== null) {
+    console.error("個人プロフィールの確認に失敗しました", error);
+    return fail("internal");
+  }
+  if (data === null) redirect("/me/setup");
+  return result;
 }
 
 export async function requireSeller(): Promise<Result<SellerSession>> {

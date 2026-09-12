@@ -1,3 +1,4 @@
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import Link from "next/link";
 import { getSessionUser } from "@/server/auth";
 import { cva, css } from "../../styled-system/css";
@@ -128,7 +129,7 @@ const ITEMS: Array<{
 /** lg 未満の5枠 BottomNav。画面下へ固定し、中央は丸型＋投稿。 */
 export async function BottomNav({ active, placement = "viewport" }: BottomNavProps) {
   const session = await getSessionUser();
-  const showPost = session === null || session.accountType === "general";
+  const showPost = session === null || canUseGeneralFeatures(session.accountType);
 
   return (
     <div className={navSlotRecipe({ placement })} data-ui="mobile-bottom-nav">

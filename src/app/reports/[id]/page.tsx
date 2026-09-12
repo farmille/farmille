@@ -1,3 +1,4 @@
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
@@ -171,7 +172,8 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   const { id } = await params;
   const report = await loadReport(id);
   const session = await getSessionUser();
-  const viewerUserId = session?.accountType === "general" ? session.userId : null;
+  const viewerUserId =
+    session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
   const isOwnPost = viewerUserId !== null && viewerUserId === report.author.userId;
   const helpfulVotedResult = await isHelpfulVotedByViewer(viewerUserId, "usage_report", report.id);
 

@@ -1,3 +1,4 @@
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -91,7 +92,8 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
 export default async function UserPage({ params }: UserPageProps) {
   const { id } = await params;
   const session = await getSessionUser();
-  const viewerUserId = session?.accountType === "general" ? session.userId : null;
+  const viewerUserId =
+    session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
   const data = await loadProfileOrNotFound(id, viewerUserId);
   const isOwnProfile = viewerUserId !== null && viewerUserId === data.profile.userId;
 

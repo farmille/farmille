@@ -78,6 +78,12 @@ function sessionUser(overrides: Partial<SessionUser> = {}): SessionUser {
 }
 
 describe("authorizeGeneralUser", () => {
+  it.each(["aal1", "aal2"] as const)("運営は %s でも本人として一般機能を利用できる", (aal) => {
+    expect(authorizeGeneralUser(sessionUser({ accountType: "admin", aal }))).toEqual({
+      ok: true,
+      data: { userId: "11111111-1111-1111-1111-111111111111" },
+    });
+  });
   it("account_type='general' を通す", () => {
     expect(authorizeGeneralUser(sessionUser())).toEqual({
       ok: true,

@@ -1,3 +1,4 @@
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 
 import { Button, Select } from "@/components";
@@ -53,7 +54,8 @@ export default async function MaterialReviewsPage({
   ]);
   const material = await loadMaterialOrNotFound(id);
   const { sort, page } = parseReviewSearchParams(requestedSearchParams);
-  const viewerUserId = session?.accountType === "general" ? session.userId : null;
+  const viewerUserId =
+    session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
   const reviews = unwrapQueryResult(await listReviewsByMaterial(id, { sort, page, viewerUserId }));
   const materialPath = `/materials/${material.id}`;
   const reviewsPath = `${materialPath}/reviews`;

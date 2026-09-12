@@ -51,6 +51,11 @@ const statLinkStyle = css({
 
 const MENU_ITEMS = [
   {
+    href: "/me",
+    label: "個人のマイページ",
+    description: "自分のプロフィール・投稿・検討リストを管理する。",
+  },
+  {
     href: "/account/passkeys",
     label: "パスキーを管理",
     description: "ログインに使うパスキーの登録・削除。",
