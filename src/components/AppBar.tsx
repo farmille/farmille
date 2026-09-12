@@ -17,7 +17,7 @@ const mobileAppBar = css({
   pt: "max(12px, env(safe-area-inset-top))",
   px: "3.5",
   pb: "2.5",
-  lg: { display: "none" },
+  tab: { display: "none" },
 });
 
 const iconButton = css({
@@ -64,7 +64,7 @@ const mobileTitle = css({
 
 const desktopHeader = css({
   display: "none",
-  lg: {
+  tab: {
     display: "block",
     position: "sticky",
     top: "0",
@@ -217,7 +217,7 @@ const desktopAction = cva({
 
 const desktopContext = css({
   display: "none",
-  lg: {
+  tab: {
     display: "block",
     bg: "surface.panel",
     borderBottomWidth: "1px",

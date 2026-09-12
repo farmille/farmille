@@ -38,7 +38,7 @@ const body = css({
   py: "4",
   pb: "10",
   bg: "surface.panel",
-  md: { px: "5", py: "5" },
+  tab: { px: "5", py: "5" },
 });
 
 const statRow = css({
@@ -70,7 +70,7 @@ const articleStack = css({
   display: "flex",
   flexDirection: "column",
   gap: "2.5",
-  lg: {
+  tab: {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   },

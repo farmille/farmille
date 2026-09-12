@@ -37,7 +37,7 @@ const shell = css({
   bg: "surface.page",
   position: "relative",
   pb: "24",
-  lg: { pb: "8" },
+  tab: { pb: "8" },
 });
 
 const main = css({
@@ -47,7 +47,7 @@ const main = css({
   px: "3.5",
   py: "4",
   bg: "surface.panel",
-  md: { px: "6", py: "6" },
+  tab: { px: "6", py: "6" },
 });
 
 const sectionTitle = css({

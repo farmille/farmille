@@ -42,7 +42,7 @@ const main = css({
   px: "3.5",
   py: "4",
   bg: "surface.panel",
-  md: { px: "6", py: "6" },
+  tab: { px: "6", py: "6" },
 });
 
 async function loadArticle(id: string) {

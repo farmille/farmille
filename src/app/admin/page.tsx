@@ -17,7 +17,7 @@ const statGridStyle = css({
   display: "grid",
   gridTemplateColumns: "repeat(2, 1fr)",
   gap: "3",
-  md: { gridTemplateColumns: "repeat(4, 1fr)" },
+  tab: { gridTemplateColumns: "repeat(4, 1fr)" },
 });
 
 const menuListStyle = css({

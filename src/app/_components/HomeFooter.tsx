@@ -31,7 +31,7 @@ export function HomeFooter() {
         pb: "24",
         borderTopWidth: "1px",
         borderColor: "border.default",
-        lg: { pb: "8" },
+        tab: { pb: "8" },
       })}
     >
       <div
@@ -39,10 +39,10 @@ export function HomeFooter() {
           display: "grid",
           gridTemplateColumns: "minmax(0, 1fr)",
           gap: "8",
-          lg: { gridTemplateColumns: "1.4fr repeat(3, minmax(0, 1fr))" },
+          tab: { gridTemplateColumns: "1.4fr repeat(3, minmax(0, 1fr))" },
         })}
       >
-        <div className={css({ gridColumn: "1 / -1", lg: { gridColumn: "auto" } })}>
+        <div className={css({ gridColumn: "1 / -1", tab: { gridColumn: "auto" } })}>
           <Link
             href="/"
             className={css({

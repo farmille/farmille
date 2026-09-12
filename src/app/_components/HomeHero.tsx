@@ -16,11 +16,11 @@ const hero = css({
   fontWeight: "light",
   pt: "12",
   pb: "12",
-  md: {
+  tab: {
     pt: "16",
     pb: "16",
   },
-  lg: {
+  pc: {
     display: "flex",
     alignItems: "center",
     minH: "700px",
@@ -35,7 +35,7 @@ const inner = css({
   maxW: "content.wide",
   mx: "auto",
   px: "5",
-  lg: {
+  pc: {
     // 写真の基準を section にしてビューポート右端まで伸ばす
     position: "static",
     px: "8",
@@ -47,7 +47,7 @@ const intro = css({
   position: "relative",
   zIndex: "1",
   mb: "-12",
-  lg: { mb: "0" },
+  pc: { mb: "0" },
 });
 
 const label = css({
@@ -58,7 +58,7 @@ const label = css({
   color: "text.subtle",
   fontSize: "2xs",
   letterSpacing: "0.24em",
-  md: { fontSize: "xs" },
+  tab: { fontSize: "xs" },
   _before: {
     content: '""',
     display: "block",
@@ -76,7 +76,7 @@ const title = css({
   fontWeight: "light",
   lineHeight: "relaxed",
   letterSpacing: "0.08em",
-  lg: {
+  pc: {
     mt: "8",
     fontSize: "hero.lg",
   },
@@ -88,8 +88,8 @@ const figure = css({
   mx: "-5",
   aspectRatio: "image.square",
   bg: "surface.panel",
-  md: { aspectRatio: "image.landscape" },
-  lg: {
+  tab: { aspectRatio: "image.landscape" },
+  pc: {
     position: "absolute",
     top: "0",
     right: "0",
@@ -117,7 +117,7 @@ const fade = css({
   bgGradient: "to-b",
   gradientFrom: "surface.page",
   gradientTo: "surface.page/0",
-  lg: {
+  pc: {
     bottom: "0",
     right: "auto",
     w: "32%",
@@ -135,8 +135,8 @@ const lead = css({
   fontSize: "sm",
   lineHeight: "loose",
   letterSpacing: "0.06em",
-  md: { fontSize: "md" },
-  lg: { maxW: "480px" },
+  tab: { fontSize: "md" },
+  pc: { maxW: "480px" },
 });
 
 /** 日本語が語中で折り返さないよう、文節ごとに inline-block で区切る。 */
@@ -148,7 +148,7 @@ const search = css({
   position: "relative",
   zIndex: "1",
   mt: "8",
-  lg: {
+  pc: {
     mt: "12",
     maxW: "content.form",
   },

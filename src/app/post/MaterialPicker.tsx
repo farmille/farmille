@@ -169,7 +169,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
             borderColor: "border.default",
             borderRadius: "card",
             boxShadow: "shadow.lift",
-            lg: {
+            tab: {
               position: "sticky",
               left: "auto",
               right: "auto",

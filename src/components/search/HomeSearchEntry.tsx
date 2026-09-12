@@ -33,7 +33,7 @@ const searchBox = css({
   boxShadow: "shadow.lift",
   px: "4",
   py: "2",
-  md: {
+  tab: {
     minH: "72px",
     px: "6",
     py: "3",
@@ -56,14 +56,14 @@ const label = css({
   fontSize: "sm",
   fontWeight: "700",
   textAlign: "left",
-  md: { fontSize: "lg" },
+  tab: { fontSize: "lg" },
 });
 
 const hint = css({
   color: "text.subtle",
   fontSize: "2xs",
   fontWeight: "500",
-  md: { fontSize: "sm" },
+  tab: { fontSize: "sm" },
 });
 
 const actionGroup = css({
@@ -85,7 +85,7 @@ const action = css({
   display: "grid",
   placeItems: "center",
   flexShrink: "0",
-  md: {
+  tab: {
     w: "44px",
     h: "44px",
   },
@@ -98,7 +98,7 @@ const categoryRow = css({
   overflowX: "auto",
   scrollbarWidth: "none",
   "&::-webkit-scrollbar": { display: "none" },
-  md: {
+  tab: {
     gap: "2.5",
     mt: "4",
   },
@@ -118,7 +118,7 @@ const category = css({
   py: "1.5",
   fontSize: "xs",
   fontWeight: "600",
-  md: {
+  tab: {
     px: "4",
     py: "2",
     fontSize: "sm",

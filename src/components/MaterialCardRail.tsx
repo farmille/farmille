@@ -10,7 +10,7 @@ const rail = css({
   pb: "1.5",
   scrollbarWidth: "none",
   "&::-webkit-scrollbar": { display: "none" },
-  lg: {
+  tab: {
     flexWrap: "wrap",
     overflowX: "visible",
     scrollSnapType: "none",
@@ -23,7 +23,7 @@ export type MaterialCardRailProps = {
   className?: string;
 };
 
-/** 資材カードを、スマホでは横送り、PCではコンパクトな折り返し行として配置する。 */
+/** 資材カードを、sp では横送り、tab 以上ではコンパクトな折り返し行として配置する。 */
 export function MaterialCardRail({ children, className }: MaterialCardRailProps) {
   return (
     <div className={cx(rail, className)} data-ui="material-card-rail">

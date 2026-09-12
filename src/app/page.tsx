@@ -88,7 +88,7 @@ export default async function HomePage({
             mx: "auto",
             px: "4",
             pt: "8",
-            lg: { px: "5", pt: "10" },
+            tab: { px: "5", pt: "10" },
           })}
         >
           <div className={css({ display: "flex", flexDirection: "column", gap: "12" })}>
@@ -151,7 +151,7 @@ export default async function HomePage({
                       scrollSnapType: "x mandatory",
                       pb: "4",
                       "& > *": { scrollSnapAlign: "start" },
-                      md: {
+                      tab: {
                         gridAutoFlow: "row",
                         gridAutoColumns: "auto",
                         gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
@@ -199,12 +199,12 @@ export default async function HomePage({
                       scrollSnapType: "x mandatory",
                       pb: "4",
                       "& > *": { scrollSnapAlign: "start" },
-                      md: {
+                      tab: {
                         gridAutoFlow: "row",
                         gridAutoColumns: "auto",
                         gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                       },
-                      lg: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))" },
+                      pc: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))" },
                     })}
                   >
                     {reviewsResult.data.map((review) => (

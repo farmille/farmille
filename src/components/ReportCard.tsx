@@ -213,7 +213,7 @@ export function ReportCard({
               preload={preload}
               sizes={
                 layout === "scroll"
-                  ? "(max-width: 1023px) 54vw, 280px"
+                  ? "(max-width: 767px) 54vw, 280px"
                   : layout === "grid"
                     ? "(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 300px"
                     : "(max-width: 768px) 100vw, 768px"

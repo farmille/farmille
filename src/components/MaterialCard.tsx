@@ -19,7 +19,7 @@ const scrollCard = cva({
     display: "block",
     flexShrink: "0",
     w: "card.materialMobile",
-    lg: { w: "card.material" },
+    tab: { w: "card.material" },
   },
 });
 
@@ -114,7 +114,7 @@ function MaterialImage({
           )}
           height={450}
           preload={preload}
-          sizes="(max-width: 1023px) 150px, 240px"
+          sizes="(max-width: 767px) 150px, 240px"
           src={src}
           width={600}
         />

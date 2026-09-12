@@ -11,7 +11,7 @@ const hero = css({
   borderRadius: "card",
   bg: "brand.soft",
   overflow: "hidden",
-  lg: {
+  tab: {
     display: "grid",
     gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 0.9fr)",
     alignItems: "stretch",
@@ -21,8 +21,7 @@ const hero = css({
 const heroCopy = css({
   px: "4",
   py: "7",
-  md: { px: "7", py: "9" },
-  lg: { px: "9", py: "12" },
+  tab: { px: "9", py: "12" },
 });
 
 const eyebrow = css({
@@ -72,13 +71,13 @@ const actions = css({
   flexDirection: "column",
   gap: "2.5",
   mt: "5",
-  md: { flexDirection: "row", alignItems: "center" },
+  tab: { flexDirection: "row", alignItems: "center" },
 });
 
 const actionButton = css({
   w: "100%",
   textAlign: "center",
-  md: { w: "auto", minW: "52" },
+  tab: { w: "auto", minW: "52" },
 });
 
 const approvalPanel = css({
@@ -92,8 +91,8 @@ const approvalPanel = css({
   borderTopWidth: "1px",
   borderTopStyle: "solid",
   borderTopColor: "green/25",
-  md: { px: "7" },
-  lg: {
+  tab: {
+    px: "7",
     borderTopWidth: "0",
     borderLeftWidth: "1px",
     borderLeftStyle: "solid",
@@ -112,8 +111,6 @@ const approvalFlow = css({
   display: "grid",
   gridTemplateColumns: "1fr",
   gap: "2",
-  md: { gridTemplateColumns: "1fr auto 1fr auto 1fr", alignItems: "center" },
-  lg: { gridTemplateColumns: "1fr" },
 });
 
 const flowItem = css({
@@ -151,13 +148,11 @@ const flowArrow = css({
   fontSize: "lg",
   textAlign: "center",
   transform: "rotate(90deg)",
-  md: { transform: "none" },
-  lg: { transform: "rotate(90deg)" },
 });
 
 const section = css({
   mt: "10",
-  md: { mt: "12" },
+  tab: { mt: "12" },
 });
 
 const sectionHeading = css({
@@ -181,7 +176,7 @@ const featureGrid = css({
   gridTemplateColumns: "1fr",
   gap: "3",
   mt: "5",
-  md: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+  tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
 });
 
 const featureCard = css({
@@ -270,7 +265,7 @@ const closing = css({
   bg: "brand.primary",
   color: "surface.card",
   textAlign: "center",
-  md: { px: "7" },
+  tab: { px: "7" },
 });
 
 const closingTitle = css({
@@ -294,14 +289,14 @@ const closingActions = css({
   maxW: "content.form",
   mx: "auto",
   mt: "5",
-  md: { flexDirection: "row", justifyContent: "center" },
+  tab: { flexDirection: "row", justifyContent: "center" },
 });
 
 const closingPrimary = css({
   w: "100%",
   bg: "surface.card",
   color: "brand.primaryDeep",
-  md: { w: "auto", minW: "52" },
+  tab: { w: "auto", minW: "52" },
 });
 
 const closingSecondary = css({
@@ -309,7 +304,7 @@ const closingSecondary = css({
   bg: "transparent",
   color: "surface.card",
   borderColor: "surface.card",
-  md: { w: "auto", minW: "52" },
+  tab: { w: "auto", minW: "52" },
 });
 
 const closingSecondaryLabel = css({ color: "surface.card" });

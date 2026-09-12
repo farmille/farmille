@@ -49,8 +49,7 @@ const main = css({
   px: "4",
   pt: "3",
   pb: "4",
-  md: { px: "5" },
-  lg: { pt: "6", pb: "8" },
+  tab: { px: "5", pt: "6", pb: "8" },
 });
 
 const pageTitle = css({
@@ -63,7 +62,7 @@ const pageTitle = css({
   clip: "rect(0 0 0 0)",
   whiteSpace: "nowrap",
   borderWidth: "0",
-  lg: {
+  tab: {
     position: "static",
     w: "auto",
     h: "auto",
@@ -102,7 +101,7 @@ const stack = css({
   display: "flex",
   flexDirection: "column",
   gap: "2.5",
-  lg: {
+  tab: {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     alignItems: "start",

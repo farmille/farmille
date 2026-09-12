@@ -237,7 +237,7 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
               overflowX: "auto",
               scrollSnapType: "x mandatory",
               pb: "1",
-              lg: {
+              tab: {
                 gridAutoFlow: "row",
                 gridAutoColumns: "auto",
                 gridTemplateColumns: "repeat(3, minmax(0, 1fr))",

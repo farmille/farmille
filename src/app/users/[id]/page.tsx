@@ -34,7 +34,7 @@ const body = css({
   py: "4",
   pb: "10",
   bg: "surface.panel",
-  md: { px: "5", py: "5" },
+  tab: { px: "5", py: "5" },
 });
 
 const statRow = css({

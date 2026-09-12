@@ -19,7 +19,7 @@ const cardGrid = css({
   display: "grid",
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   gap: "2.5",
-  md: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+  tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
 });
 
 export async function generateMetadata({ params }: MaterialArticlesPageProps): Promise<Metadata> {

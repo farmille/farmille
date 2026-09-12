@@ -24,7 +24,7 @@ const main = css({
   px: "4",
   py: "4",
   pb: "8",
-  md: { px: "5", py: "6", pb: "10" },
+  tab: { px: "5", py: "6", pb: "10" },
 });
 
 export async function generateMetadata(): Promise<Metadata> {

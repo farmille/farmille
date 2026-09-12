@@ -11,7 +11,7 @@ const panel = css({
   borderColor: "border.default",
   borderRadius: "card",
   boxShadow: "shadow",
-  lg: { p: "12" },
+  tab: { p: "12" },
 });
 const title = css({
   m: "0",
@@ -55,7 +55,7 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
             borderColor: "border.default",
             py: "10",
             textAlign: "center",
-            lg: { py: "12" },
+            tab: { py: "12" },
           })}
           aria-labelledby="signup-invitation-title"
         >
@@ -100,7 +100,7 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
           display: "flex",
           flexDirection: "column",
           gap: "5",
-          lg: {
+          tab: {
             p: "10",
             flexDirection: "row",
             alignItems: "center",

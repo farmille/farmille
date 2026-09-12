@@ -26,7 +26,7 @@ const body = css({
   py: "4",
   pb: "8",
   bg: "surface.panel",
-  md: { px: "5", py: "5" },
+  tab: { px: "5", py: "5" },
 });
 
 export default async function MeSavedPage() {

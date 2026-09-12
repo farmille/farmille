@@ -43,8 +43,7 @@ const main = css({
   mx: "auto",
   px: "3.5",
   py: "4",
-  md: { px: "5" },
-  lg: { py: "6" },
+  tab: { px: "5", py: "6" },
 });
 
 const pageTitle = css({
@@ -57,7 +56,7 @@ const pageTitle = css({
   clip: "rect(0 0 0 0)",
   whiteSpace: "nowrap",
   borderWidth: "0",
-  lg: {
+  tab: {
     position: "static",
     w: "auto",
     h: "auto",
@@ -76,8 +75,8 @@ const cardGrid = css({
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   gap: "2.5",
   mt: "3",
-  md: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
-  lg: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "4" },
+  tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+  pc: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "4" },
 });
 
 function parseFilter(value: string | undefined): ContentFeedFilter {

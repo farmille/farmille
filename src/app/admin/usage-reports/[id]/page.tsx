@@ -40,7 +40,7 @@ const mediaGridStyle = css({
   display: "grid",
   gridTemplateColumns: "1fr",
   gap: "3",
-  md: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
+  tab: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
 });
 
 const mediaStyle = css({

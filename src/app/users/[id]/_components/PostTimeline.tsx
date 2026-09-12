@@ -9,7 +9,7 @@ const stack = css({
   display: "flex",
   flexDirection: "column",
   gap: "2.5",
-  lg: {
+  tab: {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     alignItems: "start",
