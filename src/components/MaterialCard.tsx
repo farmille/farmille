@@ -28,7 +28,8 @@ const listCard = cva({
     display: "flex",
     gap: "3",
     p: "3",
-    alignItems: "center",
+    // 本文が複数行でもサムネをカード上端に置く
+    alignItems: "start",
     bg: "surface.card",
     borderWidth: "1px",
     borderStyle: "solid",
@@ -42,7 +43,7 @@ const listCard = cva({
 
 const imgBox = css({
   aspectRatio: "image.landscape",
-  bg: "green.soft2",
+  bg: "surface.card",
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
@@ -53,7 +54,7 @@ const listImg = css({
   w: "62px",
   aspectRatio: "image.square",
   borderRadius: "button",
-  bg: "green.soft2",
+  bg: "surface.card",
   display: "grid",
   placeItems: "center",
   flexShrink: "0",
@@ -151,9 +152,7 @@ export function MaterialCard({
         data-ui="material-card"
         data-variant="scroll"
       >
-        <div className={css({ bg: "surface.card", p: "2" })}>
-          <MaterialImage src={imageSrc} alt={alt} className={imgBox} preload={preload} />
-        </div>
+        <MaterialImage src={imageSrc} alt={alt} className={imgBox} preload={preload} />
         <div className={css({ px: "2.5", py: "2.5" })}>
           <div className={css({ fontSize: "sm", fontWeight: "700" })}>{name}</div>
           <div
@@ -303,7 +302,7 @@ export function MaterialCard({
       <Icon
         name="chevron_right"
         size="sm"
-        className={css({ color: "text.subtle", flexShrink: "0" })}
+        className={css({ color: "text.subtle", flexShrink: "0", alignSelf: "center" })}
       />
     </Link>
   );
