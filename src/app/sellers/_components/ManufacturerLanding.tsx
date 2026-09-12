@@ -1,7 +1,7 @@
-import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components";
+import { Icon } from "@/components/Icon";
 import { css, cx } from "../../../../styled-system/css";
 
 const hero = css({
@@ -51,18 +51,6 @@ const lead = css({
   mb: "0",
   color: "text.muted",
   fontSize: "md",
-  lineHeight: "relaxed",
-});
-
-const audience = css({
-  display: "flex",
-  alignItems: "flex-start",
-  gap: "2",
-  mt: "4",
-  mb: "0",
-  color: "brand.primaryDeep",
-  fontSize: "sm",
-  fontWeight: "700",
   lineHeight: "relaxed",
 });
 
@@ -180,7 +168,7 @@ const featureGrid = css({
 });
 
 const featureCard = css({
-  px: "4",
+  px: "5",
   py: "5",
   borderWidth: "1px",
   borderStyle: "solid",
@@ -212,45 +200,6 @@ const featureTitle = css({
 
 const featureBody = css({
   mt: "2",
-  mb: "0",
-  color: "text.muted",
-  fontSize: "sm",
-  lineHeight: "relaxed",
-});
-
-const policy = css({
-  display: "grid",
-  gridTemplateColumns: "auto 1fr",
-  gap: "3",
-  mt: "10",
-  px: "4",
-  py: "4",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "blue/28",
-  borderRadius: "card",
-  bg: "blue/12",
-});
-
-const policyIcon = css({
-  display: "grid",
-  placeItems: "center",
-  w: "9",
-  h: "9",
-  borderRadius: "pill",
-  bg: "surface.card",
-  color: "accent.official",
-});
-
-const policyTitle = css({
-  m: "0",
-  color: "text.default",
-  fontSize: "md",
-  fontWeight: "800",
-});
-
-const policyBody = css({
-  mt: "1",
   mb: "0",
   color: "text.muted",
   fontSize: "sm",
@@ -344,10 +293,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           <p className={lead}>
             Farmilleのメーカーアカウントでは、自社資材の追加・変更申請と、根拠資料や記事の管理ができます。
           </p>
-          <p className={audience}>
-            <Icon name="check" size="sm" />
-            <span>利用できるのは、農業資材を製造するメーカーです。</span>
-          </p>
           <div className={actions}>
             <Link
               className={cx(buttonRecipe({ variant: "primary", size: "md" }), actionButton)}
@@ -404,20 +349,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           ))}
         </div>
       </section>
-
-      <aside className={policy} aria-labelledby="manufacturer-policy-title">
-        <span className={policyIcon}>
-          <Icon name="verified" size="md" />
-        </span>
-        <div>
-          <h2 id="manufacturer-policy-title" className={policyTitle}>
-            資材情報の正本は運営が管理します
-          </h2>
-          <p className={policyBody}>
-            メーカーによる追加・変更・掲載終了は申請として保存され、運営が承認した内容だけが公開されます。既存情報をメーカーが確認すると、確認済みマークが表示されます。
-          </p>
-        </div>
-      </aside>
 
       <section className={closing} aria-labelledby="manufacturer-apply-title">
         <h2 id="manufacturer-apply-title" className={closingTitle}>

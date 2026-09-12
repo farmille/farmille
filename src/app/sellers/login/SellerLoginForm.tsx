@@ -25,7 +25,7 @@ export function SellerLoginForm({ next }: { next: string | null }) {
       {next === null ? null : <input name="next" type="hidden" value={next} />}
 
       <Field
-        guide="審査の完了メールに記載されたIDです"
+        guide="審査の完了メールに記載されたID"
         htmlFor="loginId"
         label="ログインID"
         requirement="required"
