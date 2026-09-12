@@ -37,7 +37,7 @@ async function recoveryLink(email: string): Promise<string> {
   const response = await fetch(`http://127.0.0.1:54324/api/v1/message/${id}`);
   const data = v.parse(MailSchema, await response.json());
   const link = data.Text.match(
-    /http:\/\/127\.0\.0\.1:3007\/password-reset\/update\?token_hash=[a-zA-Z0-9_-]+/,
+    /http:\/\/localhost:3007\/password-reset\/update\?token_hash=[a-zA-Z0-9_-]+/,
   )?.[0];
   if (!link) throw new Error("再設定メールにアプリの再設定リンクがありません。");
   return link;
