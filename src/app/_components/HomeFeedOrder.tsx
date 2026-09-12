@@ -1,3 +1,7 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
+import * as v from "valibot";
 import Link from "next/link";
 import type { HomeFeedSort } from "@/server/queries/home-order";
 import { css, cva } from "../../../styled-system/css";
@@ -7,7 +11,7 @@ const pill = cva({
     display: "inline-flex",
     alignItems: "center",
     px: "3",
-    py: "2",
+    py: "1",
     borderRadius: "pill",
     fontSize: "xs",
     textDecoration: "none",
@@ -26,12 +30,24 @@ export function HomeFeedOrder({
   target,
   reportSort,
   reviewSort,
+  local = false,
 }: {
   target: "reports" | "reviews";
   reportSort: HomeFeedSort;
   reviewSort: HomeFeedSort;
+  local?: boolean;
 }) {
-  const current = target === "reports" ? reportSort : reviewSort;
+  const params = useSearchParams();
+  const selectedReportSort = v.parse(
+    v.picklist(["newest", "helpful"]),
+    params.get("reports") ?? reportSort,
+  );
+  const selectedReviewSort = v.parse(
+    v.picklist(["newest", "helpful"]),
+    params.get("reviews") ?? reviewSort,
+  );
+  const OrderLink = local ? "a" : Link;
+  const current = target === "reports" ? selectedReportSort : selectedReviewSort;
   const options: { value: HomeFeedSort; label: string }[] =
     target === "reports"
       ? [
@@ -48,14 +64,29 @@ export function HomeFeedOrder({
       className={css({ display: "flex", flexWrap: "wrap", gap: "2" })}
     >
       {options.map((option) => (
-        <Link
+        <OrderLink
           key={option.value}
-          href={`/?reports=${target === "reports" ? option.value : reportSort}&reviews=${target === "reviews" ? option.value : reviewSort}#home-${target}`}
+          href={`/?reports=${target === "reports" ? option.value : selectedReportSort}&reviews=${target === "reviews" ? option.value : selectedReviewSort}#home-${target}`}
+          onClick={(event) => {
+            if (
+              !local ||
+              event.button !== 0 ||
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.altKey
+            )
+              return;
+            event.preventDefault();
+            // URLと戻る／進む履歴だけを更新し、サーバーへの再取得を起こさない。
+            if (current !== option.value)
+              window.history.pushState(null, "", event.currentTarget.href);
+          }}
           aria-current={current === option.value ? "true" : undefined}
           className={pill({ active: current === option.value })}
         >
           {option.label}
-        </Link>
+        </OrderLink>
       ))}
     </nav>
   );

@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { createElement } from "react";
+import { SearchParamsContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
 import { HomeFooter } from "./HomeFooter";
 import { HomeInvitations } from "./HomeInvitations";
 import { HomeFeedOrder } from "./HomeFeedOrder";
@@ -27,11 +28,15 @@ describe("ホーム下部の導線", () => {
   });
   it("並び替えで他方の条件を維持する", () => {
     render(
-      createElement(HomeFeedOrder, {
-        target: "reviews",
-        reportSort: "helpful",
-        reviewSort: "helpful",
-      }),
+      createElement(
+        SearchParamsContext.Provider,
+        { value: new URLSearchParams() },
+        createElement(HomeFeedOrder, {
+          target: "reviews",
+          reportSort: "helpful",
+          reviewSort: "helpful",
+        }),
+      ),
     );
     expect(screen.getByRole("link", { name: "新着順" }).getAttribute("href")).toBe(
       "/?reports=helpful&reviews=newest#home-reviews",

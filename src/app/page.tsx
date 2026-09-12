@@ -1,11 +1,8 @@
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
-import Link from "next/link";
-import { Icon } from "@/components/Icon";
-import { publicProfileLabel } from "@/lib/public-profile-label";
 import { notFound } from "next/navigation";
 import * as v from "valibot";
 
-import { AppBar, MaterialCard, ReportCard, ReviewCard, SectionHeading } from "@/components";
+import { AppBar, MaterialCard, ReportCard, SectionHeading } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { getSessionUser } from "@/server/auth";
 import { listHomeMaterials } from "@/server/queries/home-materials";
@@ -16,6 +13,7 @@ import { HomeMaterialMarquee } from "./_components/HomeMaterialMarquee";
 import { HomeHero } from "./_components/HomeHero";
 import { HomeInvitations } from "./_components/HomeInvitations";
 import { HomeFooter } from "./_components/HomeFooter";
+import { HomeReviewFeed } from "./_components/HomeReviewFeed";
 import { HomeFeedOrder } from "./_components/HomeFeedOrder";
 import { homeFeedIds } from "@/server/queries/home-order";
 import { getViewerHelpfulVotes } from "@/server/queries/helpful";
@@ -46,16 +44,18 @@ export default async function HomePage({
   if (!parsed.success) notFound();
   const reportSort = parsed.output.reports;
   const reviewSort = parsed.output.reviews;
-  const [session, materialsResult, reportIds, reviewIds] = await Promise.all([
+  const [session, materialsResult, reportIds, newest, helpful] = await Promise.all([
     getSessionUser(),
     listHomeMaterials(),
     homeFeedIds("usage_report", reportSort, 3),
-    homeFeedIds("review", reviewSort, 4),
+    homeFeedIds("review", "newest", 4),
+    homeFeedIds("review", "helpful", 4),
   ]);
+  const reviewIds = [...new Set([...newest, ...helpful])];
   const [reportsResult, reviewsResult, reportVotes] = await Promise.all([
     listRecentUsageReports({ limit: 3, ids: reportIds }),
     listRecentReviews({
-      limit: 4,
+      limit: Math.max(1, reviewIds.length),
       ids: reviewIds,
       viewerUserId:
         session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null,
@@ -176,75 +176,13 @@ export default async function HomePage({
                 <h2 id="home-reviews" className={feedTitle}>
                   レビュー
                 </h2>
-                <HomeFeedOrder target="reviews" reportSort={reportSort} reviewSort={reviewSort} />
-                {reviewsResult.data.length > 0 ? (
-                  <div
-                    className={css({
-                      display: "grid",
-                      gap: "3",
-                      gridAutoFlow: "column",
-                      gridAutoColumns: "85%",
-                      overflowX: "auto",
-                      scrollSnapType: "x mandatory",
-                      pb: "4",
-                      "& > *": { scrollSnapAlign: "start" },
-                      tab: {
-                        gridAutoFlow: "row",
-                        gridAutoColumns: "auto",
-                        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                      },
-                      pc: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))" },
-                    })}
-                  >
-                    {reviewsResult.data.map((review) => (
-                      <div
-                        key={review.id}
-                        className={css({
-                          bg: "surface.card",
-                          borderWidth: "1px",
-                          borderColor: "border.default",
-                          borderRadius: "card",
-                          boxShadow: "shadow",
-                          display: "flex",
-                          flexDirection: "column",
-                          overflow: "hidden",
-                        })}
-                      >
-                        <ReviewCard
-                          className={css({ borderWidth: "0", boxShadow: "none", flex: "1" })}
-                          handle={review.author?.handle ?? "匿名"}
-                          authorDetails={publicProfileLabel(review.author)}
-                          crop={review.crops.map((crop) => crop.name).join("・")}
-                          rating={review.rating}
-                          helpfulCount={review.helpfulCount}
-                          reviewId={
-                            session?.userId === review.author_user_id ? undefined : review.id
-                          }
-                          materialId={review.material_id}
-                          helpfulVoted={review.helpfulVotedByViewer}
-                          currentPath={`/?reports=${reportSort}&reviews=${reviewSort}`}
-                          body={review.body}
-                        />
-                        <Link
-                          href={`/materials/${review.material_id}/reviews`}
-                          className={css({
-                            display: "block",
-                            p: "3",
-                            fontSize: "sm",
-                            color: "brand.primaryDeep",
-                            textDecoration: "none",
-                          })}
-                        >
-                          {review.materialName} <Icon name="arrow_forward" size="sm" />
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={empty}>
-                    まだ公開中のレビューはありません。資材を使った感想を共有してください。
-                  </p>
-                )}
+                <HomeReviewFeed
+                  reviews={reviewsResult.data}
+                  orders={{ newest, helpful }}
+                  viewerUserId={session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null}
+                  reportSort={reportSort}
+                  reviewSort={reviewSort}
+                />
               </section>
             </section>
             <HomeInvitations showSignup={session === null} />
