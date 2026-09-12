@@ -67,7 +67,9 @@ erDiagram
 
 ### アカウント
 
-**profiles**（一般ユーザー。auth.users と 1:1）
+**profiles**（一般ユーザーと運営の個人プロフィール。auth.users と 1:1）
+
+運営も本人のプロフィールを持ち、レビュー・使用レポートの投稿、参考になった、検討リストを利用できる。既存のプロフィールは保持し、未作成の場合だけ初回設定を行う。`account_type` は `admin` のまま変更しない。個人としての操作は `app.can_use_general_features()` と本人のIDで制限し、管理操作の `app.is_admin_writer()` は引き続き AAL2 を要求する。
 - `user_id` uuid PK・FK → auth.users
 - `handle` text NOT NULL UNIQUE（ハンドルネーム）
 - `standpoint` text NOT NULL CHECK IN ('farmer','ja','expert','other')。登録時に必須で収集する内部属性。公開ビューや投稿には出さない

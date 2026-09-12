@@ -154,6 +154,9 @@ jobs:
             echo "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3007"
           } >> "$GITHUB_ENV"
 
+      - name: Test database authorization
+        run: npx --yes supabase@latest test db
+
       - name: Seed material master
         working-directory: .
         shell: bash
