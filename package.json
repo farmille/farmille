@@ -16,7 +16,7 @@
     "test:e2e": "playwright test",
     "gen:types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/database.types.ts",
     "gen:types:dev": "npx supabase gen types typescript --linked > src/types/database.types.ts",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 6076",
     "build-storybook": "storybook build",
     "check:component-file-names": "node scripts/check-component-file-names.mjs",
     "check:stories": "node scripts/check-story-coverage.mjs",
