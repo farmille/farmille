@@ -55,9 +55,7 @@ export function HomeFooter() {
             Farmille
           </Link>
           <p className={css({ fontSize: "sm", color: "text.subtle", lineHeight: "relaxed" })}>
-            生産者による生産者のための
-            <br />
-            事例共有サイト
+            生産者による生産者のための事例共有サイト
           </p>
           <p className={css({ fontSize: "sm", color: "text.subtle", lineHeight: "relaxed" })}>
             BS資材を作物・効果から検索し、生産者の使用レポートとレビューを確かめられます。
@@ -83,7 +81,7 @@ export function HomeFooter() {
                 p: "0",
                 display: "flex",
                 flexDirection: "column",
-                gap: "3",
+                gap: "1",
               })}
             >
               {group.links.map((link) => (
