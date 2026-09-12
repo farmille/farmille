@@ -143,7 +143,7 @@ export default async function SellerPage({ params }: SellerPageProps) {
             <SectionHeading
               title={<span id="seller-materials-heading">掲載資材</span>}
               href={showAllMaterials ? materialsHref : undefined}
-              linkLabel="すべて見る →"
+              linkLabel="すべて見る"
             />
             <MaterialCardRail>
               {materials.map((material) => (

@@ -134,7 +134,7 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
               rel="noreferrer"
               className={organizationLink}
             >
-              公式サイトを見る ↗
+              公式サイトを見る <Icon name="north_east" size="sm" />
             </a>
           ) : null}
           <span>主な地域：{seller.regionScope}</span>

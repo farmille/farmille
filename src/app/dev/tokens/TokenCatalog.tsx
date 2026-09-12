@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import type { ReactNode } from "react";
 
 import { semanticTokens, tokens } from "@/theme/tokens";
@@ -314,7 +315,15 @@ function ColorGrid({ items }: ColorGridProps) {
           />
           <div className={swatchMeta}>
             <code className={tokenNameStyle}>{item.name}</code>
-            <span>{item.reference === undefined ? item.value : `→ ${item.reference}`}</span>
+            <span>
+              {item.reference === undefined ? (
+                item.value
+              ) : (
+                <>
+                  <Icon name="arrow_forward" size="sm" /> {item.reference}
+                </>
+              )}
+            </span>
             {item.reference === undefined ? null : <span>{item.color}</span>}
           </div>
         </article>

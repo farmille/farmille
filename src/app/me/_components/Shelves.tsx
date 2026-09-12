@@ -94,7 +94,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
                   href={`/materials/${post.materialId}#review-${post.id}`}
                   className={reviewLink}
                 >
-                  資材詳細でこのレビューを見る →
+                  資材詳細でこのレビューを見る <Icon name="arrow_forward" size="sm" />
                 </Link>
               </article>
             ) : (
@@ -173,7 +173,7 @@ export function SavedShelf({ items }: SavedShelfProps) {
       <SectionHeading
         title={<span id="me-saved-heading">検討リスト</span>}
         href="/me/saved"
-        linkLabel="すべて見る →"
+        linkLabel="すべて見る"
       />
       {items.length === 0 ? (
         <EmptyState
@@ -235,7 +235,7 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
                   href={`/materials/${item.materialId}#review-${item.id}`}
                   className={reviewLink}
                 >
-                  資材詳細でこのレビューを見る →
+                  資材詳細でこのレビューを見る <Icon name="arrow_forward" size="sm" />
                 </Link>
               </article>
             ) : (

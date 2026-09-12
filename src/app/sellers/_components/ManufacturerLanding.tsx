@@ -372,14 +372,14 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               メーカーが申請
             </div>
             <span className={flowArrow} aria-hidden>
-              →
+              <Icon name="arrow_forward" size="sm" />
             </span>
             <div className={flowItem}>
               <span className={flowNumber}>2</span>
               運営が内容を確認
             </div>
             <span className={flowArrow} aria-hidden>
-              →
+              <Icon name="arrow_forward" size="sm" />
             </span>
             <div className={flowItem}>
               <span className={flowNumber}>3</span>
