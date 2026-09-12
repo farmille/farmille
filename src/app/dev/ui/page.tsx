@@ -264,7 +264,7 @@ export default function UiKitPage() {
 
       <section className={section}>
         <h2 className={sectionTitle}>StatCard / SectionHeading / Badge</h2>
-        <SectionHeading title="これまでの投稿" href="#" linkLabel="すべて見る →" />
+        <SectionHeading title="これまでの投稿" href="#" linkLabel="すべて見る" />
         <div className={css({ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2.5" })}>
           <StatCard value={12} label="レビュー" />
           <StatCard value={3} label="使用レポート" />
@@ -337,7 +337,7 @@ export default function UiKitPage() {
         <div className={phoneChrome}>
           <AppBar chrome="public" variant="home" />
           <div className={css({ p: "4", pb: "24" })}>
-            <SectionHeading title="注目のBS資材" href="/search" linkLabel="探す →" />
+            <SectionHeading title="注目のBS資材" href="/search" linkLabel="探す" />
             <div className={row}>
               <MaterialCard
                 variant="scroll"

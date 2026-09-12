@@ -135,6 +135,16 @@ export const tokens = {
   },
   // コンテンツ用途ごとの上限幅。breakpoint 名を width 値へ流用しない。
   sizes: {
+    // 共通 Icon の寸法。画面では size variant から指定する。
+    icon: {
+      "2xs": { value: "12px" },
+      xs: { value: "14px" },
+      sm: { value: "16px" },
+      md: { value: "20px" },
+      lg: { value: "24px" },
+      xl: { value: "28px" },
+      "2xl": { value: "32px" },
+    },
     card: {
       materialMobile: { value: "9.375rem" },
       material: { value: "15rem" },

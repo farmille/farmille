@@ -1,5 +1,6 @@
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import Link from "next/link";
+import { Icon } from "@/components/Icon";
 import { publicProfileLabel } from "@/lib/public-profile-label";
 import { notFound } from "next/navigation";
 import * as v from "valibot";
@@ -245,7 +246,7 @@ export default async function HomePage({
                             textDecoration: "none",
                           })}
                         >
-                          {review.materialName} →
+                          {review.materialName} <Icon name="arrow_forward" size="sm" />
                         </Link>
                       </div>
                     ))}

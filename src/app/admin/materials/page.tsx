@@ -90,7 +90,7 @@ export default async function AdminMaterialsPage({
   return (
     <AdminShell
       backHref="/admin"
-      backLabel="← 運営管理ホーム"
+      backLabel="運営管理ホーム"
       description="分類・検索層の種まき登録と全カラムの編集、claim の紐づけを行う。"
       title="資材の管理"
     >

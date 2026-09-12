@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "@/components/Icon";
 
 import { useMemo, useState } from "react";
 
@@ -198,7 +199,7 @@ export function CalendarPicker({
                 aria-label={`${dateLabel(date, suffix)}を削除`}
                 onClick={() => onChange(value.filter((candidate) => candidate !== date))}
               >
-                ×
+                <Icon name="close" size="sm" />
               </button>
             </span>
           ))
@@ -214,7 +215,7 @@ export function CalendarPicker({
             aria-label="前の月"
             onClick={() => moveMonth(-1)}
           >
-            ‹
+            <Icon name="chevron_left" size="sm" />
           </button>
           <span className={monthLabel}>
             {year}年 {month}月
@@ -225,7 +226,7 @@ export function CalendarPicker({
             aria-label="次の月"
             onClick={() => moveMonth(1)}
           >
-            ›
+            <Icon name="chevron_right" size="sm" />
           </button>
         </div>
         <div className={calendarGrid}>

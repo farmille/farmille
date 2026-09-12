@@ -1,4 +1,4 @@
-import { PersonIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import { STANDPOINTS } from "@/lib/standpoints";
 import { PREFECTURES } from "@/lib/prefectures";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
@@ -53,7 +53,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             width={70}
           />
         ) : (
-          <PersonIcon size={32} />
+          <Icon name="person" size="2xl" />
         )}
       </div>
       <h1

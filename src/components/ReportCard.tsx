@@ -3,7 +3,7 @@ import Link from "next/link";
 import { HelpfulButton } from "./HelpfulButton";
 import { toggleHelpfulAction } from "@/server/actions/helpful";
 import { cva, css, cx } from "../../styled-system/css";
-import { ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 
 const cardRecipe = cva({
   base: {
@@ -185,7 +185,7 @@ export function ReportCard({
             width={26}
           />
         ) : (
-          <PersonIcon size={compact ? 10 : 14} />
+          <Icon name="person" size={compact ? "2xs" : "xs"} />
         )}
       </span>
       <span>{author}</span>
@@ -222,7 +222,7 @@ export function ReportCard({
               width={640}
             />
           ) : (
-            <ImagePlaceholderIcon />
+            <Icon name="image" size="lg" />
           )}
         </div>
       </Link>
@@ -320,7 +320,7 @@ export function ReportCard({
             />
           ) : (
             <span className={helpfulBtn({ layout })}>
-              <ThumbIcon size={compact ? 11 : 14} />
+              <Icon name="thumb_up" size={compact ? "2xs" : "xs"} />
               {!compact ? <span>参考になった</span> : null}
               {helpfulCount}
             </span>
@@ -352,7 +352,7 @@ export function ReportCard({
             textDecoration: "none",
           })}
         >
-          {materialName} →
+          {materialName} <Icon name="arrow_forward" size="sm" />
         </Link>
       ) : null}
     </article>

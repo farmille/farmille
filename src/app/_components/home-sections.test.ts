@@ -12,7 +12,7 @@ describe("ホーム下部の導線", () => {
     expect(screen.getByRole("link", { name: "無料で会員登録" }).getAttribute("href")).toBe(
       "/signup/general",
     );
-    expect(screen.getByRole("link", { name: "メーカー様はこちら →" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "メーカー様はこちら" }).getAttribute("href")).toBe(
       "/sellers",
     );
     expect(screen.getByRole("link", { name: "使用レポートを投稿する" }).getAttribute("href")).toBe(
@@ -23,7 +23,7 @@ describe("ホーム下部の導線", () => {
   it("ログイン済みでは会員登録の勧誘を表示しない", () => {
     render(createElement(HomeInvitations, { showSignup: false }));
     expect(screen.queryByRole("link", { name: "無料で会員登録" })).toBeNull();
-    expect(screen.getByRole("link", { name: "メーカー様はこちら →" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "メーカー様はこちら" })).toBeTruthy();
   });
   it("並び替えで他方の条件を維持する", () => {
     render(

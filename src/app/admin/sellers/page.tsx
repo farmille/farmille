@@ -77,7 +77,7 @@ export default async function AdminSellersPage({
   return (
     <AdminShell
       backHref="/admin"
-      backLabel="← 運営管理ホーム"
+      backLabel="運営管理ホーム"
       description="メーカー申請を確認し、承認したアカウントに共有ログインを発行します。"
       title="メーカー審査"
     >

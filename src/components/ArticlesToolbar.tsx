@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { css } from "../../styled-system/css";
 import { formDataString } from "@/lib/validation";
 import { FilterPills, type FilterPillOption } from "./FilterPills";
-import { SearchIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 
 const FILTER_OPTIONS: FilterPillOption[] = [
   { value: "all", label: "すべて" },
@@ -69,7 +69,7 @@ export function ArticlesToolbar({ filter, q }: ArticlesToolbarProps) {
           router.push(buildHref({ q: nextQ }));
         }}
       >
-        <SearchIcon className={css({ color: "text.subtle", flexShrink: "0" })} />
+        <Icon name="search" size="sm" className={css({ color: "text.subtle", flexShrink: "0" })} />
         {filter !== "all" ? <input type="hidden" name="type" value={filter} /> : null}
         <input
           className={css({

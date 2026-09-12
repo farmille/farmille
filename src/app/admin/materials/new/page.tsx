@@ -23,7 +23,7 @@ export default async function AdminMaterialNewPage() {
   return (
     <AdminShell
       backHref="/admin/materials"
-      backLabel="← 資材の管理"
+      backLabel="資材の管理"
       description="分類・検索層を確定し、一次情報は分かる範囲を初期値として入れる（種まき）。"
       title="資材の新規登録"
     >

@@ -1,7 +1,7 @@
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
-import { ChevronIcon, ImagePlaceholderIcon, OfficialCheckIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 import { StarRating } from "./StarRating";
 
 const scrollCard = cva({
@@ -99,7 +99,7 @@ function MaterialImage({
 }) {
   return (
     <div className={className} data-ui="material-card-image">
-      <ImagePlaceholderIcon className={imageLayer} />
+      <Icon name="image" size="lg" className={imageLayer} />
       {src ? (
         <Image
           alt={alt}
@@ -168,7 +168,7 @@ export function MaterialCard({
           >
             {maker}
             {official ? (
-              <OfficialCheckIcon size={12} className={css({ color: "accent.official" })} />
+              <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />
             ) : null}
           </div>
           <div
@@ -223,7 +223,7 @@ export function MaterialCard({
       data-variant="list"
     >
       <div className={listImg} data-ui="material-card-image">
-        <ImagePlaceholderIcon className={imageLayer} />
+        <Icon name="image" size="lg" className={imageLayer} />
         {imageSrc ? (
           <Image
             alt={alt}
@@ -258,7 +258,7 @@ export function MaterialCard({
         >
           {maker}
           {official ? (
-            <OfficialCheckIcon size={14} className={css({ color: "accent.official" })} />
+            <Icon name="verified" size="xs" className={css({ color: "accent.official" })} />
           ) : null}
         </div>
         <div
@@ -300,7 +300,11 @@ export function MaterialCard({
           </p>
         ) : null}
       </div>
-      <ChevronIcon className={css({ color: "text.subtle", flexShrink: "0" })} />
+      <Icon
+        name="chevron_right"
+        size="sm"
+        className={css({ color: "text.subtle", flexShrink: "0" })}
+      />
     </Link>
   );
 }

@@ -110,7 +110,7 @@ export default async function AdminSellerDetailPage({
   return (
     <AdminShell
       backHref="/admin/sellers"
-      backLabel="← メーカー審査"
+      backLabel="メーカー審査"
       description={`状態：${statusLabel(seller.data.status)}`}
       title={seller.data.official_name}
     >

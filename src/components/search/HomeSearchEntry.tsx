@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ChevronIcon, SearchIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import { css } from "../../../styled-system/css";
 
 const entry = css({
@@ -136,7 +136,7 @@ export function HomeSearchEntry() {
     >
       <span className={searchBox}>
         <span className={icon} aria-hidden>
-          <SearchIcon size={22} />
+          <Icon name="search" size="md" />
         </span>
         <span className={label}>
           資材を検索する
@@ -145,7 +145,7 @@ export function HomeSearchEntry() {
         <span className={actionGroup} aria-hidden>
           検索へ
           <span className={action}>
-            <ChevronIcon size={18} />
+            <Icon name="chevron_right" size="sm" />
           </span>
         </span>
       </span>

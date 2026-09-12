@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 
 import { AppBar, Badge, MaterialRefCard } from "@/components";
 import { HelpfulButton } from "@/components/HelpfulButton";
-import { OfficialCheckIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
@@ -205,7 +205,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
               </span>
             )}
             <span className={css({ fontWeight: "700", color: "text.default" })}>{sellerName}</span>
-            <OfficialCheckIcon size={14} className={css({ color: "accent.official" })} />
+            <Icon name="verified" size="xs" className={css({ color: "accent.official" })} />
           </Link>
           <Badge variant="type">メーカー</Badge>
           <span className={css({ fontSize: "xs" })}>{formatDateJa(article.publishedAt)}</span>

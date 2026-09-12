@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components";
-import { PersonIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import type { OwnProfile } from "@/server/queries/profiles";
 import { css, cx } from "../../../../styled-system/css";
@@ -54,7 +54,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
             width={70}
           />
         ) : (
-          <PersonIcon size={32} />
+          <Icon name="person" size="2xl" />
         )}
       </div>
       <h1 id="me-handle" className={css({ mt: "2.5", mb: "0", fontSize: "xl", fontWeight: "800" })}>

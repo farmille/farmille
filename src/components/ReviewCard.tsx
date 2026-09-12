@@ -7,7 +7,7 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 import { cva, css, cx } from "../../styled-system/css";
 import { HelpfulButton } from "./HelpfulButton";
 import { helpfulPillRecipe } from "./helpful-pill";
-import { ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 import { ReportDialog } from "./ReportDialog";
 import { ReviewOwnerActions } from "./ReviewOwnerActions";
 import { StarRating } from "./StarRating";
@@ -121,7 +121,7 @@ export function ReviewCard({
             width={30}
           />
         ) : (
-          <PersonIcon size={16} />
+          <Icon name="person" size="sm" />
         )}
       </span>
       <span className={css({ fontWeight: "700", fontSize: "sm" })}>{handle}</span>
@@ -226,7 +226,7 @@ export function ReviewCard({
                     color: "brand.primary",
                   })}
                 >
-                  <ImagePlaceholderIcon size={20} />
+                  <Icon name="image" size="md" />
                 </div>
               ))}
         </div>
@@ -249,7 +249,7 @@ export function ReviewCard({
           />
         ) : (
           <span className={helpfulPillRecipe({ layout: "card" })}>
-            <ThumbIcon />
+            <Icon name="thumb_up" size="xs" />
             <span>参考になった</span>
             {helpfulCount}
           </span>

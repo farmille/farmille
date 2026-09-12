@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { AppBar, StatCard } from "@/components";
@@ -83,7 +84,7 @@ export default async function MePage() {
               textDecoration: "none",
             })}
           >
-            公開プロフィールを見る →
+            公開プロフィールを見る <Icon name="arrow_forward" size="sm" />
           </Link>
         </p>
 

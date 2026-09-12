@@ -98,7 +98,7 @@ export default async function AdminTagsPage() {
   return (
     <AdminShell
       backHref="/admin"
-      backLabel="← 運営管理ホーム"
+      backLabel="運営管理ホーム"
       description="検索補助タグと対象作物を管理します。効果などの専用分類は資材フォームで選択します。"
       title="検索タグ・作物マスタ"
     >

@@ -1,7 +1,7 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components";
-import { CheckIcon, OfficialCheckIcon } from "@/components/Icons";
 import { css, cx } from "../../../../styled-system/css";
 
 const hero = css({
@@ -340,7 +340,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
       <section className={hero} aria-labelledby="manufacturer-landing-title">
         <div className={heroCopy}>
           <span className={eyebrow}>
-            <CheckIcon size={16} />
+            <Icon name="check" size="sm" />
             農業資材メーカーの方へ
           </span>
           <h1 id="manufacturer-landing-title" className={title}>
@@ -350,7 +350,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             Farmilleのメーカーアカウントでは、自社資材の追加・変更申請と、根拠資料や記事の管理ができます。
           </p>
           <p className={audience}>
-            <CheckIcon size={17} />
+            <Icon name="check" size="sm" />
             <span>利用できるのは、農業資材を製造するメーカーです。</span>
           </p>
           <div className={actions}>
@@ -412,7 +412,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
 
       <aside className={policy} aria-labelledby="manufacturer-policy-title">
         <span className={policyIcon}>
-          <OfficialCheckIcon size={19} />
+          <Icon name="verified" size="md" />
         </span>
         <div>
           <h2 id="manufacturer-policy-title" className={policyTitle}>

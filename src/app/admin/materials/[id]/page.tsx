@@ -53,7 +53,7 @@ export default async function AdminMaterialDetailPage({
   return (
     <AdminShell
       backHref="/admin/materials"
-      backLabel="← 資材の管理"
+      backLabel="資材の管理"
       description={`${material.data.manufacturer_name}／レビュー ${material.data.review_count} 件`}
       title={material.data.name}
     >

@@ -2,7 +2,7 @@ import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import Link from "next/link";
 import { getSessionUser } from "@/server/auth";
 import { cva, css } from "../../styled-system/css";
-import { ArticlesNavIcon, HomeNavIcon, MeNavIcon, PlusIcon, SearchIcon } from "./Icons";
+import { Icon, type IconName } from "@/components/Icon";
 
 const navSlotRecipe = cva({
   base: {
@@ -118,12 +118,12 @@ const ITEMS: Array<{
   id: Exclude<BottomNavActive, "post">;
   href: string;
   label: string;
-  Icon: typeof HomeNavIcon;
+  name: IconName;
 }> = [
-  { id: "home", href: "/", label: "ホーム", Icon: HomeNavIcon },
-  { id: "search", href: "/search", label: "探す", Icon: SearchIcon },
-  { id: "articles", href: "/articles", label: "記事", Icon: ArticlesNavIcon },
-  { id: "me", href: "/me", label: "マイページ", Icon: MeNavIcon },
+  { id: "home", href: "/", label: "ホーム", name: "home" },
+  { id: "search", href: "/search", label: "探す", name: "search" },
+  { id: "articles", href: "/articles", label: "記事", name: "article" },
+  { id: "me", href: "/me", label: "マイページ", name: "person" },
 ];
 
 /** lg 未満の5枠 BottomNav。画面下へ固定し、中央は丸型＋投稿。 */
@@ -134,32 +134,32 @@ export async function BottomNav({ active, placement = "viewport" }: BottomNavPro
   return (
     <div className={navSlotRecipe({ placement })} data-ui="mobile-bottom-nav">
       <nav className={navRecipe({ placement })} aria-label="メインナビ">
-        {ITEMS.slice(0, 2).map(({ id, href, label, Icon }) => (
+        {ITEMS.slice(0, 2).map(({ id, href, label, name }) => (
           <Link
             key={id}
             href={href}
             className={itemRecipe({ active: active === id })}
             aria-current={active === id ? "page" : undefined}
           >
-            <Icon size={21} />
+            <Icon name={name} size="md" />
             <span>{label}</span>
           </Link>
         ))}
         {showPost ? (
           <div className={postSlot}>
             <Link href="/post" className={plusButton} aria-label="投稿する">
-              <PlusIcon />
+              <Icon name="add" size="md" />
             </Link>
           </div>
         ) : null}
-        {ITEMS.slice(2).map(({ id, href, label, Icon }) => (
+        {ITEMS.slice(2).map(({ id, href, label, name }) => (
           <Link
             key={id}
             href={href}
             className={itemRecipe({ active: active === id })}
             aria-current={active === id ? "page" : undefined}
           >
-            <Icon size={21} />
+            <Icon name={name} size="md" />
             <span>{label}</span>
           </Link>
         ))}

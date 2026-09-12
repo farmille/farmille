@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components/Button";
@@ -84,7 +85,7 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
               無料で会員登録
             </Link>
             <Link href="/search" className={textLink}>
-              資材をさがす →
+              資材をさがす <Icon name="arrow_forward" size="sm" />
             </Link>
           </div>
         </section>
@@ -118,7 +119,7 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
           </div>
         </div>
         <Link href="/sellers" className={buttonRecipe({ size: "sm" })}>
-          メーカー様はこちら →
+          メーカー様はこちら <Icon name="arrow_forward" size="sm" />
         </Link>
       </section>
     </>

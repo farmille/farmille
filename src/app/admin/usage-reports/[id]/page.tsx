@@ -168,7 +168,7 @@ export default async function AdminUsageReportDetailPage({
   return (
     <AdminShell
       backHref="/admin/usage-reports"
-      backLabel="← 使用レポート編集局"
+      backLabel="使用レポート編集局"
       description={`状態：${EDITORIAL_REPORT_STATUS_LABELS[data.status]}`}
       title={data.title}
     >

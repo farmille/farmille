@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
-import { BackIcon, LeafIcon, SearchIcon, ShareIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 
 const mobileAppBar = css({
   position: "sticky",
@@ -297,11 +297,11 @@ function MobileAppBar(props: AppBarProps) {
     return (
       <header className={mobileAppBar} data-ui="mobile-app-bar">
         <Link href="/" className={logo}>
-          <LeafIcon size={24} />
+          <Icon name="leaf" size="lg" />
           <b className={logoText}>Farmille</b>
         </Link>
         <Link href={props.searchHref ?? "/search"} className={iconButton} aria-label="検索">
-          <SearchIcon size={17} />
+          <Icon name="search" size="sm" />
         </Link>
       </header>
     );
@@ -312,12 +312,12 @@ function MobileAppBar(props: AppBarProps) {
   return (
     <header className={mobileAppBar} data-ui="mobile-app-bar">
       <Link href={backHref} className={iconButton} aria-label="戻る">
-        <BackIcon />
+        <Icon name="chevron_left" size="md" />
       </Link>
       <div className={mobileTitle}>{props.title ?? ""}</div>
       {props.shareHref ? (
         <Link href={props.shareHref} className={iconButton} aria-label="共有">
-          <ShareIcon />
+          <Icon name="share" size="md" />
         </Link>
       ) : (
         <span className={cx(iconButton, css({ visibility: "hidden" }))} aria-hidden />
@@ -331,7 +331,7 @@ function DesktopSiteHeader({ active }: { active?: AppBarActive }) {
     <header className={desktopHeader} data-ui="desktop-site-header">
       <div className={desktopHeaderInner}>
         <Link href="/" className={desktopBrand}>
-          <LeafIcon size={25} />
+          <Icon name="leaf" size="lg" />
           <span className={desktopBrandName}>Farmille</span>
         </Link>
         <Link
@@ -346,7 +346,7 @@ function DesktopSiteHeader({ active }: { active?: AppBarActive }) {
           className={desktopSearch}
           aria-current={active === "search" ? "page" : undefined}
         >
-          <SearchIcon size={17} />
+          <Icon name="search" size="sm" />
           <span className={desktopSearchLabel}>資材を検索（作物・悩み・資材名から）</span>
           <span className={desktopSearchAction}>検索へ →</span>
         </Link>
@@ -356,7 +356,7 @@ function DesktopSiteHeader({ active }: { active?: AppBarActive }) {
             className={desktopAction({ emphasis: "primary" })}
             aria-current={active === "post" ? "page" : undefined}
           >
-            ＋ 投稿
+            <Icon name="add" size="sm" /> 投稿
           </Link>
           <Link
             href="/me"
@@ -376,13 +376,13 @@ function DesktopContextBar(props: AppBarBackProps) {
     <div className={desktopContext} data-ui="desktop-context-bar">
       <div className={desktopContextInner}>
         <Link href={props.backHref ?? "/"} className={contextBack}>
-          <BackIcon size={16} />
+          <Icon name="chevron_left" size="sm" />
           戻る
         </Link>
         <div className={contextTitle}>{props.title ?? ""}</div>
         {props.shareHref ? (
           <Link href={props.shareHref} className={iconButton} aria-label="共有">
-            <ShareIcon />
+            <Icon name="share" size="md" />
           </Link>
         ) : null}
       </div>
@@ -397,7 +397,7 @@ function DesktopSellerHeader(props: AppBarProps) {
     <header className={desktopHeader} data-ui="desktop-seller-header">
       <div className={desktopHeaderInner}>
         <Link href="/dashboard" className={desktopBrand}>
-          <LeafIcon size={25} />
+          <Icon name="leaf" size="lg" />
           <span className={desktopBrandName}>Farmille メーカー</span>
         </Link>
         <span className={workspaceTitle}>{title}</span>

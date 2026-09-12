@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
-import { SearchIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import { TagChip, TAG_CATEGORY_LABELS, type TagCategory } from "@/components/TagChip";
 import type { SearchFilterItem } from "@/lib/material-search";
 import { css } from "../../../styled-system/css";
@@ -251,7 +251,7 @@ export function MaterialSearchBox({
     <div aria-busy={isPending || undefined}>
       <div className={box}>
         <span className={css({ color: "text.subtle", display: "flex" })}>
-          <SearchIcon />
+          <Icon name="search" size="sm" />
         </span>
         <input
           aria-label="資材の検索条件"

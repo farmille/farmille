@@ -9,7 +9,7 @@ import { AppBar, MaterialRefCard, MetricBars } from "@/components";
 import { FabBar } from "@/components/FabBar";
 import { HelpfulButton } from "@/components/HelpfulButton";
 import { helpfulPillRecipe } from "@/components/helpful-pill";
-import { CheckIcon, ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
@@ -334,7 +334,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                   width={32}
                 />
               ) : (
-                <PersonIcon size={16} />
+                <Icon name="person" size="sm" />
               )}
             </span>
             <span className={css({ fontWeight: "700", color: "text.default" })}>
@@ -372,7 +372,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               color: "brand.primary",
             })}
           >
-            <ImagePlaceholderIcon />
+            <Icon name="image" size="lg" />
           </div>
         )}
 
@@ -526,7 +526,11 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
             lineHeight: "1.55",
           })}
         >
-          <CheckIcon className={css({ color: "brand.primary", flexShrink: "0", mt: "0.5" })} />
+          <Icon
+            name="check"
+            size="sm"
+            className={css({ color: "brand.primary", flexShrink: "0", mt: "0.5" })}
+          />
           <span>
             この使用レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。
           </span>
@@ -555,7 +559,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
             />
           ) : (
             <span className={helpfulPillRecipe()}>
-              <ThumbIcon />
+              <Icon name="thumb_up" size="xs" />
               <span>参考になった</span>
               {report.helpfulCount}
             </span>

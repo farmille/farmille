@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 
@@ -52,11 +53,11 @@ type SectionHeadingProps = {
   first?: boolean;
 };
 
-/** 見出し＋「→」リンク（sec-h）。 */
+/** 見出しと一覧へのリンク。 */
 export function SectionHeading({
   title,
   href,
-  linkLabel = "すべて見る →",
+  linkLabel = "すべて見る",
   className,
   number,
   sub,
@@ -112,7 +113,7 @@ export function SectionHeading({
             whiteSpace: "nowrap",
           })}
         >
-          {linkLabel}
+          {linkLabel} <Icon name="arrow_forward" size="xs" />
         </Link>
       ) : null}
     </div>

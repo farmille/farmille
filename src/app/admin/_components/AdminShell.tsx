@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -98,7 +99,7 @@ export function AdminShell({
   title,
   description,
   backHref,
-  backLabel = "← 戻る",
+  backLabel = "戻る",
   children,
 }: {
   title: string;
@@ -126,7 +127,7 @@ export function AdminShell({
       <main className={mainStyle}>
         {backHref === undefined ? null : (
           <Link className={backLinkStyle} href={backHref}>
-            {backLabel}
+            <Icon name="arrow_back" size="sm" /> {backLabel}
           </Link>
         )}
         <h1 className={titleStyle}>{title}</h1>

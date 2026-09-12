@@ -30,7 +30,7 @@ export const StandardWithCustomLinkLabel: Story = {
   args: {
     title: "おすすめのメーカー",
     href: "/makers",
-    linkLabel: "メーカー一覧へ →",
+    linkLabel: "メーカー一覧へ",
   },
 };
 

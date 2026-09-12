@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import {
@@ -112,7 +113,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
                         textDecoration: "none",
                       })}
                     >
-                      フォームを再開 →
+                      フォームを再開 <Icon name="arrow_forward" size="sm" />
                     </Link>
                   ) : null}
                 </div>

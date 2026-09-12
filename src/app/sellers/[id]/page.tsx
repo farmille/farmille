@@ -12,7 +12,7 @@ import {
   SectionHeading,
   StatCard,
 } from "@/components";
-import { ArticlesNavIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { getPublicSellerPage, type PublicSellerPageData } from "@/server/queries/public-sellers";
@@ -172,13 +172,13 @@ export default async function SellerPage({ params }: SellerPageProps) {
                   textDecoration: "none",
                 })}
               >
-                掲載資材 {data.materialCount}件をすべて見る →
+                掲載資材 {data.materialCount}件をすべて見る <Icon name="arrow_forward" size="sm" />
               </Link>
             ) : null}
           </section>
         ) : (
           <div className={broadcastBand}>
-            <ArticlesNavIcon size={20} />
+            <Icon name="article" size="md" />
             <span>このアカウントは記事で情報発信を行っています</span>
           </div>
         )}

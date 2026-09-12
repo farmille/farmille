@@ -2,7 +2,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 
 import { Badge, StarRating } from "@/components";
-import { ImagePlaceholderIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import type { MaterialDetail } from "@/server/queries/materials";
 import { css, cx } from "../../../../../styled-system/css";
 
@@ -87,7 +87,7 @@ export function MaterialHero({
     <section className={heroCard} aria-labelledby="material-name">
       <div className={css({ display: "flex", gap: "3.5", alignItems: "center" })}>
         <div className={imageBox} data-ui="material-hero-image">
-          <ImagePlaceholderIcon className={imageLayer} size={28} />
+          <Icon name="image" className={imageLayer} size="xl" />
           {primaryImage ? (
             <Image
               alt={material.name}

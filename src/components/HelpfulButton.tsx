@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 
 import type { HelpfulState } from "@/server/actions/helpful";
-import { ThumbIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 import { helpfulPillRecipe } from "./helpful-pill";
 
 type HelpfulAction = (previous: HelpfulState, formData: FormData) => Promise<HelpfulState>;
@@ -26,7 +26,7 @@ export function HelpfulButton({ action, voted, count, layout = "detail" }: Helpf
         aria-pressed={state.voted}
         className={helpfulPillRecipe({ layout, interactive: true, voted: state.voted })}
       >
-        <ThumbIcon />
+        <Icon name="thumb_up" size="xs" />
         <span>参考になった</span>
         {state.count}
       </button>

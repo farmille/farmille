@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -170,7 +171,7 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
               rel="noreferrer"
               className={externalLink}
             >
-              製造元公式ページを見る →
+              製造元公式ページを見る <Icon name="arrow_forward" size="sm" />
             </a>
           ) : null}
           {material.catalog_url ? (
@@ -180,7 +181,7 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
               rel="noreferrer"
               className={externalLink}
             >
-              公式カタログPDFを見る →
+              公式カタログPDFを見る <Icon name="arrow_forward" size="sm" />
             </a>
           ) : null}
         </div>
