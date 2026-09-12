@@ -37,14 +37,16 @@ const buttonRecipe = cva({
       md: {
         w: "100%",
         borderRadius: "button",
-        px: "3",
+        px: "6",
+        minW: "button.md",
         py: "3",
         fontSize: "md",
       },
       sm: {
         w: "auto",
         borderRadius: "pill",
-        px: "4",
+        px: "6",
+        minW: "button.sm",
         py: "2",
         fontSize: "sm",
       },

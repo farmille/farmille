@@ -135,6 +135,11 @@ export const tokens = {
   },
   // コンテンツ用途ごとの上限幅。breakpoint 名を width 値へ流用しない。
   sizes: {
+    // 短いラベルでも操作対象として横幅を確保する。
+    button: {
+      sm: { value: "96px" },
+      md: { value: "120px" },
+    },
     // 共通 Icon の寸法。画面では size variant から指定する。
     icon: {
       "2xs": { value: "12px" },
