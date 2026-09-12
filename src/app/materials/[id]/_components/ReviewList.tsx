@@ -1,4 +1,5 @@
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
+import { publicProfileLabel } from "@/lib/public-profile-label";
 import { EmptyState, ReviewCard } from "@/components";
 import { getSessionUser } from "@/server/auth";
 import type { ReviewListItem } from "@/server/queries/reviews";
@@ -38,6 +39,7 @@ export async function ReviewList({ reviews, emptyDescription, currentPath }: Rev
             helpfulVoted={review.helpfulVotedByViewer}
             currentPath={currentPath}
             handle={review.author?.handle ?? "退会したユーザー"}
+            authorDetails={publicProfileLabel(review.author)}
             authorHref={review.author?.user_id ? `/users/${review.author.user_id}` : undefined}
             avatarSrc={review.author?.avatar_url ?? undefined}
             crop={review.crops.map(({ name }) => name).join("・")}

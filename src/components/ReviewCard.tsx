@@ -49,6 +49,7 @@ const avatar = css({
 
 export type ReviewCardProps = {
   handle: string;
+  authorDetails?: string;
   authorHref?: string;
   avatarSrc?: string;
   crop: string;
@@ -82,6 +83,7 @@ export type ReviewCardProps = {
  */
 export function ReviewCard({
   handle,
+  authorDetails,
   authorHref,
   avatarSrc,
   crop,
@@ -123,6 +125,9 @@ export function ReviewCard({
         )}
       </span>
       <span className={css({ fontWeight: "700", fontSize: "sm" })}>{handle}</span>
+      {authorDetails ? (
+        <span className={css({ color: "text.subtle", fontSize: "xs" })}>{authorDetails}</span>
+      ) : null}
     </>
   );
   const displayedPhotoCount = photos.length > 0 ? photos.length : photoCount;

@@ -1,5 +1,6 @@
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import Link from "next/link";
+import { publicProfileLabel } from "@/lib/public-profile-label";
 import { notFound } from "next/navigation";
 import * as v from "valibot";
 
@@ -222,6 +223,7 @@ export default async function HomePage({
                         <ReviewCard
                           className={css({ borderWidth: "0", boxShadow: "none", flex: "1" })}
                           handle={review.author?.handle ?? "匿名"}
+                          authorDetails={publicProfileLabel(review.author)}
                           crop={review.crops.map((crop) => crop.name).join("・")}
                           rating={review.rating}
                           helpfulCount={review.helpfulCount}

@@ -23,11 +23,12 @@ function submittedValues(formData: FormData): AuthFormValues {
   const values: AuthFormValues = {};
   const names = [
     "officialName",
-    "loginId",
+    "corporateNumber",
     "contactEmail",
     "contactName",
     "location",
-    "regionScope",
+    "contactPhone",
+    "materialRequestNotes",
     "websiteUrl",
     "inviteCode",
   ] as const;
@@ -46,13 +47,14 @@ export async function sellerApplyAction(
 ): Promise<AuthFormState> {
   const validation = validateSellerApply({
     officialName: formData.get("officialName"),
-    loginId: formData.get("loginId"),
+    corporateNumber: formData.get("corporateNumber"),
     contactEmail: formData.get("contactEmail"),
     contactName: formData.get("contactName"),
     location: formData.get("location"),
-    regionScope: formData.get("regionScope"),
+    contactPhone: formData.get("contactPhone"),
+    materialRequestNotes: formData.get("materialRequestNotes"),
     websiteUrl: formData.get("websiteUrl"),
-    inviteCode: formData.get("inviteCode"),
+    inviteCode: formData.get("inviteCode") ?? "",
   });
 
   if (!validation.ok) {

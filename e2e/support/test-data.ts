@@ -376,6 +376,17 @@ export async function sellerApprovalByLoginId(loginId: string): Promise<SellerAp
   return sellers[0] ?? null;
 }
 
+export async function sellerLoginIdByOfficialName(officialName: string): Promise<string> {
+  const params = new URLSearchParams({
+    select: "login_id",
+    official_name: `eq.${officialName}`,
+    limit: "1",
+  });
+  const sellers = await restSelect(v.object({ login_id: v.string() }), "seller_accounts", params);
+  if (sellers[0] === undefined) throw new Error("申請済みメーカーが見つかりません。");
+  return sellers[0].login_id;
+}
+
 export async function createMaterial(
   prefix: string,
   sellerId: string | null = null,

@@ -7,6 +7,13 @@ const validRaw = {
   email: "farmer@example.com",
   password: "farmille-pass",
   standpoint: "farmer",
+  familyName: "山田",
+  givenName: "太郎",
+  phone: "",
+  postalCode: "1000001",
+  prefectureCode: "13",
+  city: "千代田区",
+  terms: "on",
 };
 
 describe("validateGeneralSignup", () => {
@@ -15,12 +22,7 @@ describe("validateGeneralSignup", () => {
 
     expect(result).toEqual({
       ok: true,
-      input: {
-        handle: "農家の山田",
-        email: "farmer@example.com",
-        password: "farmille-pass",
-        standpoint: "farmer",
-      },
+      input: { ...validRaw, prefectureCode: 13 },
     });
   });
 
@@ -48,7 +50,7 @@ describe("validateGeneralSignup", () => {
   });
 
   it("立場は一般ユーザー向けの4択だけを受け付ける", () => {
-    for (const standpoint of ["farmer", "ja", "expert", "other"]) {
+    for (const standpoint of ["farmer", "ja", "government", "other"]) {
       expect(validateGeneralSignup({ ...validRaw, standpoint })).toMatchObject({
         ok: true,
         input: { standpoint },

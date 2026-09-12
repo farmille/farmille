@@ -1,4 +1,6 @@
 import { PersonIcon } from "@/components/Icons";
+import { STANDPOINTS } from "@/lib/standpoints";
+import { PREFECTURES } from "@/lib/prefectures";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import type { PublicProfilePageData } from "@/server/queries/public-profiles";
 import { css } from "../../../../../styled-system/css";
@@ -31,7 +33,7 @@ type ProfileHeaderProps = {
   profile: PublicProfilePageData["profile"];
 };
 
-/** 投稿者ページに、ハンドルとアバターだけを表示する。 */
+/** 連絡先を含めず、公開プロフィールだけを表示する。 */
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   return (
     <section className={card} aria-labelledby="profile-handle">
@@ -60,6 +62,14 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
       >
         {profile.handle}
       </h1>
+      <p className={css({ color: "text.subtle", fontSize: "sm" })}>
+        {[
+          STANDPOINTS.find((item) => item.value === profile.standpoint)?.label,
+          PREFECTURES.find((item) => item.code === profile.prefectureCode)?.name,
+        ]
+          .filter(Boolean)
+          .join(" ・ ")}
+      </p>
     </section>
   );
 }
