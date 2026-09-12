@@ -87,6 +87,7 @@ const contentStyle = css({
 });
 
 const NAV_ITEMS = [
+  { href: "/me", label: "個人のマイページ" },
   { href: "/admin", label: "ホーム" },
   { href: "/admin/sellers", label: "メーカー審査" },
   { href: "/admin/materials", label: "資材" },

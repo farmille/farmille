@@ -1,3 +1,4 @@
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import Link from "next/link";
 import { getSessionUser } from "@/server/auth";
 import { cva, css, cx } from "../../styled-system/css";
@@ -95,7 +96,7 @@ export async function FabBar({
 }: FabBarProps) {
   const session = await getSessionUser();
 
-  if (session !== null && session.accountType !== "general") {
+  if (session !== null && !canUseGeneralFeatures(session.accountType)) {
     return null;
   }
 

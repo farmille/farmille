@@ -1,3 +1,4 @@
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import * as v from "valibot";
@@ -53,10 +54,11 @@ export default async function HomePage({
     listRecentReviews({
       limit: 4,
       ids: reviewIds,
-      viewerUserId: session?.accountType === "general" ? session.userId : null,
+      viewerUserId:
+        session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null,
     }),
     getViewerHelpfulVotes(
-      session?.accountType === "general" ? session.userId : null,
+      session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null,
       "usage_report",
       reportIds,
     ),

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AppBar, StatCard } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { errorMessageJa } from "@/server/errors";
+import { getSessionUser } from "@/server/auth";
 import { getMyPageData } from "@/server/queries/me-page";
 import { css } from "../../../styled-system/css";
 
@@ -89,7 +90,7 @@ export default async function MePage() {
         <PostsShelf profile={data.profile} posts={data.posts} />
         <SavedShelf items={data.savedMaterials} />
         <HelpfulShelf items={data.helpfulItems} />
-        <AccountActions />
+        <AccountActions admin={(await getSessionUser())?.accountType === "admin"} />
       </main>
       <BottomNav active="me" />
     </div>

@@ -1,3 +1,4 @@
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { after } from "next/server";
@@ -95,7 +96,7 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const material = await loadMaterialOrNotFound(id);
   const sessionUser = await getSessionUser();
-  const isGeneralUser = sessionUser?.accountType === "general";
+  const isGeneralUser = sessionUser !== null && canUseGeneralFeatures(sessionUser.accountType);
   const viewerUserId = isGeneralUser ? sessionUser.userId : null;
   // after() の中では cookies() が使えないため、Supabase クライアントは先に作る。
   const viewEventSupabase = await createServerSupabase();

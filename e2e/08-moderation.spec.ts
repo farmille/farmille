@@ -73,9 +73,18 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
     await expect(page.getByText(material.name, { exact: true })).toBeVisible();
 
     await page.goto("/post");
+    await expect(page).toHaveURL(/\/me\/setup$/);
+    await page.getByRole("textbox", { name: "ハンドルネーム" }).fill("運営の個人利用テスト");
+    await page.getByRole("radio", { name: "その他" }).check();
+    await page.getByRole("button", { name: "設定してマイページへ" }).click();
+    await expect(page).toHaveURL(/\/me$/);
+    await expect(page.getByRole("link", { name: "運営管理へ", exact: true })).toHaveAttribute(
+      "href",
+      "/admin",
+    );
+    await page.goto("/post");
     await expect(page).toHaveURL(/\/post$/);
-    await expect(page.getByRole("heading", { name: "一般ユーザー向けの画面です" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "運営管理へ" })).toHaveAttribute("href", "/admin");
+    await expect(page.getByRole("heading", { name: "一般ユーザー向けの画面です" })).toHaveCount(0);
   } finally {
     await deleteMaterial(material.id);
     await deleteAuthUsersByEmail(author.email);
