@@ -12,6 +12,7 @@ import { listHomeMaterials } from "@/server/queries/home-materials";
 import { listRecentReviews } from "@/server/queries/reviews";
 import { listRecentUsageReports } from "@/server/queries/usage-reports";
 import { css } from "../../styled-system/css";
+import { HomeMaterialMarquee } from "./_components/HomeMaterialMarquee";
 import { HomeHero } from "./_components/HomeHero";
 import { HomeInvitations } from "./_components/HomeInvitations";
 import { HomeFooter } from "./_components/HomeFooter";
@@ -93,16 +94,8 @@ export default async function HomePage({
         >
           <div className={css({ display: "flex", flexDirection: "column", gap: "12" })}>
             <section aria-label="掲載資材一覧">
-              <SectionHeading as="h1" title="掲載資材一覧" href="/search" linkLabel="すべて見る →" />
-              <div
-                className={css({
-                  display: "flex",
-                  gap: "3",
-                  overflowX: "auto",
-                  scrollSnapType: "x mandatory",
-                  pb: "4",
-                })}
-              >
+              <SectionHeading as="h1" title="掲載資材一覧" href="/search" linkLabel="すべて見る" />
+              <HomeMaterialMarquee>
                 {materialsResult.map((material) => (
                   <MaterialCard
                     key={material.id}
@@ -119,14 +112,10 @@ export default async function HomePage({
                     href={`/materials/${material.id}`}
                   />
                 ))}
-              </div>
+              </HomeMaterialMarquee>
               {materialsResult.length === 0 ? (
                 <p className={empty}>表示できる資材がまだありません。</p>
-              ) : (
-                <p className={css({ fontSize: "xs", color: "text.subtle" })}>
-                  ※ 表示順はランダムです（広告・優先枠ではありません）。
-                </p>
-              )}
+              ) : null}
             </section>
             <section className={section} aria-labelledby="producer-voices">
               <h1
