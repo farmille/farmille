@@ -236,6 +236,7 @@ export function ReviewCard({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexWrap: "wrap",
           gap: "2.5",
           mt: "2.5",
         })}

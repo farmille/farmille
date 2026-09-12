@@ -296,6 +296,23 @@ for (let shardIndex = 0; shardIndex < SHARD_COUNT; shardIndex += 1) {
   });
 }
 
+test("自分のレビューの操作ボタンが狭い画面でも収まる", async ({ page }, testInfo) => {
+  for (const width of [320, 360, 375]) {
+    await page.setViewportSize({ width, height: 812 });
+    await gotoStory(page, "components-reviewcard--own-review");
+    await expect(page.getByRole("button", { name: "削除", exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      width + OVERFLOW_TOLERANCE,
+    );
+    if (width === 375) {
+      await page.screenshot({
+        path: path.join(resolveScreenshotDirectory(testInfo), "review-own-375.png"),
+        fullPage: true,
+      });
+    }
+  }
+});
+
 test("BottomNav は tab 未満で固定され、tab 以上では非表示になる", async ({ page }) => {
   const storyId = "components-bottomnav--viewport-fixed";
   await page.setViewportSize({ width: 375, height: 812 });
