@@ -1,0 +1,13 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+select plan(8);
+select ok(not has_table_privilege('anon', 'public.profile_contact_details', 'select'), 'anonymous cannot read private contacts');
+select ok(not has_table_privilege('authenticated', 'public.profile_contact_details', 'select'), 'signed in users cannot read private contacts directly');
+select ok(has_table_privilege('service_role', 'public.profile_contact_details', 'insert'), 'server can store contacts');
+select ok(not has_column_privilege('anon', 'public.seller_accounts', 'contact_phone', 'select'), 'manufacturer phone is private');
+select ok(not has_column_privilege('authenticated', 'public.seller_accounts', 'contact_phone', 'select'), 'other accounts cannot read manufacturer phone');
+select ok(has_column_privilege('anon', 'public.public_profiles', 'prefecture_code', 'select'), 'prefecture is public');
+select ok(has_column_privilege('anon', 'public.public_profiles', 'standpoint', 'select'), 'standpoint is public');
+select ok(not exists (select 1 from information_schema.columns where table_schema='public' and table_name='public_profiles' and column_name in ('family_name','given_name','city','phone','postal_code')), 'private fields are absent from public view');
+select * from finish();
+rollback;
