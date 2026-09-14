@@ -1,6 +1,6 @@
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 
-import { OfficialCheckIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import type { PublicSellerPageData } from "@/server/queries/public-sellers";
 import { css } from "../../../../../styled-system/css";
 
@@ -101,7 +101,7 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
           <h1 id="seller-name" className={css({ m: "0", fontSize: "xl", fontWeight: "800" })}>
             {seller.officialName}
           </h1>
-          <OfficialCheckIcon size={16} className={css({ color: "accent.official" })} />
+          <Icon name="verified" size="sm" className={css({ color: "accent.official" })} />
         </div>
         <span className={typeLabel}>メーカー</span>
         {seller.profileText ? (
@@ -134,7 +134,7 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
               rel="noreferrer"
               className={organizationLink}
             >
-              公式サイトを見る ↗
+              公式サイトを見る <Icon name="north_east" size="sm" />
             </a>
           ) : null}
           <span>主な地域：{seller.regionScope}</span>

@@ -8,6 +8,7 @@ import {
   deleteMaterial,
   getMaterial,
   sellerApprovalByLoginId,
+  sellerLoginIdByOfficialName,
   uniqueToken,
 } from "./support/test-data";
 import { loginAdminAndEnrollMfa } from "./support/ui";
@@ -23,7 +24,7 @@ for (const mode of ["existing", "new"]) {
   test(`@smoke メーカー申請、メーカー紐づけ（${mode}）、共有ログイン、ダッシュボード`, async ({
     page,
   }) => {
-    const loginId = uniqueToken("seller").slice(0, 30);
+    let loginId = uniqueToken("seller").slice(0, 30);
     const officialName = `E2Eメーカー${loginId.slice(-6)}株式会社`;
     let material = await createMaterial("approval-link");
     const newManufacturerName = `E2E新規メーカー_${loginId}`;
@@ -32,9 +33,6 @@ for (const mode of ["existing", "new"]) {
       await page.goto("/sellers");
       await expect(
         page.getByRole("heading", { name: "自社資材の情報を、正確に届ける。" }),
-      ).toBeVisible();
-      await expect(
-        page.getByText("利用できるのは、農業資材を製造するメーカーです。"),
       ).toBeVisible();
       await expect(page.getByRole("link", { name: "ログイン", exact: true })).toHaveAttribute(
         "href",
@@ -48,17 +46,20 @@ for (const mode of ["existing", "new"]) {
       await expect(page).toHaveURL(/\/sellers\/apply$/);
       await expect(page.getByRole("link", { name: "戻る" })).toHaveAttribute("href", "/sellers");
       await captureAccountScreen(page, "03-seller-apply.png");
-      await page.getByLabel("メーカー名（法人名）").fill(officialName);
+      await page.getByLabel("法人名", { exact: false }).fill(officialName);
       await expect(page.getByLabel("種別")).toHaveCount(0);
       await expect(page.getByText(/JA|農業法人|専門家/)).toHaveCount(0);
-      await page.getByLabel("ご希望のログインID").fill(loginId);
+      await expect(page.getByLabel("ご希望のログインID")).toHaveCount(0);
+      await page.getByLabel("法人番号").fill("1234567890123");
+      await page.getByLabel("ご担当者電話番号").fill("090-1234-5678");
       await page.getByLabel("連絡先メールアドレス").fill(`${loginId}@example.test`);
       await page.getByLabel("ご担当者名").fill("E2E 申請担当");
       await page.getByLabel("本社・主な拠点の所在地").fill("東京都千代田区");
-      await page.getByLabel("主な地域").selectOption("全国");
+      await expect(page.getByLabel("主な地域")).toHaveCount(0);
       await page.getByRole("button", { name: "申請する" }).click();
       await expect(page.getByRole("heading", { name: "申請を受け付けました" })).toBeVisible();
       await captureAccountScreen(page, "04-seller-apply-done.png");
+      loginId = await sellerLoginIdByOfficialName(officialName);
 
       await page.setViewportSize({ width: 1280, height: 900 });
       await loginAdminAndEnrollMfa(

@@ -128,7 +128,7 @@ export default async function AdminMaterialChangeRequestPage({
   return (
     <AdminShell
       backHref="/admin/materials/requests"
-      backLabel="← 資材変更申請"
+      backLabel="資材変更申請"
       description="公開中の内容とメーカー申請を比較し、承認後にだけ公開行へ反映する。"
       title="資材変更申請を確認"
     >

@@ -1,9 +1,9 @@
-// 一般ユーザーの立場（profiles.standpoint）。内部専用で公開画面には表示しない。
+// 公開プロフィールと投稿に表示する立場。
 export const STANDPOINTS = [
-  { value: "farmer", label: "農家" },
-  { value: "ja", label: "JA関係者" },
-  { value: "expert", label: "専門家・研究者" },
-  { value: "other", label: "その他" },
+  { value: "farmer", label: "生産者" },
+  { value: "ja", label: "JA関係者（指導員等も含む）" },
+  { value: "government", label: "行政関係者（県の普及員など）" },
+  { value: "other", label: "その他（メーカー関係者、専門家、研究者）" },
 ] as const satisfies readonly { value: string; label: string }[];
 
 export type Standpoint = (typeof STANDPOINTS)[number]["value"];

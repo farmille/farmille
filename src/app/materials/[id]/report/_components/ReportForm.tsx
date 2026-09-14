@@ -10,7 +10,7 @@ import {
   submitUsageReportAction,
 } from "@/app/materials/[id]/report/new/actions";
 import { Button } from "@/components/Button";
-import { LeafIcon, OfficialCheckIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import { Textarea } from "@/components/Textarea";
 import { trackUsageReportSubmitted } from "@/lib/analytics/events";
 import type {
@@ -329,14 +329,14 @@ export function ReportForm({
                 width={44}
               />
             ) : (
-              <LeafIcon size={28} />
+              <Icon name="leaf" size="xl" />
             )}
           </div>
           <div className={targetCopy}>
             <div className={targetName}>{material.name}</div>
             <div className={manufacturer}>
               {material.manufacturerName}
-              {material.isOfficial ? <OfficialCheckIcon /> : null}
+              {material.isOfficial ? <Icon name="verified" size="xs" /> : null}
             </div>
           </div>
           <span className={autoBadge}>自動</span>

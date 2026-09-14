@@ -89,7 +89,7 @@ export default async function AdminMaterialChangeRequestsPage({
   return (
     <AdminShell
       backHref="/admin/materials"
-      backLabel="← 資材の管理"
+      backLabel="資材の管理"
       description="メーカーから届いた新規登録・情報変更・掲載終了を、公開内容と比較して処理する。"
       title="資材変更申請"
     >

@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { AppBar } from "@/components";
@@ -76,7 +77,7 @@ export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
           </p>
           {destination !== null ? (
             <Link href={destination.href} className={linkStyle}>
-              {destination.label} →
+              {destination.label} <Icon name="arrow_forward" size="sm" />
             </Link>
           ) : null}
         </section>

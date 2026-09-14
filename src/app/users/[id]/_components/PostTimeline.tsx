@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { EmptyState, ReportCard, ReviewCard } from "@/components";
@@ -8,7 +9,7 @@ const stack = css({
   display: "flex",
   flexDirection: "column",
   gap: "2.5",
-  lg: {
+  tab: {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     alignItems: "start",
@@ -75,7 +76,7 @@ export function PostTimeline({ profile, posts, viewerUserId = null }: PostTimeli
               href={`/materials/${post.materialId}#review-${post.id}`}
               className={reviewDestination}
             >
-              資材詳細でこのレビューを見る →
+              資材詳細でこのレビューを見る <Icon name="arrow_forward" size="sm" />
             </Link>
           </article>
         ) : (

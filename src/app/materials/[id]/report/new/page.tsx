@@ -28,7 +28,7 @@ const main = css({
   px: "3.5",
   py: "4",
   bg: "surface.panel",
-  md: { px: "5", py: "5" },
+  tab: { px: "5", py: "5" },
 });
 
 export async function generateMetadata({ params }: ReportFormPageProps): Promise<Metadata> {

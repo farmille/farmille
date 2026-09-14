@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import {
@@ -18,7 +19,7 @@ const stack = css({
   display: "flex",
   flexDirection: "column",
   gap: "2.5",
-  lg: {
+  tab: {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     alignItems: "start",
@@ -93,7 +94,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
                   href={`/materials/${post.materialId}#review-${post.id}`}
                   className={reviewLink}
                 >
-                  資材詳細でこのレビューを見る →
+                  資材詳細でこのレビューを見る <Icon name="arrow_forward" size="sm" />
                 </Link>
               </article>
             ) : (
@@ -112,7 +113,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
                         textDecoration: "none",
                       })}
                     >
-                      フォームを再開 →
+                      フォームを再開 <Icon name="arrow_forward" size="sm" />
                     </Link>
                   ) : null}
                 </div>
@@ -172,7 +173,7 @@ export function SavedShelf({ items }: SavedShelfProps) {
       <SectionHeading
         title={<span id="me-saved-heading">検討リスト</span>}
         href="/me/saved"
-        linkLabel="すべて見る →"
+        linkLabel="すべて見る"
       />
       {items.length === 0 ? (
         <EmptyState
@@ -234,7 +235,7 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
                   href={`/materials/${item.materialId}#review-${item.id}`}
                   className={reviewLink}
                 >
-                  資材詳細でこのレビューを見る →
+                  資材詳細でこのレビューを見る <Icon name="arrow_forward" size="sm" />
                 </Link>
               </article>
             ) : (

@@ -1,7 +1,7 @@
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
-import { ChevronIcon, ImagePlaceholderIcon, OfficialCheckIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 import { StarRating } from "./StarRating";
 
 const scrollCard = cva({
@@ -19,7 +19,7 @@ const scrollCard = cva({
     display: "block",
     flexShrink: "0",
     w: "card.materialMobile",
-    lg: { w: "card.material" },
+    tab: { w: "card.material" },
   },
 });
 
@@ -28,7 +28,8 @@ const listCard = cva({
     display: "flex",
     gap: "3",
     p: "3",
-    alignItems: "center",
+    // 本文が複数行でもサムネをカード上端に置く
+    alignItems: "start",
     bg: "surface.card",
     borderWidth: "1px",
     borderStyle: "solid",
@@ -42,7 +43,7 @@ const listCard = cva({
 
 const imgBox = css({
   aspectRatio: "image.landscape",
-  bg: "green.soft2",
+  bg: "surface.card",
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
@@ -53,7 +54,7 @@ const listImg = css({
   w: "62px",
   aspectRatio: "image.square",
   borderRadius: "button",
-  bg: "green.soft2",
+  bg: "surface.card",
   display: "grid",
   placeItems: "center",
   flexShrink: "0",
@@ -99,7 +100,7 @@ function MaterialImage({
 }) {
   return (
     <div className={className} data-ui="material-card-image">
-      <ImagePlaceholderIcon className={imageLayer} />
+      <Icon name="image" size="lg" className={imageLayer} />
       {src ? (
         <Image
           alt={alt}
@@ -114,7 +115,7 @@ function MaterialImage({
           )}
           height={450}
           preload={preload}
-          sizes="(max-width: 1023px) 150px, 240px"
+          sizes="(max-width: 767px) 150px, 240px"
           src={src}
           width={600}
         />
@@ -151,9 +152,7 @@ export function MaterialCard({
         data-ui="material-card"
         data-variant="scroll"
       >
-        <div className={css({ bg: "surface.card", p: "2" })}>
-          <MaterialImage src={imageSrc} alt={alt} className={imgBox} preload={preload} />
-        </div>
+        <MaterialImage src={imageSrc} alt={alt} className={imgBox} preload={preload} />
         <div className={css({ px: "2.5", py: "2.5" })}>
           <div className={css({ fontSize: "sm", fontWeight: "700" })}>{name}</div>
           <div
@@ -168,7 +167,7 @@ export function MaterialCard({
           >
             {maker}
             {official ? (
-              <OfficialCheckIcon size={12} className={css({ color: "accent.official" })} />
+              <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />
             ) : null}
           </div>
           <div
@@ -223,7 +222,7 @@ export function MaterialCard({
       data-variant="list"
     >
       <div className={listImg} data-ui="material-card-image">
-        <ImagePlaceholderIcon className={imageLayer} />
+        <Icon name="image" size="lg" className={imageLayer} />
         {imageSrc ? (
           <Image
             alt={alt}
@@ -258,7 +257,7 @@ export function MaterialCard({
         >
           {maker}
           {official ? (
-            <OfficialCheckIcon size={14} className={css({ color: "accent.official" })} />
+            <Icon name="verified" size="xs" className={css({ color: "accent.official" })} />
           ) : null}
         </div>
         <div
@@ -300,7 +299,11 @@ export function MaterialCard({
           </p>
         ) : null}
       </div>
-      <ChevronIcon className={css({ color: "text.subtle", flexShrink: "0" })} />
+      <Icon
+        name="chevron_right"
+        size="sm"
+        className={css({ color: "text.subtle", flexShrink: "0", alignSelf: "center" })}
+      />
     </Link>
   );
 }

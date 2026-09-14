@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "@/components/Icon";
 
 import { TAG_CATEGORY_LABELS, type TagCategory } from "@/lib/tag-categories";
 import { cva, css, cx, type RecipeVariantProps } from "../../styled-system/css";
@@ -170,7 +171,7 @@ export function TagChip({
             onRemove();
           }}
         >
-          ×
+          <Icon name="close" size="sm" />
         </button>
       ) : null}
     </Comp>

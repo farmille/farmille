@@ -2,7 +2,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { Badge } from "./Badge";
-import { ChevronIcon, ImagePlaceholderIcon, OfficialCheckIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 
 const rowRecipe = cva({
   base: {
@@ -71,7 +71,7 @@ export function ArtMini({
             width={70}
           />
         ) : (
-          <ImagePlaceholderIcon size={20} />
+          <Icon name="image" size="md" />
         )}
       </div>
       <div className={css({ flex: "1", minW: "0" })}>
@@ -89,12 +89,16 @@ export function ArtMini({
         >
           {organization}
           {official ? (
-            <OfficialCheckIcon size={11} className={css({ color: "accent.official" })} />
+            <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />
           ) : null}
           <Badge variant="type">{typeLabel}</Badge>
         </div>
       </div>
-      <ChevronIcon className={css({ color: "text.subtle", flexShrink: "0" })} />
+      <Icon
+        name="chevron_right"
+        size="sm"
+        className={css({ color: "text.subtle", flexShrink: "0" })}
+      />
     </Link>
   );
 }

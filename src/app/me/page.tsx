@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { AppBar, StatCard } from "@/components";
@@ -31,7 +32,7 @@ const body = css({
   py: "4",
   pb: "6",
   bg: "surface.panel",
-  md: { px: "5", py: "5" },
+  tab: { px: "5", py: "5" },
 });
 
 const statRow = css({
@@ -83,7 +84,7 @@ export default async function MePage() {
               textDecoration: "none",
             })}
           >
-            公開プロフィールを見る →
+            公開プロフィールを見る <Icon name="arrow_forward" size="sm" />
           </Link>
         </p>
 

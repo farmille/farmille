@@ -31,7 +31,7 @@ export function HomeFooter() {
         pb: "24",
         borderTopWidth: "1px",
         borderColor: "border.default",
-        lg: { pb: "8" },
+        tab: { pb: "8" },
       })}
     >
       <div
@@ -39,10 +39,10 @@ export function HomeFooter() {
           display: "grid",
           gridTemplateColumns: "minmax(0, 1fr)",
           gap: "8",
-          lg: { gridTemplateColumns: "1.4fr repeat(3, minmax(0, 1fr))" },
+          tab: { gridTemplateColumns: "1.4fr repeat(3, minmax(0, 1fr))" },
         })}
       >
-        <div className={css({ gridColumn: "1 / -1", lg: { gridColumn: "auto" } })}>
+        <div className={css({ gridColumn: "1 / -1", tab: { gridColumn: "auto" } })}>
           <Link
             href="/"
             className={css({
@@ -55,9 +55,7 @@ export function HomeFooter() {
             Farmille
           </Link>
           <p className={css({ fontSize: "sm", color: "text.subtle", lineHeight: "relaxed" })}>
-            生産者による生産者のための
-            <br />
-            事例共有サイト
+            生産者による生産者のための事例共有サイト
           </p>
           <p className={css({ fontSize: "sm", color: "text.subtle", lineHeight: "relaxed" })}>
             BS資材を作物・効果から検索し、生産者の使用レポートとレビューを確かめられます。
@@ -65,7 +63,7 @@ export function HomeFooter() {
         </div>
         {groups.map((group) => (
           <nav key={group.title} aria-label={group.title}>
-            <h2
+            <h1
               className={css({
                 m: "0",
                 mb: "3",
@@ -75,7 +73,7 @@ export function HomeFooter() {
               })}
             >
               {group.title}
-            </h2>
+            </h1>
             <ul
               className={css({
                 listStyle: "none",
@@ -83,7 +81,7 @@ export function HomeFooter() {
                 p: "0",
                 display: "flex",
                 flexDirection: "column",
-                gap: "3",
+                gap: "1",
               })}
             >
               {group.links.map((link) => (

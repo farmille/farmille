@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import type { ReactNode } from "react";
 
 import { semanticTokens, tokens } from "@/theme/tokens";
@@ -84,8 +85,8 @@ const frame = css({
   fontFamily: "sans",
   maxW: "content.wide",
   mx: "auto",
-  px: { base: "4", md: "8" },
-  py: { base: "6", md: "10" },
+  px: { base: "4", tab: "8" },
+  py: { base: "6", tab: "10" },
 });
 
 const titleStyle = css({
@@ -122,8 +123,8 @@ const sectionLeadStyle = css({
 
 const swatchGrid = css({
   display: "grid",
-  gridTemplateColumns: { base: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
-  gap: { base: "2.5", md: "4" },
+  gridTemplateColumns: { base: "repeat(2, minmax(0, 1fr))", tab: "repeat(4, minmax(0, 1fr))" },
+  gap: { base: "2.5", tab: "4" },
 });
 
 const swatchCard = css({
@@ -168,7 +169,7 @@ const tokenRow = css({
   display: "grid",
   gridTemplateColumns: {
     base: "minmax(5.5rem, 0.4fr) minmax(0, 1fr)",
-    md: "12rem minmax(0, 1fr)",
+    tab: "12rem minmax(0, 1fr)",
   },
   alignItems: "center",
   gap: "3",
@@ -314,7 +315,15 @@ function ColorGrid({ items }: ColorGridProps) {
           />
           <div className={swatchMeta}>
             <code className={tokenNameStyle}>{item.name}</code>
-            <span>{item.reference === undefined ? item.value : `→ ${item.reference}`}</span>
+            <span>
+              {item.reference === undefined ? (
+                item.value
+              ) : (
+                <>
+                  <Icon name="arrow_forward" size="sm" /> {item.reference}
+                </>
+              )}
+            </span>
             {item.reference === undefined ? null : <span>{item.color}</span>}
           </div>
         </article>

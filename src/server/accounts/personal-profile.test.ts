@@ -3,7 +3,7 @@ import * as v from "valibot";
 import { PersonalProfileSchema } from "./personal-profile";
 
 describe("個人プロフィールの入力", () => {
-  it.each(["farmer", "ja", "expert", "other"])("立場 %s を選べる", (standpoint) => {
+  it.each(["farmer", "ja", "government", "other"])("立場 %s を選べる", (standpoint) => {
     expect(v.safeParse(PersonalProfileSchema, { handle: "名前", standpoint }).success).toBe(true);
   });
   it("空白・長すぎる名前・不正な立場を拒否する", () => {

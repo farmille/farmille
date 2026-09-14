@@ -3,13 +3,29 @@ import type { ReactNode } from "react";
 import { css } from "../../../styled-system/css";
 
 // モック（reference/mockup-sp-19screens.html）の .appbar / .body 相当。
-// 共通 AppBar は T-21 で作るため、ここでは認証画面用の最小の枠だけを持つ。
+// sp は上詰め、tab 以上はタイトルとフォームを画面中央に置く。
 const screenStyle = css({
   minH: "100dvh",
   bg: "surface.panel",
   color: "text.default",
   mx: "auto",
   maxW: "auth",
+  tab: {
+    maxW: "none",
+    display: "flex",
+    flexDirection: "column",
+    px: "5",
+  },
+});
+
+const frameStyle = css({
+  tab: {
+    w: "100%",
+    maxW: "auth",
+    my: "auto",
+    mx: "auto",
+    py: "10",
+  },
 });
 
 const appBarStyle = css({
@@ -26,6 +42,11 @@ const appBarStyle = css({
   borderBottomWidth: "1px",
   borderBottomStyle: "solid",
   borderBottomColor: "border.default",
+  tab: {
+    position: "static",
+    px: "4",
+    borderBottomWidth: "0",
+  },
 });
 
 const titleStyle = css({
@@ -40,6 +61,9 @@ const bodyStyle = css({
   px: "4",
   pt: "4",
   pb: "10",
+  tab: {
+    pb: "4",
+  },
 });
 
 const leadStyle = css({
@@ -60,12 +84,14 @@ export function AuthScreen({
 }) {
   return (
     <main className={screenStyle}>
-      <header className={appBarStyle}>
-        <h1 className={titleStyle}>{title}</h1>
-      </header>
-      <div className={bodyStyle}>
-        {lead === undefined ? null : <p className={leadStyle}>{lead}</p>}
-        {children}
+      <div className={frameStyle}>
+        <header className={appBarStyle}>
+          <h1 className={titleStyle}>{title}</h1>
+        </header>
+        <div className={bodyStyle}>
+          {lead === undefined ? null : <p className={leadStyle}>{lead}</p>}
+          {children}
+        </div>
       </div>
     </main>
   );

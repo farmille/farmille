@@ -38,7 +38,7 @@ const materialShellRecipe = cva({
   },
   variants: {
     hasFab: {
-      true: { pb: "24", lg: { pb: "8" } },
+      true: { pb: "24", tab: { pb: "8" } },
       false: { pb: "6" },
     },
   },
@@ -78,13 +78,12 @@ export function FormPageShell({
         className={cx(
           mainWidthRecipe({ width: chrome === "seller" ? "seller" : variant }),
           isMaterial
-            ? css({ px: "3.5", py: "4", md: { px: "5", py: "5" } })
+            ? css({ px: "3.5", py: "4", tab: { px: "5", py: "5" } })
             : css({
                 px: "4",
                 pt: "4",
                 pb: hasFixedFooter ? "40" : "8",
-                md: { px: "5" },
-                lg: { pb: "8" },
+                tab: { px: "5", pb: "8" },
               }),
           isMaterial && materialShellRecipe({ hasFab }),
         )}

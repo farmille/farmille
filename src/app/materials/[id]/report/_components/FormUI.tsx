@@ -1,5 +1,5 @@
 import { cva, css, cx } from "../../../../../../styled-system/css";
-import { CheckIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 
 export { SectionHeading } from "@/components/SectionHeading";
 
@@ -265,7 +265,7 @@ export function TogglePanel({
         onClick={() => onChange(!checked)}
       >
         <span className={checkBox({ checked })} aria-hidden>
-          <CheckIcon size={14} />
+          <Icon name="check" size="xs" />
         </span>
         <span>{label}</span>
         {optional ? (
@@ -321,7 +321,7 @@ export function ConsentCheck({
         onClick={() => onChange(!checked)}
       >
         <span className={checkBox({ checked })} aria-hidden>
-          <CheckIcon size={14} />
+          <Icon name="check" size="xs" />
         </span>
         <span>
           この使用結果には、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬的な効果を断定する表現を含めていません

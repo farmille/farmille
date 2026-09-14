@@ -58,7 +58,7 @@ const listStyle = css({
   gridTemplateColumns: "1fr",
   gap: "0",
   m: "0",
-  md: { gridTemplateColumns: "180px 1fr" },
+  tab: { gridTemplateColumns: "180px 1fr" },
 });
 
 const termStyle = css({
@@ -79,7 +79,7 @@ const valueStyle = css({
   py: "2",
   wordBreak: "break-word",
   whiteSpace: "pre-wrap",
-  md: {
+  tab: {
     borderTopWidth: "1px",
     borderTopStyle: "solid",
     borderTopColor: "border.default",
@@ -140,7 +140,7 @@ export const adminFieldGridStyle = css({
   display: "grid",
   gridTemplateColumns: "1fr",
   gap: "3",
-  md: { gridTemplateColumns: "1fr 1fr" },
+  tab: { gridTemplateColumns: "1fr 1fr" },
 });
 
 export const adminInlineNoteStyle = css({

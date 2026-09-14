@@ -49,6 +49,10 @@ export const tokens = {
         value: "0 1px 2px rgba(30,35,31,.05), 0 4px 14px rgba(30,35,31,.06)",
       },
       lift: { value: "0 8px 30px rgba(30,35,31,.16)" },
+      // 写真の上に置く半透明の面。上辺の内側ハイライトでガラスの厚みを出す
+      glass: {
+        value: "inset 0 1px 0 rgba(255,255,255,.65), 0 10px 32px rgba(30,35,31,.18)",
+      },
     },
   },
   radii: {
@@ -80,11 +84,16 @@ export const tokens = {
     // ホームのヒーロー見出し専用（ゴシックMB101 L）。通常UIの8段とは別枠で持つ
     hero: {
       DEFAULT: { value: "28px" },
+      md: { value: "44px" },
       lg: { value: "64px" },
     },
   },
   // 公式npmパッケージをlayoutで読み込む（フォールバックは02 §5のスタック）
   fonts: {
+    // Adobe Fonts の DNP秀英角ゴシック金 Std B（weight 600）
+    shueiGothicKin: {
+      value: '"dnp-shuei-gothic-kin-std", var(--fonts-sans)',
+    },
     // Adobe Fonts の Farmille Web プロジェクトで配信するゴシックMB101 L（weight 300）
     gothicMb101: {
       value: '"a-otf-gothic-mb101-pr6n", var(--fonts-sans)',
@@ -135,6 +144,31 @@ export const tokens = {
   },
   // コンテンツ用途ごとの上限幅。breakpoint 名を width 値へ流用しない。
   sizes: {
+    // 短いラベルでも操作対象として横幅を確保する。
+    button: {
+      sm: { value: "96px" },
+      md: { value: "120px" },
+    },
+    skeleton: {
+      materialHero: { value: "118px" },
+      text: { value: "16px" },
+      short: { value: "12px" },
+      title: { value: "24px" },
+      avatar: { value: "32px" },
+      thumbnail: { value: "62px" },
+      control: { value: "44px" },
+      count: { value: "96px" },
+    },
+    // 共通 Icon の寸法。画面では size variant から指定する。
+    icon: {
+      "2xs": { value: "12px" },
+      xs: { value: "14px" },
+      sm: { value: "16px" },
+      md: { value: "20px" },
+      lg: { value: "24px" },
+      xl: { value: "28px" },
+      "2xl": { value: "32px" },
+    },
     card: {
       materialMobile: { value: "9.375rem" },
       material: { value: "15rem" },
@@ -166,6 +200,7 @@ export const tokens = {
     // トーストだけUI標準より柔らかいカーブにする
     soft: { value: "ease" },
   },
+  animations: { skeletonPulse: { value: "skeleton-pulse 1.6s ease-in-out infinite" } },
   durations: {
     fast: { value: "160ms" },
     dialog: { value: "250ms" },

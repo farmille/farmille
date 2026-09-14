@@ -12,7 +12,7 @@ const linkStyle = css({
 
 export default function AdminMaterialNotFound() {
   return (
-    <AdminShell backHref="/admin/materials" backLabel="← 資材の管理" title="資材が見つかりません">
+    <AdminShell backHref="/admin/materials" backLabel="資材の管理" title="資材が見つかりません">
       <Panel title="対象なし">
         <p className={adminInlineNoteStyle}>
           指定された資材は存在しないか、削除された可能性があります。

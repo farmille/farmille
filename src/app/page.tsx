@@ -1,9 +1,10 @@
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
-import Link from "next/link";
+import { Suspense } from "react";
+import { SkeletonList } from "@/components/SkeletonList";
 import { notFound } from "next/navigation";
 import * as v from "valibot";
 
-import { AppBar, MaterialCard, ReportCard, ReviewCard, SectionHeading } from "@/components";
+import { AppBar, MaterialCard, ReportCard, SectionHeading } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { getSessionUser } from "@/server/auth";
 import { listHomeMaterials } from "@/server/queries/home-materials";
@@ -12,7 +13,9 @@ import { listRecentUsageReports } from "@/server/queries/usage-reports";
 import { css } from "../../styled-system/css";
 import { HomeHero } from "./_components/HomeHero";
 import { HomeInvitations } from "./_components/HomeInvitations";
+import { HomeMaterialMarquee } from "./_components/HomeMaterialMarquee";
 import { HomeFooter } from "./_components/HomeFooter";
+import { HomeReviewFeed } from "./_components/HomeReviewFeed";
 import { HomeFeedOrder } from "./_components/HomeFeedOrder";
 import { homeFeedIds } from "@/server/queries/home-order";
 import { getViewerHelpfulVotes } from "@/server/queries/helpful";
@@ -43,30 +46,6 @@ export default async function HomePage({
   if (!parsed.success) notFound();
   const reportSort = parsed.output.reports;
   const reviewSort = parsed.output.reviews;
-  const [session, materialsResult, reportIds, reviewIds] = await Promise.all([
-    getSessionUser(),
-    listHomeMaterials(),
-    homeFeedIds("usage_report", reportSort, 3),
-    homeFeedIds("review", reviewSort, 4),
-  ]);
-  const [reportsResult, reviewsResult, reportVotes] = await Promise.all([
-    listRecentUsageReports({ limit: 3, ids: reportIds }),
-    listRecentReviews({
-      limit: 4,
-      ids: reviewIds,
-      viewerUserId:
-        session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null,
-    }),
-    getViewerHelpfulVotes(
-      session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null,
-      "usage_report",
-      reportIds,
-    ),
-  ]);
-  if (!reportVotes.ok) throw new Error("使用レポートの投票状態を取得できませんでした。");
-  if (!reportsResult.ok)
-    throw new Error("使用レポートの取得に失敗しました：" + reportsResult.error);
-  if (!reviewsResult.ok) throw new Error("レビューの取得に失敗しました：" + reviewsResult.error);
 
   return (
     <div
@@ -86,176 +65,57 @@ export default async function HomePage({
             mx: "auto",
             px: "4",
             pt: "8",
-            lg: { px: "5", pt: "10" },
+            tab: { px: "5", pt: "10" },
           })}
         >
           <div className={css({ display: "flex", flexDirection: "column", gap: "12" })}>
             <section aria-label="掲載資材一覧">
-              <SectionHeading title="掲載資材一覧" href="/search" linkLabel="すべて見る →" />
-              <div
-                className={css({
-                  display: "flex",
-                  gap: "3",
-                  overflowX: "auto",
-                  scrollSnapType: "x mandatory",
-                  pb: "4",
-                })}
+              <SectionHeading as="h1" title="掲載資材一覧" href="/search" linkLabel="すべて見る" />
+              <Suspense
+                fallback={
+                  <SkeletonList variant="materialScroll" label="掲載資材を読み込んでいます" />
+                }
               >
-                {materialsResult.map((material) => (
-                  <MaterialCard
-                    key={material.id}
-                    variant="scroll"
-                    name={material.name}
-                    maker={material.manufacturer_name}
-                    rating={material.avg_rating ?? 0}
-                    reviewCount={material.review_count}
-                    articleCount={material.reportCount}
-                    savedCount={material.savedCount}
-                    categories={material.categories}
-                    official={material.manufacturer_verified_at !== null}
-                    imageSrc={material.primaryImage?.url}
-                    href={`/materials/${material.id}`}
-                  />
-                ))}
-              </div>
-              {materialsResult.length === 0 ? (
-                <p className={empty}>表示できる資材がまだありません。</p>
-              ) : (
-                <p className={css({ fontSize: "xs", color: "text.subtle" })}>
-                  ※ 表示順はランダムです（広告・優先枠ではありません）。
-                </p>
-              )}
+                <HomeMaterials />
+              </Suspense>
             </section>
             <section className={section} aria-labelledby="producer-voices">
-              <h2
+              <h1
                 id="producer-voices"
                 className={css({ m: "0", fontSize: "2xl", fontWeight: "700" })}
               >
                 生産者の声
-              </h2>
+              </h1>
               <section className={section} aria-labelledby="home-reports">
-                <h3 id="home-reports" className={feedTitle}>
+                <h2 id="home-reports" className={feedTitle}>
                   使用レポート
-                </h3>
+                </h2>
                 <HomeFeedOrder target="reports" reportSort={reportSort} reviewSort={reviewSort} />
-                {reportsResult.data.length > 0 ? (
-                  <div
-                    className={css({
-                      display: "grid",
-                      gap: "3",
-                      gridAutoFlow: "column",
-                      gridAutoColumns: "85%",
-                      overflowX: "auto",
-                      scrollSnapType: "x mandatory",
-                      pb: "4",
-                      "& > *": { scrollSnapAlign: "start" },
-                      md: {
-                        gridAutoFlow: "row",
-                        gridAutoColumns: "auto",
-                        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                      },
-                    })}
-                  >
-                    {reportsResult.data.map((report) => (
-                      <ReportCard
-                        key={report.id}
-                        layout="list"
-                        title={report.title}
-                        summary={report.summary}
-                        reportId={session?.userId === report.authorUserId ? undefined : report.id}
-                        helpfulVoted={reportVotes.data.has(report.id)}
-                        currentPath={`/?reports=${reportSort}&reviews=${reviewSort}`}
-                        materialName={report.materialName}
-                        materialHref={`/materials/${report.materialId}`}
-                        author={report.authorHandle}
-                        crop={report.cropName}
-                        helpfulCount={report.helpfulCount}
-                        coverSrc={report.coverUrl ?? undefined}
-                        href={`/reports/${report.id}`}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <p className={empty}>
-                    まだ公開中の使用レポートはありません。投稿は運営の確認後に公開されます。
-                  </p>
-                )}
+                <Suspense
+                  key={reportSort}
+                  fallback={
+                    <SkeletonList variant="reportScroll" label="使用レポートを読み込んでいます" />
+                  }
+                >
+                  <HomeReports reportSort={reportSort} reviewSort={reviewSort} />
+                </Suspense>
               </section>
               <section className={section} aria-labelledby="home-reviews">
-                <h3 id="home-reviews" className={feedTitle}>
+                <h2 id="home-reviews" className={feedTitle}>
                   レビュー
-                </h3>
-                <HomeFeedOrder target="reviews" reportSort={reportSort} reviewSort={reviewSort} />
-                {reviewsResult.data.length > 0 ? (
-                  <div
-                    className={css({
-                      display: "grid",
-                      gap: "3",
-                      gridAutoFlow: "column",
-                      gridAutoColumns: "85%",
-                      overflowX: "auto",
-                      scrollSnapType: "x mandatory",
-                      pb: "4",
-                      "& > *": { scrollSnapAlign: "start" },
-                      md: {
-                        gridAutoFlow: "row",
-                        gridAutoColumns: "auto",
-                        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                      },
-                      lg: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))" },
-                    })}
-                  >
-                    {reviewsResult.data.map((review) => (
-                      <div
-                        key={review.id}
-                        className={css({
-                          bg: "surface.card",
-                          borderWidth: "1px",
-                          borderColor: "border.default",
-                          borderRadius: "card",
-                          boxShadow: "shadow",
-                          display: "flex",
-                          flexDirection: "column",
-                          overflow: "hidden",
-                        })}
-                      >
-                        <ReviewCard
-                          className={css({ borderWidth: "0", boxShadow: "none", flex: "1" })}
-                          handle={review.author?.handle ?? "匿名"}
-                          crop={review.crops.map((crop) => crop.name).join("・")}
-                          rating={review.rating}
-                          helpfulCount={review.helpfulCount}
-                          reviewId={
-                            session?.userId === review.author_user_id ? undefined : review.id
-                          }
-                          materialId={review.material_id}
-                          helpfulVoted={review.helpfulVotedByViewer}
-                          currentPath={`/?reports=${reportSort}&reviews=${reviewSort}`}
-                          body={review.body}
-                        />
-                        <Link
-                          href={`/materials/${review.material_id}/reviews`}
-                          className={css({
-                            display: "block",
-                            p: "3",
-                            fontSize: "sm",
-                            color: "brand.primaryDeep",
-                            textDecoration: "none",
-                          })}
-                        >
-                          {review.materialName} →
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={empty}>
-                    まだ公開中のレビューはありません。資材を使った感想を共有してください。
-                  </p>
-                )}
+                </h2>
+                <Suspense
+                  fallback={
+                    <SkeletonList variant="reviewScroll" label="レビューを読み込んでいます" />
+                  }
+                >
+                  <HomeReviews reportSort={reportSort} reviewSort={reviewSort} />
+                </Suspense>
               </section>
             </section>
-            <HomeInvitations showSignup={session === null} />
+            <Suspense fallback={null}>
+              <HomeAccountInvitations />
+            </Suspense>
           </div>
           <HomeFooter />
         </div>
@@ -263,4 +123,141 @@ export default async function HomePage({
       <BottomNav active="home" />
     </div>
   );
+}
+
+async function HomeMaterials() {
+  const materialsResult = await listHomeMaterials();
+  return (
+    <>
+      <HomeMaterialMarquee>
+        {materialsResult.map((material) => (
+          <MaterialCard
+            key={material.id}
+            variant="scroll"
+            name={material.name}
+            maker={material.manufacturer_name}
+            rating={material.avg_rating ?? 0}
+            reviewCount={material.review_count}
+            articleCount={material.reportCount}
+            savedCount={material.savedCount}
+            categories={material.categories}
+            official={material.manufacturer_verified_at !== null}
+            imageSrc={material.primaryImage?.url}
+            href={`/materials/${material.id}`}
+          />
+        ))}
+      </HomeMaterialMarquee>
+      {materialsResult.length === 0 ? (
+        <p className={empty}>表示できる資材がまだありません。</p>
+      ) : null}
+    </>
+  );
+}
+
+async function HomeReports({
+  reportSort,
+  reviewSort,
+}: {
+  reportSort: "newest" | "helpful";
+  reviewSort: "newest" | "helpful";
+}) {
+  const [session, reportIds] = await Promise.all([
+    getSessionUser(),
+    homeFeedIds("usage_report", reportSort, 3),
+  ]);
+  const [reportsResult, reportVotes] = await Promise.all([
+    listRecentUsageReports({ limit: 3, ids: reportIds }),
+    getViewerHelpfulVotes(
+      session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null,
+      "usage_report",
+      reportIds,
+    ),
+  ]);
+  if (!reportVotes.ok) throw new Error("使用レポートの投票状態を取得できませんでした。");
+  if (!reportsResult.ok)
+    throw new Error("使用レポートの取得に失敗しました：" + reportsResult.error);
+  return (
+    <>
+      {reportsResult.data.length > 0 ? (
+        <div
+          className={css({
+            display: "grid",
+            gap: "3",
+            gridAutoFlow: "column",
+            gridAutoColumns: "85%",
+            overflowX: "auto",
+            scrollSnapType: "x mandatory",
+            pb: "4",
+            "& > *": { scrollSnapAlign: "start" },
+            tab: {
+              gridAutoFlow: "row",
+              gridAutoColumns: "auto",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            },
+          })}
+        >
+          {reportsResult.data.map((report) => (
+            <ReportCard
+              key={report.id}
+              layout="list"
+              title={report.title}
+              summary={report.summary}
+              reportId={session?.userId === report.authorUserId ? undefined : report.id}
+              helpfulVoted={reportVotes.data.has(report.id)}
+              currentPath={`/?reports=${reportSort}&reviews=${reviewSort}`}
+              materialName={report.materialName}
+              materialHref={`/materials/${report.materialId}`}
+              author={report.authorHandle}
+              crop={report.cropName}
+              helpfulCount={report.helpfulCount}
+              coverSrc={report.coverUrl ?? undefined}
+              href={`/reports/${report.id}`}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className={empty}>
+          まだ公開中の使用レポートはありません。投稿は運営の確認後に公開されます。
+        </p>
+      )}
+    </>
+  );
+}
+
+async function HomeReviews({
+  reportSort,
+  reviewSort,
+}: {
+  reportSort: "newest" | "helpful";
+  reviewSort: "newest" | "helpful";
+}) {
+  const [session, newest, helpful] = await Promise.all([
+    getSessionUser(),
+    homeFeedIds("review", "newest", 4),
+    homeFeedIds("review", "helpful", 4),
+  ]);
+  // 重複投稿の本文・投票状態は一度だけ取得する。最大8件に限定する。
+  const reviewIds = [...new Set([...newest, ...helpful])];
+  const viewerUserId =
+    session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
+  const reviewsResult = await listRecentReviews({
+    limit: Math.max(1, reviewIds.length),
+    ids: reviewIds,
+    viewerUserId,
+  });
+  if (!reviewsResult.ok) throw new Error("レビューの取得に失敗しました：" + reviewsResult.error);
+  return (
+    <HomeReviewFeed
+      reviews={reviewsResult.data}
+      orders={{ newest, helpful }}
+      viewerUserId={viewerUserId}
+      reportSort={reportSort}
+      reviewSort={reviewSort}
+    />
+  );
+}
+
+async function HomeAccountInvitations() {
+  const session = await getSessionUser();
+  return <HomeInvitations showSignup={session === null} />;
 }

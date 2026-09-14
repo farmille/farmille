@@ -33,7 +33,7 @@ const fieldGridStyle = css({
   display: "grid",
   gridTemplateColumns: "1fr",
   gap: "4",
-  md: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
+  tab: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
 });
 
 const chipGridStyle = css({ display: "flex", flexWrap: "wrap", gap: "2" });

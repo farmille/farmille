@@ -1,20 +1,20 @@
 "use client";
 
+import { Icon } from "./Icon";
+
 import { cva, css, cx } from "../../styled-system/css";
 
 const displayRecipe = cva({
   base: {
     color: "accent.star",
-    fontSize: "sm",
-    letterSpacing: "1px",
     display: "inline-flex",
     alignItems: "center",
     gap: "0",
   },
   variants: {
     size: {
-      sm: { fontSize: "sm" },
-      lg: { fontSize: "2xl", gap: "2", letterSpacing: "0" },
+      sm: { gap: "0" },
+      lg: { gap: "2" },
     },
   },
   defaultVariants: {
@@ -27,7 +27,6 @@ const inputStar = css({
   bg: "transparent",
   padding: "0",
   cursor: "pointer",
-  fontSize: "32px",
   lineHeight: "1",
   color: "accent.star",
 });
@@ -59,7 +58,7 @@ function clampInt(n: number): number {
   return Math.max(0, Math.min(5, Math.round(n)));
 }
 
-/** ★表示（整数）と入力（タップで 1〜5）。 */
+/** 評価の星を表示し、入力時はタップで1〜5を選択する。 */
 export function StarRating(props: StarRatingProps) {
   if (props.mode === "input") {
     const value = clampInt(props.value);
@@ -81,7 +80,7 @@ export function StarRating(props: StarRatingProps) {
               className={cx(inputStar, !on && inputStarOff)}
               onClick={() => props.onChange(n)}
             >
-              ★
+              <Icon name="star_filled" size="2xl" />
             </button>
           );
         })}
@@ -91,15 +90,20 @@ export function StarRating(props: StarRatingProps) {
   }
 
   const value = clampInt(props.value);
-  const filled = "★".repeat(value);
-  const empty = "☆".repeat(5 - value);
   return (
     <span
       className={cx(displayRecipe({ size: props.size }), props.className)}
+      role="img"
       aria-label={`評価 ${value}`}
     >
-      {filled}
-      {empty}
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Icon
+          key={n}
+          name={n <= value ? "star_filled" : "star"}
+          // sm は本文（md=14px）の横に置く。Material アイコンの内余白を見込んで 16px。
+          size={props.size === "lg" ? "md" : "sm"}
+        />
+      ))}
     </span>
   );
 }

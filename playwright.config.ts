@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const BASE_URL = "http://127.0.0.1:3007";
+const BASE_URL = "http://localhost:3007";
 const LOCAL_SUPABASE_ORIGIN = "http://127.0.0.1:54321";
 const useExternalWebServer = process.env.PLAYWRIGHT_EXTERNAL_WEB_SERVER === "1";
 

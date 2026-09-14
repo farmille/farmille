@@ -1,87 +1,33 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import * as v from "valibot";
 
 import { clientEnv } from "@/env";
-import {
-  EMAIL_PATTERN,
-  HANDLE_MAX_LENGTH,
-  PASSWORD_MAX_LENGTH,
-  PASSWORD_MIN_LENGTH,
-} from "@/lib/auth/account-rules";
-import { isStandpoint, type Standpoint } from "@/lib/standpoints";
-import { formDataString, trimmedFormDataString } from "@/lib/validation";
+import { generalRegistrationSchema } from "@/lib/auth/registration-schema";
 import { toErrorCode } from "@/server/accounts/auth-errors";
 import { fail, succeed, type Result } from "@/server/result";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
-export type GeneralSignupInput = {
-  handle: string;
-  email: string;
-  password: string;
-  standpoint: Standpoint;
-};
-
+export type GeneralSignupInput = v.InferOutput<typeof generalRegistrationSchema>;
 export type GeneralSignupFieldErrors = Partial<Record<keyof GeneralSignupInput, string>>;
-
 export type GeneralSignupValidation =
   | { ok: true; input: GeneralSignupInput }
   | { ok: false; fieldErrors: GeneralSignupFieldErrors };
+export type GeneralSignupResult = { userId: string; signedIn: boolean };
 
-export type GeneralSignupResult = {
-  userId: string;
-  /** メール確認が不要な設定では、登録と同時にログイン状態になる。 */
-  signedIn: boolean;
-};
-
-export function validateGeneralSignup(raw: {
-  handle: FormDataEntryValue | null;
-  email: FormDataEntryValue | null;
-  password: FormDataEntryValue | null;
-  standpoint: FormDataEntryValue | null;
-}): GeneralSignupValidation {
+/** フォーム境界で必須項目・形式・同意をまとめて検証する。 */
+type GeneralSignupFormValues = { [Key in keyof GeneralSignupInput]: FormDataEntryValue | null };
+export function validateGeneralSignup(raw: GeneralSignupFormValues): GeneralSignupValidation {
+  const result = v.safeParse(generalRegistrationSchema, raw);
+  if (result.success) return { ok: true, input: result.output };
   const fieldErrors: GeneralSignupFieldErrors = {};
-
-  const handle = trimmedFormDataString(raw.handle);
-  if (handle.length === 0) {
-    fieldErrors.handle = "ハンドルネームを入力してください。";
-  } else if (handle.length > HANDLE_MAX_LENGTH) {
-    fieldErrors.handle = `ハンドルネームは${HANDLE_MAX_LENGTH}文字以内で入力してください。`;
+  const nested = v.flatten(result.issues).nested;
+  for (const key of Object.keys(generalRegistrationSchema.entries)) {
+    const parsedKey = v.parse(v.keyof(generalRegistrationSchema), key);
+    const message = nested?.[parsedKey]?.[0];
+    if (message !== undefined) fieldErrors[parsedKey] = message;
   }
-
-  const email = trimmedFormDataString(raw.email);
-  if (email.length === 0) {
-    fieldErrors.email = "メールアドレスを入力してください。";
-  } else if (!EMAIL_PATTERN.test(email)) {
-    fieldErrors.email = "メールアドレスの形式が正しくありません。";
-  }
-
-  const password = formDataString(raw.password) ?? "";
-  if (password.length < PASSWORD_MIN_LENGTH) {
-    fieldErrors.password = `パスワードは${PASSWORD_MIN_LENGTH}文字以上で入力してください。`;
-  } else if (password.length > PASSWORD_MAX_LENGTH) {
-    fieldErrors.password = `パスワードは${PASSWORD_MAX_LENGTH}文字以内で入力してください。`;
-  }
-
-  const standpoint = formDataString(raw.standpoint);
-  if (!isStandpoint(standpoint)) {
-    fieldErrors.standpoint = "あなたの立場を選択してください。";
-
-    return { ok: false, fieldErrors };
-  }
-
-  if (Object.keys(fieldErrors).length > 0) {
-    return { ok: false, fieldErrors };
-  }
-
-  return {
-    ok: true,
-    input: {
-      handle,
-      email,
-      password,
-      standpoint,
-    },
-  };
+  return { ok: false, fieldErrors };
 }
 
 async function isHandleTaken(
@@ -167,6 +113,7 @@ export async function registerGeneralUser(
     user_id: user.id,
     handle: input.handle,
     standpoint: input.standpoint,
+    prefecture_code: input.prefectureCode,
   });
 
   if (profileError !== null) {
@@ -177,6 +124,20 @@ export async function registerGeneralUser(
 
     console.error(`[auth] profiles の作成に失敗: ${profileError.code} ${profileError.message}`);
 
+    return fail("internal");
+  }
+
+  const { error: contactError } = await admin.from("profile_contact_details").insert({
+    user_id: user.id,
+    family_name: input.familyName,
+    given_name: input.givenName,
+    phone: input.phone || null,
+    postal_code: input.postalCode,
+    city: input.city,
+  });
+  if (contactError !== null) {
+    console.error("[auth] 非公開連絡先の保存に失敗", contactError.code);
+    await rollbackAuthUser(admin, user.id);
     return fail("internal");
   }
 

@@ -4,7 +4,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { useEffect, useState } from "react";
 
 import { css } from "../../../../../../styled-system/css";
-import { ImagePlaceholderIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 import {
@@ -148,7 +148,7 @@ function MediaPreview({ item }: { item: ReportMediaDraft }) {
   if (item.file !== null) {
     return <LocalMediaPreview file={item.file} mediaType={item.mediaType} caption={item.caption} />;
   }
-  if (item.url.length === 0) return <ImagePlaceholderIcon size={30} />;
+  if (item.url.length === 0) return <Icon name="image" size="xl" />;
   if (item.mediaType === "video") {
     return <video className={previewMedia} src={item.url} controls muted playsInline />;
   }
@@ -237,7 +237,7 @@ export function MediaFields({
                   aria-label="写真・動画を削除"
                   onClick={() => onChange(media.filter((candidate) => candidate.key !== item.key))}
                 >
-                  ×
+                  <Icon name="close" size="sm" />
                 </button>
               </div>
               <Select
@@ -269,7 +269,7 @@ export function MediaFields({
             </div>
           ))}
           <label className={addLabel}>
-            ＋
+            <Icon name="add" size="sm" />
             <br />
             写真・動画を追加
             <input

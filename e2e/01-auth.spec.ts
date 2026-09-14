@@ -32,18 +32,18 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
 
     await page.goto("/signup/general");
     await expect(page.getByRole("heading", { name: "一般ユーザー登録" })).toBeVisible();
-    await expect(page.getByLabel("都道府県")).toHaveCount(0);
+    await expect(page.getByLabel("都道府県")).toBeVisible();
     await expect(page.getByText("あなたの立場")).toBeVisible();
     await expect(page.getByRole("radio")).toHaveCount(4);
-    await expect(page.getByRole("radio", { name: "農家", exact: true })).toBeVisible();
-    await expect(page.getByRole("radio", { name: "JA関係者", exact: true })).toBeVisible();
-    await expect(page.getByRole("radio", { name: "専門家・研究者", exact: true })).toBeVisible();
-    await expect(page.getByRole("radio", { name: "その他", exact: true })).toBeVisible();
+    await expect(page.getByRole("radio", { name: "生産者", exact: true })).toBeVisible();
+    await expect(page.getByRole("radio", { name: /^JA関係者/ })).toBeVisible();
+    await expect(page.getByRole("radio", { name: /^行政関係者/ })).toBeVisible();
+    await expect(page.getByRole("radio", { name: /^その他/ })).toBeVisible();
     await expect(page.getByText("メーカー関係者", { exact: true })).toHaveCount(0);
     await captureAccountScreen(page, "02-general-signup.png");
 
     await signupGeneral(page, { handle, email, password });
-    await expect(page).toHaveURL(/\/signup\/done$/);
+    await expect(page).toHaveURL(/\/signup\/done$/, { timeout: 30_000 });
     await expect(page.getByRole("heading", { name: "登録が完了しました" })).toBeVisible();
     await captureAccountScreen(page, "07-general-signup-done.png");
 

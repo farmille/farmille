@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "@/components/Icon";
 
 import { useState } from "react";
 
@@ -279,7 +280,7 @@ function CultivationFeatures({
             className={tagButton({ selected: false })}
             onClick={() => setExpanded(true)}
           >
-            ＋ その他の技術
+            <Icon name="add" size="sm" /> その他の技術
           </button>
         ) : null}
       </div>
@@ -823,7 +824,7 @@ function MetricsFields({
         className={cx(smallButton, css({ mt: "3" }))}
         onClick={() => onChange({ ...input, metrics: [...input.metrics, createBlankMetric()] })}
       >
-        ＋ 指標を追加
+        <Icon name="add" size="sm" /> 指標を追加
       </button>
       <FieldError message={error} />
     </TogglePanel>

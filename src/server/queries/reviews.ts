@@ -26,7 +26,10 @@ type ReviewFields = Pick<
   | "created_at"
 >;
 
-export type ReviewAuthor = Pick<PublicProfileRow, "user_id" | "handle" | "avatar_url">;
+export type ReviewAuthor = Pick<
+  PublicProfileRow,
+  "user_id" | "handle" | "avatar_url" | "standpoint" | "prefecture_code"
+>;
 
 export type ReviewCrop = Pick<CropRow, "id" | "name">;
 
@@ -87,7 +90,9 @@ const REVIEW_SELECT = `
   author:public_profiles!reviews_author_user_id_fkey (
     user_id,
     handle,
-    avatar_url
+    avatar_url,
+    standpoint,
+    prefecture_code
   ),
   cropRelations:review_crops (
     sort_order,

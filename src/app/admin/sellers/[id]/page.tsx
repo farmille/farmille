@@ -61,6 +61,12 @@ function publicItems(seller: SellerDetail): DescriptionItem[] {
 function internalItems(seller: SellerDetail): DescriptionItem[] {
   return [
     { term: "担当者名", value: seller.contact_name },
+    { term: "法人番号", value: <OptionalValue value={seller.corporate_number} /> },
+    { term: "担当者電話番号", value: <OptionalValue value={seller.contact_phone} /> },
+    {
+      term: "掲載・編集を希望する資材",
+      value: <OptionalValue value={seller.material_request_notes} />,
+    },
     { term: "連絡先メール", value: seller.contact_email },
     { term: "招待コード", value: <OptionalValue value={seller.invite_code} /> },
     { term: "却下理由", value: <OptionalValue value={seller.rejected_reason} /> },
@@ -104,7 +110,7 @@ export default async function AdminSellerDetailPage({
   return (
     <AdminShell
       backHref="/admin/sellers"
-      backLabel="← メーカー審査"
+      backLabel="メーカー審査"
       description={`状態：${statusLabel(seller.data.status)}`}
       title={seller.data.official_name}
     >

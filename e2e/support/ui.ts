@@ -25,10 +25,16 @@ export async function signupGeneral(
   input: { handle: string; email: string; password: string },
 ): Promise<void> {
   await page.goto("/signup/general");
-  await page.getByLabel("ハンドルネーム").fill(input.handle);
+  await page.getByLabel("ニックネーム").fill(input.handle);
+  await page.getByLabel("本名（姓）").fill("試験");
+  await page.getByLabel("本名（名）").fill("太郎");
+  await page.getByLabel("郵便番号").fill("1000001");
+  await page.getByLabel("都道府県").selectOption("13");
+  await page.getByLabel("市区町村").fill("千代田区");
+  await page.getByRole("checkbox", { name: /利用規約/ }).check();
   await page.getByLabel("メールアドレス").fill(input.email);
   await page.getByLabel("パスワード").fill(input.password);
-  await page.getByRole("radio", { name: "農家", exact: true }).check();
+  await page.getByRole("radio", { name: "生産者", exact: true }).check();
   const submitButton = page.getByRole("button", { name: "登録する" });
   await waitForReactHydration(submitButton);
   await submitButton.click();

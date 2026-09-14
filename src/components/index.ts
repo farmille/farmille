@@ -73,3 +73,6 @@ export { helpfulPillRecipe } from "./helpful-pill";
 export { FormMessage } from "./FormMessage";
 export { PendingButton } from "./PendingButton";
 export { TextLink } from "./TextLink";
+
+export { Icon } from "./Icon";
+export type { IconName, IconProps } from "./Icon";

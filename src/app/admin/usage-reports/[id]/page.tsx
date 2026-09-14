@@ -40,7 +40,7 @@ const mediaGridStyle = css({
   display: "grid",
   gridTemplateColumns: "1fr",
   gap: "3",
-  md: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
+  tab: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
 });
 
 const mediaStyle = css({
@@ -168,7 +168,7 @@ export default async function AdminUsageReportDetailPage({
   return (
     <AdminShell
       backHref="/admin/usage-reports"
-      backLabel="← 使用レポート編集局"
+      backLabel="使用レポート編集局"
       description={`状態：${EDITORIAL_REPORT_STATUS_LABELS[data.status]}`}
       title={data.title}
     >

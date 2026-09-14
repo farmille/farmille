@@ -110,7 +110,7 @@ export function CompareTable({ materials }: CompareTableProps) {
       render: (material) => material.manufacturerName,
     },
     {
-      label: "平均★",
+      label: "平均評価",
       render: (material) => (
         <div className={css({ display: "flex", flexDirection: "column", gap: "1" })}>
           <span className={css({ fontWeight: "800", fontVariantNumeric: "tabular-nums" })}>

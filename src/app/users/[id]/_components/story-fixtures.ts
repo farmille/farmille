@@ -4,6 +4,8 @@ export const publicProfile = {
   userId: "00000000-0000-4000-8000-000000000301",
   handle: "緑の畑",
   avatarUrl: null,
+  standpoint: "farmer",
+  prefectureCode: 13,
 } satisfies PublicProfilePageData["profile"];
 
 export const publicPosts = [

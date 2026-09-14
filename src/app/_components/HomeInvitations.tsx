@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components/Button";
@@ -10,7 +11,7 @@ const panel = css({
   borderColor: "border.default",
   borderRadius: "card",
   boxShadow: "shadow",
-  lg: { p: "12" },
+  tab: { p: "12" },
 });
 const title = css({
   m: "0",
@@ -28,9 +29,9 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
   return (
     <>
       <section className={panel} aria-labelledby="share-experience-title">
-        <h2 id="share-experience-title" className={title}>
+        <h1 id="share-experience-title" className={title}>
           実際に使った体験を共有し、1人で何年もかかっていた試験を、1年で。
-        </h2>
+        </h1>
         <div className={copy}>
           <p>
             資材の種類は増えていますが、自分の畑で結果が出るかどうかは、使ってみるまで分かりません。
@@ -54,13 +55,13 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
             borderColor: "border.default",
             py: "10",
             textAlign: "center",
-            lg: { py: "12" },
+            tab: { py: "12" },
           })}
           aria-labelledby="signup-invitation-title"
         >
-          <h2 id="signup-invitation-title" className={title}>
+          <h1 id="signup-invitation-title" className={title}>
             会員登録して、あなたの体験を共有してください
-          </h2>
+          </h1>
           <div className={copy}>
             <p>
               <strong>登録は無料です。</strong>
@@ -84,7 +85,7 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
               無料で会員登録
             </Link>
             <Link href="/search" className={textLink}>
-              資材をさがす →
+              資材をさがす <Icon name="arrow_forward" size="sm" />
             </Link>
           </div>
         </section>
@@ -99,7 +100,7 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
           display: "flex",
           flexDirection: "column",
           gap: "5",
-          lg: {
+          tab: {
             p: "10",
             flexDirection: "row",
             alignItems: "center",
@@ -109,16 +110,16 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
         aria-labelledby="manufacturer-invitation-title"
       >
         <div>
-          <h2 id="manufacturer-invitation-title" className={title}>
+          <h1 id="manufacturer-invitation-title" className={title}>
             バイオスティミュラント・関連資材メーカー様へ
-          </h2>
+          </h1>
           <div className={copy}>
             <p>自社の資材情報の掲載・編集を申請できます。運営の承認後に公開情報へ反映されます。</p>
             <p>生産者が資材を比較するために、詳細な情報を掲載してください。</p>
           </div>
         </div>
         <Link href="/sellers" className={buttonRecipe({ size: "sm" })}>
-          メーカー様はこちら →
+          メーカー様はこちら <Icon name="arrow_forward" size="sm" />
         </Link>
       </section>
     </>

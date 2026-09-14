@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { cva, css } from "../../../../../../styled-system/css";
-import { SearchIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
 import { FieldError, FieldLabel, formStyles } from "./FormUI";
@@ -256,7 +256,7 @@ export function CropPicker({
         使用作物
       </FieldLabel>
       <div className={searchBox}>
-        <SearchIcon />
+        <Icon name="search" size="sm" />
         <input
           id="crop-search"
           className={searchInput}
@@ -281,7 +281,7 @@ export function CropPicker({
                   aria-label={`${crop.name}を削除`}
                   onClick={() => onRemove(crop.id)}
                 >
-                  ×
+                  <Icon name="close" size="sm" />
                 </button>
               </span>
             );
@@ -349,7 +349,7 @@ export function CropPicker({
                     aria-label={`${crop.name}を削除`}
                     onClick={() => onRemove(crop.id)}
                   >
-                    ×
+                    <Icon name="close" size="sm" />
                   </button>
                 </div>
               );

@@ -24,7 +24,18 @@ function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string
 function submittedValues(formData: FormData): AuthFormValues {
   const values: AuthFormValues = {};
 
-  for (const name of ["handle", "email", "standpoint"]) {
+  for (const name of [
+    "handle",
+    "email",
+    "standpoint",
+    "familyName",
+    "givenName",
+    "phone",
+    "postalCode",
+    "prefectureCode",
+    "city",
+    "terms",
+  ]) {
     const value = formDataString(formData.get(name));
     if (value !== null) values[name] = value;
   }
@@ -41,6 +52,13 @@ export async function signupAction(
     email: formData.get("email"),
     password: formData.get("password"),
     standpoint: formData.get("standpoint"),
+    familyName: formData.get("familyName"),
+    givenName: formData.get("givenName"),
+    phone: formData.get("phone"),
+    postalCode: formData.get("postalCode"),
+    prefectureCode: formData.get("prefectureCode"),
+    city: formData.get("city"),
+    terms: formData.get("terms"),
   });
 
   if (!validation.ok) {

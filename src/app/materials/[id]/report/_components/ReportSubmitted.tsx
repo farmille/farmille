@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { css } from "../../../../../../styled-system/css";
-import { CheckIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import type { SubmittedUsageReport } from "@/server/queries/usage-report-form";
 
 const shell = css({
@@ -92,7 +92,7 @@ export function ReportSubmitted({
   return (
     <main className={shell}>
       <div className={icon}>
-        <CheckIcon size={34} />
+        <Icon name="check" size="2xl" />
       </div>
       <h1 className={title}>レポートは提出済みです</h1>
       <p className={description}>

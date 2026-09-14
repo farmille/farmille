@@ -3,7 +3,9 @@ import { expect, test } from "@playwright/test";
 import type { APIRequestContext, Page, TestInfo } from "@playwright/test";
 import * as v from "valibot";
 
-const VIEWPORT_WIDTHS = [320, 360, 375, 390, 414, 480, 640, 768, 900, 1024, 1280, 1440] as const;
+const VIEWPORT_WIDTHS = [
+  320, 360, 375, 390, 414, 480, 640, 767, 768, 900, 1024, 1280, 1440,
+] as const;
 const VIEWPORT_HEIGHT = 1000;
 const OVERFLOW_TOLERANCE = 1;
 const RENDER_TIMEOUT = 15_000;
@@ -294,7 +296,24 @@ for (let shardIndex = 0; shardIndex < SHARD_COUNT; shardIndex += 1) {
   });
 }
 
-test("BottomNav は lg 未満で固定され、lg 以上では非表示になる", async ({ page }) => {
+test("自分のレビューの操作ボタンが狭い画面でも収まる", async ({ page }, testInfo) => {
+  for (const width of [320, 360, 375]) {
+    await page.setViewportSize({ width, height: 812 });
+    await gotoStory(page, "components-reviewcard--own-review");
+    await expect(page.getByRole("button", { name: "削除", exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      width + OVERFLOW_TOLERANCE,
+    );
+    if (width === 375) {
+      await page.screenshot({
+        path: path.join(resolveScreenshotDirectory(testInfo), "review-own-375.png"),
+        fullPage: true,
+      });
+    }
+  }
+});
+
+test("BottomNav は tab 未満で固定され、tab 以上では非表示になる", async ({ page }) => {
   const storyId = "components-bottomnav--viewport-fixed";
   await page.setViewportSize({ width: 375, height: 812 });
   await gotoStory(page, storyId);
@@ -311,7 +330,7 @@ test("BottomNav は lg 未満で固定され、lg 以上では非表示になる
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   expect(Math.abs(await bottomGap()), "スクロール後も画面下端に接すること").toBeLessThanOrEqual(1);
 
-  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.setViewportSize({ width: 640, height: 1024 });
   await page.evaluate(
     () =>
       new Promise<void>((resolve) => {
@@ -321,15 +340,15 @@ test("BottomNav は lg 未満で固定され、lg 以上では非表示になる
   await expect(navigation).toBeVisible();
   await expect(navigation).toHaveCSS("position", "fixed");
 
-  await page.setViewportSize({ width: 1023, height: 900 });
+  await page.setViewportSize({ width: 767, height: 900 });
   await expect(navigation).toBeVisible();
   await expect(navigation).toHaveCSS("position", "fixed");
 
-  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.setViewportSize({ width: 768, height: 900 });
   await expect(navigation).toBeHidden();
 });
 
-test("AppBar は lg 境界でモバイル版と PC 版を相互排他にする", async ({ page }) => {
+test("AppBar は tab 境界でモバイル版と PC 版を相互排他にする", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await gotoStory(page, "components-appbar--home");
 
@@ -338,11 +357,11 @@ test("AppBar は lg 境界でモバイル版と PC 版を相互排他にする",
   await expect(mobileAppBar).toBeVisible();
   await expect(desktopSiteHeader).toBeHidden();
 
-  await page.setViewportSize({ width: 1023, height: 900 });
+  await page.setViewportSize({ width: 767, height: 900 });
   await expect(mobileAppBar).toBeVisible();
   await expect(desktopSiteHeader).toBeHidden();
 
-  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.setViewportSize({ width: 768, height: 900 });
   await expect(mobileAppBar).toBeHidden();
   await expect(desktopSiteHeader).toBeVisible();
 });
@@ -416,6 +435,7 @@ test("画像枠は画面幅が変わっても用途別のアスペクト比を�
 test("横送り用の資材カードはPCで過度に拡大しない", async ({ page }) => {
   const cases = [
     { width: 375, expectedCardWidth: 150 },
+    { width: 768, expectedCardWidth: 240 },
     { width: 1440, expectedCardWidth: 240 },
   ] as const;
 

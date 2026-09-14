@@ -12,8 +12,6 @@ import {
 } from "@/components/auth/Fields";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
-import { PREFECTURES } from "@/lib/prefectures";
-import { REGION_BLOCKS } from "@/lib/region-scopes";
 import { css } from "../../../../styled-system/css";
 
 const inviteToggleRow = css({
@@ -47,7 +45,7 @@ export function SellerApplyForm() {
   const [inviteOpen, setInviteOpen] = useState(hadInvite);
 
   // エラー後の再表示で select の defaultValue を効かせるため、送信値ごとに form を載せ替える。
-  const formKey = state.status === "error" ? `error:${values.loginId ?? ""}` : "idle";
+  const formKey = state.status === "error" ? `error:${values.officialName ?? ""}` : "idle";
 
   return (
     <form action={formAction} key={formKey} noValidate>
@@ -56,7 +54,7 @@ export function SellerApplyForm() {
       <Field
         error={fieldErrors.officialName}
         htmlFor="officialName"
-        label="メーカー名（法人名）"
+        label="法人名"
         requirement="required"
       >
         <input
@@ -72,23 +70,20 @@ export function SellerApplyForm() {
       </Field>
 
       <Field
-        error={fieldErrors.loginId}
-        guide="半角英小文字・数字と . _ - のみ（3〜31文字）"
-        htmlFor="loginId"
-        label="ご希望のログインID"
+        error={fieldErrors.corporateNumber}
+        htmlFor="corporateNumber"
+        label="法人番号"
         requirement="required"
+        guide="13桁の法人番号を入力してください。"
       >
         <input
-          autoCapitalize="none"
-          autoComplete="username"
           className={controlStyle}
-          defaultValue={values.loginId}
-          id="loginId"
-          name="loginId"
-          placeholder="login_id"
+          defaultValue={values.corporateNumber}
+          id="corporateNumber"
+          name="corporateNumber"
           required
-          spellCheck={false}
-          type="text"
+          inputMode="numeric"
+          maxLength={13}
         />
       </Field>
 
@@ -117,7 +112,7 @@ export function SellerApplyForm() {
         error={fieldErrors.contactName}
         guide="公開されません"
         htmlFor="contactName"
-        label="ご担当者名"
+        label="ご担当者名・部署"
         requirement="required"
       >
         <input
@@ -136,7 +131,7 @@ export function SellerApplyForm() {
         error={fieldErrors.location}
         htmlFor="location"
         label="本社・主な拠点の所在地"
-        requirement="required"
+        requirement="optional"
       >
         <input
           autoComplete="street-address"
@@ -145,46 +140,43 @@ export function SellerApplyForm() {
           id="location"
           name="location"
           placeholder="東京都〇〇区…"
-          required
           type="text"
         />
       </Field>
 
       <Field
-        error={fieldErrors.regionScope}
-        guide="公開プロフィールに表示されます"
-        htmlFor="regionScope"
-        label="主な地域"
+        error={fieldErrors.contactPhone}
+        htmlFor="contactPhone"
+        label="ご担当者電話番号"
         requirement="required"
+        guide="公開されません。確認が必要な場合の連絡に使用します。"
       >
-        <select
+        <input
           className={controlStyle}
-          defaultValue={values.regionScope ?? ""}
-          id="regionScope"
-          name="regionScope"
+          defaultValue={values.contactPhone}
+          id="contactPhone"
+          name="contactPhone"
           required
-        >
-          <option disabled value="">
-            選択してください
-          </option>
-          <optgroup label="全国">
-            <option value="全国">全国</option>
-          </optgroup>
-          <optgroup label="地方ブロック">
-            {REGION_BLOCKS.map((block) => (
-              <option key={block} value={block}>
-                {block}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="都道府県">
-            {PREFECTURES.map((prefecture) => (
-              <option key={prefecture.code} value={prefecture.name}>
-                {prefecture.name}
-              </option>
-            ))}
-          </optgroup>
-        </select>
+          type="tel"
+          autoComplete="tel"
+          maxLength={20}
+        />
+      </Field>
+      <Field
+        error={fieldErrors.materialRequestNotes}
+        htmlFor="materialRequestNotes"
+        label="備考：掲載・編集を希望する資材"
+        requirement="optional"
+        guide="掲載済みで編集したい資材、またはこれから掲載したい資材の正式名称を記入してください。"
+      >
+        <textarea
+          className={controlStyle}
+          defaultValue={values.materialRequestNotes}
+          id="materialRequestNotes"
+          name="materialRequestNotes"
+          maxLength={2000}
+          rows={4}
+        />
       </Field>
 
       <Field

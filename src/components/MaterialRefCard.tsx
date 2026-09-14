@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { css, cx } from "../../styled-system/css";
-import { ChevronIcon, ImagePlaceholderIcon, OfficialCheckIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 import { StarRating } from "./StarRating";
 
 type MaterialRefCardProps = {
@@ -57,7 +57,7 @@ export function MaterialRefCard({
           color: "brand.primary",
         })}
       >
-        <ImagePlaceholderIcon size={22} />
+        <Icon name="image" size="md" />
       </div>
       <div className={css({ flex: "1", minW: "0" })}>
         {showTargetLabel ? (
@@ -80,12 +80,16 @@ export function MaterialRefCard({
             {isOfficial ? "（メーカー確認済み）" : ""}
           </span>
           {isOfficial ? (
-            <OfficialCheckIcon size={12} className={css({ color: "accent.official" })} />
+            <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />
           ) : null}
           {avgRating !== null ? <StarRating value={Math.round(avgRating)} size="sm" /> : null}
         </div>
       </div>
-      <ChevronIcon className={css({ color: "text.subtle", flexShrink: "0" })} />
+      <Icon
+        name="chevron_right"
+        size="sm"
+        className={css({ color: "text.subtle", flexShrink: "0" })}
+      />
     </Link>
   );
 }

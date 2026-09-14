@@ -2,7 +2,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { Badge } from "./Badge";
-import { ImagePlaceholderIcon, OfficialCheckIcon, ThumbIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 
 const cardRecipe = cva({
   base: {
@@ -89,7 +89,7 @@ export function ArticleCard({
             width={640}
           />
         ) : (
-          <ImagePlaceholderIcon />
+          <Icon name="image" size="lg" />
         )}
       </div>
       <div className={css({ px: "3.5", py: "3" })}>
@@ -123,7 +123,7 @@ export function ArticleCard({
           </span>
           {organization}
           {official ? (
-            <OfficialCheckIcon size={12} className={css({ color: "accent.official" })} />
+            <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />
           ) : null}
           <Badge variant="type">{typeLabel}</Badge>
         </div>
@@ -140,7 +140,7 @@ export function ArticleCard({
           })}
         >
           <span className={helpfulBtn}>
-            <ThumbIcon />
+            <Icon name="thumb_up" size="xs" />
             <span>参考になった</span>
             {helpfulCount}
           </span>

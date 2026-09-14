@@ -67,6 +67,8 @@ export type PublicProfilePageData = {
     userId: string;
     handle: string;
     avatarUrl: string | null;
+    standpoint: PublicProfileRow["standpoint"];
+    prefectureCode: PublicProfileRow["prefecture_code"];
   };
   reviewCount: number;
   helpfulCount: number;
@@ -129,7 +131,7 @@ export async function getPublicProfilePage(
   const supabase = await createServerSupabase();
   const { data: profileData, error: profileError } = await supabase
     .from("public_profiles")
-    .select("user_id, handle, avatar_url")
+    .select("user_id, handle, avatar_url, standpoint, prefecture_code")
     .eq("user_id", id)
     .maybeSingle();
 
@@ -142,7 +144,7 @@ export async function getPublicProfilePage(
     return fail("not_found");
   }
 
-  const profile: Pick<PublicProfileRow, "user_id" | "handle" | "avatar_url"> = profileData;
+  const profile = profileData;
 
   if (profile.user_id === null || profile.handle === null) {
     reportQueryError("公開プロフィールの必須項目が欠落", { id });
@@ -321,6 +323,8 @@ export async function getPublicProfilePage(
       userId: profile.user_id,
       handle: profile.handle,
       avatarUrl: profile.avatar_url,
+      standpoint: profile.standpoint,
+      prefectureCode: profile.prefecture_code,
     },
     reviewCount: reviewRows.length,
     helpfulCount,

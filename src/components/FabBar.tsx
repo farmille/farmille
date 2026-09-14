@@ -26,7 +26,7 @@ const fabBarRecipe = cva({
         left: "3",
         right: "3",
         bottom: "3",
-        lg: {
+        tab: {
           position: "static",
           w: "100%",
           maxW: "content.form",
@@ -41,7 +41,7 @@ const fabBarRecipe = cva({
         bottom: "3",
         maxW: "content.medium",
         mx: "auto",
-        lg: {
+        tab: {
           position: "sticky",
           left: "auto",
           right: "auto",

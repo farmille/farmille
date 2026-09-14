@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components";
-import { CheckIcon, OfficialCheckIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import { css, cx } from "../../../../styled-system/css";
 
 const hero = css({
@@ -11,7 +11,7 @@ const hero = css({
   borderRadius: "card",
   bg: "brand.soft",
   overflow: "hidden",
-  lg: {
+  tab: {
     display: "grid",
     gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 0.9fr)",
     alignItems: "stretch",
@@ -21,8 +21,7 @@ const hero = css({
 const heroCopy = css({
   px: "4",
   py: "7",
-  md: { px: "7", py: "9" },
-  lg: { px: "9", py: "12" },
+  tab: { px: "9", py: "12" },
 });
 
 const eyebrow = css({
@@ -55,30 +54,18 @@ const lead = css({
   lineHeight: "relaxed",
 });
 
-const audience = css({
-  display: "flex",
-  alignItems: "flex-start",
-  gap: "2",
-  mt: "4",
-  mb: "0",
-  color: "brand.primaryDeep",
-  fontSize: "sm",
-  fontWeight: "700",
-  lineHeight: "relaxed",
-});
-
 const actions = css({
   display: "flex",
   flexDirection: "column",
   gap: "2.5",
   mt: "5",
-  md: { flexDirection: "row", alignItems: "center" },
+  tab: { flexDirection: "row", alignItems: "center" },
 });
 
 const actionButton = css({
   w: "100%",
   textAlign: "center",
-  md: { w: "auto", minW: "52" },
+  tab: { w: "auto", minW: "52" },
 });
 
 const approvalPanel = css({
@@ -92,8 +79,8 @@ const approvalPanel = css({
   borderTopWidth: "1px",
   borderTopStyle: "solid",
   borderTopColor: "green/25",
-  md: { px: "7" },
-  lg: {
+  tab: {
+    px: "7",
     borderTopWidth: "0",
     borderLeftWidth: "1px",
     borderLeftStyle: "solid",
@@ -112,8 +99,6 @@ const approvalFlow = css({
   display: "grid",
   gridTemplateColumns: "1fr",
   gap: "2",
-  md: { gridTemplateColumns: "1fr auto 1fr auto 1fr", alignItems: "center" },
-  lg: { gridTemplateColumns: "1fr" },
 });
 
 const flowItem = css({
@@ -151,13 +136,11 @@ const flowArrow = css({
   fontSize: "lg",
   textAlign: "center",
   transform: "rotate(90deg)",
-  md: { transform: "none" },
-  lg: { transform: "rotate(90deg)" },
 });
 
 const section = css({
   mt: "10",
-  md: { mt: "12" },
+  tab: { mt: "12" },
 });
 
 const sectionHeading = css({
@@ -181,11 +164,11 @@ const featureGrid = css({
   gridTemplateColumns: "1fr",
   gap: "3",
   mt: "5",
-  md: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+  tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
 });
 
 const featureCard = css({
-  px: "4",
+  px: "5",
   py: "5",
   borderWidth: "1px",
   borderStyle: "solid",
@@ -223,45 +206,6 @@ const featureBody = css({
   lineHeight: "relaxed",
 });
 
-const policy = css({
-  display: "grid",
-  gridTemplateColumns: "auto 1fr",
-  gap: "3",
-  mt: "10",
-  px: "4",
-  py: "4",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "blue/28",
-  borderRadius: "card",
-  bg: "blue/12",
-});
-
-const policyIcon = css({
-  display: "grid",
-  placeItems: "center",
-  w: "9",
-  h: "9",
-  borderRadius: "pill",
-  bg: "surface.card",
-  color: "accent.official",
-});
-
-const policyTitle = css({
-  m: "0",
-  color: "text.default",
-  fontSize: "md",
-  fontWeight: "800",
-});
-
-const policyBody = css({
-  mt: "1",
-  mb: "0",
-  color: "text.muted",
-  fontSize: "sm",
-  lineHeight: "relaxed",
-});
-
 const closing = css({
   mt: "10",
   px: "4",
@@ -270,7 +214,7 @@ const closing = css({
   bg: "brand.primary",
   color: "surface.card",
   textAlign: "center",
-  md: { px: "7" },
+  tab: { px: "7" },
 });
 
 const closingTitle = css({
@@ -294,14 +238,14 @@ const closingActions = css({
   maxW: "content.form",
   mx: "auto",
   mt: "5",
-  md: { flexDirection: "row", justifyContent: "center" },
+  tab: { flexDirection: "row", justifyContent: "center" },
 });
 
 const closingPrimary = css({
   w: "100%",
   bg: "surface.card",
   color: "brand.primaryDeep",
-  md: { w: "auto", minW: "52" },
+  tab: { w: "auto", minW: "52" },
 });
 
 const closingSecondary = css({
@@ -309,7 +253,7 @@ const closingSecondary = css({
   bg: "transparent",
   color: "surface.card",
   borderColor: "surface.card",
-  md: { w: "auto", minW: "52" },
+  tab: { w: "auto", minW: "52" },
 });
 
 const closingSecondaryLabel = css({ color: "surface.card" });
@@ -340,7 +284,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
       <section className={hero} aria-labelledby="manufacturer-landing-title">
         <div className={heroCopy}>
           <span className={eyebrow}>
-            <CheckIcon size={16} />
+            <Icon name="check" size="sm" />
             農業資材メーカーの方へ
           </span>
           <h1 id="manufacturer-landing-title" className={title}>
@@ -348,10 +292,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           </h1>
           <p className={lead}>
             Farmilleのメーカーアカウントでは、自社資材の追加・変更申請と、根拠資料や記事の管理ができます。
-          </p>
-          <p className={audience}>
-            <CheckIcon size={17} />
-            <span>利用できるのは、農業資材を製造するメーカーです。</span>
           </p>
           <div className={actions}>
             <Link
@@ -377,14 +317,14 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               メーカーが申請
             </div>
             <span className={flowArrow} aria-hidden>
-              →
+              <Icon name="arrow_forward" size="sm" />
             </span>
             <div className={flowItem}>
               <span className={flowNumber}>2</span>
               運営が内容を確認
             </div>
             <span className={flowArrow} aria-hidden>
-              →
+              <Icon name="arrow_forward" size="sm" />
             </span>
             <div className={flowItem}>
               <span className={flowNumber}>3</span>
@@ -409,20 +349,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           ))}
         </div>
       </section>
-
-      <aside className={policy} aria-labelledby="manufacturer-policy-title">
-        <span className={policyIcon}>
-          <OfficialCheckIcon size={19} />
-        </span>
-        <div>
-          <h2 id="manufacturer-policy-title" className={policyTitle}>
-            資材情報の正本は運営が管理します
-          </h2>
-          <p className={policyBody}>
-            メーカーによる追加・変更・掲載終了は申請として保存され、運営が承認した内容だけが公開されます。既存情報をメーカーが確認すると、確認済みマークが表示されます。
-          </p>
-        </div>
-      </aside>
 
       <section className={closing} aria-labelledby="manufacturer-apply-title">
         <h2 id="manufacturer-apply-title" className={closingTitle}>

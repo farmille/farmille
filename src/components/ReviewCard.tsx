@@ -7,7 +7,7 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 import { cva, css, cx } from "../../styled-system/css";
 import { HelpfulButton } from "./HelpfulButton";
 import { helpfulPillRecipe } from "./helpful-pill";
-import { ImagePlaceholderIcon, PersonIcon, ThumbIcon } from "./Icons";
+import { Icon } from "@/components/Icon";
 import { ReportDialog } from "./ReportDialog";
 import { ReviewOwnerActions } from "./ReviewOwnerActions";
 import { StarRating } from "./StarRating";
@@ -49,6 +49,7 @@ const avatar = css({
 
 export type ReviewCardProps = {
   handle: string;
+  authorDetails?: string;
   authorHref?: string;
   avatarSrc?: string;
   crop: string;
@@ -82,6 +83,7 @@ export type ReviewCardProps = {
  */
 export function ReviewCard({
   handle,
+  authorDetails,
   authorHref,
   avatarSrc,
   crop,
@@ -119,10 +121,13 @@ export function ReviewCard({
             width={30}
           />
         ) : (
-          <PersonIcon size={16} />
+          <Icon name="person" size="sm" />
         )}
       </span>
       <span className={css({ fontWeight: "700", fontSize: "sm" })}>{handle}</span>
+      {authorDetails ? (
+        <span className={css({ color: "text.subtle", fontSize: "xs" })}>{authorDetails}</span>
+      ) : null}
     </>
   );
   const displayedPhotoCount = photos.length > 0 ? photos.length : photoCount;
@@ -221,7 +226,7 @@ export function ReviewCard({
                     color: "brand.primary",
                   })}
                 >
-                  <ImagePlaceholderIcon size={20} />
+                  <Icon name="image" size="md" />
                 </div>
               ))}
         </div>
@@ -231,6 +236,7 @@ export function ReviewCard({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexWrap: "wrap",
           gap: "2.5",
           mt: "2.5",
         })}
@@ -244,7 +250,7 @@ export function ReviewCard({
           />
         ) : (
           <span className={helpfulPillRecipe({ layout: "card" })}>
-            <ThumbIcon />
+            <Icon name="thumb_up" size="xs" />
             <span>参考になった</span>
             {helpfulCount}
           </span>

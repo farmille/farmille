@@ -116,6 +116,8 @@ export const materialReviews: ReviewListItem[] = [
       user_id: "00000000-0000-4000-8000-000000000901",
       handle: "北のトマト農家",
       avatar_url: null,
+      standpoint: "farmer",
+      prefecture_code: 13,
     },
     crops: [{ id: "crop-tomato", name: "トマト" }],
     photos: [],

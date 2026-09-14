@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { SearchIcon } from "@/components/Icons";
+import { Icon } from "@/components/Icon";
 import type { ReviewCropOption } from "@/server/queries/reviews";
 import { css } from "../../../../../../styled-system/css";
 
@@ -190,7 +190,7 @@ export function ReviewCropPicker({
   return (
     <>
       <div className={searchBox}>
-        <SearchIcon />
+        <Icon name="search" size="sm" />
         <input
           id="review-crop"
           aria-label="作目"
@@ -220,7 +220,7 @@ export function ReviewCropPicker({
                   aria-label={`${crop.name}を削除`}
                   onClick={() => onRemove(crop.id)}
                 >
-                  ×
+                  <Icon name="close" size="sm" />
                 </button>
               </span>
             );

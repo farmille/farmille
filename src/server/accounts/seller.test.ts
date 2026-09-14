@@ -44,11 +44,12 @@ describe("LOGIN_ID_PATTERN", () => {
 describe("validateSellerApply", () => {
   const valid = {
     officialName: "デモ株式会社",
-    loginId: "demo-apply-01",
+    corporateNumber: "1234567890123",
+    contactPhone: "090-1234-5678",
+    materialRequestNotes: "",
     contactEmail: "contact@example.com",
     contactName: "担当 太郎",
     location: "東京都千代田区",
-    regionScope: "全国",
     websiteUrl: "https://example.com",
     inviteCode: "",
   };
@@ -57,29 +58,29 @@ describe("validateSellerApply", () => {
     const result = validateSellerApply(valid);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.input.loginId).toBe("demo-apply-01");
-    expect(result.input.websiteUrl).toBe("https://example.com/");
-    expect(result.input.inviteCode).toBeNull();
+    expect(result.input.corporateNumber).toBe("1234567890123");
+    expect(result.input.websiteUrl).toBe("https://example.com");
+    expect(result.input.inviteCode).toBe("");
   });
 
-  it("login_id の形式エラーをフィールドに返す", () => {
-    const result = validateSellerApply({ ...valid, loginId: "AB" });
+  it("法人番号の形式エラーをフィールドに返す", () => {
+    const result = validateSellerApply({ ...valid, corporateNumber: "AB" });
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.fieldErrors.loginId).toBeDefined();
+    expect(result.fieldErrors.corporateNumber).toBeDefined();
   });
 
-  it("主な地域の候補外を弾く", () => {
-    const result = validateSellerApply({ ...valid, regionScope: "市区町村" });
+  it("電話番号の入力漏れを弾く", () => {
+    const result = validateSellerApply({ ...valid, contactPhone: "" });
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.fieldErrors.regionScope).toBeDefined();
+    expect(result.fieldErrors.contactPhone).toBeDefined();
   });
 
   it("公式サイト URL は空を許可し、不正なスキームを弾く", () => {
-    const empty = validateSellerApply({ ...valid, websiteUrl: "  " });
+    const empty = validateSellerApply({ ...valid, websiteUrl: "" });
     expect(empty.ok).toBe(true);
-    if (empty.ok) expect(empty.input.websiteUrl).toBeNull();
+    if (empty.ok) expect(empty.input.websiteUrl).toBe("");
 
     const bad = validateSellerApply({ ...valid, websiteUrl: "ftp://example.com" });
     expect(bad.ok).toBe(false);

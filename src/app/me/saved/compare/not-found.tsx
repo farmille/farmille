@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { AppBar, EmptyState } from "@/components";
@@ -39,7 +40,7 @@ export default function CompareNotFound() {
               textDecoration: "none",
             })}
           >
-            検討リストへ戻る →
+            検討リストへ戻る <Icon name="arrow_forward" size="sm" />
           </Link>
         </EmptyState>
       </main>

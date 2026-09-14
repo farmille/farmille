@@ -1,4 +1,10 @@
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
+import { Suspense } from "react";
+import { SkeletonRegion, RatingSkeleton } from "@/components/Skeleton";
+import { SkeletonList } from "@/components/SkeletonList";
+import { MaterialPageSkeleton } from "./_components/MaterialPageSkeleton";
+import type { MaterialDetail } from "@/server/queries/materials";
+import { Icon } from "@/components/Icon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { after } from "next/server";
@@ -92,7 +98,7 @@ export async function generateMetadata({ params }: MaterialPageProps): Promise<M
   return materialMetadata(material);
 }
 
-export default async function MaterialPage({ params, searchParams }: MaterialPageProps) {
+async function MaterialContent({ params, searchParams }: MaterialPageProps) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const material = await loadMaterialOrNotFound(id);
   const sessionUser = await getSessionUser();
@@ -110,16 +116,6 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
     });
   });
 
-  const [reportsResult, articlesResult, reviewsResult, distributionResult] = await Promise.all([
-    listPublishedUsageReportsByMaterial(id, { limit: 3 }),
-    listPublishedArticlesByMaterial(id),
-    listReviewsByMaterial(id, { sort: "newest", page: 1, viewerUserId }),
-    getReviewRatingDistribution(id),
-  ]);
-  const reports = unwrapQueryResult(reportsResult);
-  const articles = unwrapQueryResult(articlesResult);
-  const reviews = unwrapQueryResult(reviewsResult);
-  const distribution = unwrapQueryResult(distributionResult);
   const materialPath = `/materials/${material.id}`;
   const saved = isGeneralUser
     ? unwrapQueryResult(await isMaterialSaved(material.id, sessionUser.userId))
@@ -170,7 +166,7 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
               rel="noreferrer"
               className={externalLink}
             >
-              製造元公式ページを見る →
+              製造元公式ページを見る <Icon name="arrow_forward" size="sm" />
             </a>
           ) : null}
           {material.catalog_url ? (
@@ -180,7 +176,7 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
               rel="noreferrer"
               className={externalLink}
             >
-              公式カタログPDFを見る →
+              公式カタログPDFを見る <Icon name="arrow_forward" size="sm" />
             </a>
           ) : null}
         </div>
@@ -207,107 +203,29 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
       ) : null}
       <EvidenceList evidences={material.evidences} />
 
-      <section aria-labelledby="usage-reports-heading">
-        <SectionHeading
-          title={
-            <span id="usage-reports-heading">
-              使用レポート
-              <span
-                className={css({
-                  ml: "2",
-                  fontSize: "sm",
-                  color: "text.subtle",
-                  fontVariantNumeric: "tabular-nums",
-                })}
-              >
-                {reports.total}件
-              </span>
-            </span>
-          }
-          href={`${materialPath}/articles`}
-        />
-        {reports.items.length > 0 ? (
-          <div
-            className={css({
-              display: "grid",
-              gridAutoFlow: "column",
-              gridAutoColumns: "54%",
-              gap: "2.5",
-              overflowX: "auto",
-              scrollSnapType: "x mandatory",
-              pb: "1",
-              lg: {
-                gridAutoFlow: "row",
-                gridAutoColumns: "auto",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                overflowX: "visible",
-                scrollSnapType: "none",
-                pb: "0",
-              },
-            })}
-          >
-            {reports.items.map((report) => (
-              <ReportCard
-                key={report.id}
-                title={report.title ?? `${material.name} 使用レポート`}
-                author={report.author?.handle ?? "退会したユーザー"}
-                crop={report.crop?.name ?? "作目情報なし"}
-                helpfulCount={report.helpfulCount}
-                viewCount={report.viewCount}
-                href={`/reports/${report.id}`}
-                coverSrc={report.coverImage?.url}
-                layout="scroll"
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="公開中の使用レポートはまだありません"
-            description="投稿された使用レポートは、編集部の確認後に公開されます。"
-          />
-        )}
-        {articles.total > 0 ? (
-          <Link
-            href={`${materialPath}/articles`}
-            className={cx(buttonRecipe({ variant: "ghost", size: "md" }), css({ mt: "3" }))}
-          >
-            メーカーの記事 {articles.total}件
-          </Link>
-        ) : null}
-      </section>
-
-      <section aria-labelledby="review-summary-heading">
-        <SectionHeading title={<span id="review-summary-heading">レビューサマリー</span>} />
-        <RatingSummary
-          average={material.avg_rating}
-          reviewCount={material.review_count}
-          controlPlotRatio={material.control_plot_ratio}
-          distribution={distribution}
-        />
-      </section>
-
-      <section aria-labelledby="reviews-heading">
-        <SectionHeading
-          title={
-            <span id="reviews-heading">
-              レビュー
-              <span
-                className={css({
-                  ml: "2",
-                  fontSize: "sm",
-                  color: "text.subtle",
-                  fontVariantNumeric: "tabular-nums",
-                })}
-              >
-                {reviews.total}件
-              </span>
-            </span>
-          }
-          href={`${materialPath}/reviews`}
-          linkLabel={`レビューをすべて見る（${reviews.total}件）`}
-        />
-        <ReviewList reviews={reviews.items.slice(0, 3)} currentPath={materialPath} />
-      </section>
+      <Suspense
+        fallback={
+          <>
+            <SectionHeading title="使用レポート" />
+            <SkeletonList variant="materialReports" label="使用レポートを読み込んでいます" />
+          </>
+        }
+      >
+        <MaterialReports material={material} />
+      </Suspense>
+      <Suspense
+        fallback={
+          <>
+            <SectionHeading title="レビュー" />
+            <SkeletonRegion label="評価の分布を読み込んでいます">
+              <RatingSkeleton />
+            </SkeletonRegion>
+            <SkeletonList variant="reviews" label="レビューを読み込んでいます" />
+          </>
+        }
+      >
+        <MaterialReviews material={material} viewerUserId={viewerUserId} />
+      </Suspense>
 
       {material.publication_status === "published" ? (
         <FabBar
@@ -317,5 +235,152 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
         />
       ) : null}
     </MaterialPageShell>
+  );
+}
+
+// この詳細画面だけの初期表示。投稿フォームやレビュー一覧には継承しない。
+export default function MaterialPage(props: MaterialPageProps) {
+  return (
+    <Suspense fallback={<MaterialPageSkeleton />}>
+      <MaterialContent {...props} />
+    </Suspense>
+  );
+}
+
+async function MaterialReports({ material }: { material: MaterialDetail }) {
+  const [reportsResult, articlesResult] = await Promise.all([
+    listPublishedUsageReportsByMaterial(material.id, { limit: 3 }),
+    listPublishedArticlesByMaterial(material.id),
+  ]);
+  const reports = unwrapQueryResult(reportsResult);
+  const articles = unwrapQueryResult(articlesResult);
+  const materialPath = `/materials/${material.id}`;
+  return (
+    <section aria-labelledby="usage-reports-heading">
+      <SectionHeading
+        title={
+          <span id="usage-reports-heading">
+            使用レポート
+            <span
+              className={css({
+                ml: "2",
+                fontSize: "sm",
+                color: "text.subtle",
+                fontVariantNumeric: "tabular-nums",
+              })}
+            >
+              {reports.total}件
+            </span>
+          </span>
+        }
+        href={`${materialPath}/articles`}
+      />
+      {reports.items.length > 0 ? (
+        <div
+          className={css({
+            display: "grid",
+            gridAutoFlow: "column",
+            gridAutoColumns: "54%",
+            gap: "2.5",
+            overflowX: "auto",
+            scrollSnapType: "x mandatory",
+            pb: "1",
+            tab: {
+              gridAutoFlow: "row",
+              gridAutoColumns: "auto",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              overflowX: "visible",
+              scrollSnapType: "none",
+              pb: "0",
+            },
+          })}
+        >
+          {reports.items.map((report) => (
+            <ReportCard
+              key={report.id}
+              title={report.title ?? `${material.name} 使用レポート`}
+              author={report.author?.handle ?? "退会したユーザー"}
+              crop={report.crop?.name ?? "作目情報なし"}
+              helpfulCount={report.helpfulCount}
+              viewCount={report.viewCount}
+              href={`/reports/${report.id}`}
+              coverSrc={report.coverImage?.url}
+              layout="scroll"
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="公開中の使用レポートはまだありません"
+          description="投稿された使用レポートは、編集部の確認後に公開されます。"
+        />
+      )}
+      {articles.total > 0 ? (
+        <Link
+          href={`${materialPath}/articles`}
+          className={cx(buttonRecipe({ variant: "ghost", size: "md" }), css({ mt: "3" }))}
+        >
+          メーカーの記事 {articles.total}件
+        </Link>
+      ) : null}
+    </section>
+  );
+}
+
+async function MaterialReviews({
+  material,
+  viewerUserId,
+}: {
+  material: MaterialDetail;
+  viewerUserId: string | null;
+}) {
+  const reviews = unwrapQueryResult(
+    await listReviewsByMaterial(material.id, { sort: "newest", page: 1, viewerUserId }),
+  );
+  const materialPath = `/materials/${material.id}`;
+  return (
+    <section aria-labelledby="reviews-heading">
+      <SectionHeading
+        title={
+          <span id="reviews-heading">
+            レビュー
+            <span
+              className={css({
+                ml: "2",
+                fontSize: "sm",
+                color: "text.subtle",
+                fontVariantNumeric: "tabular-nums",
+              })}
+            >
+              {reviews.total}件
+            </span>
+          </span>
+        }
+        href={`${materialPath}/reviews`}
+        linkLabel={`レビューをすべて見る（${reviews.total}件）`}
+      />
+      <Suspense
+        fallback={
+          <SkeletonRegion label="評価の分布を読み込んでいます">
+            <RatingSkeleton />
+          </SkeletonRegion>
+        }
+      >
+        <MaterialRating material={material} />
+      </Suspense>
+      <ReviewList reviews={reviews.items.slice(0, 3)} currentPath={materialPath} />
+    </section>
+  );
+}
+
+async function MaterialRating({ material }: { material: MaterialDetail }) {
+  const distribution = unwrapQueryResult(await getReviewRatingDistribution(material.id));
+  return (
+    <RatingSummary
+      average={material.avg_rating}
+      reviewCount={material.review_count}
+      controlPlotRatio={material.control_plot_ratio}
+      distribution={distribution}
+    />
   );
 }
