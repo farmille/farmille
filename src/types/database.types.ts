@@ -2293,6 +2293,59 @@ export type Database = {
           },
         ]
       }
+      saved_posts: {
+        Row: {
+          created_at: string
+          id: string
+          review_id: string | null
+          usage_report_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          review_id?: string | null
+          usage_report_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          review_id?: string | null
+          usage_report_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_posts_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_posts_usage_report_id_fkey"
+            columns: ["usage_report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "saved_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       search_tags: {
         Row: {
           category: string
