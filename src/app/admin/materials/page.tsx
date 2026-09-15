@@ -125,8 +125,7 @@ export default async function AdminMaterialsPage({
         />
         <p className={css({ mt: "2" })}>
           <span className={adminInlineNoteStyle}>
-            claim
-            は編集主体との紐づけ。メーカー確認済み表示は、メーカーが初期情報を確認するか変更申請を行った資材だけに付く。
+            claim は編集主体との紐づけ。メーカーによる記入項目には、小さな注記を表示します。
           </span>
         </p>
       </Panel>

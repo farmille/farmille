@@ -1,7 +1,7 @@
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 
-import { Badge, StarRating } from "@/components";
+import { StarRating } from "@/components";
 import { Icon } from "@/components/Icon";
 import type { MaterialDetail } from "@/server/queries/materials";
 import { css, cx } from "../../../../../styled-system/css";
@@ -73,11 +73,7 @@ export function MaterialHero({
   const primaryImage = material.images[0];
   const manufacturer = material.seller_id ? (
     <Link href={`/sellers/${material.seller_id}`} className={manufacturerStyle}>
-      {material.manufacturer_verified_at === null ? (
-        material.manufacturer_name
-      ) : (
-        <Badge variant="official">{material.manufacturer_name} メーカー確認済み</Badge>
-      )}
+      {material.manufacturer_name}
     </Link>
   ) : (
     <span className={manufacturerStyle}>{material.manufacturer_name}</span>

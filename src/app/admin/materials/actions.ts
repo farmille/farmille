@@ -205,6 +205,6 @@ export async function setMaterialSellerAction(
     message:
       nextSellerId === null
         ? "claim を解除し、メーカー確認状態をリセットしました。"
-        : "claim を紐づけました。メーカーが情報を確認するまで確認済み表示は付きません。",
+        : "claim を紐づけました。",
   };
 }

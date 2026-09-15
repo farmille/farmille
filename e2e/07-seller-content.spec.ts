@@ -61,12 +61,7 @@ test("メーカーの資材追加・変更・掲載終了は運営承認後に�
     await expect(adminPage.getByText("資材を登録しました。", { exact: true })).toBeVisible();
     await adminPage.getByLabel("claim 元のメーカー").selectOption(seller.id);
     await adminPage.getByRole("button", { name: "claim を更新する" }).click();
-    await expect(
-      adminPage.getByText(
-        "claim を紐づけました。メーカーが情報を確認するまで確認済み表示は付きません。",
-        { exact: true },
-      ),
-    ).toBeVisible();
+    await expect(adminPage.getByText("claim を紐づけました。", { exact: true })).toBeVisible();
 
     await page.goto(`/materials/${adminSeedMaterialId}`);
     await expect(page.getByRole("heading", { name: adminSeedMaterialName })).toBeVisible();
@@ -86,7 +81,7 @@ test("メーカーの資材追加・変更・掲載終了は運営承認後に�
     await confirmButton.click();
     await expect(page.getByText("確認済み", { exact: true })).toBeVisible();
     await page.goto(`/materials/${adminSeedMaterialId}`);
-    await expect(page.getByText("メーカー確認済み", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("メーカー確認済み", { exact: true })).toHaveCount(0);
     await captureScreen(page, "15-public-material-verified.png");
 
     await page.goto(`/dashboard/materials/${adminSeedMaterialId}`);
@@ -102,7 +97,7 @@ test("メーカーの資材追加・変更・掲載終了は運営承認後に�
     await captureScreen(page, "16-seller-update-request.png");
 
     await page.goto(`/materials/${adminSeedMaterialId}`);
-    await expect(page.getByText("メーカー確認済み", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("メーカー確認済み", { exact: true })).toHaveCount(0);
     await expect(page.getByText(generalUse, { exact: true })).toHaveCount(0);
 
     await adminPage.goto(`/admin/materials/requests/${updateRequestId}`);
@@ -140,13 +135,13 @@ test("メーカーの資材追加・変更・掲載終了は運営承認後に�
 
     await page.goto(`/materials/${createdMaterialId}`);
     await expect(page.getByRole("heading", { name: newMaterialName })).toBeVisible();
-    await expect(page.getByText("メーカー確認済み", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("メーカー確認済み", { exact: true })).toHaveCount(0);
     await captureScreen(page, "22-public-created-material.png");
     await createReview({
       materialId: createdMaterialId,
       authorUserId: reviewer.id,
       rating: 4,
-      body: "非公開後もデータを保持するレビュー",
+      body: "非公開後もデータを保持する感想口コミ",
     });
 
     await page.goto(`/dashboard/materials/${createdMaterialId}`);

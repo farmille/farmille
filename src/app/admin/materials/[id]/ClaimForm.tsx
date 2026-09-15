@@ -40,7 +40,7 @@ export function ClaimForm({
       {state.status === "done" ? <FormMessage tone="info">{state.message}</FormMessage> : null}
       <input name="materialId" type="hidden" value={materialId} />
       <Field
-        guide="承認済みのメーカーだけを選べます。claim だけではメーカー確認済み表示は付きません。"
+        guide="承認済みのメーカーだけを選べます。claim は編集主体との紐づけに使います。"
         htmlFor="sellerId"
         label="claim 元のメーカー"
         requirement="optional"

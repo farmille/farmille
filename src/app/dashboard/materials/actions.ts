@@ -139,7 +139,7 @@ export async function confirmMaterialInformationAction(
   if (!result.ok) return errorState(result.error);
 
   revalidateMaterialRoutes(materialId);
-  return { status: "success", message: "公開中の資材情報をメーカー確認済みにしました。" };
+  return { status: "success", message: "公開中の資材情報の確認を記録しました。" };
 }
 
 export async function cancelMaterialChangeRequestAction(

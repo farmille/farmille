@@ -134,7 +134,6 @@ export function MaterialCard({
   savedCount,
   categories,
   description,
-  official = false,
   href = "#",
   imageSrc,
   imageAlt,
@@ -166,9 +165,6 @@ export function MaterialCard({
             })}
           >
             {maker}
-            {official ? (
-              <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />
-            ) : null}
           </div>
           <div
             className={css({
@@ -256,9 +252,6 @@ export function MaterialCard({
           })}
         >
           {maker}
-          {official ? (
-            <Icon name="verified" size="xs" className={css({ color: "accent.official" })} />
-          ) : null}
         </div>
         <div
           className={css({

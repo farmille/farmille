@@ -1,5 +1,4 @@
 import { cva, cx, type RecipeVariantProps } from "../../styled-system/css";
-import { Icon } from "@/components/Icon";
 
 const badgeRecipe = cva({
   base: {
@@ -81,12 +80,7 @@ type BadgeProps = BadgeVariants & {
 
 /** 公式・タイプ・必須/任意などの小バッジ。 */
 export function Badge({ variant, children, className }: BadgeProps) {
-  return (
-    <span className={cx(badgeRecipe({ variant }), className)}>
-      {variant === "official" ? <Icon name="verified" size="xs" /> : null}
-      {children}
-    </span>
-  );
+  return <span className={cx(badgeRecipe({ variant }), className)}>{children}</span>;
 }
 
 export { badgeRecipe };
