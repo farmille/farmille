@@ -2,6 +2,11 @@ import Link from "next/link";
 
 import { buttonRecipe } from "@/components";
 import { Icon } from "@/components/Icon";
+import {
+  BS_GUIDELINE_TITLE,
+  BS_GUIDELINE_URL,
+  MANUFACTURER_ONBOARDING_STEPS,
+} from "@/lib/manufacturer-policy";
 import { css, cx } from "../../../../styled-system/css";
 
 const hero = css({
@@ -131,13 +136,6 @@ const flowNumber = css({
   fontWeight: "800",
 });
 
-const flowArrow = css({
-  color: "text.subtle",
-  fontSize: "lg",
-  textAlign: "center",
-  transform: "rotate(90deg)",
-});
-
 const section = css({
   mt: "10",
   tab: { mt: "12" },
@@ -265,15 +263,15 @@ export type ManufacturerLandingProps = {
 const FEATURES = [
   {
     title: "自社資材をまとめて管理",
-    body: "Farmilleに掲載済みの自社資材を確認し、未掲載の資材は追加を申請できます。",
+    body: "編集権を持つ資材ページを、メーカー自身で編集できます。未入力で「−」と表示される項目も、貴社の記入で埋められます。",
   },
   {
-    title: "正しい情報へ更新",
-    body: "用途や成分、使い方などの変更を申請できます。運営の確認後に公開情報へ反映されます。",
+    title: "下書きとプレビューで確認",
+    body: "製品説明・画像・資料・施用方法などを保存し、公開時の見え方を確認できます。運営は公開前の表現確認を行います。",
   },
   {
-    title: "根拠と記事を届ける",
-    body: "カタログや試験資料などの根拠を管理し、メーカー名義の記事を公開できます。",
+    title: "会社の紹介も掲載",
+    body: "メーカーページに会社紹介・ロゴ・リンクを掲載できます。メーカー名義の記事も発信できます。申請・掲載・編集は無料です。",
   },
 ] as const;
 
@@ -291,7 +289,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             自社資材の情報を、正確に届ける。
           </h1>
           <p className={lead}>
-            Farmilleのメーカーアカウントでは、自社資材の追加・変更申請と、根拠資料や記事の管理ができます。
+            自社の資材ページを、メーカー自身の言葉で更新できます。運営は編集権をお渡しする前の所有権確認と、公開前の表現確認・掲載後の監査を行います。申請・掲載・編集は無料です。
           </p>
           <div className={actions}>
             <Link
@@ -310,26 +308,14 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         </div>
 
         <div className={approvalPanel} aria-label="情報公開までの流れ">
-          <p className={approvalTitle}>申請した情報が公開されるまで</p>
+          <p className={approvalTitle}>掲載と情報管理の流れ</p>
           <div className={approvalFlow}>
-            <div className={flowItem}>
-              <span className={flowNumber}>1</span>
-              メーカーが申請
-            </div>
-            <span className={flowArrow} aria-hidden>
-              <Icon name="arrow_forward" size="sm" />
-            </span>
-            <div className={flowItem}>
-              <span className={flowNumber}>2</span>
-              運営が内容を確認
-            </div>
-            <span className={flowArrow} aria-hidden>
-              <Icon name="arrow_forward" size="sm" />
-            </span>
-            <div className={flowItem}>
-              <span className={flowNumber}>3</span>
-              公開情報へ反映
-            </div>
+            {MANUFACTURER_ONBOARDING_STEPS.map((step, index) => (
+              <div className={flowItem} key={step.title}>
+                <span className={flowNumber}>{index + 1}</span>
+                {step.title}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -338,7 +324,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         <h2 id="manufacturer-features-title" className={sectionHeading}>
           メーカーアカウントでできること
         </h2>
-        <p className={sectionLead}>自社の資材情報を起点に、確認・申請・発信を一か所で行えます。</p>
+        <p className={sectionLead}>製品を選び、公開ページと同じ構成で情報を編集できます。</p>
         <div className={featureGrid}>
           {FEATURES.map((feature, index) => (
             <article className={featureCard} key={feature.title}>
@@ -350,12 +336,45 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         </div>
       </section>
 
+      <section className={section} aria-labelledby="manufacturer-flow-title">
+        <h2 id="manufacturer-flow-title" className={sectionHeading}>
+          申請から運用開始まで
+        </h2>
+        <p className={sectionLead}>
+          掲載済みのページを引き継ぐため、これまでの口コミやレポートも同じ資材に残ります。
+        </p>
+        {MANUFACTURER_ONBOARDING_STEPS.map((step, index) => (
+          <article className={featureCard} key={step.title}>
+            <h3 className={featureTitle}>
+              {index + 1}．{step.title}
+            </h3>
+            <p className={featureBody}>{step.body}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className={section} aria-labelledby="manufacturer-policy-title">
+        <h2 id="manufacturer-policy-title" className={sectionHeading}>
+          掲載情報と表現の確認について
+        </h2>
+        <p className={sectionLead}>
+          メーカーが記入した情報には「入力済み」と表示します。公式認証や製品の効果を保証するマークではありません。メーカーが内容の管理と責任を持ち、運営は原稿の整理・代筆を行いません。
+        </p>
+        <p className={featureBody}>
+          掲載ポリシーの根拠は
+          <a href={BS_GUIDELINE_URL} target="_blank" rel="noreferrer">
+            {BS_GUIDELINE_TITLE}
+          </a>
+          です。効果・使用方法・安全性について、根拠を確認できる内容をご記入ください。画像やリンク・資料も公開前の表現確認の対象です。
+        </p>
+      </section>
+
       <section className={closing} aria-labelledby="manufacturer-apply-title">
         <h2 id="manufacturer-apply-title" className={closingTitle}>
           メーカーアカウントを申請する
         </h2>
         <p className={closingBody}>
-          申請内容を運営が審査し、通常3営業日以内に連絡先メールアドレスへご案内します。
+          申請内容を確認し、ご登録の連絡先メールアドレスへご案内します。申請・掲載・編集は無料です。
         </p>
         <div className={closingActions}>
           <Link
