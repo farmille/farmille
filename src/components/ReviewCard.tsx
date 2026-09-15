@@ -161,18 +161,8 @@ export function ReviewCard({
           </span>
         )}
       </div>
-      <div className={css({ display: "flex", alignItems: "center", gap: "2", mt: "2" })}>
-        <StarRating value={rating} />
-        <span
-          className={css({
-            color: "accent.star",
-            fontWeight: "800",
-            fontSize: "md",
-            fontVariantNumeric: "tabular-nums",
-          })}
-        >
-          {Number(rating).toFixed(1)}
-        </span>
+      <div className={css({ mt: "2" })}>
+        <StarRating value={rating} showValue />
       </div>
       <div
         className={css({
