@@ -367,7 +367,7 @@ function DesktopSiteHeader({
           className={desktopNavLink({ active: active === "articles" })}
           aria-current={active === "articles" ? "page" : undefined}
         >
-          使用レポート一覧
+          実証詳細レポート一覧
         </Link>
         <Form action="/search" aria-label="ヘッダー検索" className={desktopSearch} role="search">
           <Icon name="search" size="sm" />

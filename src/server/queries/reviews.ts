@@ -40,7 +40,7 @@ export type ReviewListItem = ReviewFields & {
   crops: ReviewCrop[];
   photos: ReviewPhoto[];
   helpfulCount: number;
-  /** 閲覧者（ログイン中の一般ユーザー）がこのレビューに「参考になった」を押しているか。 */
+  /** 閲覧者（ログイン中の一般ユーザー）がこの感想口コミに「参考になった」を押しているか。 */
   helpfulVotedByViewer: boolean;
 };
 
@@ -137,7 +137,7 @@ async function listPublishedReviewOrder(
       .range(from, from + POSTGREST_PAGE_SIZE - 1);
 
     if (error !== null) {
-      reportQueryError("参考順用のレビュー取得に失敗", error);
+      reportQueryError("参考順用の感想口コミ取得に失敗", error);
       return fail("internal");
     }
 
@@ -192,7 +192,7 @@ function toReviewListItem(
   const crops = orderedReviewCrops(cropRelations);
 
   if (crops === null) {
-    reportQueryError("レビューの作目関連が欠落", { reviewId: review.id });
+    reportQueryError("感想口コミの作目関連が欠落", { reviewId: review.id });
     return null;
   }
 
@@ -256,7 +256,7 @@ async function listByHelpfulCount(
     .in("id", pageReviewIds);
 
   if (error !== null) {
-    reportQueryError("参考順レビュー詳細の取得に失敗", error);
+    reportQueryError("参考順感想口コミ詳細の取得に失敗", error);
     return fail("internal");
   }
 
@@ -274,7 +274,7 @@ async function listByHelpfulCount(
     const review = reviewById.get(reviewId);
 
     if (review === undefined) {
-      reportQueryError("参考順レビューの詳細が取得結果にない", { reviewId });
+      reportQueryError("参考順感想口コミの詳細が取得結果にない", { reviewId });
       return fail("internal");
     }
 
@@ -296,7 +296,7 @@ export type RecentReviewItem = ReviewListItem & {
   materialName: string;
 };
 
-/** ホームの新着レビュー。published のみ・新しい順。 */
+/** ホームの新着感想口コミ。published のみ・新しい順。 */
 export async function listRecentReviews({
   limit,
   ids,
@@ -331,7 +331,7 @@ export async function listRecentReviews({
   const { data, error } = await query;
 
   if (error !== null) {
-    reportQueryError("新着レビューの取得に失敗", error);
+    reportQueryError("新着感想口コミの取得に失敗", error);
     return fail("internal");
   }
 
@@ -356,7 +356,7 @@ export async function listRecentReviews({
 
   for (const row of rows) {
     if (row.material === null) {
-      reportQueryError("新着レビューに資材名が無い", { reviewId: row.id });
+      reportQueryError("新着感想口コミに資材名が無い", { reviewId: row.id });
       return fail("internal");
     }
 
@@ -409,12 +409,12 @@ export async function listReviewsByMaterial(
   const { data, error, count } = await query.order("id", { ascending: true }).range(from, to);
 
   if (error !== null) {
-    reportQueryError("レビュー一覧の取得に失敗", error);
+    reportQueryError("感想口コミ一覧の取得に失敗", error);
     return fail("internal");
   }
 
   if (count === null) {
-    reportQueryError("レビュー一覧の総件数が返されなかった", {
+    reportQueryError("感想口コミ一覧の総件数が返されなかった", {
       materialId,
       page,
       sort,
@@ -458,7 +458,7 @@ export async function listReviewsByMaterial(
   });
 }
 
-/** レビュー作目候補を作物群・作物の表示順で返す。 */
+/** 感想口コミ作目候補を作物群・作物の表示順で返す。 */
 export async function listReviewCropOptions(): Promise<Result<ReviewCropOption[]>> {
   const supabase = await createServerSupabase();
   const { data, error } = await supabase
@@ -479,14 +479,14 @@ export async function listReviewCropOptions(): Promise<Result<ReviewCropOption[]
     .order("name");
 
   if (error !== null) {
-    reportQueryError("レビュー作目候補の取得に失敗", error);
+    reportQueryError("感想口コミ作目候補の取得に失敗", error);
     return fail("internal");
   }
 
   const rows: ReviewCropOptionQueryRow[] = data;
 
   if (rows.some(({ group }) => group === null)) {
-    reportQueryError("レビュー作目候補の作物群が欠落", rows);
+    reportQueryError("感想口コミ作目候補の作物群が欠落", rows);
     return fail("internal");
   }
 
@@ -538,7 +538,7 @@ export async function findOwnReviewIdByMaterial(
     .maybeSingle();
 
   if (error !== null) {
-    reportQueryError("投稿済みレビューの確認に失敗", error);
+    reportQueryError("投稿済み感想口コミの確認に失敗", error);
     return fail("internal");
   }
 
@@ -584,7 +584,7 @@ export async function getReviewForEdit(
     .maybeSingle();
 
   if (error !== null) {
-    reportQueryError("編集対象レビューの取得に失敗", error);
+    reportQueryError("編集対象感想口コミの取得に失敗", error);
     return fail("internal");
   }
 
@@ -597,7 +597,7 @@ export async function getReviewForEdit(
   const crops = orderedReviewCrops(typedCropRelations);
 
   if (crops === null) {
-    reportQueryError("編集対象レビューの作目関連が欠落", { reviewId });
+    reportQueryError("編集対象感想口コミの作目関連が欠落", { reviewId });
     return fail("internal");
   }
 

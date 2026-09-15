@@ -270,12 +270,12 @@ async function fetchSearchFilters(): Promise<Result<SearchFilterItem[]>> {
       sort_order: effect.sort_order,
       category: "effect" as const,
     })),
-    ...options.data.productTypes.map((productType) => ({
-      id: productType.id,
-      name: productType.name,
+    ...options.data.ingredientCategories.map((genre) => ({
+      id: genre.id,
+      name: genre.name,
       aliases: [],
-      sort_order: productType.sort_order,
-      category: "type" as const,
+      sort_order: genre.sort_order,
+      category: "genre" as const,
     })),
   ];
 

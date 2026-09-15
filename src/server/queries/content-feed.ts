@@ -204,7 +204,7 @@ async function fetchPublishedReports(
     .limit(FEED_FETCH_LIMIT);
 
   if (error !== null) {
-    reportQueryError("公開使用レポート一覧の取得に失敗", error);
+    reportQueryError("公開実証詳細レポート一覧の取得に失敗", error);
     return fail("internal");
   }
 
@@ -249,7 +249,7 @@ function toReportItem(
   }
 
   if (row.author?.handle == null || row.crop === null || row.material === null) {
-    reportQueryError("使用レポートの関連データが欠落", { id: row.id });
+    reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
     return fail("internal");
   }
 
@@ -260,7 +260,7 @@ function toReportItem(
   return succeed({
     kind: "report",
     id: row.id,
-    title: row.title ?? `${row.material.name} 使用レポート`,
+    title: row.title ?? `${row.material.name} 実証詳細レポート`,
     publishedAt: row.published_at,
     helpfulCount,
     viewCount,
@@ -271,7 +271,7 @@ function toReportItem(
 }
 
 /**
- * 記事一覧（/articles）用。使用レポートと記事を published_at 降順で混載する。
+ * 記事一覧（/articles）用。実証詳細レポートと記事を published_at 降順で混載する。
  * タイトル部分一致検索・種別フィルタ・ページネーション対応。
  */
 export async function listContentFeed({
@@ -315,11 +315,11 @@ export async function listContentFeed({
     }
 
     if (row.material === null) {
-      reportQueryError("使用レポートの資材が欠落", { id: row.id });
+      reportQueryError("実証詳細レポートの資材が欠落", { id: row.id });
       return fail("internal");
     }
 
-    const displayTitle = row.title ?? `${row.material.name} 使用レポート`;
+    const displayTitle = row.title ?? `${row.material.name} 実証詳細レポート`;
 
     if (searchQ !== undefined && !matchesSearch(displayTitle, searchQ)) {
       continue;
@@ -369,7 +369,7 @@ export async function listContentFeed({
 
     const row = reportById.get(key.id);
     if (row === undefined) {
-      reportQueryError("ページ内の使用レポートが見つからない", key);
+      reportQueryError("ページ内の実証詳細レポートが見つからない", key);
       return fail("internal");
     }
     const item = toReportItem(

@@ -93,7 +93,7 @@ export function RatingSummary({
                 className={progressStyle}
                 value={count}
                 max={Math.max(distribution.total, 1)}
-                aria-label={`星${rating}のレビュー ${count}件`}
+                aria-label={`星${rating}の感想口コミ ${count}件`}
               />
               <span
                 className={css({

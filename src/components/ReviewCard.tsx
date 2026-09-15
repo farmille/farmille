@@ -1,12 +1,11 @@
+import type { ReactNode } from "react";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 
-import { toggleHelpfulAction } from "@/server/actions/helpful";
 import { createReportAction } from "@/server/actions/reports";
 import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 import { cva, css, cx } from "../../styled-system/css";
-import { HelpfulButton } from "./HelpfulButton";
-import { helpfulPillRecipe } from "./helpful-pill";
+import { PostActions } from "./PostActions";
 import { Icon } from "@/components/Icon";
 import { ReportDialog } from "./ReportDialog";
 import { ReviewOwnerActions } from "./ReviewOwnerActions";
@@ -55,13 +54,14 @@ export type ReviewCardProps = {
   crop: string;
   rating: number;
   helpfulCount: number;
+  viewCount?: number;
   body: string;
   reviewId?: string;
   materialId?: string;
   canManage?: boolean;
   /**
    * 閲覧者の「参考になった」押下状態。reviewId があり canManage が false のときだけ
-   * 押せるボタンとして表示する（自分のレビューは押せない・T-34）。
+   * 押せるボタンとして表示する（自分の感想口コミは押せない・T-34）。
    */
   helpfulVoted?: boolean;
   /** ログイン誘導・revalidatePath の対象パス（未指定時は資材詳細ページにフォールバック）。 */
@@ -74,12 +74,12 @@ export type ReviewCardProps = {
     src: string;
     alt: string;
   }>;
+  actions?: ReactNode;
   className?: string;
 };
 
 /**
- * レビューカード。
- * 閲覧数は出さない（02 §4-9）。用語は「レビュー」（D8）。
+ * 感想口コミカード。
  */
 export function ReviewCard({
   handle,
@@ -89,6 +89,7 @@ export function ReviewCard({
   crop,
   rating,
   helpfulCount,
+  viewCount = 0,
   body,
   reviewId,
   materialId,
@@ -98,6 +99,7 @@ export function ReviewCard({
   materialName,
   photoCount = 0,
   photos = [],
+  actions,
   className,
 }: ReviewCardProps) {
   const interactive = reviewId !== undefined && !canManage;
@@ -136,7 +138,7 @@ export function ReviewCard({
     <article className={cx(cardRecipe(), className)}>
       {materialName ? (
         <div className={css({ fontSize: "xs", color: "text.subtle", mb: "1" })}>
-          {materialName} のレビュー
+          {materialName} の感想口コミ
         </div>
       ) : null}
       <div className={css({ display: "flex", alignItems: "center", gap: "2" })}>
@@ -241,27 +243,27 @@ export function ReviewCard({
           mt: "2.5",
         })}
       >
-        {interactive ? (
-          <HelpfulButton
-            action={toggleHelpfulAction.bind(null, "review", reviewId, resolvedPath)}
-            count={helpfulCount}
-            layout="card"
-            voted={helpfulVoted}
-          />
-        ) : (
-          <span className={helpfulPillRecipe({ layout: "card" })}>
-            <Icon name="thumb_up" size="xs" />
-            <span>参考になった</span>
-            {helpfulCount}
-          </span>
-        )}
+        <div className={css({ w: "100%" })}>
+          {actions ?? (
+            <PostActions
+              id={reviewId}
+              target="review"
+              currentPath={resolvedPath}
+              helpfulCount={helpfulCount}
+              voted={helpfulVoted}
+              saved={false}
+              viewCount={viewCount}
+              own={canManage}
+            />
+          )}
+        </div>
         {canManage && reviewId !== undefined && materialId !== undefined ? (
           <ReviewOwnerActions reviewId={reviewId} materialId={materialId} />
         ) : interactive && reviewId !== undefined ? (
           <ReportDialog
             action={createReportAction.bind(null, "review", reviewId, resolvedPath)}
             reasonOptions={REPORT_REASON_OPTIONS}
-            title="このレビューを通報する"
+            title="この感想口コミを通報する"
           />
         ) : null}
       </div>

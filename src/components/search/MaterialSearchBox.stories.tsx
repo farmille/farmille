@@ -53,7 +53,7 @@ const catalog = {
     {
       id: "1c9a7e58-2f34-4b6d-9a01-000000000006",
       name: "微生物資材",
-      category: "type" as const,
+      category: "genre" as const,
       sort_order: 1,
       aliases: [],
     },

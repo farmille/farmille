@@ -1,4 +1,10 @@
-export const SEARCH_FILTER_CATEGORIES = ["crop", "concern", "effect", "condition", "type"] as const;
+export const SEARCH_FILTER_CATEGORIES = [
+  "crop",
+  "concern",
+  "effect",
+  "condition",
+  "genre",
+] as const;
 
 export type SearchFilterCategory = (typeof SEARCH_FILTER_CATEGORIES)[number];
 

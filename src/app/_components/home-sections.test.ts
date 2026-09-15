@@ -16,9 +16,9 @@ describe("ホーム下部の導線", () => {
     expect(screen.getByRole("link", { name: "メーカー様はこちら" }).getAttribute("href")).toBe(
       "/sellers",
     );
-    expect(screen.getByRole("link", { name: "使用レポートを投稿する" }).getAttribute("href")).toBe(
-      "/post?type=report",
-    );
+    expect(
+      screen.getByRole("link", { name: "実証詳細レポートを投稿する" }).getAttribute("href"),
+    ).toBe("/post?type=report");
     expect(screen.queryByText(/農林水産省/)).toBeNull();
   });
   it("ログイン済みでは会員登録の勧誘を表示しない", () => {

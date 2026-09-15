@@ -161,13 +161,13 @@ export async function listPendingUsageReports(): Promise<Result<PendingUsageRepo
 
     for (const row of rows) {
       if (row.author === null || row.crop === null || row.material === null) {
-        reportError("pending 使用レポートの関連データが欠落", row);
+        reportError("pending 実証詳細レポートの関連データが欠落", row);
         return fail("internal");
       }
 
       items.push({
         id: row.id,
-        title: row.title ?? `${row.material.name} 使用レポート`,
+        title: row.title ?? `${row.material.name} 実証詳細レポート`,
         createdAt: row.created_at,
         author: { userId: row.author.user_id, handle: row.author.handle },
         crop: row.crop,
@@ -252,7 +252,7 @@ export async function getUsageReportEditorialDetail(
       (left, right) => left.sort_order - right.sort_order || left.id.localeCompare(right.id),
     )) {
       if (item.media_type !== "photo" && item.media_type !== "video") {
-        reportError("未知の使用レポート media_type", item);
+        reportError("未知の実証詳細レポート media_type", item);
         return fail("internal");
       }
       media.push({
@@ -267,7 +267,7 @@ export async function getUsageReportEditorialDetail(
 
     return succeed({
       id: row.id,
-      title: row.title ?? `${row.material.name} 使用レポート`,
+      title: row.title ?? `${row.material.name} 実証詳細レポート`,
       status: row.status,
       createdAt: row.created_at,
       publishedAt: row.published_at,

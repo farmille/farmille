@@ -42,7 +42,7 @@ const columns: DataTableColumn<MaterialRow>[] = [
   { key: "name", header: "資材名", cell: (row) => row.name },
   { key: "maker", header: "メーカー名", cell: (row) => row.maker },
   { key: "productType", header: "種別", cell: (row) => row.productType },
-  { key: "reviewCount", header: "レビュー", align: "end", cell: (row) => row.reviewCount },
+  { key: "reviewCount", header: "感想口コミ", align: "end", cell: (row) => row.reviewCount },
 ];
 
 const wideColumns: DataTableColumn<MaterialRow>[] = [

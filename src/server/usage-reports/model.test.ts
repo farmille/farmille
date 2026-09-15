@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { mediaPlacementLabel } from "@/server/usage-reports/model";
 
-describe("使用レポートのメディア配置表示", () => {
+describe("実証詳細レポートのメディア配置表示", () => {
   it.each([
     ["observation", "観察した変化"],
     ["cover", "冒頭（カバー）"],

@@ -29,7 +29,7 @@ export default function CompareNotFound() {
       <main className={body}>
         <EmptyState
           title="比較できる資材が見つかりません"
-          description="検討リストから2〜4件を選んで比較してください。"
+          description="お気に入りから2〜4件を選んで比較してください。"
         >
           <Link
             href="/me/saved"
@@ -40,7 +40,7 @@ export default function CompareNotFound() {
               textDecoration: "none",
             })}
           >
-            検討リストへ戻る <Icon name="arrow_forward" size="sm" />
+            お気に入りへ戻る <Icon name="arrow_forward" size="sm" />
           </Link>
         </EmptyState>
       </main>

@@ -42,10 +42,10 @@ export function ReviewOwnerActions({ materialId, reviewId }: ReviewOwnerActionsP
           id={`delete-review-title-${reviewId}`}
           className={css({ m: "0", fontSize: "lg", fontWeight: "700" })}
         >
-          レビューを削除しますか？
+          感想口コミを削除しますか？
         </h2>
         <p className={css({ mt: "2", mb: "4", fontSize: "sm", color: "text.muted" })}>
-          削除したレビューと写真は元に戻せません。
+          削除した感想口コミと写真は元に戻せません。
         </p>
         <div className={css({ display: "flex", gap: "2" })}>
           <button

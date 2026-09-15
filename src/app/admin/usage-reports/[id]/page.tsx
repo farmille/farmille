@@ -26,7 +26,7 @@ import { mediaPlacementLabel } from "@/server/usage-reports/model";
 import { css } from "../../../../../styled-system/css";
 
 export const metadata: Metadata = {
-  title: "使用レポート編集",
+  title: "実証詳細レポート編集",
 };
 
 const linkStyle = css({
@@ -168,7 +168,7 @@ export default async function AdminUsageReportDetailPage({
   return (
     <AdminShell
       backHref="/admin/usage-reports"
-      backLabel="使用レポート編集局"
+      backLabel="実証詳細レポート編集局"
       description={`状態：${EDITORIAL_REPORT_STATUS_LABELS[data.status]}`}
       title={data.title}
     >
@@ -206,7 +206,7 @@ export default async function AdminUsageReportDetailPage({
         {data.status === "published" ? (
           <p className={adminInlineNoteStyle}>
             <Link className={linkStyle} href={`/reports/${data.id}`}>
-              公開中の使用レポートを見る
+              公開中の実証詳細レポートを見る
             </Link>
           </p>
         ) : null}

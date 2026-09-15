@@ -139,7 +139,7 @@ const category = css({
   },
 });
 
-const categories = ["作物", "効果", "製品タイプ", "メーカー"] as const;
+const categories = ["作物", "効果", "資材ジャンル", "メーカー"] as const;
 
 export function HomeSearchEntry() {
   return (

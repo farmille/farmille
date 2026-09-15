@@ -334,10 +334,7 @@ export function ReportForm({
           </div>
           <div className={targetCopy}>
             <div className={targetName}>{material.name}</div>
-            <div className={manufacturer}>
-              {material.manufacturerName}
-              {material.isOfficial ? <Icon name="verified" size="xs" /> : null}
-            </div>
+            <div className={manufacturer}>{material.manufacturerName}</div>
           </div>
           <span className={autoBadge}>自動</span>
         </div>

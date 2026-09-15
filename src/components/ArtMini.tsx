@@ -50,7 +50,6 @@ export function ArtMini({
   typeLabel,
   href = "#",
   thumbSrc,
-  official = true,
   className,
 }: ArtMiniProps) {
   return (
@@ -88,9 +87,7 @@ export function ArtMini({
           })}
         >
           {organization}
-          {official ? (
-            <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />
-          ) : null}
+
           <Badge variant="type">{typeLabel}</Badge>
         </div>
       </div>

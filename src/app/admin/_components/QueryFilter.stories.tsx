@@ -6,7 +6,7 @@ const meta = {
   title: "App/Admin/QueryFilter",
   component: QueryFilter,
   args: {
-    ariaLabel: "審査状態で絞り込む",
+    ariaLabel: "確認状態で絞り込む",
     options: [
       { value: "all", label: "すべて" },
       { value: "applied", label: "申請中" },

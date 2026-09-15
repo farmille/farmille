@@ -66,7 +66,6 @@ export function ArticleCard({
   viewCount,
   href = "#",
   coverSrc,
-  official = true,
   className,
 }: ArticleCardProps) {
   const initial = organization.charAt(0);
@@ -122,9 +121,7 @@ export function ArticleCard({
             {initial}
           </span>
           {organization}
-          {official ? (
-            <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />
-          ) : null}
+
           <Badge variant="type">{typeLabel}</Badge>
         </div>
         <div

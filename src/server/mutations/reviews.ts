@@ -101,7 +101,7 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
     fieldErrors.rating = "星を1〜5から選択してください。";
   }
   if (body.length === 0) {
-    fieldErrors.body = "レビュー本文を入力してください。";
+    fieldErrors.body = "感想口コミ本文を入力してください。";
   }
   if (purchaseChannelValue.length > 0 && !purchaseChannelResult.success) {
     fieldErrors.purchaseChannel = "購入場所を選び直してください。";
@@ -204,7 +204,7 @@ export async function removeReviewPhotoUploads(paths: string[]): Promise<void> {
 
   const session = await requireGeneralUser();
   if (!session.ok) {
-    reportMutationError("未確定のレビュー写真を削除できません", session.error);
+    reportMutationError("未確定の感想口コミ写真を削除できません", session.error);
     return;
   }
 
@@ -214,7 +214,7 @@ export async function removeReviewPhotoUploads(paths: string[]): Promise<void> {
         !REVIEW_PHOTO_PATH_PATTERN.test(path) || !path.startsWith(`${session.data.userId}/`),
     )
   ) {
-    reportMutationError("未確定のレビュー写真パスが不正です", paths);
+    reportMutationError("未確定の感想口コミ写真パスが不正です", paths);
     return;
   }
 
@@ -222,7 +222,7 @@ export async function removeReviewPhotoUploads(paths: string[]): Promise<void> {
   const { error } = await supabase.storage.from("review-photos").remove(paths);
 
   if (error !== null) {
-    reportMutationError("未確定のレビュー写真を削除できません", error);
+    reportMutationError("未確定の感想口コミ写真を削除できません", error);
   }
 }
 
@@ -254,7 +254,7 @@ export async function createReviewWithDependencies(
     .maybeSingle();
 
   if (existingError !== null) {
-    reportMutationError("重複レビューの確認に失敗", existingError);
+    reportMutationError("重複感想口コミの確認に失敗", existingError);
     return fail("internal");
   }
   if (existing !== null) return fail("conflict");
@@ -277,7 +277,7 @@ export async function createReviewWithDependencies(
   );
 
   if (reviewError !== null || reviewId === null) {
-    reportMutationError("レビューの作成に失敗", reviewError);
+    reportMutationError("感想口コミの作成に失敗", reviewError);
     return fail("internal");
   }
 
@@ -292,10 +292,10 @@ export async function createReviewWithDependencies(
     const { error: photoError } = await supabase.from("review_photos").insert(photoRows.data);
 
     if (photoError !== null) {
-      reportMutationError("レビュー写真行の作成に失敗", photoError);
+      reportMutationError("感想口コミ写真行の作成に失敗", photoError);
       const { error: rollbackError } = await supabase.from("reviews").delete().eq("id", reviewId);
       if (rollbackError !== null) {
-        reportMutationError("レビュー作成のロールバックに失敗", rollbackError);
+        reportMutationError("感想口コミ作成のロールバックに失敗", rollbackError);
       }
       return fail("internal");
     }
@@ -334,7 +334,7 @@ async function removeStoragePhotos(
   const { error } = await supabase.storage.from("review-photos").remove(paths);
   if (error !== null) {
     // DB 上の削除は完了済み。ユーザー操作を失敗扱いに戻さず、運用ログへ残す。
-    reportMutationError("削除済みレビュー写真の Storage 清掃に失敗", error);
+    reportMutationError("削除済み感想口コミ写真の Storage 清掃に失敗", error);
   }
 }
 
@@ -376,7 +376,7 @@ export async function updateReview(
     .maybeSingle();
 
   if (reviewError !== null) {
-    reportMutationError("編集対象レビューの確認に失敗", reviewError);
+    reportMutationError("編集対象感想口コミの確認に失敗", reviewError);
     return fail("internal");
   }
   if (review === null) return fail("not_found");
@@ -430,7 +430,7 @@ export async function updateReview(
   );
 
   if (updateError !== null || updatedReviewId !== reviewId) {
-    reportMutationError("レビューの更新に失敗", updateError);
+    reportMutationError("感想口コミの更新に失敗", updateError);
     return fail("internal");
   }
 
@@ -453,7 +453,7 @@ export async function updateReview(
       .upsert(upsertRows, { onConflict: "id" });
 
     if (upsertError !== null) {
-      reportMutationError("レビュー写真行の更新に失敗", upsertError);
+      reportMutationError("感想口コミ写真行の更新に失敗", upsertError);
       return fail("internal");
     }
   }
@@ -469,7 +469,7 @@ export async function updateReview(
       .eq("review_id", reviewId);
 
     if (deleteError !== null) {
-      reportMutationError("レビュー写真行の削除に失敗", deleteError);
+      reportMutationError("感想口コミ写真行の削除に失敗", deleteError);
       return fail("internal");
     }
 
@@ -501,7 +501,7 @@ export async function deleteReview(materialId: string, reviewId: string): Promis
     .maybeSingle();
 
   if (reviewError !== null) {
-    reportMutationError("削除対象レビューの確認に失敗", reviewError);
+    reportMutationError("削除対象感想口コミの確認に失敗", reviewError);
     return fail("internal");
   }
   if (review === null) return fail("not_found");
@@ -516,7 +516,7 @@ export async function deleteReview(materialId: string, reviewId: string): Promis
     .eq("author_user_id", session.data.userId);
 
   if (deleteError !== null) {
-    reportMutationError("レビューの削除に失敗", deleteError);
+    reportMutationError("感想口コミの削除に失敗", deleteError);
     return fail("internal");
   }
 

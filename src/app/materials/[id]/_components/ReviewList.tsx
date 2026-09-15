@@ -1,3 +1,4 @@
+import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import { publicProfileLabel } from "@/lib/public-profile-label";
 import { EmptyState, ReviewCard } from "@/components";
@@ -16,8 +17,8 @@ export async function ReviewList({ reviews, emptyDescription, currentPath }: Rev
   if (reviews.length === 0) {
     return (
       <EmptyState
-        title="まだレビューがありません"
-        description={emptyDescription ?? "この資材の最初のレビューを投稿できます。"}
+        title="まだ感想口コミがありません"
+        description={emptyDescription ?? "この資材の最初の感想口コミを投稿できます。"}
       />
     );
   }
@@ -29,6 +30,14 @@ export async function ReviewList({ reviews, emptyDescription, currentPath }: Rev
       {reviews.map((review) => (
         <div key={review.id} id={`review-${review.id}`} className={css({ scrollMarginTop: "16" })}>
           <ReviewCard
+            actions={
+              <PostActionsLoader
+                target="review"
+                id={review.id}
+                currentPath={currentPath ?? `/materials/${review.material_id}`}
+                helpfulCount={review.helpfulCount}
+              />
+            }
             reviewId={review.id}
             materialId={review.material_id}
             canManage={
@@ -37,7 +46,7 @@ export async function ReviewList({ reviews, emptyDescription, currentPath }: Rev
               session.userId === review.author_user_id
             }
             helpfulVoted={review.helpfulVotedByViewer}
-            currentPath={currentPath}
+            currentPath={currentPath ?? `/materials/${review.material_id}`}
             handle={review.author?.handle ?? "退会したユーザー"}
             authorDetails={publicProfileLabel(review.author)}
             authorHref={review.author?.user_id ? `/users/${review.author.user_id}` : undefined}
@@ -49,7 +58,7 @@ export async function ReviewList({ reviews, emptyDescription, currentPath }: Rev
             photos={review.photos.map((photo) => ({
               id: photo.id,
               src: photo.url,
-              alt: photo.caption ?? "レビュー写真",
+              alt: photo.caption ?? "感想口コミ写真",
             }))}
           />
         </div>

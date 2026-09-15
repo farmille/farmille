@@ -416,7 +416,7 @@ export async function setMaterialSeller(
         return fail("internal");
       }
       if (seller === null) return fail("not_found");
-      // 審査中・却下・凍結中の組織に一次情報の編集権を渡さない。
+      // 確認中・却下・凍結中の組織に一次情報の編集権を渡さない。
       if (seller.status !== "approved") return fail("conflict");
     }
 

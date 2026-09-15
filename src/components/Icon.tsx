@@ -1,5 +1,8 @@
 import {
   MdSearch,
+  MdOutlineBookmarkBorder,
+  MdBookmark,
+  MdOutlineVisibility,
   MdChevronLeft,
   MdShare,
   MdOutlineVerified,
@@ -23,6 +26,9 @@ import { cva, cx, type RecipeVariantProps } from "../../styled-system/css";
 // Google Material Icons を用途名で参照する。
 const glyphs = {
   search: MdSearch,
+  bookmark: MdOutlineBookmarkBorder,
+  bookmark_filled: MdBookmark,
+  visibility: MdOutlineVisibility,
   chevron_left: MdChevronLeft,
   share: MdShare,
   verified: MdOutlineVerified,

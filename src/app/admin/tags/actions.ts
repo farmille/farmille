@@ -189,7 +189,7 @@ export async function cropOperationAction(
         status: "error",
         message: masterErrorMessage(
           result.error,
-          "使用中の作物は削除できません。レビュー・使用レポート・プロフィールから参照されています。",
+          "使用中の作物は削除できません。感想口コミ・実証詳細レポート・プロフィールから参照されています。",
         ),
       };
     }

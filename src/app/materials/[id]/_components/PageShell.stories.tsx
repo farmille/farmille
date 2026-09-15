@@ -8,7 +8,7 @@ const meta = {
   title: "App/Materials/MaterialPageShell",
   component: MaterialPageShell,
   args: {
-    title: "レビューを書く",
+    title: "感想口コミを書く",
     backHref: "/materials/storybook",
     children: <SurfaceCard title="投稿内容">フォームコンテンツ</SurfaceCard>,
   },

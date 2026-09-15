@@ -21,7 +21,7 @@ export const Standard: Story = {
 
 export const StandardWithLink: Story = {
   args: {
-    title: "新着レビュー",
+    title: "新着感想口コミ",
     href: "/reviews",
   },
 };
@@ -51,7 +51,7 @@ export const NumberedFirst: Story = {
 
 export const NumberedWithSub: Story = {
   args: {
-    title: "使用レポートを投稿する",
+    title: "実証詳細レポートを投稿する",
     number: "3",
     sub: "経過14日目",
   },

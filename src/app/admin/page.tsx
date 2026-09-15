@@ -53,7 +53,7 @@ const MENU_ITEMS = [
   {
     href: "/me",
     label: "個人のマイページ",
-    description: "自分のプロフィール・投稿・検討リストを管理する。",
+    description: "自分のプロフィール・投稿・お気に入りを管理する。",
   },
   {
     href: "/account/passkeys",
@@ -97,7 +97,7 @@ export default async function AdminHomePage() {
   }
 
   return (
-    <AdminShell description="運営が扱う審査・登録・分類管理の入口。" title="運営管理">
+    <AdminShell description="運営が扱う確認・登録・分類管理の入口。" title="運営管理">
       <Panel note="対応待ちの件数" title="いま見るべきもの">
         <div className={statGridStyle}>
           <StatCard label="確認中のメーカー" value={summary.data.appliedSellerCount} />
@@ -105,11 +105,14 @@ export default async function AdminHomePage() {
             <StatCard label="未処理の通報" value={summary.data.openReportCount} />
           </Link>
           <Link
-            aria-label="確認待ちの使用レポートを見る"
+            aria-label="確認待ちの実証詳細レポートを見る"
             className={statLinkStyle}
             href="/admin/usage-reports"
           >
-            <StatCard label="確認待ちの使用レポート" value={summary.data.pendingUsageReportCount} />
+            <StatCard
+              label="確認待ちの実証詳細レポート"
+              value={summary.data.pendingUsageReportCount}
+            />
           </Link>
           <Link
             aria-label="承認待ちの資材変更申請を見る"

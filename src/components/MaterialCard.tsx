@@ -134,7 +134,6 @@ export function MaterialCard({
   savedCount,
   categories,
   description,
-  official = false,
   href = "#",
   imageSrc,
   imageAlt,
@@ -166,7 +165,6 @@ export function MaterialCard({
             })}
           >
             {maker}
-            {official ? <span>入力済み</span> : null}
           </div>
           <div
             className={css({
@@ -184,8 +182,8 @@ export function MaterialCard({
           </div>
           {articleCount !== undefined ? (
             <p className={css({ fontSize: "xs", color: "text.subtle", mt: "2" })}>
-              使用レポート {articleCount}件
-              {savedCount !== undefined ? ` ・ 検討リスト ${savedCount}件` : ""}
+              実証詳細レポート {articleCount}件
+              {savedCount !== undefined ? ` ・ お気に入り ${savedCount}件` : ""}
             </p>
           ) : null}
           {categories ? (
@@ -254,7 +252,6 @@ export function MaterialCard({
           })}
         >
           {maker}
-          {official ? <span>入力済み</span> : null}
         </div>
         <div
           className={css({
@@ -278,7 +275,8 @@ export function MaterialCard({
             {rating.toFixed(1)}
           </span>
           <span className={css({ color: "text.subtle" })}>
-            レビュー {reviewCount}件{articleCount !== undefined ? ` ・ 記事 ${articleCount}件` : ""}
+            感想口コミ {reviewCount}件
+            {articleCount !== undefined ? ` ・ 記事 ${articleCount}件` : ""}
           </span>
         </div>
         {description ? (

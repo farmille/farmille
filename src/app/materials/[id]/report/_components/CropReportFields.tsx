@@ -932,7 +932,7 @@ export function CropReportFields({
     <div
       className={scopedPanel({ tabbed })}
       role={tabbed ? "tabpanel" : undefined}
-      aria-label={`${crop.name}の使用レポート入力`}
+      aria-label={`${crop.name}の実証詳細レポート入力`}
     >
       <SectionHeading number="1" title="使ってみて、どうでしたか？" sub="まずは結果から" first />
       <div className={formStyles.field}>

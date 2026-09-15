@@ -7,8 +7,8 @@ afterEach(cleanup);
 
 describe("SectionHeading", () => {
   it("通常のセクション見出しをh2にする", () => {
-    render(createElement(SectionHeading, { title: "レビュー" }));
-    expect(screen.getByRole("heading", { name: "レビュー", level: 2 })).toBeVisible();
+    render(createElement(SectionHeading, { title: "感想口コミ" }));
+    expect(screen.getByRole("heading", { name: "感想口コミ", level: 2 })).toBeVisible();
   });
 
   it("ページ見出しにはh1を指定できる", () => {

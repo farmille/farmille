@@ -177,9 +177,6 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
     submitted?.ingredientCategoryIds ?? material?.ingredientCategoryIds ?? [],
   );
   const selectedIngredientIds = new Set(submitted?.ingredientIds ?? material?.ingredientIds ?? []);
-  const selectedProductTypeIds = new Set(
-    submitted?.productTypeIds ?? material?.productTypeIds ?? [],
-  );
   const selectedSearchTagIds = new Set(submitted?.searchTagIds ?? material?.searchTagIds ?? []);
 
   return (
@@ -187,6 +184,10 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
       {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
       {state.status === "done" ? <FormMessage tone="info">{state.message}</FormMessage> : null}
       {isEdit ? <input name="materialId" type="hidden" value={material.id} /> : null}
+      {/* 表示対象外の既存分類は、別の情報を保存しても失わない。 */}
+      {(submitted?.productTypeIds ?? material?.productTypeIds ?? []).map((id) => (
+        <input key={id} name="productTypeIds" type="hidden" value={id} />
+      ))}
 
       <p className={groupTitleStyle}>分類・検索層（Farmille 所有）</p>
       <div className={adminFieldGridStyle}>
@@ -263,7 +264,7 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
         </div>
       </Field>
 
-      <Field label="JBSA材料分類" requirement="optional">
+      <Field label="資材ジャンル（JBSA材料8分類）" requirement="optional">
         <CheckboxGroup
           name="ingredientCategoryIds"
           options={classifications.ingredientCategories}
@@ -286,14 +287,6 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
             </div>
           ))}
         </div>
-      </Field>
-
-      <Field label="製品タイプ（メーカー分類）" requirement="optional">
-        <CheckboxGroup
-          name="productTypeIds"
-          options={classifications.productTypes}
-          selectedIds={selectedProductTypeIds}
-        />
       </Field>
 
       <Field label="検索補助タグ" requirement="optional">
@@ -337,7 +330,7 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
         />
         <TextField
           defaultValue={valueOf("mechanism", material?.mechanism)}
-          label="作用機序"
+          label="作用機作"
           name="mechanism"
         />
         <TextField

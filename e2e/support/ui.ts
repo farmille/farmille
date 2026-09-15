@@ -121,7 +121,9 @@ export async function fillUsageReportForSubmission(page: Page): Promise<void> {
   await applicationCalendar.getByRole("button", { name: "1", exact: true }).click();
   await page.getByRole("button", { name: "葉・茎・果実に散布", exact: true }).click();
   await page.getByPlaceholder("例：1000").fill("1000");
-  await page.getByLabel("全体をまとめてひとこと").fill("E2Eで入力した使用レポートのまとめです。");
+  await page
+    .getByLabel("全体をまとめてひとこと")
+    .fill("E2Eで入力した実証詳細レポートのまとめです。");
   await page
     .getByRole("button", {
       name: /この使用結果には、病害虫の防除、殺菌・殺虫、農薬の代替/,

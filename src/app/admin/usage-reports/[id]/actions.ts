@@ -14,7 +14,7 @@ function formText(formData: FormData, name: string): string | null {
   return formDataString(formData.get(name));
 }
 
-/** pending 使用レポートの調整保存・公開・差し戻し。 */
+/** pending 実証詳細レポートの調整保存・公開・差し戻し。 */
 export async function updateUsageReportEditorialAction(
   _previousState: AdminActionState,
   formData: FormData,
@@ -57,7 +57,7 @@ export async function updateUsageReportEditorialAction(
             ? "タイトル・本文・まとめ・差し戻し理由を入力してください。"
             : "タイトル・本文・まとめを入力してください。"
           : result.error === "conflict"
-            ? "この使用レポートはすでに別の状態へ変わっています。再読み込みしてください。"
+            ? "この実証詳細レポートはすでに別の状態へ変わっています。再読み込みしてください。"
             : errorMessageJa[result.error],
     };
   }
@@ -71,8 +71,8 @@ export async function updateUsageReportEditorialAction(
 
   const messages = {
     save: "編集内容を保存しました。",
-    publish: "使用レポートを公開しました。",
-    decline: "使用レポートを差し戻しました。",
+    publish: "実証詳細レポートを公開しました。",
+    decline: "実証詳細レポートを差し戻しました。",
   } as const;
 
   return { status: "done", message: messages[operation] };

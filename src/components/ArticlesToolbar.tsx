@@ -9,7 +9,7 @@ import { Icon } from "@/components/Icon";
 
 const FILTER_OPTIONS: FilterPillOption[] = [
   { value: "all", label: "すべて" },
-  { value: "report", label: "使用レポート" },
+  { value: "report", label: "実証詳細レポート" },
   { value: "article", label: "記事" },
 ];
 

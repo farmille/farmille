@@ -431,7 +431,7 @@ export async function mutateUsageReports({
     return validationFailure("対象資材が見つかりません。", {});
   }
   if (materialResult.data.publication_status !== "published") {
-    return validationFailure("掲載終了した資材には使用レポートを投稿できません。", {});
+    return validationFailure("掲載終了した資材には実証詳細レポートを投稿できません。", {});
   }
   if (cropsResult.data.length !== new Set(cropIds).size) {
     return validationFailure("選択した作物が見つかりません。", {
@@ -464,7 +464,7 @@ export async function mutateUsageReports({
 
   const existingReports: ExistingReport[] = existingResult.data;
   if (existingReports.some(({ status }) => status === "pending")) {
-    return validationFailure("提出済みの使用レポートは編集できません。", {});
+    return validationFailure("提出済みの実証詳細レポートは編集できません。", {});
   }
 
   const existingByCrop = new Map<string, ExistingReport>();
@@ -499,7 +499,7 @@ export async function mutateUsageReports({
             .single();
 
     if (saveResult.error !== null) {
-      mutationError("使用レポート本体の保存に失敗", saveResult.error);
+      mutationError("実証詳細レポート本体の保存に失敗", saveResult.error);
       return internalFailure();
     }
     reportIds.push(saveResult.data.id);
@@ -537,7 +537,7 @@ export async function mutateUsageReports({
       .select("id");
 
     if (error !== null || data.length !== reportIds.length) {
-      mutationError("使用レポートの提出状態更新に失敗", {
+      mutationError("実証詳細レポートの提出状態更新に失敗", {
         error,
         expected: reportIds,
         updated: data,
@@ -550,6 +550,6 @@ export async function mutateUsageReports({
     ok: true,
     status: mode === "submit" ? "pending" : "draft",
     reportIds,
-    message: mode === "submit" ? "使用レポートを提出しました。" : "下書きを保存しました。",
+    message: mode === "submit" ? "実証詳細レポートを提出しました。" : "下書きを保存しました。",
   };
 }

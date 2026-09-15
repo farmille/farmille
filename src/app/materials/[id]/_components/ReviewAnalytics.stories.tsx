@@ -16,7 +16,7 @@ const meta = {
   render: (args) => (
     <>
       <ReviewAnalytics {...args} />
-      <p className={noteStyle}>表示を持たず、レビュー投稿完了イベントだけを送ります。</p>
+      <p className={noteStyle}>表示を持たず、感想口コミ投稿完了イベントだけを送ります。</p>
     </>
   ),
 } satisfies Meta<typeof ReviewAnalytics>;

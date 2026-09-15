@@ -497,7 +497,7 @@ export async function createReview(input: {
   const review = rows[0];
 
   if (review === undefined) {
-    throw new Error(`作成したレビュー ${reviewId} が見つかりません。`);
+    throw new Error(`作成した感想口コミ ${reviewId} が見つかりません。`);
   }
 
   return review;

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Icon } from "@/components/Icon";
 import { useActionState } from "react";
 
 import { buttonRecipe } from "@/components";
@@ -44,7 +45,8 @@ function SaveToggleForm({
         onClick={state.saved ? undefined : () => trackMaterialSaved(materialId)}
         className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}
       >
-        {state.saved ? "保存済み（解除する）" : "検討リストに保存"}
+        <Icon name={state.saved ? "star_filled" : "star"} size="sm" />
+        {state.saved ? "お気に入りから解除" : "お気に入りに追加"}
       </button>
     </form>
   );
@@ -60,7 +62,7 @@ export function SaveControl({
   if (unavailable) {
     return (
       <p className={css({ m: "0", fontSize: "sm", color: "text.subtle" })}>
-        検討リストは一般ユーザー向けの機能です。
+        お気に入りは一般ユーザー向けの機能です。
       </p>
     );
   }
@@ -73,7 +75,7 @@ export function SaveControl({
         href={loginHref}
         className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}
       >
-        ログインして検討リストに保存
+        ログインしてお気に入りに保存
       </Link>
     );
   }

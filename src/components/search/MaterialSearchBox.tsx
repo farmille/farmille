@@ -167,7 +167,7 @@ function categoryAccentClass(category: TagCategory): string {
       return css({ bg: "tag.effect/15", color: "tag.effect" });
     case "cond":
       return css({ bg: "accent.official/15", color: "accent.official" });
-    case "type":
+    case "genre":
       return css({ bg: "tag.type/15", color: "tag.type" });
     case "maker":
       return css({ bg: "text.subtle/15", color: "text.subtle" });

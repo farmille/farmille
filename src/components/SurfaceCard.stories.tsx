@@ -25,7 +25,7 @@ export const Soft: Story = {
   args: {
     tone: "soft",
     title: "口コミサマリー",
-    description: "直近30件のレビューから抽出した傾向です。",
+    description: "直近30件の感想口コミから抽出した傾向です。",
     children: <p>「効果を実感」との回答が7割を超え、リピート意向も高い傾向です。</p>,
   },
 };
@@ -47,6 +47,6 @@ export const NoHeading: Story = {
   args: {
     title: undefined,
     description: undefined,
-    children: <p>評価 4.2 ・ レビュー128件</p>,
+    children: <p>評価 4.2 ・ 感想口コミ128件</p>,
   },
 };

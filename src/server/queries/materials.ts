@@ -177,13 +177,16 @@ async function findCategoryMaterialIds(
     return succeed(new Set(relations.data.map(({ material_id }) => material_id)));
   }
 
-  if (category === "type") {
+  if (category === "genre") {
     const [masters, relations] = await Promise.all([
-      supabase.from("product_types").select("id").in("id", ids),
-      supabase.from("material_product_types").select("material_id").in("product_type_id", ids),
+      supabase.from("ingredient_categories").select("id").in("id", ids),
+      supabase
+        .from("material_ingredient_categories")
+        .select("material_id")
+        .in("ingredient_category_id", ids),
     ]);
     if (masters.error !== null || relations.error !== null) {
-      reportQueryError("製品タイプによる絞り込みに失敗", {
+      reportQueryError("資材ジャンルによる絞り込みに失敗", {
         masterError: masters.error,
         relationError: relations.error,
       });

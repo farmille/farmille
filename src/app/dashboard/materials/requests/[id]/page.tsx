@@ -88,7 +88,7 @@ export default async function SellerMaterialRequestPage({
               { label: "紹介文", value: proposal.description },
               { label: "一般用途", value: proposal.general_use },
               { label: "主成分", value: proposal.main_components },
-              { label: "作用機序", value: proposal.mechanism },
+              { label: "作用機作", value: proposal.mechanism },
               { label: "使い方", value: proposal.usage_text },
               { label: "価格帯", value: proposal.price_range },
               { label: "公式URL", value: proposal.official_url },

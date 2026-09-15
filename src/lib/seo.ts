@@ -4,7 +4,7 @@ import { clientEnv } from "@/env";
 
 export const SITE_NAME = "Farmille";
 export const DEFAULT_DESCRIPTION =
-  "農業資材の製品情報、農家のレビュー、使用レポートを共有するプラットフォームです。";
+  "農業資材の製品情報、農家の感想口コミ、実証詳細レポートを共有するプラットフォームです。";
 
 const DEFAULT_OG_IMAGE_PATH = "/opengraph-image";
 
@@ -294,7 +294,7 @@ export function createReviewListJsonLd({
       item: {
         "@type": "Review",
         "@id": `${absoluteUrl(`/materials/${materialId}/reviews`)}#review-${review.id}`,
-        name: `${materialName}のレビュー`,
+        name: `${materialName}の感想口コミ`,
         reviewBody: review.body,
         datePublished: review.createdAt,
         author: {

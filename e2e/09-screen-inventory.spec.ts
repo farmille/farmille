@@ -95,7 +95,7 @@ test("アカウント別の画面一覧を撮影する", async ({ page }) => {
       await capture(page, path, name);
     await page.goto(`/admin/usage-reports/${report.id}`);
     await page.getByRole("button", { name: "公開する", exact: true }).click();
-    await expect(page.getByText("使用レポートを公開しました。")).toBeVisible();
+    await expect(page.getByText("実証詳細レポートを公開しました。")).toBeVisible();
     await capture(page, `/reports/${report.id}`, "59-public-report");
   } finally {
     await deleteMaterial(unreviewedMaterial.id);

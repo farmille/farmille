@@ -170,7 +170,7 @@ export async function approveSellerApplication(
   });
 }
 
-/** 審査で選べるメーカー名。別アカウントへの紐づけはDBでも一意制約を適用する。 */
+/** 確認で選べるメーカー名。別アカウントへの紐づけはDBでも一意制約を適用する。 */
 export async function listManufacturerNames(): Promise<Result<string[]>> {
   return withAdmin(async ({ supabase }) => {
     const { data, error } = await supabase.from("manufacturers").select("name").order("name");

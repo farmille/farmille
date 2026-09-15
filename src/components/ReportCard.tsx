@@ -1,7 +1,7 @@
+import type { ReactNode } from "react";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
-import { HelpfulButton } from "./HelpfulButton";
-import { toggleHelpfulAction } from "@/server/actions/helpful";
+import { PostActions } from "./PostActions";
 import { cva, css, cx } from "../../styled-system/css";
 import { Icon } from "@/components/Icon";
 
@@ -86,32 +86,6 @@ const titleRecipe = cva({
   },
 });
 
-const helpfulBtn = cva({
-  base: {
-    display: "inline-flex",
-    alignItems: "center",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.strong",
-    bg: "surface.card",
-    color: "text.muted",
-    borderRadius: "pill",
-    whiteSpace: "nowrap",
-    fontVariantNumeric: "tabular-nums",
-    flexShrink: "0",
-  },
-  variants: {
-    layout: {
-      scroll: { px: "2", py: "1", fontSize: "2xs", gap: "1" },
-      grid: { px: "2", py: "1", fontSize: "2xs", gap: "1" },
-      list: { px: "3", py: "1.5", fontSize: "sm", gap: "1.5" },
-    },
-  },
-  defaultVariants: {
-    layout: "list",
-  },
-});
-
 export type ReportCardProps = {
   title: string;
   author: string;
@@ -130,10 +104,11 @@ export type ReportCardProps = {
   coverSrc?: string;
   layout?: "scroll" | "grid" | "list";
   preload?: boolean;
+  actions?: ReactNode;
   className?: string;
 };
 
-/** 使用レポートのカード（横スクロール・グリッド・一覧）。 */
+/** 実証詳細レポートのカード（横スクロール・グリッド・一覧）。 */
 export function ReportCard({
   title,
   author,
@@ -152,6 +127,7 @@ export function ReportCard({
   coverSrc,
   layout = "list",
   preload = false,
+  actions,
   className,
 }: ReportCardProps) {
   const compact = layout === "scroll" || layout === "grid";
@@ -299,44 +275,17 @@ export function ReportCard({
             </span>
           ) : null}
         </div>
-        <div
-          className={css({
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "2",
-            flexWrap: "wrap",
-            fontSize: compact ? "2xs" : "xs",
-            color: "text.subtle",
-            mt: compact ? "1.5" : "2",
-          })}
-        >
-          {reportId !== undefined && currentPath !== undefined ? (
-            <HelpfulButton
-              action={toggleHelpfulAction.bind(null, "usage_report", reportId, currentPath)}
-              count={helpfulCount}
-              voted={helpfulVoted}
-              layout="card"
-            />
-          ) : (
-            <span className={helpfulBtn({ layout })}>
-              <Icon name="thumb_up" size={compact ? "2xs" : "xs"} />
-              {!compact ? <span>参考になった</span> : null}
-              {helpfulCount}
-            </span>
-          )}
-          {viewCount !== undefined ? (
-            <span
-              className={css({
-                flexShrink: "0",
-                whiteSpace: "nowrap",
-                fontVariantNumeric: "tabular-nums",
-              })}
-            >
-              {viewCount} 回閲覧
-            </span>
-          ) : null}
-        </div>
+        {actions ?? (
+          <PostActions
+            id={reportId}
+            target="usage_report"
+            currentPath={currentPath ?? href}
+            helpfulCount={helpfulCount}
+            voted={helpfulVoted}
+            saved={false}
+            viewCount={viewCount ?? 0}
+          />
+        )}
       </div>
       {materialName && materialHref ? (
         <Link

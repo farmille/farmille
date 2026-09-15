@@ -10,17 +10,16 @@ type MaterialRefCardProps = {
   manufacturerName: string;
   isOfficial?: boolean;
   avgRating?: number | null;
-  /** 使用レポート側の「対象資材」ラベルを出す */
+  /** 実証詳細レポート側の「対象資材」ラベルを出す */
   showTargetLabel?: boolean;
   className?: string;
 };
 
-/** 記事・使用レポート詳細の対象資材カード（モック .card.ref）。 */
+/** 記事・実証詳細レポート詳細の対象資材カード（モック .card.ref）。 */
 export function MaterialRefCard({
   href,
   name,
   manufacturerName,
-  isOfficial = false,
   avgRating = null,
   showTargetLabel = false,
   className,
@@ -75,13 +74,7 @@ export function MaterialRefCard({
             mt: "0.5",
           })}
         >
-          <span>
-            {manufacturerName}
-            {isOfficial ? "（メーカー入力済み）" : ""}
-          </span>
-          {isOfficial ? (
-            <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />
-          ) : null}
+          <span>{manufacturerName}</span>
           {avgRating !== null ? <StarRating value={Math.round(avgRating)} size="sm" /> : null}
         </div>
       </div>

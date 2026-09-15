@@ -35,8 +35,8 @@ export async function generateMetadata({ params }: ReportFormPageProps): Promise
   const { id } = await params;
   const material = await loadMaterialOrNotFound(id);
   return materialMetadata(material, {
-    titleSuffix: "の使用レポートを投稿",
-    description: `${material.name}を使った条件と観察結果を使用レポートとして投稿します。`,
+    titleSuffix: "の実証詳細レポートを投稿",
+    description: `${material.name}を使った条件と観察結果を実証詳細レポートとして投稿します。`,
     pathSuffix: "/report/new",
   });
 }
