@@ -96,7 +96,7 @@ export default async function AdminMaterialChangeRequestPage({
     ["紹介文", currentValues.description, proposal.description],
     ["一般用途", currentValues.generalUse, proposal.generalUse],
     ["主成分", currentValues.mainComponents, proposal.mainComponents],
-    ["作用機序", currentValues.mechanism, proposal.mechanism],
+    ["作用機作", currentValues.mechanism, proposal.mechanism],
     ["使い方", currentValues.usageText, proposal.usageText],
     ["価格帯", currentValues.priceRange, proposal.priceRange],
     ["公式URL", currentValues.officialUrl, proposal.officialUrl],
@@ -104,14 +104,9 @@ export default async function AdminMaterialChangeRequestPage({
     ["対象作物", currentValues.crops, names(proposal.cropIds, classifications.data.crops)],
     ["効果", currentValues.effects, names(proposal.effectIds, classifications.data.effects)],
     [
-      "JBSA材料分類",
+      "資材ジャンル（JBSA材料8分類）",
       currentValues.ingredientCategories,
       names(proposal.ingredientCategoryIds, classifications.data.ingredientCategories),
-    ],
-    [
-      "製品タイプ",
-      currentValues.productTypes,
-      names(proposal.productTypeIds, classifications.data.productTypes),
     ],
     [
       "エビデンス件数",

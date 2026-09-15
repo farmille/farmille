@@ -195,7 +195,7 @@ export async function getUsageReportFormData(
     return fail("internal");
   }
   if (reportsResult.error !== null) {
-    reportQueryError("使用レポート入力データの取得に失敗", reportsResult.error);
+    reportQueryError("実証詳細レポート入力データの取得に失敗", reportsResult.error);
     return fail("internal");
   }
 
@@ -218,7 +218,7 @@ export async function getUsageReportFormData(
   const submitted: SubmittedUsageReport[] = [];
   for (const row of pendingRows) {
     if (row.crop === null) {
-      reportQueryError("pending 使用レポートの作物が欠落", row.id);
+      reportQueryError("pending 実証詳細レポートの作物が欠落", row.id);
       return fail("internal");
     }
     submitted.push({
@@ -247,7 +247,7 @@ export async function getUsageReportFormData(
     cropIds.add(row.crop_id);
     const cropReport = toCropReport(row);
     if (cropReport === null) {
-      reportQueryError("draft 使用レポートの関連データが欠落", row.id);
+      reportQueryError("draft 実証詳細レポートの関連データが欠落", row.id);
       return fail("internal");
     }
     cropReports.push(cropReport);
@@ -256,7 +256,7 @@ export async function getUsageReportFormData(
   const firstDraft = draftRows[0];
   const media = firstDraft.media.toSorted(bySortOrder).map(toMediaInput);
   if (media.some((item) => item === null)) {
-    reportQueryError("draft 使用レポートに未知のメディア値", firstDraft.id);
+    reportQueryError("draft 実証詳細レポートに未知のメディア値", firstDraft.id);
     return fail("internal");
   }
 

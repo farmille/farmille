@@ -8,7 +8,7 @@ import { TagChip, type TagCategory } from "@/components/TagChip";
 
 const FILTER_OPTIONS = [
   { value: "all", label: "すべて" },
-  { value: "report", label: "使用レポート" },
+  { value: "report", label: "実証詳細レポート" },
   { value: "other", label: "その他の記事" },
 ];
 

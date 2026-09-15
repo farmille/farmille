@@ -223,7 +223,7 @@ export function ReviewForm({
     <form action={submit}>
       {existingReviewNotice ? (
         <FormMessage tone="info">
-          この資材には投稿済みのレビューがあります。内容を編集できます。
+          この資材には投稿済みの感想口コミがあります。内容を編集できます。
         </FormMessage>
       ) : null}
       {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
@@ -281,7 +281,7 @@ export function ReviewForm({
 
       <div className={field}>
         <label className={label} htmlFor="review-body">
-          レビュー本文 <Badge variant="required">必須</Badge>
+          感想口コミ本文 <Badge variant="required">必須</Badge>
         </label>
         <Textarea
           id="review-body"
@@ -306,7 +306,7 @@ export function ReviewForm({
                 <input type="hidden" name="existingPhotoId" value={photo.id} />
                 <Image
                   src={photo.url}
-                  alt={photo.caption ?? "レビュー写真"}
+                  alt={photo.caption ?? "感想口コミ写真"}
                   width={80}
                   height={80}
                   unoptimized
@@ -380,7 +380,7 @@ export function ReviewForm({
         <FileInput
           accept="image/jpeg,image/png,image/webp"
           multiple
-          aria-label="レビュー写真を追加"
+          aria-label="感想口コミ写真を追加"
           onChange={(event) => {
             addPhotos(event.target.files);
             event.target.value = "";
@@ -451,7 +451,7 @@ export function ReviewForm({
             className={css({ mt: "1", flexShrink: "0" })}
           />
           <span>
-            このレビューには、病害虫の防除・殺菌・殺虫・農薬の代替など、農薬的な効果を断定する表現を含めていません
+            この感想口コミには、病害虫の防除・殺菌・殺虫・農薬の代替など、農薬的な効果を断定する表現を含めていません
             <span className={css({ color: "accent.danger", fontWeight: "700" })}>（必須）</span>
           </span>
         </label>

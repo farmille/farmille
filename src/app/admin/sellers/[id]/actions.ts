@@ -23,7 +23,7 @@ function isSellerOperation(value: string | null): value is SellerOperation {
 /** 状態遷移の競合（すでに承認済み・却下済み等）は conflict で返る。 */
 function sellerErrorMessage(code: ErrorCode): string {
   if (code === "conflict") {
-    return "申請は審査済みか、指定メーカーまたは資材が別アカウントに紐づいています。新規追加の場合は既存メーカーとの名称重複も確認してください。";
+    return "申請は確認済みか、指定メーカーまたは資材が別アカウントに紐づいています。新規追加の場合は既存メーカーとの名称重複も確認してください。";
   }
 
   return errorMessageJa[code];

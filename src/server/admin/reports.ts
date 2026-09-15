@@ -30,8 +30,8 @@ export const CONTENT_REPORT_TARGET_TYPES = [
 export type ContentReportTargetType = (typeof CONTENT_REPORT_TARGET_TYPES)[number];
 
 export const CONTENT_REPORT_TARGET_LABELS = {
-  review: "レビュー",
-  usage_report: "使用レポート",
+  review: "感想口コミ",
+  usage_report: "実証詳細レポート",
   article: "記事",
   profile: "プロフィール",
   material: "資材",
@@ -116,7 +116,7 @@ async function loadReviewTargets(
     .in("id", ids);
 
   if (error !== null) {
-    reportError("通報対象レビューの取得に失敗", error);
+    reportError("通報対象感想口コミの取得に失敗", error);
     return fail("internal");
   }
 
@@ -144,7 +144,7 @@ async function loadUsageReportTargets(
   const { data, error } = await supabase.from("usage_reports").select("id, title").in("id", ids);
 
   if (error !== null) {
-    reportError("通報対象使用レポートの取得に失敗", error);
+    reportError("通報対象実証詳細レポートの取得に失敗", error);
     return fail("internal");
   }
 
@@ -152,7 +152,7 @@ async function loadUsageReportTargets(
   for (const row of rows) {
     targets.set(targetKey("usage_report", row.id), {
       type: "usage_report",
-      label: row.title ?? "無題の使用レポート",
+      label: row.title ?? "無題の実証詳細レポート",
       publicHref: `/reports/${row.id}`,
       adminHref: `/admin/usage-reports/${row.id}`,
     });
@@ -347,7 +347,7 @@ async function hideReportedTarget(
       .maybeSingle();
 
     if (loadError !== null) {
-      reportError("通報対象レビューの状態取得に失敗", loadError);
+      reportError("通報対象感想口コミの状態取得に失敗", loadError);
       return fail("internal");
     }
     if (review === null || review.status === "hidden") return succeed(null);
@@ -361,7 +361,7 @@ async function hideReportedTarget(
       .select("id");
 
     if (error !== null) {
-      reportError("通報対象レビューの非公開化に失敗", error);
+      reportError("通報対象感想口コミの非公開化に失敗", error);
       return fail("internal");
     }
     if (data.length === 0) return fail("conflict");
@@ -382,7 +382,7 @@ async function hideReportedTarget(
       .maybeSingle();
 
     if (loadError !== null) {
-      reportError("通報対象使用レポートの状態取得に失敗", loadError);
+      reportError("通報対象実証詳細レポートの状態取得に失敗", loadError);
       return fail("internal");
     }
     if (report === null || report.status === "declined") return succeed(null);
@@ -396,7 +396,7 @@ async function hideReportedTarget(
       .select("id");
 
     if (error !== null) {
-      reportError("通報対象使用レポートの非公開化に失敗", error);
+      reportError("通報対象実証詳細レポートの非公開化に失敗", error);
       return fail("internal");
     }
     if (data.length === 0) return fail("conflict");

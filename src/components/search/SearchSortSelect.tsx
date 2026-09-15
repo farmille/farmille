@@ -44,7 +44,7 @@ export function SearchSortSelect({ selected, sort }: SearchSortSelectProps) {
         });
       }}
     >
-      <option value="reviews">レビューが多い順</option>
+      <option value="reviews">感想口コミが多い順</option>
       <option value="rating">評価が高い順</option>
       <option value="newest">新着順</option>
     </Select>

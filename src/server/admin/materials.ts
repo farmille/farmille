@@ -1,4 +1,5 @@
 import { isUniqueViolation, reportAdminError, withAdmin } from "@/server/admin/guard";
+import * as v from "valibot";
 import { materialInputToRow, type MaterialInput } from "@/server/material-input";
 import { fail, succeed, type Result } from "@/server/result";
 import type { Database } from "@/types/database.types";
@@ -241,7 +242,7 @@ export async function createMaterial(input: MaterialInput): Promise<Result<{ id:
   });
 }
 
-/** 資材の編集（admin は全カラム可）。 */
+/** 運営が用意する、編集権移行前の資材情報を更新する。 */
 export async function updateMaterial(
   materialId: string,
   input: MaterialInput,
@@ -249,7 +250,7 @@ export async function updateMaterial(
   return withAdmin(async ({ supabase }) => {
     const { data: current, error: currentError } = await supabase
       .from("materials")
-      .select("content_revision")
+      .select("content_revision, seller_id, published_page_version_id")
       .eq("id", materialId)
       .maybeSingle();
 
@@ -258,11 +259,17 @@ export async function updateMaterial(
       return fail("internal");
     }
     if (current === null) return fail("not_found");
+    if (current.seller_id !== null || current.published_page_version_id !== null) {
+      return fail("forbidden");
+    }
 
     const { data, error } = await supabase
       .from("materials")
       .update({ ...materialInputToRow(input), content_revision: current.content_revision + 1 })
       .eq("id", materialId)
+      .is("seller_id", null)
+      .is("published_page_version_id", null)
+      .eq("content_revision", current.content_revision)
       .select("id");
 
     if (error !== null) {
@@ -384,8 +391,19 @@ async function replaceMaterialClassifications(
 export async function setMaterialSeller(
   materialId: string,
   sellerId: string | null,
+  documentReference: string,
 ): Promise<Result<null>> {
-  return withAdmin(async ({ supabase }) => {
+  const validated = v.safeParse(
+    v.object({
+      materialId: v.pipe(v.string(), v.uuid()),
+      sellerId: v.nullable(v.pipe(v.string(), v.uuid())),
+      documentReference: v.pipe(v.string(), v.trim(), v.maxLength(2000)),
+    }),
+    { materialId, sellerId, documentReference },
+  );
+  if (!validated.success || (sellerId !== null && validated.output.documentReference.length === 0))
+    return fail("invalid_body");
+  return withAdmin(async ({ supabase, session }) => {
     if (sellerId !== null) {
       const { data: seller, error } = await supabase
         .from("seller_accounts")
@@ -398,27 +416,27 @@ export async function setMaterialSeller(
         return fail("internal");
       }
       if (seller === null) return fail("not_found");
-      // 審査中・却下・凍結中の組織に一次情報の編集権を渡さない。
+      // 確認中・却下・凍結中の組織に一次情報の編集権を渡さない。
       if (seller.status !== "approved") return fail("conflict");
     }
 
-    const { data, error } = await supabase
-      .from("materials")
-      .update({
-        seller_id: sellerId,
-        manufacturer_verified_at: null,
-        manufacturer_verified_by_seller_id: null,
-        manufacturer_verification_method: null,
-      })
-      .eq("id", materialId)
-      .select("id");
+    const { error } =
+      sellerId === null
+        ? await supabase.rpc("revoke_material_editor_grant", {
+            p_material_id: materialId,
+            p_actor_id: session.userId,
+          })
+        : await supabase.rpc("set_material_editor_grant", {
+            p_material_id: materialId,
+            p_seller_id: sellerId,
+            p_document_reference: validated.output.documentReference,
+            p_actor_id: session.userId,
+          });
 
     if (error !== null) {
       reportError("claim 紐づけの更新に失敗", error);
       return fail("internal");
     }
-    if (data.length === 0) return fail("not_found");
-
     return succeed(null);
   });
 }

@@ -49,7 +49,7 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
     <FormPageShell
       chrome="public"
       active="search"
-      title={`${material.name}のレビュー編集`}
+      title={`${material.name}の感想口コミ編集`}
       backHref={materialPath}
     >
       <ReviewForm

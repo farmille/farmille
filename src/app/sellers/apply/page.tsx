@@ -8,7 +8,7 @@ import { css } from "../../../../styled-system/css";
 export const metadata: Metadata = {
   title: "メーカーアカウントの申請",
   description:
-    "農業資材メーカー専用アカウントの申請フォームです。審査のうえ、通常3営業日以内にご連絡します。",
+    "農業資材メーカー専用アカウントの申請フォームです。申請内容を確認し、メールでご案内します。申請・掲載・編集は無料です。",
   robots: NO_INDEX_ROBOTS,
 };
 
@@ -39,7 +39,7 @@ export default async function SellerApplyPage({ searchParams }: SellerApplyPageP
       title="メーカーアカウントの申請"
     >
       <p className={leadStyle}>
-        農業資材メーカー専用のアカウントです。自社資材の情報確認や変更申請、記事管理に利用できます。審査のうえ、通常3営業日以内にご連絡します。
+        農業資材メーカー専用のアカウントです。内容を確認し、ログインIDとパスワード設定のご案内、資材候補一覧、編集権の申込書類をメールでお送りします。編集権は書類確認後に資材ごとにお渡しします。申請・掲載・編集は無料です。
       </p>
       <SellerApplyForm />
     </FormPageShell>

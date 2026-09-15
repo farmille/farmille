@@ -1,4 +1,7 @@
+import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
+import { MaterialPageContent } from "@/components/materials/MaterialPageContent";
+import { getPublishedMaterialPage } from "@/server/material-page-editor";
 import { Suspense } from "react";
 import { SkeletonRegion, RatingSkeleton } from "@/components/Skeleton";
 import { SkeletonList } from "@/components/SkeletonList";
@@ -102,6 +105,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const material = await loadMaterialOrNotFound(id);
   const sessionUser = await getSessionUser();
+  const publishedPage = await getPublishedMaterialPage(id);
   const isGeneralUser = sessionUser !== null && canUseGeneralFeatures(sessionUser.accountType);
   const viewerUserId = isGeneralUser ? sessionUser.userId : null;
   // after() の中では cookies() が使えないため、Supabase クライアントは先に作る。
@@ -153,11 +157,11 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
 
       {material.publication_status === "archived" ? (
         <p className={archivedNotice}>
-          この資材は掲載を終了しています。過去の情報と投稿は参照できますが、新しいレビューや使用レポートは投稿できません。
+          この資材は掲載を終了しています。過去の情報と投稿は参照できますが、新しい感想口コミや実証詳細レポートは投稿できません。
         </p>
       ) : null}
 
-      {material.official_url || material.catalog_url ? (
+      {!publishedPage && (material.official_url || material.catalog_url) ? (
         <div className={externalLinks}>
           {material.official_url ? (
             <a
@@ -183,12 +187,19 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
       ) : null}
 
       <p className={disclaimer}>
-        掲載情報は、製造元公式サイト等の公開情報をもとに Farmille
-        が独自に整理・分類したものです。最新・正式な使用方法は必ず製造元公式情報をご確認ください。
+        {publishedPage
+          ? "製品情報はメーカーが入力しています。運営は公開前の表現確認と掲載後の監査を行います。"
+          : "掲載情報は、製造元公式サイト等の公開情報をもとにFarmilleが作成しています。"}
+        最新・正式な使用方法は必ず製造元公式情報をご確認ください。
       </p>
 
       <MaterialDetailTable material={material} />
-      {material.description ? (
+      {publishedPage ? (
+        <MaterialPageContent
+          content={publishedPage.content}
+          imageSources={publishedPage.images.map((image) => image.url)}
+        />
+      ) : material.description ? (
         <section aria-labelledby="material-description-heading">
           <h2
             id="material-description-heading"
@@ -201,13 +212,13 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
           </p>
         </section>
       ) : null}
-      <EvidenceList evidences={material.evidences} />
+      {!publishedPage ? <EvidenceList evidences={material.evidences} /> : null}
 
       <Suspense
         fallback={
           <>
-            <SectionHeading title="使用レポート" />
-            <SkeletonList variant="materialReports" label="使用レポートを読み込んでいます" />
+            <SectionHeading title="実証詳細レポート" />
+            <SkeletonList variant="materialReports" label="実証詳細レポートを読み込んでいます" />
           </>
         }
       >
@@ -216,11 +227,11 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
       <Suspense
         fallback={
           <>
-            <SectionHeading title="レビュー" />
+            <SectionHeading title="感想口コミ" />
             <SkeletonRegion label="評価の分布を読み込んでいます">
               <RatingSkeleton />
             </SkeletonRegion>
-            <SkeletonList variant="reviews" label="レビューを読み込んでいます" />
+            <SkeletonList variant="reviews" label="感想口コミを読み込んでいます" />
           </>
         }
       >
@@ -238,7 +249,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
   );
 }
 
-// この詳細画面だけの初期表示。投稿フォームやレビュー一覧には継承しない。
+// この詳細画面だけの初期表示。投稿フォームや感想口コミ一覧には継承しない。
 export default function MaterialPage(props: MaterialPageProps) {
   return (
     <Suspense fallback={<MaterialPageSkeleton />}>
@@ -260,7 +271,7 @@ async function MaterialReports({ material }: { material: MaterialDetail }) {
       <SectionHeading
         title={
           <span id="usage-reports-heading">
-            使用レポート
+            実証詳細レポート
             <span
               className={css({
                 ml: "2",
@@ -297,8 +308,17 @@ async function MaterialReports({ material }: { material: MaterialDetail }) {
         >
           {reports.items.map((report) => (
             <ReportCard
+              actions={
+                <PostActionsLoader
+                  target="usage_report"
+                  id={report.id}
+                  currentPath={`/reports/${report.id}`}
+                  helpfulCount={report.helpfulCount}
+                />
+              }
+              reportId={report.id}
               key={report.id}
-              title={report.title ?? `${material.name} 使用レポート`}
+              title={report.title ?? `${material.name} 実証詳細レポート`}
               author={report.author?.handle ?? "退会したユーザー"}
               crop={report.crop?.name ?? "作目情報なし"}
               helpfulCount={report.helpfulCount}
@@ -311,8 +331,8 @@ async function MaterialReports({ material }: { material: MaterialDetail }) {
         </div>
       ) : (
         <EmptyState
-          title="公開中の使用レポートはまだありません"
-          description="投稿された使用レポートは、編集部の確認後に公開されます。"
+          title="公開中の実証詳細レポートはまだありません"
+          description="投稿された実証詳細レポートは、編集部の確認後に公開されます。"
         />
       )}
       {articles.total > 0 ? (
@@ -343,7 +363,7 @@ async function MaterialReviews({
       <SectionHeading
         title={
           <span id="reviews-heading">
-            レビュー
+            感想口コミ
             <span
               className={css({
                 ml: "2",
@@ -357,7 +377,7 @@ async function MaterialReviews({
           </span>
         }
         href={`${materialPath}/reviews`}
-        linkLabel={`レビューをすべて見る（${reviews.total}件）`}
+        linkLabel={`感想口コミをすべて見る（${reviews.total}件）`}
       />
       <Suspense
         fallback={

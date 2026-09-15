@@ -86,7 +86,7 @@ type FabBarProps = {
 
 /**
  * 資材詳細等の固定 CTA バー。
- * 文言は D8：「使用レポートを書く」「レビューを書く」。
+ * 文言は D8：「実証詳細レポートを書く」「感想口コミを書く」。
  */
 export async function FabBar({
   reportHref = "/reports/new",
@@ -105,10 +105,10 @@ export async function FabBar({
       <ReviewCompletionToast />
       <div className={cx(fabBarRecipe({ placement }), className)} data-ui="responsive-fab-bar">
         <Link href={reportHref} className={cx(buttonRecipe({ variant: "primary" }), reportLink)}>
-          使用レポートを書く
+          実証詳細レポートを書く
         </Link>
         <Link href={reviewHref} className={cx(buttonRecipe({ variant: "ghost" }), reviewLink)}>
-          レビューを書く
+          感想口コミを書く
         </Link>
       </div>
     </>

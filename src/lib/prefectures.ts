@@ -1,4 +1,4 @@
-// 都道府県（JIS X 0401）。使用レポートの prefecture_code は 1〜47 の smallint（01 §3）。
+// 都道府県（JIS X 0401）。実証詳細レポートの prefecture_code は 1〜47 の smallint（01 §3）。
 export const PREFECTURES = [
   { code: 1, name: "北海道" },
   { code: 2, name: "青森県" },

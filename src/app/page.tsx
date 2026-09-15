@@ -1,3 +1,4 @@
+import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import { Suspense } from "react";
 import { SkeletonList } from "@/components/SkeletonList";
@@ -88,13 +89,16 @@ export default async function HomePage({
               </h1>
               <section className={section} aria-labelledby="home-reports">
                 <h2 id="home-reports" className={feedTitle}>
-                  使用レポート
+                  実証詳細レポート
                 </h2>
                 <HomeFeedOrder target="reports" reportSort={reportSort} reviewSort={reviewSort} />
                 <Suspense
                   key={reportSort}
                   fallback={
-                    <SkeletonList variant="reportScroll" label="使用レポートを読み込んでいます" />
+                    <SkeletonList
+                      variant="reportScroll"
+                      label="実証詳細レポートを読み込んでいます"
+                    />
                   }
                 >
                   <HomeReports reportSort={reportSort} reviewSort={reviewSort} />
@@ -102,11 +106,11 @@ export default async function HomePage({
               </section>
               <section className={section} aria-labelledby="home-reviews">
                 <h2 id="home-reviews" className={feedTitle}>
-                  レビュー
+                  感想口コミ
                 </h2>
                 <Suspense
                   fallback={
-                    <SkeletonList variant="reviewScroll" label="レビューを読み込んでいます" />
+                    <SkeletonList variant="reviewScroll" label="感想口コミを読み込んでいます" />
                   }
                 >
                   <HomeReviews reportSort={reportSort} reviewSort={reviewSort} />
@@ -173,9 +177,9 @@ async function HomeReports({
       reportIds,
     ),
   ]);
-  if (!reportVotes.ok) throw new Error("使用レポートの投票状態を取得できませんでした。");
+  if (!reportVotes.ok) throw new Error("実証詳細レポートの投票状態を取得できませんでした。");
   if (!reportsResult.ok)
-    throw new Error("使用レポートの取得に失敗しました：" + reportsResult.error);
+    throw new Error("実証詳細レポートの取得に失敗しました：" + reportsResult.error);
   return (
     <>
       {reportsResult.data.length > 0 ? (
@@ -198,11 +202,19 @@ async function HomeReports({
         >
           {reportsResult.data.map((report) => (
             <ReportCard
+              actions={
+                <PostActionsLoader
+                  target="usage_report"
+                  id={report.id}
+                  currentPath={`/?reports=${reportSort}&reviews=${reviewSort}`}
+                  helpfulCount={report.helpfulCount}
+                />
+              }
               key={report.id}
               layout="list"
               title={report.title}
               summary={report.summary}
-              reportId={session?.userId === report.authorUserId ? undefined : report.id}
+              reportId={report.id}
               helpfulVoted={reportVotes.data.has(report.id)}
               currentPath={`/?reports=${reportSort}&reviews=${reviewSort}`}
               materialName={report.materialName}
@@ -217,7 +229,7 @@ async function HomeReports({
         </div>
       ) : (
         <p className={empty}>
-          まだ公開中の使用レポートはありません。投稿は運営の確認後に公開されます。
+          まだ公開中の実証詳細レポートはありません。投稿は運営の確認後に公開されます。
         </p>
       )}
     </>
@@ -245,10 +257,21 @@ async function HomeReviews({
     ids: reviewIds,
     viewerUserId,
   });
-  if (!reviewsResult.ok) throw new Error("レビューの取得に失敗しました：" + reviewsResult.error);
+  if (!reviewsResult.ok) throw new Error("感想口コミの取得に失敗しました：" + reviewsResult.error);
   return (
     <HomeReviewFeed
       reviews={reviewsResult.data}
+      actions={reviewsResult.data.map((review) => ({
+        id: review.id,
+        node: (
+          <PostActionsLoader
+            target="review"
+            id={review.id}
+            currentPath="/"
+            helpfulCount={review.helpfulCount}
+          />
+        ),
+      }))}
       orders={{ newest, helpful }}
       viewerUserId={viewerUserId}
       reportSort={reportSort}

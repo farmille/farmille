@@ -16,6 +16,7 @@ import { formatDateJa } from "@/components";
 import {
   getSellerDetail,
   listManufacturerNames,
+  listSellerMaterialCandidates,
   isSellerStatus,
   SELLER_STATUS_LABELS,
   type SellerDetail,
@@ -42,7 +43,6 @@ function publicItems(seller: SellerDetail): DescriptionItem[] {
     { term: "メーカー名", value: seller.official_name },
     { term: "ログインID", value: seller.login_id },
     { term: "本社・主な拠点", value: seller.location },
-    { term: "主な地域", value: seller.region_scope },
     {
       term: "サイト",
       value:
@@ -85,7 +85,7 @@ function internalItems(seller: SellerDetail): DescriptionItem[] {
       term: "共有ログイン",
       value: seller.auth_user_id === null ? "未発行" : `発行済み（${seller.auth_user_id}）`,
     },
-    { term: "claim 済み資材", value: `${seller.materialCount} 件` },
+    { term: "編集権を付与した資材", value: `${seller.materialCount} 件` },
     { term: "資材マスタのメーカー", value: <OptionalValue value={seller.manufacturer_name} /> },
   ];
 }
@@ -106,17 +106,19 @@ export default async function AdminSellerDetailPage({
     if (seller.error === "not_found") notFound();
     throw new Error(errorMessageJa[seller.error]);
   }
+  const candidates = await listSellerMaterialCandidates(seller.data.manufacturer_name);
+  if (!candidates.ok) throw new Error("掲載ページの候補を取得できませんでした。");
 
   return (
     <AdminShell
       backHref="/admin/sellers"
-      backLabel="メーカー審査"
+      backLabel="メーカー確認"
       description={`状態：${statusLabel(seller.data.status)}`}
       title={seller.data.official_name}
     >
       <Panel
-        note="農業資材メーカーであることを確認してください。承認すると、申請したログインIDで共有ログインを発行します。"
-        title="審査"
+        note="会社と担当者を確認し、運営発行のログインIDとパスワード設定用の案内を送付します。編集権は返送書類の確認後に付与します。"
+        title="申請内容の確認とご案内"
       >
         <SellerReviewActions
           manufacturerNames={manufacturers.data}
@@ -126,11 +128,35 @@ export default async function AdminSellerDetailPage({
         />
       </Panel>
 
+      <Panel
+        title="掲載ページの候補一覧"
+        note="会社名から抽出した候補です。所有権の確認結果ではありません。メーカーへ候補の正誤確認と、追加掲載を希望する資材の記入を依頼してください。"
+      >
+        {candidates.data.length === 0 ? (
+          <p>候補はありません。会社名の紐づけ、または新しい資材ページの用意を確認してください。</p>
+        ) : (
+          candidates.data.map((material) => (
+            <p key={material.id}>
+              <Link className={linkStyle} href={`/materials/${material.id}`}>
+                {material.name}
+              </Link>
+              {" ／ "}
+              <Link className={linkStyle} href={`/admin/materials/${material.id}`}>
+                返送書類を確認して編集権を設定
+              </Link>
+            </p>
+          ))
+        )}
+        <p>
+          候補一覧と編集権の申込書類を連絡先メールへ送付し、返送書類を保管してください。各資材の編集権設定で、書類の保管先または管理番号を記録します。
+        </p>
+      </Panel>
+
       <Panel note="メーカーページに出る情報" title="申請内容（公開）">
         <DescriptionList items={publicItems(seller.data)} />
       </Panel>
 
-      <Panel note="連絡先・審査記録。公開ビューには出さない。" title="内部項目">
+      <Panel note="連絡先・確認記録。公開ビューには出さない。" title="内部項目">
         <DescriptionList items={internalItems(seller.data)} />
       </Panel>
 
@@ -143,7 +169,7 @@ export default async function AdminSellerDetailPage({
           </p>
           <p className={adminInlineNoteStyle}>
             <Link className={linkStyle} href="/admin/materials">
-              資材の claim 紐づけへ
+              資材ごとの編集権設定へ
             </Link>
           </p>
         </Panel>

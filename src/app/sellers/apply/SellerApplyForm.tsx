@@ -87,11 +87,13 @@ export function SellerApplyForm() {
         />
       </Field>
 
-      <HintBox>パスワードは申請時には受け付けません。承認時にログイン情報をご連絡します。</HintBox>
+      <HintBox>
+        ログインIDは運営が発行します。パスワードは、ご案内する設定用ページで設定してください。
+      </HintBox>
 
       <Field
         error={fieldErrors.contactEmail}
-        guide="公開されません"
+        guide="公開されません。確認後、このアドレスにログインIDとパスワード設定用のご案内をお送りします。"
         htmlFor="contactEmail"
         label="連絡先メールアドレス"
         requirement="required"
@@ -181,7 +183,6 @@ export function SellerApplyForm() {
 
       <Field
         error={fieldErrors.websiteUrl}
-        guide="審査の参考にさせていただきます"
         htmlFor="websiteUrl"
         label="公式サイトURL"
         requirement="optional"

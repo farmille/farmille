@@ -40,7 +40,7 @@ export type SavedMaterialItem = {
   materialId: string;
   name: string;
   manufacturerName: string;
-  productType: string | null;
+  genre: string | null;
   priceRange: string | null;
   reviewCount: number;
   avgRating: number | null;
@@ -57,7 +57,7 @@ export type CompareMaterialItem = {
   avgRating: number | null;
   reviewCount: number;
   controlPlotRatio: number | null;
-  productType: string | null;
+  genre: string | null;
   priceRange: string | null;
   tags: ReadonlyArray<{ id: string; name: string; category: string }>;
 };
@@ -73,31 +73,31 @@ function bySortOrder(
   return left.sort_order - right.sort_order || left.id.localeCompare(right.id);
 }
 
-async function loadProductTypeNames(
+async function loadGenreNames(
   supabase: SupabaseClient<Database>,
   materialIds: string[],
 ): Promise<Result<Map<string, string>>> {
   if (materialIds.length === 0) return succeed(new Map());
 
   const { data, error } = await supabase
-    .from("material_product_types")
+    .from("material_ingredient_categories")
     .select(
-      "material_id, product_type:product_types!material_product_types_product_type_id_fkey(name, sort_order)",
+      "material_id, ingredient_category:ingredient_categories!material_ingredient_categories_ingredient_category_id_fkey(name, sort_order)",
     )
     .in("material_id", materialIds);
   if (error !== null || data === null) {
-    reportQueryError("製品タイプの取得に失敗", error);
+    reportQueryError("資材ジャンルの取得に失敗", error);
     return fail("internal");
   }
 
   const itemsByMaterial = new Map<string, Array<{ name: string; sort_order: number }>>();
   for (const relation of data) {
-    if (relation.product_type === null) {
-      reportQueryError("製品タイプの参照先が無い", relation);
+    if (relation.ingredient_category === null) {
+      reportQueryError("資材ジャンルの参照先が無い", relation);
       return fail("internal");
     }
     const items = itemsByMaterial.get(relation.material_id) ?? [];
-    items.push(relation.product_type);
+    items.push(relation.ingredient_category);
     itemsByMaterial.set(relation.material_id, items);
   }
 
@@ -194,7 +194,7 @@ export async function toggleSavedMaterial(
   return succeed(true);
 }
 
-/** 検討リスト一覧。新しい保存から順。 */
+/** お気に入り一覧。新しい保存から順。 */
 export async function listSavedMaterials(
   userId: string,
   options?: { limit?: number },
@@ -226,6 +226,7 @@ export async function listSavedMaterials(
       `,
     )
     .eq("user_id", userId)
+    .eq("material.material_images.is_current", true)
     .order("created_at", { ascending: false })
     .order("id", { ascending: true });
 
@@ -236,21 +237,21 @@ export async function listSavedMaterials(
   const { data, error } = await query;
 
   if (error !== null) {
-    reportQueryError("検討リストの取得に失敗", error);
+    reportQueryError("お気に入りの取得に失敗", error);
     return fail("internal");
   }
 
   const rows: SavedMaterialQueryRow[] = data;
-  const productTypes = await loadProductTypeNames(
+  const genres = await loadGenreNames(
     supabase,
     rows.flatMap(({ material }) => (material === null ? [] : [material.id])),
   );
-  if (!productTypes.ok) return productTypes;
+  if (!genres.ok) return genres;
   const items: SavedMaterialItem[] = [];
 
   for (const row of rows) {
     if (row.material === null) {
-      reportQueryError("検討リストの資材関連が欠落", { savedId: row.id });
+      reportQueryError("お気に入りの資材関連が欠落", { savedId: row.id });
       return fail("internal");
     }
 
@@ -262,7 +263,7 @@ export async function listSavedMaterials(
       materialId: row.material.id,
       name: row.material.name,
       manufacturerName: row.material.manufacturer_name,
-      productType: productTypes.data.get(row.material.id) ?? null,
+      genre: genres.data.get(row.material.id) ?? null,
       priceRange: row.material.price_range,
       reviewCount: row.material.review_count,
       avgRating: row.material.avg_rating,
@@ -276,7 +277,7 @@ export async function listSavedMaterials(
   return succeed(items);
 }
 
-/** 検討リストから1件解除する。 */
+/** お気に入りから1件解除する。 */
 export async function unsaveMaterial(materialId: string, userId: string): Promise<Result<null>> {
   const supabase = await createServerSupabase();
   const { error } = await supabase
@@ -286,7 +287,7 @@ export async function unsaveMaterial(materialId: string, userId: string): Promis
     .eq("user_id", userId);
 
   if (error !== null) {
-    reportQueryError("検討リストの解除に失敗", error);
+    reportQueryError("お気に入りの解除に失敗", error);
     return fail("internal");
   }
 
@@ -378,7 +379,7 @@ export async function listMaterialsForCompare(
     const tags = [
       ...detail.effects.map(({ id, name }) => ({ id, name, category: "effect" })),
       ...detail.targetCrops.map(({ id, name }) => ({ id, name, category: "crop" })),
-      ...detail.productTypes.map(({ id, name }) => ({ id, name, category: "type" })),
+      ...detail.ingredientCategories.map(({ id, name }) => ({ id, name, category: "genre" })),
       ...detail.searchTags.map(({ id, name, category }) => ({ id, name, category })),
     ];
 
@@ -389,10 +390,10 @@ export async function listMaterialsForCompare(
       avgRating: row.avg_rating,
       reviewCount: row.review_count,
       controlPlotRatio: row.control_plot_ratio,
-      productType:
-        detail.productTypes.length === 0
+      genre:
+        detail.ingredientCategories.length === 0
           ? null
-          : detail.productTypes.map(({ name }) => name).join("、"),
+          : detail.ingredientCategories.map(({ name }) => name).join("、"),
       priceRange: row.price_range,
       tags,
     });

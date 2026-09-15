@@ -149,7 +149,7 @@ export function SellerReviewActions({
             </label>
           ) : null}
           <p className={adminInlineNoteStyle}>
-            承認すると、このメーカーの既存資材がダッシュボードに表示され、情報確認・変更申請・掲載終了申請ができるようになります。
+            アカウントの確認後にログインを発行します。この操作では編集権は付与されません。掲載ページの候補一覧と編集権の申込書類をメールで送り、返送書類を確認してから資材ごとに編集権を付与してください。
           </p>
         </div>
       ) : null}
@@ -158,21 +158,19 @@ export function SellerReviewActions({
 
       {state.status === "approved" ? (
         <div className={credentialsStyle}>
-          <p className={credentialLabelStyle}>
-            共有ログインを発行しました。パスワードはこの画面にしか表示されません。
-          </p>
+          <p className={credentialLabelStyle}>ログインIDとパスワード設定用の案内を発行しました。</p>
           <div>
             <span className={adminInlineNoteStyle}>ログインID</span>
             <br />
             <span className={adminCodeStyle}>{state.credentials.loginId}</span>
           </div>
           <div>
-            <span className={adminInlineNoteStyle}>初期パスワード</span>
+            <span className={adminInlineNoteStyle}>パスワード設定用URL</span>
             <br />
-            <span className={adminCodeStyle}>{state.credentials.password}</span>
+            <span className={adminCodeStyle}>{state.credentials.passwordSetupUrl}</span>
           </div>
           <p className={adminInlineNoteStyle}>
-            申請者へ安全な手段で伝え、初回ログイン後にパスワードを変更してもらってください。
+            このURLを、掲載ページの候補一覧と編集権の申込書類とともに、申請時の連絡先へ手動でメール送付してください。期限切れの場合はメーカーのパスワード再設定画面から再送できます。
           </p>
         </div>
       ) : null}
@@ -199,7 +197,7 @@ export function SellerReviewActions({
               >
                 {pending && submitting === "approve"
                   ? "共有ログインを発行中…"
-                  : "承認して共有ログインを発行"}
+                  : "確認を完了してログインを発行"}
               </Button>
               <Button
                 disabled={pending}

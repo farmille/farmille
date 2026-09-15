@@ -183,13 +183,17 @@ export async function setMaterialSellerAction(
   }
 
   const nextSellerId = sellerId !== null && sellerId.length > 0 ? sellerId : null;
-  const result = await setMaterialSeller(materialId, nextSellerId);
+  const documentReference = formDataString(formData.get("documentReference"))?.trim() ?? "";
+  if (nextSellerId !== null && documentReference.length === 0) {
+    return { status: "error", message: "返送書類の保管先または管理番号を入力してください。" };
+  }
+  const result = await setMaterialSeller(materialId, nextSellerId, documentReference);
 
   if (!result.ok) {
     if (result.error === "conflict") {
       return {
         status: "error",
-        message: "承認済みのメーカーにだけ claim を紐づけられます。",
+        message: "アカウントの確認が完了したメーカーにだけ編集権を付与できます。",
       };
     }
 
@@ -204,7 +208,7 @@ export async function setMaterialSellerAction(
     status: "done",
     message:
       nextSellerId === null
-        ? "claim を解除し、メーカー確認状態をリセットしました。"
-        : "claim を紐づけました。メーカーが情報を確認するまで確認済み表示は付きません。",
+        ? "編集権を取り消しました。公開中の情報は保持しています。"
+        : "書類確認の記録を保存し、この資材の編集権を付与しました。",
   };
 }

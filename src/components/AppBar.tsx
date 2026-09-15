@@ -367,7 +367,7 @@ function DesktopSiteHeader({
           className={desktopNavLink({ active: active === "articles" })}
           aria-current={active === "articles" ? "page" : undefined}
         >
-          使用レポート一覧
+          実証詳細レポート一覧
         </Link>
         <Form action="/search" aria-label="ヘッダー検索" className={desktopSearch} role="search">
           <Icon name="search" size="sm" />
@@ -443,7 +443,10 @@ function DesktopSellerHeader(props: AppBarProps) {
             ホーム
           </Link>
           <Link href="/dashboard/materials" className={desktopNavLink()}>
-            資材管理
+            製品情報
+          </Link>
+          <Link href="/dashboard/profile" className={desktopNavLink()}>
+            会社情報
           </Link>
           <Link href="/dashboard/articles" className={desktopNavLink()}>
             記事管理

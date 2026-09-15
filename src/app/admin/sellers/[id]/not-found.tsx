@@ -12,7 +12,7 @@ const linkStyle = css({
 
 export default function AdminSellerNotFound() {
   return (
-    <AdminShell backHref="/admin/sellers" backLabel="メーカー審査" title="メーカーが見つかりません">
+    <AdminShell backHref="/admin/sellers" backLabel="メーカー確認" title="メーカーが見つかりません">
       <Panel title="対象なし">
         <p className={adminInlineNoteStyle}>
           指定されたメーカーアカウントは存在しないか、削除された可能性があります。

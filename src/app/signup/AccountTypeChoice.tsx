@@ -27,17 +27,17 @@ const detailsStyle = css({
   lineHeight: "1.65",
 });
 
-/** 一般ユーザーとメーカーを入力前に分け、異なる審査・ログイン方式を明示する。 */
+/** 一般ユーザーとメーカーを入力前に分け、異なる確認・ログイン方式を明示する。 */
 export function AccountTypeChoice() {
   return (
     <>
       <div className={choicesStyle}>
         <SurfaceCard
-          description="匿名・ハンドルネームで、レビューや使用レポートを投稿できます。"
+          description="匿名・ハンドルネームで、感想口コミや実証詳細レポートを投稿できます。"
           title="一般ユーザーとして登録"
         >
           <span className={accountTypeStyle}>個人用アカウント</span>
-          <p className={detailsStyle}>メールアドレスで登録します。運営による審査はありません。</p>
+          <p className={detailsStyle}>メールアドレスで登録します。運営による確認はありません。</p>
           <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/signup/general">
             一般ユーザー登録へ
           </Link>
@@ -49,7 +49,7 @@ export function AccountTypeChoice() {
         >
           <span className={accountTypeStyle}>メーカー用アカウント</span>
           <p className={detailsStyle}>
-            ログインIDを申請します。運営の審査後にログイン情報を発行します。
+            ログインIDを申請します。運営の確認後にログイン情報を発行します。
           </p>
           <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/sellers">
             メーカー向けページへ

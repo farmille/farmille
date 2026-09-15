@@ -1,8 +1,9 @@
 import { notFound, redirect } from "next/navigation";
+import * as v from "valibot";
 
-import { MaterialChangeForm } from "@/app/dashboard/materials/_components/MaterialChangeForm";
+import { MaterialPageEditor } from "@/app/dashboard/materials/_components/MaterialPageEditor";
+import { HideMaterialPageForm } from "@/app/dashboard/materials/_components/HideMaterialPageForm";
 import {
-  Badge,
   DataList,
   EmptyState,
   FormPageShell,
@@ -10,169 +11,104 @@ import {
   TextLink,
   formatDateJa,
 } from "@/components";
-import {
-  isMaterialChangeRequestStatus,
-  isMaterialChangeType,
-  MATERIAL_CHANGE_REQUEST_STATUS_LABELS,
-  MATERIAL_CHANGE_TYPE_LABELS,
-} from "@/lib/material-change";
+import { materialPageStack } from "@/components/materials/MaterialPageContent";
+import { MATERIAL_PAGE_STATUS_LABELS } from "@/lib/material-page-editor";
 import { requireSeller } from "@/server/auth";
-import { listClassificationOptions } from "@/server/queries/classifications";
-import { getSellerMaterialPageData } from "@/server/queries/seller-dashboard";
-import { css } from "../../../../../styled-system/css";
+import { getMaterialEditor } from "@/server/material-page-editor";
+import { listMaterialPageAudits } from "@/server/material-page-audits";
 import { SellerAccessDenied } from "../../_components/AccessDenied";
-import { EvidenceManager } from "./_components/EvidenceManager";
-import {
-  ArchiveMaterialForm,
-  ConfirmMaterialInformationForm,
-} from "./_components/MaterialWorkflowForms";
-
-const pageStack = css({ display: "flex", flexDirection: "column", gap: "6" });
-const historyLayout = css({ display: "flex", flexDirection: "column", gap: "3" });
 
 export default async function SellerMaterialPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!v.is(v.pipe(v.string(), v.uuid()), id)) notFound();
   const session = await requireSeller();
-
   if (!session.ok) {
-    if (session.error === "unauthorized") {
+    if (session.error === "unauthorized")
       redirect(`/sellers/login?next=${encodeURIComponent(`/dashboard/materials/${id}`)}`);
-    }
     return <SellerAccessDenied backHref="/dashboard/materials" />;
   }
-
-  const [result, classifications] = await Promise.all([
-    getSellerMaterialPageData(session.data.sellerId, id),
-    listClassificationOptions(),
-  ]);
-  if (!result.ok) {
-    if (result.error === "not_found") notFound();
-    throw new Error("自社資材の取得に失敗しました。");
-  }
-  if (!classifications.ok) throw new Error("資材分類の取得に失敗しました。");
-
-  const { material, changeRequests } = result.data;
-  const pendingRequest = changeRequests.find(({ status }) => status === "pending") ?? null;
-  const isArchived = material.publication_status === "archived";
-  const isVerified = material.manufacturer_verified_at !== null;
-
+  const editor = await getMaterialEditor(id, session.data.sellerId);
+  const audits = editor ? await listMaterialPageAudits(id) : [];
+  if (!editor)
+    return (
+      <FormPageShell chrome="seller" backHref="/dashboard/materials" title="製品情報の管理">
+        <EmptyState
+          title="編集権の書類確認が必要です"
+          description="この資材はまだ編集できません。返送書類の確認後、運営が資材ごとに編集権を付与します。公開中の情報は引き続き閲覧できます。"
+        />
+      </FormPageShell>
+    );
   return (
-    <FormPageShell chrome="seller" backHref="/dashboard/materials" title={material.name}>
-      <div className={pageStack}>
+    <FormPageShell chrome="seller" backHref="/dashboard/materials" title="製品情報の管理">
+      <div className={materialPageStack}>
+        {audits.length > 0 ? (
+          <SurfaceCard title="掲載後の確認記録">
+            {audits.map((audit) => (
+              <p key={audit.id}>
+                {formatDateJa(audit.created_at)}／{audit.note}
+              </p>
+            ))}
+          </SurfaceCard>
+        ) : null}
         <SurfaceCard
-          description={`${material.manufacturer_name}の自社資材`}
-          title={material.name}
+          title={editor.material.name}
+          description="製品名の変更は運営へご連絡ください。"
           tone="soft"
         >
           <DataList
             rows={[
+              { label: "メーカー", value: editor.material.manufacturer_name },
               {
                 label: "公開状態",
-                value: (
-                  <Badge variant={isArchived ? "optional" : "published"}>
-                    {isArchived ? "非公開" : "公開中"}
-                  </Badge>
-                ),
+                value: editor.material.publication_status === "published" ? "公開中" : "非公開",
               },
-              { label: "メーカー確認", value: isVerified ? "確認済み" : "未確認" },
               {
-                label: "公開画面",
-                value: <TextLink href={`/materials/${material.id}`}>資材詳細を確認</TextLink>,
+                label: "公開ページ",
+                value: <TextLink href={`/materials/${id}`}>公開中の内容を見る</TextLink>,
               },
             ]}
           />
         </SurfaceCard>
-
-        {!isVerified ? (
-          <SurfaceCard
-            description="運営が先に登録した情報が正しい場合は、変更申請を出さずに確認済みにできます。"
-            title="初期データを確認"
-          >
-            <ConfirmMaterialInformationForm materialId={material.id} />
-          </SurfaceCard>
-        ) : null}
-
-        {pendingRequest === null && !isArchived ? (
-          <SurfaceCard
-            description="送信後も公開中の内容は変わりません。運営が承認すると反映されます。"
-            title="資材情報を変更"
-          >
-            <MaterialChangeForm
-              classifications={classifications.data}
-              manufacturerName={material.manufacturer_name}
-              material={material}
-            />
-          </SurfaceCard>
-        ) : null}
-
-        {pendingRequest === null && !isArchived ? (
-          <EvidenceManager
-            evidences={material.evidences}
-            materialId={material.id}
-            sellerId={session.data.sellerId}
-          />
-        ) : null}
-
-        {pendingRequest !== null ? (
-          <SurfaceCard
-            description="同じ資材へ重複して申請できません。運営の処理を待つか、申請詳細から取り消してください。"
-            title="承認待ちの申請があります"
-          >
-            <TextLink href={`/dashboard/materials/requests/${pendingRequest.id}`}>
-              申請内容を見る
-            </TextLink>
-          </SurfaceCard>
-        ) : null}
-
-        {pendingRequest === null && !isArchived ? (
-          <SurfaceCard
-            description="運営の承認後、一般ユーザーは資材の検索・詳細閲覧・新規投稿ができなくなります。データは削除せず、メーカーと運営が引き続き確認できます。"
-            title="資材を非公開にする"
-          >
-            <ArchiveMaterialForm materialId={material.id} />
-          </SurfaceCard>
-        ) : null}
-
-        <SurfaceCard title="申請履歴">
-          {changeRequests.length === 0 ? (
-            <EmptyState title="資材変更の申請はありません" />
+        <MaterialPageEditor
+          materialId={id}
+          sellerId={session.data.sellerId}
+          initialContent={editor.content}
+          expectedVersion={editor.expectedVersion}
+          pendingVersion={editor.pendingVersion}
+          initialImageSources={editor.imageSources}
+        />
+        <SurfaceCard title="変更履歴">
+          {editor.history.length === 0 ? (
+            <p>保存した原稿はありません。</p>
           ) : (
-            <div className={historyLayout}>
-              {changeRequests.map((request) => (
-                <SurfaceCard
-                  key={request.id}
-                  title={formatDateJa(request.submitted_at)}
-                  tone="soft"
-                >
-                  <DataList
-                    rows={[
-                      {
-                        label: "申請種別",
-                        value: isMaterialChangeType(request.change_type)
-                          ? MATERIAL_CHANGE_TYPE_LABELS[request.change_type]
-                          : request.change_type,
-                      },
-                      {
-                        label: "状態",
-                        value: isMaterialChangeRequestStatus(request.status)
-                          ? MATERIAL_CHANGE_REQUEST_STATUS_LABELS[request.status]
-                          : request.status,
-                      },
-                      {
-                        label: "詳細",
-                        value: (
-                          <TextLink href={`/dashboard/materials/requests/${request.id}`}>
-                            申請内容を見る
-                          </TextLink>
-                        ),
-                      },
-                    ]}
-                  />
-                </SurfaceCard>
-              ))}
-            </div>
+            editor.history.map((version) => {
+              const status = v.parse(
+                v.picklist([
+                  "draft",
+                  "pending",
+                  "published",
+                  "returned",
+                  "superseded",
+                  "withdrawn",
+                ]),
+                version.status,
+              );
+              return (
+                <div key={version.id}>
+                  <TextLink href={`/dashboard/materials/${id}/history/${version.id}`}>
+                    {formatDateJa(version.created_at)}／{MATERIAL_PAGE_STATUS_LABELS[status]}
+                  </TextLink>
+                  {version.review_note ? <p>{version.review_note}</p> : null}
+                </div>
+              );
+            })
           )}
         </SurfaceCard>
+        {editor.material.publication_status === "published" ? (
+          <SurfaceCard title="公開を停止する">
+            <HideMaterialPageForm materialId={id} />
+          </SurfaceCard>
+        ) : null}
       </div>
     </FormPageShell>
   );

@@ -202,7 +202,7 @@ export function SignupForm() {
       <Field
         error={fieldErrors.terms}
         htmlFor="terms"
-        label="利用規約・レビューガイドラインへの同意"
+        label="利用規約・感想口コミガイドラインへの同意"
         requirement="required"
       >
         <label>
@@ -213,7 +213,7 @@ export function SignupForm() {
             required
             defaultChecked={values.terms === "on"}
           />{" "}
-          利用規約・レビューガイドラインに同意する
+          利用規約・感想口コミガイドラインに同意する
         </label>
       </Field>
 

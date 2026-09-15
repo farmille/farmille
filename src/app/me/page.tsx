@@ -64,7 +64,7 @@ export default async function MePage() {
         <ProfileCard profile={data.profile} />
 
         <div className={statRow}>
-          <StatCard value={data.reviewCount} label="レビュー" />
+          <StatCard value={data.reviewCount} label="感想口コミ" />
           <StatCard value={data.helpfulReceivedCount} label="参考になった" />
         </div>
 

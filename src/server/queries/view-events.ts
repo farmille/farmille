@@ -12,7 +12,7 @@ function reportViewError<ErrorValue>(operation: string, error: ErrorValue): void
 }
 
 /**
- * 資材詳細・記事・使用レポートの閲覧ログを追記する。
+ * 資材詳細・記事・実証詳細レポートの閲覧ログを追記する。
  * 表示用パスからは失敗を握りつぶしてよい（呼び出し側で Result を無視する）。
  *
  * 呼び出し側は `next/server` の `after()` からこの関数を呼ぶ想定だが、

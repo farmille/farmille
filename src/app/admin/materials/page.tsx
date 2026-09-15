@@ -48,11 +48,6 @@ const columns: DataTableColumn<AdminMaterialListItem>[] = [
     ),
   },
   { key: "manufacturer_name", header: "メーカー名", cell: (row) => row.manufacturer_name },
-  {
-    key: "product_types",
-    header: "製品タイプ",
-    cell: (row) => (row.productTypeNames.length === 0 ? "—" : row.productTypeNames.join("、")),
-  },
   { key: "sales_status", header: "販売状況", cell: (row) => row.sales_status ?? "—" },
   {
     key: "publication_status",
@@ -69,7 +64,7 @@ const columns: DataTableColumn<AdminMaterialListItem>[] = [
     header: "メーカー確認",
     cell: (row) => (row.manufacturer_verified_at === null ? "未確認" : "確認済み"),
   },
-  { key: "review_count", header: "レビュー", align: "end", cell: (row) => row.review_count },
+  { key: "review_count", header: "感想口コミ", align: "end", cell: (row) => row.review_count },
 ];
 
 export default async function AdminMaterialsPage({
@@ -130,8 +125,7 @@ export default async function AdminMaterialsPage({
         />
         <p className={css({ mt: "2" })}>
           <span className={adminInlineNoteStyle}>
-            claim
-            は編集主体との紐づけ。メーカー確認済み表示は、メーカーが初期情報を確認するか変更申請を行った資材だけに付く。
+            claim は編集主体との紐づけ。メーカーによる記入項目には、小さな注記を表示します。
           </span>
         </p>
       </Panel>

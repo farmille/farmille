@@ -42,7 +42,7 @@ function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): voi
   console.error(`[server/queries/usage-reports] ${operation}`, error);
 }
 
-/** ホームの新着使用レポート。published のみ。0件なら空配列。 */
+/** ホームの新着実証詳細レポート。published のみ。0件なら空配列。 */
 export async function listRecentUsageReports({
   limit,
   ids,
@@ -91,7 +91,7 @@ export async function listRecentUsageReports({
   const { data, error } = await query;
 
   if (error !== null) {
-    reportQueryError("新着使用レポートの取得に失敗", error);
+    reportQueryError("新着実証詳細レポートの取得に失敗", error);
     return fail("internal");
   }
 
@@ -107,7 +107,7 @@ export async function listRecentUsageReports({
       .in("target_id", reportIds);
 
     if (helpfulError !== null) {
-      reportQueryError("使用レポートの参考になった件数の取得に失敗", helpfulError);
+      reportQueryError("実証詳細レポートの参考になった件数の取得に失敗", helpfulError);
       return fail("internal");
     }
 
@@ -131,7 +131,7 @@ export async function listRecentUsageReports({
     }
 
     if (row.author?.handle == null || row.crop === null || row.material === null) {
-      reportQueryError("使用レポートの関連データが欠落", { id: row.id });
+      reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
       return fail("internal");
     }
 
@@ -250,12 +250,12 @@ async function getReportCounts(
   ]);
 
   if (helpfulResult.error !== null) {
-    reportQueryError("使用レポートの参考になった件数の取得に失敗", helpfulResult.error);
+    reportQueryError("実証詳細レポートの参考になった件数の取得に失敗", helpfulResult.error);
     return fail("internal");
   }
 
   if (viewResult.error !== null) {
-    reportQueryError("使用レポートの閲覧数の取得に失敗", viewResult.error);
+    reportQueryError("実証詳細レポートの閲覧数の取得に失敗", viewResult.error);
     return fail("internal");
   }
 
@@ -290,7 +290,7 @@ function toMediaType(value: string): "photo" | "video" | null {
   return null;
 }
 
-/** published の使用レポート詳細。draft/pending 等は null。 */
+/** published の実証詳細レポート詳細。draft/pending 等は null。 */
 export async function getPublishedUsageReport(
   reportId: string,
 ): Promise<Result<PublishedUsageReportDetail | null>> {
@@ -350,7 +350,7 @@ export async function getPublishedUsageReport(
     .maybeSingle();
 
   if (error !== null) {
-    reportQueryError("公開使用レポートの取得に失敗", error);
+    reportQueryError("公開実証詳細レポートの取得に失敗", error);
     return fail("internal");
   }
 
@@ -371,7 +371,7 @@ export async function getPublishedUsageReport(
     row.crop === null ||
     row.material === null
   ) {
-    reportQueryError("使用レポートの関連データが欠落", { id: row.id });
+    reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
     return fail("internal");
   }
 
@@ -403,7 +403,7 @@ export async function getPublishedUsageReport(
 
   return succeed({
     id: row.id,
-    title: row.title ?? `${row.material.name} 使用レポート`,
+    title: row.title ?? `${row.material.name} 実証詳細レポート`,
     publishedAt: row.published_at,
     purposeTags: row.purpose_tags,
     purposeNote: row.purpose_note,

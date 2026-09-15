@@ -24,10 +24,10 @@ export const Articles: Story = {
   render: () => <SkeletonList variant="articles" label="記事を読み込んでいます" />,
 };
 export const Reports: Story = {
-  render: () => <SkeletonList variant="reportScroll" label="使用レポートを読み込んでいます" />,
+  render: () => <SkeletonList variant="reportScroll" label="実証詳細レポートを読み込んでいます" />,
 };
 export const Reviews: Story = {
-  render: () => <SkeletonList variant="reviewScroll" label="レビューを読み込んでいます" />,
+  render: () => <SkeletonList variant="reviewScroll" label="感想口コミを読み込んでいます" />,
 };
 export const MaterialHero: Story = {
   render: () => (

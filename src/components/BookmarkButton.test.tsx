@@ -1,0 +1,54 @@
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { BookmarkButton } from "./BookmarkButton";
+
+afterEach(cleanup);
+describe("投稿の保存ボタン", () => {
+  it("保存と解除を処理結果に合わせて表示する", async () => {
+    const action = vi.fn(async (saved: boolean) => saved);
+    render(<BookmarkButton saved={false} action={action} />);
+    fireEvent.click(screen.getByRole("button", { name: "投稿を保存" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "保存を解除" }).getAttribute("aria-pressed")).toBe(
+        "true",
+      ),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "保存を解除" }).hasAttribute("disabled")).toBe(
+        false,
+      ),
+    );
+    expect(action).toHaveBeenLastCalledWith(true);
+    fireEvent.click(screen.getByRole("button", { name: "保存を解除" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "投稿を保存" }).getAttribute("aria-pressed")).toBe(
+        "false",
+      ),
+    );
+    expect(action).toHaveBeenLastCalledWith(false);
+  });
+  it("送信中は再送せず、処理完了まで保存状態を変えない", async () => {
+    let finish: (saved: boolean) => void = () => {
+      throw new Error("処理が未開始です。");
+    };
+    const action = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    render(<BookmarkButton saved={false} action={action} />);
+    const button = screen.getByRole("button", { name: "投稿を保存" });
+    fireEvent.click(button);
+    expect(button.hasAttribute("disabled")).toBe(true);
+    expect(button.getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(button);
+    expect(action).toHaveBeenCalledTimes(1);
+    finish(true);
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "保存を解除" }).hasAttribute("disabled")).toBe(
+        false,
+      ),
+    );
+  });
+});

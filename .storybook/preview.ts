@@ -11,6 +11,10 @@ import "../src/app/globals.css";
 // Supabase・next/headers に依存する server モジュールを __mocks__ 配下の実装へ差し替える
 sb.mock(import("../src/server/auth.ts"));
 sb.mock(import("../src/server/actions/helpful.ts"));
+sb.mock(import("../src/server/actions/post-actions.ts"));
+sb.mock(import("../src/server/queries/post-actions.ts"));
+sb.mock(import("../src/server/queries/reviews.ts"));
+sb.mock(import("../src/server/queries/usage-reports.ts"));
 sb.mock(import("../src/server/actions/reports.ts"));
 sb.mock(import("../src/env.ts"));
 sb.mock(import("../src/lib/analytics/events.ts"));

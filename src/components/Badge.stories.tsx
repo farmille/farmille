@@ -6,7 +6,7 @@ const meta = {
   title: "Components/Badge",
   component: Badge,
   args: {
-    children: "資材タイプ",
+    children: "資材ジャンル",
   },
 } satisfies Meta<typeof Badge>;
 

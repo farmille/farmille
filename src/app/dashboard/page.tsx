@@ -69,7 +69,6 @@ export default async function DashboardPage() {
             rows={[
               { label: "資材マスタのメーカー", value: seller.manufacturer_name },
               { label: "所在地", value: seller.location },
-              { label: "対応地域", value: seller.region_scope },
               {
                 label: "公式サイト",
                 value:
@@ -98,9 +97,9 @@ export default async function DashboardPage() {
                   </TextLink>
                 ),
               },
-              { label: "状態", value: seller.status === "approved" ? "承認済み" : seller.status },
+              { label: "状態", value: seller.status === "approved" ? "確認済み" : seller.status },
               {
-                label: "承認日",
+                label: "確認日",
                 value: seller.approved_at === null ? null : formatDateJa(seller.approved_at),
               },
             ]}
@@ -108,12 +107,16 @@ export default async function DashboardPage() {
         </SurfaceCard>
 
         <SurfaceCard
-          description="資材の新規登録、情報変更、掲載終了、承認状況の確認を行います。"
+          description="編集権のある製品の編集、下書き保存、プレビュー、表現確認の状況確認を行います。"
           title="資材管理"
         >
           <Link className={buttonRecipe()} href="/dashboard/materials">
             資材管理を開く
           </Link>
+        </SurfaceCard>
+
+        <SurfaceCard title="メーカープロフィール">
+          <TextLink href="/dashboard/profile">会社紹介・ロゴ・公式リンクを編集する</TextLink>
         </SurfaceCard>
 
         <section aria-label="自社資材">
@@ -122,7 +125,7 @@ export default async function DashboardPage() {
             <SurfaceCard>
               <EmptyState
                 title="公開中の自社資材はありません"
-                description="資材管理から新規登録を申請できます"
+                description="編集権の書類確認が完了すると、資材ごとに編集できるようになります。"
               />
             </SurfaceCard>
           ) : (

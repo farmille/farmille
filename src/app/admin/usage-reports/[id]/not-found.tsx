@@ -15,8 +15,8 @@ export default function AdminUsageReportNotFound() {
   return (
     <AdminShell
       backHref="/admin/usage-reports"
-      backLabel="使用レポート編集局"
-      title="使用レポートが見つかりません"
+      backLabel="実証詳細レポート編集局"
+      title="実証詳細レポートが見つかりません"
     >
       <Panel title="確認">
         <p>対象が存在しないか、編集局へ提出されていない下書きです。</p>

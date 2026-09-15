@@ -30,6 +30,6 @@ export const External: Story = {
 export const LongLabel: Story = {
   args: {
     href: "/reports/tomato-field-2026",
-    children: "施設栽培トマトでの使用レポート（うどんこ病対策・定植前土壌灌注）をすべて見る",
+    children: "施設栽培トマトでの実証詳細レポート（うどんこ病対策・定植前土壌灌注）をすべて見る",
   },
 };

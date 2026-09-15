@@ -21,7 +21,7 @@ export default async function ProfileSetupPage() {
   return (
     <AuthScreen
       title="個人プロフィールの設定"
-      lead="レビューや検討リストを使うための設定です。運営権限とログイン情報はそのまま使えます。"
+      lead="感想口コミやお気に入りを使うための設定です。運営権限とログイン情報はそのまま使えます。"
     >
       <ProfileSetupForm />
     </AuthScreen>

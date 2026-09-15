@@ -23,7 +23,14 @@ export const helpfulPillRecipe = cva({
   variants: {
     /** card はカード内の横並びに置くため折り返さない。detail は詳細画面の単独配置。 */
     layout: {
-      card: { whiteSpace: "nowrap", flexShrink: "0" },
+      card: {
+        whiteSpace: "nowrap",
+        flexShrink: "0",
+        fontSize: "2xs",
+        px: "2",
+        py: "1.5",
+        gap: "1",
+      },
       detail: {},
     },
     interactive: {

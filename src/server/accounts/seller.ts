@@ -170,7 +170,7 @@ export async function signInSellerWithLoginId(
     return fail("internal");
   }
 
-  // 未申請・審査中・却下・凍結、共有ログイン未発行はすべて同じ扱いにする。
+  // 未申請・確認中・却下・凍結、共有ログイン未発行はすべて同じ扱いにする。
   if (seller === null || seller.status !== "approved" || seller.auth_user_id === null) {
     return fail("seller_invalid_credentials");
   }

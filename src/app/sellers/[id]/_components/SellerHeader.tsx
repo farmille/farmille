@@ -101,7 +101,6 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
           <h1 id="seller-name" className={css({ m: "0", fontSize: "xl", fontWeight: "800" })}>
             {seller.officialName}
           </h1>
-          <Icon name="verified" size="sm" className={css({ color: "accent.official" })} />
         </div>
         <span className={typeLabel}>メーカー</span>
         {seller.profileText ? (
@@ -137,7 +136,6 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
               公式サイトを見る <Icon name="north_east" size="sm" />
             </a>
           ) : null}
-          <span>主な地域：{seller.regionScope}</span>
         </div>
       </div>
     </section>

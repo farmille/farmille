@@ -69,7 +69,9 @@ for (const mode of ["existing", "new"]) {
       );
       await captureAccountScreen(page, "11-admin-sellers-list.png");
       await page.getByRole("link", { name: officialName }).click();
-      await expect(page.getByRole("button", { name: "承認して共有ログインを発行" })).toBeDisabled();
+      await expect(
+        page.getByRole("button", { name: "確認を完了してログインを発行" }),
+      ).toBeDisabled();
       if (mode === "new") {
         await page.getByLabel("紐づける資材メーカー").selectOption("__new__");
         await page.getByLabel("新規メーカー名").fill(newManufacturerName);
@@ -85,7 +87,7 @@ for (const mode of ["existing", "new"]) {
         page,
         mode === "new" ? "63-admin-new-mobile.png" : "62-admin-link-mobile.png",
       );
-      await page.getByRole("button", { name: "承認して共有ログインを発行" }).click();
+      await page.getByRole("button", { name: "確認を完了してログインを発行" }).click();
       await expect
         .poll(
           async () => {
@@ -95,20 +97,23 @@ for (const mode of ["existing", "new"]) {
           { timeout: 30_000 },
         )
         .toBe(true);
-      await expect(page.getByText("共有ログインを発行しました。")).toBeVisible({
+      await expect(
+        page.getByText("ログインIDとパスワード設定用の案内を発行しました。"),
+      ).toBeVisible({
         timeout: 30_000,
       });
-      await expect(page.getByText("状態：承認済み", { exact: true })).toBeVisible({
+      await expect(page.getByText("状態：確認済み", { exact: true })).toBeVisible({
         timeout: 30_000,
       });
       await expect(page.getByText(/^発行済み（.+）$/)).toBeVisible({ timeout: 30_000 });
 
       const loginIdBlock = page.getByText("ログインID", { exact: true }).locator("..");
-      const passwordBlock = page.getByText("初期パスワード", { exact: true }).locator("..");
+      const passwordBlock = page.getByText("パスワード設定用URL", { exact: true }).locator("..");
       const issuedLoginId = (await loginIdBlock.locator("span").nth(1).textContent())?.trim();
-      const issuedPassword = (await passwordBlock.locator("span").nth(1).textContent())?.trim();
+      const setupUrl = (await passwordBlock.locator("span").nth(1).textContent())?.trim();
+      const issuedPassword = "Farmille-E2E-Setup-2026!";
 
-      if (issuedLoginId === undefined || issuedPassword === undefined) {
+      if (issuedLoginId === undefined || setupUrl === undefined) {
         throw new Error("承認後の共有ログイン情報を取得できませんでした。");
       }
 
@@ -119,6 +124,11 @@ for (const mode of ["existing", "new"]) {
       }
       await page.context().clearCookies();
       await page.setViewportSize({ width: 375, height: 812 });
+      await page.goto(setupUrl);
+      await page.locator('input[name="password"]').fill(issuedPassword);
+      await page.locator('input[name="passwordConfirmation"]').fill(issuedPassword);
+      await page.getByRole("button", { name: "パスワードを変更する" }).click();
+      await expect(page.getByText("パスワードを変更しました。", { exact: true })).toBeVisible();
       await page.goto("/sellers/login");
       await captureAccountScreen(page, "05-seller-login.png");
       await page.getByLabel("ログインID").fill(issuedLoginId);
@@ -127,16 +137,11 @@ for (const mode of ["existing", "new"]) {
 
       await expect(page).toHaveURL(/\/dashboard$/);
       await expect(page.getByRole("heading", { name: officialName })).toBeVisible();
-      await expect(page.getByText("承認済み", { exact: true })).toBeVisible();
-      await expect(
-        page.getByRole("link", {
-          name: `${material.name} ${material.manufacturer_name}`,
-          exact: true,
-        }),
-      ).toBeVisible();
-      expect((await getMaterial(material.id)).seller_id).not.toBeNull();
+      await expect(page.getByText("確認済み", { exact: true })).toBeVisible();
+      // アカウント確認や会社名の一致だけでは資材の編集権を渡さない。
+      expect((await getMaterial(material.id)).seller_id).toBeNull();
       await page.goto(`/dashboard/materials/${material.id}`);
-      await expect(page.getByRole("heading", { name: "資材情報を変更" })).toBeVisible();
+      await expect(page.getByText("編集権の書類確認が必要です", { exact: true })).toBeVisible();
       await page.goto("/dashboard");
       await captureAccountScreen(page, "10-dashboard.png");
 

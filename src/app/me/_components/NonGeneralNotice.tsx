@@ -73,7 +73,7 @@ export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
               lineHeight: "1.7",
             })}
           >
-            マイページ・プロフィール編集・検討リストは一般ユーザー専用です。メーカーや運営の作業は、それぞれのダッシュボードから行ってください。
+            マイページ・プロフィール編集・お気に入りは一般ユーザー専用です。メーカーや運営の作業は、それぞれのダッシュボードから行ってください。
           </p>
           {destination !== null ? (
             <Link href={destination.href} className={linkStyle}>

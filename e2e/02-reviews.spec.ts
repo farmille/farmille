@@ -13,11 +13,11 @@ import {
 } from "./support/test-data";
 import { loginGeneral } from "./support/ui";
 
-test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page }) => {
+test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ page }) => {
   const user = await createGeneralUser("review");
   const material = await createMaterial("review");
 
-  const body = `E2Eレビュー_${user.id}`;
+  const body = `E2E感想口コミ_${user.id}`;
   const updatedBody = `${body}_更新済み`;
 
   try {
@@ -29,8 +29,8 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
     await cropSearch.fill("ミニトマト");
     await page.getByRole("button", { name: "ミニトマトを選択", exact: true }).click();
     await page.getByRole("radio", { name: "4", exact: true }).check();
-    await page.getByLabel("レビュー本文").fill(body);
-    await page.getByRole("checkbox", { name: /このレビューには、病害虫の防除/ }).check();
+    await page.getByLabel("感想口コミ本文").fill(body);
+    await page.getByRole("checkbox", { name: /この感想口コミには、病害虫の防除/ }).check();
     await page.getByRole("button", { name: "投稿する" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/materials/${material.id}\\?review=posted`));
@@ -43,14 +43,14 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
     await expect.poll(async () => (await getMaterial(material.id)).avg_rating).toBe(4);
 
     const createdReview = await reviewByAuthor(user.id);
-    if (createdReview === null) throw new Error("投稿したレビューが見つかりません。");
+    if (createdReview === null) throw new Error("投稿した感想口コミが見つかりません。");
     await expect.poll(async () => await reviewCropNames(createdReview.id)).toEqual(["ミニトマト"]);
 
     for (const path of ["/", "/me", `/users/${user.id}`]) {
       await page.goto(path);
       if (path === "/") {
         await page
-          .getByRole("navigation", { name: "レビューの表示順", exact: true })
+          .getByRole("navigation", { name: "感想口コミの表示順", exact: true })
           .getByRole("link", { name: "新着順", exact: true })
           .click();
         await expect(page).toHaveURL(/reviews=newest#home-reviews$/);
@@ -66,7 +66,7 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
     await expect(page.getByRole("button", { name: "ミニトマトを削除", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "トマトを削除", exact: true })).toHaveCount(0);
     await page.getByRole("radio", { name: "5", exact: true }).check();
-    await page.getByLabel("レビュー本文").fill(updatedBody);
+    await page.getByLabel("感想口コミ本文").fill(updatedBody);
     await page.getByRole("button", { name: "変更を保存する" }).click();
 
     await expect(page.getByText(updatedBody, { exact: true })).toBeVisible();
@@ -88,12 +88,12 @@ test("@smoke レビュー投稿、集計反映、編集、削除", async ({ page
   }
 });
 
-test("資材詳細でレビューの参考になったを押すと、その場でカウントが増減する", async ({ page }) => {
+test("資材詳細で感想口コミの参考になったを押すと、その場でカウントが増減する", async ({ page }) => {
   const author = await createGeneralUser("helpful-author");
   const viewer = await createGeneralUser("helpful-viewer");
   const material = await createMaterial("helpful");
 
-  const body = `E2E参考になったレビュー_${author.id}`;
+  const body = `E2E参考になった感想口コミ_${author.id}`;
 
   try {
     await createReview({

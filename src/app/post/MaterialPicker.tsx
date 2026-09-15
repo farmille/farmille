@@ -116,7 +116,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                   })}
                 >
                   <StarRating value={Math.round(material.avg_rating ?? 0)} />
-                  レビュー {material.review_count}件
+                  感想口コミ {material.review_count}件
                 </span>
               </span>
               <span
@@ -206,7 +206,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                 textDecoration: "none",
               })}
             >
-              使用レポートを書く
+              実証詳細レポートを書く
             </Link>
           ) : null}
           {postType !== "report" ? (
@@ -228,7 +228,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                 textDecoration: "none",
               })}
             >
-              レビューを書く
+              感想口コミを書く
             </Link>
           ) : null}
         </div>

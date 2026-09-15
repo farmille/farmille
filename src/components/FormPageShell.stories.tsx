@@ -41,7 +41,7 @@ const meta = {
   component: FormPageShell,
   args: {
     chrome: "public",
-    title: "レビューを投稿",
+    title: "感想口コミを投稿",
     backHref: "/materials/m-001",
   },
 } satisfies Meta<typeof FormPageShell>;
@@ -61,7 +61,7 @@ export const Default: Story = {
         </div>
         <div className={field}>
           <label className={label} htmlFor="body">
-            レビュー本文
+            感想口コミ本文
           </label>
           <Textarea
             id="body"
@@ -81,7 +81,7 @@ export const Default: Story = {
 
 export const WithFixedFooter: Story = {
   args: {
-    title: "使用レポートを投稿",
+    title: "実証詳細レポートを投稿",
     hasFixedFooter: true,
     children: (
       <>
@@ -94,7 +94,7 @@ export const WithFixedFooter: Story = {
           </div>
           <div className={field}>
             <label className={label} htmlFor="report-body">
-              使用レポート
+              実証詳細レポート
             </label>
             <Textarea
               id="report-body"
@@ -132,7 +132,7 @@ export const MaterialWithFab: Story = {
     hasFab: true,
     title: "トリコデルマ菌床 ネマガード",
     children: (
-      <SurfaceCard title="口コミサマリー" description="直近30件のレビューから抽出した傾向です。">
+      <SurfaceCard title="口コミサマリー" description="直近30件の感想口コミから抽出した傾向です。">
         <p>「効果を実感」との回答が7割を超え、リピート意向も高い傾向です。</p>
       </SurfaceCard>
     ),

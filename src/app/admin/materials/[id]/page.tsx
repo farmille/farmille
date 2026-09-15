@@ -14,6 +14,9 @@ import { listClaimableSellers } from "@/server/admin/sellers";
 import { errorMessageJa } from "@/server/errors";
 import { listClassificationOptions } from "@/server/queries/classifications";
 import { css } from "../../../../../styled-system/css";
+import { listMaterialPageAudits, listMaterialEditorGrants } from "@/server/material-page-audits";
+import { formatDateJa } from "@/components";
+import { MaterialAuditForm } from "./MaterialAuditForm";
 
 export const metadata: Metadata = {
   title: "資材の編集",
@@ -49,12 +52,16 @@ export default async function AdminMaterialDetailPage({
   }
   if (!classifications.ok) throw new Error(errorMessageJa[classifications.error]);
   if (!sellers.ok) throw new Error(errorMessageJa[sellers.error]);
+  const [grants, audits] = await Promise.all([
+    listMaterialEditorGrants(id),
+    listMaterialPageAudits(id),
+  ]);
 
   return (
     <AdminShell
       backHref="/admin/materials"
       backLabel="資材の管理"
-      description={`${material.data.manufacturer_name}／レビュー ${material.data.review_count} 件`}
+      description={`${material.data.manufacturer_name}／感想口コミ ${material.data.review_count} 件`}
       title={material.data.name}
     >
       {created === "1" ? <FormMessage tone="info">資材を登録しました。</FormMessage> : null}
@@ -62,16 +69,31 @@ export default async function AdminMaterialDetailPage({
       <Panel
         note={
           material.data.sellerName === null
-            ? "未 claim"
-            : `claim 済み：${material.data.sellerName}／メーカー確認：${material.data.manufacturer_verified_at === null ? "未確認" : "確認済み"}`
+            ? "編集権は未付与です。既存の紐づけがあった場合も書類確認が必要です。"
+            : `編集権を付与したメーカー：${material.data.sellerName}`
         }
-        title="claim 紐づけ"
+        title="編集権と所有権の書類確認"
       >
         <ClaimForm
           currentSellerId={material.data.seller_id}
           materialId={material.data.id}
           sellers={sellers.data}
         />
+        {grants.map((grant) => (
+          <p key={grant.id}>
+            {formatDateJa(grant.granted_at)}／{grant.revoked_at ? "取消済み" : "有効"}／書類：
+            {grant.document_reference}
+          </p>
+        ))}
+      </Panel>
+
+      <Panel title="掲載後の確認・監査">
+        <MaterialAuditForm materialId={id} />
+        {audits.map((audit) => (
+          <p key={audit.id}>
+            {formatDateJa(audit.created_at)}／{audit.note}
+          </p>
+        ))}
       </Panel>
 
       <Panel title="公開状態">
@@ -81,8 +103,18 @@ export default async function AdminMaterialDetailPage({
         />
       </Panel>
 
-      <Panel note="admin は分類・検索層と一次情報層の両方を編集できる。" title="資材情報">
-        <MaterialForm classifications={classifications.data} material={material.data} />
+      <Panel title="資材情報">
+        {material.data.seller_id !== null || material.data.published_page_version_id !== null ? (
+          <p className={adminInlineNoteStyle}>
+            この資材の原稿はメーカーが管理します。内容の修正はメーカーへ依頼し、提出された原稿を
+            <Link className={linkStyle} href="/admin/materials/expressions">
+              表現確認
+            </Link>
+            で確認してください。
+          </p>
+        ) : (
+          <MaterialForm classifications={classifications.data} material={material.data} />
+        )}
       </Panel>
 
       <Panel title="関連">

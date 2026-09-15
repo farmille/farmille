@@ -15,7 +15,7 @@ describe("validatePrimaryInformation", () => {
       description: "  紹介文  ",
       general_use: "",
       main_components: "菌体",
-      mechanism: "作用機序",
+      mechanism: "作用機作",
       usage_text: "希釈して使用",
       price_range: "1,000円前後",
       official_url: "https://example.com/material",

@@ -121,7 +121,7 @@ export function CompareTable({ materials }: CompareTableProps) {
       ),
     },
     {
-      label: "レビュー数",
+      label: "感想口コミ数",
       render: (material) => (
         <span className={css({ fontVariantNumeric: "tabular-nums" })}>{material.reviewCount}</span>
       ),
@@ -135,8 +135,8 @@ export function CompareTable({ materials }: CompareTableProps) {
       ),
     },
     {
-      label: "製品タイプ",
-      render: (material) => material.productType ?? "—",
+      label: "資材ジャンル（JBSA材料8分類）",
+      render: (material) => material.genre ?? "—",
     },
     {
       label: "主な分類",

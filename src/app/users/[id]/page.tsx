@@ -78,7 +78,7 @@ type UserPageProps = {
 export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
   const { id } = await params;
   const { profile } = await loadProfileOrNotFound(id);
-  const description = `${profile.handle}さんのレビューと使用レポートを確認できます。`;
+  const description = `${profile.handle}さんの感想口コミと実証詳細レポートを確認できます。`;
 
   return createPageMetadata({
     title: profile.handle,
@@ -114,7 +114,7 @@ export default async function UserPage({ params }: UserPageProps) {
         )}
 
         <div className={statRow}>
-          <StatCard value={data.reviewCount} label="レビュー" />
+          <StatCard value={data.reviewCount} label="感想口コミ" />
           <StatCard value={data.helpfulCount} label="参考になった" />
         </div>
 

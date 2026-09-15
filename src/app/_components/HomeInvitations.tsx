@@ -41,10 +41,10 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
         </div>
         <div className={actions}>
           <Link href="/post?type=report" className={buttonRecipe({ size: "sm" })}>
-            使用レポートを投稿する
+            実証詳細レポートを投稿する
           </Link>
           <Link href="/post?type=review" className={buttonRecipe({ size: "sm" })}>
-            レビューを投稿する
+            感想口コミを投稿する
           </Link>
         </div>
       </section>
@@ -65,10 +65,10 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
           <div className={copy}>
             <p>
               <strong>登録は無料です。</strong>
-              資材検索とレビュー・使用レポートの閲覧は、登録なしで利用できます。
+              資材検索と感想口コミ・実証詳細レポートの閲覧は、登録なしで利用できます。
             </p>
             <p>
-              会員登録すると、使用レポートやレビューの投稿、参考になったの投票、検討リストへの保存ができます。
+              会員登録すると、実証詳細レポートや感想口コミの投稿、参考になったの投票、お気に入りへの保存ができます。
             </p>
           </div>
           <div
@@ -114,7 +114,9 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
             バイオスティミュラント・関連資材メーカー様へ
           </h1>
           <div className={copy}>
-            <p>自社の資材情報の掲載・編集を申請できます。運営の承認後に公開情報へ反映されます。</p>
+            <p>
+              資材ページの編集権を確認後、製品情報をメーカーご自身で更新できます。下書きとプレビューを用意し、公開前に運営が表現を確認します。
+            </p>
             <p>生産者が資材を比較するために、詳細な情報を掲載してください。</p>
           </div>
         </div>

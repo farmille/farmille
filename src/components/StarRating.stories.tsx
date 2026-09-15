@@ -55,6 +55,23 @@ export const Small: Story = {
   },
 };
 
+export const WithValue: Story = {
+  args: {
+    mode: "display",
+    value: 5,
+    showValue: true,
+  },
+};
+
+export const WithValueLarge: Story = {
+  args: {
+    mode: "display",
+    value: 4,
+    size: "lg",
+    showValue: true,
+  },
+};
+
 export const Input: Story = {
   args: {
     mode: "input",

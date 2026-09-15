@@ -102,7 +102,7 @@ export function SavedList({ items }: SavedListProps) {
     return (
       <EmptyState
         title="保存した資材はまだありません"
-        description="資材詳細の保存ボタンから検討リストへ追加できます。"
+        description="資材詳細の保存ボタンからお気に入りへ追加できます。"
       />
     );
   }

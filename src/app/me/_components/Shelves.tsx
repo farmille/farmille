@@ -1,3 +1,4 @@
+import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
@@ -74,7 +75,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
       {posts.length === 0 ? (
         <EmptyState
           title="まだ投稿がありません"
-          description="レビューや使用レポートを書くと、ここに並びます。"
+          description="感想口コミや実証詳細レポートを書くと、ここに並びます。"
         />
       ) : (
         <div className={stack}>
@@ -82,6 +83,16 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
             post.kind === "review" ? (
               <article key={`review-${post.id}`}>
                 <ReviewCard
+                  actions={
+                    <PostActionsLoader
+                      target="review"
+                      id={post.id}
+                      currentPath="/me"
+                      helpfulCount={post.helpfulCount}
+                    />
+                  }
+                  reviewId={post.id}
+                  materialId={post.materialId}
                   handle={profile.handle}
                   avatarSrc={profile.avatarUrl ?? undefined}
                   crop={post.cropName}
@@ -94,7 +105,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
                   href={`/materials/${post.materialId}#review-${post.id}`}
                   className={reviewLink}
                 >
-                  資材詳細でこのレビューを見る <Icon name="arrow_forward" size="sm" />
+                  資材詳細でこの感想口コミを見る <Icon name="arrow_forward" size="sm" />
                 </Link>
               </article>
             ) : (
@@ -119,6 +130,15 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
                 </div>
                 {post.status === "published" ? (
                   <ReportCard
+                    actions={
+                      <PostActionsLoader
+                        target="usage_report"
+                        id={post.id}
+                        currentPath={`/reports/${post.id}`}
+                        helpfulCount={post.helpfulCount}
+                      />
+                    }
+                    reportId={post.id}
                     title={post.title}
                     author={profile.handle}
                     avatarSrc={profile.avatarUrl ?? undefined}
@@ -171,7 +191,11 @@ export function SavedShelf({ items }: SavedShelfProps) {
   return (
     <section aria-labelledby="me-saved-heading">
       <SectionHeading
-        title={<span id="me-saved-heading">検討リスト</span>}
+        title={
+          <span id="me-saved-heading">
+            <Icon name="star_filled" size="sm" /> お気に入り
+          </span>
+        }
         href="/me/saved"
         linkLabel="すべて見る"
       />
@@ -212,7 +236,7 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
       {items.length === 0 ? (
         <EmptyState
           title="まだ参考になったを付けていません"
-          description="役に立ったレビューや使用レポートに付けると、ここに残ります。"
+          description="役に立った感想口コミや実証詳細レポートに付けると、ここに残ります。"
         />
       ) : (
         <div className={stack}>
@@ -220,6 +244,14 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
             item.kind === "review" ? (
               <article key={`helpful-review-${item.id}`}>
                 <ReviewCard
+                  actions={
+                    <PostActionsLoader
+                      target="review"
+                      id={item.id}
+                      currentPath="/me"
+                      helpfulCount={item.helpfulCount}
+                    />
+                  }
                   reviewId={item.id}
                   helpfulVoted
                   currentPath="/me"
@@ -235,11 +267,20 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
                   href={`/materials/${item.materialId}#review-${item.id}`}
                   className={reviewLink}
                 >
-                  資材詳細でこのレビューを見る <Icon name="arrow_forward" size="sm" />
+                  資材詳細でこの感想口コミを見る <Icon name="arrow_forward" size="sm" />
                 </Link>
               </article>
             ) : (
               <ReportCard
+                actions={
+                  <PostActionsLoader
+                    target="usage_report"
+                    id={item.id}
+                    currentPath={`/reports/${item.id}`}
+                    helpfulCount={item.helpfulCount}
+                  />
+                }
+                reportId={item.id}
                 key={`helpful-report-${item.id}`}
                 title={item.title}
                 author={item.authorHandle}

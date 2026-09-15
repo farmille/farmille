@@ -117,6 +117,7 @@ export type SellerApproval = v.InferOutput<typeof SellerApprovalStateSchema>;
 export type ContentReport = v.InferOutput<typeof ContentReportStateSchema>;
 
 type RestInsertTable =
+  | "material_ingredient_categories"
   | "material_crops"
   | "material_product_types"
   | "materials"
@@ -241,8 +242,13 @@ export async function cleanupOwnedE2eData(): Promise<void> {
     await checkedFetch(restPath("material_change_requests", requestParams), { method: "DELETE" });
   }
 
-  const materialParams = new URLSearchParams({ name: `like.E2E資材_${E2E_TOKEN_PREFIX}*` });
-  await checkedFetch(restPath("materials", materialParams), { method: "DELETE" });
+  const materialParams = new URLSearchParams({
+    select: "id",
+    name: `like.E2E資材_${E2E_TOKEN_PREFIX}*`,
+  });
+  for (const material of await restSelect(IdSchema, "materials", materialParams)) {
+    await deleteMaterial(material.id);
+  }
 
   const sellerParams = new URLSearchParams({ login_id: `like.${E2E_TOKEN_PREFIX}*` });
   await checkedFetch(restPath("seller_accounts", sellerParams), { method: "DELETE" });
@@ -403,6 +409,39 @@ export async function createMaterial(
 }
 
 export async function deleteMaterial(materialId: string): Promise<void> {
+  // 書類・原稿の証跡は本番では保持する。使い捨てE2E資材だけを参照順に片付ける。
+  const material = await getMaterial(materialId);
+  if (!material.name.startsWith(`E2E資材_${E2E_TOKEN_PREFIX}`)) {
+    throw new Error("E2E以外の資材は削除できません。");
+  }
+  const materialFilter = new URLSearchParams({ material_id: `eq.${materialId}` });
+  await checkedFetch(restPath("material_page_audits", materialFilter), { method: "DELETE" });
+  const versions = await restSelect(
+    IdSchema,
+    "material_page_versions",
+    new URLSearchParams({ select: "id", material_id: `eq.${materialId}` }),
+  );
+  for (const version of versions) {
+    await checkedFetch(
+      restPath(
+        "material_page_existing_images",
+        new URLSearchParams({ version_id: `eq.${version.id}` }),
+      ),
+      { method: "DELETE" },
+    );
+  }
+  await checkedFetch(restPath("materials", new URLSearchParams({ id: `eq.${materialId}` })), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ published_page_version_id: null }),
+  });
+  for (const table of [
+    "material_page_versions",
+    "material_editor_grants",
+    "material_editor_legacy_links",
+  ]) {
+    await checkedFetch(restPath(table, materialFilter), { method: "DELETE" });
+  }
   const targetRequestParams = new URLSearchParams({ material_id: `eq.${materialId}` });
   await checkedFetch(restPath("material_change_requests", targetRequestParams), {
     method: "DELETE",
@@ -417,9 +456,19 @@ export async function deleteMaterial(materialId: string): Promise<void> {
 
 export async function addMaterialClassifications(
   materialId: string,
-  input: { cropIds?: readonly string[]; productTypeIds?: readonly string[] },
+  input: {
+    cropIds?: readonly string[];
+    productTypeIds?: readonly string[];
+    genreIds?: readonly string[];
+  },
 ): Promise<void> {
   await Promise.all([
+    ...(input.genreIds ?? []).map((id) =>
+      restInsert(IdSchema, "material_ingredient_categories", {
+        material_id: materialId,
+        ingredient_category_id: id,
+      }),
+    ),
     ...(input.cropIds ?? []).map((cropId, sortOrder) =>
       restInsert(IdSchema, "material_crops", {
         material_id: materialId,
@@ -497,7 +546,7 @@ export async function createReview(input: {
   const review = rows[0];
 
   if (review === undefined) {
-    throw new Error(`作成したレビュー ${reviewId} が見つかりません。`);
+    throw new Error(`作成した感想口コミ ${reviewId} が見つかりません。`);
   }
 
   return review;
@@ -601,4 +650,15 @@ export async function productTypesByNames(
     name: `in.(${names.join(",")})`,
   });
   return restSelect(ProductTypeSchema, "product_types", params);
+}
+
+export async function genresByNames(names: string[]) {
+  return restSelect(
+    v.object({ id: UuidSchema, name: v.string() }),
+    "ingredient_categories",
+    new URLSearchParams({
+      select: "id,name",
+      name: `in.(${names.join(",")})`,
+    }),
+  );
 }

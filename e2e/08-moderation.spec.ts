@@ -38,7 +38,7 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
     await loginGeneral(page, reporter, materialPath);
     const reviewCard = page.getByRole("article").filter({ hasText: reviewBody });
     await reviewCard.getByRole("button", { name: "通報する" }).click();
-    const reportDialog = page.getByRole("dialog", { name: "このレビューを通報する" });
+    const reportDialog = page.getByRole("dialog", { name: "この感想口コミを通報する" });
     await reportDialog.getByLabel("通報理由").selectOption("false_info");
     await reportDialog.getByLabel("詳細（任意）").fill("E2Eで非公開化を確認します。");
     await reportDialog.getByRole("button", { name: "通報する" }).click();
@@ -66,7 +66,7 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
     await expect
       .poll(async () => (await usageReportByAuthor(reporter.id))?.status)
       .toBe("published");
-    await expect(page.getByText("使用レポートを公開しました。")).toBeVisible();
+    await expect(page.getByText("実証詳細レポートを公開しました。")).toBeVisible();
 
     await page.goto(`/reports/${usageReport.id}`);
     await expect(page.getByRole("heading", { name: reportTitle })).toBeVisible();

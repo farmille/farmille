@@ -13,8 +13,8 @@ export default function ReviewError({ error, unstable_retry }: ReviewErrorProps)
       description="時間をおいて、もう一度お試しください。"
       error={error}
       onRetry={unstable_retry}
-      pageTitle="レビュー"
-      title="レビュー画面を読み込めませんでした"
+      pageTitle="感想口コミ"
+      title="感想口コミ画面を読み込めませんでした"
     />
   );
 }

@@ -10,16 +10,16 @@ const meta = {
   title: "App/Admin/Tags/MasterForms",
   component: TagCreateForm,
   args: {
-    categories: ["crop", "concern", "effect", "condition", "type"],
+    categories: ["concern", "condition"],
   },
   render: (args) => (
     <div className={stackStyle}>
       <TagCreateForm {...args} />
       <TagRow
         tag={{
-          id: "tag-effect",
-          name: "発根促進",
-          category: "effect",
+          id: "tag-concern",
+          name: "高温障害",
+          category: "concern",
           sort_order: 10,
           usageCount: 8,
         }}

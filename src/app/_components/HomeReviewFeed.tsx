@@ -14,12 +14,14 @@ import { HomeFeedOrder } from "./HomeFeedOrder";
 
 export function HomeReviewFeed({
   reviews,
+  actions,
   orders,
   viewerUserId,
   reportSort,
   reviewSort,
 }: {
   reviews: RecentReviewItem[];
+  actions?: { id: string; node: React.ReactNode }[];
   orders: { newest: string[]; helpful: string[] };
   viewerUserId: string | null;
   reportSort: HomeFeedSort;
@@ -88,13 +90,15 @@ export function HomeReviewFeed({
                 })}
               >
                 <ReviewCard
+                  actions={actions?.find((entry) => entry.id === review.id)?.node}
                   className={css({ borderWidth: "0", boxShadow: "none", flex: "1" })}
                   handle={review.author?.handle ?? "匿名"}
                   authorDetails={publicProfileLabel(review.author)}
                   crop={review.crops.map((crop) => crop.name).join("・")}
                   rating={review.rating}
                   helpfulCount={review.helpfulCount}
-                  reviewId={viewerUserId === review.author_user_id ? undefined : review.id}
+                  reviewId={review.id}
+                  canManage={viewerUserId === review.author_user_id}
                   materialId={review.material_id}
                   helpfulVoted={review.helpfulVotedByViewer}
                   currentPath={currentPath}
@@ -128,7 +132,7 @@ export function HomeReviewFeed({
             fontSize: "md",
           })}
         >
-          まだ公開中のレビューはありません。資材を使った感想を共有してください。
+          まだ公開中の感想口コミはありません。資材を使った感想を共有してください。
         </p>
       ) : null}
     </>
