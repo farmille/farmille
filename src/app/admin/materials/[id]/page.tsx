@@ -54,7 +54,7 @@ export default async function AdminMaterialDetailPage({
     <AdminShell
       backHref="/admin/materials"
       backLabel="資材の管理"
-      description={`${material.data.manufacturer_name}／レビュー ${material.data.review_count} 件`}
+      description={`${material.data.manufacturer_name}／感想口コミ ${material.data.review_count} 件`}
       title={material.data.name}
     >
       {created === "1" ? <FormMessage tone="info">資材を登録しました。</FormMessage> : null}

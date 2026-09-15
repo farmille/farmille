@@ -14,7 +14,7 @@ export function PostAccessDenied({ accountType }: { accountType: AccountType | n
   return (
     <FormPageShell active="post" backHref="/" chrome="public" title="投稿する">
       <SurfaceCard
-        description="レビューと使用レポートの投稿は一般ユーザー専用です。メーカーや運営の作業は、それぞれの管理画面から行ってください。"
+        description="感想口コミと実証詳細レポートの投稿は一般ユーザー専用です。メーカーや運営の作業は、それぞれの管理画面から行ってください。"
         title="一般ユーザー向けの画面です"
       >
         {destination === null ? null : (

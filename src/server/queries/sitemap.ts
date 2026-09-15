@@ -54,7 +54,7 @@ export async function listSitemapEntries(): Promise<Result<SitemapEntries>> {
     return fail("internal");
   }
   if (reports.error !== null) {
-    reportQueryError("使用レポート一覧の取得に失敗", reports.error);
+    reportQueryError("実証詳細レポート一覧の取得に失敗", reports.error);
     return fail("internal");
   }
   if (sellers.error !== null) {

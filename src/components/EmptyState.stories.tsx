@@ -16,15 +16,15 @@ export const Default: Story = {};
 
 export const WithDescription: Story = {
   args: {
-    title: "レビューがまだありません",
-    description: "気になる資材を使ったら、最初のレビューを投稿してみましょう。",
+    title: "感想口コミがまだありません",
+    description: "気になる資材を使ったら、最初の感想口コミを投稿してみましょう。",
   },
 };
 
 export const WithAction: Story = {
   args: {
-    title: "検討リストに資材がありません",
-    description: "資材ページの「検討リストに保存」から気になる資材を追加できます。",
+    title: "お気に入りに資材がありません",
+    description: "資材ページの「お気に入りに保存」から気になる資材を追加できます。",
     children: <Button onClick={fn()}>資材を探す</Button>,
   },
 };

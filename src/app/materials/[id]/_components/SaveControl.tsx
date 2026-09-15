@@ -60,7 +60,7 @@ export function SaveControl({
   if (unavailable) {
     return (
       <p className={css({ m: "0", fontSize: "sm", color: "text.subtle" })}>
-        検討リストは一般ユーザー向けの機能です。
+        お気に入りは一般ユーザー向けの機能です。
       </p>
     );
   }
@@ -73,7 +73,7 @@ export function SaveControl({
         href={loginHref}
         className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}
       >
-        ログインして検討リストに保存
+        ログインしてお気に入りに保存
       </Link>
     );
   }

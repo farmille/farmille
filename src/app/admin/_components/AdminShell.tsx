@@ -90,7 +90,7 @@ const contentStyle = css({
 const NAV_ITEMS = [
   { href: "/me", label: "個人のマイページ" },
   { href: "/admin", label: "ホーム" },
-  { href: "/admin/sellers", label: "メーカー審査" },
+  { href: "/admin/sellers", label: "メーカー確認" },
   { href: "/admin/materials", label: "資材" },
   { href: "/admin/tags", label: "検索タグ・作物" },
 ] as const;

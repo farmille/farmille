@@ -9,7 +9,7 @@ import {
 } from "./support/test-data";
 import { fillUsageReportForSubmission, loginGeneral } from "./support/ui";
 
-test("使用レポートの下書き保存、提出、pending の公開側 404", async ({ page }) => {
+test("実証詳細レポートの下書き保存、提出、pending の公開側 404", async ({ page }) => {
   const user = await createGeneralUser("usage");
   const material = await createMaterial("usage");
 
@@ -36,7 +36,7 @@ test("使用レポートの下書き保存、提出、pending の公開側 404",
 
     const pending = await usageReportByAuthor(user.id);
     if (pending === null) {
-      throw new Error("提出した使用レポートを取得できませんでした。");
+      throw new Error("提出した実証詳細レポートを取得できませんでした。");
     }
     expect(pending.status).toBe("pending");
 

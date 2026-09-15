@@ -74,7 +74,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
       {posts.length === 0 ? (
         <EmptyState
           title="まだ投稿がありません"
-          description="レビューや使用レポートを書くと、ここに並びます。"
+          description="感想口コミや実証詳細レポートを書くと、ここに並びます。"
         />
       ) : (
         <div className={stack}>
@@ -94,7 +94,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
                   href={`/materials/${post.materialId}#review-${post.id}`}
                   className={reviewLink}
                 >
-                  資材詳細でこのレビューを見る <Icon name="arrow_forward" size="sm" />
+                  資材詳細でこの感想口コミを見る <Icon name="arrow_forward" size="sm" />
                 </Link>
               </article>
             ) : (
@@ -212,7 +212,7 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
       {items.length === 0 ? (
         <EmptyState
           title="まだ参考になったを付けていません"
-          description="役に立ったレビューや使用レポートに付けると、ここに残ります。"
+          description="役に立った感想口コミや実証詳細レポートに付けると、ここに残ります。"
         />
       ) : (
         <div className={stack}>

@@ -37,7 +37,7 @@ export function PostTimeline({ profile, posts, viewerUserId = null }: PostTimeli
     return (
       <EmptyState
         title="公開中の投稿はまだありません"
-        description="レビューや使用レポートが公開されると、ここに表示されます。"
+        description="感想口コミや実証詳細レポートが公開されると、ここに表示されます。"
       />
     );
   }

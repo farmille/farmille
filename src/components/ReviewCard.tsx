@@ -136,7 +136,7 @@ export function ReviewCard({
     <article className={cx(cardRecipe(), className)}>
       {materialName ? (
         <div className={css({ fontSize: "xs", color: "text.subtle", mb: "1" })}>
-          {materialName} のレビュー
+          {materialName} の感想口コミ
         </div>
       ) : null}
       <div className={css({ display: "flex", alignItems: "center", gap: "2" })}>

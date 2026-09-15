@@ -44,7 +44,7 @@ export type PublicProfilePost =
       rating: number;
       body: string;
       helpfulCount: number;
-      /** 閲覧者がこのレビューに「参考になった」を押しているか。 */
+      /** 閲覧者がこの感想口コミに「参考になった」を押しているか。 */
       helpfulVotedByViewer: boolean;
       photos: ReadonlyArray<{
         id: string;
@@ -215,12 +215,12 @@ export async function getPublicProfilePage(
   ]);
 
   if (reviewsResult.error !== null) {
-    reportQueryError("公開レビューの取得に失敗", reviewsResult.error);
+    reportQueryError("公開感想口コミの取得に失敗", reviewsResult.error);
     return fail("internal");
   }
 
   if (reportsResult.error !== null) {
-    reportQueryError("公開使用レポートの取得に失敗", reportsResult.error);
+    reportQueryError("公開実証詳細レポートの取得に失敗", reportsResult.error);
     return fail("internal");
   }
 
@@ -263,7 +263,7 @@ export async function getPublicProfilePage(
     const cropName = reviewCropLabel(review.cropRelations);
 
     if (cropName === null || review.material === null) {
-      reportQueryError("公開レビューの関連データが欠落", { reviewId: review.id });
+      reportQueryError("公開感想口コミの関連データが欠落", { reviewId: review.id });
       return fail("internal");
     }
 
@@ -281,14 +281,14 @@ export async function getPublicProfilePage(
       photos: review.photos.toSorted(bySortOrder).map((photo) => ({
         id: photo.id,
         url: photo.url,
-        alt: photo.caption ?? "レビュー写真",
+        alt: photo.caption ?? "感想口コミ写真",
       })),
     });
   }
 
   for (const report of reportRows) {
     if (report.published_at === null || report.crop === null || report.material === null) {
-      reportQueryError("公開使用レポートの関連データが欠落", { reportId: report.id });
+      reportQueryError("公開実証詳細レポートの関連データが欠落", { reportId: report.id });
       return fail("internal");
     }
 
@@ -301,7 +301,7 @@ export async function getPublicProfilePage(
       kind: "usage_report",
       id: report.id,
       createdAt: report.published_at,
-      title: report.title ?? `${report.material.name} 使用レポート`,
+      title: report.title ?? `${report.material.name} 実証詳細レポート`,
       cropName: report.crop.name,
       helpfulCount: reportHelpful.data.get(report.id) ?? 0,
       coverUrl: cover?.url ?? null,

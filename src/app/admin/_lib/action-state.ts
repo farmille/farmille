@@ -13,7 +13,7 @@ export type AdminActionState =
 
 export const initialAdminActionState: AdminActionState = { status: "idle" };
 
-/** メーカー審査。承認と招待コード発行は一度だけ表示する値を持ち帰る。 */
+/** メーカー確認。承認と招待コード発行は一度だけ表示する値を持ち帰る。 */
 export type SellerActionState =
   | AdminActionState
   /** 発行した共有ログイン。パスワードは保存していないので、この表示が唯一の受け渡し機会。 */

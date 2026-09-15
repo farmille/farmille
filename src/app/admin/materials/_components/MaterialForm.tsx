@@ -337,7 +337,7 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
         />
         <TextField
           defaultValue={valueOf("mechanism", material?.mechanism)}
-          label="作用機序"
+          label="作用機作"
           name="mechanism"
         />
         <TextField

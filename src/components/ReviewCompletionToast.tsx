@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { css } from "../../styled-system/css";
 
 const messages = {
-  posted: "レビューを投稿しました。",
-  updated: "レビューを更新しました。",
-  deleted: "レビューを削除しました。",
+  posted: "感想口コミを投稿しました。",
+  updated: "感想口コミを更新しました。",
+  deleted: "感想口コミを削除しました。",
 } as const;
 
 const VISIBLE_MS = 4_000;

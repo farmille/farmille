@@ -41,10 +41,10 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
         </div>
         <div className={actions}>
           <Link href="/post?type=report" className={buttonRecipe({ size: "sm" })}>
-            使用レポートを投稿する
+            実証詳細レポートを投稿する
           </Link>
           <Link href="/post?type=review" className={buttonRecipe({ size: "sm" })}>
-            レビューを投稿する
+            感想口コミを投稿する
           </Link>
         </div>
       </section>
@@ -65,10 +65,10 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
           <div className={copy}>
             <p>
               <strong>登録は無料です。</strong>
-              資材検索とレビュー・使用レポートの閲覧は、登録なしで利用できます。
+              資材検索と感想口コミ・実証詳細レポートの閲覧は、登録なしで利用できます。
             </p>
             <p>
-              会員登録すると、使用レポートやレビューの投稿、参考になったの投票、検討リストへの保存ができます。
+              会員登録すると、実証詳細レポートや感想口コミの投稿、参考になったの投票、お気に入りへの保存ができます。
             </p>
           </div>
           <div

@@ -42,7 +42,7 @@ async function assertHelpfulTarget(
       .maybeSingle();
 
     if (error !== null) {
-      reportMutationError("対象レビューの確認に失敗", error);
+      reportMutationError("対象感想口コミの確認に失敗", error);
       return fail("internal");
     }
     if (data === null || data.status !== "published") return fail("not_found");
@@ -58,7 +58,7 @@ async function assertHelpfulTarget(
       .maybeSingle();
 
     if (error !== null) {
-      reportMutationError("対象使用レポートの確認に失敗", error);
+      reportMutationError("対象実証詳細レポートの確認に失敗", error);
       return fail("internal");
     }
     if (data === null || data.status !== "published") return fail("not_found");

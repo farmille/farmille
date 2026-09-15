@@ -46,7 +46,7 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
     <FormPageShell
       chrome="public"
       active="search"
-      title={`${material.name}のレビュー`}
+      title={`${material.name}の感想口コミ`}
       backHref={materialPath}
     >
       <ReviewForm

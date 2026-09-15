@@ -16,8 +16,8 @@ export async function ReviewList({ reviews, emptyDescription, currentPath }: Rev
   if (reviews.length === 0) {
     return (
       <EmptyState
-        title="まだレビューがありません"
-        description={emptyDescription ?? "この資材の最初のレビューを投稿できます。"}
+        title="まだ感想口コミがありません"
+        description={emptyDescription ?? "この資材の最初の感想口コミを投稿できます。"}
       />
     );
   }
@@ -49,7 +49,7 @@ export async function ReviewList({ reviews, emptyDescription, currentPath }: Rev
             photos={review.photos.map((photo) => ({
               id: photo.id,
               src: photo.url,
-              alt: photo.caption ?? "レビュー写真",
+              alt: photo.caption ?? "感想口コミ写真",
             }))}
           />
         </div>

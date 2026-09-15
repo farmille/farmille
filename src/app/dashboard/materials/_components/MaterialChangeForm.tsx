@@ -267,7 +267,7 @@ export function MaterialChangeForm({
             name="mainComponents"
           />
         </Field>
-        <Field htmlFor="mechanism" label="作用機序" requirement="optional">
+        <Field htmlFor="mechanism" label="作用機作" requirement="optional">
           <Input defaultValue={material?.mechanism ?? ""} id="mechanism" name="mechanism" />
         </Field>
         <Field htmlFor="priceRange" label="価格帯" requirement="optional">

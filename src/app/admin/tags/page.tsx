@@ -125,7 +125,7 @@ export default async function AdminTagsPage() {
       </Panel>
 
       <Panel
-        note={`${crops.data.length} 件。資材・レビュー・使用レポート・プロフィールから参照される。`}
+        note={`${crops.data.length} 件。資材・感想口コミ・実証詳細レポート・プロフィールから参照される。`}
         title="作物マスタ"
       >
         <CropCreateForm groups={groups.data} />

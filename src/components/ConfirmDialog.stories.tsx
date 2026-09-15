@@ -7,8 +7,8 @@ const meta = {
   title: "Components/ConfirmDialog",
   component: ConfirmDialog,
   args: {
-    title: "レビューを削除しますか？",
-    description: "削除したレビューと写真は元に戻せません。",
+    title: "感想口コミを削除しますか？",
+    description: "削除した感想口コミと写真は元に戻せません。",
     confirmLabel: "削除する",
     triggerLabel: "削除",
     onConfirm: fn(),

@@ -165,7 +165,7 @@ test("メーカーの資材追加・変更・掲載終了は運営承認後に�
 
     await page.goto(`/materials/${createdMaterialId}`);
     await expect(page.getByText(/この資材は掲載を終了しています/)).toBeVisible();
-    await expect(page.getByRole("link", { name: "レビューを書く" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "感想口コミを書く" })).toHaveCount(0);
     await captureScreen(page, "24-public-archived-material.png");
 
     const publicPage = await browser.newPage();
@@ -179,7 +179,7 @@ test("メーカーの資材追加・変更・掲載終了は運営承認後に�
         publicPage.getByText("ページを表示できませんでした", { exact: true }),
       ).toHaveCount(0);
       await expect(
-        publicPage.getByText("非公開後もデータを保持するレビュー", { exact: true }),
+        publicPage.getByText("非公開後もデータを保持する感想口コミ", { exact: true }),
       ).toHaveCount(0);
     } finally {
       await publicPage.close();

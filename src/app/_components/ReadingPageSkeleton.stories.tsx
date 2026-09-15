@@ -3,7 +3,7 @@ import { ReadingPageSkeleton } from "./ReadingPageSkeleton";
 const meta = {
   title: "App/ReadingPageSkeleton",
   component: ReadingPageSkeleton,
-  args: { title: "使用レポート", variant: "report" },
+  args: { title: "実証詳細レポート", variant: "report" },
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof ReadingPageSkeleton>;
 export default meta;

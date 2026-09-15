@@ -31,6 +31,6 @@ export const Filled: Story = {
 export const Disabled: Story = {
   args: {
     disabled: true,
-    defaultValue: "審査中のため編集できません。",
+    defaultValue: "確認中のため編集できません。",
   },
 };

@@ -10,7 +10,7 @@ import { errorMessageJa } from "@/server/errors";
 import { css } from "../../../../styled-system/css";
 
 export const metadata: Metadata = {
-  title: "使用レポート編集局",
+  title: "実証詳細レポート編集局",
 };
 
 const linkStyle = css({
@@ -23,7 +23,7 @@ const linkStyle = css({
 const columns: DataTableColumn<PendingUsageReportItem>[] = [
   {
     key: "title",
-    header: "使用レポート",
+    header: "実証詳細レポート",
     cell: (row) => (
       <Link className={linkStyle} href={`/admin/usage-reports/${row.id}`}>
         {row.title}
@@ -64,13 +64,13 @@ export default async function AdminUsageReportsPage() {
   return (
     <AdminShell
       backHref="/admin"
-      description="提出済みの使用レポートを確認し、本文を調整して公開または差し戻す。下書きは表示しない。"
-      title="使用レポート編集局"
+      description="提出済みの実証詳細レポートを確認し、本文を調整して公開または差し戻す。下書きは表示しない。"
+      title="実証詳細レポート編集局"
     >
       <Panel note={`${reports.data.length} 件`} title="確認待ち">
         <DataTable
           columns={columns}
-          emptyMessage="確認待ちの使用レポートはありません。"
+          emptyMessage="確認待ちの実証詳細レポートはありません。"
           rowKey={(row) => row.id}
           rows={reports.data}
         />

@@ -51,7 +51,7 @@ const loginForm = (
 const signupForm = (
   <form action={submitAction}>
     <Field
-      guide="レビューに表示される名前です。実名を避けることをおすすめします。"
+      guide="感想口コミに表示される名前です。実名を避けることをおすすめします。"
       htmlFor="signup-handle"
       label="ハンドルネーム"
       requirement="required"
@@ -118,7 +118,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Login: Story = {
   args: {
-    lead: "レビューの投稿・参考になった・検討リストの利用にはログインが必要です。",
+    lead: "感想口コミの投稿・参考になった・お気に入りの利用にはログインが必要です。",
   },
 };
 
@@ -134,7 +134,7 @@ export const SignUp: Story = {
 
 export const SubmitError: Story = {
   args: {
-    lead: "レビューの投稿・参考になった・検討リストの利用にはログインが必要です。",
+    lead: "感想口コミの投稿・参考になった・お気に入りの利用にはログインが必要です。",
     children: (
       <div>
         <FormMessage tone="error">メールアドレスまたはパスワードが正しくありません。</FormMessage>
@@ -147,6 +147,6 @@ export const SubmitError: Story = {
 export const LongTitle: Story = {
   args: {
     title: "メーカーアカウントの新規申請",
-    lead: "メーカーアカウントは審査制です。承認までに2〜3営業日かかります。",
+    lead: "メーカーアカウントは確認制です。承認までに2〜3営業日かかります。",
   },
 };

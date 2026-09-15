@@ -110,13 +110,13 @@ export default async function AdminSellerDetailPage({
   return (
     <AdminShell
       backHref="/admin/sellers"
-      backLabel="メーカー審査"
+      backLabel="メーカー確認"
       description={`状態：${statusLabel(seller.data.status)}`}
       title={seller.data.official_name}
     >
       <Panel
         note="農業資材メーカーであることを確認してください。承認すると、申請したログインIDで共有ログインを発行します。"
-        title="審査"
+        title="確認"
       >
         <SellerReviewActions
           manufacturerNames={manufacturers.data}
@@ -130,7 +130,7 @@ export default async function AdminSellerDetailPage({
         <DescriptionList items={publicItems(seller.data)} />
       </Panel>
 
-      <Panel note="連絡先・審査記録。公開ビューには出さない。" title="内部項目">
+      <Panel note="連絡先・確認記録。公開ビューには出さない。" title="内部項目">
         <DescriptionList items={internalItems(seller.data)} />
       </Panel>
 

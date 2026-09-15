@@ -7,7 +7,7 @@ const groups = [
     title: "参加する",
     links: [
       { label: "新規会員登録", href: "/signup/general" },
-      { label: "使用レポートを投稿", href: "/post?type=report" },
+      { label: "実証詳細レポートを投稿", href: "/post?type=report" },
       { label: "マイページ", href: "/me" },
     ],
   },
@@ -58,7 +58,7 @@ export function HomeFooter() {
             生産者による生産者のための事例共有サイト
           </p>
           <p className={css({ fontSize: "sm", color: "text.subtle", lineHeight: "relaxed" })}>
-            BS資材を作物・効果から検索し、生産者の使用レポートとレビューを確かめられます。
+            BS資材を作物・効果から検索し、生産者の実証詳細レポートと感想口コミを確かめられます。
           </p>
         </div>
         {groups.map((group) => (

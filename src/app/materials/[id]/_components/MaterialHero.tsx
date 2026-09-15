@@ -141,7 +141,7 @@ export function MaterialHero({
                   fontVariantNumeric: "tabular-nums",
                 })}
               >
-                農家のレビュー {material.review_count}件
+                農家の感想口コミ {material.review_count}件
               </p>
             </div>
           </div>

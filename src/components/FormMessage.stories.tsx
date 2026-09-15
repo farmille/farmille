@@ -7,7 +7,7 @@ const meta = {
   component: FormMessage,
   args: {
     status: "success",
-    children: "レビューを投稿しました。",
+    children: "感想口コミを投稿しました。",
   },
 } satisfies Meta<typeof FormMessage>;
 
@@ -18,7 +18,7 @@ export const Success: Story = {};
 
 export const SuccessLong: Story = {
   args: {
-    children: "検討リストに追加しました。マイページの検討リストからいつでも確認できます。",
+    children: "お気に入りに追加しました。マイページのお気に入りからいつでも確認できます。",
   },
 };
 
@@ -33,6 +33,6 @@ export const ErrorLong: Story = {
   args: {
     status: "error",
     children:
-      "評価・レビュー本文・使用時期のいずれかが未入力です。すべての必須項目を入力してから送信してください。",
+      "評価・感想口コミ本文・使用時期のいずれかが未入力です。すべての必須項目を入力してから送信してください。",
   },
 };

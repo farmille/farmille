@@ -41,7 +41,7 @@ export default function OpenGraphImage() {
           lineHeight: 1.5,
         }}
       >
-        農業資材の製品情報・レビュー・使用レポート
+        農業資材の製品情報・感想口コミ・実証詳細レポート
       </div>
     </div>,
     size,

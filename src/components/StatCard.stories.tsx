@@ -7,7 +7,7 @@ const meta = {
   component: StatCard,
   args: {
     value: 128,
-    label: "レビュー",
+    label: "感想口コミ",
   },
 } satisfies Meta<typeof StatCard>;
 
@@ -26,13 +26,13 @@ export const StringValue: Story = {
 export const ZeroValue: Story = {
   args: {
     value: 0,
-    label: "使用レポート",
+    label: "実証詳細レポート",
   },
 };
 
 export const LongLabel: Story = {
   args: {
     value: 12,
-    label: "確認待ちの使用レポート",
+    label: "確認待ちの実証詳細レポート",
   },
 };

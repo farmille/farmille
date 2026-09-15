@@ -13,7 +13,7 @@ export const SELLER_STATUSES = ["applied", "approved", "rejected", "suspended"] 
 export type SellerStatus = (typeof SELLER_STATUSES)[number];
 
 export const SELLER_STATUS_LABELS = {
-  applied: "審査中",
+  applied: "確認中",
   approved: "承認済み",
   rejected: "却下",
   suspended: "凍結中",
@@ -160,7 +160,7 @@ export async function approveSellerApplication(
   });
 }
 
-/** 審査で選べるメーカー名。別アカウントへの紐づけはDBでも一意制約を適用する。 */
+/** 確認で選べるメーカー名。別アカウントへの紐づけはDBでも一意制約を適用する。 */
 export async function listManufacturerNames(): Promise<Result<string[]>> {
   return withAdmin(async ({ supabase }) => {
     const { data, error } = await supabase.from("manufacturers").select("name").order("name");

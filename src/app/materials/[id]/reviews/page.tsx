@@ -37,8 +37,8 @@ export async function generateMetadata({ params }: MaterialReviewsPageProps): Pr
   const material = await loadMaterialOrNotFound(id);
 
   return materialMetadata(material, {
-    titleSuffix: "のレビュー",
-    description: `${material.name}を使った農家のレビューを一覧で確認できます。`,
+    titleSuffix: "の感想口コミ",
+    description: `${material.name}を使った農家の感想口コミを一覧で確認できます。`,
     pathSuffix: "/reviews",
   });
 }
@@ -83,7 +83,7 @@ export default async function MaterialReviewsPage({
   };
 
   return (
-    <MaterialPageShell title={`${material.name}のレビュー`} backHref={materialPath}>
+    <MaterialPageShell title={`${material.name}の感想口コミ`} backHref={materialPath}>
       {reviewListJsonLd === null ? null : (
         <script
           type="application/ld+json"
@@ -109,7 +109,7 @@ export default async function MaterialReviewsPage({
             fontVariantNumeric: "tabular-nums",
           })}
         >
-          総合評価 {material.avg_rating?.toFixed(1) ?? "—"}・レビュー {reviews.total}件
+          総合評価 {material.avg_rating?.toFixed(1) ?? "—"}・感想口コミ {reviews.total}件
         </p>
       </section>
 
@@ -134,7 +134,7 @@ export default async function MaterialReviewsPage({
         <form method="get" className={css({ display: "flex", alignItems: "end", gap: "2" })}>
           <label className={css({ display: "flex", flexDirection: "column", gap: "1" })}>
             <span className={css({ fontSize: "xs", color: "text.subtle" })}>並び替え</span>
-            <Select name="sort" defaultValue={sort} aria-label="レビューの並び替え">
+            <Select name="sort" defaultValue={sort} aria-label="感想口コミの並び替え">
               {REVIEW_SORT_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -150,7 +150,7 @@ export default async function MaterialReviewsPage({
 
       <ReviewList
         reviews={reviews.items}
-        emptyDescription="この資材には、公開中のレビューがまだありません。"
+        emptyDescription="この資材には、公開中の感想口コミがまだありません。"
         currentPath={reviewsPath}
       />
       <Pagination page={page} totalPages={reviews.totalPages} hrefForPage={hrefForPage} />

@@ -17,7 +17,7 @@ import { errorMessageJa } from "@/server/errors";
 import { css } from "../../../../styled-system/css";
 
 export const metadata: Metadata = {
-  title: "メーカー審査",
+  title: "メーカー確認",
 };
 
 const linkStyle = css({
@@ -79,7 +79,7 @@ export default async function AdminSellersPage({
       backHref="/admin"
       backLabel="運営管理ホーム"
       description="メーカー申請を確認し、承認したアカウントに共有ログインを発行します。"
-      title="メーカー審査"
+      title="メーカー確認"
     >
       <Panel note={`${sellers.data.length} 件`} title="申請・アカウント一覧">
         <div className={css({ mb: "3" })}>
@@ -94,7 +94,7 @@ export default async function AdminSellersPage({
           columns={columns}
           emptyMessage={
             selected === "applied"
-              ? "審査中の申請はありません。"
+              ? "確認中の申請はありません。"
               : "この状態のメーカーアカウントはありません。"
           }
           rowKey={(row) => row.id}

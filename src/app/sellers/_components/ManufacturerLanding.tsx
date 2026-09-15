@@ -355,7 +355,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           メーカーアカウントを申請する
         </h2>
         <p className={closingBody}>
-          申請内容を運営が審査し、通常3営業日以内に連絡先メールアドレスへご案内します。
+          申請内容を運営が確認し、通常3営業日以内に連絡先メールアドレスへご案内します。
         </p>
         <div className={closingActions}>
           <Link

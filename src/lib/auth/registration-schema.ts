@@ -52,7 +52,7 @@ export const generalRegistrationSchema = v.object({
     ),
     v.maxLength(PASSWORD_MAX_LENGTH),
   ),
-  terms: v.literal("on", "利用規約・レビューガイドラインへの同意が必要です。"),
+  terms: v.literal("on", "利用規約・感想口コミガイドラインへの同意が必要です。"),
 });
 
 export const manufacturerRegistrationSchema = v.object({

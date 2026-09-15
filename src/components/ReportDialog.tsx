@@ -42,7 +42,7 @@ export type ReportDialogProps = {
   /** `createReportAction.bind(null, targetType, targetId, currentPath)` を渡す。 */
   action: (prevState: ReportActionState, formData: FormData) => Promise<ReportActionState>;
   reasonOptions: ReadonlyArray<{ value: string; label: string }>;
-  /** モーダル見出し。例：「このレビューを通報する」 */
+  /** モーダル見出し。例：「この感想口コミを通報する」 */
   title: string;
   triggerLabel?: string;
   className?: string;

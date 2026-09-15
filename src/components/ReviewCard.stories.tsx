@@ -69,7 +69,7 @@ export const PhotoPlaceholders: Story = {
   },
 };
 
-/** materialName あり（ホームの新着など、どの資材のレビューかを冒頭に示す）。 */
+/** materialName あり（ホームの新着など、どの資材の感想口コミかを冒頭に示す）。 */
 export const WithMaterialName: Story = {
   args: {
     materialName: "バチルス菌体資材 ツチイキル",
@@ -92,7 +92,7 @@ export const Static: Story = {
   },
 };
 
-/** 長文レビュー。行間と折り返しの確認用。 */
+/** 長文感想口コミ。行間と折り返しの確認用。 */
 export const LongBody: Story = {
   args: {
     handle: "露地野菜の佐藤",

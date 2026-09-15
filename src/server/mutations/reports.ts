@@ -47,7 +47,7 @@ async function assertReportTarget(
       .maybeSingle();
 
     if (error !== null) {
-      reportMutationError("通報対象レビューの確認に失敗", error);
+      reportMutationError("通報対象感想口コミの確認に失敗", error);
       return fail("internal");
     }
     if (data === null || data.status !== "published") return fail("not_found");
@@ -62,7 +62,7 @@ async function assertReportTarget(
       .maybeSingle();
 
     if (error !== null) {
-      reportMutationError("通報対象使用レポートの確認に失敗", error);
+      reportMutationError("通報対象実証詳細レポートの確認に失敗", error);
       return fail("internal");
     }
     if (data === null || data.status !== "published") return fail("not_found");

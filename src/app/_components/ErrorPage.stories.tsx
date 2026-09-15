@@ -33,10 +33,10 @@ export const CustomPageTitle: Story = {
 // Sentry へ送るための digest 付きエラー（本番のサーバーエラーを模したケース）。
 export const WithDigest: Story = {
   args: {
-    error: Object.assign(new Error("使用レポートの送信に失敗しました。"), {
+    error: Object.assign(new Error("実証詳細レポートの送信に失敗しました。"), {
       digest: "a1b2c3d4",
     }),
-    pageTitle: "使用レポート",
+    pageTitle: "実証詳細レポート",
     backHref: "/materials/101/report/new",
     title: "送信できませんでした",
     description: "しばらく時間をおいて再度お試しください。",

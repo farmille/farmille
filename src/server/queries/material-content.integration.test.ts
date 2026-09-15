@@ -11,7 +11,7 @@ import type { Database } from "@/types/database.types";
 const localSupabaseUrl = process.env.SUPABASE_LOCAL_URL;
 
 describe.skipIf(localSupabaseUrl === undefined)("資材関連コンテンツ統合", () => {
-  it("ローカルDBからレビュー分布・使用レポート・記事を取得できる", async () => {
+  it("ローカルDBから感想口コミ分布・実証詳細レポート・記事を取得できる", async () => {
     const localPublishableKey =
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

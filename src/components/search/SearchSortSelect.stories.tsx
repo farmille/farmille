@@ -28,7 +28,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** レビューが多い順（既定） */
+/** 感想口コミが多い順（既定） */
 export const Reviews: Story = {};
 
 /** 評価が高い順 */

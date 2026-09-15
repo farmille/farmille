@@ -60,7 +60,7 @@ export function HomeFeedOrder({
         ];
   return (
     <nav
-      aria-label={target === "reports" ? "使用レポートの表示順" : "レビューの表示順"}
+      aria-label={target === "reports" ? "実証詳細レポートの表示順" : "感想口コミの表示順"}
       className={css({ display: "flex", flexWrap: "wrap", gap: "2" })}
     >
       {options.map((option) => (

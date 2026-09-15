@@ -95,7 +95,7 @@ export default function UiKitPage() {
         </h1>
         <p className={css({ fontSize: "sm", color: "text.muted", mt: "2", lineHeight: "1.6" })}>
           T-21 共通コンポーネント。375px 幅でモックと並べて比較する。用語は
-          D8（レビュー／使用レポート）。
+          D8（感想口コミ／実証詳細レポート）。
         </p>
       </div>
 
@@ -122,7 +122,7 @@ export default function UiKitPage() {
 
       <section className={section}>
         <h2 className={sectionTitle}>FabBar</h2>
-        <p className={sectionLead}>使用レポート＋レビューの固定バー。</p>
+        <p className={sectionLead}>実証詳細レポート＋感想口コミの固定バー。</p>
         <div className={cx(phoneChrome, css({ position: "relative", h: "88px" }))}>
           <FabBar />
         </div>
@@ -195,12 +195,12 @@ export default function UiKitPage() {
 
       <section className={section}>
         <h2 className={sectionTitle}>ReportCard</h2>
-        <p className={sectionLead}>使用レポート。scroll / grid / list。</p>
+        <p className={sectionLead}>実証詳細レポート。scroll / grid / list。</p>
         <p className={label}>scroll</p>
         <div className={row}>
           <ReportCard
             layout="scroll"
-            title="Skeepon 使用レポート"
+            title="Skeepon 実証詳細レポート"
             author="しおさい農園"
             crop="ミニトマト"
             helpfulCount={24}
@@ -208,7 +208,7 @@ export default function UiKitPage() {
           />
           <ReportCard
             layout="scroll"
-            title="ボンバルディア 使用レポート"
+            title="ボンバルディア 実証詳細レポート"
             author="いちご屋A"
             crop="いちご"
             helpfulCount={15}
@@ -218,7 +218,7 @@ export default function UiKitPage() {
         <p className={cx(label, css({ mt: "3" }))}>list</p>
         <ReportCard
           layout="list"
-          title="Skeepon 使用レポート"
+          title="Skeepon 実証詳細レポート"
           author="たなか農園"
           crop="ミニトマト"
           helpfulCount={8}
@@ -266,8 +266,8 @@ export default function UiKitPage() {
         <h2 className={sectionTitle}>StatCard / SectionHeading / Badge</h2>
         <SectionHeading title="これまでの投稿" href="#" linkLabel="すべて見る" />
         <div className={css({ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "2.5" })}>
-          <StatCard value={12} label="レビュー" />
-          <StatCard value={3} label="使用レポート" />
+          <StatCard value={12} label="感想口コミ" />
+          <StatCard value={3} label="実証詳細レポート" />
           <StatCard value={48} label="参考になった" />
         </div>
         <div
@@ -298,7 +298,7 @@ export default function UiKitPage() {
           <Button variant="ghost">キャンセル</Button>
           <Button variant="danger">削除する</Button>
           <Button variant="primary" size="sm">
-            レビューをすべて見る（32件）
+            感想口コミをすべて見る（32件）
           </Button>
           <Input placeholder="作物・悩み・資材名を入力" />
           <Textarea placeholder="本文を入力" />
@@ -325,7 +325,7 @@ export default function UiKitPage() {
         >
           <EmptyState
             title="まだ投稿がありません"
-            description="レビューや使用レポートを書くと、ここに表示されます。"
+            description="感想口コミや実証詳細レポートを書くと、ここに表示されます。"
           />
         </div>
       </section>

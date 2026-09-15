@@ -181,7 +181,7 @@ export function SellerApplyForm() {
 
       <Field
         error={fieldErrors.websiteUrl}
-        guide="審査の参考にさせていただきます"
+        guide="確認の参考にさせていただきます"
         htmlFor="websiteUrl"
         label="公式サイトURL"
         requirement="optional"

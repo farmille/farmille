@@ -27,7 +27,7 @@ function validPayload(): UsageReportFormPayload {
   };
 }
 
-describe("使用レポート提出時の必須検証", () => {
+describe("実証詳細レポート提出時の必須検証", () => {
   it("必須項目が揃った入力を受け付ける", () => {
     expect(validateUsageReportSubmission(validPayload())).toEqual({});
   });
@@ -46,20 +46,20 @@ describe("使用レポート提出時の必須検証", () => {
   });
 });
 
-describe("使用レポート Action Result", () => {
+describe("実証詳細レポート Action Result", () => {
   it("成功結果をスキーマどおりに検証する", () => {
     expect(
       v.parse(UsageReportActionResultSchema, {
         ok: true,
         status: "pending",
         reportIds: ["00000000-0000-4000-8000-000000001001"],
-        message: "使用レポートを提出しました。",
+        message: "実証詳細レポートを提出しました。",
       }),
     ).toEqual({
       ok: true,
       status: "pending",
       reportIds: ["00000000-0000-4000-8000-000000001001"],
-      message: "使用レポートを提出しました。",
+      message: "実証詳細レポートを提出しました。",
     });
   });
 

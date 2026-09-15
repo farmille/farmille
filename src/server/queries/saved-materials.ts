@@ -194,7 +194,7 @@ export async function toggleSavedMaterial(
   return succeed(true);
 }
 
-/** 検討リスト一覧。新しい保存から順。 */
+/** お気に入り一覧。新しい保存から順。 */
 export async function listSavedMaterials(
   userId: string,
   options?: { limit?: number },
@@ -276,7 +276,7 @@ export async function listSavedMaterials(
   return succeed(items);
 }
 
-/** 検討リストから1件解除する。 */
+/** お気に入りから1件解除する。 */
 export async function unsaveMaterial(materialId: string, userId: string): Promise<Result<null>> {
   const supabase = await createServerSupabase();
   const { error } = await supabase
@@ -286,7 +286,7 @@ export async function unsaveMaterial(materialId: string, userId: string): Promis
     .eq("user_id", userId);
 
   if (error !== null) {
-    reportQueryError("検討リストの解除に失敗", error);
+    reportQueryError("お気に入りの解除に失敗", error);
     return fail("internal");
   }
 

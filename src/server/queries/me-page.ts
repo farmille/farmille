@@ -216,12 +216,12 @@ async function listOwnPosts(
   ]);
 
   if (reviewsResult.error !== null) {
-    reportQueryError("自分のレビュー取得に失敗", reviewsResult.error);
+    reportQueryError("自分の感想口コミ取得に失敗", reviewsResult.error);
     return fail("internal");
   }
 
   if (reportsResult.error !== null) {
-    reportQueryError("自分の使用レポート取得に失敗", reportsResult.error);
+    reportQueryError("自分の実証詳細レポート取得に失敗", reportsResult.error);
     return fail("internal");
   }
 
@@ -249,7 +249,7 @@ async function listOwnPosts(
     const cropName = reviewCropLabel(review.cropRelations);
 
     if (cropName === null || review.material === null) {
-      reportQueryError("自分のレビューの関連データが欠落", { reviewId: review.id });
+      reportQueryError("自分の感想口コミの関連データが欠落", { reviewId: review.id });
       return fail("internal");
     }
 
@@ -268,7 +268,7 @@ async function listOwnPosts(
 
   for (const report of reportRows) {
     if (report.crop === null || report.material === null || !isUsageReportStatus(report.status)) {
-      reportQueryError("自分の使用レポートの関連データが欠落", { reportId: report.id });
+      reportQueryError("自分の実証詳細レポートの関連データが欠落", { reportId: report.id });
       return fail("internal");
     }
 
@@ -277,7 +277,7 @@ async function listOwnPosts(
       id: report.id,
       createdAt: report.published_at ?? report.created_at,
       materialId: report.material_id,
-      title: report.title ?? `${report.material.name} 使用レポート`,
+      title: report.title ?? `${report.material.name} 実証詳細レポート`,
       cropName: report.crop.name,
       status: report.status,
       helpfulCount: reportHelpful.data.get(report.id) ?? 0,
@@ -378,12 +378,12 @@ async function listHelpfulItems(
   ]);
 
   if (reviewsResult.error !== null) {
-    reportQueryError("参考になったレビュー詳細の取得に失敗", reviewsResult.error);
+    reportQueryError("参考になった感想口コミ詳細の取得に失敗", reviewsResult.error);
     return fail("internal");
   }
 
   if (reportsResult.error !== null) {
-    reportQueryError("参考になった使用レポート詳細の取得に失敗", reportsResult.error);
+    reportQueryError("参考になった実証詳細レポート詳細の取得に失敗", reportsResult.error);
     return fail("internal");
   }
 
@@ -426,7 +426,7 @@ async function listHelpfulItems(
     items.push({
       kind: "usage_report",
       id: report.id,
-      title: report.title ?? `${report.material.name} 使用レポート`,
+      title: report.title ?? `${report.material.name} 実証詳細レポート`,
       cropName: report.crop.name,
       authorHandle: report.author?.handle ?? "不明な投稿者",
       authorUserId: report.author?.user_id ?? null,

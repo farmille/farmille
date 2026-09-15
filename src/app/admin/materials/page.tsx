@@ -69,7 +69,7 @@ const columns: DataTableColumn<AdminMaterialListItem>[] = [
     header: "メーカー確認",
     cell: (row) => (row.manufacturer_verified_at === null ? "未確認" : "確認済み"),
   },
-  { key: "review_count", header: "レビュー", align: "end", cell: (row) => row.review_count },
+  { key: "review_count", header: "感想口コミ", align: "end", cell: (row) => row.review_count },
 ];
 
 export default async function AdminMaterialsPage({

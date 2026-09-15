@@ -8,7 +8,7 @@ import {
 } from "./support/test-data";
 import { loginGeneral } from "./support/ui";
 
-test("検討リスト保存、マイページ一覧、比較表", async ({ page }) => {
+test("お気に入り保存、マイページ一覧、比較表", async ({ page }) => {
   const user = await createGeneralUser("saved");
   const materials = await Promise.all([createMaterial("saved-a"), createMaterial("saved-b")]);
 

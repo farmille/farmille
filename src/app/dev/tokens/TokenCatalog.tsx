@@ -380,7 +380,7 @@ export function TypographyTokens() {
         <div className={tokenTable}>
           {fontWeights.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <span style={{ fontWeight: Number(token.value) }}>Farmille 農業資材レビュー</span>
+              <span style={{ fontWeight: Number(token.value) }}>Farmille 農業資材感想口コミ</span>
             </TokenRow>
           ))}
         </div>

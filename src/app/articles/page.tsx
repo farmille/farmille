@@ -20,7 +20,7 @@ import { css } from "../../../styled-system/css";
 export async function generateMetadata(): Promise<Metadata> {
   return createPageMetadata({
     title: "記事を読む",
-    description: "農家の使用レポートとメーカーの記事を探せます。",
+    description: "農家の実証詳細レポートとメーカーの記事を探せます。",
     path: "/articles",
   });
 }
@@ -151,7 +151,7 @@ async function ArticleResults({
     <>
       {feed.items.length === 0 ? (
         <EmptyState
-          title="該当する記事・使用レポートがありません"
+          title="該当する記事・実証詳細レポートがありません"
           description="検索条件やフィルタを変えて、もう一度探してみてください。"
         />
       ) : (

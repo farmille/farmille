@@ -88,13 +88,16 @@ export default async function HomePage({
               </h1>
               <section className={section} aria-labelledby="home-reports">
                 <h2 id="home-reports" className={feedTitle}>
-                  使用レポート
+                  実証詳細レポート
                 </h2>
                 <HomeFeedOrder target="reports" reportSort={reportSort} reviewSort={reviewSort} />
                 <Suspense
                   key={reportSort}
                   fallback={
-                    <SkeletonList variant="reportScroll" label="使用レポートを読み込んでいます" />
+                    <SkeletonList
+                      variant="reportScroll"
+                      label="実証詳細レポートを読み込んでいます"
+                    />
                   }
                 >
                   <HomeReports reportSort={reportSort} reviewSort={reviewSort} />
@@ -102,11 +105,11 @@ export default async function HomePage({
               </section>
               <section className={section} aria-labelledby="home-reviews">
                 <h2 id="home-reviews" className={feedTitle}>
-                  レビュー
+                  感想口コミ
                 </h2>
                 <Suspense
                   fallback={
-                    <SkeletonList variant="reviewScroll" label="レビューを読み込んでいます" />
+                    <SkeletonList variant="reviewScroll" label="感想口コミを読み込んでいます" />
                   }
                 >
                   <HomeReviews reportSort={reportSort} reviewSort={reviewSort} />
@@ -173,9 +176,9 @@ async function HomeReports({
       reportIds,
     ),
   ]);
-  if (!reportVotes.ok) throw new Error("使用レポートの投票状態を取得できませんでした。");
+  if (!reportVotes.ok) throw new Error("実証詳細レポートの投票状態を取得できませんでした。");
   if (!reportsResult.ok)
-    throw new Error("使用レポートの取得に失敗しました：" + reportsResult.error);
+    throw new Error("実証詳細レポートの取得に失敗しました：" + reportsResult.error);
   return (
     <>
       {reportsResult.data.length > 0 ? (
@@ -217,7 +220,7 @@ async function HomeReports({
         </div>
       ) : (
         <p className={empty}>
-          まだ公開中の使用レポートはありません。投稿は運営の確認後に公開されます。
+          まだ公開中の実証詳細レポートはありません。投稿は運営の確認後に公開されます。
         </p>
       )}
     </>

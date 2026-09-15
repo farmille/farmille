@@ -6,7 +6,7 @@ import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "一般ユーザー登録",
-  description: "匿名で参加できる農業資材レビューの個人用アカウントを作成します。",
+  description: "匿名で参加できる農業資材感想口コミの個人用アカウントを作成します。",
   robots: NO_INDEX_ROBOTS,
 };
 

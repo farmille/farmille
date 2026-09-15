@@ -214,12 +214,12 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
   const { data, error, count } = await query;
 
   if (error !== null) {
-    reportQueryError("公開使用レポートの取得に失敗", error);
+    reportQueryError("公開実証詳細レポートの取得に失敗", error);
     return fail("internal");
   }
 
   if (count === null) {
-    reportQueryError("公開使用レポートの総件数が返されなかった", { materialId });
+    reportQueryError("公開実証詳細レポートの総件数が返されなかった", { materialId });
     return fail("internal");
   }
 
@@ -357,7 +357,7 @@ export async function getReviewRatingDistributionWithSupabase(
       .range(from, from + POSTGREST_PAGE_SIZE - 1);
 
     if (error !== null) {
-      reportQueryError("星分布用レビューの取得に失敗", error);
+      reportQueryError("星分布用感想口コミの取得に失敗", error);
       return fail("internal");
     }
 

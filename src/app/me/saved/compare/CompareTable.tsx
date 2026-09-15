@@ -121,7 +121,7 @@ export function CompareTable({ materials }: CompareTableProps) {
       ),
     },
     {
-      label: "レビュー数",
+      label: "感想口コミ数",
       render: (material) => (
         <span className={css({ fontVariantNumeric: "tabular-nums" })}>{material.reviewCount}</span>
       ),

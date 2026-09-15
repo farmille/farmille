@@ -39,17 +39,17 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// レビュー投稿完了（?review=posted）
+// 感想口コミ投稿完了（?review=posted）
 export const Posted: Story = {
   beforeEach: withReviewQuery("posted"),
 };
 
-// レビュー更新完了（?review=updated）
+// 感想口コミ更新完了（?review=updated）
 export const Updated: Story = {
   beforeEach: withReviewQuery("updated"),
 };
 
-// レビュー削除完了（?review=deleted）
+// 感想口コミ削除完了（?review=deleted）
 export const Deleted: Story = {
   beforeEach: withReviewQuery("deleted"),
 };

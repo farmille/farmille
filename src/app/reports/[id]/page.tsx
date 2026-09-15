@@ -85,7 +85,7 @@ async function loadReport(id: string) {
 }
 
 function reportDescription(authorHandle: string, materialName: string): string {
-  return `${authorHandle}さんの${materialName}に関する使用レポート`;
+  return `${authorHandle}さんの${materialName}に関する実証詳細レポート`;
 }
 
 export async function generateMetadata({ params }: ReportDetailPageProps): Promise<Metadata> {
@@ -254,7 +254,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     imageUrls: report.media
       .filter((media) => media.mediaType === "photo")
       .map((media) => media.url),
-    articleSection: "使用レポート",
+    articleSection: "実証詳細レポート",
     about: {
       id: report.material.id,
       name: report.material.name,
@@ -532,7 +532,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
             className={css({ color: "brand.primary", flexShrink: "0", mt: "0.5" })}
           />
           <span>
-            この使用レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。
+            この実証詳細レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。
           </span>
         </div>
 
@@ -579,7 +579,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 `/reports/${report.id}`,
               )}
               reasonOptions={REPORT_REASON_OPTIONS}
-              title="この使用レポートを通報する"
+              title="この実証詳細レポートを通報する"
             />
           </div>
         ) : null}

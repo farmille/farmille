@@ -29,7 +29,7 @@ export default async function SignupDonePage({
       lead={
         needsEmailConfirmation
           ? "確認メールを送信しました。メール内のリンクを開くと利用を開始できます。"
-          : "ようこそ。さっそく資材のレビューを読んでみましょう。"
+          : "ようこそ。さっそく資材の感想口コミを読んでみましょう。"
       }
       title="登録が完了しました"
     >

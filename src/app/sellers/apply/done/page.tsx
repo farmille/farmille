@@ -30,7 +30,7 @@ export default function SellerApplyDonePage() {
     <FormPageShell chrome="public" backHref="/" title="申請受付完了">
       <h2 className={titleStyle}>申請を受け付けました</h2>
       <p className={bodyStyle}>
-        内容を確認し、通常3営業日以内にご連絡します。審査結果はご登録の連絡先メールアドレスへお送りします。
+        内容を確認し、通常3営業日以内にご連絡します。確認結果はご登録の連絡先メールアドレスへお送りします。
       </p>
       <HintBox>
         ログイン情報は承認後にご案内します。追加の資料が必要な場合は、担当者からご連絡することがあります。
