@@ -64,7 +64,7 @@ const chipRecipe = cva({
         color: "accent.official",
         borderColor: "accent.official/30",
       },
-      type: {
+      genre: {
         bg: "tag.type/12",
         color: "tag.type",
         borderColor: "tag.type/35",

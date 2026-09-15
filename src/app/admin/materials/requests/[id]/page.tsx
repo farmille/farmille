@@ -104,14 +104,9 @@ export default async function AdminMaterialChangeRequestPage({
     ["対象作物", currentValues.crops, names(proposal.cropIds, classifications.data.crops)],
     ["効果", currentValues.effects, names(proposal.effectIds, classifications.data.effects)],
     [
-      "JBSA材料分類",
+      "資材ジャンル（JBSA材料8分類）",
       currentValues.ingredientCategories,
       names(proposal.ingredientCategoryIds, classifications.data.ingredientCategories),
-    ],
-    [
-      "製品タイプ",
-      currentValues.productTypes,
-      names(proposal.productTypeIds, classifications.data.productTypes),
     ],
     [
       "エビデンス件数",

@@ -47,7 +47,7 @@ export const CategoryCond: Story = {
 export const CategoryType: Story = {
   args: {
     label: "微生物資材",
-    category: "type",
+    category: "genre",
   },
 };
 
@@ -73,7 +73,7 @@ export const AllCategories: Story = {
       <TagChip label="うどんこ病" category="concern" />
       <TagChip label="土壌改良" category="effect" />
       <TagChip label="施設栽培" category="cond" />
-      <TagChip label="微生物資材" category="type" />
+      <TagChip label="微生物資材" category="genre" />
       <TagChip label="グリーンバイオ株式会社" category="maker" />
       <TagChip label="バチルス菌体資材 ツチイキル" category="name" />
     </div>

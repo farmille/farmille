@@ -1,12 +1,12 @@
 /** UI 上のタグ分類。DB の `condition` は `cond` に正規化する。 */
-export type TagCategory = "crop" | "concern" | "effect" | "cond" | "type" | "maker" | "name";
+export type TagCategory = "crop" | "concern" | "effect" | "cond" | "genre" | "maker" | "name";
 
 export const TAG_CATEGORY_LABELS = {
   crop: "作物",
   concern: "悩み",
   effect: "効果",
   cond: "栽培条件",
-  type: "資材タイプ",
+  genre: "資材ジャンル",
   maker: "メーカー",
   name: "製品名",
 } satisfies Record<TagCategory, string>;
@@ -19,7 +19,7 @@ export function toTagChipCategory(category: string): TagCategory {
     category === "concern" ||
     category === "effect" ||
     category === "cond" ||
-    category === "type" ||
+    category === "genre" ||
     category === "maker" ||
     category === "name"
   ) {

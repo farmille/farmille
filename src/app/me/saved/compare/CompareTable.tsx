@@ -135,8 +135,8 @@ export function CompareTable({ materials }: CompareTableProps) {
       ),
     },
     {
-      label: "製品タイプ",
-      render: (material) => material.productType ?? "—",
+      label: "資材ジャンル（JBSA材料8分類）",
+      render: (material) => material.genre ?? "—",
     },
     {
       label: "主な分類",

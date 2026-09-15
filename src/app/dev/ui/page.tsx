@@ -255,7 +255,7 @@ export default function UiKitPage() {
             <TagChip category="concern" label="高温対策" />
             <TagChip category="effect" label="草勢維持" />
             <TagChip category="cond" label="施設園芸" />
-            <TagChip category="type" label="バイオスティミュラント" />
+            <TagChip category="genre" label="バイオスティミュラント" />
             <TagChip appearance="plain" label="微生物資材" />
           </div>
         </div>

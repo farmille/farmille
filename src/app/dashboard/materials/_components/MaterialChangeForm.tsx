@@ -113,11 +113,13 @@ export function MaterialChangeForm({
     material?.ingredientCategories.map(({ id }) => id) ?? [],
   );
   const selectedIngredientIds = new Set(material?.ingredients.map(({ id }) => id) ?? []);
-  const selectedProductTypeIds = new Set(material?.productTypes.map(({ id }) => id) ?? []);
   const selectedSearchTagIds = new Set(material?.searchTags.map(({ id }) => id) ?? []);
 
   return (
     <form action={formAction} className={formStyle} noValidate>
+      {(material?.productTypes ?? []).map(({ id }) => (
+        <input key={id} name="productTypeIds" type="hidden" value={id} />
+      ))}
       <h2 className={sectionTitleStyle}>基本情報</h2>
       <div className={fieldGridStyle}>
         <Field error={fieldErrors.name} htmlFor="name" label="資材名" requirement="required">
@@ -197,7 +199,7 @@ export function MaterialChangeForm({
         </div>
       </Field>
 
-      <Field label="JBSA材料分類" requirement="optional">
+      <Field label="資材ジャンル（JBSA材料8分類）" requirement="optional">
         <CheckboxGroup
           name="ingredientCategoryIds"
           options={classifications.ingredientCategories}
@@ -220,14 +222,6 @@ export function MaterialChangeForm({
             </div>
           ))}
         </div>
-      </Field>
-
-      <Field label="製品タイプ" requirement="optional">
-        <CheckboxGroup
-          name="productTypeIds"
-          options={classifications.productTypes}
-          selectedIds={selectedProductTypeIds}
-        />
       </Field>
 
       <Field label="検索補助タグ" requirement="optional">

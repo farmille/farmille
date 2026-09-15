@@ -10,6 +10,12 @@ import {
 } from "./search-selection";
 
 describe("search-selection", () => {
+  it("資材ジャンルを検索軸に使い、製品タイプのクエリを拒否する", () => {
+    const id = "11111111-1111-4111-8111-111111111111";
+    expect(parseFiltersQuery(`genre:${id}`).filters).toEqual([{ category: "genre", id }]);
+    expect(() => parseFiltersQuery(`type:${id}`)).toThrow("不正な filters クエリ");
+  });
+
   it("同一分類は「または」、分類間は「かつ」で文言化する", () => {
     const filters: SelectedSearchFilter[] = [
       { kind: "filter", id: "1", name: "ミニトマト", category: "crop" },

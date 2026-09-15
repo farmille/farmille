@@ -27,9 +27,8 @@ export function MaterialDetailTable({ material }: { material: MaterialDetail }) 
   const rows: DetailRow[] = [
     { label: "一般用途", value: material.general_use },
     { label: "組成タイプ", value: material.compositionType?.name ?? null },
-    { label: "製品タイプ（メーカー分類）", value: names(material.productTypes) },
     { label: "主成分", value: material.main_components },
-    { label: "JBSA材料分類", value: names(material.ingredientCategories) },
+    { label: "資材ジャンル（JBSA材料8分類）", value: names(material.ingredientCategories) },
     { label: "個別材料", value: names(material.ingredients) },
     { label: "作用機序", value: material.mechanism },
     { label: "効果", value: names(material.effects) },

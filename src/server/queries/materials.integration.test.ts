@@ -20,6 +20,29 @@ describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
     }
 
     const localClient = createClient<Database>(localSupabaseUrl, localPublishableKey);
+    const { data: genres, error: genreError } = await localClient
+      .from("ingredient_categories")
+      .select("id");
+    expect(genreError).toBeNull();
+    expect(genres).toHaveLength(8);
+    if (genres === null) throw new Error("資材ジャンルが取得できません。");
+    await Promise.all(
+      genres.map(async (genre) => {
+        const result = await listMaterialsWithSupabase(localClient, {
+          page: 1,
+          filters: [{ category: "genre", id: genre.id }],
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok) throw new Error(result.error);
+        const { data: relations, error } = await localClient
+          .from("material_ingredient_categories")
+          .select("material_id")
+          .eq("ingredient_category_id", genre.id);
+        expect(error).toBeNull();
+        const ids = new Set(relations?.map((row) => row.material_id));
+        for (const item of result.data.items) expect(ids.has(item.id)).toBe(true);
+      }),
+    );
     const result = await listMaterialsWithSupabase(localClient, { page: 1 });
 
     expect(result.ok).toBe(true);
@@ -36,5 +59,5 @@ describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
         expect(detail.ok).toBe(true);
       }
     }
-  });
+  }, 20_000);
 });

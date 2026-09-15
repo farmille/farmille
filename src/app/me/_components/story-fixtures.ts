@@ -49,7 +49,7 @@ export const savedMaterials = [
     materialId: "material-1",
     name: "土づくり微生物資材",
     manufacturerName: "グリーンバイオ株式会社",
-    productType: "微生物資材",
+    genre: "微生物資材",
     priceRange: "5,000〜8,000円",
     reviewCount: 18,
     avgRating: 4.3,
@@ -64,7 +64,7 @@ export const savedMaterials = [
     materialId: "material-2",
     name: "根圏サポートA",
     manufacturerName: "ファーム技研",
-    productType: "バイオスティミュラント",
+    genre: "バイオスティミュラント",
     priceRange: "3,000〜5,000円",
     reviewCount: 9,
     avgRating: 3.8,
@@ -79,7 +79,7 @@ export const savedMaterials = [
     materialId: "material-3",
     name: "葉面活力プラス",
     manufacturerName: "みのり資材株式会社",
-    productType: "葉面散布材",
+    genre: "葉面散布材",
     priceRange: null,
     reviewCount: 3,
     avgRating: null,
@@ -103,9 +103,9 @@ export const compareMaterials = savedMaterials.map(
     id,
     ...material,
     tags:
-      material.productType === null
+      material.genre === null
         ? []
-        : [{ id: `${id}-type`, name: material.productType, category: "type" }],
+        : [{ id: `${id}-type`, name: material.genre, category: "genre" }],
   }),
 ) satisfies CompareMaterialItem[];
 
