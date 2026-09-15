@@ -2,6 +2,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["127.0.0.1"],
   agentRules: false,
   // アプリ層セキュリティヘッダ (SEC-02)。strict CSP は Sentry/GA/inline を壊しうるため
   // v1 では nosniff / clickjacking / HSTS / referrer / permissions に限定。CSP は別途。
