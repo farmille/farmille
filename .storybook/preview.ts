@@ -13,6 +13,8 @@ sb.mock(import("../src/server/auth.ts"));
 sb.mock(import("../src/server/actions/helpful.ts"));
 sb.mock(import("../src/server/actions/post-actions.ts"));
 sb.mock(import("../src/server/queries/post-actions.ts"));
+sb.mock(import("../src/server/queries/reviews.ts"));
+sb.mock(import("../src/server/queries/usage-reports.ts"));
 sb.mock(import("../src/server/actions/reports.ts"));
 sb.mock(import("../src/env.ts"));
 sb.mock(import("../src/lib/analytics/events.ts"));

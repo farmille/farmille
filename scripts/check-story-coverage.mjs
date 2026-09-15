@@ -18,7 +18,12 @@ async function collectComponentModules(directory) {
       const entryPath = path.join(directory, entry.name);
       if (entry.isDirectory()) return collectComponentModules(entryPath);
       if (!entry.isFile() || !entry.name.endsWith(".tsx")) return [];
-      if (entry.name.endsWith(".stories.tsx") || routeModuleNames.has(entry.name)) return [];
+      if (
+        entry.name.endsWith(".stories.tsx") ||
+        entry.name.endsWith(".test.tsx") ||
+        routeModuleNames.has(entry.name)
+      )
+        return [];
       return [entryPath];
     }),
   );
