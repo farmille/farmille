@@ -1,3 +1,4 @@
+import { SavedPosts } from "./SavedPosts";
 import { AppBar } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { errorMessageJa } from "@/server/errors";
@@ -44,9 +45,11 @@ export default async function MeSavedPage() {
 
   return (
     <div className={shell}>
-      <AppBar chrome="public" active="me" title="検討リスト" backHref="/me" />
+      <AppBar chrome="public" active="me" title="お気に入り（★）" backHref="/me" />
       <main className={body}>
+        <h1 className={css({ fontSize: "lg", fontWeight: "700", mb: "3" })}>お気に入りの資材</h1>
         <SavedList items={result.data} />
+        <SavedPosts userId={access.session.userId} />
       </main>
       <BottomNav active="me" />
     </div>

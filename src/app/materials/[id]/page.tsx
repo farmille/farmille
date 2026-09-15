@@ -1,3 +1,4 @@
+import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import { Suspense } from "react";
 import { SkeletonRegion, RatingSkeleton } from "@/components/Skeleton";
@@ -297,8 +298,17 @@ async function MaterialReports({ material }: { material: MaterialDetail }) {
         >
           {reports.items.map((report) => (
             <ReportCard
+              actions={
+                <PostActionsLoader
+                  target="usage_report"
+                  id={report.id}
+                  currentPath={`/reports/${report.id}`}
+                  helpfulCount={report.helpfulCount}
+                />
+              }
+              reportId={report.id}
               key={report.id}
-              title={report.title ?? `${material.name} 使用レポート`}
+              title={report.title ?? `${material.name} 実証詳細レポート`}
               author={report.author?.handle ?? "退会したユーザー"}
               crop={report.crop?.name ?? "作目情報なし"}
               helpfulCount={report.helpfulCount}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Icon } from "@/components/Icon";
 import { useActionState } from "react";
 
 import { buttonRecipe } from "@/components";
@@ -44,7 +45,8 @@ function SaveToggleForm({
         onClick={state.saved ? undefined : () => trackMaterialSaved(materialId)}
         className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}
       >
-        {state.saved ? "保存済み（解除する）" : "検討リストに保存"}
+        <Icon name={state.saved ? "star_filled" : "star"} size="sm" />
+        {state.saved ? "お気に入りから解除" : "お気に入りに追加"}
       </button>
     </form>
   );

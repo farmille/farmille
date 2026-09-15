@@ -1,3 +1,4 @@
+import { PostActionsLoader } from "@/components/PostActionsLoader";
 import type { Metadata } from "next";
 
 import { ArticleCard, EmptyState, ReportCard, SectionHeading } from "@/components";
@@ -93,8 +94,17 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
               <div className={cardGrid}>
                 {reports.items.map((report) => (
                   <ReportCard
+                    actions={
+                      <PostActionsLoader
+                        target="usage_report"
+                        id={report.id}
+                        currentPath={`/reports/${report.id}`}
+                        helpfulCount={report.helpfulCount}
+                      />
+                    }
+                    reportId={report.id}
                     key={report.id}
-                    title={report.title ?? `${material.name} 使用レポート`}
+                    title={report.title ?? `${material.name} 実証詳細レポート`}
                     author={report.author?.handle ?? "退会したユーザー"}
                     crop={report.crop?.name ?? "作目情報なし"}
                     helpfulCount={report.helpfulCount}

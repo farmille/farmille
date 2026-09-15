@@ -1,3 +1,4 @@
+import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { Suspense } from "react";
 import { SkeletonList } from "@/components/SkeletonList";
 import type { Metadata } from "next";
@@ -160,6 +161,15 @@ async function ArticleResults({
             {feed.items.map((item) =>
               item.kind === "report" ? (
                 <ReportCard
+                  actions={
+                    <PostActionsLoader
+                      target="usage_report"
+                      id={item.id}
+                      currentPath={`/reports/${item.id}`}
+                      helpfulCount={item.helpfulCount}
+                    />
+                  }
+                  reportId={item.id}
                   key={`report-${item.id}`}
                   title={item.title}
                   author={item.authorHandle}

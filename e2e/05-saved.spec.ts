@@ -17,8 +17,8 @@ test("お気に入り保存、マイページ一覧、比較表", async ({ page 
 
     for (const material of materials) {
       await page.goto(`/materials/${material.id}`);
-      await page.getByRole("button", { name: "検討リストに保存" }).click();
-      await expect(page.getByRole("button", { name: "保存済み（解除する）" })).toBeVisible();
+      await page.getByRole("button", { name: "お気に入りに追加" }).click();
+      await expect(page.getByRole("button", { name: "お気に入りから解除" })).toBeVisible();
     }
 
     await page.goto("/me/saved");

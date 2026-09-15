@@ -1,3 +1,4 @@
+import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import { Suspense } from "react";
 import { SkeletonList } from "@/components/SkeletonList";
@@ -201,11 +202,19 @@ async function HomeReports({
         >
           {reportsResult.data.map((report) => (
             <ReportCard
+              actions={
+                <PostActionsLoader
+                  target="usage_report"
+                  id={report.id}
+                  currentPath={`/?reports=${reportSort}&reviews=${reviewSort}`}
+                  helpfulCount={report.helpfulCount}
+                />
+              }
               key={report.id}
               layout="list"
               title={report.title}
               summary={report.summary}
-              reportId={session?.userId === report.authorUserId ? undefined : report.id}
+              reportId={report.id}
               helpfulVoted={reportVotes.data.has(report.id)}
               currentPath={`/?reports=${reportSort}&reviews=${reviewSort}`}
               materialName={report.materialName}
@@ -248,10 +257,21 @@ async function HomeReviews({
     ids: reviewIds,
     viewerUserId,
   });
-  if (!reviewsResult.ok) throw new Error("レビューの取得に失敗しました：" + reviewsResult.error);
+  if (!reviewsResult.ok) throw new Error("感想口コミの取得に失敗しました：" + reviewsResult.error);
   return (
     <HomeReviewFeed
       reviews={reviewsResult.data}
+      actions={reviewsResult.data.map((review) => ({
+        id: review.id,
+        node: (
+          <PostActionsLoader
+            target="review"
+            id={review.id}
+            currentPath="/"
+            helpfulCount={review.helpfulCount}
+          />
+        ),
+      }))}
       orders={{ newest, helpful }}
       viewerUserId={viewerUserId}
       reportSort={reportSort}

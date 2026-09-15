@@ -1,3 +1,4 @@
+import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
@@ -54,6 +55,14 @@ export function PostTimeline({ profile, posts, viewerUserId = null }: PostTimeli
         post.kind === "review" ? (
           <article key={`review-${post.id}`}>
             <ReviewCard
+              actions={
+                <PostActionsLoader
+                  target="review"
+                  id={post.id}
+                  currentPath={authorHref}
+                  helpfulCount={post.helpfulCount}
+                />
+              }
               reviewId={post.id}
               canManage={isOwnReview}
               helpfulVoted={post.helpfulVotedByViewer}
@@ -76,11 +85,20 @@ export function PostTimeline({ profile, posts, viewerUserId = null }: PostTimeli
               href={`/materials/${post.materialId}#review-${post.id}`}
               className={reviewDestination}
             >
-              資材詳細でこのレビューを見る <Icon name="arrow_forward" size="sm" />
+              資材詳細でこの感想口コミを見る <Icon name="arrow_forward" size="sm" />
             </Link>
           </article>
         ) : (
           <ReportCard
+            actions={
+              <PostActionsLoader
+                target="usage_report"
+                id={post.id}
+                currentPath={`/reports/${post.id}`}
+                helpfulCount={post.helpfulCount}
+              />
+            }
+            reportId={post.id}
             key={`usage-report-${post.id}`}
             title={post.title}
             author={profile.handle}
