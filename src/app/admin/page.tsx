@@ -67,7 +67,7 @@ const MENU_ITEMS = [
   },
   {
     href: "/admin/sellers",
-    label: "メーカー審査",
+    label: "メーカー確認",
     description: "申請の確認・承認（共有ログイン発行）・却下・凍結・招待コード発行。",
   },
   {
@@ -100,7 +100,7 @@ export default async function AdminHomePage() {
     <AdminShell description="運営が扱う審査・登録・分類管理の入口。" title="運営管理">
       <Panel note="対応待ちの件数" title="いま見るべきもの">
         <div className={statGridStyle}>
-          <StatCard label="審査中のメーカー" value={summary.data.appliedSellerCount} />
+          <StatCard label="確認中のメーカー" value={summary.data.appliedSellerCount} />
           <Link aria-label="未処理の通報を見る" className={statLinkStyle} href="/admin/reports">
             <StatCard label="未処理の通報" value={summary.data.openReportCount} />
           </Link>

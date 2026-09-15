@@ -166,9 +166,7 @@ export function MaterialCard({
             })}
           >
             {maker}
-            {official ? (
-              <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />
-            ) : null}
+            {official ? <span>入力済み</span> : null}
           </div>
           <div
             className={css({
@@ -256,9 +254,7 @@ export function MaterialCard({
           })}
         >
           {maker}
-          {official ? (
-            <Icon name="verified" size="xs" className={css({ color: "accent.official" })} />
-          ) : null}
+          {official ? <span>入力済み</span> : null}
         </div>
         <div
           className={css({

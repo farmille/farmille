@@ -226,6 +226,7 @@ export async function listSavedMaterials(
       `,
     )
     .eq("user_id", userId)
+    .eq("material.material_images.is_current", true)
     .order("created_at", { ascending: false })
     .order("id", { ascending: true });
 

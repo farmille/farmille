@@ -1,0 +1,49 @@
+"use server";
+import * as v from "valibot";
+import { revalidatePath } from "next/cache";
+import { SaveManufacturerProfileSchema } from "@/lib/manufacturer-profile";
+import { requireSeller } from "@/server/auth";
+import { createServerSupabase } from "@/server/supabase";
+
+export async function saveManufacturerProfile(
+  input: v.InferOutput<typeof SaveManufacturerProfileSchema>,
+) {
+  const session = await requireSeller();
+  if (!session.ok)
+    return { ok: false as const, message: "メーカーアカウントでログインしてください。" };
+  const parsed = v.safeParse(SaveManufacturerProfileSchema, input);
+  if (!parsed.success)
+    return { ok: false as const, message: "紹介文とURLの入力を確認してください。" };
+  const db = await createServerSupabase();
+  const { data, error } = await db.rpc("save_manufacturer_profile_version", {
+    p_profile_text: parsed.output.content.profileText,
+    p_logo_url: parsed.output.content.logoUrl,
+    p_website_url: parsed.output.content.websiteUrl,
+    p_submit: parsed.output.submit,
+    p_expected_version: parsed.output.expectedVersion ?? undefined,
+  });
+  if (error) {
+    console.error("[manufacturer-profile] 保存に失敗", error);
+    return {
+      ok: false as const,
+      message:
+        error.code === "40001"
+          ? "別の画面で更新されました。入力を控えて再読み込みしてください。"
+          : "プロフィールを保存できませんでした。入力内容と通信状態を確認してください。",
+    };
+  }
+  revalidatePath("/dashboard/profile");
+  return { ok: true as const, versionId: data };
+}
+
+export async function withdrawManufacturerProfile(id: string) {
+  if (!(await requireSeller()).ok || !v.is(v.pipe(v.string(), v.uuid()), id)) return false;
+  const db = await createServerSupabase();
+  const { error } = await db.rpc("withdraw_manufacturer_profile_version", { p_version_id: id });
+  if (error) {
+    console.error("[manufacturer-profile] 取り下げに失敗", error);
+    return false;
+  }
+  revalidatePath("/dashboard/profile");
+  return true;
+}

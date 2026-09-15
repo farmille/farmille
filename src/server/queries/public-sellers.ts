@@ -23,7 +23,7 @@ export type PublicSellerPageData = {
   seller: {
     id: string;
     officialName: string;
-    regionScope: string;
+    regionScope: string | null;
     websiteUrl: string | null;
     logoUrl: string | null;
     profileText: string | null;
@@ -118,7 +118,7 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
     "id" | "official_name" | "region_scope" | "website_url" | "logo_url" | "profile_text"
   > = sellerData;
 
-  if (seller.id === null || seller.official_name === null || seller.region_scope === null) {
+  if (seller.id === null || seller.official_name === null) {
     reportQueryError("公開メーカーの必須項目が欠落", { id });
     return fail("internal");
   }
@@ -143,6 +143,7 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
         { count: "exact" },
       )
       .eq("seller_id", seller.id)
+      .eq("material_images.is_current", true)
       .eq("publication_status", "published")
       .order("review_count", { ascending: false })
       .order("id", { ascending: true })

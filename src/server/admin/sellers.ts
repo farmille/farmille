@@ -1,4 +1,5 @@
 import * as v from "valibot";
+import { clientEnv } from "@/env";
 
 import { syntheticSellerEmail } from "@/server/accounts/seller";
 import { isUniqueViolation, reportAdminError, withAdmin } from "@/server/admin/guard";
@@ -13,8 +14,8 @@ export const SELLER_STATUSES = ["applied", "approved", "rejected", "suspended"] 
 export type SellerStatus = (typeof SELLER_STATUSES)[number];
 
 export const SELLER_STATUS_LABELS = {
-  applied: "審査中",
-  approved: "承認済み",
+  applied: "確認中",
+  approved: "確認済み",
   rejected: "却下",
   suspended: "凍結中",
 } satisfies Record<SellerStatus, string>;
@@ -36,7 +37,7 @@ export type SellerDetail = SellerRow & {
 /** 承認時に発行した共有ログイン。パスワードは保存せず、この戻り値で一度だけ表示する。 */
 export type SellerCredentials = {
   loginId: string;
-  password: string;
+  passwordSetupUrl: string;
 };
 
 function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
@@ -138,6 +139,15 @@ export async function approveSellerApplication(
       return fail(createError.code === "email_exists" ? "conflict" : "internal");
     }
 
+    const invitation = await supabase.auth.admin.generateLink({ type: "recovery", email });
+    if (invitation.error) {
+      const rollback = await supabase.auth.admin.deleteUser(created.user.id);
+      if (rollback.error) reportError("案内発行失敗後のログイン削除に失敗", rollback.error);
+      reportError("パスワード設定案内の発行に失敗", invitation.error);
+      return fail("internal");
+    }
+    const passwordSetupUrl = new URL("/password-reset/update", clientEnv.siteUrl);
+    passwordSetupUrl.searchParams.set("token_hash", invitation.data.properties.hashed_token);
     const { error: updateError } = await supabase.rpc("approve_seller_with_manufacturer", {
       p_seller_id: seller.id,
       p_auth_user_id: created.user.id,
@@ -156,7 +166,7 @@ export async function approveSellerApplication(
       return fail(isUniqueViolation(updateError) ? "conflict" : "internal");
     }
 
-    return succeed({ loginId: seller.login_id, password });
+    return succeed({ loginId: seller.login_id, passwordSetupUrl: passwordSetupUrl.toString() });
   });
 }
 
@@ -169,6 +179,22 @@ export async function listManufacturerNames(): Promise<Result<string[]>> {
       return fail("internal");
     }
     return succeed(data.map(({ name }) => name));
+  });
+}
+
+export async function listSellerMaterialCandidates(manufacturerName: string | null) {
+  return withAdmin(async ({ supabase }) => {
+    if (manufacturerName === null) return succeed([]);
+    const { data, error } = await supabase
+      .from("materials")
+      .select("id,name,manufacturer_name,seller_id,publication_status")
+      .eq("manufacturer_name", manufacturerName)
+      .order("name");
+    if (error) {
+      reportError("候補資材の取得に失敗", error);
+      return fail("internal");
+    }
+    return succeed(data);
   });
 }
 

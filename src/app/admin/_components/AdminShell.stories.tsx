@@ -7,7 +7,7 @@ const meta = {
   title: "App/Admin/AdminShell",
   component: AdminShell,
   args: {
-    title: "メーカー審査",
+    title: "メーカー確認",
     description: "申請内容を確認し、共有ログインを発行します。",
     backHref: "/admin",
     children: (

@@ -1,4 +1,6 @@
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
+import { MaterialPageContent } from "@/components/materials/MaterialPageContent";
+import { getPublishedMaterialPage } from "@/server/material-page-editor";
 import { Suspense } from "react";
 import { SkeletonRegion, RatingSkeleton } from "@/components/Skeleton";
 import { SkeletonList } from "@/components/SkeletonList";
@@ -102,6 +104,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const material = await loadMaterialOrNotFound(id);
   const sessionUser = await getSessionUser();
+  const publishedPage = await getPublishedMaterialPage(id);
   const isGeneralUser = sessionUser !== null && canUseGeneralFeatures(sessionUser.accountType);
   const viewerUserId = isGeneralUser ? sessionUser.userId : null;
   // after() の中では cookies() が使えないため、Supabase クライアントは先に作る。
@@ -157,7 +160,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
         </p>
       ) : null}
 
-      {material.official_url || material.catalog_url ? (
+      {!publishedPage && (material.official_url || material.catalog_url) ? (
         <div className={externalLinks}>
           {material.official_url ? (
             <a
@@ -183,12 +186,19 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
       ) : null}
 
       <p className={disclaimer}>
-        掲載情報は、製造元公式サイト等の公開情報をもとに Farmille
-        が独自に整理・分類したものです。最新・正式な使用方法は必ず製造元公式情報をご確認ください。
+        {publishedPage
+          ? "製品情報はメーカーが入力しています。運営は公開前の表現確認と掲載後の監査を行います。"
+          : "掲載情報は、製造元公式サイト等の公開情報をもとにFarmilleが作成しています。"}
+        最新・正式な使用方法は必ず製造元公式情報をご確認ください。
       </p>
 
       <MaterialDetailTable material={material} />
-      {material.description ? (
+      {publishedPage ? (
+        <MaterialPageContent
+          content={publishedPage.content}
+          imageSources={publishedPage.images.map((image) => image.url)}
+        />
+      ) : material.description ? (
         <section aria-labelledby="material-description-heading">
           <h2
             id="material-description-heading"
@@ -201,7 +211,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
           </p>
         </section>
       ) : null}
-      <EvidenceList evidences={material.evidences} />
+      {!publishedPage ? <EvidenceList evidences={material.evidences} /> : null}
 
       <Suspense
         fallback={

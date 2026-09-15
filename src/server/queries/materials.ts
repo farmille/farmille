@@ -373,6 +373,7 @@ export async function listMaterialsWithSupabase(
       : await supabase
           .from("material_images")
           .select("id, material_id, url, image_type, sort_order")
+          .eq("is_current", true)
           .in("material_id", materialIds);
 
   if (imageResult.error !== null) {
@@ -463,6 +464,7 @@ export async function getMaterialWithSupabase(
     supabase
       .from("material_images")
       .select("id, url, image_type, sort_order")
+      .eq("is_current", true)
       .eq("material_id", id),
     supabase
       .from("material_evidences")

@@ -77,7 +77,7 @@ export function MaterialRefCard({
         >
           <span>
             {manufacturerName}
-            {isOfficial ? "（メーカー確認済み）" : ""}
+            {isOfficial ? "（メーカー入力済み）" : ""}
           </span>
           {isOfficial ? (
             <Icon name="verified" size="2xs" className={css({ color: "accent.official" })} />

@@ -137,7 +137,6 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
               公式サイトを見る <Icon name="north_east" size="sm" />
             </a>
           ) : null}
-          <span>主な地域：{seller.regionScope}</span>
         </div>
       </div>
     </section>

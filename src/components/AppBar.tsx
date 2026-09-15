@@ -443,7 +443,10 @@ function DesktopSellerHeader(props: AppBarProps) {
             ホーム
           </Link>
           <Link href="/dashboard/materials" className={desktopNavLink()}>
-            資材管理
+            製品情報
+          </Link>
+          <Link href="/dashboard/profile" className={desktopNavLink()}>
+            会社情報
           </Link>
           <Link href="/dashboard/articles" className={desktopNavLink()}>
             記事管理

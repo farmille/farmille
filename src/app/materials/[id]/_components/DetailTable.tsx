@@ -57,7 +57,7 @@ export function MaterialDetailTable({ material }: { material: MaterialDetail }) 
           資材詳細
         </h2>
         {material.manufacturer_verified_at !== null ? (
-          <Badge variant="official">メーカー確認済み</Badge>
+          <Badge variant="optional">メーカー入力済み</Badge>
         ) : null}
       </div>
       <dl className={tableCard}>
@@ -79,7 +79,7 @@ export function MaterialDetailTable({ material }: { material: MaterialDetail }) 
               {row.label}
             </dt>
             <dd className={css({ m: "0", fontSize: "sm", lineHeight: "1.65" })}>
-              {row.value ?? "未設定"}
+              {row.value ?? "−"}
             </dd>
           </div>
         ))}

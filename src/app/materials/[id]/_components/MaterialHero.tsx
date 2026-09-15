@@ -76,7 +76,7 @@ export function MaterialHero({
       {material.manufacturer_verified_at === null ? (
         material.manufacturer_name
       ) : (
-        <Badge variant="official">{material.manufacturer_name} メーカー確認済み</Badge>
+        <Badge variant="optional">メーカー入力済み</Badge>
       )}
     </Link>
   ) : (
