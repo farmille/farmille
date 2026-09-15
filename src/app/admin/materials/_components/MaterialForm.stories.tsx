@@ -58,6 +58,7 @@ const classifications: ClassificationOptions = {
 };
 
 const material: AdminMaterialDetail = {
+  published_page_version_id: null,
   id: "00000000-0000-4000-8000-000000000101",
   name: "土づくり微生物資材",
   manufacturer_name: "グリーンバイオ株式会社",

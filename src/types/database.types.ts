@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       answers: {
@@ -486,6 +461,69 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "ingredient_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manufacturer_profile_versions: {
+        Row: {
+          base_logo_url: string | null
+          base_profile_text: string | null
+          base_website_url: string | null
+          created_at: string
+          id: string
+          logo_url: string
+          profile_text: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          seller_id: string
+          status: string
+          website_url: string
+        }
+        Insert: {
+          base_logo_url?: string | null
+          base_profile_text?: string | null
+          base_website_url?: string | null
+          created_at?: string
+          id?: string
+          logo_url: string
+          profile_text: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          seller_id: string
+          status: string
+          website_url: string
+        }
+        Update: {
+          base_logo_url?: string | null
+          base_profile_text?: string | null
+          base_website_url?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string
+          profile_text?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          seller_id?: string
+          status?: string
+          website_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manufacturer_profile_versions_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manufacturer_profile_versions_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -996,6 +1034,101 @@ export type Database = {
           },
         ]
       }
+      material_editor_grants: {
+        Row: {
+          document_reference: string
+          granted_at: string
+          granted_by: string
+          id: string
+          material_id: string
+          revoked_at: string | null
+          revoked_by: string | null
+          seller_id: string
+        }
+        Insert: {
+          document_reference: string
+          granted_at?: string
+          granted_by: string
+          id?: string
+          material_id: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          seller_id: string
+        }
+        Update: {
+          document_reference?: string
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          material_id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_editor_grants_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_editor_grants_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_editor_grants_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_editor_legacy_links: {
+        Row: {
+          material_id: string
+          seller_id: string
+          suspended_at: string
+        }
+        Insert: {
+          material_id: string
+          seller_id: string
+          suspended_at?: string
+        }
+        Update: {
+          material_id?: string
+          seller_id?: string
+          suspended_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_editor_legacy_links_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: true
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_editor_legacy_links_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_editor_legacy_links_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       material_effects: {
         Row: {
           created_at: string
@@ -1087,6 +1220,7 @@ export type Database = {
           created_at: string
           id: string
           image_type: string | null
+          is_current: boolean
           material_id: string
           sort_order: number
           updated_at: string
@@ -1096,6 +1230,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_type?: string | null
+          is_current?: boolean
           material_id: string
           sort_order?: number
           updated_at?: string
@@ -1105,6 +1240,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_type?: string | null
+          is_current?: boolean
           material_id?: string
           sort_order?: number
           updated_at?: string
@@ -1194,6 +1330,364 @@ export type Database = {
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_page_audits: {
+        Row: {
+          actor_id: string
+          created_at: string
+          id: string
+          material_id: string
+          note: string
+          outcome: string
+          version_id: string | null
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          id?: string
+          material_id: string
+          note: string
+          outcome: string
+          version_id?: string | null
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          id?: string
+          material_id?: string
+          note?: string
+          outcome?: string
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_audits_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_audits_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "material_page_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_audits_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "public_material_page_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_page_certifications: {
+        Row: {
+          id: string
+          sort_order: number
+          title: string
+          version_id: string
+        }
+        Insert: {
+          id?: string
+          sort_order: number
+          title: string
+          version_id: string
+        }
+        Update: {
+          id?: string
+          sort_order?: number
+          title?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_certifications_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "material_page_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_certifications_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "public_material_page_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_page_existing_images: {
+        Row: {
+          alt: string
+          image_id: string
+          sort_order: number
+          version_id: string
+        }
+        Insert: {
+          alt?: string
+          image_id: string
+          sort_order: number
+          version_id: string
+        }
+        Update: {
+          alt?: string
+          image_id?: string
+          sort_order?: number
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_existing_images_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "material_images"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_existing_images_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "material_page_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_existing_images_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "public_material_page_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_page_images: {
+        Row: {
+          alt: string
+          id: string
+          sort_order: number
+          storage_path: string
+          version_id: string
+        }
+        Insert: {
+          alt?: string
+          id?: string
+          sort_order: number
+          storage_path: string
+          version_id: string
+        }
+        Update: {
+          alt?: string
+          id?: string
+          sort_order?: number
+          storage_path?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_images_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "material_page_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_images_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "public_material_page_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_page_links: {
+        Row: {
+          group_name: string
+          id: string
+          sort_order: number
+          title: string
+          url: string
+          version_id: string
+        }
+        Insert: {
+          group_name: string
+          id?: string
+          sort_order: number
+          title: string
+          url: string
+          version_id: string
+        }
+        Update: {
+          group_name?: string
+          id?: string
+          sort_order?: number
+          title?: string
+          url?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_links_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "material_page_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_links_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "public_material_page_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_page_timings: {
+        Row: {
+          timing: number
+          version_id: string
+        }
+        Insert: {
+          timing: number
+          version_id: string
+        }
+        Update: {
+          timing?: number
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_timings_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "material_page_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_timings_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "public_material_page_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_page_usages: {
+        Row: {
+          detail: string
+          id: string
+          method: string
+          sort_order: number
+          version_id: string
+        }
+        Insert: {
+          detail?: string
+          id?: string
+          method: string
+          sort_order: number
+          version_id: string
+        }
+        Update: {
+          detail?: string
+          id?: string
+          method?: string
+          sort_order?: number
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_usages_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "material_page_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_usages_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "public_material_page_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_page_versions: {
+        Row: {
+          base_revision: number
+          created_at: string
+          description: string
+          grant_id: string
+          id: string
+          main_components: string
+          material_id: string
+          mechanism: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          seller_id: string
+          status: string
+        }
+        Insert: {
+          base_revision: number
+          created_at?: string
+          description?: string
+          grant_id: string
+          id?: string
+          main_components?: string
+          material_id: string
+          mechanism?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          seller_id: string
+          status: string
+        }
+        Update: {
+          base_revision?: number
+          created_at?: string
+          description?: string
+          grant_id?: string
+          id?: string
+          main_components?: string
+          material_id?: string
+          mechanism?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          seller_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_versions_grant_id_fkey"
+            columns: ["grant_id"]
+            isOneToOne: false
+            referencedRelation: "material_editor_grants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_versions_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_versions_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_versions_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -1336,6 +1830,7 @@ export type Database = {
           official_url: string | null
           price_range: string | null
           publication_status: string
+          published_page_version_id: string | null
           review_count: number
           sales_status: string | null
           seller_id: string | null
@@ -1363,6 +1858,7 @@ export type Database = {
           official_url?: string | null
           price_range?: string | null
           publication_status?: string
+          published_page_version_id?: string | null
           review_count?: number
           sales_status?: string | null
           seller_id?: string | null
@@ -1390,6 +1886,7 @@ export type Database = {
           official_url?: string | null
           price_range?: string | null
           publication_status?: string
+          published_page_version_id?: string | null
           review_count?: number
           sales_status?: string | null
           seller_id?: string | null
@@ -1423,6 +1920,20 @@ export type Database = {
             columns: ["manufacturer_verified_by_seller_id"]
             isOneToOne: false
             referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_published_page_version_id_fkey"
+            columns: ["published_page_version_id"]
+            isOneToOne: false
+            referencedRelation: "material_page_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_published_page_version_id_fkey"
+            columns: ["published_page_version_id"]
+            isOneToOne: false
+            referencedRelation: "public_material_page_versions"
             referencedColumns: ["id"]
           },
           {
@@ -2183,6 +2694,24 @@ export type Database = {
         }
         Relationships: []
       }
+      public_material_page_versions: {
+        Row: {
+          description: string | null
+          id: string | null
+          main_components: string | null
+          material_id: string | null
+          mechanism: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_versions_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_profiles: {
         Row: {
           avatar_url: string | null
@@ -2301,11 +2830,74 @@ export type Database = {
         }
         Returns: string
       }
+      hide_owned_material_page: {
+        Args: { p_material_id: string; p_note: string }
+        Returns: undefined
+      }
+      record_material_page_audit: {
+        Args: {
+          p_actor_id: string
+          p_material_id: string
+          p_note: string
+          p_outcome: string
+        }
+        Returns: undefined
+      }
       reject_material_change_request: {
         Args: {
           p_request_id: string
           p_review_note: string
           p_reviewed_by_user_id: string
+        }
+        Returns: undefined
+      }
+      review_manufacturer_profile_version: {
+        Args: {
+          p_actor_id: string
+          p_note: string
+          p_publish: boolean
+          p_version_id: string
+        }
+        Returns: string
+      }
+      review_material_page_version: {
+        Args: {
+          p_actor_id: string
+          p_note: string
+          p_publish: boolean
+          p_version_id: string
+        }
+        Returns: string
+      }
+      revoke_material_editor_grant: {
+        Args: { p_actor_id: string; p_material_id: string }
+        Returns: undefined
+      }
+      save_manufacturer_profile_version: {
+        Args: {
+          p_expected_version?: string
+          p_logo_url: string
+          p_profile_text: string
+          p_submit: boolean
+          p_website_url: string
+        }
+        Returns: string
+      }
+      save_material_page_version: {
+        Args: {
+          p_content: Json
+          p_expected_version?: string
+          p_material_id: string
+          p_submit: boolean
+        }
+        Returns: string
+      }
+      set_material_editor_grant: {
+        Args: {
+          p_actor_id: string
+          p_document_reference: string
+          p_material_id: string
+          p_seller_id: string
         }
         Returns: undefined
       }
@@ -2436,6 +3028,14 @@ export type Database = {
         }
         Returns: string
       }
+      withdraw_manufacturer_profile_version: {
+        Args: { p_version_id: string }
+        Returns: undefined
+      }
+      withdraw_material_page_version: {
+        Args: { p_version_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -2564,9 +3164,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },

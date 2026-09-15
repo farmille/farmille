@@ -203,8 +203,7 @@ insert into public.materials (
   general_use,
   main_components,
   mechanism,
-  usage_text,
-  seller_id
+  usage_text
 ) values (
   '11111111-1111-4111-8111-111111111111',
   'アクティビオ検証',
@@ -215,8 +214,7 @@ insert into public.materials (
   '施設園芸の高温対策',
   '海藻抽出物・アミノ酸',
   '非生物的ストレス下での代謝維持を支援',
-  '1,000倍希釈で葉面散布または灌水施用。',
-  '33333333-3333-4333-8333-333333333333'
+  '1,000倍希釈で葉面散布または灌水施用。'
 );
 
 insert into public.material_effects (material_id, effect_id)
