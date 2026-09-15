@@ -8,21 +8,21 @@ import {
   cropsByNames,
   deleteAuthUsersByEmail,
   deleteMaterial,
-  productTypesByNames,
+  genresByNames,
 } from "./support/test-data";
 
 test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷移", async ({ page }) => {
-  const [crops, productTypes] = await Promise.all([
+  const [crops, genres] = await Promise.all([
     cropsByNames(["いちご", "水稲"]),
-    productTypesByNames(["バイオスティミュラント"]),
+    genresByNames(["海藻、海藻抽出物"]),
   ]);
   const cropsByName = new Map(crops.map((crop) => [crop.name, crop]));
-  const productTypesByName = new Map(productTypes.map((type) => [type.name, type]));
+  const genresByName = new Map(genres.map((genre) => [genre.name, genre]));
   const strawberry = cropsByName.get("いちご");
   const rice = cropsByName.get("水稲");
-  const biostimulant = productTypesByName.get("バイオスティミュラント");
+  const seaweed = genresByName.get("海藻、海藻抽出物");
 
-  if (strawberry === undefined || rice === undefined || biostimulant === undefined) {
+  if (strawberry === undefined || rice === undefined || seaweed === undefined) {
     throw new Error("検索テスト用の分類マスタが見つかりません。");
   }
 
@@ -41,7 +41,7 @@ test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷�
       addMaterialClassifications(reviewHeavy.id, { cropIds: [rice.id] }),
       addMaterialClassifications(ratingHigh.id, {
         cropIds: [strawberry.id],
-        productTypeIds: [biostimulant.id],
+        genreIds: [seaweed.id],
       }),
     ]);
     await createReview({
@@ -68,10 +68,8 @@ test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷�
     await expect(page.getByText(reviewHeavy.name, { exact: true })).toBeVisible();
     await expect(page.getByText(ratingHigh.name, { exact: true })).toBeVisible();
 
-    await page.goto(`/search?filters=crop:${strawberry.id},type:${biostimulant.id}`);
-    await expect(
-      page.getByText("いちご かつ バイオスティミュラント", { exact: true }),
-    ).toBeVisible();
+    await page.goto(`/search?filters=crop:${strawberry.id},genre:${seaweed.id}`);
+    await expect(page.getByText("いちご かつ 海藻、海藻抽出物", { exact: true })).toBeVisible();
     await expect(page.getByText(ratingHigh.name, { exact: true })).toBeVisible();
     await expect(page.getByText(reviewHeavy.name, { exact: true })).toHaveCount(0);
 

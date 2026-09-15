@@ -117,6 +117,7 @@ export type SellerApproval = v.InferOutput<typeof SellerApprovalStateSchema>;
 export type ContentReport = v.InferOutput<typeof ContentReportStateSchema>;
 
 type RestInsertTable =
+  | "material_ingredient_categories"
   | "material_crops"
   | "material_product_types"
   | "materials"
@@ -417,9 +418,19 @@ export async function deleteMaterial(materialId: string): Promise<void> {
 
 export async function addMaterialClassifications(
   materialId: string,
-  input: { cropIds?: readonly string[]; productTypeIds?: readonly string[] },
+  input: {
+    cropIds?: readonly string[];
+    productTypeIds?: readonly string[];
+    genreIds?: readonly string[];
+  },
 ): Promise<void> {
   await Promise.all([
+    ...(input.genreIds ?? []).map((id) =>
+      restInsert(IdSchema, "material_ingredient_categories", {
+        material_id: materialId,
+        ingredient_category_id: id,
+      }),
+    ),
     ...(input.cropIds ?? []).map((cropId, sortOrder) =>
       restInsert(IdSchema, "material_crops", {
         material_id: materialId,
@@ -601,4 +612,15 @@ export async function productTypesByNames(
     name: `in.(${names.join(",")})`,
   });
   return restSelect(ProductTypeSchema, "product_types", params);
+}
+
+export async function genresByNames(names: string[]) {
+  return restSelect(
+    v.object({ id: UuidSchema, name: v.string() }),
+    "ingredient_categories",
+    new URLSearchParams({
+      select: "id,name",
+      name: `in.(${names.join(",")})`,
+    }),
+  );
 }
