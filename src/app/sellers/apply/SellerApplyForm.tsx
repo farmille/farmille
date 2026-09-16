@@ -93,7 +93,7 @@ export function SellerApplyForm() {
 
       <Field
         error={fieldErrors.contactEmail}
-        guide="公開されません。確認後、このアドレスにログインIDとパスワード設定用のご案内をお送りします。"
+        guide="ご担当者のメールアドレスを入力してください。公開されません。確認後、このアドレスにログインIDとパスワード設定用のご案内をお送りします。"
         htmlFor="contactEmail"
         label="連絡先メールアドレス"
         requirement="required"

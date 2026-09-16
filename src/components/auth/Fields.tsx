@@ -43,6 +43,12 @@ const optionalBadgeStyle = css({
   borderColor: "border.default",
 });
 
+const publicBadgeStyle = css({
+  ...badgeBaseStyle,
+  bg: "brand.soft",
+  color: "brand.primaryDeep",
+});
+
 const guideStyle = css({
   fontSize: "sm",
   color: "text.muted",
@@ -83,6 +89,7 @@ export function Field({
   label,
   htmlFor,
   requirement,
+  visibility,
   guide,
   error,
   children,
@@ -90,6 +97,7 @@ export function Field({
   label: string;
   htmlFor?: string;
   requirement?: "required" | "optional";
+  visibility?: "public";
   guide?: string;
   error?: string;
   children: ReactNode;
@@ -100,6 +108,7 @@ export function Field({
         {label}
         {requirement === "required" ? <span className={requiredBadgeStyle}>必須</span> : null}
         {requirement === "optional" ? <span className={optionalBadgeStyle}>任意</span> : null}
+        {visibility === "public" ? <span className={publicBadgeStyle}>公開</span> : null}
       </label>
       {children}
       {guide === undefined ? null : <p className={guideStyle}>{guide}</p>}

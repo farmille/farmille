@@ -9,7 +9,7 @@ import {
   Field,
   FormMessage,
   formActionsStyle,
-  HintBox,
+  NoteBox,
   linkRowStyle,
   RadioCards,
   textLinkStyle,
@@ -29,11 +29,16 @@ export function SignupForm() {
     <form action={formAction} noValidate>
       {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
 
+      <NoteBox>
+        ニックネーム・あなたの立場・都道府県は、投稿や公開プロフィールに表示されます。本名・メールアドレス・電話番号・郵便番号・市区町村は公開されません。
+      </NoteBox>
+
       <Field
         error={fieldErrors.handle}
         guide="公開されます。本名でなくてOKです"
         htmlFor="handle"
         label="ニックネーム"
+        visibility="public"
         requirement="required"
       >
         <input
@@ -114,6 +119,7 @@ export function SignupForm() {
         error={fieldErrors.standpoint}
         guide="投稿や公開プロフィールに表示されます。"
         label="あなたの立場"
+        visibility="public"
         requirement="required"
       >
         <RadioCards defaultValue={values.standpoint} name="standpoint" options={STANDPOINTS} />
@@ -141,6 +147,7 @@ export function SignupForm() {
         error={fieldErrors.prefectureCode}
         htmlFor="prefectureCode"
         label="都道府県"
+        visibility="public"
         guide="公開されます"
         requirement="required"
       >
@@ -215,10 +222,6 @@ export function SignupForm() {
           />{" "}
           利用規約・感想口コミガイドラインに同意する
         </label>
-      </Field>
-
-      <Field label="アイコン画像" requirement="optional">
-        <HintBox>登録後にマイページで設定できます。</HintBox>
       </Field>
 
       <div className={formActionsStyle}>
