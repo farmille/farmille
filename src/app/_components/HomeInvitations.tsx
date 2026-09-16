@@ -65,7 +65,7 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
           <div className={copy}>
             <p>
               <strong>登録は無料です。</strong>
-              資材検索と感想口コミ・実証詳細レポートの閲覧は、登録なしで利用できます。
+              資材検索と感想口コミの閲覧は、登録なしで利用できます。実証詳細レポートの全文は、無料会員登録後にご覧いただけます。
             </p>
             <p>
               会員登録すると、実証詳細レポートや感想口コミの投稿、参考になったの投票、お気に入りへの保存ができます。

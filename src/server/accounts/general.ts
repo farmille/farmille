@@ -3,6 +3,7 @@ import * as v from "valibot";
 
 import { clientEnv } from "@/env";
 import { generalRegistrationSchema } from "@/lib/auth/registration-schema";
+import { safeNextPath } from "@/lib/auth/safe-next";
 import { toErrorCode } from "@/server/accounts/auth-errors";
 import { fail, succeed, type Result } from "@/server/result";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
@@ -72,6 +73,7 @@ async function rollbackAuthUser(admin: SupabaseClient<Database>, userId: string)
  */
 export async function registerGeneralUser(
   input: GeneralSignupInput,
+  next: string | null = null,
 ): Promise<Result<GeneralSignupResult>> {
   const admin = createAdminSupabase();
 
@@ -80,7 +82,10 @@ export async function registerGeneralUser(
   if (handleTaken.data) return fail("handle_taken");
 
   const supabase = await createServerSupabase();
-  const emailRedirectTo = new URL("/auth/confirm?next=%2F", clientEnv.siteUrl).toString();
+  const emailRedirectTo = new URL(
+    `/auth/confirm?next=${encodeURIComponent(safeNextPath(next) ?? "/")}`,
+    clientEnv.siteUrl,
+  ).toString();
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email: input.email,
     password: input.password,

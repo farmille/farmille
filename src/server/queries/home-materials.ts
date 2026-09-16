@@ -33,8 +33,8 @@ export async function listHomeMaterials() {
       .map(async (material) => {
         const [reports, saves, categories] = await Promise.all([
           client
-            .from("usage_reports")
-            .select("id", { count: "exact", head: true })
+            .rpc("list_usage_report_previews", undefined, { count: "exact", head: true })
+            .select("id")
             .eq("material_id", material.id)
             .eq("status", "published"),
           // 保存者の識別情報は取得せず、総件数だけを公開する。

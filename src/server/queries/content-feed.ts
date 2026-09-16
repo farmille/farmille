@@ -175,7 +175,7 @@ async function fetchPublishedReports(
 ): Promise<Result<ReportFeedRow[]>> {
   // タイトル NULL 行もあるため、絞り込みは取得後にタイトル／表示タイトルで行う。
   const { data, error } = await supabase
-    .from("usage_reports")
+    .rpc("list_usage_report_previews")
     .select(
       `
       id,

@@ -20,13 +20,14 @@ import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/au
 import { STANDPOINTS } from "@/lib/standpoints";
 import { PREFECTURES } from "@/lib/prefectures";
 
-export function SignupForm() {
+export function SignupForm({ next = null }: { next?: string | null }) {
   const [state, formAction] = useActionState(signupAction, initialAuthFormState);
   const fieldErrors = fieldErrorsOf(state);
   const values = submittedValuesOf(state);
 
   return (
     <form action={formAction} noValidate>
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
 
       <NoteBox>
@@ -258,7 +259,10 @@ export function SignupForm() {
       </div>
 
       <div className={linkRowStyle}>
-        <Link className={textLinkStyle} href="/login">
+        <Link
+          className={textLinkStyle}
+          href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+        >
           すでに一般ユーザーアカウントをお持ちの方はログイン
         </Link>
         <Link className={textLinkStyle} href="/signup">

@@ -33,7 +33,7 @@ export async function listSitemapEntries(): Promise<Result<SitemapEntries>> {
       .eq("status", "published")
       .order("id", { ascending: true }),
     supabase
-      .from("usage_reports")
+      .rpc("list_usage_report_previews")
       .select("id, updated_at")
       .eq("status", "published")
       .order("id", { ascending: true }),

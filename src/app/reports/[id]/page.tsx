@@ -12,6 +12,7 @@ import { helpfulPillRecipe } from "@/components/helpful-pill";
 import { Icon } from "@/components/Icon";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
+import { ReportReadingGate } from "@/components/ReportReadingGate";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { toggleHelpfulAction } from "@/server/actions/helpful";
@@ -344,6 +345,12 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           <span className={css({ fontSize: "xs" })}>{formatDateJa(report.publishedAt)}</span>
         </div>
 
+        <p className={css({ mt: "3", fontSize: "sm", color: "text.muted", lineHeight: "relaxed" })}>
+          作物：{report.crop.name}
+          {report.variety ? `（${report.variety}）` : ""}
+          {report.purposeTags.length ? `　効果：${report.purposeTags.join("・")}` : ""}
+        </p>
+
         <MaterialRefCard
           className={css({ mt: "3.5" })}
           href={materialPath}
@@ -376,165 +383,172 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           </div>
         )}
 
-        <h2 className={sectionTitle}>使用目的</h2>
-        {report.purposeTags.length > 0 ? (
-          <div
-            className={css({
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "1.5",
-              mb: "2",
-            })}
-          >
-            {report.purposeTags.map((tag) => (
-              <span
-                key={tag}
+        <h2 className={sectionTitle}>使ってみて、どうでしたか？</h2>
+        <p className={bodyText}>{report.observedChange}</p>
+
+        {session === null ? (
+          <ReportReadingGate reportPath={`/reports/${report.id}`} />
+        ) : (
+          <>
+            <h2 className={sectionTitle}>使用目的</h2>
+            {report.purposeTags.length > 0 ? (
+              <div
                 className={css({
-                  fontSize: "xs",
-                  px: "2.5",
-                  py: "1",
-                  borderRadius: "pill",
-                  bg: "brand.soft",
-                  color: "brand.primaryDeep",
-                  fontWeight: "600",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "1.5",
+                  mb: "2",
                 })}
               >
-                {tag}
-              </span>
-            ))}
-          </div>
-        ) : null}
-        {report.purposeNote ? <p className={bodyText}>{report.purposeNote}</p> : null}
-
-        <h2 className={sectionTitle}>環境</h2>
-        <p className={bodyText}>{envLines.join("\n")}</p>
-
-        <h2 className={sectionTitle}>使用方法・頻度</h2>
-        {applicationLines.length > 0 ? (
-          <p className={bodyText}>{applicationLines.join("\n")}</p>
-        ) : (
-          <p className={bodyText}>使用方法の詳細は記録されていません。</p>
-        )}
-        {methodMedia.map((media) => (
-          <MediaFigure
-            key={media.id}
-            url={media.url}
-            caption={media.caption}
-            mediaType={media.mediaType}
-            wide
-          />
-        ))}
-
-        {report.climateNote ? (
-          <>
-            <h2 className={sectionTitle}>当時の気候・圃場の状況</h2>
-            <p className={bodyText}>{report.climateNote}</p>
-          </>
-        ) : null}
-
-        <h2 className={sectionTitle}>使用後に観察した変化</h2>
-        <p className={bodyText}>{report.observedChange}</p>
-        {observationPhotos.length > 0 ? (
-          <div
-            className={css({
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              gap: "2",
-              mt: "3",
-            })}
-          >
-            {observationPhotos.map((photo) => (
-              <figure key={photo.id} className={css({ m: "0" })}>
-                <div
-                  className={css({
-                    position: "relative",
-                    aspectRatio: "image.portrait",
-                    borderRadius: "button",
-                    overflow: "hidden",
-                    bg: "green.soft2",
-                  })}
-                >
-                  <Image
-                    alt={photo.caption ?? ""}
+                {report.purposeTags.map((tag) => (
+                  <span
+                    key={tag}
                     className={css({
-                      display: "block",
-                      w: "100%",
-                      h: "100%",
-                      objectFit: "cover",
-                    })}
-                    fill
-                    sizes="(max-width: 768px) 50vw, 320px"
-                    src={photo.url}
-                  />
-                </div>
-                {photo.caption ? (
-                  <figcaption
-                    className={css({
-                      mt: "1",
-                      fontSize: "2xs",
-                      color: "text.subtle",
+                      fontSize: "xs",
+                      px: "2.5",
+                      py: "1",
+                      borderRadius: "pill",
+                      bg: "brand.soft",
+                      color: "brand.primaryDeep",
+                      fontWeight: "600",
                     })}
                   >
-                    {photo.caption}
-                  </figcaption>
-                ) : null}
-              </figure>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+            {report.purposeNote ? <p className={bodyText}>{report.purposeNote}</p> : null}
+
+            <h2 className={sectionTitle}>環境</h2>
+            <p className={bodyText}>{envLines.join("\n")}</p>
+
+            <h2 className={sectionTitle}>使用方法・頻度</h2>
+            {applicationLines.length > 0 ? (
+              <p className={bodyText}>{applicationLines.join("\n")}</p>
+            ) : (
+              <p className={bodyText}>使用方法の詳細は記録されていません。</p>
+            )}
+            {methodMedia.map((media) => (
+              <MediaFigure
+                key={media.id}
+                url={media.url}
+                caption={media.caption}
+                mediaType={media.mediaType}
+                wide
+              />
             ))}
-          </div>
-        ) : null}
 
-        <h2 className={sectionTitle}>マイナス・良くなかった点（薬害など）</h2>
-        <p className={bodyText}>
-          {report.negativeNote !== null && report.negativeNote.length > 0
-            ? report.negativeNote
-            : "特に記載はありません。"}
-        </p>
+            {report.climateNote ? (
+              <>
+                <h2 className={sectionTitle}>当時の気候・圃場の状況</h2>
+                <p className={bodyText}>{report.climateNote}</p>
+              </>
+            ) : null}
 
-        {report.metrics.length > 0 ? (
-          <>
-            <h2 className={sectionTitle}>収穫調査</h2>
-            <MetricBars metrics={report.metrics} />
+            {observationPhotos.length > 0 ? (
+              <div
+                className={css({
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                  gap: "2",
+                  mt: "3",
+                })}
+              >
+                {observationPhotos.map((photo) => (
+                  <figure key={photo.id} className={css({ m: "0" })}>
+                    <div
+                      className={css({
+                        position: "relative",
+                        aspectRatio: "image.portrait",
+                        borderRadius: "button",
+                        overflow: "hidden",
+                        bg: "green.soft2",
+                      })}
+                    >
+                      <Image
+                        alt={photo.caption ?? ""}
+                        className={css({
+                          display: "block",
+                          w: "100%",
+                          h: "100%",
+                          objectFit: "cover",
+                        })}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 320px"
+                        src={photo.url}
+                      />
+                    </div>
+                    {photo.caption ? (
+                      <figcaption
+                        className={css({
+                          mt: "1",
+                          fontSize: "2xs",
+                          color: "text.subtle",
+                        })}
+                      >
+                        {photo.caption}
+                      </figcaption>
+                    ) : null}
+                  </figure>
+                ))}
+              </div>
+            ) : null}
+
+            <h2 className={sectionTitle}>マイナス・良くなかった点（薬害など）</h2>
+            <p className={bodyText}>
+              {report.negativeNote !== null && report.negativeNote.length > 0
+                ? report.negativeNote
+                : "特に記載はありません。"}
+            </p>
+
+            {report.metrics.length > 0 ? (
+              <>
+                <h2 className={sectionTitle}>収穫調査</h2>
+                <MetricBars metrics={report.metrics} />
+              </>
+            ) : null}
+
+            <h2 className={sectionTitle}>まとめ・感想</h2>
+            <p className={bodyText}>{report.summary}</p>
+            {summaryMedia.map((media) => (
+              <MediaFigure
+                key={media.id}
+                url={media.url}
+                caption={media.caption}
+                mediaType={media.mediaType}
+                wide
+              />
+            ))}
+
+            <div
+              className={css({
+                display: "flex",
+                gap: "2",
+                alignItems: "flex-start",
+                mt: "5.5",
+                p: "3",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "border.default",
+                borderRadius: "button",
+                bg: "surface.page",
+                fontSize: "xs",
+                color: "text.muted",
+                lineHeight: "1.55",
+              })}
+            >
+              <Icon
+                name="check"
+                size="sm"
+                className={css({ color: "brand.primary", flexShrink: "0", mt: "0.5" })}
+              />
+              <span>
+                この実証詳細レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。
+              </span>
+            </div>
           </>
-        ) : null}
-
-        <h2 className={sectionTitle}>まとめ・感想</h2>
-        <p className={bodyText}>{report.summary}</p>
-        {summaryMedia.map((media) => (
-          <MediaFigure
-            key={media.id}
-            url={media.url}
-            caption={media.caption}
-            mediaType={media.mediaType}
-            wide
-          />
-        ))}
-
-        <div
-          className={css({
-            display: "flex",
-            gap: "2",
-            alignItems: "flex-start",
-            mt: "5.5",
-            p: "3",
-            borderWidth: "1px",
-            borderStyle: "solid",
-            borderColor: "border.default",
-            borderRadius: "button",
-            bg: "surface.page",
-            fontSize: "xs",
-            color: "text.muted",
-            lineHeight: "1.55",
-          })}
-        >
-          <Icon
-            name="check"
-            size="sm"
-            className={css({ color: "brand.primary", flexShrink: "0", mt: "0.5" })}
-          />
-          <span>
-            この実証詳細レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。
-          </span>
-        </div>
+        )}
 
         <div
           className={css({

@@ -21,7 +21,7 @@ export async function homeFeedIds(
             .from("reviews")
             .select("id, sort_date:created_at, material:materials!inner(publication_status)")
         : client
-            .from("usage_reports")
+            .rpc("list_usage_report_previews")
             .select("id, sort_date:published_at, material:materials!inner(publication_status)");
     const result = await query
       .eq("status", "published")
