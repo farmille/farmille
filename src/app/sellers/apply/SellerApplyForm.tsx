@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 
 import { sellerApplyAction } from "@/app/sellers/apply/actions";
 import {
@@ -220,6 +221,17 @@ export function SellerApplyForm() {
       ) : null}
 
       <div className={formActionsStyle}>
+        <p className={css({ fontSize: "md", lineHeight: "relaxed" })}>
+          申請前に
+          <Link href="/legal/manufacturer" target="_blank" rel="noopener noreferrer">
+            メーカー会員規約（別タブ）
+          </Link>
+          と
+          <Link href="/legal" target="_blank" rel="noopener noreferrer">
+            各規約・ガイドライン（別タブ）
+          </Link>
+          をご確認ください。
+        </p>
         <SubmitButton label="申請する" pendingLabel="申請中…" />
         <div className={inviteToggleRow}>
           {inviteOpen ? (

@@ -21,7 +21,6 @@ const groups = [
   },
 ];
 
-/** フッターは実在する画面だけに接続し、未公開の規約はリンクにしない。 */
 export function HomeFooter() {
   return (
     <footer
@@ -63,7 +62,7 @@ export function HomeFooter() {
         </div>
         {groups.map((group) => (
           <nav key={group.title} aria-label={group.title}>
-            <h1
+            <h2
               className={css({
                 m: "0",
                 mb: "3",
@@ -73,7 +72,7 @@ export function HomeFooter() {
               })}
             >
               {group.title}
-            </h1>
+            </h2>
             <ul
               className={css({
                 listStyle: "none",
@@ -114,8 +113,8 @@ export function HomeFooter() {
       >
         <span>© {new Date().getFullYear()} Farmille</span>
         <div className={css({ display: "flex", flexWrap: "wrap", gap: "4" })}>
-          <span>プライバシーポリシー（準備中）</span>
-          <span>利用規約（準備中）</span>
+          <Link href="/legal/privacy">プライバシーポリシー</Link>
+          <Link href="/legal">規約・ガイドライン</Link>
         </div>
       </div>
     </footer>

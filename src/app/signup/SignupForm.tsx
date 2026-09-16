@@ -209,7 +209,7 @@ export function SignupForm() {
       <Field
         error={fieldErrors.terms}
         htmlFor="terms"
-        label="利用規約・感想口コミガイドラインへの同意"
+        label="総合利用規約・投稿ガイドラインへの同意"
         requirement="required"
       >
         <label>
@@ -220,8 +220,37 @@ export function SignupForm() {
             required
             defaultChecked={values.terms === "on"}
           />{" "}
-          利用規約・感想口コミガイドラインに同意する
+          総合利用規約・投稿ガイドラインに同意する
         </label>
+        <p>
+          <Link
+            className={textLinkStyle}
+            href="/legal/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            総合利用規約（別タブ）
+          </Link>
+          {" ／ "}
+          <Link
+            className={textLinkStyle}
+            href="/legal/posting"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            投稿ガイドライン（別タブ）
+          </Link>
+        </p>
+        <p>
+          <Link
+            className={textLinkStyle}
+            href="/legal/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            プライバシーポリシー（別タブ）
+          </Link>
+        </p>
       </Field>
 
       <div className={formActionsStyle}>

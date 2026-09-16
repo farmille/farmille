@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { legalDocuments } from "@/content/legal/documents";
 
 import { absoluteUrl } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
@@ -50,6 +51,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.6,
     },
+    { url: absoluteUrl("/legal") },
+    ...legalDocuments.map((document) => ({ url: absoluteUrl(`/legal/${document.slug}`) })),
     ...dynamicUrls(materials, (id) => `/materials/${id}`),
     ...dynamicUrls(materials, (id) => `/materials/${id}/reviews`),
     ...dynamicUrls(materials, (id) => `/materials/${id}/articles`),
