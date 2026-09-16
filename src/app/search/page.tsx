@@ -14,6 +14,7 @@ import {
   resolveSelectedFilters,
 } from "@/components/search/search-selection";
 import { createPageMetadata } from "@/lib/seo";
+import { matchSearchCatalog } from "@/lib/material-search";
 import { listMaterials } from "@/server/queries/materials";
 import {
   listSearchFiltersByPairs,
@@ -187,6 +188,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   });
 
   const logic = formatLogicHint(selected);
+  const keywordMatches = initialQuery
+    ? matchSearchCatalog(catalogResult.data, initialQuery)
+    : undefined;
 
   return (
     <div className={shell}>
@@ -200,8 +204,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <main className={main}>
         <SearchPageHeading />
         <MaterialSearchBox
-          // q が変わるたびに入力欄を作り直す（同じ画面のヘッダーから再送信したときに初期値を反映するため）
-          key={initialQuery}
           initialQuery={initialQuery}
           selected={selected}
           sort={sort}
@@ -218,10 +220,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         ) : null}
 
         <Suspense
-          key={JSON.stringify([filters, makerNames, materialNames, sort])}
+          key={JSON.stringify([filters, makerNames, materialNames, sort, initialQuery])}
           fallback={
             <SearchResultsSkeleton
-              controls={<SearchSortSelect selected={selected} sort={sort} />}
+              controls={<SearchSortSelect selected={selected} sort={sort} query={initialQuery} />}
             />
           }
         >
@@ -231,6 +233,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             materialNames={materialNames}
             sort={sort}
             selected={selected}
+            query={initialQuery}
+            keywordMatches={keywordMatches}
           />
         </Suspense>
       </main>
@@ -246,17 +250,22 @@ async function SearchResults({
   materialNames,
   sort,
   selected,
+  query,
+  keywordMatches,
 }: {
   filters: NonNullable<Parameters<typeof listMaterials>[0]["filters"]>;
   makerNames: string[];
   materialNames: string[];
   sort: ReturnType<typeof parseSortParam>;
   selected: ReturnType<typeof resolveSelectedFilters>;
+  query: string;
+  keywordMatches: Parameters<typeof listMaterials>[0]["keywordMatches"];
 }) {
   const materialsResult = await listMaterials({
     filters: filters.length > 0 ? filters : undefined,
     makerNames: makerNames.length > 0 ? makerNames : undefined,
     materialNames: materialNames.length > 0 ? materialNames : undefined,
+    keywordMatches,
     sort,
     page: 1,
   });
@@ -271,7 +280,7 @@ async function SearchResults({
     <>
       <SearchAnalytics filterCount={selected.length} resultCount={total} sort={sort} />
       <div className={resultHeader}>
-        <span className={css({ fontSize: "sm", color: "text.muted" })}>
+        <span role="status" className={css({ fontSize: "sm", color: "text.muted" })}>
           該当{" "}
           <b
             className={css({
@@ -284,7 +293,7 @@ async function SearchResults({
           </b>{" "}
           件
         </span>
-        <SearchSortSelect selected={selected} sort={sort} />
+        <SearchSortSelect selected={selected} sort={sort} query={query} />
       </div>
 
       {items.length > 0 ? (

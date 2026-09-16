@@ -238,6 +238,27 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
         <MaterialReviews material={material} viewerUserId={viewerUserId} />
       </Suspense>
 
+      <section aria-label="掲載情報と投稿についての注意事項" className={disclaimer}>
+        <p>
+          掲載している商品情報は、各事業者によって提供・編集を受けた情報または各事業者のウェブサイト等にて公開されている特定時点の情報をもとに作成したものです。当サイトに掲載している情報の正確性については、誤記や最新でない内容を含む可能性があり、その内容を保証するものではありません。
+          <br />
+          使用前に必ず製品ラベル・安全データシート等の各種公式情報をご確認ください。
+        </p>
+        <p className={css({ mt: "3" })}>
+          実証詳細レポート・感想口コミは、投稿した生産者個人の圃場・条件での体験と見解です。ほかの圃場・作物・気象条件で同じ結果が得られることや、薬害等が生じないことを保証するものではありません。
+        </p>
+        <p className={css({ mt: "3" })}>
+          ご利用の前に
+          <Link
+            href="/legal"
+            className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
+          >
+            規約・ガイドライン
+          </Link>
+          をご確認ください。
+        </p>
+      </section>
+
       {material.publication_status === "published" ? (
         <FabBar
           reportHref={`${materialPath}/report/new`}

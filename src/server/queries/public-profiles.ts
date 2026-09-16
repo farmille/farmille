@@ -185,7 +185,7 @@ export async function getPublicProfilePage(
       .order("created_at", { ascending: false })
       .order("id", { ascending: true }),
     supabase
-      .from("usage_reports")
+      .rpc("list_usage_report_previews")
       .select(
         `
           id,

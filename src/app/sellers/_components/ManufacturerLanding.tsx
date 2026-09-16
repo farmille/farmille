@@ -358,7 +358,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           掲載情報と表現の確認について
         </h2>
         <p className={sectionLead}>
-          メーカーが記入した情報には「入力済み」と表示します。公式認証や製品の効果を保証するマークではありません。メーカーが内容の管理と責任を持ち、運営は原稿の整理・代筆を行いません。
+          メーカーが記入した情報には「メーカー記入」と表示します。公式認証や製品の効果を保証するマークではありません。メーカーが内容の管理と責任を持ち、運営は原稿の整理・代筆を行いません。
         </p>
         <p className={featureBody}>
           掲載ポリシーの根拠は

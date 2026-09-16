@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import type { AuthFormState, AuthFormValues } from "@/lib/auth/form-state";
 import { formDataString } from "@/lib/validation";
+import { safeNextPath } from "@/lib/auth/safe-next";
 import { registerGeneralUser, validateGeneralSignup } from "@/server/accounts/general";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 
@@ -70,7 +71,8 @@ export async function signupAction(
     };
   }
 
-  const result = await registerGeneralUser(validation.input);
+  const next = safeNextPath(formData.get("next"));
+  const result = await registerGeneralUser(validation.input, next);
 
   if (!result.ok) {
     const message = errorMessageJa[result.error];
@@ -83,5 +85,9 @@ export async function signupAction(
     };
   }
 
-  redirect(result.data.signedIn ? "/signup/done" : "/signup/done?confirm=1");
+  if (result.data.signedIn && next) redirect(next);
+  const params = new URLSearchParams();
+  if (!result.data.signedIn) params.set("confirm", "1");
+  if (next) params.set("next", next);
+  redirect(params.size ? `/signup/done?${params}` : "/signup/done");
 }

@@ -9,7 +9,7 @@ import {
   Field,
   FormMessage,
   formActionsStyle,
-  HintBox,
+  NoteBox,
   linkRowStyle,
   RadioCards,
   textLinkStyle,
@@ -20,20 +20,26 @@ import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/au
 import { STANDPOINTS } from "@/lib/standpoints";
 import { PREFECTURES } from "@/lib/prefectures";
 
-export function SignupForm() {
+export function SignupForm({ next = null }: { next?: string | null }) {
   const [state, formAction] = useActionState(signupAction, initialAuthFormState);
   const fieldErrors = fieldErrorsOf(state);
   const values = submittedValuesOf(state);
 
   return (
     <form action={formAction} noValidate>
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
+
+      <NoteBox>
+        ニックネーム・あなたの立場・都道府県は、投稿や公開プロフィールに表示されます。本名・メールアドレス・電話番号・郵便番号・市区町村は公開されません。
+      </NoteBox>
 
       <Field
         error={fieldErrors.handle}
         guide="公開されます。本名でなくてOKです"
         htmlFor="handle"
         label="ニックネーム"
+        visibility="public"
         requirement="required"
       >
         <input
@@ -114,6 +120,7 @@ export function SignupForm() {
         error={fieldErrors.standpoint}
         guide="投稿や公開プロフィールに表示されます。"
         label="あなたの立場"
+        visibility="public"
         requirement="required"
       >
         <RadioCards defaultValue={values.standpoint} name="standpoint" options={STANDPOINTS} />
@@ -141,6 +148,7 @@ export function SignupForm() {
         error={fieldErrors.prefectureCode}
         htmlFor="prefectureCode"
         label="都道府県"
+        visibility="public"
         guide="公開されます"
         requirement="required"
       >
@@ -202,7 +210,7 @@ export function SignupForm() {
       <Field
         error={fieldErrors.terms}
         htmlFor="terms"
-        label="利用規約・感想口コミガイドラインへの同意"
+        label="総合利用規約・投稿ガイドラインへの同意"
         requirement="required"
       >
         <label>
@@ -213,12 +221,37 @@ export function SignupForm() {
             required
             defaultChecked={values.terms === "on"}
           />{" "}
-          利用規約・感想口コミガイドラインに同意する
+          総合利用規約・投稿ガイドラインに同意する
         </label>
-      </Field>
-
-      <Field label="アイコン画像" requirement="optional">
-        <HintBox>登録後にマイページで設定できます。</HintBox>
+        <p>
+          <Link
+            className={textLinkStyle}
+            href="/legal/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            総合利用規約（別タブ）
+          </Link>
+          {" ／ "}
+          <Link
+            className={textLinkStyle}
+            href="/legal/posting"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            投稿ガイドライン（別タブ）
+          </Link>
+        </p>
+        <p>
+          <Link
+            className={textLinkStyle}
+            href="/legal/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            プライバシーポリシー（別タブ）
+          </Link>
+        </p>
       </Field>
 
       <div className={formActionsStyle}>
@@ -226,7 +259,10 @@ export function SignupForm() {
       </div>
 
       <div className={linkRowStyle}>
-        <Link className={textLinkStyle} href="/login">
+        <Link
+          className={textLinkStyle}
+          href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+        >
           すでに一般ユーザーアカウントをお持ちの方はログイン
         </Link>
         <Link className={textLinkStyle} href="/signup">

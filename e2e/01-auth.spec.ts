@@ -33,7 +33,7 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await page.goto("/signup/general");
     await expect(page.getByRole("heading", { name: "一般ユーザー登録" })).toBeVisible();
     await expect(page.getByLabel("都道府県")).toBeVisible();
-    await expect(page.getByText("あなたの立場")).toBeVisible();
+    await expect(page.getByText(/^あなたの立場必須公開$/)).toBeVisible();
     await expect(page.getByRole("radio")).toHaveCount(4);
     await expect(page.getByRole("radio", { name: "生産者", exact: true })).toBeVisible();
     await expect(page.getByRole("radio", { name: /^JA関係者/ })).toBeVisible();

@@ -14,6 +14,7 @@ import {
 type SearchSortSelectProps = {
   selected: SelectedSearchFilter[];
   sort: MaterialSortParam;
+  query?: string;
 };
 
 const selectClass = css({
@@ -24,7 +25,7 @@ const selectClass = css({
 });
 
 /** 検索結果の並び替え。URL の sort を更新する。 */
-export function SearchSortSelect({ selected, sort }: SearchSortSelectProps) {
+export function SearchSortSelect({ selected, sort, query }: SearchSortSelectProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -40,7 +41,7 @@ export function SearchSortSelect({ selected, sort }: SearchSortSelectProps) {
           throw new Error(`未対応の並び替えです: ${next}`);
         }
         startTransition(() => {
-          router.push(buildSearchHref({ filters: selected, sort: next }));
+          router.push(buildSearchHref({ filters: selected, sort: next, query }), { scroll: false });
         });
       }}
     >

@@ -57,10 +57,16 @@ export function LoginForm({ next }: { next: string | null }) {
         <Link className={textLinkStyle} href="/password-reset">
           パスワードをお忘れの方
         </Link>
-        <Link className={textLinkStyle} href="/signup">
+        <Link
+          className={textLinkStyle}
+          href={next ? `/signup/general?next=${encodeURIComponent(next)}` : "/signup"}
+        >
           アカウントをお持ちでない方は登録方法を選ぶ
         </Link>
-        <Link className={textLinkStyle} href="/sellers/login">
+        <Link
+          className={textLinkStyle}
+          href={next ? `/sellers/login?next=${encodeURIComponent(next)}` : "/sellers/login"}
+        >
           メーカーの方のログイン
         </Link>
       </div>

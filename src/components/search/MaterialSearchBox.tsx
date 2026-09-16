@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { Icon } from "@/components/Icon";
 import { TagChip, TAG_CATEGORY_LABELS, type TagCategory } from "@/components/TagChip";
-import type { SearchFilterItem } from "@/lib/material-search";
+import type { SearchCatalog, SearchFilterItem } from "@/lib/material-search";
 import { css } from "../../../styled-system/css";
 import {
   buildSearchHref,
@@ -17,17 +17,13 @@ import {
 } from "./search-selection";
 
 type MaterialSearchBoxProps = {
-  /** URL の q。着地直後から候補を出すための入力欄の初期値。 */
+  /** URL の q。候補表示と資材一覧に共通の検索文字。 */
   initialQuery: string;
   selected: SelectedSearchFilter[];
   sort: MaterialSortParam;
   popular: SearchFilterItem[];
   seasonal: SearchFilterItem[];
-  catalog: {
-    filters: SearchFilterItem[];
-    makers: string[];
-    materialNames: string[];
-  };
+  catalog: SearchCatalog;
   placeholder?: string;
 };
 
@@ -196,20 +192,49 @@ export function MaterialSearchBox({
   placeholder = "作物・悩み・資材名を入力してください",
 }: MaterialSearchBoxProps) {
   const router = useRouter();
-  const [query, setQuery] = useState(initialQuery);
+  const [input, setInput] = useState<{ value: string; urlQuery: string; requested: string | null }>(
+    {
+      value: initialQuery,
+      urlQuery: initialQuery,
+      requested: null,
+    },
+  );
+  const [composing, setComposing] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const query = input.value;
+
+  // 自分の検索結果が届いても入力中の文字は戻さない。履歴移動やヘッダー検索は反映する。
+  if (input.urlQuery !== initialQuery) {
+    setInput({
+      value: input.requested === initialQuery ? input.value : initialQuery,
+      urlQuery: initialQuery,
+      requested: null,
+    });
+  }
+
+  useEffect(() => {
+    if (composing || isPending || query.trim() === initialQuery) return;
+    // 日本語変換中は検索せず、入力が落ち着いてから件数と一覧を更新する。
+    const timer = setTimeout(() => {
+      setInput((current) => ({ ...current, requested: query.trim() }));
+      startTransition(() => {
+        router.replace(buildSearchHref({ filters: selected, sort, query }), { scroll: false });
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [composing, initialQuery, isPending, query, router, selected, sort]);
   const selectedKeys = useMemo(() => new Set(selected.map(selectedFilterKey)), [selected]);
 
-  const navigate = (nextFilters: SelectedSearchFilter[]) => {
-    const href = buildSearchHref({ filters: nextFilters, sort });
-    startTransition(() => router.push(href));
+  const navigate = (nextFilters: SelectedSearchFilter[], nextQuery = query) => {
+    setInput((current) => ({ ...current, value: nextQuery, requested: nextQuery.trim() }));
+    const href = buildSearchHref({ filters: nextFilters, sort, query: nextQuery });
+    startTransition(() => router.push(href, { scroll: false }));
   };
 
   const addSuggestion = (suggestion: Suggestion) => {
     const next = toSelected(suggestion);
     if (selectedKeys.has(selectedFilterKey(next))) return;
-    setQuery("");
-    navigate([...selected, next]);
+    navigate([...selected, next], "");
   };
 
   const filteredSuggestions = useMemo((): Suggestion[] => {
@@ -260,7 +285,9 @@ export function MaterialSearchBox({
           aria-label="資材の検索条件"
           autoComplete="off"
           className={inputClass}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => setInput({ ...input, value: event.target.value })}
+          onCompositionStart={() => setComposing(true)}
+          onCompositionEnd={() => setComposing(false)}
           placeholder={placeholder}
           value={query}
         />
@@ -277,7 +304,7 @@ export function MaterialSearchBox({
               onRemove={() => navigate(selected.filter((_, itemIndex) => itemIndex !== index))}
             />
           ))}
-          <button className={clearButton} onClick={() => navigate([])} type="button">
+          <button className={clearButton} onClick={() => navigate([], "")} type="button">
             すべて解除
           </button>
         </div>

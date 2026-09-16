@@ -623,6 +623,26 @@ export async function createPendingUsageReport(input: {
   });
 }
 
+export async function createPublishedUsageReport(input: {
+  materialId: string;
+  authorUserId: string;
+  title: string;
+  observedChange: string;
+}) {
+  const crop = await firstCrop();
+  return restInsert(UsageReportSchema, "usage_reports", {
+    material_id: input.materialId,
+    author_user_id: input.authorUserId,
+    title: input.title,
+    status: "published",
+    published_at: new Date().toISOString(),
+    crop_id: crop.id,
+    observed_change: input.observedChange,
+    summary: "公開一覧の要約です。",
+    pesticide_ack: true,
+  });
+}
+
 export async function usageReportByAuthor(authorUserId: string): Promise<UsageReport | null> {
   const params = new URLSearchParams({
     select: "id,material_id,author_user_id,title,status",

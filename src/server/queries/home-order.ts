@@ -20,12 +20,10 @@ export async function homeFeedIds(
         ? client
             .from("reviews")
             .select("id, sort_date:created_at, material:materials!inner(publication_status)")
-        : client
-            .from("usage_reports")
-            .select("id, sort_date:published_at, material:materials!inner(publication_status)");
+            .eq("material.publication_status", "published")
+        : client.rpc("list_usage_report_previews").select("id, sort_date:published_at");
     const result = await query
       .eq("status", "published")
-      .eq("material.publication_status", "published")
       .order(dateColumn, { ascending: false })
       .order("id")
       .range(offset, offset + (sort === "newest" ? limit : 500) - 1);

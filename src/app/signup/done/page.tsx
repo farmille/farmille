@@ -10,6 +10,7 @@ import {
   textLinkStyle,
 } from "@/components/auth/Fields";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
+import { safeNextPath } from "@/lib/auth/safe-next";
 
 export const metadata: Metadata = {
   title: "登録完了",
@@ -19,9 +20,10 @@ export const metadata: Metadata = {
 export default async function SignupDonePage({
   searchParams,
 }: {
-  searchParams: Promise<{ confirm?: string }>;
+  searchParams: Promise<{ confirm?: string; next?: string }>;
 }) {
-  const { confirm } = await searchParams;
+  const { confirm, next: requestedNext } = await searchParams;
+  const next = safeNextPath(requestedNext);
   const needsEmailConfirmation = confirm === "1";
 
   return (
@@ -38,6 +40,11 @@ export default async function SignupDonePage({
       </HintBox>
 
       <div className={formActionsStyle}>
+        {!needsEmailConfirmation && next ? (
+          <Link className={ghostButtonStyle} href={next}>
+            実証詳細レポートに戻る
+          </Link>
+        ) : null}
         <Link className={ghostButtonStyle} href="/">
           ホームへ
         </Link>
@@ -45,7 +52,10 @@ export default async function SignupDonePage({
 
       {needsEmailConfirmation ? (
         <div className={linkRowStyle}>
-          <Link className={textLinkStyle} href="/login">
+          <Link
+            className={textLinkStyle}
+            href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+          >
             確認が済んだ方はログイン
           </Link>
         </div>

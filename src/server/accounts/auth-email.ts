@@ -3,6 +3,7 @@ import { Webhook } from "standardwebhooks";
 import * as v from "valibot";
 
 import { clientEnv, serverEnv } from "@/env";
+import { safeNextPath } from "@/lib/auth/safe-next";
 import { createAdminSupabase } from "@/server/supabase";
 
 const EmailSchema = v.pipe(v.string(), v.email());
@@ -25,6 +26,7 @@ export const AuthEmailSchema = v.object({
     token: v.string(),
     token_hash_new: v.optional(v.string()),
     token_new: v.optional(v.string()),
+    redirect_to: v.optional(v.string()),
   }),
 });
 type AuthEmail = v.InferOutput<typeof AuthEmailSchema>;
@@ -53,7 +55,7 @@ async function recipientFor(user: AuthEmail["user"]): Promise<string> {
   return user.email;
 }
 
-function confirmationUrl(tokenHash: string, type: string): string {
+export function confirmationUrl(tokenHash: string, type: string, redirectTo?: string): string {
   if (!tokenHash) throw new Error("認証トークンがありません。");
   const url = new URL(
     type === "recovery" ? "/password-reset/update" : "/auth/confirm",
@@ -61,6 +63,13 @@ function confirmationUrl(tokenHash: string, type: string): string {
   );
   url.searchParams.set("token_hash", tokenHash);
   if (type !== "recovery") url.searchParams.set("type", type);
+  if (type === "signup" && redirectTo) {
+    const destination = new URL(v.parse(v.pipe(v.string(), v.url()), redirectTo));
+    if (destination.origin === url.origin && destination.pathname === "/auth/confirm") {
+      const next = safeNextPath(destination.searchParams.get("next"));
+      if (next) url.searchParams.set("next", next);
+    }
+  }
   return url.toString();
 }
 
@@ -100,6 +109,6 @@ export async function deliverAuthEmail(input: AuthEmail): Promise<void> {
   await send(
     to,
     recovery ? "パスワードの再設定" : "アカウントの確認",
-    `${recovery ? "次のリンクから新しいパスワードを設定してください。" : "次のリンクからアカウントを確認してください。"}\n\n${confirmationUrl(data.token_hash, data.email_action_type)}`,
+    `${recovery ? "次のリンクから新しいパスワードを設定してください。" : "次のリンクからアカウントを確認してください。"}\n\n${confirmationUrl(data.token_hash, data.email_action_type, data.redirect_to)}`,
   );
 }

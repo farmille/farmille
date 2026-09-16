@@ -176,7 +176,7 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
   }
 
   let query = supabase
-    .from("usage_reports")
+    .rpc("list_usage_report_previews", undefined, { count: "exact" })
     .select(
       `
         id,
@@ -200,7 +200,6 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
           sort_order
         )
       `,
-      { count: "exact" },
     )
     .eq("material_id", materialId)
     .eq("status", "published")

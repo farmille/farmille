@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SignupForm } from "@/app/signup/SignupForm";
 import { AuthScreen } from "@/components/auth/AuthScreen";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
+import { safeNextPath } from "@/lib/auth/safe-next";
 
 export const metadata: Metadata = {
   title: "一般ユーザー登録",
@@ -10,10 +11,15 @@ export const metadata: Metadata = {
   robots: NO_INDEX_ROBOTS,
 };
 
-export default function GeneralSignupPage() {
+export default async function GeneralSignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const next = safeNextPath((await searchParams).next);
   return (
     <AuthScreen lead="匿名で参加できます。実名や所属の公開は不要です。" title="一般ユーザー登録">
-      <SignupForm />
+      <SignupForm next={next} />
     </AuthScreen>
   );
 }

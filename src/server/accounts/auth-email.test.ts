@@ -1,7 +1,7 @@
 import { Webhook } from "standardwebhooks";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { verifyAuthEmail } from "./auth-email";
+import { confirmationUrl, verifyAuthEmail } from "./auth-email";
 
 const secret = "bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ==";
 const payload = {
@@ -20,6 +20,32 @@ function signedHeaders(body: string, timestamp = new Date()): Headers {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("認証メールの署名検証", () => {
+  it("会員登録の確認後は同一サイトのレポートに戻れる", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://www.farmille.com");
+    const url = new URL(
+      confirmationUrl(
+        "test-hash",
+        "signup",
+        "https://www.farmille.com/auth/confirm?next=%2Freports%2Fsample",
+      ),
+    );
+    expect(url.origin).toBe("https://www.farmille.com");
+    expect(url.searchParams.get("next")).toBe("/reports/sample");
+  });
+
+  it("外部サイトと認証画面への戻り先を確認メールへ持ち込まない", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://www.farmille.com");
+    for (const destination of [
+      "https://example.com/auth/confirm?next=/reports/sample",
+      "https://www.farmille.com/auth/confirm?next=//example.com",
+      "https://www.farmille.com/auth/confirm?next=/login",
+    ]) {
+      expect(
+        new URL(confirmationUrl("test-hash", "signup", destination)).searchParams.has("next"),
+      ).toBe(false);
+    }
+  });
+
   it("正しい署名とスキーマの通知だけを受け付ける", () => {
     vi.stubEnv("AUTH_EMAIL_HOOK_SECRET", `v1,whsec_${secret}`);
     const body = JSON.stringify(payload);

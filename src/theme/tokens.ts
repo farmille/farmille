@@ -5,6 +5,7 @@ import type { SemanticTokens, Tokens } from "@pandacss/dev";
  * Panda の設定とトークンカタログが同じ元本を参照する。
  */
 export const tokens = {
+  blurs: { reportGate: { value: "4px" } },
   colors: {
     // プライマリ緑とその階調（deep / soft / soft2）
     green: {

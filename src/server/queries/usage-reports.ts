@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getSessionUser } from "@/server/auth";
 
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
@@ -57,7 +58,7 @@ export async function listRecentUsageReports({
   const supabase = await createServerSupabase();
   if (ids?.length === 0) return succeed([]);
   let query = supabase
-    .from("usage_reports")
+    .rpc("list_usage_report_previews")
     .select(
       `
       id,
@@ -299,8 +300,11 @@ export async function getPublishedUsageReport(
   }
 
   const supabase = await createServerSupabase();
-  const { data, error } = await supabase
-    .from("usage_reports")
+  const session = await getSessionUser();
+  // 未ログインではDB側で本文を切り落とした公開用データだけを取得する。
+  const query =
+    session === null ? supabase.rpc("list_usage_report_previews") : supabase.from("usage_reports");
+  const { data, error } = await query
     .select(
       `
       *,

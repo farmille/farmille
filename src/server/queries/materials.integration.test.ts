@@ -34,6 +34,17 @@ describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
         });
         expect(result.ok).toBe(true);
         if (!result.ok) throw new Error(result.error);
+        const keywordResult = await listMaterialsWithSupabase(localClient, {
+          page: 1,
+          keywordMatches: {
+            filters: [{ category: "genre", id: genre.id, name: "", aliases: [], sort_order: 0 }],
+            makerNames: [],
+            materialNames: [],
+          },
+        });
+        expect(keywordResult.ok).toBe(true);
+        if (!keywordResult.ok) throw new Error(keywordResult.error);
+        expect(keywordResult.data.total).toBe(result.data.total);
         const { data: relations, error } = await localClient
           .from("material_ingredient_categories")
           .select("material_id")
@@ -57,6 +68,37 @@ describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
         const detail = await getMaterialWithSupabase(localClient, firstMaterial.id);
 
         expect(detail.ok).toBe(true);
+
+        const keyword = await listMaterialsWithSupabase(localClient, {
+          page: 1,
+          keywordMatches: { filters: [], makerNames: [], materialNames: [firstMaterial.name] },
+        });
+        expect(keyword.ok).toBe(true);
+        if (!keyword.ok) throw new Error(keyword.error);
+        expect(keyword.data.items.some((item) => item.id === firstMaterial.id)).toBe(true);
+        expect(keyword.data.items.every((item) => item.name === firstMaterial.name)).toBe(true);
+
+        // 資材名とメーカー名は OR。同じ資材に両方一致しても件数を重複させない。
+        const union = await listMaterialsWithSupabase(localClient, {
+          page: 1,
+          keywordMatches: {
+            filters: [],
+            makerNames: [firstMaterial.manufacturer_name],
+            materialNames: [firstMaterial.name],
+          },
+        });
+        expect(union.ok).toBe(true);
+        if (!union.ok) throw new Error(union.error);
+        expect(union.data.total).toBeGreaterThanOrEqual(keyword.data.total);
+        expect(new Set(union.data.items.map((item) => item.id)).size).toBe(union.data.items.length);
+
+        const noMatch = await listMaterialsWithSupabase(localClient, {
+          page: 1,
+          keywordMatches: { filters: [], makerNames: [], materialNames: [] },
+        });
+        expect(noMatch.ok).toBe(true);
+        if (!noMatch.ok) throw new Error(noMatch.error);
+        expect(noMatch.data.total).toBe(0);
       }
     }
   }, 20_000);
