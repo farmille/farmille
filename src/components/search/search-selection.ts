@@ -101,16 +101,19 @@ export function parseSortParam(raw: string | undefined): MaterialSortParam {
 export function buildSearchHref({
   filters,
   sort,
+  query = "",
 }: {
   filters: SelectedSearchFilter[];
   sort: MaterialSortParam;
+  query?: string;
 }): string {
   const params = new URLSearchParams();
   const encoded = encodeFiltersQuery(filters);
   if (encoded.length > 0) params.set("filters", encoded);
   if (sort !== "reviews") params.set("sort", sort);
-  const query = params.toString();
-  return query.length > 0 ? `/search?${query}` : "/search";
+  if (query.trim().length > 0) params.set("q", query.trim());
+  const encodedQuery = params.toString();
+  return encodedQuery.length > 0 ? `/search?${encodedQuery}` : "/search";
 }
 
 export function formatLogicHint(filters: SelectedSearchFilter[]): string {

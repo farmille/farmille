@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildSearchHref,
   encodeFiltersQuery,
   formatLogicHint,
   parseFiltersQuery,
@@ -10,6 +11,21 @@ import {
 } from "./search-selection";
 
 describe("search-selection", () => {
+  it("並び替えと選択条件を保ってキーワードをURLへ格納する", () => {
+    const url = new URL(
+      buildSearchHref({
+        filters: [{ kind: "maker", name: "メーカー" }],
+        sort: "rating",
+        query: " トマト ",
+      }),
+      "https://example.com",
+    );
+    expect(url.searchParams.get("q")).toBe("トマト");
+    expect(url.searchParams.get("sort")).toBe("rating");
+    expect(parseFiltersQuery(url.searchParams.get("filters") ?? undefined).makerNames).toEqual([
+      "メーカー",
+    ]);
+  });
   it("資材ジャンルを検索軸に使い、製品タイプのクエリを拒否する", () => {
     const id = "11111111-1111-4111-8111-111111111111";
     expect(parseFiltersQuery(`genre:${id}`).filters).toEqual([{ category: "genre", id }]);
