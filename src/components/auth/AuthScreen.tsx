@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { PreparationNotice } from "@/components/PreparationNotice";
 
 import { css } from "../../../styled-system/css";
 
@@ -88,6 +89,7 @@ export function AuthScreen({
         <header className={appBarStyle}>
           <h1 className={titleStyle}>{title}</h1>
         </header>
+        <PreparationNotice />
         <div className={bodyStyle}>
           {lead === undefined ? null : <p className={leadStyle}>{lead}</p>}
           {children}

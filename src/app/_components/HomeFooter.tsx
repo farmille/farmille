@@ -115,6 +115,8 @@ export function HomeFooter() {
         <div className={css({ display: "flex", flexWrap: "wrap", gap: "4" })}>
           <Link href="/legal/privacy">プライバシーポリシー</Link>
           <Link href="/legal">規約・ガイドライン</Link>
+          <span>お問い合わせフォーム（準備中）</span>
+          <a href="mailto:info@farmille.com">info@farmille.com</a>
         </div>
       </div>
     </footer>

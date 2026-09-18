@@ -2,6 +2,7 @@ import Form from "next/form";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { Icon } from "@/components/Icon";
+import { PreparationNotice } from "@/components/PreparationNotice";
 
 const mobileAppBar = css({
   position: "sticky",
@@ -468,10 +469,14 @@ export function AppBar(props: AppBarProps) {
       {props.chrome === "public" ? (
         <>
           <DesktopSiteHeader active={props.active} searchQuery={props.searchQuery} />
+          <PreparationNotice />
           {props.variant === "home" ? null : <DesktopContextBar {...props} />}
         </>
       ) : (
-        <DesktopSellerHeader {...props} />
+        <>
+          <DesktopSellerHeader {...props} />
+          <PreparationNotice />
+        </>
       )}
     </>
   );
