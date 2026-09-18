@@ -35,7 +35,7 @@ export function MaterialDetailTable({ material }: { material: MaterialDetail }) 
     { label: "対象作物（メーカー表記）", manufacturerEntry: true, value: manufacturerCrops },
     { label: "対象作物（Farmille正規化）", value: names(material.targetCrops) },
     { label: "販売状況", manufacturerEntry: true, value: material.sales_status },
-    { label: "製造元", manufacturerEntry: true, value: material.manufacturer_name },
+    { label: "製造元・販売元・輸入元", manufacturerEntry: true, value: material.manufacturer_name },
   ];
 
   return (

@@ -1,0 +1,41 @@
+import { css } from "../../styled-system/css";
+
+/** 公開準備中の受付期間と連絡先を、各画面のヘッダー直下で案内する。 */
+export function PreparationNotice() {
+  return (
+    <aside
+      id="preparation-notice"
+      aria-label="公開準備中のお知らせ"
+      className={css({ bg: "brand.soft", color: "text.default", px: "4", py: "3" })}
+    >
+      <div
+        className={css({
+          maxW: "content.wide",
+          mx: "auto",
+          fontSize: "md",
+          lineHeight: "relaxed",
+          display: "flex",
+          flexDirection: "column",
+          gap: "2",
+        })}
+      >
+        <p className={css({ m: "0" })}>
+          Farmilleは現在準備中です。メーカー様のご登録および一般の会員登録は、現在受け付けておりません。
+        </p>
+        <p className={css({ m: "0" })}>
+          メーカー様からの掲載・編集のご希望、掲載内容の修正・非表示のご依頼、アカウント登録は、9月24日〜28日に{" "}
+          <a
+            href="mailto:info@farmille.com"
+            className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
+          >
+            info@farmille.com
+          </a>{" "}
+          またはお問い合わせフォーム（準備中）にて承ります。いただいたご連絡には順次対応いたしますので、お返事までお時間をいただく場合がございます。
+        </p>
+        <p className={css({ m: "0" })}>
+          生産者の皆様への公開（感想口コミ・実証詳細レポートの投稿）は、10月1日以降を予定しております。
+        </p>
+      </div>
+    </aside>
+  );
+}
