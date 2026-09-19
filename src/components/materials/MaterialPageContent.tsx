@@ -36,7 +36,7 @@ const imageFrame = css({
   borderColor: "border.default",
 });
 
-/** 公開ページと原稿プレビューで同じ本文表示を使う。 */
+/** メーカー原稿の本文と資料をプレビューする。 */
 export function MaterialPageContent({
   content,
   imageSources,

@@ -143,6 +143,29 @@ export function MaterialHero({
           </div>
         </div>
       </div>
+      {material.images.length > 1 ? (
+        <div
+          aria-label="追加の製品画像"
+          className={css({ display: "flex", flexWrap: "wrap", gap: "3", mt: "4" })}
+        >
+          {material.images.slice(1).map((image, index) => (
+            <Image
+              key={image.id}
+              src={image.url}
+              alt={`${material.name}の製品画像${index + 2}`}
+              width={160}
+              height={160}
+              sizes="160px"
+              className={css({
+                w: "imagePreview",
+                h: "imagePreview",
+                objectFit: "contain",
+                borderRadius: "card",
+              })}
+            />
+          ))}
+        </div>
+      ) : null}
       <div
         className={css({
           mt: "3.5",

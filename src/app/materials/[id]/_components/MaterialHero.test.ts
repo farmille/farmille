@@ -37,6 +37,18 @@ describe("MaterialHero", () => {
     expect(imageBox).toContainElement(placeholder);
   });
 
+  it("追加の製品画像も表示する", () => {
+    const material = {
+      ...materialDetail,
+      images: [
+        { id: "first", url: "/first.png", image_type: "package", sort_order: 0 },
+        { id: "second", url: "/second.png", image_type: "package", sort_order: 1 },
+      ],
+    };
+    render(createElement(MaterialHero, { material, saved: null }));
+    expect(screen.getByRole("img", { name: `${material.name}の製品画像2` })).toBeInTheDocument();
+  });
+
   it("画像がない場合もプレースホルダーを画像領域内に表示する", () => {
     render(createElement(MaterialHero, { material: materialDetail, saved: null }));
 
