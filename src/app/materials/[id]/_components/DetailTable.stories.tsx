@@ -31,3 +31,21 @@ export const UnclaimedWithMissingValues: Story = {
     },
   },
 };
+
+export const ManufacturerContent: Story = {
+  args: {
+    content: {
+      description: "製品説明",
+      mainComponents: "",
+      mechanism: "メーカー記入の作用機作",
+      links: [],
+      images: [],
+      timings: [],
+      certifications: ["肥料登録"],
+      usages: [
+        { method: "spray", detail: "使用前に製品ラベルをご確認ください。" },
+        { method: "other", detail: "表示しない補足" },
+      ],
+    },
+  },
+};

@@ -1,10 +1,8 @@
 import Image from "next/image";
-import * as v from "valibot";
+import { MaterialLinks } from "./MaterialLinks";
 import {
   APPLICATION_METHODS,
   APPLICATION_TIMINGS,
-  MATERIAL_LINK_GROUPS,
-  MaterialExternalUrlSchema,
   type MaterialPageContent as Content,
 } from "@/lib/material-page-editor";
 import { css } from "../../../styled-system/css";
@@ -74,41 +72,22 @@ export function MaterialPageContent({
         <h2>施用タイミング</h2>
         <p>{content.timings.map((timing) => APPLICATION_TIMINGS[timing]).join(" ／ ") || "−"}</p>
       </section>
-      <section>
-        <h2>リンク・資料</h2>
-        {MATERIAL_LINK_GROUPS.map((group) => (
-          <div key={group.value}>
-            <h3>{group.label}</h3>
-            {content.links.filter((link) => link.group === group.value).length === 0 ? (
-              <p>−</p>
-            ) : null}
-            {content.links
-              .filter((link) => link.group === group.value)
-              .map((link) => (
-                <p key={`${link.group}-${link.url}-${link.title}`}>
-                  {v.is(MaterialExternalUrlSchema, link.url) ? (
-                    <a href={link.url} target="_blank" rel="noreferrer">
-                      {link.title || "資料名は未入力です"}
-                    </a>
-                  ) : (
-                    <span>{link.title || "資料名は未入力です"}（URLを入力してください）</span>
-                  )}
-                </p>
-              ))}
-          </div>
-        ))}
-      </section>
+      <MaterialLinks links={content.links} />
       <section>
         <h2>施用方法</h2>
         {content.usages.length === 0 ? <p>−</p> : null}
-        {content.usages.map((usage, index) => (
-          <details key={index} open>
-            <summary>
-              {APPLICATION_METHODS.find((method) => method.value === usage.method)?.label}
-            </summary>
-            <p className={materialPageText}>{usage.detail || "−"}</p>
-          </details>
-        ))}
+        {content.usages.map((usage, index) =>
+          usage.method === "other" ? (
+            <p key={index}>その他</p>
+          ) : (
+            <details key={index}>
+              <summary>
+                {APPLICATION_METHODS.find((method) => method.value === usage.method)?.label}
+              </summary>
+              <p className={materialPageText}>{usage.detail || "−"}</p>
+            </details>
+          ),
+        )}
       </section>
       <section>
         <h2>製品詳細</h2>

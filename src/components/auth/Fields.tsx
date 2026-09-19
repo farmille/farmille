@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Icon } from "@/components/Icon";
 
 import { css } from "../../../styled-system/css";
 
@@ -97,7 +98,7 @@ export function Field({
   label: string;
   htmlFor?: string;
   requirement?: "required" | "optional";
-  visibility?: "public";
+  visibility?: "public" | "private";
   guide?: string;
   error?: string;
   children: ReactNode;
@@ -108,7 +109,12 @@ export function Field({
         {label}
         {requirement === "required" ? <span className={requiredBadgeStyle}>必須</span> : null}
         {requirement === "optional" ? <span className={optionalBadgeStyle}>任意</span> : null}
-        {visibility === "public" ? <span className={publicBadgeStyle}>公開</span> : null}
+        {visibility ? (
+          <span className={visibility === "public" ? publicBadgeStyle : optionalBadgeStyle}>
+            <Icon name={visibility === "public" ? "visibility" : "visibility_off"} size="xs" />{" "}
+            {visibility === "public" ? "公開されます" : "公開されません"}
+          </span>
+        ) : null}
       </label>
       {children}
       {guide === undefined ? null : <p className={guideStyle}>{guide}</p>}
