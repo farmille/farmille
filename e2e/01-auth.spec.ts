@@ -32,8 +32,8 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
 
     await page.goto("/signup/general");
     await expect(page.getByRole("heading", { name: "一般ユーザー登録" })).toBeVisible();
-    await expect(page.getByLabel("都道府県")).toBeVisible();
-    await expect(page.getByText(/^あなたの立場必須公開$/)).toBeVisible();
+    await expect(page.getByRole("combobox", { name: /^都道府県/ })).toBeVisible();
+    await expect(page.getByText(/^あなたの立場必須\s*公開されます$/)).toBeVisible();
     await expect(page.getByRole("radio")).toHaveCount(4);
     await expect(page.getByRole("radio", { name: "生産者", exact: true })).toBeVisible();
     await expect(page.getByRole("radio", { name: /^JA関係者/ })).toBeVisible();
@@ -55,7 +55,7 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await expect(page.getByRole("banner").getByText("表示情報編集", { exact: true })).toBeVisible();
     await expect(page.getByLabel("アバター")).toBeVisible();
     await expect(page.getByLabel("ハンドルネーム")).toBeVisible();
-    await expect(page.getByLabel("都道府県")).toHaveCount(0);
+    await expect(page.getByRole("combobox", { name: /^都道府県/ })).toHaveCount(0);
     await expect(page.getByText("主な作目", { exact: true })).toHaveCount(0);
     await page.goto("/me");
     const sellerApplyLink = page.getByRole("link", {
