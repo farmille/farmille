@@ -1,4 +1,6 @@
 begin;
+create extension if not exists pgtap with schema extensions;
+select plan(1);
 insert into auth.users(id,email,raw_app_meta_data) values
 ('eeeeeeee-0000-4000-8000-000000000001','profile-one@example.test','{"account_type":"general"}'),
 ('eeeeeeee-0000-4000-8000-000000000002','profile-two@example.test','{"account_type":"general"}');
@@ -41,4 +43,6 @@ reset role;
 do $$ begin
   if (select count(*) from public.registration_notifications where user_id in('eeeeeeee-0000-4000-8000-000000000001','eeeeeeee-0000-4000-8000-000000000002'))<>2 then raise exception '登録通知が作成されない'; end if;
 end $$;
+select pass('プロフィールの一括更新・公開設定・匿名権限・登録通知を検証');
+select * from finish();
 rollback;

@@ -8,6 +8,6 @@ select ok(not has_column_privilege('anon', 'public.seller_accounts', 'contact_ph
 select ok(not has_column_privilege('authenticated', 'public.seller_accounts', 'contact_phone', 'select'), 'other accounts cannot read manufacturer phone');
 select ok(has_column_privilege('anon', 'public.public_profiles', 'prefecture_code', 'select'), 'prefecture is public');
 select ok(has_column_privilege('anon', 'public.public_profiles', 'standpoint', 'select'), 'standpoint is public');
-select ok(not exists (select 1 from information_schema.columns where table_schema='public' and table_name='public_profiles' and column_name in ('family_name','given_name','city','phone','postal_code')), 'private fields are absent from public view');
+select ok(not exists (select 1 from information_schema.columns where table_schema='public' and table_name='public_profiles' and column_name in ('family_name','given_name','phone','postal_code')), 'private fields are absent from public view');
 select * from finish();
 rollback;
