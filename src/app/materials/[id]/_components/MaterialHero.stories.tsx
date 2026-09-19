@@ -60,3 +60,26 @@ export const ImageLoadFailure: Story = {
     },
   },
 };
+
+export const MultipleImages: Story = {
+  args: {
+    material: {
+      ...materialDetail,
+      images: [
+        { ...imageRecord, url: loadedImageUrl },
+        {
+          ...imageRecord,
+          id: "00000000-0000-4000-8000-000000000798",
+          url: loadedImageUrl,
+          sort_order: 1,
+        },
+        {
+          ...imageRecord,
+          id: "00000000-0000-4000-8000-000000000797",
+          url: loadedImageUrl,
+          sort_order: 2,
+        },
+      ],
+    },
+  },
+};

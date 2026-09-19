@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 import { css } from "../../../../../styled-system/css";
@@ -37,7 +37,7 @@ describe("MaterialHero", () => {
     expect(imageBox).toContainElement(placeholder);
   });
 
-  it("追加の製品画像も表示する", () => {
+  it("追加の製品画像も表示する", async () => {
     const material = {
       ...materialDetail,
       images: [
@@ -45,7 +45,9 @@ describe("MaterialHero", () => {
         { id: "second", url: "/second.png", image_type: "package", sort_order: 1 },
       ],
     };
-    render(createElement(MaterialHero, { material, saved: null }));
+    await act(async () => {
+      render(createElement(MaterialHero, { material, saved: null }));
+    });
     expect(screen.getByRole("img", { name: `${material.name}の製品画像2` })).toBeInTheDocument();
   });
 
