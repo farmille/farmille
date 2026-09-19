@@ -65,6 +65,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           htmlFor={field.name}
           label={field.label}
           guide="公開されません"
+          visibility="private"
           requirement="required"
         >
           <input
@@ -84,6 +85,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         guide="公開されません"
         htmlFor="email"
         label="メールアドレス"
+        visibility="private"
         requirement="required"
       >
         <input
@@ -102,6 +104,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         error={fieldErrors.phone}
         htmlFor="phone"
         label="電話番号"
+        visibility="private"
         guide="公開されません。確認が必要な場合の連絡に使用します。"
         requirement="optional"
       >
@@ -129,6 +132,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         error={fieldErrors.postalCode}
         htmlFor="postalCode"
         label="郵便番号"
+        visibility="private"
         guide="公開されません"
         requirement="required"
       >
@@ -174,6 +178,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         error={fieldErrors.city}
         htmlFor="city"
         label="市区町村"
+        visibility="private"
         guide="公開されません"
         requirement="required"
       >
@@ -267,6 +272,9 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         </Link>
         <Link className={textLinkStyle} href="/signup">
           登録方法を選び直す
+        </Link>
+        <Link className={textLinkStyle} href="/sellers/apply">
+          メーカー様はこちら → 法人アカウントの申請へ
         </Link>
       </div>
     </form>

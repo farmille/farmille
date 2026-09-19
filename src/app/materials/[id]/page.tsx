@@ -1,18 +1,18 @@
 import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
-import { MaterialPageContent } from "@/components/materials/MaterialPageContent";
+import { MaterialLinks } from "@/components/materials/MaterialLinks";
+import { APPLICATION_TIMINGS, type MaterialPageContent } from "@/lib/material-page-editor";
 import { getPublishedMaterialPage } from "@/server/material-page-editor";
 import { Suspense } from "react";
 import { SkeletonRegion, RatingSkeleton } from "@/components/Skeleton";
 import { SkeletonList } from "@/components/SkeletonList";
 import { MaterialPageSkeleton } from "./_components/MaterialPageSkeleton";
-import type { MaterialDetail } from "@/server/queries/materials";
-import { Icon } from "@/components/Icon";
+import { listMaterials, type MaterialDetail } from "@/server/queries/materials";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { after } from "next/server";
 
-import { buttonRecipe, EmptyState, ReportCard, SectionHeading } from "@/components";
+import { buttonRecipe, EmptyState, MaterialCard, ReportCard, SectionHeading } from "@/components";
 import { FabBar } from "@/components/FabBar";
 import { createProductJsonLd, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
@@ -27,7 +27,6 @@ import { recordViewEvent } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
 import { css, cx } from "../../../../styled-system/css";
 
-import { EvidenceList } from "./_components/EvidenceList";
 import { MaterialDetailTable } from "./_components/DetailTable";
 import { MaterialHero } from "./_components/MaterialHero";
 import { MaterialPageShell } from "./_components/PageShell";
@@ -46,20 +45,6 @@ type MaterialPageProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ review?: string | string[] }>;
 };
-
-const externalLinks = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "2",
-  px: "1",
-});
-
-const externalLink = css({
-  color: "brand.primary",
-  fontSize: "sm",
-  fontWeight: "700",
-  textDecoration: "none",
-});
 
 const disclaimer = css({
   m: "0",
@@ -83,16 +68,6 @@ const archivedNotice = css({
   fontSize: "sm",
   lineHeight: "1.6",
 });
-
-function checkedExternalUrl(value: string, label: string): string {
-  const url = new URL(value);
-
-  if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw new Error(`${label}のURL形式が不正です。`);
-  }
-
-  return value;
-}
 
 export async function generateMetadata({ params }: MaterialPageProps): Promise<Metadata> {
   const { id } = await params;
@@ -161,58 +136,55 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
         </p>
       ) : null}
 
-      {!publishedPage && (material.official_url || material.catalog_url) ? (
-        <div className={externalLinks}>
-          {material.official_url ? (
-            <a
-              href={checkedExternalUrl(material.official_url, "製造元公式ページ")}
-              target="_blank"
-              rel="noreferrer"
-              className={externalLink}
-            >
-              製造元公式ページを見る <Icon name="arrow_forward" size="sm" />
-            </a>
-          ) : null}
-          {material.catalog_url ? (
-            <a
-              href={checkedExternalUrl(material.catalog_url, "公式カタログ")}
-              target="_blank"
-              rel="noreferrer"
-              className={externalLink}
-            >
-              公式カタログPDFを見る <Icon name="arrow_forward" size="sm" />
-            </a>
-          ) : null}
-        </div>
-      ) : null}
+      <section aria-labelledby="material-description-heading">
+        <h2
+          id="material-description-heading"
+          className={css({ fontSize: "lg", fontWeight: "700", mb: "3" })}
+        >
+          製品説明
+        </h2>
+        <p className={css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere" })}>
+          {publishedPage?.content.description || "−"}
+        </p>
+      </section>
+      <section aria-labelledby="material-timing-heading">
+        <h2
+          id="material-timing-heading"
+          className={css({ fontSize: "lg", fontWeight: "700", mb: "3" })}
+        >
+          施用タイミング
+        </h2>
+        <p>
+          {publishedPage?.content.timings
+            .map((timing) => APPLICATION_TIMINGS[timing])
+            .join(" ／ ") || "−"}
+        </p>
+      </section>
+      <MaterialLinks
+        links={publishedPage ? publishedPage.content.links : materialSourceLinks(material)}
+      />
+      <MaterialDetailTable material={material} content={publishedPage?.content} />
 
-      <p className={disclaimer}>
-        {publishedPage
-          ? "製品情報はメーカーが入力しています。運営は公開前の表現確認と掲載後の監査を行います。"
-          : "掲載情報は、製造元公式サイト等の公開情報をもとにFarmilleが作成しています。"}
-        最新・正式な使用方法は必ず製造元公式情報をご確認ください。
-      </p>
-
-      <MaterialDetailTable material={material} />
-      {publishedPage ? (
-        <MaterialPageContent
-          content={publishedPage.content}
-          imageSources={publishedPage.images.map((image) => image.url)}
-        />
-      ) : material.description ? (
-        <section aria-labelledby="material-description-heading">
-          <h2
-            id="material-description-heading"
-            className={css({ fontSize: "lg", fontWeight: "bold", mb: "3" })}
+      <section aria-label="掲載情報と投稿についての注意事項" className={disclaimer}>
+        <p>
+          掲載している商品情報は、各事業者によって提供・編集を受けた情報または各事業者のウェブサイト等にて公開されている特定時点の情報をもとに作成したものです。当サイトに掲載している情報の正確性については、誤記や最新でない内容を含む可能性があり、その内容を保証するものではありません。
+          <br />
+          使用前に必ず製品ラベル・安全データシート等の各種公式情報をご確認ください。
+        </p>
+        <p className={css({ mt: "3" })}>
+          実証詳細レポート・感想口コミは、投稿した生産者個人の圃場・条件での体験と見解です。ほかの圃場・作物・気象条件で同じ結果が得られることや、薬害等が生じないことを保証するものではありません。
+        </p>
+        <p className={css({ mt: "3" })}>
+          ご利用の前に
+          <Link
+            href="/legal"
+            className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
           >
-            資材の紹介
-          </h2>
-          <p className={css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere" })}>
-            {material.description}
-          </p>
-        </section>
-      ) : null}
-      {!publishedPage ? <EvidenceList evidences={material.evidences} /> : null}
+            規約・ガイドライン
+          </Link>
+          をご確認ください。
+        </p>
+      </section>
 
       <Suspense
         fallback={
@@ -238,26 +210,9 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
         <MaterialReviews material={material} viewerUserId={viewerUserId} />
       </Suspense>
 
-      <section aria-label="掲載情報と投稿についての注意事項" className={disclaimer}>
-        <p>
-          掲載している商品情報は、各事業者によって提供・編集を受けた情報または各事業者のウェブサイト等にて公開されている特定時点の情報をもとに作成したものです。当サイトに掲載している情報の正確性については、誤記や最新でない内容を含む可能性があり、その内容を保証するものではありません。
-          <br />
-          使用前に必ず製品ラベル・安全データシート等の各種公式情報をご確認ください。
-        </p>
-        <p className={css({ mt: "3" })}>
-          実証詳細レポート・感想口コミは、投稿した生産者個人の圃場・条件での体験と見解です。ほかの圃場・作物・気象条件で同じ結果が得られることや、薬害等が生じないことを保証するものではありません。
-        </p>
-        <p className={css({ mt: "3" })}>
-          ご利用の前に
-          <Link
-            href="/legal"
-            className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
-          >
-            規約・ガイドライン
-          </Link>
-          をご確認ください。
-        </p>
-      </section>
+      <Suspense fallback={<SkeletonList variant="materials" label="関連資材を読み込んでいます" />}>
+        <RelatedMaterials material={material} />
+      </Suspense>
 
       {material.publication_status === "published" ? (
         <FabBar
@@ -423,5 +378,67 @@ async function MaterialRating({ material }: { material: MaterialDetail }) {
       controlPlotRatio={material.control_plot_ratio}
       distribution={distribution}
     />
+  );
+}
+
+function materialSourceLinks(material: MaterialDetail): MaterialPageContent["links"] {
+  const links: MaterialPageContent["links"] = [];
+  if (material.official_url)
+    links.push({ group: "overview", title: "公式製品ページ", url: material.official_url });
+  if (material.catalog_url)
+    links.push({ group: "overview", title: "公式カタログ", url: material.catalog_url });
+  for (const evidence of material.evidences) {
+    const url = evidence.file_url || evidence.external_url;
+    if (url)
+      links.push({
+        group:
+          evidence.evidence_type === "sds"
+            ? "safety"
+            : evidence.evidence_type === "leaflet"
+              ? "overview"
+              : "technical",
+        title: evidence.title,
+        url,
+      });
+  }
+  return links;
+}
+
+// 同じ資材ジャンルに分類された公開資材を紹介する。
+async function RelatedMaterials({ material }: { material: MaterialDetail }) {
+  const related =
+    material.ingredientCategories.length === 0
+      ? []
+      : unwrapQueryResult(
+          await listMaterials({
+            page: 1,
+            filters: material.ingredientCategories.map(({ id }) => ({ category: "genre", id })),
+          }),
+        )
+          .items.filter(({ id }) => id !== material.id)
+          .slice(0, 3);
+  return (
+    <section aria-label="関連資材">
+      <SectionHeading title="関連資材" />
+      {related.length ? (
+        <div className={css({ display: "grid", gap: "3" })}>
+          {related.map((item) => (
+            <MaterialCard
+              key={item.id}
+              variant="list"
+              name={item.name}
+              maker={item.manufacturer_name}
+              rating={item.avg_rating ?? 0}
+              reviewCount={item.review_count}
+              official={item.manufacturer_verified_at !== null}
+              imageSrc={item.primaryImage?.url}
+              href={`/materials/${item.id}`}
+            />
+          ))}
+        </div>
+      ) : (
+        <p>同じ資材ジャンルの関連資材はありません。</p>
+      )}
+    </section>
   );
 }

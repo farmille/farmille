@@ -1,9 +1,11 @@
+import type { ReactNode } from "react";
+import { APPLICATION_METHODS, type MaterialPageContent } from "@/lib/material-page-editor";
 import type { MaterialDetail } from "@/server/queries/materials";
 import { css } from "../../../../../styled-system/css";
 
 type DetailRow = {
   label: string;
-  value: string | null;
+  value: ReactNode;
   manufacturerEntry?: boolean;
 };
 
@@ -17,24 +19,69 @@ const tableCard = css({
   overflow: "hidden",
 });
 
-export function MaterialDetailTable({ material }: { material: MaterialDetail }) {
-  const names = (items: ReadonlyArray<{ name: string }>): string | null =>
-    items.length === 0 ? null : items.map(({ name }) => name).join("・");
-  const manufacturerCrops =
-    material.targetCrops.length === 0
-      ? null
-      : material.targetCrops.map(({ sourceName }) => sourceName).join("・");
+// 分類は登録された名前を表示し、メーカー未入力の説明を補完しない。
+export function MaterialDetailTable({
+  material,
+  content,
+}: {
+  material: MaterialDetail;
+  content?: MaterialPageContent;
+}) {
+  const tags = (items: ReadonlyArray<{ name: string }>): ReactNode =>
+    items.length === 0 ? (
+      "−"
+    ) : (
+      <span className={css({ display: "flex", flexWrap: "wrap", gap: "1.5" })}>
+        {[...new Set(items.map(({ name }) => name))].map((name) => (
+          <span
+            key={name}
+            className={css({
+              bg: "surface.panel",
+              borderRadius: "button",
+              px: "2",
+              py: "1",
+              fontSize: "xs",
+            })}
+          >
+            {name}
+          </span>
+        ))}
+      </span>
+    );
   const rows: DetailRow[] = [
-    { label: "一般用途", manufacturerEntry: true, value: material.general_use },
-    { label: "組成タイプ", value: material.compositionType?.name ?? null },
-    { label: "主成分", manufacturerEntry: true, value: material.main_components },
-    { label: "資材ジャンル（JBSA材料8分類）", value: names(material.ingredientCategories) },
-    { label: "個別材料", value: names(material.ingredients) },
-    { label: "作用機作", manufacturerEntry: true, value: material.mechanism },
-    { label: "効果", value: names(material.effects) },
-    { label: "対象作物（メーカー表記）", manufacturerEntry: true, value: manufacturerCrops },
-    { label: "対象作物（Farmille正規化）", value: names(material.targetCrops) },
-    { label: "販売状況", manufacturerEntry: true, value: material.sales_status },
+    { label: "期待効果", value: tags(material.effects) },
+    { label: "資材ジャンル", value: tags(material.ingredientCategories) },
+    { label: "主な成分", value: material.main_components },
+    { label: "対象作物", value: tags(material.targetCrops) },
+    {
+      label: "施用方法",
+      value: content?.usages.length
+        ? content.usages.map((usage, index) => (
+            <div key={index} className={css({ mb: "2" })}>
+              {tags(
+                APPLICATION_METHODS.filter((method) => method.value === usage.method).map(
+                  (method) => ({ name: method.label }),
+                ),
+              )}
+              {usage.method !== "other" ? (
+                <details className={css({ mt: "1" })}>
+                  <summary>詳細</summary>
+                  <p className={css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere" })}>
+                    {usage.detail || "−"}
+                  </p>
+                </details>
+              ) : null}
+            </div>
+          ))
+        : "−",
+    },
+    { label: "技術", value: "−" },
+    { label: "作用機作", manufacturerEntry: true, value: content?.mechanism || "−" },
+    {
+      label: "登録・認証",
+      manufacturerEntry: true,
+      value: content?.certifications.join("・") || "−",
+    },
     { label: "製造元・販売元・輸入元", manufacturerEntry: true, value: material.manufacturer_name },
   ];
 
@@ -53,7 +100,7 @@ export function MaterialDetailTable({ material }: { material: MaterialDetail }) 
           id="material-detail-heading"
           className={css({ m: "0", fontSize: "lg", fontWeight: "700" })}
         >
-          資材詳細
+          製品詳細
         </h2>
       </div>
       <dl className={tableCard}>
@@ -72,9 +119,15 @@ export function MaterialDetailTable({ material }: { material: MaterialDetail }) 
             })}
           >
             <dt className={css({ fontSize: "sm", fontWeight: "700", color: "text.muted" })}>
-              {row.label}
+              {row.label.split("・").map((part, index) => (
+                <span key={part} className={css({ display: "inline-block" })}>
+                  {index > 0 ? "・" : ""}
+                  {part}
+                </span>
+              ))}
               {row.manufacturerEntry &&
               row.value !== null &&
+              row.value !== "−" &&
               material.manufacturer_verified_at !== null ? (
                 <small
                   className={css({
@@ -95,6 +148,9 @@ export function MaterialDetailTable({ material }: { material: MaterialDetail }) 
           </div>
         ))}
       </dl>
+      <p className={css({ mt: "3", fontSize: "xs", color: "text.subtle", lineHeight: "relaxed" })}>
+        作物・効果・施用方法の分類は、農林水産省の通知（30消安第6281号）・JBSAの公式分類を参考にFarmilleが整理・解釈しています。効果を検証・保証するものではありません。
+      </p>
     </section>
   );
 }

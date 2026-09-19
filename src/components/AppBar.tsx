@@ -364,11 +364,11 @@ function DesktopSiteHeader({
           <span className={desktopBrandName}>Farmille</span>
         </Link>
         <Link
-          href="/articles?type=report"
-          className={desktopNavLink({ active: active === "articles" })}
-          aria-current={active === "articles" ? "page" : undefined}
+          href="/search"
+          className={desktopNavLink({ active: active === "search" })}
+          aria-current={active === "search" ? "page" : undefined}
         >
-          実証詳細レポート一覧
+          資材をさがす
         </Link>
         <Form action="/search" aria-label="ヘッダー検索" className={desktopSearch} role="search">
           <Icon name="search" size="sm" />

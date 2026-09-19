@@ -29,7 +29,7 @@ export async function signupGeneral(
   await page.getByLabel("本名（姓）").fill("試験");
   await page.getByLabel("本名（名）").fill("太郎");
   await page.getByLabel("郵便番号").fill("1000001");
-  await page.getByLabel("都道府県").selectOption("13");
+  await page.getByRole("combobox", { name: /^都道府県/ }).selectOption("13");
   await page.getByLabel("市区町村").fill("千代田区");
   await page.getByRole("checkbox", { name: /利用規約/ }).check();
   await page.getByLabel("メールアドレス").fill(input.email);

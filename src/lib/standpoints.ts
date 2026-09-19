@@ -2,8 +2,8 @@
 export const STANDPOINTS = [
   { value: "farmer", label: "生産者" },
   { value: "ja", label: "JA関係者（指導員等も含む）" },
-  { value: "government", label: "行政関係者（県の普及員など）" },
-  { value: "other", label: "その他（メーカー関係者、専門家、研究者）" },
+  { value: "government", label: "行政関係者（都道府県の普及員や研究員）" },
+  { value: "other", label: "その他（メーカー関係者、専門家、研究者など）" },
 ] as const satisfies readonly { value: string; label: string }[];
 
 export type Standpoint = (typeof STANDPOINTS)[number]["value"];

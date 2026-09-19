@@ -60,15 +60,12 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
           aria-labelledby="signup-invitation-title"
         >
           <h1 id="signup-invitation-title" className={title}>
-            会員登録して、あなたの体験を共有してください
+            登録は無料
           </h1>
           <div className={copy}>
+            <p>検索と感想口コミの閲覧は、登録なしで利用できます。</p>
             <p>
-              <strong>登録は無料です。</strong>
-              資材検索と感想口コミの閲覧は、登録なしで利用できます。実証詳細レポートの全文は、無料会員登録後にご覧いただけます。
-            </p>
-            <p>
-              会員登録すると、実証詳細レポートや感想口コミの投稿、参考になったの投票、お気に入りへの保存ができます。
+              会員登録すると、実証詳細レポートの閲覧・投稿、感想口コミの投稿、お気に入りの保存ができます。
             </p>
           </div>
           <div
