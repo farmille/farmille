@@ -28,6 +28,7 @@ export function ProfileSetupForm() {
         error={fields.handle}
         htmlFor="handle"
         label="ハンドルネーム"
+        visibility="public"
         requirement="required"
         guide="投稿に表示されます。本名でなくても構いません。"
       >
@@ -45,8 +46,9 @@ export function ProfileSetupForm() {
       <Field
         error={fields.standpoint}
         label="あなたの立場"
+        visibility="public"
         requirement="required"
-        guide="公開プロフィールや投稿には表示されません。"
+        guide="公開プロフィールや投稿に表示されます。"
       >
         <RadioCards name="standpoint" options={STANDPOINTS} defaultValue={values.standpoint} />
       </Field>
