@@ -34,6 +34,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliation_options: {
+        Row: {
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       answers: {
         Row: {
           author_seller_id: string | null
@@ -190,6 +208,73 @@ export type Database = {
           },
         ]
       }
+      catalog_source_evidence: {
+        Row: {
+          evidence_id: string
+          field_code: string
+          source_product_id: string
+          source_text: string
+          source_title: string | null
+          source_url: string | null
+        }
+        Insert: {
+          evidence_id: string
+          field_code: string
+          source_product_id: string
+          source_text: string
+          source_title?: string | null
+          source_url?: string | null
+        }
+        Update: {
+          evidence_id?: string
+          field_code?: string
+          source_product_id?: string
+          source_text?: string
+          source_title?: string | null
+          source_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_source_evidence_source_product_id_fkey"
+            columns: ["source_product_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_source_products"
+            referencedColumns: ["source_product_id"]
+          },
+        ]
+      }
+      catalog_source_products: {
+        Row: {
+          imported_at: string
+          material_id: string
+          publication_decision: string
+          source_name: string
+          source_product_id: string
+        }
+        Insert: {
+          imported_at?: string
+          material_id: string
+          publication_decision: string
+          source_name: string
+          source_product_id: string
+        }
+        Update: {
+          imported_at?: string
+          material_id?: string
+          publication_decision?: string
+          source_name?: string
+          source_product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_source_products_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       composition_types: {
         Row: {
           created_at: string
@@ -271,26 +356,43 @@ export type Database = {
       crop_groups: {
         Row: {
           created_at: string
+          hierarchy_level: string
           id: string
+          is_active: boolean
           name: string
+          parent_id: string | null
           sort_order: number
           updated_at: string
         }
         Insert: {
           created_at?: string
+          hierarchy_level?: string
           id?: string
+          is_active?: boolean
           name: string
+          parent_id?: string | null
           sort_order?: number
           updated_at?: string
         }
         Update: {
           created_at?: string
+          hierarchy_level?: string
           id?: string
+          is_active?: boolean
           name?: string
+          parent_id?: string | null
           sort_order?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "crop_groups_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "crop_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crops: {
         Row: {
@@ -298,6 +400,7 @@ export type Database = {
           created_at: string
           group_id: string
           id: string
+          is_active: boolean
           name: string
           sort_order: number
           updated_at: string
@@ -307,6 +410,7 @@ export type Database = {
           created_at?: string
           group_id: string
           id?: string
+          is_active?: boolean
           name: string
           sort_order?: number
           updated_at?: string
@@ -316,6 +420,7 @@ export type Database = {
           created_at?: string
           group_id?: string
           id?: string
+          is_active?: boolean
           name?: string
           sort_order?: number
           updated_at?: string
@@ -567,6 +672,35 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      material_application_methods: {
+        Row: {
+          material_id: string
+          method: string
+          sort_order: number
+          source_text: string
+        }
+        Insert: {
+          material_id: string
+          method: string
+          sort_order?: number
+          source_text: string
+        }
+        Update: {
+          material_id?: string
+          method?: string
+          sort_order?: number
+          source_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_application_methods_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       material_change_request_crops: {
         Row: {
@@ -1010,6 +1144,42 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_crop_groups: {
+        Row: {
+          crop_group_id: string
+          material_id: string
+          sort_order: number
+          source_name: string
+        }
+        Insert: {
+          crop_group_id: string
+          material_id: string
+          sort_order?: number
+          source_name: string
+        }
+        Update: {
+          crop_group_id?: string
+          material_id?: string
+          sort_order?: number
+          source_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_crop_groups_crop_group_id_fkey"
+            columns: ["crop_group_id"]
+            isOneToOne: false
+            referencedRelation: "crop_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_crop_groups_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
             referencedColumns: ["id"]
           },
         ]
@@ -2001,6 +2171,39 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_affiliations: {
+        Row: {
+          name: string
+          sort_order: number
+          user_id: string
+        }
+        Insert: {
+          name: string
+          sort_order?: number
+          user_id: string
+        }
+        Update: {
+          name?: string
+          sort_order?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_affiliations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profile_affiliations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profile_contact_details: {
         Row: {
           city: string
@@ -2041,6 +2244,112 @@ export type Database = {
             foreignKeyName: "profile_contact_details_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      profile_crops: {
+        Row: {
+          crop_id: string
+          sort_order: number
+          user_id: string
+        }
+        Insert: {
+          crop_id: string
+          sort_order?: number
+          user_id: string
+        }
+        Update: {
+          crop_id?: string
+          sort_order?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_crops_crop_id_fkey"
+            columns: ["crop_id"]
+            isOneToOne: false
+            referencedRelation: "crops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_crops_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profile_crops_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      profile_details: {
+        Row: {
+          bio: string
+          city_public: boolean
+          user_id: string
+        }
+        Insert: {
+          bio?: string
+          city_public?: boolean
+          user_id: string
+        }
+        Update: {
+          bio?: string
+          city_public?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_details_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profile_details_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      profile_links: {
+        Row: {
+          sort_order: number
+          url: string
+          user_id: string
+        }
+        Insert: {
+          sort_order?: number
+          url: string
+          user_id: string
+        }
+        Update: {
+          sort_order?: number
+          url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_links_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profile_links_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["user_id"]
           },
@@ -2124,6 +2433,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      registration_notifications: {
+        Row: {
+          claimed_at: string | null
+          sent_at: string | null
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          sent_at?: string | null
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string | null
+          sent_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       review_crops: {
         Row: {
@@ -2793,27 +3120,13 @@ export type Database = {
       public_profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
+          city: string | null
           created_at: string | null
           handle: string | null
           prefecture_code: number | null
           standpoint: string | null
           user_id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
-          handle?: string | null
-          prefecture_code?: number | null
-          standpoint?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string | null
-          handle?: string | null
-          prefecture_code?: number | null
-          standpoint?: string | null
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -2890,6 +3203,14 @@ export type Database = {
       cancel_material_change_request: {
         Args: { p_request_id: string }
         Returns: undefined
+      }
+      catalog_material_counts: {
+        Args: never
+        Returns: {
+          material_id: string
+          report_count: number
+          saved_count: number
+        }[]
       }
       confirm_material_information: {
         Args: { p_material_id: string }
@@ -3005,6 +3326,17 @@ export type Database = {
           p_submit: boolean
         }
         Returns: string
+      }
+      save_profile_details: {
+        Args: {
+          p_affiliations: string[]
+          p_bio: string
+          p_city_public: boolean
+          p_crop_ids: string[]
+          p_handle: string
+          p_links: string[]
+        }
+        Returns: undefined
       }
       set_material_editor_grant: {
         Args: {
