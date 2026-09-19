@@ -19,7 +19,7 @@ const tableCard = css({
   overflow: "hidden",
 });
 
-// 分類名だけを表示し、含有量やメーカー未入力の説明を補完しない。
+// 分類は登録された名前を表示し、メーカー未入力の説明を補完しない。
 export function MaterialDetailTable({
   material,
   content,
@@ -51,7 +51,7 @@ export function MaterialDetailTable({
   const rows: DetailRow[] = [
     { label: "期待効果", value: tags(material.effects) },
     { label: "資材ジャンル", value: tags(material.ingredientCategories) },
-    { label: "主な成分", value: tags(material.ingredients) },
+    { label: "主な成分", value: material.main_components },
     { label: "対象作物", value: tags(material.targetCrops) },
     {
       label: "施用方法",
