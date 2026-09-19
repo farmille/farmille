@@ -1,5 +1,7 @@
 export const SEARCH_FILTER_CATEGORIES = [
   "crop",
+  "crop_group",
+  "method",
   "concern",
   "effect",
   "condition",
@@ -27,13 +29,19 @@ export type SearchCatalog = {
 
 /** キーワードに合う候補を全件返す。一覧の絞り込みには候補表示の件数上限を適用しない。 */
 export function matchSearchCatalog(catalog: SearchCatalog, query: string) {
-  const keyword = query.trim().toLowerCase();
+  const keyword = query.trim().normalize("NFKC").toLowerCase();
   return {
     filters: catalog.filters.filter((filter) =>
-      [filter.name, ...filter.aliases].some((name) => name.toLowerCase().includes(keyword)),
+      [filter.name, ...filter.aliases].some((name) =>
+        name.normalize("NFKC").toLowerCase().includes(keyword),
+      ),
     ),
-    makerNames: catalog.makers.filter((name) => name.toLowerCase().includes(keyword)),
-    materialNames: catalog.materialNames.filter((name) => name.toLowerCase().includes(keyword)),
+    makerNames: catalog.makers.filter((name) =>
+      name.normalize("NFKC").toLowerCase().includes(keyword),
+    ),
+    materialNames: catalog.materialNames.filter((name) =>
+      name.normalize("NFKC").toLowerCase().includes(keyword),
+    ),
   };
 }
 

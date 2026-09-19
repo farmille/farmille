@@ -9,13 +9,18 @@ import { HANDLE_MAX_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 import type { OwnProfile } from "@/server/queries/profiles";
 
+import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
+import { ProfileTagsEditor } from "./ProfileTagsEditor";
+
 import { updateProfileAction } from "./actions";
 
 type ProfileEditFormProps = {
   profile: OwnProfile;
+  details: ProfileDetails;
+  options: ProfileOptions;
 };
 
-export function ProfileEditForm({ profile }: ProfileEditFormProps) {
+export function ProfileEditForm({ profile, details, options }: ProfileEditFormProps) {
   const [state, formAction] = useActionState(updateProfileAction, initialAuthFormState);
   const fieldErrors = fieldErrorsOf(state);
   const values = submittedValuesOf(state);
@@ -53,6 +58,54 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         />
       </Field>
 
+      <Field
+        htmlFor="bio"
+        label="自己紹介"
+        requirement="optional"
+        guide="2000文字以内。公開されます。"
+      >
+        <textarea
+          className={controlStyle}
+          id="bio"
+          name="bio"
+          rows={5}
+          maxLength={2000}
+          defaultValue={values.bio ?? details.bio ?? ""}
+        />
+      </Field>
+      <ProfileTagsEditor details={details} options={options} />
+      <Field
+        htmlFor="links"
+        label="リンク"
+        requirement="optional"
+        guide="自分のサイトやSNSのURLを1行に1件入力してください（10件まで）。公開されます。"
+      >
+        <textarea
+          className={controlStyle}
+          id="links"
+          name="links"
+          rows={3}
+          defaultValue={values.links ?? details.links.join("\n")}
+        />
+      </Field>
+      <Field
+        htmlFor="cityPublic"
+        label="地域の公開範囲"
+        requirement="optional"
+        guide="設定しない場合は都道府県まで公開します。本名・電話番号・郵便番号は公開されません。"
+      >
+        <label>
+          <input
+            id="cityPublic"
+            name="cityPublic"
+            type="checkbox"
+            defaultChecked={
+              values.cityPublic === undefined ? details.cityPublic : values.cityPublic === "on"
+            }
+          />
+          市区町村も公開する
+        </label>
+      </Field>
       <div className={formActionsStyle}>
         <SubmitButton label="保存する" pendingLabel="保存中…" />
       </div>

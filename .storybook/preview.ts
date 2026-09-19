@@ -41,6 +41,8 @@ sb.mock(import("../src/app/password-reset/update/actions.ts"));
 sb.mock(import("../src/app/sellers/apply/actions.ts"));
 sb.mock(import("../src/app/sellers/login/actions.ts"));
 sb.mock(import("../src/app/signup/actions.ts"));
+sb.mock(import("../src/app/signup/postal-action.ts"));
+sb.mock(import("../src/app/dashboard/profile/actions.ts"));
 
 // 主要なブレークポイントの直前後をツールバーから連続して確認できるようにする。
 const viewports = {

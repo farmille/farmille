@@ -1,3 +1,6 @@
+import { ProfileDetailsDisplay } from "@/components/ProfileDetailsDisplay";
+import { getProfileDetails } from "@/server/queries/profile-details";
+import { buttonRecipe } from "@/components";
 import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
@@ -37,12 +40,17 @@ const body = css({
 
 const statRow = css({
   display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
   gap: "2.5",
   mt: "3.5",
 });
 
-export default async function MePage() {
+export default async function MePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const tab = (await searchParams).tab === "reviews" ? "reviews" : "reports";
   const access = await resolveMeAccess("/me");
 
   if (access.kind === "other") {
@@ -56,16 +64,21 @@ export default async function MePage() {
   }
 
   const data = result.data;
+  const details = await getProfileDetails(access.session.userId);
+  if (!details.ok) throw new Error(errorMessageJa[details.error]);
+  const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 
   return (
     <div className={shell}>
       <AppBar chrome="public" active="me" title="マイページ" />
       <main className={body}>
         <ProfileCard profile={data.profile} />
+        <ProfileDetailsDisplay details={details.data} editable />
 
         <div className={statRow}>
           <StatCard value={data.reviewCount} label="感想口コミ" />
-          <StatCard value={data.helpfulReceivedCount} label="参考になった" />
+          <StatCard value={reportCount} label="実証詳細レポート" />
+          <StatCard value={data.savedMaterials.length} label="お気に入り" />
         </div>
 
         <p
@@ -88,7 +101,34 @@ export default async function MePage() {
           </Link>
         </p>
 
-        <PostsShelf profile={data.profile} posts={data.posts} />
+        <nav aria-label="投稿の種類" className={css({ display: "flex", gap: "2", mt: "5" })}>
+          <Link
+            href="/me?tab=reports"
+            aria-current={tab === "reports" ? "page" : undefined}
+            className={buttonRecipe({
+              variant: tab === "reports" ? "primary" : "ghost",
+              size: "sm",
+            })}
+          >
+            実証詳細レポート {reportCount}
+          </Link>
+          <Link
+            href="/me?tab=reviews"
+            aria-current={tab === "reviews" ? "page" : undefined}
+            className={buttonRecipe({
+              variant: tab === "reviews" ? "primary" : "ghost",
+              size: "sm",
+            })}
+          >
+            感想口コミ {data.reviewCount}
+          </Link>
+        </nav>
+        <PostsShelf
+          profile={data.profile}
+          posts={data.posts.filter((post) =>
+            tab === "reviews" ? post.kind === "review" : post.kind === "usage_report",
+          )}
+        />
         <SavedShelf items={data.savedMaterials} />
         <HelpfulShelf items={data.helpfulItems} />
         <AccountActions admin={(await getSessionUser())?.accountType === "admin"} />

@@ -55,6 +55,13 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
           .click();
         await expect(page).toHaveURL(/reviews=newest#home-reviews$/);
       }
+      if (path === "/me") {
+        await page
+          .getByRole("navigation", { name: "投稿の種類" })
+          .getByRole("link", { name: /^感想口コミ/ })
+          .click();
+        await expect(page).toHaveURL(/tab=reviews$/);
+      }
       const reviewCard = page.getByRole("article").filter({ hasText: body });
       await expect(reviewCard.getByText(body, { exact: true })).toBeVisible();
       await expect(reviewCard.getByText("ミニトマト", { exact: true })).toBeVisible();

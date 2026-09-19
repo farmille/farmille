@@ -16,6 +16,7 @@ export async function listCropOptions(): Promise<Result<readonly CropOption[]>> 
   const { data, error } = await supabase
     .from("crops")
     .select("id, name, group_id, sort_order")
+    .eq("is_active", true)
     .order("sort_order", { ascending: true })
     .order("id", { ascending: true });
 

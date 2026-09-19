@@ -1,5 +1,3 @@
-import { Suspense } from "react";
-import { SearchResultsSkeleton } from "@/components/SkeletonList";
 import type { Metadata } from "next";
 
 import { AppBar, EmptyState, MaterialCard } from "@/components";
@@ -15,14 +13,11 @@ import {
 } from "@/components/search/search-selection";
 import { createPageMetadata } from "@/lib/seo";
 import { matchSearchCatalog } from "@/lib/material-search";
-import { listMaterials } from "@/server/queries/materials";
-import {
-  listSearchFiltersByPairs,
-  listSearchFiltersByRefs,
-  listSearchSuggestions,
-  POPULAR_FILTER_PAIRS,
-  SEASONAL_FILTER_PAIRS,
-} from "@/server/queries/classifications";
+import { getCatalogSearch, type CatalogSearch } from "@/server/queries/catalog-search";
+import { filterCatalog, cropEvidence } from "@/lib/catalog-search";
+import { CatalogSidebar } from "./_components/CatalogSidebar";
+import type { SearchFilterRef } from "@/lib/material-search";
+import { listSearchFiltersByRefs, listSearchSuggestions } from "@/server/queries/classifications";
 import { css } from "../../../styled-system/css";
 
 import { SearchAnalytics } from "./_components/SearchAnalytics";
@@ -148,14 +143,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     );
   }
 
-  const [filtersResult, popularResult, seasonalResult, catalogResult] = await Promise.all([
+  const [filtersResult, catalogResult, catalog] = await Promise.all([
     listSearchFiltersByRefs(filters),
-    listSearchFiltersByPairs(POPULAR_FILTER_PAIRS),
-    listSearchFiltersByPairs(SEASONAL_FILTER_PAIRS),
     listSearchSuggestions(),
+    getCatalogSearch(),
   ]);
 
-  if (!popularResult.ok || !seasonalResult.ok || !catalogResult.ok) {
+  if (!catalogResult.ok) {
     throw new Error("タグ候補の取得に失敗しました。");
   }
 
@@ -203,48 +197,58 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       />
       <main className={main}>
         <SearchPageHeading />
-        <MaterialSearchBox
-          initialQuery={initialQuery}
-          selected={selected}
-          sort={sort}
-          popular={popularResult.data}
-          seasonal={seasonalResult.data}
-          catalog={catalogResult.data}
-          placeholder="作物・悩み・資材名を入力してください"
-        />
-
-        {logic.length > 0 ? (
-          <p className={logicHint}>
-            絞り込み条件：<span className={logicStrong}>{logic}</span>
-          </p>
-        ) : null}
-
-        <Suspense
-          key={JSON.stringify([filters, makerNames, materialNames, sort, initialQuery])}
-          fallback={
-            <SearchResultsSkeleton
-              controls={<SearchSortSelect selected={selected} sort={sort} query={initialQuery} />}
-            />
-          }
+        <div
+          className={css({
+            display: "grid",
+            gap: "4",
+            tab: { gridTemplateColumns: "minmax(0, 1fr) minmax(0, 3fr)" },
+          })}
         >
-          <SearchResults
-            filters={filters}
-            makerNames={makerNames}
-            materialNames={materialNames}
-            sort={sort}
+          <CatalogSidebar
+            catalog={catalog}
+            search={catalogResult.data}
             selected={selected}
+            sort={sort}
             query={initialQuery}
-            keywordMatches={keywordMatches}
           />
-        </Suspense>
+          <div className={css({ minW: "0" })}>
+            <MaterialSearchBox
+              initialQuery={initialQuery}
+              selected={selected}
+              sort={sort}
+              popular={[]}
+              seasonal={[]}
+              catalog={catalogResult.data}
+              placeholder="作物・悩み・資材名を入力してください"
+            />
+
+            {logic.length > 0 ? (
+              <p className={logicHint}>
+                絞り込み条件：<span className={logicStrong}>{logic}</span>
+              </p>
+            ) : null}
+
+            <SearchResults
+              catalog={catalog}
+              filters={filters}
+              makerNames={makerNames}
+              materialNames={materialNames}
+              sort={sort}
+              selected={selected}
+              query={initialQuery}
+              keywordMatches={keywordMatches}
+            />
+          </div>
+        </div>
       </main>
       <BottomNav active="search" />
     </div>
   );
 }
 
-// 検索候補は操作可能なまま、検索件数とカードをまとめて更新する。
-async function SearchResults({
+// 作目への直接記載を先に並べ、同じ資材を下の分類グループへ重複表示しない。
+function SearchResults({
+  catalog,
   filters,
   makerNames,
   materialNames,
@@ -253,72 +257,107 @@ async function SearchResults({
   query,
   keywordMatches,
 }: {
-  filters: NonNullable<Parameters<typeof listMaterials>[0]["filters"]>;
+  catalog: CatalogSearch;
+  filters: SearchFilterRef[];
   makerNames: string[];
   materialNames: string[];
   sort: ReturnType<typeof parseSortParam>;
   selected: ReturnType<typeof resolveSelectedFilters>;
   query: string;
-  keywordMatches: Parameters<typeof listMaterials>[0]["keywordMatches"];
+  keywordMatches: ReturnType<typeof matchSearchCatalog> | undefined;
 }) {
-  const materialsResult = await listMaterials({
-    filters: filters.length > 0 ? filters : undefined,
-    makerNames: makerNames.length > 0 ? makerNames : undefined,
-    materialNames: materialNames.length > 0 ? materialNames : undefined,
-    keywordMatches,
-    sort,
-    page: 1,
-  });
-
-  if (!materialsResult.ok) {
-    throw new Error(`資材検索に失敗しました: ${materialsResult.error}`);
-  }
-
-  const { items, total } = materialsResult.data;
-
+  const items = filterCatalog(catalog, filters, makerNames, materialNames, keywordMatches).toSorted(
+    (a, b) => {
+      if (sort === "rating")
+        return (b.avg_rating ?? 0) - (a.avg_rating ?? 0) || a.name.localeCompare(b.name, "ja");
+      if (sort === "newest")
+        return b.created_at.localeCompare(a.created_at) || a.name.localeCompare(b.name, "ja");
+      return b.review_count - a.review_count || a.name.localeCompare(b.name, "ja");
+    },
+  );
+  const cropFilters = [...filters, ...(keywordMatches?.filters ?? [])].filter(
+    (filter) => filter.category === "crop",
+  );
+  const namedCrops = catalog.crops.filter((crop) =>
+    cropFilters.some((filter) => filter.id === crop.id),
+  );
+  const results = items.map((material) => ({
+    material,
+    evidence: cropEvidence(material, cropFilters, catalog),
+  }));
+  const direct = results.filter(
+    (result) => result.evidence.direct.length > 0 || result.evidence.groups.length === 0,
+  );
+  const broader = results.filter(
+    (result) => result.evidence.direct.length === 0 && result.evidence.groups.length > 0,
+  );
+  const groups =
+    namedCrops.length > 0
+      ? [
+          {
+            title: `「${namedCrops.map((crop) => crop.name).join("・")}」の記載がある資材`,
+            items: direct,
+          },
+          { title: "作物分類として記載のある資材", items: broader },
+        ]
+      : [{ title: "検索結果", items: results }];
   return (
     <>
-      <SearchAnalytics filterCount={selected.length} resultCount={total} sort={sort} />
+      <SearchAnalytics filterCount={selected.length} resultCount={items.length} sort={sort} />
       <div className={resultHeader}>
-        <span role="status" className={css({ fontSize: "sm", color: "text.muted" })}>
-          該当{" "}
-          <b
-            className={css({
-              color: "text.default",
-              fontVariantNumeric: "tabular-nums",
-              fontWeight: "700",
-            })}
-          >
-            {total}
-          </b>{" "}
-          件
+        <span role="status">
+          該当 <b>{items.length}</b> 件
         </span>
         <SearchSortSelect selected={selected} sort={sort} query={query} />
       </div>
-
-      {items.length > 0 ? (
-        <div className={stack}>
-          {items.map((material, index) => (
-            <MaterialCard
-              key={material.id}
-              variant="list"
-              name={material.name}
-              maker={material.manufacturer_name}
-              rating={material.avg_rating ?? 0}
-              reviewCount={material.review_count}
-              official={material.manufacturer_verified_at !== null}
-              imageSrc={material.primaryImage?.url}
-              description={material.description ?? undefined}
-              href={`/materials/${material.id}`}
-              preload={index === 0}
-            />
-          ))}
-        </div>
-      ) : (
+      {items.length === 0 ? (
         <EmptyState
           title="条件に合う資材が見つかりませんでした"
           description="分類の組み合わせを変えるか、条件を減らして再度お試しください。"
         />
+      ) : (
+        groups.map((group) => (
+          <section key={group.title}>
+            <h2 className={css({ fontSize: "md", fontWeight: "700", mt: "4" })}>
+              {group.title} {group.items.length}件
+            </h2>
+            <div className={stack}>
+              {group.items.map(({ material, evidence }, index) => {
+                const counts = catalog.counts.find((row) => row.material_id === material.id);
+                if (!counts) throw new Error("資材の集計が見つかりませんでした。");
+                return (
+                  <MaterialCard
+                    key={material.id}
+                    variant="list"
+                    name={material.name}
+                    maker={material.manufacturer_name}
+                    rating={material.avg_rating ?? 0}
+                    reviewCount={material.review_count}
+                    articleCount={counts.report_count}
+                    savedCount={counts.saved_count}
+                    categories={material.material_ingredient_categories.map(
+                      (row) => row.ingredient_categories.name,
+                    )}
+                    evidenceBadges={[
+                      ...evidence.direct.map((name) => `✓ ${name}の記載あり`),
+                      ...(!evidence.direct.length
+                        ? evidence.groups.map((name) => `${name}として記載`)
+                        : []),
+                    ]}
+                    imageSrc={
+                      material.material_images
+                        .filter((image) => image.is_current)
+                        .toSorted((a, b) => a.sort_order - b.sort_order)[0]?.url
+                    }
+                    description={material.description ?? undefined}
+                    href={`/materials/${material.id}`}
+                    preload={index === 0}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        ))
       )}
     </>
   );

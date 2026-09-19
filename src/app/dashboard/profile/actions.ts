@@ -4,6 +4,13 @@ import { revalidatePath } from "next/cache";
 import { SaveManufacturerProfileSchema } from "@/lib/manufacturer-profile";
 import { requireSeller } from "@/server/auth";
 import { createServerSupabase } from "@/server/supabase";
+import { uploadManufacturerLogo } from "@/server/manufacturer-logo";
+
+export async function uploadLogo(formData: FormData) {
+  const file = formData.get("logo");
+  if (!(file instanceof File)) return { ok: false as const, message: "ロゴ画像を選んでください。" };
+  return uploadManufacturerLogo(file);
+}
 
 export async function saveManufacturerProfile(
   input: v.InferOutput<typeof SaveManufacturerProfileSchema>,

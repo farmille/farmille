@@ -1,6 +1,4 @@
 import { Icon } from "@/components/Icon";
-import { STANDPOINTS } from "@/lib/standpoints";
-import { PREFECTURES } from "@/lib/prefectures";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import type { PublicProfilePageData } from "@/server/queries/public-profiles";
 import { css } from "../../../../../styled-system/css";
@@ -62,14 +60,6 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
       >
         {profile.handle}
       </h1>
-      <p className={css({ color: "text.subtle", fontSize: "sm" })}>
-        {[
-          STANDPOINTS.find((item) => item.value === profile.standpoint)?.label,
-          PREFECTURES.find((item) => item.code === profile.prefectureCode)?.name,
-        ]
-          .filter(Boolean)
-          .join(" ・ ")}
-      </p>
     </section>
   );
 }

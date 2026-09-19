@@ -24,6 +24,8 @@ export const UnclaimedWithMissingValues: Story = {
       mechanism: null,
       effects: [],
       targetCrops: [],
+      targetCropGroups: [],
+      applicationMethods: [],
       ingredientCategories: [],
       ingredients: [],
       productTypes: [],

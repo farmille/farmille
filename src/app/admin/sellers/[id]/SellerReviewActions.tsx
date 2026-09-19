@@ -170,7 +170,9 @@ export function SellerReviewActions({
             <span className={adminCodeStyle}>{state.credentials.passwordSetupUrl}</span>
           </div>
           <p className={adminInlineNoteStyle}>
-            このURLを、掲載ページの候補一覧と編集権の申込書類とともに、申請時の連絡先へ手動でメール送付してください。期限切れの場合はメーカーのパスワード再設定画面から再送できます。
+            {state.credentials.emailSent
+              ? "ログインIDとパスワード設定用URLを申請時の連絡先へ送信しました。掲載ページの候補一覧と編集権の申込書類は別途送付してください。"
+              : "承認は完了しましたが、案内メールを送信できませんでした。上記のログインIDとURLを申請時の連絡先へ送付してください。期限切れの場合はメーカーのパスワード再設定画面から再送できます。"}
           </p>
         </div>
       ) : null}

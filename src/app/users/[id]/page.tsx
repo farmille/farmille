@@ -1,3 +1,5 @@
+import { ProfileDetailsDisplay } from "@/components/ProfileDetailsDisplay";
+import { getProfileDetails } from "@/server/queries/profile-details";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -95,6 +97,8 @@ export default async function UserPage({ params }: UserPageProps) {
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
   const data = await loadProfileOrNotFound(id, viewerUserId);
+  const details = await getProfileDetails(id);
+  if (!details.ok) throw new Error(errorMessageJa[details.error]);
   const isOwnProfile = viewerUserId !== null && viewerUserId === data.profile.userId;
 
   return (
@@ -102,6 +106,7 @@ export default async function UserPage({ params }: UserPageProps) {
       <AppBar chrome="public" title={data.profile.handle} backHref="/" />
       <main className={body}>
         <ProfileHeader profile={data.profile} />
+        <ProfileDetailsDisplay details={details.data} />
 
         {isOwnProfile ? null : (
           <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>

@@ -1,3 +1,4 @@
+import { sendPendingRegistrationEmail } from "./notification-email";
 import type { EmailOtpType } from "@supabase/supabase-js";
 
 import { clientEnv } from "@/env";
@@ -26,6 +27,7 @@ export async function signInWithEmail(
 
   if (error !== null) return fail(toErrorCode(error, "signIn"));
 
+  await sendPendingRegistrationEmail();
   return succeed({ userId: data.user.id });
 }
 
