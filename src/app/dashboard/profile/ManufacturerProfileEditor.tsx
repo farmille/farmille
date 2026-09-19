@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
-import { Button } from "@/components";
+import { Button, FileInput } from "@/components";
 import { Field, FormMessage, controlStyle } from "@/components/auth/Fields";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { SellerHeader } from "@/app/sellers/[id]/_components/SellerHeader";
@@ -10,7 +10,7 @@ import {
   ManufacturerProfileSchema,
   type ManufacturerProfileContent,
 } from "@/lib/manufacturer-profile";
-import { saveManufacturerProfile, withdrawManufacturerProfile } from "./actions";
+import { saveManufacturerProfile, withdrawManufacturerProfile, uploadLogo } from "./actions";
 
 export function ManufacturerProfileEditor({
   sellerId,
@@ -79,18 +79,42 @@ export function ManufacturerProfileEditor({
             />
           </Field>
           <Field
-            label="ロゴ画像URL"
+            label="ロゴ画像"
             htmlFor="profile-logo"
-            guide="公開しているロゴ画像のURLを入力してください。"
+            requirement="optional"
+            guide="JPEG・PNG・WebP、2MBまで。保存後、表現確認を経て公開されます。"
           >
-            <input
-              className={controlStyle}
+            <FileInput
               id="profile-logo"
-              type="url"
-              value={content.logoUrl}
-              onChange={(event) => setContent({ ...content, logoUrl: event.target.value })}
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                startTransition(async () => {
+                  const form = new FormData();
+                  form.set("logo", file);
+                  const result = await uploadLogo(form);
+                  if (!result.ok) {
+                    setMessage(result.message);
+                    return;
+                  }
+                  setContent((current) => ({ ...current, logoUrl: result.url }));
+                  setMessage(
+                    "ロゴをアップロードしました。下書き保存または表現確認への送信をしてください。",
+                  );
+                });
+              }}
               disabled={pending}
             />
+            {content.logoUrl ? (
+              <Button
+                variant="ghost"
+                disabled={pending}
+                onClick={() => setContent({ ...content, logoUrl: "" })}
+              >
+                ロゴを外す
+              </Button>
+            ) : null}
           </Field>
           <Field label="公式サイトURL" htmlFor="profile-site">
             <input

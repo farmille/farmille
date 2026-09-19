@@ -48,26 +48,32 @@ export function MaterialDetailTable({
         ))}
       </span>
     );
+  const methods = [
+    ...new Set([
+      ...material.applicationMethods.map((item) => item.method),
+      ...(content?.usages.map((item) => item.method) ?? []),
+    ]),
+  ];
   const rows: DetailRow[] = [
     { label: "期待効果", value: tags(material.effects) },
     { label: "資材ジャンル", value: tags(material.ingredientCategories) },
     { label: "主な成分", value: material.main_components },
-    { label: "対象作物", value: tags(material.targetCrops) },
+    { label: "対象作物", value: tags([...material.targetCrops, ...material.targetCropGroups]) },
     {
       label: "施用方法",
-      value: content?.usages.length
-        ? content.usages.map((usage, index) => (
+      value: methods.length
+        ? methods.map((method, index) => (
             <div key={index} className={css({ mb: "2" })}>
               {tags(
-                APPLICATION_METHODS.filter((method) => method.value === usage.method).map(
-                  (method) => ({ name: method.label }),
-                ),
+                APPLICATION_METHODS.filter((item) => item.value === method).map((method) => ({
+                  name: method.label,
+                })),
               )}
-              {usage.method !== "other" ? (
+              {method !== "other" ? (
                 <details className={css({ mt: "1" })}>
                   <summary>詳細</summary>
                   <p className={css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere" })}>
-                    {usage.detail || "−"}
+                    {content?.usages.find((usage) => usage.method === method)?.detail || "−"}
                   </p>
                 </details>
               ) : null}

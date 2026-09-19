@@ -1,3 +1,4 @@
+import { sendPendingRegistrationEmail } from "./notification-email";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import * as v from "valibot";
 
@@ -162,5 +163,6 @@ export async function registerGeneralUser(
     return succeed({ userId: user.id, signedIn: false });
   }
 
+  await sendPendingRegistrationEmail();
   return succeed({ userId: user.id, signedIn: true });
 }

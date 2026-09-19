@@ -18,7 +18,7 @@ import { SubmitButton } from "@/components/auth/SubmitButton";
 import { HANDLE_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 import { STANDPOINTS } from "@/lib/standpoints";
-import { PREFECTURES } from "@/lib/prefectures";
+import { PostalAddressFields } from "./PostalAddressFields";
 
 export function SignupForm({ next = null }: { next?: string | null }) {
   const [state, formAction] = useActionState(signupAction, initialAuthFormState);
@@ -128,70 +128,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       >
         <RadioCards defaultValue={values.standpoint} name="standpoint" options={STANDPOINTS} />
       </Field>
-      <Field
-        error={fieldErrors.postalCode}
-        htmlFor="postalCode"
-        label="郵便番号"
-        visibility="private"
-        guide="公開されません"
-        requirement="required"
-      >
-        <input
-          className={controlStyle}
-          id="postalCode"
-          name="postalCode"
-          autoComplete="postal-code"
-          inputMode="numeric"
-          defaultValue={values.postalCode}
-          placeholder="123-4567"
-          maxLength={8}
-          required
-        />
-      </Field>
-      <Field
-        error={fieldErrors.prefectureCode}
-        htmlFor="prefectureCode"
-        label="都道府県"
-        visibility="public"
-        guide="公開されます"
-        requirement="required"
-      >
-        <select
-          className={controlStyle}
-          id="prefectureCode"
-          name="prefectureCode"
-          defaultValue={values.prefectureCode ?? ""}
-          autoComplete="address-level1"
-          required
-        >
-          <option value="" disabled>
-            選択してください
-          </option>
-          {PREFECTURES.map((prefecture) => (
-            <option key={prefecture.code} value={prefecture.code}>
-              {prefecture.name}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field
-        error={fieldErrors.city}
-        htmlFor="city"
-        label="市区町村"
-        visibility="private"
-        guide="公開されません"
-        requirement="required"
-      >
-        <input
-          className={controlStyle}
-          id="city"
-          name="city"
-          autoComplete="address-level2"
-          defaultValue={values.city}
-          maxLength={100}
-          required
-        />
-      </Field>
+      <PostalAddressFields values={values} fieldErrors={fieldErrors} />
 
       <Field
         error={fieldErrors.password}

@@ -1,3 +1,4 @@
+import { sendPendingRegistrationEmail } from "@/server/accounts/notification-email";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { safeNextPath } from "@/lib/auth/safe-next";
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(sameOriginUrl(request, `/login?error=${result.error}`));
   }
 
+  await sendPendingRegistrationEmail();
   return NextResponse.redirect(sameOriginUrl(request, next));
 }
 

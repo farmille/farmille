@@ -1,0 +1,42 @@
+import { describe, expect, it } from "vitest";
+import * as v from "valibot";
+import { ProfileDetailsInputSchema } from "./profile-details";
+
+const profile = {
+  handle: "農家",
+  bio: "",
+  cityPublic: false,
+  affiliations: [],
+  cropIds: [],
+  links: [],
+};
+describe("公開プロフィールの入力境界", () => {
+  it("自己紹介やタグは任意で、市区町村非公開を保存できる", () => {
+    expect(v.safeParse(ProfileDetailsInputSchema, profile).success).toBe(true);
+  });
+  it.each(["javascript:alert(1)", "data:text/html,test", "ftp://example.com", "https://"])(
+    "不正な公開リンクを拒否する：%s",
+    (url) => {
+      expect(v.safeParse(ProfileDetailsInputSchema, { ...profile, links: [url] }).success).toBe(
+        false,
+      );
+    },
+  );
+  it("自由入力の所属と複数のURLを保存できる", () => {
+    const result = v.parse(ProfileDetailsInputSchema, {
+      ...profile,
+      affiliations: [" JA青年部 ", "生産者の会"],
+      links: ["https://example.com", "https://example.org"],
+    });
+    expect(result.affiliations).toEqual(["JA青年部", "生産者の会"]);
+  });
+  it("マスタID以外の作目と過大な入力を拒否する", () => {
+    expect(
+      v.safeParse(ProfileDetailsInputSchema, { ...profile, cropIds: ["トマト"] }).success,
+    ).toBe(false);
+    expect(
+      v.safeParse(ProfileDetailsInputSchema, { ...profile, affiliations: Array(21).fill("所属") })
+        .success,
+    ).toBe(false);
+  });
+});

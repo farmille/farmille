@@ -1,4 +1,5 @@
 import * as v from "valibot";
+import { sendSellerWelcome } from "@/server/accounts/notification-email";
 import { clientEnv } from "@/env";
 
 import { syntheticSellerEmail } from "@/server/accounts/seller";
@@ -38,6 +39,7 @@ export type SellerDetail = SellerRow & {
 export type SellerCredentials = {
   loginId: string;
   passwordSetupUrl: string;
+  emailSent: boolean;
 };
 
 function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
@@ -108,7 +110,7 @@ export async function approveSellerApplication(
   return withAdmin(async ({ supabase }) => {
     const { data: seller, error } = await supabase
       .from("seller_accounts")
-      .select("id, login_id, status, auth_user_id")
+      .select("id, login_id, status, auth_user_id, contact_email")
       .eq("id", sellerId)
       .maybeSingle();
 
@@ -166,7 +168,16 @@ export async function approveSellerApplication(
       return fail(isUniqueViolation(updateError) ? "conflict" : "internal");
     }
 
-    return succeed({ loginId: seller.login_id, passwordSetupUrl: passwordSetupUrl.toString() });
+    const emailSent = await sendSellerWelcome(
+      seller.contact_email,
+      seller.login_id,
+      passwordSetupUrl.toString(),
+    );
+    return succeed({
+      loginId: seller.login_id,
+      passwordSetupUrl: passwordSetupUrl.toString(),
+      emailSent,
+    });
   });
 }
 

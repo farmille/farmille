@@ -1,3 +1,4 @@
+import { APPLICATION_METHODS } from "@/lib/material-page-editor";
 import { cache } from "react";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -104,7 +105,7 @@ export async function listClassificationOptionsWithSupabase(
   ] = await Promise.all([
     supabase.from("composition_types").select("id, name, sort_order"),
     supabase.from("crop_groups").select("id, name, sort_order"),
-    supabase.from("crops").select("id, group_id, name, aliases, sort_order"),
+    supabase.from("crops").select("id, group_id, name, aliases, sort_order").eq("is_active", true),
     supabase.from("effect_categories").select("id, name, sort_order"),
     supabase.from("effects").select("id, category_id, name, sort_order"),
     supabase.from("ingredient_categories").select("id, name, sort_order"),
@@ -243,6 +244,13 @@ async function fetchSearchFilters(): Promise<Result<SearchFilterItem[]>> {
   const options = await listClassificationOptions();
   if (!options.ok) return options;
 
+  const supabase = await createServerSupabase();
+  const groups = await supabase
+    .from("crop_groups")
+    .select("id,name,sort_order,hierarchy_level")
+    .eq("is_active", true)
+    .order("sort_order");
+  if (groups.error) return fail("internal");
   const filters: SearchFilterItem[] = [
     ...options.data.crops.map((crop) => ({
       id: crop.id,
@@ -250,6 +258,24 @@ async function fetchSearchFilters(): Promise<Result<SearchFilterItem[]>> {
       aliases: crop.aliases,
       sort_order: crop.sort_order,
       category: "crop" as const,
+    })),
+    ...groups.data
+      .toSorted(
+        (a, b) => Number(a.hierarchy_level === "major") - Number(b.hierarchy_level === "major"),
+      )
+      .map((group) => ({
+        id: group.id,
+        name: group.name,
+        aliases: [],
+        sort_order: (group.hierarchy_level === "major" ? 10000 : 0) + group.sort_order,
+        category: "crop_group" as const,
+      })),
+    ...APPLICATION_METHODS.map((method, index) => ({
+      id: method.value,
+      name: method.label,
+      aliases: [],
+      sort_order: index,
+      category: "method" as const,
     })),
     ...options.data.searchTags.map((tag) => {
       if (!isSearchFilterCategory(tag.category)) {

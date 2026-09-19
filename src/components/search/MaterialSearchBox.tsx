@@ -238,7 +238,7 @@ export function MaterialSearchBox({
   };
 
   const filteredSuggestions = useMemo((): Suggestion[] => {
-    const normalizedQuery = query.trim().toLowerCase();
+    const normalizedQuery = query.trim().normalize("NFKC").toLowerCase();
     if (normalizedQuery.length === 0) return [];
 
     const suggestions: Suggestion[] = [];
@@ -246,7 +246,7 @@ export function MaterialSearchBox({
     for (const filter of catalog.filters) {
       if (selectedKeys.has(`${filter.category}:${filter.id}`)) continue;
       const names = [filter.name, ...filter.aliases];
-      if (names.some((name) => name.toLowerCase().includes(normalizedQuery))) {
+      if (names.some((name) => name.normalize("NFKC").toLowerCase().includes(normalizedQuery))) {
         suggestions.push({ kind: "filter", filter });
       }
       if (suggestions.length >= 8) return suggestions;
@@ -254,13 +254,15 @@ export function MaterialSearchBox({
 
     for (const name of catalog.materialNames) {
       if (selectedKeys.has(`name:${name}`)) continue;
-      if (name.toLowerCase().includes(normalizedQuery)) suggestions.push({ kind: "name", name });
+      if (name.normalize("NFKC").toLowerCase().includes(normalizedQuery))
+        suggestions.push({ kind: "name", name });
       if (suggestions.length >= 8) return suggestions;
     }
 
     for (const name of catalog.makers) {
       if (selectedKeys.has(`maker:${name}`)) continue;
-      if (name.toLowerCase().includes(normalizedQuery)) suggestions.push({ kind: "maker", name });
+      if (name.normalize("NFKC").toLowerCase().includes(normalizedQuery))
+        suggestions.push({ kind: "maker", name });
       if (suggestions.length >= 8) return suggestions;
     }
 
@@ -310,60 +312,62 @@ export function MaterialSearchBox({
         </div>
       ) : null}
 
-      <div className={panel}>
-        {showDefaultPanel ? (
-          <>
-            <div className={panelGroup}>
-              <h2 className={panelTitle}>よく探されている条件</h2>
-              <div className={suggestionChips}>
-                {popularAvailable.map((filter) => (
-                  <TagChip
-                    appearance="suggestion"
-                    key={`${filter.category}:${filter.id}`}
-                    label={filter.name}
-                    onClick={() => addSuggestion({ kind: "filter", filter })}
-                  />
-                ))}
+      {(!showDefaultPanel || popularAvailable.length > 0 || seasonalAvailable.length > 0) && (
+        <div className={panel}>
+          {showDefaultPanel ? (
+            <>
+              <div className={panelGroup}>
+                <h2 className={panelTitle}>よく探されている条件</h2>
+                <div className={suggestionChips}>
+                  {popularAvailable.map((filter) => (
+                    <TagChip
+                      appearance="suggestion"
+                      key={`${filter.category}:${filter.id}`}
+                      label={filter.name}
+                      onClick={() => addSuggestion({ kind: "filter", filter })}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className={panelGroup}>
-              <h2 className={panelTitle}>今の時期におすすめ</h2>
-              <div className={suggestionChips}>
-                {seasonalAvailable.map((filter) => (
-                  <TagChip
-                    appearance="suggestion"
-                    key={`${filter.category}:${filter.id}`}
-                    label={filter.name}
-                    onClick={() => addSuggestion({ kind: "filter", filter })}
-                  />
-                ))}
+              <div className={panelGroup}>
+                <h2 className={panelTitle}>今の時期におすすめ</h2>
+                <div className={suggestionChips}>
+                  {seasonalAvailable.map((filter) => (
+                    <TagChip
+                      appearance="suggestion"
+                      key={`${filter.category}:${filter.id}`}
+                      label={filter.name}
+                      onClick={() => addSuggestion({ kind: "filter", filter })}
+                    />
+                  ))}
+                </div>
               </div>
+            </>
+          ) : filteredSuggestions.length > 0 ? (
+            <div className={panelGroup}>
+              {filteredSuggestions.map((suggestion) => {
+                const selectedLike = toSelected(suggestion);
+                const category = selectedFilterCategory(selectedLike);
+                return (
+                  <button
+                    className={suggestionRow}
+                    key={suggestionKey(suggestion)}
+                    onClick={() => addSuggestion(suggestion)}
+                    type="button"
+                  >
+                    <span className={`${categoryLabel} ${categoryAccentClass(category)}`}>
+                      {TAG_CATEGORY_LABELS[category]}
+                    </span>
+                    <span>{selectedLike.name}</span>
+                  </button>
+                );
+              })}
             </div>
-          </>
-        ) : filteredSuggestions.length > 0 ? (
-          <div className={panelGroup}>
-            {filteredSuggestions.map((suggestion) => {
-              const selectedLike = toSelected(suggestion);
-              const category = selectedFilterCategory(selectedLike);
-              return (
-                <button
-                  className={suggestionRow}
-                  key={suggestionKey(suggestion)}
-                  onClick={() => addSuggestion(suggestion)}
-                  type="button"
-                >
-                  <span className={`${categoryLabel} ${categoryAccentClass(category)}`}>
-                    {TAG_CATEGORY_LABELS[category]}
-                  </span>
-                  <span>{selectedLike.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className={emptyHint}>「{query.trim()}」に一致する候補がありません</div>
-        )}
-      </div>
+          ) : (
+            <div className={emptyHint}>「{query.trim()}」に一致する候補がありません</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

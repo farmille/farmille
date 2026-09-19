@@ -76,6 +76,7 @@ export type MaterialCardProps = {
   articleCount?: number;
   savedCount?: number;
   categories?: string[];
+  evidenceBadges?: string[];
   description?: string;
   official?: boolean;
   href?: string;
@@ -133,6 +134,7 @@ export function MaterialCard({
   articleCount,
   savedCount,
   categories,
+  evidenceBadges,
   description,
   href = "#",
   imageSrc,
@@ -276,7 +278,8 @@ export function MaterialCard({
           </span>
           <span className={css({ color: "text.subtle" })}>
             感想口コミ {reviewCount}件
-            {articleCount !== undefined ? ` ・ 記事 ${articleCount}件` : ""}
+            {articleCount !== undefined ? ` ・ 実証詳細レポート ${articleCount}件` : ""}
+            {savedCount !== undefined ? ` ・ お気に入り ${savedCount}件` : ""}
           </span>
         </div>
         {description ? (
@@ -286,12 +289,43 @@ export function MaterialCard({
               color: "text.muted",
               mt: "1",
               lineHeight: "1.3",
-              lineClamp: 2,
+              lineClamp: 1,
             })}
           >
             {description}
           </p>
         ) : null}
+        {categories && (
+          <div className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}>
+            {categories.map((name) => (
+              <span
+                key={name}
+                className={css({
+                  fontSize: "2xs",
+                  px: "2",
+                  py: "1",
+                  bg: "brand.soft",
+                  color: "brand.primaryDeep",
+                  borderRadius: "pill",
+                })}
+              >
+                {name}
+              </span>
+            ))}
+          </div>
+        )}
+        {evidenceBadges && (
+          <div className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}>
+            {evidenceBadges.map((label) => (
+              <span
+                key={label}
+                className={css({ fontSize: "xs", fontWeight: "700", color: "brand.primary" })}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
       <Icon
         name="chevron_right"

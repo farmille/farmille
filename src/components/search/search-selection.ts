@@ -1,3 +1,4 @@
+import { APPLICATION_METHODS } from "@/lib/material-page-editor";
 import * as v from "valibot";
 
 import type { TagCategory } from "@/components/TagChip";
@@ -29,7 +30,8 @@ export type ParsedSearchQuery = {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function toUiCategory(category: SearchFilterCategory): TagCategory {
-  return category === "condition" ? "cond" : category;
+  if (category === "crop_group") return "crop";
+  return category === "condition" || category === "method" ? "cond" : category;
 }
 
 export function selectedFilterKey(filter: SelectedSearchFilter): string {
@@ -75,7 +77,12 @@ export function parseFiltersQuery(raw: string | undefined): ParsedSearchQuery {
     const category = separator === -1 ? "" : token.slice(0, separator);
     const id = separator === -1 ? "" : token.slice(separator + 1);
 
-    if (isSearchFilterCategory(category) && UUID_RE.test(id)) {
+    if (
+      isSearchFilterCategory(category) &&
+      (category === "method"
+        ? APPLICATION_METHODS.some((method) => method.value === id)
+        : UUID_RE.test(id))
+    ) {
       filters.push({ category, id });
       continue;
     }

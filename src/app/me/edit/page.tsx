@@ -1,6 +1,7 @@
 import { AppBar } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { errorMessageJa } from "@/server/errors";
+import { getProfileDetails, getProfileOptions } from "@/server/queries/profile-details";
 import { getOwnProfile } from "@/server/queries/profiles";
 import { css } from "../../../../styled-system/css";
 
@@ -42,11 +43,21 @@ export default async function MeEditPage() {
     throw new Error(errorMessageJa[profileResult.error]);
   }
 
+  const [details, options] = await Promise.all([
+    getProfileDetails(access.session.userId),
+    getProfileOptions(),
+  ]);
+  if (!details.ok || !options.ok) throw new Error("プロフィール設定の取得に失敗しました。");
+
   return (
     <div className={shell}>
       <AppBar chrome="public" active="me" title="表示情報編集" backHref="/me" />
       <main className={body}>
-        <ProfileEditForm profile={profileResult.data} />
+        <ProfileEditForm
+          profile={profileResult.data}
+          details={details.data}
+          options={options.data}
+        />
       </main>
       <BottomNav active="me" />
     </div>

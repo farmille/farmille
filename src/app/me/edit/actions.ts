@@ -1,5 +1,9 @@
 "use server";
 
+import * as v from "valibot";
+import { ProfileDetailsInputSchema } from "@/lib/profile-details";
+import { saveProfileDetails } from "@/server/queries/profile-details";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -8,11 +12,7 @@ import { AVATAR_MAX_BYTES } from "@/lib/avatar-rules";
 import { formDataString } from "@/lib/validation";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 import { requireGeneralUser } from "@/server/auth";
-import {
-  updateOwnProfile,
-  uploadOwnAvatar,
-  validateProfileUpdate,
-} from "@/server/queries/profiles";
+import { uploadOwnAvatar } from "@/server/queries/profiles";
 
 function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string> | undefined {
   switch (code) {
@@ -28,11 +28,12 @@ function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string
 function submittedValues(formData: FormData): AuthFormValues {
   const values: AuthFormValues = {};
 
-  for (const name of ["handle"]) {
+  for (const name of ["handle", "bio", "links", "cityPublic"]) {
     const value = formDataString(formData.get(name));
     if (value !== null) values[name] = value;
   }
 
+  values.cityPublic = formData.get("cityPublic") === "on" ? "on" : "off";
   return values;
 }
 
@@ -54,15 +55,23 @@ export async function updateProfileAction(
     };
   }
 
-  const validation = validateProfileUpdate({
+  const validation = v.safeParse(ProfileDetailsInputSchema, {
     handle: formData.get("handle"),
+    bio: formData.get("bio"),
+    cityPublic: formData.get("cityPublic") === "on",
+    affiliations: formData.getAll("affiliations"),
+    cropIds: formData.getAll("cropIds"),
+    links: (formDataString(formData.get("links")) ?? "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean),
   });
 
-  if (!validation.ok) {
+  if (!validation.success) {
     return {
       status: "error",
-      message: errorMessageJa.invalid_body,
-      fieldErrors: validation.fieldErrors,
+      message:
+        "入力内容を確認してください。ハンドルネームは30文字、自己紹介は2000文字以内、リンクはhttps://またはhttp://で始まるURLを入力してください。",
       values: submittedValues(formData),
     };
   }
@@ -96,7 +105,7 @@ export async function updateProfileAction(
     }
   }
 
-  const result = await updateOwnProfile(session.data.userId, validation.input);
+  const result = await saveProfileDetails(validation.output);
 
   if (!result.ok) {
     const message = errorMessageJa[result.error];

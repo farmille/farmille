@@ -111,6 +111,13 @@ export type MaterialDetail = MaterialDetailFields & {
   productTypes: MaterialClassification[];
   searchTags: MaterialSearchTag[];
   targetCrops: MaterialTargetCrop[];
+  targetCropGroups: MaterialClassification[];
+  applicationMethods: Array<
+    Pick<
+      Database["public"]["Tables"]["material_application_methods"]["Row"],
+      "method" | "sort_order"
+    >
+  >;
 };
 
 type MaterialFilterResult = Result<string[] | null>;
@@ -519,6 +526,8 @@ export async function getMaterialWithSupabase(
     evidencesResult,
     effectsResult,
     cropsResult,
+    cropGroupsResult,
+    methodsResult,
     ingredientCategoriesResult,
     ingredientsResult,
     productTypesResult,
@@ -540,6 +549,15 @@ export async function getMaterialWithSupabase(
       .select("crop_id, source_name, sort_order")
       .eq("material_id", id),
     supabase
+      .from("material_crop_groups")
+      .select("sort_order,crop_groups(id,name)")
+      .eq("material_id", id),
+    supabase
+      .from("material_application_methods")
+      .select("method,sort_order")
+      .eq("material_id", id)
+      .order("sort_order"),
+    supabase
       .from("material_ingredient_categories")
       .select("ingredient_category_id")
       .eq("material_id", id),
@@ -554,6 +572,8 @@ export async function getMaterialWithSupabase(
     evidencesResult.error ??
     effectsResult.error ??
     cropsResult.error ??
+    cropGroupsResult.error ??
+    methodsResult.error ??
     ingredientCategoriesResult.error ??
     ingredientsResult.error ??
     productTypesResult.error ??
@@ -573,6 +593,8 @@ export async function getMaterialWithSupabase(
   const productTypeRelations = productTypesResult.data;
   const searchTagRelations = searchTagsResult.data;
   if (
+    cropGroupsResult.data === null ||
+    methodsResult.data === null ||
     images === null ||
     evidences === null ||
     effectRelations === null ||
@@ -687,6 +709,11 @@ export async function getMaterialWithSupabase(
     searchTags: searchTags.toSorted(
       (left, right) => left.category.localeCompare(right.category) || bySortOrder(left, right),
     ),
+    targetCropGroups: cropGroupsResult.data.map((row) => ({
+      ...row.crop_groups,
+      sort_order: row.sort_order,
+    })),
+    applicationMethods: methodsResult.data,
     targetCrops: targetCrops.toSorted(
       (left, right) => left.groupSortOrder - right.groupSortOrder || bySortOrder(left, right),
     ),

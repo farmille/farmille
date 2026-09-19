@@ -65,6 +65,8 @@ export const materialDetail: MaterialDetail = {
       categorySortOrder: 40,
     },
   ],
+  targetCropGroups: [],
+  applicationMethods: [],
   targetCrops: [
     {
       id: "00000000-0000-4000-8000-000000000304",
