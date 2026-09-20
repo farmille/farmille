@@ -127,6 +127,37 @@ export function PostalAddressFields({
           required
         />
       </Field>
+      {[
+        { name: "streetAddress", label: "番地", autoComplete: "address-line1", required: true },
+        {
+          name: "buildingName",
+          label: "建物名・部屋番号",
+          autoComplete: "address-line2",
+          required: false,
+        },
+      ].map((field) => (
+        <Field
+          key={field.name}
+          error={fieldErrors[field.name]}
+          htmlFor={field.name}
+          label={field.label}
+          visibility="private"
+          guide={
+            field.required ? "町名・丁目・番地を入力してください。公開されません" : "公開されません"
+          }
+          requirement={field.required ? "required" : "optional"}
+        >
+          <input
+            className={controlStyle}
+            id={field.name}
+            name={field.name}
+            autoComplete={field.autoComplete}
+            defaultValue={values[field.name]}
+            maxLength={200}
+            required={field.required}
+          />
+        </Field>
+      ))}
     </>
   );
 }
