@@ -1,8 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-import { HANDLE_MAX_LENGTH } from "@/lib/auth/account-rules";
 import { AVATAR_MAX_BYTES } from "@/lib/avatar-rules";
-import { trimmedFormDataString } from "@/lib/validation";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
@@ -14,16 +10,6 @@ export type OwnProfile = {
   handle: string;
   avatarUrl: string | null;
 };
-
-export type ProfileUpdateInput = {
-  handle: string;
-};
-
-export type ProfileUpdateFieldErrors = Partial<Record<"handle" | "avatar", string>>;
-
-export type ProfileUpdateValidation =
-  | { ok: true; input: ProfileUpdateInput }
-  | { ok: false; fieldErrors: ProfileUpdateFieldErrors };
 
 const AVATAR_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -42,26 +28,6 @@ function avatarExtension(mimeType: string): string | null {
     default:
       return null;
   }
-}
-
-async function isHandleTakenByOther(
-  supabase: SupabaseClient<Database>,
-  handle: string,
-  userId: string,
-): Promise<Result<boolean>> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("user_id")
-    .eq("handle", handle)
-    .neq("user_id", userId)
-    .maybeSingle();
-
-  if (error !== null) {
-    reportQueryError("ハンドル重複確認に失敗", error);
-    return fail("internal");
-  }
-
-  return succeed(data !== null);
 }
 
 /** マイページと表示情報編集で使う、本人の公開表示情報を取得する。 */
@@ -89,52 +55,6 @@ export async function getOwnProfile(userId: string): Promise<Result<OwnProfile>>
     handle: profile.handle,
     avatarUrl: profile.avatar_url,
   });
-}
-
-export function validateProfileUpdate(raw: {
-  handle: FormDataEntryValue | null;
-}): ProfileUpdateValidation {
-  const handle = trimmedFormDataString(raw.handle);
-
-  if (handle.length === 0) {
-    return { ok: false, fieldErrors: { handle: "ハンドルネームを入力してください。" } };
-  }
-
-  if (handle.length > HANDLE_MAX_LENGTH) {
-    return {
-      ok: false,
-      fieldErrors: {
-        handle: `ハンドルネームは${HANDLE_MAX_LENGTH}文字以内で入力してください。`,
-      },
-    };
-  }
-
-  return { ok: true, input: { handle } };
-}
-
-/** 本人のハンドルネームを更新する。 */
-export async function updateOwnProfile(
-  userId: string,
-  input: ProfileUpdateInput,
-): Promise<Result<null>> {
-  const supabase = await createServerSupabase();
-
-  const handleTaken = await isHandleTakenByOther(supabase, input.handle, userId);
-  if (!handleTaken.ok) return handleTaken;
-  if (handleTaken.data) return fail("handle_taken");
-
-  const { error: updateError } = await supabase
-    .from("profiles")
-    .update({ handle: input.handle })
-    .eq("user_id", userId);
-
-  if (updateError !== null) {
-    if (updateError.code === "23505") return fail("handle_taken");
-    reportQueryError("表示情報の更新に失敗", updateError);
-    return fail("internal");
-  }
-
-  return succeed(null);
 }
 
 /** アバターを Storage `avatars/{user_id}/…` に上げ、profiles.avatar_url を更新する。 */

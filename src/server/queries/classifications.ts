@@ -52,28 +52,6 @@ export type ClassificationOptions = {
   searchTags: Array<Pick<SearchTagRow, "id" | "name" | "category" | "sort_order">>;
 };
 
-export const POPULAR_FILTER_PAIRS: ReadonlyArray<{
-  category: SearchFilterCategory;
-  name: string;
-}> = [
-  { category: "concern", name: "高温対策" },
-  { category: "crop", name: "ミニトマト" },
-  { category: "crop", name: "いちご" },
-  { category: "concern", name: "根張り改善" },
-  { category: "condition", name: "施設園芸" },
-  { category: "condition", name: "葉面散布" },
-];
-
-export const SEASONAL_FILTER_PAIRS: ReadonlyArray<{
-  category: SearchFilterCategory;
-  name: string;
-}> = [
-  { category: "concern", name: "夏の暑さ対策" },
-  { category: "effect", name: "樹勢改善" },
-  { category: "concern", name: "日持ち向上" },
-  { category: "condition", name: "ハウス栽培" },
-];
-
 const CATEGORY_ORDER = new Map<SearchFilterCategory, number>(
   SEARCH_FILTER_CATEGORIES.map((category, index) => [category, index]),
 );
@@ -330,31 +308,6 @@ export async function listSearchFiltersByRefs(
   for (const ref of refs) {
     const filter = byKey.get(`${ref.category}:${ref.id}`);
     if (filter === undefined) return fail("invalid_body");
-    resolved.push(filter);
-  }
-
-  return succeed(resolved);
-}
-
-export async function listSearchFiltersByPairs(
-  pairs: ReadonlyArray<{ category: SearchFilterCategory; name: string }>,
-): Promise<Result<SearchFilterItem[]>> {
-  if (pairs.length === 0) return succeed([]);
-
-  const filters = await listSearchFilters();
-  if (!filters.ok) return filters;
-
-  const byKey = new Map(
-    filters.data.map((filter) => [`${filter.category}\0${filter.name}`, filter]),
-  );
-  const resolved: SearchFilterItem[] = [];
-
-  for (const pair of pairs) {
-    const filter = byKey.get(`${pair.category}\0${pair.name}`);
-    if (filter === undefined) {
-      reportQueryError("シードに無い検索条件", pair);
-      return fail("internal");
-    }
     resolved.push(filter);
   }
 
