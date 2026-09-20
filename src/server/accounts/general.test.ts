@@ -13,6 +13,8 @@ const validRaw = {
   postalCode: "1000001",
   prefectureCode: "13",
   city: "千代田区",
+  streetAddress: "千代田1-1",
+  buildingName: "",
   terms: "on",
 };
 
@@ -33,6 +35,18 @@ describe("validateGeneralSignup", () => {
     });
     expect(validateGeneralSignup({ ...validRaw, handle: "   " })).toMatchObject({ ok: false });
     expect(validateGeneralSignup({ ...validRaw, handle: "あ".repeat(31) })).toMatchObject({
+      ok: false,
+    });
+  });
+
+  it("番地は必須で、建物名は任意とし、前後の空白と長さを検証する", () => {
+    expect(
+      validateGeneralSignup({ ...validRaw, streetAddress: "  1-1  ", buildingName: "  本館101  " }),
+    ).toMatchObject({ ok: true, input: { streetAddress: "1-1", buildingName: "本館101" } });
+    for (const streetAddress of [null, "", "　 ", "あ".repeat(201)]) {
+      expect(validateGeneralSignup({ ...validRaw, streetAddress })).toMatchObject({ ok: false });
+    }
+    expect(validateGeneralSignup({ ...validRaw, buildingName: "あ".repeat(201) })).toMatchObject({
       ok: false,
     });
   });

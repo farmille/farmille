@@ -35,6 +35,8 @@ function submittedValues(formData: FormData): AuthFormValues {
     "postalCode",
     "prefectureCode",
     "city",
+    "streetAddress",
+    "buildingName",
     "terms",
   ]) {
     const value = formDataString(formData.get(name));
@@ -59,6 +61,8 @@ export async function signupAction(
     postalCode: formData.get("postalCode"),
     prefectureCode: formData.get("prefectureCode"),
     city: formData.get("city"),
+    streetAddress: formData.get("streetAddress"),
+    buildingName: formData.get("buildingName"),
     terms: formData.get("terms"),
   });
 

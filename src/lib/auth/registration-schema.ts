@@ -44,6 +44,8 @@ export const generalRegistrationSchema = v.object({
     v.transform(Number),
   ),
   city: requiredText("市区町村", 100),
+  streetAddress: requiredText("番地", 200),
+  buildingName: optionalText(200),
   password: v.pipe(
     v.string(),
     v.minLength(

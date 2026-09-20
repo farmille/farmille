@@ -31,7 +31,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
 
       <NoteBox>
-        ニックネーム・あなたの立場・都道府県は、投稿や公開プロフィールに表示されます。本名・メールアドレス・電話番号・郵便番号・市区町村は公開されません。
+        ニックネーム・あなたの立場・都道府県は、投稿や公開プロフィールに表示されます。本名・メールアドレス・電話番号・郵便番号・番地・建物名は公開されません。市区町村は初期設定では非公開です。
       </NoteBox>
 
       <Field
