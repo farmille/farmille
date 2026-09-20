@@ -140,6 +140,8 @@ export async function registerGeneralUser(
     phone: input.phone || null,
     postal_code: input.postalCode,
     city: input.city,
+    street_address: input.streetAddress,
+    building_name: input.buildingName || null,
   });
   if (contactError !== null) {
     console.error("[auth] 非公開連絡先の保存に失敗", contactError.code);

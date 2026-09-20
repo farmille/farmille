@@ -36,9 +36,16 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await expect(page.getByText(/^あなたの立場必須\s*公開されます$/)).toBeVisible();
     await expect(page.getByRole("radio")).toHaveCount(4);
     await expect(page.getByRole("radio", { name: "生産者", exact: true })).toBeVisible();
-    await expect(page.getByRole("radio", { name: /^JA関係者/ })).toBeVisible();
+    await expect(
+      page.getByRole("radio", { name: "JAグループ職員（営農指導員など）", exact: true }),
+    ).toBeVisible();
     await expect(page.getByRole("radio", { name: /^行政関係者/ })).toBeVisible();
-    await expect(page.getByRole("radio", { name: /^その他/ })).toBeVisible();
+    await expect(
+      page.getByRole("radio", {
+        name: "その他（メーカー関係者、専門家、大学研究員など）",
+        exact: true,
+      }),
+    ).toBeVisible();
     await expect(page.getByText("メーカー関係者", { exact: true })).toHaveCount(0);
     await captureAccountScreen(page, "02-general-signup.png");
 
@@ -94,6 +101,8 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
       page.getByRole("alert").filter({ hasText: "このハンドルネームはすでに使われています。" }),
     ).toHaveCount(2);
     await expect(page).toHaveURL(/\/signup\/general$/);
+    await expect(page.getByLabel("番地", { exact: false })).toHaveValue("千代田1-1");
+    await expect(page.getByLabel("建物名・部屋番号")).toHaveValue("試験ビル101号室");
   } finally {
     await deleteAuthUsersByEmail(email);
     await deleteAuthUsersByEmail(duplicateEmail);
