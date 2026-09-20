@@ -2206,29 +2206,35 @@ export type Database = {
       }
       profile_contact_details: {
         Row: {
+          building_name: string | null
           city: string
           family_name: string
           given_name: string
           phone: string | null
           postal_code: string
+          street_address: string | null
           terms_accepted_at: string
           user_id: string
         }
         Insert: {
+          building_name?: string | null
           city: string
           family_name: string
           given_name: string
           phone?: string | null
           postal_code: string
+          street_address?: string | null
           terms_accepted_at?: string
           user_id: string
         }
         Update: {
+          building_name?: string | null
           city?: string
           family_name?: string
           given_name?: string
           phone?: string | null
           postal_code?: string
+          street_address?: string | null
           terms_accepted_at?: string
           user_id?: string
         }
@@ -3617,3 +3623,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
