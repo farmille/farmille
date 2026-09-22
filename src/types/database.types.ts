@@ -1701,26 +1701,41 @@ export type Database = {
       }
       material_page_links: {
         Row: {
-          group_name: string
+          group_name: string | null
           id: string
           sort_order: number
           title: string
+          trial_crops: string | null
+          trial_institution: string | null
+          trial_page_count: number | null
+          trial_summary: string | null
+          trial_year: number | null
           url: string
           version_id: string
         }
         Insert: {
-          group_name: string
+          group_name?: string | null
           id?: string
           sort_order: number
           title: string
+          trial_crops?: string | null
+          trial_institution?: string | null
+          trial_page_count?: number | null
+          trial_summary?: string | null
+          trial_year?: number | null
           url: string
           version_id: string
         }
         Update: {
-          group_name?: string
+          group_name?: string | null
           id?: string
           sort_order?: number
           title?: string
+          trial_crops?: string | null
+          trial_institution?: string | null
+          trial_page_count?: number | null
+          trial_summary?: string | null
+          trial_year?: number | null
           url?: string
           version_id?: string
         }
@@ -1734,6 +1749,75 @@ export type Database = {
           },
           {
             foreignKeyName: "material_page_links_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "public_material_page_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_page_registrations: {
+        Row: {
+          company_name: string
+          effects: string
+          kind: string
+          version_id: string
+        }
+        Insert: {
+          company_name: string
+          effects?: string
+          kind: string
+          version_id: string
+        }
+        Update: {
+          company_name?: string
+          effects?: string
+          kind?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_registrations_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "material_page_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_registrations_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "public_material_page_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_page_related_companies: {
+        Row: {
+          company_name: string
+          sort_order: number
+          version_id: string
+        }
+        Insert: {
+          company_name: string
+          sort_order: number
+          version_id: string
+        }
+        Update: {
+          company_name?: string
+          sort_order?: number
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_page_related_companies_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "material_page_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_page_related_companies_version_id_fkey"
             columns: ["version_id"]
             isOneToOne: false
             referencedRelation: "public_material_page_versions"
@@ -1813,6 +1897,7 @@ export type Database = {
       material_page_versions: {
         Row: {
           base_revision: number
+          content_contract: number
           created_at: string
           description: string
           grant_id: string
@@ -1828,6 +1913,7 @@ export type Database = {
         }
         Insert: {
           base_revision: number
+          content_contract?: number
           created_at?: string
           description?: string
           grant_id: string
@@ -1843,6 +1929,7 @@ export type Database = {
         }
         Update: {
           base_revision?: number
+          content_contract?: number
           created_at?: string
           description?: string
           grant_id?: string
