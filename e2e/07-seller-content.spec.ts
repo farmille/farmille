@@ -65,28 +65,40 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
     for (const document of documents) {
       const group = page.getByRole("heading", { name: document.label, exact: true }).locator("..");
       await group.getByRole("button", { name: "資料を追加", exact: true }).click();
-      await group.getByLabel("資料名", { exact: true }).fill(document.title);
+      await group.getByRole("textbox", { name: "資料名", exact: true }).fill(document.title);
       await group
-        .getByLabel("資料URL", { exact: true })
+        .getByRole("textbox", { name: "資料URL", exact: true })
         .fill(`https://example.com/${document.group}.pdf`);
       if (document.group === "public_trial" || document.group === "other_trial") {
-        await group.getByLabel("試験の作目（任意）", { exact: true }).fill("トマト");
-        await group.getByLabel("試験の概要", { exact: true }).fill(`${document.title}の概要`);
         await group
-          .getByLabel("試験の実施機関", { exact: true })
+          .getByRole("textbox", { name: "試験の作目（任意）", exact: true })
+          .fill("トマト");
+        await group
+          .getByRole("textbox", { name: "試験の概要", exact: true })
+          .fill(`${document.title}の概要`);
+        await group
+          .getByRole("textbox", { name: "試験の実施機関", exact: true })
           .fill(`${document.title}の実施機関`);
-        await group.getByLabel("試験実施年（任意）", { exact: true }).fill("2025");
-        await group.getByLabel("資料のページ数（任意）", { exact: true }).fill("12");
+        await group
+          .getByRole("spinbutton", { name: "試験実施年（任意）", exact: true })
+          .fill("2025");
+        await group
+          .getByRole("spinbutton", { name: "資料のページ数（任意）", exact: true })
+          .fill("12");
       }
     }
     await page.getByRole("checkbox", { name: "農薬登録", exact: true }).check();
-    await page.getByLabel("農薬登録者", { exact: true }).fill("農薬登録会社");
-    await page.getByLabel("農薬としての効果・特徴", { exact: true }).fill("製品表示に沿った効果");
+    await page.getByRole("textbox", { name: "農薬登録者", exact: true }).fill("農薬登録会社");
+    await page
+      .getByRole("textbox", { name: "農薬としての効果・特徴", exact: true })
+      .fill("製品表示に沿った効果");
     await page.getByRole("checkbox", { name: "土壌改良資材", exact: true }).check();
-    await page.getByLabel("表示者（土壌改良資材）", { exact: true }).fill("土壌改良資材の表示会社");
-    await page.getByLabel("関係会社1", { exact: true }).fill("製造会社");
+    await page
+      .getByRole("textbox", { name: "表示者（土壌改良資材）", exact: true })
+      .fill("土壌改良資材の表示会社");
+    await page.getByRole("textbox", { name: "関係会社1", exact: true }).fill("製造会社");
     await page.getByRole("button", { name: "関係会社を追加", exact: true }).click();
-    await page.getByLabel("関係会社2", { exact: true }).fill("販売会社");
+    await page.getByRole("textbox", { name: "関係会社2", exact: true }).fill("販売会社");
     await page.getByRole("button", { name: "下書きを保存", exact: true }).click();
     await expect(page.getByText("下書きを保存しました。", { exact: true })).toBeVisible();
     await page.reload();
@@ -98,17 +110,27 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
       await expect(group.getByRole("combobox", { name: "資料の分類", exact: true })).toHaveValue(
         document.group,
       );
-      await expect(group.getByLabel("資料名", { exact: true })).toHaveValue(document.title);
+      await expect(group.getByRole("textbox", { name: "資料名", exact: true })).toHaveValue(
+        document.title,
+      );
       if (document.group === "public_trial" || document.group === "other_trial") {
-        await expect(group.getByLabel("試験の概要", { exact: true })).toHaveValue(
+        await expect(group.getByRole("textbox", { name: "試験の概要", exact: true })).toHaveValue(
           `${document.title}の概要`,
         );
-        await expect(group.getByLabel("試験実施年（任意）", { exact: true })).toHaveValue("2025");
-        await expect(group.getByLabel("資料のページ数（任意）", { exact: true })).toHaveValue("12");
+        await expect(
+          group.getByRole("spinbutton", { name: "試験実施年（任意）", exact: true }),
+        ).toHaveValue("2025");
+        await expect(
+          group.getByRole("spinbutton", { name: "資料のページ数（任意）", exact: true }),
+        ).toHaveValue("12");
       }
     }
-    await expect(page.getByLabel("農薬登録者", { exact: true })).toHaveValue("農薬登録会社");
-    await expect(page.getByLabel("関係会社2", { exact: true })).toHaveValue("販売会社");
+    await expect(page.getByRole("textbox", { name: "農薬登録者", exact: true })).toHaveValue(
+      "農薬登録会社",
+    );
+    await expect(page.getByRole("textbox", { name: "関係会社2", exact: true })).toHaveValue(
+      "販売会社",
+    );
     await page.getByRole("button", { name: "プレビュー", exact: true }).click();
     await expect(page.getByText(description, { exact: true })).toBeVisible();
     await expect(page.getByText("製造会社、販売会社", { exact: true })).toBeVisible();
@@ -132,7 +154,9 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
     await expect(adminPage.getByText("農薬登録会社", { exact: true })).toBeVisible();
     await expect(adminPage.getByText("製造会社、販売会社", { exact: true })).toBeVisible();
     await adminPage.getByRole("button", { name: "表現確認を完了して反映", exact: true }).click();
-    await expect(adminPage.getByText("表現確認を完了し、製品情報を反映しました。")).toBeVisible();
+    await expect(
+      adminPage.getByText("この原稿の表現確認は終了しています。", { exact: true }),
+    ).toBeVisible();
     await page.goto(`/materials/${material.id}`);
     await expect(page.getByText(description, { exact: true })).toBeVisible();
     await expect(page.getByText("メーカー確認済み", { exact: true })).toHaveCount(0);
