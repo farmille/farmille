@@ -95,7 +95,9 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
     );
     for (const document of documents) {
       const group = page.getByRole("heading", { name: document.label, exact: true }).locator("..");
-      await expect(group.getByLabel("資料の分類", { exact: true })).toHaveValue(document.group);
+      await expect(group.getByRole("combobox", { name: "資料の分類", exact: true })).toHaveValue(
+        document.group,
+      );
       await expect(group.getByLabel("資料名", { exact: true })).toHaveValue(document.title);
       if (document.group === "public_trial" || document.group === "other_trial") {
         await expect(group.getByLabel("試験の概要", { exact: true })).toHaveValue(
