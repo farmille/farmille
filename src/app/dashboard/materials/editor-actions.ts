@@ -15,7 +15,7 @@ export async function saveMaterialPage(input: v.InferOutput<typeof SaveMaterialP
     return {
       ok: false as const,
       message:
-        "入力内容を確認してください。資料のタイトル・URLと登録・認証の空欄を確認してください。",
+        "資料の分類・タイトル・URL、試験の概要・実施機関、登録事業者と関係会社を確認してください。同じURLや会社名は重複して送信できません。",
     };
   const db = await createServerSupabase();
   const { data, error } = await db.rpc("save_material_page_version", {

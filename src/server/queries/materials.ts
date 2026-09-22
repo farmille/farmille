@@ -102,6 +102,10 @@ export type PostingMaterial = Pick<
 >;
 
 export type MaterialDetail = MaterialDetailFields & {
+  representativeSeller: Pick<
+    Database["public"]["Views"]["public_sellers"]["Row"],
+    "id" | "official_name"
+  > | null;
   compositionType: MaterialClassification | null;
   effects: MaterialEffect[];
   images: MaterialImage[];
@@ -533,6 +537,7 @@ export async function getMaterialWithSupabase(
     productTypesResult,
     searchTagsResult,
     optionsResult,
+    representativeSellerResult,
   ] = await Promise.all([
     supabase
       .from("material_images")
@@ -565,6 +570,13 @@ export async function getMaterialWithSupabase(
     supabase.from("material_product_types").select("product_type_id").eq("material_id", id),
     supabase.from("material_search_tags").select("search_tag_id").eq("material_id", id),
     listClassificationOptionsWithSupabase(supabase),
+    data.seller_id === null
+      ? { data: null, error: null }
+      : supabase
+          .from("public_sellers")
+          .select("id,official_name")
+          .eq("id", data.seller_id)
+          .maybeSingle(),
   ]);
 
   const relationError =
@@ -577,7 +589,8 @@ export async function getMaterialWithSupabase(
     ingredientCategoriesResult.error ??
     ingredientsResult.error ??
     productTypesResult.error ??
-    searchTagsResult.error;
+    searchTagsResult.error ??
+    representativeSellerResult.error;
   if (relationError !== null) {
     reportQueryError("資材分類の取得に失敗", relationError);
     return fail("internal");
@@ -695,6 +708,7 @@ export async function getMaterialWithSupabase(
 
   return succeed({
     ...data,
+    representativeSeller: representativeSellerResult.data,
     compositionType,
     effects: effects.toSorted(
       (left, right) => left.categorySortOrder - right.categorySortOrder || bySortOrder(left, right),

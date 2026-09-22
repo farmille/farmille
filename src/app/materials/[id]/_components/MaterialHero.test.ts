@@ -7,6 +7,31 @@ import { MaterialHero } from "./MaterialHero";
 import { materialDetail } from "./story-fixtures";
 
 describe("MaterialHero", () => {
+  it("代表メーカーの正式名称とリンク先を同じ会社から表示する", () => {
+    const material = {
+      ...materialDetail,
+      manufacturer_name: "旧掲載会社",
+      representativeSeller: { id: "maker-id", official_name: "編集権を持つメーカー" },
+    };
+    render(createElement(MaterialHero, { material, saved: null }));
+    expect(screen.getByRole("link", { name: "編集権を持つメーカー" })).toHaveAttribute(
+      "href",
+      "/sellers/maker-id",
+    );
+    expect(screen.queryByText("旧掲載会社")).not.toBeInTheDocument();
+  });
+  it("編集権のない資材は従来の会社名をリンクなしで表示する", () => {
+    const material = { ...materialDetail, seller_id: null, representativeSeller: null };
+    render(createElement(MaterialHero, { material, saved: null }));
+    expect(screen.getByText(material.manufacturer_name)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: material.manufacturer_name }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "メーカー登録" })).toHaveAttribute(
+      "href",
+      "/sellers/apply",
+    );
+  });
   it("画像の読み込みに失敗してもプレースホルダーを残す", () => {
     const material = {
       ...materialDetail,

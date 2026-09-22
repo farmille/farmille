@@ -1,5 +1,10 @@
+import { MaterialRegistrationBadges } from "@/components/materials/MaterialRegistrationBadges";
 import type { ReactNode } from "react";
-import { APPLICATION_METHODS, type MaterialPageContent } from "@/lib/material-page-editor";
+import {
+  APPLICATION_METHODS,
+  materialRegistrationRows,
+  type MaterialPageContent,
+} from "@/lib/material-page-editor";
 import type { MaterialDetail } from "@/server/queries/materials";
 import { css } from "../../../../../styled-system/css";
 
@@ -86,9 +91,19 @@ export function MaterialDetailTable({
     {
       label: "登録・認証",
       manufacturerEntry: true,
-      value: content?.certifications.join("・") || "−",
+      value: (
+        <MaterialRegistrationBadges
+          registrations={content?.registrations ?? []}
+          certifications={content?.certifications ?? []}
+        />
+      ),
     },
-    { label: "製造元・販売元・輸入元", manufacturerEntry: true, value: material.manufacturer_name },
+    ...materialRegistrationRows(content?.registrations ?? []),
+    {
+      label: "関係会社（販売元、製造元、輸入元など）",
+      manufacturerEntry: true,
+      value: content ? content.relatedCompanies.join("、") || "−" : material.manufacturer_name,
+    },
   ];
 
   return (
@@ -154,9 +169,6 @@ export function MaterialDetailTable({
           </div>
         ))}
       </dl>
-      <p className={css({ mt: "3", fontSize: "xs", color: "text.subtle", lineHeight: "relaxed" })}>
-        作物・効果・施用方法の分類は、農林水産省の通知（30消安第6281号）・JBSAの公式分類を参考にFarmilleが整理・解釈しています。効果を検証・保証するものではありません。
-      </p>
     </section>
   );
 }

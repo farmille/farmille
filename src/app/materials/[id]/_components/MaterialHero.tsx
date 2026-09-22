@@ -71,9 +71,9 @@ export function MaterialHero({
   saveUnavailable,
 }: MaterialHeroProps) {
   const primaryImage = material.images[0];
-  const manufacturer = material.seller_id ? (
-    <Link href={`/sellers/${material.seller_id}`} className={manufacturerStyle}>
-      {material.manufacturer_name}
+  const manufacturer = material.representativeSeller ? (
+    <Link href={`/sellers/${material.representativeSeller.id}`} className={manufacturerStyle}>
+      {material.representativeSeller.official_name}
     </Link>
   ) : (
     <span className={manufacturerStyle}>{material.manufacturer_name}</span>
@@ -143,6 +143,16 @@ export function MaterialHero({
           </div>
         </div>
       </div>
+      <p className={css({ mt: "3", fontSize: "xs", color: "text.subtle", lineHeight: "relaxed" })}>
+        国内での販売を代表する立場にあるとFarmille運営が調査・認識した企業を表示しています。相違がある場合は、
+        <Link
+          href="/sellers/apply"
+          className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
+        >
+          メーカー登録
+        </Link>
+        からご連絡ください。
+      </p>
       {material.images.length > 1 ? (
         <div
           aria-label="追加の製品画像"
