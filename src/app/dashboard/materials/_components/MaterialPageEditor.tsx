@@ -11,6 +11,7 @@ import {
   APPLICATION_METHODS,
   APPLICATION_TIMINGS,
   MATERIAL_LINK_GROUPS,
+  MATERIAL_REGISTRATION_KINDS,
   MaterialPageContentSchema,
   type MaterialPageContent as Content,
 } from "@/lib/material-page-editor";
@@ -264,12 +265,60 @@ export function MaterialPageEditor({
             </section>
             <section>
               <h2>リンク・資料</h2>
-              {MATERIAL_LINK_GROUPS.map((group) => (
-                <div key={group.value}>
+              {[{ value: null, label: "分類未選択" }, ...MATERIAL_LINK_GROUPS].map((group) => (
+                <div key={group.value ?? "unclassified"}>
                   <h3>{group.label}</h3>
                   {content.links.map((link, index) =>
                     link.group === group.value ? (
                       <div className={row} key={index}>
+                        <label>
+                          資料の分類
+                          <select
+                            className={controlStyle}
+                            value={link.group ?? ""}
+                            onChange={(event) => {
+                              const value = v.parse(
+                                v.picklist([
+                                  "",
+                                  "overview",
+                                  "safety",
+                                  "technical",
+                                  "public_trial",
+                                  "other_trial",
+                                ]),
+                                event.target.value,
+                              );
+                              setContent({
+                                ...content,
+                                links: content.links.map((entry, i) =>
+                                  i === index
+                                    ? {
+                                        ...entry,
+                                        group: value === "" ? null : value,
+                                        trial:
+                                          value === "public_trial" || value === "other_trial"
+                                            ? (entry.trial ?? {
+                                                crops: "",
+                                                summary: "",
+                                                institution: "",
+                                                year: null,
+                                                pageCount: null,
+                                              })
+                                            : null,
+                                      }
+                                    : entry,
+                                ),
+                              });
+                            }}
+                          >
+                            <option value="">分類を選択してください</option>
+                            {MATERIAL_LINK_GROUPS.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
                         <label>
                           資料名
                           <input
@@ -301,6 +350,83 @@ export function MaterialPageEditor({
                             }
                           />
                         </label>
+                        {link.trial ? (
+                          <>
+                            {(
+                              [
+                                { key: "crops", label: "試験の作目（任意）" },
+                                { key: "summary", label: "試験の概要" },
+                                { key: "institution", label: "試験の実施機関" },
+                              ] as const
+                            ).map((field) => (
+                              <label key={field.key}>
+                                {field.label}
+                                <textarea
+                                  className={controlStyle}
+                                  rows={field.key === "summary" ? 3 : 1}
+                                  value={link.trial?.[field.key] ?? ""}
+                                  onChange={(event) =>
+                                    setContent({
+                                      ...content,
+                                      links: content.links.map((entry, i) =>
+                                        i === index && entry.trial
+                                          ? {
+                                              ...entry,
+                                              trial: {
+                                                ...entry.trial,
+                                                [field.key]: event.target.value,
+                                              },
+                                            }
+                                          : entry,
+                                      ),
+                                    })
+                                  }
+                                />
+                              </label>
+                            ))}
+                            {(
+                              [
+                                { key: "year", label: "試験実施年（任意）", max: 9999 },
+                                {
+                                  key: "pageCount",
+                                  label: "資料のページ数（任意）",
+                                  max: 2147483647,
+                                },
+                              ] as const
+                            ).map((field) => (
+                              <label key={field.key}>
+                                {field.label}
+                                <input
+                                  className={controlStyle}
+                                  type="number"
+                                  min={1}
+                                  max={field.max}
+                                  step={1}
+                                  value={link.trial?.[field.key] ?? ""}
+                                  onChange={(event) =>
+                                    setContent({
+                                      ...content,
+                                      links: content.links.map((entry, i) =>
+                                        i === index && entry.trial
+                                          ? {
+                                              ...entry,
+                                              trial: {
+                                                ...entry.trial,
+                                                [field.key]:
+                                                  event.target.value === ""
+                                                    ? null
+                                                    : event.target.valueAsNumber,
+                                              },
+                                            }
+                                          : entry,
+                                      ),
+                                    })
+                                  }
+                                />
+                              </label>
+                            ))}
+                          </>
+                        ) : null}
                         <Button
                           variant="ghost"
                           onClick={() =>
@@ -320,7 +446,24 @@ export function MaterialPageEditor({
                     onClick={() =>
                       setContent({
                         ...content,
-                        links: [...content.links, { group: group.value, title: "", url: "" }],
+                        links: [
+                          ...content.links,
+                          {
+                            group: group.value,
+                            title: "",
+                            url: "",
+                            trial:
+                              group.value === "public_trial" || group.value === "other_trial"
+                                ? {
+                                    crops: "",
+                                    summary: "",
+                                    institution: "",
+                                    year: null,
+                                    pageCount: null,
+                                  }
+                                : null,
+                          },
+                        ],
                       })
                     }
                   >
@@ -423,7 +566,81 @@ export function MaterialPageEditor({
             </section>
             <section>
               <h2>登録・認証</h2>
-              <p>肥料登録・農薬登録・有機JAS適合などを1件ずつ記入してください。</p>
+              <p>該当する区分を選び、事業者名と表示できる効果・特徴を記入してください。</p>
+              {MATERIAL_REGISTRATION_KINDS.map((kind) => {
+                const registration = content.registrations.find(
+                  (entry) => entry.kind === kind.value,
+                );
+                return (
+                  <div className={row} key={kind.value}>
+                    <label className={timingOption}>
+                      <input
+                        type="checkbox"
+                        checked={Boolean(registration)}
+                        onChange={(event) =>
+                          setContent({
+                            ...content,
+                            registrations: event.target.checked
+                              ? [
+                                  ...content.registrations,
+                                  { kind: kind.value, companyName: "", effects: "" },
+                                ]
+                              : content.registrations.filter((entry) => entry.kind !== kind.value),
+                          })
+                        }
+                      />
+                      {kind.label}
+                    </label>
+                    {registration ? (
+                      <>
+                        <Field
+                          label={kind.companyLabel}
+                          htmlFor={`registration-${kind.value}-company`}
+                        >
+                          <input
+                            id={`registration-${kind.value}-company`}
+                            className={controlStyle}
+                            value={registration.companyName}
+                            onChange={(event) =>
+                              setContent({
+                                ...content,
+                                registrations: content.registrations.map((entry) =>
+                                  entry.kind === kind.value
+                                    ? { ...entry, companyName: event.target.value }
+                                    : entry,
+                                ),
+                              })
+                            }
+                          />
+                        </Field>
+                        <Field
+                          label={kind.effectsLabel}
+                          htmlFor={`registration-${kind.value}-effects`}
+                        >
+                          <textarea
+                            id={`registration-${kind.value}-effects`}
+                            className={controlStyle}
+                            rows={3}
+                            value={registration.effects}
+                            onChange={(event) =>
+                              setContent({
+                                ...content,
+                                registrations: content.registrations.map((entry) =>
+                                  entry.kind === kind.value
+                                    ? { ...entry, effects: event.target.value }
+                                    : entry,
+                                ),
+                              })
+                            }
+                          />
+                        </Field>
+                      </>
+                    ) : null}
+                  </div>
+                );
+              })}
+              <h3>その他の登録・認証</h3>
+              <p>有機JAS適合など、上記以外の情報を1件ずつ記入してください。</p>
               {content.certifications.map((title, index) => (
                 <div className={row} key={index}>
                   <input
@@ -459,6 +676,48 @@ export function MaterialPageEditor({
                 }
               >
                 登録・認証を追加
+              </Button>
+            </section>
+            <section>
+              <h2>関係会社（販売元、製造元、輸入元など）</h2>
+              <p>掲載する会社名を1社ずつ記入してください。</p>
+              {content.relatedCompanies.map((company, index) => (
+                <div className={row} key={index}>
+                  <label>
+                    関係会社{index + 1}
+                    <input
+                      className={controlStyle}
+                      value={company}
+                      onChange={(event) =>
+                        setContent({
+                          ...content,
+                          relatedCompanies: content.relatedCompanies.map((name, i) =>
+                            i === index ? event.target.value : name,
+                          ),
+                        })
+                      }
+                    />
+                  </label>
+                  <Button
+                    variant="ghost"
+                    onClick={() =>
+                      setContent({
+                        ...content,
+                        relatedCompanies: content.relatedCompanies.filter((_, i) => i !== index),
+                      })
+                    }
+                  >
+                    関係会社を外す
+                  </Button>
+                </div>
+              ))}
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  setContent({ ...content, relatedCompanies: [...content.relatedCompanies, ""] })
+                }
+              >
+                関係会社を追加
               </Button>
             </section>
           </div>

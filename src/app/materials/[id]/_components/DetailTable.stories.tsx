@@ -43,6 +43,8 @@ export const ManufacturerContent: Story = {
       links: [],
       images: [],
       timings: [],
+      registrations: [],
+      relatedCompanies: [],
       certifications: ["肥料登録"],
       usages: [
         { method: "spray", detail: "使用前に製品ラベルをご確認ください。" },

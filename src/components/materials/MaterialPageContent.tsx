@@ -1,7 +1,9 @@
+import { MaterialRegistrationBadges } from "./MaterialRegistrationBadges";
 import Image from "next/image";
 import { MaterialLinks } from "./MaterialLinks";
 import {
   APPLICATION_METHODS,
+  materialRegistrationRows,
   APPLICATION_TIMINGS,
   type MaterialPageContent as Content,
 } from "@/lib/material-page-editor";
@@ -98,15 +100,22 @@ export function MaterialPageContent({
       </section>
       <section>
         <h2>登録・認証</h2>
-        {content.certifications.length === 0 ? (
-          <p>−</p>
-        ) : (
-          <ul>
-            {content.certifications.map((title, index) => (
-              <li key={index}>{title}</li>
-            ))}
-          </ul>
-        )}
+        <MaterialRegistrationBadges
+          registrations={content.registrations}
+          certifications={content.certifications}
+        />
+        <dl>
+          {materialRegistrationRows(content.registrations).map((entry) => (
+            <div key={entry.label}>
+              <dt className={css({ fontWeight: "700", mt: "3" })}>{entry.label}</dt>
+              <dd className={materialPageText}>{entry.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+      <section>
+        <h2>関係会社（販売元、製造元、輸入元など）</h2>
+        <p className={materialPageText}>{content.relatedCompanies.join("、") || "−"}</p>
       </section>
     </div>
   );
