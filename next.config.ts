@@ -28,6 +28,14 @@ const nextConfig: NextConfig = {
         source: "/password-reset/:path*",
         headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
       },
+      {
+        source: "/company-requests/removal/confirm",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
+      {
+        source: "/api/company-application-evidence/:path*",
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      },
     ];
   },
   images: {

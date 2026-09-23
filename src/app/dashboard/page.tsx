@@ -115,6 +115,11 @@ export default async function DashboardPage() {
           </Link>
         </SurfaceCard>
 
+        <SurfaceCard title="各種お手続き">
+          <TextLink href="/dashboard/applications">
+            資材掲載・オーナー権限・移行の申請と受付票
+          </TextLink>
+        </SurfaceCard>
         <SurfaceCard title="メーカープロフィール">
           <TextLink href="/dashboard/profile">会社紹介・ロゴ・公式リンクを編集する</TextLink>
         </SurfaceCard>
