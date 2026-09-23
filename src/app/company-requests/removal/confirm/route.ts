@@ -20,7 +20,10 @@ export async function GET() {
   );
 }
 export async function POST(request: Request) {
-  if (request.headers.get("origin") !== new URL(clientEnv.siteUrl).origin)
+  const origin = request.headers.get("origin");
+  const sameOriginForm =
+    origin === "null" && request.headers.get("sec-fetch-site") === "same-origin";
+  if (origin !== new URL(clientEnv.siteUrl).origin && !sameOriginForm)
     return new Response("この操作は許可されていません。", { status: 403 });
   const form = await request.formData();
   const token = v.safeParse(v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/)), form.get("token"));

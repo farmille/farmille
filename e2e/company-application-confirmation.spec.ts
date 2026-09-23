@@ -36,3 +36,18 @@ test("申請用メール確認は解析を読み込まず、明示POSTだけを�
   });
   expect(invalid.status()).toBe(400);
 });
+
+test("no-referrerの確認フォームは同一オリジンだけを受け付ける", async ({ request }) => {
+  for (const site of ["cross-site", "same-site", "none"]) {
+    const response = await request.post("/company-requests/removal/confirm", {
+      headers: { origin: "null", "sec-fetch-site": site },
+      form: { token: "invalid" },
+    });
+    expect(response.status()).toBe(403);
+  }
+  const sameOrigin = await request.post("/company-requests/removal/confirm", {
+    headers: { origin: "null", "sec-fetch-site": "same-origin" },
+    form: { token: "invalid" },
+  });
+  expect(sameOrigin.status()).toBe(400);
+});
