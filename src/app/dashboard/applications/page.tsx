@@ -1,8 +1,11 @@
+import { applicationSellerPage } from "./_lib/access";
+import { SellerAccessDenied } from "../_components/AccessDenied";
 import Link from "next/link";
 import { FormPageShell, SurfaceCard } from "@/components";
 import { listCompanyApplications } from "@/server/company-applications";
 import { applicationCopy } from "@/lib/company-application-copy";
 export default async function ApplicationsPage() {
+  if (!(await applicationSellerPage("/dashboard/applications"))) return <SellerAccessDenied />;
   const receipts = await listCompanyApplications();
   return (
     <FormPageShell chrome="seller" title="各種お手続き" backHref="/dashboard">
