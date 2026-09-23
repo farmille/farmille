@@ -1,3 +1,9 @@
+import type { UsageReportInput } from "@/lib/usage-report";
+import {
+  getStructuredUsageReport,
+  getReportDocumentUrls,
+  reportMediaUrl,
+} from "@/server/usage-reports/structured";
 import { reportAdminError, withAdmin } from "@/server/admin/guard";
 import { fail, succeed, type Result } from "@/server/result";
 import type { Database } from "@/types/database.types";
@@ -47,6 +53,9 @@ export type PendingUsageReportItem = {
 };
 
 export type UsageReportEditorialDetail = {
+  formVersion: number;
+  structured: UsageReportInput | null;
+  documentUrls: Array<{ id: string; url: string }>;
   id: string;
   title: string;
   status: EditorialReportStatus;
@@ -167,7 +176,7 @@ export async function listPendingUsageReports(): Promise<Result<PendingUsageRepo
 
       items.push({
         id: row.id,
-        title: row.title ?? `${row.material.name} 実証詳細レポート`,
+        title: row.title ?? `${row.material.name} 実証詳細レポート｜${row.crop.name}`,
         createdAt: row.created_at,
         author: { userId: row.author.user_id, handle: row.author.handle },
         crop: row.crop,
@@ -257,7 +266,7 @@ export async function getUsageReportEditorialDetail(
       }
       media.push({
         id: item.id,
-        url: item.url,
+        url: row.form_version === 2 ? reportMediaUrl(item.url, row.author_user_id) : item.url,
         mediaType: item.media_type,
         caption: item.caption,
         placement: item.placement,
@@ -265,9 +274,21 @@ export async function getUsageReportEditorialDetail(
       });
     }
 
+    const structured =
+      row.form_version === 2 ? await getStructuredUsageReport(row.id, supabase) : succeed(null);
+    if (!structured.ok) return structured;
+    const documentUrls =
+      structured.data === null
+        ? succeed([])
+        : await getReportDocumentUrls(structured.data, supabase);
+    if (!documentUrls.ok) return documentUrls;
+
     return succeed({
+      formVersion: row.form_version,
+      structured: structured.data,
+      documentUrls: documentUrls.data,
       id: row.id,
-      title: row.title ?? `${row.material.name} 実証詳細レポート`,
+      title: row.title ?? `${row.material.name} 実証詳細レポート｜${row.crop.name}`,
       status: row.status,
       createdAt: row.created_at,
       publishedAt: row.published_at,
@@ -330,17 +351,29 @@ export async function updateUsageReportEditorial(
   const summary = input.summary.trim();
   const editorNote = optionalText(input.editorNote);
 
-  if (title.length === 0 || observedChange.length === 0 || summary.length === 0) {
+  if (title.length === 0 || observedChange.length === 0) {
     return fail("invalid_body");
   }
   if (operation === "decline" && editorNote === null) return fail("invalid_body");
 
   return withAdmin(async ({ supabase }) => {
+    const current = await supabase
+      .from("usage_reports")
+      .select("form_version")
+      .eq("id", reportId)
+      .eq("status", "pending")
+      .maybeSingle();
+    if (current.error !== null) return fail("internal");
+    if (current.data === null) return fail("conflict");
+    if (current.data.form_version !== 2 && summary.length === 0) return fail("invalid_body");
     const update: Database["public"]["Tables"]["usage_reports"]["Update"] = {
       title,
       observed_change: observedChange,
       negative_note: optionalText(input.negativeNote),
-      summary,
+      summary:
+        current.data.form_version === 2
+          ? Array.from(observedChange).slice(0, 120).join("")
+          : summary,
       editor_note: editorNote,
     };
     if (operation === "publish") {

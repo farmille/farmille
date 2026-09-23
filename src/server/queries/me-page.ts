@@ -267,7 +267,11 @@ async function listOwnPosts(
   }
 
   for (const report of reportRows) {
-    if (report.crop === null || report.material === null || !isUsageReportStatus(report.status)) {
+    if (
+      (report.crop === null && report.status !== "draft") ||
+      report.material === null ||
+      !isUsageReportStatus(report.status)
+    ) {
       reportQueryError("自分の実証詳細レポートの関連データが欠落", { reportId: report.id });
       return fail("internal");
     }
@@ -278,7 +282,7 @@ async function listOwnPosts(
       createdAt: report.published_at ?? report.created_at,
       materialId: report.material_id,
       title: report.title ?? `${report.material.name} 実証詳細レポート`,
-      cropName: report.crop.name,
+      cropName: report.crop?.name ?? "作物未選択",
       status: report.status,
       helpfulCount: reportHelpful.data.get(report.id) ?? 0,
     });

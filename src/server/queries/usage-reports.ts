@@ -1,3 +1,9 @@
+import type { UsageReportInput } from "@/lib/usage-report";
+import {
+  getStructuredUsageReport,
+  getReportDocumentUrls,
+  reportMediaUrl,
+} from "@/server/usage-reports/structured";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSessionUser } from "@/server/auth";
 
@@ -31,7 +37,7 @@ export type RecentUsageReportItem = {
 
 type RecentReportQueryRow = Pick<
   UsageReportRow,
-  "id" | "title" | "published_at" | "material_id" | "summary" | "author_user_id"
+  "id" | "title" | "published_at" | "material_id" | "summary" | "author_user_id" | "form_version"
 > & {
   author: Pick<PublicProfileRow, "handle"> | null;
   crop: Pick<CropRow, "name"> | null;
@@ -67,6 +73,7 @@ export async function listRecentUsageReports({
       material_id,
       summary,
       author_user_id,
+      form_version,
       author:public_profiles!usage_reports_author_user_id_fkey (
         handle
       ),
@@ -145,7 +152,12 @@ export async function listRecentUsageReports({
       title: row.title ?? `${row.material.name} 使用結果レポート`,
       publishedAt: row.published_at,
       helpfulCount: helpfulById.get(row.id) ?? 0,
-      coverUrl: cover?.url ?? null,
+      coverUrl:
+        cover === undefined
+          ? null
+          : row.form_version === 2
+            ? reportMediaUrl(cover.url, row.author_user_id)
+            : cover.url,
       authorHandle: row.author.handle,
       authorUserId: row.author_user_id,
       cropName: row.crop.name,
@@ -161,7 +173,7 @@ export async function listRecentUsageReports({
 }
 
 type UsageReportDetailQueryRow = UsageReportRow & {
-  author: Pick<PublicProfileRow, "user_id" | "handle" | "avatar_url"> | null;
+  author: Pick<PublicProfileRow, "user_id" | "handle" | "avatar_url" | "standpoint"> | null;
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<
     MaterialRow,
@@ -176,6 +188,9 @@ type UsageReportDetailQueryRow = UsageReportRow & {
 };
 
 export type PublishedUsageReportDetail = {
+  formVersion: number;
+  structured: UsageReportInput | null;
+  documentUrls: Array<{ id: string; url: string }>;
   id: string;
   title: string;
   publishedAt: string;
@@ -196,6 +211,7 @@ export type PublishedUsageReportDetail = {
     userId: string;
     handle: string;
     avatarUrl: string | null;
+    standpoint: string | null;
   };
   crop: { id: string; name: string };
   material: {
@@ -311,7 +327,8 @@ export async function getPublishedUsageReport(
       author:public_profiles!usage_reports_author_user_id_fkey (
         user_id,
         handle,
-        avatar_url
+        avatar_url,
+        standpoint
       ),
       crop:crops!usage_reports_crop_id_fkey (
         id,
@@ -391,7 +408,7 @@ export async function getPublishedUsageReport(
     }
     media.push({
       id: item.id,
-      url: item.url,
+      url: row.form_version === 2 ? reportMediaUrl(item.url, row.author_user_id) : item.url,
       mediaType,
       caption: item.caption,
       placement: item.placement,
@@ -405,9 +422,22 @@ export async function getPublishedUsageReport(
     return counts;
   }
 
+  const structured =
+    row.form_version === 2 && session !== null
+      ? await getStructuredUsageReport(row.id, supabase)
+      : succeed(null);
+  if (!structured.ok) return structured;
+  if (structured.data !== null && !structured.data.showCity) structured.data.city = "";
+  const documentUrls =
+    structured.data === null ? succeed([]) : await getReportDocumentUrls(structured.data, supabase);
+  if (!documentUrls.ok) return documentUrls;
+
   return succeed({
+    formVersion: row.form_version,
+    structured: structured.data,
+    documentUrls: documentUrls.data,
     id: row.id,
-    title: row.title ?? `${row.material.name} 実証詳細レポート`,
+    title: row.title ?? `${row.material.name} 実証詳細レポート｜${row.crop.name}`,
     publishedAt: row.published_at,
     purposeTags: row.purpose_tags,
     purposeNote: row.purpose_note,
@@ -426,6 +456,7 @@ export async function getPublishedUsageReport(
       userId: row.author.user_id,
       handle: row.author.handle,
       avatarUrl: row.author.avatar_url,
+      standpoint: row.author.standpoint,
     },
     crop: row.crop,
     material: {

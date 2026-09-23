@@ -1,3 +1,4 @@
+import { createBlankUsageReport } from "@/lib/usage-report";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -5,7 +6,7 @@ import { css } from "../../../../../../styled-system/css";
 import { AppBar } from "@/components/AppBar";
 import { errorMessageJa } from "@/server/errors";
 import { requireGeneralUser } from "@/server/auth";
-import { getUsageReportFormData } from "@/server/queries/usage-report-form";
+import { getStructuredReportFormData } from "@/server/usage-reports/structured";
 
 import { loadMaterialOrNotFound, materialMetadata } from "../../material-page-data";
 import { ReportForm } from "../_components/ReportForm";
@@ -55,7 +56,7 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
 
   const [material, formDataResult] = await Promise.all([
     loadMaterialOrNotFound(id),
-    getUsageReportFormData(id, session.data.userId),
+    getStructuredReportFormData(id, session.data.userId),
   ]);
 
   if (!formDataResult.ok) {
@@ -64,12 +65,17 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
   if (material.publication_status !== "published") notFound();
 
   const formData = formDataResult.data;
+  const initialDraft = formData.draft ?? {
+    ...createBlankUsageReport(material.id),
+    prefectureCode: formData.prefectureCode,
+    city: formData.city,
+  };
   return (
     <div className={shell}>
       <AppBar
         chrome="public"
         active="post"
-        title="使用結果入力"
+        title="実証詳細レポート"
         backHref={`/materials/${material.id}`}
       />
       {formData.submitted.length > 0 ? (
@@ -86,8 +92,13 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
             }}
             userId={session.data.userId}
             crops={formData.crops}
-            draft={formData.draft}
-            initialMonth={new Date().toISOString().slice(0, 7)}
+            draft={initialDraft}
+            effects={formData.effects}
+            favoriteCropIds={formData.favoriteCropIds}
+            materialCropIds={formData.materialCropIds}
+            prefectureCode={formData.prefectureCode}
+            city={formData.city}
+            initialDocumentUrls={formData.documentUrls}
           />
         </main>
       )}

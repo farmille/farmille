@@ -41,7 +41,7 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
         <Input defaultValue={report.title} disabled={!editable} name="title" required />
       </label>
       <label className={labelStyle}>
-        観察した変化
+        {report.formVersion === 2 ? "結果・感想" : "観察した変化"}
         <Textarea
           defaultValue={report.observedChange}
           disabled={!editable}
@@ -50,24 +50,33 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
           size="lg"
         />
       </label>
-      <label className={labelStyle}>
-        悪影響・気になった点
-        <Textarea
-          defaultValue={report.negativeNote ?? ""}
-          disabled={!editable}
-          name="negativeNote"
-        />
-      </label>
-      <label className={labelStyle}>
-        まとめ
-        <Textarea
-          defaultValue={report.summary}
-          disabled={!editable}
-          name="summary"
-          required
-          size="lg"
-        />
-      </label>
+      {report.formVersion === 2 ? (
+        <>
+          <input name="negativeNote" type="hidden" value="" />
+          <input name="summary" type="hidden" value={report.summary} />
+        </>
+      ) : (
+        <>
+          <label className={labelStyle}>
+            悪影響・気になった点
+            <Textarea
+              defaultValue={report.negativeNote ?? ""}
+              disabled={!editable}
+              name="negativeNote"
+            />
+          </label>
+          <label className={labelStyle}>
+            まとめ
+            <Textarea
+              defaultValue={report.summary}
+              disabled={!editable}
+              name="summary"
+              required
+              size="lg"
+            />
+          </label>
+        </>
+      )}
       <label className={labelStyle}>
         編集局メモ（内部）
         <Textarea defaultValue={report.editorNote ?? ""} disabled={!editable} name="editorNote" />
