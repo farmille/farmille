@@ -6,7 +6,7 @@ export function PreparationNotice() {
     <aside
       id="preparation-notice"
       aria-label="公開準備中のお知らせ"
-      className={css({ bg: "brand.soft", color: "text.default", px: "4", py: "3" })}
+      className={css({ bg: "brand.primaryDeep", color: "surface.card", px: "4", py: "3" })}
     >
       <div
         className={css({
@@ -26,7 +26,7 @@ export function PreparationNotice() {
           メーカー様からの掲載・編集のご希望、掲載内容の修正・非表示のご依頼、アカウント登録は、9月24日〜28日に{" "}
           <a
             href="mailto:info@farmille.com"
-            className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
+            className={css({ color: "inherit", textDecoration: "underline" })}
           >
             info@farmille.com
           </a>{" "}
