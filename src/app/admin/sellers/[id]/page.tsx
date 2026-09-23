@@ -117,7 +117,7 @@ export default async function AdminSellerDetailPage({
       title={seller.data.official_name}
     >
       <Panel
-        note="会社と担当者を確認し、運営発行のログインIDとパスワード設定用の案内を送付します。編集権は返送書類の確認後に付与します。"
+        note="会社と担当者を確認し、運営発行のログインIDとパスワード設定用の案内を送付します。編集権は申請と確認資料の審査後に付与します。"
         title="申請内容の確認とご案内"
       >
         <SellerReviewActions
@@ -142,13 +142,16 @@ export default async function AdminSellerDetailPage({
               </Link>
               {" ／ "}
               <Link className={linkStyle} href={`/admin/materials/${material.id}`}>
-                返送書類を確認して編集権を設定
+                申請と確認資料を確認して編集権を設定
               </Link>
             </p>
           ))
         )}
         <p>
-          候補一覧と編集権の申込書類を連絡先メールへ送付し、返送書類を保管してください。各資材の編集権設定で、書類の保管先または管理番号を記録します。
+          <Link className={linkStyle} href="/admin/company-applications">
+            企業からの申請一覧
+          </Link>
+          で、メーカーが提出した申請と確認資料を審査してください。各資材の編集権設定で、確認資料の保管先または受付番号を記録します。
         </p>
       </Panel>
 

@@ -39,7 +39,7 @@ export default async function SellerApplyPage({ searchParams }: SellerApplyPageP
       title="メーカーアカウントの申請"
     >
       <p className={leadStyle}>
-        農業資材メーカー専用のアカウントです。内容を確認し、ログインIDとパスワード設定のご案内、資材候補一覧、編集権の申込書類をメールでお送りします。編集権は書類確認後に資材ごとにお渡しします。申請・掲載・編集は無料です。
+        農業資材メーカー専用のアカウントです。内容を確認し、ログインIDとパスワード設定のご案内をメールでお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。申請・掲載・編集は無料です。
       </p>
       <SellerApplyForm />
     </FormPageShell>

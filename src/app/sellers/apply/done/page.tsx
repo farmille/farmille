@@ -31,7 +31,7 @@ export default function SellerApplyDonePage() {
       <h2 className={titleStyle}>申請を受け付けました</h2>
       <p className={bodyStyle}>内容を確認し、ご登録の連絡先メールアドレスへご案内します。</p>
       <HintBox>
-        ログインIDとパスワード設定のご案内、資材候補一覧、編集権の申込書類をお送りします。書類をご返送いただき、所有権を確認した資材の編集権をお渡しします。
+        ログインIDとパスワード設定のご案内をお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。
       </HintBox>
       <div className={formActionsStyle}>
         <Link className={ghostButtonStyle} href="/">

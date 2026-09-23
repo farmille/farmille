@@ -32,17 +32,16 @@ for (const mode of ["existing", "new"]) {
     try {
       await page.goto("/sellers");
       await expect(
-        page.getByRole("heading", { name: "自社資材の情報を、正確に届ける。" }),
+        page.getByRole("heading", { name: "Farmille 企業様向け利用ガイド" }),
       ).toBeVisible();
-      await expect(page.getByRole("link", { name: "ログイン", exact: true })).toHaveAttribute(
-        "href",
-        "/sellers/login",
-      );
+      await expect(
+        page.getByRole("link", { name: "登録済みの方：ログイン", exact: true }),
+      ).toHaveAttribute("href", "/sellers/login");
       await expect(
         page.getByRole("link", { name: "アカウントをお持ちの方はログイン" }),
       ).toBeVisible();
       await captureAccountScreen(page, "33-manufacturer-landing.png");
-      await page.getByRole("link", { name: "メーカーアカウントを申請" }).click();
+      await page.getByRole("link", { name: "申請フォームへ進む" }).click();
       await expect(page).toHaveURL(/\/sellers\/apply$/);
       await expect(page.getByRole("link", { name: "戻る" })).toHaveAttribute("href", "/sellers");
       await captureAccountScreen(page, "03-seller-apply.png");

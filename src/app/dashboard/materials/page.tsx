@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { EmptyState, FormPageShell, MaterialRefCard, SurfaceCard } from "@/components";
+import { EmptyState, FormPageShell, MaterialRefCard, SurfaceCard, TextLink } from "@/components";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { requireSeller } from "@/server/auth";
 import { getSellerMaterialsPageData } from "@/server/queries/seller-dashboard";
@@ -43,9 +43,11 @@ export default async function SellerMaterialsPage() {
         )}
         <SurfaceCard title="掲載・編集する製品を追加する">
           <p>
-            製品の正式名称を運営へご連絡ください。公開ページの用意と、編集権の書類確認を進めます。申請・掲載・編集は無料です。
+            フォームAから新規掲載または掲載済み資材のオーナー権限を申請してください。運営が申請と確認資料を審査します。申請・掲載・編集は無料です。
           </p>
-          <p>登録時に届いた案内メールへの返信でご連絡ください。</p>
+          <TextLink href="/dashboard/applications/new/registration">
+            掲載・オーナー権限を申請する
+          </TextLink>
         </SurfaceCard>
       </div>
     </FormPageShell>

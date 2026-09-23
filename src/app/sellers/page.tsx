@@ -29,9 +29,9 @@ const main = css({
 
 export async function generateMetadata(): Promise<Metadata> {
   return createPageMetadata({
-    title: "メーカーの方へ",
+    title: "企業様向け利用ガイド",
     description:
-      "Farmilleのメーカーアカウントで、自社の農業資材情報、根拠資料、記事を管理できます。",
+      "メーカーの企業会員登録、資材掲載・編集、オーナー権限の移行、終売・非表示の申請方法と必要資料をご案内します。",
     path: "/sellers",
   });
 }

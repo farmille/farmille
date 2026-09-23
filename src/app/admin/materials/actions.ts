@@ -185,7 +185,7 @@ export async function setMaterialSellerAction(
   const nextSellerId = sellerId !== null && sellerId.length > 0 ? sellerId : null;
   const documentReference = formDataString(formData.get("documentReference"))?.trim() ?? "";
   if (nextSellerId !== null && documentReference.length === 0) {
-    return { status: "error", message: "返送書類の保管先または管理番号を入力してください。" };
+    return { status: "error", message: "確認資料の保管先または受付番号を入力してください。" };
   }
   const result = await setMaterialSeller(materialId, nextSellerId, documentReference);
 
