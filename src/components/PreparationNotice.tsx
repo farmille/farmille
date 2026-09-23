@@ -55,20 +55,31 @@ export function PreparationNotice({ overlapImage = false }: { overlapImage?: boo
           })}
         >
           <p className={css({ m: "0" })}>
-            Farmilleは現在準備中です。メーカー様のご登録および一般の会員登録は、現在受け付けておりません。
+            Farmilleは現在、公開に向けて準備中です。
+            <br />
+            メーカー様のご登録および一般会員のご登録は、現在受け付けておりません。
           </p>
           <p className={css({ m: "0" })}>
-            メーカー様からの掲載・編集のご希望、掲載内容の修正・非表示のご依頼、アカウント登録は、9月24日〜28日に{" "}
+            メーカー様からのお問い合わせや、資材ページの非公開に関するご依頼は、
+            <br />
+            まずは9月24日〜28日を目安に、
             <a
-              href="mailto:info@farmille.com"
+              href="mailto:contact@farmille.com"
               className={css({ color: "inherit", textDecoration: "underline" })}
             >
-              info@farmille.com
-            </a>{" "}
-            またはお問い合わせフォーム（準備中）にて承ります。いただいたご連絡には順次対応いたしますので、お返事までお時間をいただく場合がございます。
+              contact@farmille.com
+            </a>
+            までご連絡ください。
           </p>
           <p className={css({ m: "0" })}>
-            生産者の皆様への公開（感想口コミ・実証詳細レポートの投稿）は、10月1日以降を予定しております。
+            いただいたご連絡は、内容を確認のうえ、順次対応いたします。
+            <br />
+            大変申し訳ありませんが、返信までにお時間をいただく場合があります。
+          </p>
+          <p className={css({ m: "0" })}>
+            生産者の皆様への公開および口コミ・実証詳細レポートの投稿受付は、
+            <br />
+            10月1日以降を予定しております。
           </p>
         </div>
       </div>
