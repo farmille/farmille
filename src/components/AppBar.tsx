@@ -295,6 +295,7 @@ export type AppBarActive = "home" | "search" | "post" | "articles" | "me";
 
 type AppBarBaseProps = {
   chrome: AppChrome;
+  overlapNoticeImage?: boolean;
   active?: AppBarActive;
   /** PC ヘッダーの検索入力欄の初期値。`/search` が現在の q を渡す。未指定なら空。 */
   searchQuery?: string;
@@ -469,7 +470,7 @@ export function AppBar(props: AppBarProps) {
       {props.chrome === "public" ? (
         <>
           <DesktopSiteHeader active={props.active} searchQuery={props.searchQuery} />
-          <PreparationNotice />
+          <PreparationNotice overlapImage={props.overlapNoticeImage} />
           {props.variant === "home" ? null : <DesktopContextBar {...props} />}
         </>
       ) : (

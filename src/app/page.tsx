@@ -57,7 +57,7 @@ export default async function HomePage({
         fontFamily: "sans",
       })}
     >
-      <AppBar chrome="public" active="home" variant="home" />
+      <AppBar chrome="public" active="home" variant="home" overlapNoticeImage />
       <main>
         <HomeHero />
         <div
