@@ -33,7 +33,7 @@ type MutationMode = "draft" | "submit";
 
 type ExistingReport = {
   id: string;
-  crop_id: string;
+  crop_id: string | null;
   status: string;
 };
 
@@ -469,6 +469,7 @@ export async function mutateUsageReports({
 
   const existingByCrop = new Map<string, ExistingReport>();
   for (const report of existingReports) {
+    if (report.crop_id === null) return validationFailure("下書きの作物を確認してください。", {});
     if (existingByCrop.has(report.crop_id)) {
       mutationError("同じ作物の draft が重複", {
         materialId,
@@ -508,7 +509,7 @@ export async function mutateUsageReports({
 
   const selectedCropIds = new Set(cropIds);
   const staleReportIds = existingReports
-    .filter(({ crop_id }) => !selectedCropIds.has(crop_id))
+    .filter(({ crop_id }) => crop_id === null || !selectedCropIds.has(crop_id))
     .map(({ id }) => id);
   if (staleReportIds.length > 0) {
     const { error } = await supabase
