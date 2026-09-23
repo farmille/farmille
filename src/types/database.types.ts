@@ -275,6 +275,603 @@ export type Database = {
           },
         ]
       }
+      company_application_access: {
+        Row: {
+          company_name: string
+          consumed_at: string | null
+          contact_name: string
+          created_at: string
+          email: string
+          id: string
+          session_expires_at: string | null
+          session_hash: string | null
+          token_expires_at: string
+          token_hash: string
+        }
+        Insert: {
+          company_name: string
+          consumed_at?: string | null
+          contact_name: string
+          created_at?: string
+          email: string
+          id?: string
+          session_expires_at?: string | null
+          session_hash?: string | null
+          token_expires_at: string
+          token_hash: string
+        }
+        Update: {
+          company_name?: string
+          consumed_at?: string | null
+          contact_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          session_expires_at?: string | null
+          session_hash?: string | null
+          token_expires_at?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
+      company_application_consents: {
+        Row: {
+          accepted_at: string
+          application_id: string
+          position: number
+          text_snapshot: string
+          version: string
+        }
+        Insert: {
+          accepted_at?: string
+          application_id: string
+          position: number
+          text_snapshot: string
+          version: string
+        }
+        Update: {
+          accepted_at?: string
+          application_id?: string
+          position?: number
+          text_snapshot?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_consents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "company_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_application_evidence: {
+        Row: {
+          byte_size: number
+          created_at: string
+          declared_mime: string
+          file_name: string
+          id: string
+          intent_id: string
+          item_key: string | null
+          purpose: string
+          sealed_path: string | null
+          sha256: string | null
+          staging_path: string
+          verified_at: string | null
+        }
+        Insert: {
+          byte_size: number
+          created_at?: string
+          declared_mime: string
+          file_name: string
+          id?: string
+          intent_id: string
+          item_key?: string | null
+          purpose: string
+          sealed_path?: string | null
+          sha256?: string | null
+          staging_path: string
+          verified_at?: string | null
+        }
+        Update: {
+          byte_size?: number
+          created_at?: string
+          declared_mime?: string
+          file_name?: string
+          id?: string
+          intent_id?: string
+          item_key?: string | null
+          purpose?: string
+          sealed_path?: string | null
+          sha256?: string | null
+          staging_path?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_evidence_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "company_application_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_application_evidence_links: {
+        Row: {
+          item_id: string
+          url: string
+        }
+        Insert: {
+          item_id: string
+          url: string
+        }
+        Update: {
+          item_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_evidence_links_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "company_application_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_application_intents: {
+        Row: {
+          access_id: string | null
+          cleanup_claimed_at: string | null
+          content_hash: string | null
+          expires_at: string
+          id: string
+          kind: string
+          seller_id: string | null
+          submitted_at: string | null
+        }
+        Insert: {
+          access_id?: string | null
+          cleanup_claimed_at?: string | null
+          content_hash?: string | null
+          expires_at?: string
+          id?: string
+          kind: string
+          seller_id?: string | null
+          submitted_at?: string | null
+        }
+        Update: {
+          access_id?: string | null
+          cleanup_claimed_at?: string | null
+          content_hash?: string | null
+          expires_at?: string
+          id?: string
+          kind?: string
+          seller_id?: string | null
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_intents_access_id_fkey"
+            columns: ["access_id"]
+            isOneToOne: false
+            referencedRelation: "company_application_access"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_application_intents_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_application_intents_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_application_items: {
+        Row: {
+          application_id: string
+          id: string
+          material_id: string | null
+          material_name: string
+          material_url: string
+          position: number
+        }
+        Insert: {
+          application_id: string
+          id: string
+          material_id?: string | null
+          material_name: string
+          material_url: string
+          position: number
+        }
+        Update: {
+          application_id?: string
+          id?: string
+          material_id?: string | null
+          material_name?: string
+          material_url?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_items_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "company_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_application_items_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_application_mail_deliveries: {
+        Row: {
+          application_id: string
+          attempts: number
+          claimed_at: string | null
+          last_error_code: string | null
+          recipient: string
+          sent_at: string | null
+        }
+        Insert: {
+          application_id: string
+          attempts?: number
+          claimed_at?: string | null
+          last_error_code?: string | null
+          recipient: string
+          sent_at?: string | null
+        }
+        Update: {
+          application_id?: string
+          attempts?: number
+          claimed_at?: string | null
+          last_error_code?: string | null
+          recipient?: string
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_mail_deliveries_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "company_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_application_rate_limits: {
+        Row: {
+          attempts: number
+          key_hash: string
+          started_at: string
+        }
+        Insert: {
+          attempts: number
+          key_hash: string
+          started_at: string
+        }
+        Update: {
+          attempts?: number
+          key_hash?: string
+          started_at?: string
+        }
+        Relationships: []
+      }
+      company_application_registration_items: {
+        Row: {
+          item_id: string
+          official_url: string
+          target: string
+        }
+        Insert: {
+          item_id: string
+          official_url: string
+          target: string
+        }
+        Update: {
+          item_id?: string
+          official_url?: string
+          target?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_registration_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "company_application_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_application_relations: {
+        Row: {
+          item_id: string
+          relation: string
+        }
+        Insert: {
+          item_id: string
+          relation: string
+        }
+        Update: {
+          item_id?: string
+          relation?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_relations_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "company_application_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_application_removal_items: {
+        Row: {
+          disclose_reason: boolean
+          item_id: string
+          reason: string
+          request_type: string
+        }
+        Insert: {
+          disclose_reason: boolean
+          item_id: string
+          reason: string
+          request_type: string
+        }
+        Update: {
+          disclose_reason?: boolean
+          item_id?: string
+          reason?: string
+          request_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_removal_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "company_application_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_application_removals: {
+        Row: {
+          application_id: string
+          company_url: string
+          kind: string
+        }
+        Insert: {
+          application_id: string
+          company_url: string
+          kind?: string
+        }
+        Update: {
+          application_id?: string
+          company_url?: string
+          kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_removals_application_id_kind_fkey"
+            columns: ["application_id", "kind"]
+            isOneToOne: false
+            referencedRelation: "company_applications"
+            referencedColumns: ["id", "kind"]
+          },
+        ]
+      }
+      company_application_transfer_in: {
+        Row: {
+          application_id: string
+          background: string
+          kind: string
+        }
+        Insert: {
+          application_id: string
+          background: string
+          kind?: string
+        }
+        Update: {
+          application_id?: string
+          background?: string
+          kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_transfer_in_application_id_kind_fkey"
+            columns: ["application_id", "kind"]
+            isOneToOne: false
+            referencedRelation: "company_applications"
+            referencedColumns: ["id", "kind"]
+          },
+        ]
+      }
+      company_application_transfer_in_items: {
+        Row: {
+          item_id: string
+          owner_information: string
+          owner_name: string
+        }
+        Insert: {
+          item_id: string
+          owner_information: string
+          owner_name: string
+        }
+        Update: {
+          item_id?: string
+          owner_information?: string
+          owner_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_transfer_in_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "company_application_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_application_transfer_out: {
+        Row: {
+          account_id: string
+          application_id: string
+          company_name: string
+          contact_name: string
+          corporate_number: string
+          department: string
+          destination_seller_id: string
+          email: string
+          kind: string
+          phone: string
+        }
+        Insert: {
+          account_id: string
+          application_id: string
+          company_name: string
+          contact_name: string
+          corporate_number: string
+          department: string
+          destination_seller_id: string
+          email: string
+          kind?: string
+          phone: string
+        }
+        Update: {
+          account_id?: string
+          application_id?: string
+          company_name?: string
+          contact_name?: string
+          corporate_number?: string
+          department?: string
+          destination_seller_id?: string
+          email?: string
+          kind?: string
+          phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_transfer_out_application_id_kind_fkey"
+            columns: ["application_id", "kind"]
+            isOneToOne: false
+            referencedRelation: "company_applications"
+            referencedColumns: ["id", "kind"]
+          },
+          {
+            foreignKeyName: "company_application_transfer_out_destination_seller_id_fkey"
+            columns: ["destination_seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_application_transfer_out_destination_seller_id_fkey"
+            columns: ["destination_seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_applications: {
+        Row: {
+          access_id: string | null
+          account_id: string
+          application_date: string
+          company_name: string
+          contact_name: string
+          corporate_number: string | null
+          department: string
+          email: string
+          id: string
+          kind: string
+          phone: string
+          receipt_number: number
+          seller_id: string | null
+          signer_name: string
+          submitted_at: string
+        }
+        Insert: {
+          access_id?: string | null
+          account_id: string
+          application_date: string
+          company_name: string
+          contact_name: string
+          corporate_number?: string | null
+          department: string
+          email: string
+          id: string
+          kind: string
+          phone: string
+          receipt_number?: never
+          seller_id?: string | null
+          signer_name: string
+          submitted_at?: string
+        }
+        Update: {
+          access_id?: string | null
+          account_id?: string
+          application_date?: string
+          company_name?: string
+          contact_name?: string
+          corporate_number?: string | null
+          department?: string
+          email?: string
+          id?: string
+          kind?: string
+          phone?: string
+          receipt_number?: never
+          seller_id?: string | null
+          signer_name?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_applications_access_id_fkey"
+            columns: ["access_id"]
+            isOneToOne: false
+            referencedRelation: "company_application_access"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_applications_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "company_application_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_applications_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "public_sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_applications_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "seller_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       composition_types: {
         Row: {
           created_at: string
@@ -3305,6 +3902,33 @@ export type Database = {
           saved_count: number
         }[]
       }
+      check_company_application_rate: {
+        Args: { p_key_hash: string; p_limit: number }
+        Returns: boolean
+      }
+      claim_expired_company_application_uploads: {
+        Args: never
+        Returns: {
+          access_id: string | null
+          cleanup_claimed_at: string | null
+          content_hash: string | null
+          expires_at: string
+          id: string
+          kind: string
+          seller_id: string | null
+          submitted_at: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "company_application_intents"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      confirm_company_application_access: {
+        Args: { p_session_hash: string; p_token_hash: string }
+        Returns: string
+      }
       confirm_material_information: {
         Args: { p_material_id: string }
         Returns: undefined
@@ -3321,6 +3945,16 @@ export type Database = {
           p_rating: number
         }
         Returns: string
+      }
+      finalize_company_application_evidence: {
+        Args: {
+          p_id: string
+          p_sealed_path?: string
+          p_session_hash?: string
+          p_sha256?: string
+          p_user_id?: string
+        }
+        Returns: undefined
       }
       hide_owned_material_page: {
         Args: { p_material_id: string; p_note: string }
@@ -3378,6 +4012,65 @@ export type Database = {
           p_reviewed_by_user_id: string
         }
         Returns: undefined
+      }
+      remove_company_application_evidence: {
+        Args: { p_id: string; p_session_hash?: string; p_user_id?: string }
+        Returns: {
+          byte_size: number
+          created_at: string
+          declared_mime: string
+          file_name: string
+          id: string
+          intent_id: string
+          item_key: string | null
+          purpose: string
+          sealed_path: string | null
+          sha256: string | null
+          staging_path: string
+          verified_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "company_application_evidence"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reserve_company_application_evidence: {
+        Args: {
+          p_file_name?: string
+          p_intent_id: string
+          p_item_key?: string
+          p_mime?: string
+          p_purpose?: string
+          p_session_hash?: string
+          p_size?: number
+          p_user_id?: string
+        }
+        Returns: {
+          byte_size: number
+          created_at: string
+          declared_mime: string
+          file_name: string
+          id: string
+          intent_id: string
+          item_key: string | null
+          purpose: string
+          sealed_path: string | null
+          sha256: string | null
+          staging_path: string
+          verified_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "company_application_evidence"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      restart_removal_application: {
+        Args: { p_intent_id: string; p_session_hash: string }
+        Returns: string
       }
       review_manufacturer_profile_version: {
         Args: {
@@ -3439,6 +4132,16 @@ export type Database = {
           p_seller_id: string
         }
         Returns: undefined
+      }
+      submit_company_application: {
+        Args: {
+          p_consents?: string[]
+          p_input?: Json
+          p_intent_id: string
+          p_session_hash?: string
+          p_user_id?: string
+        }
+        Returns: string
       }
       submit_material_archive_request: {
         Args: { p_material_id: string; p_reason: string }
