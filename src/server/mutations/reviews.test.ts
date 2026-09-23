@@ -17,8 +17,6 @@ function validFormData(): FormData {
   formData.append("cropIds", cropId);
   formData.set("rating", "4");
   formData.set("body", "定植後に使用し、葉の状態を継続して観察しました。");
-  formData.set("purchaseChannel", "ja");
-  formData.set("hasControlPlot", "on");
   formData.set("pesticideAck", "on");
   formData.set(
     "newPhotos",
@@ -42,8 +40,6 @@ describe("validateReviewFormData", () => {
         cropIds: [cropId],
         rating: 4,
         body: "定植後に使用し、葉の状態を継続して観察しました。",
-        purchaseChannel: "ja",
-        hasControlPlot: true,
         pesticideAck: true,
         newPhotos: [
           {
@@ -53,6 +49,13 @@ describe("validateReviewFormData", () => {
         ],
       },
     });
+  });
+
+  it("退役した購入場所と対照区は送信されても保存入力に含めない", () => {
+    const formData = validFormData();
+    formData.set("purchaseChannel", "ja");
+    formData.set("hasControlPlot", "on");
+    expect(validateReviewFormData(formData)).toEqual(validateReviewFormData(validFormData()));
   });
 
   it("農薬表現同意が無ければ送信を拒否する", () => {
@@ -66,13 +69,12 @@ describe("validateReviewFormData", () => {
     });
   });
 
-  it("星・本文・作目・購入場所・写真パスを server 側で検証する", () => {
+  it("星・本文・作目・写真パスを server 側で検証する", () => {
     const formData = validFormData();
     formData.delete("cropIds");
     formData.append("cropIds", "not-a-uuid");
     formData.set("rating", "6");
     formData.set("body", "   ");
-    formData.set("purchaseChannel", "public-marketplace");
     formData.set("newPhotos", JSON.stringify([{ path: "../outside.jpg", caption: null }]));
     const result = validateReviewFormData(formData);
 
@@ -82,7 +84,6 @@ describe("validateReviewFormData", () => {
         cropIds: expect.any(String),
         rating: expect.any(String),
         body: expect.any(String),
-        purchaseChannel: expect.any(String),
         photos: expect.any(String),
       },
     });
@@ -109,8 +110,6 @@ describe("createReview", () => {
       cropIds: [cropId],
       rating: 5,
       body: "使用後の状態を記録しました。",
-      purchaseChannel: null,
-      hasControlPlot: false,
       pesticideAck: true,
       newPhotos: [],
     };

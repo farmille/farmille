@@ -12,16 +12,6 @@ type ReviewPhotoInsert = Database["public"]["Tables"]["review_photos"]["Insert"]
 type CreateReviewRpcArgs = Database["public"]["Functions"]["create_review_with_crops"]["Args"];
 type UpdateReviewRpcArgs = Database["public"]["Functions"]["update_review_with_crops"]["Args"];
 
-export const PURCHASE_CHANNELS = ["ja", "home_center", "ec", "direct", "other"] as const;
-export type PurchaseChannel = (typeof PURCHASE_CHANNELS)[number];
-
-const PurchaseChannelSchema = v.picklist(PURCHASE_CHANNELS);
-
-export function purchaseChannelFromDatabase(value: string | null): PurchaseChannel | null {
-  const result = v.safeParse(PurchaseChannelSchema, value);
-  return result.success ? result.output : null;
-}
-
 export type ExistingReviewPhotoInput = {
   id: string;
   caption: string | null;
@@ -33,14 +23,12 @@ export type ReviewMutationInput = {
   cropIds: string[];
   rating: number;
   body: string;
-  purchaseChannel: PurchaseChannel | null;
-  hasControlPlot: boolean;
   pesticideAck: true;
   newPhotos: NewReviewPhoto[];
 };
 
 export type ReviewFieldErrors = Partial<
-  Record<"cropIds" | "rating" | "body" | "purchaseChannel" | "pesticideAck" | "photos", string>
+  Record<"cropIds" | "rating" | "body" | "pesticideAck" | "photos", string>
 >;
 
 export type ReviewValidation =
@@ -89,8 +77,6 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
   const ratingValue = trimmedFormDataString(formData.get("rating"));
   const rating = Number(ratingValue);
   const body = trimmedFormDataString(formData.get("body"));
-  const purchaseChannelValue = trimmedFormDataString(formData.get("purchaseChannel"));
-  const purchaseChannelResult = v.safeParse(PurchaseChannelSchema, purchaseChannelValue);
   const pesticideAck = formData.get("pesticideAck") === "on";
   const newPhotos = parseNewPhotos(formData.get("newPhotos"));
 
@@ -102,9 +88,6 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
   }
   if (body.length === 0) {
     fieldErrors.body = "感想口コミ本文を入力してください。";
-  }
-  if (purchaseChannelValue.length > 0 && !purchaseChannelResult.success) {
-    fieldErrors.purchaseChannel = "購入場所を選び直してください。";
   }
   if (!pesticideAck) {
     fieldErrors.pesticideAck = "内容を確認し、同意してください。";
@@ -123,8 +106,6 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
       cropIds: cropIdsResult.output,
       rating,
       body,
-      purchaseChannel: purchaseChannelResult.success ? purchaseChannelResult.output : null,
-      hasControlPlot: formData.get("hasControlPlot") === "on",
       pesticideAck: true,
       newPhotos,
     },
@@ -265,12 +246,8 @@ export async function createReviewWithDependencies(
     p_rating: input.rating,
     p_body: input.body,
     p_crop_ids: input.cropIds,
-    p_has_control_plot: input.hasControlPlot,
     p_pesticide_ack: input.pesticideAck,
   };
-  if (input.purchaseChannel !== null) {
-    rpcInput.p_purchase_channel = input.purchaseChannel;
-  }
   const { data: reviewId, error: reviewError } = await supabase.rpc(
     "create_review_with_crops",
     rpcInput,
@@ -418,12 +395,8 @@ export async function updateReview(
     p_rating: input.rating,
     p_body: input.body,
     p_crop_ids: input.cropIds,
-    p_has_control_plot: input.hasControlPlot,
     p_pesticide_ack: input.pesticideAck,
   };
-  if (input.purchaseChannel !== null) {
-    rpcInput.p_purchase_channel = input.purchaseChannel;
-  }
   const { data: updatedReviewId, error: updateError } = await supabase.rpc(
     "update_review_with_crops",
     rpcInput,

@@ -6,8 +6,6 @@ const initialValues = {
   cropIds: ["crop-tomato"],
   rating: 4,
   body: "定植後の根の動きがよく、株ごとの生育差が小さくなりました。",
-  purchaseChannel: "direct" as const,
-  hasControlPlot: true,
   pesticideAck: true,
   photos: [],
 };
@@ -60,8 +58,6 @@ export const Blank: Story = {
       cropIds: [],
       rating: 0,
       body: "",
-      purchaseChannel: null,
-      hasControlPlot: false,
       pesticideAck: false,
       photos: [],
     },

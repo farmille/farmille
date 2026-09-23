@@ -16,14 +16,7 @@ type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
 type ReviewFields = Pick<
   ReviewRow,
-  | "id"
-  | "material_id"
-  | "author_user_id"
-  | "rating"
-  | "body"
-  | "has_control_plot"
-  | "is_provided_sample"
-  | "created_at"
+  "id" | "material_id" | "author_user_id" | "rating" | "body" | "is_provided_sample" | "created_at"
 >;
 
 export type ReviewAuthor = Pick<
@@ -50,15 +43,7 @@ export type ReviewCropOption = Pick<CropRow, "id" | "name" | "aliases"> & {
 
 export type ReviewEditorData = Pick<
   ReviewRow,
-  | "id"
-  | "material_id"
-  | "author_user_id"
-  | "rating"
-  | "body"
-  | "has_control_plot"
-  | "purchase_channel"
-  | "pesticide_ack"
-  | "status"
+  "id" | "material_id" | "author_user_id" | "rating" | "body" | "pesticide_ack" | "status"
 > & {
   cropIds: string[];
   photos: ReviewPhoto[];
@@ -84,7 +69,6 @@ const REVIEW_SELECT = `
   author_user_id,
   rating,
   body,
-  has_control_plot,
   is_provided_sample,
   created_at,
   author:public_profiles!reviews_author_user_id_fkey (
@@ -561,8 +545,6 @@ export async function getReviewForEdit(
         author_user_id,
         rating,
         body,
-        has_control_plot,
-        purchase_channel,
         pesticide_ack,
         status,
         cropRelations:review_crops (

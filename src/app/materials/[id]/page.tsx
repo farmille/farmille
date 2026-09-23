@@ -389,7 +389,6 @@ async function MaterialRating({ material }: { material: MaterialDetail }) {
     <RatingSummary
       average={material.avg_rating}
       reviewCount={material.review_count}
-      controlPlotRatio={material.control_plot_ratio}
       distribution={distribution}
     />
   );

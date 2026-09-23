@@ -10,15 +10,13 @@ import {
   type ReviewActionState,
   updateReviewAction,
 } from "@/app/materials/[id]/review/actions";
-import { FormMessage, SwitchToggle } from "@/components/auth/Fields";
+import { FormMessage } from "@/components/auth/Fields";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { FileInput } from "@/components/FileInput";
 import { Input } from "@/components/Input";
-import { Select } from "@/components/Select";
 import { StarRating } from "@/components/StarRating";
 import { Textarea } from "@/components/Textarea";
-import type { PurchaseChannel } from "@/server/mutations/reviews";
 import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
 import { css } from "../../../../../../styled-system/css";
 
@@ -37,8 +35,6 @@ type ReviewFormValues = {
   cropIds: string[];
   rating: number;
   body: string;
-  purchaseChannel: PurchaseChannel | null;
-  hasControlPlot: boolean;
   pesticideAck: boolean;
   photos: ReviewPhoto[];
 };
@@ -288,10 +284,13 @@ export function ReviewForm({
           name="body"
           size="lg"
           defaultValue={initialValues.body}
-          placeholder="作物・使用時期・使い方・感じた変化を入力してください"
+          placeholder="トマト（ハウス栽培）で、定植後から2週間おきに灌水と合わせて使いました。1ヶ月ほどで根張りがしっかりしてきて、高温が続いた時期も葉のしおれが少なかったように感じます。"
           required
         />
-        <p className={guide}>作物・使用時期・使い方・感じた変化が入っていると参考になります。</p>
+        <p className={guide}>
+          作物・使用時期・使い方・感じた変化が入っていると参考になります。もっと詳しく書きたい場合は「
+          <Link href={`/materials/${material.id}/report/new`}>実証詳細レポート入力</Link>」から。
+        </p>
         {fieldErrors?.body === undefined ? null : <p className={fieldError}>{fieldErrors.body}</p>}
       </div>
 
@@ -393,39 +392,6 @@ export function ReviewForm({
       </div>
 
       <div className={field}>
-        <label className={label} htmlFor="purchase-channel">
-          購入場所 <Badge variant="optional">任意</Badge>
-        </label>
-        <Select
-          id="purchase-channel"
-          name="purchaseChannel"
-          defaultValue={initialValues.purchaseChannel ?? ""}
-        >
-          <option value="">選択しない</option>
-          <option value="ja">JA</option>
-          <option value="home_center">ホームセンター</option>
-          <option value="ec">ECサイト</option>
-          <option value="direct">製造元・販売元から直接</option>
-          <option value="other">その他</option>
-        </Select>
-        <p className={guide}>購入場所は公開されません。</p>
-        {fieldErrors?.purchaseChannel === undefined ? null : (
-          <p className={fieldError}>{fieldErrors.purchaseChannel}</p>
-        )}
-      </div>
-
-      <div className={field}>
-        <span className={label}>
-          対照区の有無 <Badge variant="optional">任意</Badge>
-        </span>
-        <SwitchToggle
-          name="hasControlPlot"
-          label="対照区を設けて比較した"
-          defaultChecked={initialValues.hasControlPlot}
-        />
-      </div>
-
-      <div className={field}>
         <label
           className={css({
             display: "flex",
@@ -451,7 +417,15 @@ export function ReviewForm({
             className={css({ mt: "1", flexShrink: "0" })}
           />
           <span>
-            この感想口コミには、病害虫の防除・殺菌・殺虫・農薬の代替など、農薬的な効果を断定する表現を含めていません
+            実際に使用した感想を、使用条件や感じた変化が分かるよう具体的にご記入ください。農薬として登録されていない資材については、農薬としての効果を断定せず、実際に感じた変化としてご記載ください。投稿の前に
+            <Link href="/legal/posting" target="_blank" rel="noopener noreferrer">
+              感想口コミガイドライン
+            </Link>
+            ・
+            <Link href="/legal/terms" target="_blank" rel="noopener noreferrer">
+              サイト運営ポリシー
+            </Link>
+            をご確認ください。
             <span className={css({ color: "accent.danger", fontWeight: "700" })}>（必須）</span>
           </span>
         </label>
