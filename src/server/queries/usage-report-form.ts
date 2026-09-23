@@ -99,7 +99,7 @@ function toMediaInput(row: MediaRow): ReportMediaInput | null {
 }
 
 function toCropReport(row: DraftReportQueryRow): CropReportInput | null {
-  if (row.crop === null) return null;
+  if (row.crop === null || row.crop_id === null) return null;
   const applications = row.applications.toSorted(bySortOrder);
   const firstApplication = applications[0] ?? null;
   const input = applyApplicationDetail(
@@ -240,6 +240,7 @@ export async function getUsageReportFormData(
   const cropIds = new Set<string>();
   const cropReports: CropReportInput[] = [];
   for (const row of draftRows) {
+    if (row.crop_id === null) return fail("conflict");
     if (cropIds.has(row.crop_id)) {
       reportQueryError("同じ作物の draft が重複", { materialId, cropId: row.crop_id });
       return fail("conflict");

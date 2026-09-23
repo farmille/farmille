@@ -3536,6 +3536,173 @@ export type Database = {
           },
         ]
       }
+      usage_report_documents: {
+        Row: {
+          id: string
+          name: string
+          report_id: string
+          sort_order: number
+          storage_path: string
+        }
+        Insert: {
+          id: string
+          name: string
+          report_id: string
+          sort_order: number
+          storage_path: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          report_id?: string
+          sort_order?: number
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_documents_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_report_graph_rows: {
+        Row: {
+          graph_id: string
+          id: string
+          label: string
+          plot_id: string | null
+          sort_order: number
+          value_text: string
+        }
+        Insert: {
+          graph_id: string
+          id: string
+          label: string
+          plot_id?: string | null
+          sort_order: number
+          value_text: string
+        }
+        Update: {
+          graph_id?: string
+          id?: string
+          label?: string
+          plot_id?: string | null
+          sort_order?: number
+          value_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_graph_rows_graph_id_fkey"
+            columns: ["graph_id"]
+            isOneToOne: false
+            referencedRelation: "usage_report_graphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_report_graph_rows_plot_id_fkey"
+            columns: ["plot_id"]
+            isOneToOne: false
+            referencedRelation: "usage_report_plots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_report_graphs: {
+        Row: {
+          heading: string
+          id: string
+          measurement_id: string
+          sort_order: number
+        }
+        Insert: {
+          heading: string
+          id: string
+          measurement_id: string
+          sort_order: number
+        }
+        Update: {
+          heading?: string
+          id?: string
+          measurement_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_graphs_measurement_id_fkey"
+            columns: ["measurement_id"]
+            isOneToOne: false
+            referencedRelation: "usage_report_measurements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_report_headings: {
+        Row: {
+          report_id: string
+          section: string
+          title: string
+        }
+        Insert: {
+          report_id: string
+          section: string
+          title: string
+        }
+        Update: {
+          report_id?: string
+          section?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_headings_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_report_measurements: {
+        Row: {
+          body: string
+          id: string
+          kind: string
+          name: string
+          report_id: string
+          sort_order: number
+          unit: string
+        }
+        Insert: {
+          body: string
+          id: string
+          kind: string
+          name: string
+          report_id: string
+          sort_order: number
+          unit: string
+        }
+        Update: {
+          body?: string
+          id?: string
+          kind?: string
+          name?: string
+          report_id?: string
+          sort_order?: number
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_measurements_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_report_media: {
         Row: {
           caption: string | null
@@ -3624,87 +3791,244 @@ export type Database = {
           },
         ]
       }
+      usage_report_plot_steps: {
+        Row: {
+          id: string
+          method: string
+          other_text: string
+          plot_id: string
+          sort_order: number
+        }
+        Insert: {
+          id: string
+          method: string
+          other_text: string
+          plot_id: string
+          sort_order: number
+        }
+        Update: {
+          id?: string
+          method?: string
+          other_text?: string
+          plot_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_plot_steps_plot_id_fkey"
+            columns: ["plot_id"]
+            isOneToOne: false
+            referencedRelation: "usage_report_plots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_report_plots: {
+        Row: {
+          description: string
+          id: string
+          name: string
+          report_id: string
+          sort_order: number
+          survey_scope: string
+        }
+        Insert: {
+          description: string
+          id: string
+          name: string
+          report_id: string
+          sort_order: number
+          survey_scope: string
+        }
+        Update: {
+          description?: string
+          id?: string
+          name?: string
+          report_id?: string
+          sort_order?: number
+          survey_scope?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_plots_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_report_private_locations: {
+        Row: {
+          city: string
+          report_id: string
+        }
+        Insert: {
+          city: string
+          report_id: string
+        }
+        Update: {
+          city?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_private_locations_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: true
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_report_step_targets: {
+        Row: {
+          step_id: string
+          target: string
+        }
+        Insert: {
+          step_id: string
+          target: string
+        }
+        Update: {
+          step_id?: string
+          target?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_step_targets_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "usage_report_plot_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_report_timings: {
+        Row: {
+          report_id: string
+          stage: number
+        }
+        Insert: {
+          report_id: string
+          stage: number
+        }
+        Update: {
+          report_id?: string
+          stage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_timings_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_reports: {
         Row: {
           author_user_id: string
           climate_note: string | null
           created_at: string
-          crop_id: string
+          crop_id: string | null
+          cultivation_environment: string
           cultivation_tags: string[]
           cultivation_type: string | null
+          documents_ack: boolean
           editor_note: string | null
           field_name: string | null
+          form_version: number
           growth_stage: string | null
           id: string
           is_provided_sample: boolean
           material_id: string
+          method_details_ack: boolean
           negative_note: string | null
           observed_change: string
           pesticide_ack: boolean
           planting_date: string | null
           prefecture_code: number | null
+          publish_city: boolean
           published_at: string | null
           purpose_note: string | null
           purpose_tags: string[]
           status: string
           summary: string
+          timing_note: string
           title: string | null
           updated_at: string
           variety: string | null
+          variety_unknown: boolean
         }
         Insert: {
           author_user_id: string
           climate_note?: string | null
           created_at?: string
-          crop_id: string
+          crop_id?: string | null
+          cultivation_environment?: string
           cultivation_tags?: string[]
           cultivation_type?: string | null
+          documents_ack?: boolean
           editor_note?: string | null
           field_name?: string | null
+          form_version?: number
           growth_stage?: string | null
           id?: string
           is_provided_sample?: boolean
           material_id: string
+          method_details_ack?: boolean
           negative_note?: string | null
           observed_change: string
           pesticide_ack: boolean
           planting_date?: string | null
           prefecture_code?: number | null
+          publish_city?: boolean
           published_at?: string | null
           purpose_note?: string | null
           purpose_tags?: string[]
           status?: string
           summary: string
+          timing_note?: string
           title?: string | null
           updated_at?: string
           variety?: string | null
+          variety_unknown?: boolean
         }
         Update: {
           author_user_id?: string
           climate_note?: string | null
           created_at?: string
-          crop_id?: string
+          crop_id?: string | null
+          cultivation_environment?: string
           cultivation_tags?: string[]
           cultivation_type?: string | null
+          documents_ack?: boolean
           editor_note?: string | null
           field_name?: string | null
+          form_version?: number
           growth_stage?: string | null
           id?: string
           is_provided_sample?: boolean
           material_id?: string
+          method_details_ack?: boolean
           negative_note?: string | null
           observed_change?: string
           pesticide_ack?: boolean
           planting_date?: string | null
           prefecture_code?: number | null
+          publish_city?: boolean
           published_at?: string | null
           purpose_note?: string | null
           purpose_tags?: string[]
           status?: string
           summary?: string
+          timing_note?: string
           title?: string | null
           updated_at?: string
           variety?: string | null
+          variety_unknown?: boolean
         }
         Relationships: [
           {
@@ -3966,28 +4290,35 @@ export type Database = {
           author_user_id: string
           climate_note: string | null
           created_at: string
-          crop_id: string
+          crop_id: string | null
+          cultivation_environment: string
           cultivation_tags: string[]
           cultivation_type: string | null
+          documents_ack: boolean
           editor_note: string | null
           field_name: string | null
+          form_version: number
           growth_stage: string | null
           id: string
           is_provided_sample: boolean
           material_id: string
+          method_details_ack: boolean
           negative_note: string | null
           observed_change: string
           pesticide_ack: boolean
           planting_date: string | null
           prefecture_code: number | null
+          publish_city: boolean
           published_at: string | null
           purpose_note: string | null
           purpose_tags: string[]
           status: string
           summary: string
+          timing_note: string
           title: string | null
           updated_at: string
           variety: string | null
+          variety_unknown: boolean
         }[]
         SetofOptions: {
           from: "*"
@@ -4123,6 +4454,14 @@ export type Database = {
           p_links: string[]
         }
         Returns: undefined
+      }
+      save_usage_report: {
+        Args: { p_input: Json; p_submit: boolean }
+        Returns: {
+          report_id: string
+          status: string
+          updated_at: string
+        }[]
       }
       set_material_editor_grant: {
         Args: {
@@ -4296,12 +4635,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4325,11 +4664,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4350,11 +4689,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
+  TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4375,11 +4714,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -4392,11 +4731,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
