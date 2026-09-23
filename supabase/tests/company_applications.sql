@@ -1,4 +1,8 @@
 begin;
+create extension if not exists pgtap with schema extensions;
+select plan(2);
+
+select lives_ok($test$
 do $$
 declare
  access_id uuid:=gen_random_uuid(); intent_id uuid:=gen_random_uuid(); item_id uuid:=gen_random_uuid(); material_id uuid:=gen_random_uuid();
@@ -42,8 +46,10 @@ begin
  if (select material_name from public.company_application_items where id=item_id)<>'申請時の資材名' then raise exception 'receipt did not preserve material name'; end if;
  if (select recipient from public.company_application_mail_deliveries where application_id=intent_id)<>'forms-check@example.test' then raise exception 'wrong recipient'; end if;
  if (select sent_at from public.company_application_mail_deliveries where application_id=intent_id) is not null then raise exception 'mail pretended sent'; end if;
- raise notice 'PASS: unverified access, token replay, receipt idempotency/conflict, immutable evidence, material unchanged, answer snapshot, pending delivery';
 end $$;
+$test$, 'application submission enforces access, idempotency, immutable evidence and receipt snapshots');
+
+select lives_ok($test$
 do $$
 declare restart_access_id uuid:=gen_random_uuid(); old_intent uuid:=gen_random_uuid(); new_intent uuid;
 begin
@@ -61,6 +67,8 @@ begin
   raise exception 'discarded intent remained usable';
  exception when raise_exception then if sqlerrm<>'forbidden' then raise; end if; end;
  if not exists(select 1 from public.company_application_evidence where intent_id=old_intent) then raise exception 'restart lost cleanup metadata'; end if;
- raise notice 'PASS: verified access survives restart and token reissue; discarded intent unusable; cleanup metadata retained';
 end $$;
+$test$, 'restart preserves verified access and cleanup metadata while rejecting discarded intents');
+
+select * from finish();
 rollback;
