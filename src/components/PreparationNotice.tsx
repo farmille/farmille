@@ -1,23 +1,27 @@
 import Image from "next/image";
-import { css } from "../../styled-system/css";
+import { css, cva } from "../../styled-system/css";
+
+const noticeStyle = cva({
+  base: {
+    position: "relative",
+    zIndex: "2",
+    bg: "brand.primaryDeep",
+    color: "surface.card",
+    borderBottomRadius: "banner",
+    boxShadow: "overlay",
+    px: "4",
+    py: "3",
+  },
+  variants: { overlapImage: { true: { mb: "-4" }, false: {} } },
+});
 
 /** 下端を次のセクションに重ね、角丸の背後にもその背景を見せる。 */
-export function PreparationNotice() {
+export function PreparationNotice({ overlapImage = false }: { overlapImage?: boolean }) {
   return (
     <aside
       id="preparation-notice"
       aria-label="公開準備中のお知らせ"
-      className={css({
-        position: "relative",
-        zIndex: "2",
-        mb: "-4",
-        bg: "brand.primaryDeep",
-        color: "surface.card",
-        borderBottomRadius: "banner",
-        boxShadow: "overlay",
-        px: "4",
-        py: "3",
-      })}
+      className={noticeStyle({ overlapImage })}
     >
       <div className={css({ maxW: "content.wide", mx: "auto" })}>
         <p

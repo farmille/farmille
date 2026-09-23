@@ -469,7 +469,7 @@ export function AppBar(props: AppBarProps) {
       {props.chrome === "public" ? (
         <>
           <DesktopSiteHeader active={props.active} searchQuery={props.searchQuery} />
-          <PreparationNotice />
+          <PreparationNotice overlapImage={props.variant === "home"} />
           {props.variant === "home" ? null : <DesktopContextBar {...props} />}
         </>
       ) : (
