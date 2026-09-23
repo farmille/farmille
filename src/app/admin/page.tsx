@@ -51,6 +51,11 @@ const statLinkStyle = css({
 
 const MENU_ITEMS = [
   {
+    href: "/admin/company-applications",
+    label: "企業からの申請",
+    description: "資材掲載・オーナー権限の移行・終売や非表示の受付内容と添付を確認する。",
+  },
+  {
     href: "/me",
     label: "個人のマイページ",
     description: "自分のプロフィール・投稿・お気に入りを管理する。",

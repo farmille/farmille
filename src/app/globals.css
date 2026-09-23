@@ -65,3 +65,18 @@ h2 {
     }
   }
 }
+
+@media print {
+  body:has(.application-receipt) header,
+  body:has(.application-receipt) nav,
+  body:has(.application-receipt) footer,
+  body:has(.application-receipt) #preparation-notice,
+  body:has(.application-receipt) [data-ui="desktop-context-bar"],
+  .application-print-hidden {
+    display: none !important;
+  }
+  .application-receipt {
+    color: var(--colors-text-default);
+    overflow: visible;
+  }
+}
