@@ -1,3 +1,4 @@
+import { reportMediaUrl } from "@/server/usage-reports/structured";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getViewerHelpfulVotes } from "@/server/queries/helpful";
@@ -26,7 +27,7 @@ type ProfileReviewQueryRow = Pick<
 
 type ProfileReportQueryRow = Pick<
   UsageReportRow,
-  "id" | "material_id" | "title" | "published_at"
+  "id" | "material_id" | "title" | "published_at" | "form_version"
 > & {
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
@@ -192,6 +193,7 @@ export async function getPublicProfilePage(
           material_id,
           title,
           published_at,
+          form_version,
           crop:crops!usage_reports_crop_id_fkey (
             id,
             name
@@ -304,7 +306,12 @@ export async function getPublicProfilePage(
       title: report.title ?? `${report.material.name} 実証詳細レポート`,
       cropName: report.crop.name,
       helpfulCount: reportHelpful.data.get(report.id) ?? 0,
-      coverUrl: cover?.url ?? null,
+      coverUrl:
+        cover === null
+          ? null
+          : report.form_version === 2
+            ? reportMediaUrl(cover.url, profile.user_id)
+            : cover.url,
     });
   }
 

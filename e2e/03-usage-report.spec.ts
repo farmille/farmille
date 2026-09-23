@@ -17,17 +17,20 @@ test("実証詳細レポートの下書き保存、提出、pending の公開側
 
   try {
     await loginGeneral(page, user, reportPath);
-    await page.getByLabel("使用作物").fill("トマト");
-    await page
-      .getByRole("button", { name: /なす科果菜類.*トマト/ })
-      .first()
-      .click();
+    await page.getByLabel("作目").fill("トマト");
+    await page.getByRole("button", { name: "トマトを選択", exact: true }).first().click();
     await page.getByRole("button", { name: "下書き保存" }).click();
     await expect(page.getByRole("status")).toHaveText("下書きを保存しました。");
     await expect.poll(async () => (await usageReportByAuthor(user.id))?.status).toBe("draft");
 
     await fillUsageReportForSubmission(page);
-    await page.getByRole("button", { name: "レポートを投稿する" }).click();
+    await page
+      .getByLabel("＋ 写真を挿入", { exact: true })
+      .first()
+      .setInputFiles("e2e/fixtures/report.png");
+    await page.getByLabel("写真の説明", { exact: true }).fill("検証用写真");
+    await expect(page.getByRole("img", { name: "検証用写真", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "公開に進む" }).click();
     await expect.poll(async () => (await usageReportByAuthor(user.id))?.status).toBe("pending");
     await expect(page.getByRole("heading", { name: "レポートは提出済みです" })).toBeVisible();
 

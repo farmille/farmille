@@ -5,6 +5,9 @@ import type { UsageReportEditorialDetail } from "@/server/admin/usage-reports";
 import { UsageReportEditorialForm } from "./EditorialForm";
 
 const report: UsageReportEditorialDetail = {
+  formVersion: 1,
+  structured: null,
+  documentUrls: [],
   id: "00000000-0000-4000-8000-000000000501",
   title: "トマト定植後の根張りを比較",
   status: "pending",
@@ -45,4 +48,8 @@ export const Pending: Story = {};
 
 export const Published: Story = {
   args: { report: { ...report, status: "published", publishedAt: "2026-08-09T00:00:00.000Z" } },
+};
+
+export const StructuredReport: Story = {
+  args: { report: { ...report, formVersion: 2 } },
 };

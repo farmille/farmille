@@ -1,3 +1,4 @@
+import { reportMediaUrl } from "@/server/usage-reports/structured";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
@@ -51,7 +52,10 @@ type ArticleFeedRow = Pick<ArticleRow, "id" | "title" | "hero_image_url" | "publ
   seller: Pick<PublicSellerRow, "official_name"> | null;
 };
 
-type ReportFeedRow = Pick<UsageReportRow, "id" | "title" | "published_at" | "material_id"> & {
+type ReportFeedRow = Pick<
+  UsageReportRow,
+  "id" | "title" | "published_at" | "material_id" | "form_version" | "author_user_id"
+> & {
   author: Pick<PublicProfileRow, "handle"> | null;
   crop: Pick<CropRow, "name"> | null;
   material: { name: string } | null;
@@ -182,6 +186,8 @@ async function fetchPublishedReports(
       title,
       published_at,
       material_id,
+      form_version,
+      author_user_id,
       author:public_profiles!usage_reports_author_user_id_fkey (
         handle
       ),
@@ -264,7 +270,12 @@ function toReportItem(
     publishedAt: row.published_at,
     helpfulCount,
     viewCount,
-    coverUrl: cover?.url ?? null,
+    coverUrl:
+      cover === undefined
+        ? null
+        : row.form_version === 2
+          ? reportMediaUrl(cover.url, row.author_user_id)
+          : cover.url,
     authorHandle: row.author.handle,
     cropName: row.crop.name,
   });

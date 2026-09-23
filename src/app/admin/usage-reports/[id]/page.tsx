@@ -13,6 +13,7 @@ import {
 } from "@/app/admin/_components/AdminUI";
 import { requireAdminPage } from "@/app/admin/_lib/access";
 import { UsageReportEditorialForm } from "@/app/admin/usage-reports/[id]/EditorialForm";
+import { UsageReportArticle } from "@/components/UsageReportArticle";
 import { DataTable, formatDateJa, type DataTableColumn } from "@/components";
 import { isPrefectureCode, PREFECTURES } from "@/lib/prefectures";
 import {
@@ -212,61 +213,69 @@ export default async function AdminUsageReportDetailPage({
         ) : null}
       </Panel>
 
-      <Panel title="使用目的">
-        <DescriptionList items={purposeItems(data)} />
-      </Panel>
+      {data.structured !== null ? (
+        <Panel title="記事の内容">
+          <UsageReportArticle input={data.structured} documentUrls={data.documentUrls} />
+        </Panel>
+      ) : (
+        <>
+          <Panel title="使用目的">
+            <DescriptionList items={purposeItems(data)} />
+          </Panel>
 
-      <Panel title="栽培環境">
-        <DescriptionList items={environmentItems(data)} />
-      </Panel>
+          <Panel title="栽培環境">
+            <DescriptionList items={environmentItems(data)} />
+          </Panel>
 
-      <Panel note={`${data.applications.length} 件`} title="処理日・使用方法">
-        {data.applications.length === 0 ? (
-          <p className={adminInlineNoteStyle}>登録なし</p>
-        ) : (
-          <DescriptionList items={applicationItems(data)} />
-        )}
-      </Panel>
+          <Panel note={`${data.applications.length} 件`} title="処理日・使用方法">
+            {data.applications.length === 0 ? (
+              <p className={adminInlineNoteStyle}>登録なし</p>
+            ) : (
+              <DescriptionList items={applicationItems(data)} />
+            )}
+          </Panel>
 
-      <Panel note={`${data.media.length} 件`} title="写真・動画">
-        {data.media.length === 0 ? (
-          <p className={adminInlineNoteStyle}>登録なし</p>
-        ) : (
-          <div className={mediaGridStyle}>
-            {data.media.map((media) => (
-              <figure className={css({ m: "0" })} key={media.id}>
-                {media.mediaType === "photo" ? (
-                  <Image
-                    alt={media.caption ?? ""}
-                    className={mediaStyle}
-                    height={480}
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    src={media.url}
-                    width={640}
-                  />
-                ) : (
-                  <video className={mediaStyle} controls src={media.url} />
-                )}
-                <figcaption className={captionStyle}>
-                  {media.placement === null
-                    ? "配置未設定"
-                    : `配置：${mediaPlacementLabel(media.placement)}`}
-                  {media.caption === null ? "" : `／${media.caption}`}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        )}
-      </Panel>
+          <Panel note={`${data.media.length} 件`} title="写真・動画">
+            {data.media.length === 0 ? (
+              <p className={adminInlineNoteStyle}>登録なし</p>
+            ) : (
+              <div className={mediaGridStyle}>
+                {data.media.map((media) => (
+                  <figure className={css({ m: "0" })} key={media.id}>
+                    {media.mediaType === "photo" ? (
+                      <Image
+                        alt={media.caption ?? ""}
+                        className={mediaStyle}
+                        height={480}
+                        sizes="(min-width: 768px) 50vw, 100vw"
+                        src={media.url}
+                        width={640}
+                      />
+                    ) : (
+                      <video className={mediaStyle} controls src={media.url} />
+                    )}
+                    <figcaption className={captionStyle}>
+                      {media.placement === null
+                        ? "配置未設定"
+                        : `配置：${mediaPlacementLabel(media.placement)}`}
+                      {media.caption === null ? "" : `／${media.caption}`}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            )}
+          </Panel>
 
-      <Panel note={`${data.metrics.length} 件`} title="収穫調査">
-        <DataTable
-          columns={metricColumns}
-          emptyMessage="収穫調査は登録されていません。"
-          rowKey={(row) => row.id}
-          rows={data.metrics}
-        />
-      </Panel>
+          <Panel note={`${data.metrics.length} 件`} title="収穫調査">
+            <DataTable
+              columns={metricColumns}
+              emptyMessage="収穫調査は登録されていません。"
+              rowKey={(row) => row.id}
+              rows={data.metrics}
+            />
+          </Panel>
+        </>
+      )}
 
       <Panel note="公開内容と内部メモ" title="編集局調整">
         <UsageReportEditorialForm report={data} />

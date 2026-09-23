@@ -12,6 +12,9 @@ import { helpfulPillRecipe } from "@/components/helpful-pill";
 import { Icon } from "@/components/Icon";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
+import { UsageReportArticle } from "@/components/UsageReportArticle";
+import { APPLICATION_METHODS } from "@/lib/material-page-editor";
+import { STANDPOINTS } from "@/lib/standpoints";
 import { ReportReadingGate } from "@/components/ReportReadingGate";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
@@ -240,6 +243,12 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     return lines;
   });
 
+  const methodTags = APPLICATION_METHODS.filter((method) =>
+    report.structured?.plots.some((plot) =>
+      plot.steps.some((step) => step.method === method.value),
+    ),
+  );
+
   const materialPath = `/materials/${report.material.id}`;
   const reportJsonLd = createArticleJsonLd({
     id: report.id,
@@ -342,6 +351,11 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               {report.author.handle}
             </span>
           </Link>
+          {report.author.standpoint ? (
+            <span>
+              {STANDPOINTS.find((item) => item.value === report.author.standpoint)?.label}
+            </span>
+          ) : null}
           <span className={css({ fontSize: "xs" })}>{formatDateJa(report.publishedAt)}</span>
         </div>
 
@@ -349,6 +363,9 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           作物：{report.crop.name}
           {report.variety ? `（${report.variety}）` : ""}
           {report.purposeTags.length ? `　効果：${report.purposeTags.join("・")}` : ""}
+          {methodTags.length
+            ? `　施用方法：${methodTags.map((method) => method.label).join("・")}`
+            : ""}
         </p>
 
         <MaterialRefCard
@@ -360,167 +377,179 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           showTargetLabel
         />
 
-        {cover ? (
-          <MediaFigure
-            url={cover.url}
-            caption={cover.caption}
-            mediaType={cover.mediaType}
-            wide={cover.mediaType === "photo"}
-          />
-        ) : (
-          <div
-            className={css({
-              mt: "3",
-              aspectRatio: "image.wide",
-              borderRadius: "card",
-              bg: "green.soft2",
-              display: "grid",
-              placeItems: "center",
-              color: "brand.primary",
-            })}
-          >
-            <Icon name="image" size="lg" />
-          </div>
-        )}
+        {report.formVersion === 1 &&
+          (cover ? (
+            <MediaFigure
+              url={cover.url}
+              caption={cover.caption}
+              mediaType={cover.mediaType}
+              wide={cover.mediaType === "photo"}
+            />
+          ) : (
+            <div
+              className={css({
+                mt: "3",
+                aspectRatio: "image.wide",
+                borderRadius: "card",
+                bg: "green.soft2",
+                display: "grid",
+                placeItems: "center",
+                color: "brand.primary",
+              })}
+            >
+              <Icon name="image" size="lg" />
+            </div>
+          ))}
 
-        <h2 className={sectionTitle}>使ってみて、どうでしたか？</h2>
-        <p className={bodyText}>{report.observedChange}</p>
+        {report.structured === null ? (
+          <>
+            <h2 className={sectionTitle}>
+              {report.formVersion === 2 ? "結果・感想" : "使ってみて、どうでしたか？"}
+            </h2>
+            <p className={bodyText}>{report.observedChange}</p>
+          </>
+        ) : null}
 
         {session === null ? (
           <ReportReadingGate reportPath={`/reports/${report.id}`} />
         ) : (
           <>
-            <h2 className={sectionTitle}>使用目的</h2>
-            {report.purposeTags.length > 0 ? (
-              <div
-                className={css({
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: "1.5",
-                  mb: "2",
-                })}
-              >
-                {report.purposeTags.map((tag) => (
-                  <span
-                    key={tag}
+            {report.structured !== null ? (
+              <UsageReportArticle input={report.structured} documentUrls={report.documentUrls} />
+            ) : (
+              <>
+                <h2 className={sectionTitle}>使用目的</h2>
+                {report.purposeTags.length > 0 ? (
+                  <div
                     className={css({
-                      fontSize: "xs",
-                      px: "2.5",
-                      py: "1",
-                      borderRadius: "pill",
-                      bg: "brand.soft",
-                      color: "brand.primaryDeep",
-                      fontWeight: "600",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "1.5",
+                      mb: "2",
                     })}
                   >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-            {report.purposeNote ? <p className={bodyText}>{report.purposeNote}</p> : null}
-
-            <h2 className={sectionTitle}>環境</h2>
-            <p className={bodyText}>{envLines.join("\n")}</p>
-
-            <h2 className={sectionTitle}>使用方法・頻度</h2>
-            {applicationLines.length > 0 ? (
-              <p className={bodyText}>{applicationLines.join("\n")}</p>
-            ) : (
-              <p className={bodyText}>使用方法の詳細は記録されていません。</p>
-            )}
-            {methodMedia.map((media) => (
-              <MediaFigure
-                key={media.id}
-                url={media.url}
-                caption={media.caption}
-                mediaType={media.mediaType}
-                wide
-              />
-            ))}
-
-            {report.climateNote ? (
-              <>
-                <h2 className={sectionTitle}>当時の気候・圃場の状況</h2>
-                <p className={bodyText}>{report.climateNote}</p>
-              </>
-            ) : null}
-
-            {observationPhotos.length > 0 ? (
-              <div
-                className={css({
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                  gap: "2",
-                  mt: "3",
-                })}
-              >
-                {observationPhotos.map((photo) => (
-                  <figure key={photo.id} className={css({ m: "0" })}>
-                    <div
-                      className={css({
-                        position: "relative",
-                        aspectRatio: "image.portrait",
-                        borderRadius: "button",
-                        overflow: "hidden",
-                        bg: "green.soft2",
-                      })}
-                    >
-                      <Image
-                        alt={photo.caption ?? ""}
+                    {report.purposeTags.map((tag) => (
+                      <span
+                        key={tag}
                         className={css({
-                          display: "block",
-                          w: "100%",
-                          h: "100%",
-                          objectFit: "cover",
-                        })}
-                        fill
-                        sizes="(max-width: 768px) 50vw, 320px"
-                        src={photo.url}
-                      />
-                    </div>
-                    {photo.caption ? (
-                      <figcaption
-                        className={css({
-                          mt: "1",
-                          fontSize: "2xs",
-                          color: "text.subtle",
+                          fontSize: "xs",
+                          px: "2.5",
+                          py: "1",
+                          borderRadius: "pill",
+                          bg: "brand.soft",
+                          color: "brand.primaryDeep",
+                          fontWeight: "600",
                         })}
                       >
-                        {photo.caption}
-                      </figcaption>
-                    ) : null}
-                  </figure>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                {report.purposeNote ? <p className={bodyText}>{report.purposeNote}</p> : null}
+
+                <h2 className={sectionTitle}>環境</h2>
+                <p className={bodyText}>{envLines.join("\n")}</p>
+
+                <h2 className={sectionTitle}>使用方法・頻度</h2>
+                {applicationLines.length > 0 ? (
+                  <p className={bodyText}>{applicationLines.join("\n")}</p>
+                ) : (
+                  <p className={bodyText}>使用方法の詳細は記録されていません。</p>
+                )}
+                {methodMedia.map((media) => (
+                  <MediaFigure
+                    key={media.id}
+                    url={media.url}
+                    caption={media.caption}
+                    mediaType={media.mediaType}
+                    wide
+                  />
                 ))}
-              </div>
-            ) : null}
 
-            <h2 className={sectionTitle}>マイナス・良くなかった点（薬害など）</h2>
-            <p className={bodyText}>
-              {report.negativeNote !== null && report.negativeNote.length > 0
-                ? report.negativeNote
-                : "特に記載はありません。"}
-            </p>
+                {report.climateNote ? (
+                  <>
+                    <h2 className={sectionTitle}>当時の気候・圃場の状況</h2>
+                    <p className={bodyText}>{report.climateNote}</p>
+                  </>
+                ) : null}
 
-            {report.metrics.length > 0 ? (
-              <>
-                <h2 className={sectionTitle}>収穫調査</h2>
-                <MetricBars metrics={report.metrics} />
+                {observationPhotos.length > 0 ? (
+                  <div
+                    className={css({
+                      display: "grid",
+                      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                      gap: "2",
+                      mt: "3",
+                    })}
+                  >
+                    {observationPhotos.map((photo) => (
+                      <figure key={photo.id} className={css({ m: "0" })}>
+                        <div
+                          className={css({
+                            position: "relative",
+                            aspectRatio: "image.portrait",
+                            borderRadius: "button",
+                            overflow: "hidden",
+                            bg: "green.soft2",
+                          })}
+                        >
+                          <Image
+                            alt={photo.caption ?? ""}
+                            className={css({
+                              display: "block",
+                              w: "100%",
+                              h: "100%",
+                              objectFit: "cover",
+                            })}
+                            fill
+                            sizes="(max-width: 768px) 50vw, 320px"
+                            src={photo.url}
+                          />
+                        </div>
+                        {photo.caption ? (
+                          <figcaption
+                            className={css({
+                              mt: "1",
+                              fontSize: "2xs",
+                              color: "text.subtle",
+                            })}
+                          >
+                            {photo.caption}
+                          </figcaption>
+                        ) : null}
+                      </figure>
+                    ))}
+                  </div>
+                ) : null}
+
+                <h2 className={sectionTitle}>マイナス・良くなかった点（薬害など）</h2>
+                <p className={bodyText}>
+                  {report.negativeNote !== null && report.negativeNote.length > 0
+                    ? report.negativeNote
+                    : "特に記載はありません。"}
+                </p>
+
+                {report.metrics.length > 0 ? (
+                  <>
+                    <h2 className={sectionTitle}>収穫調査</h2>
+                    <MetricBars metrics={report.metrics} />
+                  </>
+                ) : null}
+
+                <h2 className={sectionTitle}>まとめ・感想</h2>
+                <p className={bodyText}>{report.summary}</p>
+                {summaryMedia.map((media) => (
+                  <MediaFigure
+                    key={media.id}
+                    url={media.url}
+                    caption={media.caption}
+                    mediaType={media.mediaType}
+                    wide
+                  />
+                ))}
               </>
-            ) : null}
-
-            <h2 className={sectionTitle}>まとめ・感想</h2>
-            <p className={bodyText}>{report.summary}</p>
-            {summaryMedia.map((media) => (
-              <MediaFigure
-                key={media.id}
-                url={media.url}
-                caption={media.caption}
-                mediaType={media.mediaType}
-                wide
-              />
-            ))}
-
+            )}
             <div
               className={css({
                 display: "flex",

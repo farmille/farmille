@@ -36,9 +36,14 @@ function sourceKey(src: ImageProps["src"]): string {
 
 function mustSkipOptimization(src: ImageProps["src"]): boolean {
   const result = v.safeParse(v.string(), src);
-  if (!result.success || !result.output.startsWith("https://")) return false;
-
-  return DIRECT_IMAGE_HOSTS.has(new URL(result.output).hostname);
+  if (!result.success) return false;
+  const url = URL.parse(result.output);
+  if (url === null) return false;
+  return (
+    url.hostname === "127.0.0.1" ||
+    url.hostname === "localhost" ||
+    DIRECT_IMAGE_HOSTS.has(url.hostname)
+  );
 }
 
 /**

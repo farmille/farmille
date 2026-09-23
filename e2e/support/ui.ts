@@ -113,22 +113,36 @@ export async function loginAdminAndEnrollMfa(
 }
 
 export async function fillUsageReportForSubmission(page: Page): Promise<void> {
-  await page.getByLabel("使用後に観察した変化").fill("E2Eで観察した変化を具体的に記録しました。");
+  await page.getByRole("button", { name: "次へ", exact: true }).click();
+  await page.getByLabel(/^結果・感想/).fill("E2Eで観察した変化を具体的に記録しました。");
   await page.getByRole("button", { name: "樹勢改善", exact: true }).click();
-  await page.getByLabel("地域").selectOption("13");
-  await page.getByRole("button", { name: "露地栽培", exact: true }).click();
-  await page.getByRole("button", { name: "栄養生長期", exact: true }).click();
-
-  const applicationCalendar = page.getByLabel("処理日のカレンダー");
-  await applicationCalendar.getByRole("button", { name: "1", exact: true }).click();
-  await page.getByRole("button", { name: "葉・茎・果実に散布", exact: true }).click();
-  await page.getByPlaceholder("例：1000").fill("1000");
+  await page.getByRole("button", { name: "次へ", exact: true }).click();
+  await page.getByLabel(/^栽培環境/).fill("露地栽培で調査しました。");
+  await page.getByRole("button", { name: "生育初〜中期", exact: true }).click();
   await page
-    .getByLabel("全体をまとめてひとこと")
-    .fill("E2Eで入力した実証詳細レポートのまとめです。");
-  await page
-    .getByRole("button", {
-      name: /この使用結果には、病害虫の防除、殺菌・殺虫、農薬の代替/,
-    })
-    .click();
+    .getByLabel("処理日・定植日・生育状況（必須）")
+    .fill("9月1日に定植、9月10日に施用しました。");
+  await page.getByRole("button", { name: "次へ", exact: true }).click();
+  for (const [index, name] of ["処理区", "無処理区"].entries()) {
+    await page
+      .getByLabel(/^区の名前/)
+      .nth(index)
+      .fill(name);
+    await page
+      .getByLabel(/^調査した範囲/)
+      .nth(index)
+      .fill("10株");
+    await page
+      .getByLabel(/^この区の説明/)
+      .nth(index)
+      .fill(
+        index === 0 ? "1000倍、200L/10aを1回葉面散布しました。" : "資材なし。ほかは同じ条件です。",
+      );
+  }
+  await page.getByLabel(/資材を使った区の説明に/).check();
+  await page.getByLabel(/^指標名/).fill("活着率");
+  await page.getByLabel("グラフ1の区分1の数値", { exact: true }).fill("90±2 a");
+  await page.getByLabel("グラフ1の区分2の数値", { exact: true }).fill("80±3 b");
+  await page.getByRole("button", { name: "次へ", exact: true }).click();
+  await page.getByLabel(/投稿ガイドラインを確認し/).check();
 }
