@@ -51,3 +51,15 @@ test("no-referrerの確認フォームは同一オリジンだけを受け付け
   });
   expect(sameOrigin.status()).toBe(400);
 });
+
+test("未ログインのメーカー申請ページは戻り先を保ってログインへ案内する", async ({ request }) => {
+  for (const path of [
+    "/dashboard/applications",
+    "/dashboard/applications/new/registration",
+    "/dashboard/applications/00000000-0000-4000-8000-000000000001",
+  ]) {
+    const response = await request.get(path, { maxRedirects: 0 });
+    expect(response.status()).toBe(307);
+    expect(response.headers().location).toBe(`/sellers/login?next=${encodeURIComponent(path)}`);
+  }
+});
