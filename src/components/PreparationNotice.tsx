@@ -55,7 +55,7 @@ export function PreparationNotice({ overlapImage = false }: { overlapImage?: boo
           })}
         >
           <p className={css({ m: "0" })}>
-            Farmilleは現在、公開に向けて準備中です。
+            Farmilleは現在、準備中です。
             <br />
             メーカー様のご登録および一般会員のご登録は、現在受け付けておりません。
           </p>
