@@ -45,6 +45,7 @@ export const tokens = {
     },
   },
   shadows: {
+    overlay: { value: "0 0 1px rgba(0,0,0,.08), 0 8px 16px -2px rgba(0,0,0,.12)" },
     shadow: {
       DEFAULT: {
         value: "0 1px 2px rgba(30,35,31,.05), 0 4px 14px rgba(30,35,31,.06)",
@@ -57,6 +58,7 @@ export const tokens = {
     },
   },
   radii: {
+    banner: { value: "16px" },
     pill: { value: "999px" },
     card: { value: "14px" },
     button: { value: "12px" },
