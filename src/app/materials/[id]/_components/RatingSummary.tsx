@@ -37,19 +37,10 @@ const progressStyle = css({
 type RatingSummaryProps = {
   average: number | null;
   reviewCount: number;
-  controlPlotRatio: number | null;
   distribution: ReviewRatingDistribution;
 };
 
-export function RatingSummary({
-  average,
-  reviewCount,
-  controlPlotRatio,
-  distribution,
-}: RatingSummaryProps) {
-  const controlPlotLabel =
-    controlPlotRatio === null ? "まだ算出できません" : `${Math.round(controlPlotRatio * 100)}%`;
-
+export function RatingSummary({ average, reviewCount, distribution }: RatingSummaryProps) {
   return (
     <div className={summaryCard}>
       <div className={css({ display: "grid", gridTemplateColumns: "auto 1fr", gap: "5" })}>
@@ -107,23 +98,6 @@ export function RatingSummary({
             </div>
           ))}
         </div>
-      </div>
-      <div
-        className={css({
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "3",
-          mt: "3.5",
-          pt: "3",
-          borderTopWidth: "1px",
-          borderTopStyle: "solid",
-          borderTopColor: "border.default",
-          fontSize: "sm",
-        })}
-      >
-        <span className={css({ color: "text.muted" })}>対照区あり率</span>
-        <strong className={css({ fontVariantNumeric: "tabular-nums" })}>{controlPlotLabel}</strong>
       </div>
     </div>
   );

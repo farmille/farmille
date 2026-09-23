@@ -3,7 +3,6 @@ import { notFound, redirect } from "next/navigation";
 import { FormPageShell } from "@/components";
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
-import { purchaseChannelFromDatabase } from "@/server/mutations/reviews";
 import { getReviewForEdit, listReviewCropOptions } from "@/server/queries/reviews";
 
 import { loadMaterialOrNotFound } from "../../../material-page-data";
@@ -67,8 +66,6 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
           cropIds: review.cropIds,
           rating: review.rating,
           body: review.body,
-          purchaseChannel: purchaseChannelFromDatabase(review.purchase_channel),
-          hasControlPlot: review.has_control_plot ?? false,
           pesticideAck: review.pesticide_ack,
           photos: review.photos,
         }}

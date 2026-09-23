@@ -8,7 +8,6 @@ const meta = {
   args: {
     average: 4.2,
     reviewCount: 18,
-    controlPlotRatio: 0.72,
     distribution: {
       total: 18,
       stars: [
@@ -31,7 +30,6 @@ export const NoReviews: Story = {
   args: {
     average: null,
     reviewCount: 0,
-    controlPlotRatio: null,
     distribution: {
       total: 0,
       stars: [

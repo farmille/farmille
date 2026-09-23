@@ -77,11 +77,6 @@ const tag = css({
   fontWeight: "600",
 });
 
-function formatRatio(ratio: number | null): string {
-  if (ratio === null) return "—";
-  return `${Math.round(ratio * 100)}%`;
-}
-
 function formatRating(rating: number | null): string {
   if (rating === null) return "—";
   return rating.toFixed(1);
@@ -124,14 +119,6 @@ export function CompareTable({ materials }: CompareTableProps) {
       label: "感想口コミ数",
       render: (material) => (
         <span className={css({ fontVariantNumeric: "tabular-nums" })}>{material.reviewCount}</span>
-      ),
-    },
-    {
-      label: "対照区あり率",
-      render: (material) => (
-        <span className={css({ fontVariantNumeric: "tabular-nums" })}>
-          {formatRatio(material.controlPlotRatio)}
-        </span>
       ),
     },
     {

@@ -62,8 +62,6 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
           cropIds: [],
           rating: 0,
           body: "",
-          purchaseChannel: null,
-          hasControlPlot: false,
           pesticideAck: false,
           photos: [],
         }}

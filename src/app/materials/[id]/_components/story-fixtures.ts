@@ -115,7 +115,6 @@ export const materialReviews: ReviewListItem[] = [
     author_user_id: "00000000-0000-4000-8000-000000000901",
     rating: 5,
     body: "定植後の根の動きがよく、株ごとの生育差が小さくなりました。",
-    has_control_plot: true,
     is_provided_sample: false,
     created_at: "2026-08-02T00:00:00.000Z",
     author: {
