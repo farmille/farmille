@@ -40,7 +40,7 @@ export function ClaimForm({
       {state.status === "done" ? <FormMessage tone="info">{state.message}</FormMessage> : null}
       <input name="materialId" type="hidden" value={materialId} />
       <Field
-        guide="返送書類で、このメーカーにこの資材の編集権を渡してよいことを確認してください。会社名が一致するだけでは付与できません。"
+        guide="申請と確認資料で、このメーカーにこの資材の編集権を渡してよいことを確認してください。会社名が一致するだけでは付与できません。"
         htmlFor="sellerId"
         label="編集権を付与するメーカー"
         requirement="optional"
@@ -62,8 +62,8 @@ export function ClaimForm({
       </Field>
       <Field
         htmlFor="documentReference"
-        label="確認した返送書類"
-        guide="付与時は必須です。書類の保管先または管理番号を記入してください。公開されません。"
+        label="確認資料の保管先または受付番号"
+        guide="付与時は必須です。確認資料の保管先または受付番号を記入してください。公開されません。"
       >
         <input
           className={controlStyle}

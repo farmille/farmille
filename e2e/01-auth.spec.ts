@@ -72,9 +72,9 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await sellerApplyLink.click();
     await expect(page).toHaveURL(/\/sellers\?from=me$/);
     await expect(
-      page.getByRole("heading", { name: "自社資材の情報を、正確に届ける。" }),
+      page.getByRole("heading", { name: "Farmille 企業様向け利用ガイド" }),
     ).toBeVisible();
-    const landingApplyLink = page.getByRole("link", { name: "メーカーアカウントを申請" });
+    const landingApplyLink = page.getByRole("link", { name: "申請フォームへ進む" });
     await expect(landingApplyLink).toHaveAttribute("href", "/sellers/apply?from=me");
     await landingApplyLink.click();
     await expect(page).toHaveURL(/\/sellers\/apply\?from=me$/);
