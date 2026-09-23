@@ -30,7 +30,7 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
     await page.getByRole("button", { name: "ミニトマトを選択", exact: true }).click();
     await page.getByRole("radio", { name: "4", exact: true }).check();
     await page.getByLabel("感想口コミ本文").fill(body);
-    await page.getByRole("checkbox", { name: /この感想口コミには、病害虫の防除/ }).check();
+    await page.getByRole("checkbox", { name: /実際に使用した感想を、使用条件や感じた変化/ }).check();
     await page.getByRole("button", { name: "投稿する" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/materials/${material.id}\\?review=posted`));
