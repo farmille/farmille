@@ -2,9 +2,15 @@ import type { ReactNode } from "react";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
-import { APPLICATION_METHODS, APPLICATION_TIMINGS } from "@/lib/material-page-editor";
+import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
+import { reportPlotColor } from "@/components/ReportPlotColor";
 import { PREFECTURES } from "@/lib/prefectures";
-import { REPORT_SECTIONS, parseReportNumber, type UsageReportInput } from "@/lib/usage-report";
+import {
+  REPORT_SECTIONS,
+  groupReportMeasurements,
+  parseReportNumber,
+  type UsageReportInput,
+} from "@/lib/usage-report";
 import { css } from "../../styled-system/css";
 
 const sectionStyle = css({ py: "5", borderBottomWidth: "1px", borderColor: "border.default" });
@@ -17,9 +23,12 @@ const photoGrid = css({
   mt: "3",
 });
 const muted = css({ color: "text.muted", fontSize: "sm" });
-const barStyle = css({ fill: "brand.primary", color: "brand.primary" });
-const firstBarStyle = css({ fill: "text.subtle", color: "text.subtle" });
-const chart = css({ width: "100%", height: "10", display: "block", overflow: "visible" });
+const chart = css({
+  width: "100%",
+  height: "reportGraph.horizontal",
+  display: "block",
+  overflow: "visible",
+});
 
 export function ReportGraph({
   graph,
@@ -37,15 +46,23 @@ export function ReportGraph({
       : [
           {
             ...row,
-            index,
+            index: row.plotId
+              ? Math.max(
+                  0,
+                  plots.findIndex((plot) => plot.id === row.plotId),
+                )
+              : index,
             parsed,
             label:
-              row.label || plots.find((plot) => plot.id === row.plotId)?.name || `区 ${index + 1}`,
+              plots.find((plot) => plot.id === row.plotId)?.name || row.label || `区 ${index + 1}`,
           },
         ];
   });
   const minimum = Math.min(0, ...rows.map(({ parsed }) => parsed.value - (parsed.error ?? 0)));
-  const maximum = Math.max(0, ...rows.map(({ parsed }) => parsed.value + (parsed.error ?? 0)));
+  const maximum = Math.max(
+    unit === "%" ? 100 : 0,
+    ...rows.map(({ parsed }) => parsed.value + (parsed.error ?? 0)),
+  );
   const range = maximum - minimum || 1;
   const x = (value: number) => 5 + ((value - minimum) / range) * 290;
   return (
@@ -74,7 +91,7 @@ export function ReportGraph({
           >
             <line x1={x(0)} x2={x(0)} y1="0" y2="30" stroke="currentColor" />
             <rect
-              className={row.index === 0 ? firstBarStyle : barStyle}
+              className={reportPlotColor(row.index)}
               x={Math.min(x(0), x(row.parsed.value))}
               y="5"
               width={Math.abs(x(row.parsed.value) - x(0))}
@@ -182,99 +199,77 @@ export function UsageReportArticle({
             </>
           )}
           {section.value === "plots" &&
-            input.plots.map((plot) => (
-              <div key={plot.id} className={css({ mt: "3" })}>
-                {onChange ? (
-                  <Input
-                    aria-label="記事内の区の名前"
-                    value={plot.name}
-                    onChange={(event) =>
-                      onChange({
-                        ...input,
-                        plots: input.plots.map((item) =>
-                          item.id === plot.id ? { ...item, name: event.target.value } : item,
-                        ),
-                      })
-                    }
-                  />
-                ) : (
-                  <h3 className={headingStyle}>
-                    {plot.name || "区名未入力"}（{plot.scope}）
-                  </h3>
-                )}
-                {onChange && (
-                  <label>
-                    調査した範囲
-                    <Input
-                      value={plot.scope}
-                      onChange={(event) =>
-                        onChange({
-                          ...input,
-                          plots: input.plots.map((item) =>
-                            item.id === plot.id ? { ...item, scope: event.target.value } : item,
-                          ),
-                        })
-                      }
-                    />
-                  </label>
-                )}
-                {text(plot.description, `${plot.name}の説明`, (description) => ({
-                  ...input,
-                  plots: input.plots.map((item) =>
-                    item.id === plot.id ? { ...item, description } : item,
-                  ),
-                }))}
-                <p className={muted}>
-                  {plot.steps
-                    .filter((step) => step.method !== "")
-                    .map(
-                      (step) =>
-                        `${APPLICATION_METHODS.find((method) => method.value === step.method)?.label}：${step.method === "other" ? step.otherText : step.targets.join("・")}`,
-                    )
-                    .join(" ／ ")}
-                </p>
-              </div>
-            ))}
-          {section.value === "measurements" &&
-            input.measurements.map((measurement) => (
-              <div key={measurement.id} className={css({ mt: "5" })}>
-                {onChange && (
-                  <Input
-                    aria-label="記事内の調査項目の見出し"
-                    value={measurement.name}
-                    onChange={(event) =>
-                      onChange({
-                        ...input,
-                        measurements: input.measurements.map((item) =>
-                          item.id === measurement.id ? { ...item, name: event.target.value } : item,
-                        ),
-                      })
-                    }
-                  />
-                )}
+            input.plots.map((plot, index) => (
+              <div
+                key={plot.id}
+                className={css({
+                  mt: "3",
+                  p: "3",
+                  borderWidth: "1px",
+                  borderColor: "border.default",
+                  borderRadius: "card",
+                })}
+              >
                 <h3 className={headingStyle}>
-                  {measurement.name || "指標名未入力"}
-                  {measurement.kind === "numeric" && measurement.unit
-                    ? `（${measurement.unit}）`
-                    : ""}
+                  <span aria-hidden="true" className={reportPlotColor(index)}>
+                    ●{" "}
+                  </span>
+                  {plot.name || "区名未入力"}{" "}
+                  <span
+                    className={css({
+                      fontSize: "sm",
+                      fontWeight: "normal",
+                      bg: "surface.page",
+                      borderWidth: "1px",
+                      borderColor: "border.default",
+                      borderRadius: "pill",
+                      px: "2",
+                      py: "1",
+                    })}
+                  >
+                    {plot.scope}
+                  </span>
                 </h3>
-                {measurement.kind === "text"
-                  ? text(measurement.body, `${measurement.name}の本文`, (body) => ({
-                      ...input,
-                      measurements: input.measurements.map((item) =>
-                        item.id === measurement.id ? { ...item, body } : item,
-                      ),
-                    }))
-                  : measurement.graphs.map((graph) => (
-                      <ReportGraph
-                        key={graph.id}
-                        graph={graph}
-                        plots={input.plots}
-                        unit={measurement.unit}
-                      />
-                    ))}
+                <p className={prose}>{plot.description}</p>
               </div>
             ))}
+          {section.value === "measurements" && (
+            <>
+              {groupReportMeasurements(input.measurements).map((measurement) => (
+                <div key={measurement.id} className={css({ mt: "5" })}>
+                  <h3 className={headingStyle}>
+                    使用結果の詳細：{measurement.name || "調査項目未入力"}
+                    {measurement.unit ? `（${measurement.unit}）` : ""}
+                  </h3>
+                  {measurement.graphs.map((graph) => (
+                    <ReportGraph
+                      key={graph.id}
+                      graph={graph}
+                      plots={input.plots}
+                      unit={measurement.unit}
+                    />
+                  ))}
+                </div>
+              ))}
+              {input.measurements
+                .filter((measurement) => measurement.kind === "text")
+                .map((measurement) => (
+                  <div key={measurement.id} className={css({ mt: "5" })}>
+                    <h3 className={headingStyle}>{measurement.name}</h3>
+                    {text(measurement.body, `${measurement.name}の本文`, (body) => ({
+                      ...input,
+                      measurements: input.measurements.flatMap((item) =>
+                        item.id !== measurement.id
+                          ? [item]
+                          : body.trim()
+                            ? [{ ...item, body }]
+                            : [],
+                      ),
+                    }))}
+                  </div>
+                ))}
+            </>
+          )}
           {section.value === "documents" && (
             <ul>
               {input.documents.map((document) => (

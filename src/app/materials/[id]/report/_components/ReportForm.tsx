@@ -75,6 +75,9 @@ export function ReportForm({
   const [input, setInput] = useState(
     () => draft ?? { ...createBlankUsageReport(material.id), prefectureCode, city },
   );
+  const [manualUnits, setManualUnits] = useState(
+    () => new Set(input.measurements.filter((item) => item.unit).map((item) => item.id)),
+  );
   const [documentUrls, setDocumentUrls] = useState(initialDocumentUrls);
   const [saved, setSaved] = useState(() => JSON.stringify(input));
   const [materialName, setMaterialName] = useState(material.name);
@@ -214,7 +217,7 @@ export function ReportForm({
     return (
       <section className={panel}>
         <h2>レポートを受け付けました</h2>
-        <p>編集部が内容を確認して公開します。修正をお願いする場合があります。</p>
+        <p>運営が内容を確認して公開します。修正をお願いする場合があります。</p>
         <a href={`/materials/${input.materialId}`}>資材ページに戻る</a>
       </section>
     );
@@ -531,7 +534,15 @@ export function ReportForm({
               )}
           </>
         )}
-        {step === 4 && <ReportComparisonFields input={input} onChange={setInput} errors={errors} />}
+        {step === 4 && (
+          <ReportComparisonFields
+            input={input}
+            onChange={setInput}
+            errors={errors}
+            manualUnits={manualUnits}
+            onManualUnit={(id) => setManualUnits((previous) => new Set([...previous, id]))}
+          />
+        )}
         {step === 5 && (
           <>
             <h2>
@@ -600,7 +611,7 @@ export function ReportForm({
                 <li>観察した事実にもとづいて記入してください。</li>
                 <li>未登録資材の病害虫・雑草への効果を断定しないでください。</li>
                 <li>他者の権利・秘密保持に反する内容を含めないでください。</li>
-                <li>編集部が確認して公開します。修正をお願いする場合があります。</li>
+                <li>運営が確認して公開します。修正をお願いする場合があります。</li>
               </ul>
             </section>
             <label>

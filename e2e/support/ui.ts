@@ -123,11 +123,21 @@ export async function fillUsageReportForSubmission(page: Page): Promise<void> {
     .getByLabel("処理日・定植日・生育状況（必須）")
     .fill("9月1日に定植、9月10日に施用しました。");
   await page.getByRole("button", { name: "次へ", exact: true }).click();
-  for (const [index, name] of ["処理区", "無処理区"].entries()) {
-    await page
-      .getByLabel(/^区の名前/)
-      .nth(index)
-      .fill(name);
+  await page.getByRole("button", { name: "グラフ1の調査項目を編集", exact: true }).click();
+  await page.getByLabel("調査項目（必須）", { exact: true }).fill("活着率");
+  await page.getByLabel("調査項目（必須）", { exact: true }).press("Enter");
+  await page.getByLabel("単位（任意）", { exact: true }).press("Enter");
+  const graph = page.getByRole("region", { name: "グラフ 1", exact: true });
+  for (const name of ["処理区", "無処理区"]) {
+    await graph.getByLabel("区の名前（必須）", { exact: true }).fill(name);
+    await graph.getByLabel("区の名前（必須）", { exact: true }).press("Enter");
+  }
+  for (const [index, value] of ["90±2 a", "80±3 b"].entries()) {
+    const field = page.getByLabel(`グラフ1の区${index + 1}の数値`, { exact: true });
+    await field.fill(value);
+    await field.press("Enter");
+  }
+  for (const index of [0, 1]) {
     await page
       .getByLabel(/^調査した範囲/)
       .nth(index)
@@ -140,9 +150,6 @@ export async function fillUsageReportForSubmission(page: Page): Promise<void> {
       );
   }
   await page.getByLabel(/資材を使った区の説明に/).check();
-  await page.getByLabel(/^指標名/).fill("活着率");
-  await page.getByLabel("グラフ1の区分1の数値", { exact: true }).fill("90±2 a");
-  await page.getByLabel("グラフ1の区分2の数値", { exact: true }).fill("80±3 b");
   await page.getByRole("button", { name: "次へ", exact: true }).click();
   await page.getByLabel(/投稿ガイドラインを確認し/).check();
 }

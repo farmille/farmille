@@ -147,6 +147,11 @@ export const tokens = {
   },
   // コンテンツ用途ごとの上限幅。breakpoint 名を width 値へ流用しない。
   sizes: {
+    reportGraph: {
+      vertical: { value: "12rem" },
+      horizontal: { value: "2.5rem" },
+      plot: { value: "6rem" },
+    },
     imagePreview: { value: "10rem" },
     // 短いラベルでも操作対象として横幅を確保する。
     button: {

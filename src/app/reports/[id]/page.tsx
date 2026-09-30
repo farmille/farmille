@@ -13,7 +13,6 @@ import { Icon } from "@/components/Icon";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
 import { UsageReportArticle } from "@/components/UsageReportArticle";
-import { APPLICATION_METHODS } from "@/lib/material-page-editor";
 import { STANDPOINTS } from "@/lib/standpoints";
 import { ReportReadingGate } from "@/components/ReportReadingGate";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
@@ -243,12 +242,6 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     return lines;
   });
 
-  const methodTags = APPLICATION_METHODS.filter((method) =>
-    report.structured?.plots.some((plot) =>
-      plot.steps.some((step) => step.method === method.value),
-    ),
-  );
-
   const materialPath = `/materials/${report.material.id}`;
   const reportJsonLd = createArticleJsonLd({
     id: report.id,
@@ -363,9 +356,6 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           作物：{report.crop.name}
           {report.variety ? `（${report.variety}）` : ""}
           {report.purposeTags.length ? `　効果：${report.purposeTags.join("・")}` : ""}
-          {methodTags.length
-            ? `　施用方法：${methodTags.map((method) => method.label).join("・")}`
-            : ""}
         </p>
 
         <MaterialRefCard
