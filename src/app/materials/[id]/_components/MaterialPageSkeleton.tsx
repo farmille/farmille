@@ -15,20 +15,6 @@ export function MaterialPageSkeleton() {
         <div className={css({ display: "grid", gap: "4" })}>
           <MaterialHeroSkeleton />
           <Skeleton variant="short" />
-          <p
-            className={css({
-              m: "0",
-              p: "3",
-              borderRadius: "button",
-              bg: "surface.page",
-              color: "text.subtle",
-              fontSize: "xs",
-              lineHeight: "1.65",
-            })}
-          >
-            掲載情報は、製造元公式サイト等の公開情報をもとに Farmille
-            が独自に整理・分類したものです。最新・正式な使用方法は必ず製造元公式情報をご確認ください。
-          </p>
           <SectionHeading title="資材詳細" />
           <MaterialDetailsSkeleton />
         </div>

@@ -67,6 +67,9 @@ export default async function AdminUsageReportsPage() {
       description="提出済みの実証詳細レポートを確認し、本文を調整して公開または差し戻す。下書きは表示しない。"
       title="実証詳細レポート編集局"
     >
+      <Link className={linkStyle} href="/admin/published-posts">
+        公開済みの投稿を管理する
+      </Link>
       <Panel note={`${reports.data.length} 件`} title="確認待ち">
         <DataTable
           columns={columns}
