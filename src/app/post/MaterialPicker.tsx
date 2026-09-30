@@ -27,7 +27,7 @@ const materialButton = cva({
   },
   variants: {
     selected: {
-      true: { borderColor: "brand.primary", bg: "green.soft2" },
+      true: { borderColor: "primary.600", bg: "primary.100" },
       false: { borderColor: "border.default" },
     },
   },
@@ -121,7 +121,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
               </span>
               <span
                 className={css({
-                  color: "brand.primary",
+                  color: "primary.700",
                   fontSize: "sm",
                   fontWeight: "700",
                   flexShrink: "0",
@@ -140,8 +140,8 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
           px: "3",
           py: "2.5",
           borderRadius: "pill",
-          bg: "brand.soft",
-          color: "brand.primaryDeep",
+          bg: "primary.200",
+          color: "primary.700",
           fontSize: "xs",
           textAlign: "center",
         })}
@@ -199,7 +199,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                 justifyContent: "center",
                 py: "3",
                 borderRadius: "button",
-                bg: "brand.primary",
+                bg: "primary.700",
                 color: "surface.card",
                 fontSize: "md",
                 fontWeight: "700",
@@ -219,7 +219,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                 py: "3",
                 borderRadius: "button",
                 bg: "surface.card",
-                color: "brand.primary",
+                color: "primary.700",
                 borderWidth: "1px",
                 borderStyle: "solid",
                 borderColor: "border.strong",

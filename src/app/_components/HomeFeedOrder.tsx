@@ -20,7 +20,7 @@ const pill = cva({
   },
   variants: {
     active: {
-      true: { bg: "brand.primary", color: "surface.card" },
+      true: { bg: "primary.700", color: "surface.card" },
       false: { bg: "surface.card", color: "text.muted" },
     },
   },

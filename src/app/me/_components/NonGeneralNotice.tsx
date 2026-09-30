@@ -38,7 +38,7 @@ const card = css({
 const linkStyle = css({
   display: "inline-flex",
   mt: "4",
-  color: "brand.primary",
+  color: "primary.700",
   fontWeight: "700",
   textDecoration: "none",
 });

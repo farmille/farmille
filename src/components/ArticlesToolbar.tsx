@@ -54,10 +54,10 @@ export function ArticlesToolbar({ filter, q }: ArticlesToolbarProps) {
           py: "2.5",
           mb: "3",
           _focusWithin: {
-            borderColor: "brand.primary",
+            borderColor: "primary.600",
             outlineWidth: "2px",
             outlineStyle: "solid",
-            outlineColor: "brand.soft",
+            outlineColor: "primary.200",
           },
         })}
         action="/articles"

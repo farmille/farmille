@@ -80,7 +80,7 @@ export function SectionHeading({
             w: "5.5",
             h: "5.5",
             borderRadius: "pill",
-            bg: "brand.primary",
+            bg: "primary.700",
             color: "surface.card",
             display: "grid",
             placeItems: "center",
@@ -110,7 +110,7 @@ export function SectionHeading({
           href={href}
           className={css({
             fontSize: "sm",
-            color: "brand.primary",
+            color: "primary.700",
             textDecoration: "none",
             whiteSpace: "nowrap",
           })}

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 const linkStyle = css({
-  color: "brand.primary",
+  color: "primary.700",
   fontWeight: "700",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },

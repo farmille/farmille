@@ -35,7 +35,7 @@ const toast = css({
   m: "0",
   px: "4",
   py: "3",
-  bg: "brand.primaryDeep",
+  bg: "primary.700",
   color: "surface.card",
   borderRadius: "card",
   boxShadow: "shadow.lift",

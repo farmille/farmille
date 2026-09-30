@@ -285,7 +285,7 @@ export function ReportForm({
               fontSize: "sm",
               p: "2",
               borderRadius: "button",
-              _currentStep: { bg: "brand.soft" },
+              _currentStep: { bg: "primary.200" },
             })}
           >
             {index + 1} {label}

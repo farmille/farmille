@@ -174,7 +174,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
           また、農薬、肥料、土壌改良資材等として法令上の登録・届出・表示その他の規制がある資材については、当該法令およびそれに基づく製品表示・使用条件等をご確認のうえ、それらに従ってご使用ください。ご利用の前に
           <Link
             href="/legal"
-            className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
+            className={css({ color: "primary.700", textDecoration: "underline" })}
           >
             規約・ガイドライン
           </Link>

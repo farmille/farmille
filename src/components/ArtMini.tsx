@@ -25,12 +25,12 @@ const thumb = css({
   w: "70px",
   aspectRatio: "image.landscape",
   borderRadius: "button",
-  bg: "green.soft2",
+  bg: "primary.100",
   flexShrink: "0",
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
-  color: "brand.primary",
+  color: "primary.700",
 });
 
 export type ArtMiniProps = {

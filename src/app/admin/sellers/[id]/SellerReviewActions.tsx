@@ -24,7 +24,7 @@ const credentialsStyle = css({
   display: "flex",
   flexDirection: "column",
   gap: "2",
-  bg: "brand.soft",
+  bg: "primary.200",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
@@ -35,7 +35,7 @@ const credentialsStyle = css({
 const credentialLabelStyle = css({
   fontSize: "sm",
   fontWeight: "700",
-  color: "brand.primaryDeep",
+  color: "primary.700",
 });
 
 const confirmationStyle = css({

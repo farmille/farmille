@@ -32,7 +32,7 @@ const menuListStyle = css({
 const menuLinkStyle = css({
   fontSize: "lg",
   fontWeight: "700",
-  color: "brand.primary",
+  color: "primary.700",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },
 });
@@ -45,7 +45,7 @@ const statLinkStyle = css({
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
   },
 });
 

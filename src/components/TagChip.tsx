@@ -45,9 +45,9 @@ const chipRecipe = cva({
     },
     category: {
       crop: {
-        bg: "brand.soft",
-        color: "brand.primaryDeep",
-        borderColor: "brand.primary/30",
+        bg: "primary.200",
+        color: "primary.700",
+        borderColor: "primary.600/30",
       },
       concern: {
         bg: "tag.concern/12",
@@ -60,7 +60,7 @@ const chipRecipe = cva({
         borderColor: "tag.effect/35",
       },
       cond: {
-        bg: "brand.soft",
+        bg: "primary.200",
         color: "accent.official",
         borderColor: "accent.official/30",
       },
@@ -82,9 +82,9 @@ const chipRecipe = cva({
     },
     selectedOn: {
       true: {
-        bg: "brand.primary",
+        bg: "primary.700",
         color: "surface.card",
-        borderColor: "brand.primary",
+        borderColor: "primary.600",
         fontWeight: "600",
       },
       false: {},
@@ -105,8 +105,8 @@ const catMini = css({
 
 const removeBtn = css({
   borderWidth: "0",
-  bg: "brand.primary/18",
-  color: "brand.primaryDeep",
+  bg: "primary.600/18",
+  color: "primary.700",
   w: "17px",
   h: "17px",
   borderRadius: "pill",

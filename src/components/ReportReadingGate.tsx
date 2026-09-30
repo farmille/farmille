@@ -64,7 +64,7 @@ export function ReportReadingGate({ reportPath }: { reportPath: string }) {
         <Link
           href={`/login?next=${next}`}
           className={css({
-            color: "brand.primaryDeep",
+            color: "primary.700",
             textDecoration: "underline",
             fontSize: "md",
           })}

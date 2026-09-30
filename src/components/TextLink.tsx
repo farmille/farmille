@@ -4,7 +4,7 @@ import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { css, cx } from "../../styled-system/css";
 
 const textLinkStyle = css({
-  color: "brand.primary",
+  color: "primary.700",
   fontWeight: "700",
   textDecoration: "underline",
   textUnderlineOffset: "2px",

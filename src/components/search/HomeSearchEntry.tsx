@@ -16,7 +16,7 @@ const searchBox = css({
   display: "flex",
   alignItems: "center",
   gap: "2.5",
-  minH: "56px",
+  minH: "12",
   w: "100%",
   bg: "ink/24",
   backdropFilter: "blur(3px)",
@@ -26,18 +26,17 @@ const searchBox = css({
   borderRadius: "pill",
   boxShadow: "shadow.glass",
   px: "4",
-  py: "2",
-  // 送信ボタンのフォーカスでも面の枠が出る _focusWithin は使わず、入力欄のときだけ枠を出す
+  py: "1",
   "&:has(input:focus-visible)": {
-    outlineWidth: "3px",
+    outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "surface.card",
     outlineOffset: "3px",
   },
   tab: {
-    minH: "72px",
+    minH: "16",
     px: "6",
-    py: "3",
+    py: "2",
   },
 });
 
@@ -82,7 +81,7 @@ const submit = css({
   _focusVisible: {
     outlineWidth: "3px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
     outlineOffset: "3px",
   },
 });
@@ -92,7 +91,7 @@ const action = css({
   w: "36px",
   h: "36px",
   borderRadius: "pill",
-  bg: "brand.primary/72",
+  bg: "primary.600/72",
   backdropFilter: "blur(3px)",
   color: "surface.card",
   display: "grid",
@@ -103,43 +102,6 @@ const action = css({
     h: "44px",
   },
 });
-
-const categoryRow = css({
-  display: "flex",
-  gap: "1.5",
-  mt: "3",
-  overflowX: "auto",
-  scrollbarWidth: "none",
-  "&::-webkit-scrollbar": { display: "none" },
-  tab: {
-    gap: "2.5",
-    mt: "4",
-  },
-});
-
-const category = css({
-  display: "inline-flex",
-  alignItems: "center",
-  flexShrink: "0",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "surface.card/35",
-  borderRadius: "pill",
-  bg: "ink/20",
-  backdropFilter: "blur(2px)",
-  color: "surface.card/88",
-  px: "2.5",
-  py: "1.5",
-  fontSize: "xs",
-  fontWeight: "600",
-  tab: {
-    px: "4",
-    py: "2",
-    fontSize: "sm",
-  },
-});
-
-const categories = ["作物", "効果", "資材ジャンル", "メーカー"] as const;
 
 export function HomeSearchEntry() {
   return (
@@ -157,19 +119,11 @@ export function HomeSearchEntry() {
           placeholder="作物・悩み・資材名から探す"
           type="search"
         />
-        <button className={submit} type="submit">
-          検索
+        <button className={submit} type="submit" aria-label="検索">
           <span className={action} aria-hidden>
             <Icon name="chevron_right" size="sm" />
           </span>
         </button>
-      </div>
-      <div className={categoryRow} aria-hidden>
-        {categories.map((categoryLabel) => (
-          <span className={category} key={categoryLabel}>
-            {categoryLabel}
-          </span>
-        ))}
       </div>
     </Form>
   );

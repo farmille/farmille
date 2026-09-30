@@ -18,13 +18,13 @@ const buttonRecipe = cva({
   variants: {
     variant: {
       primary: {
-        bg: "brand.primary",
+        bg: "primary.700",
         color: "surface.card",
         borderColor: "transparent",
       },
       ghost: {
         bg: "surface.card",
-        color: "brand.primary",
+        color: "primary.700",
         borderColor: "border.strong",
       },
       danger: {

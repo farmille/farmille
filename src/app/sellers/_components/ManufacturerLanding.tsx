@@ -13,9 +13,9 @@ import { css, cx } from "../../../../styled-system/css";
 const hero = css({
   borderWidth: "1px",
   borderStyle: "solid",
-  borderColor: "green/25",
+  borderColor: "primary.600/25",
   borderRadius: "card",
-  bg: "brand.soft",
+  bg: "primary.200",
   overflow: "hidden",
   tab: {
     display: "grid",
@@ -35,7 +35,7 @@ const eyebrow = css({
   alignItems: "center",
   gap: "1.5",
   mb: "3",
-  color: "brand.primaryDeep",
+  color: "primary.700",
   fontSize: "xs",
   fontWeight: "800",
   letterSpacing: "0.04em",
@@ -84,13 +84,13 @@ const approvalPanel = css({
   bg: "surface.card",
   borderTopWidth: "1px",
   borderTopStyle: "solid",
-  borderTopColor: "green/25",
+  borderTopColor: "primary.600/25",
   tab: {
     px: "7",
     borderTopWidth: "0",
     borderLeftWidth: "1px",
     borderLeftStyle: "solid",
-    borderLeftColor: "green/25",
+    borderLeftColor: "primary.600/25",
   },
 });
 
@@ -185,7 +185,7 @@ const closing = css({
   px: "4",
   py: "7",
   borderRadius: "card",
-  bg: "brand.primary",
+  bg: "primary.700",
   color: "surface.card",
   textAlign: "center",
   tab: { px: "7" },
@@ -218,7 +218,7 @@ const closingActions = css({
 const closingPrimary = css({
   w: "100%",
   bg: "surface.card",
-  color: "brand.primaryDeep",
+  color: "primary.700",
   tab: { w: "auto", minW: "52" },
 });
 
@@ -257,7 +257,7 @@ const list = css({
   color: "text.muted",
 });
 const textLink = css({
-  color: "brand.primaryDeep",
+  color: "primary.700",
   textDecoration: "underline",
   textUnderlineOffset: "0.2em",
   fontWeight: "700",
@@ -279,7 +279,7 @@ const summary = css({
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
     outlineOffset: "2px",
   },
 });

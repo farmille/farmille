@@ -197,20 +197,20 @@ const spacingTrack = css({
   h: "4",
   overflow: "hidden",
   borderRadius: "pill",
-  bg: "brand.soft",
+  bg: "primary.200",
 });
 
 const spacingBar = css({
   h: "full",
-  bg: "brand.primary",
+  bg: "primary.600",
 });
 
 const radiusSample = css({
   w: "16",
   h: "12",
   borderWidth: "1px",
-  borderColor: "brand.primary",
-  bg: "brand.soft",
+  borderColor: "primary.600",
+  bg: "primary.200",
 });
 
 const elevationSample = css({
@@ -226,21 +226,21 @@ const sizeTrack = css({
   h: "8",
   overflow: "hidden",
   borderRadius: "input",
-  bg: "brand.soft",
+  bg: "primary.200",
 });
 
 const sizeBar = css({
   h: "full",
-  bg: "brand.primary",
+  bg: "primary.600",
 });
 
 const ratioSample = css({
   w: "24",
   maxW: "full",
   borderWidth: "1px",
-  borderColor: "brand.primary",
+  borderColor: "primary.600",
   borderRadius: "input",
-  bg: "brand.soft",
+  bg: "primary.200",
 });
 
 const catalog = css({
@@ -349,7 +349,7 @@ export function SemanticColorTokens() {
   return (
     <TokenDocFrame
       title="Semantic Colors"
-      subtitle="brand・text・surface・border・accent の用途別カラー。"
+      subtitle="primary・text・surface・border・accent の用途別カラー。"
     >
       <TokenSection title="Aliases" lead="参照先と解決後の色を同時に確認できる。">
         <ColorGrid items={semanticColors} />

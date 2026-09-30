@@ -125,11 +125,11 @@ function MediaFigure({
           position: "relative",
           borderRadius: "card",
           overflow: "hidden",
-          bg: "green.soft2",
+          bg: "primary.100",
           aspectRatio: wide ? "image.wide" : "image.landscape",
           display: "grid",
           placeItems: "center",
-          color: "brand.primary",
+          color: "primary.700",
         })}
       >
         {mediaType === "photo" ? (
@@ -315,10 +315,10 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 w: "32px",
                 aspectRatio: "image.square",
                 borderRadius: "pill",
-                bg: "brand.soft",
+                bg: "primary.200",
                 display: "grid",
                 placeItems: "center",
-                color: "brand.primary",
+                color: "primary.700",
                 overflow: "hidden",
               })}
             >
@@ -381,10 +381,10 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 mt: "3",
                 aspectRatio: "image.wide",
                 borderRadius: "card",
-                bg: "green.soft2",
+                bg: "primary.100",
                 display: "grid",
                 placeItems: "center",
-                color: "brand.primary",
+                color: "primary.700",
               })}
             >
               <Icon name="image" size="lg" />
@@ -426,8 +426,8 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                           px: "2.5",
                           py: "1",
                           borderRadius: "pill",
-                          bg: "brand.soft",
-                          color: "brand.primaryDeep",
+                          bg: "primary.200",
+                          color: "primary.700",
                           fontWeight: "600",
                         })}
                       >
@@ -481,7 +481,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                             aspectRatio: "image.portrait",
                             borderRadius: "button",
                             overflow: "hidden",
-                            bg: "green.soft2",
+                            bg: "primary.100",
                           })}
                         >
                           <Image
@@ -560,7 +560,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               <Icon
                 name="check"
                 size="sm"
-                className={css({ color: "brand.primary", flexShrink: "0", mt: "0.5" })}
+                className={css({ color: "primary.700", flexShrink: "0", mt: "0.5" })}
               />
               <span>
                 この実証詳細レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。

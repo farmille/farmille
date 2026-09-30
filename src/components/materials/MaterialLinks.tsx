@@ -31,9 +31,9 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
                       ? css({
                           mb: "3",
                           p: "4",
-                          bg: "brand.soft",
+                          bg: "primary.200",
                           borderWidth: "1px",
-                          borderColor: "brand.primary",
+                          borderColor: "primary.600",
                           borderRadius: "card",
                           overflowWrap: "anywhere",
                           fontSize: "sm",
@@ -46,7 +46,7 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
                       href={link.url}
                       target="_blank"
                       rel="noreferrer"
-                      className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
+                      className={css({ color: "primary.700", textDecoration: "underline" })}
                     >
                       {link.title || "資料名は未入力です"}
                     </a>
