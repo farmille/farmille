@@ -12,7 +12,7 @@ import {
 } from "./support/test-data";
 import { loginAdminAndEnrollMfa, loginGeneral } from "./support/ui";
 
-test("運営が公開済み投稿を非公開化し、本文を保持する", async ({ page, browser }) => {
+test("運営が公開済み投稿を非公開化し、本文を保持する", async ({ page, browser }, testInfo) => {
   const author = await createGeneralUser("post-removal");
   const material = await createMaterial("post-removal");
   const review = await createReview({
@@ -36,7 +36,11 @@ test("運営が公開済み投稿を非公開化し、本文を保持する", as
     await page.goto(`/materials/${material.id}#review-${review.id}`);
     await expect(page.locator(`#review-${review.id}`)).toContainText(review.body);
     await page.context().clearCookies();
-    await loginAdminAndEnrollMfa(page, E2E_ADMIN_ACCOUNTS.moderation, "/admin/published-posts");
+    await loginAdminAndEnrollMfa(
+      page,
+      E2E_ADMIN_ACCOUNTS.publishedPostModeration,
+      "/admin/published-posts",
+    );
     for (const title of [review.body, report.title]) {
       if (title === null) throw new Error("投稿タイトルがありません");
       const card = page
@@ -63,7 +67,7 @@ test("運営が公開済み投稿を非公開化し、本文を保持する", as
     const hiddenReport = await publicPage.goto(`/reports/${report.id}`);
     expect(hiddenReport?.status()).toBe(404);
     await publicPage.screenshot({
-      path: "/tmp/farmille-september30/moderation-local-after.png",
+      path: testInfo.outputPath("moderation-after.png"),
       fullPage: true,
     });
     await anonymous.close();

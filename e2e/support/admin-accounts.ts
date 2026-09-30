@@ -20,6 +20,10 @@ export const E2E_ADMIN_ACCOUNTS = {
     email: "e2e-admin-moderation@farmille.local",
     password: "Farmille-E2E-Admin-Moderation-2026!",
   },
+  publishedPostModeration: {
+    email: "e2e-admin-published-posts@farmille.local",
+    password: "Farmille-E2E-Admin-Published-Posts-2026!",
+  },
   materialGovernance: {
     email: "e2e-admin-materials@farmille.local",
     password: "Farmille-E2E-Admin-Materials-2026!",
