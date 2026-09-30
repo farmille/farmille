@@ -28,8 +28,8 @@ const cropChip = css({
   px: "2.5",
   py: "0.5",
   borderRadius: "pill",
-  bg: "brand.soft",
-  color: "brand.primaryDeep",
+  bg: "primary.200",
+  color: "primary.700",
   fontWeight: "600",
   whiteSpace: "nowrap",
 });
@@ -38,12 +38,12 @@ const avatar = css({
   w: "30px",
   aspectRatio: "image.square",
   borderRadius: "pill",
-  bg: "brand.soft",
+  bg: "primary.200",
   display: "grid",
   placeItems: "center",
   flexShrink: "0",
   overflow: "hidden",
-  color: "brand.primary",
+  color: "primary.700",
 });
 
 export type ReviewCardProps = {
@@ -211,11 +211,11 @@ export function ReviewCard({
                     w: "72px",
                     aspectRatio: "image.square",
                     borderRadius: "button",
-                    bg: "green.soft2",
+                    bg: "primary.100",
                     display: "grid",
                     placeItems: "center",
                     flexShrink: "0",
-                    color: "brand.primary",
+                    color: "primary.700",
                   })}
                 >
                   <Icon name="image" size="md" />

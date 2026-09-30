@@ -14,28 +14,28 @@ export const legalHeading = cva({
         pb: "5",
         mb: "6",
         borderBottomWidth: "2px",
-        borderColor: "brand.primary",
+        borderColor: "primary.600",
       },
       h2: {
         fontSize: "xl",
         pl: "3",
         mb: "4",
         borderLeftWidth: "4px",
-        borderColor: "brand.primary",
+        borderColor: "primary.600",
       },
     },
   },
 });
 
 export const legalLink = css({
-  color: "brand.primaryDeep",
+  color: "primary.700",
   textDecoration: "underline",
   textUnderlineOffset: "0.2em",
   _hover: { color: "text.default" },
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
     outlineOffset: "2px",
   },
 });
@@ -49,5 +49,5 @@ export const legalProse = css({
   "& ul": { listStyleType: "disc", pl: "6", my: "4" },
   "& ol": { listStyleType: "decimal", pl: "6", my: "4" },
   "& li": { mb: "3" },
-  "& a": { color: "brand.primaryDeep", textDecoration: "underline", overflowWrap: "anywhere" },
+  "& a": { color: "primary.700", textDecoration: "underline", overflowWrap: "anywhere" },
 });

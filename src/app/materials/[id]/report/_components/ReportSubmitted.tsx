@@ -20,7 +20,7 @@ const icon = css({
   display: "grid",
   placeItems: "center",
   borderRadius: "pill",
-  bg: "brand.primary",
+  bg: "primary.700",
   color: "surface.card",
 });
 
@@ -59,8 +59,8 @@ const reportRow = css({
 const status = css({
   flexShrink: "0",
   borderRadius: "pill",
-  bg: "brand.soft",
-  color: "brand.primaryDeep",
+  bg: "primary.200",
+  color: "primary.700",
   px: "2.5",
   py: "1",
   fontSize: "xs",
@@ -74,7 +74,7 @@ const link = css({
   justifyContent: "center",
   minH: "44px",
   borderRadius: "button",
-  bg: "brand.primary",
+  bg: "primary.700",
   color: "surface.card",
   px: "5",
   fontSize: "md",

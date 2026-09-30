@@ -229,7 +229,7 @@ export function ReviewForm({
         className={css({
           mt: "3",
           p: "3",
-          bg: "green.soft2",
+          bg: "primary.100",
           borderWidth: "1px",
           borderStyle: "solid",
           borderColor: "border.default",
@@ -445,7 +445,7 @@ export function ReviewForm({
             alignItems: "center",
             justifyContent: "center",
             py: "3",
-            color: "brand.primary",
+            color: "primary.700",
             fontSize: "md",
             fontWeight: "700",
             textDecoration: "none",

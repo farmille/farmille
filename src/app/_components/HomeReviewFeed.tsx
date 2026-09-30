@@ -110,7 +110,7 @@ export function HomeReviewFeed({
                     display: "block",
                     p: "3",
                     fontSize: "sm",
-                    color: "brand.primaryDeep",
+                    color: "primary.700",
                     textDecoration: "none",
                   })}
                 >

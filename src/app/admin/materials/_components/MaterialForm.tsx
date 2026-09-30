@@ -48,8 +48,8 @@ const chipLabelStyle = css({
   fontSize: "sm",
   cursor: "pointer",
   "&:has(input:checked)": {
-    borderColor: "brand.primary",
-    bg: "brand.soft",
+    borderColor: "primary.600",
+    bg: "primary.200",
     fontWeight: "700",
   },
 });

@@ -16,10 +16,10 @@ const inputRecipe = cva({
     fontFamily: "sans",
     _placeholder: { color: "text.subtle" },
     _focus: {
-      outlineWidth: "2px",
+      outlineWidth: "1px",
       outlineStyle: "solid",
-      outlineColor: "brand.soft",
-      borderColor: "brand.primary",
+      outlineColor: "primary.200",
+      borderColor: "primary.600",
     },
   },
 });

@@ -19,10 +19,10 @@ const textareaRecipe = cva({
     minH: "84px",
     _placeholder: { color: "text.subtle" },
     _focus: {
-      outlineWidth: "2px",
+      outlineWidth: "1px",
       outlineStyle: "solid",
-      outlineColor: "brand.soft",
-      borderColor: "brand.primary",
+      outlineColor: "primary.200",
+      borderColor: "primary.600",
     },
   },
   variants: {

@@ -92,7 +92,7 @@ export default async function MePage({
           <Link
             href={`/users/${data.profile.userId}`}
             className={css({
-              color: "brand.primary",
+              color: "primary.700",
               fontWeight: "700",
               textDecoration: "none",
             })}

@@ -48,15 +48,11 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
     if (createdReview === null) throw new Error("投稿した感想口コミが見つかりません。");
     await expect.poll(async () => await reviewCropNames(createdReview.id)).toEqual(["ミニトマト"]);
 
-    for (const path of ["/", "/me", `/users/${user.id}`]) {
+    await page.goto("/");
+    await expect(page.getByRole("navigation", { name: "感想口コミの表示順" })).toHaveCount(0);
+    await expect(page.getByText(body, { exact: true })).toHaveCount(0);
+    for (const path of ["/me", `/users/${user.id}`]) {
       await page.goto(path);
-      if (path === "/") {
-        await page
-          .getByRole("navigation", { name: "感想口コミの表示順", exact: true })
-          .getByRole("link", { name: "新着順", exact: true })
-          .click();
-        await expect(page).toHaveURL(/reviews=newest#home-reviews$/);
-      }
       if (path === "/me") {
         await page
           .getByRole("navigation", { name: "投稿の種類" })

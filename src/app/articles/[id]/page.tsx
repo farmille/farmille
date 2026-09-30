@@ -192,12 +192,12 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
                   w: "32px",
                   aspectRatio: "image.square",
                   borderRadius: "button",
-                  bg: "brand.soft",
+                  bg: "primary.200",
                   display: "grid",
                   placeItems: "center",
                   fontSize: "sm",
                   fontWeight: "800",
-                  color: "brand.primaryDeep",
+                  color: "primary.700",
                 })}
               >
                 {sellerInitial}
@@ -215,7 +215,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
               mt: "4",
               borderRadius: "card",
               overflow: "hidden",
-              bg: "green.soft2",
+              bg: "primary.100",
               aspectRatio: "image.wide",
             })}
           >

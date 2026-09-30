@@ -65,7 +65,7 @@ const editButton = css({
   borderColor: "border.strong",
   textAlign: "left",
   overflowWrap: "anywhere",
-  _focusVisible: { outline: "2px solid", outlineColor: "brand.primary" },
+  _focusVisible: { outline: "2px solid", outlineColor: "primary.600" },
 });
 const plotHint =
   "資材の使い方（施用方法・希釈倍率・使用量・回数など）と、あれば他の区と違う条件を記入してください。資材を使っていない区は「資材なし」と書き、他の区と違う条件があれば記入してください。";

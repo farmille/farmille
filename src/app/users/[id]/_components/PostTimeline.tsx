@@ -20,7 +20,7 @@ const stack = css({
 const reviewDestination = css({
   display: "inline-flex",
   mt: "2",
-  color: "brand.primary",
+  color: "primary.700",
   fontSize: "sm",
   fontWeight: "700",
   textDecoration: "none",

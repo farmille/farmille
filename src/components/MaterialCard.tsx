@@ -47,7 +47,7 @@ const imgBox = css({
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
-  color: "brand.primary",
+  color: "primary.700",
 });
 
 const listImg = css({
@@ -62,7 +62,7 @@ const listImg = css({
   borderStyle: "solid",
   borderColor: "border.default",
   overflow: "hidden",
-  color: "brand.primary",
+  color: "primary.700",
 });
 
 /** 通常画像と読み込み失敗時のプレースホルダーを同じグリッドセルに重ねる。 */
@@ -197,8 +197,8 @@ export function MaterialCard({
                     fontSize: "2xs",
                     px: "2",
                     py: "1",
-                    bg: "brand.soft",
-                    color: "brand.primaryDeep",
+                    bg: "primary.100",
+                    color: "primary.700",
                     borderRadius: "pill",
                   })}
                 >
@@ -304,8 +304,8 @@ export function MaterialCard({
                   fontSize: "2xs",
                   px: "2",
                   py: "1",
-                  bg: "brand.soft",
-                  color: "brand.primaryDeep",
+                  bg: "primary.100",
+                  color: "primary.700",
                   borderRadius: "pill",
                 })}
               >
@@ -319,7 +319,7 @@ export function MaterialCard({
             {evidenceBadges.map((label) => (
               <span
                 key={label}
-                className={css({ fontSize: "xs", fontWeight: "700", color: "brand.primary" })}
+                className={css({ fontSize: "xs", fontWeight: "700", color: "primary.700" })}
               >
                 {label}
               </span>

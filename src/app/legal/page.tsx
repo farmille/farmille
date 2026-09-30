@@ -47,7 +47,7 @@ export default function LegalIndexPage() {
                       className={css({
                         display: "block",
                         py: "4",
-                        color: "brand.primaryDeep",
+                        color: "primary.700",
                         textDecoration: "underline",
                         fontSize: "lg",
                         lineHeight: "relaxed",

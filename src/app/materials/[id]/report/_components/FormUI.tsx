@@ -35,7 +35,7 @@ export const formStyles = {
     pl: "3",
     borderLeftWidth: "2px",
     borderLeftStyle: "solid",
-    borderLeftColor: "brand.soft",
+    borderLeftColor: "primary.200",
   }),
   row: css({ display: "flex", gap: "2" }),
   grow: css({ flex: "1", minW: "0" }),
@@ -53,7 +53,7 @@ const badge = cva({
   },
   variants: {
     required: {
-      true: { bg: "brand.primary", color: "surface.card" },
+      true: { bg: "primary.700", color: "surface.card" },
       false: { bg: "surface.page", color: "text.subtle" },
     },
   },
@@ -85,8 +85,8 @@ export const choiceButton = cva({
   variants: {
     selected: {
       true: {
-        borderColor: "brand.primary",
-        bg: "green.soft2",
+        borderColor: "primary.600",
+        bg: "primary.100",
         color: "text.default",
         fontWeight: "700",
       },
@@ -113,38 +113,11 @@ const choiceRing = cva({
   variants: {
     selected: {
       true: {
-        borderColor: "brand.primary",
-        bg: "brand.primary",
+        borderColor: "primary.600",
+        bg: "primary.600",
         boxShadow: "inset 0 0 0 4px var(--colors-surface-card)",
       },
       false: { borderColor: "border.strong", bg: "surface.card" },
-    },
-  },
-});
-
-export const tagButton = cva({
-  base: {
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderRadius: "pill",
-    px: "2.5",
-    py: "1.5",
-    fontSize: "sm",
-    cursor: "pointer",
-  },
-  variants: {
-    selected: {
-      true: {
-        bg: "brand.primary",
-        borderColor: "brand.primary",
-        color: "surface.card",
-        fontWeight: "600",
-      },
-      false: {
-        bg: "surface.card",
-        borderColor: "border.default",
-        color: "text.muted",
-      },
     },
   },
 });
@@ -183,8 +156,8 @@ const checkBox = cva({
   variants: {
     checked: {
       true: {
-        bg: "brand.primary",
-        borderColor: "brand.primary",
+        bg: "primary.600",
+        borderColor: "primary.600",
         color: "surface.card",
       },
       false: {

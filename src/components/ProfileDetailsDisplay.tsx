@@ -12,8 +12,8 @@ const chip = css({
   mr: "1",
   mb: "1",
   borderRadius: "pill",
-  bg: "brand.soft",
-  color: "brand.primary",
+  bg: "primary.200",
+  color: "primary.700",
 });
 
 /** 本人画面と公開画面で同じ公開情報を表示する。 */
@@ -70,7 +70,7 @@ export function ProfileDetailsDisplay({
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={css({ color: "brand.primary" })}
+                className={css({ color: "primary.700" })}
               >
                 {url}
               </a>
@@ -85,8 +85,8 @@ export function ProfileDetailsDisplay({
         </p>
       )}
       {editable && missing.length > 0 && (
-        <p className={css({ bg: "brand.soft", p: "3", borderRadius: "card" })}>
-          <Link href="/me/edit" className={css({ color: "brand.primary", fontWeight: "700" })}>
+        <p className={css({ bg: "primary.200", p: "3", borderRadius: "card" })}>
+          <Link href="/me/edit" className={css({ color: "primary.700", fontWeight: "700" })}>
             {missing.join("・")}を設定して、プロフィールを充実させましょう。
           </Link>
         </p>

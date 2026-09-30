@@ -42,7 +42,7 @@ const logo = css({
   alignItems: "center",
   gap: "1.5",
   flex: "1",
-  color: "brand.primary",
+  color: "primary.700",
   textDecoration: "none",
   minW: "0",
 });
@@ -94,7 +94,7 @@ const desktopBrand = css({
   display: "inline-flex",
   alignItems: "center",
   gap: "2",
-  color: "brand.primary",
+  color: "primary.700",
   textDecoration: "none",
   flexShrink: "0",
 });
@@ -135,13 +135,13 @@ const desktopSearch = css({
   borderColor: "border.strong",
   borderRadius: "button",
   color: "text.subtle",
-  _hover: { borderColor: "brand.primary" },
+  _hover: { borderColor: "primary.600" },
   // 送信ボタンのフォーカスでは枠を出さず、入力欄のときだけ検索画面と同じ焦点表現にする
   "&:has(input:focus-visible)": {
-    borderColor: "brand.primary",
+    borderColor: "primary.600",
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.soft",
+    outlineColor: "primary.200",
   },
 });
 
@@ -162,7 +162,7 @@ const desktopSearchInput = css({
 });
 
 const desktopSearchAction = css({
-  color: "brand.primaryDeep",
+  color: "primary.700",
   fontSize: "xs",
   fontWeight: "700",
   whiteSpace: "nowrap",
@@ -174,7 +174,7 @@ const desktopSearchAction = css({
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
     outlineOffset: "2px",
   },
 });
@@ -191,17 +191,17 @@ const desktopNavLink = cva({
     fontWeight: "700",
     textDecoration: "none",
     whiteSpace: "nowrap",
-    _hover: { bg: "brand.soft", color: "brand.primaryDeep" },
+    _hover: { bg: "primary.200", color: "primary.700" },
     _focusVisible: {
       outlineWidth: "2px",
       outlineStyle: "solid",
-      outlineColor: "brand.primary",
+      outlineColor: "primary.600",
       outlineOffset: "2px",
     },
   },
   variants: {
     active: {
-      true: { bg: "brand.soft", color: "brand.primaryDeep" },
+      true: { bg: "primary.200", color: "primary.700" },
       false: {},
     },
   },
@@ -223,10 +223,10 @@ const desktopAction = cva({
   },
   variants: {
     emphasis: {
-      primary: { bg: "brand.primary", color: "surface.card" },
+      primary: { bg: "primary.700", color: "surface.card" },
       secondary: {
         bg: "surface.card",
-        color: "brand.primaryDeep",
+        color: "primary.700",
         borderWidth: "1px",
         borderStyle: "solid",
         borderColor: "border.strong",
@@ -364,13 +364,6 @@ function DesktopSiteHeader({
           <Icon name="leaf" size="lg" />
           <span className={desktopBrandName}>Farmille</span>
         </Link>
-        <Link
-          href="/search"
-          className={desktopNavLink({ active: active === "search" })}
-          aria-current={active === "search" ? "page" : undefined}
-        >
-          資材をさがす
-        </Link>
         <Form action="/search" aria-label="ヘッダー検索" className={desktopSearch} role="search">
           <Icon name="search" size="sm" />
           <input
@@ -437,7 +430,7 @@ function DesktopSellerHeader(props: AppBarProps) {
       <div className={desktopHeaderInner}>
         <Link href="/dashboard" className={desktopBrand}>
           <Icon name="leaf" size="lg" />
-          <span className={desktopBrandName}>Farmille メーカー</span>
+          <span className={desktopBrandName}>Farmille for Business</span>
         </Link>
         <span className={workspaceTitle}>{title}</span>
         <nav className={desktopNav} aria-label="メーカーナビ">

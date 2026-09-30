@@ -32,7 +32,7 @@ const inviteToggleButton = css({
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
     outlineOffset: "2px",
   },
 });

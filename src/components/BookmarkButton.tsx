@@ -29,7 +29,7 @@ export function BookmarkButton({ saved, action }: BookmarkButtonProps) {
         borderRadius: "button",
         border: "none",
         bg: "transparent",
-        color: "brand.primaryDeep",
+        color: "primary.700",
         cursor: "pointer",
         _disabled: { cursor: "default", opacity: "0.5" },
       })}

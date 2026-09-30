@@ -55,7 +55,7 @@ const td = css({
 });
 
 const materialLink = css({
-  color: "brand.primary",
+  color: "primary.700",
   fontWeight: "700",
   textDecoration: "none",
 });
@@ -71,8 +71,8 @@ const tag = css({
   px: "2",
   py: "0.5",
   borderRadius: "pill",
-  bg: "brand.soft",
-  color: "brand.primaryDeep",
+  bg: "primary.200",
+  color: "primary.700",
   fontSize: "2xs",
   fontWeight: "600",
 });

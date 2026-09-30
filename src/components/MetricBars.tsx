@@ -144,7 +144,7 @@ function MetricRow({
           className={css({
             h: "100%",
             borderRadius: "1",
-            bg: variant === "treated" ? "brand.primary" : "border.strong",
+            bg: variant === "treated" ? "primary.600" : "border.strong",
           })}
           style={{ width: `${widthPercent}%` }}
         />

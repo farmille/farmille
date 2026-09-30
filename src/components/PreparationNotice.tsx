@@ -5,7 +5,7 @@ const noticeStyle = cva({
   base: {
     position: "relative",
     zIndex: "2",
-    bg: "brand.primaryDeep",
+    bg: "primary.700",
     color: "surface.card",
     borderBottomRadius: "banner",
     boxShadow: "overlay",

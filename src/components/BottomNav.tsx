@@ -76,7 +76,7 @@ const itemRecipe = cva({
   },
   variants: {
     active: {
-      true: { color: "brand.primary" },
+      true: { color: "primary.700" },
       false: { color: "text.subtle" },
     },
   },
@@ -96,7 +96,7 @@ const plusButton = css({
   w: "46px",
   h: "46px",
   borderRadius: "pill",
-  bg: "brand.primary",
+  bg: "primary.700",
   color: "surface.card",
   display: "grid",
   placeItems: "center",
