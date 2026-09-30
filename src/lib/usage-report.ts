@@ -12,15 +12,6 @@ export const REPORT_SECTIONS = [
   { value: "documents", title: "関連資料" },
 ] as const;
 const section = v.picklist(REPORT_SECTIONS.map(({ value }) => value));
-export const REPORT_METHOD_TARGETS = {
-  spray: ["茎葉", "果実", "株元", "土壌", "育苗箱", "田面（水面）"],
-  drench: ["株元", "土壌", "培地", "育苗箱"],
-  mix: ["土壌", "培地", "養液"],
-  soak: ["種子", "苗・根"],
-  coat: ["種子", "樹幹・枝"],
-  other: [],
-  "": [],
-};
 const graphRow = v.object({ id: uuid, plotId: v.nullable(uuid), label: short, value: short });
 const graph = v.object({
   id: uuid,
@@ -112,7 +103,7 @@ export function createReportPlot(): UsageReportInput["plots"][number] {
     name: "",
     scope: "",
     description: "",
-    steps: [{ id: crypto.randomUUID(), method: "", targets: [], otherText: "" }],
+    steps: [],
   };
 }
 export function createReportGraph(
@@ -166,6 +157,7 @@ export function createBlankUsageReport(materialId: string): UsageReportInput {
 export function parseReportNumber(raw: string): { value: number; error: number | null } | null {
   const match = raw
     .trim()
+    .replace(/(?<=\d),(?=\d{3}(?:\D|$))/g, "")
     .match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+))(?:\s*±\s*(\d+(?:\.\d*)?|\.\d+))?/);
   if (!match) return null;
   const value = Number(match[1]);
@@ -191,7 +183,18 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
     required(`plots.${i}.scope`, plot.scope.trim().length > 0);
     required(`plots.${i}.description`, plot.description.trim().length > 0);
   });
-  required("measurements", input.measurements.length > 0);
+  required(
+    "measurements",
+    input.measurements.some(
+      (measurement) =>
+        measurement.kind === "numeric" &&
+        measurement.name.trim().length > 0 &&
+        measurement.graphs.some((graph) =>
+          graph.rows.some((row) => parseReportNumber(row.value) !== null),
+        ),
+    ),
+    "※ 調査項目と数値を入力したグラフを1つ以上追加してください",
+  );
   input.measurements.forEach((measurement, i) => {
     required(
       `measurements.${i}.name`,
@@ -208,15 +211,19 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
             ),
       "※ 各区の数値、または文章を入力してください",
     );
-    if (measurement.kind === "numeric")
-      measurement.graphs.forEach((g, j) =>
-        g.rows.forEach((row, k) =>
-          required(
-            `measurements.${i}.graphs.${j}.rows.${k}.label`,
-            row.plotId !== null || row.label.trim().length > 0,
-          ),
+    if (measurement.kind === "numeric") {
+      required(
+        `measurements.${i}.plots`,
+        measurement.graphs.every(
+          (graph) =>
+            graph.rows.length === input.plots.length &&
+            input.plots.every(
+              (plot) => graph.rows.filter((row) => row.plotId === plot.id).length === 1,
+            ),
         ),
+        "※ グラフの区を区の説明と揃えてください",
       );
+    }
   });
   required("methodDetailsAck", input.methodDetailsAck, "※ 使用方法の記載を確認してください");
   required(
@@ -234,4 +241,19 @@ export function reportErrorStep(key: string): number {
   if (key.startsWith("plots") || key.startsWith("measurements") || key === "methodDetailsAck")
     return 4;
   return 5;
+}
+
+export function groupReportMeasurements(measurements: UsageReportInput["measurements"]) {
+  const groups: UsageReportInput["measurements"] = [];
+  for (const measurement of measurements) {
+    if (measurement.kind !== "numeric") continue;
+    const group = groups.find(
+      (item) =>
+        item.name.trim() === measurement.name.trim() &&
+        item.unit.trim() === measurement.unit.trim(),
+    );
+    if (group) group.graphs.push(...measurement.graphs);
+    else groups.push({ ...measurement, graphs: [...measurement.graphs] });
+  }
+  return groups;
 }

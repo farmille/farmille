@@ -96,7 +96,7 @@ export function ReportSubmitted({
       </div>
       <h1 className={title}>レポートは提出済みです</h1>
       <p className={description}>
-        編集部で確認後に公開されます。
+        運営で確認後に公開されます。
         <br />
         提出後のレポートは、確認が終わるまで編集できません。
       </p>
@@ -105,7 +105,7 @@ export function ReportSubmitted({
           {reports.map((report) => (
             <div key={report.id} className={reportRow}>
               <span>{report.cropName}</span>
-              <span className={status}>編集部で確認中</span>
+              <span className={status}>運営で確認中</span>
             </div>
           ))}
         </div>

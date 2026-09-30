@@ -76,7 +76,7 @@ export async function saveStructuredUsageReport(
     reportId: saved.report_id,
     updatedAt: saved.updated_at,
     message: submit
-      ? "実証詳細レポートを提出しました。編集部が確認後に公開します。"
+      ? "実証詳細レポートを提出しました。運営が確認後に公開します。"
       : "下書きを保存しました。",
   };
 }

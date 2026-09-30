@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as v from "valibot";
 import {
   createBlankUsageReport,
+  groupReportMeasurements,
   parseReportNumber,
   UsageReportInputSchema,
   validateUsageReportSubmission,
@@ -21,6 +22,8 @@ describe("実証詳細レポート", () => {
     expect(parseReportNumber("-2.5±0.2 n.s.")).toEqual({ value: -2.5, error: 0.2 });
     expect(parseReportNumber("0 ＊")).toEqual({ value: 0, error: null });
     expect(parseReportNumber("未測定")).toBeNull();
+    expect(parseReportNumber("1,250±20 a")).toEqual({ value: 1250, error: 20 });
+    expect(parseReportNumber("1,234,567")).toEqual({ value: 1234567, error: null });
   });
   it("ゼロの数値を有効とし、文章や添付資料の未確認を提出前に検出する", () => {
     const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
@@ -52,9 +55,30 @@ describe("実証詳細レポート", () => {
       kind: "text",
     }));
     expect(validateUsageReportSubmission(input)["measurements.0.values"]).toBeDefined();
+    expect(validateUsageReportSubmission(input).measurements).toBeDefined();
     input.documents = [
       { id: crypto.randomUUID(), path: "owner/report/document.pdf", name: "成績書.pdf" },
     ];
     expect(validateUsageReportSubmission(input).documentsAck).toBeDefined();
+  });
+  it("同じ調査項目と単位のグラフを入力を変えずにまとめる", () => {
+    const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
+    const first = input.measurements[0]!;
+    const second = {
+      ...first,
+      id: crypto.randomUUID(),
+      name: "収量 ",
+      unit: "kg",
+      graphs: [{ ...first.graphs[0]!, id: crypto.randomUUID() }],
+    };
+    first.name = "収量";
+    first.unit = "kg";
+    const differentUnit = { ...second, id: crypto.randomUUID(), unit: "g" };
+    const groups = groupReportMeasurements([first, second, differentUnit]);
+    expect(groups).toHaveLength(2);
+    expect(groups[0]?.graphs).toHaveLength(2);
+    expect(first.graphs).toHaveLength(1);
+    first.graphs[0]!.rows[0]!.plotId = null;
+    expect(validateUsageReportSubmission(input)["measurements.0.plots"]).toBeDefined();
   });
 });
