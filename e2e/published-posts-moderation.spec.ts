@@ -21,11 +21,13 @@ test("運営が公開済み投稿を非公開化し、本文を保持する", as
     rating: 4,
     body: `運営非公開テスト口コミ${material.id}`,
   });
+  const reportTitle = `運営非公開テストレポート${material.id}`;
+  const reportBody = "非公開後も本文を保存する";
   const report = await createPublishedUsageReport({
     materialId: material.id,
     authorUserId: author.id,
-    title: `運営非公開テストレポート${material.id}`,
-    observedChange: "非公開後も本文を保存する",
+    title: reportTitle,
+    observedChange: reportBody,
   });
   try {
     await page.goto("/admin/published-posts");
@@ -64,8 +66,10 @@ test("運営が公開済み投稿を非公開化し、本文を保持する", as
     const publicPage = await anonymous.newPage();
     await publicPage.goto(`/materials/${material.id}`);
     await expect(publicPage.getByText(review.body, { exact: true })).toHaveCount(0);
-    const hiddenReport = await publicPage.goto(`/reports/${report.id}`);
-    expect(hiddenReport?.status()).toBe(404);
+    await publicPage.goto(`/reports/${report.id}`);
+    await expect(publicPage.getByRole("heading", { name: "ページが見つかりません" })).toBeVisible();
+    await expect(publicPage.getByText(reportTitle, { exact: true })).toHaveCount(0);
+    await expect(publicPage.getByText(reportBody, { exact: true })).toHaveCount(0);
     await publicPage.screenshot({
       path: testInfo.outputPath("moderation-after.png"),
       fullPage: true,
