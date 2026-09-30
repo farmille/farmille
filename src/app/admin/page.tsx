@@ -51,6 +51,11 @@ const statLinkStyle = css({
 
 const MENU_ITEMS = [
   {
+    href: "/admin/published-posts",
+    label: "公開済みの投稿",
+    description: "感想口コミ・実証詳細レポートを確認し、公開から削除する。",
+  },
+  {
     href: "/admin/company-applications",
     label: "企業からの申請",
     description: "資材掲載・オーナー権限の移行・終売や非表示の受付内容と添付を確認する。",
