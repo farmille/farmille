@@ -6,9 +6,9 @@ import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { css } from "../../../../styled-system/css";
 
 export const metadata: Metadata = {
-  title: "メーカーアカウントの申請",
+  title: "企業会員登録の申請",
   description:
-    "農業資材メーカー専用アカウントの申請フォームです。申請内容を確認し、メールでご案内します。申請・掲載・編集は無料です。",
+    "企業会員登録の申請フォームです。申請内容を確認し、メールでご案内します。申請・掲載・編集は無料です。",
   robots: NO_INDEX_ROBOTS,
 };
 
@@ -36,7 +36,7 @@ export default async function SellerApplyPage({ searchParams }: SellerApplyPageP
       chrome="public"
       active="me"
       backHref={backHrefFor(from)}
-      title="メーカーアカウントの申請"
+      title="企業会員登録の申請"
     >
       <p className={leadStyle}>
         農業資材メーカー専用のアカウントです。内容を確認し、ログインIDとパスワード設定のご案内をメールでお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。申請・掲載・編集は無料です。

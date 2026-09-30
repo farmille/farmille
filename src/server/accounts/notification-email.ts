@@ -14,8 +14,8 @@ export async function sendSellerWelcome(
     await nodemailer.createTransport(serverEnv.smtpUrl).sendMail({
       from: serverEnv.mailFrom,
       to: v.parse(EmailSchema, to),
-      subject: "Farmille：メーカーアカウントのご案内",
-      text: `メーカーアカウントの申請を承認しました。\n\nログインID：${loginId}\nパスワード設定：${passwordSetupUrl}\n\nメーカーのログイン画面：${new URL("/sellers/login", clientEnv.siteUrl)}\n\nパスワード設定リンクの期限が切れた場合は、ログイン画面の「パスワードをお忘れの方」から再発行してください。\n資材の編集権については、運営から別途ご案内します。\n`,
+      subject: "Farmille：企業会員のご案内",
+      text: `企業会員登録の申請を承認しました。\n\nログインID：${loginId}\nパスワード設定：${passwordSetupUrl}\n\nメーカーのログイン画面：${new URL("/sellers/login", clientEnv.siteUrl)}\n\nパスワード設定リンクの期限が切れた場合は、ログイン画面の「パスワードをお忘れの方」から再発行してください。\n資材の編集権については、運営から別途ご案内します。\n`,
     });
     return true;
   } catch (error) {

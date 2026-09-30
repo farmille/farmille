@@ -4,8 +4,7 @@ import { createServerSupabase } from "@/server/supabase";
 /** メーカー自身の領域に保存し、原稿の保存・表現確認を経てロゴへ反映する。 */
 export async function uploadManufacturerLogo(file: File) {
   const session = await requireSeller();
-  if (!session.ok)
-    return { ok: false as const, message: "メーカーアカウントでログインしてください。" };
+  if (!session.ok) return { ok: false as const, message: "企業会員でログインしてください。" };
   const extensions = new Map([
     ["image/jpeg", "jpg"],
     ["image/png", "png"],

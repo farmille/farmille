@@ -7,13 +7,13 @@ describe("規約集", () => {
     expect(legalDocuments).toHaveLength(10);
     expect(new Set(legalDocuments.map((document) => document.slug)).size).toBe(10);
     for (const document of legalDocuments) {
-      expect(document.title).toMatch(/^Farmille /);
+      expect(document.title).toMatch(/^Farmille/);
       expect(document.sections.some((section) => section.heading)).toBe(true);
       expect(document.sections.at(-1)?.markdown).toContain("ファーミル株式会社");
     }
   });
 
-  it("総合利用規約とメーカー会員規約の全20条を収録する", () => {
+  it("総合利用規約と企業向けサービス利用規約の全20条を収録する", () => {
     for (const slug of ["terms", "manufacturer"]) {
       const document = legalDocuments.find((entry) => entry.slug === slug);
       expect(document?.sections.filter((section) => section.heading)).toHaveLength(20);

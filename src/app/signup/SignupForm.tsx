@@ -211,7 +211,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           登録方法を選び直す
         </Link>
         <Link className={textLinkStyle} href="/sellers/apply">
-          メーカー様はこちら → 法人アカウントの申請へ
+          メーカー様はこちら → 企業会員登録の申請へ
         </Link>
       </div>
     </form>

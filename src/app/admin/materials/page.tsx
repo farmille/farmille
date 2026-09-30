@@ -59,11 +59,6 @@ const columns: DataTableColumn<AdminMaterialListItem>[] = [
     header: "claim",
     cell: (row) => (row.sellerName === null ? "未 claim" : row.sellerName),
   },
-  {
-    key: "verified",
-    header: "メーカー確認",
-    cell: (row) => (row.manufacturer_verified_at === null ? "未確認" : "確認済み"),
-  },
   { key: "review_count", header: "感想口コミ", align: "end", cell: (row) => row.review_count },
 ];
 

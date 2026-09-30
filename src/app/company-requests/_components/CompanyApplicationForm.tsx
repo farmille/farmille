@@ -388,7 +388,7 @@ export function CompanyApplicationForm({
       </label>
       <p>
         受付番号と回答の控えを
-        {kind === "removal" ? "確認済みメール" : "メーカーアカウントの登録連絡先"}「{recipient}
+        {kind === "removal" ? "確認済みメール" : "企業会員の登録連絡先"}「{recipient}
         」へ送信します。審査後の連絡先は、入力した担当者メールアドレスです。
       </p>
       {error && <p role="alert">{error}</p>}

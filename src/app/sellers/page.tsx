@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { AppBar } from "@/components";
+import { HomeFooter } from "@/app/_components/HomeFooter";
 import { BottomNav } from "@/components/BottomNav";
 import { createPageMetadata } from "@/lib/seo";
 import { css } from "../../../styled-system/css";
@@ -49,6 +50,7 @@ export default async function ManufacturerPage({ searchParams }: ManufacturerPag
       <AppBar chrome="public" active="home" variant="home" />
       <main className={main}>
         <ManufacturerLanding applyHref={applyHref} />
+        <HomeFooter />
       </main>
       <BottomNav active="home" />
     </div>

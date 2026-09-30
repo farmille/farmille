@@ -146,7 +146,7 @@ export const SubmitError: Story = {
 
 export const LongTitle: Story = {
   args: {
-    title: "メーカーアカウントの新規申請",
+    title: "企業会員の新規申請",
     lead: "会社と担当者を確認後、ログインIDとパスワード設定用の案内をお送りします。",
   },
 };

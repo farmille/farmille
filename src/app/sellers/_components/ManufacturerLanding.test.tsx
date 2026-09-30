@@ -14,14 +14,23 @@ describe("企業向け利用ガイド", () => {
     expect(links.map((link) => link.getAttribute("href"))).toEqual([
       "/dashboard/applications/new/registration",
       "/dashboard/materials",
+      "/dashboard/applications/new/registration",
       "/company-requests/removal",
       "/dashboard/applications/new/transfer_out",
       "/dashboard/applications/new/transfer_in",
       "/dashboard/profile",
-      "mailto:contact@farmille.com",
       "/dashboard/applications",
     ]);
+    const faq = screen.getByRole("region", { name: "よくあるご質問" });
+    expect(within(faq).getAllByRole("heading", { level: 3 })).toHaveLength(9);
+    for (const target of within(faq).getAllByRole("link")) {
+      const href = target.getAttribute("href");
+      expect(href).toMatch(/^#/);
+      expect(document.querySelector(href ?? "")).not.toBeNull();
+    }
+    expect(document.querySelector('a[href="/company-requests/removal/form"]')).toBeNull();
     const contents = screen.getByRole("navigation", { name: "利用ガイドの目次" });
+    expect(within(contents).getAllByRole("link")).toHaveLength(5);
     for (const link of within(contents).getAllByRole("link")) {
       const target = link.getAttribute("href");
       expect(target).toMatch(/^#/);

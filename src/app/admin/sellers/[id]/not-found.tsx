@@ -15,7 +15,7 @@ export default function AdminSellerNotFound() {
     <AdminShell backHref="/admin/sellers" backLabel="メーカー確認" title="メーカーが見つかりません">
       <Panel title="対象なし">
         <p className={adminInlineNoteStyle}>
-          指定されたメーカーアカウントは存在しないか、削除された可能性があります。
+          指定された企業会員は存在しないか、削除された可能性があります。
         </p>
         <p>
           <Link className={linkStyle} href="/admin/sellers">
