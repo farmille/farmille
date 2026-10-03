@@ -1,4 +1,5 @@
 import type { ProfileDetailsInput } from "@/lib/profile-details";
+import { selectAllRows } from "@/server/pagination";
 import { createServerSupabase } from "@/server/supabase";
 import { fail, succeed, type Result } from "@/server/result";
 
@@ -53,12 +54,16 @@ export type ProfileDetails = Extract<
 export async function getProfileOptions() {
   const supabase = await createServerSupabase();
   const [crops, affiliations] = await Promise.all([
-    supabase
-      .from("crops")
-      .select("id,name,aliases,crop_groups(name)")
-      .eq("is_active", true)
-      .order("sort_order")
-      .order("name"),
+    selectAllRows((from, to) =>
+      supabase
+        .from("crops")
+        .select("id,name,aliases,crop_groups(name)")
+        .eq("is_active", true)
+        .order("sort_order")
+        .order("name")
+        .order("id")
+        .range(from, to),
+    ),
     supabase.from("affiliation_options").select("name").order("sort_order").order("name"),
   ]);
   if (crops.error || affiliations.error) {

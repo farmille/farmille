@@ -13,6 +13,7 @@ import {
   type SearchFilterRef,
 } from "@/lib/material-search";
 import { CACHE_TAGS } from "@/server/cache-tags";
+import { selectAllRows } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { createPublicSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
@@ -93,7 +94,14 @@ export async function listClassificationOptionsWithSupabase(
     supabase
       .from("crop_groups")
       .select("id, name, parent_id, hierarchy_level, sort_order, is_active"),
-    supabase.from("crops").select("id, group_id, name, aliases, sort_order").eq("is_active", true),
+    selectAllRows((from, to) =>
+      supabase
+        .from("crops")
+        .select("id, group_id, name, aliases, sort_order")
+        .eq("is_active", true)
+        .order("id")
+        .range(from, to),
+    ),
     supabase.from("effect_categories").select("id, name, sort_order"),
     supabase.from("effects").select("id, category_id, name, sort_order"),
     supabase.from("ingredient_categories").select("id, name, sort_order"),
