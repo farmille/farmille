@@ -1,4 +1,5 @@
 import { isUniqueViolation, reportAdminError, withAdmin } from "@/server/admin/guard";
+import { selectAllRows } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import type { Database } from "@/types/database.types";
 
@@ -172,15 +173,25 @@ export async function listAdminCrops(): Promise<Result<AdminCropItem[]>> {
   return withAdmin(async ({ supabase }) => {
     const [cropsResult, groupsResult, reviewsResult, reportsResult, materialCropsResult] =
       await Promise.all([
-        supabase
-          .from("crops")
-          .select("id, name, aliases, sort_order, group_id")
-          .order("sort_order", { ascending: true })
-          .order("name", { ascending: true }),
+        selectAllRows((from, to) =>
+          supabase
+            .from("crops")
+            .select("id, name, aliases, sort_order, group_id")
+            .order("sort_order", { ascending: true })
+            .order("name", { ascending: true })
+            .order("id")
+            .range(from, to),
+        ),
         supabase.from("crop_groups").select("id, name"),
-        supabase.from("review_crops").select("crop_id"),
-        supabase.from("usage_reports").select("crop_id"),
-        supabase.from("material_crops").select("crop_id"),
+        selectAllRows((from, to) =>
+          supabase.from("review_crops").select("crop_id").order("id").range(from, to),
+        ),
+        selectAllRows((from, to) =>
+          supabase.from("usage_reports").select("crop_id").order("id").range(from, to),
+        ),
+        selectAllRows((from, to) =>
+          supabase.from("material_crops").select("crop_id").order("id").range(from, to),
+        ),
       ]);
 
     if (

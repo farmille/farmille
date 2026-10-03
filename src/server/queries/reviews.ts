@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getViewerHelpfulVotes } from "@/server/queries/helpful";
-import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
+import { DEFAULT_PER_PAGE, pageRange, selectAllRows, type Paginated } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { orderedReviewCrops, type ReviewCropRelation } from "@/server/reviews/crop-relations";
 import { createServerSupabase } from "@/server/supabase";
@@ -445,22 +445,26 @@ export async function listReviewsByMaterial(
 /** 感想口コミ作目候補を作物群・作物の表示順で返す。 */
 export async function listReviewCropOptions(): Promise<Result<ReviewCropOption[]>> {
   const supabase = await createServerSupabase();
-  const { data, error } = await supabase
-    .from("crops")
-    .select(
-      `
-        id,
-        name,
-        aliases,
-        sort_order,
-        group:crop_groups!crops_group_id_fkey (
+  const { data, error } = await selectAllRows((from, to) =>
+    supabase
+      .from("crops")
+      .select(
+        `
+          id,
           name,
-          sort_order
-        )
-      `,
-    )
-    .order("sort_order")
-    .order("name");
+          aliases,
+          sort_order,
+          group:crop_groups!crops_group_id_fkey (
+            name,
+            sort_order
+          )
+        `,
+      )
+      .order("sort_order")
+      .order("name")
+      .order("id")
+      .range(from, to),
+  );
 
   if (error !== null) {
     reportQueryError("感想口コミ作目候補の取得に失敗", error);
