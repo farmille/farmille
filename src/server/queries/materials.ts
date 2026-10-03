@@ -1,10 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type {
-  matchSearchCatalog,
-  SearchFilterCategory,
-  SearchFilterRef,
-} from "@/lib/material-search";
+import type { SearchFilterCategory, SearchFilterRef } from "@/lib/material-search";
 import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
 import {
   listClassificationOptions,
@@ -33,8 +29,6 @@ type MaterialListFields = Pick<
   | "created_at"
   | "description"
 >;
-
-export type MaterialSort = "reviews" | "rating" | "newest";
 
 type MaterialDetailFields = Pick<
   MaterialRow,
@@ -280,54 +274,9 @@ async function findMatchingMaterialIds(
   return succeed(intersection === null ? [] : [...intersection]);
 }
 
-async function findKeywordMaterialIds(
-  supabase: SupabaseClient<Database>,
-  matches: ReturnType<typeof matchSearchCatalog>,
-): Promise<Result<string[]>> {
-  const byCategory = new Map<SearchFilterCategory, string[]>();
-  for (const filter of matches.filters) {
-    const ids = byCategory.get(filter.category) ?? [];
-    ids.push(filter.id);
-    byCategory.set(filter.category, ids);
-  }
-  const categoryResults = await Promise.all(
-    [...byCategory].map(([category, ids]) => findCategoryMaterialIds(supabase, category, ids)),
-  );
-  const ids = new Set<string>();
-  for (const result of categoryResults) {
-    if (!result.ok) return result;
-    for (const id of result.data) ids.add(id);
-  }
-  // 候補カタログの実名だけを渡すため、検索文字を PostgREST の式へ連結しない。
-  const nameResults = await Promise.all([
-    matches.materialNames.length > 0
-      ? supabase.from("materials").select("id").in("name", matches.materialNames)
-      : null,
-    matches.makerNames.length > 0
-      ? supabase.from("materials").select("id").in("manufacturer_name", matches.makerNames)
-      : null,
-  ]);
-  for (const result of nameResults) {
-    if (result === null) continue;
-    if (result.error !== null) {
-      reportQueryError("キーワードによる資材検索に失敗", result.error);
-      return fail("internal");
-    }
-    for (const row of result.data) ids.add(row.id);
-  }
-  return succeed([...ids]);
-}
-
 export type ListMaterialsOptions = {
-  /** 入力文字に合う候補は分類をまたいで OR、選択済みの条件とは AND で絞る。 */
-  keywordMatches?: ReturnType<typeof matchSearchCatalog>;
   ids?: string[];
   filters?: readonly SearchFilterRef[];
-  /** メーカー名での絞り込み（同一分類 OR）。タグではなく materials 由来。 */
-  makerNames?: string[];
-  /** 製品名での絞り込み（同一分類 OR）。タグではなく materials 由来。 */
-  materialNames?: string[];
-  sort?: MaterialSort;
   page: number;
 };
 
@@ -340,15 +289,7 @@ export async function listMaterials(
 
 export async function listMaterialsWithSupabase(
   supabase: SupabaseClient<Database>,
-  {
-    filters,
-    makerNames,
-    materialNames,
-    keywordMatches,
-    ids,
-    sort = "reviews",
-    page,
-  }: ListMaterialsOptions,
+  { filters, ids, page }: ListMaterialsOptions,
 ): Promise<Result<Paginated<MaterialListItem>>> {
   const { from, to } = pageRange(page);
   const materialFilter = await findMatchingMaterialIds(supabase, filters);
@@ -366,9 +307,6 @@ export async function listMaterialsWithSupabase(
       totalPages: 0,
     });
   }
-
-  const makers = [...new Set(makerNames ?? [])];
-  const names = [...new Set(materialNames ?? [])];
 
   let query = supabase
     .from("materials")
@@ -397,36 +335,10 @@ export async function listMaterialsWithSupabase(
 
   if (ids !== undefined) query = query.in("id", ids);
 
-  if (keywordMatches !== undefined) {
-    const keywordIds = await findKeywordMaterialIds(supabase, keywordMatches);
-    if (!keywordIds.ok) return keywordIds;
-    if (keywordIds.data.length === 0) {
-      return succeed({ items: [], page, perPage: DEFAULT_PER_PAGE, total: 0, totalPages: 0 });
-    }
-    query = query.in("id", keywordIds.data);
-  }
-
-  if (makers.length > 0) {
-    query = query.in("manufacturer_name", makers);
-  }
-
-  if (names.length > 0) {
-    query = query.in("name", names);
-  }
-
-  // 並び替え。同点は id で安定化。
-  if (sort === "rating") {
-    query = query
-      .order("avg_rating", { ascending: false, nullsFirst: false })
-      .order("review_count", { ascending: false })
-      .order("id", { ascending: true });
-  } else if (sort === "newest") {
-    query = query.order("created_at", { ascending: false }).order("id", { ascending: true });
-  } else {
-    query = query.order("review_count", { ascending: false }).order("id", { ascending: true });
-  }
-
-  const { data, error, count } = await query.range(from, to);
+  const { data, error, count } = await query
+    .order("review_count", { ascending: false })
+    .order("id", { ascending: true })
+    .range(from, to);
 
   if (error !== null) {
     reportQueryError("資材一覧の取得に失敗", error);
@@ -434,13 +346,7 @@ export async function listMaterialsWithSupabase(
   }
 
   if (count === null) {
-    reportQueryError("資材一覧の総件数が返されなかった", {
-      page,
-      filters,
-      makerNames: makers,
-      materialNames: names,
-      sort,
-    });
+    reportQueryError("資材一覧の総件数が返されなかった", { page, filters });
     return fail("internal");
   }
 
