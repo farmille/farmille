@@ -16,10 +16,10 @@ export const materialPageStack = css({
   minW: "0",
   fontSize: "sm",
   lineHeight: "relaxed",
-  "& h2": { fontSize: "lg", fontWeight: "700", color: "brand.primaryDeep", mb: "3" },
+  "& h2": { fontSize: "lg", fontWeight: "700", color: "primary.700", mb: "3" },
   "& h3": { fontSize: "sm", fontWeight: "700", mt: "3", mb: "2" },
   "& > section": { pb: "5", borderBottomWidth: "1px", borderBottomColor: "border.default" },
-  "& a": { color: "brand.primary", overflowWrap: "anywhere" },
+  "& a": { color: "primary.700", overflowWrap: "anywhere" },
 });
 export const materialPageText = css({
   whiteSpace: "pre-wrap",

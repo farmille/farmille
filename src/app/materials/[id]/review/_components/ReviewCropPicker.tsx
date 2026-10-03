@@ -18,10 +18,10 @@ const searchBox = css({
   px: "3",
   py: "2.5",
   _focusWithin: {
-    borderColor: "brand.primary",
+    borderColor: "primary.600",
     outlineWidth: "3px",
     outlineStyle: "solid",
-    outlineColor: "brand.soft",
+    outlineColor: "primary.200",
   },
 });
 
@@ -54,8 +54,8 @@ const selectedChip = css({
   borderStyle: "solid",
   borderColor: "border.default",
   borderRadius: "pill",
-  bg: "brand.soft",
-  color: "brand.primaryDeep",
+  bg: "primary.200",
+  color: "primary.700",
   px: "2.5",
   py: "1",
   fontSize: "sm",
@@ -126,11 +126,11 @@ const suggestion = css({
   color: "text.default",
   textAlign: "left",
   cursor: "pointer",
-  _hover: { bg: "green.soft2" },
+  _hover: { bg: "primary.100" },
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
     outlineOffset: "-2px",
   },
 });

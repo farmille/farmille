@@ -39,9 +39,9 @@ export const helpfulPillRecipe = cva({
     },
     voted: {
       true: {
-        bg: "brand.soft",
-        color: "brand.primaryDeep",
-        borderColor: "brand.primary",
+        bg: "primary.200",
+        color: "primary.700",
+        borderColor: "primary.600",
       },
       false: {},
     },

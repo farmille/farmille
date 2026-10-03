@@ -22,7 +22,7 @@ const pickerLabelStyle = css({
   "&:has(input:focus-visible) > span": {
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
     outlineOffset: "2px",
   },
 });

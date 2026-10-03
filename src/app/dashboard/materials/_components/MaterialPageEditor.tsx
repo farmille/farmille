@@ -32,7 +32,7 @@ const timingOption = css({
   borderColor: "border.default",
   borderRadius: "pill",
   cursor: "pointer",
-  "&:has(input:checked)": { bg: "brand.soft", borderColor: "brand.primary" },
+  "&:has(input:checked)": { bg: "primary.200", borderColor: "primary.600" },
 });
 const row = css({
   display: "flex",

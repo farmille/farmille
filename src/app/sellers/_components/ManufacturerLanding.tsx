@@ -11,17 +11,17 @@ const heading = css({
   fontSize: "2xl",
   fontWeight: "800",
   lineHeight: "1.5",
-  bg: "brand.soft2",
+  bg: "primary.100",
   borderLeftWidth: "4px",
   borderLeftStyle: "solid",
-  borderColor: "brand.primary",
+  borderColor: "primary.600",
   px: "4",
   py: "3",
   mb: "4",
 });
 const copy = css({ fontSize: "md", color: "text.muted", lineHeight: "relaxed" });
 const link = css({
-  color: "brand.primaryDeep",
+  color: "primary.700",
   fontWeight: "700",
   textDecoration: "underline",
   textUnderlineOffset: "0.2em",
@@ -132,8 +132,8 @@ const arrow = cva({
   variants: {
     operator: {
       true: {
-        bg: "brand.primaryDeep",
-        color: "brand.primaryDeep",
+        bg: "primary.700",
+        color: "primary.700",
         _before: {
           content: '""',
           position: "absolute",
@@ -168,7 +168,7 @@ function ApplicationDetails({ guidance }: { guidance: Guidance }) {
           fontSize: "sm",
           fontWeight: "700",
           py: "2",
-          _focusVisible: { outline: "2px solid", outlineColor: "brand.primary" },
+          _focusVisible: { outline: "2px solid", outlineColor: "primary.600" },
         })}
       >
         対象となる企業様・ご準備いただくもの
@@ -297,7 +297,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         </p>
         <p className={css({ display: "flex", gap: "4", fontSize: "xs", my: "4" })}>
           <span className={css({ color: "tag.effect" })}>■ メーカー様作業</span>
-          <span className={css({ color: "brand.primaryDeep" })}>□ Farmille側作業</span>
+          <span className={css({ color: "primary.700" })}>□ Farmille側作業</span>
         </p>
         <ol
           aria-label="掲載までの5ステップ"
@@ -466,7 +466,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         </h2>
         {GUIDE_FAQS.map((faq) => (
           <article className={block} key={faq.question}>
-            <h3 className={cx(title, css({ color: "brand.primaryDeep" }))}>Q　{faq.question}</h3>
+            <h3 className={cx(title, css({ color: "primary.700" }))}>Q　{faq.question}</h3>
             <p className={cx(copy, css({ mt: "3" }))}>A　{faq.answer}</p>
             {faq.links.map((target) => (
               <p key={target.href} className={css({ mt: "3" })}>
@@ -491,7 +491,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           お問い合わせの際は、法人名・ご担当者名・対象資材の名称（掲載済みの場合はFarmilleページのURL）をご記入ください。いただいたご連絡には順次対応いたしますので、お返事までお時間をいただく場合がございます。
         </p>
       </section>
-      <section className={cx(section, card, css({ textAlign: "center", bg: "brand.soft2" }))}>
+      <section className={cx(section, card, css({ textAlign: "center", bg: "primary.100" }))}>
         <h2 className={title}>企業会員登録を申請する</h2>
         <p className={copy}>
           申請内容を確認し、ご登録のメールアドレスへFarmilleアカウントIDとログインのご案内をお送りします。申請・掲載・編集は無料です。

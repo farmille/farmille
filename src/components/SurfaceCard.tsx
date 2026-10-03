@@ -16,7 +16,7 @@ const surfaceCardRecipe = cva({
     tone: {
       standard: {},
       soft: {
-        bg: "green.soft2",
+        bg: "primary.100",
       },
     },
   },

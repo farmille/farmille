@@ -40,7 +40,7 @@ export default async function ApplicationsPage() {
             <p>{item.description}</p>
             <Link
               className={css({
-                color: "brand.primaryDeep",
+                color: "primary.700",
                 textDecoration: "underline",
                 fontWeight: "700",
               })}

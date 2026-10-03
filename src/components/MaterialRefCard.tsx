@@ -37,7 +37,7 @@ export function MaterialRefCard({
           borderColor: "border.default",
           borderRadius: "card",
           p: "3",
-          bg: "green.soft2",
+          bg: "primary.100",
           textDecoration: "none",
           color: "inherit",
         }),
@@ -49,11 +49,11 @@ export function MaterialRefCard({
           w: "44px",
           aspectRatio: "image.square",
           borderRadius: "button",
-          bg: "green.soft2",
+          bg: "primary.100",
           display: "grid",
           placeItems: "center",
           flexShrink: "0",
-          color: "brand.primary",
+          color: "primary.700",
         })}
       >
         <Icon name="image" size="md" />

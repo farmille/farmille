@@ -23,7 +23,7 @@ const imageBox = css({
   w: "118px",
   aspectRatio: "image.square",
   borderRadius: "button",
-  bg: "green.soft2",
+  bg: "primary.100",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
@@ -31,7 +31,7 @@ const imageBox = css({
   placeItems: "center",
   flexShrink: "0",
   overflow: "hidden",
-  color: "brand.primary",
+  color: "primary.700",
 });
 
 /** 通常画像と読み込み失敗時のプレースホルダーを同じグリッドセルに重ねる。 */
@@ -147,7 +147,7 @@ export function MaterialHero({
         国内での販売を代表する立場にあるとFarmille運営が調査・認識した企業を表示しています。相違がある場合は、
         <Link
           href="/sellers/apply"
-          className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
+          className={css({ color: "primary.700", textDecoration: "underline" })}
         >
           メーカー登録
         </Link>

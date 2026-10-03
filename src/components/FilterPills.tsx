@@ -27,8 +27,8 @@ const pillRecipe = cva({
   variants: {
     active: {
       true: {
-        bg: "brand.primary",
-        borderColor: "brand.primary",
+        bg: "primary.700",
+        borderColor: "primary.600",
         color: "surface.card",
         fontWeight: "600",
       },

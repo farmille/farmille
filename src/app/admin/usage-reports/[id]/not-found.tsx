@@ -5,7 +5,7 @@ import { Panel } from "@/app/admin/_components/AdminUI";
 import { css } from "../../../../../styled-system/css";
 
 const linkStyle = css({
-  color: "brand.primary",
+  color: "primary.700",
   fontWeight: "700",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },

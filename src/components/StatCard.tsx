@@ -27,7 +27,7 @@ export function StatCard({ value, label, className }: StatCardProps) {
         className={css({
           fontSize: "2xl",
           fontWeight: "800",
-          color: "brand.primary",
+          color: "primary.700",
           fontVariantNumeric: "tabular-nums",
         })}
       >

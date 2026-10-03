@@ -65,7 +65,7 @@ const label = css({
     display: "block",
     w: "32px",
     h: "1px",
-    bg: "brand.primary",
+    bg: "primary.600",
     flexShrink: "0",
   },
 });

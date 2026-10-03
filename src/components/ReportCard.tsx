@@ -37,11 +37,11 @@ const cardRecipe = cva({
 
 const coverRecipe = cva({
   base: {
-    bg: "green.soft2",
+    bg: "primary.100",
     display: "grid",
     placeItems: "center",
     overflow: "hidden",
-    color: "brand.primary",
+    color: "primary.700",
   },
   variants: {
     layout: {
@@ -138,10 +138,10 @@ export function ReportCard({
           w: compact ? "18px" : "26px",
           aspectRatio: "image.square",
           borderRadius: "pill",
-          bg: "brand.soft",
+          bg: "primary.200",
           display: "grid",
           placeItems: "center",
-          color: "brand.primary",
+          color: "primary.700",
           flexShrink: "0",
           overflow: "hidden",
         })}
@@ -266,8 +266,8 @@ export function ReportCard({
                 px: "2.5",
                 py: "0.5",
                 borderRadius: "pill",
-                bg: "brand.soft",
-                color: "brand.primaryDeep",
+                bg: "primary.200",
+                color: "primary.700",
                 fontWeight: "600",
               })}
             >
@@ -297,7 +297,7 @@ export function ReportCard({
             p: "3",
             fontSize: "sm",
             fontWeight: "700",
-            color: "brand.primaryDeep",
+            color: "primary.700",
             textDecoration: "none",
           })}
         >

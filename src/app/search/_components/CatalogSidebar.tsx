@@ -79,7 +79,7 @@ export function CatalogSidebar({
         alignSelf: "start",
       })}
     >
-      <Link href="/search" className={css({ color: "brand.primary", fontWeight: "700" })}>
+      <Link href="/search" className={css({ color: "primary.700", fontWeight: "700" })}>
         すべてクリア
       </Link>
       <details className={section}>

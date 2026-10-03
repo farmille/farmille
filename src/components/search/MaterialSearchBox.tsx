@@ -44,10 +44,10 @@ const box = css({
   px: "3.5",
   py: "2.5",
   _focusWithin: {
-    borderColor: "brand.primary",
+    borderColor: "primary.600",
     outlineWidth: "3px",
     outlineStyle: "solid",
-    outlineColor: "brand.soft",
+    outlineColor: "primary.200",
   },
 });
 
@@ -132,7 +132,7 @@ const suggestionRow = css({
   cursor: "pointer",
   textAlign: "left",
   fontFamily: "sans",
-  _hover: { bg: "green.soft2" },
+  _hover: { bg: "primary.100" },
 });
 
 const categoryLabel = css({
@@ -156,7 +156,7 @@ const emptyHint = css({
 function categoryAccentClass(category: TagCategory): string {
   switch (category) {
     case "crop":
-      return css({ bg: "brand.primary/15", color: "brand.primaryDeep" });
+      return css({ bg: "primary.600/15", color: "primary.700" });
     case "concern":
       return css({ bg: "tag.concern/15", color: "tag.concern" });
     case "effect":

@@ -23,6 +23,7 @@ sb.mock(import("../src/app/admin/materials/actions.ts"));
 sb.mock(import("../src/app/admin/materials/requests/actions.ts"));
 sb.mock(import("../src/app/admin/mfa/actions.ts"));
 sb.mock(import("../src/app/admin/reports/actions.ts"));
+sb.mock(import("../src/app/admin/published-posts/actions.ts"));
 sb.mock(import("../src/app/admin/sellers/[id]/actions.ts"));
 sb.mock(import("../src/app/admin/tags/actions.ts"));
 sb.mock(import("../src/app/admin/usage-reports/[id]/actions.ts"));

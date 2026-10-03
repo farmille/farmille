@@ -168,35 +168,17 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
 
       <section aria-label="掲載情報と投稿についての注意事項" className={disclaimer}>
         <p>
-          「−」の項目は、メーカーによる確認が済んでいない項目、またはメーカーの意向で掲載していない項目です。
-          <Link
-            href="/sellers/apply"
-            className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
-          >
-            メーカーご担当者様はご連絡ください →
-          </Link>
-        </p>
-        <p className={css({ mt: "3" })}>
-          掲載している商品情報（農薬・肥料・土壌改良資材等に関する登録・届出・表示情報を含みます）は、各事業者によって提供・編集を受けた情報、Farmilleによる調査、または各事業者のウェブサイト等にて公開されている特定時点の情報をもとに作成したものです。当サイトに掲載している情報には、誤記や最新でない内容を含む可能性があり、その正確性・完全性・最新性を保証するものではありません。
-        </p>
-        <p className={css({ mt: "3" })}>
-          作物・効果・施用方法の分類は、農林水産省の通知（30消安第6281号）・JBSAの公式分類等を参考に、Farmilleがバイオスティミュラント資材として整理・解釈したものです。これらの分類や記載は、当該資材の効果を検証・保証するものではありません。
-        </p>
-        <p className={css({ mt: "3" })}>
           商品の使用にあたっては、当該製品についてメーカー公式サイトなどの公式情報を必ずご確認のうえ、製品の表示や使用条件に従ってご使用ください。
         </p>
         <p className={css({ mt: "3" })}>
           また、農薬、肥料、土壌改良資材等として法令上の登録・届出・表示その他の規制がある資材については、当該法令およびそれに基づく製品表示・使用条件等をご確認のうえ、それらに従ってご使用ください。ご利用の前に
           <Link
             href="/legal"
-            className={css({ color: "brand.primaryDeep", textDecoration: "underline" })}
+            className={css({ color: "primary.700", textDecoration: "underline" })}
           >
             規約・ガイドライン
           </Link>
           をご確認ください。
-        </p>
-        <p className={css({ mt: "3" })}>
-          実証詳細レポート・感想口コミは、投稿した生産者個人の圃場・条件での体験と見解です。ほかの圃場・作物・気象条件で同じ結果が得られることや、薬害等が生じないことを保証するものではありません。
         </p>
       </section>
 

@@ -46,8 +46,8 @@ const optionalBadgeStyle = css({
 
 const publicBadgeStyle = css({
   ...badgeBaseStyle,
-  bg: "brand.soft",
-  color: "brand.primaryDeep",
+  bg: "primary.200",
+  color: "primary.700",
 });
 
 const guideStyle = css({
@@ -79,10 +79,10 @@ export const controlStyle = css({
   fontFamily: "sans",
   _placeholder: { color: "text.subtle" },
   _focusVisible: {
-    outlineWidth: "2px",
+    outlineWidth: "1px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
-    borderColor: "brand.primary",
+    outlineColor: "primary.600",
+    borderColor: "primary.600",
   },
 });
 
@@ -148,14 +148,14 @@ const radioCardStyle = css({
   cursor: "pointer",
   // チェック状態は :has で表現し、クライアント状態を持たない
   "&:has(input:checked)": {
-    borderColor: "brand.primary",
-    bg: "green.soft2",
+    borderColor: "primary.600",
+    bg: "primary.100",
     fontWeight: "700",
   },
   "&:has(input:focus-visible)": {
-    outlineWidth: "2px",
+    outlineWidth: "1px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
   },
 });
 
@@ -170,8 +170,8 @@ const radioInputStyle = css({
   borderStyle: "solid",
   borderColor: "border.strong",
   _checked: {
-    borderColor: "brand.primary",
-    bg: "brand.primary",
+    borderColor: "primary.600",
+    bg: "primary.600",
     boxShadow: "inset 0 0 0 3px white",
   },
 });
@@ -235,13 +235,13 @@ const switchStyle = css({
     transition: "left 120ms ease",
   },
   _checked: {
-    bg: "brand.primary",
+    bg: "primary.600",
     _after: { left: "4" },
   },
   _focusVisible: {
-    outlineWidth: "2px",
+    outlineWidth: "1px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
   },
 });
 
@@ -319,8 +319,8 @@ const errorMessageStyle = css({
 
 const infoMessageStyle = css({
   ...messageBaseStyle,
-  bg: "brand.soft",
-  color: "brand.primaryDeep",
+  bg: "primary.200",
+  color: "primary.700",
   borderColor: "border.default",
 });
 
@@ -341,7 +341,7 @@ export const formActionsStyle = css({
 
 export const primaryButtonStyle = css({
   w: "100%",
-  bg: "brand.primary",
+  bg: "primary.700",
   color: "white",
   rounded: "button",
   py: "calc(var(--spacing-3) + var(--spacing-0\\.5) / 2)",
@@ -359,7 +359,7 @@ export const ghostButtonStyle = css({
   display: "block",
   w: "100%",
   bg: "surface.card",
-  color: "brand.primary",
+  color: "primary.700",
   rounded: "button",
   py: "calc(var(--spacing-3) + var(--spacing-0\\.5) / 2)",
   fontSize: "md",
@@ -375,7 +375,7 @@ export const ghostButtonStyle = css({
 
 export const textLinkStyle = css({
   display: "inline-block",
-  color: "brand.primary",
+  color: "primary.700",
   fontSize: "sm",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },

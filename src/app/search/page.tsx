@@ -83,7 +83,7 @@ const logicHint = css({
 });
 
 const logicStrong = css({
-  color: "brand.primaryDeep",
+  color: "primary.700",
   fontWeight: "700",
 });
 
@@ -300,7 +300,7 @@ function SearchResults({
           },
           { title: "作物分類として記載のある資材", items: broader },
         ]
-      : [{ title: "検索結果", items: results }];
+      : [{ title: null, items: results }];
   return (
     <>
       <SearchAnalytics filterCount={selected.length} resultCount={items.length} sort={sort} />
@@ -317,10 +317,12 @@ function SearchResults({
         />
       ) : (
         groups.map((group) => (
-          <section key={group.title}>
-            <h2 className={css({ fontSize: "md", fontWeight: "700", mt: "4" })}>
-              {group.title} {group.items.length}件
-            </h2>
+          <section key={group.title ?? "results"}>
+            {group.title ? (
+              <h2 className={css({ fontSize: "md", fontWeight: "700", mt: "4" })}>
+                {group.title} {group.items.length}件
+              </h2>
+            ) : null}
             <div className={stack}>
               {group.items.map(({ material, evidence }, index) => {
                 const counts = catalog.counts.find((row) => row.material_id === material.id);

@@ -13,7 +13,6 @@ import { Icon } from "@/components/Icon";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
 import { UsageReportArticle } from "@/components/UsageReportArticle";
-import { APPLICATION_METHODS } from "@/lib/material-page-editor";
 import { STANDPOINTS } from "@/lib/standpoints";
 import { ReportReadingGate } from "@/components/ReportReadingGate";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
@@ -126,11 +125,11 @@ function MediaFigure({
           position: "relative",
           borderRadius: "card",
           overflow: "hidden",
-          bg: "green.soft2",
+          bg: "primary.100",
           aspectRatio: wide ? "image.wide" : "image.landscape",
           display: "grid",
           placeItems: "center",
-          color: "brand.primary",
+          color: "primary.700",
         })}
       >
         {mediaType === "photo" ? (
@@ -243,12 +242,6 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     return lines;
   });
 
-  const methodTags = APPLICATION_METHODS.filter((method) =>
-    report.structured?.plots.some((plot) =>
-      plot.steps.some((step) => step.method === method.value),
-    ),
-  );
-
   const materialPath = `/materials/${report.material.id}`;
   const reportJsonLd = createArticleJsonLd({
     id: report.id,
@@ -322,10 +315,10 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 w: "32px",
                 aspectRatio: "image.square",
                 borderRadius: "pill",
-                bg: "brand.soft",
+                bg: "primary.200",
                 display: "grid",
                 placeItems: "center",
-                color: "brand.primary",
+                color: "primary.700",
                 overflow: "hidden",
               })}
             >
@@ -363,9 +356,6 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           作物：{report.crop.name}
           {report.variety ? `（${report.variety}）` : ""}
           {report.purposeTags.length ? `　効果：${report.purposeTags.join("・")}` : ""}
-          {methodTags.length
-            ? `　施用方法：${methodTags.map((method) => method.label).join("・")}`
-            : ""}
         </p>
 
         <MaterialRefCard
@@ -391,10 +381,10 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 mt: "3",
                 aspectRatio: "image.wide",
                 borderRadius: "card",
-                bg: "green.soft2",
+                bg: "primary.100",
                 display: "grid",
                 placeItems: "center",
-                color: "brand.primary",
+                color: "primary.700",
               })}
             >
               <Icon name="image" size="lg" />
@@ -436,8 +426,8 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                           px: "2.5",
                           py: "1",
                           borderRadius: "pill",
-                          bg: "brand.soft",
-                          color: "brand.primaryDeep",
+                          bg: "primary.200",
+                          color: "primary.700",
                           fontWeight: "600",
                         })}
                       >
@@ -491,7 +481,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                             aspectRatio: "image.portrait",
                             borderRadius: "button",
                             overflow: "hidden",
-                            bg: "green.soft2",
+                            bg: "primary.100",
                           })}
                         >
                           <Image
@@ -570,7 +560,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               <Icon
                 name="check"
                 size="sm"
-                className={css({ color: "brand.primary", flexShrink: "0", mt: "0.5" })}
+                className={css({ color: "primary.700", flexShrink: "0", mt: "0.5" })}
               />
               <span>
                 この実証詳細レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。

@@ -32,7 +32,7 @@ const menuListStyle = css({
 const menuLinkStyle = css({
   fontSize: "lg",
   fontWeight: "700",
-  color: "brand.primary",
+  color: "primary.700",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },
 });
@@ -45,11 +45,16 @@ const statLinkStyle = css({
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "brand.primary",
+    outlineColor: "primary.600",
   },
 });
 
 const MENU_ITEMS = [
+  {
+    href: "/admin/published-posts",
+    label: "公開済みの投稿",
+    description: "感想口コミ・実証詳細レポートを確認し、公開から削除する。",
+  },
   {
     href: "/admin/company-applications",
     label: "企業からの申請",

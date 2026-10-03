@@ -66,14 +66,14 @@ const dayButton = cva({
   variants: {
     selected: {
       true: {
-        bg: "brand.primary",
+        bg: "primary.700",
         color: "surface.card",
         fontWeight: "700",
       },
       false: {
         bg: "transparent",
         color: "text.default",
-        _hover: { bg: "brand.soft" },
+        _hover: { bg: "primary.200" },
       },
     },
   },
@@ -96,8 +96,8 @@ const dateChip = css({
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
-  bg: "brand.soft",
-  color: "brand.primaryDeep",
+  bg: "primary.200",
+  color: "primary.700",
   borderRadius: "pill",
   px: "2.5",
   py: "1",

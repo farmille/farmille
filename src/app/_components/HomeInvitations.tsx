@@ -4,15 +4,6 @@ import Link from "next/link";
 import { buttonRecipe } from "@/components/Button";
 import { css } from "../../../styled-system/css";
 
-const panel = css({
-  p: "6",
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderColor: "border.default",
-  borderRadius: "card",
-  boxShadow: "shadow",
-  tab: { p: "12" },
-});
 const title = css({
   m: "0",
   fontSize: "2xl",
@@ -21,33 +12,11 @@ const title = css({
   textWrap: "balance",
 });
 const copy = css({ fontSize: "md", color: "text.muted", lineHeight: "relaxed" });
-const actions = css({ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "3", mt: "5" });
-const textLink = css({ color: "brand.primaryDeep", fontSize: "md", textDecoration: "none" });
+const textLink = css({ color: "primary.700", fontSize: "md", textDecoration: "none" });
 
-/** 閲覧から体験の投稿へつなぎ、一般登録とメーカー向け案内を分ける。 */
 export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
   return (
     <>
-      <section className={panel} aria-labelledby="share-experience-title">
-        <h1 id="share-experience-title" className={title}>
-          実際に使った体験を共有し、1人で何年もかかっていた試験を、1年で。
-        </h1>
-        <div className={copy}>
-          <p>
-            資材の種類は増えていますが、自分の畑で結果が出るかどうかは、使ってみるまで分かりません。
-          </p>
-          <p>いちばん参考になるのは、生産者が実際に使った体験です。</p>
-          <p>Farmilleで、みなさんの体験を共有して、より良い資材選びを実現しましょう。</p>
-        </div>
-        <div className={actions}>
-          <Link href="/post?type=report" className={buttonRecipe({ size: "sm" })}>
-            実証詳細レポートを投稿する
-          </Link>
-          <Link href="/post?type=review" className={buttonRecipe({ size: "sm" })}>
-            感想口コミを投稿する
-          </Link>
-        </div>
-      </section>
       {showSignup ? (
         <section
           className={css({

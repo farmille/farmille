@@ -7,12 +7,16 @@ import type { SemanticTokens, Tokens } from "@pandacss/dev";
 export const tokens = {
   blurs: { reportGate: { value: "4px" } },
   colors: {
-    // プライマリ緑とその階調（deep / soft / soft2）
     green: {
-      DEFAULT: { value: "#2E7D32" },
-      deep: { value: "#1B5E20" },
-      soft: { value: "#E8F5E9" },
-      soft2: { value: "#F1F8F2" },
+      100: { value: "#D8F3DC" },
+      200: { value: "#B7E4C7" },
+      300: { value: "#95D5B2" },
+      400: { value: "#74C69D" },
+      500: { value: "#52B788" },
+      600: { value: "#40916C" },
+      700: { value: "#2D6A4F" },
+      800: { value: "#1B4332" },
+      900: { value: "#081C15" },
     },
     blue: { value: "#1976D2" },
     star: { value: "#F5A623" },
@@ -147,6 +151,11 @@ export const tokens = {
   },
   // コンテンツ用途ごとの上限幅。breakpoint 名を width 値へ流用しない。
   sizes: {
+    reportGraph: {
+      vertical: { value: "12rem" },
+      horizontal: { value: "2.5rem" },
+      plot: { value: "6rem" },
+    },
     imagePreview: { value: "10rem" },
     // 短いラベルでも操作対象として横幅を確保する。
     button: {
@@ -223,10 +232,16 @@ export const tokens = {
 /** UI ではプリミティブよりこちらを優先して参照する。 */
 export const semanticTokens = {
   colors: {
-    brand: {
-      primary: { value: "{colors.green}" },
-      primaryDeep: { value: "{colors.green.deep}" },
-      soft: { value: "{colors.green.soft}" },
+    primary: {
+      100: { value: "{colors.green.100}" },
+      200: { value: "{colors.green.200}" },
+      300: { value: "{colors.green.300}" },
+      400: { value: "{colors.green.400}" },
+      500: { value: "{colors.green.500}" },
+      600: { value: "{colors.green.600}" },
+      700: { value: "{colors.green.700}" },
+      800: { value: "{colors.green.800}" },
+      900: { value: "{colors.green.900}" },
     },
     text: {
       default: { value: "{colors.ink}" },

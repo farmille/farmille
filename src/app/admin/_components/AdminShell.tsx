@@ -33,7 +33,7 @@ const headerInnerStyle = css({
 const brandStyle = css({
   fontSize: "md",
   fontWeight: "800",
-  color: "brand.primaryDeep",
+  color: "primary.700",
   textDecoration: "none",
 });
 
@@ -48,7 +48,7 @@ const navLinkStyle = css({
   fontSize: "md",
   color: "text.muted",
   textDecoration: "none",
-  _hover: { color: "brand.primary", textDecoration: "underline" },
+  _hover: { color: "primary.700", textDecoration: "underline" },
 });
 
 const mainStyle = css({
@@ -61,7 +61,7 @@ const mainStyle = css({
 const backLinkStyle = css({
   display: "inline-block",
   fontSize: "md",
-  color: "brand.primary",
+  color: "primary.700",
   textDecoration: "none",
   mb: "2",
   _hover: { textDecoration: "underline" },

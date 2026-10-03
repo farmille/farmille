@@ -30,7 +30,7 @@ const stack = css({
 const reviewLink = css({
   display: "inline-flex",
   mt: "2",
-  color: "brand.primary",
+  color: "primary.700",
   fontSize: "sm",
   fontWeight: "700",
   textDecoration: "none",
@@ -118,7 +118,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
                     <Link
                       href={`/materials/${post.materialId}/report/new`}
                       className={css({
-                        color: "brand.primary",
+                        color: "primary.700",
                         fontSize: "xs",
                         fontWeight: "700",
                         textDecoration: "none",
