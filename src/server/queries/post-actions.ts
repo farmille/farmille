@@ -15,10 +15,11 @@ export const getPostActions = cache(async (target: PostTarget, id: string) => {
   const column = target === "review" ? "review_id" : "usage_report_id";
   const [views, saved, helpful, post] = await Promise.all([
     supabase
-      .from("view_counts_daily")
+      .from("view_counts_total")
       .select("view_count")
       .eq("target_type", target)
-      .eq("target_id", id),
+      .eq("target_id", id)
+      .maybeSingle(),
     session === null
       ? null
       : supabase
@@ -44,10 +45,11 @@ export const getPostActions = cache(async (target: PostTarget, id: string) => {
   ]);
   if (views.error || saved?.error || helpful?.error || post.error)
     throw new Error("投稿の保存状態・閲覧数を取得できませんでした。");
-  const viewCount = views.data.reduce((sum, row) => {
-    if (row.view_count === null) throw new Error("投稿の閲覧数が欠落しています。");
-    return sum + row.view_count;
-  }, 0);
+  let viewCount = 0;
+  if (views.data !== null) {
+    if (views.data.view_count === null) throw new Error("投稿の閲覧数が欠落しています。");
+    viewCount = views.data.view_count;
+  }
   return {
     saved: saved?.data != null,
     voted: helpful?.data != null,
