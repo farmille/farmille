@@ -35,7 +35,9 @@ for (const mode of ["existing", "new"]) {
         page.getByRole("heading", { name: "Farmille 企業様向け利用ガイド" }),
       ).toBeVisible();
       await expect(
-        page.getByRole("link", { name: "登録済みの方：ログイン", exact: true }),
+        page.getByRole("link", {
+          name: /^企業会員登録済みの方\s*企業会員ダッシュボードにログイン$/,
+        }),
       ).toHaveAttribute("href", "/sellers/login");
       await expect(
         page.getByRole("link", { name: "アカウントをお持ちの方はログイン" }),

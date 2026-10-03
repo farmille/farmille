@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import * as v from "valibot";
 import { receiptAccessSchema, removalVerificationSchema } from "@/lib/company-application";
 import { useState, type FormEvent } from "react";
@@ -7,6 +8,7 @@ import { errorMessageJa } from "@/server/errors";
 import { requestVerification, requestReceiptVerification } from "../actions";
 import { applicationField, applicationStack } from "./ContactFields";
 export function VerificationForm({ receipt = false }: { receipt?: boolean }) {
+  const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -29,6 +31,7 @@ export function VerificationForm({ receipt = false }: { receipt?: boolean }) {
               email: data.get("email"),
             }),
           );
+      if (result.ok && !receipt) setSent(true);
       setMessage(
         result.ok
           ? receipt
@@ -44,6 +47,29 @@ export function VerificationForm({ receipt = false }: { receipt?: boolean }) {
       setBusy(false);
     }
   }
+  if (sent)
+    return (
+      <section role="status" className={applicationStack}>
+        <h2>申請フォームのご案内をお送りしました</h2>
+        <p>
+          ご入力いただいたメールアドレスへ、申請フォームのURLをお送りしました。30分以内にメールのリンクを開き、申請内容をご記入・ご提出ください。
+        </p>
+        <p>
+          この受付だけでは申請は完了していません。メールが届かない場合は迷惑メールフォルダーもご確認ください。
+        </p>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => {
+            setSent(false);
+            setMessage("");
+          }}
+        >
+          メールアドレスを確認して再送する
+        </Button>
+        <Link href="/sellers">企業様向け利用ガイドに戻る</Link>
+      </section>
+    );
   return (
     <form onSubmit={submit} className={applicationStack}>
       {receipt ? (
@@ -54,22 +80,40 @@ export function VerificationForm({ receipt = false }: { receipt?: boolean }) {
       ) : (
         <>
           <label className={applicationField}>
-            法人名
-            <Input name="companyName" required maxLength={200} />
+            法人名（必須）
+            <Input
+              name="companyName"
+              required
+              maxLength={200}
+              placeholder="例）〇〇バイオ株式会社"
+            />
           </label>
           <label className={applicationField}>
-            担当者名
-            <Input name="contactName" required maxLength={200} />
+            担当者名（必須）
+            <Input name="contactName" required maxLength={200} placeholder="例）金子 太郎" />
           </label>
         </>
       )}
       <label className={applicationField}>
-        法人メールアドレス
-        <Input name="email" type="email" required maxLength={254} />
+        担当者メールアドレス（必須）
+        <Input
+          name="email"
+          type="email"
+          required
+          maxLength={254}
+          placeholder="tanto@example.co.jp"
+        />
       </label>
+      {!receipt && <p>ご担当者名・担当者メールアドレスは公開されません。</p>}
+      {!receipt && (
+        <p>
+          貴社ドメインのメールアドレスをご入力ください。このアドレス宛に申請フォームのURLをお送りします（フリーメールの場合、確認のご連絡をすることがあります）。
+        </p>
+      )}
       <Button type="submit" disabled={busy}>
-        {busy ? "送信しています…" : "確認メールを送信"}
+        {busy ? "送信しています…" : receipt ? "確認メールを送信" : "送信して申請フォームを受け取る"}
       </Button>
+      {!receipt && <p>送信後すぐに、上記のメールアドレス宛に申請フォームのURLを自動送信します。</p>}
       {message && <p role="status">{message}</p>}
     </form>
   );

@@ -53,13 +53,13 @@ export default async function DashboardPage() {
   const result = await getSellerDashboardData(session.data.sellerId);
   if (!result.ok) {
     if (result.error === "forbidden") return <SellerAccessDenied />;
-    throw new Error("メーカーダッシュボードの取得に失敗しました。");
+    throw new Error("企業会員ダッシュボードの取得に失敗しました。");
   }
 
   const { seller, materials } = result.data;
 
   return (
-    <FormPageShell chrome="seller" backHref="/" title="メーカーダッシュボード">
+    <FormPageShell chrome="seller" backHref="/" title="企業会員ダッシュボード">
       <div className={pageStack}>
         <SurfaceCard
           description={seller.profile_text ?? "会社情報は公開メーカーページにも表示されます。"}

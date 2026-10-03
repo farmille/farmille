@@ -64,8 +64,8 @@ export function SellerLoginForm({ next }: { next: string | null }) {
         <Link className={textLinkStyle} href="/sellers/password-reset">
           パスワードをお忘れの方
         </Link>
-        <Link className={textLinkStyle} href="/sellers">
-          メーカーアカウントをお持ちでない方
+        <Link className={textLinkStyle} href="/sellers/apply">
+          企業会員でない方（企業会員登録の申請へ）
         </Link>
         <Link className={textLinkStyle} href="/login">
           一般ユーザーの方のログイン

@@ -16,8 +16,7 @@ export async function saveManufacturerProfile(
   input: v.InferOutput<typeof SaveManufacturerProfileSchema>,
 ) {
   const session = await requireSeller();
-  if (!session.ok)
-    return { ok: false as const, message: "メーカーアカウントでログインしてください。" };
+  if (!session.ok) return { ok: false as const, message: "企業会員でログインしてください。" };
   const parsed = v.safeParse(SaveManufacturerProfileSchema, input);
   if (!parsed.success)
     return { ok: false as const, message: "紹介文とURLの入力を確認してください。" };

@@ -95,7 +95,7 @@ export default async function AdminSellersPage({
           emptyMessage={
             selected === "applied"
               ? "確認中の申請はありません。"
-              : "この状態のメーカーアカウントはありません。"
+              : "この状態の企業会員はありません。"
           }
           rowKey={(row) => row.id}
           rows={sellers.data}

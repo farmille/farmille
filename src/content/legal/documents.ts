@@ -450,7 +450,7 @@ export const legalDocuments = [
   },
   {
     slug: "manufacturer",
-    title: "Farmille メーカー会員規約",
+    title: "Farmille企業向けサービス利用規約",
     group: "メーカーの方へ",
     sections: [
       {

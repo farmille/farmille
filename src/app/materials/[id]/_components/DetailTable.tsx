@@ -11,7 +11,6 @@ import { css } from "../../../../../styled-system/css";
 type DetailRow = {
   label: string;
   value: ReactNode;
-  manufacturerEntry?: boolean;
 };
 
 const tableCard = css({
@@ -87,10 +86,10 @@ export function MaterialDetailTable({
         : "−",
     },
     { label: "技術", value: "−" },
-    { label: "作用機作", manufacturerEntry: true, value: content?.mechanism || "−" },
+    { label: "作用機作", value: content?.mechanism || "−" },
     {
       label: "登録・認証",
-      manufacturerEntry: true,
+
       value: (
         <MaterialRegistrationBadges
           registrations={content?.registrations ?? []}
@@ -101,7 +100,7 @@ export function MaterialDetailTable({
     ...materialRegistrationRows(content?.registrations ?? []),
     {
       label: "関係会社（販売元、製造元、輸入元など）",
-      manufacturerEntry: true,
+
       value: content ? content.relatedCompanies.join("、") || "−" : material.manufacturer_name,
     },
   ];
@@ -146,22 +145,6 @@ export function MaterialDetailTable({
                   {part}
                 </span>
               ))}
-              {row.manufacturerEntry &&
-              row.value !== null &&
-              row.value !== "−" &&
-              material.manufacturer_verified_at !== null ? (
-                <small
-                  className={css({
-                    display: "block",
-                    fontSize: "2xs",
-                    fontWeight: "400",
-                    color: "text.subtle",
-                    mt: "1",
-                  })}
-                >
-                  メーカー記入
-                </small>
-              ) : null}
             </dt>
             <dd className={css({ m: "0", fontSize: "sm", lineHeight: "1.65" })}>
               {row.value ?? "−"}

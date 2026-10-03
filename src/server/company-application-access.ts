@@ -4,6 +4,7 @@ import { headers, cookies } from "next/headers";
 import nodemailer from "nodemailer";
 import * as v from "valibot";
 import { clientEnv, serverEnv } from "@/env";
+import { companyApplicationSender, removalInvitationEmail } from "@/lib/company-application-email";
 import { removalVerificationSchema, receiptAccessSchema } from "@/lib/company-application";
 import { createAdminSupabase } from "@/server/supabase";
 import {
@@ -28,15 +29,21 @@ async function checkRate(email: string) {
     if (!result.data) throw new ApplicationError("rate_limited");
   }
 }
-async function sendVerification(to: string, token: string) {
+async function sendVerification(
+  to: string,
+  token: string,
+  company: string,
+  contact: string,
+  receipt: boolean,
+) {
   const link = new URL("/company-requests/removal/confirm", clientEnv.siteUrl);
   link.hash = token;
   try {
     await nodemailer.createTransport(serverEnv.smtpUrl).sendMail({
-      from: serverEnv.mailFrom,
+      from: companyApplicationSender,
+      replyTo: "contact@farmille.com",
       to,
-      subject: "Farmille：申請用メールアドレスの確認",
-      text: `次のリンクを開き、「メールアドレスを確認する」を押してください。リンクの有効期限は30分です。\n\n${link}\n\n心当たりがない場合は、このメールを破棄してください。`,
+      ...removalInvitationEmail(company, contact, link.toString(), receipt),
     });
   } catch {
     throw new ApplicationError("internal");
@@ -56,7 +63,7 @@ export async function requestRemovalVerification(input: RemovalVerification) {
       token_expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
     });
   checkApplicationDb(inserted.error);
-  await sendVerification(values.email, token);
+  await sendVerification(values.email, token, values.companyName, values.contactName, false);
   return true;
 }
 export async function requestReceiptAccess(input: ReceiptAccess) {
@@ -65,7 +72,7 @@ export async function requestReceiptAccess(input: ReceiptAccess) {
   const db = createAdminSupabase();
   const receipt = await db
     .from("company_applications")
-    .select("access_id,email")
+    .select("access_id,email,company_name,contact_name")
     .eq("receipt_number", Number(values.receiptNumber))
     .eq("kind", "removal")
     .maybeSingle();
@@ -81,7 +88,13 @@ export async function requestReceiptAccess(input: ReceiptAccess) {
     })
     .eq("id", receipt.data.access_id);
   checkApplicationDb(updated.error);
-  await sendVerification(values.email, token);
+  await sendVerification(
+    values.email,
+    token,
+    receipt.data.company_name,
+    receipt.data.contact_name,
+    true,
+  );
   return true;
 }
 export async function confirmRemovalAccess(token: string) {

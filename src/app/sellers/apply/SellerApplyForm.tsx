@@ -224,7 +224,7 @@ export function SellerApplyForm() {
         <p className={css({ fontSize: "md", lineHeight: "relaxed" })}>
           申請前に
           <Link href="/legal/manufacturer" target="_blank" rel="noopener noreferrer">
-            メーカー会員規約（別タブ）
+            Farmille企業向けサービス利用規約（別タブ）
           </Link>
           と
           <Link href="/legal" target="_blank" rel="noopener noreferrer">

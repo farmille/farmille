@@ -66,7 +66,7 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await expect(page.getByText("主な作目", { exact: true })).toHaveCount(0);
     await page.goto("/me");
     const sellerApplyLink = page.getByRole("link", {
-      name: "メーカーアカウントを申請",
+      name: "企業会員登録を申請",
     });
     await expect(sellerApplyLink).toHaveAttribute("href", "/sellers?from=me");
     await sellerApplyLink.click();
@@ -140,7 +140,7 @@ test("未ログインの保護ページと safe-next の回帰", async ({ page }
 
     await page.goto("/dashboard");
     await expect(
-      page.getByRole("heading", { name: "メーカーアカウントでログインしてください" }),
+      page.getByRole("heading", { name: "企業会員のログインIDでログインしてください" }),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "メーカーログインへ" })).toHaveAttribute(
       "href",

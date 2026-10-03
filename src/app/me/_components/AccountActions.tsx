@@ -39,7 +39,7 @@ export function AccountActions({ admin = false }: { admin?: boolean }) {
             css({ display: "flex", textAlign: "center" }),
           )}
         >
-          メーカーアカウントを申請
+          企業会員登録を申請
         </Link>
       ) : null}
     </div>

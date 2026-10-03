@@ -8,8 +8,7 @@ import { createServerSupabase } from "@/server/supabase";
 
 export async function saveMaterialPage(input: v.InferOutput<typeof SaveMaterialPageSchema>) {
   const session = await requireSeller();
-  if (!session.ok)
-    return { ok: false as const, message: "メーカーアカウントでログインしてください。" };
+  if (!session.ok) return { ok: false as const, message: "企業会員でログインしてください。" };
   const parsed = v.safeParse(SaveMaterialPageSchema, input);
   if (!parsed.success)
     return {
