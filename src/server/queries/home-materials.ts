@@ -1,23 +1,22 @@
 import { randomInt } from "node:crypto";
+import { selectAllRows } from "@/server/pagination";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
 import { listMaterials } from "./materials";
 
 /** 公開資材全体から重複なしで14件を抽出する。広告・優先枠は持たない。 */
 export async function listHomeMaterials() {
   const client = await createServerSupabase();
-  const ids: string[] = [];
-  for (let offset = 0; ; offset += 500) {
-    const result = await client
+  const candidates = await selectAllRows((from, to) =>
+    client
       .from("materials")
       .select("id")
       .eq("publication_status", "published")
       .order("id")
-      .range(offset, offset + 499);
-    if (result.error)
-      throw new Error("掲載資材の候補を取得できませんでした。", { cause: result.error });
-    ids.push(...result.data.map((row) => row.id));
-    if (result.data.length < 500) break;
-  }
+      .range(from, to),
+  );
+  if (candidates.error)
+    throw new Error("掲載資材の候補を取得できませんでした。", { cause: candidates.error });
+  const ids = candidates.data.map((row) => row.id);
   for (let i = ids.length - 1; i > 0; i--) {
     const j = randomInt(i + 1);
     [ids[i], ids[j]] = [ids[j], ids[i]];

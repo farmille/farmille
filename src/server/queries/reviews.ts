@@ -93,7 +93,6 @@ const REVIEW_SELECT = `
   )
 ` as const;
 
-const POSTGREST_PAGE_SIZE = 1_000;
 const IN_FILTER_CHUNK_SIZE = 100;
 
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
@@ -108,29 +107,23 @@ async function listPublishedReviewOrder(
   supabase: SupabaseClient<Database>,
   materialId: string,
 ): Promise<Result<ReviewOrderRow[]>> {
-  const rows: ReviewOrderRow[] = [];
-
-  for (let from = 0; ; from += POSTGREST_PAGE_SIZE) {
-    const { data, error } = await supabase
+  const { data, error } = await selectAllRows((from, to) =>
+    supabase
       .from("reviews")
       .select("id, created_at")
       .eq("material_id", materialId)
       .eq("status", "published")
       .order("created_at", { ascending: false })
       .order("id", { ascending: true })
-      .range(from, from + POSTGREST_PAGE_SIZE - 1);
+      .range(from, to),
+  );
 
-    if (error !== null) {
-      reportQueryError("参考順用の感想口コミ取得に失敗", error);
-      return fail("internal");
-    }
-
-    rows.push(...data);
-
-    if (data.length < POSTGREST_PAGE_SIZE) {
-      return succeed(rows);
-    }
+  if (error !== null) {
+    reportQueryError("参考順用の感想口コミ取得に失敗", error);
+    return fail("internal");
   }
+
+  return succeed(data);
 }
 
 async function getHelpfulCounts(

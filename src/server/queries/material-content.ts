@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { selectAllRows } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
@@ -9,7 +10,6 @@ type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
-type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 type UsageReportMediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
 type ViewCountRow = Database["public"]["Views"]["view_counts_total"]["Row"];
@@ -80,7 +80,6 @@ export type ReviewRatingDistribution = {
 };
 
 const IN_FILTER_CHUNK_SIZE = 100;
-const POSTGREST_PAGE_SIZE = 1_000;
 
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/material-content] ${operation}`, error);
@@ -337,6 +336,21 @@ export async function getReviewRatingDistributionWithSupabase(
   supabase: SupabaseClient<Database>,
   materialId: string,
 ): Promise<Result<ReviewRatingDistribution>> {
+  const { data, error } = await selectAllRows((from, to) =>
+    supabase
+      .from("reviews")
+      .select("rating")
+      .eq("material_id", materialId)
+      .eq("status", "published")
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+
+  if (error !== null) {
+    reportQueryError("星分布用感想口コミの取得に失敗", error);
+    return fail("internal");
+  }
+
   const counts = new Map<number, number>([
     [1, 0],
     [2, 0],
@@ -344,36 +358,13 @@ export async function getReviewRatingDistributionWithSupabase(
     [4, 0],
     [5, 0],
   ]);
-  let total = 0;
 
-  for (let from = 0; ; from += POSTGREST_PAGE_SIZE) {
-    const { data, error } = await supabase
-      .from("reviews")
-      .select("rating")
-      .eq("material_id", materialId)
-      .eq("status", "published")
-      .order("id", { ascending: true })
-      .range(from, from + POSTGREST_PAGE_SIZE - 1);
-
-    if (error !== null) {
-      reportQueryError("星分布用感想口コミの取得に失敗", error);
-      return fail("internal");
-    }
-
-    const rows: Pick<ReviewRow, "rating">[] = data;
-
-    for (const row of rows) {
-      counts.set(row.rating, (counts.get(row.rating) ?? 0) + 1);
-      total += 1;
-    }
-
-    if (rows.length < POSTGREST_PAGE_SIZE) {
-      break;
-    }
+  for (const row of data) {
+    counts.set(row.rating, (counts.get(row.rating) ?? 0) + 1);
   }
 
   return succeed({
-    total,
+    total: data.length,
     stars: [
       { rating: 5, count: counts.get(5) ?? 0 },
       { rating: 4, count: counts.get(4) ?? 0 },

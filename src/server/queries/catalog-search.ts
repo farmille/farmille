@@ -3,6 +3,7 @@ import { cache } from "react";
 
 import type { SearchCatalog } from "@/lib/material-search";
 import { CACHE_TAGS } from "@/server/cache-tags";
+import { selectAllRows } from "@/server/pagination";
 import { listClassificationOptions, listSearchFilters } from "@/server/queries/classifications";
 import { succeed, type Result } from "@/server/result";
 import { createPublicSupabase } from "@/server/supabase";
@@ -12,27 +13,23 @@ import { createPublicSupabase } from "@/server/supabase";
 const fetchCatalogMaterials = unstable_cache(
   async () => {
     const db = createPublicSupabase();
-    function page(offset: number) {
-      return db
-        .from("materials")
-        .select(`id,name,manufacturer_name,description,avg_rating,review_count,created_at,
+    const [counts, materials] = await Promise.all([
+      db.rpc("catalog_material_counts"),
+      selectAllRows((from, to) =>
+        db
+          .from("materials")
+          .select(`id,name,manufacturer_name,description,avg_rating,review_count,created_at,
       material_images(url,is_current,sort_order),material_crops(crop_id),material_crop_groups(crop_group_id),
       material_effects(effect_id),material_ingredient_categories(ingredient_category_id,ingredient_categories(name)),
       material_search_tags(search_tag_id),material_application_methods(method)`)
-        .eq("publication_status", "published")
-        .order("id")
-        .range(offset, offset + 499);
-    }
-    const [counts, first] = await Promise.all([db.rpc("catalog_material_counts"), page(0)]);
+          .eq("publication_status", "published")
+          .order("id")
+          .range(from, to),
+      ),
+    ]);
     if (counts.error) throw new Error("検索用の件数を取得できませんでした。");
-    if (first.error) throw new Error("資材の検索情報を取得できませんでした。");
-    const materials = first.data;
-    for (let offset = 500; materials.length === offset; offset += 500) {
-      const next = await page(offset);
-      if (next.error) throw new Error("資材の検索情報を取得できませんでした。");
-      materials.push(...next.data);
-    }
-    return { materials, counts: counts.data };
+    if (materials.error) throw new Error("資材の検索情報を取得できませんでした。");
+    return { materials: materials.data, counts: counts.data };
   },
   ["catalog-materials"],
   { tags: [CACHE_TAGS.catalog], revalidate: 600 },
