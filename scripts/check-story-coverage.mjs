@@ -11,31 +11,22 @@ const routeModuleNames = new Set([
   "page.tsx",
 ]);
 
-async function collectComponentModules(directory) {
-  const entries = await readdir(directory, { withFileTypes: true });
-  const files = await Promise.all(
-    entries.map(async (entry) => {
-      const entryPath = path.join(directory, entry.name);
-      if (entry.isDirectory()) return collectComponentModules(entryPath);
-      if (!entry.isFile() || !entry.name.endsWith(".tsx")) return [];
-      if (
-        entry.name.endsWith(".stories.tsx") ||
-        entry.name.endsWith(".test.tsx") ||
-        routeModuleNames.has(entry.name)
-      )
-        return [];
-      return [entryPath];
-    }),
-  );
-
-  return files.flat();
-}
-
-const componentModules = await collectComponentModules(sourceRoot);
+const componentModules = (await readdir(sourceRoot, { recursive: true, withFileTypes: true }))
+  .filter((entry) => entry.isFile() && entry.name.endsWith(".tsx"))
+  .map((entry) => path.join(entry.parentPath, entry.name));
 const missingStories = [];
 const detachedStories = [];
 
+let componentCount = 0;
 for (const componentPath of componentModules) {
+  const fileName = path.basename(componentPath);
+  if (
+    fileName.endsWith(".stories.tsx") ||
+    fileName.endsWith(".test.tsx") ||
+    routeModuleNames.has(fileName)
+  )
+    continue;
+  componentCount += 1;
   const basename = path.basename(componentPath, ".tsx");
   const storyPath = path.join(path.dirname(componentPath), `${basename}.stories.tsx`);
 
@@ -65,5 +56,5 @@ if (missingStories.length > 0 || detachedStories.length > 0) {
   }
   process.exitCode = 1;
 } else {
-  console.log(`${componentModules.length}件のコンポーネントに Story があります。`);
+  console.log(`${componentCount}件のコンポーネントに Story があります。`);
 }

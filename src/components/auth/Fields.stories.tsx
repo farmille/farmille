@@ -1,14 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import {
-  controlStyle,
-  Field,
-  FormMessage,
-  HintBox,
-  NoteBox,
-  RadioCards,
-  SwitchToggle,
-} from "./Fields";
+import { controlStyle, Field, FormMessage, HintBox, NoteBox, RadioCards } from "./Fields";
 
 const meta = {
   title: "Components/Auth/Fields",
@@ -100,16 +92,6 @@ export const RadioCardsUnselected: Story = {
         ]}
       />
     </Field>
-  ),
-};
-
-export const SwitchToggleOn: Story = {
-  render: () => <SwitchToggle defaultChecked label="次回から自動でログインする" name="remember" />,
-};
-
-export const SwitchToggleOff: Story = {
-  render: () => (
-    <SwitchToggle defaultChecked={false} label="次回から自動でログインする" name="remember" />
   ),
 };
 

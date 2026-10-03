@@ -203,65 +203,6 @@ export function RadioCards({
   );
 }
 
-const toggleStyle = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "2",
-  mt: "2",
-  fontSize: "sm",
-  color: "text.muted",
-  cursor: "pointer",
-});
-
-const switchStyle = css({
-  appearance: "none",
-  position: "relative",
-  w: "34px",
-  h: "20px",
-  m: "0",
-  flex: "0 0 auto",
-  rounded: "pill",
-  bg: "border.strong",
-  cursor: "pointer",
-  _after: {
-    content: '""',
-    position: "absolute",
-    top: "0.5",
-    left: "0.5",
-    w: "16px",
-    h: "16px",
-    rounded: "pill",
-    bg: "surface.card",
-    transition: "left 120ms ease",
-  },
-  _checked: {
-    bg: "primary.600",
-    _after: { left: "4" },
-  },
-  _focusVisible: {
-    outlineWidth: "1px",
-    outlineStyle: "solid",
-    outlineColor: "primary.600",
-  },
-});
-
-export function SwitchToggle({
-  name,
-  label,
-  defaultChecked,
-}: {
-  name: string;
-  label: string;
-  defaultChecked: boolean;
-}) {
-  return (
-    <label className={toggleStyle}>
-      <input className={switchStyle} defaultChecked={defaultChecked} name={name} type="checkbox" />
-      {label}
-    </label>
-  );
-}
-
 const noteStyle = css({
   display: "block",
   mt: "2",
