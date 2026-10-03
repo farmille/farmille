@@ -4,6 +4,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { AppBar, Badge, MaterialRefCard } from "@/components";
 import { HelpfulButton } from "@/components/HelpfulButton";
@@ -44,12 +45,14 @@ const main = css({
   tab: { px: "6", py: "6" },
 });
 
+const getCachedArticle = cache(getPublishedArticle);
+
 async function loadArticle(id: string) {
   if (!UUID_RE.test(id)) {
     notFound();
   }
 
-  const result = await getPublishedArticle(id);
+  const result = await getCachedArticle(id);
 
   if (!result.ok) {
     throw new Error(errorMessageJa[result.error]);
@@ -83,12 +86,13 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
 
 export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
   const { id } = await params;
-  const article = await loadArticle(id);
-  const session = await getSessionUser();
+  const [article, session] = await Promise.all([loadArticle(id), getSessionUser()]);
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
-  const bodyHtml = await renderMarkdownToHtml(article.body);
-  const helpfulVotedResult = await isHelpfulVotedByViewer(viewerUserId, "article", article.id);
+  const [bodyHtml, helpfulVotedResult] = await Promise.all([
+    renderMarkdownToHtml(article.body),
+    isHelpfulVotedByViewer(viewerUserId, "article", article.id),
+  ]);
 
   if (!helpfulVotedResult.ok) {
     throw new Error(errorMessageJa[helpfulVotedResult.error]);

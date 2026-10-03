@@ -19,7 +19,6 @@ export const publicPosts = [
     rating: 4,
     body: "定植前に使用しました。対照区より根の張りが揃い、その後の生育も安定しました。",
     helpfulCount: 12,
-    helpfulVotedByViewer: true,
     photos: [],
   },
   {

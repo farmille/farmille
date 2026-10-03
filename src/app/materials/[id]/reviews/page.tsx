@@ -1,5 +1,6 @@
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { Button, Select } from "@/components";
 import { Pagination } from "@/components/Pagination";
@@ -10,7 +11,7 @@ import { css } from "../../../../../styled-system/css";
 
 import { MaterialPageShell } from "../_components/PageShell";
 import { ReviewList } from "../_components/ReviewList";
-import { loadMaterialOrNotFound, materialMetadata } from "../material-page-data";
+import { isMaterialId, loadMaterialOrNotFound, materialMetadata } from "../material-page-data";
 import { unwrapQueryResult } from "../query-result";
 import { parseReviewSearchParams, REVIEW_SORT_OPTIONS } from "./search-params";
 
@@ -52,11 +53,19 @@ export default async function MaterialReviewsPage({
     searchParams,
     getSessionUser(),
   ]);
-  const material = await loadMaterialOrNotFound(id);
+
+  if (!isMaterialId(id)) {
+    notFound();
+  }
+
   const { sort, page } = parseReviewSearchParams(requestedSearchParams);
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
-  const reviews = unwrapQueryResult(await listReviewsByMaterial(id, { sort, page, viewerUserId }));
+  const [material, reviewsResult] = await Promise.all([
+    loadMaterialOrNotFound(id),
+    listReviewsByMaterial(id, { sort, page, viewerUserId }),
+  ]);
+  const reviews = unwrapQueryResult(reviewsResult);
   const materialPath = `/materials/${material.id}`;
   const reviewsPath = `${materialPath}/reviews`;
   const reviewListJsonLd =

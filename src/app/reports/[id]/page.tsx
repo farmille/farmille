@@ -4,6 +4,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { AppBar, MaterialRefCard, MetricBars } from "@/components";
 import { FabBar } from "@/components/FabBar";
@@ -69,12 +70,14 @@ const bodyText = css({
   whiteSpace: "pre-wrap",
 });
 
+const getCachedReport = cache(getPublishedUsageReport);
+
 async function loadReport(id: string) {
   if (!UUID_RE.test(id)) {
     notFound();
   }
 
-  const result = await getPublishedUsageReport(id);
+  const result = await getCachedReport(id);
 
   if (!result.ok) {
     throw new Error(errorMessageJa[result.error]);
@@ -85,6 +88,15 @@ async function loadReport(id: string) {
   }
 
   return result.data;
+}
+
+async function loadViewer(reportId: string) {
+  const session = await getSessionUser();
+  const viewerUserId =
+    session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
+  const helpfulVotedResult = await isHelpfulVotedByViewer(viewerUserId, "usage_report", reportId);
+
+  return { session, viewerUserId, helpfulVotedResult };
 }
 
 function reportDescription(authorHandle: string, materialName: string): string {
@@ -173,12 +185,16 @@ function MediaFigure({
 
 export default async function ReportDetailPage({ params }: ReportDetailPageProps) {
   const { id } = await params;
-  const report = await loadReport(id);
-  const session = await getSessionUser();
-  const viewerUserId =
-    session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
+
+  if (!UUID_RE.test(id)) {
+    notFound();
+  }
+
+  const [report, { session, viewerUserId, helpfulVotedResult }] = await Promise.all([
+    loadReport(id),
+    loadViewer(id),
+  ]);
   const isOwnPost = viewerUserId !== null && viewerUserId === report.author.userId;
-  const helpfulVotedResult = await isHelpfulVotedByViewer(viewerUserId, "usage_report", report.id);
 
   if (!helpfulVotedResult.ok) {
     throw new Error(errorMessageJa[helpfulVotedResult.error]);

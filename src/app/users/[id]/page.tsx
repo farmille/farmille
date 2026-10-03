@@ -46,21 +46,16 @@ const statRow = css({
   mt: "3.5",
 });
 
-const getCachedProfilePage = cache(
-  async (id: string, viewerUserId: string | null): Promise<Result<PublicProfilePageData>> => {
-    if (!UUID_PATTERN.test(id)) {
-      return { ok: false, error: "not_found" };
-    }
+const getCachedProfilePage = cache(async (id: string): Promise<Result<PublicProfilePageData>> => {
+  if (!UUID_PATTERN.test(id)) {
+    return { ok: false, error: "not_found" };
+  }
 
-    return getPublicProfilePage(id, viewerUserId);
-  },
-);
+  return getPublicProfilePage(id);
+});
 
-async function loadProfileOrNotFound(
-  id: string,
-  viewerUserId: string | null = null,
-): Promise<PublicProfilePageData> {
-  const result = await getCachedProfilePage(id, viewerUserId);
+async function loadProfileOrNotFound(id: string): Promise<PublicProfilePageData> {
+  const result = await getCachedProfilePage(id);
 
   if (!result.ok) {
     if (result.error === "not_found") {
@@ -93,12 +88,19 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
 
 export default async function UserPage({ params }: UserPageProps) {
   const { id } = await params;
-  const session = await getSessionUser();
+
+  if (!UUID_PATTERN.test(id)) {
+    notFound();
+  }
+
+  const [data, session, details] = await Promise.all([
+    loadProfileOrNotFound(id),
+    getSessionUser(),
+    getProfileDetails(id),
+  ]);
+  if (!details.ok) throw new Error(errorMessageJa[details.error]);
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
-  const data = await loadProfileOrNotFound(id, viewerUserId);
-  const details = await getProfileDetails(id);
-  if (!details.ok) throw new Error(errorMessageJa[details.error]);
   const isOwnProfile = viewerUserId !== null && viewerUserId === data.profile.userId;
 
   return (

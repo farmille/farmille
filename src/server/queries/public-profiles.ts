@@ -1,7 +1,6 @@
 import { reportMediaUrl } from "@/server/usage-reports/structured";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { getViewerHelpfulVotes } from "@/server/queries/helpful";
 import { fail, succeed, type Result } from "@/server/result";
 import { reviewCropLabel, type ReviewCropRelation } from "@/server/reviews/crop-relations";
 import { createServerSupabase } from "@/server/supabase";
@@ -45,8 +44,6 @@ export type PublicProfilePost =
       rating: number;
       body: string;
       helpfulCount: number;
-      /** 閲覧者がこの感想口コミに「参考になった」を押しているか。 */
-      helpfulVotedByViewer: boolean;
       photos: ReadonlyArray<{
         id: string;
         url: string;
@@ -125,10 +122,7 @@ async function getHelpfulCounts(
 }
 
 /** 一般ユーザーの公開プロフィールと公開済み投稿だけを取得する。 */
-export async function getPublicProfilePage(
-  id: string,
-  viewerUserId: string | null = null,
-): Promise<Result<PublicProfilePageData>> {
+export async function getPublicProfilePage(id: string): Promise<Result<PublicProfilePageData>> {
   const supabase = await createServerSupabase();
   const { data: profileData, error: profileError } = await supabase
     .from("public_profiles")
@@ -249,16 +243,6 @@ export async function getPublicProfilePage(
     return reportHelpful;
   }
 
-  const votedReviewIds = await getViewerHelpfulVotes(
-    viewerUserId,
-    "review",
-    reviewRows.map(({ id: reviewId }) => reviewId),
-  );
-
-  if (!votedReviewIds.ok) {
-    return votedReviewIds;
-  }
-
   const posts: PublicProfilePost[] = [];
 
   for (const review of reviewRows) {
@@ -279,7 +263,6 @@ export async function getPublicProfilePage(
       rating: review.rating,
       body: review.body,
       helpfulCount: reviewHelpful.data.get(review.id) ?? 0,
-      helpfulVotedByViewer: votedReviewIds.data.has(review.id),
       photos: review.photos.toSorted(bySortOrder).map((photo) => ({
         id: photo.id,
         url: photo.url,

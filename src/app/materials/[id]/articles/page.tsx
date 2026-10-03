@@ -1,5 +1,6 @@
 import { PostActionsLoader } from "@/components/PostActionsLoader";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { ArticleCard, EmptyState, ReportCard, SectionHeading } from "@/components";
 import {
@@ -9,7 +10,7 @@ import {
 import { css } from "../../../../../styled-system/css";
 
 import { MaterialPageShell } from "../_components/PageShell";
-import { loadMaterialOrNotFound, materialMetadata } from "../material-page-data";
+import { isMaterialId, loadMaterialOrNotFound, materialMetadata } from "../material-page-data";
 import { unwrapQueryResult } from "../query-result";
 
 type MaterialArticlesPageProps = {
@@ -36,8 +37,13 @@ export async function generateMetadata({ params }: MaterialArticlesPageProps): P
 
 export default async function MaterialArticlesPage({ params }: MaterialArticlesPageProps) {
   const { id } = await params;
-  const material = await loadMaterialOrNotFound(id);
-  const [reportsResult, articlesResult] = await Promise.all([
+
+  if (!isMaterialId(id)) {
+    notFound();
+  }
+
+  const [material, reportsResult, articlesResult] = await Promise.all([
+    loadMaterialOrNotFound(id),
     listPublishedUsageReportsByMaterial(id),
     listPublishedArticlesByMaterial(id),
   ]);

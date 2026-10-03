@@ -82,8 +82,23 @@ export async function isHelpfulVotedByViewer(
   targetType: HelpfulTargetType,
   targetId: string,
 ): Promise<Result<boolean>> {
-  const votes = await getViewerHelpfulVotes(userId, targetType, [targetId]);
-  if (!votes.ok) return votes;
+  if (userId === null) {
+    return succeed(false);
+  }
 
-  return succeed(votes.data.has(targetId));
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("helpful_votes")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("target_type", targetType)
+    .eq("target_id", targetId)
+    .maybeSingle();
+
+  if (error !== null) {
+    reportQueryError("参考になった投票状況の取得に失敗", { targetType, error });
+    return fail("internal");
+  }
+
+  return succeed(data !== null);
 }

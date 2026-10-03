@@ -11,6 +11,7 @@ import { MaterialPageSkeleton } from "./_components/MaterialPageSkeleton";
 import { listRelatedMaterials, type MaterialDetail } from "@/server/queries/materials";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { after } from "next/server";
 
 import { buttonRecipe, EmptyState, MaterialCard, ReportCard, SectionHeading } from "@/components";
@@ -36,6 +37,7 @@ import { ReviewAnalytics } from "./_components/ReviewAnalytics";
 import { ReviewList } from "./_components/ReviewList";
 import { toggleSavedMaterialAction } from "./actions";
 import {
+  isMaterialId,
   loadMaterialOrNotFound,
   materialDescription,
   materialMetadata,
@@ -77,13 +79,30 @@ export async function generateMetadata({ params }: MaterialPageProps): Promise<M
   return materialMetadata(material);
 }
 
+async function loadViewer(materialId: string) {
+  const sessionUser = await getSessionUser();
+  const isGeneralUser = sessionUser !== null && canUseGeneralFeatures(sessionUser.accountType);
+
+  return {
+    sessionUser,
+    viewerUserId: isGeneralUser ? sessionUser.userId : null,
+    savedResult: isGeneralUser ? await isMaterialSaved(materialId, sessionUser.userId) : null,
+  };
+}
+
 async function MaterialContent({ params, searchParams }: MaterialPageProps) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const material = await loadMaterialOrNotFound(id);
-  const sessionUser = await getSessionUser();
-  const publishedPage = await getPublishedMaterialPage(id);
-  const isGeneralUser = sessionUser !== null && canUseGeneralFeatures(sessionUser.accountType);
-  const viewerUserId = isGeneralUser ? sessionUser.userId : null;
+
+  if (!isMaterialId(id)) {
+    notFound();
+  }
+
+  const [material, { sessionUser, viewerUserId, savedResult }, publishedPage] = await Promise.all([
+    loadMaterialOrNotFound(id),
+    loadViewer(id),
+    getPublishedMaterialPage(id),
+  ]);
+  const isGeneralUser = viewerUserId !== null;
   // after() の中では cookies() が使えないため、Supabase クライアントは先に作る。
   const viewEventSupabase = await createServerSupabase();
 
@@ -97,9 +116,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
   });
 
   const materialPath = `/materials/${material.id}`;
-  const saved = isGeneralUser
-    ? unwrapQueryResult(await isMaterialSaved(material.id, sessionUser.userId))
-    : null;
+  const saved = savedResult === null ? null : unwrapQueryResult(savedResult);
   const toggleAction = isGeneralUser
     ? toggleSavedMaterialAction.bind(null, material.id)
     : undefined;
