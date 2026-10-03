@@ -57,7 +57,9 @@ export async function listAdminTags(): Promise<Result<AdminTagItem[]>> {
         .order("category", { ascending: true })
         .order("sort_order", { ascending: true })
         .order("name", { ascending: true }),
-      supabase.from("material_search_tags").select("search_tag_id"),
+      selectAllRows((from, to) =>
+        supabase.from("material_search_tags").select("search_tag_id").order("id").range(from, to),
+      ),
     ]);
 
     if (tagsResult.error !== null) {

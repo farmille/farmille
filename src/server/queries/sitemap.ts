@@ -1,3 +1,4 @@
+import { selectAllRows } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { createAdminSupabase } from "@/server/supabase";
 
@@ -22,27 +23,45 @@ function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): voi
 export async function listSitemapEntries(): Promise<Result<SitemapEntries>> {
   const supabase = createAdminSupabase();
   const [materials, articles, reports, sellers, users] = await Promise.all([
-    supabase
-      .from("materials")
-      .select("id, updated_at")
-      .eq("publication_status", "published")
-      .order("id", { ascending: true }),
-    supabase
-      .from("articles")
-      .select("id, updated_at")
-      .eq("status", "published")
-      .order("id", { ascending: true }),
-    supabase
-      .rpc("list_usage_report_previews")
-      .select("id, updated_at")
-      .eq("status", "published")
-      .order("id", { ascending: true }),
-    supabase
-      .from("seller_accounts")
-      .select("id, updated_at")
-      .eq("status", "approved")
-      .order("id", { ascending: true }),
-    supabase.from("profiles").select("user_id, updated_at").order("user_id", { ascending: true }),
+    selectAllRows((from, to) =>
+      supabase
+        .from("materials")
+        .select("id, updated_at")
+        .eq("publication_status", "published")
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    selectAllRows((from, to) =>
+      supabase
+        .from("articles")
+        .select("id, updated_at")
+        .eq("status", "published")
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    selectAllRows((from, to) =>
+      supabase
+        .rpc("list_usage_report_previews")
+        .select("id, updated_at")
+        .eq("status", "published")
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    selectAllRows((from, to) =>
+      supabase
+        .from("seller_accounts")
+        .select("id, updated_at")
+        .eq("status", "approved")
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    selectAllRows((from, to) =>
+      supabase
+        .from("profiles")
+        .select("user_id, updated_at")
+        .order("user_id", { ascending: true })
+        .range(from, to),
+    ),
   ]);
 
   if (materials.error !== null) {
