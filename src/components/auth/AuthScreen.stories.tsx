@@ -11,7 +11,6 @@ import {
   linkRowStyle,
   NoteBox,
   RadioCards,
-  SwitchToggle,
   textLinkStyle,
 } from "./Fields";
 import { SubmitButton } from "./SubmitButton";
@@ -33,7 +32,6 @@ const loginForm = (
     <Field htmlFor="login-password" label="パスワード" requirement="required">
       <input className={controlStyle} id="login-password" name="password" type="password" />
     </Field>
-    <SwitchToggle defaultChecked label="次回から自動でログインする" name="remember" />
     <div className={formActionsStyle}>
       <SubmitButton label="ログイン" pendingLabel="ログイン中…" />
     </div>

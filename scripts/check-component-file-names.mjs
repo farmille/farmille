@@ -22,20 +22,6 @@ const nextReservedFiles = new Set([
   "unauthorized.tsx",
 ]);
 
-async function collectTsxFiles(directory) {
-  const entries = await readdir(directory, { withFileTypes: true });
-  const files = await Promise.all(
-    entries.map(async (entry) => {
-      const entryPath = path.join(directory, entry.name);
-      if (entry.isDirectory()) return collectTsxFiles(entryPath);
-      if (!entry.isFile() || !entry.name.endsWith(".tsx")) return [];
-      return [entryPath];
-    }),
-  );
-
-  return files.flat();
-}
-
 function componentStem(fileName) {
   for (const suffix of [".stories.tsx", ".test.tsx", ".spec.tsx", ".tsx"]) {
     if (fileName.endsWith(suffix)) return fileName.slice(0, -suffix.length);
@@ -44,7 +30,9 @@ function componentStem(fileName) {
   return fileName;
 }
 
-const tsxFiles = await collectTsxFiles(sourceRoot);
+const tsxFiles = (await readdir(sourceRoot, { recursive: true, withFileTypes: true }))
+  .filter((entry) => entry.isFile() && entry.name.endsWith(".tsx"))
+  .map((entry) => path.join(entry.parentPath, entry.name));
 const invalidFiles = tsxFiles.filter((file) => {
   const relativePath = path.relative(repositoryRoot, file);
   const isAppFile = relativePath.startsWith(`src${path.sep}app${path.sep}`);

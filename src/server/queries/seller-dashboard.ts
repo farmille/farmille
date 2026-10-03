@@ -1,6 +1,4 @@
 import { fail, succeed, type Result } from "@/server/result";
-import { listClassificationOptions } from "@/server/queries/classifications";
-import { getMaterialWithSupabase, type MaterialDetail } from "@/server/queries/materials";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
@@ -42,10 +40,6 @@ export type SellerDashboardData = {
   materials: DashboardMaterial[];
 };
 
-export type SellerMaterialEvidence = MaterialDetail["evidences"][number];
-
-export type SellerMaterialDetail = MaterialDetail;
-
 export type SellerMaterialChangeRequest = Pick<
   MaterialChangeRequestRow,
   | "id"
@@ -60,11 +54,6 @@ export type SellerMaterialChangeRequest = Pick<
   | "created_at"
   | "updated_at"
 > & { materialName: string };
-
-export type SellerMaterialPageData = {
-  material: SellerMaterialDetail;
-  changeRequests: SellerMaterialChangeRequest[];
-};
 
 export type SellerMaterialsPageData = {
   sellerName: string;
@@ -143,48 +132,6 @@ export async function getSellerDashboardData(
   const materials: DashboardMaterial[] = materialsResult.data;
 
   return succeed({ seller, materials });
-}
-
-/** 自社資材だけを取得する。所有者が違う場合も存在を明かさず not_found にする。 */
-export async function getSellerMaterialPageData(
-  sellerId: string,
-  materialId: string,
-): Promise<Result<SellerMaterialPageData>> {
-  const [supabase, options] = await Promise.all([
-    createServerSupabase(),
-    listClassificationOptions(),
-  ]);
-  if (!options.ok) return options;
-  const [materialResult, requestsResult] = await Promise.all([
-    getMaterialWithSupabase(supabase, materialId, options.data),
-    supabase
-      .from("material_change_requests")
-      .select(
-        "id, material_id, result_material_id, change_type, status, reason, submitted_at, reviewed_at, review_note, created_at, updated_at",
-      )
-      .eq("material_id", materialId)
-      .eq("seller_id", sellerId)
-      .order("submitted_at", { ascending: false })
-      .order("id", { ascending: true }),
-  ]);
-
-  if (!materialResult.ok) return materialResult;
-  if (materialResult.data.seller_id !== sellerId) return fail("not_found");
-
-  if (requestsResult.error !== null) {
-    reportQueryError("資材変更申請履歴の取得に失敗", requestsResult.error);
-    return fail("internal");
-  }
-
-  const changeRequests: SellerMaterialChangeRequest[] = requestsResult.data.map((request) => ({
-    ...request,
-    materialName: materialResult.data.name,
-  }));
-
-  return succeed({
-    material: materialResult.data,
-    changeRequests,
-  });
 }
 
 /** 自社資材と、対象未作成の新規登録申請を含む申請履歴を一覧する。 */
