@@ -19,7 +19,7 @@ type MediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
 type ApplicationRow = Database["public"]["Tables"]["usage_report_applications"]["Row"];
 type MetricRow = Database["public"]["Tables"]["usage_report_metrics"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
-type ViewCountRow = Database["public"]["Views"]["view_counts_daily"]["Row"];
+type ViewCountRow = Database["public"]["Views"]["view_counts_total"]["Row"];
 
 export type RecentUsageReportItem = {
   id: string;
@@ -260,10 +260,11 @@ async function getReportCounts(
       .eq("target_id", reportId)
       .maybeSingle(),
     supabase
-      .from("view_counts_daily")
+      .from("view_counts_total")
       .select("target_id, view_count")
       .eq("target_type", "usage_report")
-      .eq("target_id", reportId),
+      .eq("target_id", reportId)
+      .maybeSingle(),
   ]);
 
   if (helpfulResult.error !== null) {
@@ -288,15 +289,15 @@ async function getReportCounts(
     helpfulCount = helpfulRow.helpful_count;
   }
 
-  const viewRows: Pick<ViewCountRow, "target_id" | "view_count">[] = viewResult.data;
+  const viewRow: Pick<ViewCountRow, "target_id" | "view_count"> | null = viewResult.data;
   let viewCount = 0;
 
-  for (const row of viewRows) {
-    if (row.view_count === null) {
-      reportQueryError("閲覧数にNULLが含まれる", row);
+  if (viewRow !== null) {
+    if (viewRow.view_count === null) {
+      reportQueryError("閲覧数にNULLが含まれる", viewRow);
       return fail("internal");
     }
-    viewCount += row.view_count;
+    viewCount = viewRow.view_count;
   }
 
   return succeed({ helpfulCount, viewCount });

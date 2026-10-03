@@ -13,7 +13,7 @@ type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
 type UsageReportMediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
-type ViewCountRow = Database["public"]["Views"]["view_counts_daily"]["Row"];
+type ViewCountRow = Database["public"]["Views"]["view_counts_total"]["Row"];
 
 export type ContentFeedFilter = "all" | "report" | "article";
 
@@ -99,7 +99,7 @@ async function loadCounts(
       .eq("target_type", targetType)
       .in("target_id", targetIds),
     supabase
-      .from("view_counts_daily")
+      .from("view_counts_total")
       .select("target_id, view_count")
       .eq("target_type", targetType)
       .in("target_id", targetIds),
@@ -131,7 +131,7 @@ async function loadCounts(
       reportQueryError("閲覧数にNULLが含まれる", row);
       return fail("internal");
     }
-    viewsById.set(row.target_id, (viewsById.get(row.target_id) ?? 0) + row.view_count);
+    viewsById.set(row.target_id, row.view_count);
   }
 
   return succeed({ helpfulById, viewsById });

@@ -4195,6 +4195,14 @@ export type Database = {
         }
         Relationships: []
       }
+      view_counts_total: {
+        Row: {
+          target_id: string | null
+          target_type: string | null
+          view_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       approve_material_change_request: {

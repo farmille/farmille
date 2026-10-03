@@ -8,7 +8,7 @@ type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
-type ViewCountRow = Database["public"]["Views"]["view_counts_daily"]["Row"];
+type ViewCountRow = Database["public"]["Views"]["view_counts_total"]["Row"];
 
 type ArticleSeller = Pick<PublicSellerRow, "id" | "official_name" | "logo_url">;
 
@@ -55,10 +55,11 @@ async function getArticleCounts(
       .eq("target_id", articleId)
       .maybeSingle(),
     supabase
-      .from("view_counts_daily")
+      .from("view_counts_total")
       .select("target_id, view_count")
       .eq("target_type", "article")
-      .eq("target_id", articleId),
+      .eq("target_id", articleId)
+      .maybeSingle(),
   ]);
 
   if (helpfulResult.error !== null) {
@@ -83,15 +84,15 @@ async function getArticleCounts(
     helpfulCount = helpfulRow.helpful_count;
   }
 
-  const viewRows: Pick<ViewCountRow, "target_id" | "view_count">[] = viewResult.data;
+  const viewRow: Pick<ViewCountRow, "target_id" | "view_count"> | null = viewResult.data;
   let viewCount = 0;
 
-  for (const row of viewRows) {
-    if (row.view_count === null) {
-      reportQueryError("閲覧数にNULLが含まれる", row);
+  if (viewRow !== null) {
+    if (viewRow.view_count === null) {
+      reportQueryError("閲覧数にNULLが含まれる", viewRow);
       return fail("internal");
     }
-    viewCount += row.view_count;
+    viewCount = viewRow.view_count;
   }
 
   return succeed({ helpfulCount, viewCount });

@@ -12,7 +12,7 @@ type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 type UsageReportMediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
-type ViewCountRow = Database["public"]["Views"]["view_counts_daily"]["Row"];
+type ViewCountRow = Database["public"]["Views"]["view_counts_total"]["Row"];
 
 type ContentType = "article" | "usage_report";
 
@@ -113,7 +113,7 @@ async function getContentCounts(
         .eq("target_type", targetType)
         .in("target_id", ids),
       supabase
-        .from("view_counts_daily")
+        .from("view_counts_total")
         .select("target_id, view_count")
         .eq("target_type", targetType)
         .in("target_id", ids),
@@ -147,7 +147,7 @@ async function getContentCounts(
         return fail("internal");
       }
 
-      viewsById.set(row.target_id, (viewsById.get(row.target_id) ?? 0) + row.view_count);
+      viewsById.set(row.target_id, row.view_count);
     }
   }
 
