@@ -46,6 +46,7 @@ const photoEyebrow = css({
 });
 
 const photoTitle = css({
+  wordBreak: "auto-phrase",
   mt: "2.5",
   mb: "0",
   color: "text.default",
@@ -55,9 +56,6 @@ const photoTitle = css({
   letterSpacing: "0.02em",
   pc: { fontSize: "display" },
 });
-
-/** 日本語が語中で折り返さないよう、文節ごとに inline-block で区切る。 */
-const phrase = css({ display: "inline-block" });
 
 const body = css({ px: "4", tab: { px: "5" } });
 
@@ -690,8 +688,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         <div className={photoCopy}>
           <p className={photoEyebrow}>FOR BUSINESS</p>
           <h1 id="manufacturer-landing-title" className={photoTitle}>
-            <span className={phrase}>Farmille</span> <span className={phrase}>企業様向け</span>
-            <span className={phrase}>利用ガイド</span>
+            Farmille 企業様向け利用ガイド
           </h1>
         </div>
       </section>
