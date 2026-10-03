@@ -106,14 +106,19 @@ export function CompareTable({ materials }: CompareTableProps) {
     },
     {
       label: "平均評価",
-      render: (material) => (
-        <div className={css({ display: "flex", flexDirection: "column", gap: "1" })}>
-          <span className={css({ fontWeight: "800", fontVariantNumeric: "tabular-nums" })}>
-            {formatRating(material.avgRating)}
-          </span>
-          {material.avgRating !== null ? <StarRating value={material.avgRating} size="sm" /> : null}
-        </div>
-      ),
+      render: (material) =>
+        material.reviewCount > 0 ? (
+          <div className={css({ display: "flex", flexDirection: "column", gap: "1" })}>
+            <span className={css({ fontWeight: "800", fontVariantNumeric: "tabular-nums" })}>
+              {formatRating(material.avgRating)}
+            </span>
+            {material.avgRating !== null ? (
+              <StarRating value={material.avgRating} size="sm" />
+            ) : null}
+          </div>
+        ) : (
+          "—"
+        ),
     },
     {
       label: "感想口コミ数",

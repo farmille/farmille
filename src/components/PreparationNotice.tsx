@@ -12,16 +12,25 @@ const noticeStyle = cva({
     px: "4",
     py: "3",
   },
-  variants: { overlapImage: { true: { mb: "-4" }, false: {} } },
+  variants: {
+    overlapImage: { true: { mb: "-4" }, false: {} },
+    roundedTop: { true: { borderTopRadius: "banner" }, false: {} },
+  },
 });
 
 /** 下端を次のセクションに重ね、角丸の背後にもその背景を見せる。 */
-export function PreparationNotice({ overlapImage = false }: { overlapImage?: boolean }) {
+export function PreparationNotice({
+  overlapImage = false,
+  roundedTop = false,
+}: {
+  overlapImage?: boolean;
+  roundedTop?: boolean;
+}) {
   return (
     <aside
       id="preparation-notice"
       aria-label="公開準備中のお知らせ"
-      className={noticeStyle({ overlapImage })}
+      className={noticeStyle({ overlapImage, roundedTop })}
     >
       <div className={css({ maxW: "content.wide", mx: "auto" })}>
         <p
@@ -54,32 +63,12 @@ export function PreparationNotice({ overlapImage = false }: { overlapImage?: boo
             gap: "2",
           })}
         >
+          <p className={css({ m: "0" })}>Farmilleは現在準備中です。</p>
           <p className={css({ m: "0" })}>
-            Farmilleは現在、準備中です。
-            <br />
-            メーカー様のご登録および一般会員のご登録は、現在受け付けておりません。
+            ユーザー様・企業様ともに、会員登録は受け付けておりません。
           </p>
           <p className={css({ m: "0" })}>
-            メーカー様からのお問い合わせや、資材ページの非公開に関するご依頼は、
-            <br />
-            まずは9月24日〜28日を目安に、
-            <a
-              href="mailto:contact@farmille.com"
-              className={css({ color: "inherit", textDecoration: "underline" })}
-            >
-              contact@farmille.com
-            </a>
-            までご連絡ください。
-          </p>
-          <p className={css({ m: "0" })}>
-            いただいたご連絡は、内容を確認のうえ、順次対応いたします。
-            <br />
-            大変申し訳ありませんが、返信までにお時間をいただく場合があります。
-          </p>
-          <p className={css({ m: "0" })}>
-            生産者の皆様への公開および口コミ・実証詳細レポートの投稿受付は、
-            <br />
-            10月1日以降を予定しております。
+            なお、企業様からの、資材ページ削除のご依頼・間違いのご指摘については順次対応いたします。
           </p>
         </div>
       </div>

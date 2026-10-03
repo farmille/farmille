@@ -155,7 +155,18 @@ export function MaterialCard({
       >
         <MaterialImage src={imageSrc} alt={alt} className={imgBox} preload={preload} />
         <div className={css({ px: "2.5", py: "2.5" })}>
-          <div className={css({ fontSize: "sm", fontWeight: "700" })}>{name}</div>
+          <div
+            className={css({
+              fontSize: "sm",
+              fontWeight: "700",
+              minW: "0",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            })}
+          >
+            {name}
+          </div>
           <div
             className={css({
               fontSize: "2xs",
@@ -168,25 +179,21 @@ export function MaterialCard({
           >
             {maker}
           </div>
-          <div
-            className={css({
-              display: "flex",
-              alignItems: "center",
-              gap: "1",
-              mt: "1",
-              fontSize: "2xs",
-            })}
-          >
-            <StarRating value={rating} />
-            <span className={css({ color: "text.subtle", fontVariantNumeric: "tabular-nums" })}>
-              {reviewCount}件
-            </span>
-          </div>
-          {articleCount !== undefined ? (
-            <p className={css({ fontSize: "xs", color: "text.subtle", mt: "2" })}>
-              実証詳細レポート {articleCount}件
-              {savedCount !== undefined ? ` ・ お気に入り ${savedCount}件` : ""}
-            </p>
+          {reviewCount > 0 ? (
+            <div
+              className={css({
+                display: "flex",
+                alignItems: "center",
+                gap: "1",
+                mt: "1",
+                fontSize: "2xs",
+              })}
+            >
+              <StarRating value={rating} />
+              <span className={css({ color: "text.subtle", fontVariantNumeric: "tabular-nums" })}>
+                {reviewCount}件
+              </span>
+            </div>
           ) : null}
           {categories ? (
             <div className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}>
@@ -211,6 +218,12 @@ export function MaterialCard({
       </Link>
     );
   }
+
+  const countParts = [
+    ...(reviewCount > 0 ? [`感想口コミ ${reviewCount}件`] : []),
+    ...(articleCount !== undefined ? [`実証詳細レポート ${articleCount}件`] : []),
+    ...(savedCount !== undefined ? [`お気に入り ${savedCount}件`] : []),
+  ];
 
   return (
     <Link
@@ -255,33 +268,37 @@ export function MaterialCard({
         >
           {maker}
         </div>
-        <div
-          className={css({
-            display: "flex",
-            alignItems: "center",
-            gap: "1.5",
-            fontSize: "xs",
-            color: "text.muted",
-            mt: "1",
-            flexWrap: "wrap",
-          })}
-        >
-          <StarRating value={rating} />
-          <span
+        {reviewCount > 0 || countParts.length > 0 ? (
+          <div
             className={css({
-              fontWeight: "800",
-              color: "text.default",
-              fontVariantNumeric: "tabular-nums",
+              display: "flex",
+              alignItems: "center",
+              gap: "1.5",
+              fontSize: "xs",
+              color: "text.muted",
+              mt: "1",
+              flexWrap: "wrap",
             })}
           >
-            {rating.toFixed(1)}
-          </span>
-          <span className={css({ color: "text.subtle" })}>
-            感想口コミ {reviewCount}件
-            {articleCount !== undefined ? ` ・ 実証詳細レポート ${articleCount}件` : ""}
-            {savedCount !== undefined ? ` ・ お気に入り ${savedCount}件` : ""}
-          </span>
-        </div>
+            {reviewCount > 0 ? (
+              <>
+                <StarRating value={rating} />
+                <span
+                  className={css({
+                    fontWeight: "800",
+                    color: "text.default",
+                    fontVariantNumeric: "tabular-nums",
+                  })}
+                >
+                  {rating.toFixed(1)}
+                </span>
+              </>
+            ) : null}
+            {countParts.length > 0 ? (
+              <span className={css({ color: "text.subtle" })}>{countParts.join(" ・ ")}</span>
+            ) : null}
+          </div>
+        ) : null}
         {description ? (
           <p
             className={css({

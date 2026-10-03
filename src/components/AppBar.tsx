@@ -1,6 +1,7 @@
 import Form from "next/form";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
+import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
 import { Icon } from "@/components/Icon";
 import { PreparationNotice } from "@/components/PreparationNotice";
 
@@ -383,20 +384,7 @@ function DesktopSiteHeader({
           </button>
         </Form>
         <nav className={desktopPublicActions} aria-label="PCメインナビ">
-          <Link
-            href="/post"
-            className={desktopAction({ emphasis: "primary" })}
-            aria-current={active === "post" ? "page" : undefined}
-          >
-            <Icon name="add" size="sm" /> 投稿
-          </Link>
-          <Link
-            href="/me"
-            className={desktopAction({ emphasis: "secondary" })}
-            aria-current={active === "me" ? "page" : undefined}
-          >
-            マイページ
-          </Link>
+          <DesktopAccountMenu myPageCurrent={active === "me"} />
         </nav>
       </div>
     </header>

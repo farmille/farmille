@@ -12,8 +12,6 @@ type MarqueeMaterial = {
   maker: string;
   rating: number;
   reviewCount: number;
-  reportCount: number;
-  savedCount: number;
   category: string;
   official: boolean;
 };
@@ -24,8 +22,6 @@ const materials: MarqueeMaterial[] = [
     maker: "グリーンバイオ株式会社",
     rating: 4.2,
     reviewCount: 128,
-    reportCount: 12,
-    savedCount: 64,
     category: "土壌改良",
     official: true,
   },
@@ -34,8 +30,6 @@ const materials: MarqueeMaterial[] = [
     maker: "日本マイクロ農研",
     rating: 3.9,
     reviewCount: 86,
-    reportCount: 8,
-    savedCount: 41,
     category: "微生物資材",
     official: false,
   },
@@ -44,8 +38,6 @@ const materials: MarqueeMaterial[] = [
     maker: "みどり化成工業",
     rating: 4.5,
     reviewCount: 212,
-    reportCount: 25,
-    savedCount: 138,
     category: "菌根菌",
     official: true,
   },
@@ -54,8 +46,6 @@ const materials: MarqueeMaterial[] = [
     maker: "西日本バイオテック",
     rating: 4.0,
     reviewCount: 47,
-    reportCount: 5,
-    savedCount: 22,
     category: "病害抑制",
     official: false,
   },
@@ -64,8 +54,6 @@ const materials: MarqueeMaterial[] = [
     maker: "三陸水産資材",
     rating: 4.3,
     reviewCount: 154,
-    reportCount: 18,
-    savedCount: 90,
     category: "液肥",
     official: true,
   },
@@ -74,8 +62,6 @@ const materials: MarqueeMaterial[] = [
     maker: "北海道土壌研究所",
     rating: 3.7,
     reviewCount: 33,
-    reportCount: 3,
-    savedCount: 15,
     category: "腐植資材",
     official: false,
   },
@@ -84,8 +70,6 @@ const materials: MarqueeMaterial[] = [
     maker: "発酵技研",
     rating: 4.1,
     reviewCount: 61,
-    reportCount: 7,
-    savedCount: 38,
     category: "発酵資材",
     official: false,
   },
@@ -94,8 +78,6 @@ const materials: MarqueeMaterial[] = [
     maker: "山陽鉱産",
     rating: 3.8,
     reviewCount: 19,
-    reportCount: 2,
-    savedCount: 9,
     category: "ミネラル",
     official: true,
   },
@@ -104,8 +86,6 @@ const materials: MarqueeMaterial[] = [
     maker: "アグリプロテクト",
     rating: 4.4,
     reviewCount: 98,
-    reportCount: 11,
-    savedCount: 57,
     category: "線虫対策",
     official: true,
   },
@@ -114,8 +94,6 @@ const materials: MarqueeMaterial[] = [
     maker: "九州微生物センター",
     rating: 4.6,
     reviewCount: 175,
-    reportCount: 21,
-    savedCount: 112,
     category: "微生物資材",
     official: false,
   },
@@ -124,8 +102,6 @@ const materials: MarqueeMaterial[] = [
     maker: "東北コンポスト",
     rating: 3.6,
     reviewCount: 27,
-    reportCount: 4,
-    savedCount: 13,
     category: "堆肥化促進",
     official: false,
   },
@@ -134,8 +110,6 @@ const materials: MarqueeMaterial[] = [
     maker: "信州果樹資材",
     rating: 4.2,
     reviewCount: 73,
-    reportCount: 9,
-    savedCount: 45,
     category: "葉面散布",
     official: true,
   },
@@ -144,8 +118,6 @@ const materials: MarqueeMaterial[] = [
     maker: "越後ライスラボ",
     rating: 4.0,
     reviewCount: 52,
-    reportCount: 6,
-    savedCount: 31,
     category: "水稲",
     official: false,
   },
@@ -154,8 +126,6 @@ const materials: MarqueeMaterial[] = [
     maker: "中部バイオ肥料",
     rating: 3.9,
     reviewCount: 41,
-    reportCount: 5,
-    savedCount: 24,
     category: "窒素固定",
     official: true,
   },
@@ -172,8 +142,6 @@ function materialCards(count: number) {
         maker={material.maker}
         rating={material.rating}
         reviewCount={material.reviewCount}
-        articleCount={material.reportCount}
-        savedCount={material.savedCount}
         categories={[material.category]}
         official={material.official}
         imageSrc={thumbnail}

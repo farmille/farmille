@@ -41,6 +41,8 @@ type RatingSummaryProps = {
 };
 
 export function RatingSummary({ average, reviewCount, distribution }: RatingSummaryProps) {
+  if (reviewCount === 0) return null;
+
   return (
     <div className={summaryCard}>
       <div className={css({ display: "grid", gridTemplateColumns: "auto 1fr", gap: "5" })}>
