@@ -74,6 +74,7 @@ async function fetchSortedStories(request: APIRequestContext): Promise<StoryInde
 
 // 「何も描画しない」ことが仕様の Story。Pagination は1ページ以下・MetricBars は0件で非表示。
 const NULL_RENDER_STORY_IDS: ReadonlySet<string> = new Set([
+  "app-materials-ratingsummary--no-reviews",
   "components-metricbars--empty",
   "components-pagination--single-page",
 ]);
@@ -475,4 +476,11 @@ test("代表的な複雑 Story のスクリーンショットを 375px と 1440p
       });
     }
   }
+});
+
+test("口コミ0件の評価サマリーは表示しない", async ({ page }) => {
+  await gotoStory(page, "app-materials-ratingsummary--default");
+  await expect(page.locator("#storybook-root")).toContainText("18件");
+  await gotoStory(page, "app-materials-ratingsummary--no-reviews");
+  await expect(page.locator("#storybook-root")).toBeEmpty();
 });

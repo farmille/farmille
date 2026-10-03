@@ -1,6 +1,6 @@
 import { randomInt } from "node:crypto";
 import { selectAllRows } from "@/server/pagination";
-import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
+import { createServerSupabase } from "@/server/supabase";
 import { listMaterials } from "./materials";
 
 /** 公開資材全体から重複なしで14件を抽出する。広告・優先枠は持たない。 */
@@ -25,35 +25,15 @@ export async function listHomeMaterials() {
   if (selected.length === 0) return [];
   const result = await listMaterials({ page: 1, ids: selected });
   if (!result.ok) throw new Error("掲載資材を取得できませんでした：" + result.error);
-  const admin = createAdminSupabase();
   return Promise.all(
     result.data.items
       .toSorted((a, b) => selected.indexOf(a.id) - selected.indexOf(b.id))
       .map(async (material) => {
-        const [reports, saves, categories] = await Promise.all([
-          client
-            .rpc("list_usage_report_previews", undefined, { count: "exact", head: true })
-            .select("id")
-            .eq("material_id", material.id)
-            .eq("status", "published"),
-          // 保存者の識別情報は取得せず、総件数だけを公開する。
-          admin
-            .from("saved_materials")
-            .select("id", { count: "exact", head: true })
-            .eq("material_id", material.id),
-          client
-            .from("material_ingredient_categories")
-            .select("category:ingredient_categories(name,sort_order)")
-            .eq("material_id", material.id),
-        ]);
-        if (
-          reports.error ||
-          saves.error ||
-          categories.error ||
-          reports.count === null ||
-          saves.count === null
-        )
-          throw new Error("掲載資材の集計を取得できませんでした。");
+        const categories = await client
+          .from("material_ingredient_categories")
+          .select("category:ingredient_categories(name,sort_order)")
+          .eq("material_id", material.id);
+        if (categories.error) throw new Error("資材の分類情報を取得できませんでした。");
         const names = categories.data
           .map((row) => {
             if (row.category === null) throw new Error("資材の分類情報が欠落しています。");
@@ -63,8 +43,6 @@ export async function listHomeMaterials() {
           .map((row) => row.name);
         return {
           ...material,
-          reportCount: reports.count,
-          savedCount: saves.count,
           categories: names,
         };
       }),

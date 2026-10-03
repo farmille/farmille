@@ -109,17 +109,19 @@ export default async function MaterialReviewsPage({
         <p className={css({ m: "0", mt: "1", fontSize: "sm", color: "text.muted" })}>
           {material.manufacturer_name}
         </p>
-        <p
-          className={css({
-            m: "0",
-            mt: "2",
-            fontSize: "sm",
-            color: "text.muted",
-            fontVariantNumeric: "tabular-nums",
-          })}
-        >
-          総合評価 {material.avg_rating?.toFixed(1) ?? "—"}・感想口コミ {reviews.total}件
-        </p>
+        {reviews.total > 0 ? (
+          <p
+            className={css({
+              m: "0",
+              mt: "2",
+              fontSize: "sm",
+              color: "text.muted",
+              fontVariantNumeric: "tabular-nums",
+            })}
+          >
+            総合評価 {material.avg_rating?.toFixed(1) ?? "—"}・感想口コミ {reviews.total}件
+          </p>
+        ) : null}
       </section>
 
       <div

@@ -80,8 +80,6 @@ async function HomeMaterials() {
             maker={material.manufacturer_name}
             rating={material.avg_rating ?? 0}
             reviewCount={material.review_count}
-            articleCount={material.reportCount}
-            savedCount={material.savedCount}
             categories={material.categories}
             official={material.manufacturer_verified_at !== null}
             imageSrc={material.primaryImage?.url}

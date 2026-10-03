@@ -109,38 +109,40 @@ export function MaterialHero({
             {material.name}
           </h1>
           {manufacturer}
-          <div
-            className={css({
-              display: "flex",
-              alignItems: "center",
-              gap: "2",
-              mt: "2.5",
-            })}
-          >
-            <span
+          {material.review_count > 0 ? (
+            <div
               className={css({
-                fontSize: "3xl",
-                fontWeight: "800",
-                fontVariantNumeric: "tabular-nums",
+                display: "flex",
+                alignItems: "center",
+                gap: "2",
+                mt: "2.5",
               })}
             >
-              {material.avg_rating?.toFixed(1) ?? "—"}
-            </span>
-            <div>
-              <StarRating value={material.avg_rating ?? 0} />
-              <p
+              <span
                 className={css({
-                  m: "0",
-                  mt: "0.5",
-                  color: "text.subtle",
-                  fontSize: "xs",
+                  fontSize: "3xl",
+                  fontWeight: "800",
                   fontVariantNumeric: "tabular-nums",
                 })}
               >
-                農家の感想口コミ {material.review_count}件
-              </p>
+                {material.avg_rating?.toFixed(1) ?? "—"}
+              </span>
+              <div>
+                <StarRating value={material.avg_rating ?? 0} />
+                <p
+                  className={css({
+                    m: "0",
+                    mt: "0.5",
+                    color: "text.subtle",
+                    fontSize: "xs",
+                    fontVariantNumeric: "tabular-nums",
+                  })}
+                >
+                  農家の感想口コミ {material.review_count}件
+                </p>
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
       <p className={css({ mt: "3", fontSize: "xs", color: "text.subtle", lineHeight: "relaxed" })}>

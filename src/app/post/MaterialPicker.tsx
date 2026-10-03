@@ -105,19 +105,21 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                 >
                   {material.manufacturer_name}
                 </span>
-                <span
-                  className={css({
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "1.5",
-                    mt: "1.5",
-                    fontSize: "xs",
-                    color: "text.subtle",
-                  })}
-                >
-                  <StarRating value={Math.round(material.avg_rating ?? 0)} />
-                  感想口コミ {material.review_count}件
-                </span>
+                {material.review_count > 0 ? (
+                  <span
+                    className={css({
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "1.5",
+                      mt: "1.5",
+                      fontSize: "xs",
+                      color: "text.subtle",
+                    })}
+                  >
+                    <StarRating value={Math.round(material.avg_rating ?? 0)} />
+                    感想口コミ {material.review_count}件
+                  </span>
+                ) : null}
               </span>
               <span
                 className={css({

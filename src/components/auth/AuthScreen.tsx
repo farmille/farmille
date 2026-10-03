@@ -89,7 +89,7 @@ export function AuthScreen({
         <header className={appBarStyle}>
           <h1 className={titleStyle}>{title}</h1>
         </header>
-        <PreparationNotice />
+        <PreparationNotice roundedTop />
         <div className={bodyStyle}>
           {lead === undefined ? null : <p className={leadStyle}>{lead}</p>}
           {children}
