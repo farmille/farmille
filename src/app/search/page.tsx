@@ -13,11 +13,15 @@ import {
 } from "@/components/search/search-selection";
 import { createPageMetadata } from "@/lib/seo";
 import { matchSearchCatalog } from "@/lib/material-search";
-import { getCatalogSearch, type CatalogSearch } from "@/server/queries/catalog-search";
+import {
+  getCatalogSearch,
+  listSearchSuggestions,
+  type CatalogSearch,
+} from "@/server/queries/catalog-search";
 import { filterCatalog, cropEvidence } from "@/lib/catalog-search";
 import { CatalogSidebar } from "./_components/CatalogSidebar";
 import type { SearchFilterRef } from "@/lib/material-search";
-import { listSearchFiltersByRefs, listSearchSuggestions } from "@/server/queries/classifications";
+import { listSearchFiltersByRefs } from "@/server/queries/classifications";
 import { css } from "../../../styled-system/css";
 
 import { SearchAnalytics } from "./_components/SearchAnalytics";

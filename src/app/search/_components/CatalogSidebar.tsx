@@ -106,7 +106,7 @@ export function CatalogSidebar({
             const visible = catalog.crops.filter(
               (crop) =>
                 cropCounts.has(crop.id) &&
-                cropAncestors(crop.group_id, catalog.groups).includes(major.id),
+                cropAncestors(crop.groupId, catalog.groups).includes(major.id),
             );
             if (
               !visible.length &&
@@ -124,13 +124,13 @@ export function CatalogSidebar({
                   {visible
                     .filter(
                       (crop) =>
-                        crop.group_id === major.id ||
-                        (visible.length <= 8 && !groupCounts.has(crop.group_id)),
+                        crop.groupId === major.id ||
+                        (visible.length <= 8 && !groupCounts.has(crop.groupId)),
                     )
                     .map(cropChip)}
                 </div>
                 {groups.map((group) => {
-                  const crops = visible.filter((crop) => crop.group_id === group.id);
+                  const crops = visible.filter((crop) => crop.groupId === group.id);
                   if ((!crops.length || visible.length <= 8) && !groupCounts.has(group.id))
                     return null;
                   return (

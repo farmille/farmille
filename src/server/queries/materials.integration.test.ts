@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 
+import { listClassificationOptionsWithSupabase } from "@/server/queries/classifications";
 import { getMaterialWithSupabase, listMaterialsWithSupabase } from "@/server/queries/materials";
 import type { Database } from "@/types/database.types";
 
@@ -65,7 +66,9 @@ describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
       const firstMaterial = result.data.items[0];
 
       if (firstMaterial !== undefined) {
-        const detail = await getMaterialWithSupabase(localClient, firstMaterial.id);
+        const options = await listClassificationOptionsWithSupabase(localClient);
+        if (!options.ok) throw new Error("分類マスタを取得できませんでした。");
+        const detail = await getMaterialWithSupabase(localClient, firstMaterial.id, options.data);
 
         expect(detail.ok).toBe(true);
 

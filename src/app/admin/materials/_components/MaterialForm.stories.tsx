@@ -18,6 +18,15 @@ const classifications: ClassificationOptions = {
       groupSortOrder: 10,
     },
   ],
+  cropGroups: [
+    {
+      id: "00000000-0000-4000-8000-000000000303",
+      name: "果菜類",
+      parent_id: null,
+      hierarchy_level: "major",
+      sort_order: 10,
+    },
+  ],
   effectCategories: [
     { id: "00000000-0000-4000-8000-000000000304", name: "その他", sort_order: 40 },
   ],
@@ -113,6 +122,7 @@ export const WithoutClassifications: Story = {
     classifications: {
       compositionTypes: [],
       crops: [],
+      cropGroups: [],
       effectCategories: [],
       effects: [],
       ingredientCategories: [],

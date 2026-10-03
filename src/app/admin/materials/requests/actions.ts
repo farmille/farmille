@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import type { AdminActionState } from "@/app/admin/_lib/action-state";
@@ -9,6 +9,7 @@ import {
   approveMaterialChangeRequest,
   rejectMaterialChangeRequest,
 } from "@/server/admin/material-change-requests";
+import { CACHE_TAGS } from "@/server/cache-tags";
 import { errorMessageJa } from "@/server/errors";
 
 export async function resolveMaterialChangeRequestAction(
@@ -41,6 +42,7 @@ export async function resolveMaterialChangeRequestAction(
     };
   }
 
+  if (decision === "approve") updateTag(CACHE_TAGS.catalog);
   revalidatePath("/admin");
   revalidatePath("/admin/materials");
   revalidatePath("/admin/materials/requests");

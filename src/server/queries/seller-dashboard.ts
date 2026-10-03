@@ -1,4 +1,5 @@
 import { fail, succeed, type Result } from "@/server/result";
+import { listClassificationOptions } from "@/server/queries/classifications";
 import { getMaterialWithSupabase, type MaterialDetail } from "@/server/queries/materials";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
@@ -149,9 +150,13 @@ export async function getSellerMaterialPageData(
   sellerId: string,
   materialId: string,
 ): Promise<Result<SellerMaterialPageData>> {
-  const supabase = await createServerSupabase();
+  const [supabase, options] = await Promise.all([
+    createServerSupabase(),
+    listClassificationOptions(),
+  ]);
+  if (!options.ok) return options;
   const [materialResult, requestsResult] = await Promise.all([
-    getMaterialWithSupabase(supabase, materialId),
+    getMaterialWithSupabase(supabase, materialId, options.data),
     supabase
       .from("material_change_requests")
       .select(
