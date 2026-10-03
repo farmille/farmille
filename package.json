@@ -24,12 +24,12 @@
     "test:storybook:responsive": "playwright test --config=playwright.storybook.config.ts"
   },
   "dependencies": {
-    "@next/third-parties": "^16.3.3",
+    "@next/third-parties": "^16.3.8",
     "@sentry/nextjs": "^10.50.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.116.0",
     "gen-interface-jp": "0.8.0",
-    "next": "16.3.3",
+    "next": "16.3.8",
     "nodemailer": "^10.0.13",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -57,7 +57,7 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9",
-    "eslint-config-next": "16.3.3",
+    "eslint-config-next": "16.3.8",
     "eslint-plugin-oxlint": "1.78.0",
     "happy-dom": "^20.8.9",
     "otpauth": "9.5.1",
