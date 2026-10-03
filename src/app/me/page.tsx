@@ -57,14 +57,16 @@ export default async function MePage({
     return <NonGeneralNotice accountType={access.accountType} />;
   }
 
-  const result = await getMyPageData(access.session.userId);
+  const [result, details] = await Promise.all([
+    getMyPageData(access.session.userId),
+    getProfileDetails(access.session.userId),
+  ]);
 
   if (!result.ok) {
     throw new Error(errorMessageJa[result.error]);
   }
 
   const data = result.data;
-  const details = await getProfileDetails(access.session.userId);
   if (!details.ok) throw new Error(errorMessageJa[details.error]);
   const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 

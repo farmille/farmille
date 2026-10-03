@@ -65,7 +65,6 @@ export function PostTimeline({ profile, posts, viewerUserId = null }: PostTimeli
               }
               reviewId={post.id}
               canManage={isOwnReview}
-              helpfulVoted={post.helpfulVotedByViewer}
               currentPath={authorHref}
               handle={profile.handle}
               authorHref={authorHref}
