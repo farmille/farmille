@@ -39,6 +39,7 @@ export function CatalogSidebar({
       <Link
         key={key}
         href={buildSearchHref({ filters: next, sort, query })}
+        rel="nofollow"
         aria-current={active ? "true" : undefined}
         className={buttonRecipe({ variant: active ? "primary" : "ghost", size: "sm" })}
         scroll={false}
