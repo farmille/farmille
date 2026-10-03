@@ -24,6 +24,9 @@ auditConfig:
   ignoreGhsas:
     - GHSA-w3rx-r6r6-pgpr
     - GHSA-5p2g-fcmc-qvqq
+    # braces は修正版が未公開（2026-10-03 時点の最新は 3.0.3）。Panda と eslint-config-next の
+    # fast-glob 経由でビルド時に使われ、展開する glob はリポジトリ内の設定値だけなので外部入力は届かない。
+    - GHSA-vfj7-8cjw-p6xm
 
 minimumReleaseAgeExclude:
   - nodemailer@10.0.13
