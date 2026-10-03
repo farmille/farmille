@@ -8,7 +8,7 @@ import { Suspense } from "react";
 import { SkeletonRegion, RatingSkeleton } from "@/components/Skeleton";
 import { SkeletonList } from "@/components/SkeletonList";
 import { MaterialPageSkeleton } from "./_components/MaterialPageSkeleton";
-import { listMaterials, type MaterialDetail } from "@/server/queries/materials";
+import { listRelatedMaterials, type MaterialDetail } from "@/server/queries/materials";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { after } from "next/server";
@@ -378,17 +378,12 @@ async function MaterialRating({ material }: { material: MaterialDetail }) {
 
 // 同じ資材ジャンルに分類された公開資材を紹介する。
 async function RelatedMaterials({ material }: { material: MaterialDetail }) {
-  const related =
-    material.ingredientCategories.length === 0
-      ? []
-      : unwrapQueryResult(
-          await listMaterials({
-            page: 1,
-            filters: material.ingredientCategories.map(({ id }) => ({ category: "genre", id })),
-          }),
-        )
-          .items.filter(({ id }) => id !== material.id)
-          .slice(0, 3);
+  const related = unwrapQueryResult(
+    await listRelatedMaterials(
+      material.id,
+      material.ingredientCategories.map(({ id }) => id),
+    ),
+  );
   return (
     <section aria-label="関連資材">
       <SectionHeading title="関連資材" />
