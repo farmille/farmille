@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { SearchFilterCategory, SearchFilterRef } from "@/lib/material-search";
 import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
 import {
   listClassificationOptions,
@@ -121,9 +120,6 @@ export type MaterialDetail = MaterialDetailFields & {
   >;
 };
 
-type MaterialFilterResult = Result<string[] | null>;
-type CategoryMaterialResult = Result<Set<string>>;
-
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/materials] ${operation}`, error);
 }
@@ -135,222 +131,28 @@ function bySortOrder(
   return left.sort_order - right.sort_order || left.id.localeCompare(right.id);
 }
 
-function invalidFilterIds(requestedIds: string[], actualIds: string[]): boolean {
-  const actual = new Set(actualIds);
-  return requestedIds.some((id) => !actual.has(id));
-}
+const MATERIAL_LIST_COLUMNS = `
+  id,
+  name,
+  manufacturer_name,
+  sales_status,
+  seller_id,
+  manufacturer_verified_at,
+  publication_status,
+  review_count,
+  avg_rating,
+  control_plot_ratio,
+  created_at,
+  description
+` as const;
 
-async function findCategoryMaterialIds(
+const RELATED_MATERIAL_LIMIT = 3;
+
+async function withPrimaryImages(
   supabase: SupabaseClient<Database>,
-  category: SearchFilterCategory,
-  ids: string[],
-): Promise<CategoryMaterialResult> {
-  if (category === "crop") {
-    const [masters, relations] = await Promise.all([
-      supabase.from("crops").select("id").in("id", ids),
-      supabase.from("material_crops").select("material_id").in("crop_id", ids),
-    ]);
-    if (masters.error !== null || relations.error !== null) {
-      reportQueryError("対象作物による絞り込みに失敗", {
-        masterError: masters.error,
-        relationError: relations.error,
-      });
-      return fail("internal");
-    }
-    if (
-      invalidFilterIds(
-        ids,
-        masters.data.map(({ id }) => id),
-      )
-    )
-      return fail("invalid_body");
-    return succeed(new Set(relations.data.map(({ material_id }) => material_id)));
-  }
-
-  if (category === "effect") {
-    const [masters, relations] = await Promise.all([
-      supabase.from("effects").select("id").in("id", ids),
-      supabase.from("material_effects").select("material_id").in("effect_id", ids),
-    ]);
-    if (masters.error !== null || relations.error !== null) {
-      reportQueryError("効果による絞り込みに失敗", {
-        masterError: masters.error,
-        relationError: relations.error,
-      });
-      return fail("internal");
-    }
-    if (
-      invalidFilterIds(
-        ids,
-        masters.data.map(({ id }) => id),
-      )
-    )
-      return fail("invalid_body");
-    return succeed(new Set(relations.data.map(({ material_id }) => material_id)));
-  }
-
-  if (category === "genre") {
-    const [masters, relations] = await Promise.all([
-      supabase.from("ingredient_categories").select("id").in("id", ids),
-      supabase
-        .from("material_ingredient_categories")
-        .select("material_id")
-        .in("ingredient_category_id", ids),
-    ]);
-    if (masters.error !== null || relations.error !== null) {
-      reportQueryError("資材ジャンルによる絞り込みに失敗", {
-        masterError: masters.error,
-        relationError: relations.error,
-      });
-      return fail("internal");
-    }
-    if (
-      invalidFilterIds(
-        ids,
-        masters.data.map(({ id }) => id),
-      )
-    )
-      return fail("invalid_body");
-    return succeed(new Set(relations.data.map(({ material_id }) => material_id)));
-  }
-
-  const [masters, relations] = await Promise.all([
-    supabase.from("search_tags").select("id").eq("category", category).in("id", ids),
-    supabase.from("material_search_tags").select("material_id").in("search_tag_id", ids),
-  ]);
-  if (masters.error !== null || relations.error !== null) {
-    reportQueryError("検索タグによる絞り込みに失敗", {
-      masterError: masters.error,
-      relationError: relations.error,
-    });
-    return fail("internal");
-  }
-  if (
-    invalidFilterIds(
-      ids,
-      masters.data.map(({ id }) => id),
-    )
-  )
-    return fail("invalid_body");
-  return succeed(new Set(relations.data.map(({ material_id }) => material_id)));
-}
-
-async function findMatchingMaterialIds(
-  supabase: SupabaseClient<Database>,
-  requestedFilters: readonly SearchFilterRef[] | undefined,
-): Promise<MaterialFilterResult> {
-  const uniqueFilters = new Map<string, SearchFilterRef>();
-  for (const filter of requestedFilters ?? []) {
-    uniqueFilters.set(`${filter.category}:${filter.id}`, filter);
-  }
-  if (uniqueFilters.size === 0) return succeed(null);
-
-  const idsByCategory = new Map<SearchFilterCategory, string[]>();
-  for (const filter of uniqueFilters.values()) {
-    const ids = idsByCategory.get(filter.category) ?? [];
-    ids.push(filter.id);
-    idsByCategory.set(filter.category, ids);
-  }
-
-  const categoryResults = await Promise.all(
-    [...idsByCategory].map(([category, ids]) => findCategoryMaterialIds(supabase, category, ids)),
-  );
-  let intersection: Set<string> | null = null;
-
-  for (const result of categoryResults) {
-    if (!result.ok) return result;
-    if (intersection === null) {
-      intersection = new Set(result.data);
-      continue;
-    }
-
-    const nextIntersection = new Set<string>();
-    for (const materialId of intersection) {
-      if (result.data.has(materialId)) nextIntersection.add(materialId);
-    }
-    intersection = nextIntersection;
-  }
-
-  return succeed(intersection === null ? [] : [...intersection]);
-}
-
-export type ListMaterialsOptions = {
-  ids?: string[];
-  filters?: readonly SearchFilterRef[];
-  page: number;
-};
-
-export async function listMaterials(
-  options: ListMaterialsOptions,
-): Promise<Result<Paginated<MaterialListItem>>> {
-  const supabase = await createServerSupabase();
-  return listMaterialsWithSupabase(supabase, options);
-}
-
-export async function listMaterialsWithSupabase(
-  supabase: SupabaseClient<Database>,
-  { filters, ids, page }: ListMaterialsOptions,
-): Promise<Result<Paginated<MaterialListItem>>> {
-  const { from, to } = pageRange(page);
-  const materialFilter = await findMatchingMaterialIds(supabase, filters);
-
-  if (!materialFilter.ok) {
-    return materialFilter;
-  }
-
-  if (materialFilter.data !== null && materialFilter.data.length === 0) {
-    return succeed({
-      items: [],
-      page,
-      perPage: DEFAULT_PER_PAGE,
-      total: 0,
-      totalPages: 0,
-    });
-  }
-
-  let query = supabase
-    .from("materials")
-    .select(
-      `
-        id,
-        name,
-        manufacturer_name,
-        sales_status,
-        seller_id,
-        manufacturer_verified_at,
-        publication_status,
-        review_count,
-        avg_rating,
-        control_plot_ratio,
-        created_at,
-        description
-      `,
-      { count: "exact" },
-    )
-    .eq("publication_status", "published");
-
-  if (materialFilter.data !== null) {
-    query = query.in("id", materialFilter.data);
-  }
-
-  if (ids !== undefined) query = query.in("id", ids);
-
-  const { data, error, count } = await query
-    .order("review_count", { ascending: false })
-    .order("id", { ascending: true })
-    .range(from, to);
-
-  if (error !== null) {
-    reportQueryError("資材一覧の取得に失敗", error);
-    return fail("internal");
-  }
-
-  if (count === null) {
-    reportQueryError("資材一覧の総件数が返されなかった", { page, filters });
-    return fail("internal");
-  }
-
-  const materialIds = data.map(({ id }) => id);
+  materials: MaterialListFields[],
+): Promise<Result<MaterialListItem[]>> {
+  const materialIds = materials.map(({ id }) => id);
   const imageResult =
     materialIds.length === 0
       ? { data: [], error: null }
@@ -372,16 +174,100 @@ export async function listMaterialsWithSupabase(
     imagesByMaterial.set(material_id, images);
   }
 
-  return succeed({
-    items: data.map((material) => ({
+  return succeed(
+    materials.map((material) => ({
       ...material,
       primaryImage: (imagesByMaterial.get(material.id) ?? []).toSorted(bySortOrder)[0] ?? null,
     })),
+  );
+}
+
+export type ListMaterialsOptions = {
+  ids?: string[];
+  page: number;
+};
+
+export async function listMaterials(
+  options: ListMaterialsOptions,
+): Promise<Result<Paginated<MaterialListItem>>> {
+  const supabase = await createServerSupabase();
+  return listMaterialsWithSupabase(supabase, options);
+}
+
+export async function listMaterialsWithSupabase(
+  supabase: SupabaseClient<Database>,
+  { ids, page }: ListMaterialsOptions,
+): Promise<Result<Paginated<MaterialListItem>>> {
+  const { from, to } = pageRange(page);
+  let query = supabase
+    .from("materials")
+    .select(MATERIAL_LIST_COLUMNS, { count: "exact" })
+    .eq("publication_status", "published");
+
+  if (ids !== undefined) query = query.in("id", ids);
+
+  const { data, error, count } = await query
+    .order("review_count", { ascending: false })
+    .order("id", { ascending: true })
+    .range(from, to);
+
+  if (error !== null) {
+    reportQueryError("資材一覧の取得に失敗", error);
+    return fail("internal");
+  }
+
+  if (count === null) {
+    reportQueryError("資材一覧の総件数が返されなかった", { page });
+    return fail("internal");
+  }
+
+  const items = await withPrimaryImages(supabase, data);
+  if (!items.ok) return items;
+
+  return succeed({
+    items: items.data,
     page,
     perPage: DEFAULT_PER_PAGE,
     total: count,
     totalPages: Math.ceil(count / DEFAULT_PER_PAGE),
   });
+}
+
+export async function listRelatedMaterials(
+  materialId: string,
+  genreIds: readonly string[],
+): Promise<Result<MaterialListItem[]>> {
+  const supabase = await createServerSupabase();
+  return listRelatedMaterialsWithSupabase(supabase, materialId, genreIds);
+}
+
+/**
+ * 資材ジャンルを1つでも共有する公開資材を、口コミの多い順に返す。
+ * 候補の資材 ID を URL に並べると、候補が200件を超えたあたりで 414 になるため、内部結合で絞る。
+ */
+export async function listRelatedMaterialsWithSupabase(
+  supabase: SupabaseClient<Database>,
+  materialId: string,
+  genreIds: readonly string[],
+): Promise<Result<MaterialListItem[]>> {
+  if (genreIds.length === 0) return succeed([]);
+
+  const { data, error } = await supabase
+    .from("materials")
+    .select(`${MATERIAL_LIST_COLUMNS}, material_ingredient_categories!inner()`)
+    .eq("publication_status", "published")
+    .neq("id", materialId)
+    .in("material_ingredient_categories.ingredient_category_id", genreIds)
+    .order("review_count", { ascending: false })
+    .order("id", { ascending: true })
+    .limit(RELATED_MATERIAL_LIMIT);
+
+  if (error !== null) {
+    reportQueryError("関連資材の取得に失敗", error);
+    return fail("internal");
+  }
+
+  return withPrimaryImages(supabase, data);
 }
 
 export async function getMaterial(id: string): Promise<Result<MaterialDetail>> {
