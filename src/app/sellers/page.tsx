@@ -22,11 +22,11 @@ const main = css({
   w: "100%",
   maxW: "content.wide",
   mx: "auto",
-  px: "4",
-  py: "4",
   pb: "8",
-  tab: { px: "5", py: "6", pb: "10" },
+  tab: { pb: "10" },
 });
+
+const footer = css({ px: "4", tab: { px: "5" } });
 
 export async function generateMetadata(): Promise<Metadata> {
   return createPageMetadata({
@@ -43,14 +43,22 @@ type ManufacturerPageProps = {
 
 export default async function ManufacturerPage({ searchParams }: ManufacturerPageProps) {
   const { from } = await searchParams;
-  const applyHref = from === "me" ? "/sellers/apply?from=me" : "/sellers/apply";
+  const fromMe = from === "me";
+  const applyHref = fromMe ? "/sellers/apply?from=me" : "/sellers/apply";
 
   return (
     <div className={shell}>
-      <AppBar chrome="public" active="home" variant="home" />
+      <AppBar
+        chrome="public"
+        active="home"
+        title="メーカーの方へ"
+        backHref={fromMe ? "/me" : "/"}
+      />
       <main className={main}>
         <ManufacturerLanding applyHref={applyHref} />
-        <HomeFooter />
+        <div className={footer}>
+          <HomeFooter />
+        </div>
       </main>
       <BottomNav active="home" />
     </div>
