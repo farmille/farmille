@@ -29,7 +29,15 @@ const catalog: CatalogSearch = {
     },
   ],
   crops: [
-    { id: "onion", name: "たまねぎ", aliases: ["玉ねぎ"], group_id: "middle", sort_order: 1 },
+    {
+      id: "onion",
+      name: "たまねぎ",
+      aliases: ["玉ねぎ"],
+      sort_order: 1,
+      groupId: "middle",
+      groupName: "鱗茎類",
+      groupSortOrder: 2,
+    },
   ],
   groups: [
     { id: "major", name: "野菜類", parent_id: null, hierarchy_level: "major", sort_order: 1 },

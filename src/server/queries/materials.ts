@@ -6,7 +6,10 @@ import type {
   SearchFilterRef,
 } from "@/lib/material-search";
 import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
-import { listClassificationOptionsWithSupabase } from "@/server/queries/classifications";
+import {
+  listClassificationOptions,
+  type ClassificationOptions,
+} from "@/server/queries/classifications";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
@@ -476,13 +479,18 @@ export async function listMaterialsWithSupabase(
 }
 
 export async function getMaterial(id: string): Promise<Result<MaterialDetail>> {
-  const supabase = await createServerSupabase();
-  return getMaterialWithSupabase(supabase, id);
+  const [supabase, options] = await Promise.all([
+    createServerSupabase(),
+    listClassificationOptions(),
+  ]);
+  if (!options.ok) return options;
+  return getMaterialWithSupabase(supabase, id, options.data);
 }
 
 export async function getMaterialWithSupabase(
   supabase: SupabaseClient<Database>,
   id: string,
+  options: ClassificationOptions,
 ): Promise<Result<MaterialDetail>> {
   const { data, error } = await supabase
     .from("materials")
@@ -536,7 +544,6 @@ export async function getMaterialWithSupabase(
     ingredientsResult,
     productTypesResult,
     searchTagsResult,
-    optionsResult,
     representativeSellerResult,
   ] = await Promise.all([
     supabase
@@ -569,7 +576,6 @@ export async function getMaterialWithSupabase(
     supabase.from("material_ingredients").select("ingredient_id").eq("material_id", id),
     supabase.from("material_product_types").select("product_type_id").eq("material_id", id),
     supabase.from("material_search_tags").select("search_tag_id").eq("material_id", id),
-    listClassificationOptionsWithSupabase(supabase),
     data.seller_id === null
       ? { data: null, error: null }
       : supabase
@@ -595,7 +601,6 @@ export async function getMaterialWithSupabase(
     reportQueryError("資材分類の取得に失敗", relationError);
     return fail("internal");
   }
-  if (!optionsResult.ok) return optionsResult;
 
   const images = imagesResult.data;
   const evidences = evidencesResult.data;
@@ -624,7 +629,7 @@ export async function getMaterialWithSupabase(
   const compositionType =
     data.composition_type_id === null
       ? null
-      : (optionsResult.data.compositionTypes.find(
+      : (options.compositionTypes.find(
           ({ id: compositionTypeId }) => compositionTypeId === data.composition_type_id,
         ) ?? null);
   if (data.composition_type_id !== null && compositionType === null) {
@@ -632,20 +637,18 @@ export async function getMaterialWithSupabase(
     return fail("internal");
   }
 
-  const effectById = new Map(optionsResult.data.effects.map((effect) => [effect.id, effect]));
-  const cropById = new Map(optionsResult.data.crops.map((crop) => [crop.id, crop]));
+  const effectById = new Map(options.effects.map((effect) => [effect.id, effect]));
+  const cropById = new Map(options.crops.map((crop) => [crop.id, crop]));
   const ingredientCategoryById = new Map(
-    optionsResult.data.ingredientCategories.map((category) => [category.id, category]),
+    options.ingredientCategories.map((category) => [category.id, category]),
   );
   const ingredientById = new Map(
-    optionsResult.data.ingredients.map((ingredient) => [ingredient.id, ingredient]),
+    options.ingredients.map((ingredient) => [ingredient.id, ingredient]),
   );
   const productTypeById = new Map(
-    optionsResult.data.productTypes.map((productType) => [productType.id, productType]),
+    options.productTypes.map((productType) => [productType.id, productType]),
   );
-  const searchTagById = new Map(
-    optionsResult.data.searchTags.map((searchTag) => [searchTag.id, searchTag]),
-  );
+  const searchTagById = new Map(options.searchTags.map((searchTag) => [searchTag.id, searchTag]));
   const effects: MaterialEffect[] = [];
   const targetCrops: MaterialTargetCrop[] = [];
   const ingredientCategories: MaterialClassification[] = [];

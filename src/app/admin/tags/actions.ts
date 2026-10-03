@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import type { AdminActionState } from "@/app/admin/_lib/action-state";
 import { formDataString, trimmedFormDataString } from "@/lib/validation";
@@ -13,9 +13,13 @@ import {
   renameCrop,
   renameTag,
 } from "@/server/admin/tags";
+import { CACHE_TAGS } from "@/server/cache-tags";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 
+// 削除は資材との紐づけも外すので、分類マスタと検索データの両方を失効させる。
 function refresh(): void {
+  updateTag(CACHE_TAGS.classifications);
+  updateTag(CACHE_TAGS.catalog);
   revalidatePath("/admin/tags");
   revalidatePath("/search");
 }

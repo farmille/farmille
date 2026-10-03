@@ -1,4 +1,6 @@
 import { APPLICATION_METHODS } from "@/lib/material-page-editor";
+import { unstable_cache } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 import { cache } from "react";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -10,11 +12,13 @@ import {
   type SearchFilterItem,
   type SearchFilterRef,
 } from "@/lib/material-search";
+import { CACHE_TAGS } from "@/server/cache-tags";
 import { fail, succeed, type Result } from "@/server/result";
-import { createServerSupabase } from "@/server/supabase";
+import { createPublicSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type CompositionTypeRow = Database["public"]["Tables"]["composition_types"]["Row"];
+type CropGroupRow = Database["public"]["Tables"]["crop_groups"]["Row"];
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 type EffectCategoryRow = Database["public"]["Tables"]["effect_categories"]["Row"];
 type EffectRow = Database["public"]["Tables"]["effects"]["Row"];
@@ -44,6 +48,10 @@ export type IngredientOption = Pick<IngredientRow, "id" | "name" | "sort_order">
 export type ClassificationOptions = {
   compositionTypes: Array<Pick<CompositionTypeRow, "id" | "name" | "sort_order">>;
   crops: CropOption[];
+  /** 有効な作物分類だけ。検索の親子判定に使う。 */
+  cropGroups: Array<
+    Pick<CropGroupRow, "id" | "name" | "parent_id" | "hierarchy_level" | "sort_order">
+  >;
   effectCategories: Array<Pick<EffectCategoryRow, "id" | "name" | "sort_order">>;
   effects: EffectOption[];
   ingredientCategories: Array<Pick<IngredientCategoryRow, "id" | "name" | "sort_order">>;
@@ -82,7 +90,9 @@ export async function listClassificationOptionsWithSupabase(
     searchTagsResult,
   ] = await Promise.all([
     supabase.from("composition_types").select("id, name, sort_order"),
-    supabase.from("crop_groups").select("id, name, sort_order"),
+    supabase
+      .from("crop_groups")
+      .select("id, name, parent_id, hierarchy_level, sort_order, is_active"),
     supabase.from("crops").select("id, group_id, name, aliases, sort_order").eq("is_active", true),
     supabase.from("effect_categories").select("id, name, sort_order"),
     supabase.from("effects").select("id, category_id, name, sort_order"),
@@ -196,6 +206,16 @@ export async function listClassificationOptionsWithSupabase(
     crops: crops.toSorted(
       (left, right) => left.groupSortOrder - right.groupSortOrder || bySortOrder(left, right),
     ),
+    cropGroups: cropGroupRows
+      .filter((group) => group.is_active)
+      .toSorted(bySortOrder)
+      .map(({ id, name, parent_id, hierarchy_level, sort_order }) => ({
+        id,
+        name,
+        parent_id,
+        hierarchy_level,
+        sort_order,
+      })),
     effectCategories: effectCategoryRows.toSorted(bySortOrder),
     effects: effects.toSorted(
       (left, right) => left.categorySortOrder - right.categorySortOrder || bySortOrder(left, right),
@@ -211,9 +231,27 @@ export async function listClassificationOptionsWithSupabase(
   });
 }
 
+// 分類マスタは運営のタグ管理でだけ変わり、その操作が updateTag で失効させる。
+// SQL で直接直した場合に備えて、1時間で取り直す。
+const fetchCachedClassificationOptions = unstable_cache(
+  async (): Promise<ClassificationOptions> => {
+    const result = await listClassificationOptionsWithSupabase(createPublicSupabase());
+    // 失敗を値で返すとキャッシュに残るので、例外にして保存させない。
+    if (!result.ok) throw new Error("分類マスタを取得できませんでした。");
+    return result.data;
+  },
+  ["classification-options"],
+  { tags: [CACHE_TAGS.classifications], revalidate: 3600 },
+);
+
 async function fetchClassificationOptions(): Promise<Result<ClassificationOptions>> {
-  const supabase = await createServerSupabase();
-  return listClassificationOptionsWithSupabase(supabase);
+  try {
+    return succeed(await fetchCachedClassificationOptions());
+  } catch (error) {
+    unstable_rethrow(error);
+    reportQueryError("分類マスタの取得に失敗", error);
+    return fail("internal");
+  }
 }
 
 export const listClassificationOptions = cache(fetchClassificationOptions);
@@ -222,13 +260,6 @@ async function fetchSearchFilters(): Promise<Result<SearchFilterItem[]>> {
   const options = await listClassificationOptions();
   if (!options.ok) return options;
 
-  const supabase = await createServerSupabase();
-  const groups = await supabase
-    .from("crop_groups")
-    .select("id,name,sort_order,hierarchy_level")
-    .eq("is_active", true)
-    .order("sort_order");
-  if (groups.error) return fail("internal");
   const filters: SearchFilterItem[] = [
     ...options.data.crops.map((crop) => ({
       id: crop.id,
@@ -237,7 +268,7 @@ async function fetchSearchFilters(): Promise<Result<SearchFilterItem[]>> {
       sort_order: crop.sort_order,
       category: "crop" as const,
     })),
-    ...groups.data
+    ...options.data.cropGroups
       .toSorted(
         (a, b) => Number(a.hierarchy_level === "major") - Number(b.hierarchy_level === "major"),
       )
@@ -312,38 +343,4 @@ export async function listSearchFiltersByRefs(
   }
 
   return succeed(resolved);
-}
-
-export async function listSearchSuggestions(): Promise<
-  Result<{
-    filters: SearchFilterItem[];
-    makers: string[];
-    materialNames: string[];
-  }>
-> {
-  const supabase = await createServerSupabase();
-  const [filtersResult, materialsResult] = await Promise.all([
-    listSearchFilters(),
-    supabase
-      .from("materials")
-      .select("name, manufacturer_name")
-      .eq("publication_status", "published")
-      .order("name", { ascending: true }),
-  ]);
-
-  if (!filtersResult.ok) return filtersResult;
-
-  if (materialsResult.error !== null) {
-    reportQueryError("資材名・メーカー候補の取得に失敗", materialsResult.error);
-    return fail("internal");
-  }
-
-  const makers = [...new Set(materialsResult.data.map((row) => row.manufacturer_name))].toSorted(
-    (left, right) => left.localeCompare(right, "ja"),
-  );
-  const materialNames = materialsResult.data
-    .map((row) => row.name)
-    .toSorted((left, right) => left.localeCompare(right, "ja"));
-
-  return succeed({ filters: filtersResult.data, makers, materialNames });
 }

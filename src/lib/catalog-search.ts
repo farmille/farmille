@@ -26,9 +26,7 @@ export function cropEvidence(
   const direct = crops.filter((crop) =>
     material.material_crops.some((row) => row.crop_id === crop.id),
   );
-  const ancestorIds = new Set(
-    crops.flatMap((crop) => cropAncestors(crop.group_id, catalog.groups)),
-  );
+  const ancestorIds = new Set(crops.flatMap((crop) => cropAncestors(crop.groupId, catalog.groups)));
   const groups = catalog.groups.filter(
     (group) =>
       ancestorIds.has(group.id) &&
@@ -52,7 +50,7 @@ export function matchesCatalogFilter(
         .filter((group) => cropAncestors(group.id, catalog.groups).includes(filter.id))
         .map((group) => group.id);
       const crops = new Set(
-        catalog.crops.filter((crop) => descendants.includes(crop.group_id)).map((crop) => crop.id),
+        catalog.crops.filter((crop) => descendants.includes(crop.groupId)).map((crop) => crop.id),
       );
       return (
         material.material_crop_groups.some((row) => descendants.includes(row.crop_group_id)) ||

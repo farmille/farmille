@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { COMPARE_MATERIAL_LIMITS } from "@/lib/compare-limits";
+import { listClassificationOptions } from "@/server/queries/classifications";
 import { getMaterialWithSupabase } from "@/server/queries/materials";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
@@ -360,8 +361,10 @@ export async function listMaterialsForCompare(
 
   const rows: CompareQueryRow[] = data;
   const byId = new Map(rows.map((row) => [row.id, row]));
+  const options = await listClassificationOptions();
+  if (!options.ok) return options;
   const detailResults = await Promise.all(
-    uniqueIds.map((materialId) => getMaterialWithSupabase(supabase, materialId)),
+    uniqueIds.map((materialId) => getMaterialWithSupabase(supabase, materialId, options.data)),
   );
   const detailById = new Map(
     detailResults.flatMap((result) => (result.ok ? [[result.data.id, result.data] as const] : [])),

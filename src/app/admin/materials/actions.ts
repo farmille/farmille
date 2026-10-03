@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import type { MaterialFormState, MaterialFormValues } from "@/app/admin/_lib/action-state";
@@ -12,6 +12,7 @@ import {
   updateMaterial,
   validateMaterialInput,
 } from "@/server/admin/materials";
+import { CACHE_TAGS } from "@/server/cache-tags";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 
 function materialErrorMessage(code: ErrorCode): string {
@@ -35,6 +36,7 @@ export async function setMaterialPublicationStatusAction(
   const result = await setMaterialPublicationStatus(materialId, status);
   if (!result.ok) return { status: "error", message: errorMessageJa[result.error] };
 
+  updateTag(CACHE_TAGS.catalog);
   revalidatePath(`/admin/materials/${materialId}`);
   revalidatePath("/admin/materials");
   revalidatePath(`/materials/${materialId}`);
@@ -128,6 +130,7 @@ export async function createMaterialAction(
     };
   }
 
+  updateTag(CACHE_TAGS.catalog);
   revalidatePath("/admin/materials");
   redirect(`/admin/materials/${result.data.id}?created=1`);
 }
@@ -163,6 +166,7 @@ export async function updateMaterialAction(
     };
   }
 
+  updateTag(CACHE_TAGS.catalog);
   revalidatePath(`/admin/materials/${materialId}`);
   revalidatePath("/admin/materials");
   revalidatePath(`/materials/${materialId}`);

@@ -1,6 +1,7 @@
 "use server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { reviewMaterialPage, reviewManufacturerProfile } from "@/server/admin/material-page-review";
+import { CACHE_TAGS } from "@/server/cache-tags";
 
 export async function reviewManufacturerProfileAction(input: {
   versionId: string;
@@ -41,6 +42,8 @@ export async function reviewMaterialPageAction(input: {
             ? "修正が必要な箇所と理由を記入してください。"
             : "結果を保存できませんでした。編集権と通信状態を確認してください。",
     };
+  // 公開すると資材の説明文が変わり、検索結果のカードにも出る。
+  if (input.publish) updateTag(CACHE_TAGS.catalog);
   revalidatePath(`/materials/${result.data}`);
   revalidatePath(`/dashboard/materials/${result.data}`);
   revalidatePath("/admin/materials/expressions", "layout");
