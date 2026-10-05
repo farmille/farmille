@@ -10,7 +10,11 @@ export default defineConfig({
   theme: {
     // sp（767px 以下）は base。tab 以上は PC 寄りの UI にし、pc は 768px 幅で成立しない密度だけを持つ。
     breakpoints: { tab: "768px", pc: "1024px" },
-    tokens,
+    tokens: {
+      ...tokens,
+      // Panda は sizes に無い数値を px のまま出力する（w: "8" → 8px）。寸法でも余白と同じ数値スケールと full を使えるようにする。
+      sizes: { ...tokens.spacing, full: { value: "100%" }, ...tokens.sizes },
+    },
     semanticTokens,
     extend: {
       keyframes: { "skeleton-pulse": { "0%, 100%": { opacity: "1" }, "50%": { opacity: "0.5" } } },
