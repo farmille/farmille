@@ -65,11 +65,11 @@ export async function loginSeller(page: Page, seller: SellerAccount): Promise<vo
   await expect(page).toHaveURL(/\/dashboard$/, { timeout: COLD_NAVIGATION_TIMEOUT_MS });
 }
 
-export async function loginAdminAndEnrollMfa(
+export async function loginAdminWithPassword(
   page: Page,
   admin: E2eAdminAccount,
   next: string,
-): Promise<string> {
+): Promise<void> {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
   await page.getByLabel("メールアドレス").fill(admin.email);
   await page.getByLabel("パスワード").fill(admin.password);
@@ -77,6 +77,14 @@ export async function loginAdminAndEnrollMfa(
   await waitForReactHydration(loginButton);
   await loginButton.click();
   await expect(page).toHaveURL(/\/admin\/mfa\?/, { timeout: COLD_NAVIGATION_TIMEOUT_MS });
+}
+
+export async function loginAdminAndEnrollMfa(
+  page: Page,
+  admin: E2eAdminAccount,
+  next: string,
+): Promise<string> {
+  await loginAdminWithPassword(page, admin, next);
 
   const enrollmentButton = page.getByRole("button", { name: "登録を始める" });
   if (process.env.CAPTURE_SCREEN_FLOW === "1") {
