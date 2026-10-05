@@ -103,7 +103,9 @@ for (const document of legalDocuments) {
     );
     const contents = screen.getByRole("navigation", "このページの目次");
     for (const [index, section] of document.sections.entries()) {
-      await expect(browser.locator(`#section-${index + 1} > div`)).toContainText(/\S/);
+      const body = browser.locator(`#section-${index + 1} > div`);
+      if (section.markdown.trim()) await expect(body).toContainText(/\S/);
+      else await expect(body).toHaveText("");
       if (section.heading) {
         await expect(screen.getByRole("heading", section.heading, { level: 2 })).toHaveCount(1);
         await expect(contents.getByRole("link", section.heading)).toHaveAttribute(
