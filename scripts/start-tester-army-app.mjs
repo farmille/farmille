@@ -1,6 +1,8 @@
 import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const build = spawn("pnpm", ["build"], { stdio: "inherit" });
+const nextCli = fileURLToPath(import.meta.resolve("next/dist/bin/next"));
+const build = spawn(process.execPath, [nextCli, "build"], { stdio: "inherit" });
 let activeProcess = build;
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
@@ -16,7 +18,9 @@ build.on("exit", (code) => {
     process.exitCode = code ?? 1;
     return;
   }
-  activeProcess = spawn("pnpm", ["start", "--port", "3007"], { stdio: "inherit" });
+  activeProcess = spawn(process.execPath, [nextCli, "start", "--port", "3007"], {
+    stdio: "inherit",
+  });
   activeProcess.on("error", (error) => {
     console.error(error);
     process.exitCode = 1;
