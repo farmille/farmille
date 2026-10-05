@@ -1,5 +1,6 @@
 import * as v from "valibot";
 
+import type { Database } from "@/types/database.types";
 import type { E2eAdminAccount } from "./admin-accounts";
 import { uniqueToken } from "./test-data";
 
@@ -187,4 +188,65 @@ export async function materialManuscripts(materialId: string) {
       order: "created_at.asc",
     }),
   );
+}
+
+const LegacyRequestSchema = v.object({
+  id: v.pipe(v.string(), v.uuid()),
+  status: v.string(),
+  review_note: v.nullable(v.string()),
+  result_material_id: v.nullable(v.pipe(v.string(), v.uuid())),
+});
+
+export async function createLegacyMaterialRequest(
+  sellerId: string,
+  manufacturerName: string,
+  prefix: string,
+) {
+  const sellers = await select(
+    v.object({ login_id: v.string() }),
+    "seller_accounts",
+    new URLSearchParams({ select: "login_id", id: `eq.${sellerId}` }),
+  );
+  if (!sellers[0]?.login_id.startsWith("e2e-"))
+    throw new Error("Legacy requests require a test-owned seller.");
+  const name = `E2E資材_${uniqueToken(prefix)}`;
+  const body: Database["public"]["Tables"]["material_change_requests"]["Insert"] = {
+    seller_id: sellerId,
+    change_type: "create",
+    status: "pending",
+    reason: "E2Eで既存の申請処理を確認します。",
+  };
+  const response = await request("/rest/v1/material_change_requests", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Prefer: "return=representation" },
+    body: JSON.stringify(body),
+  });
+  const rows = v.parse(v.array(LegacyRequestSchema), await response.json());
+  const saved = rows[0];
+  if (saved === undefined) throw new Error("Legacy request insert returned no row.");
+  const details: Database["public"]["Tables"]["material_change_request_details"]["Insert"] = {
+    request_id: saved.id,
+    name,
+    manufacturer_name: manufacturerName,
+    sales_status: "販売中",
+    description: "既存申請の比較対象となる紹介文です。",
+  };
+  await request("/rest/v1/material_change_request_details", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(details),
+  });
+  return { id: saved.id, name };
+}
+
+export async function legacyMaterialRequestById(requestId: string) {
+  const rows = await select(
+    LegacyRequestSchema,
+    "material_change_requests",
+    new URLSearchParams({
+      select: "id,status,review_note,result_material_id",
+      id: `eq.${requestId}`,
+    }),
+  );
+  return rows[0] ?? null;
 }

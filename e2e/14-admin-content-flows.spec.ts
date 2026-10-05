@@ -5,8 +5,10 @@ import {
   articleMaterialIds,
   cleanupArticleImages,
   createContentAdmin,
+  createLegacyMaterialRequest,
   deleteOwnedTag,
   editorialReportById,
+  legacyMaterialRequestById,
   materialByOwnedName,
   materialManuscripts,
   materialTagNames,
@@ -458,6 +460,12 @@ test("資材原稿の修正依頼・再提出・取り下げを履歴に残し�
       .toBe("returned");
     await page.reload();
     await expect(page.getByText(reason, { exact: true })).toBeVisible();
+    await page
+      .locator(`a[href="/dashboard/materials/${material.id}/history/${firstVersion.id}"]`)
+      .click();
+    await expect(page.getByRole("heading", { name: "保存した原稿", exact: true })).toBeVisible();
+    await expect(page.getByText(description, { exact: true })).toBeVisible();
+    await page.goto(`/dashboard/materials/${material.id}`);
     await expect(page.getByRole("textbox", { name: "製品説明", exact: true })).toHaveValue(
       description,
     );
@@ -535,6 +543,107 @@ test("資材原稿の修正依頼・再提出・取り下げを履歴に残し�
     await adminContext.close();
     await deleteMaterial(material.id);
     await cleanupSellerByLoginId(seller.loginId);
+    await deleteAuthUsersByEmail(admin.email);
+  }
+});
+
+test("既存資材申請の本人限定閲覧・取消・運営の却下と承認を確認する", async ({ page, browser }) => {
+  test.setTimeout(180_000);
+  const seller = await createApprovedSeller("legacy-request-owner");
+  const otherSeller = await createApprovedSeller("legacy-request-other");
+  const admin = await createContentAdmin("legacy-request-admin");
+  const cancel = await createLegacyMaterialRequest(seller.id, seller.officialName, "legacy-cancel");
+  const reject = await createLegacyMaterialRequest(seller.id, seller.officialName, "legacy-reject");
+  const approve = await createLegacyMaterialRequest(
+    seller.id,
+    seller.officialName,
+    "legacy-approve",
+  );
+  const otherContext = await browser.newContext({ viewport: { width: 375, height: 812 } });
+  const otherPage = await otherContext.newPage();
+  const adminContext = await browser.newContext({ viewport: { width: 375, height: 812 } });
+  const adminPage = await adminContext.newPage();
+  let createdMaterialId: string | null = null;
+  try {
+    await loginSeller(page, seller);
+    await page.goto("/dashboard/materials/new");
+    await expect(page).toHaveURL(/\/dashboard\/materials$/);
+    await page.goto(`/dashboard/materials/requests/${cancel.id}`);
+    await expect(page.getByRole("heading", { name: cancel.name, exact: true })).toBeVisible();
+    await loginSeller(otherPage, otherSeller);
+    await otherPage.goto(`/dashboard/materials/requests/${cancel.id}`);
+    await expect(
+      otherPage.getByRole("heading", { name: "ページが見つかりません", exact: true }).first(),
+    ).toBeVisible();
+    expect(await otherPage.content()).not.toContain(cancel.name);
+    await page.getByRole("button", { name: "申請を取り消す", exact: true }).click();
+    await expect
+      .poll(async () => (await legacyMaterialRequestById(cancel.id))?.status)
+      .toBe("cancelled");
+    await page.reload();
+    await expect(page.getByText("取消済み", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "申請を取り消す", exact: true })).toHaveCount(0);
+    await loginAdminAndEnrollMfa(adminPage, admin, "/admin/materials/requests");
+    await expect(adminPage.getByRole("link", { name: cancel.name, exact: true })).toHaveCount(0);
+    await adminPage.getByRole("link", { name: reject.name, exact: true }).click();
+    await expect(
+      adminPage.getByRole("heading", { name: "公開内容との比較", exact: true }),
+    ).toBeVisible();
+    await adminPage.getByRole("button", { name: "却下する", exact: true }).click();
+    await expect(
+      adminPage.getByText("却下理由を入力してください。", { exact: true }),
+    ).toBeVisible();
+    expect((await legacyMaterialRequestById(reject.id))?.status).toBe("pending");
+    await adminPage
+      .getByLabel("メーカーへの連絡メモ", { exact: false })
+      .fill("申請内容の資料が不足しています。");
+    await adminPage.getByRole("button", { name: "却下する", exact: true }).click();
+    await expect(adminPage).toHaveURL(
+      new RegExp(`/admin/materials/requests/${reject.id}\\?resolved=reject$`),
+    );
+    expect(await legacyMaterialRequestById(reject.id)).toMatchObject({
+      status: "rejected",
+      review_note: "申請内容の資料が不足しています。",
+      result_material_id: null,
+    });
+    await page.goto(`/dashboard/materials/requests/${reject.id}`);
+    await expect(page.getByText("申請内容の資料が不足しています。", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "申請を取り消す", exact: true })).toHaveCount(0);
+    await adminPage.goto(`/admin/materials/requests/${approve.id}`);
+    await adminPage
+      .getByLabel("メーカーへの連絡メモ", { exact: false })
+      .fill("公開資料との一致を確認しました。");
+    await adminPage.getByRole("button", { name: "承認して反映", exact: true }).click();
+    await expect
+      .poll(async () => (await legacyMaterialRequestById(approve.id))?.status)
+      .toBe("approved");
+    createdMaterialId = (await legacyMaterialRequestById(approve.id))?.result_material_id ?? null;
+    if (createdMaterialId === null)
+      throw new Error("Approved legacy request did not produce a material.");
+    await page.goto(`/dashboard/materials/requests/${approve.id}`);
+    await expect(page.getByText("承認済み", { exact: true })).toBeVisible();
+    await page.getByRole("link", { name: "公開画面を見る", exact: true }).click();
+    await expect(page).toHaveURL(`/materials/${createdMaterialId}`);
+    await expect(page.getByRole("heading", { name: approve.name, exact: true })).toBeVisible();
+    await expect(
+      page.getByText("既存申請の比較対象となる紹介文です。", { exact: true }),
+    ).toBeVisible();
+    await adminPage.goto("/admin/materials/requests?status=all");
+    for (const request of [cancel, reject, approve])
+      await expect(
+        adminPage.getByRole("link", { name: request.name, exact: true }),
+      ).toHaveAttribute("href", `/admin/materials/requests/${request.id}`);
+    await adminPage.screenshot({
+      path: test.info().outputPath("legacy-material-requests-375.png"),
+      fullPage: true,
+    });
+  } finally {
+    await otherContext.close();
+    await adminContext.close();
+    createdMaterialId ??= await materialByOwnedName(approve.name);
+    if (createdMaterialId !== null) await deleteMaterial(createdMaterialId);
+    await cleanupSellerByLoginId(seller.loginId);
+    await cleanupSellerByLoginId(otherSeller.loginId);
     await deleteAuthUsersByEmail(admin.email);
   }
 });
