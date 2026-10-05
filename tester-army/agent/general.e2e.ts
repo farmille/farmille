@@ -1,8 +1,10 @@
 import { expect } from "e2e";
 import { memberTest, materialTest } from "../support/fixtures";
 import { loginMember } from "../support/ui";
+import { refreshCatalogThroughAdmin } from "../support/catalog-fixture";
 
 materialTest("Luna6が資材検索から詳細へ進む", async ({ app, agent, screen, browser, material }) => {
+  await refreshCatalogThroughAdmin(app, screen, browser, material.id);
   await app.open("/search");
   await agent.act("資材名{name}を検索して、その資材の詳細ページを開いてください。", {
     params: { name: material.name },

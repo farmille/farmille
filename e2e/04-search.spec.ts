@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { refreshCatalogThroughAdmin } from "./support/catalog-fixture";
 
 import {
   addMaterialClassifications,
@@ -11,7 +12,9 @@ import {
   genresByNames,
 } from "./support/test-data";
 
-test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷移", async ({ page }) => {
+test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷移", async ({ page, browser }) => {
+  // REST seeds do not invalidate the 600s public catalog.
+  await page.goto("/search");
   const [crops, genres] = await Promise.all([
     cropsByNames(["いちご", "水稲"]),
     genresByNames(["海藻、海藻抽出物"]),
@@ -62,6 +65,7 @@ test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷�
       rating: 5,
       body: `E2E並び替えC_${authors[2].id}`,
     });
+    await refreshCatalogThroughAdmin(browser, ratingHigh.id);
 
     await page.goto(`/search?filters=crop:${strawberry.id},crop:${rice.id}`);
     await expect(page.getByText("いちご または 水稲", { exact: true })).toBeVisible();
