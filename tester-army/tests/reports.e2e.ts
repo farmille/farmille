@@ -14,6 +14,7 @@ materialTest(
     await screen.getByRole("button", "トマトを選択").first().tap();
     await screen.getByRole("button", "下書き保存").tap();
     await expect(screen.getByRole("status")).toHaveText("下書きを保存しました。");
+    await expect(screen.getByRole("button", "下書き保存")).toBeEnabled();
     await browser.reload();
     await expect(screen.getByRole("button", "トマトを削除")).toBeVisible();
     await fillReportForSubmission(screen);
