@@ -6,6 +6,7 @@ import {
   accountDb,
   captureAccount,
   checkedData,
+  createDurableAdmin,
   createDurableMaterial,
   createDurableSeller,
   localMail,
@@ -53,8 +54,8 @@ for (const kind of ["registration", "transfer_out", "transfer_in", "removal"] as
     const db = accountDb();
     const seller = await createDurableSeller(kind);
     const destination = kind === "transfer_out" ? await createDurableSeller("destination") : null;
-    const first = await createDurableMaterial(kind === "transfer_out" ? seller.id : null);
-    const second = await createDurableMaterial(kind === "transfer_out" ? seller.id : null);
+    const first = await createDurableMaterial();
+    const second = await createDurableMaterial();
     const operatorAccount = await createGeneralUser(`company-admin-${kind}`);
     const outsider = await createGeneralUser(`company-outsider-${kind}`);
     const otherSeller = await createDurableSeller("other");
@@ -72,19 +73,15 @@ for (const kind of ["registration", "transfer_out", "transfer_in", "removal"] as
       kind === "removal" ? "/company-requests/receipts/" : "/dashboard/applications/";
     try {
       if (kind === "transfer_out") {
+        const grantAdmin = await createDurableAdmin();
         for (const material of [first, second]) {
-          checkedData(
-            await db
-              .from("material_editor_grants")
-              .insert({
-                material_id: material.id,
-                seller_id: seller.id,
-                document_reference: `E2E ${seller.loginId}`,
-                granted_by: seller.authUserId,
-              })
-              .select()
-              .single(),
-          );
+          const { error } = await db.rpc("set_material_editor_grant", {
+            p_material_id: material.id,
+            p_seller_id: seller.id,
+            p_document_reference: `E2E ${seller.loginId}`,
+            p_actor_id: grantAdmin.id,
+          });
+          if (error) throw new Error(error.message);
         }
       }
       if (kind === "removal") invitationLink = await verifyRemovalEmail(page, company, recipient);
@@ -155,7 +152,9 @@ for (const kind of ["registration", "transfer_out", "transfer_in", "removal"] as
       const checks = page.locator('input[name^="consent."]');
       for (const check of await checks.all()) await check.check();
       await submit.click();
-      await expect(page.getByRole("alert")).toContainText("必須資料もご確認ください。");
+      await expect(
+        page.getByRole("alert").filter({ hasText: "必須資料もご確認ください。" }),
+      ).toContainText("必須資料もご確認ください。");
       await expect(page.getByLabel("署名・担当者名（必須）")).toHaveValue(signer);
       const firstRow = page.getByRole("region", { name: "資材 1", exact: true });
       const upload = firstRow.getByLabel("パッケージ・ラベルの資料", { exact: false });
@@ -291,7 +290,10 @@ for (const kind of ["registration", "transfer_out", "transfer_in", "removal"] as
       const publicMaterial = checkedData(
         await db.from("materials").select("seller_id,sales_status").eq("id", first.id).single(),
       );
-      expect(publicMaterial).toEqual({ seller_id: first.seller_id, sales_status: "販売中" });
+      expect(publicMaterial).toEqual({
+        seller_id: kind === "transfer_out" ? seller.id : null,
+        sales_status: "販売中",
+      });
       await visitor.goto(`/materials/${first.id}`);
       expect(await visitor.content()).not.toContain("非公開 営業企画部");
       expect(await visitor.content()).not.toContain(recipient);

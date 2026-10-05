@@ -72,7 +72,9 @@ test("一般プロフィールの保存・再読み込み・公開設定とエ�
     await page.getByLabel("ハンドルネーム").fill(handle);
     await page.getByLabel("リンク", { exact: false }).fill("javascript:alert(1)");
     await page.getByRole("button", { name: "保存する" }).click();
-    await expect(page.getByRole("alert")).toContainText("リンクはhttps://またはhttp://");
+    await expect(
+      page.getByRole("alert").filter({ hasText: "リンクはhttps://またはhttp://" }),
+    ).toContainText("リンクはhttps://またはhttp://");
     await expect(page.getByLabel("ハンドルネーム")).toHaveValue(handle);
     await page.getByLabel("リンク", { exact: false }).fill("https://example.test/farm");
     await page.getByRole("button", { name: "保存する" }).click();
@@ -198,7 +200,9 @@ for (const role of ["general", "seller", "admin"] as const) {
       await page.context().clearCookies();
       await page.goto(`/login?next=${encodeURIComponent(home)}`);
       await page.getByRole("button", { name: "パスキーでログイン", exact: true }).click();
-      await expect(page.getByRole("alert")).toContainText("パスキーの操作を完了できませんでした。");
+      await expect(
+        page.getByRole("alert").filter({ hasText: "パスキーの操作を完了できませんでした。" }),
+      ).toContainText("パスキーの操作を完了できませんでした。");
       await expect(page).toHaveURL(/\/login\?/);
       await page.goto(home);
       await expect(page).toHaveURL(role === "seller" ? /\/sellers\/login\?/ : /\/login\?/);

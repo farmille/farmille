@@ -105,7 +105,7 @@ export async function createDurableAdmin(): Promise<GeneralUser> {
   return { id: user.id, email, password, handle: token.slice(0, 30) };
 }
 
-export async function createDurableMaterial(sellerId: string | null = null) {
+export async function createDurableMaterial() {
   return checkedData(
     await accountDb()
       .from("materials")
@@ -113,7 +113,7 @@ export async function createDurableMaterial(sellerId: string | null = null) {
         name: `E2E資材_company-e2e-${randomUUID()}`,
         manufacturer_name: "E2E申請資料メーカー",
         sales_status: "販売中",
-        seller_id: sellerId,
+        seller_id: null,
       })
       .select("id,name,seller_id,sales_status")
       .single(),
