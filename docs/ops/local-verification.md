@@ -6,13 +6,14 @@
 
 ```bash
 cd /Users/shun/Documents/farmille/farmille
-npx supabase start -x studio,analytics,vector,edge-runtime,functions,inbucket,imgproxy,realtime
+npx supabase start -x studio,analytics,vector,edge-runtime,functions,imgproxy,realtime
 pnpm dev
 ```
 
 - Docker のディスクに余裕がある場合は `-x` 以下を外して Studio 込みで起動してよい
 - `.env.local` はローカル既定値で作成済み（gitignore 対象）。値がずれたら `npx supabase status` の `ANON_KEY` / `SERVICE_ROLE_KEY` と突き合わせる
-- ブラウザで http://localhost:3000 。**スマホ幅（375px）で見るのが正**（Chrome DevTools のデバイスツールバー → iPhone SE 等）
+- ブラウザで http://localhost:3007 。**スマホ幅（375px）で見るのが正**（Chrome DevTools のデバイスツールバー → iPhone SE 等）
+- 認証メールと企業申請メールを確認するため、Mailpitは停止しない。設定は`supabase/config.toml`のSMTPポート54325と`/api/auth/email`へのフックを使う。メール一覧はhttp://localhost:54324で確認する。
 
 ## 2. データを入れ直したいとき
 

@@ -1,0 +1,668 @@
+[
+  {
+    "route": "/account/passkeys",
+    "role": "general",
+    "state": "登録・削除・キャンセル",
+    "actions": ["三役の仮想WebAuthnを登録・再ログイン・削除"],
+    "assertions": ["追加認証、削除キャンセル、削除済み拒否"],
+    "tests": ["e2e/12-account-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/account/password",
+    "role": "general",
+    "state": "現在パスワード正誤",
+    "actions": ["三役の現在パスワードを変更"],
+    "assertions": ["誤った現在値の拒否、新値ログイン"],
+    "tests": ["e2e/10-password-security.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/company-applications/[id]",
+    "role": "admin",
+    "state": "会社申請詳細",
+    "actions": ["回答と非公開添付を閲覧、控えメール再送"],
+    "assertions": ["受付情報保持、権限を満たす資料アクセス"],
+    "tests": ["e2e/13-company-applications.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/company-applications",
+    "role": "admin",
+    "state": "会社申請一覧",
+    "actions": ["AAL2で受付済み申請一覧を見る"],
+    "assertions": ["受付番号、AAL1から拒否"],
+    "tests": ["e2e/13-company-applications.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/materials/[id]",
+    "role": "admin",
+    "state": "書類確認・公開監査",
+    "actions": ["編集権を資材単位で付与、掲載状態変更"],
+    "assertions": ["対象資材だけ権限反映、非公開状態"],
+    "tests": ["e2e/07-seller-content.spec.ts", "e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/materials/expressions/[id]",
+    "role": "admin",
+    "state": "資材確認中・確認終了",
+    "actions": ["確認済み版を公開する"],
+    "assertions": ["同じ版の公開反映、確認終了"],
+    "tests": ["e2e/07-seller-content.spec.ts", "e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/materials/expressions",
+    "role": "admin",
+    "state": "表現確認待ち一覧",
+    "actions": ["資材と会社原稿を選ぶ"],
+    "assertions": ["対象原稿の内容へ進む"],
+    "tests": ["e2e/07-seller-content.spec.ts", "e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/materials/expressions/profiles/[id]",
+    "role": "admin",
+    "state": "会社紹介確認中",
+    "actions": ["会社紹介を表現確認し公開する"],
+    "assertions": ["公開会社ページに紹介反映"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/materials/new",
+    "role": "admin",
+    "state": "運営初期登録",
+    "actions": ["資材の初期ページを登録する"],
+    "assertions": ["登録資材と公開内容"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/materials",
+    "role": "admin",
+    "state": "資材一覧",
+    "actions": ["資材登録と既存資材管理へ進む"],
+    "assertions": ["対象の資材名と詳細"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/materials/requests/[id]",
+    "role": "admin",
+    "state": "旧申請比較・審査",
+    "actions": ["申請内容を比較し承認または却下する"],
+    "assertions": ["審査状態と理由、権限境界"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/materials/requests",
+    "role": "admin",
+    "state": "旧変更申請一覧",
+    "actions": ["保留・承認・却下・取消で絞り込む"],
+    "assertions": ["対応状態だけの申請一覧"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/mfa",
+    "role": "admin",
+    "state": "TOTP未登録・登録済み",
+    "actions": ["TOTP登録と検証"],
+    "assertions": ["認証後の保護画面遷移"],
+    "tests": ["e2e/06-seller-approval.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin",
+    "role": "admin",
+    "state": "AAL1・AAL2",
+    "actions": ["MFAを完了して運営管理へ進む"],
+    "assertions": ["AAL1はMFA要求、一般会員は404"],
+    "tests": ["e2e/06-seller-approval.spec.ts", "tester-army/tests/member.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/published-posts",
+    "role": "admin",
+    "state": "公開済み投稿",
+    "actions": ["理由を記録して投稿を非公開化"],
+    "assertions": ["一覧から除外、本文はDBに保持"],
+    "tests": ["e2e/published-posts-moderation.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/reports",
+    "role": "admin",
+    "state": "未処理通報",
+    "actions": ["口コミを通報し運営が非公開化して解決する"],
+    "assertions": ["通報処理完了、対象非公開"],
+    "tests": ["e2e/08-moderation.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/sellers/[id]",
+    "role": "admin",
+    "state": "未確認・確認済み",
+    "actions": ["メーカー紐付け、ログイン発行"],
+    "assertions": ["承認、設定URL、資材編集権は自動付与しない"],
+    "tests": ["e2e/06-seller-approval.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/sellers",
+    "role": "admin",
+    "state": "申請一覧",
+    "actions": ["申請メーカーを選択する"],
+    "assertions": ["申請した会社の詳細へ遷移"],
+    "tests": ["e2e/06-seller-approval.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/tags",
+    "role": "admin",
+    "state": "分類マスタ",
+    "actions": ["タグ追加、変更、削除"],
+    "assertions": ["保存値と一覧更新"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/usage-reports/[id]",
+    "role": "admin",
+    "state": "保留・公開",
+    "actions": ["運営がレポートを公開する"],
+    "assertions": ["公開本文とstatus"],
+    "tests": ["e2e/08-moderation.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/admin/usage-reports",
+    "role": "admin",
+    "state": "編集局の保留一覧",
+    "actions": ["提出レポートを選択する"],
+    "assertions": ["対象レポートの編集画面"],
+    "tests": ["e2e/08-moderation.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/articles/[id]",
+    "role": "anonymous",
+    "state": "公開・下書き・非公開",
+    "actions": ["記事本文を読む、非公開化後に再訪する"],
+    "assertions": ["公開本文、非公開後の404"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/articles",
+    "role": "anonymous",
+    "state": "公開一覧",
+    "actions": ["記事一覧を見る"],
+    "assertions": ["h1、main、横はみ出しなし"],
+    "tests": ["tester-army/tests/public.e2e.ts", "e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/company-requests/receipts/[id]",
+    "role": "verified-company",
+    "state": "有効セッション・別受付票",
+    "actions": ["Dの受付票と資料を読む、メール再送"],
+    "assertions": ["本人限定、添付の非公開、同じ受付番号"],
+    "tests": ["e2e/13-company-applications.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/company-requests/receipts",
+    "role": "anonymous",
+    "state": "期限切れ受付票の再確認",
+    "actions": ["受付番号と法人メールから再確認する"],
+    "assertions": ["再確認メール、確認前の情報非開示"],
+    "tests": ["e2e/13-company-applications.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/company-requests/removal/form",
+    "role": "verified-company",
+    "state": "メール確認済み・期限切れ",
+    "actions": ["Dフォーム送信、未提出入力破棄、確認期限切れ"],
+    "assertions": ["受付票、入力破棄、未確認・期限切れ拒否"],
+    "tests": ["e2e/13-company-applications.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/company-requests/removal",
+    "role": "anonymous",
+    "state": "簡易受付",
+    "actions": ["会社名・担当者・法人メールで確認メールを送る"],
+    "assertions": ["確認メール送信案内"],
+    "tests": ["e2e/13-company-applications.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/applications/[id]",
+    "role": "seller",
+    "state": "受付票",
+    "actions": ["自社の申請控えと資料を閲覧"],
+    "assertions": ["本人限定、回答・添付・印刷対象"],
+    "tests": ["e2e/13-company-applications.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/applications/new/[kind]",
+    "role": "seller",
+    "state": "登録・引渡し・引継ぎ",
+    "actions": ["A/B/Cフォームの資料と同意を入力し送信"],
+    "assertions": ["受付番号、控え、公開資材や権限は変更しない"],
+    "tests": ["e2e/13-company-applications.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/applications",
+    "role": "seller",
+    "state": "会社申請一覧",
+    "actions": ["受付済み会社申請の一覧を開く"],
+    "assertions": ["自社だけの受付番号"],
+    "tests": ["e2e/13-company-applications.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/articles/[id]/edit",
+    "role": "seller",
+    "state": "保存済み記事",
+    "actions": ["記事本文と関連付けを編集"],
+    "assertions": ["再読込保持と公開本文反映"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/articles/new",
+    "role": "seller",
+    "state": "入力・下書き",
+    "actions": ["記事を作成し資材に関連付ける"],
+    "assertions": ["下書き保持、記事と資材関連記事への公開"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/articles",
+    "role": "seller",
+    "state": "下書き・公開・非公開",
+    "actions": ["記事一覧、公開状態切替、削除"],
+    "assertions": ["公開反映、非公開404、一覧から削除"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/materials/[id]/history/[versionId]",
+    "role": "seller",
+    "state": "原稿履歴",
+    "actions": ["過去原稿を開く"],
+    "assertions": ["過去本文と原稿状態"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/materials/[id]",
+    "role": "seller",
+    "state": "権限なし・下書き・確認中・公開・非公開",
+    "actions": ["書類確認、執筆、保存、プレビュー、公開確認送信、非公開化"],
+    "assertions": ["資材単位の権限、保存値、公開前非反映、承認後反映"],
+    "tests": ["e2e/07-seller-content.spec.ts", "e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/materials/new",
+    "role": "seller",
+    "state": "旧新規ページ",
+    "actions": ["旧URLを開く"],
+    "assertions": ["/dashboard/materialsへのredirect"],
+    "tests": ["tester-army/tests/access.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/materials",
+    "role": "seller",
+    "state": "書類未確認・編集権あり",
+    "actions": ["対象資材一覧を見る"],
+    "assertions": ["権限対象資材と状態"],
+    "tests": ["e2e/07-seller-content.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/materials/requests/[id]",
+    "role": "seller",
+    "state": "旧変更申請履歴",
+    "actions": ["旧申請を閲覧、保留中なら取消"],
+    "assertions": ["本人限定、取消状態"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard",
+    "role": "seller",
+    "state": "承認済み・一般会員拒否",
+    "actions": ["共有IDでログイン、一般会員で訪問"],
+    "assertions": ["会社名、一般会員のアクセス拒否"],
+    "tests": ["e2e/06-seller-approval.spec.ts", "tester-army/tests/member.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/profile/history/[id]",
+    "role": "seller",
+    "state": "原稿履歴",
+    "actions": ["過去の会社紹介原稿を開く"],
+    "assertions": ["過去本文と状態"],
+    "tests": ["e2e/12-account-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dashboard/profile",
+    "role": "seller",
+    "state": "下書き・確認中・公開済み",
+    "actions": ["会社紹介を保存、プレビュー、表現確認送信"],
+    "assertions": ["入力保持、公開前非反映、承認後公開"],
+    "tests": ["e2e/12-account-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/dev/tokens",
+    "role": "local-development",
+    "state": "トークン一覧",
+    "actions": ["開発用カタログを開く"],
+    "assertions": ["開発環境のみ表示"],
+    "tests": [],
+    "verification": "local-only"
+  },
+  {
+    "route": "/dev/ui",
+    "role": "local-development",
+    "state": "UI一覧",
+    "actions": ["開発用UIカタログを開く"],
+    "assertions": ["開発環境のみ表示"],
+    "tests": [],
+    "verification": "local-only"
+  },
+  {
+    "route": "/legal/[slug]",
+    "role": "anonymous",
+    "state": "各文書・未知slug",
+    "actions": ["全規約文書を読む、一覧へ戻る、未知slugを開く"],
+    "assertions": ["各タイトル、戻り先、404"],
+    "tests": ["tester-army/tests/public.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/legal",
+    "role": "anonymous",
+    "state": "一覧",
+    "actions": ["規約一覧を見る、文書から戻る"],
+    "assertions": ["一覧のURLとh1"],
+    "tests": ["tester-army/tests/public.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/login",
+    "role": "anonymous",
+    "state": "保護画面戻り先・外部next",
+    "actions": ["ログイン、外部nextを指定する"],
+    "assertions": ["戻り先のURL、外部へ遷移しない"],
+    "tests": ["tester-army/tests/member.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/materials/[id]/articles",
+    "role": "anonymous",
+    "state": "関連記事一覧",
+    "actions": ["一覧を見る、関連付け済み記事を読む"],
+    "assertions": ["資材名、関連付け済み記事"],
+    "tests": ["tester-army/tests/public.e2e.ts", "e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/materials/[id]",
+    "role": "anonymous",
+    "state": "公開・非公開",
+    "actions": ["資材詳細を見る、投稿・保存・口コミ導線を操作"],
+    "assertions": ["資材名、投稿内容、非公開後の404"],
+    "tests": [
+      "tester-army/tests/public.e2e.ts",
+      "tester-army/tests/reviews.e2e.ts",
+      "tester-army/tests/saved.e2e.ts",
+      "e2e/07-seller-content.spec.ts"
+    ],
+    "verification": "pending"
+  },
+  {
+    "route": "/materials/[id]/report/new",
+    "role": "general",
+    "state": "下書き・プレビュー・提出済み",
+    "actions": ["保存、再読込、五段階入力、写真と比較グラフ、提出"],
+    "assertions": ["保存内容、pending、提出後ロック、匿名404"],
+    "tests": [
+      "tester-army/tests/reports.e2e.ts",
+      "e2e/03-usage-report.spec.ts",
+      "e2e/14-admin-content-flows.spec.ts"
+    ],
+    "verification": "pending"
+  },
+  {
+    "route": "/materials/[id]/review/[reviewId]/edit",
+    "role": "general",
+    "state": "本人の投稿",
+    "actions": ["評価と本文を編集、削除"],
+    "assertions": ["編集本文、平均評価、削除後の集計"],
+    "tests": ["tester-army/tests/reviews.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/materials/[id]/review/new",
+    "role": "general",
+    "state": "未入力・入力済み",
+    "actions": ["口コミ投稿、未ログインで訪問"],
+    "assertions": ["本文と評価集計、ログイン戻り先"],
+    "tests": ["tester-army/tests/reviews.e2e.ts", "tester-army/tests/member.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/materials/[id]/reviews",
+    "role": "anonymous",
+    "state": "口コミ一覧",
+    "actions": ["一覧を見る"],
+    "assertions": ["mainに資材名"],
+    "tests": ["tester-army/tests/public.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/me/edit",
+    "role": "general",
+    "state": "入力・保存済み",
+    "actions": ["ハンドル、自己紹介、所属、リンクを保存"],
+    "assertions": ["再読込後の値、公開プロフィール反映"],
+    "tests": ["tester-army/tests/member.e2e.ts", "e2e/12-account-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/me",
+    "role": "general",
+    "state": "ログイン中",
+    "actions": ["本人名を見る、ログアウト"],
+    "assertions": ["ハンドル、匿名で再訪するとログイン"],
+    "tests": ["tester-army/tests/member.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/me/saved/compare",
+    "role": "general",
+    "state": "二資材比較",
+    "actions": ["二資材を選択して比較する"],
+    "assertions": ["比較表に両資材名"],
+    "tests": ["tester-army/tests/saved.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/me/saved",
+    "role": "general",
+    "state": "保存あり・なし",
+    "actions": ["資材と投稿を保存、比較選択、解除、再読込"],
+    "assertions": ["解除後の一覧、比較可否、空表示"],
+    "tests": ["tester-army/tests/saved.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/me/setup",
+    "role": "admin",
+    "state": "一般プロフィール未設定",
+    "actions": ["一般投稿からプロフィール設定へ進む"],
+    "assertions": ["設定保存後のマイページ"],
+    "tests": ["e2e/08-moderation.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/",
+    "role": "anonymous",
+    "state": "閲覧",
+    "actions": ["案内・検索・投稿導線を見る"],
+    "assertions": ["h1、main、横はみ出しなし"],
+    "tests": ["tester-army/tests/public.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/password-reset",
+    "role": "anonymous",
+    "state": "メール送信",
+    "actions": ["一般・運営のパスワード再設定メールを送る"],
+    "assertions": ["Mailpit内のリンクから変更成功"],
+    "tests": ["e2e/10-password-security.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/password-reset/update",
+    "role": "general",
+    "state": "有効リンク・使用済み",
+    "actions": ["再設定リンクで変更、再訪"],
+    "assertions": ["新パスワードのログイン、無効リンク表示"],
+    "tests": ["e2e/10-password-security.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/post",
+    "role": "general",
+    "state": "資材未選択・選択済み",
+    "actions": ["資材検索、選択、口コミ作成へ進む"],
+    "assertions": ["選んだ資材IDの投稿先"],
+    "tests": ["tester-army/tests/member.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/reports/[id]",
+    "role": "general",
+    "state": "公開・会員ゲート",
+    "actions": ["匿名で開く、ログイン、全文を見る、ログアウト"],
+    "assertions": ["HTMLに限定本文なし、会員全文、再度ゲート"],
+    "tests": ["tester-army/tests/reports.e2e.ts", "e2e/11-report-reading.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/search",
+    "role": "anonymous",
+    "state": "検索条件あり・なし",
+    "actions": ["分類AND/OR、評価順、空結果、詳細遷移"],
+    "assertions": ["AND/OR別の資材集合、並び順、遷移先"],
+    "tests": ["tester-army/tests/search.e2e.ts", "tester-army/tests/public.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/sellers/[id]",
+    "role": "anonymous",
+    "state": "公開紹介",
+    "actions": ["会社紹介の承認前後に閲覧する"],
+    "assertions": ["承認前非公開、承認後の紹介"],
+    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/sellers/apply/done",
+    "role": "anonymous",
+    "state": "受付済み",
+    "actions": ["メーカー登録申請を送信する"],
+    "assertions": ["申請受付の見出し"],
+    "tests": ["e2e/06-seller-approval.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/sellers/apply",
+    "role": "anonymous",
+    "state": "法人申請入力",
+    "actions": ["会社情報を申請する"],
+    "assertions": ["受付完了、運営確認待ち"],
+    "tests": ["e2e/06-seller-approval.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/sellers/login",
+    "role": "seller",
+    "state": "承認済みアカウント",
+    "actions": ["発行された共有IDでログイン"],
+    "assertions": ["メーカーのダッシュボード、役割境界"],
+    "tests": ["e2e/06-seller-approval.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/sellers",
+    "role": "anonymous",
+    "state": "利用ガイド",
+    "actions": ["会員登録と各種手続き案内を開く"],
+    "assertions": ["ガイド、申請先、from=meの保持"],
+    "tests": ["tester-army/tests/public.e2e.ts", "e2e/06-seller-approval.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/sellers/password-reset",
+    "role": "anonymous",
+    "state": "ID指定再設定",
+    "actions": ["メーカーの再設定メールを送る"],
+    "assertions": ["Mailpitのリンクで変更後ログイン"],
+    "tests": ["e2e/10-password-security.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/signup/done",
+    "role": "general",
+    "state": "登録直後",
+    "actions": ["一般登録を完了する"],
+    "assertions": ["登録完了の見出し"],
+    "tests": ["tester-army/tests/signup.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/signup/general",
+    "role": "anonymous",
+    "state": "入力・重複ハンドル",
+    "actions": ["一般登録、同じニックネームで再登録"],
+    "assertions": ["登録完了、重複エラー、住所入力保持"],
+    "tests": ["tester-army/tests/signup.e2e.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/signup",
+    "role": "anonymous",
+    "state": "会員種別選択",
+    "actions": ["会員種別選択を見る"],
+    "assertions": ["h1、main、横はみ出しなし"],
+    "tests": ["tester-army/tests/public.e2e.ts", "e2e/01-auth.spec.ts"],
+    "verification": "pending"
+  },
+  {
+    "route": "/users/[id]",
+    "role": "anonymous",
+    "state": "公開プロフィール",
+    "actions": ["プロフィール変更後に匿名で読む"],
+    "assertions": ["保存したハンドル・自己紹介・所属・リンク"],
+    "tests": ["tester-army/tests/member.e2e.ts"],
+    "verification": "pending"
+  }
+]

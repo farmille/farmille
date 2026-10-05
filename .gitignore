@@ -26,6 +26,7 @@ styled-system/
 storybook-static/
 test-results/
 playwright-report/
+.e2e/
 .vercel/
 *.tsbuildinfo
 next-env.d.ts

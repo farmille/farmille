@@ -14,6 +14,10 @@
     "check": "pnpm lint && pnpm exec tsc --noEmit && pnpm exec vitest run",
     "test": "vitest",
     "test:e2e": "playwright test",
+    "test:tester-army": "e2e run",
+    "test:tester-army:agent": "node scripts/run-tester-army-agent.mjs",
+    "test:tester-army:list": "e2e list",
+    "check:tester-army:coverage": "node scripts/check-tester-army-coverage.mjs",
     "gen:types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/database.types.ts",
     "gen:types:dev": "npx supabase gen types typescript --linked > src/types/database.types.ts",
     "storybook": "storybook dev -p 6076",
@@ -43,6 +47,8 @@
     "valibot": "1.4.2"
   },
   "devDependencies": {
+    "@ai-sdk/openai": "4.0.83",
+    "@e2e-dev/web": "0.12.0",
     "@oxlint/plugins": "1.78.0",
     "@pandacss/dev": "~1.11.5",
     "@playwright/test": "1.62.0",
@@ -56,6 +62,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4.7.0",
+    "ai": "7.0.127",
+    "e2e": "0.17.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "eslint-plugin-oxlint": "1.78.0",

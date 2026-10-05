@@ -30,6 +30,7 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "e2e/**/*.ts",
+    "tester-army/**/*.ts",
     "tests/release/**/*.ts",
     ".storybook/**/*.ts",
     ".storybook/**/*.tsx",

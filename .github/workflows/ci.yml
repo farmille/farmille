@@ -111,13 +111,13 @@ jobs:
           if-no-files-found: ignore
 
   e2e:
-    name: Playwright E2E
+    name: Playwright and Tester Army E2E
     env:
       SMTP_URL: "smtp://127.0.0.1:54325"
       MAIL_FROM: "Farmille <noreply@example.test>"
       AUTH_EMAIL_HOOK_SECRET: "v1,whsec_bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ=="
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     steps:
       - name: Check out repository
@@ -177,3 +177,30 @@ jobs:
 
       - name: Run Playwright E2E
         run: pnpm exec playwright test
+
+      - name: Check application flow inventory
+        run: pnpm check:tester-army:coverage
+
+      - name: Install Tester Army browser
+        run: pnpm exec e2e-web install chromium --with-deps
+
+      - name: Run deterministic Tester Army E2E
+        run: pnpm test:tester-army
+        env:
+          E2E_TELEMETRY_DISABLED: "1"
+
+      - name: Upload application E2E evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: application-e2e-evidence
+          path: |
+            .e2e/report.json
+            .e2e/junit.xml
+            .e2e/summary.md
+            .e2e/artifacts
+            .e2e/logs
+            playwright-report
+            test-results
+          retention-days: 14
+          if-no-files-found: warn

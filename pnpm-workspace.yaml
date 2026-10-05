@@ -30,3 +30,5 @@ auditConfig:
 
 minimumReleaseAgeExclude:
   - nodemailer@10.0.13
+  - "@e2e-dev/web@0.12.0"
+  - e2e@0.17.0
