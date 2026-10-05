@@ -67,6 +67,10 @@ export const tokens = {
     card: { value: "14px" },
     button: { value: "12px" },
     input: { value: "11px" },
+    // 実証データの横棒グラフ
+    bar: { value: "5px" },
+    // 組織の頭文字など、文字を1字載せる小さな標章
+    mark: { value: "6px" },
   },
   // 画像枠は用途ごとに比率を固定し、画面幅や取得画像の寸法で高さを変えない。
   aspectRatios: {

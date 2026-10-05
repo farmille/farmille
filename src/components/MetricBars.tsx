@@ -136,14 +136,14 @@ function MetricRow({
           flex: "1",
           h: "17px",
           bg: "surface.page",
-          borderRadius: "1",
+          borderRadius: "bar",
           overflow: "hidden",
         })}
       >
         <div
           className={css({
             h: "100%",
-            borderRadius: "1",
+            borderRadius: "bar",
             bg: variant === "treated" ? "primary.600" : "border.strong",
           })}
           style={{ width: `${widthPercent}%` }}

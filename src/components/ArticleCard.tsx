@@ -108,7 +108,7 @@ export function ArticleCard({
             className={css({
               w: "18px",
               h: "18px",
-              borderRadius: "1.5",
+              borderRadius: "mark",
               bg: "primary.200",
               display: "grid",
               placeItems: "center",
