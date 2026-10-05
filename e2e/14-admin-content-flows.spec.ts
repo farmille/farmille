@@ -94,6 +94,9 @@ test("メーカー記事の画像・Markdown・資材紐づけを保存し、公
       path: test.info().outputPath("article-published-375.png"),
       fullPage: true,
     });
+    await anonymous.goto(`/materials/${material.id}/articles`);
+    await expect(anonymous.locator(`a[href="/articles/${draft.id}"]`)).toContainText(editedTitle);
+    await anonymous.goto(`/articles/${draft.id}`);
     await page.goto("/dashboard/articles");
     const card = page.getByRole("region", { name: editedTitle, exact: true });
     await card.getByRole("button", { name: "非公開にする", exact: true }).click();
@@ -166,6 +169,23 @@ test("運営が資材と検索タグを登録・編集し、使用中の削除�
     materialId = await materialByOwnedName(materialName);
     if (materialId === null) throw new Error("Admin-created material was not persisted.");
     expect(await materialTagNames(materialId)).toEqual([renamedTag]);
+    await page.goto("/admin/materials");
+    const materialRow = page
+      .getByRole("row")
+      .filter({ has: page.getByRole("link", { name: materialName, exact: true }) });
+    await expect(
+      materialRow.getByRole("link", { name: materialName, exact: true }),
+    ).toHaveAttribute("href", `/admin/materials/${materialId}`);
+    await expect(materialRow).toContainText("E2E 運営登録メーカー");
+    await expect(materialRow).toContainText("公開中");
+    await expect(page.getByRole("link", { name: "資材を新規登録", exact: true })).toHaveAttribute(
+      "href",
+      "/admin/materials/new",
+    );
+    await expect(
+      page.getByRole("link", { name: "資材変更申請を処理", exact: true }),
+    ).toHaveAttribute("href", "/admin/materials/requests");
+    await materialRow.getByRole("link", { name: materialName, exact: true }).click();
     await page.getByLabel("紹介文", { exact: false }).fill("保存して更新した紹介文です。");
     await page.getByLabel("公式 URL", { exact: false }).fill("https://example.com/owned-material");
     await page.getByRole("button", { name: "保存する", exact: true }).click();
@@ -411,6 +431,7 @@ test("資材原稿の修正依頼・再提出・取り下げを履歴に残し�
   const seller = await createApprovedSeller("material-revisions");
   const admin = await createContentAdmin("material-revisions");
   const material = await createMaterial("material-revisions", null, seller.officialName);
+  const unrelatedMaterial = await createMaterial("material-unrelated", null, seller.officialName);
   const adminContext = await browser.newContext({ viewport: { width: 375, height: 812 } });
   const adminPage = await adminContext.newPage();
   const description = uniqueToken("first-manuscript");
@@ -429,7 +450,14 @@ test("資材原稿の修正依頼・再提出・取り下げを履歴に残し�
       }),
     ).toBeVisible();
     await loginSeller(page, seller);
-    await page.goto(`/dashboard/materials/${material.id}`);
+    await page.goto("/dashboard/materials");
+    const authorizedCard = page.locator(`a[href="/dashboard/materials/${material.id}"]`);
+    await expect(authorizedCard).toContainText(material.name);
+    await expect(authorizedCard).not.toContainText("（非公開）");
+    await expect(
+      page.locator(`a[href="/dashboard/materials/${unrelatedMaterial.id}"]`),
+    ).toHaveCount(0);
+    await authorizedCard.click();
     await page.getByRole("textbox", { name: "製品説明", exact: true }).fill(description);
     await page.getByRole("button", { name: "保存して表現確認へ送る", exact: true }).click();
     await expect(
@@ -541,6 +569,7 @@ test("資材原稿の修正依頼・再提出・取り下げを履歴に残し�
     ).toMatchObject({ status: "returned", review_note: reason });
   } finally {
     await adminContext.close();
+    await deleteMaterial(unrelatedMaterial.id);
     await deleteMaterial(material.id);
     await cleanupSellerByLoginId(seller.loginId);
     await deleteAuthUsersByEmail(admin.email);
@@ -558,6 +587,11 @@ test("既存資材申請の本人限定閲覧・取消・運営の却下と承�
     seller.id,
     seller.officialName,
     "legacy-approve",
+  );
+  const pending = await createLegacyMaterialRequest(
+    seller.id,
+    seller.officialName,
+    "legacy-pending",
   );
   const otherContext = await browser.newContext({ viewport: { width: 375, height: 812 } });
   const otherPage = await otherContext.newPage();
@@ -628,8 +662,25 @@ test("既存資材申請の本人限定閲覧・取消・運営の却下と承�
     await expect(
       page.getByText("既存申請の比較対象となる紹介文です。", { exact: true }),
     ).toBeVisible();
+    const requestsByStatus = [
+      { status: "pending", request: pending },
+      { status: "approved", request: approve },
+      { status: "rejected", request: reject },
+      { status: "cancelled", request: cancel },
+    ];
+    for (const selected of requestsByStatus) {
+      await adminPage.goto(`/admin/materials/requests?status=${selected.status}`);
+      await expect(
+        adminPage.getByRole("link", { name: selected.request.name, exact: true }),
+      ).toHaveAttribute("href", `/admin/materials/requests/${selected.request.id}`);
+      for (const other of requestsByStatus.filter((entry) => entry.status !== selected.status)) {
+        await expect(
+          adminPage.locator(`a[href="/admin/materials/requests/${other.request.id}"]`),
+        ).toHaveCount(0);
+      }
+    }
     await adminPage.goto("/admin/materials/requests?status=all");
-    for (const request of [cancel, reject, approve])
+    for (const request of [cancel, reject, approve, pending])
       await expect(
         adminPage.getByRole("link", { name: request.name, exact: true }),
       ).toHaveAttribute("href", `/admin/materials/requests/${request.id}`);
