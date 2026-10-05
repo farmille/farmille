@@ -162,7 +162,8 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
           製品説明
         </h2>
         <p className={css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere" })}>
-          {publishedPage?.content.description || "−"}
+          {(publishedPage === null ? material.description : publishedPage.content.description) ||
+            "−"}
         </p>
       </section>
       <section aria-labelledby="material-timing-heading">
