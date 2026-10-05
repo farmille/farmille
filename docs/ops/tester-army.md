@@ -24,6 +24,34 @@ pnpm check:tester-army:coverage
 
 アプリはランナーが本番ビルドを作って起動する。既に起動しているローカルアプリを使う場合は`PLAYWRIGHT_EXTERNAL_WEB_SERVER=1`を指定する。CIではPlaywright完了後にTester Armyを実行し、Supabaseとメール環境を共有する。
 
+## インストール済みChromiumを使う場合
+
+ブラウザの配布先に接続できない環境では、インストール済みのChromiumを明示的に使える。未指定時とCIの通常実行は、各ランナーが用意したブラウザを使う。
+
+Playwrightには実行可能なファイルの絶対パスを渡す。
+
+```bash
+FARMILLE_E2E_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium \
+  node --env-file=.env.local node_modules/@playwright/test/cli.js test
+```
+
+ローカルでrootとして実行し、Chromiumがsandboxの解除を要求する場合だけ、同じコマンドに`FARMILLE_E2E_CHROMIUM_NO_SANDBOX=1`を追加する。この指定は明示的な実行パスとローカルroot実行が必要で、CIでは拒否する。
+
+`@e2e-dev/web@0.12.0`には実行パスの設定がない。Tester Armyでは公開APIの`web.connect`で、別に起動したローカルChromiumのCDPへ接続する。接続先は認証情報を含まないloopbackの`http`または`ws`に限る。以下はbashで、専用の一時プロフィールを作り、終了時にブラウザとプロフィールを片付ける例。
+
+```bash
+CHROMIUM_PROFILE="$(mktemp -d)"
+/usr/bin/chromium --headless --remote-debugging-address=127.0.0.1 \
+  --remote-debugging-port=9222 --user-data-dir="$CHROMIUM_PROFILE" \
+  about:blank > /tmp/farmille-chromium.log 2>&1 &
+CHROMIUM_PID=$!
+trap 'kill "$CHROMIUM_PID" 2>/dev/null || true; wait "$CHROMIUM_PID" 2>/dev/null || true; rm -rf "$CHROMIUM_PROFILE"' EXIT
+FARMILLE_TESTER_ARMY_CDP_ENDPOINT=http://127.0.0.1:9222 \
+  node --env-file=.env.local node_modules/e2e/dist/cli/bin.js run
+```
+
+接続前にChromiumのログでCDPの起動を確認する。rootのローカル環境で必要な場合だけ、ブラウザを起動する上のコマンドに`--no-sandbox`を追加する。CDPを外部へ公開せず、他の作業で使うブラウザへは接続しない。Tester Armyは試行ごとに独立したcontextを作るが、CDP接続の終了では外部のブラウザプロセスを停止しないため、起動した側で必ず終了する。システムChromiumの版は各ランナーの同梱版と異なる場合があるため、検証結果には使用した版も記録する。
+
 ## AIによる操作
 
 ```bash

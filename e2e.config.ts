@@ -2,6 +2,7 @@ import { web } from "@e2e-dev/web";
 import { openai } from "@ai-sdk/openai";
 import { gateway } from "ai";
 import type { E2EConfig } from "e2e";
+import { localChromiumCdpEndpoint } from "./e2e/support/browser-environment";
 
 import {
   FARMILLE_E2E_ORIGIN,
@@ -10,6 +11,7 @@ import {
 } from "./tester-army/support/environment";
 
 const applicationEnvironment = localApplicationEnvironment();
+const cdpEndpoint = localChromiumCdpEndpoint();
 const agentMode = process.env.FARMILLE_TESTER_ARMY_AI === "1";
 if (agentMode && !process.env.OPENAI_API_KEY) requiredEnvironment("AI_GATEWAY_API_KEY");
 
@@ -18,7 +20,11 @@ export default {
   targets: [
     {
       name: "chromium-375",
-      engine: web({ browser: "chromium", viewport: { width: 375, height: 812 } }),
+      engine: web({
+        browser: "chromium",
+        viewport: { width: 375, height: 812 },
+        connect: cdpEndpoint === undefined ? undefined : { cdpEndpoint: () => cdpEndpoint },
+      }),
       app: {
         url: FARMILLE_E2E_ORIGIN,
         environment: "test",

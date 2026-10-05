@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { localChromiumLaunchOptions } from "./e2e/support/browser-environment";
 
 const BASE_URL = "http://localhost:3007";
 const LOCAL_SUPABASE_ORIGIN = "http://127.0.0.1:54321";
@@ -40,6 +41,7 @@ export default defineConfig({
   reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : [["list"]],
   use: {
     baseURL: BASE_URL,
+    launchOptions: localChromiumLaunchOptions(),
     trace: "retain-on-failure-and-retries",
     screenshot: "on",
     video: "retain-on-failure",
