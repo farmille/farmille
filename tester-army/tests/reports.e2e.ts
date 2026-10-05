@@ -15,7 +15,7 @@ materialTest(
     await screen.getByRole("button", "下書き保存").tap();
     await expect(screen.getByRole("status")).toHaveText("下書きを保存しました。");
     await browser.reload();
-    await expect(screen.getByLabel("作目")).toHaveValue("トマト");
+    await expect(screen.getByRole("button", "トマトを削除")).toBeVisible();
     await fillReportForSubmission(screen);
     await screen.getByLabel("＋ 写真を挿入").first().setInputFiles("e2e/fixtures/report.png");
     await screen.getByLabel("写真の説明").fill("検証用の比較写真");

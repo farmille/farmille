@@ -55,8 +55,9 @@ materialTest(
   },
 );
 
-materialTest("一致する資材がない検索結果を表示する", async ({ app, screen, member }) => {
+materialTest("一致する資材がない検索結果を表示する", async ({ app, screen, browser, member }) => {
   await app.open(`/search?filters=${encodeURIComponent(`name:存在しない資材_${member.id}`)}`);
-  await expect(screen.getByRole("main")).toContainText(/見つかりません|0件|0 件/);
+  await expect(screen.getByRole("heading", "条件に合う資材が見つかりませんでした")).toBeVisible();
+  await expect(browser.locator('main a[href^="/materials/"]')).toHaveCount(0);
   await expect(screen.getByText("ページを表示できませんでした")).toHaveCount(0);
 });
