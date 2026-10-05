@@ -26,12 +26,38 @@ SUPABASE_USE_SLIM_IMAGES=1 npx supabase@2.119.0 start --yes \
 
 この環境ではAuthとStorageのコンテナ内HEAD検査が403を返した。一方、ローカルKong経由の`/auth/v1/health`、`/storage/v1/status`、`/rest/v1/`のGETは200だった。専用の使い捨てデータで会員作成・パスワード認証・Storageへのuploadとdownloadの内容一致まで確認し、そのデータを削除した。通常のhealth検査が通らない場合の`--ignore-health-check`は、実APIのreadinessを別途確認するローカル検証に限って上の起動コマンドへ追加する。起動コマンドの成功だけでAuthやStorageの準備完了を判定しない。
 
-認証メールのフックがコンテナからアプリへ届かない場合は、Docker向けの`NO_PROXY`と`no_proxy`の既存値に`host.docker.internal`だけを追加して起動し直す。外部接続用proxyや既存の除外先は維持する。
+親シェルの`NO_PROXY`を変更して再起動しても、Authコンテナには反映されなかった。Supabase CLI 2.119.0は`docker create`を実行し、Docker client設定の`proxies.default.noProxy`がコンテナの`NO_PROXY`と`no_proxy`に使われる。既存のユーザー認証設定を読んだり変更したりせず、提供済みのproxy環境変数からタスク専用の私的な`DOCKER_CONFIG`を作る。両方のno-proxy集合を保持し、`host.docker.internal`だけを追加する。外部proxyとCAは維持する。
 
 ```bash
-export NO_PROXY="${NO_PROXY:+$NO_PROXY,}host.docker.internal"
-export no_proxy="${no_proxy:+$no_proxy,}host.docker.internal"
+FARMILLE_DOCKER_CONFIG="$(mktemp -d)"
+export FARMILLE_DOCKER_CONFIG
+python3 <<'PY'
+import json, os
+from pathlib import Path
+target = Path(os.environ["FARMILLE_DOCKER_CONFIG"])
+os.chmod(target, 0o700)
+proxy = {}
+for field, key in [("httpProxy", "HTTP_PROXY"), ("httpsProxy", "HTTPS_PROXY"),
+                   ("ftpProxy", "FTP_PROXY"), ("allProxy", "ALL_PROXY")]:
+    values = {os.environ[k] for k in (key, key.lower()) if os.environ.get(k)}
+    if len(values) > 1:
+        raise SystemExit("proxyの大文字・小文字の値が異なります。既存の有効値を確認してください。")
+    if values:
+        proxy[field] = values.pop()
+tokens = dict.fromkeys(token.strip() for key in ("NO_PROXY", "no_proxy")
+                       for token in os.environ.get(key, "").split(",") if token.strip())
+tokens["host.docker.internal"] = None
+proxy["noProxy"] = ",".join(tokens)
+path = target / "config.json"
+with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w") as file:
+    json.dump({"proxies": {"default": proxy}}, file)
+PY
+DOCKER_CONFIG="$FARMILLE_DOCKER_CONFIG" SUPABASE_USE_SLIM_IMAGES=1 \
+  npx supabase@2.119.0 start --yes --ignore-health-check \
+  --exclude=studio,edge-runtime,postgres-meta,logflare,vector,imgproxy,supavisor,realtime
 ```
+
+起動前に元のDocker contextと接続先のmetadataを比較する。この環境ではcontextは両方`default`で接続先も同一だった。別contextを使う環境で既定のdaemonへ切り替えない。適用後はコンテナ内の両no-proxy値に`host.docker.internal`があるか、値そのものを出さず有無だけを確認する。CLIのexit 0だけではDBの54322番ポートやメール到達を保証しないため、DB・Auth・Storageの実APIとMailpitの受信まで確認する。このclient設定を使ったメールの実受信は、文書追記時点では未確認。専用設定はローカル検証後に削除する。
 
 `.env.local`のSupabase接続情報はこのローカルstackの`supabase status`と照合し、SMTP・送信元・認証メールフックは[ローカル設定](../../supabase/config.toml)のダミー設定とそろえる。秘密の値をログや文書へ転記しない。ブラウザとアプリのoriginは`http://localhost:3007`、Supabaseは`http://127.0.0.1:54321`を使う。Dockerからのメールフックだけは設定済みの`host.docker.internal:3007`を使い、Server Actionsのブラウザoriginと混同しない。メール到達はMailpitの実受信で確認する。
 
