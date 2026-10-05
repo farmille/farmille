@@ -8,6 +8,7 @@ import {
   deleteOwnedTag,
   editorialReportById,
   materialByOwnedName,
+  materialManuscripts,
   materialTagNames,
   tagByOwnedName,
 } from "./support/admin-content-flows";
@@ -397,5 +398,143 @@ test("実証レポートの複数グラフと区を再読込し、別画面の�
     await stalePage.close();
     await deleteMaterial(material.id);
     await deleteAuthUsersByEmail(author.email);
+  }
+});
+
+test("資材原稿の修正依頼・再提出・取り下げを履歴に残し、取消後の編集を拒否する", async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(180_000);
+  const seller = await createApprovedSeller("material-revisions");
+  const admin = await createContentAdmin("material-revisions");
+  const material = await createMaterial("material-revisions", null, seller.officialName);
+  const adminContext = await browser.newContext({ viewport: { width: 375, height: 812 } });
+  const adminPage = await adminContext.newPage();
+  const description = uniqueToken("first-manuscript");
+  const revisedDescription = uniqueToken("revised-manuscript");
+  const reason = "使用条件を具体的に追記してください。";
+  try {
+    await loginAdminAndEnrollMfa(adminPage, admin, `/admin/materials/${material.id}`);
+    await adminPage.getByLabel("編集権を付与するメーカー").selectOption(seller.id);
+    await adminPage
+      .getByLabel("確認資料の保管先または受付番号")
+      .fill(`E2E-REVISION-${material.id}`);
+    await adminPage.getByRole("button", { name: "編集権を更新する" }).click();
+    await expect(
+      adminPage.getByText("書類確認の記録を保存し、この資材の編集権を付与しました。", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await loginSeller(page, seller);
+    await page.goto(`/dashboard/materials/${material.id}`);
+    await page.getByRole("textbox", { name: "製品説明", exact: true }).fill(description);
+    await page.getByRole("button", { name: "保存して表現確認へ送る", exact: true }).click();
+    await expect(
+      page.getByText("表現確認中です。公開内容は確認完了後に変わります。", { exact: true }),
+    ).toBeVisible();
+    const firstVersion = (await materialManuscripts(material.id)).find(
+      (version) => version.status === "pending",
+    );
+    if (firstVersion === undefined)
+      throw new Error("Submitted material manuscript was not persisted.");
+    await adminPage.goto(`/admin/materials/expressions/${firstVersion.id}`);
+    await adminPage.getByRole("button", { name: "修正を依頼", exact: true }).click();
+    await expect(
+      adminPage.getByText("修正が必要な箇所と理由を記入してください。", { exact: true }),
+    ).toBeVisible();
+    expect(
+      (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id)
+        ?.status,
+    ).toBe("pending");
+    await adminPage.getByLabel("確認メモ・修正が必要な箇所").fill(reason);
+    await adminPage.getByRole("button", { name: "修正を依頼", exact: true }).click();
+    await expect
+      .poll(
+        async () =>
+          (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id)
+            ?.status,
+      )
+      .toBe("returned");
+    await page.reload();
+    await expect(page.getByText(reason, { exact: true })).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "製品説明", exact: true })).toHaveValue(
+      description,
+    );
+    await page.getByRole("textbox", { name: "製品説明", exact: true }).fill(revisedDescription);
+    await page.getByRole("button", { name: "保存して表現確認へ送る", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "取り下げて編集を再開", exact: true }),
+    ).toBeVisible();
+    const secondVersion = (await materialManuscripts(material.id)).find(
+      (version) => version.status === "pending",
+    );
+    if (secondVersion === undefined || secondVersion.id === firstVersion.id)
+      throw new Error("Revision did not create a new manuscript version.");
+    await page.getByRole("button", { name: "取り下げて編集を再開", exact: true }).click();
+    await expect(page.getByRole("textbox", { name: "製品説明", exact: true })).toBeVisible();
+    expect(
+      (await materialManuscripts(material.id)).find((version) => version.id === secondVersion.id)
+        ?.status,
+    ).toBe("withdrawn");
+    await expect(page.getByRole("textbox", { name: "製品説明", exact: true })).toHaveValue(
+      revisedDescription,
+    );
+    await expect(page.getByRole("link", { name: /取り下げ済み/ })).toBeVisible();
+    await page.getByRole("button", { name: "保存して表現確認へ送る", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "取り下げて編集を再開", exact: true }),
+    ).toBeVisible();
+    const finalVersion = (await materialManuscripts(material.id)).find(
+      (version) => version.status === "pending",
+    );
+    if (finalVersion === undefined || finalVersion.id === secondVersion.id)
+      throw new Error("Resubmission did not create a new manuscript version.");
+    await adminPage.goto(`/admin/materials/expressions/${finalVersion.id}`);
+    await adminPage.getByRole("button", { name: "表現確認を完了して反映", exact: true }).click();
+    await expect
+      .poll(
+        async () =>
+          (await materialManuscripts(material.id)).find((version) => version.id === finalVersion.id)
+            ?.status,
+      )
+      .toBe("published");
+    await page.goto(`/materials/${material.id}`);
+    await expect(page.getByText(revisedDescription, { exact: true })).toBeVisible();
+    await expect(page.getByText(description, { exact: true })).toHaveCount(0);
+    await page.goto(`/dashboard/materials/${material.id}`);
+    await page
+      .getByRole("textbox", { name: "製品説明", exact: true })
+      .fill("編集権取消後に保存してはいけない変更です。");
+    const manuscriptCount = (await materialManuscripts(material.id)).length;
+    await adminPage.goto(`/admin/materials/${material.id}`);
+    await adminPage.getByLabel("編集権を付与するメーカー").selectOption("");
+    await adminPage.getByRole("button", { name: "編集権を更新する" }).click();
+    await expect(
+      adminPage.getByText("編集権を取り消しました。公開中の情報は保持しています。", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "下書きを保存", exact: true }).click();
+    await expect(
+      page.getByText("この資材は編集権の書類確認が必要です。", { exact: true }),
+    ).toBeVisible();
+    expect((await materialManuscripts(material.id)).length).toBe(manuscriptCount);
+    await page.screenshot({
+      path: test.info().outputPath("material-revoked-editor-375.png"),
+      fullPage: true,
+    });
+    await page.reload();
+    await expect(page.getByText("編集権の書類確認が必要です", { exact: true })).toBeVisible();
+    await page.goto(`/materials/${material.id}`);
+    await expect(page.getByText(revisedDescription, { exact: true })).toBeVisible();
+    expect(
+      (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id),
+    ).toMatchObject({ status: "returned", review_note: reason });
+  } finally {
+    await adminContext.close();
+    await deleteMaterial(material.id);
+    await cleanupSellerByLoginId(seller.loginId);
+    await deleteAuthUsersByEmail(admin.email);
   }
 });

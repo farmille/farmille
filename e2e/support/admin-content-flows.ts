@@ -172,3 +172,19 @@ export async function articleMaterialIds(articleId: string): Promise<string[]> {
   );
   return rows.map((row) => row.material_id);
 }
+
+export async function materialManuscripts(materialId: string) {
+  return select(
+    v.object({
+      id: v.pipe(v.string(), v.uuid()),
+      status: v.string(),
+      review_note: v.nullable(v.string()),
+    }),
+    "material_page_versions",
+    new URLSearchParams({
+      select: "id,status,review_note",
+      material_id: `eq.${materialId}`,
+      order: "created_at.asc",
+    }),
+  );
+}
