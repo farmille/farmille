@@ -70,7 +70,7 @@ test("通報の resolve と対象非公開、編集局の pending 編集・公�
     await page.goto("/admin/usage-reports");
     await page.getByRole("link", { name: reportTitle }).click();
     await expect(page).toHaveURL(`/admin/usage-reports/${usageReport.id}`);
-    await page.getByLabel("観察した変化", { exact: true }).fill(editedReportBody);
+    await page.getByRole("textbox", { name: "観察した変化", exact: true }).fill(editedReportBody);
     await page.getByRole("button", { name: "公開する" }).click();
     await expect
       .poll(async () => (await usageReportByAuthor(reporter.id))?.status)
