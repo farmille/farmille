@@ -268,6 +268,20 @@ for (const kind of ["registration", "transfer_out", "transfer_in", "removal"] as
       expect((await outsiderContext.request.get(evidenceHref, { maxRedirects: 0 })).status()).toBe(
         kind === "removal" ? 400 : 403,
       );
+      if (kind !== "removal") {
+        await visitor.goto("/dashboard/applications");
+        await expect(
+          visitor.getByRole("heading", { name: "受付済みの申請", exact: true }),
+        ).toBeVisible();
+        await expect(
+          visitor.locator(`a[href="/dashboard/applications/${applicationId}"]`),
+        ).toHaveCount(0);
+        await expect(
+          visitor.getByRole("link", {
+            name: new RegExp(`^受付番号 ${application.receipt_number}：`),
+          }),
+        ).toHaveCount(0);
+      }
       await visitor.goto(
         kind === "removal"
           ? `/company-requests/receipts/${applicationId}`
