@@ -2,7 +2,7 @@ import * as v from "valibot";
 
 import type { Database } from "@/types/database.types";
 import type { E2eAdminAccount } from "./admin-accounts";
-import { uniqueToken } from "./test-data";
+import { createMaterial, deleteMaterial, uniqueToken } from "./test-data";
 
 const IdSchema = v.object({ id: v.pipe(v.string(), v.uuid()) });
 const TagSchema = v.object({
@@ -200,6 +200,7 @@ const LegacyRequestSchema = v.object({
 export async function createLegacyMaterialRequest(
   sellerId: string,
   manufacturerName: string,
+  adminUserId: string,
   prefix: string,
 ) {
   const sellers = await select(
@@ -209,34 +210,58 @@ export async function createLegacyMaterialRequest(
   );
   if (!sellers[0]?.login_id.startsWith("e2e-"))
     throw new Error("Legacy requests require a test-owned seller.");
-  const name = `E2E資材_${uniqueToken(prefix)}`;
-  const body: Database["public"]["Tables"]["material_change_requests"]["Insert"] = {
-    seller_id: sellerId,
-    change_type: "create",
-    status: "pending",
-    reason: "E2Eで既存の申請処理を確認します。",
-  };
-  const response = await request("/rest/v1/material_change_requests", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Prefer: "return=representation" },
-    body: JSON.stringify(body),
-  });
-  const rows = v.parse(v.array(LegacyRequestSchema), await response.json());
-  const saved = rows[0];
-  if (saved === undefined) throw new Error("Legacy request insert returned no row.");
-  const details: Database["public"]["Tables"]["material_change_request_details"]["Insert"] = {
-    request_id: saved.id,
-    name,
-    manufacturer_name: manufacturerName,
-    sales_status: "販売中",
-    description: "既存申請の比較対象となる紹介文です。",
-  };
-  await request("/rest/v1/material_change_request_details", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(details),
-  });
-  return { id: saved.id, name };
+  const material = await createMaterial(prefix, null, manufacturerName);
+  try {
+    await request("/rest/v1/rpc/set_material_editor_grant", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        p_material_id: material.id,
+        p_seller_id: sellerId,
+        p_document_reference: `E2E-LEGACY-${material.id}`,
+        p_actor_id: adminUserId,
+      }),
+    });
+    const materials = await select(
+      v.object({ content_revision: v.number() }),
+      "materials",
+      new URLSearchParams({ select: "content_revision", id: `eq.${material.id}` }),
+    );
+    const current = materials[0];
+    if (current === undefined) throw new Error("Legacy request material was not found.");
+    const body: Database["public"]["Tables"]["material_change_requests"]["Insert"] = {
+      seller_id: sellerId,
+      material_id: material.id,
+      base_content_revision: current.content_revision,
+      change_type: "update",
+      status: "pending",
+      reason: "E2Eで既存の申請処理を確認します。",
+    };
+    const response = await request("/rest/v1/material_change_requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Prefer: "return=representation" },
+      body: JSON.stringify(body),
+    });
+    const rows = v.parse(v.array(LegacyRequestSchema), await response.json());
+    const saved = rows[0];
+    if (saved === undefined) throw new Error("Legacy request insert returned no row.");
+    const details: Database["public"]["Tables"]["material_change_request_details"]["Insert"] = {
+      request_id: saved.id,
+      name: material.name,
+      manufacturer_name: manufacturerName,
+      sales_status: "販売中",
+      description: "既存申請の比較対象となる紹介文です。",
+    };
+    await request("/rest/v1/material_change_request_details", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(details),
+    });
+    return { id: saved.id, name: material.name, materialId: material.id };
+  } catch (error) {
+    await deleteMaterial(material.id);
+    throw error;
+  }
 }
 
 export async function legacyMaterialRequestById(requestId: string) {
