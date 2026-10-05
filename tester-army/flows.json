@@ -21,7 +21,7 @@
     "route": "/admin/company-applications/[id]",
     "role": "admin",
     "state": "会社申請詳細",
-    "actions": ["回答と非公開添付を閲覧、控えメール再送"],
+    "actions": ["提出時点の回答と非公開添付を運営が閲覧する"],
     "assertions": ["受付情報保持、権限を満たす資料アクセス"],
     "tests": ["e2e/13-company-applications.spec.ts"],
     "verification": "pending"
@@ -129,7 +129,7 @@
     "route": "/admin/published-posts",
     "role": "admin",
     "state": "公開済み投稿",
-    "actions": ["理由を記録して投稿を非公開化"],
+    "actions": ["確認チェックを入れて公開済み投稿を非公開化する"],
     "assertions": ["一覧から除外、本文はDBに保持"],
     "tests": ["e2e/published-posts-moderation.spec.ts"],
     "verification": "pending"
@@ -617,7 +617,11 @@
     "state": "利用ガイド",
     "actions": ["会員登録と各種手続き案内を開く"],
     "assertions": ["ガイド、申請先、from=meの保持"],
-    "tests": ["tester-army/tests/public.e2e.ts", "e2e/06-seller-approval.spec.ts"],
+    "tests": [
+      "tester-army/tests/public.e2e.ts",
+      "e2e/06-seller-approval.spec.ts",
+      "e2e/01-auth.spec.ts"
+    ],
     "verification": "pending"
   },
   {
