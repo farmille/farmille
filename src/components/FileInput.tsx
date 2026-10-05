@@ -17,7 +17,7 @@ const pickerLabelStyle = css({
   cursor: "pointer",
   "&:has(input:disabled)": {
     cursor: "not-allowed",
-    opacity: "0.6",
+    opacity: "disabled",
   },
   "&:has(input:focus-visible) > span": {
     outlineWidth: "2px",

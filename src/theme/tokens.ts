@@ -72,6 +72,10 @@ export const tokens = {
     // 組織の頭文字など、文字を1字載せる小さな標章
     mark: { value: "6px" },
   },
+  // 無効化した操作部品は形を保ったまま薄くする
+  opacity: {
+    disabled: { value: "0.6" },
+  },
   // 画像枠は用途ごとに比率を固定し、画面幅や取得画像の寸法で高さを変えない。
   aspectRatios: {
     image: {
