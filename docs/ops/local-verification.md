@@ -15,6 +15,26 @@ pnpm dev
 - ブラウザで http://localhost:3007 。**スマホ幅（375px）で見るのが正**（Chrome DevTools のデバイスツールバー → iPhone SE 等）
 - 認証メールと企業申請メールを確認するため、Mailpitは停止しない。設定は`supabase/config.toml`のSMTPポート54325と`/api/auth/email`へのフックを使う。メール一覧はhttp://localhost:54324で確認する。
 
+### 管理されたクラウド環境での起動
+
+DockerのVFS保存領域で`no space left on device`になった場合は、Supabase CLI公式のslim imagesを使える。今回の検証ではCLI 2.119.0の次の指定でDBの展開容量を抑えた。任意サービスを除外しても、Auth・Storage・Mailpitは残す。既存のHTTP/HTTPS proxyとCA設定を維持する。
+
+```bash
+SUPABASE_USE_SLIM_IMAGES=1 npx supabase@2.119.0 start --yes \
+  --exclude=studio,edge-runtime,postgres-meta,logflare,vector,imgproxy,supavisor,realtime
+```
+
+この環境ではAuthとStorageのコンテナ内HEAD検査が403を返した。一方、ローカルKong経由の`/auth/v1/health`、`/storage/v1/status`、`/rest/v1/`のGETは200だった。専用の使い捨てデータで会員作成・パスワード認証・Storageへのuploadとdownloadの内容一致まで確認し、そのデータを削除した。通常のhealth検査が通らない場合の`--ignore-health-check`は、実APIのreadinessを別途確認するローカル検証に限って上の起動コマンドへ追加する。起動コマンドの成功だけでAuthやStorageの準備完了を判定しない。
+
+認証メールのフックがコンテナからアプリへ届かない場合は、Docker向けの`NO_PROXY`と`no_proxy`の既存値に`host.docker.internal`だけを追加して起動し直す。外部接続用proxyや既存の除外先は維持する。
+
+```bash
+export NO_PROXY="${NO_PROXY:+$NO_PROXY,}host.docker.internal"
+export no_proxy="${no_proxy:+$no_proxy,}host.docker.internal"
+```
+
+`.env.local`のSupabase接続情報はこのローカルstackの`supabase status`と照合し、SMTP・送信元・認証メールフックは[ローカル設定](../../supabase/config.toml)のダミー設定とそろえる。秘密の値をログや文書へ転記しない。ブラウザとアプリのoriginは`http://localhost:3007`、Supabaseは`http://127.0.0.1:54321`を使う。Dockerからのメールフックだけは設定済みの`host.docker.internal:3007`を使い、Server Actionsのブラウザoriginと混同しない。メール到達はMailpitの実受信で確認する。
+
 ## 2. データを入れ直したいとき
 
 ```bash
@@ -81,4 +101,4 @@ PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres \
 - 資材マスタはローカル開発用の15件のみ（本番相当の381件は `supabase login` 後に投入する。`docs/ops/cutover-runbook.md` §1.3）
 - 一部の資材画像は外部サイトへの直リンクで、リンク切れだと代替アイコンが出る（Storage へのリホストは本番投入時に実施）
 - 存在しない資材 ID を開くと画面には「資材が見つかりません」と出るが、HTTP ステータスは 200 になる（Next.js のストリーミング配信の仕様。SEO 上の扱いは要検討事項として記録）
-- メール確認・パスワード再設定のメールは Mailpit（http://127.0.0.1:54324 ）で受け取る。上の `-x` 付き起動では Mailpit を除外しているため、メールを見るときは除外指定から `inbucket` を外して起動する
+- メール確認・パスワード再設定のメールは Mailpit（http://127.0.0.1:54324 ）で受け取る。第1節の起動コマンドはMailpitを保持しているため、そのまま認証メールを確認できる
