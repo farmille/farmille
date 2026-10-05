@@ -6,7 +6,7 @@ memberTest("ログインの戻り先とログアウトを確認する", async ({
   await app.open("/me");
   await expect(browser).toHaveURL(/\/login\?next=%2Fme$/);
   await loginMember(app, screen, browser, member);
-  await expect(screen.getByText(member.handle)).toBeVisible();
+  await expect(screen.getByRole("heading", member.handle)).toBeVisible();
   await screen.getByRole("button", "ログアウト").tap();
   await expect(browser).toHaveURL("/");
   await app.open("/me");
@@ -72,6 +72,6 @@ materialTest(
     await screen.getByRole("button", new RegExp(material.name)).tap();
     await screen.getByRole("link", /感想口コミ/).tap();
     await expect(browser).toHaveURL(`/materials/${material.id}/review/new`);
-    await expect(screen.getByLabel("感想口コミ本文")).toBeVisible();
+    await expect(screen.getByRole("textbox", "感想口コミ本文 必須")).toBeVisible();
   },
 );

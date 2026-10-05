@@ -19,7 +19,7 @@ materialTest(
     await screen.getByRole("textbox", "作目").fill("トマト");
     await screen.getByRole("button", "トマトを選択").tap();
     await screen.getByRole("radio", "4").check();
-    await screen.getByLabel("感想口コミ本文").fill(body);
+    await screen.getByRole("textbox", "感想口コミ本文 必須").fill(body);
     await screen.getByRole("checkbox", /実際に使用した感想を、使用条件や感じた変化/).check();
     await screen.getByRole("button", "投稿する").tap();
     await expect(browser).toHaveURL(`/materials/${material.id}?review=posted`);
@@ -28,7 +28,7 @@ materialTest(
     await expect.poll(async () => (await getMaterial(material.id)).avg_rating).toBe(4);
     await screen.getByRole("article").filter({ hasText: body }).getByRole("link", "編集").tap();
     await screen.getByRole("radio", "5").check();
-    await screen.getByLabel("感想口コミ本文").fill(edited);
+    await screen.getByRole("textbox", "感想口コミ本文 必須").fill(edited);
     await screen.getByRole("button", "変更を保存する").tap();
     await expect(screen.getByText(edited)).toBeVisible();
     await expect.poll(async () => (await getMaterial(material.id)).avg_rating).toBe(5);
