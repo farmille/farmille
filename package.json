@@ -68,7 +68,7 @@
     "storybook": "10.5.7",
     "typescript": "^5",
     "vite": "^6.4.3",
-    "vitest": "^3.2.6"
+    "vitest": "^4.1.11"
   },
   "packageManager": "pnpm@11.21.0"
 }
