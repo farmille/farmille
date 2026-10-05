@@ -100,7 +100,11 @@ test("メーカー記事の画像・Markdown・資材紐づけを保存し、公
         ),
       )
       .toBe(true);
-    await expect(anonymous.getByRole("link", { name: material.name, exact: true })).toHaveAttribute(
+    const relatedMaterials = anonymous.getByRole("region", {
+      name: "この記事で紹介した資材",
+      exact: true,
+    });
+    await expect(relatedMaterials.getByRole("link", { name: material.name })).toHaveAttribute(
       "href",
       `/materials/${material.id}`,
     );
