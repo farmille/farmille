@@ -243,12 +243,20 @@ test("運営が資材と検索タグを登録・編集し、使用中の削除�
     await page.getByRole("checkbox", { name: renamedTag, exact: true }).uncheck();
     await page.getByRole("button", { name: "保存する", exact: true }).click();
     await expect.poll(async () => materialTagNames(materialId ?? "")).toEqual([]);
-    await page.getByLabel("編集権を付与するメーカー").selectOption(seller.id);
+    const grantSellerSelect = page.getByLabel("編集権を付与するメーカー");
+    const grantSubmit = page.getByRole("button", { name: "編集権を更新する", exact: true });
+    await grantSellerSelect.selectOption(seller.id);
     await page.getByLabel("確認資料の保管先または受付番号").fill(`E2E-GRANT-${materialId}`);
-    await page.getByRole("button", { name: "編集権を更新する" }).click();
+    await grantSubmit.click();
     await expect.poll(async () => (await getMaterial(materialId ?? "")).seller_id).toBe(seller.id);
-    await page.getByLabel("編集権を付与するメーカー").selectOption("");
-    await page.getByRole("button", { name: "編集権を更新する" }).click();
+    await expect(
+      page.getByText("書類確認の記録を保存し、この資材の編集権を付与しました。", { exact: true }),
+    ).toBeVisible();
+    await expect(grantSellerSelect).toHaveValue(seller.id);
+    await expect(grantSubmit).toBeEnabled();
+    await grantSellerSelect.selectOption("");
+    await expect(grantSellerSelect).toHaveValue("");
+    await grantSubmit.click();
     await expect(
       page.getByText("編集権を取り消しました。公開中の情報は保持しています。", { exact: true }),
     ).toBeVisible();
