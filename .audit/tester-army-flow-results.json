@@ -1,85 +1,85 @@
 {
-  "source_commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd",
+  "source_commit": "dae45964399adfe44654a03e9534b38bf99de952",
   "source_review_baseline": "6ec346d38085d8d425f5d49f75ac018e547070de",
   "historical_source_commit": "1a55e2750b4f2178549098a5fc70b421caf8fdce",
   "historical_original": "/workspace/work/sol-integration/production-flow-crosswalk-1a55e27-original.json",
   "historical_errata": "/workspace/work/sol-integration/production-flow-crosswalk-errata.json",
   "ci_status_at_publication": "pending",
   "native_report": "/workspace/work/farmille-tester-e2e/.e2e/native-results-48625ae-default/report.json",
-  "playwright_junit": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+  "playwright_junit": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
   "execution_join_completed": true,
   "source_identity": {
     "e2e/01-auth.spec.ts": {
       "sha256": "e21349057e76eccfd0710e60f61a622ea345f3b5fea6d0d65e0625884937e438",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "e2e/06-seller-approval.spec.ts": {
       "sha256": "d7ce6fe01da0054e14222398f1e8ee7cdf8601d4033577c0bec06e7981ac0e9f",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "e2e/07-seller-content.spec.ts": {
       "sha256": "64f20a1a2905b80589aa8314843fdadc0b288f9c4f6cdc85de8543a1908c4d36",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "e2e/08-moderation.spec.ts": {
       "sha256": "6d441fb6f65c4dcea939243e7311bdc3968b7336132917ad98fd23cba1488218",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "e2e/10-password-security.spec.ts": {
       "sha256": "5b4768480d0ba58dc64fbec68767b776ac13be62814ef58f8ee185f59bb2e6fa",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "e2e/11-report-reading.spec.ts": {
       "sha256": "b7f69eee621f95bc6b2e749b73ae0cd8e9791822e9627c5a696cab28542bf1d2",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "e2e/12-account-flows.spec.ts": {
       "sha256": "b0a7232351d63e3c1a169fe16a5af03f8da9aa7ed725bb7a4bbd58f8004a96ae",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "e2e/13-company-applications.spec.ts": {
       "sha256": "d6b17adf400385d608be90f835ab71d62ae35e231f80a50a4def429cc7d86098",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "e2e/14-admin-content-flows.spec.ts": {
-      "sha256": "3bcd8e982e6ce3165ba899a116c4d3bfa85c71339713d361d547b05172a5b701",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "sha256": "912c5567154607f35aa30313b14c3af7da1e0bd26450d567a907ea1251824ed3",
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "e2e/published-posts-moderation.spec.ts": {
       "sha256": "bd129ae2eaddc2c84dc96007bcc053067262bdc860e73fa5294e4a55c221b36b",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "tester-army/tests/access.e2e.ts": {
       "sha256": "a09e04627e1d36aab3fb4a35dff0b722647632b7e93ed26b1b6d01ff30aa3db0",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "tester-army/tests/member.e2e.ts": {
       "sha256": "308e2099818602a1ee212a1aab8d967fab29ed6e027ffdf5c49ba7897773babe",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "tester-army/tests/public.e2e.ts": {
       "sha256": "e3dd933bafaf34334c79175efc72b0b01f6fb8f116080c7a6ffa71417aacfe7c",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "tester-army/tests/reports.e2e.ts": {
       "sha256": "385b0d811c854ea14262d26bcebf7bca81d0e2c3972731eeb12600dd3a4f9593",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "tester-army/tests/reviews.e2e.ts": {
       "sha256": "3b50c3fb8243525c5b0217788cd7ee79499d8d379b166f866756f7ead7f6c9ca",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "tester-army/tests/saved.e2e.ts": {
       "sha256": "56833ec9857be23a3fc3aaf51e11ec6e50c6c37681ee09edb85ca2d4812abe70",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "tester-army/tests/search.e2e.ts": {
       "sha256": "5d14bddcdf31b364c2f358e9c99ce63263170638df655b6a7691cf678361c68e",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     },
     "tester-army/tests/signup.e2e.ts": {
       "sha256": "a4aed535655f3f55e31253856cb8555c77f09668988913f14c0012d990c7bf91",
-      "commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd"
+      "commit": "dae45964399adfe44654a03e9534b38bf99de952"
     }
   },
   "method": "Each ledger action and assertion maps to concrete named test declarations and operation/expectation source ranges. Native proof includes immutable source commit, selected test/result/run IDs and passed step IDs. Playwright proof joins exact file and named passing JUnit case to reviewed source ranges. No inference from a referenced file merely being green. Inventory screenshots are supplemental viewing evidence, never mutation proof.",
@@ -137,7 +137,7 @@
               "runner": "playwright",
               "title": "generalのパスキー登録・ログイン・削除キャンセル・削除後拒否",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 181,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -145,7 +145,7 @@
               "runner": "playwright",
               "title": "sellerのパスキー登録・ログイン・削除キャンセル・削除後拒否",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 181,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -153,7 +153,7 @@
               "runner": "playwright",
               "title": "adminのパスキー登録・ログイン・削除キャンセル・削除後拒否",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 181,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -217,7 +217,7 @@
               "runner": "playwright",
               "title": "generalの現在パスワード変更とメールによる再設定",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 47,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -225,7 +225,7 @@
               "runner": "playwright",
               "title": "sellerの現在パスワード変更とメールによる再設定",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 47,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -233,7 +233,7 @@
               "runner": "playwright",
               "title": "adminの現在パスワード変更とメールによる再設定",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 47,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -298,7 +298,7 @@
               "runner": "playwright",
               "title": "フォームA 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -306,7 +306,7 @@
               "runner": "playwright",
               "title": "フォームB 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -314,7 +314,7 @@
               "runner": "playwright",
               "title": "フォームC 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -322,7 +322,7 @@
               "runner": "playwright",
               "title": "フォームD 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -387,7 +387,7 @@
               "runner": "playwright",
               "title": "フォームA 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -395,7 +395,7 @@
               "runner": "playwright",
               "title": "フォームB 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -403,7 +403,7 @@
               "runner": "playwright",
               "title": "フォームC 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -411,7 +411,7 @@
               "runner": "playwright",
               "title": "フォームD 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -444,7 +444,7 @@
               "runner": "playwright",
               "title": "adminのパスキー登録・ログイン・削除キャンセル・削除後拒否",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 181,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -506,7 +506,7 @@
               "runner": "playwright",
               "title": "書類確認で資材単位の編集権を付与し、原稿を表現確認後に公開する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 16,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -520,16 +520,16 @@
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
               "start_line": 230,
-              "end_line": 255,
-              "code": "230:     await page.goto(`/admin/materials/${materialId}`);\n231:     await page.getByRole(\"combobox\", { name: \"公開状態\", exact: false }).selectOption(\"archived\");\n232:     await page.getByRole(\"button\", { name: \"公開状態を更新\", exact: true }).click();\n233:     await expect(page.getByText(\"資材を掲載終了にしました。\", { exact: true })).toBeVisible();\n234:     await anonymous.reload();\n235:     await expect(\n236:       anonymous.getByRole(\"main\").getByText(\"資材が見つかりません\", { exact: true }),\n237:     ).toBeVisible();\n238:     await page.getByRole(\"combobox\", { name: \"公開状態\", exact: false }).selectOption(\"published\");\n239:     await page.getByRole(\"button\", { name: \"公開状態を更新\", exact: true }).click();\n240:     await expect(page.getByText(\"資材を公開状態へ戻しました。\", { exact: true })).toBeVisible();\n241:     await anonymous.reload();\n242:     await expect(anonymous.getByRole(\"heading\", { name: materialName, exact: true })).toBeVisible();\n243:     await page.getByRole(\"checkbox\", { name: renamedTag, exact: true }).uncheck();\n244:     await page.getByRole(\"button\", { name: \"保存する\", exact: true }).click();\n245:     await expect.poll(async () => materialTagNames(materialId ?? \"\")).toEqual([]);\n246:     await page.getByLabel(\"編集権を付与するメーカー\").selectOption(seller.id);\n247:     await page.getByLabel(\"確認資料の保管先または受付番号\").fill(`E2E-GRANT-${materialId}`);\n248:     await page.getByRole(\"button\", { name: \"編集権を更新する\" }).click();\n249:     await expect.poll(async () => (await getMaterial(materialId ?? \"\")).seller_id).toBe(seller.id);\n250:     await page.getByLabel(\"編集権を付与するメーカー\").selectOption(\"\");\n251:     await page.getByRole(\"button\", { name: \"編集権を更新する\" }).click();\n252:     await expect(\n253:       page.getByText(\"編集権を取り消しました。公開中の情報は保持しています。\", { exact: true }),\n254:     ).toBeVisible();\n255:     expect((await getMaterial(materialId)).seller_id).toBeNull();"
+              "end_line": 263,
+              "code": "230:     await page.goto(`/admin/materials/${materialId}`);\n231:     await page.getByRole(\"combobox\", { name: \"公開状態\", exact: false }).selectOption(\"archived\");\n232:     await page.getByRole(\"button\", { name: \"公開状態を更新\", exact: true }).click();\n233:     await expect(page.getByText(\"資材を掲載終了にしました。\", { exact: true })).toBeVisible();\n234:     await anonymous.reload();\n235:     await expect(\n236:       anonymous.getByRole(\"main\").getByText(\"資材が見つかりません\", { exact: true }),\n237:     ).toBeVisible();\n238:     await page.getByRole(\"combobox\", { name: \"公開状態\", exact: false }).selectOption(\"published\");\n239:     await page.getByRole(\"button\", { name: \"公開状態を更新\", exact: true }).click();\n240:     await expect(page.getByText(\"資材を公開状態へ戻しました。\", { exact: true })).toBeVisible();\n241:     await anonymous.reload();\n242:     await expect(anonymous.getByRole(\"heading\", { name: materialName, exact: true })).toBeVisible();\n243:     await page.getByRole(\"checkbox\", { name: renamedTag, exact: true }).uncheck();\n244:     await page.getByRole(\"button\", { name: \"保存する\", exact: true }).click();\n245:     await expect.poll(async () => materialTagNames(materialId ?? \"\")).toEqual([]);\n246:     const grantSellerSelect = page.getByLabel(\"編集権を付与するメーカー\");\n247:     const grantSubmit = page.getByRole(\"button\", { name: \"編集権を更新する\", exact: true });\n248:     await grantSellerSelect.selectOption(seller.id);\n249:     await page.getByLabel(\"確認資料の保管先または受付番号\").fill(`E2E-GRANT-${materialId}`);\n250:     await grantSubmit.click();\n251:     await expect.poll(async () => (await getMaterial(materialId ?? \"\")).seller_id).toBe(seller.id);\n252:     await expect(\n253:       page.getByText(\"書類確認の記録を保存し、この資材の編集権を付与しました。\", { exact: true }),\n254:     ).toBeVisible();\n255:     await expect(grantSellerSelect).toHaveValue(seller.id);\n256:     await expect(grantSubmit).toBeEnabled();\n257:     await grantSellerSelect.selectOption(\"\");\n258:     await expect(grantSellerSelect).toHaveValue(\"\");\n259:     await grantSubmit.click();\n260:     await expect(\n261:       page.getByText(\"編集権を取り消しました。公開中の情報は保持しています。\", { exact: true }),\n262:     ).toBeVisible();\n263:     expect((await getMaterial(materialId)).seller_id).toBeNull();"
             }
           ],
           "assertion_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
               "start_line": 233,
-              "end_line": 258,
-              "code": "233:     await expect(page.getByText(\"資材を掲載終了にしました。\", { exact: true })).toBeVisible();\n234:     await anonymous.reload();\n235:     await expect(\n236:       anonymous.getByRole(\"main\").getByText(\"資材が見つかりません\", { exact: true }),\n237:     ).toBeVisible();\n238:     await page.getByRole(\"combobox\", { name: \"公開状態\", exact: false }).selectOption(\"published\");\n239:     await page.getByRole(\"button\", { name: \"公開状態を更新\", exact: true }).click();\n240:     await expect(page.getByText(\"資材を公開状態へ戻しました。\", { exact: true })).toBeVisible();\n241:     await anonymous.reload();\n242:     await expect(anonymous.getByRole(\"heading\", { name: materialName, exact: true })).toBeVisible();\n243:     await page.getByRole(\"checkbox\", { name: renamedTag, exact: true }).uncheck();\n244:     await page.getByRole(\"button\", { name: \"保存する\", exact: true }).click();\n245:     await expect.poll(async () => materialTagNames(materialId ?? \"\")).toEqual([]);\n246:     await page.getByLabel(\"編集権を付与するメーカー\").selectOption(seller.id);\n247:     await page.getByLabel(\"確認資料の保管先または受付番号\").fill(`E2E-GRANT-${materialId}`);\n248:     await page.getByRole(\"button\", { name: \"編集権を更新する\" }).click();\n249:     await expect.poll(async () => (await getMaterial(materialId ?? \"\")).seller_id).toBe(seller.id);\n250:     await page.getByLabel(\"編集権を付与するメーカー\").selectOption(\"\");\n251:     await page.getByRole(\"button\", { name: \"編集権を更新する\" }).click();\n252:     await expect(\n253:       page.getByText(\"編集権を取り消しました。公開中の情報は保持しています。\", { exact: true }),\n254:     ).toBeVisible();\n255:     expect((await getMaterial(materialId)).seller_id).toBeNull();\n256:     await expect(\n257:       page.getByText(new RegExp(`取消済み／書類：.*E2E-GRANT-${materialId}`)),\n258:     ).toBeVisible();"
+              "end_line": 266,
+              "code": "233:     await expect(page.getByText(\"資材を掲載終了にしました。\", { exact: true })).toBeVisible();\n234:     await anonymous.reload();\n235:     await expect(\n236:       anonymous.getByRole(\"main\").getByText(\"資材が見つかりません\", { exact: true }),\n237:     ).toBeVisible();\n238:     await page.getByRole(\"combobox\", { name: \"公開状態\", exact: false }).selectOption(\"published\");\n239:     await page.getByRole(\"button\", { name: \"公開状態を更新\", exact: true }).click();\n240:     await expect(page.getByText(\"資材を公開状態へ戻しました。\", { exact: true })).toBeVisible();\n241:     await anonymous.reload();\n242:     await expect(anonymous.getByRole(\"heading\", { name: materialName, exact: true })).toBeVisible();\n243:     await page.getByRole(\"checkbox\", { name: renamedTag, exact: true }).uncheck();\n244:     await page.getByRole(\"button\", { name: \"保存する\", exact: true }).click();\n245:     await expect.poll(async () => materialTagNames(materialId ?? \"\")).toEqual([]);\n246:     const grantSellerSelect = page.getByLabel(\"編集権を付与するメーカー\");\n247:     const grantSubmit = page.getByRole(\"button\", { name: \"編集権を更新する\", exact: true });\n248:     await grantSellerSelect.selectOption(seller.id);\n249:     await page.getByLabel(\"確認資料の保管先または受付番号\").fill(`E2E-GRANT-${materialId}`);\n250:     await grantSubmit.click();\n251:     await expect.poll(async () => (await getMaterial(materialId ?? \"\")).seller_id).toBe(seller.id);\n252:     await expect(\n253:       page.getByText(\"書類確認の記録を保存し、この資材の編集権を付与しました。\", { exact: true }),\n254:     ).toBeVisible();\n255:     await expect(grantSellerSelect).toHaveValue(seller.id);\n256:     await expect(grantSubmit).toBeEnabled();\n257:     await grantSellerSelect.selectOption(\"\");\n258:     await expect(grantSellerSelect).toHaveValue(\"\");\n259:     await grantSubmit.click();\n260:     await expect(\n261:       page.getByText(\"編集権を取り消しました。公開中の情報は保持しています。\", { exact: true }),\n262:     ).toBeVisible();\n263:     expect((await getMaterial(materialId)).seller_id).toBeNull();\n264:     await expect(\n265:       page.getByText(new RegExp(`取消済み／書類：.*E2E-GRANT-${materialId}`)),\n266:     ).toBeVisible();"
             }
           ],
           "helper_code": [],
@@ -541,7 +541,7 @@
               "runner": "playwright",
               "title": "運営が資材と検索タグを登録・編集し、使用中の削除を防ぎ、掲載と編集権と監査を管理する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 149,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -603,7 +603,7 @@
               "runner": "playwright",
               "title": "書類確認で資材単位の編集権を付与し、原稿を表現確認後に公開する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 16,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -611,22 +611,22 @@
         },
         {
           "file": "e2e/14-admin-content-flows.spec.ts",
-          "test_declaration_line": 440,
+          "test_declaration_line": 448,
           "additional_reference_not_in_ledger": false,
           "action_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 553,
-              "end_line": 554,
-              "code": "553:     await adminPage.goto(`/admin/materials/expressions/${finalVersion.id}`);\n554:     await adminPage.getByRole(\"button\", { name: \"表現確認を完了して反映\", exact: true }).click();"
+              "start_line": 561,
+              "end_line": 562,
+              "code": "561:     await adminPage.goto(`/admin/materials/expressions/${finalVersion.id}`);\n562:     await adminPage.getByRole(\"button\", { name: \"表現確認を完了して反映\", exact: true }).click();"
             }
           ],
           "assertion_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 555,
-              "end_line": 564,
-              "code": "555:     await expect\n556:       .poll(\n557:         async () =>\n558:           (await materialManuscripts(material.id)).find((version) => version.id === finalVersion.id)\n559:             ?.status,\n560:       )\n561:       .toBe(\"published\");\n562:     await page.goto(`/materials/${material.id}`);\n563:     await expect(page.getByText(revisedDescription, { exact: true })).toBeVisible();\n564:     await expect(page.getByText(description, { exact: true })).toHaveCount(0);"
+              "start_line": 563,
+              "end_line": 572,
+              "code": "563:     await expect\n564:       .poll(\n565:         async () =>\n566:           (await materialManuscripts(material.id)).find((version) => version.id === finalVersion.id)\n567:             ?.status,\n568:       )\n569:       .toBe(\"published\");\n570:     await page.goto(`/materials/${material.id}`);\n571:     await expect(page.getByText(revisedDescription, { exact: true })).toBeVisible();\n572:     await expect(page.getByText(description, { exact: true })).toHaveCount(0);"
             }
           ],
           "helper_code": [],
@@ -638,8 +638,8 @@
               "runner": "playwright",
               "title": "資材原稿の修正依頼・再提出・取り下げを履歴に残し、取消後の編集を拒否する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
-              "source_declaration_line": 440,
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
+              "source_declaration_line": 448,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
           ]
@@ -700,7 +700,7 @@
               "runner": "playwright",
               "title": "書類確認で資材単位の編集権を付与し、原稿を表現確認後に公開する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 16,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -741,7 +741,7 @@
               "runner": "playwright",
               "title": "メーカー会社紹介の下書き・非公開・取り下げ・差し戻し・再送信・公開・履歴",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 264,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -803,7 +803,7 @@
               "runner": "playwright",
               "title": "メーカー会社紹介の下書き・非公開・取り下げ・差し戻し・再送信・公開・履歴",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 264,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -871,7 +871,7 @@
               "runner": "playwright",
               "title": "運営が資材と検索タグを登録・編集し、使用中の削除を防ぎ、掲載と編集権と監査を管理する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 149,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -933,7 +933,7 @@
               "runner": "playwright",
               "title": "運営が資材と検索タグを登録・編集し、使用中の削除を防ぎ、掲載と編集権と監査を管理する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 149,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -968,22 +968,22 @@
       "references": [
         {
           "file": "e2e/14-admin-content-flows.spec.ts",
-          "test_declaration_line": 603,
+          "test_declaration_line": 611,
           "additional_reference_not_in_ledger": false,
           "action_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 657,
-              "end_line": 687,
-              "code": "657:     await loginAdminAndEnrollMfa(adminPage, admin, \"/admin/materials/requests\");\n658:     await expect(adminPage.getByRole(\"link\", { name: cancel.name, exact: true })).toHaveCount(0);\n659:     await adminPage.getByRole(\"link\", { name: reject.name, exact: true }).click();\n660:     await expect(\n661:       adminPage.getByRole(\"heading\", { name: \"公開内容との比較\", exact: true }),\n662:     ).toBeVisible();\n663:     await adminPage.getByRole(\"button\", { name: \"却下する\", exact: true }).click();\n664:     await expect(\n665:       adminPage.getByText(\"却下理由を入力してください。\", { exact: true }),\n666:     ).toBeVisible();\n667:     expect((await legacyMaterialRequestById(reject.id))?.status).toBe(\"pending\");\n668:     await adminPage\n669:       .getByLabel(\"メーカーへの連絡メモ\", { exact: false })\n670:       .fill(\"申請内容の資料が不足しています。\");\n671:     await adminPage.getByRole(\"button\", { name: \"却下する\", exact: true }).click();\n672:     await expect(adminPage).toHaveURL(\n673:       new RegExp(`/admin/materials/requests/${reject.id}\\\\?resolved=reject$`),\n674:     );\n675:     expect(await legacyMaterialRequestById(reject.id)).toMatchObject({\n676:       status: \"rejected\",\n677:       review_note: \"申請内容の資料が不足しています。\",\n678:       result_material_id: null,\n679:     });\n680:     await page.goto(`/dashboard/materials/requests/${reject.id}`);\n681:     await expect(page.getByText(\"申請内容の資料が不足しています。\", { exact: true })).toBeVisible();\n682:     await expect(page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true })).toHaveCount(0);\n683:     await adminPage.goto(`/admin/materials/requests/${approve.id}`);\n684:     await adminPage\n685:       .getByLabel(\"メーカーへの連絡メモ\", { exact: false })\n686:       .fill(\"公開資料との一致を確認しました。\");\n687:     await adminPage.getByRole(\"button\", { name: \"承認して反映\", exact: true }).click();"
+              "start_line": 665,
+              "end_line": 695,
+              "code": "665:     await loginAdminAndEnrollMfa(adminPage, admin, \"/admin/materials/requests\");\n666:     await expect(adminPage.getByRole(\"link\", { name: cancel.name, exact: true })).toHaveCount(0);\n667:     await adminPage.getByRole(\"link\", { name: reject.name, exact: true }).click();\n668:     await expect(\n669:       adminPage.getByRole(\"heading\", { name: \"公開内容との比較\", exact: true }),\n670:     ).toBeVisible();\n671:     await adminPage.getByRole(\"button\", { name: \"却下する\", exact: true }).click();\n672:     await expect(\n673:       adminPage.getByText(\"却下理由を入力してください。\", { exact: true }),\n674:     ).toBeVisible();\n675:     expect((await legacyMaterialRequestById(reject.id))?.status).toBe(\"pending\");\n676:     await adminPage\n677:       .getByLabel(\"メーカーへの連絡メモ\", { exact: false })\n678:       .fill(\"申請内容の資料が不足しています。\");\n679:     await adminPage.getByRole(\"button\", { name: \"却下する\", exact: true }).click();\n680:     await expect(adminPage).toHaveURL(\n681:       new RegExp(`/admin/materials/requests/${reject.id}\\\\?resolved=reject$`),\n682:     );\n683:     expect(await legacyMaterialRequestById(reject.id)).toMatchObject({\n684:       status: \"rejected\",\n685:       review_note: \"申請内容の資料が不足しています。\",\n686:       result_material_id: null,\n687:     });\n688:     await page.goto(`/dashboard/materials/requests/${reject.id}`);\n689:     await expect(page.getByText(\"申請内容の資料が不足しています。\", { exact: true })).toBeVisible();\n690:     await expect(page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true })).toHaveCount(0);\n691:     await adminPage.goto(`/admin/materials/requests/${approve.id}`);\n692:     await adminPage\n693:       .getByLabel(\"メーカーへの連絡メモ\", { exact: false })\n694:       .fill(\"公開資料との一致を確認しました。\");\n695:     await adminPage.getByRole(\"button\", { name: \"承認して反映\", exact: true }).click();"
             }
           ],
           "assertion_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 660,
-              "end_line": 701,
-              "code": "660:     await expect(\n661:       adminPage.getByRole(\"heading\", { name: \"公開内容との比較\", exact: true }),\n662:     ).toBeVisible();\n663:     await adminPage.getByRole(\"button\", { name: \"却下する\", exact: true }).click();\n664:     await expect(\n665:       adminPage.getByText(\"却下理由を入力してください。\", { exact: true }),\n666:     ).toBeVisible();\n667:     expect((await legacyMaterialRequestById(reject.id))?.status).toBe(\"pending\");\n668:     await adminPage\n669:       .getByLabel(\"メーカーへの連絡メモ\", { exact: false })\n670:       .fill(\"申請内容の資料が不足しています。\");\n671:     await adminPage.getByRole(\"button\", { name: \"却下する\", exact: true }).click();\n672:     await expect(adminPage).toHaveURL(\n673:       new RegExp(`/admin/materials/requests/${reject.id}\\\\?resolved=reject$`),\n674:     );\n675:     expect(await legacyMaterialRequestById(reject.id)).toMatchObject({\n676:       status: \"rejected\",\n677:       review_note: \"申請内容の資料が不足しています。\",\n678:       result_material_id: null,\n679:     });\n680:     await page.goto(`/dashboard/materials/requests/${reject.id}`);\n681:     await expect(page.getByText(\"申請内容の資料が不足しています。\", { exact: true })).toBeVisible();\n682:     await expect(page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true })).toHaveCount(0);\n683:     await adminPage.goto(`/admin/materials/requests/${approve.id}`);\n684:     await adminPage\n685:       .getByLabel(\"メーカーへの連絡メモ\", { exact: false })\n686:       .fill(\"公開資料との一致を確認しました。\");\n687:     await adminPage.getByRole(\"button\", { name: \"承認して反映\", exact: true }).click();\n688:     await expect\n689:       .poll(async () => (await legacyMaterialRequestById(approve.id))?.status)\n690:       .toBe(\"approved\");\n691:     expect((await legacyMaterialRequestById(approve.id))?.result_material_id).toBe(\n692:       approve.materialId,\n693:     );\n694:     await page.goto(`/dashboard/materials/requests/${approve.id}`);\n695:     await expect(page.getByText(\"承認済み\", { exact: true })).toBeVisible();\n696:     await page.getByRole(\"link\", { name: \"公開画面を見る\", exact: true }).click();\n697:     await expect(page).toHaveURL(`/materials/${approve.materialId}`);\n698:     await expect(page.getByRole(\"heading\", { name: approve.name, exact: true })).toBeVisible();\n699:     await expect(\n700:       page.getByText(\"既存申請の比較対象となる紹介文です。\", { exact: true }),\n701:     ).toBeVisible();"
+              "start_line": 668,
+              "end_line": 709,
+              "code": "668:     await expect(\n669:       adminPage.getByRole(\"heading\", { name: \"公開内容との比較\", exact: true }),\n670:     ).toBeVisible();\n671:     await adminPage.getByRole(\"button\", { name: \"却下する\", exact: true }).click();\n672:     await expect(\n673:       adminPage.getByText(\"却下理由を入力してください。\", { exact: true }),\n674:     ).toBeVisible();\n675:     expect((await legacyMaterialRequestById(reject.id))?.status).toBe(\"pending\");\n676:     await adminPage\n677:       .getByLabel(\"メーカーへの連絡メモ\", { exact: false })\n678:       .fill(\"申請内容の資料が不足しています。\");\n679:     await adminPage.getByRole(\"button\", { name: \"却下する\", exact: true }).click();\n680:     await expect(adminPage).toHaveURL(\n681:       new RegExp(`/admin/materials/requests/${reject.id}\\\\?resolved=reject$`),\n682:     );\n683:     expect(await legacyMaterialRequestById(reject.id)).toMatchObject({\n684:       status: \"rejected\",\n685:       review_note: \"申請内容の資料が不足しています。\",\n686:       result_material_id: null,\n687:     });\n688:     await page.goto(`/dashboard/materials/requests/${reject.id}`);\n689:     await expect(page.getByText(\"申請内容の資料が不足しています。\", { exact: true })).toBeVisible();\n690:     await expect(page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true })).toHaveCount(0);\n691:     await adminPage.goto(`/admin/materials/requests/${approve.id}`);\n692:     await adminPage\n693:       .getByLabel(\"メーカーへの連絡メモ\", { exact: false })\n694:       .fill(\"公開資料との一致を確認しました。\");\n695:     await adminPage.getByRole(\"button\", { name: \"承認して反映\", exact: true }).click();\n696:     await expect\n697:       .poll(async () => (await legacyMaterialRequestById(approve.id))?.status)\n698:       .toBe(\"approved\");\n699:     expect((await legacyMaterialRequestById(approve.id))?.result_material_id).toBe(\n700:       approve.materialId,\n701:     );\n702:     await page.goto(`/dashboard/materials/requests/${approve.id}`);\n703:     await expect(page.getByText(\"承認済み\", { exact: true })).toBeVisible();\n704:     await page.getByRole(\"link\", { name: \"公開画面を見る\", exact: true }).click();\n705:     await expect(page).toHaveURL(`/materials/${approve.materialId}`);\n706:     await expect(page.getByRole(\"heading\", { name: approve.name, exact: true })).toBeVisible();\n707:     await expect(\n708:       page.getByText(\"既存申請の比較対象となる紹介文です。\", { exact: true }),\n709:     ).toBeVisible();"
             }
           ],
           "helper_code": [],
@@ -993,8 +993,8 @@
               "runner": "playwright",
               "title": "既存資材申請の本人限定閲覧・取消・運営の却下と承認を確認する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
-              "source_declaration_line": 603,
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
+              "source_declaration_line": 611,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
           ]
@@ -1028,28 +1028,28 @@
       "references": [
         {
           "file": "e2e/14-admin-content-flows.spec.ts",
-          "test_declaration_line": 603,
+          "test_declaration_line": 611,
           "additional_reference_not_in_ledger": false,
           "action_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 708,
-              "end_line": 709,
-              "code": "708:     for (const selected of requestsByStatus) {\n709:       await adminPage.goto(`/admin/materials/requests?status=${selected.status}`);"
+              "start_line": 716,
+              "end_line": 717,
+              "code": "716:     for (const selected of requestsByStatus) {\n717:       await adminPage.goto(`/admin/materials/requests?status=${selected.status}`);"
             },
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 719,
-              "end_line": 719,
-              "code": "719:     await adminPage.goto(\"/admin/materials/requests?status=all\");"
+              "start_line": 727,
+              "end_line": 727,
+              "code": "727:     await adminPage.goto(\"/admin/materials/requests?status=all\");"
             }
           ],
           "assertion_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 710,
-              "end_line": 723,
-              "code": "710:       await expect(\n711:         adminPage.getByRole(\"link\", { name: selected.request.name, exact: true }),\n712:       ).toHaveAttribute(\"href\", `/admin/materials/requests/${selected.request.id}`);\n713:       for (const other of requestsByStatus.filter((entry) => entry.status !== selected.status)) {\n714:         await expect(\n715:           adminPage.locator(`a[href=\"/admin/materials/requests/${other.request.id}\"]`),\n716:         ).toHaveCount(0);\n717:       }\n718:     }\n719:     await adminPage.goto(\"/admin/materials/requests?status=all\");\n720:     for (const request of [cancel, reject, approve, pending])\n721:       await expect(\n722:         adminPage.getByRole(\"link\", { name: request.name, exact: true }),\n723:       ).toHaveAttribute(\"href\", `/admin/materials/requests/${request.id}`);"
+              "start_line": 718,
+              "end_line": 731,
+              "code": "718:       await expect(\n719:         adminPage.getByRole(\"link\", { name: selected.request.name, exact: true }),\n720:       ).toHaveAttribute(\"href\", `/admin/materials/requests/${selected.request.id}`);\n721:       for (const other of requestsByStatus.filter((entry) => entry.status !== selected.status)) {\n722:         await expect(\n723:           adminPage.locator(`a[href=\"/admin/materials/requests/${other.request.id}\"]`),\n724:         ).toHaveCount(0);\n725:       }\n726:     }\n727:     await adminPage.goto(\"/admin/materials/requests?status=all\");\n728:     for (const request of [cancel, reject, approve, pending])\n729:       await expect(\n730:         adminPage.getByRole(\"link\", { name: request.name, exact: true }),\n731:       ).toHaveAttribute(\"href\", `/admin/materials/requests/${request.id}`);"
             }
           ],
           "helper_code": [],
@@ -1059,8 +1059,8 @@
               "runner": "playwright",
               "title": "既存資材申請の本人限定閲覧・取消・運営の却下と承認を確認する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
-              "source_declaration_line": 603,
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
+              "source_declaration_line": 611,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
           ]
@@ -1129,7 +1129,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（existing）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -1137,7 +1137,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（new）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -1204,7 +1204,7 @@
               "runner": "playwright",
               "title": "adminの現在パスワード変更とメールによる再設定",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 47,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -1344,7 +1344,7 @@
               "runner": "playwright",
               "title": "運営が公開済み投稿を非公開化し、本文を保持する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 15,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -1406,7 +1406,7 @@
               "runner": "playwright",
               "title": "通報の resolve と対象非公開、編集局の pending 編集・公開と同じ本文の会員閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 18,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -1481,7 +1481,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（existing）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -1489,7 +1489,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（new）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -1552,7 +1552,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（existing）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -1560,7 +1560,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（new）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -1606,9 +1606,9 @@
             },
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 272,
-              "end_line": 281,
-              "code": "272:     await page.goto(\"/admin/tags\");\n273:     await page\n274:       .locator(\"summary\")\n275:       .filter({ hasText: /^悩み/ })\n276:       .click();\n277:     const unusedTag = page\n278:       .getByRole(\"textbox\", { name: `${renamedTag} の名前`, exact: true })\n279:       .locator(\"..\");\n280:     await expect(unusedTag).toContainText(\"使用 0 件\");\n281:     await unusedTag.getByRole(\"button\", { name: \"削除\", exact: true }).click();"
+              "start_line": 280,
+              "end_line": 289,
+              "code": "280:     await page.goto(\"/admin/tags\");\n281:     await page\n282:       .locator(\"summary\")\n283:       .filter({ hasText: /^悩み/ })\n284:       .click();\n285:     const unusedTag = page\n286:       .getByRole(\"textbox\", { name: `${renamedTag} の名前`, exact: true })\n287:       .locator(\"..\");\n288:     await expect(unusedTag).toContainText(\"使用 0 件\");\n289:     await unusedTag.getByRole(\"button\", { name: \"削除\", exact: true }).click();"
             }
           ],
           "assertion_code": [
@@ -1626,9 +1626,9 @@
             },
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 280,
-              "end_line": 285,
-              "code": "280:     await expect(unusedTag).toContainText(\"使用 0 件\");\n281:     await unusedTag.getByRole(\"button\", { name: \"削除\", exact: true }).click();\n282:     await expect.poll(async () => tagByOwnedName(renamedTag)).toBeNull();\n283:     await expect(\n284:       page.getByRole(\"textbox\", { name: `${renamedTag} の名前`, exact: true }),\n285:     ).toHaveCount(0);"
+              "start_line": 288,
+              "end_line": 293,
+              "code": "288:     await expect(unusedTag).toContainText(\"使用 0 件\");\n289:     await unusedTag.getByRole(\"button\", { name: \"削除\", exact: true }).click();\n290:     await expect.poll(async () => tagByOwnedName(renamedTag)).toBeNull();\n291:     await expect(\n292:       page.getByRole(\"textbox\", { name: `${renamedTag} の名前`, exact: true }),\n293:     ).toHaveCount(0);"
             }
           ],
           "helper_code": [],
@@ -1640,7 +1640,7 @@
               "runner": "playwright",
               "title": "運営が資材と検索タグを登録・編集し、使用中の削除を防ぎ、掲載と編集権と監査を管理する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 149,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -1702,7 +1702,7 @@
               "runner": "playwright",
               "title": "通報の resolve と対象非公開、編集局の pending 編集・公開と同じ本文の会員閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 18,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -1710,22 +1710,22 @@
         },
         {
           "file": "e2e/14-admin-content-flows.spec.ts",
-          "test_declaration_line": 297,
+          "test_declaration_line": 305,
           "additional_reference_not_in_ledger": true,
           "action_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 313,
-              "end_line": 330,
-              "code": "313:     await loginAdminAndEnrollMfa(page, admin, `/admin/usage-reports/${publish.id}`);\n314:     const editedTitle = uniqueToken(\"editorial-edited\");\n315:     await page.getByLabel(\"タイトル\", { exact: true }).fill(editedTitle);\n316:     await page.getByLabel(/^観察した変化/).fill(\"編集局で確認して補足した観察です。\");\n317:     await page.getByLabel(/^編集局メモ（内部）/).fill(\"公開前の内部確認記録\");\n318:     await page.getByRole(\"button\", { name: \"編集内容を保存\", exact: true }).click();\n319:     await expect(page.getByText(\"編集内容を保存しました。\", { exact: true })).toBeVisible();\n320:     await page.reload();\n321:     await expect(page.getByLabel(\"タイトル\", { exact: true })).toHaveValue(editedTitle);\n322:     expect(await editorialReportById(publish.id)).toMatchObject({\n323:       status: \"pending\",\n324:       title: editedTitle,\n325:       observed_change: \"編集局で確認して補足した観察です。\",\n326:       editor_note: \"公開前の内部確認記録\",\n327:     });\n328:     await anonymous.goto(`/reports/${publish.id}`);\n329:     await expect(anonymous.getByRole(\"heading\", { name: \"ページが見つかりません\" })).toBeVisible();\n330:     await page.getByRole(\"button\", { name: \"公開する\", exact: true }).click();"
+              "start_line": 321,
+              "end_line": 338,
+              "code": "321:     await loginAdminAndEnrollMfa(page, admin, `/admin/usage-reports/${publish.id}`);\n322:     const editedTitle = uniqueToken(\"editorial-edited\");\n323:     await page.getByLabel(\"タイトル\", { exact: true }).fill(editedTitle);\n324:     await page.getByLabel(/^観察した変化/).fill(\"編集局で確認して補足した観察です。\");\n325:     await page.getByLabel(/^編集局メモ（内部）/).fill(\"公開前の内部確認記録\");\n326:     await page.getByRole(\"button\", { name: \"編集内容を保存\", exact: true }).click();\n327:     await expect(page.getByText(\"編集内容を保存しました。\", { exact: true })).toBeVisible();\n328:     await page.reload();\n329:     await expect(page.getByLabel(\"タイトル\", { exact: true })).toHaveValue(editedTitle);\n330:     expect(await editorialReportById(publish.id)).toMatchObject({\n331:       status: \"pending\",\n332:       title: editedTitle,\n333:       observed_change: \"編集局で確認して補足した観察です。\",\n334:       editor_note: \"公開前の内部確認記録\",\n335:     });\n336:     await anonymous.goto(`/reports/${publish.id}`);\n337:     await expect(anonymous.getByRole(\"heading\", { name: \"ページが見つかりません\" })).toBeVisible();\n338:     await page.getByRole(\"button\", { name: \"公開する\", exact: true }).click();"
             }
           ],
           "assertion_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 319,
-              "end_line": 337,
-              "code": "319:     await expect(page.getByText(\"編集内容を保存しました。\", { exact: true })).toBeVisible();\n320:     await page.reload();\n321:     await expect(page.getByLabel(\"タイトル\", { exact: true })).toHaveValue(editedTitle);\n322:     expect(await editorialReportById(publish.id)).toMatchObject({\n323:       status: \"pending\",\n324:       title: editedTitle,\n325:       observed_change: \"編集局で確認して補足した観察です。\",\n326:       editor_note: \"公開前の内部確認記録\",\n327:     });\n328:     await anonymous.goto(`/reports/${publish.id}`);\n329:     await expect(anonymous.getByRole(\"heading\", { name: \"ページが見つかりません\" })).toBeVisible();\n330:     await page.getByRole(\"button\", { name: \"公開する\", exact: true }).click();\n331:     await expect\n332:       .poll(async () => (await editorialReportById(publish.id))?.status)\n333:       .toBe(\"published\");\n334:     await expect(page.getByLabel(\"タイトル\", { exact: true })).toBeDisabled();\n335:     await anonymous.reload();\n336:     await expect(anonymous.getByRole(\"heading\", { name: editedTitle, exact: true })).toBeVisible();\n337:     expect(await anonymous.content()).not.toContain(\"公開前の内部確認記録\");"
+              "start_line": 327,
+              "end_line": 345,
+              "code": "327:     await expect(page.getByText(\"編集内容を保存しました。\", { exact: true })).toBeVisible();\n328:     await page.reload();\n329:     await expect(page.getByLabel(\"タイトル\", { exact: true })).toHaveValue(editedTitle);\n330:     expect(await editorialReportById(publish.id)).toMatchObject({\n331:       status: \"pending\",\n332:       title: editedTitle,\n333:       observed_change: \"編集局で確認して補足した観察です。\",\n334:       editor_note: \"公開前の内部確認記録\",\n335:     });\n336:     await anonymous.goto(`/reports/${publish.id}`);\n337:     await expect(anonymous.getByRole(\"heading\", { name: \"ページが見つかりません\" })).toBeVisible();\n338:     await page.getByRole(\"button\", { name: \"公開する\", exact: true }).click();\n339:     await expect\n340:       .poll(async () => (await editorialReportById(publish.id))?.status)\n341:       .toBe(\"published\");\n342:     await expect(page.getByLabel(\"タイトル\", { exact: true })).toBeDisabled();\n343:     await anonymous.reload();\n344:     await expect(anonymous.getByRole(\"heading\", { name: editedTitle, exact: true })).toBeVisible();\n345:     expect(await anonymous.content()).not.toContain(\"公開前の内部確認記録\");"
             }
           ],
           "helper_code": [],
@@ -1735,8 +1735,8 @@
               "runner": "playwright",
               "title": "編集局の調整保存と差し戻し理由の必須検証と公開を確認する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
-              "source_declaration_line": 297,
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
+              "source_declaration_line": 305,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
           ]
@@ -1797,7 +1797,7 @@
               "runner": "playwright",
               "title": "通報の resolve と対象非公開、編集局の pending 編集・公開と同じ本文の会員閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 18,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -1895,7 +1895,7 @@
               "runner": "playwright",
               "title": "メーカー記事の画像・Markdown・資材紐づけを保存し、公開・非公開・削除を反映する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 35,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2059,7 +2059,7 @@
               "runner": "playwright",
               "title": "メーカー記事の画像・Markdown・資材紐づけを保存し、公開・非公開・削除を反映する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 35,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2145,7 +2145,7 @@
               "runner": "playwright",
               "title": "フォームD 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2207,7 +2207,7 @@
               "runner": "playwright",
               "title": "フォームD 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2269,7 +2269,7 @@
               "runner": "playwright",
               "title": "フォームD 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2309,7 +2309,7 @@
               "runner": "playwright",
               "title": "Dの未確認・期限切れ・確認リンク再使用の拒否と入力破棄",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 466,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2371,7 +2371,7 @@
               "runner": "playwright",
               "title": "フォームD 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2404,7 +2404,7 @@
               "runner": "playwright",
               "title": "Dの未確認・期限切れ・確認リンク再使用の拒否と入力破棄",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 466,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2510,7 +2510,7 @@
               "runner": "playwright",
               "title": "フォームA 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -2518,7 +2518,7 @@
               "runner": "playwright",
               "title": "フォームB 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -2526,7 +2526,7 @@
               "runner": "playwright",
               "title": "フォームC 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2596,7 +2596,7 @@
               "runner": "playwright",
               "title": "フォームA 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -2604,7 +2604,7 @@
               "runner": "playwright",
               "title": "フォームB 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -2612,7 +2612,7 @@
               "runner": "playwright",
               "title": "フォームC 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2688,7 +2688,7 @@
               "runner": "playwright",
               "title": "フォームA 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -2696,7 +2696,7 @@
               "runner": "playwright",
               "title": "フォームB 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -2704,7 +2704,7 @@
               "runner": "playwright",
               "title": "フォームC 複数資材の申請・受付票・非公開資料・控え再送・運営閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 49,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2784,7 +2784,7 @@
               "runner": "playwright",
               "title": "メーカー記事の画像・Markdown・資材紐づけを保存し、公開・非公開・削除を反映する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 35,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2852,7 +2852,7 @@
               "runner": "playwright",
               "title": "メーカー記事の画像・Markdown・資材紐づけを保存し、公開・非公開・削除を反映する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 35,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2920,7 +2920,7 @@
               "runner": "playwright",
               "title": "メーカー記事の画像・Markdown・資材紐づけを保存し、公開・非公開・削除を反映する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 35,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -2955,22 +2955,22 @@
       "references": [
         {
           "file": "e2e/14-admin-content-flows.spec.ts",
-          "test_declaration_line": 440,
+          "test_declaration_line": 448,
           "additional_reference_not_in_ledger": false,
           "action_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 505,
-              "end_line": 509,
-              "code": "505:     const returnedVersionLink = page.locator(\n506:       `a[href=\"/dashboard/materials/${material.id}/history/${firstVersion.id}\"]`,\n507:     );\n508:     await expect(returnedVersionLink).toContainText(\"修正待ち\");\n509:     await returnedVersionLink.click();"
+              "start_line": 513,
+              "end_line": 517,
+              "code": "513:     const returnedVersionLink = page.locator(\n514:       `a[href=\"/dashboard/materials/${material.id}/history/${firstVersion.id}\"]`,\n515:     );\n516:     await expect(returnedVersionLink).toContainText(\"修正待ち\");\n517:     await returnedVersionLink.click();"
             }
           ],
           "assertion_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 508,
-              "end_line": 515,
-              "code": "508:     await expect(returnedVersionLink).toContainText(\"修正待ち\");\n509:     await returnedVersionLink.click();\n510:     await expect(page).toHaveURL(`/dashboard/materials/${material.id}/history/${firstVersion.id}`);\n511:     await expect(page.getByRole(\"banner\")).toContainText(\"保存した原稿\");\n512:     await expect(page.getByText(description, { exact: true })).toBeVisible();\n513:     await expect(\n514:       page.getByRole(\"banner\").getByRole(\"link\", { name: \"戻る\", exact: true }),\n515:     ).toHaveAttribute(\"href\", `/dashboard/materials/${material.id}`);"
+              "start_line": 516,
+              "end_line": 523,
+              "code": "516:     await expect(returnedVersionLink).toContainText(\"修正待ち\");\n517:     await returnedVersionLink.click();\n518:     await expect(page).toHaveURL(`/dashboard/materials/${material.id}/history/${firstVersion.id}`);\n519:     await expect(page.getByRole(\"banner\")).toContainText(\"保存した原稿\");\n520:     await expect(page.getByText(description, { exact: true })).toBeVisible();\n521:     await expect(\n522:       page.getByRole(\"banner\").getByRole(\"link\", { name: \"戻る\", exact: true }),\n523:     ).toHaveAttribute(\"href\", `/dashboard/materials/${material.id}`);"
             }
           ],
           "helper_code": [],
@@ -2982,8 +2982,8 @@
               "runner": "playwright",
               "title": "資材原稿の修正依頼・再提出・取り下げを履歴に残し、取消後の編集を拒否する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
-              "source_declaration_line": 440,
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
+              "source_declaration_line": 448,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
           ]
@@ -3074,7 +3074,7 @@
               "runner": "playwright",
               "title": "書類確認で資材単位の編集権を付与し、原稿を表現確認後に公開する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 16,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -3082,34 +3082,34 @@
         },
         {
           "file": "e2e/14-admin-content-flows.spec.ts",
-          "test_declaration_line": 440,
+          "test_declaration_line": 448,
           "additional_reference_not_in_ledger": false,
           "action_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 475,
-              "end_line": 554,
-              "code": "475:     await page.getByRole(\"textbox\", { name: \"製品説明\", exact: true }).fill(description);\n476:     await page.getByRole(\"button\", { name: \"保存して表現確認へ送る\", exact: true }).click();\n477:     await expect(\n478:       page.getByText(\"表現確認中です。公開内容は確認完了後に変わります。\", { exact: true }),\n479:     ).toBeVisible();\n480:     const firstVersion = (await materialManuscripts(material.id)).find(\n481:       (version) => version.status === \"pending\",\n482:     );\n483:     if (firstVersion === undefined)\n484:       throw new Error(\"Submitted material manuscript was not persisted.\");\n485:     await adminPage.goto(`/admin/materials/expressions/${firstVersion.id}`);\n486:     await adminPage.getByRole(\"button\", { name: \"修正を依頼\", exact: true }).click();\n487:     await expect(\n488:       adminPage.getByText(\"修正が必要な箇所と理由を記入してください。\", { exact: true }),\n489:     ).toBeVisible();\n490:     expect(\n491:       (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id)\n492:         ?.status,\n493:     ).toBe(\"pending\");\n494:     await adminPage.getByLabel(\"確認メモ・修正が必要な箇所\").fill(reason);\n495:     await adminPage.getByRole(\"button\", { name: \"修正を依頼\", exact: true }).click();\n496:     await expect\n497:       .poll(\n498:         async () =>\n499:           (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id)\n500:             ?.status,\n501:       )\n502:       .toBe(\"returned\");\n503:     await page.reload();\n504:     await expect(page.getByText(reason, { exact: true })).toBeVisible();\n505:     const returnedVersionLink = page.locator(\n506:       `a[href=\"/dashboard/materials/${material.id}/history/${firstVersion.id}\"]`,\n507:     );\n508:     await expect(returnedVersionLink).toContainText(\"修正待ち\");\n509:     await returnedVersionLink.click();\n510:     await expect(page).toHaveURL(`/dashboard/materials/${material.id}/history/${firstVersion.id}`);\n511:     await expect(page.getByRole(\"banner\")).toContainText(\"保存した原稿\");\n512:     await expect(page.getByText(description, { exact: true })).toBeVisible();\n513:     await expect(\n514:       page.getByRole(\"banner\").getByRole(\"link\", { name: \"戻る\", exact: true }),\n515:     ).toHaveAttribute(\"href\", `/dashboard/materials/${material.id}`);\n516:     await page.screenshot({\n517:       path: test.info().outputPath(\"material-returned-history-375.png\"),\n518:       fullPage: true,\n519:     });\n520:     await page.goto(`/dashboard/materials/${material.id}`);\n521:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toHaveValue(\n522:       description,\n523:     );\n524:     await page.getByRole(\"textbox\", { name: \"製品説明\", exact: true }).fill(revisedDescription);\n525:     await page.getByRole(\"button\", { name: \"保存して表現確認へ送る\", exact: true }).click();\n526:     await expect(\n527:       page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }),\n528:     ).toBeVisible();\n529:     const secondVersion = (await materialManuscripts(material.id)).find(\n530:       (version) => version.status === \"pending\",\n531:     );\n532:     if (secondVersion === undefined || secondVersion.id === firstVersion.id)\n533:       throw new Error(\"Revision did not create a new manuscript version.\");\n534:     await page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }).click();\n535:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toBeVisible();\n536:     expect(\n537:       (await materialManuscripts(material.id)).find((version) => version.id === secondVersion.id)\n538:         ?.status,\n539:     ).toBe(\"withdrawn\");\n540:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toHaveValue(\n541:       revisedDescription,\n542:     );\n543:     await expect(page.getByRole(\"link\", { name: /取り下げ済み/ })).toBeVisible();\n544:     await page.getByRole(\"button\", { name: \"保存して表現確認へ送る\", exact: true }).click();\n545:     await expect(\n546:       page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }),\n547:     ).toBeVisible();\n548:     const finalVersion = (await materialManuscripts(material.id)).find(\n549:       (version) => version.status === \"pending\",\n550:     );\n551:     if (finalVersion === undefined || finalVersion.id === secondVersion.id)\n552:       throw new Error(\"Resubmission did not create a new manuscript version.\");\n553:     await adminPage.goto(`/admin/materials/expressions/${finalVersion.id}`);\n554:     await adminPage.getByRole(\"button\", { name: \"表現確認を完了して反映\", exact: true }).click();"
+              "start_line": 483,
+              "end_line": 562,
+              "code": "483:     await page.getByRole(\"textbox\", { name: \"製品説明\", exact: true }).fill(description);\n484:     await page.getByRole(\"button\", { name: \"保存して表現確認へ送る\", exact: true }).click();\n485:     await expect(\n486:       page.getByText(\"表現確認中です。公開内容は確認完了後に変わります。\", { exact: true }),\n487:     ).toBeVisible();\n488:     const firstVersion = (await materialManuscripts(material.id)).find(\n489:       (version) => version.status === \"pending\",\n490:     );\n491:     if (firstVersion === undefined)\n492:       throw new Error(\"Submitted material manuscript was not persisted.\");\n493:     await adminPage.goto(`/admin/materials/expressions/${firstVersion.id}`);\n494:     await adminPage.getByRole(\"button\", { name: \"修正を依頼\", exact: true }).click();\n495:     await expect(\n496:       adminPage.getByText(\"修正が必要な箇所と理由を記入してください。\", { exact: true }),\n497:     ).toBeVisible();\n498:     expect(\n499:       (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id)\n500:         ?.status,\n501:     ).toBe(\"pending\");\n502:     await adminPage.getByLabel(\"確認メモ・修正が必要な箇所\").fill(reason);\n503:     await adminPage.getByRole(\"button\", { name: \"修正を依頼\", exact: true }).click();\n504:     await expect\n505:       .poll(\n506:         async () =>\n507:           (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id)\n508:             ?.status,\n509:       )\n510:       .toBe(\"returned\");\n511:     await page.reload();\n512:     await expect(page.getByText(reason, { exact: true })).toBeVisible();\n513:     const returnedVersionLink = page.locator(\n514:       `a[href=\"/dashboard/materials/${material.id}/history/${firstVersion.id}\"]`,\n515:     );\n516:     await expect(returnedVersionLink).toContainText(\"修正待ち\");\n517:     await returnedVersionLink.click();\n518:     await expect(page).toHaveURL(`/dashboard/materials/${material.id}/history/${firstVersion.id}`);\n519:     await expect(page.getByRole(\"banner\")).toContainText(\"保存した原稿\");\n520:     await expect(page.getByText(description, { exact: true })).toBeVisible();\n521:     await expect(\n522:       page.getByRole(\"banner\").getByRole(\"link\", { name: \"戻る\", exact: true }),\n523:     ).toHaveAttribute(\"href\", `/dashboard/materials/${material.id}`);\n524:     await page.screenshot({\n525:       path: test.info().outputPath(\"material-returned-history-375.png\"),\n526:       fullPage: true,\n527:     });\n528:     await page.goto(`/dashboard/materials/${material.id}`);\n529:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toHaveValue(\n530:       description,\n531:     );\n532:     await page.getByRole(\"textbox\", { name: \"製品説明\", exact: true }).fill(revisedDescription);\n533:     await page.getByRole(\"button\", { name: \"保存して表現確認へ送る\", exact: true }).click();\n534:     await expect(\n535:       page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }),\n536:     ).toBeVisible();\n537:     const secondVersion = (await materialManuscripts(material.id)).find(\n538:       (version) => version.status === \"pending\",\n539:     );\n540:     if (secondVersion === undefined || secondVersion.id === firstVersion.id)\n541:       throw new Error(\"Revision did not create a new manuscript version.\");\n542:     await page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }).click();\n543:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toBeVisible();\n544:     expect(\n545:       (await materialManuscripts(material.id)).find((version) => version.id === secondVersion.id)\n546:         ?.status,\n547:     ).toBe(\"withdrawn\");\n548:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toHaveValue(\n549:       revisedDescription,\n550:     );\n551:     await expect(page.getByRole(\"link\", { name: /取り下げ済み/ })).toBeVisible();\n552:     await page.getByRole(\"button\", { name: \"保存して表現確認へ送る\", exact: true }).click();\n553:     await expect(\n554:       page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }),\n555:     ).toBeVisible();\n556:     const finalVersion = (await materialManuscripts(material.id)).find(\n557:       (version) => version.status === \"pending\",\n558:     );\n559:     if (finalVersion === undefined || finalVersion.id === secondVersion.id)\n560:       throw new Error(\"Resubmission did not create a new manuscript version.\");\n561:     await adminPage.goto(`/admin/materials/expressions/${finalVersion.id}`);\n562:     await adminPage.getByRole(\"button\", { name: \"表現確認を完了して反映\", exact: true }).click();"
             },
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 565,
-              "end_line": 578,
-              "code": "565:     await page.goto(`/dashboard/materials/${material.id}`);\n566:     await page\n567:       .getByRole(\"textbox\", { name: \"製品説明\", exact: true })\n568:       .fill(\"編集権取消後に保存してはいけない変更です。\");\n569:     const manuscriptCount = (await materialManuscripts(material.id)).length;\n570:     await adminPage.goto(`/admin/materials/${material.id}`);\n571:     await adminPage.getByLabel(\"編集権を付与するメーカー\").selectOption(\"\");\n572:     await adminPage.getByRole(\"button\", { name: \"編集権を更新する\" }).click();\n573:     await expect(\n574:       adminPage.getByText(\"編集権を取り消しました。公開中の情報は保持しています。\", {\n575:         exact: true,\n576:       }),\n577:     ).toBeVisible();\n578:     await page.getByRole(\"button\", { name: \"下書きを保存\", exact: true }).click();"
+              "start_line": 573,
+              "end_line": 586,
+              "code": "573:     await page.goto(`/dashboard/materials/${material.id}`);\n574:     await page\n575:       .getByRole(\"textbox\", { name: \"製品説明\", exact: true })\n576:       .fill(\"編集権取消後に保存してはいけない変更です。\");\n577:     const manuscriptCount = (await materialManuscripts(material.id)).length;\n578:     await adminPage.goto(`/admin/materials/${material.id}`);\n579:     await adminPage.getByLabel(\"編集権を付与するメーカー\").selectOption(\"\");\n580:     await adminPage.getByRole(\"button\", { name: \"編集権を更新する\" }).click();\n581:     await expect(\n582:       adminPage.getByText(\"編集権を取り消しました。公開中の情報は保持しています。\", {\n583:         exact: true,\n584:       }),\n585:     ).toBeVisible();\n586:     await page.getByRole(\"button\", { name: \"下書きを保存\", exact: true }).click();"
             }
           ],
           "assertion_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 477,
-              "end_line": 564,
-              "code": "477:     await expect(\n478:       page.getByText(\"表現確認中です。公開内容は確認完了後に変わります。\", { exact: true }),\n479:     ).toBeVisible();\n480:     const firstVersion = (await materialManuscripts(material.id)).find(\n481:       (version) => version.status === \"pending\",\n482:     );\n483:     if (firstVersion === undefined)\n484:       throw new Error(\"Submitted material manuscript was not persisted.\");\n485:     await adminPage.goto(`/admin/materials/expressions/${firstVersion.id}`);\n486:     await adminPage.getByRole(\"button\", { name: \"修正を依頼\", exact: true }).click();\n487:     await expect(\n488:       adminPage.getByText(\"修正が必要な箇所と理由を記入してください。\", { exact: true }),\n489:     ).toBeVisible();\n490:     expect(\n491:       (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id)\n492:         ?.status,\n493:     ).toBe(\"pending\");\n494:     await adminPage.getByLabel(\"確認メモ・修正が必要な箇所\").fill(reason);\n495:     await adminPage.getByRole(\"button\", { name: \"修正を依頼\", exact: true }).click();\n496:     await expect\n497:       .poll(\n498:         async () =>\n499:           (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id)\n500:             ?.status,\n501:       )\n502:       .toBe(\"returned\");\n503:     await page.reload();\n504:     await expect(page.getByText(reason, { exact: true })).toBeVisible();\n505:     const returnedVersionLink = page.locator(\n506:       `a[href=\"/dashboard/materials/${material.id}/history/${firstVersion.id}\"]`,\n507:     );\n508:     await expect(returnedVersionLink).toContainText(\"修正待ち\");\n509:     await returnedVersionLink.click();\n510:     await expect(page).toHaveURL(`/dashboard/materials/${material.id}/history/${firstVersion.id}`);\n511:     await expect(page.getByRole(\"banner\")).toContainText(\"保存した原稿\");\n512:     await expect(page.getByText(description, { exact: true })).toBeVisible();\n513:     await expect(\n514:       page.getByRole(\"banner\").getByRole(\"link\", { name: \"戻る\", exact: true }),\n515:     ).toHaveAttribute(\"href\", `/dashboard/materials/${material.id}`);\n516:     await page.screenshot({\n517:       path: test.info().outputPath(\"material-returned-history-375.png\"),\n518:       fullPage: true,\n519:     });\n520:     await page.goto(`/dashboard/materials/${material.id}`);\n521:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toHaveValue(\n522:       description,\n523:     );\n524:     await page.getByRole(\"textbox\", { name: \"製品説明\", exact: true }).fill(revisedDescription);\n525:     await page.getByRole(\"button\", { name: \"保存して表現確認へ送る\", exact: true }).click();\n526:     await expect(\n527:       page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }),\n528:     ).toBeVisible();\n529:     const secondVersion = (await materialManuscripts(material.id)).find(\n530:       (version) => version.status === \"pending\",\n531:     );\n532:     if (secondVersion === undefined || secondVersion.id === firstVersion.id)\n533:       throw new Error(\"Revision did not create a new manuscript version.\");\n534:     await page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }).click();\n535:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toBeVisible();\n536:     expect(\n537:       (await materialManuscripts(material.id)).find((version) => version.id === secondVersion.id)\n538:         ?.status,\n539:     ).toBe(\"withdrawn\");\n540:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toHaveValue(\n541:       revisedDescription,\n542:     );\n543:     await expect(page.getByRole(\"link\", { name: /取り下げ済み/ })).toBeVisible();\n544:     await page.getByRole(\"button\", { name: \"保存して表現確認へ送る\", exact: true }).click();\n545:     await expect(\n546:       page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }),\n547:     ).toBeVisible();\n548:     const finalVersion = (await materialManuscripts(material.id)).find(\n549:       (version) => version.status === \"pending\",\n550:     );\n551:     if (finalVersion === undefined || finalVersion.id === secondVersion.id)\n552:       throw new Error(\"Resubmission did not create a new manuscript version.\");\n553:     await adminPage.goto(`/admin/materials/expressions/${finalVersion.id}`);\n554:     await adminPage.getByRole(\"button\", { name: \"表現確認を完了して反映\", exact: true }).click();\n555:     await expect\n556:       .poll(\n557:         async () =>\n558:           (await materialManuscripts(material.id)).find((version) => version.id === finalVersion.id)\n559:             ?.status,\n560:       )\n561:       .toBe(\"published\");\n562:     await page.goto(`/materials/${material.id}`);\n563:     await expect(page.getByText(revisedDescription, { exact: true })).toBeVisible();\n564:     await expect(page.getByText(description, { exact: true })).toHaveCount(0);"
+              "start_line": 485,
+              "end_line": 572,
+              "code": "485:     await expect(\n486:       page.getByText(\"表現確認中です。公開内容は確認完了後に変わります。\", { exact: true }),\n487:     ).toBeVisible();\n488:     const firstVersion = (await materialManuscripts(material.id)).find(\n489:       (version) => version.status === \"pending\",\n490:     );\n491:     if (firstVersion === undefined)\n492:       throw new Error(\"Submitted material manuscript was not persisted.\");\n493:     await adminPage.goto(`/admin/materials/expressions/${firstVersion.id}`);\n494:     await adminPage.getByRole(\"button\", { name: \"修正を依頼\", exact: true }).click();\n495:     await expect(\n496:       adminPage.getByText(\"修正が必要な箇所と理由を記入してください。\", { exact: true }),\n497:     ).toBeVisible();\n498:     expect(\n499:       (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id)\n500:         ?.status,\n501:     ).toBe(\"pending\");\n502:     await adminPage.getByLabel(\"確認メモ・修正が必要な箇所\").fill(reason);\n503:     await adminPage.getByRole(\"button\", { name: \"修正を依頼\", exact: true }).click();\n504:     await expect\n505:       .poll(\n506:         async () =>\n507:           (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id)\n508:             ?.status,\n509:       )\n510:       .toBe(\"returned\");\n511:     await page.reload();\n512:     await expect(page.getByText(reason, { exact: true })).toBeVisible();\n513:     const returnedVersionLink = page.locator(\n514:       `a[href=\"/dashboard/materials/${material.id}/history/${firstVersion.id}\"]`,\n515:     );\n516:     await expect(returnedVersionLink).toContainText(\"修正待ち\");\n517:     await returnedVersionLink.click();\n518:     await expect(page).toHaveURL(`/dashboard/materials/${material.id}/history/${firstVersion.id}`);\n519:     await expect(page.getByRole(\"banner\")).toContainText(\"保存した原稿\");\n520:     await expect(page.getByText(description, { exact: true })).toBeVisible();\n521:     await expect(\n522:       page.getByRole(\"banner\").getByRole(\"link\", { name: \"戻る\", exact: true }),\n523:     ).toHaveAttribute(\"href\", `/dashboard/materials/${material.id}`);\n524:     await page.screenshot({\n525:       path: test.info().outputPath(\"material-returned-history-375.png\"),\n526:       fullPage: true,\n527:     });\n528:     await page.goto(`/dashboard/materials/${material.id}`);\n529:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toHaveValue(\n530:       description,\n531:     );\n532:     await page.getByRole(\"textbox\", { name: \"製品説明\", exact: true }).fill(revisedDescription);\n533:     await page.getByRole(\"button\", { name: \"保存して表現確認へ送る\", exact: true }).click();\n534:     await expect(\n535:       page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }),\n536:     ).toBeVisible();\n537:     const secondVersion = (await materialManuscripts(material.id)).find(\n538:       (version) => version.status === \"pending\",\n539:     );\n540:     if (secondVersion === undefined || secondVersion.id === firstVersion.id)\n541:       throw new Error(\"Revision did not create a new manuscript version.\");\n542:     await page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }).click();\n543:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toBeVisible();\n544:     expect(\n545:       (await materialManuscripts(material.id)).find((version) => version.id === secondVersion.id)\n546:         ?.status,\n547:     ).toBe(\"withdrawn\");\n548:     await expect(page.getByRole(\"textbox\", { name: \"製品説明\", exact: true })).toHaveValue(\n549:       revisedDescription,\n550:     );\n551:     await expect(page.getByRole(\"link\", { name: /取り下げ済み/ })).toBeVisible();\n552:     await page.getByRole(\"button\", { name: \"保存して表現確認へ送る\", exact: true }).click();\n553:     await expect(\n554:       page.getByRole(\"button\", { name: \"取り下げて編集を再開\", exact: true }),\n555:     ).toBeVisible();\n556:     const finalVersion = (await materialManuscripts(material.id)).find(\n557:       (version) => version.status === \"pending\",\n558:     );\n559:     if (finalVersion === undefined || finalVersion.id === secondVersion.id)\n560:       throw new Error(\"Resubmission did not create a new manuscript version.\");\n561:     await adminPage.goto(`/admin/materials/expressions/${finalVersion.id}`);\n562:     await adminPage.getByRole(\"button\", { name: \"表現確認を完了して反映\", exact: true }).click();\n563:     await expect\n564:       .poll(\n565:         async () =>\n566:           (await materialManuscripts(material.id)).find((version) => version.id === finalVersion.id)\n567:             ?.status,\n568:       )\n569:       .toBe(\"published\");\n570:     await page.goto(`/materials/${material.id}`);\n571:     await expect(page.getByText(revisedDescription, { exact: true })).toBeVisible();\n572:     await expect(page.getByText(description, { exact: true })).toHaveCount(0);"
             },
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 579,
-              "end_line": 593,
-              "code": "579:     await expect(\n580:       page.getByText(\"この資材は編集権の書類確認が必要です。\", { exact: true }),\n581:     ).toBeVisible();\n582:     expect((await materialManuscripts(material.id)).length).toBe(manuscriptCount);\n583:     await page.screenshot({\n584:       path: test.info().outputPath(\"material-revoked-editor-375.png\"),\n585:       fullPage: true,\n586:     });\n587:     await page.reload();\n588:     await expect(page.getByText(\"編集権の書類確認が必要です\", { exact: true })).toBeVisible();\n589:     await page.goto(`/materials/${material.id}`);\n590:     await expect(page.getByText(revisedDescription, { exact: true })).toBeVisible();\n591:     expect(\n592:       (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id),\n593:     ).toMatchObject({ status: \"returned\", review_note: reason });"
+              "start_line": 587,
+              "end_line": 601,
+              "code": "587:     await expect(\n588:       page.getByText(\"この資材は編集権の書類確認が必要です。\", { exact: true }),\n589:     ).toBeVisible();\n590:     expect((await materialManuscripts(material.id)).length).toBe(manuscriptCount);\n591:     await page.screenshot({\n592:       path: test.info().outputPath(\"material-revoked-editor-375.png\"),\n593:       fullPage: true,\n594:     });\n595:     await page.reload();\n596:     await expect(page.getByText(\"編集権の書類確認が必要です\", { exact: true })).toBeVisible();\n597:     await page.goto(`/materials/${material.id}`);\n598:     await expect(page.getByText(revisedDescription, { exact: true })).toBeVisible();\n599:     expect(\n600:       (await materialManuscripts(material.id)).find((version) => version.id === firstVersion.id),\n601:     ).toMatchObject({ status: \"returned\", review_note: reason });"
             }
           ],
           "helper_code": [],
@@ -3121,8 +3121,8 @@
               "runner": "playwright",
               "title": "資材原稿の修正依頼・再提出・取り下げを履歴に残し、取消後の編集を拒否する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
-              "source_declaration_line": 440,
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
+              "source_declaration_line": 448,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
           ]
@@ -3307,22 +3307,22 @@
       "references": [
         {
           "file": "e2e/14-admin-content-flows.spec.ts",
-          "test_declaration_line": 440,
+          "test_declaration_line": 448,
           "additional_reference_not_in_ledger": false,
           "action_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 467,
-              "end_line": 474,
-              "code": "467:     await page.goto(\"/dashboard/materials\");\n468:     const authorizedCard = page.locator(`a[href=\"/dashboard/materials/${material.id}\"]`);\n469:     await expect(authorizedCard).toContainText(material.name);\n470:     await expect(authorizedCard).not.toContainText(\"（非公開）\");\n471:     await expect(\n472:       page.locator(`a[href=\"/dashboard/materials/${unrelatedMaterial.id}\"]`),\n473:     ).toHaveCount(0);\n474:     await authorizedCard.click();"
+              "start_line": 475,
+              "end_line": 482,
+              "code": "475:     await page.goto(\"/dashboard/materials\");\n476:     const authorizedCard = page.locator(`a[href=\"/dashboard/materials/${material.id}\"]`);\n477:     await expect(authorizedCard).toContainText(material.name);\n478:     await expect(authorizedCard).not.toContainText(\"（非公開）\");\n479:     await expect(\n480:       page.locator(`a[href=\"/dashboard/materials/${unrelatedMaterial.id}\"]`),\n481:     ).toHaveCount(0);\n482:     await authorizedCard.click();"
             }
           ],
           "assertion_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 468,
-              "end_line": 473,
-              "code": "468:     const authorizedCard = page.locator(`a[href=\"/dashboard/materials/${material.id}\"]`);\n469:     await expect(authorizedCard).toContainText(material.name);\n470:     await expect(authorizedCard).not.toContainText(\"（非公開）\");\n471:     await expect(\n472:       page.locator(`a[href=\"/dashboard/materials/${unrelatedMaterial.id}\"]`),\n473:     ).toHaveCount(0);"
+              "start_line": 476,
+              "end_line": 481,
+              "code": "476:     const authorizedCard = page.locator(`a[href=\"/dashboard/materials/${material.id}\"]`);\n477:     await expect(authorizedCard).toContainText(material.name);\n478:     await expect(authorizedCard).not.toContainText(\"（非公開）\");\n479:     await expect(\n480:       page.locator(`a[href=\"/dashboard/materials/${unrelatedMaterial.id}\"]`),\n481:     ).toHaveCount(0);"
             }
           ],
           "helper_code": [],
@@ -3334,8 +3334,8 @@
               "runner": "playwright",
               "title": "資材原稿の修正依頼・再提出・取り下げを履歴に残し、取消後の編集を拒否する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
-              "source_declaration_line": 440,
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
+              "source_declaration_line": 448,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
           ]
@@ -3369,52 +3369,52 @@
       "references": [
         {
           "file": "e2e/14-admin-content-flows.spec.ts",
-          "test_declaration_line": 603,
+          "test_declaration_line": 611,
           "additional_reference_not_in_ledger": false,
           "action_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 640,
-              "end_line": 650,
-              "code": "640:     await page.goto(`/dashboard/materials/requests/${cancel.id}`);\n641:     await expect(page.getByRole(\"heading\", { name: cancel.name, exact: true })).toBeVisible();\n642:     await loginSeller(otherPage, otherSeller);\n643:     await otherPage.goto(`/dashboard/materials/requests/${cancel.id}`);\n644:     await expect(\n645:       otherPage\n646:         .getByRole(\"main\")\n647:         .getByRole(\"heading\", { name: \"ページが見つかりません\", exact: true }),\n648:     ).toBeVisible();\n649:     expect(await otherPage.content()).not.toContain(cancel.name);\n650:     await page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true }).click();"
+              "start_line": 648,
+              "end_line": 658,
+              "code": "648:     await page.goto(`/dashboard/materials/requests/${cancel.id}`);\n649:     await expect(page.getByRole(\"heading\", { name: cancel.name, exact: true })).toBeVisible();\n650:     await loginSeller(otherPage, otherSeller);\n651:     await otherPage.goto(`/dashboard/materials/requests/${cancel.id}`);\n652:     await expect(\n653:       otherPage\n654:         .getByRole(\"main\")\n655:         .getByRole(\"heading\", { name: \"ページが見つかりません\", exact: true }),\n656:     ).toBeVisible();\n657:     expect(await otherPage.content()).not.toContain(cancel.name);\n658:     await page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true }).click();"
             },
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 654,
-              "end_line": 654,
-              "code": "654:     await page.reload();"
+              "start_line": 662,
+              "end_line": 662,
+              "code": "662:     await page.reload();"
             },
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 680,
-              "end_line": 680,
-              "code": "680:     await page.goto(`/dashboard/materials/requests/${reject.id}`);"
+              "start_line": 688,
+              "end_line": 688,
+              "code": "688:     await page.goto(`/dashboard/materials/requests/${reject.id}`);"
             },
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 694,
-              "end_line": 694,
-              "code": "694:     await page.goto(`/dashboard/materials/requests/${approve.id}`);"
+              "start_line": 702,
+              "end_line": 702,
+              "code": "702:     await page.goto(`/dashboard/materials/requests/${approve.id}`);"
             }
           ],
           "assertion_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 641,
-              "end_line": 656,
-              "code": "641:     await expect(page.getByRole(\"heading\", { name: cancel.name, exact: true })).toBeVisible();\n642:     await loginSeller(otherPage, otherSeller);\n643:     await otherPage.goto(`/dashboard/materials/requests/${cancel.id}`);\n644:     await expect(\n645:       otherPage\n646:         .getByRole(\"main\")\n647:         .getByRole(\"heading\", { name: \"ページが見つかりません\", exact: true }),\n648:     ).toBeVisible();\n649:     expect(await otherPage.content()).not.toContain(cancel.name);\n650:     await page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true }).click();\n651:     await expect\n652:       .poll(async () => (await legacyMaterialRequestById(cancel.id))?.status)\n653:       .toBe(\"cancelled\");\n654:     await page.reload();\n655:     await expect(page.getByText(\"取消済み\", { exact: true })).toBeVisible();\n656:     await expect(page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true })).toHaveCount(0);"
+              "start_line": 649,
+              "end_line": 664,
+              "code": "649:     await expect(page.getByRole(\"heading\", { name: cancel.name, exact: true })).toBeVisible();\n650:     await loginSeller(otherPage, otherSeller);\n651:     await otherPage.goto(`/dashboard/materials/requests/${cancel.id}`);\n652:     await expect(\n653:       otherPage\n654:         .getByRole(\"main\")\n655:         .getByRole(\"heading\", { name: \"ページが見つかりません\", exact: true }),\n656:     ).toBeVisible();\n657:     expect(await otherPage.content()).not.toContain(cancel.name);\n658:     await page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true }).click();\n659:     await expect\n660:       .poll(async () => (await legacyMaterialRequestById(cancel.id))?.status)\n661:       .toBe(\"cancelled\");\n662:     await page.reload();\n663:     await expect(page.getByText(\"取消済み\", { exact: true })).toBeVisible();\n664:     await expect(page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true })).toHaveCount(0);"
             },
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 681,
-              "end_line": 682,
-              "code": "681:     await expect(page.getByText(\"申請内容の資料が不足しています。\", { exact: true })).toBeVisible();\n682:     await expect(page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true })).toHaveCount(0);"
+              "start_line": 689,
+              "end_line": 690,
+              "code": "689:     await expect(page.getByText(\"申請内容の資料が不足しています。\", { exact: true })).toBeVisible();\n690:     await expect(page.getByRole(\"button\", { name: \"申請を取り消す\", exact: true })).toHaveCount(0);"
             },
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 695,
-              "end_line": 701,
-              "code": "695:     await expect(page.getByText(\"承認済み\", { exact: true })).toBeVisible();\n696:     await page.getByRole(\"link\", { name: \"公開画面を見る\", exact: true }).click();\n697:     await expect(page).toHaveURL(`/materials/${approve.materialId}`);\n698:     await expect(page.getByRole(\"heading\", { name: approve.name, exact: true })).toBeVisible();\n699:     await expect(\n700:       page.getByText(\"既存申請の比較対象となる紹介文です。\", { exact: true }),\n701:     ).toBeVisible();"
+              "start_line": 703,
+              "end_line": 709,
+              "code": "703:     await expect(page.getByText(\"承認済み\", { exact: true })).toBeVisible();\n704:     await page.getByRole(\"link\", { name: \"公開画面を見る\", exact: true }).click();\n705:     await expect(page).toHaveURL(`/materials/${approve.materialId}`);\n706:     await expect(page.getByRole(\"heading\", { name: approve.name, exact: true })).toBeVisible();\n707:     await expect(\n708:       page.getByText(\"既存申請の比較対象となる紹介文です。\", { exact: true }),\n709:     ).toBeVisible();"
             }
           ],
           "helper_code": [],
@@ -3424,8 +3424,8 @@
               "runner": "playwright",
               "title": "既存資材申請の本人限定閲覧・取消・運営の却下と承認を確認する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
-              "source_declaration_line": 603,
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
+              "source_declaration_line": 611,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
           ]
@@ -3487,7 +3487,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（existing）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -3495,7 +3495,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（new）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -3615,7 +3615,7 @@
               "runner": "playwright",
               "title": "メーカー会社紹介の下書き・非公開・取り下げ・差し戻し・再送信・公開・履歴",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 264,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -3683,7 +3683,7 @@
               "runner": "playwright",
               "title": "メーカー会社紹介の下書き・非公開・取り下げ・差し戻し・再送信・公開・履歴",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 264,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -9727,7 +9727,7 @@
               "runner": "playwright",
               "title": "メーカー記事の画像・Markdown・資材紐づけを保存し、公開・非公開・削除を反映する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 35,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -10389,7 +10389,7 @@
               "runner": "playwright",
               "title": "書類確認で資材単位の編集権を付与し、原稿を表現確認後に公開する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 16,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -11151,22 +11151,22 @@
         },
         {
           "file": "e2e/14-admin-content-flows.spec.ts",
-          "test_declaration_line": 366,
+          "test_declaration_line": 374,
           "additional_reference_not_in_ledger": false,
           "action_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 374,
-              "end_line": 419,
-              "code": "374:     await loginGeneral(page, author, reportPath);\n375:     await page.getByLabel(\"作目\", { exact: true }).fill(\"トマト\");\n376:     await page.getByRole(\"button\", { name: \"トマトを選択\", exact: true }).first().click();\n377:     await fillUsageReportForSubmission(page);\n378:     await page.getByRole(\"button\", { name: \"4 比較・使用結果\", exact: true }).click();\n379:     await page.getByRole(\"button\", { name: \"グラフ1の題を編集\", exact: true }).click();\n380:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).fill(\"施用7日後\");\n381:     await page\n382:       .getByRole(\"button\", { name: \"＋ この調査項目で、別の時期のグラフを追加\", exact: true })\n383:       .click();\n384:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toBeVisible();\n385:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).press(\"Enter\");\n386:     await page.getByRole(\"button\", { name: \"グラフ2を削除\", exact: true }).click();\n387:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toHaveCount(0);\n388:     await page.getByRole(\"button\", { name: \"元に戻す\", exact: true }).click();\n389:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toBeVisible();\n390:     await page.getByRole(\"button\", { name: \"グラフ2の題を編集\", exact: true }).click();\n391:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).fill(\"施用14日後\");\n392:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).press(\"Enter\");\n393:     for (const [index, value] of [\"95±1 a\", \"82±2 b\"].entries()) {\n394:       await page\n395:         .getByRole(\"button\", { name: `グラフ2の区${index + 1}の数値を編集`, exact: true })\n396:         .click();\n397:       await page.getByLabel(`グラフ2の区${index + 1}の数値`, { exact: true }).fill(value);\n398:       await page.getByLabel(`グラフ2の区${index + 1}の数値`, { exact: true }).press(\"Enter\");\n399:     }\n400:     await page.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();\n401:     await expect(page.getByRole(\"status\")).toHaveText(\"下書きを保存しました。\");\n402:     await page.reload();\n403:     await page.getByRole(\"button\", { name: \"4 比較・使用結果\", exact: true }).click();\n404:     await expect(page.getByRole(\"region\", { name: \"グラフ 1\", exact: true })).toContainText(\n405:       \"施用7日後\",\n406:     );\n407:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toContainText(\n408:       \"施用14日後\",\n409:     );\n410:     await expect(page.getByRole(\"img\", { name: \"処理区 95±1 a\", exact: true })).toBeVisible();\n411:     await expect(page.getByRole(\"img\", { name: \"無処理区 82±2 b\", exact: true })).toBeVisible();\n412:     await stalePage.goto(reportPath);\n413:     await stalePage.getByRole(\"button\", { name: \"2 結果\", exact: true }).click();\n414:     await stalePage.getByLabel(/^結果・感想/).fill(\"別画面の保存できなかった入力を保持します。\");\n415:     await page.getByRole(\"button\", { name: \"2 結果\", exact: true }).click();\n416:     await page.getByLabel(/^結果・感想/).fill(\"先に保存した画面の観察結果です。\");\n417:     await page.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();\n418:     await expect(page.getByRole(\"status\")).toHaveText(\"下書きを保存しました。\");\n419:     await stalePage.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();"
+              "start_line": 382,
+              "end_line": 427,
+              "code": "382:     await loginGeneral(page, author, reportPath);\n383:     await page.getByLabel(\"作目\", { exact: true }).fill(\"トマト\");\n384:     await page.getByRole(\"button\", { name: \"トマトを選択\", exact: true }).first().click();\n385:     await fillUsageReportForSubmission(page);\n386:     await page.getByRole(\"button\", { name: \"4 比較・使用結果\", exact: true }).click();\n387:     await page.getByRole(\"button\", { name: \"グラフ1の題を編集\", exact: true }).click();\n388:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).fill(\"施用7日後\");\n389:     await page\n390:       .getByRole(\"button\", { name: \"＋ この調査項目で、別の時期のグラフを追加\", exact: true })\n391:       .click();\n392:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toBeVisible();\n393:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).press(\"Enter\");\n394:     await page.getByRole(\"button\", { name: \"グラフ2を削除\", exact: true }).click();\n395:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toHaveCount(0);\n396:     await page.getByRole(\"button\", { name: \"元に戻す\", exact: true }).click();\n397:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toBeVisible();\n398:     await page.getByRole(\"button\", { name: \"グラフ2の題を編集\", exact: true }).click();\n399:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).fill(\"施用14日後\");\n400:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).press(\"Enter\");\n401:     for (const [index, value] of [\"95±1 a\", \"82±2 b\"].entries()) {\n402:       await page\n403:         .getByRole(\"button\", { name: `グラフ2の区${index + 1}の数値を編集`, exact: true })\n404:         .click();\n405:       await page.getByLabel(`グラフ2の区${index + 1}の数値`, { exact: true }).fill(value);\n406:       await page.getByLabel(`グラフ2の区${index + 1}の数値`, { exact: true }).press(\"Enter\");\n407:     }\n408:     await page.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();\n409:     await expect(page.getByRole(\"status\")).toHaveText(\"下書きを保存しました。\");\n410:     await page.reload();\n411:     await page.getByRole(\"button\", { name: \"4 比較・使用結果\", exact: true }).click();\n412:     await expect(page.getByRole(\"region\", { name: \"グラフ 1\", exact: true })).toContainText(\n413:       \"施用7日後\",\n414:     );\n415:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toContainText(\n416:       \"施用14日後\",\n417:     );\n418:     await expect(page.getByRole(\"img\", { name: \"処理区 95±1 a\", exact: true })).toBeVisible();\n419:     await expect(page.getByRole(\"img\", { name: \"無処理区 82±2 b\", exact: true })).toBeVisible();\n420:     await stalePage.goto(reportPath);\n421:     await stalePage.getByRole(\"button\", { name: \"2 結果\", exact: true }).click();\n422:     await stalePage.getByLabel(/^結果・感想/).fill(\"別画面の保存できなかった入力を保持します。\");\n423:     await page.getByRole(\"button\", { name: \"2 結果\", exact: true }).click();\n424:     await page.getByLabel(/^結果・感想/).fill(\"先に保存した画面の観察結果です。\");\n425:     await page.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();\n426:     await expect(page.getByRole(\"status\")).toHaveText(\"下書きを保存しました。\");\n427:     await stalePage.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();"
             }
           ],
           "assertion_code": [
             {
               "file": "e2e/14-admin-content-flows.spec.ts",
-              "start_line": 384,
-              "end_line": 428,
-              "code": "384:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toBeVisible();\n385:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).press(\"Enter\");\n386:     await page.getByRole(\"button\", { name: \"グラフ2を削除\", exact: true }).click();\n387:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toHaveCount(0);\n388:     await page.getByRole(\"button\", { name: \"元に戻す\", exact: true }).click();\n389:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toBeVisible();\n390:     await page.getByRole(\"button\", { name: \"グラフ2の題を編集\", exact: true }).click();\n391:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).fill(\"施用14日後\");\n392:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).press(\"Enter\");\n393:     for (const [index, value] of [\"95±1 a\", \"82±2 b\"].entries()) {\n394:       await page\n395:         .getByRole(\"button\", { name: `グラフ2の区${index + 1}の数値を編集`, exact: true })\n396:         .click();\n397:       await page.getByLabel(`グラフ2の区${index + 1}の数値`, { exact: true }).fill(value);\n398:       await page.getByLabel(`グラフ2の区${index + 1}の数値`, { exact: true }).press(\"Enter\");\n399:     }\n400:     await page.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();\n401:     await expect(page.getByRole(\"status\")).toHaveText(\"下書きを保存しました。\");\n402:     await page.reload();\n403:     await page.getByRole(\"button\", { name: \"4 比較・使用結果\", exact: true }).click();\n404:     await expect(page.getByRole(\"region\", { name: \"グラフ 1\", exact: true })).toContainText(\n405:       \"施用7日後\",\n406:     );\n407:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toContainText(\n408:       \"施用14日後\",\n409:     );\n410:     await expect(page.getByRole(\"img\", { name: \"処理区 95±1 a\", exact: true })).toBeVisible();\n411:     await expect(page.getByRole(\"img\", { name: \"無処理区 82±2 b\", exact: true })).toBeVisible();\n412:     await stalePage.goto(reportPath);\n413:     await stalePage.getByRole(\"button\", { name: \"2 結果\", exact: true }).click();\n414:     await stalePage.getByLabel(/^結果・感想/).fill(\"別画面の保存できなかった入力を保持します。\");\n415:     await page.getByRole(\"button\", { name: \"2 結果\", exact: true }).click();\n416:     await page.getByLabel(/^結果・感想/).fill(\"先に保存した画面の観察結果です。\");\n417:     await page.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();\n418:     await expect(page.getByRole(\"status\")).toHaveText(\"下書きを保存しました。\");\n419:     await stalePage.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();\n420:     await expect(stalePage.getByRole(\"status\")).toHaveText(\n421:       \"別の画面で下書きが更新されています。入力内容を控えてから再読み込みしてください。\",\n422:     );\n423:     await expect(stalePage.getByLabel(/^結果・感想/)).toHaveValue(\n424:       \"別画面の保存できなかった入力を保持します。\",\n425:     );\n426:     await page.reload();\n427:     await page.getByRole(\"button\", { name: \"2 結果\", exact: true }).click();\n428:     await expect(page.getByLabel(/^結果・感想/)).toHaveValue(\"先に保存した画面の観察結果です。\");"
+              "start_line": 392,
+              "end_line": 436,
+              "code": "392:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toBeVisible();\n393:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).press(\"Enter\");\n394:     await page.getByRole(\"button\", { name: \"グラフ2を削除\", exact: true }).click();\n395:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toHaveCount(0);\n396:     await page.getByRole(\"button\", { name: \"元に戻す\", exact: true }).click();\n397:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toBeVisible();\n398:     await page.getByRole(\"button\", { name: \"グラフ2の題を編集\", exact: true }).click();\n399:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).fill(\"施用14日後\");\n400:     await page.getByLabel(\"グラフの題（任意）\", { exact: true }).press(\"Enter\");\n401:     for (const [index, value] of [\"95±1 a\", \"82±2 b\"].entries()) {\n402:       await page\n403:         .getByRole(\"button\", { name: `グラフ2の区${index + 1}の数値を編集`, exact: true })\n404:         .click();\n405:       await page.getByLabel(`グラフ2の区${index + 1}の数値`, { exact: true }).fill(value);\n406:       await page.getByLabel(`グラフ2の区${index + 1}の数値`, { exact: true }).press(\"Enter\");\n407:     }\n408:     await page.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();\n409:     await expect(page.getByRole(\"status\")).toHaveText(\"下書きを保存しました。\");\n410:     await page.reload();\n411:     await page.getByRole(\"button\", { name: \"4 比較・使用結果\", exact: true }).click();\n412:     await expect(page.getByRole(\"region\", { name: \"グラフ 1\", exact: true })).toContainText(\n413:       \"施用7日後\",\n414:     );\n415:     await expect(page.getByRole(\"region\", { name: \"グラフ 2\", exact: true })).toContainText(\n416:       \"施用14日後\",\n417:     );\n418:     await expect(page.getByRole(\"img\", { name: \"処理区 95±1 a\", exact: true })).toBeVisible();\n419:     await expect(page.getByRole(\"img\", { name: \"無処理区 82±2 b\", exact: true })).toBeVisible();\n420:     await stalePage.goto(reportPath);\n421:     await stalePage.getByRole(\"button\", { name: \"2 結果\", exact: true }).click();\n422:     await stalePage.getByLabel(/^結果・感想/).fill(\"別画面の保存できなかった入力を保持します。\");\n423:     await page.getByRole(\"button\", { name: \"2 結果\", exact: true }).click();\n424:     await page.getByLabel(/^結果・感想/).fill(\"先に保存した画面の観察結果です。\");\n425:     await page.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();\n426:     await expect(page.getByRole(\"status\")).toHaveText(\"下書きを保存しました。\");\n427:     await stalePage.getByRole(\"button\", { name: \"下書き保存\", exact: true }).click();\n428:     await expect(stalePage.getByRole(\"status\")).toHaveText(\n429:       \"別の画面で下書きが更新されています。入力内容を控えてから再読み込みしてください。\",\n430:     );\n431:     await expect(stalePage.getByLabel(/^結果・感想/)).toHaveValue(\n432:       \"別画面の保存できなかった入力を保持します。\",\n433:     );\n434:     await page.reload();\n435:     await page.getByRole(\"button\", { name: \"2 結果\", exact: true }).click();\n436:     await expect(page.getByLabel(/^結果・感想/)).toHaveValue(\"先に保存した画面の観察結果です。\");"
             }
           ],
           "helper_code": [],
@@ -11178,8 +11178,8 @@
               "runner": "playwright",
               "title": "実証レポートの複数グラフと区を再読込し、別画面の下書き更新で上書きを防ぐ",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
-              "source_declaration_line": 366,
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
+              "source_declaration_line": 374,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
           ]
@@ -12030,7 +12030,7 @@
               "runner": "playwright",
               "title": "一般プロフィールの保存・再読み込み・公開設定とエラー時の入力保持",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 67,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -12933,7 +12933,7 @@
               "runner": "playwright",
               "title": "通報の resolve と対象非公開、編集局の pending 編集・公開と同じ本文の会員閲覧",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 18,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -12982,7 +12982,7 @@
               "runner": "playwright",
               "title": "プロフィール未設定の一般会員が初回設定を保存し再読み込みして確認する",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 21,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -13430,7 +13430,7 @@
               "runner": "playwright",
               "title": "generalの現在パスワード変更とメールによる再設定",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 47,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -13438,7 +13438,7 @@
               "runner": "playwright",
               "title": "adminの現在パスワード変更とメールによる再設定",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 47,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -13502,7 +13502,7 @@
               "runner": "playwright",
               "title": "generalの現在パスワード変更とメールによる再設定",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 47,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -13510,7 +13510,7 @@
               "runner": "playwright",
               "title": "sellerの現在パスワード変更とメールによる再設定",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 47,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -13518,7 +13518,7 @@
               "runner": "playwright",
               "title": "adminの現在パスワード変更とメールによる再設定",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 47,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -13843,7 +13843,7 @@
               "runner": "playwright",
               "title": "レポートの全文はログイン後に表示し、ログアウト後は返さない",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 10,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -14350,7 +14350,7 @@
               "runner": "playwright",
               "title": "メーカー会社紹介の下書き・非公開・取り下げ・差し戻し・再送信・公開・履歴",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 264,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -14413,7 +14413,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（existing）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -14421,7 +14421,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（new）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -14490,7 +14490,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（existing）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -14498,7 +14498,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（new）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -14573,7 +14573,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（existing）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -14581,7 +14581,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（new）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -14750,7 +14750,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（existing）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             },
@@ -14758,7 +14758,7 @@
               "runner": "playwright",
               "title": "@smoke メーカー申請、メーカー紐づけ（new）、共有ログイン、ダッシュボード",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 24,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -14791,7 +14791,7 @@
               "runner": "playwright",
               "title": "@smoke 一般登録、ログイン、ログアウトとハンドル重複エラー",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 13,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -14851,7 +14851,7 @@
               "runner": "playwright",
               "title": "sellerの現在パスワード変更とメールによる再設定",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 47,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -15843,7 +15843,7 @@
               "runner": "playwright",
               "title": "@smoke 一般登録、ログイン、ログアウトとハンドル重複エラー",
               "status": "passed",
-              "evidence": "/workspace/work/luna-baseline/playwright-full-98098e3.junit.xml",
+              "evidence": "/workspace/work/luna-baseline/playwright-full-dae4596.junit.xml",
               "source_declaration_line": 13,
               "step_evidence_limit": "JUnit records complete named test outcome. The awaited source ranges identify the tested operation; JUnit does not independently emit per-operation steps."
             }
@@ -15995,19 +15995,94 @@
       ]
     }
   ],
+  "ci_history": [
+    {
+      "run_id": "37290346406",
+      "url": "https://github.com/farmille/farmille/actions/runs/37290346406",
+      "source_commit": "21e85b2cbec47093ff5f9189ca21b6ad5c8c75b6",
+      "status": "completed",
+      "conclusion": "failure",
+      "playwright": {
+        "passed": 35,
+        "failed": 1,
+        "intentional_skip": 1,
+        "failure": "Playwright14 exact revoked toast expectation; grant server-action completion race."
+      },
+      "native": {
+        "executed": false,
+        "reason": "Later route gate, browser install and native49 steps were skipped after the Playwright failure. This run provides no CI native49 execution proof."
+      },
+      "other_jobs": {
+        "application_quality": {
+          "status": "success",
+          "unit_passed": 254,
+          "db_dependent_skipped": 4
+        },
+        "story": {
+          "status": "success",
+          "passed": 12
+        },
+        "sql": {
+          "status": "success",
+          "files": 16,
+          "passed": 179
+        }
+      },
+      "sanitized_evidence": [
+        "/workspace/work/luna-baseline/ci-run-37290346406/summary.md",
+        "/workspace/work/luna-baseline/ci-run-37290346406/e2e.log"
+      ],
+      "limit": "Historical failed CI at an earlier source. It is not replaced by local success and is not proof of the next CI result."
+    }
+  ],
   "native_proof_commit": "48625aefd3f9837a21821c312d35395fe33b2048",
   "native_source_equivalence": {
     "equivalent": true,
     "proof_commit": "48625aefd3f9837a21821c312d35395fe33b2048",
-    "functional_source_commit": "98098e39f8b4380d4ae8ea65cec12eb1c13fd6fd",
-    "changed_files": ["e2e/08-moderation.spec.ts"],
-    "permitted_change": {
-      "file": "e2e/08-moderation.spec.ts",
-      "old_line": "await page.getByLabel(\"観察した変化\", { exact: true }).fill(editedReportBody);",
-      "new_line": "await page.getByRole(\"textbox\", { name: \"観察した変化\", exact: true }).fill(editedReportBody);",
-      "source_line_count_unchanged": true
+    "functional_source_commit": "dae45964399adfe44654a03e9534b38bf99de952",
+    "changed_files": [
+      ".audit/tester-army-decisions.tsv",
+      ".audit/tester-army-flow-results.json",
+      ".audit/tester-army-flow-results.tsv",
+      "e2e/08-moderation.spec.ts",
+      "e2e/14-admin-content-flows.spec.ts"
+    ],
+    "source_changed_files": ["e2e/08-moderation.spec.ts", "e2e/14-admin-content-flows.spec.ts"],
+    "permitted_changes": [
+      {
+        "file": "e2e/08-moderation.spec.ts",
+        "old_line": "await page.getByLabel(\"観察した変化\", { exact: true }).fill(editedReportBody);",
+        "new_line": "await page.getByRole(\"textbox\", { name: \"観察した変化\", exact: true }).fill(editedReportBody);",
+        "source_line_count_unchanged": true
+      },
+      {
+        "file": "e2e/14-admin-content-flows.spec.ts",
+        "old_block": "    await page.getByLabel(\"編集権を付与するメーカー\").selectOption(seller.id);\n    await page.getByLabel(\"確認資料の保管先または受付番号\").fill(`E2E-GRANT-${materialId}`);\n    await page.getByRole(\"button\", { name: \"編集権を更新する\" }).click();\n    await expect.poll(async () => (await getMaterial(materialId ?? \"\")).seller_id).toBe(seller.id);\n    await page.getByLabel(\"編集権を付与するメーカー\").selectOption(\"\");\n    await page.getByRole(\"button\", { name: \"編集権を更新する\" }).click();",
+        "new_block": "    const grantSellerSelect = page.getByLabel(\"編集権を付与するメーカー\");\n    const grantSubmit = page.getByRole(\"button\", { name: \"編集権を更新する\", exact: true });\n    await grantSellerSelect.selectOption(seller.id);\n    await page.getByLabel(\"確認資料の保管先または受付番号\").fill(`E2E-GRANT-${materialId}`);\n    await grantSubmit.click();\n    await expect.poll(async () => (await getMaterial(materialId ?? \"\")).seller_id).toBe(seller.id);\n    await expect(\n      page.getByText(\"書類確認の記録を保存し、この資材の編集権を付与しました。\", { exact: true }),\n    ).toBeVisible();\n    await expect(grantSellerSelect).toHaveValue(seller.id);\n    await expect(grantSubmit).toBeEnabled();\n    await grantSellerSelect.selectOption(\"\");\n    await expect(grantSellerSelect).toHaveValue(\"\");\n    await grantSubmit.click();",
+        "source_line_delta": 8,
+        "reason": "Await completed grant UI, selected seller and enabled submit before choosing blank seller and revoking. Exact revoke toast and database assertions remain unchanged."
+      }
+    ],
+    "non_runtime_metadata_changed_files": [
+      ".audit/tester-army-decisions.tsv",
+      ".audit/tester-army-flow-results.json",
+      ".audit/tester-army-flow-results.tsv"
+    ],
+    "non_runtime_metadata_hashes": {
+      ".audit/tester-army-decisions.tsv": {
+        "functional_sha256": "44477fc734b2088262549440547928f5e8fae90f807382911fdbdf2aab156980",
+        "classification": "Generated publication proof/trail; not imported by the application or either runner."
+      },
+      ".audit/tester-army-flow-results.json": {
+        "functional_sha256": "2dedf129efa96c555a41f1f57be12895b27c88546a8d00e8770ebd558e1d24e6",
+        "classification": "Generated publication proof/trail; not imported by the application or either runner."
+      },
+      ".audit/tester-army-flow-results.tsv": {
+        "functional_sha256": "a3e59a4e95b74b70d4ed78f659c565db53b29ea0d2603461ddde4cf10066cd2f",
+        "classification": "Generated publication proof/trail; not imported by the application or either runner."
+      }
     },
-    "reason": "Only a Playwright08 locator changed from exact label matching to the exact accessible textbox role/name. Native test bodies, configuration, fixture/support/helper code, application, schema, dependencies, and scripts are byte-identical. The native proof remains the actual run at proof_commit; no new native execution is claimed.",
+    "reason": "Only the exact Playwright08 textbox locator and, when present, exact Playwright14 completed-grant synchronization block changed. Native test bodies, configuration, fixture/support/helper code, application, schema, dependencies, and scripts are byte-identical. The three explicitly named audit publication files are recorded separately as non-runtime metadata. The native proof remains the actual run at proof_commit; no new native execution is claimed.",
     "runtime_closure_file_count": 772,
     "runtime_closure_source_hashes": {
       "e2e.config.ts": {
@@ -19873,7 +19948,7 @@
     }
   },
   "native_report_sha256": "5b3b47c319a9f375e6a9ca6274826691708eaf1d9c957c8a7d6f1453d5665005",
-  "playwright_junit_sha256": "ecca801ed5a9f5f07a0b41293844bbd02561f0700376698944b05fb866ecf79c",
+  "playwright_junit_sha256": "13db617dd2bab608a452e302ed7f6ab8f7a4e32609da6b88efb015e05490517b",
   "native_summary": {
     "discovered": 49,
     "selected": 49,
