@@ -87,9 +87,9 @@ export const SellerReturnsNull: Story = {
   },
 };
 
-// 運営（admin）ログイン時も同じ分岐で null を返す。
-export const AdminReturnsNull: Story = {
-  name: "AdminReturnsNull（運営ログイン時は null を返し非表示）",
+// 運営（admin）は一般ユーザー機能も使えるため、一般ログインと同じく表示される。
+export const AdminLoggedIn: Story = {
+  name: "AdminLoggedIn（運営ログイン・表示あり）",
   beforeEach: () => {
     mocked(getSessionUser).mockResolvedValue({
       userId: "user-3",
