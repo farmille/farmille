@@ -7,8 +7,13 @@ for (const path of ["/", "/search", "/articles", "/sellers", "/signup", "/legal"
   test(`公開ページ${path}を375pxで閲覧する`, async ({ app, screen, browser }) => {
     await app.open(path);
     await expect(browser).toHaveURL(path);
-    await expect(screen.getByRole("main")).toBeVisible();
-    await expect(screen.getByRole("heading", { level: 1 })).toBeVisible();
+    const main = screen.getByRole("main");
+    await expect(main).toBeVisible();
+    await expect(
+      path === "/"
+        ? main.getByRole("heading", "掲載資材一覧", { level: 1 })
+        : main.getByRole("heading", { level: 1 }),
+    ).toBeVisible();
     await expect(screen.getByText("ページを表示できませんでした")).toHaveCount(0);
     expect(
       await browser.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
@@ -26,21 +31,56 @@ for (const document of legalDocuments) {
   });
 }
 
-for (const path of [
-  "/unknown-e2e-page",
-  "/legal/unknown-e2e-document",
-  "/materials/00000000-0000-4000-8000-000000000000",
-  "/reports/00000000-0000-4000-8000-000000000000",
-  "/articles/00000000-0000-4000-8000-000000000000",
-  "/users/00000000-0000-4000-8000-000000000000",
-  "/sellers/00000000-0000-4000-8000-000000000000",
+for (const [path, title, description] of [
+  [
+    "/unknown-e2e-page",
+    "ページが見つかりません",
+    "指定されたページは存在しないか、移動した可能性があります。",
+  ],
+  [
+    "/legal/unknown-e2e-document",
+    "ページが見つかりません",
+    "指定されたページは存在しないか、移動した可能性があります。",
+  ],
+  [
+    "/materials/00000000-0000-4000-8000-000000000000",
+    "資材が見つかりません",
+    "指定された資材は存在しないか、公開が終了した可能性があります。",
+  ],
+  [
+    "/reports/00000000-0000-4000-8000-000000000000",
+    "ページが見つかりません",
+    "指定されたページは存在しないか、移動した可能性があります。",
+  ],
+  [
+    "/articles/00000000-0000-4000-8000-000000000000",
+    "ページが見つかりません",
+    "指定されたページは存在しないか、移動した可能性があります。",
+  ],
+  [
+    "/users/00000000-0000-4000-8000-000000000000",
+    "プロフィールが見つかりません",
+    "指定されたユーザーは存在しないか、プロフィールを利用できません。",
+  ],
+  [
+    "/sellers/00000000-0000-4000-8000-000000000000",
+    "メーカーが見つかりません",
+    "指定されたメーカーは存在しないか、現在公開されていません。",
+  ],
 ]) {
-  test(`存在しない${path}に日本語の404を表示する`, async ({ app, screen }) => {
+  test(`存在しない${path}に日本語の404を表示する`, async ({ app, screen, browser }) => {
     await app.open(path);
-    const heading = path.startsWith("/materials/")
-      ? "資材が見つかりません"
-      : "ページが見つかりません";
-    await expect(screen.getByRole("heading", heading)).toBeVisible();
+    await expect(browser).toHaveURL(path);
+    const main = screen.getByRole("main");
+    await expect(main).toBeVisible();
+    await expect(main.getByText(title)).toBeVisible();
+    await expect(main.getByText(description)).toBeVisible();
+    await expect(screen.getByText("ページを表示できませんでした")).toHaveCount(0);
+    const home = main.getByRole("link", "ホームへ戻る");
+    await expect(home).toHaveAttribute("href", "/");
+    await home.tap();
+    await expect(browser).toHaveURL("/");
+    await expect(screen.getByRole("main").getByRole("heading", "掲載資材一覧")).toBeVisible();
   });
 }
 
