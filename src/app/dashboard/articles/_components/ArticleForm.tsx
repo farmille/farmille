@@ -26,6 +26,7 @@ import {
 } from "@/components";
 import { Field } from "@/components/auth/Fields";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
+import { clientEnv } from "@/env";
 import { errorMessageJa } from "@/server/errors";
 import type { SellerArticleMaterial } from "@/server/queries/seller-articles";
 import { css, cx } from "../../../../../styled-system/css";
@@ -182,7 +183,9 @@ export function ArticleForm({
   useEffect(() => {
     if (editorTab !== "preview") return;
     let cancelled = false;
-    void renderMarkdownToHtml(body).then((html) => {
+    void renderMarkdownToHtml(body, {
+      articleImageStorageOrigin: new URL(clientEnv.supabaseUrl).origin,
+    }).then((html) => {
       if (!cancelled) setPreviewHtml(html);
     });
     return () => {

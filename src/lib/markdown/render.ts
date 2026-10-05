@@ -10,24 +10,22 @@ import * as v from "valibot";
  * 記事本文の markdown を Server Component から呼び出して
  * sanitize 済 HTML 文字列に変換する。
  *
- * spec §6.2 / §10.1:
- * - rehype-sanitize の defaultSchema をベースにする（<script>, <iframe>, on* 属性除去）
- * - <img> の src は *.supabase.co と placehold.co のホストのみ許可。
- *   それ以外のホスト（http(s)）の <img> は src 属性を取り除き、画像が表示されないようにする。
- *
- * 実装メモ:
- * - サニタイズ allowlist を独自に「緩める」拡張は spec §10.1 の方針に反するため行わない。
- *   ホスト制限は defaultSchema の補助として、サニタイズ後にもう一段プラグインで実施する。
- * - spec §6.2 は "remark-html + rehype-sanitize" と表記しているが、remark-html は
- *   mdast→HTML を直接出力し hast 段階を経由しないため、hast ベースの rehype-sanitize と
- *   組み合わせられない。同等の挙動を保つため remark-parse + remark-rehype +
- *   rehype-sanitize + rehype-stringify の標準パイプを採用している。
+ * - rehype-sanitize の defaultSchema を維持する（<script>, <iframe>, on* 属性除去）。
+ * - <img> の src は従来の *.supabase.co と placehold.co に加え、呼出し側が指定した
+ *   Storage origin の公開 article-images URL のみ許可する。未指定時は従来ホストのみ。
+ *   それ以外は src 属性を取り除く。
+ * - 画像URL制限は defaultSchema の補助として、サニタイズ後に適用する。
  */
 
 const ALLOWED_IMG_HOSTS = new Set<string>(["placehold.co"]);
 const ALLOWED_IMG_HOST_SUFFIX = ".supabase.co";
+const PUBLIC_ARTICLE_IMAGE_PATH = "/storage/v1/object/public/article-images/";
 
-function isAllowedImageSrc(src: string): boolean {
+type MarkdownRenderOptions = {
+  articleImageStorageOrigin?: string;
+};
+
+function isAllowedImageSrc(src: string, articleImageStorageOrigin: string | undefined): boolean {
   let url: URL;
   try {
     url = new URL(src);
@@ -40,21 +38,35 @@ function isAllowedImageSrc(src: string): boolean {
   const host = url.hostname;
   if (ALLOWED_IMG_HOSTS.has(host)) return true;
   if (host.endsWith(ALLOWED_IMG_HOST_SUFFIX)) return true;
-  return false;
+  if (
+    articleImageStorageOrigin === undefined ||
+    url.username !== "" ||
+    url.password !== "" ||
+    url.search !== "" ||
+    /%(?:2f|5c|2e|25)/i.test(url.pathname) ||
+    !url.pathname.startsWith(PUBLIC_ARTICLE_IMAGE_PATH) ||
+    url.pathname.length === PUBLIC_ARTICLE_IMAGE_PATH.length
+  ) {
+    return false;
+  }
+  return url.origin === articleImageStorageOrigin;
 }
 
-function stripDisallowedImgSrc(node: Root | Element): void {
+function stripDisallowedImgSrc(
+  node: Root | Element,
+  articleImageStorageOrigin: string | undefined,
+): void {
   if (node.type === "element" && node.tagName === "img") {
     const src = node.properties?.src;
     const srcResult = v.safeParse(v.string(), src);
-    if (srcResult.success && !isAllowedImageSrc(srcResult.output)) {
+    if (srcResult.success && !isAllowedImageSrc(srcResult.output, articleImageStorageOrigin)) {
       delete node.properties.src;
     }
   }
   const children: ReadonlyArray<RootContent | ElementContent> = node.children;
   for (const child of children) {
     if (child.type === "element") {
-      stripDisallowedImgSrc(child);
+      stripDisallowedImgSrc(child, articleImageStorageOrigin);
     }
   }
 }
@@ -65,21 +77,23 @@ function stripDisallowedImgSrc(node: Root | Element): void {
  *
  * unified の Plugin として transformer 関数を直接返す（rehype-sanitize と同じスタイル）。
  */
-function rehypeRestrictImageHosts() {
+function rehypeRestrictImageHosts(articleImageStorageOrigin: string | undefined) {
   return (tree: Root): Root => {
-    stripDisallowedImgSrc(tree);
+    stripDisallowedImgSrc(tree, articleImageStorageOrigin);
     return tree;
   };
 }
 
-const processor = unified()
-  .use(remarkParse)
-  .use(remarkRehype)
-  .use(rehypeSanitize, defaultSchema)
-  .use(rehypeRestrictImageHosts)
-  .use(rehypeStringify);
-
-export async function renderMarkdownToHtml(markdown: string): Promise<string> {
+export async function renderMarkdownToHtml(
+  markdown: string,
+  options: MarkdownRenderOptions = {},
+): Promise<string> {
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .use(rehypeSanitize, defaultSchema)
+    .use(rehypeRestrictImageHosts, options.articleImageStorageOrigin)
+    .use(rehypeStringify);
   const file = await processor.process(markdown);
   return String(file);
 }

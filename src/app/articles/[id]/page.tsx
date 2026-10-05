@@ -11,6 +11,7 @@ import { HelpfulButton } from "@/components/HelpfulButton";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
+import { clientEnv } from "@/env";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { toggleHelpfulAction } from "@/server/actions/helpful";
@@ -90,7 +91,9 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
   const [bodyHtml, helpfulVotedResult] = await Promise.all([
-    renderMarkdownToHtml(article.body),
+    renderMarkdownToHtml(article.body, {
+      articleImageStorageOrigin: new URL(clientEnv.supabaseUrl).origin,
+    }),
     isHelpfulVotedByViewer(viewerUserId, "article", article.id),
   ]);
 
