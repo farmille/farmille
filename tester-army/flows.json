@@ -68,7 +68,7 @@
     "state": "会社紹介確認中",
     "actions": ["会社紹介を表現確認し公開する"],
     "assertions": ["公開会社ページに紹介反映"],
-    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "tests": ["e2e/12-account-flows.spec.ts"],
     "verification": "pending"
   },
   {
@@ -329,7 +329,7 @@
     "state": "書類未確認・編集権あり",
     "actions": ["対象資材一覧を見る"],
     "assertions": ["権限対象資材と状態"],
-    "tests": ["e2e/07-seller-content.spec.ts"],
+    "tests": ["e2e/07-seller-content.spec.ts", "e2e/14-admin-content-flows.spec.ts"],
     "verification": "pending"
   },
   {
@@ -581,7 +581,7 @@
     "state": "公開紹介",
     "actions": ["会社紹介の承認前後に閲覧する"],
     "assertions": ["承認前非公開、承認後の紹介"],
-    "tests": ["e2e/14-admin-content-flows.spec.ts"],
+    "tests": ["e2e/12-account-flows.spec.ts"],
     "verification": "pending"
   },
   {

@@ -27,6 +27,20 @@ materialTest(
     if (report === null) throw new Error("提出したレポートがありません。");
     await browser.reload();
     await expect(screen.getByRole("heading", "レポートは提出済みです")).toBeVisible();
+    await expect(screen.getByRole("main")).toContainText(
+      "提出後のレポートは、確認が終わるまで編集できません。",
+    );
+    await expect(screen.getByRole("main")).toContainText("トマト");
+    await expect(screen.getByRole("main")).toContainText("運営で確認中");
+    await expect(
+      browser.locator("main input, main textarea, main select, main [contenteditable]"),
+    ).toHaveCount(0);
+    await expect(screen.getByRole("button", "下書き保存")).toHaveCount(0);
+    await expect(screen.getByRole("button", "公開に進む")).toHaveCount(0);
+    await expect(screen.getByRole("link", "資材ページへ戻る")).toHaveAttribute(
+      "href",
+      `/materials/${material.id}`,
+    );
     await app.clearState();
     await app.open(`/reports/${report.id}`);
     await expect(screen.getByRole("heading", "ページが見つかりません")).toBeVisible();
