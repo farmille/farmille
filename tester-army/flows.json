@@ -300,8 +300,8 @@
     "route": "/dashboard/materials/[id]/history/[versionId]",
     "role": "seller",
     "state": "原稿履歴",
-    "actions": ["過去原稿を開く"],
-    "assertions": ["過去本文と原稿状態"],
+    "actions": ["親履歴の状態を確認して同じ版の過去原稿を開く"],
+    "assertions": ["親履歴の原稿状態、同じ版の過去本文と資材編集画面への戻り先"],
     "tests": ["e2e/14-admin-content-flows.spec.ts"],
     "verification": "pending"
   },
@@ -354,8 +354,8 @@
     "route": "/dashboard/profile/history/[id]",
     "role": "seller",
     "state": "原稿履歴",
-    "actions": ["過去の会社紹介原稿を開く"],
-    "assertions": ["過去本文と状態"],
+    "actions": ["親履歴の状態を確認して同じ版の会社紹介を開く"],
+    "assertions": ["親履歴の原稿状態、同じ版の会社紹介と会社紹介編集画面への戻り先"],
     "tests": ["e2e/12-account-flows.spec.ts"],
     "verification": "pending"
   },
