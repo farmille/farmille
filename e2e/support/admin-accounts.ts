@@ -28,6 +28,10 @@ export const E2E_ADMIN_ACCOUNTS = {
     email: "e2e-admin-materials@farmille.local",
     password: "Farmille-E2E-Admin-Materials-2026!",
   },
+  notFoundVisibility: {
+    email: "e2e-admin-not-found@farmille.local",
+    password: "Farmille-E2E-Admin-Not-Found-2026!",
+  },
 } as const satisfies Record<string, E2eAdminAccount>;
 
 export const ALL_E2E_ADMIN_ACCOUNTS = Object.values(E2E_ADMIN_ACCOUNTS);
