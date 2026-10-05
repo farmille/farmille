@@ -18,6 +18,52 @@ import {
   verifyExistingMfa,
 } from "./support/account-flows";
 
+test("プロフィール未設定の一般会員が初回設定を保存し再読み込みして確認する", async ({ page }) => {
+  const token = uniqueToken("profile-setup");
+  const email = `${token}@example.test`;
+  const password = "Farmille-E2E-Setup-2026!";
+  const handle = `E2E_${token}`.slice(0, 30);
+  const db = accountDb();
+  const created = await db.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    app_metadata: { account_type: "general" },
+  });
+  if (created.error) throw new Error(created.error.message);
+  const user = created.data.user;
+  if (!user) throw new Error("General setup fixture has no auth user.");
+  try {
+    const initial = await db
+      .from("profiles")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    expect(initial.error).toBeNull();
+    expect(initial.data).toBeNull();
+    await loginGeneral(page, { id: user.id, email, password, handle }, "/me/setup");
+    await expect(page.getByRole("heading", { name: "個人プロフィールの設定" })).toBeVisible();
+    await page.getByLabel("ハンドルネーム", { exact: false }).fill(handle);
+    await page
+      .getByRole("radio", { name: "JAグループ職員（営農指導員など）", exact: true })
+      .check();
+    await page.getByRole("button", { name: "設定してマイページへ", exact: true }).click();
+    await expect(page).toHaveURL("/me");
+    await expect(page.getByRole("heading", { name: handle, exact: true })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole("heading", { name: handle, exact: true })).toBeVisible();
+    const saved = checkedData(
+      await db.from("profiles").select("handle,standpoint").eq("user_id", user.id).single(),
+    );
+    expect(saved).toEqual({ handle, standpoint: "ja" });
+    await page.goto("/me/setup");
+    await expect(page).toHaveURL("/me");
+    await expect(page.getByRole("heading", { name: handle, exact: true })).toBeVisible();
+  } finally {
+    await deleteAuthUser(user.id);
+  }
+});
+
 test("一般プロフィールの保存・再読み込み・公開設定とエラー時の入力保持", async ({
   page,
   browser,
@@ -290,11 +336,26 @@ test("メーカー会社紹介の下書き・非公開・取り下げ・差し�
     expect(await publicPage.content()).not.toContain(`${seller.loginId}@example.test`);
     await captureAccount(publicPage, info, "manufacturer-public-profile-375");
     await page.reload();
-    const history = page.getByRole("link", { name: /公開済み/ }).first();
-    const historyUrl = await history.getAttribute("href");
-    if (!historyUrl) throw new Error("Published profile has no history link.");
+    const published = checkedData(
+      await accountDb()
+        .from("manufacturer_profile_versions")
+        .select("id,status,profile_text")
+        .eq("seller_id", seller.id)
+        .eq("status", "published")
+        .single(),
+    );
+    expect(published).toMatchObject({ status: "published", profile_text: revised });
+    const historyUrl = `/dashboard/profile/history/${published.id}`;
+    const history = page.locator(`a[href="${historyUrl}"]`);
+    await expect(history).toHaveText(/／公開済み$/);
     await history.click();
+    await expect(page).toHaveURL(historyUrl);
     await expect(page.getByText(revised, { exact: true })).toBeVisible();
+    const back = page.getByRole("link", { name: "戻る", exact: true });
+    await expect(back).toHaveAttribute("href", "/dashboard/profile");
+    await back.click();
+    await expect(page).toHaveURL("/dashboard/profile");
+    await expect(history).toHaveText(/／公開済み$/);
     await page.context().clearCookies();
     await loginSeller(page, other);
     await page.goto(historyUrl);
