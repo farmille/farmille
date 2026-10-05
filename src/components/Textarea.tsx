@@ -24,6 +24,7 @@ const textareaRecipe = cva({
       outlineColor: "primary.200",
       borderColor: "primary.600",
     },
+    _disabled: { opacity: "disabled", cursor: "not-allowed" },
   },
   variants: {
     size: {

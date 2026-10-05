@@ -1,4 +1,4 @@
-import { cva, css } from "../../styled-system/css";
+import { cva, css, cx } from "../../styled-system/css";
 
 const cardRecipe = cva({
   base: {
@@ -22,7 +22,7 @@ type StatCardProps = {
 /** 実績カード。大きな緑数字＋ラベル。 */
 export function StatCard({ value, label, className }: StatCardProps) {
   return (
-    <div className={cardRecipe({ className })}>
+    <div className={cx(cardRecipe(), className)}>
       <div
         className={css({
           fontSize: "2xl",

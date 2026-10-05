@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+
 import { css } from "../../styled-system/css";
 
 export type MetricBarItem = {
@@ -34,6 +36,12 @@ export function MetricBars({ metrics }: MetricBarsProps) {
   return (
     <div
       className={css({
+        display: "grid",
+        // 値の列は単位付きの最長の値に合わせ、横棒の長さを同じ基準で比べられるよう全行の幅をそろえる
+        gridTemplateColumns: "54px minmax(0, 1fr) minmax(46px, max-content)",
+        alignItems: "center",
+        columnGap: "2",
+        rowGap: "1.5",
         borderWidth: "1px",
         borderStyle: "solid",
         borderColor: "border.default",
@@ -50,18 +58,14 @@ export function MetricBars({ metrics }: MetricBarsProps) {
         const max = candidates.length === 0 ? 0 : Math.max(...candidates);
 
         return (
-          <div
-            key={metric.id}
-            className={css({
-              _first: { mt: "0" },
-              mt: "3.5",
-            })}
-          >
+          <Fragment key={metric.id}>
             <div
               className={css({
+                gridColumn: "1 / -1",
+                mt: "2",
+                _first: { mt: "0" },
                 fontSize: "xs",
                 fontWeight: "700",
-                mb: "1.5",
               })}
             >
               {metric.metricName}
@@ -82,15 +86,16 @@ export function MetricBars({ metrics }: MetricBarsProps) {
                 variant="untreated"
               />
             ) : null}
-          </div>
+          </Fragment>
         );
       })}
       <div
         className={css({
+          gridColumn: "1 / -1",
           display: "flex",
           alignItems: "center",
           gap: "1.5",
-          mt: "3.5",
+          mt: "2",
           fontSize: "2xs",
           color: "text.subtle",
         })}
@@ -113,37 +118,20 @@ function MetricRow({
   variant: "treated" | "untreated";
 }) {
   return (
-    <div
-      className={css({
-        display: "flex",
-        alignItems: "center",
-        gap: "2",
-        mt: "1.5",
-      })}
-    >
-      <span
-        className={css({
-          w: "54px",
-          flexShrink: "0",
-          color: "text.muted",
-          fontSize: "2xs",
-        })}
-      >
-        {label}
-      </span>
+    <>
+      <span className={css({ color: "text.muted", fontSize: "2xs" })}>{label}</span>
       <div
         className={css({
-          flex: "1",
           h: "17px",
           bg: "surface.page",
-          borderRadius: "1",
+          borderRadius: "bar",
           overflow: "hidden",
         })}
       >
         <div
           className={css({
             h: "100%",
-            borderRadius: "1",
+            borderRadius: "bar",
             bg: variant === "treated" ? "primary.600" : "border.strong",
           })}
           style={{ width: `${widthPercent}%` }}
@@ -151,9 +139,8 @@ function MetricRow({
       </div>
       <span
         className={css({
-          w: "46px",
-          flexShrink: "0",
           textAlign: "right",
+          whiteSpace: "nowrap",
           fontWeight: "700",
           fontSize: "xs",
           fontVariantNumeric: "tabular-nums",
@@ -161,6 +148,6 @@ function MetricRow({
       >
         {valueLabel}
       </span>
-    </div>
+    </>
   );
 }

@@ -14,6 +14,7 @@ const buttonRecipe = cva({
     cursor: "pointer",
     textDecoration: "none",
     lineHeight: "1.3",
+    _disabled: { opacity: "disabled", cursor: "not-allowed" },
   },
   variants: {
     variant: {

@@ -22,10 +22,10 @@ const layout = cva({
       },
       materialScroll: {
         gridAutoFlow: "column",
-        gridAutoColumns: "card.materialMobile",
+        gridAutoColumns: "{sizes.card.materialMobile}",
         overflowX: "auto",
         pb: "4",
-        tab: { gridAutoColumns: "card.material" },
+        tab: { gridAutoColumns: "{sizes.card.material}" },
       },
       reportScroll: {
         gridAutoFlow: "column",

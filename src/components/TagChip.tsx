@@ -81,18 +81,25 @@ const chipRecipe = cva({
       },
     },
     selectedOn: {
-      true: {
+      true: {},
+      false: {},
+    },
+  },
+  // バリアントの適用順に左右されず、候補ピルの地色の上に選択ハイライトを重ねる
+  compoundVariants: [
+    {
+      appearance: "suggestion",
+      selectedOn: true,
+      css: {
         bg: "primary.700",
         color: "surface.card",
         borderColor: "primary.600",
         fontWeight: "600",
       },
-      false: {},
     },
-  },
+  ],
   defaultVariants: {
     appearance: "selected",
-    category: "crop",
     selectedOn: false,
   },
 });
@@ -152,7 +159,7 @@ export function TagChip({
       className={cx(
         chipRecipe({
           appearance,
-          category: appearance === "suggestion" && !selected ? undefined : category,
+          category: appearance === "suggestion" ? undefined : category,
           selectedOn: appearance === "suggestion" ? selected : false,
         }),
         className,

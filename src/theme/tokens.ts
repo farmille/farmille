@@ -67,6 +67,14 @@ export const tokens = {
     card: { value: "14px" },
     button: { value: "12px" },
     input: { value: "11px" },
+    // 実証データの横棒グラフ
+    bar: { value: "5px" },
+    // 組織の頭文字など、文字を1字載せる小さな標章
+    mark: { value: "6px" },
+  },
+  // 無効化した操作部品は形を保ったまま薄くする
+  opacity: {
+    disabled: { value: "0.6" },
   },
   // 画像枠は用途ごとに比率を固定し、画面幅や取得画像の寸法で高さを変えない。
   aspectRatios: {
@@ -125,7 +133,9 @@ export const tokens = {
     5: { value: "1.25rem" },
     5.5: { value: "1.375rem" },
     6: { value: "1.5rem" },
+    6.5: { value: "1.625rem" },
     7: { value: "1.75rem" },
+    7.5: { value: "1.875rem" },
     8: { value: "2rem" },
     9: { value: "2.25rem" },
     10: { value: "2.5rem" },

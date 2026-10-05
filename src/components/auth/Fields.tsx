@@ -293,7 +293,7 @@ export const primaryButtonStyle = css({
   borderStyle: "solid",
   borderColor: "transparent",
   cursor: "pointer",
-  _disabled: { opacity: "0.6", cursor: "progress" },
+  _disabled: { opacity: "disabled", cursor: "progress" },
 });
 
 export const ghostButtonStyle = css({

@@ -36,7 +36,7 @@ const comparisonCell = css({
   fontSize: "sm",
 });
 
-const headingCell = css({ fontWeight: "700", bg: "surface.subtle" });
+const headingCell = css({ fontWeight: "700", bg: "surface.panel" });
 
 function display(value: string | null | undefined): string {
   return value === null || value === undefined || value.length === 0 ? "—" : value;
