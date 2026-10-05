@@ -22,7 +22,7 @@ materialTest(
     await screen.getByRole("textbox", "感想口コミ本文 必須").fill(body);
     await screen.getByRole("checkbox", /実際に使用した感想を、使用条件や感じた変化/).check();
     await screen.getByRole("button", "投稿する").tap();
-    await expect(browser).toHaveURL(`/materials/${material.id}?review=posted`);
+    await expect(browser).toHaveURL(`/materials/${material.id}?review=posted#reviews-heading`);
     await expect(screen.getByText(body)).toBeVisible();
     await expect.poll(async () => (await getMaterial(material.id)).review_count).toBe(1);
     await expect.poll(async () => (await getMaterial(material.id)).avg_rating).toBe(4);

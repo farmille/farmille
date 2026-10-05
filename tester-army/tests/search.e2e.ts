@@ -64,7 +64,9 @@ materialTest("一致する資材がない検索結果を表示する", async ({ 
   await expect(
     screen.getByRole("main").getByText("条件に合う資材が見つかりませんでした"),
   ).toBeVisible();
-  await expect(screen.getByRole("status", "該当 0 件")).toBeVisible();
+  const resultCount = screen.getByRole("main").getByRole("status");
+  await expect(resultCount).toBeVisible();
+  await expect(resultCount).toHaveText("該当 0 件");
   await expect(browser.locator('main a[href^="/materials/"]')).toHaveCount(0);
   await expect(screen.getByText("ページを表示できませんでした")).toHaveCount(0);
 });
