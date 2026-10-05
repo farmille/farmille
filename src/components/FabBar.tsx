@@ -59,23 +59,18 @@ const fabBarRecipe = cva({
   },
 });
 
-const reportLink = css({
-  flex: "1.3",
+// cx で recipe のクラスと並べると同じプロパティの勝敗が CSS の出力順で決まるため、スタイルの段階で上書きする。
+const fabLink = {
   paddingInline: "2",
   paddingBlock: "3",
   fontSize: "sm",
   borderRadius: "input",
   whiteSpace: "nowrap",
-});
+} as const;
 
-const reviewLink = css({
-  flex: "1",
-  paddingInline: "2",
-  paddingBlock: "3",
-  fontSize: "sm",
-  borderRadius: "input",
-  whiteSpace: "nowrap",
-});
+const reportLink = css(buttonRecipe.raw({ variant: "primary" }), fabLink, { flex: "1.3" });
+
+const reviewLink = css(buttonRecipe.raw({ variant: "ghost" }), fabLink, { flex: "1" });
 
 type FabBarProps = {
   reportHref?: string;
@@ -104,10 +99,10 @@ export async function FabBar({
     <>
       <ReviewCompletionToast />
       <div className={cx(fabBarRecipe({ placement }), className)} data-ui="responsive-fab-bar">
-        <Link href={reportHref} className={cx(buttonRecipe({ variant: "primary" }), reportLink)}>
+        <Link href={reportHref} className={reportLink}>
           実証詳細レポートを書く
         </Link>
-        <Link href={reviewHref} className={cx(buttonRecipe({ variant: "ghost" }), reviewLink)}>
+        <Link href={reviewHref} className={reviewLink}>
           感想口コミを書く
         </Link>
       </div>
