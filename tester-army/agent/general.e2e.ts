@@ -21,6 +21,6 @@ memberTest(
     });
     await expect(browser).toHaveURL("/me");
     await app.open("/me/edit");
-    await expect(screen.getByLabel("自己紹介")).toHaveValue(bio);
+    await expect(screen.getByLabel("自己紹介", { exact: false })).toHaveValue(bio);
   },
 );

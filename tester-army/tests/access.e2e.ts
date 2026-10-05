@@ -28,8 +28,8 @@ for (const path of [
 
 sellerTest("旧メーカー新規登録URLから資材一覧へ戻る", async ({ app, screen, browser, seller }) => {
   await app.open("/sellers/login");
-  await screen.getByLabel("ログインID").fill(seller.loginId);
-  await screen.getByLabel("パスワード").fill(credentials.user("seller").password);
+  await screen.getByLabel("ログインID", { exact: false }).fill(seller.loginId);
+  await screen.getByLabel("パスワード", { exact: false }).fill(credentials.user("seller").password);
   await screen.getByRole("button", "ログインする").tap();
   await expect(browser).toHaveURL("/dashboard");
   await app.open("/dashboard/materials/new");

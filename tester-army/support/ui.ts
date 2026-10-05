@@ -10,8 +10,10 @@ export async function loginMember(
   next = "/me",
 ): Promise<void> {
   await app.open(`/login?next=${encodeURIComponent(next)}`);
-  await screen.getByLabel("メールアドレス").fill(member.email);
-  await screen.getByLabel("パスワード").fill(credentials.user("general").password);
+  await screen.getByLabel("メールアドレス", { exact: false }).fill(member.email);
+  await screen
+    .getByLabel("パスワード", { exact: false })
+    .fill(credentials.user("general").password);
   await screen.getByRole("button", "ログインする").tap();
   await expect(browser).toHaveURL(next);
 }

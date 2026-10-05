@@ -15,8 +15,10 @@ memberTest("ログインの戻り先とログアウトを確認する", async ({
 
 memberTest("外部の戻り先へログイン後に遷移しない", async ({ app, screen, browser, member }) => {
   await app.open("/login?next=https%3A%2F%2Fevil.example%2Fsteal");
-  await screen.getByLabel("メールアドレス").fill(member.email);
-  await screen.getByLabel("パスワード").fill(credentials.user("general").password);
+  await screen.getByLabel("メールアドレス", { exact: false }).fill(member.email);
+  await screen
+    .getByLabel("パスワード", { exact: false })
+    .fill(credentials.user("general").password);
   await screen.getByRole("button", "ログインする").tap();
   await expect(browser).toHaveURL("/");
 });
@@ -38,16 +40,16 @@ memberTest(
     const bio = "トマトを育てながら資材の使い方を記録しています。";
     const affiliation = "E2E検証農園";
     await loginMember(app, screen, browser, member, "/me/edit");
-    await screen.getByLabel("ハンドルネーム").fill(handle);
-    await screen.getByLabel("自己紹介").fill(bio);
-    await screen.getByLabel("所属").fill(affiliation);
+    await screen.getByLabel("ハンドルネーム", { exact: false }).fill(handle);
+    await screen.getByLabel("自己紹介", { exact: false }).fill(bio);
+    await screen.getByLabel("所属", { exact: false }).fill(affiliation);
     await screen.getByRole("button", "所属を追加").tap();
-    await screen.getByLabel("リンク").fill("https://example.test/farm");
+    await screen.getByLabel("リンク", { exact: false }).fill("https://example.test/farm");
     await screen.getByRole("button", "保存する").tap();
     await expect(browser).toHaveURL("/me");
     await app.open("/me/edit");
-    await expect(screen.getByLabel("ハンドルネーム")).toHaveValue(handle);
-    await expect(screen.getByLabel("自己紹介")).toHaveValue(bio);
+    await expect(screen.getByLabel("ハンドルネーム", { exact: false })).toHaveValue(handle);
+    await expect(screen.getByLabel("自己紹介", { exact: false })).toHaveValue(bio);
     await expect(screen.getByRole("button", `${affiliation} ×`)).toBeVisible();
     await app.clearState();
     await app.open(`/users/${member.id}`);

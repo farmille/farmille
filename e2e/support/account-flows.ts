@@ -45,8 +45,6 @@ export async function promoteAdmin(user: GeneralUser): Promise<void> {
   );
 }
 
-// Submitted evidence and reviewed profile history must remain immutable, including in E2E.
-// This namespace survives the shared e2e-* cleanup and is removed only by resetting the local DB.
 export async function createDurableSeller(prefix: string): Promise<SellerAccount> {
   const loginId = `company-e2e-${randomUUID().slice(0, 8)}-${prefix}`.slice(0, 30);
   const password = "Farmille-E2E-Durable-2026!";
