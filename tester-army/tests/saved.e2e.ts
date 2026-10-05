@@ -45,7 +45,7 @@ materialTest(
     const title = `E2E保存レポート_${author.id}`;
     try {
       await createReview({ materialId: material.id, authorUserId: author.id, rating: 3, body });
-      const report = await createPublishedUsageReport({
+      await createPublishedUsageReport({
         materialId: material.id,
         authorUserId: author.id,
         title,
@@ -57,15 +57,24 @@ materialTest(
         .filter({ hasText: body })
         .getByRole("button", "投稿を保存")
         .tap();
-      await app.open(`/reports/${report.id}`);
-      await screen.getByRole("button", "投稿を保存").tap();
+      await app.open(`/materials/${material.id}/articles`);
+      const reportCard = screen.getByRole("article").filter({ hasText: title });
+      await reportCard.getByRole("button", "投稿を保存").tap();
+      await expect(reportCard.getByRole("button", "保存を解除")).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
       await app.open("/me/saved");
-      await expect(screen.getByText(body)).toBeVisible();
-      await expect(screen.getByText(title)).toBeVisible();
-      await screen.getByRole("button", "保存を解除").first().tap();
+      const savedReview = screen.getByRole("article").filter({ hasText: body });
+      const savedReport = screen.getByRole("article").filter({ hasText: title });
+      await expect(savedReview).toBeVisible();
+      await expect(savedReport).toBeVisible();
+      await savedReview.getByRole("button", "保存を解除").tap();
       await browser.reload();
+      await expect(savedReview).toHaveCount(0);
+      await expect(savedReport).toBeVisible();
       await expect(screen.getByRole("button", "保存を解除")).toHaveCount(1);
-      await screen.getByRole("button", "保存を解除").tap();
+      await savedReport.getByRole("button", "保存を解除").tap();
       await browser.reload();
       await expect(screen.getByText("まだ保存した投稿がありません。")).toBeVisible();
     } finally {
