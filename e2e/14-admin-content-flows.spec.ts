@@ -90,7 +90,16 @@ test("メーカー記事の画像・Markdown・資材紐づけを保存し、公
     await anonymous.goto(`/articles/${draft.id}`);
     await expect(anonymous.getByRole("heading", { name: editedTitle, exact: true })).toBeVisible();
     await expect(anonymous.getByText("改訂して保存した観察です。", { exact: true })).toBeVisible();
-    await expect(anonymous.getByRole("img", { name: "画像", exact: true })).toBeVisible();
+    const publishedBodyImage = anonymous.getByRole("img", { name: "画像", exact: true });
+    await expect(publishedBodyImage).toBeVisible();
+    await expect
+      .poll(() =>
+        publishedBodyImage.evaluate(
+          (element) =>
+            element instanceof HTMLImageElement && element.complete && element.naturalWidth > 0,
+        ),
+      )
+      .toBe(true);
     await expect(anonymous.getByRole("link", { name: material.name, exact: true })).toHaveAttribute(
       "href",
       `/materials/${material.id}`,
