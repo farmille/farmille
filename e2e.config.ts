@@ -2,7 +2,7 @@ import { web } from "@e2e-dev/web";
 import { openai } from "@ai-sdk/openai";
 import { gateway } from "ai";
 import type { E2EConfig } from "e2e";
-import { localChromiumCdpEndpoint } from "./e2e/support/browser-environment";
+import { localChromiumCdpEndpoint, localE2EVideoDisabled } from "./e2e/support/browser-environment";
 
 import {
   FARMILLE_E2E_ORIGIN,
@@ -66,5 +66,5 @@ export default {
   reporters: ["list", "junit", "markdown"],
   cache: "off",
   trace: "retain-on-failure",
-  video: "retain-on-failure",
+  video: localE2EVideoDisabled() ? "off" : "retain-on-failure",
 } satisfies E2EConfig;

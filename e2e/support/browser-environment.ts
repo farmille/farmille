@@ -1,6 +1,15 @@
 import { accessSync, constants, statSync } from "node:fs";
 import { isAbsolute } from "node:path";
 
+export function localE2EVideoDisabled(): boolean {
+  const setting = process.env.FARMILLE_E2E_DISABLE_VIDEO;
+  if (setting === undefined) return false;
+  if (setting !== "1" || process.env.CI) {
+    throw new Error("FARMILLE_E2E_DISABLE_VIDEO=1はCI以外のローカル実行に限ります。");
+  }
+  return true;
+}
+
 export function localChromiumLaunchOptions() {
   const executablePath = process.env.FARMILLE_E2E_CHROMIUM_EXECUTABLE_PATH;
   const sandboxSetting = process.env.FARMILLE_E2E_CHROMIUM_NO_SANDBOX;

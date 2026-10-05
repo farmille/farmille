@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
-import { localChromiumLaunchOptions } from "./e2e/support/browser-environment";
+import {
+  localChromiumLaunchOptions,
+  localE2EVideoDisabled,
+} from "./e2e/support/browser-environment";
 
 const BASE_URL = "http://localhost:3007";
 const LOCAL_SUPABASE_ORIGIN = "http://127.0.0.1:54321";
@@ -44,7 +47,7 @@ export default defineConfig({
     launchOptions: localChromiumLaunchOptions(),
     trace: "retain-on-failure-and-retries",
     screenshot: "on",
-    video: "retain-on-failure",
+    video: localE2EVideoDisabled() ? "off" : "retain-on-failure",
   },
   projects: [
     {
