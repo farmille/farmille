@@ -54,6 +54,7 @@ test("メーカー記事の画像・Markdown・資材紐づけを保存し、公
     await expect(page.getByRole("button", { name: "ヒーロー画像を外す" })).toBeVisible();
     await page.locator('input[type="file"]').nth(1).setInputFiles("e2e/fixtures/report.png");
     await expect(body).toHaveValue(/!\[画像\]\(http:\/\/127\.0\.0\.1:54321\/storage/);
+    const writtenBody = (await body.inputValue()).trim();
     await page
       .getByLabel("資材を検索して追加", { exact: false })
       .fill(material.name.replace("E2E資材_", ""));
@@ -67,13 +68,14 @@ test("メーカー記事の画像・Markdown・資材紐づけを保存し、公
     const draft = await articleBySeller(seller.id);
     if (draft === null) throw new Error("Article draft was not saved.");
     expect(draft.status).toBe("draft");
+    expect(draft.body.replace(/\r\n?/g, "\n")).toBe(writtenBody);
     expect(draft.hero_image_url).toContain(`/article-images/${seller.id}/`);
     expect(await articleMaterialIds(draft.id)).toEqual([material.id]);
     await anonymous.goto(`/articles/${draft.id}`);
     await expect(anonymous.getByRole("heading", { name: "ページが見つかりません" })).toBeVisible();
     await page.reload();
     await expect(page.getByLabel("タイトル", { exact: false })).toHaveValue(title);
-    await expect(body).toHaveValue(draft.body);
+    await expect(body).toHaveValue(writtenBody);
     await page.getByRole("tab", { name: "プレビュー", exact: true }).click();
     await expect(page.getByRole("heading", { name: "試験結果", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "試験資料", exact: true })).toHaveAttribute(
