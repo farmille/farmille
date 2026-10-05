@@ -397,7 +397,12 @@ for (const kind of ["registration", "transfer_out", "transfer_in", "removal"] as
       );
       await operatorContext.clearCookies();
       await loginAdminAndEnrollMfa(operator, operatorAccount, "/admin/company-applications");
-      await operator.locator(`a[href="/admin/company-applications/${applicationId}"]`).click();
+      const adminApplicationLink = operator.locator(
+        `a[href="/admin/company-applications/${applicationId}"]`,
+      );
+      await expect(adminApplicationLink).toContainText(`受付番号 ${application.receipt_number}：`);
+      await captureAccount(operator, info, `company-${kind}-admin-list-375`);
+      await adminApplicationLink.click();
       await expect(operator.locator("article.application-receipt")).toContainText(signer);
       expect((await operatorContext.request.get(evidenceHref, { maxRedirects: 0 })).status()).toBe(
         302,

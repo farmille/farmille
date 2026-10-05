@@ -502,12 +502,21 @@ test("資材原稿の修正依頼・再提出・取り下げを履歴に残し�
       .toBe("returned");
     await page.reload();
     await expect(page.getByText(reason, { exact: true })).toBeVisible();
-    await page
-      .locator(`a[href="/dashboard/materials/${material.id}/history/${firstVersion.id}"]`)
-      .click();
+    const returnedVersionLink = page.locator(
+      `a[href="/dashboard/materials/${material.id}/history/${firstVersion.id}"]`,
+    );
+    await expect(returnedVersionLink).toContainText("修正待ち");
+    await returnedVersionLink.click();
     await expect(page).toHaveURL(`/dashboard/materials/${material.id}/history/${firstVersion.id}`);
     await expect(page.getByRole("banner")).toContainText("保存した原稿");
     await expect(page.getByText(description, { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("banner").getByRole("link", { name: "戻る", exact: true }),
+    ).toHaveAttribute("href", `/dashboard/materials/${material.id}`);
+    await page.screenshot({
+      path: test.info().outputPath("material-returned-history-375.png"),
+      fullPage: true,
+    });
     await page.goto(`/dashboard/materials/${material.id}`);
     await expect(page.getByRole("textbox", { name: "製品説明", exact: true })).toHaveValue(
       description,

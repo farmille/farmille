@@ -15,12 +15,17 @@ import {
 } from "./support/test-data";
 import { loginAdminAndEnrollMfa, loginGeneral } from "./support/ui";
 
-test("通報の resolve と対象非公開、編集局の pending 公開", async ({ page }) => {
+test("通報の resolve と対象非公開、編集局の pending 編集・公開と同じ本文の会員閲覧", async ({
+  page,
+  browser,
+}) => {
   const author = await createGeneralUser("reported");
   const reporter = await createGeneralUser("reporter");
   const material = await createMaterial("moderation");
   const reviewBody = `E2E通報対象_${uniqueToken("review")}`;
   const reportTitle = `E2E編集局_${uniqueToken("report")}`;
+  const editedReportBody =
+    "編集局で修正した観察結果です。".repeat(30) + uniqueToken("edited-report-body-tail");
   const review = await createReview({
     materialId: material.id,
     authorUserId: author.id,
@@ -33,6 +38,8 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
     title: reportTitle,
   });
   const materialPath = `/materials/${material.id}`;
+  const reportPath = `/reports/${usageReport.id}`;
+  const memberPage = await browser.newPage({ viewport: { width: 375, height: 812 } });
 
   try {
     await loginGeneral(page, reporter, materialPath);
@@ -62,15 +69,28 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
 
     await page.goto("/admin/usage-reports");
     await page.getByRole("link", { name: reportTitle }).click();
+    await expect(page).toHaveURL(`/admin/usage-reports/${usageReport.id}`);
+    await page.getByLabel("観察した変化", { exact: true }).fill(editedReportBody);
     await page.getByRole("button", { name: "公開する" }).click();
     await expect
       .poll(async () => (await usageReportByAuthor(reporter.id))?.status)
       .toBe("published");
     await expect(page.getByText("実証詳細レポートを公開しました。")).toBeVisible();
 
-    await page.goto(`/reports/${usageReport.id}`);
+    await page.goto(reportPath);
     await expect(page.getByRole("heading", { name: reportTitle })).toBeVisible();
     await expect(page.getByText(material.name, { exact: true })).toBeVisible();
+
+    await loginGeneral(memberPage, author, reportPath);
+    await expect(memberPage).toHaveURL(reportPath);
+    await expect(memberPage.getByRole("heading", { name: reportTitle, exact: true })).toBeVisible();
+    await expect(
+      memberPage.getByRole("main").getByText(editedReportBody, { exact: true }),
+    ).toBeVisible();
+    await memberPage.screenshot({
+      path: test.info().outputPath("moderation-edited-report-member-375.png"),
+      fullPage: true,
+    });
 
     await page.goto("/post");
     await expect(page).toHaveURL(/\/me\/setup$/);
@@ -86,6 +106,7 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
     await expect(page).toHaveURL(/\/post$/);
     await expect(page.getByRole("heading", { name: "一般ユーザー向けの画面です" })).toHaveCount(0);
   } finally {
+    await memberPage.close();
     await deleteMaterial(material.id);
     await deleteAuthUsersByEmail(author.email);
     await deleteAuthUsersByEmail(reporter.email);
