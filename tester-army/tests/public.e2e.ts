@@ -37,7 +37,10 @@ for (const path of [
 ]) {
   test(`存在しない${path}に日本語の404を表示する`, async ({ app, screen }) => {
     await app.open(path);
-    await expect(screen.getByRole("heading", "ページが見つかりません")).toBeVisible();
+    const heading = path.startsWith("/materials/")
+      ? "資材が見つかりません"
+      : "ページが見つかりません";
+    await expect(screen.getByRole("heading", heading)).toBeVisible();
   });
 }
 
