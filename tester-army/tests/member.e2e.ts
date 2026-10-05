@@ -58,7 +58,6 @@ memberTest(
       "href",
       "https://example.test/farm",
     );
-    await app.screenshot("public-profile-saved");
   },
 );
 
