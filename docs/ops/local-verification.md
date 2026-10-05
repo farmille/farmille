@@ -57,7 +57,7 @@ DOCKER_CONFIG="$FARMILLE_DOCKER_CONFIG" SUPABASE_USE_SLIM_IMAGES=1 \
   --exclude=studio,edge-runtime,postgres-meta,logflare,vector,imgproxy,supavisor,realtime
 ```
 
-起動前に元のDocker contextと接続先のmetadataを比較する。この環境ではcontextは両方`default`で接続先も同一だった。別contextを使う環境で既定のdaemonへ切り替えない。適用後はコンテナ内の両no-proxy値に`host.docker.internal`があるか、値そのものを出さず有無だけを確認する。CLIのexit 0だけではDBの54322番ポートやメール到達を保証しないため、DB・Auth・Storageの実APIとMailpitの受信まで確認する。このclient設定を使ったメールの実受信は、文書追記時点では未確認。専用設定はローカル検証後に削除する。
+起動前に元のDocker contextと接続先のmetadataを比較する。この環境ではcontextは両方`default`で接続先も同一だった。別contextを使う環境で既定のdaemonへ切り替えない。適用後はコンテナ内の両no-proxy値に`host.docker.internal`があるか、値そのものを出さず有無だけを確認する。今回の再起動ではAuthの両方に反映され、ローカルAuth・Storage・PostgRESTの実APIは200を返した。CLIのexit 0だけではDBの54322番ポートやメール到達を保証しないため、DB・Auth・Storageの実APIとMailpitの受信まで確認する。このclient設定を使ったメールの実受信は、文書追記時点では未確認。専用設定はローカル検証後に削除する。
 
 `.env.local`のSupabase接続情報はこのローカルstackの`supabase status`と照合し、SMTP・送信元・認証メールフックは[ローカル設定](../../supabase/config.toml)のダミー設定とそろえる。秘密の値をログや文書へ転記しない。ブラウザとアプリのoriginは`http://localhost:3007`、Supabaseは`http://127.0.0.1:54321`を使う。Dockerからのメールフックだけは設定済みの`host.docker.internal:3007`を使い、Server Actionsのブラウザoriginと混同しない。メール到達はMailpitの実受信で確認する。
 
