@@ -4,7 +4,6 @@ import { TOTP } from "otpauth";
 import { createGeneralUser, deleteAuthUser, getMaterial } from "../../e2e/support/test-data";
 import { promoteAdmin } from "../../e2e/support/account-flows";
 
-/** Publish only the owned fixture through the existing AAL2 admin UI to refresh REST seeds. */
 export async function refreshCatalogThroughAdmin(
   app: App,
   screen: Screen,

@@ -11,7 +11,7 @@ import { refreshCatalogThroughAdmin } from "../support/catalog-fixture";
 materialTest(
   "作物内のORと分類間のANDを保ち評価順に資材を表示する",
   async ({ app, screen, browser, member, material, secondMaterial }) => {
-    // Warm the public catalog before REST seeds; its classifications and ratings can lag 600s.
+    // REST seeds do not invalidate the 600s public catalog.
     await app.open("/search");
     const crops = await cropsByNames(["いちご", "水稲"]);
     const strawberry = crops.find((crop) => crop.name === "いちご");

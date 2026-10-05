@@ -45,7 +45,7 @@ materialTest(
     const title = `E2E保存レポート_${author.id}`;
     try {
       await createReview({ materialId: material.id, authorUserId: author.id, rating: 3, body });
-      await createPublishedUsageReport({
+      const report = await createPublishedUsageReport({
         materialId: material.id,
         authorUserId: author.id,
         title,
@@ -59,6 +59,11 @@ materialTest(
         .tap();
       await app.open(`/materials/${material.id}/articles`);
       const reportCard = screen.getByRole("article").filter({ hasText: title });
+      const reportLinks = reportCard.getByRole("link", title);
+      await expect(reportLinks).not.toHaveCount(0);
+      for (const link of await reportLinks.all()) {
+        await expect(link).toHaveAttribute("href", `/reports/${report.id}`);
+      }
       await reportCard.getByRole("button", "投稿を保存").tap();
       await expect(reportCard.getByRole("button", "保存を解除")).toHaveAttribute(
         "aria-pressed",
