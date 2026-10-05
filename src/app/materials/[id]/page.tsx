@@ -63,7 +63,7 @@ const archivedNotice = css({
   m: "0",
   p: "3",
   borderRadius: "button",
-  bg: "surface.subtle",
+  bg: "surface.page",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.strong",
