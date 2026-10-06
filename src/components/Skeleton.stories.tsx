@@ -44,3 +44,5 @@ export const Rating: Story = {
   ),
 };
 export const Reading: Story = { render: () => <ReadingSkeleton /> };
+
+export const ReadingReport: Story = { render: () => <ReadingSkeleton variant="report" /> };

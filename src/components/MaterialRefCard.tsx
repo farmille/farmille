@@ -30,7 +30,7 @@ export function MaterialRefCard({
       className={cx(
         css({
           display: "flex",
-          alignItems: "center",
+          alignItems: "start",
           gap: "2.5",
           borderWidth: "1px",
           borderStyle: "solid",
@@ -81,7 +81,7 @@ export function MaterialRefCard({
       <Icon
         name="chevron_right"
         size="sm"
-        className={css({ color: "text.subtle", flexShrink: "0" })}
+        className={css({ color: "text.subtle", flexShrink: "0", alignSelf: "center" })}
       />
     </Link>
   );

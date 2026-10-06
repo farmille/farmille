@@ -83,3 +83,12 @@ export const MultipleImages: Story = {
     },
   },
 };
+
+export const LongName: Story = {
+  args: {
+    material: {
+      ...materialDetail,
+      name: "光合成細菌・バチルス菌・トリコデルマ菌を配合した土壌改良用複合微生物資材 ツチイキルプレミアム 業務用20kg",
+    },
+  },
+};

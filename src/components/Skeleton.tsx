@@ -68,7 +68,7 @@ export function MaterialCardSkeleton({ variant = "list" }: { variant?: "list" | 
   return (
     <div className={card}>
       {variant === "scroll" ? <Skeleton variant="product" /> : null}
-      <div className={css({ display: "flex", gap: "3", p: "3", alignItems: "center" })}>
+      <div className={css({ display: "flex", gap: "3", p: "3", alignItems: "start" })}>
         {variant === "list" ? <Skeleton variant="thumbnail" /> : null}
         <div className={lines}>
           <Skeleton />
@@ -131,7 +131,7 @@ export function MaterialHeroSkeleton() {
   return (
     <div className={card}>
       <div className={css({ p: "3.5", display: "grid", gap: "4" })}>
-        <div className={css({ display: "flex", gap: "3.5", alignItems: "center" })}>
+        <div className={css({ display: "flex", gap: "3.5", alignItems: "start" })}>
           <Skeleton variant="materialHero" />
           <div className={lines}>
             <Skeleton variant="title" />
@@ -173,7 +173,7 @@ export function ReadingSkeleton({ variant = "article" }: { variant?: "article" |
         </div>
         {variant === "report" ? (
           <div className={card}>
-            <div className={css({ display: "flex", alignItems: "center", gap: "2.5", p: "3" })}>
+            <div className={css({ display: "flex", alignItems: "start", gap: "2.5", p: "3" })}>
               <Skeleton variant="reference" />
               <div className={lines}>
                 <Skeleton variant="short" />
