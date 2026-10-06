@@ -126,3 +126,18 @@
   font-family: var(--sans);
   font-weight: 700;
 }
+
+/* 口コミカードの投稿者行：長い立場（「その他（メーカー関係者、専門家、大学研究員など）」など）でも
+   名前が1文字ずつ折れたり 320px ではみ出したりしないよう、立場は次の行へ回して折り返す */
+.fm .rc-head {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+.fm .rc-head .rc-name {
+  overflow-wrap: anywhere;
+}
+.fm .rc-head .type-label {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
