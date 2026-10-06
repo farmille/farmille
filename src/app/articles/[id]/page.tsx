@@ -1,3 +1,7 @@
+import { MockPageShell } from "@/app/_mock/MockPageShell";
+// mock.css（MockPageShell が読み込む）より後に読み込む。
+import "@/app/_mock/reports-articles.css";
+
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
@@ -6,7 +10,6 @@ import { after } from "next/server";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { AppBar, Badge, MaterialRefCard } from "@/components";
 import { HelpfulButton } from "@/components/HelpfulButton";
 import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
@@ -21,29 +24,15 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublishedArticle } from "@/server/queries/articles";
 import { recordViewEvent } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
-import { css } from "../../../../styled-system/css";
+
+import { MockStars } from "../../materials/[id]/_components/MockParts";
+import { MockChevronIcon, MockSeedIcon, MockViewCount } from "../_components/MockIcons";
 
 type ArticleDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-const shell = css({
-  minH: "100dvh",
-  bg: "surface.page",
-  pb: "6",
-});
-
-const main = css({
-  w: "100%",
-  maxW: "content.reading",
-  mx: "auto",
-  px: "3.5",
-  py: "4",
-  bg: "surface.panel",
-  tab: { px: "6", py: "6" },
-});
 
 const getCachedArticle = cache(getPublishedArticle);
 
@@ -84,6 +73,7 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
   });
 }
 
+// 見本 S.articleDetail の `.body`。スタイルは src/app/_mock/（.fm 配下に閉じている）。
 export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
   const { id } = await params;
   const [article, session] = await Promise.all([loadArticle(id), getSessionUser()]);
@@ -114,6 +104,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
 
   const sellerName = article.seller.official_name ?? "メーカー";
   const sellerInitial = sellerName.charAt(0);
+  const sellerPath = `/sellers/${article.seller.id}`;
   const articleJsonLd = createArticleJsonLd({
     id: article.id,
     route: "articles",
@@ -123,182 +114,86 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
     author: {
       type: "Organization",
       name: sellerName,
-      path: `/sellers/${article.seller.id}`,
+      path: sellerPath,
     },
     imageUrls: article.heroImageUrl === null ? [] : [article.heroImageUrl],
     articleSection: "記事",
   });
 
   return (
-    <div className={shell}>
+    <MockPageShell title="" backHref="/articles" shareHref={`/articles/${article.id}`}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
       />
-      <AppBar
-        chrome="public"
-        active="articles"
-        title={article.title}
-        backHref="/articles"
-        shareHref={`/articles/${article.id}`}
-      />
-      <main className={main}>
-        <h1
-          className={css({
-            m: "0",
-            fontSize: "xl",
-            fontWeight: "700",
-            lineHeight: "1.4",
-          })}
-        >
-          {article.title}
-        </h1>
-
-        <div
-          className={css({
-            display: "flex",
-            alignItems: "center",
-            gap: "2",
-            mt: "3",
-            fontSize: "sm",
-            color: "text.muted",
-            flexWrap: "wrap",
-          })}
-        >
-          <Link
-            href={`/sellers/${article.seller.id}`}
-            className={css({
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "2",
-              textDecoration: "none",
-              color: "inherit",
-            })}
-          >
-            {article.seller.logo_url ? (
-              <Image
-                alt=""
-                className={css({
-                  w: "32px",
-                  aspectRatio: "image.square",
-                  display: "block",
-                  borderRadius: "button",
-                  objectFit: "cover",
-                })}
-                height={32}
-                sizes="32px"
-                src={article.seller.logo_url}
-                width={32}
-              />
-            ) : (
-              <span
-                className={css({
-                  w: "32px",
-                  aspectRatio: "image.square",
-                  borderRadius: "button",
-                  bg: "primary.soft",
-                  display: "grid",
-                  placeItems: "center",
-                  fontSize: "sm",
-                  fontWeight: "800",
-                  color: "primary.700",
-                })}
-              >
-                {sellerInitial}
-              </span>
-            )}
-            <span className={css({ fontWeight: "700", color: "text.default" })}>{sellerName}</span>
+      <article className="rp-body">
+        <h1 className="art-title">{article.title}</h1>
+        <div className="byline">
+          <Link href={sellerPath} className="by-link">
+            <span className="org-logo" aria-hidden="true">
+              {article.seller.logo_url ? (
+                <Image alt="" height={32} sizes="32px" src={article.seller.logo_url} width={32} />
+              ) : (
+                sellerInitial
+              )}
+            </span>
+            <span className="by-name">{sellerName}</span>
           </Link>
-          <Badge variant="type">メーカー</Badge>
-          <span className={css({ fontSize: "xs" })}>{formatDateJa(article.publishedAt)}</span>
+          <span className="type-label">メーカー</span>
+          <time className="by-sub" dateTime={article.publishedAt}>
+            {formatDateJa(article.publishedAt)}
+          </time>
         </div>
 
         {article.heroImageUrl ? (
-          <div
-            className={css({
-              mt: "4",
-              borderRadius: "card",
-              overflow: "hidden",
-              bg: "primary.soft",
-              aspectRatio: "image.wide",
-            })}
-          >
-            <Image
-              alt=""
-              className={css({
-                w: "100%",
-                h: "100%",
-                display: "block",
-                objectFit: "cover",
-              })}
-              height={360}
-              preload
-              sizes="(max-width: 768px) 100vw, 768px"
-              src={article.heroImageUrl}
-              width={640}
-            />
+          <div className="figure">
+            <div className="fimg wide">
+              <Image
+                alt=""
+                height={400}
+                preload
+                sizes="(max-width: 820px) 100vw, 790px"
+                src={article.heroImageUrl}
+                width={640}
+              />
+            </div>
           </div>
         ) : null}
 
-        <div
-          className={css({
-            mt: "4",
-            fontSize: "md",
-            color: "text.muted",
-            lineHeight: "1.75",
-            "& p": { mb: "3.5" },
-            "& p:last-child": { mb: "0" },
-            "& img": { maxW: "100%", borderRadius: "button" },
-            "& ul, & ol": { pl: "5", mb: "3.5" },
-            "& h2, & h3": {
-              color: "text.default",
-              fontWeight: "700",
-              mt: "5",
-              mb: "2",
-            },
-          })}
-          dangerouslySetInnerHTML={{ __html: bodyHtml }}
-        />
+        <div className="a-body md-body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
 
         {article.materials.length > 0 ? (
           <section aria-labelledby="article-materials-heading">
-            <h2
-              id="article-materials-heading"
-              className={css({
-                m: "0",
-                mt: "6",
-                mb: "3",
-                fontSize: "md",
-                fontWeight: "700",
-              })}
-            >
+            <h2 id="article-materials-heading" className="a-h3">
               この記事で紹介した資材
             </h2>
-            <div className={css({ display: "flex", flexDirection: "column", gap: "2.5" })}>
+            <div className="ref-list">
               {article.materials.map((material) => (
-                <MaterialRefCard
-                  key={material.id}
-                  href={`/materials/${material.id}`}
-                  name={material.name}
-                  manufacturerName={material.manufacturer_name}
-                  isOfficial={material.manufacturer_verified_at !== null}
-                  avgRating={material.avg_rating}
-                />
+                <Link key={material.id} href={`/materials/${material.id}`} className="card ref">
+                  <span className="t-ic">
+                    <MockSeedIcon />
+                  </span>
+                  <span style={{ minWidth: 0 }}>
+                    <span className="t-name" style={{ display: "block" }}>
+                      {material.name}
+                    </span>
+                    <span className="muted ref-maker">
+                      {material.manufacturer_name}
+                      {material.avg_rating !== null ? (
+                        <MockStars value={material.avg_rating} />
+                      ) : null}
+                    </span>
+                  </span>
+                  <span className="cev">
+                    <MockChevronIcon />
+                  </span>
+                </Link>
               ))}
             </div>
           </section>
         ) : null}
 
-        <div
-          className={css({
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mt: "4",
-            fontSize: "xs",
-            color: "text.subtle",
-          })}
-        >
+        <div className="rc-foot" style={{ marginTop: 16 }}>
           <HelpfulButton
             action={toggleHelpfulAction.bind(
               null,
@@ -310,19 +205,21 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
             layout="card"
             voted={helpfulVoted}
           />
-          <span className={css({ fontVariantNumeric: "tabular-nums" })}>
-            {article.viewCount} 回閲覧
+          <MockViewCount count={article.viewCount} />
+          <span>
+            <ReportDialog
+              action={createReportAction.bind(
+                null,
+                "article",
+                article.id,
+                `/articles/${article.id}`,
+              )}
+              reasonOptions={REPORT_REASON_OPTIONS}
+              title="この記事を通報する"
+            />
           </span>
         </div>
-
-        <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>
-          <ReportDialog
-            action={createReportAction.bind(null, "article", article.id, `/articles/${article.id}`)}
-            reasonOptions={REPORT_REASON_OPTIONS}
-            title="この記事を通報する"
-          />
-        </div>
-      </main>
-    </div>
+      </article>
+    </MockPageShell>
   );
 }
