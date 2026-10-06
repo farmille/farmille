@@ -46,7 +46,7 @@ export function MockSearch({
         role="combobox"
         aria-label={ariaLabel}
         aria-expanded={shown}
-        aria-controls={listId}
+        aria-controls={shown ? listId : undefined}
         aria-autocomplete="list"
         aria-activedescendant={shown && activeItem ? `${listId}-${activeItem.value}` : undefined}
         placeholder={placeholder}
@@ -71,10 +71,11 @@ export function MockSearch({
           } else if (event.key === "Escape") setOpen(false);
         }}
       />
-      <div id={listId} role="listbox" aria-label={ariaLabel} className={shown ? "drop on" : "drop"}>
-        {shown && items.length === 0 && <div className="none">{emptyMessage}</div>}
-        {shown &&
-          items.map((item) => (
+      {/* 候補を出していないときは listbox を置かない（入力欄と同じ名前の空の一覧を読み上げさせない）。 */}
+      {shown ? (
+        <div id={listId} role="listbox" aria-label={ariaLabel} className="drop on">
+          {items.length === 0 && <div className="none">{emptyMessage}</div>}
+          {items.map((item) => (
             <div
               key={item.value}
               id={`${listId}-${item.value}`}
@@ -88,7 +89,8 @@ export function MockSearch({
               {item.content}
             </div>
           ))}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }
