@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { AppBar, EmptyState, MaterialCard } from "@/components";
-import { BottomNav } from "@/components/BottomNav";
-import { MaterialSearchBox } from "@/components/search/MaterialSearchBox";
-import { SearchSortSelect } from "@/components/search/SearchSortSelect";
+import { MockPageShell } from "@/app/_mock/MockPageShell";
+// mock.css（MockPageShell が読み込む）より後に読み込み、同じ詳細度のルールを上書きする。
+import "@/app/_mock/home-search.css";
+import { EmptyState } from "@/components";
 import {
   formatLogicHint,
   parseFiltersQuery,
@@ -22,7 +22,9 @@ import { filterCatalog, cropEvidence } from "@/lib/catalog-search";
 import { CatalogSidebar } from "./_components/CatalogSidebar";
 import type { SearchFilterRef } from "@/lib/material-search";
 import { listSearchFiltersByRefs } from "@/server/queries/classifications";
-import { css } from "../../../styled-system/css";
+import { MockSearchBox } from "./_components/MockSearchBox";
+import { MockSortSelect } from "./_components/MockSortSelect";
+import { SearchResultCard } from "./_components/SearchResultCard";
 
 import { SearchAnalytics } from "./_components/SearchAnalytics";
 
@@ -35,84 +37,9 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-const shell = css({
-  minH: "100dvh",
-  display: "flex",
-  flexDirection: "column",
-  bg: "surface.page",
-  color: "text.default",
-  fontFamily: "sans",
-});
-
-const main = css({
-  flex: "1",
-  w: "100%",
-  maxW: "content.wide",
-  mx: "auto",
-  px: "4",
-  pt: "3",
-  pb: "4",
-  tab: { px: "5", pt: "6", pb: "8" },
-});
-
-const pageTitle = css({
-  position: "absolute",
-  w: "1px",
-  h: "1px",
-  p: "0",
-  m: "-1px",
-  overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  whiteSpace: "nowrap",
-  borderWidth: "0",
-  tab: {
-    position: "static",
-    w: "auto",
-    h: "auto",
-    m: "0",
-    mb: "4",
-    overflow: "visible",
-    clip: "auto",
-    whiteSpace: "normal",
-    fontSize: "2xl",
-    fontWeight: "800",
-  },
-});
-
-const logicHint = css({
-  fontSize: "xs",
-  color: "text.muted",
-  mt: "2.5",
-  lineHeight: "1.5",
-});
-
-const logicStrong = css({
-  color: "primary.700",
-  fontWeight: "700",
-});
-
-const resultHeader = css({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: "2.5",
-  mt: "4.5",
-  mb: "2.5",
-});
-
-const stack = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "2.5",
-  tab: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    alignItems: "start",
-  },
-});
-
+/** 見本は戻るバーの題名だけで本文に見出しを置かないので、見出しは読み上げ用に残す。 */
 function SearchPageHeading() {
-  return <h1 className={pageTitle}>BS資材を探す</h1>;
+  return <h1 className="sr-only">BS資材を探す</h1>;
 }
 
 type SearchPageProps = {
@@ -133,17 +60,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     initialQuery = parseQueryParam(params.q);
   } catch {
     return (
-      <div className={shell}>
-        <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" />
-        <main className={main}>
-          <SearchPageHeading />
-          <EmptyState
-            title="検索条件が正しくありません"
-            description="URL の検索パラメータを確認するか、条件を選び直してください。"
-          />
-        </main>
-        <BottomNav active="search" />
-      </div>
+      <MockPageShell active="search" title="BS資材を探す" backHref="/">
+        <SearchPageHeading />
+        <EmptyState
+          title="検索条件が正しくありません"
+          description="URL の検索パラメータを確認するか、条件を選び直してください。"
+        />
+      </MockPageShell>
     );
   }
 
@@ -159,23 +82,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (!filtersResult.ok) {
     return (
-      <div className={shell}>
-        <AppBar
-          chrome="public"
-          active="search"
-          title="BS資材を探す"
-          backHref="/"
-          searchQuery={initialQuery}
+      <MockPageShell active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery}>
+        <SearchPageHeading />
+        <EmptyState
+          title="指定された検索条件が見つかりません"
+          description="条件を選び直して、もう一度検索してください。"
         />
-        <main className={main}>
-          <SearchPageHeading />
-          <EmptyState
-            title="指定された検索条件が見つかりません"
-            description="条件を選び直して、もう一度検索してください。"
-          />
-        </main>
-        <BottomNav active="search" />
-      </div>
+      </MockPageShell>
     );
   }
 
@@ -190,63 +103,39 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     ? matchSearchCatalog(catalogResult.data, initialQuery)
     : undefined;
 
+  // 見本 S.search の `.body`。スタイルは mock.css（.fm 配下）と home-search.css。
   return (
-    <div className={shell}>
-      <AppBar
-        chrome="public"
-        active="search"
-        title="BS資材を探す"
-        backHref="/"
-        searchQuery={initialQuery}
+    <MockPageShell active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery}>
+      <SearchPageHeading />
+      <MockSearchBox
+        initialQuery={initialQuery}
+        selected={selected}
+        sort={sort}
+        catalog={catalogResult.data}
       />
-      <main className={main}>
-        <SearchPageHeading />
-        <div
-          className={css({
-            display: "grid",
-            gap: "4",
-            tab: { gridTemplateColumns: "minmax(0, 1fr) minmax(0, 3fr)" },
-          })}
-        >
-          <CatalogSidebar
+      <div className="s-cols">
+        <CatalogSidebar
+          catalog={catalog}
+          search={catalogResult.data}
+          selected={selected}
+          sort={sort}
+          query={initialQuery}
+        />
+        <div className="s-main" style={{ minWidth: 0 }}>
+          <SearchResults
             catalog={catalog}
-            search={catalogResult.data}
-            selected={selected}
+            filters={filters}
+            makerNames={makerNames}
+            materialNames={materialNames}
             sort={sort}
+            selected={selected}
             query={initialQuery}
+            keywordMatches={keywordMatches}
+            logic={logic}
           />
-          <div className={css({ minW: "0" })}>
-            <MaterialSearchBox
-              initialQuery={initialQuery}
-              selected={selected}
-              sort={sort}
-              popular={[]}
-              seasonal={[]}
-              catalog={catalogResult.data}
-              placeholder="作物・悩み・資材名を入力してください"
-            />
-
-            {logic.length > 0 ? (
-              <p className={logicHint}>
-                絞り込み条件：<span className={logicStrong}>{logic}</span>
-              </p>
-            ) : null}
-
-            <SearchResults
-              catalog={catalog}
-              filters={filters}
-              makerNames={makerNames}
-              materialNames={materialNames}
-              sort={sort}
-              selected={selected}
-              query={initialQuery}
-              keywordMatches={keywordMatches}
-            />
-          </div>
         </div>
-      </main>
-      <BottomNav active="search" />
-    </div>
+      </div>
+    </MockPageShell>
   );
 }
 
@@ -260,6 +149,7 @@ function SearchResults({
   selected,
   query,
   keywordMatches,
+  logic,
 }: {
   catalog: CatalogSearch;
   filters: SearchFilterRef[];
@@ -269,6 +159,7 @@ function SearchResults({
   selected: ReturnType<typeof resolveSelectedFilters>;
   query: string;
   keywordMatches: ReturnType<typeof matchSearchCatalog> | undefined;
+  logic: string;
 }) {
   const items = filterCatalog(catalog, filters, makerNames, materialNames, keywordMatches).toSorted(
     (a, b) => {
@@ -308,55 +199,70 @@ function SearchResults({
   return (
     <>
       <SearchAnalytics filterCount={selected.length} resultCount={items.length} sort={sort} />
-      <div className={resultHeader}>
-        <span role="status">
-          該当 <b>{items.length}</b> 件
+      <div className="logic-hint">
+        {logic.length > 0 ? (
+          <>
+            絞り込み条件：<b>{logic}</b>
+          </>
+        ) : (
+          `全 ${catalog.materials.length} 件を表示中（条件を追加すると絞り込みます）`
+        )}
+      </div>
+      <div className="sec-h" style={{ marginTop: 8 }}>
+        <span className="muted" style={{ fontSize: 12.5 }} role="status">
+          該当{" "}
+          <b className="tnum" style={{ color: "var(--ink)" }}>
+            {items.length}
+          </b>{" "}
+          件
         </span>
-        <SearchSortSelect selected={selected} sort={sort} query={query} />
+        <MockSortSelect selected={selected} sort={sort} query={query} />
       </div>
       {items.length === 0 ? (
-        <EmptyState
-          title="条件に合う資材が見つかりませんでした"
-          description="分類の組み合わせを変えるか、条件を減らして再度お試しください。"
-        />
+        <div
+          className="card pad"
+          style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 12.5 }}
+        >
+          <p style={{ fontWeight: 700, color: "var(--ink-2)" }}>
+            条件に合う資材が見つかりませんでした
+          </p>
+          <p style={{ marginTop: 4 }}>
+            分類の組み合わせを変えるか、条件を減らして再度お試しください。
+          </p>
+        </div>
       ) : (
         groups.map((group) => (
           <section key={group.title ?? "results"}>
             {group.title ? (
-              <h2 className={css({ fontSize: "md", fontWeight: "700", mt: "4" })}>
+              <h2 className="search-group-h">
                 {group.title} {group.items.length}件
               </h2>
             ) : null}
-            <div className={stack}>
+            <div className="stack search-results">
               {group.items.map(({ material, evidence }, index) => {
                 const counts = catalog.counts.find((row) => row.material_id === material.id);
                 if (!counts) throw new Error("資材の集計が見つかりませんでした。");
                 return (
-                  <MaterialCard
+                  <SearchResultCard
                     key={material.id}
-                    variant="list"
+                    href={`/materials/${material.id}`}
                     name={material.name}
                     maker={material.manufacturer_name}
-                    rating={material.avg_rating ?? 0}
+                    rating={material.review_count > 0 ? material.avg_rating : null}
                     reviewCount={material.review_count}
-                    articleCount={counts.report_count}
+                    reportCount={counts.report_count}
                     savedCount={counts.saved_count}
+                    description={material.description}
                     categories={material.material_ingredient_categories.map(
                       (row) => row.ingredient_categories.name,
                     )}
-                    evidenceBadges={[
-                      ...evidence.direct.map((name) => `✓ ${name}の記載あり`),
-                      ...(!evidence.direct.length
-                        ? evidence.groups.map((name) => `${name}として記載`)
-                        : []),
-                    ]}
+                    directEvidence={evidence.direct}
+                    groupEvidence={evidence.groups}
                     imageSrc={
                       material.material_images
                         .filter((image) => image.is_current)
                         .toSorted((a, b) => a.sort_order - b.sort_order)[0]?.url
                     }
-                    description={material.description ?? undefined}
-                    href={`/materials/${material.id}`}
                     preload={index === 0}
                   />
                 );

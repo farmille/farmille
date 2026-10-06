@@ -1,0 +1,262 @@
+/*
+ * ホーム（/）と資材検索（/search）を完成見本 S.home・S.search へ寄せるときに足したクラス。
+ * mock.css（見本の写し）と mock-extra.css は触らず、見本のインラインスタイル・
+ * 見本では div だったものをリンクにした分の打ち消しだけをここに置く。
+ */
+
+/* ホームと検索は .body の左右余白（16px）で組むので、資材ページ用の 2px の足しを外す */
+.fm.fm-page {
+  padding-inline: 0;
+}
+
+/* 見本では div[data-go] だったものを Next の Link にしたので、リンクの色と下線を消す */
+.fm a.pm-card,
+.fm a.mat-card,
+.fm a.vc-prod,
+.fm a.hs-row,
+.fm a.hs-foot,
+.fm a.pd-row,
+.fm a.pd-foot,
+.fm a.sug,
+.fm a.qchip,
+.fm a.ts-clear {
+  color: inherit;
+  text-decoration: none;
+}
+.fm a.hs-foot,
+.fm a.pd-foot,
+.fm a.ts-clear {
+  display: block;
+}
+.fm a.hs-foot,
+.fm a.pd-foot {
+  color: var(--green);
+}
+.fm a.btn {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+}
+.fm a.btn-primary {
+  color: #fff;
+}
+
+/* ---- ホーム：写真ヒーロー（見本は data URI の背景。アプリは next/image を敷く） ---- */
+/* 見本のヒーローは .body の外だが、MockPageShell は本文を .body に入れるので、.body の余白を打ち消して全幅に出す */
+.fm.fm-page:has(.hero-photo) {
+  overflow-x: clip;
+}
+.fm .body > .hero-photo {
+  margin: -16px calc(50% - 50vw) 0;
+}
+.fm .body > .hero-photo + * {
+  margin-top: 28px;
+}
+@media (min-width: 900px) {
+  .fm .body > .hero-photo {
+    margin-top: -26px;
+  }
+}
+.fm .hero-photo .hero-bg > img {
+  object-fit: cover;
+  object-position: center 58%;
+}
+.fm .hero-photo .hero-bg::after {
+  z-index: 1;
+}
+.fm .hero-search button.go-arrow {
+  cursor: pointer;
+  padding: 0;
+  font-size: 16px;
+}
+.fm .hero-search .ts-input::-webkit-search-cancel-button,
+.fm .hero-search .ts-input::-webkit-search-decoration {
+  display: none;
+}
+/* 入力中はピルを隠す（見本は visibility を JS で切り替え） */
+.fm .hero-pills.is-hidden {
+  visibility: hidden;
+}
+.fm button.hero-pill {
+  font-family: inherit;
+}
+.fm .hs-row .thumb img,
+.fm .vc-prod .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+  background: #fff;
+}
+.fm .hs-row .thumb,
+.fm .vc-prod .thumb {
+  overflow: hidden;
+}
+
+/* ---- ホーム：流れる資材帯（見本は1列、アプリはループ用に同じ並びを2組持つ） ---- */
+.fm .prod-marquee {
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+.fm .prod-marquee[data-mode="static"] {
+  overflow-x: auto;
+  cursor: auto;
+  user-select: auto;
+  touch-action: auto;
+}
+.fm .pm-track {
+  gap: 0;
+}
+.fm .pm-set {
+  display: flex;
+  gap: 12px;
+  padding-right: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fm .pm-set[aria-hidden="true"] {
+    display: none;
+  }
+}
+.fm .pm-card .img {
+  overflow: hidden;
+}
+.fm .pm-card .img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #fff;
+}
+
+/* ---- ホーム：生産者の声 ---- */
+.fm .voice-card .vc-head b {
+  font-weight: 700;
+}
+.fm .voice-card .stars {
+  margin-top: 7px;
+}
+
+/* ---- 検索：絞り込みパネル（見本の開閉行を details/summary で組む） ---- */
+.fm .s-side details > summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  list-style: none;
+}
+.fm .s-side details > summary::-webkit-details-marker {
+  display: none;
+}
+.fm .s-side .caret {
+  margin-left: auto;
+  color: var(--green);
+  font-size: 11.5px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+.fm .s-side .caret::after {
+  content: "開く ▾";
+}
+.fm .s-side details[open] > summary .caret::after {
+  content: "閉じる ▴";
+}
+.fm .s-side .sec-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+.fm .s-side .sub-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+  margin: 8px 0 6px;
+}
+.fm .s-side .sug-chips {
+  padding: 2px 0 6px;
+}
+.fm .s-side .qchip {
+  font-size: 12px;
+  padding: 5px 11px;
+}
+.fm .s-side a.sug:hover {
+  background: var(--green-soft-2);
+}
+.fm .s-side a.sug[aria-current="true"] {
+  background: var(--green-soft);
+  color: var(--green-deep);
+}
+.fm .s-side .crop-major {
+  border-top: 1px solid var(--line);
+  padding: 2px 0;
+}
+.fm .s-side .crop-major:first-of-type {
+  border-top: none;
+}
+.fm .s-side .crop-major > summary {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ---- 検索：選択中の条件の解除ボタン・結果カード ---- */
+.fm .chip-sel button {
+  cursor: pointer;
+  padding: 0;
+}
+.fm button.ts-clear,
+.fm button.sug {
+  cursor: pointer;
+  font-family: inherit;
+}
+.fm button.sug {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  color: inherit;
+}
+.fm button.sug:hover {
+  background: var(--green-soft-2);
+}
+.fm .mat-card .mat-img {
+  overflow: hidden;
+}
+.fm .mat-card .mat-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.fm .search-group-h {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 16px 0 8px;
+}
+@media (min-width: 900px) {
+  .fm .search-results.stack {
+    gap: 12px;
+  }
+}
+
+/* 見本 TAG_CATS の色相（`.cat-label` の --h）。見本はインラインで渡す。資材ジャンルは見本の資材タイプの色 */
+.fm .cat-label[data-cat="crop"] {
+  --h: var(--green);
+}
+.fm .cat-label[data-cat="concern"] {
+  --h: #d97a2b;
+}
+.fm .cat-label[data-cat="effect"] {
+  --h: #1f9e95;
+}
+.fm .cat-label[data-cat="cond"] {
+  --h: var(--blue);
+}
+.fm .cat-label[data-cat="genre"] {
+  --h: #8b7bc0;
+}
+.fm .cat-label[data-cat="maker"] {
+  --h: var(--ink-3);
+}
+.fm .cat-label[data-cat="name"] {
+  --h: #c0705f;
+}

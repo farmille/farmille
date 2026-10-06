@@ -1,61 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-
-import { css, cva, cx } from "../../../styled-system/css";
-
 /** 1セット分を流し切る周期。 */
 const LOOP_MS = 55_000;
 /** カーソルを乗せている間の再生速度。 */
 const HOVER_RATE = 0.25;
 /** これを超えて動いたらタップではなく横ドラッグとして扱う。 */
 const DRAG_THRESHOLD_PX = 4;
-
-const frame = cva({
-  base: { pb: "4" },
-  variants: {
-    mode: {
-      marquee: {
-        // clip はスクロール可能領域を作らないので、フォーカス移動でブラウザが
-        // スクロール位置を動かして transform とズレることがない。
-        overflowX: "clip",
-        overflowY: "visible",
-        // ページコンテナの左右余白の分だけ画面端まで広げる。
-        mx: "-4",
-        tab: { mx: "-5" },
-        // 両端のフェード。transparent と black はマスクのアルファ指定であり配色ではない。
-        maskImage: "linear-gradient(90deg, transparent, black 6%, black 94%, transparent)",
-        cursor: "grab",
-        // 縦スクロールはブラウザに任せ、横方向のドラッグだけ受け取る。
-        touchAction: "pan-y",
-        userSelect: "none",
-        // JS が動く前の SSR HTML でも静止させる。
-        "@media (prefers-reduced-motion: reduce)": {
-          overflowX: "auto",
-          mx: "0",
-          maskImage: "none",
-          cursor: "auto",
-          scrollSnapType: "x mandatory",
-          touchAction: "auto",
-          userSelect: "auto",
-        },
-      },
-      static: {
-        overflowX: "auto",
-        scrollSnapType: "x mandatory",
-      },
-    },
-  },
-});
-
-const track = css({ display: "flex", w: "max-content", willChange: "transform" });
-
-/** 末尾の余白をカード間の gap と揃えると、-50% の折り返しが2セット目の先頭に一致する。 */
-const cardSet = css({ display: "flex", gap: "3", pr: "3" });
-
-const cloneSet = css({
-  "@media (prefers-reduced-motion: reduce)": { display: "none" },
-});
 
 type MarqueeMode = "marquee" | "static";
 
@@ -212,20 +163,16 @@ export function HomeMaterialMarquee({ children }: { children: ReactNode }) {
     };
   }, [mode]);
 
+  // 見本 S.home の `.prod-marquee > .pm-track`。スタイルは mock.css と home-search.css。
   return (
-    <div
-      ref={frameRef}
-      data-ui="home-material-marquee"
-      data-mode={mode}
-      className={frame({ mode })}
-    >
-      <div ref={trackRef} className={track}>
-        <div ref={setRef} className={cardSet}>
+    <div ref={frameRef} data-ui="home-material-marquee" data-mode={mode} className="prod-marquee">
+      <div ref={trackRef} className="pm-track">
+        <div ref={setRef} className="pm-set">
           {children}
         </div>
         {mode === "marquee" ? (
           // ループ用の複製。支援技術とキーボードフォーカスから除外する。
-          <div className={cx(cardSet, cloneSet)} aria-hidden="true" inert>
+          <div className="pm-set" aria-hidden="true" inert>
             {children}
           </div>
         ) : null}
