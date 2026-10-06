@@ -104,6 +104,8 @@ export function ProfileTagsEditor({
           maxLength={100}
           onValueChange={setAffiliation}
           onSubmitValue={() => addAffiliation()}
+          closeOnSubmit
+          showEmptyState={false}
           disabled={affiliations.length >= 20}
           options={options.affiliations
             .filter(
@@ -116,7 +118,6 @@ export function ProfileTagsEditor({
             )
             .map((name) => ({ value: name, label: name }))}
           onSelect={addAffiliation}
-          emptyMessage="所属名を入力して追加できます。"
         />
         <button
           type="button"

@@ -67,6 +67,7 @@ type ComboboxProps = Omit<
   onValueChange: (value: string) => void;
   onSelect: (value: string) => void;
   onSubmitValue?: () => void;
+  closeOnSubmit?: boolean;
   emptyMessage?: string;
   showEmptyState?: boolean;
 };
@@ -78,6 +79,7 @@ export function Combobox({
   onValueChange,
   onSelect,
   onSubmitValue,
+  closeOnSubmit = false,
   showEmptyState = true,
   emptyMessage = "一致する候補がありません。",
   id,
@@ -180,6 +182,7 @@ export function Combobox({
           } else if (event.key === "Enter" && onSubmitValue) {
             event.preventDefault();
             onSubmitValue();
+            if (closeOnSubmit) setOpen(false);
             setActiveIndex(-1);
           } else if (event.key === "Enter" && !onKeyDown) {
             event.preventDefault();

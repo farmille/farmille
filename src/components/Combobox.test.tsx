@@ -69,6 +69,7 @@ describe("コンボボックス", () => {
     const user = userEvent.setup();
     const select = vi.fn();
     const change = vi.fn();
+    const submit = vi.fn();
     const { rerender } = render(
       <Combobox
         id="material"
@@ -77,10 +78,13 @@ describe("コンボボックス", () => {
         options={[]}
         onValueChange={change}
         onSelect={select}
+        onSubmitValue={submit}
         showEmptyState={false}
       />,
     );
     await user.click(screen.getByRole("combobox"));
+    await user.keyboard("{Enter}");
+    expect(submit).toHaveBeenCalledOnce();
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     rerender(
       <Combobox
@@ -90,6 +94,7 @@ describe("コンボボックス", () => {
         options={options}
         onValueChange={change}
         onSelect={select}
+        onSubmitValue={submit}
         showEmptyState={false}
       />,
     );

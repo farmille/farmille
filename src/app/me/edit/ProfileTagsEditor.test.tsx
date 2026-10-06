@@ -30,10 +30,30 @@ describe("プロフィールのタグ編集", () => {
     const input = screen.getByRole("combobox", { name: "所属" });
     await user.type(input, "地域農業研究会");
     await user.keyboard("{Enter}");
+    expect(input).toHaveValue("");
+    expect(input).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     await user.type(input, "地域農業研究会");
     await user.keyboard("{Enter}");
     expect(container.querySelectorAll('input[name="affiliations"]')).toHaveLength(2);
     await user.click(screen.getByRole("button", { name: "地域農業研究会を削除" }));
+    expect(container.querySelectorAll('input[name="affiliations"]')).toHaveLength(1);
+  });
+  it("一致する候補がない所属をマウスで追加して削除できる", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <form>
+        <ProfileTagsEditor {...meta.args} />
+      </form>,
+    );
+    const input = screen.getByRole("combobox", { name: "所属" });
+    await user.type(input, "野菜研究サークル");
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "所属を追加" }));
+    expect(input).toHaveValue("");
+    expect(input).toHaveAttribute("aria-expanded", "false");
+    expect(container.querySelectorAll('input[name="affiliations"]')).toHaveLength(2);
+    await user.click(screen.getByRole("button", { name: "野菜研究サークルを削除" }));
     expect(container.querySelectorAll('input[name="affiliations"]')).toHaveLength(1);
   });
   it("作目50件と所属20件の上限を保つ", () => {
