@@ -1,0 +1,121 @@
+/*
+ * mock.css（見本の写し）に無い、アプリへ移すときに足したクラス。
+ * 見本のインラインスタイルを置き換えたもの・Next の部品（画像・フォーム）に合わせたものだけを置く。
+ */
+
+/* 資材画像：画像と「NO IMAGE」を同じセルに重ね、画像が読めないときだけ下の表示が見える */
+.fm .mat-hero-img > * {
+  grid-area: 1 / 1;
+}
+.fm .mat-hero-photo {
+  object-fit: contain;
+  background: #fff;
+}
+
+/* 見本の data-fav ボタン（インラインスタイルをクラス化） */
+.fm .mat-fav {
+  margin-top: 8px;
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+  border-radius: 999px;
+  padding: 5px 13px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--ink-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+}
+.fm .mat-fav.on {
+  color: #e05252;
+}
+.fm .mat-fav-note {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+/* 見本の .cover は div。アプリでは本文へのリンクにするので色と下線を消す */
+.fm .alist-card .cover,
+.fm .alist-card .t {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+.fm .alist-card .cover {
+  display: grid;
+}
+.fm .alist-card .cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 見本の prod-card は div。アプリでは資材ページへのリンク */
+.fm a.prod-card {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+.fm .prod-card .img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #fff;
+}
+
+/* 本文中のリンク（見本では span[data-go]） */
+.fm .text-link {
+  color: var(--green-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+.fm a.link-more {
+  cursor: pointer;
+}
+
+/* 感想口コミの写真 */
+.fm .rphoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 画面には出さず読み上げだけに使う文言 */
+.fm .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 見本のパンくず（span[data-go]）をリンクにしたもの */
+.fm .crumb {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* 資材ジャンル名は長いものがあるので、資材カードの中では折り返す（見本の chip は nowrap） */
+.fm .mat-hero .chip {
+  white-space: normal;
+  max-width: 100%;
+}
+
+/*
+ * 見本の .body は左右 16px で、横スクロール帯（.report-scroll など）は margin:0 -16px で端まで出す。
+ * アプリの本文枠はスマホで左右 14px なので、足りない 2px をここで足して見本と同じ余白にする。
+ */
+@media (max-width: 767px) {
+  .fm {
+    padding-inline: 2px;
+  }
+}
