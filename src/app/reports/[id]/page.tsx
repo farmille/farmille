@@ -150,7 +150,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   });
 
   return (
-    <MockPageShell title="" backHref="/articles" shareHref={`/reports/${report.id}`} hasFab>
+    <MockPageShell title="" backHref={materialPath} shareHref={`/reports/${report.id}`} hasFab>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(reportJsonLd) }}

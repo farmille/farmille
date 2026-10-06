@@ -40,7 +40,6 @@ function revalidateArticlePaths(articleId: string, materialIds: string[]): void 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/articles");
   revalidatePath(`/dashboard/articles/${articleId}/edit`);
-  revalidatePath("/articles");
   revalidatePath(`/articles/${articleId}`);
   for (const materialId of materialIds) {
     revalidatePath(`/materials/${materialId}`);

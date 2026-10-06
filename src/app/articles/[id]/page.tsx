@@ -120,8 +120,12 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
     articleSection: "記事",
   });
 
+  // 記事一覧は置かない（docs/mock-port/decisions.md）。戻る先は紐づく最初の資材、なければホーム。
+  const firstMaterial = article.materials[0];
+  const backHref = firstMaterial === undefined ? "/" : `/materials/${firstMaterial.id}`;
+
   return (
-    <MockPageShell title="" backHref="/articles" shareHref={`/articles/${article.id}`}>
+    <MockPageShell title="" backHref={backHref} shareHref={`/articles/${article.id}`}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}

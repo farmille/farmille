@@ -38,7 +38,6 @@ export async function processContentReportAction(
   revalidatePath("/admin/reports");
   revalidatePath("/admin");
   revalidatePath("/me");
-  revalidatePath("/articles");
 
   return {
     status: "done",

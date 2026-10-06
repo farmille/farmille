@@ -1,5 +1,5 @@
 /*
- * 実証詳細レポート記事・感想口コミ一覧・記事一覧／記事詳細で、mock.css（見本の写し）に足したクラス。
+ * 実証詳細レポート記事・感想口コミ一覧・資材の記事一覧・記事詳細で、mock.css（見本の写し）に足したクラス。
  * 見本のインラインスタイルを置き換えたもの・Next の部品（画像・リンク・フォーム）に合わせたものだけを置く。
  */
 
@@ -200,10 +200,7 @@
   background: linear-gradient(180deg, transparent, var(--bg));
 }
 
-/* 記事一覧：検索窓（見本の ts-box）をフォームにしたもの・種別（見本の fpill）をリンクにしたもの */
-.fm form.ts-box {
-  margin-bottom: 12px;
-}
+/* 種別（見本の fpill）をリンクにしたもの */
 .fm a.fpill {
   text-decoration: none;
 }

@@ -45,7 +45,6 @@ test("アカウント別の画面一覧を撮影する", async ({ page }) => {
   try {
     for (const [path, name] of [
       ["/search", "34-search"],
-      ["/articles", "35-articles"],
       ["/password-reset", "36-password-reset"],
       [`/materials/${material.id}`, "37-material"],
       [`/materials/${material.id}/reviews`, "38-reviews"],

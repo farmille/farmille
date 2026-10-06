@@ -11,7 +11,7 @@ export function ReadingPageSkeleton({
 }) {
   return (
     <div className={css({ minH: "100dvh", bg: "surface.page", pb: "6" })}>
-      <AppBar chrome="public" active="articles" title={title} backHref="/articles" />
+      <AppBar chrome="public" title={title} backHref="/" />
       <main
         className={css({
           w: "100%",

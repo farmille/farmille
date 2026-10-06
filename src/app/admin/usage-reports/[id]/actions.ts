@@ -65,7 +65,6 @@ export async function updateUsageReportEditorialAction(
   revalidatePath(`/admin/usage-reports/${reportId}`);
   revalidatePath("/admin/usage-reports");
   revalidatePath(`/reports/${reportId}`);
-  revalidatePath("/articles");
   revalidatePath("/me");
   revalidatePath("/admin");
 

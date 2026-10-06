@@ -107,7 +107,7 @@ const plusButton = css({
   textDecoration: "none",
 });
 
-export type BottomNavActive = "home" | "search" | "post" | "articles" | "me";
+export type BottomNavActive = "home" | "search" | "post" | "me";
 
 type BottomNavProps = {
   active: BottomNavActive;
@@ -122,11 +122,10 @@ const ITEMS: Array<{
 }> = [
   { id: "home", href: "/", label: "ホーム", name: "home" },
   { id: "search", href: "/search", label: "探す", name: "search" },
-  { id: "articles", href: "/articles", label: "記事", name: "article" },
   { id: "me", href: "/me", label: "マイページ", name: "person" },
 ];
 
-/** tab 未満の5枠 BottomNav。画面下へ固定し、中央は丸型＋投稿。 */
+/** tab 未満の4枠 BottomNav。画面下へ固定し、中央は丸型＋投稿。 */
 export async function BottomNav({ active, placement = "viewport" }: BottomNavProps) {
   const session = await getSessionUser();
   const showPost = session === null || canUseGeneralFeatures(session.accountType);

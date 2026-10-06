@@ -25,7 +25,6 @@ export async function removePublishedPostAction(
     "/admin/usage-reports",
     "/admin/reports",
     "/me",
-    "/articles",
     `/materials/${result.data.materialId}`,
     `/users/${result.data.authorUserId}`,
   ])
