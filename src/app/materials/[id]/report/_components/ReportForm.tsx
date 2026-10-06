@@ -11,6 +11,7 @@ import {
 } from "@/app/materials/[id]/report/new/actions";
 import { ReviewCropPicker } from "@/app/materials/[id]/review/_components/ReviewCropPicker";
 import { Button } from "@/components/Button";
+import { Combobox } from "@/components/Combobox";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 import { Textarea } from "@/components/Textarea";
@@ -90,6 +91,7 @@ export function ReportForm({
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const materialSearchRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState("");
   const [materials, setMaterials] = useState<PostingMaterial[]>([]);
   const closeDialog = useRef<HTMLDialogElement>(null);
@@ -104,6 +106,9 @@ export function ReportForm({
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty, submitted]);
+  useEffect(() => {
+    if (!pending && materials.length > 0) materialSearchRef.current?.focus();
+  }, [materials, pending]);
   function navigate(next: number) {
     setStep(next);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -316,10 +321,28 @@ export function ReportForm({
             </div>
             {searchOpen && (
               <div className={stack}>
-                <label>
-                  資材を検索
-                  <Input value={search} onChange={(event) => setSearch(event.target.value)} />
-                </label>
+                <label htmlFor="report-material-search">資材を検索</label>
+                <Combobox
+                  id="report-material-search"
+                  aria-label="資材を検索"
+                  showEmptyState={false}
+                  ref={materialSearchRef}
+                  value={search}
+                  onValueChange={(value) => {
+                    setSearch(value);
+                    setMaterials([]);
+                  }}
+                  options={materials.map((item) => ({ value: item.id, label: item.name }))}
+                  onSelect={(id) => {
+                    const item = materials.find((material) => material.id === id);
+                    if (item) {
+                      setInput({ ...input, materialId: item.id });
+                      setMaterialName(item.name);
+                      setSearchOpen(false);
+                    }
+                  }}
+                  emptyMessage="検索を実行すると候補を表示します。"
+                />
                 <Button
                   type="button"
                   variant="ghost"
@@ -327,8 +350,9 @@ export function ReportForm({
                     startTransition(async () => {
                       try {
                         const result = await searchReportMaterialsAction(search);
-                        if (result.ok) setMaterials(result.data);
-                        else setMessage("資材を検索できませんでした。");
+                        if (result.ok) {
+                          setMaterials(result.data);
+                        } else setMessage("資材を検索できませんでした。");
                       } catch {
                         setMessage("資材を検索できませんでした。通信状態を確認してください。");
                       }
@@ -337,20 +361,6 @@ export function ReportForm({
                 >
                   検索
                 </Button>
-                {materials.map((item) => (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    key={item.id}
-                    onClick={() => {
-                      setInput({ ...input, materialId: item.id });
-                      setMaterialName(item.name);
-                      setSearchOpen(false);
-                    }}
-                  >
-                    {item.name}
-                  </Button>
-                ))}
               </div>
             )}
             <FieldLabel required>使用作物</FieldLabel>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { createBlankUsageReport } from "@/lib/usage-report";
@@ -8,6 +9,19 @@ if (!measurement || !measurement.graphs[0]) throw new Error("グラフの初期�
 const meta = {
   title: "App/Materials/Report/ReportGraphEditor",
   component: ReportGraphEditor,
+  render: function ReportGraphStory(args) {
+    const [current, setCurrent] = useState(args.measurement);
+    return (
+      <ReportGraphEditor
+        {...args}
+        measurement={current}
+        onMeasurementChange={(value) => {
+          args.onMeasurementChange(value);
+          setCurrent(value);
+        }}
+      />
+    );
+  },
   args: {
     measurement,
     graph: measurement.graphs[0],

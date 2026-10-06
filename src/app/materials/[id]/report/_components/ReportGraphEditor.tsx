@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type KeyboardEvent } from "react";
+import { Combobox } from "@/components/Combobox";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
@@ -318,14 +319,17 @@ export function ReportGraphEditor({
             <>
               <label>
                 調査項目（必須）
-                <Input
+                <Combobox
+                  id={`${graph.id}-metric`}
+                  aria-label="調査項目"
                   data-graph-input={target.kind === "metric" ? "" : undefined}
                   onFocus={() => setTarget({ kind: "metric" })}
-                  list={`${graph.id}-metrics`}
                   value={measurement.name}
                   placeholder="例）収量"
-                  onChange={(e) => {
-                    const name = e.target.value;
+                  options={candidates
+                    .filter(([name]) => name.includes(measurement.name))
+                    .map(([name, unit]) => ({ value: name, label: name, description: unit }))}
+                  onValueChange={(name) => {
                     const suggested = candidates.find(([candidate]) => candidate === name)?.[1];
                     onMeasurementChange({
                       ...measurement,
@@ -333,14 +337,18 @@ export function ReportGraphEditor({
                       unit: !unitIsManual && suggested ? suggested : measurement.unit,
                     });
                   }}
+                  onSelect={(name) => {
+                    const suggested = candidates.find(([candidate]) => candidate === name)?.[1];
+                    onMeasurementChange({
+                      ...measurement,
+                      name,
+                      unit: !unitIsManual && suggested ? suggested : measurement.unit,
+                    });
+                  }}
+                  emptyMessage="調査項目を自由に入力できます。"
                   onKeyDown={next}
                 />
               </label>
-              <datalist id={`${graph.id}-metrics`}>
-                {candidates.map(([name]) => (
-                  <option key={name} value={name} />
-                ))}
-              </datalist>
               <label>
                 単位（任意）
                 <Input

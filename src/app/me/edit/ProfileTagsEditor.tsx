@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { buttonRecipe } from "@/components";
-import { controlStyle, Field } from "@/components/auth/Fields";
+import { Combobox } from "@/components/Combobox";
+import { TagChip } from "@/components/TagChip";
+import { Field } from "@/components/auth/Fields";
 import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
 import { css } from "../../../../styled-system/css";
 
+const chipStyle = css({ maxW: "full", whiteSpace: "normal", overflowWrap: "anywhere" });
 const choices = css({ display: "flex", flexWrap: "wrap", gap: "2", my: "2" });
 
 /** 選択済みタグは検索語に関係なく残し、自由入力した所属も同じ形式で保存する。 */
@@ -27,8 +30,10 @@ export function ProfileTagsEditor({
       name.normalize("NFKC").toLocaleLowerCase().includes(query),
     ),
   );
-  function addAffiliation() {
-    const value = affiliation.trim();
+  const cropById = new Map([...details.crops, ...options.crops].map((crop) => [crop.id, crop]));
+  const available = found.filter((crop) => !cropIds.includes(crop.id));
+  function addAffiliation(name = affiliation) {
+    const value = name.trim();
     if (!value) return;
     if (affiliations.length >= 20) {
       setMessage("所属は20件まで登録できます。");
@@ -46,48 +51,44 @@ export function ProfileTagsEditor({
         requirement="optional"
         guide="作物名や別名で検索して選んでください。複数選べます（50件まで）。公開されます。"
       >
-        <input
-          className={controlStyle}
+        <Combobox
           id="crop-search"
-          type="search"
+          aria-label="主な作目"
           value={cropQuery}
-          onChange={(event) => setCropQuery(event.target.value)}
+          onValueChange={setCropQuery}
           placeholder="作物名・別名を検索"
+          disabled={cropIds.length >= 50}
+          options={available.slice(0, 20).map((crop) => ({
+            value: crop.id,
+            label: crop.name,
+            description: crop.crop_groups?.name,
+          }))}
+          onSelect={(id) => {
+            setCropIds([...cropIds, id]);
+            setCropQuery("");
+          }}
         />
         <div className={choices} aria-label="選択済みの作目">
-          {cropIds.map((id) => (
-            <span key={id}>
-              <input type="hidden" name="cropIds" value={id} />
-              <button
-                type="button"
-                className={buttonRecipe({ variant: "primary", size: "sm" })}
-                onClick={() => setCropIds(cropIds.filter((value) => value !== id))}
-              >
-                {options.crops.find((crop) => crop.id === id)?.name} ×
-              </button>
-            </span>
-          ))}
-        </div>
-        <div className={choices}>
-          {found
-            .slice(0, 20)
-            .filter((crop) => !cropIds.includes(crop.id))
-            .map((crop) => (
-              <button
-                key={crop.id}
-                type="button"
-                disabled={cropIds.length >= 50}
-                className={buttonRecipe({ variant: "ghost", size: "sm" })}
-                onClick={() => setCropIds([...cropIds, crop.id])}
-              >
-                {crop.name}（{crop.crop_groups?.name}）
-              </button>
-            ))}
+          {cropIds.map((id) => {
+            const crop = cropById.get(id);
+            if (!crop) throw new Error("選択済みの作目が見つかりません。");
+            return (
+              <span key={id}>
+                <input type="hidden" name="cropIds" value={id} />
+                <TagChip
+                  className={chipStyle}
+                  label={crop.name}
+                  showCategoryLabel={false}
+                  onRemove={() => setCropIds(cropIds.filter((value) => value !== id))}
+                />
+              </span>
+            );
+          })}
         </div>
         <p className={css({ fontSize: "xs", color: "text.subtle" })}>
-          {found.length > 20
-            ? `${found.length}件中20件を表示しています。検索語を入力して絞り込めます。`
-            : `${found.length}件の候補があります。`}
+          {available.length > 20
+            ? `${available.length}件中20件を表示しています。検索語を入力して絞り込めます。`
+            : `${available.length}件の候補があります。`}
         </p>
       </Field>
       <Field
@@ -96,29 +97,31 @@ export function ProfileTagsEditor({
         requirement="optional"
         guide="候補から選ぶか、所属名を入力して追加してください。複数登録できます（20件まで）。公開されます。"
       >
-        <input
-          className={controlStyle}
+        <Combobox
           id="affiliation"
-          list="affiliation-options"
+          aria-label="所属"
           value={affiliation}
           maxLength={100}
-          onChange={(event) => setAffiliation(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.nativeEvent.isComposing) {
-              event.preventDefault();
-              addAffiliation();
-            }
-          }}
+          onValueChange={setAffiliation}
+          onSubmitValue={() => addAffiliation()}
+          disabled={affiliations.length >= 20}
+          options={options.affiliations
+            .filter(
+              (name) =>
+                !affiliations.includes(name) &&
+                name
+                  .normalize("NFKC")
+                  .toLocaleLowerCase()
+                  .includes(affiliation.normalize("NFKC").toLocaleLowerCase()),
+            )
+            .map((name) => ({ value: name, label: name }))}
+          onSelect={addAffiliation}
+          emptyMessage="所属名を入力して追加できます。"
         />
-        <datalist id="affiliation-options">
-          {options.affiliations.map((name) => (
-            <option key={name} value={name} />
-          ))}
-        </datalist>
         <button
           type="button"
           className={buttonRecipe({ variant: "ghost", size: "sm" })}
-          onClick={addAffiliation}
+          onClick={() => addAffiliation()}
         >
           所属を追加
         </button>
@@ -126,13 +129,13 @@ export function ProfileTagsEditor({
           {affiliations.map((name) => (
             <span key={name}>
               <input type="hidden" name="affiliations" value={name} />
-              <button
-                type="button"
-                className={buttonRecipe({ variant: "primary", size: "sm" })}
-                onClick={() => setAffiliations(affiliations.filter((value) => value !== name))}
-              >
-                {name} ×
-              </button>
+              <TagChip
+                className={chipStyle}
+                label={name}
+                category="maker"
+                showCategoryLabel={false}
+                onRemove={() => setAffiliations(affiliations.filter((value) => value !== name))}
+              />
             </span>
           ))}
         </div>
