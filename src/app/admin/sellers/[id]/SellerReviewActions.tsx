@@ -24,7 +24,6 @@ const credentialsStyle = css({
   display: "flex",
   flexDirection: "column",
   gap: "4",
-  bg: "primary.soft",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
