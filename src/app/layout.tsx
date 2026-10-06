@@ -1,5 +1,6 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
+import { Noto_Sans_JP } from "next/font/google";
 import Script from "next/script";
 
 import { createRootMetadata } from "@/lib/seo";
@@ -10,6 +11,14 @@ import "gen-interface-jp/600.css";
 import "gen-interface-jp/700.css";
 import "gen-interface-jp/800.css";
 import "./globals.css";
+
+// 完成見本と同じ本文書体。fonts.sans の先頭から変数で参照する
+const notoSansJp = Noto_Sans_JP({
+  weight: ["400", "500", "700", "800"],
+  display: "swap",
+  preload: false,
+  variable: "--font-noto-sans-jp",
+});
 
 // Adobe Fontsの日本語フォント用ローダー。Hydration後に実行し、Typekitのclass追加とReactの照合を競合させない。
 const adobeFontsLoader = String.raw`
@@ -38,7 +47,7 @@ export default function RootLayout({
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 
   return (
-    <html lang="ja">
+    <html lang="ja" className={notoSansJp.variable}>
       <body>{children}</body>
       <Script id="adobe-fonts" strategy="afterInteractive">
         {adobeFontsLoader}
