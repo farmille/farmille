@@ -8,16 +8,14 @@ import type { listCompanyApplications } from "@/server/company-applications";
 const PROCEDURES = [
   {
     title: "自社の資材を掲載する／掲載済みの自社資材を管理する",
-    description:
-      "資材情報の新規掲載と、掲載済み資材の資材オーナー権限の申請。",
+    description: "資材情報の新規掲載と、掲載済み資材の資材オーナー権限の申請。",
     needs: "資材ごとのパッケージ画像 or 製品ページURL、法人番号、掲載済み資材はそのページURL",
     href: "/dashboard/applications/new/registration",
     label: "申請フォーム A",
   },
   {
     title: "資材オーナー権限を別の会社に引き渡す",
-    description:
-      "貴社が資材オーナー企業になっている資材について、権限を別の会社に移す申請。",
+    description: "貴社が資材オーナー企業になっている資材について、権限を別の会社に移す申請。",
     needs:
       "対象資材のページURL、移行先の法人番号・FarmilleアカウントID・担当者連絡先、移行先企業名が載ったパッケージ画像 or 製品ページURL",
     href: "/dashboard/applications/new/transfer_out",
