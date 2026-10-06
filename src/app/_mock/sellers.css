@@ -154,6 +154,11 @@
   width: 4px;
   height: 8px;
 }
+/* 見本の fm-chic は入力欄のフォーカスを枠の色だけで示すため、キーボード操作時の輪を足す */
+.fm .fm-chic .input:focus-visible,
+.fm .fm-chic .textarea:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, #1f9e95 28%, transparent);
+}
 .fm .consent:has(input:focus-visible),
 .fm .org-opt:has(input:focus-visible) {
   outline: 2px solid var(--green);
