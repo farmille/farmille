@@ -26,3 +26,5 @@ export const Submitted: Story = {
     ).resolves.toBeVisible();
   },
 };
+
+export const ReceiptAccess: Story = { args: { receipt: true } };

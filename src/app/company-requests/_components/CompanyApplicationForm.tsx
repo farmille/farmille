@@ -1,5 +1,6 @@
 "use client";
 
+import { css, cx } from "../../../../styled-system/css";
 import { Checkbox } from "@/components/Checkbox";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -26,6 +27,16 @@ import {
 } from "./ContactFields";
 import { ConsentFields } from "./ConsentFields";
 import { EvidenceFields } from "./EvidenceFields";
+
+const optionGroup = css({ display: "flex", flexDirection: "column", gap: "2" });
+const optionLabel = css({
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "2",
+  fontSize: "md",
+  lineHeight: "relaxed",
+});
+const legendStyle = css({ fontSize: "md", fontWeight: "700", mb: "2" });
 
 type ItemRow = { id: string; target: "new" | "existing" };
 export function CompanyApplicationForm({
@@ -138,7 +149,13 @@ export function CompanyApplicationForm({
     }
   }
   return (
-    <form onSubmit={submit} className={applicationStack}>
+    <form
+      onSubmit={submit}
+      className={cx(
+        applicationStack,
+        css({ fontSize: "md", lineHeight: "relaxed", "& h2, & h3": { fontSize: "lg" } }),
+      )}
+    >
       <p>{copy.introduction}</p>
       {kind === "removal" && (
         <div>
@@ -157,7 +174,7 @@ export function CompanyApplicationForm({
       )}
       <p>担当者情報・ご提出資料は公開されません。申請の保存後に運営が内容を確認します。</p>
       <fieldset disabled={submitting} className={applicationStack}>
-        <legend>申請企業情報</legend>
+        <legend className={legendStyle}>申請企業情報</legend>
         <ContactFields
           defaults={defaults}
           removal={kind === "removal"}
@@ -211,10 +228,10 @@ export function CompanyApplicationForm({
               </label>
             )}
             {(kind === "registration" || kind === "removal") && (
-              <fieldset className={applicationStack}>
-                <legend>当該資材との関係（1つ以上必須）</legend>
+              <fieldset className={optionGroup}>
+                <legend className={legendStyle}>当該資材との関係（1つ以上必須）</legend>
                 {Object.entries(relationLabels).map(([value, label]) => (
-                  <label key={value}>
+                  <label className={optionLabel} key={value}>
                     <Checkbox name={`${row.id}.relations`} value={value} /> {label}
                   </label>
                 ))}
@@ -290,13 +307,15 @@ export function CompanyApplicationForm({
                     placeholder="例：2026年3月末をもって製造終了のため"
                   />
                 </label>
-                <fieldset className={applicationStack}>
-                  <legend>他の関係会社から問い合わせがあった場合の申請理由の開示（必須）</legend>
-                  <label>
+                <fieldset className={optionGroup}>
+                  <legend className={legendStyle}>
+                    他の関係会社から問い合わせがあった場合の申請理由の開示（必須）
+                  </legend>
+                  <label className={optionLabel}>
                     <input type="radio" name={`${row.id}.discloseReason`} value="yes" required />{" "}
                     開示してよい
                   </label>
-                  <label>
+                  <label className={optionLabel}>
                     <input type="radio" name={`${row.id}.discloseReason`} value="no" required />{" "}
                     開示を希望しない（「関係会社からの申請による」旨のみお伝えします）
                   </label>
