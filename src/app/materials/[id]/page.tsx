@@ -24,6 +24,7 @@ import {
   MaterialSpecDisclaimer,
   PostsCompliance,
 } from "./_components/MaterialCompliance";
+import { HeroSavedCount } from "./_components/HeroSavedCount";
 import { MaterialHero } from "./_components/MaterialHero";
 import { MaterialDescriptionBox, MaterialTimingBox } from "./_components/MaterialOverview";
 import { MaterialPageSkeleton } from "./_components/MaterialPageSkeleton";
@@ -139,6 +140,11 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
           reportCount={
             <Suspense fallback={<b className="tnum">−件</b>}>
               <HeroReportCount materialId={material.id} />
+            </Suspense>
+          }
+          savedCount={
+            <Suspense fallback={<b className="tnum">−</b>}>
+              <HeroSavedCount materialId={material.id} />
             </Suspense>
           }
         />

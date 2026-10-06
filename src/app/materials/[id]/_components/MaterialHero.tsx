@@ -27,6 +27,8 @@ type MaterialHeroProps = {
   saveUnavailable?: boolean;
   /** 実証詳細レポートの件数（読み込み中は Suspense の代替表示が入る）。 */
   reportCount?: ReactNode;
+  /** お気に入り数（読み込み中は Suspense の代替表示が入る）。 */
+  savedCount?: ReactNode;
 };
 
 /** 見本 S.material の `.card.mat-hero`。 */
@@ -36,6 +38,7 @@ export function MaterialHero({
   toggleAction,
   saveUnavailable,
   reportCount = <b className="tnum">−件</b>,
+  savedCount = <b className="tnum">−</b>,
 }: MaterialHeroProps) {
   const primaryImage = material.images[0];
   const extraImages = material.images.slice(1);
@@ -147,8 +150,7 @@ export function MaterialHero({
             ・ 感想口コミ <b className="tnum">{material.review_count}件</b>
           </a>{" "}
           <span style={{ fontSize: 10.5, whiteSpace: "nowrap" }}>
-            ・ <span style={{ color: "var(--green-deep)" }}>★</span> お気に入り{" "}
-            <b className="tnum">−</b>
+            ・ <span style={{ color: "var(--green-deep)" }}>★</span> お気に入り {savedCount}
           </span>
         </div>
         <SaveControl

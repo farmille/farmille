@@ -11,7 +11,9 @@ export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
         <section className="signup-cta" aria-labelledby="signup-invitation-title">
           <h2 id="signup-invitation-title">会員登録して、あなたの体験を共有してください</h2>
           <p>
-            <span style={{ color: "var(--green-deep)", fontWeight: 800 }}>登録は無料です。</span>
+            <span style={{ color: "var(--green-deep)", fontWeight: 800 }}>
+              登録は無料で、1分で完了します。
+            </span>
             検索と感想口コミの閲覧は、登録なしで利用できます。
             <br />
             会員登録すると、実証詳細レポートの閲覧・投稿、感想口コミの投稿、お気に入りの保存ができます。

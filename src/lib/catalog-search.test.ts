@@ -43,6 +43,7 @@ const catalog: CatalogSearch = {
     { id: "major", name: "野菜類", parent_id: null, hierarchy_level: "major", sort_order: 1 },
     { id: "middle", name: "鱗茎類", parent_id: "major", hierarchy_level: "middle", sort_order: 2 },
   ],
+  effects: [],
   counts: [],
 };
 

@@ -198,6 +198,30 @@
   font-size: 13px;
 }
 
+/* 見本 effChipsHtml の大分類の開閉行（`.sug[data-etoggle]`）と、開いた中のタグ */
+.fm .s-side .eff-group > summary.sug {
+  gap: 9px;
+  padding: 9px 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.fm .s-side .eff-group > summary.sug:hover {
+  background: var(--green-soft-2);
+}
+.fm .s-side .eff-caret {
+  color: var(--green);
+  font-size: 11px;
+}
+.fm .s-side .eff-caret::after {
+  content: "▸";
+}
+.fm .s-side .eff-group[open] .eff-caret::after {
+  content: "▾";
+}
+.fm .s-side .eff-chips {
+  padding: 2px 6px 10px 24px;
+}
+
 /* ---- 検索：選択中の条件の解除ボタン・結果カード ---- */
 .fm .chip-sel button {
   cursor: pointer;

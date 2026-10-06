@@ -50,6 +50,24 @@ const meta = {
           sort_order: 1,
         },
       ],
+      effects: [
+        {
+          id: "00000000-0000-4000-8000-000000000005",
+          name: "養分吸収の改善",
+          sort_order: 1,
+          categoryId: "00000000-0000-4000-8000-000000000007",
+          categoryName: "栄養利用の効率改善",
+          categorySortOrder: 1,
+        },
+        {
+          id: "00000000-0000-4000-8000-000000000008",
+          name: "耐暑性改善",
+          sort_order: 1,
+          categoryId: "00000000-0000-4000-8000-000000000009",
+          categoryName: "非生物的ストレス耐性の改善",
+          categorySortOrder: 2,
+        },
+      ],
       counts: [],
     },
     search: {
@@ -57,7 +75,7 @@ const meta = {
         {
           category: "effect",
           id: "00000000-0000-4000-8000-000000000005",
-          name: "生育促進",
+          name: "養分吸収の改善",
           aliases: [],
           sort_order: 1,
         },
@@ -88,7 +106,7 @@ export const Selected: Story = {
         kind: "filter",
         category: "effect",
         id: "00000000-0000-4000-8000-000000000005",
-        name: "生育促進",
+        name: "養分吸収の改善",
       },
     ],
     sort: "rating",

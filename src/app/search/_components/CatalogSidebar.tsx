@@ -118,6 +118,14 @@ export function CatalogSidebar({
   function cropChip(crop: CatalogSearch["crops"][number]) {
     return chip({ kind: "filter", category: "crop", id: crop.id, name: crop.name });
   }
+  // 見本の EFF_GROUPS4：JBSA の効果大分類（4区分）ごとに開閉行を置き、中に個別効果のタグを並べる。
+  // catalog.effects は大分類の表示順 → 個別効果の表示順に並んでいる。
+  const effectGroups: Array<{ id: string; name: string; effects: CatalogSearch["effects"] }> = [];
+  for (const effect of catalog.effects) {
+    const group = effectGroups.at(-1);
+    if (group?.id === effect.categoryId) group.effects.push(effect);
+    else effectGroups.push({ id: effect.categoryId, name: effect.categoryName, effects: [effect] });
+  }
   const genres = search.filters
     .filter((filter) => filter.category === "genre")
     .toSorted((a, b) => (genreCounts.get(b.id) ?? 0) - (genreCounts.get(a.id) ?? 0));
@@ -138,9 +146,22 @@ export function CatalogSidebar({
           作物 × 効果 など、条件を組み合わせて検索できます
         </div>
         <Section title="効果分類で探す">
-          <div className="sug-chips">
-            {search.filters.filter((filter) => filter.category === "effect").map(tag)}
-          </div>
+          {effectGroups.map((group) => (
+            <details key={group.id} className="eff-group">
+              <summary className="sug">
+                <span className="eff-caret" aria-hidden="true" />
+                <span style={{ flex: 1, minWidth: 0 }}>{group.name}</span>
+                <span className="alias-note" style={{ flex: "0 0 auto" }}>
+                  {group.effects.length}効果
+                </span>
+              </summary>
+              <div className="sug-chips eff-chips">
+                {group.effects.map((effect) =>
+                  chip({ kind: "filter", category: "effect", id: effect.id, name: effect.name }),
+                )}
+              </div>
+            </details>
+          ))}
         </Section>
         <Section title="資材ジャンルで探す">
           <div>
