@@ -35,9 +35,11 @@ function SaveToggleForm({
         type="submit"
         onClick={state.saved ? undefined : () => trackMaterialSaved(materialId)}
         className={state.saved ? "mat-fav on" : "mat-fav"}
+        aria-label={state.saved ? "お気に入りから解除" : "お気に入りに追加"}
+        aria-pressed={state.saved}
       >
         <span aria-hidden="true">{state.saved ? "★" : "☆"}</span>
-        {state.saved ? "お気に入りから解除" : "お気に入りに追加"}
+        {state.saved ? "お気に入り済み" : "お気に入り"}
       </button>
     </form>
   );
