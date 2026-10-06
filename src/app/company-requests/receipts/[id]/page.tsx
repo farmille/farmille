@@ -31,7 +31,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           <h1 style={{ fontSize: 20 }}>ご申請を受け付けました</h1>
         </div>
         <div className="card pad">
-          <ApplicationReceipt receipt={receipt} />
+          <ApplicationReceipt receipt={receipt} hideMissingCorporateNumber />
         </div>
       </div>
     </MockPageShell>

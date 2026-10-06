@@ -3,7 +3,14 @@ import { applicationReceiptLines } from "@/lib/company-application-receipt";
 import { SectionHeading, TextLink } from "@/components";
 import { ReceiptButtons } from "./ReceiptButtons";
 import { css, cx } from "../../../../styled-system/css";
-export function ApplicationReceipt({ receipt }: { receipt: Receipt }) {
+export function ApplicationReceipt({
+  receipt,
+  hideMissingCorporateNumber = false,
+}: {
+  receipt: Receipt;
+  /** 申請者向けの受付票（公開の受付票ページ）だけ、法人番号の無い申請で「法人番号：該当なし」を出さない */
+  hideMissingCorporateNumber?: boolean;
+}) {
   return (
     <article className={cx("application-receipt", css({ fontSize: "md", lineHeight: "relaxed" }))}>
       <div className={css({ display: "flex", flexDirection: "column", gap: "3" })}>
@@ -26,7 +33,9 @@ export function ApplicationReceipt({ receipt }: { receipt: Receipt }) {
           py: "6",
         })}
       >
-        {applicationReceiptLines(receipt).join("\n")}
+        {applicationReceiptLines(receipt, {
+          omitMissingCorporateNumber: hideMissingCorporateNumber,
+        }).join("\n")}
       </div>
       <div className="application-print-hidden">
         <SectionHeading title="添付資料" first />

@@ -6,15 +6,27 @@ import * as v from "valibot";
 const receiptDateTime = (value: string) =>
   `${new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium", timeStyle: "medium", timeZone: "Asia/Tokyo" }).format(new Date(value))}（日本時間）`;
 
-export function applicationReceiptLines(receipt: ApplicationReceipt) {
+/**
+ * 受付票の本文（1行ずつ）。控えメール・運営画面・申請者の画面で共通。
+ * `omitMissingCorporateNumber` は申請者向けの画面だけで使う：法人番号の欄が無いフォームD（終売・廃盤／非表示）では
+ * 「法人番号：該当なし」の行を出さない。運営画面と控えメールは従来どおり「該当なし」と出す。
+ */
+export function applicationReceiptLines(
+  receipt: ApplicationReceipt,
+  { omitMissingCorporateNumber = false }: { omitMissingCorporateNumber?: boolean } = {},
+) {
   const a = receipt.application;
   const kind = v.parse(applicationKindSchema, a.kind);
+  const corporateNumberLines =
+    a.corporate_number === null && omitMissingCorporateNumber
+      ? []
+      : [`法人番号：${a.corporate_number ?? "該当なし"}`];
   const lines = [
     applicationCopy[kind].title,
     `受付番号：${a.receipt_number}`,
     `受付日時：${receiptDateTime(a.submitted_at)}`,
     `法人名：${a.company_name}`,
-    `法人番号：${a.corporate_number ?? "該当なし"}`,
+    ...corporateNumberLines,
     `FarmilleアカウントID：${a.account_id}`,
     `担当者名：${a.contact_name}`,
     `部署名：${a.department}`,
