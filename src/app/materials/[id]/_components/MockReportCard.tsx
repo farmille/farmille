@@ -12,13 +12,15 @@ type MockReportCardProps = {
   author: string;
   avatarSrc?: string | null;
   coverSrc?: string;
+  /** 作物名（本番の ReportCard と同じく投稿者の横に出す）。 */
+  crop?: string | null;
   /** 参考になった・保存・閲覧数（PostActionsLoader）。 */
   actions: ReactNode;
 };
 
 /**
  * 見本の reportCard（`.alist-card`）。
- * 一覧で見せるのは表紙・題名・投稿者・反応だけで、本文の抜粋は出さない（既存の資材ページと同じ範囲）。
+ * 一覧で見せるのは表紙・題名・投稿者・作物・反応（参考になった・保存・閲覧数）で、本文の抜粋は出さない（既存の資材ページと同じ範囲）。
  */
 export function MockReportCard({
   href,
@@ -26,6 +28,7 @@ export function MockReportCard({
   author,
   avatarSrc,
   coverSrc,
+  crop,
   actions,
 }: MockReportCardProps) {
   return (
@@ -50,6 +53,11 @@ export function MockReportCard({
         <div className="rp-by">
           <MockAvatar name={author} src={avatarSrc} extraSmall />
           <b>{author}</b>
+          {crop ? (
+            <span className="chip" style={{ flex: "0 0 auto" }}>
+              {crop}
+            </span>
+          ) : null}
         </div>
         {actions}
       </div>

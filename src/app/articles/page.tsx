@@ -106,6 +106,7 @@ async function ArticleResults({
               author={item.authorHandle}
               coverSrc={item.coverUrl}
               publishedAt={item.publishedAt}
+              crop={item.cropName}
               actions={
                 <PostActionsLoader
                   target="usage_report"

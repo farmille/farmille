@@ -22,6 +22,8 @@ type FeedReportCardProps = {
   avatarSrc?: string | null;
   coverSrc?: string | null;
   publishedAt?: string;
+  /** 作物名（本番の ReportCard と同じく投稿者の横に出す）。 */
+  crop?: string | null;
   /** 参考になった・保存・閲覧数（PostActionsLoader）。見本の .rp-foot にあたる。 */
   actions: ReactNode;
 };
@@ -37,6 +39,7 @@ export function FeedReportCard({
   avatarSrc,
   coverSrc,
   publishedAt,
+  crop,
   actions,
 }: FeedReportCardProps) {
   return (
@@ -61,6 +64,11 @@ export function FeedReportCard({
         <div className="rp-by">
           <MockAvatar name={author} src={avatarSrc} extraSmall />
           <b>{author}</b>
+          {crop ? (
+            <span className="chip" style={{ flex: "0 0 auto" }}>
+              {crop}
+            </span>
+          ) : null}
           {publishedAt ? (
             <time className="rp-time" dateTime={publishedAt} title={formatDateJa(publishedAt)}>
               {shortDate.format(new Date(publishedAt))}

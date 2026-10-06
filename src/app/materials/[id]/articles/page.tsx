@@ -96,6 +96,7 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
                 avatarSrc={report.author?.avatar_url}
                 coverSrc={report.coverImage?.url}
                 publishedAt={report.published_at ?? undefined}
+                crop={report.crop?.name}
                 actions={
                   <PostActionsLoader
                     target="usage_report"

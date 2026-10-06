@@ -6,6 +6,7 @@ import {
   getMaterialWithSupabase,
   listMaterialsWithSupabase,
   listRelatedMaterialsWithSupabase,
+  withPostingMaterialImagesWithSupabase,
 } from "@/server/queries/materials";
 import type { Database } from "@/types/database.types";
 
@@ -93,4 +94,36 @@ describe.skipIf(localSupabaseUrl === undefined)("listMaterials 統合", () => {
       );
     }
   }, 30_000);
+
+  it("投稿先候補に代表画像（並び順が最小の現行画像）の URL を付け、画像が無い資材は null にする", async () => {
+    const client = createLocalClient();
+    const [materials, images] = await Promise.all([
+      client
+        .from("materials")
+        .select("id, name, manufacturer_name, review_count, avg_rating, manufacturer_verified_at")
+        .eq("publication_status", "published")
+        .order("id")
+        .limit(30),
+      client
+        .from("material_images")
+        .select("material_id, url, sort_order, id")
+        .eq("is_current", true),
+    ]);
+    if (materials.error !== null) throw materials.error;
+    if (images.error !== null) throw images.error;
+
+    const result = await withPostingMaterialImagesWithSupabase(client, materials.data);
+    if (!result.ok) throw new Error(`投稿先候補の画像: ${result.error}`);
+
+    expect(result.data.map(({ id }) => id)).toEqual(materials.data.map(({ id }) => id));
+    for (const item of result.data) {
+      const expected =
+        images.data
+          .filter((image) => image.material_id === item.id)
+          .toSorted(
+            (left, right) => left.sort_order - right.sort_order || left.id.localeCompare(right.id),
+          )[0]?.url ?? null;
+      expect(item.imageUrl).toBe(expected);
+    }
+  }, 20_000);
 });

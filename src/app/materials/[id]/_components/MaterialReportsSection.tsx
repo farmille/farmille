@@ -82,6 +82,7 @@ export async function MaterialReportsSection({
               author={report.author?.handle ?? "退会したユーザー"}
               avatarSrc={report.author?.avatar_url}
               coverSrc={report.coverImage?.url}
+              crop={report.crop?.name}
               actions={
                 <PostActionsLoader
                   target="usage_report"

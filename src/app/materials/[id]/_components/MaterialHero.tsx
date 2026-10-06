@@ -8,7 +8,7 @@ import type { SaveControlState } from "../actions";
 import { MockChip, MockNoImage, MockStars } from "./MockParts";
 import { SaveControl } from "./SaveControl";
 
-/** 見本の追加画像サムネイル（34px）の枠。 */
+/** 見本の追加画像サムネイル（34px）の枠。本番どおり追加画像はすべて出し、3枚ごとに折り返す。 */
 const thumbStyle = {
   width: 34,
   height: 34,
@@ -68,8 +68,17 @@ export function MaterialHero({
           ) : null}
         </div>
         {extraImages.length > 0 ? (
-          <div aria-label="追加の製品画像" style={{ display: "flex", gap: 5, marginTop: 6 }}>
-            {extraImages.slice(0, 3).map((image, index) => (
+          <div
+            role="group"
+            aria-label="追加の製品画像"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 34px)",
+              gap: 5,
+              marginTop: 6,
+            }}
+          >
+            {extraImages.map((image, index) => (
               <div key={image.id} style={thumbStyle}>
                 <Image
                   src={image.url}
@@ -81,19 +90,6 @@ export function MaterialHero({
                 />
               </div>
             ))}
-            {extraImages.length > 3 ? (
-              <div
-                style={{
-                  ...thumbStyle,
-                  border: "none",
-                  background: "none",
-                  fontSize: 10,
-                  color: "var(--ink-3)",
-                }}
-              >
-                +{extraImages.length - 3}
-              </div>
-            ) : null}
           </div>
         ) : null}
       </div>

@@ -97,6 +97,9 @@ export type PostingMaterial = Pick<
   "id" | "name" | "manufacturer_name" | "review_count" | "avg_rating" | "manufacturer_verified_at"
 >;
 
+/** 投稿先選択の行に出す資材（代表画像の URL つき。画像が無ければ null）。 */
+export type PostingMaterialWithImage = PostingMaterial & { imageUrl: string | null };
+
 export type MaterialDetail = MaterialDetailFields & {
   representativeSeller: Pick<
     Database["public"]["Views"]["public_sellers"]["Row"],
@@ -148,11 +151,11 @@ const MATERIAL_LIST_COLUMNS = `
 
 const RELATED_MATERIAL_LIMIT = 3;
 
-async function withPrimaryImages(
+/** 資材ごとの代表画像（is_current の画像のうち sort_order が最小のもの）を引く。 */
+async function fetchPrimaryImages(
   supabase: SupabaseClient<Database>,
-  materials: MaterialListFields[],
-): Promise<Result<MaterialListItem[]>> {
-  const materialIds = materials.map(({ id }) => id);
+  materialIds: readonly string[],
+): Promise<Result<Map<string, MaterialImage>>> {
   const imageResult =
     materialIds.length === 0
       ? { data: [], error: null }
@@ -174,10 +177,28 @@ async function withPrimaryImages(
     imagesByMaterial.set(material_id, images);
   }
 
+  const primaryByMaterial = new Map<string, MaterialImage>();
+  for (const [materialId, images] of imagesByMaterial) {
+    const [primary] = images.toSorted(bySortOrder);
+    if (primary !== undefined) primaryByMaterial.set(materialId, primary);
+  }
+  return succeed(primaryByMaterial);
+}
+
+async function withPrimaryImages(
+  supabase: SupabaseClient<Database>,
+  materials: MaterialListFields[],
+): Promise<Result<MaterialListItem[]>> {
+  const primaryImages = await fetchPrimaryImages(
+    supabase,
+    materials.map(({ id }) => id),
+  );
+  if (!primaryImages.ok) return primaryImages;
+
   return succeed(
     materials.map((material) => ({
       ...material,
-      primaryImage: (imagesByMaterial.get(material.id) ?? []).toSorted(bySortOrder)[0] ?? null,
+      primaryImage: primaryImages.data.get(material.id) ?? null,
     })),
   );
 }
@@ -609,5 +630,31 @@ export async function searchPostingMaterials(query: string): Promise<Result<Post
 
   return succeed(
     [...materialsById.values()].toSorted(byPostingPriority).slice(0, POSTING_MATERIAL_LIMIT),
+  );
+}
+
+/** 投稿先候補に代表画像の URL を付ける（`/post` の資材の行で使う）。 */
+export async function withPostingMaterialImages(
+  materials: readonly PostingMaterial[],
+): Promise<Result<PostingMaterialWithImage[]>> {
+  const supabase = await createServerSupabase();
+  return withPostingMaterialImagesWithSupabase(supabase, materials);
+}
+
+export async function withPostingMaterialImagesWithSupabase(
+  supabase: SupabaseClient<Database>,
+  materials: readonly PostingMaterial[],
+): Promise<Result<PostingMaterialWithImage[]>> {
+  const primaryImages = await fetchPrimaryImages(
+    supabase,
+    materials.map(({ id }) => id),
+  );
+  if (!primaryImages.ok) return primaryImages;
+
+  return succeed(
+    materials.map((material) => ({
+      ...material,
+      imageUrl: primaryImages.data.get(material.id)?.url ?? null,
+    })),
   );
 }

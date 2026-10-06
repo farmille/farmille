@@ -64,6 +64,7 @@ export function PostTimeline({
             author={profile.handle}
             avatarSrc={profile.avatarUrl}
             coverSrc={post.coverUrl ?? undefined}
+            crop={post.cropName}
             actions={
               <PostActionsLoader
                 target="usage_report"

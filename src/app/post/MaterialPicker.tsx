@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { SearchIcon } from "@/app/_mock/FormParts";
-import { MockNoImage } from "@/app/materials/[id]/_components/MockParts";
-import type { PostingMaterial } from "@/server/queries/materials";
+import { MockNoImage, MockStars } from "@/app/materials/[id]/_components/MockParts";
+import { OptimizedImage as Image } from "@/components/OptimizedImage";
+import type { PostingMaterialWithImage } from "@/server/queries/materials";
 
 type MaterialPickerProps = {
-  materials: PostingMaterial[];
+  materials: PostingMaterialWithImage[];
   query: string;
   postType?: "report" | "review";
 };
@@ -16,7 +17,29 @@ type MaterialPickerProps = {
 /**
  * 見本 S.pickMaterial の `.body` と `.pick-footer`。
  * 検索は本番の仕組み（検索語を送って候補を取り直す）のまま、入力欄の見た目を見本の `.ts-box` にしている。
+ * 行には本番どおり★平均・感想口コミ件数と「選択中」を出し、資材画像があれば画像、無いときだけ見本の NO IMAGE を出す。
  */
+function MaterialThumb({ src, size }: { src: string | null; size: number }) {
+  return src ? (
+    <Image
+      alt=""
+      src={src}
+      width={size * 2}
+      height={size * 2}
+      sizes={`${size}px`}
+      style={{
+        maxWidth: "100%",
+        maxHeight: "100%",
+        width: "auto",
+        height: "auto",
+        objectFit: "contain",
+      }}
+    />
+  ) : (
+    <MockNoImage />
+  );
+}
+
 export function MaterialPicker({ materials, query, postType }: MaterialPickerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = materials.find(({ id }) => id === selectedId) ?? null;
@@ -56,7 +79,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
             className="card pad"
             style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 12.5 }}
           >
-            該当する資材がありません
+            条件に合う資材が見つかりませんでした。
           </div>
         ) : (
           materials.map((material) => (
@@ -69,8 +92,11 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
               onClick={() => setSelectedId(material.id)}
             >
               <span className="ring" aria-hidden="true" />
-              <span className="mat-img" style={{ width: 44, height: 44 }}>
-                <MockNoImage />
+              <span
+                className="mat-img"
+                style={{ width: 44, height: 44, flex: "0 0 auto", overflow: "hidden" }}
+              >
+                <MaterialThumb src={material.imageUrl} size={44} />
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span className="t-name" style={{ display: "block", fontSize: 13.5 }}>
@@ -79,7 +105,40 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                 <span className="muted" style={{ display: "block", fontSize: 11, marginTop: 2 }}>
                   {material.manufacturer_name}
                 </span>
+                {material.review_count > 0 ? (
+                  <span
+                    className="muted"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 5,
+                      flexWrap: "wrap",
+                      fontSize: 11,
+                      marginTop: 3,
+                    }}
+                  >
+                    <MockStars value={material.avg_rating ?? 0} />
+                    {material.avg_rating === null ? null : (
+                      <b className="tnum" style={{ color: "var(--ink)" }}>
+                        {material.avg_rating.toFixed(1)}
+                      </b>
+                    )}
+                    <span>感想口コミ {material.review_count}件</span>
+                  </span>
+                ) : null}
               </span>
+              {material.id === selectedId ? (
+                <span
+                  style={{
+                    flex: "0 0 auto",
+                    color: "var(--green)",
+                    fontSize: 12,
+                    fontWeight: 700,
+                  }}
+                >
+                  選択中
+                </span>
+              ) : null}
             </button>
           ))
         )}
@@ -100,9 +159,10 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                 background: "#fff",
                 border: "1px solid var(--line)",
                 padding: 3,
+                overflow: "hidden",
               }}
             >
-              <MockNoImage />
+              <MaterialThumb src={selected.imageUrl} size={42} />
             </span>
             <span style={{ minWidth: 0 }}>
               <span

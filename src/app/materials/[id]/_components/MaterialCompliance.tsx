@@ -14,13 +14,13 @@ export function MaterialPageCompliance({ makerVerified }: { makerVerified: boole
           ? "製品情報は企業会員（資材オーナー企業）が記入・管理しています。掲載情報は効果を保証するものではありません。"
           : "このページはFarmille運営が、メーカーの公開資料（製品ページ・パンフレット・SDS等）をもとに作成したもので、メーカーによる内容の確認は受けていません。誤記や最新でない内容を含むことがあり、効果を保証するものではありません。"}
         使用前に必ずメーカー公式情報をご確認ください。{" "}
-        <Link className="link-more" href="/legal">
+        <Link className="link-more" href="/legal/disclaimer">
           免責事項 →
         </Link>
         {makerVerified ? null : (
           <div style={{ marginTop: 6 }}>
             メーカーご担当者様：内容の修正や掲載に関するご要望は{" "}
-            <Link className="link-more" href="/sellers/apply">
+            <Link className="link-more" href="/sellers/procedures">
               こちら →
             </Link>
           </div>
@@ -40,7 +40,7 @@ export function MaterialSpecDisclaimer() {
     >
       <div>
         「−」の項目は、メーカーによる確認が済んでいない項目、またはメーカーの意向で掲載していない項目です。
-        <Link className="text-link" href="/sellers/apply">
+        <Link className="text-link" href="/sellers/procedures">
           メーカーご担当者様はご連絡ください →
         </Link>
       </div>
@@ -73,7 +73,7 @@ export function PostsCompliance() {
       </span>
       <div>
         実証詳細レポート・感想口コミは、投稿した生産者個人の圃場・条件での体験と見解です。ほかの圃場・作物・気象条件で同じ結果が得られることや、薬害等が生じないことを保証するものではありません。{" "}
-        <Link className="link-more" href="/legal">
+        <Link className="link-more" href="/legal/disclaimer">
           免責事項 →
         </Link>
       </div>

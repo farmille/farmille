@@ -6,7 +6,7 @@ import * as v from "valibot";
 import { MockPageShell } from "@/app/_mock/MockPageShell";
 import { getSessionUser, requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
-import { searchPostingMaterials } from "@/server/queries/materials";
+import { searchPostingMaterials, withPostingMaterialImages } from "@/server/queries/materials";
 
 import { MaterialPicker } from "./MaterialPicker";
 import { PostAccessDenied } from "./PostAccessDenied";
@@ -43,10 +43,14 @@ export default async function PostPage({ searchParams }: PostPageProps) {
   if (!result.ok) {
     throw new Error(errorMessageJa[result.error]);
   }
+  const materials = await withPostingMaterialImages(result.data);
+  if (!materials.ok) {
+    throw new Error(errorMessageJa[materials.error]);
+  }
 
   return (
     <MockPageShell title="投稿する" backHref="/">
-      <MaterialPicker materials={result.data} query={query} postType={postType} />
+      <MaterialPicker materials={materials.data} query={query} postType={postType} />
     </MockPageShell>
   );
 }

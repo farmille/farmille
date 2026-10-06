@@ -27,6 +27,8 @@ type MockProfileCardProps = {
   stats: ReadonlyArray<{ label: string; value: number }>;
   /** 本人のマイページ（未設定の項目に「＋ 〜を設定する」を出し、編集ボタンを置く）。 */
   editable?: boolean;
+  /** 本人の公開プロフィール（`/users/{id}`）。渡したときだけカードの末尾に「公開プロフィールを見る」を出す。 */
+  publicProfileHref?: string;
 };
 
 function TodoHint({ children, style }: { children: string; style?: CSSProperties }) {
@@ -50,6 +52,7 @@ export function MockProfileCard({
   details,
   stats,
   editable = false,
+  publicProfileHref,
 }: MockProfileCardProps) {
   const standpoint = STANDPOINTS.find((item) => item.value === details.standpoint)?.label;
   const prefecture = PREFECTURES.find((item) => item.code === details.prefecture_code)?.name;
@@ -198,11 +201,32 @@ export function MockProfileCard({
             </span>
           ))}
         </div>
-        {editable ? (
-          <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>
-            {details.cityPublic ? "市区町村まで公開中" : "都道府県まで公開中"}
-            。本名・連絡先は公開されません。
-          </p>
+        {editable || publicProfileHref ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+              gap: 10,
+              flexWrap: "wrap",
+              marginTop: 8,
+            }}
+          >
+            {editable ? (
+              <p className="muted" style={{ fontSize: 11, margin: 0 }}>
+                {details.cityPublic ? "市区町村まで公開中" : "都道府県まで公開中"}
+                。本名・連絡先は公開されません。
+              </p>
+            ) : null}
+            {publicProfileHref ? (
+              <Link
+                href={publicProfileHref}
+                style={{ fontSize: 12, fontWeight: 700, marginLeft: "auto" }}
+              >
+                公開プロフィールを見る →
+              </Link>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </section>

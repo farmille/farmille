@@ -48,6 +48,7 @@ export default async function MePage({
         avatarUrl={data.profile.avatarUrl}
         details={details.data}
         editable
+        publicProfileHref={`/users/${data.profile.userId}`}
         stats={[
           { label: "実証詳細レポート", value: reportCount },
           { label: "感想口コミ", value: data.reviewCount },

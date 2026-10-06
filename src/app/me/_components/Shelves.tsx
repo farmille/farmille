@@ -121,6 +121,7 @@ export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: Po
             title={post.title}
             author={profile.handle}
             avatarSrc={profile.avatarUrl}
+            crop={post.cropName}
             actions={
               <PostActionsLoader
                 target="usage_report"
@@ -238,6 +239,7 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
                 href={`/reports/${item.id}`}
                 title={item.title}
                 author={item.authorHandle}
+                crop={item.cropName}
                 actions={
                   <PostActionsLoader
                     target="usage_report"
