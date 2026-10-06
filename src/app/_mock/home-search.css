@@ -18,14 +18,12 @@
 .fm a.pd-row,
 .fm a.pd-foot,
 .fm a.sug,
-.fm a.qchip,
-.fm a.ts-clear {
+.fm a.qchip {
   color: inherit;
   text-decoration: none;
 }
 .fm a.hs-foot,
-.fm a.pd-foot,
-.fm a.ts-clear {
+.fm a.pd-foot {
   display: block;
 }
 .fm a.hs-foot,
@@ -137,7 +135,80 @@
   margin-top: 7px;
 }
 
-/* ---- 検索：絞り込みパネル（見本の開閉行を details/summary で組む） ---- */
+/* ---- 検索：絞り込みパネル（見本 renderPanelV2 の sec()） ---- */
+/* 条件を選んでいるときだけ、パネルの先頭に件数と「すべての条件をクリア」を出す */
+.fm .s-side .side-clear {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.fm .s-side .side-clear .ts-clear {
+  font-weight: 400;
+  padding: 8px 2px;
+}
+.fm .s-side .side-sec {
+  padding: 8px 12px;
+}
+.fm .s-side .sec-head {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  border: none;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.fm .s-side .sec-head:focus-visible,
+.fm .s-side a.sug:focus-visible,
+.fm .s-side a.qchip:focus-visible,
+.fm .s-side .eff-group > summary:focus-visible,
+.fm .s-side .crop-major > summary:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+.fm .s-side .sec-head[aria-expanded="true"] .caret::after {
+  content: "閉じる ▴";
+}
+.fm .s-side .side-filter {
+  width: 100%;
+  padding: 8px 11px;
+  font-size: 12.5px;
+  margin-bottom: 8px;
+}
+.fm .s-side .side-selected {
+  padding: 0 0 8px;
+}
+.fm .s-side .side-selected .chip-sel {
+  font-size: 12px;
+  padding: 4px 5px 4px 10px;
+}
+.fm .s-side .chip-x {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  line-height: 1;
+  text-decoration: none;
+  color: var(--green-deep);
+  background: color-mix(in srgb, var(--green) 18%, transparent);
+}
+.fm .s-side .chip-x:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 1px;
+}
+/* 開閉行（効果の大分類・作物の大分類）は details/summary で組む */
 .fm .s-side details > summary {
   cursor: pointer;
   display: flex;
@@ -159,9 +230,6 @@
 .fm .s-side .caret::after {
   content: "開く ▾";
 }
-.fm .s-side details[open] > summary .caret::after {
-  content: "閉じる ▴";
-}
 .fm .s-side .sec-title {
   font-size: 13px;
   font-weight: 700;
@@ -179,12 +247,37 @@
   font-size: 12px;
   padding: 5px 11px;
 }
+/* 資材ジャンルの行：見本どおり右端に「＋」。選択中は塗りと「✓ 選択中」 */
+.fm .s-side a.sug {
+  border-radius: 9px;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  min-height: 40px;
+}
 .fm .s-side a.sug:hover {
   background: var(--green-soft-2);
+}
+.fm .s-side .sug-mark::after {
+  content: "＋";
+  color: var(--ink-3);
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+.fm .s-side a.sug:hover .sug-mark::after {
+  color: var(--green-deep);
 }
 .fm .s-side a.sug[aria-current="true"] {
   background: var(--green-soft);
   color: var(--green-deep);
+}
+.fm .s-side a.sug[aria-current="true"] .sug-mark::after {
+  content: "✓ 選択中";
+  color: var(--green-deep);
+  font-size: 11px;
+}
+/* 選択中のタグは塗りに加えて ✓ を付け、色だけに頼らない */
+.fm .s-side a.qchip[aria-current="true"]::before {
+  content: "✓";
 }
 .fm .s-side .crop-major {
   border-top: 1px solid var(--line);

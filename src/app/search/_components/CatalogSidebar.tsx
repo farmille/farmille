@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import {
   buildSearchHref,
@@ -11,20 +10,7 @@ import type { CatalogSearch } from "@/server/queries/catalog-search";
 import type { SearchCatalog, SearchFilterItem } from "@/lib/material-search";
 import { cropAncestors } from "@/lib/catalog-search";
 
-/** 見本の開閉行（`data-sectoggle`）。見本は JS で開閉するので details/summary で組む。 */
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="ts-pg" style={{ padding: "8px 12px" }}>
-      <details>
-        <summary>
-          <span className="sec-title">{title}</span>
-          <span className="caret" aria-hidden="true" />
-        </summary>
-        <div style={{ paddingTop: 2 }}>{children}</div>
-      </details>
-    </div>
-  );
-}
+import { SideSection, type SideFilterItem } from "./SideSection";
 
 /**
  * 見本 S.search の絞り込みパネル（`aside.s-side > .ts-panel`）。
@@ -81,13 +67,11 @@ export function CatalogSidebar({
         scroll={false}
         style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 2px" }}
       >
-        <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700 }}>
-          {active ? "✓ " : ""}
-          {filter.name}
-        </span>
+        <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700 }}>{filter.name}</span>
         <span className="alias-note tnum" style={{ flex: "0 0 auto" }}>
           {count}
         </span>
+        <span className="sug-mark" aria-hidden="true" />
       </Link>
     );
   }
@@ -126,26 +110,80 @@ export function CatalogSidebar({
     if (group?.id === effect.categoryId) group.effects.push(effect);
     else effectGroups.push({ id: effect.categoryId, name: effect.categoryName, effects: [effect] });
   }
+  // 見本どおり、掲載資材のない資材ジャンルは出さない（選択中のものは外せるよう残す）。
   const genres = search.filters
-    .filter((filter) => filter.category === "genre")
+    .filter(
+      (filter) =>
+        filter.category === "genre" &&
+        ((genreCounts.get(filter.id) ?? 0) > 0 ||
+          selectedKeys.has(selectedFilterKey({ ...filter, kind: "filter" }))),
+    )
     .toSorted((a, b) => (genreCounts.get(b.id) ?? 0) - (genreCounts.get(a.id) ?? 0));
+
+  /** 見本 selHtml：区分ごとの選択中の条件（`.chip-sel`）。× で その条件だけを外す。 */
+  function selectedChips(match: (filter: SelectedSearchFilter) => boolean) {
+    const items = selected.filter(match);
+    if (!items.length) return null;
+    return (
+      <div className="sug-chips side-selected">
+        {items.map((filter) => {
+          const { href, key } = hrefFor(filter);
+          return (
+            <span key={key} className="chip-sel">
+              <span className="cat-mini">選択中</span>
+              {filter.name}
+              <Link
+                href={href}
+                rel="nofollow"
+                scroll={false}
+                className="chip-x"
+                aria-label={`${filter.name}の条件を外す`}
+              >
+                ×
+              </Link>
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
+  const isFilter = (...categories: SearchFilterItem["category"][]) =>
+    function (filter: SelectedSearchFilter) {
+      return filter.kind === "filter" && categories.includes(filter.category);
+    };
+  function filterItems(filters: SearchFilterItem[]): SideFilterItem[] {
+    return filters.map((filter) => ({
+      key: `${filter.category}:${filter.id}`,
+      terms: [filter.name, ...filter.aliases],
+      node: tag(filter),
+    }));
+  }
+  const conditionCount = selected.length + (query ? 1 : 0);
 
   return (
     <aside aria-label="資材の絞り込み" className="s-side">
       <div className="ts-panel">
-        <div style={{ padding: "10px 12px 0" }}>
-          <Link
-            href="/search"
-            className="ts-clear"
-            style={{ width: "100%", textAlign: "center", padding: 8 }}
-          >
-            すべての条件をクリア
-          </Link>
-        </div>
-        <div className="logic-hint" style={{ padding: "6px 12px 2px" }}>
+        {conditionCount > 0 ? (
+          <div className="side-clear">
+            <span>選択中の条件 {conditionCount}件</span>
+            <Link href="/search" className="ts-clear">
+              すべての条件をクリア
+            </Link>
+          </div>
+        ) : null}
+        <div className="logic-hint" style={{ padding: "8px 12px 2px" }}>
           作物 × 効果 など、条件を組み合わせて検索できます
         </div>
-        <Section title="効果分類で探す">
+        <SideSection
+          title="効果分類で探す"
+          selected={selectedChips(isFilter("effect"))}
+          filter={{
+            label: "効果名で検索",
+            placeholder: "効果名で検索（例：耐暑）",
+            empty: "該当する効果がありません",
+            items: filterItems(search.filters.filter((filter) => filter.category === "effect")),
+          }}
+        >
           {effectGroups.map((group) => (
             <details key={group.id} className="eff-group">
               <summary className="sug">
@@ -162,18 +200,29 @@ export function CatalogSidebar({
               </div>
             </details>
           ))}
-        </Section>
-        <Section title="資材ジャンルで探す">
+        </SideSection>
+        <SideSection title="資材ジャンルで探す" selected={selectedChips(isFilter("genre"))}>
           <div>
             {genres.map((genre) =>
               row({ ...genre, kind: "filter" }, genreCounts.get(genre.id) ?? 0),
             )}
           </div>
-        </Section>
-        <Section title="作物で探す">
-          <div className="fguide" style={{ margin: "2px 0 6px" }}>
-            文字検索はすべての作目・別名が対象です。下のタグ一覧は、資材に記載のある作目だけを表示しています。
-          </div>
+        </SideSection>
+        <SideSection
+          title="作物で探す"
+          selected={selectedChips(isFilter("crop", "crop_group"))}
+          filter={{
+            label: "作物名で検索",
+            placeholder: "作物名で検索（例：トマト、柿）",
+            empty: "該当する作物がありません",
+            items: filterItems(
+              search.filters.filter(
+                (filter) => filter.category === "crop" || filter.category === "crop_group",
+              ),
+            ),
+          }}
+          note="文字検索はすべての作目・別名が対象です。下のタグ一覧は、資材に記載のある作目だけを表示しています。"
+        >
           {catalog.groups
             .filter((group) => group.hierarchy_level === "major")
             .map((major) => {
@@ -230,17 +279,30 @@ export function CatalogSidebar({
           <div className="fguide" style={{ marginTop: 8, marginBottom: 2 }}>
             一覧には、資材に記載のある作目だけを表示しています。ここにない作目も、検索窓からすべて探せます。
           </div>
-        </Section>
-        <Section title={`メーカーから探す（全${search.makers.length}社）`}>
+        </SideSection>
+        <SideSection
+          title={`メーカーから探す（全${search.makers.length}社）`}
+          selected={selectedChips((filter) => filter.kind === "maker")}
+          filter={{
+            label: "メーカー名で絞り込み",
+            placeholder: "メーカー名で絞り込み",
+            empty: "該当するメーカーがありません",
+            items: search.makers.map((name) => ({
+              key: `maker:${name}`,
+              terms: [name],
+              node: chip({ kind: "maker", name }),
+            })),
+          }}
+        >
           <div className="sug-chips">
             {search.makers.map((name) => chip({ kind: "maker", name }))}
           </div>
-        </Section>
-        <Section title="施用方法で探す">
+        </SideSection>
+        <SideSection title="施用方法で探す" selected={selectedChips(isFilter("method"))}>
           <div className="sug-chips">
             {search.filters.filter((filter) => filter.category === "method").map(tag)}
           </div>
-        </Section>
+        </SideSection>
       </div>
     </aside>
   );
