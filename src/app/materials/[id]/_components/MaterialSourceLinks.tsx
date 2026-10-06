@@ -1,3 +1,4 @@
+import { useId } from "react";
 import * as v from "valibot";
 
 import {
@@ -19,17 +20,27 @@ function linkKind(url: string): "PDF" | "LINK" {
 }
 
 /** 見本の srcGroup の1行（`.file-row`）。 */
+// リンクの読み上げ名は資料名にする（「開く」だけのリンクが並ぶと区別できないため。流用前と同じ）。
 function FileRow({ link }: { link: MaterialLink }) {
+  const titleId = useId();
   const title = link.title || "資料名は未入力です";
   const valid = v.is(MaterialExternalUrlSchema, link.url);
   return (
     <div className="file-row">
       <span className="file-ic">{linkKind(link.url)}</span>
       <div style={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>
-        <div className="fr-title">{valid ? title : `${title}（URLを入力してください）`}</div>
+        <div className="fr-title" id={titleId}>
+          {valid ? title : `${title}（URLを入力してください）`}
+        </div>
       </div>
       {valid ? (
-        <a className="file-dl" href={link.url} target="_blank" rel="noreferrer">
+        <a
+          className="file-dl"
+          href={link.url}
+          target="_blank"
+          rel="noreferrer"
+          aria-labelledby={titleId}
+        >
           <MockExternalIcon />
           開く
         </a>
@@ -39,7 +50,9 @@ function FileRow({ link }: { link: MaterialLink }) {
 }
 
 /** 見本の testCard（`.test-row`）。試験の概要は運営・メーカーが入力した公開情報。 */
+// 行全体がリンクだが、読み上げ名は資料名だけにする（概要・実施機関は本文として読ませる。流用前と同じ）。
 function TestRow({ link }: { link: MaterialLink }) {
+  const titleId = useId();
   const title = link.title || "資料名は未入力です";
   const trial = link.trial;
   const meta = [
@@ -52,7 +65,7 @@ function TestRow({ link }: { link: MaterialLink }) {
       <span className="file-ic">{linkKind(link.url)}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="tr-title">
-          {title}
+          <span id={titleId}>{title}</span>
           {trial?.crops ? `｜${trial.crops}` : ""}
         </div>
         <div className="tr-sum">{trial?.summary || "概要は未入力です"}</div>
@@ -78,7 +91,13 @@ function TestRow({ link }: { link: MaterialLink }) {
     );
   }
   return (
-    <a className="test-row" href={link.url} target="_blank" rel="noreferrer">
+    <a
+      className="test-row"
+      href={link.url}
+      target="_blank"
+      rel="noreferrer"
+      aria-labelledby={titleId}
+    >
       {body}
       <span className="tr-open">
         <MockExternalIcon /> 開く
