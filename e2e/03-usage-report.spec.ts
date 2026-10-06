@@ -23,7 +23,7 @@ test("実証詳細レポートの下書き保存、提出、pending の公開側
     await expect(page.getByText("作物未選択", { exact: true })).toBeVisible();
     await page.goto(reportPath);
     await page.getByLabel("作目").fill("トマト");
-    await page.getByRole("button", { name: "トマトを選択", exact: true }).first().click();
+    await page.getByRole("option", { name: "トマト なす科果菜類", exact: true }).click();
     await page.getByRole("button", { name: "下書き保存" }).click();
     await expect(page.getByRole("status")).toHaveText("下書きを保存しました。");
     await expect.poll(async () => (await usageReportByAuthor(user.id))?.status).toBe("draft");

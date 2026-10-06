@@ -23,11 +23,11 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
   try {
     await loginGeneral(page, user);
     await page.goto(`/materials/${material.id}/review/new`);
-    const cropSearch = page.getByRole("textbox", { name: "作目" });
+    const cropSearch = page.getByRole("combobox", { name: "作目", exact: true });
     await cropSearch.fill("トマト");
-    await page.getByRole("button", { name: "トマトを選択", exact: true }).click();
+    await page.getByRole("option", { name: "トマト なす科果菜類", exact: true }).click();
     await cropSearch.fill("ミニトマト");
-    await page.getByRole("button", { name: "ミニトマトを選択", exact: true }).click();
+    await page.getByRole("option", { name: "ミニトマト なす科果菜類", exact: true }).click();
     await page.getByRole("radio", { name: "4", exact: true }).check();
     await page.getByLabel("感想口コミ本文").fill(body);
     await page
