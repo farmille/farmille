@@ -132,8 +132,8 @@ export async function fillUsageReportForSubmission(page: Page): Promise<void> {
     .fill("9月1日に定植、9月10日に施用しました。");
   await page.getByRole("button", { name: "次へ", exact: true }).click();
   await page.getByRole("button", { name: "グラフ1の調査項目を編集", exact: true }).click();
-  await page.getByLabel("調査項目（必須）", { exact: true }).fill("活着率");
-  await page.getByLabel("調査項目（必須）", { exact: true }).press("Enter");
+  await page.getByRole("combobox", { name: "調査項目", exact: true }).fill("活着率");
+  await page.getByRole("combobox", { name: "調査項目", exact: true }).press("Enter");
   await page.getByLabel("単位（任意）", { exact: true }).press("Enter");
   const graph = page.getByRole("region", { name: "グラフ 1", exact: true });
   for (const name of ["処理区", "無処理区"]) {
