@@ -207,6 +207,11 @@
   .fm .pc-search:has(input:focus-visible) {
     border-color: var(--green);
   }
+  /* 入力中が分かるよう、他の操作部品と同じ緑の輪郭線を出す */
+  .fm .pc-search:has(input:focus-visible) {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+  }
 }
 
 @media (max-width: 899px) {
@@ -254,6 +259,30 @@
   /* 見本はスマホ枠のノッチ分 40px あけるが、アプリではヘッダーの下に来るので詰める */
   .fm .fm-chrome .appbar {
     padding-top: 11px;
+  }
+}
+
+/* 320px 前後では「資材をさがす」「投稿」とアカウントボタンが重ならないよう、余白とアイコンを詰める */
+@media (max-width: 359px) {
+  .fm .bottom-nav {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .fm .bn-logo {
+    font-size: 16px;
+    margin-right: 6px;
+  }
+  .fm .bn-item {
+    padding: 8px 6px;
+    gap: 4px;
+  }
+  .fm .bn-post .plus {
+    padding: 8px 10px;
+    gap: 4px;
+  }
+  .fm .bn-post .plus svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
