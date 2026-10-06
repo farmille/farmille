@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { mocked } from "storybook/test";
+import { sellerOperationAction } from "./actions";
 import { SellerReviewActions } from "./SellerReviewActions";
 
 const meta = {
@@ -24,4 +26,17 @@ export const Approved: Story = {
 
 export const Suspended: Story = {
   args: { status: "suspended" },
+};
+
+export const IssueLogin: Story = {
+  beforeEach() {
+    mocked(sellerOperationAction).mockResolvedValue({
+      status: "approved",
+      credentials: {
+        loginId: "demo-manufacturer",
+        passwordSetupUrl: "https://farmille.example/seller/password/setup?code=storybook-example",
+        emailSent: true,
+      },
+    });
+  },
 };

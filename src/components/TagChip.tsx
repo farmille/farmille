@@ -45,7 +45,7 @@ const chipRecipe = cva({
     },
     category: {
       crop: {
-        bg: "primary.200",
+        bg: "primary.soft",
         color: "primary.700",
         borderColor: "primary.600/30",
       },
@@ -60,7 +60,7 @@ const chipRecipe = cva({
         borderColor: "tag.effect/35",
       },
       cond: {
-        bg: "primary.200",
+        bg: "accent.official/8",
         color: "accent.official",
         borderColor: "accent.official/30",
       },

@@ -120,3 +120,5 @@ export const FormMessageInfo: Story = {
     </FormMessage>
   ),
 };
+
+export const Public: Story = { args: { visibility: "public" } };

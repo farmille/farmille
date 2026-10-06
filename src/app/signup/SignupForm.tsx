@@ -1,5 +1,7 @@
 "use client";
 
+import { Checkbox } from "@/components/Checkbox";
+
 import Link from "next/link";
 import { useActionState } from "react";
 
@@ -156,10 +158,10 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         requirement="required"
       >
         <label>
-          <input
+          <Checkbox
             id="terms"
             name="terms"
-            type="checkbox"
+
             required
             defaultChecked={values.terms === "on"}
           />{" "}

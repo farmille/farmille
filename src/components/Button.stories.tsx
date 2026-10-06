@@ -72,3 +72,13 @@ export const ShortLabels: Story = {
     </div>
   ),
 };
+
+export const LongLabels: Story = {
+  render: () => (
+    <div className={css({ display: "grid", gap: "4", maxW: "content.form" })}>
+      <Button size="sm">確認を完了してログインを発行</Button>
+      <Button variant="ghost">アカウントをお持ちの方はログイン</Button>
+      <Button>入力した内容を確認して実証詳細レポートを投稿する</Button>
+    </div>
+  ),
+};

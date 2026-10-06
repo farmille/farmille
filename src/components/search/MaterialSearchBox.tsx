@@ -132,7 +132,7 @@ const suggestionRow = css({
   cursor: "pointer",
   textAlign: "left",
   fontFamily: "sans",
-  _hover: { bg: "primary.100" },
+  _hover: { bg: "primary.soft" },
 });
 
 const categoryLabel = css({

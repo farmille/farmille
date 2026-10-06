@@ -1,4 +1,6 @@
 "use client";
+
+import { Checkbox } from "@/components/Checkbox";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Select, Textarea, SurfaceCard } from "@/components";
@@ -213,7 +215,7 @@ export function CompanyApplicationForm({
                 <legend>当該資材との関係（1つ以上必須）</legend>
                 {Object.entries(relationLabels).map(([value, label]) => (
                   <label key={value}>
-                    <input type="checkbox" name={`${row.id}.relations`} value={value} /> {label}
+                    <Checkbox name={`${row.id}.relations`} value={value} /> {label}
                   </label>
                 ))}
                 <p>{relationExplanation}</p>

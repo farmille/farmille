@@ -54,7 +54,7 @@ const selectedChip = css({
   borderStyle: "solid",
   borderColor: "border.default",
   borderRadius: "pill",
-  bg: "primary.200",
+  bg: "primary.soft",
   color: "primary.700",
   px: "2.5",
   py: "1",
@@ -126,7 +126,7 @@ const suggestion = css({
   color: "text.default",
   textAlign: "left",
   cursor: "pointer",
-  _hover: { bg: "primary.100" },
+  _hover: { bg: "primary.soft" },
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",

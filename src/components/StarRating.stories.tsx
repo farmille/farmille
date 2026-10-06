@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { useState } from "react";
 import { fn } from "storybook/test";
 
 import { StarRating } from "./StarRating";
@@ -94,4 +95,13 @@ export const InputFull: Story = {
     value: 5,
     onChange: fn(),
   },
+};
+
+function RatingInput() {
+  const [value, setValue] = useState(3);
+  return <StarRating mode="input" value={value} onChange={setValue} />;
+}
+export const Interactive: Story = {
+  args: { mode: "input", value: 3, onChange: fn() },
+  render: () => <RatingInput />,
 };

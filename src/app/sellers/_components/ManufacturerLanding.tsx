@@ -68,7 +68,7 @@ const band = css({
   borderLeftWidth: "5px",
   borderLeftStyle: "solid",
   borderLeftColor: "primary.600",
-  bg: "primary.100",
+  bg: "primary.soft",
   color: "text.default",
   fontSize: "2xl",
   fontWeight: "800",
@@ -123,7 +123,7 @@ const choice = sva({
         root: { bg: "primary.600", color: "surface.card", _hover: { bg: "primary.700" } },
       },
       secondary: {
-        root: { bg: "surface.card", color: "primary.700", _hover: { bg: "primary.100" } },
+        root: { bg: "surface.card", color: "primary.700" },
       },
     },
   },
@@ -292,7 +292,7 @@ const timelineNote = css({
   borderStyle: "solid",
   borderColor: "primary.600",
   borderRadius: "input",
-  bg: "primary.100",
+  bg: "primary.soft",
   color: "text.muted",
   fontSize: "sm",
   lineHeight: "relaxed",
@@ -639,8 +639,12 @@ const closingActions = css({
 });
 
 const closingButton = css({
-  px: "4.5",
+  px: "6",
   py: "3",
+  minW: "button.md",
+  maxW: "100%",
+  textAlign: "center",
+  overflowWrap: "anywhere",
   borderRadius: "button",
   bg: "surface.card",
   color: "primary.700",
@@ -648,7 +652,7 @@ const closingButton = css({
   fontWeight: "800",
   textDecoration: "none",
   transition: "background-color {durations.fast} {easings.soft}",
-  _hover: { bg: "primary.100" },
+  _hover: { bg: "primary.soft" },
 });
 
 const CONTENTS = [

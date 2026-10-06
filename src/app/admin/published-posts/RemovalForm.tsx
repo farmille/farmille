@@ -1,5 +1,7 @@
 "use client";
 
+import { Checkbox } from "@/components/Checkbox";
+
 import { useActionState } from "react";
 import { Button } from "@/components";
 import { FormMessage } from "@/components/auth/Fields";
@@ -24,8 +26,7 @@ export function RemovalForm({ id, type }: { id: string; type: "review" | "usage_
           この投稿を非公開にします。公開ページと一覧から表示されなくなります。本文や添付データは保持されます。
         </p>
         <label>
-          <input type="checkbox" name="confirmed" required />{" "}
-          この投稿を非公開にすることを確認しました
+          <Checkbox name="confirmed" required /> この投稿を非公開にすることを確認しました
         </label>
         {state.status !== "idle" ? (
           <FormMessage tone={state.status === "error" ? "error" : "info"}>

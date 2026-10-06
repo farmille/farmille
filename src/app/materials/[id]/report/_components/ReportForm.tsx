@@ -1,5 +1,7 @@
 "use client";
 
+import { Checkbox } from "@/components/Checkbox";
+
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -285,7 +287,7 @@ export function ReportForm({
               fontSize: "sm",
               p: "2",
               borderRadius: "button",
-              _currentStep: { bg: "primary.200" },
+              _currentStep: { bg: "primary.soft" },
             })}
           >
             {index + 1} {label}
@@ -395,8 +397,7 @@ export function ReportForm({
               onChange={(event) => setInput({ ...input, variety: event.target.value })}
             />
             <label>
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={input.varietyUnknown}
                 onChange={(event) => setInput({ ...input, varietyUnknown: event.target.checked })}
               />{" "}
@@ -471,8 +472,7 @@ export function ReportForm({
               onChange={(event) => setInput({ ...input, city: event.target.value })}
             />
             <label>
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={input.showCity}
                 onChange={(event) => setInput({ ...input, showCity: event.target.checked })}
               />{" "}
@@ -596,8 +596,7 @@ export function ReportForm({
             ))}
             {input.documents.length > 0 && (
               <label>
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={input.documentsAck}
                   onChange={(event) => setInput({ ...input, documentsAck: event.target.checked })}
                 />{" "}
@@ -615,8 +614,7 @@ export function ReportForm({
               </ul>
             </section>
             <label>
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={input.guidelineAck}
                 onChange={(event) => setInput({ ...input, guidelineAck: event.target.checked })}
               />{" "}

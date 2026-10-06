@@ -23,7 +23,7 @@ const avatar = css({
   aspectRatio: "image.square",
   mx: "auto",
   borderRadius: "pill",
-  bg: "primary.200",
+  bg: "primary.soft",
   color: "primary.700",
   display: "grid",
   placeItems: "center",

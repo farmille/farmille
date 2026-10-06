@@ -1,5 +1,7 @@
 "use client";
 
+import { Checkbox } from "@/components/Checkbox";
+
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
@@ -229,7 +231,7 @@ export function ReviewForm({
         className={css({
           mt: "3",
           p: "3",
-          bg: "primary.100",
+          bg: "primary.soft",
           borderWidth: "1px",
           borderStyle: "solid",
           borderColor: "border.default",
@@ -334,7 +336,7 @@ export function ReviewForm({
                     color: "accent.danger",
                   })}
                 >
-                  <input type="checkbox" name="removePhotoId" value={photo.id} />
+                  <Checkbox name="removePhotoId" value={photo.id} />
                   この写真を削除する
                 </label>
               </div>
@@ -408,8 +410,7 @@ export function ReviewForm({
             cursor: "pointer",
           })}
         >
-          <input
-            type="checkbox"
+          <Checkbox
             name="pesticideAck"
             required
             checked={pesticideAck}

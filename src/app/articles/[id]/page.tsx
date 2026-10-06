@@ -196,7 +196,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
                   w: "32px",
                   aspectRatio: "image.square",
                   borderRadius: "button",
-                  bg: "primary.200",
+                  bg: "primary.soft",
                   display: "grid",
                   placeItems: "center",
                   fontSize: "sm",
@@ -219,7 +219,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
               mt: "4",
               borderRadius: "card",
               overflow: "hidden",
-              bg: "primary.100",
+              bg: "primary.soft",
               aspectRatio: "image.wide",
             })}
           >

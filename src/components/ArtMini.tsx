@@ -25,7 +25,7 @@ const thumb = css({
   w: "70px",
   aspectRatio: "image.landscape",
   borderRadius: "button",
-  bg: "primary.100",
+  bg: "primary.soft",
   flexShrink: "0",
   display: "grid",
   placeItems: "center",

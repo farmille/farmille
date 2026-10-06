@@ -30,7 +30,7 @@ const starsRecipe = cva({
   variants: {
     size: {
       sm: { gap: "0" },
-      lg: { gap: "2" },
+      lg: { gap: "0" },
     },
   },
   defaultVariants: {
@@ -102,7 +102,7 @@ export function StarRating(props: StarRatingProps) {
     const value = clampInt(props.value);
     return (
       <div
-        className={cx(css({ display: "flex", gap: "2", alignItems: "center" }), props.className)}
+        className={cx(css({ display: "flex", gap: "0", alignItems: "center" }), props.className)}
         role="radiogroup"
         aria-label="評価"
       >

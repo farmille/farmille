@@ -88,7 +88,7 @@ const chip = css({
   borderStyle: "solid",
   borderColor: "border.strong",
   borderRadius: "pill",
-  bg: "primary.100",
+  bg: "primary.soft",
   px: "3",
   py: "1.5",
   fontSize: "sm",

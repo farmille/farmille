@@ -23,7 +23,7 @@ const imageBox = css({
   w: "118px",
   aspectRatio: "image.square",
   borderRadius: "button",
-  bg: "primary.100",
+  bg: "primary.soft",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",

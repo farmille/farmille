@@ -27,7 +27,7 @@ const materialButton = cva({
   },
   variants: {
     selected: {
-      true: { borderColor: "primary.600", bg: "primary.100" },
+      true: { borderColor: "primary.600", bg: "primary.soft" },
       false: { borderColor: "border.default" },
     },
   },
@@ -142,7 +142,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
           px: "3",
           py: "2.5",
           borderRadius: "pill",
-          bg: "primary.200",
+          bg: "primary.soft",
           color: "primary.700",
           fontSize: "xs",
           textAlign: "center",
