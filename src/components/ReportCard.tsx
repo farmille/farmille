@@ -3,17 +3,13 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { PostActions } from "./PostActions";
 import { cva, css, cx } from "../../styled-system/css";
+import { Badge } from "./Badge";
+import { surfaceCardRecipe } from "./SurfaceCard";
 import { Icon } from "@/components/Icon";
 
 const cardRecipe = cva({
   base: {
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.default",
-    borderRadius: "card",
     overflow: "hidden",
-    bg: "surface.card",
-    boxShadow: "shadow",
     textDecoration: "none",
     color: "inherit",
     display: "block",
@@ -37,7 +33,7 @@ const cardRecipe = cva({
 
 const coverRecipe = cva({
   base: {
-    bg: "primary.soft",
+    bg: "primary.100",
     display: "grid",
     placeItems: "center",
     overflow: "hidden",
@@ -71,13 +67,13 @@ const bodyRecipe = cva({
 
 const titleRecipe = cva({
   base: {
-    fontWeight: "700",
-    lineHeight: "1.4",
+    fontWeight: "bold",
+    lineHeight: "snug",
   },
   variants: {
     layout: {
-      scroll: { fontSize: "sm", lineHeight: "1.35" },
-      grid: { fontSize: "sm", lineHeight: "1.35" },
+      scroll: { fontSize: "sm", lineHeight: "snug" },
+      grid: { fontSize: "sm", lineHeight: "snug" },
       list: { fontSize: "md" },
     },
   },
@@ -138,7 +134,7 @@ export function ReportCard({
           w: compact ? "18px" : "26px",
           aspectRatio: "image.square",
           borderRadius: "pill",
-          bg: "primary.soft",
+          bg: "primary.200",
           display: "grid",
           placeItems: "center",
           color: "primary.700",
@@ -169,7 +165,9 @@ export function ReportCard({
   );
 
   return (
-    <article className={cx(cardRecipe({ layout }), className)}>
+    <article
+      className={cx(surfaceCardRecipe({ padding: "flush" }), cardRecipe({ layout }), className)}
+    >
       <Link
         href={href}
         aria-label={title}
@@ -259,21 +257,7 @@ export function ReportCard({
               {authorContent}
             </span>
           )}
-          {!compact ? (
-            <span
-              className={css({
-                fontSize: "2xs",
-                px: "2.5",
-                py: "0.5",
-                borderRadius: "pill",
-                bg: "primary.soft",
-                color: "primary.700",
-                fontWeight: "600",
-              })}
-            >
-              {crop}
-            </span>
-          ) : null}
+          {!compact ? <Badge variant="type">{crop}</Badge> : null}
         </div>
         {actions ?? (
           <PostActions
@@ -296,7 +280,7 @@ export function ReportCard({
             borderColor: "border.default",
             p: "3",
             fontSize: "sm",
-            fontWeight: "700",
+            fontWeight: "bold",
             color: "primary.700",
             textDecoration: "none",
           })}

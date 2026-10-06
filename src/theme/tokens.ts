@@ -20,6 +20,10 @@ export const tokens = {
       900: { value: "#081C15" },
     },
     blue: { value: "#1976D2" },
+    teal: { value: "#1F9E95" },
+    violet: { value: "#8B7BC0" },
+    orange: { value: "#D97A2B" },
+    terracotta: { value: "#C0705F" },
     star: { value: "#F5A623" },
     amber: {
       DEFAULT: { value: "#B26A00" },
@@ -39,10 +43,11 @@ export const tokens = {
     },
     // タグ分類色（モック TAG_CATS）と危険操作色（T-22）
     tag: {
-      concern: { value: "#D97A2B" },
-      effect: { value: "#1F9E95" },
-      type: { value: "#8B7BC0" },
-      name: { value: "#C0705F" },
+      concern: { value: "{colors.orange}" },
+      effect: { value: "{colors.teal}" },
+      type: { value: "{colors.violet}" },
+      name: { value: "{colors.terracotta}" },
+      cond: { value: "{colors.blue}" },
     },
     danger: {
       DEFAULT: { value: "#C0392B" },
@@ -67,6 +72,8 @@ export const tokens = {
     pill: { value: "999px" },
     card: { value: "14px" },
     button: { value: "12px" },
+    // 画像枠。ボタンと同じ12pxだが、操作部品の角丸とは別の役割で持つ
+    media: { value: "12px" },
     input: { value: "11px" },
     // 実証データの横棒グラフ
     bar: { value: "5px" },
@@ -236,6 +243,8 @@ export const tokens = {
     snug: { value: "1.375" },
     normal: { value: "1.5" },
     relaxed: { value: "1.625" },
+    // 記事・レポートなど、段落が続く長文の本文
+    prose: { value: "1.75" },
     loose: { value: "2" },
   },
 } satisfies Tokens;
@@ -259,6 +268,8 @@ export const semanticTokens = {
       default: { value: "{colors.ink}" },
       muted: { value: "{colors.ink2}" },
       subtle: { value: "{colors.ink3}" },
+      // 濃色の面や写真の上に置く文字
+      inverse: { value: "{colors.card}" },
     },
     surface: {
       page: { value: "{colors.bg}" },
@@ -273,8 +284,20 @@ export const semanticTokens = {
       official: { value: "{colors.blue}" },
       star: { value: "{colors.star}" },
       warn: { value: "{colors.amber}" },
+      warnSoft: { value: "{colors.amber.soft}" },
       danger: { value: "{colors.danger}" },
       dangerSoft: { value: "{colors.danger.soft}" },
+      manufacturer: { value: "{colors.teal}" },
+    },
+    // モーダルの背面や写真の上に敷く半透明の幕。不透明度は使う側で指定する
+    scrim: { value: "{colors.ink}" },
+    // 実証データのグラフで区ごとに割り当てる系列色
+    chart: {
+      1: { value: "{colors.ink3}" },
+      2: { value: "{colors.green.600}" },
+      3: { value: "{colors.teal}" },
+      4: { value: "{colors.violet}" },
+      5: { value: "{colors.orange}" },
     },
   },
 } satisfies SemanticTokens;

@@ -49,7 +49,7 @@ export function DataList({ rows, emptyLabel = "未設定" }: DataListProps) {
           })}
           key={row.label}
         >
-          <dt className={css({ color: "text.subtle", fontSize: "sm", fontWeight: "700" })}>
+          <dt className={css({ color: "text.subtle", fontSize: "sm", fontWeight: "bold" })}>
             {row.label}
           </dt>
           <dd
@@ -58,7 +58,7 @@ export function DataList({ rows, emptyLabel = "未設定" }: DataListProps) {
               minW: "0",
               color: "text.default",
               fontSize: "sm",
-              lineHeight: "1.6",
+              lineHeight: "relaxed",
               overflowWrap: "anywhere",
             })}
           >

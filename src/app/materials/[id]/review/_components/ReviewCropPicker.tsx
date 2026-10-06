@@ -25,7 +25,7 @@ const selectionError = css({
   m: "0",
   fontSize: "sm",
   color: "accent.danger",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 export function ReviewCropPicker({

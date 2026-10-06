@@ -69,7 +69,7 @@ const label = css({
   gap: "2",
   mb: "1.5",
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 const guide = css({
@@ -77,7 +77,7 @@ const guide = css({
   mt: "1.5",
   fontSize: "xs",
   color: "text.muted",
-  lineHeight: "1.55",
+  lineHeight: "normal",
 });
 
 const fieldError = css({
@@ -85,7 +85,7 @@ const fieldError = css({
   mt: "1.5",
   fontSize: "sm",
   color: "accent.danger",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 const photoCard = css({
@@ -252,7 +252,7 @@ export function ReviewForm({
       <div className={field}>
         <label className={label} htmlFor="review-crop">
           作目 <Badge variant="required">必須</Badge>
-          <span className={css({ fontSize: "xs", color: "text.muted", fontWeight: "400" })}>
+          <span className={css({ fontSize: "xs", color: "text.muted", fontWeight: "normal" })}>
             1つ選択してください
           </span>
         </label>
@@ -316,7 +316,7 @@ export function ReviewForm({
                     aspectRatio: "image.square",
                     display: "block",
                     objectFit: "cover",
-                    borderRadius: "button",
+                    borderRadius: "media",
                     mb: "2",
                   })}
                 />
@@ -348,7 +348,7 @@ export function ReviewForm({
           <div className={css({ display: "grid", gap: "2", mb: "2" })}>
             {pendingPhotos.map((photo) => (
               <div key={photo.key} className={photoCard}>
-                <p className={css({ m: "0", mb: "2", fontSize: "sm", fontWeight: "700" })}>
+                <p className={css({ m: "0", mb: "2", fontSize: "sm", fontWeight: "bold" })}>
                   {photo.file.name}
                 </p>
                 <Input
@@ -400,13 +400,13 @@ export function ReviewForm({
             alignItems: "flex-start",
             gap: "2.5",
             p: "3",
-            bg: "amber.soft",
+            bg: "accent.warnSoft",
             borderWidth: "1px",
             borderStyle: "solid",
             borderColor: "border.default",
             borderRadius: "card",
             fontSize: "sm",
-            lineHeight: "1.6",
+            lineHeight: "relaxed",
             cursor: "pointer",
           })}
         >
@@ -427,7 +427,7 @@ export function ReviewForm({
               サイト運営ポリシー
             </Link>
             をご確認ください。
-            <span className={css({ color: "accent.danger", fontWeight: "700" })}>（必須）</span>
+            <span className={css({ color: "accent.danger", fontWeight: "bold" })}>（必須）</span>
           </span>
         </label>
         {fieldErrors?.pesticideAck === undefined ? null : (
@@ -448,7 +448,7 @@ export function ReviewForm({
             py: "3",
             color: "primary.700",
             fontSize: "md",
-            fontWeight: "700",
+            fontWeight: "bold",
             textDecoration: "none",
           })}
         >

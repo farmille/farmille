@@ -32,7 +32,7 @@ const reviewLink = css({
   mt: "2",
   color: "primary.700",
   fontSize: "sm",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
 });
 
@@ -120,7 +120,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
                       className={css({
                         color: "primary.700",
                         fontSize: "xs",
-                        fontWeight: "700",
+                        fontWeight: "bold",
                         textDecoration: "none",
                       })}
                     >
@@ -159,7 +159,7 @@ export function PostsShelf({ profile, posts }: PostsShelfProps) {
                       boxShadow: "shadow",
                     })}
                   >
-                    <p className={css({ m: "0", fontWeight: "700", fontSize: "md" })}>
+                    <p className={css({ m: "0", fontWeight: "bold", fontSize: "md" })}>
                       {post.title}
                     </p>
                     <p

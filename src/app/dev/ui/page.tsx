@@ -39,7 +39,6 @@ const section = css({
 
 const sectionTitle = css({
   fontSize: "lg",
-  fontWeight: "700",
   mb: "1",
 });
 
@@ -47,7 +46,7 @@ const sectionLead = css({
   fontSize: "sm",
   color: "text.muted",
   mb: "3",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
 });
 
 const stack = css({
@@ -78,7 +77,7 @@ const label = css({
   fontSize: "2xs",
   color: "text.subtle",
   mb: "1.5",
-  fontWeight: "600",
+  fontWeight: "semibold",
 });
 
 export default function UiKitPage() {
@@ -90,10 +89,8 @@ export default function UiKitPage() {
   return (
     <main className={page}>
       <div className={css({ px: "4", pt: "6", pb: "2" })}>
-        <h1 className={css({ fontSize: "3xl", fontWeight: "800", letterSpacing: "0.01em" })}>
-          UI Kit
-        </h1>
-        <p className={css({ fontSize: "sm", color: "text.muted", mt: "2", lineHeight: "1.6" })}>
+        <h1 className={css({ fontSize: "3xl", letterSpacing: "0.01em" })}>UI Kit</h1>
+        <p className={css({ fontSize: "sm", color: "text.muted", mt: "2", lineHeight: "relaxed" })}>
           T-21 共通コンポーネント。375px 幅でモックと並べて比較する。用語は
           D8（感想口コミ／実証詳細レポート）。
         </p>
@@ -331,9 +328,7 @@ export default function UiKitPage() {
       </section>
 
       <section className={css({ mt: "8", px: "0" })}>
-        <h2 className={css({ fontSize: "lg", fontWeight: "700", mb: "3", px: "4" })}>
-          Chrome 組み合わせ
-        </h2>
+        <h2 className={css({ fontSize: "lg", mb: "3", px: "4" })}>Chrome 組み合わせ</h2>
         <div className={phoneChrome}>
           <AppBar chrome="public" variant="home" />
           <div className={css({ p: "4", pb: "24" })}>

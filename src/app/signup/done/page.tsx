@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { buttonRecipe } from "@/components/Button";
 import { AuthScreen } from "@/components/auth/AuthScreen";
-import {
-  formActionsStyle,
-  ghostButtonStyle,
-  HintBox,
-  linkRowStyle,
-  textLinkStyle,
-} from "@/components/auth/Fields";
+import { formActionsStyle, HintBox, linkRowStyle, textLinkStyle } from "@/components/auth/Fields";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { safeNextPath } from "@/lib/auth/safe-next";
 
@@ -41,11 +36,11 @@ export default async function SignupDonePage({
 
       <div className={formActionsStyle}>
         {!needsEmailConfirmation && next ? (
-          <Link className={ghostButtonStyle} href={next}>
+          <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href={next}>
             実証詳細レポートに戻る
           </Link>
         ) : null}
-        <Link className={ghostButtonStyle} href="/">
+        <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/">
           ホームへ
         </Link>
       </div>

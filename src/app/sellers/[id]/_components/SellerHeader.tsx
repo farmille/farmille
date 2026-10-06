@@ -19,15 +19,15 @@ const card = css({
 const logo = css({
   w: "56px",
   aspectRatio: "image.square",
-  borderRadius: "button",
-  bg: "primary.soft",
+  borderRadius: "media",
+  bg: "primary.200",
   display: "grid",
   placeItems: "center",
   flexShrink: "0",
   overflow: "hidden",
   color: "primary.700",
   fontSize: "xl",
-  fontWeight: "800",
+  fontWeight: "extrabold",
 });
 
 const typeLabel = css({
@@ -36,10 +36,10 @@ const typeLabel = css({
   px: "2.5",
   py: "0.5",
   borderRadius: "pill",
-  bg: "primary.soft",
+  bg: "primary.200",
   color: "primary.700",
   fontSize: "xs",
-  fontWeight: "700",
+  fontWeight: "bold",
   whiteSpace: "nowrap",
 });
 
@@ -98,7 +98,7 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
             flexWrap: "wrap",
           })}
         >
-          <h1 id="seller-name" className={css({ m: "0", fontSize: "xl", fontWeight: "800" })}>
+          <h1 id="seller-name" className={css({ m: "0", fontSize: "xl" })}>
             {seller.officialName}
           </h1>
         </div>
@@ -110,7 +110,7 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
               mb: "0",
               color: "text.muted",
               fontSize: "sm",
-              lineHeight: "1.65",
+              lineHeight: "relaxed",
             })}
           >
             {seller.profileText}

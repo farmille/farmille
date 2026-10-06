@@ -15,7 +15,7 @@ const accountTypeStyle = css({
   mb: "2",
   color: "text.subtle",
   fontSize: "xs",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 const detailsStyle = css({
@@ -24,7 +24,7 @@ const detailsStyle = css({
   mb: "4",
   color: "text.muted",
   fontSize: "sm",
-  lineHeight: "1.65",
+  lineHeight: "relaxed",
 });
 
 /** 一般ユーザーとメーカーを入力前に分け、異なる確認・ログイン方式を明示する。 */

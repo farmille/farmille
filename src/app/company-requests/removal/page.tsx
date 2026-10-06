@@ -30,7 +30,7 @@ export default function RemovalEntryPage() {
           </li>
           <li>資材ページや感想口コミ・実証詳細レポートのデータは削除しません。</li>
         </ul>
-        <h2 className={css({ fontSize: "lg", fontWeight: "700" })}>申請者情報</h2>
+        <h2 className={css({ fontSize: "lg" })}>申請者情報</h2>
         <VerificationForm />
         <TextLink href="/company-requests/receipts">受付済みの申請を確認する</TextLink>
       </div>

@@ -25,7 +25,7 @@ const formStyle = css({
 
 const groupTitleStyle = css({
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "text.muted",
   mt: "2",
 });
@@ -55,7 +55,7 @@ const classificationGroupStyle = css({
 
 const classificationGroupNameStyle = css({
   fontSize: "sm",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "text.subtle",
 });
 

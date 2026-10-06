@@ -1,6 +1,7 @@
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
+import { surfaceCardRecipe } from "./SurfaceCard";
 import { Badge } from "./Badge";
 import { Icon } from "@/components/Icon";
 
@@ -8,14 +9,7 @@ const rowRecipe = cva({
   base: {
     display: "flex",
     gap: "2.5",
-    p: "2.5",
     alignItems: "start",
-    bg: "surface.card",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.default",
-    borderRadius: "card",
-    boxShadow: "shadow",
     textDecoration: "none",
     color: "inherit",
   },
@@ -24,8 +18,8 @@ const rowRecipe = cva({
 const thumb = css({
   w: "70px",
   aspectRatio: "image.landscape",
-  borderRadius: "button",
-  bg: "primary.soft",
+  borderRadius: "media",
+  bg: "primary.100",
   flexShrink: "0",
   display: "grid",
   placeItems: "center",
@@ -53,7 +47,10 @@ export function ArtMini({
   className,
 }: ArtMiniProps) {
   return (
-    <Link href={href} className={cx(rowRecipe(), className)}>
+    <Link
+      href={href}
+      className={cx(surfaceCardRecipe({ padding: "snug" }), rowRecipe(), className)}
+    >
       <div className={thumb}>
         {thumbSrc ? (
           <Image
@@ -74,7 +71,9 @@ export function ArtMini({
         )}
       </div>
       <div className={css({ flex: "1", minW: "0" })}>
-        <div className={css({ fontSize: "sm", fontWeight: "700", lineHeight: "1.4" })}>{title}</div>
+        <div className={css({ fontSize: "sm", fontWeight: "bold", lineHeight: "snug" })}>
+          {title}
+        </div>
         <div
           className={css({
             fontSize: "2xs",

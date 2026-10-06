@@ -54,7 +54,7 @@ export function ProfileDetailsDisplay({
       )}
       {details.crops.length > 0 && (
         <div>
-          <p className={css({ fontWeight: "700", mb: "1" })}>主な作目</p>
+          <p className={css({ fontWeight: "bold", mb: "1" })}>主な作目</p>
           {details.crops.map((crop) => (
             <span key={crop.id} className={chip}>
               {crop.name}
@@ -85,8 +85,8 @@ export function ProfileDetailsDisplay({
         </p>
       )}
       {editable && missing.length > 0 && (
-        <p className={css({ bg: "primary.soft", p: "3", borderRadius: "card" })}>
-          <Link href="/me/edit" className={css({ color: "primary.700", fontWeight: "700" })}>
+        <p className={css({ bg: "primary.200", p: "3", borderRadius: "card" })}>
+          <Link href="/me/edit" className={css({ color: "primary.700", fontWeight: "bold" })}>
             {missing.join("・")}を設定して、プロフィールを充実させましょう。
           </Link>
         </p>

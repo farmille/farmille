@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { buttonRecipe } from "@/components/Button";
 import { FormPageShell } from "@/components/FormPageShell";
-import { formActionsStyle, ghostButtonStyle, HintBox } from "@/components/auth/Fields";
+import { formActionsStyle, HintBox } from "@/components/auth/Fields";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { css } from "../../../../../styled-system/css";
 
@@ -13,15 +14,14 @@ export const metadata: Metadata = {
 
 const titleStyle = css({
   fontSize: "xl",
-  fontWeight: "700",
-  lineHeight: "1.4",
+  lineHeight: "snug",
   mb: "3",
 });
 
 const bodyStyle = css({
   fontSize: "md",
   color: "text.muted",
-  lineHeight: "1.7",
+  lineHeight: "relaxed",
   mb: "4",
 });
 
@@ -34,7 +34,7 @@ export default function SellerApplyDonePage() {
         ログインIDとパスワード設定のご案内をお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。
       </HintBox>
       <div className={formActionsStyle}>
-        <Link className={ghostButtonStyle} href="/">
+        <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/">
           ホームへ
         </Link>
       </div>

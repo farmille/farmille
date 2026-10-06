@@ -4,33 +4,22 @@ import Link from "next/link";
 
 import { createReportAction } from "@/server/actions/reports";
 import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
-import { cva, css, cx } from "../../styled-system/css";
+import { css, cx } from "../../styled-system/css";
+import { surfaceCardRecipe } from "./SurfaceCard";
 import { PostActions } from "./PostActions";
 import { Icon } from "@/components/Icon";
 import { ReportDialog } from "./ReportDialog";
 import { ReviewOwnerActions } from "./ReviewOwnerActions";
 import { StarRating } from "./StarRating";
 
-const cardRecipe = cva({
-  base: {
-    p: "3.5",
-    bg: "surface.card",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.default",
-    borderRadius: "card",
-    boxShadow: "shadow",
-  },
-});
-
 const cropChip = css({
   fontSize: "xs",
   px: "2.5",
   py: "0.5",
   borderRadius: "pill",
-  bg: "primary.soft",
+  bg: "primary.200",
   color: "primary.700",
-  fontWeight: "600",
+  fontWeight: "semibold",
   whiteSpace: "nowrap",
 });
 
@@ -38,7 +27,7 @@ const avatar = css({
   w: "30px",
   aspectRatio: "image.square",
   borderRadius: "pill",
-  bg: "primary.soft",
+  bg: "primary.200",
   display: "grid",
   placeItems: "center",
   flexShrink: "0",
@@ -126,7 +115,7 @@ export function ReviewCard({
           <Icon name="person" size="sm" />
         )}
       </span>
-      <span className={css({ fontWeight: "700", fontSize: "sm" })}>{handle}</span>
+      <span className={css({ fontWeight: "bold", fontSize: "sm" })}>{handle}</span>
       {authorDetails ? (
         <span className={css({ color: "text.subtle", fontSize: "xs" })}>{authorDetails}</span>
       ) : null}
@@ -135,7 +124,7 @@ export function ReviewCard({
   const displayedPhotoCount = photos.length > 0 ? photos.length : photoCount;
 
   return (
-    <article className={cx(cardRecipe(), className)}>
+    <article className={cx(surfaceCardRecipe({ padding: "cozy" }), className)}>
       {materialName ? (
         <div className={css({ fontSize: "xs", color: "text.subtle", mb: "1" })}>
           {materialName} の感想口コミ
@@ -175,7 +164,7 @@ export function ReviewCard({
       >
         <span className={cropChip}>{crop}</span>
       </div>
-      <p className={css({ fontSize: "sm", color: "text.muted", lineHeight: "1.65" })}>{body}</p>
+      <p className={css({ fontSize: "sm", color: "text.muted", lineHeight: "relaxed" })}>{body}</p>
       {displayedPhotoCount > 0 ? (
         <div
           className={css({
@@ -198,7 +187,7 @@ export function ReviewCard({
                     w: "72px",
                     aspectRatio: "image.square",
                     display: "block",
-                    borderRadius: "button",
+                    borderRadius: "media",
                     objectFit: "cover",
                     flexShrink: "0",
                   })}
@@ -210,8 +199,8 @@ export function ReviewCard({
                   className={css({
                     w: "72px",
                     aspectRatio: "image.square",
-                    borderRadius: "button",
-                    bg: "primary.soft",
+                    borderRadius: "media",
+                    bg: "primary.100",
                     display: "grid",
                     placeItems: "center",
                     flexShrink: "0",

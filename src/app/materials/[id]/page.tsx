@@ -52,24 +52,24 @@ type MaterialPageProps = {
 const disclaimer = css({
   m: "0",
   p: "3",
-  borderRadius: "button",
+  borderRadius: "card",
   bg: "surface.page",
   color: "text.subtle",
   fontSize: "xs",
-  lineHeight: "1.65",
+  lineHeight: "relaxed",
 });
 
 const archivedNotice = css({
   m: "0",
   p: "3",
-  borderRadius: "button",
+  borderRadius: "card",
   bg: "surface.page",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.strong",
   color: "text.muted",
   fontSize: "sm",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
 });
 
 export async function generateMetadata({ params }: MaterialPageProps): Promise<Metadata> {
@@ -155,10 +155,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
       ) : null}
 
       <section aria-labelledby="material-description-heading">
-        <h2
-          id="material-description-heading"
-          className={css({ fontSize: "lg", fontWeight: "700", mb: "3" })}
-        >
+        <h2 id="material-description-heading" className={css({ fontSize: "lg", mb: "3" })}>
           製品説明
         </h2>
         <p className={css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere" })}>
@@ -166,10 +163,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
         </p>
       </section>
       <section aria-labelledby="material-timing-heading">
-        <h2
-          id="material-timing-heading"
-          className={css({ fontSize: "lg", fontWeight: "700", mb: "3" })}
-        >
+        <h2 id="material-timing-heading" className={css({ fontSize: "lg", mb: "3" })}>
           施用タイミング
         </h2>
         <p>

@@ -22,14 +22,13 @@ const panelHeadStyle = css({
 
 const panelTitleStyle = css({
   fontSize: "lg",
-  fontWeight: "700",
   m: "0",
 });
 
 const panelNoteStyle = css({
   fontSize: "sm",
   color: "text.subtle",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
 });
 
 /** 運営管理の区画。見出し＋補足＋中身。 */
@@ -63,7 +62,7 @@ const listStyle = css({
 
 const termStyle = css({
   fontSize: "sm",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "text.muted",
   py: "2",
   borderTopWidth: "1px",
@@ -74,7 +73,7 @@ const termStyle = css({
 const valueStyle = css({
   fontSize: "md",
   color: "text.default",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
   m: "0",
   py: "2",
   wordBreak: "break-word",
@@ -146,14 +145,14 @@ export const adminFieldGridStyle = css({
 export const adminInlineNoteStyle = css({
   fontSize: "sm",
   color: "text.subtle",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
 });
 
 export const adminCodeStyle = css({
   display: "inline-block",
   fontFamily: "monospace",
   fontSize: "lg",
-  fontWeight: "700",
+  fontWeight: "bold",
   bg: "surface.page",
   borderWidth: "1px",
   borderStyle: "solid",

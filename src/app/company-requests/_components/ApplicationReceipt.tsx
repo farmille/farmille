@@ -22,7 +22,7 @@ export function ApplicationReceipt({ receipt }: { receipt: Receipt }) {
           whiteSpace: "pre-wrap",
           overflowWrap: "anywhere",
           fontSize: "md",
-          lineHeight: "1.8",
+          lineHeight: "prose",
           py: "6",
         })}
       >

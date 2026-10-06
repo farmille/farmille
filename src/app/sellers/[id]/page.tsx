@@ -59,11 +59,11 @@ const broadcastBand = css({
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "primary.600/25",
-  borderRadius: "button",
+  borderRadius: "card",
   color: "primary.700",
   fontSize: "sm",
-  fontWeight: "600",
-  lineHeight: "1.55",
+  fontWeight: "semibold",
+  lineHeight: "normal",
 });
 
 const articleStack = css({
@@ -168,7 +168,7 @@ export default async function SellerPage({ params }: SellerPageProps) {
                   mt: "2.5",
                   color: "primary.700",
                   fontSize: "sm",
-                  fontWeight: "700",
+                  fontWeight: "bold",
                   textDecoration: "none",
                 })}
               >

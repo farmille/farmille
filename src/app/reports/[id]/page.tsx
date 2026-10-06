@@ -58,15 +58,14 @@ const sectionTitle = css({
   m: "0",
   mt: "6",
   mb: "2.5",
-  fontSize: "md",
-  fontWeight: "700",
+  fontSize: "lg",
 });
 
 const bodyText = css({
   m: "0",
   fontSize: "md",
   color: "text.muted",
-  lineHeight: "1.75",
+  lineHeight: "prose",
   whiteSpace: "pre-wrap",
 });
 
@@ -173,7 +172,7 @@ function MediaFigure({
             mt: "1.5",
             fontSize: "xs",
             color: "text.subtle",
-            lineHeight: "1.5",
+            lineHeight: "normal",
           })}
         >
           {caption}
@@ -298,8 +297,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           className={css({
             m: "0",
             fontSize: "xl",
-            fontWeight: "700",
-            lineHeight: "1.4",
+            lineHeight: "snug",
           })}
         >
           {report.title}
@@ -356,7 +354,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 <Icon name="person" size="sm" />
               )}
             </span>
-            <span className={css({ fontWeight: "700", color: "text.default" })}>
+            <span className={css({ fontWeight: "bold", color: "text.default" })}>
               {report.author.handle}
             </span>
           </Link>
@@ -444,7 +442,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                           borderRadius: "pill",
                           bg: "primary.soft",
                           color: "primary.700",
-                          fontWeight: "600",
+                          fontWeight: "semibold",
                         })}
                       >
                         {tag}
@@ -495,7 +493,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                           className={css({
                             position: "relative",
                             aspectRatio: "image.portrait",
-                            borderRadius: "button",
+                            borderRadius: "media",
                             overflow: "hidden",
                             bg: "primary.soft",
                           })}
@@ -566,11 +564,11 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 borderWidth: "1px",
                 borderStyle: "solid",
                 borderColor: "border.default",
-                borderRadius: "button",
+                borderRadius: "card",
                 bg: "surface.page",
                 fontSize: "xs",
                 color: "text.muted",
-                lineHeight: "1.55",
+                lineHeight: "normal",
               })}
             >
               <Icon

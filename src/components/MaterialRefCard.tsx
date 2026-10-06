@@ -30,14 +30,14 @@ export function MaterialRefCard({
       className={cx(
         css({
           display: "flex",
-          alignItems: "start",
+          alignItems: "center",
           gap: "2.5",
           borderWidth: "1px",
           borderStyle: "solid",
           borderColor: "border.default",
           borderRadius: "card",
           p: "3",
-          bg: "primary.soft",
+          bg: "primary.100",
           textDecoration: "none",
           color: "inherit",
         }),
@@ -48,8 +48,8 @@ export function MaterialRefCard({
         className={css({
           w: "44px",
           aspectRatio: "image.square",
-          borderRadius: "button",
-          bg: "primary.soft",
+          borderRadius: "media",
+          bg: "primary.100",
           display: "grid",
           placeItems: "center",
           flexShrink: "0",
@@ -62,7 +62,9 @@ export function MaterialRefCard({
         {showTargetLabel ? (
           <div className={css({ fontSize: "2xs", color: "text.muted" })}>対象資材</div>
         ) : null}
-        <div className={css({ fontWeight: "700", fontSize: "md", lineHeight: "1.35" })}>{name}</div>
+        <div className={css({ fontWeight: "bold", fontSize: "md", lineHeight: "snug" })}>
+          {name}
+        </div>
         <div
           className={css({
             display: "flex",
@@ -81,7 +83,7 @@ export function MaterialRefCard({
       <Icon
         name="chevron_right"
         size="sm"
-        className={css({ color: "text.subtle", flexShrink: "0", alignSelf: "center" })}
+        className={css({ color: "text.subtle", flexShrink: "0" })}
       />
     </Link>
   );

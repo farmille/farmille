@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 const leadStyle = css({
   fontSize: "sm",
   color: "text.subtle",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
   mb: "4.5",
 });
 

@@ -1,19 +1,14 @@
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
+import { surfaceCardRecipe } from "./SurfaceCard";
 import { Icon } from "@/components/Icon";
 import { StarRating } from "./StarRating";
 
 const scrollCard = cva({
   base: {
     scrollSnapAlign: "start",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.default",
-    borderRadius: "card",
     overflow: "hidden",
-    bg: "surface.card",
-    boxShadow: "shadow",
     textDecoration: "none",
     color: "inherit",
     display: "block",
@@ -27,15 +22,8 @@ const listCard = cva({
   base: {
     display: "flex",
     gap: "3",
-    p: "3",
     // 本文が複数行でもサムネをカード上端に置く
     alignItems: "start",
-    bg: "surface.card",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.default",
-    borderRadius: "card",
-    boxShadow: "shadow",
     textDecoration: "none",
     color: "inherit",
   },
@@ -53,7 +41,7 @@ const imgBox = css({
 const listImg = css({
   w: "62px",
   aspectRatio: "image.square",
-  borderRadius: "button",
+  borderRadius: "media",
   bg: "surface.card",
   display: "grid",
   placeItems: "center",
@@ -149,7 +137,7 @@ export function MaterialCard({
     return (
       <Link
         href={href}
-        className={cx(scrollCard(), className)}
+        className={cx(surfaceCardRecipe({ padding: "flush" }), scrollCard(), className)}
         data-ui="material-card"
         data-variant="scroll"
       >
@@ -158,7 +146,7 @@ export function MaterialCard({
           <div
             className={css({
               fontSize: "sm",
-              fontWeight: "700",
+              fontWeight: "bold",
               minW: "0",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -228,7 +216,7 @@ export function MaterialCard({
   return (
     <Link
       href={href}
-      className={cx(listCard(), className)}
+      className={cx(surfaceCardRecipe({ padding: "compact" }), listCard(), className)}
       data-ui="material-card"
       data-variant="list"
     >
@@ -255,7 +243,7 @@ export function MaterialCard({
         ) : null}
       </div>
       <div className={css({ flex: "1", minW: "0" })}>
-        <div className={css({ fontSize: "md", fontWeight: "700" })}>{name}</div>
+        <div className={css({ fontSize: "md", fontWeight: "bold" })}>{name}</div>
         <div
           className={css({
             fontSize: "xs",
@@ -285,7 +273,7 @@ export function MaterialCard({
                 <StarRating value={rating} />
                 <span
                   className={css({
-                    fontWeight: "800",
+                    fontWeight: "extrabold",
                     color: "text.default",
                     fontVariantNumeric: "tabular-nums",
                   })}
@@ -305,7 +293,7 @@ export function MaterialCard({
               fontSize: "sm",
               color: "text.muted",
               mt: "1",
-              lineHeight: "1.3",
+              lineHeight: "tight",
               lineClamp: 1,
             })}
           >
@@ -336,7 +324,7 @@ export function MaterialCard({
             {evidenceBadges.map((label) => (
               <span
                 key={label}
-                className={css({ fontSize: "xs", fontWeight: "700", color: "primary.700" })}
+                className={css({ fontSize: "xs", fontWeight: "bold", color: "primary.700" })}
               >
                 {label}
               </span>

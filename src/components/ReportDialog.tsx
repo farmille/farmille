@@ -17,7 +17,7 @@ const trigger = css({
   bg: "transparent",
   color: "text.subtle",
   fontSize: "xs",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "underline",
   textUnderlineOffset: "2px",
   cursor: "pointer",
@@ -34,7 +34,7 @@ const field = css({
 
 const fieldLabel = css({
   fontSize: "xs",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "text.muted",
 });
 
@@ -73,7 +73,7 @@ export function ReportDialog({
       <dialog ref={dialogRef} aria-labelledby={titleId} className={dialogPanel}>
         {state.status === "success" ? (
           <>
-            <h2 id={titleId} className={css({ m: "0", fontSize: "lg", fontWeight: "700" })}>
+            <h2 id={titleId} className={css({ m: "0", fontSize: "lg" })}>
               通報を受け付けました
             </h2>
             <p className={css({ mt: "2", mb: "4", fontSize: "sm", color: "text.muted" })}>
@@ -89,7 +89,7 @@ export function ReportDialog({
           </>
         ) : (
           <form action={formAction}>
-            <h2 id={titleId} className={css({ m: "0", fontSize: "lg", fontWeight: "700" })}>
+            <h2 id={titleId} className={css({ m: "0", fontSize: "lg" })}>
               {title}
             </h2>
 

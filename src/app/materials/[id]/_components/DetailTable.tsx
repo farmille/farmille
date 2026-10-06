@@ -41,7 +41,7 @@ export function MaterialDetailTable({
             key={name}
             className={css({
               bg: "surface.panel",
-              borderRadius: "button",
+              borderRadius: "input",
               px: "2",
               py: "1",
               fontSize: "xs",
@@ -116,10 +116,7 @@ export function MaterialDetailTable({
           mb: "2.5",
         })}
       >
-        <h2
-          id="material-detail-heading"
-          className={css({ m: "0", fontSize: "lg", fontWeight: "700" })}
-        >
+        <h2 id="material-detail-heading" className={css({ m: "0", fontSize: "lg" })}>
           製品詳細
         </h2>
       </div>
@@ -138,7 +135,7 @@ export function MaterialDetailTable({
               borderTopColor: "border.default",
             })}
           >
-            <dt className={css({ fontSize: "sm", fontWeight: "700", color: "text.muted" })}>
+            <dt className={css({ fontSize: "sm", fontWeight: "bold", color: "text.muted" })}>
               {row.label.split("・").map((part, index) => (
                 <span key={part} className={css({ display: "inline-block" })}>
                   {index > 0 ? "・" : ""}
@@ -146,7 +143,7 @@ export function MaterialDetailTable({
                 </span>
               ))}
             </dt>
-            <dd className={css({ m: "0", fontSize: "sm", lineHeight: "1.65" })}>
+            <dd className={css({ m: "0", fontSize: "sm", lineHeight: "relaxed" })}>
               {row.value ?? "−"}
             </dd>
           </div>

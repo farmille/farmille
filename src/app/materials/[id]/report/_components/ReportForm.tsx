@@ -238,7 +238,7 @@ export function ReportForm({
       }}
     >
       <header className={stack}>
-        <h1 className={css({ fontSize: "xl", fontWeight: "700" })}>実証詳細レポート</h1>
+        <h1 className={css({ fontSize: "xl" })}>実証詳細レポート</h1>
         <p>{materialName}</p>
         <div className={row}>
           <Button

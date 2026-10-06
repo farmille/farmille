@@ -46,7 +46,7 @@ export const dialogPanel = css({
     "&[open]::backdrop": { opacity: "0" },
   },
   "&::backdrop": {
-    bg: "ink/45",
+    bg: "scrim/45",
     opacity: "1",
     transitionProperty: "opacity, overlay, display",
     transitionDuration: "dialog",

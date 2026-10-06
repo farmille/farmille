@@ -33,7 +33,7 @@ const valueRecipe = cva({
     display: "inline-flex",
     alignItems: "center",
     lineHeight: "none",
-    fontWeight: "800",
+    fontWeight: "extrabold",
     fontVariantNumeric: "tabular-nums",
   },
   variants: {
@@ -52,7 +52,7 @@ const inputStar = css({
   bg: "transparent",
   padding: "0",
   cursor: "pointer",
-  lineHeight: "1",
+  lineHeight: "none",
   color: "accent.star",
 });
 

@@ -57,7 +57,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           <Icon name="person" size="2xl" />
         )}
       </div>
-      <h1 id="me-handle" className={css({ mt: "2.5", mb: "0", fontSize: "xl", fontWeight: "800" })}>
+      <h1 id="me-handle" className={css({ mt: "2.5", mb: "0", fontSize: "xl" })}>
         {profile.handle}
       </h1>
 

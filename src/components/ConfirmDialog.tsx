@@ -53,7 +53,7 @@ export function ConfirmDialog({
       </button>
 
       <dialog ref={dialogRef} aria-labelledby={titleId} className={dialogPanel}>
-        <h2 id={titleId} className={css({ m: "0", fontSize: "lg", fontWeight: "700" })}>
+        <h2 id={titleId} className={css({ m: "0", fontSize: "lg" })}>
           {title}
         </h2>
         <div
@@ -62,7 +62,7 @@ export function ConfirmDialog({
             mb: "4",
             fontSize: "sm",
             color: "text.muted",
-            lineHeight: "1.6",
+            lineHeight: "relaxed",
           })}
         >
           {description}

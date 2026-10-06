@@ -13,7 +13,7 @@ import { css } from "../../../../styled-system/css";
 
 const list = css({ display: "flex", flexWrap: "wrap", gap: "2", py: "2" });
 const section = css({ borderBottomWidth: "1px", borderColor: "border.default", py: "3" });
-const summary = css({ fontSize: "md", fontWeight: "700", cursor: "pointer" });
+const summary = css({ fontSize: "md", fontWeight: "bold", cursor: "pointer" });
 
 export function CatalogSidebar({
   catalog,
@@ -82,7 +82,7 @@ export function CatalogSidebar({
     >
       <Link
         href="/search"
-        className={css({ color: "primary.700", fontSize: "md", fontWeight: "700" })}
+        className={css({ color: "primary.700", fontSize: "md", fontWeight: "bold" })}
       >
         すべてクリア
       </Link>
@@ -139,7 +139,7 @@ export function CatalogSidebar({
                     return null;
                   return (
                     <div key={group.id}>
-                      <p className={css({ fontSize: "sm", fontWeight: "700", mb: "1" })}>
+                      <p className={css({ fontSize: "sm", fontWeight: "bold", mb: "1" })}>
                         {group.name}
                       </p>
                       <div className={list}>

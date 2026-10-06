@@ -69,7 +69,6 @@ const pageTitle = css({
     clip: "auto",
     whiteSpace: "normal",
     fontSize: "2xl",
-    fontWeight: "800",
   },
 });
 

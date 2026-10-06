@@ -27,7 +27,7 @@ const materialButton = cva({
   },
   variants: {
     selected: {
-      true: { borderColor: "primary.600", bg: "primary.soft" },
+      true: { borderColor: "primary.600", bg: "primary.100" },
       false: { borderColor: "border.default" },
     },
   },
@@ -93,7 +93,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
               onClick={() => setSelectedId(material.id)}
             >
               <span className={css({ flex: "1", minW: "0" })}>
-                <span className={css({ display: "block", fontSize: "md", fontWeight: "700" })}>
+                <span className={css({ display: "block", fontSize: "md", fontWeight: "bold" })}>
                   {material.name}
                 </span>
                 <span
@@ -127,7 +127,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                   className={css({
                     color: "primary.700",
                     fontSize: "sm",
-                    fontWeight: "700",
+                    fontWeight: "bold",
                     flexShrink: "0",
                   })}
                 >
@@ -145,7 +145,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
           px: "3",
           py: "2.5",
           borderRadius: "pill",
-          bg: "primary.soft",
+          bg: "primary.200",
           color: "primary.700",
           fontSize: "xs",
           textAlign: "center",
@@ -189,7 +189,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
               m: "0",
               mb: "1",
               fontSize: "sm",
-              fontWeight: "700",
+              fontWeight: "bold",
               color: "text.default",
             })}
           >
@@ -205,9 +205,9 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                 py: "3",
                 borderRadius: "button",
                 bg: "primary.700",
-                color: "surface.card",
+                color: "text.inverse",
                 fontSize: "md",
-                fontWeight: "700",
+                fontWeight: "bold",
                 textDecoration: "none",
               })}
             >
@@ -229,7 +229,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                 borderStyle: "solid",
                 borderColor: "border.strong",
                 fontSize: "md",
-                fontWeight: "700",
+                fontWeight: "bold",
                 textDecoration: "none",
               })}
             >

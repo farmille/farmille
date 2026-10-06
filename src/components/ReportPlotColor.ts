@@ -1,11 +1,11 @@
 import { css } from "../../styled-system/css";
 
 const colors = [
-  css({ fill: "text.subtle", color: "text.subtle" }),
-  css({ fill: "primary.600", color: "primary.600" }),
-  css({ fill: "tag.effect", color: "tag.effect" }),
-  css({ fill: "tag.type", color: "tag.type" }),
-  css({ fill: "tag.concern", color: "tag.concern" }),
+  css({ fill: "chart.1", color: "chart.1" }),
+  css({ fill: "chart.2", color: "chart.2" }),
+  css({ fill: "chart.3", color: "chart.3" }),
+  css({ fill: "chart.4", color: "chart.4" }),
+  css({ fill: "chart.5", color: "chart.5" }),
 ];
 
 export function reportPlotColor(index: number) {

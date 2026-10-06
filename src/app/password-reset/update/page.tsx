@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { UpdatePasswordForm } from "@/app/password-reset/update/UpdatePasswordForm";
+import { buttonRecipe } from "@/components/Button";
 import { AuthScreen } from "@/components/auth/AuthScreen";
-import { formActionsStyle, FormMessage, ghostButtonStyle } from "@/components/auth/Fields";
+import { formActionsStyle, FormMessage } from "@/components/auth/Fields";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -24,10 +25,13 @@ export default async function UpdatePasswordPage({
           再設定用のリンクが確認できませんでした。もう一度メールの送信からやり直してください。
         </FormMessage>
         <div className={formActionsStyle}>
-          <Link className={ghostButtonStyle} href="/password-reset">
+          <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/password-reset">
             一般・運営の再設定メールの送信へ
           </Link>
-          <Link className={ghostButtonStyle} href="/sellers/password-reset">
+          <Link
+            className={buttonRecipe({ variant: "ghost", size: "md" })}
+            href="/sellers/password-reset"
+          >
             メーカーの再設定メールの送信へ
           </Link>
         </div>

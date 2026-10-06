@@ -30,7 +30,7 @@ const linkStyle = css({
   display: "inline-flex",
   mt: "4",
   color: "primary.700",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
 });
 

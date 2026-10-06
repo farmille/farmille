@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 const linkStyle = css({
   color: "primary.700",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },
 });
@@ -37,7 +37,7 @@ const stackStyle = css({
 
 const reasonStyle = css({
   maxW: "360px",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
   whiteSpace: "pre-wrap",
 });
 

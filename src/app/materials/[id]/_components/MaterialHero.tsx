@@ -22,8 +22,8 @@ const heroCard = css({
 const imageBox = css({
   w: "118px",
   aspectRatio: "image.square",
-  borderRadius: "button",
-  bg: "primary.soft",
+  borderRadius: "media",
+  bg: "primary.100",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
@@ -49,7 +49,7 @@ const manufacturerStyle = css({
     maxW: "100%",
     alignItems: "flex-start",
     whiteSpace: "normal",
-    lineHeight: "1.4",
+    lineHeight: "snug",
   },
   "& svg": {
     flexShrink: "0",
@@ -81,7 +81,7 @@ export function MaterialHero({
 
   return (
     <section className={heroCard} aria-labelledby="material-name">
-      <div className={css({ display: "flex", gap: "3.5", alignItems: "start" })}>
+      <div className={css({ display: "flex", gap: "3.5", alignItems: "center" })}>
         <div className={imageBox} data-ui="material-hero-image">
           <Icon name="image" className={imageLayer} size="xl" />
           {primaryImage ? (
@@ -105,7 +105,7 @@ export function MaterialHero({
           ) : null}
         </div>
         <div className={css({ flex: "1", minW: "0" })}>
-          <h1 id="material-name" className={css({ m: "0", fontSize: "2xl", fontWeight: "700" })}>
+          <h1 id="material-name" className={css({ m: "0", fontSize: "2xl" })}>
             {material.name}
           </h1>
           {manufacturer}
@@ -121,7 +121,7 @@ export function MaterialHero({
               <span
                 className={css({
                   fontSize: "3xl",
-                  fontWeight: "800",
+                  fontWeight: "extrabold",
                   fontVariantNumeric: "tabular-nums",
                 })}
               >

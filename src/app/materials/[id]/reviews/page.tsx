@@ -100,10 +100,7 @@ export default async function MaterialReviewsPage({
         />
       )}
       <section className={materialSummary} aria-labelledby="reviews-page-heading">
-        <h1
-          id="reviews-page-heading"
-          className={css({ m: "0", fontSize: "xl", fontWeight: "700" })}
-        >
+        <h1 id="reviews-page-heading" className={css({ m: "0", fontSize: "xl" })}>
           {material.name}
         </h1>
         <p className={css({ m: "0", mt: "1", fontSize: "sm", color: "text.muted" })}>

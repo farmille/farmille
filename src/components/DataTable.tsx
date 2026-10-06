@@ -34,7 +34,7 @@ const cellRecipe = cva({
         bg: "surface.panel",
         color: "text.muted",
         fontSize: "sm",
-        fontWeight: "700",
+        fontWeight: "bold",
         position: "sticky",
         top: "0",
       },
