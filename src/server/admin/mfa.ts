@@ -1,20 +1,18 @@
 import type { AuthError } from "@supabase/supabase-js";
-import * as v from "valibot";
 
 import { requireAdminAccount, reportAdminError } from "@/server/admin/guard";
 import { normalizeTotpQrCodeSource } from "@/server/admin/mfa-qr";
+import { getSessionUser } from "@/server/auth";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 
 /** 運営の追加認証に使う認証アプリの登録名。 */
 const FRIENDLY_NAME = "farmille-admin";
-const AssuranceLevelSchema = v.nullable(v.picklist(["aal1", "aal2"]));
 
 export type AdminMfaState = {
   /** 検証済みの TOTP factor。ある場合はコード入力（challenge）だけで AAL2 に上がる。 */
   verifiedFactorId: string | null;
   currentLevel: "aal1" | "aal2" | null;
-  nextLevel: "aal1" | "aal2" | null;
 };
 
 export type TotpEnrollment = {
@@ -63,14 +61,13 @@ export async function getAdminMfaState(): Promise<Result<AdminMfaState>> {
   const account = await requireAdminAccount();
   if (!account.ok) return account;
 
+  const user = await getSessionUser();
+  if (user === null) return fail("unauthorized");
+
   const supabase = await createServerSupabase();
-  const [factors, aal] = await Promise.all([
-    supabase.auth.mfa.listFactors(),
-    supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
-  ]);
+  const factors = await supabase.auth.mfa.listFactors();
 
   if (factors.error !== null) return fail(toMfaErrorCode(factors.error, "factor 一覧の取得"));
-  if (aal.error !== null) return fail(toMfaErrorCode(aal.error, "AAL の取得"));
 
   const verified = factors.data.all.find(
     (factor) => factor.factor_type === "totp" && factor.status === "verified",
@@ -78,8 +75,7 @@ export async function getAdminMfaState(): Promise<Result<AdminMfaState>> {
 
   return succeed({
     verifiedFactorId: verified?.id ?? null,
-    currentLevel: v.parse(AssuranceLevelSchema, aal.data.currentLevel),
-    nextLevel: v.parse(AssuranceLevelSchema, aal.data.nextLevel),
+    currentLevel: user.aal,
   });
 }
 
