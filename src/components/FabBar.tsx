@@ -77,6 +77,11 @@ type FabBarProps = {
   reviewHref?: string;
   placement?: "container" | "viewport";
   className?: string;
+  /**
+   * "mock" は完成見本の画面（.fm の中）用で、見本 .fab-bar の構造とクラスで出す
+   * （スタイルは src/app/_mock/mock.css と chrome.css）。見本にない画面は既定のまま。
+   */
+  look?: "default" | "mock";
 };
 
 /**
@@ -88,11 +93,31 @@ export async function FabBar({
   reviewHref = "/reviews/new",
   placement = "container",
   className,
+  look = "default",
 }: FabBarProps) {
   const session = await getSessionUser();
 
   if (session !== null && !canUseGeneralFeatures(session.accountType)) {
     return null;
+  }
+
+  if (look === "mock") {
+    return (
+      <>
+        <ReviewCompletionToast />
+        <div
+          className={cx("fab-bar", placement === "viewport" && "is-fixed", className)}
+          data-ui="responsive-fab-bar"
+        >
+          <Link href={reportHref} className="btn btn-primary fab-report">
+            実証詳細レポートを書く
+          </Link>
+          <Link href={reviewHref} className="btn btn-ghost fab-review">
+            感想口コミを書く
+          </Link>
+        </div>
+      </>
+    );
   }
 
   return (

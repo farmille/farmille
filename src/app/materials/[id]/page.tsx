@@ -1,12 +1,10 @@
-import "../../_mock/mock.css";
-import "../../_mock/mock-extra.css";
-
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { Suspense } from "react";
 
+import { MockPageShell } from "@/app/_mock/MockPageShell";
 import { FabBar } from "@/components/FabBar";
 import { SkeletonList } from "@/components/SkeletonList";
 import { RatingSkeleton, SkeletonRegion } from "@/components/Skeleton";
@@ -36,7 +34,6 @@ import {
 } from "./_components/MaterialReportsSection";
 import { MaterialReviewsSection, ReviewsHeading } from "./_components/MaterialReviewsSection";
 import { MaterialSourceLinks } from "./_components/MaterialSourceLinks";
-import { MaterialPageShell } from "./_components/PageShell";
 import { RelatedHeading, RelatedMaterialsSection } from "./_components/RelatedMaterialsSection";
 import { ReviewAnalytics } from "./_components/ReviewAnalytics";
 import { toggleSavedMaterialAction } from "./actions";
@@ -113,7 +110,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
 
   // 見本 S.material の `.body` の中身。スタイルは src/app/_mock/mock.css（.fm 配下に閉じている）。
   return (
-    <MaterialPageShell
+    <MockPageShell
       title={material.name}
       backHref="/"
       hasFab={material.publication_status === "published"}
@@ -196,10 +193,11 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
             reportHref={`${materialPath}/report/new`}
             reviewHref={`${materialPath}/review/new`}
             placement="viewport"
+            look="mock"
           />
         ) : null}
       </div>
-    </MaterialPageShell>
+    </MockPageShell>
   );
 }
 

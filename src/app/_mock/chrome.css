@@ -1,0 +1,368 @@
+/*
+ * 完成見本の画面に共通する外枠（ヘッダー・戻るバー・準備中のお知らせ・投稿ボタン・フッター）。
+ * mock.css は見本の外枠ルール（.bottom-nav / .bn-* / .pc-search / .auth-btns / .has-fab 等）を
+ * 生成時に除いているので、MockPageShell が使う分だけをここに写す。値は見本の <style> のまま。
+ * - 見本はスマホ枠の中の .screen がスクロールするが、アプリはページ全体がスクロールするので、
+ *   ヘッダーと戻るバーをまとめて .fm-chrome で上に固定する。
+ * - 見本のロゴは .bottom-nav::before の文字だが、アプリではホームへのリンク（.bn-logo）にする。
+ * - 見本の .pc-search は検索画面へ移る飾りだが、アプリではヘッダーから検索を送信できる入力欄にする。
+ * 見本にない画面（運営・パスワード再設定など）では読み込まない。
+ */
+
+.fm.fm-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+}
+.fm.fm-page > main {
+  flex: 1;
+  width: 100%;
+}
+
+/* ヘッダー＋戻るバー（見本 .bottom-nav と .appbar） */
+.fm .fm-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.fm .fm-chrome .appbar {
+  position: static;
+}
+
+.fm .bottom-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 10px 24px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+  position: relative;
+  z-index: 30;
+}
+.fm .bn-logo {
+  font-weight: 800;
+  font-size: 19px;
+  color: var(--ink);
+  margin-right: 22px;
+  white-space: nowrap;
+  text-decoration: none;
+  flex: 0 0 auto;
+}
+/* 見本ではナビの項目がそのまま .bottom-nav の子。スマホでは横にはみ出す分を横スクロールにする */
+.fm .bn-scroll {
+  display: contents;
+}
+.fm .bn-item {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: none;
+  background: none;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  border-radius: 9px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.fm .bn-item:hover {
+  color: var(--ink);
+  background: var(--bg);
+}
+.fm .bn-item.on {
+  color: var(--green);
+  background: var(--green-soft);
+}
+.fm .bn-item svg {
+  display: block;
+}
+.fm .bn-item.bn-search {
+  flex-direction: row-reverse;
+}
+.fm .bn-item.bn-search svg {
+  width: 15px;
+  height: 15px;
+}
+.fm .bn-item.bn-mypage {
+  margin-left: 10px;
+}
+.fm .bn-post {
+  flex: 0 0 auto;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fm .bn-post .plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--green);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.fm .auth-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.fm .auth-btns .a-login {
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 10px;
+  border-radius: 9px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.fm .auth-btns .a-login:hover {
+  color: var(--ink);
+  background: var(--bg);
+}
+.fm .auth-btns .a-signup {
+  border: 1px solid var(--green);
+  background: var(--card);
+  color: var(--green-deep);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 14px;
+  border-radius: 9px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.fm .auth-btns .a-signup:hover {
+  background: var(--green-soft);
+}
+.fm .bn-account {
+  flex: 0 0 auto;
+  margin-left: 8px;
+}
+
+/* ヘッダー内の検索バー（見本 .pc-search。スマホでは「資材をさがす」に任せて出さない） */
+.fm .pc-search {
+  display: none;
+}
+.fm .pc-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  appearance: none;
+}
+.fm .pc-search input::placeholder {
+  color: var(--ink-3);
+}
+.fm .pc-search input::-webkit-search-cancel-button,
+.fm .pc-search input::-webkit-search-decoration {
+  display: none;
+}
+.fm .pc-search .go {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--green);
+  white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+  .fm .pc-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 240px;
+    min-width: 190px;
+    max-width: 520px;
+    margin: 0 0 0 auto;
+    background: var(--bg);
+    border: 1.5px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 8px 15px;
+    color: var(--ink-3);
+  }
+  .fm .pc-search:hover,
+  .fm .pc-search:has(input:focus-visible) {
+    border-color: var(--green);
+  }
+}
+
+@media (max-width: 899px) {
+  .fm .bottom-nav {
+    padding: 8px 12px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    gap: 2px;
+  }
+  .fm .bn-logo {
+    font-size: 17px;
+    margin-right: 10px;
+  }
+  .fm .bn-scroll {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .fm .bn-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .fm .bn-item {
+    padding: 8px 8px;
+    font-size: 12px;
+  }
+  .fm .bn-item.bn-mypage {
+    margin-left: 0;
+  }
+  .fm .auth-btns {
+    margin-left: 6px;
+  }
+  .fm .auth-btns .a-signup {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  .fm .bn-post .plus {
+    padding: 8px 12px;
+  }
+  .fm .bn-account {
+    margin-left: 4px;
+  }
+  /* 見本はスマホ枠のノッチ分 40px あけるが、アプリではヘッダーの下に来るので詰める */
+  .fm .fm-chrome .appbar {
+    padding-top: 11px;
+  }
+}
+
+/* 準備中のお知らせ（本番の告知。見本の注記ボックスの色と文字組みに合わせる） */
+.fm .prep-notice {
+  background: var(--amber-soft);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-2);
+}
+.fm .prep-notice-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 16px 13px;
+}
+.fm .prep-notice-h {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--amber);
+  line-height: 1.5;
+}
+.fm .prep-notice-h svg {
+  flex: 0 0 auto;
+  display: block;
+}
+.fm .prep-notice-body {
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.fm .prep-notice-body p + p {
+  margin-top: 2px;
+}
+@media (min-width: 900px) {
+  .fm .prep-notice-inner {
+    padding: 14px 32px 15px;
+  }
+  .fm .prep-notice-body {
+    font-size: 12.5px;
+  }
+}
+
+/* 投稿ボタンの帯（見本 .fab-bar。見本は画面枠の中の absolute、アプリは画面に固定） */
+.fm .fab-bar.is-fixed {
+  position: fixed;
+}
+.fm .fab-bar a.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.fm .fab-bar .fab-report {
+  flex: 1.3;
+}
+.fm .fab-bar .fab-review {
+  flex: 1;
+}
+.fm.has-fab .body {
+  padding-bottom: 96px;
+}
+
+/* フッター（見本 .site-footer のリンク。本番の項目をリンクにする） */
+.fm .site-footer a {
+  text-decoration: none;
+}
+.fm .sf-brand a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.fm .sf-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.fm .sf-legal {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+.fm .sf-legal a {
+  color: var(--ink-3);
+}
+.fm .sf-legal a:hover {
+  color: var(--green-deep);
+}
+/* 見本のインラインスタイルをクラス化したもの */
+.fm .sf-brand b {
+  font-size: 16px;
+}
+.fm .sf-tagline {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  margin-top: 8px;
+  line-height: 1.8;
+}
+.fm .sf-desc {
+  font-size: 11.5px;
+  margin-top: 10px;
+  line-height: 1.8;
+}
+.fm .sf-legal .dis {
+  color: var(--ink-3);
+}
+
+/* 幅の狭いスマホでは「マイページ」をアカウントメニュー（中にマイページがある）に任せ、ヘッダーからはみ出さないようにする */
+@media (max-width: 479px) {
+  .fm .bn-item.bn-mypage {
+    display: none;
+  }
+}
