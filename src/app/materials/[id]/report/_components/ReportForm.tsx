@@ -294,6 +294,10 @@ export function ReportForm({
     );
 
   const readyToPost = input.cropId !== null && input.observedChange.trim().length > 0;
+  // ✓ は「通り過ぎた」だけでなく、そのステップの必須項目がそろっているときだけ付ける。
+  const incompleteSteps = new Set(
+    Object.keys(validateUsageReportSubmission(input)).map(reportErrorStep),
+  );
   return (
     <div className="fm-wiz">
       <form
@@ -355,7 +359,8 @@ export function ReportForm({
           <nav className="steps" aria-label="入力ステップ">
             {STEPS.map((label, index) => {
               const n = index + 1;
-              const state = n === step ? "step cur" : n < step ? "step done" : "step";
+              const done = n < step && !incompleteSteps.has(n);
+              const state = n === step ? "step cur" : done ? "step done" : "step";
               return (
                 <button
                   key={label}
@@ -365,7 +370,7 @@ export function ReportForm({
                   aria-label={`${n} ${label}`}
                   onClick={() => navigate(n)}
                 >
-                  <span className="n">{n < step ? "✓" : n}</span>
+                  <span className="n">{done ? "✓" : n}</span>
                   <span className="lb">{label}</span>
                   {n < TOTAL && <span className="ln" />}
                 </button>
