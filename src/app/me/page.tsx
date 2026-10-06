@@ -12,7 +12,7 @@ import { getProfileDetails } from "@/server/queries/profile-details";
 
 import { AccountActions } from "./_components/AccountActions";
 import { NonGeneralNotice } from "./_components/NonGeneralNotice";
-import { HelpfulShelf, MockLinkRow, PostsShelf, SavedShelf } from "./_components/Shelves";
+import { HelpfulShelf, PostsShelf, SavedShelf } from "./_components/Shelves";
 import { resolveMeAccess } from "./_lib/access";
 
 export default async function MePage({
@@ -86,14 +86,6 @@ export default async function MePage({
       <SavedShelf items={data.savedMaterials} />
       <HelpfulShelf items={data.helpfulItems} />
 
-      <div className="sec-h">
-        <h2>ページ</h2>
-      </div>
-      <div className="card">
-        <MockLinkRow href={`/users/${data.profile.userId}`}>
-          <div className="dv">公開プロフィールを確認</div>
-        </MockLinkRow>
-      </div>
       <AccountActions admin={(await getSessionUser())?.accountType === "admin"} />
     </MockPageShell>
   );
