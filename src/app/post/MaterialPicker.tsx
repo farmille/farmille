@@ -3,35 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { Button } from "@/components/Button";
-import { Input } from "@/components/Input";
-import { StarRating } from "@/components/StarRating";
+import { SearchIcon } from "@/app/_mock/FormParts";
+import { MockNoImage } from "@/app/materials/[id]/_components/MockParts";
 import type { PostingMaterial } from "@/server/queries/materials";
-import { css, cva } from "../../../styled-system/css";
-
-const materialButton = cva({
-  base: {
-    w: "100%",
-    display: "flex",
-    alignItems: "center",
-    gap: "3",
-    p: "3",
-    textAlign: "left",
-    bg: "surface.card",
-    color: "text.default",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderRadius: "card",
-    boxShadow: "shadow",
-    cursor: "pointer",
-  },
-  variants: {
-    selected: {
-      true: { borderColor: "primary.600", bg: "primary.soft" },
-      false: { borderColor: "border.default" },
-    },
-  },
-});
 
 type MaterialPickerProps = {
   materials: PostingMaterial[];
@@ -39,202 +13,135 @@ type MaterialPickerProps = {
   postType?: "report" | "review";
 };
 
+/**
+ * 見本 S.pickMaterial の `.body` と `.pick-footer`。
+ * 検索は本番の仕組み（検索語を送って候補を取り直す）のまま、入力欄の見た目を見本の `.ts-box` にしている。
+ */
 export function MaterialPicker({ materials, query, postType }: MaterialPickerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = materials.find(({ id }) => id === selectedId) ?? null;
 
   return (
     <>
-      <p className={css({ m: "0", mb: "3", fontSize: "sm", color: "text.muted" })}>
+      <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
         どの資材について書きますか？
       </p>
 
-      <form method="get" className={css({ display: "flex", gap: "2" })}>
+      <form method="get" className="pick-search" role="search">
         {postType !== undefined ? <input type="hidden" name="type" value={postType} /> : null}
-        <Input
-          type="search"
-          name="q"
-          defaultValue={query}
-          maxLength={100}
-          placeholder="資材名・メーカー名で検索"
-          aria-label="資材名・メーカー名で検索"
-        />
-        <Button type="submit" size="sm">
+        <div className="ts-box">
+          <span className="ts-ic">
+            <SearchIcon />
+          </span>
+          <input
+            id="pickInput"
+            className="ts-input"
+            type="search"
+            name="q"
+            defaultValue={query}
+            maxLength={100}
+            placeholder="資材名・メーカー名で検索"
+            aria-label="資材名・メーカー名で検索"
+            autoComplete="off"
+          />
+        </div>
+        <button type="submit" className="btn btn-primary btn-sm">
           検索
-        </Button>
+        </button>
       </form>
 
-      <div
-        className={css({ display: "flex", flexDirection: "column", gap: "2.5", mt: "3" })}
-        aria-live="polite"
-      >
+      <div className="stack" style={{ marginTop: 12 }} aria-live="polite">
         {materials.length === 0 ? (
-          <p
-            className={css({
-              m: "0",
-              p: "4",
-              bg: "surface.card",
-              borderRadius: "card",
-              color: "text.muted",
-              fontSize: "sm",
-              textAlign: "center",
-            })}
+          <div
+            className="card pad"
+            style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 12.5 }}
           >
-            条件に合う資材が見つかりませんでした。
-          </p>
+            該当する資材がありません
+          </div>
         ) : (
           materials.map((material) => (
             <button
               key={material.id}
               type="button"
-              className={materialButton({ selected: material.id === selectedId })}
+              className={material.id === selectedId ? "pick-row sel" : "pick-row"}
               aria-label={`${material.name}を選択`}
               aria-pressed={material.id === selectedId}
               onClick={() => setSelectedId(material.id)}
             >
-              <span className={css({ flex: "1", minW: "0" })}>
-                <span className={css({ display: "block", fontSize: "md", fontWeight: "700" })}>
+              <span className="ring" aria-hidden="true" />
+              <span className="mat-img" style={{ width: 44, height: 44 }}>
+                <MockNoImage />
+              </span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span className="t-name" style={{ display: "block", fontSize: 13.5 }}>
                   {material.name}
                 </span>
-                <span
-                  className={css({
-                    display: "block",
-                    mt: "0.5",
-                    fontSize: "xs",
-                    color: "text.muted",
-                  })}
-                >
+                <span className="muted" style={{ display: "block", fontSize: 11, marginTop: 2 }}>
                   {material.manufacturer_name}
                 </span>
-                {material.review_count > 0 ? (
-                  <span
-                    className={css({
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "1.5",
-                      mt: "1.5",
-                      fontSize: "xs",
-                      color: "text.subtle",
-                    })}
-                  >
-                    <StarRating value={Math.round(material.avg_rating ?? 0)} />
-                    感想口コミ {material.review_count}件
-                  </span>
-                ) : null}
               </span>
-              {material.id === selectedId ? (
-                <span
-                  className={css({
-                    color: "primary.700",
-                    fontSize: "sm",
-                    fontWeight: "700",
-                    flexShrink: "0",
-                  })}
-                >
-                  選択中
-                </span>
-              ) : null}
             </button>
           ))
         )}
       </div>
-
-      <p
-        className={css({
-          mt: "4",
-          px: "3",
-          py: "2.5",
-          borderRadius: "pill",
-          bg: "primary.soft",
-          color: "primary.700",
-          fontSize: "xs",
-          textAlign: "center",
-        })}
-      >
+      <div className="hint-pill" style={{ marginTop: 14 }}>
         資材ページの「書く」ボタンからも投稿できます
-      </p>
+      </div>
 
       {selected === null ? null : (
-        <div
-          className={css({
-            position: "fixed",
-            left: "3",
-            right: "3",
-            bottom: "3",
-            zIndex: "20",
-            maxW: "content.form",
-            mx: "auto",
-            p: "3",
-            display: "grid",
-            gap: "2",
-            bg: "card/94",
-            backdropFilter: "blur(10px)",
-            borderWidth: "1px",
-            borderStyle: "solid",
-            borderColor: "border.default",
-            borderRadius: "card",
-            boxShadow: "shadow.lift",
-            tab: {
-              position: "sticky",
-              left: "auto",
-              right: "auto",
-              bottom: "4",
-              mt: "4",
-            },
-          })}
-          data-ui="responsive-post-actions"
-        >
-          <p
-            className={css({
-              m: "0",
-              mb: "1",
-              fontSize: "sm",
-              fontWeight: "700",
-              color: "text.default",
-            })}
-          >
-            {selected.name}
-          </p>
-          {postType !== "review" ? (
-            <Link
-              href={`/materials/${selected.id}/report/new`}
-              className={css({
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                py: "3",
-                borderRadius: "button",
-                bg: "primary.700",
-                color: "surface.card",
-                fontSize: "md",
-                fontWeight: "700",
-                textDecoration: "none",
-              })}
+        <div className="pick-footer" data-ui="responsive-post-actions">
+          <div className="pf-name">
+            <span
+              className="mat-img"
+              style={{
+                width: 42,
+                height: 42,
+                flex: "0 0 auto",
+                background: "#fff",
+                border: "1px solid var(--line)",
+                padding: 3,
+              }}
             >
-              実証詳細レポートを書く
-            </Link>
+              <MockNoImage />
+            </span>
+            <span style={{ minWidth: 0 }}>
+              <span
+                style={{
+                  display: "block",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {selected.name}
+              </span>
+              <span
+                className="muted"
+                style={{ display: "block", fontSize: 11, fontWeight: 400, marginTop: 1 }}
+              >
+                {selected.manufacturer_name}
+              </span>
+            </span>
+          </div>
+          {postType !== "review" ? (
+            <>
+              <Link className="btn btn-primary" href={`/materials/${selected.id}/report/new`}>
+                実証詳細レポートを書く
+              </Link>
+              <div className="fguide" style={{ textAlign: "center", margin: "5px 0 7px" }}>
+                対照区を設けた、詳しい体験の共有です
+              </div>
+            </>
           ) : null}
           {postType !== "report" ? (
-            <Link
-              href={`/materials/${selected.id}/review/new`}
-              className={css({
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                py: "3",
-                borderRadius: "button",
-                bg: "surface.card",
-                color: "primary.700",
-                borderWidth: "1px",
-                borderStyle: "solid",
-                borderColor: "border.strong",
-                fontSize: "md",
-                fontWeight: "700",
-                textDecoration: "none",
-              })}
-            >
-              感想口コミを書く
-            </Link>
+            <>
+              <Link className="btn btn-ghost" href={`/materials/${selected.id}/review/new`}>
+                感想口コミを書く
+              </Link>
+              <div className="fguide" style={{ textAlign: "center", margin: "5px 0 0" }}>
+                星5段階の評価とコメント・写真で、気軽に体験を共有できます
+              </div>
+            </>
           ) : null}
         </div>
       )}

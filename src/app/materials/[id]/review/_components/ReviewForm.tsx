@@ -1,7 +1,5 @@
 "use client";
 
-import { Checkbox } from "@/components/Checkbox";
-
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
@@ -12,15 +10,15 @@ import {
   type ReviewActionState,
   updateReviewAction,
 } from "@/app/materials/[id]/review/actions";
-import { FormMessage } from "@/components/auth/Fields";
-import { Badge } from "@/components/Badge";
-import { Button } from "@/components/Button";
-import { FileInput } from "@/components/FileInput";
-import { Input } from "@/components/Input";
-import { StarRating } from "@/components/StarRating";
-import { Textarea } from "@/components/Textarea";
+import {
+  describedBy,
+  FieldError,
+  FormNotice,
+  ImagePlaceholderIcon,
+  OptionalBadge,
+  RequiredBadge,
+} from "@/app/_mock/FormParts";
 import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
-import { css } from "../../../../../../styled-system/css";
 
 import { ReviewCropPicker } from "./ReviewCropPicker";
 
@@ -31,6 +29,8 @@ type PendingPhoto = {
   key: string;
   file: File;
   caption: string;
+  /** 選んだ写真の表示用（URL.createObjectURL）。外すときと画面を離れるときに解放する。 */
+  previewUrl: string;
 };
 
 type ReviewFormValues = {
@@ -56,46 +56,6 @@ type ReviewFormProps = ReviewFormBaseProps &
   ({ mode: "create"; reviewId?: never } | { mode: "edit"; reviewId: string });
 
 const initialActionState: ReviewActionState = { status: "idle" };
-
-const field = css({
-  mt: "5",
-  _first: { mt: "0" },
-});
-
-const label = css({
-  display: "flex",
-  alignItems: "center",
-  flexWrap: "wrap",
-  gap: "2",
-  mb: "1.5",
-  fontSize: "md",
-  fontWeight: "700",
-});
-
-const guide = css({
-  m: "0",
-  mt: "1.5",
-  fontSize: "xs",
-  color: "text.muted",
-  lineHeight: "1.55",
-});
-
-const fieldError = css({
-  m: "0",
-  mt: "1.5",
-  fontSize: "sm",
-  color: "accent.danger",
-  fontWeight: "700",
-});
-
-const photoCard = css({
-  p: "3",
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "card",
-});
 
 function extensionFor(file: File): "jpg" | "png" | "webp" {
   if (file.type === "image/jpeg") return "jpg";
@@ -131,6 +91,8 @@ export function ReviewForm({
   const [state, formAction, actionPending] = useActionState(action, initialActionState);
   const [selectedCropIds, setSelectedCropIds] = useState(initialValues.cropIds);
   const [rating, setRating] = useState(initialValues.rating);
+  // form action の後に React が未制御の入力を初期値へ戻すため、本文は state で保持してエラー時も消さない。
+  const [body, setBody] = useState(initialValues.body);
   const [pesticideAck, setPesticideAck] = useState(initialValues.pesticideAck);
   const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -164,6 +126,15 @@ export function ReviewForm({
     };
   }, [state, supabase]);
 
+  // 画面を離れるときに、選んだ写真の表示用 URL を解放する。
+  const pendingPreviewUrls = pendingPhotos.map((photo) => photo.previewUrl).join("\n");
+  useEffect(() => {
+    const urls = pendingPreviewUrls.length === 0 ? [] : pendingPreviewUrls.split("\n");
+    return () => {
+      for (const url of urls) URL.revokeObjectURL(url);
+    };
+  }, [pendingPreviewUrls]);
+
   function addPhotos(files: FileList | null) {
     if (files === null) return;
     const additions: PendingPhoto[] = [];
@@ -174,8 +145,15 @@ export function ReviewForm({
         setLocalError(validationMessage);
         return;
       }
+    }
 
-      additions.push({ key: crypto.randomUUID(), file, caption: "" });
+    for (const file of Array.from(files)) {
+      additions.push({
+        key: crypto.randomUUID(),
+        file,
+        caption: "",
+        previewUrl: URL.createObjectURL(file),
+      });
     }
 
     setLocalError(null);
@@ -217,42 +195,34 @@ export function ReviewForm({
     }
   }
 
+  // 見本 S.reviewForm の `.body` の中身。スタイルは src/app/_mock/mock.css・forms.css（.fm 配下）。
   return (
     <form action={submit}>
       {existingReviewNotice ? (
-        <FormMessage tone="info">
+        <FormNotice tone="info">
           この資材には投稿済みの感想口コミがあります。内容を編集できます。
-        </FormMessage>
+        </FormNotice>
       ) : null}
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
-      {localError === null ? null : <FormMessage tone="error">{localError}</FormMessage>}
+      {state.status === "error" ? <FormNotice tone="error">{state.message}</FormNotice> : null}
+      {localError === null ? null : <FormNotice tone="error">{localError}</FormNotice>}
 
-      <div
-        className={css({
-          mt: "3",
-          p: "3",
-          bg: "primary.soft",
-          borderWidth: "1px",
-          borderStyle: "solid",
-          borderColor: "border.default",
-          borderRadius: "card",
-        })}
-      >
-        <span className={css({ display: "block", fontSize: "2xs", color: "text.muted" })}>
-          対象資材
-        </span>
-        <strong className={css({ display: "block", mt: "0.5", fontSize: "md" })}>
-          {material.name}
-        </strong>
-        <span className={css({ display: "block", mt: "0.5", fontSize: "xs", color: "text.muted" })}>
-          {material.manufacturerName}
-        </span>
+      <div className="card target" style={{ marginBottom: 18 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="muted" style={{ fontSize: 10.5 }}>
+            対象資材
+          </div>
+          <div className="t-name">{material.name}</div>
+          <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>
+            {material.manufacturerName}
+          </div>
+        </div>
       </div>
 
-      <div className={field}>
-        <label className={label} htmlFor="review-crop">
-          作目 <Badge variant="required">必須</Badge>
-          <span className={css({ fontSize: "xs", color: "text.muted", fontWeight: "400" })}>
+      <div className="field">
+        <label htmlFor="review-crop">
+          作目
+          <RequiredBadge />
+          <span className="muted" style={{ fontSize: 11, fontWeight: 400 }}>
             1つ選択してください
           </span>
         </label>
@@ -267,191 +237,212 @@ export function ReviewForm({
         />
       </div>
 
-      <div className={field}>
-        <span className={label}>
-          総合評価 <Badge variant="required">必須</Badge>
-        </span>
-        <StarRating mode="input" value={rating} onChange={setRating} name="rating" />
-        {fieldErrors?.rating === undefined ? null : (
-          <p className={fieldError}>{fieldErrors.rating}</p>
-        )}
-      </div>
+      <fieldset
+        className="field"
+        aria-describedby={describedBy(fieldErrors?.rating && "review-rating-error")}
+      >
+        <legend className="field-label">
+          総合評価
+          <RequiredBadge />
+        </legend>
+        <div className="stars-input">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <label key={n}>
+              <input
+                type="radio"
+                name="rating"
+                value={n}
+                aria-label={`${n}`}
+                checked={rating === n}
+                onChange={() => setRating(n)}
+              />
+              <span className={n <= rating ? undefined : "off"} aria-hidden="true">
+                ★
+              </span>
+            </label>
+          ))}
+        </div>
+        <FieldError id="review-rating-error" message={fieldErrors?.rating} />
+      </fieldset>
 
-      <div className={field}>
-        <label className={label} htmlFor="review-body">
-          感想口コミ本文 <Badge variant="required">必須</Badge>
+      <div className="field">
+        <label htmlFor="review-body">
+          感想口コミ本文
+          <RequiredBadge />
         </label>
-        <Textarea
+        <textarea
           id="review-body"
           name="body"
-          size="lg"
-          defaultValue={initialValues.body}
-          placeholder="トマト（ハウス栽培）で、定植後から2週間おきに灌水と合わせて使いました。1ヶ月ほどで根張りがしっかりしてきて、高温が続いた時期も葉のしおれが少なかったように感じます。"
+          className="textarea big"
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          placeholder="自由に記入してください"
+          aria-describedby={describedBy(
+            "review-body-example",
+            "review-body-guide",
+            fieldErrors?.body && "review-body-error",
+          )}
+          aria-invalid={fieldErrors?.body ? true : undefined}
           required
         />
-        <p className={guide}>
+        <div>
+          <div className="muted" style={{ fontSize: 10.5, margin: "8px 0 4px" }}>
+            記入例
+          </div>
+          <div className="quote-box" id="review-body-example" style={{ marginTop: 0 }}>
+            トマト（ハウス栽培）で、定植後から2週間おきに灌水と合わせて使いました。1ヶ月ほどで根張りがしっかりしてきて、高温が続いた時期も葉のしおれが少なかったように感じます。
+          </div>
+        </div>
+        <div className="fguide" id="review-body-guide" style={{ marginTop: 7 }}>
           作物・使用時期・使い方・感じた変化が入っていると参考になります。もっと詳しく書きたい場合は「
-          <Link href={`/materials/${material.id}/report/new`}>実証詳細レポート入力</Link>」から。
-        </p>
-        {fieldErrors?.body === undefined ? null : <p className={fieldError}>{fieldErrors.body}</p>}
+          <Link className="text-link" href={`/materials/${material.id}/report/new`}>
+            実証詳細レポート入力
+          </Link>
+          」から。
+        </div>
+        <FieldError id="review-body-error" message={fieldErrors?.body} />
       </div>
 
-      <div className={field}>
-        <span className={label}>
-          写真 <Badge variant="optional">任意・複数可</Badge>
-        </span>
-        {initialValues.photos.length === 0 ? null : (
-          <div className={css({ display: "grid", gap: "2", mb: "2" })}>
-            {initialValues.photos.map((photo) => (
-              <div key={photo.id} className={photoCard}>
-                <input type="hidden" name="existingPhotoId" value={photo.id} />
+      <fieldset
+        className="field"
+        aria-describedby={describedBy(
+          "review-photo-guide",
+          fieldErrors?.photos && "review-photo-error",
+        )}
+      >
+        <legend className="field-label">
+          写真
+          <OptionalBadge>任意・複数可</OptionalBadge>
+        </legend>
+        <div className="photo-grid">
+          {initialValues.photos.map((photo) => (
+            <div key={photo.id} className="photo-item">
+              <input type="hidden" name="existingPhotoId" value={photo.id} />
+              <div className="ph">
                 <Image
                   src={photo.url}
                   alt={photo.caption ?? "感想口コミ写真"}
-                  width={80}
-                  height={80}
+                  width={240}
+                  height={180}
                   unoptimized
-                  className={css({
-                    w: "80px",
-                    aspectRatio: "image.square",
-                    display: "block",
-                    objectFit: "cover",
-                    borderRadius: "button",
-                    mb: "2",
-                  })}
                 />
-                <Input
-                  name={`existingPhotoCaption-${photo.id}`}
-                  defaultValue={photo.caption ?? ""}
-                  placeholder="写真の説明"
-                  aria-label="既存写真の説明"
-                />
-                <label
-                  className={css({
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "2",
-                    mt: "2",
-                    fontSize: "sm",
-                    color: "accent.danger",
-                  })}
-                >
-                  <Checkbox name="removePhotoId" value={photo.id} />
-                  この写真を削除する
-                </label>
               </div>
-            ))}
-          </div>
-        )}
-
-        {pendingPhotos.length === 0 ? null : (
-          <div className={css({ display: "grid", gap: "2", mb: "2" })}>
-            {pendingPhotos.map((photo) => (
-              <div key={photo.key} className={photoCard}>
-                <p className={css({ m: "0", mb: "2", fontSize: "sm", fontWeight: "700" })}>
-                  {photo.file.name}
-                </p>
-                <Input
-                  value={photo.caption}
-                  onChange={(event) => {
-                    setPendingPhotos((current) =>
-                      current.map((item) =>
-                        item.key === photo.key ? { ...item, caption: event.target.value } : item,
-                      ),
-                    );
-                  }}
-                  placeholder="例）散布前の様子"
-                  aria-label={`${photo.file.name}の説明`}
+              <input
+                className="input photo-cap"
+                name={`existingPhotoCaption-${photo.id}`}
+                defaultValue={photo.caption ?? ""}
+                placeholder="写真の説明"
+                aria-label="既存写真の説明"
+              />
+              <label className="photo-remove">
+                <input type="checkbox" name="removePhotoId" value={photo.id} />
+                この写真を削除する
+              </label>
+            </div>
+          ))}
+          {pendingPhotos.map((photo) => (
+            <div key={photo.key} className="photo-item">
+              <div className="ph">
+                <Image
+                  src={photo.previewUrl}
+                  alt={photo.file.name}
+                  width={240}
+                  height={180}
+                  unoptimized
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    setPendingPhotos((current) => current.filter((item) => item.key !== photo.key))
-                  }
-                >
-                  選択を解除
-                </Button>
               </div>
-            ))}
-          </div>
-        )}
+              <input
+                className="input photo-cap"
+                value={photo.caption}
+                onChange={(event) => {
+                  setPendingPhotos((current) =>
+                    current.map((item) =>
+                      item.key === photo.key ? { ...item, caption: event.target.value } : item,
+                    ),
+                  );
+                }}
+                placeholder="例）散布前の様子"
+                aria-label={`${photo.file.name}の説明`}
+              />
+              <button
+                type="button"
+                className="photo-remove"
+                onClick={() =>
+                  setPendingPhotos((current) => current.filter((item) => item.key !== photo.key))
+                }
+              >
+                選択を解除
+              </button>
+            </div>
+          ))}
+          <label className="photo-add">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              aria-label="感想口コミ写真を追加"
+              onChange={(event) => {
+                addPhotos(event.target.files);
+                event.target.value = "";
+              }}
+            />
+            <span aria-hidden="true">
+              {initialValues.photos.length + pendingPhotos.length === 0 ? (
+                <>
+                  <ImagePlaceholderIcon />
+                  <br />
+                </>
+              ) : null}
+              ＋<br />
+              追加
+            </span>
+          </label>
+        </div>
+        <div className="fguide" id="review-photo-guide" style={{ marginTop: 7 }}>
+          1枚あたり5MB以下の jpeg・png・webp を選択できます。
+        </div>
+        <FieldError id="review-photo-error" message={fieldErrors?.photos} />
+      </fieldset>
 
-        <FileInput
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          aria-label="感想口コミ写真を追加"
-          onChange={(event) => {
-            addPhotos(event.target.files);
-            event.target.value = "";
-          }}
+      <label className="compliance check-toggle">
+        <input
+          type="checkbox"
+          name="pesticideAck"
+          required
+          checked={pesticideAck}
+          onChange={(event) => setPesticideAck(event.target.checked)}
+          aria-describedby={describedBy(fieldErrors?.pesticideAck && "review-ack-error")}
+          aria-invalid={fieldErrors?.pesticideAck ? true : undefined}
         />
-        <p className={guide}>1枚あたり5MB以下の jpeg・png・webp を選択できます。</p>
-        {fieldErrors?.photos === undefined ? null : (
-          <p className={fieldError}>{fieldErrors.photos}</p>
-        )}
+        <span className="cbox" aria-hidden="true" />
+        <span>
+          実際に使用した感想を、使用条件や感じた変化が分かるよう具体的にご記入ください。農薬として登録されていない資材については、農薬としての効果を断定せず、実際に感じた変化としてご記載ください。
+          <br />
+          投稿の前に
+          <Link href="/legal/posting" target="_blank" rel="noopener noreferrer">
+            感想口コミガイドライン
+          </Link>
+          ・
+          <Link href="/legal/terms" target="_blank" rel="noopener noreferrer">
+            サイト運営ポリシー
+          </Link>
+          をご確認ください。 <RequiredBadge />
+        </span>
+      </label>
+      <FieldError id="review-ack-error" message={fieldErrors?.pesticideAck} />
+      <div className="fguide" style={{ marginTop: 6 }}>
+        登録済みのニックネームで投稿されます。
       </div>
 
-      <div className={field}>
-        <label
-          className={css({
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "2.5",
-            p: "3",
-            bg: "amber.soft",
-            borderWidth: "1px",
-            borderStyle: "solid",
-            borderColor: "border.default",
-            borderRadius: "card",
-            fontSize: "sm",
-            lineHeight: "1.6",
-            cursor: "pointer",
-          })}
+      <div className="form-actions">
+        <button
+          className="btn btn-primary"
+          type="submit"
+          disabled={isPending || rating === 0 || !pesticideAck}
         >
-          <Checkbox
-            name="pesticideAck"
-            required
-            checked={pesticideAck}
-            onChange={(event) => setPesticideAck(event.target.checked)}
-            className={css({ mt: "1", flexShrink: "0" })}
-          />
-          <span>
-            実際に使用した感想を、使用条件や感じた変化が分かるよう具体的にご記入ください。農薬として登録されていない資材については、農薬としての効果を断定せず、実際に感じた変化としてご記載ください。投稿の前に
-            <Link href="/legal/posting" target="_blank" rel="noopener noreferrer">
-              感想口コミガイドライン
-            </Link>
-            ・
-            <Link href="/legal/terms" target="_blank" rel="noopener noreferrer">
-              サイト運営ポリシー
-            </Link>
-            をご確認ください。
-            <span className={css({ color: "accent.danger", fontWeight: "700" })}>（必須）</span>
-          </span>
-        </label>
-        {fieldErrors?.pesticideAck === undefined ? null : (
-          <p className={fieldError}>{fieldErrors.pesticideAck}</p>
-        )}
-      </div>
-
-      <div className={css({ display: "grid", gap: "2", mt: "6" })}>
-        <Button type="submit" disabled={isPending || rating === 0 || !pesticideAck}>
           {isPending ? "送信中…" : mode === "create" ? "投稿する" : "変更を保存する"}
-        </Button>
-        <Link
-          href={`/materials/${material.id}`}
-          className={css({
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            py: "3",
-            color: "primary.700",
-            fontSize: "md",
-            fontWeight: "700",
-            textDecoration: "none",
-          })}
-        >
+        </button>
+        <Link className="draft" href={`/materials/${material.id}`}>
           キャンセル
         </Link>
       </div>

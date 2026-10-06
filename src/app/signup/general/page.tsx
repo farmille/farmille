@@ -1,7 +1,9 @@
+import "../../_mock/forms.css";
+
 import type { Metadata } from "next";
 
+import { MockPageShell } from "@/app/_mock/MockPageShell";
 import { SignupForm } from "@/app/signup/SignupForm";
-import { AuthScreen } from "@/components/auth/AuthScreen";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { safeNextPath } from "@/lib/auth/safe-next";
 
@@ -17,9 +19,13 @@ export default async function GeneralSignupPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const next = safeNextPath((await searchParams).next);
+  // 見本 S.signup。戻るバーの題は見本どおり「Farmilleをはじめる」、見出しは読み上げ用に画面名を置く。
   return (
-    <AuthScreen lead="匿名で参加できます。実名や所属の公開は不要です。" title="一般ユーザー登録">
-      <SignupForm next={next} />
-    </AuthScreen>
+    <MockPageShell title="Farmilleをはじめる" backHref="/signup">
+      <div className="fm-narrow">
+        <h1 className="sr-only">一般ユーザー登録</h1>
+        <SignupForm next={next} />
+      </div>
+    </MockPageShell>
   );
 }

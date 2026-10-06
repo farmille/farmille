@@ -1,6 +1,8 @@
+import "@/app/_mock/forms.css";
+
 import { notFound, redirect } from "next/navigation";
 
-import { FormPageShell } from "@/components";
+import { MockPageShell } from "@/app/_mock/MockPageShell";
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { findOwnReviewIdByMaterial, listReviewCropOptions } from "@/server/queries/reviews";
@@ -43,12 +45,7 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
   }
 
   return (
-    <FormPageShell
-      chrome="public"
-      active="search"
-      title={`${material.name}の感想口コミ`}
-      backHref={materialPath}
-    >
+    <MockPageShell title={`${material.name} の感想口コミ投稿`} backHref={materialPath}>
       <ReviewForm
         mode="create"
         material={{
@@ -66,6 +63,6 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
           photos: [],
         }}
       />
-    </FormPageShell>
+    </MockPageShell>
   );
 }

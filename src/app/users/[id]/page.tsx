@@ -1,11 +1,14 @@
-import { ProfileDetailsDisplay } from "@/components/ProfileDetailsDisplay";
+import "@/app/_mock/forms.css";
+
 import { getProfileDetails } from "@/server/queries/profile-details";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { AppBar, SectionHeading, StatCard } from "@/components";
+import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { MockProfileCard } from "@/app/_mock/MockProfileCard";
+import { publicProfileLabel } from "@/lib/public-profile-label";
 import { createPageMetadata } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { createReportAction } from "@/server/actions/reports";
@@ -14,37 +17,10 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublicProfilePage, type PublicProfilePageData } from "@/server/queries/public-profiles";
 import type { Result } from "@/server/result";
 import { ReportDialog } from "@/components/ReportDialog";
-import { css } from "../../../../styled-system/css";
 
 import { PostTimeline } from "./_components/PostTimeline";
-import { ProfileHeader } from "./_components/ProfileHeader";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-const shell = css({
-  minH: "100dvh",
-  bg: "surface.page",
-  color: "text.default",
-  fontFamily: "sans",
-});
-
-const body = css({
-  w: "100%",
-  maxW: "content.medium",
-  mx: "auto",
-  px: "4",
-  py: "4",
-  pb: "10",
-  bg: "surface.panel",
-  tab: { px: "5", py: "5" },
-});
-
-const statRow = css({
-  display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: "2.5",
-  mt: "3.5",
-});
 
 const getCachedProfilePage = cache(async (id: string): Promise<Result<PublicProfilePageData>> => {
   if (!UUID_PATTERN.test(id)) {
@@ -102,34 +78,43 @@ export default async function UserPage({ params }: UserPageProps) {
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
   const isOwnProfile = viewerUserId !== null && viewerUserId === data.profile.userId;
+  const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 
+  // 見本 S.profilePublic の `.body` の中身。スタイルは src/app/_mock/mock.css・forms.css（.fm 配下）。
   return (
-    <div className={shell}>
-      <AppBar chrome="public" title={data.profile.handle} backHref="/" />
-      <main className={body}>
-        <ProfileHeader profile={data.profile} />
-        <ProfileDetailsDisplay details={details.data} />
+    <MockPageShell title={data.profile.handle} backHref="/">
+      <MockProfileCard
+        handle={data.profile.handle}
+        avatarUrl={data.profile.avatarUrl}
+        details={details.data}
+        stats={[
+          { label: "実証詳細レポート", value: reportCount },
+          { label: "感想口コミ", value: data.reviewCount },
+          { label: "参考になった", value: data.helpfulCount },
+        ]}
+      />
 
-        {isOwnProfile ? null : (
-          <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>
-            <ReportDialog
-              action={createReportAction.bind(null, "profile", data.profile.userId, `/users/${id}`)}
-              reasonOptions={REPORT_REASON_OPTIONS}
-              title={`${data.profile.handle}さんを通報する`}
-            />
-          </div>
-        )}
-
-        <div className={statRow}>
-          <StatCard value={data.reviewCount} label="感想口コミ" />
-          <StatCard value={data.helpfulCount} label="参考になった" />
+      {isOwnProfile ? null : (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+          <ReportDialog
+            action={createReportAction.bind(null, "profile", data.profile.userId, `/users/${id}`)}
+            reasonOptions={REPORT_REASON_OPTIONS}
+            title={`${data.profile.handle}さんを通報する`}
+          />
         </div>
+      )}
 
-        <section aria-labelledby="profile-posts-heading">
-          <SectionHeading title={<span id="profile-posts-heading">これまでの投稿</span>} />
-          <PostTimeline profile={data.profile} posts={data.posts} viewerUserId={viewerUserId} />
-        </section>
-      </main>
-    </div>
+      <section aria-labelledby="profile-posts-heading">
+        <div className="sec-h">
+          <h2 id="profile-posts-heading">これまでの投稿</h2>
+        </div>
+        <PostTimeline
+          profile={data.profile}
+          posts={data.posts}
+          authorLabel={publicProfileLabel(details.data)}
+          viewerUserId={viewerUserId}
+        />
+      </section>
+    </MockPageShell>
   );
 }

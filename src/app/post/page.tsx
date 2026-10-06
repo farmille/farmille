@@ -1,7 +1,9 @@
+import "@/app/_mock/forms.css";
+
 import { notFound, redirect } from "next/navigation";
 import * as v from "valibot";
 
-import { FormPageShell } from "@/components";
+import { MockPageShell } from "@/app/_mock/MockPageShell";
 import { getSessionUser, requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { searchPostingMaterials } from "@/server/queries/materials";
@@ -43,8 +45,8 @@ export default async function PostPage({ searchParams }: PostPageProps) {
   }
 
   return (
-    <FormPageShell chrome="public" active="post" title="投稿する" backHref="/" hasFixedFooter>
+    <MockPageShell title="投稿する" backHref="/">
       <MaterialPicker materials={result.data} query={query} postType={postType} />
-    </FormPageShell>
+    </MockPageShell>
   );
 }

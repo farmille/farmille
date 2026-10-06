@@ -1,6 +1,8 @@
+import "@/app/_mock/forms.css";
+
 import { notFound, redirect } from "next/navigation";
 
-import { FormPageShell } from "@/components";
+import { MockPageShell } from "@/app/_mock/MockPageShell";
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { getReviewForEdit, listReviewCropOptions } from "@/server/queries/reviews";
@@ -45,12 +47,7 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
   const review = reviewResult.data;
 
   return (
-    <FormPageShell
-      chrome="public"
-      active="search"
-      title={`${material.name}の感想口コミ編集`}
-      backHref={materialPath}
-    >
+    <MockPageShell title={`${material.name} の感想口コミ編集`} backHref={materialPath}>
       <ReviewForm
         mode="edit"
         material={{
@@ -70,6 +67,6 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
           photos: review.photos,
         }}
       />
-    </FormPageShell>
+    </MockPageShell>
   );
 }
