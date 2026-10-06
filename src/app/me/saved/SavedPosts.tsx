@@ -28,7 +28,7 @@ export async function SavedPosts({ userId }: { userId: string }) {
   const reportById = new Map(reports.data.map((report) => [report.id, report]));
   return (
     <section className={css({ mt: "6" })} aria-labelledby="saved-posts-heading">
-      <h2 id="saved-posts-heading" className={css({ fontSize: "lg", fontWeight: "700", mb: "3" })}>
+      <h2 id="saved-posts-heading" className={css({ fontSize: "lg", mb: "3" })}>
         保存した投稿
       </h2>
       <div className={css({ display: "grid", gap: "3" })}>

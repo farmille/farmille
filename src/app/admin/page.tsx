@@ -31,7 +31,7 @@ const menuListStyle = css({
 
 const menuLinkStyle = css({
   fontSize: "lg",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "primary.700",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },

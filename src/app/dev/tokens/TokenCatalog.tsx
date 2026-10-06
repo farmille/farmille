@@ -92,7 +92,6 @@ const frame = css({
 const titleStyle = css({
   m: "0",
   fontSize: "3xl",
-  fontWeight: "bold",
   letterSpacing: "0.01em",
 });
 
@@ -110,7 +109,6 @@ const sectionTitleStyle = css({
   m: "0",
   color: "text.default",
   fontSize: "lg",
-  fontWeight: "bold",
 });
 
 const sectionLeadStyle = css({

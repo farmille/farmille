@@ -23,7 +23,7 @@ const formStyle = css({
 
 const groupTitleStyle = css({
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "text.muted",
   mt: "2",
 });
@@ -50,7 +50,7 @@ const chipLabelStyle = css({
   "&:has(input:checked)": {
     borderColor: "primary.600",
     bg: "primary.200",
-    fontWeight: "700",
+    fontWeight: "bold",
   },
 });
 
@@ -63,7 +63,7 @@ const classificationGroupStyle = css({
 
 const classificationGroupNameStyle = css({
   fontSize: "sm",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "text.subtle",
 });
 

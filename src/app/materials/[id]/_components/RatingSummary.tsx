@@ -50,7 +50,7 @@ export function RatingSummary({ average, reviewCount, distribution }: RatingSumm
           <div
             className={css({
               fontSize: "3xl",
-              fontWeight: "800",
+              fontWeight: "extrabold",
               fontVariantNumeric: "tabular-nums",
             })}
           >

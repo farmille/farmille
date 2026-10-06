@@ -54,10 +54,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           <Icon name="person" size="2xl" />
         )}
       </div>
-      <h1
-        id="profile-handle"
-        className={css({ mt: "2.5", mb: "0", fontSize: "xl", fontWeight: "800" })}
-      >
+      <h1 id="profile-handle" className={css({ mt: "2.5", mb: "0", fontSize: "xl" })}>
         {profile.handle}
       </h1>
     </section>

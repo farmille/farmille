@@ -75,7 +75,6 @@ const pageTitle = css({
     clip: "auto",
     whiteSpace: "normal",
     fontSize: "2xl",
-    fontWeight: "800",
   },
 });
 
@@ -83,12 +82,12 @@ const logicHint = css({
   fontSize: "xs",
   color: "text.muted",
   mt: "2.5",
-  lineHeight: "1.5",
+  lineHeight: "normal",
 });
 
 const logicStrong = css({
   color: "primary.700",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 const resultHeader = css({
@@ -323,7 +322,7 @@ function SearchResults({
         groups.map((group) => (
           <section key={group.title ?? "results"}>
             {group.title ? (
-              <h2 className={css({ fontSize: "md", fontWeight: "700", mt: "4" })}>
+              <h2 className={css({ fontSize: "md", mt: "4" })}>
                 {group.title} {group.items.length}件
               </h2>
             ) : null}

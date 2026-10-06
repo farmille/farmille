@@ -55,7 +55,7 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
   return (
     <MaterialPageShell title={`${material.name}の記事`} backHref={materialPath}>
       <header>
-        <h1 className={css({ m: "0", fontSize: "xl", fontWeight: "700" })}>
+        <h1 className={css({ m: "0", fontSize: "xl" })}>
           {material.name} の記事・実証詳細レポート
         </h1>
         <p
@@ -64,7 +64,7 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
             mt: "2",
             color: "text.muted",
             fontSize: "sm",
-            lineHeight: "1.65",
+            lineHeight: "relaxed",
           })}
         >
           この資材に紐づく、農家の実証詳細レポートとメーカーによる記事です。

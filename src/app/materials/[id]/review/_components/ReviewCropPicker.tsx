@@ -59,13 +59,13 @@ const selectedChip = css({
   px: "2.5",
   py: "1",
   fontSize: "sm",
-  fontWeight: "600",
+  fontWeight: "semibold",
 });
 
 const category = css({
   fontSize: "2xs",
   color: "text.subtle",
-  fontWeight: "600",
+  fontWeight: "semibold",
 });
 
 const removeButton = css({
@@ -74,7 +74,7 @@ const removeButton = css({
   color: "inherit",
   p: "0",
   fontSize: "md",
-  lineHeight: "1",
+  lineHeight: "none",
   cursor: "pointer",
 });
 
@@ -88,7 +88,7 @@ const selectionError = css({
   m: "0",
   fontSize: "sm",
   color: "accent.danger",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 const panel = css({
@@ -96,7 +96,7 @@ const panel = css({
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
-  borderRadius: "button",
+  borderRadius: "card",
   bg: "surface.card",
   boxShadow: "shadow",
   overflow: "hidden",
@@ -107,7 +107,7 @@ const panelHeading = css({
   pt: "2.5",
   pb: "1",
   fontSize: "xs",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "text.subtle",
 });
 

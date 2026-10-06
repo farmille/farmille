@@ -54,8 +54,7 @@ const titleStyle = css({
   flex: "1",
   minW: "0",
   fontSize: "lg",
-  fontWeight: "700",
-  lineHeight: "1.35",
+  lineHeight: "snug",
 });
 
 const bodyStyle = css({
@@ -70,7 +69,7 @@ const bodyStyle = css({
 const leadStyle = css({
   fontSize: "sm",
   color: "text.subtle",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
   mb: "4.5",
 });
 

@@ -14,8 +14,10 @@ import {
 import { css } from "../../styled-system/css";
 
 const sectionStyle = css({ py: "5", borderBottomWidth: "1px", borderColor: "border.default" });
-const prose = css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere", lineHeight: "1.8" });
-const headingStyle = css({ fontSize: "lg", fontWeight: "700", mb: "3" });
+const prose = css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere", lineHeight: "prose" });
+const sectionHeading = css({ fontSize: "lg", mb: "3" });
+const subHeading = css({ fontSize: "md", fontWeight: "bold", mb: "3" });
+const graphCaption = css({ fontSize: "sm", fontWeight: "bold", mb: "2" });
 const photoGrid = css({
   display: "grid",
   gridTemplateColumns: "repeat(2,minmax(0,1fr))",
@@ -67,7 +69,7 @@ export function ReportGraph({
   const x = (value: number) => 5 + ((value - minimum) / range) * 290;
   return (
     <figure>
-      {graph.heading && <figcaption className={headingStyle}>{graph.heading}</figcaption>}
+      {graph.heading && <figcaption className={graphCaption}>{graph.heading}</figcaption>}
       {rows.map((row) => (
         <div key={row.id}>
           <div
@@ -173,7 +175,7 @@ export function UsageReportArticle({
               }
             />
           ) : (
-            <h2 className={headingStyle}>
+            <h2 className={sectionHeading}>
               {input.headings.find((item) => item.section === section.value)?.title ||
                 section.title}
             </h2>
@@ -210,7 +212,7 @@ export function UsageReportArticle({
                   borderRadius: "card",
                 })}
               >
-                <h3 className={headingStyle}>
+                <h3 className={subHeading}>
                   <span aria-hidden="true" className={reportPlotColor(index)}>
                     ●{" "}
                   </span>
@@ -237,7 +239,7 @@ export function UsageReportArticle({
             <>
               {groupReportMeasurements(input.measurements).map((measurement) => (
                 <div key={measurement.id} className={css({ mt: "5" })}>
-                  <h3 className={headingStyle}>
+                  <h3 className={subHeading}>
                     使用結果の詳細：{measurement.name || "調査項目未入力"}
                     {measurement.unit ? `（${measurement.unit}）` : ""}
                   </h3>
@@ -255,7 +257,7 @@ export function UsageReportArticle({
                 .filter((measurement) => measurement.kind === "text")
                 .map((measurement) => (
                   <div key={measurement.id} className={css({ mt: "5" })}>
-                    <h3 className={headingStyle}>{measurement.name}</h3>
+                    <h3 className={subHeading}>{measurement.name}</h3>
                     {text(measurement.body, `${measurement.name}の本文`, (body) => ({
                       ...input,
                       measurements: input.measurements.flatMap((item) =>

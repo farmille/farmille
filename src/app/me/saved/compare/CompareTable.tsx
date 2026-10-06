@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { StarRating } from "@/components";
+import { Badge, StarRating } from "@/components";
 import type { CompareMaterialItem } from "@/server/queries/saved-materials";
 import { css } from "../../../../../styled-system/css";
 
@@ -28,7 +28,7 @@ const th = css({
   zIndex: "1",
   bg: "surface.page",
   color: "text.subtle",
-  fontWeight: "700",
+  fontWeight: "bold",
   fontSize: "xs",
   textAlign: "left",
   px: "3",
@@ -56,7 +56,7 @@ const td = css({
 
 const materialLink = css({
   color: "primary.700",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
 });
 
@@ -64,17 +64,6 @@ const tagList = css({
   display: "flex",
   flexWrap: "wrap",
   gap: "1",
-});
-
-const tag = css({
-  display: "inline-flex",
-  px: "2",
-  py: "0.5",
-  borderRadius: "pill",
-  bg: "primary.200",
-  color: "primary.700",
-  fontSize: "2xs",
-  fontWeight: "600",
 });
 
 function formatRating(rating: number | null): string {
@@ -109,7 +98,7 @@ export function CompareTable({ materials }: CompareTableProps) {
       render: (material) =>
         material.reviewCount > 0 ? (
           <div className={css({ display: "flex", flexDirection: "column", gap: "1" })}>
-            <span className={css({ fontWeight: "800", fontVariantNumeric: "tabular-nums" })}>
+            <span className={css({ fontWeight: "extrabold", fontVariantNumeric: "tabular-nums" })}>
               {formatRating(material.avgRating)}
             </span>
             {material.avgRating !== null ? (
@@ -138,9 +127,9 @@ export function CompareTable({ materials }: CompareTableProps) {
         ) : (
           <div className={tagList}>
             {material.tags.slice(0, 6).map((item) => (
-              <span key={item.id} className={tag}>
+              <Badge key={item.id} variant="type">
                 {item.name}
-              </span>
+              </Badge>
             ))}
           </div>
         ),

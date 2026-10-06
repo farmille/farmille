@@ -54,7 +54,7 @@ export default async function LegalDocumentPage({ params }: Props) {
             mb: "8",
           })}
         >
-          <p className={css({ fontWeight: "700", mb: "3" })}>目次</p>
+          <p className={css({ fontWeight: "bold", mb: "3" })}>目次</p>
           <ul
             className={css({
               listStyle: "none",

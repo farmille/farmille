@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useActionState } from "react";
 
 import { changePasswordAction } from "@/app/account/password/actions";
+import { buttonRecipe } from "@/components/Button";
 import {
   controlStyle,
   Field,
   FormMessage,
   formActionsStyle,
-  ghostButtonStyle,
   textLinkStyle,
 } from "@/components/auth/Fields";
 import { SubmitButton } from "@/components/auth/SubmitButton";
@@ -27,7 +27,7 @@ export function ChangePasswordForm({
     return (
       <>
         <FormMessage tone="info">{state.message}</FormMessage>
-        <Link className={ghostButtonStyle} href={loginHref}>
+        <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href={loginHref}>
           ログイン画面へ
         </Link>
       </>

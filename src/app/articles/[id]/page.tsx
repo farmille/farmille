@@ -147,8 +147,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
           className={css({
             m: "0",
             fontSize: "xl",
-            fontWeight: "700",
-            lineHeight: "1.4",
+            lineHeight: "snug",
           })}
         >
           {article.title}
@@ -182,7 +181,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
                   w: "32px",
                   aspectRatio: "image.square",
                   display: "block",
-                  borderRadius: "button",
+                  borderRadius: "media",
                   objectFit: "cover",
                 })}
                 height={32}
@@ -195,19 +194,19 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
                 className={css({
                   w: "32px",
                   aspectRatio: "image.square",
-                  borderRadius: "button",
+                  borderRadius: "media",
                   bg: "primary.200",
                   display: "grid",
                   placeItems: "center",
                   fontSize: "sm",
-                  fontWeight: "800",
+                  fontWeight: "extrabold",
                   color: "primary.700",
                 })}
               >
                 {sellerInitial}
               </span>
             )}
-            <span className={css({ fontWeight: "700", color: "text.default" })}>{sellerName}</span>
+            <span className={css({ fontWeight: "bold", color: "text.default" })}>{sellerName}</span>
           </Link>
           <Badge variant="type">メーカー</Badge>
           <span className={css({ fontSize: "xs" })}>{formatDateJa(article.publishedAt)}</span>
@@ -245,17 +244,14 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
             mt: "4",
             fontSize: "md",
             color: "text.muted",
-            lineHeight: "1.75",
+            lineHeight: "prose",
             "& p": { mb: "3.5" },
             "& p:last-child": { mb: "0" },
-            "& img": { maxW: "100%", borderRadius: "button" },
+            "& img": { maxW: "100%", borderRadius: "media" },
             "& ul, & ol": { pl: "5", mb: "3.5" },
-            "& h2, & h3": {
-              color: "text.default",
-              fontWeight: "700",
-              mt: "5",
-              mb: "2",
-            },
+            "& h2, & h3": { color: "text.default", mt: "5", mb: "2" },
+            "& h2": { fontSize: "lg" },
+            "& h3": { fontWeight: "bold" },
           })}
           dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
@@ -268,8 +264,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
                 m: "0",
                 mt: "6",
                 mb: "3",
-                fontSize: "md",
-                fontWeight: "700",
+                fontSize: "lg",
               })}
             >
               この記事で紹介した資材

@@ -6,7 +6,7 @@ const noticeStyle = cva({
     position: "relative",
     zIndex: "2",
     bg: "primary.700",
-    color: "surface.card",
+    color: "text.inverse",
     borderBottomRadius: "banner",
     boxShadow: "overlay",
     px: "4",

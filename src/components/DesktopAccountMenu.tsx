@@ -63,7 +63,7 @@ const item = css({
   color: "text.default",
   fontFamily: "sans",
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
   lineHeight: "tight",
   textAlign: "left",
   textDecoration: "none",

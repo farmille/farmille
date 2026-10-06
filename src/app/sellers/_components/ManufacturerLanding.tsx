@@ -41,7 +41,7 @@ const photoEyebrow = css({
   m: "0",
   color: "text.muted",
   fontSize: "xs",
-  fontWeight: "800",
+  fontWeight: "extrabold",
   letterSpacing: "0.28em",
 });
 
@@ -51,7 +51,6 @@ const photoTitle = css({
   mb: "0",
   color: "text.default",
   fontSize: "hero",
-  fontWeight: "800",
   lineHeight: "snug",
   letterSpacing: "0.02em",
   pc: { fontSize: "display" },
@@ -71,7 +70,6 @@ const band = css({
   bg: "primary.100",
   color: "text.default",
   fontSize: "2xl",
-  fontWeight: "800",
   lineHeight: "snug",
   tab: { fontSize: "3xl" },
 });
@@ -84,7 +82,7 @@ const lead = css({
   lineHeight: "loose",
 });
 
-const highlight = css({ color: "primary.700", fontWeight: "800" });
+const highlight = css({ color: "primary.700", fontWeight: "extrabold" });
 
 const choices = css({
   display: "flex",
@@ -109,18 +107,18 @@ const choice = sva({
       borderColor: "primary.600",
       borderRadius: "button",
       fontSize: "lg",
-      fontWeight: "800",
+      fontWeight: "extrabold",
       lineHeight: "normal",
       textAlign: "center",
       textDecoration: "none",
       transition: "background-color {durations.fast} {easings.soft}",
     },
-    note: { fontSize: "sm", fontWeight: "500", opacity: "0.92" },
+    note: { fontSize: "sm", fontWeight: "medium", opacity: "0.92" },
   },
   variants: {
     tone: {
       primary: {
-        root: { bg: "primary.600", color: "surface.card", _hover: { bg: "primary.700" } },
+        root: { bg: "primary.600", color: "text.inverse", _hover: { bg: "primary.700" } },
       },
       secondary: {
         root: { bg: "surface.card", color: "primary.700", _hover: { bg: "primary.100" } },
@@ -133,7 +131,7 @@ const card = css({
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
-  borderRadius: "button",
+  borderRadius: "card",
   bg: "surface.card",
 });
 
@@ -144,7 +142,7 @@ const tocTitle = css({
   mb: "1.5",
   color: "text.subtle",
   fontSize: "sm",
-  fontWeight: "800",
+  fontWeight: "extrabold",
   letterSpacing: "0.06em",
 });
 
@@ -155,7 +153,7 @@ const tocLink = css({
   py: "1",
   color: "primary.700",
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
   _before: { content: '"›"', mr: "2", color: "text.subtle" },
   _hover: { textDecoration: "underline" },
@@ -168,7 +166,7 @@ const sectionEyebrow = css({
   mb: "1.5",
   color: "primary.700",
   fontSize: "xs",
-  fontWeight: "800",
+  fontWeight: "extrabold",
   letterSpacing: "0.06em",
 });
 
@@ -177,7 +175,6 @@ const sectionHeading = css({
   m: "0",
   color: "text.default",
   fontSize: "2xl",
-  fontWeight: "800",
   lineHeight: "snug",
   scrollMarginTop: "24",
   tab: { fontSize: "3xl" },
@@ -200,7 +197,7 @@ const legend = css({
   gap: "4.5",
   mb: "3",
   fontSize: "sm",
-  fontWeight: "800",
+  fontWeight: "extrabold",
 });
 
 const legendItem = sva({
@@ -211,7 +208,7 @@ const legendItem = sva({
   },
   variants: {
     actor: {
-      maker: { root: { color: "tag.effect" }, swatch: { bg: "tag.effect" } },
+      maker: { root: { color: "accent.manufacturer" }, swatch: { bg: "accent.manufacturer" } },
       farmille: {
         root: { color: "primary.700" },
         swatch: {
@@ -249,13 +246,13 @@ const chevron = cva({
     px: "1",
     py: "1.5",
     fontSize: "xs",
-    fontWeight: "800",
+    fontWeight: "extrabold",
     clipPath: CHEVRON_CLIP,
     "li:first-child > &": { clipPath: CHEVRON_CLIP_FIRST },
   },
   variants: {
     actor: {
-      maker: { bg: "tag.effect", color: "surface.card" },
+      maker: { bg: "accent.manufacturer", color: "text.inverse" },
       farmille: {
         bg: "primary.700",
         color: "primary.700",
@@ -279,7 +276,7 @@ const chevronCaption = css({
   mb: "0",
   color: "text.default",
   fontSize: "xs",
-  fontWeight: "700",
+  fontWeight: "bold",
   lineHeight: "normal",
 });
 
@@ -309,7 +306,7 @@ const stepCard = sva({
       py: "0.5",
       borderRadius: "pill",
       fontSize: "xs",
-      fontWeight: "800",
+      fontWeight: "extrabold",
       letterSpacing: "0.06em",
     },
     body: { mt: "1.5", mb: "0", fontSize: "sm", lineHeight: "loose" },
@@ -317,7 +314,7 @@ const stepCard = sva({
   variants: {
     actor: {
       maker: {
-        badge: { bg: "tag.effect", color: "surface.card" },
+        badge: { bg: "accent.manufacturer", color: "text.inverse" },
         body: { color: "text.muted" },
       },
       farmille: {
@@ -337,7 +334,7 @@ const stepCard = sva({
 
 const underlineLink = css({
   color: "primary.700",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "underline",
   textUnderlineOffset: "3px",
   overflowWrap: "anywhere",
@@ -353,7 +350,7 @@ const prepTitle = css({
   mb: "2",
   color: "primary.700",
   fontSize: "md",
-  fontWeight: "800",
+  fontWeight: "extrabold",
 });
 
 const prepList = css({
@@ -389,7 +386,7 @@ const guideTitle = css({
   borderLeftColor: "primary.600",
   color: "text.default",
   fontSize: "md",
-  fontWeight: "800",
+  fontWeight: "extrabold",
   lineHeight: "snug",
 });
 
@@ -401,13 +398,13 @@ const idBadge = cva({
     py: "0.5",
     borderRadius: "pill",
     fontSize: "xs",
-    fontWeight: "700",
+    fontWeight: "bold",
     whiteSpace: "nowrap",
     verticalAlign: "0.1em",
   },
   variants: {
     required: {
-      true: { bg: "amber.soft", color: "accent.warn" },
+      true: { bg: "accent.warnSoft", color: "accent.warn" },
       false: {
         borderWidth: "1px",
         borderStyle: "solid",
@@ -438,7 +435,7 @@ const guideStep = cva({
           display: "inline-block",
           minW: "1.6em",
           color: "text.subtle",
-          fontWeight: "800",
+          fontWeight: "extrabold",
         },
       },
       false: { pl: "2.2em", color: "text.muted" },
@@ -453,7 +450,7 @@ const details = sva({
       display: "flex",
       alignItems: "center",
       gap: "2.5",
-      fontWeight: "700",
+      fontWeight: "bold",
       cursor: "pointer",
       listStyle: "none",
       "&::-webkit-details-marker": { display: "none" },
@@ -490,7 +487,13 @@ const details = sva({
       borderRadius: "input",
       bg: "surface.page",
     },
-    panelTitle: { m: "0", mb: "1.5", color: "primary.700", fontSize: "sm", fontWeight: "800" },
+    panelTitle: {
+      m: "0",
+      mb: "1.5",
+      color: "primary.700",
+      fontSize: "sm",
+      fontWeight: "extrabold",
+    },
     panelList: {
       m: "0",
       listStyleType: "disc",
@@ -509,7 +512,7 @@ const details = sva({
           py: "0.5",
           color: "text.muted",
           fontSize: "sm",
-          fontWeight: "600",
+          fontWeight: "semibold",
           "details[open] > &": { color: "primary.700" },
         },
         panels: { mt: "2" },
@@ -553,7 +556,7 @@ const faqQuestion = css({
   m: "0",
   color: "text.default",
   fontSize: "md",
-  fontWeight: "800",
+  fontWeight: "extrabold",
   lineHeight: "normal",
   _before: { content: '"Q"', flex: "0 0 auto", color: "primary.600" },
 });
@@ -572,7 +575,7 @@ const faqAnswerMark = css({
   left: "0.5",
   top: "0",
   color: "text.subtle",
-  fontWeight: "800",
+  fontWeight: "extrabold",
 });
 
 const faqAnswerText = css({ m: "0" });
@@ -581,14 +584,18 @@ const faqLink = css({ display: "block", mt: "1.5" });
 
 const contact = css({ mt: "6", px: "5", py: "4.5", tab: { px: "6.5" } });
 
-const contactTitle = css({ m: "0", color: "text.default", fontSize: "md", fontWeight: "800" });
+const contactTitle = css({
+  m: "0",
+  color: "text.default",
+  fontSize: "md",
+  fontWeight: "extrabold",
+});
 
 const contactMail = css({
   display: "inline-block",
   mt: "1",
   color: "primary.700",
   fontSize: "xl",
-  fontWeight: "800",
   letterSpacing: "0.01em",
   textDecoration: "none",
   wordBreak: "break-all",
@@ -609,7 +616,7 @@ const closing = css({
   py: "7",
   borderRadius: "card",
   bg: "primary.600",
-  color: "surface.card",
+  color: "text.inverse",
   textAlign: "center",
   tab: { px: "8", py: "9" },
 });
@@ -618,7 +625,6 @@ const closingTitle = css({
   wordBreak: "auto-phrase",
   m: "0",
   fontSize: "xl",
-  fontWeight: "800",
   tab: { fontSize: "2xl" },
 });
 
@@ -645,7 +651,7 @@ const closingButton = css({
   bg: "surface.card",
   color: "primary.700",
   fontSize: "md",
-  fontWeight: "800",
+  fontWeight: "extrabold",
   textDecoration: "none",
   transition: "background-color {durations.fast} {easings.soft}",
   _hover: { bg: "primary.100" },

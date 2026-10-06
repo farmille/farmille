@@ -39,7 +39,7 @@ const linkStyle = css({
   display: "inline-flex",
   mt: "4",
   color: "primary.700",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
 });
 
@@ -61,16 +61,14 @@ export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
       <AppBar chrome="public" active="me" title="マイページ" />
       <main className={body}>
         <section className={card}>
-          <h1 className={css({ m: "0", fontSize: "lg", fontWeight: "800" })}>
-            一般ユーザー向けの画面です
-          </h1>
+          <h1 className={css({ m: "0", fontSize: "lg" })}>一般ユーザー向けの画面です</h1>
           <p
             className={css({
               mt: "3",
               mb: "0",
               color: "text.muted",
               fontSize: "sm",
-              lineHeight: "1.7",
+              lineHeight: "relaxed",
             })}
           >
             マイページ・プロフィール編集・お気に入りは一般ユーザー専用です。メーカーや運営の作業は、それぞれのダッシュボードから行ってください。

@@ -5,7 +5,7 @@ import { css, cx } from "../../styled-system/css";
 
 const textLinkStyle = css({
   color: "primary.700",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "underline",
   textUnderlineOffset: "2px",
 });

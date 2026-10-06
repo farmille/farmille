@@ -29,8 +29,8 @@ const pillRecipe = cva({
       true: {
         bg: "primary.700",
         borderColor: "primary.600",
-        color: "surface.card",
-        fontWeight: "600",
+        color: "text.inverse",
+        fontWeight: "semibold",
       },
       false: {},
     },

@@ -8,7 +8,7 @@ const label = css({
   gap: "2",
   mb: "1.5",
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
   flexWrap: "wrap",
 });
 
@@ -18,7 +18,7 @@ const badge = cva({
     px: "2",
     py: "0.5",
     fontSize: "2xs",
-    fontWeight: "700",
+    fontWeight: "bold",
   },
   variants: {
     required: {
@@ -32,8 +32,8 @@ const fieldError = css({
   mt: "1.5",
   fontSize: "sm",
   color: "accent.danger",
-  fontWeight: "600",
-  lineHeight: "1.45",
+  fontWeight: "semibold",
+  lineHeight: "normal",
 });
 
 export function FieldLabel({

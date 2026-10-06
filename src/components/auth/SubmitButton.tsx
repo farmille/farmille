@@ -1,15 +1,7 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
-
-import { primaryButtonStyle } from "@/components/auth/Fields";
+import { PendingButton } from "@/components/PendingButton";
 
 export function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
-  const { pending } = useFormStatus();
-
-  return (
-    <button className={primaryButtonStyle} disabled={pending} type="submit">
-      {pending ? pendingLabel : label}
-    </button>
-  );
+  return <PendingButton label={label} pendingLabel={pendingLabel} />;
 }

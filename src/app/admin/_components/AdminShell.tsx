@@ -32,7 +32,7 @@ const headerInnerStyle = css({
 
 const brandStyle = css({
   fontSize: "md",
-  fontWeight: "800",
+  fontWeight: "extrabold",
   color: "primary.700",
   textDecoration: "none",
 });
@@ -69,14 +69,13 @@ const backLinkStyle = css({
 
 const titleStyle = css({
   fontSize: "2xl",
-  fontWeight: "800",
   m: "0",
 });
 
 const descriptionStyle = css({
   fontSize: "md",
   color: "text.muted",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
   mt: "1.5",
 });
 

@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 
 const linkStyle = css({
   color: "primary.700",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },
 });
@@ -56,7 +56,7 @@ const captionStyle = css({
   mt: "1.5",
   color: "text.subtle",
   fontSize: "sm",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
 });
 
 type Metric = UsageReportEditorialDetail["metrics"][number];

@@ -49,7 +49,7 @@ export function ReportReadingGate({ reportPath }: { reportPath: string }) {
           gap: "4",
         })}
       >
-        <h2 className={css({ m: "0", fontSize: "xl", fontWeight: "700", lineHeight: "relaxed" })}>
+        <h2 className={css({ m: "0", fontSize: "xl", lineHeight: "relaxed" })}>
           続きは無料会員登録で読めます
         </h2>
         <p className={css({ m: "0", fontSize: "md", lineHeight: "relaxed", color: "text.muted" })}>

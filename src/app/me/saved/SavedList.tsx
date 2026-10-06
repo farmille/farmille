@@ -45,7 +45,7 @@ const checkboxLabel = css({
   alignItems: "center",
   gap: "2",
   fontSize: "sm",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "text.muted",
   cursor: "pointer",
 });
@@ -161,7 +161,7 @@ export function SavedList({ items }: SavedListProps) {
               mb: "2",
               fontSize: "sm",
               color: "accent.warn",
-              fontWeight: "700",
+              fontWeight: "bold",
               textAlign: "center",
             })}
             role="alert"

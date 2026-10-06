@@ -34,7 +34,7 @@ const credentialsStyle = css({
 
 const credentialLabelStyle = css({
   fontSize: "sm",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "primary.700",
 });
 
@@ -50,7 +50,7 @@ const fieldLabelStyle = css({
   flexDirection: "column",
   gap: "1.5",
   fontSize: "sm",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "text.muted",
 });
 

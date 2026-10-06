@@ -56,10 +56,10 @@ const label = css({
   alignItems: "center",
   gap: "3",
   m: "0",
-  color: "surface.card/90",
+  color: "text.inverse/90",
   fontSize: "2xs",
   letterSpacing: "0.24em",
-  tab: { fontSize: "xs", color: "surface.card" },
+  tab: { fontSize: "xs", color: "text.inverse" },
   _before: {
     content: '""',
     display: "block",
@@ -73,7 +73,7 @@ const label = css({
 const title = css({
   m: "0",
   mt: "6",
-  color: "surface.card",
+  color: "text.inverse",
   fontSize: "hero",
   fontWeight: "light",
   lineHeight: "relaxed",
@@ -147,7 +147,7 @@ const lead = css({
   fontSize: "sm",
   lineHeight: "loose",
   letterSpacing: "0.06em",
-  tab: { fontSize: "md", maxW: "480px", color: "surface.card/90" },
+  tab: { fontSize: "md", maxW: "480px", color: "text.inverse/90" },
 });
 
 /** 日本語が語中で折り返さないよう、文節ごとに inline-block で区切る。 */

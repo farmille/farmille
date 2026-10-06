@@ -42,7 +42,7 @@ export default async function ApplicationsPage() {
               className={css({
                 color: "primary.700",
                 textDecoration: "underline",
-                fontWeight: "700",
+                fontWeight: "bold",
               })}
               href={item.href}
             >

@@ -14,7 +14,7 @@ const textareaRecipe = cva({
     py: "2.5",
     fontSize: "md",
     fontFamily: "sans",
-    lineHeight: "1.6",
+    lineHeight: "relaxed",
     resize: "vertical",
     minH: "84px",
     _placeholder: { color: "text.subtle" },

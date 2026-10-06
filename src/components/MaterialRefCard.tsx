@@ -48,7 +48,7 @@ export function MaterialRefCard({
         className={css({
           w: "44px",
           aspectRatio: "image.square",
-          borderRadius: "button",
+          borderRadius: "media",
           bg: "primary.100",
           display: "grid",
           placeItems: "center",
@@ -62,7 +62,9 @@ export function MaterialRefCard({
         {showTargetLabel ? (
           <div className={css({ fontSize: "2xs", color: "text.muted" })}>対象資材</div>
         ) : null}
-        <div className={css({ fontWeight: "700", fontSize: "md", lineHeight: "1.35" })}>{name}</div>
+        <div className={css({ fontWeight: "bold", fontSize: "md", lineHeight: "snug" })}>
+          {name}
+        </div>
         <div
           className={css({
             display: "flex",

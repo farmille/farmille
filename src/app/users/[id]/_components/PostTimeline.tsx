@@ -22,7 +22,7 @@ const reviewDestination = css({
   mt: "2",
   color: "primary.700",
   fontSize: "sm",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
 });
 

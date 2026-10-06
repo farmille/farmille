@@ -21,16 +21,16 @@ const icon = css({
   placeItems: "center",
   borderRadius: "pill",
   bg: "primary.700",
-  color: "surface.card",
+  color: "text.inverse",
 });
 
-const title = css({ mt: "4", fontSize: "2xl", fontWeight: "800" });
+const title = css({ mt: "4", fontSize: "2xl" });
 
 const description = css({
   mt: "3",
   color: "text.muted",
   fontSize: "md",
-  lineHeight: "1.7",
+  lineHeight: "relaxed",
 });
 
 const reportList = css({
@@ -49,7 +49,7 @@ const reportRow = css({
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
-  borderRadius: "button",
+  borderRadius: "card",
   bg: "surface.card",
   px: "3",
   py: "3",
@@ -64,7 +64,7 @@ const status = css({
   px: "2.5",
   py: "1",
   fontSize: "xs",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 const link = css({
@@ -75,10 +75,10 @@ const link = css({
   minH: "44px",
   borderRadius: "button",
   bg: "primary.700",
-  color: "surface.card",
+  color: "text.inverse",
   px: "5",
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
 });
 

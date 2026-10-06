@@ -7,7 +7,6 @@ import { css } from "../../../styled-system/css";
 const title = css({
   m: "0",
   fontSize: "2xl",
-  fontWeight: "700",
   lineHeight: "relaxed",
   textWrap: "balance",
 });

@@ -23,7 +23,7 @@ export const metadata: Metadata = { title: "資材変更申請" };
 
 const linkStyle = css({
   color: "primary.700",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },
 });

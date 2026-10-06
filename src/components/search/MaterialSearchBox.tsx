@@ -87,7 +87,7 @@ const panel = css({
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
-  borderRadius: "button",
+  borderRadius: "card",
   boxShadow: "shadow",
   overflow: "hidden",
 });
@@ -105,10 +105,8 @@ const panelTitle = css({
   fontSize: "2xs",
   color: "text.subtle",
   letterSpacing: "0.04em",
-  textTransform: "uppercase",
   m: "0",
   mb: "2",
-  fontWeight: "700",
 });
 
 const suggestionChips = css({
@@ -139,8 +137,8 @@ const categoryLabel = css({
   fontSize: "2xs",
   px: "1.5",
   py: "0.5",
-  borderRadius: "button",
-  fontWeight: "700",
+  borderRadius: "input",
+  fontWeight: "bold",
   whiteSpace: "nowrap",
   flexShrink: "0",
 });
@@ -162,7 +160,7 @@ function categoryAccentClass(category: TagCategory): string {
     case "effect":
       return css({ bg: "tag.effect/15", color: "tag.effect" });
     case "cond":
-      return css({ bg: "accent.official/15", color: "accent.official" });
+      return css({ bg: "tag.cond/15", color: "tag.cond" });
     case "genre":
       return css({ bg: "tag.type/15", color: "tag.type" });
     case "maker":

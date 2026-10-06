@@ -8,8 +8,8 @@ const messageRecipe = cva({
     px: "3",
     py: "2.5",
     fontSize: "sm",
-    fontWeight: "700",
-    lineHeight: "1.55",
+    fontWeight: "bold",
+    lineHeight: "normal",
   },
   variants: {
     status: {
@@ -19,7 +19,7 @@ const messageRecipe = cva({
         borderColor: "primary.600/30",
       },
       error: {
-        bg: "amber.soft",
+        bg: "accent.warnSoft",
         color: "accent.warn",
         borderColor: "accent.warn/30",
       },

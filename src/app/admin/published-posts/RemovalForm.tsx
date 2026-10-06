@@ -14,7 +14,7 @@ export function RemovalForm({ id, type }: { id: string; type: "review" | "usage_
   );
   return (
     <details>
-      <summary className={css({ color: "primary.700", cursor: "pointer", fontWeight: "700" })}>
+      <summary className={css({ color: "primary.700", cursor: "pointer", fontWeight: "bold" })}>
         公開から削除する
       </summary>
       <form action={action} className={css({ display: "grid", gap: "3", mt: "3" })}>

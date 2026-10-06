@@ -7,20 +7,20 @@ const buttonRecipe = cva({
     justifyContent: "center",
     gap: "2",
     fontFamily: "sans",
-    fontWeight: "700",
+    fontWeight: "bold",
     borderWidth: "1px",
     borderStyle: "solid",
     borderColor: "transparent",
     cursor: "pointer",
     textDecoration: "none",
-    lineHeight: "1.3",
+    lineHeight: "tight",
     _disabled: { opacity: "disabled", cursor: "not-allowed" },
   },
   variants: {
     variant: {
       primary: {
         bg: "primary.700",
-        color: "surface.card",
+        color: "text.inverse",
         borderColor: "transparent",
       },
       ghost: {
