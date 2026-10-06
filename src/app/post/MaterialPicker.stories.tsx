@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { userEvent, within } from "storybook/test";
 
 import type { PostingMaterial } from "@/server/queries/materials";
 import { MaterialPicker } from "./MaterialPicker";
@@ -32,6 +33,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Results: Story = {};
+
+export const Selected: Story = {
+  play: async ({ canvasElement }) => {
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "土づくり微生物資材を選択" }),
+    );
+  },
+};
 
 export const NoResults: Story = {
   args: { materials: [], query: "見つからない資材" },

@@ -32,7 +32,7 @@ const guideStyle = css({
 const errorTextStyle = css({
   fontSize: "sm",
   color: "accent.warn",
-  fontWeight: "bold",
+  fontWeight: "normal",
   lineHeight: "normal",
   mt: "1.5",
 });

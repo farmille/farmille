@@ -192,7 +192,7 @@ export function MaterialCard({
                     fontSize: "2xs",
                     px: "2",
                     py: "1",
-                    bg: "primary.100",
+                    bg: "primary.soft",
                     color: "primary.700",
                     borderRadius: "pill",
                   })}
@@ -309,7 +309,7 @@ export function MaterialCard({
                   fontSize: "2xs",
                   px: "2",
                   py: "1",
-                  bg: "primary.100",
+                  bg: "primary.soft",
                   color: "primary.700",
                   borderRadius: "pill",
                 })}

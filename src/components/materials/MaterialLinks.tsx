@@ -31,7 +31,7 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
                       ? css({
                           mb: "3",
                           p: "4",
-                          bg: "primary.200",
+                          bg: "primary.soft",
                           borderWidth: "1px",
                           borderColor: "primary.600",
                           borderRadius: "card",

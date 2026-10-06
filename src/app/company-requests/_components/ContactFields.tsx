@@ -19,7 +19,13 @@ export const emptyContact: ContactDefaults = {
   email: "",
   phone: "",
 };
-export const applicationStack = css({ display: "flex", flexDirection: "column", gap: "4" });
+export const applicationStack = css({
+  display: "flex",
+  flexDirection: "column",
+  gap: "4",
+  fontSize: "md",
+  lineHeight: "relaxed",
+});
 export const applicationField = css({
   display: "flex",
   flexDirection: "column",

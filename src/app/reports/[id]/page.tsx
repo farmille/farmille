@@ -136,7 +136,7 @@ function MediaFigure({
           position: "relative",
           borderRadius: "card",
           overflow: "hidden",
-          bg: "primary.100",
+          bg: "primary.soft",
           aspectRatio: wide ? "image.wide" : "image.landscape",
           display: "grid",
           placeItems: "center",
@@ -329,7 +329,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 w: "32px",
                 aspectRatio: "image.square",
                 borderRadius: "pill",
-                bg: "primary.200",
+                bg: "primary.soft",
                 display: "grid",
                 placeItems: "center",
                 color: "primary.700",
@@ -395,7 +395,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                 mt: "3",
                 aspectRatio: "image.wide",
                 borderRadius: "card",
-                bg: "primary.100",
+                bg: "primary.soft",
                 display: "grid",
                 placeItems: "center",
                 color: "primary.700",
@@ -440,7 +440,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                           px: "2.5",
                           py: "1",
                           borderRadius: "pill",
-                          bg: "primary.200",
+                          bg: "primary.soft",
                           color: "primary.700",
                           fontWeight: "semibold",
                         })}
@@ -495,7 +495,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                             aspectRatio: "image.portrait",
                             borderRadius: "media",
                             overflow: "hidden",
-                            bg: "primary.100",
+                            bg: "primary.soft",
                           })}
                         >
                           <Image

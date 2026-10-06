@@ -23,13 +23,12 @@ const wrapStyle = css({
 const credentialsStyle = css({
   display: "flex",
   flexDirection: "column",
-  gap: "2",
-  bg: "primary.200",
+  gap: "4",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
   borderRadius: "card",
-  p: "3",
+  p: "5",
 });
 
 const credentialLabelStyle = css({
@@ -159,14 +158,12 @@ export function SellerReviewActions({
       {state.status === "approved" ? (
         <div className={credentialsStyle}>
           <p className={credentialLabelStyle}>ログインIDとパスワード設定用の案内を発行しました。</p>
-          <div>
+          <div className={css({ display: "grid", gap: "2" })}>
             <span className={adminInlineNoteStyle}>ログインID</span>
-            <br />
             <span className={adminCodeStyle}>{state.credentials.loginId}</span>
           </div>
-          <div>
+          <div className={css({ display: "grid", gap: "2" })}>
             <span className={adminInlineNoteStyle}>パスワード設定用URL</span>
-            <br />
             <span className={adminCodeStyle}>{state.credentials.passwordSetupUrl}</span>
           </div>
           <p className={adminInlineNoteStyle}>

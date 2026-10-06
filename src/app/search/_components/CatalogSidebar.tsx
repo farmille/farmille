@@ -13,7 +13,7 @@ import { css } from "../../../../styled-system/css";
 
 const list = css({ display: "flex", flexWrap: "wrap", gap: "2", py: "2" });
 const section = css({ borderBottomWidth: "1px", borderColor: "border.default", py: "3" });
-const summary = css({ fontWeight: "bold", cursor: "pointer" });
+const summary = css({ fontSize: "md", fontWeight: "bold", cursor: "pointer" });
 
 export function CatalogSidebar({
   catalog,
@@ -80,7 +80,10 @@ export function CatalogSidebar({
         alignSelf: "start",
       })}
     >
-      <Link href="/search" className={css({ color: "primary.700", fontWeight: "bold" })}>
+      <Link
+        href="/search"
+        className={css({ color: "primary.700", fontSize: "md", fontWeight: "bold" })}
+      >
         すべてクリア
       </Link>
       <details className={section}>

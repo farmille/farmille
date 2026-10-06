@@ -12,7 +12,7 @@ const chip = css({
   mr: "1",
   mb: "1",
   borderRadius: "pill",
-  bg: "primary.200",
+  bg: "primary.soft",
   color: "primary.700",
 });
 

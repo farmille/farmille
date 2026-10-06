@@ -24,5 +24,14 @@ export const submitUsageReportAction = fn<Actions["submitUsageReportAction"]>(
 
 export const searchReportMaterialsAction = fn<Actions["searchReportMaterialsAction"]>(async () => ({
   ok: true,
-  data: [],
+  data: [
+    {
+      id: "00000000-0000-4000-8000-000000000102",
+      name: "根圏サポートA",
+      manufacturer_name: "ファーム技研",
+      review_count: 9,
+      avg_rating: 3.8,
+      manufacturer_verified_at: null,
+    },
+  ],
 }));

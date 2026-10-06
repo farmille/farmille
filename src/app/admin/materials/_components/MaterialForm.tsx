@@ -1,5 +1,7 @@
 "use client";
 
+import { Checkbox } from "@/components/Checkbox";
+
 import { useActionState } from "react";
 
 import {
@@ -28,30 +30,20 @@ const groupTitleStyle = css({
   mt: "2",
 });
 
-const chipGridStyle = css({
+const checkboxGroupStyle = css({
   display: "flex",
   flexWrap: "wrap",
   gap: "2",
 });
 
-const chipLabelStyle = css({
+const checkboxLabelStyle = css({
   display: "inline-flex",
   alignItems: "center",
   gap: "1.5",
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "pill",
   px: "2.5",
   py: "1.5",
   fontSize: "sm",
   cursor: "pointer",
-  "&:has(input:checked)": {
-    borderColor: "primary.600",
-    bg: "primary.200",
-    fontWeight: "bold",
-  },
 });
 
 const classificationGroupStyle = css({
@@ -84,15 +76,10 @@ function CheckboxGroup({
   selectedIds: ReadonlySet<string>;
 }) {
   return (
-    <div className={chipGridStyle}>
+    <div className={checkboxGroupStyle}>
       {options.map((option) => (
-        <label className={chipLabelStyle} key={option.id}>
-          <input
-            defaultChecked={selectedIds.has(option.id)}
-            name={name}
-            type="checkbox"
-            value={option.id}
-          />
+        <label className={checkboxLabelStyle} key={option.id}>
+          <Checkbox defaultChecked={selectedIds.has(option.id)} name={name} value={option.id} />
           {option.name}
         </label>
       ))}

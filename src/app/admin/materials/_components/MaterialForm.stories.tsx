@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { mocked, userEvent, within } from "storybook/test";
 
+import { updateMaterialAction } from "@/app/admin/materials/actions";
 import type { AdminMaterialDetail } from "@/server/admin/materials";
 import type { ClassificationOptions } from "@/server/queries/classifications";
 
@@ -115,6 +117,21 @@ export const Edit: Story = { args: { classifications, material } };
 
 export const Create: Story = {
   args: { classifications, material: null },
+};
+
+export const ClassificationError: Story = {
+  args: { material: { ...material, effectIds: [] } },
+  beforeEach() {
+    mocked(updateMaterialAction).mockResolvedValueOnce({
+      status: "error",
+      message: "入力内容を確認してください。",
+      fieldErrors: { classifications: "効果は1件以上選んでください。" },
+    });
+  },
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "保存する" }));
+  },
 };
 
 export const WithoutClassifications: Story = {

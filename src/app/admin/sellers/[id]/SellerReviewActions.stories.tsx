@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { expect, mocked, userEvent, within } from "storybook/test";
+import { sellerOperationAction } from "./actions";
 import { SellerReviewActions } from "./SellerReviewActions";
 
 const meta = {
@@ -24,4 +26,67 @@ export const Approved: Story = {
 
 export const Suspended: Story = {
   args: { status: "suspended" },
+};
+
+export const IssueLogin: Story = {
+  beforeEach() {
+    mocked(sellerOperationAction).mockResolvedValue({
+      status: "approved",
+      credentials: {
+        loginId: "demo-manufacturer",
+        passwordSetupUrl: "https://farmille.example/seller/password/setup?code=storybook-example",
+        emailSent: true,
+      },
+    });
+  },
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.selectOptions(
+      canvas.getByLabelText("紐づける資材メーカー"),
+      "しおさい資材株式会社",
+    );
+    await userEvent.click(canvas.getByRole("button", { name: "確認を完了してログインを発行" }));
+    await expect(
+      await canvas.findByText("ログインIDとパスワード設定用の案内を発行しました。"),
+    ).toBeVisible();
+  },
+};
+
+export const IssueLoginEmailFailed: Story = {
+  ...IssueLogin,
+  beforeEach() {
+    mocked(sellerOperationAction).mockResolvedValue({
+      status: "approved",
+      credentials: {
+        loginId: "demo-manufacturer",
+        passwordSetupUrl: "https://farmille.example/seller/password/setup?code=storybook-example",
+        emailSent: false,
+      },
+    });
+  },
+};
+
+export const IssueInvite: Story = {
+  args: { status: "approved" },
+  beforeEach() {
+    mocked(sellerOperationAction).mockResolvedValue({
+      status: "invited",
+      inviteCode: "FARM-2026",
+    });
+  },
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "招待コードを発行" }));
+    await expect(await canvas.findByText("招待コードを発行しました。")).toBeVisible();
+  },
+};
+
+export const ReissueInvite: Story = {
+  ...IssueInvite,
+  args: { status: "approved", inviteCode: "FARM-2025" },
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "招待コードを再発行" }));
+    await expect(await canvas.findByText("招待コードを発行しました。")).toBeVisible();
+  },
 };

@@ -69,3 +69,14 @@ export const ScrollImageLoaded: Story = {
 export const ScrollImageFailure: Story = {
   args: { imageSrc: "/missing-material-image.png", variant: "scroll" },
 };
+
+export const ListLongName: Story = {
+  args: {
+    name: "光合成細菌・バチルス菌・トリコデルマ菌を配合した土壌改良用複合微生物資材 ツチイキルプレミアム 業務用20kg",
+    maker: "土壌微生物と持続可能な農業を研究するグリーンバイオ株式会社",
+    articleCount: 6,
+    categories: ["微生物資材", "土壌改良"],
+    description:
+      "納豆菌群の働きで土壌の団粒化を促し、施設野菜の連作障害を軽減する微生物資材。定植前の土づくりから生育中の管理まで使えます。",
+  },
+};

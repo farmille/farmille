@@ -11,7 +11,6 @@ import {
   useState,
   useTransition,
   type ChangeEvent,
-  type FormEvent,
 } from "react";
 
 import {
@@ -24,6 +23,7 @@ import {
   TextLink,
   buttonRecipe,
 } from "@/components";
+import { Combobox } from "@/components/Combobox";
 import { Field } from "@/components/auth/Fields";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { errorMessageJa } from "@/server/errors";
@@ -90,39 +90,10 @@ const chip = css({
   borderStyle: "solid",
   borderColor: "border.strong",
   borderRadius: "pill",
-  bg: "primary.100",
+  bg: "primary.soft",
   px: "3",
   py: "1.5",
   fontSize: "sm",
-});
-
-const searchResult = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "1",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "input",
-  overflow: "hidden",
-});
-
-const searchResultButton = css({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "flex-start",
-  gap: "0.5",
-  w: "100%",
-  px: "3",
-  py: "2.5",
-  bg: "surface.card",
-  borderWidth: "0",
-  borderBottomWidth: "1px",
-  borderBottomStyle: "solid",
-  borderBottomColor: "border.default",
-  cursor: "pointer",
-  textAlign: "left",
-  _last: { borderBottomWidth: "0" },
 });
 
 type ArticleFormBaseProps = {
@@ -151,6 +122,7 @@ export function ArticleForm({
   initialMaterials = [],
 }: ArticleFormProps) {
   const router = useRouter();
+  const materialSearchRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const bodyImageInputRef = useRef<HTMLInputElement>(null);
   const statusInputRef = useRef<HTMLInputElement>(null);
@@ -191,6 +163,10 @@ export function ArticleForm({
       cancelled = true;
     };
   }, [body, editorTab]);
+
+  useEffect(() => {
+    if (!searchPending && materialHits.length > 0) materialSearchRef.current?.focus();
+  }, [materialHits, searchPending]);
 
   async function uploadArticleImage(file: File): Promise<string | null> {
     if (!isImageFile(file)) {
@@ -261,8 +237,7 @@ export function ArticleForm({
     });
   }
 
-  function handleMaterialSearch(event: FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
+  function handleMaterialSearch(): void {
     const q = materialQuery.trim();
     if (q.length === 0) {
       setMaterialHits([]);
@@ -473,36 +448,43 @@ export function ArticleForm({
         </Field>
       </form>
 
-      <form className={formLayout} onSubmit={handleMaterialSearch}>
+      <div className={formLayout}>
         <Field htmlFor="article-material-search" label="資材を検索して追加" requirement="optional">
-          <Input
+          <Combobox
             id="article-material-search"
-            onChange={(event) => setMaterialQuery(event.target.value)}
-            placeholder="資材名またはメーカー名"
+            aria-label="資材を検索して追加"
+            showEmptyState={false}
+            ref={materialSearchRef}
             value={materialQuery}
+            placeholder="資材名またはメーカー名"
+            onValueChange={(value) => {
+              setMaterialQuery(value);
+              setMaterialHits([]);
+            }}
+            onSubmitValue={handleMaterialSearch}
+            disabled={busy}
+            options={materialHits.map((material) => ({
+              value: material.id,
+              label: material.name,
+              description: material.manufacturer_name ?? undefined,
+            }))}
+            onSelect={(id) => {
+              const material = materialHits.find((item) => item.id === id);
+              if (material) addMaterial(material);
+            }}
+            emptyMessage={searchPending ? "検索中…" : "検索を実行すると候補を表示します。"}
           />
         </Field>
-        <Button disabled={busy} size="sm" type="submit" variant="ghost">
+        <Button
+          disabled={busy}
+          size="sm"
+          type="button"
+          variant="ghost"
+          onClick={handleMaterialSearch}
+        >
           {searchPending ? "検索中…" : "検索"}
         </Button>
-        {materialHits.length === 0 ? null : (
-          <div className={searchResult}>
-            {materialHits.map((material) => (
-              <button
-                className={searchResultButton}
-                key={material.id}
-                onClick={() => addMaterial(material)}
-                type="button"
-              >
-                <span className={css({ fontWeight: "bold", fontSize: "sm" })}>{material.name}</span>
-                <span className={css({ fontSize: "xs", color: "text.muted" })}>
-                  {material.manufacturer_name}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-      </form>
+      </div>
 
       {state.status === "idle" ? null : (
         <FormMessage status={state.status === "error" ? "error" : "success"}>

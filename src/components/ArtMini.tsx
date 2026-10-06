@@ -9,7 +9,7 @@ const rowRecipe = cva({
   base: {
     display: "flex",
     gap: "2.5",
-    alignItems: "center",
+    alignItems: "start",
     textDecoration: "none",
     color: "inherit",
   },
@@ -93,7 +93,7 @@ export function ArtMini({
       <Icon
         name="chevron_right"
         size="sm"
-        className={css({ color: "text.subtle", flexShrink: "0" })}
+        className={css({ color: "text.subtle", flexShrink: "0", alignSelf: "center" })}
       />
     </Link>
   );

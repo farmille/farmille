@@ -1,12 +1,14 @@
 "use client";
-import Link from "next/link";
+import { css, cx } from "../../../../styled-system/css";
 import * as v from "valibot";
 import { receiptAccessSchema, removalVerificationSchema } from "@/lib/company-application";
 import { useState, type FormEvent } from "react";
-import { Button, Input } from "@/components";
+import { Button, Input, TextLink } from "@/components";
 import { errorMessageJa } from "@/server/errors";
 import { requestVerification, requestReceiptVerification } from "../actions";
 import { applicationField, applicationStack } from "./ContactFields";
+const verificationStack = cx(applicationStack, css({ "& h2": { fontSize: "lg" } }));
+
 export function VerificationForm({ receipt = false }: { receipt?: boolean }) {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -49,7 +51,7 @@ export function VerificationForm({ receipt = false }: { receipt?: boolean }) {
   }
   if (sent)
     return (
-      <section role="status" className={applicationStack}>
+      <section role="status" className={verificationStack}>
         <h2>申請フォームのご案内をお送りしました</h2>
         <p>
           ご入力いただいたメールアドレスへ、申請フォームのURLをお送りしました。30分以内にメールのリンクを開き、申請内容をご記入・ご提出ください。
@@ -67,11 +69,11 @@ export function VerificationForm({ receipt = false }: { receipt?: boolean }) {
         >
           メールアドレスを確認して再送する
         </Button>
-        <Link href="/sellers">企業様向け利用ガイドに戻る</Link>
+        <TextLink href="/sellers">企業様向け利用ガイドに戻る</TextLink>
       </section>
     );
   return (
-    <form onSubmit={submit} className={applicationStack}>
+    <form onSubmit={submit} className={verificationStack}>
       {receipt ? (
         <label className={applicationField}>
           受付番号

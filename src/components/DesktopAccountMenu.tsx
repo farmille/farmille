@@ -24,8 +24,8 @@ const trigger = css({
   bg: "surface.card",
   color: "primary.700",
   cursor: "pointer",
-  _hover: { bg: "primary.200" },
-  "&[aria-expanded=true]": { bg: "primary.200" },
+  _hover: { bg: "primary.soft" },
+  "&[aria-expanded=true]": { bg: "primary.soft" },
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
@@ -69,14 +69,14 @@ const item = css({
   textDecoration: "none",
   whiteSpace: "nowrap",
   cursor: "pointer",
-  _hover: { bg: "primary.200", color: "primary.700" },
+  _hover: { bg: "primary.soft", color: "primary.700" },
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.600",
     outlineOffset: "2px",
   },
-  "&[aria-current=page]": { bg: "primary.200", color: "primary.700" },
+  "&[aria-current=page]": { bg: "primary.soft", color: "primary.700" },
 });
 
 const logoutForm = css({

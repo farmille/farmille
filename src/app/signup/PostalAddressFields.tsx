@@ -3,7 +3,10 @@ import { useRef, useState, useTransition } from "react";
 import { buttonRecipe } from "@/components";
 import { Field, controlStyle } from "@/components/auth/Fields";
 import { PREFECTURES } from "@/lib/prefectures";
+import { css } from "../../../styled-system/css";
 import { findPostalAddress } from "./postal-action";
+
+const lookupStatusStyle = css({ fontSize: "sm" });
 
 export function PostalAddressFields({
   values,
@@ -44,7 +47,7 @@ export function PostalAddressFields({
         htmlFor="postalCode"
         label="郵便番号"
         visibility="private"
-        guide="7桁で入力すると都道府県と市区町村を自動入力します。公開されません。"
+        guide="7桁で入力すると都道府県と市区町村を自動入力します。"
         requirement="required"
       >
         <input
@@ -73,14 +76,15 @@ export function PostalAddressFields({
         >
           {pending ? "住所を検索中…" : "住所を自動入力"}
         </button>
-        <p role="status">{message}</p>
+        <p className={lookupStatusStyle} role="status">
+          {message}
+        </p>
       </Field>
       <Field
         error={fieldErrors.prefectureCode}
         htmlFor="prefectureCode"
         label="都道府県"
         visibility="public"
-        guide="公開されます"
         requirement="required"
       >
         <select
@@ -110,7 +114,6 @@ export function PostalAddressFields({
         htmlFor="city"
         label="市区町村"
         visibility="private"
-        guide="公開されません"
         requirement="required"
       >
         <input
@@ -142,9 +145,7 @@ export function PostalAddressFields({
           htmlFor={field.name}
           label={field.label}
           visibility="private"
-          guide={
-            field.required ? "町名・丁目・番地を入力してください。公開されません" : "公開されません"
-          }
+          guide={field.required ? "町名・丁目・番地を入力してください。" : undefined}
           requirement={field.required ? "required" : "optional"}
         >
           <input

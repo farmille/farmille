@@ -55,7 +55,7 @@ const broadcastBand = css({
   mt: "3.5",
   px: "3.5",
   py: "3",
-  bg: "primary.200",
+  bg: "primary.soft",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "primary.600/25",

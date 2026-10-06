@@ -14,7 +14,7 @@ const messageRecipe = cva({
   variants: {
     status: {
       success: {
-        bg: "primary.200",
+        bg: "primary.soft",
         color: "primary.700",
         borderColor: "primary.600/30",
       },

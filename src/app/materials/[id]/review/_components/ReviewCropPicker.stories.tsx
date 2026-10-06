@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 
@@ -27,6 +28,23 @@ const crops = [
 const meta = {
   title: "App/Materials/Review/ReviewCropPicker",
   component: ReviewCropPicker,
+  render: function ReviewCropStory(args) {
+    const [ids, setIds] = useState(args.selectedCropIds);
+    return (
+      <ReviewCropPicker
+        {...args}
+        selectedCropIds={ids}
+        onAdd={(id) => {
+          args.onAdd(id);
+          setIds([...ids, id]);
+        }}
+        onRemove={(id) => {
+          args.onRemove(id);
+          setIds(ids.filter((value) => value !== id));
+        }}
+      />
+    );
+  },
   args: {
     crops,
     selectedCropIds: ["crop-tomato", "crop-mini-tomato"],
