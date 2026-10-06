@@ -1,26 +1,30 @@
 "use client";
 import { useState } from "react";
 import * as v from "valibot";
-import { Button, Input } from "@/components";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { evidenceMimeSchema, evidencePurposeSchema } from "@/lib/company-application";
 import { errorMessageJa } from "@/server/errors";
 import { reserveEvidence, finalizeEvidence, removeEvidence } from "../actions";
-import { applicationField, applicationStack } from "./ContactFields";
 
 type EvidenceFile = { id: string; name: string; verified: boolean };
+/** 見本 formScreen の添付欄（label.upload「ファイルを添付」）。送信の手順は本番のまま（予約 → 署名付きURLへ直接送信 → サーバーで形式を検査）。 */
 export function EvidenceFields({
   intentId,
   itemKey,
   purpose,
   label,
+  inputId,
+  describedBy,
   onBusy,
   onCount,
 }: {
   intentId: string;
   itemKey: string | null;
   purpose: v.InferOutput<typeof evidencePurposeSchema>;
+  /** 読み上げ用の添付欄の名前。 */
   label: string;
+  inputId: string;
+  describedBy?: string;
   onBusy: (busy: boolean) => void;
   onCount?: (count: number) => void;
 }) {
@@ -100,38 +104,56 @@ export function EvidenceFields({
     }
   }
   return (
-    <div className={applicationStack}>
-      <label className={applicationField}>
-        {label}
-        <Input
-          type="file"
+    <div>
+      <label className="upload" htmlFor={inputId}>
+        <input
           accept="image/jpeg,image/png,application/pdf"
-          multiple
+          aria-describedby={describedBy}
+          aria-label={label}
           disabled={busy || files.length >= 5}
+          id={inputId}
+          multiple
           onChange={(event) => {
             void upload(event.currentTarget.files);
             event.currentTarget.value = "";
           }}
+          type="file"
         />
-        <span>JPG・PNG・PDF、1ファイル10MB以内、各欄5件まで</span>
+        ファイルを添付
+        <br />
+        <span style={{ fontSize: 11 }}>jpg / png / pdf、1ファイル10MBまで、最大5ファイル</span>
+        {files.length > 0 ? <div className="uf">{files.length}件を添付</div> : null}
       </label>
-      {files.map((file) => (
-        <div key={file.id}>
-          <span>
-            {file.name}（{file.verified ? "登録済み" : "未完了"}）
-          </span>{" "}
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={busy}
-            onClick={() => void remove(file.id)}
-          >
-            削除
-          </Button>
-        </div>
-      ))}
-      {busy && <p role="status">資料を処理しています…</p>}
-      {error && <p role="alert">{error}</p>}
+      {files.length > 0 ? (
+        <ul className="uf-list">
+          {files.map((file) => (
+            <li key={file.id}>
+              <span>
+                {file.name}
+                <span className="uf-state">（{file.verified ? "登録済み" : "未完了"}）</span>
+              </span>
+              <button
+                aria-label={`${file.name}を削除`}
+                disabled={busy}
+                onClick={() => void remove(file.id)}
+                type="button"
+              >
+                削除
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {busy ? (
+        <p className="fguide" role="status" style={{ marginTop: 6 }}>
+          資料を処理しています…
+        </p>
+      ) : null}
+      {error ? (
+        <p className="field-error" role="alert">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -1,102 +1,249 @@
-export const APPLICATION_GUIDANCE = {
-  registration: {
-    eligibility: [
+/*
+ * 企業様向けの案内の原稿。見本（farmille-demo/index.html）の PROCS・sellersLP・sellerProcs の文面の写し。
+ * リンク先だけ本番のルートに置き換えている（見本の data-go="formA" など → 実在するパス）。
+ */
+
+export const CONTACT_EMAIL = "contact@farmille.com";
+export const OWNER_APPLICATION_HREF = "/dashboard/applications/new/registration";
+export const REMOVAL_INTAKE_HREF = "/company-requests/removal";
+
+export type ProcedureSlug = "owner" | "transfer-out" | "transfer-in" | "removal";
+
+type ProcedureStep = {
+  title: string;
+  body: string;
+  link?: { href: string; label: string };
+};
+
+export type Procedure = {
+  slug: ProcedureSlug;
+  title: string;
+  /** お手続き一覧の行の文言（見本 sellerProcs）。 */
+  listTitle: string;
+  lead: string;
+  needId: boolean;
+  /** 申請の入口。ID が必要な手続きはダッシュボードの申請フォーム（未ログインならログインへ）。 */
+  formHref: string;
+  formLabel: string;
+  steps: ReadonlyArray<ProcedureStep>;
+  conds: ReadonlyArray<string>;
+  prep: ReadonlyArray<readonly [string, string]>;
+};
+
+/** 見本 PROCS（procOwner・procTransferOut・procTransferIn・procDelist）。 */
+export const PROCEDURES = {
+  owner: {
+    slug: "owner",
+    title: "資材オーナー権限の申請",
+    listTitle: "資材オーナー権限を申請する（新規掲載・掲載済み資材）",
+    lead: "貴社の資材について、資材オーナー権限（資材ごとに1社に設定する権限で、資材情報の編集権限を含みます）を申請します。新しく掲載する資材も、すでにFarmilleに掲載されている資材も同じ申請です。",
+    needId: true,
+    formHref: OWNER_APPLICATION_HREF,
+    formLabel: "資材オーナー権限の申請フォームへ",
+    steps: [
+      {
+        title: "ログインし、「各種お手続き」から申請フォームにご記入ください",
+        body: "資材ごとに、申請内容（新規掲載／掲載済み資材の資材オーナー権限）、資材名、当該資材との関係（製造元・販売元・輸入元）、パッケージが確認できる資料を記入します。",
+      },
+      {
+        title: "運営が内容を確認後、資材ごとに資材オーナー権限をお渡しいたします",
+        body: "完了した場合、またご提出資料に不足がある場合は、担当者メールアドレス宛にメールでご連絡いたします。",
+      },
+    ],
+    conds: [
       "申請するすべての資材について、当該資材の製造元・販売元・輸入元のいずれか、または複数に該当すること。特定地域の販売代理店・卸・小売店は受付対象外です。",
       "「販売元」とは、当該資材のパッケージ上で「販売元」「発売元」等として表記され、国内における販売を代表する立場にある企業を指します。",
       "当該資材の製造・輸入・販売等に関わる他の関係会社との間で合意を得ているか、または貴社の判断で申請できる立場にあり、本申請を行う正当な権利を有していること。",
       "資材オーナー権限は、1資材につき1社に付与されます。すでに別の会社が資材オーナー企業になっている資材に申請している場合は、確認のうえ当事者間での話し合いをお願いすることがあります。",
     ],
-    documents: [
-      "法人番号（13桁）とFarmilleアカウントID",
-      "ご担当者の氏名・部署名・メールアドレス・電話番号",
-      "資材名（パッケージ記載の正式名称）",
-      "掲載済み資材の場合：FarmilleページのURL。製品公式ページのURLは任意です",
-      "資材ごとのパッケージ・ラベルの画像（貴社名の記載箇所を含む）。または、パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL",
+    prep: [
+      ["法人番号（13桁）とFarmilleアカウントID", ""],
+      ["ご担当者の氏名・部署名・メールアドレス・電話番号", ""],
+      ["資材名（パッケージ記載の正式名称）", ""],
+      ["掲載済み資材の場合：FarmilleページのURL", "製品公式ページのURLは任意です"],
+      [
+        "資材ごとのパッケージ・ラベルの画像（貴社名の記載箇所を含む）",
+        "または、パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL",
+      ],
     ],
   },
-  removal: {
-    eligibility: [
-      "申請するすべての資材について、当該資材の製造元・販売元・輸入元のいずれか、または複数に該当すること。特定地域の販売代理店、二次卸・三次卸、小売店は受付対象外です。",
-      "当該資材の製造・輸入・販売等に関わる他の関係会社との間で合意を得ているか、または貴社の判断で申請できる立場にあり、本申請を行う正当な権利を有していること。",
-      "本申請を行う担当者が、所属法人から必要な権限を付与されていること。",
+  "transfer-out": {
+    slug: "transfer-out",
+    title: "資材オーナー権限を別の会社に引き渡す",
+    listTitle: "資材オーナー権限を別の会社に引き渡す",
+    lead: "貴社が資材オーナー企業になっている資材について、資材オーナー権限を別の会社に移す申請です。現在の資材オーナー企業から申請します。",
+    needId: true,
+    formHref: "/dashboard/applications/new/transfer_out",
+    formLabel: "資材オーナー権限の移行申請フォームへ",
+    steps: [
+      {
+        title: "ログインし、「各種お手続き」から申請フォームにご記入ください",
+        body: "対象資材ごとに、FarmilleページURLと資材名、移行先企業の法人名・法人番号・FarmilleアカウントID・ご担当者の連絡先を記入します。あわせて、移行先企業名が当該資材のパッケージに記載されていることが分かる資料（パッケージ・ラベルの画像、または製品ページURL）を添えます。",
+      },
+      {
+        title: "運営が、移行先企業の関与をパッケージで確認します",
+        body: "移行先企業名が当該資材のパッケージ・ラベルに記載されていることを、ご提出の画像または製品ページURLで確認します。パッケージに記載がない場合に限り、契約書の写し・官報公告・プレスリリース等の資料で確認します。いずれでも確認できない場合は、両社の合意があっても移行できません。あわせて、移行先企業が企業会員として登録済みであることを確認します。",
+      },
+      {
+        title: "確認後、資材オーナー権限を移行先企業に移し、両社にメールでご連絡いたします",
+        body: "貴社の資材オーナー権限は解除されます。資材ページと感想口コミ・実証詳細レポートは、移行後もそのまま引き継がれます。",
+      },
     ],
-    documents: [
-      "対象資材のFarmilleページURLと資材名",
-      "ご担当者の氏名・部署名・メールアドレス・電話番号",
-      "会社概要ページのURL",
-      "資材ごとのパッケージ・ラベルの画像（貴社名の記載箇所を含む）。または、パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL",
-    ],
-  },
-  transfer_out: {
-    eligibility: [
+    conds: [
       "貴社が、対象資材の資材オーナー企業であること。",
       "移行先企業もFarmilleアカウントIDを持っていること。未開設の場合は、先に移行先企業にアカウント開設を依頼してください。",
       "資材オーナー権限を移行することについて、移行先企業から承諾を得ていること。",
       "既存の編集権限の委託がある場合、移行の完了をもって解除されること。",
       "本申請を行う担当者が、所属法人から必要な権限を付与されていること。",
     ],
-    documents: [
-      "対象資材のFarmilleページURLと資材名",
-      "移行先企業の法人名・法人番号・FarmilleアカウントID・ご担当者の連絡先。事前に移行先企業へご確認ください",
-      "移行先企業の関与を確認できる資料。移行先企業名が記載されたパッケージ・ラベルの画像 or 製品ページURL（必須）。パッケージに記載がない場合は、契約書の写し・官報公告・プレスリリース等（関係のない機密情報・個人情報はマスキング可）",
-      "貴社の法人番号（13桁）とFarmilleアカウントID",
+    prep: [
+      ["対象資材のFarmilleページURLと資材名", ""],
+      [
+        "移行先企業の法人名・法人番号・FarmilleアカウントID・ご担当者の連絡先",
+        "事前に移行先企業へご確認ください",
+      ],
+      [
+        "移行先企業の関与を確認できる資料",
+        "移行先企業名が記載されたパッケージ・ラベルの画像 or 製品ページURL（必須）。パッケージに記載がない場合は、契約書の写し・官報公告・プレスリリース等（関係のない機密情報・個人情報はマスキング可）",
+      ],
+      ["貴社の法人番号（13桁）とFarmilleアカウントID", ""],
     ],
   },
-  transfer_in: {
-    eligibility: [
+  "transfer-in": {
+    slug: "transfer-in",
+    title: "別の会社から資材の事業を引き継いだ",
+    listTitle: "別の会社から資材の事業を引き継いだ",
+    lead: "事業譲渡・合併等により資材に関する事業を引き継いだ会社が、資材オーナー権限の移行を申請します。",
+    needId: true,
+    formHref: "/dashboard/applications/new/transfer_in",
+    formLabel: "資材オーナー権限の移行申請フォーム（引き継ぎ先）へ",
+    steps: [
+      {
+        title: "ログインし、「各種お手続き」から申請フォームにご記入ください",
+        body: "対象資材ごとに、FarmilleページURLと資材名、現在の資材オーナー企業の法人名、貴社の関与を確認できる資料を記入します。あわせて、移行の経緯と、経緯を確認できる資料（現在の資材オーナー企業の同意がわかるメールの写し、官報公告、プレスリリース、契約書の写し等）を添えます。",
+      },
+      {
+        title: "運営が、現在の資材オーナー企業に本申請を通知し、14日間の確認期間をとります",
+        body: "期間内に異議があった場合は、お手続きを保留し、当事者間での協議をお願いします。現在の資材オーナー企業に連絡がつかない場合は、ご提出の承継資料をもとに判断します。",
+      },
+      {
+        title: "運営が、貴社の関与と移行の経緯を資料で確認します",
+        body: "14日以内に異議がない場合でも、自動では移行しません。貴社名のパッケージ記載、または承継資料で確認できない場合は、移行をお受けできないことがあります。",
+      },
+      {
+        title: "確認後、資材オーナー権限を貴社に移し、両社にメールでご連絡いたします",
+        body: "現在の資材オーナー企業の資材オーナー権限は解除されます。資材ページと感想口コミ・実証詳細レポートは、移行後もそのまま引き継がれます。",
+      },
+    ],
+    conds: [
       "事業譲渡・合併等により、当該資材に関する事業を引き継いだ企業であること。",
       "当該資材の製造元・販売元・輸入元のいずれかに該当すること。",
       "本申請を行う担当者が、所属法人から必要な権限を付与されていること。",
     ],
-    documents: [
-      "対象資材のFarmilleページURLと資材名",
-      "現在の資材オーナー企業の法人名。分かる範囲で担当部署・連絡先も",
-      "貴社の関与を確認できる資料。貴社名が記載されたパッケージ・ラベルの画像 or 製品ページURL、またはその他の関係確認資料",
-      "移行の経緯と、経緯を確認できる資料。現在の資材オーナー企業の同意がわかるメールの写し、官報公告、プレスリリース、契約書の写し等。できるだけ添付してください",
-      "法人番号（13桁）とFarmilleアカウントID",
+    prep: [
+      ["対象資材のFarmilleページURLと資材名", ""],
+      ["現在の資材オーナー企業の法人名", "分かる範囲で担当部署・連絡先も"],
+      [
+        "貴社の関与を確認できる資料",
+        "貴社名が記載されたパッケージ・ラベルの画像 or 製品ページURL、またはその他の関係確認資料",
+      ],
+      [
+        "移行の経緯と、経緯を確認できる資料",
+        "現在の資材オーナー企業の同意がわかるメールの写し、官報公告、プレスリリース、契約書の写し等。できるだけ添付してください",
+      ],
+      ["法人番号（13桁）とFarmilleアカウントID", ""],
     ],
   },
-} as const;
+  removal: {
+    slug: "removal",
+    title: "終売・販売終了の反映／資材ページの非表示",
+    listTitle: "販売終了した資材が掲載されている／掲載資材を非表示にしたい",
+    lead: "掲載されている資材ページについて、終売・廃盤の表示、または非表示を申請します。当該資材の製造元・販売元・輸入元の企業様からの申請を受け付けます。",
+    needId: false,
+    formHref: REMOVAL_INTAKE_HREF,
+    formLabel: "受付フォームへ",
+    steps: [
+      {
+        title: "受付フォームにご記入ください",
+        body: "申請フォームをお送りするための簡単なフォームです。法人名・ご担当者名・メールアドレスの3項目をご記入ください。",
+        link: { href: REMOVAL_INTAKE_HREF, label: "受付フォームはこちら →" },
+      },
+      {
+        title: "メールで申請フォームを送付いたします",
+        body: "ご記入のメールアドレス宛にお送りします。届かない場合は、迷惑メールフォルダをご確認ください。",
+      },
+      {
+        title: "申請フォームにご記入のうえ、送信してください",
+        body: "資材ごとに、FarmilleページURL、当該資材との関係、パッケージが確認できる資料、申請種別（終売・廃盤の表示／非表示）と申請理由を記入します。",
+      },
+      {
+        title: "運営が内容を確認後、完了のご連絡をいたします",
+        body: "ご提出資料に不足がある場合も、担当者メールアドレス宛にメールでご連絡いたします。資材ページやレビューのデータは削除しません。",
+      },
+    ],
+    conds: [
+      "申請するすべての資材について、当該資材の製造元・販売元・輸入元のいずれか、または複数に該当すること。特定地域の販売代理店、二次卸・三次卸、小売店は受付対象外です。",
+      "当該資材の製造・輸入・販売等に関わる他の関係会社との間で合意を得ているか、または貴社の判断で申請できる立場にあり、本申請を行う正当な権利を有していること。",
+      "本申請を行う担当者が、所属法人から必要な権限を付与されていること。",
+    ],
+    prep: [
+      ["対象資材のFarmilleページURLと資材名", ""],
+      ["ご担当者の氏名・部署名・メールアドレス・電話番号", ""],
+      ["会社概要ページのURL", ""],
+      [
+        "資材ごとのパッケージ・ラベルの画像（貴社名の記載箇所を含む）",
+        "または、パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL",
+      ],
+    ],
+  },
+} as const satisfies Record<ProcedureSlug, Procedure>;
 
-export const MEMBER_ACTIONS = [
+export const PROCEDURE_ORDER: ReadonlyArray<ProcedureSlug> = [
+  "owner",
+  "transfer-out",
+  "transfer-in",
+  "removal",
+];
+
+export function isProcedureSlug(value: string): value is ProcedureSlug {
+  return PROCEDURE_ORDER.some((slug) => slug === value);
+}
+
+type MemberAction = {
+  title: string;
+  href: string;
+  note?: string;
+  procedure?: ProcedureSlug;
+};
+
+/** 見本 sellersLP「企業会員登録済みの方の活用ガイド」。 */
+export const MEMBER_ACTIONS: ReadonlyArray<MemberAction> = [
+  { title: "新しい資材を掲載する", href: OWNER_APPLICATION_HREF, procedure: "owner" },
   {
-    title: "新しい資材を掲載する",
-    href: "/dashboard/applications/new/registration",
-    guidance: APPLICATION_GUIDANCE.registration,
-  },
-  {
-    title: "自社資材の情報を確認・編集する（企業会員ダッシュボードから）",
+    title: "自社資材の情報を確認・編集する",
     href: "/dashboard/materials",
-    guidance: null,
+    note: "（企業会員ダッシュボードから）",
   },
-  {
-    title: "資材を終売・非表示にする",
-    href: "/company-requests/removal",
-    guidance: APPLICATION_GUIDANCE.removal,
-  },
+  { title: "資材を終売・非表示にする", href: REMOVAL_INTAKE_HREF, procedure: "removal" },
   {
     title: "資材オーナー権限を別の会社に引き渡す",
     href: "/dashboard/applications/new/transfer_out",
-    guidance: APPLICATION_GUIDANCE.transfer_out,
+    procedure: "transfer-out",
   },
   {
     title: "引き継いだ資材の資材オーナー権限を申請する",
     href: "/dashboard/applications/new/transfer_in",
-    guidance: APPLICATION_GUIDANCE.transfer_in,
+    procedure: "transfer-in",
   },
-  {
-    title: "会社の情報（メーカープロフィール）を編集する",
-    href: "/dashboard/profile",
-    guidance: null,
-  },
-  {
-    title: "各種お手続きの一覧を見る",
-    href: "/dashboard/applications",
-    guidance: null,
-  },
-] as const;
+  { title: "会社の情報（メーカープロフィール）を編集する", href: "/dashboard/profile" },
+  { title: "各種お手続きの一覧を見る", href: "/dashboard/applications" },
+];
 
-export const GUIDE_FAQS = [
+type FaqLink = { href: string; label: string };
+type Faq = { question: string; answer: string; links: ReadonlyArray<FaqLink> };
+
+/** 見本 sellersLP の「よくあるご質問」。リンクは同じページの該当ガイドへ。 */
+export const GUIDE_FAQS: ReadonlyArray<Faq> = [
   {
     question: "申請から掲載まではどのくらいかかりますか？",
     answer:
@@ -107,23 +254,13 @@ export const GUIDE_FAQS = [
     question: "Farmilleに登録した覚えがないのに、自社の資材が掲載されています。",
     answer:
       "Farmille運営が公開情報をもとに作成した仮掲載ページです。貴社で情報を管理したい場合は、企業会員登録のうえ、掲載済み資材の資材オーナー権限をお申し込みください。ページに蓄積された感想口コミ・実証詳細レポートはそのまま引き継がれます。",
-    links: [
-      {
-        label: "資材オーナー権限の申請について",
-        href: "#guide-existing",
-      },
-    ],
+    links: [{ href: "#lpGuideNew", label: "資材オーナー権限の申請について →" }],
   },
   {
     question: "資材ページを削除してもらえますか？",
     answer:
       "販売を終了した資材には「終売・廃盤」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非表示」にします。いずれも受付フォームからお手続きください。なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。",
-    links: [
-      {
-        label: "終売・非表示の申請について",
-        href: "#guide-removal",
-      },
-    ],
+    links: [{ href: "#lpGuideDelist", label: "終売・非表示の申請について →" }],
   },
   {
     question: "販売代理店や卸売業者でも申請できますか？",
@@ -135,23 +272,13 @@ export const GUIDE_FAQS = [
     question: "資材オーナー権限を別の会社に移せますか？",
     answer:
       "資材オーナー権限を移行することは可能です。現在の資材オーナー企業から申請する場合と、事業譲渡・合併などで引き継いだ会社から申請する場合で、手続きが異なります。",
-    links: [
-      {
-        label: "権限の引き渡し・引き継ぎについて",
-        href: "#members",
-      },
-    ],
+    links: [{ href: "#lpGuideMore", label: "権限の引き渡し・引き継ぎについて →" }],
   },
   {
     question: "終売や非表示の申請にFarmilleアカウントは必要ですか？",
     answer:
       "不要です。受付フォームに法人名・ご担当者名・メールアドレスを入力すると、申請フォームのURLをメールでお送りします。",
-    links: [
-      {
-        label: "終売・非表示の申請について",
-        href: "#guide-removal",
-      },
-    ],
+    links: [{ href: "#lpGuideDelist", label: "終売・非表示の申請について →" }],
   },
   {
     question: "生産者の感想口コミや実証詳細レポートを削除してもらえますか？",
@@ -169,11 +296,61 @@ export const GUIDE_FAQS = [
     question: "非表示にした後、再び掲載できますか？",
     answer:
       "可能です。関係する会社間で掲載についての合意をいただいたうえで、あらためて資材オーナー権限をご申請ください。",
+    links: [{ href: "#lpGuideNew", label: "資材オーナー権限の申請について →" }],
+  },
+];
+
+/** 見本 sellerProcs の「よくあるご質問」。リンクはお手続きの詳細ページへ。 */
+export const PROCEDURE_FAQS: ReadonlyArray<Faq> = [
+  {
+    question: "資材ページを削除してもらえますか？",
+    answer:
+      "販売を終了した資材には「終売・廃盤」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非表示」にします。いずれも受付フォームからお手続きください。なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。",
+    links: [{ href: "/sellers/procedures/removal", label: "終売・非表示の申請について →" }],
+  },
+  {
+    question: "Farmilleに登録した覚えがないのに、自社の資材が掲載されています。",
+    answer:
+      "Farmille運営が公開情報をもとに登録した資材ページです。貴社で情報を管理したい場合は、企業会員登録のうえ、掲載済み資材の資材オーナー権限をお申し込みください。ページに蓄積されたレビューはそのまま引き継がれます。",
+    links: [{ href: "/sellers/procedures/owner", label: "資材オーナー権限の申請 →" }],
+  },
+  {
+    question: "資材オーナー権限とは何ですか？",
+    answer:
+      "Farmilleに掲載される資材ごとに1社に設定する権限で、資材情報の編集権限を含みます。製造元・販売元・輸入元の企業様に、資材ごとにお渡しします。編集権限だけを代理店等に委託することもできます。",
+    links: [{ href: "/sellers/procedures/owner", label: "申請の流れ・条件 →" }],
+  },
+  {
+    question: "販売代理店や卸売業者でも申請できますか？",
+    answer:
+      "特定地域の販売代理店・卸・小売店の皆様からのお手続きは受け付けておりません。パッケージ上で「販売元」「発売元」等として表記され、国内の販売を代表する立場の企業様は「販売元」としてお申し込みいただけます。",
+    links: [],
+  },
+  {
+    question: "資材オーナー権限を別の会社に移せますか？",
+    answer:
+      "資材オーナー権限を移行することは可能です。現在の資材オーナー企業から申請する場合と、事業譲渡・合併などで引き継いだ会社から申請する場合で、手続きが異なります。",
     links: [
-      {
-        label: "資材オーナー権限の申請について",
-        href: "#guide-existing",
-      },
+      { href: "/sellers/procedures/transfer-out", label: "引き渡す（現在の資材オーナー企業）→" },
+      { href: "/sellers/procedures/transfer-in", label: "引き継いだ会社から申請する →" },
     ],
   },
-] as const;
+  {
+    question: "終売や非表示の申請にFarmilleアカウントは必要ですか？",
+    answer:
+      "不要です。受付フォームに法人名・ご担当者名・メールアドレスを入力すると、申請フォームのURLをメールでお送りします。アカウントをお持ちの企業様は、申請フォームにアカウントIDをご記入いただくと確認が早くなります。",
+    links: [{ href: "/sellers/procedures/removal", label: "終売・非表示の申請について →" }],
+  },
+  {
+    question: "申請の結果はどのように連絡されますか？",
+    answer:
+      "運営から、ご記入いただいたご担当者様のメールアドレス宛にご連絡いたします。ご提出資料に不足がある場合も、同じくメールでご連絡します。",
+    links: [],
+  },
+  {
+    question: "非表示にした後、再び掲載できますか？",
+    answer:
+      "可能です。関係する会社間で掲載についての合意をいただいたうえで、あらためて資材オーナー権限をご申請ください。",
+    links: [{ href: "/sellers/procedures/owner", label: "資材オーナー権限の申請 →" }],
+  },
+];

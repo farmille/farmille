@@ -9,6 +9,7 @@ const meta = {
     itemKey: "22222222-2222-4222-8222-222222222222",
     purpose: "package",
     label: "パッケージ資料",
+    inputId: "evidence-file",
     onBusy: () => undefined,
   },
 } satisfies Meta<typeof EvidenceFields>;

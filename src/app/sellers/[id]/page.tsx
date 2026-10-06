@@ -1,80 +1,24 @@
+import "../../_mock/forms.css";
+import "../../_mock/reports-articles.css";
+import "../../_mock/sellers.css";
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import {
-  AppBar,
-  ArtMini,
-  EmptyState,
-  MaterialCard,
-  MaterialCardRail,
-  SectionHeading,
-  StatCard,
-} from "@/components";
-import { Icon } from "@/components/Icon";
+import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { MockImagePlaceholderIcon } from "@/app/articles/_components/MockIcons";
+import { MockNoImage, MockStars } from "@/app/materials/[id]/_components/MockParts";
+import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { getPublicSellerPage, type PublicSellerPageData } from "@/server/queries/public-sellers";
 import type { Result } from "@/server/result";
-import { css } from "../../../../styled-system/css";
 
 import { SellerHeader } from "./_components/SellerHeader";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-const shell = css({
-  minH: "100dvh",
-  bg: "surface.page",
-  color: "text.default",
-  fontFamily: "sans",
-});
-
-const body = css({
-  w: "100%",
-  maxW: "content.wide",
-  mx: "auto",
-  px: "4",
-  py: "4",
-  pb: "10",
-  bg: "surface.panel",
-  tab: { px: "5", py: "5" },
-});
-
-const statRow = css({
-  display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: "2.5",
-  mt: "3.5",
-});
-
-const broadcastBand = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "2.5",
-  mt: "3.5",
-  px: "3.5",
-  py: "3",
-  bg: "primary.soft",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "primary.600/25",
-  borderRadius: "button",
-  color: "primary.700",
-  fontSize: "sm",
-  fontWeight: "600",
-  lineHeight: "1.55",
-});
-
-const articleStack = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "2.5",
-  tab: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  },
-});
 
 const getCachedSellerPage = cache(async (id: string): Promise<Result<PublicSellerPageData>> => {
   if (!UUID_PATTERN.test(id)) {
@@ -120,6 +64,10 @@ export async function generateMetadata({ params }: SellerPageProps): Promise<Met
   });
 }
 
+/**
+ * 見本 S.seller（企業会員のメーカーページ）。公開されるのは企業会員として確認済みのメーカーだけなので、
+ * 見本の「確認済みメーカー」の表示を使う。参考になった数と投稿記事は本番の機能として残す。
+ */
 export default async function SellerPage({ params }: SellerPageProps) {
   const { id } = await params;
   const data = await loadSellerOrNotFound(id);
@@ -128,84 +76,109 @@ export default async function SellerPage({ params }: SellerPageProps) {
   const showAllMaterials = data.materialCount > 3;
 
   return (
-    <div className={shell}>
-      <AppBar chrome="public" active="search" title={seller.officialName} backHref="/" />
-      <main className={body}>
-        <SellerHeader seller={seller} />
+    <MockPageShell title={seller.officialName} backHref="/" active="search">
+      <SellerHeader seller={seller} />
 
-        <div className={statRow}>
-          <StatCard value={`${data.materialCount}件`} label="掲載資材" />
-          <StatCard value={data.helpfulCount} label="参考になった" />
+      <div className="stat-row">
+        <div className="stat">
+          <div className="num tnum">{data.materialCount}</div>
+          <div className="lbl">掲載製品</div>
         </div>
+        <div className="stat">
+          <div className="num tnum">{data.helpfulCount}</div>
+          <div className="lbl">参考になった</div>
+        </div>
+      </div>
 
-        {data.materialCount > 0 ? (
-          <section aria-labelledby="seller-materials-heading">
-            <SectionHeading
-              title={<span id="seller-materials-heading">掲載資材</span>}
-              href={showAllMaterials ? materialsHref : undefined}
-              linkLabel="すべて見る"
-            />
-            <MaterialCardRail>
-              {materials.map((material) => (
-                <MaterialCard
-                  key={material.id}
-                  variant="scroll"
-                  name={material.name}
-                  maker={material.manufacturerName}
-                  rating={material.averageRating ?? 0}
-                  reviewCount={material.reviewCount}
-                  official={material.manufacturerVerified}
-                  imageSrc={material.imageUrl ?? undefined}
-                  href={`/materials/${material.id}`}
-                />
-              ))}
-            </MaterialCardRail>
+      {data.materialCount > 0 ? (
+        <section aria-labelledby="seller-materials-heading">
+          <div className="sec-h">
+            <h2 id="seller-materials-heading">掲載製品</h2>
             {showAllMaterials ? (
-              <Link
-                href={materialsHref}
-                className={css({
-                  display: "inline-flex",
-                  mt: "2.5",
-                  color: "primary.700",
-                  fontSize: "sm",
-                  fontWeight: "700",
-                  textDecoration: "none",
-                })}
-              >
-                掲載資材 {data.materialCount}件をすべて見る <Icon name="arrow_forward" size="sm" />
+              <Link className="link-more" href={materialsHref}>
+                すべて見る
               </Link>
             ) : null}
-          </section>
+          </div>
+          <div className="prod-scroll">
+            {materials.map((material) => (
+              <Link className="prod-card" href={`/materials/${material.id}`} key={material.id}>
+                <div className="img">
+                  {material.imageUrl ? (
+                    <Image alt="" height={225} sizes="150px" src={material.imageUrl} width={300} />
+                  ) : (
+                    <MockNoImage />
+                  )}
+                </div>
+                <div className="info">
+                  <div className="nm">{material.name}</div>
+                  <div className="rt">
+                    <MockStars value={material.averageRating ?? 0} />
+                    <span className="sr-only">（感想口コミ {material.reviewCount}件）</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+          {showAllMaterials ? (
+            <div style={{ marginTop: 10 }}>
+              <Link className="link-more" href={materialsHref}>
+                掲載製品 {data.materialCount}件をすべて見る →
+              </Link>
+            </div>
+          ) : null}
+        </section>
+      ) : (
+        <div className="broadcast-band" style={{ marginTop: 14 }}>
+          このアカウントは記事で情報発信を行っています
+        </div>
+      )}
+
+      <section aria-labelledby="seller-articles-heading">
+        <div className="sec-h">
+          <h2 id="seller-articles-heading">投稿記事</h2>
+        </div>
+        {articles.length > 0 ? (
+          <div className="report-grid">
+            {articles.map((article) => (
+              <article className="alist-card" data-kind="other" key={article.id}>
+                <Link aria-label={article.title} className="cover" href={`/articles/${article.id}`}>
+                  {article.heroImageUrl ? (
+                    <Image
+                      alt=""
+                      height={480}
+                      sizes="(min-width: 900px) 420px, 50vw"
+                      src={article.heroImageUrl}
+                      width={640}
+                    />
+                  ) : (
+                    <MockImagePlaceholderIcon />
+                  )}
+                </Link>
+                <div className="abody">
+                  <Link className="t" href={`/articles/${article.id}`}>
+                    {article.title}
+                  </Link>
+                  <div className="by">
+                    <span aria-hidden="true" className="org-mini">
+                      {seller.officialName.charAt(0)}
+                    </span>
+                    {seller.officialName}
+                    <span className="type-label" style={{ fontSize: 9.5 }}>
+                      メーカー
+                    </span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         ) : (
-          <div className={broadcastBand}>
-            <Icon name="article" size="md" />
-            <span>このアカウントは記事で情報発信を行っています</span>
+          <div className="card pad empty-note">
+            <b>公開中の記事はまだありません</b>
+            記事が公開されると、ここに表示されます。
           </div>
         )}
-
-        <section aria-labelledby="seller-articles-heading">
-          <SectionHeading title={<span id="seller-articles-heading">投稿記事</span>} />
-          {articles.length > 0 ? (
-            <div className={articleStack}>
-              {articles.map((article) => (
-                <ArtMini
-                  key={article.id}
-                  title={article.title}
-                  organization={seller.officialName}
-                  typeLabel="メーカー"
-                  thumbSrc={article.heroImageUrl ?? undefined}
-                  href={`/articles/${article.id}`}
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title="公開中の記事はまだありません"
-              description="記事が公開されると、ここに表示されます。"
-            />
-          )}
-        </section>
-      </main>
-    </div>
+      </section>
+    </MockPageShell>
   );
 }

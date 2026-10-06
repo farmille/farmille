@@ -1,32 +1,11 @@
+import "../_mock/sellers.css";
+
 import type { Metadata } from "next";
 
-import { AppBar } from "@/components";
-import { HomeFooter } from "@/app/_components/HomeFooter";
-import { BottomNav } from "@/components/BottomNav";
+import { MockPageShell } from "@/app/_mock/MockPageShell";
 import { createPageMetadata } from "@/lib/seo";
-import { css } from "../../../styled-system/css";
 
 import { ManufacturerLanding } from "./_components/ManufacturerLanding";
-
-const shell = css({
-  minH: "100dvh",
-  display: "flex",
-  flexDirection: "column",
-  bg: "surface.page",
-  color: "text.default",
-  fontFamily: "sans",
-});
-
-const main = css({
-  flex: "1",
-  w: "100%",
-  maxW: "content.wide",
-  mx: "auto",
-  pb: "8",
-  tab: { pb: "10" },
-});
-
-const footer = css({ px: "4", tab: { px: "5" } });
 
 export async function generateMetadata(): Promise<Metadata> {
   return createPageMetadata({
@@ -41,26 +20,15 @@ type ManufacturerPageProps = {
   searchParams: Promise<{ from?: string | string[] }>;
 };
 
+/** 見本 S.sellersLP（メーカーの方へ）。 */
 export default async function ManufacturerPage({ searchParams }: ManufacturerPageProps) {
   const { from } = await searchParams;
   const fromMe = from === "me";
   const applyHref = fromMe ? "/sellers/apply?from=me" : "/sellers/apply";
 
   return (
-    <div className={shell}>
-      <AppBar
-        chrome="public"
-        active="home"
-        title="メーカーの方へ"
-        backHref={fromMe ? "/me" : "/"}
-      />
-      <main className={main}>
-        <ManufacturerLanding applyHref={applyHref} />
-        <div className={footer}>
-          <HomeFooter />
-        </div>
-      </main>
-      <BottomNav active="home" />
-    </div>
+    <MockPageShell title="メーカーの方へ" backHref={fromMe ? "/me" : "/"}>
+      <ManufacturerLanding applyHref={applyHref} />
+    </MockPageShell>
   );
 }

@@ -1,55 +1,6 @@
+import { MockExternalIcon } from "@/app/materials/[id]/_components/MockParts";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
-
-import { Icon } from "@/components/Icon";
 import type { PublicSellerPageData } from "@/server/queries/public-sellers";
-import { css } from "../../../../../styled-system/css";
-
-const card = css({
-  display: "flex",
-  gap: "3",
-  p: "4",
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "card",
-  boxShadow: "shadow",
-});
-
-const logo = css({
-  w: "56px",
-  aspectRatio: "image.square",
-  borderRadius: "button",
-  bg: "primary.soft",
-  display: "grid",
-  placeItems: "center",
-  flexShrink: "0",
-  overflow: "hidden",
-  color: "primary.700",
-  fontSize: "xl",
-  fontWeight: "800",
-});
-
-const typeLabel = css({
-  display: "inline-flex",
-  mt: "1",
-  px: "2.5",
-  py: "0.5",
-  borderRadius: "pill",
-  bg: "primary.soft",
-  color: "primary.700",
-  fontSize: "xs",
-  fontWeight: "700",
-  whiteSpace: "nowrap",
-});
-
-const organizationLink = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1",
-  color: "primary.700",
-  textDecoration: "none",
-});
 
 function checkedExternalUrl(value: string): string {
   const url = new URL(value);
@@ -61,82 +12,65 @@ function checkedExternalUrl(value: string): string {
   return url.toString();
 }
 
+function PinIcon() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
+      <path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
 type SellerHeaderProps = {
   seller: PublicSellerPageData["seller"];
 };
 
+/** 見本 S.seller の `.card.org-head`。名前の横の確認済みマークは表記ルールにより出さない。 */
 export function SellerHeader({ seller }: SellerHeaderProps) {
-  const fallbackLogo = seller.officialName.charAt(0);
+  const websiteUrl = seller.websiteUrl === null ? null : checkedExternalUrl(seller.websiteUrl);
 
   return (
-    <section className={card} aria-labelledby="seller-name">
-      <div className={logo}>
+    <section className="card org-head" aria-labelledby="seller-name">
+      <div className="org-logo">
         {seller.logoUrl ? (
-          <Image
-            alt=""
-            className={css({
-              display: "block",
-              w: "100%",
-              h: "100%",
-              objectFit: "cover",
-            })}
-            height={56}
-            sizes="56px"
-            src={seller.logoUrl}
-            width={56}
-          />
+          <Image alt="" height={56} sizes="56px" src={seller.logoUrl} width={56} />
         ) : (
-          fallbackLogo
+          seller.officialName.charAt(0)
         )}
       </div>
-      <div className={css({ flex: "1", minW: "0" })}>
-        <div
-          className={css({
-            display: "flex",
-            alignItems: "center",
-            gap: "1.5",
-            flexWrap: "wrap",
-          })}
-        >
-          <h1 id="seller-name" className={css({ m: "0", fontSize: "xl", fontWeight: "800" })}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="org-name">
+          <h1 id="seller-name" style={{ fontSize: 17 }}>
             {seller.officialName}
           </h1>
         </div>
-        <span className={typeLabel}>メーカー</span>
-        {seller.profileText ? (
-          <p
-            className={css({
-              mt: "2",
-              mb: "0",
-              color: "text.muted",
-              fontSize: "sm",
-              lineHeight: "1.65",
-            })}
-          >
-            {seller.profileText}
-          </p>
+        <span className="type-label" style={{ marginTop: 5, display: "inline-block" }}>
+          メーカー
+        </span>
+        {seller.profileText ? <p className="org-desc">{seller.profileText}</p> : null}
+        {websiteUrl !== null || seller.regionScope !== null ? (
+          <div className="org-links">
+            {websiteUrl === null ? null : (
+              <a href={websiteUrl} target="_blank" rel="noreferrer">
+                <MockExternalIcon /> {websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                <span className="sr-only">（公式サイト・別タブで開きます）</span>
+              </a>
+            )}
+            {seller.regionScope === null ? null : (
+              <span className="loc">
+                <PinIcon /> {seller.regionScope}
+              </span>
+            )}
+          </div>
         ) : null}
-        <div
-          className={css({
-            display: "flex",
-            flexDirection: "column",
-            gap: "1.5",
-            mt: "2.5",
-            color: "text.muted",
-            fontSize: "sm",
-          })}
-        >
-          {seller.websiteUrl ? (
-            <a
-              href={checkedExternalUrl(seller.websiteUrl)}
-              target="_blank"
-              rel="noreferrer"
-              className={organizationLink}
-            >
-              公式サイトを見る <Icon name="north_east" size="sm" />
-            </a>
-          ) : null}
-        </div>
       </div>
     </section>
   );

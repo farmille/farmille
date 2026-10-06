@@ -10,8 +10,10 @@ describe("企業向け利用ガイド", () => {
       "/sellers/apply?from=me",
     );
     const members = screen.getByRole("region", { name: "企業会員登録済みの方の活用ガイド" });
-    const links = within(members).getAllByRole("link");
-    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+    const links = within(members)
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"));
+    expect(links).toEqual([
       "/dashboard/applications/new/registration",
       "/dashboard/materials",
       "/dashboard/applications/new/registration",

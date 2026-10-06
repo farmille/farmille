@@ -4,7 +4,7 @@ const meta = {
   title: "CompanyApplications/ConsentFields",
   component: ConsentFields,
   parameters: { nextjs: { appDirectory: true } },
-  args: { kind: "registration" },
+  args: { kind: "registration", startNumber: 3 },
 } satisfies Meta<typeof ConsentFields>;
 export default meta;
 type Story = StoryObj<typeof meta>;
