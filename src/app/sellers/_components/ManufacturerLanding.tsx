@@ -555,7 +555,13 @@ const faqQuestion = css({
   fontSize: "md",
   fontWeight: "800",
   lineHeight: "normal",
-  _before: { content: '"Q"', flex: "0 0 auto", color: "primary.600" },
+  _before: {
+    content: '"Q"',
+    flex: "0 0 auto",
+    w: "3.5",
+    color: "primary.600",
+    textAlign: "center",
+  },
 });
 
 const faqAnswer = css({
@@ -569,10 +575,12 @@ const faqAnswer = css({
 
 const faqAnswerMark = css({
   position: "absolute",
-  left: "0.5",
+  left: "0",
   top: "0",
+  w: "3.5",
   color: "text.subtle",
   fontWeight: "800",
+  textAlign: "center",
 });
 
 const faqAnswerText = css({ m: "0" });
