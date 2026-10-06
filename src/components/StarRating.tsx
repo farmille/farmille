@@ -21,21 +21,10 @@ const displayRowRecipe = cva({
   },
 });
 
-const starsRecipe = cva({
-  base: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "0",
-  },
-  variants: {
-    size: {
-      sm: { gap: "0" },
-      lg: { gap: "2" },
-    },
-  },
-  defaultVariants: {
-    size: "sm",
-  },
+const starsStyle = css({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "0",
 });
 
 const valueRecipe = cva({
@@ -102,7 +91,7 @@ export function StarRating(props: StarRatingProps) {
     const value = clampInt(props.value);
     return (
       <div
-        className={cx(css({ display: "flex", gap: "2", alignItems: "center" }), props.className)}
+        className={cx(css({ display: "flex", gap: "0", alignItems: "center" }), props.className)}
         role="radiogroup"
         aria-label="評価"
       >
@@ -136,7 +125,7 @@ export function StarRating(props: StarRatingProps) {
       role="img"
       aria-label={showValue ? `評価 ${formatted}` : `評価 ${value}`}
     >
-      <span className={starsRecipe({ size: props.size })}>
+      <span className={starsStyle}>
         {[1, 2, 3, 4, 5].map((n) => (
           <Icon
             key={n}

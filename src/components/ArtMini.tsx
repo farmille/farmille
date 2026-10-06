@@ -9,7 +9,7 @@ const rowRecipe = cva({
     display: "flex",
     gap: "2.5",
     p: "2.5",
-    alignItems: "center",
+    alignItems: "start",
     bg: "surface.card",
     borderWidth: "1px",
     borderStyle: "solid",
@@ -25,7 +25,7 @@ const thumb = css({
   w: "70px",
   aspectRatio: "image.landscape",
   borderRadius: "button",
-  bg: "primary.100",
+  bg: "primary.soft",
   flexShrink: "0",
   display: "grid",
   placeItems: "center",
@@ -94,7 +94,7 @@ export function ArtMini({
       <Icon
         name="chevron_right"
         size="sm"
-        className={css({ color: "text.subtle", flexShrink: "0" })}
+        className={css({ color: "text.subtle", flexShrink: "0", alignSelf: "center" })}
       />
     </Link>
   );

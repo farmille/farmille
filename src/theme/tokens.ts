@@ -8,6 +8,7 @@ export const tokens = {
   blurs: { reportGate: { value: "4px" } },
   colors: {
     green: {
+      50: { value: "#EEF9F0" },
       100: { value: "#D8F3DC" },
       200: { value: "#B7E4C7" },
       300: { value: "#95D5B2" },
@@ -243,6 +244,7 @@ export const tokens = {
 export const semanticTokens = {
   colors: {
     primary: {
+      soft: { value: "{colors.green.50}" },
       100: { value: "{colors.green.100}" },
       200: { value: "{colors.green.200}" },
       300: { value: "{colors.green.300}" },

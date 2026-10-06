@@ -59,7 +59,7 @@ const reportRow = css({
 const status = css({
   flexShrink: "0",
   borderRadius: "pill",
-  bg: "primary.200",
+  bg: "primary.soft",
   color: "primary.700",
   px: "2.5",
   py: "1",

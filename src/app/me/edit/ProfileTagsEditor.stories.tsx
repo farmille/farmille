@@ -22,6 +22,18 @@ const meta = {
           aliases: ["苺"],
           crop_groups: { name: "野菜類" },
         },
+        {
+          id: "10000000-0000-4000-8000-000000000002",
+          name: "トマト",
+          aliases: ["大玉トマト"],
+          crop_groups: { name: "なす科果菜類" },
+        },
+        {
+          id: "10000000-0000-4000-8000-000000000003",
+          name: "きゅうり",
+          aliases: [],
+          crop_groups: { name: "うり類" },
+        },
       ],
       affiliations: ["JA青年部"],
     },

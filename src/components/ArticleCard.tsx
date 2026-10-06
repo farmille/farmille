@@ -21,7 +21,7 @@ const cardRecipe = cva({
 
 const cover = css({
   aspectRatio: "image.wide",
-  bg: "primary.100",
+  bg: "primary.soft",
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
@@ -109,7 +109,7 @@ export function ArticleCard({
               w: "18px",
               h: "18px",
               borderRadius: "mark",
-              bg: "primary.200",
+              bg: "primary.soft",
               display: "grid",
               placeItems: "center",
               fontSize: "2xs",

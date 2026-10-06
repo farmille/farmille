@@ -30,14 +30,14 @@ export function MaterialRefCard({
       className={cx(
         css({
           display: "flex",
-          alignItems: "center",
+          alignItems: "start",
           gap: "2.5",
           borderWidth: "1px",
           borderStyle: "solid",
           borderColor: "border.default",
           borderRadius: "card",
           p: "3",
-          bg: "primary.100",
+          bg: "primary.soft",
           textDecoration: "none",
           color: "inherit",
         }),
@@ -49,7 +49,7 @@ export function MaterialRefCard({
           w: "44px",
           aspectRatio: "image.square",
           borderRadius: "button",
-          bg: "primary.100",
+          bg: "primary.soft",
           display: "grid",
           placeItems: "center",
           flexShrink: "0",
@@ -81,7 +81,7 @@ export function MaterialRefCard({
       <Icon
         name="chevron_right"
         size="sm"
-        className={css({ color: "text.subtle", flexShrink: "0" })}
+        className={css({ color: "text.subtle", flexShrink: "0", alignSelf: "center" })}
       />
     </Link>
   );

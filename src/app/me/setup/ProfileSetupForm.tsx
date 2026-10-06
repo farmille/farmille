@@ -30,7 +30,7 @@ export function ProfileSetupForm() {
         label="ハンドルネーム"
         visibility="public"
         requirement="required"
-        guide="投稿に表示されます。本名でなくても構いません。"
+        guide="本名でなくても構いません。"
       >
         <input
           id="handle"
@@ -48,7 +48,6 @@ export function ProfileSetupForm() {
         label="あなたの立場"
         visibility="public"
         requirement="required"
-        guide="公開プロフィールや投稿に表示されます。"
       >
         <RadioCards name="standpoint" options={STANDPOINTS} defaultValue={values.standpoint} />
       </Field>

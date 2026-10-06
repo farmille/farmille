@@ -1,5 +1,7 @@
 "use client";
 
+import { Checkbox } from "@/components/Checkbox";
+
 import { useActionState } from "react";
 
 import { FileInput } from "@/components";
@@ -95,10 +97,10 @@ export function ProfileEditForm({ profile, details, options }: ProfileEditFormPr
         guide="設定しない場合は都道府県まで公開します。本名・電話番号・郵便番号は公開されません。"
       >
         <label>
-          <input
+          <Checkbox
             id="cityPublic"
             name="cityPublic"
-            type="checkbox"
+
             defaultChecked={
               values.cityPublic === undefined ? details.cityPublic : values.cityPublic === "on"
             }

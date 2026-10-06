@@ -46,7 +46,7 @@ const optionalBadgeStyle = css({
 
 const publicBadgeStyle = css({
   ...badgeBaseStyle,
-  bg: "primary.200",
+  bg: "primary.soft",
   color: "primary.700",
 });
 
@@ -60,7 +60,7 @@ const guideStyle = css({
 const errorTextStyle = css({
   fontSize: "sm",
   color: "accent.warn",
-  fontWeight: "700",
+  fontWeight: "normal",
   lineHeight: "1.55",
   mt: "1.5",
 });
@@ -149,7 +149,6 @@ const radioCardStyle = css({
   // チェック状態は :has で表現し、クライアント状態を持たない
   "&:has(input:checked)": {
     borderColor: "primary.600",
-    bg: "primary.100",
     fontWeight: "700",
   },
   "&:has(input:focus-visible)": {
@@ -260,7 +259,7 @@ const errorMessageStyle = css({
 
 const infoMessageStyle = css({
   ...messageBaseStyle,
-  bg: "primary.200",
+  bg: "primary.soft",
   color: "primary.700",
   borderColor: "border.default",
 });
@@ -282,6 +281,7 @@ export const formActionsStyle = css({
 
 export const primaryButtonStyle = css({
   w: "100%",
+  px: "6",
   bg: "primary.700",
   color: "white",
   rounded: "button",
@@ -299,6 +299,7 @@ export const primaryButtonStyle = css({
 export const ghostButtonStyle = css({
   display: "block",
   w: "100%",
+  px: "6",
   bg: "surface.card",
   color: "primary.700",
   rounded: "button",

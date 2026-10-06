@@ -42,3 +42,5 @@ export const WithDigest: Story = {
     description: "しばらく時間をおいて再度お試しください。",
   },
 };
+
+export const Seller: Story = { args: { chrome: "seller" } };

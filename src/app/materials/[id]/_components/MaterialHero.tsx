@@ -23,7 +23,7 @@ const imageBox = css({
   w: "118px",
   aspectRatio: "image.square",
   borderRadius: "button",
-  bg: "primary.100",
+  bg: "primary.soft",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.default",
@@ -81,7 +81,7 @@ export function MaterialHero({
 
   return (
     <section className={heroCard} aria-labelledby="material-name">
-      <div className={css({ display: "flex", gap: "3.5", alignItems: "center" })}>
+      <div className={css({ display: "flex", gap: "3.5", alignItems: "start" })}>
         <div className={imageBox} data-ui="material-hero-image">
           <Icon name="image" className={imageLayer} size="xl" />
           {primaryImage ? (

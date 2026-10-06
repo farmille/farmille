@@ -12,7 +12,7 @@ const chip = css({
   mr: "1",
   mb: "1",
   borderRadius: "pill",
-  bg: "primary.200",
+  bg: "primary.soft",
   color: "primary.700",
 });
 
@@ -85,7 +85,7 @@ export function ProfileDetailsDisplay({
         </p>
       )}
       {editable && missing.length > 0 && (
-        <p className={css({ bg: "primary.200", p: "3", borderRadius: "card" })}>
+        <p className={css({ bg: "primary.soft", p: "3", borderRadius: "card" })}>
           <Link href="/me/edit" className={css({ color: "primary.700", fontWeight: "700" })}>
             {missing.join("・")}を設定して、プロフィールを充実させましょう。
           </Link>

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { css, cx } from "../../../../styled-system/css";
 import { Button } from "@/components";
 import { retryApplicationMail } from "../actions";
 import { errorMessageJa } from "@/server/errors";
@@ -21,7 +22,19 @@ export function ReceiptButtons({ id, sent }: { id: string; sent: boolean }) {
     }
   }
   return (
-    <div className="application-print-hidden">
+    <div
+      className={cx(
+        "application-print-hidden",
+        css({
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: "3",
+          fontSize: "md",
+          lineHeight: "relaxed",
+        }),
+      )}
+    >
       <Button type="button" onClick={() => window.print()}>
         受付票を印刷・PDF保存
       </Button>

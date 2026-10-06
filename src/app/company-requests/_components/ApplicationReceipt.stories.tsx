@@ -24,9 +24,35 @@ const meta = {
         receipt_number: 1,
         submitted_at: "2026-09-23T00:00:00Z",
       },
-      items: [],
+      items: [
+        {
+          id,
+          application_id: id,
+          material_id: null,
+          material_name: "土づくりサポート",
+          material_url: "",
+          position: 0,
+          company_application_relations: [],
+          company_application_registration_items: {
+            item_id: id,
+            target: "new",
+            official_url: "https://example.com",
+          },
+          company_application_transfer_in_items: null,
+          company_application_removal_items: null,
+          company_application_evidence_links: [],
+        },
+      ],
       consents: [],
-      evidence: [],
+      evidence: [
+        {
+          id,
+          item_key: id,
+          purpose: "package",
+          file_name: "パッケージ資料.pdf",
+          byte_size: 1024,
+        },
+      ],
       delivery: {
         application_id: id,
         recipient: "contact@example.com",

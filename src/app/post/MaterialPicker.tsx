@@ -27,7 +27,7 @@ const materialButton = cva({
   },
   variants: {
     selected: {
-      true: { borderColor: "primary.600", bg: "primary.100" },
+      true: { borderColor: "primary.600", bg: "primary.soft" },
       false: { borderColor: "border.default" },
     },
   },
@@ -88,6 +88,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
               key={material.id}
               type="button"
               className={materialButton({ selected: material.id === selectedId })}
+              aria-label={`${material.name}を選択`}
               aria-pressed={material.id === selectedId}
               onClick={() => setSelectedId(material.id)}
             >
@@ -121,16 +122,18 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                   </span>
                 ) : null}
               </span>
-              <span
-                className={css({
-                  color: "primary.700",
-                  fontSize: "sm",
-                  fontWeight: "700",
-                  flexShrink: "0",
-                })}
-              >
-                {material.id === selectedId ? "選択中" : "選ぶ"}
-              </span>
+              {material.id === selectedId ? (
+                <span
+                  className={css({
+                    color: "primary.700",
+                    fontSize: "sm",
+                    fontWeight: "700",
+                    flexShrink: "0",
+                  })}
+                >
+                  選択中
+                </span>
+              ) : null}
             </button>
           ))
         )}
@@ -142,7 +145,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
           px: "3",
           py: "2.5",
           borderRadius: "pill",
-          bg: "primary.200",
+          bg: "primary.soft",
           color: "primary.700",
           fontSize: "xs",
           textAlign: "center",

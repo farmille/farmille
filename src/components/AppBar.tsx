@@ -192,7 +192,7 @@ const desktopNavLink = cva({
     fontWeight: "700",
     textDecoration: "none",
     whiteSpace: "nowrap",
-    _hover: { bg: "primary.200", color: "primary.700" },
+    _hover: { bg: "primary.soft", color: "primary.700" },
     _focusVisible: {
       outlineWidth: "2px",
       outlineStyle: "solid",
@@ -202,7 +202,7 @@ const desktopNavLink = cva({
   },
   variants: {
     active: {
-      true: { bg: "primary.200", color: "primary.700" },
+      true: { bg: "primary.soft", color: "primary.700" },
       false: {},
     },
   },
@@ -256,7 +256,7 @@ const desktopContextInner = css({
   py: "2.5",
   display: "flex",
   alignItems: "center",
-  gap: "3",
+  gap: "6",
 });
 
 const contextBack = css({

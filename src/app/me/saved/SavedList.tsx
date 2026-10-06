@@ -1,5 +1,7 @@
 "use client";
 
+import { Checkbox } from "@/components/Checkbox";
+
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -113,10 +115,9 @@ export function SavedList({ items }: SavedListProps) {
         {items.map((item) => (
           <div key={item.savedId} className={row}>
             <label className={checkboxLabel}>
-              <input
+              <Checkbox
                 checked={selected.includes(item.materialId)}
                 onChange={() => toggle(item.materialId)}
-                type="checkbox"
               />
               比較に含める
             </label>

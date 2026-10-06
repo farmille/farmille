@@ -68,7 +68,7 @@ const band = css({
   borderLeftWidth: "5px",
   borderLeftStyle: "solid",
   borderLeftColor: "primary.600",
-  bg: "primary.100",
+  bg: "primary.soft",
   color: "text.default",
   fontSize: "2xl",
   fontWeight: "800",
@@ -123,7 +123,7 @@ const choice = sva({
         root: { bg: "primary.600", color: "surface.card", _hover: { bg: "primary.700" } },
       },
       secondary: {
-        root: { bg: "surface.card", color: "primary.700", _hover: { bg: "primary.100" } },
+        root: { bg: "surface.card", color: "primary.700" },
       },
     },
   },
@@ -292,7 +292,7 @@ const timelineNote = css({
   borderStyle: "solid",
   borderColor: "primary.600",
   borderRadius: "input",
-  bg: "primary.100",
+  bg: "primary.soft",
   color: "text.muted",
   fontSize: "sm",
   lineHeight: "relaxed",
@@ -555,7 +555,13 @@ const faqQuestion = css({
   fontSize: "md",
   fontWeight: "800",
   lineHeight: "normal",
-  _before: { content: '"Q"', flex: "0 0 auto", color: "primary.600" },
+  _before: {
+    content: '"Q"',
+    flex: "0 0 auto",
+    w: "3.5",
+    color: "primary.600",
+    textAlign: "center",
+  },
 });
 
 const faqAnswer = css({
@@ -569,10 +575,12 @@ const faqAnswer = css({
 
 const faqAnswerMark = css({
   position: "absolute",
-  left: "0.5",
+  left: "0",
   top: "0",
+  w: "3.5",
   color: "text.subtle",
   fontWeight: "800",
+  textAlign: "center",
 });
 
 const faqAnswerText = css({ m: "0" });
@@ -639,8 +647,12 @@ const closingActions = css({
 });
 
 const closingButton = css({
-  px: "4.5",
+  px: "6",
   py: "3",
+  minW: "button.md",
+  maxW: "100%",
+  textAlign: "center",
+  overflowWrap: "anywhere",
   borderRadius: "button",
   bg: "surface.card",
   color: "primary.700",
@@ -648,7 +660,7 @@ const closingButton = css({
   fontWeight: "800",
   textDecoration: "none",
   transition: "background-color {durations.fast} {easings.soft}",
-  _hover: { bg: "primary.100" },
+  _hover: { bg: "primary.soft" },
 });
 
 const CONTENTS = [

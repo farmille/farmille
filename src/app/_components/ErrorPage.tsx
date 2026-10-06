@@ -1,9 +1,11 @@
 "use client";
 
+import { PageNotice } from "@/components/PageNotice";
+
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
-import { Button, FormPageShell, SurfaceCard } from "@/components";
+import { Button, FormPageShell } from "@/components";
 import type { AppChrome } from "@/components/AppBar";
 
 type ErrorPageProps = {
@@ -32,11 +34,11 @@ export function ErrorPage({
 
   return (
     <FormPageShell chrome={chrome} backHref={backHref} title={pageTitle}>
-      <SurfaceCard description={description} title={title}>
+      <PageNotice description={description} title={title}>
         <Button onClick={onRetry} type="button" variant="ghost">
           もう一度試す
         </Button>
-      </SurfaceCard>
+      </PageNotice>
     </FormPageShell>
   );
 }

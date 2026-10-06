@@ -1,5 +1,7 @@
 "use client";
 
+import { Checkbox } from "@/components/Checkbox";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
@@ -250,8 +252,7 @@ export function ReportComparisonFields({
         </section>
       ))}
       <label>
-        <input
-          type="checkbox"
+        <Checkbox
           checked={input.methodDetailsAck}
           onChange={(e) => onChange({ ...input, methodDetailsAck: e.target.checked })}
         />{" "}

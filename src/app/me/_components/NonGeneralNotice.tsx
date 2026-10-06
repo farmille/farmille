@@ -1,3 +1,4 @@
+import { PageNotice } from "@/components/PageNotice";
 import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
@@ -25,16 +26,6 @@ const body = css({
   bg: "surface.panel",
 });
 
-const card = css({
-  p: "5",
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "card",
-  boxShadow: "shadow",
-});
-
 const linkStyle = css({
   display: "inline-flex",
   mt: "4",
@@ -60,27 +51,16 @@ export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
     <div className={shell}>
       <AppBar chrome="public" active="me" title="マイページ" />
       <main className={body}>
-        <section className={card}>
-          <h1 className={css({ m: "0", fontSize: "lg", fontWeight: "800" })}>
-            一般ユーザー向けの画面です
-          </h1>
-          <p
-            className={css({
-              mt: "3",
-              mb: "0",
-              color: "text.muted",
-              fontSize: "sm",
-              lineHeight: "1.7",
-            })}
-          >
-            マイページ・プロフィール編集・お気に入りは一般ユーザー専用です。メーカーや運営の作業は、それぞれのダッシュボードから行ってください。
-          </p>
+        <PageNotice
+          title="一般ユーザー向けの画面です"
+          description="マイページ・プロフィール編集・お気に入りは一般ユーザー専用です。メーカーや運営の作業は、それぞれのダッシュボードから行ってください。"
+        >
           {destination !== null ? (
             <Link href={destination.href} className={linkStyle}>
               {destination.label} <Icon name="arrow_forward" size="sm" />
             </Link>
           ) : null}
-        </section>
+        </PageNotice>
       </main>
       <BottomNav active="me" />
     </div>

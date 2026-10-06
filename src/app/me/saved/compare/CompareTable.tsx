@@ -71,7 +71,7 @@ const tag = css({
   px: "2",
   py: "0.5",
   borderRadius: "pill",
-  bg: "primary.200",
+  bg: "primary.soft",
   color: "primary.700",
   fontSize: "2xs",
   fontWeight: "600",

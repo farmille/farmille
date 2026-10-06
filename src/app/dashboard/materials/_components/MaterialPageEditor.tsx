@@ -1,5 +1,7 @@
 "use client";
 
+import { Checkbox, checkboxChipStyle } from "@/components/Checkbox";
+
 import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -22,18 +24,7 @@ import { css } from "../../../../../styled-system/css";
 
 const actions = css({ display: "flex", gap: "2", flexWrap: "wrap" });
 const timingOptions = css({ display: "flex", flexWrap: "wrap", gap: "2", mt: "3" });
-const timingOption = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "2",
-  px: "3",
-  py: "3",
-  borderWidth: "1px",
-  borderColor: "border.default",
-  borderRadius: "pill",
-  cursor: "pointer",
-  "&:has(input:checked)": { bg: "primary.200", borderColor: "primary.600" },
-});
+const timingOption = checkboxChipStyle;
 const row = css({
   display: "flex",
   flexDirection: "column",
@@ -246,8 +237,7 @@ export function MaterialPageEditor({
               <div className={timingOptions}>
                 {APPLICATION_TIMINGS.map((label, index) => (
                   <label className={timingOption} key={label}>
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={content.timings.includes(index)}
                       onChange={(event) =>
                         setContent({
@@ -574,8 +564,7 @@ export function MaterialPageEditor({
                 return (
                   <div className={row} key={kind.value}>
                     <label className={timingOption}>
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={Boolean(registration)}
                         onChange={(event) =>
                           setContent({

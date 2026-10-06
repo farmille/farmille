@@ -37,7 +37,7 @@ const cardRecipe = cva({
 
 const coverRecipe = cva({
   base: {
-    bg: "primary.100",
+    bg: "primary.soft",
     display: "grid",
     placeItems: "center",
     overflow: "hidden",
@@ -138,7 +138,7 @@ export function ReportCard({
           w: compact ? "18px" : "26px",
           aspectRatio: "image.square",
           borderRadius: "pill",
-          bg: "primary.200",
+          bg: "primary.soft",
           display: "grid",
           placeItems: "center",
           color: "primary.700",
@@ -266,7 +266,7 @@ export function ReportCard({
                 px: "2.5",
                 py: "0.5",
                 borderRadius: "pill",
-                bg: "primary.200",
+                bg: "primary.soft",
                 color: "primary.700",
                 fontWeight: "600",
               })}

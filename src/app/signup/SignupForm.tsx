@@ -1,5 +1,7 @@
 "use client";
 
+import { Checkbox } from "@/components/Checkbox";
+
 import Link from "next/link";
 import { useActionState } from "react";
 
@@ -36,7 +38,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
 
       <Field
         error={fieldErrors.handle}
-        guide="公開されます。本名でなくてOKです"
+        guide="本名でなくてOKです"
         htmlFor="handle"
         label="ニックネーム"
         visibility="public"
@@ -64,7 +66,6 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           error={fieldErrors[field.name]}
           htmlFor={field.name}
           label={field.label}
-          guide="公開されません"
           visibility="private"
           requirement="required"
         >
@@ -82,7 +83,6 @@ export function SignupForm({ next = null }: { next?: string | null }) {
 
       <Field
         error={fieldErrors.email}
-        guide="公開されません"
         htmlFor="email"
         label="メールアドレス"
         visibility="private"
@@ -105,7 +105,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         htmlFor="phone"
         label="電話番号"
         visibility="private"
-        guide="公開されません。確認が必要な場合の連絡に使用します。"
+        guide="確認が必要な場合の連絡に使用します。"
         requirement="optional"
       >
         <input
@@ -121,7 +121,6 @@ export function SignupForm({ next = null }: { next?: string | null }) {
 
       <Field
         error={fieldErrors.standpoint}
-        guide="投稿や公開プロフィールに表示されます。"
         label="あなたの立場"
         visibility="public"
         requirement="required"
@@ -156,10 +155,10 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         requirement="required"
       >
         <label>
-          <input
+          <Checkbox
             id="terms"
             name="terms"
-            type="checkbox"
+
             required
             defaultChecked={values.terms === "on"}
           />{" "}
