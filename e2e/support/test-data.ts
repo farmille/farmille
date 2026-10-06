@@ -408,6 +408,19 @@ export async function createMaterial(
   });
 }
 
+/** 運営画面から公開し直す前提で、E2E資材を掲載終了にする。 */
+export async function archiveMaterial(materialId: string): Promise<void> {
+  const material = await getMaterial(materialId);
+  if (!material.name.startsWith(`E2E資材_${E2E_TOKEN_PREFIX}`)) {
+    throw new Error("E2E以外の資材は変更できません。");
+  }
+  await checkedFetch(restPath("materials", new URLSearchParams({ id: `eq.${materialId}` })), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ publication_status: "archived", archived_at: new Date().toISOString() }),
+  });
+}
+
 export async function deleteMaterial(materialId: string): Promise<void> {
   // 書類・原稿の証跡は本番では保持する。使い捨てE2E資材だけを参照順に片付ける。
   const material = await getMaterial(materialId);
