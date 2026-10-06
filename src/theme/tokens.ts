@@ -7,18 +7,17 @@ import type { SemanticTokens, Tokens } from "@pandacss/dev";
 export const tokens = {
   blurs: { reportGate: { value: "4px" } },
   colors: {
-    // 完成見本（farmille-demo）の緑。700 が主色（--green）、800 が濃い緑（--green-deep）、50 が淡い面（--green-soft）
     green: {
-      50: { value: "#E8F5E9" },
-      100: { value: "#DCEFDD" },
-      200: { value: "#C8E6C9" },
-      300: { value: "#A5D6A7" },
-      400: { value: "#66BB6A" },
-      500: { value: "#43A047" },
-      600: { value: "#388E3C" },
-      700: { value: "#2E7D32" },
-      800: { value: "#1B5E20" },
-      900: { value: "#0D3B12" },
+      50: { value: "#EEF9F0" },
+      100: { value: "#D8F3DC" },
+      200: { value: "#B7E4C7" },
+      300: { value: "#95D5B2" },
+      400: { value: "#74C69D" },
+      500: { value: "#52B788" },
+      600: { value: "#40916C" },
+      700: { value: "#2D6A4F" },
+      800: { value: "#1B4332" },
+      900: { value: "#081C15" },
     },
     blue: { value: "#1976D2" },
     star: { value: "#F5A623" },
@@ -26,8 +25,8 @@ export const tokens = {
       DEFAULT: { value: "#B26A00" },
       soft: { value: "#FFF4E0" },
     },
-    bg: { value: "#F5F4EF" },
-    panel: { value: "#FAFAF7" },
+    bg: { value: "#FCFCFB" },
+    panel: { value: "#FDFDFC" },
     card: { value: "#FFFFFF" },
     // ink 3段（本文 / 副文 / 補助）
     ink: { value: "#1E231F" },
@@ -117,7 +116,7 @@ export const tokens = {
     },
     sans: {
       value:
-        'var(--font-noto-sans-jp), "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif',
+        '"Gen Interface JP", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif',
     },
   },
   // preset-panda の数値 spacing を明示し、既定色を復活させず余白スケールだけを維持する

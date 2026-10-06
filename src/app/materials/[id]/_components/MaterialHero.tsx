@@ -117,16 +117,18 @@ export function MaterialHero({
             {material.manufacturer_name}
           </div>
         )}
-        <div className="muted" style={{ fontSize: 10.5, marginTop: 3, lineHeight: 1.6 }}>
-          国内での販売を代表する立場にあるとFarmille運営が調査・認識した企業を表示しています。相違がある場合は、
-          <Link
-            href="/sellers/apply"
-            style={{ color: "var(--green-deep)", fontWeight: 600, textDecoration: "none" }}
-          >
-            メーカー登録
-          </Link>
-          からご連絡ください。
-        </div>
+        {material.manufacturer_verified_at === null ? (
+          <div className="muted" style={{ fontSize: 10.5, marginTop: 3, lineHeight: 1.6 }}>
+            国内での販売を代表する立場にあるとFarmille運営が調査・認識した企業を表示しています。相違がある場合は、
+            <Link
+              href="/sellers/apply"
+              style={{ color: "var(--green-deep)", fontWeight: 600, textDecoration: "none" }}
+            >
+              企業会員登録
+            </Link>
+            からご連絡ください。
+          </div>
+        ) : null}
         {material.ingredientCategories.length > 0 ? (
           <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 5 }}>
             {[...new Set(material.ingredientCategories.map(({ name }) => name))].map((name) => (

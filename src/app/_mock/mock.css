@@ -6867,7 +6867,9 @@
   }
 }
 
-/* 見本の --sans は "Noto Sans JP" の名前指定。アプリでは next/font が読み込んだ書体を fonts.sans から使う。 */
+/* 見本の --sans は "Noto Sans JP" の名前指定。アプリでは next/font が読み込んだ Noto Sans JP を見本の画面の中だけで使う。 */
 .fm {
-  --sans: var(--fonts-sans);
+  --sans:
+    var(--font-noto-sans-jp), "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+    "Meiryo", sans-serif;
 }

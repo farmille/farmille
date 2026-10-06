@@ -119,3 +119,10 @@
     padding-inline: 2px;
   }
 }
+
+/* アプリ全体の h1・h2 は秀英角ゴシックだが、見本の画面の中は本文と同じ書体にする */
+.fm h1,
+.fm h2 {
+  font-family: var(--sans);
+  font-weight: 700;
+}

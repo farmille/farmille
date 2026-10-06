@@ -20,16 +20,25 @@ describe("MaterialHero", () => {
     expect(screen.queryByText("旧掲載会社")).not.toBeInTheDocument();
   });
   it("編集権のない資材は従来の会社名をリンクなしで表示する", () => {
-    const material = { ...materialDetail, seller_id: null, representativeSeller: null };
+    const material = {
+      ...materialDetail,
+      seller_id: null,
+      representativeSeller: null,
+      manufacturer_verified_at: null,
+    };
     render(createElement(MaterialHero, { material, saved: null }));
     expect(screen.getByText(material.manufacturer_name)).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: material.manufacturer_name }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "メーカー登録" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "企業会員登録" })).toHaveAttribute(
       "href",
       "/sellers/apply",
     );
+  });
+  it("メーカー確認済みの資材では会社名の注記を出さない", () => {
+    render(createElement(MaterialHero, { material: materialDetail, saved: null }));
+    expect(screen.queryByRole("link", { name: "企業会員登録" })).not.toBeInTheDocument();
   });
   it("画像の読み込みに失敗してもプレースホルダーを残す", () => {
     const material = {
