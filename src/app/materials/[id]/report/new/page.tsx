@@ -1,3 +1,6 @@
+import "../../../../_mock/report-form.css";
+import "../../../../_mock/report-form-extra.css";
+
 import { createBlankUsageReport } from "@/lib/usage-report";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -20,16 +23,6 @@ const shell = css({
   minH: "100dvh",
   bg: "surface.page",
   pb: "8",
-});
-
-const main = css({
-  w: "100%",
-  maxW: "content.form",
-  mx: "auto",
-  px: "3.5",
-  py: "4",
-  bg: "surface.panel",
-  tab: { px: "5", py: "5" },
 });
 
 export async function generateMetadata({ params }: ReportFormPageProps): Promise<Metadata> {
@@ -70,38 +63,41 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
     prefectureCode: formData.prefectureCode,
     city: formData.city,
   };
-  return (
-    <div className={shell}>
-      <AppBar
-        chrome="public"
-        active="post"
-        title="実証詳細レポート"
-        backHref={`/materials/${material.id}`}
-      />
-      {formData.submitted.length > 0 ? (
+  if (formData.submitted.length > 0) {
+    return (
+      <div className={shell}>
+        <AppBar
+          chrome="public"
+          active="post"
+          title="実証詳細レポート"
+          backHref={`/materials/${material.id}`}
+        />
         <ReportSubmitted materialId={material.id} reports={formData.submitted} />
-      ) : (
-        <main className={main}>
-          <ReportForm
-            material={{
-              id: material.id,
-              name: material.name,
-              manufacturerName: material.manufacturer_name,
-              isOfficial: material.manufacturer_verified_at !== null,
-              imageUrl: material.images[0]?.url ?? null,
-            }}
-            userId={session.data.userId}
-            crops={formData.crops}
-            draft={initialDraft}
-            effects={formData.effects}
-            favoriteCropIds={formData.favoriteCropIds}
-            materialCropIds={formData.materialCropIds}
-            prefectureCode={formData.prefectureCode}
-            city={formData.city}
-            initialDocumentUrls={formData.documentUrls}
-          />
-        </main>
-      )}
-    </div>
+      </div>
+    );
+  }
+
+  // 入力画面は見本（WIZ_SRC）どおり、ステッパー・下書き保存・閉じるを持つ専用の見出しだけの全画面にする。
+  return (
+    <main>
+      <ReportForm
+        material={{
+          id: material.id,
+          name: material.name,
+          manufacturerName: material.manufacturer_name,
+          imageUrl: material.images[0]?.url ?? null,
+        }}
+        userId={session.data.userId}
+        crops={formData.crops}
+        draft={initialDraft}
+        effects={formData.effects}
+        materialEffectNames={material.effects.map((effect) => effect.name)}
+        favoriteCropIds={formData.favoriteCropIds}
+        materialCropIds={formData.materialCropIds}
+        prefectureCode={formData.prefectureCode}
+        city={formData.city}
+        initialDocumentUrls={formData.documentUrls}
+      />
+    </main>
   );
 }
