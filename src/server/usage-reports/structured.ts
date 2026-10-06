@@ -249,7 +249,7 @@ export async function getStructuredUsageReport(
 
 export async function getStructuredReportFormData(materialId: string, userId: string) {
   const supabase = await createServerSupabase();
-  const [options, reports, profile, favorites, materialCrops] = await Promise.all([
+  const [options, reports, favorites, materialCrops] = await Promise.all([
     listClassificationOptions(),
     supabase
       .from("usage_reports")
@@ -258,15 +258,13 @@ export async function getStructuredReportFormData(materialId: string, userId: st
       .eq("author_user_id", userId)
       .in("status", ["draft", "pending"])
       .order("updated_at", { ascending: false }),
-    supabase.from("public_profiles").select("prefecture_code,city").eq("user_id", userId).single(),
     supabase.from("profile_crops").select("crop_id").eq("user_id", userId),
     supabase.from("material_crops").select("crop_id").eq("material_id", materialId),
   ]);
   if (!options.ok) return options;
-  const error = reports.error ?? profile.error ?? favorites.error ?? materialCrops.error;
+  const error = reports.error ?? favorites.error ?? materialCrops.error;
   if (
     error !== null ||
-    profile.data === null ||
     reports.data === null ||
     favorites.data === null ||
     materialCrops.data === null
@@ -287,8 +285,6 @@ export async function getStructuredReportFormData(materialId: string, userId: st
     effects: options.data.effects,
     favoriteCropIds: favorites.data.map((item) => item.crop_id),
     materialCropIds: materialCrops.data.map((item) => item.crop_id),
-    prefectureCode: profile.data.prefecture_code,
-    city: profile.data.city ?? "",
     draft: draft.data,
     submitted: reports.data
       .filter((row) => row.status === "pending")

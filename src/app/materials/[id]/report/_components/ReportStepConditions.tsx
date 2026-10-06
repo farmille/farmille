@@ -15,10 +15,13 @@ export function ReportStepConditions({
   input,
   onChange,
   errors,
+  registeredCity,
 }: {
   input: UsageReportInput;
   onChange: (input: UsageReportInput) => void;
   errors: UsageReportFieldErrors;
+  /** アカウント登録時の市区町村（本人のみ）。チェックを入れたときの初期値 */
+  registeredCity: string;
 }) {
   const missingDate =
     input.timingNote.trim().length > 0 && !DATE_PATTERN.test(toHalfWidth(input.timingNote));
@@ -54,24 +57,34 @@ export function ReportStepConditions({
             </option>
           ))}
         </select>
-        <input
-          id="report-city"
-          aria-label="市区町村"
-          className="input"
-          style={{ maxWidth: 260, marginTop: 6, display: "block" }}
-          placeholder="市区町村　例）〇〇市"
-          value={input.city}
-          onChange={(event) => onChange({ ...input, city: event.target.value })}
-        />
         <label className="check" style={{ marginTop: 8 }}>
           <input
             type="checkbox"
             checked={input.showCity}
-            onChange={(event) => onChange({ ...input, showCity: event.target.checked })}
+            onChange={(event) =>
+              onChange({
+                ...input,
+                showCity: event.target.checked,
+                // 欄が空のときだけ登録住所の市区町村で埋める。外しても入力済みの値は消さない。
+                city:
+                  event.target.checked && input.city.trim() === "" ? registeredCity : input.city,
+              })
+            }
           />{" "}
           市区町村も表示する
           <span className="muted">チェックなしの場合は都道府県まで表示します</span>
         </label>
+        {input.showCity && (
+          <input
+            id="report-city"
+            aria-label="市区町村"
+            className="input"
+            style={{ maxWidth: 260, marginTop: 6, display: "block" }}
+            placeholder="市区町村　例）〇〇市"
+            value={input.city}
+            onChange={(event) => onChange({ ...input, city: event.target.value })}
+          />
+        )}
       </div>
 
       <div className="field">

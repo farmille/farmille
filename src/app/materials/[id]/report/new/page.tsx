@@ -1,12 +1,12 @@
 import "../../../../_mock/report-form.css";
 import "../../../../_mock/report-form-extra.css";
 
-import { createBlankUsageReport } from "@/lib/usage-report";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { css } from "../../../../../../styled-system/css";
 import { AppBar } from "@/components/AppBar";
+import { getOwnRegisteredAddress } from "@/server/accounts/registered-address";
 import { errorMessageJa } from "@/server/errors";
 import { requireGeneralUser } from "@/server/auth";
 import { getStructuredReportFormData } from "@/server/usage-reports/structured";
@@ -47,22 +47,21 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
     throw new Error(errorMessageJa[session.error]);
   }
 
-  const [material, formDataResult] = await Promise.all([
+  const [material, formDataResult, addressResult] = await Promise.all([
     loadMaterialOrNotFound(id),
     getStructuredReportFormData(id, session.data.userId),
+    getOwnRegisteredAddress(),
   ]);
 
   if (!formDataResult.ok) {
     throw new Error(errorMessageJa[formDataResult.error]);
   }
+  if (!addressResult.ok) {
+    throw new Error(errorMessageJa[addressResult.error]);
+  }
   if (material.publication_status !== "published") notFound();
 
   const formData = formDataResult.data;
-  const initialDraft = formData.draft ?? {
-    ...createBlankUsageReport(material.id),
-    prefectureCode: formData.prefectureCode,
-    city: formData.city,
-  };
   if (formData.submitted.length > 0) {
     return (
       <div className={shell}>
@@ -89,13 +88,12 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
         }}
         userId={session.data.userId}
         crops={formData.crops}
-        draft={initialDraft}
+        draft={formData.draft}
         effects={formData.effects}
         materialEffectNames={material.effects.map((effect) => effect.name)}
         favoriteCropIds={formData.favoriteCropIds}
         materialCropIds={formData.materialCropIds}
-        prefectureCode={formData.prefectureCode}
-        city={formData.city}
+        registeredAddress={addressResult.data}
         initialDocumentUrls={formData.documentUrls}
       />
     </main>

@@ -15,6 +15,7 @@ import {
   type UsageReportFieldErrors,
   type UsageReportInput,
 } from "@/lib/usage-report";
+import type { RegisteredAddress } from "@/server/accounts/registered-address";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
 import { ReportArticleEditor } from "./ReportArticleEditor";
@@ -88,8 +89,7 @@ export function ReportForm({
   favoriteCropIds,
   materialCropIds,
   draft,
-  prefectureCode,
-  city,
+  registeredAddress,
   initialDocumentUrls = [],
 }: {
   material: ReportMaterialSummary;
@@ -100,14 +100,16 @@ export function ReportForm({
   favoriteCropIds: string[];
   materialCropIds: string[];
   draft: UsageReportInput | null;
-  prefectureCode: number | null;
-  city: string;
+  /** 本人の登録住所。都道府県の初期値と「市区町村も表示する」を選んだときの初期値に使う */
+  registeredAddress: RegisteredAddress;
   initialDocumentUrls?: { id: string; url: string }[];
 }) {
   const router = useRouter();
-  const [input, setInput] = useState(
-    () => draft ?? { ...createBlankUsageReport(material.id), prefectureCode, city },
-  );
+  // 登録住所で埋めるのは、レポート側の値が空のときだけ（下書きの保存内容は上書きしない）。
+  const [input, setInput] = useState(() => {
+    const base = draft ?? createBlankUsageReport(material.id);
+    return { ...base, prefectureCode: base.prefectureCode ?? registeredAddress.prefectureCode };
+  });
   const [manualUnits, setManualUnits] = useState(
     () => new Set(input.measurements.filter((item) => item.unit).map((item) => item.id)),
   );
@@ -415,7 +417,12 @@ export function ReportForm({
               />
             )}
             {step === 3 && (
-              <ReportStepConditions input={input} onChange={setInput} errors={errors} />
+              <ReportStepConditions
+                input={input}
+                onChange={setInput}
+                errors={errors}
+                registeredCity={registeredAddress.city}
+              />
             )}
             {step === 4 && (
               <ReportComparisonFields
