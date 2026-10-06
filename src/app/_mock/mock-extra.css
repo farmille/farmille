@@ -146,3 +146,9 @@
 .fm #reviews-heading {
   scroll-margin-top: 128px;
 }
+
+/* 必須項目の未入力で送信してブラウザが入力欄まで送ったとき、入力欄と見出し（ラベル）・ブラウザの吹き出しが
+   固定ヘッダー（ヘッダー＋戻るバー）に隠れず、その下に見えるようにする */
+.fm :is(input, select, textarea, button) {
+  scroll-margin-top: 164px;
+}
