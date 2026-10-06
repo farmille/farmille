@@ -11,7 +11,6 @@ import { listHomeMaterials } from "@/server/queries/home-materials";
 import { HomeHero } from "./_components/HomeHero";
 import { buildHeroSearchOptions } from "./_components/home-hero-options";
 import { HomeInvitations } from "./_components/HomeInvitations";
-import { HomeLetter } from "./_components/HomeLetter";
 import { HomeMaterialCard } from "./_components/HomeMaterialCard";
 import { HomeMaterialMarquee } from "./_components/HomeMaterialMarquee";
 import { HomeVoices } from "./_components/HomeVoices";
@@ -42,8 +41,6 @@ export default function HomePage() {
       >
         <HomeVoices />
       </Suspense>
-
-      <HomeLetter />
 
       <Suspense fallback={null}>
         <HomeAccountInvitations />
