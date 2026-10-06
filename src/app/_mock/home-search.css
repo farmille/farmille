@@ -344,6 +344,13 @@
   object-fit: contain;
   display: block;
 }
+/* 長い資材ジャンル名（見本の .chip は折り返さない）でも 320px で横にはみ出さないよう、カード内では折り返す */
+.fm .mat-card .mat-rate .chip {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 .fm .search-group-h {
   font-size: 13px;
   font-weight: 700;

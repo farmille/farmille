@@ -276,9 +276,6 @@ export function CatalogSidebar({
                 </details>
               );
             })}
-          <div className="fguide" style={{ marginTop: 8, marginBottom: 2 }}>
-            一覧には、資材に記載のある作目だけを表示しています。ここにない作目も、検索窓からすべて探せます。
-          </div>
         </SideSection>
         <SideSection
           title={`メーカーから探す（全${search.makers.length}社）`}

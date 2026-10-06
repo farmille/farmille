@@ -165,9 +165,6 @@ export function MockSearchBox({ initialQuery, selected, sort, catalog }: MockSea
               </button>
             </span>
           ))}
-          <button className="ts-clear" onClick={() => navigate([], "")} type="button">
-            すべて解除
-          </button>
         </div>
       ) : null}
 
