@@ -65,7 +65,7 @@ export function StructuredReportArticle({
   const stages = input.timingStages.map((stage) => APPLICATION_TIMINGS[stage]).join("、");
   const conditionLines = [
     prefecture
-      ? `地域：${prefecture}${input.showCity && input.city ? ` ${input.city}` : ""}`
+      ? `地域：${prefecture}${input.showCity && input.city.trim() ? input.city.trim() : ""}`
       : null,
     `使用作物：${cropLabel}`,
     input.cultivationEnvironment.trim() ? `栽培環境：${input.cultivationEnvironment.trim()}` : null,
@@ -95,7 +95,11 @@ export function StructuredReportArticle({
             return (
               <Fragment key={section}>
                 <h2 className="a-h3">{h}</h2>
-                <Prose text={input.purposeTags.join("、")} />
+                <Prose
+                  text={[input.purposeTags.join("、"), input.purposeNote.trim()]
+                    .filter((text) => text.length > 0)
+                    .join("\n")}
+                />
                 <ReportFigures media={media} />
               </Fragment>
             );

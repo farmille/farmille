@@ -7,6 +7,7 @@ import {
   PlotList,
   ReportBars,
   conditionLines,
+  effectsText,
   numericGroups,
   sectionHeading,
   type ReportSection,
@@ -30,7 +31,7 @@ export function ReportPublishedView({
   const today = new Date();
   function body(section: ReportSection) {
     if (section === "results") return input.observedChange;
-    if (section === "effects") return input.purposeTags.join("、");
+    if (section === "effects") return effectsText(input);
     if (section === "conditions")
       return [conditionLines(input, cropName), input.cultivationEnvironment, input.timingNote]
         .filter((text) => text.trim())

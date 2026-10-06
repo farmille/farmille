@@ -21,10 +21,17 @@ export function conditionLines(input: UsageReportInput, cropName: string) {
   const prefecture = PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name ?? "−";
   const variety = input.varietyUnknown ? "不明" : input.variety.trim() || "−";
   return [
-    `地域：${prefecture}${input.showCity && input.city.trim() ? ` ${input.city.trim()}` : ""}`,
+    `地域：${prefecture}${input.showCity && input.city.trim() ? input.city.trim() : ""}`,
     `使用作物：${cropName}（品種：${variety}）`,
     `施用時期：${input.timingStages.map((stage) => APPLICATION_TIMINGS[stage]).join("、") || "−"}`,
   ].join("\n");
+}
+
+/** 記事の「期待した効果」の本文（効果タグ、改行して使用目的の補足） */
+export function effectsText(input: UsageReportInput) {
+  return [input.purposeTags.join("、"), input.purposeNote.trim()]
+    .filter((text) => text.length > 0)
+    .join("\n");
 }
 
 /** 見本の `.plot-list`（比較した区の静的なカード） */

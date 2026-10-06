@@ -4,6 +4,7 @@ import {
   createBlankUsageReport,
   groupReportMeasurements,
   parseReportNumber,
+  reportErrorStep,
   UsageReportInputSchema,
   validateUsageReportSubmission,
 } from "./usage-report";
@@ -28,6 +29,8 @@ describe("実証詳細レポート", () => {
   it("ゼロの数値を有効とし、文章や添付資料の未確認を提出前に検出する", () => {
     const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
     input.cropId = "22222222-2222-4222-8222-222222222222";
+    input.varietyUnknown = true;
+    input.prefectureCode = 8;
     input.observedChange = "変化はありませんでした。";
     input.purposeTags = ["耐暑性改善"];
     input.cultivationEnvironment = "露地";
@@ -60,6 +63,32 @@ describe("実証詳細レポート", () => {
       { id: crypto.randomUUID(), path: "owner/report/document.pdf", name: "成績書.pdf" },
     ];
     expect(validateUsageReportSubmission(input).documentsAck).toBeDefined();
+  });
+  it("都道府県と品種は提出時に必須で、品種は「不明」のチェックで不要になる", () => {
+    const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
+    const errors = validateUsageReportSubmission(input);
+    expect(errors.prefectureCode).toBe("※ 都道府県を選んでください");
+    expect(errors.variety).toBeDefined();
+    expect(reportErrorStep("prefectureCode")).toBe(3);
+    expect(reportErrorStep("variety")).toBe(1);
+    input.prefectureCode = 8;
+    input.variety = "  ";
+    expect(validateUsageReportSubmission(input).prefectureCode).toBeUndefined();
+    expect(validateUsageReportSubmission(input).variety).toBeDefined();
+    input.variety = "アイコ";
+    expect(validateUsageReportSubmission(input).variety).toBeUndefined();
+    input.variety = "";
+    input.varietyUnknown = true;
+    expect(validateUsageReportSubmission(input).variety).toBeUndefined();
+  });
+  it("使用目的の補足は任意で、500字を超えると形式エラーにする", () => {
+    const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
+    expect(input.purposeNote).toBe("");
+    expect(validateUsageReportSubmission(input).purposeNote).toBeUndefined();
+    input.purposeNote = "高温期の萎れを軽くしたかった";
+    expect(v.safeParse(UsageReportInputSchema, input).success).toBe(true);
+    input.purposeNote = "あ".repeat(501);
+    expect(v.safeParse(UsageReportInputSchema, input).success).toBe(false);
   });
   it("同じ調査項目と単位のグラフを入力を変えずにまとめる", () => {
     const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");

@@ -32,6 +32,8 @@ const TOTAL = STEPS.length;
 function missingLabels(errors: UsageReportFieldErrors) {
   const label = (key: string) => {
     if (key === "cropId") return "使用作物";
+    if (key === "variety") return "品種";
+    if (key === "prefectureCode") return "都道府県";
     if (key === "observedChange") return "結果・感想";
     if (key === "purposeTags") return "使用目的";
     if (key === "cultivationEnvironment") return "栽培環境";
@@ -45,7 +47,37 @@ function missingLabels(errors: UsageReportFieldErrors) {
   return [...new Set(Object.keys(errors).map(label))];
 }
 
-type Notice = { kind: "ok" | "error"; text: string } | null;
+/** 提出時に出す、足りない項目ごとの案内（「都道府県を選んでください」など）。ステップ順に並べる */
+function missingMessages(errors: UsageReportFieldErrors) {
+  const message = (key: string) => {
+    if (key === "cropId") return "使用作物を選んでください";
+    if (key === "variety") return "品種を入力するか、「品種が不明」にチェックしてください";
+    if (key === "observedChange") return "結果・感想を入力してください";
+    if (key === "purposeTags") return "使用目的を選んでください";
+    if (key === "prefectureCode") return "都道府県を選んでください";
+    if (key === "cultivationEnvironment") return "栽培環境を入力してください";
+    if (key === "timingStages") return "施用時期の段階を選んでください";
+    if (key === "timingNote") return "処理日・定植日・生育状況を入力してください";
+    if (key === "plots") return "比較する区を2つ以上作ってください";
+    if (/^plots\.\d+\.name$/.test(key)) return "区の名前を入力してください";
+    if (/^plots\.\d+\.scope$/.test(key)) return "区の調査した範囲を入力してください";
+    if (/^plots\.\d+\.description$/.test(key)) return "区の説明を入力してください";
+    if (key === "methodDetailsAck") return "使用方法の明記を確認してください";
+    if (key.startsWith("measurements")) return "グラフの調査項目と数値を入力してください";
+    if (key === "documentsAck") return "資料の秘密保持を確認してください";
+    if (key === "guidelineAck") return "投稿ガイドラインに同意してください";
+    return "入力内容を確認してください";
+  };
+  return [
+    ...new Set(
+      Object.keys(errors)
+        .toSorted((a, b) => reportErrorStep(a) - reportErrorStep(b))
+        .map((key) => `ステップ${reportErrorStep(key)}：${message(key)}`),
+    ),
+  ];
+}
+
+type Notice = { kind: "ok" | "error"; text: string; items?: string[] } | null;
 
 export function ReportForm({
   material,
@@ -121,6 +153,14 @@ export function ReportForm({
   }, [leaving]);
 
   const showError = useCallback((text: string) => setNotice({ kind: "error", text }), []);
+  function showMissing(text: string, missing: UsageReportFieldErrors) {
+    setErrors(missing);
+    const first = Object.keys(missing).toSorted(
+      (a, b) => reportErrorStep(a) - reportErrorStep(b),
+    )[0];
+    if (first) navigate(reportErrorStep(first));
+    setNotice({ kind: "error", text, items: missingMessages(missing) });
+  }
   function navigate(next: number) {
     if (next !== TOTAL) setPreview(false);
     setStep(Math.max(1, Math.min(TOTAL, next)));
@@ -130,10 +170,8 @@ export function ReportForm({
     if (submit) {
       const missing = validateUsageReportSubmission(input);
       setErrors(missing);
-      const first = Object.keys(missing)[0];
-      if (first) {
-        navigate(reportErrorStep(first));
-        showError("入力が足りない箇所があります。赤字の項目を確認してください。");
+      if (Object.keys(missing).length > 0) {
+        showMissing("入力が足りない項目があります。", missing);
         return;
       }
     }
@@ -143,10 +181,17 @@ export function ReportForm({
           ? await submitUsageReportAction(input.materialId, input)
           : await saveUsageReportDraftAction(input.materialId, input);
         if (!result.ok) {
-          showError(result.message);
-          setErrors(result.fieldErrors);
-          const first = Object.keys(result.fieldErrors)[0];
-          if (first) navigate(reportErrorStep(first));
+          if (result.savedUpdatedAt !== undefined) {
+            const savedInput = { ...input, expectedUpdatedAt: result.savedUpdatedAt };
+            setInput(savedInput);
+            setSaved(JSON.stringify(savedInput));
+          }
+          if (Object.keys(result.fieldErrors).length > 0)
+            showMissing(result.message, result.fieldErrors);
+          else {
+            setErrors({});
+            showError(result.message);
+          }
           return;
         }
         setNotice({ kind: "ok", text: result.message });
@@ -329,6 +374,13 @@ export function ReportForm({
         {notice?.kind === "error" && (
           <div className="msg" role="alert">
             {notice.text}
+            {notice.items && notice.items.length > 0 && (
+              <ul style={{ margin: "4px 0 0", paddingLeft: "1.2em" }}>
+                {notice.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
         <fieldset disabled={busy} style={{ border: "none", margin: 0, padding: 0, minWidth: 0 }}>

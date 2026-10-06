@@ -312,8 +312,9 @@ export function ReportStepBasics({
 
       <div className="field">
         <label htmlFor="report-variety">
-          品種 <Badge />
+          品種 <Badge required />
         </label>
+        <Need message={errors.variety} block />
         <input
           id="report-variety"
           className="input"

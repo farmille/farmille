@@ -55,4 +55,30 @@ describe("実証詳細レポート（新形式）の記事", () => {
     // 施用方法タグは記事に出さない
     expect(screen.queryByText("施用方法")).toBeNull();
   });
+  it("使用目的の補足を効果タグの次の行に出し、市区町村は公開を選んだ場合だけ都道府県の直後に出す", () => {
+    const input = sampleReport();
+    input.purposeNote = "高温期の萎れを軽くしたかった";
+    input.prefectureCode = 8;
+    input.city = "水戸市";
+    const { rerender } = render(
+      <StructuredReportArticle input={input} cropLabel="ミニトマト" documentUrls={[]} />,
+    );
+    expect(
+      screen.getByText((_, element) =>
+        element?.tagName === "P"
+          ? element.textContent === "耐暑性改善、しおれ軽減\n高温期の萎れを軽くしたかった"
+          : false,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/地域：茨城県(?!水戸市)/)).toBeInTheDocument();
+    expect(screen.queryByText(/水戸市/)).toBeNull();
+    rerender(
+      <StructuredReportArticle
+        input={{ ...input, showCity: true }}
+        cropLabel="ミニトマト"
+        documentUrls={[]}
+      />,
+    );
+    expect(screen.getByText(/地域：茨城県水戸市/)).toBeInTheDocument();
+  });
 });

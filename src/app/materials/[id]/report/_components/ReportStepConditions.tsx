@@ -29,7 +29,8 @@ export function ReportStepConditions({
       </h3>
       <div className="field">
         <label htmlFor="report-prefecture">
-          地域 <Badge />
+          地域 <Badge required />
+          <Need message={errors.prefectureCode} />
         </label>
         <div className="guide">
           アカウント登録時の住所が入っています。今回の圃場が別の場所なら変更してください。
@@ -46,13 +47,22 @@ export function ReportStepConditions({
             })
           }
         >
-          <option value="">未設定</option>
+          <option value="">都道府県を選択</option>
           {PREFECTURES.map((prefecture) => (
             <option key={prefecture.code} value={prefecture.code}>
               {prefecture.name}
             </option>
           ))}
         </select>
+        <input
+          id="report-city"
+          aria-label="市区町村"
+          className="input"
+          style={{ maxWidth: 260, marginTop: 6, display: "block" }}
+          placeholder="市区町村　例）〇〇市"
+          value={input.city}
+          onChange={(event) => onChange({ ...input, city: event.target.value })}
+        />
         <label className="check" style={{ marginTop: 8 }}>
           <input
             type="checkbox"
@@ -62,21 +72,6 @@ export function ReportStepConditions({
           市区町村も表示する
           <span className="muted">チェックなしの場合は都道府県まで表示します</span>
         </label>
-        {input.showCity && (
-          <div style={{ marginTop: 8 }}>
-            <input
-              id="report-city"
-              aria-label="市区町村"
-              className="input"
-              style={{ maxWidth: 260 }}
-              value={input.city}
-              onChange={(event) => onChange({ ...input, city: event.target.value })}
-            />
-            <div className="guide" style={{ margin: "4px 0 0" }}>
-              アカウント登録時の市区町村が入っています。
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="field">

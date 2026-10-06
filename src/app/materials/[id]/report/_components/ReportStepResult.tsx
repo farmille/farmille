@@ -116,6 +116,20 @@ export function ReportStepResult({
             ))}
           </div>
         )}
+        <input
+          className="input"
+          style={{ marginTop: 10 }}
+          aria-label="使用目的の補足（任意）"
+          placeholder="補足（任意）"
+          maxLength={500}
+          value={input.purposeNote}
+          onChange={(event) => onChange({ ...input, purposeNote: event.target.value })}
+        />
+        <Example>
+          ・灌水量を変えずに樹勢を維持したかった
+          <br />
+          ・高温期の萎れを軽くしたかった
+        </Example>
       </div>
     </>
   );

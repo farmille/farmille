@@ -11,6 +11,7 @@ import {
   PlotList,
   ReportBars,
   conditionLines,
+  effectsText,
   numericGroups,
   sectionHeading,
   type ReportSection,
@@ -91,7 +92,7 @@ export function ReportArticleEditor({
           onChange={(observedChange) => onChange({ ...input, observedChange })}
         />
       );
-    if (section === "effects") return <div className="sec-b">{input.purposeTags.join("、")}</div>;
+    if (section === "effects") return <div className="sec-b">{effectsText(input)}</div>;
     if (section === "conditions")
       return (
         <>
