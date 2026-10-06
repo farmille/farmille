@@ -1,21 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Icon } from "@/components/Icon";
 import { useActionState } from "react";
 
-import { buttonRecipe } from "@/components";
 import { trackMaterialSaved } from "@/lib/analytics/events";
-import { css, cx } from "../../../../../styled-system/css";
 import type { SaveControlState } from "../actions";
 
-const saveForm = css({
-  display: "flex",
-});
-
-const saveButton = css({
-  flex: "1",
-});
+// 見本 S.material の data-fav ボタン。見た目は src/app/_mock/mock-extra.css の .mat-fav。
 
 type ToggleAction = (previous: SaveControlState, formData: FormData) => Promise<SaveControlState>;
 
@@ -39,13 +30,13 @@ function SaveToggleForm({
   const [state, formAction] = useActionState(toggleAction, { saved });
 
   return (
-    <form action={formAction} className={saveForm}>
+    <form action={formAction}>
       <button
         type="submit"
         onClick={state.saved ? undefined : () => trackMaterialSaved(materialId)}
-        className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}
+        className={state.saved ? "mat-fav on" : "mat-fav"}
       >
-        <Icon name={state.saved ? "star_filled" : "star"} size="sm" />
+        <span aria-hidden="true">{state.saved ? "★" : "☆"}</span>
         {state.saved ? "お気に入りから解除" : "お気に入りに追加"}
       </button>
     </form>
@@ -60,21 +51,15 @@ export function SaveControl({
   unavailable = false,
 }: SaveControlProps) {
   if (unavailable) {
-    return (
-      <p className={css({ m: "0", fontSize: "sm", color: "text.subtle" })}>
-        お気に入りは一般ユーザー向けの機能です。
-      </p>
-    );
+    return <p className="mat-fav-note">お気に入りは一般ユーザー向けの機能です。</p>;
   }
 
   if (saved === null || toggleAction === undefined) {
     const loginHref = `/login?next=${encodeURIComponent(materialPath)}`;
 
     return (
-      <Link
-        href={loginHref}
-        className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}
-      >
+      <Link href={loginHref} className="mat-fav">
+        <span aria-hidden="true">☆</span>
         ログインしてお気に入りに保存
       </Link>
     );

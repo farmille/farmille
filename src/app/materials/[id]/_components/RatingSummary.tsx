@@ -1,38 +1,6 @@
-import { StarRating } from "@/components";
 import type { ReviewRatingDistribution } from "@/server/queries/material-content";
-import { css } from "../../../../../styled-system/css";
 
-const summaryCard = css({
-  p: "3.5",
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "card",
-  boxShadow: "shadow",
-});
-
-const progressStyle = css({
-  appearance: "none",
-  w: "100%",
-  h: "6px",
-  borderWidth: "0",
-  borderRadius: "pill",
-  overflow: "hidden",
-  bg: "border.default",
-  "&::-webkit-progress-bar": {
-    bg: "border.default",
-    borderRadius: "pill",
-  },
-  "&::-webkit-progress-value": {
-    bg: "accent.star",
-    borderRadius: "pill",
-  },
-  "&::-moz-progress-bar": {
-    bg: "accent.star",
-    borderRadius: "pill",
-  },
-});
+import { MockStars } from "./MockParts";
 
 type RatingSummaryProps = {
   average: number | null;
@@ -40,66 +8,41 @@ type RatingSummaryProps = {
   distribution: ReviewRatingDistribution;
 };
 
+/** 見本の barRow：星ごとの割合（%）。 */
+function BarRow({ rating, count, total }: { rating: number; count: number; total: number }) {
+  const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+  return (
+    <div className="bar-row" role="img" aria-label={`星${rating}の感想口コミ ${count}件`}>
+      <span className="tnum">★{rating}</span>
+      <div className="bar">
+        <span style={{ width: `${percent}%` }} />
+      </div>
+      <span className="tnum" style={{ width: 26, textAlign: "right" }}>
+        {percent}%
+      </span>
+    </div>
+  );
+}
+
+/** 見本 S.material の `.rating-summary`。感想口コミが無い資材では出さない。 */
 export function RatingSummary({ average, reviewCount, distribution }: RatingSummaryProps) {
   if (reviewCount === 0) return null;
 
   return (
-    <div className={summaryCard}>
-      <div className={css({ display: "grid", gridTemplateColumns: "auto 1fr", gap: "5" })}>
-        <div className={css({ textAlign: "center" })}>
-          <div
-            className={css({
-              fontSize: "3xl",
-              fontWeight: "800",
-              fontVariantNumeric: "tabular-nums",
-            })}
-          >
-            {average?.toFixed(1) ?? "—"}
-          </div>
-          <StarRating value={average ?? 0} />
-          <div
-            className={css({
-              mt: "1",
-              fontSize: "xs",
-              color: "text.subtle",
-              fontVariantNumeric: "tabular-nums",
-            })}
-          >
-            {reviewCount}件
-          </div>
+    <div className="card rating-summary">
+      <div style={{ textAlign: "center" }}>
+        <div className="big tnum">{average?.toFixed(1) ?? "−"}</div>
+        <MockStars value={average ?? 0} />
+        <div className="muted tnum" style={{ fontSize: 10 }}>
+          {reviewCount}件
         </div>
-        <div className={css({ display: "flex", flexDirection: "column", gap: "1.5" })}>
-          {distribution.stars.map(({ rating, count }) => (
-            <div
-              key={rating}
-              className={css({
-                display: "grid",
-                gridTemplateColumns: "auto 1fr auto",
-                alignItems: "center",
-                gap: "2",
-                fontSize: "xs",
-                color: "text.muted",
-              })}
-            >
-              <span>{rating}</span>
-              <progress
-                className={progressStyle}
-                value={count}
-                max={Math.max(distribution.total, 1)}
-                aria-label={`星${rating}の感想口コミ ${count}件`}
-              />
-              <span
-                className={css({
-                  minW: "20px",
-                  textAlign: "right",
-                  fontVariantNumeric: "tabular-nums",
-                })}
-              >
-                {count}
-              </span>
-            </div>
+      </div>
+      <div className="bars">
+        {distribution.stars
+          .toSorted((left, right) => right.rating - left.rating)
+          .map(({ rating, count }) => (
+            <BarRow key={rating} rating={rating} count={count} total={distribution.total} />
           ))}
-        </div>
       </div>
     </div>
   );

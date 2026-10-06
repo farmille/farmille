@@ -1,7 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
-import { css } from "../../../../../styled-system/css";
 
 import { MaterialHero } from "./MaterialHero";
 import { materialDetail } from "./story-fixtures";
@@ -48,12 +47,12 @@ describe("MaterialHero", () => {
 
     const image = screen.getByRole("img", { name: material.name });
     const imageBox = document.querySelector('[data-ui="material-hero-image"]');
-    const placeholder = imageBox?.querySelector<SVGElement>("svg[aria-hidden='true']") ?? null;
-    const imageLayer = css({ gridArea: "1 / 1" });
+    // 画像と「NO IMAGE」は mock-extra.css の .mat-hero-img > * で同じセルに重なる。
+    const placeholder = imageBox?.querySelector<HTMLElement>(".mat-hero-placeholder") ?? null;
     expect(imageBox).toContainElement(image);
     expect(placeholder).toBeInTheDocument();
-    expect(image).toHaveClass(imageLayer);
-    expect(placeholder).toHaveClass(imageLayer);
+    expect(image).toHaveClass("mat-hero-photo");
+    expect(placeholder).toHaveAttribute("aria-hidden", "true");
 
     fireEvent.error(image);
 
@@ -80,10 +79,10 @@ describe("MaterialHero", () => {
     render(createElement(MaterialHero, { material: materialDetail, saved: null }));
 
     const imageBox = document.querySelector('[data-ui="material-hero-image"]');
-    const placeholder = imageBox?.querySelector<SVGElement>("svg[aria-hidden='true']") ?? null;
+    const placeholder = imageBox?.querySelector<HTMLElement>(".mat-hero-placeholder") ?? null;
 
     expect(screen.queryByRole("img", { name: materialDetail.name })).not.toBeInTheDocument();
     expect(imageBox).toContainElement(placeholder);
-    expect(placeholder).toHaveClass(css({ gridArea: "1 / 1" }));
+    expect(placeholder).toHaveTextContent("NO IMAGE");
   });
 });
