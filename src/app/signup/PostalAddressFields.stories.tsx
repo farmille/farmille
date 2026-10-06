@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { userEvent, within } from "storybook/test";
 import { PostalAddressFields } from "./PostalAddressFields";
 const meta = {
   title: "App/Auth/PostalAddressFields",
@@ -11,3 +12,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
+export const LookupCompleted: Story = {
+  args: { values: { postalCode: "1000001" } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "住所を自動入力" }));
+  },
+};
