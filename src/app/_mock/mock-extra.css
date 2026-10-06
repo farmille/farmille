@@ -141,3 +141,8 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
+
+/* 資材ページの感想口コミ見出し（#reviews-heading）へ移ったとき、固定ヘッダーと戻るバーの下に見出しが来るようにする */
+.fm #reviews-heading {
+  scroll-margin-top: 128px;
+}

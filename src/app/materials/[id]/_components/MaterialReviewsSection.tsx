@@ -15,6 +15,7 @@ import { createServerSupabase } from "@/server/supabase";
 import { unwrapQueryResult } from "../query-result";
 import { MockReviewCard } from "./MockReviewCard";
 import { RatingSummary } from "./RatingSummary";
+import { ScrollToHashOnMount } from "./ScrollToHashOnMount";
 
 /** 見本 S.material の感想口コミ見出し（`.sec-h`）。読み込み中の表示でも使う。 */
 export function ReviewsHeading({ count }: { count?: number }) {
@@ -73,6 +74,8 @@ export async function MaterialReviewsSection({
   return (
     <section aria-labelledby="reviews-heading">
       <ReviewsHeading count={reviews.total} />
+      {/* 投稿・削除後の `?review=…#reviews-heading` で、この欄が出たあとに見出しまで移る */}
+      <ScrollToHashOnMount targetId="reviews-heading" trigger={reviews.total} />
       <Suspense
         fallback={
           <SkeletonRegion label="評価の分布を読み込んでいます">
