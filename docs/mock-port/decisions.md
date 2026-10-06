@@ -86,6 +86,7 @@
 | 見本の扱い | 見本は画面を見せるためのデモで、押しやすさのためにロジックを簡略化している。管理・編集・申請など機能の厚い画面は本番の作りを優先し、見本は見た目だけ当てる。製品情報の管理（/dashboard/materials/**）は見本に作り替えない |
 | 使用目的の補足の保存方法 | 今は既存の保存関数を変えずに、下書き保存のあと purpose_note を別に書き込む形（提出は3往復で1トランザクションではない）。本来は保存関数（save_usage_report）に purposeNote を足す migration を別PRで入れるのが望ましい → 裏側の追加の候補 |
 | 登録住所の読み取り（レポートの地域の初期値） | `src/server/accounts/registered-address.ts` の `getOwnRegisteredAddress()` は、本人の行だけを service_role（admin クライアント）で読む。profile_contact_details が service_role でしか読めないため。取り込み時にエンジニアの確認を受けたい点 |
+| 口コミの閲覧数 | 一覧に表示されたら1回と数える。対象は資材ページの感想口コミ欄（新しい3件）・口コミ一覧（/materials/[id]/reviews の表示中のページ）・ホームの「生産者の声」の感想口コミ。表示1回につき口コミごとに1行を `view_events`（target_type='review'）へ追記し、同じ人の再表示などの重複は除かない（多少多めに数えてよい）。記録は `src/server/queries/view-events.ts` の `recordViewEvents`（1回の複数行 insert）を各画面の `after()` から呼ぶ。カードに出す閲覧数は従来どおり `view_counts_total` から読む（その表示回の分は次の表示から反映） |
 
 ## 見直し（疑わしい所の洗い出し）への決定（2026-10-07）
 

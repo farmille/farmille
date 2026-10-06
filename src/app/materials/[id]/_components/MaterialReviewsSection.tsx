@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { Suspense } from "react";
 
 import { PostActionsLoader } from "@/components/PostActionsLoader";
@@ -8,6 +9,8 @@ import { getSessionUser } from "@/server/auth";
 import { getReviewRatingDistribution } from "@/server/queries/material-content";
 import type { MaterialDetail } from "@/server/queries/materials";
 import { listReviewsByMaterial } from "@/server/queries/reviews";
+import { recordViewEvents, viewEventsInsertFor } from "@/server/queries/view-events";
+import { createServerSupabase } from "@/server/supabase";
 
 import { unwrapQueryResult } from "../query-result";
 import { MockReviewCard } from "./MockReviewCard";
@@ -53,6 +56,17 @@ export async function MaterialReviewsSection({
     getSessionUser(),
   ]);
   const reviews = unwrapQueryResult(reviewsResult);
+  const displayedReviews = reviews.items.slice(0, 3);
+  // 表示した口コミごとに閲覧を1回記録する。after() の中では cookies() が使えないため、クライアントは先に作る。
+  const insertViewEvents = viewEventsInsertFor(await createServerSupabase());
+  after(async () => {
+    await recordViewEvents({
+      targetType: "review",
+      targetIds: displayedReviews.map((review) => review.id),
+      viewerUserId,
+      insert: insertViewEvents,
+    });
+  });
   const materialPath = `/materials/${material.id}`;
   const viewerIsGeneral = session !== null && canUseGeneralFeatures(session.accountType);
 
@@ -68,9 +82,9 @@ export async function MaterialReviewsSection({
       >
         <MaterialRating material={material} />
       </Suspense>
-      {reviews.items.length > 0 ? (
+      {displayedReviews.length > 0 ? (
         <div className="stack" style={{ marginTop: 10 }}>
-          {reviews.items.slice(0, 3).map((review) => (
+          {displayedReviews.map((review) => (
             <MockReviewCard
               key={review.id}
               review={review}

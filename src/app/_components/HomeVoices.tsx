@@ -1,14 +1,19 @@
 import Link from "next/link";
+import { after } from "next/server";
 
 import { formatDateJa } from "@/components/format-date";
 import { Icon } from "@/components/Icon";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import { publicProfileLabel } from "@/lib/public-profile-label";
 import { MockAvatar, MockStars } from "@/app/materials/[id]/_components/MockParts";
+import { getSessionUser } from "@/server/auth";
 import { getCatalogSearch, type CatalogSearch } from "@/server/queries/catalog-search";
 import { listRecentReviews, type RecentReviewItem } from "@/server/queries/reviews";
 import { listRecentUsageReports, type RecentUsageReportItem } from "@/server/queries/usage-reports";
+import { recordViewEvents, viewEventsInsertFor } from "@/server/queries/view-events";
+import { createServerSupabase } from "@/server/supabase";
 
 /** 見本の生産者の声は実証詳細レポート3件・感想口コミ4件。 */
 const REPORT_LIMIT = 3;
@@ -151,15 +156,30 @@ function VoiceReviewCard({
 
 /** 見本 S.home の「生産者の声」。新着の実証詳細レポートと感想口コミ（公開中のみ）。 */
 export async function HomeVoices() {
-  const [reportsResult, reviewsResult, catalog] = await Promise.all([
+  const [reportsResult, reviewsResult, catalog, session, viewEventSupabase] = await Promise.all([
     listRecentUsageReports({ limit: REPORT_LIMIT }),
     listRecentReviews({ limit: REVIEW_LIMIT }),
     getCatalogSearch(),
+    getSessionUser(),
+    // after() の中では cookies() が使えないため、閲覧記録用のクライアントは先に作る。
+    createServerSupabase(),
   ]);
   if (!reportsResult.ok) throw new Error("新着の実証詳細レポートを取得できませんでした。");
   if (!reviewsResult.ok) throw new Error("新着の感想口コミを取得できませんでした。");
   const reports = reportsResult.data;
   const reviews = reviewsResult.data;
+  const viewerUserId =
+    session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
+  const insertViewEvents = viewEventsInsertFor(viewEventSupabase);
+  // 表示した感想口コミごとに閲覧を1回記録する。
+  after(async () => {
+    await recordViewEvents({
+      targetType: "review",
+      targetIds: reviews.map((review) => review.id),
+      viewerUserId,
+      insert: insertViewEvents,
+    });
+  });
 
   return (
     <section aria-labelledby="home-voices-heading">

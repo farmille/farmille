@@ -5,6 +5,7 @@ import "@/app/_mock/reports-articles.css";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 
 import { Pagination } from "@/components/Pagination";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
@@ -12,6 +13,8 @@ import { createReviewListJsonLd, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { getReviewRatingDistribution } from "@/server/queries/material-content";
 import { listReviewsByMaterial } from "@/server/queries/reviews";
+import { recordViewEvents, viewEventsInsertFor } from "@/server/queries/view-events";
+import { createServerSupabase } from "@/server/supabase";
 
 import { MockReviewCard } from "../_components/MockReviewCard";
 import { RatingSummary } from "../_components/RatingSummary";
@@ -64,6 +67,16 @@ export default async function MaterialReviewsPage({
   ]);
   const reviews = unwrapQueryResult(reviewsResult);
   const distribution = unwrapQueryResult(distributionResult);
+  // 表示した口コミごとに閲覧を1回記録する。after() の中では cookies() が使えないため、クライアントは先に作る。
+  const insertViewEvents = viewEventsInsertFor(await createServerSupabase());
+  after(async () => {
+    await recordViewEvents({
+      targetType: "review",
+      targetIds: reviews.items.map((review) => review.id),
+      viewerUserId,
+      insert: insertViewEvents,
+    });
+  });
   const materialPath = `/materials/${material.id}`;
   const reviewsPath = `${materialPath}/reviews`;
   const reviewListJsonLd =
