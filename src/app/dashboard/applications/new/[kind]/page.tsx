@@ -1,7 +1,3 @@
-import "../../../../_mock/forms.css";
-import "../../../../_mock/sellers.css";
-import "../../../../_mock/dashboard.css";
-
 import { notFound } from "next/navigation";
 import * as v from "valibot";
 
@@ -13,13 +9,10 @@ import { applicationCopy } from "@/lib/company-application-copy";
 import { cleanupExpiredApplicationUploads } from "@/server/company-application-evidence";
 import { beginCompanyApplication } from "@/server/company-applications";
 
+import { css } from "../../../../../../styled-system/css";
 import { SellerAccessDenied } from "../../../_components/AccessDenied";
 import { applicationSellerPage } from "../../_lib/access";
 
-/**
- * 見本 S.formA〜formC（申請フォーム）。フォーム本体は申請フォームD と共通の
- * CompanyApplicationForm（見本 formScreen の .fm-chic に移したもの）を使う。
- */
 export default async function NewApplicationPage({
   params,
 }: {
@@ -35,8 +28,8 @@ export default async function NewApplicationPage({
   const intent = await beginCompanyApplication(kind);
   return (
     <MockPageShell title={applicationCopy[kind].title} backHref="/dashboard/applications">
-      <div className="fm-chic">
-        <h1 style={{ fontSize: 19 }}>{applicationCopy[kind].title}</h1>
+      <div className={css({ maxW: "content.medium", mx: "auto", pt: "6.5" })}>
+        <h1 className={css({ fontSize: "xl" })}>{applicationCopy[kind].title}</h1>
         <CompanyApplicationForm
           intentId={intent.id}
           kind={kind}

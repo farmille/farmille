@@ -1,19 +1,25 @@
-import "../../_mock/forms.css";
-import "../../_mock/sellers.css";
-
 import Link from "next/link";
 
 import { MockPageShell } from "@/app/_mock/MockPageShell";
 
+import { FormSection } from "../_components/FormSection";
+import {
+  formalPageRecipe,
+  formalTitleStyle,
+  formNoteStyle,
+  introStyle,
+} from "../_components/formal-styles";
 import { VerificationForm } from "../_components/VerificationForm";
 
-/** 見本 S.delistIntake（終売・廃盤／非表示の申請 受付）。 */
+import { css, cx } from "../../../../styled-system/css";
+
+/** 終売・廃盤／非表示の申請の受付。申請フォームのURLをメールで送る。 */
 export default function RemovalEntryPage() {
   return (
     <MockPageShell title="終売・廃盤／非表示の申請 受付" backHref="/sellers">
-      <div className="fm-chic" style={{ maxWidth: 820, marginLeft: "auto", marginRight: "auto" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800 }}>終売・廃盤／非表示の申請 受付フォーム</h1>
-        <div className="card intro-card" style={{ marginTop: 12 }}>
+      <div className={formalPageRecipe({ width: "narrow" })}>
+        <h1 className={formalTitleStyle}>終売・廃盤／非表示の申請 受付フォーム</h1>
+        <div className={introStyle}>
           <p>
             掲載されている資材ページについて、終売・廃盤の表示、または非表示をご希望の企業様向けの受付フォームです。ここで法人名・ご担当者名・メールアドレスを送信すると、申請フォームのURLをメールでお送りします。申請そのものは、メールで届く申請フォームから行います。
           </p>
@@ -27,12 +33,10 @@ export default function RemovalEntryPage() {
             <li>資材ページや感想口コミ・実証詳細レポートのデータは削除しません。</li>
           </ul>
         </div>
-        <div className="form-sec">
-          <span className="no">1</span>
-          <h2 className="sec-title">申請者情報</h2>
-        </div>
-        <VerificationForm />
-        <p className="form-note" style={{ textAlign: "center" }}>
+        <FormSection title="申請者情報">
+          <VerificationForm />
+        </FormSection>
+        <p className={cx(formNoteStyle, css({ textAlign: "center" }))}>
           <Link href="/company-requests/receipts">受付済みの申請を確認する</Link>
         </p>
       </div>

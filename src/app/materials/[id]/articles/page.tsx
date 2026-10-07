@@ -1,6 +1,4 @@
 import { MockPageShell } from "@/app/_mock/MockPageShell";
-// mock.css（MockPageShell が読み込む）より後に読み込む。
-import "@/app/_mock/reports-articles.css";
 
 import { PostActionsLoader } from "@/components/PostActionsLoader";
 import type { Metadata } from "next";
@@ -11,8 +9,13 @@ import {
   listPublishedUsageReportsByMaterial,
 } from "@/server/queries/material-content";
 
+import { css } from "../../../../../styled-system/css";
+
+import { ArticleGrid } from "../../../articles/_components/FeedCard";
 import { FeedReportCard } from "../../../articles/_components/FeedReportCard";
 import { OrgArticleCard } from "../../../articles/_components/OrgArticleCard";
+import { EmptyCard } from "../_components/EmptyCard";
+import { MaterialSectionHeading } from "../_components/MaterialSectionHeading";
 import { isMaterialId, loadMaterialOrNotFound, materialMetadata } from "../material-page-data";
 import { unwrapQueryResult } from "../query-result";
 
@@ -31,21 +34,10 @@ export async function generateMetadata({ params }: MaterialArticlesPageProps): P
   });
 }
 
-/** 見本の `.sec-h`（件数つきの見出し）。 */
-function SectionHeading({ id, title, count }: { id: string; title: string; count: number }) {
-  return (
-    <div className="sec-h" style={{ marginTop: 18 }}>
-      <h2 id={id}>
-        {title}{" "}
-        <span className="muted tnum" style={{ fontSize: 12 }}>
-          {count}件
-        </span>
-      </h2>
-    </div>
-  );
-}
+const visuallyHiddenStyle = css({ srOnly: true });
+const leadStyle = css({ mb: "3", fontSize: "sm", color: "text.subtle" });
 
-// 見本 S.materialArticles の `.body`。本番は実証詳細レポートも同じ画面に並べる（資材ページの「すべて見る」の行き先）。
+// 資材ページの「すべて見る」の行き先。メーカーの記事に加えて実証詳細レポートも同じ画面に並べる。
 export default async function MaterialArticlesPage({ params }: MaterialArticlesPageProps) {
   const { id } = await params;
 
@@ -65,28 +57,28 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
 
   return (
     <MockPageShell title={`${material.name} の記事`} backHref={materialPath}>
-      <h1 className="sr-only">{material.name} の記事・実証詳細レポート</h1>
-      <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
+      <h1 className={visuallyHiddenStyle}>{material.name} の記事・実証詳細レポート</h1>
+      <div className={leadStyle}>
         この資材に紐づく、生産者の実証詳細レポートとメーカーによる記事です。
-      </p>
+      </div>
 
       {isEmpty ? (
-        <div className="card pad" style={{ textAlign: "center" }}>
-          <p style={{ fontSize: 13, fontWeight: 700 }}>記事・実証詳細レポートはまだありません</p>
-          <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-            この資材に紐づく公開コンテンツは、まだ登録されていません。
-          </p>
-        </div>
+        <EmptyCard
+          align="center"
+          title="記事・実証詳細レポートはまだありません"
+          description="この資材に紐づく公開コンテンツは、まだ登録されていません。"
+        />
       ) : null}
 
       {reports.items.length > 0 ? (
         <section aria-labelledby="material-reports-heading">
-          <SectionHeading
-            id="material-reports-heading"
+          <MaterialSectionHeading
+            headingId="material-reports-heading"
             title="実証詳細レポート"
             count={reports.total}
+            spacing="list"
           />
-          <div className="report-grid">
+          <ArticleGrid>
             {reports.items.map((report) => (
               <FeedReportCard
                 key={report.id}
@@ -107,18 +99,19 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
                 }
               />
             ))}
-          </div>
+          </ArticleGrid>
         </section>
       ) : null}
 
       {articles.items.length > 0 ? (
         <section aria-labelledby="material-articles-heading">
-          <SectionHeading
-            id="material-articles-heading"
+          <MaterialSectionHeading
+            headingId="material-articles-heading"
             title="メーカーの記事"
             count={articles.total}
+            spacing="list"
           />
-          <div className="report-grid">
+          <ArticleGrid>
             {articles.items.map((article) => (
               <OrgArticleCard
                 key={article.id}
@@ -131,7 +124,7 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
                 viewCount={article.viewCount}
               />
             ))}
-          </div>
+          </ArticleGrid>
         </section>
       ) : null}
     </MockPageShell>

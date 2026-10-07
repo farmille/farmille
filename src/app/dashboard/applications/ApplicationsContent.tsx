@@ -1,9 +1,18 @@
-import "../../_mock/dashboard.css";
-
 import Link from "next/link";
 
 import { MockPageShell } from "@/app/_mock/MockPageShell";
 import type { listCompanyApplications } from "@/server/company-applications";
+
+import { css } from "../../../../styled-system/css";
+import {
+  cardList,
+  logDate,
+  logRow,
+  logText,
+  sectionHeading,
+  workspaceColumn,
+} from "../_components/dashboard-styles";
+import { ProcedureRow } from "../_components/ProcedureRow";
 
 const PROCEDURES = [
   {
@@ -39,7 +48,34 @@ const PROCEDURES = [
   },
 ] as const;
 
-/** 見本 S.makerProcs（各種お手続き）。下に受付済みの申請（受付票）への導線を置く。 */
+const pageTitle = css({ fontSize: "lg", mb: "2.5", tab: { fontSize: "3xl" } });
+
+const lead = css({
+  fontSize: "md",
+  lineHeight: "loose",
+  color: "text.muted",
+  mt: "2",
+  mb: "1.5",
+});
+
+const requirementNote = css({
+  fontSize: "sm",
+  lineHeight: "prose",
+  color: "text.subtle",
+  mb: "3.5",
+});
+
+const procedureStack = css({ display: "flex", flexDirection: "column", gap: "3" });
+
+const backLink = css({
+  display: "block",
+  mt: "3.5",
+  fontSize: "sm",
+  color: "primary.700",
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+});
+
 export function ApplicationsContent({
   receipts,
 }: {
@@ -47,57 +83,53 @@ export function ApplicationsContent({
 }) {
   return (
     <MockPageShell title="各種お手続き" backHref="/dashboard">
-      <div className="dash-mid">
-        <div className="sec-h" style={{ marginTop: 0 }}>
-          <h1 className="dash-title">各種お手続き</h1>
-        </div>
-        <p className="guide-lead" style={{ marginBottom: 6 }}>
+      <div className={workspaceColumn}>
+        <h1 className={pageTitle}>各種お手続き</h1>
+        <p className={lead}>
           資材の掲載・資材オーナー権限の移行・終売・非表示に関するお手続きは、以下の申請フォームから行います。申請後、内容を確認のうえ結果をメールでお知らせします。
         </p>
-        <p className="muted" style={{ fontSize: 12, lineHeight: 1.8, marginBottom: 14 }}>
+        <p className={requirementNote}>
           どの申請にも、貴社のFarmilleアカウントIDと、資材ごとのパッケージ画像（貴社名の記載箇所）または製品ページのURLが必要です。
         </p>
-        <div className="stack">
+        <div className={procedureStack}>
           {PROCEDURES.map((item) => (
-            <div className="card proc-row" key={item.href}>
-              <div className="pr-main">
-                <h2 style={{ fontSize: 14 }}>{item.title}</h2>
-                <p>
-                  {item.description}
-                  {item.needs ? (
-                    <>
-                      <br />
-                      <b>必要なもの：</b>
-                      {item.needs}
-                    </>
-                  ) : null}
-                </p>
-              </div>
-              <Link className="btn btn-ghost" href={item.href}>
-                {item.label}
-              </Link>
-            </div>
+            <ProcedureRow
+              key={item.href}
+              heading="h2"
+              title={item.title}
+              href={item.href}
+              actionLabel={item.label}
+            >
+              {item.description}
+              {item.needs ? (
+                <>
+                  <br />
+                  <b>必要なもの：</b>
+                  {item.needs}
+                </>
+              ) : null}
+            </ProcedureRow>
           ))}
         </div>
 
         <section aria-labelledby="receipts-heading">
-          <h2 id="receipts-heading" className="dash-sec-h">
+          <h2 id="receipts-heading" className={sectionHeading}>
             受付済みの申請
           </h2>
-          <ul className="card" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+          <ul className={cardList}>
             {receipts.length === 0 ? (
-              <li className="md-log">
-                <div className="t">受付済みの申請はありません。</div>
+              <li className={logRow}>
+                <div className={logText}>受付済みの申請はありません。</div>
               </li>
             ) : (
               receipts.map((receipt) => (
-                <li className="md-log" key={receipt.id}>
-                  <span className="d tnum">
+                <li className={logRow} key={receipt.id}>
+                  <span className={logDate}>
                     {new Date(receipt.submitted_at).toLocaleDateString("ja-JP", {
                       timeZone: "Asia/Tokyo",
                     })}
                   </span>
-                  <div className="t">
+                  <div className={logText}>
                     <Link href={`/dashboard/applications/${receipt.id}`}>
                       受付番号 {receipt.receipt_number}：{receipt.company_name}
                     </Link>
@@ -108,11 +140,9 @@ export function ApplicationsContent({
           </ul>
         </section>
 
-        <div className="dash-back">
-          <Link className="link-more" href="/dashboard">
-            ← 企業会員ダッシュボードへ
-          </Link>
-        </div>
+        <Link className={backLink} href="/dashboard">
+          ← 企業会員ダッシュボードへ
+        </Link>
       </div>
     </MockPageShell>
   );

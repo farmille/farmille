@@ -1,18 +1,92 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { Badge } from "@/components/Badge";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { MockProfileReviewCard } from "@/app/_mock/MockProfileReviewCard";
+import { RequiredBadge } from "@/app/_mock/FormParts";
 import { MockReportCard } from "@/app/materials/[id]/_components/MockReportCard";
 import type { HelpfulItem, OwnPostItem } from "@/server/queries/me-page";
 import type { OwnProfile } from "@/server/queries/profiles";
 import type { SavedMaterialItem } from "@/server/queries/saved-materials";
+import { css, cva } from "../../../../styled-system/css";
 
-/** 見本の CHEV（行の右端の ›）。 */
+import { EmptyNote, postStackStyle, ProfileSectionHeading } from "./ProfileParts";
+
+const linkRow = css({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "2",
+  px: "3.5",
+  py: "3",
+  color: "inherit",
+  textDecoration: "none",
+  borderBottomWidth: "1px",
+  borderBottomStyle: "solid",
+  borderBottomColor: "border.default",
+  _last: { borderBottomWidth: "0" },
+});
+
+const postList = cva({
+  base: { mt: "2.5" },
+  variants: {
+    kind: {
+      reports: {
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "2.5",
+        mx: "-4",
+        px: "4",
+        pt: "0.5",
+        pb: "1.5",
+        overflowX: "auto",
+        scrollSnapType: "x mandatory",
+        scrollbarWidth: "none",
+        "&::-webkit-scrollbar": { display: "none" },
+        "& > *": { flex: "0 0 74%", scrollSnapAlign: "start" },
+        tab: {
+          display: "grid",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gap: "3",
+          mx: "0",
+          px: "0",
+          overflow: "visible",
+          "& > *": { flex: "none", w: "auto" },
+        },
+      },
+      reviews: { display: "flex", flexDirection: "column", gap: "3" },
+    },
+  },
+});
+
+const unpublishedCard = css(surfaceCardRecipe.raw(), { overflow: "hidden" });
+
+const postStatus = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  mb: "1.5",
+  fontSize: "sm",
+  "& a": { color: "primary.800", fontWeight: "bold", textDecoration: "none" },
+});
+
+const postTitle = css({ fontSize: "md", fontWeight: "bold", lineHeight: "snug" });
+
+const postCrop = css({ mt: "1", color: "text.subtle", fontSize: "xs" });
+
+const savedList = css(surfaceCardRecipe.raw({ padding: "flush" }));
+
+const savedName = css({ mt: "0.5", fontSize: "md", fontWeight: "bold", lineHeight: "relaxed" });
+
+const savedMaker = css({ mt: "0.5", color: "text.subtle", fontSize: "xs" });
+
+/** 行の右端の ›。 */
 function Chevron() {
   return (
     <svg
-      className="chev"
+      className={css({ flex: "0 0 auto", color: "text.subtle" })}
       width="16"
       height="16"
       viewBox="0 0 24 24"
@@ -26,63 +100,47 @@ function Chevron() {
   );
 }
 
-/** 見本 S.mypage の `.detail-row`（タップで移動する行）。 */
+/** タップで移動する行。 */
 export function MockLinkRow({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link
-      className="detail-row"
-      href={href}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 8,
-        color: "inherit",
-        textDecoration: "none",
-      }}
-    >
-      <div style={{ minWidth: 0 }}>{children}</div>
+    <Link className={linkRow} href={href}>
+      <div className={css({ minW: "0" })}>{children}</div>
       <Chevron />
     </Link>
   );
 }
 
-function EmptyNote({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="card pad empty-note">
-      <b>{title}</b>
-      {description}
-    </div>
-  );
-}
-
-function usageReportStatusLabel(status: (OwnPostItem & { kind: "usage_report" })["status"]) {
+function UsageReportStatus({
+  status,
+}: {
+  status: (OwnPostItem & { kind: "usage_report" })["status"];
+}) {
   switch (status) {
     case "draft":
-      return { label: "下書き", className: "badge badge-opt" };
+      return <Badge variant="optional">下書き</Badge>;
     case "pending":
-      return { label: "調整中", className: "badge badge-req" };
+      return <RequiredBadge>調整中</RequiredBadge>;
     case "published":
-      return { label: "公開済み", className: "badge badge-pub" };
+      return <Badge variant="published">公開済み</Badge>;
     case "declined":
-      return { label: "差し戻し", className: "badge badge-req" };
+      return <RequiredBadge>差し戻し</RequiredBadge>;
   }
 }
 
 type PostsShelfProps = {
   profile: OwnProfile;
   posts: readonly OwnPostItem[];
-  /** 見本は実証詳細レポートを横スクロール、感想口コミを縦に並べる。 */
+  /** 実証詳細レポートは横スクロール、感想口コミは縦に並べる。 */
   kind?: "reports" | "reviews";
   /** 投稿者の肩書き（立場・都道府県）。 */
   authorLabel?: string;
 };
 
-/** 見本 S.mypage の「これまでの投稿」（`#myRep` の `.report-scroll`／`#myRev` の `.stack`）。 */
+/** 「これまでの投稿」。実証詳細レポートは横スクロール、感想口コミは縦に並べる。 */
 export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: PostsShelfProps) {
   if (posts.length === 0) {
     return (
-      <div style={{ marginTop: 10 }}>
+      <div className={css({ mt: "2.5" })}>
         <EmptyNote
           title="まだ投稿がありません"
           description="感想口コミや実証詳細レポートを書くと、ここに並びます。"
@@ -92,13 +150,8 @@ export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: Po
   }
 
   return (
-    <div
-      className={kind === "reports" ? "report-scroll" : "stack"}
-      // 下書き・調整中のカードは表紙が無く低い。横並びで公開済みカードの高さに引き伸ばされて空白ができないよう、上揃えにする。
-      style={kind === "reports" ? { marginTop: 10, alignItems: "flex-start" } : { marginTop: 10 }}
-      aria-labelledby="me-posts-heading"
-      role="region"
-    >
+    // 下書き・調整中のカードは表紙が無く低い。横並びで公開済みカードの高さに引き伸ばされて空白ができないよう、上揃えにする。
+    <div className={postList({ kind })} aria-labelledby="me-posts-heading" role="region">
       {posts.map((post) =>
         post.kind === "review" ? (
           <MockProfileReviewCard
@@ -133,21 +186,15 @@ export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: Po
             }
           />
         ) : (
-          <article key={`report-${post.id}`} className="card pad alist-card">
-            <div className="post-status">
-              <span className={usageReportStatusLabel(post.status).className}>
-                {usageReportStatusLabel(post.status).label}
-              </span>
+          <article key={`report-${post.id}`} className={unpublishedCard}>
+            <div className={postStatus}>
+              <UsageReportStatus status={post.status} />
               {post.status === "draft" ? (
                 <Link href={`/materials/${post.materialId}/report/new`}>フォームを再開 →</Link>
               ) : null}
             </div>
-            <div className="t" style={{ fontWeight: 700, fontSize: 13.5 }}>
-              {post.title}
-            </div>
-            <div className="muted" style={{ fontSize: 11.5, marginTop: 4 }}>
-              {post.cropName}
-            </div>
+            <div className={postTitle}>{post.title}</div>
+            <div className={postCrop}>{post.cropName}</div>
           </article>
         ),
       )}
@@ -159,36 +206,28 @@ type SavedShelfProps = {
   items: readonly SavedMaterialItem[];
 };
 
-/** 見本 S.mypage の「お気に入りの資材」（`.card` の中に `.detail-row`）。 */
+/** 「お気に入りの資材」。カードの中に資材の行を並べる。 */
 export function SavedShelf({ items }: SavedShelfProps) {
   return (
     <section aria-labelledby="me-saved-heading">
-      <div className="sec-h">
-        <h2 id="me-saved-heading">
-          お気に入りの資材{" "}
-          <span className="muted tnum" style={{ fontSize: 12 }}>
-            {items.length}件
-          </span>
-        </h2>
-        <Link className="link-more" href="/me/saved">
-          すべて見る・比較する
-        </Link>
-      </div>
+      <ProfileSectionHeading
+        id="me-saved-heading"
+        count={`${items.length}件`}
+        more={{ href: "/me/saved", label: "すべて見る・比較する" }}
+      >
+        お気に入りの資材
+      </ProfileSectionHeading>
       {items.length === 0 ? (
         <EmptyNote
           title="保存した資材はまだありません"
           description="気になる資材を保存すると、比較やあとからの確認がしやすくなります。"
         />
       ) : (
-        <div className="card">
+        <div className={savedList}>
           {items.map((item) => (
             <MockLinkRow key={item.savedId} href={`/materials/${item.materialId}`}>
-              <div className="dv" style={{ fontWeight: 700 }}>
-                ★ {item.name}
-              </div>
-              <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>
-                {item.manufacturerName}
-              </div>
+              <div className={savedName}>★ {item.name}</div>
+              <div className={savedMaker}>{item.manufacturerName}</div>
             </MockLinkRow>
           ))}
         </div>
@@ -201,20 +240,18 @@ type HelpfulShelfProps = {
   items: readonly HelpfulItem[];
 };
 
-/** 「参考になった」を付けた投稿（見本に無い本番の機能。見本のカードで並べる）。 */
+/** 「参考になった」を付けた投稿。 */
 export function HelpfulShelf({ items }: HelpfulShelfProps) {
   return (
     <section aria-labelledby="me-helpful-heading">
-      <div className="sec-h">
-        <h2 id="me-helpful-heading">参考になった</h2>
-      </div>
+      <ProfileSectionHeading id="me-helpful-heading">参考になった</ProfileSectionHeading>
       {items.length === 0 ? (
         <EmptyNote
           title="まだ参考になったを付けていません"
           description="役に立った感想口コミや実証詳細レポートに付けると、ここに残ります。"
         />
       ) : (
-        <div className="stack">
+        <div className={postStackStyle}>
           {items.map((item) =>
             item.kind === "review" ? (
               <MockProfileReviewCard

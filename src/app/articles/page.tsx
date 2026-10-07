@@ -8,13 +8,16 @@ import { SkeletonList } from "@/components/SkeletonList";
 import type { Metadata } from "next";
 
 import { Pagination } from "@/components";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { listContentFeed, type ContentFeedFilter } from "@/server/queries/content-feed";
 
 import { ArticlesSearchBar, articlesHref } from "./_components/ArticlesSearchBar";
+import { ArticleGrid } from "./_components/FeedCard";
 import { FeedReportCard } from "./_components/FeedReportCard";
 import { OrgArticleCard } from "./_components/OrgArticleCard";
+import { css } from "../../../styled-system/css";
 
 // NEXT_PUBLIC_SITE_URL の評価をモジュール読み込み時ではなく使用時に遅延させる（layout.tsx と同じ理由）。
 export async function generateMetadata(): Promise<Metadata> {
@@ -43,7 +46,6 @@ function parsePage(value: string | undefined): number {
   return page;
 }
 
-// 見本 S.articles の `.body`。スタイルは src/app/_mock/（.fm 配下に閉じている）。
 export default async function ArticlesPage({ searchParams }: ArticlesPageProps) {
   const params = await searchParams;
   const filter = parseFilter(params.type);
@@ -52,7 +54,7 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
 
   return (
     <MockPageShell>
-      <h1 className="sr-only">記事を読む</h1>
+      <h1 className={css({ srOnly: true })}>記事を読む</h1>
       <ArticlesSearchBar filter={filter} q={q} />
 
       <Suspense
@@ -85,9 +87,16 @@ async function ArticleResults({
 
   if (feed.items.length === 0) {
     return (
-      <div className="card pad" style={{ marginTop: 12, textAlign: "center" }}>
-        <p style={{ fontSize: 13, fontWeight: 700 }}>該当する記事・実証詳細レポートがありません</p>
-        <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+      <div
+        className={css(surfaceCardRecipe.raw({ padding: "cozy" }), {
+          mt: "3",
+          textAlign: "center",
+        })}
+      >
+        <p className={css({ fontSize: "md", fontWeight: "bold" })}>
+          該当する記事・実証詳細レポートがありません
+        </p>
+        <p className={css({ mt: "1", fontSize: "sm", color: "text.subtle" })}>
           検索条件やフィルタを変えて、もう一度探してみてください。
         </p>
       </div>
@@ -96,7 +105,7 @@ async function ArticleResults({
 
   return (
     <>
-      <div className="report-grid" style={{ marginTop: 12 }}>
+      <ArticleGrid className={css({ mt: "3" })}>
         {feed.items.map((item) =>
           item.kind === "report" ? (
             <FeedReportCard
@@ -129,7 +138,7 @@ async function ArticleResults({
             />
           ),
         )}
-      </div>
+      </ArticleGrid>
       <Pagination
         page={feed.page}
         totalPages={feed.totalPages}

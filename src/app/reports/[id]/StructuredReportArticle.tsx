@@ -10,11 +10,65 @@ import {
   type UsageReportInput,
 } from "@/lib/usage-report";
 
-import { ReportBars, type ReportBarRow } from "./ReportBars";
+import { css, cx } from "../../../../styled-system/css";
+import { ReadingHeading, ReadingProse } from "../../articles/_components/Reading";
+import { ReportBars, ReportGraphNote, type ReportBarRow } from "./ReportBars";
 import { ReportFigures } from "./ReportFigures";
 
 type Section = (typeof REPORT_SECTIONS)[number]["value"];
 type Graph = UsageReportInput["measurements"][number]["graphs"][number];
+
+const plotStyles = {
+  list: css({ display: "flex", flexDirection: "column", gap: "2.5", mt: "2.5" }),
+  row: css({
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "2.5",
+    px: "3",
+    py: "2.5",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "border.default",
+    borderRadius: "input",
+    bg: "surface.card",
+  }),
+  dot: css({ flexShrink: "0", w: "3", h: "3", mt: "1", borderRadius: "pill", bg: "currentColor" }),
+  name: css({
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    columnGap: "2.5",
+    rowGap: "1.5",
+    fontSize: "md",
+  }),
+  scope: css({
+    px: "2",
+    py: "0.5",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "border.default",
+    borderRadius: "pill",
+    bg: "surface.page",
+    fontSize: "xs",
+    color: "text.muted",
+  }),
+  description: css({
+    mt: "1",
+    fontSize: "md",
+    color: "text.muted",
+    lineHeight: "prose",
+    whiteSpace: "pre-wrap",
+  }),
+};
+
+const documentList = css({
+  m: "0",
+  pl: "4.5",
+  fontSize: "md",
+  color: "text.muted",
+  lineHeight: "prose",
+  "& a": { color: "primary.800" },
+});
 
 /** 先頭の数値が読めた行だけを、区の並び順の色で棒にする。 */
 function graphRows(graph: Graph, plots: UsageReportInput["plots"]): ReportBarRow[] {
@@ -35,16 +89,8 @@ function graphRows(graph: Graph, plots: UsageReportInput["plots"]): ReportBarRow
   });
 }
 
-function Prose({ text }: { text: string }) {
-  return (
-    <div className="a-body">
-      <p>{text}</p>
-    </div>
-  );
-}
-
 /**
- * 実証詳細レポート（新形式）の記事。見本 S.reportArticle／report-full の公開記事と同じ構成とクラス。
+ * 実証詳細レポート（新形式）の記事。
  * 結果・感想 → 期待した効果 → 栽培条件・施用時期 → 比較した区 → 使用結果の詳細 → 関連資料。
  * 施用方法タグは出さない（usage-reports-SPEC）。
  */
@@ -86,16 +132,16 @@ export function StructuredReportArticle({
           case "results":
             return (
               <Fragment key={section}>
-                <h2 className="a-h3">{h}</h2>
-                <Prose text={input.observedChange} />
+                <ReadingHeading>{h}</ReadingHeading>
+                <ReadingProse text={input.observedChange} />
                 <ReportFigures media={media} />
               </Fragment>
             );
           case "effects":
             return (
               <Fragment key={section}>
-                <h2 className="a-h3">{h}</h2>
-                <Prose
+                <ReadingHeading>{h}</ReadingHeading>
+                <ReadingProse
                   text={[input.purposeTags.join("、"), input.purposeNote.trim()]
                     .filter((text) => text.length > 0)
                     .join("\n")}
@@ -106,28 +152,30 @@ export function StructuredReportArticle({
           case "conditions":
             return (
               <Fragment key={section}>
-                <h2 className="a-h3">{h}</h2>
-                <Prose text={conditionLines.join("\n")} />
+                <ReadingHeading>{h}</ReadingHeading>
+                <ReadingProse text={conditionLines.join("\n")} />
                 <ReportFigures media={media} />
               </Fragment>
             );
           case "plots":
             return (
               <Fragment key={section}>
-                <h2 className="a-h3">{h}</h2>
-                <div className="plot-list">
+                <ReadingHeading>{h}</ReadingHeading>
+                <div className={plotStyles.list}>
                   {input.plots.map((plot, index) => (
-                    <div key={plot.id} className="plot-row">
+                    <div key={plot.id} className={plotStyles.row}>
                       <span
-                        className={`plot-dot plot-color ${reportPlotColor(index)}`}
+                        className={cx(plotStyles.dot, reportPlotColor(index))}
                         aria-hidden="true"
                       />
-                      <div className="plot-txt">
-                        <div className="plot-nm">
+                      <div className={css({ minW: "0", flex: "1" })}>
+                        <div className={plotStyles.name}>
                           <b>{plot.name || "区名未入力"}</b>
-                          {plot.scope ? <span className="plot-scope">{plot.scope}</span> : null}
+                          {plot.scope ? (
+                            <span className={plotStyles.scope}>{plot.scope}</span>
+                          ) : null}
                         </div>
-                        <div className="plot-desc">{plot.description || "−"}</div>
+                        <div className={plotStyles.description}>{plot.description || "−"}</div>
                       </div>
                     </div>
                   ))}
@@ -144,9 +192,9 @@ export function StructuredReportArticle({
                     .filter(({ rows }) => rows.length > 0);
                   return (
                     <Fragment key={measurement.id}>
-                      <h2 className="a-h3">
+                      <ReadingHeading>
                         {h}：{measurement.name || "調査項目未入力"}
-                      </h2>
+                      </ReadingHeading>
                       {graphs.map(({ graph, rows }) => (
                         <ReportBars
                           key={graph.id}
@@ -156,19 +204,19 @@ export function StructuredReportArticle({
                         />
                       ))}
                       {graphs.length > 0 ? (
-                        <div className="graph-cap">
+                        <ReportGraphNote>
                           グラフは投稿されたデータからFarmilleが自動生成しています
-                        </div>
+                        </ReportGraphNote>
                       ) : null}
                     </Fragment>
                   );
                 })}
                 {textMeasurements.map((measurement) => (
                   <Fragment key={measurement.id}>
-                    <h2 className="a-h3">
+                    <ReadingHeading>
                       {h}：{measurement.name}
-                    </h2>
-                    <Prose text={measurement.body} />
+                    </ReadingHeading>
+                    <ReadingProse text={measurement.body} />
                   </Fragment>
                 ))}
                 <ReportFigures media={media} />
@@ -178,9 +226,9 @@ export function StructuredReportArticle({
             if (input.documents.length === 0 && media.length === 0) return null;
             return (
               <Fragment key={section}>
-                <h2 className="a-h3">{h}</h2>
+                <ReadingHeading>{h}</ReadingHeading>
                 {input.documents.length > 0 ? (
-                  <ul className="rp-docs">
+                  <ul className={documentList}>
                     {input.documents.map((document) => {
                       const url = documentUrls.find((item) => item.id === document.id)?.url;
                       return (

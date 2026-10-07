@@ -1,20 +1,125 @@
 "use client";
-import "../../_mock/forms.css";
-import "../../_mock/dashboard.css";
-
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
 import { FormNotice } from "@/app/_mock/FormParts";
 import { SellerHeader } from "@/app/sellers/[id]/_components/SellerHeader";
+import { Field } from "@/components/auth/Fields";
+import { buttonRecipe, Input, surfaceCardRecipe, Textarea } from "@/components";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import {
   ManufacturerProfileSchema,
   type ManufacturerProfileContent,
 } from "@/lib/manufacturer-profile";
+import { css } from "../../../../styled-system/css";
+import { pillButtonRecipe, visuallyHidden } from "../_components/dashboard-styles";
 import { saveManufacturerProfile, withdrawManufacturerProfile, uploadLogo } from "./actions";
 
-/** 見本 S.makerDash の tabProfile（ロゴの .md-slot、会社紹介・公式サイトの card、.md-save の保存行）。 */
+const draftNote = css(surfaceCardRecipe.raw({ tone: "soft" }), {
+  mb: "3",
+  borderStyle: "dashed",
+  borderColor: "primary.700",
+});
+
+const draftNoteTitle = css({ fontSize: "sm" });
+
+const draftNoteText = css({ fontSize: "sm", color: "text.subtle" });
+
+const slots = css({
+  display: "grid",
+  gridTemplateColumns: "1fr",
+  gap: "2.5",
+  mb: "2.5",
+  tab: { gridTemplateColumns: "1fr 1fr" },
+});
+
+const slot = css({
+  bg: "surface.card",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "card",
+  p: "3.5",
+});
+
+const dropZone = css({
+  display: "block",
+  position: "relative",
+  borderWidth: "1.5px",
+  borderStyle: "dashed",
+  borderColor: "border.strong",
+  borderRadius: "input",
+  p: "5.5",
+  textAlign: "center",
+  color: "text.subtle",
+  fontSize: "sm",
+  cursor: "pointer",
+  lineHeight: "prose",
+  _hover: { borderColor: "primary.700", color: "primary.800" },
+  "&:has(input:focus-visible)": {
+    borderColor: "primary.700",
+    outlineWidth: "2px",
+    outlineStyle: "solid",
+    outlineColor: "primary.700",
+    outlineOffset: "2px",
+  },
+});
+
+const fileInput = css({
+  position: "absolute",
+  inset: "0",
+  opacity: "0",
+  w: "full",
+  h: "full",
+  cursor: "pointer",
+});
+
+const slotRequirement = css({ fontSize: "xs", color: "text.muted", mt: "2" });
+
+const currentLogo = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  flexWrap: "wrap",
+  fontSize: "xs",
+  mt: "0.5",
+  color: "text.subtle",
+});
+
+const logoThumb = css({
+  w: "7",
+  h: "7",
+  borderRadius: "pill",
+  objectFit: "cover",
+  bg: "surface.page",
+  mr: "1.5",
+});
+
+const fields = css({ pt: "3.5", px: "4" });
+
+const saveRow = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2.5",
+  flexWrap: "wrap",
+  py: "3",
+  px: "4",
+});
+
+const primaryAction = css(buttonRecipe.raw({ variant: "primary", size: "sm" }), {
+  minW: "auto",
+  py: "2",
+  px: "4",
+  lineHeight: "normal",
+});
+
+const secondaryAction = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
+  minW: "auto",
+  py: "2",
+  px: "4",
+  lineHeight: "normal",
+});
+
 export function ManufacturerProfileEditor({
   sellerId,
   name,
@@ -53,7 +158,7 @@ export function ManufacturerProfileEditor({
     });
   }
   const sellerPreview = (
-    <div className="dash-preview">
+    <div className={css({ mb: "3" })}>
       <SellerHeader
         seller={{
           id: sellerId,
@@ -71,21 +176,24 @@ export function ManufacturerProfileEditor({
       {message ? <FormNotice tone="info">{message}</FormNotice> : null}
       {pendingVersion ? <FormNotice tone="info">プロフィールの表現確認中です。</FormNotice> : null}
       {versionId && !pendingVersion ? (
-        <div className="card pad dash-draft-note">
-          <b>未公開の下書きを編集中です。</b>
-          <span className="muted">表現確認を経るまで、メーカーページには反映されません。</span>
+        <div className={draftNote}>
+          <b className={draftNoteTitle}>未公開の下書きを編集中です。</b>
+          <span className={draftNoteText}>
+            表現確認を経るまで、メーカーページには反映されません。
+          </span>
         </div>
       ) : null}
       {preview || pendingVersion ? (
         sellerPreview
       ) : (
         <>
-          <div className="md-slots dash-slots">
-            <div className="md-slot">
-              <label className="ph" htmlFor="profile-logo">
+          <div className={slots}>
+            <div className={slot}>
+              <label className={dropZone} htmlFor="profile-logo">
                 ＋<br />
-                企業ロゴをアップロード<span className="sr-only">（ロゴ画像・任意）</span>
+                企業ロゴをアップロード<span className={visuallyHidden}>（ロゴ画像・任意）</span>
                 <input
+                  className={fileInput}
                   id="profile-logo"
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
@@ -110,17 +218,24 @@ export function ManufacturerProfileEditor({
                   }}
                 />
               </label>
-              <div className="req" id="profile-logo-req">
+              <div className={slotRequirement} id="profile-logo-req">
                 JPEG / PNG / WebP ・ 2MBまで。保存後、表現確認を経て公開されます。
               </div>
-              <div className="now muted dash-logo-now">
+              <div className={currentLogo}>
                 {content.logoUrl ? (
                   <>
-                    <Image alt="" src={content.logoUrl} width={48} height={48} sizes="48px" />
+                    <Image
+                      alt=""
+                      className={logoThumb}
+                      src={content.logoUrl}
+                      width={28}
+                      height={28}
+                      sizes="28px"
+                    />
                     現在：設定した画像を表示中
                     <button
                       type="button"
-                      className="md-btn ghost"
+                      className={pillButtonRecipe({ tone: "ghost" })}
                       disabled={pending}
                       onClick={() => setContent({ ...content, logoUrl: "" })}
                     >
@@ -133,39 +248,36 @@ export function ManufacturerProfileEditor({
               </div>
             </div>
           </div>
-          <div className="card">
-            <div className="field dash-field">
-              <label htmlFor="profile-text">会社紹介</label>
-              <textarea
-                className="textarea"
-                id="profile-text"
-                rows={7}
-                style={{ minHeight: 96 }}
-                value={content.profileText}
-                onChange={(event) => setContent({ ...content, profileText: event.target.value })}
-                disabled={pending}
-              />
-            </div>
-            <div className="field dash-field">
-              <label htmlFor="profile-site">公式サイトURL</label>
-              <input
-                className="input"
-                id="profile-site"
-                type="url"
-                value={content.websiteUrl}
-                onChange={(event) => setContent({ ...content, websiteUrl: event.target.value })}
-                disabled={pending}
-              />
+          <div className={surfaceCardRecipe({ padding: "flush" })}>
+            <div className={fields}>
+              <Field label="会社紹介" htmlFor="profile-text">
+                <Textarea
+                  id="profile-text"
+                  rows={7}
+                  value={content.profileText}
+                  onChange={(event) => setContent({ ...content, profileText: event.target.value })}
+                  disabled={pending}
+                />
+              </Field>
+              <Field label="公式サイトURL" htmlFor="profile-site">
+                <Input
+                  id="profile-site"
+                  type="url"
+                  value={content.websiteUrl}
+                  onChange={(event) => setContent({ ...content, websiteUrl: event.target.value })}
+                  disabled={pending}
+                />
+              </Field>
             </div>
           </div>
         </>
       )}
-      <div className="card" style={{ marginTop: 12 }}>
-        <div className="md-save dash-save">
+      <div className={css(surfaceCardRecipe.raw({ padding: "flush" }), { mt: "3" })}>
+        <div className={saveRow}>
           {pendingVersion ? (
             <button
               type="button"
-              className="btn btn-primary btn-sm"
+              className={primaryAction}
               disabled={pending}
               onClick={() =>
                 startTransition(async () => {
@@ -180,7 +292,7 @@ export function ManufacturerProfileEditor({
             <>
               <button
                 type="button"
-                className="btn btn-primary btn-sm"
+                className={primaryAction}
                 disabled={pending}
                 onClick={() => save(true)}
               >
@@ -188,7 +300,7 @@ export function ManufacturerProfileEditor({
               </button>
               <button
                 type="button"
-                className="btn btn-ghost btn-sm"
+                className={secondaryAction}
                 disabled={pending}
                 onClick={() => save(false)}
               >
@@ -196,7 +308,7 @@ export function ManufacturerProfileEditor({
               </button>
               <button
                 type="button"
-                className="btn btn-ghost btn-sm"
+                className={secondaryAction}
                 disabled={pending}
                 onClick={() => {
                   if (!v.is(ManufacturerProfileSchema, content)) {

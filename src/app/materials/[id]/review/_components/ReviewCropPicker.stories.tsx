@@ -1,7 +1,9 @@
 import { useState } from "react";
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
+
 import { fn } from "storybook/test";
 
+import { css, cx } from "../../../../../../styled-system/css";
 import { ReviewCropPicker } from "./ReviewCropPicker";
 
 const crops = [
@@ -25,9 +27,14 @@ const crops = [
   },
 ];
 
+const fmDecorator: Decorator = (Story) => (
+  <div className={cx("fm", css({ p: "4" }))}>{Story()}</div>
+);
+
 const meta = {
   title: "App/Materials/Review/ReviewCropPicker",
   component: ReviewCropPicker,
+  decorators: [fmDecorator],
   render: function ReviewCropStory(args) {
     const [ids, setIds] = useState(args.selectedCropIds);
     return (

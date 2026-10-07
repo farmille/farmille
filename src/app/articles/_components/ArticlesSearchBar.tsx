@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { ContentFeedFilter } from "@/server/queries/content-feed";
 
+import { css, cva } from "../../../../styled-system/css";
 import { MockSearchIcon } from "./MockIcons";
 
 const FILTER_OPTIONS: ReadonlyArray<{ value: ContentFeedFilter; label: string }> = [
@@ -20,32 +21,108 @@ export function articlesHref(filter: ContentFeedFilter, q: string, page = 1): st
   return query.length > 0 ? `/articles?${query}` : "/articles";
 }
 
+const filterPillRecipe = cva({
+  base: {
+    flexShrink: "0",
+    fontSize: "sm",
+    px: "3",
+    py: "1.5",
+    borderRadius: "pill",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "border.strong",
+    bg: "surface.card",
+    color: "text.muted",
+    textDecoration: "none",
+    _focusVisible: {
+      outlineWidth: "2px",
+      outlineStyle: "solid",
+      outlineColor: "primary.700",
+      outlineOffset: "2px",
+    },
+  },
+  variants: {
+    active: {
+      true: {
+        bg: "primary.700",
+        borderColor: "primary.700",
+        color: "text.inverse",
+        fontWeight: "semibold",
+      },
+      false: {},
+    },
+  },
+  defaultVariants: { active: false },
+});
+
 /**
- * 見本 S.articles の検索窓（`.ts-box`）と種別の切り替え（`.filter-row .fpill`）。
+ * 検索窓と種別の切り替え。
  * 検索は GET フォーム、種別はリンクなので、読み込み中でもそのまま使える。
  */
 export function ArticlesSearchBar({ filter, q }: { filter: ContentFeedFilter; q: string }) {
   return (
     <>
-      <form className="ts-box" action="/articles" method="get" role="search">
-        <span className="ts-ic">
+      <form
+        className={css({
+          display: "flex",
+          alignItems: "center",
+          gap: "2",
+          bg: "surface.card",
+          borderWidth: "1.5px",
+          borderStyle: "solid",
+          borderColor: "border.strong",
+          borderRadius: "button",
+          px: "3.5",
+          py: "2.5",
+          _focusWithin: {
+            borderColor: "primary.700",
+            outlineWidth: "3px",
+            outlineStyle: "solid",
+            outlineColor: "primary.700/16",
+          },
+        })}
+        action="/articles"
+        method="get"
+        role="search"
+      >
+        <span className={css({ display: "flex", color: "text.subtle" })}>
           <MockSearchIcon />
         </span>
         {filter !== "all" ? <input type="hidden" name="type" value={filter} /> : null}
         <input
-          className="ts-input"
+          className={css({
+            flex: "1",
+            minW: "0",
+            borderWidth: "0",
+            bg: "transparent",
+            color: "text.default",
+            fontSize: "md",
+            fontFamily: "inherit",
+            outline: "none",
+            _placeholder: { color: "text.subtle" },
+          })}
           name="q"
           defaultValue={q}
           placeholder="記事を検索"
           aria-label="記事を検索"
         />
       </form>
-      <nav className="filter-row" aria-label="コンテンツ種別">
+      <nav
+        className={css({
+          display: "flex",
+          gap: "1.5",
+          overflowX: "auto",
+          pb: "1",
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        })}
+        aria-label="コンテンツ種別"
+      >
         {FILTER_OPTIONS.map((option) => (
           <Link
             key={option.value}
             href={articlesHref(option.value, q)}
-            className={option.value === filter ? "fpill on" : "fpill"}
+            className={filterPillRecipe({ active: option.value === filter })}
             aria-current={option.value === filter ? "page" : undefined}
           >
             {option.label}

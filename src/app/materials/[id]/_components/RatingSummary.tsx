@@ -1,6 +1,42 @@
 import type { ReviewRatingDistribution } from "@/server/queries/material-content";
 
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
+
+import { css, cx } from "../../../../../styled-system/css";
+
 import { MockStars } from "./MockParts";
+
+const summaryStyle = css({ display: "flex", alignItems: "center", gap: "4" });
+const averageColumnStyle = css({ textAlign: "center" });
+const averageStyle = css({
+  fontSize: "display",
+  fontWeight: "extrabold",
+  lineHeight: "none",
+  fontVariantNumeric: "tabular-nums",
+});
+const countStyle = css({
+  fontSize: "xs",
+  color: "text.subtle",
+  fontVariantNumeric: "tabular-nums",
+});
+const barsStyle = css({ flex: "1", minW: "0", display: "flex", flexDirection: "column", gap: "1" });
+const rowStyle = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "1.5",
+  fontSize: "xs",
+  color: "text.subtle",
+  fontVariantNumeric: "tabular-nums",
+});
+const trackStyle = css({
+  flex: "1",
+  h: "1.5",
+  bg: "surface.page",
+  borderRadius: "pill",
+  overflow: "hidden",
+});
+const fillStyle = css({ display: "block", h: "full", bg: "accent.star", borderRadius: "pill" });
+const percentStyle = css({ w: "6.5", textAlign: "right" });
 
 type RatingSummaryProps = {
   average: number | null;
@@ -8,36 +44,32 @@ type RatingSummaryProps = {
   distribution: ReviewRatingDistribution;
 };
 
-/** 見本の barRow：星ごとの割合（%）。 */
+/** 星ごとの割合（%）。 */
 function BarRow({ rating, count, total }: { rating: number; count: number; total: number }) {
   const percent = total > 0 ? Math.round((count / total) * 100) : 0;
   return (
-    <div className="bar-row" role="img" aria-label={`星${rating}の感想口コミ ${count}件`}>
-      <span className="tnum">★{rating}</span>
-      <div className="bar">
-        <span style={{ width: `${percent}%` }} />
+    <div className={rowStyle} role="img" aria-label={`星${rating}の感想口コミ ${count}件`}>
+      <span>★{rating}</span>
+      <div className={trackStyle}>
+        <span className={fillStyle} style={{ width: `${percent}%` }} />
       </div>
-      <span className="tnum" style={{ width: 26, textAlign: "right" }}>
-        {percent}%
-      </span>
+      <span className={percentStyle}>{percent}%</span>
     </div>
   );
 }
 
-/** 見本 S.material の `.rating-summary`。感想口コミが無い資材では出さない。 */
+/** 平均評価と星ごとの分布。感想口コミが無い資材では出さない。 */
 export function RatingSummary({ average, reviewCount, distribution }: RatingSummaryProps) {
   if (reviewCount === 0) return null;
 
   return (
-    <div className="card rating-summary">
-      <div style={{ textAlign: "center" }}>
-        <div className="big tnum">{average?.toFixed(1) ?? "−"}</div>
+    <div className={cx(surfaceCardRecipe({ padding: "cozy" }), summaryStyle)}>
+      <div className={averageColumnStyle}>
+        <div className={averageStyle}>{average?.toFixed(1) ?? "−"}</div>
         <MockStars value={average ?? 0} />
-        <div className="muted tnum" style={{ fontSize: 10 }}>
-          {reviewCount}件
-        </div>
+        <div className={countStyle}>{reviewCount}件</div>
       </div>
-      <div className="bars">
+      <div className={barsStyle}>
         {distribution.stars
           .toSorted((left, right) => right.rating - left.rating)
           .map(({ rating, count }) => (

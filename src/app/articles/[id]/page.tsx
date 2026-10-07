@@ -4,14 +4,11 @@ import "@/app/_mock/reports-articles.css";
 
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
-import { OptimizedImage as Image } from "@/components/OptimizedImage";
-import Link from "next/link";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { HelpfulButton } from "@/components/HelpfulButton";
-import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
@@ -25,8 +22,11 @@ import { getPublishedArticle } from "@/server/queries/articles";
 import { recordViewEvent } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
 
-import { MockStars } from "../../materials/[id]/_components/MockParts";
-import { MockChevronIcon, MockSeedIcon, MockViewCount } from "../_components/MockIcons";
+import { ArticleHeader } from "../_components/ArticleHeader";
+import { ArticleMaterialList } from "../_components/ArticleMaterialList";
+import { MockViewCount } from "../_components/MockIcons";
+import { readingArticle, readingFoot, ReadingMarkdown } from "../_components/Reading";
+import { css } from "../../../../styled-system/css";
 
 type ArticleDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -73,7 +73,6 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
   });
 }
 
-// 見本 S.articleDetail の `.body`。スタイルは src/app/_mock/（.fm 配下に閉じている）。
 export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
   const { id } = await params;
   const [article, session] = await Promise.all([loadArticle(id), getSessionUser()]);
@@ -103,7 +102,6 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
   });
 
   const sellerName = article.seller.official_name ?? "メーカー";
-  const sellerInitial = sellerName.charAt(0);
   const sellerPath = `/sellers/${article.seller.id}`;
   const articleJsonLd = createArticleJsonLd({
     id: article.id,
@@ -130,74 +128,23 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
       />
-      <article className="rp-body">
-        <h1 className="art-title">{article.title}</h1>
-        <div className="byline">
-          <Link href={sellerPath} className="by-link">
-            <span className="org-logo" aria-hidden="true">
-              {article.seller.logo_url ? (
-                <Image alt="" height={32} sizes="32px" src={article.seller.logo_url} width={32} />
-              ) : (
-                sellerInitial
-              )}
-            </span>
-            <span className="by-name">{sellerName}</span>
-          </Link>
-          <span className="type-label">メーカー</span>
-          <time className="by-sub" dateTime={article.publishedAt}>
-            {formatDateJa(article.publishedAt)}
-          </time>
-        </div>
+      <article className={readingArticle}>
+        <ArticleHeader
+          title={article.title}
+          sellerName={sellerName}
+          sellerPath={sellerPath}
+          logoUrl={article.seller.logo_url}
+          publishedAt={article.publishedAt}
+          heroImageUrl={article.heroImageUrl}
+        />
 
-        {article.heroImageUrl ? (
-          <div className="figure">
-            <div className="fimg wide">
-              <Image
-                alt=""
-                height={400}
-                preload
-                sizes="(max-width: 820px) 100vw, 790px"
-                src={article.heroImageUrl}
-                width={640}
-              />
-            </div>
-          </div>
-        ) : null}
-
-        <div className="a-body md-body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+        <ReadingMarkdown html={bodyHtml} />
 
         {article.materials.length > 0 ? (
-          <section aria-labelledby="article-materials-heading">
-            <h2 id="article-materials-heading" className="a-h3">
-              この記事で紹介した資材
-            </h2>
-            <div className="ref-list">
-              {article.materials.map((material) => (
-                <Link key={material.id} href={`/materials/${material.id}`} className="card ref">
-                  <span className="t-ic">
-                    <MockSeedIcon />
-                  </span>
-                  <span style={{ minWidth: 0 }}>
-                    <span className="t-name" style={{ display: "block" }}>
-                      {material.name}
-                    </span>
-                    <span className="muted ref-maker">
-                      {material.manufacturer_name}
-                      {material.avg_rating !== null ? (
-                        <MockStars value={material.avg_rating} />
-                      ) : null}
-                    </span>
-                  </span>
-                  <span className="cev">
-                    <MockChevronIcon />
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
+          <ArticleMaterialList materials={article.materials} />
         ) : null}
 
-        <div className="rc-foot" style={{ marginTop: 16 }}>
+        <div className={readingFoot}>
           <HelpfulButton
             action={toggleHelpfulAction.bind(
               null,
@@ -209,7 +156,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
             layout="card"
             voted={helpfulVoted}
           />
-          <MockViewCount count={article.viewCount} />
+          <MockViewCount count={article.viewCount} className={css({ ml: "auto" })} />
           <span>
             <ReportDialog
               action={createReportAction.bind(

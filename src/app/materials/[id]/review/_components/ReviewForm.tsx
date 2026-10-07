@@ -20,6 +20,14 @@ import {
 } from "@/app/_mock/FormParts";
 import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
 
+import { buttonRecipe } from "@/components/Button";
+import { formActionsStyle } from "@/components/auth/Fields";
+import { Icon } from "@/components/Icon";
+import { inputRecipe } from "@/components/Input";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
+import { textareaRecipe } from "@/components/Textarea";
+
+import { css, cva } from "../../../../../../styled-system/css";
 import { ReviewCropPicker } from "./ReviewCropPicker";
 
 const REVIEW_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -54,6 +62,195 @@ type ReviewFormBaseProps = {
 };
 type ReviewFormProps = ReviewFormBaseProps &
   ({ mode: "create"; reviewId?: never } | { mode: "edit"; reviewId: string });
+
+const focusRing = {
+  outlineWidth: "2px",
+  outlineStyle: "solid",
+  outlineColor: "primary.700",
+  outlineOffset: "2px",
+} as const;
+
+const fieldStyle = css({ mt: "5", minW: "0", _first: { mt: "0" } });
+
+const fieldLabelStyle = css({
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: "2",
+  w: "full",
+  mb: "1.5",
+  fontSize: "md",
+  fontWeight: "bold",
+});
+
+const guideStyle = css({
+  mt: "1.5",
+  mb: "2",
+  fontSize: "sm",
+  lineHeight: "normal",
+  color: "text.muted",
+});
+
+const textLinkStyle = css({
+  color: "primary.800",
+  fontWeight: "semibold",
+  textDecoration: "none",
+});
+
+const targetCardStyle = css(surfaceCardRecipe.raw({ padding: "compact" }), { mb: "4.5" });
+
+const coverInputStyle = css({
+  position: "absolute",
+  inset: "0",
+  w: "full",
+  h: "full",
+  m: "0",
+  opacity: "0",
+  cursor: "pointer",
+});
+
+const starOptionRecipe = cva({
+  base: {
+    position: "relative",
+    display: "flex",
+    lineHeight: "none",
+    cursor: "pointer",
+    "&:has(input:focus-visible)": { ...focusRing, borderRadius: "mark" },
+  },
+  variants: {
+    on: {
+      true: { color: "accent.star" },
+      false: { color: "border.strong" },
+    },
+  },
+});
+
+const bodyTextareaStyle = css(textareaRecipe.raw({ size: "lg" }), {
+  fontFamily: "inherit",
+  "&[aria-invalid=true]": { borderColor: "accent.danger" },
+});
+
+const exampleStyle = css({
+  bg: "surface.page",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "input",
+  p: "3",
+  fontSize: "sm",
+  lineHeight: "relaxed",
+  color: "text.muted",
+});
+
+const photoGridStyle = css({
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "2.5",
+  tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+});
+
+const photoFrameStyle = css({
+  display: "grid",
+  placeItems: "center",
+  w: "full",
+  aspectRatio: "image.landscape",
+  overflow: "hidden",
+  borderRadius: "media",
+  bg: "primary.soft",
+});
+
+const photoImageStyle = css({ display: "block", w: "full", h: "full", objectFit: "cover" });
+
+const photoCaptionStyle = css(inputRecipe.raw(), {
+  mt: "1.5",
+  px: "2",
+  py: "1.5",
+  fontSize: "sm",
+  fontFamily: "inherit",
+});
+
+const photoRemoveStyle = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "1.5",
+  mt: "1",
+  p: "0",
+  bg: "transparent",
+  fontSize: "sm",
+  color: "accent.danger",
+  cursor: "pointer",
+});
+
+const photoAddStyle = css({
+  position: "relative",
+  alignSelf: "stretch",
+  w: "full",
+  display: "grid",
+  placeItems: "center",
+  aspectRatio: "image.landscape",
+  borderWidth: "1.5px",
+  borderStyle: "dashed",
+  borderColor: "border.strong",
+  borderRadius: "media",
+  fontSize: "sm",
+  color: "text.subtle",
+  textAlign: "center",
+  cursor: "pointer",
+  "&:has(input:focus-visible)": focusRing,
+});
+
+const complianceStyle = css({
+  position: "relative",
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "2",
+  mt: "5.5",
+  px: "3",
+  py: "3",
+  bg: "surface.page",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "input",
+  fontSize: "sm",
+  lineHeight: "normal",
+  color: "text.muted",
+  cursor: "pointer",
+  "&:has(input:focus-visible)": focusRing,
+  "& a": { color: "inherit", textDecoration: "underline" },
+});
+
+const checkBoxStyle = css({
+  display: "grid",
+  placeItems: "center",
+  flex: "0 0 auto",
+  w: "5",
+  h: "5",
+  bg: "surface.card",
+  borderWidth: "1.5px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  borderRadius: "mark",
+  color: "transparent",
+  "input:checked + &": { bg: "primary.700", borderColor: "primary.700", color: "text.inverse" },
+});
+
+const submitButtonStyle = css(buttonRecipe.raw({ variant: "primary", size: "md" }), {
+  py: "3.5",
+  fontFamily: "inherit",
+  lineHeight: "normal",
+  _focusVisible: focusRing,
+});
+
+const cancelLinkStyle = css({
+  display: "block",
+  p: "1",
+  textAlign: "center",
+  textDecoration: "none",
+  fontSize: "sm",
+  color: "text.subtle",
+  _focusVisible: focusRing,
+});
 
 const initialActionState: ReviewActionState = { status: "idle" };
 
@@ -195,7 +392,6 @@ export function ReviewForm({
     }
   }
 
-  // 見本 S.reviewForm の `.body` の中身。スタイルは src/app/_mock/mock.css・forms.css（.fm 配下）。
   return (
     <form action={submit}>
       {existingReviewNotice ? (
@@ -206,23 +402,19 @@ export function ReviewForm({
       {state.status === "error" ? <FormNotice tone="error">{state.message}</FormNotice> : null}
       {localError === null ? null : <FormNotice tone="error">{localError}</FormNotice>}
 
-      <div className="card target" style={{ marginBottom: 18 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="muted" style={{ fontSize: 10.5 }}>
-            対象資材
-          </div>
-          <div className="t-name">{material.name}</div>
-          <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>
-            {material.manufacturerName}
-          </div>
+      <div className={targetCardStyle}>
+        <div className={css({ fontSize: "xs", color: "text.subtle" })}>対象資材</div>
+        <div className={css({ fontSize: "md", fontWeight: "bold" })}>{material.name}</div>
+        <div className={css({ fontSize: "xs", color: "text.subtle", mt: "0.5" })}>
+          {material.manufacturerName}
         </div>
       </div>
 
-      <div className="field">
-        <label htmlFor="review-crop">
+      <div className={fieldStyle}>
+        <label className={fieldLabelStyle} htmlFor="review-crop">
           作目
           <RequiredBadge />
-          <span className="muted" style={{ fontSize: 11, fontWeight: 400 }}>
+          <span className={css({ fontSize: "xs", fontWeight: "normal", color: "text.subtle" })}>
             1つ選択してください
           </span>
         </label>
@@ -238,17 +430,18 @@ export function ReviewForm({
       </div>
 
       <fieldset
-        className="field"
+        className={fieldStyle}
         aria-describedby={describedBy(fieldErrors?.rating && "review-rating-error")}
       >
-        <legend className="field-label">
+        <legend className={fieldLabelStyle}>
           総合評価
           <RequiredBadge />
         </legend>
-        <div className="stars-input">
+        <div className={css({ display: "flex", gap: "2" })}>
           {[1, 2, 3, 4, 5].map((n) => (
-            <label key={n}>
+            <label key={n} className={starOptionRecipe({ on: n <= rating })}>
               <input
+                className={coverInputStyle}
                 type="radio"
                 name="rating"
                 value={n}
@@ -256,24 +449,22 @@ export function ReviewForm({
                 checked={rating === n}
                 onChange={() => setRating(n)}
               />
-              <span className={n <= rating ? undefined : "off"} aria-hidden="true">
-                ★
-              </span>
+              <Icon name="star_filled" size="2xl" />
             </label>
           ))}
         </div>
         <FieldError id="review-rating-error" message={fieldErrors?.rating} />
       </fieldset>
 
-      <div className="field">
-        <label htmlFor="review-body">
+      <div className={fieldStyle}>
+        <label className={fieldLabelStyle} htmlFor="review-body">
           感想口コミ本文
           <RequiredBadge />
         </label>
         <textarea
           id="review-body"
           name="body"
-          className="textarea big"
+          className={bodyTextareaStyle}
           value={body}
           onChange={(event) => setBody(event.target.value)}
           placeholder="自由に記入してください"
@@ -285,17 +476,15 @@ export function ReviewForm({
           aria-invalid={fieldErrors?.body ? true : undefined}
           required
         />
-        <div>
-          <div className="muted" style={{ fontSize: 10.5, margin: "8px 0 4px" }}>
-            記入例
-          </div>
-          <div className="quote-box" id="review-body-example" style={{ marginTop: 0 }}>
-            トマト（ハウス栽培）で、定植後から2週間おきに灌水と合わせて使いました。1ヶ月ほどで根張りがしっかりしてきて、高温が続いた時期も葉のしおれが少なかったように感じます。
-          </div>
+        <div className={css({ fontSize: "xs", color: "text.subtle", mt: "2", mb: "1" })}>
+          記入例
         </div>
-        <div className="fguide" id="review-body-guide" style={{ marginTop: 7 }}>
+        <div className={exampleStyle} id="review-body-example">
+          トマト（ハウス栽培）で、定植後から2週間おきに灌水と合わせて使いました。1ヶ月ほどで根張りがしっかりしてきて、高温が続いた時期も葉のしおれが少なかったように感じます。
+        </div>
+        <div className={guideStyle} id="review-body-guide">
           作物・使用時期・使い方・感じた変化が入っていると参考になります。もっと詳しく書きたい場合は「
-          <Link className="text-link" href={`/materials/${material.id}/report/new`}>
+          <Link className={textLinkStyle} href={`/materials/${material.id}/report/new`}>
             実証詳細レポート入力
           </Link>
           」から。
@@ -304,22 +493,23 @@ export function ReviewForm({
       </div>
 
       <fieldset
-        className="field"
+        className={fieldStyle}
         aria-describedby={describedBy(
           "review-photo-guide",
           fieldErrors?.photos && "review-photo-error",
         )}
       >
-        <legend className="field-label">
+        <legend className={fieldLabelStyle}>
           写真
           <OptionalBadge>任意・複数可</OptionalBadge>
         </legend>
-        <div className="photo-grid">
+        <div className={photoGridStyle}>
           {initialValues.photos.map((photo) => (
-            <div key={photo.id} className="photo-item">
+            <div key={photo.id}>
               <input type="hidden" name="existingPhotoId" value={photo.id} />
-              <div className="ph">
+              <div className={photoFrameStyle}>
                 <Image
+                  className={photoImageStyle}
                   src={photo.url}
                   alt={photo.caption ?? "感想口コミ写真"}
                   width={240}
@@ -328,22 +518,23 @@ export function ReviewForm({
                 />
               </div>
               <input
-                className="input photo-cap"
+                className={photoCaptionStyle}
                 name={`existingPhotoCaption-${photo.id}`}
                 defaultValue={photo.caption ?? ""}
                 placeholder="写真の説明"
                 aria-label="既存写真の説明"
               />
-              <label className="photo-remove">
+              <label className={photoRemoveStyle}>
                 <input type="checkbox" name="removePhotoId" value={photo.id} />
                 この写真を削除する
               </label>
             </div>
           ))}
           {pendingPhotos.map((photo) => (
-            <div key={photo.key} className="photo-item">
-              <div className="ph">
+            <div key={photo.key}>
+              <div className={photoFrameStyle}>
                 <Image
+                  className={photoImageStyle}
                   src={photo.previewUrl}
                   alt={photo.file.name}
                   width={240}
@@ -352,7 +543,7 @@ export function ReviewForm({
                 />
               </div>
               <input
-                className="input photo-cap"
+                className={photoCaptionStyle}
                 value={photo.caption}
                 onChange={(event) => {
                   setPendingPhotos((current) =>
@@ -366,7 +557,7 @@ export function ReviewForm({
               />
               <button
                 type="button"
-                className="photo-remove"
+                className={photoRemoveStyle}
                 onClick={() =>
                   setPendingPhotos((current) => current.filter((item) => item.key !== photo.key))
                 }
@@ -375,8 +566,9 @@ export function ReviewForm({
               </button>
             </div>
           ))}
-          <label className="photo-add">
+          <label className={photoAddStyle}>
             <input
+              className={coverInputStyle}
               type="file"
               accept="image/jpeg,image/png,image/webp"
               multiple
@@ -398,14 +590,15 @@ export function ReviewForm({
             </span>
           </label>
         </div>
-        <div className="fguide" id="review-photo-guide" style={{ marginTop: 7 }}>
+        <div className={guideStyle} id="review-photo-guide">
           1枚あたり5MB以下の jpeg・png・webp を選択できます。
         </div>
         <FieldError id="review-photo-error" message={fieldErrors?.photos} />
       </fieldset>
 
-      <label className="compliance check-toggle">
+      <label className={complianceStyle}>
         <input
+          className={coverInputStyle}
           type="checkbox"
           name="pesticideAck"
           required
@@ -414,7 +607,9 @@ export function ReviewForm({
           aria-describedby={describedBy(fieldErrors?.pesticideAck && "review-ack-error")}
           aria-invalid={fieldErrors?.pesticideAck ? true : undefined}
         />
-        <span className="cbox" aria-hidden="true" />
+        <span className={checkBoxStyle} aria-hidden="true">
+          <Icon name="check" size="xs" />
+        </span>
         <span>
           実際に使用した感想を、使用条件や感じた変化が分かるよう具体的にご記入ください。農薬として登録されていない資材については、農薬としての効果を断定せず、実際に感じた変化としてご記載ください。
           <br />
@@ -430,19 +625,17 @@ export function ReviewForm({
         </span>
       </label>
       <FieldError id="review-ack-error" message={fieldErrors?.pesticideAck} />
-      <div className="fguide" style={{ marginTop: 6 }}>
-        登録済みのニックネームで投稿されます。
-      </div>
+      <div className={guideStyle}>登録済みのニックネームで投稿されます。</div>
 
-      <div className="form-actions">
+      <div className={formActionsStyle}>
         <button
-          className="btn btn-primary"
+          className={submitButtonStyle}
           type="submit"
           disabled={isPending || rating === 0 || !pesticideAck}
         >
           {isPending ? "送信中…" : mode === "create" ? "投稿する" : "変更を保存する"}
         </button>
-        <Link className="draft" href={`/materials/${material.id}`}>
+        <Link className={cancelLinkStyle} href={`/materials/${material.id}`}>
           キャンセル
         </Link>
       </div>

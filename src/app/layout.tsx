@@ -12,7 +12,7 @@ import "gen-interface-jp/700.css";
 import "gen-interface-jp/800.css";
 import "./globals.css";
 
-// 完成見本の画面（.fm）で使う本文書体。src/app/_mock/mock.css の --sans から変数で参照する
+// 完成見本の画面（.fm）で使う本文書体。fonts.noto トークンが変数で参照する
 const notoSansJp = Noto_Sans_JP({
   weight: ["400", "500", "700", "800"],
   display: "swap",

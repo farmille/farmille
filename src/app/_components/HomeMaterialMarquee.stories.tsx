@@ -156,8 +156,8 @@ const meta = {
   // ページコンテナと同じ左右余白を与え、フレームの負マージンを画面幅に収める。
   decorators: [
     (Story) => (
-      <div className={css({ px: "4", tab: { px: "5" } })}>
-        <Story />
+      <div className="fm">
+        <div className={css({ px: "4", tab: { px: "5" } })}>{Story()}</div>
       </div>
     ),
   ],

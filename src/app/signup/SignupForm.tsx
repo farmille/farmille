@@ -16,9 +16,73 @@ import { MockSubmitButton } from "@/app/_mock/MockSubmitButton";
 import { HANDLE_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 import { STANDPOINTS } from "@/lib/standpoints";
+import { formActionsStyle, RadioCards } from "@/components/auth/Fields";
+import { Icon } from "@/components/Icon";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
+
+import { css, cx } from "../../../styled-system/css";
+import {
+  fieldInputStyle,
+  fieldLabelStyle,
+  fieldStyle,
+  guideStyle,
+  softCardStyle,
+  textLinkStyle,
+} from "./form-styles";
 import { PostalAddressFields } from "./PostalAddressFields";
 
-/** 見本 S.signup の `.body` の中身。スタイルは src/app/_mock/mock.css・forms.css（.fm 配下）。 */
+const termsToggleStyle = css({
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  gap: "2.5",
+  mt: "2.5",
+  px: "3",
+  py: "3",
+  bg: "surface.card",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "input",
+  fontSize: "md",
+  fontWeight: "bold",
+  cursor: "pointer",
+  "&:has(input:focus-visible)": {
+    outlineWidth: "2px",
+    outlineStyle: "solid",
+    outlineColor: "primary.700",
+    outlineOffset: "2px",
+  },
+  "& a": { color: "inherit", textDecoration: "underline" },
+});
+
+const coverInputStyle = css({
+  position: "absolute",
+  inset: "0",
+  w: "full",
+  h: "full",
+  m: "0",
+  opacity: "0",
+  cursor: "pointer",
+});
+
+const checkBoxStyle = css({
+  display: "grid",
+  placeItems: "center",
+  flex: "0 0 auto",
+  w: "5",
+  h: "5",
+  bg: "surface.card",
+  borderWidth: "1.5px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  borderRadius: "mark",
+  color: "transparent",
+  "input:checked + &": { bg: "primary.700", borderColor: "primary.700", color: "text.inverse" },
+});
+
+const inputGuideStyle = cx(guideStyle, css({ mt: "1.5" }));
+
 export function SignupForm({ next = null }: { next?: string | null }) {
   const [state, formAction] = useActionState(signupAction, initialAuthFormState);
   const fieldErrors = fieldErrorsOf(state);
@@ -29,29 +93,20 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       {next ? <input type="hidden" name="next" value={next} /> : null}
       {state.status === "error" ? <FormNotice tone="error">{state.message}</FormNotice> : null}
 
-      <div
-        className="card pad"
-        style={{
-          background: "var(--green-soft-2)",
-          border: "1px solid color-mix(in srgb, var(--green) 22%, var(--line))",
-          marginBottom: 12,
-          textAlign: "center",
-          padding: 15,
-        }}
-      >
-        <div style={{ fontSize: 14, fontWeight: 700 }}>
+      <div className={cx(softCardStyle, css({ mb: "3", textAlign: "center" }))}>
+        <div className={css({ fontSize: "md", fontWeight: "bold" })}>
           投稿と実証詳細レポートの閲覧には、会員登録が必要です
         </div>
-        <div style={{ fontSize: 12.5, marginTop: 4, color: "var(--green-deep)", fontWeight: 700 }}>
+        <div className={css({ mt: "1", fontSize: "sm", fontWeight: "bold", color: "primary.800" })}>
           登録は無料・1分で完了します。
         </div>
       </div>
-      <p className="muted" style={{ fontSize: 12.5, marginBottom: 18 }}>
+      <p className={css({ mb: "4.5", fontSize: "sm", color: "text.subtle" })}>
         ニックネームで参加できます。本名や連絡先が公開されることはありません。
       </p>
 
-      <div className="field">
-        <label htmlFor="handle">
+      <div className={fieldStyle}>
+        <label className={fieldLabelStyle} htmlFor="handle">
           ニックネーム
           <RequiredBadge />
           <VisibilityTag visibility="public" />
@@ -60,7 +115,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           aria-describedby={describedBy("handle-guide", fieldErrors.handle && "handle-error")}
           aria-invalid={fieldErrors.handle ? true : undefined}
           autoComplete="nickname"
-          className="input"
+          className={fieldInputStyle}
           defaultValue={values.handle}
           id="handle"
           maxLength={HANDLE_MAX_LENGTH}
@@ -69,25 +124,25 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           required
           type="text"
         />
-        <div className="fguide" id="handle-guide" style={{ marginTop: 6, marginBottom: 0 }}>
+        <div className={inputGuideStyle} id="handle-guide">
           本名でなくてOKです
         </div>
         <FieldError id="handle-error" message={fieldErrors.handle} />
       </div>
 
-      <fieldset className="field">
-        <legend className="field-label">
+      <fieldset className={fieldStyle}>
+        <legend className={fieldLabelStyle}>
           本名
           <RequiredBadge />
           <VisibilityTag visibility="private" />
         </legend>
-        <div className="amount-row">
+        <div className={css({ display: "flex", gap: "2" })}>
           <input
             aria-describedby={describedBy(fieldErrors.familyName && "familyName-error")}
             aria-invalid={fieldErrors.familyName ? true : undefined}
             aria-label="本名（姓）"
             autoComplete="family-name"
-            className="input"
+            className={fieldInputStyle}
             defaultValue={values.familyName}
             id="familyName"
             maxLength={80}
@@ -100,7 +155,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
             aria-invalid={fieldErrors.givenName ? true : undefined}
             aria-label="本名（名）"
             autoComplete="given-name"
-            className="input"
+            className={fieldInputStyle}
             defaultValue={values.givenName}
             id="givenName"
             maxLength={80}
@@ -113,8 +168,8 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         <FieldError id="givenName-error" message={fieldErrors.givenName} />
       </fieldset>
 
-      <div className="field">
-        <label htmlFor="email">
+      <div className={fieldStyle}>
+        <label className={fieldLabelStyle} htmlFor="email">
           メールアドレス
           <RequiredBadge />
           <VisibilityTag visibility="private" />
@@ -123,7 +178,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           aria-describedby={describedBy(fieldErrors.email && "email-error")}
           aria-invalid={fieldErrors.email ? true : undefined}
           autoComplete="email"
-          className="input"
+          className={fieldInputStyle}
           defaultValue={values.email}
           id="email"
           name="email"
@@ -134,8 +189,8 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         <FieldError id="email-error" message={fieldErrors.email} />
       </div>
 
-      <div className="field">
-        <label htmlFor="phone">
+      <div className={fieldStyle}>
+        <label className={fieldLabelStyle} htmlFor="phone">
           電話番号
           <OptionalBadge />
           <VisibilityTag visibility="private" />
@@ -144,7 +199,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           aria-describedby={describedBy("phone-guide", fieldErrors.phone && "phone-error")}
           aria-invalid={fieldErrors.phone ? true : undefined}
           autoComplete="tel"
-          className="input"
+          className={fieldInputStyle}
           defaultValue={values.phone}
           id="phone"
           maxLength={20}
@@ -152,39 +207,26 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           placeholder="例）090-1234-5678"
           type="tel"
         />
-        <div className="fguide" id="phone-guide" style={{ marginTop: 6, marginBottom: 0 }}>
+        <div className={inputGuideStyle} id="phone-guide">
           確認が必要な場合の連絡に使用します。公開されません。
         </div>
         <FieldError id="phone-error" message={fieldErrors.phone} />
       </div>
 
       <fieldset
-        className="field"
+        className={fieldStyle}
         aria-describedby={describedBy(
           "standpoint-guide",
           fieldErrors.standpoint && "standpoint-error",
         )}
       >
-        <legend className="field-label">
+        <legend className={fieldLabelStyle}>
           あなたの立場
           <RequiredBadge />
           <VisibilityTag visibility="public" />
         </legend>
-        <div className="radios">
-          {STANDPOINTS.map((option) => (
-            <label className="radio" key={option.value}>
-              <input
-                defaultChecked={option.value === values.standpoint}
-                name="standpoint"
-                type="radio"
-                value={option.value}
-              />
-              <span className="ring" aria-hidden="true" />
-              {option.label}
-            </label>
-          ))}
-        </div>
-        <div className="fguide" id="standpoint-guide" style={{ marginTop: 8, marginBottom: 0 }}>
+        <RadioCards name="standpoint" options={STANDPOINTS} defaultValue={values.standpoint} />
+        <div className={inputGuideStyle} id="standpoint-guide">
           立場は、投稿やマイページで肩書きとして表示されます。
         </div>
         <FieldError id="standpoint-error" message={fieldErrors.standpoint} />
@@ -192,8 +234,8 @@ export function SignupForm({ next = null }: { next?: string | null }) {
 
       <PostalAddressFields values={values} fieldErrors={fieldErrors} />
 
-      <div className="field">
-        <label htmlFor="password">
+      <div className={fieldStyle}>
+        <label className={fieldLabelStyle} htmlFor="password">
           パスワード
           <RequiredBadge />
         </label>
@@ -201,7 +243,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           aria-describedby={describedBy("password-guide", fieldErrors.password && "password-error")}
           aria-invalid={fieldErrors.password ? true : undefined}
           autoComplete="new-password"
-          className="input"
+          className={fieldInputStyle}
           id="password"
           minLength={PASSWORD_MIN_LENGTH}
           name="password"
@@ -209,14 +251,15 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           required
           type="password"
         />
-        <div className="fguide" id="password-guide" style={{ marginTop: 6, marginBottom: 0 }}>
+        <div className={inputGuideStyle} id="password-guide">
           {PASSWORD_MIN_LENGTH}文字以上で設定してください
         </div>
         <FieldError id="password-error" message={fieldErrors.password} />
       </div>
 
-      <label className="check-toggle" style={{ marginTop: 10 }}>
+      <label className={termsToggleStyle}>
         <input
+          className={coverInputStyle}
           aria-describedby={describedBy(fieldErrors.terms && "terms-error")}
           aria-invalid={fieldErrors.terms ? true : undefined}
           defaultChecked={values.terms === "on"}
@@ -225,7 +268,9 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           required
           type="checkbox"
         />
-        <span className="cbox" aria-hidden="true" />{" "}
+        <span className={checkBoxStyle} aria-hidden="true">
+          <Icon name="check" size="xs" />
+        </span>{" "}
         <span>
           <Link href="/legal/terms" target="_blank" rel="noopener noreferrer">
             総合利用規約
@@ -238,41 +283,55 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         </span>
       </label>
       <FieldError id="terms-error" message={fieldErrors.terms} />
-      <div className="fguide" style={{ marginTop: 4 }}>
+      <div className={cx(guideStyle, css({ mt: "1", mb: "2" }))}>
         規約・ガイドラインは別タブで開きます。個人情報の扱いは
-        <Link className="text-link" href="/legal/privacy" target="_blank" rel="noopener noreferrer">
+        <Link
+          className={textLinkStyle}
+          href="/legal/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           プライバシーポリシー（別タブ）
         </Link>
         をご確認ください。
       </div>
-      <div className="fguide" style={{ marginTop: 4 }}>
+      <div className={cx(guideStyle, css({ mt: "1", mb: "2" }))}>
         アイコン・主な作目・所属などは、あとからマイページで設定できます。
       </div>
 
-      <div className="form-actions">
+      <div className={formActionsStyle}>
         <MockSubmitButton label="登録する" pendingLabel="登録中…" />
       </div>
-      <div className="fguide" style={{ textAlign: "center" }}>
+      <div className={cx(guideStyle, css({ mb: "2", textAlign: "center" }))}>
         <Link
-          className="text-link"
+          className={textLinkStyle}
           href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
         >
           すでに一般ユーザーアカウントをお持ちの方はログイン
         </Link>
         <br />
-        <Link className="text-link" href="/signup">
+        <Link className={textLinkStyle} href="/signup">
           登録方法を選び直す
         </Link>
       </div>
 
-      <div className="card pad" style={{ marginTop: 14, textAlign: "center" }}>
-        <div className="muted" style={{ fontSize: 12.5 }}>
-          メーカー様はこちら
-        </div>
+      <div
+        className={cx(
+          surfaceCardRecipe({ padding: "cozy" }),
+          css({ mt: "3.5", textAlign: "center" }),
+        )}
+      >
+        <div className={css({ fontSize: "sm", color: "text.subtle" })}>メーカー様はこちら</div>
         <Link
-          className="link-more"
+          className={css({
+            display: "inline-block",
+            mt: "1.5",
+            fontSize: "sm",
+            color: "primary.700",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          })}
           href="/sellers/apply"
-          style={{ display: "inline-block", marginTop: 6 }}
         >
           企業会員登録申請へ →
         </Link>

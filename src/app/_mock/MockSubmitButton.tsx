@@ -2,7 +2,15 @@
 
 import { useFormStatus } from "react-dom";
 
-/** 見本の `<button class="btn btn-primary">`。送信中は文言を変えて押せなくする。 */
+import { buttonRecipe } from "@/components/Button";
+import { css } from "../../../styled-system/css";
+
+const submitButton = css(buttonRecipe.raw({ variant: "primary" }), {
+  fontFamily: "inherit",
+  lineHeight: "normal",
+});
+
+/** フォームの送信ボタン。送信中は文言を変えて押せなくする。 */
 export function MockSubmitButton({
   label,
   pendingLabel,
@@ -15,7 +23,7 @@ export function MockSubmitButton({
   const { pending } = useFormStatus();
 
   return (
-    <button className="btn btn-primary" disabled={pending || disabled} type="submit">
+    <button className={submitButton} disabled={pending || disabled} type="submit">
       {pending ? pendingLabel : label}
     </button>
   );

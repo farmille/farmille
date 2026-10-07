@@ -12,3 +12,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const RoundedTop: Story = { args: { roundedTop: true } };
+
+export const MockLook: Story = {
+  args: { look: "mock" },
+  decorators: [(Story) => <div className="fm">{Story()}</div>],
+  parameters: { layout: "fullscreen" },
+};

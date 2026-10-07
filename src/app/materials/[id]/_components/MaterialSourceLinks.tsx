@@ -7,35 +7,135 @@ import {
   type MaterialPageContent,
 } from "@/lib/material-page-editor";
 
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
+
+import { css, cx } from "../../../../../styled-system/css";
+
+import { MaterialBox } from "./MaterialBox";
 import { MockExternalIcon } from "./MockParts";
 
 type MaterialLink = MaterialPageContent["links"][number];
 type LinkGroup = MaterialLink["group"];
 
-const groupTitleStyle = { fontSize: 11, fontWeight: 700, padding: "8px 2px 2px" } as const;
-const emptyStyle = { fontSize: 12, padding: "4px 2px 8px" } as const;
+const cardStyle = css(surfaceCardRecipe.raw({ padding: "flush" }), {
+  pt: "1.5",
+  px: "3.5",
+  pb: "2.5",
+});
+const groupTitleStyle = css({
+  pt: "2",
+  px: "0.5",
+  pb: "0.5",
+  fontSize: "xs",
+  fontWeight: "bold",
+  color: "text.subtle",
+});
+const emptyStyle = css({ pt: "1", px: "0.5", pb: "2", fontSize: "sm", color: "text.subtle" });
+const kindStyle = css({
+  flex: "none",
+  px: "1",
+  py: "1",
+  fontSize: "2xs",
+  fontWeight: "extrabold",
+  color: "accent.danger",
+  bg: "accent.danger/14",
+  borderRadius: "mark",
+});
+const fileRowStyle = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2.5",
+  px: "3",
+  py: "2.5",
+  borderBottomWidth: "1px",
+  borderColor: "border.default",
+  _last: { borderBottomWidth: "0" },
+});
+const fileTitleBoxStyle = css({ flex: "1", minW: "0", overflowWrap: "anywhere" });
+const fileTitleStyle = css({ fontSize: "sm", fontWeight: "semibold", lineHeight: "snug" });
+const openLinkStyle = css({
+  flex: "none",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "1",
+  p: "1",
+  fontSize: "sm",
+  fontWeight: "bold",
+  color: "primary.700",
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+});
+const testRowStyle = css({
+  display: "flex",
+  alignItems: "flex-start",
+  gap: "2.5",
+  px: "0.5",
+  py: "2.5",
+  color: "inherit",
+  textDecoration: "none",
+  borderTopWidth: "1px",
+  borderColor: "border.default",
+  _first: { borderTopWidth: "0" },
+});
+const testKindStyle = css({ mt: "0.5" });
+const testBodyStyle = css({ flex: "1", minW: "0" });
+const testTitleStyle = css({
+  fontSize: "md",
+  fontWeight: "bold",
+  lineHeight: "snug",
+  color: "text.default",
+  _groupHover: {
+    color: "primary.800",
+    textDecoration: "underline",
+    textUnderlineOffset: "2px",
+  },
+});
+const testSummaryStyle = css({
+  mt: "0.5",
+  fontSize: "sm",
+  lineHeight: "relaxed",
+  color: "text.muted",
+  lineClamp: "2",
+});
+const testMetaStyle = css({ mt: "1", fontSize: "xs", color: "text.subtle" });
+const testOpenStyle = css({
+  flex: "none",
+  alignSelf: "center",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "1",
+  px: "2.5",
+  py: "1",
+  fontSize: "xs",
+  fontWeight: "bold",
+  color: "primary.800",
+  whiteSpace: "nowrap",
+  bg: "surface.card",
+  borderWidth: "1px",
+  borderColor: "border.strong",
+  borderRadius: "pill",
+});
 
 function linkKind(url: string): "PDF" | "LINK" {
   return /\.pdf(?:$|[?#])/i.test(url) ? "PDF" : "LINK";
 }
 
-/** 見本の srcGroup の1行（`.file-row`）。 */
 // リンクの読み上げ名は資料名にする（「開く」だけのリンクが並ぶと区別できないため。流用前と同じ）。
 function FileRow({ link }: { link: MaterialLink }) {
   const titleId = useId();
   const title = link.title || "資料名は未入力です";
   const valid = v.is(MaterialExternalUrlSchema, link.url);
   return (
-    <div className="file-row">
-      <span className="file-ic">{linkKind(link.url)}</span>
-      <div style={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>
-        <div className="fr-title" id={titleId}>
+    <div className={fileRowStyle}>
+      <span className={kindStyle}>{linkKind(link.url)}</span>
+      <div className={fileTitleBoxStyle}>
+        <div className={fileTitleStyle} id={titleId}>
           {valid ? title : `${title}（URLを入力してください）`}
         </div>
       </div>
       {valid ? (
         <a
-          className="file-dl"
+          className={openLinkStyle}
           href={link.url}
           target="_blank"
           rel="noreferrer"
@@ -49,7 +149,7 @@ function FileRow({ link }: { link: MaterialLink }) {
   );
 }
 
-/** 見本の testCard（`.test-row`）。試験の概要は運営・メーカーが入力した公開情報。 */
+/** 試験結果の1行。試験の概要は運営・メーカーが入力した公開情報。 */
 // 行全体がリンクだが、読み上げ名は資料名だけにする（概要・実施機関は本文として読ませる。流用前と同じ）。
 function TestRow({ link }: { link: MaterialLink }) {
   const titleId = useId();
@@ -62,18 +162,18 @@ function TestRow({ link }: { link: MaterialLink }) {
   ].filter(Boolean);
   const body = (
     <>
-      <span className="file-ic">{linkKind(link.url)}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div className="tr-title">
+      <span className={cx(kindStyle, testKindStyle)}>{linkKind(link.url)}</span>
+      <div className={testBodyStyle}>
+        <div className={testTitleStyle}>
           <span id={titleId}>{title}</span>
           {trial?.crops ? `｜${trial.crops}` : ""}
         </div>
-        <div className="tr-sum">{trial?.summary || "概要は未入力です"}</div>
+        <div className={testSummaryStyle}>{trial?.summary || "概要は未入力です"}</div>
         {meta.length > 0 ? (
-          <div className="tr-meta">
+          <div className={testMetaStyle}>
             {meta.map((item, index) => (
               <span key={index}>
-                {index > 0 ? <span className="dot">・</span> : null}
+                {index > 0 ? "・" : null}
                 {item}
               </span>
             ))}
@@ -84,22 +184,22 @@ function TestRow({ link }: { link: MaterialLink }) {
   );
   if (!v.is(MaterialExternalUrlSchema, link.url)) {
     return (
-      <div className="test-row">
+      <div className={testRowStyle}>
         {body}
-        <span className="tr-open">URL未入力</span>
+        <span className={testOpenStyle}>URL未入力</span>
       </div>
     );
   }
   return (
     <a
-      className="test-row"
+      className={cx("group", testRowStyle)}
       href={link.url}
       target="_blank"
       rel="noreferrer"
       aria-labelledby={titleId}
     >
       {body}
-      <span className="tr-open">
+      <span className={testOpenStyle}>
         <MockExternalIcon /> 開く
       </span>
     </a>
@@ -110,32 +210,25 @@ function isTrialGroup(group: LinkGroup): boolean {
   return group === "public_trial" || group === "other_trial";
 }
 
-/** 見本 S.material の box5（リンク・資料）。分類ごとに並べ、無い分類は「−」。 */
+/** リンク・資料。分類ごとに並べ、無い分類は「−」。 */
 export function MaterialSourceLinks({ links }: { links: MaterialPageContent["links"] }) {
   const groups: ReadonlyArray<{ value: LinkGroup; label: string }> = [
     ...MATERIAL_LINK_GROUPS,
     ...(links.some((link) => link.group === null) ? [{ value: null, label: "分類未選択" }] : []),
   ];
   return (
-    <section aria-labelledby="material-links-heading">
-      <h2 id="material-links-heading" className="pp-h">
-        リンク・資料
-      </h2>
-      <div className="card" style={{ marginTop: 10, padding: "6px 14px 10px" }}>
+    <MaterialBox headingId="material-links-heading" title="リンク・資料">
+      <div className={cardStyle}>
         {groups.map((group) => {
           const items = links.filter((link) => link.group === group.value);
           const trial = isTrialGroup(group.value);
           return (
             <div key={group.value ?? "unclassified"}>
-              <h3 className="muted" style={groupTitleStyle}>
-                {group.label}
-              </h3>
+              <h3 className={groupTitleStyle}>{group.label}</h3>
               {items.length === 0 ? (
-                <div className="muted" style={emptyStyle}>
-                  −
-                </div>
+                <div className={emptyStyle}>−</div>
               ) : trial ? (
-                <div className="test-list">
+                <div>
                   {items.map((link, index) => (
                     <TestRow key={index} link={link} />
                   ))}
@@ -147,6 +240,6 @@ export function MaterialSourceLinks({ links }: { links: MaterialPageContent["lin
           );
         })}
       </div>
-    </section>
+    </MaterialBox>
   );
 }

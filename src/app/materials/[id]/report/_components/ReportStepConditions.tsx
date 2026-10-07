@@ -4,13 +4,122 @@ import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-report";
 
-import { Badge, Example, Need } from "./ReportFormParts";
+import { Checkbox } from "@/components/Checkbox";
+import { inputRecipe } from "@/components/Input";
+import { selectRecipe } from "@/components/Select";
+import { textareaRecipe } from "@/components/Textarea";
+
+import { css, cva, cx } from "../../../../../../styled-system/css";
+
+import {
+  Badge,
+  Example,
+  GroupHeading,
+  Need,
+  checkNote,
+  checkRow,
+  checkRowWithNote,
+  field,
+  fieldLabel,
+  guide,
+} from "./ReportFormParts";
 
 const DATE_PATTERN = /\d+\s*月\s*\d+\s*日|\d+\s*[/／]\s*\d+|\d+\s*日/;
 const toHalfWidth = (text: string) =>
   text.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
 
-/** 見本の pane 3「栽培条件」 */
+const shortControl = css({ maxW: "64" });
+
+const noteArea = css(textareaRecipe.raw({}), { minH: "16" });
+
+const timeline = css({
+  position: "relative",
+  tab: { _after: { display: "none" } },
+  _after: {
+    content: '""',
+    position: "absolute",
+    top: "0",
+    right: "0",
+    bottom: "0",
+    w: "9",
+    bgImage: "linear-gradient(to right, transparent, {colors.surface.page})",
+    pointerEvents: "none",
+  },
+});
+
+const timelineTrack = css({
+  position: "relative",
+  display: "flex",
+  alignItems: "flex-start",
+  overflowX: "auto",
+  pt: "1.5",
+  pb: "0.5",
+  scrollbarWidth: "none",
+  "&::-webkit-scrollbar": { display: "none" },
+  _before: {
+    content: '""',
+    position: "absolute",
+    top: "3.5",
+    left: "5",
+    right: "5",
+    h: "0.5",
+    bg: "border.strong",
+  },
+});
+
+const timelineStep = cva({
+  base: {
+    position: "relative",
+    flexGrow: "1",
+    flexShrink: "0",
+    flexBasis: "20",
+    border: "none",
+    bg: "transparent",
+    pt: "6.5",
+    fontSize: "xs",
+    lineHeight: "snug",
+    color: "text.subtle",
+    textAlign: "center",
+    cursor: "pointer",
+    userSelect: "none",
+    _before: {
+      content: '""',
+      position: "absolute",
+      top: "2",
+      left: "50%",
+      w: "4",
+      h: "4",
+      ml: "-2",
+      borderWidth: "2px",
+      borderStyle: "solid",
+      borderColor: "border.strong",
+      borderRadius: "pill",
+      bg: "surface.card",
+    },
+    _hover: { _before: { borderColor: "primary.700" } },
+  },
+  variants: {
+    on: {
+      true: {
+        color: "primary.800",
+        fontWeight: "extrabold",
+        _before: { bg: "primary.700", borderColor: "primary.700" },
+      },
+      false: {},
+    },
+  },
+});
+
+const timelineHint = css({
+  mt: "0.5",
+  fontSize: "xs",
+  color: "text.subtle",
+  tab: { display: "none" },
+});
+
+const warning = css({ mt: "1.5", fontSize: "sm", fontWeight: "bold", color: "accent.danger" });
+
+/** 「栽培条件」のステップ */
 export function ReportStepConditions({
   input,
   onChange,
@@ -27,21 +136,18 @@ export function ReportStepConditions({
     input.timingNote.trim().length > 0 && !DATE_PATTERN.test(toHalfWidth(input.timingNote));
   return (
     <>
-      <h3 className="grp" style={{ marginTop: 0, borderTop: "none", paddingTop: 0 }}>
-        栽培条件<small>どこで・どんな環境で育てているか</small>
-      </h3>
-      <div className="field">
-        <label htmlFor="report-prefecture">
+      <GroupHeading title="栽培条件" note="どこで・どんな環境で育てているか" />
+      <div className={field}>
+        <label className={fieldLabel} htmlFor="report-prefecture">
           地域 <Badge required />
           <Need message={errors.prefectureCode} />
         </label>
-        <div className="guide">
+        <div className={guide}>
           アカウント登録時の住所が入っています。今回の圃場が別の場所なら変更してください。
         </div>
         <select
           id="report-prefecture"
-          className="input"
-          style={{ maxWidth: 260 }}
+          className={cx(selectRecipe(), shortControl)}
           value={input.prefectureCode ?? ""}
           onChange={(event) =>
             onChange({
@@ -57,9 +163,8 @@ export function ReportStepConditions({
             </option>
           ))}
         </select>
-        <label className="check" style={{ marginTop: 8 }}>
-          <input
-            type="checkbox"
+        <label className={cx(checkRow, checkRowWithNote, css({ mt: "2" }))}>
+          <Checkbox
             checked={input.showCity}
             onChange={(event) =>
               onChange({
@@ -70,16 +175,15 @@ export function ReportStepConditions({
                   event.target.checked && input.city.trim() === "" ? registeredCity : input.city,
               })
             }
-          />{" "}
+          />
           市区町村も表示する
-          <span className="muted">チェックなしの場合は都道府県まで表示します</span>
+          <span className={checkNote}>チェックなしの場合は都道府県まで表示します</span>
         </label>
         {input.showCity && (
           <input
             id="report-city"
             aria-label="市区町村"
-            className="input"
-            style={{ maxWidth: 260, marginTop: 6, display: "block" }}
+            className={cx(inputRecipe(), shortControl, css({ display: "block", mt: "1.5" }))}
             placeholder="市区町村　例）〇〇市"
             value={input.city}
             onChange={(event) => onChange({ ...input, city: event.target.value })}
@@ -87,18 +191,17 @@ export function ReportStepConditions({
         )}
       </div>
 
-      <div className="field">
-        <label htmlFor="report-environment">
+      <div className={field}>
+        <label className={fieldLabel} htmlFor="report-environment">
           栽培環境 <Badge required />
           <Need message={errors.cultivationEnvironment} />
         </label>
-        <div className="guide">
+        <div className={guide}>
           露地栽培か施設栽培か、養液の使用など、栽培環境を記入してください。
         </div>
         <textarea
           id="report-environment"
-          className="textarea"
-          style={{ minHeight: 70 }}
+          className={noteArea}
           placeholder="栽培環境"
           value={input.cultivationEnvironment}
           onChange={(event) => onChange({ ...input, cultivationEnvironment: event.target.value })}
@@ -112,21 +215,21 @@ export function ReportStepConditions({
         </Example>
       </div>
 
-      <div className="field">
-        <label>
+      <div className={field}>
+        <div className={fieldLabel}>
           施用時期 <Badge required />
           <Need message={errors.timingStages ?? errors.timingNote} />
-        </label>
-        <div className="guide">資材を使ったときの段階をタップします（複数選択できます）。</div>
-        <div className="tl-wrap">
-          <div className="tl" role="group" aria-label="施用時期の段階">
+        </div>
+        <div className={guide}>資材を使ったときの段階をタップします（複数選択できます）。</div>
+        <div className={timeline}>
+          <div className={timelineTrack} role="group" aria-label="施用時期の段階">
             {APPLICATION_TIMINGS.map((timing, index) => {
               const on = input.timingStages.includes(index);
               return (
                 <button
                   key={timing}
                   type="button"
-                  className={on ? "tl-i on" : "tl-i"}
+                  className={timelineStep({ on })}
                   aria-pressed={on}
                   onClick={() =>
                     onChange({
@@ -143,21 +246,20 @@ export function ReportStepConditions({
             })}
           </div>
         </div>
-        <div className="tl-hint">横にスクロールすると続きの段階が出ます</div>
-        <div className="guide" style={{ marginTop: 12 }}>
+        <div className={timelineHint}>横にスクロールすると続きの段階が出ます</div>
+        <div className={cx(guide, css({ mt: "3" }))}>
           <b>処理日（資材を使った日）は必ず記入してください。</b>
           あわせて、定植日やそのときの生育状況も記入します。
         </div>
         <textarea
-          className="textarea"
-          style={{ minHeight: 70 }}
+          className={noteArea}
           aria-label="処理日・定植日・生育状況（必須）"
           placeholder="処理日・定植日・そのときの生育状況"
           value={input.timingNote}
           onChange={(event) => onChange({ ...input, timingNote: event.target.value })}
         />
         {missingDate && (
-          <div className="warn" role="status">
+          <div className={warning} role="status">
             処理日（〇月〇日）が見当たりません。資材を使った日を記入してください。
           </div>
         )}

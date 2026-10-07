@@ -1,7 +1,4 @@
-/*
- * 企業様向けの案内の原稿。見本（farmille-demo/index.html）の PROCS・sellersLP・sellerProcs の文面の写し。
- * リンク先だけ本番のルートに置き換えている（見本の data-go="formA" など → 実在するパス）。
- */
+/** 企業様向けの利用ガイド・お手続きの原稿。 */
 
 export const CONTACT_EMAIL = "contact@farmille.com";
 export const OWNER_APPLICATION_HREF = "/dashboard/applications/new/registration";
@@ -18,7 +15,7 @@ type ProcedureStep = {
 export type Procedure = {
   slug: ProcedureSlug;
   title: string;
-  /** お手続き一覧の行の文言（見本 sellerProcs）。 */
+  /** お手続き一覧の行の文言。 */
   listTitle: string;
   lead: string;
   needId: boolean;
@@ -30,7 +27,7 @@ export type Procedure = {
   prep: ReadonlyArray<readonly [string, string]>;
 };
 
-/** 見本 PROCS（procOwner・procTransferOut・procTransferIn・procDelist）。 */
+/** お手続きごとの流れ・対象・準備物。 */
 export const PROCEDURES = {
   owner: {
     slug: "owner",
@@ -216,7 +213,7 @@ type MemberAction = {
   procedure?: ProcedureSlug;
 };
 
-/** 見本 sellersLP「企業会員登録済みの方の活用ガイド」。 */
+/** 利用ガイドの「企業会員登録済みの方の活用ガイド」。 */
 export const MEMBER_ACTIONS: ReadonlyArray<MemberAction> = [
   { title: "新しい資材を掲載する", href: OWNER_APPLICATION_HREF, procedure: "owner" },
   {
@@ -242,7 +239,7 @@ export const MEMBER_ACTIONS: ReadonlyArray<MemberAction> = [
 type FaqLink = { href: string; label: string };
 type Faq = { question: string; answer: string; links: ReadonlyArray<FaqLink> };
 
-/** 見本 sellersLP の「よくあるご質問」。リンクは同じページの該当ガイドへ。 */
+/** 利用ガイドの「よくあるご質問」。リンクは同じページの該当ガイドへ。 */
 export const GUIDE_FAQS: ReadonlyArray<Faq> = [
   {
     question: "申請から掲載まではどのくらいかかりますか？",
@@ -300,7 +297,7 @@ export const GUIDE_FAQS: ReadonlyArray<Faq> = [
   },
 ];
 
-/** 見本 sellerProcs の「よくあるご質問」。リンクはお手続きの詳細ページへ。 */
+/** お手続き一覧の「よくあるご質問」。リンクはお手続きの詳細ページへ。 */
 export const PROCEDURE_FAQS: ReadonlyArray<Faq> = [
   {
     question: "資材ページを削除してもらえますか？",

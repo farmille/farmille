@@ -1,21 +1,127 @@
 import type { ReactNode } from "react";
 
-/*
- * 完成見本（farmille-demo/index.html）の入力フォームの共通部品（badge・pubTag・privTag・SEARCH_ICON・CK）を JSX にしたもの。
- * クラス名とインラインスタイルは見本のまま。スタイルの正は src/app/_mock/mock.css と forms.css。
- */
+import { Badge, badgeRecipe } from "@/components/Badge";
+import { inputRecipe } from "@/components/Input";
+import { textareaRecipe } from "@/components/Textarea";
+import { css, cva } from "../../../styled-system/css";
 
-/** 見本の `<span class="badge badge-req">必須</span>`。 */
-export function RequiredBadge() {
-  return <span className="badge badge-req">必須</span>;
+/** 入力欄1つ分の区切り。2つ目以降の欄の上に間をあける。 */
+export const formFieldStyle = css({ mt: "5", _first: { mt: "0" } });
+
+/** 欄の名前（label や、複数の部品をまとめる見出し）。 */
+export const formLabelStyle = css({
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: "2",
+  mb: "1.5",
+  fontSize: "md",
+  fontWeight: "bold",
+});
+
+/** 欄の補足。入力欄の上に置くか、下に置くかで間のとり方が変わる。 */
+export const formGuideRecipe = cva({
+  base: { color: "text.muted", fontSize: "sm", lineHeight: "normal" },
+  variants: {
+    placement: { above: { mb: "2" }, below: { mt: "1.5" } },
+  },
+  defaultVariants: { placement: "above" },
+});
+
+const invalidControl = { "&[aria-invalid=true]": { borderColor: "accent.danger" } } as const;
+
+export const formInputStyle = css(inputRecipe.raw(), { fontFamily: "inherit" }, invalidControl);
+
+export const formTextareaStyle = css(
+  textareaRecipe.raw(),
+  { fontFamily: "inherit" },
+  invalidControl,
+);
+
+/** 送信ボタンと「キャンセル」などを縦に並べる。 */
+export const formActionsStyle = css({
+  display: "flex",
+  flexDirection: "column",
+  gap: "2.5",
+  mt: "6",
+});
+
+/** 送信ボタンの下に置く控えめなリンク（キャンセル・下書き保存など）。 */
+export const formSecondaryLinkStyle = css({
+  display: "block",
+  p: "1",
+  color: "text.subtle",
+  fontSize: "sm",
+  textAlign: "center",
+  textDecoration: "none",
+  _focusVisible: {
+    outlineWidth: "2px",
+    outlineStyle: "solid",
+    outlineColor: "primary.700",
+    outlineOffset: "2px",
+  },
+});
+
+const requiredBadge = css(badgeRecipe.raw({ variant: "required" }), {
+  bg: "accent.dangerSoft",
+  color: "accent.danger",
+});
+
+const visibilityTag = cva({
+  base: { display: "inline-flex", alignItems: "center", gap: "1", fontWeight: "bold" },
+  variants: {
+    visibility: {
+      public: { color: "primary.800" },
+      private: { color: "text.subtle" },
+    },
+  },
+});
+
+const srOnly = css({ srOnly: true });
+
+const fieldError = css({
+  mt: "1.5",
+  color: "accent.danger",
+  fontSize: "sm",
+  fontWeight: "bold",
+  lineHeight: "normal",
+});
+
+const formNotice = cva({
+  base: {
+    mb: "3.5",
+    px: "3",
+    py: "3",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderRadius: "input",
+    fontSize: "sm",
+    lineHeight: "relaxed",
+  },
+  variants: {
+    tone: {
+      error: {
+        bg: "accent.dangerSoft",
+        color: "accent.danger",
+        borderColor: "accent.danger/25",
+        fontWeight: "bold",
+      },
+      info: { bg: "primary.soft", color: "primary.800", borderColor: "primary.700/22" },
+    },
+  },
+});
+
+/** 「必須」などの赤い小バッジ。 */
+export function RequiredBadge({ children = "必須" }: { children?: ReactNode }) {
+  return <span className={requiredBadge}>{children}</span>;
 }
 
-/** 見本の `<span class="badge badge-opt">任意</span>`。 */
+/** 「任意」などの灰色の小バッジ。 */
 export function OptionalBadge({ children = "任意" }: { children?: ReactNode }) {
-  return <span className="badge badge-opt">{children}</span>;
+  return <Badge variant="optional">{children}</Badge>;
 }
 
-/** 見本の ICO_PUB（地球儀）。 */
+/** 公開の印（地球儀）。 */
 function PublicIcon() {
   return (
     <svg
@@ -33,7 +139,7 @@ function PublicIcon() {
   );
 }
 
-/** 見本の ICO_PRIV（鍵）。 */
+/** 非公開の印（鍵）。 */
 function PrivateIcon() {
   return (
     <svg
@@ -52,25 +158,25 @@ function PrivateIcon() {
 }
 
 /**
- * 見本の pubTag()／privTag()。画面には「公開」「非公開」と出し、
+ * 画面には「公開」「非公開」と出し、
  * 読み上げでは「公開されます」「公開されません」と文で伝える。
  */
 export function VisibilityTag({ visibility }: { visibility: "public" | "private" }) {
   return visibility === "public" ? (
-    <span className="vis-tag vis-pub">
+    <span className={visibilityTag({ visibility: "public" })}>
       <PublicIcon />
-      公開<span className="sr-only">されます</span>
+      公開<span className={srOnly}>されます</span>
     </span>
   ) : (
-    <span className="vis-tag vis-priv">
+    <span className={visibilityTag({ visibility: "private" })}>
       <PrivateIcon />
       <span aria-hidden="true">非公開</span>
-      <span className="sr-only">公開されません</span>
+      <span className={srOnly}>公開されません</span>
     </span>
   );
 }
 
-/** 見本の SEARCH_ICON。 */
+/** 検索欄の虫眼鏡。 */
 export function SearchIcon() {
   return (
     <svg
@@ -88,7 +194,7 @@ export function SearchIcon() {
   );
 }
 
-/** 見本の IMGP（写真の置き場）。 */
+/** 写真の置き場の印。 */
 export function ImagePlaceholderIcon() {
   return (
     <svg
@@ -96,9 +202,10 @@ export function ImagePlaceholderIcon() {
       height="24"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="var(--green)"
+      stroke="currentColor"
       strokeWidth="1.4"
       aria-hidden="true"
+      className={css({ color: "primary.700" })}
     >
       <rect x="3" y="4" width="18" height="16" rx="2" />
       <circle cx="8.5" cy="9.5" r="1.6" />
@@ -111,7 +218,7 @@ export function ImagePlaceholderIcon() {
 export function FieldError({ id, message }: { id: string; message?: string }) {
   if (message === undefined) return null;
   return (
-    <p id={id} className="field-error" role="alert">
+    <p id={id} className={fieldError} role="alert">
       {message}
     </p>
   );
@@ -120,7 +227,7 @@ export function FieldError({ id, message }: { id: string; message?: string }) {
 /** 画面上部に出すフォーム全体の通知（エラー・お知らせ）。 */
 export function FormNotice({ tone, children }: { tone: "error" | "info"; children: ReactNode }) {
   return (
-    <p className={tone === "error" ? "form-notice error" : "form-notice info"} role="alert">
+    <p className={formNotice({ tone })} role="alert">
       {children}
     </p>
   );

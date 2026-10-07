@@ -1,9 +1,16 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
+
 import { userEvent, within } from "storybook/test";
+import { css, cx } from "../../../styled-system/css";
 import { PostalAddressFields } from "./PostalAddressFields";
+const fmDecorator: Decorator = (Story) => (
+  <div className={cx("fm", css({ p: "4" }))}>{Story()}</div>
+);
+
 const meta = {
   title: "App/Auth/PostalAddressFields",
   component: PostalAddressFields,
+  decorators: [fmDecorator],
   args: {
     values: { postalCode: "1000001", prefectureCode: "13", city: "千代田区" },
     fieldErrors: {},

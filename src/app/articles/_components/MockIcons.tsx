@@ -1,9 +1,8 @@
-/*
- * 完成見本（farmille-demo/index.html）の線画アイコン（THUMB・EYE・SEED・CHEV・IMGP・SEARCH_ICON）を JSX にしたもの。
- * 色は currentColor か見本の変数を使う。
- */
+import { css, cva, cx } from "../../../../styled-system/css";
 
-/** 見本の THUMB（参考になった）。 */
+const brandStroke = css({ stroke: "primary.700" });
+
+/** 参考になった。 */
 export function MockThumbIcon() {
   return (
     <svg
@@ -20,7 +19,7 @@ export function MockThumbIcon() {
   );
 }
 
-/** 見本の EYE（閲覧数）。 */
+/** 閲覧数。 */
 export function MockEyeIcon() {
   return (
     <svg
@@ -38,15 +37,15 @@ export function MockEyeIcon() {
   );
 }
 
-/** 見本の SEED（資材の印）。 */
+/** 資材の印。 */
 export function MockSeedIcon() {
   return (
     <svg
+      className={brandStroke}
       width="22"
       height="22"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="var(--green)"
       strokeWidth="1.6"
       aria-hidden="true"
     >
@@ -55,11 +54,11 @@ export function MockSeedIcon() {
   );
 }
 
-/** 見本の CHEV（右向きの矢印）。 */
+/** 右向きの矢印。 */
 export function MockChevronIcon() {
   return (
     <svg
-      className="chev"
+      className={css({ color: "text.subtle", flexShrink: "0" })}
       width="16"
       height="16"
       viewBox="0 0 24 24"
@@ -73,15 +72,15 @@ export function MockChevronIcon() {
   );
 }
 
-/** 見本の IMGP（画像が無いときの印）。 */
+/** 画像が無いときの印。 */
 export function MockImagePlaceholderIcon() {
   return (
     <svg
+      className={brandStroke}
       width="24"
       height="24"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="var(--green)"
       strokeWidth="1.4"
       aria-hidden="true"
     >
@@ -92,7 +91,7 @@ export function MockImagePlaceholderIcon() {
   );
 }
 
-/** 見本の SEARCH_ICON（検索窓の虫眼鏡）。 */
+/** 検索窓の虫眼鏡。 */
 export function MockSearchIcon() {
   return (
     <svg
@@ -110,11 +109,37 @@ export function MockSearchIcon() {
   );
 }
 
-/** 見本の vc(n)。閲覧数（読み上げは「N回閲覧」）。 */
-export function MockViewCount({ count }: { count: number }) {
+const viewCountRecipe = cva({
+  base: {
+    display: "inline-flex",
+    alignItems: "center",
+    color: "text.subtle",
+    whiteSpace: "nowrap",
+    fontVariantNumeric: "tabular-nums",
+    "& svg": { display: "block" },
+  },
+  variants: {
+    size: {
+      md: { fontSize: "sm", gap: "1.5" },
+      sm: { fontSize: "xs", gap: "1" },
+    },
+  },
+  defaultVariants: { size: "md" },
+});
+
+/** 閲覧数（読み上げは「N回閲覧」）。sm は2列の一覧カード用。 */
+export function MockViewCount({
+  count,
+  size,
+  className,
+}: {
+  count: number;
+  size?: "md" | "sm";
+  className?: string;
+}) {
   return (
-    <span className="view-count" aria-label={`${count}回閲覧`}>
-      <MockEyeIcon /> <span className="tnum">{count.toLocaleString("ja-JP")}</span>
+    <span className={cx(viewCountRecipe({ size }), className)} aria-label={`${count}回閲覧`}>
+      <MockEyeIcon /> <span>{count.toLocaleString("ja-JP")}</span>
     </span>
   );
 }

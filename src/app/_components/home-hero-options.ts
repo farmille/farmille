@@ -19,7 +19,7 @@ export type HeroSearchOptions = {
   pills: Record<HeroPillKind, HeroPillItem[]>;
 };
 
-/** 見本の絞り込みピルは作物・効果・メーカーを上位8件、資材ジャンルは全件出す。 */
+/** 絞り込みピルは作物・効果・メーカーを上位8件、資材ジャンルは全件出す。 */
 const PILL_LIMIT = 8;
 
 function countBy(values: string[]): Map<string, number> {
@@ -52,7 +52,7 @@ function filterPills(
 
 /**
  * 件数は「その作目・効果・資材ジャンルが資材に明記されている数」。
- * 作物群（〇〇類 全般）としての記載は数えない（見本のピルと同じ数え方）。
+ * 作物群（〇〇類 全般）としての記載は数えない。
  */
 export function buildHeroSearchOptions(
   catalog: CatalogSearch,

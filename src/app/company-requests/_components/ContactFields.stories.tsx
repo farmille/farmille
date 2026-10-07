@@ -1,4 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { css } from "../../../../styled-system/css";
+
+import { formalPageRecipe } from "./formal-styles";
 import { ContactFields } from "./ContactFields";
 import { emptyContact } from "./ContactFields";
 const meta = {
@@ -6,6 +9,15 @@ const meta = {
   component: ContactFields,
   parameters: { nextjs: { appDirectory: true } },
   args: { defaults: emptyContact },
+  decorators: [
+    (Story) => (
+      <div className="fm">
+        <div className={css({ p: "4" })}>
+          <div className={formalPageRecipe()}>{Story()}</div>
+        </div>
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof ContactFields>;
 export default meta;
 type Story = StoryObj<typeof meta>;

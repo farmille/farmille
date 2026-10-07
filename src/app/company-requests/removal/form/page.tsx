@@ -1,6 +1,3 @@
-import "../../../_mock/forms.css";
-import "../../../_mock/sellers.css";
-
 import { redirect } from "next/navigation";
 
 import { MockPageShell } from "@/app/_mock/MockPageShell";
@@ -11,8 +8,11 @@ import { beginCompanyApplication } from "@/server/company-applications";
 
 import { CompanyApplicationForm } from "../../_components/CompanyApplicationForm";
 import { emptyContact } from "../../_components/ContactFields";
+import { formalPageRecipe } from "../../_components/formal-styles";
 
-/** 見本 S.formD（資材ページに関する申請フォーム）。メールの確認リンクから開く。 */
+import { css } from "../../../../../styled-system/css";
+
+/** 資材ページに関する申請フォーム（終売・非表示）。メールの確認リンクから開く。 */
 export default async function RemovalFormPage() {
   const { access } = await removalApplicationAccess();
   await cleanupExpiredApplicationUploads();
@@ -20,8 +20,8 @@ export default async function RemovalFormPage() {
   if (intent.submitted_at) redirect(`/company-requests/receipts/${intent.id}`);
   return (
     <MockPageShell title={applicationCopy.removal.title} backHref="/company-requests/removal">
-      <div className="fm-chic">
-        <h1 style={{ fontSize: 19 }}>{applicationCopy.removal.title}</h1>
+      <div className={formalPageRecipe()}>
+        <h1 className={css({ fontSize: "xl" })}>{applicationCopy.removal.title}</h1>
         <CompanyApplicationForm
           intentId={intent.id}
           kind="removal"

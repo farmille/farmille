@@ -1,3 +1,4 @@
+import { reportPlotColor } from "@/components/ReportPlotColor";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import {
@@ -6,7 +7,8 @@ import {
   type UsageReportInput,
 } from "@/lib/usage-report";
 
-import { plotColorClass } from "./ReportFormParts";
+import { css, cx } from "../../../../../../styled-system/css";
+
 import { readCell } from "./ReportGraphEditor";
 
 export type ReportSection = (typeof REPORT_SECTIONS)[number]["value"];
@@ -34,19 +36,67 @@ export function effectsText(input: UsageReportInput) {
     .join("\n");
 }
 
-/** 見本の `.plot-list`（比較した区の静的なカード） */
+const plotList = css({ display: "flex", flexDirection: "column", gap: "2.5", mt: "2.5" });
+const plotRow = css({
+  display: "flex",
+  gap: "2.5",
+  alignItems: "flex-start",
+  py: "2.5",
+  px: "3",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "input",
+  bg: "surface.card",
+});
+const plotDot = css({
+  flex: "none",
+  w: "3",
+  h: "3",
+  borderRadius: "pill",
+  mt: "1",
+  bg: "currentColor",
+});
+const plotName = css({
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  columnGap: "2.5",
+  rowGap: "1.5",
+  fontSize: "md",
+});
+const plotScope = css({
+  fontSize: "sm",
+  color: "text.muted",
+  bg: "surface.page",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "pill",
+  py: "0.5",
+  px: "2",
+});
+const plotDescription = css({
+  fontSize: "md",
+  color: "text.muted",
+  mt: "1",
+  lineHeight: "prose",
+  whiteSpace: "pre-wrap",
+});
+
+/** 比較した区の静的なカード */
 export function PlotList({ plots }: { plots: UsageReportInput["plots"] }) {
   return (
-    <div className="plot-list">
+    <div className={plotList}>
       {plots.map((plot, index) => (
-        <div key={plot.id} className="plot-row">
-          <span className={`plot-dot ${plotColorClass(index)}`} />
-          <div className="plot-txt">
-            <div className="plot-nm">
+        <div key={plot.id} className={plotRow}>
+          <span className={cx(plotDot, reportPlotColor(index))} />
+          <div className={css({ minW: "0", flex: "1" })}>
+            <div className={plotName}>
               <b>{plot.name || `区${index + 1}`}</b>
-              {plot.scope && <span className="plot-scope">{plot.scope}</span>}
+              {plot.scope && <span className={plotScope}>{plot.scope}</span>}
             </div>
-            <div className="plot-desc">{plot.description || "−"}</div>
+            <div className={plotDescription}>{plot.description || "−"}</div>
           </div>
         </div>
       ))}
@@ -54,7 +104,19 @@ export function PlotList({ plots }: { plots: UsageReportInput["plots"] }) {
   );
 }
 
-/** 見本の `.bars`（記事の横棒グラフ）。区の色は入力の縦棒と揃える */
+const bars = css({ mt: "2", display: "flex", flexDirection: "column", gap: "1.5", maxW: "96" });
+const bar = css({
+  display: "grid",
+  gridTemplateColumns: "token(sizes.reportGraph.plot) minmax(0, 1fr) auto",
+  alignItems: "center",
+  gap: "2",
+  fontSize: "sm",
+  "& > span:first-child": { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
+  "& > b": { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" },
+});
+const barFill = css({ display: "block", h: "4", borderRadius: "bar", bg: "currentColor" });
+
+/** 記事の横棒グラフ。区の色は入力の縦棒と揃える */
 export function ReportBars({
   graph,
   plots,
@@ -68,18 +130,18 @@ export function ReportBars({
   });
   const max = Math.max(1, ...rows.map(({ cell }) => cell.value + cell.error));
   return (
-    <div className="bars" role="list">
+    <div className={bars} role="list">
       {rows.map(({ plot, index, cell }) => (
         <div
           key={plot.id}
           role="listitem"
-          className={index === 0 ? "bar ctrl" : "bar"}
+          className={bar}
           aria-label={`${plot.name || `区${index + 1}`} ${cell.label}`}
         >
           <span>{plot.name || `区${index + 1}`}</span>
           <span>
             <i
-              className={plotColorClass(index)}
+              className={cx(barFill, reportPlotColor(index))}
               style={{ width: `${Math.max(4, (cell.value / max) * 100)}%` }}
             />
           </span>

@@ -5,8 +5,12 @@ import { useState } from "react";
 
 import { SearchIcon } from "@/app/_mock/FormParts";
 import { MockNoImage, MockStars } from "@/app/materials/[id]/_components/MockParts";
+import { buttonRecipe } from "@/components/Button";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import type { PostingMaterialWithImage } from "@/server/queries/materials";
+
+import { css, cx } from "../../../styled-system/css";
 
 type MaterialPickerProps = {
   materials: PostingMaterialWithImage[];
@@ -14,51 +18,192 @@ type MaterialPickerProps = {
   postType?: "report" | "review";
 };
 
-/**
- * 見本 S.pickMaterial の `.body` と `.pick-footer`。
- * 検索は本番の仕組み（検索語を送って候補を取り直す）のまま、入力欄の見た目を見本の `.ts-box` にしている。
- * 行には本番どおり★平均・感想口コミ件数と「選択中」を出し、資材画像があれば画像、無いときだけ見本の NO IMAGE を出す。
- */
+const focusRing = {
+  outlineWidth: "2px",
+  outlineStyle: "solid",
+  outlineColor: "primary.700",
+  outlineOffset: "2px",
+} as const;
+
+const searchBoxStyle = css({
+  display: "flex",
+  flex: "1",
+  alignItems: "center",
+  gap: "2",
+  minW: "0",
+  px: "3",
+  py: "2.5",
+  bg: "surface.card",
+  borderWidth: "1.5px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  borderRadius: "button",
+  _focusWithin: {
+    borderColor: "primary.700",
+    outlineWidth: "3px",
+    outlineStyle: "solid",
+    outlineColor: "primary.700/16",
+  },
+});
+
+const searchInputStyle = css({
+  flex: "1",
+  minW: "0",
+  bg: "transparent",
+  fontSize: "md",
+  fontFamily: "inherit",
+  color: "text.default",
+  outline: "none",
+  _placeholder: { color: "text.subtle" },
+});
+
+const searchButtonStyle = css(buttonRecipe.raw({ variant: "primary", size: "sm" }), {
+  flex: "0 0 auto",
+  minW: "0",
+  px: "4",
+  fontFamily: "inherit",
+  lineHeight: "normal",
+  _focusVisible: focusRing,
+});
+
+const pickRowStyle = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "3",
+  w: "full",
+  p: "3",
+  bg: "surface.card",
+  borderWidth: "1.5px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "card",
+  boxShadow: "shadow",
+  color: "inherit",
+  textAlign: "left",
+  cursor: "pointer",
+  _pressed: { borderColor: "primary.700", bg: "primary.soft" },
+  _focusVisible: focusRing,
+});
+
+const pickRingStyle = css({
+  flex: "0 0 auto",
+  w: "4.5",
+  h: "4.5",
+  p: "0.5",
+  borderWidth: "2px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  borderRadius: "pill",
+  backgroundClip: "content-box",
+  "[aria-pressed=true] > &": { borderColor: "primary.700", bgColor: "primary.700" },
+});
+
+const thumbRecipeBase = {
+  display: "grid",
+  placeItems: "center",
+  flex: "0 0 auto",
+  overflow: "hidden",
+  borderRadius: "media",
+} as const;
+
+const rowThumbStyle = css(thumbRecipeBase, { w: "11", h: "11", bg: "primary.soft" });
+
+const footerThumbStyle = css(thumbRecipeBase, {
+  w: "10",
+  h: "10",
+  p: "0.5",
+  bg: "surface.card",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+});
+
+const footerStyle = css({
+  position: "sticky",
+  bottom: "0",
+  zIndex: "20",
+  mt: "3.5",
+  mx: "-4",
+  pt: "3.5",
+  px: "4",
+  pb: "calc(token(spacing.4) + env(safe-area-inset-bottom, 0px))",
+  bg: "surface.card",
+  borderTopWidth: "1px",
+  borderTopStyle: "solid",
+  borderTopColor: "border.default",
+  borderTopRadius: "banner",
+  boxShadow: "shadow.lift",
+  tab: {
+    w: "full",
+    maxW: "content.workspace",
+    mx: "0",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "border.default",
+    borderRadius: "banner",
+  },
+});
+
+const footerLinkBase = {
+  py: "3.5",
+  fontFamily: "inherit",
+  lineHeight: "normal",
+  _focusVisible: focusRing,
+} as const;
+
+const reportLinkStyle = css(buttonRecipe.raw({ variant: "primary", size: "md" }), footerLinkBase);
+const reviewLinkStyle = css(buttonRecipe.raw({ variant: "ghost", size: "md" }), footerLinkBase);
+
+const footerGuideStyle = css({
+  mt: "1",
+  fontSize: "sm",
+  lineHeight: "normal",
+  color: "text.muted",
+  textAlign: "center",
+});
+
 function MaterialThumb({ src, size }: { src: string | null; size: number }) {
   return src ? (
     <Image
       alt=""
+      className={css({ w: "auto", h: "auto", maxW: "full", maxH: "full", objectFit: "contain" })}
       src={src}
       width={size * 2}
       height={size * 2}
       sizes={`${size}px`}
-      style={{
-        maxWidth: "100%",
-        maxHeight: "100%",
-        width: "auto",
-        height: "auto",
-        objectFit: "contain",
-      }}
     />
   ) : (
     <MockNoImage />
   );
 }
 
+/**
+ * 検索は検索語を送って候補を取り直す。行には★平均・感想口コミ件数と「選択中」を出し、
+ * 資材画像が無いときだけ NO IMAGE を出す。
+ */
 export function MaterialPicker({ materials, query, postType }: MaterialPickerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = materials.find(({ id }) => id === selectedId) ?? null;
 
   return (
     <>
-      <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+      <p className={css({ mb: "3", fontSize: "sm", color: "text.subtle" })}>
         どの資材について書きますか？
       </p>
 
-      <form method="get" className="pick-search" role="search">
+      <form
+        method="get"
+        className={css({ display: "flex", alignItems: "center", gap: "2" })}
+        role="search"
+      >
         {postType !== undefined ? <input type="hidden" name="type" value={postType} /> : null}
-        <div className="ts-box">
-          <span className="ts-ic">
+        <div className={searchBoxStyle}>
+          <span className={css({ display: "flex", color: "text.subtle" })}>
             <SearchIcon />
           </span>
           <input
             id="pickInput"
-            className="ts-input"
+            className={searchInputStyle}
             type="search"
             name="q"
             defaultValue={query}
@@ -68,16 +213,21 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
             autoComplete="off"
           />
         </div>
-        <button type="submit" className="btn btn-primary btn-sm">
+        <button type="submit" className={searchButtonStyle}>
           検索
         </button>
       </form>
 
-      <div className="stack" style={{ marginTop: 12 }} aria-live="polite">
+      <div
+        className={css({ display: "flex", flexDirection: "column", gap: "2.5", mt: "3" })}
+        aria-live="polite"
+      >
         {materials.length === 0 ? (
           <div
-            className="card pad"
-            style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 12.5 }}
+            className={cx(
+              surfaceCardRecipe({ padding: "cozy" }),
+              css({ textAlign: "center", fontSize: "sm", color: "text.subtle" }),
+            )}
           >
             条件に合う資材が見つかりませんでした。
           </div>
@@ -86,40 +236,49 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
             <button
               key={material.id}
               type="button"
-              className={material.id === selectedId ? "pick-row sel" : "pick-row"}
+              className={pickRowStyle}
               aria-label={`${material.name}を選択`}
               aria-pressed={material.id === selectedId}
               onClick={() => setSelectedId(material.id)}
             >
-              <span className="ring" aria-hidden="true" />
-              <span
-                className="mat-img"
-                style={{ width: 44, height: 44, flex: "0 0 auto", overflow: "hidden" }}
-              >
+              <span className={pickRingStyle} aria-hidden="true" />
+              <span className={rowThumbStyle}>
                 <MaterialThumb src={material.imageUrl} size={44} />
               </span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span className="t-name" style={{ display: "block", fontSize: 13.5 }}>
+              <span className={css({ flex: "1", minW: "0" })}>
+                <span className={css({ display: "block", fontSize: "md", fontWeight: "bold" })}>
                   {material.name}
                 </span>
-                <span className="muted" style={{ display: "block", fontSize: 11, marginTop: 2 }}>
+                <span
+                  className={css({
+                    display: "block",
+                    mt: "0.5",
+                    fontSize: "xs",
+                    color: "text.subtle",
+                  })}
+                >
                   {material.manufacturer_name}
                 </span>
                 {material.review_count > 0 ? (
                   <span
-                    className="muted"
-                    style={{
+                    className={css({
                       display: "flex",
                       alignItems: "center",
-                      gap: 5,
                       flexWrap: "wrap",
-                      fontSize: 11,
-                      marginTop: 3,
-                    }}
+                      gap: "1",
+                      mt: "1",
+                      fontSize: "xs",
+                      color: "text.subtle",
+                    })}
                   >
                     <MockStars value={material.avg_rating ?? 0} />
                     {material.avg_rating === null ? null : (
-                      <b className="tnum" style={{ color: "var(--ink)" }}>
+                      <b
+                        className={css({
+                          color: "text.default",
+                          fontVariantNumeric: "tabular-nums",
+                        })}
+                      >
                         {material.avg_rating.toFixed(1)}
                       </b>
                     )}
@@ -129,12 +288,12 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
               </span>
               {material.id === selectedId ? (
                 <span
-                  style={{
+                  className={css({
                     flex: "0 0 auto",
-                    color: "var(--green)",
-                    fontSize: 12,
-                    fontWeight: 700,
-                  }}
+                    fontSize: "sm",
+                    fontWeight: "bold",
+                    color: "primary.700",
+                  })}
                 >
                   選択中
                 </span>
@@ -143,41 +302,50 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
           ))
         )}
       </div>
-      <div className="hint-pill" style={{ marginTop: 14 }}>
+      <div
+        className={css({
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "1.5",
+          mt: "3.5",
+          px: "2.5",
+          py: "0.5",
+          bg: "surface.page",
+          borderWidth: "1px",
+          borderStyle: "solid",
+          borderColor: "border.default",
+          borderRadius: "pill",
+          fontSize: "xs",
+          color: "text.subtle",
+        })}
+      >
         資材ページの「書く」ボタンからも投稿できます
       </div>
 
       {selected === null ? null : (
-        <div className="pick-footer" data-ui="responsive-post-actions">
-          <div className="pf-name">
-            <span
-              className="mat-img"
-              style={{
-                width: 42,
-                height: 42,
-                flex: "0 0 auto",
-                background: "#fff",
-                border: "1px solid var(--line)",
-                padding: 3,
-                overflow: "hidden",
-              }}
-            >
+        <div className={footerStyle} data-ui="responsive-post-actions">
+          <div
+            className={css({
+              display: "flex",
+              alignItems: "center",
+              gap: "2",
+              mb: "2.5",
+              fontSize: "md",
+              fontWeight: "bold",
+            })}
+          >
+            <span className={footerThumbStyle}>
               <MaterialThumb src={selected.imageUrl} size={42} />
             </span>
-            <span style={{ minWidth: 0 }}>
+            <span className={css({ minW: "0" })}>
+              <span className={css({ display: "block", truncate: true })}>{selected.name}</span>
               <span
-                style={{
+                className={css({
                   display: "block",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {selected.name}
-              </span>
-              <span
-                className="muted"
-                style={{ display: "block", fontSize: 11, fontWeight: 400, marginTop: 1 }}
+                  fontSize: "xs",
+                  fontWeight: "normal",
+                  color: "text.subtle",
+                })}
               >
                 {selected.manufacturer_name}
               </span>
@@ -185,20 +353,20 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
           </div>
           {postType !== "review" ? (
             <>
-              <Link className="btn btn-primary" href={`/materials/${selected.id}/report/new`}>
+              <Link className={reportLinkStyle} href={`/materials/${selected.id}/report/new`}>
                 実証詳細レポートを書く
               </Link>
-              <div className="fguide" style={{ textAlign: "center", margin: "5px 0 7px" }}>
+              <div className={cx(footerGuideStyle, css({ mb: "2" }))}>
                 対照区を設けた、詳しい体験の共有です
               </div>
             </>
           ) : null}
           {postType !== "report" ? (
             <>
-              <Link className="btn btn-ghost" href={`/materials/${selected.id}/review/new`}>
+              <Link className={reviewLinkStyle} href={`/materials/${selected.id}/review/new`}>
                 感想口コミを書く
               </Link>
-              <div className="fguide" style={{ textAlign: "center", margin: "5px 0 0" }}>
+              <div className={footerGuideStyle}>
                 星5段階の評価とコメント・写真で、気軽に体験を共有できます
               </div>
             </>

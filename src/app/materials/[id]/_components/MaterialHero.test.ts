@@ -56,11 +56,8 @@ describe("MaterialHero", () => {
 
     const image = screen.getByRole("img", { name: material.name });
     const imageBox = document.querySelector('[data-ui="material-hero-image"]');
-    // 画像と「NO IMAGE」は mock-extra.css の .mat-hero-img > * で同じセルに重なる。
-    const placeholder = imageBox?.querySelector<HTMLElement>(".mat-hero-placeholder") ?? null;
+    const placeholder = screen.getByText("NO IMAGE");
     expect(imageBox).toContainElement(image);
-    expect(placeholder).toBeInTheDocument();
-    expect(image).toHaveClass("mat-hero-photo");
     expect(placeholder).toHaveAttribute("aria-hidden", "true");
 
     fireEvent.error(image);
@@ -88,10 +85,9 @@ describe("MaterialHero", () => {
     render(createElement(MaterialHero, { material: materialDetail, saved: null }));
 
     const imageBox = document.querySelector('[data-ui="material-hero-image"]');
-    const placeholder = imageBox?.querySelector<HTMLElement>(".mat-hero-placeholder") ?? null;
+    const placeholder = screen.getByText("NO IMAGE");
 
     expect(screen.queryByRole("img", { name: materialDetail.name })).not.toBeInTheDocument();
     expect(imageBox).toContainElement(placeholder);
-    expect(placeholder).toHaveTextContent("NO IMAGE");
   });
 });

@@ -2,7 +2,92 @@
 
 import { useEffect, useRef, useState, type InputHTMLAttributes } from "react";
 
+import { css, cva } from "../../../styled-system/css";
+
 import { SearchIcon } from "./FormParts";
+
+const root = css({ position: "relative" });
+
+const box = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  px: "3",
+  py: "2.5",
+  bg: "surface.card",
+  borderWidth: "1.5px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  borderRadius: "button",
+  _focusWithin: {
+    borderColor: "primary.700",
+    boxShadow: "0 0 0 3px color-mix(in srgb, token(colors.primary.700) 16%, transparent)",
+  },
+});
+
+const icon = css({ display: "flex", color: "text.subtle" });
+
+const field = css({
+  flex: "1",
+  minW: "0",
+  border: "none",
+  outline: "none",
+  bg: "transparent",
+  color: "text.default",
+  fontFamily: "inherit",
+  fontSize: "md",
+  _placeholder: { color: "text.subtle" },
+  _disabled: { cursor: "not-allowed" },
+});
+
+const panel = css({
+  mt: "2.5",
+  maxH: "72",
+  overflowY: "auto",
+  bg: "surface.card",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "button",
+  boxShadow: "shadow",
+});
+
+const empty = css({ p: "3.5", textAlign: "center", color: "text.subtle", fontSize: "sm" });
+
+const optionGroup = css({ px: "3", py: "3" });
+
+const optionRecipe = cva({
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "2",
+    w: "100%",
+    px: "1.5",
+    py: "2",
+    border: "0",
+    borderRadius: "input",
+    bg: "transparent",
+    color: "inherit",
+    font: "inherit",
+    fontSize: "md",
+    textAlign: "left",
+    _hover: { bg: "primary.soft" },
+  },
+  variants: {
+    active: { true: { bg: "primary.soft" }, false: {} },
+  },
+});
+
+const optionCategory = css({
+  px: "1.5",
+  py: "0.5",
+  borderRadius: "mark",
+  bg: "text.subtle/15",
+  color: "text.muted",
+  fontSize: "xs",
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
+});
 
 export type MockComboboxOption = { value: string; label: string; description?: string };
 
@@ -22,8 +107,7 @@ type MockComboboxProps = Omit<
 };
 
 /**
- * 見本の検索ピッカー（`.ts-box` の入力＋ `.ts-panel` の候補）を、
- * 共通の Combobox（src/components/Combobox.tsx）と同じキーボード操作で動かすもの。
+ * 検索欄つきの候補ピッカーを、共通の Combobox（src/components/Combobox.tsx）と同じキーボード操作で動かすもの。
  * 候補の絞り込みと保存は呼び出し元に任せる。
  */
 export function MockCombobox({
@@ -41,7 +125,7 @@ export function MockCombobox({
   onKeyDown,
   ...inputProps
 }: MockComboboxProps) {
-  const root = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -52,7 +136,7 @@ export function MockCombobox({
   useEffect(() => {
     if (!expanded) return;
     function closeOutside(event: PointerEvent) {
-      if (event.target instanceof Node && !root.current?.contains(event.target)) setOpen(false);
+      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) setOpen(false);
     }
     document.addEventListener("pointerdown", closeOutside);
     return () => document.removeEventListener("pointerdown", closeOutside);
@@ -78,21 +162,21 @@ export function MockCombobox({
 
   return (
     <div
-      ref={root}
-      className="ts-combobox"
+      ref={rootRef}
+      className={root}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
       }}
     >
-      <div className="ts-box">
-        <span className="ts-ic">
+      <div className={box}>
+        <span className={icon}>
           <SearchIcon />
         </span>
         <input
           {...inputProps}
           id={id}
           disabled={disabled}
-          className="ts-input"
+          className={field}
           type="text"
           role="combobox"
           value={value}
@@ -153,12 +237,12 @@ export function MockCombobox({
           ref={list}
           role="listbox"
           aria-label={inputProps["aria-label"]}
-          className="ts-panel ts-panel-float"
+          className={panel}
         >
           {options.length === 0 ? (
-            <div className="ts-empty">{emptyMessage}</div>
+            <div className={empty}>{emptyMessage}</div>
           ) : (
-            <div className="ts-pg">
+            <div className={optionGroup}>
               {options.map((option, index) => (
                 <button
                   key={option.value}
@@ -170,13 +254,13 @@ export function MockCombobox({
                   aria-label={
                     option.description ? `${option.label} ${option.description}` : option.label
                   }
-                  className={index === activeIndex ? "sug active" : "sug"}
+                  className={optionRecipe({ active: index === activeIndex })}
                   onMouseDown={(event) => event.preventDefault()}
                   onPointerMove={() => setActiveIndex(index)}
                   onClick={() => select(option)}
                 >
                   {option.description ? (
-                    <span className="cat-label">{option.description}</span>
+                    <span className={optionCategory}>{option.description}</span>
                   ) : null}
                   <span>{option.label}</span>
                 </button>

@@ -2,15 +2,20 @@
 
 import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
 
+import { inputRecipe } from "@/components/Input";
+import { textareaRecipe } from "@/components/Textarea";
 import type { UsageReportInput } from "@/lib/usage-report";
 
+import { css, cva, cx } from "../../../../../../styled-system/css";
+
 import { editKey, readCell, type EditTarget } from "./ReportGraphEditor";
+import { pillButton } from "./reportStyles";
 
 type Measurement = UsageReportInput["measurements"][number];
 type Graph = Measurement["graphs"][number];
 type Plot = UsageReportInput["plots"][number];
 
-/** 単位の候補（見本 UNITS） */
+/** 単位の候補 */
 export const UNITS = [
   "g",
   "kg",
@@ -27,7 +32,7 @@ export const UNITS = [
   "日",
   "SPAD",
 ];
-/** 調査項目 → 単位（見本 METRIC_UNIT。単位を手で入れていないときだけ自動で入れる） */
+/** 調査項目 → 単位（単位を手で入れていないときだけ自動で入れる） */
 export const METRIC_UNIT = new Map<string, string>([
   ["可販果収量", "kg/10a"],
   ["1株あたり収量", "kg"],
@@ -55,7 +60,134 @@ export const METRIC_UNIT = new Map<string, string>([
 
 const isEnter = (event: KeyboardEvent) => event.key === "Enter" && !event.nativeEvent.isComposing;
 
-/** 見本ステップ4の書き込み枠 `.ed`。PC は押した場所の横、スマホは画面の下に出す */
+const panel = cva({
+  base: {
+    position: "fixed",
+    zIndex: "20",
+    bg: "surface.card",
+    borderStyle: "solid",
+    borderColor: "primary.700",
+    boxShadow: "shadow.lift",
+    py: "3",
+    px: "3.5",
+  },
+  variants: {
+    mobile: {
+      true: {
+        left: "0",
+        right: "0",
+        bottom: "var(--kb, 0)",
+        borderWidth: "0",
+        borderTopWidth: "1.5px",
+        borderTopRadius: "banner",
+        pb: "calc(token(spacing.3) + env(safe-area-inset-bottom))",
+      },
+      false: { w: "80", borderWidth: "1.5px", borderRadius: "card" },
+    },
+  },
+});
+const heading = css({
+  fontSize: "sm",
+  fontWeight: "extrabold",
+  color: "primary.800",
+  mb: "1.5",
+  display: "flex",
+  gap: "1.5",
+  alignItems: "center",
+});
+const closeButton = css({
+  ml: "auto",
+  w: "8",
+  h: "8",
+  borderRadius: "pill",
+  borderWidth: "0",
+  bg: "transparent",
+  color: "text.subtle",
+  fontSize: "xl",
+  lineHeight: "none",
+  display: "grid",
+  placeItems: "center",
+  cursor: "pointer",
+  _hover: { bg: "surface.panel", color: "text.default" },
+});
+const row = css({ display: "flex", gap: "2", alignItems: "center" });
+const bigInput = cva({
+  base: {
+    flex: "1",
+    minW: "0",
+    borderWidth: "1.5px",
+    borderStyle: "solid",
+    borderColor: "border.strong",
+    borderRadius: "input",
+    py: "2",
+    px: "2.5",
+    fontWeight: "extrabold",
+    fontVariantNumeric: "tabular-nums",
+    fontFamily: "inherit",
+    color: "inherit",
+    bg: "surface.card",
+    _focus: {
+      borderColor: "primary.700",
+      outlineWidth: "3px",
+      outlineStyle: "solid",
+      outlineColor: "primary.100",
+      outlineOffset: "0",
+    },
+  },
+  variants: {
+    size: { value: { fontSize: "2xl" }, text: { fontSize: "lg", w: "full" } },
+    bad: { true: { bg: "accent.dangerSoft", borderColor: "accent.danger" } },
+  },
+  defaultVariants: { size: "text" },
+});
+const fieldLabel = css({
+  fontSize: "sm",
+  color: "text.subtle",
+  fontWeight: "bold",
+  display: "block",
+  mb: "0.5",
+});
+const hint = css({ fontSize: "sm", color: "text.subtle", mt: "1.5" });
+const smallInput = css(inputRecipe.raw(), { py: "2", px: "2.5", borderRadius: "input" });
+const nav = css({ display: "flex", gap: "1.5", mt: "2.5", alignItems: "center" });
+const doneButton = cx(pillButton({ tone: "primary", strong: true }), css({ ml: "auto" }));
+const removeButton = css({
+  borderWidth: "0",
+  bg: "transparent",
+  color: "text.subtle",
+  py: "1.5",
+  px: "1",
+  fontSize: "sm",
+  fontWeight: "bold",
+  cursor: "pointer",
+  _hover: { color: "accent.danger" },
+});
+const unitChip = cva({
+  base: {
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "border.strong",
+    bg: "surface.card",
+    borderRadius: "pill",
+    py: "0.5",
+    px: "2.5",
+    fontSize: "sm",
+    cursor: "pointer",
+    color: "text.muted",
+  },
+  variants: {
+    on: {
+      true: {
+        bg: "primary.700",
+        borderColor: "primary.700",
+        color: "text.inverse",
+        fontWeight: "bold",
+      },
+    },
+  },
+});
+
+/** グラフの書き込み枠。PC は押した場所の横、スマホは画面の下に出す */
 export function ReportCellEditor({
   target,
   graphNumber,
@@ -105,11 +237,11 @@ export function ReportCellEditor({
           const r = anchor.getBoundingClientRect();
           const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
           const limit = vh - box.offsetHeight - 16;
-          const head = (document.querySelector(".fm-wiz .head")?.clientHeight ?? 100) + 10;
+          const head = (document.querySelector("[data-report-head]")?.clientHeight ?? 100) + 10;
           if (r.bottom > limit) window.scrollBy({ top: r.bottom - limit, behavior: "smooth" });
           else if (r.top < head) window.scrollBy({ top: r.top - head, behavior: "smooth" });
         });
-        const scroller = anchor.closest(".scroller");
+        const scroller = anchor.closest("[data-scroller]");
         if (scroller) {
           const r = anchor.getBoundingClientRect();
           const s = scroller.getBoundingClientRect();
@@ -121,7 +253,7 @@ export function ReportCellEditor({
         }
       }
     } else {
-      // 右に入らなければ左に、左右とも入らなければ下（上）に置く（見本の place()）
+      // 右に入らなければ左に、左右とも入らなければ下（上）に置く
       const r = anchor.getBoundingClientRect();
       const w = box.offsetWidth;
       const h = box.offsetHeight;
@@ -141,7 +273,7 @@ export function ReportCellEditor({
     first?.select();
   }, [key, mobile]);
 
-  // スマホでソフトキーボードが出たとき、書き込み枠をキーボードの上に出す（見本の --kb）
+  // スマホでソフトキーボードが出たとき、書き込み枠をキーボードの上に出す
   useLayoutEffect(() => {
     const viewport = window.visualViewport;
     if (!viewport) return;
@@ -160,12 +292,12 @@ export function ReportCellEditor({
   }, []);
 
   const close = (
-    <button type="button" className="x" aria-label="閉じる" onClick={onClose}>
+    <button type="button" className={closeButton} aria-label="閉じる" onClick={onClose}>
       ×
     </button>
   );
   const done = (
-    <button type="button" className="go" onClick={onClose}>
+    <button type="button" className={doneButton} onClick={onClose}>
       完了
     </button>
   );
@@ -178,14 +310,14 @@ export function ReportCellEditor({
     const raw = graph.rows.find((row) => row.plotId === plot.id)?.value ?? "";
     body = (
       <>
-        <div className="t">
+        <div className={heading}>
           {plot.name || `区${plotIndex + 1}`}の{measurement.name || "数値"}
           {close}
         </div>
-        <div className="row">
+        <div className={row}>
           <input
             data-first
-            className={readCell(raw).kind === "bad" ? "big bad" : "big"}
+            className={bigInput({ size: "value", bad: readCell(raw).kind === "bad" })}
             aria-label={`グラフ${graphNumber}の区${plotIndex + 1}の数値`}
             inputMode="decimal"
             enterKeyHint="next"
@@ -205,24 +337,32 @@ export function ReportCellEditor({
               onNext(target);
             }}
           />
-          <span className="unit">{measurement.unit}</span>
+          <span
+            className={css({
+              flex: "1",
+              fontWeight: "extrabold",
+              color: "text.muted",
+              whiteSpace: "nowrap",
+            })}
+          >
+            {measurement.unit}
+          </span>
         </div>
-        <div className="hint">±や＊も一緒に書けます。例：41.7±0.8 a、82 ＊</div>
-        <div className="nav">{done}</div>
+        <div className={hint}>±や＊も一緒に書けます。例：41.7±0.8 a、82 ＊</div>
+        <div className={nav}>{done}</div>
       </>
     );
   } else if (target.k === "name" && plot) {
     body = (
       <>
-        <div className="t">
+        <div className={heading}>
           区の名前
           {close}
         </div>
-        <div className="row">
+        <div className={row}>
           <input
             data-first
-            className="big"
-            style={{ fontSize: 17 }}
+            className={bigInput()}
             aria-label="区の名前（必須）"
             enterKeyHint="done"
             placeholder={plotIndex === 0 ? "例）無処理区、対照区" : "例）処理区、使用区"}
@@ -235,14 +375,24 @@ export function ReportCellEditor({
             }}
           />
         </div>
-        <div className="sub2">
-          <label className="lbl" htmlFor={`ed-range-${plot.id}`}>
+        <div
+          className={css({
+            borderTopWidth: "1px",
+            borderTopStyle: "solid",
+            borderTopColor: "border.default",
+            mt: "2.5",
+            pt: "2",
+          })}
+        >
+          <label className={cx(fieldLabel, css({ mt: "1" }))} htmlFor={`ed-range-${plot.id}`}>
             調査した範囲（必須）
           </label>
-          <div className="rangeline">
+          <div
+            className={css({ display: "flex", gap: "1.5", alignItems: "center", flexWrap: "wrap" })}
+          >
             <input
               id={`ed-range-${plot.id}`}
-              className="input"
+              className={cx(smallInput, css({ flex: "1 1 token(sizes.44)" }))}
               placeholder="例）1区10株、3反復"
               value={plot.scope}
               onChange={(event) => onPlotChange(plot.id, { scope: event.target.value })}
@@ -252,16 +402,26 @@ export function ReportCellEditor({
                 ref.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus();
               }}
             />
-            <button type="button" className="mini" onClick={() => onRangeAll(plot.scope)}>
+            <button
+              type="button"
+              className={pillButton({ size: "xs" })}
+              onClick={() => onRangeAll(plot.scope)}
+            >
               この範囲を全ての区に入れる
             </button>
           </div>
-          <label className="lbl" htmlFor={`ed-desc-${plot.id}`}>
+          <label className={cx(fieldLabel, css({ mt: "1" }))} htmlFor={`ed-desc-${plot.id}`}>
             この区の説明
           </label>
           <textarea
             id={`ed-desc-${plot.id}`}
-            className="input"
+            className={css(textareaRecipe.raw(), {
+              py: "2",
+              px: "2.5",
+              minH: "14",
+              fontSize: "md",
+              lineHeight: "relaxed",
+            })}
             placeholder={
               plotIndex === 0
                 ? "例）〇〇は使っていない。かん水と施肥は処理区と同じ。"
@@ -271,9 +431,9 @@ export function ReportCellEditor({
             onChange={(event) => onPlotChange(plot.id, { description: event.target.value })}
           />
         </div>
-        <div className="nav">
+        <div className={nav}>
           {plots.length > 2 && (
-            <button type="button" className="rm" onClick={() => onRemovePlot(plot.id)}>
+            <button type="button" className={removeButton} onClick={() => onRemovePlot(plot.id)}>
               この区を削除
             </button>
           )}
@@ -296,17 +456,16 @@ export function ReportCellEditor({
     };
     body = (
       <>
-        <div className="t">
+        <div className={heading}>
           調査項目と単位
           {close}
         </div>
-        <div className="row">
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <span className="lbl">調査項目</span>
+        <div className={row}>
+          <div className={css({ flex: "1", minW: "0" })}>
+            <span className={fieldLabel}>調査項目</span>
             <input
               data-first
-              className="big"
-              style={{ fontSize: 17, width: "100%" }}
+              className={bigInput()}
               list="metricList"
               aria-label="調査項目"
               enterKeyHint="next"
@@ -320,12 +479,11 @@ export function ReportCellEditor({
               }}
             />
           </div>
-          <div style={{ flex: "0 0 130px" }}>
-            <span className="lbl">単位</span>
+          <div className={css({ flex: "0 0 token(sizes.32)" })}>
+            <span className={fieldLabel}>単位</span>
             <input
               data-unit-input
-              className="big"
-              style={{ fontSize: 17, width: "100%" }}
+              className={bigInput()}
               list="unitList"
               aria-label="単位（任意）"
               enterKeyHint="done"
@@ -340,12 +498,16 @@ export function ReportCellEditor({
             />
           </div>
         </div>
-        <div className="units" role="group" aria-label="単位の候補">
+        <div
+          className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}
+          role="group"
+          aria-label="単位の候補"
+        >
           {UNITS.map((unit) => (
             <button
               key={unit}
               type="button"
-              className={unit === measurement.unit ? "uchip on" : "uchip"}
+              className={unitChip({ on: unit === measurement.unit })}
               aria-pressed={unit === measurement.unit}
               onClick={() => setUnit(unit)}
             >
@@ -353,27 +515,33 @@ export function ReportCellEditor({
             </button>
           ))}
         </div>
-        <div className="hint">
+        <div className={hint}>
           {measurement.unit ? `数値の単位は「${measurement.unit}」になります。` : ""}
         </div>
-        <div className="nav">{done}</div>
+        <div className={nav}>{done}</div>
       </>
     );
   } else if (target.k === "title") {
     body = (
       <>
-        <div className="t">
+        <div className={heading}>
           グラフの題（任意）
-          <span className="hint" style={{ margin: "0 0 0 6px", fontWeight: 400 }}>
+          <span
+            className={css({
+              fontSize: "sm",
+              color: "text.subtle",
+              ml: "1.5",
+              fontWeight: "normal",
+            })}
+          >
             何と何を比べたグラフか
           </span>
           {close}
         </div>
-        <div className="row">
+        <div className={row}>
           <input
             data-first
-            className="big"
-            style={{ fontSize: 17 }}
+            className={bigInput()}
             aria-label="グラフの題（任意）"
             enterKeyHint="done"
             placeholder={
@@ -390,10 +558,10 @@ export function ReportCellEditor({
             }}
           />
         </div>
-        <div className="hint">
+        <div className={hint}>
           グラフの上に出る題です。書かないときは、調査項目がそのまま題になります。
         </div>
-        <div className="nav">{done}</div>
+        <div className={nav}>{done}</div>
       </>
     );
   }
@@ -401,7 +569,8 @@ export function ReportCellEditor({
   return (
     <div
       ref={ref}
-      className="ed"
+      className={panel({ mobile })}
+      data-cell-editor
       role="dialog"
       aria-label="書き込み"
       onKeyDown={(event) => {

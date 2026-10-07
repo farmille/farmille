@@ -1,98 +1,66 @@
-import Link from "next/link";
-import { after } from "next/server";
-import { Suspense } from "react";
+import type { ReactNode } from "react";
 
 import { PostActionsLoader } from "@/components/PostActionsLoader";
-import { RatingSkeleton, SkeletonRegion } from "@/components/Skeleton";
-import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
-import { getSessionUser } from "@/server/auth";
-import { getReviewRatingDistribution } from "@/server/queries/material-content";
-import type { MaterialDetail } from "@/server/queries/materials";
-import { listReviewsByMaterial } from "@/server/queries/reviews";
-import { recordViewEvents, viewEventsInsertFor } from "@/server/queries/view-events";
-import { createServerSupabase } from "@/server/supabase";
+import type { ReviewListItem } from "@/server/queries/reviews";
 
-import { unwrapQueryResult } from "../query-result";
+import { css } from "../../../../../styled-system/css";
+
+import { EmptyCard } from "./EmptyCard";
+import { MaterialSectionHeading } from "./MaterialSectionHeading";
 import { MockReviewCard } from "./MockReviewCard";
-import { RatingSummary } from "./RatingSummary";
+import { MoreLink } from "./MoreLink";
 import { ScrollToHashOnMount } from "./ScrollToHashOnMount";
 
-/** 見本 S.material の感想口コミ見出し（`.sec-h`）。読み込み中の表示でも使う。 */
+const listStyle = css({ mt: "2.5", display: "flex", flexDirection: "column", gap: "2.5" });
+const emptyStyle = css({ mt: "2.5" });
+const moreStyle = css({ mt: "3", textAlign: "center" });
+const ellipsisStyle = css({ mb: "0.5", color: "text.subtle", letterSpacing: "0.2em" });
+
+/** 感想口コミの見出し。読み込み中の表示でも使う。 */
 export function ReviewsHeading({ count }: { count?: number }) {
   return (
-    <div className="sec-h" id="anchorReviews" style={{ marginTop: 26 }}>
-      <h2 id="reviews-heading">
-        感想口コミ{" "}
-        {count === undefined ? null : (
-          <span className="muted tnum" style={{ fontSize: 12 }}>
-            {count}件
-          </span>
-        )}
-      </h2>
-    </div>
-  );
-}
-
-async function MaterialRating({ material }: { material: MaterialDetail }) {
-  const distribution = unwrapQueryResult(await getReviewRatingDistribution(material.id));
-  return (
-    <RatingSummary
-      average={material.avg_rating}
-      reviewCount={material.review_count}
-      distribution={distribution}
+    <MaterialSectionHeading
+      id="anchorReviews"
+      headingId="reviews-heading"
+      title="感想口コミ"
+      count={count}
+      spacing="section"
     />
   );
 }
 
-/** 見本 S.material の boxReviews（評価の分布・新しい3件・もっと見る）。 */
-export async function MaterialReviewsSection({
-  material,
-  viewerUserId,
-}: {
-  material: MaterialDetail;
+type MaterialReviewsSectionProps = {
+  materialPath: string;
+  reviews: ReviewListItem[];
+  total: number;
+  /** 一般ユーザーとしてログインしている閲覧者。自分の感想口コミに編集・削除を出す。 */
   viewerUserId: string | null;
-}) {
-  const [reviewsResult, session] = await Promise.all([
-    listReviewsByMaterial(material.id, { sort: "newest", page: 1, viewerUserId }),
-    getSessionUser(),
-  ]);
-  const reviews = unwrapQueryResult(reviewsResult);
-  const displayedReviews = reviews.items.slice(0, 3);
-  // 表示した口コミごとに閲覧を1回記録する。after() の中では cookies() が使えないため、クライアントは先に作る。
-  const insertViewEvents = viewEventsInsertFor(await createServerSupabase());
-  after(async () => {
-    await recordViewEvents({
-      targetType: "review",
-      targetIds: displayedReviews.map((review) => review.id),
-      viewerUserId,
-      insert: insertViewEvents,
-    });
-  });
-  const materialPath = `/materials/${material.id}`;
-  const viewerIsGeneral = session !== null && canUseGeneralFeatures(session.accountType);
+  /** 評価の分布（読み込み中は Suspense の代替表示が入る）。 */
+  rating: ReactNode;
+};
 
+/** 資材ページの感想口コミ欄（評価の分布・新しい3件・もっと見る）。 */
+export function MaterialReviewsSection({
+  materialPath,
+  reviews,
+  total,
+  viewerUserId,
+  rating,
+}: MaterialReviewsSectionProps) {
   return (
     <section aria-labelledby="reviews-heading">
-      <ReviewsHeading count={reviews.total} />
+      <ReviewsHeading count={total} />
       {/* 投稿・削除後の `?review=…#reviews-heading` で、この欄が出たあとに見出しまで移る */}
-      <ScrollToHashOnMount targetId="reviews-heading" trigger={reviews.total} />
-      <Suspense
-        fallback={
-          <SkeletonRegion label="評価の分布を読み込んでいます">
-            <RatingSkeleton />
-          </SkeletonRegion>
-        }
-      >
-        <MaterialRating material={material} />
-      </Suspense>
-      {displayedReviews.length > 0 ? (
-        <div className="stack" style={{ marginTop: 10 }}>
-          {displayedReviews.map((review) => (
+      <ScrollToHashOnMount targetId="reviews-heading" trigger={total} />
+      {rating}
+      {reviews.length > 0 ? (
+        <div className={listStyle}>
+          {reviews.map((review) => (
             <MockReviewCard
               key={review.id}
               review={review}
               currentPath={materialPath}
-              canManage={viewerIsGeneral && session.userId === review.author_user_id}
+              canManage={viewerUserId !== null && viewerUserId === review.author_user_id}
               actions={
                 <PostActionsLoader
                   target="review"
@@ -105,25 +73,18 @@ export async function MaterialReviewsSection({
           ))}
         </div>
       ) : (
-        <div className="card pad" style={{ marginTop: 10 }}>
-          <p style={{ fontSize: 13, fontWeight: 700 }}>まだ感想口コミがありません</p>
-          <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-            この資材の最初の感想口コミを投稿できます。
-          </p>
-        </div>
+        <EmptyCard
+          className={emptyStyle}
+          title="まだ感想口コミがありません"
+          description="この資材の最初の感想口コミを投稿できます。"
+        />
       )}
-      {reviews.total > 0 ? (
-        <div style={{ textAlign: "center", marginTop: 12 }}>
-          <div
-            className="muted"
-            aria-hidden="true"
-            style={{ letterSpacing: ".2em", marginBottom: 2 }}
-          >
+      {total > 0 ? (
+        <div className={moreStyle}>
+          <div className={ellipsisStyle} aria-hidden="true">
             ・・・
           </div>
-          <Link className="link-more" href={`${materialPath}/reviews`}>
-            もっと見る（全{reviews.total}件） →
-          </Link>
+          <MoreLink href={`${materialPath}/reviews`}>もっと見る（全{total}件） →</MoreLink>
         </div>
       ) : null}
     </section>

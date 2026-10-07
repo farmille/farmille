@@ -4,15 +4,16 @@ import Link from "next/link";
 import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import { getSessionUser } from "@/server/auth";
+import { css, cva } from "../../../styled-system/css";
 
 export type MockNavActive = "search" | "me";
 
 type MockSiteHeaderProps = {
-  /** 現在地のナビ項目（見本 .bn-item.on）。資材ページなど該当しない画面では渡さない。 */
+  /** 現在地のナビ項目。資材ページなど該当しない画面では渡さない。 */
   active?: MockNavActive;
   /** ヘッダー検索の初期値。検索画面が現在の q を渡す。 */
   searchQuery?: string;
-  /** 見本のホームはヒーローに検索欄があるので、ヘッダーの検索バーを出さない。 */
+  /** ホームはヒーローに検索欄があるので、ヘッダーの検索バーを出さない。 */
   showSearch?: boolean;
 };
 
@@ -33,8 +34,205 @@ function SearchIcon({ size }: { size: number }) {
   );
 }
 
+const header = css({
+  position: "relative",
+  zIndex: "30",
+  display: "flex",
+  alignItems: "center",
+  gap: "0.5",
+  px: "3",
+  pt: "max(token(spacing.2), env(safe-area-inset-top))",
+  pb: "2",
+  bg: "surface.card",
+  borderBottomWidth: "1px",
+  borderBottomStyle: "solid",
+  borderBottomColor: "border.default",
+  pc: {
+    gap: "1",
+    px: "6",
+    pt: "max(token(spacing.2.5), env(safe-area-inset-top))",
+    pb: "2.5",
+  },
+});
+
+const logo = css({
+  flex: "0 0 auto",
+  mr: "2.5",
+  color: "text.default",
+  fontSize: "lg",
+  fontWeight: "extrabold",
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+  pc: { mr: "5.5", fontSize: "xl" },
+});
+
+const scroller = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "0.5",
+  flex: "1",
+  minW: "0",
+  overflowX: "auto",
+  scrollbarWidth: "none",
+  "&::-webkit-scrollbar": { display: "none" },
+  pc: { display: "contents" },
+});
+
+const navItem = cva({
+  base: {
+    flex: "0 0 auto",
+    display: "flex",
+    alignItems: "center",
+    gap: "2",
+    px: "2",
+    py: "2",
+    borderRadius: "input",
+    color: "text.muted",
+    fontSize: "sm",
+    fontWeight: "bold",
+    textDecoration: "none",
+    whiteSpace: "nowrap",
+    _hover: { color: "text.default", bg: "surface.page" },
+    "& svg": { display: "block" },
+    pc: { px: "3.5" },
+  },
+  variants: {
+    kind: {
+      search: { flexDirection: "row-reverse" },
+      mypage: { display: "none", tab: { display: "flex" }, pc: { ml: "2.5" } },
+    },
+    active: {
+      true: {
+        color: "primary.700",
+        bg: "primary.100",
+        _hover: { color: "primary.700", bg: "primary.100" },
+      },
+      false: {},
+    },
+  },
+});
+
+const search = css({
+  display: "none",
+  pc: {
+    display: "flex",
+    alignItems: "center",
+    gap: "2.5",
+    flex: "1 1 token(spacing.60)",
+    minW: "48",
+    maxW: "auth",
+    ml: "auto",
+    px: "3.5",
+    py: "2",
+    bg: "surface.page",
+    color: "text.subtle",
+    borderWidth: "1.5px",
+    borderStyle: "solid",
+    borderColor: "border.strong",
+    borderRadius: "pill",
+    "&:hover, &:has(input:focus-visible)": { borderColor: "primary.700" },
+    "&:has(input:focus-visible)": {
+      outlineWidth: "2px",
+      outlineStyle: "solid",
+      outlineColor: "primary.700",
+      outlineOffset: "2px",
+    },
+  },
+});
+
+const searchInput = css({
+  flex: "1",
+  minW: "0",
+  p: "0",
+  border: "none",
+  outline: "none",
+  bg: "transparent",
+  font: "inherit",
+  fontSize: "sm",
+  color: "text.default",
+  appearance: "none",
+  _placeholder: { color: "text.subtle" },
+  "&::-webkit-search-cancel-button, &::-webkit-search-decoration": { display: "none" },
+});
+
+const searchSubmit = css({
+  p: "0",
+  border: "none",
+  bg: "transparent",
+  color: "primary.700",
+  fontSize: "xs",
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
+});
+
+const postSlot = css({
+  flex: "0 0 auto",
+  ml: "auto",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+const postLink = css({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "2",
+  px: "3",
+  py: "2",
+  borderRadius: "input",
+  bg: "primary.700",
+  color: "text.inverse",
+  fontSize: "sm",
+  fontWeight: "bold",
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+  pc: { px: "4", py: "2.5" },
+});
+
+const authLinks = css({
+  flex: "0 0 auto",
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  ml: "1.5",
+  whiteSpace: "nowrap",
+  pc: { ml: "3" },
+});
+
+const loginLink = css({
+  px: "2.5",
+  py: "2",
+  borderRadius: "input",
+  color: "text.muted",
+  fontSize: "sm",
+  fontWeight: "bold",
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+  _hover: { color: "text.default", bg: "surface.page" },
+});
+
+const signupLink = css({
+  px: "2.5",
+  py: "2",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "primary.700",
+  borderRadius: "input",
+  bg: "surface.card",
+  color: "primary.800",
+  fontSize: "sm",
+  fontWeight: "bold",
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+  _hover: { bg: "primary.100" },
+  pc: { px: "3.5" },
+});
+
+const accountSlot = css({ flex: "0 0 auto", ml: "1", pc: { ml: "2" } });
+
 /**
- * 見本の上部ナビ（.bottom-nav を全幅のヘッダーにしたもの）。
+ * 全幅の上部ナビ。
  * ログイン状態はサーバーで判定し、未ログインは「ログイン／新規会員登録」、
  * ログイン後は「マイページ」と、ログアウト等を含む既存のアカウントメニューを出す。
  */
@@ -49,41 +247,42 @@ export async function MockSiteHeader({
   const showPost = !signedIn || generalUser;
 
   return (
-    <header className="bottom-nav" data-ui="mock-site-header">
-      <Link href="/" className="bn-logo">
+    <header className={header} data-ui="mock-site-header">
+      <Link href="/" className={logo}>
         Farmille
       </Link>
-      <nav className="bn-scroll" aria-label="メインナビ">
+      <nav className={scroller} aria-label="メインナビ">
         <Link
           href="/search"
-          className={active === "search" ? "bn-item bn-search on" : "bn-item bn-search"}
+          className={navItem({ kind: "search", active: active === "search" })}
           aria-current={active === "search" ? "page" : undefined}
         >
-          <SearchIcon size={21} />
+          <SearchIcon size={15} />
           <span>資材をさがす</span>
         </Link>
         {showSearch ? (
-          <Form action="/search" aria-label="ヘッダー検索" className="pc-search" role="search">
+          <Form action="/search" aria-label="ヘッダー検索" className={search} role="search">
             <SearchIcon size={17} />
             <input
               // q が変わったとき（同じ画面での再送信や履歴の前後移動）に入力欄を作り直して反映する
               key={searchQuery}
               aria-label="資材を検索"
               autoComplete="off"
+              className={searchInput}
               defaultValue={searchQuery}
               enterKeyHint="search"
               name="q"
               placeholder="資材を検索"
               type="search"
             />
-            <button className="go" type="submit">
+            <button className={searchSubmit} type="submit">
               検索へ →
             </button>
           </Form>
         ) : null}
         {showPost ? (
-          <div className="bn-post">
-            <Link href="/post" className="plus" aria-label="投稿する">
+          <div className={postSlot}>
+            <Link href="/post" className={postLink} aria-label="投稿する">
               <svg
                 width="22"
                 height="22"
@@ -103,25 +302,25 @@ export async function MockSiteHeader({
           generalUser ? (
             <Link
               href="/me"
-              className={active === "me" ? "bn-item bn-mypage on" : "bn-item bn-mypage"}
+              className={navItem({ kind: "mypage", active: active === "me" })}
               aria-current={active === "me" ? "page" : undefined}
             >
               マイページ
             </Link>
           ) : null
         ) : (
-          <div className="auth-btns">
-            <Link href="/login" className="a-login">
+          <div className={authLinks}>
+            <Link href="/login" className={loginLink}>
               ログイン
             </Link>
-            <Link href="/signup/general" className="a-signup">
+            <Link href="/signup/general" className={signupLink}>
               新規会員登録
             </Link>
           </div>
         )}
       </nav>
       {signedIn ? (
-        <div className="bn-account">
+        <div className={accountSlot}>
           <DesktopAccountMenu myPageCurrent={active === "me"} />
         </div>
       ) : null}

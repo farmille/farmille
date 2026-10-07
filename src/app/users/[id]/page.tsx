@@ -1,5 +1,3 @@
-import "@/app/_mock/forms.css";
-
 import { getProfileDetails } from "@/server/queries/profile-details";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
@@ -17,6 +15,9 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublicProfilePage, type PublicProfilePageData } from "@/server/queries/public-profiles";
 import type { Result } from "@/server/result";
 import { ReportDialog } from "@/components/ReportDialog";
+import { css } from "../../../../styled-system/css";
+
+import { ProfileSectionHeading } from "@/app/me/_components/ProfileParts";
 
 import { PostTimeline } from "./_components/PostTimeline";
 
@@ -80,7 +81,6 @@ export default async function UserPage({ params }: UserPageProps) {
   const isOwnProfile = viewerUserId !== null && viewerUserId === data.profile.userId;
   const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 
-  // 見本 S.profilePublic の `.body` の中身。スタイルは src/app/_mock/mock.css・forms.css（.fm 配下）。
   return (
     <MockPageShell title={data.profile.handle} backHref="/">
       <MockProfileCard
@@ -95,7 +95,7 @@ export default async function UserPage({ params }: UserPageProps) {
       />
 
       {isOwnProfile ? null : (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+        <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>
           <ReportDialog
             action={createReportAction.bind(null, "profile", data.profile.userId, `/users/${id}`)}
             reasonOptions={REPORT_REASON_OPTIONS}
@@ -105,9 +105,7 @@ export default async function UserPage({ params }: UserPageProps) {
       )}
 
       <section aria-labelledby="profile-posts-heading">
-        <div className="sec-h">
-          <h2 id="profile-posts-heading">これまでの投稿</h2>
-        </div>
+        <ProfileSectionHeading id="profile-posts-heading">これまでの投稿</ProfileSectionHeading>
         <PostTimeline
           profile={data.profile}
           posts={data.posts}

@@ -1,13 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
+
 import { createBlankUsageReport } from "@/lib/usage-report";
+
 import { ReportGraphEditor } from "./ReportGraphEditor";
+import { filledReport } from "./reportStoryFixture";
+
 const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
 const measurement = input.measurements[0];
-if (!measurement || !measurement.graphs[0]) throw new Error("グラフの初期データがありません。");
+const filled = filledReport.measurements[0];
+if (!measurement?.graphs[0] || !filled?.graphs[0])
+  throw new Error("グラフの初期データがありません。");
 const meta = {
   title: "App/Materials/Report/ReportGraphEditor",
   component: ReportGraphEditor,
+  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     measurement,
     graph: measurement.graphs[0],
@@ -26,3 +33,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Blank: Story = {};
+export const Filled: Story = {
+  args: {
+    measurement: filled,
+    graph: filled.graphs[0],
+    plots: filledReport.plots,
+    active: { k: "val", g: filled.graphs[0].id, p: filledReport.plots[1]?.id ?? "" },
+  },
+};
+export const FilledDesktop: Story = {
+  args: { ...Filled.args, mobile: false, active: { k: "title", g: filled.graphs[0].id } },
+};

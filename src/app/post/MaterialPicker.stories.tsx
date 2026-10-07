@@ -1,7 +1,9 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
+
 import { userEvent, within } from "storybook/test";
 
 import type { PostingMaterialWithImage } from "@/server/queries/materials";
+import { css, cx } from "../../../styled-system/css";
 import { MaterialPicker } from "./MaterialPicker";
 
 const materials = [
@@ -25,9 +27,14 @@ const materials = [
   },
 ] satisfies PostingMaterialWithImage[];
 
+const fmDecorator: Decorator = (Story) => (
+  <div className={cx("fm", css({ p: "4" }))}>{Story()}</div>
+);
+
 const meta = {
   title: "App/Post/MaterialPicker",
   component: MaterialPicker,
+  decorators: [fmDecorator],
   args: { materials, query: "" },
 } satisfies Meta<typeof MaterialPicker>;
 

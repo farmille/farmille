@@ -1,5 +1,3 @@
-import "../_mock/sellers.css";
-
 import type { Metadata } from "next";
 
 import { MockPageShell } from "@/app/_mock/MockPageShell";
@@ -20,7 +18,6 @@ type ManufacturerPageProps = {
   searchParams: Promise<{ from?: string | string[] }>;
 };
 
-/** 見本 S.sellersLP（メーカーの方へ）。 */
 export default async function ManufacturerPage({ searchParams }: ManufacturerPageProps) {
   const { from } = await searchParams;
   const fromMe = from === "me";

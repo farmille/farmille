@@ -13,6 +13,9 @@ import {
   type SelectedSearchFilter,
 } from "@/components/search/search-selection";
 import type { SearchCatalog, SearchFilterItem } from "@/lib/material-search";
+import { css, cva } from "../../../../styled-system/css";
+
+import { chipCategoryStyle, chipRemoveRecipe, selectedChipRecipe } from "./search-chips";
 
 type MockSearchBoxProps = {
   /** URL の q。候補表示と資材一覧に共通の検索文字。 */
@@ -27,7 +30,7 @@ type Suggestion =
   | { kind: "maker"; name: string }
   | { kind: "name"; name: string };
 
-/** 見本の候補は8件まで。 */
+/** 候補は8件まで。 */
 const SUGGESTION_LIMIT = 8;
 
 function toSelected(suggestion: Suggestion): SelectedSearchFilter {
@@ -40,7 +43,6 @@ function normalize(text: string): string {
   return text.normalize("NFKC").toLowerCase();
 }
 
-/** 見本の SEARCH_ICON。 */
 function SearchIcon() {
   return (
     <svg
@@ -58,10 +60,85 @@ function SearchIcon() {
   );
 }
 
+const searchBoxStyle = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2.5",
+  py: "3",
+  px: "3",
+  bg: "surface.card",
+  borderWidth: "1.5px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  borderRadius: "button",
+  _focusWithin: {
+    borderColor: "primary.700",
+    boxShadow: "0 0 0 3px token(colors.primary.700/16)",
+  },
+});
+
+const inputStyle = css({
+  flex: "1",
+  minW: "0",
+  borderWidth: "0",
+  bg: "transparent",
+  color: "text.default",
+  fontFamily: "inherit",
+  fontSize: "md",
+  outline: "none",
+  _placeholder: { color: "text.subtle" },
+});
+
+const suggestionStyle = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2.5",
+  w: "full",
+  py: "2",
+  px: "1.5",
+  borderWidth: "0",
+  borderRadius: "input",
+  bg: "transparent",
+  color: "inherit",
+  fontFamily: "inherit",
+  fontSize: "md",
+  textAlign: "left",
+  cursor: "pointer",
+  _hover: { bg: "primary.soft" },
+  _active: { bg: "primary.soft" },
+});
+
+const tint = (hue: string) => ({
+  bg: `color-mix(in srgb, ${hue} 15%, token(colors.surface.card))`,
+  color: `color-mix(in srgb, ${hue} 68%, token(colors.text.default))`,
+});
+
+const categoryLabelRecipe = cva({
+  base: {
+    py: "0.5",
+    px: "1.5",
+    borderRadius: "mark",
+    fontSize: "xs",
+    fontWeight: "bold",
+    whiteSpace: "nowrap",
+  },
+  variants: {
+    category: {
+      crop: tint("token(colors.primary.700)"),
+      concern: tint("token(colors.tag.concern)"),
+      effect: tint("token(colors.tag.effect)"),
+      cond: tint("token(colors.tag.cond)"),
+      genre: tint("token(colors.tag.type)"),
+      maker: tint("token(colors.text.subtle)"),
+      name: tint("token(colors.tag.name)"),
+    },
+  },
+});
+
 /**
- * 見本 S.search の検索窓（`.ts-box`）・選択中の条件（`.ts-chips`）・候補（`.ts-panel`）。
+ * 検索ページの検索窓・選択中の条件・候補。
  * 動き（URL の q・filters・sort の更新、日本語変換中は検索しない、300ms 待ってから反映）は
- * 共通部品 MaterialSearchBox と同じ。見た目だけを見本のクラスで組む。
+ * 共通部品 MaterialSearchBox と同じ。
  */
 export function MockSearchBox({ initialQuery, selected, sort, catalog }: MockSearchBoxProps) {
   const router = useRouter();
@@ -132,14 +209,14 @@ export function MockSearchBox({ initialQuery, selected, sort, catalog }: MockSea
 
   return (
     <div aria-busy={isPending || undefined}>
-      <div className="ts-box">
-        <span className="ts-ic">
+      <div className={searchBoxStyle}>
+        <span className={css({ display: "flex", color: "text.subtle" })}>
           <SearchIcon />
         </span>
         <input
           aria-label="資材の検索条件"
           autoComplete="off"
-          className="ts-input"
+          className={inputStyle}
           onChange={(event) => setInput({ ...input, value: event.target.value })}
           onCompositionStart={() => setComposing(true)}
           onCompositionEnd={() => setComposing(false)}
@@ -149,15 +226,16 @@ export function MockSearchBox({ initialQuery, selected, sort, catalog }: MockSea
       </div>
 
       {selected.length > 0 ? (
-        <div className="ts-chips">
+        <div className={css({ display: "flex", flexWrap: "wrap", gap: "2", mt: "2.5" })}>
           {selected.map((filter, index) => (
-            <span className="chip-sel" key={selectedFilterKey(filter)}>
-              <span className="cat-mini">
+            <span className={selectedChipRecipe({ size: "md" })} key={selectedFilterKey(filter)}>
+              <span className={chipCategoryStyle}>
                 {TAG_CATEGORY_LABELS[selectedFilterCategory(filter)]}
               </span>
               {filter.name}
               <button
                 type="button"
+                className={chipRemoveRecipe({ size: "md" })}
                 aria-label={`${filter.name}を外す`}
                 onClick={() => navigate(selected.filter((_, itemIndex) => itemIndex !== index))}
               >
@@ -169,20 +247,31 @@ export function MockSearchBox({ initialQuery, selected, sort, catalog }: MockSea
       ) : null}
 
       {query.trim().length > 0 ? (
-        <div className="ts-panel">
+        <div
+          className={css({
+            mt: "2.5",
+            overflow: "hidden",
+            bg: "surface.card",
+            borderWidth: "1px",
+            borderStyle: "solid",
+            borderColor: "border.default",
+            borderRadius: "button",
+            boxShadow: "shadow",
+          })}
+        >
           {suggestions.length > 0 ? (
-            <div className="ts-pg">
+            <div className={css({ p: "3" })}>
               {suggestions.map((suggestion) => {
                 const next = toSelected(suggestion);
                 const category = selectedFilterCategory(next);
                 return (
                   <button
-                    className="sug"
+                    className={suggestionStyle}
                     key={selectedFilterKey(next)}
                     onClick={() => addSuggestion(suggestion)}
                     type="button"
                   >
-                    <span className="cat-label" data-cat={category}>
+                    <span className={categoryLabelRecipe({ category })}>
                       {TAG_CATEGORY_LABELS[category]}
                     </span>
                     <span>{next.name}</span>
@@ -191,7 +280,16 @@ export function MockSearchBox({ initialQuery, selected, sort, catalog }: MockSea
               })}
             </div>
           ) : (
-            <div className="ts-empty">「{query.trim()}」に一致する候補がありません</div>
+            <div
+              className={css({
+                p: "3.5",
+                color: "text.subtle",
+                fontSize: "md",
+                textAlign: "center",
+              })}
+            >
+              「{query.trim()}」に一致する候補がありません
+            </div>
           )}
         </div>
       ) : null}

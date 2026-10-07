@@ -2,16 +2,9 @@ import { formatDateJa } from "@/components/format-date";
 import type { PublishedUsageReportDetail } from "@/server/queries/usage-reports";
 
 import { prefectureName } from "./prefecture-name";
-import { ReportBars } from "./ReportBars";
+import { ReadingHeading, ReadingProse } from "../../articles/_components/Reading";
+import { ReportBars, ReportGraphNote } from "./ReportBars";
 import { ReportFigures, type ReportFigureMedia } from "./ReportFigures";
-
-function Prose({ text }: { text: string }) {
-  return (
-    <div className="a-body">
-      <p>{text}</p>
-    </div>
-  );
-}
 
 function formatMetricValue(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
@@ -19,7 +12,7 @@ function formatMetricValue(value: number): string {
 
 /**
  * 旧形式（form_version 1）の実証詳細レポートの続き（会員だけに出す部分）。
- * 節の並びと見出しは本番のまま、見た目を見本 S.reportArticle の `.a-h3`／`.a-body`／`.figure`／`.hgraph` にそろえる。
+ * 節の並びと見出しは本番のまま、見た目は新形式の記事にそろえる。
  */
 export function LegacyReportSections({
   report,
@@ -78,14 +71,14 @@ export function LegacyReportSections({
 
   return (
     <>
-      <h2 className="a-h3">使用目的</h2>
-      {purposeText ? <Prose text={purposeText} /> : null}
+      <ReadingHeading>使用目的</ReadingHeading>
+      {purposeText ? <ReadingProse text={purposeText} /> : null}
 
-      <h2 className="a-h3">環境</h2>
-      <Prose text={envLines.join("\n")} />
+      <ReadingHeading>環境</ReadingHeading>
+      <ReadingProse text={envLines.join("\n")} />
 
-      <h2 className="a-h3">使用方法・頻度</h2>
-      <Prose
+      <ReadingHeading>使用方法・頻度</ReadingHeading>
+      <ReadingProse
         text={
           applicationLines.length > 0
             ? applicationLines.join("\n")
@@ -98,15 +91,15 @@ export function LegacyReportSections({
 
       {report.climateNote ? (
         <>
-          <h2 className="a-h3">当時の気候・圃場の状況</h2>
-          <Prose text={report.climateNote} />
+          <ReadingHeading>当時の気候・圃場の状況</ReadingHeading>
+          <ReadingProse text={report.climateNote} />
         </>
       ) : null}
 
       <ReportFigures media={observationPhotos} grid />
 
-      <h2 className="a-h3">マイナス・良くなかった点（薬害など）</h2>
-      <Prose
+      <ReadingHeading>マイナス・良くなかった点（薬害など）</ReadingHeading>
+      <ReadingProse
         text={
           report.negativeNote !== null && report.negativeNote.length > 0
             ? report.negativeNote
@@ -116,7 +109,7 @@ export function LegacyReportSections({
 
       {report.metrics.length > 0 ? (
         <>
-          <h2 className="a-h3">収穫調査</h2>
+          <ReadingHeading>収穫調査</ReadingHeading>
           {report.metrics.map((metric) => (
             <ReportBars
               key={metric.id}
@@ -146,12 +139,12 @@ export function LegacyReportSections({
               ].filter((row) => row !== null)}
             />
           ))}
-          <div className="graph-cap">グラフは Farmille編集部が作成しています</div>
+          <ReportGraphNote>グラフは Farmille編集部が作成しています</ReportGraphNote>
         </>
       ) : null}
 
-      <h2 className="a-h3">まとめ・感想</h2>
-      <Prose text={report.summary} />
+      <ReadingHeading>まとめ・感想</ReadingHeading>
+      <ReadingProse text={report.summary} />
       <ReportFigures media={summaryMedia} />
     </>
   );

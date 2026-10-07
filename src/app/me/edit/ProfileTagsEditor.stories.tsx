@@ -3,6 +3,7 @@ import { ProfileTagsEditor } from "./ProfileTagsEditor";
 const meta = {
   title: "App/Me/ProfileTagsEditor",
   component: ProfileTagsEditor,
+  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     details: {
       standpoint: "farmer",

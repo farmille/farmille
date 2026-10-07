@@ -76,7 +76,7 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
     );
   }
 
-  // 入力画面は見本（WIZ_SRC）どおり、ステッパー・下書き保存・閉じるを持つ専用の見出しだけの全画面にする。
+  // 入力画面は共通の AppBar を出さず、ステッパー・下書き保存・閉じるを持つ専用の見出しだけの全画面にする。
   return (
     <main>
       <ReportForm

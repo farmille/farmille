@@ -102,3 +102,19 @@ export const AdminLoggedIn: Story = {
     placement: "container",
   },
 };
+
+export const MockLook: Story = {
+  beforeEach: () => {
+    mocked(getSessionUser).mockResolvedValue(null);
+  },
+  args: { look: "mock", placement: "container" },
+  decorators: [(Story) => <div className="fm">{Story()}</div>],
+};
+
+export const MockLookViewport: Story = {
+  beforeEach: () => {
+    mocked(getSessionUser).mockResolvedValue(null);
+  },
+  args: { look: "mock", placement: "viewport" },
+  decorators: [(Story) => <div className="fm">{Story()}</div>],
+};

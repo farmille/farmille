@@ -2,12 +2,14 @@ import Link from "next/link";
 
 import { MockChip, MockNoImage } from "@/app/materials/[id]/_components/MockParts";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
+import { css, cva, cx } from "../../../../styled-system/css";
 
 type SearchResultCardProps = {
   href: string;
   name: string;
   maker: string;
-  /** 感想口コミが無い資材は null（見本どおり★を出さない）。 */
+  /** 感想口コミが無い資材は null（★を出さない）。 */
   rating: number | null;
   reviewCount: number;
   reportCount: number;
@@ -22,34 +24,68 @@ type SearchResultCardProps = {
   preload?: boolean;
 };
 
-const evidenceBase = {
-  display: "inline-flex",
+const cardStyle = css(surfaceCardRecipe.raw({ padding: "flush" }), {
+  display: "flex",
   alignItems: "center",
-  fontSize: 10,
-  fontWeight: 700,
-  borderRadius: 999,
-  padding: "2px 9px",
-} as const;
+  gap: "3",
+  py: "3",
+  px: "3.5",
+  color: "inherit",
+  textDecoration: "none",
+});
 
-const directStyle = {
-  ...evidenceBase,
-  background: "var(--green-soft)",
-  color: "var(--green-deep)",
-  border: "1px solid color-mix(in srgb,var(--green) 30%,var(--line))",
-} as const;
+const imageStyle = css({
+  flex: "none",
+  display: "grid",
+  placeItems: "center",
+  w: "28",
+  h: "28",
+  p: "1.5",
+  overflow: "hidden",
+  bg: "surface.card",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "input",
+  "& img": { display: "block", w: "full", h: "full", objectFit: "contain" },
+});
 
-const groupStyle = {
-  ...evidenceBase,
-  background: "var(--bg)",
-  color: "var(--ink-2)",
-  border: "1px solid var(--line)",
-} as const;
+const tabularNums = css({ fontVariantNumeric: "tabular-nums" });
 
-/** 見本の CHEV。 */
+const reportCountRecipe = cva({
+  base: { fontVariantNumeric: "tabular-nums" },
+  variants: {
+    emphasized: {
+      true: { color: "accent.warn", fontSize: "md" },
+      false: { color: "text.default" },
+    },
+  },
+});
+
+const evidenceRecipe = cva({
+  base: {
+    display: "inline-flex",
+    alignItems: "center",
+    py: "0.5",
+    px: "2",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderRadius: "pill",
+    fontSize: "xs",
+    fontWeight: "bold",
+  },
+  variants: {
+    tone: {
+      direct: { bg: "primary.100", color: "primary.800", borderColor: "primary.700/30" },
+      group: { bg: "surface.page", color: "text.muted", borderColor: "border.default" },
+    },
+  },
+});
+
 function ChevronIcon() {
   return (
     <svg
-      className="chev"
+      className={css({ flex: "none", color: "text.subtle" })}
       width="16"
       height="16"
       viewBox="0 0 24 24"
@@ -64,8 +100,8 @@ function ChevronIcon() {
 }
 
 /**
- * 見本 S.search の結果カード（prodCard、`.card.mat-card`）。
- * 作物の根拠バッジは見本の tierBadge（✓ 直接記載＝緑、分類として記載＝灰）に当てる。
+ * 検索結果の資材カード。
+ * 作物で絞り込んだときは根拠のバッジ（✓ 直接記載＝緑、分類として記載＝灰）を出す。
  */
 export function SearchResultCard({
   href,
@@ -84,83 +120,49 @@ export function SearchResultCard({
 }: SearchResultCardProps) {
   const genres = categories.slice(0, 3);
   return (
-    <Link className="card mat-card" href={href} style={{ padding: "12px 14px", gap: 12 }}>
-      <div
-        className="mat-img"
-        style={{
-          width: 112,
-          height: 112,
-          flex: "0 0 auto",
-          background: "#fff",
-          border: "1px solid var(--line)",
-          padding: 6,
-        }}
-      >
+    <Link className={cardStyle} href={href}>
+      <div className={imageStyle}>
         {imageSrc ? (
           <Image alt="" src={imageSrc} width={100} height={100} sizes="100px" preload={preload} />
         ) : (
           <MockNoImage />
         )}
       </div>
-      <div className="mat-main" style={{ minWidth: 0 }}>
-        <div
-          className="mat-maker"
-          style={{
-            margin: "0 0 1px",
-            fontSize: 10.5,
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            flexWrap: "wrap",
-          }}
-        >
-          <span>{maker}</span>
-        </div>
-        <div className="mat-name" style={{ fontSize: 14.5 }}>
-          {name}
-        </div>
-        <div style={{ fontSize: 11.5, marginTop: 3 }}>
+      <div className={css({ flex: "1", minW: "0" })}>
+        <div className={css({ color: "text.muted", fontSize: "xs" })}>{maker}</div>
+        <div className={css({ fontSize: "md", fontWeight: "bold" })}>{name}</div>
+        <div className={css({ mt: "1", fontSize: "xs" })}>
           {rating === null ? null : (
             <>
-              <span style={{ color: "var(--amber)", fontWeight: 800 }}>
-                ★ <span className="tnum">{rating.toFixed(1)}</span>
+              <span className={css({ color: "accent.warn", fontWeight: "extrabold" })}>
+                ★ <span className={tabularNums}>{rating.toFixed(1)}</span>
               </span>
-              <span className="muted">（{reviewCount}）</span>
+              <span className={css({ color: "text.subtle" })}>（{reviewCount}）</span>
             </>
           )}
-          <span className="muted">
+          <span className={css({ color: "text.subtle" })}>
             {rating === null ? "" : " ・ "}実証詳細レポート{" "}
-            <b
-              className="tnum"
-              style={{
-                color: reportCount > 0 ? "var(--amber)" : "var(--ink)",
-                fontSize: reportCount > 0 ? "1.2em" : "1em",
-              }}
-            >
-              {reportCount}
-            </b>{" "}
-            件 ・ <span style={{ color: "var(--green-deep)" }}>★</span> お気に入り{" "}
-            <b className="tnum" style={{ color: "var(--ink)" }}>
-              {savedCount}
-            </b>
+            <b className={reportCountRecipe({ emphasized: reportCount > 0 })}>{reportCount}</b> 件
+            ・ <span className={css({ color: "primary.800" })}>★</span> お気に入り{" "}
+            <b className={cx(tabularNums, css({ color: "text.default" }))}>{savedCount}</b>
           </span>
         </div>
         {description ? (
-          <div
-            className="mat-desc"
-            style={{
-              marginTop: 3,
-              display: "-webkit-box",
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
-          >
+          <div className={css({ mt: "1", color: "text.muted", fontSize: "sm", lineClamp: "1" })}>
             {description}
           </div>
         ) : null}
         {genres.length > 0 ? (
-          <div className="mat-rate" style={{ gap: 5, marginTop: 5, flexWrap: "wrap" }}>
+          <div
+            className={css({
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: "1.5",
+              mt: "1.5",
+              "& > *": { minW: "0", maxW: "full", whiteSpace: "normal", overflowWrap: "anywhere" },
+            })}
+          >
             {genres.map((genre) => (
               <MockChip key={genre} tone="grey">
                 {genre}
@@ -169,15 +171,15 @@ export function SearchResultCard({
           </div>
         ) : null}
         {directEvidence.length > 0 || groupEvidence.length > 0 ? (
-          <div style={{ marginTop: 5, display: "flex", gap: 5, flexWrap: "wrap" }}>
+          <div className={css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "1.5" })}>
             {directEvidence.map((crop) => (
-              <span key={crop} style={directStyle}>
+              <span key={crop} className={evidenceRecipe({ tone: "direct" })}>
                 ✓ {crop}の記載あり
               </span>
             ))}
             {directEvidence.length === 0
               ? groupEvidence.map((group) => (
-                  <span key={group} style={groupStyle}>
+                  <span key={group} className={evidenceRecipe({ tone: "group" })}>
                     {group}として記載
                   </span>
                 ))

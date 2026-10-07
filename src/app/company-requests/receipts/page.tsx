@@ -1,17 +1,15 @@
-import "../../_mock/forms.css";
-import "../../_mock/sellers.css";
-
 import { MockPageShell } from "@/app/_mock/MockPageShell";
 
+import { formalPageRecipe, formalTitleStyle, introStyle } from "../_components/formal-styles";
 import { VerificationForm } from "../_components/VerificationForm";
 
-/** 受付票の確認メールの再発行。見本に画面はなく、簡易受付（S.delistIntake）と同じ部品で組む。 */
+/** 受付票の確認メールの再発行。終売・非表示の申請の受付と同じ部品で組む。 */
 export default function ReceiptAccessPage() {
   return (
     <MockPageShell title="受付票の確認" backHref="/company-requests/removal">
-      <div className="fm-chic" style={{ maxWidth: 820, marginLeft: "auto", marginRight: "auto" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800 }}>受付票の確認</h1>
-        <div className="card intro-card" style={{ marginTop: 12 }}>
+      <div className={formalPageRecipe({ width: "narrow" })}>
+        <h1 className={formalTitleStyle}>受付票の確認</h1>
+        <div className={introStyle}>
           <p>
             申請時の受付番号と確認済みメールアドレスを入力してください。受付票を開くための確認メールをお送りします。
           </p>

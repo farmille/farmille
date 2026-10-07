@@ -11,7 +11,22 @@ import {
 } from "@/lib/usage-report";
 
 import { METRIC_UNIT, ReportCellEditor, UNITS } from "./ReportCellEditor";
-import { Badge, Need, plotColorClass } from "./ReportFormParts";
+import { Checkbox } from "@/components/Checkbox";
+import { reportPlotColor } from "@/components/ReportPlotColor";
+import { inputRecipe } from "@/components/Input";
+import { textareaRecipe } from "@/components/Textarea";
+
+import { css, cva, cx } from "../../../../../../styled-system/css";
+
+import {
+  Badge,
+  Example,
+  GroupHeading,
+  Need,
+  checkRow,
+  pillButtonRecipe,
+  toast as toastStyle,
+} from "./ReportFormParts";
 import { ReportGraphEditor, editKey, readCell, type EditTarget } from "./ReportGraphEditor";
 
 type Measurement = UsageReportInput["measurements"][number];
@@ -48,6 +63,84 @@ function useMobile() {
   );
 }
 
+const sectionHeading = cva({
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "2",
+    mt: "6.5",
+    mb: "1",
+    fontSize: "md",
+    fontWeight: "extrabold",
+    lineHeight: "prose",
+  },
+  variants: { lead: { true: { mt: "1.5" }, false: {} } },
+  defaultVariants: { lead: false },
+});
+
+const sectionGuide = css({ mb: "2.5", fontSize: "sm", color: "text.muted" });
+
+const emptyGraphs = css({
+  mt: "3",
+  borderWidth: "1.5px",
+  borderStyle: "dashed",
+  borderColor: "border.strong",
+  borderRadius: "card",
+  p: "4.5",
+  textAlign: "center",
+  fontSize: "sm",
+  color: "text.subtle",
+});
+
+const addRow = css({ display: "flex", flexWrap: "wrap", gap: "2", mt: "3" });
+
+const footnote = css({ mt: "2.5", fontSize: "sm", lineHeight: "prose", color: "text.muted" });
+
+const plotCard = css({
+  mt: "2.5",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "card",
+  bg: "surface.card",
+  px: "3.5",
+  py: "3",
+});
+
+const plotHead = css({ display: "flex", alignItems: "center", gap: "2", fontWeight: "extrabold" });
+
+const swatch = css({ w: "3", h: "3", borderRadius: "mark", bg: "currentColor" });
+
+const plotGrid = css({
+  display: "grid",
+  gridTemplateColumns: "1fr",
+  gap: "2.5",
+  mt: "2",
+  tab: { gridTemplateColumns: "{sizes.44} 1fr" },
+});
+
+const smallLabel = css({
+  display: "block",
+  mb: "0.5",
+  fontSize: "sm",
+  fontWeight: "bold",
+  color: "text.subtle",
+});
+
+const longArea = css(textareaRecipe.raw({}), { minH: "24" });
+
+const undoButton = css({
+  border: "none",
+  bg: "transparent",
+  p: "0",
+  fontSize: "sm",
+  fontWeight: "extrabold",
+  color: "primary.300",
+  textDecoration: "underline",
+  whiteSpace: "nowrap",
+  cursor: "pointer",
+});
+
 const blankRow = (plotId: string): Row => ({
   id: crypto.randomUUID(),
   plotId,
@@ -55,7 +148,7 @@ const blankRow = (plotId: string): Row => ({
   value: "",
 });
 
-/** 見本の pane 4「比較・使用結果」（試作C2）。区は全グラフで共有する */
+/** 「比較・使用結果」のステップ。区は全グラフで共有する */
 export function ReportComparisonFields({
   input,
   onChange,
@@ -80,12 +173,12 @@ export function ReportComparisonFields({
     return () => clearTimeout(timer);
   }, [toast]);
 
-  // 書き込み枠とグラフの外を押したら閉じる（見本の pointerdown）
+  // 書き込み枠とグラフの外を押したら閉じる
   useEffect(() => {
     if (!ed) return;
     const close = (event: PointerEvent) => {
       if (!(event.target instanceof Element)) return;
-      if (event.target.closest(".ed") || event.target.closest("[data-edit]")) return;
+      if (event.target.closest("[data-cell-editor], [data-edit]")) return;
       setEd(null);
     };
     document.addEventListener("pointerdown", close);
@@ -137,7 +230,7 @@ export function ReportComparisonFields({
     };
   }
 
-  // 書く順番：項目と単位 → 区の名前（最初のグラフだけ） → 数値（見本の seq()）
+  // 書く順番：項目と単位 → 区の名前（最初のグラフだけ） → 数値
   function sequence(): EditTarget[] {
     return cards.flatMap(({ graph }, index) => [
       { k: "axis", g: graph.id },
@@ -287,20 +380,18 @@ export function ReportComparisonFields({
 
   return (
     <>
-      <h3 className="grp" style={{ marginTop: 0, borderTop: "none", paddingTop: 0 }}>
-        比較・使用結果<small>何と何を比べて、何を測ったか</small>
-      </h3>
-      <div id="s4">
-        <div id="itemsField">
-          <h3>
+      <GroupHeading title="比較・使用結果" note="何と何を比べて、何を測ったか" />
+      <div>
+        <div>
+          <h3 className={sectionHeading({ lead: true })}>
             結果のグラフ <Badge required />
             <Need message={errors.measurements} />
           </h3>
-          <p className="guide">
+          <p className={sectionGuide}>
             グラフの ✎ の付いた欄を押して書き込みます。書き終えたら Enter で次の欄へ進みます。
           </p>
           {cards.length === 0 && (
-            <div className="nocards">グラフがありません。下のボタンから追加します。</div>
+            <div className={emptyGraphs}>グラフがありません。下のボタンから追加します。</div>
           )}
           {cards.map(({ measurement, graph, graphIndex }, index) => {
             const measurementIndex = input.measurements.indexOf(measurement);
@@ -356,10 +447,10 @@ export function ReportComparisonFields({
               </ReportGraphEditor>
             );
           })}
-          <div className="adds">
+          <div className={addRow}>
             <button
               type="button"
-              className="add"
+              className={pillButtonRecipe({ tone: "dashed", strong: true })}
               disabled={input.measurements.length >= 30}
               onClick={() =>
                 onChange({
@@ -371,33 +462,35 @@ export function ReportComparisonFields({
               ＋ 別の調査項目のグラフを追加
             </button>
           </div>
-          <div className="note-s">
+          <div className={footnote}>
             ※ 誤差や有意差の記号も、数値のあとにそのまま書けます（例：41.7±0.8 a、82
             ＊）。±はエラーバーになります。記号の意味は、いちばん下の欄に書けます。
           </div>
         </div>
 
-        <div id="plotsField">
-          <h3>
+        <div>
+          <h3 className={sectionHeading({ lead: true })}>
             区の説明 <Badge required />
             <Need message={errors.plots} />
           </h3>
-          <p className="guide">グラフの区ごとに、調査した範囲と、この区の説明。{PLOT_GUIDE}</p>
+          <p className={sectionGuide}>
+            グラフの区ごとに、調査した範囲と、この区の説明。{PLOT_GUIDE}
+          </p>
           {input.plots.map((plot, index) => (
-            <div key={plot.id} className="plotd">
-              <div className="plotd-h">
-                <span className={`sw ${plotColorClass(index)}`} />
+            <div key={plot.id} className={plotCard}>
+              <div className={plotHead}>
+                <span className={cx(swatch, reportPlotColor(index))} />
                 {plot.name || "（区の名前）"}
                 <Need message={errors[`plots.${index}.name`]} />
               </div>
-              <div className="pg">
+              <div className={plotGrid}>
                 <div>
-                  <label className="lbl" htmlFor={`plot-scope-${plot.id}`}>
+                  <label className={smallLabel} htmlFor={`plot-scope-${plot.id}`}>
                     調査した範囲（必須）
                   </label>
                   <input
                     id={`plot-scope-${plot.id}`}
-                    className="input"
+                    className={inputRecipe()}
                     placeholder="例）1区10株、3反復"
                     value={plot.scope}
                     onChange={(event) => updatePlot(plot.id, { scope: event.target.value })}
@@ -405,8 +498,10 @@ export function ReportComparisonFields({
                   <Need block message={errors[`plots.${index}.scope`]} />
                   <button
                     type="button"
-                    className="mini"
-                    style={{ marginTop: 6 }}
+                    className={cx(
+                      pillButtonRecipe({ tone: "quiet", size: "xs", strong: true }),
+                      css({ mt: "1.5" }),
+                    )}
                     onClick={() => {
                       onChange({
                         ...input,
@@ -419,70 +514,61 @@ export function ReportComparisonFields({
                   </button>
                 </div>
                 <div>
-                  <label className="lbl" htmlFor={`plot-desc-${plot.id}`}>
+                  <label className={smallLabel} htmlFor={`plot-desc-${plot.id}`}>
                     この区の説明（必須）
                   </label>
                   <textarea
                     id={`plot-desc-${plot.id}`}
-                    className="input"
-                    data-desc
+                    className={longArea}
                     placeholder={PLOT_GUIDE}
                     value={plot.description}
                     onChange={(event) => updatePlot(plot.id, { description: event.target.value })}
                   />
                   <Need block message={errors[`plots.${index}.description`]} />
-                  <div className="ex ex-s">
-                    <b>記入例</b>
+                  <Example compact>
                     {index === 0
                       ? "〇〇は使っていない。かん水と施肥は処理区と同じ。"
                       : "〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。元肥は慣行の75%に減らした。"}
-                  </div>
+                  </Example>
                 </div>
               </div>
             </div>
           ))}
         </div>
-        <div id="usageField">
-          <label className="chk2">
-            <input
-              type="checkbox"
-              checked={input.methodDetailsAck}
-              onChange={(event) => onChange({ ...input, methodDetailsAck: event.target.checked })}
-            />
-            資材を使った区の説明に、施用方法・希釈倍率・使用量・回数を明記しました{" "}
-            <Badge required />
-            <Need message={errors.methodDetailsAck} />
-          </label>
-        </div>
-        <h3>
+        <label className={cx(checkRow, css({ mt: "3" }))}>
+          <Checkbox
+            checked={input.methodDetailsAck}
+            onChange={(event) => onChange({ ...input, methodDetailsAck: event.target.checked })}
+          />
+          資材を使った区の説明に、施用方法・希釈倍率・使用量・回数を明記しました <Badge required />
+          <Need message={errors.methodDetailsAck} />
+        </label>
+        <h3 className={sectionHeading()}>
           グラフにしにくい調査結果 <Badge />
         </h3>
-        <p className="guide">
+        <p className={sectionGuide}>
           数値にしにくい変化や様子、区ごとの違いなど。±や＊を使った場合の意味もここに書けます。
         </p>
         {(textMeasurements.length > 0 ? textMeasurements : [undefined]).map((measurement) => (
           <textarea
             key={measurement?.id ?? "qualitative"}
-            className="input"
-            style={{ minHeight: 96 }}
+            className={longArea}
             aria-label={measurement?.name || "グラフにしにくい調査結果"}
             placeholder="グラフにしにくい変化や様子"
             value={measurement?.body ?? ""}
             onChange={(event) => updateText(measurement, event.target.value)}
           />
         ))}
-        <div className="ex">
-          <b>記入例</b>
-          <br />
+        <Example>
           ・処理区では11月以降も葉色が濃く、成り疲れが見られなかった。無処理区は12月に入って草勢が落ち、下葉の黄化が目立った。
           <br />
           ・奇形（花芽飛び）の発生節数は、処理区が平均1.2節、無処理区が2.5節（平均値±標準誤差、n=30、5%水準で有意差あり）。
-        </div>
+        </Example>
         {toast && (
-          <div className="toast on" role="status">
+          <div className={toastStyle} role="status">
             <span>{toast.message}</span>
             {toast.kind !== "info" && (
-              <button type="button" onClick={undo}>
+              <button type="button" className={undoButton} onClick={undo}>
                 元に戻す
               </button>
             )}

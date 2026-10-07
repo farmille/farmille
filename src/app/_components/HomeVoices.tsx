@@ -1,71 +1,138 @@
 import Link from "next/link";
-import { after } from "next/server";
 
 import { formatDateJa } from "@/components/format-date";
 import { Icon } from "@/components/Icon";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
-import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
+import { SectionHeading } from "@/components/SectionHeading";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { publicProfileLabel } from "@/lib/public-profile-label";
 import { MockAvatar, MockStars } from "@/app/materials/[id]/_components/MockParts";
-import { getSessionUser } from "@/server/auth";
-import { getCatalogSearch, type CatalogSearch } from "@/server/queries/catalog-search";
-import { listRecentReviews, type RecentReviewItem } from "@/server/queries/reviews";
-import { listRecentUsageReports, type RecentUsageReportItem } from "@/server/queries/usage-reports";
-import { recordViewEvents, viewEventsInsertFor } from "@/server/queries/view-events";
-import { createServerSupabase } from "@/server/supabase";
+import type { RecentReviewItem } from "@/server/queries/reviews";
+import type { RecentUsageReportItem } from "@/server/queries/usage-reports";
+import { css, cva, cx } from "../../../styled-system/css";
 
-/** 見本の生産者の声は実証詳細レポート3件・感想口コミ4件。 */
-const REPORT_LIMIT = 3;
-const REVIEW_LIMIT = 4;
+export type VoiceMaterial = { id: string; name: string; maker: string; imageUrl: string | null };
 
-type MaterialSummary = { id: string; name: string; maker: string; imageUrl: string | null };
+const cardFrame = css.raw({
+  display: "flex",
+  flexDirection: "column",
+  bg: "surface.card",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "card",
+  boxShadow: "shadow",
+});
 
-function materialSummary(
-  catalog: CatalogSearch,
-  id: string,
-  fallbackName: string,
-): MaterialSummary {
-  const material = catalog.materials.find((row) => row.id === id);
-  return {
-    id,
-    name: material?.name ?? fallbackName,
-    maker: material?.manufacturer_name ?? "",
-    imageUrl:
-      material?.material_images
-        .filter((image) => image.is_current)
-        .toSorted((a, b) => a.sort_order - b.sort_order)[0]?.url ?? null,
-  };
-}
+const scrollRowStyle = css({
+  display: "flex",
+  overflowX: "auto",
+  scrollbarWidth: "none",
+  mx: "-4",
+  pt: "0.5",
+  px: "4",
+  pb: "1.5",
+  "&::-webkit-scrollbar": { display: "none" },
+  tab: { display: "grid", gap: "3", mx: "0", px: "0", overflow: "visible" },
+});
 
-/** 見本の prodRow（`.vc-prod`）。資材ページの該当欄へ移る。 */
-function VoiceMaterialRow({ material, anchor }: { material: MaterialSummary; anchor: string }) {
+const subheadingStyle = css({
+  mt: "5",
+  mb: "2.5",
+  color: "text.muted",
+  fontSize: "sm",
+  fontWeight: "extrabold",
+  tab: { mt: "6.5", mb: "3", fontSize: "md" },
+});
+
+const emptyTextStyle = css({ color: "text.subtle", fontSize: "sm" });
+
+const materialRowRecipe = cva({
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "2.5",
+    borderTopWidth: "1px",
+    borderTopStyle: "solid",
+    borderTopColor: "border.default",
+    color: "inherit",
+    textDecoration: "none",
+  },
+  variants: {
+    placement: {
+      report: { mt: "2.5", pt: "3", tab: { mt: "auto", pt: "2.5" } },
+      review: { mt: "3", pt: "3" },
+    },
+  },
+});
+
+const thumbStyle = css({
+  flex: "none",
+  display: "grid",
+  placeItems: "center",
+  w: "8",
+  h: "8",
+  overflow: "hidden",
+  bg: "surface.page",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "input",
+  color: "text.subtle",
+  fontSize: "2xs",
+  letterSpacing: "0.05em",
+  "& img": {
+    w: "full",
+    h: "full",
+    objectFit: "contain",
+    borderRadius: "inherit",
+    bg: "surface.card",
+  },
+});
+
+/** 資材ページの該当欄（実証詳細レポート・感想口コミ）へ移る行。 */
+function VoiceMaterialRow({
+  material,
+  placement,
+}: {
+  material: VoiceMaterial;
+  placement: "report" | "review";
+}) {
+  const anchor = placement === "report" ? "anchorReports" : "anchorReviews";
   return (
-    <Link className="vc-prod" href={`/materials/${material.id}#${anchor}`}>
-      <span className="thumb" aria-hidden="true">
+    <Link
+      className={cx("group", materialRowRecipe({ placement }))}
+      href={`/materials/${material.id}#${anchor}`}
+    >
+      <span className={thumbStyle} aria-hidden="true">
         {material.imageUrl ? (
           <Image alt="" src={material.imageUrl} width={34} height={34} sizes="34px" />
         ) : (
           "NO IMAGE"
         )}
       </span>
-      <div style={{ minWidth: 0 }}>
-        <div className="vp-name">{material.name}</div>
+      <div className={css({ minW: "0" })}>
+        <div
+          className={css({
+            fontSize: "sm",
+            fontWeight: "bold",
+            truncate: true,
+            _groupHover: { color: "primary.800" },
+          })}
+        >
+          {material.name}
+        </div>
         {material.maker ? (
-          <div
-            className="muted"
-            style={{
-              fontSize: 10,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
+          <div className={css({ color: "text.subtle", fontSize: "xs", truncate: true })}>
             {material.maker}
           </div>
         ) : null}
       </div>
-      <span className="arr" aria-hidden="true">
+      <span
+        className={css({ ml: "auto", color: "primary.700", fontWeight: "bold" })}
+        aria-hidden="true"
+      >
         →
       </span>
     </Link>
@@ -77,12 +144,32 @@ function VoiceReportCard({
   material,
 }: {
   report: RecentUsageReportItem;
-  material: MaterialSummary;
+  material: VoiceMaterial;
 }) {
   const href = `/reports/${report.id}`;
   return (
-    <article className="alist-card">
-      <Link href={href} className="cover" aria-label={report.title}>
+    <article
+      className={css(cardFrame, {
+        flex: "0 0 74%",
+        overflow: "hidden",
+        scrollSnapAlign: "start",
+        tab: { flex: "none" },
+      })}
+    >
+      <Link
+        href={href}
+        className={css({
+          display: "grid",
+          placeItems: "center",
+          aspectRatio: "image.landscape",
+          overflow: "hidden",
+          bg: "primary.soft",
+          color: "inherit",
+          "& img": { display: "block", w: "full", h: "full", objectFit: "cover" },
+          tab: { aspectRatio: "image.wide" },
+        })}
+        aria-label={report.title}
+      >
         {report.coverUrl ? (
           <Image
             alt=""
@@ -95,15 +182,69 @@ function VoiceReportCard({
           <Icon name="image" size="lg" />
         )}
       </Link>
-      <div className="abody">
-        <Link href={href} className="t">
+      <div
+        className={css({
+          flex: "1",
+          display: "flex",
+          flexDirection: "column",
+          pt: "2.5",
+          px: "3",
+          pb: "3",
+          tab: { pb: "2.5" },
+        })}
+      >
+        <Link
+          href={href}
+          className={css({
+            display: "block",
+            color: "inherit",
+            textDecoration: "none",
+            fontSize: "sm",
+            fontWeight: "bold",
+            lineHeight: "snug",
+            tab: { h: "2lh", lineClamp: "2" },
+          })}
+        >
           {report.title}｜{report.cropName}
         </Link>
-        {report.summary ? <div className="rp-ex">{report.summary}</div> : null}
-        <div className="rp-by">
+        {report.summary ? (
+          <div
+            className={css({
+              mt: "1.5",
+              color: "text.muted",
+              fontSize: "xs",
+              lineHeight: "relaxed",
+              lineClamp: "2",
+            })}
+          >
+            {report.summary}
+          </div>
+        ) : null}
+        <div
+          className={css({
+            display: "flex",
+            alignItems: "center",
+            gap: "2",
+            mt: "auto",
+            pt: "2",
+            color: "text.subtle",
+            fontSize: "sm",
+          })}
+        >
           <MockAvatar name={report.authorHandle} extraSmall />
-          <b>{report.authorHandle}</b>
-          <span className="rp-time">{formatDateJa(report.publishedAt)}</span>
+          <b
+            className={css({
+              minW: "0",
+              color: "text.muted",
+              fontWeight: "normal",
+              truncate: true,
+            })}
+          >
+            {report.authorHandle}
+          </b>
+          <span className={css({ flex: "none", ml: "auto", fontSize: "xs" })}>
+            {formatDateJa(report.publishedAt)}
+          </span>
         </div>
         <PostActionsLoader
           target="usage_report"
@@ -111,7 +252,7 @@ function VoiceReportCard({
           currentPath="/"
           helpfulCount={report.helpfulCount}
         />
-        <VoiceMaterialRow material={material} anchor="anchorReports" />
+        <VoiceMaterialRow material={material} placement="report" />
       </div>
     </article>
   );
@@ -122,104 +263,126 @@ function VoiceReviewCard({
   material,
 }: {
   review: RecentReviewItem;
-  material: MaterialSummary;
+  material: VoiceMaterial;
 }) {
   const handle = review.author?.handle ?? "退会したユーザー";
   const role = publicProfileLabel(review.author);
   const crops = review.crops.map((crop) => crop.name).join("・");
   return (
-    <article className="card voice-card">
-      <div className="vc-head">
+    <article
+      className={css(cardFrame, {
+        flex: "0 0 82%",
+        p: "3.5",
+        scrollSnapAlign: "start",
+        tab: { flex: "none" },
+      })}
+    >
+      <div className={css({ display: "flex", alignItems: "flex-start", gap: "2", fontSize: "sm" })}>
         <MockAvatar name={handle} src={review.author?.avatar_url} extraSmall />
         <div>
-          <b>{handle}</b> {role ? <span className="chip">{role}</span> : null}
-          <div className="muted" style={{ fontSize: 10.5, marginTop: 1 }}>
+          <b className={css({ fontWeight: "bold" })}>{handle}</b>{" "}
+          {role ? (
+            <span
+              className={css({
+                py: "0.5",
+                px: "2",
+                bg: "primary.100",
+                color: "primary.800",
+                borderRadius: "pill",
+                fontSize: "xs",
+                fontWeight: "semibold",
+                whiteSpace: "nowrap",
+              })}
+            >
+              {role}
+            </span>
+          ) : null}
+          <div className={css({ mt: "0.5", color: "text.subtle", fontSize: "xs" })}>
             {crops ? `${crops}で使用 ・ ` : ""}
             {formatDateJa(review.created_at)}
           </div>
         </div>
       </div>
-      <div className="stars">
+      <div className={css({ mt: "2" })}>
         <MockStars value={review.rating} />
       </div>
-      <div className="vc-text">{review.body}</div>
+      <div
+        className={css({
+          flex: "1",
+          mt: "2",
+          color: "text.muted",
+          fontSize: "sm",
+          lineHeight: "prose",
+          lineClamp: "4",
+        })}
+      >
+        {review.body}
+      </div>
       <PostActionsLoader
         target="review"
         id={review.id}
         currentPath="/"
         helpfulCount={review.helpfulCount}
       />
-      <VoiceMaterialRow material={material} anchor="anchorReviews" />
+      <VoiceMaterialRow material={material} placement="review" />
     </article>
   );
 }
 
-/** 見本 S.home の「生産者の声」。新着の実証詳細レポートと感想口コミ（公開中のみ）。 */
-export async function HomeVoices() {
-  const [reportsResult, reviewsResult, catalog, session, viewEventSupabase] = await Promise.all([
-    listRecentUsageReports({ limit: REPORT_LIMIT }),
-    listRecentReviews({ limit: REVIEW_LIMIT }),
-    getCatalogSearch(),
-    getSessionUser(),
-    // after() の中では cookies() が使えないため、閲覧記録用のクライアントは先に作る。
-    createServerSupabase(),
-  ]);
-  if (!reportsResult.ok) throw new Error("新着の実証詳細レポートを取得できませんでした。");
-  if (!reviewsResult.ok) throw new Error("新着の感想口コミを取得できませんでした。");
-  const reports = reportsResult.data;
-  const reviews = reviewsResult.data;
-  const viewerUserId =
-    session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
-  const insertViewEvents = viewEventsInsertFor(viewEventSupabase);
-  // 表示した感想口コミごとに閲覧を1回記録する。
-  after(async () => {
-    await recordViewEvents({
-      targetType: "review",
-      targetIds: reviews.map((review) => review.id),
-      viewerUserId,
-      insert: insertViewEvents,
-    });
-  });
-
+/** ホームの「生産者の声」。新着の実証詳細レポートと感想口コミ（公開中のみ）。 */
+export function HomeVoices({
+  reports,
+  reviews,
+}: {
+  reports: { report: RecentUsageReportItem; material: VoiceMaterial }[];
+  reviews: { review: RecentReviewItem; material: VoiceMaterial }[];
+}) {
   return (
-    <section aria-labelledby="home-voices-heading">
-      <div className="sec-h" style={{ marginTop: 34 }}>
-        <h2 id="home-voices-heading">生産者の声</h2>
-      </div>
-      <h3 className="voice-sub">実証詳細レポート</h3>
+    <section aria-labelledby="home-voices-heading" className={css({ mt: "8" })}>
+      <SectionHeading
+        className={css({ tab: { mb: "5", "& h2": { fontSize: "3xl" } } })}
+        title={<span id="home-voices-heading">生産者の声</span>}
+      />
+      <h3 className={subheadingStyle}>実証詳細レポート</h3>
       {reports.length > 0 ? (
-        <div className="report-scroll voice-reps">
-          {reports.map((report) => (
-            <VoiceReportCard
-              key={report.id}
-              report={report}
-              material={materialSummary(catalog, report.materialId, report.materialName)}
-            />
+        <div
+          className={cx(
+            scrollRowStyle,
+            css({
+              gap: "2.5",
+              scrollSnapType: "x mandatory",
+              tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+            }),
+          )}
+        >
+          {reports.map(({ report, material }) => (
+            <VoiceReportCard key={report.id} report={report} material={material} />
           ))}
         </div>
       ) : (
-        <div className="card pad">
-          <p className="muted" style={{ fontSize: 12.5 }}>
-            公開中の実証詳細レポートはまだありません。
-          </p>
+        <div className={surfaceCardRecipe()}>
+          <p className={emptyTextStyle}>公開中の実証詳細レポートはまだありません。</p>
         </div>
       )}
-      <h3 className="voice-sub">感想口コミ</h3>
+      <h3 className={subheadingStyle}>感想口コミ</h3>
       {reviews.length > 0 ? (
-        <div className="voice-scroll">
-          {reviews.map((review) => (
-            <VoiceReviewCard
-              key={review.id}
-              review={review}
-              material={materialSummary(catalog, review.material_id, review.materialName)}
-            />
+        <div
+          className={cx(
+            scrollRowStyle,
+            css({
+              gap: "3",
+              scrollSnapType: "x proximity",
+              tab: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))" },
+            }),
+          )}
+        >
+          {reviews.map(({ review, material }) => (
+            <VoiceReviewCard key={review.id} review={review} material={material} />
           ))}
         </div>
       ) : (
-        <div className="card pad">
-          <p className="muted" style={{ fontSize: 12.5 }}>
-            公開中の感想口コミはまだありません。
-          </p>
+        <div className={surfaceCardRecipe()}>
+          <p className={emptyTextStyle}>公開中の感想口コミはまだありません。</p>
         </div>
       )}
     </section>

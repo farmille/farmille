@@ -1,18 +1,69 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { useId, useState } from "react";
+
+import { inputRecipe } from "@/components/Input";
+import { css } from "../../../../../../styled-system/css";
 
 export type MockSearchItem = {
   value: string;
   /** 読み上げ名。見た目の並び（分類→名前）と違う順で読ませたいときに使う */
   label: string;
-  content: ReactNode;
+  name: string;
+  category?: string;
+  note?: string;
 };
 
-/**
- * 見本の `.search` ＋ `.drop`（入力しながら候補が出る検索欄）。
- * 見た目は見本のクラスのまま、入力欄は combobox、候補は listbox/option として読み上げる。
- */
+const root = css({ position: "relative", mt: "2" });
+
+const list = css({
+  position: "absolute",
+  top: "calc(100% + {spacing.1})",
+  left: "0",
+  right: "0",
+  zIndex: "6",
+  maxH: "72",
+  overflow: "auto",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "card",
+  bg: "surface.card",
+  boxShadow: "shadow.lift",
+});
+
+const option = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2.5",
+  px: "3",
+  py: "2",
+  borderBottomWidth: "1px",
+  borderBottomStyle: "solid",
+  borderBottomColor: "border.default",
+  cursor: "pointer",
+  _last: { borderBottomWidth: "0" },
+  _hover: { bg: "primary.soft" },
+  _selected: { bg: "primary.soft" },
+});
+
+const category = css({
+  flex: "0 0 auto",
+  borderRadius: "mark",
+  bg: "surface.panel",
+  px: "1.5",
+  fontSize: "xs",
+  color: "text.subtle",
+  whiteSpace: "nowrap",
+});
+
+const name = css({ fontWeight: "bold" });
+
+const note = css({ ml: "auto", fontSize: "xs", color: "text.subtle", whiteSpace: "nowrap" });
+
+const empty = css({ px: "3", py: "2.5", fontSize: "sm", color: "text.subtle" });
+
+/** 入力しながら候補が出る検索欄。入力欄は combobox、候補は listbox/option として読み上げる */
 export function MockSearch({
   ariaLabel,
   placeholder,
@@ -40,9 +91,9 @@ export function MockSearch({
     setOpen(false);
   }
   return (
-    <div className="search">
+    <div className={root}>
       <input
-        className="input"
+        className={inputRecipe()}
         role="combobox"
         aria-label={ariaLabel}
         aria-expanded={shown}
@@ -73,8 +124,8 @@ export function MockSearch({
       />
       {/* 候補を出していないときは listbox を置かない（入力欄と同じ名前の空の一覧を読み上げさせない）。 */}
       {shown ? (
-        <div id={listId} role="listbox" aria-label={ariaLabel} className="drop on">
-          {items.length === 0 && <div className="none">{emptyMessage}</div>}
+        <div id={listId} role="listbox" aria-label={ariaLabel} className={list}>
+          {items.length === 0 && <div className={empty}>{emptyMessage}</div>}
           {items.map((item) => (
             <div
               key={item.value}
@@ -82,11 +133,13 @@ export function MockSearch({
               role="option"
               aria-label={item.label}
               aria-selected={item === activeItem}
-              className="it"
+              className={option}
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => choose(item)}
             >
-              {item.content}
+              {item.category && <span className={category}>{item.category}</span>}
+              <span className={name}>{item.name}</span>
+              {item.note && <span className={note}>{item.note}</span>}
             </div>
           ))}
         </div>

@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+
+import { css, cva, cx } from "../../../styled-system/css";
+
 /** 1セット分を流し切る周期。 */
 const LOOP_MS = 55_000;
 /** カーソルを乗せている間の再生速度。 */
@@ -9,6 +12,27 @@ const HOVER_RATE = 0.25;
 const DRAG_THRESHOLD_PX = 4;
 
 type MarqueeMode = "marquee" | "static";
+
+const frameRecipe = cva({
+  base: {
+    mx: "-4",
+    pt: "1",
+    pb: "2",
+    overflow: "hidden",
+    maskImage:
+      "linear-gradient(90deg, transparent, token(colors.scrim) 6%, token(colors.scrim) 94%, transparent)",
+    _motionReduce: { overflowX: "auto" },
+    tab: { mx: "0" },
+  },
+  variants: {
+    mode: {
+      marquee: { cursor: "grab", touchAction: "pan-y", userSelect: "none" },
+      static: { overflowX: "auto" },
+    },
+  },
+});
+
+const setStyle = css({ display: "flex", gap: "3", pr: "3" });
 
 /** 周期内に収まるよう再生位置を正規化する。 */
 function wrapTime(time: number): number {
@@ -163,16 +187,27 @@ export function HomeMaterialMarquee({ children }: { children: ReactNode }) {
     };
   }, [mode]);
 
-  // 見本 S.home の `.prod-marquee > .pm-track`。スタイルは mock.css と home-search.css。
   return (
-    <div ref={frameRef} data-ui="home-material-marquee" data-mode={mode} className="prod-marquee">
-      <div ref={trackRef} className="pm-track">
-        <div ref={setRef} className="pm-set">
+    <div
+      ref={frameRef}
+      data-ui="home-material-marquee"
+      data-mode={mode}
+      className={frameRecipe({ mode })}
+    >
+      <div
+        ref={trackRef}
+        className={css({ display: "flex", w: "max-content", willChange: "transform" })}
+      >
+        <div ref={setRef} className={setStyle}>
           {children}
         </div>
         {mode === "marquee" ? (
           // ループ用の複製。支援技術とキーボードフォーカスから除外する。
-          <div className="pm-set" aria-hidden="true" inert>
+          <div
+            className={cx(setStyle, css({ _motionReduce: { display: "none" } }))}
+            aria-hidden="true"
+            inert
+          >
             {children}
           </div>
         ) : null}

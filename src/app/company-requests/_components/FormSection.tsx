@@ -1,24 +1,23 @@
 import type { ReactNode } from "react";
 
-/** 見本 section()：`.form-sec`（番号・見出し）と、その下の本文。 */
-export function FormSection({
-  number,
-  title,
-  children,
-}: {
-  number: number;
-  title: string;
-  children: ReactNode;
-}) {
+import { css } from "../../../../styled-system/css";
+
+const headingStyle = css({
+  mt: "10",
+  pt: "6.5",
+  borderTopWidth: "2px",
+  borderTopStyle: "solid",
+  borderTopColor: "accent.manufacturer/30",
+  fontSize: "3xl",
+  fontWeight: "extrabold",
+  letterSpacing: "0.02em",
+});
+
+export function FormSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section aria-label={title}>
-      <div className="form-sec">
-        <span className="no" aria-hidden="true">
-          {number}
-        </span>
-        <h2>{title}</h2>
-      </div>
-      <div style={{ marginTop: 14 }}>{children}</div>
+      <h2 className={headingStyle}>{title}</h2>
+      <div className={css({ mt: "3.5" })}>{children}</div>
     </section>
   );
 }

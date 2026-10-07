@@ -93,8 +93,8 @@ const postSlot = css({
 });
 
 const plusButton = css({
-  w: "46px",
-  h: "46px",
+  w: "12",
+  h: "12",
   borderRadius: "pill",
   bg: "primary.700",
   color: "text.inverse",

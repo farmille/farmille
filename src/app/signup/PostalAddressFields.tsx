@@ -9,11 +9,32 @@ import {
   VisibilityTag,
 } from "@/app/_mock/FormParts";
 import { PREFECTURES } from "@/lib/prefectures";
+
+import { css, cva, cx } from "../../../styled-system/css";
+import {
+  fieldInputStyle,
+  fieldLabelStyle,
+  fieldStyle,
+  guideStyle,
+  smallGhostButtonStyle,
+} from "./form-styles";
 import { findPostalAddress } from "./postal-action";
 
 const ZIP_GUIDE = "郵便番号を入れると、都道府県と市区町村（町域まで）が自動で入ります。";
 
-/** 見本 S.signup の「住所」欄（`.addr-grid`）。郵便番号からの自動入力は本番の仕組み（離れたとき＋ボタン）。 */
+const addressLabelStyle = css({ pt: "2", fontSize: "sm", fontWeight: "bold", color: "text.muted" });
+
+const zipNoteRecipe = cva({
+  base: { mt: "1", fontSize: "sm", lineHeight: "normal" },
+  variants: {
+    announced: {
+      true: { color: "primary.800" },
+      false: { color: "text.muted" },
+    },
+  },
+});
+
+/** 郵便番号からの自動入力は、入力欄を離れたときとボタンの両方で行う。 */
 export function PostalAddressFields({
   values,
   fieldErrors,
@@ -50,36 +71,44 @@ export function PostalAddressFields({
   const invalid = (name: string) => (fieldErrors[name] ? true : undefined);
 
   return (
-    <fieldset className="field">
-      <legend className="field-label">
+    <fieldset className={fieldStyle}>
+      <legend className={fieldLabelStyle}>
         住所
         <RequiredBadge />
       </legend>
       <div
-        className="fguide"
-        style={{
-          margin: "0 0 6px",
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          flexWrap: "wrap",
-        }}
+        className={cx(
+          guideStyle,
+          css({ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "1.5", mb: "1.5" }),
+        )}
       >
         <VisibilityTag visibility="public" />
         都道府県 ／ <VisibilityTag visibility="private" />
         郵便番号・市区町村・番地・建物名
       </div>
-      <div className="addr-grid">
-        <label className="addr-lb" htmlFor="postalCode">
+      <div
+        className={css({
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 1fr)",
+          rowGap: "1.5",
+          columnGap: "3",
+          alignItems: "start",
+          mt: "1",
+          tab: { gridTemplateColumns: "token(sizes.36) minmax(0, 1fr)", rowGap: "2.5" },
+        })}
+      >
+        <label className={addressLabelStyle} htmlFor="postalCode">
           郵便番号
         </label>
-        <div>
-          <div className="zip-row">
+        <div className={css({ minW: "0" })}>
+          <div
+            className={css({ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "2" })}
+          >
             <input
               aria-describedby={describedBy("postalCode-note", errorFor("postalCode"))}
               aria-invalid={invalid("postalCode")}
               autoComplete="postal-code"
-              className="input"
+              className={cx(fieldInputStyle, css({ flex: "1 1 token(sizes.44)", maxW: "80" }))}
               id="postalCode"
               inputMode="numeric"
               maxLength={8}
@@ -97,7 +126,7 @@ export function PostalAddressFields({
             />
             <button
               type="button"
-              className="btn btn-ghost btn-sm"
+              className={smallGhostButtonStyle}
               disabled={pending}
               onClick={lookup}
             >
@@ -105,28 +134,24 @@ export function PostalAddressFields({
             </button>
           </div>
           <div
-            className="fguide"
+            className={zipNoteRecipe({ announced: message !== "" })}
             id="postalCode-note"
             role="status"
-            style={{
-              margin: "4px 0 0",
-              color: message ? "var(--green-deep)" : undefined,
-            }}
           >
             {message || ZIP_GUIDE}
           </div>
           <FieldError id="postalCode-error" message={fieldErrors.postalCode} />
         </div>
 
-        <label className="addr-lb" htmlFor="prefectureCode">
+        <label className={addressLabelStyle} htmlFor="prefectureCode">
           都道府県
         </label>
-        <div>
+        <div className={css({ minW: "0" })}>
           <select
             aria-describedby={errorFor("prefectureCode")}
             aria-invalid={invalid("prefectureCode")}
             autoComplete="address-level1"
-            className="input"
+            className={cx(fieldInputStyle, css({ maxW: "56" }))}
             id="prefectureCode"
             name="prefectureCode"
             onChange={(event) => {
@@ -134,7 +159,6 @@ export function PostalAddressFields({
               setPrefecture(event.target.value);
             }}
             required
-            style={{ maxWidth: 220 }}
             value={prefecture}
           >
             <option value="" disabled>
@@ -149,15 +173,15 @@ export function PostalAddressFields({
           <FieldError id="prefectureCode-error" message={fieldErrors.prefectureCode} />
         </div>
 
-        <label className="addr-lb" htmlFor="city">
+        <label className={addressLabelStyle} htmlFor="city">
           市区町村
         </label>
-        <div>
+        <div className={css({ minW: "0" })}>
           <input
             aria-describedby={errorFor("city")}
             aria-invalid={invalid("city")}
             autoComplete="address-level2"
-            className="input"
+            className={fieldInputStyle}
             id="city"
             maxLength={100}
             name="city"
@@ -172,15 +196,15 @@ export function PostalAddressFields({
           <FieldError id="city-error" message={fieldErrors.city} />
         </div>
 
-        <label className="addr-lb" htmlFor="streetAddress">
+        <label className={addressLabelStyle} htmlFor="streetAddress">
           番地
         </label>
-        <div>
+        <div className={css({ minW: "0" })}>
           <input
             aria-describedby={errorFor("streetAddress")}
             aria-invalid={invalid("streetAddress")}
             autoComplete="address-line1"
-            className="input"
+            className={fieldInputStyle}
             defaultValue={values.streetAddress}
             id="streetAddress"
             maxLength={200}
@@ -191,15 +215,15 @@ export function PostalAddressFields({
           <FieldError id="streetAddress-error" message={fieldErrors.streetAddress} />
         </div>
 
-        <label className="addr-lb" htmlFor="buildingName">
+        <label className={addressLabelStyle} htmlFor="buildingName">
           建物名・部屋番号 <OptionalBadge />
         </label>
-        <div>
+        <div className={css({ minW: "0" })}>
           <input
             aria-describedby={errorFor("buildingName")}
             aria-invalid={invalid("buildingName")}
             autoComplete="address-line2"
-            className="input"
+            className={fieldInputStyle}
             defaultValue={values.buildingName}
             id="buildingName"
             maxLength={200}
@@ -209,7 +233,7 @@ export function PostalAddressFields({
           <FieldError id="buildingName-error" message={fieldErrors.buildingName} />
         </div>
       </div>
-      <div className="fguide" style={{ marginTop: 6, marginBottom: 0 }}>
+      <div className={cx(guideStyle, css({ mt: "1.5" }))}>
         ※
         市区町村は、プロフィール設定で「市区町村も表示する」を選んだ場合のみ公開されます。郵便番号・番地・建物名は公開されません。
       </div>

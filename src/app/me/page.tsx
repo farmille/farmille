@@ -1,5 +1,3 @@
-import "@/app/_mock/forms.css";
-
 import Link from "next/link";
 
 import { MockPageShell } from "@/app/_mock/MockPageShell";
@@ -9,11 +7,55 @@ import { errorMessageJa } from "@/server/errors";
 import { getSessionUser } from "@/server/auth";
 import { getMyPageData } from "@/server/queries/me-page";
 import { getProfileDetails } from "@/server/queries/profile-details";
+import { css, cva } from "../../../styled-system/css";
 
 import { AccountActions } from "./_components/AccountActions";
 import { NonGeneralNotice } from "./_components/NonGeneralNotice";
+import { ProfileSectionHeading } from "./_components/ProfileParts";
 import { HelpfulShelf, PostsShelf, SavedShelf } from "./_components/Shelves";
 import { resolveMeAccess } from "./_lib/access";
+
+const tabRow = css({
+  display: "flex",
+  gap: "2",
+  pb: "1",
+  overflowX: "auto",
+  scrollbarWidth: "none",
+  "&::-webkit-scrollbar": { display: "none" },
+});
+
+const tabPill = cva({
+  base: {
+    flex: "0 0 auto",
+    px: "3",
+    py: "1.5",
+    bg: "surface.card",
+    color: "text.muted",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "border.strong",
+    borderRadius: "pill",
+    fontSize: "sm",
+    textDecoration: "none",
+    _focusVisible: {
+      outlineWidth: "2px",
+      outlineStyle: "solid",
+      outlineColor: "primary.700",
+      outlineOffset: "2px",
+    },
+  },
+  variants: {
+    current: {
+      true: {
+        bg: "primary.700",
+        borderColor: "primary.700",
+        color: "text.inverse",
+        fontWeight: "semibold",
+      },
+      false: {},
+    },
+  },
+});
 
 export default async function MePage({
   searchParams,
@@ -40,7 +82,6 @@ export default async function MePage({
   if (!details.ok) throw new Error(errorMessageJa[details.error]);
   const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 
-  // 見本 S.mypage の `.body` の中身。スタイルは src/app/_mock/mock.css・forms.css（.fm 配下）。
   return (
     <MockPageShell title="マイページ" backHref="/" active="me">
       <MockProfileCard
@@ -56,21 +97,19 @@ export default async function MePage({
         ]}
       />
 
-      <div className="sec-h">
-        <h2 id="me-posts-heading">これまでの投稿</h2>
-      </div>
-      <nav aria-label="投稿の種類" className="filter-row">
+      <ProfileSectionHeading id="me-posts-heading">これまでの投稿</ProfileSectionHeading>
+      <nav aria-label="投稿の種類" className={tabRow}>
         <Link
           href="/me?tab=reports"
           aria-current={tab === "reports" ? "page" : undefined}
-          className={tab === "reports" ? "fpill on" : "fpill"}
+          className={tabPill({ current: tab === "reports" })}
         >
           実証詳細レポート {reportCount}
         </Link>
         <Link
           href="/me?tab=reviews"
           aria-current={tab === "reviews" ? "page" : undefined}
-          className={tab === "reviews" ? "fpill on" : "fpill"}
+          className={tabPill({ current: tab === "reviews" })}
         >
           感想口コミ {data.reviewCount}
         </Link>

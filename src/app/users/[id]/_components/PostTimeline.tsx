@@ -3,6 +3,8 @@ import { MockProfileReviewCard } from "@/app/_mock/MockProfileReviewCard";
 import { MockReportCard } from "@/app/materials/[id]/_components/MockReportCard";
 import type { PublicProfilePageData, PublicProfilePost } from "@/server/queries/public-profiles";
 
+import { EmptyNote, postStackStyle } from "@/app/me/_components/ProfileParts";
+
 type PostTimelineProps = {
   profile: PublicProfilePageData["profile"];
   posts: readonly PublicProfilePost[];
@@ -12,7 +14,7 @@ type PostTimelineProps = {
   viewerUserId?: string | null;
 };
 
-/** 見本 S.profilePublic の「これまでの投稿」（`.stack` に reportCard・reviewCard）。 */
+/** 公開プロフィールの「これまでの投稿」。実証詳細レポートと感想口コミを縦に並べる。 */
 export function PostTimeline({
   profile,
   posts,
@@ -21,10 +23,10 @@ export function PostTimeline({
 }: PostTimelineProps) {
   if (posts.length === 0) {
     return (
-      <div className="card pad empty-note">
-        <b>公開中の投稿はまだありません</b>
-        感想口コミや実証詳細レポートが公開されると、ここに表示されます。
-      </div>
+      <EmptyNote
+        title="公開中の投稿はまだありません"
+        description="感想口コミや実証詳細レポートが公開されると、ここに表示されます。"
+      />
     );
   }
 
@@ -33,7 +35,7 @@ export function PostTimeline({
   const isOwnProfile = viewerUserId !== null && viewerUserId === profile.userId;
 
   return (
-    <div className="stack">
+    <div className={postStackStyle}>
       {posts.map((post) =>
         post.kind === "review" ? (
           <MockProfileReviewCard

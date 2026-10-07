@@ -8,7 +8,56 @@ import {
 } from "@/lib/material-page-editor";
 import type { MaterialDetail } from "@/server/queries/materials";
 
+import { css, cx } from "../../../../../styled-system/css";
+
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
+
+import { MaterialBox } from "./MaterialBox";
 import { MockChip } from "./MockParts";
+
+const chipsStyle = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "0.5" });
+const usageMoreStyle = css({ mt: "1.5", "&[open] > summary::after": { content: '"▴"' } });
+const usageSummaryStyle = css({
+  cursor: "pointer",
+  fontSize: "sm",
+  color: "primary.800",
+  fontWeight: "semibold",
+  listStyle: "none",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "1",
+  "&::-webkit-details-marker": { display: "none" },
+  _after: { content: '"▾"', fontSize: "xs" },
+});
+const usageBlockStyle = css({
+  mt: "1.5",
+  px: "3",
+  py: "2",
+  bg: "surface.page",
+  borderWidth: "1px",
+  borderColor: "border.default",
+  borderRadius: "input",
+  fontSize: "sm",
+  lineHeight: "prose",
+  whiteSpace: "pre-wrap",
+  overflowWrap: "anywhere",
+});
+const usageEmptyStyle = css({ mt: "1.5", fontSize: "xs", color: "text.subtle" });
+const rowStyle = css({
+  px: "3.5",
+  py: "2.5",
+  borderBottomWidth: "1px",
+  borderColor: "border.default",
+  _last: { borderBottomWidth: "0" },
+});
+const termStyle = css({ fontSize: "xs", color: "text.subtle" });
+const valueStyle = css({
+  m: "0",
+  mt: "0.5",
+  fontSize: "md",
+  lineHeight: "relaxed",
+  overflowWrap: "anywhere",
+});
 
 type DetailRow = {
   label: string;
@@ -19,12 +68,12 @@ function methodLabel(method: string): string {
   return APPLICATION_METHODS.find((item) => item.value === method)?.label ?? method;
 }
 
-/** 見本の tagRow：タグを `.ts-chips` に並べる。無ければ「−」。 */
+/** タグを並べる。無ければ「−」。 */
 function tags(names: readonly string[], tone?: "grey"): ReactNode {
   const unique = [...new Set(names)];
   if (unique.length === 0) return "−";
   return (
-    <div className="ts-chips" style={{ marginTop: 2 }}>
+    <div className={chipsStyle}>
       {unique.map((name) => (
         <MockChip key={name} tone={tone}>
           {name}
@@ -35,7 +84,7 @@ function tags(names: readonly string[], tone?: "grey"): ReactNode {
 }
 
 /**
- * 見本 S.material の boxSpec（製品詳細）。
+ * 製品詳細。
  * 分類は登録された名前を表示し、メーカー未入力の説明を補完しない。全行を常に出し、未入力は「−」。
  */
 export function MaterialDetailTable({
@@ -74,22 +123,16 @@ export function MaterialDetailTable({
         <>
           {methods.length > 0 ? tags(methods.map(methodLabel)) : "−"}
           {usageBlocks.length > 0 ? (
-            <details className="usage-more">
-              <summary>詳細を見る</summary>
+            <details className={usageMoreStyle}>
+              <summary className={usageSummaryStyle}>詳細を見る</summary>
               {usageBlocks.map((usage, index) => (
-                <div
-                  key={index}
-                  className="usage-b"
-                  style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}
-                >
+                <div key={index} className={usageBlockStyle}>
                   {methodLabel(usage.method)}：{usage.detail}
                 </div>
               ))}
             </details>
           ) : (
-            <div className="muted" style={{ fontSize: 11.5, marginTop: 6 }}>
-              詳細：−
-            </div>
+            <div className={usageEmptyStyle}>詳細：−</div>
           )}
         </>
       ),
@@ -112,20 +155,15 @@ export function MaterialDetailTable({
   ];
 
   return (
-    <section aria-labelledby="material-detail-heading">
-      <h2 id="material-detail-heading" className="pp-h">
-        製品詳細
-      </h2>
-      <dl className="card" style={{ margin: 0 }}>
+    <MaterialBox headingId="material-detail-heading" title="製品詳細">
+      <dl className={cx(surfaceCardRecipe({ padding: "flush" }), css({ m: "0" }))}>
         {rows.map((row) => (
-          <div key={row.label} className="detail-row">
-            <dt className="dk">{row.label}</dt>
-            <dd className="dv" style={{ margin: 0, overflowWrap: "anywhere" }}>
-              {row.value ?? "−"}
-            </dd>
+          <div key={row.label} className={rowStyle}>
+            <dt className={termStyle}>{row.label}</dt>
+            <dd className={valueStyle}>{row.value ?? "−"}</dd>
           </div>
         ))}
       </dl>
-    </section>
+    </MaterialBox>
   );
 }

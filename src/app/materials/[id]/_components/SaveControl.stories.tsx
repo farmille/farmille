@@ -13,6 +13,7 @@ const toggleAction = fn(
 const meta = {
   title: "App/Materials/SaveControl",
   component: SaveControl,
+  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     materialId: "00000000-0000-4000-8000-000000000101",
     materialPath: "/materials/00000000-0000-4000-8000-000000000101",

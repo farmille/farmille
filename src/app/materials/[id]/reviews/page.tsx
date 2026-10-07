@@ -1,7 +1,4 @@
 import { MockPageShell } from "@/app/_mock/MockPageShell";
-// mock.css（MockPageShell が読み込む）より後に読み込む。
-import "@/app/_mock/reports-articles.css";
-
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -16,12 +13,31 @@ import { listReviewsByMaterial } from "@/server/queries/reviews";
 import { recordViewEvents, viewEventsInsertFor } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
 
+import { css } from "../../../../../styled-system/css";
+
+import { EmptyCard } from "../_components/EmptyCard";
 import { MockReviewCard } from "../_components/MockReviewCard";
 import { RatingSummary } from "../_components/RatingSummary";
 import { isMaterialId, loadMaterialOrNotFound, materialMetadata } from "../material-page-data";
 import { unwrapQueryResult } from "../query-result";
 import { ReviewSortSelect } from "./ReviewSortSelect";
 import { parseReviewSearchParams } from "./search-params";
+
+const visuallyHiddenStyle = css({ srOnly: true });
+const summaryStyle = css({ mb: "3" });
+const toolsStyle = css({
+  mb: "2.5",
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: "2",
+});
+const countStyle = css({
+  fontSize: "sm",
+  color: "text.subtle",
+  fontVariantNumeric: "tabular-nums",
+});
+const listStyle = css({ display: "flex", flexDirection: "column", gap: "2.5" });
 
 type MaterialReviewsPageProps = {
   params: Promise<{ id: string }>;
@@ -42,7 +58,6 @@ export async function generateMetadata({ params }: MaterialReviewsPageProps): Pr
   });
 }
 
-// 見本 S.reviewsAll の `.body`。スタイルは src/app/_mock/（.fm 配下に閉じている）。
 export default async function MaterialReviewsPage({
   params,
   searchParams,
@@ -110,8 +125,8 @@ export default async function MaterialReviewsPage({
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(reviewListJsonLd) }}
         />
       )}
-      <h1 className="sr-only">{material.name}の感想口コミ</h1>
-      <div style={{ marginBottom: 12 }}>
+      <h1 className={visuallyHiddenStyle}>{material.name}の感想口コミ</h1>
+      <div className={summaryStyle}>
         <RatingSummary
           average={material.avg_rating}
           reviewCount={material.review_count}
@@ -119,15 +134,13 @@ export default async function MaterialReviewsPage({
         />
       </div>
 
-      <div className="rv-tools">
-        <span className="muted tnum" style={{ fontSize: 12 }}>
-          {reviews.total}件
-        </span>
+      <div className={toolsStyle}>
+        <span className={countStyle}>{reviews.total}件</span>
         <ReviewSortSelect sort={sort} />
       </div>
 
       {reviews.items.length > 0 ? (
-        <div className="stack">
+        <div className={listStyle}>
           {reviews.items.map((review) => (
             <MockReviewCard
               key={review.id}
@@ -146,12 +159,11 @@ export default async function MaterialReviewsPage({
           ))}
         </div>
       ) : (
-        <div className="card pad" style={{ textAlign: "center" }}>
-          <p style={{ fontSize: 13, fontWeight: 700 }}>まだ感想口コミがありません</p>
-          <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-            この資材には、公開中の感想口コミがまだありません。
-          </p>
-        </div>
+        <EmptyCard
+          align="center"
+          title="まだ感想口コミがありません"
+          description="この資材には、公開中の感想口コミがまだありません。"
+        />
       )}
       <Pagination page={page} totalPages={reviews.totalPages} hrefForPage={hrefForPage} />
     </MockPageShell>

@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
 
-import { OptionalBadge, RequiredBadge } from "@/app/_mock/FormParts";
 import { applicationCopy } from "@/lib/company-application-copy";
 import {
   companyApplicationSchema,
@@ -17,8 +16,11 @@ import {
 } from "@/lib/company-application";
 import { errorMessageJa } from "@/server/errors";
 
+import { css, cx } from "../../../../styled-system/css";
+import { buttonRecipe } from "@/components/Button";
 import { submitApplication, restartRemoval } from "../actions";
-import { ConsentFields, consentSectionCount } from "./ConsentFields";
+import { pageButtonStyles } from "./button-styles";
+import { ConsentFields } from "./ConsentFields";
 import {
   ApplicationField,
   ContactFields,
@@ -26,35 +28,69 @@ import {
   type ContactDefaults,
 } from "./ContactFields";
 import { EvidenceFields } from "./EvidenceFields";
+import { textDangerButtonStyle } from "./EvidenceFields";
+import {
+  choiceInputStyle,
+  choiceListStyle,
+  choiceStyle,
+  fieldHeadingStyle,
+  fieldLabelStyle,
+  fieldsetStyle,
+  formBlockStyle,
+  fieldStyle,
+  formalActionsStyle,
+  formalControlRecipe,
+  formalDraftStyle,
+  formalGuideRecipe,
+  formalMessageRecipe,
+  formalSubmitStyle,
+  formNoteStyle,
+  introStyle,
+} from "./formal-styles";
+import { ConditionMark, LabelNote, OptionalMark, RequiredMark } from "./FormalMarks";
 import { FormSection } from "./FormSection";
+
+const itemCardStyle = css({
+  mt: "3",
+  pt: "4.5",
+  px: "5",
+  pb: "5.5",
+  bg: "surface.card",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "formal.line",
+  borderRadius: "mark",
+});
+
+const subHeadingStyle = css({
+  mt: "6.5",
+  mb: "-2",
+  fontSize: "md",
+  fontWeight: "extrabold",
+  color: "formal.ink",
+  letterSpacing: "0.02em",
+});
+
+const addItemStyle = css(buttonRecipe.raw({ variant: "ghost" }), {
+  mt: "3",
+  fontFamily: "inherit",
+  borderRadius: "mark",
+  borderStyle: "dashed",
+  borderColor: "accent.manufacturer",
+  color: "accent.manufacturer",
+  _disabled: { color: "text.subtle", borderColor: "border.default", cursor: "default" },
+});
+
+const orSeparatorStyle = css({
+  my: "2.5",
+  textAlign: "center",
+  fontSize: "xs",
+  color: "formal.subtle",
+  letterSpacing: "0.1em",
+});
 
 type ItemRow = { id: string; target: "new" | "existing" };
 
-/** 見本の f.tag（「単一選択」「複数選択可」など）。 */
-function Tag({ children }: { children: ReactNode }) {
-  return (
-    <span className="muted" style={{ fontSize: 11, fontWeight: 400 }}>
-      {children}
-    </span>
-  );
-}
-
-/** 見本の f.cond（「掲載済み資材の場合は必須」）。 */
-function ConditionBadge({ children }: { children: ReactNode }) {
-  return (
-    <span
-      className="badge badge-opt"
-      style={{
-        color: "var(--amber)",
-        borderColor: "color-mix(in srgb, var(--amber) 35%, var(--line))",
-      }}
-    >
-      {children}
-    </span>
-  );
-}
-
-/** 見本の single（`.radios` の `.radio`）。本物のラジオを中に置く。 */
 function RadioGroup({
   legend,
   name,
@@ -69,14 +105,15 @@ function RadioGroup({
   onChange?: (value: string) => void;
 }) {
   return (
-    <fieldset className="field single">
-      <legend className="field-label">
-        {legend} <RequiredBadge /> <Tag>単一選択</Tag>
+    <fieldset className={fieldsetStyle}>
+      <legend className={fieldLabelStyle}>
+        {legend} <RequiredMark /> <LabelNote>単一選択</LabelNote>
       </legend>
-      <div className="radios">
+      <div className={choiceListStyle}>
         {options.map((option) => (
-          <label className="radio" key={option.value}>
+          <label className={choiceStyle} key={option.value}>
             <input
+              className={choiceInputStyle}
               checked={value === undefined ? undefined : value === option.value}
               name={name}
               onChange={onChange === undefined ? undefined : () => onChange(option.value)}
@@ -84,11 +121,10 @@ function RadioGroup({
               type="radio"
               value={option.value}
             />
-            <span className="ring" aria-hidden="true"></span>
             <div>
               <div>{option.label}</div>
               {option.sub === undefined ? null : (
-                <div className="muted" style={{ fontSize: 11.5, fontWeight: 400, marginTop: 2 }}>
+                <div className={css({ mt: "0.5", fontSize: "xs", color: "text.subtle" })}>
                   {option.sub}
                 </div>
               )}
@@ -100,7 +136,7 @@ function RadioGroup({
   );
 }
 
-/** 本番の申請紹介文（「\n\n」の後ろが「・」区切りの箇条）を、見本の intro-card の p と ul に分ける。 */
+/** 申請紹介文（「\n\n」の後ろが「・」区切りの箇条）を段落と箇条に分ける。 */
 function IntroCard({ text }: { text: string }) {
   const [lead, list = ""] = text.split("\n\n");
   const bullets = list
@@ -109,7 +145,7 @@ function IntroCard({ text }: { text: string }) {
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
   return (
-    <div className="card intro-card" style={{ marginTop: 12 }}>
+    <div className={introStyle}>
       <p>{lead}</p>
       {bullets.length > 0 ? (
         <ul>
@@ -136,10 +172,7 @@ const SIGNER_LABELS = {
   removal: "申請者氏名",
 } as const satisfies Record<ApplicationKind, string>;
 
-/**
- * 見本 formScreen（申請フォーム A〜D、`.fm-chic`）。項目・必須・送信の手順・受付票への遷移は本番のまま。
- * 公開の終売・非表示（D）で使う。A〜C はメーカーダッシュボード側の申請フォームが受け持つ。
- */
+/** 申請フォーム（掲載・移行・終売／非表示）。終売・非表示は公開の画面、ほかはメーカーダッシュボードで使う。 */
 export function CompanyApplicationForm({
   intentId,
   kind,
@@ -251,48 +284,39 @@ export function CompanyApplicationForm({
     }
   }
 
-  const extraSections = kind === "transfer_out" ? 1 : kind === "transfer_in" ? 2 : 0;
-  const consentStart = 3 + extraSections;
-  const signNumber = consentStart + consentSectionCount(kind);
-
   return (
     <form onSubmit={submit}>
       <IntroCard text={copy.introduction} />
       {kind === "removal" ? (
-        <div style={{ marginTop: 12 }}>
-          <p className="form-note">
+        <div className={css({ mt: "3" })}>
+          <p className={formNoteStyle}>
             途中でページを閉じた場合、入力内容は復元されません。残った添付を破棄するには、最初から入力してください。
           </p>
           <button
-            className="btn btn-ghost btn-sm"
+            className={cx(pageButtonStyles.ghostSmall, css({ mt: "2" }))}
             disabled={submitting || uploads > 0}
             onClick={() => void restart()}
-            style={{ marginTop: 8 }}
             type="button"
           >
             入力と添付を破棄して最初から入力
           </button>
         </div>
       ) : null}
-      <p className="form-note">
+      <p className={formNoteStyle}>
         担当者情報・ご提出資料は公開されません。申請の保存後に運営が内容を確認します。
       </p>
 
-      <fieldset disabled={submitting} className="form-block">
-        <FormSection number={1} title={titles.company}>
+      <fieldset disabled={submitting} className={formBlockStyle}>
+        <FormSection title={titles.company}>
           <ContactFields
             defaults={defaults}
             removal={kind === "removal"}
             fixedAccount={kind !== "removal"}
           />
           {kind === "removal" ? (
-            <ApplicationField
-              id="companyUrl"
-              label="会社概要ページのURL"
-              badges={<RequiredBadge />}
-            >
+            <ApplicationField id="companyUrl" label="会社概要ページのURL" badges={<RequiredMark />}>
               <input
-                className="input"
+                className={formalControlRecipe()}
                 id="companyUrl"
                 maxLength={2000}
                 name="companyUrl"
@@ -305,11 +329,11 @@ export function CompanyApplicationForm({
         </FormSection>
       </fieldset>
 
-      <FormSection number={2} title={titles.items}>
-        <div className="fguide">
+      <FormSection title={titles.items}>
+        <div className={formalGuideRecipe()}>
           複数ある場合は「資材を追加」で資材ごとに繰り返し入力してください。資材名はパッケージ記載の正式名称を入力してください。
         </div>
-        <div className="items">
+        <div>
           {rows.map((row, index) => (
             <MaterialItem
               index={index}
@@ -335,7 +359,7 @@ export function CompanyApplicationForm({
           ))}
         </div>
         <button
-          className="btn btn-ghost add-item"
+          className={addItemStyle}
           disabled={rows.length >= 100 || submitting}
           onClick={() =>
             setRows((previous) => [
@@ -350,16 +374,16 @@ export function CompanyApplicationForm({
       </FormSection>
 
       {kind === "transfer_out" ? (
-        <FormSection number={3} title="移行先企業情報">
+        <FormSection title="移行先企業情報">
           <ContactFields prefix="destination." defaults={emptyContact} />
         </FormSection>
       ) : null}
       {kind === "transfer_in" ? (
         <>
-          <FormSection number={3} title="移行の経緯">
-            <ApplicationField id="background" label="申請の経緯" badges={<RequiredBadge />}>
+          <FormSection title="移行の経緯">
+            <ApplicationField id="background" label="申請の経緯" badges={<RequiredMark />}>
               <textarea
-                className="textarea"
+                className={formalControlRecipe({ multiline: true })}
                 id="background"
                 maxLength={10000}
                 name="background"
@@ -368,11 +392,11 @@ export function CompanyApplicationForm({
               />
             </ApplicationField>
           </FormSection>
-          <FormSection number={4} title="経緯を確認できる資料">
-            <div className="fguide">{historyExplanation}</div>
-            <div className="field">
-              <div className="field-label">
-                現オーナー企業の同意が確認できる資料（メール等の写し） <OptionalBadge />
+          <FormSection title="経緯を確認できる資料">
+            <div className={formalGuideRecipe()}>{historyExplanation}</div>
+            <div className={fieldStyle}>
+              <div className={fieldHeadingStyle}>
+                現オーナー企業の同意が確認できる資料（メール等の写し） <OptionalMark />
               </div>
               <EvidenceFields
                 inputId="evidence-owner-agreement"
@@ -383,9 +407,9 @@ export function CompanyApplicationForm({
                 purpose="owner_agreement"
               />
             </div>
-            <div className="field">
-              <div className="field-label">
-                移行の事実が確認できる資料（官報公告・プレスリリース・契約書等） <OptionalBadge />
+            <div className={fieldStyle}>
+              <div className={fieldHeadingStyle}>
+                移行の事実が確認できる資料（官報公告・プレスリリース・契約書等） <OptionalMark />
               </div>
               <EvidenceFields
                 inputId="evidence-succession"
@@ -400,12 +424,12 @@ export function CompanyApplicationForm({
         </>
       ) : null}
 
-      <ConsentFields kind={kind} startNumber={consentStart} />
+      <ConsentFields kind={kind} />
 
-      <FormSection number={signNumber} title="署名">
-        <ApplicationField id="applicationDate" label="申請日" badges={<RequiredBadge />}>
+      <FormSection title="署名">
+        <ApplicationField id="applicationDate" label="申請日" badges={<RequiredMark />}>
           <input
-            className="input"
+            className={formalControlRecipe()}
             defaultValue={new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" })}
             id="applicationDate"
             name="applicationDate"
@@ -413,9 +437,9 @@ export function CompanyApplicationForm({
             type="date"
           />
         </ApplicationField>
-        <ApplicationField id="signerName" label={SIGNER_LABELS[kind]} badges={<RequiredBadge />}>
+        <ApplicationField id="signerName" label={SIGNER_LABELS[kind]} badges={<RequiredMark />}>
           <input
-            className="input"
+            className={formalControlRecipe()}
             id="signerName"
             maxLength={200}
             name="signerName"
@@ -425,27 +449,28 @@ export function CompanyApplicationForm({
         </ApplicationField>
       </FormSection>
 
-      <p className="form-note">
+      <p className={formNoteStyle}>
         受付番号と回答の控えを
         {kind === "removal" ? "確認済みメール" : "企業会員の登録連絡先"}「{recipient}
         」へ送信します。審査後の連絡先は、入力した担当者メールアドレスです。
       </p>
       {error ? (
-        <div className="err-box show" role="alert">
+        <div className={formalMessageRecipe({ tone: "error" })} role="alert">
           {error}
         </div>
       ) : null}
-      <div className="form-actions">
-        <button className="btn btn-primary" disabled={submitting || uploads > 0} type="submit">
+      <div className={formalActionsStyle}>
+        <button className={formalSubmitStyle} disabled={submitting || uploads > 0} type="submit">
           {submitting ? "申請を保存しています…" : "内容を確認して申請する"}
         </button>
-        <div className="draft">完了時、または資料に不足がある場合にメールでご連絡します</div>
+        <div className={formalDraftStyle}>
+          完了時、または資料に不足がある場合にメールでご連絡します
+        </div>
       </div>
     </form>
   );
 }
 
-/** 見本 itemTpl()：資材ごとの `.card.item-card`。 */
 function MaterialItem({
   row,
   index,
@@ -476,12 +501,12 @@ function MaterialItem({
     <ApplicationField
       id={fieldId("materialName")}
       label="資材名"
-      badges={<RequiredBadge />}
+      badges={<RequiredMark />}
       guide="※パッケージ記載の正式名称"
     >
       <input
         aria-describedby={`${fieldId("materialName")}-guide`}
-        className="input"
+        className={formalControlRecipe()}
         id={fieldId("materialName")}
         maxLength={300}
         name={field("materialName")}
@@ -497,14 +522,14 @@ function MaterialItem({
         label="FarmilleページURL"
         badges={
           kind === "registration" ? (
-            <ConditionBadge>掲載済み資材の場合は必須</ConditionBadge>
+            <ConditionMark>掲載済み資材の場合は必須</ConditionMark>
           ) : (
-            <RequiredBadge />
+            <RequiredMark />
           )
         }
       >
         <input
-          className="input"
+          className={formalControlRecipe()}
           id={fieldId("materialUrl")}
           maxLength={2000}
           name={field("materialUrl")}
@@ -516,34 +541,37 @@ function MaterialItem({
     ) : null;
   const relations =
     kind === "registration" || kind === "removal" ? (
-      <fieldset className="field multi">
-        <legend className="field-label">
-          当該資材との関係 <RequiredBadge /> <Tag>複数選択可</Tag>
+      <fieldset className={fieldsetStyle}>
+        <legend className={fieldLabelStyle}>
+          当該資材との関係 <RequiredMark /> <LabelNote>複数選択可</LabelNote>
         </legend>
-        <div className="rel-chips">
+        <div className={choiceListStyle}>
           {Object.entries(relationLabels).map(([value, label]) => (
-            <label className="org-opt" key={value}>
-              <input name={field("relations")} type="checkbox" value={value} />
+            <label className={choiceStyle} key={value}>
+              <input
+                className={choiceInputStyle}
+                name={field("relations")}
+                type="checkbox"
+                value={value}
+              />
               {label}
             </label>
           ))}
         </div>
-        <div className="fguide" style={{ marginTop: 6, marginBottom: 0 }}>
-          {relationExplanation}
-        </div>
+        <div className={formalGuideRecipe({ placement: "trailing" })}>{relationExplanation}</div>
       </fieldset>
     ) : null;
   const evidence = (
-    <div className="field evidence">
-      <div className="field-label">
+    <div className={fieldStyle}>
+      <div className={fieldHeadingStyle}>
         {kind === "transfer_out"
           ? "移行先企業の関与を確認できる資料"
           : kind === "transfer_in"
             ? "貴社の企業名が当該資材のパッケージ上に明記されていることが確認できる資料"
             : "パッケージが確認できる資料"}{" "}
-        <RequiredBadge />
+        <RequiredMark />
       </div>
-      <div className="fguide" id={evidenceGuideId}>
+      <div className={formalGuideRecipe()} id={evidenceGuideId}>
         {kind === "transfer_out"
           ? "移行先企業名がパッケージ上に明記されていることが確認できる画像・PDF、またはパッケージが確認できる製品ページURLをご提出ください。"
           : evidenceExplanation}
@@ -559,10 +587,10 @@ function MaterialItem({
         onCount={(count) => onCount(`${row.id}.package`, count)}
         purpose="package"
       />
-      <div className="or-sep">または</div>
+      <div className={orSeparatorStyle}>または</div>
       <input
         aria-label="パッケージが確認できる製品ページURL"
-        className="input"
+        className={formalControlRecipe()}
         maxLength={2000}
         name={field("evidenceUrl")}
         placeholder="パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL（https://）"
@@ -572,26 +600,38 @@ function MaterialItem({
   );
 
   return (
-    <div className="card item-card">
-      <div className="ih">
-        <b>
-          資材 <span className="idx">{index + 1}</span>
-        </b>
+    <div className={itemCardStyle}>
+      <div
+        className={css({
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "2.5",
+        })}
+      >
+        <b className={css({ fontSize: "lg", color: "formal.ink" })}>資材 {index + 1}</b>
         {removable ? (
-          <button className="rm" disabled={removeDisabled} onClick={onRemove} type="button">
+          <button
+            className={textDangerButtonStyle}
+            disabled={removeDisabled}
+            onClick={onRemove}
+            type="button"
+          >
             この資材を削除
           </button>
         ) : null}
       </div>
       {removable ? (
-        <div className="fguide" style={{ marginTop: 4 }}>
+        <div
+          className={css({ mt: "1", color: "accent.danger", fontSize: "sm", lineHeight: "prose" })}
+        >
           添付がある場合は、資料を削除してから資材を削除してください。
         </div>
       ) : null}
 
       {kind === "registration" ? (
         <>
-          <div className="sub-h">2-1. 申請内容</div>
+          <div className={subHeadingStyle}>2-1. 申請内容</div>
           <RadioGroup
             legend="申請内容"
             name={field("target")}
@@ -602,16 +642,16 @@ function MaterialItem({
             ]}
             value={row.target}
           />
-          <div className="sub-h">2-2. 対象資材</div>
+          <div className={subHeadingStyle}>2-2. 対象資材</div>
           {materialName}
           {materialUrl}
           <ApplicationField
             id={fieldId("officialUrl")}
             label="製品公式ページURL"
-            badges={<OptionalBadge />}
+            badges={<OptionalMark />}
           >
             <input
-              className="input"
+              className={formalControlRecipe()}
               id={fieldId("officialUrl")}
               maxLength={2000}
               name={field("officialUrl")}
@@ -619,23 +659,23 @@ function MaterialItem({
               type="url"
             />
           </ApplicationField>
-          <div className="sub-h">2-3. 当該資材との関係</div>
+          <div className={subHeadingStyle}>2-3. 当該資材との関係</div>
           {relations}
-          <div className="sub-h">2-4. パッケージが確認できる資料</div>
+          <div className={subHeadingStyle}>2-4. パッケージが確認できる資料</div>
           {evidence}
         </>
       ) : null}
 
       {kind === "removal" ? (
         <>
-          <div className="sub-h">2-1. 対象資材</div>
+          <div className={subHeadingStyle}>2-1. 対象資材</div>
           {materialUrl}
           {materialName}
-          <div className="sub-h">2-2. 当該資材との関係</div>
+          <div className={subHeadingStyle}>2-2. 当該資材との関係</div>
           {relations}
-          <div className="sub-h">2-3. パッケージが確認できる資料</div>
+          <div className={subHeadingStyle}>2-3. パッケージが確認できる資料</div>
           {evidence}
-          <div className="sub-h">2-4. 申請内容</div>
+          <div className={subHeadingStyle}>2-4. 申請内容</div>
           <RadioGroup
             legend="申請種別"
             name={field("requestType")}
@@ -652,9 +692,9 @@ function MaterialItem({
               },
             ]}
           />
-          <ApplicationField id={fieldId("reason")} label="申請理由" badges={<RequiredBadge />}>
+          <ApplicationField id={fieldId("reason")} label="申請理由" badges={<RequiredMark />}>
             <textarea
-              className="textarea"
+              className={formalControlRecipe({ multiline: true })}
               id={fieldId("reason")}
               maxLength={10000}
               name={field("reason")}
@@ -682,15 +722,15 @@ function MaterialItem({
 
       {kind === "transfer_out" || kind === "transfer_in" ? (
         <>
-          <div className="sub-h">2-1. 対象資材</div>
+          <div className={subHeadingStyle}>2-1. 対象資材</div>
           {materialUrl}
           {materialName}
           {kind === "transfer_in" ? (
             <>
-              <div className="sub-h">2-2. 当該資材の現在の資材オーナー企業</div>
-              <ApplicationField id={fieldId("ownerName")} label="法人名" badges={<RequiredBadge />}>
+              <div className={subHeadingStyle}>2-2. 当該資材の現在の資材オーナー企業</div>
+              <ApplicationField id={fieldId("ownerName")} label="法人名" badges={<RequiredMark />}>
                 <input
-                  className="input"
+                  className={formalControlRecipe()}
                   id={fieldId("ownerName")}
                   maxLength={200}
                   name={field("ownerName")}
@@ -700,10 +740,10 @@ function MaterialItem({
               <ApplicationField
                 id={fieldId("ownerInformation")}
                 label="その他、分かる情報"
-                badges={<OptionalBadge />}
+                badges={<OptionalMark />}
               >
                 <textarea
-                  className="textarea"
+                  className={formalControlRecipe({ multiline: true })}
                   id={fieldId("ownerInformation")}
                   maxLength={10000}
                   name={field("ownerInformation")}
@@ -712,17 +752,17 @@ function MaterialItem({
               </ApplicationField>
             </>
           ) : null}
-          <div className="sub-h">
+          <div className={subHeadingStyle}>
             {kind === "transfer_in"
               ? "2-3. 申請企業の関与を確認できる資料"
               : "2-2. 移行先企業の関与を確認できる資料"}
           </div>
           {evidence}
-          <div className="field ev-alt">
-            <div className="field-label">
+          <div className={fieldStyle}>
+            <div className={fieldHeadingStyle}>
               または、その他、当該資材と貴社との関係を確認できる資料
             </div>
-            <div className="fguide">{successionExplanation}</div>
+            <div className={formalGuideRecipe()}>{successionExplanation}</div>
             <EvidenceFields
               inputId={fieldId("involvement")}
               intentId={intentId}

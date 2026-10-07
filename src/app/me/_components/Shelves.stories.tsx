@@ -7,6 +7,7 @@ import { helpfulItems, ownPosts, ownProfile, savedMaterials } from "./story-fixt
 const meta = {
   title: "App/Me/Shelves",
   component: PostsShelf,
+  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { profile: ownProfile, posts: ownPosts },
 } satisfies Meta<typeof PostsShelf>;
 

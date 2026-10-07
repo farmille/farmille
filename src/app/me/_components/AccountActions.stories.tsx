@@ -5,6 +5,7 @@ import { AccountActions } from "./AccountActions";
 const meta = {
   title: "App/Me/AccountActions",
   component: AccountActions,
+  decorators: [(Story) => <div className="fm">{Story()}</div>],
 } satisfies Meta<typeof AccountActions>;
 
 export default meta;

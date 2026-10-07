@@ -40,7 +40,7 @@ const th = css({
   borderRightStyle: "solid",
   borderRightColor: "border.default",
   whiteSpace: "nowrap",
-  minW: "96px",
+  minW: "24",
 });
 
 const td = css({

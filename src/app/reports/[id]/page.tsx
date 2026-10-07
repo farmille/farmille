@@ -4,7 +4,6 @@ import "@/app/_mock/reports-articles.css";
 
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -13,7 +12,6 @@ import { FabBar } from "@/components/FabBar";
 import { HelpfulButton } from "@/components/HelpfulButton";
 import { helpfulPillRecipe } from "@/components/helpful-pill";
 import { Icon } from "@/components/Icon";
-import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
 import { STANDPOINTS } from "@/lib/standpoints";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
@@ -27,10 +25,18 @@ import { getPublishedUsageReport } from "@/server/queries/usage-reports";
 import { recordViewEvent } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
 
-import { MockAvatar, MockCheckIcon } from "../../materials/[id]/_components/MockParts";
+import { MockCheckIcon } from "../../materials/[id]/_components/MockParts";
 import { LegacyReportSections } from "./LegacyReportSections";
 import { ReportFigure } from "./ReportFigures";
 import { ReportGate } from "./ReportGate";
+import { ReportHeader } from "./ReportHeader";
+import {
+  ReadingHeading,
+  ReadingProse,
+  readingArticle,
+  readingFoot,
+} from "../../articles/_components/Reading";
+import { css } from "../../../../styled-system/css";
 import { StructuredReportArticle } from "./StructuredReportArticle";
 
 type ReportDetailPageProps = {
@@ -155,48 +161,18 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(reportJsonLd) }}
       />
-      <article className="pub-body">
-        <h1 className="art-title">{report.title}</h1>
-        <div className="byline">
-          <Link href={`/users/${report.author.userId}`} className="by-link">
-            <MockAvatar name={report.author.handle} src={report.author.avatarUrl} size={32} />
-            <span className="by-name">{report.author.handle}</span>
-          </Link>
-          <time className="by-sub" dateTime={report.publishedAt}>
-            {formatDateJa(report.publishedAt)}
-          </time>
-          {standpointLabel ? <span className="by-sub">{standpointLabel}</span> : null}
-        </div>
-        <div className="rp-tags">
-          <span className="chip-sel">
-            <span className="cat-mini">作物</span>
-            {cropLabel}
-          </span>
-          {report.purposeTags.map((tag) => (
-            <span key={tag} className="chip-sel">
-              <span className="cat-mini">効果</span>
-              {tag}
-            </span>
-          ))}
-        </div>
-        <Link href={materialPath} className="ref">
-          <div>
-            <div className="muted" style={{ fontSize: 10.5 }}>
-              対象資材
-            </div>
-            <div className="t-name">{report.material.name}</div>
-            <div className="muted" style={{ fontSize: 12 }}>
-              {report.material.manufacturerName}
-            </div>
-          </div>
-        </Link>
+      <article className={readingArticle}>
+        <ReportHeader
+          report={report}
+          cropLabel={cropLabel}
+          standpointLabel={standpointLabel}
+          materialPath={materialPath}
+        />
 
         {report.structured === null ? (
           <>
-            <h2 className="a-h3">結果・感想</h2>
-            <div className="a-body">
-              <p>{report.observedChange}</p>
-            </div>
+            <ReadingHeading>結果・感想</ReadingHeading>
+            <ReadingProse text={report.observedChange} />
             {report.formVersion === 1 && cover ? <ReportFigure media={cover} /> : null}
           </>
         ) : null}
@@ -214,8 +190,32 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
             ) : (
               <LegacyReportSections report={report} coverId={cover?.id ?? null} />
             )}
-            <div className="compliance">
-              <span className="ck">
+            <div
+              className={css({
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "2",
+                mt: "5.5",
+                px: "3",
+                py: "3",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "border.default",
+                borderRadius: "input",
+                bg: "surface.page",
+                fontSize: "sm",
+                color: "text.muted",
+                lineHeight: "normal",
+              })}
+            >
+              <span
+                className={css({
+                  display: "flex",
+                  flexShrink: "0",
+                  mt: "0.5",
+                  color: "primary.700",
+                })}
+              >
                 <MockCheckIcon />
               </span>
               <span>
@@ -225,7 +225,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
           </>
         )}
 
-        <div className="rc-foot">
+        <div className={readingFoot}>
           {!isOwnPost ? (
             <HelpfulButton
               action={toggleHelpfulAction.bind(
@@ -245,8 +245,11 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
             </span>
           )}
           <span
-            className="muted tnum rp-views"
-            style={{ fontSize: 12 }}
+            className={css({
+              fontSize: "sm",
+              color: "text.subtle",
+              fontVariantNumeric: "tabular-nums",
+            })}
             aria-label={`${report.viewCount}回閲覧`}
           >
             閲覧 {report.viewCount}

@@ -2,14 +2,32 @@
 
 import { useEffect, useState, useTransition } from "react";
 
+import { Checkbox } from "@/components/Checkbox";
+import { inputRecipe } from "@/components/Input";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { searchReportMaterialsAction } from "@/app/materials/[id]/report/new/actions";
 import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-report";
 import type { PostingMaterial } from "@/server/queries/materials";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
+import { css, cva, cx } from "../../../../../../styled-system/css";
+
 import { MockSearch } from "./MockSearch";
-import { Badge, Need } from "./ReportFormParts";
+import {
+  Badge,
+  Example,
+  Need,
+  checkNote,
+  checkRow,
+  checkRowWithNote,
+  chipRecipe,
+  chips,
+  field,
+  fieldLabel,
+  guide,
+  pillButtonRecipe,
+  subLabel,
+} from "./ReportFormParts";
 
 export type ReportMaterialSummary = {
   id: string;
@@ -26,7 +44,105 @@ function cropMatches(crop: CropOption, query: string) {
     : null;
 }
 
-/** 見本の pane 1「資材・作物」 */
+const materialCard = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "3",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "card",
+  bg: "surface.card",
+  px: "3.5",
+  py: "3",
+});
+
+const thumb = css({
+  flex: "0 0 auto",
+  display: "grid",
+  placeItems: "center",
+  w: "12",
+  h: "12",
+  overflow: "hidden",
+  borderRadius: "button",
+  bg: "surface.panel",
+  fontSize: "2xs",
+  color: "text.subtle",
+});
+
+const thumbImage = css({ objectFit: "cover" });
+
+const materialText = css({ flex: "1", minW: "0" });
+
+const manufacturer = css({ fontSize: "sm", color: "text.subtle" });
+
+const chipCategory = css({
+  mr: "1.5",
+  borderRadius: "pill",
+  bg: "surface.card",
+  px: "1.5",
+  fontSize: "xs",
+  color: "primary.800",
+});
+
+const removeButton = css({
+  ml: "2",
+  border: "none",
+  bg: "transparent",
+  p: "0",
+  color: "primary.800",
+  opacity: "0.7",
+  cursor: "pointer",
+});
+
+const tree = css({
+  mt: "2",
+  maxH: "96",
+  overflow: "auto",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "card",
+  bg: "surface.card",
+});
+
+const treeGroup = css({
+  "&:not(:first-child)": {
+    borderTopWidth: "1px",
+    borderTopStyle: "solid",
+    borderTopColor: "border.default",
+  },
+});
+
+const treeHead = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  w: "full",
+  border: "none",
+  bg: "transparent",
+  px: "3",
+  py: "2",
+  fontSize: "md",
+  textAlign: "left",
+  cursor: "pointer",
+});
+
+const treeArrow = cva({
+  base: {
+    fontSize: "xs",
+    color: "primary.700",
+    transitionProperty: "transform",
+    transitionDuration: "fast",
+  },
+  variants: { open: { true: { transform: "rotate(90deg)" }, false: {} } },
+});
+
+const treeCount = css({ ml: "auto", fontSize: "sm", color: "text.subtle" });
+
+const treeBody = css({ pt: "0.5", pr: "3", pb: "2.5", pl: "6.5" });
+
+/** 「資材・作物」のステップ */
 export function ReportStepBasics({
   input,
   onChange,
@@ -86,7 +202,7 @@ export function ReportStepBasics({
         )
         .slice(0, 10)
     : [];
-  const suggestionGroups = [
+  const suggestions = [
     {
       title: "この資材に登録されている主な作物",
       ids: input.materialId === pageMaterialId ? materialCropIds.slice(0, 8) : [],
@@ -95,10 +211,12 @@ export function ReportStepBasics({
       title: "主な作物として登録している作物",
       ids: favoriteCropIds.filter((id) => !materialCropIds.includes(id)),
     },
-  ].map((group) => ({
-    ...group,
-    crops: crops.filter((crop) => group.ids.includes(crop.id) && crop.id !== input.cropId),
-  }));
+  ]
+    .map((group) => ({
+      ...group,
+      crops: crops.filter((crop) => group.ids.includes(crop.id) && crop.id !== input.cropId),
+    }))
+    .filter((group) => group.crops.length > 0);
   const groups = [...new Set(crops.map((crop) => crop.groupName))];
   function pickCrop(cropId: string) {
     onChange({ ...input, cropId });
@@ -108,25 +226,12 @@ export function ReportStepBasics({
 
   return (
     <>
-      <div className="field" style={{ marginTop: 0 }}>
-        <label>
+      <div>
+        <div className={fieldLabel}>
           対象資材 <Badge required />
-        </label>
-        <div className="card" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 10,
-              background: "var(--panel)",
-              display: "grid",
-              placeItems: "center",
-              fontSize: 9,
-              color: "var(--ink-3)",
-              flex: "0 0 auto",
-              overflow: "hidden",
-            }}
-          >
+        </div>
+        <div className={materialCard}>
+          <div className={thumb}>
             {material.imageUrl ? (
               <OptimizedImage
                 src={material.imageUrl}
@@ -134,19 +239,19 @@ export function ReportStepBasics({
                 width={48}
                 height={48}
                 sizes="48px"
-                style={{ objectFit: "cover" }}
+                className={thumbImage}
               />
             ) : (
               "NO IMAGE"
             )}
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className={materialText}>
             <b>{material.name}</b>
-            <div style={{ fontSize: 12, color: "var(--ink-3)" }}>{material.manufacturerName}</div>
+            <div className={manufacturer}>{material.manufacturerName}</div>
           </div>
           <button
             type="button"
-            className="mini"
+            className={pillButtonRecipe()}
             aria-expanded={searchOpen}
             onClick={() => setSearchOpen(!searchOpen)}
           >
@@ -165,12 +270,8 @@ export function ReportStepBasics({
             items={materials.map((item) => ({
               value: item.id,
               label: `${item.name} ${item.manufacturer_name}`,
-              content: (
-                <>
-                  <span className="nm">{item.name}</span>
-                  <span className="al">{item.manufacturer_name}</span>
-                </>
-              ),
+              name: item.name,
+              note: item.manufacturer_name,
             }))}
             emptyMessage="見つかりません。"
             onSelect={(id) => {
@@ -189,22 +290,22 @@ export function ReportStepBasics({
         )}
       </div>
 
-      <div className="field">
-        <label>
+      <div className={field}>
+        <div className={fieldLabel}>
           使用作物 <Badge required />
           <Need message={errors.cropId} />
-        </label>
-        <div className="guide">
+        </div>
+        <div className={guide}>
           1つ選んでください。複数の作物で使った場合は、作物ごとに別のレポートにしてください。
         </div>
-        <div className="chips" style={{ marginBottom: 8 }} aria-live="polite">
+        <div className={cx(chips, css({ mb: "2" }))} aria-live="polite">
           {selectedCrop && (
-            <span className="chip sel">
-              <span className="cat-mini">作物</span>
+            <span className={chipRecipe({ state: "selected" })}>
+              <span className={chipCategory}>作物</span>
               {selectedCrop.name}
               <button
                 type="button"
-                className="rm"
+                className={removeButton}
                 aria-label={`${selectedCrop.name}を外す`}
                 onClick={() => onChange({ ...input, cropId: null })}
               >
@@ -221,29 +322,24 @@ export function ReportStepBasics({
           items={cropHits.map(({ crop, alias }) => ({
             value: crop.id,
             label: `${crop.name} ${crop.groupName}`,
-            content: (
-              <>
-                <span className="cat">{crop.groupName}</span>
-                <span className="nm">{crop.name}</span>
-                {alias && <span className="al">別名: {alias}</span>}
-              </>
-            ),
+            name: crop.name,
+            category: crop.groupName,
+            note: alias && `別名: ${alias}`,
           }))}
           emptyMessage={`「${cropQuery.trim()}」に一致する作物がありません`}
           onSelect={pickCrop}
         />
-        <div className="sug">
-          {suggestionGroups
-            .filter((group) => group.crops.length > 0)
-            .map((group) => (
+        {suggestions.length > 0 && (
+          <div className={css({ mt: "2.5" })}>
+            {suggestions.map((group) => (
               <div key={group.title}>
-                <div className="sl">{group.title}</div>
-                <div className="chips">
+                <div className={subLabel}>{group.title}</div>
+                <div className={chips}>
                   {group.crops.map((crop) => (
                     <button
                       key={crop.id}
                       type="button"
-                      className="chip"
+                      className={chipRecipe({ size: "sm" })}
                       onClick={() => pickCrop(crop.id)}
                     >
                       {crop.name}
@@ -252,27 +348,26 @@ export function ReportStepBasics({
                 </div>
               </div>
             ))}
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
-          <button
-            type="button"
-            className="mini"
-            aria-expanded={treeOpen}
-            onClick={() => setTreeOpen(!treeOpen)}
-          >
-            {treeOpen ? "－ 作物一覧を閉じる" : "＋ 作物一覧から選択"}
-          </button>
-        </div>
+          </div>
+        )}
+        <button
+          type="button"
+          className={cx(pillButtonRecipe(), css({ mt: "2.5" }))}
+          aria-expanded={treeOpen}
+          onClick={() => setTreeOpen(!treeOpen)}
+        >
+          {treeOpen ? "－ 作物一覧を閉じる" : "＋ 作物一覧から選択"}
+        </button>
         {treeOpen && (
-          <div className="tree">
+          <div className={tree}>
             {groups.map((group) => {
               const members = crops.filter((crop) => crop.groupName === group);
               const open = openGroups.has(group);
               return (
-                <div key={group} className="tr-g">
+                <div key={group} className={treeGroup}>
                   <button
                     type="button"
-                    className={open ? "tr-gh open" : "tr-gh"}
+                    className={treeHead}
                     aria-expanded={open}
                     onClick={() =>
                       setOpenGroups((current) => {
@@ -283,18 +378,18 @@ export function ReportStepBasics({
                       })
                     }
                   >
-                    <span className="tr-arrow">▸</span>
+                    <span className={treeArrow({ open })}>▸</span>
                     <b>{group}</b>
-                    <span className="muted">{members.length}品目</span>
+                    <span className={treeCount}>{members.length}品目</span>
                   </button>
                   {open && (
-                    <div className="tr-gb">
-                      <div className="chips">
+                    <div className={treeBody}>
+                      <div className={chips}>
                         {members.map((crop) => (
                           <button
                             key={crop.id}
                             type="button"
-                            className="chip"
+                            className={chipRecipe({ size: "xs" })}
                             onClick={() => pickCrop(crop.id)}
                           >
                             {crop.name}
@@ -310,29 +405,28 @@ export function ReportStepBasics({
         )}
       </div>
 
-      <div className="field">
-        <label htmlFor="report-variety">
+      <div className={field}>
+        <label className={fieldLabel} htmlFor="report-variety">
           品種 <Badge required />
         </label>
         <Need message={errors.variety} block />
         <input
           id="report-variety"
-          className="input"
+          className={inputRecipe()}
           placeholder="品種名"
           disabled={input.varietyUnknown}
           value={input.variety}
           onChange={(event) => onChange({ ...input, variety: event.target.value })}
         />
-        <div className="example">
-          <b>記入例</b>・アイコ
+        <Example>
+          ・アイコ
           <br />
           ・桃太郎
           <br />
           ・とちおとめ
-        </div>
-        <label className="check" style={{ marginTop: 8 }}>
-          <input
-            type="checkbox"
+        </Example>
+        <label className={cx(checkRow, checkRowWithNote, css({ mt: "2" }))}>
+          <Checkbox
             checked={input.varietyUnknown}
             onChange={(event) =>
               onChange({
@@ -341,9 +435,9 @@ export function ReportStepBasics({
                 variety: event.target.checked ? "" : input.variety,
               })
             }
-          />{" "}
+          />
           品種が不明、または品種がない
-          <span className="muted">チェックすると品種の記入は不要です</span>
+          <span className={checkNote}>チェックすると品種の記入は不要です</span>
         </label>
       </div>
     </>

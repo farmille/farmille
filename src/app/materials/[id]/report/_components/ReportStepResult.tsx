@@ -4,7 +4,23 @@ import { useState } from "react";
 
 import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-report";
 
-import { Badge, Example, Need } from "./ReportFormParts";
+import { inputRecipe } from "@/components/Input";
+import { textareaRecipe } from "@/components/Textarea";
+
+import { css, cx } from "../../../../../../styled-system/css";
+
+import {
+  Badge,
+  Example,
+  Need,
+  chipRecipe,
+  chips,
+  field,
+  fieldLabel,
+  guide,
+  pillButtonRecipe,
+  subLabel,
+} from "./ReportFormParts";
 
 export type ReportEffectOption = { id: string; name: string; categoryName: string };
 
@@ -13,7 +29,9 @@ const RESULT_EXAMPLE = [
   "収量が増えるような劇的な変化は確認できませんでしたが、暑い時期の萎れや樹勢低下を抑える補助としては手応えがありました。通常の灌水に足すだけなので手間はほとんど増えていません。薬害（葉焼け・変色）や生育の悪化は見られませんでした。次回は定植直後から使い、収量や裂果数も比べながらもう一度試したいと思います。",
 ];
 
-/** 見本の pane 2「結果」 */
+const resultArea = css(textareaRecipe.raw({}), { minH: "40" });
+
+/** 「結果」のステップ */
 export function ReportStepResult({
   input,
   onChange,
@@ -36,7 +54,7 @@ export function ReportStepResult({
       <button
         key={name}
         type="button"
-        className={on ? "chip on" : "chip"}
+        className={chipRecipe({ state: on ? "on" : "idle" })}
         aria-pressed={on}
         onClick={() =>
           onChange({
@@ -53,18 +71,18 @@ export function ReportStepResult({
   }
   return (
     <>
-      <div className="field" style={{ marginTop: 0 }}>
-        <label htmlFor="report-result">
+      <div>
+        <label className={fieldLabel} htmlFor="report-result">
           結果・感想 <Badge required />
           <Need message={errors.observedChange} />
         </label>
-        <div className="guide">
+        <div className={guide}>
           いつ頃から・どこに・どんな変化があったかと、全体の感想を記入してください。明確な変化が見られなかった場合も、そのまま記入してください。薬害や生育の悪化など良くなかった点があれば併記してください。
           <br />※ 収量や糖度などの数値は、ステップ4「比較・使用結果」で入力できます。
         </div>
         <textarea
           id="report-result"
-          className="textarea"
+          className={resultArea}
           placeholder="結果と感想"
           value={input.observedChange}
           onChange={(event) => onChange({ ...input, observedChange: event.target.value })}
@@ -75,35 +93,32 @@ export function ReportStepResult({
           {RESULT_EXAMPLE[1]}
         </Example>
       </div>
-      <div className="field">
-        <label>
+      <div className={field}>
+        <div className={fieldLabel}>
           使用目的 <Badge required />
           <Need message={errors.purposeTags} />
-        </label>
-        <div className="guide">この資材に期待した効果を選びます（複数選択できます）。</div>
+        </div>
+        <div className={guide}>この資材に期待した効果を選びます（複数選択できます）。</div>
         {materialEffectNames.length > 0 && (
           <>
-            <div className="sl">この資材に登録されている効果タグ</div>
-            <div className="chips">{materialEffectNames.map(chip)}</div>
+            <div className={subLabel}>この資材に登録されている効果タグ</div>
+            <div className={chips}>{materialEffectNames.map(chip)}</div>
           </>
         )}
         <button
           type="button"
-          className="mini"
-          style={{ marginTop: 10 }}
+          className={cx(pillButtonRecipe(), css({ mt: "2.5" }))}
           aria-expanded={allOpen}
           onClick={() => setAllOpen(!allOpen)}
         >
           {allOpen ? "－ 効果タグ一覧を閉じる" : "＋ 効果タグ一覧から選択"}
         </button>
         {allOpen && (
-          <div style={{ marginTop: 6 }}>
+          <div className={css({ mt: "1.5" })}>
             {categories.map((category) => (
               <div key={category}>
-                <div className="sl" style={{ marginTop: 10 }}>
-                  {category}
-                </div>
-                <div className="chips">
+                <div className={subLabel}>{category}</div>
+                <div className={chips}>
                   {effects
                     .filter(
                       (effect) =>
@@ -117,8 +132,7 @@ export function ReportStepResult({
           </div>
         )}
         <input
-          className="input"
-          style={{ marginTop: 10 }}
+          className={cx(inputRecipe(), css({ mt: "2.5" }))}
           aria-label="使用目的の補足（任意）"
           placeholder="補足（任意）"
           maxLength={500}

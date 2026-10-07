@@ -6,10 +6,46 @@ import { FieldError } from "@/app/_mock/FormParts";
 import { MockCombobox } from "@/app/_mock/MockCombobox";
 import type { ReviewCropOption } from "@/server/queries/reviews";
 
-/**
- * 見本 S.reviewForm の作目ピッカー（`.ts-box`・`.ts-panel`・`.ts-chips`）。
- * 本番の仕様どおり作目は1件だけ選べる（選び直すと入れ替わる）。
- */
+import { css } from "../../../../../../styled-system/css";
+
+const chipStyle = css({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "1.5",
+  py: "1",
+  pr: "1.5",
+  pl: "3",
+  bg: "primary.100",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "primary.700/30",
+  borderRadius: "pill",
+  fontSize: "sm",
+  fontWeight: "semibold",
+  color: "primary.800",
+});
+
+const chipRemoveStyle = css({
+  display: "grid",
+  placeItems: "center",
+  w: "4",
+  h: "4",
+  p: "0",
+  bg: "primary.700/18",
+  borderRadius: "pill",
+  fontSize: "sm",
+  lineHeight: "none",
+  color: "primary.800",
+  cursor: "pointer",
+  _focusVisible: {
+    outlineWidth: "2px",
+    outlineStyle: "solid",
+    outlineColor: "primary.700",
+    outlineOffset: "1px",
+  },
+});
+
+/** 作目は1件だけ選べる（選び直すと入れ替わる）。 */
 export function ReviewCropPicker({
   crops,
   selectedCropIds,
@@ -62,18 +98,27 @@ export function ReviewCropPicker({
         emptyMessage="一致する作物がありません。"
       />
 
-      <div id="review-crop-selection" className="ts-chips" aria-live="polite">
+      <div
+        id="review-crop-selection"
+        className={css({ display: "flex", flexWrap: "wrap", gap: "2", mt: "2.5" })}
+        aria-live="polite"
+      >
         {selectedCropIds.length > 0 ? (
           selectedCropIds.map((cropId) => {
             const crop = cropById.get(cropId);
             if (crop === undefined) return null;
 
             return (
-              <span key={crop.id} className="chip-sel">
+              <span key={crop.id} className={chipStyle}>
                 <input type="hidden" name="cropIds" value={crop.id} />
-                <span className="cat-mini">{crop.groupName}</span>
+                <span
+                  className={css({ fontSize: "2xs", fontWeight: "bold", color: "primary.800/65" })}
+                >
+                  {crop.groupName}
+                </span>
                 {crop.name}
                 <button
+                  className={chipRemoveStyle}
                   type="button"
                   aria-label={`${crop.name}を削除`}
                   onClick={() => onRemove(crop.id)}
@@ -84,7 +129,9 @@ export function ReviewCropPicker({
             );
           })
         ) : (
-          <span className="muted">作目を1つ選んでください。</span>
+          <span className={css({ fontSize: "sm", color: "text.subtle" })}>
+            作目を1つ選んでください。
+          </span>
         )}
       </div>
       <FieldError id="review-crop-error" message={shownError} />

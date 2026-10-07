@@ -8,6 +8,8 @@ import {
   type MaterialSortParam,
   type SelectedSearchFilter,
 } from "@/components/search/search-selection";
+import { selectRecipe } from "@/components/Select";
+import { css } from "../../../../styled-system/css";
 
 type MockSortSelectProps = {
   selected: SelectedSearchFilter[];
@@ -15,9 +17,17 @@ type MockSortSelectProps = {
   query?: string;
 };
 
+const sortSelectStyle = css(selectRecipe.raw(), {
+  w: "auto",
+  py: "2",
+  px: "3",
+  fontFamily: "inherit",
+  fontSize: "sm",
+});
+
 /**
- * 見本 S.search の並び替え（`select.input#tsSort`）。URL の sort を更新する（共通部品 SearchSortSelect と同じ動き）。
- * 選択肢は本番の並び順（感想口コミ・評価・新着）のまま。
+ * 検索結果の並び替え。URL の sort を更新する（共通部品 SearchSortSelect と同じ動き）。
+ * 選択肢は感想口コミ・評価・新着の順。
  */
 export function MockSortSelect({ selected, sort, query }: MockSortSelectProps) {
   const router = useRouter();
@@ -25,8 +35,7 @@ export function MockSortSelect({ selected, sort, query }: MockSortSelectProps) {
 
   return (
     <select
-      className="input"
-      style={{ width: "auto", padding: "7px 11px", fontSize: 12 }}
+      className={sortSelectStyle}
       value={sort}
       aria-label="並び替え"
       disabled={isPending}

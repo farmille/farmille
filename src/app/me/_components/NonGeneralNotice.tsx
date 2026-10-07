@@ -4,6 +4,11 @@ import Link from "next/link";
 
 import { MockPageShell } from "@/app/_mock/MockPageShell";
 import type { AccountType } from "@/server/auth";
+import { css, cx } from "../../../../styled-system/css";
+
+import { moreLinkStyle } from "./ProfileParts";
+
+const destinationLink = css({ display: "inline-flex", alignItems: "center", gap: "1", mt: "4" });
 
 type NonGeneralNoticeProps = {
   accountType: AccountType | null;
@@ -25,11 +30,7 @@ export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
         description="マイページ・プロフィール編集・お気に入りは一般ユーザー専用です。メーカーや運営の作業は、それぞれのダッシュボードから行ってください。"
       >
         {destination !== null ? (
-          <Link
-            href={destination.href}
-            className="link-more"
-            style={{ display: "inline-flex", marginTop: 16 }}
-          >
+          <Link href={destination.href} className={cx(moreLinkStyle, destinationLink)}>
             {destination.label} <Icon name="arrow_forward" size="sm" />
           </Link>
         ) : null}

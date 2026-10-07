@@ -14,7 +14,16 @@ import { MockSubmitButton } from "@/app/_mock/MockSubmitButton";
 import { sellerApplyAction } from "@/app/sellers/apply/actions";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 
-const guideStyle = { marginTop: 6, marginBottom: 0 } as const;
+import { css, cx } from "../../../../styled-system/css";
+import {
+  sellerActionsStyle,
+  sellerFieldStyle,
+  sellerGuideStyle,
+  sellerInputStyle,
+  sellerLabelStyle,
+  sellerLeadStyle,
+  sellerTextareaStyle,
+} from "../_components/form-styles";
 
 type ApplyFieldProps = {
   name: string;
@@ -25,17 +34,16 @@ type ApplyFieldProps = {
   children: (describedById: string | undefined) => ReactNode;
 };
 
-/** 見本 S.sellerApply の `.field`（label・入力・.fguide）。 */
 function ApplyField({ name, label, required, guide, error, children }: ApplyFieldProps) {
   const guideId = guide === undefined ? undefined : `${name}-guide`;
   return (
-    <div className="field">
-      <label htmlFor={name}>
+    <div className={sellerFieldStyle}>
+      <label className={sellerLabelStyle} htmlFor={name}>
         {label} {required ? <RequiredBadge /> : <OptionalBadge />}
       </label>
       {children(describedBy(guideId, error && `${name}-error`))}
       {guide === undefined ? null : (
-        <div className="fguide" id={guideId} style={guideStyle}>
+        <div className={sellerGuideStyle} id={guideId}>
           {guide}
         </div>
       )}
@@ -44,7 +52,6 @@ function ApplyField({ name, label, required, guide, error, children }: ApplyFiel
   );
 }
 
-/** 見本 S.sellerApply の `.body` の中身（フォーム部分）。項目・検証・送信は本番のまま。 */
 export function SellerApplyForm() {
   const [state, formAction] = useActionState(sellerApplyAction, initialAuthFormState);
   const fieldErrors = fieldErrorsOf(state);
@@ -67,7 +74,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("officialName")}
             autoComplete="organization"
-            className="input"
+            className={sellerInputStyle}
             defaultValue={values.officialName}
             id="officialName"
             name="officialName"
@@ -78,8 +85,8 @@ export function SellerApplyForm() {
         )}
       </ApplyField>
 
-      <div className="field">
-        <label htmlFor="corporateNumber">
+      <div className={sellerFieldStyle}>
+        <label className={sellerLabelStyle} htmlFor="corporateNumber">
           法人番号 <RequiredBadge />
         </label>
         <input
@@ -88,7 +95,7 @@ export function SellerApplyForm() {
             fieldErrors.corporateNumber && "corporateNumber-error",
           )}
           aria-invalid={invalid("corporateNumber")}
-          className="input"
+          className={sellerInputStyle}
           defaultValue={values.corporateNumber}
           id="corporateNumber"
           inputMode="numeric"
@@ -96,21 +103,24 @@ export function SellerApplyForm() {
           name="corporateNumber"
           required
         />
-        <div className="fguide" id="corporateNumber-guide" style={guideStyle}>
+        <div className={sellerGuideStyle} id="corporateNumber-guide">
           13桁の法人番号を入力してください。
         </div>
         <FieldError id="corporateNumber-error" message={fieldErrors.corporateNumber} />
         <div
-          style={{
-            marginTop: 8,
-            background: "var(--bg)",
-            border: "1px solid var(--line)",
-            borderRadius: 9,
-            padding: "9px 12px",
-            fontSize: 11.5,
-            color: "var(--ink-2)",
-            lineHeight: 1.7,
-          }}
+          className={css({
+            mt: "2",
+            bg: "surface.page",
+            borderWidth: "1px",
+            borderStyle: "solid",
+            borderColor: "border.default",
+            borderRadius: "input",
+            px: "3",
+            py: "2",
+            fontSize: "xs",
+            lineHeight: "prose",
+            color: "text.muted",
+          })}
         >
           ログインIDは運営が発行します。パスワードは、ご案内する設定用ページで設定してください。
         </div>
@@ -128,7 +138,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("contactEmail")}
             autoComplete="email"
-            className="input"
+            className={sellerInputStyle}
             defaultValue={values.contactEmail}
             id="contactEmail"
             name="contactEmail"
@@ -151,7 +161,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("contactName")}
             autoComplete="name"
-            className="input"
+            className={sellerInputStyle}
             defaultValue={values.contactName}
             id="contactName"
             name="contactName"
@@ -173,7 +183,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("location")}
             autoComplete="street-address"
-            className="input"
+            className={sellerInputStyle}
             defaultValue={values.location}
             id="location"
             name="location"
@@ -195,7 +205,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("contactPhone")}
             autoComplete="tel"
-            className="input"
+            className={sellerInputStyle}
             defaultValue={values.contactPhone}
             id="contactPhone"
             maxLength={20}
@@ -217,7 +227,7 @@ export function SellerApplyForm() {
           <textarea
             aria-describedby={described}
             aria-invalid={invalid("materialRequestNotes")}
-            className="textarea"
+            className={sellerTextareaStyle}
             defaultValue={values.materialRequestNotes}
             id="materialRequestNotes"
             maxLength={2000}
@@ -237,7 +247,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("websiteUrl")}
             autoComplete="url"
-            className="input"
+            className={sellerInputStyle}
             defaultValue={values.websiteUrl}
             id="websiteUrl"
             name="websiteUrl"
@@ -260,7 +270,7 @@ export function SellerApplyForm() {
               aria-invalid={invalid("inviteCode")}
               autoCapitalize="none"
               autoComplete="off"
-              className="input"
+              className={sellerInputStyle}
               defaultValue={values.inviteCode}
               id="inviteCode"
               name="inviteCode"
@@ -272,7 +282,7 @@ export function SellerApplyForm() {
         </ApplyField>
       ) : null}
 
-      <p className="muted" style={{ fontSize: 12.5, lineHeight: 1.8, margin: "6px 0 14px" }}>
+      <p className={cx(sellerLeadStyle, css({ lineHeight: "prose", mt: "1.5", mb: "3.5" }))}>
         申請前に
         <Link href="/legal/manufacturer" target="_blank" rel="noopener noreferrer">
           Farmille企業向けサービス利用規約（別タブ）
@@ -283,13 +293,26 @@ export function SellerApplyForm() {
         </Link>
         をご確認ください。
       </p>
-      <div className="form-actions">
+      <div className={sellerActionsStyle}>
         <MockSubmitButton label="申請する" pendingLabel="申請中…" />
         <button
           aria-expanded={inviteOpen}
-          className="draft"
+          className={css({
+            w: "full",
+            p: "1",
+            borderWidth: "0",
+            bg: "transparent",
+            color: "text.subtle",
+            fontSize: "sm",
+            textAlign: "center",
+            _focusVisible: {
+              outlineWidth: "2px",
+              outlineStyle: "solid",
+              outlineColor: "primary.700",
+              outlineOffset: "2px",
+            },
+          })}
           onClick={() => setInviteOpen((open) => !open)}
-          style={{ background: "none", border: 0, width: "100%", font: "inherit" }}
           type="button"
         >
           {inviteOpen

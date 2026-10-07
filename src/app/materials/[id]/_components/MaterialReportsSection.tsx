@@ -1,79 +1,99 @@
 import Link from "next/link";
 
+import { buttonRecipe } from "@/components/Button";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
-import { listPublishedArticlesByMaterial } from "@/server/queries/material-content";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
+import {
+  listPublishedArticlesByMaterial,
+  type MaterialContentList,
+  type PublishedUsageReport,
+} from "@/server/queries/material-content";
 import type { MaterialDetail } from "@/server/queries/materials";
+
+import { css, cx } from "../../../../../styled-system/css";
 
 import { loadMaterialReports } from "../material-reports";
 import { unwrapQueryResult } from "../query-result";
+import { EmptyCard } from "./EmptyCard";
+import { HeroCount } from "./HeroSavedCount";
+import { MaterialSectionHeading } from "./MaterialSectionHeading";
 import { MockReportCard } from "./MockReportCard";
+import { MoreLink } from "./MoreLink";
 
-const secHeadStyle = { marginTop: 26 } as const;
+const scrollStyle = css({
+  display: "flex",
+  gap: "2.5",
+  mx: "-4",
+  px: "4",
+  pt: "0.5",
+  pb: "1.5",
+  overflowX: "auto",
+  scrollSnapType: "x mandatory",
+  scrollbarWidth: "none",
+  "&::-webkit-scrollbar": { display: "none" },
+  pc: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+    gap: "3",
+    mx: "0",
+    px: "0",
+    overflowX: "visible",
+  },
+});
+const signupStyle = css({ mt: "2.5", textAlign: "center" });
+const signupTitleStyle = css({ fontSize: "md", fontWeight: "bold" });
+const signupActionsStyle = css({
+  mt: "2",
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "2.5",
+});
+const articlesLinkStyle = css({ mt: "3" });
 
-/** 見本 S.material の実証詳細レポート見出し（`.sec-h`）。読み込み中の表示でも使う。 */
-export function ReportsHeading({ count }: { count?: number }) {
+/** 実証詳細レポートの見出し。読み込み中の表示でも使う。 */
+export function ReportsHeading({ count, moreHref }: { count?: number; moreHref?: string }) {
   return (
-    <div className="sec-h" id="anchorReports" style={secHeadStyle}>
-      <h2 id="usage-reports-heading">
-        実証詳細レポート{" "}
-        {count === undefined ? null : (
-          <span className="muted tnum" style={{ fontSize: 12 }}>
-            {count}件
-          </span>
-        )}
-      </h2>
-    </div>
+    <MaterialSectionHeading
+      id="anchorReports"
+      headingId="usage-reports-heading"
+      title="実証詳細レポート"
+      count={count}
+      more={moreHref === undefined ? undefined : { href: moreHref, label: "すべて見る →" }}
+      spacing="section"
+    />
   );
 }
 
-/** 資材カードの「実証詳細レポート N件」。件数がある時は見本どおり強調する。 */
+/** 資材カードの「実証詳細レポート N件」。件数がある時は強調する。 */
 export async function HeroReportCount({ materialId }: { materialId: string }) {
   const reports = unwrapQueryResult(await loadMaterialReports(materialId));
-  return (
-    <b
-      className="tnum"
-      style={{
-        color: reports.total > 0 ? "var(--amber)" : "var(--ink)",
-        fontSize: reports.total > 0 ? "1.15em" : "1em",
-      }}
-    >
-      {reports.total}件
-    </b>
-  );
+  return <HeroCount tone={reports.total > 0 ? "highlight" : "zero"}>{reports.total}件</HeroCount>;
 }
 
-/** 見本 S.material の boxReports。会員登録の案内は未ログインのときだけ出す。 */
-export async function MaterialReportsSection({
-  material,
-  signedIn,
-}: {
-  material: MaterialDetail;
+type MaterialReportsViewProps = {
+  material: Pick<MaterialDetail, "id" | "name">;
+  reports: MaterialContentList<PublishedUsageReport>;
+  articleTotal: number;
   signedIn: boolean;
-}) {
-  const [reportsResult, articlesResult] = await Promise.all([
-    loadMaterialReports(material.id),
-    listPublishedArticlesByMaterial(material.id),
-  ]);
-  const reports = unwrapQueryResult(reportsResult);
-  const articles = unwrapQueryResult(articlesResult);
+};
+
+/** 資材ページの実証詳細レポート欄。会員登録の案内は未ログインのときだけ出す。 */
+export function MaterialReportsView({
+  material,
+  reports,
+  articleTotal,
+  signedIn,
+}: MaterialReportsViewProps) {
   const materialPath = `/materials/${material.id}`;
   const next = encodeURIComponent(materialPath);
 
   return (
     <section aria-labelledby="usage-reports-heading">
-      <div className="sec-h" id="anchorReports" style={secHeadStyle}>
-        <h2 id="usage-reports-heading">
-          実証詳細レポート{" "}
-          <span className="muted tnum" style={{ fontSize: 12 }}>
-            {reports.total}件
-          </span>
-        </h2>
-        <Link className="link-more" href={`${materialPath}/articles`}>
-          すべて見る →
-        </Link>
-      </div>
+      <ReportsHeading count={reports.total} moreHref={`${materialPath}/articles`} />
       {reports.items.length > 0 ? (
-        <div className="report-scroll">
+        <div className={scrollStyle}>
           {reports.items.map((report) => (
             <MockReportCard
               key={report.id}
@@ -83,6 +103,7 @@ export async function MaterialReportsSection({
               avatarSrc={report.author?.avatar_url}
               coverSrc={report.coverImage?.url}
               crop={report.crop?.name}
+              layout="scroll"
               actions={
                 <PostActionsLoader
                   target="usage_report"
@@ -95,48 +116,53 @@ export async function MaterialReportsSection({
           ))}
         </div>
       ) : (
-        <div className="card pad">
-          <p style={{ fontSize: 13, fontWeight: 700 }}>公開中の実証詳細レポートはまだありません</p>
-          <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-            投稿された実証詳細レポートは、編集部の確認後に公開されます。
-          </p>
-        </div>
+        <EmptyCard
+          title="公開中の実証詳細レポートはまだありません"
+          description="投稿された実証詳細レポートは、編集部の確認後に公開されます。"
+        />
       )}
       {!signedIn && reports.items.length > 0 ? (
-        <div className="card pad" style={{ marginTop: 10, textAlign: "center" }}>
-          <div style={{ fontSize: 13, fontWeight: 700 }}>
+        <div className={cx(surfaceCardRecipe(), signupStyle)}>
+          <div className={signupTitleStyle}>
             実証詳細レポートの続きを読むには、会員登録が必要です
           </div>
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 9,
-              flexWrap: "wrap",
-            }}
-          >
+          <div className={signupActionsStyle}>
             <Link
-              className="btn btn-primary btn-sm"
+              className={buttonRecipe({ variant: "primary", size: "sm" })}
               href={`/signup/general?next=${next}`}
-              style={{ textDecoration: "none" }}
             >
               無料会員登録して読む（1分）
             </Link>
-            <Link className="link-more" href={`/login?next=${next}`} style={{ fontSize: 12 }}>
-              ログインはこちら →
-            </Link>
+            <MoreLink href={`/login?next=${next}`}>ログインはこちら →</MoreLink>
           </div>
         </div>
       ) : null}
-      {articles.total > 0 ? (
-        <div style={{ marginTop: 12 }}>
-          <Link className="link-more" href={`${materialPath}/articles`}>
-            メーカーの記事 {articles.total}件 →
-          </Link>
+      {articleTotal > 0 ? (
+        <div className={articlesLinkStyle}>
+          <MoreLink href={`${materialPath}/articles`}>メーカーの記事 {articleTotal}件 →</MoreLink>
         </div>
       ) : null}
     </section>
+  );
+}
+
+export async function MaterialReportsSection({
+  material,
+  signedIn,
+}: {
+  material: MaterialDetail;
+  signedIn: boolean;
+}) {
+  const [reportsResult, articlesResult] = await Promise.all([
+    loadMaterialReports(material.id),
+    listPublishedArticlesByMaterial(material.id),
+  ]);
+  return (
+    <MaterialReportsView
+      material={material}
+      reports={unwrapQueryResult(reportsResult)}
+      articleTotal={unwrapQueryResult(articlesResult).total}
+      signedIn={signedIn}
+    />
   );
 }

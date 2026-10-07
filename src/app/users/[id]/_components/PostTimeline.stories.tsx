@@ -6,6 +6,7 @@ import { publicPosts, publicProfile } from "./story-fixtures";
 const meta = {
   title: "App/Users/PostTimeline",
   component: PostTimeline,
+  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { profile: publicProfile, posts: publicPosts, viewerUserId: null },
 } satisfies Meta<typeof PostTimeline>;
 

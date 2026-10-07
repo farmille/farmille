@@ -2,6 +2,11 @@
 
 import { Fragment, useId, useState, type ReactNode } from "react";
 
+import { inputRecipe } from "@/components/Input";
+import { css } from "../../../../styled-system/css";
+
+import { chipListStyle, focusRing } from "./search-chips";
+
 /** 絞り込み欄の文字検索で探す対象。`terms` は名前と別名。 */
 export type SideFilterItem = {
   key: string;
@@ -13,8 +18,32 @@ function normalize(value: string) {
   return value.normalize("NFKC").toLowerCase();
 }
 
+const headerButtonStyle = css(focusRing, {
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  w: "full",
+  minH: "11",
+  py: "1.5",
+  px: "0.5",
+  borderWidth: "0",
+  bg: "transparent",
+  color: "inherit",
+  fontFamily: "inherit",
+  textAlign: "left",
+  cursor: "pointer",
+});
+
+const filterInputStyle = css(inputRecipe.raw(), {
+  mb: "2",
+  py: "2",
+  px: "3",
+  fontFamily: "inherit",
+  fontSize: "sm",
+});
+
 /**
- * 見本 S.search の絞り込みパネルの1区分（`sec()`）。
+ * 絞り込みパネルの1区分。
  * 見出し行で開閉し、見出しのすぐ下に文字検索の欄と選択中の条件を常に出す。
  * 文字検索に入力があるあいだは、一覧の代わりに一致した候補だけを並べる。
  */
@@ -47,21 +76,42 @@ export function SideSection({
       : null;
 
   return (
-    <div className="ts-pg side-sec">
+    <div
+      className={css({
+        py: "2",
+        px: "3",
+        "& + &": {
+          borderTopWidth: "1px",
+          borderTopStyle: "solid",
+          borderTopColor: "border.default",
+        },
+      })}
+    >
       <button
         type="button"
-        className="sec-head"
+        className={headerButtonStyle}
         aria-expanded={open}
         aria-controls={bodyId}
         onClick={() => setOpen(!open)}
       >
-        <span className="sec-title">{title}</span>
-        <span className="caret" aria-hidden="true" />
+        <span className={css({ fontSize: "md", fontWeight: "bold" })}>{title}</span>
+        <span
+          className={css({
+            flex: "none",
+            ml: "auto",
+            color: "primary.700",
+            fontSize: "xs",
+            fontWeight: "bold",
+          })}
+          aria-hidden="true"
+        >
+          {open ? "閉じる ▴" : "開く ▾"}
+        </span>
       </button>
       {filter ? (
         <input
           type="search"
-          className="input side-filter"
+          className={filterInputStyle}
           aria-label={filter.label}
           placeholder={filter.placeholder}
           autoComplete="off"
@@ -70,21 +120,46 @@ export function SideSection({
         />
       ) : null}
       {note ? (
-        <div className="fguide" style={{ margin: "2px 0 6px" }}>
+        <div
+          className={css({
+            mt: "0.5",
+            mb: "1.5",
+            color: "text.muted",
+            fontSize: "sm",
+            lineHeight: "normal",
+          })}
+        >
           {note}
         </div>
       ) : null}
       {selected}
       {hits ? (
-        <div className="sug-chips">
+        <div className={chipListStyle}>
           {hits.length > 0 ? (
             hits.map((item) => <Fragment key={item.key}>{item.node}</Fragment>)
           ) : (
-            <span className="hint-pill">{filter?.empty}</span>
+            <span
+              className={css({
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "1.5",
+                py: "0.5",
+                px: "2.5",
+                bg: "surface.page",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "border.default",
+                borderRadius: "pill",
+                color: "text.subtle",
+                fontSize: "xs",
+              })}
+            >
+              {filter?.empty}
+            </span>
           )}
         </div>
       ) : null}
-      <div id={bodyId} hidden={!open || hits !== null} className="sec-body">
+      <div id={bodyId} hidden={!open || hits !== null}>
         {children}
       </div>
     </div>

@@ -4,9 +4,37 @@ import Link from "next/link";
 import { useActionState } from "react";
 
 import { trackMaterialSaved } from "@/lib/analytics/events";
+import { css, cva } from "../../../../../styled-system/css";
+
 import type { SaveControlState } from "../actions";
 
-// 見本 S.material の data-fav ボタン。見た目は src/app/_mock/mock-extra.css の .mat-fav。
+const favRecipe = cva({
+  base: {
+    mt: "2",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "1",
+    px: "3",
+    py: "1",
+    fontSize: "sm",
+    color: "text.muted",
+    bg: "surface.card",
+    borderWidth: "1px",
+    borderColor: "border.strong",
+    borderRadius: "pill",
+    textDecoration: "none",
+    cursor: "pointer",
+  },
+  variants: {
+    saved: {
+      true: { color: "accent.danger" },
+      false: {},
+    },
+  },
+  defaultVariants: { saved: false },
+});
+
+const noteStyle = css({ mt: "2", fontSize: "xs", color: "text.subtle" });
 
 type ToggleAction = (previous: SaveControlState, formData: FormData) => Promise<SaveControlState>;
 
@@ -34,7 +62,7 @@ function SaveToggleForm({
       <button
         type="submit"
         onClick={state.saved ? undefined : () => trackMaterialSaved(materialId)}
-        className={state.saved ? "mat-fav on" : "mat-fav"}
+        className={favRecipe({ saved: state.saved })}
         aria-label={state.saved ? "お気に入りから解除" : "お気に入りに追加"}
         aria-pressed={state.saved}
       >
@@ -53,14 +81,14 @@ export function SaveControl({
   unavailable = false,
 }: SaveControlProps) {
   if (unavailable) {
-    return <p className="mat-fav-note">お気に入りは一般ユーザー向けの機能です。</p>;
+    return <div className={noteStyle}>お気に入りは一般ユーザー向けの機能です。</div>;
   }
 
   if (saved === null || toggleAction === undefined) {
     const loginHref = `/login?next=${encodeURIComponent(materialPath)}`;
 
     return (
-      <Link href={loginHref} className="mat-fav">
+      <Link href={loginHref} className={favRecipe()}>
         <span aria-hidden="true">☆</span>
         ログインしてお気に入りに保存
       </Link>

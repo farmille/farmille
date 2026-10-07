@@ -18,9 +18,12 @@ import {
 import type { RegisteredAddress } from "@/server/accounts/registered-address";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
+import { css, cva } from "../../../../../../styled-system/css";
+
 import { ReportArticleEditor } from "./ReportArticleEditor";
 import type { ReportSection } from "./ReportArticleParts";
 import { ReportComparisonFields } from "./ReportComparisonFields";
+import { pillButtonRecipe, reportFrame, toast } from "./ReportFormParts";
 import { ReportPublishedView } from "./ReportPublishedView";
 import { ReportStepBasics, type ReportMaterialSummary } from "./ReportStepBasics";
 import { ReportStepConditions } from "./ReportStepConditions";
@@ -29,7 +32,7 @@ import { ReportStepResult, type ReportEffectOption } from "./ReportStepResult";
 const STEPS = ["資材・作物", "結果", "栽培条件", "比較・使用結果", "写真・記事の確認"];
 const TOTAL = STEPS.length;
 
-/** 未入力の項目キー → 見本の REQ() の項目名（プレビューの注意書きに使う） */
+/** 未入力の項目キー → プレビューの注意書きに出す項目名 */
 function missingLabels(errors: UsageReportFieldErrors) {
   const label = (key: string) => {
     if (key === "cropId") return "使用作物";
@@ -77,6 +80,251 @@ function missingMessages(errors: UsageReportFieldErrors) {
     ),
   ];
 }
+
+const shell = css({ maxW: "content.medium", mx: "auto", pb: "28" });
+
+const head = css({
+  position: "sticky",
+  top: "0",
+  zIndex: "5",
+  borderBottomWidth: "1px",
+  borderBottomStyle: "solid",
+  borderBottomColor: "border.default",
+  bg: "surface.card",
+});
+
+const headTop = css({
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: "1.5",
+  pt: "2.5",
+  px: "3",
+  tab: { flexWrap: "nowrap", gap: "2.5", pt: "3", px: "4.5" },
+});
+
+const title = css({
+  flex: "1 1 100%",
+  minW: "0",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  fontSize: "md",
+  fontWeight: "extrabold",
+  tab: { flex: "1" },
+});
+
+const titleMaterial = css({
+  display: "block",
+  fontSize: "sm",
+  fontWeight: "medium",
+  color: "text.subtle",
+  tab: { display: "inline", ml: "2" },
+});
+
+const closeButton = css({
+  display: "grid",
+  placeItems: "center",
+  w: "8",
+  h: "8",
+  border: "none",
+  borderRadius: "pill",
+  bg: "transparent",
+  fontSize: "xl",
+  color: "text.subtle",
+  cursor: "pointer",
+  _hover: { bg: "surface.panel", color: "text.default" },
+});
+
+const stepper = css({
+  position: "relative",
+  display: "flex",
+  alignItems: "flex-start",
+  px: "2",
+  py: "2.5",
+  tab: { px: "4.5", py: "3" },
+});
+
+const stepButton = css({
+  position: "relative",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "1.5",
+  flex: "1",
+  minW: "0",
+  border: "none",
+  bg: "transparent",
+  p: "0",
+  cursor: "pointer",
+  _focusVisible: {
+    outlineWidth: "2px",
+    outlineStyle: "solid",
+    outlineColor: "primary.700",
+    outlineOffset: "2px",
+    borderRadius: "mark",
+  },
+});
+
+const stepNumber = cva({
+  base: {
+    position: "relative",
+    zIndex: "1",
+    flex: "0 0 auto",
+    display: "grid",
+    placeItems: "center",
+    w: "6.5",
+    h: "6.5",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "border.strong",
+    borderRadius: "pill",
+    bg: "surface.card",
+    fontSize: "sm",
+    fontWeight: "extrabold",
+    color: "text.subtle",
+  },
+  variants: {
+    state: {
+      todo: {},
+      done: { bg: "primary.700", borderColor: "primary.700", color: "text.inverse" },
+      current: {
+        bg: "primary.700",
+        borderColor: "primary.700",
+        color: "text.inverse",
+        outlineWidth: "4px",
+        outlineStyle: "solid",
+        outlineColor: "primary.100",
+      },
+    },
+  },
+});
+
+const stepLabel = cva({
+  base: {
+    maxW: "16",
+    fontSize: "xs",
+    lineHeight: "tight",
+    textAlign: "center",
+    color: "text.subtle",
+    tab: { maxW: "none", fontSize: "sm", whiteSpace: "nowrap" },
+  },
+  variants: {
+    state: {
+      todo: {},
+      done: { color: "text.muted" },
+      current: { color: "text.default", fontWeight: "extrabold" },
+    },
+  },
+});
+
+const stepLine = cva({
+  base: {
+    position: "absolute",
+    top: "3",
+    left: "50%",
+    right: "-50%",
+    h: "0.5",
+    bg: "border.strong",
+  },
+  variants: { state: { todo: {}, done: { bg: "primary.700" }, current: {} } },
+});
+
+const errorNotice = css({
+  mt: "3",
+  mx: "4.5",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "input",
+  bg: "surface.card",
+  px: "3",
+  py: "2.5",
+  fontSize: "sm",
+  fontWeight: "bold",
+});
+
+const errorList = css({ mt: "1", pl: "4" });
+
+const fields = css({ minW: "0", m: "0", border: "none", p: "0" });
+
+const pane = css({ pt: "5.5", px: "4.5" });
+
+const doneTitle = css({ m: "0", fontSize: "xl", fontWeight: "extrabold", textWrap: "balance" });
+
+const doneText = css({ mt: "1", mb: "4", fontSize: "sm", color: "text.subtle" });
+
+const foot = css({
+  position: "fixed",
+  right: "0",
+  bottom: "0",
+  left: "0",
+  zIndex: "5",
+  borderTopWidth: "1px",
+  borderTopStyle: "solid",
+  borderTopColor: "border.default",
+  bg: "surface.card",
+});
+
+const footInner = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  maxW: "content.medium",
+  mx: "auto",
+  px: "4.5",
+  py: "2.5",
+});
+
+const stepCount = css({
+  display: "none",
+  fontSize: "sm",
+  color: "text.subtle",
+  tab: { display: "inline" },
+});
+
+const stepCountNumber = css({ color: "text.default", fontVariantNumeric: "tabular-nums" });
+
+const spacer = css({ flex: "1" });
+
+const modal = css({
+  position: "fixed",
+  inset: "0",
+  zIndex: "20",
+  display: "grid",
+  placeItems: "center",
+  bg: "scrim/40",
+  p: "5",
+});
+
+const modalBox = css({
+  w: "full",
+  maxW: "dialog",
+  borderRadius: "card",
+  bg: "surface.card",
+  px: "5.5",
+  pt: "5.5",
+  pb: "4.5",
+  boxShadow: "shadow.lift",
+  tab: { w: "fit-content", maxW: "full" },
+});
+
+const modalTitle = css({ fontSize: "lg", fontWeight: "extrabold" });
+
+const modalText = css({ mt: "1.5", fontSize: "sm", color: "text.muted" });
+
+const modalActions = css({
+  display: "flex",
+  flexDirection: "column-reverse",
+  alignItems: "stretch",
+  gap: "2",
+  mt: "4.5",
+  tab: { flexDirection: "row", alignItems: "center" },
+});
+
+const footButton = pillButtonRecipe({ tone: "quiet", size: "md", strong: true });
+
+type StepState = "todo" | "done" | "current";
 
 type Notice = { kind: "ok" | "error"; text: string; items?: string[] } | null;
 
@@ -280,12 +528,14 @@ export function ReportForm({
 
   if (submitted)
     return (
-      <div className="fm-wiz">
-        <div className="shell">
-          <section className="pane on">
-            <h2>レポートを受け付けました</h2>
-            <p className="sub">運営が内容を確認して公開します。修正をお願いする場合があります。</p>
-            <a className="mini" href={`/materials/${input.materialId}`}>
+      <div className={reportFrame}>
+        <div className={shell}>
+          <section className={pane}>
+            <h2 className={doneTitle}>レポートを受け付けました</h2>
+            <p className={doneText}>
+              運営が内容を確認して公開します。修正をお願いする場合があります。
+            </p>
+            <a className={pillButtonRecipe()} href={`/materials/${input.materialId}`}>
               資材ページに戻る
             </a>
           </section>
@@ -299,26 +549,31 @@ export function ReportForm({
     Object.keys(validateUsageReportSubmission(input)).map(reportErrorStep),
   );
   return (
-    <div className="fm-wiz">
+    <div className={reportFrame}>
       <form
-        className="shell"
+        className={shell}
         onSubmit={(event) => {
           event.preventDefault();
           if (step < TOTAL) navigate(step + 1);
           else save(true);
         }}
       >
-        <div className="head">
-          <div className="head-top">
-            <div className="ttl">
-              実証詳細レポート <small>{currentMaterial.name}</small>
+        <div className={head} data-report-head>
+          <div className={headTop}>
+            <div className={title}>
+              実証詳細レポート <small className={titleMaterial}>{currentMaterial.name}</small>
             </div>
-            <button type="button" className="hb" disabled={busy} onClick={() => save(false)}>
+            <button
+              type="button"
+              className={pillButtonRecipe({ strong: true })}
+              disabled={busy}
+              onClick={() => save(false)}
+            >
               下書き保存
             </button>
             <button
               type="button"
-              className="hb"
+              className={pillButtonRecipe({ strong: true })}
               disabled={busy}
               onClick={() => {
                 if (preview) {
@@ -334,7 +589,7 @@ export function ReportForm({
             {preview && (
               <button
                 type="button"
-                className="hb"
+                className={pillButtonRecipe({ strong: true })}
                 onClick={() => {
                   setPublished(true);
                   window.scrollTo(0, 0);
@@ -345,7 +600,7 @@ export function ReportForm({
             )}
             <button
               type="button"
-              className="x"
+              className={closeButton}
               aria-label="レポートを閉じる"
               title="下書きを保存して閉じる"
               disabled={busy}
@@ -356,33 +611,33 @@ export function ReportForm({
               ×
             </button>
           </div>
-          <nav className="steps" aria-label="入力ステップ">
+          <nav className={stepper} aria-label="入力ステップ">
             {STEPS.map((label, index) => {
               const n = index + 1;
               const done = n < step && !incompleteSteps.has(n);
-              const state = n === step ? "step cur" : done ? "step done" : "step";
+              const state: StepState = n === step ? "current" : done ? "done" : "todo";
               return (
                 <button
                   key={label}
                   type="button"
-                  className={state}
+                  className={stepButton}
                   aria-current={n === step ? "step" : undefined}
                   aria-label={`${n} ${label}`}
                   onClick={() => navigate(n)}
                 >
-                  <span className="n">{done ? "✓" : n}</span>
-                  <span className="lb">{label}</span>
-                  {n < TOTAL && <span className="ln" />}
+                  <span className={stepNumber({ state })}>{done ? "✓" : n}</span>
+                  <span className={stepLabel({ state })}>{label}</span>
+                  {n < TOTAL && <span className={stepLine({ state })} />}
                 </button>
               );
             })}
           </nav>
         </div>
         {notice?.kind === "error" && (
-          <div className="msg" role="alert">
+          <div className={errorNotice} role="alert">
             {notice.text}
             {notice.items && notice.items.length > 0 && (
-              <ul style={{ margin: "4px 0 0", paddingLeft: "1.2em" }}>
+              <ul className={errorList}>
                 {notice.items.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
@@ -390,11 +645,8 @@ export function ReportForm({
             )}
           </div>
         )}
-        <fieldset disabled={busy} style={{ border: "none", margin: 0, padding: 0, minWidth: 0 }}>
-          <section
-            className={step === TOTAL && preview ? "pane on pv-on" : "pane on"}
-            data-p={step}
-          >
+        <fieldset disabled={busy} className={fields}>
+          <section className={pane}>
             {step === 1 && (
               <ReportStepBasics
                 input={input}
@@ -454,32 +706,40 @@ export function ReportForm({
             )}
           </section>
         </fieldset>
-        <div className="foot">
-          <div className="foot-in">
+        <div className={foot}>
+          <div className={footInner}>
             <button
               type="button"
-              className="btn"
+              className={footButton}
               disabled={busy || step === 1}
               onClick={() => navigate(step - 1)}
             >
               戻る
             </button>
-            <span className="st">
-              ステップ <b className="tnum">{step}</b> / {TOTAL}
+            <span className={stepCount}>
+              ステップ <b className={stepCountNumber}>{step}</b> / {TOTAL}
             </span>
-            <span className="sp" />
+            <span className={spacer} />
             {step >= 3 && step < TOTAL && readyToPost && (
-              <button type="button" className="btn g" onClick={() => navigate(TOTAL)}>
+              <button
+                type="button"
+                className={pillButtonRecipe({ tone: "soft", size: "md", strong: true })}
+                onClick={() => navigate(TOTAL)}
+              >
                 ここまでで投稿
               </button>
             )}
-            <button type="submit" className="btn p" disabled={busy}>
+            <button
+              type="submit"
+              className={pillButtonRecipe({ tone: "primary", size: "md", strong: true })}
+              disabled={busy}
+            >
               {busy ? "保存しています…" : step === TOTAL ? "公開に進む" : "次へ"}
             </button>
           </div>
         </div>
         {notice?.kind === "ok" && (
-          <div className="toast on" role="status">
+          <div className={toast} role="status">
             {notice.text}
           </div>
         )}
@@ -493,23 +753,23 @@ export function ReportForm({
           />
         )}
         {leaving && (
-          <div className="modal show">
+          <div className={modal}>
             <div
-              className="modal-box"
+              className={modalBox}
               role="dialog"
               aria-modal="true"
               aria-labelledby="report-leave-title"
             >
-              <div className="modal-t" id="report-leave-title">
+              <div className={modalTitle} id="report-leave-title">
                 入力途中の内容を下書きに保存しますか？
               </div>
-              <div className="modal-s">
+              <div className={modalText}>
                 保存すると、マイページの「下書き」から続きを入力できます。
               </div>
-              <div className="modal-a">
+              <div className={modalActions}>
                 <button
                   type="button"
-                  className="btn"
+                  className={footButton}
                   disabled={busy}
                   onClick={() => {
                     setLeaving(false);
@@ -518,14 +778,13 @@ export function ReportForm({
                 >
                   保存せずに閉じる
                 </button>
-                <span className="sp" />
-                <button type="button" className="btn" onClick={() => setLeaving(false)}>
+                <button type="button" className={footButton} onClick={() => setLeaving(false)}>
                   入力に戻る
                 </button>
                 <button
                   ref={leaveSave}
                   type="button"
-                  className="btn p"
+                  className={pillButtonRecipe({ tone: "primary", size: "md", strong: true })}
                   disabled={busy}
                   onClick={() => save(false, true)}
                 >

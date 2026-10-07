@@ -1,6 +1,12 @@
 import { MockExternalIcon } from "@/app/materials/[id]/_components/MockParts";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
+import { Badge } from "@/components/Badge";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import type { PublicSellerPageData } from "@/server/queries/public-sellers";
+
+import { css, cx } from "../../../../../styled-system/css";
+
+const linkRowStyle = css({ display: "inline-flex", alignItems: "center", gap: "1" });
 
 function checkedExternalUrl(value: string): string {
   const url = new URL(value);
@@ -33,39 +39,72 @@ type SellerHeaderProps = {
   seller: PublicSellerPageData["seller"];
 };
 
-/** 見本 S.seller の `.card.org-head`。名前の横の確認済みマークは表記ルールにより出さない。 */
+/** メーカーの名前・紹介・リンク。名前の横の確認済みマークは表記ルールにより出さない。 */
 export function SellerHeader({ seller }: SellerHeaderProps) {
   const websiteUrl = seller.websiteUrl === null ? null : checkedExternalUrl(seller.websiteUrl);
 
   return (
-    <section className="card org-head" aria-labelledby="seller-name">
-      <div className="org-logo">
+    <section
+      className={cx(surfaceCardRecipe(), css({ display: "flex", gap: "3" }))}
+      aria-labelledby="seller-name"
+    >
+      <div
+        className={css({
+          display: "grid",
+          placeItems: "center",
+          flexShrink: "0",
+          w: "14",
+          h: "14",
+          overflow: "hidden",
+          borderRadius: "media",
+          bg: "primary.100",
+          color: "primary.800",
+          fontSize: "xl",
+          fontWeight: "extrabold",
+          "& img": { w: "full", h: "full", objectFit: "cover" },
+        })}
+      >
         {seller.logoUrl ? (
           <Image alt="" height={56} sizes="56px" src={seller.logoUrl} width={56} />
         ) : (
           seller.officialName.charAt(0)
         )}
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div className="org-name">
-          <h1 id="seller-name" style={{ fontSize: 17 }}>
-            {seller.officialName}
-          </h1>
-        </div>
-        <span className="type-label" style={{ marginTop: 5, display: "inline-block" }}>
-          メーカー
-        </span>
-        {seller.profileText ? <p className="org-desc">{seller.profileText}</p> : null}
+      <div className={css({ flex: "1", minW: "0" })}>
+        <h1 id="seller-name" className={css({ fontSize: "lg" })}>
+          {seller.officialName}
+        </h1>
+        <Badge className={css({ mt: "1" })}>メーカー</Badge>
+        {seller.profileText ? (
+          <p
+            className={css({ mt: "2", fontSize: "sm", lineHeight: "relaxed", color: "text.muted" })}
+          >
+            {seller.profileText}
+          </p>
+        ) : null}
         {websiteUrl !== null || seller.regionScope !== null ? (
-          <div className="org-links">
+          <div
+            className={css({
+              display: "flex",
+              flexDirection: "column",
+              gap: "1.5",
+              mt: "2",
+              fontSize: "sm",
+            })}
+          >
             {websiteUrl === null ? null : (
-              <a href={websiteUrl} target="_blank" rel="noreferrer">
+              <a
+                className={cx(linkRowStyle, css({ color: "primary.700", textDecoration: "none" }))}
+                href={websiteUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <MockExternalIcon /> {websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                <span className="sr-only">（公式サイト・別タブで開きます）</span>
+                <span className={css({ srOnly: true })}>（公式サイト・別タブで開きます）</span>
               </a>
             )}
             {seller.regionScope === null ? null : (
-              <span className="loc">
+              <span className={cx(linkRowStyle, css({ color: "text.muted" }))}>
                 <PinIcon /> {seller.regionScope}
               </span>
             )}

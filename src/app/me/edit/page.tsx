@@ -1,9 +1,8 @@
-import "@/app/_mock/forms.css";
-
 import { MockPageShell } from "@/app/_mock/MockPageShell";
 import { errorMessageJa } from "@/server/errors";
 import { getProfileDetails, getProfileOptions } from "@/server/queries/profile-details";
 import { getOwnProfile } from "@/server/queries/profiles";
+import { css } from "../../../../styled-system/css";
 
 import { NonGeneralNotice } from "../_components/NonGeneralNotice";
 import { resolveMeAccess } from "../_lib/access";
@@ -28,11 +27,10 @@ export default async function MeEditPage() {
   ]);
   if (!details.ok || !options.ok) throw new Error("プロフィール設定の取得に失敗しました。");
 
-  // 見本 S.profileEdit（本文は 640px に絞る）。
   return (
     <MockPageShell title="プロフィールを編集" backHref="/me" active="me">
-      <div style={{ maxWidth: 640, margin: "0 auto" }}>
-        <h1 className="sr-only">表示情報編集</h1>
+      <div className={css({ maxW: "content.form", mx: "auto" })}>
+        <h1 className={css({ srOnly: true })}>表示情報編集</h1>
         <ProfileEditForm
           profile={profileResult.data}
           details={details.data}

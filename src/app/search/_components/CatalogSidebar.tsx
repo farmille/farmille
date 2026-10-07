@@ -10,11 +10,95 @@ import type { CatalogSearch } from "@/server/queries/catalog-search";
 import type { SearchCatalog, SearchFilterItem } from "@/lib/material-search";
 import { cropAncestors } from "@/lib/catalog-search";
 
+import { css, cva, cx } from "../../../../styled-system/css";
+
+import {
+  chipCategoryStyle,
+  chipList,
+  chipListStyle,
+  chipRemoveRecipe,
+  focusRing,
+  selectedChipRecipe,
+} from "./search-chips";
 import { SideSection, type SideFilterItem } from "./SideSection";
 
+const chipRecipe = cva({
+  base: {
+    ...focusRing,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "1.5",
+    py: "1",
+    px: "3",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderRadius: "pill",
+    fontSize: "sm",
+    textDecoration: "none",
+  },
+  variants: {
+    active: {
+      true: {
+        bg: "primary.700",
+        borderColor: "primary.700",
+        color: "text.inverse",
+        fontWeight: "bold",
+      },
+      false: { bg: "surface.card", borderColor: "border.strong", color: "inherit" },
+    },
+  },
+});
+
+const genreRowRecipe = cva({
+  base: {
+    ...focusRing,
+    display: "flex",
+    alignItems: "center",
+    gap: "2",
+    minH: "10",
+    py: "2",
+    px: "2",
+    borderRadius: "input",
+    textDecoration: "none",
+  },
+  variants: {
+    active: {
+      true: { bg: "primary.100", color: "primary.800" },
+      false: { color: "inherit", _hover: { bg: "primary.soft" } },
+    },
+  },
+});
+
+const countNoteStyle = css({ flex: "none", color: "text.subtle", fontSize: "xs" });
+
+const summaryBase = css.raw(focusRing, {
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  listStyle: "none",
+  cursor: "pointer",
+  "&::-webkit-details-marker": { display: "none" },
+});
+
+const effectSummaryStyle = css(summaryBase, {
+  py: "2",
+  px: "1.5",
+  borderRadius: "input",
+  fontSize: "md",
+  fontWeight: "semibold",
+  _hover: { bg: "primary.soft" },
+});
+
+const cropSummaryStyle = css(summaryBase, {
+  py: "1.5",
+  px: "0.5",
+  fontSize: "md",
+  fontWeight: "semibold",
+});
+
 /**
- * 見本 S.search の絞り込みパネル（`aside.s-side > .ts-panel`）。
- * 各条件は検索ページへのリンク（押すと条件の追加・解除）。並びと件数の出し方は本番のまま。
+ * 検索ページの絞り込みパネル。
+ * 各条件は検索ページへのリンク（押すと条件の追加・解除）。
  */
 export function CatalogSidebar({
   catalog,
@@ -38,7 +122,7 @@ export function CatalogSidebar({
       : [...selected, filter];
     return { href: buildSearchHref({ filters: next, sort, query }), active, key };
   }
-  /** 見本の qchip（`.qchip`、選択中は `.on`）。 */
+  /** 選択中は塗りに加えて ✓ を付け、色だけに頼らない。 */
   function chip(filter: SelectedSearchFilter, label = filter.name) {
     const { href, active, key } = hrefFor(filter);
     return (
@@ -47,14 +131,15 @@ export function CatalogSidebar({
         href={href}
         rel="nofollow"
         aria-current={active ? "true" : undefined}
-        className={active ? "qchip on" : "qchip"}
+        className={chipRecipe({ active })}
         scroll={false}
       >
+        {active ? <span aria-hidden="true">✓</span> : null}
         {label}
       </Link>
     );
   }
-  /** 見本の件数つきの候補行（`.sug` ＋ `.alias-note`）。 */
+  /** 件数つきの候補行。右端は「＋」、選択中は「✓ 選択中」。 */
   function row(filter: SelectedSearchFilter, count: number) {
     const { href, active, key } = hrefFor(filter);
     return (
@@ -63,15 +148,30 @@ export function CatalogSidebar({
         href={href}
         rel="nofollow"
         aria-current={active ? "true" : undefined}
-        className="sug"
+        className={cx("group", genreRowRecipe({ active }))}
         scroll={false}
-        style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 2px" }}
       >
-        <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700 }}>{filter.name}</span>
-        <span className="alias-note tnum" style={{ flex: "0 0 auto" }}>
+        <span className={css({ flex: "1", minW: "0", fontSize: "sm", fontWeight: "bold" })}>
+          {filter.name}
+        </span>
+        <span className={cx(countNoteStyle, css({ fontVariantNumeric: "tabular-nums" }))}>
           {count}
         </span>
-        <span className="sug-mark" aria-hidden="true" />
+        <span
+          className={
+            active
+              ? css({ flex: "none", color: "primary.800", fontSize: "xs", fontWeight: "bold" })
+              : css({
+                  flex: "none",
+                  color: "text.subtle",
+                  fontWeight: "bold",
+                  _groupHover: { color: "primary.800" },
+                })
+          }
+          aria-hidden="true"
+        >
+          {active ? "✓ 選択中" : "＋"}
+        </span>
       </Link>
     );
   }
@@ -102,7 +202,7 @@ export function CatalogSidebar({
   function cropChip(crop: CatalogSearch["crops"][number]) {
     return chip({ kind: "filter", category: "crop", id: crop.id, name: crop.name });
   }
-  // 見本の EFF_GROUPS4：JBSA の効果大分類（4区分）ごとに開閉行を置き、中に個別効果のタグを並べる。
+  // JBSA の効果大分類（4区分）ごとに開閉行を置き、中に個別効果のタグを並べる。
   // catalog.effects は大分類の表示順 → 個別効果の表示順に並んでいる。
   const effectGroups: Array<{ id: string; name: string; effects: CatalogSearch["effects"] }> = [];
   for (const effect of catalog.effects) {
@@ -110,7 +210,7 @@ export function CatalogSidebar({
     if (group?.id === effect.categoryId) group.effects.push(effect);
     else effectGroups.push({ id: effect.categoryId, name: effect.categoryName, effects: [effect] });
   }
-  // 見本どおり、掲載資材のない資材ジャンルは出さない（選択中のものは外せるよう残す）。
+  // 掲載資材のない資材ジャンルは出さない（選択中のものは外せるよう残す）。
   const genres = search.filters
     .filter(
       (filter) =>
@@ -120,23 +220,23 @@ export function CatalogSidebar({
     )
     .toSorted((a, b) => (genreCounts.get(b.id) ?? 0) - (genreCounts.get(a.id) ?? 0));
 
-  /** 見本 selHtml：区分ごとの選択中の条件（`.chip-sel`）。× で その条件だけを外す。 */
+  /** 区分ごとの選択中の条件。× でその条件だけを外す。 */
   function selectedChips(match: (filter: SelectedSearchFilter) => boolean) {
     const items = selected.filter(match);
     if (!items.length) return null;
     return (
-      <div className="sug-chips side-selected">
+      <div className={css(chipList, { pt: "0", pb: "2" })}>
         {items.map((filter) => {
           const { href, key } = hrefFor(filter);
           return (
-            <span key={key} className="chip-sel">
-              <span className="cat-mini">選択中</span>
+            <span key={key} className={selectedChipRecipe({ size: "sm" })}>
+              <span className={chipCategoryStyle}>選択中</span>
               {filter.name}
               <Link
                 href={href}
                 rel="nofollow"
                 scroll={false}
-                className="chip-x"
+                className={chipRemoveRecipe({ size: "sm" })}
                 aria-label={`${filter.name}の条件を外す`}
               >
                 ×
@@ -161,17 +261,59 @@ export function CatalogSidebar({
   const conditionCount = selected.length + (query ? 1 : 0);
 
   return (
-    <aside aria-label="資材の絞り込み" className="s-side">
-      <div className="ts-panel">
+    <aside aria-label="資材の絞り込み" className={css({ pc: { position: "sticky", top: "20" } })}>
+      <div
+        className={css({
+          mt: "2.5",
+          bg: "surface.card",
+          borderWidth: "1px",
+          borderStyle: "solid",
+          borderColor: "border.default",
+          borderRadius: "button",
+          overflow: "hidden",
+          pc: { maxH: "calc(100vh - token(spacing.24))", overflowY: "auto" },
+        })}
+      >
         {conditionCount > 0 ? (
-          <div className="side-clear">
+          <div
+            className={css({
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "2",
+              pt: "2.5",
+              px: "3",
+              color: "text.muted",
+              fontSize: "sm",
+              fontWeight: "bold",
+            })}
+          >
             <span>選択中の条件 {conditionCount}件</span>
-            <Link href="/search" className="ts-clear">
+            <Link
+              href="/search"
+              className={css({
+                py: "2",
+                px: "0.5",
+                color: "text.subtle",
+                fontSize: "sm",
+                fontWeight: "normal",
+                textDecoration: "underline",
+              })}
+            >
               すべての条件をクリア
             </Link>
           </div>
         ) : null}
-        <div className="logic-hint" style={{ padding: "8px 12px 2px" }}>
+        <div
+          className={css({
+            mt: "2.5",
+            pt: "2",
+            px: "3",
+            pb: "0.5",
+            color: "text.muted",
+            fontSize: "xs",
+          })}
+        >
           作物 × 効果 など、条件を組み合わせて検索できます
         </div>
         <SideSection
@@ -185,15 +327,23 @@ export function CatalogSidebar({
           }}
         >
           {effectGroups.map((group) => (
-            <details key={group.id} className="eff-group">
-              <summary className="sug">
-                <span className="eff-caret" aria-hidden="true" />
-                <span style={{ flex: 1, minWidth: 0 }}>{group.name}</span>
-                <span className="alias-note" style={{ flex: "0 0 auto" }}>
-                  {group.effects.length}効果
+            <details key={group.id}>
+              <summary className={effectSummaryStyle}>
+                <span
+                  className={css({
+                    display: "inline-block",
+                    color: "primary.700",
+                    fontSize: "xs",
+                    "details[open] > summary &": { transform: "rotate(90deg)" },
+                  })}
+                  aria-hidden="true"
+                >
+                  ▸
                 </span>
+                <span className={css({ flex: "1", minW: "0" })}>{group.name}</span>
+                <span className={countNoteStyle}>{group.effects.length}効果</span>
               </summary>
-              <div className="sug-chips eff-chips">
+              <div className={css(chipList, { pr: "1.5", pb: "2.5", pl: "6" })}>
                 {group.effects.map((effect) =>
                   chip({ kind: "filter", category: "effect", id: effect.id, name: effect.name }),
                 )}
@@ -239,17 +389,29 @@ export function CatalogSidebar({
               )
                 return null;
               return (
-                <details key={major.id} className="crop-major">
-                  <summary>
-                    <span style={{ color: "var(--green)", fontSize: 11 }} aria-hidden="true">
+                <details
+                  key={major.id}
+                  className={css({
+                    py: "0.5",
+                    borderTopWidth: "1px",
+                    borderTopStyle: "solid",
+                    borderTopColor: "border.default",
+                    _firstOfType: { borderTopWidth: "0" },
+                  })}
+                >
+                  <summary className={cropSummaryStyle}>
+                    <span
+                      className={css({ color: "primary.700", fontSize: "xs" })}
+                      aria-hidden="true"
+                    >
                       ▸
                     </span>
-                    <span style={{ flex: 1, minWidth: 0 }}>{major.name}</span>
-                    <span className="alias-note" style={{ flex: "0 0 auto", whiteSpace: "nowrap" }}>
+                    <span className={css({ flex: "1", minW: "0" })}>{major.name}</span>
+                    <span className={cx(countNoteStyle, css({ whiteSpace: "nowrap" }))}>
                       記載あり {visible.length}品目
                     </span>
                   </summary>
-                  <div className="sug-chips">
+                  <div className={chipListStyle}>
                     {groupChip(major)}
                     {visible
                       .filter(
@@ -265,8 +427,18 @@ export function CatalogSidebar({
                       return null;
                     return (
                       <div key={group.id}>
-                        <p className="sub-title">{group.name}</p>
-                        <div className="sug-chips">
+                        <p
+                          className={css({
+                            mt: "2",
+                            mb: "1.5",
+                            color: "text.muted",
+                            fontSize: "sm",
+                            fontWeight: "bold",
+                          })}
+                        >
+                          {group.name}
+                        </p>
+                        <div className={chipListStyle}>
                           {groupChip(group)}
                           {crops.map(cropChip)}
                         </div>
@@ -291,12 +463,12 @@ export function CatalogSidebar({
             })),
           }}
         >
-          <div className="sug-chips">
+          <div className={chipListStyle}>
             {search.makers.map((name) => chip({ kind: "maker", name }))}
           </div>
         </SideSection>
         <SideSection title="施用方法で探す" selected={selectedChips(isFilter("method"))}>
-          <div className="sug-chips">
+          <div className={chipListStyle}>
             {search.filters.filter((filter) => filter.category === "method").map(tag)}
           </div>
         </SideSection>

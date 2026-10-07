@@ -14,8 +14,8 @@ const shell = css({
 });
 
 const icon = css({
-  w: "76px",
-  h: "76px",
+  w: "20",
+  h: "20",
   mx: "auto",
   display: "grid",
   placeItems: "center",
@@ -72,7 +72,7 @@ const link = css({
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  minH: "44px",
+  minH: "11",
   borderRadius: "button",
   bg: "primary.700",
   color: "text.inverse",
