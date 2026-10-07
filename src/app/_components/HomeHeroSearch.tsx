@@ -222,6 +222,7 @@ const pillDropStyle = css({
   left: "50%",
   transform: "translateX(-50%)",
   zIndex: "50",
+  tab: { left: "auto", right: "0", transform: "none" },
   w: "min(token(sizes.96), calc(100vw - token(spacing.8)))",
   textAlign: "left",
 });

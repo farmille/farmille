@@ -47,7 +47,7 @@ export const Chips: Story = {
     <div className={row}>
       <Chip>トマト</Chip>
       <Chip tone="grey">微生物資材</Chip>
-      <Chip>光合成細菌・バチルス菌・トリコデルマ菌を配合した複合微生物資材</Chip>
+      <Chip wrap>光合成細菌・バチルス菌・トリコデルマ菌を配合した複合微生物資材</Chip>
     </div>
   ),
 };

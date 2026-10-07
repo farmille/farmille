@@ -85,6 +85,7 @@ export function SellerPageContent({ data }: { data: PublicSellerPageData }) {
           </SectionHead>
           <div
             className={css({
+              position: "relative",
               display: "flex",
               gap: "3",
               overflowX: "auto",
