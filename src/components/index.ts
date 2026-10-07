@@ -53,6 +53,8 @@ export type { MetricBarItem } from "./MetricBars";
 
 export { MaterialRefCard } from "./MaterialRefCard";
 
+export { ArticlesToolbar } from "./ArticlesToolbar";
+
 export { DataTable } from "./DataTable";
 export type { DataTableColumn } from "./DataTable";
 
