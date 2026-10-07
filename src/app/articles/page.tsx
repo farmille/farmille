@@ -20,7 +20,7 @@ import { OrgArticleCard } from "./_components/OrgArticleCard";
 export async function generateMetadata(): Promise<Metadata> {
   return createPageMetadata({
     title: "記事を読む",
-    description: "農家の実証詳細レポートとメーカーの記事を探せます。",
+    description: "生産者の実証詳細レポートとメーカーの記事を探せます。",
     path: "/articles",
   });
 }

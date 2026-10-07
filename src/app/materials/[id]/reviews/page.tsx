@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: MaterialReviewsPageProps): Pr
 
   return materialMetadata(material, {
     titleSuffix: "の感想口コミ",
-    description: `${material.name}を使った農家の感想口コミを一覧で確認できます。`,
+    description: `${material.name}を使った生産者の感想口コミを一覧で確認できます。`,
     pathSuffix: "/reviews",
   });
 }

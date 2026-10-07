@@ -67,7 +67,7 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
     <MockPageShell title={`${material.name} の記事`} backHref={materialPath}>
       <h1 className="sr-only">{material.name} の記事・実証詳細レポート</h1>
       <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
-        この資材に紐づく、農家の実証詳細レポートとメーカーによる記事です。
+        この資材に紐づく、生産者の実証詳細レポートとメーカーによる記事です。
       </p>
 
       {isEmpty ? (

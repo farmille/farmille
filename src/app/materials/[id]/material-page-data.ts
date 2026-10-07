@@ -38,7 +38,7 @@ export async function loadMaterialOrNotFound(id: string): Promise<MaterialDetail
 export function materialDescription(material: MaterialDetail): string {
   return (
     material.description ??
-    `${material.name}の製品情報、実証詳細レポート、農家の感想口コミを確認できます。`
+    `${material.name}の製品情報、実証詳細レポート、生産者の感想口コミを確認できます。`
   );
 }
 
