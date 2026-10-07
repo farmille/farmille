@@ -12,6 +12,36 @@ const RENDER_TIMEOUT = 15_000;
 const SHARD_COUNT = 4;
 const MAX_REPORTED_FAILURES = 50;
 
+// CI の matrix で Story の検査を複数ジョブに分ける。未指定なら 1 ジョブで全 Story を検査する。
+const CiShardSchema = v.pipe(
+  v.string(),
+  v.regex(
+    /^[1-9]\d*\/[1-9]\d*$/,
+    "STORYBOOK_RESPONSIVE_SHARD は <current>/<total> の形式で指定する",
+  ),
+  v.transform((value) => {
+    const [current, total] = value.split("/");
+    return { current: Number(current), total: Number(total) };
+  }),
+  v.check(
+    ({ current, total }) => current <= total,
+    "STORYBOOK_RESPONSIVE_SHARD の current は total 以下にする",
+  ),
+);
+type CiShard = v.InferOutput<typeof CiShardSchema>;
+
+function resolveCiShard(): CiShard {
+  const raw = process.env.STORYBOOK_RESPONSIVE_SHARD;
+  return raw === undefined ? { current: 1, total: 1 } : v.parse(CiShardSchema, raw);
+}
+
+const CI_SHARD = resolveCiShard();
+
+// 個別部品の検査は CI の最初の shard だけが受け持つ。2 番目以降は全 Story の検査に専念する。
+function skipUnlessFirstShard(): void {
+  test.skip(CI_SHARD.current !== 1, "CI では shard 1 だけで検査する");
+}
+
 const SCREENSHOT_WIDTHS = [375, 1440] as const;
 const REPRESENTATIVE_STORY_IDS = [
   "app-admin-adminshell--default",
@@ -264,12 +294,15 @@ async function collectResponsiveFailures(
 }
 
 for (let shardIndex = 0; shardIndex < SHARD_COUNT; shardIndex += 1) {
-  test(`全 Story が段階的な画面幅で横にはみ出さない（shard ${shardIndex + 1}/${SHARD_COUNT}）`, async ({
+  test(`全 Story が段階的な画面幅で横にはみ出さない（CI shard ${CI_SHARD.current}/${CI_SHARD.total}・worker ${shardIndex + 1}/${SHARD_COUNT}）`, async ({
     page,
     request,
   }, testInfo) => {
     const allStories = await fetchSortedStories(request);
-    const stories = allStories.filter((_, index) => index % SHARD_COUNT === shardIndex);
+    const ciShardStories = allStories.filter(
+      (_, index) => index % CI_SHARD.total === CI_SHARD.current - 1,
+    );
+    const stories = ciShardStories.filter((_, index) => index % SHARD_COUNT === shardIndex);
     expect(stories.length, "shard に検査対象の Story が割り当てられること").toBeGreaterThan(0);
 
     const failures = await collectResponsiveFailures(page, stories);
@@ -277,8 +310,10 @@ for (let shardIndex = 0; shardIndex < SHARD_COUNT; shardIndex += 1) {
     await testInfo.attach("responsive-results", {
       body: JSON.stringify(
         {
-          shard: `${shardIndex + 1}/${SHARD_COUNT}`,
+          ciShard: `${CI_SHARD.current}/${CI_SHARD.total}`,
+          worker: `${shardIndex + 1}/${SHARD_COUNT}`,
           storiesInIndex: allStories.length,
+          storiesInCiShard: ciShardStories.length,
           storiesInShard: stories.length,
           widths: VIEWPORT_WIDTHS,
           checks: stories.length * VIEWPORT_WIDTHS.length,
@@ -298,6 +333,7 @@ for (let shardIndex = 0; shardIndex < SHARD_COUNT; shardIndex += 1) {
 }
 
 test("自分のレビューの操作ボタンが狭い画面でも収まる", async ({ page }, testInfo) => {
+  skipUnlessFirstShard();
   for (const width of [320, 360, 375]) {
     await page.setViewportSize({ width, height: 812 });
     await gotoStory(page, "components-reviewcard--own-review");
@@ -315,6 +351,7 @@ test("自分のレビューの操作ボタンが狭い画面でも収まる", as
 });
 
 test("BottomNav は tab 未満で固定され、tab 以上では非表示になる", async ({ page }) => {
+  skipUnlessFirstShard();
   const storyId = "components-bottomnav--viewport-fixed";
   await page.setViewportSize({ width: 375, height: 812 });
   await gotoStory(page, storyId);
@@ -350,6 +387,7 @@ test("BottomNav は tab 未満で固定され、tab 以上では非表示にな�
 });
 
 test("AppBar は tab 境界でモバイル版と PC 版を相互排他にする", async ({ page }) => {
+  skipUnlessFirstShard();
   await page.setViewportSize({ width: 375, height: 812 });
   await gotoStory(page, "components-appbar--home");
 
@@ -368,6 +406,7 @@ test("AppBar は tab 境界でモバイル版と PC 版を相互排他にする"
 });
 
 test("FormPageShell は PC で用途別の有限幅を持つ", async ({ page }) => {
+  skipUnlessFirstShard();
   await page.setViewportSize({ width: 1440, height: 900 });
   await gotoStory(page, "components-formpageshell--default");
 
@@ -379,6 +418,7 @@ test("FormPageShell は PC で用途別の有限幅を持つ", async ({ page }) 
 });
 
 test("画像枠は画面幅が変わっても用途別のアスペクト比を維持する", async ({ page }) => {
+  skipUnlessFirstShard();
   const cases = [
     {
       storyId: "components-materialcard--scroll",
@@ -434,6 +474,7 @@ test("画像枠は画面幅が変わっても用途別のアスペクト比を�
 });
 
 test("横送り用の資材カードはPCで過度に拡大しない", async ({ page }) => {
+  skipUnlessFirstShard();
   const cases = [
     { width: 375, expectedCardWidth: 150 },
     { width: 768, expectedCardWidth: 240 },
@@ -454,6 +495,7 @@ test("代表的な複雑 Story のスクリーンショットを 375px と 1440p
   page,
   request,
 }, testInfo) => {
+  skipUnlessFirstShard();
   const stories = await fetchSortedStories(request);
   const storiesById = new Map(stories.map((story) => [story.id, story]));
   const outputDirectory = resolveScreenshotDirectory(testInfo);
@@ -479,6 +521,7 @@ test("代表的な複雑 Story のスクリーンショットを 375px と 1440p
 });
 
 test("口コミ0件の評価サマリーは表示しない", async ({ page }) => {
+  skipUnlessFirstShard();
   await gotoStory(page, "app-materials-ratingsummary--default");
   await expect(page.locator("#storybook-root")).toContainText("18件");
   await gotoStory(page, "app-materials-ratingsummary--no-reviews");
