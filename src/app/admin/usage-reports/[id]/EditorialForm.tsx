@@ -20,7 +20,7 @@ const labelStyle = css({
   gap: "1.5",
   color: "text.muted",
   fontSize: "sm",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 export function UsageReportEditorialForm({ report }: { report: UsageReportEditorialDetail }) {

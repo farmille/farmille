@@ -1,17 +1,7 @@
-import { cva, css, cx } from "../../styled-system/css";
+import { css, cx } from "../../styled-system/css";
+import { surfaceCardRecipe } from "./SurfaceCard";
 
-const cardRecipe = cva({
-  base: {
-    bg: "surface.card",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.default",
-    borderRadius: "button",
-    p: "3",
-    boxShadow: "shadow",
-    textAlign: "center",
-  },
-});
+const cardRecipe = css({ textAlign: "center" });
 
 type StatCardProps = {
   value: string | number;
@@ -22,11 +12,11 @@ type StatCardProps = {
 /** 実績カード。大きな緑数字＋ラベル。 */
 export function StatCard({ value, label, className }: StatCardProps) {
   return (
-    <div className={cx(cardRecipe(), className)}>
+    <div className={cx(surfaceCardRecipe({ padding: "compact" }), cardRecipe, className)}>
       <div
         className={css({
           fontSize: "2xl",
-          fontWeight: "800",
+          fontWeight: "extrabold",
           color: "primary.700",
           fontVariantNumeric: "tabular-nums",
         })}

@@ -10,7 +10,6 @@ const surfaceCardRecipe = cva({
     borderColor: "border.default",
     borderRadius: "card",
     boxShadow: "shadow",
-    p: "4",
   },
   variants: {
     tone: {
@@ -19,9 +18,17 @@ const surfaceCardRecipe = cva({
         bg: "primary.soft",
       },
     },
+    padding: {
+      standard: { p: "4" },
+      cozy: { p: "3.5" },
+      compact: { p: "3" },
+      snug: { p: "2.5" },
+      flush: { p: "0" },
+    },
   },
   defaultVariants: {
     tone: "standard",
+    padding: "standard",
   },
 });
 
@@ -35,17 +42,23 @@ type SurfaceCardProps = SurfaceCardVariants & {
 };
 
 /** 見出しを持てる共通カード。画面固有のカード装飾を増やさないために使う。 */
-export function SurfaceCard({ title, description, tone, children, className }: SurfaceCardProps) {
+export function SurfaceCard({
+  title,
+  description,
+  tone,
+  padding,
+  children,
+  className,
+}: SurfaceCardProps) {
   return (
-    <section aria-label={title} className={cx(surfaceCardRecipe({ tone }), className)}>
+    <section aria-label={title} className={cx(surfaceCardRecipe({ tone, padding }), className)}>
       {title === undefined ? null : (
         <h2
           className={css({
             m: "0",
             color: "text.default",
             fontSize: "lg",
-            fontWeight: "800",
-            lineHeight: "1.4",
+            lineHeight: "snug",
           })}
         >
           {title}
@@ -58,7 +71,7 @@ export function SurfaceCard({ title, description, tone, children, className }: S
             mb: "0",
             color: "text.muted",
             fontSize: "sm",
-            lineHeight: "1.65",
+            lineHeight: "relaxed",
           })}
         >
           {description}

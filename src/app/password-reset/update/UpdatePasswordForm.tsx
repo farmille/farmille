@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useActionState } from "react";
 
 import { updatePasswordAction } from "@/app/password-reset/update/actions";
+import { buttonRecipe } from "@/components/Button";
 import {
   controlStyle,
   Field,
   FormMessage,
   formActionsStyle,
-  ghostButtonStyle,
   linkRowStyle,
   textLinkStyle,
 } from "@/components/auth/Fields";
@@ -26,10 +26,10 @@ export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
       <>
         <FormMessage tone="info">{state.message}</FormMessage>
         <div className={formActionsStyle}>
-          <Link className={ghostButtonStyle} href="/login">
+          <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/login">
             一般・運営のログインへ
           </Link>
-          <Link className={ghostButtonStyle} href="/sellers/login">
+          <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/sellers/login">
             メーカーのログインへ
           </Link>
         </div>

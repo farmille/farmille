@@ -46,7 +46,7 @@ export function HomeFooter() {
             href="/"
             className={css({
               fontSize: "xl",
-              fontWeight: "700",
+              fontWeight: "bold",
               color: "text.default",
               textDecoration: "none",
             })}
@@ -67,7 +67,6 @@ export function HomeFooter() {
                 m: "0",
                 mb: "3",
                 fontSize: "sm",
-                fontWeight: "700",
                 color: "text.subtle",
               })}
             >

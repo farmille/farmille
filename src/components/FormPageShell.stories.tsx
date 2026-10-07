@@ -17,7 +17,7 @@ const label = css({
   display: "block",
   mb: "1.5",
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 const fixedFooter = css({

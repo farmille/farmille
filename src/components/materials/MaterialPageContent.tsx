@@ -16,8 +16,8 @@ export const materialPageStack = css({
   minW: "0",
   fontSize: "sm",
   lineHeight: "relaxed",
-  "& h2": { fontSize: "lg", fontWeight: "700", color: "primary.700", mb: "3" },
-  "& h3": { fontSize: "sm", fontWeight: "700", mt: "3", mb: "2" },
+  "& h2": { fontSize: "lg", color: "primary.700", mb: "3" },
+  "& h3": { fontSize: "sm", fontWeight: "bold", mt: "3", mb: "2" },
   "& > section": { pb: "5", borderBottomWidth: "1px", borderBottomColor: "border.default" },
   "& a": { color: "primary.700", overflowWrap: "anywhere" },
 });
@@ -107,7 +107,7 @@ export function MaterialPageContent({
         <dl>
           {materialRegistrationRows(content.registrations).map((entry) => (
             <div key={entry.label}>
-              <dt className={css({ fontWeight: "700", mt: "3" })}>{entry.label}</dt>
+              <dt className={css({ fontWeight: "bold", mt: "3" })}>{entry.label}</dt>
               <dd className={materialPageText}>{entry.value}</dd>
             </div>
           ))}

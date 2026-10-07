@@ -13,7 +13,7 @@ const chipRecipe = cva({
     alignItems: "center",
     gap: "1.5",
     borderRadius: "pill",
-    fontWeight: "600",
+    fontWeight: "semibold",
     whiteSpace: "nowrap",
     borderWidth: "1px",
     borderStyle: "solid",
@@ -45,7 +45,7 @@ const chipRecipe = cva({
     },
     category: {
       crop: {
-        bg: "primary.soft",
+        bg: "primary.200",
         color: "primary.700",
         borderColor: "primary.600/30",
       },
@@ -60,9 +60,9 @@ const chipRecipe = cva({
         borderColor: "tag.effect/35",
       },
       cond: {
-        bg: "accent.official/8",
-        color: "accent.official",
-        borderColor: "accent.official/30",
+        bg: "tag.cond/12",
+        color: "tag.cond",
+        borderColor: "tag.cond/35",
       },
       genre: {
         bg: "tag.type/12",
@@ -92,9 +92,9 @@ const chipRecipe = cva({
       selectedOn: true,
       css: {
         bg: "primary.700",
-        color: "surface.card",
+        color: "text.inverse",
         borderColor: "primary.600",
-        fontWeight: "600",
+        fontWeight: "semibold",
       },
     },
   ],
@@ -107,7 +107,7 @@ const chipRecipe = cva({
 const catMini = css({
   fontSize: "2xs",
   opacity: "0.65",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 const removeBtn = css({
@@ -120,7 +120,7 @@ const removeBtn = css({
   display: "grid",
   placeItems: "center",
   fontSize: "sm",
-  lineHeight: "1",
+  lineHeight: "none",
   cursor: "pointer",
   padding: "0",
 });

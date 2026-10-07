@@ -81,18 +81,18 @@ export function SectionHeading({
             h: "5.5",
             borderRadius: "pill",
             bg: "primary.700",
-            color: "surface.card",
+            color: "text.inverse",
             display: "grid",
             placeItems: "center",
             flexShrink: "0",
             fontSize: "xs",
-            fontWeight: "800",
+            fontWeight: "extrabold",
           })}
         >
           {number}
         </span>
       ) : null}
-      <Heading className={css({ fontSize: "lg", fontWeight: "700", m: "0" })}>{title}</Heading>
+      <Heading className={css({ fontSize: "lg", m: "0" })}>{title}</Heading>
       {numbered && sub ? (
         <span
           className={css({

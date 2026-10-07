@@ -2,17 +2,13 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { Badge } from "./Badge";
+import { helpfulPillRecipe } from "./helpful-pill";
+import { surfaceCardRecipe } from "./SurfaceCard";
 import { Icon } from "@/components/Icon";
 
 const cardRecipe = cva({
   base: {
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.default",
-    borderRadius: "card",
     overflow: "hidden",
-    bg: "surface.card",
-    boxShadow: "shadow",
     textDecoration: "none",
     color: "inherit",
     display: "block",
@@ -26,23 +22,6 @@ const cover = css({
   placeItems: "center",
   overflow: "hidden",
   color: "primary.700",
-});
-
-const helpfulBtn = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1.5",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  bg: "surface.card",
-  color: "text.muted",
-  borderRadius: "pill",
-  px: "3",
-  py: "1.5",
-  fontSize: "sm",
-  whiteSpace: "nowrap",
-  fontVariantNumeric: "tabular-nums",
 });
 
 export type ArticleCardProps = {
@@ -71,7 +50,10 @@ export function ArticleCard({
   const initial = organization.charAt(0);
 
   return (
-    <Link href={href} className={cx(cardRecipe(), className)}>
+    <Link
+      href={href}
+      className={cx(surfaceCardRecipe({ padding: "flush" }), cardRecipe(), className)}
+    >
       <div className={cover} data-ui="article-card-image">
         {coverSrc ? (
           <Image
@@ -92,7 +74,9 @@ export function ArticleCard({
         )}
       </div>
       <div className={css({ px: "3.5", py: "3" })}>
-        <div className={css({ fontSize: "md", fontWeight: "700", lineHeight: "1.4" })}>{title}</div>
+        <div className={css({ fontSize: "md", fontWeight: "bold", lineHeight: "snug" })}>
+          {title}
+        </div>
         <div
           className={css({
             display: "flex",
@@ -113,7 +97,7 @@ export function ArticleCard({
               display: "grid",
               placeItems: "center",
               fontSize: "2xs",
-              fontWeight: "800",
+              fontWeight: "extrabold",
               color: "primary.700",
               flexShrink: "0",
             })}
@@ -136,7 +120,7 @@ export function ArticleCard({
             mt: "2",
           })}
         >
-          <span className={helpfulBtn}>
+          <span className={cx(helpfulPillRecipe(), css({ whiteSpace: "nowrap" }))}>
             <Icon name="thumb_up" size="xs" />
             <span>参考になった</span>
             {helpfulCount}

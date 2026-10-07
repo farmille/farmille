@@ -18,11 +18,11 @@ const searchBox = css({
   gap: "2.5",
   minH: "12",
   w: "100%",
-  bg: "ink/24",
+  bg: "scrim/24",
   backdropFilter: "blur(3px)",
   borderWidth: "1px",
   borderStyle: "solid",
-  borderColor: "surface.card/35",
+  borderColor: "text.inverse/35",
   borderRadius: "pill",
   boxShadow: "shadow.glass",
   px: "4",
@@ -30,7 +30,7 @@ const searchBox = css({
   "&:has(input:focus-visible)": {
     outlineWidth: "2px",
     outlineStyle: "solid",
-    outlineColor: "surface.card",
+    outlineColor: "text.inverse",
     outlineOffset: "3px",
   },
   tab: {
@@ -42,7 +42,7 @@ const searchBox = css({
 
 const icon = css({
   display: "flex",
-  color: "surface.card/90",
+  color: "text.inverse/90",
   flexShrink: "0",
 });
 
@@ -56,11 +56,11 @@ const input = css({
   p: "0",
   fontFamily: "sans",
   fontSize: "lg",
-  fontWeight: "700",
-  color: "surface.card",
-  caretColor: "surface.card",
+  fontWeight: "bold",
+  color: "text.inverse",
+  caretColor: "text.inverse",
   appearance: "none",
-  _placeholder: { color: "surface.card/90", fontWeight: "500" },
+  _placeholder: { color: "text.inverse/90", fontWeight: "medium" },
   "&::-webkit-search-cancel-button": { display: "none" },
   "&::-webkit-search-decoration": { display: "none" },
 });
@@ -70,9 +70,9 @@ const submit = css({
   alignItems: "center",
   gap: "1.5",
   flexShrink: "0",
-  color: "surface.card/90",
+  color: "text.inverse/90",
   fontSize: "xs",
-  fontWeight: "700",
+  fontWeight: "bold",
   bg: "transparent",
   borderWidth: "0",
   p: "0",
@@ -93,7 +93,7 @@ const action = css({
   borderRadius: "pill",
   bg: "primary.600/72",
   backdropFilter: "blur(3px)",
-  color: "surface.card",
+  color: "text.inverse",
   display: "grid",
   placeItems: "center",
   flexShrink: "0",

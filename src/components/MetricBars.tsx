@@ -65,7 +65,7 @@ export function MetricBars({ metrics }: MetricBarsProps) {
                 mt: "2",
                 _first: { mt: "0" },
                 fontSize: "xs",
-                fontWeight: "700",
+                fontWeight: "bold",
               })}
             >
               {metric.metricName}
@@ -141,7 +141,7 @@ function MetricRow({
         className={css({
           textAlign: "right",
           whiteSpace: "nowrap",
-          fontWeight: "700",
+          fontWeight: "bold",
           fontSize: "xs",
           fontVariantNumeric: "tabular-nums",
         })}

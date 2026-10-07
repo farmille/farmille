@@ -67,8 +67,10 @@ const previewBox = css({
   py: "3",
   minH: "180px",
   fontSize: "md",
-  lineHeight: "1.7",
-  "& h1, & h2, & h3": { fontWeight: "800", mt: "3", mb: "2" },
+  lineHeight: "prose",
+  "& h1, & h2, & h3": { mt: "3", mb: "2" },
+  "& h2": { fontSize: "lg" },
+  "& h3": { fontWeight: "extrabold" },
   "& p": { my: "2" },
   "& img": { maxW: "100%", borderRadius: "card", my: "2" },
   "& ul, & ol": { pl: "5", my: "2" },
@@ -432,7 +434,7 @@ export function ArticleForm({
                     bg: "transparent",
                     color: "accent.danger",
                     cursor: "pointer",
-                    fontWeight: "700",
+                    fontWeight: "bold",
                     fontSize: "sm",
                   })}
                   onClick={() => removeMaterial(material.id)}

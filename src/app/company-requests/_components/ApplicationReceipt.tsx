@@ -29,7 +29,7 @@ export function ApplicationReceipt({
           whiteSpace: "pre-wrap",
           overflowWrap: "anywhere",
           fontSize: "md",
-          lineHeight: "1.8",
+          lineHeight: "prose",
           py: "6",
         })}
       >

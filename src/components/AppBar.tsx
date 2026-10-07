@@ -50,13 +50,13 @@ const logo = css({
 
 const logoText = css({
   fontSize: "xl",
-  fontWeight: "700",
+  fontWeight: "bold",
   color: "text.default",
 });
 
 const mobileTitle = css({
   fontSize: "lg",
-  fontWeight: "700",
+  fontWeight: "bold",
   flex: "1",
   minW: "0",
   overflow: "hidden",
@@ -103,7 +103,7 @@ const desktopBrand = css({
 const desktopBrandName = css({
   color: "text.default",
   fontSize: "xl",
-  fontWeight: "800",
+  fontWeight: "extrabold",
 });
 
 const desktopNav = css({
@@ -165,7 +165,7 @@ const desktopSearchInput = css({
 const desktopSearchAction = css({
   color: "primary.700",
   fontSize: "xs",
-  fontWeight: "700",
+  fontWeight: "bold",
   whiteSpace: "nowrap",
   bg: "transparent",
   borderWidth: "0",
@@ -189,7 +189,7 @@ const desktopNavLink = cva({
     borderRadius: "button",
     color: "text.muted",
     fontSize: "md",
-    fontWeight: "700",
+    fontWeight: "bold",
     textDecoration: "none",
     whiteSpace: "nowrap",
     _hover: { bg: "primary.soft", color: "primary.700" },
@@ -218,7 +218,7 @@ const desktopAction = cva({
     px: "3.5",
     borderRadius: "button",
     fontSize: "md",
-    fontWeight: "700",
+    fontWeight: "bold",
     textDecoration: "none",
     whiteSpace: "nowrap",
   },
@@ -265,7 +265,7 @@ const contextBack = css({
   gap: "1.5",
   color: "text.muted",
   fontSize: "sm",
-  fontWeight: "700",
+  fontWeight: "bold",
   textDecoration: "none",
   flexShrink: "0",
 });
@@ -278,7 +278,7 @@ const contextTitle = css({
   whiteSpace: "nowrap",
   color: "text.default",
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 const workspaceTitle = css({
@@ -288,7 +288,7 @@ const workspaceTitle = css({
   whiteSpace: "nowrap",
   color: "text.default",
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
 });
 
 export type AppChrome = "public" | "seller";

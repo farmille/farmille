@@ -3,7 +3,6 @@ import { css, cva } from "../../../styled-system/css";
 export const legalHeading = cva({
   base: {
     color: "text.default",
-    fontWeight: "700",
     lineHeight: "relaxed",
     overflowWrap: "anywhere",
   },
@@ -45,7 +44,7 @@ export const legalProse = css({
   lineHeight: "loose",
   overflowWrap: "anywhere",
   "& p": { my: "4" },
-  "& h3": { fontSize: "lg", fontWeight: "700", mt: "6", mb: "3" },
+  "& h3": { fontSize: "lg", fontWeight: "bold", mt: "6", mb: "3" },
   "& ul": { listStyleType: "disc", pl: "6", my: "4" },
   "& ol": { listStyleType: "decimal", pl: "6", my: "4" },
   "& li": { mb: "3" },

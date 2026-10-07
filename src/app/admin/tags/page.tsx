@@ -40,7 +40,7 @@ const groupSummaryStyle = css({
   py: "3",
   color: "text.default",
   fontSize: "md",
-  fontWeight: "700",
+  fontWeight: "bold",
   cursor: "pointer",
   "&::marker": { color: "primary.700" },
 });

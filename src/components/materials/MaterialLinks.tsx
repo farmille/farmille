@@ -9,7 +9,7 @@ import { css } from "../../../styled-system/css";
 export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }) {
   return (
     <section aria-label="リンク・資料">
-      <h2 className={css({ fontSize: "lg", fontWeight: "700", mb: "3" })}>リンク・資料</h2>
+      <h2 className={css({ fontSize: "lg", mb: "3" })}>リンク・資料</h2>
       {[
         ...MATERIAL_LINK_GROUPS,
         ...(links.some((link) => link.group === null)
@@ -19,7 +19,7 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
         const items = links.filter((link) => link.group === group.value);
         return (
           <div key={group.value ?? "unclassified"} className={css({ mt: "3" })}>
-            <h3 className={css({ fontSize: "sm", fontWeight: "700", mb: "2" })}>{group.label}</h3>
+            <h3 className={css({ fontSize: "sm", fontWeight: "bold", mb: "2" })}>{group.label}</h3>
             {items.length === 0 ? (
               <p>−</p>
             ) : (
@@ -56,7 +56,7 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
                   {link.trial ? (
                     <>
                       {link.trial.crops ? (
-                        <p className={css({ mt: "2", fontWeight: "700" })}>{link.trial.crops}</p>
+                        <p className={css({ mt: "2", fontWeight: "bold" })}>{link.trial.crops}</p>
                       ) : null}
                       <p className={css({ mt: "2", whiteSpace: "pre-wrap" })}>
                         {link.trial.summary || "概要は未入力です"}

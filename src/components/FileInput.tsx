@@ -33,7 +33,7 @@ const selectionStyle = css({
   m: "0",
   color: "text.subtle",
   fontSize: "sm",
-  lineHeight: "1.6",
+  lineHeight: "relaxed",
   overflowWrap: "anywhere",
 });
 
