@@ -94,7 +94,8 @@ export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: Po
   return (
     <div
       className={kind === "reports" ? "report-scroll" : "stack"}
-      style={{ marginTop: 10 }}
+      // 下書き・調整中のカードは表紙が無く低い。横並びで公開済みカードの高さに引き伸ばされて空白ができないよう、上揃えにする。
+      style={kind === "reports" ? { marginTop: 10, alignItems: "flex-start" } : { marginTop: 10 }}
       aria-labelledby="me-posts-heading"
       role="region"
     >

@@ -283,3 +283,15 @@
   gap: 6px;
   flex-wrap: wrap;
 }
+
+/*
+ * 2列の一覧（.report-grid）はカード幅が狭く、作物・投稿日を同じ行に並べると投稿者名が幅 0 まで縮んで頭文字だけになる。
+ * 折り返しを許し、入りきらないときは作物・投稿日を次の行に回す（投稿者名はアイコン 26px＋間隔 8px を除いた幅まで）。
+ */
+.fm .report-grid .rp-by {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+.fm .report-grid .rp-by b {
+  max-width: calc(100% - 34px);
+}
