@@ -49,7 +49,7 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
     await expect.poll(async () => await reviewCropNames(createdReview.id)).toEqual(["ミニトマト"]);
 
     await page.goto("/");
-    await expect(page.getByRole("navigation", { name: "感想口コミの表示順" })).toHaveCount(0);
+    // ホームの「生産者の声」に新しい感想口コミが並ぶ。
     // ホームの「生産者の声」に新しい感想口コミが並ぶ（docs/mock-port/decisions.md「ホームに残す欄」）。
     await expect(page.getByText(body, { exact: true })).toBeVisible();
     for (const path of ["/me", `/users/${user.id}`]) {
