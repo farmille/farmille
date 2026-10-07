@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 
 import { FormSection } from "../_components/FormSection";
 import {
@@ -16,7 +16,7 @@ import { css, cx } from "../../../../styled-system/css";
 /** 終売・廃盤／非表示の申請の受付。申請フォームのURLをメールで送る。 */
 export default function RemovalEntryPage() {
   return (
-    <MockPageShell title="終売・廃盤／非表示の申請 受付" backHref="/sellers">
+    <SitePageShell title="終売・廃盤／非表示の申請 受付" backHref="/sellers">
       <div className={formalPageRecipe({ width: "narrow" })}>
         <h1 className={formalTitleStyle}>終売・廃盤／非表示の申請 受付フォーム</h1>
         <div className={introStyle}>
@@ -40,6 +40,6 @@ export default function RemovalEntryPage() {
           <Link href="/company-requests/receipts">受付済みの申請を確認する</Link>
         </p>
       </div>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

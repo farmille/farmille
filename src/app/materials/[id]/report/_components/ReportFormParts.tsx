@@ -1,19 +1,8 @@
 import type { ReactNode } from "react";
 
-import { css, cva, cx } from "../../../../../../styled-system/css";
+import { css, cva } from "../../../../../../styled-system/css";
 
-/** レポート入力の外枠。`.fm` の中では primary・surface のトークンが完成見本の緑・地色になる */
-export const reportFrame = cx(
-  "fm",
-  css({
-    minH: "100dvh",
-    bg: "surface.page",
-    color: "text.default",
-    fontFamily: "sans",
-    fontSize: "md",
-    lineHeight: "prose",
-  }),
-);
+export const reportFrame = css({ minH: "100dvh", fontSize: "md", lineHeight: "prose" });
 
 export const field = css({ mt: "4" });
 

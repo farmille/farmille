@@ -17,13 +17,7 @@ const meta = {
   title: "App/Sellers/SellerHeader",
   component: SellerHeader,
   args: { seller },
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>],
 } satisfies Meta<typeof SellerHeader>;
 
 export default meta;

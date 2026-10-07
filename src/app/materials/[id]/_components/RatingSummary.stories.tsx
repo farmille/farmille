@@ -5,7 +5,6 @@ import { RatingSummary } from "./RatingSummary";
 const meta = {
   title: "App/Materials/RatingSummary",
   component: RatingSummary,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     average: 4.2,
     reviewCount: 18,

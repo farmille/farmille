@@ -30,7 +30,6 @@ function Marks() {
 const meta = {
   title: "CompanyApplications/FormalMarks",
   component: Marks,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
 } satisfies Meta<typeof Marks>;
 
 export default meta;

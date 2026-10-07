@@ -9,7 +9,7 @@ import { css } from "../../../../../styled-system/css";
 
 import type { SaveControlState } from "../actions";
 import { HeroCount } from "./HeroSavedCount";
-import { MockChip, MockNoImage, MockStars } from "./MockParts";
+import { Chip, NoImage, Stars } from "./CardParts";
 import { SaveControl } from "./SaveControl";
 
 const heroStyle = css(surfaceCardRecipe.raw({ padding: "flush" }), {
@@ -118,7 +118,7 @@ export function MaterialHero({
     <section className={heroStyle} aria-labelledby="material-name">
       <div className={mediaColumnStyle}>
         <div className={imageFrameStyle} data-ui="material-hero-image">
-          <MockNoImage />
+          <NoImage />
           {primaryImage ? (
             <Image
               alt={material.name}
@@ -154,7 +154,7 @@ export function MaterialHero({
         </h1>
         {hasReviews ? (
           <div className={ratingStyle}>
-            <MockStars value={material.avg_rating ?? 0} /> {material.avg_rating?.toFixed(1)}
+            <Stars value={material.avg_rating ?? 0} /> {material.avg_rating?.toFixed(1)}
           </div>
         ) : null}
         {material.representativeSeller ? (
@@ -176,9 +176,9 @@ export function MaterialHero({
         {material.ingredientCategories.length > 0 ? (
           <div className={chipsStyle}>
             {[...new Set(material.ingredientCategories.map(({ name }) => name))].map((name) => (
-              <MockChip key={name} wrap>
+              <Chip key={name} wrap>
                 {name}
-              </MockChip>
+              </Chip>
             ))}
           </div>
         ) : null}

@@ -11,8 +11,8 @@ import {
   OptionalBadge,
   RequiredBadge,
   VisibilityTag,
-} from "@/app/_mock/FormParts";
-import { MockSubmitButton } from "@/app/_mock/MockSubmitButton";
+} from "@/app/_site/FormParts";
+import { FormSubmitButton } from "@/app/_site/FormSubmitButton";
 import { HANDLE_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 import { STANDPOINTS } from "@/lib/standpoints";
@@ -300,7 +300,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       </div>
 
       <div className={formActionsStyle}>
-        <MockSubmitButton label="登録する" pendingLabel="登録中…" />
+        <FormSubmitButton label="登録する" pendingLabel="登録中…" />
       </div>
       <div className={cx(guideStyle, css({ mb: "2", textAlign: "center" }))}>
         <Link

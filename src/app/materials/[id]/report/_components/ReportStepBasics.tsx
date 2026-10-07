@@ -12,7 +12,7 @@ import type { CropOption } from "@/server/queries/usage-report-form";
 
 import { css, cva, cx } from "../../../../../../styled-system/css";
 
-import { MockSearch } from "./MockSearch";
+import { ReportSearchField } from "./ReportSearchField";
 import {
   Badge,
   Example,
@@ -259,7 +259,7 @@ export function ReportStepBasics({
           </button>
         </div>
         {searchOpen && (
-          <MockSearch
+          <ReportSearchField
             ariaLabel="資材を検索"
             placeholder="資材名・メーカー名で検索"
             value={materialQuery}
@@ -314,7 +314,7 @@ export function ReportStepBasics({
             </span>
           )}
         </div>
-        <MockSearch
+        <ReportSearchField
           ariaLabel="作目"
           placeholder="作物名で検索　例）トマト、みかん"
           value={cropQuery}

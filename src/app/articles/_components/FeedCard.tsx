@@ -5,7 +5,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cx } from "../../../../styled-system/css";
-import { MockImagePlaceholderIcon } from "./MockIcons";
+import { ArticleImagePlaceholderIcon } from "./ArticleIcons";
 
 /** 記事・実証詳細レポートのカードを2列に並べる。 */
 export function ArticleGrid({ children, className }: { children: ReactNode; className?: string }) {
@@ -68,7 +68,7 @@ export function FeedCard({
             sizes="(min-width: 900px) 420px, 50vw"
           />
         ) : (
-          <MockImagePlaceholderIcon />
+          <ArticleImagePlaceholderIcon />
         )}
       </Link>
       <div className={css({ display: "flex", flexDirection: "column", flex: "1", p: "2.5" })}>

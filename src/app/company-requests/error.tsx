@@ -1,17 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { buttonRecipe } from "@/components/Button";
 
-import { css, cx } from "../../../styled-system/css";
-import { pageButtonStyles } from "./_components/button-styles";
+import { css } from "../../../styled-system/css";
 import { DoneMessage } from "./_components/DoneMessage";
 
-/** error.tsx はクライアント部品なので、ログイン状態を読む外枠（MockPageShell）は使わず .fm だけを当てる。 */
+/** error.tsx はクライアント部品なので、ログイン状態を読む外枠（SitePageShell）は使わない。 */
 export default function ApplicationErrorPage({ unstable_retry }: { unstable_retry: () => void }) {
   return (
-    <div
-      className={cx("fm", css({ minH: "100dvh", bg: "surface.panel", px: "4", pt: "4", pb: "10" }))}
-    >
+    <div className={css({ minH: "100dvh", bg: "surface.panel", px: "4", pt: "4", pb: "10" })}>
       <main>
         <DoneMessage
           as="h1"
@@ -20,13 +18,20 @@ export default function ApplicationErrorPage({ unstable_retry }: { unstable_retr
           title="申請ページを開けませんでした"
           actions={
             <>
-              <button className={pageButtonStyles.primary} onClick={unstable_retry} type="button">
+              <button
+                className={buttonRecipe({ variant: "primary" })}
+                onClick={unstable_retry}
+                type="button"
+              >
                 再読み込み
               </button>
-              <Link className={pageButtonStyles.ghost} href="/company-requests/receipts">
+              <Link
+                className={buttonRecipe({ variant: "ghost" })}
+                href="/company-requests/receipts"
+              >
                 受付票の確認メールを再発行
               </Link>
-              <Link className={pageButtonStyles.ghost} href="/company-requests/removal">
+              <Link className={buttonRecipe({ variant: "ghost" })} href="/company-requests/removal">
                 申請用メールを再発行
               </Link>
             </>

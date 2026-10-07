@@ -1,14 +1,10 @@
 import Link from "next/link";
 
+import { buttonRecipe } from "@/components/Button";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cva } from "../../../styled-system/css";
-import {
-  ghostLinkButtonStyle,
-  primaryLinkButtonStyle,
-  softCardStyle,
-  textLinkStyle,
-} from "./form-styles";
+import { softCardStyle, textLinkStyle } from "./form-styles";
 
 const typeLabelRecipe = cva({
   base: {
@@ -45,7 +41,7 @@ export function AccountTypeChoice() {
           <p className={leadStyle}>ニックネームで、感想口コミや実証詳細レポートを投稿できます。</p>
           <p className={noteStyle}>メールアドレスで登録します。運営による確認はありません。</p>
           <div className={actionStyle}>
-            <Link className={primaryLinkButtonStyle} href="/signup/general">
+            <Link className={buttonRecipe({ variant: "primary" })} href="/signup/general">
               一般ユーザー登録へ
             </Link>
           </div>
@@ -66,7 +62,7 @@ export function AccountTypeChoice() {
             ログインIDを申請します。運営の確認後にログイン情報を発行します。
           </p>
           <div className={actionStyle}>
-            <Link className={ghostLinkButtonStyle} href="/sellers">
+            <Link className={buttonRecipe({ variant: "ghost" })} href="/sellers">
               メーカー向けページへ
             </Link>
           </div>

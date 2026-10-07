@@ -5,7 +5,6 @@ import { MaterialDescriptionBox, MaterialTimingBox } from "./MaterialOverview";
 const meta = {
   title: "App/Materials/MaterialOverview",
   component: MaterialDescriptionBox,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     description:
       "土壌環境を整え、定植後の根張りを支える微生物資材です。\nバチルス属菌が根圏に定着し、養分の吸収を助けます。",

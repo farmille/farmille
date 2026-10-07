@@ -11,13 +11,7 @@ const reportId = "71000000-0000-4000-8000-000000000101";
 const meta = {
   title: "Articles/FeedReportCard",
   component: FeedReportCard,
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <ArticleGrid>{Story()}</ArticleGrid>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <ArticleGrid>{Story()}</ArticleGrid>],
   args: {
     href: `/reports/${reportId}`,
     title: "高温期のミニトマトで萎れが軽くなった",

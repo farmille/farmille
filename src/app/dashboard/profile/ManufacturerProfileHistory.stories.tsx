@@ -4,7 +4,6 @@ import { ManufacturerProfileHistory } from "./ManufacturerProfileHistory";
 const meta = {
   title: "Manufacturer/ProfileHistory",
   component: ManufacturerProfileHistory,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     versions: [
       {

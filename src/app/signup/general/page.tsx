@@ -1,8 +1,6 @@
-import "../../_mock/forms.css";
-
 import type { Metadata } from "next";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { SignupForm } from "@/app/signup/SignupForm";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { safeNextPath } from "@/lib/auth/safe-next";
@@ -23,11 +21,11 @@ export default async function GeneralSignupPage({
   const next = safeNextPath((await searchParams).next);
   // 戻るバーの題は「Farmilleをはじめる」のまま、見出しは読み上げ用に画面名を置く。
   return (
-    <MockPageShell title="Farmilleをはじめる" backHref="/signup">
+    <SitePageShell title="Farmilleをはじめる" backHref="/signup">
       <div className={css({ maxW: "content.reading", mx: "auto" })}>
         <h1 className={css({ srOnly: true })}>一般ユーザー登録</h1>
         <SignupForm next={next} />
       </div>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

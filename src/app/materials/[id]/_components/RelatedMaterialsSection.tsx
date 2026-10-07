@@ -11,7 +11,7 @@ import { css } from "../../../../../styled-system/css";
 
 import { unwrapQueryResult } from "../query-result";
 import { MaterialSectionHeading } from "./MaterialSectionHeading";
-import { MockNoImage } from "./MockParts";
+import { NoImage } from "./CardParts";
 
 const captionStyle = css({ mb: "1.5", fontSize: "xs", color: "text.subtle" });
 const scrollStyle = css({
@@ -114,7 +114,7 @@ export function RelatedMaterialsView({ related }: { related: MaterialListItem[] 
                       className={imageStyle}
                     />
                   ) : (
-                    <MockNoImage />
+                    <NoImage />
                   )}
                 </div>
                 <div className={infoStyle}>

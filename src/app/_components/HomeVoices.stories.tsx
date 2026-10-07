@@ -7,13 +7,7 @@ import { homeVoiceReports, homeVoiceReviews } from "./story-fixtures";
 const meta = {
   title: "App/Home/HomeVoices",
   component: HomeVoices,
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <div className={css({ px: "4", pb: "6" })}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ px: "4", pb: "6" })}>{Story()}</div>],
   args: { reports: homeVoiceReports, reviews: homeVoiceReviews },
 } satisfies Meta<typeof HomeVoices>;
 

@@ -5,7 +5,6 @@ import { MaterialSectionHeading } from "./MaterialSectionHeading";
 const meta = {
   title: "App/Materials/MaterialSectionHeading",
   component: MaterialSectionHeading,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { title: "感想口コミ", spacing: "section" },
 } satisfies Meta<typeof MaterialSectionHeading>;
 

@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { SearchIcon } from "@/app/_mock/FormParts";
-import { MockNoImage, MockStars } from "@/app/materials/[id]/_components/MockParts";
+import { SearchIcon } from "@/app/_site/FormParts";
+import { NoImage, Stars } from "@/app/materials/[id]/_components/CardParts";
 import { buttonRecipe } from "@/components/Button";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
@@ -51,7 +51,6 @@ const searchInputStyle = css({
   minW: "0",
   bg: "transparent",
   fontSize: "md",
-  fontFamily: "inherit",
   color: "text.default",
   outline: "none",
   _placeholder: { color: "text.subtle" },
@@ -61,7 +60,6 @@ const searchButtonStyle = css(buttonRecipe.raw({ variant: "primary", size: "sm" 
   flex: "0 0 auto",
   minW: "0",
   px: "4",
-  fontFamily: "inherit",
   lineHeight: "normal",
   _focusVisible: focusRing,
 });
@@ -146,7 +144,6 @@ const footerStyle = css({
 
 const footerLinkBase = {
   py: "3.5",
-  fontFamily: "inherit",
   lineHeight: "normal",
   _focusVisible: focusRing,
 } as const;
@@ -173,7 +170,7 @@ function MaterialThumb({ src, size }: { src: string | null; size: number }) {
       sizes={`${size}px`}
     />
   ) : (
-    <MockNoImage />
+    <NoImage />
   );
 }
 
@@ -271,7 +268,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                       color: "text.subtle",
                     })}
                   >
-                    <MockStars value={material.avg_rating ?? 0} />
+                    <Stars value={material.avg_rating ?? 0} />
                     {material.avg_rating === null ? null : (
                       <b
                         className={css({

@@ -25,7 +25,7 @@ const NOTICE_LINES = [
   "なお、企業様からの、資材ページ削除のご依頼・間違いのご指摘については順次対応いたします。",
 ] as const;
 
-const mockNotice = css({
+const siteNotice = css({
   bg: "accent.warnSoft",
   color: "text.muted",
   borderBottomWidth: "1px",
@@ -33,7 +33,7 @@ const mockNotice = css({
   borderBottomColor: "border.default",
 });
 
-const mockNoticeInner = css({
+const siteNoticeInner = css({
   maxW: "content.wide",
   mx: "auto",
   px: "4",
@@ -42,7 +42,7 @@ const mockNoticeInner = css({
   tab: { px: "8", pt: "3.5", pb: "4" },
 });
 
-const mockNoticeTitle = css({
+const siteNoticeTitle = css({
   display: "flex",
   alignItems: "center",
   gap: "2",
@@ -53,25 +53,25 @@ const mockNoticeTitle = css({
   "& svg": { flex: "0 0 auto", display: "block" },
 });
 
-const mockNoticeBody = css({
+const siteNoticeBody = css({
   mt: "1",
   fontSize: "sm",
   lineHeight: "prose",
   "& p + p": { mt: "0.5" },
 });
 
-/** 完成見本の画面（.fm の中）で使う見た目。文言は既定の見た目と共通。 */
-function MockPreparationNotice() {
+/** SitePageShell の画面で使う見た目。文言は既定の見た目と共通。 */
+function SitePreparationNotice() {
   return (
-    <aside id="preparation-notice" aria-label="公開準備中のお知らせ" className={mockNotice}>
-      <div className={mockNoticeInner}>
-        <p className={mockNoticeTitle}>
+    <aside id="preparation-notice" aria-label="公開準備中のお知らせ" className={siteNotice}>
+      <div className={siteNoticeInner}>
+        <p className={siteNoticeTitle}>
           <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
             <path d="M0.833333 17.5L10 1.66667L19.1667 17.5H0.833333ZM10 15C10.4602 15 10.8333 14.6269 10.8333 14.1667C10.8333 13.7064 10.4602 13.3333 10 13.3333C9.53976 13.3333 9.16667 13.7064 9.16667 14.1667C9.16667 14.6269 9.53976 15 10 15ZM9.16667 12.5H10.8333V8.33333H9.16667V12.5Z" />
           </svg>
           {NOTICE_TITLE}
         </p>
-        <div className={mockNoticeBody}>
+        <div className={siteNoticeBody}>
           {NOTICE_LINES.map((line) => (
             <p key={line}>{line}</p>
           ))}
@@ -89,11 +89,11 @@ export function PreparationNotice({
 }: {
   overlapImage?: boolean;
   roundedTop?: boolean;
-  /** "mock" は完成見本の画面（.fm の中）用。見本にない画面は既定のまま。 */
-  look?: "default" | "mock";
+  /** "site" は SitePageShell の画面用。 */
+  look?: "default" | "site";
 }) {
-  if (look === "mock") {
-    return <MockPreparationNotice />;
+  if (look === "site") {
+    return <SitePreparationNotice />;
   }
 
   return (

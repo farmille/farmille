@@ -17,7 +17,7 @@ import {
   ImagePlaceholderIcon,
   OptionalBadge,
   RequiredBadge,
-} from "@/app/_mock/FormParts";
+} from "@/app/_site/FormParts";
 import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
 
 import { buttonRecipe } from "@/components/Button";
@@ -126,7 +126,6 @@ const starOptionRecipe = cva({
 });
 
 const bodyTextareaStyle = css(textareaRecipe.raw({ size: "lg" }), {
-  fontFamily: "inherit",
   "&[aria-invalid=true]": { borderColor: "accent.danger" },
 });
 
@@ -166,7 +165,6 @@ const photoCaptionStyle = css(inputRecipe.raw(), {
   px: "2",
   py: "1.5",
   fontSize: "sm",
-  fontFamily: "inherit",
 });
 
 const photoRemoveStyle = css({
@@ -237,7 +235,6 @@ const checkBoxStyle = css({
 
 const submitButtonStyle = css(buttonRecipe.raw({ variant: "primary", size: "md" }), {
   py: "3.5",
-  fontFamily: "inherit",
   lineHeight: "normal",
   _focusVisible: focusRing,
 });

@@ -17,7 +17,7 @@ import { unwrapQueryResult } from "../query-result";
 import { EmptyCard } from "./EmptyCard";
 import { HeroCount } from "./HeroSavedCount";
 import { MaterialSectionHeading } from "./MaterialSectionHeading";
-import { MockReportCard } from "./MockReportCard";
+import { UsageReportCard } from "./UsageReportCard";
 import { MoreLink } from "./MoreLink";
 
 const scrollStyle = css({
@@ -95,7 +95,7 @@ export function MaterialReportsView({
       {reports.items.length > 0 ? (
         <div className={scrollStyle}>
           {reports.items.map((report) => (
-            <MockReportCard
+            <UsageReportCard
               key={report.id}
               href={`/reports/${report.id}`}
               title={report.title ?? `${material.name} 実証詳細レポート`}

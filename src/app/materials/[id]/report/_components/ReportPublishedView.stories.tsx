@@ -7,7 +7,6 @@ import { filledReport } from "./reportStoryFixture";
 const meta = {
   title: "App/Materials/Report/ReportPublishedView",
   component: ReportPublishedView,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     input: filledReport,
     materialName: "土づくり微生物資材",

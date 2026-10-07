@@ -7,13 +7,7 @@ import { storyThumbnail } from "./story-fixtures";
 const meta = {
   title: "App/Search/SearchResultCard",
   component: SearchResultCard,
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <div className={css({ p: "4" })}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ p: "4" })}>{Story()}</div>],
   args: {
     href: "/materials/1",
     name: "根張りエース",

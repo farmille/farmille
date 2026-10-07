@@ -6,7 +6,6 @@ import { ProfileEditForm } from "./ProfileEditForm";
 const meta = {
   title: "App/Me/ProfileEditForm",
   component: ProfileEditForm,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     profile: ownProfile,
     details: {

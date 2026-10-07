@@ -6,7 +6,6 @@ import { materialDetail } from "./story-fixtures";
 const meta = {
   title: "App/Materials/DetailTable",
   component: MaterialDetailTable,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { material: materialDetail },
 } satisfies Meta<typeof MaterialDetailTable>;
 

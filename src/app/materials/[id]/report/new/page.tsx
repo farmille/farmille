@@ -1,6 +1,3 @@
-import "../../../../_mock/report-form.css";
-import "../../../../_mock/report-form-extra.css";
-
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 

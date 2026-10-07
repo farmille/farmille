@@ -7,13 +7,7 @@ import { OrgArticleCard } from "./OrgArticleCard";
 const meta = {
   title: "Articles/OrgArticleCard",
   component: OrgArticleCard,
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <ArticleGrid>{Story()}</ArticleGrid>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <ArticleGrid>{Story()}</ArticleGrid>],
   args: {
     href: "/articles/72000000-0000-4000-8000-000000000101",
     title: "微生物資材を土に定着させる3つのポイント",

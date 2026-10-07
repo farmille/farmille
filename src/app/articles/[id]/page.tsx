@@ -1,6 +1,4 @@
-import { MockPageShell } from "@/app/_mock/MockPageShell";
-// mock.css（MockPageShell が読み込む）より後に読み込む。
-import "@/app/_mock/reports-articles.css";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
@@ -24,7 +22,7 @@ import { createServerSupabase } from "@/server/supabase";
 
 import { ArticleHeader } from "../_components/ArticleHeader";
 import { ArticleMaterialList } from "../_components/ArticleMaterialList";
-import { MockViewCount } from "../_components/MockIcons";
+import { ViewCount } from "../_components/ArticleIcons";
 import { readingArticle, readingFoot, ReadingMarkdown } from "../_components/Reading";
 import { css } from "../../../../styled-system/css";
 
@@ -123,7 +121,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
   const backHref = firstMaterial === undefined ? "/" : `/materials/${firstMaterial.id}`;
 
   return (
-    <MockPageShell title="" backHref={backHref} shareHref={`/articles/${article.id}`}>
+    <SitePageShell title="" backHref={backHref} shareHref={`/articles/${article.id}`}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
@@ -156,7 +154,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
             layout="card"
             voted={helpfulVoted}
           />
-          <MockViewCount count={article.viewCount} className={css({ ml: "auto" })} />
+          <ViewCount count={article.viewCount} className={css({ ml: "auto" })} />
           <span>
             <ReportDialog
               action={createReportAction.bind(
@@ -171,6 +169,6 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
           </span>
         </div>
       </article>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

@@ -10,7 +10,6 @@ import { filledReport } from "./reportStoryFixture";
 const meta = {
   title: "App/Materials/Report/ReportArticleEditor",
   component: ReportArticleEditor,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     input: filledReport,
     onChange: fn(),

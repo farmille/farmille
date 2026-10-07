@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { formatDateJa } from "@/components/format-date";
 
 import { css } from "../../../../styled-system/css";
-import { MockAvatar, MockChip } from "../../materials/[id]/_components/MockParts";
+import { Avatar, Chip } from "../../materials/[id]/_components/CardParts";
 import { FeedCard } from "./FeedCard";
 
 /** 投稿日（カードが狭いので「2026/9/6」の短い形）。 */
@@ -57,7 +57,7 @@ export function FeedReportCard({
           color: "text.subtle",
         })}
       >
-        <MockAvatar name={author} src={avatarSrc} extraSmall />
+        <Avatar name={author} src={avatarSrc} extraSmall />
         <b
           className={css({
             fontWeight: "normal",
@@ -71,7 +71,7 @@ export function FeedReportCard({
         >
           {author}
         </b>
-        {crop ? <MockChip>{crop}</MockChip> : null}
+        {crop ? <Chip>{crop}</Chip> : null}
         {publishedAt ? (
           <time
             className={css({ ml: "auto", flexShrink: "0", fontSize: "xs" })}

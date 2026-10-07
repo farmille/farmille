@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { ArticleGrid, FeedCard } from "@/app/articles/_components/FeedCard";
-import { MockNoImage, MockStars } from "@/app/materials/[id]/_components/MockParts";
+import { NoImage, Stars } from "@/app/materials/[id]/_components/CardParts";
 import { Badge } from "@/components/Badge";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { StatCard } from "@/components/StatCard";
@@ -112,13 +112,13 @@ export function SellerPageContent({ data }: { data: PublicSellerPageData }) {
                   {material.imageUrl ? (
                     <Image alt="" height={225} sizes="150px" src={material.imageUrl} width={300} />
                   ) : (
-                    <MockNoImage />
+                    <NoImage />
                   )}
                 </div>
                 <div className={css({ px: "3", py: "2.5" })}>
                   <div className={css({ fontSize: "md", fontWeight: "bold" })}>{material.name}</div>
                   <div className={css({ mt: "1", fontSize: "xs", color: "accent.star" })}>
-                    <MockStars value={material.averageRating ?? 0} />
+                    <Stars value={material.averageRating ?? 0} />
                     <span className={css({ srOnly: true })}>
                       （感想口コミ {material.reviewCount}件）
                     </span>

@@ -4,8 +4,8 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import type { PublishedArticleDetail } from "@/server/queries/articles";
 
 import { css } from "../../../../styled-system/css";
-import { MockStars } from "../../materials/[id]/_components/MockParts";
-import { MockChevronIcon, MockSeedIcon } from "./MockIcons";
+import { Stars } from "../../materials/[id]/_components/CardParts";
+import { ChevronIcon, SeedIcon } from "./ArticleIcons";
 import { ReadingHeading } from "./Reading";
 
 const materialLink = css(surfaceCardRecipe.raw({ tone: "soft", padding: "compact" }), {
@@ -39,7 +39,7 @@ export function ArticleMaterialList({
                 flexShrink: "0",
               })}
             >
-              <MockSeedIcon />
+              <SeedIcon />
             </span>
             <span className={css({ minW: "0" })}>
               <span className={css({ display: "block", fontWeight: "bold", fontSize: "md" })}>
@@ -56,11 +56,11 @@ export function ArticleMaterialList({
                 })}
               >
                 {material.manufacturer_name}
-                {material.avg_rating !== null ? <MockStars value={material.avg_rating} /> : null}
+                {material.avg_rating !== null ? <Stars value={material.avg_rating} /> : null}
               </span>
             </span>
             <span className={css({ display: "flex", ml: "auto" })}>
-              <MockChevronIcon />
+              <ChevronIcon />
             </span>
           </Link>
         ))}

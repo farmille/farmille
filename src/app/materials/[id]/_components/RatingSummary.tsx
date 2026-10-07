@@ -4,7 +4,7 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cx } from "../../../../../styled-system/css";
 
-import { MockStars } from "./MockParts";
+import { Stars } from "./CardParts";
 
 const summaryStyle = css({ display: "flex", alignItems: "center", gap: "4" });
 const averageColumnStyle = css({ textAlign: "center" });
@@ -66,7 +66,7 @@ export function RatingSummary({ average, reviewCount, distribution }: RatingSumm
     <div className={cx(surfaceCardRecipe({ padding: "cozy" }), summaryStyle)}>
       <div className={averageColumnStyle}>
         <div className={averageStyle}>{average?.toFixed(1) ?? "−"}</div>
-        <MockStars value={average ?? 0} />
+        <Stars value={average ?? 0} />
         <div className={countStyle}>{reviewCount}件</div>
       </div>
       <div className={barsStyle}>

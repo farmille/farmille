@@ -6,7 +6,6 @@ import { css } from "../../../../styled-system/css";
 const actions = css({ display: "flex", flexDirection: "column", gap: "2.5", mt: "8", pb: "4" });
 
 const action = css(buttonRecipe.raw({ variant: "ghost" }), {
-  fontFamily: "inherit",
   lineHeight: "normal",
 });
 

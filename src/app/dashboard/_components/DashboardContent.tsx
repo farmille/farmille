@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { buttonRecipe, formatDateJa, surfaceCardRecipe } from "@/components";
 import type { SellerDashboardData } from "@/server/queries/seller-dashboard";
 
@@ -269,7 +269,7 @@ export function DashboardContent({ seller, materials }: SellerDashboardData) {
   const hasProfileText = (seller.profile_text ?? "").trim().length > 0;
 
   return (
-    <MockPageShell title="企業会員ダッシュボード" backHref="/">
+    <SitePageShell title="企業会員ダッシュボード" backHref="/">
       <div className={readingColumn}>
         <DashboardTabs active="dash" />
 
@@ -458,6 +458,6 @@ export function DashboardContent({ seller, materials }: SellerDashboardData) {
           </div>
         </div>
       </div>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

@@ -1,4 +1,4 @@
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 
 import { formalPageRecipe, formalTitleStyle, introStyle } from "../_components/formal-styles";
 import { VerificationForm } from "../_components/VerificationForm";
@@ -6,7 +6,7 @@ import { VerificationForm } from "../_components/VerificationForm";
 /** 受付票の確認メールの再発行。終売・非表示の申請の受付と同じ部品で組む。 */
 export default function ReceiptAccessPage() {
   return (
-    <MockPageShell title="受付票の確認" backHref="/company-requests/removal">
+    <SitePageShell title="受付票の確認" backHref="/company-requests/removal">
       <div className={formalPageRecipe({ width: "narrow" })}>
         <h1 className={formalTitleStyle}>受付票の確認</h1>
         <div className={introStyle}>
@@ -16,6 +16,6 @@ export default function ReceiptAccessPage() {
         </div>
         <VerificationForm receipt />
       </div>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

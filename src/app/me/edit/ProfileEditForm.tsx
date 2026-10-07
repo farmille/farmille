@@ -16,8 +16,8 @@ import {
   formTextareaStyle,
   OptionalBadge,
   RequiredBadge,
-} from "@/app/_mock/FormParts";
-import { MockSubmitButton } from "@/app/_mock/MockSubmitButton";
+} from "@/app/_site/FormParts";
+import { FormSubmitButton } from "@/app/_site/FormSubmitButton";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { HANDLE_MAX_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
@@ -293,7 +293,7 @@ export function ProfileEditForm({ profile, details, options }: ProfileEditFormPr
       </div>
 
       <div className={formActionsStyle}>
-        <MockSubmitButton label="保存する" pendingLabel="保存中…" />
+        <FormSubmitButton label="保存する" pendingLabel="保存中…" />
         <Link className={formSecondaryLinkStyle} href="/me">
           キャンセル
         </Link>

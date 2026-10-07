@@ -1,6 +1,5 @@
 import Link from "next/link";
-
-import { pageButtonStyles } from "@/app/company-requests/_components/button-styles";
+import { buttonRecipe } from "@/components/Button";
 
 import { css, cx } from "../../../../styled-system/css";
 import {
@@ -59,13 +58,16 @@ export function ProcedureDetail({ procedure }: { procedure: Procedure }) {
             })}
           >
             <Link
-              className={cx(pageButtonStyles.primary, idBoxButtonStyle)}
+              className={cx(buttonRecipe({ variant: "primary" }), idBoxButtonStyle)}
               href={procedure.formHref}
             >
               {procedure.formLabel}
             </Link>
             {procedure.needId ? (
-              <Link className={cx(pageButtonStyles.ghost, idBoxButtonStyle)} href="/sellers/apply">
+              <Link
+                className={cx(buttonRecipe({ variant: "ghost" }), idBoxButtonStyle)}
+                href="/sellers/apply"
+              >
                 企業会員登録の申請
               </Link>
             ) : null}
@@ -103,10 +105,10 @@ export function ProcedureDetail({ procedure }: { procedure: Procedure }) {
           pc: { flexDirection: "row", "& > a": { flex: "1" } },
         })}
       >
-        <Link className={pageButtonStyles.primary} href={procedure.formHref}>
+        <Link className={buttonRecipe({ variant: "primary" })} href={procedure.formHref}>
           {procedure.formLabel}
         </Link>
-        <Link className={pageButtonStyles.ghost} href="/sellers/procedures">
+        <Link className={buttonRecipe({ variant: "ghost" })} href="/sellers/procedures">
           お手続き一覧へ戻る
         </Link>
       </div>

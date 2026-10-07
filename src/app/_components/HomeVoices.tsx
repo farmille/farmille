@@ -7,7 +7,7 @@ import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { SectionHeading } from "@/components/SectionHeading";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { publicProfileLabel } from "@/lib/public-profile-label";
-import { MockAvatar, MockStars } from "@/app/materials/[id]/_components/MockParts";
+import { Avatar, Stars } from "@/app/materials/[id]/_components/CardParts";
 import type { RecentReviewItem } from "@/server/queries/reviews";
 import type { RecentUsageReportItem } from "@/server/queries/usage-reports";
 import { css, cva, cx } from "../../../styled-system/css";
@@ -231,7 +231,7 @@ function VoiceReportCard({
             fontSize: "sm",
           })}
         >
-          <MockAvatar name={report.authorHandle} extraSmall />
+          <Avatar name={report.authorHandle} extraSmall />
           <b
             className={css({
               minW: "0",
@@ -278,7 +278,7 @@ function VoiceReviewCard({
       })}
     >
       <div className={css({ display: "flex", alignItems: "flex-start", gap: "2", fontSize: "sm" })}>
-        <MockAvatar name={handle} src={review.author?.avatar_url} extraSmall />
+        <Avatar name={handle} src={review.author?.avatar_url} extraSmall />
         <div>
           <b className={css({ fontWeight: "bold" })}>{handle}</b>{" "}
           {role ? (
@@ -304,7 +304,7 @@ function VoiceReviewCard({
         </div>
       </div>
       <div className={css({ mt: "2" })}>
-        <MockStars value={review.rating} />
+        <Stars value={review.rating} />
       </div>
       <div
         className={css({

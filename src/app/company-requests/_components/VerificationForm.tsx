@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { buttonRecipe } from "@/components/Button";
 import * as v from "valibot";
 import { useState, type FormEvent } from "react";
 
@@ -9,7 +10,6 @@ import { errorMessageJa } from "@/server/errors";
 import { css } from "../../../../styled-system/css";
 
 import { requestVerification, requestReceiptVerification } from "../actions";
-import { pageButtonStyles } from "./button-styles";
 import { DoneMessage } from "./DoneMessage";
 import {
   fieldLabelStyle,
@@ -76,14 +76,14 @@ export function VerificationForm({ receipt = false }: { receipt?: boolean }) {
         title="申請フォームのURLをお送りしました"
         actions={
           <>
-            <Link className={pageButtonStyles.primary} href="/sellers/procedures">
+            <Link className={buttonRecipe({ variant: "primary" })} href="/sellers/procedures">
               お手続き一覧へ戻る
             </Link>
-            <Link className={pageButtonStyles.ghost} href="/sellers">
+            <Link className={buttonRecipe({ variant: "ghost" })} href="/sellers">
               企業様向け利用ガイドに戻る
             </Link>
             <button
-              className={pageButtonStyles.ghost}
+              className={buttonRecipe({ variant: "ghost" })}
               type="button"
               onClick={() => {
                 setSent(false);

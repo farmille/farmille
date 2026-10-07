@@ -19,19 +19,6 @@ export const tokens = {
       800: { value: "#1B4332" },
       900: { value: "#081C15" },
     },
-    // 完成見本の画面（.fm）の緑。700 が主色、800 が濃い緑、50・100 が淡い面
-    leaf: {
-      50: { value: "#F1F8F2" },
-      100: { value: "#E8F5E9" },
-      200: { value: "#C8E6C9" },
-      300: { value: "#A5D6A7" },
-      400: { value: "#66BB6A" },
-      500: { value: "#43A047" },
-      600: { value: "#388E3C" },
-      700: { value: "#2E7D32" },
-      800: { value: "#1B5E20" },
-      900: { value: "#0D3B12" },
-    },
     // 企業会員の申請書類の青みのある灰色
     slate: {
       50: { value: "#F5F8FB" },
@@ -50,15 +37,8 @@ export const tokens = {
       DEFAULT: { value: "#B26A00" },
       soft: { value: "#FFF4E0" },
     },
-    bg: {
-      DEFAULT: { value: "#FCFCFB" },
-      // 完成見本の画面の地色
-      warm: { value: "#F5F4EF" },
-    },
-    panel: {
-      DEFAULT: { value: "#FDFDFC" },
-      warm: { value: "#FAFAF7" },
-    },
+    bg: { value: "#FCFCFB" },
+    panel: { value: "#FDFDFC" },
     card: { value: "#FFFFFF" },
     // ink 3段（本文 / 副文 / 補助）
     ink: { value: "#1E231F" },
@@ -148,11 +128,6 @@ export const tokens = {
     // Adobe Fonts の Farmille Web プロジェクトで配信するゴシックMB101 L（weight 300）
     gothicMb101: {
       value: '"a-otf-gothic-mb101-pr6n", var(--fonts-sans)',
-    },
-    // 完成見本の画面の本文書体。next/font が --font-noto-sans-jp を定義する
-    noto: {
-      value:
-        'var(--font-noto-sans-jp), "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif',
     },
     sans: {
       value:
@@ -286,17 +261,16 @@ export const tokens = {
 export const semanticTokens = {
   colors: {
     primary: {
-      // .fm の中（完成見本の画面）は見本の緑に切り替わる
-      soft: { value: { base: "{colors.green.50}", _fm: "{colors.leaf.50}" } },
-      100: { value: { base: "{colors.green.100}", _fm: "{colors.leaf.100}" } },
-      200: { value: { base: "{colors.green.200}", _fm: "{colors.leaf.200}" } },
-      300: { value: { base: "{colors.green.300}", _fm: "{colors.leaf.300}" } },
-      400: { value: { base: "{colors.green.400}", _fm: "{colors.leaf.400}" } },
-      500: { value: { base: "{colors.green.500}", _fm: "{colors.leaf.500}" } },
-      600: { value: { base: "{colors.green.600}", _fm: "{colors.leaf.600}" } },
-      700: { value: { base: "{colors.green.700}", _fm: "{colors.leaf.700}" } },
-      800: { value: { base: "{colors.green.800}", _fm: "{colors.leaf.800}" } },
-      900: { value: { base: "{colors.green.900}", _fm: "{colors.leaf.900}" } },
+      soft: { value: "{colors.green.50}" },
+      100: { value: "{colors.green.100}" },
+      200: { value: "{colors.green.200}" },
+      300: { value: "{colors.green.300}" },
+      400: { value: "{colors.green.400}" },
+      500: { value: "{colors.green.500}" },
+      600: { value: "{colors.green.600}" },
+      700: { value: "{colors.green.700}" },
+      800: { value: "{colors.green.800}" },
+      900: { value: "{colors.green.900}" },
     },
     text: {
       default: { value: "{colors.ink}" },
@@ -306,8 +280,8 @@ export const semanticTokens = {
       inverse: { value: "{colors.card}" },
     },
     surface: {
-      page: { value: { base: "{colors.bg}", _fm: "{colors.bg.warm}" } },
-      panel: { value: { base: "{colors.panel}", _fm: "{colors.panel.warm}" } },
+      page: { value: "{colors.bg}" },
+      panel: { value: "{colors.panel}" },
       card: { value: "{colors.card}" },
     },
     border: {

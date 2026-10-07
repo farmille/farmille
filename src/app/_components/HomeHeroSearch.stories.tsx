@@ -7,13 +7,7 @@ import { heroSearchOptions } from "./story-fixtures";
 const meta = {
   title: "App/Home/HomeHeroSearch",
   component: HomeHeroSearch,
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <div className={css({ bg: "primary.800", p: "6" })}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ bg: "primary.800", p: "6" })}>{Story()}</div>],
   args: { options: heroSearchOptions },
 } satisfies Meta<typeof HomeHeroSearch>;
 

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { Suspense } from "react";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { FabBar } from "@/components/FabBar";
 import { SkeletonList } from "@/components/SkeletonList";
 import { RatingSkeleton, SkeletonRegion } from "@/components/Skeleton";
@@ -177,7 +177,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
   });
 
   return (
-    <MockPageShell
+    <SitePageShell
       title={material.name}
       backHref="/"
       hasFab={material.publication_status === "published"}
@@ -260,10 +260,10 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
           reportHref={`${materialPath}/report/new`}
           reviewHref={`${materialPath}/review/new`}
           placement="viewport"
-          look="mock"
+          look="site"
         />
       ) : null}
-    </MockPageShell>
+    </SitePageShell>
   );
 }
 

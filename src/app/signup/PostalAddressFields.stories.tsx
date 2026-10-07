@@ -1,11 +1,9 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { userEvent, within } from "storybook/test";
-import { css, cx } from "../../../styled-system/css";
+import { css } from "../../../styled-system/css";
 import { PostalAddressFields } from "./PostalAddressFields";
-const fmDecorator: Decorator = (Story) => (
-  <div className={cx("fm", css({ p: "4" }))}>{Story()}</div>
-);
+const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
 
 const meta = {
   title: "App/Auth/PostalAddressFields",

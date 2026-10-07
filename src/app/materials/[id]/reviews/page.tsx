@@ -1,4 +1,4 @@
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -16,7 +16,7 @@ import { createServerSupabase } from "@/server/supabase";
 import { css } from "../../../../../styled-system/css";
 
 import { EmptyCard } from "../_components/EmptyCard";
-import { MockReviewCard } from "../_components/MockReviewCard";
+import { MaterialReviewCard } from "../_components/MaterialReviewCard";
 import { RatingSummary } from "../_components/RatingSummary";
 import { isMaterialId, loadMaterialOrNotFound, materialMetadata } from "../material-page-data";
 import { unwrapQueryResult } from "../query-result";
@@ -118,7 +118,7 @@ export default async function MaterialReviewsPage({
   };
 
   return (
-    <MockPageShell title={`${material.name} の感想口コミ`} backHref={materialPath}>
+    <SitePageShell title={`${material.name} の感想口コミ`} backHref={materialPath}>
       {reviewListJsonLd === null ? null : (
         <script
           type="application/ld+json"
@@ -142,7 +142,7 @@ export default async function MaterialReviewsPage({
       {reviews.items.length > 0 ? (
         <div className={listStyle}>
           {reviews.items.map((review) => (
-            <MockReviewCard
+            <MaterialReviewCard
               key={review.id}
               review={review}
               currentPath={reviewsPath}
@@ -166,6 +166,6 @@ export default async function MaterialReviewsPage({
         />
       )}
       <Pagination page={page} totalPages={reviews.totalPages} hrefForPage={hrefForPage} />
-    </MockPageShell>
+    </SitePageShell>
   );
 }

@@ -1,7 +1,7 @@
 import { after } from "next/server";
 import { Suspense } from "react";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { SkeletonList } from "@/components/SkeletonList";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import { getSessionUser } from "@/server/auth";
@@ -31,7 +31,7 @@ const REVIEW_LIMIT = 4;
 
 export default function HomePage() {
   return (
-    <MockPageShell showHeaderSearch={false}>
+    <SitePageShell showHeaderSearch={false}>
       <div className={heroBleedStyle}>
         <Suspense fallback={<HomeHero />}>
           <HomeHeroWithOptions />
@@ -48,7 +48,7 @@ export default function HomePage() {
       <Suspense fallback={null}>
         <HomeAccountInvitations />
       </Suspense>
-    </MockPageShell>
+    </SitePageShell>
   );
 }
 

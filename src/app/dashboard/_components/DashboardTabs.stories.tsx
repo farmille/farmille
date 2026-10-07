@@ -3,7 +3,6 @@ import { DashboardTabs } from "./DashboardTabs";
 const meta = {
   title: "Dashboard/DashboardTabs",
   component: DashboardTabs,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { active: "dash" },
 } satisfies Meta<typeof DashboardTabs>;
 export default meta;

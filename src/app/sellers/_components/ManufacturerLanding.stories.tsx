@@ -13,10 +13,8 @@ const meta = {
   parameters: { layout: "fullscreen" },
   decorators: [
     (Story) => (
-      <div className="fm">
-        <div className={canvas}>
-          <Story />
-        </div>
+      <div className={canvas}>
+        <Story />
       </div>
     ),
   ],

@@ -123,7 +123,6 @@ const bigInput = cva({
     px: "2.5",
     fontWeight: "extrabold",
     fontVariantNumeric: "tabular-nums",
-    fontFamily: "inherit",
     color: "inherit",
     bg: "surface.card",
     _focus: {

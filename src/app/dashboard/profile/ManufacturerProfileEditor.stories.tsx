@@ -11,7 +11,6 @@ const meta = {
   title: "Manufacturer/ProfileEditor",
   component: ManufacturerProfileEditor,
   parameters: { nextjs: { appDirectory: true } },
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     sellerId: "33333333-3333-4333-8333-333333333333",
     name: "デモ株式会社",

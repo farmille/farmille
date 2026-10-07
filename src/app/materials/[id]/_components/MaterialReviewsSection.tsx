@@ -7,7 +7,7 @@ import { css } from "../../../../../styled-system/css";
 
 import { EmptyCard } from "./EmptyCard";
 import { MaterialSectionHeading } from "./MaterialSectionHeading";
-import { MockReviewCard } from "./MockReviewCard";
+import { MaterialReviewCard } from "./MaterialReviewCard";
 import { MoreLink } from "./MoreLink";
 import { ScrollToHashOnMount } from "./ScrollToHashOnMount";
 
@@ -56,7 +56,7 @@ export function MaterialReviewsSection({
       {reviews.length > 0 ? (
         <div className={listStyle}>
           {reviews.map((review) => (
-            <MockReviewCard
+            <MaterialReviewCard
               key={review.id}
               review={review}
               currentPath={materialPath}

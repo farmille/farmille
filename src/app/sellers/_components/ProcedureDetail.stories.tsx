@@ -9,13 +9,7 @@ const meta = {
   title: "App/Sellers/ProcedureDetail",
   component: ProcedureDetail,
   parameters: { layout: "fullscreen" },
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>],
   args: { procedure: PROCEDURES.owner },
 } satisfies Meta<typeof ProcedureDetail>;
 

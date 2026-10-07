@@ -9,8 +9,8 @@ import {
   formGuideRecipe,
   formLabelStyle,
   OptionalBadge,
-} from "@/app/_mock/FormParts";
-import { MockCombobox } from "@/app/_mock/MockCombobox";
+} from "@/app/_site/FormParts";
+import { SearchCombobox } from "@/app/_site/SearchCombobox";
 import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
 import { css, cva } from "../../../../styled-system/css";
 
@@ -75,7 +75,6 @@ const affiliationOption = cva({
     borderStyle: "solid",
     borderColor: "border.strong",
     borderRadius: "pill",
-    fontFamily: "inherit",
     fontSize: "sm",
     fontWeight: "semibold",
     lineHeight: "tight",
@@ -142,7 +141,6 @@ const addRow = css({
 const addButton = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   flex: "0 0 auto",
   px: "4",
-  fontFamily: "inherit",
   lineHeight: "normal",
   _focusVisible: focusRing,
 });
@@ -224,7 +222,7 @@ export function ProfileTagsEditor({
             );
           })}
         </div>
-        <MockCombobox
+        <SearchCombobox
           id="crop-search"
           aria-label="主な作目"
           aria-describedby="crop-search-guide"
@@ -295,7 +293,7 @@ export function ProfileTagsEditor({
           <input key={name} type="hidden" name="affiliations" value={name} />
         ))}
         <div className={addRow}>
-          <MockCombobox
+          <SearchCombobox
             id="affiliation"
             aria-label="所属"
             value={affiliation}

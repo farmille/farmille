@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { MockChip, MockNoImage } from "@/app/materials/[id]/_components/MockParts";
+import { Chip, NoImage } from "@/app/materials/[id]/_components/CardParts";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { css, cva, cx } from "../../../../styled-system/css";
@@ -125,7 +125,7 @@ export function SearchResultCard({
         {imageSrc ? (
           <Image alt="" src={imageSrc} width={100} height={100} sizes="100px" preload={preload} />
         ) : (
-          <MockNoImage />
+          <NoImage />
         )}
       </div>
       <div className={css({ flex: "1", minW: "0" })}>
@@ -164,9 +164,9 @@ export function SearchResultCard({
             })}
           >
             {genres.map((genre) => (
-              <MockChip key={genre} tone="grey">
+              <Chip key={genre} tone="grey">
                 {genre}
-              </MockChip>
+              </Chip>
             ))}
           </div>
         ) : null}

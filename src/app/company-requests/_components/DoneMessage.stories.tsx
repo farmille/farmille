@@ -1,13 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { buttonRecipe } from "@/components/Button";
 import Link from "next/link";
 
-import { pageButtonStyles } from "./button-styles";
 import { DoneMessage } from "./DoneMessage";
 
 const meta = {
   title: "CompanyApplications/DoneMessage",
   component: DoneMessage,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { title: "ご申請を受け付けました" },
 } satisfies Meta<typeof DoneMessage>;
 
@@ -23,10 +22,10 @@ export const WithActions: Story = {
     children: <p>内容を確認し、ご登録の連絡先メールアドレスへご案内します。</p>,
     actions: (
       <>
-        <Link className={pageButtonStyles.primary} href="/sellers">
+        <Link className={buttonRecipe({ variant: "primary" })} href="/sellers">
           メーカーの方へ に戻る
         </Link>
-        <Link className={pageButtonStyles.ghost} href="/">
+        <Link className={buttonRecipe({ variant: "ghost" })} href="/">
           ホームへ
         </Link>
       </>

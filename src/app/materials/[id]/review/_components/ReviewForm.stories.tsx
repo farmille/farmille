@@ -1,6 +1,6 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { css, cx } from "../../../../../../styled-system/css";
+import { css } from "../../../../../../styled-system/css";
 import { ReviewForm } from "./ReviewForm";
 
 const initialValues = {
@@ -11,9 +11,7 @@ const initialValues = {
   photos: [],
 };
 
-const fmDecorator: Decorator = (Story) => (
-  <div className={cx("fm", css({ p: "4" }))}>{Story()}</div>
-);
+const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
 
 const meta = {
   title: "App/Materials/Review/ReviewForm",

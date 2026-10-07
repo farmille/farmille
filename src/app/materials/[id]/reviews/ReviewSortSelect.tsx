@@ -13,7 +13,6 @@ const selectStyle = css(selectRecipe.raw(), {
   px: "2.5",
   py: "1.5",
   fontSize: "sm",
-  fontFamily: "inherit",
 });
 const submitStyle = css({ srOnly: true });
 

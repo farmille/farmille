@@ -19,7 +19,6 @@ import { errorMessageJa } from "@/server/errors";
 import { css, cx } from "../../../../styled-system/css";
 import { buttonRecipe } from "@/components/Button";
 import { submitApplication, restartRemoval } from "../actions";
-import { pageButtonStyles } from "./button-styles";
 import { ConsentFields } from "./ConsentFields";
 import {
   ApplicationField,
@@ -73,7 +72,6 @@ const subHeadingStyle = css({
 
 const addItemStyle = css(buttonRecipe.raw({ variant: "ghost" }), {
   mt: "3",
-  fontFamily: "inherit",
   borderRadius: "mark",
   borderStyle: "dashed",
   borderColor: "accent.manufacturer",
@@ -293,7 +291,7 @@ export function CompanyApplicationForm({
             途中でページを閉じた場合、入力内容は復元されません。残った添付を破棄するには、最初から入力してください。
           </p>
           <button
-            className={cx(pageButtonStyles.ghostSmall, css({ mt: "2" }))}
+            className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), css({ mt: "2" }))}
             disabled={submitting || uploads > 0}
             onClick={() => void restart()}
             type="button"

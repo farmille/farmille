@@ -5,7 +5,6 @@ import { MoreLink } from "./MoreLink";
 const meta = {
   title: "App/Materials/MoreLink",
   component: MoreLink,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { href: "/materials/storybook/articles", children: "すべて見る →" },
 } satisfies Meta<typeof MoreLink>;
 

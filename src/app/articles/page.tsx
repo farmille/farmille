@@ -1,6 +1,4 @@
-import { MockPageShell } from "@/app/_mock/MockPageShell";
-// mock.css（MockPageShell が読み込む）より後に読み込む。
-import "@/app/_mock/reports-articles.css";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 
 import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { Suspense } from "react";
@@ -53,7 +51,7 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
   const page = parsePage(params.page);
 
   return (
-    <MockPageShell>
+    <SitePageShell>
       <h1 className={css({ srOnly: true })}>記事を読む</h1>
       <ArticlesSearchBar filter={filter} q={q} />
 
@@ -63,7 +61,7 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
       >
         <ArticleResults filter={filter} q={q} page={page} />
       </Suspense>
-    </MockPageShell>
+    </SitePageShell>
   );
 }
 

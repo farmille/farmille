@@ -5,7 +5,6 @@ import { HeroCount } from "./HeroSavedCount";
 const meta = {
   title: "App/Materials/HeroSavedCount",
   component: HeroCount,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { children: "12" },
 } satisfies Meta<typeof HeroCount>;
 

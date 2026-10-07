@@ -50,7 +50,6 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
 
     await page.goto("/");
     // ホームの「生産者の声」に新しい感想口コミが並ぶ。
-    // ホームの「生産者の声」に新しい感想口コミが並ぶ（docs/mock-port/decisions.md「ホームに残す欄」）。
     await expect(page.getByText(body, { exact: true })).toBeVisible();
     for (const path of ["/me", `/users/${user.id}`]) {
       await page.goto(path);

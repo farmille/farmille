@@ -1,8 +1,6 @@
-import "../_mock/forms.css";
-
 import type { Metadata } from "next";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { AccountTypeChoice } from "@/app/signup/AccountTypeChoice";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
@@ -16,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function SignupPage() {
   return (
-    <MockPageShell title="アカウントを作成" backHref="/">
+    <SitePageShell title="アカウントを作成" backHref="/">
       <div className={css({ maxW: "content.reading", mx: "auto" })}>
         <h1 className={css({ srOnly: true })}>アカウントを作成</h1>
         <p className={css({ mb: "3.5", fontSize: "sm", color: "text.subtle" })}>
@@ -24,6 +22,6 @@ export default function SignupPage() {
         </p>
         <AccountTypeChoice />
       </div>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

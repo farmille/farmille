@@ -1,6 +1,6 @@
 import { PostActionsLoader } from "@/components/PostActionsLoader";
-import { MockProfileReviewCard } from "@/app/_mock/MockProfileReviewCard";
-import { MockReportCard } from "@/app/materials/[id]/_components/MockReportCard";
+import { ProfileReviewCard } from "@/app/_site/ProfileReviewCard";
+import { UsageReportCard } from "@/app/materials/[id]/_components/UsageReportCard";
 import type { PublicProfilePageData, PublicProfilePost } from "@/server/queries/public-profiles";
 
 import { EmptyNote, postStackStyle } from "@/app/me/_components/ProfileParts";
@@ -38,7 +38,7 @@ export function PostTimeline({
     <div className={postStackStyle}>
       {posts.map((post) =>
         post.kind === "review" ? (
-          <MockProfileReviewCard
+          <ProfileReviewCard
             key={`review-${post.id}`}
             review={post}
             author={{
@@ -59,7 +59,7 @@ export function PostTimeline({
             reportReturnPath={isOwnProfile ? undefined : authorHref}
           />
         ) : (
-          <MockReportCard
+          <UsageReportCard
             key={`usage-report-${post.id}`}
             href={`/reports/${post.id}`}
             title={post.title}

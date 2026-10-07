@@ -7,7 +7,6 @@ import { storyCatalog, storyIds, storySearchCatalog } from "./story-fixtures";
 const meta = {
   title: "App/Search/CatalogSidebar",
   component: CatalogSidebar,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     catalog: storyCatalog,
     search: storySearchCatalog,

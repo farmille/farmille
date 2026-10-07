@@ -1,4 +1,4 @@
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 
 import { PostActionsLoader } from "@/components/PostActionsLoader";
 import type { Metadata } from "next";
@@ -56,7 +56,7 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
   const isEmpty = reports.items.length === 0 && articles.items.length === 0;
 
   return (
-    <MockPageShell title={`${material.name} の記事`} backHref={materialPath}>
+    <SitePageShell title={`${material.name} の記事`} backHref={materialPath}>
       <h1 className={visuallyHiddenStyle}>{material.name} の記事・実証詳細レポート</h1>
       <div className={leadStyle}>
         この資材に紐づく、生産者の実証詳細レポートとメーカーによる記事です。
@@ -127,6 +127,6 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
           </ArticleGrid>
         </section>
       ) : null}
-    </MockPageShell>
+    </SitePageShell>
   );
 }

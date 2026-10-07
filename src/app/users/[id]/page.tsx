@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
-import { MockProfileCard } from "@/app/_mock/MockProfileCard";
+import { SitePageShell } from "@/app/_site/SitePageShell";
+import { ProfileCard } from "@/app/_site/ProfileCard";
 import { publicProfileLabel } from "@/lib/public-profile-label";
 import { createPageMetadata } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
@@ -82,8 +82,8 @@ export default async function UserPage({ params }: UserPageProps) {
   const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 
   return (
-    <MockPageShell title={data.profile.handle} backHref="/">
-      <MockProfileCard
+    <SitePageShell title={data.profile.handle} backHref="/">
+      <ProfileCard
         handle={data.profile.handle}
         avatarUrl={data.profile.avatarUrl}
         details={details.data}
@@ -113,6 +113,6 @@ export default async function UserPage({ params }: UserPageProps) {
           viewerUserId={viewerUserId}
         />
       </section>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

@@ -4,9 +4,9 @@ import type { ReactNode } from "react";
 import { Badge } from "@/components/Badge";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
-import { MockProfileReviewCard } from "@/app/_mock/MockProfileReviewCard";
-import { RequiredBadge } from "@/app/_mock/FormParts";
-import { MockReportCard } from "@/app/materials/[id]/_components/MockReportCard";
+import { ProfileReviewCard } from "@/app/_site/ProfileReviewCard";
+import { RequiredBadge } from "@/app/_site/FormParts";
+import { UsageReportCard } from "@/app/materials/[id]/_components/UsageReportCard";
 import type { HelpfulItem, OwnPostItem } from "@/server/queries/me-page";
 import type { OwnProfile } from "@/server/queries/profiles";
 import type { SavedMaterialItem } from "@/server/queries/saved-materials";
@@ -101,7 +101,7 @@ function Chevron() {
 }
 
 /** タップで移動する行。 */
-export function MockLinkRow({ href, children }: { href: string; children: ReactNode }) {
+export function LinkRow({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link className={linkRow} href={href}>
       <div className={css({ minW: "0" })}>{children}</div>
@@ -154,7 +154,7 @@ export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: Po
     <div className={postList({ kind })} aria-labelledby="me-posts-heading" role="region">
       {posts.map((post) =>
         post.kind === "review" ? (
-          <MockProfileReviewCard
+          <ProfileReviewCard
             key={`review-${post.id}`}
             review={post}
             author={{ handle: profile.handle, avatarUrl: profile.avatarUrl, label: authorLabel }}
@@ -169,7 +169,7 @@ export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: Po
             reportReturnPath={`/materials/${post.materialId}`}
           />
         ) : post.status === "published" ? (
-          <MockReportCard
+          <UsageReportCard
             key={`report-${post.id}`}
             href={`/reports/${post.id}`}
             title={post.title}
@@ -225,10 +225,10 @@ export function SavedShelf({ items }: SavedShelfProps) {
       ) : (
         <div className={savedList}>
           {items.map((item) => (
-            <MockLinkRow key={item.savedId} href={`/materials/${item.materialId}`}>
+            <LinkRow key={item.savedId} href={`/materials/${item.materialId}`}>
               <div className={savedName}>★ {item.name}</div>
               <div className={savedMaker}>{item.manufacturerName}</div>
-            </MockLinkRow>
+            </LinkRow>
           ))}
         </div>
       )}
@@ -254,7 +254,7 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
         <div className={postStackStyle}>
           {items.map((item) =>
             item.kind === "review" ? (
-              <MockProfileReviewCard
+              <ProfileReviewCard
                 key={`helpful-review-${item.id}`}
                 review={item}
                 author={{
@@ -272,7 +272,7 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
                 reportReturnPath="/me"
               />
             ) : (
-              <MockReportCard
+              <UsageReportCard
                 key={`helpful-report-${item.id}`}
                 href={`/reports/${item.id}`}
                 title={item.title}

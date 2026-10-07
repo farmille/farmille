@@ -12,7 +12,7 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { css, cx } from "../../../../../styled-system/css";
 
 import { MaterialBox } from "./MaterialBox";
-import { MockExternalIcon } from "./MockParts";
+import { ExternalIcon } from "./CardParts";
 
 type MaterialLink = MaterialPageContent["links"][number];
 type LinkGroup = MaterialLink["group"];
@@ -141,7 +141,7 @@ function FileRow({ link }: { link: MaterialLink }) {
           rel="noreferrer"
           aria-labelledby={titleId}
         >
-          <MockExternalIcon />
+          <ExternalIcon />
           開く
         </a>
       ) : null}
@@ -200,7 +200,7 @@ function TestRow({ link }: { link: MaterialLink }) {
     >
       {body}
       <span className={testOpenStyle}>
-        <MockExternalIcon /> 開く
+        <ExternalIcon /> 開く
       </span>
     </a>
   );

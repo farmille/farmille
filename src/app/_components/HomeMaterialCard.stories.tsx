@@ -8,11 +8,7 @@ const meta = {
   title: "App/Home/HomeMaterialCard",
   component: HomeMaterialCard,
   decorators: [
-    (Story) => (
-      <div className="fm">
-        <div className={css({ display: "flex", gap: "3", p: "4" })}>{Story()}</div>
-      </div>
-    ),
+    (Story) => <div className={css({ display: "flex", gap: "3", p: "4" })}>{Story()}</div>,
   ],
   args: homeMaterials[0],
 } satisfies Meta<typeof HomeMaterialCard>;

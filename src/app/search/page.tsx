@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { EmptyState } from "@/components";
 import {
   formatLogicHint,
@@ -14,7 +14,7 @@ import { matchSearchCatalog } from "@/lib/material-search";
 import { getCatalogSearch, listSearchSuggestions } from "@/server/queries/catalog-search";
 import { CatalogSidebar } from "./_components/CatalogSidebar";
 import { listSearchFiltersByRefs } from "@/server/queries/classifications";
-import { MockSearchBox } from "./_components/MockSearchBox";
+import { SearchBox } from "./_components/SearchBox";
 import { css } from "../../../styled-system/css";
 import { SearchResults } from "./_components/SearchResults";
 
@@ -50,13 +50,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     initialQuery = parseQueryParam(params.q);
   } catch {
     return (
-      <MockPageShell active="search" title="BS資材を探す" backHref="/">
+      <SitePageShell active="search" title="BS資材を探す" backHref="/">
         <SearchPageHeading />
         <EmptyState
           title="検索条件が正しくありません"
           description="URL の検索パラメータを確認するか、条件を選び直してください。"
         />
-      </MockPageShell>
+      </SitePageShell>
     );
   }
 
@@ -72,13 +72,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (!filtersResult.ok) {
     return (
-      <MockPageShell active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery}>
+      <SitePageShell active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery}>
         <SearchPageHeading />
         <EmptyState
           title="指定された検索条件が見つかりません"
           description="条件を選び直して、もう一度検索してください。"
         />
-      </MockPageShell>
+      </SitePageShell>
     );
   }
 
@@ -94,9 +94,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     : undefined;
 
   return (
-    <MockPageShell active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery}>
+    <SitePageShell active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery}>
       <SearchPageHeading />
-      <MockSearchBox
+      <SearchBox
         initialQuery={initialQuery}
         selected={selected}
         sort={sort}
@@ -134,6 +134,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           />
         </div>
       </div>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

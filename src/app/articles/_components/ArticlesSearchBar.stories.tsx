@@ -5,7 +5,6 @@ import { ArticlesSearchBar } from "./ArticlesSearchBar";
 const meta = {
   title: "Articles/ArticlesSearchBar",
   component: ArticlesSearchBar,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { filter: "all", q: "" },
 } satisfies Meta<typeof ArticlesSearchBar>;
 export default meta;

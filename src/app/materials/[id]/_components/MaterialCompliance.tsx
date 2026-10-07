@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { css, cva } from "../../../../../styled-system/css";
 
-import { MockCheckIcon } from "./MockParts";
+import { CheckIcon } from "./CardParts";
 
 const noticeRecipe = cva({
   base: {
@@ -55,7 +55,7 @@ function CheckedNotice({
   return (
     <div className={noticeRecipe({ spacing })}>
       <span className={checkStyle}>
-        <MockCheckIcon />
+        <CheckIcon />
       </span>
       <div>{children}</div>
     </div>

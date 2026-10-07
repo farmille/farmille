@@ -6,7 +6,6 @@ import { materialLinks } from "./story-fixtures";
 const meta = {
   title: "App/Materials/MaterialSourceLinks",
   component: MaterialSourceLinks,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { links: materialLinks },
 } satisfies Meta<typeof MaterialSourceLinks>;
 

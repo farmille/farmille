@@ -4,7 +4,6 @@ import { textareaRecipe } from "@/components/Textarea";
 import { css } from "../../../../styled-system/css";
 
 const invalidControl = {
-  fontFamily: "inherit",
   "&[aria-invalid=true]": { borderColor: "accent.danger" },
 };
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { SellerLoginPanel } from "@/app/sellers/login/SellerLoginPanel";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
@@ -35,12 +35,12 @@ export default async function SellerLoginPage({
   const destinationLabel = destinationLabelOf(destination);
 
   return (
-    <MockPageShell title="メーカーログイン" backHref="/sellers">
+    <SitePageShell title="メーカーログイン" backHref="/sellers">
       <SellerLoginPanel
         destinationLabel={destinationLabel}
         next={destination}
         passwordChanged={password === "changed"}
       />
-    </MockPageShell>
+    </SitePageShell>
   );
 }

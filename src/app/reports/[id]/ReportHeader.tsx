@@ -5,7 +5,7 @@ import type { PublishedUsageReportDetail } from "@/server/queries/usage-reports"
 
 import { css, cx } from "../../../../styled-system/css";
 import { articleTitle, byline } from "../../articles/_components/Reading";
-import { MockAvatar } from "../../materials/[id]/_components/MockParts";
+import { Avatar } from "../../materials/[id]/_components/CardParts";
 
 type ReportHeaderProps = {
   report: Pick<
@@ -56,7 +56,7 @@ export function ReportHeader({
       <h1 className={cx(articleTitle, css({ fontWeight: "extrabold" }))}>{report.title}</h1>
       <div className={byline.row}>
         <Link href={`/users/${report.author.userId}`} className={byline.link}>
-          <MockAvatar name={report.author.handle} src={report.author.avatarUrl} size={32} />
+          <Avatar name={report.author.handle} src={report.author.avatarUrl} size={32} />
           <span className={byline.name}>{report.author.handle}</span>
         </Link>
         <time className={byline.sub} dateTime={report.publishedAt}>

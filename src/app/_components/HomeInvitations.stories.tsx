@@ -6,13 +6,7 @@ import { HomeInvitations } from "./HomeInvitations";
 const meta = {
   title: "App/Home/Invitations",
   component: HomeInvitations,
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <div className={css({ px: "4", pb: "6" })}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ px: "4", pb: "6" })}>{Story()}</div>],
   args: { showSignup: true },
 } satisfies Meta<typeof HomeInvitations>;
 export default meta;

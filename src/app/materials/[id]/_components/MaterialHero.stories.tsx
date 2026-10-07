@@ -23,7 +23,6 @@ const toggleAction = fn(
 const meta = {
   title: "App/Materials/MaterialHero",
   component: MaterialHero,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     material: materialDetail,
     saved: false,

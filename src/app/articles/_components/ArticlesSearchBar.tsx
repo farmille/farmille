@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ContentFeedFilter } from "@/server/queries/content-feed";
 
 import { css, cva } from "../../../../styled-system/css";
-import { MockSearchIcon } from "./MockIcons";
+import { ArticleSearchIcon } from "./ArticleIcons";
 
 const FILTER_OPTIONS: ReadonlyArray<{ value: ContentFeedFilter; label: string }> = [
   { value: "all", label: "すべて" },
@@ -86,7 +86,7 @@ export function ArticlesSearchBar({ filter, q }: { filter: ContentFeedFilter; q:
         role="search"
       >
         <span className={css({ display: "flex", color: "text.subtle" })}>
-          <MockSearchIcon />
+          <ArticleSearchIcon />
         </span>
         {filter !== "all" ? <input type="hidden" name="type" value={filter} /> : null}
         <input
@@ -97,7 +97,6 @@ export function ArticlesSearchBar({ filter, q }: { filter: ContentFeedFilter; q:
             bg: "transparent",
             color: "text.default",
             fontSize: "md",
-            fontFamily: "inherit",
             outline: "none",
             _placeholder: { color: "text.subtle" },
           })}

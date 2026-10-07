@@ -13,7 +13,7 @@ import { css, cx } from "../../../../../styled-system/css";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { MaterialBox } from "./MaterialBox";
-import { MockChip } from "./MockParts";
+import { Chip } from "./CardParts";
 
 const chipsStyle = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "0.5" });
 const usageMoreStyle = css({ mt: "1.5", "&[open] > summary::after": { content: '"▴"' } });
@@ -75,9 +75,9 @@ function tags(names: readonly string[], tone?: "grey"): ReactNode {
   return (
     <div className={chipsStyle}>
       {unique.map((name) => (
-        <MockChip key={name} tone={tone}>
+        <Chip key={name} tone={tone}>
           {name}
-        </MockChip>
+        </Chip>
       ))}
     </div>
   );

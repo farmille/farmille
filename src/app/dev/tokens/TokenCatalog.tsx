@@ -6,8 +6,7 @@ import { semanticTokens, tokens } from "@/theme/tokens";
 import { css } from "../../../../styled-system/css";
 
 type TokenLeaf = {
-  // 条件つきのセマンティックトークンは既定（base）の値を表示する
-  readonly value: string | { readonly base: string; readonly _fm: string };
+  readonly value: string;
 };
 
 type TokenBranch = {
@@ -35,7 +34,7 @@ function flattenTokenBranch(branch: TokenBranch, prefix = ""): DisplayToken[] {
       segment === "DEFAULT" ? prefix : prefix.length === 0 ? segment : `${prefix}.${segment}`;
 
     if (isTokenLeaf(node)) {
-      return [{ name, value: typeof node.value === "string" ? node.value : node.value.base }];
+      return [{ name, value: node.value }];
     }
 
     return flattenTokenBranch(node, name);

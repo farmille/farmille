@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { getPublicSellerPage, type PublicSellerPageData } from "@/server/queries/public-sellers";
@@ -58,8 +58,8 @@ export default async function SellerPage({ params }: SellerPageProps) {
   const data = await loadSellerOrNotFound(id);
 
   return (
-    <MockPageShell title={data.seller.officialName} backHref="/" active="search">
+    <SitePageShell title={data.seller.officialName} backHref="/" active="search">
       <SellerPageContent data={data} />
-    </MockPageShell>
+    </SitePageShell>
   );
 }

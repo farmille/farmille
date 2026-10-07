@@ -1,7 +1,7 @@
 import { PageNotice } from "@/components/PageNotice";
 import Link from "next/link";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { buttonRecipe } from "@/components";
 import type { AccountType } from "@/server/auth";
 
@@ -14,7 +14,7 @@ export function PostAccessDenied({ accountType }: { accountType: AccountType | n
         : null;
 
   return (
-    <MockPageShell backHref="/" title="投稿する">
+    <SitePageShell backHref="/" title="投稿する">
       <PageNotice
         description="感想口コミと実証詳細レポートの投稿は一般ユーザー専用です。メーカーや運営の作業は、それぞれの管理画面から行ってください。"
         title="一般ユーザー向けの画面です"
@@ -25,6 +25,6 @@ export function PostAccessDenied({ accountType }: { accountType: AccountType | n
           </Link>
         )}
       </PageNotice>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

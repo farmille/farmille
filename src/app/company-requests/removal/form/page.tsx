@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { applicationCopy } from "@/lib/company-application-copy";
 import { removalApplicationAccess } from "@/server/company-application-auth";
 import { cleanupExpiredApplicationUploads } from "@/server/company-application-evidence";
@@ -19,7 +19,7 @@ export default async function RemovalFormPage() {
   const intent = await beginCompanyApplication("removal");
   if (intent.submitted_at) redirect(`/company-requests/receipts/${intent.id}`);
   return (
-    <MockPageShell title={applicationCopy.removal.title} backHref="/company-requests/removal">
+    <SitePageShell title={applicationCopy.removal.title} backHref="/company-requests/removal">
       <div className={formalPageRecipe()}>
         <h1 className={css({ fontSize: "xl" })}>{applicationCopy.removal.title}</h1>
         <CompanyApplicationForm
@@ -34,6 +34,6 @@ export default async function RemovalFormPage() {
           recipient={access.email}
         />
       </div>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

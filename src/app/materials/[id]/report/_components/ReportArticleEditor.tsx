@@ -71,7 +71,6 @@ const bodyInput = css({
   bg: "transparent",
   resize: "none",
   fieldSizing: "content",
-  fontFamily: "inherit",
   color: "inherit",
   fontSize: "md",
   lineHeight: "loose",
@@ -101,7 +100,6 @@ const sectionTitle = cva({
   base: {
     display: "block",
     w: "full",
-    fontFamily: "inherit",
     color: "inherit",
     fontSize: "lg",
     fontWeight: "extrabold",
@@ -158,7 +156,6 @@ const caption = cva({
     borderRadius: "input",
     py: "1",
     px: "2",
-    fontFamily: "inherit",
     color: "inherit",
     fontSize: "sm",
   },

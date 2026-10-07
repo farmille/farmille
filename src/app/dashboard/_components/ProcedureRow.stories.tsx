@@ -4,7 +4,6 @@ import { ProcedureRow } from "./ProcedureRow";
 const meta = {
   title: "Dashboard/ProcedureRow",
   component: ProcedureRow,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     heading: "h3",
     title: "製品情報の管理",

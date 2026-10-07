@@ -89,7 +89,6 @@ export const formalControlRecipe = cva({
     borderRadius: "mark",
     p: "3.5",
     fontSize: "lg",
-    fontFamily: "inherit",
     _placeholder: { color: "formal.subtle" },
     _focus: {
       bg: "surface.card",

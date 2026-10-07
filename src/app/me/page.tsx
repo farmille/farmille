@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
-import { MockProfileCard } from "@/app/_mock/MockProfileCard";
+import { SitePageShell } from "@/app/_site/SitePageShell";
+import { ProfileCard } from "@/app/_site/ProfileCard";
 import { publicProfileLabel } from "@/lib/public-profile-label";
 import { errorMessageJa } from "@/server/errors";
 import { getSessionUser } from "@/server/auth";
@@ -83,8 +83,8 @@ export default async function MePage({
   const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 
   return (
-    <MockPageShell title="マイページ" backHref="/" active="me">
-      <MockProfileCard
+    <SitePageShell title="マイページ" backHref="/" active="me">
+      <ProfileCard
         handle={data.profile.handle}
         avatarUrl={data.profile.avatarUrl}
         details={details.data}
@@ -127,6 +127,6 @@ export default async function MePage({
       <HelpfulShelf items={data.helpfulItems} />
 
       <AccountActions admin={(await getSessionUser())?.accountType === "admin"} />
-    </MockPageShell>
+    </SitePageShell>
   );
 }

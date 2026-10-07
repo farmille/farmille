@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { createPageMetadata } from "@/lib/seo";
 
 import { ManufacturerLanding } from "./_components/ManufacturerLanding";
@@ -24,8 +24,8 @@ export default async function ManufacturerPage({ searchParams }: ManufacturerPag
   const applyHref = fromMe ? "/sellers/apply?from=me" : "/sellers/apply";
 
   return (
-    <MockPageShell title="メーカーの方へ" backHref={fromMe ? "/me" : "/"}>
+    <SitePageShell title="メーカーの方へ" backHref={fromMe ? "/me" : "/"}>
       <ManufacturerLanding applyHref={applyHref} />
-    </MockPageShell>
+    </SitePageShell>
   );
 }

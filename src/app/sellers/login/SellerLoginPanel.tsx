@@ -1,4 +1,4 @@
-import { FormNotice } from "@/app/_mock/FormParts";
+import { FormNotice } from "@/app/_site/FormParts";
 import { SellerLoginForm } from "@/app/sellers/login/SellerLoginForm";
 import { PasskeyLogin } from "@/components/auth/PasskeyLogin";
 

@@ -6,7 +6,6 @@ import { relatedMaterials } from "./story-fixtures";
 const meta = {
   title: "App/Materials/RelatedMaterialsSection",
   component: RelatedMaterialsView,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { related: relatedMaterials },
 } satisfies Meta<typeof RelatedMaterialsView>;
 

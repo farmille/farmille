@@ -8,13 +8,7 @@ const meta = {
   title: "App/Sellers/SellerLoginPanel",
   component: SellerLoginPanel,
   parameters: { layout: "fullscreen" },
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>],
   args: { destinationLabel: null, next: null, passwordChanged: false },
 } satisfies Meta<typeof SellerLoginPanel>;
 

@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
-import { FormNotice, RequiredBadge } from "@/app/_mock/FormParts";
-import { MockSubmitButton } from "@/app/_mock/MockSubmitButton";
+import { FormNotice, RequiredBadge } from "@/app/_site/FormParts";
+import { FormSubmitButton } from "@/app/_site/FormSubmitButton";
 import { sellerLoginAction } from "@/app/sellers/login/actions";
 import { initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 
@@ -65,7 +65,7 @@ export function SellerLoginForm({ next }: { next: string | null }) {
       </div>
 
       <div className={sellerActionsStyle}>
-        <MockSubmitButton label="ログインする" pendingLabel="ログイン中…" />
+        <FormSubmitButton label="ログインする" pendingLabel="ログイン中…" />
       </div>
 
       <div

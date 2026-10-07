@@ -3,7 +3,7 @@ import { helpfulPillRecipe } from "@/components/helpful-pill";
 
 import { css } from "../../../../styled-system/css";
 import { FeedCard } from "./FeedCard";
-import { MockThumbIcon, MockViewCount } from "./MockIcons";
+import { ThumbIcon, ViewCount } from "./ArticleIcons";
 
 type OrgArticleCardProps = {
   href: string;
@@ -73,11 +73,11 @@ export function OrgArticleCard({
           })}
           aria-label={`参考になった ${helpfulCount}件`}
         >
-          <MockThumbIcon />
+          <ThumbIcon />
           <span>参考になった</span>
           {helpfulCount}
         </span>
-        <MockViewCount count={viewCount} size="sm" />
+        <ViewCount count={viewCount} size="sm" />
       </div>
     </FeedCard>
   );

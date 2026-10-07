@@ -2,7 +2,7 @@ import { PageNotice } from "@/components/PageNotice";
 import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import type { AccountType } from "@/server/auth";
 import { css, cx } from "../../../../styled-system/css";
 
@@ -24,7 +24,7 @@ export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
         : null;
 
   return (
-    <MockPageShell title="マイページ" backHref="/" active="me">
+    <SitePageShell title="マイページ" backHref="/" active="me">
       <PageNotice
         title="一般ユーザー向けの画面です"
         description="マイページ・プロフィール編集・お気に入りは一般ユーザー専用です。メーカーや運営の作業は、それぞれのダッシュボードから行ってください。"
@@ -35,6 +35,6 @@ export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
           </Link>
         ) : null}
       </PageNotice>
-    </MockPageShell>
+    </SitePageShell>
   );
 }

@@ -7,13 +7,11 @@ const meta = {
   component: FeedCard,
   decorators: [
     (Story) => (
-      <div className="fm">
-        <ArticleGrid>
-          {Story()}
-          {Story()}
-          {Story()}
-        </ArticleGrid>
-      </div>
+      <ArticleGrid>
+        {Story()}
+        {Story()}
+        {Story()}
+      </ArticleGrid>
     ),
   ],
   args: {

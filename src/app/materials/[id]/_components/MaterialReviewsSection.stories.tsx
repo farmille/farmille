@@ -7,7 +7,6 @@ import { detailedReview, materialReviews, withdrawnReview } from "./story-fixtur
 const meta = {
   title: "App/Materials/MaterialReviewsSection",
   component: MaterialReviewsSection,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     materialPath: "/materials/storybook",
     reviews: [...materialReviews, detailedReview, withdrawnReview],

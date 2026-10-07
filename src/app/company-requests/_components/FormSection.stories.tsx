@@ -11,10 +11,8 @@ const meta = {
   component: FormSection,
   decorators: [
     (Story) => (
-      <div className="fm">
-        <div className={css({ p: "4" })}>
-          <div className={formalPageRecipe()}>{Story()}</div>
-        </div>
+      <div className={css({ p: "4" })}>
+        <div className={formalPageRecipe()}>{Story()}</div>
       </div>
     ),
   ],

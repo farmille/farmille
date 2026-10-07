@@ -6,7 +6,6 @@ import { SideSection } from "./SideSection";
 const meta = {
   title: "App/Search/SideSection",
   component: SideSection,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     title: "作物で探す",
     note: "文字検索はすべての作目・別名が対象です。",

@@ -5,7 +5,6 @@ import { EmptyNote, ProfileSectionHeading } from "./ProfileParts";
 const meta = {
   title: "App/Me/ProfileParts",
   component: ProfileSectionHeading,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { id: "heading", children: "これまでの投稿" },
 } satisfies Meta<typeof ProfileSectionHeading>;
 

@@ -6,7 +6,6 @@ import { materialDetail, materialReports } from "./story-fixtures";
 const meta = {
   title: "App/Materials/MaterialReportsSection",
   component: MaterialReportsView,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     material: materialDetail,
     reports: { items: materialReports, total: 5 },

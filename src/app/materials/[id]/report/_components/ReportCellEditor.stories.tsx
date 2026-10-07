@@ -17,7 +17,6 @@ const badGraph = {
 const meta = {
   title: "App/Materials/Report/ReportCellEditor",
   component: ReportCellEditor,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     target: { k: "val", g: graph.id, p: plot.id },
     graphNumber: 1,

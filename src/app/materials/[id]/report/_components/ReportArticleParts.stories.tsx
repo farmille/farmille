@@ -9,7 +9,6 @@ if (!graph) throw new Error("グラフの初期データがありません。");
 const meta = {
   title: "App/Materials/Report/ReportArticleParts",
   component: PlotList,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { plots: filledReport.plots },
 } satisfies Meta<typeof PlotList>;
 export default meta;

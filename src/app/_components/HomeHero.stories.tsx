@@ -8,7 +8,6 @@ const meta = {
   title: "App/Home/HomeHero",
   component: HomeHero,
   parameters: { layout: "fullscreen" },
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { searchOptions: heroSearchOptions },
 } satisfies Meta<typeof HomeHero>;
 

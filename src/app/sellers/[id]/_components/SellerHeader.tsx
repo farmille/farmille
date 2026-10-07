@@ -1,4 +1,4 @@
-import { MockExternalIcon } from "@/app/materials/[id]/_components/MockParts";
+import { ExternalIcon } from "@/app/materials/[id]/_components/CardParts";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { Badge } from "@/components/Badge";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
@@ -99,7 +99,7 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
                 target="_blank"
                 rel="noreferrer"
               >
-                <MockExternalIcon /> {websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                <ExternalIcon /> {websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                 <span className={css({ srOnly: true })}>（公式サイト・別タブで開きます）</span>
               </a>
             )}

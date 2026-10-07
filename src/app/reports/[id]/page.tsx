@@ -1,6 +1,4 @@
-import { MockPageShell } from "@/app/_mock/MockPageShell";
-// mock.css（MockPageShell が読み込む）より後に読み込む。
-import "@/app/_mock/reports-articles.css";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
@@ -25,7 +23,7 @@ import { getPublishedUsageReport } from "@/server/queries/usage-reports";
 import { recordViewEvent } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
 
-import { MockCheckIcon } from "../../materials/[id]/_components/MockParts";
+import { CheckIcon } from "../../materials/[id]/_components/CardParts";
 import { LegacyReportSections } from "./LegacyReportSections";
 import { ReportFigure } from "./ReportFigures";
 import { ReportGate } from "./ReportGate";
@@ -156,7 +154,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   });
 
   return (
-    <MockPageShell title="" backHref={materialPath} shareHref={`/reports/${report.id}`} hasFab>
+    <SitePageShell title="" backHref={materialPath} shareHref={`/reports/${report.id}`} hasFab>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(reportJsonLd) }}
@@ -216,7 +214,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                   color: "primary.700",
                 })}
               >
-                <MockCheckIcon />
+                <CheckIcon />
               </span>
               <span>
                 この実証詳細レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。
@@ -273,8 +271,8 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
         reportHref={`${materialPath}/report/new`}
         reviewHref={`${materialPath}/review/new`}
         placement="viewport"
-        look="mock"
+        look="site"
       />
-    </MockPageShell>
+    </SitePageShell>
   );
 }

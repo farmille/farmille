@@ -29,7 +29,6 @@ const signupButtonStyle = css(buttonRecipe.raw({ variant: "primary" }), {
   w: "auto",
   px: "7.5",
   py: "3.5",
-  fontFamily: "inherit",
   lineHeight: "normal",
 });
 
@@ -68,7 +67,6 @@ const makerButtonStyle = css(buttonRecipe.raw({ variant: "primary", size: "sm" }
   alignSelf: "flex-start",
   gap: "1",
   px: "4",
-  fontFamily: "inherit",
   lineHeight: "normal",
   tab: { alignSelf: "center", flex: "none", py: "3", px: "6" },
 });

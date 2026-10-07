@@ -66,13 +66,7 @@ const meta = {
   title: "App/Sellers/SellerPageContent",
   component: SellerPageContent,
   parameters: { layout: "fullscreen" },
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>],
   args: { data },
 } satisfies Meta<typeof SellerPageContent>;
 

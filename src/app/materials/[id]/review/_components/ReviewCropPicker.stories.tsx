@@ -3,7 +3,7 @@ import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { fn } from "storybook/test";
 
-import { css, cx } from "../../../../../../styled-system/css";
+import { css } from "../../../../../../styled-system/css";
 import { ReviewCropPicker } from "./ReviewCropPicker";
 
 const crops = [
@@ -27,9 +27,7 @@ const crops = [
   },
 ];
 
-const fmDecorator: Decorator = (Story) => (
-  <div className={cx("fm", css({ p: "4" }))}>{Story()}</div>
-);
+const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
 
 const meta = {
   title: "App/Materials/Review/ReviewCropPicker",

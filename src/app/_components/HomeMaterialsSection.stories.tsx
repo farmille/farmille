@@ -7,13 +7,7 @@ import { homeMaterials } from "./story-fixtures";
 const meta = {
   title: "App/Home/HomeMaterialsSection",
   component: HomeMaterialsSection,
-  decorators: [
-    (Story) => (
-      <div className="fm">
-        <div className={css({ px: "4" })}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ px: "4" })}>{Story()}</div>],
   args: { materials: homeMaterials },
 } satisfies Meta<typeof HomeMaterialsSection>;
 

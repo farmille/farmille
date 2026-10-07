@@ -29,7 +29,6 @@ const headerButtonStyle = css(focusRing, {
   borderWidth: "0",
   bg: "transparent",
   color: "inherit",
-  fontFamily: "inherit",
   textAlign: "left",
   cursor: "pointer",
 });
@@ -38,7 +37,6 @@ const filterInputStyle = css(inputRecipe.raw(), {
   mb: "2",
   py: "2",
   px: "3",
-  fontFamily: "inherit",
   fontSize: "sm",
 });
 

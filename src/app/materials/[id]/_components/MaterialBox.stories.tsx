@@ -7,7 +7,6 @@ import { MaterialBox } from "./MaterialBox";
 const meta = {
   title: "App/Materials/MaterialBox",
   component: MaterialBox,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     headingId: "storybook-box-heading",
     title: "製品説明",

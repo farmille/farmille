@@ -14,7 +14,6 @@ if (!measurement?.graphs[0] || !filled?.graphs[0])
 const meta = {
   title: "App/Materials/Report/ReportGraphEditor",
   component: ReportGraphEditor,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: {
     measurement,
     graph: measurement.graphs[0],

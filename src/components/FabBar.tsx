@@ -55,7 +55,7 @@ const fabBarRecipe = cva({
     },
     look: {
       default: {},
-      mock: {
+      site: {
         borderRadius: "banner",
         tab: {
           left: "auto",
@@ -71,8 +71,8 @@ const fabBarRecipe = cva({
     },
   },
   compoundVariants: [
-    { placement: "container", look: "mock", css: { tab: { position: "absolute" } } },
-    { placement: "viewport", look: "mock", css: { maxW: "none", tab: { position: "fixed" } } },
+    { placement: "container", look: "site", css: { tab: { position: "absolute" } } },
+    { placement: "viewport", look: "site", css: { maxW: "none", tab: { position: "fixed" } } },
   ],
   defaultVariants: {
     placement: "container",
@@ -87,19 +87,18 @@ const fabLink = {
   fontSize: "sm",
   borderRadius: "input",
   whiteSpace: "nowrap",
-  fontFamily: "inherit",
 } as const;
 
 const reportLink = css(buttonRecipe.raw({ variant: "primary" }), fabLink, { flex: "1.3" });
 
 const reviewLink = css(buttonRecipe.raw({ variant: "ghost" }), fabLink, { flex: "1" });
 
-const mockReportLink = css(buttonRecipe.raw({ variant: "primary" }), fabLink, {
+const siteReportLink = css(buttonRecipe.raw({ variant: "primary" }), fabLink, {
   flex: "1.3",
   lineHeight: "normal",
 });
 
-const mockReviewLink = css(buttonRecipe.raw({ variant: "ghost" }), fabLink, {
+const siteReviewLink = css(buttonRecipe.raw({ variant: "ghost" }), fabLink, {
   flex: "1",
   lineHeight: "normal",
 });
@@ -109,8 +108,8 @@ type FabBarProps = {
   reviewHref?: string;
   placement?: "container" | "viewport";
   className?: string;
-  /** "mock" は完成見本の画面（.fm の中）用。PC 幅でも右下に浮かせたまま置く。 */
-  look?: "default" | "mock";
+  /** "site" は SitePageShell の画面用。PC 幅でも右下に浮かせたまま置く。 */
+  look?: "default" | "site";
 };
 
 /**
@@ -137,10 +136,10 @@ export async function FabBar({
         className={cx(fabBarRecipe({ placement, look }), className)}
         data-ui="responsive-fab-bar"
       >
-        <Link href={reportHref} className={look === "mock" ? mockReportLink : reportLink}>
+        <Link href={reportHref} className={look === "site" ? siteReportLink : reportLink}>
           実証詳細レポートを書く
         </Link>
-        <Link href={reviewHref} className={look === "mock" ? mockReviewLink : reviewLink}>
+        <Link href={reviewHref} className={look === "site" ? siteReviewLink : reviewLink}>
           感想口コミを書く
         </Link>
       </div>

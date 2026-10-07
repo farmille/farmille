@@ -10,7 +10,6 @@ import {
 const meta = {
   title: "App/Materials/MaterialCompliance",
   component: MaterialPageCompliance,
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
   args: { makerVerified: true },
 } satisfies Meta<typeof MaterialPageCompliance>;
 

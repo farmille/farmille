@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 
 type MaterialPageShellProps = {
   title: string;
@@ -20,8 +20,8 @@ export function MaterialPageShell({
   children,
 }: MaterialPageShellProps) {
   return (
-    <MockPageShell title={title} backHref={backHref} hasFab={hasFab}>
+    <SitePageShell title={title} backHref={backHref} hasFab={hasFab}>
       {children}
-    </MockPageShell>
+    </SitePageShell>
   );
 }

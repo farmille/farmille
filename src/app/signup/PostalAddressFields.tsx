@@ -7,20 +7,21 @@ import {
   OptionalBadge,
   RequiredBadge,
   VisibilityTag,
-} from "@/app/_mock/FormParts";
+} from "@/app/_site/FormParts";
+import { buttonRecipe } from "@/components/Button";
 import { PREFECTURES } from "@/lib/prefectures";
 
 import { css, cva, cx } from "../../../styled-system/css";
-import {
-  fieldInputStyle,
-  fieldLabelStyle,
-  fieldStyle,
-  guideStyle,
-  smallGhostButtonStyle,
-} from "./form-styles";
+import { fieldInputStyle, fieldLabelStyle, fieldStyle, guideStyle } from "./form-styles";
 import { findPostalAddress } from "./postal-action";
 
 const ZIP_GUIDE = "郵便番号を入れると、都道府県と市区町村（町域まで）が自動で入ります。";
+
+const lookupButton = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
+  flex: "0 0 auto",
+  minW: "0",
+  px: "4",
+});
 
 const addressLabelStyle = css({ pt: "2", fontSize: "sm", fontWeight: "bold", color: "text.muted" });
 
@@ -124,12 +125,7 @@ export function PostalAddressFields({
               required
               value={postal}
             />
-            <button
-              type="button"
-              className={smallGhostButtonStyle}
-              disabled={pending}
-              onClick={lookup}
-            >
+            <button type="button" className={lookupButton} disabled={pending} onClick={lookup}>
               {pending ? "住所を検索中…" : "住所を自動入力"}
             </button>
           </div>

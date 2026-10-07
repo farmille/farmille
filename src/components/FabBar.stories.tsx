@@ -103,18 +103,16 @@ export const AdminLoggedIn: Story = {
   },
 };
 
-export const MockLook: Story = {
+export const SiteLook: Story = {
   beforeEach: () => {
     mocked(getSessionUser).mockResolvedValue(null);
   },
-  args: { look: "mock", placement: "container" },
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
+  args: { look: "site", placement: "container" },
 };
 
-export const MockLookViewport: Story = {
+export const SiteLookViewport: Story = {
   beforeEach: () => {
     mocked(getSessionUser).mockResolvedValue(null);
   },
-  args: { look: "mock", placement: "viewport" },
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
+  args: { look: "site", placement: "viewport" },
 };

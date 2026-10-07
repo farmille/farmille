@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
-import { MockNoImage } from "@/app/materials/[id]/_components/MockParts";
+import { NoImage } from "@/app/materials/[id]/_components/CardParts";
 import { css, cva, cx } from "../../../styled-system/css";
 
 const tabularNums = css({ fontVariantNumeric: "tabular-nums" });
@@ -105,7 +105,7 @@ export function HomeMaterialCard({
         {imageSrc ? (
           <Image alt="" src={imageSrc} width={168} height={140} sizes="190px" draggable={false} />
         ) : (
-          <MockNoImage />
+          <NoImage />
         )}
       </div>
       <div

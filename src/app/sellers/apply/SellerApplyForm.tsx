@@ -9,8 +9,8 @@ import {
   FormNotice,
   OptionalBadge,
   RequiredBadge,
-} from "@/app/_mock/FormParts";
-import { MockSubmitButton } from "@/app/_mock/MockSubmitButton";
+} from "@/app/_site/FormParts";
+import { FormSubmitButton } from "@/app/_site/FormSubmitButton";
 import { sellerApplyAction } from "@/app/sellers/apply/actions";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 
@@ -294,7 +294,7 @@ export function SellerApplyForm() {
         をご確認ください。
       </p>
       <div className={sellerActionsStyle}>
-        <MockSubmitButton label="申請する" pendingLabel="申請中…" />
+        <FormSubmitButton label="申請する" pendingLabel="申請中…" />
         <button
           aria-expanded={inviteOpen}
           className={css({

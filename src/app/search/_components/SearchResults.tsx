@@ -6,7 +6,7 @@ import type { CatalogSearch } from "@/server/queries/catalog-search";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { css } from "../../../../styled-system/css";
 
-import { MockSortSelect } from "./MockSortSelect";
+import { SortSelect } from "./SortSelect";
 import { SearchAnalytics } from "./SearchAnalytics";
 import { SearchResultCard } from "./SearchResultCard";
 
@@ -97,7 +97,7 @@ export function SearchResults({
           </b>{" "}
           件
         </span>
-        <MockSortSelect selected={selected} sort={sort} query={query} />
+        <SortSelect selected={selected} sort={sort} query={query} />
       </div>
       {items.length === 0 ? (
         <div

@@ -13,8 +13,7 @@ export const Default: Story = {};
 
 export const RoundedTop: Story = { args: { roundedTop: true } };
 
-export const MockLook: Story = {
-  args: { look: "mock" },
-  decorators: [(Story) => <div className="fm">{Story()}</div>],
+export const SiteLook: Story = {
+  args: { look: "site" },
   parameters: { layout: "fullscreen" },
 };

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { MockPageShell } from "@/app/_mock/MockPageShell";
+import { SitePageShell } from "@/app/_site/SitePageShell";
 import { createPageMetadata } from "@/lib/seo";
 
 import { ProcedureDetail } from "../../_components/ProcedureDetail";
@@ -39,8 +39,8 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
   const procedure = await procedureOf(params);
 
   return (
-    <MockPageShell title={procedure.title} backHref="/sellers/procedures">
+    <SitePageShell title={procedure.title} backHref="/sellers/procedures">
       <ProcedureDetail procedure={procedure} />
-    </MockPageShell>
+    </SitePageShell>
   );
 }
