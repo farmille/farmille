@@ -52,9 +52,13 @@ jobs:
           NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
 
   storybook:
-    name: Storybook and responsive checks
+    name: Storybook and responsive checks (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
 
     steps:
       - name: Check out repository
@@ -74,6 +78,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        id: build-storybook
+        run: pnpm build-storybook
+        background: true
 
       - name: Audit high severity vulnerabilities
         run: pnpm audit --audit-level=high
@@ -84,9 +93,6 @@ jobs:
       - name: Check Story coverage
         run: pnpm check:stories
 
-      - name: Build Storybook
-        run: pnpm build-storybook
-
       - name: Select Ubuntu package mirror
         run: |
           sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
@@ -95,14 +101,19 @@ jobs:
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Wait for Storybook build
+        wait: build-storybook
+
       - name: Check responsive layouts
         run: pnpm test:storybook:responsive
+        env:
+          STORYBOOK_RESPONSIVE_SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
 
       - name: Upload responsive check artifacts
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: storybook-responsive-report
+          name: storybook-responsive-report-${{ matrix.shard }}
           path: |
             playwright-report
             test-results
@@ -111,13 +122,17 @@ jobs:
           if-no-files-found: ignore
 
   e2e:
-    name: Playwright E2E
+    name: Playwright E2E (${{ matrix.shard }}/${{ strategy.job-total }})
     env:
       SMTP_URL: "smtp://127.0.0.1:54325"
       MAIL_FROM: "Farmille <noreply@example.test>"
       AUTH_EMAIL_HOOK_SECRET: "v1,whsec_bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ=="
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
 
     steps:
       - name: Check out repository
@@ -135,12 +150,25 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
+      - name: Start local Supabase
+        id: supabase
+        # E2E が使うのは DB・Auth・PostgREST・Storage・メール。管理画面や Edge Functions などは起動しない。
+        run: npx --yes supabase@latest start -x studio,edge-runtime,realtime,imgproxy,logflare,vector
+        background: true
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Start local Supabase
-        working-directory: .
-        run: npx --yes supabase@latest start
+      - name: Select Ubuntu package mirror
+        run: |
+          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+          grep -Fq 'https://archive.ubuntu.com/ubuntu/' /etc/apt/apt-mirrors.txt
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Wait for local Supabase
+        wait: supabase
 
       - name: Export local Supabase environment
         working-directory: .
@@ -167,13 +195,5 @@ jobs:
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f tools/migration/materials-v2-seed.sql
           psql "$DB_URL" -tAc "select 'materials: ' || count(*) from materials"
 
-      - name: Select Ubuntu package mirror
-        run: |
-          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
-          grep -Fq 'https://archive.ubuntu.com/ubuntu/' /etc/apt/apt-mirrors.txt
-
-      - name: Install Playwright browser
-        run: pnpm exec playwright install --with-deps chromium
-
       - name: Run Playwright E2E
-        run: pnpm exec playwright test
+        run: pnpm exec playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
