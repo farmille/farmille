@@ -19,6 +19,27 @@ export const tokens = {
       800: { value: "#1B4332" },
       900: { value: "#081C15" },
     },
+    // 完成見本の画面（.fm）の緑。700 が主色、800 が濃い緑、50・100 が淡い面
+    leaf: {
+      50: { value: "#F1F8F2" },
+      100: { value: "#E8F5E9" },
+      200: { value: "#C8E6C9" },
+      300: { value: "#A5D6A7" },
+      400: { value: "#66BB6A" },
+      500: { value: "#43A047" },
+      600: { value: "#388E3C" },
+      700: { value: "#2E7D32" },
+      800: { value: "#1B5E20" },
+      900: { value: "#0D3B12" },
+    },
+    // 企業会員の申請書類の青みのある灰色
+    slate: {
+      50: { value: "#F5F8FB" },
+      200: { value: "#D5DDE6" },
+      400: { value: "#8A94A0" },
+      500: { value: "#6B7784" },
+      700: { value: "#3A4A5C" },
+    },
     blue: { value: "#1976D2" },
     teal: { value: "#1F9E95" },
     violet: { value: "#8B7BC0" },
@@ -29,8 +50,15 @@ export const tokens = {
       DEFAULT: { value: "#B26A00" },
       soft: { value: "#FFF4E0" },
     },
-    bg: { value: "#FCFCFB" },
-    panel: { value: "#FDFDFC" },
+    bg: {
+      DEFAULT: { value: "#FCFCFB" },
+      // 完成見本の画面の地色
+      warm: { value: "#F5F4EF" },
+    },
+    panel: {
+      DEFAULT: { value: "#FDFDFC" },
+      warm: { value: "#FAFAF7" },
+    },
     card: { value: "#FFFFFF" },
     // ink 3段（本文 / 副文 / 補助）
     ink: { value: "#1E231F" },
@@ -120,6 +148,11 @@ export const tokens = {
     // Adobe Fonts の Farmille Web プロジェクトで配信するゴシックMB101 L（weight 300）
     gothicMb101: {
       value: '"a-otf-gothic-mb101-pr6n", var(--fonts-sans)',
+    },
+    // 完成見本の画面の本文書体。next/font が --font-noto-sans-jp を定義する
+    noto: {
+      value:
+        'var(--font-noto-sans-jp), "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif',
     },
     sans: {
       value:
@@ -253,16 +286,17 @@ export const tokens = {
 export const semanticTokens = {
   colors: {
     primary: {
-      soft: { value: "{colors.green.50}" },
-      100: { value: "{colors.green.100}" },
-      200: { value: "{colors.green.200}" },
-      300: { value: "{colors.green.300}" },
-      400: { value: "{colors.green.400}" },
-      500: { value: "{colors.green.500}" },
-      600: { value: "{colors.green.600}" },
-      700: { value: "{colors.green.700}" },
-      800: { value: "{colors.green.800}" },
-      900: { value: "{colors.green.900}" },
+      // .fm の中（完成見本の画面）は見本の緑に切り替わる
+      soft: { value: { base: "{colors.green.50}", _fm: "{colors.leaf.50}" } },
+      100: { value: { base: "{colors.green.100}", _fm: "{colors.leaf.100}" } },
+      200: { value: { base: "{colors.green.200}", _fm: "{colors.leaf.200}" } },
+      300: { value: { base: "{colors.green.300}", _fm: "{colors.leaf.300}" } },
+      400: { value: { base: "{colors.green.400}", _fm: "{colors.leaf.400}" } },
+      500: { value: { base: "{colors.green.500}", _fm: "{colors.leaf.500}" } },
+      600: { value: { base: "{colors.green.600}", _fm: "{colors.leaf.600}" } },
+      700: { value: { base: "{colors.green.700}", _fm: "{colors.leaf.700}" } },
+      800: { value: { base: "{colors.green.800}", _fm: "{colors.leaf.800}" } },
+      900: { value: { base: "{colors.green.900}", _fm: "{colors.leaf.900}" } },
     },
     text: {
       default: { value: "{colors.ink}" },
@@ -272,8 +306,8 @@ export const semanticTokens = {
       inverse: { value: "{colors.card}" },
     },
     surface: {
-      page: { value: "{colors.bg}" },
-      panel: { value: "{colors.panel}" },
+      page: { value: { base: "{colors.bg}", _fm: "{colors.bg.warm}" } },
+      panel: { value: { base: "{colors.panel}", _fm: "{colors.panel.warm}" } },
       card: { value: "{colors.card}" },
     },
     border: {
@@ -288,6 +322,14 @@ export const semanticTokens = {
       danger: { value: "{colors.danger}" },
       dangerSoft: { value: "{colors.danger.soft}" },
       manufacturer: { value: "{colors.teal}" },
+    },
+    // 企業会員の申請書類（書面に近い落ち着いた体裁）
+    formal: {
+      ink: { value: "{colors.slate.700}" },
+      muted: { value: "{colors.slate.500}" },
+      subtle: { value: "{colors.slate.400}" },
+      line: { value: "{colors.slate.200}" },
+      surface: { value: "{colors.slate.50}" },
     },
     // モーダルの背面や写真の上に敷く半透明の幕。不透明度は使う側で指定する
     scrim: { value: "{colors.ink}" },
