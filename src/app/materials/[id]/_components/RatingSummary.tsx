@@ -44,7 +44,6 @@ type RatingSummaryProps = {
   distribution: ReviewRatingDistribution;
 };
 
-/** 星ごとの割合（%）。 */
 function BarRow({ rating, count, total }: { rating: number; count: number; total: number }) {
   const percent = total > 0 ? Math.round((count / total) * 100) : 0;
   return (
@@ -58,7 +57,6 @@ function BarRow({ rating, count, total }: { rating: number; count: number; total
   );
 }
 
-/** 平均評価と星ごとの分布。感想口コミが無い資材では出さない。 */
 export function RatingSummary({ average, reviewCount, distribution }: RatingSummaryProps) {
   if (reviewCount === 0) return null;
 

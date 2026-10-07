@@ -5,10 +5,8 @@ import { inputRecipe } from "@/components/Input";
 import { textareaRecipe } from "@/components/Textarea";
 import { css, cva } from "../../../styled-system/css";
 
-/** 入力欄1つ分の区切り。2つ目以降の欄の上に間をあける。 */
 export const formFieldStyle = css({ mt: "5", minW: "0", _first: { mt: "0" } });
 
-/** 欄の名前（label や、複数の部品をまとめる見出し）。 */
 export const formLabelStyle = css({
   display: "flex",
   alignItems: "center",
@@ -20,7 +18,6 @@ export const formLabelStyle = css({
   fontWeight: "bold",
 });
 
-/** 欄の補足。入力欄の上に置くか、下に置くかで間のとり方が変わる。 */
 export const formGuideRecipe = cva({
   base: { color: "text.muted", fontSize: "sm", lineHeight: "normal" },
   variants: {
@@ -41,7 +38,6 @@ export const formTextLinkStyle = css({
   textDecoration: "none",
 });
 
-/** 送信ボタンの下に置く控えめなリンク（キャンセル・下書き保存など）。 */
 export const formSecondaryLinkStyle = css({
   display: "block",
   p: "1",
@@ -106,17 +102,14 @@ const formNotice = cva({
   },
 });
 
-/** 「必須」などの赤い小バッジ。 */
 export function RequiredBadge({ children = "必須" }: { children?: ReactNode }) {
   return <span className={requiredBadge}>{children}</span>;
 }
 
-/** 「任意」などの灰色の小バッジ。 */
 export function OptionalBadge({ children = "任意" }: { children?: ReactNode }) {
   return <Badge variant="optional">{children}</Badge>;
 }
 
-/** 公開の印（地球儀）。 */
 function PublicIcon() {
   return (
     <svg
@@ -134,7 +127,6 @@ function PublicIcon() {
   );
 }
 
-/** 非公開の印（鍵）。 */
 function PrivateIcon() {
   return (
     <svg
@@ -152,10 +144,6 @@ function PrivateIcon() {
   );
 }
 
-/**
- * 画面には「公開」「非公開」と出し、
- * 読み上げでは「公開されます」「公開されません」と文で伝える。
- */
 export function VisibilityTag({ visibility }: { visibility: "public" | "private" }) {
   return visibility === "public" ? (
     <span className={visibilityTag({ visibility: "public" })}>
@@ -171,7 +159,6 @@ export function VisibilityTag({ visibility }: { visibility: "public" | "private"
   );
 }
 
-/** 検索欄の虫眼鏡。 */
 export function SearchIcon() {
   return (
     <svg
@@ -189,7 +176,6 @@ export function SearchIcon() {
   );
 }
 
-/** 写真の置き場の印。 */
 export function ImagePlaceholderIcon() {
   return (
     <svg
@@ -209,7 +195,6 @@ export function ImagePlaceholderIcon() {
   );
 }
 
-/** 入力欄の下に出すエラー。入力欄の aria-describedby から id で参照する。 */
 export function FieldError({ id, message }: { id: string; message?: string }) {
   if (message === undefined) return null;
   return (
@@ -219,7 +204,6 @@ export function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
-/** 画面上部に出すフォーム全体の通知（エラー・お知らせ）。 */
 export function FormNotice({ tone, children }: { tone: "error" | "info"; children: ReactNode }) {
   return (
     <p className={formNotice({ tone })} role="alert">
@@ -228,7 +212,6 @@ export function FormNotice({ tone, children }: { tone: "error" | "info"; childre
   );
 }
 
-/** aria-describedby に渡す id を、存在するものだけ空白区切りでつなぐ。 */
 export function describedBy(...ids: Array<string | false | null | undefined>): string | undefined {
   const joined: string[] = [];
   for (const id of ids) {

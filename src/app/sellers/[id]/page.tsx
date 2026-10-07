@@ -52,7 +52,6 @@ export async function generateMetadata({ params }: SellerPageProps): Promise<Met
   });
 }
 
-/** 企業会員のメーカーページ。公開されるのは企業会員として確認済みのメーカーだけ。 */
 export default async function SellerPage({ params }: SellerPageProps) {
   const { id } = await params;
   const data = await loadSellerOrNotFound(id);

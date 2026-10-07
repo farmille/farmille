@@ -49,7 +49,7 @@ const REPRESENTATIVE_STORY_IDS = [
   "app-materials-detailtable--official",
   "app-materials-materialhero--signed-in",
   "app-materials-report-reportform--draft",
-  "app-materials-reviewlist--default",
+  "app-materials-materialreviewssection--default",
   "app-me-saved-comparetable--three-materials",
   "app-me-shelves--all-sections",
   "app-sellers-manufacturerlanding--default",

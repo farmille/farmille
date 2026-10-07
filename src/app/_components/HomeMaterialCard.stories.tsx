@@ -17,7 +17,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-/** 感想口コミなし・画像なし・長い名前とジャンル。 */
 export const LongNoImage: Story = { args: homeMaterials[1] };
-/** 集計が取れない資材は「−」。 */
 export const NoCounts: Story = { args: homeMaterials[2] };

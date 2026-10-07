@@ -28,7 +28,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-/** 感想口コミ・レポートなし、画像なし、分類としての記載だけ。 */
 export const Sparse: Story = {
   args: {
     rating: null,

@@ -1,7 +1,5 @@
 import { css, cva } from "../../../../styled-system/css";
 
-/** 企業様向けの利用ガイド・お手続きの画面で共通の見出し・カード・リンク。 */
-
 export const guidePageStyle = css({ "& [id]": { scrollMarginTop: "32" } });
 
 export const guideNarrowPageStyle = css({
@@ -110,7 +108,6 @@ export const stepLinkStyle = css({
   textUnderlineOffset: "3px",
 });
 
-/** 冒頭に「Q」を添える質問の見出し。 */
 export const questionStyle = css({
   display: "flex",
   gap: "2.5",

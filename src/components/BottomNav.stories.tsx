@@ -47,7 +47,6 @@ export const ActiveSearch: Story = {
   },
 };
 
-// active="post" は中央ボタンに対応し、3タブはどれもハイライトされない。
 export const ActivePost: Story = {
   beforeEach: () => {
     mocked(getSessionUser).mockResolvedValue(null);
@@ -98,7 +97,6 @@ export const GeneralLoggedIn: Story = {
   },
 };
 
-// メーカーログイン時は中央の投稿ボタンが非表示になり、3タブだけが並ぶ。
 export const SellerLoggedIn: Story = {
   name: "SellerLoggedIn（メーカーログイン・投稿ボタン非表示）",
   beforeEach: () => {

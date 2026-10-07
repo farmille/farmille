@@ -27,7 +27,6 @@ export const byline = {
   sub: css({ fontSize: "sm", color: "text.subtle" }),
 };
 
-/** 記事の下に並べる「参考になった」・閲覧数・通報。 */
 export const readingFoot = css({
   display: "flex",
   alignItems: "center",
@@ -69,7 +68,6 @@ const headingStyle = css({
   borderLeftColor: "primary.700",
 });
 
-/** 記事の節見出し。ぼかしの飾りなど、見出しとして読ませない場所では div にする。 */
 export function ReadingHeading({
   as: Tag = "h2",
   id,
@@ -88,7 +86,6 @@ export function ReadingHeading({
 
 const proseText = { fontSize: "md", color: "text.muted", lineHeight: "prose" } as const;
 
-/** 投稿された本文。改行は入力のまま出す。 */
 export function ReadingProse({ text }: { text: string }) {
   return <p className={css(proseText, { whiteSpace: "pre-wrap" })}>{text}</p>;
 }
@@ -103,7 +100,6 @@ const markdownStyle = css({
   "& a": { color: "primary.800" },
 });
 
-/** サーバーで Markdown から変換・無害化した本文の HTML。 */
 export function ReadingMarkdown({ html }: { html: string }) {
   return <div className={markdownStyle} dangerouslySetInnerHTML={{ __html: html }} />;
 }

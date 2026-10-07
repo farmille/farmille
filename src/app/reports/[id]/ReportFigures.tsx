@@ -20,7 +20,6 @@ function FigureMedia({ media, sizes }: { media: ReportFigureMedia; sizes: string
   );
 }
 
-/** 写真1枚＋説明。 */
 export function ReportFigure({ media }: { media: ReportFigureMedia }) {
   return (
     <figure className={css({ m: "0", mt: "3.5" })}>
@@ -32,10 +31,6 @@ export function ReportFigure({ media }: { media: ReportFigureMedia }) {
   );
 }
 
-/**
- * 節に添えた写真。2枚なら縦長の比較写真を2列、それ以外は1枚ずつ縦に並べる。
- * `grid` を指定すると、枚数によらず2列で並べる（観察写真）。
- */
 export function ReportFigures({
   media,
   grid = false,

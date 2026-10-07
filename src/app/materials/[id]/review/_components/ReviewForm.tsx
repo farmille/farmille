@@ -40,7 +40,6 @@ type PendingPhoto = {
   key: string;
   file: File;
   caption: string;
-  /** 選んだ写真の表示用（URL.createObjectURL）。外すときと画面を離れるときに解放する。 */
   previewUrl: string;
 };
 
@@ -303,7 +302,6 @@ export function ReviewForm({
     };
   }, [state, supabase]);
 
-  // 画面を離れるときに、選んだ写真の表示用 URL を解放する。
   const pendingPreviewUrls = pendingPhotos.map((photo) => photo.previewUrl).join("\n");
   useEffect(() => {
     const urls = pendingPreviewUrls.length === 0 ? [] : pendingPreviewUrls.split("\n");

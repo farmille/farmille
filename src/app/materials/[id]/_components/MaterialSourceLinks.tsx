@@ -120,7 +120,6 @@ function linkKind(url: string): "PDF" | "LINK" {
   return /\.pdf(?:$|[?#])/i.test(url) ? "PDF" : "LINK";
 }
 
-// リンクの読み上げ名は資料名にする（「開く」だけのリンクが並ぶと区別できないため。流用前と同じ）。
 function FileRow({ link }: { link: MaterialLink }) {
   const titleId = useId();
   const title = link.title || "資料名は未入力です";
@@ -149,8 +148,6 @@ function FileRow({ link }: { link: MaterialLink }) {
   );
 }
 
-/** 試験結果の1行。試験の概要は運営・メーカーが入力した公開情報。 */
-// 行全体がリンクだが、読み上げ名は資料名だけにする（概要・実施機関は本文として読ませる。流用前と同じ）。
 function TestRow({ link }: { link: MaterialLink }) {
   const titleId = useId();
   const title = link.title || "資料名は未入力です";
@@ -210,7 +207,6 @@ function isTrialGroup(group: LinkGroup): boolean {
   return group === "public_trial" || group === "other_trial";
 }
 
-/** リンク・資料。分類ごとに並べ、無い分類は「−」。 */
 export function MaterialSourceLinks({ links }: { links: MaterialPageContent["links"] }) {
   const groups: ReadonlyArray<{ value: LinkGroup; label: string }> = [
     ...MATERIAL_LINK_GROUPS,

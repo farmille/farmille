@@ -166,7 +166,6 @@ type ProfileEditFormProps = {
   options: ProfileOptions;
 };
 
-/** 表示情報（アイコン・ニックネーム・自己紹介・作目・所属・リンク・地域の公開範囲）の編集フォーム。 */
 export function ProfileEditForm({ profile, details, options }: ProfileEditFormProps) {
   const [state, formAction] = useActionState(updateProfileAction, initialAuthFormState);
   const fieldErrors = fieldErrorsOf(state);

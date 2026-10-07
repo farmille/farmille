@@ -69,7 +69,6 @@ export const textDangerButtonStyle = css({
 });
 
 type EvidenceFile = { id: string; name: string; verified: boolean };
-/** 添付欄。予約 → 署名付きURLへ直接送信 → サーバーで形式を検査、の順に送る。 */
 export function EvidenceFields({
   intentId,
   itemKey,
@@ -83,7 +82,6 @@ export function EvidenceFields({
   intentId: string;
   itemKey: string | null;
   purpose: v.InferOutput<typeof evidencePurposeSchema>;
-  /** 読み上げ用の添付欄の名前。 */
   label: string;
   inputId: string;
   describedBy?: string;

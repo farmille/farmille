@@ -38,7 +38,6 @@ const zipNoteRecipe = cva({
   },
 });
 
-/** 郵便番号からの自動入力は、入力欄を離れたときとボタンの両方で行う。 */
 export function PostalAddressFields({
   values,
   fieldErrors,

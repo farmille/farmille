@@ -32,7 +32,6 @@ import { ReportStepResult, type ReportEffectOption } from "./ReportStepResult";
 const STEPS = ["資材・作物", "結果", "栽培条件", "比較・使用結果", "写真・記事の確認"];
 const TOTAL = STEPS.length;
 
-/** 未入力の項目キー → プレビューの注意書きに出す項目名 */
 function missingLabels(errors: UsageReportFieldErrors) {
   const label = (key: string) => {
     if (key === "cropId") return "使用作物";
@@ -51,7 +50,6 @@ function missingLabels(errors: UsageReportFieldErrors) {
   return [...new Set(Object.keys(errors).map(label))];
 }
 
-/** 提出時に出す、足りない項目ごとの案内（「都道府県を選んでください」など）。ステップ順に並べる */
 function missingMessages(errors: UsageReportFieldErrors) {
   const message = (key: string) => {
     if (key === "cropId") return "使用作物を選んでください";
@@ -348,12 +346,10 @@ export function ReportForm({
   favoriteCropIds: string[];
   materialCropIds: string[];
   draft: UsageReportInput | null;
-  /** 本人の登録住所。都道府県の初期値と「市区町村も表示する」を選んだときの初期値に使う */
   registeredAddress: RegisteredAddress;
   initialDocumentUrls?: { id: string; url: string }[];
 }) {
   const router = useRouter();
-  // 登録住所で埋めるのは、レポート側の値が空のときだけ（下書きの保存内容は上書きしない）。
   const [input, setInput] = useState(() => {
     const base = draft ?? createBlankUsageReport(material.id);
     return { ...base, prefectureCode: base.prefectureCode ?? registeredAddress.prefectureCode };
@@ -544,7 +540,6 @@ export function ReportForm({
     );
 
   const readyToPost = input.cropId !== null && input.observedChange.trim().length > 0;
-  // ✓ は「通り過ぎた」だけでなく、そのステップの必須項目がそろっているときだけ付ける。
   const incompleteSteps = new Set(
     Object.keys(validateUsageReportSubmission(input)).map(reportErrorStep),
   );

@@ -38,7 +38,6 @@ const row = (plotId: string, value: string) => ({
   value,
 });
 
-/** 入力を一通り終えたレポート。記事・公開後の見え方・グラフの Story で共有する */
 export const filledReport: UsageReportInput = {
   ...blank,
   cropId: "22222222-2222-4222-8222-222222222222",

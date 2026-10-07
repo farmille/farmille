@@ -27,7 +27,6 @@ export const UsageReportInputSchema = v.object({
   varietyUnknown: v.boolean(),
   observedChange: body,
   purposeTags: v.pipe(v.array(short), v.maxLength(30)),
-  /** 使用目的の補足（任意）。usage_reports.purpose_note に保存する */
   purposeNote: short,
   prefectureCode: v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(47))),
   city: short,
@@ -102,7 +101,6 @@ export type UsageReportActionResult =
       ok: false;
       message: string;
       fieldErrors: UsageReportFieldErrors;
-      /** 提出に失敗しても下書きとしては保存できた場合の更新日時（次の保存の照合に使う） */
       savedUpdatedAt?: string;
     };
 export function createReportPlot(): UsageReportInput["plots"][number] {

@@ -9,14 +9,12 @@ type OrgArticleCardProps = {
   href: string;
   title: string;
   organization: string;
-  /** 投稿元の種別（メーカー・JA・専門家）。本番の記事はメーカーだけ。 */
   typeLabel: string;
   coverSrc?: string | null;
   helpfulCount: number;
   viewCount: number;
 };
 
-/** メーカーなどの記事のカード。参考になったの件数は表示だけ（押すのは記事ページ）。 */
 export function OrgArticleCard({
   href,
   title,

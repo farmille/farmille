@@ -16,7 +16,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** 候補の読み込み中は検索窓だけが使え、ピルは押せない。 */
 export const Loading: Story = { args: { searchOptions: null } };
 
 export const PillOpen: Story = {

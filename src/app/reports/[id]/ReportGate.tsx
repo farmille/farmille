@@ -6,7 +6,6 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { css, cva } from "../../../../styled-system/css";
 import { ReadingHeading } from "../../articles/_components/Reading";
 
-/** ぼかしの下に置く飾りの見出し。実際の本文は受け取らない。 */
 const DECOY_SECTIONS = ["期待した効果", "栽培条件・施用時期", "比較した区", "使用結果の詳細"];
 
 const decoyLine = cva({
@@ -15,10 +14,6 @@ const decoyLine = cva({
   defaultVariants: { short: false },
 });
 
-/**
- * 未ログイン時の続きの案内。
- * 会員限定の本文は受け取らないため、本文の代わりに飾りの線をぼかす。
- */
 export function ReportGate({ reportPath }: { reportPath: string }) {
   const next = encodeURIComponent(reportPath);
   return (

@@ -97,7 +97,6 @@ export type PostingMaterial = Pick<
   "id" | "name" | "manufacturer_name" | "review_count" | "avg_rating" | "manufacturer_verified_at"
 >;
 
-/** 投稿先選択の行に出す資材（代表画像の URL つき。画像が無ければ null）。 */
 export type PostingMaterialWithImage = PostingMaterial & { imageUrl: string | null };
 
 export type MaterialDetail = MaterialDetailFields & {
@@ -151,7 +150,6 @@ const MATERIAL_LIST_COLUMNS = `
 
 const RELATED_MATERIAL_LIMIT = 3;
 
-/** 資材ごとの代表画像（is_current の画像のうち sort_order が最小のもの）を引く。 */
 async function fetchPrimaryImages(
   supabase: SupabaseClient<Database>,
   materialIds: readonly string[],
@@ -633,7 +631,6 @@ export async function searchPostingMaterials(query: string): Promise<Result<Post
   );
 }
 
-/** 投稿先候補に代表画像の URL を付ける（`/post` の資材の行で使う）。 */
 export async function withPostingMaterialImages(
   materials: readonly PostingMaterial[],
 ): Promise<Result<PostingMaterialWithImage[]>> {

@@ -8,13 +8,11 @@ import { EmptyNote, postStackStyle } from "@/app/me/_components/ProfileParts";
 type PostTimelineProps = {
   profile: PublicProfilePageData["profile"];
   posts: readonly PublicProfilePost[];
-  /** 投稿者の肩書き（立場・都道府県）。 */
   authorLabel?: string;
   /** ログイン中の一般ユーザーの user_id。未ログインは null。 */
   viewerUserId?: string | null;
 };
 
-/** 公開プロフィールの「これまでの投稿」。実証詳細レポートと感想口コミを縦に並べる。 */
 export function PostTimeline({
   profile,
   posts,
@@ -31,7 +29,6 @@ export function PostTimeline({
   }
 
   const authorHref = `/users/${profile.userId}`;
-  // プロフィール本人が自分の公開プロフィールを見ている場合は、自分の投稿に「通報する」を出さない。
   const isOwnProfile = viewerUserId !== null && viewerUserId === profile.userId;
 
   return (

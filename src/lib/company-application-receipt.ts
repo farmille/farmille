@@ -6,11 +6,6 @@ import * as v from "valibot";
 const receiptDateTime = (value: string) =>
   `${new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium", timeStyle: "medium", timeZone: "Asia/Tokyo" }).format(new Date(value))}（日本時間）`;
 
-/**
- * 受付票の本文（1行ずつ）。控えメール・運営画面・申請者の画面で共通。
- * `omitMissingCorporateNumber` は申請者向けの画面だけで使う：法人番号の欄が無いフォームD（終売・廃盤／非表示）では
- * 「法人番号：該当なし」の行を出さない。運営画面と控えメールは従来どおり「該当なし」と出す。
- */
 export function applicationReceiptLines(
   receipt: ApplicationReceipt,
   { omitMissingCorporateNumber = false }: { omitMissingCorporateNumber?: boolean } = {},

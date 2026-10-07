@@ -91,7 +91,6 @@ const thumbStyle = css({
   },
 });
 
-/** 資材ページの該当欄（実証詳細レポート・感想口コミ）へ移る行。 */
 function VoiceMaterialRow({
   material,
   placement,
@@ -329,7 +328,6 @@ function VoiceReviewCard({
   );
 }
 
-/** ホームの「生産者の声」。新着の実証詳細レポートと感想口コミ（公開中のみ）。 */
 export function HomeVoices({
   reports,
   reviews,

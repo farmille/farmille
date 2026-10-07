@@ -408,7 +408,6 @@ export async function createMaterial(
   });
 }
 
-/** 運営画面から公開し直す前提で、E2E資材を掲載終了にする。 */
 export async function archiveMaterial(materialId: string): Promise<void> {
   const material = await getMaterial(materialId);
   if (!material.name.startsWith(`E2E資材_${E2E_TOKEN_PREFIX}`)) {

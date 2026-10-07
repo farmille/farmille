@@ -16,7 +16,6 @@ const emptyStyle = css({ mt: "2.5" });
 const moreStyle = css({ mt: "3", textAlign: "center" });
 const ellipsisStyle = css({ mb: "0.5", color: "text.subtle", letterSpacing: "0.2em" });
 
-/** 感想口コミの見出し。読み込み中の表示でも使う。 */
 export function ReviewsHeading({ count }: { count?: number }) {
   return (
     <MaterialSectionHeading
@@ -33,13 +32,10 @@ type MaterialReviewsSectionProps = {
   materialPath: string;
   reviews: ReviewListItem[];
   total: number;
-  /** 一般ユーザーとしてログインしている閲覧者。自分の感想口コミに編集・削除を出す。 */
   viewerUserId: string | null;
-  /** 評価の分布（読み込み中は Suspense の代替表示が入る）。 */
   rating: ReactNode;
 };
 
-/** 資材ページの感想口コミ欄（評価の分布・新しい3件・もっと見る）。 */
 export function MaterialReviewsSection({
   materialPath,
   reviews,
@@ -50,7 +46,6 @@ export function MaterialReviewsSection({
   return (
     <section aria-labelledby="reviews-heading">
       <ReviewsHeading count={total} />
-      {/* 投稿・削除後の `?review=…#reviews-heading` で、この欄が出たあとに見出しまで移る */}
       <ScrollToHashOnMount targetId="reviews-heading" trigger={total} />
       {rating}
       {reviews.length > 0 ? (

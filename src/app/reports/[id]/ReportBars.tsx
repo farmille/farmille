@@ -7,15 +7,12 @@ import { css, cx } from "../../../../styled-system/css";
 export type ReportBarRow = {
   id: string;
   label: string;
-  /** 投稿された値の原文（誤差・有意差記号を含む）。棒の右に出す。 */
   valueText: string;
   value: number;
   error: number | null;
-  /** 区の並び順。入力のグラフ・区カードと同じ色にする。 */
   colorIndex: number;
 };
 
-/** 0 と各値（誤差込み）が収まる範囲。% は 100 を上限の下限にする。 */
 function domain(rows: ReportBarRow[], unit: string) {
   const min = Math.min(0, ...rows.map((row) => row.value - (row.error ?? 0)));
   const max = Math.max(unit === "%" ? 100 : 0, ...rows.map((row) => row.value + (row.error ?? 0)));
@@ -43,10 +40,6 @@ const errorStyle = css({
   _after: { ...whisker, right: "0" },
 });
 
-/**
- * 横棒グラフ。棒は先頭の数値、ひげは±の誤差。
- * 値の列は原文（誤差・有意差記号つき）が収まるよう可変にする。
- */
 export function ReportBars({
   title,
   unit,
@@ -158,7 +151,6 @@ export function ReportBars({
   );
 }
 
-/** グラフの下に添える出典の注記。 */
 export function ReportGraphNote({ children }: { children: ReactNode }) {
   return (
     <div

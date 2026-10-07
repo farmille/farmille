@@ -134,11 +134,9 @@ function RadioGroup({
   );
 }
 
-/** 申請紹介文（「\n\n」の後ろが「・」区切りの箇条）を段落と箇条に分ける。 */
 function IntroCard({ text }: { text: string }) {
   const [lead, list = ""] = text.split("\n\n");
   const bullets = list
-    // 箇条の区切りは行頭か空白の直後の「・」だけ（「製造元・販売元」などの中黒では割らない）。
     .split(/(?:^|\s)・/u)
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
@@ -170,7 +168,6 @@ const SIGNER_LABELS = {
   removal: "申請者氏名",
 } as const satisfies Record<ApplicationKind, string>;
 
-/** 申請フォーム（掲載・移行・終売／非表示）。終売・非表示は公開の画面、ほかはメーカーダッシュボードで使う。 */
 export function CompanyApplicationForm({
   intentId,
   kind,

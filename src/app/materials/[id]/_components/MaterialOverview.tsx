@@ -75,7 +75,6 @@ const labelRecipe = cva({
 const visuallyHiddenStyle = css({ srOnly: true });
 const noteStyle = css({ mt: "2.5", fontSize: "xs", lineHeight: "normal", color: "text.subtle" });
 
-/** 製品説明。未記入は「−」。 */
 export function MaterialDescriptionBox({ description }: { description: string | undefined }) {
   return (
     <MaterialBox headingId="material-description-heading" title="製品説明">
@@ -90,7 +89,6 @@ export function MaterialDescriptionBox({ description }: { description: string | 
   );
 }
 
-/** 施用タイミング（8段階のタイムライン）。未記入は「−」。 */
 export function MaterialTimingBox({ timings }: { timings: readonly number[] }) {
   return (
     <MaterialBox headingId="material-timing-heading" title="施用タイミング">

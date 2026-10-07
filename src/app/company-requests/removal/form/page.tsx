@@ -12,7 +12,6 @@ import { formalPageRecipe } from "../../_components/formal-styles";
 
 import { css } from "../../../../../styled-system/css";
 
-/** 資材ページに関する申請フォーム（終売・非表示）。メールの確認リンクから開く。 */
 export default async function RemovalFormPage() {
   const { access } = await removalApplicationAccess();
   await cleanupExpiredApplicationUploads();

@@ -70,7 +70,6 @@ const documentList = css({
   "& a": { color: "primary.800" },
 });
 
-/** 先頭の数値が読めた行だけを、区の並び順の色で棒にする。 */
 function graphRows(graph: Graph, plots: UsageReportInput["plots"]): ReportBarRow[] {
   return graph.rows.flatMap((row, index) => {
     const parsed = parseReportNumber(row.value);
@@ -89,18 +88,12 @@ function graphRows(graph: Graph, plots: UsageReportInput["plots"]): ReportBarRow
   });
 }
 
-/**
- * 実証詳細レポート（新形式）の記事。
- * 結果・感想 → 期待した効果 → 栽培条件・施用時期 → 比較した区 → 使用結果の詳細 → 関連資料。
- * 施用方法タグは出さない（usage-reports-SPEC）。
- */
 export function StructuredReportArticle({
   input,
   cropLabel,
   documentUrls,
 }: {
   input: UsageReportInput;
-  /** 使用作物（品種つき）。作物は親レコードにあるため外から渡す。 */
   cropLabel: string;
   documentUrls: { id: string; url: string }[];
 }) {

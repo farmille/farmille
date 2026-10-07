@@ -24,10 +24,6 @@ const sortSelectStyle = css(selectRecipe.raw(), {
   fontSize: "sm",
 });
 
-/**
- * 検索結果の並び替え。URL の sort を更新する（共通部品 SearchSortSelect と同じ動き）。
- * 選択肢は感想口コミ・評価・新着の順。
- */
 export function SortSelect({ selected, sort, query }: SortSelectProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

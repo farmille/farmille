@@ -18,7 +18,6 @@ import { css, cva } from "../../../../styled-system/css";
 import { chipCategoryStyle, chipRemoveRecipe, selectedChipRecipe } from "./search-chips";
 
 type SearchBoxProps = {
-  /** URL の q。候補表示と資材一覧に共通の検索文字。 */
   initialQuery: string;
   selected: SelectedSearchFilter[];
   sort: MaterialSortParam;
@@ -30,7 +29,6 @@ type Suggestion =
   | { kind: "maker"; name: string }
   | { kind: "name"; name: string };
 
-/** 候補は8件まで。 */
 const SUGGESTION_LIMIT = 8;
 
 function toSelected(suggestion: Suggestion): SelectedSearchFilter {
@@ -133,11 +131,6 @@ const categoryLabelRecipe = cva({
   },
 });
 
-/**
- * 検索ページの検索窓・選択中の条件・候補。
- * 動き（URL の q・filters・sort の更新、日本語変換中は検索しない、300ms 待ってから反映）は
- * 共通部品 MaterialSearchBox と同じ。
- */
 export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxProps) {
   const router = useRouter();
   const [input, setInput] = useState<{ value: string; urlQuery: string; requested: string | null }>(
@@ -147,7 +140,6 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
   const [isPending, startTransition] = useTransition();
   const query = input.value;
 
-  // 自分の検索結果が届いても入力中の文字は戻さない。履歴移動やヘッダー検索は反映する。
   if (input.urlQuery !== initialQuery) {
     setInput({
       value: input.requested === initialQuery ? input.value : initialQuery,
@@ -158,7 +150,6 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
 
   useEffect(() => {
     if (composing || isPending || query.trim() === initialQuery) return;
-    // 日本語変換中は検索せず、入力が落ち着いてから件数と一覧を更新する。
     const timer = setTimeout(() => {
       setInput((current) => ({ ...current, requested: query.trim() }));
       startTransition(() => {

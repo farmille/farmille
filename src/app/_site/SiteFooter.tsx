@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { css } from "../../../styled-system/css";
 
-// 本番に実在する画面だけを並べる（本番に画面がない「よくあるご質問」「メーカー掲載の流れ」は載せない）。
 const groups = [
   { title: "さがす", links: [{ label: "BS資材検索", href: "/search" }] },
   {
@@ -101,7 +100,6 @@ const legal = css({
   "& a": { color: "text.subtle", _hover: { color: "primary.800" } },
 });
 
-/** 全画面共通のフッター（サイトマップ）。 */
 export function SiteFooter() {
   return (
     <footer className={footer}>

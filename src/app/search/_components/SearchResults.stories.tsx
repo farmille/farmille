@@ -22,7 +22,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const All: Story = {};
-/** 作物で絞り込むと、直接記載と作物分類としての記載を分けて並べる。 */
 export const ByCrop: Story = {
   args: {
     filters: [{ category: "crop", id: storyIds.tomato }],

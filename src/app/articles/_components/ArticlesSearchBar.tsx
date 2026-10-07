@@ -11,7 +11,6 @@ const FILTER_OPTIONS: ReadonlyArray<{ value: ContentFeedFilter; label: string }>
   { value: "article", label: "その他の記事" },
 ];
 
-/** 種別とキーワードを URL の type / q に載せる（ページは1に戻す）。 */
 export function articlesHref(filter: ContentFeedFilter, q: string, page = 1): string {
   const params = new URLSearchParams();
   if (filter !== "all") params.set("type", filter);
@@ -55,10 +54,6 @@ const filterPillRecipe = cva({
   defaultVariants: { active: false },
 });
 
-/**
- * 検索窓と種別の切り替え。
- * 検索は GET フォーム、種別はリンクなので、読み込み中でもそのまま使える。
- */
 export function ArticlesSearchBar({ filter, q }: { filter: ContentFeedFilter; q: string }) {
   return (
     <>

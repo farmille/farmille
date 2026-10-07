@@ -142,7 +142,6 @@ const treeCount = css({ ml: "auto", fontSize: "sm", color: "text.subtle" });
 
 const treeBody = css({ pt: "0.5", pr: "3", pb: "2.5", pl: "6.5" });
 
-/** 「資材・作物」のステップ */
 export function ReportStepBasics({
   input,
   onChange,

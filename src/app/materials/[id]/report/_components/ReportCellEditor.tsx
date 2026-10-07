@@ -15,7 +15,6 @@ type Measurement = UsageReportInput["measurements"][number];
 type Graph = Measurement["graphs"][number];
 type Plot = UsageReportInput["plots"][number];
 
-/** 単位の候補 */
 export const UNITS = [
   "g",
   "kg",
@@ -32,7 +31,6 @@ export const UNITS = [
   "日",
   "SPAD",
 ];
-/** 調査項目 → 単位（単位を手で入れていないときだけ自動で入れる） */
 export const METRIC_UNIT = new Map<string, string>([
   ["可販果収量", "kg/10a"],
   ["1株あたり収量", "kg"],
@@ -186,7 +184,6 @@ const unitChip = cva({
   },
 });
 
-/** グラフの書き込み枠。PC は押した場所の横、スマホは画面の下に出す */
 export function ReportCellEditor({
   target,
   graphNumber,
@@ -217,7 +214,6 @@ export function ReportCellEditor({
   onPlotChange: (id: string, values: Partial<Plot>) => void;
   onRangeAll: (scope: string) => void;
   onRemovePlot: (id: string) => void;
-  /** Enter で次の空いた欄へ（数値は同じグラフの次の区へ） */
   onNext: (from: EditTarget) => void;
   onClose: () => void;
 }) {
@@ -252,7 +248,6 @@ export function ReportCellEditor({
         }
       }
     } else {
-      // 右に入らなければ左に、左右とも入らなければ下（上）に置く
       const r = anchor.getBoundingClientRect();
       const w = box.offsetWidth;
       const h = box.offsetHeight;
@@ -272,7 +267,6 @@ export function ReportCellEditor({
     first?.select();
   }, [key, mobile]);
 
-  // スマホでソフトキーボードが出たとき、書き込み枠をキーボードの上に出す
   useLayoutEffect(() => {
     const viewport = window.visualViewport;
     if (!viewport) return;

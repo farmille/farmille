@@ -10,7 +10,6 @@ const moreLinkStyle = css({
   whiteSpace: "nowrap",
 });
 
-/** 一覧・注記への「→」つきの小さな緑のリンク。 */
 export function MoreLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link className={moreLinkStyle} href={href}>

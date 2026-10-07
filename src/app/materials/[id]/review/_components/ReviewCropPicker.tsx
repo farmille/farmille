@@ -45,7 +45,6 @@ const chipRemoveStyle = css({
   },
 });
 
-/** 作目は1件だけ選べる（選び直すと入れ替わる）。 */
 export function ReviewCropPicker({
   crops,
   selectedCropIds,
@@ -60,7 +59,6 @@ export function ReviewCropPicker({
   onRemove: (cropId: string) => void;
 }) {
   const [query, setQuery] = useState("");
-  // 送信時のエラーは、作目を選び直したら消す（選択が空のときだけ出す）。
   const shownError = selectedCropIds.length === 0 ? error : undefined;
   const selected = useMemo(() => new Set(selectedCropIds), [selectedCropIds]);
   const cropById = useMemo(() => new Map(crops.map((crop) => [crop.id, crop])), [crops]);

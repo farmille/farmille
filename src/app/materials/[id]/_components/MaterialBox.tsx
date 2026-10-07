@@ -11,7 +11,6 @@ const headingStyle = css({
   letterSpacing: "0.02em",
 });
 
-/** 資材ページの製品情報の1欄（製品説明・リンク・製品詳細など）。 */
 export function MaterialBox({
   headingId,
   title,

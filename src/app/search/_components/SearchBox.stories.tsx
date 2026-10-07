@@ -21,6 +21,5 @@ export const WithSelection: Story = {
     ],
   },
 };
-/** 入力に合う候補（分類・資材名・メーカー）。 */
 export const Suggestions: Story = { args: { initialQuery: "ト" } };
 export const NoSuggestion: Story = { args: { initialQuery: "該当なし" } };

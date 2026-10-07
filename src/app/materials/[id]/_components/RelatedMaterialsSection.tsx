@@ -70,7 +70,6 @@ const ratingStyle = css({ mt: "0.5", fontSize: "xs", color: "accent.star" });
 const reviewCountStyle = css({ color: "text.subtle", fontVariantNumeric: "tabular-nums" });
 const emptyStyle = css({ fontSize: "sm", color: "text.subtle" });
 
-/** 一覧の小さなカードの★（文字の大きさに合わせる）。 */
 function StarText({ value }: { value: number }) {
   const filled = Math.min(5, Math.max(0, Math.round(value)));
   return (
@@ -81,7 +80,6 @@ function StarText({ value }: { value: number }) {
   );
 }
 
-/** 関連資材の見出し。読み込み中の表示でも使う。 */
 export function RelatedHeading() {
   return (
     <MaterialSectionHeading
@@ -92,7 +90,6 @@ export function RelatedHeading() {
   );
 }
 
-/** 関連資材（同じ資材ジャンルの公開資材）。感想口コミがある資材は★と件数を出す。 */
 export function RelatedMaterialsView({ related }: { related: MaterialListItem[] }) {
   return (
     <section aria-labelledby="related-materials-heading">

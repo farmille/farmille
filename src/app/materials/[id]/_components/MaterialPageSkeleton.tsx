@@ -8,7 +8,6 @@ import { css } from "../../../../../styled-system/css";
 import { MaterialSectionHeading } from "./MaterialSectionHeading";
 import { MaterialPageShell } from "./PageShell";
 
-/** 資材ページの読み込み中。外枠と見出しは表示後と同じものを使う。 */
 export function MaterialPageSkeleton() {
   return (
     <MaterialPageShell title="資材情報" backHref="/">

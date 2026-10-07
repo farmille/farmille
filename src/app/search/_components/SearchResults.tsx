@@ -10,7 +10,6 @@ import { SortSelect } from "./SortSelect";
 import { SearchAnalytics } from "./SearchAnalytics";
 import { SearchResultCard } from "./SearchResultCard";
 
-// 作目への直接記載を先に並べ、同じ資材を下の分類グループへ重複表示しない。
 export function SearchResults({
   catalog,
   filters,

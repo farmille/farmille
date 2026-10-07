@@ -157,7 +157,6 @@ const listNumberStyle = css({
 
 export type ManufacturerLandingProps = { applyHref: "/sellers/apply" | "/sellers/apply?from=me" };
 
-/** 企業様向け利用ガイド（メーカーの方へ）の本文。 */
 export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
   const stepLinks = {
     register: { href: applyHref, label: "企業会員登録の申請はこちらから →" },
@@ -843,7 +842,6 @@ const requirementBoxStyle = css({
   "& li b": { color: "text.default", fontWeight: "bold" },
 });
 
-/** 対象となる企業様・ご準備いただくもの。お手続きの詳細ページでも使う。 */
 export function ProcedureRequirements({
   slug,
   spacing,

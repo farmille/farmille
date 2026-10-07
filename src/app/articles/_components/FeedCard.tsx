@@ -7,7 +7,6 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { css, cx } from "../../../../styled-system/css";
 import { ArticleImagePlaceholderIcon } from "./ArticleIcons";
 
-/** 記事・実証詳細レポートのカードを2列に並べる。 */
 export function ArticleGrid({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div
@@ -39,7 +38,6 @@ const titleStyle = css({
   textDecoration: "none",
 });
 
-/** ArticleGrid に並べるカードの枠：表紙・題名と、その下に種類ごとの中身。 */
 export function FeedCard({
   href,
   title,

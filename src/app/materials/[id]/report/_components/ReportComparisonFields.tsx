@@ -148,7 +148,6 @@ const blankRow = (plotId: string): Row => ({
   value: "",
 });
 
-/** 「比較・使用結果」のステップ。区は全グラフで共有する */
 export function ReportComparisonFields({
   input,
   onChange,
@@ -173,7 +172,6 @@ export function ReportComparisonFields({
     return () => clearTimeout(timer);
   }, [toast]);
 
-  // 書き込み枠とグラフの外を押したら閉じる
   useEffect(() => {
     if (!ed) return;
     const close = (event: PointerEvent) => {
@@ -230,7 +228,6 @@ export function ReportComparisonFields({
     };
   }
 
-  // 書く順番：項目と単位 → 区の名前（最初のグラフだけ） → 数値
   function sequence(): EditTarget[] {
     return cards.flatMap(({ graph }, index) => [
       { k: "axis", g: graph.id },

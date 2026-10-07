@@ -1,7 +1,5 @@
 import { css, cva } from "../../../../styled-system/css";
 
-/** 申請書類の体裁（書面に近い灰青の入力欄・見出し）。公開の申請画面とメーカーダッシュボードの申請フォームで共通。 */
-
 export const formalPageRecipe = cva({
   base: { mx: "auto", pt: "6.5" },
   variants: {
@@ -74,7 +72,6 @@ export const fieldLabelStyle = css(labelRow, {
   color: "formal.ink",
 });
 
-/** 添付欄など、入力欄に直接結び付かない項目の見出し。 */
 export const fieldHeadingStyle = css(labelRow, { gap: "2", mb: "1.5", fontWeight: "bold" });
 
 export const formalControlRecipe = cva({

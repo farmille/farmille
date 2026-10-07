@@ -46,17 +46,12 @@ async function fetchCatalogSearch() {
     // 分類マスタは作物群ごとに並ぶが、検索のタグ一覧は作物の表示順で並べる。
     crops: options.data.crops.toSorted((left, right) => left.sort_order - right.sort_order),
     groups: options.data.cropGroups,
-    // 効果は大分類（効果大分類の表示順）→ 個別効果の表示順に並んでいる。絞り込みパネルで大分類ごとに束ねる。
     effects: options.data.effects,
   };
 }
 export const getCatalogSearch = cache(fetchCatalogSearch);
 export type CatalogSearch = Awaited<ReturnType<typeof getCatalogSearch>>;
 
-/**
- * 資材ページのお気に入り数。ホーム・検索と同じ集計（catalog_material_counts、10分の遅れを許容）を使う。
- * 集計は公開中の資材だけなので、掲載終了の資材は null を返す。
- */
 export async function getMaterialSavedCount(materialId: string): Promise<number | null> {
   const { counts } = await fetchCatalogMaterials();
   return counts.find((row) => row.material_id === materialId)?.saved_count ?? null;

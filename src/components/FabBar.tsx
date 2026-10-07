@@ -93,13 +93,11 @@ const reportLink = css(buttonRecipe.raw({ variant: "primary" }), fabLink, { flex
 
 const reviewLink = css(buttonRecipe.raw({ variant: "ghost" }), fabLink, { flex: "1" });
 
-
 type FabBarProps = {
   reportHref?: string;
   reviewHref?: string;
   placement?: "container" | "viewport";
   className?: string;
-  /** "site" は SitePageShell の画面用。PC 幅でも右下に浮かせたまま置く。 */
   look?: "default" | "site";
 };
 

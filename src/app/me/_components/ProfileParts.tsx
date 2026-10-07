@@ -32,7 +32,6 @@ export const moreLinkStyle = css({
   whiteSpace: "nowrap",
 });
 
-/** プロフィール画面の区切り見出し。件数と一覧へのリンクを右に添えられる。 */
 export function ProfileSectionHeading({
   id,
   children,
@@ -66,7 +65,6 @@ const emptyNote = css(surfaceCardRecipe.raw(), {
   "& b": { display: "block", mb: "1", color: "text.muted", fontSize: "sm" },
 });
 
-/** 一覧が空のときの案内。 */
 export function EmptyNote({ title, description }: { title: string; description: string }) {
   return (
     <div className={emptyNote}>
@@ -76,5 +74,4 @@ export function EmptyNote({ title, description }: { title: string; description: 
   );
 }
 
-/** 投稿カードを縦に積む。 */
 export const postStackStyle = css({ display: "flex", flexDirection: "column", gap: "3" });

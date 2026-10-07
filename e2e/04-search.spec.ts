@@ -66,8 +66,6 @@ test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷�
       body: `E2E並び替えC_${authors[2].id}`,
     });
 
-    // 検索用データは10分キャッシュされ、運営の公開操作で失効する（src/server/queries/catalog-search.ts）。
-    // ホーム・資材ページも同じデータを読むため、直接作った資材は本番と同じく運営画面で公開して検索に出す。
     await archiveMaterial(ratingHigh.id);
     const adminContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     try {

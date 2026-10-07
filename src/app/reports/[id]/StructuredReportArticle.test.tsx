@@ -52,7 +52,6 @@ describe("実証詳細レポート（新形式）の記事", () => {
     expect(
       screen.getByText("グラフは投稿されたデータからFarmilleが自動生成しています"),
     ).toBeInTheDocument();
-    // 施用方法タグは記事に出さない
     expect(screen.queryByText("施用方法")).toBeNull();
   });
   it("使用目的の補足を効果タグの次の行に出し、市区町村は公開を選んだ場合だけ都道府県の直後に出す", () => {

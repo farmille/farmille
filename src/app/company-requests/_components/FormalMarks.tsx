@@ -32,7 +32,6 @@ export function ConditionMark({ children }: { children: ReactNode }) {
   );
 }
 
-/** 「公開されません」「単一選択」など、見出しの横に添える小さな注記。 */
 export function LabelNote({ children }: { children: ReactNode }) {
   return (
     <span

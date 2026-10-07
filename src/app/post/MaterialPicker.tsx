@@ -166,10 +166,6 @@ function MaterialThumb({ src, size }: { src: string | null; size: number }) {
   );
 }
 
-/**
- * 検索は検索語を送って候補を取り直す。行には★平均・感想口コミ件数と「選択中」を出し、
- * 資材画像が無いときだけ NO IMAGE を出す。
- */
 export function MaterialPicker({ materials, query, postType }: MaterialPickerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = materials.find(({ id }) => id === selectedId) ?? null;

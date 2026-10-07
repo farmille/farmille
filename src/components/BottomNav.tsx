@@ -125,7 +125,6 @@ const ITEMS: Array<{
   { id: "me", href: "/me", label: "マイページ", name: "person" },
 ];
 
-/** tab 未満の4枠 BottomNav。画面下へ固定し、中央は丸型＋投稿。 */
 export async function BottomNav({ active, placement = "viewport" }: BottomNavProps) {
   const session = await getSessionUser();
   const showPost = session === null || canUseGeneralFeatures(session.accountType);

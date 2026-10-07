@@ -10,10 +10,6 @@ function formatMetricValue(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
-/**
- * 旧形式（form_version 1）の実証詳細レポートの続き（会員だけに出す部分）。
- * 節の並びと見出しは本番のまま、見た目は新形式の記事にそろえる。
- */
 export function LegacyReportSections({
   report,
   coverId,

@@ -127,7 +127,6 @@ export const checkRow = css({
   cursor: "pointer",
 });
 
-/** 補足（checkNote）を持つ行。狭い画面では補足を次の行に送る */
 export const checkRowWithNote = css({ flexWrap: "wrap", tab: { flexWrap: "nowrap" } });
 
 export const checkNote = css({
@@ -163,7 +162,6 @@ const needRecipe = cva({
   variants: { block: { true: { display: "block", ml: "0", mt: "1.5" }, false: {} } },
 });
 
-/** 未入力の項目の見出しの横に出す赤い注意書き */
 export function Need({ message, block = false }: { message?: string; block?: boolean }) {
   return message ? (
     <span className={needRecipe({ block })} role="alert">

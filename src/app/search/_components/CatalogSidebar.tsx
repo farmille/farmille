@@ -96,10 +96,6 @@ const cropSummaryStyle = css(summaryBase, {
   fontWeight: "semibold",
 });
 
-/**
- * 検索ページの絞り込みパネル。
- * 各条件は検索ページへのリンク（押すと条件の追加・解除）。
- */
 export function CatalogSidebar({
   catalog,
   search,
@@ -122,7 +118,6 @@ export function CatalogSidebar({
       : [...selected, filter];
     return { href: buildSearchHref({ filters: next, sort, query }), active, key };
   }
-  /** 選択中は塗りに加えて ✓ を付け、色だけに頼らない。 */
   function chip(filter: SelectedSearchFilter, label = filter.name) {
     const { href, active, key } = hrefFor(filter);
     return (
@@ -139,7 +134,6 @@ export function CatalogSidebar({
       </Link>
     );
   }
-  /** 件数つきの候補行。右端は「＋」、選択中は「✓ 選択中」。 */
   function row(filter: SelectedSearchFilter, count: number) {
     const { href, active, key } = hrefFor(filter);
     return (
@@ -202,15 +196,12 @@ export function CatalogSidebar({
   function cropChip(crop: CatalogSearch["crops"][number]) {
     return chip({ kind: "filter", category: "crop", id: crop.id, name: crop.name });
   }
-  // JBSA の効果大分類（4区分）ごとに開閉行を置き、中に個別効果のタグを並べる。
-  // catalog.effects は大分類の表示順 → 個別効果の表示順に並んでいる。
   const effectGroups: Array<{ id: string; name: string; effects: CatalogSearch["effects"] }> = [];
   for (const effect of catalog.effects) {
     const group = effectGroups.at(-1);
     if (group?.id === effect.categoryId) group.effects.push(effect);
     else effectGroups.push({ id: effect.categoryId, name: effect.categoryName, effects: [effect] });
   }
-  // 掲載資材のない資材ジャンルは出さない（選択中のものは外せるよう残す）。
   const genres = search.filters
     .filter(
       (filter) =>
@@ -220,7 +211,6 @@ export function CatalogSidebar({
     )
     .toSorted((a, b) => (genreCounts.get(b.id) ?? 0) - (genreCounts.get(a.id) ?? 0));
 
-  /** 区分ごとの選択中の条件。× でその条件だけを外す。 */
   function selectedChips(match: (filter: SelectedSearchFilter) => boolean) {
     const items = selected.filter(match);
     if (!items.length) return null;

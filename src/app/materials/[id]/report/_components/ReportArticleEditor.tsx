@@ -266,7 +266,6 @@ const visuallyHidden = css({ srOnly: true });
 
 type Upload = (file: File | undefined, section: ReportSection, document: boolean) => void;
 
-/** 本文欄。編集中は textarea、プレビュー中は文字だけを出す */
 function Body({
   value,
   label,
@@ -293,7 +292,6 @@ function Body({
   );
 }
 
-/** 「写真・記事の確認」の記事エディターと、その下の関連資料・公開前の確認 */
 export function ReportArticleEditor({
   input,
   onChange,
@@ -310,7 +308,6 @@ export function ReportArticleEditor({
   onChange: (input: UsageReportInput) => void;
   errors: UsageReportFieldErrors;
   preview: boolean;
-  /** プレビュー中に出す未入力の項目名 */
   missingLabels: string[];
   materialName: string;
   cropName: string;

@@ -9,10 +9,6 @@ type MaterialPageShellProps = {
   children: ReactNode;
 };
 
-/**
- * 資材ページの読み込み中・見つからないときの外枠。表示後の資材ページ（page.tsx）と同じ外枠を使い、
- * 読み込みから表示へ切り替わるときにヘッダーや戻るバーが入れ替わらないようにする。
- */
 export function MaterialPageShell({
   title,
   backHref,

@@ -15,9 +15,7 @@ const headingRecipe = cva({
   },
   variants: {
     spacing: {
-      /** 資材ページの欄の間 */
       section: { mt: "6.5" },
-      /** 一覧画面の欄の間 */
       list: { mt: "4.5" },
       standalone: { mt: "6", pc: { mt: "14" } },
     },
@@ -45,7 +43,6 @@ type MaterialSectionHeadingProps = {
   spacing?: "section" | "list" | "standalone";
 };
 
-/** 件数と「すべて見る」を添えられる欄の見出し。 */
 export function MaterialSectionHeading({
   id,
   headingId,

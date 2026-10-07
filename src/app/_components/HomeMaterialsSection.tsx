@@ -6,7 +6,6 @@ import { css } from "../../../styled-system/css";
 import { HomeMaterialCard, type HomeMaterialCardProps } from "./HomeMaterialCard";
 import { HomeMaterialMarquee } from "./HomeMaterialMarquee";
 
-/** ホームの掲載資材一覧。`materials` が null の間は読み込み中の骨組みを出す。 */
 export function HomeMaterialsSection({ materials }: { materials: HomeMaterialCardProps[] | null }) {
   return (
     <section aria-labelledby="home-materials-heading" className={css({ mt: "7" })}>

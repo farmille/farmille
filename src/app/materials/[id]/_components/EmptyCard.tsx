@@ -16,7 +16,6 @@ const wrapRecipe = cva({
 const titleStyle = css({ fontSize: "md", fontWeight: "bold" });
 const descriptionStyle = css({ fontSize: "sm", color: "text.subtle" });
 
-/** 投稿がまだ無い欄に出すカード。 */
 export function EmptyCard({
   title,
   description,

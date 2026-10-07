@@ -2,7 +2,6 @@ import { css, cva, cx } from "../../../../styled-system/css";
 
 const brandStroke = css({ stroke: "primary.700" });
 
-/** 参考になった。 */
 export function ThumbIcon() {
   return (
     <svg
@@ -19,7 +18,6 @@ export function ThumbIcon() {
   );
 }
 
-/** 閲覧数。 */
 export function EyeIcon() {
   return (
     <svg
@@ -37,7 +35,6 @@ export function EyeIcon() {
   );
 }
 
-/** 資材の印。 */
 export function SeedIcon() {
   return (
     <svg
@@ -54,7 +51,6 @@ export function SeedIcon() {
   );
 }
 
-/** 右向きの矢印。 */
 export function ChevronIcon() {
   return (
     <svg
@@ -72,7 +68,6 @@ export function ChevronIcon() {
   );
 }
 
-/** 画像が無いときの印。 */
 export function ArticleImagePlaceholderIcon() {
   return (
     <svg
@@ -91,7 +86,6 @@ export function ArticleImagePlaceholderIcon() {
   );
 }
 
-/** 検索窓の虫眼鏡。 */
 export function ArticleSearchIcon() {
   return (
     <svg
@@ -127,7 +121,6 @@ const viewCountRecipe = cva({
   defaultVariants: { size: "md" },
 });
 
-/** 閲覧数（読み上げは「N回閲覧」）。sm は2列の一覧カード用。 */
 export function ViewCount({
   count,
   size,

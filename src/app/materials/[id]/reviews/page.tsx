@@ -82,7 +82,6 @@ export default async function MaterialReviewsPage({
   ]);
   const reviews = unwrapQueryResult(reviewsResult);
   const distribution = unwrapQueryResult(distributionResult);
-  // 表示した口コミごとに閲覧を1回記録する。after() の中では cookies() が使えないため、クライアントは先に作る。
   const insertViewEvents = viewEventsInsertFor(await createServerSupabase());
   after(async () => {
     await recordViewEvents({

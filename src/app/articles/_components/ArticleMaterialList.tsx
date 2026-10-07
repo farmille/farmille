@@ -16,7 +16,6 @@ const materialLink = css(surfaceCardRecipe.raw({ tone: "soft", padding: "compact
   textDecoration: "none",
 });
 
-/** 記事で紹介した資材。各資材のページへのリンク。 */
 export function ArticleMaterialList({
   materials,
 }: {

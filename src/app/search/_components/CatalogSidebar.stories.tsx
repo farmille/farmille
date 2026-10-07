@@ -30,7 +30,6 @@ export const Selected: Story = {
   },
 };
 
-/** 区分を開き、効果の大分類と作物の大分類も開いた状態。 */
 export const Expanded: Story = {
   args: Selected.args,
   play: async ({ canvasElement }) => {

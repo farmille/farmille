@@ -144,11 +144,6 @@ const addButton = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   _focusVisible: focusRing,
 });
 
-/**
- * 「主な作目」（選択済みの作目＋検索）と「所属」（候補の選択＋自由入力）。
- * 選択済みタグは検索語に関係なく残し、自由入力した所属も同じ形式（affiliations）で保存する。
- * 全欄を最初から見せる方針のため、自由入力の欄は常に出す。
- */
 export function ProfileTagsEditor({
   details,
   options,

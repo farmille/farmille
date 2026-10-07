@@ -53,7 +53,6 @@ function ConsentList({ children }: { children: ReactNode }) {
   return <div className={css({ mt: "3" })}>{children}</div>;
 }
 
-/** name は consent.0〜consent.n（最後が「上記に同意します」）。 */
 export function ConsentFields({ kind }: { kind: ApplicationKind }) {
   const copy = applicationCopy[kind];
   const last = copy.consents.length - 1;

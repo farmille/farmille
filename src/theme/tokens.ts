@@ -19,7 +19,6 @@ export const tokens = {
       800: { value: "#1B4332" },
       900: { value: "#081C15" },
     },
-    // 企業会員の申請書類の青みのある灰色
     slate: {
       50: { value: "#F5F8FB" },
       200: { value: "#D5DDE6" },
@@ -297,7 +296,6 @@ export const semanticTokens = {
       dangerSoft: { value: "{colors.danger.soft}" },
       manufacturer: { value: "{colors.teal}" },
     },
-    // 企業会員の申請書類（書面に近い落ち着いた体裁）
     formal: {
       ink: { value: "{colors.slate.700}" },
       muted: { value: "{colors.slate.500}" },

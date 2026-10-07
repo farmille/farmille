@@ -13,13 +13,11 @@ export type HeroMaterialOption = {
   imageUrl: string | null;
 };
 
-/** ホームの検索窓の候補（資材名・メーカー）と、絞り込みピルの一覧。 */
 export type HeroSearchOptions = {
   materials: HeroMaterialOption[];
   pills: Record<HeroPillKind, HeroPillItem[]>;
 };
 
-/** 絞り込みピルは作物・効果・メーカーを上位8件、資材ジャンルは全件出す。 */
 const PILL_LIMIT = 8;
 
 function countBy(values: string[]): Map<string, number> {
@@ -50,10 +48,6 @@ function filterPills(
   return limit === null ? items : items.slice(0, limit);
 }
 
-/**
- * 件数は「その作目・効果・資材ジャンルが資材に明記されている数」。
- * 作物群（〇〇類 全般）としての記載は数えない。
- */
 export function buildHeroSearchOptions(
   catalog: CatalogSearch,
   search: SearchCatalog,

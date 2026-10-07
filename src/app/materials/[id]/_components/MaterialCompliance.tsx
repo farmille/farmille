@@ -62,7 +62,6 @@ function CheckedNotice({
   );
 }
 
-/** 資材カード直下の注記（掲載情報の出どころ）。 */
 export function MaterialPageCompliance({ makerVerified }: { makerVerified: boolean }) {
   return (
     <CheckedNotice spacing="near">
@@ -85,7 +84,6 @@ export function MaterialPageCompliance({ makerVerified }: { makerVerified: boole
   );
 }
 
-/** 製品詳細の下に置く注記。 */
 export function MaterialSpecDisclaimer() {
   return (
     <section aria-label="掲載情報と投稿についての注意事項" className={disclaimerStyle}>
@@ -115,7 +113,6 @@ export function MaterialSpecDisclaimer() {
   );
 }
 
-/** 投稿一覧の前に置く注記（投稿は個人の体験）。 */
 export function PostsCompliance() {
   return (
     <CheckedNotice spacing="section">
@@ -127,7 +124,6 @@ export function PostsCompliance() {
   );
 }
 
-/** 掲載終了の資材に出す注記。 */
 export function ArchivedNotice() {
   return (
     <div className={noticeRecipe({ spacing: "near" })}>

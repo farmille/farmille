@@ -58,7 +58,6 @@ export function SellerApplyForm() {
     state.status === "error" && values.inviteCode !== undefined && values.inviteCode.length > 0;
   const [inviteOpen, setInviteOpen] = useState(hadInvite);
 
-  // エラー後の再表示で defaultValue を効かせるため、送信値ごとに form を載せ替える。
   const formKey = state.status === "error" ? `error:${values.officialName ?? ""}` : "idle";
   const invalid = (name: string) => (fieldErrors[name] ? true : undefined);
 

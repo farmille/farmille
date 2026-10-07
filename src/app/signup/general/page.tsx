@@ -19,7 +19,6 @@ export default async function GeneralSignupPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const next = safeNextPath((await searchParams).next);
-  // 戻るバーの題は「Farmilleをはじめる」のまま、見出しは読み上げ用に画面名を置く。
   return (
     <SitePageShell title="Farmilleをはじめる" backHref="/signup">
       <div className={css({ maxW: "content.reading", mx: "auto" })}>

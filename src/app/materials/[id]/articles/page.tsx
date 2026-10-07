@@ -37,7 +37,6 @@ export async function generateMetadata({ params }: MaterialArticlesPageProps): P
 const visuallyHiddenStyle = css({ srOnly: true });
 const leadStyle = css({ mb: "3", fontSize: "sm", color: "text.subtle" });
 
-// 資材ページの「すべて見る」の行き先。メーカーの記事に加えて実証詳細レポートも同じ画面に並べる。
 export default async function MaterialArticlesPage({ params }: MaterialArticlesPageProps) {
   const { id } = await params;
 

@@ -16,7 +16,6 @@ type ArticleHeaderProps = {
   heroImageUrl: string | null;
 };
 
-/** 記事の冒頭：題名・メーカー名と投稿日・見出し画像。 */
 export function ArticleHeader({
   title,
   sellerName,

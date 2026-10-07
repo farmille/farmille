@@ -1,6 +1,5 @@
 import { css, cva } from "../../../../styled-system/css";
 
-/** 選択中の条件のチップ。検索窓の下は md、絞り込みパネルの中は sm。 */
 export const selectedChipRecipe = cva({
   base: {
     display: "inline-flex",

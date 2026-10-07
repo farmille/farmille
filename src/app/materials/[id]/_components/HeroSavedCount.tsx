@@ -16,7 +16,6 @@ const countRecipe = cva({
   defaultVariants: { tone: "plain" },
 });
 
-/** 資材カードの件数。実証詳細レポートが1件以上あるときだけ highlight で強調する。 */
 export function HeroCount({
   tone,
   children,
@@ -27,7 +26,6 @@ export function HeroCount({
   return <b className={countRecipe({ tone })}>{children}</b>;
 }
 
-/** 資材ページ上部のお気に入り数。ホーム・検索の資材カードと同じ集計を使う（掲載終了の資材は「−」）。 */
 export async function HeroSavedCount({ materialId }: { materialId: string }) {
   const count = await getMaterialSavedCount(materialId);
   return <HeroCount>{count ?? "−"}</HeroCount>;

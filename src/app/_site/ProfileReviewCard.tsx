@@ -107,16 +107,10 @@ type ProfileReviewCardProps = {
     photos?: ReadonlyArray<{ id: string; url: string; alt: string }>;
   };
   author: { handle: string; avatarUrl?: string | null; href?: string; label?: string };
-  /** 参考になった・保存・閲覧数（PostActionsLoader）。 */
   actions: ReactNode;
-  /** 通報の戻り先。渡さないときは通報ボタンを出さない（本人が自分の公開プロフィールを見ているとき）。 */
   reportReturnPath?: string;
 };
 
-/**
- * 資材名つきの感想口コミカード（上に「〇〇 の感想口コミ」）。
- * マイページ・公開プロフィールの投稿一覧で使う。
- */
 export function ProfileReviewCard({
   review,
   author,

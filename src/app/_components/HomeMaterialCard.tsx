@@ -10,10 +10,8 @@ export type HomeMaterialCardProps = {
   href: string;
   name: string;
   maker: string;
-  /** 感想口コミが無い資材は null。 */
   rating: number | null;
   reviewCount: number;
-  /** 集計が取れない資材は null（「−」で出す）。 */
   reportCount: number | null;
   savedCount: number | null;
   categories: string[];
@@ -86,7 +84,6 @@ const tagStyle = css({
   tab: { py: "1", px: "2.5", fontSize: "xs" },
 });
 
-/** ホームの掲載資材一覧のカード。 */
 export function HomeMaterialCard({
   href,
   name,

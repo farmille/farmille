@@ -119,7 +119,6 @@ const timelineHint = css({
 
 const warning = css({ mt: "1.5", fontSize: "sm", fontWeight: "bold", color: "accent.danger" });
 
-/** 「栽培条件」のステップ */
 export function ReportStepConditions({
   input,
   onChange,
@@ -129,7 +128,6 @@ export function ReportStepConditions({
   input: UsageReportInput;
   onChange: (input: UsageReportInput) => void;
   errors: UsageReportFieldErrors;
-  /** アカウント登録時の市区町村（本人のみ）。チェックを入れたときの初期値 */
   registeredCity: string;
 }) {
   const missingDate =
@@ -170,7 +168,6 @@ export function ReportStepConditions({
               onChange({
                 ...input,
                 showCity: event.target.checked,
-                // 欄が空のときだけ登録住所の市区町村で埋める。外しても入力済みの値は消さない。
                 city:
                   event.target.checked && input.city.trim() === "" ? registeredCity : input.city,
               })

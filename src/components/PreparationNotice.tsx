@@ -60,7 +60,6 @@ const siteNoticeBody = css({
   "& p + p": { mt: "0.5" },
 });
 
-/** SitePageShell の画面で使う見た目。文言は既定の見た目と共通。 */
 function SitePreparationNotice() {
   return (
     <aside id="preparation-notice" aria-label="公開準備中のお知らせ" className={siteNotice}>
@@ -89,7 +88,6 @@ export function PreparationNotice({
 }: {
   overlapImage?: boolean;
   roundedTop?: boolean;
-  /** "site" は SitePageShell の画面用。 */
   look?: "default" | "site";
 }) {
   if (look === "site") {

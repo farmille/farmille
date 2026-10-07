@@ -104,10 +104,6 @@ type SearchComboboxProps = Omit<
   showEmptyState?: boolean;
 };
 
-/**
- * 検索欄つきの候補ピッカーを、共通の Combobox（src/components/Combobox.tsx）と同じキーボード操作で動かすもの。
- * 候補の絞り込みと保存は呼び出し元に任せる。
- */
 export function SearchCombobox({
   value,
   options,

@@ -3,7 +3,6 @@ import { SitePageShell } from "@/app/_site/SitePageShell";
 import { formalPageRecipe, formalTitleStyle, introStyle } from "../_components/formal-styles";
 import { VerificationForm } from "../_components/VerificationForm";
 
-/** 受付票の確認メールの再発行。終売・非表示の申請の受付と同じ部品で組む。 */
 export default function ReceiptAccessPage() {
   return (
     <SitePageShell title="受付票の確認" backHref="/company-requests/removal">

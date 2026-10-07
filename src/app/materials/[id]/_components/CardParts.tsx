@@ -4,7 +4,6 @@ import { css, cva, cx } from "../../../../../styled-system/css";
 
 const starsStyle = css({ color: "accent.star", fontSize: "md" });
 
-/** ★を n 個、☆を残りで並べる。 */
 export function Stars({ value }: { value: number }) {
   const filled = Math.min(5, Math.max(0, Math.round(value)));
   return (
@@ -15,7 +14,6 @@ export function Stars({ value }: { value: number }) {
   );
 }
 
-/** 法人格を外した先頭1文字。 */
 function initials(name: string): string {
   const text = name.trim();
   if (!text) return "?";
@@ -63,7 +61,6 @@ function avatarSize(size: number | undefined, extraSmall: boolean): AvatarSize {
 
 const avatarImageStyle = css({ w: "full", h: "full", objectFit: "cover", borderRadius: "pill" });
 
-/** 画像があれば画像、無ければ頭文字。size は使われている寸法（18・30・32・36）を近い段へ丸める。 */
 export function Avatar({
   name,
   src,
@@ -109,7 +106,6 @@ const noImageStyle = css({
   borderRadius: "input",
 });
 
-/** 画像が無いときの置き場。 */
 export function NoImage({ className }: { className?: string }) {
   return (
     <div className={cx(noImageStyle, className)} aria-hidden="true">
@@ -144,7 +140,6 @@ const chipRecipe = cva({
   defaultVariants: { tone: "green", wrap: false },
 });
 
-/** 小さな丸いラベル。資材ジャンルは灰色。wrap は長い名前を枠の中で折り返す。 */
 export function Chip({
   children,
   tone,
@@ -157,7 +152,6 @@ export function Chip({
   return <span className={chipRecipe({ tone, wrap })}>{children}</span>;
 }
 
-/** チェックの線画。 */
 export function CheckIcon() {
   return (
     <svg
@@ -174,7 +168,6 @@ export function CheckIcon() {
   );
 }
 
-/** 外部リンクの線画。 */
 export function ExternalIcon() {
   return (
     <svg

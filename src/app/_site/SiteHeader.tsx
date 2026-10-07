@@ -9,11 +9,8 @@ import { css, cva } from "../../../styled-system/css";
 export type SiteNavActive = "search" | "me";
 
 type SiteHeaderProps = {
-  /** 現在地のナビ項目。資材ページなど該当しない画面では渡さない。 */
   active?: SiteNavActive;
-  /** ヘッダー検索の初期値。検索画面が現在の q を渡す。 */
   searchQuery?: string;
-  /** ホームはヒーローに検索欄があるので、ヘッダーの検索バーを出さない。 */
   showSearch?: boolean;
 };
 
@@ -230,11 +227,6 @@ const signupLink = css({
 
 const accountSlot = css({ flex: "0 0 auto", ml: "1", pc: { ml: "2" } });
 
-/**
- * 全幅の上部ナビ。
- * ログイン状態はサーバーで判定し、未ログインは「ログイン／新規会員登録」、
- * ログイン後は「マイページ」と、ログアウト等を含む既存のアカウントメニューを出す。
- */
 export async function SiteHeader({ active, searchQuery, showSearch = true }: SiteHeaderProps) {
   const session = await getSessionUser();
   const signedIn = session !== null;
@@ -259,7 +251,6 @@ export async function SiteHeader({ active, searchQuery, showSearch = true }: Sit
           <Form action="/search" aria-label="ヘッダー検索" className={search} role="search">
             <SearchIcon size={17} />
             <input
-              // q が変わったとき（同じ画面での再送信や履歴の前後移動）に入力欄を作り直して反映する
               key={searchQuery}
               aria-label="資材を検索"
               autoComplete="off"

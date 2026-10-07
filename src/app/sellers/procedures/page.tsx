@@ -50,7 +50,6 @@ const membershipRecipe = cva({
   },
 });
 
-/** よくあるご質問とお手続きの一覧。 */
 export default function SellerProceduresPage() {
   return (
     <SitePageShell title="よくあるご質問" backHref="/sellers">

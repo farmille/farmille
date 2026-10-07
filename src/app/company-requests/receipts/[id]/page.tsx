@@ -7,7 +7,6 @@ import { DoneMessage } from "../../_components/DoneMessage";
 
 import { css } from "../../../../../styled-system/css";
 
-/** 申請受付票。受付票の部品はメーカーダッシュボード・運営画面と共通。 */
 export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
   const receipt = await readCompanyApplication((await params).id);
   return (

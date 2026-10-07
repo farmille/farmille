@@ -23,7 +23,6 @@ import {
 } from "./formal-styles";
 import { PrivateNote, RequiredMark } from "./FormalMarks";
 
-/** 終売・非表示の申請の受付（申請フォームのURLをメールで送る）。receipt のときは受付票の確認メールの再発行。 */
 export function VerificationForm({ receipt = false }: { receipt?: boolean }) {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);

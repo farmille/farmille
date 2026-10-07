@@ -8,7 +8,6 @@ export function ApplicationReceipt({
   hideMissingCorporateNumber = false,
 }: {
   receipt: Receipt;
-  /** 申請者向けの受付票（公開の受付票ページ）だけ、法人番号の無い申請で「法人番号：該当なし」を出さない */
   hideMissingCorporateNumber?: boolean;
 }) {
   return (

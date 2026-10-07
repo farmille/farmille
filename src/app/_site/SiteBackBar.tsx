@@ -4,9 +4,7 @@ import { css } from "../../../styled-system/css";
 
 type SiteBackBarProps = {
   title: string;
-  /** 戻る先。ブラウザ履歴に頼らず、画面ごとに決めた親画面へ戻す。 */
   backHref: string;
-  /** 共有アイコン。共有先がある画面だけ渡す。 */
   shareHref?: string;
 };
 
@@ -44,7 +42,6 @@ const titleText = css({
   whiteSpace: "nowrap",
 });
 
-/** 戻る・画面名・（共有）の帯。 */
 export function SiteBackBar({ title, backHref, shareHref }: SiteBackBarProps) {
   return (
     <div className={bar}>

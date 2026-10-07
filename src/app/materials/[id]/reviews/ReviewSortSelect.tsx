@@ -16,10 +16,6 @@ const selectStyle = css(selectRecipe.raw(), {
 });
 const submitStyle = css({ srOnly: true });
 
-/**
- * 感想口コミの並び替え。選び直すとその場で並び替える（GET フォームを送る）。
- * スクリプトが動かない環境向けに、読み上げ用の「適用」ボタンを残す。
- */
 export function ReviewSortSelect({ sort }: { sort: ReviewSort }) {
   return (
     <form method="get" className={formStyle}>

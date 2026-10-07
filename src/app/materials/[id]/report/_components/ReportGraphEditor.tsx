@@ -11,7 +11,6 @@ type Measurement = UsageReportInput["measurements"][number];
 type Graph = Measurement["graphs"][number];
 type Plot = UsageReportInput["plots"][number];
 
-/** グラフの中で書き込める場所。g は書き込み枠を出すグラフ（区の名前は全グラフで共有） */
 export type EditTarget =
   | { k: "title"; g: string }
   | { k: "axis"; g: string }
@@ -24,7 +23,6 @@ export function editKey(target: EditTarget) {
   return `${target.k}:${target.g}`;
 }
 
-/** 空欄・数字が読めない（bad）・数値を区別する */
 export type Cell =
   | { kind: "empty" }
   | { kind: "bad" }
@@ -32,7 +30,6 @@ export type Cell =
 export function readCell(raw: string): Cell {
   const label = raw.trim();
   if (!label) return { kind: "empty" };
-  // 全角の数字・記号を半角にしてから読む
   const half = label.replace(/[０-９．－，]/g, (c) =>
     c === "．"
       ? "."
@@ -48,7 +45,6 @@ export function readCell(raw: string): Cell {
     : { kind: "num", value: parsed.value, error: parsed.error ?? 0, label };
 }
 
-/** 目盛りの上端と刻み。% の目盛りは 100 まで出す */
 function niceScale(max: number, unit: string) {
   if (/^[%％]$/.test(unit.trim()) && max <= 100) return { top: 100, step: 25, none: !(max > 0) };
   if (!(max > 0)) return { top: 100, step: 25, none: true };
@@ -60,7 +56,6 @@ function niceScale(max: number, unit: string) {
 }
 const fmt = (x: number) => (Math.round(x * 100) / 100).toLocaleString("ja-JP");
 
-/** 単位に合った数値の記入例 */
 export function exampleValues(unit: string): [string, string] | null {
   const u = unit.trim().toLowerCase();
   const table: [RegExp, [string, string]][] = [
@@ -217,10 +212,6 @@ function Hit({
   );
 }
 
-/**
- * 比較グラフの入力カード。
- * 調査項目・単位は measurement（同じ調査項目の時期別グラフで共有）、題と数値は graph に入る。
- */
 export function ReportGraphEditor({
   measurement,
   graph,
@@ -247,9 +238,7 @@ export function ReportGraphEditor({
   onRemovePlot: (plotId: string) => void;
   onRemove: () => void;
   onAddPeriod: () => void;
-  /** 同じ調査項目のグラフが複数あるとき、題の記入例を時期にする */
   periodHint: boolean;
-  /** 書き込み枠（このグラフで開いているとき） */
   children?: ReactNode;
 }) {
   const on = (key: string) => active !== null && editKey(active) === key && active.g === graph.id;
@@ -275,7 +264,6 @@ export function ReportGraphEditor({
   const ticks: number[] = [];
   for (let t = 0; t <= top + 1e-9; t += step) ticks.push(t);
 
-  // 1行目：グラフの題（任意）
   const sw = Math.min(W - 44, 440);
   const titleExample =
     periodHint && measurement.name
@@ -286,7 +274,6 @@ export function ReportGraphEditor({
   const titleFont = Math.max(10, Math.min(13.5, (sw - 112) / titleExample.length));
   const titleSize = Math.max(10, Math.min(15, (W - 64 - 90) / Math.max(1, graph.heading.length)));
   const titleWidth = Math.min(W - 64, titleSize * 1.05 * graph.heading.length + 94);
-  // 2行目：調査項目（単位）
   const y0 = 36;
   const axisShown = measurement.name + (measurement.unit ? `（${measurement.unit}）` : "");
   const axisSize = Math.max(10, Math.min(13.5, (W - 20 - 90) / Math.max(1, axisShown.length)));

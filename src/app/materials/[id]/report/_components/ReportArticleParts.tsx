@@ -18,7 +18,6 @@ export function sectionHeading(input: UsageReportInput, section: ReportSection) 
   return custom ?? REPORT_SECTIONS.find((item) => item.value === section)?.title ?? "";
 }
 
-/** 記事の「栽培条件・施用時期」の先頭に出す行（地域・作物・施用時期） */
 export function conditionLines(input: UsageReportInput, cropName: string) {
   const prefecture = PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name ?? "−";
   const variety = input.varietyUnknown ? "不明" : input.variety.trim() || "−";
@@ -29,7 +28,6 @@ export function conditionLines(input: UsageReportInput, cropName: string) {
   ].join("\n");
 }
 
-/** 記事の「期待した効果」の本文（効果タグ、改行して使用目的の補足） */
 export function effectsText(input: UsageReportInput) {
   return [input.purposeTags.join("、"), input.purposeNote.trim()]
     .filter((text) => text.length > 0)
@@ -84,7 +82,6 @@ const plotDescription = css({
   whiteSpace: "pre-wrap",
 });
 
-/** 比較した区の静的なカード */
 export function PlotList({ plots }: { plots: UsageReportInput["plots"] }) {
   return (
     <div className={plotList}>
@@ -116,7 +113,6 @@ const bar = css({
 });
 const barFill = css({ display: "block", h: "4", borderRadius: "bar", bg: "currentColor" });
 
-/** 記事の横棒グラフ。区の色は入力の縦棒と揃える */
 export function ReportBars({
   graph,
   plots,

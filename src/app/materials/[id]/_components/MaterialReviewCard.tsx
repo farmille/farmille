@@ -95,14 +95,11 @@ const actionsStyle = css({ flex: "1", minW: "0" });
 
 type MaterialReviewCardProps = {
   review: ReviewListItem;
-  /** 投稿者本人が見ているとき（編集・削除を出し、通報は出さない）。 */
   canManage: boolean;
   currentPath: string;
-  /** 参考になった・保存・閲覧数（PostActionsLoader）。 */
   actions: ReactNode;
 };
 
-/** 感想口コミのカード。通報・本人の編集削除は既存の ReviewCard と同じ部品を使う。 */
 export function MaterialReviewCard({
   review,
   canManage,

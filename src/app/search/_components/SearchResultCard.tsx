@@ -9,16 +9,13 @@ type SearchResultCardProps = {
   href: string;
   name: string;
   maker: string;
-  /** 感想口コミが無い資材は null（★を出さない）。 */
   rating: number | null;
   reviewCount: number;
   reportCount: number;
   savedCount: number;
   description?: string | null;
   categories: string[];
-  /** 作物で絞り込んだときの根拠（作目への直接記載）。 */
   directEvidence: string[];
-  /** 作物分類としての記載（直接記載が無いときだけ）。 */
   groupEvidence: string[];
   imageSrc?: string;
   preload?: boolean;
@@ -99,10 +96,6 @@ function ChevronIcon() {
   );
 }
 
-/**
- * 検索結果の資材カード。
- * 作物で絞り込んだときは根拠のバッジ（✓ 直接記載＝緑、分類として記載＝灰）を出す。
- */
 export function SearchResultCard({
   href,
   name,

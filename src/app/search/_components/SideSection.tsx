@@ -7,7 +7,6 @@ import { css } from "../../../../styled-system/css";
 
 import { chipListStyle, focusRing } from "./search-chips";
 
-/** 絞り込み欄の文字検索で探す対象。`terms` は名前と別名。 */
 export type SideFilterItem = {
   key: string;
   terms: string[];
@@ -40,11 +39,6 @@ const filterInputStyle = css(inputRecipe.raw(), {
   fontSize: "sm",
 });
 
-/**
- * 絞り込みパネルの1区分。
- * 見出し行で開閉し、見出しのすぐ下に文字検索の欄と選択中の条件を常に出す。
- * 文字検索に入力があるあいだは、一覧の代わりに一致した候補だけを並べる。
- */
 export function SideSection({
   title,
   note,
@@ -53,7 +47,6 @@ export function SideSection({
   children,
 }: {
   title: string;
-  /** 文字検索の欄の下に常に出す説明 */
   note?: string;
   selected?: ReactNode;
   filter?: {

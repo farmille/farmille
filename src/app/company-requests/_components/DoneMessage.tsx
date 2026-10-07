@@ -25,7 +25,6 @@ export const doneActionsStyle = css({
   mt: "6.5",
 });
 
-/** 送信・受付の完了表示（チェックの円・見出し・本文・操作）を中央にそろえる。 */
 export function DoneMessage({
   title,
   as: Heading = "h2",

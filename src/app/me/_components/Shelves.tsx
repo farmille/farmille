@@ -82,7 +82,6 @@ const savedName = css({ mt: "0.5", fontSize: "md", fontWeight: "bold", lineHeigh
 
 const savedMaker = css({ mt: "0.5", color: "text.subtle", fontSize: "xs" });
 
-/** 行の右端の ›。 */
 function Chevron() {
   return (
     <svg
@@ -100,7 +99,6 @@ function Chevron() {
   );
 }
 
-/** タップで移動する行。 */
 export function LinkRow({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link className={linkRow} href={href}>
@@ -130,13 +128,10 @@ function UsageReportStatus({
 type PostsShelfProps = {
   profile: OwnProfile;
   posts: readonly OwnPostItem[];
-  /** 実証詳細レポートは横スクロール、感想口コミは縦に並べる。 */
   kind?: "reports" | "reviews";
-  /** 投稿者の肩書き（立場・都道府県）。 */
   authorLabel?: string;
 };
 
-/** 「これまでの投稿」。実証詳細レポートは横スクロール、感想口コミは縦に並べる。 */
 export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: PostsShelfProps) {
   if (posts.length === 0) {
     return (
@@ -150,7 +145,6 @@ export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: Po
   }
 
   return (
-    // 下書き・調整中のカードは表紙が無く低い。横並びで公開済みカードの高さに引き伸ばされて空白ができないよう、上揃えにする。
     <div className={postList({ kind })} aria-labelledby="me-posts-heading" role="region">
       {posts.map((post) =>
         post.kind === "review" ? (
@@ -206,7 +200,6 @@ type SavedShelfProps = {
   items: readonly SavedMaterialItem[];
 };
 
-/** 「お気に入りの資材」。カードの中に資材の行を並べる。 */
 export function SavedShelf({ items }: SavedShelfProps) {
   return (
     <section aria-labelledby="me-saved-heading">
@@ -240,7 +233,6 @@ type HelpfulShelfProps = {
   items: readonly HelpfulItem[];
 };
 
-/** 「参考になった」を付けた投稿。 */
 export function HelpfulShelf({ items }: HelpfulShelfProps) {
   return (
     <section aria-labelledby="me-helpful-heading">

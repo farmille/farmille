@@ -52,7 +52,6 @@ const signupActionsStyle = css({
 });
 const articlesLinkStyle = css({ mt: "3" });
 
-/** 実証詳細レポートの見出し。読み込み中の表示でも使う。 */
 export function ReportsHeading({ count, moreHref }: { count?: number; moreHref?: string }) {
   return (
     <MaterialSectionHeading
@@ -66,7 +65,6 @@ export function ReportsHeading({ count, moreHref }: { count?: number; moreHref?:
   );
 }
 
-/** 資材カードの「実証詳細レポート N件」。件数がある時は強調する。 */
 export async function HeroReportCount({ materialId }: { materialId: string }) {
   const reports = unwrapQueryResult(await loadMaterialReports(materialId));
   return <HeroCount tone={reports.total > 0 ? "highlight" : "zero"}>{reports.total}件</HeroCount>;
@@ -79,7 +77,6 @@ type MaterialReportsViewProps = {
   signedIn: boolean;
 };
 
-/** 資材ページの実証詳細レポート欄。会員登録の案内は未ログインのときだけ出す。 */
 export function MaterialReportsView({
   material,
   reports,

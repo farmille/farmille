@@ -7,7 +7,6 @@ import { css } from "../../../../../../styled-system/css";
 
 export type ReportSearchItem = {
   value: string;
-  /** 読み上げ名。見た目の並び（分類→名前）と違う順で読ませたいときに使う */
   label: string;
   name: string;
   category?: string;
@@ -63,7 +62,6 @@ const note = css({ ml: "auto", fontSize: "xs", color: "text.subtle", whiteSpace:
 
 const empty = css({ px: "3", py: "2.5", fontSize: "sm", color: "text.subtle" });
 
-/** 入力しながら候補が出る検索欄。入力欄は combobox、候補は listbox/option として読み上げる */
 export function ReportSearchField({
   ariaLabel,
   placeholder,
@@ -122,7 +120,6 @@ export function ReportSearchField({
           } else if (event.key === "Escape") setOpen(false);
         }}
       />
-      {/* 候補を出していないときは listbox を置かない（入力欄と同じ名前の空の一覧を読み上げさせない）。 */}
       {shown ? (
         <div id={listId} role="listbox" aria-label={ariaLabel} className={list}>
           {items.length === 0 && <div className={empty}>{emptyMessage}</div>}

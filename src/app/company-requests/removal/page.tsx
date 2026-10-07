@@ -13,7 +13,6 @@ import { VerificationForm } from "../_components/VerificationForm";
 
 import { css, cx } from "../../../../styled-system/css";
 
-/** 終売・廃盤／非表示の申請の受付。申請フォームのURLをメールで送る。 */
 export default function RemovalEntryPage() {
   return (
     <SitePageShell title="終売・廃盤／非表示の申請 受付" backHref="/sellers">

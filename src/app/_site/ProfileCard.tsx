@@ -16,7 +16,6 @@ function initials(name: string): string {
   return text ? text.slice(0, 1).toUpperCase() : "?";
 }
 
-/** リンクの表示名（「ichigo-farm.com」のようにホスト名だけを出す）。 */
 function linkLabel(url: string): string {
   const parsed = URL.parse(url);
   return parsed === null ? url : parsed.hostname.replace(/^www\./, "");
@@ -189,9 +188,7 @@ type ProfileCardProps = {
   avatarUrl: string | null;
   details: ProfileDetails;
   stats: ReadonlyArray<{ label: string; value: number }>;
-  /** 本人のマイページ（未設定の項目に「＋ 〜を設定する」を出し、編集ボタンを置く）。 */
   editable?: boolean;
-  /** 本人の公開プロフィール（`/users/{id}`）。渡したときだけカードの末尾に「公開プロフィールを見る」を出す。 */
   publicProfileHref?: string;
 };
 
@@ -212,10 +209,6 @@ function TodoHint({
   );
 }
 
-/**
- * マイページと公開プロフィールのカード（帯・アバター・名前・地域・所属・自己紹介・主な作目・リンク・数）。
- * 背景画像の欄は本番に無いため、帯は既定のグラデーションだけを出す。
- */
 export function ProfileCard({
   handle,
   avatarUrl,

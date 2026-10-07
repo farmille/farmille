@@ -44,7 +44,6 @@ function Tag({ category, label }: { category: string; label: string }) {
   );
 }
 
-/** 実証詳細レポートの冒頭：題名・投稿者・作物と効果のタグ・対象資材。 */
 export function ReportHeader({
   report,
   cropLabel,

@@ -49,7 +49,6 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
     await expect.poll(async () => await reviewCropNames(createdReview.id)).toEqual(["ミニトマト"]);
 
     await page.goto("/");
-    // ホームの「生産者の声」に新しい感想口コミが並ぶ。
     await expect(page.getByText(body, { exact: true })).toBeVisible();
     for (const path of ["/me", `/users/${user.id}`]) {
       await page.goto(path);

@@ -68,7 +68,6 @@ function methodLabel(method: string): string {
   return APPLICATION_METHODS.find((item) => item.value === method)?.label ?? method;
 }
 
-/** タグを並べる。無ければ「−」。 */
 function tags(names: readonly string[], tone?: "grey"): ReactNode {
   const unique = [...new Set(names)];
   if (unique.length === 0) return "−";
@@ -83,10 +82,6 @@ function tags(names: readonly string[], tone?: "grey"): ReactNode {
   );
 }
 
-/**
- * 製品詳細。
- * 分類は登録された名前を表示し、メーカー未入力の説明を補完しない。全行を常に出し、未入力は「−」。
- */
 export function MaterialDetailTable({
   material,
   content,

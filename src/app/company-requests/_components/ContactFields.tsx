@@ -64,10 +64,6 @@ const requiredPrivate = (
   </>
 );
 
-/**
- * 終売・非表示（removal）は法人番号なし・アカウントID任意。
- * removal の法人名・担当者名・メールは確認済みの値で、書き換えられない。
- */
 export function ContactFields({
   prefix = "",
   defaults,

@@ -34,7 +34,6 @@ function ownedMediaUrl(value: string, userId: string): boolean {
 type SaveRpcInput = Omit<UsageReportInput, "purposeNote">;
 type SaveStepResult<T> = ({ ok: true } & T) | { ok: false; message: string };
 
-/** 保存の手順が使う DB 操作。手順の検証ではテスト用の実装に差し替える */
 export type UsageReportSaveStore = {
   saveReport(
     input: SaveRpcInput,
@@ -54,7 +53,6 @@ const SAVE_CONFLICT =
 
 function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveStore {
   return {
-    /** save_usage_report RPC（親・子テーブルをまとめて保存する）。RPC は入力のキーを厳密に照合するため purposeNote を含めない */
     async saveReport(input, submit) {
       const { data, error } = await supabase.rpc("save_usage_report", {
         p_input: input,
@@ -70,7 +68,6 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
       }
       return { ok: true, status: saved.status, updatedAt: saved.updated_at };
     },
-    /** usage_reports.purpose_note は RPC の入力にない列のため、下書きの更新日時が一致する場合だけ書き込む */
     async savePurposeNote(reportId, purposeNote, expectedUpdatedAt) {
       const { data, error } = await supabase
         .from("usage_reports")
@@ -90,12 +87,6 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
   };
 }
 
-/**
- * 検証済みの入力を保存する手順。
- * 下書き保存：RPC（下書き）→ 使用目的の補足。
- * 提出：同じ手順で下書きとして保存したあと、その更新日時を照合して RPC で提出する。
- * 下書きまで保存できて後の手順だけ失敗した場合は、下書きの更新日時を savedUpdatedAt で返す。
- */
 export async function runUsageReportSave(
   input: UsageReportInput,
   submit: boolean,

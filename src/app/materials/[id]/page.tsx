@@ -104,7 +104,6 @@ async function MaterialReviews({
     await listReviewsByMaterial(material.id, { sort: "newest", page: 1, viewerUserId }),
   );
   const displayedReviews = reviews.items.slice(0, 3);
-  // 表示した口コミごとに閲覧を1回記録する。after() の中では cookies() が使えないため、クライアントは先に作る。
   const insertViewEvents = viewEventsInsertFor(await createServerSupabase());
   after(async () => {
     await recordViewEvents({

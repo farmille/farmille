@@ -26,7 +26,6 @@ const photoStyle = css({
     position: "absolute",
     inset: "0",
     zIndex: "1",
-    // 写真の左側だけを暗くし、白い見出しを読めるようにする
     bgImage:
       "linear-gradient(to right, token(colors.scrim/50) 0%, token(colors.scrim/46) 30%, token(colors.scrim/30) 52%, token(colors.scrim/10) 72%, transparent 88%)",
   },
@@ -104,10 +103,6 @@ const searchColumnStyle = css({
   tab: { alignItems: "flex-end" },
 });
 
-/**
- * ホームの写真ヒーロー（見出しと検索窓）。背景は next/image（LCP・blur）で敷く。
- * `searchOptions` が null の間（候補の読み込み中）は検索窓だけが使え、ピルは押せない。
- */
 export function HomeHero({ searchOptions = null }: { searchOptions?: HeroSearchOptions | null }) {
   return (
     <section className={heroStyle} aria-labelledby="home-heading">

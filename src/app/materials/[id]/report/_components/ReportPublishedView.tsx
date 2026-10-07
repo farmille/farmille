@@ -132,7 +132,6 @@ const compliance = css({
   lineHeight: "normal",
 });
 
-/** 公開後の見え方。資材ページや検索から開いたときの記事の形で出す */
 export function ReportPublishedView({
   input,
   materialName,

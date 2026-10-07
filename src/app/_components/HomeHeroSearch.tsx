@@ -10,7 +10,6 @@ import { css, cva, cx } from "../../../styled-system/css";
 
 import type { HeroPillKind, HeroSearchOptions } from "./home-hero-options";
 
-/** ホームの検索窓の候補は資材6件まで。 */
 const SUGGESTION_LIMIT = 6;
 
 const PILLS: { kind: HeroPillKind; label: string; head: string }[] = [
@@ -244,17 +243,12 @@ const countStyle = css({
   fontVariantNumeric: "tabular-nums",
 });
 
-/**
- * ホームの写真ヒーロー右側（検索窓・資材名の候補・絞り込みピル）。
- * 送信は /search?q= へ（既存の HomeSearchEntry と同じ）。候補とピルは検索ページへのリンク。
- */
 export function HomeHeroSearch({ options }: { options: HeroSearchOptions | null }) {
   const [query, setQuery] = useState("");
   const [openPill, setOpenPill] = useState<HeroPillKind | null>(null);
   const pillsRef = useRef<HTMLDivElement>(null);
   const keyword = normalize(query);
 
-  // ピルとドロップダウンの外側を押したら閉じる（スクロールでは閉じない）。
   useEffect(() => {
     if (openPill === null) return;
     const close = (event: Event) => {

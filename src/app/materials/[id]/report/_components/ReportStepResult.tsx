@@ -31,7 +31,6 @@ const RESULT_EXAMPLE = [
 
 const resultArea = css(textareaRecipe.raw({}), { minH: "40" });
 
-/** 「結果」のステップ */
 export function ReportStepResult({
   input,
   onChange,
@@ -43,7 +42,6 @@ export function ReportStepResult({
   onChange: (input: UsageReportInput) => void;
   errors: UsageReportFieldErrors;
   effects: ReportEffectOption[];
-  /** 対象資材に登録されている効果タグ。資材を変更した場合は空 */
   materialEffectNames: string[];
 }) {
   const [allOpen, setAllOpen] = useState(materialEffectNames.length === 0);

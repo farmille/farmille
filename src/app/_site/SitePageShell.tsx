@@ -10,16 +10,12 @@ import { type SiteNavActive, SiteHeader } from "./SiteHeader";
 type SitePageShellBaseProps = {
   active?: SiteNavActive;
   searchQuery?: string;
-  /** ヘッダーの検索バー。ヒーローに検索欄があるホームだけ出さない。 */
   showHeaderSearch?: boolean;
-  /** 画面下の投稿ボタン（FabBar look="site"）がある画面。本文の下に隠れない余白をとる。 */
   hasFab?: boolean;
-  /** 本文末尾のフッター。記事フィード以外の画面で出す。 */
   footer?: boolean;
   children: ReactNode;
 };
 
-/** 戻るバー。渡さない画面（ホーム）は戻るバーを出さない。 */
 type SitePageShellProps = SitePageShellBaseProps &
   (
     | { title: string; backHref: string; shareHref?: string }
@@ -50,11 +46,6 @@ const body = cva({
   },
 });
 
-/**
- * 画面の外枠。上から、ヘッダー＋戻るバー（上に固定）、準備中のお知らせ、
- * 本文とフッター。見本にない画面（運営・パスワード再設定など）は使わず、
- * 既定の AppBar / FormPageShell のままにする。
- */
 export function SitePageShell(props: SitePageShellProps) {
   const { active, searchQuery, showHeaderSearch = true, hasFab = false, footer = true } = props;
 

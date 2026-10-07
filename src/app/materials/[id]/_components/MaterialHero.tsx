@@ -95,13 +95,10 @@ type MaterialHeroProps = {
   saved: boolean | null;
   toggleAction?: (previous: SaveControlState, formData: FormData) => Promise<SaveControlState>;
   saveUnavailable?: boolean;
-  /** 実証詳細レポートの件数（読み込み中は Suspense の代替表示が入る）。 */
   reportCount?: ReactNode;
-  /** お気に入り数（読み込み中は Suspense の代替表示が入る）。 */
   savedCount?: ReactNode;
 };
 
-/** 資材ページ先頭の資材カード（画像・名前・評価・メーカー・お気に入り）。追加画像はすべて出し、3枚ごとに折り返す。 */
 export function MaterialHero({
   material,
   saved,

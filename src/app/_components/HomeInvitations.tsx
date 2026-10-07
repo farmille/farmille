@@ -69,7 +69,6 @@ const makerButtonStyle = css(buttonRecipe.raw({ variant: "primary", size: "sm" }
   tab: { alignSelf: "center", flex: "none", py: "3", px: "6" },
 });
 
-/** 会員登録の案内とメーカー向けの帯。会員登録の案内はログインしていないときだけ出す。 */
 export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
   return (
     <>

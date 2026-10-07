@@ -23,7 +23,6 @@ function backHrefFor(source: string | string[] | undefined): "/me" | "/sellers" 
   return source === "me" ? "/me" : "/sellers";
 }
 
-/** 企業会員登録の申請。ログイン後に申請フォームから資料を提出する手順を案内する。 */
 export default async function SellerApplyPage({ searchParams }: SellerApplyPageProps) {
   const { from } = await searchParams;
 

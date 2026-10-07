@@ -27,7 +27,6 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-/** 画面上は戻るバーの題名だけで本文に見出しを置かないので、見出しは読み上げ用に残す。 */
 function SearchPageHeading() {
   return <h1 className={css({ srOnly: true })}>BS資材を探す</h1>;
 }

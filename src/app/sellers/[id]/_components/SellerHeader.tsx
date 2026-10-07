@@ -39,7 +39,6 @@ type SellerHeaderProps = {
   seller: PublicSellerPageData["seller"];
 };
 
-/** メーカーの名前・紹介・リンク。名前の横の確認済みマークは表記ルールにより出さない。 */
 export function SellerHeader({ seller }: SellerHeaderProps) {
   const websiteUrl = seller.websiteUrl === null ? null : checkedExternalUrl(seller.websiteUrl);
 
