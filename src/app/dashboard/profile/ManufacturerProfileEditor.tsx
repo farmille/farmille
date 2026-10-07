@@ -110,14 +110,12 @@ const primaryAction = css(buttonRecipe.raw({ variant: "primary", size: "sm" }), 
   minW: "auto",
   py: "2",
   px: "4",
-  lineHeight: "normal",
 });
 
 const secondaryAction = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   minW: "auto",
   py: "2",
   px: "4",
-  lineHeight: "normal",
 });
 
 export function ManufacturerProfileEditor({

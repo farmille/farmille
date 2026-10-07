@@ -3,8 +3,9 @@ import Link from "next/link";
 import { buttonRecipe } from "@/components/Button";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
+import { formTextLinkStyle } from "@/app/_site/FormParts";
 import { css, cva } from "../../../styled-system/css";
-import { softCardStyle, textLinkStyle } from "./form-styles";
+import { softCardStyle } from "./form-styles";
 
 const typeLabelRecipe = cva({
   base: {
@@ -79,11 +80,11 @@ export function AccountTypeChoice() {
           textAlign: "center",
         })}
       >
-        <Link className={textLinkStyle} href="/login">
+        <Link className={formTextLinkStyle} href="/login">
           一般ユーザーの方はログイン
         </Link>
         <br />
-        <Link className={textLinkStyle} href="/sellers/login">
+        <Link className={formTextLinkStyle} href="/sellers/login">
           メーカーの方はログイン
         </Link>
       </div>

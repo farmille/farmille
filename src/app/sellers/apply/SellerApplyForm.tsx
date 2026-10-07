@@ -6,24 +6,22 @@ import { type ReactNode, useActionState, useState } from "react";
 import {
   describedBy,
   FieldError,
+  formFieldStyle,
+  formGuideRecipe,
+  formInputStyle,
+  formLabelStyle,
   FormNotice,
+  formTextareaStyle,
   OptionalBadge,
   RequiredBadge,
 } from "@/app/_site/FormParts";
 import { FormSubmitButton } from "@/app/_site/FormSubmitButton";
+import { formActionsStyle } from "@/components/auth/Fields";
 import { sellerApplyAction } from "@/app/sellers/apply/actions";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 
 import { css, cx } from "../../../../styled-system/css";
-import {
-  sellerActionsStyle,
-  sellerFieldStyle,
-  sellerGuideStyle,
-  sellerInputStyle,
-  sellerLabelStyle,
-  sellerLeadStyle,
-  sellerTextareaStyle,
-} from "../_components/form-styles";
+import { sellerLeadStyle } from "../_components/form-styles";
 
 type ApplyFieldProps = {
   name: string;
@@ -37,13 +35,13 @@ type ApplyFieldProps = {
 function ApplyField({ name, label, required, guide, error, children }: ApplyFieldProps) {
   const guideId = guide === undefined ? undefined : `${name}-guide`;
   return (
-    <div className={sellerFieldStyle}>
-      <label className={sellerLabelStyle} htmlFor={name}>
+    <div className={formFieldStyle}>
+      <label className={formLabelStyle} htmlFor={name}>
         {label} {required ? <RequiredBadge /> : <OptionalBadge />}
       </label>
       {children(describedBy(guideId, error && `${name}-error`))}
       {guide === undefined ? null : (
-        <div className={sellerGuideStyle} id={guideId}>
+        <div className={formGuideRecipe({ placement: "below" })} id={guideId}>
           {guide}
         </div>
       )}
@@ -74,7 +72,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("officialName")}
             autoComplete="organization"
-            className={sellerInputStyle}
+            className={formInputStyle}
             defaultValue={values.officialName}
             id="officialName"
             name="officialName"
@@ -85,8 +83,8 @@ export function SellerApplyForm() {
         )}
       </ApplyField>
 
-      <div className={sellerFieldStyle}>
-        <label className={sellerLabelStyle} htmlFor="corporateNumber">
+      <div className={formFieldStyle}>
+        <label className={formLabelStyle} htmlFor="corporateNumber">
           法人番号 <RequiredBadge />
         </label>
         <input
@@ -95,7 +93,7 @@ export function SellerApplyForm() {
             fieldErrors.corporateNumber && "corporateNumber-error",
           )}
           aria-invalid={invalid("corporateNumber")}
-          className={sellerInputStyle}
+          className={formInputStyle}
           defaultValue={values.corporateNumber}
           id="corporateNumber"
           inputMode="numeric"
@@ -103,7 +101,7 @@ export function SellerApplyForm() {
           name="corporateNumber"
           required
         />
-        <div className={sellerGuideStyle} id="corporateNumber-guide">
+        <div className={formGuideRecipe({ placement: "below" })} id="corporateNumber-guide">
           13桁の法人番号を入力してください。
         </div>
         <FieldError id="corporateNumber-error" message={fieldErrors.corporateNumber} />
@@ -138,7 +136,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("contactEmail")}
             autoComplete="email"
-            className={sellerInputStyle}
+            className={formInputStyle}
             defaultValue={values.contactEmail}
             id="contactEmail"
             name="contactEmail"
@@ -161,7 +159,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("contactName")}
             autoComplete="name"
-            className={sellerInputStyle}
+            className={formInputStyle}
             defaultValue={values.contactName}
             id="contactName"
             name="contactName"
@@ -183,7 +181,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("location")}
             autoComplete="street-address"
-            className={sellerInputStyle}
+            className={formInputStyle}
             defaultValue={values.location}
             id="location"
             name="location"
@@ -205,7 +203,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("contactPhone")}
             autoComplete="tel"
-            className={sellerInputStyle}
+            className={formInputStyle}
             defaultValue={values.contactPhone}
             id="contactPhone"
             maxLength={20}
@@ -227,7 +225,7 @@ export function SellerApplyForm() {
           <textarea
             aria-describedby={described}
             aria-invalid={invalid("materialRequestNotes")}
-            className={sellerTextareaStyle}
+            className={formTextareaStyle}
             defaultValue={values.materialRequestNotes}
             id="materialRequestNotes"
             maxLength={2000}
@@ -247,7 +245,7 @@ export function SellerApplyForm() {
             aria-describedby={described}
             aria-invalid={invalid("websiteUrl")}
             autoComplete="url"
-            className={sellerInputStyle}
+            className={formInputStyle}
             defaultValue={values.websiteUrl}
             id="websiteUrl"
             name="websiteUrl"
@@ -270,7 +268,7 @@ export function SellerApplyForm() {
               aria-invalid={invalid("inviteCode")}
               autoCapitalize="none"
               autoComplete="off"
-              className={sellerInputStyle}
+              className={formInputStyle}
               defaultValue={values.inviteCode}
               id="inviteCode"
               name="inviteCode"
@@ -293,7 +291,7 @@ export function SellerApplyForm() {
         </Link>
         をご確認ください。
       </p>
-      <div className={sellerActionsStyle}>
+      <div className={formActionsStyle}>
         <FormSubmitButton label="申請する" pendingLabel="申請中…" />
         <button
           aria-expanded={inviteOpen}

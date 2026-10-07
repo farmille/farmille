@@ -93,15 +93,6 @@ const reportLink = css(buttonRecipe.raw({ variant: "primary" }), fabLink, { flex
 
 const reviewLink = css(buttonRecipe.raw({ variant: "ghost" }), fabLink, { flex: "1" });
 
-const siteReportLink = css(buttonRecipe.raw({ variant: "primary" }), fabLink, {
-  flex: "1.3",
-  lineHeight: "normal",
-});
-
-const siteReviewLink = css(buttonRecipe.raw({ variant: "ghost" }), fabLink, {
-  flex: "1",
-  lineHeight: "normal",
-});
 
 type FabBarProps = {
   reportHref?: string;
@@ -136,10 +127,10 @@ export async function FabBar({
         className={cx(fabBarRecipe({ placement, look }), className)}
         data-ui="responsive-fab-bar"
       >
-        <Link href={reportHref} className={look === "site" ? siteReportLink : reportLink}>
+        <Link href={reportHref} className={reportLink}>
           実証詳細レポートを書く
         </Link>
-        <Link href={reviewHref} className={look === "site" ? siteReviewLink : reviewLink}>
+        <Link href={reviewHref} className={reviewLink}>
           感想口コミを書く
         </Link>
       </div>

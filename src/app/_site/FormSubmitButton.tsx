@@ -3,11 +3,7 @@
 import { useFormStatus } from "react-dom";
 
 import { buttonRecipe } from "@/components/Button";
-import { css } from "../../../styled-system/css";
 
-const submitButton = css(buttonRecipe.raw({ variant: "primary" }), {
-  lineHeight: "normal",
-});
 
 /** フォームの送信ボタン。送信中は文言を変えて押せなくする。 */
 export function FormSubmitButton({
@@ -22,7 +18,7 @@ export function FormSubmitButton({
   const { pending } = useFormStatus();
 
   return (
-    <button className={submitButton} disabled={pending || disabled} type="submit">
+    <button className={buttonRecipe({ variant: "primary" })} disabled={pending || disabled} type="submit">
       {pending ? pendingLabel : label}
     </button>
   );

@@ -13,7 +13,7 @@ import {
   sectionHeading,
   type ReportSection,
 } from "./ReportArticleParts";
-import { pillButton } from "./reportStyles";
+import { pillButtonRecipe } from "./ReportFormParts";
 
 const overlay = css({
   position: "fixed",
@@ -169,7 +169,7 @@ export function ReportPublishedView({
       <div className={wrap}>
         <div className={topBar}>
           <span>公開後の見え方（資材ページや検索から開いたときの記事）</span>
-          <button type="button" className={pillButton({ strong: true })} onClick={onBack}>
+          <button type="button" className={pillButtonRecipe({ strong: true })} onClick={onBack}>
             プレビューに戻る
           </button>
         </div>

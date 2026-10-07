@@ -33,7 +33,6 @@ const action = css(buttonRecipe.raw({ variant: "ghost" }), {
   py: "2",
   px: "3.5",
   fontSize: "sm",
-  lineHeight: "normal",
   flex: "none",
   whiteSpace: "nowrap",
 });

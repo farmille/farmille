@@ -91,8 +91,6 @@ const affiliation = css({
 const editLink = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   flex: "0 0 auto",
   px: "4",
-  py: "2",
-  lineHeight: "normal",
 });
 
 const srOnly = css({ srOnly: true });

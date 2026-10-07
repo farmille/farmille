@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
+import { formActionsStyle } from "@/components/auth/Fields";
 import {
   describedBy,
   FieldError,
-  formActionsStyle,
   formFieldStyle,
   formGuideRecipe,
   formInputStyle,

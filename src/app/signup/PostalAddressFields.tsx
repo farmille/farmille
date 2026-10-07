@@ -4,6 +4,9 @@ import { useRef, useState, useTransition } from "react";
 import {
   describedBy,
   FieldError,
+  formFieldStyle,
+  formInputStyle,
+  formLabelStyle,
   OptionalBadge,
   RequiredBadge,
   VisibilityTag,
@@ -12,7 +15,7 @@ import { buttonRecipe } from "@/components/Button";
 import { PREFECTURES } from "@/lib/prefectures";
 
 import { css, cva, cx } from "../../../styled-system/css";
-import { fieldInputStyle, fieldLabelStyle, fieldStyle, guideStyle } from "./form-styles";
+import { guideStyle } from "./form-styles";
 import { findPostalAddress } from "./postal-action";
 
 const ZIP_GUIDE = "郵便番号を入れると、都道府県と市区町村（町域まで）が自動で入ります。";
@@ -72,8 +75,8 @@ export function PostalAddressFields({
   const invalid = (name: string) => (fieldErrors[name] ? true : undefined);
 
   return (
-    <fieldset className={fieldStyle}>
-      <legend className={fieldLabelStyle}>
+    <fieldset className={formFieldStyle}>
+      <legend className={formLabelStyle}>
         住所
         <RequiredBadge />
       </legend>
@@ -109,7 +112,7 @@ export function PostalAddressFields({
               aria-describedby={describedBy("postalCode-note", errorFor("postalCode"))}
               aria-invalid={invalid("postalCode")}
               autoComplete="postal-code"
-              className={cx(fieldInputStyle, css({ flex: "1 1 token(sizes.44)", maxW: "80" }))}
+              className={cx(formInputStyle, css({ flex: "1 1 token(sizes.44)", maxW: "80" }))}
               id="postalCode"
               inputMode="numeric"
               maxLength={8}
@@ -147,7 +150,7 @@ export function PostalAddressFields({
             aria-describedby={errorFor("prefectureCode")}
             aria-invalid={invalid("prefectureCode")}
             autoComplete="address-level1"
-            className={cx(fieldInputStyle, css({ maxW: "56" }))}
+            className={cx(formInputStyle, css({ maxW: "56" }))}
             id="prefectureCode"
             name="prefectureCode"
             onChange={(event) => {
@@ -177,7 +180,7 @@ export function PostalAddressFields({
             aria-describedby={errorFor("city")}
             aria-invalid={invalid("city")}
             autoComplete="address-level2"
-            className={fieldInputStyle}
+            className={formInputStyle}
             id="city"
             maxLength={100}
             name="city"
@@ -200,7 +203,7 @@ export function PostalAddressFields({
             aria-describedby={errorFor("streetAddress")}
             aria-invalid={invalid("streetAddress")}
             autoComplete="address-line1"
-            className={fieldInputStyle}
+            className={formInputStyle}
             defaultValue={values.streetAddress}
             id="streetAddress"
             maxLength={200}
@@ -219,7 +222,7 @@ export function PostalAddressFields({
             aria-describedby={errorFor("buildingName")}
             aria-invalid={invalid("buildingName")}
             autoComplete="address-line2"
-            className={fieldInputStyle}
+            className={formInputStyle}
             defaultValue={values.buildingName}
             id="buildingName"
             maxLength={200}

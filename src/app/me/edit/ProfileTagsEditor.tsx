@@ -141,7 +141,6 @@ const addRow = css({
 const addButton = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   flex: "0 0 auto",
   px: "4",
-  lineHeight: "normal",
   _focusVisible: focusRing,
 });
 

@@ -257,7 +257,6 @@ const accountButton = css(buttonRecipe.raw({ variant: "ghost" }), {
   w: "auto",
   minW: "auto",
   py: "2",
-  lineHeight: "normal",
   px: "4",
 });
 

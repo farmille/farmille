@@ -5,9 +5,7 @@ import { css } from "../../../../styled-system/css";
 
 const actions = css({ display: "flex", flexDirection: "column", gap: "2.5", mt: "8", pb: "4" });
 
-const action = css(buttonRecipe.raw({ variant: "ghost" }), {
-  lineHeight: "normal",
-});
+const action = buttonRecipe({ variant: "ghost" });
 
 /** ログアウトとメーカー申請への導線。項目名と並びは以前の本番（b4ef5df）どおり。 */
 export function AccountActions({ admin = false }: { admin?: boolean }) {

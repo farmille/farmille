@@ -7,7 +7,11 @@ import { signupAction } from "@/app/signup/actions";
 import {
   describedBy,
   FieldError,
+  formFieldStyle,
+  formInputStyle,
+  formLabelStyle,
   FormNotice,
+  formTextLinkStyle,
   OptionalBadge,
   RequiredBadge,
   VisibilityTag,
@@ -21,14 +25,7 @@ import { Icon } from "@/components/Icon";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cx } from "../../../styled-system/css";
-import {
-  fieldInputStyle,
-  fieldLabelStyle,
-  fieldStyle,
-  guideStyle,
-  softCardStyle,
-  textLinkStyle,
-} from "./form-styles";
+import { guideStyle, softCardStyle } from "./form-styles";
 import { PostalAddressFields } from "./PostalAddressFields";
 
 const termsToggleStyle = css({
@@ -105,8 +102,8 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         ニックネームで参加できます。本名や連絡先が公開されることはありません。
       </p>
 
-      <div className={fieldStyle}>
-        <label className={fieldLabelStyle} htmlFor="handle">
+      <div className={formFieldStyle}>
+        <label className={formLabelStyle} htmlFor="handle">
           ニックネーム
           <RequiredBadge />
           <VisibilityTag visibility="public" />
@@ -115,7 +112,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           aria-describedby={describedBy("handle-guide", fieldErrors.handle && "handle-error")}
           aria-invalid={fieldErrors.handle ? true : undefined}
           autoComplete="nickname"
-          className={fieldInputStyle}
+          className={formInputStyle}
           defaultValue={values.handle}
           id="handle"
           maxLength={HANDLE_MAX_LENGTH}
@@ -130,8 +127,8 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         <FieldError id="handle-error" message={fieldErrors.handle} />
       </div>
 
-      <fieldset className={fieldStyle}>
-        <legend className={fieldLabelStyle}>
+      <fieldset className={formFieldStyle}>
+        <legend className={formLabelStyle}>
           本名
           <RequiredBadge />
           <VisibilityTag visibility="private" />
@@ -142,7 +139,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
             aria-invalid={fieldErrors.familyName ? true : undefined}
             aria-label="本名（姓）"
             autoComplete="family-name"
-            className={fieldInputStyle}
+            className={formInputStyle}
             defaultValue={values.familyName}
             id="familyName"
             maxLength={80}
@@ -155,7 +152,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
             aria-invalid={fieldErrors.givenName ? true : undefined}
             aria-label="本名（名）"
             autoComplete="given-name"
-            className={fieldInputStyle}
+            className={formInputStyle}
             defaultValue={values.givenName}
             id="givenName"
             maxLength={80}
@@ -168,8 +165,8 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         <FieldError id="givenName-error" message={fieldErrors.givenName} />
       </fieldset>
 
-      <div className={fieldStyle}>
-        <label className={fieldLabelStyle} htmlFor="email">
+      <div className={formFieldStyle}>
+        <label className={formLabelStyle} htmlFor="email">
           メールアドレス
           <RequiredBadge />
           <VisibilityTag visibility="private" />
@@ -178,7 +175,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           aria-describedby={describedBy(fieldErrors.email && "email-error")}
           aria-invalid={fieldErrors.email ? true : undefined}
           autoComplete="email"
-          className={fieldInputStyle}
+          className={formInputStyle}
           defaultValue={values.email}
           id="email"
           name="email"
@@ -189,8 +186,8 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         <FieldError id="email-error" message={fieldErrors.email} />
       </div>
 
-      <div className={fieldStyle}>
-        <label className={fieldLabelStyle} htmlFor="phone">
+      <div className={formFieldStyle}>
+        <label className={formLabelStyle} htmlFor="phone">
           電話番号
           <OptionalBadge />
           <VisibilityTag visibility="private" />
@@ -199,7 +196,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           aria-describedby={describedBy("phone-guide", fieldErrors.phone && "phone-error")}
           aria-invalid={fieldErrors.phone ? true : undefined}
           autoComplete="tel"
-          className={fieldInputStyle}
+          className={formInputStyle}
           defaultValue={values.phone}
           id="phone"
           maxLength={20}
@@ -214,13 +211,13 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       </div>
 
       <fieldset
-        className={fieldStyle}
+        className={formFieldStyle}
         aria-describedby={describedBy(
           "standpoint-guide",
           fieldErrors.standpoint && "standpoint-error",
         )}
       >
-        <legend className={fieldLabelStyle}>
+        <legend className={formLabelStyle}>
           あなたの立場
           <RequiredBadge />
           <VisibilityTag visibility="public" />
@@ -234,8 +231,8 @@ export function SignupForm({ next = null }: { next?: string | null }) {
 
       <PostalAddressFields values={values} fieldErrors={fieldErrors} />
 
-      <div className={fieldStyle}>
-        <label className={fieldLabelStyle} htmlFor="password">
+      <div className={formFieldStyle}>
+        <label className={formLabelStyle} htmlFor="password">
           パスワード
           <RequiredBadge />
         </label>
@@ -243,7 +240,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           aria-describedby={describedBy("password-guide", fieldErrors.password && "password-error")}
           aria-invalid={fieldErrors.password ? true : undefined}
           autoComplete="new-password"
-          className={fieldInputStyle}
+          className={formInputStyle}
           id="password"
           minLength={PASSWORD_MIN_LENGTH}
           name="password"
@@ -286,7 +283,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       <div className={cx(guideStyle, css({ mt: "1", mb: "2" }))}>
         規約・ガイドラインは別タブで開きます。個人情報の扱いは
         <Link
-          className={textLinkStyle}
+          className={formTextLinkStyle}
           href="/legal/privacy"
           target="_blank"
           rel="noopener noreferrer"
@@ -304,13 +301,13 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       </div>
       <div className={cx(guideStyle, css({ mb: "2", textAlign: "center" }))}>
         <Link
-          className={textLinkStyle}
+          className={formTextLinkStyle}
           href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
         >
           すでに一般ユーザーアカウントをお持ちの方はログイン
         </Link>
         <br />
-        <Link className={textLinkStyle} href="/signup">
+        <Link className={formTextLinkStyle} href="/signup">
           登録方法を選び直す
         </Link>
       </div>

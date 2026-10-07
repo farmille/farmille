@@ -60,8 +60,6 @@ const searchButtonStyle = css(buttonRecipe.raw({ variant: "primary", size: "sm" 
   flex: "0 0 auto",
   minW: "0",
   px: "4",
-  lineHeight: "normal",
-  _focusVisible: focusRing,
 });
 
 const pickRowStyle = css({
@@ -142,14 +140,8 @@ const footerStyle = css({
   },
 });
 
-const footerLinkBase = {
-  py: "3.5",
-  lineHeight: "normal",
-  _focusVisible: focusRing,
-} as const;
-
-const reportLinkStyle = css(buttonRecipe.raw({ variant: "primary", size: "md" }), footerLinkBase);
-const reviewLinkStyle = css(buttonRecipe.raw({ variant: "ghost", size: "md" }), footerLinkBase);
+const reportLinkStyle = buttonRecipe({ variant: "primary" });
+const reviewLinkStyle = buttonRecipe({ variant: "ghost" });
 
 const footerGuideStyle = css({
   mt: "1",

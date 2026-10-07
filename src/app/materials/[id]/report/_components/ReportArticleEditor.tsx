@@ -19,8 +19,7 @@ import {
   sectionHeading,
   type ReportSection,
 } from "./ReportArticleParts";
-import { Badge, Need } from "./ReportFormParts";
-import { pillButton } from "./reportStyles";
+import { Badge, Need, pillButtonRecipe } from "./ReportFormParts";
 
 const groupHeading = cva({
   base: {
@@ -542,7 +541,7 @@ export function ReportArticleEditor({
             </div>
             {!preview && section.value !== "documents" && (
               <div className={css({ display: "flex", alignItems: "center", gap: "2", mt: "2" })}>
-                <label className={cx(pillButton(), fileButton)}>
+                <label className={cx(pillButtonRecipe(), fileButton)}>
                   ＋ 写真を挿入
                   <input
                     className={visuallyHidden}

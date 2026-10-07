@@ -9,7 +9,7 @@ import type { UsageReportInput } from "@/lib/usage-report";
 import { css, cva, cx } from "../../../../../../styled-system/css";
 
 import { editKey, readCell, type EditTarget } from "./ReportGraphEditor";
-import { pillButton } from "./reportStyles";
+import { pillButtonRecipe } from "./ReportFormParts";
 
 type Measurement = UsageReportInput["measurements"][number];
 type Graph = Measurement["graphs"][number];
@@ -149,7 +149,7 @@ const fieldLabel = css({
 const hint = css({ fontSize: "sm", color: "text.subtle", mt: "1.5" });
 const smallInput = css(inputRecipe.raw(), { py: "2", px: "2.5", borderRadius: "input" });
 const nav = css({ display: "flex", gap: "1.5", mt: "2.5", alignItems: "center" });
-const doneButton = cx(pillButton({ tone: "primary", strong: true }), css({ ml: "auto" }));
+const doneButton = cx(pillButtonRecipe({ tone: "primary", strong: true }), css({ ml: "auto" }));
 const removeButton = css({
   borderWidth: "0",
   bg: "transparent",
@@ -403,7 +403,7 @@ export function ReportCellEditor({
             />
             <button
               type="button"
-              className={pillButton({ size: "xs" })}
+              className={pillButtonRecipe({ size: "xs", tone: "quiet", strong: true })}
               onClick={() => onRangeAll(plot.scope)}
             >
               この範囲を全ての区に入れる

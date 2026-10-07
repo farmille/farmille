@@ -13,7 +13,10 @@ import {
 import {
   describedBy,
   FieldError,
+  formFieldStyle,
+  formLabelStyle,
   FormNotice,
+  formTextLinkStyle,
   ImagePlaceholderIcon,
   OptionalBadge,
   RequiredBadge,
@@ -70,31 +73,12 @@ const focusRing = {
   outlineOffset: "2px",
 } as const;
 
-const fieldStyle = css({ mt: "5", minW: "0", _first: { mt: "0" } });
-
-const fieldLabelStyle = css({
-  display: "flex",
-  alignItems: "center",
-  flexWrap: "wrap",
-  gap: "2",
-  w: "full",
-  mb: "1.5",
-  fontSize: "md",
-  fontWeight: "bold",
-});
-
 const guideStyle = css({
   mt: "1.5",
   mb: "2",
   fontSize: "sm",
   lineHeight: "normal",
   color: "text.muted",
-});
-
-const textLinkStyle = css({
-  color: "primary.800",
-  fontWeight: "semibold",
-  textDecoration: "none",
 });
 
 const targetCardStyle = css(surfaceCardRecipe.raw({ padding: "compact" }), { mb: "4.5" });
@@ -235,7 +219,6 @@ const checkBoxStyle = css({
 
 const submitButtonStyle = css(buttonRecipe.raw({ variant: "primary", size: "md" }), {
   py: "3.5",
-  lineHeight: "normal",
   _focusVisible: focusRing,
 });
 
@@ -407,8 +390,8 @@ export function ReviewForm({
         </div>
       </div>
 
-      <div className={fieldStyle}>
-        <label className={fieldLabelStyle} htmlFor="review-crop">
+      <div className={formFieldStyle}>
+        <label className={formLabelStyle} htmlFor="review-crop">
           作目
           <RequiredBadge />
           <span className={css({ fontSize: "xs", fontWeight: "normal", color: "text.subtle" })}>
@@ -427,10 +410,10 @@ export function ReviewForm({
       </div>
 
       <fieldset
-        className={fieldStyle}
+        className={formFieldStyle}
         aria-describedby={describedBy(fieldErrors?.rating && "review-rating-error")}
       >
-        <legend className={fieldLabelStyle}>
+        <legend className={formLabelStyle}>
           総合評価
           <RequiredBadge />
         </legend>
@@ -453,8 +436,8 @@ export function ReviewForm({
         <FieldError id="review-rating-error" message={fieldErrors?.rating} />
       </fieldset>
 
-      <div className={fieldStyle}>
-        <label className={fieldLabelStyle} htmlFor="review-body">
+      <div className={formFieldStyle}>
+        <label className={formLabelStyle} htmlFor="review-body">
           感想口コミ本文
           <RequiredBadge />
         </label>
@@ -481,7 +464,7 @@ export function ReviewForm({
         </div>
         <div className={guideStyle} id="review-body-guide">
           作物・使用時期・使い方・感じた変化が入っていると参考になります。もっと詳しく書きたい場合は「
-          <Link className={textLinkStyle} href={`/materials/${material.id}/report/new`}>
+          <Link className={formTextLinkStyle} href={`/materials/${material.id}/report/new`}>
             実証詳細レポート入力
           </Link>
           」から。
@@ -490,13 +473,13 @@ export function ReviewForm({
       </div>
 
       <fieldset
-        className={fieldStyle}
+        className={formFieldStyle}
         aria-describedby={describedBy(
           "review-photo-guide",
           fieldErrors?.photos && "review-photo-error",
         )}
       >
-        <legend className={fieldLabelStyle}>
+        <legend className={formLabelStyle}>
           写真
           <OptionalBadge>任意・複数可</OptionalBadge>
         </legend>

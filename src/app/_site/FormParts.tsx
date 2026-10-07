@@ -6,7 +6,7 @@ import { textareaRecipe } from "@/components/Textarea";
 import { css, cva } from "../../../styled-system/css";
 
 /** 入力欄1つ分の区切り。2つ目以降の欄の上に間をあける。 */
-export const formFieldStyle = css({ mt: "5", _first: { mt: "0" } });
+export const formFieldStyle = css({ mt: "5", minW: "0", _first: { mt: "0" } });
 
 /** 欄の名前（label や、複数の部品をまとめる見出し）。 */
 export const formLabelStyle = css({
@@ -14,6 +14,7 @@ export const formLabelStyle = css({
   alignItems: "center",
   flexWrap: "wrap",
   gap: "2",
+  w: "full",
   mb: "1.5",
   fontSize: "md",
   fontWeight: "bold",
@@ -30,20 +31,14 @@ export const formGuideRecipe = cva({
 
 const invalidControl = { "&[aria-invalid=true]": { borderColor: "accent.danger" } } as const;
 
-export const formInputStyle = css(inputRecipe.raw(), { fontFamily: "inherit" }, invalidControl);
+export const formInputStyle = css(inputRecipe.raw(), invalidControl);
 
-export const formTextareaStyle = css(
-  textareaRecipe.raw(),
-  { fontFamily: "inherit" },
-  invalidControl,
-);
+export const formTextareaStyle = css(textareaRecipe.raw(), invalidControl);
 
-/** 送信ボタンと「キャンセル」などを縦に並べる。 */
-export const formActionsStyle = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "2.5",
-  mt: "6",
+export const formTextLinkStyle = css({
+  color: "primary.800",
+  fontWeight: "semibold",
+  textDecoration: "none",
 });
 
 /** 送信ボタンの下に置く控えめなリンク（キャンセル・下書き保存など）。 */
