@@ -51,7 +51,8 @@ supabase/.temp/
 **/supabase/.temp/
 
 # Claude
-.claude/
+.claude/*
+!.claude/settings.json
 
 # GSD planning state (local)
 .planning/
