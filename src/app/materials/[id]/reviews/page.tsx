@@ -2,7 +2,6 @@ import { MaterialPageShell } from "../_components/PageShell";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { after } from "next/server";
 
 import { Pagination } from "@/components/Pagination";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
@@ -10,8 +9,6 @@ import { createReviewListJsonLd, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { getReviewRatingDistribution } from "@/server/queries/material-content";
 import { listReviewsByMaterial } from "@/server/queries/reviews";
-import { recordViewEvents, viewEventsInsertFor } from "@/server/queries/view-events";
-import { createServerSupabase } from "@/server/supabase";
 
 import { css } from "../../../../../styled-system/css";
 
@@ -82,15 +79,6 @@ export default async function MaterialReviewsPage({
   ]);
   const reviews = unwrapQueryResult(reviewsResult);
   const distribution = unwrapQueryResult(distributionResult);
-  const insertViewEvents = viewEventsInsertFor(await createServerSupabase());
-  after(async () => {
-    await recordViewEvents({
-      targetType: "review",
-      targetIds: reviews.items.map((review) => review.id),
-      viewerUserId,
-      insert: insertViewEvents,
-    });
-  });
   const materialPath = `/materials/${material.id}`;
   const reviewsPath = `${materialPath}/reviews`;
   const reviewListJsonLd =

@@ -17,11 +17,7 @@ import { getReviewRatingDistribution } from "@/server/queries/material-content";
 import type { MaterialDetail } from "@/server/queries/materials";
 import { listReviewsByMaterial } from "@/server/queries/reviews";
 import { isMaterialSaved } from "@/server/queries/saved-materials";
-import {
-  recordViewEvent,
-  recordViewEvents,
-  viewEventsInsertFor,
-} from "@/server/queries/view-events";
+import { recordViewEvent } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
 
 import { css } from "../../../../styled-system/css";
@@ -104,15 +100,6 @@ async function MaterialReviews({
     await listReviewsByMaterial(material.id, { sort: "newest", page: 1, viewerUserId }),
   );
   const displayedReviews = reviews.items.slice(0, 3);
-  const insertViewEvents = viewEventsInsertFor(await createServerSupabase());
-  after(async () => {
-    await recordViewEvents({
-      targetType: "review",
-      targetIds: displayedReviews.map((review) => review.id),
-      viewerUserId,
-      insert: insertViewEvents,
-    });
-  });
 
   return (
     <MaterialReviewsSection

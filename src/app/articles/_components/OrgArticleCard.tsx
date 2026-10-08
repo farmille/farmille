@@ -67,9 +67,7 @@ export function OrgArticleCard({
         })}
       >
         <span
-          className={css(helpfulPillRecipe.raw({ layout: "card" }), {
-            "& svg": { display: "block" },
-          })}
+          className={helpfulPillRecipe({ layout: "card" })}
           aria-label={`参考になった ${helpfulCount}件`}
         >
           <Icon name="thumb_up" size="xs" />
