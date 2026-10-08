@@ -7,7 +7,6 @@ import {
   ImagePlaceholderIcon,
   OptionalBadge,
   RequiredBadge,
-  SearchIcon,
   VisibilityTag,
 } from "./FormParts";
 
@@ -36,7 +35,6 @@ export const AllParts: Story = {
         <VisibilityTag visibility="private" />
       </div>
       <div className={row}>
-        <SearchIcon />
         <ImagePlaceholderIcon />
       </div>
       <FieldError id="handle-error" message="ニックネームを入力してください。" />

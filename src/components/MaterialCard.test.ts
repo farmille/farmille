@@ -21,7 +21,8 @@ describe("MaterialCard", () => {
 
       const card = container.querySelector(`[data-ui="material-card"][data-variant="${variant}"]`);
       const imageBox = card?.querySelector('[data-ui="material-card-image"]') ?? null;
-      const placeholder = imageBox?.querySelector<SVGElement>("svg[aria-hidden='true']") ?? null;
+      const placeholder =
+        imageBox?.querySelector<HTMLElement>("[translate='no'][aria-hidden='true']") ?? null;
       const image = screen.getByRole("img", { name: baseProps.name });
       const imageLayer = css({ gridArea: "1 / 1" });
 

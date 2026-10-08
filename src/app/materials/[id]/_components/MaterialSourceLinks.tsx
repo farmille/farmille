@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import { useId } from "react";
 import * as v from "valibot";
 
@@ -12,7 +13,6 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { css, cx } from "../../../../../styled-system/css";
 
 import { MaterialBox } from "./MaterialBox";
-import { ExternalIcon } from "./CardParts";
 
 type MaterialLink = MaterialPageContent["links"][number];
 type LinkGroup = MaterialLink["group"];
@@ -140,7 +140,7 @@ function FileRow({ link }: { link: MaterialLink }) {
           rel="noreferrer"
           aria-labelledby={titleId}
         >
-          <ExternalIcon />
+          <Icon name="open_in_new" size="2xs" />
           開く
         </a>
       ) : null}
@@ -197,7 +197,7 @@ function TestRow({ link }: { link: MaterialLink }) {
     >
       {body}
       <span className={testOpenStyle}>
-        <ExternalIcon /> 開く
+        <Icon name="open_in_new" size="2xs" /> 開く
       </span>
     </a>
   );

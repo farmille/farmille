@@ -1,10 +1,9 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import { useEffect, useRef, useState, type InputHTMLAttributes } from "react";
 
 import { css, cva } from "../../../styled-system/css";
-
-import { SearchIcon } from "./FormParts";
 
 const root = css({ position: "relative" });
 
@@ -164,7 +163,7 @@ export function SearchCombobox({
     >
       <div className={box}>
         <span className={icon}>
-          <SearchIcon />
+          <Icon name="search" size="sm" />
         </span>
         <input
           {...inputProps}

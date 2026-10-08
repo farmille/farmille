@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
@@ -5,7 +6,6 @@ import type { PublishedArticleDetail } from "@/server/queries/articles";
 
 import { css } from "../../../../styled-system/css";
 import { Stars } from "../../materials/[id]/_components/CardParts";
-import { ChevronIcon, SeedIcon } from "./ArticleIcons";
 import { ReadingHeading } from "./Reading";
 
 const materialLink = css(surfaceCardRecipe.raw({ tone: "soft", padding: "compact" }), {
@@ -38,7 +38,7 @@ export function ArticleMaterialList({
                 flexShrink: "0",
               })}
             >
-              <SeedIcon />
+              <Icon name="eco" size="lg" className={css({ color: "primary.700" })} />
             </span>
             <span className={css({ minW: "0" })}>
               <span className={css({ display: "block", fontWeight: "bold", fontSize: "md" })}>
@@ -59,7 +59,7 @@ export function ArticleMaterialList({
               </span>
             </span>
             <span className={css({ display: "flex", ml: "auto" })}>
-              <ChevronIcon />
+              <Icon name="chevron_right" size="sm" className={css({ color: "text.subtle" })} />
             </span>
           </Link>
         ))}

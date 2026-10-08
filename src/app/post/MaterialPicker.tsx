@@ -1,9 +1,9 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { useState } from "react";
 
-import { SearchIcon } from "@/app/_site/FormParts";
 import { NoImage, Stars } from "@/app/materials/[id]/_components/CardParts";
 import { buttonRecipe } from "@/components/Button";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
@@ -184,7 +184,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
         {postType !== undefined ? <input type="hidden" name="type" value={postType} /> : null}
         <div className={searchBoxStyle}>
           <span className={css({ display: "flex", color: "text.subtle" })}>
-            <SearchIcon />
+            <Icon name="search" size="sm" />
           </span>
           <input
             id="pickInput"

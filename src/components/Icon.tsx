@@ -1,78 +1,81 @@
-import {
-  MdSearch,
-  MdOutlineBookmarkBorder,
-  MdBookmark,
-  MdOutlineVisibility,
-  MdOutlineVisibilityOff,
-  MdChevronLeft,
-  MdShare,
-  MdOutlineVerified,
-  MdOutlinePerson,
-  MdOutlineThumbUp,
-  MdChevronRight,
-  MdOutlineHome,
-  MdOutlineArticle,
-  MdAdd,
-  MdOutlineImage,
-  MdCheck,
-  MdArrowForward,
-  MdArrowBack,
-  MdNorthEast,
-  MdClose,
-  MdStarBorder,
-  MdStar,
-} from "react-icons/md";
 import { cva, cx, type RecipeVariantProps } from "../../styled-system/css";
 
-// Google Material Icons を用途名で参照する。
+// Google Material Icons（material-icons パッケージのフォント）を用途名で参照する。
+// Material Icons の線版は書体（Outlined）で出し分けるが、bookmark・star のように
+// 塗りと線が別名（*_border）の glyph は ligature 名で出し分ける。書体は glyph ごとに固定する。
 const glyphs = {
-  search: MdSearch,
-  bookmark: MdOutlineBookmarkBorder,
-  bookmark_filled: MdBookmark,
-  visibility: MdOutlineVisibility,
-  visibility_off: MdOutlineVisibilityOff,
-  chevron_left: MdChevronLeft,
-  share: MdShare,
-  verified: MdOutlineVerified,
-  person: MdOutlinePerson,
-  thumb_up: MdOutlineThumbUp,
-  chevron_right: MdChevronRight,
-  home: MdOutlineHome,
-  article: MdOutlineArticle,
-  add: MdAdd,
-  image: MdOutlineImage,
-  check: MdCheck,
-  arrow_forward: MdArrowForward,
-  arrow_back: MdArrowBack,
-  north_east: MdNorthEast,
-  close: MdClose,
-  star: MdStarBorder,
-  star_filled: MdStar,
-};
+  search: { ligature: "search", face: "filled" },
+  bookmark: { ligature: "bookmark_border", face: "outlined" },
+  bookmark_filled: { ligature: "bookmark", face: "filled" },
+  visibility: { ligature: "visibility", face: "outlined" },
+  visibility_off: { ligature: "visibility_off", face: "outlined" },
+  chevron_left: { ligature: "chevron_left", face: "filled" },
+  share: { ligature: "share", face: "filled" },
+  verified: { ligature: "verified", face: "outlined" },
+  person: { ligature: "person", face: "outlined" },
+  thumb_up: { ligature: "thumb_up", face: "outlined" },
+  chevron_right: { ligature: "chevron_right", face: "filled" },
+  home: { ligature: "home", face: "outlined" },
+  article: { ligature: "article", face: "outlined" },
+  add: { ligature: "add", face: "filled" },
+  image: { ligature: "image", face: "outlined" },
+  check: { ligature: "check", face: "filled" },
+  arrow_forward: { ligature: "arrow_forward", face: "filled" },
+  arrow_back: { ligature: "arrow_back", face: "filled" },
+  north_east: { ligature: "north_east", face: "filled" },
+  close: { ligature: "close", face: "filled" },
+  star: { ligature: "star_border", face: "filled" },
+  star_filled: { ligature: "star", face: "filled" },
+  public: { ligature: "language", face: "outlined" },
+  lock: { ligature: "lock", face: "outlined" },
+  open_in_new: { ligature: "open_in_new", face: "filled" },
+  location_on: { ligature: "location_on", face: "outlined" },
+  eco: { ligature: "eco", face: "outlined" },
+  warning: { ligature: "warning", face: "filled" },
+} as const;
 
+// 一辺 = フォントサイズ。フォント読み込み前に ligature の文字列で幅が広がらないよう箱を固定して切り取る。
 const iconRecipe = cva({
   base: {
     display: "inline-block",
     flexShrink: "0",
     verticalAlign: "middle",
-    fill: "currentColor",
+    overflow: "hidden",
+    lineHeight: "1",
+    letterSpacing: "normal",
+    textTransform: "none",
+    whiteSpace: "nowrap",
+    direction: "ltr",
+    fontStyle: "normal",
+    fontWeight: "normal",
+    fontFeatureSettings: '"liga"',
+    userSelect: "none",
+    // ligature 名は属性から疑似要素で描き、本文テキスト（getByText・検索エンジン・コピー）に混ぜない。
+    _before: { content: "attr(data-icon)" },
+    fontSmoothing: "antialiased",
   },
   variants: {
     size: {
-      "2xs": { width: "icon.2xs", height: "icon.2xs" },
-      xs: { width: "icon.xs", height: "icon.xs" },
-      sm: { width: "icon.sm", height: "icon.sm" },
-      md: { width: "icon.md", height: "icon.md" },
-      lg: { width: "icon.lg", height: "icon.lg" },
-      xl: { width: "icon.xl", height: "icon.xl" },
-      "2xl": { width: "icon.2xl", height: "icon.2xl" },
+      "2xs": { width: "icon.2xs", height: "icon.2xs", fontSize: "token(sizes.icon.2xs)" },
+      xs: { width: "icon.xs", height: "icon.xs", fontSize: "token(sizes.icon.xs)" },
+      sm: { width: "icon.sm", height: "icon.sm", fontSize: "token(sizes.icon.sm)" },
+      md: { width: "icon.md", height: "icon.md", fontSize: "token(sizes.icon.md)" },
+      lg: { width: "icon.lg", height: "icon.lg", fontSize: "token(sizes.icon.lg)" },
+      xl: { width: "icon.xl", height: "icon.xl", fontSize: "token(sizes.icon.xl)" },
+      "2xl": { width: "icon.2xl", height: "icon.2xl", fontSize: "token(sizes.icon.2xl)" },
+    },
+    face: {
+      filled: { fontFamily: "materialIcons" },
+      outlined: { fontFamily: "materialIconsOutlined" },
     },
   },
   defaultVariants: { size: "md" },
 });
 
-export type IconName = keyof typeof glyphs | "leaf";
-export type IconProps = RecipeVariantProps<typeof iconRecipe> & {
+export type IconName = keyof typeof glyphs;
+/** 利用できる glyph 名の一覧（Storybook の全件表示用）。 */
+export const iconNames = Object.keys(glyphs).filter((name): name is IconName => name in glyphs);
+export type IconProps = Pick<NonNullable<RecipeVariantProps<typeof iconRecipe>>, "size"> & {
   name: IconName;
   className?: string;
   /** 単独で意味を伝える場合の読み上げ名。装飾アイコンでは省略する。 */
@@ -81,23 +84,15 @@ export type IconProps = RecipeVariantProps<typeof iconRecipe> & {
 
 /** サイズをトークンで指定するアイコン。色は親要素から継承する。 */
 export function Icon({ name, size, className, label }: IconProps) {
-  const accessibility = {
-    "aria-hidden": label === undefined ? true : undefined,
-    role: label === undefined ? undefined : "img",
-    "aria-label": label,
-    focusable: false,
-  };
-  const iconClassName = cx(iconRecipe({ size }), className);
-
-  // 葉は Farmille 固有のロゴとして保持する。
-  if (name === "leaf") {
-    return (
-      <svg viewBox="0 0 32 32" className={iconClassName} {...accessibility}>
-        <path d="M26 5C14 5 6 12 6 22c0 2 .4 3.6 1 5 6-9 12-12 18-13-5 2.5-9 6.5-12 13 1 .3 2.3.5 4 .5 8 0 13-6 13-15 0-4-1-7-4-8z" />
-      </svg>
-    );
-  }
-
-  const Glyph = glyphs[name];
-  return <Glyph className={iconClassName} {...accessibility} />;
+  const { ligature, face } = glyphs[name];
+  return (
+    <span
+      className={cx(iconRecipe({ size, face }), className)}
+      data-icon={ligature}
+      translate="no"
+      aria-hidden={label === undefined ? true : undefined}
+      role={label === undefined ? undefined : "img"}
+      aria-label={label}
+    />
+  );
 }

@@ -1,4 +1,4 @@
-import { ExternalIcon } from "@/app/materials/[id]/_components/CardParts";
+import { Icon } from "@/components/Icon";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { Badge } from "@/components/Badge";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
@@ -16,23 +16,6 @@ function checkedExternalUrl(value: string): string {
   }
 
   return url.toString();
-}
-
-function PinIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z" />
-      <circle cx="12" cy="10" r="2.5" />
-    </svg>
-  );
 }
 
 type SellerHeaderProps = {
@@ -98,13 +81,14 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
                 target="_blank"
                 rel="noreferrer"
               >
-                <ExternalIcon /> {websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                <Icon name="open_in_new" size="2xs" />{" "}
+                {websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                 <span className={css({ srOnly: true })}>（公式サイト・別タブで開きます）</span>
               </a>
             )}
             {seller.regionScope === null ? null : (
               <span className={cx(linkRowStyle, css({ color: "text.muted" }))}>
-                <PinIcon /> {seller.regionScope}
+                <Icon name="location_on" size="xs" /> {seller.regionScope}
               </span>
             )}
           </div>

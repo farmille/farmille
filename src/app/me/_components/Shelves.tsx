@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -82,28 +83,11 @@ const savedName = css({ mt: "0.5", fontSize: "md", fontWeight: "bold", lineHeigh
 
 const savedMaker = css({ mt: "0.5", color: "text.subtle", fontSize: "xs" });
 
-function Chevron() {
-  return (
-    <svg
-      className={css({ flex: "0 0 auto", color: "text.subtle" })}
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <path d="M9 6l6 6-6 6" />
-    </svg>
-  );
-}
-
 export function LinkRow({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link className={linkRow} href={href}>
       <div className={css({ minW: "0" })}>{children}</div>
-      <Chevron />
+      <Icon name="chevron_right" size="sm" className={css({ color: "text.subtle" })} />
     </Link>
   );
 }

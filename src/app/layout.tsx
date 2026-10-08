@@ -9,6 +9,8 @@ import "gen-interface-jp/500.css";
 import "gen-interface-jp/600.css";
 import "gen-interface-jp/700.css";
 import "gen-interface-jp/800.css";
+import "material-icons/iconfont/filled.css";
+import "material-icons/iconfont/outlined.css";
 import "./globals.css";
 
 // Adobe Fontsの日本語フォント用ローダー。Hydration後に実行し、Typekitのclass追加とReactの照合を競合させない。

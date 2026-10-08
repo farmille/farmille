@@ -1,9 +1,9 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import type { ContentFeedFilter } from "@/server/queries/content-feed";
 
 import { css, cva } from "../../../../styled-system/css";
-import { ArticleSearchIcon } from "./ArticleIcons";
 
 const FILTER_OPTIONS: ReadonlyArray<{ value: ContentFeedFilter; label: string }> = [
   { value: "all", label: "すべて" },
@@ -81,7 +81,7 @@ export function ArticlesSearchBar({ filter, q }: { filter: ContentFeedFilter; q:
         role="search"
       >
         <span className={css({ display: "flex", color: "text.subtle" })}>
-          <ArticleSearchIcon />
+          <Icon name="search" size="sm" />
         </span>
         {filter !== "all" ? <input type="hidden" name="type" value={filter} /> : null}
         <input

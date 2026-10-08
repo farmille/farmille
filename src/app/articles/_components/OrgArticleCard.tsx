@@ -1,9 +1,10 @@
+import { Icon } from "@/components/Icon";
 import { Badge } from "@/components/Badge";
 import { helpfulPillRecipe } from "@/components/helpful-pill";
 
 import { css } from "../../../../styled-system/css";
 import { FeedCard } from "./FeedCard";
-import { ThumbIcon, ViewCount } from "./ArticleIcons";
+import { ViewCount } from "./ViewCount";
 
 type OrgArticleCardProps = {
   href: string;
@@ -71,7 +72,7 @@ export function OrgArticleCard({
           })}
           aria-label={`参考になった ${helpfulCount}件`}
         >
-          <ThumbIcon />
+          <Icon name="thumb_up" size="xs" />
           <span>参考になった</span>
           {helpfulCount}
         </span>

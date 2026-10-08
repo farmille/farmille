@@ -21,7 +21,7 @@ import { createServerSupabase } from "@/server/supabase";
 
 import { ArticleHeader } from "../_components/ArticleHeader";
 import { ArticleMaterialList } from "../_components/ArticleMaterialList";
-import { ViewCount } from "../_components/ArticleIcons";
+import { ViewCount } from "../_components/ViewCount";
 import { readingArticle, readingFoot, ReadingMarkdown } from "../_components/Reading";
 import { css } from "../../../../styled-system/css";
 

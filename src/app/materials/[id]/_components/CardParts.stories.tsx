@@ -1,8 +1,9 @@
+import { Icon } from "@/components/Icon";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { css } from "../../../../../styled-system/css";
 
-import { Avatar, CheckIcon, Chip, ExternalIcon, NoImage, Stars } from "./CardParts";
+import { Avatar, Chip, NoImage, Stars } from "./CardParts";
 import { storyImageUrl } from "./story-fixtures";
 
 const row = css({ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "3", mb: "4" });
@@ -58,8 +59,8 @@ export const NoImageAndIcons: Story = {
       <div className={imageBox}>
         <NoImage />
       </div>
-      <CheckIcon />
-      <ExternalIcon />
+      <Icon name="check" size="sm" />
+      <Icon name="open_in_new" size="2xs" />
     </div>
   ),
 };

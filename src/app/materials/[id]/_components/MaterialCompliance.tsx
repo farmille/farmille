@@ -1,9 +1,8 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { css, cva } from "../../../../../styled-system/css";
-
-import { CheckIcon } from "./CardParts";
 
 const noticeRecipe = cva({
   base: {
@@ -55,7 +54,7 @@ function CheckedNotice({
   return (
     <div className={noticeRecipe({ spacing })}>
       <span className={checkStyle}>
-        <CheckIcon />
+        <Icon name="check" size="sm" />
       </span>
       <div>{children}</div>
     </div>

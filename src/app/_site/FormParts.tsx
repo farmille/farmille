@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { Badge, badgeRecipe } from "@/components/Badge";
+import { Icon } from "@/components/Icon";
 import { inputRecipe } from "@/components/Input";
 import { textareaRecipe } from "@/components/Textarea";
 import { css, cva } from "../../../styled-system/css";
@@ -110,89 +111,25 @@ export function OptionalBadge({ children = "任意" }: { children?: ReactNode })
   return <Badge variant="optional">{children}</Badge>;
 }
 
-function PublicIcon() {
-  return (
-    <svg
-      width="11"
-      height="11"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="9" />
-      <path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z" />
-    </svg>
-  );
-}
-
-function PrivateIcon() {
-  return (
-    <svg
-      width="11"
-      height="11"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V7a4 4 0 018 0v4" />
-    </svg>
-  );
-}
-
 export function VisibilityTag({ visibility }: { visibility: "public" | "private" }) {
   return visibility === "public" ? (
     <span className={visibilityTag({ visibility: "public" })}>
-      <PublicIcon />
+      <Icon name="public" size="2xs" />
       公開<span className={srOnly}>されます</span>
     </span>
   ) : (
     <span className={visibilityTag({ visibility: "private" })}>
-      <PrivateIcon />
+      <Icon name="lock" size="2xs" />
       <span aria-hidden="true">非公開</span>
       <span className={srOnly}>公開されません</span>
     </span>
   );
 }
 
-export function SearchIcon() {
-  return (
-    <svg
-      width="17"
-      height="17"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="M21 21l-4-4" />
-    </svg>
-  );
-}
+const imagePlaceholderStyle = css({ color: "primary.700" });
 
 export function ImagePlaceholderIcon() {
-  return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      aria-hidden="true"
-      className={css({ color: "primary.700" })}
-    >
-      <rect x="3" y="4" width="18" height="16" rx="2" />
-      <circle cx="8.5" cy="9.5" r="1.6" />
-      <path d="M21 16l-5-5-7 7" />
-    </svg>
-  );
+  return <Icon name="image" size="lg" className={imagePlaceholderStyle} />;
 }
 
 export function FieldError({ id, message }: { id: string; message?: string }) {

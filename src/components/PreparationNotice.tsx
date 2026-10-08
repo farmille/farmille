@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { Icon } from "@/components/Icon";
 import { css, cva } from "../../styled-system/css";
 
 const noticeStyle = cva({
@@ -44,13 +44,7 @@ export function PreparationNotice({
             fontWeight: "semibold",
           })}
         >
-          <Image
-            src="/icons/notice-warning.svg"
-            alt=""
-            width={20}
-            height={20}
-            className={css({ flexShrink: "0" })}
-          />
+          <Icon name="warning" size="md" />
           Farmilleは現在準備中です
         </p>
         <div
