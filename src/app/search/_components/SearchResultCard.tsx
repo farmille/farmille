@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { Chip, NoImage } from "@/app/materials/[id]/_components/CardParts";
@@ -78,23 +79,6 @@ const evidenceRecipe = cva({
     },
   },
 });
-
-function ChevronIcon() {
-  return (
-    <svg
-      className={css({ flex: "none", color: "text.subtle" })}
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <path d="M9 6l6 6-6 6" />
-    </svg>
-  );
-}
 
 export function SearchResultCard({
   href,
@@ -180,7 +164,7 @@ export function SearchResultCard({
           </div>
         ) : null}
       </div>
-      <ChevronIcon />
+      <Icon name="chevron_right" size="sm" className={css({ color: "text.subtle" })} />
     </Link>
   );
 }

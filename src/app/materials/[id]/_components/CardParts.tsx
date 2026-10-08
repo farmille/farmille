@@ -151,35 +151,3 @@ export function Chip({
 }) {
   return <span className={chipRecipe({ tone, wrap })}>{children}</span>;
 }
-
-export function CheckIcon() {
-  return (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      aria-hidden="true"
-    >
-      <path d="M5 12l5 5 9-11" />
-    </svg>
-  );
-}
-
-export function ExternalIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-    >
-      <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" />
-    </svg>
-  );
-}

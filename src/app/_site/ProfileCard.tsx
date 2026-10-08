@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { Badge } from "@/components/Badge";
@@ -9,7 +10,7 @@ import { STANDPOINTS } from "@/lib/standpoints";
 import type { ProfileDetails } from "@/server/queries/profile-details";
 import { css, cva } from "../../../styled-system/css";
 
-import { Chip, ExternalIcon } from "@/app/materials/[id]/_components/CardParts";
+import { Chip } from "@/app/materials/[id]/_components/CardParts";
 
 function initials(name: string): string {
   const text = name.trim();
@@ -300,7 +301,7 @@ export function ProfileCard({
           <div className={linkRow}>
             {details.links.map((url) => (
               <a key={url} href={url} target="_blank" rel="noopener noreferrer">
-                <ExternalIcon /> {linkLabel(url)}
+                <Icon name="open_in_new" size="2xs" /> {linkLabel(url)}
               </a>
             ))}
           </div>

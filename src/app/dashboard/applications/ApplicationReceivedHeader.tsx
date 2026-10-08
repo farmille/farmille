@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components";
+import { Icon } from "@/components/Icon";
 
 import { css } from "../../../../styled-system/css";
 
@@ -32,16 +33,7 @@ export function ApplicationReceivedHeader({ title }: { title: string | null }) {
   return (
     <div className={wrap}>
       <div className={checkMark} aria-hidden="true">
-        <svg
-          width="34"
-          height="34"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.4"
-        >
-          <path d="M5 12l5 5 9-11" />
-        </svg>
+        <Icon name="check" size="2xl" />
       </div>
       <h1 className={css({ fontSize: "2xl" })}>ご申請を受け付けました</h1>
       {title === null ? null : <p className={kindTitle}>{title}</p>}

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { Icon } from "@/components/Icon";
+
 import { cva, css, cx } from "../../../../styled-system/css";
 
 const doneRecipe = cva({
@@ -61,16 +63,7 @@ export function DoneMessage({
             color: "primary.700",
           })}
         >
-          <svg
-            width="34"
-            height="34"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-          >
-            <path d="M5 12l5 5 9-11" />
-          </svg>
+          <Icon name="check" size="2xl" />
         </div>
       ) : null}
       <Heading className={css({ fontSize: "2xl" })}>{title}</Heading>

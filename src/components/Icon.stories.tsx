@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { css } from "../../styled-system/css";
-import { Icon, type IconProps } from "./Icon";
+import { Icon, iconNames, type IconProps } from "./Icon";
 
 const meta = {
   title: "Components/Icon",
@@ -27,3 +27,16 @@ export const Sizes: Story = {
 };
 
 export const WithLabel: Story = { args: { name: "verified", label: "公式メーカー" } };
+
+export const AllGlyphs: Story = {
+  render: (args) => (
+    <div className={css({ display: "flex", flexWrap: "wrap", gap: "4" })}>
+      {iconNames.map((name) => (
+        <div key={name} className={css({ display: "grid", justifyItems: "center", gap: "1" })}>
+          <Icon {...args} name={name} size="lg" />
+          <span className={css({ fontSize: "xs" })}>{name}</span>
+        </div>
+      ))}
+    </div>
+  ),
+};

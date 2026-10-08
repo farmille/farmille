@@ -5,7 +5,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cx } from "../../../../styled-system/css";
-import { ArticleImagePlaceholderIcon } from "./ArticleIcons";
+import { ImagePlaceholderIcon } from "@/app/_site/FormParts";
 
 export function ArticleGrid({ children, className }: { children: ReactNode; className?: string }) {
   return (
@@ -66,7 +66,7 @@ export function FeedCard({
             sizes="(min-width: 900px) 420px, 50vw"
           />
         ) : (
-          <ArticleImagePlaceholderIcon />
+          <ImagePlaceholderIcon />
         )}
       </Link>
       <div className={css({ display: "flex", flexDirection: "column", flex: "1", p: "2.5" })}>

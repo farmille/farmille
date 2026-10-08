@@ -2,6 +2,7 @@ import Form from "next/form";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
+import { BrandMark } from "@/components/BrandMark";
 import { Icon } from "@/components/Icon";
 import { PreparationNotice } from "@/components/PreparationNotice";
 
@@ -322,7 +323,7 @@ function MobileAppBar(props: AppBarProps) {
     return (
       <header className={mobileAppBar} data-ui="mobile-app-bar">
         <Link href="/" className={logo}>
-          <Icon name="leaf" size="lg" />
+          <BrandMark />
           <b className={logoText}>Farmille</b>
         </Link>
         <Link href={props.searchHref ?? "/search"} className={iconButton} aria-label="検索">
@@ -362,7 +363,7 @@ function DesktopSiteHeader({
     <header className={desktopHeader} data-ui="desktop-site-header">
       <div className={desktopHeaderInner}>
         <Link href="/" className={desktopBrand}>
-          <Icon name="leaf" size="lg" />
+          <BrandMark />
           <span className={desktopBrandName}>Farmille</span>
         </Link>
         <Form action="/search" aria-label="ヘッダー検索" className={desktopSearch} role="search">
@@ -417,7 +418,7 @@ function DesktopSellerHeader(props: AppBarProps) {
     <header className={desktopHeader} data-ui="desktop-seller-header">
       <div className={desktopHeaderInner}>
         <Link href="/dashboard" className={desktopBrand}>
-          <Icon name="leaf" size="lg" />
+          <BrandMark />
           <span className={desktopBrandName}>Farmille for Business</span>
         </Link>
         <span className={workspaceTitle}>{title}</span>
