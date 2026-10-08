@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import * as v from "valibot";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { getSessionUser, requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { searchPostingMaterials, withPostingMaterialImages } from "@/server/queries/materials";
@@ -47,8 +47,8 @@ export default async function PostPage({ searchParams }: PostPageProps) {
   }
 
   return (
-    <SitePageShell title="投稿する" backHref="/">
+    <FormPageShell chrome="public" active="post" title="投稿する" backHref="/" hasFixedFooter>
       <MaterialPicker materials={materials.data} query={query} postType={postType} />
-    </SitePageShell>
+    </FormPageShell>
   );
 }

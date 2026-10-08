@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 
 import { FormSection } from "../_components/FormSection";
 import {
@@ -15,7 +15,11 @@ import { css, cx } from "../../../../styled-system/css";
 
 export default function RemovalEntryPage() {
   return (
-    <SitePageShell title="終売・廃盤／非表示の申請 受付" backHref="/sellers">
+    <FormPageShell
+      chrome="public"
+      title="終売・廃盤／非表示の申請 受付フォーム"
+      backHref="/sellers"
+    >
       <div className={formalPageRecipe({ width: "narrow" })}>
         <h1 className={formalTitleStyle}>終売・廃盤／非表示の申請 受付フォーム</h1>
         <div className={introStyle}>
@@ -39,6 +43,6 @@ export default function RemovalEntryPage() {
           <Link href="/company-requests/receipts">受付済みの申請を確認する</Link>
         </p>
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { buttonRecipe } from "@/components/Button";
 import Link from "next/link";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { DoneMessage } from "@/app/company-requests/_components/DoneMessage";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function SellerApplyDonePage() {
   return (
-    <SitePageShell title="申請受付完了" backHref="/">
+    <FormPageShell chrome="public" backHref="/" title="申請受付完了">
       <DoneMessage
         className={css({ maxW: "content.reading", mx: "auto" })}
         spacing="section"
@@ -36,6 +36,6 @@ export default function SellerApplyDonePage() {
           ログインIDとパスワード設定のご案内をお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。
         </p>
       </DoneMessage>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

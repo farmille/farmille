@@ -110,7 +110,7 @@ const plusButton = css({
 export type BottomNavActive = "home" | "search" | "post" | "me";
 
 type BottomNavProps = {
-  active: BottomNavActive;
+  active?: BottomNavActive;
   placement?: "container" | "viewport";
 };
 

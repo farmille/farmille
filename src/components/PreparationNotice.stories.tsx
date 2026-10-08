@@ -12,8 +12,3 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const RoundedTop: Story = { args: { roundedTop: true } };
-
-export const SiteLook: Story = {
-  args: { look: "site" },
-  parameters: { layout: "fullscreen" },
-};

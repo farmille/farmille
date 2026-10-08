@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { SellerApplyForm } from "@/app/sellers/apply/SellerApplyForm";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
@@ -27,7 +27,12 @@ export default async function SellerApplyPage({ searchParams }: SellerApplyPageP
   const { from } = await searchParams;
 
   return (
-    <SitePageShell title="企業会員登録の申請" backHref={backHrefFor(from)}>
+    <FormPageShell
+      chrome="public"
+      active="me"
+      backHref={backHrefFor(from)}
+      title="企業会員登録の申請"
+    >
       <div className={css({ maxW: "content.form", mx: "auto" })}>
         <h1 className={css({ srOnly: true })}>企業会員登録の申請</h1>
         <p className={cx(sellerLeadStyle, css({ mb: "4.5" }))}>
@@ -35,6 +40,6 @@ export default async function SellerApplyPage({ searchParams }: SellerApplyPageP
         </p>
         <SellerApplyForm />
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

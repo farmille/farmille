@@ -23,8 +23,8 @@ import { MoreLink } from "./MoreLink";
 const scrollStyle = css({
   display: "flex",
   gap: "2.5",
-  mx: "-4",
-  px: "4",
+  mx: "-3.5",
+  px: "3.5",
   pt: "0.5",
   pb: "1.5",
   overflowX: "auto",

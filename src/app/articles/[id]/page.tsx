@@ -1,11 +1,10 @@
-import { SitePageShell } from "@/app/_site/SitePageShell";
-
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
+import { AppBar } from "@/components";
 import { HelpfulButton } from "@/components/HelpfulButton";
 import { ReportDialog } from "@/components/ReportDialog";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
@@ -31,6 +30,22 @@ type ArticleDetailPageProps = {
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const shell = css({
+  minH: "100dvh",
+  bg: "surface.page",
+  pb: "6",
+});
+
+const main = css({
+  w: "100%",
+  maxW: "content.reading",
+  mx: "auto",
+  px: "3.5",
+  py: "4",
+  bg: "surface.panel",
+  tab: { px: "6", py: "6" },
+});
 
 const getCachedArticle = cache(getPublishedArticle);
 
@@ -120,54 +135,62 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
   const backHref = firstMaterial === undefined ? "/" : `/materials/${firstMaterial.id}`;
 
   return (
-    <SitePageShell title="" backHref={backHref} shareHref={`/articles/${article.id}`}>
+    <div className={shell}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
       />
-      <article className={readingArticle}>
-        <ArticleHeader
-          title={article.title}
-          sellerName={sellerName}
-          sellerPath={sellerPath}
-          logoUrl={article.seller.logo_url}
-          publishedAt={article.publishedAt}
-          heroImageUrl={article.heroImageUrl}
-        />
-
-        <ReadingMarkdown html={bodyHtml} />
-
-        {article.materials.length > 0 ? (
-          <ArticleMaterialList materials={article.materials} />
-        ) : null}
-
-        <div className={readingFoot}>
-          <HelpfulButton
-            action={toggleHelpfulAction.bind(
-              null,
-              "article",
-              article.id,
-              `/articles/${article.id}`,
-            )}
-            count={article.helpfulCount}
-            layout="card"
-            voted={helpfulVoted}
+      <AppBar
+        chrome="public"
+        title={article.title}
+        backHref={backHref}
+        shareHref={`/articles/${article.id}`}
+      />
+      <main className={main}>
+        <article className={readingArticle}>
+          <ArticleHeader
+            title={article.title}
+            sellerName={sellerName}
+            sellerPath={sellerPath}
+            logoUrl={article.seller.logo_url}
+            publishedAt={article.publishedAt}
+            heroImageUrl={article.heroImageUrl}
           />
-          <ViewCount count={article.viewCount} className={css({ ml: "auto" })} />
-          <span>
-            <ReportDialog
-              action={createReportAction.bind(
+
+          <ReadingMarkdown html={bodyHtml} />
+
+          {article.materials.length > 0 ? (
+            <ArticleMaterialList materials={article.materials} />
+          ) : null}
+
+          <div className={readingFoot}>
+            <HelpfulButton
+              action={toggleHelpfulAction.bind(
                 null,
                 "article",
                 article.id,
                 `/articles/${article.id}`,
               )}
-              reasonOptions={REPORT_REASON_OPTIONS}
-              title="この記事を通報する"
+              count={article.helpfulCount}
+              layout="card"
+              voted={helpfulVoted}
             />
-          </span>
-        </div>
-      </article>
-    </SitePageShell>
+            <ViewCount count={article.viewCount} className={css({ ml: "auto" })} />
+            <span>
+              <ReportDialog
+                action={createReportAction.bind(
+                  null,
+                  "article",
+                  article.id,
+                  `/articles/${article.id}`,
+                )}
+                reasonOptions={REPORT_REASON_OPTIONS}
+                title="この記事を通報する"
+              />
+            </span>
+          </div>
+        </article>
+      </main>
+    </div>
   );
 }

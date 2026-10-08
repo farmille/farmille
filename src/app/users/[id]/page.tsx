@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
 import { ProfileCard } from "@/app/_site/ProfileCard";
 import { publicProfileLabel } from "@/lib/public-profile-label";
 import { createPageMetadata } from "@/lib/seo";
@@ -14,6 +13,7 @@ import { errorMessageJa } from "@/server/errors";
 import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublicProfilePage, type PublicProfilePageData } from "@/server/queries/public-profiles";
 import type { Result } from "@/server/result";
+import { AppBar } from "@/components";
 import { ReportDialog } from "@/components/ReportDialog";
 import { css } from "../../../../styled-system/css";
 
@@ -22,6 +22,24 @@ import { ProfileSectionHeading } from "@/app/me/_components/ProfileParts";
 import { PostTimeline } from "./_components/PostTimeline";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const shell = css({
+  minH: "100dvh",
+  bg: "surface.page",
+  color: "text.default",
+  fontFamily: "sans",
+});
+
+const body = css({
+  w: "100%",
+  maxW: "content.medium",
+  mx: "auto",
+  px: "4",
+  py: "4",
+  pb: "10",
+  bg: "surface.panel",
+  tab: { px: "5", py: "5" },
+});
 
 const getCachedProfilePage = cache(async (id: string): Promise<Result<PublicProfilePageData>> => {
   if (!UUID_PATTERN.test(id)) {
@@ -82,37 +100,40 @@ export default async function UserPage({ params }: UserPageProps) {
   const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 
   return (
-    <SitePageShell title={data.profile.handle} backHref="/">
-      <ProfileCard
-        handle={data.profile.handle}
-        avatarUrl={data.profile.avatarUrl}
-        details={details.data}
-        stats={[
-          { label: "実証詳細レポート", value: reportCount },
-          { label: "感想口コミ", value: data.reviewCount },
-          { label: "参考になった", value: data.helpfulCount },
-        ]}
-      />
-
-      {isOwnProfile ? null : (
-        <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>
-          <ReportDialog
-            action={createReportAction.bind(null, "profile", data.profile.userId, `/users/${id}`)}
-            reasonOptions={REPORT_REASON_OPTIONS}
-            title={`${data.profile.handle}さんを通報する`}
-          />
-        </div>
-      )}
-
-      <section aria-labelledby="profile-posts-heading">
-        <ProfileSectionHeading id="profile-posts-heading">これまでの投稿</ProfileSectionHeading>
-        <PostTimeline
-          profile={data.profile}
-          posts={data.posts}
-          authorLabel={publicProfileLabel(details.data)}
-          viewerUserId={viewerUserId}
+    <div className={shell}>
+      <AppBar chrome="public" title={data.profile.handle} backHref="/" />
+      <main className={body}>
+        <ProfileCard
+          handle={data.profile.handle}
+          avatarUrl={data.profile.avatarUrl}
+          details={details.data}
+          stats={[
+            { label: "実証詳細レポート", value: reportCount },
+            { label: "感想口コミ", value: data.reviewCount },
+            { label: "参考になった", value: data.helpfulCount },
+          ]}
         />
-      </section>
-    </SitePageShell>
+
+        {isOwnProfile ? null : (
+          <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>
+            <ReportDialog
+              action={createReportAction.bind(null, "profile", data.profile.userId, `/users/${id}`)}
+              reasonOptions={REPORT_REASON_OPTIONS}
+              title={`${data.profile.handle}さんを通報する`}
+            />
+          </div>
+        )}
+
+        <section aria-labelledby="profile-posts-heading">
+          <ProfileSectionHeading id="profile-posts-heading">これまでの投稿</ProfileSectionHeading>
+          <PostTimeline
+            profile={data.profile}
+            posts={data.posts}
+            authorLabel={publicProfileLabel(details.data)}
+            viewerUserId={viewerUserId}
+          />
+        </section>
+      </main>
+    </div>
   );
 }

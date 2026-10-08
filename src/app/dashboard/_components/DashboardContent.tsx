@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { buttonRecipe, formatDateJa, surfaceCardRecipe } from "@/components";
 import type { SellerDashboardData } from "@/server/queries/seller-dashboard";
 
@@ -268,7 +268,7 @@ export function DashboardContent({ seller, materials }: SellerDashboardData) {
   const hasProfileText = (seller.profile_text ?? "").trim().length > 0;
 
   return (
-    <SitePageShell title="企業会員ダッシュボード" backHref="/">
+    <FormPageShell chrome="seller" backHref="/" title="企業会員ダッシュボード">
       <div className={readingColumn}>
         <DashboardTabs active="dash" />
 
@@ -457,6 +457,6 @@ export function DashboardContent({ seller, materials }: SellerDashboardData) {
           </div>
         </div>
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

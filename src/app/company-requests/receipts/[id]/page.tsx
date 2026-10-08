@@ -1,4 +1,4 @@
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { SurfaceCard } from "@/components/SurfaceCard";
 import { readCompanyApplication } from "@/server/company-applications";
 
@@ -10,7 +10,7 @@ import { css } from "../../../../../styled-system/css";
 export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
   const receipt = await readCompanyApplication((await params).id);
   return (
-    <SitePageShell title="申請受付票" backHref="/company-requests/receipts">
+    <FormPageShell chrome="public" title="申請受付票" backHref="/company-requests/receipts">
       <div className={css({ maxW: "content.reading", mx: "auto" })}>
         <DoneMessage
           as="h1"
@@ -22,6 +22,6 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           <ApplicationReceipt receipt={receipt} hideMissingCorporateNumber />
         </SurfaceCard>
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

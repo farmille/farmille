@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import * as v from "valibot";
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { ManufacturerProfileSchema } from "@/lib/manufacturer-profile";
 import { requireSeller } from "@/server/auth";
 import { getManufacturerProfileEditor } from "@/server/manufacturer-profile";
@@ -20,7 +20,7 @@ export default async function ManufacturerProfilePage() {
     websiteUrl: latest?.website_url ?? seller.website_url ?? "",
   });
   return (
-    <SitePageShell title="メーカープロフィールの編集" backHref="/dashboard">
+    <FormPageShell chrome="seller" title="メーカープロフィールの編集" backHref="/dashboard">
       <div className={readingColumn}>
         <DashboardTabs active="profile" />
         <h1 className={visuallyHidden}>メーカープロフィールの編集</h1>
@@ -37,6 +37,6 @@ export default async function ManufacturerProfilePage() {
         />
         <ManufacturerProfileHistory versions={versions} />
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

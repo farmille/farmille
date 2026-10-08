@@ -2,11 +2,31 @@ import { PageNotice } from "@/components/PageNotice";
 import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { AppBar } from "@/components";
+import { BottomNav } from "@/components/BottomNav";
 import type { AccountType } from "@/server/auth";
 import { css, cx } from "../../../../styled-system/css";
 
 import { moreLinkStyle } from "./ProfileParts";
+
+const shell = css({
+  minH: "100dvh",
+  display: "flex",
+  flexDirection: "column",
+  bg: "surface.page",
+  color: "text.default",
+  fontFamily: "sans",
+});
+
+const body = css({
+  flex: "1",
+  w: "100%",
+  maxW: "content.form",
+  mx: "auto",
+  px: "4",
+  py: "8",
+  bg: "surface.panel",
+});
 
 const destinationLink = css({ display: "inline-flex", alignItems: "center", gap: "1", mt: "4" });
 
@@ -24,17 +44,21 @@ export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
         : null;
 
   return (
-    <SitePageShell title="マイページ" backHref="/" active="me">
-      <PageNotice
-        title="一般ユーザー向けの画面です"
-        description="マイページ・プロフィール編集・お気に入りは一般ユーザー専用です。メーカーや運営の作業は、それぞれのダッシュボードから行ってください。"
-      >
-        {destination !== null ? (
-          <Link href={destination.href} className={cx(moreLinkStyle, destinationLink)}>
-            {destination.label} <Icon name="arrow_forward" size="sm" />
-          </Link>
-        ) : null}
-      </PageNotice>
-    </SitePageShell>
+    <div className={shell}>
+      <AppBar chrome="public" active="me" title="マイページ" />
+      <main className={body}>
+        <PageNotice
+          title="一般ユーザー向けの画面です"
+          description="マイページ・プロフィール編集・お気に入りは一般ユーザー専用です。メーカーや運営の作業は、それぞれのダッシュボードから行ってください。"
+        >
+          {destination !== null ? (
+            <Link href={destination.href} className={cx(moreLinkStyle, destinationLink)}>
+              {destination.label} <Icon name="arrow_forward" size="sm" />
+            </Link>
+          ) : null}
+        </PageNotice>
+      </main>
+      <BottomNav active="me" />
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { MaterialPageShell } from "../_components/PageShell";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -117,7 +117,7 @@ export default async function MaterialReviewsPage({
   };
 
   return (
-    <SitePageShell title={`${material.name} の感想口コミ`} backHref={materialPath}>
+    <MaterialPageShell title={`${material.name}の感想口コミ`} backHref={materialPath}>
       {reviewListJsonLd === null ? null : (
         <script
           type="application/ld+json"
@@ -165,6 +165,6 @@ export default async function MaterialReviewsPage({
         />
       )}
       <Pagination page={page} totalPages={reviews.totalPages} hrefForPage={hrefForPage} />
-    </SitePageShell>
+    </MaterialPageShell>
   );
 }

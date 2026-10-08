@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { createPageMetadata } from "@/lib/seo";
 
 import { ProcedureDetail } from "../../_components/ProcedureDetail";
@@ -39,8 +39,8 @@ export default async function ProcedurePage({ params }: ProcedurePageProps) {
   const procedure = await procedureOf(params);
 
   return (
-    <SitePageShell title={procedure.title} backHref="/sellers/procedures">
+    <FormPageShell chrome="public" title={procedure.title} backHref="/sellers/procedures">
       <ProcedureDetail procedure={procedure} />
-    </SitePageShell>
+    </FormPageShell>
   );
 }

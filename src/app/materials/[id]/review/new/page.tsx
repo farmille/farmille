@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components";
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { findOwnReviewIdByMaterial, listReviewCropOptions } from "@/server/queries/reviews";
@@ -43,7 +43,12 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
   }
 
   return (
-    <SitePageShell title={`${material.name} の感想口コミ投稿`} backHref={materialPath}>
+    <FormPageShell
+      chrome="public"
+      active="search"
+      title={`${material.name}の感想口コミ`}
+      backHref={materialPath}
+    >
       <ReviewForm
         mode="create"
         material={{
@@ -61,6 +66,6 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
           photos: [],
         }}
       />
-    </SitePageShell>
+    </FormPageShell>
   );
 }

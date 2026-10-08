@@ -1,12 +1,10 @@
-import type { ReactNode } from "react";
-
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 
 type MaterialPageShellProps = {
   title: string;
   backHref: string;
   hasFab?: boolean;
-  children: ReactNode;
+  children: React.ReactNode;
 };
 
 export function MaterialPageShell({
@@ -16,8 +14,15 @@ export function MaterialPageShell({
   children,
 }: MaterialPageShellProps) {
   return (
-    <SitePageShell title={title} backHref={backHref} hasFab={hasFab}>
+    <FormPageShell
+      chrome="public"
+      active="search"
+      title={title}
+      backHref={backHref}
+      variant="material"
+      hasFab={hasFab}
+    >
       {children}
-    </SitePageShell>
+    </FormPageShell>
   );
 }

@@ -1,9 +1,32 @@
 import type { Metadata } from "next";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { HomeFooter } from "@/app/_components/HomeFooter";
+import { AppBar } from "@/components";
+import { BottomNav } from "@/components/BottomNav";
 import { createPageMetadata } from "@/lib/seo";
 
+import { css } from "../../../styled-system/css";
 import { ManufacturerLanding } from "./_components/ManufacturerLanding";
+
+const shell = css({
+  minH: "100dvh",
+  display: "flex",
+  flexDirection: "column",
+  bg: "surface.page",
+  color: "text.default",
+  fontFamily: "sans",
+});
+
+const main = css({
+  flex: "1",
+  w: "100%",
+  maxW: "content.wide",
+  mx: "auto",
+  px: "4",
+  pt: "4",
+  pb: "8",
+  tab: { px: "5", pb: "10" },
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   return createPageMetadata({
@@ -24,8 +47,18 @@ export default async function ManufacturerPage({ searchParams }: ManufacturerPag
   const applyHref = fromMe ? "/sellers/apply?from=me" : "/sellers/apply";
 
   return (
-    <SitePageShell title="メーカーの方へ" backHref={fromMe ? "/me" : "/"}>
-      <ManufacturerLanding applyHref={applyHref} />
-    </SitePageShell>
+    <div className={shell}>
+      <AppBar
+        chrome="public"
+        active="home"
+        title="メーカーの方へ"
+        backHref={fromMe ? "/me" : "/"}
+      />
+      <main className={main}>
+        <ManufacturerLanding applyHref={applyHref} />
+        <HomeFooter />
+      </main>
+      <BottomNav active="home" />
+    </div>
   );
 }

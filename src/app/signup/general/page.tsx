@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
 import { SignupForm } from "@/app/signup/SignupForm";
+import { AuthScreen } from "@/components/auth/AuthScreen";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { safeNextPath } from "@/lib/auth/safe-next";
-
-import { css } from "../../../../styled-system/css";
 
 export const metadata: Metadata = {
   title: "一般ユーザー登録",
@@ -20,11 +18,8 @@ export default async function GeneralSignupPage({
 }) {
   const next = safeNextPath((await searchParams).next);
   return (
-    <SitePageShell title="Farmilleをはじめる" backHref="/signup">
-      <div className={css({ maxW: "content.reading", mx: "auto" })}>
-        <h1 className={css({ srOnly: true })}>一般ユーザー登録</h1>
-        <SignupForm next={next} />
-      </div>
-    </SitePageShell>
+    <AuthScreen lead="匿名で参加できます。実名や所属の公開は不要です。" title="一般ユーザー登録">
+      <SignupForm next={next} />
+    </AuthScreen>
   );
 }

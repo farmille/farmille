@@ -1,11 +1,10 @@
-import { SitePageShell } from "@/app/_site/SitePageShell";
-
 import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { Suspense } from "react";
 import { SkeletonList } from "@/components/SkeletonList";
 import type { Metadata } from "next";
 
-import { Pagination } from "@/components";
+import { AppBar, Pagination } from "@/components";
+import { BottomNav } from "@/components/BottomNav";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
@@ -30,6 +29,25 @@ type ArticlesPageProps = {
   searchParams: Promise<{ q?: string; type?: string; page?: string }>;
 };
 
+const shell = css({
+  minH: "100dvh",
+  display: "flex",
+  flexDirection: "column",
+  bg: "surface.page",
+  color: "text.default",
+  fontFamily: "sans",
+});
+
+const main = css({
+  flex: "1",
+  w: "100%",
+  maxW: "content.wide",
+  mx: "auto",
+  px: "3.5",
+  py: "4",
+  tab: { px: "5", py: "6" },
+});
+
 function parseFilter(value: string | undefined): ContentFeedFilter {
   if (value === "report" || value === "article" || value === "all") {
     return value;
@@ -51,17 +69,21 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
   const page = parsePage(params.page);
 
   return (
-    <SitePageShell>
-      <h1 className={css({ srOnly: true })}>記事を読む</h1>
-      <ArticlesSearchBar filter={filter} q={q} />
+    <div className={shell}>
+      <AppBar chrome="public" title="記事を読む" backHref="/" />
+      <main className={main}>
+        <h1 className={css({ srOnly: true })}>記事を読む</h1>
+        <ArticlesSearchBar filter={filter} q={q} />
 
-      <Suspense
-        key={`${filter}:${q}:${page}`}
-        fallback={<SkeletonList variant="articles" label="記事を読み込んでいます" />}
-      >
-        <ArticleResults filter={filter} q={q} page={page} />
-      </Suspense>
-    </SitePageShell>
+        <Suspense
+          key={`${filter}:${q}:${page}`}
+          fallback={<SkeletonList variant="articles" label="記事を読み込んでいます" />}
+        >
+          <ArticleResults filter={filter} q={q} page={page} />
+        </Suspense>
+      </main>
+      <BottomNav />
+    </div>
   );
 }
 

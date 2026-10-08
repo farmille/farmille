@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import * as v from "valibot";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { CompanyApplicationForm } from "@/app/company-requests/_components/CompanyApplicationForm";
 import { emptyContact } from "@/app/company-requests/_components/ContactFields";
 import { applicationKindSchema } from "@/lib/company-application";
@@ -27,7 +27,11 @@ export default async function NewApplicationPage({
   await cleanupExpiredApplicationUploads();
   const intent = await beginCompanyApplication(kind);
   return (
-    <SitePageShell title={applicationCopy[kind].title} backHref="/dashboard/applications">
+    <FormPageShell
+      chrome="seller"
+      title={applicationCopy[kind].title}
+      backHref="/dashboard/applications"
+    >
       <div className={css({ maxW: "content.medium", mx: "auto", pt: "6.5" })}>
         <h1 className={css({ fontSize: "xl" })}>{applicationCopy[kind].title}</h1>
         <CompanyApplicationForm
@@ -44,6 +48,6 @@ export default async function NewApplicationPage({
           recipient={seller.contact_email}
         />
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

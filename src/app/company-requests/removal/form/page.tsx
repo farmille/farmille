@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { applicationCopy } from "@/lib/company-application-copy";
 import { removalApplicationAccess } from "@/server/company-application-auth";
 import { cleanupExpiredApplicationUploads } from "@/server/company-application-evidence";
@@ -18,7 +18,11 @@ export default async function RemovalFormPage() {
   const intent = await beginCompanyApplication("removal");
   if (intent.submitted_at) redirect(`/company-requests/receipts/${intent.id}`);
   return (
-    <SitePageShell title={applicationCopy.removal.title} backHref="/company-requests/removal">
+    <FormPageShell
+      chrome="public"
+      title="資材ページに関する申請（終売・廃盤／非表示）"
+      backHref="/company-requests/removal"
+    >
       <div className={formalPageRecipe()}>
         <h1 className={css({ fontSize: "xl" })}>{applicationCopy.removal.title}</h1>
         <CompanyApplicationForm
@@ -33,6 +37,6 @@ export default async function RemovalFormPage() {
           recipient={access.email}
         />
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

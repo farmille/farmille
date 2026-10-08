@@ -2,8 +2,7 @@ import { FormNotice } from "@/app/_site/FormParts";
 import { SellerLoginForm } from "@/app/sellers/login/SellerLoginForm";
 import { PasskeyLogin } from "@/components/auth/PasskeyLogin";
 
-import { css, cx } from "../../../../styled-system/css";
-import { sellerLeadStyle } from "../_components/form-styles";
+import { css } from "../../../../styled-system/css";
 
 export function SellerLoginPanel({
   destinationLabel,
@@ -42,10 +41,6 @@ export function SellerLoginPanel({
           パスワードを変更しました。新しいパスワードでログインしてください。
         </FormNotice>
       ) : null}
-      <h1 className={css({ fontSize: "xl" })}>メーカーログイン</h1>
-      <p className={cx(sellerLeadStyle, css({ mt: "1.5" }))}>
-        企業会員のログインIDでサインインします。
-      </p>
       <SellerLoginForm next={next} />
       <PasskeyLogin next={next ?? "/dashboard"} />
     </div>

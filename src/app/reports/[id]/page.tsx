@@ -1,11 +1,10 @@
-import { SitePageShell } from "@/app/_site/SitePageShell";
-
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
+import { AppBar } from "@/components";
 import { FabBar } from "@/components/FabBar";
 import { HelpfulButton } from "@/components/HelpfulButton";
 import { helpfulPillRecipe } from "@/components/helpful-pill";
@@ -42,6 +41,24 @@ type ReportDetailPageProps = {
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const shell = css({
+  minH: "100dvh",
+  bg: "surface.page",
+  position: "relative",
+  pb: "24",
+  tab: { pb: "8" },
+});
+
+const main = css({
+  w: "100%",
+  maxW: "content.reading",
+  mx: "auto",
+  px: "3.5",
+  py: "4",
+  bg: "surface.panel",
+  tab: { px: "6", py: "6" },
+});
 
 const getCachedReport = cache(getPublishedUsageReport);
 
@@ -154,125 +171,133 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   });
 
   return (
-    <SitePageShell title="" backHref={materialPath} shareHref={`/reports/${report.id}`} hasFab>
+    <div className={shell}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(reportJsonLd) }}
       />
-      <article className={readingArticle}>
-        <ReportHeader
-          report={report}
-          cropLabel={cropLabel}
-          standpointLabel={standpointLabel}
-          materialPath={materialPath}
-        />
+      <AppBar
+        chrome="public"
+        title={report.title}
+        backHref={materialPath}
+        shareHref={`/reports/${report.id}`}
+      />
+      <main className={main}>
+        <article className={readingArticle}>
+          <ReportHeader
+            report={report}
+            cropLabel={cropLabel}
+            standpointLabel={standpointLabel}
+            materialPath={materialPath}
+          />
 
-        {report.structured === null ? (
-          <>
-            <ReadingHeading>結果・感想</ReadingHeading>
-            <ReadingProse text={report.observedChange} />
-            {report.formVersion === 1 && cover ? <ReportFigure media={cover} /> : null}
-          </>
-        ) : null}
+          {report.structured === null ? (
+            <>
+              <ReadingHeading>結果・感想</ReadingHeading>
+              <ReadingProse text={report.observedChange} />
+              {report.formVersion === 1 && cover ? <ReportFigure media={cover} /> : null}
+            </>
+          ) : null}
 
-        {session === null ? (
-          <ReportGate reportPath={`/reports/${report.id}`} />
-        ) : (
-          <>
-            {report.structured !== null ? (
-              <StructuredReportArticle
-                input={report.structured}
-                cropLabel={cropLabel}
-                documentUrls={report.documentUrls}
-              />
-            ) : (
-              <LegacyReportSections report={report} coverId={cover?.id ?? null} />
-            )}
-            <div
-              className={css({
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "2",
-                mt: "5.5",
-                px: "3",
-                py: "3",
-                borderWidth: "1px",
-                borderStyle: "solid",
-                borderColor: "border.default",
-                borderRadius: "input",
-                bg: "surface.page",
-                fontSize: "sm",
-                color: "text.muted",
-                lineHeight: "normal",
-              })}
-            >
-              <span
+          {session === null ? (
+            <ReportGate reportPath={`/reports/${report.id}`} />
+          ) : (
+            <>
+              {report.structured !== null ? (
+                <StructuredReportArticle
+                  input={report.structured}
+                  cropLabel={cropLabel}
+                  documentUrls={report.documentUrls}
+                />
+              ) : (
+                <LegacyReportSections report={report} coverId={cover?.id ?? null} />
+              )}
+              <div
                 className={css({
                   display: "flex",
-                  flexShrink: "0",
-                  mt: "0.5",
-                  color: "primary.700",
+                  alignItems: "flex-start",
+                  gap: "2",
+                  mt: "5.5",
+                  px: "3",
+                  py: "3",
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                  borderColor: "border.default",
+                  borderRadius: "input",
+                  bg: "surface.page",
+                  fontSize: "sm",
+                  color: "text.muted",
+                  lineHeight: "normal",
                 })}
               >
-                <CheckIcon />
-              </span>
-              <span>
-                この実証詳細レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。
-              </span>
-            </div>
-          </>
-        )}
-
-        <div className={readingFoot}>
-          {!isOwnPost ? (
-            <HelpfulButton
-              action={toggleHelpfulAction.bind(
-                null,
-                "usage_report",
-                report.id,
-                `/reports/${report.id}`,
-              )}
-              count={report.helpfulCount}
-              voted={helpfulVoted}
-            />
-          ) : (
-            <span className={helpfulPillRecipe()}>
-              <Icon name="thumb_up" size="xs" />
-              <span>参考になった</span>
-              {report.helpfulCount}
-            </span>
+                <span
+                  className={css({
+                    display: "flex",
+                    flexShrink: "0",
+                    mt: "0.5",
+                    color: "primary.700",
+                  })}
+                >
+                  <CheckIcon />
+                </span>
+                <span>
+                  この実証詳細レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。
+                </span>
+              </div>
+            </>
           )}
-          <span
-            className={css({
-              fontSize: "sm",
-              color: "text.subtle",
-              fontVariantNumeric: "tabular-nums",
-            })}
-            aria-label={`${report.viewCount}回閲覧`}
-          >
-            閲覧 {report.viewCount}
-          </span>
-          {!isOwnPost ? (
-            <ReportDialog
-              action={createReportAction.bind(
-                null,
-                "usage_report",
-                report.id,
-                `/reports/${report.id}`,
-              )}
-              reasonOptions={REPORT_REASON_OPTIONS}
-              title="この実証詳細レポートを通報する"
-            />
-          ) : null}
-        </div>
-      </article>
 
-      <FabBar
-        reportHref={`${materialPath}/report/new`}
-        reviewHref={`${materialPath}/review/new`}
-        placement="viewport"
-        look="site"
-      />
-    </SitePageShell>
+          <div className={readingFoot}>
+            {!isOwnPost ? (
+              <HelpfulButton
+                action={toggleHelpfulAction.bind(
+                  null,
+                  "usage_report",
+                  report.id,
+                  `/reports/${report.id}`,
+                )}
+                count={report.helpfulCount}
+                voted={helpfulVoted}
+              />
+            ) : (
+              <span className={helpfulPillRecipe()}>
+                <Icon name="thumb_up" size="xs" />
+                <span>参考になった</span>
+                {report.helpfulCount}
+              </span>
+            )}
+            <span
+              className={css({
+                fontSize: "sm",
+                color: "text.subtle",
+                fontVariantNumeric: "tabular-nums",
+              })}
+              aria-label={`${report.viewCount}回閲覧`}
+            >
+              閲覧 {report.viewCount}
+            </span>
+            {!isOwnPost ? (
+              <ReportDialog
+                action={createReportAction.bind(
+                  null,
+                  "usage_report",
+                  report.id,
+                  `/reports/${report.id}`,
+                )}
+                reasonOptions={REPORT_REASON_OPTIONS}
+                title="この実証詳細レポートを通報する"
+              />
+            ) : null}
+          </div>
+        </article>
+
+        <FabBar
+          reportHref={`${materialPath}/report/new`}
+          reviewHref={`${materialPath}/review/new`}
+          placement="viewport"
+          look="site"
+        />
+      </main>
+    </div>
   );
 }

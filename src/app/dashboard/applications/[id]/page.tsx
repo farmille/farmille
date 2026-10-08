@@ -1,7 +1,7 @@
 import * as v from "valibot";
 import { applicationSellerPage } from "../_lib/access";
 import { SellerAccessDenied } from "../../_components/AccessDenied";
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { applicationKindSchema } from "@/lib/company-application";
 import { applicationCopy } from "@/lib/company-application-copy";
 import { readCompanyApplication } from "@/server/company-applications";
@@ -17,7 +17,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   const receipt = await readCompanyApplication(id);
   const kind = v.safeParse(applicationKindSchema, receipt.application.kind);
   return (
-    <SitePageShell title="申請受付票" backHref="/dashboard/applications">
+    <FormPageShell chrome="seller" title="申請受付票" backHref="/dashboard/applications">
       <div className={readingColumn}>
         <ApplicationReceivedHeader
           title={kind.success ? applicationCopy[kind.output].title : null}
@@ -26,6 +26,6 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           <ApplicationReceipt receipt={receipt} />
         </div>
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

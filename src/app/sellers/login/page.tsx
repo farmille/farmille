@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
 import { SellerLoginPanel } from "@/app/sellers/login/SellerLoginPanel";
+import { AuthScreen } from "@/components/auth/AuthScreen";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
@@ -35,12 +35,12 @@ export default async function SellerLoginPage({
   const destinationLabel = destinationLabelOf(destination);
 
   return (
-    <SitePageShell title="メーカーログイン" backHref="/sellers">
+    <AuthScreen lead="企業会員のログインIDでサインインします。" title="メーカーログイン">
       <SellerLoginPanel
         destinationLabel={destinationLabel}
         next={destination}
         passwordChanged={password === "changed"}
       />
-    </SitePageShell>
+    </AuthScreen>
   );
 }

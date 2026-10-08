@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { Suspense } from "react";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { MaterialPageShell } from "./_components/PageShell";
 import { FabBar } from "@/components/FabBar";
 import { SkeletonList } from "@/components/SkeletonList";
 import { RatingSkeleton, SkeletonRegion } from "@/components/Skeleton";
@@ -176,7 +176,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
   });
 
   return (
-    <SitePageShell
+    <MaterialPageShell
       title={material.name}
       backHref="/"
       hasFab={material.publication_status === "published"}
@@ -262,7 +262,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
           look="site"
         />
       ) : null}
-    </SitePageShell>
+    </MaterialPageShell>
   );
 }
 

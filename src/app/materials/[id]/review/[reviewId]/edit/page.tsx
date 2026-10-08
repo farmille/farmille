@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components";
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { getReviewForEdit, listReviewCropOptions } from "@/server/queries/reviews";
@@ -45,7 +45,12 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
   const review = reviewResult.data;
 
   return (
-    <SitePageShell title={`${material.name} の感想口コミ編集`} backHref={materialPath}>
+    <FormPageShell
+      chrome="public"
+      active="search"
+      title={`${material.name}の感想口コミ編集`}
+      backHref={materialPath}
+    >
       <ReviewForm
         mode="edit"
         material={{
@@ -65,6 +70,6 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
           photos: review.photos,
         }}
       />
-    </SitePageShell>
+    </FormPageShell>
   );
 }

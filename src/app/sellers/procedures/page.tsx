@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { createPageMetadata } from "@/lib/seo";
 
@@ -52,7 +52,7 @@ const membershipRecipe = cva({
 
 export default function SellerProceduresPage() {
   return (
-    <SitePageShell title="よくあるご質問" backHref="/sellers">
+    <FormPageShell chrome="public" title="よくあるご質問" backHref="/sellers">
       <div className={guideNarrowPageStyle}>
         <h1 className={guideTitleStyle}>よくあるご質問</h1>
         <p className={guideLeadStyle}>
@@ -172,6 +172,6 @@ export default function SellerProceduresPage() {
           </div>
         </div>
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

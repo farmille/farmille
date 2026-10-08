@@ -2,13 +2,32 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { AppBar } from "@/components";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { getPublicSellerPage, type PublicSellerPageData } from "@/server/queries/public-sellers";
 import type { Result } from "@/server/result";
 
+import { css } from "../../../../styled-system/css";
 import { SellerPageContent } from "./_components/SellerPageContent";
+
+const shell = css({
+  minH: "100dvh",
+  bg: "surface.page",
+  color: "text.default",
+  fontFamily: "sans",
+});
+
+const body = css({
+  w: "100%",
+  maxW: "content.wide",
+  mx: "auto",
+  px: "4",
+  py: "4",
+  pb: "10",
+  bg: "surface.panel",
+  tab: { px: "5", py: "5" },
+});
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -57,8 +76,11 @@ export default async function SellerPage({ params }: SellerPageProps) {
   const data = await loadSellerOrNotFound(id);
 
   return (
-    <SitePageShell title={data.seller.officialName} backHref="/" active="search">
-      <SellerPageContent data={data} />
-    </SitePageShell>
+    <div className={shell}>
+      <AppBar chrome="public" active="search" title={data.seller.officialName} backHref="/" />
+      <main className={body}>
+        <SellerPageContent data={data} />
+      </main>
+    </div>
   );
 }

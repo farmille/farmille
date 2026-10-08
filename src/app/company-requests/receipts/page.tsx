@@ -1,11 +1,11 @@
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 
 import { formalPageRecipe, formalTitleStyle, introStyle } from "../_components/formal-styles";
 import { VerificationForm } from "../_components/VerificationForm";
 
 export default function ReceiptAccessPage() {
   return (
-    <SitePageShell title="受付票の確認" backHref="/company-requests/removal">
+    <FormPageShell chrome="public" title="受付票の確認" backHref="/company-requests/removal">
       <div className={formalPageRecipe({ width: "narrow" })}>
         <h1 className={formalTitleStyle}>受付票の確認</h1>
         <div className={introStyle}>
@@ -15,6 +15,6 @@ export default function ReceiptAccessPage() {
         </div>
         <VerificationForm receipt />
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

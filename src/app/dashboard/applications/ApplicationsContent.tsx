@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
+import { FormPageShell } from "@/components/FormPageShell";
 import type { listCompanyApplications } from "@/server/company-applications";
 
 import { css } from "../../../../styled-system/css";
@@ -82,7 +82,7 @@ export function ApplicationsContent({
   receipts: Awaited<ReturnType<typeof listCompanyApplications>>;
 }) {
   return (
-    <SitePageShell title="各種お手続き" backHref="/dashboard">
+    <FormPageShell chrome="seller" title="各種お手続き" backHref="/dashboard">
       <div className={workspaceColumn}>
         <h1 className={pageTitle}>各種お手続き</h1>
         <p className={lead}>
@@ -144,6 +144,6 @@ export function ApplicationsContent({
           ← 企業会員ダッシュボードへ
         </Link>
       </div>
-    </SitePageShell>
+    </FormPageShell>
   );
 }

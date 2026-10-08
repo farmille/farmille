@@ -1,7 +1,8 @@
 import Link from "next/link";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
 import { ProfileCard } from "@/app/_site/ProfileCard";
+import { AppBar } from "@/components";
+import { BottomNav } from "@/components/BottomNav";
 import { publicProfileLabel } from "@/lib/public-profile-label";
 import { errorMessageJa } from "@/server/errors";
 import { getSessionUser } from "@/server/auth";
@@ -14,6 +15,27 @@ import { NonGeneralNotice } from "./_components/NonGeneralNotice";
 import { ProfileSectionHeading } from "./_components/ProfileParts";
 import { HelpfulShelf, PostsShelf, SavedShelf } from "./_components/Shelves";
 import { resolveMeAccess } from "./_lib/access";
+
+const shell = css({
+  minH: "100dvh",
+  display: "flex",
+  flexDirection: "column",
+  bg: "surface.page",
+  color: "text.default",
+  fontFamily: "sans",
+});
+
+const body = css({
+  flex: "1",
+  w: "100%",
+  maxW: "content.medium",
+  mx: "auto",
+  px: "4",
+  py: "4",
+  pb: "6",
+  bg: "surface.panel",
+  tab: { px: "5", py: "5" },
+});
 
 const tabRow = css({
   display: "flex",
@@ -83,50 +105,54 @@ export default async function MePage({
   const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 
   return (
-    <SitePageShell title="マイページ" backHref="/" active="me">
-      <ProfileCard
-        handle={data.profile.handle}
-        avatarUrl={data.profile.avatarUrl}
-        details={details.data}
-        editable
-        publicProfileHref={`/users/${data.profile.userId}`}
-        stats={[
-          { label: "実証詳細レポート", value: reportCount },
-          { label: "感想口コミ", value: data.reviewCount },
-          { label: "お気に入り", value: data.savedMaterials.length },
-        ]}
-      />
+    <div className={shell}>
+      <AppBar chrome="public" active="me" title="マイページ" />
+      <main className={body}>
+        <ProfileCard
+          handle={data.profile.handle}
+          avatarUrl={data.profile.avatarUrl}
+          details={details.data}
+          editable
+          publicProfileHref={`/users/${data.profile.userId}`}
+          stats={[
+            { label: "実証詳細レポート", value: reportCount },
+            { label: "感想口コミ", value: data.reviewCount },
+            { label: "お気に入り", value: data.savedMaterials.length },
+          ]}
+        />
 
-      <ProfileSectionHeading id="me-posts-heading">これまでの投稿</ProfileSectionHeading>
-      <nav aria-label="投稿の種類" className={tabRow}>
-        <Link
-          href="/me?tab=reports"
-          aria-current={tab === "reports" ? "page" : undefined}
-          className={tabPill({ current: tab === "reports" })}
-        >
-          実証詳細レポート {reportCount}
-        </Link>
-        <Link
-          href="/me?tab=reviews"
-          aria-current={tab === "reviews" ? "page" : undefined}
-          className={tabPill({ current: tab === "reviews" })}
-        >
-          感想口コミ {data.reviewCount}
-        </Link>
-      </nav>
-      <PostsShelf
-        profile={data.profile}
-        kind={tab}
-        authorLabel={publicProfileLabel(details.data)}
-        posts={data.posts.filter((post) =>
-          tab === "reviews" ? post.kind === "review" : post.kind === "usage_report",
-        )}
-      />
+        <ProfileSectionHeading id="me-posts-heading">これまでの投稿</ProfileSectionHeading>
+        <nav aria-label="投稿の種類" className={tabRow}>
+          <Link
+            href="/me?tab=reports"
+            aria-current={tab === "reports" ? "page" : undefined}
+            className={tabPill({ current: tab === "reports" })}
+          >
+            実証詳細レポート {reportCount}
+          </Link>
+          <Link
+            href="/me?tab=reviews"
+            aria-current={tab === "reviews" ? "page" : undefined}
+            className={tabPill({ current: tab === "reviews" })}
+          >
+            感想口コミ {data.reviewCount}
+          </Link>
+        </nav>
+        <PostsShelf
+          profile={data.profile}
+          kind={tab}
+          authorLabel={publicProfileLabel(details.data)}
+          posts={data.posts.filter((post) =>
+            tab === "reviews" ? post.kind === "review" : post.kind === "usage_report",
+          )}
+        />
 
-      <SavedShelf items={data.savedMaterials} />
-      <HelpfulShelf items={data.helpfulItems} />
+        <SavedShelf items={data.savedMaterials} />
+        <HelpfulShelf items={data.helpfulItems} />
 
-      <AccountActions admin={(await getSessionUser())?.accountType === "admin"} />
-    </SitePageShell>
+        <AccountActions admin={(await getSessionUser())?.accountType === "admin"} />
+      </main>
+      <BottomNav active="me" />
+    </div>
   );
 }

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
-import { SitePageShell } from "@/app/_site/SitePageShell";
-import { EmptyState } from "@/components";
+import { AppBar, EmptyState } from "@/components";
+import { BottomNav } from "@/components/BottomNav";
 import {
   formatLogicHint,
   parseFiltersQuery,
@@ -27,6 +28,42 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
+const shell = css({
+  minH: "100dvh",
+  display: "flex",
+  flexDirection: "column",
+  bg: "surface.page",
+  color: "text.default",
+  fontFamily: "sans",
+});
+
+const main = css({
+  flex: "1",
+  w: "100%",
+  maxW: "content.wide",
+  mx: "auto",
+  px: "4",
+  pt: "3",
+  pb: "4",
+  tab: { px: "5", pt: "6", pb: "8" },
+});
+
+function SearchPageShell({ searchQuery, children }: { searchQuery?: string; children: ReactNode }) {
+  return (
+    <div className={shell}>
+      <AppBar
+        chrome="public"
+        active="search"
+        title="BS資材を探す"
+        backHref="/"
+        searchQuery={searchQuery}
+      />
+      <main className={main}>{children}</main>
+      <BottomNav active="search" />
+    </div>
+  );
+}
+
 function SearchPageHeading() {
   return <h1 className={css({ srOnly: true })}>BS資材を探す</h1>;
 }
@@ -49,13 +86,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     initialQuery = parseQueryParam(params.q);
   } catch {
     return (
-      <SitePageShell active="search" title="BS資材を探す" backHref="/">
+      <SearchPageShell>
         <SearchPageHeading />
         <EmptyState
           title="検索条件が正しくありません"
           description="URL の検索パラメータを確認するか、条件を選び直してください。"
         />
-      </SitePageShell>
+      </SearchPageShell>
     );
   }
 
@@ -71,13 +108,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (!filtersResult.ok) {
     return (
-      <SitePageShell active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery}>
+      <SearchPageShell searchQuery={initialQuery}>
         <SearchPageHeading />
         <EmptyState
           title="指定された検索条件が見つかりません"
           description="条件を選び直して、もう一度検索してください。"
         />
-      </SitePageShell>
+      </SearchPageShell>
     );
   }
 
@@ -93,7 +130,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     : undefined;
 
   return (
-    <SitePageShell active="search" title="BS資材を探す" backHref="/" searchQuery={initialQuery}>
+    <SearchPageShell searchQuery={initialQuery}>
       <SearchPageHeading />
       <SearchBox
         initialQuery={initialQuery}
@@ -133,6 +170,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           />
         </div>
       </div>
-    </SitePageShell>
+    </SearchPageShell>
   );
 }
