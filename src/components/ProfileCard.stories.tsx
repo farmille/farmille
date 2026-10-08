@@ -34,7 +34,7 @@ const fullDetails = {
 };
 
 const meta = {
-  title: "App/Site/ProfileCard",
+  title: "Components/ProfileCard",
   component: ProfileCard,
   args: {
     handle: "緑の畑",

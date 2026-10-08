@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { ProfileCard } from "@/app/_site/ProfileCard";
+import { ProfileCard } from "@/components/ProfileCard";
 import { publicProfileLabel } from "@/lib/public-profile-label";
 import { createPageMetadata } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";

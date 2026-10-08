@@ -1,16 +1,16 @@
 "use client";
 import { useRef, useState, useTransition } from "react";
 
+import { Badge } from "@/components/Badge";
 import {
   describedBy,
   FieldError,
   formFieldStyle,
   formInputStyle,
   formLabelStyle,
-  OptionalBadge,
   RequiredBadge,
   VisibilityTag,
-} from "@/app/_site/FormParts";
+} from "@/components/FormParts";
 import { buttonRecipe } from "@/components/Button";
 import { PREFECTURES } from "@/lib/prefectures";
 
@@ -214,7 +214,7 @@ export function PostalAddressFields({
         </div>
 
         <label className={addressLabelStyle} htmlFor="buildingName">
-          建物名・部屋番号 <OptionalBadge />
+          建物名・部屋番号 <Badge variant="optional">任意</Badge>
         </label>
         <div className={css({ minW: "0" })}>
           <input

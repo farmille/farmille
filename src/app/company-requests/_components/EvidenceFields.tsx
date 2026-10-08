@@ -3,7 +3,7 @@ import { useState } from "react";
 import * as v from "valibot";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { evidenceMimeSchema, evidencePurposeSchema } from "@/lib/company-application";
-import { FieldError } from "@/app/_site/FormParts";
+import { FieldError } from "@/components/FormParts";
 import { errorMessageJa } from "@/server/errors";
 
 import { css } from "../../../../styled-system/css";

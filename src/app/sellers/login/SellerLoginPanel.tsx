@@ -1,4 +1,4 @@
-import { FormNotice } from "@/app/_site/FormParts";
+import { FormNotice } from "@/components/FormParts";
 import { SellerLoginForm } from "@/app/sellers/login/SellerLoginForm";
 import { PasskeyLogin } from "@/components/auth/PasskeyLogin";
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { buttonRecipe } from "@/components/Button";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
-import { formTextLinkStyle } from "@/app/_site/FormParts";
+import { formTextLinkStyle } from "@/components/FormParts";
 import { css, cva } from "../../../styled-system/css";
 import { softCardStyle } from "./form-styles";
 

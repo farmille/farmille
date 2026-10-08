@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 
 import { signupAction } from "@/app/signup/actions";
+import { Badge } from "@/components/Badge";
 import {
   describedBy,
   FieldError,
@@ -12,11 +13,10 @@ import {
   formLabelStyle,
   FormNotice,
   formTextLinkStyle,
-  OptionalBadge,
   RequiredBadge,
   VisibilityTag,
-} from "@/app/_site/FormParts";
-import { FormSubmitButton } from "@/app/_site/FormSubmitButton";
+} from "@/components/FormParts";
+import { SubmitButton } from "@/components/auth/SubmitButton";
 import { HANDLE_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 import { STANDPOINTS } from "@/lib/standpoints";
@@ -189,7 +189,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       <div className={formFieldStyle}>
         <label className={formLabelStyle} htmlFor="phone">
           電話番号
-          <OptionalBadge />
+          <Badge variant="optional">任意</Badge>
           <VisibilityTag visibility="private" />
         </label>
         <input
@@ -297,7 +297,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       </div>
 
       <div className={formActionsStyle}>
-        <FormSubmitButton label="登録する" pendingLabel="登録中…" />
+        <SubmitButton label="登録する" pendingLabel="登録中…" />
       </div>
       <div className={cx(guideStyle, css({ mb: "2", textAlign: "center" }))}>
         <Link

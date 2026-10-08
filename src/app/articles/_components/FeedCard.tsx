@@ -5,7 +5,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cx } from "../../../../styled-system/css";
-import { ImagePlaceholderIcon } from "@/app/_site/FormParts";
+import { ImagePlaceholderIcon } from "@/components/FormParts";
 
 export function ArticleGrid({ children, className }: { children: ReactNode; className?: string }) {
   return (

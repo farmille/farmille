@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 
 import { formActionsStyle } from "@/components/auth/Fields";
+import { Badge } from "@/components/Badge";
 import {
   describedBy,
   FieldError,
@@ -14,10 +15,9 @@ import {
   FormNotice,
   formSecondaryLinkStyle,
   formTextareaStyle,
-  OptionalBadge,
   RequiredBadge,
-} from "@/app/_site/FormParts";
-import { FormSubmitButton } from "@/app/_site/FormSubmitButton";
+} from "@/components/FormParts";
+import { SubmitButton } from "@/components/auth/SubmitButton";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { HANDLE_MAX_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
@@ -232,7 +232,7 @@ export function ProfileEditForm({ profile, details, options }: ProfileEditFormPr
       <div className={formFieldStyle}>
         <label className={formLabelStyle} htmlFor="bio">
           自己紹介
-          <OptionalBadge />
+          <Badge variant="optional">任意</Badge>
         </label>
         <textarea
           aria-describedby="bio-guide"
@@ -253,7 +253,7 @@ export function ProfileEditForm({ profile, details, options }: ProfileEditFormPr
       <div className={formFieldStyle}>
         <label className={formLabelStyle} htmlFor="links">
           リンク
-          <OptionalBadge />
+          <Badge variant="optional">任意</Badge>
         </label>
         <div className={formGuideRecipe()} id="links-guide">
           自己紹介に表示するリンクを、1行に1件入力してください（10件まで）。公開されます。
@@ -292,7 +292,7 @@ export function ProfileEditForm({ profile, details, options }: ProfileEditFormPr
       </div>
 
       <div className={formActionsStyle}>
-        <FormSubmitButton label="保存する" pendingLabel="保存中…" />
+        <SubmitButton label="保存する" pendingLabel="保存中…" />
         <Link className={formSecondaryLinkStyle} href="/me">
           キャンセル
         </Link>

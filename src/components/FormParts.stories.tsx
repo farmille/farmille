@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { css } from "../../../styled-system/css";
+import { css } from "../../styled-system/css";
+import { Badge } from "./Badge";
 import {
   FieldError,
   FormNotice,
   ImagePlaceholderIcon,
-  OptionalBadge,
   RequiredBadge,
   VisibilityTag,
 } from "./FormParts";
 
 const meta = {
-  title: "App/Site/FormParts",
+  title: "Components/FormParts",
   component: VisibilityTag,
   args: { visibility: "public" },
 } satisfies Meta<typeof VisibilityTag>;
@@ -27,8 +27,8 @@ export const AllParts: Story = {
       <div className={row}>
         ニックネーム
         <RequiredBadge />
-        <OptionalBadge />
-        <OptionalBadge>あとで設定可</OptionalBadge>
+        <Badge variant="optional">任意</Badge>
+        <Badge variant="optional">あとで設定可</Badge>
       </div>
       <div className={row}>
         <VisibilityTag visibility="public" />

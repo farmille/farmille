@@ -10,6 +10,7 @@ import {
   type ReviewActionState,
   updateReviewAction,
 } from "@/app/materials/[id]/review/actions";
+import { Badge } from "@/components/Badge";
 import {
   describedBy,
   FieldError,
@@ -18,9 +19,8 @@ import {
   FormNotice,
   formTextLinkStyle,
   ImagePlaceholderIcon,
-  OptionalBadge,
   RequiredBadge,
-} from "@/app/_site/FormParts";
+} from "@/components/FormParts";
 import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
 
 import { buttonRecipe } from "@/components/Button";
@@ -479,7 +479,7 @@ export function ReviewForm({
       >
         <legend className={formLabelStyle}>
           写真
-          <OptionalBadge>任意・複数可</OptionalBadge>
+          <Badge variant="optional">任意・複数可</Badge>
         </legend>
         <div className={photoGridStyle}>
           {initialValues.photos.map((photo) => (

@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
-import { FormNotice } from "@/app/_site/FormParts";
+import { FormNotice } from "@/components/FormParts";
 import { SellerHeader } from "@/app/sellers/[id]/_components/SellerHeader";
 import { Field } from "@/components/auth/Fields";
 import { buttonRecipe, Input, surfaceCardRecipe, Textarea } from "@/components";

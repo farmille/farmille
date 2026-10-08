@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ProfileCard } from "@/app/_site/ProfileCard";
+import { ProfileCard } from "@/components/ProfileCard";
 import { AppBar } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { publicProfileLabel } from "@/lib/public-profile-label";

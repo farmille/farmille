@@ -1,5 +1,5 @@
 import { PostActionsLoader } from "@/components/PostActionsLoader";
-import { ProfileReviewCard } from "@/app/_site/ProfileReviewCard";
+import { ProfileReviewCard } from "@/components/ProfileReviewCard";
 import { UsageReportCard } from "@/app/materials/[id]/_components/UsageReportCard";
 import type { PublicProfilePageData, PublicProfilePost } from "@/server/queries/public-profiles";
 

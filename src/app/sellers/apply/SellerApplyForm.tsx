@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type ReactNode, useActionState, useState } from "react";
 
+import { Badge } from "@/components/Badge";
 import {
   describedBy,
   FieldError,
@@ -12,10 +13,9 @@ import {
   formLabelStyle,
   FormNotice,
   formTextareaStyle,
-  OptionalBadge,
   RequiredBadge,
-} from "@/app/_site/FormParts";
-import { FormSubmitButton } from "@/app/_site/FormSubmitButton";
+} from "@/components/FormParts";
+import { SubmitButton } from "@/components/auth/SubmitButton";
 import { formActionsStyle } from "@/components/auth/Fields";
 import { sellerApplyAction } from "@/app/sellers/apply/actions";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
@@ -37,7 +37,7 @@ function ApplyField({ name, label, required, guide, error, children }: ApplyFiel
   return (
     <div className={formFieldStyle}>
       <label className={formLabelStyle} htmlFor={name}>
-        {label} {required ? <RequiredBadge /> : <OptionalBadge />}
+        {label} {required ? <RequiredBadge /> : <Badge variant="optional">任意</Badge>}
       </label>
       {children(describedBy(guideId, error && `${name}-error`))}
       {guide === undefined ? null : (
@@ -291,7 +291,7 @@ export function SellerApplyForm() {
         をご確認ください。
       </p>
       <div className={formActionsStyle}>
-        <FormSubmitButton label="申請する" pendingLabel="申請中…" />
+        <SubmitButton label="申請する" pendingLabel="申請中…" />
         <button
           aria-expanded={inviteOpen}
           className={css({

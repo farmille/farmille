@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import { FieldError } from "@/app/_site/FormParts";
-import { SearchCombobox } from "@/app/_site/SearchCombobox";
+import { FieldError } from "@/components/FormParts";
+import { Combobox } from "@/components/Combobox";
 import type { ReviewCropOption } from "@/server/queries/reviews";
 
 import { css } from "../../../../../../styled-system/css";
@@ -76,7 +76,7 @@ export function ReviewCropPicker({
 
   return (
     <>
-      <SearchCombobox
+      <Combobox
         id="review-crop"
         aria-label="作目"
         aria-describedby={shownError === undefined ? "review-crop-selection" : "review-crop-error"}

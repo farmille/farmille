@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 
-import { Badge, badgeRecipe } from "@/components/Badge";
+import { badgeRecipe } from "@/components/Badge";
 import { Icon } from "@/components/Icon";
 import { inputRecipe } from "@/components/Input";
 import { textareaRecipe } from "@/components/Textarea";
-import { css, cva } from "../../../styled-system/css";
+import { css, cva } from "../../styled-system/css";
 
 export const formFieldStyle = css({ mt: "5", minW: "0", _first: { mt: "0" } });
 
@@ -105,10 +105,6 @@ const formNotice = cva({
 
 export function RequiredBadge({ children = "必須" }: { children?: ReactNode }) {
   return <span className={requiredBadge}>{children}</span>;
-}
-
-export function OptionalBadge({ children = "任意" }: { children?: ReactNode }) {
-  return <Badge variant="optional">{children}</Badge>;
 }
 
 export function VisibilityTag({ visibility }: { visibility: "public" | "private" }) {

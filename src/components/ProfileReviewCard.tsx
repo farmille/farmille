@@ -8,7 +8,7 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { createReportAction } from "@/server/actions/reports";
 import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 
-import { css } from "../../../styled-system/css";
+import { css } from "../../styled-system/css";
 
 import { Avatar, Chip, Stars } from "@/app/materials/[id]/_components/CardParts";
 

@@ -10,8 +10,8 @@ import {
   formLabelStyle,
   FormNotice,
   RequiredBadge,
-} from "@/app/_site/FormParts";
-import { FormSubmitButton } from "@/app/_site/FormSubmitButton";
+} from "@/components/FormParts";
+import { SubmitButton } from "@/components/auth/SubmitButton";
 import { formActionsStyle } from "@/components/auth/Fields";
 import { sellerLoginAction } from "@/app/sellers/login/actions";
 import { initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
@@ -66,7 +66,7 @@ export function SellerLoginForm({ next }: { next: string | null }) {
       </div>
 
       <div className={formActionsStyle}>
-        <FormSubmitButton label="ログインする" pendingLabel="ログイン中…" />
+        <SubmitButton label="ログインする" pendingLabel="ログイン中…" />
       </div>
 
       <div

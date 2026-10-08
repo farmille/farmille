@@ -9,7 +9,7 @@ const photo = (fill: string) =>
   );
 
 const meta = {
-  title: "App/Site/ProfileReviewCard",
+  title: "Components/ProfileReviewCard",
   component: ProfileReviewCard,
   args: {
     review: {

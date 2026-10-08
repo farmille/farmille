@@ -3,14 +3,14 @@
 import { useState } from "react";
 
 import { buttonRecipe } from "@/components/Button";
+import { Badge } from "@/components/Badge";
 import {
   FieldError,
   formFieldStyle,
   formGuideRecipe,
   formLabelStyle,
-  OptionalBadge,
-} from "@/app/_site/FormParts";
-import { SearchCombobox } from "@/app/_site/SearchCombobox";
+} from "@/components/FormParts";
+import { Combobox } from "@/components/Combobox";
 import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
 import { css, cva } from "../../../../styled-system/css";
 
@@ -193,7 +193,7 @@ export function ProfileTagsEditor({
       <div className={formFieldStyle}>
         <label className={formLabelStyle} htmlFor="crop-search">
           主な作目
-          <OptionalBadge />
+          <Badge variant="optional">任意</Badge>
         </label>
         <div className={selectedCrops} aria-label="選択済みの作目" role="group">
           {cropIds.map((id) => {
@@ -216,7 +216,7 @@ export function ProfileTagsEditor({
             );
           })}
         </div>
-        <SearchCombobox
+        <Combobox
           id="crop-search"
           aria-label="主な作目"
           aria-describedby="crop-search-guide"
@@ -246,7 +246,7 @@ export function ProfileTagsEditor({
       <div className={formFieldStyle}>
         <label className={formLabelStyle} htmlFor="affiliation">
           所属
-          <OptionalBadge />
+          <Badge variant="optional">任意</Badge>
         </label>
         <div className={formGuideRecipe()}>
           当てはまるものを選んでください（複数可）。一覧にない所属は下の欄に入力して追加できます（
@@ -287,7 +287,7 @@ export function ProfileTagsEditor({
           <input key={name} type="hidden" name="affiliations" value={name} />
         ))}
         <div className={addRow}>
-          <SearchCombobox
+          <Combobox
             id="affiliation"
             aria-label="所属"
             value={affiliation}

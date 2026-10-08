@@ -8,7 +8,7 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { PREFECTURES } from "@/lib/prefectures";
 import { STANDPOINTS } from "@/lib/standpoints";
 import type { ProfileDetails } from "@/server/queries/profile-details";
-import { css, cva } from "../../../styled-system/css";
+import { css, cva } from "../../styled-system/css";
 
 import { Chip } from "@/app/materials/[id]/_components/CardParts";
 
