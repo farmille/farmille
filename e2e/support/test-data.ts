@@ -611,6 +611,17 @@ export async function helpfulVoteCount(userId: string): Promise<number> {
   return rows.length;
 }
 
+/** 指定の感想口コミについて記録された閲覧（view_events）の件数。 */
+export async function reviewViewEventCount(reviewId: string): Promise<number> {
+  const params = new URLSearchParams({
+    select: "id",
+    target_type: "eq.review",
+    target_id: `eq.${reviewId}`,
+  });
+  const rows = await restSelect(IdSchema, "view_events", params);
+  return rows.length;
+}
+
 export async function createPendingUsageReport(input: {
   materialId: string;
   authorUserId: string;

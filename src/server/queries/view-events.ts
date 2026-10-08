@@ -4,13 +4,8 @@ import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
-type ViewTargetType = "article" | "usage_report" | "material" | "review";
-
-type ViewEventInsert = Database["public"]["Tables"]["view_events"]["Insert"];
-
-export type ViewEventsInsert<InsertError> = (
-  rows: ViewEventInsert[],
-) => Promise<{ error: InsertError | null }>;
+/** view_events.target_type のうち詳細画面で記録する種別。 */
+type ViewTargetType = "article" | "usage_report" | "material";
 
 function reportViewError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/view-events] ${operation}`, error);
@@ -49,54 +44,6 @@ export async function recordViewEvent({
 
   if (error !== null) {
     reportViewError("閲覧イベントの記録に失敗", error);
-    return fail("internal");
-  }
-
-  return succeed(null);
-}
-
-/**
- * `after()` の中では `cookies()` が使えないため、クライアントは `after()` の外で
- * 生成して渡す。
- */
-export function viewEventsInsertFor(
-  supabase: SupabaseClient<Database>,
-): ViewEventsInsert<{ message: string }> {
-  return async (rows) => {
-    const { error } = await supabase.from("view_events").insert(rows);
-    return { error };
-  };
-}
-
-export async function recordViewEvents<InsertError>({
-  targetType,
-  targetIds,
-  viewerUserId = null,
-  insert,
-}: {
-  targetType: ViewTargetType;
-  targetIds: readonly string[];
-  viewerUserId?: string | null;
-  insert: ViewEventsInsert<InsertError>;
-}): Promise<Result<null>> {
-  if (targetIds.some((targetId) => targetId.length === 0)) {
-    throw new Error("targetIds に空の値は含められません。");
-  }
-
-  if (targetIds.length === 0) {
-    return succeed(null);
-  }
-
-  const { error } = await insert(
-    targetIds.map((targetId) => ({
-      target_type: targetType,
-      target_id: targetId,
-      viewer_user_id: viewerUserId,
-    })),
-  );
-
-  if (error !== null) {
-    reportViewError("閲覧イベントの一括記録に失敗", error);
     return fail("internal");
   }
 
