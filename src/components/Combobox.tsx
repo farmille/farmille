@@ -15,7 +15,6 @@ const indicatorStyle = css({
   color: "text.subtle",
   pointerEvents: "none",
   display: "flex",
-  "& svg": { transform: "rotate(90deg)" },
 });
 const panelStyle = css({
   position: "absolute",
@@ -192,7 +191,7 @@ export function Combobox({
         }}
       />
       <span className={indicatorStyle}>
-        <Icon name="chevron_right" size="sm" />
+        <Icon name="expand_more" size="sm" />
       </span>
       {expanded ? (
         <div

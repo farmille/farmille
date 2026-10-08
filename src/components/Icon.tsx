@@ -15,6 +15,7 @@ const glyphs = {
   person: { ligature: "person", face: "outlined" },
   thumb_up: { ligature: "thumb_up", face: "outlined" },
   chevron_right: { ligature: "chevron_right", face: "filled" },
+  expand_more: { ligature: "expand_more", face: "filled" },
   home: { ligature: "home", face: "outlined" },
   article: { ligature: "article", face: "outlined" },
   add: { ligature: "add", face: "filled" },
