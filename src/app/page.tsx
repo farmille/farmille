@@ -1,131 +1,96 @@
-import { after } from "next/server";
 import { Suspense } from "react";
-
-import { SitePageShell } from "@/app/_site/SitePageShell";
 import { SkeletonList } from "@/components/SkeletonList";
-import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
+
+import { AppBar, MaterialCard, SectionHeading } from "@/components";
+import { BottomNav } from "@/components/BottomNav";
 import { getSessionUser } from "@/server/auth";
-import {
-  getCatalogSearch,
-  listSearchSuggestions,
-  type CatalogSearch,
-} from "@/server/queries/catalog-search";
 import { listHomeMaterials } from "@/server/queries/home-materials";
-import { listRecentReviews } from "@/server/queries/reviews";
-import { listRecentUsageReports } from "@/server/queries/usage-reports";
-import { recordViewEvents, viewEventsInsertFor } from "@/server/queries/view-events";
-import { createServerSupabase } from "@/server/supabase";
 import { css } from "../../styled-system/css";
 import { HomeHero } from "./_components/HomeHero";
-import { buildHeroSearchOptions } from "./_components/home-hero-options";
 import { HomeInvitations } from "./_components/HomeInvitations";
-import { HomeMaterialsSection } from "./_components/HomeMaterialsSection";
-import { HomeVoices, type VoiceMaterial } from "./_components/HomeVoices";
+import { HomeMaterialMarquee } from "./_components/HomeMaterialMarquee";
+import { HomeFooter } from "./_components/HomeFooter";
 
-const heroBleedStyle = css({ mt: "-4", mx: "calc(50% - 50vw)", tab: { mt: "-6.5" } });
-
-const REPORT_LIMIT = 3;
-const REVIEW_LIMIT = 4;
+const empty = css({
+  p: "5",
+  borderWidth: "1px",
+  borderColor: "border.default",
+  borderRadius: "card",
+  bg: "surface.card",
+  color: "text.subtle",
+  fontSize: "md",
+});
 
 export default function HomePage() {
   return (
-    <SitePageShell showHeaderSearch={false}>
-      <div className={heroBleedStyle}>
-        <Suspense fallback={<HomeHero />}>
-          <HomeHeroWithOptions />
-        </Suspense>
-      </div>
-      <Suspense fallback={<HomeMaterialsSection materials={null} />}>
-        <HomeMaterials />
-      </Suspense>
-      <Suspense
-        fallback={<SkeletonList variant="materialReports" label="生産者の声を読み込んでいます" />}
-      >
-        <HomeRecentVoices />
-      </Suspense>
-      <Suspense fallback={null}>
-        <HomeAccountInvitations />
-      </Suspense>
-    </SitePageShell>
-  );
-}
+    <div
+      className={css({
+        minH: "100dvh",
+        bg: "surface.page",
+        color: "text.default",
+        fontFamily: "sans",
+      })}
+    >
+      <AppBar chrome="public" active="home" variant="home" overlapNoticeImage />
+      <main>
+        <HomeHero />
+        <div
+          className={css({
+            maxW: "content.wide",
+            mx: "auto",
+            px: "4",
+            pt: "8",
+            tab: { px: "5", pt: "10" },
+          })}
+        >
+          <div className={css({ display: "flex", flexDirection: "column", gap: "12" })}>
+            <section aria-label="掲載資材一覧">
+              <SectionHeading as="h1" title="掲載資材一覧" href="/search" linkLabel="すべて見る" />
+              <Suspense
+                fallback={
+                  <SkeletonList variant="materialScroll" label="掲載資材を読み込んでいます" />
+                }
+              >
+                <HomeMaterials />
+              </Suspense>
+            </section>
 
-async function HomeHeroWithOptions() {
-  const [catalog, search] = await Promise.all([getCatalogSearch(), listSearchSuggestions()]);
-  if (!search.ok) throw new Error("検索候補を取得できませんでした。");
-  return <HomeHero searchOptions={buildHeroSearchOptions(catalog, search.data)} />;
+            <Suspense fallback={null}>
+              <HomeAccountInvitations />
+            </Suspense>
+          </div>
+          <HomeFooter />
+        </div>
+      </main>
+      <BottomNav active="home" />
+    </div>
+  );
 }
 
 async function HomeMaterials() {
-  const [materials, catalog] = await Promise.all([listHomeMaterials(), getCatalogSearch()]);
+  const materialsResult = await listHomeMaterials();
   return (
-    <HomeMaterialsSection
-      materials={materials.map((material) => {
-        const counts = catalog.counts.find((row) => row.material_id === material.id);
-        return {
-          href: `/materials/${material.id}`,
-          name: material.name,
-          maker: material.manufacturer_name,
-          rating: material.review_count > 0 ? material.avg_rating : null,
-          reviewCount: material.review_count,
-          reportCount: counts?.report_count ?? null,
-          savedCount: counts?.saved_count ?? null,
-          categories: material.categories,
-          imageSrc: material.primaryImage?.url,
-        };
-      })}
-    />
-  );
-}
-
-function voiceMaterial(catalog: CatalogSearch, id: string, fallbackName: string): VoiceMaterial {
-  const material = catalog.materials.find((row) => row.id === id);
-  return {
-    id,
-    name: material?.name ?? fallbackName,
-    maker: material?.manufacturer_name ?? "",
-    imageUrl:
-      material?.material_images
-        .filter((image) => image.is_current)
-        .toSorted((a, b) => a.sort_order - b.sort_order)[0]?.url ?? null,
-  };
-}
-
-async function HomeRecentVoices() {
-  const [reportsResult, reviewsResult, catalog, session, viewEventSupabase] = await Promise.all([
-    listRecentUsageReports({ limit: REPORT_LIMIT }),
-    listRecentReviews({ limit: REVIEW_LIMIT }),
-    getCatalogSearch(),
-    getSessionUser(),
-    createServerSupabase(),
-  ]);
-  if (!reportsResult.ok) throw new Error("新着の実証詳細レポートを取得できませんでした。");
-  if (!reviewsResult.ok) throw new Error("新着の感想口コミを取得できませんでした。");
-  const reports = reportsResult.data;
-  const reviews = reviewsResult.data;
-  const viewerUserId =
-    session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
-  const insertViewEvents = viewEventsInsertFor(viewEventSupabase);
-  after(async () => {
-    await recordViewEvents({
-      targetType: "review",
-      targetIds: reviews.map((review) => review.id),
-      viewerUserId,
-      insert: insertViewEvents,
-    });
-  });
-
-  return (
-    <HomeVoices
-      reports={reports.map((report) => ({
-        report,
-        material: voiceMaterial(catalog, report.materialId, report.materialName),
-      }))}
-      reviews={reviews.map((review) => ({
-        review,
-        material: voiceMaterial(catalog, review.material_id, review.materialName),
-      }))}
-    />
+    <>
+      <HomeMaterialMarquee>
+        {materialsResult.map((material) => (
+          <MaterialCard
+            key={material.id}
+            variant="scroll"
+            name={material.name}
+            maker={material.manufacturer_name}
+            rating={material.avg_rating ?? 0}
+            reviewCount={material.review_count}
+            categories={material.categories}
+            official={material.manufacturer_verified_at !== null}
+            imageSrc={material.primaryImage?.url}
+            href={`/materials/${material.id}`}
+          />
+        ))}
+      </HomeMaterialMarquee>
+      {materialsResult.length === 0 ? (
+        <p className={empty}>表示できる資材がまだありません。</p>
+      ) : null}
+    </>
   );
 }
 

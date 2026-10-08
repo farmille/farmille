@@ -49,7 +49,8 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
     await expect.poll(async () => await reviewCropNames(createdReview.id)).toEqual(["ミニトマト"]);
 
     await page.goto("/");
-    await expect(page.getByText(body, { exact: true })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "感想口コミの表示順" })).toHaveCount(0);
+    await expect(page.getByText(body, { exact: true })).toHaveCount(0);
     for (const path of ["/me", `/users/${user.id}`]) {
       await page.goto(path);
       if (path === "/me") {
