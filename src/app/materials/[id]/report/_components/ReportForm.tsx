@@ -18,9 +18,10 @@ import {
 import type { RegisteredAddress } from "@/server/accounts/registered-address";
 import type { CropOption } from "@/server/queries/usage-report-form";
 import { Notice } from "@/components/form";
+import { SuccessMark, completionStepRecipe } from "@/components/SuccessMark";
 import { toast } from "@/components/Toaster";
 
-import { css, cva } from "../../../../../../styled-system/css";
+import { css, cva, cx } from "../../../../../../styled-system/css";
 
 import { ReportArticleEditor } from "./ReportArticleEditor";
 import type { ReportSection } from "./ReportArticleParts";
@@ -237,6 +238,10 @@ const errorList = css({ mt: "1", pl: "4" });
 const fields = css({ minW: "0", m: "0", border: "none", p: "0" });
 
 const pane = css({ pt: "5.5", px: "4.5" });
+
+const donePane = css({ pt: "10", px: "4.5", textAlign: "center" });
+
+const doneMark = css({ mb: "4.5" });
 
 const doneTitle = css({ m: "0", fontSize: "xl", fontWeight: "extrabold", textWrap: "balance" });
 
@@ -513,12 +518,18 @@ export function ReportForm({
     return (
       <div className={reportFrame}>
         <div className={shell}>
-          <section className={pane}>
-            <h2 className={doneTitle}>レポートを受け付けました</h2>
-            <p className={doneText}>
+          <section className={donePane}>
+            <SuccessMark entrance className={doneMark} />
+            <h2 className={cx(doneTitle, completionStepRecipe({ step: 1 }))}>
+              レポートを受け付けました
+            </h2>
+            <p className={cx(doneText, completionStepRecipe({ step: 2 }))}>
               運営が内容を確認して公開します。修正をお願いする場合があります。
             </p>
-            <a className={pillButtonRecipe()} href={`/materials/${input.materialId}`}>
+            <a
+              className={cx(pillButtonRecipe(), completionStepRecipe({ step: 3 }))}
+              href={`/materials/${input.materialId}`}
+            >
               資材ページに戻る
             </a>
           </section>

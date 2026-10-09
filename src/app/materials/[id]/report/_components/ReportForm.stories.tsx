@@ -4,6 +4,7 @@ import { saveUsageReportDraftAction } from "@/app/materials/[id]/report/new/acti
 import { Toaster } from "@/components/Toaster";
 import { createBlankUsageReport } from "@/lib/usage-report";
 import { ReportForm } from "./ReportForm";
+import { filledReport } from "./reportStoryFixture";
 const draft = createBlankUsageReport("00000000-0000-4000-8000-000000000101");
 const meta = {
   title: "App/Materials/Report/ReportForm",
@@ -76,3 +77,26 @@ export const PartialSaveFailure: Story = {
 };
 
 export const PartialSaveFailureManual: Story = { ...PartialSaveFailure, play: undefined };
+
+/** 全項目を埋めた下書きを提出し、受付の完了画面を出す。 */
+export const Submitted: Story = {
+  args: {
+    draft: {
+      ...filledReport,
+      materialId: draft.materialId,
+      plots: filledReport.plots.map((plot) => ({
+        ...plot,
+        description: plot.description || "資材を2,000倍に希釈し、10aあたり200Lを葉面散布。",
+      })),
+      methodDetailsAck: true,
+      documentsAck: true,
+      guidelineAck: true,
+    },
+  },
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "5 写真・記事の確認" }));
+    await userEvent.click(canvas.getByRole("button", { name: "公開に進む" }));
+    await canvas.findByRole("heading", { name: "レポートを受け付けました" });
+  },
+};
