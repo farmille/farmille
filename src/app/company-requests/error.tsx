@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { buttonRecipe } from "@/components/Button";
+import { Button, buttonRecipe } from "@/components/Button";
 import { FormPageShell } from "@/components/FormPageShell";
 
 import { css } from "../../../styled-system/css";
@@ -17,13 +17,7 @@ export default function ApplicationErrorPage({ unstable_retry }: { unstable_retr
         title="申請ページを開けませんでした"
         actions={
           <>
-            <button
-              className={buttonRecipe({ variant: "primary" })}
-              onClick={unstable_retry}
-              type="button"
-            >
-              再読み込み
-            </button>
+            <Button onClick={unstable_retry}>再読み込み</Button>
             <Link className={buttonRecipe({ variant: "ghost" })} href="/company-requests/receipts">
               受付票の確認メールを再発行
             </Link>

@@ -3,20 +3,28 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { css, cx } from "../../../../styled-system/css";
 import { Button } from "@/components";
+import { Notice } from "@/components/form";
 import { retryApplicationMail } from "../actions";
 import { errorMessageJa } from "@/server/errors";
 export function ReceiptButtons({ id, sent }: { id: string; sent: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
   async function retry() {
     setBusy(true);
     try {
       const result = await retryApplicationMail(id);
-      setMessage(result.ok ? "メールの送信状況を確認しました。" : errorMessageJa[result.error]);
+      setMessage(
+        result.ok
+          ? { tone: "success", text: "メールの送信状況を確認しました。" }
+          : { tone: "error", text: errorMessageJa[result.error] },
+      );
       router.refresh();
     } catch {
-      setMessage("送信状況を確認できませんでした。時間をおいて再度お試しください。");
+      setMessage({
+        tone: "error",
+        text: "送信状況を確認できませんでした。時間をおいて再度お試しください。",
+      });
     } finally {
       setBusy(false);
     }
@@ -43,7 +51,7 @@ export function ReceiptButtons({ id, sent }: { id: string; sent: boolean }) {
           控えメールを再送
         </Button>
       )}
-      {message && <p role="status">{message}</p>}
+      {message === null ? null : <Notice tone={message.tone}>{message.text}</Notice>}
     </div>
   );
 }

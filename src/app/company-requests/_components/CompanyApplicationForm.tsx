@@ -18,13 +18,20 @@ import { errorMessageJa } from "@/server/errors";
 
 import { css, cx } from "../../../../styled-system/css";
 import { Button } from "@/components/Button";
-import { Checkbox, checkboxChipStyle } from "@/components/Checkbox";
-import { Input } from "@/components/Input";
+import {
+  CheckboxGroup,
+  Field,
+  Fieldset,
+  Form,
+  FormActions,
+  Input,
+  Notice,
+  RadioGroup,
+  SubmitButton,
+  Textarea,
+} from "@/components/form";
 import { SectionHeading } from "@/components/SectionHeading";
-import { RadioGroup } from "@/components/Radio";
 import { SurfaceCard } from "@/components/SurfaceCard";
-import { Textarea } from "@/components/Textarea";
-import { Field, FormMessage, formActionsStyle, HintBox, NoteBox } from "@/components/auth/Fields";
 import { submitApplication } from "../actions";
 import { ConsentFields } from "./ConsentFields";
 import { ContactFields, emptyContact, type ContactDefaults } from "./ContactFields";
@@ -45,7 +52,14 @@ const introListStyle = css({
   listStyle: "disc",
 });
 
-const relationListStyle = css({ display: "flex", flexWrap: "wrap", gap: "2" });
+const RELATION_OPTIONS = Object.entries(relationLabels).map(([value, label]) => ({ value, label }));
+
+const TARGET_OPTIONS = [
+  { value: "new", label: "資材情報の新規掲載" },
+  { value: "existing", label: "掲載済み資材の資材オーナー権限" },
+] as const satisfies readonly { value: ItemRow["target"]; label: string }[];
+
+const noteStyle = css({ mt: "2" });
 
 const orStyle = css({ my: "2", textAlign: "center", fontSize: "xs", color: "text.subtle" });
 
@@ -165,12 +179,12 @@ export function CompanyApplicationForm({
     }
   }
   return (
-    <form onSubmit={submit}>
+    <Form onSubmit={submit}>
       <fieldset className={cx(fieldsetStyle, stackStyle)} disabled={submitting}>
         <IntroCard text={copy.introduction} />
-        <HintBox>
+        <Notice tone="neutral">
           担当者情報・ご提出資料は公開されません。申請の保存後に運営が内容を確認します。
-        </HintBox>
+        </Notice>
 
         <SurfaceCard title={titles.company}>
           <ContactFields defaults={defaults} fixedAccount />
@@ -178,9 +192,9 @@ export function CompanyApplicationForm({
 
         <section className={stackStyle}>
           <SectionHeading title={titles.items} />
-          <HintBox>
+          <Notice tone="neutral">
             複数ある場合は「資材を追加」で資材ごとに繰り返し入力してください。資材名はパッケージ記載の正式名称を入力してください。
-          </HintBox>
+          </Notice>
           {rows.map((row, index) => (
             <MaterialItem
               index={index}
@@ -226,42 +240,35 @@ export function CompanyApplicationForm({
         {kind === "transfer_in" ? (
           <>
             <SurfaceCard title="移行の経緯">
-              <Field htmlFor="background" label="申請の経緯" requirement="required">
+              <Field label="申請の経緯" name="background" requirement="required">
                 <Textarea
-                  id="background"
                   maxLength={10000}
-                  name="background"
                   placeholder="例：事業譲渡により当該資材に関する事業を承継した"
-                  required
                 />
               </Field>
             </SurfaceCard>
             <SurfaceCard title="経緯を確認できる資料">
-              <NoteBox>{historyExplanation}</NoteBox>
+              <Notice className={noteStyle} tone="warn">
+                {historyExplanation}
+              </Notice>
               <Field
-                htmlFor="evidence-owner-agreement"
                 label="現オーナー企業の同意が確認できる資料（メール等の写し）"
                 requirement="optional"
               >
                 <EvidenceFields
-                  inputId="evidence-owner-agreement"
                   intentId={intentId}
                   itemKey={null}
-                  label="現オーナー企業の同意が確認できる資料（任意、メール等の写し）"
                   onBusy={onBusy}
                   purpose="owner_agreement"
                 />
               </Field>
               <Field
-                htmlFor="evidence-succession"
                 label="移行の事実が確認できる資料（官報公告・プレスリリース・契約書等）"
                 requirement="optional"
               >
                 <EvidenceFields
-                  inputId="evidence-succession"
                   intentId={intentId}
                   itemKey={null}
-                  label="移行の事実が確認できる資料（任意、官報公告・プレスリリース・契約書等）"
                   onBusy={onBusy}
                   purpose="succession"
                 />
@@ -273,39 +280,34 @@ export function CompanyApplicationForm({
         <ConsentFields kind={kind} />
 
         <SurfaceCard title="署名">
-          <Field htmlFor="applicationDate" label="申請日" requirement="required">
+          <Field label="申請日" name="applicationDate" requirement="required">
             <Input
               defaultValue={new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" })}
-              id="applicationDate"
-              name="applicationDate"
-              required
               type="date"
             />
           </Field>
-          <Field htmlFor="signerName" label={SIGNER_LABELS[kind]} requirement="required">
-            <Input
-              id="signerName"
-              maxLength={200}
-              name="signerName"
-              placeholder="記入例）金子 太郎"
-              required
-            />
+          <Field label={SIGNER_LABELS[kind]} name="signerName" requirement="required">
+            <Input maxLength={200} placeholder="記入例）金子 太郎" />
           </Field>
         </SurfaceCard>
 
-        <HintBox>
+        <Notice tone="neutral">
           受付番号と回答の控えを企業会員の登録連絡先「{recipient}
           」へ送信します。審査後の連絡先は、入力した担当者メールアドレスです。
-        </HintBox>
-        {error ? <FormMessage tone="error">{error}</FormMessage> : null}
-        <div className={formActionsStyle}>
-          <Button disabled={submitting || uploads > 0} type="submit">
-            {submitting ? "申請を保存しています…" : "内容を確認して申請する"}
-          </Button>
-          <HintBox>完了時、または資料に不足がある場合にメールでご連絡します</HintBox>
-        </div>
+        </Notice>
+        {error ? <Notice tone="error">{error}</Notice> : null}
+        <FormActions>
+          <SubmitButton
+            disabled={uploads > 0}
+            pending={submitting}
+            pendingLabel="申請を保存しています…"
+          >
+            内容を確認して申請する
+          </SubmitButton>
+          <Notice tone="neutral">完了時、または資料に不足がある場合にメールでご連絡します</Notice>
+        </FormActions>
       </fieldset>
-    </form>
+    </Form>
   );
 }
 
@@ -333,66 +335,46 @@ function MaterialItem({
   onCount: (key: string, count: number) => void;
 }) {
   const field = (name: string) => `${row.id}.${name}`;
-  const fieldId = (name: string) => `item-${row.id}-${name}`;
   const materialName = (
     <Field
-      guide="※パッケージ記載の正式名称"
-      htmlFor={fieldId("materialName")}
+      description="※パッケージ記載の正式名称"
       label="資材名"
+      name={field("materialName")}
       requirement="required"
     >
-      <Input
-        id={fieldId("materialName")}
-        maxLength={300}
-        name={field("materialName")}
-        placeholder="パッケージ記載の正式名称"
-        required
-      />
+      <Input maxLength={300} placeholder="パッケージ記載の正式名称" />
     </Field>
   );
   const materialUrl =
     row.target === "existing" ? (
       <Field
-        guide={kind === "registration" ? "掲載済み資材の場合は必須です。" : undefined}
-        htmlFor={fieldId("materialUrl")}
+        description={kind === "registration" ? "掲載済み資材の場合は必須です。" : undefined}
         label="FarmilleページURL"
+        name={field("materialUrl")}
         requirement="required"
       >
-        <Input
-          id={fieldId("materialUrl")}
-          maxLength={2000}
-          name={field("materialUrl")}
-          placeholder="https://www.farmille.com/materials/…"
-          required
-          type="url"
-        />
+        <Input maxLength={2000} placeholder="https://www.farmille.com/materials/…" type="url" />
       </Field>
     ) : null;
   const relations = (
-    <Field
-      guide={relationExplanation}
-      label="当該資材との関係（複数選択可）"
+    <Fieldset
+      description={relationExplanation}
+      legend="当該資材との関係（複数選択可）"
+      name={field("relations")}
       requirement="required"
     >
-      <div className={relationListStyle}>
-        {Object.entries(relationLabels).map(([value, label]) => (
-          <label className={checkboxChipStyle} key={value}>
-            <Checkbox name={field("relations")} value={value} />
-            {label}
-          </label>
-        ))}
-      </div>
-    </Field>
+      <CheckboxGroup options={RELATION_OPTIONS} variant="chips" />
+    </Fieldset>
   );
+  // 添付と URL のどちらか一方があればよいので、組だけを必須にし、中の2つは見出しを隠した任意の欄にする
   const evidence = (
-    <Field
-      guide={`${
+    <Fieldset
+      description={`${
         kind === "transfer_out"
           ? "移行先企業名がパッケージ上に明記されていることが確認できる画像・PDF、またはパッケージが確認できる製品ページURLをご提出ください。"
           : evidenceExplanation
       }資料の添付、または資料URLのいずれかが必須です。`}
-      htmlFor={fieldId("package")}
-      label={
+      legend={
         kind === "transfer_out"
           ? "移行先企業の関与を確認できる資料"
           : kind === "transfer_in"
@@ -401,24 +383,29 @@ function MaterialItem({
       }
       requirement="required"
     >
-      <EvidenceFields
-        inputId={fieldId("package")}
-        intentId={intentId}
-        itemKey={row.id}
-        label="パッケージ・ラベルの資料"
-        onBusy={onBusy}
-        onCount={(count) => onCount(`${row.id}.package`, count)}
-        purpose="package"
-      />
+      <Field hideLabel label="パッケージ・ラベルの資料" requirement="optional">
+        <EvidenceFields
+          intentId={intentId}
+          itemKey={row.id}
+          onBusy={onBusy}
+          onCount={(count) => onCount(`${row.id}.package`, count)}
+          purpose="package"
+        />
+      </Field>
       <p className={orStyle}>または</p>
-      <Input
-        aria-label="パッケージが確認できる製品ページURL"
-        maxLength={2000}
+      <Field
+        hideLabel
+        label="パッケージが確認できる製品ページURL"
         name={field("evidenceUrl")}
-        placeholder="パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL（https://）"
-        type="url"
-      />
-    </Field>
+        requirement="optional"
+      >
+        <Input
+          maxLength={2000}
+          placeholder="パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL（https://）"
+          type="url"
+        />
+      </Field>
+    </Fieldset>
   );
 
   return (
@@ -426,30 +413,14 @@ function MaterialItem({
       {kind === "registration" ? (
         <>
           <SectionHeading title="2-1. 申請内容" />
-          <Field labelId={fieldId("target-label")} label="申請内容" requirement="required">
-            <RadioGroup
-              aria-labelledby={fieldId("target-label")}
-              name={field("target")}
-              onChange={onTarget}
-              options={[
-                { value: "new", label: "資材情報の新規掲載" },
-                { value: "existing", label: "掲載済み資材の資材オーナー権限" },
-              ]}
-              required
-              value={row.target}
-            />
-          </Field>
+          <Fieldset legend="申請内容" name={field("target")} requirement="required">
+            <RadioGroup onValueChange={onTarget} options={TARGET_OPTIONS} value={row.target} />
+          </Fieldset>
           <SectionHeading title="2-2. 対象資材" />
           {materialName}
           {materialUrl}
-          <Field htmlFor={fieldId("officialUrl")} label="製品公式ページURL" requirement="optional">
-            <Input
-              id={fieldId("officialUrl")}
-              maxLength={2000}
-              name={field("officialUrl")}
-              placeholder="https://"
-              type="url"
-            />
+          <Field label="製品公式ページURL" name={field("officialUrl")} requirement="optional">
+            <Input maxLength={2000} placeholder="https://" type="url" />
           </Field>
           <SectionHeading title="2-3. 当該資材との関係" />
           {relations}
@@ -466,23 +437,16 @@ function MaterialItem({
           {kind === "transfer_in" ? (
             <>
               <SectionHeading title="2-2. 当該資材の現在の資材オーナー企業" />
-              <Field htmlFor={fieldId("ownerName")} label="法人名" requirement="required">
-                <Input
-                  id={fieldId("ownerName")}
-                  maxLength={200}
-                  name={field("ownerName")}
-                  required
-                />
+              <Field label="法人名" name={field("ownerName")} requirement="required">
+                <Input maxLength={200} />
               </Field>
               <Field
-                htmlFor={fieldId("ownerInformation")}
                 label="その他、分かる情報"
+                name={field("ownerInformation")}
                 requirement="optional"
               >
                 <Textarea
-                  id={fieldId("ownerInformation")}
                   maxLength={10000}
-                  name={field("ownerInformation")}
                   placeholder="担当部署・担当者名・連絡先など、分かる範囲で"
                 />
               </Field>
@@ -497,15 +461,12 @@ function MaterialItem({
           />
           {evidence}
           <Field
-            guide={successionExplanation}
-            htmlFor={fieldId("involvement")}
+            description={successionExplanation}
             label="または、その他、当該資材と貴社との関係を確認できる資料"
           >
             <EvidenceFields
-              inputId={fieldId("involvement")}
               intentId={intentId}
               itemKey={row.id}
-              label="その他、資材との関係を確認できる資料"
               onBusy={onBusy}
               onCount={(count) => onCount(`${row.id}.involvement`, count)}
               purpose="involvement"
@@ -516,7 +477,9 @@ function MaterialItem({
 
       {removable ? (
         <>
-          <NoteBox>添付がある場合は、資料を削除してから資材を削除してください。</NoteBox>
+          <Notice className={noteStyle} tone="warn">
+            添付がある場合は、資料を削除してから資材を削除してください。
+          </Notice>
           <Button disabled={removeDisabled} onClick={onRemove} size="sm" variant="danger">
             この資材を削除
           </Button>

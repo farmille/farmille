@@ -3,9 +3,8 @@ import { useState } from "react";
 import * as v from "valibot";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { evidenceMimeSchema, evidencePurposeSchema } from "@/lib/company-application";
-import { FormMessage, HintBox } from "@/components/auth/Fields";
 import { Button } from "@/components/Button";
-import { FileInput } from "@/components/FileInput";
+import { FileInput, Notice } from "@/components/form";
 import { errorMessageJa } from "@/server/errors";
 
 import { css } from "../../../../styled-system/css";
@@ -32,16 +31,12 @@ export function EvidenceFields({
   intentId,
   itemKey,
   purpose,
-  label,
-  inputId,
   onBusy,
   onCount,
 }: {
   intentId: string;
   itemKey: string | null;
   purpose: v.InferOutput<typeof evidencePurposeSchema>;
-  label: string;
-  inputId: string;
   onBusy: (busy: boolean) => void;
   onCount?: (count: number) => void;
 }) {
@@ -124,16 +119,14 @@ export function EvidenceFields({
     <div className={stackStyle}>
       <FileInput
         accept="image/jpeg,image/png,application/pdf"
-        aria-label={label}
         disabled={busy || files.length >= 5}
-        id={inputId}
         multiple
         onChange={(event) => {
           void upload(event.currentTarget.files);
           event.currentTarget.value = "";
         }}
       />
-      <HintBox>jpg / png / pdf、1ファイル10MBまで、最大5ファイル</HintBox>
+      <Notice tone="neutral">jpg / png / pdf、1ファイル10MBまで、最大5ファイル</Notice>
       {files.length > 0 ? (
         <ul className={fileListStyle}>
           {files.map((file) => (
@@ -154,8 +147,8 @@ export function EvidenceFields({
           ))}
         </ul>
       ) : null}
-      {busy ? <FormMessage tone="info">資料を処理しています…</FormMessage> : null}
-      {error ? <FormMessage tone="error">{error}</FormMessage> : null}
+      {busy ? <Notice tone="info">資料を処理しています…</Notice> : null}
+      {error ? <Notice tone="error">{error}</Notice> : null}
     </div>
   );
 }

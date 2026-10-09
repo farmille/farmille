@@ -1,5 +1,4 @@
-import { Field } from "@/components/auth/Fields";
-import { Input } from "@/components/Input";
+import { Field, Input } from "@/components/form";
 
 export type ContactDefaults = {
   companyName: string;
@@ -29,106 +28,81 @@ export function ContactFields({
   defaults: ContactDefaults;
   fixedAccount?: boolean;
 }) {
-  const id = (name: string) => `${prefix.replace(/\W/g, "-")}${name}`;
   return (
     <>
-      <Field htmlFor={id("companyName")} label="法人名" requirement="required">
+      <Field label="法人名" name={`${prefix}companyName`} requirement="required">
         <Input
           defaultValue={defaults.companyName}
-          id={id("companyName")}
           maxLength={200}
-          name={`${prefix}companyName`}
           placeholder="例）〇〇バイオ株式会社"
-          required
         />
       </Field>
       <Field
-        guide="13桁の法人番号。国税庁 法人番号公表サイトで確認できます。"
-        htmlFor={id("corporateNumber")}
+        description="13桁の法人番号。国税庁 法人番号公表サイトで確認できます。"
         label="法人番号"
+        name={`${prefix}corporateNumber`}
         requirement="required"
       >
         <Input
           defaultValue={defaults.corporateNumber}
-          id={id("corporateNumber")}
           inputMode="numeric"
           maxLength={13}
-          name={`${prefix}corporateNumber`}
           pattern="[0-9]{13}"
           placeholder="例）1234567890123"
-          required
         />
       </Field>
       <Field
-        guide="Farmilleが発行したIDをご入力ください。"
-        htmlFor={id("accountId")}
+        description="Farmilleが発行したIDをご入力ください。"
         label="FarmilleアカウントID"
+        name={`${prefix}accountId`}
         requirement="required"
       >
         <Input
           defaultValue={defaults.accountId}
-          id={id("accountId")}
           maxLength={100}
-          name={`${prefix}accountId`}
           placeholder="Farmilleが発行したID"
           readOnly={fixedAccount}
-          required
         />
       </Field>
       <Field
-        htmlFor={id("contactName")}
         label="担当者名"
+        name={`${prefix}contactName`}
         requirement="required"
         visibility="private"
       >
-        <Input
-          defaultValue={defaults.contactName}
-          id={id("contactName")}
-          maxLength={200}
-          name={`${prefix}contactName`}
-          placeholder="例）金子 太郎"
-          required
-        />
-      </Field>
-      <Field htmlFor={id("department")} label="部署名" requirement="required" visibility="private">
-        <Input
-          defaultValue={defaults.department}
-          id={id("department")}
-          maxLength={200}
-          name={`${prefix}department`}
-          placeholder="例）営業部"
-          required
-        />
+        <Input defaultValue={defaults.contactName} maxLength={200} placeholder="例）金子 太郎" />
       </Field>
       <Field
-        htmlFor={id("email")}
+        label="部署名"
+        name={`${prefix}department`}
+        requirement="required"
+        visibility="private"
+      >
+        <Input defaultValue={defaults.department} maxLength={200} placeholder="例）営業部" />
+      </Field>
+      <Field
         label="担当者メールアドレス"
+        name={`${prefix}email`}
         requirement="required"
         visibility="private"
       >
         <Input
           defaultValue={defaults.email}
-          id={id("email")}
           maxLength={254}
-          name={`${prefix}email`}
           placeholder="tanto@example.co.jp"
-          required
           type="email"
         />
       </Field>
       <Field
-        htmlFor={id("phone")}
         label="担当者電話番号"
+        name={`${prefix}phone`}
         requirement="required"
         visibility="private"
       >
         <Input
           defaultValue={defaults.phone}
-          id={id("phone")}
           maxLength={50}
-          name={`${prefix}phone`}
           placeholder="例）03-1234-5678"
-          required
           type="tel"
         />
       </Field>
