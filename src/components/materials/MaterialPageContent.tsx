@@ -1,5 +1,5 @@
 import { MaterialRegistrationBadges } from "./MaterialRegistrationBadges";
-import Image from "next/image";
+import { MaterialIllustration } from "./MaterialIllustration";
 import { MaterialLinks } from "./MaterialLinks";
 import {
   APPLICATION_METHODS,
@@ -27,44 +27,19 @@ export const materialPageText = css({
   lineHeight: "relaxed",
   fontSize: "sm",
 });
-export const materialPageImages = css({ display: "flex", gap: "3", flexWrap: "wrap" });
-const imageFrame = css({
-  position: "relative",
-  w: "imagePreview",
-  h: "imagePreview",
-  borderRadius: "card",
-  overflow: "hidden",
-  borderWidth: "1px",
-  borderColor: "border.default",
-});
-
 /** メーカー原稿の本文と資料をプレビューする。 */
 export function MaterialPageContent({
   content,
-  imageSources,
+  imageUrl,
 }: {
   content: Content;
-  imageSources: string[];
+  imageUrl: string | null;
 }) {
   return (
     <div className={materialPageStack}>
       <section>
         <h2>製品画像</h2>
-        <div className={materialPageImages}>
-          {content.images.map((entry, index) => (
-            <div className={imageFrame} key={entry.path}>
-              <Image
-                unoptimized
-                src={imageSources[index]}
-                alt={entry.alt || "製品画像"}
-                fill
-                sizes="160px"
-                className={css({ objectFit: "contain" })}
-              />
-            </div>
-          ))}
-          {content.images.length === 0 ? <p>画像は未登録です</p> : null}
-        </div>
+        <MaterialIllustration imageUrl={imageUrl} />
       </section>
       <section>
         <h2>製品説明</h2>

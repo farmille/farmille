@@ -64,7 +64,7 @@ describe("製品ページの原稿", () => {
       ).toBe(false);
     }
   });
-  it("試験資料の分類・概要・実施機関を公開前に確認する", () => {
+  it("試験資料は分類・題名・URLで公開でき、試験の詳細は任意にする", () => {
     const trial = {
       crops: "",
       summary: "概要",
@@ -80,11 +80,7 @@ describe("製品ページの原稿", () => {
         content: { ...content, links: [link] },
       }),
     ).toBe(true);
-    for (const incomplete of [
-      { ...link, group: null, trial: null },
-      { ...link, trial: { ...trial, summary: "" } },
-      { ...link, trial: { ...trial, institution: "" } },
-    ]) {
+    for (const incomplete of [{ ...link, group: null, trial: null }]) {
       expect(
         v.is(SaveMaterialPageSchema, { ...input, content: { ...content, links: [incomplete] } }),
       ).toBe(true);
@@ -96,6 +92,16 @@ describe("製品ページの原稿", () => {
         }),
       ).toBe(false);
     }
+    expect(
+      v.is(SaveMaterialPageSchema, {
+        ...input,
+        submit: true,
+        content: {
+          ...content,
+          links: [{ ...link, trial: { ...trial, summary: "", institution: "" } }],
+        },
+      }),
+    ).toBe(true);
     expect(
       v.is(MaterialPageContentSchema, { ...content, links: [{ ...link, group: "overview" }] }),
     ).toBe(false);

@@ -29,10 +29,7 @@ export default async function ExpressionReviewPage({
       <TextLink href={`/materials/${saved.version.material_id}`}>
         現在の公開ページと比較する
       </TextLink>
-      <MaterialPageContent
-        content={saved.content}
-        imageSources={saved.images.map((image) => image.url)}
-      />
+      <MaterialPageContent content={saved.content} imageUrl={saved.imageUrl} />
       {saved.version.status === "pending" ? (
         <ExpressionReviewForm versionId={id} />
       ) : (

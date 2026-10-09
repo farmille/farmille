@@ -33,24 +33,6 @@ const imageFrameStyle = css({
   pc: { w: "44", h: "44" },
 });
 const photoStyle = css({ objectFit: "contain", bg: "surface.card" });
-const thumbGridStyle = css({
-  display: "grid",
-  gridTemplateColumns: "repeat(3, token(sizes.9))",
-  gap: "1",
-  mt: "1.5",
-});
-const thumbStyle = css({
-  w: "9",
-  h: "9",
-  display: "grid",
-  placeItems: "center",
-  overflow: "hidden",
-  bg: "surface.page",
-  borderWidth: "1px",
-  borderColor: "border.default",
-  borderRadius: "mark",
-});
-const thumbImageStyle = css({ w: "full", h: "full", objectFit: "contain" });
 const infoStyle = css({ flex: "1", minW: "0" });
 const nameStyle = css({ fontSize: "lg" });
 const ratingStyle = css({
@@ -107,8 +89,6 @@ export function MaterialHero({
   reportCount = <HeroCount>−件</HeroCount>,
   savedCount = <HeroCount>−</HeroCount>,
 }: MaterialHeroProps) {
-  const primaryImage = material.images[0];
-  const extraImages = material.images.slice(1);
   const hasReviews = material.review_count > 0 && material.avg_rating !== null;
 
   return (
@@ -116,34 +96,19 @@ export function MaterialHero({
       <div className={mediaColumnStyle}>
         <div className={imageFrameStyle} data-ui="material-hero-image">
           <NoImage />
-          {primaryImage ? (
+          {material.imageUrl ? (
             <Image
-              alt={material.name}
+              alt={`${material.name}の容器イメージ`}
               className={photoStyle}
               height={170}
               preload
               sizes="(min-width: 1024px) 176px, 118px"
-              src={primaryImage.url}
+              src={material.imageUrl}
               width={170}
             />
           ) : null}
         </div>
-        {extraImages.length > 0 ? (
-          <div role="group" aria-label="追加の製品画像" className={thumbGridStyle}>
-            {extraImages.map((image, index) => (
-              <div key={image.id} className={thumbStyle}>
-                <Image
-                  src={image.url}
-                  alt={`${material.name}の製品画像${index + 2}`}
-                  width={72}
-                  height={72}
-                  sizes="36px"
-                  className={thumbImageStyle}
-                />
-              </div>
-            ))}
-          </div>
-        ) : null}
+        <p className={css({ fontSize: "2xs", color: "text.subtle", mt: "1" })}>容器のイメージ</p>
       </div>
       <div className={infoStyle}>
         <h1 id="material-name" className={nameStyle}>

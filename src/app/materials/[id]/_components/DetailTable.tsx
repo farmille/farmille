@@ -99,6 +99,7 @@ export function MaterialDetailTable({
     (usage) => usage.method !== "other" && usage.detail.trim().length > 0,
   );
   const rows: DetailRow[] = [
+    { label: "正式名称", value: material.official_name ?? "−" },
     { label: "期待効果", value: tags(material.effects.map(({ name }) => name)) },
     {
       label: "資材ジャンル",

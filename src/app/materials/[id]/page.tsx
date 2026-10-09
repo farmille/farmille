@@ -157,7 +157,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
     name: material.name,
     manufacturerName: material.manufacturer_name,
     description: materialDescription(material),
-    imageUrls: material.images.map((image) => image.url),
+    imageUrls: material.imageUrl ? [material.imageUrl] : [],
     averageRating: material.avg_rating,
     reviewCount: material.review_count,
   });
@@ -196,7 +196,11 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
         }
       />
       {material.publication_status === "archived" ? <ArchivedNotice /> : null}
-      <MaterialPageCompliance makerVerified={material.manufacturer_verified_at !== null} />
+      <MaterialPageCompliance
+        makerVerified={
+          material.manufacturer_verified_at !== null && publishedPage?.origin !== "catalog"
+        }
+      />
 
       <MaterialDescriptionBox description={publishedPage?.content.description} />
       <MaterialTimingBox timings={publishedPage?.content.timings ?? []} />

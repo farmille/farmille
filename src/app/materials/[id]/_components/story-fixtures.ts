@@ -58,7 +58,10 @@ export const materialDetail: MaterialDetail = {
   price_range: "5,000〜8,000円",
   official_url: "https://example.com/material",
   catalog_url: "https://example.com/catalog.pdf",
-  images: [],
+  imageUrl: null,
+  container_type_id: null,
+  official_name: "土づくり微生物資材",
+  name_reading: "ツチヅクリビセイブツシザイ",
   evidences: materialEvidence,
   compositionType: {
     id: "00000000-0000-4000-8000-000000000301",
@@ -219,7 +222,8 @@ export const relatedMaterials: MaterialListItem[] = [
     control_plot_ratio: null,
     created_at: "2026-07-01T00:00:00.000Z",
     description: null,
-    primaryImage: { id: "img-1", url: photoUrl, image_type: "package", sort_order: 0 },
+    imageUrl: "/images/container-shapes/5.png",
+    container_type_id: 5,
   },
   {
     id: "00000000-0000-4000-8000-000000000112",
@@ -234,7 +238,8 @@ export const relatedMaterials: MaterialListItem[] = [
     control_plot_ratio: null,
     created_at: "2026-07-01T00:00:00.000Z",
     description: null,
-    primaryImage: null,
+    imageUrl: null,
+    container_type_id: null,
   },
 ];
 

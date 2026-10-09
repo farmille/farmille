@@ -24,24 +24,31 @@ export type SearchFilterItem = SearchFilterRef & {
 export type SearchCatalog = {
   filters: SearchFilterItem[];
   makers: string[];
-  materialNames: string[];
+  materials: { name: string; aliases: string[] }[];
 };
+
+function normalizeSearchText(value: string) {
+  return value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[ァ-ヶ]/g, (character) => String.fromCharCode(character.charCodeAt(0) - 0x60));
+}
 
 /** キーワードに合う候補を全件返す。一覧の絞り込みには候補表示の件数上限を適用しない。 */
 export function matchSearchCatalog(catalog: SearchCatalog, query: string) {
-  const keyword = query.trim().normalize("NFKC").toLowerCase();
+  const keyword = normalizeSearchText(query.trim());
   return {
     filters: catalog.filters.filter((filter) =>
-      [filter.name, ...filter.aliases].some((name) =>
-        name.normalize("NFKC").toLowerCase().includes(keyword),
-      ),
+      [filter.name, ...filter.aliases].some((name) => normalizeSearchText(name).includes(keyword)),
     ),
-    makerNames: catalog.makers.filter((name) =>
-      name.normalize("NFKC").toLowerCase().includes(keyword),
-    ),
-    materialNames: catalog.materialNames.filter((name) =>
-      name.normalize("NFKC").toLowerCase().includes(keyword),
-    ),
+    makerNames: catalog.makers.filter((name) => normalizeSearchText(name).includes(keyword)),
+    materialNames: catalog.materials
+      .filter((material) =>
+        [material.name, ...material.aliases].some((name) =>
+          normalizeSearchText(name).includes(keyword),
+        ),
+      )
+      .map((material) => material.name),
   };
 }
 

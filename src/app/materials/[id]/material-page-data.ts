@@ -48,12 +48,12 @@ export function materialMetadata(
 ): Metadata {
   const title = options.titleSuffix ? `${material.name}${options.titleSuffix}` : material.name;
   const description = options.description ?? materialDescription(material);
-  const primaryImage = material.images[0]?.url;
+  const primaryImage = material.imageUrl;
 
   return createPageMetadata({
     title,
     description,
     path: `/materials/${material.id}${options.pathSuffix ?? ""}`,
-    imageUrls: primaryImage === undefined ? undefined : [primaryImage],
+    imageUrls: primaryImage === null ? undefined : [primaryImage],
   });
 }

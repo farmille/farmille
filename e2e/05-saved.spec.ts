@@ -5,6 +5,7 @@ import {
   createMaterial,
   deleteAuthUsersByEmail,
   deleteMaterial,
+  seedCatalogMaterial,
 } from "./support/test-data";
 import { loginGeneral } from "./support/ui";
 
@@ -13,6 +14,7 @@ test("お気に入り保存、マイページ一覧、比較表", async ({ page 
   const materials = await Promise.all([createMaterial("saved-a"), createMaterial("saved-b")]);
 
   try {
+    await seedCatalogMaterial(materials[0].id);
     await loginGeneral(page, user);
 
     for (const material of materials) {
@@ -28,12 +30,15 @@ test("お気に入り保存、マイページ一覧、比較表", async ({ page 
       await materialLink.locator("..").getByRole("checkbox", { name: "比較に含める" }).check();
     }
 
+    await expect(page.locator('img[src*="container-shapes"]')).toBeVisible();
     await page.getByRole("button", { name: "比較する" }).click();
     await expect(page).toHaveURL(/\/me\/saved\/compare\?/);
     await expect(page.getByRole("table")).toBeVisible();
     for (const material of materials) {
       await expect(page.getByText(material.name, { exact: true })).toBeVisible();
     }
+    await page.goto(`/materials/${materials[0].id}/report/new`);
+    await expect(page.locator('img[src*="container-shapes"]')).toBeVisible();
   } finally {
     await deleteAuthUsersByEmail(user.email);
     for (const material of materials) {
