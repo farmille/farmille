@@ -2,26 +2,11 @@
 
 import { useActionState } from "react";
 
-import {
-  adminActionsStyle,
-  adminFormStyle,
-  adminInlineNoteStyle,
-} from "@/app/admin/_components/AdminUI";
 import { initialAdminActionState } from "@/app/admin/_lib/action-state";
 import { updateUsageReportEditorialAction } from "@/app/admin/usage-reports/[id]/actions";
-import { Button, Input, Textarea } from "@/components";
-import { FormMessage } from "@/components/auth/Fields";
+import { Button } from "@/components";
+import { Field, Form, FormActions, Input, Notice, Textarea } from "@/components/form";
 import type { UsageReportEditorialDetail } from "@/server/admin/usage-reports";
-import { css } from "../../../../../styled-system/css";
-
-const labelStyle = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "1.5",
-  color: "text.muted",
-  fontSize: "sm",
-  fontWeight: "bold",
-});
 
 export function UsageReportEditorialForm({ report }: { report: UsageReportEditorialDetail }) {
   const [state, formAction, pending] = useActionState(
@@ -31,25 +16,21 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
   const editable = report.status === "pending";
 
   return (
-    <form action={formAction} className={adminFormStyle}>
-      <input name="reportId" type="hidden" value={report.id} />
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
-      {state.status === "done" ? <FormMessage tone="info">{state.message}</FormMessage> : null}
+    <Form action={formAction}>
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
+      {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
 
-      <label className={labelStyle}>
-        タイトル
-        <Input defaultValue={report.title} disabled={!editable} name="title" required />
-      </label>
-      <label className={labelStyle}>
-        {report.formVersion === 2 ? "結果・感想" : "観察した変化"}
-        <Textarea
-          defaultValue={report.observedChange}
-          disabled={!editable}
-          name="observedChange"
-          required
-          size="lg"
-        />
-      </label>
+      <Field label="タイトル" labelSize="sm" name="title" requirement="required">
+        <Input defaultValue={report.title} disabled={!editable} />
+      </Field>
+      <Field
+        label={report.formVersion === 2 ? "結果・感想" : "観察した変化"}
+        labelSize="sm"
+        name="observedChange"
+        requirement="required"
+      >
+        <Textarea defaultValue={report.observedChange} disabled={!editable} size="lg" />
+      </Field>
       {report.formVersion === 2 ? (
         <>
           <input name="negativeNote" type="hidden" value="" />
@@ -57,37 +38,32 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
         </>
       ) : (
         <>
-          <label className={labelStyle}>
-            悪影響・気になった点
-            <Textarea
-              defaultValue={report.negativeNote ?? ""}
-              disabled={!editable}
-              name="negativeNote"
-            />
-          </label>
-          <label className={labelStyle}>
-            まとめ
-            <Textarea
-              defaultValue={report.summary}
-              disabled={!editable}
-              name="summary"
-              required
-              size="lg"
-            />
-          </label>
+          <Field label="悪影響・気になった点" labelSize="sm" name="negativeNote">
+            <Textarea defaultValue={report.negativeNote ?? ""} disabled={!editable} />
+          </Field>
+          <Field label="まとめ" labelSize="sm" name="summary" requirement="required">
+            <Textarea defaultValue={report.summary} disabled={!editable} size="lg" />
+          </Field>
         </>
       )}
-      <label className={labelStyle}>
-        編集局メモ（内部）
-        <Textarea defaultValue={report.editorNote ?? ""} disabled={!editable} name="editorNote" />
-      </label>
+      <Field
+        description={
+          editable
+            ? "差し戻す場合は、投稿者が対応できる理由を編集局メモへ必ず入力する。"
+            : undefined
+        }
+        label="編集局メモ（内部）"
+        labelSize="sm"
+        name="editorNote"
+      >
+        <Textarea defaultValue={report.editorNote ?? ""} disabled={!editable} />
+      </Field>
 
-      {editable ? (
-        <>
-          <p className={adminInlineNoteStyle}>
-            差し戻す場合は、投稿者が対応できる理由を編集局メモへ必ず入力する。
-          </p>
-          <div className={adminActionsStyle}>
+      <input name="reportId" type="hidden" value={report.id} />
+      {/* 保存・公開・差し戻しで operation の値を分けて送るため、name/value を持てる Button のままにする */}
+      <FormActions layout="row">
+        {editable ? (
+          <>
             <Button disabled={pending} name="operation" size="sm" type="submit" value="save">
               編集内容を保存
             </Button>
@@ -104,11 +80,11 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
             >
               差し戻す
             </Button>
-          </div>
-        </>
-      ) : (
-        <p className={adminInlineNoteStyle}>処理済みのため編集できません。</p>
-      )}
-    </form>
+          </>
+        ) : (
+          <Notice tone="neutral">処理済みのため編集できません。</Notice>
+        )}
+      </FormActions>
+    </Form>
   );
 }
