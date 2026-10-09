@@ -4,271 +4,172 @@ import Link from "next/link";
 import { useActionState } from "react";
 
 import { signupAction } from "@/app/signup/actions";
-import { Badge } from "@/components/Badge";
 import {
-  describedBy,
-  FieldError,
-  formFieldStyle,
-  formInputStyle,
-  formLabelStyle,
-  FormNotice,
-  formTextLinkStyle,
-  RequiredBadge,
-  VisibilityTag,
-} from "@/components/FormParts";
-import { SubmitButton } from "@/components/auth/SubmitButton";
+  Checkbox,
+  Field,
+  Fieldset,
+  Form,
+  FormActions,
+  Input,
+  Notice,
+  RadioGroup,
+  SubmitButton,
+} from "@/components/form";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
+import { TextLink } from "@/components/TextLink";
 import { HANDLE_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 import { STANDPOINTS } from "@/lib/standpoints";
-import { formActionsStyle, RadioCards } from "@/components/auth/Fields";
-import { Icon } from "@/components/Icon";
-import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cx } from "../../../styled-system/css";
-import { guideStyle, softCardStyle } from "./form-styles";
 import { PostalAddressFields } from "./PostalAddressFields";
 
-const termsToggleStyle = css({
-  position: "relative",
-  display: "flex",
-  alignItems: "center",
-  gap: "2.5",
-  mt: "2.5",
-  px: "3",
-  py: "3",
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "input",
-  fontSize: "md",
-  fontWeight: "bold",
-  cursor: "pointer",
-  "&:has(input:focus-visible)": {
-    outlineWidth: "2px",
-    outlineStyle: "solid",
-    outlineColor: "primary.700",
-    outlineOffset: "2px",
-  },
-  "& a": { color: "inherit", textDecoration: "underline" },
-});
+const introStyle = css({ mb: "3", textAlign: "center" });
 
-const coverInputStyle = css({
-  position: "absolute",
-  inset: "0",
-  w: "full",
-  h: "full",
-  m: "0",
-  opacity: "0",
-  cursor: "pointer",
-});
+const nameRowStyle = css({ display: "flex", gap: "2" });
 
-const checkBoxStyle = css({
-  display: "grid",
-  placeItems: "center",
-  flex: "0 0 auto",
-  w: "5",
-  h: "5",
-  bg: "surface.card",
-  borderWidth: "1.5px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  borderRadius: "mark",
-  color: "transparent",
-  "input:checked + &": { bg: "primary.700", borderColor: "primary.700", color: "text.inverse" },
-});
+const namePartStyle = css({ flex: "1" });
 
-const inputGuideStyle = cx(guideStyle, css({ mt: "1.5" }));
+const noteStyle = css({
+  mt: "1",
+  mb: "2",
+  fontSize: "sm",
+  lineHeight: "normal",
+  color: "text.muted",
+});
 
 export function SignupForm({ next = null }: { next?: string | null }) {
   const [state, formAction] = useActionState(signupAction, initialAuthFormState);
-  const fieldErrors = fieldErrorsOf(state);
   const values = submittedValuesOf(state);
 
   return (
-    <form action={formAction} noValidate>
+    <Form action={formAction} errors={fieldErrorsOf(state)}>
       {next ? <input type="hidden" name="next" value={next} /> : null}
-      {state.status === "error" ? <FormNotice tone="error">{state.message}</FormNotice> : null}
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
-      <div className={cx(softCardStyle, css({ mb: "3", textAlign: "center" }))}>
-        <div className={css({ fontSize: "md", fontWeight: "bold" })}>
-          投稿と実証詳細レポートの閲覧には、会員登録が必要です
-        </div>
-        <div className={css({ mt: "1", fontSize: "sm", fontWeight: "bold", color: "primary.800" })}>
-          登録は無料・1分で完了します。
-        </div>
-      </div>
+      <Notice
+        className={introStyle}
+        title="投稿と実証詳細レポートの閲覧には、会員登録が必要です"
+        tone="info"
+      >
+        登録は無料・1分で完了します。
+      </Notice>
       <p className={css({ mb: "4.5", fontSize: "sm", color: "text.subtle" })}>
         ニックネームで参加できます。本名や連絡先が公開されることはありません。
       </p>
 
-      <div className={formFieldStyle}>
-        <label className={formLabelStyle} htmlFor="handle">
-          ニックネーム
-          <RequiredBadge />
-          <VisibilityTag visibility="public" />
-        </label>
-        <input
-          aria-describedby={describedBy("handle-guide", fieldErrors.handle && "handle-error")}
-          aria-invalid={fieldErrors.handle ? true : undefined}
+      <Field
+        description="本名でなくてOKです"
+        label="ニックネーム"
+        name="handle"
+        requirement="required"
+        visibility="public"
+      >
+        <Input
           autoComplete="nickname"
-          className={formInputStyle}
           defaultValue={values.handle}
-          id="handle"
           maxLength={HANDLE_MAX_LENGTH}
-          name="handle"
           placeholder="例）農家の山田"
-          required
-          type="text"
         />
-        <div className={inputGuideStyle} id="handle-guide">
-          本名でなくてOKです
-        </div>
-        <FieldError id="handle-error" message={fieldErrors.handle} />
-      </div>
+      </Field>
 
-      <fieldset className={formFieldStyle}>
-        <legend className={formLabelStyle}>
-          本名
-          <RequiredBadge />
-          <VisibilityTag visibility="private" />
-        </legend>
-        <div className={css({ display: "flex", gap: "2" })}>
-          <input
-            aria-describedby={describedBy(fieldErrors.familyName && "familyName-error")}
-            aria-invalid={fieldErrors.familyName ? true : undefined}
-            aria-label="本名（姓）"
-            autoComplete="family-name"
-            className={formInputStyle}
-            defaultValue={values.familyName}
-            id="familyName"
-            maxLength={80}
-            name="familyName"
-            placeholder="姓　例）山田"
-            required
-          />
-          <input
-            aria-describedby={describedBy(fieldErrors.givenName && "givenName-error")}
-            aria-invalid={fieldErrors.givenName ? true : undefined}
-            aria-label="本名（名）"
-            autoComplete="given-name"
-            className={formInputStyle}
-            defaultValue={values.givenName}
-            id="givenName"
-            maxLength={80}
-            name="givenName"
-            placeholder="名　例）太郎"
-            required
-          />
+      <Fieldset legend="本名" requirement="required" visibility="private">
+        <div className={nameRowStyle}>
+          <Field className={namePartStyle} hideLabel label="本名（姓）" name="familyName">
+            <Input
+              autoComplete="family-name"
+              defaultValue={values.familyName}
+              maxLength={80}
+              placeholder="姓　例）山田"
+            />
+          </Field>
+          <Field className={namePartStyle} hideLabel label="本名（名）" name="givenName">
+            <Input
+              autoComplete="given-name"
+              defaultValue={values.givenName}
+              maxLength={80}
+              placeholder="名　例）太郎"
+            />
+          </Field>
         </div>
-        <FieldError id="familyName-error" message={fieldErrors.familyName} />
-        <FieldError id="givenName-error" message={fieldErrors.givenName} />
-      </fieldset>
+      </Fieldset>
 
-      <div className={formFieldStyle}>
-        <label className={formLabelStyle} htmlFor="email">
-          メールアドレス
-          <RequiredBadge />
-          <VisibilityTag visibility="private" />
-        </label>
-        <input
-          aria-describedby={describedBy(fieldErrors.email && "email-error")}
-          aria-invalid={fieldErrors.email ? true : undefined}
+      <Field label="メールアドレス" name="email" requirement="required" visibility="private">
+        <Input
           autoComplete="email"
-          className={formInputStyle}
           defaultValue={values.email}
-          id="email"
-          name="email"
           placeholder="you@example.com"
-          required
           type="email"
         />
-        <FieldError id="email-error" message={fieldErrors.email} />
-      </div>
+      </Field>
 
-      <div className={formFieldStyle}>
-        <label className={formLabelStyle} htmlFor="phone">
-          電話番号
-          <Badge variant="optional">任意</Badge>
-          <VisibilityTag visibility="private" />
-        </label>
-        <input
-          aria-describedby={describedBy("phone-guide", fieldErrors.phone && "phone-error")}
-          aria-invalid={fieldErrors.phone ? true : undefined}
+      <Field
+        description="確認が必要な場合の連絡に使用します。公開されません。"
+        label="電話番号"
+        name="phone"
+        requirement="optional"
+        visibility="private"
+      >
+        <Input
           autoComplete="tel"
-          className={formInputStyle}
           defaultValue={values.phone}
-          id="phone"
           maxLength={20}
-          name="phone"
           placeholder="例）090-1234-5678"
           type="tel"
         />
-        <div className={inputGuideStyle} id="phone-guide">
-          確認が必要な場合の連絡に使用します。公開されません。
-        </div>
-        <FieldError id="phone-error" message={fieldErrors.phone} />
-      </div>
+      </Field>
 
-      <fieldset
-        className={formFieldStyle}
-        aria-describedby={describedBy(
-          "standpoint-guide",
-          fieldErrors.standpoint && "standpoint-error",
-        )}
+      <Fieldset
+        description="立場は、投稿やマイページで肩書きとして表示されます。"
+        legend="あなたの立場"
+        name="standpoint"
+        requirement="required"
+        visibility="public"
       >
-        <legend className={formLabelStyle}>
-          あなたの立場
-          <RequiredBadge />
-          <VisibilityTag visibility="public" />
-        </legend>
-        <RadioCards name="standpoint" options={STANDPOINTS} defaultValue={values.standpoint} />
-        <div className={inputGuideStyle} id="standpoint-guide">
-          立場は、投稿やマイページで肩書きとして表示されます。
-        </div>
-        <FieldError id="standpoint-error" message={fieldErrors.standpoint} />
-      </fieldset>
+        {/* 送信後のフォームのリセットで選択が外れないよう、再表示の値ごとに載せ替える */}
+        <RadioGroup<string>
+          defaultValue={values.standpoint}
+          key={values.standpoint}
+          options={STANDPOINTS}
+          variant="cards"
+        />
+      </Fieldset>
 
-      <PostalAddressFields values={values} fieldErrors={fieldErrors} />
+      <PostalAddressFields values={values} />
 
-      <div className={formFieldStyle}>
-        <label className={formLabelStyle} htmlFor="password">
-          パスワード
-          <RequiredBadge />
-        </label>
-        <input
-          aria-describedby={describedBy("password-guide", fieldErrors.password && "password-error")}
-          aria-invalid={fieldErrors.password ? true : undefined}
+      <Field
+        description={`${PASSWORD_MIN_LENGTH}文字以上で設定してください`}
+        label="パスワード"
+        name="password"
+        requirement="required"
+      >
+        <Input
           autoComplete="new-password"
-          className={formInputStyle}
-          id="password"
           minLength={PASSWORD_MIN_LENGTH}
-          name="password"
           placeholder="••••••••"
-          required
           type="password"
         />
-        <div className={inputGuideStyle} id="password-guide">
-          {PASSWORD_MIN_LENGTH}文字以上で設定してください
-        </div>
-        <FieldError id="password-error" message={fieldErrors.password} />
-      </div>
+      </Field>
 
-      <label className={termsToggleStyle}>
-        <input
-          className={coverInputStyle}
-          aria-describedby={describedBy(fieldErrors.terms && "terms-error")}
-          aria-invalid={fieldErrors.terms ? true : undefined}
-          defaultChecked={values.terms === "on"}
-          id="terms"
-          name="terms"
-          required
-          type="checkbox"
-        />
-        <span className={checkBoxStyle} aria-hidden="true">
-          <Icon name="check" size="xs" />
-        </span>{" "}
-        <span>
+      <Field
+        description={
+          <>
+            規約・ガイドラインは別タブで開きます。個人情報の扱いは
+            <TextLink
+              href="/legal/privacy"
+              rel="noopener noreferrer"
+              target="_blank"
+              variant="plain"
+            >
+              プライバシーポリシー（別タブ）
+            </TextLink>
+            をご確認ください。
+          </>
+        }
+        name="terms"
+        requirement="required"
+      >
+        <Checkbox defaultChecked={values.terms === "on"} key={values.terms} variant="row">
           <Link href="/legal/terms" target="_blank" rel="noopener noreferrer">
             総合利用規約
           </Link>
@@ -276,41 +177,27 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           <Link href="/legal/posting" target="_blank" rel="noopener noreferrer">
             投稿ガイドライン
           </Link>
-          に同意する <RequiredBadge />
-        </span>
-      </label>
-      <FieldError id="terms-error" message={fieldErrors.terms} />
-      <div className={cx(guideStyle, css({ mt: "1", mb: "2" }))}>
-        規約・ガイドラインは別タブで開きます。個人情報の扱いは
-        <Link
-          className={formTextLinkStyle}
-          href="/legal/privacy"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          プライバシーポリシー（別タブ）
-        </Link>
-        をご確認ください。
-      </div>
-      <div className={cx(guideStyle, css({ mt: "1", mb: "2" }))}>
+          に同意する
+        </Checkbox>
+      </Field>
+      <p className={noteStyle}>
         アイコン・主な作目・所属などは、あとからマイページで設定できます。
-      </div>
+      </p>
 
-      <div className={formActionsStyle}>
-        <SubmitButton label="登録する" pendingLabel="登録中…" />
-      </div>
-      <div className={cx(guideStyle, css({ mb: "2", textAlign: "center" }))}>
-        <Link
-          className={formTextLinkStyle}
+      <FormActions>
+        <SubmitButton pendingLabel="登録中…">登録する</SubmitButton>
+      </FormActions>
+      <FormActions layout="links">
+        <TextLink
           href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+          variant="plain"
         >
           すでに一般ユーザーアカウントをお持ちの方はログイン
-        </Link>
-        <br />
-        <Link className={formTextLinkStyle} href="/signup">
+        </TextLink>
+        <TextLink href="/signup" variant="plain">
           登録方法を選び直す
-        </Link>
-      </div>
+        </TextLink>
+      </FormActions>
 
       <div
         className={cx(
@@ -319,20 +206,14 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         )}
       >
         <div className={css({ fontSize: "sm", color: "text.subtle" })}>メーカー様はこちら</div>
-        <Link
-          className={css({
-            display: "inline-block",
-            mt: "1.5",
-            fontSize: "sm",
-            color: "primary.700",
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-          })}
+        <TextLink
+          className={css({ mt: "1.5", whiteSpace: "nowrap" })}
           href="/sellers/apply"
+          variant="plain"
         >
           企業会員登録申請へ →
-        </Link>
+        </TextLink>
       </div>
-    </form>
+    </Form>
   );
 }

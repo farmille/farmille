@@ -1,25 +1,19 @@
 "use client";
 import { useRef, useState, useTransition } from "react";
 
-import { Badge } from "@/components/Badge";
-import {
-  describedBy,
-  FieldError,
-  formFieldStyle,
-  formInputStyle,
-  formLabelStyle,
-  RequiredBadge,
-  VisibilityTag,
-} from "@/components/FormParts";
 import { buttonRecipe } from "@/components/Button";
-import { Select } from "@/components/Select";
+import { Field, Fieldset, Input, Select } from "@/components/form";
 import { PREFECTURES } from "@/lib/prefectures";
 
-import { css, cva, cx } from "../../../styled-system/css";
-import { guideStyle } from "./form-styles";
+import { css, cva } from "../../../styled-system/css";
 import { findPostalAddress } from "./postal-action";
 
 const ZIP_GUIDE = "郵便番号を入れると、都道府県と市区町村（町域まで）が自動で入ります。";
+
+const PREFECTURE_OPTIONS = PREFECTURES.map((item) => ({
+  value: String(item.code),
+  label: item.name,
+}));
 
 const lookupButton = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   flex: "0 0 auto",
@@ -27,25 +21,20 @@ const lookupButton = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   px: "4",
 });
 
-const addressLabelStyle = css({ pt: "2", fontSize: "sm", fontWeight: "bold", color: "text.muted" });
+const postalRowStyle = css({ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "2" });
+
+const postalInputStyle = css({ flex: "1 1 token(sizes.44)", maxW: "80" });
 
 const zipNoteRecipe = cva({
-  base: { mt: "1", fontSize: "sm", lineHeight: "normal" },
   variants: {
     announced: {
       true: { color: "primary.800" },
-      false: { color: "text.muted" },
+      false: {},
     },
   },
 });
 
-export function PostalAddressFields({
-  values,
-  fieldErrors,
-}: {
-  values: Record<string, string>;
-  fieldErrors: Record<string, string>;
-}) {
+export function PostalAddressFields({ values }: { values: Record<string, string> }) {
   const [postal, setPostal] = useState(values.postalCode ?? "");
   const [prefecture, setPrefecture] = useState(values.prefectureCode ?? "");
   const [city, setCity] = useState(values.city ?? "");
@@ -71,171 +60,96 @@ export function PostalAddressFields({
       setMessage("都道府県と市区町村を入力しました。内容を確認してください。");
     });
   }
-  const errorFor = (name: string) => (fieldErrors[name] ? `${name}-error` : undefined);
-  const invalid = (name: string) => (fieldErrors[name] ? true : undefined);
 
   return (
-    <fieldset className={formFieldStyle}>
-      <legend className={formLabelStyle}>
-        住所
-        <RequiredBadge />
-      </legend>
-      <div
-        className={cx(
-          guideStyle,
-          css({ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "1.5", mb: "1.5" }),
-        )}
-      >
-        <VisibilityTag visibility="public" />
-        都道府県 ／ <VisibilityTag visibility="private" />
-        郵便番号・市区町村・番地・建物名
-      </div>
-      <div
-        className={css({
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr)",
-          rowGap: "1.5",
-          columnGap: "3",
-          alignItems: "start",
-          mt: "1",
-          tab: { gridTemplateColumns: "token(sizes.36) minmax(0, 1fr)", rowGap: "2.5" },
-        })}
-      >
-        <label className={addressLabelStyle} htmlFor="postalCode">
-          郵便番号
-        </label>
-        <div className={css({ minW: "0" })}>
-          <div
-            className={css({ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "2" })}
-          >
-            <input
-              aria-describedby={describedBy("postalCode-note", errorFor("postalCode"))}
-              aria-invalid={invalid("postalCode")}
-              autoComplete="postal-code"
-              className={cx(formInputStyle, css({ flex: "1 1 token(sizes.44)", maxW: "80" }))}
-              id="postalCode"
-              inputMode="numeric"
-              maxLength={8}
-              name="postalCode"
-              onBlur={() => {
-                if (/^\d{7}$/.test(postal.normalize("NFKC").replace(/-/g, ""))) lookup();
-              }}
-              onChange={(event) => {
-                requestVersion.current++;
-                setPostal(event.target.value);
-              }}
-              placeholder="例）3100011"
-              required
-              value={postal}
-            />
-            <button type="button" className={lookupButton} disabled={pending} onClick={lookup}>
-              {pending ? "住所を検索中…" : "住所を自動入力"}
-            </button>
-          </div>
-          <div
-            className={zipNoteRecipe({ announced: message !== "" })}
-            id="postalCode-note"
-            role="status"
-          >
+    <Fieldset
+      description="※ 市区町村は、プロフィール設定で「市区町村も表示する」を選んだ場合のみ公開されます。郵便番号・番地・建物名は公開されません。"
+      legend="住所"
+      requirement="required"
+    >
+      <Field
+        description={
+          <span className={zipNoteRecipe({ announced: message !== "" })} role="status">
             {message || ZIP_GUIDE}
-          </div>
-          <FieldError id="postalCode-error" message={fieldErrors.postalCode} />
-        </div>
-
-        <label className={addressLabelStyle} htmlFor="prefectureCode">
-          都道府県
-        </label>
-        <div className={css({ minW: "0" })}>
-          <Select
-            aria-describedby={errorFor("prefectureCode")}
-            aria-invalid={invalid("prefectureCode")}
-            autoComplete="address-level1"
-            className={css({ maxW: "56" })}
-            id="prefectureCode"
-            name="prefectureCode"
+          </span>
+        }
+        label="郵便番号"
+        labelSize="sm"
+        name="postalCode"
+        visibility="private"
+      >
+        <div className={postalRowStyle}>
+          <Input
+            autoComplete="postal-code"
+            className={postalInputStyle}
+            inputMode="numeric"
+            maxLength={8}
+            onBlur={() => {
+              if (/^\d{7}$/.test(postal.normalize("NFKC").replace(/-/g, ""))) lookup();
+            }}
             onChange={(event) => {
               requestVersion.current++;
-              setPrefecture(event.target.value);
+              setPostal(event.target.value);
             }}
-            required
-            value={prefecture}
-          >
-            <option value="" disabled>
-              選択してください
-            </option>
-            {PREFECTURES.map((item) => (
-              <option key={item.code} value={item.code}>
-                {item.name}
-              </option>
-            ))}
-          </Select>
-          <FieldError id="prefectureCode-error" message={fieldErrors.prefectureCode} />
-        </div>
-
-        <label className={addressLabelStyle} htmlFor="city">
-          市区町村
-        </label>
-        <div className={css({ minW: "0" })}>
-          <input
-            aria-describedby={errorFor("city")}
-            aria-invalid={invalid("city")}
-            autoComplete="address-level2"
-            className={formInputStyle}
-            id="city"
-            maxLength={100}
-            name="city"
-            onChange={(event) => {
-              requestVersion.current++;
-              setCity(event.target.value);
-            }}
-            placeholder="例）水戸市笠原町"
-            required
-            value={city}
+            placeholder="例）3100011"
+            value={postal}
           />
-          <FieldError id="city-error" message={fieldErrors.city} />
+          <button type="button" className={lookupButton} disabled={pending} onClick={lookup}>
+            {pending ? "住所を検索中…" : "住所を自動入力"}
+          </button>
         </div>
+      </Field>
 
-        <label className={addressLabelStyle} htmlFor="streetAddress">
-          番地
-        </label>
-        <div className={css({ minW: "0" })}>
-          <input
-            aria-describedby={errorFor("streetAddress")}
-            aria-invalid={invalid("streetAddress")}
-            autoComplete="address-line1"
-            className={formInputStyle}
-            defaultValue={values.streetAddress}
-            id="streetAddress"
-            maxLength={200}
-            name="streetAddress"
-            placeholder="例）978-6"
-            required
-          />
-          <FieldError id="streetAddress-error" message={fieldErrors.streetAddress} />
-        </div>
+      <Field label="都道府県" labelSize="sm" name="prefectureCode" visibility="public">
+        <Select
+          autoComplete="address-level1"
+          className={css({ maxW: "56" })}
+          onValueChange={(value) => {
+            requestVersion.current++;
+            setPrefecture(value ?? "");
+          }}
+          options={PREFECTURE_OPTIONS}
+          placeholder="選択してください"
+          value={prefecture === "" ? null : prefecture}
+        />
+      </Field>
 
-        <label className={addressLabelStyle} htmlFor="buildingName">
-          建物名・部屋番号 <Badge variant="optional">任意</Badge>
-        </label>
-        <div className={css({ minW: "0" })}>
-          <input
-            aria-describedby={errorFor("buildingName")}
-            aria-invalid={invalid("buildingName")}
-            autoComplete="address-line2"
-            className={formInputStyle}
-            defaultValue={values.buildingName}
-            id="buildingName"
-            maxLength={200}
-            name="buildingName"
-            placeholder="例）〇〇マンション101"
-          />
-          <FieldError id="buildingName-error" message={fieldErrors.buildingName} />
-        </div>
-      </div>
-      <div className={cx(guideStyle, css({ mt: "1.5" }))}>
-        ※
-        市区町村は、プロフィール設定で「市区町村も表示する」を選んだ場合のみ公開されます。郵便番号・番地・建物名は公開されません。
-      </div>
-    </fieldset>
+      <Field label="市区町村" labelSize="sm" name="city" visibility="private">
+        <Input
+          autoComplete="address-level2"
+          maxLength={100}
+          onChange={(event) => {
+            requestVersion.current++;
+            setCity(event.target.value);
+          }}
+          placeholder="例）水戸市笠原町"
+          value={city}
+        />
+      </Field>
+
+      <Field label="番地" labelSize="sm" name="streetAddress" visibility="private">
+        <Input
+          autoComplete="address-line1"
+          defaultValue={values.streetAddress}
+          maxLength={200}
+          placeholder="例）978-6"
+        />
+      </Field>
+
+      <Field
+        label="建物名・部屋番号"
+        labelSize="sm"
+        name="buildingName"
+        requirement="optional"
+        visibility="private"
+      >
+        <Input
+          autoComplete="address-line2"
+          defaultValue={values.buildingName}
+          maxLength={200}
+          placeholder="例）〇〇マンション101"
+        />
+      </Field>
+    </Fieldset>
   );
 }
