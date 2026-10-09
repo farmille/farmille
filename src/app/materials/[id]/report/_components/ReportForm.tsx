@@ -720,15 +720,14 @@ export function ReportForm({
             </button>
           </div>
         </div>
-        {published && (
-          <ReportPublishedView
-            input={input}
-            materialName={currentMaterial.name}
-            manufacturerName={currentMaterial.manufacturerName}
-            cropName={cropName}
-            onBack={() => setPublished(false)}
-          />
-        )}
+        <ReportPublishedView
+          open={published}
+          onOpenChange={setPublished}
+          input={input}
+          materialName={currentMaterial.name}
+          manufacturerName={currentMaterial.manufacturerName}
+          cropName={cropName}
+        />
         {leaving && (
           <div className={modal}>
             <div

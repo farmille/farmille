@@ -8,11 +8,12 @@ const meta = {
   title: "App/Materials/Report/ReportPublishedView",
   component: ReportPublishedView,
   args: {
+    open: true,
+    onOpenChange: fn(),
     input: filledReport,
     materialName: "土づくり微生物資材",
     manufacturerName: "グリーンバイオ株式会社",
     cropName: "トマト",
-    onBack: fn(),
   },
 } satisfies Meta<typeof ReportPublishedView>;
 export default meta;
