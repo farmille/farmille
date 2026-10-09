@@ -86,8 +86,8 @@ export const QueryChange: Story = {
     const input = canvas.getByRole("combobox", { name: "資材を検索" });
     await userEvent.type(input, "根圏");
     await canvas.findByRole("option");
-    fireEvent.change(input, { target: { value: "別の資材" } });
-    await expect(fireEvent.keyDown(input, { key: "Enter" })).toBe(false);
+    await fireEvent.change(input, { target: { value: "別の資材" } });
+    await expect(await fireEvent.keyDown(input, { key: "Enter" })).toBe(false);
     await expect(args.onMaterialChange).not.toHaveBeenCalled();
     await expect(canvas.queryByRole("option")).not.toBeInTheDocument();
   },
