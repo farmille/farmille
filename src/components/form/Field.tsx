@@ -114,15 +114,20 @@ export function LabelRow({
   size,
   requirement,
   visibility,
+  visuallyHidden = false,
   children,
 }: {
   size: "md" | "sm";
   requirement?: Requirement;
   visibility: ReactNode;
+  visuallyHidden?: boolean;
   children: ReactNode;
 }) {
   return (
-    <div className={labelRowRecipe({ size })}>
+    <div
+      className={cx(labelRowRecipe({ size }), visuallyHidden ? srOnlyStyle : undefined)}
+      data-visually-hidden={visuallyHidden ? "" : undefined}
+    >
       {children}
       {requirement === undefined ? null : <RequirementBadge requirement={requirement} />}
       {visibility}

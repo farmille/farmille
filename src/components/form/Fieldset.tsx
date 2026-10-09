@@ -11,6 +11,8 @@ import { fieldRecipe, fieldsetStyle, guideRecipe, visibilityRecipe } from "./rec
 
 export type FieldsetProps = Omit<FieldProps, "label" | "hideLabel" | "labelSize"> & {
   legend: ReactNode;
+  /** 見出しと札を画面から隠し、組の名前として読み上げにだけ残す（見出しを外側のカードが持つ同意欄など）。 */
+  hideLegend?: boolean;
   labelSize?: "md" | "sm";
 };
 
@@ -21,6 +23,7 @@ export type FieldsetProps = Omit<FieldProps, "label" | "hideLabel" | "labelSize"
  */
 export function Fieldset({
   legend,
+  hideLegend = false,
   labelSize = "md",
   name,
   requirement,
@@ -61,6 +64,7 @@ export function Fieldset({
             </p>
           )
         }
+        visuallyHidden={hideLegend}
       >
         <BaseFieldset.Legend>{legend}</BaseFieldset.Legend>
       </LabelRow>

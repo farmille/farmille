@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { css } from "../../../styled-system/css";
+import { Checkbox } from "./Checkbox";
 import { Field } from "./Field";
 import { Fieldset } from "./Fieldset";
 import { Input } from "./Input";
@@ -53,6 +54,25 @@ export const AddressParts: Story = {
         </Field>
         <Field label="建物名・部屋番号" labelSize="sm" name="building" requirement="optional">
           <Input placeholder="例）〇〇マンション101" />
+        </Field>
+      </>
+    ),
+  },
+};
+
+/** 見出しを外側のカードが持つ同意欄。見出しと札は読み上げにだけ残し、必須は中の行が受け継ぐ。 */
+export const HiddenLegend: Story = {
+  args: {
+    legend: "ご申請にあたっての確認事項",
+    hideLegend: true,
+    visibility: undefined,
+    children: (
+      <>
+        <Field name="consent.0">
+          <Checkbox>申請内容に誤りがないことを確認しました。</Checkbox>
+        </Field>
+        <Field name="consent.1">
+          <Checkbox>審査の結果、掲載をお断りする場合があることに同意します。</Checkbox>
         </Field>
       </>
     ),

@@ -71,7 +71,11 @@ export const selectTriggerRecipe = cva({
 export const fieldRecipe = cva({
   base: { minW: "0" },
   variants: {
-    spacing: { stack: { mt: "5", _first: { mt: "0" } }, none: {} },
+    spacing: {
+      // 隠した見出しは場所を取らないので、その直後の項目も先頭と同じく上を詰める
+      stack: { mt: "5", _first: { mt: "0" }, "[data-visually-hidden] + &": { mt: "0" } },
+      none: {},
+    },
   },
   defaultVariants: { spacing: "stack" },
 });

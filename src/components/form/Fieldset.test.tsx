@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { Checkbox } from "./Checkbox";
 import { Field } from "./Field";
 import { Fieldset } from "./Fieldset";
 import { Form } from "./Form";
@@ -26,5 +27,18 @@ describe("Fieldset", () => {
     expect(screen.getByRole("textbox", { name: "名" })).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByRole("textbox", { name: "姓" })).not.toHaveAttribute("aria-invalid");
     expect(screen.getByRole("alert")).toHaveTextContent("名を入力してください。");
+  });
+
+  it("見出しを隠しても組の名前は残り、中の行は札なしで組の必須を受け継ぐ", () => {
+    render(
+      <Fieldset hideLegend legend="確認事項" requirement="required">
+        <Field name="consent.0">
+          <Checkbox>内容を確認しました</Checkbox>
+        </Field>
+      </Fieldset>,
+    );
+
+    expect(screen.getByRole("group", { name: "確認事項" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "内容を確認しました" })).toBeRequired();
   });
 });
