@@ -8,7 +8,7 @@ import { requireAdminPage } from "@/app/admin/_lib/access";
 import { ClaimForm } from "@/app/admin/materials/[id]/ClaimForm";
 import { MaterialForm } from "@/app/admin/materials/_components/MaterialForm";
 import { PublicationStatusForm } from "@/app/admin/materials/[id]/PublicationStatusForm";
-import { FormMessage } from "@/components/auth/Fields";
+import { Notice } from "@/components/form";
 import { getAdminMaterial } from "@/server/admin/materials";
 import { listClaimableSellers } from "@/server/admin/sellers";
 import { errorMessageJa } from "@/server/errors";
@@ -64,7 +64,7 @@ export default async function AdminMaterialDetailPage({
       description={`${material.data.manufacturer_name}／感想口コミ ${material.data.review_count} 件`}
       title={material.data.name}
     >
-      {created === "1" ? <FormMessage tone="info">資材を登録しました。</FormMessage> : null}
+      {created === "1" ? <Notice tone="success">資材を登録しました。</Notice> : null}
 
       <Panel
         note={

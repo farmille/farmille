@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
-import { Field, FormMessage, controlStyle } from "@/components/auth/Fields";
+import { Field, Notice, Textarea } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { reviewMaterialPageAction, reviewManufacturerProfileAction } from "./actions";
 
@@ -14,34 +14,29 @@ export function ExpressionReviewForm({
   kind?: "material" | "profile";
 }) {
   const [note, setNote] = useState("");
-  const [message, setMessage] = useState("");
+  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   function submit(publish: boolean) {
     startTransition(async () => {
-      const result = await (
+      const next = await (
         kind === "material" ? reviewMaterialPageAction : reviewManufacturerProfileAction
       )({ versionId, publish, note });
-      setMessage(result.message);
-      if (result.ok) router.refresh();
+      setResult(next);
+      if (next.ok) router.refresh();
     });
   }
   return (
     <div className={materialPageStack}>
       <Field
-        htmlFor="review-note"
+        description="メーカーにも表示されます。修正を求める場合は、該当箇所と理由を記入してください。"
         label="確認メモ・修正が必要な箇所"
-        guide="メーカーにも表示されます。修正を求める場合は、該当箇所と理由を記入してください。"
       >
-        <textarea
-          id="review-note"
-          className={controlStyle}
-          value={note}
-          onChange={(event) => setNote(event.target.value)}
-          rows={4}
-        />
+        <Textarea onChange={(event) => setNote(event.target.value)} rows={4} value={note} />
       </Field>
-      {message ? <FormMessage tone="info">{message}</FormMessage> : null}
+      {result === null ? null : (
+        <Notice tone={result.ok ? "success" : "error"}>{result.message}</Notice>
+      )}
       <Button disabled={pending} onClick={() => submit(true)}>
         表現確認を完了して反映
       </Button>

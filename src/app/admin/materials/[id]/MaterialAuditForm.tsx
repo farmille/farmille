@@ -1,54 +1,55 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Select } from "@/components";
-import { Field, FormMessage, controlStyle } from "@/components/auth/Fields";
+import { Button } from "@/components";
+import { Field, Notice, Select, Textarea, type Option } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { recordMaterialAuditAction } from "./audit-actions";
 
+type AuditOutcome = "checked" | "correction_requested" | "hidden";
+
+const AUDIT_OUTCOMES: readonly Option<AuditOutcome>[] = [
+  { value: "checked", label: "確認済み" },
+  { value: "correction_requested", label: "修正を依頼" },
+  { value: "hidden", label: "非公開にする" },
+];
+
 export function MaterialAuditForm({ materialId }: { materialId: string }) {
-  const [outcome, setOutcome] = useState("checked");
+  const [outcome, setOutcome] = useState<AuditOutcome>("checked");
   const [note, setNote] = useState("");
-  const [message, setMessage] = useState("");
+  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   return (
     <div className={materialPageStack}>
-      <Field label="掲載後の確認結果" htmlFor="audit-outcome">
+      <Field label="掲載後の確認結果">
         <Select
-          id="audit-outcome"
+          onValueChange={(value) => {
+            if (value !== null) setOutcome(value);
+          }}
+          options={AUDIT_OUTCOMES}
           value={outcome}
-          onChange={(event) => setOutcome(event.target.value)}
-        >
-          <option value="checked">確認済み</option>
-          <option value="correction_requested">修正を依頼</option>
-          <option value="hidden">非公開にする</option>
-        </Select>
+        />
       </Field>
       <Field
+        description="メーカーにも表示されます。修正依頼の場合は該当箇所を記入し、案内メールでも連絡してください。"
         label="確認した内容と理由"
-        htmlFor="audit-note"
-        guide="メーカーにも表示されます。修正依頼の場合は該当箇所を記入し、案内メールでも連絡してください。"
       >
-        <textarea
-          id="audit-note"
-          className={controlStyle}
-          value={note}
-          onChange={(event) => setNote(event.target.value)}
-          rows={4}
-        />
+        <Textarea onChange={(event) => setNote(event.target.value)} rows={4} value={note} />
       </Field>
       {outcome === "hidden" ? (
         <p>保存すると資材ページを非公開にします。原稿と投稿履歴は保持します。</p>
       ) : null}
-      {message ? <FormMessage tone="info">{message}</FormMessage> : null}
+      {result === null ? null : (
+        <Notice tone={result.ok ? "success" : "error"}>{result.message}</Notice>
+      )}
       <Button
         disabled={pending}
         onClick={() =>
           startTransition(async () => {
-            const result = await recordMaterialAuditAction({ materialId, outcome, note });
-            setMessage(result.message);
-            if (result.ok) router.refresh();
+            const next = await recordMaterialAuditAction({ materialId, outcome, note });
+            setResult(next);
+            if (next.ok) router.refresh();
           })
         }
       >

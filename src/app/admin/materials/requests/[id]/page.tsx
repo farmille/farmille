@@ -4,7 +4,7 @@ import { AdminShell } from "@/app/admin/_components/AdminShell";
 import { Panel } from "@/app/admin/_components/AdminUI";
 import { requireAdminPage } from "@/app/admin/_lib/access";
 import { Badge, DataList, TextLink, formatDateJa } from "@/components";
-import { FormMessage } from "@/components/auth/Fields";
+import { Notice } from "@/components/form";
 import {
   isMaterialChangeRequestStatus,
   isMaterialChangeType,
@@ -128,9 +128,9 @@ export default async function AdminMaterialChangeRequestPage({
       title="資材変更申請を確認"
     >
       {resolved === "approve" ? (
-        <FormMessage tone="info">申請を承認して公開内容へ反映しました。</FormMessage>
+        <Notice tone="success">申請を承認して公開内容へ反映しました。</Notice>
       ) : null}
-      {resolved === "reject" ? <FormMessage tone="info">申請を却下しました。</FormMessage> : null}
+      {resolved === "reject" ? <Notice tone="success">申請を却下しました。</Notice> : null}
       <Panel title={proposal.name}>
         <DataList
           rows={[
