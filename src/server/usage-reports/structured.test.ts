@@ -74,13 +74,16 @@ describe("実証詳細レポートの保存手順", () => {
   it("提出だけが失敗した場合は、下書きの更新日時を返す", async () => {
     const { store } = fakeStore({ failSubmit: true });
     const result = await runUsageReportSave(completeReport(), true, store);
-    expect(result).toMatchObject({ ok: false, savedUpdatedAt: "t2" });
+    expect(result).toMatchObject({
+      ok: false,
+      savedDraft: { updatedAt: "t2", status: "complete" },
+    });
   });
 
   it("補足の書き込みが競合したら提出しない", async () => {
     const { store, calls } = fakeStore({ conflictNote: true });
     const result = await runUsageReportSave(completeReport(), true, store);
     expect(calls).toHaveLength(2);
-    expect(result).toMatchObject({ ok: false, savedUpdatedAt: "t1" });
+    expect(result).toMatchObject({ ok: false, savedDraft: { updatedAt: "t1", status: "partial" } });
   });
 });

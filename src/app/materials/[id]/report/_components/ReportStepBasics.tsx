@@ -176,18 +176,24 @@ export function ReportStepBasics({
   useEffect(() => {
     const query = materialQuery.trim();
     if (!query) return;
+    let active = true;
     const timer = setTimeout(() => {
       startSearch(async () => {
         try {
           const result = await searchReportMaterialsAction(query);
+          if (!active) return;
           if (result.ok) setMaterials(result.data.slice(0, 8));
           else onMessage("資材を検索できませんでした。");
         } catch {
+          if (!active) return;
           onMessage("資材を検索できませんでした。通信状態を確認してください。");
         }
       });
     }, 250);
-    return () => clearTimeout(timer);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, [materialQuery, onMessage]);
 
   const selectedCrop = crops.find((crop) => crop.id === input.cropId);
@@ -264,7 +270,7 @@ export function ReportStepBasics({
             value={materialQuery}
             onValueChange={(value) => {
               setMaterialQuery(value);
-              if (!value.trim()) setMaterials([]);
+              setMaterials([]);
             }}
             items={materials.map((item) => ({
               value: item.id,

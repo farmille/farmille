@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
-import { fn } from "storybook/test";
+import { useEffect, useState } from "react";
+import { expect, fireEvent, fn, mocked, userEvent, waitFor, within } from "storybook/test";
 
+import { searchReportMaterialsAction } from "@/app/materials/[id]/report/new/actions";
 import { createBlankUsageReport } from "@/lib/usage-report";
 
 import { ReportStepBasics } from "./ReportStepBasics";
@@ -76,4 +77,75 @@ export const Missing: Story = {
 };
 export const VarietyUnknown: Story = {
   args: { input: { ...blank, varietyUnknown: true } },
+};
+
+export const QueryChange: Story = {
+  async play({ canvasElement, args }) {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "変更" }));
+    const input = canvas.getByRole("combobox", { name: "資材を検索" });
+    await userEvent.type(input, "根圏");
+    await canvas.findByRole("option");
+    fireEvent.change(input, { target: { value: "別の資材" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    await expect(args.onMaterialChange).not.toHaveBeenCalled();
+    await expect(canvas.queryByRole("option")).not.toBeInTheDocument();
+  },
+};
+
+export const StaleSearchResponse: Story = {
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "変更" }));
+    const input = canvas.getByRole("combobox", { name: "資材を検索" });
+    await userEvent.type(input, "旧");
+    const respond = canvas.getByRole("button", { name: "古い検索結果を返す" });
+    await waitFor(() => expect(searchReportMaterialsAction).toHaveBeenCalledWith("旧"));
+    await userEvent.clear(input);
+    await userEvent.type(input, "新");
+    await waitFor(() => expect(searchReportMaterialsAction).toHaveBeenCalledWith("新"));
+    await userEvent.click(respond);
+    await userEvent.click(input);
+    await expect(canvas.queryByRole("option")).not.toBeInTheDocument();
+  },
+  render: function DeferredSearchStory(args) {
+    const [response] = useState(() =>
+      Promise.withResolvers<Awaited<ReturnType<typeof searchReportMaterialsAction>>>(),
+    );
+    const [input, setInput] = useState(args.input);
+    useEffect(() => {
+      mocked(searchReportMaterialsAction).mockImplementation(async (query) => {
+        if (query === "旧") {
+          return response.promise;
+        }
+        return { ok: true, data: [] };
+      });
+    }, [response]);
+    return (
+      <>
+        <p>「旧」を検索してから別の検索語に変え、古い検索結果を返してください。</p>
+        <button
+          type="button"
+          onClick={() =>
+            response.resolve({
+              ok: true,
+              data: [
+                {
+                  id: "00000000-0000-4000-8000-000000000102",
+                  name: "古い候補",
+                  manufacturer_name: "ファーム技研",
+                  review_count: 0,
+                  avg_rating: null,
+                  manufacturer_verified_at: null,
+                },
+              ],
+            })
+          }
+        >
+          古い検索結果を返す
+        </button>
+        <ReportStepBasics {...args} input={input} onChange={setInput} />
+      </>
+    );
+  },
 };

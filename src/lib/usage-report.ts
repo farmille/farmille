@@ -101,7 +101,7 @@ export type UsageReportActionResult =
       ok: false;
       message: string;
       fieldErrors: UsageReportFieldErrors;
-      savedUpdatedAt?: string;
+      savedDraft?: { updatedAt: string; status: "partial" | "complete" };
     };
 export function createReportPlot(): UsageReportInput["plots"][number] {
   return {

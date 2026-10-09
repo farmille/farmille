@@ -427,10 +427,10 @@ export function ReportForm({
           ? await submitUsageReportAction(input.materialId, input)
           : await saveUsageReportDraftAction(input.materialId, input);
         if (!result.ok) {
-          if (result.savedUpdatedAt !== undefined) {
-            const savedInput = { ...input, expectedUpdatedAt: result.savedUpdatedAt };
+          if (result.savedDraft !== undefined) {
+            const savedInput = { ...input, expectedUpdatedAt: result.savedDraft.updatedAt };
             setInput(savedInput);
-            setSaved(JSON.stringify(savedInput));
+            if (result.savedDraft.status === "complete") setSaved(JSON.stringify(savedInput));
           }
           if (Object.keys(result.fieldErrors).length > 0)
             showMissing(result.message, result.fieldErrors);

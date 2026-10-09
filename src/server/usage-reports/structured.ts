@@ -97,7 +97,12 @@ export async function runUsageReportSave(
   if (!draft.ok) return { ok: false, message: draft.message, fieldErrors: {} };
   const note = await store.savePurposeNote(input.reportId, purposeNote.trim(), draft.updatedAt);
   if (!note.ok)
-    return { ok: false, message: note.message, fieldErrors: {}, savedUpdatedAt: draft.updatedAt };
+    return {
+      ok: false,
+      message: note.message,
+      fieldErrors: {},
+      savedDraft: { updatedAt: draft.updatedAt, status: "partial" },
+    };
   if (!submit)
     return {
       ok: true,
@@ -115,7 +120,7 @@ export async function runUsageReportSave(
       ok: false,
       message: `下書きは保存しましたが、提出できませんでした。${submitted.message}`,
       fieldErrors: {},
-      savedUpdatedAt: note.updatedAt,
+      savedDraft: { updatedAt: note.updatedAt, status: "complete" },
     };
   return {
     ok: true,
