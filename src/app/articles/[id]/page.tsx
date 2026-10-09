@@ -131,9 +131,6 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
     articleSection: "記事",
   });
 
-  const firstMaterial = article.materials[0];
-  const backHref = firstMaterial === undefined ? "/" : `/materials/${firstMaterial.id}`;
-
   return (
     <div className={shell}>
       <script
@@ -142,8 +139,9 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
       />
       <AppBar
         chrome="public"
+        active="articles"
         title={article.title}
-        backHref={backHref}
+        backHref="/articles"
         shareHref={`/articles/${article.id}`}
       />
       <main className={main}>

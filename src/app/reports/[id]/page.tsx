@@ -177,8 +177,9 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
       />
       <AppBar
         chrome="public"
+        active="articles"
         title={report.title}
-        backHref={materialPath}
+        backHref="/articles"
         shareHref={`/reports/${report.id}`}
       />
       <main className={main}>

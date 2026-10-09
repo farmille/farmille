@@ -293,7 +293,7 @@ const workspaceTitle = css({
 });
 
 export type AppChrome = "public" | "seller";
-export type AppBarActive = "home" | "search" | "post" | "me";
+export type AppBarActive = "home" | "search" | "post" | "articles" | "me";
 
 type AppBarBaseProps = {
   chrome: AppChrome;

@@ -3,17 +3,18 @@ import { Suspense } from "react";
 import { SkeletonList } from "@/components/SkeletonList";
 import type { Metadata } from "next";
 
-import { AppBar, Pagination } from "@/components";
+import {
+  AppBar,
+  ArticleCard,
+  ArticlesToolbar,
+  EmptyState,
+  Pagination,
+  ReportCard,
+} from "@/components";
 import { BottomNav } from "@/components/BottomNav";
-import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { listContentFeed, type ContentFeedFilter } from "@/server/queries/content-feed";
-
-import { ArticlesSearchBar, articlesHref } from "./_components/ArticlesSearchBar";
-import { ArticleGrid } from "./_components/FeedCard";
-import { FeedReportCard } from "./_components/FeedReportCard";
-import { OrgArticleCard } from "./_components/OrgArticleCard";
 import { css } from "../../../styled-system/css";
 
 // NEXT_PUBLIC_SITE_URL の評価をモジュール読み込み時ではなく使用時に遅延させる（layout.tsx と同じ理由）。
@@ -48,6 +49,38 @@ const main = css({
   tab: { px: "5", py: "6" },
 });
 
+const pageTitle = css({
+  position: "absolute",
+  w: "1px",
+  h: "1px",
+  p: "0",
+  m: "-1px",
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  whiteSpace: "nowrap",
+  borderWidth: "0",
+  tab: {
+    position: "static",
+    w: "auto",
+    h: "auto",
+    m: "0",
+    mb: "4",
+    overflow: "visible",
+    clip: "auto",
+    whiteSpace: "normal",
+    fontSize: "2xl",
+  },
+});
+
+const cardGrid = css({
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "2.5",
+  mt: "3",
+  tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+  pc: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "4" },
+});
+
 function parseFilter(value: string | undefined): ContentFeedFilter {
   if (value === "report" || value === "article" || value === "all") {
     return value;
@@ -62,6 +95,15 @@ function parsePage(value: string | undefined): number {
   return page;
 }
 
+function hrefForPage(page: number, filter: ContentFeedFilter, q: string): string {
+  const params = new URLSearchParams();
+  if (filter !== "all") params.set("type", filter);
+  if (q.trim().length > 0) params.set("q", q.trim());
+  if (page > 1) params.set("page", String(page));
+  const query = params.toString();
+  return query.length > 0 ? `/articles?${query}` : "/articles";
+}
+
 export default async function ArticlesPage({ searchParams }: ArticlesPageProps) {
   const params = await searchParams;
   const filter = parseFilter(params.type);
@@ -70,10 +112,10 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
 
   return (
     <div className={shell}>
-      <AppBar chrome="public" title="記事を読む" backHref="/" />
+      <AppBar chrome="public" active="articles" title="記事を読む" backHref="/" />
       <main className={main}>
-        <h1 className={css({ srOnly: true })}>記事を読む</h1>
-        <ArticlesSearchBar filter={filter} q={q} />
+        <h1 className={pageTitle}>記事を読む</h1>
+        <ArticlesToolbar filter={filter} q={q} />
 
         <Suspense
           key={`${filter}:${q}:${page}`}
@@ -82,7 +124,7 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
           <ArticleResults filter={filter} q={q} page={page} />
         </Suspense>
       </main>
-      <BottomNav />
+      <BottomNav active="articles" />
     </div>
   );
 }
@@ -105,65 +147,59 @@ async function ArticleResults({
 
   const feed = result.data;
 
-  if (feed.items.length === 0) {
-    return (
-      <div
-        className={css(surfaceCardRecipe.raw({ padding: "cozy" }), {
-          mt: "3",
-          textAlign: "center",
-        })}
-      >
-        <p className={css({ fontSize: "md", fontWeight: "bold" })}>
-          該当する記事・実証詳細レポートがありません
-        </p>
-        <p className={css({ mt: "1", fontSize: "sm", color: "text.subtle" })}>
-          検索条件やフィルタを変えて、もう一度探してみてください。
-        </p>
-      </div>
-    );
-  }
-
   return (
     <>
-      <ArticleGrid className={css({ mt: "3" })}>
-        {feed.items.map((item) =>
-          item.kind === "report" ? (
-            <FeedReportCard
-              key={`report-${item.id}`}
-              href={`/reports/${item.id}`}
-              title={item.title}
-              author={item.authorHandle}
-              coverSrc={item.coverUrl}
-              publishedAt={item.publishedAt}
-              crop={item.cropName}
-              actions={
-                <PostActionsLoader
-                  target="usage_report"
-                  id={item.id}
-                  currentPath={`/reports/${item.id}`}
+      {feed.items.length === 0 ? (
+        <EmptyState
+          title="該当する記事・実証詳細レポートがありません"
+          description="検索条件やフィルタを変えて、もう一度探してみてください。"
+        />
+      ) : (
+        <>
+          <div className={cardGrid}>
+            {feed.items.map((item) =>
+              item.kind === "report" ? (
+                <ReportCard
+                  actions={
+                    <PostActionsLoader
+                      target="usage_report"
+                      id={item.id}
+                      currentPath={`/reports/${item.id}`}
+                      helpfulCount={item.helpfulCount}
+                    />
+                  }
+                  reportId={item.id}
+                  key={`report-${item.id}`}
+                  title={item.title}
+                  author={item.authorHandle}
+                  crop={item.cropName}
                   helpfulCount={item.helpfulCount}
+                  viewCount={item.viewCount}
+                  href={`/reports/${item.id}`}
+                  coverSrc={item.coverUrl ?? undefined}
+                  layout="grid"
                 />
-              }
-            />
-          ) : (
-            <OrgArticleCard
-              key={`article-${item.id}`}
-              href={`/articles/${item.id}`}
-              title={item.title}
-              organization={item.organization}
-              typeLabel="メーカー"
-              coverSrc={item.coverUrl}
-              helpfulCount={item.helpfulCount}
-              viewCount={item.viewCount}
-            />
-          ),
-        )}
-      </ArticleGrid>
-      <Pagination
-        page={feed.page}
-        totalPages={feed.totalPages}
-        hrefForPage={(nextPage) => articlesHref(filter, q, nextPage)}
-      />
+              ) : (
+                <ArticleCard
+                  key={`article-${item.id}`}
+                  title={item.title}
+                  organization={item.organization}
+                  typeLabel="メーカー"
+                  helpfulCount={item.helpfulCount}
+                  viewCount={item.viewCount}
+                  href={`/articles/${item.id}`}
+                  coverSrc={item.coverUrl ?? undefined}
+                />
+              ),
+            )}
+          </div>
+          <Pagination
+            page={feed.page}
+            totalPages={feed.totalPages}
+            hrefForPage={(nextPage) => hrefForPage(nextPage, filter, q)}
+          />
+        </>
+      )}
     </>
   );
 }

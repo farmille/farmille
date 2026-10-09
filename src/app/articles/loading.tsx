@@ -1,14 +1,12 @@
-import { AppBar } from "@/components";
+import { AppBar, ArticlesToolbar } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { SkeletonList } from "@/components/SkeletonList";
-
 import { css } from "../../../styled-system/css";
-import { ArticlesSearchBar } from "./_components/ArticlesSearchBar";
 
 export default function ArticlesLoading() {
   return (
     <div className={css({ minH: "100dvh", bg: "surface.page" })}>
-      <AppBar chrome="public" title="記事を読む" backHref="/" />
+      <AppBar chrome="public" active="articles" title="記事を読む" backHref="/" />
       <main
         className={css({
           maxW: "content.wide",
@@ -18,10 +16,10 @@ export default function ArticlesLoading() {
           tab: { px: "5", py: "6" },
         })}
       >
-        <ArticlesSearchBar filter="all" q="" />
+        <ArticlesToolbar filter="all" q="" />
         <SkeletonList variant="articles" label="記事を読み込んでいます" />
       </main>
-      <BottomNav />
+      <BottomNav active="articles" />
     </div>
   );
 }

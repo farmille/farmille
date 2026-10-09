@@ -107,7 +107,7 @@ const plusButton = css({
   textDecoration: "none",
 });
 
-export type BottomNavActive = "home" | "search" | "post" | "me";
+export type BottomNavActive = "home" | "search" | "post" | "articles" | "me";
 
 type BottomNavProps = {
   active?: BottomNavActive;
@@ -122,6 +122,7 @@ const ITEMS: Array<{
 }> = [
   { id: "home", href: "/", label: "ホーム", name: "home" },
   { id: "search", href: "/search", label: "探す", name: "search" },
+  { id: "articles", href: "/articles", label: "記事", name: "article" },
   { id: "me", href: "/me", label: "マイページ", name: "person" },
 ];
 
