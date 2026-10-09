@@ -166,8 +166,10 @@ export function FieldErrorText({ error }: { error?: string }) {
 }
 
 type ChoiceProps = {
-  look: "inline" | "row" | "card" | "chip";
+  look: "inline" | "row" | "note" | "card" | "chip";
   mark: "checkbox" | "radio";
+  size?: "md" | "sm";
+  tone?: "default" | "danger";
   label: ReactNode;
   description?: ReactNode;
   disabled?: boolean;
@@ -184,6 +186,8 @@ type ChoiceProps = {
 export function Choice({
   look,
   mark,
+  size,
+  tone,
   label,
   description,
   disabled,
@@ -193,7 +197,7 @@ export function Choice({
   return (
     <BaseField.Item className={cx(choiceItemStyle, className)} disabled={disabled}>
       {children((props) => (
-        <BaseField.Label className={choiceRecipe({ look })}>
+        <BaseField.Label className={choiceRecipe({ look, size, tone })}>
           <button {...props} />
           <span>{label}</span>
         </BaseField.Label>

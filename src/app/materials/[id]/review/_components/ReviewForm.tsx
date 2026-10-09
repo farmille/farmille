@@ -431,7 +431,13 @@ export function ReviewForm({
                 placeholder="写真の説明"
                 aria-label="既存写真の説明"
               />
-              <Checkbox className={photoRemoveCheckStyle} name="removePhotoId" value={photo.id}>
+              <Checkbox
+                className={photoRemoveCheckStyle}
+                name="removePhotoId"
+                size="sm"
+                tone="danger"
+                value={photo.id}
+              >
                 この写真を削除する
               </Checkbox>
             </div>
@@ -509,7 +515,7 @@ export function ReviewForm({
         requirement="required"
         description="登録済みのニックネームで投稿されます。"
       >
-        <Checkbox variant="row" checked={pesticideAck} onCheckedChange={setPesticideAck}>
+        <Checkbox variant="note" checked={pesticideAck} onCheckedChange={setPesticideAck}>
           実際に使用した感想を、使用条件や感じた変化が分かるよう具体的にご記入ください。農薬として登録されていない資材については、農薬としての効果を断定せず、実際に感じた変化としてご記載ください。
           <br />
           投稿の前に

@@ -159,6 +159,20 @@ export const choiceRecipe = cva({
         fontWeight: "bold",
         "&:has([data-checked])": { borderColor: "primary.600" },
       },
+      // 長い注意書きへの同意。太字の row だと重いので、地の色の枠に控えめな文字で置く
+      note: {
+        alignItems: "flex-start",
+        gap: "2",
+        px: "3",
+        py: "3",
+        bg: "surface.page",
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: "border.default",
+        borderRadius: "input",
+        fontSize: "sm",
+        color: "text.muted",
+      },
       card: {
         alignItems: "center",
         px: "calc(var(--spacing-3) + var(--spacing-0\\.5) / 2)",
@@ -194,8 +208,11 @@ export const choiceRecipe = cva({
         },
       },
     },
+    size: { md: {}, sm: { gap: "1.5", fontSize: "sm" } },
+    // 写真の削除のように、チェックすると何かを消す選択肢
+    tone: { default: {}, danger: { color: "accent.danger" } },
   },
-  defaultVariants: { look: "inline" },
+  defaultVariants: { look: "inline", size: "md", tone: "default" },
 });
 
 export const choiceGroupRecipe = cva({
@@ -234,8 +251,6 @@ export const checkboxBoxRecipe = cva({
         display: "grid",
         placeItems: "center",
         flex: "0 0 auto",
-        w: "5",
-        h: "5",
         p: "0",
         bg: "surface.card",
         color: "text.inverse",
@@ -250,8 +265,9 @@ export const checkboxBoxRecipe = cva({
       // チップは枠の色でチェック状態を見せるので、印は読み上げ用に残して隠す
       hidden: { srOnly: true },
     },
+    size: { md: { w: "5", h: "5" }, sm: { w: "4", h: "4" } },
   },
-  defaultVariants: { look: "box" },
+  defaultVariants: { look: "box", size: "md" },
 });
 
 export const checkIndicatorStyle = css({ display: "flex" });

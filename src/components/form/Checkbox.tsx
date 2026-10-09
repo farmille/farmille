@@ -13,7 +13,10 @@ type CheckboxProps = {
   /** チェックボックスの名前になる文。リンクを含めてよい。 */
   children: ReactNode;
   description?: ReactNode;
-  variant?: "inline" | "row";
+  /** row は短い同意の太字の行、note は長い注意書きへの同意を控えめに置く行。 */
+  variant?: "inline" | "row" | "note";
+  size?: "md" | "sm";
+  tone?: "default" | "danger";
   value?: string;
   name?: string;
   disabled?: boolean;
@@ -28,6 +31,8 @@ export function Checkbox({
   children,
   description,
   variant = "inline",
+  size,
+  tone,
   value,
   name,
   disabled,
@@ -56,11 +61,13 @@ export function Checkbox({
       }
       look={variant}
       mark="checkbox"
+      size={size}
+      tone={tone}
     >
       {(frame) => (
         <BaseCheckbox.Root
           checked={checked}
-          className={checkboxBoxRecipe()}
+          className={checkboxBoxRecipe({ size })}
           defaultChecked={defaultChecked}
           name={name}
           nativeButton

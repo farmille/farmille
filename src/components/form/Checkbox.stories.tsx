@@ -69,3 +69,20 @@ export const Invalid: Story = {
 export const Disabled: Story = {
   args: { disabled: true, defaultChecked: true },
 };
+
+// 長い注意書きへの同意（感想口コミの投稿前の確認など）
+export const NoteRow: Story = {
+  render: (args) => (
+    <Field name="pesticideAck" requirement="required">
+      <Checkbox {...args} variant="note">
+        実際に使用した感想を、使用条件や感じた変化が分かるよう具体的にご記入ください。農薬として登録されていない資材については、農薬としての効果を断定せず、実際に感じた変化としてご記載ください。投稿の前に
+        <Link href="/legal/posting">感想口コミガイドライン</Link>をご確認ください。
+      </Checkbox>
+    </Field>
+  ),
+};
+
+// チェックすると何かを消す選択肢（写真の削除など）
+export const DangerSmall: Story = {
+  args: { children: "この写真を削除する", size: "sm", tone: "danger" },
+};
