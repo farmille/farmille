@@ -27,7 +27,6 @@ import {
   FieldError,
   formFieldStyle,
   formLabelStyle,
-  ImagePlaceholderIcon,
   RequiredBadge,
 } from "@/components/FormParts";
 import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
@@ -130,6 +129,8 @@ const photoFrameStyle = css({
 const photoImageStyle = css({ display: "block", w: "full", h: "full", objectFit: "cover" });
 
 const photoCaptionStyle = css({ mt: "1.5" });
+
+const photoPlaceholderIconStyle = css({ color: "primary.700" });
 
 const photoRemoveCheckStyle = css({ mt: "1" });
 
@@ -494,7 +495,7 @@ export function ReviewForm({
             <span aria-hidden="true">
               {initialValues.photos.length + pendingPhotos.length === 0 ? (
                 <>
-                  <ImagePlaceholderIcon />
+                  <Icon className={photoPlaceholderIconStyle} name="image" size="lg" />
                   <br />
                 </>
               ) : null}
