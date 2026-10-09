@@ -7,7 +7,7 @@ import { confirmReceiptAccess } from "@/server/company-application-access";
 export async function GET() {
   const nonce = randomBytes(16).toString("base64");
   return new Response(
-    `<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>申請用メールアドレスの確認</title><main><h1>申請用メールアドレスの確認</h1><p>確認後、申請フォームまたは受付票を開きます。メールアドレスの確認は、法人の申請権限を確認するものではありません。</p><form method="post"><input type="hidden" name="token" id="token"><button type="submit">メールアドレスを確認する</button></form></main><script nonce="${nonce}">document.getElementById('token').value=location.hash.slice(1);history.replaceState(null,'',location.pathname);</script></html>`,
+    `<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>受付票の確認</title><main><h1>受付票の確認</h1><p>確認後、受付票を開きます。メールアドレスの確認は、法人の申請権限を確認するものではありません。</p><form method="post"><input type="hidden" name="token" id="token"><button type="submit">メールアドレスを確認する</button></form></main><script nonce="${nonce}">document.getElementById('token').value=location.hash.slice(1);history.replaceState(null,'',location.pathname);</script></html>`,
     {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
