@@ -27,6 +27,7 @@ export const UsageReportInputSchema = v.object({
   varietyUnknown: v.boolean(),
   observedChange: body,
   purposeTags: v.pipe(v.array(short), v.maxLength(30)),
+  purposeNote: short,
   prefectureCode: v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(47))),
   city: short,
   showCity: v.boolean(),
@@ -96,7 +97,12 @@ export type UsageReportInput = v.InferOutput<typeof UsageReportInputSchema>;
 export type UsageReportFieldErrors = { [key: string]: string };
 export type UsageReportActionResult =
   | { ok: true; status: "draft" | "pending"; reportId: string; updatedAt: string; message: string }
-  | { ok: false; message: string; fieldErrors: UsageReportFieldErrors };
+  | {
+      ok: false;
+      message: string;
+      fieldErrors: UsageReportFieldErrors;
+      savedDraft?: { updatedAt: string; status: "partial" | "complete" };
+    };
 export function createReportPlot(): UsageReportInput["plots"][number] {
   return {
     id: crypto.randomUUID(),
@@ -138,6 +144,7 @@ export function createBlankUsageReport(materialId: string): UsageReportInput {
     varietyUnknown: false,
     observedChange: "",
     purposeTags: [],
+    purposeNote: "",
     prefectureCode: null,
     city: "",
     showCity: false,
@@ -171,9 +178,15 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   const required = (key: string, valid: boolean, message = "※ ここを入力してください") => {
     if (!valid) errors[key] = message;
   };
-  required("cropId", input.cropId !== null);
+  required("cropId", input.cropId !== null, "※ 使用作物を選んでください");
+  required(
+    "variety",
+    input.varietyUnknown || input.variety.trim().length > 0,
+    "※ 品種を入力するか、「品種が不明、または品種がない」にチェックしてください",
+  );
   required("observedChange", input.observedChange.trim().length > 0);
   required("purposeTags", input.purposeTags.length > 0);
+  required("prefectureCode", input.prefectureCode !== null, "※ 都道府県を選んでください");
   required("cultivationEnvironment", input.cultivationEnvironment.trim().length > 0);
   required("timingStages", input.timingStages.length > 0);
   required("timingNote", input.timingNote.trim().length > 0);
@@ -235,9 +248,10 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   return errors;
 }
 export function reportErrorStep(key: string): number {
-  if (key === "cropId" || key === "materialId") return 1;
+  if (key === "cropId" || key === "materialId" || key === "variety") return 1;
   if (key === "observedChange" || key === "purposeTags") return 2;
-  if (["cultivationEnvironment", "timingStages", "timingNote"].includes(key)) return 3;
+  if (["prefectureCode", "cultivationEnvironment", "timingStages", "timingNote"].includes(key))
+    return 3;
   if (key.startsWith("plots") || key.startsWith("measurements") || key === "methodDetailsAck")
     return 4;
   return 5;

@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 
-import { SellerLoginForm } from "@/app/sellers/login/SellerLoginForm";
-import { PasskeyLogin } from "@/components/auth/PasskeyLogin";
+import { SellerLoginPanel } from "@/app/sellers/login/SellerLoginPanel";
 import { AuthScreen } from "@/components/auth/AuthScreen";
-import { FormMessage } from "@/components/auth/Fields";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
@@ -12,6 +10,21 @@ export const metadata: Metadata = {
   robots: NO_INDEX_ROBOTS,
 };
 
+function destinationLabelOf(destination: string | null): string | null {
+  if (destination === null) return null;
+  if (destination.startsWith("/dashboard/applications/new/registration"))
+    return "資材掲載・資材オーナー権限申請";
+  if (destination.startsWith("/dashboard/applications/new/transfer_out"))
+    return "資材オーナー権限の移行申請（現資材オーナー企業）";
+  if (destination.startsWith("/dashboard/applications/new/transfer_in"))
+    return "資材オーナー権限の移行申請（引き継ぎ先企業）";
+  if (destination.startsWith("/dashboard/applications")) return "各種お手続き";
+  if (destination.startsWith("/dashboard/materials")) return "製品情報の管理";
+  if (destination.startsWith("/dashboard/profile")) return "メーカープロフィールの編集";
+  if (destination.startsWith("/dashboard")) return "企業会員ダッシュボード";
+  return null;
+}
+
 export default async function SellerLoginPage({
   searchParams,
 }: {
@@ -19,37 +32,15 @@ export default async function SellerLoginPage({
 }) {
   const { next, password } = await searchParams;
   const destination = safeNextPath(next);
-  const destinationLabel = destination?.startsWith("/dashboard/applications/new/registration")
-    ? "資材掲載・資材オーナー権限申請"
-    : destination?.startsWith("/dashboard/applications/new/transfer_out")
-      ? "資材オーナー権限の移行申請（現資材オーナー企業）"
-      : destination?.startsWith("/dashboard/applications/new/transfer_in")
-        ? "資材オーナー権限の移行申請（引き継ぎ先企業）"
-        : destination?.startsWith("/dashboard/applications")
-          ? "各種お手続き"
-          : destination?.startsWith("/dashboard/materials")
-            ? "製品情報の管理"
-            : destination?.startsWith("/dashboard/profile")
-              ? "メーカープロフィールの編集"
-              : destination?.startsWith("/dashboard")
-                ? "企業会員ダッシュボード"
-                : null;
+  const destinationLabel = destinationLabelOf(destination);
 
   return (
     <AuthScreen lead="企業会員のログインIDでサインインします。" title="メーカーログイン">
-      {destinationLabel && (
-        <FormMessage tone="info">
-          「{destinationLabel}
-          」は、企業会員のログインが必要です。企業会員でない方は、先に企業会員登録をお申し込みください。
-        </FormMessage>
-      )}
-      {password === "changed" ? (
-        <FormMessage tone="info">
-          パスワードを変更しました。新しいパスワードでログインしてください。
-        </FormMessage>
-      ) : null}
-      <SellerLoginForm next={destination} />
-      <PasskeyLogin next={destination ?? "/dashboard"} />
+      <SellerLoginPanel
+        destinationLabel={destinationLabel}
+        next={destination}
+        passwordChanged={password === "changed"}
+      />
     </AuthScreen>
   );
 }

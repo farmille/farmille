@@ -1,16 +1,12 @@
 "use server";
 import type {
   ApplicationSubmission,
-  RemovalVerification,
   ReceiptAccess,
   EvidenceReservation,
 } from "@/lib/company-application";
 import { applicationResult } from "@/server/company-application-auth";
-import { saveCompanyApplication, restartRemovalApplication } from "@/server/company-applications";
-import {
-  requestReceiptAccess,
-  requestRemovalVerification,
-} from "@/server/company-application-access";
+import { saveCompanyApplication } from "@/server/company-applications";
+import { requestReceiptAccess } from "@/server/company-application-access";
 import {
   reserveApplicationEvidence,
   finalizeApplicationEvidence,
@@ -35,9 +31,6 @@ export async function retryApplicationMail(id: string) {
     return true;
   });
 }
-export async function requestVerification(input: RemovalVerification) {
-  return applicationResult(() => requestRemovalVerification(input));
-}
 export async function requestReceiptVerification(input: ReceiptAccess) {
   return applicationResult(() => requestReceiptAccess(input));
 }
@@ -49,8 +42,4 @@ export async function finalizeEvidence(id: string) {
 }
 export async function removeEvidence(id: string) {
   return applicationResult(() => removeApplicationEvidence(id));
-}
-
-export async function restartRemoval(id: string) {
-  return applicationResult(() => restartRemovalApplication(id));
 }

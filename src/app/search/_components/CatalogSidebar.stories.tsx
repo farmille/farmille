@@ -1,78 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { userEvent, within } from "storybook/test";
+
 import { CatalogSidebar } from "./CatalogSidebar";
+import { storyCatalog, storyIds, storySearchCatalog } from "./story-fixtures";
+
 const meta = {
   title: "App/Search/CatalogSidebar",
   component: CatalogSidebar,
   args: {
-    catalog: {
-      materials: [
-        {
-          id: "00000000-0000-4000-8000-000000000001",
-          name: "植物活力液",
-          manufacturer_name: "農業資材株式会社",
-          description: null,
-          avg_rating: null,
-          review_count: 0,
-          created_at: "2026-09-01",
-          material_images: [],
-          material_crops: [{ crop_id: "00000000-0000-4000-8000-000000000002" }],
-          material_crop_groups: [{ crop_group_id: "00000000-0000-4000-8000-000000000004" }],
-          material_effects: [],
-          material_ingredient_categories: [],
-          material_search_tags: [],
-          material_application_methods: [],
-        },
-      ],
-      crops: [
-        {
-          id: "00000000-0000-4000-8000-000000000002",
-          name: "たまねぎ",
-          aliases: ["玉ねぎ"],
-          sort_order: 1,
-          groupId: "00000000-0000-4000-8000-000000000004",
-          groupName: "鱗茎類",
-          groupSortOrder: 1,
-        },
-      ],
-      groups: [
-        {
-          id: "00000000-0000-4000-8000-000000000003",
-          name: "野菜類",
-          parent_id: null,
-          hierarchy_level: "major",
-          sort_order: 1,
-        },
-        {
-          id: "00000000-0000-4000-8000-000000000004",
-          name: "鱗茎類",
-          parent_id: "00000000-0000-4000-8000-000000000003",
-          hierarchy_level: "middle",
-          sort_order: 1,
-        },
-      ],
-      counts: [],
-    },
-    search: {
-      filters: [
-        {
-          category: "effect",
-          id: "00000000-0000-4000-8000-000000000005",
-          name: "生育促進",
-          aliases: [],
-          sort_order: 1,
-        },
-        {
-          category: "genre",
-          id: "00000000-0000-4000-8000-000000000006",
-          name: "微生物資材",
-          aliases: [],
-          sort_order: 1,
-        },
-        { category: "method", id: "葉面散布", name: "葉面散布", aliases: [], sort_order: 1 },
-      ],
-      makers: ["農業資材株式会社"],
-      materialNames: [],
-    },
+    catalog: storyCatalog,
+    search: storySearchCatalog,
     selected: [],
     sort: "newest",
     query: "",
@@ -84,14 +21,42 @@ export const Default: Story = {};
 export const Selected: Story = {
   args: {
     selected: [
-      {
-        kind: "filter",
-        category: "effect",
-        id: "00000000-0000-4000-8000-000000000005",
-        name: "生育促進",
-      },
+      { kind: "filter", category: "effect", id: storyIds.nutrient, name: "養分吸収の改善" },
+      { kind: "filter", category: "genre", id: storyIds.microbe, name: "微生物資材" },
+      { kind: "filter", category: "crop", id: storyIds.onion, name: "たまねぎ" },
     ],
     sort: "rating",
     query: "植物",
+  },
+};
+
+export const Expanded: Story = {
+  args: Selected.args,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    for (const button of canvas.getAllByRole("button", { expanded: false })) {
+      await userEvent.click(button);
+    }
+    for (const summary of canvasElement.querySelectorAll("summary")) {
+      await userEvent.click(summary);
+    }
+  },
+};
+
+export const FilterNoMatch: Story = {
+  play: async ({ canvasElement }) => {
+    await userEvent.type(
+      within(canvasElement).getByRole("searchbox", { name: "効果名で検索" }),
+      "該当なし",
+    );
+  },
+};
+
+export const FilterMatch: Story = {
+  play: async ({ canvasElement }) => {
+    await userEvent.type(
+      within(canvasElement).getByRole("searchbox", { name: "作物名で検索" }),
+      "トマト",
+    );
   },
 };

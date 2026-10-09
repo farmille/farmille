@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Badge } from "@/components/Badge";
 import { Icon } from "@/components/Icon";
+import { Radio } from "@/components/Radio";
 
 import { css } from "../../../styled-system/css";
 
@@ -61,6 +62,7 @@ export const controlStyle = css({
 export function Field({
   label,
   htmlFor,
+  labelId,
   requirement,
   visibility,
   guide,
@@ -69,6 +71,8 @@ export function Field({
 }: {
   label: string;
   htmlFor?: string;
+  /** ラベルを `aria-labelledby` から参照するときの id（ラジオ一覧など、単一の入力に結べない子向け）。 */
+  labelId?: string;
   requirement?: "required" | "optional";
   visibility?: "public" | "private";
   guide?: string;
@@ -77,7 +81,7 @@ export function Field({
 }) {
   return (
     <div className={fieldStyle}>
-      <label className={labelRowStyle} htmlFor={htmlFor}>
+      <label className={labelRowStyle} htmlFor={htmlFor} id={labelId}>
         {label}
         {requirement === "required" ? <Badge variant="required">必須</Badge> : null}
         {requirement === "optional" ? <Badge variant="optional">任意</Badge> : null}
@@ -131,23 +135,6 @@ const radioCardStyle = css({
   },
 });
 
-const radioInputStyle = css({
-  appearance: "none",
-  w: "17px",
-  h: "17px",
-  m: "0",
-  flex: "0 0 auto",
-  rounded: "pill",
-  borderWidth: "2px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  _checked: {
-    borderColor: "primary.600",
-    bg: "primary.600",
-    boxShadow: "inset 0 0 0 3px white",
-  },
-});
-
 export function RadioCards({
   name,
   options,
@@ -161,13 +148,7 @@ export function RadioCards({
     <div className={radioListStyle}>
       {options.map((option) => (
         <label className={radioCardStyle} key={option.value}>
-          <input
-            className={radioInputStyle}
-            defaultChecked={option.value === defaultValue}
-            name={name}
-            type="radio"
-            value={option.value}
-          />
+          <Radio defaultChecked={option.value === defaultValue} name={name} value={option.value} />
           {option.label}
         </label>
       ))}

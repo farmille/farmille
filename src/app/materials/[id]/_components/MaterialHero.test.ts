@@ -1,7 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
-import { css } from "../../../../../styled-system/css";
 
 import { MaterialHero } from "./MaterialHero";
 import { materialDetail } from "./story-fixtures";
@@ -21,16 +20,25 @@ describe("MaterialHero", () => {
     expect(screen.queryByText("旧掲載会社")).not.toBeInTheDocument();
   });
   it("編集権のない資材は従来の会社名をリンクなしで表示する", () => {
-    const material = { ...materialDetail, seller_id: null, representativeSeller: null };
+    const material = {
+      ...materialDetail,
+      seller_id: null,
+      representativeSeller: null,
+      manufacturer_verified_at: null,
+    };
     render(createElement(MaterialHero, { material, saved: null }));
     expect(screen.getByText(material.manufacturer_name)).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: material.manufacturer_name }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "メーカー登録" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "企業会員登録" })).toHaveAttribute(
       "href",
       "/sellers/apply",
     );
+  });
+  it("メーカー確認済みの資材では会社名の注記を出さない", () => {
+    render(createElement(MaterialHero, { material: materialDetail, saved: null }));
+    expect(screen.queryByRole("link", { name: "企業会員登録" })).not.toBeInTheDocument();
   });
   it("画像の読み込みに失敗してもプレースホルダーを残す", () => {
     const material = {
@@ -48,12 +56,9 @@ describe("MaterialHero", () => {
 
     const image = screen.getByRole("img", { name: material.name });
     const imageBox = document.querySelector('[data-ui="material-hero-image"]');
-    const placeholder = imageBox?.querySelector<SVGElement>("svg[aria-hidden='true']") ?? null;
-    const imageLayer = css({ gridArea: "1 / 1" });
+    const placeholder = screen.getByText("NO IMAGE");
     expect(imageBox).toContainElement(image);
-    expect(placeholder).toBeInTheDocument();
-    expect(image).toHaveClass(imageLayer);
-    expect(placeholder).toHaveClass(imageLayer);
+    expect(placeholder).toHaveAttribute("aria-hidden", "true");
 
     fireEvent.error(image);
 
@@ -80,10 +85,9 @@ describe("MaterialHero", () => {
     render(createElement(MaterialHero, { material: materialDetail, saved: null }));
 
     const imageBox = document.querySelector('[data-ui="material-hero-image"]');
-    const placeholder = imageBox?.querySelector<SVGElement>("svg[aria-hidden='true']") ?? null;
+    const placeholder = screen.getByText("NO IMAGE");
 
     expect(screen.queryByRole("img", { name: materialDetail.name })).not.toBeInTheDocument();
     expect(imageBox).toContainElement(placeholder);
-    expect(placeholder).toHaveClass(css({ gridArea: "1 / 1" }));
   });
 });

@@ -121,10 +121,12 @@ export async function loginAdminAndEnrollMfa(
 }
 
 export async function fillUsageReportForSubmission(page: Page): Promise<void> {
+  await page.getByRole("checkbox", { name: /品種が不明/ }).check();
   await page.getByRole("button", { name: "次へ", exact: true }).click();
   await page.getByLabel(/^結果・感想/).fill("E2Eで観察した変化を具体的に記録しました。");
   await page.getByRole("button", { name: "樹勢改善", exact: true }).click();
   await page.getByRole("button", { name: "次へ", exact: true }).click();
+  await page.getByLabel(/^地域/).selectOption({ label: "東京都" });
   await page.getByLabel(/^栽培環境/).fill("露地栽培で調査しました。");
   await page.getByRole("button", { name: "生育初〜中期", exact: true }).click();
   await page

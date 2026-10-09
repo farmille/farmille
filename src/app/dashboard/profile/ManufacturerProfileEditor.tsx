@@ -2,15 +2,35 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
-import { Button, FileInput } from "@/components";
-import { Field, FormMessage, controlStyle } from "@/components/auth/Fields";
-import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { SellerHeader } from "@/app/sellers/[id]/_components/SellerHeader";
+import { Button, FileInput, Input, Textarea } from "@/components";
+import { Field, FormMessage, HintBox, formActionsStyle } from "@/components/auth/Fields";
+import { materialPageStack } from "@/components/materials/MaterialPageContent";
+import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import {
   ManufacturerProfileSchema,
   type ManufacturerProfileContent,
 } from "@/lib/manufacturer-profile";
+import { css } from "../../../../styled-system/css";
 import { saveManufacturerProfile, withdrawManufacturerProfile, uploadLogo } from "./actions";
+
+const currentLogoStyle = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  flexWrap: "wrap",
+  fontSize: "xs",
+  mt: "2",
+  color: "text.subtle",
+});
+
+const logoThumbStyle = css({
+  w: "7",
+  h: "7",
+  borderRadius: "pill",
+  objectFit: "cover",
+  bg: "surface.page",
+});
 
 export function ManufacturerProfileEditor({
   sellerId,
@@ -55,6 +75,11 @@ export function ManufacturerProfileEditor({
       {pendingVersion ? (
         <FormMessage tone="info">プロフィールの表現確認中です。</FormMessage>
       ) : null}
+      {versionId && !pendingVersion ? (
+        <HintBox>
+          未公開の下書きを編集中です。表現確認を経るまで、メーカーページには反映されません。
+        </HintBox>
+      ) : null}
       {preview || pendingVersion ? (
         <SellerHeader
           seller={{
@@ -68,16 +93,6 @@ export function ManufacturerProfileEditor({
         />
       ) : (
         <>
-          <Field label="会社紹介" htmlFor="profile-text">
-            <textarea
-              className={controlStyle}
-              id="profile-text"
-              rows={7}
-              value={content.profileText}
-              onChange={(event) => setContent({ ...content, profileText: event.target.value })}
-              disabled={pending}
-            />
-          </Field>
           <Field
             label="ロゴ画像"
             htmlFor="profile-logo"
@@ -106,19 +121,43 @@ export function ManufacturerProfileEditor({
               }}
               disabled={pending}
             />
-            {content.logoUrl ? (
-              <Button
-                variant="ghost"
-                disabled={pending}
-                onClick={() => setContent({ ...content, logoUrl: "" })}
-              >
-                ロゴを外す
-              </Button>
-            ) : null}
+            <div className={currentLogoStyle}>
+              {content.logoUrl ? (
+                <>
+                  <Image
+                    alt=""
+                    className={logoThumbStyle}
+                    src={content.logoUrl}
+                    width={28}
+                    height={28}
+                    sizes="28px"
+                  />
+                  現在：設定した画像を表示中
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={pending}
+                    onClick={() => setContent({ ...content, logoUrl: "" })}
+                  >
+                    ロゴを外す
+                  </Button>
+                </>
+              ) : (
+                `現在：未設定（頭文字「${name.slice(0, 1)}」を表示中）`
+              )}
+            </div>
+          </Field>
+          <Field label="会社紹介" htmlFor="profile-text">
+            <Textarea
+              id="profile-text"
+              rows={7}
+              value={content.profileText}
+              onChange={(event) => setContent({ ...content, profileText: event.target.value })}
+              disabled={pending}
+            />
           </Field>
           <Field label="公式サイトURL" htmlFor="profile-site">
-            <input
-              className={controlStyle}
+            <Input
               id="profile-site"
               type="url"
               value={content.websiteUrl}
@@ -128,41 +167,43 @@ export function ManufacturerProfileEditor({
           </Field>
         </>
       )}
-      {pendingVersion ? (
-        <Button
-          disabled={pending}
-          onClick={() =>
-            startTransition(async () => {
-              if (await withdrawManufacturerProfile(pendingVersion)) router.refresh();
-              else setMessage("取り下げできませんでした。再読み込みして確認してください。");
-            })
-          }
-        >
-          取り下げて編集を再開
-        </Button>
-      ) : (
-        <>
-          <Button disabled={pending} onClick={() => save(true)}>
-            保存して表現確認へ送る
-          </Button>
-          <Button disabled={pending} variant="ghost" onClick={() => save(false)}>
-            下書きを保存
-          </Button>
+      <div className={formActionsStyle}>
+        {pendingVersion ? (
           <Button
             disabled={pending}
-            variant="ghost"
-            onClick={() => {
-              if (!v.is(ManufacturerProfileSchema, content)) {
-                setMessage("URLの入力を確認してください。");
-                return;
-              }
-              setPreview(!preview);
-            }}
+            onClick={() =>
+              startTransition(async () => {
+                if (await withdrawManufacturerProfile(pendingVersion)) router.refresh();
+                else setMessage("取り下げできませんでした。再読み込みして確認してください。");
+              })
+            }
           >
-            {preview ? "編集に戻る" : "プレビュー"}
+            取り下げて編集を再開
           </Button>
-        </>
-      )}
+        ) : (
+          <>
+            <Button disabled={pending} onClick={() => save(true)}>
+              保存して表現確認へ送る
+            </Button>
+            <Button disabled={pending} variant="ghost" onClick={() => save(false)}>
+              下書きを保存
+            </Button>
+            <Button
+              disabled={pending}
+              variant="ghost"
+              onClick={() => {
+                if (!v.is(ManufacturerProfileSchema, content)) {
+                  setMessage("URLの入力を確認してください。");
+                  return;
+                }
+                setPreview(!preview);
+              }}
+            >
+              {preview ? "編集に戻る" : "プレビュー"}
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

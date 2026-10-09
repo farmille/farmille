@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { css } from "../../../../../styled-system/css";
 
 import type { PublicSellerPageData } from "@/server/queries/public-sellers";
 import { SellerHeader } from "./SellerHeader";
@@ -16,6 +17,7 @@ const meta = {
   title: "App/Sellers/SellerHeader",
   component: SellerHeader,
   args: { seller },
+  decorators: [(Story) => <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>],
 } satisfies Meta<typeof SellerHeader>;
 
 export default meta;

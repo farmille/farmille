@@ -53,11 +53,14 @@ export default async function MeEditPage() {
     <div className={shell}>
       <AppBar chrome="public" active="me" title="表示情報編集" backHref="/me" />
       <main className={body}>
-        <ProfileEditForm
-          profile={profileResult.data}
-          details={details.data}
-          options={options.data}
-        />
+        <div className={css({ maxW: "content.form", mx: "auto" })}>
+          <h1 className={css({ srOnly: true })}>表示情報編集</h1>
+          <ProfileEditForm
+            profile={profileResult.data}
+            details={details.data}
+            options={options.data}
+          />
+        </div>
       </main>
       <BottomNav active="me" />
     </div>

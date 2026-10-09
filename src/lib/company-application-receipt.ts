@@ -1,20 +1,27 @@
 import type { ApplicationReceipt } from "@/server/company-applications";
-import { applicationCopy } from "./company-application-copy";
+import { applicationTitle } from "./company-application-copy";
 import { relationLabels, applicationKindSchema } from "./company-application";
 import * as v from "valibot";
 
 const receiptDateTime = (value: string) =>
   `${new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium", timeStyle: "medium", timeZone: "Asia/Tokyo" }).format(new Date(value))}（日本時間）`;
 
-export function applicationReceiptLines(receipt: ApplicationReceipt) {
+export function applicationReceiptLines(
+  receipt: ApplicationReceipt,
+  { omitMissingCorporateNumber = false }: { omitMissingCorporateNumber?: boolean } = {},
+) {
   const a = receipt.application;
   const kind = v.parse(applicationKindSchema, a.kind);
+  const corporateNumberLines =
+    a.corporate_number === null && omitMissingCorporateNumber
+      ? []
+      : [`法人番号：${a.corporate_number ?? "該当なし"}`];
   const lines = [
-    applicationCopy[kind].title,
+    applicationTitle(kind),
     `受付番号：${a.receipt_number}`,
     `受付日時：${receiptDateTime(a.submitted_at)}`,
     `法人名：${a.company_name}`,
-    `法人番号：${a.corporate_number ?? "該当なし"}`,
+    ...corporateNumberLines,
     `FarmilleアカウントID：${a.account_id}`,
     `担当者名：${a.contact_name}`,
     `部署名：${a.department}`,

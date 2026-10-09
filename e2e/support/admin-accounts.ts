@@ -28,6 +28,10 @@ export const E2E_ADMIN_ACCOUNTS = {
     email: "e2e-admin-materials@farmille.local",
     password: "Farmille-E2E-Admin-Materials-2026!",
   },
+  searchCatalog: {
+    email: "e2e-admin-search@farmille.local",
+    password: "Farmille-E2E-Admin-Search-2026!",
+  },
   notFoundVisibility: {
     email: "e2e-admin-not-found@farmille.local",
     password: "Farmille-E2E-Admin-Not-Found-2026!",

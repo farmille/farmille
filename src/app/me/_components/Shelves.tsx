@@ -1,185 +1,182 @@
-import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { Icon } from "@/components/Icon";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
-import {
-  Badge,
-  EmptyState,
-  MaterialCard,
-  MaterialCardRail,
-  ReportCard,
-  ReviewCard,
-  SectionHeading,
-} from "@/components";
+import { Badge } from "@/components/Badge";
+import { PostActionsLoader } from "@/components/PostActionsLoader";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
+import { ProfileReviewCard } from "@/components/ProfileReviewCard";
+import { RequiredBadge } from "@/components/FormParts";
+import { UsageReportCard } from "@/app/materials/[id]/_components/UsageReportCard";
 import type { HelpfulItem, OwnPostItem } from "@/server/queries/me-page";
 import type { OwnProfile } from "@/server/queries/profiles";
 import type { SavedMaterialItem } from "@/server/queries/saved-materials";
-import { css } from "../../../../styled-system/css";
+import { css, cva } from "../../../../styled-system/css";
 
-const stack = css({
+import { EmptyNote, postStackStyle, ProfileSectionHeading } from "./ProfileParts";
+
+const linkRow = css({
   display: "flex",
-  flexDirection: "column",
-  gap: "2.5",
-  tab: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    alignItems: "start",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "2",
+  px: "3.5",
+  py: "3",
+  color: "inherit",
+  textDecoration: "none",
+  borderBottomWidth: "1px",
+  borderBottomStyle: "solid",
+  borderBottomColor: "border.default",
+  _last: { borderBottomWidth: "0" },
+});
+
+const postList = cva({
+  base: { mt: "2.5" },
+  variants: {
+    kind: {
+      reports: {
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "2.5",
+        mx: "-4",
+        px: "4",
+        pt: "0.5",
+        pb: "1.5",
+        overflowX: "auto",
+        scrollSnapType: "x mandatory",
+        scrollbarWidth: "none",
+        "&::-webkit-scrollbar": { display: "none" },
+        "& > *": { flex: "0 0 74%", scrollSnapAlign: "start" },
+        tab: {
+          display: "grid",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gap: "3",
+          mx: "0",
+          px: "0",
+          overflow: "visible",
+          "& > *": { flex: "none", w: "auto" },
+        },
+      },
+      reviews: { display: "flex", flexDirection: "column", gap: "3" },
+    },
   },
 });
 
-const reviewLink = css({
-  display: "inline-flex",
-  mt: "2",
-  color: "primary.700",
-  fontSize: "sm",
-  fontWeight: "bold",
-  textDecoration: "none",
-});
+const unpublishedCard = css(surfaceCardRecipe.raw(), { overflow: "hidden" });
 
-const statusRow = css({
+const postStatus = css({
   display: "flex",
   alignItems: "center",
   gap: "2",
-  mb: "2",
+  mb: "1.5",
+  fontSize: "sm",
+  "& a": { color: "primary.800", fontWeight: "bold", textDecoration: "none" },
 });
 
-type UsageReportStatusPresentation = {
-  label: string;
-  variant: "optional" | "required" | "published";
-};
+const postTitle = css({ fontSize: "md", fontWeight: "bold", lineHeight: "snug" });
 
-function usageReportStatusLabel(
-  status: OwnPostItem & { kind: "usage_report" },
-): UsageReportStatusPresentation {
-  switch (status.status) {
+const postCrop = css({ mt: "1", color: "text.subtle", fontSize: "xs" });
+
+const savedList = css(surfaceCardRecipe.raw({ padding: "flush" }));
+
+const savedName = css({ mt: "0.5", fontSize: "md", fontWeight: "bold", lineHeight: "relaxed" });
+
+const savedMaker = css({ mt: "0.5", color: "text.subtle", fontSize: "xs" });
+
+export function LinkRow({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link className={linkRow} href={href}>
+      <div className={css({ minW: "0" })}>{children}</div>
+      <Icon name="chevron_right" size="sm" className={css({ color: "text.subtle" })} />
+    </Link>
+  );
+}
+
+function UsageReportStatus({
+  status,
+}: {
+  status: (OwnPostItem & { kind: "usage_report" })["status"];
+}) {
+  switch (status) {
     case "draft":
-      return { label: "下書き", variant: "optional" };
+      return <Badge variant="optional">下書き</Badge>;
     case "pending":
-      return { label: "調整中", variant: "required" };
+      return <RequiredBadge>調整中</RequiredBadge>;
     case "published":
-      return { label: "公開済み", variant: "published" };
+      return <Badge variant="published">公開済み</Badge>;
     case "declined":
-      return { label: "差し戻し", variant: "required" };
+      return <RequiredBadge>差し戻し</RequiredBadge>;
   }
 }
 
 type PostsShelfProps = {
   profile: OwnProfile;
   posts: readonly OwnPostItem[];
+  kind?: "reports" | "reviews";
+  authorLabel?: string;
 };
 
-export function PostsShelf({ profile, posts }: PostsShelfProps) {
-  return (
-    <section aria-labelledby="me-posts-heading">
-      <SectionHeading title={<span id="me-posts-heading">自分の投稿</span>} />
-      {posts.length === 0 ? (
-        <EmptyState
+export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: PostsShelfProps) {
+  if (posts.length === 0) {
+    return (
+      <div className={css({ mt: "2.5" })}>
+        <EmptyNote
           title="まだ投稿がありません"
           description="感想口コミや実証詳細レポートを書くと、ここに並びます。"
         />
-      ) : (
-        <div className={stack}>
-          {posts.map((post) =>
-            post.kind === "review" ? (
-              <article key={`review-${post.id}`}>
-                <ReviewCard
-                  actions={
-                    <PostActionsLoader
-                      target="review"
-                      id={post.id}
-                      currentPath="/me"
-                      helpfulCount={post.helpfulCount}
-                    />
-                  }
-                  reviewId={post.id}
-                  materialId={post.materialId}
-                  handle={profile.handle}
-                  avatarSrc={profile.avatarUrl ?? undefined}
-                  crop={post.cropName}
-                  rating={post.rating}
-                  helpfulCount={post.helpfulCount}
-                  body={post.body}
-                  materialName={post.materialName}
-                />
-                <Link
-                  href={`/materials/${post.materialId}#review-${post.id}`}
-                  className={reviewLink}
-                >
-                  資材詳細でこの感想口コミを見る <Icon name="arrow_forward" size="sm" />
-                </Link>
-              </article>
-            ) : (
-              <article key={`report-${post.id}`}>
-                <div className={statusRow}>
-                  <Badge variant={usageReportStatusLabel(post).variant}>
-                    {usageReportStatusLabel(post).label}
-                  </Badge>
-                  {post.status === "draft" ? (
-                    <Link
-                      href={`/materials/${post.materialId}/report/new`}
-                      className={css({
-                        color: "primary.700",
-                        fontSize: "xs",
-                        fontWeight: "bold",
-                        textDecoration: "none",
-                      })}
-                    >
-                      フォームを再開 <Icon name="arrow_forward" size="sm" />
-                    </Link>
-                  ) : null}
-                </div>
-                {post.status === "published" ? (
-                  <ReportCard
-                    actions={
-                      <PostActionsLoader
-                        target="usage_report"
-                        id={post.id}
-                        currentPath={`/reports/${post.id}`}
-                        helpfulCount={post.helpfulCount}
-                      />
-                    }
-                    reportId={post.id}
-                    title={post.title}
-                    author={profile.handle}
-                    avatarSrc={profile.avatarUrl ?? undefined}
-                    crop={post.cropName}
-                    helpfulCount={post.helpfulCount}
-                    href={`/reports/${post.id}`}
-                    layout="list"
-                  />
-                ) : (
-                  <div
-                    className={css({
-                      p: "3.5",
-                      bg: "surface.card",
-                      borderWidth: "1px",
-                      borderStyle: "solid",
-                      borderColor: "border.default",
-                      borderRadius: "card",
-                      boxShadow: "shadow",
-                    })}
-                  >
-                    <p className={css({ m: "0", fontWeight: "bold", fontSize: "md" })}>
-                      {post.title}
-                    </p>
-                    <p
-                      className={css({
-                        m: "0",
-                        mt: "1.5",
-                        color: "text.muted",
-                        fontSize: "sm",
-                      })}
-                    >
-                      {post.cropName}
-                    </p>
-                  </div>
-                )}
-              </article>
-            ),
-          )}
-        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={postList({ kind })} aria-labelledby="me-posts-heading" role="region">
+      {posts.map((post) =>
+        post.kind === "review" ? (
+          <ProfileReviewCard
+            key={`review-${post.id}`}
+            review={post}
+            author={{ handle: profile.handle, avatarUrl: profile.avatarUrl, label: authorLabel }}
+            actions={
+              <PostActionsLoader
+                target="review"
+                id={post.id}
+                currentPath="/me"
+                helpfulCount={post.helpfulCount}
+              />
+            }
+            reportReturnPath={`/materials/${post.materialId}`}
+          />
+        ) : post.status === "published" ? (
+          <UsageReportCard
+            key={`report-${post.id}`}
+            href={`/reports/${post.id}`}
+            title={post.title}
+            author={profile.handle}
+            avatarSrc={profile.avatarUrl}
+            crop={post.cropName}
+            actions={
+              <PostActionsLoader
+                target="usage_report"
+                id={post.id}
+                currentPath={`/reports/${post.id}`}
+                helpfulCount={post.helpfulCount}
+              />
+            }
+          />
+        ) : (
+          <article key={`report-${post.id}`} className={unpublishedCard}>
+            <div className={postStatus}>
+              <UsageReportStatus status={post.status} />
+              {post.status === "draft" ? (
+                <Link href={`/materials/${post.materialId}/report/new`}>フォームを再開 →</Link>
+              ) : null}
+            </div>
+            <div className={postTitle}>{post.title}</div>
+            <div className={postCrop}>{post.cropName}</div>
+          </article>
+        ),
       )}
-    </section>
+    </div>
   );
 }
 
@@ -190,36 +187,27 @@ type SavedShelfProps = {
 export function SavedShelf({ items }: SavedShelfProps) {
   return (
     <section aria-labelledby="me-saved-heading">
-      <SectionHeading
-        title={
-          <span id="me-saved-heading">
-            <Icon name="star_filled" size="sm" /> お気に入り
-          </span>
-        }
-        href="/me/saved"
-        linkLabel="すべて見る"
-      />
+      <ProfileSectionHeading
+        id="me-saved-heading"
+        count={`${items.length}件`}
+        more={{ href: "/me/saved", label: "すべて見る・比較する" }}
+      >
+        お気に入りの資材
+      </ProfileSectionHeading>
       {items.length === 0 ? (
-        <EmptyState
+        <EmptyNote
           title="保存した資材はまだありません"
           description="気になる資材を保存すると、比較やあとからの確認がしやすくなります。"
         />
       ) : (
-        <MaterialCardRail>
+        <div className={savedList}>
           {items.map((item) => (
-            <MaterialCard
-              key={item.savedId}
-              variant="scroll"
-              name={item.name}
-              maker={item.manufacturerName}
-              rating={item.avgRating ?? 0}
-              reviewCount={item.reviewCount}
-              official={item.official}
-              href={`/materials/${item.materialId}`}
-              imageSrc={item.primaryImageUrl ?? undefined}
-            />
+            <LinkRow key={item.savedId} href={`/materials/${item.materialId}`}>
+              <div className={savedName}>★ {item.name}</div>
+              <div className={savedMaker}>{item.manufacturerName}</div>
+            </LinkRow>
           ))}
-        </MaterialCardRail>
+        </div>
       )}
     </section>
   );
@@ -232,46 +220,40 @@ type HelpfulShelfProps = {
 export function HelpfulShelf({ items }: HelpfulShelfProps) {
   return (
     <section aria-labelledby="me-helpful-heading">
-      <SectionHeading title={<span id="me-helpful-heading">参考になった</span>} />
+      <ProfileSectionHeading id="me-helpful-heading">参考になった</ProfileSectionHeading>
       {items.length === 0 ? (
-        <EmptyState
+        <EmptyNote
           title="まだ参考になったを付けていません"
           description="役に立った感想口コミや実証詳細レポートに付けると、ここに残ります。"
         />
       ) : (
-        <div className={stack}>
+        <div className={postStackStyle}>
           {items.map((item) =>
             item.kind === "review" ? (
-              <article key={`helpful-review-${item.id}`}>
-                <ReviewCard
-                  actions={
-                    <PostActionsLoader
-                      target="review"
-                      id={item.id}
-                      currentPath="/me"
-                      helpfulCount={item.helpfulCount}
-                    />
-                  }
-                  reviewId={item.id}
-                  helpfulVoted
-                  currentPath="/me"
-                  handle={item.authorHandle}
-                  authorHref={item.authorUserId ? `/users/${item.authorUserId}` : undefined}
-                  crop={item.cropName}
-                  rating={item.rating}
-                  helpfulCount={item.helpfulCount}
-                  body={item.body}
-                  materialName={item.materialName}
-                />
-                <Link
-                  href={`/materials/${item.materialId}#review-${item.id}`}
-                  className={reviewLink}
-                >
-                  資材詳細でこの感想口コミを見る <Icon name="arrow_forward" size="sm" />
-                </Link>
-              </article>
+              <ProfileReviewCard
+                key={`helpful-review-${item.id}`}
+                review={item}
+                author={{
+                  handle: item.authorHandle,
+                  href: item.authorUserId ? `/users/${item.authorUserId}` : undefined,
+                }}
+                actions={
+                  <PostActionsLoader
+                    target="review"
+                    id={item.id}
+                    currentPath="/me"
+                    helpfulCount={item.helpfulCount}
+                  />
+                }
+                reportReturnPath="/me"
+              />
             ) : (
-              <ReportCard
+              <UsageReportCard
+                key={`helpful-report-${item.id}`}
+                href={`/reports/${item.id}`}
+                title={item.title}
+                author={item.authorHandle}
+                crop={item.cropName}
                 actions={
                   <PostActionsLoader
                     target="usage_report"
@@ -280,15 +262,6 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
                     helpfulCount={item.helpfulCount}
                   />
                 }
-                reportId={item.id}
-                key={`helpful-report-${item.id}`}
-                title={item.title}
-                author={item.authorHandle}
-                authorHref={item.authorUserId ? `/users/${item.authorUserId}` : undefined}
-                crop={item.cropName}
-                helpfulCount={item.helpfulCount}
-                href={`/reports/${item.id}`}
-                layout="list"
               />
             ),
           )}

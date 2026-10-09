@@ -2,30 +2,47 @@
 
 import { useMemo, useState } from "react";
 
+import { FieldError } from "@/components/FormParts";
 import { Combobox } from "@/components/Combobox";
-import { TagChip } from "@/components/TagChip";
 import type { ReviewCropOption } from "@/server/queries/reviews";
+
 import { css } from "../../../../../../styled-system/css";
 
-const selectedChips = css({
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "1.5",
-  mt: "2",
+const chipStyle = css({
+  display: "inline-flex",
   alignItems: "center",
+  gap: "1.5",
+  py: "1",
+  pr: "1.5",
+  pl: "3",
+  bg: "primary.100",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "primary.700/30",
+  borderRadius: "pill",
+  fontSize: "sm",
+  fontWeight: "semibold",
+  color: "primary.800",
 });
 
-const emptySelection = css({
-  m: "0",
+const chipRemoveStyle = css({
+  display: "grid",
+  placeItems: "center",
+  w: "4",
+  h: "4",
+  p: "0",
+  bg: "primary.700/18",
+  borderRadius: "pill",
   fontSize: "sm",
-  color: "text.subtle",
-});
-
-const selectionError = css({
-  m: "0",
-  fontSize: "sm",
-  color: "accent.danger",
-  fontWeight: "bold",
+  lineHeight: "none",
+  color: "primary.800",
+  cursor: "pointer",
+  _focusVisible: {
+    outlineWidth: "2px",
+    outlineStyle: "solid",
+    outlineColor: "primary.700",
+    outlineOffset: "1px",
+  },
 });
 
 export function ReviewCropPicker({
@@ -42,6 +59,7 @@ export function ReviewCropPicker({
   onRemove: (cropId: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  const shownError = selectedCropIds.length === 0 ? error : undefined;
   const selected = useMemo(() => new Set(selectedCropIds), [selectedCropIds]);
   const cropById = useMemo(() => new Map(crops.map((crop) => [crop.id, crop])), [crops]);
   const normalizedQuery = query.trim().toLocaleLowerCase("ja");
@@ -61,7 +79,8 @@ export function ReviewCropPicker({
       <Combobox
         id="review-crop"
         aria-label="作目"
-        aria-describedby="review-crop-selection"
+        aria-describedby={shownError === undefined ? "review-crop-selection" : "review-crop-error"}
+        aria-invalid={shownError === undefined ? undefined : true}
         value={query}
         onValueChange={setQuery}
         placeholder="作物名を入力（例：みかん、デコポン）"
@@ -77,31 +96,43 @@ export function ReviewCropPicker({
         emptyMessage="一致する作物がありません。"
       />
 
-      <div id="review-crop-selection" className={selectedChips} aria-live="polite">
+      <div
+        id="review-crop-selection"
+        className={css({ display: "flex", flexWrap: "wrap", gap: "2", mt: "2.5" })}
+        aria-live="polite"
+      >
         {selectedCropIds.length > 0 ? (
           selectedCropIds.map((cropId) => {
             const crop = cropById.get(cropId);
             if (crop === undefined) return null;
 
             return (
-              <span key={crop.id}>
+              <span key={crop.id} className={chipStyle}>
                 <input type="hidden" name="cropIds" value={crop.id} />
-                <TagChip
-                  label={crop.name}
-                  showCategoryLabel={false}
-                  onRemove={() => onRemove(crop.id)}
-                />
+                <span
+                  className={css({ fontSize: "2xs", fontWeight: "bold", color: "primary.800/65" })}
+                >
+                  {crop.groupName}
+                </span>
+                {crop.name}
+                <button
+                  className={chipRemoveStyle}
+                  type="button"
+                  aria-label={`${crop.name}を削除`}
+                  onClick={() => onRemove(crop.id)}
+                >
+                  ×
+                </button>
               </span>
             );
           })
-        ) : error === undefined ? (
-          <p className={emptySelection}>作目を1つ選んでください。</p>
         ) : (
-          <p role="alert" className={selectionError}>
-            {error}
-          </p>
+          <span className={css({ fontSize: "sm", color: "text.subtle" })}>
+            作目を1つ選んでください。
+          </span>
         )}
       </div>
+      <FieldError id="review-crop-error" message={shownError} />
     </>
   );
 }

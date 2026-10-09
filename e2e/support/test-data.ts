@@ -408,6 +408,18 @@ export async function createMaterial(
   });
 }
 
+export async function archiveMaterial(materialId: string): Promise<void> {
+  const material = await getMaterial(materialId);
+  if (!material.name.startsWith(`E2E資材_${E2E_TOKEN_PREFIX}`)) {
+    throw new Error("E2E以外の資材は変更できません。");
+  }
+  await checkedFetch(restPath("materials", new URLSearchParams({ id: `eq.${materialId}` })), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ publication_status: "archived", archived_at: new Date().toISOString() }),
+  });
+}
+
 export async function deleteMaterial(materialId: string): Promise<void> {
   // 書類・原稿の証跡は本番では保持する。使い捨てE2E資材だけを参照順に片付ける。
   const material = await getMaterial(materialId);
@@ -596,6 +608,17 @@ export async function helpfulVoteCount(userId: string): Promise<number> {
     user_id: `eq.${userId}`,
   });
   const rows = await restSelect(IdSchema, "helpful_votes", params);
+  return rows.length;
+}
+
+/** 指定の感想口コミについて記録された閲覧（view_events）の件数。 */
+export async function reviewViewEventCount(reviewId: string): Promise<number> {
+  const params = new URLSearchParams({
+    select: "id",
+    target_type: "eq.review",
+    target_id: `eq.${reviewId}`,
+  });
+  const rows = await restSelect(IdSchema, "view_events", params);
   return rows.length;
 }
 

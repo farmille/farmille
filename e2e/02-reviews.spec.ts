@@ -10,6 +10,7 @@ import {
   helpfulVoteCount,
   reviewByAuthor,
   reviewCropNames,
+  reviewViewEventCount,
 } from "./support/test-data";
 import { loginGeneral } from "./support/ui";
 
@@ -133,6 +134,34 @@ test("資材詳細で感想口コミの参考になったを押すと、その�
   } finally {
     await deleteAuthUsersByEmail(author.email);
     await deleteAuthUsersByEmail(viewer.email);
+    await deleteMaterial(material.id);
+  }
+});
+
+test("感想口コミの閲覧は、表示した画面ごとに1件だけ記録される", async ({ page }) => {
+  const author = await createGeneralUser("view-author");
+  const material = await createMaterial("view");
+
+  try {
+    const review = await createReview({
+      materialId: material.id,
+      authorUserId: author.id,
+      rating: 4,
+      body: `E2E閲覧数の感想口コミ_${author.id}`,
+    });
+
+    let expected = 0;
+    for (const path of [`/materials/${material.id}`, `/materials/${material.id}/reviews`]) {
+      await page.goto(path);
+      await page.getByRole("article").filter({ hasText: review.body }).scrollIntoViewIfNeeded();
+      expected += 1;
+      await expect.poll(async () => await reviewViewEventCount(review.id)).toBe(expected);
+      // 記録が遅れて重複しないことを、少し待ってから確かめる。
+      await page.waitForTimeout(2_000);
+      expect(await reviewViewEventCount(review.id)).toBe(expected);
+    }
+  } finally {
+    await deleteAuthUsersByEmail(author.email);
     await deleteMaterial(material.id);
   }
 });

@@ -1,11 +1,11 @@
-import { ProfileDetailsDisplay } from "@/components/ProfileDetailsDisplay";
 import { getProfileDetails } from "@/server/queries/profile-details";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { AppBar, SectionHeading, StatCard } from "@/components";
+import { ProfileCard } from "@/components/ProfileCard";
+import { publicProfileLabel } from "@/lib/public-profile-label";
 import { createPageMetadata } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { createReportAction } from "@/server/actions/reports";
@@ -13,11 +13,13 @@ import { errorMessageJa } from "@/server/errors";
 import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublicProfilePage, type PublicProfilePageData } from "@/server/queries/public-profiles";
 import type { Result } from "@/server/result";
+import { AppBar } from "@/components";
 import { ReportDialog } from "@/components/ReportDialog";
 import { css } from "../../../../styled-system/css";
 
+import { ProfileSectionHeading } from "@/app/me/_components/ProfileParts";
+
 import { PostTimeline } from "./_components/PostTimeline";
-import { ProfileHeader } from "./_components/ProfileHeader";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -37,13 +39,6 @@ const body = css({
   pb: "10",
   bg: "surface.panel",
   tab: { px: "5", py: "5" },
-});
-
-const statRow = css({
-  display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: "2.5",
-  mt: "3.5",
 });
 
 const getCachedProfilePage = cache(async (id: string): Promise<Result<PublicProfilePageData>> => {
@@ -102,13 +97,22 @@ export default async function UserPage({ params }: UserPageProps) {
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
   const isOwnProfile = viewerUserId !== null && viewerUserId === data.profile.userId;
+  const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 
   return (
     <div className={shell}>
       <AppBar chrome="public" title={data.profile.handle} backHref="/" />
       <main className={body}>
-        <ProfileHeader profile={data.profile} />
-        <ProfileDetailsDisplay details={details.data} />
+        <ProfileCard
+          handle={data.profile.handle}
+          avatarUrl={data.profile.avatarUrl}
+          details={details.data}
+          stats={[
+            { label: "実証詳細レポート", value: reportCount },
+            { label: "感想口コミ", value: data.reviewCount },
+            { label: "参考になった", value: data.helpfulCount },
+          ]}
+        />
 
         {isOwnProfile ? null : (
           <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>
@@ -120,14 +124,14 @@ export default async function UserPage({ params }: UserPageProps) {
           </div>
         )}
 
-        <div className={statRow}>
-          <StatCard value={data.reviewCount} label="感想口コミ" />
-          <StatCard value={data.helpfulCount} label="参考になった" />
-        </div>
-
         <section aria-labelledby="profile-posts-heading">
-          <SectionHeading title={<span id="profile-posts-heading">これまでの投稿</span>} />
-          <PostTimeline profile={data.profile} posts={data.posts} viewerUserId={viewerUserId} />
+          <ProfileSectionHeading id="profile-posts-heading">これまでの投稿</ProfileSectionHeading>
+          <PostTimeline
+            profile={data.profile}
+            posts={data.posts}
+            authorLabel={publicProfileLabel(details.data)}
+            viewerUserId={viewerUserId}
+          />
         </section>
       </main>
     </div>

@@ -6,7 +6,7 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
-import { Button } from "@/components";
+import { Button, Select } from "@/components";
 import { Field, FormMessage, controlStyle } from "@/components/auth/Fields";
 import { MaterialPageContent, materialPageStack } from "@/components/materials/MaterialPageContent";
 import {
@@ -263,8 +263,7 @@ export function MaterialPageEditor({
                       <div className={row} key={index}>
                         <label>
                           資料の分類
-                          <select
-                            className={controlStyle}
+                          <Select
                             value={link.group ?? ""}
                             onChange={(event) => {
                               const value = v.parse(
@@ -307,7 +306,7 @@ export function MaterialPageEditor({
                                 {option.label}
                               </option>
                             ))}
-                          </select>
+                          </Select>
                         </label>
                         <label>
                           資料名
@@ -468,8 +467,7 @@ export function MaterialPageEditor({
                 <div className={row} key={index}>
                   <label>
                     施用方法
-                    <select
-                      className={controlStyle}
+                    <Select
                       value={usage.method}
                       onChange={(event) => {
                         const method = v.parse(
@@ -489,7 +487,7 @@ export function MaterialPageEditor({
                           {method.label}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </label>
                   <label>
                     詳細

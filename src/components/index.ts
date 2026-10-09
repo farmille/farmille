@@ -43,6 +43,7 @@ export { Input } from "./Input";
 export { FileInput } from "./FileInput";
 export { Textarea } from "./Textarea";
 export { Select } from "./Select";
+export { Radio, RadioGroup } from "./Radio";
 
 export { EmptyState } from "./EmptyState";
 

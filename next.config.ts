@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
         headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
       },
       {
-        source: "/company-requests/removal/confirm",
+        source: "/company-requests/receipts/confirm",
         headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
       },
       {

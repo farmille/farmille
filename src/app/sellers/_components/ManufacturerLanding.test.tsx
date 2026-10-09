@@ -3,32 +3,40 @@ import { describe, expect, it } from "vitest";
 import { ManufacturerLanding } from "./ManufacturerLanding";
 
 describe("企業向け利用ガイド", () => {
-  it("登録の戻り先を保持し、4種の申請と実在する編集・連絡先へ案内する", () => {
+  it("登録の戻り先を保持し、3種の申請フォームと実在する編集・連絡先へ案内し、終売・非表示はメールで受け付ける", () => {
     render(<ManufacturerLanding applyHref="/sellers/apply?from=me" />);
     expect(screen.getByRole("link", { name: "申請フォームへ進む" })).toHaveAttribute(
       "href",
       "/sellers/apply?from=me",
     );
     const members = screen.getByRole("region", { name: "企業会員登録済みの方の活用ガイド" });
-    const links = within(members).getAllByRole("link");
-    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+    const links = within(members)
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"));
+    expect(links).toEqual([
       "/dashboard/applications/new/registration",
       "/dashboard/materials",
       "/dashboard/applications/new/registration",
-      "/company-requests/removal",
+      "mailto:contact@farmille.com",
       "/dashboard/applications/new/transfer_out",
       "/dashboard/applications/new/transfer_in",
       "/dashboard/profile",
       "/dashboard/applications",
     ]);
     const faq = screen.getByRole("region", { name: "よくあるご質問" });
-    expect(within(faq).getAllByRole("heading", { level: 3 })).toHaveLength(9);
+    expect(within(faq).getAllByRole("heading", { level: 3 })).toHaveLength(8);
     for (const target of within(faq).getAllByRole("link")) {
       const href = target.getAttribute("href");
       expect(href).toMatch(/^#/);
       expect(document.querySelector(href ?? "")).not.toBeNull();
     }
-    expect(document.querySelector('a[href="/company-requests/removal/form"]')).toBeNull();
+    expect(document.querySelector('a[href^="/company-requests/removal"]')).toBeNull();
+    const delist = document.getElementById("lpGuideDelist");
+    if (!delist) throw new Error("終売・非表示の案内がありません");
+    expect(within(delist).getByRole("link", { name: "contact@farmille.com" })).toHaveAttribute(
+      "href",
+      "mailto:contact@farmille.com",
+    );
     const contents = screen.getByRole("navigation", { name: "利用ガイドの目次" });
     expect(within(contents).getAllByRole("link")).toHaveLength(5);
     for (const link of within(contents).getAllByRole("link")) {

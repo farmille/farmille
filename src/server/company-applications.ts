@@ -1,10 +1,10 @@
 import type { ApplicationSubmission } from "@/lib/company-application";
 import * as v from "valibot";
 import {
-  applicationKindSchema,
   submissionSchema,
+  submittableKindSchema,
   uuidSchema,
-  type ApplicationKind,
+  type SubmittableKind,
 } from "@/lib/company-application";
 import { applicationCopy } from "@/lib/company-application-copy";
 import { clientEnv } from "@/env";
@@ -17,7 +17,6 @@ import {
   approvedApplicationSeller,
   authorizeApplicationReceipt,
   checkApplicationDb,
-  removalApplicationAccess,
 } from "./company-application-auth";
 
 export function applicationData<T>(result: {
@@ -28,30 +27,11 @@ export function applicationData<T>(result: {
   if (result.data === null || result.data === undefined) throw new ApplicationError("not_found");
   return result.data;
 }
-export async function beginCompanyApplication(kind: ApplicationKind) {
-  v.parse(applicationKindSchema, kind);
-  const db = createAdminSupabase();
-  if (kind === "removal") {
-    const { access } = await removalApplicationAccess();
-    const existing = await db
-      .from("company_application_intents")
-      .select("*")
-      .eq("access_id", access.id)
-      .is("cleanup_claimed_at", null)
-      .maybeSingle();
-    checkApplicationDb(existing.error);
-    if (existing.data) return existing.data;
-    return applicationData(
-      await db
-        .from("company_application_intents")
-        .insert({ kind, access_id: access.id })
-        .select()
-        .single(),
-    );
-  }
+export async function beginCompanyApplication(kind: SubmittableKind) {
+  v.parse(submittableKindSchema, kind);
   const { seller } = await approvedApplicationSeller();
   return applicationData(
-    await db
+    await createAdminSupabase()
       .from("company_application_intents")
       .insert({ kind, seller_id: seller.id })
       .select()
@@ -147,15 +127,4 @@ export async function listCompanyApplications(admin = false) {
     query = query.eq("seller_id", seller.id);
   }
   return applicationData(await query.limit(100));
-}
-
-export async function restartRemovalApplication(id: string) {
-  v.parse(uuidSchema, id);
-  const { sessionHash } = await removalApplicationAccess();
-  return applicationData(
-    await createAdminSupabase().rpc("restart_removal_application", {
-      p_intent_id: id,
-      p_session_hash: sessionHash,
-    }),
-  );
 }

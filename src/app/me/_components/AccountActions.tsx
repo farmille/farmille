@@ -1,44 +1,33 @@
 import Link from "next/link";
 
-import { Button, buttonRecipe } from "@/components";
-import { css, cx } from "../../../../styled-system/css";
+import { buttonRecipe } from "@/components/Button";
+import { css } from "../../../../styled-system/css";
 
-const wrap = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "2.5",
-  mt: "8",
-  pb: "4",
-});
+const actions = css({ display: "flex", flexDirection: "column", gap: "2.5", mt: "8", pb: "4" });
 
-/** ログアウトとメーカー申請への導線。 */
+const action = buttonRecipe({ variant: "ghost" });
+
 export function AccountActions({ admin = false }: { admin?: boolean }) {
   return (
-    <div className={wrap}>
+    <div className={actions}>
       {admin ? (
-        <Link className={buttonRecipe({ variant: "ghost" })} href="/admin">
+        <Link className={action} href="/admin">
           運営管理へ
         </Link>
       ) : null}
-      <Link className={buttonRecipe({ variant: "ghost" })} href="/account/passkeys">
+      <Link className={action} href="/account/passkeys">
         パスキーを管理
       </Link>
-      <Link className={buttonRecipe({ variant: "ghost" })} href="/account/password">
+      <Link className={action} href="/account/password">
         パスワードを変更
       </Link>
       <form action="/logout" method="post">
-        <Button type="submit" variant="ghost">
+        <button type="submit" className={action}>
           ログアウト
-        </Button>
+        </button>
       </form>
       {!admin ? (
-        <Link
-          href="/sellers?from=me"
-          className={cx(
-            buttonRecipe({ variant: "ghost", size: "md" }),
-            css({ display: "flex", textAlign: "center" }),
-          )}
-        >
+        <Link className={action} href="/sellers?from=me">
           企業会員登録を申請
         </Link>
       ) : null}

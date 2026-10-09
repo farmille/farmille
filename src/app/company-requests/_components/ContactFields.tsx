@@ -1,5 +1,5 @@
-import { Input } from "@/components";
-import { css } from "../../../../styled-system/css";
+import { Field } from "@/components/auth/Fields";
+import { Input } from "@/components/Input";
 
 export type ContactDefaults = {
   companyName: string;
@@ -19,109 +19,119 @@ export const emptyContact: ContactDefaults = {
   email: "",
   phone: "",
 };
-export const applicationStack = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "4",
-  fontSize: "md",
-  lineHeight: "relaxed",
-});
-export const applicationField = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "2",
-  fontSize: "md",
-});
+
 export function ContactFields({
   prefix = "",
   defaults,
-  removal = false,
   fixedAccount = false,
 }: {
   prefix?: string;
   defaults: ContactDefaults;
-  removal?: boolean;
   fixedAccount?: boolean;
 }) {
+  const id = (name: string) => `${prefix.replace(/\W/g, "-")}${name}`;
   return (
-    <div className={applicationStack}>
-      <label className={applicationField}>
-        法人名（必須）
+    <>
+      <Field htmlFor={id("companyName")} label="法人名" requirement="required">
         <Input
-          name={`${prefix}companyName`}
           defaultValue={defaults.companyName}
-          required
+          id={id("companyName")}
           maxLength={200}
-          readOnly={removal}
+          name={`${prefix}companyName`}
+          placeholder="例）〇〇バイオ株式会社"
+          required
         />
-      </label>
-      {!removal && (
-        <label className={applicationField}>
-          法人番号（必須・13桁）
-          <Input
-            name={`${prefix}corporateNumber`}
-            defaultValue={defaults.corporateNumber}
-            pattern="[0-9]{13}"
-            inputMode="numeric"
-            required
-            maxLength={13}
-          />
-          <span>国税庁 法人番号公表サイトで確認できます。</span>
-        </label>
-      )}
-      <label className={applicationField}>
-        FarmilleアカウントID（{removal ? "任意" : "必須"}）
+      </Field>
+      <Field
+        guide="13桁の法人番号。国税庁 法人番号公表サイトで確認できます。"
+        htmlFor={id("corporateNumber")}
+        label="法人番号"
+        requirement="required"
+      >
         <Input
-          name={`${prefix}accountId`}
+          defaultValue={defaults.corporateNumber}
+          id={id("corporateNumber")}
+          inputMode="numeric"
+          maxLength={13}
+          name={`${prefix}corporateNumber`}
+          pattern="[0-9]{13}"
+          placeholder="例）1234567890123"
+          required
+        />
+      </Field>
+      <Field
+        guide="Farmilleが発行したIDをご入力ください。"
+        htmlFor={id("accountId")}
+        label="FarmilleアカウントID"
+        requirement="required"
+      >
+        <Input
           defaultValue={defaults.accountId}
-          required={!removal}
-          readOnly={fixedAccount}
+          id={id("accountId")}
           maxLength={100}
+          name={`${prefix}accountId`}
+          placeholder="Farmilleが発行したID"
+          readOnly={fixedAccount}
+          required
         />
-        <span>
-          {removal ? "企業会員の場合はご入力ください。" : "Farmilleが発行したIDをご入力ください。"}
-        </span>
-      </label>
-      <label className={applicationField}>
-        担当者名（必須・非公開）
+      </Field>
+      <Field
+        htmlFor={id("contactName")}
+        label="担当者名"
+        requirement="required"
+        visibility="private"
+      >
         <Input
-          name={`${prefix}contactName`}
           defaultValue={defaults.contactName}
-          required
-          readOnly={removal}
+          id={id("contactName")}
           maxLength={200}
+          name={`${prefix}contactName`}
+          placeholder="例）金子 太郎"
+          required
         />
-      </label>
-      <label className={applicationField}>
-        部署名（必須・非公開）
+      </Field>
+      <Field htmlFor={id("department")} label="部署名" requirement="required" visibility="private">
         <Input
-          name={`${prefix}department`}
           defaultValue={defaults.department}
-          required
+          id={id("department")}
           maxLength={200}
+          name={`${prefix}department`}
+          placeholder="例）営業部"
+          required
         />
-      </label>
-      <label className={applicationField}>
-        担当者メールアドレス（必須・非公開）
+      </Field>
+      <Field
+        htmlFor={id("email")}
+        label="担当者メールアドレス"
+        requirement="required"
+        visibility="private"
+      >
         <Input
-          name={`${prefix}email`}
           defaultValue={defaults.email}
-          type="email"
-          required
-          readOnly={removal}
+          id={id("email")}
           maxLength={254}
-        />
-      </label>
-      <label className={applicationField}>
-        担当者電話番号（必須・非公開）
-        <Input
-          name={`${prefix}phone`}
-          defaultValue={defaults.phone}
-          type="tel"
+          name={`${prefix}email`}
+          placeholder="tanto@example.co.jp"
           required
-          maxLength={50}
+          type="email"
         />
-      </label>
-    </div>
+      </Field>
+      <Field
+        htmlFor={id("phone")}
+        label="担当者電話番号"
+        requirement="required"
+        visibility="private"
+      >
+        <Input
+          defaultValue={defaults.phone}
+          id={id("phone")}
+          maxLength={50}
+          name={`${prefix}phone`}
+          placeholder="例）03-1234-5678"
+          required
+          type="tel"
+        />
+      </Field>
+    </>
   );
 }

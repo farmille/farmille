@@ -2,6 +2,7 @@ import Form from "next/form";
 import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
+import { BrandMark } from "@/components/BrandMark";
 import { Icon } from "@/components/Icon";
 import { PreparationNotice } from "@/components/PreparationNotice";
 
@@ -17,15 +18,15 @@ const mobileAppBar = css({
   display: "flex",
   alignItems: "center",
   gap: "2.5",
-  pt: "max(12px, env(safe-area-inset-top))",
+  pt: "max(token(spacing.3), env(safe-area-inset-top))",
   px: "3.5",
   pb: "2.5",
   tab: { display: "none" },
 });
 
 const iconButton = css({
-  w: "32px",
-  h: "32px",
+  w: "8",
+  h: "8",
   display: "grid",
   placeItems: "center",
   color: "text.muted",
@@ -84,7 +85,7 @@ const desktopHeaderInner = css({
   w: "100%",
   maxW: "content.wide",
   mx: "auto",
-  minH: "64px",
+  minH: "16",
   px: "5",
   display: "flex",
   alignItems: "center",
@@ -121,7 +122,7 @@ const desktopPublicActions = css({
 });
 
 const desktopSearch = css({
-  minH: "42px",
+  minH: "11",
   minW: "0",
   flex: "1",
   maxW: "480px",
@@ -184,7 +185,7 @@ const desktopNavLink = cva({
   base: {
     display: "inline-flex",
     alignItems: "center",
-    minH: "40px",
+    minH: "10",
     px: "3",
     borderRadius: "button",
     color: "text.muted",
@@ -214,7 +215,7 @@ const desktopAction = cva({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    minH: "40px",
+    minH: "10",
     px: "3.5",
     borderRadius: "button",
     fontSize: "md",
@@ -322,7 +323,7 @@ function MobileAppBar(props: AppBarProps) {
     return (
       <header className={mobileAppBar} data-ui="mobile-app-bar">
         <Link href="/" className={logo}>
-          <Icon name="leaf" size="lg" />
+          <BrandMark />
           <b className={logoText}>Farmille</b>
         </Link>
         <Link href={props.searchHref ?? "/search"} className={iconButton} aria-label="検索">
@@ -362,7 +363,7 @@ function DesktopSiteHeader({
     <header className={desktopHeader} data-ui="desktop-site-header">
       <div className={desktopHeaderInner}>
         <Link href="/" className={desktopBrand}>
-          <Icon name="leaf" size="lg" />
+          <BrandMark />
           <span className={desktopBrandName}>Farmille</span>
         </Link>
         <Form action="/search" aria-label="ヘッダー検索" className={desktopSearch} role="search">
@@ -417,7 +418,7 @@ function DesktopSellerHeader(props: AppBarProps) {
     <header className={desktopHeader} data-ui="desktop-seller-header">
       <div className={desktopHeaderInner}>
         <Link href="/dashboard" className={desktopBrand}>
-          <Icon name="leaf" size="lg" />
+          <BrandMark />
           <span className={desktopBrandName}>Farmille for Business</span>
         </Link>
         <span className={workspaceTitle}>{title}</span>

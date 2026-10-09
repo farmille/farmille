@@ -1,0 +1,26 @@
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
+import { css } from "../../../../../styled-system/css";
+
+import { ScrollToHashOnMount } from "./ScrollToHashOnMount";
+
+const noteStyle = css({ color: "text.subtle", fontSize: "sm" });
+
+const meta = {
+  title: "App/Materials/ScrollToHashOnMount",
+  component: ScrollToHashOnMount,
+  args: { targetId: "reviews-heading", trigger: 1 },
+  render: (args) => (
+    <>
+      <ScrollToHashOnMount {...args} />
+      <p className={noteStyle}>
+        表示を持たず、URL のハッシュが targetId のときだけ、その要素まで移ります。
+      </p>
+    </>
+  ),
+} satisfies Meta<typeof ScrollToHashOnMount>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};

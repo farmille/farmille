@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components";
+import { Button, Select } from "@/components";
 import { Field, FormMessage, controlStyle } from "@/components/auth/Fields";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { recordMaterialAuditAction } from "./audit-actions";
@@ -15,16 +15,15 @@ export function MaterialAuditForm({ materialId }: { materialId: string }) {
   return (
     <div className={materialPageStack}>
       <Field label="掲載後の確認結果" htmlFor="audit-outcome">
-        <select
+        <Select
           id="audit-outcome"
-          className={controlStyle}
           value={outcome}
           onChange={(event) => setOutcome(event.target.value)}
         >
           <option value="checked">確認済み</option>
           <option value="correction_requested">修正を依頼</option>
           <option value="hidden">非公開にする</option>
-        </select>
+        </Select>
       </Field>
       <Field
         label="確認した内容と理由"

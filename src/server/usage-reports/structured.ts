@@ -31,6 +31,106 @@ function ownedMediaUrl(value: string, userId: string): boolean {
   );
 }
 
+type SaveRpcInput = Omit<UsageReportInput, "purposeNote">;
+type SaveStepResult<T> = ({ ok: true } & T) | { ok: false; message: string };
+
+export type UsageReportSaveStore = {
+  saveReport(
+    input: SaveRpcInput,
+    submit: boolean,
+  ): Promise<SaveStepResult<{ status: "draft" | "pending"; updatedAt: string }>>;
+  savePurposeNote(
+    reportId: string,
+    purposeNote: string,
+    expectedUpdatedAt: string,
+  ): Promise<SaveStepResult<{ updatedAt: string }>>;
+};
+
+const SAVE_FAILED =
+  "保存できませんでした。入力内容はそのまま残っています。内容を確認して、もう一度保存してください。";
+const SAVE_CONFLICT =
+  "別の画面で下書きが更新されています。入力内容を控えてから再読み込みしてください。";
+
+function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveStore {
+  return {
+    async saveReport(input, submit) {
+      const { data, error } = await supabase.rpc("save_usage_report", {
+        p_input: input,
+        p_submit: submit,
+      });
+      if (error !== null) {
+        console.error("[usage-reports] 保存に失敗", error);
+        return { ok: false, message: error.code === "40001" ? SAVE_CONFLICT : SAVE_FAILED };
+      }
+      const saved = data[0];
+      if (saved === undefined || (saved.status !== "draft" && saved.status !== "pending")) {
+        throw new Error("実証詳細レポートの保存結果を確認できませんでした。");
+      }
+      return { ok: true, status: saved.status, updatedAt: saved.updated_at };
+    },
+    async savePurposeNote(reportId, purposeNote, expectedUpdatedAt) {
+      const { data, error } = await supabase
+        .from("usage_reports")
+        .update({ purpose_note: purposeNote.length > 0 ? purposeNote : null })
+        .eq("id", reportId)
+        .eq("status", "draft")
+        .eq("updated_at", expectedUpdatedAt)
+        .select("updated_at")
+        .maybeSingle();
+      if (error !== null) {
+        console.error("[usage-reports] 使用目的の補足の保存に失敗", error);
+        return { ok: false, message: SAVE_FAILED };
+      }
+      if (data === null) return { ok: false, message: SAVE_CONFLICT };
+      return { ok: true, updatedAt: data.updated_at };
+    },
+  };
+}
+
+export async function runUsageReportSave(
+  input: UsageReportInput,
+  submit: boolean,
+  store: UsageReportSaveStore,
+): Promise<UsageReportActionResult> {
+  const { purposeNote, ...rpcInput } = input;
+  const draft = await store.saveReport(rpcInput, false);
+  if (!draft.ok) return { ok: false, message: draft.message, fieldErrors: {} };
+  const note = await store.savePurposeNote(input.reportId, purposeNote.trim(), draft.updatedAt);
+  if (!note.ok)
+    return {
+      ok: false,
+      message: note.message,
+      fieldErrors: {},
+      savedDraft: { updatedAt: draft.updatedAt, status: "partial" },
+    };
+  if (!submit)
+    return {
+      ok: true,
+      status: "draft",
+      reportId: input.reportId,
+      updatedAt: note.updatedAt,
+      message: "下書きを保存しました。",
+    };
+  const submitted = await store.saveReport(
+    { ...rpcInput, expectedUpdatedAt: note.updatedAt },
+    true,
+  );
+  if (!submitted.ok)
+    return {
+      ok: false,
+      message: `下書きは保存しましたが、提出できませんでした。${submitted.message}`,
+      fieldErrors: {},
+      savedDraft: { updatedAt: note.updatedAt, status: "complete" },
+    };
+  return {
+    ok: true,
+    status: submitted.status,
+    reportId: input.reportId,
+    updatedAt: submitted.updatedAt,
+    message: "実証詳細レポートを提出しました。運営が確認後に公開します。",
+  };
+}
+
 export async function saveStructuredUsageReport(
   raw: UsageReportInput,
   userId: string,
@@ -50,35 +150,7 @@ export async function saveStructuredUsageReport(
       fieldErrors: {},
     };
   }
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase.rpc("save_usage_report", {
-    p_input: input,
-    p_submit: submit,
-  });
-  if (error !== null) {
-    console.error("[usage-reports] 保存に失敗", error);
-    return {
-      ok: false,
-      message:
-        error.code === "40001"
-          ? "別の画面で下書きが更新されています。入力内容を控えてから再読み込みしてください。"
-          : "保存できませんでした。入力内容はそのまま残っています。内容を確認して、もう一度保存してください。",
-      fieldErrors: {},
-    };
-  }
-  const saved = data[0];
-  if (saved === undefined || (saved.status !== "draft" && saved.status !== "pending")) {
-    throw new Error("実証詳細レポートの保存結果を確認できませんでした。");
-  }
-  return {
-    ok: true,
-    status: saved.status,
-    reportId: saved.report_id,
-    updatedAt: saved.updated_at,
-    message: submit
-      ? "実証詳細レポートを提出しました。運営が確認後に公開します。"
-      : "下書きを保存しました。",
-  };
+  return runUsageReportSave(input, submit, supabaseSaveStore(await createServerSupabase()));
 }
 
 export async function getStructuredUsageReport(
@@ -113,6 +185,7 @@ export async function getStructuredUsageReport(
     varietyUnknown: data.variety_unknown,
     observedChange: data.observed_change,
     purposeTags: data.purpose_tags,
+    purposeNote: data.purpose_note ?? "",
     prefectureCode: data.prefecture_code,
     city: data.locations?.city ?? "",
     showCity: data.publish_city,
@@ -172,7 +245,7 @@ export async function getStructuredUsageReport(
 
 export async function getStructuredReportFormData(materialId: string, userId: string) {
   const supabase = await createServerSupabase();
-  const [options, reports, profile, favorites, materialCrops] = await Promise.all([
+  const [options, reports, favorites, materialCrops] = await Promise.all([
     listClassificationOptions(),
     supabase
       .from("usage_reports")
@@ -181,15 +254,13 @@ export async function getStructuredReportFormData(materialId: string, userId: st
       .eq("author_user_id", userId)
       .in("status", ["draft", "pending"])
       .order("updated_at", { ascending: false }),
-    supabase.from("public_profiles").select("prefecture_code,city").eq("user_id", userId).single(),
     supabase.from("profile_crops").select("crop_id").eq("user_id", userId),
     supabase.from("material_crops").select("crop_id").eq("material_id", materialId),
   ]);
   if (!options.ok) return options;
-  const error = reports.error ?? profile.error ?? favorites.error ?? materialCrops.error;
+  const error = reports.error ?? favorites.error ?? materialCrops.error;
   if (
     error !== null ||
-    profile.data === null ||
     reports.data === null ||
     favorites.data === null ||
     materialCrops.data === null
@@ -210,8 +281,6 @@ export async function getStructuredReportFormData(materialId: string, userId: st
     effects: options.data.effects,
     favoriteCropIds: favorites.data.map((item) => item.crop_id),
     materialCropIds: materialCrops.data.map((item) => item.crop_id),
-    prefectureCode: profile.data.prefecture_code,
-    city: profile.data.city ?? "",
     draft: draft.data,
     submitted: reports.data
       .filter((row) => row.status === "pending")

@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import * as v from "valibot";
-import { FormPageShell, SurfaceCard, TextLink, formatDateJa } from "@/components";
-import { materialPageStack } from "@/components/materials/MaterialPageContent";
+import { FormPageShell } from "@/components/FormPageShell";
 import { ManufacturerProfileSchema } from "@/lib/manufacturer-profile";
-import { MATERIAL_PAGE_STATUS_LABELS } from "@/lib/material-page-editor";
 import { requireSeller } from "@/server/auth";
 import { getManufacturerProfileEditor } from "@/server/manufacturer-profile";
+import { readingColumn, sectionNote, visuallyHidden } from "../_components/dashboard-styles";
+import { DashboardTabs } from "../_components/DashboardTabs";
 import { ManufacturerProfileEditor } from "./ManufacturerProfileEditor";
+import { ManufacturerProfileHistory } from "./ManufacturerProfileHistory";
 
 export default async function ManufacturerProfilePage() {
   const session = await requireSeller();
@@ -20,9 +21,11 @@ export default async function ManufacturerProfilePage() {
   });
   return (
     <FormPageShell chrome="seller" title="メーカープロフィールの編集" backHref="/dashboard">
-      <div className={materialPageStack}>
-        <p>
-          会社紹介・ロゴ・公式サイトをメーカーページに掲載できます。法人名や担当者の変更は運営へご連絡ください。
+      <div className={readingColumn}>
+        <DashboardTabs active="profile" />
+        <h1 className={visuallyHidden}>メーカープロフィールの編集</h1>
+        <p className={sectionNote}>
+          メーカーページに表示される、会社としての情報です。製品ごとの情報は「製品情報」で管理します。会社紹介・ロゴ・公式サイトをメーカーページに掲載できます。法人名や担当者の変更は運営へご連絡ください。
         </p>
         <ManufacturerProfileEditor
           sellerId={seller.id}
@@ -32,33 +35,7 @@ export default async function ManufacturerProfilePage() {
           expectedVersion={latest?.status === "draft" ? latest.id : null}
           pendingVersion={latest?.status === "pending" ? latest.id : null}
         />
-        <SurfaceCard title="変更履歴">
-          {versions.length === 0 ? (
-            <p>保存したプロフィールはありません。</p>
-          ) : (
-            versions.map((version) => {
-              const status = v.parse(
-                v.picklist([
-                  "draft",
-                  "pending",
-                  "published",
-                  "returned",
-                  "superseded",
-                  "withdrawn",
-                ]),
-                version.status,
-              );
-              return (
-                <p key={version.id}>
-                  <TextLink href={`/dashboard/profile/history/${version.id}`}>
-                    {formatDateJa(version.created_at)}／{MATERIAL_PAGE_STATUS_LABELS[status]}
-                  </TextLink>
-                  {version.review_note ? `／${version.review_note}` : ""}
-                </p>
-              );
-            })
-          )}
-        </SurfaceCard>
+        <ManufacturerProfileHistory versions={versions} />
       </div>
     </FormPageShell>
   );

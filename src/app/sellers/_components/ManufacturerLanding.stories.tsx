@@ -4,7 +4,7 @@ import { css } from "../../../../styled-system/css";
 
 import { ManufacturerLanding } from "./ManufacturerLanding";
 
-const canvas = css({ p: "4", bg: "surface.page" });
+const canvas = css({ p: "4", bg: "surface.panel" });
 
 const meta = {
   title: "App/Sellers/ManufacturerLanding",

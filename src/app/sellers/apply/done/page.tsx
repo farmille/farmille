@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { buttonRecipe } from "@/components/Button";
 import Link from "next/link";
 
-import { buttonRecipe } from "@/components/Button";
 import { FormPageShell } from "@/components/FormPageShell";
-import { formActionsStyle, HintBox } from "@/components/auth/Fields";
+import { DoneMessage } from "@/app/company-requests/_components/DoneMessage";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
+
 import { css } from "../../../../../styled-system/css";
 
 export const metadata: Metadata = {
@@ -12,32 +13,29 @@ export const metadata: Metadata = {
   robots: NO_INDEX_ROBOTS,
 };
 
-const titleStyle = css({
-  fontSize: "xl",
-  lineHeight: "snug",
-  mb: "3",
-});
-
-const bodyStyle = css({
-  fontSize: "md",
-  color: "text.muted",
-  lineHeight: "relaxed",
-  mb: "4",
-});
-
 export default function SellerApplyDonePage() {
   return (
     <FormPageShell chrome="public" backHref="/" title="申請受付完了">
-      <h2 className={titleStyle}>申請を受け付けました</h2>
-      <p className={bodyStyle}>内容を確認し、ご登録の連絡先メールアドレスへご案内します。</p>
-      <HintBox>
-        ログインIDとパスワード設定のご案内をお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。
-      </HintBox>
-      <div className={formActionsStyle}>
-        <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/">
-          ホームへ
-        </Link>
-      </div>
+      <DoneMessage
+        className={css({ maxW: "content.reading", mx: "auto" })}
+        spacing="section"
+        title="申請を受け付けました"
+        actions={
+          <>
+            <Link className={buttonRecipe({ variant: "primary" })} href="/sellers">
+              メーカーの方へ に戻る
+            </Link>
+            <Link className={buttonRecipe({ variant: "ghost" })} href="/">
+              ホームへ
+            </Link>
+          </>
+        }
+      >
+        <p>内容を確認し、ご登録の連絡先メールアドレスへご案内します。</p>
+        <p>
+          ログインIDとパスワード設定のご案内をお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。
+        </p>
+      </DoneMessage>
     </FormPageShell>
   );
 }

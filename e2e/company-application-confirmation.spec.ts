@@ -5,7 +5,7 @@ test("申請用メール確認は解析を読み込まず、明示POSTだけを�
   baseURL,
 }) => {
   if (!baseURL) throw new Error("E2EのbaseURLが設定されていません。");
-  const response = await request.get("/company-requests/removal/confirm");
+  const response = await request.get("/company-requests/receipts/confirm");
   expect(response.status()).toBe(200);
   expect(response.headers()["referrer-policy"]).toBe("no-referrer");
   expect(response.headers()["cache-control"]).toBe("no-store");
@@ -25,12 +25,12 @@ test("申請用メール確認は解析を読み込まず、明示POSTだけを�
   expect(html).toContain(`<script nonce="${nonce}">`);
   expect(html).not.toMatch(/<script[^>]+src=/);
   expect(html).toContain("history.replaceState");
-  const forged = await request.post("/company-requests/removal/confirm", {
+  const forged = await request.post("/company-requests/receipts/confirm", {
     headers: { origin: "https://unrelated.example" },
     form: { token: "a".repeat(64) },
   });
   expect(forged.status()).toBe(403);
-  const invalid = await request.post("/company-requests/removal/confirm", {
+  const invalid = await request.post("/company-requests/receipts/confirm", {
     headers: { origin: baseURL },
     form: { token: "invalid" },
   });
@@ -39,13 +39,13 @@ test("申請用メール確認は解析を読み込まず、明示POSTだけを�
 
 test("no-referrerの確認フォームは同一オリジンだけを受け付ける", async ({ request }) => {
   for (const site of ["cross-site", "same-site", "none"]) {
-    const response = await request.post("/company-requests/removal/confirm", {
+    const response = await request.post("/company-requests/receipts/confirm", {
       headers: { origin: "null", "sec-fetch-site": site },
       form: { token: "invalid" },
     });
     expect(response.status()).toBe(403);
   }
-  const sameOrigin = await request.post("/company-requests/removal/confirm", {
+  const sameOrigin = await request.post("/company-requests/receipts/confirm", {
     headers: { origin: "null", "sec-fetch-site": "same-origin" },
     form: { token: "invalid" },
   });

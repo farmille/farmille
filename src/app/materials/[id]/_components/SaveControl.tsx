@@ -1,21 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { Icon } from "@/components/Icon";
 import { useActionState } from "react";
 
-import { buttonRecipe } from "@/components";
 import { trackMaterialSaved } from "@/lib/analytics/events";
-import { css, cx } from "../../../../../styled-system/css";
+import { css, cva } from "../../../../../styled-system/css";
+
 import type { SaveControlState } from "../actions";
 
-const saveForm = css({
-  display: "flex",
+const favRecipe = cva({
+  base: {
+    mt: "2",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "1",
+    px: "3",
+    py: "1",
+    fontSize: "sm",
+    color: "text.muted",
+    bg: "surface.card",
+    borderWidth: "1px",
+    borderColor: "border.strong",
+    borderRadius: "pill",
+    textDecoration: "none",
+    cursor: "pointer",
+  },
+  variants: {
+    saved: {
+      true: { color: "accent.danger" },
+      false: {},
+    },
+  },
+  defaultVariants: { saved: false },
 });
 
-const saveButton = css({
-  flex: "1",
-});
+const noteStyle = css({ mt: "2", fontSize: "xs", color: "text.subtle" });
 
 type ToggleAction = (previous: SaveControlState, formData: FormData) => Promise<SaveControlState>;
 
@@ -39,14 +58,16 @@ function SaveToggleForm({
   const [state, formAction] = useActionState(toggleAction, { saved });
 
   return (
-    <form action={formAction} className={saveForm}>
+    <form action={formAction}>
       <button
         type="submit"
         onClick={state.saved ? undefined : () => trackMaterialSaved(materialId)}
-        className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}
+        className={favRecipe({ saved: state.saved })}
+        aria-label={state.saved ? "お気に入りから解除" : "お気に入りに追加"}
+        aria-pressed={state.saved}
       >
-        <Icon name={state.saved ? "star_filled" : "star"} size="sm" />
-        {state.saved ? "お気に入りから解除" : "お気に入りに追加"}
+        <span aria-hidden="true">{state.saved ? "★" : "☆"}</span>
+        {state.saved ? "お気に入り済み" : "お気に入り"}
       </button>
     </form>
   );
@@ -60,21 +81,15 @@ export function SaveControl({
   unavailable = false,
 }: SaveControlProps) {
   if (unavailable) {
-    return (
-      <p className={css({ m: "0", fontSize: "sm", color: "text.subtle" })}>
-        お気に入りは一般ユーザー向けの機能です。
-      </p>
-    );
+    return <div className={noteStyle}>お気に入りは一般ユーザー向けの機能です。</div>;
   }
 
   if (saved === null || toggleAction === undefined) {
     const loginHref = `/login?next=${encodeURIComponent(materialPath)}`;
 
     return (
-      <Link
-        href={loginHref}
-        className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), saveButton)}
-      >
+      <Link href={loginHref} className={favRecipe()}>
+        <span aria-hidden="true">☆</span>
         ログインしてお気に入りに保存
       </Link>
     );

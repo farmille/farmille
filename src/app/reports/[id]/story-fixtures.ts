@@ -1,0 +1,170 @@
+import type { UsageReportInput } from "@/lib/usage-report";
+import type { PublishedUsageReportDetail } from "@/server/queries/usage-reports";
+
+const id = (n: number) => `73000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+const photo = "/missing-material-image.png";
+
+export const structuredReport: UsageReportInput = {
+  reportId: id(1),
+  expectedUpdatedAt: null,
+  materialId: id(2),
+  cropId: id(3),
+  variety: "アイコ",
+  varietyUnknown: false,
+  observedChange:
+    "使用区は午後の萎れが軽く、梅雨明けの高温でも株の勢いが落ちにくかった。\n収穫終盤まで葉色が保たれた。",
+  purposeTags: ["耐暑性改善", "しおれ軽減"],
+  purposeNote: "高温期の萎れを軽くしたかった",
+  prefectureCode: 8,
+  city: "水戸市",
+  showCity: true,
+  cultivationEnvironment: "ハウス（雨よけ）",
+  timingStages: [1, 2],
+  timingNote: "定植後1週間ごとに3回",
+  plots: [
+    { id: id(11), name: "対照区", scope: "10株", description: "資材なし", steps: [] },
+    {
+      id: id(12),
+      name: "使用区",
+      scope: "10株",
+      description: "1,000倍で散布\n2回目以降は500倍",
+      steps: [{ id: id(13), method: "spray", targets: ["葉"], otherText: "" }],
+    },
+    { id: id(14), name: "倍量区", scope: "", description: "", steps: [] },
+  ],
+  measurements: [
+    {
+      id: id(21),
+      kind: "numeric",
+      name: "可販果率",
+      unit: "%",
+      body: "",
+      graphs: [
+        {
+          id: id(22),
+          heading: "",
+          rows: [
+            { id: id(23), plotId: id(11), label: "", value: "74" },
+            { id: id(24), plotId: id(12), label: "", value: "82±3 a" },
+            { id: id(25), plotId: id(14), label: "", value: "79.5±4.2 ab" },
+          ],
+        },
+      ],
+    },
+    {
+      id: id(26),
+      kind: "text",
+      name: "食味",
+      unit: "",
+      body: "糖度の差ははっきりしなかったが、皮が薄く感じた。",
+      graphs: [],
+    },
+  ],
+  media: [
+    {
+      id: id(31),
+      url: photo,
+      mediaType: "photo",
+      section: "results",
+      caption: "使用区の株（7月20日）",
+    },
+    { id: id(32), url: photo, mediaType: "photo", section: "plots", caption: "対照区" },
+    { id: id(33), url: photo, mediaType: "photo", section: "plots", caption: "使用区" },
+  ],
+  documents: [
+    { id: id(41), path: "docs/a.pdf", name: "収量調査の記録.pdf" },
+    { id: id(42), path: "docs/b.pdf", name: "散布記録.xlsx" },
+  ],
+  headings: [],
+  methodDetailsAck: true,
+  documentsAck: true,
+  guidelineAck: true,
+};
+
+export const legacyReport: PublishedUsageReportDetail = {
+  formVersion: 1,
+  structured: null,
+  documentUrls: [],
+  id: id(51),
+  title: "高温期のミニトマトで萎れが軽くなった",
+  publishedAt: "2026-09-06T03:00:00.000Z",
+  purposeTags: ["耐暑性改善"],
+  purposeNote: "高温期の萎れを軽くしたかった",
+  prefectureCode: 8,
+  fieldName: "第2ハウス",
+  variety: "アイコ",
+  plantingDate: "2026-04-20",
+  cultivationType: "施設",
+  cultivationTags: ["慣行", "雨よけ"],
+  growthStage: "収穫期",
+  climateNote: "梅雨明けから最高気温35度の日が続いた。",
+  observedChange: "使用区は午後の萎れが軽かった。",
+  negativeNote: null,
+  summary: "高温期の萎れ対策として来年も使いたい。\n散布の手間は少ない。",
+  author: { userId: id(61), handle: "みどり農園", avatarUrl: null, standpoint: "farmer" },
+  crop: { id: id(62), name: "ミニトマト" },
+  material: {
+    id: id(63),
+    name: "バイオリーフ液剤",
+    manufacturerName: "グリーンバイオ株式会社",
+    isOfficial: true,
+    avgRating: 4.2,
+  },
+  media: [
+    {
+      id: id(71),
+      url: photo,
+      mediaType: "photo",
+      caption: "処理区",
+      placement: "treated",
+      sortOrder: 1,
+    },
+    {
+      id: id(72),
+      url: photo,
+      mediaType: "photo",
+      caption: "無処理区",
+      placement: "untreated",
+      sortOrder: 2,
+    },
+    {
+      id: id(73),
+      url: photo,
+      mediaType: "photo",
+      caption: null,
+      placement: "observation",
+      sortOrder: 3,
+    },
+    {
+      id: id(74),
+      url: photo,
+      mediaType: "photo",
+      caption: "収穫時の様子",
+      placement: "summary",
+      sortOrder: 4,
+    },
+  ],
+  applications: [
+    { id: id(81), appliedOn: "2026-05-01", method: "葉面散布", detail: "1,000倍", sortOrder: 1 },
+  ],
+  metrics: [
+    {
+      id: id(91),
+      metricName: "収量",
+      treatedValue: 12.4,
+      untreatedValue: 10.8,
+      unit: "kg/10株",
+      sortOrder: 1,
+    },
+    {
+      id: id(92),
+      metricName: "可販果率",
+      treatedValue: 82,
+      untreatedValue: null,
+      unit: "%",
+      sortOrder: 2,
+    },
+  ],
+  helpfulCount: 12,
+  viewCount: 340,
+};

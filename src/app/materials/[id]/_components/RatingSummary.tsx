@@ -1,38 +1,42 @@
-import { StarRating } from "@/components";
 import type { ReviewRatingDistribution } from "@/server/queries/material-content";
-import { css } from "../../../../../styled-system/css";
 
-const summaryCard = css({
-  p: "3.5",
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "card",
-  boxShadow: "shadow",
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
+
+import { css, cx } from "../../../../../styled-system/css";
+
+import { Stars } from "./CardParts";
+
+const summaryStyle = css({ display: "flex", alignItems: "center", gap: "4" });
+const averageColumnStyle = css({ textAlign: "center" });
+const averageStyle = css({
+  fontSize: "display",
+  fontWeight: "extrabold",
+  lineHeight: "none",
+  fontVariantNumeric: "tabular-nums",
 });
-
-const progressStyle = css({
-  appearance: "none",
-  w: "100%",
-  h: "6px",
-  borderWidth: "0",
+const countStyle = css({
+  fontSize: "xs",
+  color: "text.subtle",
+  fontVariantNumeric: "tabular-nums",
+});
+const barsStyle = css({ flex: "1", minW: "0", display: "flex", flexDirection: "column", gap: "1" });
+const rowStyle = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "1.5",
+  fontSize: "xs",
+  color: "text.subtle",
+  fontVariantNumeric: "tabular-nums",
+});
+const trackStyle = css({
+  flex: "1",
+  h: "1.5",
+  bg: "surface.page",
   borderRadius: "pill",
   overflow: "hidden",
-  bg: "border.default",
-  "&::-webkit-progress-bar": {
-    bg: "border.default",
-    borderRadius: "pill",
-  },
-  "&::-webkit-progress-value": {
-    bg: "accent.star",
-    borderRadius: "pill",
-  },
-  "&::-moz-progress-bar": {
-    bg: "accent.star",
-    borderRadius: "pill",
-  },
 });
+const fillStyle = css({ display: "block", h: "full", bg: "accent.star", borderRadius: "pill" });
+const percentStyle = css({ w: "6.5", textAlign: "right" });
 
 type RatingSummaryProps = {
   average: number | null;
@@ -40,66 +44,35 @@ type RatingSummaryProps = {
   distribution: ReviewRatingDistribution;
 };
 
+function BarRow({ rating, count, total }: { rating: number; count: number; total: number }) {
+  const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+  return (
+    <div className={rowStyle} role="img" aria-label={`星${rating}の感想口コミ ${count}件`}>
+      <span>★{rating}</span>
+      <div className={trackStyle}>
+        <span className={fillStyle} style={{ width: `${percent}%` }} />
+      </div>
+      <span className={percentStyle}>{percent}%</span>
+    </div>
+  );
+}
+
 export function RatingSummary({ average, reviewCount, distribution }: RatingSummaryProps) {
   if (reviewCount === 0) return null;
 
   return (
-    <div className={summaryCard}>
-      <div className={css({ display: "grid", gridTemplateColumns: "auto 1fr", gap: "5" })}>
-        <div className={css({ textAlign: "center" })}>
-          <div
-            className={css({
-              fontSize: "3xl",
-              fontWeight: "extrabold",
-              fontVariantNumeric: "tabular-nums",
-            })}
-          >
-            {average?.toFixed(1) ?? "—"}
-          </div>
-          <StarRating value={average ?? 0} />
-          <div
-            className={css({
-              mt: "1",
-              fontSize: "xs",
-              color: "text.subtle",
-              fontVariantNumeric: "tabular-nums",
-            })}
-          >
-            {reviewCount}件
-          </div>
-        </div>
-        <div className={css({ display: "flex", flexDirection: "column", gap: "1.5" })}>
-          {distribution.stars.map(({ rating, count }) => (
-            <div
-              key={rating}
-              className={css({
-                display: "grid",
-                gridTemplateColumns: "auto 1fr auto",
-                alignItems: "center",
-                gap: "2",
-                fontSize: "xs",
-                color: "text.muted",
-              })}
-            >
-              <span>{rating}</span>
-              <progress
-                className={progressStyle}
-                value={count}
-                max={Math.max(distribution.total, 1)}
-                aria-label={`星${rating}の感想口コミ ${count}件`}
-              />
-              <span
-                className={css({
-                  minW: "20px",
-                  textAlign: "right",
-                  fontVariantNumeric: "tabular-nums",
-                })}
-              >
-                {count}
-              </span>
-            </div>
+    <div className={cx(surfaceCardRecipe({ padding: "cozy" }), summaryStyle)}>
+      <div className={averageColumnStyle}>
+        <div className={averageStyle}>{average?.toFixed(1) ?? "−"}</div>
+        <Stars value={average ?? 0} />
+        <div className={countStyle}>{reviewCount}件</div>
+      </div>
+      <div className={barsStyle}>
+        {distribution.stars
+          .toSorted((left, right) => right.rating - left.rating)
+          .map(({ rating, count }) => (
+            <BarRow key={rating} rating={rating} count={count} total={distribution.total} />
           ))}
-        </div>
       </div>
     </div>
   );

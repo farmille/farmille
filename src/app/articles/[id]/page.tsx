@@ -1,14 +1,11 @@
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
-import { OptimizedImage as Image } from "@/components/OptimizedImage";
-import Link from "next/link";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { AppBar, Badge, MaterialRefCard } from "@/components";
+import { AppBar } from "@/components";
 import { HelpfulButton } from "@/components/HelpfulButton";
-import { formatDateJa } from "@/components/format-date";
 import { ReportDialog } from "@/components/ReportDialog";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
@@ -21,6 +18,11 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublishedArticle } from "@/server/queries/articles";
 import { recordViewEvent } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
+
+import { ArticleHeader } from "../_components/ArticleHeader";
+import { ArticleMaterialList } from "../_components/ArticleMaterialList";
+import { ViewCount } from "../_components/ViewCount";
+import { readingArticle, readingFoot, ReadingMarkdown } from "../_components/Reading";
 import { css } from "../../../../styled-system/css";
 
 type ArticleDetailPageProps = {
@@ -113,7 +115,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
   });
 
   const sellerName = article.seller.official_name ?? "メーカー";
-  const sellerInitial = sellerName.charAt(0);
+  const sellerPath = `/sellers/${article.seller.id}`;
   const articleJsonLd = createArticleJsonLd({
     id: article.id,
     route: "articles",
@@ -123,7 +125,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
     author: {
       type: "Organization",
       name: sellerName,
-      path: `/sellers/${article.seller.id}`,
+      path: sellerPath,
     },
     imageUrls: article.heroImageUrl === null ? [] : [article.heroImageUrl],
     articleSection: "記事",
@@ -143,180 +145,49 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
         shareHref={`/articles/${article.id}`}
       />
       <main className={main}>
-        <h1
-          className={css({
-            m: "0",
-            fontSize: "xl",
-            lineHeight: "snug",
-          })}
-        >
-          {article.title}
-        </h1>
+        <article className={readingArticle}>
+          <ArticleHeader
+            title={article.title}
+            sellerName={sellerName}
+            sellerPath={sellerPath}
+            logoUrl={article.seller.logo_url}
+            publishedAt={article.publishedAt}
+            heroImageUrl={article.heroImageUrl}
+          />
 
-        <div
-          className={css({
-            display: "flex",
-            alignItems: "center",
-            gap: "2",
-            mt: "3",
-            fontSize: "sm",
-            color: "text.muted",
-            flexWrap: "wrap",
-          })}
-        >
-          <Link
-            href={`/sellers/${article.seller.id}`}
-            className={css({
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "2",
-              textDecoration: "none",
-              color: "inherit",
-            })}
-          >
-            {article.seller.logo_url ? (
-              <Image
-                alt=""
-                className={css({
-                  w: "32px",
-                  aspectRatio: "image.square",
-                  display: "block",
-                  borderRadius: "media",
-                  objectFit: "cover",
-                })}
-                height={32}
-                sizes="32px"
-                src={article.seller.logo_url}
-                width={32}
-              />
-            ) : (
-              <span
-                className={css({
-                  w: "32px",
-                  aspectRatio: "image.square",
-                  borderRadius: "media",
-                  bg: "primary.200",
-                  display: "grid",
-                  placeItems: "center",
-                  fontSize: "sm",
-                  fontWeight: "extrabold",
-                  color: "primary.700",
-                })}
-              >
-                {sellerInitial}
-              </span>
-            )}
-            <span className={css({ fontWeight: "bold", color: "text.default" })}>{sellerName}</span>
-          </Link>
-          <Badge variant="type">メーカー</Badge>
-          <span className={css({ fontSize: "xs" })}>{formatDateJa(article.publishedAt)}</span>
-        </div>
+          <ReadingMarkdown html={bodyHtml} />
 
-        {article.heroImageUrl ? (
-          <div
-            className={css({
-              mt: "4",
-              borderRadius: "card",
-              overflow: "hidden",
-              bg: "primary.100",
-              aspectRatio: "image.wide",
-            })}
-          >
-            <Image
-              alt=""
-              className={css({
-                w: "100%",
-                h: "100%",
-                display: "block",
-                objectFit: "cover",
-              })}
-              height={360}
-              preload
-              sizes="(max-width: 768px) 100vw, 768px"
-              src={article.heroImageUrl}
-              width={640}
+          {article.materials.length > 0 ? (
+            <ArticleMaterialList materials={article.materials} />
+          ) : null}
+
+          <div className={readingFoot}>
+            <HelpfulButton
+              action={toggleHelpfulAction.bind(
+                null,
+                "article",
+                article.id,
+                `/articles/${article.id}`,
+              )}
+              count={article.helpfulCount}
+              layout="card"
+              voted={helpfulVoted}
             />
+            <ViewCount count={article.viewCount} className={css({ ml: "auto" })} />
+            <span>
+              <ReportDialog
+                action={createReportAction.bind(
+                  null,
+                  "article",
+                  article.id,
+                  `/articles/${article.id}`,
+                )}
+                reasonOptions={REPORT_REASON_OPTIONS}
+                title="この記事を通報する"
+              />
+            </span>
           </div>
-        ) : null}
-
-        <div
-          className={css({
-            mt: "4",
-            fontSize: "md",
-            color: "text.muted",
-            lineHeight: "prose",
-            "& p": { mb: "3.5" },
-            "& p:last-child": { mb: "0" },
-            "& img": { maxW: "100%", borderRadius: "media" },
-            "& ul, & ol": { pl: "5", mb: "3.5" },
-            "& h2, & h3": { color: "text.default", mt: "5", mb: "2" },
-            "& h2": { fontSize: "lg" },
-            "& h3": { fontWeight: "bold" },
-          })}
-          dangerouslySetInnerHTML={{ __html: bodyHtml }}
-        />
-
-        {article.materials.length > 0 ? (
-          <section aria-labelledby="article-materials-heading">
-            <h2
-              id="article-materials-heading"
-              className={css({
-                m: "0",
-                mt: "6",
-                mb: "3",
-                fontSize: "lg",
-              })}
-            >
-              この記事で紹介した資材
-            </h2>
-            <div className={css({ display: "flex", flexDirection: "column", gap: "2.5" })}>
-              {article.materials.map((material) => (
-                <MaterialRefCard
-                  key={material.id}
-                  href={`/materials/${material.id}`}
-                  name={material.name}
-                  manufacturerName={material.manufacturer_name}
-                  isOfficial={material.manufacturer_verified_at !== null}
-                  avgRating={material.avg_rating}
-                />
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        <div
-          className={css({
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mt: "4",
-            fontSize: "xs",
-            color: "text.subtle",
-          })}
-        >
-          <HelpfulButton
-            action={toggleHelpfulAction.bind(
-              null,
-              "article",
-              article.id,
-              `/articles/${article.id}`,
-            )}
-            count={article.helpfulCount}
-            layout="card"
-            voted={helpfulVoted}
-          />
-          <span className={css({ fontVariantNumeric: "tabular-nums" })}>
-            {article.viewCount} 回閲覧
-          </span>
-        </div>
-
-        <div className={css({ display: "flex", justifyContent: "flex-end", mt: "2" })}>
-          <ReportDialog
-            action={createReportAction.bind(null, "article", article.id, `/articles/${article.id}`)}
-            reasonOptions={REPORT_REASON_OPTIONS}
-            title="この記事を通報する"
-          />
-        </div>
+        </article>
       </main>
     </div>
   );

@@ -1,9 +1,10 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import Link from "next/link";
 
 import { sellerApplyAction } from "@/app/sellers/apply/actions";
+import { Button } from "@/components/Button";
+import { TextLink } from "@/components/TextLink";
 import {
   controlStyle,
   Field,
@@ -13,29 +14,6 @@ import {
 } from "@/components/auth/Fields";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
-import { css } from "../../../../styled-system/css";
-
-const inviteToggleRow = css({
-  textAlign: "center",
-  color: "text.subtle",
-  fontSize: "sm",
-  py: "1.5",
-});
-
-const inviteToggleButton = css({
-  all: "unset",
-  cursor: "pointer",
-  color: "text.subtle",
-  fontSize: "sm",
-  textAlign: "center",
-  _hover: { textDecoration: "underline" },
-  _focusVisible: {
-    outlineWidth: "2px",
-    outlineStyle: "solid",
-    outlineColor: "primary.600",
-    outlineOffset: "2px",
-  },
-});
 
 export function SellerApplyForm() {
   const [state, formAction] = useActionState(sellerApplyAction, initialAuthFormState);
@@ -81,10 +59,10 @@ export function SellerApplyForm() {
           className={controlStyle}
           defaultValue={values.corporateNumber}
           id="corporateNumber"
-          name="corporateNumber"
-          required
           inputMode="numeric"
           maxLength={13}
+          name="corporateNumber"
+          required
         />
       </Field>
 
@@ -149,35 +127,36 @@ export function SellerApplyForm() {
 
       <Field
         error={fieldErrors.contactPhone}
+        guide="公開されません。確認が必要な場合の連絡に使用します。"
         htmlFor="contactPhone"
         label="ご担当者電話番号"
         requirement="required"
-        guide="公開されません。確認が必要な場合の連絡に使用します。"
       >
         <input
+          autoComplete="tel"
           className={controlStyle}
           defaultValue={values.contactPhone}
           id="contactPhone"
+          maxLength={20}
           name="contactPhone"
           required
           type="tel"
-          autoComplete="tel"
-          maxLength={20}
         />
       </Field>
+
       <Field
         error={fieldErrors.materialRequestNotes}
+        guide="掲載済みで編集したい資材、またはこれから掲載したい資材の正式名称を記入してください。"
         htmlFor="materialRequestNotes"
         label="備考：掲載・編集を希望する資材"
         requirement="optional"
-        guide="掲載済みで編集したい資材、またはこれから掲載したい資材の正式名称を記入してください。"
       >
         <textarea
           className={controlStyle}
           defaultValue={values.materialRequestNotes}
           id="materialRequestNotes"
-          name="materialRequestNotes"
           maxLength={2000}
+          name="materialRequestNotes"
           rows={4}
         />
       </Field>
@@ -220,38 +199,28 @@ export function SellerApplyForm() {
         </Field>
       ) : null}
 
+      <HintBox>
+        申請前に
+        <TextLink href="/legal/manufacturer" rel="noopener noreferrer" target="_blank">
+          Farmille企業向けサービス利用規約（別タブ）
+        </TextLink>
+        と
+        <TextLink href="/legal" rel="noopener noreferrer" target="_blank">
+          各規約・ガイドライン（別タブ）
+        </TextLink>
+        をご確認ください。
+      </HintBox>
       <div className={formActionsStyle}>
-        <p className={css({ fontSize: "md", lineHeight: "relaxed" })}>
-          申請前に
-          <Link href="/legal/manufacturer" target="_blank" rel="noopener noreferrer">
-            Farmille企業向けサービス利用規約（別タブ）
-          </Link>
-          と
-          <Link href="/legal" target="_blank" rel="noopener noreferrer">
-            各規約・ガイドライン（別タブ）
-          </Link>
-          をご確認ください。
-        </p>
         <SubmitButton label="申請する" pendingLabel="申請中…" />
-        <div className={inviteToggleRow}>
-          {inviteOpen ? (
-            <button
-              className={inviteToggleButton}
-              onClick={() => setInviteOpen(false)}
-              type="button"
-            >
-              招待コード入力を閉じる
-            </button>
-          ) : (
-            <button
-              className={inviteToggleButton}
-              onClick={() => setInviteOpen(true)}
-              type="button"
-            >
-              Farmilleからのご案内で登録される方はこちら（招待コード入力）
-            </button>
-          )}
-        </div>
+        <Button
+          aria-expanded={inviteOpen}
+          onClick={() => setInviteOpen((open) => !open)}
+          variant="ghost"
+        >
+          {inviteOpen
+            ? "招待コード入力を閉じる"
+            : "Farmilleからのご案内で登録される方はこちら（招待コード入力）"}
+        </Button>
       </div>
     </form>
   );

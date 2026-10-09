@@ -1,6 +1,7 @@
 "use client";
 
 import { Checkbox } from "@/components/Checkbox";
+import { Select } from "@/components/Select";
 
 import { useActionState } from "react";
 
@@ -199,8 +200,7 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
           label="組成タイプ"
           requirement="optional"
         >
-          <select
-            className={controlStyle}
+          <Select
             defaultValue={valueOf("compositionTypeId", material?.composition_type_id)}
             id="compositionTypeId"
             name="compositionTypeId"
@@ -211,7 +211,7 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
                 {option.name}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         <TextField
           defaultValue={valueOf("salesStatus", material?.sales_status)}

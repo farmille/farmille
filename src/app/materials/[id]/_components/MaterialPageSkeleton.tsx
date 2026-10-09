@@ -1,4 +1,3 @@
-import { SectionHeading } from "@/components";
 import {
   MaterialHeroSkeleton,
   MaterialDetailsSkeleton,
@@ -6,6 +5,7 @@ import {
   SkeletonRegion,
 } from "@/components/Skeleton";
 import { css } from "../../../../../styled-system/css";
+import { MaterialSectionHeading } from "./MaterialSectionHeading";
 import { MaterialPageShell } from "./PageShell";
 
 export function MaterialPageSkeleton() {
@@ -15,7 +15,7 @@ export function MaterialPageSkeleton() {
         <div className={css({ display: "grid", gap: "4" })}>
           <MaterialHeroSkeleton />
           <Skeleton variant="short" />
-          <SectionHeading title="資材詳細" />
+          <MaterialSectionHeading title="資材詳細" />
           <MaterialDetailsSkeleton />
         </div>
       </SkeletonRegion>

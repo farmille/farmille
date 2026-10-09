@@ -1,12 +1,31 @@
 "use client";
 import { useState } from "react";
 import * as v from "valibot";
-import { Button, Input } from "@/components";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { evidenceMimeSchema, evidencePurposeSchema } from "@/lib/company-application";
+import { FormMessage, HintBox } from "@/components/auth/Fields";
+import { Button } from "@/components/Button";
+import { FileInput } from "@/components/FileInput";
 import { errorMessageJa } from "@/server/errors";
+
+import { css } from "../../../../styled-system/css";
 import { reserveEvidence, finalizeEvidence, removeEvidence } from "../actions";
-import { applicationField, applicationStack } from "./ContactFields";
+
+const stackStyle = css({ display: "flex", flexDirection: "column", gap: "2" });
+
+const fileListStyle = css({
+  display: "flex",
+  flexDirection: "column",
+  gap: "1.5",
+  fontSize: "sm",
+  "& li": {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "2.5",
+    overflowWrap: "anywhere",
+  },
+});
 
 type EvidenceFile = { id: string; name: string; verified: boolean };
 export function EvidenceFields({
@@ -14,6 +33,7 @@ export function EvidenceFields({
   itemKey,
   purpose,
   label,
+  inputId,
   onBusy,
   onCount,
 }: {
@@ -21,6 +41,7 @@ export function EvidenceFields({
   itemKey: string | null;
   purpose: v.InferOutput<typeof evidencePurposeSchema>;
   label: string;
+  inputId: string;
   onBusy: (busy: boolean) => void;
   onCount?: (count: number) => void;
 }) {
@@ -100,38 +121,41 @@ export function EvidenceFields({
     }
   }
   return (
-    <div className={applicationStack}>
-      <label className={applicationField}>
-        {label}
-        <Input
-          type="file"
-          accept="image/jpeg,image/png,application/pdf"
-          multiple
-          disabled={busy || files.length >= 5}
-          onChange={(event) => {
-            void upload(event.currentTarget.files);
-            event.currentTarget.value = "";
-          }}
-        />
-        <span>JPG・PNG・PDF、1ファイル10MB以内、各欄5件まで</span>
-      </label>
-      {files.map((file) => (
-        <div key={file.id}>
-          <span>
-            {file.name}（{file.verified ? "登録済み" : "未完了"}）
-          </span>{" "}
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={busy}
-            onClick={() => void remove(file.id)}
-          >
-            削除
-          </Button>
-        </div>
-      ))}
-      {busy && <p role="status">資料を処理しています…</p>}
-      {error && <p role="alert">{error}</p>}
+    <div className={stackStyle}>
+      <FileInput
+        accept="image/jpeg,image/png,application/pdf"
+        aria-label={label}
+        disabled={busy || files.length >= 5}
+        id={inputId}
+        multiple
+        onChange={(event) => {
+          void upload(event.currentTarget.files);
+          event.currentTarget.value = "";
+        }}
+      />
+      <HintBox>jpg / png / pdf、1ファイル10MBまで、最大5ファイル</HintBox>
+      {files.length > 0 ? (
+        <ul className={fileListStyle}>
+          {files.map((file) => (
+            <li key={file.id}>
+              <span>
+                {file.name}（{file.verified ? "登録済み" : "未完了"}）
+              </span>
+              <Button
+                aria-label={`${file.name}を削除`}
+                disabled={busy}
+                onClick={() => void remove(file.id)}
+                size="sm"
+                variant="danger"
+              >
+                削除
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {busy ? <FormMessage tone="info">資料を処理しています…</FormMessage> : null}
+      {error ? <FormMessage tone="error">{error}</FormMessage> : null}
     </div>
   );
 }

@@ -46,10 +46,16 @@ async function fetchCatalogSearch() {
     // 分類マスタは作物群ごとに並ぶが、検索のタグ一覧は作物の表示順で並べる。
     crops: options.data.crops.toSorted((left, right) => left.sort_order - right.sort_order),
     groups: options.data.cropGroups,
+    effects: options.data.effects,
   };
 }
 export const getCatalogSearch = cache(fetchCatalogSearch);
 export type CatalogSearch = Awaited<ReturnType<typeof getCatalogSearch>>;
+
+export async function getMaterialSavedCount(materialId: string): Promise<number | null> {
+  const { counts } = await fetchCatalogMaterials();
+  return counts.find((row) => row.material_id === materialId)?.saved_count ?? null;
+}
 
 /** 検索欄の候補。分類は分類マスタから、資材名とメーカー名は公開中の資材から作る。 */
 export async function listSearchSuggestions(): Promise<Result<SearchCatalog>> {

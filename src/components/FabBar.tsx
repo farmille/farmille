@@ -53,9 +53,30 @@ const fabBarRecipe = cva({
         },
       },
     },
+    look: {
+      default: {},
+      site: {
+        borderRadius: "banner",
+        tab: {
+          left: "auto",
+          right: "7",
+          bottom: "6",
+          w: "auth",
+          maxW: "none",
+          ml: "0",
+          mr: "0",
+          mt: "0",
+        },
+      },
+    },
   },
+  compoundVariants: [
+    { placement: "container", look: "site", css: { tab: { position: "absolute" } } },
+    { placement: "viewport", look: "site", css: { maxW: "none", tab: { position: "fixed" } } },
+  ],
   defaultVariants: {
     placement: "container",
+    look: "default",
   },
 });
 
@@ -77,6 +98,7 @@ type FabBarProps = {
   reviewHref?: string;
   placement?: "container" | "viewport";
   className?: string;
+  look?: "default" | "site";
 };
 
 /**
@@ -88,6 +110,7 @@ export async function FabBar({
   reviewHref = "/reviews/new",
   placement = "container",
   className,
+  look = "default",
 }: FabBarProps) {
   const session = await getSessionUser();
 
@@ -98,7 +121,10 @@ export async function FabBar({
   return (
     <>
       <ReviewCompletionToast />
-      <div className={cx(fabBarRecipe({ placement }), className)} data-ui="responsive-fab-bar">
+      <div
+        className={cx(fabBarRecipe({ placement, look }), className)}
+        data-ui="responsive-fab-bar"
+      >
         <Link href={reportHref} className={reportLink}>
           実証詳細レポートを書く
         </Link>

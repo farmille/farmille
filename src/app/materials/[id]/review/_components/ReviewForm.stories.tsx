@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { css } from "../../../../../../styled-system/css";
 import { ReviewForm } from "./ReviewForm";
 
 const initialValues = {
@@ -10,9 +11,12 @@ const initialValues = {
   photos: [],
 };
 
+const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
+
 const meta = {
   title: "App/Materials/Review/ReviewForm",
   component: ReviewForm,
+  decorators: [fmDecorator],
   args: {
     mode: "create",
     material: {
@@ -60,6 +64,26 @@ export const Blank: Story = {
       body: "",
       pesticideAck: false,
       photos: [],
+    },
+  },
+};
+
+const photoUrl =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="180"><rect width="240" height="180" fill="#9ccc65"/></svg>',
+  );
+
+export const WithPhotos: Story = {
+  args: {
+    mode: "edit",
+    reviewId: "00000000-0000-4000-8000-000000000801",
+    initialValues: {
+      ...initialValues,
+      photos: [
+        { id: "photo-1", url: photoUrl, caption: "散布前の様子", sort_order: 0 },
+        { id: "photo-2", url: photoUrl, caption: null, sort_order: 1 },
+      ],
     },
   },
 };

@@ -171,7 +171,7 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
     }
     await expect(page.getByText("公的試験報告の概要", { exact: true })).toBeVisible();
     await expect(
-      page.getByText("メーカー試験報告の実施機関 ／ 2025年 ／ 12ページ", { exact: true }),
+      page.getByText("メーカー試験報告の実施機関・2025年・12ページ", { exact: true }),
     ).toBeVisible();
     await expect(page.getByText("農薬登録会社", { exact: true })).toBeVisible();
     await expect(page.getByText("製品表示に沿った効果", { exact: true })).toBeVisible();

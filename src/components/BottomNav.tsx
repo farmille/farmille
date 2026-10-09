@@ -93,8 +93,8 @@ const postSlot = css({
 });
 
 const plusButton = css({
-  w: "46px",
-  h: "46px",
+  w: "12",
+  h: "12",
   borderRadius: "pill",
   bg: "primary.700",
   color: "text.inverse",
@@ -110,7 +110,7 @@ const plusButton = css({
 export type BottomNavActive = "home" | "search" | "post" | "articles" | "me";
 
 type BottomNavProps = {
-  active: BottomNavActive;
+  active?: BottomNavActive;
   placement?: "container" | "viewport";
 };
 
@@ -126,7 +126,6 @@ const ITEMS: Array<{
   { id: "me", href: "/me", label: "マイページ", name: "person" },
 ];
 
-/** tab 未満の5枠 BottomNav。画面下へ固定し、中央は丸型＋投稿。 */
 export async function BottomNav({ active, placement = "viewport" }: BottomNavProps) {
   const session = await getSessionUser();
   const showPost = session === null || canUseGeneralFeatures(session.accountType);

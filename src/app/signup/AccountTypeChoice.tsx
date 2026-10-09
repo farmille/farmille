@@ -1,67 +1,90 @@
 import Link from "next/link";
 
-import { buttonRecipe, SurfaceCard } from "@/components";
-import { linkRowStyle, textLinkStyle } from "@/components/auth/Fields";
-import { css } from "../../../styled-system/css";
+import { buttonRecipe } from "@/components/Button";
+import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
-const choicesStyle = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "3",
+import { formTextLinkStyle } from "@/components/FormParts";
+import { css, cva } from "../../../styled-system/css";
+import { softCardStyle } from "./form-styles";
+
+const typeLabelRecipe = cva({
+  base: {
+    px: "2",
+    py: "0.5",
+    borderRadius: "pill",
+    fontSize: "xs",
+    fontWeight: "bold",
+    whiteSpace: "nowrap",
+  },
+  variants: {
+    account: {
+      general: { bg: "primary.100", color: "primary.800" },
+      seller: { bg: "surface.page", color: "text.muted" },
+    },
+  },
 });
 
-const accountTypeStyle = css({
-  display: "inline-block",
-  mb: "2",
-  color: "text.subtle",
-  fontSize: "xs",
-  fontWeight: "bold",
-});
-
-const detailsStyle = css({
-  mt: "0",
-  mx: "0",
-  mb: "4",
-  color: "text.muted",
-  fontSize: "sm",
-  lineHeight: "relaxed",
-});
+const titleStyle = css({ mt: "2", fontSize: "lg" });
+const leadStyle = css({ mt: "1", fontSize: "sm", lineHeight: "relaxed", color: "text.muted" });
+const noteStyle = css({ mt: "1", fontSize: "sm", lineHeight: "relaxed", color: "text.subtle" });
+const actionStyle = css({ mt: "3" });
 
 /** 一般ユーザーとメーカーを入力前に分け、異なる確認・ログイン方式を明示する。 */
 export function AccountTypeChoice() {
   return (
     <>
-      <div className={choicesStyle}>
-        <SurfaceCard
-          description="匿名・ハンドルネームで、感想口コミや実証詳細レポートを投稿できます。"
-          title="一般ユーザーとして登録"
-        >
-          <span className={accountTypeStyle}>個人用アカウント</span>
-          <p className={detailsStyle}>メールアドレスで登録します。運営による確認はありません。</p>
-          <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/signup/general">
-            一般ユーザー登録へ
-          </Link>
-        </SurfaceCard>
+      <div className={css({ display: "flex", flexDirection: "column", gap: "2.5" })}>
+        <section className={softCardStyle} aria-labelledby="signup-general-title">
+          <span className={typeLabelRecipe({ account: "general" })}>個人用アカウント</span>
+          <h2 id="signup-general-title" className={titleStyle}>
+            一般ユーザーとして登録
+          </h2>
+          <p className={leadStyle}>ニックネームで、感想口コミや実証詳細レポートを投稿できます。</p>
+          <p className={noteStyle}>メールアドレスで登録します。運営による確認はありません。</p>
+          <div className={actionStyle}>
+            <Link className={buttonRecipe({ variant: "primary" })} href="/signup/general">
+              一般ユーザー登録へ
+            </Link>
+          </div>
+        </section>
 
-        <SurfaceCard
-          description="自社の農業資材情報や記事を管理する、メーカー専用アカウントです。"
-          title="メーカーとして申請"
+        <section
+          className={css(surfaceCardRecipe.raw({ padding: "cozy" }))}
+          aria-labelledby="signup-seller-title"
         >
-          <span className={accountTypeStyle}>メーカー用アカウント</span>
-          <p className={detailsStyle}>
+          <span className={typeLabelRecipe({ account: "seller" })}>メーカー用アカウント</span>
+          <h2 id="signup-seller-title" className={titleStyle}>
+            メーカーとして申請
+          </h2>
+          <p className={leadStyle}>
+            自社の農業資材情報や記事を管理する、メーカー専用アカウントです。
+          </p>
+          <p className={noteStyle}>
             ログインIDを申請します。運営の確認後にログイン情報を発行します。
           </p>
-          <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/sellers">
-            メーカー向けページへ
-          </Link>
-        </SurfaceCard>
+          <div className={actionStyle}>
+            <Link className={buttonRecipe({ variant: "ghost" })} href="/sellers">
+              メーカー向けページへ
+            </Link>
+          </div>
+        </section>
       </div>
 
-      <div className={linkRowStyle}>
-        <Link className={textLinkStyle} href="/login">
+      <div
+        className={css({
+          mt: "4.5",
+          mb: "2",
+          fontSize: "sm",
+          lineHeight: "loose",
+          color: "text.muted",
+          textAlign: "center",
+        })}
+      >
+        <Link className={formTextLinkStyle} href="/login">
           一般ユーザーの方はログイン
         </Link>
-        <Link className={textLinkStyle} href="/sellers/login">
+        <br />
+        <Link className={formTextLinkStyle} href="/sellers/login">
           メーカーの方はログイン
         </Link>
       </div>

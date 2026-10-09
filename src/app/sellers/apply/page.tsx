@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
-import { SellerApplyForm } from "@/app/sellers/apply/SellerApplyForm";
 import { FormPageShell } from "@/components/FormPageShell";
+import { SellerApplyForm } from "@/app/sellers/apply/SellerApplyForm";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
+
 import { css } from "../../../../styled-system/css";
 
 export const metadata: Metadata = {
@@ -38,8 +39,9 @@ export default async function SellerApplyPage({ searchParams }: SellerApplyPageP
       backHref={backHrefFor(from)}
       title="企業会員登録の申請"
     >
+      <h1 className={css({ srOnly: true })}>企業会員登録の申請</h1>
       <p className={leadStyle}>
-        農業資材メーカー専用のアカウントです。内容を確認し、ログインIDとパスワード設定のご案内をメールでお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。申請・掲載・編集は無料です。
+        農業資材メーカー専用の企業会員アカウントです。内容を確認し、ログインIDとパスワード設定のご案内をメールでお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。申請・掲載・編集は無料です。
       </p>
       <SellerApplyForm />
     </FormPageShell>

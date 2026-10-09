@@ -1,10 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import * as v from "valibot";
 
-import { FormPageShell } from "@/components";
+import { FormPageShell } from "@/components/FormPageShell";
 import { getSessionUser, requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
-import { searchPostingMaterials } from "@/server/queries/materials";
+import { searchPostingMaterials, withPostingMaterialImages } from "@/server/queries/materials";
 
 import { MaterialPicker } from "./MaterialPicker";
 import { PostAccessDenied } from "./PostAccessDenied";
@@ -41,10 +41,14 @@ export default async function PostPage({ searchParams }: PostPageProps) {
   if (!result.ok) {
     throw new Error(errorMessageJa[result.error]);
   }
+  const materials = await withPostingMaterialImages(result.data);
+  if (!materials.ok) {
+    throw new Error(errorMessageJa[materials.error]);
+  }
 
   return (
     <FormPageShell chrome="public" active="post" title="投稿する" backHref="/" hasFixedFooter>
-      <MaterialPicker materials={result.data} query={query} postType={postType} />
+      <MaterialPicker materials={materials.data} query={query} postType={postType} />
     </FormPageShell>
   );
 }

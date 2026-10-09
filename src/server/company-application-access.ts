@@ -1,11 +1,11 @@
-import type { RemovalVerification, ReceiptAccess } from "@/lib/company-application";
+import type { ReceiptAccess } from "@/lib/company-application";
 import { randomBytes } from "node:crypto";
 import { headers, cookies } from "next/headers";
 import nodemailer from "nodemailer";
 import * as v from "valibot";
 import { clientEnv, serverEnv } from "@/env";
-import { companyApplicationSender, removalInvitationEmail } from "@/lib/company-application-email";
-import { removalVerificationSchema, receiptAccessSchema } from "@/lib/company-application";
+import { companyApplicationSender, receiptAccessEmail } from "@/lib/company-application-email";
+import { receiptAccessSchema } from "@/lib/company-application";
 import { createAdminSupabase } from "@/server/supabase";
 import {
   ApplicationError,
@@ -29,42 +29,19 @@ async function checkRate(email: string) {
     if (!result.data) throw new ApplicationError("rate_limited");
   }
 }
-async function sendVerification(
-  to: string,
-  token: string,
-  company: string,
-  contact: string,
-  receipt: boolean,
-) {
-  const link = new URL("/company-requests/removal/confirm", clientEnv.siteUrl);
+async function sendReceiptAccessLink(to: string, token: string, company: string, contact: string) {
+  const link = new URL("/company-requests/receipts/confirm", clientEnv.siteUrl);
   link.hash = token;
   try {
     await nodemailer.createTransport(serverEnv.smtpUrl).sendMail({
       from: companyApplicationSender,
       replyTo: "contact@farmille.com",
       to,
-      ...removalInvitationEmail(company, contact, link.toString(), receipt),
+      ...receiptAccessEmail(company, contact, link.toString()),
     });
   } catch {
     throw new ApplicationError("internal");
   }
-}
-export async function requestRemovalVerification(input: RemovalVerification) {
-  const values = v.parse(removalVerificationSchema, input);
-  await checkRate(values.email);
-  const token = randomBytes(32).toString("hex");
-  const inserted = await createAdminSupabase()
-    .from("company_application_access")
-    .insert({
-      company_name: values.companyName,
-      contact_name: values.contactName,
-      email: values.email,
-      token_hash: secretHash(token),
-      token_expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-    });
-  checkApplicationDb(inserted.error);
-  await sendVerification(values.email, token, values.companyName, values.contactName, false);
-  return true;
 }
 export async function requestReceiptAccess(input: ReceiptAccess) {
   const values = v.parse(receiptAccessSchema, input);
@@ -88,16 +65,15 @@ export async function requestReceiptAccess(input: ReceiptAccess) {
     })
     .eq("id", receipt.data.access_id);
   checkApplicationDb(updated.error);
-  await sendVerification(
+  await sendReceiptAccessLink(
     values.email,
     token,
     receipt.data.company_name,
     receipt.data.contact_name,
-    true,
   );
   return true;
 }
-export async function confirmRemovalAccess(token: string) {
+export async function confirmReceiptAccess(token: string) {
   v.parse(v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/)), token);
   const secret = randomBytes(32).toString("hex");
   const db = createAdminSupabase();
@@ -122,5 +98,5 @@ export async function confirmRemovalAccess(token: string) {
   checkApplicationDb(receipt.error);
   return receipt.data
     ? `/company-requests/receipts/${receipt.data.id}`
-    : "/company-requests/removal/form";
+    : "/company-requests/receipts";
 }

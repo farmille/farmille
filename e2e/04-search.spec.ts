@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+import { E2E_ADMIN_ACCOUNTS } from "./support/admin-accounts";
 import {
   addMaterialClassifications,
+  archiveMaterial,
   createGeneralUser,
   createMaterial,
   createReview,
@@ -10,8 +12,9 @@ import {
   deleteMaterial,
   genresByNames,
 } from "./support/test-data";
+import { loginAdminAndEnrollMfa } from "./support/ui";
 
-test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷移", async ({ page }) => {
+test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷移", async ({ page, browser }) => {
   const [crops, genres] = await Promise.all([
     cropsByNames(["いちご", "水稲"]),
     genresByNames(["海藻、海藻抽出物"]),
@@ -62,6 +65,24 @@ test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷�
       rating: 5,
       body: `E2E並び替えC_${authors[2].id}`,
     });
+
+    await archiveMaterial(ratingHigh.id);
+    const adminContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    try {
+      const adminPage = await adminContext.newPage();
+      await loginAdminAndEnrollMfa(
+        adminPage,
+        E2E_ADMIN_ACCOUNTS.searchCatalog,
+        `/admin/materials/${ratingHigh.id}`,
+      );
+      await adminPage.getByRole("radio", { name: "公開中", exact: true }).check();
+      await adminPage.getByRole("button", { name: "公開状態を更新", exact: true }).click();
+      await expect(
+        adminPage.getByText("資材を公開状態へ戻しました。", { exact: true }),
+      ).toBeVisible();
+    } finally {
+      await adminContext.close();
+    }
 
     await page.goto(`/search?filters=crop:${strawberry.id},crop:${rice.id}`);
     await expect(page.getByText("いちご または 水稲", { exact: true })).toBeVisible();
