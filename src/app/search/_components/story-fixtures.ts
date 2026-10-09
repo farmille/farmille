@@ -27,7 +27,12 @@ const material = (
   avg_rating: null,
   review_count: 0,
   created_at: "2026-09-01",
-  material_images: [],
+  imageUrl: null,
+  container_type_id: null,
+  official_name: null,
+  name_reading: null,
+  material_name_aliases: [],
+  manufacturer_verified_at: null,
   material_crops: [],
   material_crop_groups: [],
   material_effects: [],
@@ -54,7 +59,7 @@ export const storyCatalog: CatalogSearch = {
         "定植前の土壌に混和して使う微生物資材。根の伸長を促し、活着を早める。トマト・きゅうりなど果菜類の育苗期から使える。",
       avg_rating: 4.3,
       review_count: 18,
-      material_images: [{ url: storyThumbnail, is_current: true, sort_order: 0 }],
+      imageUrl: "/images/container-shapes/5.png",
       material_crops: [{ crop_id: TOMATO }],
       material_crop_groups: [{ crop_group_id: FRUIT_VEGETABLES }],
       material_effects: [{ effect_id: NUTRIENT }, { effect_id: HEAT }],
@@ -159,7 +164,10 @@ export const storySearchCatalog: SearchCatalog = {
     { category: "method", id: "土壌混和", name: "土壌混和", aliases: [], sort_order: 2 },
   ],
   makers: ["みどり化成工業", "三陸水産資材", "農業資材株式会社"],
-  materialNames: ["根張りエース", "植物活力液", "海藻アミノ 有機一番"],
+  materials: ["根張りエース", "植物活力液", "海藻アミノ 有機一番"].map((name) => ({
+    name,
+    aliases: [],
+  })),
 };
 
 export const storyIds = { onion: ONION, tomato: TOMATO, nutrient: NUTRIENT, microbe: MICROBE };

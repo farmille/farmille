@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 
@@ -43,18 +43,11 @@ describe("MaterialHero", () => {
   it("画像の読み込みに失敗してもプレースホルダーを残す", () => {
     const material = {
       ...materialDetail,
-      images: [
-        {
-          id: "00000000-0000-4000-8000-000000000799",
-          url: "/missing-material-image.png",
-          image_type: "package",
-          sort_order: 0,
-        },
-      ],
+      imageUrl: "/missing-material-image.png",
     };
     render(createElement(MaterialHero, { material, saved: null }));
 
-    const image = screen.getByRole("img", { name: material.name });
+    const image = screen.getByRole("img", { name: `${materialDetail.name}の容器イメージ` });
     const imageBox = document.querySelector('[data-ui="material-hero-image"]');
     const placeholder = screen.getByText("NO IMAGE");
     expect(imageBox).toContainElement(image);
@@ -62,23 +55,24 @@ describe("MaterialHero", () => {
 
     fireEvent.error(image);
 
-    expect(screen.queryByRole("img", { name: material.name })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("img", { name: `${materialDetail.name}の容器イメージ` }),
+    ).not.toBeInTheDocument();
     expect(placeholder).toBeInTheDocument();
     expect(imageBox).toContainElement(placeholder);
   });
 
-  it("追加の製品画像も表示する", async () => {
-    const material = {
-      ...materialDetail,
-      images: [
-        { id: "first", url: "/first.png", image_type: "package", sort_order: 0 },
-        { id: "second", url: "/second.png", image_type: "package", sort_order: 1 },
-      ],
-    };
-    await act(async () => {
-      render(createElement(MaterialHero, { material, saved: null }));
-    });
-    expect(screen.getByRole("img", { name: `${material.name}の製品画像2` })).toBeInTheDocument();
+  it("容器イラストにイメージ画像であることを表示する", () => {
+    render(
+      createElement(MaterialHero, {
+        material: { ...materialDetail, imageUrl: "/images/container-shapes/2.png" },
+        saved: null,
+      }),
+    );
+    expect(
+      screen.getByRole("img", { name: `${materialDetail.name}の容器イメージ` }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("容器のイメージ")).toBeInTheDocument();
   });
 
   it("画像がない場合もプレースホルダーを画像領域内に表示する", () => {

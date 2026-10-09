@@ -23,10 +23,7 @@ export default async function MaterialVersionPage({
     notFound();
   return (
     <FormPageShell chrome="seller" backHref={`/dashboard/materials/${id}`} title="保存した原稿">
-      <MaterialPageContent
-        content={saved.content}
-        imageSources={saved.images.map((image) => image.url)}
-      />
+      <MaterialPageContent content={saved.content} imageUrl={saved.imageUrl} />
     </FormPageShell>
   );
 }

@@ -1,3 +1,6 @@
+import { getCatalogSearch, listSearchSuggestions } from "@/server/queries/catalog-search";
+import { matchSearchCatalog } from "@/lib/material-search";
+import { materialIllustrationUrl } from "@/lib/material-illustration";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
@@ -10,13 +13,13 @@ import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
-type MaterialImageRow = Database["public"]["Tables"]["material_images"]["Row"];
 type MaterialEvidenceRow = Database["public"]["Tables"]["material_evidences"]["Row"];
 
 type MaterialListFields = Pick<
   MaterialRow,
   | "id"
   | "name"
+  | "container_type_id"
   | "manufacturer_name"
   | "sales_status"
   | "seller_id"
@@ -32,6 +35,8 @@ type MaterialListFields = Pick<
 type MaterialDetailFields = Pick<
   MaterialRow,
   | keyof MaterialListFields
+  | "official_name"
+  | "name_reading"
   | "composition_type_id"
   | "general_use"
   | "main_components"
@@ -44,8 +49,6 @@ type MaterialDetailFields = Pick<
   | "manufacturer_verification_method"
   | "updated_at"
 >;
-
-export type MaterialImage = Pick<MaterialImageRow, "id" | "url" | "image_type" | "sort_order">;
 
 export type MaterialEvidence = Pick<
   MaterialEvidenceRow,
@@ -89,7 +92,7 @@ export type MaterialSearchTag = MaterialClassification & {
 };
 
 export type MaterialListItem = MaterialListFields & {
-  primaryImage: MaterialImage | null;
+  imageUrl: string | null;
 };
 
 export type PostingMaterial = Pick<
@@ -106,7 +109,7 @@ export type MaterialDetail = MaterialDetailFields & {
   > | null;
   compositionType: MaterialClassification | null;
   effects: MaterialEffect[];
-  images: MaterialImage[];
+  imageUrl: string | null;
   evidences: MaterialEvidence[];
   ingredientCategories: MaterialClassification[];
   ingredients: MaterialIngredient[];
@@ -136,6 +139,7 @@ function bySortOrder(
 const MATERIAL_LIST_COLUMNS = `
   id,
   name,
+  container_type_id,
   manufacturer_name,
   sales_status,
   seller_id,
@@ -150,53 +154,11 @@ const MATERIAL_LIST_COLUMNS = `
 
 const RELATED_MATERIAL_LIMIT = 3;
 
-async function fetchPrimaryImages(
-  supabase: SupabaseClient<Database>,
-  materialIds: readonly string[],
-): Promise<Result<Map<string, MaterialImage>>> {
-  const imageResult =
-    materialIds.length === 0
-      ? { data: [], error: null }
-      : await supabase
-          .from("material_images")
-          .select("id, material_id, url, image_type, sort_order")
-          .eq("is_current", true)
-          .in("material_id", materialIds);
-
-  if (imageResult.error !== null) {
-    reportQueryError("資材一覧画像の取得に失敗", imageResult.error);
-    return fail("internal");
-  }
-
-  const imagesByMaterial = new Map<string, MaterialImage[]>();
-  for (const { material_id, ...image } of imageResult.data) {
-    const images = imagesByMaterial.get(material_id) ?? [];
-    images.push(image);
-    imagesByMaterial.set(material_id, images);
-  }
-
-  const primaryByMaterial = new Map<string, MaterialImage>();
-  for (const [materialId, images] of imagesByMaterial) {
-    const [primary] = images.toSorted(bySortOrder);
-    if (primary !== undefined) primaryByMaterial.set(materialId, primary);
-  }
-  return succeed(primaryByMaterial);
-}
-
-async function withPrimaryImages(
-  supabase: SupabaseClient<Database>,
-  materials: MaterialListFields[],
-): Promise<Result<MaterialListItem[]>> {
-  const primaryImages = await fetchPrimaryImages(
-    supabase,
-    materials.map(({ id }) => id),
-  );
-  if (!primaryImages.ok) return primaryImages;
-
+function withIllustrations(materials: MaterialListFields[]): Result<MaterialListItem[]> {
   return succeed(
     materials.map((material) => ({
       ...material,
-      primaryImage: primaryImages.data.get(material.id) ?? null,
+      imageUrl: materialIllustrationUrl(material.container_type_id),
     })),
   );
 }
@@ -240,7 +202,7 @@ export async function listMaterialsWithSupabase(
     return fail("internal");
   }
 
-  const items = await withPrimaryImages(supabase, data);
+  const items = withIllustrations(data);
   if (!items.ok) return items;
 
   return succeed({
@@ -286,7 +248,7 @@ export async function listRelatedMaterialsWithSupabase(
     return fail("internal");
   }
 
-  return withPrimaryImages(supabase, data);
+  return withIllustrations(data);
 }
 
 export async function getMaterial(id: string): Promise<Result<MaterialDetail>> {
@@ -309,6 +271,9 @@ export async function getMaterialWithSupabase(
       `
         id,
         name,
+        container_type_id,
+        official_name,
+        name_reading,
         manufacturer_name,
         sales_status,
         seller_id,
@@ -345,7 +310,6 @@ export async function getMaterialWithSupabase(
   }
 
   const [
-    imagesResult,
     evidencesResult,
     effectsResult,
     cropsResult,
@@ -357,11 +321,6 @@ export async function getMaterialWithSupabase(
     searchTagsResult,
     representativeSellerResult,
   ] = await Promise.all([
-    supabase
-      .from("material_images")
-      .select("id, url, image_type, sort_order")
-      .eq("is_current", true)
-      .eq("material_id", id),
     supabase
       .from("material_evidences")
       .select("id, evidence_type, title, file_url, external_url, meta, sort_order, created_at")
@@ -397,7 +356,6 @@ export async function getMaterialWithSupabase(
   ]);
 
   const relationError =
-    imagesResult.error ??
     evidencesResult.error ??
     effectsResult.error ??
     cropsResult.error ??
@@ -413,7 +371,6 @@ export async function getMaterialWithSupabase(
     return fail("internal");
   }
 
-  const images = imagesResult.data;
   const evidences = evidencesResult.data;
   const effectRelations = effectsResult.data;
   const cropRelations = cropsResult.data;
@@ -424,7 +381,6 @@ export async function getMaterialWithSupabase(
   if (
     cropGroupsResult.data === null ||
     methodsResult.data === null ||
-    images === null ||
     evidences === null ||
     effectRelations === null ||
     cropRelations === null ||
@@ -527,7 +483,7 @@ export async function getMaterialWithSupabase(
     effects: effects.toSorted(
       (left, right) => left.categorySortOrder - right.categorySortOrder || bySortOrder(left, right),
     ),
-    images: images.toSorted(bySortOrder),
+    imageUrl: materialIllustrationUrl(data.container_type_id),
     evidences: evidences.toSorted(bySortOrder),
     ingredientCategories: ingredientCategories.toSorted(bySortOrder),
     ingredients: ingredients.toSorted(
@@ -551,10 +507,6 @@ export async function getMaterialWithSupabase(
 const POSTING_MATERIAL_LIMIT = 20;
 const POSTING_QUERY_MAX_LENGTH = 100;
 
-function escapeLikePattern(value: string): string {
-  return value.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_");
-}
-
 function byPostingPriority(left: PostingMaterial, right: PostingMaterial): number {
   return (
     right.review_count - left.review_count ||
@@ -563,71 +515,31 @@ function byPostingPriority(left: PostingMaterial, right: PostingMaterial): numbe
   );
 }
 
-/**
- * 投稿先選択用の軽量検索。
- * 資材名とメーカー名をそれぞれ部分一致で検索する。
- */
 export async function searchPostingMaterials(query: string): Promise<Result<PostingMaterial[]>> {
   const normalizedQuery = query.trim();
-  const select =
-    "id, name, manufacturer_name, review_count, avg_rating, manufacturer_verified_at" as const;
-
-  if (normalizedQuery.length > POSTING_QUERY_MAX_LENGTH) {
-    return fail("invalid_body");
-  }
-
-  const supabase = await createServerSupabase();
-
-  if (normalizedQuery.length === 0) {
-    const { data, error } = await supabase
-      .from("materials")
-      .select(select)
-      .eq("publication_status", "published")
-      .order("review_count", { ascending: false })
-      .order("name", { ascending: true })
-      .limit(POSTING_MATERIAL_LIMIT);
-
-    if (error !== null) {
-      reportQueryError("投稿先候補の取得に失敗", error);
-      return fail("internal");
-    }
-
-    const rows: PostingMaterial[] = data;
-    return succeed(rows);
-  }
-
-  const pattern = `%${escapeLikePattern(normalizedQuery)}%`;
-  const [nameResult, manufacturerResult] = await Promise.all([
-    supabase
-      .from("materials")
-      .select(select)
-      .eq("publication_status", "published")
-      .ilike("name", pattern)
-      .limit(POSTING_MATERIAL_LIMIT),
-    supabase
-      .from("materials")
-      .select(select)
-      .eq("publication_status", "published")
-      .ilike("manufacturer_name", pattern)
-      .limit(POSTING_MATERIAL_LIMIT),
-  ]);
-
-  if (nameResult.error !== null || manufacturerResult.error !== null) {
-    reportQueryError("投稿先の部分一致検索に失敗", {
-      nameError: nameResult.error,
-      manufacturerError: manufacturerResult.error,
-    });
-    return fail("internal");
-  }
-
-  const materialsById = new Map<string, PostingMaterial>();
-
-  for (const material of [...nameResult.data, ...manufacturerResult.data]) {
-    materialsById.set(material.id, material);
-  }
-
+  if (normalizedQuery.length > POSTING_QUERY_MAX_LENGTH) return fail("invalid_body");
+  const [catalog, suggestions] = await Promise.all([getCatalogSearch(), listSearchSuggestions()]);
+  if (!suggestions.ok) return suggestions;
+  const matches = matchSearchCatalog(suggestions.data, normalizedQuery);
   return succeed(
-    [...materialsById.values()].toSorted(byPostingPriority).slice(0, POSTING_MATERIAL_LIMIT),
+    catalog.materials
+      .filter(
+        (material) =>
+          matches.materialNames.includes(material.name) ||
+          matches.makerNames.includes(material.manufacturer_name),
+      )
+      .toSorted(byPostingPriority)
+      .slice(0, POSTING_MATERIAL_LIMIT)
+      .map(
+        ({ id, name, manufacturer_name, review_count, avg_rating, manufacturer_verified_at }) => ({
+          id,
+          name,
+          manufacturer_name,
+          review_count,
+          avg_rating,
+          manufacturer_verified_at,
+        }),
+      ),
   );
 }
 
@@ -642,16 +554,24 @@ export async function withPostingMaterialImagesWithSupabase(
   supabase: SupabaseClient<Database>,
   materials: readonly PostingMaterial[],
 ): Promise<Result<PostingMaterialWithImage[]>> {
-  const primaryImages = await fetchPrimaryImages(
-    supabase,
-    materials.map(({ id }) => id),
+  const result = await supabase
+    .from("materials")
+    .select("id,container_type_id")
+    .in(
+      "id",
+      materials.map(({ id }) => id),
+    );
+  if (result.error) return fail("internal");
+  const illustrations = new Map(
+    result.data.map((material) => [
+      material.id,
+      materialIllustrationUrl(material.container_type_id),
+    ]),
   );
-  if (!primaryImages.ok) return primaryImages;
-
   return succeed(
     materials.map((material) => ({
       ...material,
-      imageUrl: primaryImages.data.get(material.id)?.url ?? null,
+      imageUrl: illustrations.get(material.id) ?? null,
     })),
   );
 }

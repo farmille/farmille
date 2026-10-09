@@ -19,7 +19,7 @@ const meta = {
       relatedCompanies: [],
       certifications: ["登録情報は製品ラベルをご確認ください"],
     },
-    imageSources: [],
+    imageUrl: "/images/container-shapes/5.png",
   },
 } satisfies Meta<typeof MaterialPageContent>;
 export default meta;

@@ -82,7 +82,7 @@ async function HomeMaterials() {
             reviewCount={material.review_count}
             categories={material.categories}
             official={material.manufacturer_verified_at !== null}
-            imageSrc={material.primaryImage?.url}
+            imageSrc={material.imageUrl ?? undefined}
             href={`/materials/${material.id}`}
           />
         ))}

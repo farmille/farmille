@@ -1,3 +1,4 @@
+import { materialIllustrationUrl } from "@/lib/material-illustration";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { COMPARE_MATERIAL_LIMITS } from "@/lib/compare-limits";
@@ -10,29 +11,23 @@ import type { Database } from "@/types/database.types";
 export { COMPARE_MATERIAL_LIMITS } from "@/lib/compare-limits";
 
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
-type MaterialImageRow = Database["public"]["Tables"]["material_images"]["Row"];
-
-type MaterialImage = Pick<MaterialImageRow, "id" | "url" | "image_type" | "sort_order">;
 
 type SavedMaterialQueryRow = {
   id: string;
   created_at: string;
-  material:
-    | (Pick<
-        MaterialRow,
-        | "id"
-        | "name"
-        | "manufacturer_name"
-        | "price_range"
-        | "review_count"
-        | "avg_rating"
-        | "control_plot_ratio"
-        | "manufacturer_verified_at"
-        | "description"
-      > & {
-        material_images: MaterialImage[];
-      })
-    | null;
+  material: Pick<
+    MaterialRow,
+    | "id"
+    | "name"
+    | "container_type_id"
+    | "manufacturer_name"
+    | "price_range"
+    | "review_count"
+    | "avg_rating"
+    | "control_plot_ratio"
+    | "manufacturer_verified_at"
+    | "description"
+  > | null;
 };
 
 export type SavedMaterialItem = {
@@ -65,13 +60,6 @@ export type CompareMaterialItem = {
 
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/saved-materials] ${operation}`, error);
-}
-
-function bySortOrder(
-  left: { id: string; sort_order: number },
-  right: { id: string; sort_order: number },
-): number {
-  return left.sort_order - right.sort_order || left.id.localeCompare(right.id);
 }
 
 async function loadGenreNames(
@@ -217,17 +205,11 @@ export async function listSavedMaterials(
           control_plot_ratio,
           manufacturer_verified_at,
           description,
-          material_images (
-            id,
-            url,
-            image_type,
-            sort_order
-          )
+          container_type_id
         )
       `,
     )
     .eq("user_id", userId)
-    .eq("material.material_images.is_current", true)
     .order("created_at", { ascending: false })
     .order("id", { ascending: true });
 
@@ -256,8 +238,6 @@ export async function listSavedMaterials(
       return fail("internal");
     }
 
-    const images = row.material.material_images.toSorted(bySortOrder);
-
     items.push({
       savedId: row.id,
       savedAt: row.created_at,
@@ -271,7 +251,7 @@ export async function listSavedMaterials(
       controlPlotRatio: row.material.control_plot_ratio,
       official: row.material.manufacturer_verified_at !== null,
       description: row.material.description,
-      primaryImageUrl: images[0]?.url ?? null,
+      primaryImageUrl: materialIllustrationUrl(row.material.container_type_id),
     });
   }
 

@@ -80,7 +80,7 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
           id: material.id,
           name: material.name,
           manufacturerName: material.manufacturer_name,
-          imageUrl: material.images[0]?.url ?? null,
+          imageUrl: material.imageUrl,
         }}
         userId={session.data.userId}
         crops={formData.crops}

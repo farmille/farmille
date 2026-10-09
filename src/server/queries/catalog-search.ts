@@ -1,3 +1,4 @@
+import { materialIllustrationUrl } from "@/lib/material-illustration";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
@@ -18,8 +19,8 @@ const fetchCatalogMaterials = unstable_cache(
       selectAllRows((from, to) =>
         db
           .from("materials")
-          .select(`id,name,manufacturer_name,description,avg_rating,review_count,created_at,
-      material_images(url,is_current,sort_order),material_crops(crop_id),material_crop_groups(crop_group_id),
+          .select(`id,name,official_name,name_reading,container_type_id,material_name_aliases(name),manufacturer_name,manufacturer_verified_at,description,avg_rating,review_count,created_at,
+      material_crops(crop_id),material_crop_groups(crop_group_id),
       material_effects(effect_id),material_ingredient_categories(ingredient_category_id,ingredient_categories(name)),
       material_search_tags(search_tag_id),material_application_methods(method)`)
           .eq("publication_status", "published")
@@ -29,7 +30,13 @@ const fetchCatalogMaterials = unstable_cache(
     ]);
     if (counts.error) throw new Error("検索用の件数を取得できませんでした。");
     if (materials.error) throw new Error("資材の検索情報を取得できませんでした。");
-    return { materials: materials.data, counts: counts.data };
+    return {
+      materials: materials.data.map((material) => ({
+        ...material,
+        imageUrl: materialIllustrationUrl(material.container_type_id),
+      })),
+      counts: counts.data,
+    };
   },
   ["catalog-materials"],
   { tags: [CACHE_TAGS.catalog], revalidate: 600 },
@@ -68,6 +75,15 @@ export async function listSearchSuggestions(): Promise<Result<SearchCatalog>> {
     makers: [...new Set(catalog.materials.map((material) => material.manufacturer_name))].toSorted(
       byJapanese,
     ),
-    materialNames: catalog.materials.map((material) => material.name).toSorted(byJapanese),
+    materials: catalog.materials
+      .map((material) => ({
+        name: material.name,
+        aliases: [
+          material.official_name,
+          material.name_reading,
+          ...material.material_name_aliases.map((alias) => alias.name),
+        ].filter((name) => name !== null),
+      }))
+      .toSorted((a, b) => byJapanese(a.name, b.name)),
   });
 }

@@ -141,9 +141,7 @@ export const SaveMaterialPageSchema = v.pipe(
           (link) =>
             link.group !== null &&
             link.title.trim().length > 0 &&
-            v.is(MaterialExternalUrlSchema, link.url) &&
-            (link.trial === null ||
-              (link.trial.summary.trim().length > 0 && link.trial.institution.trim().length > 0)),
+            v.is(MaterialExternalUrlSchema, link.url),
         ) &&
         new Set(input.content.links.map((link) => link.url.trim())).size ===
           input.content.links.length &&

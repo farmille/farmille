@@ -13,7 +13,11 @@ import {
   type MaterialSortParam,
   type SelectedSearchFilter,
 } from "@/components/search/search-selection";
-import type { SearchCatalog, SearchFilterItem } from "@/lib/material-search";
+import {
+  matchSearchCatalog,
+  type SearchCatalog,
+  type SearchFilterItem,
+} from "@/lib/material-search";
 import { css, cva } from "../../../../styled-system/css";
 
 import { chipCategoryStyle, chipRemoveRecipe, selectedChipRecipe } from "./search-chips";
@@ -36,10 +40,6 @@ function toSelected(suggestion: Suggestion): SelectedSearchFilter {
   if (suggestion.kind === "filter") return searchFilterItemToSelected(suggestion.filter);
   if (suggestion.kind === "maker") return { kind: "maker", name: suggestion.name };
   return { kind: "name", name: suggestion.name };
-}
-
-function normalize(text: string): string {
-  return text.normalize("NFKC").toLowerCase();
 }
 
 const searchBoxStyle = css({
@@ -158,23 +158,23 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
   };
 
   const suggestions = useMemo((): Suggestion[] => {
-    const keyword = normalize(query.trim());
+    const keyword = query.trim();
     if (keyword.length === 0) return [];
+    const matches = matchSearchCatalog(catalog, keyword);
     const found: Suggestion[] = [];
-    for (const filter of catalog.filters) {
+    for (const filter of matches.filters) {
       if (selectedKeys.has(`${filter.category}:${filter.id}`)) continue;
-      if ([filter.name, ...filter.aliases].some((name) => normalize(name).includes(keyword)))
-        found.push({ kind: "filter", filter });
+      found.push({ kind: "filter", filter });
       if (found.length >= SUGGESTION_LIMIT) return found;
     }
-    for (const name of catalog.materialNames) {
+    for (const name of matches.materialNames) {
       if (selectedKeys.has(`name:${name}`)) continue;
-      if (normalize(name).includes(keyword)) found.push({ kind: "name", name });
+      found.push({ kind: "name", name });
       if (found.length >= SUGGESTION_LIMIT) return found;
     }
-    for (const name of catalog.makers) {
+    for (const name of matches.makerNames) {
       if (selectedKeys.has(`maker:${name}`)) continue;
-      if (normalize(name).includes(keyword)) found.push({ kind: "maker", name });
+      found.push({ kind: "maker", name });
       if (found.length >= SUGGESTION_LIMIT) return found;
     }
     return found;

@@ -101,10 +101,10 @@ export function RelatedMaterialsView({ related }: { related: MaterialListItem[] 
             {related.map((item) => (
               <Link key={item.id} href={`/materials/${item.id}`} className={cardStyle}>
                 <div className={imageBoxStyle}>
-                  {item.primaryImage ? (
+                  {item.imageUrl ? (
                     <Image
                       alt=""
-                      src={item.primaryImage.url}
+                      src={item.imageUrl}
                       width={300}
                       height={225}
                       sizes="150px"

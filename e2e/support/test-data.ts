@@ -117,6 +117,9 @@ export type SellerApproval = v.InferOutput<typeof SellerApprovalStateSchema>;
 export type ContentReport = v.InferOutput<typeof ContentReportStateSchema>;
 
 type RestInsertTable =
+  | "catalog_import_runs"
+  | "material_page_versions"
+  | "material_page_links"
   | "material_ingredient_categories"
   | "material_crops"
   | "material_product_types"
@@ -408,6 +411,58 @@ export async function createMaterial(
   });
 }
 
+export async function seedCatalogMaterial(materialId: string): Promise<void> {
+  const material = await getMaterial(materialId);
+  if (!material.name.startsWith(`E2E資材_${E2E_TOKEN_PREFIX}`))
+    throw new Error("E2E以外の資材は変更できません。");
+  const hash = materialId.replaceAll("-", "").repeat(2);
+  await restInsert(IdSchema, "catalog_import_runs", {
+    id: materialId,
+    source_sha256: hash,
+    plan_sha256: hash,
+  });
+  const version = await restInsert(IdSchema, "material_page_versions", {
+    material_id: materialId,
+    base_revision: 0,
+    status: "published",
+    origin: "catalog",
+    catalog_import_run_id: materialId,
+    description: "取り込み済みの製品説明",
+    content_contract: 2,
+  });
+  await checkedFetch(restPath("material_page_related_companies"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      version_id: version.id,
+      sort_order: 0,
+      company_name: material.manufacturer_name,
+    } satisfies Database["public"]["Tables"]["material_page_related_companies"]["Insert"]),
+  });
+  for (const [sortOrder, group, title] of [
+    [0, "overview", "取り込み資料（削除対象）"],
+    [1, "public_trial", "取り込み試験資料"],
+  ] as const) {
+    await restInsert(IdSchema, "material_page_links", {
+      version_id: version.id,
+      sort_order: sortOrder,
+      group_name: group,
+      title,
+      url: `https://example.com/imported-${group}.pdf`,
+    });
+  }
+  await checkedFetch(restPath("materials", new URLSearchParams({ id: `eq.${materialId}` })), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      published_page_version_id: version.id,
+      container_type_id: 2,
+      official_name: "Catalog Material Official",
+      name_reading: "カタログシザイ",
+    }),
+  });
+}
+
 export async function archiveMaterial(materialId: string): Promise<void> {
   const material = await getMaterial(materialId);
   if (!material.name.startsWith(`E2E資材_${E2E_TOKEN_PREFIX}`)) {
@@ -454,6 +509,10 @@ export async function deleteMaterial(materialId: string): Promise<void> {
   ]) {
     await checkedFetch(restPath(table, materialFilter), { method: "DELETE" });
   }
+  await checkedFetch(
+    restPath("catalog_import_runs", new URLSearchParams({ id: `eq.${materialId}` })),
+    { method: "DELETE" },
+  );
   const targetRequestParams = new URLSearchParams({ material_id: `eq.${materialId}` });
   await checkedFetch(restPath("material_change_requests", targetRequestParams), {
     method: "DELETE",

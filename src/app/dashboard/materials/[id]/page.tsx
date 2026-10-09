@@ -71,11 +71,10 @@ export default async function SellerMaterialPage({ params }: { params: Promise<{
         </SurfaceCard>
         <MaterialPageEditor
           materialId={id}
-          sellerId={session.data.sellerId}
           initialContent={editor.content}
           expectedVersion={editor.expectedVersion}
           pendingVersion={editor.pendingVersion}
-          initialImageSources={editor.imageSources}
+          imageUrl={editor.imageUrl}
         />
         <SurfaceCard title="変更履歴">
           {editor.history.length === 0 ? (

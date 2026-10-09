@@ -1,3 +1,4 @@
+import { materialIllustrationUrl } from "@/lib/material-illustration";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { fail, succeed, type Result } from "@/server/result";
@@ -6,16 +7,19 @@ import type { Database } from "@/types/database.types";
 
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
-type MaterialImageRow = Database["public"]["Tables"]["material_images"]["Row"];
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
 type SellerMaterialQueryRow = Pick<
   MaterialRow,
-  "id" | "name" | "manufacturer_name" | "avg_rating" | "review_count" | "manufacturer_verified_at"
-> & {
-  material_images: Pick<MaterialImageRow, "id" | "url" | "sort_order">[];
-};
+  | "id"
+  | "name"
+  | "container_type_id"
+  | "manufacturer_name"
+  | "avg_rating"
+  | "review_count"
+  | "manufacturer_verified_at"
+>;
 
 type SellerArticleQueryRow = Pick<ArticleRow, "id" | "title" | "hero_image_url" | "published_at">;
 
@@ -52,13 +56,6 @@ const IN_FILTER_CHUNK_SIZE = 100;
 
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/public-sellers] ${operation}`, error);
-}
-
-function byImageOrder(
-  left: Pick<MaterialImageRow, "id" | "sort_order">,
-  right: Pick<MaterialImageRow, "id" | "sort_order">,
-): number {
-  return left.sort_order - right.sort_order || left.id.localeCompare(right.id);
 }
 
 async function getArticleHelpfulCount(
@@ -134,16 +131,11 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
           avg_rating,
           review_count,
           manufacturer_verified_at,
-          material_images (
-            id,
-            url,
-            sort_order
-          )
+          container_type_id
         `,
         { count: "exact" },
       )
       .eq("seller_id", seller.id)
-      .eq("material_images.is_current", true)
       .eq("publication_status", "published")
       .order("review_count", { ascending: false })
       .order("id", { ascending: true })
@@ -209,14 +201,14 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
       profileText: seller.profile_text,
     },
     materialCount: materialsResult.count,
-    materials: materialRows.map(({ material_images: images, ...material }) => ({
+    materials: materialRows.map((material) => ({
       id: material.id,
       name: material.name,
       manufacturerName: material.manufacturer_name,
       averageRating: material.avg_rating,
       reviewCount: material.review_count,
       manufacturerVerified: material.manufacturer_verified_at !== null,
-      imageUrl: images.toSorted(byImageOrder)[0]?.url ?? null,
+      imageUrl: materialIllustrationUrl(material.container_type_id),
     })),
     helpfulCount: helpfulCount.data,
     articles,

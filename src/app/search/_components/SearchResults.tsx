@@ -141,11 +141,7 @@ export function SearchResults({
                     )}
                     directEvidence={evidence.direct}
                     groupEvidence={evidence.groups}
-                    imageSrc={
-                      material.material_images
-                        .filter((image) => image.is_current)
-                        .toSorted((a, b) => a.sort_order - b.sort_order)[0]?.url
-                    }
+                    imageSrc={material.imageUrl ?? undefined}
                     preload={index === 0}
                   />
                 );

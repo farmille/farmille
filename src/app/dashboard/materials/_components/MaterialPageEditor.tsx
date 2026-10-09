@@ -3,7 +3,7 @@
 import { Checkbox, checkboxChipStyle } from "@/components/Checkbox";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
+import { MaterialIllustration } from "@/components/materials/MaterialIllustration";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
 import { Button, Select } from "@/components";
@@ -18,7 +18,6 @@ import {
   type MaterialPageContent as Content,
 } from "@/lib/material-page-editor";
 import { BS_GUIDELINE_TITLE, BS_GUIDELINE_URL } from "@/lib/manufacturer-policy";
-import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { saveMaterialPage, withdrawMaterialPage } from "../editor-actions";
 import { css } from "../../../../../styled-system/css";
 
@@ -39,21 +38,18 @@ const fieldset = css({ border: "0", p: "0", m: "0", minW: "0" });
 
 export function MaterialPageEditor({
   materialId,
-  sellerId,
   initialContent,
   expectedVersion,
   pendingVersion,
-  initialImageSources,
+  imageUrl,
 }: {
   materialId: string;
-  sellerId: string;
   initialContent: Content;
   expectedVersion: string | null;
   pendingVersion: string | null;
-  initialImageSources: string[];
+  imageUrl: string | null;
 }) {
   const [content, setContent] = useState(initialContent);
-  const [imageSources, setImageSources] = useState(initialImageSources);
   const [version, setVersion] = useState(expectedVersion);
   const [preview, setPreview] = useState(false);
   const [message, setMessage] = useState("");
@@ -82,49 +78,11 @@ export function MaterialPageEditor({
     });
   }
 
-  function upload(files: FileList | null) {
-    if (!files) return;
-    const selected = Array.from(files);
-    startTransition(async () => {
-      const db = createAuthBrowserClient();
-      for (const file of selected) {
-        const extension = new Map([
-          ["image/png", "png"],
-          ["image/jpeg", "jpg"],
-          ["image/webp", "webp"],
-        ]).get(file.type);
-        if (!extension || file.size > 10 * 1024 * 1024) {
-          setMessage("画像はPNG・JPEG・WebP形式、1枚10MB以下で選択してください。");
-          return;
-        }
-        const path = `${sellerId}/${materialId}/${crypto.randomUUID()}.${extension}`;
-        const result = await db.storage
-          .from("manufacturer-drafts")
-          .upload(path, file, { contentType: file.type, upsert: false });
-        if (result.error) {
-          setMessage("画像を追加できませんでした。編集権と通信状態を確認してください。");
-          return;
-        }
-        const signed = await db.storage.from("manufacturer-drafts").createSignedUrl(path, 3600);
-        if (signed.error) {
-          setMessage("画像のプレビューを取得できませんでした。再度お試しください。");
-          return;
-        }
-        setContent((current) => ({
-          ...current,
-          images: [...current.images, { path, alt: file.name }],
-        }));
-        setImageSources((current) => [...current, signed.data.signedUrl]);
-      }
-      setMessage("画像を追加しました。下書き保存または表現確認への送信で原稿に保存されます。");
-    });
-  }
-
   if (pendingVersion)
     return (
       <div className={materialPageStack}>
         <FormMessage tone="info">表現確認中です。公開内容は確認完了後に変わります。</FormMessage>
-        <MaterialPageContent content={content} imageSources={imageSources} />
+        <MaterialPageContent content={content} imageUrl={imageUrl} />
         {message ? <FormMessage tone="info">{message}</FormMessage> : null}
         <Button
           disabled={pending}
@@ -145,75 +103,13 @@ export function MaterialPageEditor({
       <p>枠の中を編集すると、同じ項目が資材ページに表示されます。下書きは公開されません。</p>
       {message ? <FormMessage tone="info">{message}</FormMessage> : null}
       {preview ? (
-        <MaterialPageContent content={content} imageSources={imageSources} />
+        <MaterialPageContent content={content} imageUrl={imageUrl} />
       ) : (
         <fieldset className={fieldset} disabled={pending}>
           <div className={materialPageStack}>
             <section>
               <h2>製品画像</h2>
-              <p>先頭がメイン画像です。正面・白背景・正方形を推奨します。複数枚追加できます。</p>
-              <input
-                aria-label="製品画像を追加"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                multiple
-                onChange={(event) => upload(event.target.files)}
-              />
-              {content.images.map((image, index) => (
-                <div className={row} key={image.path}>
-                  <Image
-                    unoptimized
-                    src={imageSources[index]}
-                    alt={image.alt || "製品画像"}
-                    width={160}
-                    height={160}
-                    className={css({ w: "imagePreview", h: "imagePreview", objectFit: "contain" })}
-                  />
-                  <label>
-                    画像{index + 1}の説明
-                    <input
-                      className={controlStyle}
-                      value={image.alt}
-                      onChange={(event) =>
-                        setContent({
-                          ...content,
-                          images: content.images.map((entry, i) =>
-                            i === index ? { ...entry, alt: event.target.value } : entry,
-                          ),
-                        })
-                      }
-                    />
-                  </label>
-                  <div className={actions}>
-                    <Button
-                      variant="ghost"
-                      disabled={index === 0}
-                      onClick={() => {
-                        const images = [...content.images];
-                        const sources = [...imageSources];
-                        [images[index - 1], images[index]] = [images[index], images[index - 1]];
-                        [sources[index - 1], sources[index]] = [sources[index], sources[index - 1]];
-                        setContent({ ...content, images });
-                        setImageSources(sources);
-                      }}
-                    >
-                      前へ移動
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setContent({
-                          ...content,
-                          images: content.images.filter((_, i) => i !== index),
-                        });
-                        setImageSources(imageSources.filter((_, i) => i !== index));
-                      }}
-                    >
-                      画像を外す
-                    </Button>
-                  </div>
-                </div>
-              ))}
+              <MaterialIllustration imageUrl={imageUrl} />
             </section>
             <section>
               <h2>製品説明</h2>
@@ -344,8 +240,8 @@ export function MaterialPageEditor({
                             {(
                               [
                                 { key: "crops", label: "試験の作目（任意）" },
-                                { key: "summary", label: "試験の概要" },
-                                { key: "institution", label: "試験の実施機関" },
+                                { key: "summary", label: "試験の概要（任意）" },
+                                { key: "institution", label: "試験の実施機関（任意）" },
                               ] as const
                             ).map((field) => (
                               <label key={field.key}>

@@ -15,7 +15,9 @@
     "supabase/**",
     "styled-system/**",
     "node_modules/**",
-    "tools/**",
+    "tools/migration/**",
+    "tools/oxlint/**",
+    "tools/dev/**",
     "src/types/database.types.ts"
   ]
 }

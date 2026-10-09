@@ -6,7 +6,6 @@ const meta = {
   parameters: { nextjs: { appDirectory: true } },
   args: {
     materialId: "11111111-1111-4111-8111-111111111111",
-    sellerId: "33333333-3333-4333-8333-333333333333",
     initialContent: {
       description: "製品の特徴と使用時の注意事項を記載しています。",
       mainComponents: "海藻抽出物",
@@ -23,7 +22,7 @@ const meta = {
     },
     expectedVersion: null,
     pendingVersion: null,
-    initialImageSources: [],
+    imageUrl: "/images/container-shapes/5.png",
   },
 } satisfies Meta<typeof MaterialPageEditor>;
 export default meta;
