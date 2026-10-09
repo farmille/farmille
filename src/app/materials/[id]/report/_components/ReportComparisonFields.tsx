@@ -17,15 +17,14 @@ import {
 } from "@/lib/usage-report";
 
 import { METRIC_UNIT, ReportCellEditor, UNITS } from "./ReportCellEditor";
-import { Checkbox } from "@/components/Checkbox";
+import { Badge } from "@/components/Badge";
+import { Checkbox, Field, Input, Notice, Textarea } from "@/components/form";
 import { reportPlotColor } from "@/components/ReportPlotColor";
-import { inputRecipe } from "@/components/Input";
-import { textareaRecipe } from "@/components/Textarea";
 import { toast } from "@/components/Toaster";
 
 import { css, cva, cx } from "../../../../../../styled-system/css";
 
-import { Badge, Example, GroupHeading, Need, checkRow, pillButtonRecipe } from "./ReportFormParts";
+import { GroupHeading, pillButtonRecipe } from "./ReportFormParts";
 import { ReportGraphEditor, editKey, readCell, type EditTarget } from "./ReportGraphEditor";
 
 type Measurement = UsageReportInput["measurements"][number];
@@ -106,15 +105,7 @@ const plotGrid = css({
   tab: { gridTemplateColumns: "{sizes.44} 1fr" },
 });
 
-const smallLabel = css({
-  display: "block",
-  mb: "0.5",
-  fontSize: "sm",
-  fontWeight: "bold",
-  color: "text.subtle",
-});
-
-const longArea = css(textareaRecipe.raw({}), { minH: "24" });
+const errorGap = css({ mt: "2" });
 
 const blankRow = (plotId: string): Row => ({
   id: crypto.randomUUID(),
@@ -371,17 +362,21 @@ export function ReportComparisonFields({
       <div>
         <div>
           <h3 className={sectionHeading({ lead: true })}>
-            結果のグラフ <Badge required />
-            <Need message={errors.measurements} />
+            結果のグラフ <Badge variant="required">必須</Badge>
           </h3>
           <p className={sectionGuide}>
             グラフの ✎ の付いた欄を押して書き込みます。書き終えたら Enter で次の欄へ進みます。
           </p>
+          {errors.measurements && <Notice tone="error">{errors.measurements}</Notice>}
           {cards.length === 0 && (
             <div className={emptyGraphs}>グラフがありません。下のボタンから追加します。</div>
           )}
           {cards.map(({ measurement, graph, graphIndex }, index) => {
             const measurementIndex = input.measurements.indexOf(measurement);
+            const nameError = errors[`measurements.${measurementIndex}.name`];
+            const valueError =
+              errors[`measurements.${measurementIndex}.values`] ??
+              errors[`measurements.${measurementIndex}.plots`];
             return (
               <ReportGraphEditor
                 key={graph.id}
@@ -398,14 +393,16 @@ export function ReportComparisonFields({
                 onAddPeriod={() => addPeriod(measurement, graphIndex)}
                 periodHint={periodHints.has(measurement.id) || measurement.graphs.length > 1}
               >
-                <Need block message={errors[`measurements.${measurementIndex}.name`]} />
-                <Need
-                  block
-                  message={
-                    errors[`measurements.${measurementIndex}.values`] ??
-                    errors[`measurements.${measurementIndex}.plots`]
-                  }
-                />
+                {nameError && (
+                  <Notice tone="error" className={errorGap}>
+                    {nameError}
+                  </Notice>
+                )}
+                {valueError && (
+                  <Notice tone="error" className={errorGap}>
+                    {valueError}
+                  </Notice>
+                )}
                 {ed?.g === graph.id && (
                   <ReportCellEditor
                     target={ed}
@@ -457,100 +454,109 @@ export function ReportComparisonFields({
 
         <div>
           <h3 className={sectionHeading({ lead: true })}>
-            区の説明 <Badge required />
-            <Need message={errors.plots} />
+            区の説明 <Badge variant="required">必須</Badge>
           </h3>
           <p className={sectionGuide}>
             グラフの区ごとに、調査した範囲と、この区の説明。{PLOT_GUIDE}
           </p>
-          {input.plots.map((plot, index) => (
-            <div key={plot.id} className={plotCard}>
-              <div className={plotHead}>
-                <span className={cx(swatch, reportPlotColor(index))} />
-                {plot.name || "（区の名前）"}
-                <Need message={errors[`plots.${index}.name`]} />
-              </div>
-              <div className={plotGrid}>
-                <div>
-                  <label className={smallLabel} htmlFor={`plot-scope-${plot.id}`}>
-                    調査した範囲（必須）
-                  </label>
-                  <input
-                    id={`plot-scope-${plot.id}`}
-                    className={inputRecipe()}
-                    placeholder="例）1区10株、3反復"
-                    value={plot.scope}
-                    onChange={(event) => updatePlot(plot.id, { scope: event.target.value })}
-                  />
-                  <Need block message={errors[`plots.${index}.scope`]} />
-                  <button
-                    type="button"
-                    className={cx(
-                      pillButtonRecipe({ tone: "quiet", size: "xs", strong: true }),
-                      css({ mt: "1.5" }),
-                    )}
-                    onClick={() => {
-                      onChange({
-                        ...input,
-                        plots: input.plots.map((item) => ({ ...item, scope: plot.scope })),
-                      });
-                      toast("調査した範囲を全ての区に入れました", { duration: 1800 });
-                    }}
-                  >
-                    この範囲を全ての区に入れる
-                  </button>
+          {errors.plots && <Notice tone="error">{errors.plots}</Notice>}
+          {input.plots.map((plot, index) => {
+            const nameError = errors[`plots.${index}.name`];
+            return (
+              <div key={plot.id} className={plotCard}>
+                <div className={plotHead}>
+                  <span className={cx(swatch, reportPlotColor(index))} />
+                  {plot.name || "（区の名前）"}
                 </div>
-                <div>
-                  <label className={smallLabel} htmlFor={`plot-desc-${plot.id}`}>
-                    この区の説明（必須）
-                  </label>
-                  <textarea
-                    id={`plot-desc-${plot.id}`}
-                    className={longArea}
-                    placeholder={PLOT_GUIDE}
-                    value={plot.description}
-                    onChange={(event) => updatePlot(plot.id, { description: event.target.value })}
-                  />
-                  <Need block message={errors[`plots.${index}.description`]} />
-                  <Example compact>
-                    {index === 0
-                      ? "〇〇は使っていない。かん水と施肥は処理区と同じ。"
-                      : "〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。元肥は慣行の75%に減らした。"}
-                  </Example>
+                {nameError && (
+                  <Notice tone="error" className={errorGap}>
+                    {nameError}
+                  </Notice>
+                )}
+                <div className={plotGrid}>
+                  <div>
+                    <Field
+                      label="調査した範囲（必須）"
+                      labelSize="sm"
+                      error={errors[`plots.${index}.scope`]}
+                    >
+                      <Input
+                        placeholder="例）1区10株、3反復"
+                        value={plot.scope}
+                        onChange={(event) => updatePlot(plot.id, { scope: event.target.value })}
+                      />
+                    </Field>
+                    <button
+                      type="button"
+                      className={cx(
+                        pillButtonRecipe({ tone: "quiet", size: "xs", strong: true }),
+                        css({ mt: "1.5" }),
+                      )}
+                      onClick={() => {
+                        onChange({
+                          ...input,
+                          plots: input.plots.map((item) => ({ ...item, scope: plot.scope })),
+                        });
+                        toast("調査した範囲を全ての区に入れました", { duration: 1800 });
+                      }}
+                    >
+                      この範囲を全ての区に入れる
+                    </button>
+                  </div>
+                  <div>
+                    <Field
+                      label="この区の説明（必須）"
+                      labelSize="sm"
+                      error={errors[`plots.${index}.description`]}
+                    >
+                      <Textarea
+                        placeholder={PLOT_GUIDE}
+                        value={plot.description}
+                        onChange={(event) =>
+                          updatePlot(plot.id, { description: event.target.value })
+                        }
+                      />
+                    </Field>
+                    <Notice tone="neutral" title="記入例" className={css({ mt: "1.5" })}>
+                      {index === 0
+                        ? "〇〇は使っていない。かん水と施肥は処理区と同じ。"
+                        : "〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。元肥は慣行の75%に減らした。"}
+                    </Notice>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-        <label className={cx(checkRow, css({ mt: "3" }))}>
+        <Field requirement="required" error={errors.methodDetailsAck}>
           <Checkbox
+            variant="row"
             checked={input.methodDetailsAck}
-            onChange={(event) => onChange({ ...input, methodDetailsAck: event.target.checked })}
-          />
-          資材を使った区の説明に、施用方法・希釈倍率・使用量・回数を明記しました <Badge required />
-          <Need message={errors.methodDetailsAck} />
-        </label>
+            onCheckedChange={(methodDetailsAck) => onChange({ ...input, methodDetailsAck })}
+          >
+            資材を使った区の説明に、施用方法・希釈倍率・使用量・回数を明記しました
+          </Checkbox>
+        </Field>
         <h3 className={sectionHeading()}>
-          グラフにしにくい調査結果 <Badge />
+          グラフにしにくい調査結果 <Badge variant="optional">任意</Badge>
         </h3>
         <p className={sectionGuide}>
           数値にしにくい変化や様子、区ごとの違いなど。±や＊を使った場合の意味もここに書けます。
         </p>
         {(textMeasurements.length > 0 ? textMeasurements : [undefined]).map((measurement) => (
-          <textarea
+          <Textarea
             key={measurement?.id ?? "qualitative"}
-            className={longArea}
             aria-label={measurement?.name || "グラフにしにくい調査結果"}
             placeholder="グラフにしにくい変化や様子"
             value={measurement?.body ?? ""}
             onChange={(event) => updateText(measurement, event.target.value)}
           />
         ))}
-        <Example>
+        <Notice tone="neutral" title="記入例" className={css({ mt: "2" })}>
           ・処理区では11月以降も葉色が濃く、成り疲れが見られなかった。無処理区は12月に入って草勢が落ち、下葉の黄化が目立った。
           <br />
           ・奇形（花芽飛び）の発生節数は、処理区が平均1.2節、無処理区が2.5節（平均値±標準誤差、n=30、5%水準で有意差あり）。
-        </Example>
+        </Notice>
       </div>
       <datalist id="metricList">
         {[...METRIC_UNIT.keys()].map((name) => (

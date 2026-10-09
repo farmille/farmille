@@ -2,8 +2,7 @@
 
 import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
 
-import { inputRecipe } from "@/components/Input";
-import { textareaRecipe } from "@/components/Textarea";
+import { Field, Input, Textarea } from "@/components/form";
 import type { UsageReportInput } from "@/lib/usage-report";
 
 import { css, cva, cx } from "../../../../../../styled-system/css";
@@ -109,43 +108,7 @@ const closeButton = css({
   _hover: { bg: "surface.panel", color: "text.default" },
 });
 const row = css({ display: "flex", gap: "2", alignItems: "center" });
-const bigInput = cva({
-  base: {
-    flex: "1",
-    minW: "0",
-    borderWidth: "1.5px",
-    borderStyle: "solid",
-    borderColor: "border.strong",
-    borderRadius: "input",
-    py: "2",
-    px: "2.5",
-    fontWeight: "extrabold",
-    fontVariantNumeric: "tabular-nums",
-    color: "inherit",
-    bg: "surface.card",
-    _focus: {
-      borderColor: "primary.700",
-      outlineWidth: "3px",
-      outlineStyle: "solid",
-      outlineColor: "primary.100",
-      outlineOffset: "0",
-    },
-  },
-  variants: {
-    size: { value: { fontSize: "2xl" }, text: { fontSize: "lg", w: "full" } },
-    bad: { true: { bg: "accent.dangerSoft", borderColor: "accent.danger" } },
-  },
-  defaultVariants: { size: "text" },
-});
-const fieldLabel = css({
-  fontSize: "sm",
-  color: "text.subtle",
-  fontWeight: "bold",
-  display: "block",
-  mb: "0.5",
-});
 const hint = css({ fontSize: "sm", color: "text.subtle", mt: "1.5" });
-const smallInput = css(inputRecipe.raw(), { py: "2", px: "2.5", borderRadius: "input" });
 const nav = css({ display: "flex", gap: "1.5", mt: "2.5", alignItems: "center" });
 const doneButton = cx(pillButtonRecipe({ tone: "primary", strong: true }), css({ ml: "auto" }));
 const removeButton = css({
@@ -307,41 +270,46 @@ export function ReportCellEditor({
           {plot.name || `区${plotIndex + 1}`}の{measurement.name || "数値"}
           {close}
         </div>
-        <div className={row}>
-          <input
-            data-first
-            className={bigInput({ size: "value", bad: readCell(raw).kind === "bad" })}
-            aria-label={`グラフ${graphNumber}の区${plotIndex + 1}の数値`}
-            inputMode="decimal"
-            enterKeyHint="next"
-            placeholder="数値"
-            value={raw}
-            onChange={(event) =>
-              onGraphChange({
-                ...graph,
-                rows: graph.rows.map((row) =>
-                  row.plotId === plot.id ? { ...row, value: event.target.value } : row,
-                ),
-              })
-            }
-            onKeyDown={(event) => {
-              if (!isEnter(event)) return;
-              event.preventDefault();
-              onNext(target);
-            }}
-          />
-          <span
-            className={css({
-              flex: "1",
-              fontWeight: "extrabold",
-              color: "text.muted",
-              whiteSpace: "nowrap",
-            })}
-          >
-            {measurement.unit}
-          </span>
-        </div>
-        <div className={hint}>±や＊も一緒に書けます。例：41.7±0.8 a、82 ＊</div>
+        <Field
+          label={`グラフ${graphNumber}の区${plotIndex + 1}の数値`}
+          hideLabel
+          description="±や＊も一緒に書けます。例：41.7±0.8 a、82 ＊"
+          error={readCell(raw).kind === "bad" ? "※ 数値として読み取れません" : undefined}
+        >
+          <div className={row}>
+            <Input
+              data-first
+              className={css({ flex: "1", minW: "0" })}
+              inputMode="decimal"
+              enterKeyHint="next"
+              placeholder="数値"
+              value={raw}
+              onChange={(event) =>
+                onGraphChange({
+                  ...graph,
+                  rows: graph.rows.map((row) =>
+                    row.plotId === plot.id ? { ...row, value: event.target.value } : row,
+                  ),
+                })
+              }
+              onKeyDown={(event) => {
+                if (!isEnter(event)) return;
+                event.preventDefault();
+                onNext(target);
+              }}
+            />
+            <span
+              className={css({
+                flex: "1",
+                fontWeight: "extrabold",
+                color: "text.muted",
+                whiteSpace: "nowrap",
+              })}
+            >
+              {measurement.unit}
+            </span>
+          </div>
+        </Field>
         <div className={nav}>{done}</div>
       </>
     );
@@ -352,22 +320,19 @@ export function ReportCellEditor({
           区の名前
           {close}
         </div>
-        <div className={row}>
-          <input
-            data-first
-            className={bigInput()}
-            aria-label="区の名前（必須）"
-            enterKeyHint="done"
-            placeholder={plotIndex === 0 ? "例）無処理区、対照区" : "例）処理区、使用区"}
-            value={plot.name}
-            onChange={(event) => onPlotChange(plot.id, { name: event.target.value })}
-            onKeyDown={(event) => {
-              if (!isEnter(event)) return;
-              event.preventDefault();
-              onNext(target);
-            }}
-          />
-        </div>
+        <Input
+          data-first
+          aria-label="区の名前（必須）"
+          enterKeyHint="done"
+          placeholder={plotIndex === 0 ? "例）無処理区、対照区" : "例）処理区、使用区"}
+          value={plot.name}
+          onChange={(event) => onPlotChange(plot.id, { name: event.target.value })}
+          onKeyDown={(event) => {
+            if (!isEnter(event)) return;
+            event.preventDefault();
+            onNext(target);
+          }}
+        />
         <div
           className={css({
             borderTopWidth: "1px",
@@ -377,52 +342,47 @@ export function ReportCellEditor({
             pt: "2",
           })}
         >
-          <label className={cx(fieldLabel, css({ mt: "1" }))} htmlFor={`ed-range-${plot.id}`}>
-            調査した範囲（必須）
-          </label>
-          <div
-            className={css({ display: "flex", gap: "1.5", alignItems: "center", flexWrap: "wrap" })}
-          >
-            <input
-              id={`ed-range-${plot.id}`}
-              className={cx(smallInput, css({ flex: "1 1 token(sizes.44)" }))}
-              placeholder="例）1区10株、3反復"
-              value={plot.scope}
-              onChange={(event) => onPlotChange(plot.id, { scope: event.target.value })}
-              onKeyDown={(event) => {
-                if (!isEnter(event)) return;
-                event.preventDefault();
-                ref.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus();
-              }}
-            />
-            <button
-              type="button"
-              className={pillButtonRecipe({ size: "xs", tone: "quiet", strong: true })}
-              onClick={() => onRangeAll(plot.scope)}
+          <Field label="調査した範囲（必須）" labelSize="sm">
+            <div
+              className={css({
+                display: "flex",
+                gap: "1.5",
+                alignItems: "center",
+                flexWrap: "wrap",
+              })}
             >
-              この範囲を全ての区に入れる
-            </button>
-          </div>
-          <label className={cx(fieldLabel, css({ mt: "1" }))} htmlFor={`ed-desc-${plot.id}`}>
-            この区の説明
-          </label>
-          <textarea
-            id={`ed-desc-${plot.id}`}
-            className={css(textareaRecipe.raw(), {
-              py: "2",
-              px: "2.5",
-              minH: "14",
-              fontSize: "md",
-              lineHeight: "relaxed",
-            })}
-            placeholder={
-              plotIndex === 0
-                ? "例）〇〇は使っていない。かん水と施肥は処理区と同じ。"
-                : "例）〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。"
-            }
-            value={plot.description}
-            onChange={(event) => onPlotChange(plot.id, { description: event.target.value })}
-          />
+              <Input
+                size="sm"
+                className={css({ flex: "1 1 token(sizes.44)" })}
+                placeholder="例）1区10株、3反復"
+                value={plot.scope}
+                onChange={(event) => onPlotChange(plot.id, { scope: event.target.value })}
+                onKeyDown={(event) => {
+                  if (!isEnter(event)) return;
+                  event.preventDefault();
+                  ref.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus();
+                }}
+              />
+              <button
+                type="button"
+                className={pillButtonRecipe({ size: "xs", tone: "quiet", strong: true })}
+                onClick={() => onRangeAll(plot.scope)}
+              >
+                この範囲を全ての区に入れる
+              </button>
+            </div>
+          </Field>
+          <Field label="この区の説明" labelSize="sm">
+            <Textarea
+              placeholder={
+                plotIndex === 0
+                  ? "例）〇〇は使っていない。かん水と施肥は処理区と同じ。"
+                  : "例）〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。"
+              }
+              value={plot.description}
+              onChange={(event) => onPlotChange(plot.id, { description: event.target.value })}
+            />
+          </Field>
         </div>
         <div className={nav}>
           {plots.length > 2 && (
@@ -455,40 +415,38 @@ export function ReportCellEditor({
         </div>
         <div className={row}>
           <div className={css({ flex: "1", minW: "0" })}>
-            <span className={fieldLabel}>調査項目</span>
-            <input
-              data-first
-              className={bigInput()}
-              list="metricList"
-              aria-label="調査項目"
-              enterKeyHint="next"
-              placeholder="例）収量"
-              value={measurement.name}
-              onChange={(event) => setName(event.target.value)}
-              onKeyDown={(event) => {
-                if (!isEnter(event)) return;
-                event.preventDefault();
-                ref.current?.querySelector<HTMLInputElement>("[data-unit-input]")?.focus();
-              }}
-            />
+            <Field label="調査項目" labelSize="sm">
+              <Input
+                data-first
+                list="metricList"
+                enterKeyHint="next"
+                placeholder="例）収量"
+                value={measurement.name}
+                onChange={(event) => setName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (!isEnter(event)) return;
+                  event.preventDefault();
+                  ref.current?.querySelector<HTMLInputElement>("[data-unit-input]")?.focus();
+                }}
+              />
+            </Field>
           </div>
           <div className={css({ flex: "0 0 token(sizes.32)" })}>
-            <span className={fieldLabel}>単位</span>
-            <input
-              data-unit-input
-              className={bigInput()}
-              list="unitList"
-              aria-label="単位（任意）"
-              enterKeyHint="done"
-              placeholder="例）kg/10a"
-              value={measurement.unit}
-              onChange={(event) => setUnit(event.target.value)}
-              onKeyDown={(event) => {
-                if (!isEnter(event)) return;
-                event.preventDefault();
-                onNext(target);
-              }}
-            />
+            <Field label="単位（任意）" labelSize="sm">
+              <Input
+                data-unit-input
+                list="unitList"
+                enterKeyHint="done"
+                placeholder="例）kg/10a"
+                value={measurement.unit}
+                onChange={(event) => setUnit(event.target.value)}
+                onKeyDown={(event) => {
+                  if (!isEnter(event)) return;
+                  event.preventDefault();
+                  onNext(target);
+                }}
+              />
+            </Field>
           </div>
         </div>
         <div
@@ -531,11 +489,13 @@ export function ReportCellEditor({
           </span>
           {close}
         </div>
-        <div className={row}>
-          <input
+        <Field
+          label="グラフの題（任意）"
+          hideLabel
+          description="グラフの上に出る題です。書かないときは、調査項目がそのまま題になります。"
+        >
+          <Input
             data-first
-            className={bigInput()}
-            aria-label="グラフの題（任意）"
             enterKeyHint="done"
             placeholder={
               measurement.graphs.length > 1
@@ -550,10 +510,7 @@ export function ReportCellEditor({
               onNext(target);
             }}
           />
-        </div>
-        <div className={hint}>
-          グラフの上に出る題です。書かないときは、調査項目がそのまま題になります。
-        </div>
+        </Field>
         <div className={nav}>{done}</div>
       </>
     );
