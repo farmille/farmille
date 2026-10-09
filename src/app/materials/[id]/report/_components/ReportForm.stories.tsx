@@ -1,12 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, mocked, userEvent, within } from "storybook/test";
 import { saveUsageReportDraftAction } from "@/app/materials/[id]/report/new/actions";
+import { Toaster } from "@/components/Toaster";
 import { createBlankUsageReport } from "@/lib/usage-report";
 import { ReportForm } from "./ReportForm";
 const draft = createBlankUsageReport("00000000-0000-4000-8000-000000000101");
 const meta = {
   title: "App/Materials/Report/ReportForm",
   component: ReportForm,
+  decorators: [
+    (Story) => (
+      <>
+        <Story />
+        <Toaster />
+      </>
+    ),
+  ],
   args: {
     material: {
       id: draft.materialId,

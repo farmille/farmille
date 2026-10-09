@@ -218,23 +218,3 @@ export function GroupHeading({ title, note }: { title: string; note: string }) {
     </h3>
   );
 }
-
-export const toast = css({
-  position: "fixed",
-  bottom: "20",
-  left: "50%",
-  zIndex: "40",
-  display: "flex",
-  alignItems: "center",
-  gap: "3",
-  w: "max-content",
-  maxW: "calc(100vw - {spacing.6})",
-  transform: "translateX(-50%)",
-  borderRadius: "pill",
-  bg: "text.default",
-  color: "text.inverse",
-  px: "4",
-  py: "2",
-  fontSize: "sm",
-  lineHeight: "normal",
-});

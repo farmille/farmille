@@ -17,13 +17,15 @@ import {
 } from "@/lib/usage-report";
 import type { RegisteredAddress } from "@/server/accounts/registered-address";
 import type { CropOption } from "@/server/queries/usage-report-form";
+import { Notice } from "@/components/form";
+import { toast } from "@/components/Toaster";
 
 import { css, cva } from "../../../../../../styled-system/css";
 
 import { ReportArticleEditor } from "./ReportArticleEditor";
 import type { ReportSection } from "./ReportArticleParts";
 import { ReportComparisonFields } from "./ReportComparisonFields";
-import { pillButtonRecipe, reportFrame, toast } from "./ReportFormParts";
+import { pillButtonRecipe, reportFrame } from "./ReportFormParts";
 import { ReportPublishedView } from "./ReportPublishedView";
 import { ReportStepBasics, type ReportMaterialSummary } from "./ReportStepBasics";
 import { ReportStepConditions } from "./ReportStepConditions";
@@ -228,19 +230,7 @@ const stepLine = cva({
   variants: { state: { todo: {}, done: { bg: "primary.700" }, current: {} } },
 });
 
-const errorNotice = css({
-  mt: "3",
-  mx: "4.5",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "input",
-  bg: "surface.card",
-  px: "3",
-  py: "2.5",
-  fontSize: "sm",
-  fontWeight: "bold",
-});
+const errorNotice = css({ mt: "3", mx: "4.5" });
 
 const errorList = css({ mt: "1", pl: "4" });
 
@@ -324,7 +314,7 @@ const footButton = pillButtonRecipe({ tone: "quiet", size: "md", strong: true })
 
 type StepState = "todo" | "done" | "current";
 
-type Notice = { kind: "ok" | "error"; text: string; items?: string[] } | null;
+type Failure = { text: string; items?: string[] } | null;
 
 export function ReportForm({
   material,
@@ -364,7 +354,7 @@ export function ReportForm({
   const [preview, setPreview] = useState(false);
   const [published, setPublished] = useState(false);
   const [errors, setErrors] = useState<UsageReportFieldErrors>({});
-  const [notice, setNotice] = useState<Notice>(null);
+  const [notice, setNotice] = useState<Failure>(null);
   const [pending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -384,11 +374,6 @@ export function ReportForm({
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty, submitted]);
   useEffect(() => {
-    if (notice?.kind !== "ok") return;
-    const timer = setTimeout(() => setNotice(null), 4000);
-    return () => clearTimeout(timer);
-  }, [notice]);
-  useEffect(() => {
     if (!leaving) return;
     leaveSave.current?.focus();
     const escape = (event: KeyboardEvent) => {
@@ -398,14 +383,14 @@ export function ReportForm({
     return () => document.removeEventListener("keydown", escape);
   }, [leaving]);
 
-  const showError = useCallback((text: string) => setNotice({ kind: "error", text }), []);
+  const showError = useCallback((text: string) => setNotice({ text }), []);
   function showMissing(text: string, missing: UsageReportFieldErrors) {
     setErrors(missing);
     const first = Object.keys(missing).toSorted(
       (a, b) => reportErrorStep(a) - reportErrorStep(b),
     )[0];
     if (first) navigate(reportErrorStep(first));
-    setNotice({ kind: "error", text, items: missingMessages(missing) });
+    setNotice({ text, items: missingMessages(missing) });
   }
   function navigate(next: number) {
     if (next !== TOTAL) setPreview(false);
@@ -440,12 +425,14 @@ export function ReportForm({
           }
           return;
         }
-        setNotice({ kind: "ok", text: result.message });
+        setNotice(null);
         const savedInput = { ...input, expectedUpdatedAt: result.updatedAt };
         setInput(savedInput);
         setSaved(JSON.stringify(savedInput));
         setErrors({});
+        // 提出したときは完了画面が受付を伝えるので、通知は下書き保存だけに出す
         if (result.status === "pending") setSubmitted(true);
+        else toast(result.message);
         if (close) {
           setLeaving(false);
           router.push(`/materials/${input.materialId}`);
@@ -628,8 +615,8 @@ export function ReportForm({
             })}
           </nav>
         </div>
-        {notice?.kind === "error" && (
-          <div className={errorNotice} role="alert">
+        {notice && (
+          <Notice tone="error" className={errorNotice}>
             {notice.text}
             {notice.items && notice.items.length > 0 && (
               <ul className={errorList}>
@@ -638,7 +625,7 @@ export function ReportForm({
                 ))}
               </ul>
             )}
-          </div>
+          </Notice>
         )}
         <fieldset disabled={busy} className={fields}>
           <section className={pane}>
@@ -733,11 +720,6 @@ export function ReportForm({
             </button>
           </div>
         </div>
-        {notice?.kind === "ok" && (
-          <div className={toast} role="status">
-            {notice.text}
-          </div>
-        )}
         {published && (
           <ReportPublishedView
             input={input}
