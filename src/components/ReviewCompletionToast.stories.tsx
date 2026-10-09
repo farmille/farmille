@@ -2,11 +2,12 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { css } from "../../styled-system/css";
 import { ReviewCompletionToast } from "./ReviewCompletionToast";
+import { Toaster } from "./Toaster";
 
 /**
  * このコンポーネントは URL の ?review= クエリだけを見て表示を決める。
  * beforeEach で iframe の URL を一時的に書き換え、ストーリー離脱時に元へ戻す。
- * トーストは表示から4秒で自動的に消える点に注意。
+ * 通知はアプリ共通の Toaster に出し、表示から4秒で自動的に消える点に注意。
  */
 function withReviewQuery(value: "posted" | "updated" | "deleted" | null) {
   return () => {
@@ -31,6 +32,7 @@ const meta = {
     (Story) => (
       <div className={css({ position: "relative", minH: "160px", maxW: "375px" })}>
         <Story />
+        <Toaster />
       </div>
     ),
   ],

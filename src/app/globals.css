@@ -66,6 +66,17 @@ body {
   }
 }
 
+/*
+ * Sonner は視覚過敏の設定で transition を !important で消し、不透明度の手がかりまで無くす。
+ * 位置は動かさず、不透明度だけで出入りを示す。Sonner の規則より詳細度を上げて上書きする。
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toaster] [data-sonner-toast] {
+    transform: none !important;
+    transition: opacity var(--durations-toast) var(--easings-soft) !important;
+  }
+}
+
 @media print {
   body:has(.application-receipt) header,
   body:has(.application-receipt) nav,
