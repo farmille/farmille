@@ -10,6 +10,7 @@ export { Form } from "./Form";
 export { FormActions } from "./FormActions";
 export { Input } from "./Input";
 export { Notice } from "./Notice";
+export { OtpInput } from "./OtpInput";
 export { RadioGroup } from "./RadioGroup";
 export { controlRecipe } from "./recipes";
 export { SearchInput } from "./SearchInput";
