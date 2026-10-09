@@ -114,9 +114,9 @@ export function ReportSearchField({
             event.preventDefault();
             const step = event.key === "ArrowDown" ? 1 : -1;
             setActive((current) => Math.max(0, Math.min(items.length - 1, current + step)));
-          } else if (event.key === "Enter" && shown && activeItem) {
+          } else if (event.key === "Enter" && shown) {
             event.preventDefault();
-            choose(activeItem);
+            if (activeItem) choose(activeItem);
           } else if (event.key === "Escape") setOpen(false);
         }}
       />

@@ -87,7 +87,7 @@ export const QueryChange: Story = {
     await userEvent.type(input, "根圏");
     await canvas.findByRole("option");
     fireEvent.change(input, { target: { value: "別の資材" } });
-    fireEvent.keyDown(input, { key: "Enter" });
+    await expect(fireEvent.keyDown(input, { key: "Enter" })).toBe(false);
     await expect(args.onMaterialChange).not.toHaveBeenCalled();
     await expect(canvas.queryByRole("option")).not.toBeInTheDocument();
   },
