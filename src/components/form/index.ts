@@ -10,6 +10,7 @@ export { Input } from "./Input";
 export { Notice } from "./Notice";
 export { RadioGroup } from "./RadioGroup";
 export { controlRecipe } from "./recipes";
+export { SearchInput } from "./SearchInput";
 export { Select } from "./Select";
 export { SubmitButton } from "./SubmitButton";
 export { Textarea } from "./Textarea";
