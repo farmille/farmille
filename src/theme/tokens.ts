@@ -239,6 +239,14 @@ export const tokens = {
     fast: { value: "160ms" },
     dialog: { value: "250ms" },
     toast: { value: "400ms" },
+    // 完了画面で見出し・本文・操作を順に出すときの1段ぶんの遅れ
+    stagger: { value: "50ms" },
+  },
+  // 重なり順。ヘッダー（30）より上に、ポップアップ・モーダル・トーストの順で重ねる
+  zIndex: {
+    popup: { value: 40 },
+    dialog: { value: 50 },
+    toast: { value: 60 },
   },
   lineHeights: {
     none: { value: "1" },
