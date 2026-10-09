@@ -48,6 +48,8 @@ type SelectProps<V extends string> = {
   name?: string;
   disabled?: boolean;
   "aria-label"?: string;
+  /** 住所の都道府県などで、ブラウザの自動入力に値の種類を伝える。 */
+  autoComplete?: string;
   className?: string;
 };
 
@@ -62,12 +64,14 @@ export function Select<V extends string>({
   name,
   disabled,
   "aria-label": ariaLabel,
+  autoComplete,
   className,
 }: SelectProps<V>) {
   const required = useFieldRequired();
 
   return (
     <BaseSelect.Root<V>
+      autoComplete={autoComplete}
       defaultValue={defaultValue}
       disabled={disabled}
       items={options}

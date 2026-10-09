@@ -26,12 +26,21 @@ describe("Select", () => {
     render(
       <Form onSubmit={captureSubmit(submitted)}>
         <Field label="都道府県" name="prefectureCode" requirement="required">
-          <Select options={prefectures} placeholder="選択してください" />
+          <Select
+            autoComplete="address-level1"
+            options={prefectures}
+            placeholder="選択してください"
+          />
         </Field>
         <button type="submit">送信</button>
       </Form>,
     );
 
+    // ブラウザの自動入力は名前付きの隠し input に値の種類を見る
+    expect(document.querySelector('input[name="prefectureCode"]')).toHaveAttribute(
+      "autocomplete",
+      "address-level1",
+    );
     const trigger = screen.getByRole("combobox", { name: "都道府県" });
     expect(trigger).toHaveTextContent("選択してください");
 
