@@ -41,6 +41,8 @@ export const popupRecipe = cva({
           transform: "scale(0.95)",
           _motionReduce: { transform: "none" },
         },
+        // Escape など Base UI が即時と判断した開閉（data-instant）は動かさない
+        "&[data-instant]": { transitionDuration: "0s" },
       },
       // キーボードで開いて打鍵ごとに描き直す候補リストは動かさない
       none: {},
