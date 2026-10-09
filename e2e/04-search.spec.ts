@@ -75,7 +75,7 @@ test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷�
         E2E_ADMIN_ACCOUNTS.searchCatalog,
         `/admin/materials/${ratingHigh.id}`,
       );
-      await adminPage.getByLabel(/^公開状態/).selectOption("published");
+      await adminPage.getByRole("radio", { name: "公開中", exact: true }).check();
       await adminPage.getByRole("button", { name: "公開状態を更新", exact: true }).click();
       await expect(
         adminPage.getByText("資材を公開状態へ戻しました。", { exact: true }),
