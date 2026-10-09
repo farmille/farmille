@@ -115,19 +115,6 @@ export function OptionalValue({ value }: { value: string | null | undefined }) {
   return <>{value}</>;
 }
 
-export const adminFormStyle = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "3",
-});
-
-export const adminFormRowStyle = css({
-  display: "flex",
-  flexWrap: "wrap",
-  alignItems: "flex-end",
-  gap: "3",
-});
-
 export const adminActionsStyle = css({
   display: "flex",
   flexWrap: "wrap",
