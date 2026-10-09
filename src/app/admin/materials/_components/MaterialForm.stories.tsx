@@ -69,6 +69,9 @@ const classifications: ClassificationOptions = {
 };
 
 const material: AdminMaterialDetail = {
+  official_name: null,
+  name_reading: null,
+  container_type_id: null,
   published_page_version_id: null,
   id: "00000000-0000-4000-8000-000000000101",
   name: "土づくり微生物資材",

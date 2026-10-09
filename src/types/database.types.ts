@@ -208,6 +208,63 @@ export type Database = {
           },
         ]
       }
+      catalog_import_baselines: {
+        Row: {
+          field_name: string
+          material_id: string
+          run_id: string
+          source_sha256: string
+        }
+        Insert: {
+          field_name: string
+          material_id: string
+          run_id: string
+          source_sha256: string
+        }
+        Update: {
+          field_name?: string
+          material_id?: string
+          run_id?: string
+          source_sha256?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_import_baselines_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_import_baselines_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_import_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_import_runs: {
+        Row: {
+          applied_at: string
+          id: string
+          plan_sha256: string
+          source_sha256: string
+        }
+        Insert: {
+          applied_at?: string
+          id: string
+          plan_sha256: string
+          source_sha256: string
+        }
+        Update: {
+          applied_at?: string
+          id?: string
+          plan_sha256?: string
+          source_sha256?: string
+        }
+        Relationships: []
+      }
       catalog_source_evidence: {
         Row: {
           evidence_id: string
@@ -893,6 +950,21 @@ export type Database = {
           name?: string
           sort_order?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      container_types: {
+        Row: {
+          id: number
+          name: string
+        }
+        Insert: {
+          id: number
+          name: string
+        }
+        Update: {
+          id?: number
+          name?: string
         }
         Relationships: []
       }
@@ -2126,6 +2198,29 @@ export type Database = {
           },
         ]
       }
+      material_name_aliases: {
+        Row: {
+          material_id: string
+          name: string
+        }
+        Insert: {
+          material_id: string
+          name: string
+        }
+        Update: {
+          material_id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_name_aliases_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       material_page_audits: {
         Row: {
           actor_id: string
@@ -2494,53 +2589,66 @@ export type Database = {
       material_page_versions: {
         Row: {
           base_revision: number
+          catalog_import_run_id: string | null
           content_contract: number
           created_at: string
           description: string
-          grant_id: string
+          grant_id: string | null
           id: string
           main_components: string
           material_id: string
           mechanism: string
+          origin: string
           review_note: string | null
           reviewed_at: string | null
           reviewed_by: string | null
-          seller_id: string
+          seller_id: string | null
           status: string
         }
         Insert: {
           base_revision: number
+          catalog_import_run_id?: string | null
           content_contract?: number
           created_at?: string
           description?: string
-          grant_id: string
+          grant_id?: string | null
           id?: string
           main_components?: string
           material_id: string
           mechanism?: string
+          origin?: string
           review_note?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
-          seller_id: string
+          seller_id?: string | null
           status: string
         }
         Update: {
           base_revision?: number
+          catalog_import_run_id?: string | null
           content_contract?: number
           created_at?: string
           description?: string
-          grant_id?: string
+          grant_id?: string | null
           id?: string
           main_components?: string
           material_id?: string
           mechanism?: string
+          origin?: string
           review_note?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
-          seller_id?: string
+          seller_id?: string | null
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "material_page_versions_catalog_import_run_id_fkey"
+            columns: ["catalog_import_run_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_import_runs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "material_page_versions_grant_id_fkey"
             columns: ["grant_id"]
@@ -2693,6 +2801,7 @@ export type Database = {
           avg_rating: number | null
           catalog_url: string | null
           composition_type_id: string | null
+          container_type_id: number | null
           content_revision: number
           control_plot_ratio: number | null
           created_at: string
@@ -2706,6 +2815,8 @@ export type Database = {
           manufacturer_verified_by_seller_id: string | null
           mechanism: string | null
           name: string
+          name_reading: string | null
+          official_name: string | null
           official_url: string | null
           price_range: string | null
           publication_status: string
@@ -2721,6 +2832,7 @@ export type Database = {
           avg_rating?: number | null
           catalog_url?: string | null
           composition_type_id?: string | null
+          container_type_id?: number | null
           content_revision?: number
           control_plot_ratio?: number | null
           created_at?: string
@@ -2734,6 +2846,8 @@ export type Database = {
           manufacturer_verified_by_seller_id?: string | null
           mechanism?: string | null
           name: string
+          name_reading?: string | null
+          official_name?: string | null
           official_url?: string | null
           price_range?: string | null
           publication_status?: string
@@ -2749,6 +2863,7 @@ export type Database = {
           avg_rating?: number | null
           catalog_url?: string | null
           composition_type_id?: string | null
+          container_type_id?: number | null
           content_revision?: number
           control_plot_ratio?: number | null
           created_at?: string
@@ -2762,6 +2877,8 @@ export type Database = {
           manufacturer_verified_by_seller_id?: string | null
           mechanism?: string | null
           name?: string
+          name_reading?: string | null
+          official_name?: string | null
           official_url?: string | null
           price_range?: string | null
           publication_status?: string
@@ -2778,6 +2895,13 @@ export type Database = {
             columns: ["composition_type_id"]
             isOneToOne: false
             referencedRelation: "composition_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_container_type_id_fkey"
+            columns: ["container_type_id"]
+            isOneToOne: false
+            referencedRelation: "container_types"
             referencedColumns: ["id"]
           },
           {
@@ -4120,6 +4244,7 @@ export type Database = {
           main_components: string | null
           material_id: string | null
           mechanism: string | null
+          origin: string | null
         }
         Relationships: [
           {
