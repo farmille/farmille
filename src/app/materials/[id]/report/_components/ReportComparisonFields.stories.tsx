@@ -1,13 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { fn } from "storybook/test";
+import { Toaster } from "@/components/Toaster";
 import { createBlankUsageReport } from "@/lib/usage-report";
 import { ReportComparisonFields } from "./ReportComparisonFields";
 import { reportFrame } from "./ReportFormParts";
 const meta = {
   title: "App/Materials/Report/ReportComparisonFields",
   component: ReportComparisonFields,
-  decorators: [(Story) => <div className={reportFrame}>{Story()}</div>],
+  decorators: [
+    (Story) => (
+      <div className={reportFrame}>
+        {Story()}
+        <Toaster />
+      </div>
+    ),
+  ],
   args: {
     input: createBlankUsageReport("11111111-1111-4111-8111-111111111111"),
     errors: {},

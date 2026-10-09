@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
 import {
   createReportGraph,
@@ -15,36 +21,17 @@ import { Checkbox } from "@/components/Checkbox";
 import { reportPlotColor } from "@/components/ReportPlotColor";
 import { inputRecipe } from "@/components/Input";
 import { textareaRecipe } from "@/components/Textarea";
+import { toast } from "@/components/Toaster";
 
 import { css, cva, cx } from "../../../../../../styled-system/css";
 
-import {
-  Badge,
-  Example,
-  GroupHeading,
-  Need,
-  checkRow,
-  pillButtonRecipe,
-  toast as toastStyle,
-} from "./ReportFormParts";
+import { Badge, Example, GroupHeading, Need, checkRow, pillButtonRecipe } from "./ReportFormParts";
 import { ReportGraphEditor, editKey, readCell, type EditTarget } from "./ReportGraphEditor";
 
 type Measurement = UsageReportInput["measurements"][number];
 type Graph = Measurement["graphs"][number];
 type Plot = UsageReportInput["plots"][number];
 type Row = Graph["rows"][number];
-
-type Toast =
-  | { kind: "info"; message: string }
-  | {
-      kind: "graph";
-      message: string;
-      measurement: Measurement;
-      graph: Graph;
-      measurementIndex: number;
-      graphIndex: number;
-    }
-  | { kind: "plot"; message: string; plot: Plot; index: number; rows: Map<string, Row> };
 
 export const PLOT_GUIDE =
   "資材の使い方（施用方法・希釈倍率・使用量・回数など）と、あれば他の区と違う条件を記入してください。資材を使っていない区は「資材なし」と書き、他の区と違う条件があれば記入してください。";
@@ -129,24 +116,71 @@ const smallLabel = css({
 
 const longArea = css(textareaRecipe.raw({}), { minH: "24" });
 
-const undoButton = css({
-  border: "none",
-  bg: "transparent",
-  p: "0",
-  fontSize: "sm",
-  fontWeight: "extrabold",
-  color: "primary.300",
-  textDecoration: "underline",
-  whiteSpace: "nowrap",
-  cursor: "pointer",
-});
-
 const blankRow = (plotId: string): Row => ({
   id: crypto.randomUUID(),
   plotId,
   label: "",
   value: "",
 });
+
+// 元に戻すは通知の表示中に押されるので、その時点の最新の入力を受け取って組み立てる
+function withPlots(
+  input: UsageReportInput,
+  plots: Plot[],
+  restored?: Map<string, Row>,
+): UsageReportInput {
+  return {
+    ...input,
+    plots,
+    measurements: input.measurements.map((measurement) => ({
+      ...measurement,
+      graphs: measurement.graphs.map((graph) => ({
+        ...graph,
+        rows: plots.map((plot) => {
+          const saved = restored?.get(graph.id);
+          return (
+            graph.rows.find((row) => row.plotId === plot.id) ??
+            (saved && saved.plotId === plot.id ? saved : blankRow(plot.id))
+          );
+        }),
+      })),
+    })),
+  };
+}
+
+function restorePlot(
+  input: UsageReportInput,
+  plot: Plot,
+  index: number,
+  rows: Map<string, Row>,
+): UsageReportInput {
+  const plots = [...input.plots];
+  plots.splice(index, 0, plot);
+  return withPlots(input, plots, rows);
+}
+
+function restoreGraph(
+  input: UsageReportInput,
+  measurement: Measurement,
+  measurementIndex: number,
+  removed: Graph,
+  graphIndex: number,
+): UsageReportInput {
+  const graph = {
+    ...removed,
+    rows: input.plots.map(
+      (plot) => removed.rows.find((row) => row.plotId === plot.id) ?? blankRow(plot.id),
+    ),
+  };
+  const measurements = [...input.measurements];
+  const existing = measurements.find((item) => item.id === measurement.id);
+  if (existing) {
+    const graphs = [...existing.graphs];
+    graphs.splice(graphIndex, 0, graph);
+    measurements[measurements.indexOf(existing)] = { ...existing, graphs };
+  } else measurements.splice(measurementIndex, 0, { ...measurement, graphs: [graph] });
+  return { ...input, measurements };
+}
 
 export function ReportComparisonFields({
   input,
@@ -156,21 +190,14 @@ export function ReportComparisonFields({
   onManualUnit,
 }: {
   input: UsageReportInput;
-  onChange: (input: UsageReportInput) => void;
+  onChange: Dispatch<SetStateAction<UsageReportInput>>;
   errors: UsageReportFieldErrors;
   manualUnits: ReadonlySet<string>;
   onManualUnit: (id: string) => void;
 }) {
   const mobile = useMobile();
   const [ed, setEd] = useState<EditTarget | null>(null);
-  const [toast, setToast] = useState<Toast | null>(null);
   const [periodHints, setPeriodHints] = useState<ReadonlySet<string>>(new Set());
-
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), toast.kind === "info" ? 1800 : 6000);
-    return () => clearTimeout(timer);
-  }, [toast]);
 
   useEffect(() => {
     if (!ed) return;
@@ -208,26 +235,6 @@ export function ReportComparisonFields({
       plots: input.plots.map((plot) => (plot.id === id ? { ...plot, ...values } : plot)),
     });
   }
-  function withPlots(plots: Plot[], restored?: Map<string, Row>): UsageReportInput {
-    return {
-      ...input,
-      plots,
-      measurements: input.measurements.map((measurement) => ({
-        ...measurement,
-        graphs: measurement.graphs.map((graph) => ({
-          ...graph,
-          rows: plots.map((plot) => {
-            const saved = restored?.get(graph.id);
-            return (
-              graph.rows.find((row) => row.plotId === plot.id) ??
-              (saved && saved.plotId === plot.id ? saved : blankRow(plot.id))
-            );
-          }),
-        })),
-      })),
-    };
-  }
-
   function sequence(): EditTarget[] {
     return cards.flatMap(({ graph }, index) => [
       { k: "axis", g: graph.id },
@@ -269,7 +276,7 @@ export function ReportComparisonFields({
   function edit(target: EditTarget) {
     const card = cardOf(target.g);
     if (target.k === "val" && card && !card.measurement.name.trim()) {
-      setToast({ kind: "info", message: "先に、左上の調査項目と単位を書きます" });
+      toast("先に、左上の調査項目と単位を書きます", { duration: 1800 });
       setEd({ k: "axis", g: target.g });
       return;
     }
@@ -278,12 +285,12 @@ export function ReportComparisonFields({
 
   function addPlot(graphId: string) {
     const plot = createReportPlot();
-    onChange(withPlots([...input.plots, plot]));
+    onChange(withPlots(input, [...input.plots, plot]));
     setEd({ k: "name", g: graphId, p: plot.id });
   }
   function removePlot(plotId: string) {
     if (input.plots.length <= 2) {
-      setToast({ kind: "info", message: "区は2つ以上必要です" });
+      toast("区は2つ以上必要です", { duration: 1800 });
       return;
     }
     const index = input.plots.findIndex((plot) => plot.id === plotId);
@@ -296,13 +303,18 @@ export function ReportComparisonFields({
         if (row) rows.set(graph.id, row);
       }
     setEd(null);
-    onChange(withPlots(input.plots.filter((item) => item.id !== plotId)));
-    setToast({
-      kind: "plot",
-      message: `「${plot.name || "区"}」を削除しました`,
-      plot,
-      index,
-      rows,
+    onChange(
+      withPlots(
+        input,
+        input.plots.filter((item) => item.id !== plotId),
+      ),
+    );
+    toast(`「${plot.name || "区"}」を削除しました`, {
+      duration: 6000,
+      action: {
+        label: "元に戻す",
+        onClick: () => onChange((current) => restorePlot(current, plot, index, rows)),
+      },
     });
   }
   function removeGraph(measurement: Measurement, graphIndex: number) {
@@ -318,39 +330,17 @@ export function ReportComparisonFields({
           )
         : input.measurements.filter((item) => item.id !== measurement.id),
     });
-    setToast({
-      kind: "graph",
-      message: "グラフを削除しました",
-      measurement,
-      graph,
-      graphIndex,
-      measurementIndex: input.measurements.indexOf(measurement),
+    const measurementIndex = input.measurements.indexOf(measurement);
+    toast("グラフを削除しました", {
+      duration: 6000,
+      action: {
+        label: "元に戻す",
+        onClick: () =>
+          onChange((current) =>
+            restoreGraph(current, measurement, measurementIndex, graph, graphIndex),
+          ),
+      },
     });
-  }
-  function undo() {
-    if (!toast || toast.kind === "info") return;
-    if (toast.kind === "plot") {
-      const plots = [...input.plots];
-      plots.splice(toast.index, 0, toast.plot);
-      onChange(withPlots(plots, toast.rows));
-    } else {
-      const graph = {
-        ...toast.graph,
-        rows: input.plots.map(
-          (plot) => toast.graph.rows.find((row) => row.plotId === plot.id) ?? blankRow(plot.id),
-        ),
-      };
-      const measurements = [...input.measurements];
-      const existing = measurements.find((item) => item.id === toast.measurement.id);
-      if (existing) {
-        const graphs = [...existing.graphs];
-        graphs.splice(toast.graphIndex, 0, graph);
-        measurements[measurements.indexOf(existing)] = { ...existing, graphs };
-      } else
-        measurements.splice(toast.measurementIndex, 0, { ...toast.measurement, graphs: [graph] });
-      onChange({ ...input, measurements });
-    }
-    setToast(null);
   }
   function addPeriod(measurement: Measurement, graphIndex: number) {
     const graph = createReportGraph(input.plots);
@@ -434,7 +424,7 @@ export function ReportComparisonFields({
                         ...input,
                         plots: input.plots.map((plot) => ({ ...plot, scope })),
                       });
-                      setToast({ kind: "info", message: "調査した範囲を全ての区に入れました" });
+                      toast("調査した範囲を全ての区に入れました", { duration: 1800 });
                     }}
                     onRemovePlot={removePlot}
                     onNext={next}
@@ -504,7 +494,7 @@ export function ReportComparisonFields({
                         ...input,
                         plots: input.plots.map((item) => ({ ...item, scope: plot.scope })),
                       });
-                      setToast({ kind: "info", message: "調査した範囲を全ての区に入れました" });
+                      toast("調査した範囲を全ての区に入れました", { duration: 1800 });
                     }}
                   >
                     この範囲を全ての区に入れる
@@ -561,16 +551,6 @@ export function ReportComparisonFields({
           <br />
           ・奇形（花芽飛び）の発生節数は、処理区が平均1.2節、無処理区が2.5節（平均値±標準誤差、n=30、5%水準で有意差あり）。
         </Example>
-        {toast && (
-          <div className={toastStyle} role="status">
-            <span>{toast.message}</span>
-            {toast.kind !== "info" && (
-              <button type="button" className={undoButton} onClick={undo}>
-                元に戻す
-              </button>
-            )}
-          </div>
-        )}
       </div>
       <datalist id="metricList">
         {[...METRIC_UNIT.keys()].map((name) => (
