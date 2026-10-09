@@ -66,7 +66,14 @@ export const selectTriggerRecipe = cva({
   defaultVariants: { size: "md" },
 });
 
-export const fieldStyle = css({ mt: "5", minW: "0", _first: { mt: "0" } });
+/** 縦に積む項目の間隔。見出しを隠した項目（姓・名など）は呼び出し側の行の一部なので、間隔は行に任せる。 */
+export const fieldRecipe = cva({
+  base: { minW: "0" },
+  variants: {
+    spacing: { stack: { mt: "5", _first: { mt: "0" } }, none: {} },
+  },
+  defaultVariants: { spacing: "stack" },
+});
 
 export const fieldsetStyle = css({ minW: "0" });
 
@@ -203,7 +210,13 @@ export const choiceGroupRecipe = cva({
 
 /** 選択肢の説明。印（box 20px / 丸 18px）と gap の分だけ下げて文字の頭にそろえる。 */
 export const choiceDescriptionRecipe = cva({
-  base: { mt: "0.5", color: "text.muted", fontSize: "sm", lineHeight: "normal" },
+  base: {
+    mt: "0.5",
+    color: "text.muted",
+    fontSize: "sm",
+    lineHeight: "normal",
+    _disabled: { opacity: "disabled" },
+  },
   variants: {
     mark: { checkbox: { pl: "7.5" }, radio: { pl: "7" } },
   },

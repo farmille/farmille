@@ -7,7 +7,7 @@ import { useId, type ReactNode } from "react";
 import { cx } from "../../../styled-system/css";
 import { FieldErrorText, LabelRow, VisibilityText, type FieldProps } from "./Field";
 import { FieldContext, useFieldContext } from "./field-context";
-import { fieldStyle, fieldsetStyle, guideRecipe, visibilityRecipe } from "./recipes";
+import { fieldRecipe, fieldsetStyle, guideRecipe, visibilityRecipe } from "./recipes";
 
 export type FieldsetProps = Omit<FieldProps, "label" | "hideLabel" | "labelSize"> & {
   legend: ReactNode;
@@ -48,7 +48,7 @@ export function Fieldset({
   const fieldset = (
     <BaseFieldset.Root
       aria-describedby={describedBy === "" ? undefined : describedBy}
-      className={rooted ? fieldsetStyle : cx(fieldStyle, className)}
+      className={rooted ? fieldsetStyle : cx(fieldRecipe(), className)}
       disabled={disabled}
     >
       <LabelRow
@@ -81,7 +81,7 @@ export function Fieldset({
 
   return rooted ? (
     <BaseField.Root
-      className={cx(fieldStyle, className)}
+      className={cx(fieldRecipe(), className)}
       disabled={disabled}
       invalid={error !== undefined}
       name={name}

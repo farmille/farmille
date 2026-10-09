@@ -13,7 +13,7 @@ import {
   choiceItemStyle,
   choiceRecipe,
   fieldErrorStyle,
-  fieldStyle,
+  fieldRecipe,
   guideRecipe,
   labelRowRecipe,
   srOnlyStyle,
@@ -63,7 +63,7 @@ export function Field({
 
   return (
     <BaseField.Root
-      className={cx(fieldStyle, className)}
+      className={cx(fieldRecipe({ spacing: hideLabel ? "none" : "stack" }), className)}
       disabled={disabled}
       invalid={error !== undefined}
       name={name}

@@ -82,7 +82,7 @@ export function Select<V extends string>({
       >
         <BaseSelect.Value className={valueStyle} placeholder={placeholder} />
         <BaseSelect.Icon className={triggerIconStyle}>
-          <Icon name="expand_more" />
+          <Icon name="expand_more" size={size === "sm" ? "sm" : "md"} />
         </BaseSelect.Icon>
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
