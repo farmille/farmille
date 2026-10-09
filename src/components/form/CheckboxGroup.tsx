@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { cx } from "../../../styled-system/css";
 import { Choice } from "./Field";
-import { useFieldContext } from "./field-context";
+import { useFieldContext, useResetKey } from "./field-context";
 import { checkboxBoxRecipe, checkIndicatorStyle, choiceGroupRecipe } from "./recipes";
 import type { Option } from "./types";
 
@@ -30,7 +30,13 @@ type CheckboxGroupProps<V extends string> = {
  * 複数選択。チェックした値ごとに name=value を1件ずつ送る。
  * 「1つ以上」の必須は個々のチェックボックスの required では表せないので、requirement は札だけに使う。
  */
-export function CheckboxGroup<V extends string>({
+export function CheckboxGroup<V extends string>(props: CheckboxGroupProps<V>) {
+  // 選択の state をこの部品が持つので、reset と初期値の変化では部品ごと作り直す
+  const resetKey = useResetKey((props.defaultValue ?? []).join("\u001f"));
+  return <CheckboxGroupBody<V> key={resetKey} {...props} />;
+}
+
+function CheckboxGroupBody<V extends string>({
   options,
   variant = "list",
   value,

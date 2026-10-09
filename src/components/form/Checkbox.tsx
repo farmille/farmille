@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 import { Icon } from "@/components/Icon";
 import { Choice, RequirementBadge } from "./Field";
-import { useFieldContext } from "./field-context";
+import { useFieldContext, useResetKey } from "./field-context";
 import { checkboxBoxRecipe, checkIndicatorStyle } from "./recipes";
 
 type CheckboxProps = {
@@ -42,6 +42,7 @@ export function Checkbox({
   className,
 }: CheckboxProps) {
   const { required, inRoot, requirement } = useFieldContext();
+  const resetKey = useResetKey(String(defaultChecked === true));
   const choice = (
     <Choice
       className={inRoot ? className : undefined}
@@ -66,6 +67,7 @@ export function Checkbox({
     >
       {(frame) => (
         <BaseCheckbox.Root
+          key={resetKey}
           checked={checked}
           className={checkboxBoxRecipe({ size })}
           defaultChecked={defaultChecked}

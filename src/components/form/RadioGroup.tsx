@@ -6,7 +6,7 @@ import { RadioGroup as BaseRadioGroup } from "@base-ui/react/radio-group";
 
 import { cx } from "../../../styled-system/css";
 import { Choice } from "./Field";
-import { useFieldContext } from "./field-context";
+import { useFieldContext, useResetKey } from "./field-context";
 import { choiceGroupRecipe, radioDotStyle } from "./recipes";
 import type { Option } from "./types";
 
@@ -35,8 +35,10 @@ export function RadioGroup<V extends string>({
   className,
 }: RadioGroupProps<V>) {
   const { required, inRoot } = useFieldContext();
+  const resetKey = useResetKey(defaultValue ?? "");
   const group = (
     <BaseRadioGroup<V>
+      key={resetKey}
       aria-label={ariaLabel}
       className={cx(choiceGroupRecipe({ variant }), inRoot ? className : undefined)}
       defaultValue={defaultValue}

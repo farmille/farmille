@@ -1,8 +1,9 @@
 "use client";
 
 import { Form as BaseForm } from "@base-ui/react/form";
-import { useMemo, type FormEventHandler, type ReactNode } from "react";
+import { useMemo, useState, type FormEventHandler, type ReactNode } from "react";
 
+import { FormResetContext } from "./field-context";
 import type { FieldErrors } from "./types";
 
 type BaseErrors = NonNullable<BaseForm.Props["errors"]>;
@@ -21,13 +22,18 @@ type FormProps = {
  * 送信時に中の Field を検証し、最初の不備へフォーカスを移すフォーム（noValidate）。
  * レイアウトは持たないので、並べ方は呼び出し側の className で決める。
  */
-export function Form({ errors, ...rest }: FormProps) {
+export function Form({ errors, children, ...rest }: FormProps) {
   // Base UI は errors の参照が変わるたびに取り込み直すので、描画ごとに作り直さない
   const baseErrors = useMemo(
     () => (errors === undefined ? undefined : presentErrors(errors)),
     [errors],
   );
-  return <BaseForm errors={baseErrors} {...rest} />;
+  const [resetCount, setResetCount] = useState(0);
+  return (
+    <BaseForm errors={baseErrors} onReset={() => setResetCount((count) => count + 1)} {...rest}>
+      <FormResetContext.Provider value={resetCount}>{children}</FormResetContext.Provider>
+    </BaseForm>
+  );
 }
 
 function presentErrors(errors: FieldErrors): BaseErrors {

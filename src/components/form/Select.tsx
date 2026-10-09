@@ -11,7 +11,7 @@ import {
   popupRecipe,
 } from "@/components/popup";
 import { css, cx } from "../../../styled-system/css";
-import { useFieldRequired } from "./field-context";
+import { useFieldRequired, useResetKey } from "./field-context";
 import { selectTriggerRecipe } from "./recipes";
 import type { Option } from "./types";
 
@@ -68,9 +68,11 @@ export function Select<V extends string>({
   className,
 }: SelectProps<V>) {
   const required = useFieldRequired();
+  const resetKey = useResetKey(defaultValue ?? "");
 
   return (
     <BaseSelect.Root<V>
+      key={resetKey}
       autoComplete={autoComplete}
       defaultValue={defaultValue}
       disabled={disabled}

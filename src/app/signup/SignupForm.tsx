@@ -129,7 +129,6 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         {/* 送信後のフォームのリセットで選択が外れないよう、再表示の値ごとに載せ替える */}
         <RadioGroup<string>
           defaultValue={values.standpoint}
-          key={values.standpoint}
           options={STANDPOINTS}
           variant="cards"
         />
@@ -169,7 +168,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         name="terms"
         requirement="required"
       >
-        <Checkbox defaultChecked={values.terms === "on"} key={values.terms} variant="row">
+        <Checkbox defaultChecked={values.terms === "on"} variant="row">
           <Link href="/legal/terms" target="_blank" rel="noopener noreferrer">
             総合利用規約
           </Link>

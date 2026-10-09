@@ -151,7 +151,6 @@ export function ProfileEditForm({ profile, details, options }: ProfileEditFormPr
         <Checkbox
           defaultChecked={cityPublic}
           description="チェックなしの場合は都道府県まで表示します"
-          key={String(cityPublic)}
           variant="row"
         >
           市区町村も表示する
