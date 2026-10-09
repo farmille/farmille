@@ -4,54 +4,24 @@ import { Select as BaseSelect } from "@base-ui/react/select";
 import { Fragment, type ReactNode } from "react";
 
 import { Icon } from "@/components/Icon";
+import {
+  optionDescriptionStyle,
+  optionRecipe,
+  popupPositionerStyle,
+  popupRecipe,
+} from "@/components/popup";
 import { css, cx } from "../../../styled-system/css";
 import { useFieldRequired } from "./field-context";
 import { selectTriggerRecipe } from "./recipes";
 import type { Option } from "./types";
 
-// shortcut: popup.ts（F2）の popupRecipe・optionRecipe と同じ見た目をここに持つ。合流後はそちらを import する
-const positionerStyle = css({ zIndex: "popup", outline: "none" });
-
-const popupStyle = css({
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "card",
-  boxShadow: "overlay",
-  p: "1",
-  maxH: "var(--available-height)",
-  overflowY: "auto",
-  minW: "var(--anchor-width)",
-  transformOrigin: "var(--transform-origin)",
-  outline: "none",
-  transitionProperty: "opacity, transform",
-  transitionDuration: "fast",
-  transitionTimingFunction: "out",
-  _startingStyle: { opacity: "0", transform: "scale(0.95)" },
-  _endingStyle: { opacity: "0", transform: "scale(0.95)" },
-  _motionReduce: { transitionProperty: "opacity" },
-});
-
-const optionStyle = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "2",
-  px: "3",
-  py: "2.5",
-  borderRadius: "input",
-  fontSize: "sm",
-  cursor: "default",
+// popup.ts の選択肢には無効の見た目が無いので、選べない選択肢だけここで薄くする
+const optionStateStyle = css({
   userSelect: "none",
-  outline: "none",
-  _highlighted: { bg: "primary.soft", color: "primary.700" },
-  _selected: { fontWeight: "bold" },
   _disabled: { opacity: "disabled", cursor: "not-allowed" },
 });
 
 const optionTextStyle = css({ display: "flex", flexDirection: "column", flex: "1", minW: "0" });
-
-const optionDescriptionStyle = css({ fontSize: "xs", color: "text.subtle", fontWeight: "normal" });
 
 const groupLabelStyle = css({
   px: "3",
@@ -118,10 +88,10 @@ export function Select<V extends string>({
       <BaseSelect.Portal>
         <BaseSelect.Positioner
           alignItemWithTrigger={false}
-          className={positionerStyle}
+          className={popupPositionerStyle}
           sideOffset={4}
         >
-          <BaseSelect.Popup className={popupStyle}>
+          <BaseSelect.Popup className={popupRecipe({ motion: "scale" })}>
             <BaseSelect.List>{renderOptions(options)}</BaseSelect.List>
           </BaseSelect.Popup>
         </BaseSelect.Positioner>
@@ -155,7 +125,7 @@ function renderOptions<V extends string>(options: readonly Option<V>[]): ReactNo
 function SelectOption<V extends string>({ option }: { option: Option<V> }) {
   return (
     <BaseSelect.Item
-      className={optionStyle}
+      className={cx(optionRecipe(), optionStateStyle)}
       disabled={option.disabled}
       label={option.label}
       value={option.value}
