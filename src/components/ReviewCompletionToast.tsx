@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { toast } from "./Toaster";
@@ -22,8 +21,6 @@ function isReviewCompletion(value: string | null): value is ReviewCompletion {
  * 再読み込みで出し直さないようクエリから外す。
  */
 export function ReviewCompletionToast() {
-  const router = useRouter();
-
   useEffect(() => {
     const url = new URL(window.location.href);
     const completion = url.searchParams.get("review");
@@ -32,8 +29,13 @@ export function ReviewCompletionToast() {
     // 開発時の二重実行でも同じ通知を1枚に保つ
     toast(messages[completion], { id: "review-completion" });
     url.searchParams.delete("review");
-    router.replace(`${url.pathname}${url.search}${url.hash}`, { scroll: false });
-  }, [router]);
+    // router.replace だとクエリを外すだけでページのサーバー描画をやり直すので、履歴だけを書き換える
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+  }, []);
 
   return null;
 }
