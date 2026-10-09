@@ -5,14 +5,9 @@ import { useActionState } from "react";
 
 import { initialMfaEnrollState } from "@/app/admin/_lib/action-state";
 import { startTotpEnrollmentAction, verifyTotpCodeAction } from "@/app/admin/mfa/actions";
-import {
-  adminActionsStyle,
-  adminCodeStyle,
-  adminInlineNoteStyle,
-} from "@/app/admin/_components/AdminUI";
-import { controlStyle, Field, FormMessage } from "@/components/auth/Fields";
-import { SubmitButton } from "@/components/auth/SubmitButton";
-import { Button } from "@/components";
+import { adminCodeStyle, adminInlineNoteStyle } from "@/app/admin/_components/AdminUI";
+import { controlStyle, Field } from "@/components/auth/Fields";
+import { FormActions, Notice, SubmitButton } from "@/components/form";
 import { initialAuthFormState } from "@/lib/auth/form-state";
 import { css } from "../../../../styled-system/css";
 
@@ -40,7 +35,7 @@ function VerifyForm({ factorId, next, label }: { factorId: string; next: string;
 
   return (
     <form action={formAction} className={stepStyle} noValidate>
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       <input name="factorId" type="hidden" value={factorId} />
       <input name="next" type="hidden" value={next} />
       <Field
@@ -62,9 +57,9 @@ function VerifyForm({ factorId, next, label }: { factorId: string; next: string;
           type="text"
         />
       </Field>
-      <div className={adminActionsStyle}>
-        <SubmitButton label={label} pendingLabel="確認中…" />
-      </div>
+      <FormActions layout="row">
+        <SubmitButton pendingLabel="確認中…">{label}</SubmitButton>
+      </FormActions>
     </form>
   );
 }
@@ -109,17 +104,15 @@ export function AdminMfaForms({
 
   return (
     <form action={enrollAction} className={stepStyle}>
-      {enrollState.status === "error" ? (
-        <FormMessage tone="error">{enrollState.message}</FormMessage>
-      ) : null}
+      {enrollState.status === "error" ? <Notice tone="error">{enrollState.message}</Notice> : null}
       <p className={adminInlineNoteStyle}>
         運営アカウントは2要素認証（TOTP）が必須です。認証アプリを用意してから登録を始めてください。
       </p>
-      <div className={adminActionsStyle}>
-        <Button size="sm" type="submit">
+      <FormActions layout="row">
+        <SubmitButton pendingLabel="準備中…" size="sm">
           登録を始める
-        </Button>
-      </div>
+        </SubmitButton>
+      </FormActions>
     </form>
   );
 }

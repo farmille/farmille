@@ -10,8 +10,8 @@ import {
 } from "@/app/admin/_components/AdminUI";
 import { initialSellerActionState } from "@/app/admin/_lib/action-state";
 import { sellerOperationAction } from "@/app/admin/sellers/[id]/actions";
-import { Button, Input, Select, Textarea } from "@/components";
-import { FormMessage } from "@/components/auth/Fields";
+import { Button, Textarea } from "@/components";
+import { Field, Input, Notice, Select } from "@/components/form";
 import { css } from "../../../../../styled-system/css";
 
 const wrapStyle = css({
@@ -83,7 +83,7 @@ export function SellerReviewActions({
   const [confirming, setConfirming] = useState<"reject" | "suspend" | null>(null);
   const [rejectedReason, setRejectedReason] = useState("");
   const [submitting, setSubmitting] = useState<Operation | null>(null);
-  const [selectedManufacturer, setSelectedManufacturer] = useState("");
+  const [selectedManufacturer, setSelectedManufacturer] = useState<string | null>(null);
   const [newManufacturerName, setNewManufacturerName] = useState("");
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export function SellerReviewActions({
     if (operation === "approve") {
       formData.set(
         "manufacturerName",
-        selectedManufacturer === "__new__" ? newManufacturerName : selectedManufacturer,
+        selectedManufacturer === "__new__" ? newManufacturerName : (selectedManufacturer ?? ""),
       );
       formData.set("createManufacturer", String(selectedManufacturer === "__new__"));
     }
@@ -120,40 +120,35 @@ export function SellerReviewActions({
     <div className={wrapStyle}>
       {status === "applied" && state.status !== "approved" ? (
         <div className={wrapStyle}>
-          <label className={fieldLabelStyle}>
-            紐づける資材メーカー
+          <Field label="紐づける資材メーカー" labelSize="sm">
             <Select
-              value={selectedManufacturer}
-              onChange={(event) => setSelectedManufacturer(event.target.value)}
               disabled={pending}
-            >
-              <option value="">メーカーを選択してください</option>
-              {manufacturerNames.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-              <option value="__new__">該当なし：メーカーを追加</option>
-            </Select>
-          </label>
+              onValueChange={setSelectedManufacturer}
+              options={[
+                ...manufacturerNames.map((name) => ({ value: name, label: name })),
+                { value: "__new__", label: "該当なし：メーカーを追加" },
+              ]}
+              placeholder="メーカーを選択してください"
+              value={selectedManufacturer}
+            />
+          </Field>
           {selectedManufacturer === "__new__" ? (
-            <label className={fieldLabelStyle}>
-              新規メーカー名
+            <Field label="新規メーカー名" labelSize="sm">
               <Input
-                value={newManufacturerName}
-                onChange={(event) => setNewManufacturerName(event.target.value)}
-                maxLength={300}
                 disabled={pending}
+                maxLength={300}
+                onChange={(event) => setNewManufacturerName(event.target.value)}
+                value={newManufacturerName}
               />
-            </label>
+            </Field>
           ) : null}
           <p className={adminInlineNoteStyle}>
             アカウントの確認後にログインを発行します。この操作では編集権は付与されません。メーカーが提出する掲載・オーナー権限の申請と確認資料を審査してから、資材ごとに編集権を付与してください。
           </p>
         </div>
       ) : null}
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
-      {state.status === "done" ? <FormMessage tone="info">{state.message}</FormMessage> : null}
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
+      {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
 
       {state.status === "approved" ? (
         <div className={credentialsStyle}>
@@ -188,7 +183,7 @@ export function SellerReviewActions({
               <Button
                 disabled={
                   pending ||
-                  selectedManufacturer.length === 0 ||
+                  selectedManufacturer === null ||
                   (selectedManufacturer === "__new__" && newManufacturerName.trim().length === 0)
                 }
                 onClick={() => submit("approve")}

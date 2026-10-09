@@ -41,10 +41,10 @@ export const IssueLogin: Story = {
   },
   async play({ canvasElement }) {
     const canvas = within(canvasElement);
-    await userEvent.selectOptions(
-      canvas.getByLabelText("紐づける資材メーカー"),
-      "しおさい資材株式会社",
-    );
+    await userEvent.click(canvas.getByLabelText("紐づける資材メーカー"));
+    // 選択肢の一覧は body 直下へ portal されるので、canvas の外から探す
+    const popup = within(canvasElement.ownerDocument.body);
+    await userEvent.click(await popup.findByRole("option", { name: "しおさい資材株式会社" }));
     await userEvent.click(canvas.getByRole("button", { name: "確認を完了してログインを発行" }));
     await expect(
       await canvas.findByText("ログインIDとパスワード設定用の案内を発行しました。"),
