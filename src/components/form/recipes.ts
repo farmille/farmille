@@ -60,7 +60,8 @@ export const selectTriggerRecipe = cva({
   variants: {
     size: {
       md: controlSizes.md,
-      sm: { ...controlSizes.sm, w: "auto" },
+      // トリガーはボタンなので、フォーカスしても iOS は拡大しない。並び替えなどの小さいトリガーは小さいままにする
+      sm: { ...controlSizes.sm, w: "auto", _touch: { fontSize: "sm" } },
     },
   },
   defaultVariants: { size: "md" },
