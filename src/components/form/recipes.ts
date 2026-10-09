@@ -262,11 +262,23 @@ export const checkboxBoxRecipe = cva({
         _checked: { bg: "primary.700", borderColor: "primary.700" },
         _fieldInvalid: { borderColor: "accent.danger" },
       },
-      // チップは枠の色でチェック状態を見せるので、印は読み上げ用に残して隠す
-      hidden: { srOnly: true },
+      // チップは枠の色でチェック状態を見せる。印は透明なままチップ全体に重ね、どこを押しても印が受ける
+      // （1px に畳むと label が押下を横取りし、getByRole("checkbox").check() も届かない）
+      hidden: {
+        position: "absolute",
+        inset: "0",
+        m: "0",
+        opacity: "0",
+        borderWidth: "0",
+        cursor: "inherit",
+      },
     },
-    size: { md: { w: "5", h: "5" }, sm: { w: "4", h: "4" } },
+    size: { md: {}, sm: {} },
   },
+  compoundVariants: [
+    { look: "box", size: "md", css: { w: "5", h: "5" } },
+    { look: "box", size: "sm", css: { w: "4", h: "4" } },
+  ],
   defaultVariants: { look: "box", size: "md" },
 });
 
