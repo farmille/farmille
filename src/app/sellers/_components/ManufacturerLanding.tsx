@@ -30,14 +30,13 @@ import {
   MEMBER_ACTIONS,
   OWNER_APPLICATION_HREF,
   PROCEDURES,
-  REMOVAL_INTAKE_HREF,
   type ProcedureSlug,
 } from "./manufacturer-guide";
 
 const CONTENTS = [
   ["lpFlow", "Farmille掲載までの流れ（初回5STEP）"],
   ["lpPrep", "申請にご用意いただくもの"],
-  ["lpGuide", "ご利用ガイド（新規掲載・編集・終売申請）"],
+  ["lpGuide", "ご利用ガイド（新規掲載・編集・終売のご依頼）"],
   ["lpFaq", "よくあるご質問"],
   ["lpOwner", "資材オーナー権限とは？"],
 ] as const;
@@ -454,7 +453,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
 
       <section aria-labelledby="lpGuide">
         <h2 id="lpGuide" className={guideHeadingStyle}>
-          ご利用ガイド（新規掲載・編集・終売申請）
+          ご利用ガイド（新規掲載・編集・終売のご依頼）
         </h2>
         <div className={css({ display: "grid", gap: "3.5", mt: "3.5" })}>
           {OWNER_GUIDES.map((item) => (
@@ -478,18 +477,13 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             </GuideCard>
           ))}
           <GuideCard id="lpGuideDelist" title="終売の反映・非表示にしたい" needId={false}>
-            <ol className={guideListStyle}>
-              <li>
-                <span className={listNumberStyle}>１．</span>
-                <Link href={REMOVAL_INTAKE_HREF}>受付フォームにご記入</Link>
-                （申請用フォームを送付いたします）
-              </li>
-              <li>
-                <span className={listNumberStyle}>２．</span>
-                申請フォームにご記入・ご提出（メールに記載のURLから開きます）
-              </li>
-            </ol>
-            <GuideDetails slug="removal" inline={false} />
+            <p className={css({ mt: "2", fontSize: "md", lineHeight: "prose" })}>
+              終売・廃盤表示や資材ページの非表示のご依頼は{" "}
+              <a className={guideLinkStyle} href={`mailto:${CONTACT_EMAIL}`}>
+                {CONTACT_EMAIL}
+              </a>{" "}
+              で受け付けます。
+            </p>
           </GuideCard>
           <section
             className={cx(guideCardStyle, css({ py: "3.5", px: "4.5" }))}

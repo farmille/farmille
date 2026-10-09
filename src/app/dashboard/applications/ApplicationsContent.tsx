@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { FormPageShell } from "@/components/FormPageShell";
+import { TextLink } from "@/components/TextLink";
+import { CONTACT_EMAIL } from "@/app/sellers/_components/manufacturer-guide";
 import type { listCompanyApplications } from "@/server/company-applications";
 
 import { css } from "../../../../styled-system/css";
@@ -37,14 +39,6 @@ const PROCEDURES = [
     needs: "対象資材のページURL、貴社の関与がわかる資料、引き継ぎの経緯がわかる資料",
     href: "/dashboard/applications/new/transfer_in",
     label: "申請フォーム C",
-  },
-  {
-    title: "終売・販売終了の反映、資材ページの非表示",
-    description:
-      "企業会員の方も、公開側の受付フォームからお手続きください。受付フォームをご入力いただくと、申請フォームのURLをメールでお送りします。企業会員でなくても申請できます。",
-    needs: null,
-    href: "/company-requests/removal",
-    label: "受付フォームへ",
   },
 ] as const;
 
@@ -86,7 +80,8 @@ export function ApplicationsContent({
       <div className={workspaceColumn}>
         <h1 className={pageTitle}>各種お手続き</h1>
         <p className={lead}>
-          資材の掲載・資材オーナー権限の移行・終売・非表示に関するお手続きは、以下の申請フォームから行います。申請後、内容を確認のうえ結果をメールでお知らせします。
+          資材の掲載・資材オーナー権限の移行に関するお手続きは、以下の申請フォームから行います。申請後、内容を確認のうえ結果をメールでお知らせします。終売・廃盤表示や資材ページの非表示のご依頼は{" "}
+          <TextLink href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</TextLink> で受け付けます。
         </p>
         <p className={requirementNote}>
           どの申請にも、貴社のFarmilleアカウントIDと、資材ごとのパッケージ画像（貴社名の記載箇所）または製品ページのURLが必要です。
@@ -101,13 +96,9 @@ export function ApplicationsContent({
               actionLabel={item.label}
             >
               {item.description}
-              {item.needs ? (
-                <>
-                  <br />
-                  <b>必要なもの：</b>
-                  {item.needs}
-                </>
-              ) : null}
+              <br />
+              <b>必要なもの：</b>
+              {item.needs}
             </ProcedureRow>
           ))}
         </div>

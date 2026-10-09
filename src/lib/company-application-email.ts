@@ -15,17 +15,10 @@ const signature =
 const greeting = (company: string, contact: string) =>
   `${company}\n${contact} 様\n\nお世話になっております。Farmille運営でございます。`;
 
-export function removalInvitationEmail(
-  company: string,
-  contact: string,
-  url: string,
-  receipt: boolean,
-) {
+export function receiptAccessEmail(company: string, contact: string, url: string) {
   return {
-    subject: receipt
-      ? "【Farmille】受付票の確認用リンクのご案内"
-      : "【Farmille】資材ページに関する申請フォームのご案内",
-    text: `${greeting(company, contact)}\n${receipt ? "受付票の確認をご希望いただき、ありがとうございます。下記のリンクよりお進みください。" : "このたびは受付フォームへご入力いただき、ありがとうございます。\n\n資材ページの終売・廃盤の反映、または非表示のご申請につきましては、下記の申請フォームよりお手続きをお願いいたします。"}\n\n${url}\n\nリンクの有効期限は30分です。リンク先の「メールアドレスを確認する」を押してお進みください。\n\n${receipt ? "" : "なお、受付対象は当該資材の製造元・販売元・輸入元に該当する企業様に限らせていただいております。\n"}本メールにお心当たりがない場合は、お手数ですが破棄していただきますようお願いいたします。\n\n${signature}`,
+    subject: "【Farmille】受付票の確認用リンクのご案内",
+    text: `${greeting(company, contact)}\n受付票の確認をご希望いただき、ありがとうございます。下記のリンクよりお進みください。\n\n${url}\n\nリンクの有効期限は30分です。リンク先の「メールアドレスを確認する」を押してお進みください。\n\n本メールにお心当たりがない場合は、お手数ですが破棄していただきますようお願いいたします。\n\n${signature}`,
   };
 }
 

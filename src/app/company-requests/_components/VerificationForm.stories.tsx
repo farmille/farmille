@@ -24,14 +24,11 @@ export const Default: Story = {};
 export const Submitted: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.type(canvas.getByLabelText(/^法人名/), "農業資材株式会社");
-    await userEvent.type(canvas.getByLabelText(/^担当者名/), "山田太郎");
+    await userEvent.type(canvas.getByLabelText(/^受付番号/), "12");
     await userEvent.type(canvas.getByLabelText(/^担当者メールアドレス/), "contact@example.test");
-    await userEvent.click(canvas.getByRole("button", { name: "送信して申請フォームを受け取る" }));
+    await userEvent.click(canvas.getByRole("button", { name: "確認メールを送信" }));
     await expect(
-      canvas.findByRole("heading", { name: "申請フォームのURLをお送りしました" }),
+      canvas.findByText("受付番号とメールアドレスが一致する場合は、確認メールをお送りしました。"),
     ).resolves.toBeVisible();
   },
 };
-
-export const ReceiptAccess: Story = { args: { receipt: true } };

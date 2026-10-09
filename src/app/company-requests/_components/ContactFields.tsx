@@ -6,7 +6,7 @@ import {
   formalControlRecipe,
   formalGuideRecipe,
 } from "./formal-styles";
-import { OptionalMark, PrivateNote, RequiredMark } from "./FormalMarks";
+import { PrivateNote, RequiredMark } from "./FormalMarks";
 
 export type ContactDefaults = {
   companyName: string;
@@ -67,12 +67,10 @@ const requiredPrivate = (
 export function ContactFields({
   prefix = "",
   defaults,
-  removal = false,
   fixedAccount = false,
 }: {
   prefix?: string;
   defaults: ContactDefaults;
-  removal?: boolean;
   fixedAccount?: boolean;
 }) {
   const id = (name: string) => `${prefix.replace(/\W/g, "-")}${name}`;
@@ -86,40 +84,33 @@ export function ContactFields({
           maxLength={200}
           name={`${prefix}companyName`}
           placeholder="例）〇〇バイオ株式会社"
-          readOnly={removal}
           required
         />
       </ApplicationField>
-      {removal ? null : (
-        <ApplicationField
+      <ApplicationField
+        id={id("corporateNumber")}
+        label="法人番号"
+        badges={<RequiredMark />}
+        guide="13桁の法人番号。国税庁 法人番号公表サイトで確認できます。"
+      >
+        <input
+          aria-describedby={`${id("corporateNumber")}-guide`}
+          className={formalControlRecipe()}
+          defaultValue={defaults.corporateNumber}
           id={id("corporateNumber")}
-          label="法人番号"
-          badges={<RequiredMark />}
-          guide="13桁の法人番号。国税庁 法人番号公表サイトで確認できます。"
-        >
-          <input
-            aria-describedby={`${id("corporateNumber")}-guide`}
-            className={formalControlRecipe()}
-            defaultValue={defaults.corporateNumber}
-            id={id("corporateNumber")}
-            inputMode="numeric"
-            maxLength={13}
-            name={`${prefix}corporateNumber`}
-            pattern="[0-9]{13}"
-            placeholder="例）1234567890123"
-            required
-          />
-        </ApplicationField>
-      )}
+          inputMode="numeric"
+          maxLength={13}
+          name={`${prefix}corporateNumber`}
+          pattern="[0-9]{13}"
+          placeholder="例）1234567890123"
+          required
+        />
+      </ApplicationField>
       <ApplicationField
         id={id("accountId")}
         label="FarmilleアカウントID"
-        badges={removal ? <OptionalMark /> : <RequiredMark />}
-        guide={
-          removal
-            ? "Farmilleの企業会員の場合はご入力ください（照合が速くなります）。"
-            : "Farmilleが発行したIDをご入力ください。"
-        }
+        badges={<RequiredMark />}
+        guide="Farmilleが発行したIDをご入力ください。"
       >
         <input
           aria-describedby={`${id("accountId")}-guide`}
@@ -130,7 +121,7 @@ export function ContactFields({
           name={`${prefix}accountId`}
           placeholder="Farmilleが発行したID"
           readOnly={fixedAccount}
-          required={!removal}
+          required
         />
       </ApplicationField>
       <ApplicationField id={id("contactName")} label="担当者名" badges={requiredPrivate}>
@@ -141,7 +132,6 @@ export function ContactFields({
           maxLength={200}
           name={`${prefix}contactName`}
           placeholder="例）金子 太郎"
-          readOnly={removal}
           required
         />
       </ApplicationField>
@@ -164,7 +154,6 @@ export function ContactFields({
           maxLength={254}
           name={`${prefix}email`}
           placeholder="tanto@example.co.jp"
-          readOnly={removal}
           required
           type="email"
         />

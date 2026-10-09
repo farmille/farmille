@@ -1,5 +1,5 @@
 import type { ApplicationReceipt } from "@/server/company-applications";
-import { applicationCopy } from "./company-application-copy";
+import { applicationTitle } from "./company-application-copy";
 import { relationLabels, applicationKindSchema } from "./company-application";
 import * as v from "valibot";
 
@@ -17,7 +17,7 @@ export function applicationReceiptLines(
       ? []
       : [`法人番号：${a.corporate_number ?? "該当なし"}`];
   const lines = [
-    applicationCopy[kind].title,
+    applicationTitle(kind),
     `受付番号：${a.receipt_number}`,
     `受付日時：${receiptDateTime(a.submitted_at)}`,
     `法人名：${a.company_name}`,

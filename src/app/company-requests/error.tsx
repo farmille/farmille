@@ -27,9 +27,6 @@ export default function ApplicationErrorPage({ unstable_retry }: { unstable_retr
             <Link className={buttonRecipe({ variant: "ghost" })} href="/company-requests/receipts">
               受付票の確認メールを再発行
             </Link>
-            <Link className={buttonRecipe({ variant: "ghost" })} href="/company-requests/removal">
-              申請用メールを再発行
-            </Link>
           </>
         }
       >

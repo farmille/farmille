@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import type { ApplicationKind } from "@/lib/company-application";
+import type { SubmittableKind } from "@/lib/company-application";
 import { applicationCopy } from "@/lib/company-application-copy";
 
 import { css } from "../../../../styled-system/css";
@@ -53,10 +53,10 @@ function ConsentList({ children }: { children: ReactNode }) {
   return <div className={css({ mt: "3" })}>{children}</div>;
 }
 
-export function ConsentFields({ kind }: { kind: ApplicationKind }) {
+export function ConsentFields({ kind }: { kind: SubmittableKind }) {
   const copy = applicationCopy[kind];
   const last = copy.consents.length - 1;
-  const conditionCount = kind === "registration" || kind === "removal" ? 2 : 0;
+  const conditionCount = kind === "registration" ? 2 : 0;
   const conditions = copy.consents.slice(0, conditionCount);
   const confirmations = copy.consents.slice(conditionCount, last);
   const checkAll = (

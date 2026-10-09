@@ -3,7 +3,7 @@ import { applicationSellerPage } from "../_lib/access";
 import { SellerAccessDenied } from "../../_components/AccessDenied";
 import { FormPageShell } from "@/components/FormPageShell";
 import { applicationKindSchema } from "@/lib/company-application";
-import { applicationCopy } from "@/lib/company-application-copy";
+import { applicationTitle } from "@/lib/company-application-copy";
 import { readCompanyApplication } from "@/server/company-applications";
 import { ApplicationReceivedHeader } from "../ApplicationReceivedHeader";
 import { ApplicationReceipt } from "@/app/company-requests/_components/ApplicationReceipt";
@@ -19,9 +19,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   return (
     <FormPageShell chrome="seller" title="申請受付票" backHref="/dashboard/applications">
       <div className={readingColumn}>
-        <ApplicationReceivedHeader
-          title={kind.success ? applicationCopy[kind.output].title : null}
-        />
+        <ApplicationReceivedHeader title={kind.success ? applicationTitle(kind.output) : null} />
         <div className={surfaceCardRecipe()}>
           <ApplicationReceipt receipt={receipt} />
         </div>

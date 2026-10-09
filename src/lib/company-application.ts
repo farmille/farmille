@@ -3,6 +3,7 @@ import { applicationCopy } from "./company-application-copy";
 
 const text = (max: number) => v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(max));
 const optionalText = (max: number) => v.pipe(v.string(), v.trim(), v.maxLength(max));
+/** 受付票に残る全種別。removal は受付を終了した旧フォームで、既存の受付票を読むためだけに残す。 */
 export const applicationKindSchema = v.picklist([
   "registration",
   "transfer_out",
@@ -10,6 +11,8 @@ export const applicationKindSchema = v.picklist([
   "removal",
 ]);
 export type ApplicationKind = v.InferOutput<typeof applicationKindSchema>;
+export const submittableKindSchema = v.picklist(["registration", "transfer_out", "transfer_in"]);
+export type SubmittableKind = v.InferOutput<typeof submittableKindSchema>;
 export const uuidSchema = v.pipe(v.string(), v.uuid());
 export const evidenceMimeSchema = v.picklist(["image/jpeg", "image/png", "application/pdf"]);
 export const evidencePurposeSchema = v.picklist([
@@ -105,21 +108,6 @@ export const companyApplicationSchema = v.pipe(
       ),
       background: text(10000),
     }),
-    v.object({
-      ...common,
-      kind: v.literal("removal"),
-      accountId: optionalText(100),
-      companyUrl: httpUrlSchema,
-      items: items(
-        v.object({
-          ...item,
-          relations,
-          requestType: v.picklist(["discontinued", "hidden"]),
-          reason: text(10000),
-          discloseReason: v.boolean(),
-        }),
-      ),
-    }),
   ]),
   v.check(
     (input) => input.consents.length === applicationCopy[input.kind].consents.length,
@@ -127,11 +115,6 @@ export const companyApplicationSchema = v.pipe(
   ),
 );
 export type CompanyApplicationInput = v.InferOutput<typeof companyApplicationSchema>;
-export const removalVerificationSchema = v.object({
-  companyName: text(200),
-  contactName: text(200),
-  email,
-});
 export const receiptAccessSchema = v.object({
   receiptNumber: v.pipe(v.string(), v.regex(/^\d+$/)),
   email,
@@ -160,6 +143,5 @@ export const historyExplanation =
   "Farmilleが移行の経緯を確認するための資料です。いずれか一方でも構いませんので、できるだけ添付してください。資料がない場合、確認に時間がかかったり、移行をお受けできなかったりすることがあります。どうしても添付が難しい場合は、「移行の経緯」に理由をご記入ください。契約書等は、本申請に関係のない機密情報・個人情報等をマスキングしていただいて構いません。";
 
 export type ApplicationSubmission = v.InferOutput<typeof submissionSchema>;
-export type RemovalVerification = v.InferOutput<typeof removalVerificationSchema>;
 export type ReceiptAccess = v.InferOutput<typeof receiptAccessSchema>;
 export type EvidenceReservation = v.InferOutput<typeof evidenceReservationSchema>;

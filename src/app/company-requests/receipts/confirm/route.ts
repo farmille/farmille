@@ -2,7 +2,7 @@ import * as v from "valibot";
 import { ApplicationError } from "@/server/company-application-auth";
 import { randomBytes } from "node:crypto";
 import { clientEnv } from "@/env";
-import { confirmRemovalAccess } from "@/server/company-application-access";
+import { confirmReceiptAccess } from "@/server/company-application-access";
 
 export async function GET() {
   const nonce = randomBytes(16).toString("base64");
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const token = v.safeParse(v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/)), form.get("token"));
   if (!token.success) return new Response("確認リンクを開き直してください。", { status: 400 });
   try {
-    const destination = await confirmRemovalAccess(token.output);
+    const destination = await confirmReceiptAccess(token.output);
     return Response.redirect(new URL(destination, clientEnv.siteUrl), 303);
   } catch (error) {
     if (!(error instanceof ApplicationError) || error.code === "internal")

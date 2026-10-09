@@ -10,7 +10,6 @@ import {
   stepBodyRecipe,
   stepCardRecipe,
   stepLabelRecipe,
-  stepLinkStyle,
 } from "./guide-styles";
 import { ProcedureRequirements } from "./ManufacturerLanding";
 import type { Procedure } from "./manufacturer-guide";
@@ -83,11 +82,6 @@ export function ProcedureDetail({ procedure }: { procedure: Procedure }) {
             {step.title}
           </h3>
           <div className={stepBodyRecipe()}>{step.body}</div>
-          {step.link === undefined ? null : (
-            <Link className={stepLinkStyle} href={step.link.href}>
-              {step.link.label}
-            </Link>
-          )}
         </article>
       ))}
 

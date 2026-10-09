@@ -17,5 +17,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const NeedsMembership: Story = {};
-
-export const Removal: Story = { args: { procedure: PROCEDURES.removal } };

@@ -1,13 +1,12 @@
 export const CONTACT_EMAIL = "contact@farmille.com";
+export const REMOVAL_CONTACT_SENTENCE = `終売・廃盤表示や資材ページの非表示のご依頼は ${CONTACT_EMAIL} で受け付けます。`;
 export const OWNER_APPLICATION_HREF = "/dashboard/applications/new/registration";
-export const REMOVAL_INTAKE_HREF = "/company-requests/removal";
 
-export type ProcedureSlug = "owner" | "transfer-out" | "transfer-in" | "removal";
+export type ProcedureSlug = "owner" | "transfer-out" | "transfer-in";
 
 type ProcedureStep = {
   title: string;
   body: string;
-  link?: { href: string; label: string };
 };
 
 export type Procedure = {
@@ -146,55 +145,12 @@ export const PROCEDURES = {
       ["法人番号（13桁）とFarmilleアカウントID", ""],
     ],
   },
-  removal: {
-    slug: "removal",
-    title: "終売・販売終了の反映／資材ページの非表示",
-    listTitle: "販売終了した資材が掲載されている／掲載資材を非表示にしたい",
-    lead: "掲載されている資材ページについて、終売・廃盤の表示、または非表示を申請します。当該資材の製造元・販売元・輸入元の企業様からの申請を受け付けます。",
-    needId: false,
-    formHref: REMOVAL_INTAKE_HREF,
-    formLabel: "受付フォームへ",
-    steps: [
-      {
-        title: "受付フォームにご記入ください",
-        body: "申請フォームをお送りするための簡単なフォームです。法人名・ご担当者名・メールアドレスの3項目をご記入ください。",
-        link: { href: REMOVAL_INTAKE_HREF, label: "受付フォームはこちら →" },
-      },
-      {
-        title: "メールで申請フォームを送付いたします",
-        body: "ご記入のメールアドレス宛にお送りします。届かない場合は、迷惑メールフォルダをご確認ください。",
-      },
-      {
-        title: "申請フォームにご記入のうえ、送信してください",
-        body: "資材ごとに、FarmilleページURL、当該資材との関係、パッケージが確認できる資料、申請種別（終売・廃盤の表示／非表示）と申請理由を記入します。",
-      },
-      {
-        title: "運営が内容を確認後、完了のご連絡をいたします",
-        body: "ご提出資料に不足がある場合も、担当者メールアドレス宛にメールでご連絡いたします。資材ページやレビューのデータは削除しません。",
-      },
-    ],
-    conds: [
-      "申請するすべての資材について、当該資材の製造元・販売元・輸入元のいずれか、または複数に該当すること。特定地域の販売代理店、二次卸・三次卸、小売店は受付対象外です。",
-      "当該資材の製造・輸入・販売等に関わる他の関係会社との間で合意を得ているか、または貴社の判断で申請できる立場にあり、本申請を行う正当な権利を有していること。",
-      "本申請を行う担当者が、所属法人から必要な権限を付与されていること。",
-    ],
-    prep: [
-      ["対象資材のFarmilleページURLと資材名", ""],
-      ["ご担当者の氏名・部署名・メールアドレス・電話番号", ""],
-      ["会社概要ページのURL", ""],
-      [
-        "資材ごとのパッケージ・ラベルの画像（貴社名の記載箇所を含む）",
-        "または、パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL",
-      ],
-    ],
-  },
 } as const satisfies Record<ProcedureSlug, Procedure>;
 
 export const PROCEDURE_ORDER: ReadonlyArray<ProcedureSlug> = [
   "owner",
   "transfer-out",
   "transfer-in",
-  "removal",
 ];
 
 export function isProcedureSlug(value: string): value is ProcedureSlug {
@@ -215,7 +171,11 @@ export const MEMBER_ACTIONS: ReadonlyArray<MemberAction> = [
     href: "/dashboard/materials",
     note: "（企業会員ダッシュボードから）",
   },
-  { title: "資材を終売・非表示にする", href: REMOVAL_INTAKE_HREF, procedure: "removal" },
+  {
+    title: "資材を終売・非表示にする",
+    href: `mailto:${CONTACT_EMAIL}`,
+    note: `（${CONTACT_EMAIL} で受け付けます）`,
+  },
   {
     title: "資材オーナー権限を別の会社に引き渡す",
     href: "/dashboard/applications/new/transfer_out",
@@ -248,9 +208,8 @@ export const GUIDE_FAQS: ReadonlyArray<Faq> = [
   },
   {
     question: "資材ページを削除してもらえますか？",
-    answer:
-      "販売を終了した資材には「終売・廃盤」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非表示」にします。いずれも受付フォームからお手続きください。なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。",
-    links: [{ href: "#lpGuideDelist", label: "終売・非表示の申請について →" }],
+    answer: `販売を終了した資材には「終売・廃盤」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非表示」にします。${REMOVAL_CONTACT_SENTENCE}なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。`,
+    links: [{ href: "#lpGuideDelist", label: "終売・非表示のご依頼について →" }],
   },
   {
     question: "販売代理店や卸売業者でも申請できますか？",
@@ -263,12 +222,6 @@ export const GUIDE_FAQS: ReadonlyArray<Faq> = [
     answer:
       "資材オーナー権限を移行することは可能です。現在の資材オーナー企業から申請する場合と、事業譲渡・合併などで引き継いだ会社から申請する場合で、手続きが異なります。",
     links: [{ href: "#lpGuideMore", label: "権限の引き渡し・引き継ぎについて →" }],
-  },
-  {
-    question: "終売や非表示の申請にFarmilleアカウントは必要ですか？",
-    answer:
-      "不要です。受付フォームに法人名・ご担当者名・メールアドレスを入力すると、申請フォームのURLをメールでお送りします。",
-    links: [{ href: "#lpGuideDelist", label: "終売・非表示の申請について →" }],
   },
   {
     question: "生産者の感想口コミや実証詳細レポートを削除してもらえますか？",
@@ -293,9 +246,8 @@ export const GUIDE_FAQS: ReadonlyArray<Faq> = [
 export const PROCEDURE_FAQS: ReadonlyArray<Faq> = [
   {
     question: "資材ページを削除してもらえますか？",
-    answer:
-      "販売を終了した資材には「終売・廃盤」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非表示」にします。いずれも受付フォームからお手続きください。なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。",
-    links: [{ href: "/sellers/procedures/removal", label: "終売・非表示の申請について →" }],
+    answer: `販売を終了した資材には「終売・廃盤」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非表示」にします。${REMOVAL_CONTACT_SENTENCE}なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。`,
+    links: [],
   },
   {
     question: "Farmilleに登録した覚えがないのに、自社の資材が掲載されています。",
@@ -323,12 +275,6 @@ export const PROCEDURE_FAQS: ReadonlyArray<Faq> = [
       { href: "/sellers/procedures/transfer-out", label: "引き渡す（現在の資材オーナー企業）→" },
       { href: "/sellers/procedures/transfer-in", label: "引き継いだ会社から申請する →" },
     ],
-  },
-  {
-    question: "終売や非表示の申請にFarmilleアカウントは必要ですか？",
-    answer:
-      "不要です。受付フォームに法人名・ご担当者名・メールアドレスを入力すると、申請フォームのURLをメールでお送りします。アカウントをお持ちの企業様は、申請フォームにアカウントIDをご記入いただくと確認が早くなります。",
-    links: [{ href: "/sellers/procedures/removal", label: "終売・非表示の申請について →" }],
   },
   {
     question: "申請の結果はどのように連絡されますか？",

@@ -12,13 +12,13 @@ import {
   evidenceExplanation,
   successionExplanation,
   historyExplanation,
-  type ApplicationKind,
+  type SubmittableKind,
 } from "@/lib/company-application";
 import { errorMessageJa } from "@/server/errors";
 
-import { css, cx } from "../../../../styled-system/css";
+import { css } from "../../../../styled-system/css";
 import { buttonRecipe } from "@/components/Button";
-import { submitApplication, restartRemoval } from "../actions";
+import { submitApplication } from "../actions";
 import { ConsentFields } from "./ConsentFields";
 import {
   ApplicationField,
@@ -98,9 +98,9 @@ function RadioGroup({
 }: {
   legend: string;
   name: string;
-  options: ReadonlyArray<{ value: string; label: string; sub?: string }>;
-  value?: string;
-  onChange?: (value: string) => void;
+  options: ReadonlyArray<{ value: string; label: string }>;
+  value: string;
+  onChange: (value: string) => void;
 }) {
   return (
     <fieldset className={fieldsetStyle}>
@@ -112,21 +112,14 @@ function RadioGroup({
           <label className={choiceStyle} key={option.value}>
             <input
               className={choiceInputStyle}
-              checked={value === undefined ? undefined : value === option.value}
+              checked={value === option.value}
               name={name}
-              onChange={onChange === undefined ? undefined : () => onChange(option.value)}
+              onChange={() => onChange(option.value)}
               required
               type="radio"
               value={option.value}
             />
-            <div>
-              <div>{option.label}</div>
-              {option.sub === undefined ? null : (
-                <div className={css({ mt: "0.5", fontSize: "xs", color: "text.subtle" })}>
-                  {option.sub}
-                </div>
-              )}
-            </div>
+            {option.label}
           </label>
         ))}
       </div>
@@ -158,15 +151,13 @@ const SECTION_TITLES = {
   registration: { company: "申請企業情報", items: "申請資材" },
   transfer_out: { company: "申請企業情報", items: "対象資材" },
   transfer_in: { company: "申請企業（移行先企業）情報", items: "対象資材" },
-  removal: { company: "申請者情報", items: "申請資材" },
-} as const satisfies Record<ApplicationKind, { company: string; items: string }>;
+} as const satisfies Record<SubmittableKind, { company: string; items: string }>;
 
 const SIGNER_LABELS = {
   registration: "担当者名",
   transfer_out: "担当者名（現資材オーナー企業）",
   transfer_in: "担当者名",
-  removal: "申請者氏名",
-} as const satisfies Record<ApplicationKind, string>;
+} as const satisfies Record<SubmittableKind, string>;
 
 export function CompanyApplicationForm({
   intentId,
@@ -175,7 +166,7 @@ export function CompanyApplicationForm({
   recipient,
 }: {
   intentId: string;
-  kind: ApplicationKind;
+  kind: SubmittableKind;
   defaults: ContactDefaults;
   recipient: string;
 }) {
@@ -218,9 +209,6 @@ export function CompanyApplicationForm({
       relations: data.getAll(`${row.id}.relations`),
       ownerName: text(`${row.id}.ownerName`),
       ownerInformation: text(`${row.id}.ownerInformation`),
-      requestType: text(`${row.id}.requestType`),
-      reason: text(`${row.id}.reason`),
-      discloseReason: text(`${row.id}.discloseReason`) === "yes",
     }));
     const input = v.safeParse(companyApplicationSchema, {
       ...contact(),
@@ -228,7 +216,6 @@ export function CompanyApplicationForm({
       items,
       destination: contact("destination."),
       background: text("background"),
-      companyUrl: text("companyUrl"),
       signerName: text("signerName"),
       applicationDate: text("applicationDate"),
       consents: copy.consents.map((_, index) => data.get(`consent.${index}`) === "on"),
@@ -244,11 +231,7 @@ export function CompanyApplicationForm({
         setError(`${errorMessageJa[result.error]} 資材URL・移行先ID・必須資料もご確認ください。`);
         return;
       }
-      router.push(
-        kind === "removal"
-          ? `/company-requests/receipts/${result.data}`
-          : `/dashboard/applications/${result.data}`,
-      );
+      router.push(`/dashboard/applications/${result.data}`);
     } catch {
       setError(
         "申請結果を確認できませんでした。入力内容はこの画面に残っています。同じ内容で再送しても、申請は重複しません。",
@@ -257,70 +240,16 @@ export function CompanyApplicationForm({
       setSubmitting(false);
     }
   }
-  async function restart() {
-    if (
-      !window.confirm(
-        "入力内容と添付を破棄し、最初から入力しますか？ 受付済みの申請は変更されません。",
-      )
-    )
-      return;
-    setSubmitting(true);
-    try {
-      const result = await restartRemoval(intentId);
-      if (!result.ok) {
-        setError(errorMessageJa[result.error]);
-        return;
-      }
-      window.location.reload();
-    } catch {
-      setError("入力を再開できませんでした。時間をおいてもう一度お試しください。");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
   return (
     <form onSubmit={submit}>
       <IntroCard text={copy.introduction} />
-      {kind === "removal" ? (
-        <div className={css({ mt: "3" })}>
-          <p className={formNoteStyle}>
-            途中でページを閉じた場合、入力内容は復元されません。残った添付を破棄するには、最初から入力してください。
-          </p>
-          <button
-            className={cx(buttonRecipe({ variant: "ghost", size: "sm" }), css({ mt: "2" }))}
-            disabled={submitting || uploads > 0}
-            onClick={() => void restart()}
-            type="button"
-          >
-            入力と添付を破棄して最初から入力
-          </button>
-        </div>
-      ) : null}
       <p className={formNoteStyle}>
         担当者情報・ご提出資料は公開されません。申請の保存後に運営が内容を確認します。
       </p>
 
       <fieldset disabled={submitting} className={formBlockStyle}>
         <FormSection title={titles.company}>
-          <ContactFields
-            defaults={defaults}
-            removal={kind === "removal"}
-            fixedAccount={kind !== "removal"}
-          />
-          {kind === "removal" ? (
-            <ApplicationField id="companyUrl" label="会社概要ページのURL" badges={<RequiredMark />}>
-              <input
-                className={formalControlRecipe()}
-                id="companyUrl"
-                maxLength={2000}
-                name="companyUrl"
-                placeholder="https://"
-                required
-                type="url"
-              />
-            </ApplicationField>
-          ) : null}
+          <ContactFields defaults={defaults} fixedAccount />
         </FormSection>
       </fieldset>
 
@@ -445,8 +374,7 @@ export function CompanyApplicationForm({
       </FormSection>
 
       <p className={formNoteStyle}>
-        受付番号と回答の控えを
-        {kind === "removal" ? "確認済みメール" : "企業会員の登録連絡先"}「{recipient}
+        受付番号と回答の控えを企業会員の登録連絡先「{recipient}
         」へ送信します。審査後の連絡先は、入力した担当者メールアドレスです。
       </p>
       {error ? (
@@ -480,7 +408,7 @@ function MaterialItem({
 }: {
   row: ItemRow;
   index: number;
-  kind: ApplicationKind;
+  kind: SubmittableKind;
   intentId: string;
   removable: boolean;
   removeDisabled: boolean;
@@ -535,7 +463,7 @@ function MaterialItem({
       </ApplicationField>
     ) : null;
   const relations =
-    kind === "registration" || kind === "removal" ? (
+    kind === "registration" ? (
       <fieldset className={fieldsetStyle}>
         <legend className={fieldLabelStyle}>
           当該資材との関係 <RequiredMark /> <LabelNote>複数選択可</LabelNote>
@@ -658,60 +586,6 @@ function MaterialItem({
           {relations}
           <div className={subHeadingStyle}>2-4. パッケージが確認できる資料</div>
           {evidence}
-        </>
-      ) : null}
-
-      {kind === "removal" ? (
-        <>
-          <div className={subHeadingStyle}>2-1. 対象資材</div>
-          {materialUrl}
-          {materialName}
-          <div className={subHeadingStyle}>2-2. 当該資材との関係</div>
-          {relations}
-          <div className={subHeadingStyle}>2-3. パッケージが確認できる資料</div>
-          {evidence}
-          <div className={subHeadingStyle}>2-4. 申請内容</div>
-          <RadioGroup
-            legend="申請種別"
-            name={field("requestType")}
-            options={[
-              {
-                value: "discontinued",
-                label: "終売・廃盤の表示",
-                sub: "ページに終売等のステータスを表示します",
-              },
-              {
-                value: "hidden",
-                label: "資材ページの非表示",
-                sub: "一般ユーザーに表示されない状態にします",
-              },
-            ]}
-          />
-          <ApplicationField id={fieldId("reason")} label="申請理由" badges={<RequiredMark />}>
-            <textarea
-              className={formalControlRecipe({ multiline: true })}
-              id={fieldId("reason")}
-              maxLength={10000}
-              name={field("reason")}
-              placeholder="例）2026年3月末をもって製造終了のため"
-              required
-            />
-          </ApplicationField>
-          <RadioGroup
-            legend="申請理由の開示"
-            name={field("discloseReason")}
-            options={[
-              {
-                value: "yes",
-                label: "他の関係会社から問い合わせがあった場合、申請理由を開示してよい",
-              },
-              {
-                value: "no",
-                label: "開示を希望しない",
-                sub: "「関係会社からの申請による」旨のみお伝えします",
-              },
-            ]}
-          />
         </>
       ) : null}
 

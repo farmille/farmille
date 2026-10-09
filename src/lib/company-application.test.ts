@@ -21,9 +21,7 @@ const item = {
 };
 describe("企業申請の入力境界", () => {
   it("各原稿の同意数を維持し、未同意と不足を拒否する", () => {
-    expect(Object.values(applicationCopy).map((copy) => copy.consents.length)).toEqual([
-      12, 9, 11, 9,
-    ]);
+    expect(Object.values(applicationCopy).map((copy) => copy.consents.length)).toEqual([12, 9, 11]);
     const input = {
       ...contact,
       kind: "registration",
