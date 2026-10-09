@@ -1,6 +1,9 @@
 "use client";
 
-import { Select } from "@/components/Select";
+import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
+
+import { Select } from "@/components/form";
 import type { ReviewSort } from "@/server/queries/reviews";
 
 import { css } from "../../../../../styled-system/css";
@@ -8,27 +11,26 @@ import { css } from "../../../../../styled-system/css";
 import { REVIEW_SORT_OPTIONS } from "./search-params";
 
 const formStyle = css({ ml: "auto" });
-const submitStyle = css({ srOnly: true });
 
 export function ReviewSortSelect({ sort }: { sort: ReviewSort }) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [value, setValue] = useState(sort);
+
   return (
-    <form method="get" className={formStyle}>
+    <form method="get" className={formStyle} ref={formRef}>
       <Select
         size="sm"
         name="sort"
-        defaultValue={sort}
+        options={REVIEW_SORT_OPTIONS}
+        value={value}
         aria-label="感想口コミの並び替え"
-        onChange={(event) => event.currentTarget.form?.requestSubmit()}
-      >
-        {REVIEW_SORT_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </Select>
-      <button type="submit" className={submitStyle}>
-        適用
-      </button>
+        onValueChange={(next) => {
+          if (next === null) return;
+          // 隠し input に選んだ値が入ってから送信する
+          flushSync(() => setValue(next));
+          formRef.current?.requestSubmit();
+        }}
+      />
     </form>
   );
 }
