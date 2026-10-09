@@ -13,18 +13,12 @@ import {
   type ChangeEvent,
 } from "react";
 
-import {
-  Button,
-  FileInput,
-  FormMessage,
-  Input,
-  Textarea,
-  TextLink,
-  buttonRecipe,
-} from "@/components";
+import { Button, TextLink, buttonRecipe } from "@/components";
 import { Combobox } from "@/components/Combobox";
 import { Tabs } from "@/components/Tabs";
-import { Field } from "@/components/auth/Fields";
+// shortcut: 資材の検索と選んだ資材の表示は旧 Field のまま。Combobox・Chip ができたら（wave 2）まとめて移す
+import { Field as LegacyField } from "@/components/auth/Fields";
+import { Field, FileInput, Form, FormActions, Input, Notice, Textarea } from "@/components/form";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { errorMessageJa } from "@/server/errors";
 import type { SellerArticleMaterial } from "@/server/queries/seller-articles";
@@ -48,13 +42,6 @@ const formLayout = css({
   display: "flex",
   flexDirection: "column",
   gap: "4",
-});
-
-const actionsRow = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "2.5",
-  mt: "2",
 });
 
 const previewBox = css({
@@ -279,7 +266,12 @@ export function ArticleForm({
 
   return (
     <div className={formLayout}>
-      <form action={formAction} className={formLayout} id="article-editor-form">
+      <Form
+        action={formAction}
+        className={formLayout}
+        errors={fieldErrors}
+        id="article-editor-form"
+      >
         <input defaultValue={initialStatus} name="status" ref={statusInputRef} type="hidden" />
         <input name="heroImageUrl" type="hidden" value={heroImageUrl} />
         <input
@@ -288,14 +280,8 @@ export function ArticleForm({
           value={JSON.stringify(materials.map((material) => material.id))}
         />
 
-        <Field
-          error={fieldErrors.title}
-          htmlFor="article-title"
-          label="タイトル"
-          requirement="required"
-        >
+        <Field label="タイトル" name="title" requirement="required">
           <Input
-            id="article-title"
             name="title"
             onChange={(event) => setTitle(event.target.value)}
             placeholder="例）高温期の活用ガイド"
@@ -303,17 +289,16 @@ export function ArticleForm({
           />
         </Field>
 
+        {/* 送信名を付けるとファイル入力も heroImageUrl で送られるので、サーバーのエラーも error で渡す */}
         <Field
+          description="JPEG / PNG / WebP（5MB以下）。公開カードのカバーに使います。"
           error={fieldErrors.heroImageUrl ?? uploadError ?? undefined}
-          guide="JPEG / PNG / WebP（5MB以下）。公開カードのカバーに使います。"
-          htmlFor="article-hero"
           label="ヒーロー画像"
           requirement="optional"
         >
           <FileInput
             accept="image/jpeg,image/png,image/webp"
             disabled={busy}
-            id="article-hero"
             onChange={(event) => {
               void handleHeroChange(event);
             }}
@@ -350,12 +335,7 @@ export function ArticleForm({
           )}
         </Field>
 
-        <Field
-          error={fieldErrors.body}
-          htmlFor="article-body"
-          label="本文（Markdown）"
-          requirement="required"
-        >
+        <Field label="本文（Markdown）" name="body" requirement="required">
           <Tabs
             aria-label="本文エディタ"
             onValueChange={setEditorTab}
@@ -375,6 +355,7 @@ export function ArticleForm({
                       >
                         画像を挿入
                       </Button>
+                      {/* 選んだ画像はその場でアップロードして本文に差し込むので、選択中の表示を持つ FileInput は使わない */}
                       <input
                         accept="image/jpeg,image/png,image/webp"
                         className={css({ display: "none" })}
@@ -387,7 +368,6 @@ export function ArticleForm({
                     </div>
                     <Textarea
                       className={css({ mt: "3", minH: "220px" })}
-                      id="article-body"
                       name="body"
                       onChange={(event) => setBody(event.target.value)}
                       placeholder={
@@ -419,7 +399,7 @@ export function ArticleForm({
           />
         </Field>
 
-        <Field
+        <LegacyField
           error={fieldErrors.materialIds}
           guide="自社・他社を問わず資材マスタ全体から検索して複数選択できます。"
           htmlFor="article-material-search"
@@ -452,11 +432,15 @@ export function ArticleForm({
               </span>
             ))}
           </div>
-        </Field>
-      </form>
+        </LegacyField>
+      </Form>
 
       <div className={formLayout}>
-        <Field htmlFor="article-material-search" label="資材を検索して追加" requirement="optional">
+        <LegacyField
+          htmlFor="article-material-search"
+          label="資材を検索して追加"
+          requirement="optional"
+        >
           <Combobox
             id="article-material-search"
             aria-label="資材を検索して追加"
@@ -481,7 +465,7 @@ export function ArticleForm({
             }}
             emptyMessage={searchPending ? "検索中…" : "検索を実行すると候補を表示します。"}
           />
-        </Field>
+        </LegacyField>
         <Button
           disabled={busy}
           size="sm"
@@ -494,7 +478,7 @@ export function ArticleForm({
       </div>
 
       {state.status === "idle" ? null : (
-        <FormMessage status={state.status === "error" ? "error" : "success"}>
+        <Notice tone={state.status}>
           {state.message}
           {state.status === "success" &&
           state.published === true &&
@@ -504,10 +488,10 @@ export function ArticleForm({
               <TextLink href={`/articles/${state.articleId}`}>公開ページを確認</TextLink>
             </>
           ) : null}
-        </FormMessage>
+        </Notice>
       )}
 
-      <div className={actionsRow}>
+      <FormActions>
         <Button
           disabled={busy}
           onClick={() => submitWithStatus("draft")}
@@ -519,7 +503,7 @@ export function ArticleForm({
         <Button disabled={busy} onClick={() => submitWithStatus("published")} type="button">
           {busy ? "処理中…" : "公開する"}
         </Button>
-      </div>
+      </FormActions>
 
       <Link className={buttonRecipe({ variant: "ghost" })} href="/dashboard/articles">
         一覧に戻る
