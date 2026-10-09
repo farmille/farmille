@@ -1,11 +1,12 @@
 "use client";
 
-import { Fragment, useId, useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 
-import { inputRecipe } from "@/components/Input";
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
+import { Input } from "@/components/form";
 import { css } from "../../../../styled-system/css";
 
-import { chipListStyle, focusRing } from "./search-chips";
+import { chipListStyle } from "./search-chips";
 
 export type SideFilterItem = {
   key: string;
@@ -17,27 +18,7 @@ function normalize(value: string) {
   return value.normalize("NFKC").toLowerCase();
 }
 
-const headerButtonStyle = css(focusRing, {
-  display: "flex",
-  alignItems: "center",
-  gap: "2",
-  w: "full",
-  minH: "11",
-  py: "1.5",
-  px: "0.5",
-  borderWidth: "0",
-  bg: "transparent",
-  color: "inherit",
-  textAlign: "left",
-  cursor: "pointer",
-});
-
-const filterInputStyle = css(inputRecipe.raw(), {
-  mb: "2",
-  py: "2",
-  px: "3",
-  fontSize: "sm",
-});
+const filterInputStyle = css({ mb: "2" });
 
 export function SideSection({
   title,
@@ -57,9 +38,7 @@ export function SideSection({
   };
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const bodyId = useId();
   const keyword = normalize(query.trim());
   const hits =
     filter && keyword
@@ -67,7 +46,7 @@ export function SideSection({
       : null;
 
   return (
-    <div
+    <Collapsible
       className={css({
         py: "2",
         px: "3",
@@ -78,30 +57,11 @@ export function SideSection({
         },
       })}
     >
-      <button
-        type="button"
-        className={headerButtonStyle}
-        aria-expanded={open}
-        aria-controls={bodyId}
-        onClick={() => setOpen(!open)}
-      >
-        <span className={css({ fontSize: "md", fontWeight: "bold" })}>{title}</span>
-        <span
-          className={css({
-            flex: "none",
-            ml: "auto",
-            color: "primary.700",
-            fontSize: "xs",
-            fontWeight: "bold",
-          })}
-          aria-hidden="true"
-        >
-          {open ? "閉じる ▴" : "開く ▾"}
-        </span>
-      </button>
+      <CollapsibleTrigger>{title}</CollapsibleTrigger>
       {filter ? (
-        <input
+        <Input
           type="search"
+          size="sm"
           className={filterInputStyle}
           aria-label={filter.label}
           placeholder={filter.placeholder}
@@ -150,9 +110,10 @@ export function SideSection({
           )}
         </div>
       ) : null}
-      <div id={bodyId} hidden={!open || hits !== null}>
-        {children}
-      </div>
-    </div>
+      {/* 閉じていてもページ内検索とクローラーに一覧のリンクを見せる */}
+      <CollapsiblePanel hiddenUntilFound>
+        <div hidden={hits !== null}>{children}</div>
+      </CollapsiblePanel>
+    </Collapsible>
   );
 }
