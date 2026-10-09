@@ -3,9 +3,6 @@ import { userEvent, within } from "storybook/test";
 
 import { SubmitButton } from "./SubmitButton";
 
-/** Storybook 上で useFormStatus を成立させるためのダミー送信（実際には何もしない）。 */
-async function noopSubmit() {}
-
 /** 送信中の見た目を保持するため、意図的に解決しないダミー送信。 */
 function pendingForever(): Promise<void> {
   return new Promise(() => {});
@@ -18,13 +15,6 @@ const meta = {
     children: "登録する",
     pendingLabel: "登録中…",
   },
-  decorators: [
-    (Story) => (
-      <form action={noopSubmit}>
-        <Story />
-      </form>
-    ),
-  ],
 } satisfies Meta<typeof SubmitButton>;
 
 export default meta;
