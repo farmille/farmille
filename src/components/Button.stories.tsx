@@ -52,6 +52,15 @@ export const Disabled: Story = {
   },
 };
 
+/** 送信中のように押せない間も、フォーカスを残して aria-disabled で伝える。 */
+export const FocusableWhenDisabled: Story = {
+  args: {
+    disabled: true,
+    focusableWhenDisabled: true,
+    children: "送信中…",
+  },
+};
+
 /** 短いラベルと横並び時の幅を確認する。 */
 export const ShortLabels: Story = {
   render: () => (
