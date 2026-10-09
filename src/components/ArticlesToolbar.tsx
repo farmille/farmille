@@ -4,14 +4,14 @@ import { useRouter } from "next/navigation";
 
 import { css } from "../../styled-system/css";
 import { formDataString } from "@/lib/validation";
-import { FilterPills, type FilterPillOption } from "./FilterPills";
+import { FilterPills } from "./FilterPills";
 import { Icon } from "@/components/Icon";
 
-const FILTER_OPTIONS: FilterPillOption[] = [
+const FILTER_OPTIONS = [
   { value: "all", label: "すべて" },
   { value: "report", label: "実証詳細レポート" },
   { value: "article", label: "記事" },
-];
+] as const;
 
 type ArticlesToolbarProps = {
   filter: string;
@@ -90,12 +90,12 @@ export function ArticlesToolbar({ filter, q }: ArticlesToolbarProps) {
       </form>
 
       <FilterPills
-        options={FILTER_OPTIONS}
-        value={filter}
         aria-label="コンテンツ種別"
-        onChange={(value) => {
-          router.push(buildHref({ filter: value }));
-        }}
+        items={FILTER_OPTIONS.map((option) => ({
+          href: buildHref({ filter: option.value }),
+          label: option.label,
+          current: option.value === filter,
+        }))}
       />
     </div>
   );

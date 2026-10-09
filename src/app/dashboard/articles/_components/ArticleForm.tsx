@@ -16,7 +16,6 @@ import {
 import {
   Button,
   FileInput,
-  FilterPills,
   FormMessage,
   Input,
   Textarea,
@@ -24,6 +23,7 @@ import {
   buttonRecipe,
 } from "@/components";
 import { Combobox } from "@/components/Combobox";
+import { Tabs } from "@/components/Tabs";
 import { Field } from "@/components/auth/Fields";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { errorMessageJa } from "@/server/errors";
@@ -356,60 +356,67 @@ export function ArticleForm({
           label="本文（Markdown）"
           requirement="required"
         >
-          <FilterPills
+          <Tabs
             aria-label="本文エディタ"
-            onChange={(value) => {
-              if (value === "write" || value === "preview") setEditorTab(value);
-            }}
-            options={[
-              { value: "write", label: "編集" },
-              { value: "preview", label: "プレビュー" },
+            onValueChange={setEditorTab}
+            tabs={[
+              {
+                value: "write",
+                label: "編集",
+                panel: (
+                  <>
+                    <div className={css({ mt: "3", display: "flex", gap: "2", flexWrap: "wrap" })}>
+                      <Button
+                        disabled={busy}
+                        onClick={() => bodyImageInputRef.current?.click()}
+                        size="sm"
+                        type="button"
+                        variant="ghost"
+                      >
+                        画像を挿入
+                      </Button>
+                      <input
+                        accept="image/jpeg,image/png,image/webp"
+                        className={css({ display: "none" })}
+                        onChange={(event) => {
+                          void handleBodyImageChange(event);
+                        }}
+                        ref={bodyImageInputRef}
+                        type="file"
+                      />
+                    </div>
+                    <Textarea
+                      className={css({ mt: "3", minH: "220px" })}
+                      id="article-body"
+                      name="body"
+                      onChange={(event) => setBody(event.target.value)}
+                      placeholder={
+                        "見出しや箇条書きを Markdown で書けます。\n画像は「画像を挿入」から追加できます。"
+                      }
+                      ref={bodyRef}
+                      value={body}
+                    />
+                  </>
+                ),
+              },
+              {
+                value: "preview",
+                label: "プレビュー",
+                panel: (
+                  <>
+                    <input name="body" type="hidden" value={body} />
+                    <div
+                      aria-live="polite"
+                      className={cx(css({ mt: "3" }), previewBox)}
+                      // プレビューは sanitize 済み HTML（renderMarkdownToHtml）のみを表示する。
+                      dangerouslySetInnerHTML={{ __html: previewHtml }}
+                    />
+                  </>
+                ),
+              },
             ]}
             value={editorTab}
           />
-          <div className={css({ mt: "3", display: "flex", gap: "2", flexWrap: "wrap" })}>
-            <Button
-              disabled={busy || editorTab !== "write"}
-              onClick={() => bodyImageInputRef.current?.click()}
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
-              画像を挿入
-            </Button>
-            <input
-              accept="image/jpeg,image/png,image/webp"
-              className={css({ display: "none" })}
-              onChange={(event) => {
-                void handleBodyImageChange(event);
-              }}
-              ref={bodyImageInputRef}
-              type="file"
-            />
-          </div>
-          {editorTab === "write" ? (
-            <Textarea
-              className={css({ mt: "3", minH: "220px" })}
-              id="article-body"
-              name="body"
-              onChange={(event) => setBody(event.target.value)}
-              placeholder={
-                "見出しや箇条書きを Markdown で書けます。\n画像は「画像を挿入」から追加できます。"
-              }
-              ref={bodyRef}
-              value={body}
-            />
-          ) : (
-            <>
-              <input name="body" type="hidden" value={body} />
-              <div
-                aria-live="polite"
-                className={cx(css({ mt: "3" }), previewBox)}
-                // プレビューは sanitize 済み HTML（renderMarkdownToHtml）のみを表示する。
-                dangerouslySetInnerHTML={{ __html: previewHtml }}
-              />
-            </>
-          )}
         </Field>
 
         <Field

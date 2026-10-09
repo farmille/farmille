@@ -1,12 +1,12 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
-import { FilterPills, type FilterPillOption } from "@/components";
+import { FilterPills } from "@/components";
 
 /**
  * 一覧の絞り込みをクエリ文字列で持つためのラッパー。
- * 見た目はキットの FilterPills のまま、選択時に URL を書き換えてサーバー側で絞り込む。
+ * 今のクエリに param だけを差し替えたリンクを並べ、サーバー側で絞り込む。
  */
 export function QueryFilter({
   ariaLabel,
@@ -15,24 +15,25 @@ export function QueryFilter({
   value,
 }: {
   ariaLabel: string;
-  options: FilterPillOption[];
+  options: readonly { value: string; label: string }[];
   param: string;
   value: string;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   return (
     <FilterPills
       aria-label={ariaLabel}
-      onChange={(next) => {
+      items={options.map((option) => {
         const params = new URLSearchParams(searchParams);
-        params.set(param, next);
-        router.push(`${pathname}?${params.toString()}`);
-      }}
-      options={options}
-      value={value}
+        params.set(param, option.value);
+        return {
+          href: `${pathname}?${params.toString()}`,
+          label: option.label,
+          current: option.value === value,
+        };
+      })}
     />
   );
 }
