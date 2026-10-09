@@ -21,7 +21,7 @@ import { Button } from "@/components/Button";
 import { Checkbox, checkboxChipStyle } from "@/components/Checkbox";
 import { Input } from "@/components/Input";
 import { SectionHeading } from "@/components/SectionHeading";
-import { Select } from "@/components/Select";
+import { RadioGroup } from "@/components/Radio";
 import { SurfaceCard } from "@/components/SurfaceCard";
 import { Textarea } from "@/components/Textarea";
 import { Field, FormMessage, formActionsStyle, HintBox, NoteBox } from "@/components/auth/Fields";
@@ -426,18 +426,18 @@ function MaterialItem({
       {kind === "registration" ? (
         <>
           <SectionHeading title="2-1. 申請内容" />
-          <Field htmlFor={fieldId("target")} label="申請内容" requirement="required">
-            <Select
-              id={fieldId("target")}
+          <Field labelId={fieldId("target-label")} label="申請内容" requirement="required">
+            <RadioGroup
+              aria-labelledby={fieldId("target-label")}
               name={field("target")}
-              onChange={(event) =>
-                onTarget(v.parse(v.picklist(["new", "existing"]), event.target.value))
-              }
+              onChange={onTarget}
+              options={[
+                { value: "new", label: "資材情報の新規掲載" },
+                { value: "existing", label: "掲載済み資材の資材オーナー権限" },
+              ]}
+              required
               value={row.target}
-            >
-              <option value="new">資材情報の新規掲載</option>
-              <option value="existing">掲載済み資材の資材オーナー権限</option>
-            </Select>
+            />
           </Field>
           <SectionHeading title="2-2. 対象資材" />
           {materialName}
