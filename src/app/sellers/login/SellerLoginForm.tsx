@@ -3,21 +3,17 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
-import {
-  formFieldStyle,
-  formGuideRecipe,
-  formInputStyle,
-  formLabelStyle,
-  FormNotice,
-  RequiredBadge,
-} from "@/components/FormParts";
-import { SubmitButton } from "@/components/auth/SubmitButton";
-import { formActionsStyle } from "@/components/auth/Fields";
 import { sellerLoginAction } from "@/app/sellers/login/actions";
+import {
+  controlStyle,
+  Field,
+  FormMessage,
+  formActionsStyle,
+  linkRowStyle,
+  textLinkStyle,
+} from "@/components/auth/Fields";
+import { SubmitButton } from "@/components/auth/SubmitButton";
 import { initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
-
-import { css } from "../../../../styled-system/css";
-import { greenTextLinkStyle } from "../_components/form-styles";
 
 export function SellerLoginForm({ next }: { next: string | null }) {
   const [state, formAction] = useActionState(sellerLoginAction, initialAuthFormState);
@@ -25,18 +21,19 @@ export function SellerLoginForm({ next }: { next: string | null }) {
 
   return (
     <form action={formAction} noValidate>
-      {state.status === "error" ? <FormNotice tone="error">{state.message}</FormNotice> : null}
+      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
       {next === null ? null : <input name="next" type="hidden" value={next} />}
 
-      <div className={css({ mt: "4" })}>
-        <label className={formLabelStyle} htmlFor="loginId">
-          ログインID <RequiredBadge />
-        </label>
+      <Field
+        guide="運営からの案内メールに記載されたID"
+        htmlFor="loginId"
+        label="ログインID"
+        requirement="required"
+      >
         <input
-          aria-describedby="loginId-guide"
           autoCapitalize="none"
           autoComplete="username"
-          className={formInputStyle}
+          className={controlStyle}
           defaultValue={values.loginId}
           id="loginId"
           name="loginId"
@@ -45,49 +42,35 @@ export function SellerLoginForm({ next }: { next: string | null }) {
           spellCheck={false}
           type="text"
         />
-        <div className={formGuideRecipe({ placement: "below" })} id="loginId-guide">
-          運営からの案内メールに記載されたID
-        </div>
-      </div>
+      </Field>
 
-      <div className={formFieldStyle}>
-        <label className={formLabelStyle} htmlFor="password">
-          パスワード <RequiredBadge />
-        </label>
+      <Field htmlFor="password" label="パスワード" requirement="required">
         <input
           autoComplete="current-password"
-          className={formInputStyle}
+          className={controlStyle}
           id="password"
           name="password"
           placeholder="••••••••"
           required
           type="password"
         />
-      </div>
+      </Field>
 
       <div className={formActionsStyle}>
         <SubmitButton label="ログインする" pendingLabel="ログイン中…" />
       </div>
 
-      <div
-        className={css({
-          display: "flex",
-          flexDirection: "column",
-          gap: "2",
-          mt: "3.5",
-          fontSize: "md",
-        })}
-      >
-        <Link className={greenTextLinkStyle} href="/sellers/password-reset">
+      <div className={linkRowStyle}>
+        <Link className={textLinkStyle} href="/sellers/password-reset">
           パスワードをお忘れの方
         </Link>
-        <Link className={greenTextLinkStyle} href="/sellers/apply">
+        <Link className={textLinkStyle} href="/sellers/apply">
           企業会員でない方（企業会員登録の申請へ）
         </Link>
-        <Link className={greenTextLinkStyle} href="/login">
+        <Link className={textLinkStyle} href="/login">
           一般ユーザーの方のログイン
         </Link>
-        <Link className={greenTextLinkStyle} href="/signup">
+        <Link className={textLinkStyle} href="/signup">
           登録方法を選び直す
         </Link>
       </div>

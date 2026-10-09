@@ -3,45 +3,17 @@ import { useState } from "react";
 import * as v from "valibot";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { evidenceMimeSchema, evidencePurposeSchema } from "@/lib/company-application";
-import { FieldError } from "@/components/FormParts";
+import { FormMessage, HintBox } from "@/components/auth/Fields";
+import { Button } from "@/components/Button";
+import { FileInput } from "@/components/FileInput";
 import { errorMessageJa } from "@/server/errors";
 
 import { css } from "../../../../styled-system/css";
 import { reserveEvidence, finalizeEvidence, removeEvidence } from "../actions";
 
-const uploadStyle = css({
-  position: "relative",
-  display: "block",
-  p: "4.5",
-  bg: "formal.surface",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "formal.line",
-  borderRadius: "mark",
-  textAlign: "center",
-  color: "formal.muted",
-  fontSize: "sm",
-  cursor: "pointer",
-  "&:has(input:disabled)": { opacity: "disabled", cursor: "not-allowed" },
-  "&:has(input:focus-visible)": {
-    outlineWidth: "2px",
-    outlineStyle: "solid",
-    outlineColor: "primary.700",
-    outlineOffset: "2px",
-  },
-});
-
-const fileInputStyle = css({
-  position: "absolute",
-  inset: "0",
-  w: "full",
-  h: "full",
-  opacity: "0",
-  cursor: "pointer",
-});
+const stackStyle = css({ display: "flex", flexDirection: "column", gap: "2" });
 
 const fileListStyle = css({
-  mt: "2",
   display: "flex",
   flexDirection: "column",
   gap: "1.5",
@@ -55,19 +27,6 @@ const fileListStyle = css({
   },
 });
 
-export const textDangerButtonStyle = css({
-  flexShrink: "0",
-  borderWidth: "0",
-  bg: "transparent",
-  color: "accent.danger",
-  fontSize: "sm",
-  fontWeight: "bold",
-  py: "1",
-  px: "1.5",
-  cursor: "pointer",
-  _disabled: { opacity: "disabled", cursor: "not-allowed" },
-});
-
 type EvidenceFile = { id: string; name: string; verified: boolean };
 export function EvidenceFields({
   intentId,
@@ -75,7 +34,6 @@ export function EvidenceFields({
   purpose,
   label,
   inputId,
-  describedBy,
   onBusy,
   onCount,
 }: {
@@ -84,7 +42,6 @@ export function EvidenceFields({
   purpose: v.InferOutput<typeof evidencePurposeSchema>;
   label: string;
   inputId: string;
-  describedBy?: string;
   onBusy: (busy: boolean) => void;
   onCount?: (count: number) => void;
 }) {
@@ -164,70 +121,41 @@ export function EvidenceFields({
     }
   }
   return (
-    <div>
-      <label className={uploadStyle} htmlFor={inputId}>
-        <input
-          accept="image/jpeg,image/png,application/pdf"
-          aria-describedby={describedBy}
-          aria-label={label}
-          className={fileInputStyle}
-          disabled={busy || files.length >= 5}
-          id={inputId}
-          multiple
-          onChange={(event) => {
-            void upload(event.currentTarget.files);
-            event.currentTarget.value = "";
-          }}
-          type="file"
-        />
-        ファイルを添付
-        <br />
-        <span className={css({ fontSize: "xs" })}>
-          jpg / png / pdf、1ファイル10MBまで、最大5ファイル
-        </span>
-        {files.length > 0 ? (
-          <div className={css({ mt: "1", color: "primary.800", fontWeight: "bold" })}>
-            {files.length}件を添付
-          </div>
-        ) : null}
-      </label>
+    <div className={stackStyle}>
+      <FileInput
+        accept="image/jpeg,image/png,application/pdf"
+        aria-label={label}
+        disabled={busy || files.length >= 5}
+        id={inputId}
+        multiple
+        onChange={(event) => {
+          void upload(event.currentTarget.files);
+          event.currentTarget.value = "";
+        }}
+      />
+      <HintBox>jpg / png / pdf、1ファイル10MBまで、最大5ファイル</HintBox>
       {files.length > 0 ? (
         <ul className={fileListStyle}>
           {files.map((file) => (
             <li key={file.id}>
               <span>
-                {file.name}
-                <span className={css({ color: "text.subtle", fontSize: "xs" })}>
-                  （{file.verified ? "登録済み" : "未完了"}）
-                </span>
+                {file.name}（{file.verified ? "登録済み" : "未完了"}）
               </span>
-              <button
-                className={textDangerButtonStyle}
+              <Button
                 aria-label={`${file.name}を削除`}
                 disabled={busy}
                 onClick={() => void remove(file.id)}
-                type="button"
+                size="sm"
+                variant="danger"
               >
                 削除
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
       ) : null}
-      {busy ? (
-        <p
-          className={css({
-            mt: "1.5",
-            color: "accent.danger",
-            fontSize: "sm",
-            lineHeight: "prose",
-          })}
-          role="status"
-        >
-          資料を処理しています…
-        </p>
-      ) : null}
-      <FieldError id={`${inputId}-error`} message={error || undefined} />
+      {busy ? <FormMessage tone="info">資料を処理しています…</FormMessage> : null}
+      {error ? <FormMessage tone="error">{error}</FormMessage> : null}
     </div>
   );
 }

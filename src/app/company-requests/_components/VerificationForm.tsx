@@ -5,18 +5,11 @@ import { useState, type FormEvent } from "react";
 import { receiptAccessSchema } from "@/lib/company-application";
 import { errorMessageJa } from "@/server/errors";
 
-import { css } from "../../../../styled-system/css";
+import { Field, FormMessage, formActionsStyle } from "@/components/auth/Fields";
+import { Button } from "@/components/Button";
+import { Input } from "@/components/Input";
 
 import { requestReceiptVerification } from "../actions";
-import {
-  fieldLabelStyle,
-  fieldStyle,
-  formalActionsStyle,
-  formalControlRecipe,
-  formalMessageRecipe,
-  formalSubmitStyle,
-} from "./formal-styles";
-import { RequiredMark } from "./FormalMarks";
 
 export function VerificationForm() {
   const [busy, setBusy] = useState(false);
@@ -52,44 +45,30 @@ export function VerificationForm() {
   }
   return (
     <form onSubmit={submit}>
-      <div className={css({ mt: "1.5" })}>
-        <div className={fieldStyle}>
-          <label className={fieldLabelStyle} htmlFor="receiptNumber">
-            受付番号 <RequiredMark />
-          </label>
-          <input
-            className={formalControlRecipe()}
-            id="receiptNumber"
-            inputMode="numeric"
-            name="receiptNumber"
-            pattern="[0-9]+"
-            required
-          />
-        </div>
-        <div className={fieldStyle}>
-          <label className={fieldLabelStyle} htmlFor="intakeEmail">
-            担当者メールアドレス <RequiredMark />
-          </label>
-          <input
-            className={formalControlRecipe()}
-            id="intakeEmail"
-            maxLength={254}
-            name="email"
-            placeholder="tanto@example.co.jp"
-            required
-            type="email"
-          />
-        </div>
-      </div>
-      {message ? (
-        <div className={formalMessageRecipe({ tone: failed ? "error" : "info" })} role="status">
-          {message}
-        </div>
-      ) : null}
-      <div className={formalActionsStyle}>
-        <button className={formalSubmitStyle} disabled={busy} type="submit">
+      <Field htmlFor="receiptNumber" label="受付番号" requirement="required">
+        <Input
+          id="receiptNumber"
+          inputMode="numeric"
+          name="receiptNumber"
+          pattern="[0-9]+"
+          required
+        />
+      </Field>
+      <Field htmlFor="intakeEmail" label="担当者メールアドレス" requirement="required">
+        <Input
+          id="intakeEmail"
+          maxLength={254}
+          name="email"
+          placeholder="tanto@example.co.jp"
+          required
+          type="email"
+        />
+      </Field>
+      {message ? <FormMessage tone={failed ? "error" : "info"}>{message}</FormMessage> : null}
+      <div className={formActionsStyle}>
+        <Button disabled={busy} type="submit">
           {busy ? "送信しています…" : "確認メールを送信"}
-        </button>
+        </Button>
       </div>
     </form>
   );

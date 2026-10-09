@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { css } from "../../../../styled-system/css";
 
-import { formalPageRecipe } from "./formal-styles";
 import { EvidenceFields } from "./EvidenceFields";
 const meta = {
   title: "CompanyApplications/EvidenceFields",
@@ -15,13 +14,7 @@ const meta = {
     inputId: "evidence-file",
     onBusy: () => undefined,
   },
-  decorators: [
-    (Story) => (
-      <div className={css({ p: "4" })}>
-        <div className={formalPageRecipe()}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ p: "4" })}>{Story()}</div>],
 } satisfies Meta<typeof EvidenceFields>;
 export default meta;
 type Story = StoryObj<typeof meta>;

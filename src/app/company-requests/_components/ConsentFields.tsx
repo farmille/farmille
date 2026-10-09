@@ -1,29 +1,27 @@
-import Link from "next/link";
-import type { ReactNode } from "react";
-
+import { HintBox, NoteBox } from "@/components/auth/Fields";
+import { Checkbox } from "@/components/Checkbox";
+import { SurfaceCard } from "@/components/SurfaceCard";
+import { TextLink } from "@/components/TextLink";
 import type { SubmittableKind } from "@/lib/company-application";
 import { applicationCopy } from "@/lib/company-application-copy";
 
 import { css } from "../../../../styled-system/css";
-import { choiceInputStyle, formalGuideRecipe } from "./formal-styles";
-import { FormSection } from "./FormSection";
 
-const consentStyle = css({
+const consentRowStyle = css({
   display: "flex",
   alignItems: "flex-start",
   gap: "2.5",
-  py: "1.5",
+  mt: "3",
   fontSize: "md",
-  lineHeight: "prose",
-  color: "text.muted",
+  lineHeight: "relaxed",
   cursor: "pointer",
-  "& + &": { mt: "0.5" },
+  "& input": { mt: "1" },
 });
 
 function ConsentRow({ name, text }: { name: string; text: string }) {
   return (
-    <label className={consentStyle}>
-      <input className={choiceInputStyle} name={name} required type="checkbox" />
+    <label className={consentRowStyle}>
+      <Checkbox name={name} required />
       <span>{text}</span>
     </label>
   );
@@ -32,25 +30,16 @@ function ConsentRow({ name, text }: { name: string; text: string }) {
 function PrivacyText({ text }: { text: string }) {
   const [before, ...rest] = text.split("プライバシーポリシー");
   return (
-    <p className={css({ color: "text.subtle", fontSize: "sm", lineHeight: "prose" })}>
+    <HintBox>
       {before}
       {rest.length > 0 ? (
         <>
-          <Link
-            className={css({ color: "primary.700", textDecoration: "underline" })}
-            href="/legal/privacy"
-          >
-            プライバシーポリシー
-          </Link>
+          <TextLink href="/legal/privacy">プライバシーポリシー</TextLink>
           {rest.join("プライバシーポリシー")}
         </>
       ) : null}
-    </p>
+    </HintBox>
   );
-}
-
-function ConsentList({ children }: { children: ReactNode }) {
-  return <div className={css({ mt: "3" })}>{children}</div>;
 }
 
 export function ConsentFields({ kind }: { kind: SubmittableKind }) {
@@ -59,35 +48,27 @@ export function ConsentFields({ kind }: { kind: SubmittableKind }) {
   const conditionCount = kind === "registration" ? 2 : 0;
   const conditions = copy.consents.slice(0, conditionCount);
   const confirmations = copy.consents.slice(conditionCount, last);
-  const checkAll = (
-    <div className={formalGuideRecipe()}>以下すべてをご確認のうえ、チェックしてください。</div>
-  );
+  const checkAll = <NoteBox>以下すべてをご確認のうえ、チェックしてください。</NoteBox>;
   return (
     <>
       {conditionCount > 0 ? (
-        <FormSection title="該当条件のご確認">
+        <SurfaceCard title="該当条件のご確認">
           {checkAll}
-          <ConsentList>
-            {conditions.map((text, index) => (
-              <ConsentRow key={text} name={`consent.${index}`} text={text} />
-            ))}
-          </ConsentList>
-        </FormSection>
-      ) : null}
-      <FormSection title="ご申請にあたっての確認事項">
-        {checkAll}
-        <ConsentList>
-          {confirmations.map((text, index) => (
-            <ConsentRow key={text} name={`consent.${conditionCount + index}`} text={text} />
+          {conditions.map((text, index) => (
+            <ConsentRow key={text} name={`consent.${index}`} text={text} />
           ))}
-        </ConsentList>
-      </FormSection>
-      <FormSection title="ご入力いただいた情報の取扱いについて">
+        </SurfaceCard>
+      ) : null}
+      <SurfaceCard title="ご申請にあたっての確認事項">
+        {checkAll}
+        {confirmations.map((text, index) => (
+          <ConsentRow key={text} name={`consent.${conditionCount + index}`} text={text} />
+        ))}
+      </SurfaceCard>
+      <SurfaceCard title="ご入力いただいた情報の取扱いについて">
         <PrivacyText text={copy.privacy} />
-        <ConsentList>
-          <ConsentRow name={`consent.${last}`} text={copy.consents[last]} />
-        </ConsentList>
-      </FormSection>
+        <ConsentRow name={`consent.${last}`} text={copy.consents[last]} />
+      </SurfaceCard>
     </>
   );
 }

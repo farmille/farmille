@@ -1,54 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import { type ReactNode, useActionState, useState } from "react";
+import { useActionState, useState } from "react";
 
-import { Badge } from "@/components/Badge";
-import {
-  describedBy,
-  FieldError,
-  formFieldStyle,
-  formGuideRecipe,
-  formInputStyle,
-  formLabelStyle,
-  FormNotice,
-  formTextareaStyle,
-  RequiredBadge,
-} from "@/components/FormParts";
-import { SubmitButton } from "@/components/auth/SubmitButton";
-import { formActionsStyle } from "@/components/auth/Fields";
 import { sellerApplyAction } from "@/app/sellers/apply/actions";
+import { Button } from "@/components/Button";
+import { TextLink } from "@/components/TextLink";
+import {
+  controlStyle,
+  Field,
+  FormMessage,
+  formActionsStyle,
+  HintBox,
+} from "@/components/auth/Fields";
+import { SubmitButton } from "@/components/auth/SubmitButton";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
-
-import { css, cx } from "../../../../styled-system/css";
-import { sellerLeadStyle } from "../_components/form-styles";
-
-type ApplyFieldProps = {
-  name: string;
-  label: string;
-  required: boolean;
-  guide?: string;
-  error?: string;
-  children: (describedById: string | undefined) => ReactNode;
-};
-
-function ApplyField({ name, label, required, guide, error, children }: ApplyFieldProps) {
-  const guideId = guide === undefined ? undefined : `${name}-guide`;
-  return (
-    <div className={formFieldStyle}>
-      <label className={formLabelStyle} htmlFor={name}>
-        {label} {required ? <RequiredBadge /> : <Badge variant="optional">任意</Badge>}
-      </label>
-      {children(describedBy(guideId, error && `${name}-error`))}
-      {guide === undefined ? null : (
-        <div className={formGuideRecipe({ placement: "below" })} id={guideId}>
-          {guide}
-        </div>
-      )}
-      <FieldError id={`${name}-error`} message={error} />
-    </div>
-  );
-}
 
 export function SellerApplyForm() {
   const [state, formAction] = useActionState(sellerApplyAction, initialAuthFormState);
@@ -58,41 +23,40 @@ export function SellerApplyForm() {
     state.status === "error" && values.inviteCode !== undefined && values.inviteCode.length > 0;
   const [inviteOpen, setInviteOpen] = useState(hadInvite);
 
+  // エラー後の再表示で select の defaultValue を効かせるため、送信値ごとに form を載せ替える。
   const formKey = state.status === "error" ? `error:${values.officialName ?? ""}` : "idle";
-  const invalid = (name: string) => (fieldErrors[name] ? true : undefined);
 
   return (
     <form action={formAction} key={formKey} noValidate>
-      {state.status === "error" ? <FormNotice tone="error">{state.message}</FormNotice> : null}
+      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
 
-      <ApplyField name="officialName" label="法人名" required error={fieldErrors.officialName}>
-        {(described) => (
-          <input
-            aria-describedby={described}
-            aria-invalid={invalid("officialName")}
-            autoComplete="organization"
-            className={formInputStyle}
-            defaultValue={values.officialName}
-            id="officialName"
-            name="officialName"
-            placeholder="〇〇株式会社"
-            required
-            type="text"
-          />
-        )}
-      </ApplyField>
-
-      <div className={formFieldStyle}>
-        <label className={formLabelStyle} htmlFor="corporateNumber">
-          法人番号 <RequiredBadge />
-        </label>
+      <Field
+        error={fieldErrors.officialName}
+        htmlFor="officialName"
+        label="法人名"
+        requirement="required"
+      >
         <input
-          aria-describedby={describedBy(
-            "corporateNumber-guide",
-            fieldErrors.corporateNumber && "corporateNumber-error",
-          )}
-          aria-invalid={invalid("corporateNumber")}
-          className={formInputStyle}
+          autoComplete="organization"
+          className={controlStyle}
+          defaultValue={values.officialName}
+          id="officialName"
+          name="officialName"
+          placeholder="〇〇株式会社"
+          required
+          type="text"
+        />
+      </Field>
+
+      <Field
+        error={fieldErrors.corporateNumber}
+        htmlFor="corporateNumber"
+        label="法人番号"
+        requirement="required"
+        guide="13桁の法人番号を入力してください。"
+      >
+        <input
+          className={controlStyle}
           defaultValue={values.corporateNumber}
           id="corporateNumber"
           inputMode="numeric"
@@ -100,222 +64,163 @@ export function SellerApplyForm() {
           name="corporateNumber"
           required
         />
-        <div className={formGuideRecipe({ placement: "below" })} id="corporateNumber-guide">
-          13桁の法人番号を入力してください。
-        </div>
-        <FieldError id="corporateNumber-error" message={fieldErrors.corporateNumber} />
-        <div
-          className={css({
-            mt: "2",
-            bg: "surface.page",
-            borderWidth: "1px",
-            borderStyle: "solid",
-            borderColor: "border.default",
-            borderRadius: "input",
-            px: "3",
-            py: "2",
-            fontSize: "xs",
-            lineHeight: "prose",
-            color: "text.muted",
-          })}
-        >
-          ログインIDは運営が発行します。パスワードは、ご案内する設定用ページで設定してください。
-        </div>
-      </div>
+      </Field>
 
-      <ApplyField
-        name="contactEmail"
-        label="連絡先メールアドレス"
-        required
-        guide="ご担当者のメールアドレスを入力してください。公開されません。確認後、このアドレスにログインIDとパスワード設定用のご案内をお送りします。"
+      <HintBox>
+        ログインIDは運営が発行します。パスワードは、ご案内する設定用ページで設定してください。
+      </HintBox>
+
+      <Field
         error={fieldErrors.contactEmail}
+        guide="ご担当者のメールアドレスを入力してください。公開されません。確認後、このアドレスにログインIDとパスワード設定用のご案内をお送りします。"
+        htmlFor="contactEmail"
+        label="連絡先メールアドレス"
+        requirement="required"
       >
-        {(described) => (
-          <input
-            aria-describedby={described}
-            aria-invalid={invalid("contactEmail")}
-            autoComplete="email"
-            className={formInputStyle}
-            defaultValue={values.contactEmail}
-            id="contactEmail"
-            name="contactEmail"
-            placeholder="contact@example.com"
-            required
-            type="email"
-          />
-        )}
-      </ApplyField>
+        <input
+          autoComplete="email"
+          className={controlStyle}
+          defaultValue={values.contactEmail}
+          id="contactEmail"
+          name="contactEmail"
+          placeholder="contact@example.com"
+          required
+          type="email"
+        />
+      </Field>
 
-      <ApplyField
-        name="contactName"
-        label="ご担当者名・部署"
-        required
-        guide="公開されません"
+      <Field
         error={fieldErrors.contactName}
+        guide="公開されません"
+        htmlFor="contactName"
+        label="ご担当者名・部署"
+        requirement="required"
       >
-        {(described) => (
-          <input
-            aria-describedby={described}
-            aria-invalid={invalid("contactName")}
-            autoComplete="name"
-            className={formInputStyle}
-            defaultValue={values.contactName}
-            id="contactName"
-            name="contactName"
-            placeholder="担当 太郎"
-            required
-            type="text"
-          />
-        )}
-      </ApplyField>
+        <input
+          autoComplete="name"
+          className={controlStyle}
+          defaultValue={values.contactName}
+          id="contactName"
+          name="contactName"
+          placeholder="担当 太郎"
+          required
+          type="text"
+        />
+      </Field>
 
-      <ApplyField
-        name="location"
-        label="本社・主な拠点の所在地"
-        required={false}
+      <Field
         error={fieldErrors.location}
+        htmlFor="location"
+        label="本社・主な拠点の所在地"
+        requirement="optional"
       >
-        {(described) => (
-          <input
-            aria-describedby={described}
-            aria-invalid={invalid("location")}
-            autoComplete="street-address"
-            className={formInputStyle}
-            defaultValue={values.location}
-            id="location"
-            name="location"
-            placeholder="東京都〇〇区…"
-            type="text"
-          />
-        )}
-      </ApplyField>
+        <input
+          autoComplete="street-address"
+          className={controlStyle}
+          defaultValue={values.location}
+          id="location"
+          name="location"
+          placeholder="東京都〇〇区…"
+          type="text"
+        />
+      </Field>
 
-      <ApplyField
-        name="contactPhone"
-        label="ご担当者電話番号"
-        required
-        guide="公開されません。確認が必要な場合の連絡に使用します。"
+      <Field
         error={fieldErrors.contactPhone}
+        guide="公開されません。確認が必要な場合の連絡に使用します。"
+        htmlFor="contactPhone"
+        label="ご担当者電話番号"
+        requirement="required"
       >
-        {(described) => (
-          <input
-            aria-describedby={described}
-            aria-invalid={invalid("contactPhone")}
-            autoComplete="tel"
-            className={formInputStyle}
-            defaultValue={values.contactPhone}
-            id="contactPhone"
-            maxLength={20}
-            name="contactPhone"
-            required
-            type="tel"
-          />
-        )}
-      </ApplyField>
+        <input
+          autoComplete="tel"
+          className={controlStyle}
+          defaultValue={values.contactPhone}
+          id="contactPhone"
+          maxLength={20}
+          name="contactPhone"
+          required
+          type="tel"
+        />
+      </Field>
 
-      <ApplyField
-        name="materialRequestNotes"
-        label="備考：掲載・編集を希望する資材"
-        required={false}
-        guide="掲載済みで編集したい資材、またはこれから掲載したい資材の正式名称を記入してください。"
+      <Field
         error={fieldErrors.materialRequestNotes}
+        guide="掲載済みで編集したい資材、またはこれから掲載したい資材の正式名称を記入してください。"
+        htmlFor="materialRequestNotes"
+        label="備考：掲載・編集を希望する資材"
+        requirement="optional"
       >
-        {(described) => (
-          <textarea
-            aria-describedby={described}
-            aria-invalid={invalid("materialRequestNotes")}
-            className={formTextareaStyle}
-            defaultValue={values.materialRequestNotes}
-            id="materialRequestNotes"
-            maxLength={2000}
-            name="materialRequestNotes"
-          />
-        )}
-      </ApplyField>
+        <textarea
+          className={controlStyle}
+          defaultValue={values.materialRequestNotes}
+          id="materialRequestNotes"
+          maxLength={2000}
+          name="materialRequestNotes"
+          rows={4}
+        />
+      </Field>
 
-      <ApplyField
-        name="websiteUrl"
-        label="公式サイトURL"
-        required={false}
+      <Field
         error={fieldErrors.websiteUrl}
+        htmlFor="websiteUrl"
+        label="公式サイトURL"
+        requirement="optional"
       >
-        {(described) => (
-          <input
-            aria-describedby={described}
-            aria-invalid={invalid("websiteUrl")}
-            autoComplete="url"
-            className={formInputStyle}
-            defaultValue={values.websiteUrl}
-            id="websiteUrl"
-            name="websiteUrl"
-            placeholder="https://…"
-            type="url"
-          />
-        )}
-      </ApplyField>
+        <input
+          autoComplete="url"
+          className={controlStyle}
+          defaultValue={values.websiteUrl}
+          id="websiteUrl"
+          name="websiteUrl"
+          placeholder="https://…"
+          type="url"
+        />
+      </Field>
 
       {inviteOpen ? (
-        <ApplyField
-          name="inviteCode"
-          label="招待コード"
-          required={false}
+        <Field
           error={fieldErrors.inviteCode}
+          htmlFor="inviteCode"
+          label="招待コード"
+          requirement="optional"
         >
-          {(described) => (
-            <input
-              aria-describedby={described}
-              aria-invalid={invalid("inviteCode")}
-              autoCapitalize="none"
-              autoComplete="off"
-              className={formInputStyle}
-              defaultValue={values.inviteCode}
-              id="inviteCode"
-              name="inviteCode"
-              placeholder="案内に記載のコード"
-              spellCheck={false}
-              type="text"
-            />
-          )}
-        </ApplyField>
+          <input
+            autoCapitalize="none"
+            autoComplete="off"
+            className={controlStyle}
+            defaultValue={values.inviteCode}
+            id="inviteCode"
+            name="inviteCode"
+            placeholder="案内に記載のコード"
+            spellCheck={false}
+            type="text"
+          />
+        </Field>
       ) : null}
 
-      <p className={cx(sellerLeadStyle, css({ lineHeight: "prose", mt: "1.5", mb: "3.5" }))}>
+      <HintBox>
         申請前に
-        <Link href="/legal/manufacturer" target="_blank" rel="noopener noreferrer">
+        <TextLink href="/legal/manufacturer" rel="noopener noreferrer" target="_blank">
           Farmille企業向けサービス利用規約（別タブ）
-        </Link>
+        </TextLink>
         と
-        <Link href="/legal" target="_blank" rel="noopener noreferrer">
+        <TextLink href="/legal" rel="noopener noreferrer" target="_blank">
           各規約・ガイドライン（別タブ）
-        </Link>
+        </TextLink>
         をご確認ください。
-      </p>
+      </HintBox>
       <div className={formActionsStyle}>
         <SubmitButton label="申請する" pendingLabel="申請中…" />
-        <button
+        <Button
           aria-expanded={inviteOpen}
-          className={css({
-            w: "full",
-            p: "1",
-            borderWidth: "0",
-            bg: "transparent",
-            color: "text.subtle",
-            fontSize: "sm",
-            textAlign: "center",
-            _focusVisible: {
-              outlineWidth: "2px",
-              outlineStyle: "solid",
-              outlineColor: "primary.700",
-              outlineOffset: "2px",
-            },
-          })}
           onClick={() => setInviteOpen((open) => !open)}
-          type="button"
+          variant="ghost"
         >
           {inviteOpen
             ? "招待コード入力を閉じる"
             : "Farmilleからのご案内で登録される方はこちら（招待コード入力）"}
-        </button>
+        </Button>
       </div>
     </form>
   );

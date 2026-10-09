@@ -1,12 +1,5 @@
-import type { ReactNode } from "react";
-
-import {
-  fieldLabelStyle,
-  fieldStyle,
-  formalControlRecipe,
-  formalGuideRecipe,
-} from "./formal-styles";
-import { PrivateNote, RequiredMark } from "./FormalMarks";
+import { Field } from "@/components/auth/Fields";
+import { Input } from "@/components/Input";
 
 export type ContactDefaults = {
   companyName: string;
@@ -27,43 +20,6 @@ export const emptyContact: ContactDefaults = {
   phone: "",
 };
 
-export function ApplicationField({
-  id,
-  label,
-  badges,
-  guide,
-  children,
-}: {
-  id: string;
-  label: string;
-  badges: ReactNode;
-  guide?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className={fieldStyle}>
-      <label className={fieldLabelStyle} htmlFor={id}>
-        {label} {badges}
-      </label>
-      {children}
-      {guide === undefined ? null : (
-        <div
-          className={formalGuideRecipe({ tone: "hint", placement: "trailing" })}
-          id={`${id}-guide`}
-        >
-          {guide}
-        </div>
-      )}
-    </div>
-  );
-}
-
-const requiredPrivate = (
-  <>
-    <RequiredMark /> <PrivateNote />
-  </>
-);
-
 export function ContactFields({
   prefix = "",
   defaults,
@@ -76,9 +32,8 @@ export function ContactFields({
   const id = (name: string) => `${prefix.replace(/\W/g, "-")}${name}`;
   return (
     <>
-      <ApplicationField id={id("companyName")} label="法人名" badges={<RequiredMark />}>
-        <input
-          className={formalControlRecipe()}
+      <Field htmlFor={id("companyName")} label="法人名" requirement="required">
+        <Input
           defaultValue={defaults.companyName}
           id={id("companyName")}
           maxLength={200}
@@ -86,16 +41,14 @@ export function ContactFields({
           placeholder="例）〇〇バイオ株式会社"
           required
         />
-      </ApplicationField>
-      <ApplicationField
-        id={id("corporateNumber")}
-        label="法人番号"
-        badges={<RequiredMark />}
+      </Field>
+      <Field
         guide="13桁の法人番号。国税庁 法人番号公表サイトで確認できます。"
+        htmlFor={id("corporateNumber")}
+        label="法人番号"
+        requirement="required"
       >
-        <input
-          aria-describedby={`${id("corporateNumber")}-guide`}
-          className={formalControlRecipe()}
+        <Input
           defaultValue={defaults.corporateNumber}
           id={id("corporateNumber")}
           inputMode="numeric"
@@ -105,16 +58,14 @@ export function ContactFields({
           placeholder="例）1234567890123"
           required
         />
-      </ApplicationField>
-      <ApplicationField
-        id={id("accountId")}
-        label="FarmilleアカウントID"
-        badges={<RequiredMark />}
+      </Field>
+      <Field
         guide="Farmilleが発行したIDをご入力ください。"
+        htmlFor={id("accountId")}
+        label="FarmilleアカウントID"
+        requirement="required"
       >
-        <input
-          aria-describedby={`${id("accountId")}-guide`}
-          className={formalControlRecipe()}
+        <Input
           defaultValue={defaults.accountId}
           id={id("accountId")}
           maxLength={100}
@@ -123,10 +74,14 @@ export function ContactFields({
           readOnly={fixedAccount}
           required
         />
-      </ApplicationField>
-      <ApplicationField id={id("contactName")} label="担当者名" badges={requiredPrivate}>
-        <input
-          className={formalControlRecipe()}
+      </Field>
+      <Field
+        htmlFor={id("contactName")}
+        label="担当者名"
+        requirement="required"
+        visibility="private"
+      >
+        <Input
           defaultValue={defaults.contactName}
           id={id("contactName")}
           maxLength={200}
@@ -134,10 +89,9 @@ export function ContactFields({
           placeholder="例）金子 太郎"
           required
         />
-      </ApplicationField>
-      <ApplicationField id={id("department")} label="部署名" badges={requiredPrivate}>
-        <input
-          className={formalControlRecipe()}
+      </Field>
+      <Field htmlFor={id("department")} label="部署名" requirement="required" visibility="private">
+        <Input
           defaultValue={defaults.department}
           id={id("department")}
           maxLength={200}
@@ -145,10 +99,14 @@ export function ContactFields({
           placeholder="例）営業部"
           required
         />
-      </ApplicationField>
-      <ApplicationField id={id("email")} label="担当者メールアドレス" badges={requiredPrivate}>
-        <input
-          className={formalControlRecipe()}
+      </Field>
+      <Field
+        htmlFor={id("email")}
+        label="担当者メールアドレス"
+        requirement="required"
+        visibility="private"
+      >
+        <Input
           defaultValue={defaults.email}
           id={id("email")}
           maxLength={254}
@@ -157,10 +115,14 @@ export function ContactFields({
           required
           type="email"
         />
-      </ApplicationField>
-      <ApplicationField id={id("phone")} label="担当者電話番号" badges={requiredPrivate}>
-        <input
-          className={formalControlRecipe()}
+      </Field>
+      <Field
+        htmlFor={id("phone")}
+        label="担当者電話番号"
+        requirement="required"
+        visibility="private"
+      >
+        <Input
           defaultValue={defaults.phone}
           id={id("phone")}
           maxLength={50}
@@ -169,7 +131,7 @@ export function ContactFields({
           required
           type="tel"
         />
-      </ApplicationField>
+      </Field>
     </>
   );
 }

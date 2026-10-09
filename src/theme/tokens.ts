@@ -19,13 +19,6 @@ export const tokens = {
       800: { value: "#1B4332" },
       900: { value: "#081C15" },
     },
-    slate: {
-      50: { value: "#F5F8FB" },
-      200: { value: "#D5DDE6" },
-      400: { value: "#8A94A0" },
-      500: { value: "#6B7784" },
-      700: { value: "#3A4A5C" },
-    },
     blue: { value: "#1976D2" },
     teal: { value: "#1F9E95" },
     violet: { value: "#8B7BC0" },
@@ -298,13 +291,6 @@ export const semanticTokens = {
       danger: { value: "{colors.danger}" },
       dangerSoft: { value: "{colors.danger.soft}" },
       manufacturer: { value: "{colors.teal}" },
-    },
-    formal: {
-      ink: { value: "{colors.slate.700}" },
-      muted: { value: "{colors.slate.500}" },
-      subtle: { value: "{colors.slate.400}" },
-      line: { value: "{colors.slate.200}" },
-      surface: { value: "{colors.slate.50}" },
     },
     // モーダルの背面や写真の上に敷く半透明の幕。不透明度は使う側で指定する
     scrim: { value: "{colors.ink}" },

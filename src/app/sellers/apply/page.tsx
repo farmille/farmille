@@ -4,8 +4,7 @@ import { FormPageShell } from "@/components/FormPageShell";
 import { SellerApplyForm } from "@/app/sellers/apply/SellerApplyForm";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
-import { css, cx } from "../../../../styled-system/css";
-import { sellerLeadStyle } from "../_components/form-styles";
+import { css } from "../../../../styled-system/css";
 
 export const metadata: Metadata = {
   title: "企業会員登録の申請",
@@ -13,6 +12,13 @@ export const metadata: Metadata = {
     "企業会員登録の申請フォームです。申請内容を確認し、メールでご案内します。申請・掲載・編集は無料です。",
   robots: NO_INDEX_ROBOTS,
 };
+
+const leadStyle = css({
+  fontSize: "sm",
+  color: "text.subtle",
+  lineHeight: "relaxed",
+  mb: "4.5",
+});
 
 type SellerApplyPageProps = {
   searchParams: Promise<{ from?: string | string[] }>;
@@ -33,13 +39,11 @@ export default async function SellerApplyPage({ searchParams }: SellerApplyPageP
       backHref={backHrefFor(from)}
       title="企業会員登録の申請"
     >
-      <div className={css({ maxW: "content.form", mx: "auto" })}>
-        <h1 className={css({ srOnly: true })}>企業会員登録の申請</h1>
-        <p className={cx(sellerLeadStyle, css({ mb: "4.5" }))}>
-          農業資材メーカー専用の企業会員アカウントです。内容を確認し、ログインIDとパスワード設定のご案内をメールでお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。申請・掲載・編集は無料です。
-        </p>
-        <SellerApplyForm />
-      </div>
+      <h1 className={css({ srOnly: true })}>企業会員登録の申請</h1>
+      <p className={leadStyle}>
+        農業資材メーカー専用の企業会員アカウントです。内容を確認し、ログインIDとパスワード設定のご案内をメールでお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。申請・掲載・編集は無料です。
+      </p>
+      <SellerApplyForm />
     </FormPageShell>
   );
 }

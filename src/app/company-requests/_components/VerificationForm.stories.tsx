@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { css } from "../../../../styled-system/css";
 
-import { formalPageRecipe } from "./formal-styles";
 import { expect, userEvent, within } from "storybook/test";
 import { VerificationForm } from "./VerificationForm";
 const meta = {
@@ -9,13 +8,7 @@ const meta = {
   component: VerificationForm,
   parameters: { nextjs: { appDirectory: true } },
   args: {},
-  decorators: [
-    (Story) => (
-      <div className={css({ p: "4" })}>
-        <div className={formalPageRecipe()}>{Story()}</div>
-      </div>
-    ),
-  ],
+  decorators: [(Story) => <div className={css({ p: "4" })}>{Story()}</div>],
 } satisfies Meta<typeof VerificationForm>;
 export default meta;
 type Story = StoryObj<typeof meta>;
