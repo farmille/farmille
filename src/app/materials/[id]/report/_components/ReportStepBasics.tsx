@@ -2,32 +2,18 @@
 
 import { useEffect, useState, useTransition } from "react";
 
-import { Checkbox } from "@/components/Checkbox";
-import { inputRecipe } from "@/components/Input";
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
+import { Checkbox, Field, Fieldset, Input, Notice } from "@/components/form";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { searchReportMaterialsAction } from "@/app/materials/[id]/report/new/actions";
 import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-report";
 import type { PostingMaterial } from "@/server/queries/materials";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
-import { css, cva, cx } from "../../../../../../styled-system/css";
+import { css, cx } from "../../../../../../styled-system/css";
 
 import { ReportSearchField } from "./ReportSearchField";
-import {
-  Badge,
-  Example,
-  Need,
-  checkNote,
-  checkRow,
-  checkRowWithNote,
-  chipRecipe,
-  chips,
-  field,
-  fieldLabel,
-  guide,
-  pillButtonRecipe,
-  subLabel,
-} from "./ReportFormParts";
+import { chipRecipe, chips, pillButtonRecipe } from "./ReportFormParts";
 
 export type ReportMaterialSummary = {
   id: string;
@@ -107,6 +93,7 @@ const tree = css({
 });
 
 const treeGroup = css({
+  px: "3",
   "&:not(:first-child)": {
     borderTopWidth: "1px",
     borderTopStyle: "solid",
@@ -114,33 +101,9 @@ const treeGroup = css({
   },
 });
 
-const treeHead = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "2",
-  w: "full",
-  border: "none",
-  bg: "transparent",
-  px: "3",
-  py: "2",
-  fontSize: "md",
-  textAlign: "left",
-  cursor: "pointer",
-});
+const treeCount = css({ fontSize: "sm", fontWeight: "normal", color: "text.subtle" });
 
-const treeArrow = cva({
-  base: {
-    fontSize: "xs",
-    color: "primary.700",
-    transitionProperty: "transform",
-    transitionDuration: "fast",
-  },
-  variants: { open: { true: { transform: "rotate(90deg)" }, false: {} } },
-});
-
-const treeCount = css({ ml: "auto", fontSize: "sm", color: "text.subtle" });
-
-const treeBody = css({ pt: "0.5", pr: "3", pb: "2.5", pl: "6.5" });
+const treeBody = css({ pt: "0.5", pb: "2.5" });
 
 export function ReportStepBasics({
   input,
@@ -231,10 +194,7 @@ export function ReportStepBasics({
 
   return (
     <>
-      <div>
-        <div className={fieldLabel}>
-          対象資材 <Badge required />
-        </div>
+      <Fieldset legend="対象資材" requirement="required">
         <div className={materialCard}>
           <div className={thumb}>
             {material.imageUrl ? (
@@ -293,16 +253,14 @@ export function ReportStepBasics({
             }}
           />
         )}
-      </div>
+      </Fieldset>
 
-      <div className={field}>
-        <div className={fieldLabel}>
-          使用作物 <Badge required />
-          <Need message={errors.cropId} />
-        </div>
-        <div className={guide}>
-          1つ選んでください。複数の作物で使った場合は、作物ごとに別のレポートにしてください。
-        </div>
+      <Fieldset
+        legend="使用作物"
+        requirement="required"
+        lead="1つ選んでください。複数の作物で使った場合は、作物ごとに別のレポートにしてください。"
+        error={errors.cropId}
+      >
         <div className={cx(chips, css({ mb: "2" }))} aria-live="polite">
           {selectedCrop && (
             <span className={chipRecipe({ state: "selected" })}>
@@ -334,62 +292,48 @@ export function ReportStepBasics({
           emptyMessage={`「${cropQuery.trim()}」に一致する作物がありません`}
           onSelect={pickCrop}
         />
-        {suggestions.length > 0 && (
-          <div className={css({ mt: "2.5" })}>
-            {suggestions.map((group) => (
-              <div key={group.title}>
-                <div className={subLabel}>{group.title}</div>
-                <div className={chips}>
-                  {group.crops.map((crop) => (
-                    <button
-                      key={crop.id}
-                      type="button"
-                      className={chipRecipe({ size: "sm" })}
-                      onClick={() => pickCrop(crop.id)}
-                    >
-                      {crop.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        <button
-          type="button"
-          className={cx(pillButtonRecipe(), css({ mt: "2.5" }))}
-          aria-expanded={treeOpen}
-          onClick={() => setTreeOpen(!treeOpen)}
-        >
-          {treeOpen ? "－ 作物一覧を閉じる" : "＋ 作物一覧から選択"}
-        </button>
-        {treeOpen && (
-          <div className={tree}>
-            {groups.map((group) => {
-              const members = crops.filter((crop) => crop.groupName === group);
-              const open = openGroups.has(group);
-              return (
-                <div key={group} className={treeGroup}>
-                  <button
-                    type="button"
-                    className={treeHead}
-                    aria-expanded={open}
-                    onClick={() =>
+        {suggestions.map((group) => (
+          <Fieldset key={group.title} legend={group.title} labelSize="sm">
+            <div className={chips}>
+              {group.crops.map((crop) => (
+                <button
+                  key={crop.id}
+                  type="button"
+                  className={chipRecipe({ size: "sm" })}
+                  onClick={() => pickCrop(crop.id)}
+                >
+                  {crop.name}
+                </button>
+              ))}
+            </div>
+          </Fieldset>
+        ))}
+        <Collapsible open={treeOpen} onOpenChange={setTreeOpen} className={css({ mt: "2.5" })}>
+          <CollapsibleTrigger variant="link">作物一覧から選択</CollapsibleTrigger>
+          <CollapsiblePanel>
+            <div className={tree}>
+              {groups.map((group) => {
+                const members = crops.filter((crop) => crop.groupName === group);
+                return (
+                  <Collapsible
+                    key={group}
+                    className={treeGroup}
+                    open={openGroups.has(group)}
+                    onOpenChange={(open) =>
                       setOpenGroups((current) => {
                         const next = new Set(current);
-                        if (open) next.delete(group);
-                        else next.add(group);
+                        if (open) next.add(group);
+                        else next.delete(group);
                         return next;
                       })
                     }
                   >
-                    <span className={treeArrow({ open })}>▸</span>
-                    <b>{group}</b>
-                    <span className={treeCount}>{members.length}品目</span>
-                  </button>
-                  {open && (
-                    <div className={treeBody}>
-                      <div className={chips}>
+                    <CollapsibleTrigger>
+                      {group}
+                      <span className={treeCount}>{members.length}品目</span>
+                    </CollapsibleTrigger>
+                    <CollapsiblePanel>
+                      <div className={cx(chips, treeBody)}>
                         {members.map((crop) => (
                           <button
                             key={crop.id}
@@ -401,50 +345,41 @@ export function ReportStepBasics({
                           </button>
                         ))}
                       </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                    </CollapsiblePanel>
+                  </Collapsible>
+                );
+              })}
+            </div>
+          </CollapsiblePanel>
+        </Collapsible>
+      </Fieldset>
 
-      <div className={field}>
-        <label className={fieldLabel} htmlFor="report-variety">
-          品種 <Badge required />
-        </label>
-        <Need message={errors.variety} block />
-        <input
-          id="report-variety"
-          className={inputRecipe()}
+      <Field label="品種" requirement="required" error={errors.variety}>
+        <Input
           placeholder="品種名"
           disabled={input.varietyUnknown}
           value={input.variety}
           onChange={(event) => onChange({ ...input, variety: event.target.value })}
         />
-        <Example>
-          ・アイコ
-          <br />
-          ・桃太郎
-          <br />
-          ・とちおとめ
-        </Example>
-        <label className={cx(checkRow, checkRowWithNote, css({ mt: "2" }))}>
-          <Checkbox
-            checked={input.varietyUnknown}
-            onChange={(event) =>
-              onChange({
-                ...input,
-                varietyUnknown: event.target.checked,
-                variety: event.target.checked ? "" : input.variety,
-              })
-            }
-          />
-          品種が不明、または品種がない
-          <span className={checkNote}>チェックすると品種の記入は不要です</span>
-        </label>
-      </div>
+      </Field>
+      <Notice tone="neutral" title="記入例" className={css({ mt: "2" })}>
+        ・アイコ
+        <br />
+        ・桃太郎
+        <br />
+        ・とちおとめ
+      </Notice>
+      <Checkbox
+        variant="row"
+        className={css({ mt: "2" })}
+        description="チェックすると品種の記入は不要です"
+        checked={input.varietyUnknown}
+        onCheckedChange={(varietyUnknown) =>
+          onChange({ ...input, varietyUnknown, variety: varietyUnknown ? "" : input.variety })
+        }
+      >
+        品種が不明、または品種がない
+      </Checkbox>
     </>
   );
 }

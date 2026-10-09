@@ -545,6 +545,7 @@ export function ReportForm({
     <div className={reportFrame}>
       <form
         className={shell}
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
           if (step < TOTAL) navigate(step + 1);
