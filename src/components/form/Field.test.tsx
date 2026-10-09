@@ -148,4 +148,26 @@ describe("Field", () => {
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(input).toHaveFocus();
   });
+
+  it("ブラウザの検証エラーは閲覧環境の言語によらず日本語で1つだけ出し、alert にはしない", async () => {
+    const user = userEvent.setup();
+    render(
+      <Form onSubmit={captureSubmit([])}>
+        <Field label="ニックネーム" name="handle" requirement="required">
+          <Input />
+        </Field>
+        <Field label="パスワード" name="password" requirement="required">
+          <Input type="password" />
+        </Field>
+        <button type="submit">送信</button>
+      </Form>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "送信" }));
+
+    expect(screen.getAllByText("この項目は必須です。")).toHaveLength(2);
+    expect(screen.queryAllByRole("alert")).toHaveLength(0);
+    const handle = screen.getByRole("textbox", { name: "ニックネーム" });
+    expect(handle).toHaveAccessibleDescription("この項目は必須です。");
+  });
 });

@@ -153,15 +153,47 @@ export function VisibilityText({ visibility }: { visibility: Visibility }) {
   );
 }
 
+/**
+ * ブラウザの制約検証の結果ごとの文言。ブラウザ任せだと閲覧環境の言語（英語など）で出るので日本語に固定する。
+ * 送信時は最初の不備へフォーカスが移り、その説明として読まれるので role="alert" は付けない。
+ */
+const VALIDITY_MESSAGES = [
+  ["valueMissing", "この項目は必須です。"],
+  ["typeMismatch", "入力の形式が正しくありません。"],
+  ["patternMismatch", "入力の形式が正しくありません。"],
+  ["tooShort", "文字数が足りません。"],
+  ["tooLong", "文字数が多すぎます。"],
+  ["rangeUnderflow", "入力できる範囲より小さい値です。"],
+  ["rangeOverflow", "入力できる範囲より大きい値です。"],
+  ["stepMismatch", "入力できる値の刻みに合っていません。"],
+  ["badInput", "入力内容を確認してください。"],
+] as const;
+
 /** Form の errors とブラウザの検証結果を出す。error を渡すと常にそれを出す。 */
 export function FieldErrorText({ error }: { error?: string }) {
-  // サーバーのエラーはフォーカスを動かさずに届くので、role="alert" で読み上げる
-  return error === undefined ? (
-    <BaseField.Error className={fieldErrorStyle} role="alert" />
-  ) : (
-    <BaseField.Error className={fieldErrorStyle} match role="alert">
-      {error}
-    </BaseField.Error>
+  if (error !== undefined) {
+    return (
+      <BaseField.Error className={fieldErrorStyle} match role="alert">
+        {error}
+      </BaseField.Error>
+    );
+  }
+  return (
+    <>
+      {VALIDITY_MESSAGES.map(([match, message]) => (
+        <BaseField.Error className={fieldErrorStyle} key={match} match={match}>
+          {message}
+        </BaseField.Error>
+      ))}
+      <BaseField.Validity>
+        {({ validity }) =>
+          VALIDITY_MESSAGES.some(([key]) => validity[key]) ? null : (
+            // サーバーのエラーと validate の結果はフォーカスを動かさずに届くので、role="alert" で読み上げる
+            <BaseField.Error className={fieldErrorStyle} role="alert" />
+          )
+        }
+      </BaseField.Validity>
+    </>
   );
 }
 
