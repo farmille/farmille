@@ -1,5 +1,6 @@
 export { Checkbox } from "./Checkbox";
 export { CheckboxGroup } from "./CheckboxGroup";
+export { Combobox } from "./Combobox";
 export { Field, type FieldProps } from "./Field";
 export { useFieldRequired } from "./field-context";
 export { Fieldset, type FieldsetProps } from "./Fieldset";
