@@ -8,8 +8,7 @@ import {
   type MaterialSortParam,
   type SelectedSearchFilter,
 } from "@/components/search/search-selection";
-import { selectRecipe } from "@/components/Select";
-import { css } from "../../../../styled-system/css";
+import { Select } from "@/components/Select";
 
 type SortSelectProps = {
   selected: SelectedSearchFilter[];
@@ -17,20 +16,13 @@ type SortSelectProps = {
   query?: string;
 };
 
-const sortSelectStyle = css(selectRecipe.raw(), {
-  w: "auto",
-  py: "2",
-  px: "3",
-  fontSize: "sm",
-});
-
 export function SortSelect({ selected, sort, query }: SortSelectProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   return (
-    <select
-      className={sortSelectStyle}
+    <Select
+      size="sm"
       value={sort}
       aria-label="並び替え"
       disabled={isPending}
@@ -47,6 +39,6 @@ export function SortSelect({ selected, sort, query }: SortSelectProps) {
       <option value="reviews">感想口コミが多い順</option>
       <option value="rating">★が高い順</option>
       <option value="newest">新着順</option>
-    </select>
+    </Select>
   );
 }

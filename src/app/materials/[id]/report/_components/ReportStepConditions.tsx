@@ -6,7 +6,7 @@ import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-repor
 
 import { Checkbox } from "@/components/Checkbox";
 import { inputRecipe } from "@/components/Input";
-import { selectRecipe } from "@/components/Select";
+import { Select } from "@/components/Select";
 import { textareaRecipe } from "@/components/Textarea";
 
 import { css, cva, cx } from "../../../../../../styled-system/css";
@@ -143,9 +143,9 @@ export function ReportStepConditions({
         <div className={guide}>
           アカウント登録時の住所が入っています。今回の圃場が別の場所なら変更してください。
         </div>
-        <select
+        <Select
           id="report-prefecture"
-          className={cx(selectRecipe(), shortControl)}
+          className={shortControl}
           value={input.prefectureCode ?? ""}
           onChange={(event) =>
             onChange({
@@ -160,7 +160,7 @@ export function ReportStepConditions({
               {prefecture.name}
             </option>
           ))}
-        </select>
+        </Select>
         <label className={cx(checkRow, checkRowWithNote, css({ mt: "2" }))}>
           <Checkbox
             checked={input.showCity}

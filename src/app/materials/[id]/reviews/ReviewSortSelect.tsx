@@ -1,6 +1,6 @@
 "use client";
 
-import { selectRecipe } from "@/components/Select";
+import { Select } from "@/components/Select";
 import type { ReviewSort } from "@/server/queries/reviews";
 
 import { css } from "../../../../../styled-system/css";
@@ -8,19 +8,13 @@ import { css } from "../../../../../styled-system/css";
 import { REVIEW_SORT_OPTIONS } from "./search-params";
 
 const formStyle = css({ ml: "auto" });
-const selectStyle = css(selectRecipe.raw(), {
-  w: "auto",
-  px: "2.5",
-  py: "1.5",
-  fontSize: "sm",
-});
 const submitStyle = css({ srOnly: true });
 
 export function ReviewSortSelect({ sort }: { sort: ReviewSort }) {
   return (
     <form method="get" className={formStyle}>
-      <select
-        className={selectStyle}
+      <Select
+        size="sm"
         name="sort"
         defaultValue={sort}
         aria-label="感想口コミの並び替え"
@@ -31,7 +25,7 @@ export function ReviewSortSelect({ sort }: { sort: ReviewSort }) {
             {option.label}
           </option>
         ))}
-      </select>
+      </Select>
       <button type="submit" className={submitStyle}>
         適用
       </button>

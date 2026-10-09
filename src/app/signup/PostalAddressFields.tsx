@@ -12,6 +12,7 @@ import {
   VisibilityTag,
 } from "@/components/FormParts";
 import { buttonRecipe } from "@/components/Button";
+import { Select } from "@/components/Select";
 import { PREFECTURES } from "@/lib/prefectures";
 
 import { css, cva, cx } from "../../../styled-system/css";
@@ -145,11 +146,11 @@ export function PostalAddressFields({
           都道府県
         </label>
         <div className={css({ minW: "0" })}>
-          <select
+          <Select
             aria-describedby={errorFor("prefectureCode")}
             aria-invalid={invalid("prefectureCode")}
             autoComplete="address-level1"
-            className={cx(formInputStyle, css({ maxW: "56" }))}
+            className={css({ maxW: "56" })}
             id="prefectureCode"
             name="prefectureCode"
             onChange={(event) => {
@@ -167,7 +168,7 @@ export function PostalAddressFields({
                 {item.name}
               </option>
             ))}
-          </select>
+          </Select>
           <FieldError id="prefectureCode-error" message={fieldErrors.prefectureCode} />
         </div>
 
