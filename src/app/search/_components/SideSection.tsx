@@ -111,7 +111,7 @@ export function SideSection({
         </div>
       ) : null}
       {/* 閉じていてもページ内検索とクローラーに一覧のリンクを見せる */}
-      <CollapsiblePanel hiddenUntilFound>
+      <CollapsiblePanel hiddenUntilFound motion="none">
         <div hidden={hits !== null}>{children}</div>
       </CollapsiblePanel>
     </Collapsible>

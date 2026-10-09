@@ -2,7 +2,7 @@ import { Collapsible as BaseCollapsible } from "@base-ui/react/collapsible";
 import type { ReactNode } from "react";
 
 import { Icon } from "./Icon";
-import { css, cx, sva } from "../../styled-system/css";
+import { cva, cx, sva } from "../../styled-system/css";
 
 const triggerRecipe = sva({
   slots: ["trigger", "icon"],
@@ -64,15 +64,23 @@ const triggerRecipe = sva({
   defaultVariants: { variant: "section" },
 });
 
-const panelStyle = css({
-  h: "var(--collapsible-panel-height)",
-  overflow: "hidden",
-  transitionProperty: "height, opacity",
-  transitionDuration: "fast",
-  transitionTimingFunction: "out",
-  _startingStyle: { h: "0", opacity: "0" },
-  _endingStyle: { h: "0", opacity: "0" },
-  _motionReduce: { transitionProperty: "opacity" },
+const panelRecipe = cva({
+  base: { h: "var(--collapsible-panel-height)", overflow: "hidden" },
+  variants: {
+    motion: {
+      expand: {
+        transitionProperty: "height, opacity",
+        transitionDuration: "fast",
+        transitionTimingFunction: "out",
+        _startingStyle: { h: "0", opacity: "0" },
+        _endingStyle: { h: "0", opacity: "0" },
+        _motionReduce: { transitionProperty: "opacity" },
+      },
+      // 1回の操作で何度も開け閉めする絞り込みの欄は、待たせないよう動かさない
+      none: {},
+    },
+  },
+  defaultVariants: { motion: "expand" },
 });
 
 /** 開閉する領域のまとまり。開閉状態を持たせたいときだけ open / onOpenChange を渡す。 */
@@ -122,17 +130,19 @@ export function CollapsibleTrigger({
 /** 開閉する中身。hiddenUntilFound はページ内検索で見つかったときに自動で開く。 */
 export function CollapsiblePanel({
   hiddenUntilFound,
+  motion,
   children,
   className,
 }: {
   hiddenUntilFound?: boolean;
+  motion?: "expand" | "none";
   children: ReactNode;
   className?: string;
 }) {
   return (
     <BaseCollapsible.Panel
       hiddenUntilFound={hiddenUntilFound}
-      className={cx(panelStyle, className)}
+      className={cx(panelRecipe({ motion }), className)}
     >
       {children}
     </BaseCollapsible.Panel>
