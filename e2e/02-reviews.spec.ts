@@ -39,7 +39,9 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
     await expect(
       page.getByRole("region", { name: "通知" }).getByText("感想口コミを投稿しました。"),
     ).toBeVisible();
-    await expect(page).toHaveURL(new RegExp(`/materials/${material.id}$`));
+    await expect(page).toHaveURL(
+      (url) => url.pathname === `/materials/${material.id}` && !url.searchParams.has("review"),
+    );
     const postedCard = page.getByRole("article").filter({ hasText: body });
     await expect(postedCard.getByText(body, { exact: true })).toBeVisible();
     await expect(postedCard.getByText("ミニトマト", { exact: true })).toBeVisible();
