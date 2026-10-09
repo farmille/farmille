@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { deleteReviewAction } from "@/app/materials/[id]/review/actions";
-import { buttonRecipe } from "@/components/Button";
+import { Button, buttonRecipe } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { css } from "../../styled-system/css";
 
@@ -25,7 +25,12 @@ export function ReviewOwnerActions({ materialId, reviewId }: ReviewOwnerActionsP
         title="感想口コミを削除しますか？"
         description="削除した感想口コミと写真は元に戻せません。"
         confirmLabel="削除する"
-        triggerLabel="削除"
+        pendingLabel="削除中…"
+        trigger={
+          <Button size="sm" variant="danger">
+            削除
+          </Button>
+        }
         action={deleteAction}
       />
     </div>

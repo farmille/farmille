@@ -86,7 +86,7 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
 
     const updatedCard = page.getByRole("article").filter({ hasText: updatedBody });
     await updatedCard.getByRole("button", { name: "削除" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "削除する" }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "削除する" }).click();
 
     await expect(page.getByText(updatedBody, { exact: true })).toHaveCount(0);
     await expect.poll(async () => await reviewByAuthor(user.id)).toBeNull();
