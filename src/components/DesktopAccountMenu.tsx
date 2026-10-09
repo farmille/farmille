@@ -1,14 +1,12 @@
 "use client";
 
+import { Menu } from "@base-ui/react/menu";
 import Link from "next/link";
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 
 import { Icon } from "@/components/Icon";
 import { css } from "../../styled-system/css";
-
-const root = css({
-  position: "relative",
-});
+import { popupPositionerStyle, popupRecipe } from "./popup";
 
 const trigger = css({
   w: "{spacing.10}",
@@ -34,22 +32,10 @@ const trigger = css({
   },
 });
 
-const panel = css({
-  position: "absolute",
-  top: "100%",
-  right: "0",
-  zIndex: "10",
-  mt: "1.5",
+const panel = css(popupRecipe.raw({ motion: "scale" }), {
   display: "flex",
   flexDirection: "column",
   gap: "0.5",
-  p: "1.5",
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "card",
-  boxShadow: "shadow",
 });
 
 const item = css({
@@ -69,7 +55,7 @@ const item = css({
   textDecoration: "none",
   whiteSpace: "nowrap",
   cursor: "pointer",
-  _hover: { bg: "primary.soft", color: "primary.700" },
+  _highlighted: { bg: "primary.soft", color: "primary.700" },
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
@@ -77,11 +63,6 @@ const item = css({
     outlineOffset: "2px",
   },
   "&[aria-current=page]": { bg: "primary.soft", color: "primary.700" },
-});
-
-const logoutForm = css({
-  display: "flex",
-  flexDirection: "column",
 });
 
 type AccountMenuLink = {
@@ -118,153 +99,53 @@ function hasAuthSession(): boolean {
   });
 }
 
-type MenuDirection = "ArrowDown" | "ArrowUp";
-
-function focusAdjacentMenuItem(menu: HTMLElement, key: MenuDirection): void {
-  const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]'));
-  const count = items.length;
-  if (count === 0) return;
-
-  const active = document.activeElement;
-  const index = active instanceof HTMLElement ? items.indexOf(active) : -1;
-  const nextIndex =
-    index === -1
-      ? key === "ArrowDown"
-        ? 0
-        : count - 1
-      : key === "ArrowDown"
-        ? (index + 1) % count
-        : (index - 1 + count) % count;
-  const next = items[nextIndex];
-  if (next === undefined) return;
-  next.focus();
-}
-
-function isMenuDirection(key: string): key is MenuDirection {
-  return key === "ArrowDown" || key === "ArrowUp";
-}
-
 export function DesktopAccountMenu({ myPageCurrent }: { myPageCurrent: boolean }) {
-  const menuId = useId();
-  const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const pendingFocus = useRef<MenuDirection | null>(null);
-  const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const direction = pendingFocus.current;
-    pendingFocus.current = null;
-    if (direction !== null && menuRef.current !== null) {
-      focusAdjacentMenuItem(menuRef.current, direction);
-    }
-
-    const closeIfOutside = (target: EventTarget | null) => {
-      if (!(target instanceof Node)) return;
-      if (rootRef.current?.contains(target)) return;
-      setOpen(false);
-    };
-
-    const onPointerDown = (event: PointerEvent) => {
-      closeIfOutside(event.target);
-    };
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      triggerRef.current?.focus();
-    };
-
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
-  const openMenu = (direction: MenuDirection | null) => {
-    setSignedIn(hasAuthSession());
-    pendingFocus.current = direction;
-    setOpen(true);
-  };
-
-  const toggle = () => {
-    if (open) {
-      setOpen(false);
-      return;
-    }
-    openMenu(null);
-  };
-
-  const moveFocus = (key: MenuDirection) => {
-    if (!open) {
-      openMenu(key);
-      return;
-    }
-    if (menuRef.current === null) return;
-    focusAdjacentMenuItem(menuRef.current, key);
-  };
-
+  const logoutFormId = useId();
   const entries = signedIn ? MEMBER_ENTRIES : GUEST_ENTRIES;
 
   return (
-    <div ref={rootRef} className={root}>
-      <button
-        ref={triggerRef}
-        type="button"
-        className={trigger}
-        aria-label="アカウント"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={open ? menuId : undefined}
-        onClick={toggle}
-        onKeyDown={(event) => {
-          if (!isMenuDirection(event.key)) return;
-          event.preventDefault();
-          moveFocus(event.key);
-        }}
-      >
+    <Menu.Root
+      onOpenChange={(open) => {
+        // ログイン・ログアウトは別タブでも起きるので、開くたびに Cookie から読み直す
+        if (open) setSignedIn(hasAuthSession());
+      }}
+    >
+      <Menu.Trigger className={trigger} aria-label="アカウント">
         <Icon name="person" size="md" />
-      </button>
-      {open ? (
-        <div
-          ref={menuRef}
-          id={menuId}
-          role="menu"
-          aria-label="アカウント"
-          className={panel}
-          onKeyDown={(event) => {
-            if (!isMenuDirection(event.key)) return;
-            event.preventDefault();
-            moveFocus(event.key);
-          }}
-        >
-          {entries.map((entry) =>
-            entry.kind === "logout" ? (
-              <form key={entry.label} action="/logout" method="post" className={logoutForm}>
-                <button type="submit" role="menuitem" className={item}>
+      </Menu.Trigger>
+      <Menu.Portal>
+        <Menu.Positioner align="end" sideOffset={6} className={popupPositionerStyle}>
+          <Menu.Popup aria-label="アカウント" className={panel}>
+            {entries.map((entry) =>
+              entry.kind === "logout" ? (
+                // 押した瞬間に閉じると送信前にフォームが外れるので、送信後の遷移に任せて開いたままにする
+                <Menu.Item
+                  key={entry.label}
+                  nativeButton
+                  closeOnClick={false}
+                  render={<button type="submit" form={logoutFormId} />}
+                  className={item}
+                >
                   {entry.label}
-                </button>
-              </form>
-            ) : (
-              <Link
-                key={entry.href}
-                href={entry.href}
-                role="menuitem"
-                className={item}
-                aria-current={entry.myPage && myPageCurrent ? "page" : undefined}
-                onClick={() => setOpen(false)}
-              >
-                {entry.label}
-              </Link>
-            ),
-          )}
-        </div>
-      ) : null}
-    </div>
+                </Menu.Item>
+              ) : (
+                <Menu.LinkItem
+                  key={entry.href}
+                  closeOnClick
+                  render={<Link href={entry.href} />}
+                  className={item}
+                  aria-current={entry.myPage && myPageCurrent ? "page" : undefined}
+                >
+                  {entry.label}
+                </Menu.LinkItem>
+              ),
+            )}
+            {/* 項目をフォームで包むと、キーボードで開いたとき先頭でなくログアウトが選ばれるので、form 属性で結ぶ */}
+            <form id={logoutFormId} action="/logout" method="post" hidden />
+          </Menu.Popup>
+        </Menu.Positioner>
+      </Menu.Portal>
+    </Menu.Root>
   );
 }
