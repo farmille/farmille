@@ -7,19 +7,17 @@ import {
   Badge,
   Button,
   EmptyState,
-  Input,
   MaterialCard,
   ReportCard,
   ReviewCard,
   SectionHeading,
-  Select,
   StarRating,
   StatCard,
   TagChip,
-  Textarea,
 } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { FabBar } from "@/components/FabBar";
+import { Input, Select, Textarea } from "@/components/form";
 import { UiKitInteractiveDemos } from "./Interactive";
 
 const page = css({
@@ -297,15 +295,16 @@ export default function UiKitPage() {
           <Button variant="primary" size="sm">
             感想口コミをすべて見る（32件）
           </Button>
-          <Input placeholder="作物・悩み・資材名を入力" />
-          <Textarea placeholder="本文を入力" />
-          <Select defaultValue="">
-            <option value="" disabled>
-              選択してください
-            </option>
-            <option value="tomato">ミニトマト</option>
-            <option value="strawberry">いちご</option>
-          </Select>
+          <Input aria-label="キーワード" placeholder="作物・悩み・資材名を入力" />
+          <Textarea aria-label="本文" placeholder="本文を入力" />
+          <Select
+            aria-label="作物"
+            options={[
+              { value: "tomato", label: "ミニトマト" },
+              { value: "strawberry", label: "いちご" },
+            ]}
+            placeholder="選択してください"
+          />
         </div>
       </section>
 
