@@ -3,7 +3,8 @@ import Link from "next/link";
 
 import { buttonRecipe } from "@/components/Button";
 import { AuthScreen } from "@/components/auth/AuthScreen";
-import { formActionsStyle, HintBox, linkRowStyle, textLinkStyle } from "@/components/auth/Fields";
+import { FormActions, Notice } from "@/components/form";
+import { TextLink } from "@/components/TextLink";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { safeNextPath } from "@/lib/auth/safe-next";
 
@@ -30,11 +31,11 @@ export default async function SignupDonePage({
       }
       title="登録が完了しました"
     >
-      <HintBox>
+      <Notice tone="neutral">
         アイコン画像・一言プロフィール・主な作目は、マイページからあとで設定できます。
-      </HintBox>
+      </Notice>
 
-      <div className={formActionsStyle}>
+      <FormActions>
         {!needsEmailConfirmation && next ? (
           <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href={next}>
             実証詳細レポートに戻る
@@ -43,17 +44,17 @@ export default async function SignupDonePage({
         <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/">
           ホームへ
         </Link>
-      </div>
+      </FormActions>
 
       {needsEmailConfirmation ? (
-        <div className={linkRowStyle}>
-          <Link
-            className={textLinkStyle}
+        <FormActions layout="links">
+          <TextLink
             href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+            variant="plain"
           >
             確認が済んだ方はログイン
-          </Link>
-        </div>
+          </TextLink>
+        </FormActions>
       ) : null}
     </AuthScreen>
   );

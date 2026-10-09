@@ -1,17 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
+
 import {
-  controlStyle,
   Field,
-  FormMessage,
-  formActionsStyle,
-  linkRowStyle,
-  RadioCards,
-  textLinkStyle,
-} from "@/components/auth/Fields";
-import { SubmitButton } from "@/components/auth/SubmitButton";
+  Fieldset,
+  Form,
+  FormActions,
+  Input,
+  Notice,
+  RadioGroup,
+  SubmitButton,
+} from "@/components/form";
+import { TextLink } from "@/components/TextLink";
 import { HANDLE_MAX_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 import { STANDPOINTS } from "@/lib/standpoints";
@@ -19,49 +20,39 @@ import { setupProfileAction } from "./actions";
 
 export function ProfileSetupForm() {
   const [state, formAction] = useActionState(setupProfileAction, initialAuthFormState);
-  const fields = fieldErrorsOf(state);
   const values = submittedValuesOf(state);
   return (
-    <form action={formAction} noValidate>
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
+    <Form action={formAction} errors={fieldErrorsOf(state)}>
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       <Field
-        error={fields.handle}
-        htmlFor="handle"
+        description="本名でなくても構いません。"
         label="ハンドルネーム"
-        visibility="public"
+        name="handle"
         requirement="required"
-        guide="本名でなくても構いません。"
+        visibility="public"
       >
-        <input
-          id="handle"
-          name="handle"
-          type="text"
-          autoComplete="nickname"
-          className={controlStyle}
-          maxLength={HANDLE_MAX_LENGTH}
-          defaultValue={values.handle}
-          required
+        <Input autoComplete="nickname" defaultValue={values.handle} maxLength={HANDLE_MAX_LENGTH} />
+      </Field>
+      <Fieldset legend="あなたの立場" name="standpoint" requirement="required" visibility="public">
+        {/* 送信後のフォームのリセットで選択が外れないよう、再表示の値ごとに載せ替える */}
+        <RadioGroup<string>
+          defaultValue={values.standpoint}
+          key={values.standpoint}
+          options={STANDPOINTS}
+          variant="cards"
         />
-      </Field>
-      <Field
-        error={fields.standpoint}
-        label="あなたの立場"
-        visibility="public"
-        requirement="required"
-      >
-        <RadioCards name="standpoint" options={STANDPOINTS} defaultValue={values.standpoint} />
-      </Field>
-      <div className={formActionsStyle}>
-        <SubmitButton label="設定してマイページへ" pendingLabel="設定中…" />
-      </div>
-      <div className={linkRowStyle}>
-        <Link className={textLinkStyle} href="/admin">
+      </Fieldset>
+      <FormActions>
+        <SubmitButton pendingLabel="設定中…">設定してマイページへ</SubmitButton>
+      </FormActions>
+      <FormActions layout="links">
+        <TextLink href="/admin" variant="plain">
           運営管理へ戻る
-        </Link>
-        <Link className={textLinkStyle} href="/">
+        </TextLink>
+        <TextLink href="/" variant="plain">
           ホームへ戻る
-        </Link>
-      </div>
-    </form>
+        </TextLink>
+      </FormActions>
+    </Form>
   );
 }

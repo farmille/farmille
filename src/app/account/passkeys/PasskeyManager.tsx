@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/Button";
-import { FormMessage, formActionsStyle } from "@/components/auth/Fields";
+// 削除の確認は wave 2 で ConfirmDialog に置き換えるまで旧部品のまま
+import { FormMessage } from "@/components/auth/Fields";
+import { FormActions, Notice } from "@/components/form";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { passkeyErrorMessage } from "@/lib/auth/passkey-error";
 import { errorMessageJa } from "@/server/errors";
@@ -50,13 +52,11 @@ export function PasskeyManager({
   }
 
   return (
-    <div className={formActionsStyle}>
+    <FormActions>
       {admin ? (
-        <FormMessage tone="info">
-          運営画面では、パスキーによるログイン後も2要素認証が必要です。
-        </FormMessage>
+        <Notice tone="info">運営画面では、パスキーによるログイン後も2要素認証が必要です。</Notice>
       ) : null}
-      {message ? <FormMessage tone={failed ? "error" : "info"}>{message}</FormMessage> : null}
+      {message ? <Notice tone={failed ? "error" : "success"}>{message}</Notice> : null}
       {passkeys.length === 0 ? <p>パスキーはまだ登録されていません。</p> : null}
       {passkeys.map((passkey) => (
         <div key={passkey.id}>
@@ -90,6 +90,6 @@ export function PasskeyManager({
       <p>
         パスワードでのログインも引き続き利用できます。端末のパスワード管理アプリに残ったパスキーは、必要に応じて端末側でも削除してください。
       </p>
-    </div>
+    </FormActions>
   );
 }

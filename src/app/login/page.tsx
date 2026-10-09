@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { LoginForm } from "@/app/login/LoginForm";
 import { PasskeyLogin } from "@/components/auth/PasskeyLogin";
 import { AuthScreen } from "@/components/auth/AuthScreen";
-import { FormMessage } from "@/components/auth/Fields";
+import { Notice } from "@/components/form";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
@@ -29,11 +29,11 @@ export default async function LoginPage({
 
   return (
     <AuthScreen lead="登録済みのメールアドレスでログインします。" title="ログイン">
-      {notice === null ? null : <FormMessage tone="error">{notice}</FormMessage>}
+      {notice === null ? null : <Notice tone="error">{notice}</Notice>}
       {password === "changed" ? (
-        <FormMessage tone="info">
+        <Notice tone="success">
           パスワードを変更しました。新しいパスワードでログインしてください。
-        </FormMessage>
+        </Notice>
       ) : null}
       <LoginForm next={safeNextPath(next)} />
       <PasskeyLogin next={safeNextPath(next)} />

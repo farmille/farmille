@@ -1,49 +1,33 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 
 import { requestPasswordResetAction } from "@/app/password-reset/actions";
-import {
-  controlStyle,
-  Field,
-  FormMessage,
-  formActionsStyle,
-  linkRowStyle,
-  textLinkStyle,
-} from "@/components/auth/Fields";
-import { SubmitButton } from "@/components/auth/SubmitButton";
+import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
+import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState } from "@/lib/auth/form-state";
 
 export function PasswordResetForm() {
   const [state, formAction] = useActionState(requestPasswordResetAction, initialAuthFormState);
 
   return (
-    <form action={formAction} noValidate>
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
-      {state.status === "done" ? <FormMessage tone="info">{state.message}</FormMessage> : null}
+    <Form action={formAction}>
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
+      {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
 
-      <Field htmlFor="email" label="メールアドレス" requirement="required">
-        <input
-          autoComplete="email"
-          className={controlStyle}
-          id="email"
-          name="email"
-          placeholder="you@example.com"
-          required
-          type="email"
-        />
+      <Field label="メールアドレス" name="email" requirement="required">
+        <Input autoComplete="email" placeholder="you@example.com" type="email" />
       </Field>
 
-      <div className={formActionsStyle}>
-        <SubmitButton label="再設定メールを送る" pendingLabel="送信中…" />
-      </div>
+      <FormActions>
+        <SubmitButton pendingLabel="送信中…">再設定メールを送る</SubmitButton>
+      </FormActions>
 
-      <div className={linkRowStyle}>
-        <Link className={textLinkStyle} href="/login">
+      <FormActions layout="links">
+        <TextLink href="/login" variant="plain">
           ログイン画面へ戻る
-        </Link>
-      </div>
-    </form>
+        </TextLink>
+      </FormActions>
+    </Form>
   );
 }
