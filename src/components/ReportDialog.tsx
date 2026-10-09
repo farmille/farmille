@@ -1,11 +1,9 @@
 "use client";
 
-import { useActionState, useId, useRef } from "react";
+import { useActionState } from "react";
 
-import { buttonRecipe } from "@/components/Button";
-import { dialogPanel } from "@/components/dialog-panel";
-import { Select } from "@/components/Select";
-import { Textarea } from "@/components/Textarea";
+import { Dialog, DialogActions, DialogClose } from "@/components/Dialog";
+import { Field, Form, Notice, Select, SubmitButton, Textarea } from "@/components/form";
 import type { ReportActionState } from "@/server/actions/reports";
 import { css, cx } from "../../styled-system/css";
 
@@ -25,18 +23,9 @@ const trigger = css({
   py: "1",
 });
 
-const field = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "1.5",
-  mt: "3",
-});
+const formStyle = css({ mt: "3" });
 
-const fieldLabel = css({
-  fontSize: "xs",
-  fontWeight: "bold",
-  color: "text.muted",
-});
+const errorStyle = css({ mt: "3" });
 
 export type ReportDialogProps = {
   /** `createReportAction.bind(null, targetType, targetId, currentPath)` を渡す。 */
@@ -48,7 +37,7 @@ export type ReportDialogProps = {
   className?: string;
 };
 
-/** 通報導線（控えめなテキストリンク）＋通報モーダル（理由 select＋自由記述）。T-34。 */
+/** 通報導線（控えめなテキストリンク）＋通報モーダル（理由の選択＋自由記述）。受け付けたら同じモーダルで完了を伝える。T-34。 */
 export function ReportDialog({
   action,
   reasonOptions,
@@ -56,95 +45,44 @@ export function ReportDialog({
   triggerLabel = "通報する",
   className,
 }: ReportDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const [state, formAction, isPending] = useActionState(action, idleState);
-  const titleId = useId();
+  const [state, formAction] = useActionState(action, idleState);
+  const done = state.status === "success";
 
   return (
-    <>
-      <button
-        type="button"
-        className={cx(trigger, className)}
-        onClick={() => dialogRef.current?.showModal()}
-      >
-        {triggerLabel}
-      </button>
-
-      <dialog ref={dialogRef} aria-labelledby={titleId} className={dialogPanel}>
-        {state.status === "success" ? (
-          <>
-            <h2 id={titleId} className={css({ m: "0", fontSize: "lg" })}>
-              通報を受け付けました
-            </h2>
-            <p className={css({ mt: "2", mb: "4", fontSize: "sm", color: "text.muted" })}>
-              内容を確認のうえ対応いたします。ご協力ありがとうございます。
-            </p>
-            <button
-              type="button"
-              className={cx(buttonRecipe({ variant: "ghost", size: "md" }), css({ w: "100%" }))}
-              onClick={() => dialogRef.current?.close()}
-            >
-              閉じる
-            </button>
-          </>
-        ) : (
-          <form action={formAction}>
-            <h2 id={titleId} className={css({ m: "0", fontSize: "lg" })}>
-              {title}
-            </h2>
-
-            <div className={field}>
-              <label htmlFor={`${titleId}-reason`} className={fieldLabel}>
-                通報理由
-              </label>
-              <Select name="reasonCode" id={`${titleId}-reason`} required defaultValue="">
-                <option value="" disabled>
-                  選択してください
-                </option>
-                {reasonOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className={field}>
-              <label htmlFor={`${titleId}-detail`} className={fieldLabel}>
-                詳細（任意）
-              </label>
-              <Textarea
-                name="detail"
-                id={`${titleId}-detail`}
-                placeholder="具体的な内容があればご記入ください"
-              />
-            </div>
-
-            {state.status === "error" ? (
-              <p role="alert" className={css({ mt: "3", fontSize: "sm", color: "accent.danger" })}>
-                {state.message}
-              </p>
-            ) : null}
-
-            <div className={css({ display: "flex", gap: "2", mt: "4" })}>
-              <button
-                type="button"
-                className={cx(buttonRecipe({ variant: "ghost", size: "md" }), css({ flex: "1" }))}
-                onClick={() => dialogRef.current?.close()}
-              >
-                キャンセル
-              </button>
-              <button
-                type="submit"
-                disabled={isPending}
-                className={cx(buttonRecipe({ variant: "primary", size: "md" }), css({ flex: "1" }))}
-              >
-                {isPending ? "送信中…" : "通報する"}
-              </button>
-            </div>
-          </form>
-        )}
-      </dialog>
-    </>
+    <Dialog
+      description={
+        done ? "内容を確認のうえ対応いたします。ご協力ありがとうございます。" : undefined
+      }
+      title={done ? "通報を受け付けました" : title}
+      trigger={
+        <button className={cx(trigger, className)} type="button">
+          {triggerLabel}
+        </button>
+      }
+    >
+      {done ? (
+        <DialogActions>
+          <DialogClose>閉じる</DialogClose>
+        </DialogActions>
+      ) : (
+        <Form action={formAction} className={formStyle}>
+          <Field label="通報理由" labelSize="sm" name="reasonCode" requirement="required">
+            <Select options={reasonOptions} placeholder="選択してください" />
+          </Field>
+          <Field label="詳細（任意）" labelSize="sm" name="detail">
+            <Textarea placeholder="具体的な内容があればご記入ください" />
+          </Field>
+          {state.status === "error" ? (
+            <Notice className={errorStyle} tone="error">
+              {state.message}
+            </Notice>
+          ) : null}
+          <DialogActions>
+            <DialogClose>キャンセル</DialogClose>
+            <SubmitButton pendingLabel="送信中…">通報する</SubmitButton>
+          </DialogActions>
+        </Form>
+      )}
+    </Dialog>
   );
 }

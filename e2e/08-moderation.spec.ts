@@ -13,7 +13,7 @@ import {
   uniqueToken,
   usageReportByAuthor,
 } from "./support/test-data";
-import { loginAdminAndEnrollMfa, loginGeneral } from "./support/ui";
+import { chooseOption, loginAdminAndEnrollMfa, loginGeneral } from "./support/ui";
 
 test("通報の resolve と対象非公開、編集局の pending 公開", async ({ page }) => {
   const author = await createGeneralUser("reported");
@@ -39,7 +39,7 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
     const reviewCard = page.getByRole("article").filter({ hasText: reviewBody });
     await reviewCard.getByRole("button", { name: "通報する" }).click();
     const reportDialog = page.getByRole("dialog", { name: "この感想口コミを通報する" });
-    await reportDialog.getByLabel("通報理由").selectOption("false_info");
+    await chooseOption(page, reportDialog.getByLabel("通報理由"), "誤った情報・誇大な効果表現");
     await reportDialog.getByLabel("詳細（任意）").fill("E2Eで非公開化を確認します。");
     await reportDialog.getByRole("button", { name: "通報する" }).click();
     await expect(page.getByRole("dialog", { name: "通報を受け付けました" })).toBeVisible();

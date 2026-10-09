@@ -20,6 +20,19 @@ async function waitForReactHydration(locator: Locator): Promise<void> {
     .toBe(true);
 }
 
+/**
+ * Select（role=combobox）を開き、名前が optionName の選択肢を選ぶ。一覧は body 直下に出るので page から探す。
+ * 見出しで探すなら page.getByLabel(label)、ダイアログ内なら dialog.getByLabel(label) を combobox に渡す。
+ */
+export async function chooseOption(
+  page: Page,
+  combobox: Locator,
+  optionName: string,
+): Promise<void> {
+  await combobox.click();
+  await page.getByRole("option", { name: optionName, exact: true }).click();
+}
+
 export async function signupGeneral(
   page: Page,
   input: { handle: string; email: string; password: string },
