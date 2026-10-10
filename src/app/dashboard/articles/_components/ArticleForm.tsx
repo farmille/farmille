@@ -14,11 +14,21 @@ import {
 } from "react";
 
 import { Button, TextLink, buttonRecipe } from "@/components";
+import { Chip } from "@/components/Chip";
 import { Combobox } from "@/components/Combobox";
 import { Tabs } from "@/components/Tabs";
-// shortcut: 資材の検索と選んだ資材の表示は旧 Field のまま。Combobox・Chip ができたら（wave 2）まとめて移す
+// shortcut: 資材の検索欄は旧 Field・旧 Combobox のまま。キットの Autocomplete が入力欄の参照か開閉の指定を受け取れるようになったら移す
 import { Field as LegacyField } from "@/components/auth/Fields";
-import { Field, FileInput, Form, FormActions, Input, Notice, Textarea } from "@/components/form";
+import {
+  Field,
+  Fieldset,
+  FileInput,
+  Form,
+  FormActions,
+  Input,
+  Notice,
+  Textarea,
+} from "@/components/form";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { errorMessageJa } from "@/server/errors";
 import type { SellerArticleMaterial } from "@/server/queries/seller-articles";
@@ -69,19 +79,7 @@ const chipRow = css({
   gap: "2",
 });
 
-const chip = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "2",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  borderRadius: "pill",
-  bg: "primary.soft",
-  px: "3",
-  py: "1.5",
-  fontSize: "sm",
-});
+const manufacturerStyle = css({ color: "text.subtle", fontWeight: "normal" });
 
 type ArticleFormBaseProps = {
   sellerId: string;
@@ -399,40 +397,25 @@ export function ArticleForm({
           />
         </Field>
 
-        <LegacyField
-          error={fieldErrors.materialIds}
-          guide="自社・他社を問わず資材マスタ全体から検索して複数選択できます。"
-          htmlFor="article-material-search"
-          label="紐づけ資材"
+        <Fieldset
+          description="自社・他社を問わず資材マスタ全体から検索して複数選択できます。"
+          legend="紐づけ資材"
+          name="materialIds"
           requirement="optional"
         >
           <div className={chipRow}>
             {materials.map((material) => (
-              <span className={chip} key={material.id}>
-                <span>
-                  {material.name}
-                  <span className={css({ color: "text.subtle", ml: "1" })}>
-                    / {material.manufacturer_name}
-                  </span>
-                </span>
-                <button
-                  className={css({
-                    borderWidth: "0",
-                    bg: "transparent",
-                    color: "accent.danger",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                    fontSize: "sm",
-                  })}
-                  onClick={() => removeMaterial(material.id)}
-                  type="button"
-                >
-                  外す
-                </button>
-              </span>
+              <Chip
+                key={material.id}
+                onRemove={() => removeMaterial(material.id)}
+                removeLabel={`${material.name}を外す`}
+              >
+                {material.name}
+                <span className={manufacturerStyle}>/ {material.manufacturer_name}</span>
+              </Chip>
             ))}
           </div>
-        </LegacyField>
+        </Fieldset>
       </Form>
 
       <div className={formLayout}>
