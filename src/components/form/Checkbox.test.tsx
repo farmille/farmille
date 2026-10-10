@@ -26,6 +26,20 @@ function Terms() {
 }
 
 describe("Checkbox", () => {
+  it("枠付きの行の説明は、名前に入れず説明として読ませる", () => {
+    render(
+      <Field name="varietyUnknown">
+        <Checkbox description="チェックすると品種の記入は不要です" variant="row">
+          品種が不明、または品種がない
+        </Checkbox>
+      </Field>,
+    );
+
+    expect(
+      screen.getByRole("checkbox", { name: "品種が不明、または品種がない" }),
+    ).toHaveAccessibleDescription("チェックすると品種の記入は不要です");
+  });
+
   it("包んだ文で名前が付き、必須の札は名前に入れず aria-required で伝える", () => {
     render(
       <Field name="terms" requirement="required">

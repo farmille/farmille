@@ -9,7 +9,7 @@ import { Icon } from "@/components/Icon";
 import { cx } from "../../../styled-system/css";
 import { FieldContext, useFieldContext } from "./field-context";
 import {
-  choiceDescriptionRecipe,
+  choiceDescriptionStyle,
   choiceItemStyle,
   choiceRecipe,
   fieldErrorStyle,
@@ -204,7 +204,6 @@ export function FieldErrorText({ error }: { error?: string }) {
 
 type ChoiceProps = {
   look: "inline" | "row" | "note" | "card" | "chip";
-  mark: "checkbox" | "radio";
   size?: "md" | "sm";
   tone?: "default" | "danger";
   label: ReactNode;
@@ -222,7 +221,6 @@ type ChoiceProps = {
  */
 export function Choice({
   look,
-  mark,
   size,
   tone,
   label,
@@ -234,16 +232,25 @@ export function Choice({
   return (
     <BaseField.Item className={cx(choiceItemStyle, className)} disabled={disabled}>
       {children((props) => (
-        <BaseField.Label className={choiceRecipe({ look, size, tone })}>
+        <BaseField.Label
+          className={choiceRecipe({ look, size, tone, described: description !== undefined })}
+        >
           <button {...props} />
-          <span>{label}</span>
+          <span>
+            {label}
+            {description === undefined ? null : (
+              // 枠付きの行でも説明を枠の中に置く。名前からは外し、aria-describedby で説明として読ませる
+              <BaseField.Description
+                aria-hidden
+                className={choiceDescriptionStyle}
+                render={<span />}
+              >
+                {description}
+              </BaseField.Description>
+            )}
+          </span>
         </BaseField.Label>
       ))}
-      {description === undefined ? null : (
-        <BaseField.Description className={choiceDescriptionRecipe({ mark })}>
-          {description}
-        </BaseField.Description>
-      )}
     </BaseField.Item>
   );
 }

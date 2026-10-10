@@ -55,7 +55,6 @@ export function RadioGroup<V extends string>({
           key={option.value}
           label={option.label}
           look={variant === "cards" ? "card" : "inline"}
-          mark="radio"
         >
           {(frame) => (
             <BaseRadio.Root

@@ -215,8 +215,10 @@ export const choiceRecipe = cva({
     size: { md: {}, sm: { gap: "1.5", fontSize: "sm" } },
     // 写真の削除のように、チェックすると何かを消す選択肢
     tone: { default: {}, danger: { color: "accent.danger" } },
+    // 説明が付くと文字が2段になるので、印は1段目にそろえる
+    described: { true: { alignItems: "flex-start" }, false: {} },
   },
-  defaultVariants: { look: "inline", size: "md", tone: "default" },
+  defaultVariants: { look: "inline", size: "md", tone: "default", described: false },
 });
 
 export const choiceGroupRecipe = cva({
@@ -230,18 +232,14 @@ export const choiceGroupRecipe = cva({
   },
 });
 
-/** 選択肢の説明。印（box 20px / 丸 18px）と gap の分だけ下げて文字の頭にそろえる。 */
-export const choiceDescriptionRecipe = cva({
-  base: {
-    mt: "0.5",
-    color: "text.muted",
-    fontSize: "sm",
-    lineHeight: "normal",
-    _disabled: { opacity: "disabled" },
-  },
-  variants: {
-    mark: { checkbox: { pl: "7.5" }, radio: { pl: "7" } },
-  },
+/** 選択肢の説明。見出しの文字の下に置く（行の太字や色は受け継がない）。 */
+export const choiceDescriptionStyle = css({
+  display: "block",
+  mt: "0.5",
+  color: "text.muted",
+  fontSize: "sm",
+  fontWeight: "normal",
+  lineHeight: "normal",
 });
 
 // 押下の縮みは包む label の行に付く（globals.css）。印の button まで縮むと二重になるので止める

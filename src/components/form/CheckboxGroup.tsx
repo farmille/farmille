@@ -78,7 +78,6 @@ function CheckboxGroupBody<V extends string>({
           key={option.value}
           label={option.label}
           look={variant === "chips" ? "chip" : "inline"}
-          mark="checkbox"
         >
           {(frame) => (
             <BaseCheckbox.Root

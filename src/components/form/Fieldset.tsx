@@ -7,7 +7,13 @@ import { useId, type ReactNode } from "react";
 import { cx } from "../../../styled-system/css";
 import { FieldErrorText, LabelRow, VisibilityText, type FieldProps } from "./Field";
 import { FieldContext, useFieldContext } from "./field-context";
-import { fieldRecipe, fieldsetStyle, guideRecipe, visibilityRecipe } from "./recipes";
+import {
+  fieldErrorStyle,
+  fieldRecipe,
+  fieldsetStyle,
+  guideRecipe,
+  visibilityRecipe,
+} from "./recipes";
 
 export type FieldsetProps = Omit<FieldProps, "label" | "hideLabel" | "labelSize"> & {
   legend: ReactNode;
@@ -18,8 +24,9 @@ export type FieldsetProps = Omit<FieldProps, "label" | "hideLabel" | "labelSize"
 
 /**
  * 複数の入力や、ラジオ・チェックボックスの組をまとめる見出し付きの枠。
- * name か error があるときだけ Field.Root で包み、組の送信名とエラーを持つ。
- * name が無ければ、中の Field がそれぞれ自分の name とエラーを持つ（本名＝姓＋名など）。
+ * name があるときだけ Field.Root で包み、組の送信名とエラーを持つ。
+ * name が無ければ、中の Field がそれぞれ自分の name とエラーを持ち（本名＝姓＋名など）、
+ * 組へのエラーは組の説明として下に出す（エラーの出し入れで包みが変わると、中の入力が作り直されるため）。
  */
 export function Fieldset({
   legend,
@@ -37,13 +44,14 @@ export function Fieldset({
 }: FieldsetProps) {
   const parent = useFieldContext();
   const required = requirement === undefined ? parent.required : requirement === "required";
-  const rooted = name !== undefined || error !== undefined;
+  const rooted = name !== undefined;
   const id = useId();
   // 案内は組の中の入力ではなく fieldset そのものの説明として読ませる
   const describedBy = [
     visibility === undefined ? null : `${id}-visibility`,
     lead === undefined ? null : `${id}-lead`,
     description === undefined ? null : `${id}-description`,
+    rooted || error === undefined ? null : `${id}-error`,
   ]
     .filter((part) => part !== null)
     .join(" ");
@@ -79,7 +87,13 @@ export function Fieldset({
           {description}
         </p>
       )}
-      {rooted ? <FieldErrorText error={error} /> : null}
+      {rooted ? (
+        <FieldErrorText error={error} />
+      ) : error === undefined ? null : (
+        <p className={fieldErrorStyle} id={`${id}-error`} role="alert">
+          {error}
+        </p>
+      )}
     </BaseFieldset.Root>
   );
 

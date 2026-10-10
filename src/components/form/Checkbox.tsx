@@ -61,7 +61,6 @@ export function Checkbox({
         </>
       }
       look={variant}
-      mark="checkbox"
       size={size}
       tone={tone}
     >

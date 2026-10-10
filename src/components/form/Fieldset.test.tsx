@@ -41,4 +41,25 @@ describe("Fieldset", () => {
     expect(screen.getByRole("group", { name: "確認事項" })).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "内容を確認しました" })).toBeRequired();
   });
+
+  it("name の無い組にエラーを出し入れしても、中の入力は作り直されない", () => {
+    const { rerender } = render(
+      <Fieldset legend="使用作物">
+        <Input aria-label="作物名" defaultValue="トマト" />
+      </Fieldset>,
+    );
+    const input = screen.getByRole("textbox", { name: "作物名" });
+
+    rerender(
+      <Fieldset error="使用作物を選んでください" legend="使用作物">
+        <Input aria-label="作物名" defaultValue="トマト" />
+      </Fieldset>,
+    );
+
+    expect(screen.getByRole("textbox", { name: "作物名" })).toBe(input);
+    expect(screen.getByRole("alert")).toHaveTextContent("使用作物を選んでください");
+    expect(screen.getByRole("group", { name: "使用作物" })).toHaveAccessibleDescription(
+      "使用作物を選んでください",
+    );
+  });
 });
