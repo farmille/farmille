@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
 import { BrandMark } from "@/components/BrandMark";
+import { SearchInput } from "@/components/form";
 import { Icon } from "@/components/Icon";
 import { PreparationNotice } from "@/components/PreparationNotice";
 
@@ -121,65 +122,7 @@ const desktopPublicActions = css({
   flexShrink: "0",
 });
 
-const desktopSearch = css({
-  minH: "11",
-  minW: "0",
-  flex: "1",
-  maxW: "480px",
-  display: "flex",
-  alignItems: "center",
-  gap: "2",
-  px: "3",
-  m: "0",
-  bg: "surface.card",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  borderRadius: "button",
-  color: "text.subtle",
-  _hover: { borderColor: "primary.600" },
-  // 送信ボタンのフォーカスでは枠を出さず、入力欄のときだけ検索画面と同じ焦点表現にする
-  "&:has(input:focus-visible)": {
-    borderColor: "primary.600",
-    outlineWidth: "2px",
-    outlineStyle: "solid",
-    outlineColor: "primary.200",
-  },
-});
-
-const desktopSearchInput = css({
-  flex: "1",
-  minW: "0",
-  bg: "transparent",
-  borderWidth: "0",
-  outline: "none",
-  p: "0",
-  fontFamily: "sans",
-  fontSize: "md",
-  color: "text.default",
-  appearance: "none",
-  _placeholder: { color: "text.subtle" },
-  "&::-webkit-search-cancel-button": { display: "none" },
-  "&::-webkit-search-decoration": { display: "none" },
-});
-
-const desktopSearchAction = css({
-  color: "primary.700",
-  fontSize: "xs",
-  fontWeight: "bold",
-  whiteSpace: "nowrap",
-  bg: "transparent",
-  borderWidth: "0",
-  p: "0",
-  cursor: "pointer",
-  fontFamily: "sans",
-  _focusVisible: {
-    outlineWidth: "2px",
-    outlineStyle: "solid",
-    outlineColor: "primary.600",
-    outlineOffset: "2px",
-  },
-});
+const desktopSearch = css({ flex: "1", minW: "0", maxW: "480px", m: "0" });
 
 const desktopNavLink = cva({
   base: {
@@ -367,22 +310,15 @@ function DesktopSiteHeader({
           <span className={desktopBrandName}>Farmille</span>
         </Link>
         <Form action="/search" aria-label="ヘッダー検索" className={desktopSearch} role="search">
-          <Icon name="search" size="sm" />
-          <input
+          <SearchInput
             // q が変わったとき（同じ画面での再送信や履歴の前後移動）に入力欄を作り直して反映する
             key={searchQuery}
             aria-label="資材を検索"
-            autoComplete="off"
-            className={desktopSearchInput}
             defaultValue={searchQuery}
-            enterKeyHint="search"
             name="q"
             placeholder="作物・悩み・資材名から資材を検索"
-            type="search"
+            submitLabel="検索"
           />
-          <button className={desktopSearchAction} type="submit">
-            検索
-          </button>
         </Form>
         <nav className={desktopPublicActions} aria-label="PCメインナビ">
           <DesktopAccountMenu myPageCurrent={active === "me"} />
