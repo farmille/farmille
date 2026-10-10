@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { expect, mocked, userEvent, within } from "storybook/test";
+import { expect, mocked, userEvent, waitFor, within } from "storybook/test";
 import { sellerOperationAction } from "./actions";
 import { SellerReviewActions } from "./SellerReviewActions";
 
@@ -88,5 +88,76 @@ export const ReissueInvite: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: "招待コードを再発行" }));
     await expect(await canvas.findByText("招待コードを発行しました。")).toBeVisible();
+  },
+};
+
+/** 確認ダイアログは body 直下へ portal されるので、canvas の外から探す。 */
+const dialog = (canvasElement: HTMLElement) =>
+  within(within(canvasElement.ownerDocument.body).getByRole("alertdialog"));
+
+async function openConfirm(canvasElement: HTMLElement, triggerName: string) {
+  await userEvent.click(within(canvasElement).getByRole("button", { name: triggerName }));
+  await waitFor(() => expect(dialog(canvasElement).getByRole("heading")).toBeVisible());
+}
+
+/** 最後に送った FormData の中身（確認ダイアログを経ても送る項目が変わらないことを確かめる）。 */
+function lastSubmitted(): Record<string, FormDataEntryValue> {
+  const call = mocked(sellerOperationAction).mock.lastCall;
+  if (call === undefined) throw new Error("sellerOperationAction が呼ばれていません");
+  return Object.fromEntries(call[1]);
+}
+
+// 却下の確認。理由は必須なので、空のまま確定すると送らずに入力欄のエラーを示す
+export const RejectConfirm: Story = {
+  async play({ canvasElement }) {
+    await openConfirm(canvasElement, "却下");
+    await userEvent.click(dialog(canvasElement).getByRole("button", { name: "却下する" }));
+    await waitFor(() =>
+      expect(dialog(canvasElement).getByLabelText("却下理由")).toHaveAttribute(
+        "aria-invalid",
+        "true",
+      ),
+    );
+    await expect(sellerOperationAction).not.toHaveBeenCalled();
+  },
+};
+
+export const Rejected: Story = {
+  async play({ canvasElement }) {
+    await openConfirm(canvasElement, "却下");
+    await userEvent.type(
+      dialog(canvasElement).getByLabelText("却下理由"),
+      "提出書類が不足しています",
+    );
+    await userEvent.click(dialog(canvasElement).getByRole("button", { name: "却下する" }));
+    await expect(
+      await within(canvasElement).findByText("Storybook 上でメーカー情報を更新しました。"),
+    ).toBeVisible();
+    await expect(lastSubmitted()).toEqual({
+      rejectedReason: "提出書類が不足しています",
+      sellerId: "00000000-0000-4000-8000-000000000201",
+      operation: "reject",
+    });
+  },
+};
+
+// 凍結の確認
+export const SuspendConfirm: Story = {
+  args: { status: "approved" },
+  play: ({ canvasElement }) => openConfirm(canvasElement, "凍結する"),
+};
+
+export const SuspendDone: Story = {
+  args: { status: "approved" },
+  async play({ canvasElement }) {
+    await openConfirm(canvasElement, "凍結する");
+    await userEvent.click(dialog(canvasElement).getByRole("button", { name: "凍結する" }));
+    await expect(
+      await within(canvasElement).findByText("Storybook 上でメーカー情報を更新しました。"),
+    ).toBeVisible();
+    await expect(lastSubmitted()).toEqual({
+      sellerId: "00000000-0000-4000-8000-000000000201",
+      operation: "suspend",
+    });
   },
 };
