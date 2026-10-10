@@ -38,12 +38,10 @@ export const Disabled: Story = {
   args: { disabled: true },
 };
 
-/** 画面側で送信中を渡す（ダイアログの確定など）。 */
 export const PendingProp: Story = {
   args: { pending: true },
 };
 
-/** フォームの送信中は押したボタンにフォーカスを残したまま文言を切り替える。 */
 export const PendingFormStatus: Story = {
   decorators: [
     (Story) => (

@@ -2,12 +2,11 @@
 
 import { Checkbox as BaseCheckbox } from "@base-ui/react/checkbox";
 import { CheckboxGroup as BaseCheckboxGroup } from "@base-ui/react/checkbox-group";
-import { Field as BaseField } from "@base-ui/react/field";
 import { useMemo, useState } from "react";
 
 import { Icon } from "@/components/Icon";
 import { cx } from "../../../styled-system/css";
-import { Choice } from "./Field";
+import { Choice, EnsureFieldRoot } from "./Field";
 import { useFieldContext, useResetKey } from "./field-context";
 import { checkboxBoxRecipe, checkIndicatorStyle, choiceGroupRecipe } from "./recipes";
 import type { Option } from "./types";
@@ -26,12 +25,7 @@ type CheckboxGroupProps<V extends string> = {
   className?: string;
 };
 
-/**
- * 複数選択。チェックした値ごとに name=value を1件ずつ送る。
- * 「1つ以上」の必須は個々のチェックボックスの required では表せないので、requirement は札だけに使う。
- */
 export function CheckboxGroup<V extends string>(props: CheckboxGroupProps<V>) {
-  // 選択の state をこの部品が持つので、reset と初期値の変化では部品ごと作り直す
   const resetKey = useResetKey((props.defaultValue ?? []).join("\u001f"));
   return <CheckboxGroupBody<V> key={resetKey} {...props} />;
 }
@@ -51,7 +45,7 @@ function CheckboxGroupBody<V extends string>({
   const { inRoot } = useFieldContext();
   const [uncontrolled, setUncontrolled] = useState<readonly V[]>(defaultValue ?? []);
   const current = value ?? uncontrolled;
-  // Base UI は value の参照が変わるたびに Form のエラーを消すので、中身が同じ間は同じ配列を渡す
+  // Base UI は value の参照が変わるたびに Form のエラーを消す
   const groupValue = useMemo(() => [...current], [current]);
   const full = limit !== undefined && current.length >= limit;
 
@@ -97,11 +91,9 @@ function CheckboxGroupBody<V extends string>({
     </BaseCheckboxGroup>
   );
 
-  return inRoot ? (
-    group
-  ) : (
-    <BaseField.Root className={className} disabled={disabled} name={name}>
+  return (
+    <EnsureFieldRoot className={className} disabled={disabled} name={name}>
       {group}
-    </BaseField.Root>
+    </EnsureFieldRoot>
   );
 }

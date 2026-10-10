@@ -47,7 +47,6 @@ export const Missing: Story = {
   },
 };
 
-// 施用時期を押すと aria-pressed で押した状態になり、前から押してあるものも残る
 export const PressTiming: Story = {
   async play({ canvasElement }) {
     const canvas = within(canvasElement);

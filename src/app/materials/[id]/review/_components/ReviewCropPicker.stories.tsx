@@ -45,7 +45,6 @@ type Story = StoryObj<typeof meta>;
 
 const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);
 
-/** 以前の投稿に作目が2つある場合も、そのまま2つ並べる。 */
 export const MultipleCrops: Story = {};
 
 export const EmptyWithProfileSuggestions: Story = {
@@ -61,7 +60,6 @@ export const WithError: Story = {
   ),
 };
 
-/** 別名でも探せる。選んだ作目は候補に出さない。 */
 export const Searching: Story = {
   args: { defaultCropIds: ["crop-tomato"] },
   play: async ({ canvasElement }) => {
@@ -74,7 +72,6 @@ export const Searching: Story = {
   },
 };
 
-/** 別の作目を選ぶと、選んでいた作目と入れ替える。 */
 export const Replaced: Story = {
   args: { defaultCropIds: ["crop-tomato"] },
   play: async ({ canvasElement }) => {

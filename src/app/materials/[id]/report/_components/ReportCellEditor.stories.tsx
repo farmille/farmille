@@ -59,7 +59,6 @@ export const Value: Story = {};
 export const BadValue: Story = { args: { graph: badGraph } };
 export const PlotName: Story = { args: { target: { k: "name", g: graph.id, p: plot.id } } };
 export const Axis: Story = { args: { target: { k: "axis", g: graph.id } } };
-// 単位の候補を押すと、その単位を手で選んだ単位として渡す
 export const AxisPickUnit: Story = {
   args: Axis.args,
   async play({ canvasElement, args }) {

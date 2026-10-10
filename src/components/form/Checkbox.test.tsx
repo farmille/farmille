@@ -51,11 +51,9 @@ describe("Checkbox", () => {
     expect(checkbox).not.toHaveAccessibleName(/必須/);
     expect(checkbox).toHaveAttribute("aria-required", "true");
     expect(screen.getByText("必須")).toBeInTheDocument();
-    // getByLabel が隠し input に当たらない（E2E の check() が1要素に決まる）
     expect(screen.getAllByLabelText(/投稿ガイドライン/)).toEqual([checkbox]);
   });
 
-  // 文中のリンクで切り替わらないこと（label の仕様）は happy-dom が再現しないため、Storybook の実ブラウザで確かめる
   it("文を押すと1回だけ切り替わる", async () => {
     const user = userEvent.setup();
     render(

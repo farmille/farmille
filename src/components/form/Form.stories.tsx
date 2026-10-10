@@ -8,7 +8,6 @@ import { Notice } from "./Notice";
 import { Select } from "./Select";
 import { SubmitButton } from "./SubmitButton";
 
-/** Storybook 上で送信しても画面を移らないためのダミー送信。 */
 async function noopSubmit() {}
 
 const prefectures = [
@@ -40,7 +39,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** 送信すると、未入力の必須項目にエラーを出して最初の項目へフォーカスを移す。 */
 export const Default: Story = {};
 
 export const ServerErrors: Story = {

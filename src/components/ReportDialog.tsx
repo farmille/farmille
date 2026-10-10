@@ -37,7 +37,6 @@ export type ReportDialogProps = {
   className?: string;
 };
 
-/** 通報導線（控えめなテキストリンク）＋通報モーダル（理由の選択＋自由記述）。受け付けたら同じモーダルで完了を伝える。T-34。 */
 export function ReportDialog({
   action,
   reasonOptions,

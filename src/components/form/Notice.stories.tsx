@@ -35,7 +35,6 @@ export const Neutral: Story = {
   },
 };
 
-/** 記入例のように、1行目を見出しにする。 */
 export const WithTitle: Story = {
   args: {
     tone: "neutral",

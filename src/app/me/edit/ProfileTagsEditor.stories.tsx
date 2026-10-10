@@ -46,10 +46,8 @@ type Story = StoryObj<typeof meta>;
 
 const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);
 
-/** 選んだ作目は入力欄の中のチップ、一覧にない所属は「その他」のチップで示す。 */
 export const Default: Story = {};
 
-/** 作物名や別名で探す。選んだ作目は候補に出さない。 */
 export const CropSearch: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.type(within(canvasElement).getByRole("combobox", { name: "主な作目" }), "トマ");
@@ -61,7 +59,6 @@ export const CropSearch: Story = {
   },
 };
 
-/** 一覧の所属は押して選ぶ。 */
 export const AffiliationPicked: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -73,7 +70,6 @@ export const AffiliationPicked: Story = {
   },
 };
 
-/** 一覧の所属は入力欄の候補からも選べる。 */
 export const AffiliationSuggestions: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.type(within(canvasElement).getByRole("combobox", { name: "所属" }), "JA");
@@ -83,7 +79,6 @@ export const AffiliationSuggestions: Story = {
   },
 };
 
-/** 作目50件・所属20件に達すると、作目の入力欄は読み取り専用、所属の入力と未選択の候補は押せない。 */
 export const AtLimits: Story = {
   args: {
     details: {

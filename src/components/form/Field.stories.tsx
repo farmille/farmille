@@ -51,7 +51,6 @@ export const ClientError: Story = {
   },
 };
 
-/** サーバーの項目エラーは Form の errors で渡す。入力を変えると消える。 */
 export const ServerError: Story = {
   render: (args) => (
     <Form errors={{ handle: "このハンドルネームはすでに使われています。" }}>
@@ -69,7 +68,6 @@ export const Disabled: Story = {
   },
 };
 
-/** 見出しを隠しても、読み上げとラベル検索には残る。 */
 export const HiddenLabel: Story = {
   args: {
     label: "姓",

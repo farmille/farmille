@@ -16,17 +16,12 @@ function isReviewCompletion(value: string | null): value is ReviewCompletion {
   return value !== null && Object.hasOwn(messages, value);
 }
 
-/**
- * 投稿・更新・削除から戻った直後に ?review= を読んで1度だけ通知し、
- * 再読み込みで出し直さないようクエリから外す。
- */
 export function ReviewCompletionToast() {
   useEffect(() => {
     const url = new URL(window.location.href);
     const completion = url.searchParams.get("review");
     if (!isReviewCompletion(completion)) return;
 
-    // 開発時の二重実行でも同じ通知を1枚に保つ
     toast(messages[completion], { id: "review-completion" });
     url.searchParams.delete("review");
     // router.replace だとクエリを外すだけでページのサーバー描画をやり直すので、履歴だけを書き換える

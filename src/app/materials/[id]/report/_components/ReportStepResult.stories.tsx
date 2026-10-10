@@ -50,7 +50,6 @@ export const AllEffects: Story = {
   },
 };
 
-// 効果タグを押すと aria-pressed で押した状態になり、前から押してあるものも残る
 export const PressTag: Story = {
   async play({ canvasElement }) {
     const canvas = within(canvasElement);

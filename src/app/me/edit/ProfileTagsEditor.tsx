@@ -101,7 +101,6 @@ export function ProfileTagsEditor({
         <div className={affiliationStack}>
           <ToggleGroup
             aria-label="所属の候補"
-            // 上限は一覧外の所属と合わせた件数で数える
             limit={AFFILIATION_LIMIT - customAffiliations.length}
             multiple
             onValueChange={(known) => {
@@ -156,7 +155,6 @@ export function ProfileTagsEditor({
               所属を追加
             </Button>
           </div>
-          {/* 上限の案内は送信を止めない */}
           {message === "" ? null : <Notice tone="error">{message}</Notice>}
         </div>
       </Fieldset>

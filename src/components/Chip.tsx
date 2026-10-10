@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { Icon } from "./Icon";
 import { cx, sva } from "../../styled-system/css";
 
-/** 選んだ作物・条件などを示すチップ。Combobox の複数選択の中にも同じ見た目を使う。 */
 export const chipRecipe = sva({
   slots: ["root", "category", "remove"],
   base: {
@@ -51,7 +50,6 @@ export const chipRecipe = sva({
         outlineColor: "primary.700",
         outlineOffset: "1px",
       },
-      // 見た目は小さく保ち、指で押せる範囲だけ外側へ広げる
       _after: { content: '""', position: "absolute", inset: "-1" },
     },
   },
@@ -69,7 +67,6 @@ export const chipRecipe = sva({
 });
 
 type ChipProps = {
-  /** 項目の名前。 */
   children: ReactNode;
   /** 名前の前に小さく添える種類（作物・効果など）。 */
   category?: string;

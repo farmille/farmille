@@ -45,7 +45,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Multiple: Story = {};
 
-/** 1つだけ押せる組（単位の候補など）。 */
 export const Single: Story = {
   args: {
     "aria-label": "単位の候補",
@@ -60,7 +59,6 @@ export const Single: Story = {
   },
 };
 
-/** 上限に達すると、押していない選択肢を押せなくする。 */
 export const AtLimit: Story = {
   args: { limit: 2, value: ["樹勢改善", "収量増加"] },
 };
@@ -69,7 +67,6 @@ export const Disabled: Story = {
   args: { disabled: true },
 };
 
-/** 順に並ぶ段階を線の上の点で示す（施用時期）。狭い画面では横に流れる。 */
 export const Timeline: Story = {
   args: {
     "aria-label": "施用時期の段階",

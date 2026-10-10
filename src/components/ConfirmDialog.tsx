@@ -8,7 +8,6 @@ import { dialogRecipe } from "./Dialog";
 import { Form } from "./form/Form";
 import { css, cva, cx } from "../../styled-system/css";
 
-// 3つ横に並べると 375px 幅のパネルに収まらないので、別の選択肢があるときは縦に積む
 const actionsLayoutRecipe = cva({
   base: {},
   variants: { layout: { row: {}, stack: { flexDirection: "column" } } },
@@ -30,7 +29,7 @@ type ConfirmDialogOwnership =
 
 type ConfirmDialogConfirmation =
   | {
-      /** 確認ボタンで送るフォームの action。children の入力を検証してから一緒に送る。 */
+      /** form action として渡す。確認ボタンは submit になる。 */
       action: (formData: FormData) => void | Promise<void>;
       onConfirm?: undefined;
       /** フォームに含める入力（理由の Textarea や hidden input）。 */
@@ -52,11 +51,6 @@ export type ConfirmDialogProps = {
 } & ConfirmDialogOwnership &
   ConfirmDialogConfirmation;
 
-/**
- * 削除などの操作の前に確かめるダイアログ（role=alertdialog）。trigger を渡すか、open と onOpenChange で開閉を持つ。
- * action を渡すと本文がフォームになり、children の入力を検証してから送る。
- * 確定の処理中は開いたままボタンを押せなくし、終わったら閉じる（action は trigger で開いたときだけ閉じる）。
- */
 export function ConfirmDialog(props: ConfirmDialogProps) {
   const {
     title,
@@ -103,7 +97,6 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
       <AlertDialog.Close className={closeButtonStyle} disabled={busy} ref={cancelRef}>
         {cancelLabel}
       </AlertDialog.Close>
-      {/* SubmitButton は ref を受けないので、primary で最初にフォーカスを置くため Button で送信中の表示を持つ */}
       <Button
         disabled={busy}
         focusableWhenDisabled={busy}
@@ -119,7 +112,6 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
 
   return (
     <AlertDialog.Root
-      // 処理中は Escape でも閉じない
       onOpenChange={(next) => {
         if (next || !busy) setOpen(next);
       }}

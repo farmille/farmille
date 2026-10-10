@@ -432,7 +432,6 @@ export function ReportCellEditor({
           className={css({ mt: "2" })}
           options={UNIT_OPTIONS}
           value={[measurement.unit]}
-          // 押してある単位を押し直しても外さない（手で選んだ単位として残す）
           onValueChange={([unit]) => setUnit(unit ?? measurement.unit)}
         />
         <div className={hint}>

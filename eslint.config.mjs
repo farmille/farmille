@@ -50,7 +50,6 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    // 部品の土台は共通部品の中に閉じ、画面は src/components の部品を使う（見た目と挙動をそろえるため）
     files: ["src/**/*.{ts,tsx}"],
     ignores: ["src/components/**"],
     rules: {

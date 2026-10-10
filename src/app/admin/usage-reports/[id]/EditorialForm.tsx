@@ -60,7 +60,6 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
       </Field>
 
       <input name="reportId" type="hidden" value={report.id} />
-      {/* 保存・公開・差し戻しで operation の値を分けて送るため、name/value を持てる Button のままにする */}
       <FormActions layout="row">
         {editable ? (
           <>

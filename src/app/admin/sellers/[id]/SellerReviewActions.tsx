@@ -67,7 +67,6 @@ export function SellerReviewActions({
     }
   }, [router, state.status]);
 
-  /** 却下は確認ダイアログのフォーム（却下理由 rejectedReason）を受け取り、そこへ操作を足して送る。 */
   const submit = (operation: Operation, formData = new FormData()): void => {
     formData.set("sellerId", sellerId);
     formData.set("operation", operation);
@@ -144,7 +143,6 @@ export function SellerReviewActions({
         </div>
       ) : null}
 
-      {/* 取り消せない操作（却下・凍結）は一度だけ確認を挟む */}
       {state.status === "approved" ? null : (
         <div className={adminActionsStyle}>
           {status === "applied" ? (

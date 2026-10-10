@@ -8,10 +8,6 @@ import { css, cva } from "../../styled-system/css";
  */
 export const popupPositionerStyle = css({ zIndex: "dialog", outline: "none" });
 
-/**
- * メニュー・セレクトのように操作部品から開く面。
- * 開いた部品の位置（--transform-origin）から広がり、同じ経路で閉じる。
- */
 export const popupRecipe = cva({
   base: {
     bg: "surface.card",
@@ -43,17 +39,14 @@ export const popupRecipe = cva({
           transform: "scale(0.95)",
           _motionReduce: { transform: "none" },
         },
-        // Escape など Base UI が即時と判断した開閉（data-instant）は動かさない
         "&[data-instant]": { transitionDuration: "0s" },
       },
-      // キーボードで開いて打鍵ごとに描き直す候補リストは動かさない
       none: {},
     },
   },
   defaultVariants: { motion: "scale" },
 });
 
-/** ポップアップ内の選択肢1行。 */
 export const optionRecipe = cva({
   base: {
     display: "flex",
@@ -66,10 +59,11 @@ export const optionRecipe = cva({
     color: "text.default",
     cursor: "default",
     outline: "none",
+    userSelect: "none",
     _highlighted: { bg: "primary.soft", color: "primary.700" },
     _selected: { fontWeight: "bold" },
+    _disabled: { opacity: "disabled", cursor: "not-allowed" },
   },
 });
 
-/** 選択肢の補足（「トマト なす科果菜類」の後半）。 */
 export const optionDescriptionStyle = css({ fontSize: "xs", color: "text.subtle" });

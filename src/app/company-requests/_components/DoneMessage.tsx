@@ -46,7 +46,6 @@ export function DoneMessage({
   children?: ReactNode;
   actions?: ReactNode;
 }) {
-  // 完了の印があるときだけ、印のあとに見出し・本文・操作を順に出す
   const step = (n: 1 | 2 | 3) => (check ? completionStepRecipe({ step: n }) : undefined);
   return (
     <section role={role} className={cx(doneRecipe({ spacing }), className)}>

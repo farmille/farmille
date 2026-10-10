@@ -39,13 +39,13 @@ export const Closed: Story = {
   args: { ...deleteReview, trigger: deleteTrigger, onConfirm: fn() },
 };
 
-// トリガーで開いた状態。危険な操作なので最初のフォーカスはキャンセルに置く
+// play でダイアログを開いた状態（onConfirm 版：確認ボタンは通常の button）
 export const Opened: Story = {
   args: { ...deleteReview, trigger: deleteTrigger, onConfirm: fn() },
   play: ({ canvasElement }) => openFrom(canvasElement, "削除"),
 };
 
-// action（フォーム送信）版を開いた状態
+// action（form submit 版）でダイアログを開いた状態
 export const OpenedWithFormAction: Story = {
   args: {
     ...deleteReview,
@@ -55,7 +55,7 @@ export const OpenedWithFormAction: Story = {
   play: ({ canvasElement }) => openFrom(canvasElement, "削除"),
 };
 
-// 前向きな操作（primary）の確認。最初のフォーカスは確認ボタンに置く
+// 前向きな操作（primary）の確認ダイアログ
 export const PrimaryConfirm: Story = {
   args: {
     title: "記事を公開しますか？",
@@ -70,7 +70,6 @@ export const PrimaryConfirm: Story = {
   play: ({ canvasElement }) => openFrom(canvasElement, "公開"),
 };
 
-// 開閉を呼び出し側で持ち、3つ目の選択肢を添えた状態。3つのボタンは縦に積む
 export const ControlledWithAlternative: Story = {
   args: {
     title: "入力途中の内容を下書きに保存しますか？",
@@ -86,7 +85,6 @@ export const ControlledWithAlternative: Story = {
   },
 };
 
-// 理由の入力を必須にした action 版。空のまま確定すると送らずに入力欄のエラーを示す
 export const ActionWithRequiredReason: Story = {
   args: {
     title: "この申請を却下しますか？",
@@ -113,12 +111,11 @@ export const ActionWithRequiredReason: Story = {
   },
 };
 
-// 呼び出し側の処理中。確認ボタンは文言を変えて押せなくし、キャンセルも押せない
 export const Pending: Story = {
   args: { ...deleteReview, open: true, onOpenChange: fn(), pending: true, onConfirm: fn() },
 };
 
-// 控えめな導線（ghost トリガー）から危険な操作を確かめる場合
+// 控えめな導線（ghost トリガー）から危険操作を確認する場合
 export const GhostTrigger: Story = {
   args: {
     ...deleteReview,
@@ -131,7 +128,7 @@ export const GhostTrigger: Story = {
   },
 };
 
-// トリガーが押せない状態（公開状態の切り替え中など）
+// トリガーが無効化された状態
 export const TriggerDisabled: Story = {
   args: {
     ...deleteReview,

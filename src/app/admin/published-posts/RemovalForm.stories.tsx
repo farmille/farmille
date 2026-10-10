@@ -20,14 +20,12 @@ async function expand(canvasElement: HTMLElement) {
   return canvas;
 }
 
-// 開いた状態
 export const Expanded: Story = {
   play: async ({ canvasElement }) => {
     await expand(canvasElement);
   },
 };
 
-// 確認のチェックなしで送ると、送らずにチェックボックスのエラーを示す
 export const ConfirmationMissing: Story = {
   play: async ({ canvasElement }) => {
     const canvas = await expand(canvasElement);

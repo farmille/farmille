@@ -79,10 +79,8 @@ export const VarietyUnknown: Story = {
   args: { input: { ...blank, varietyUnknown: true } },
 };
 
-// 候補の一覧はポータルで body の直下に出る
 const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);
 
-/** 作物名で検索した候補の一覧。別名で当たった作物は説明に別名を添える。 */
 export const CropSearchOpen: Story = {
   args: { input: blank },
   async play({ canvasElement }) {
@@ -94,7 +92,6 @@ export const CropSearchOpen: Story = {
   },
 };
 
-/** 候補を選ぶと選んだ作物のチップが付き、候補・一覧のボタンも押した状態になる。 */
 export const CropPicked: Story = {
   args: { input: blank },
   async play({ canvasElement }) {
@@ -112,7 +109,6 @@ export const CropPicked: Story = {
   },
 };
 
-/** 「変更」で開いた資材の検索と、サーバーから返った候補の一覧。 */
 export const MaterialSearchOpen: Story = {
   async play({ canvasElement }) {
     const canvas = within(canvasElement);

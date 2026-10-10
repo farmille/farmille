@@ -1,11 +1,10 @@
 "use client";
 
 import { Checkbox as BaseCheckbox } from "@base-ui/react/checkbox";
-import { Field as BaseField } from "@base-ui/react/field";
 import type { ReactNode } from "react";
 
 import { Icon } from "@/components/Icon";
-import { Choice, RequirementBadge } from "./Field";
+import { Choice, EnsureFieldRoot, RequirementBadge } from "./Field";
 import { useFieldContext, useResetKey } from "./field-context";
 import { checkboxBoxRecipe, checkIndicatorStyle } from "./recipes";
 
@@ -26,7 +25,6 @@ type CheckboxProps = {
   className?: string;
 };
 
-/** 文ごと押せるチェックボックス。同意欄は variant="row" の枠付きの行にする。 */
 export function Checkbox({
   children,
   description,
@@ -51,7 +49,6 @@ export function Checkbox({
       label={
         <>
           {children}
-          {/* 必須であることは aria-required で伝わるので、札は名前に含めない */}
           {requirement === undefined ? null : (
             <span aria-hidden="true">
               {" "}
@@ -85,12 +82,9 @@ export function Checkbox({
     </Choice>
   );
 
-  // Field の外では自分の Field.Root を持ち、Form の検証と errors の対象にする
-  return inRoot ? (
-    choice
-  ) : (
-    <BaseField.Root className={className} disabled={disabled} name={name}>
+  return (
+    <EnsureFieldRoot className={className} disabled={disabled} name={name}>
       {choice}
-    </BaseField.Root>
+    </EnsureFieldRoot>
   );
 }

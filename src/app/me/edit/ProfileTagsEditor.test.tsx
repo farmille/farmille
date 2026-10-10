@@ -72,7 +72,6 @@ describe("プロフィールのタグ編集", () => {
         }}
       />,
     );
-    // 上限に達しても選んだ作目は外せるよう、入力欄は無効ではなく読み取り専用にする
     expect(screen.getByRole("combobox", { name: "主な作目" })).toHaveAttribute("readonly");
     expect(screen.getByRole("combobox", { name: "所属" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "所属を追加" }));

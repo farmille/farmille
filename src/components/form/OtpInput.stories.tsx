@@ -15,7 +15,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Empty: Story = {};
 
-/** 入力中。次に入る枠に縦線のキャレットを出す。 */
 export const Typing: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.type(within(canvasElement).getByLabelText("認証コード"), "123");
@@ -28,7 +27,6 @@ export const Filled: Story = {
   },
 };
 
-/** 管理者の2要素認証。見出しと案内は Field が持つ。 */
 export const InField: Story = {
   render: () => (
     <Field

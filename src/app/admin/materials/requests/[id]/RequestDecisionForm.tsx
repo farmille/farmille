@@ -26,7 +26,6 @@ export function RequestDecisionForm({ requestId }: { requestId: string }) {
         <Textarea />
       </Field>
       <input name="requestId" type="hidden" value={requestId} />
-      {/* 承認と却下で decision の値を分けて送るため、name/value を持てる Button のままにする */}
       <FormActions layout="row">
         <Button disabled={pending} name="decision" type="submit" value="approve">
           {pending ? "処理中…" : "承認して反映"}

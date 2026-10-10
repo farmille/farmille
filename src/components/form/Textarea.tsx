@@ -11,7 +11,6 @@ type TextareaProps = Omit<ComponentPropsWithRef<"textarea">, "required" | "aria-
   size?: "md" | "lg";
 };
 
-/** 複数行の入力欄。必須かどうかは囲む Field の requirement で決まる。 */
 export function Textarea({
   size,
   className,

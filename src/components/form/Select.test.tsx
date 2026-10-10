@@ -36,7 +36,6 @@ describe("Select", () => {
       </Form>,
     );
 
-    // ブラウザの自動入力は名前付きの隠し input に値の種類を見る
     expect(document.querySelector('input[name="prefectureCode"]')).toHaveAttribute(
       "autocomplete",
       "address-level1",

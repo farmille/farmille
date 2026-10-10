@@ -224,7 +224,6 @@ function Body({
       <div className={bodyText({ preview })}>{value}</div>
     ) : null
   ) : (
-    // 記事の本文の見た目のまま直す欄なので、枠付きの Textarea にはしない
     <textarea
       className={cx(bodyText({ preview }), bodyInput)}
       aria-label={label}
@@ -418,7 +417,6 @@ export function ReportArticleEditor({
         </div>
         {sections.map((section) => (
           <div key={section.value} className={sectionBox}>
-            {/* 記事の見出しの見た目のまま直す欄なので、枠付きの Input にはしない */}
             <input
               className={sectionTitle({ preview })}
               aria-label={`${section.title}の見出し`}
@@ -491,7 +489,6 @@ export function ReportArticleEditor({
               <div className={css({ display: "flex", alignItems: "center", gap: "2", mt: "2" })}>
                 <label className={cx(pillButtonRecipe(), fileButton)}>
                   ＋ 写真を挿入
-                  {/* 選んだ写真はその場でアップロードして記事に差し込むので、選択中の表示を持つ FileInput は使わない */}
                   <input
                     className={visuallyHidden}
                     type="file"
@@ -541,7 +538,6 @@ export function ReportArticleEditor({
             ))}
             <label className={cx(addDocument, fileButton)}>
               ＋ 資料を追加
-              {/* 写真と同じく、選んだ資料はその場でアップロードして一覧に足す */}
               <input
                 className={visuallyHidden}
                 type="file"

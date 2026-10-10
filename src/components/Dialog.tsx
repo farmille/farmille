@@ -6,10 +6,6 @@ import type { ReactElement, ReactNode } from "react";
 import { buttonRecipe, type ButtonVariants } from "./Button";
 import { cx, sva } from "../../styled-system/css";
 
-/**
- * モーダルの見た目。トリガーに紐づかないので transform-origin は中央のまま、
- * 背面の幕と同じ時間で不透明度を変え、ひとつの面として現れて同じ経路で戻る。
- */
 export const dialogRecipe = sva({
   slots: ["backdrop", "popup", "bar", "title", "description", "actions"],
   base: {
@@ -69,7 +65,6 @@ export const dialogRecipe = sva({
         },
         title: { fontSize: "lg" },
       },
-      // 画面全体を覆うプレビュー。拡大縮小すると全面が揺れるので不透明度だけで出入りする
       fullscreen: {
         popup: {
           inset: "0",
@@ -116,7 +111,6 @@ export type DialogProps = {
   closeLabel?: string;
 } & DialogOwnership;
 
-/** 中身を読ませるモーダル（role=dialog）。trigger を渡すか、open と onOpenChange で開閉を持つ。 */
 export function Dialog({
   title,
   description,
@@ -157,7 +151,6 @@ export function Dialog({
   );
 }
 
-/** ダイアログを閉じるボタン。見た目は Button と同じ。 */
 export function DialogClose({
   children = "閉じる",
   variant = "ghost",
@@ -174,7 +167,6 @@ export function DialogClose({
   );
 }
 
-/** ダイアログ下端の操作列。並べたボタンを同じ幅に揃える。 */
 export function DialogActions({ children }: { children: ReactNode }) {
   return <div className={dialogRecipe().actions}>{children}</div>;
 }

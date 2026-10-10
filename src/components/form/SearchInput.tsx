@@ -5,7 +5,6 @@ import { Input as BaseInput } from "@base-ui/react/input";
 import { Icon } from "@/components/Icon";
 import { cva, cx } from "../../../styled-system/css";
 
-/** 枠の中に虫眼鏡と枠なしの入力欄を並べる検索欄。Autocomplete の size="search" も同じ枠を使う。 */
 export const searchBoxRecipe = cva({
   base: {
     display: "flex",
@@ -30,7 +29,6 @@ export const searchBoxRecipe = cva({
         borderColor: "border.strong",
         borderRadius: "button",
         color: "text.subtle",
-        // 送信ボタンにフォーカスしたときは枠を光らせず、入力欄のときだけ入力欄と同じ焦点の表現にする
         "&:has(input:focus-visible)": {
           borderColor: "primary.600",
           outlineWidth: "2px",
@@ -38,7 +36,6 @@ export const searchBoxRecipe = cva({
           outlineColor: "primary.200",
         },
       },
-      // 写真の上に置く暗いガラス面。ink の薄い透過にごく弱いぼかしを掛け、縁は白い髪の毛線で切る
       glass: {
         gap: "2.5",
         px: "4",
@@ -63,7 +60,6 @@ export const searchBoxRecipe = cva({
   defaultVariants: { size: "md", surface: "plain" },
 });
 
-/** 検索欄の中の入力。枠は searchBoxRecipe が持つ。 */
 export const searchFieldRecipe = cva({
   base: {
     flex: "1",
@@ -118,7 +114,6 @@ const submitRecipe = cva({
   variants: {
     surface: {
       plain: { w: "8", h: "8", mr: "-1", bg: "primary.700" },
-      // 面と同じく透かし、写真の色を少し通す。矢印の白は UI 部品の 3：1 を下限にする
       glass: {
         w: "9",
         h: "9",
@@ -148,7 +143,6 @@ type SearchInputProps = {
   className?: string;
 };
 
-/** 資材や記事を探す検索欄。送信は囲むフォームに任せる。 */
 export function SearchInput({
   name,
   value,

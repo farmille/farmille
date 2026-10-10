@@ -42,7 +42,6 @@ export const Create: Story = {
   },
 };
 
-/** 検索ボタンで探した資材が一覧に出て、選ぶと紐づけ資材のチップになる。 */
 export const MaterialSearch: Story = {
   args: Create.args,
   play: async ({ canvasElement }) => {

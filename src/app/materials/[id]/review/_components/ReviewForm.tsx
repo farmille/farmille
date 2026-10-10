@@ -338,7 +338,6 @@ export function ReviewForm({
         </div>
       </Field>
 
-      {/* 写真の各入力は自分の name で送るので、組の Field.Root（name="photos"）では包まない */}
       <Fieldset
         legend={
           <>

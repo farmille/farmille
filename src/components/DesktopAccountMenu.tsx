@@ -107,7 +107,6 @@ export function DesktopAccountMenu({ myPageCurrent }: { myPageCurrent: boolean }
   return (
     <Menu.Root
       onOpenChange={(open) => {
-        // ログイン・ログアウトは別タブでも起きるので、開くたびに Cookie から読み直す
         if (open) setSignedIn(hasAuthSession());
       }}
     >
@@ -119,7 +118,6 @@ export function DesktopAccountMenu({ myPageCurrent }: { myPageCurrent: boolean }
           <Menu.Popup aria-label="アカウント" className={panel}>
             {entries.map((entry) =>
               entry.kind === "logout" ? (
-                // 押した瞬間に閉じると送信前にフォームが外れるので、送信後の遷移に任せて開いたままにする
                 <Menu.Item
                   key={entry.label}
                   nativeButton

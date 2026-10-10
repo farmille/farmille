@@ -90,7 +90,6 @@ export const WithPhotos: Story = {
   },
 };
 
-/** E2E と同じ操作で作目を選び直し、星を付けて送る。送信値は作目1つと評価の数字。 */
 export const SubmitsCropAndRating: Story = {
   args: {
     initialValues: {

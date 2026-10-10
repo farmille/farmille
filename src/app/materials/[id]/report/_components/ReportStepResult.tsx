@@ -29,7 +29,6 @@ export function ReportStepResult({
   materialEffectNames: string[];
 }) {
   const categories = [...new Set(effects.map((effect) => effect.categoryName))];
-  // 効果タグは分類ごとの組に分かれるので、押した組の分だけ入れ替え、選んだ順は保つ
   function tagGroup(names: string[]) {
     return (
       <ToggleGroup

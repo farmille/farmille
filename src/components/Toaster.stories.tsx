@@ -16,7 +16,6 @@ async function openToast({ canvasElement }: { canvasElement: HTMLElement }) {
   await userEvent.click(within(canvasElement).getByRole("button", { name: "通知を出す" }));
 }
 
-// 文言だけの通知
 export const Message: Story = {
   render: () => (
     <>
@@ -29,7 +28,6 @@ export const Message: Story = {
   play: openToast,
 };
 
-// 取り消し操作を持つ通知
 export const WithAction: Story = {
   render: () => (
     <>
@@ -50,7 +48,6 @@ export const WithAction: Story = {
   play: openToast,
 };
 
-// 下端に操作バーを固定した画面が自分で置く出口。toasterId を付けた通知だけがここに出る
 export const AboveActionBar: Story = {
   render: () => (
     <>

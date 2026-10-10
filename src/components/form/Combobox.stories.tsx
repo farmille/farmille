@@ -48,7 +48,6 @@ export const Selected: Story = {
   args: { defaultValue: tomato },
 };
 
-/** 一覧を開いた状態。説明は右に小さく、選べない候補は薄く出す。 */
 export const Open: Story = {
   args: { defaultValue: strawberry },
   play: openList,
@@ -70,7 +69,6 @@ export const NoMatches: Story = {
   },
 };
 
-/** 複数選択。選んだ作物は入力欄の中のチップで示し、チップの × で外す。 */
 export const Multiple: Story = {
   args: { multiple: true, defaultValue: [tomato, cucumber] },
 };
@@ -80,7 +78,6 @@ export const MultipleOpen: Story = {
   play: openList,
 };
 
-/** 上限に達すると入力欄は読み取り専用になり、選んでいない候補は押せない。 */
 export const MultipleAtMax: Story = {
   args: { multiple: true, max: 2, defaultValue: [tomato, cucumber] },
   play: openList,

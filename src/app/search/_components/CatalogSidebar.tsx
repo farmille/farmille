@@ -216,7 +216,6 @@ export function CatalogSidebar({
         {items.map((filter) => {
           const { href, key } = hrefFor(filter);
           return (
-            // 外すのは URL の変更なので、Chip の外すボタン（JS の onRemove）ではなく同じ見た目のリンクにする
             <span key={key} className={selectedChip.root}>
               <span className={selectedChip.category}>選択中</span>
               {filter.name}

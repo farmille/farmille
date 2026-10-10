@@ -37,8 +37,6 @@ body {
    * 1日に何度も触る要素なので、知覚遅延を作らない範囲（0.98・160ms）に留める。
    * transform は inline 要素に効かないため、本文中のテキストリンクは縮まず、
    * ボタン・カード・ピルのようにブロック整形される要素だけが反応する。
-   * チェック・ラジオは包む label の行ごと縮め、label の中の印だけが二重に縮まないようにする。
-   * 無効な部品は押せないので縮めない。
    */
   button,
   summary,
@@ -82,7 +80,7 @@ body {
 
 /*
  * Sonner は視覚過敏の設定で transition を !important で消し、不透明度の手がかりまで無くす。
- * 位置は動かさず、不透明度だけで出入りを示す。Sonner の規則より詳細度を上げて上書きする。
+ * Sonner の規則より詳細度を上げて上書きする。
  */
 @media (prefers-reduced-motion: reduce) {
   [data-sonner-toaster] [data-sonner-toast] {

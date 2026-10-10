@@ -135,7 +135,6 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
     );
     for (const document of documents) {
       const group = page.getByRole("heading", { name: document.label, exact: true }).locator("..");
-      // 分類は Select のボタンに選んだ見出しの文字で出る
       await expect(group.getByRole("combobox", { name: "資料の分類", exact: true })).toContainText(
         document.label,
       );

@@ -5,7 +5,8 @@ import { OTPInput, OTPInputContext, REGEXP_ONLY_DIGITS, type SlotProps } from "i
 import { useContext, useState } from "react";
 
 import { css, cva } from "../../../styled-system/css";
-import { useFieldContext } from "./field-context";
+import { EnsureFieldRoot } from "./Field";
+import { useFieldRequired } from "./field-context";
 
 const CODE_LENGTH = 6;
 
@@ -14,7 +15,6 @@ const containerStyle = css({ w: "fit-content", maxW: "100%" });
 
 const slotsStyle = css({ display: "flex", gap: "2" });
 
-/** 1桁ぶんの枠。見た目は入力欄（controlRecipe）と同じ枠・角丸・焦点の色にそろえる。 */
 const slotRecipe = cva({
   base: {
     display: "grid",
@@ -54,7 +54,6 @@ const slotRecipe = cva({
   },
 });
 
-// 本物のキャレットは透明なので、次に入る枠に縦線を出す
 const caretStyle = css({ w: "0.5", h: "6", bg: "text.default" });
 
 type OtpInputProps = {
@@ -70,14 +69,13 @@ type OtpInputProps = {
  * Field の見出しがこの入力欄の名前になり、必須かどうかは Field の requirement で決まる。
  */
 export function OtpInput({ name, disabled, "aria-label": ariaLabel }: OtpInputProps) {
-  const { required, inRoot } = useFieldContext();
+  const required = useFieldRequired();
   const [code, setCode] = useState("");
 
   const control = (
     <BaseField.Control
       aria-label={ariaLabel}
       disabled={disabled}
-      // 6桁そろわない値は送信前に止める（空のままは requirement に従う）
       minLength={CODE_LENGTH}
       name={name}
       render={(props, state) => (
@@ -100,8 +98,7 @@ export function OtpInput({ name, disabled, "aria-label": ariaLabel }: OtpInputPr
     />
   );
 
-  // Field の外では自分の Field.Root を持ち、Form の検証と errors の対象にする
-  return inRoot ? control : <BaseField.Root name={name}>{control}</BaseField.Root>;
+  return <EnsureFieldRoot name={name}>{control}</EnsureFieldRoot>;
 }
 
 function Slots({ invalid, disabled }: { invalid: boolean; disabled: boolean }) {
@@ -109,7 +106,6 @@ function Slots({ invalid, disabled }: { invalid: boolean; disabled: boolean }) {
   return (
     <div className={slotsStyle}>
       {slots.map((slot, index) => (
-        // 枠は位置そのものが識別子になる
         <Slot disabled={disabled} invalid={invalid} key={`slot-${index}`} slot={slot} />
       ))}
     </div>

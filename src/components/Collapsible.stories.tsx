@@ -31,7 +31,6 @@ const usage = (
   </div>
 );
 
-// 見出し行の開閉（閉じた状態）
 export const Section: Story = {
   render: () => (
     <Collapsible>
@@ -41,7 +40,6 @@ export const Section: Story = {
   ),
 };
 
-// 見出し行の開閉（開いた状態）
 export const SectionOpen: Story = {
   render: () => (
     <Collapsible defaultOpen>
@@ -51,7 +49,6 @@ export const SectionOpen: Story = {
   ),
 };
 
-// 本文中の控えめな開閉（閉じた状態）
 export const Link: Story = {
   render: () => (
     <Collapsible>
@@ -61,7 +58,6 @@ export const Link: Story = {
   ),
 };
 
-// 本文中の控えめな開閉（開いた状態）
 export const LinkOpen: Story = {
   render: () => (
     <Collapsible defaultOpen>

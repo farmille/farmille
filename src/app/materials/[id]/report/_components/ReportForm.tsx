@@ -369,7 +369,6 @@ export function ReportForm({
     }
     startTransition(() => persist(submit));
   }
-  // 閉じる前の確認ダイアログは、保存が終わるまで開いたままにするので Promise を返す
   async function persist(submit: boolean, close = false) {
     try {
       const result = submit
@@ -394,7 +393,6 @@ export function ReportForm({
       setInput(savedInput);
       setSaved(JSON.stringify(savedInput));
       setErrors({});
-      // 提出したときは完了画面が受付を伝えるので、通知は下書き保存だけに出す
       if (result.status === "pending") setSubmitted(true);
       else toast(result.message, { toasterId: reportToasterId });
       if (close) {

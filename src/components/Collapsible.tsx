@@ -21,7 +21,6 @@ const triggerRecipe = sva({
         outlineOffset: "2px",
       },
     },
-    // 開閉と同じ時間で1つの山形を半回転させ、開いている向きを示す
     icon: {
       flexShrink: "0",
       transitionProperty: "transform",
@@ -33,7 +32,6 @@ const triggerRecipe = sva({
   },
   variants: {
     variant: {
-      // 見出し行全体を押せる区切り（検索の絞り込み欄など）
       section: {
         trigger: {
           display: "flex",
@@ -48,7 +46,6 @@ const triggerRecipe = sva({
         },
         icon: { ml: "auto", color: "primary.700" },
       },
-      // 本文中の「詳細を見る」のような控えめな開閉
       link: {
         trigger: {
           display: "inline-flex",
@@ -76,14 +73,12 @@ const panelRecipe = cva({
         _endingStyle: { h: "0", opacity: "0" },
         _motionReduce: { transitionProperty: "opacity" },
       },
-      // 1回の操作で何度も開け閉めする絞り込みの欄は、待たせないよう動かさない
       none: {},
     },
   },
   defaultVariants: { motion: "expand" },
 });
 
-/** 開閉する領域のまとまり。開閉状態を持たせたいときだけ open / onOpenChange を渡す。 */
 export function Collapsible({
   open,
   defaultOpen,

@@ -19,7 +19,6 @@ const body = (
   </p>
 );
 
-// トリガーのみ（閉じた状態）
 export const Closed: Story = {
   args: {
     title: "この感想口コミを通報する",
@@ -28,7 +27,6 @@ export const Closed: Story = {
   },
 };
 
-// トリガーから開いた状態
 export const Panel: Story = {
   args: {
     title: "この感想口コミを通報する",
@@ -49,7 +47,6 @@ export const Panel: Story = {
   },
 };
 
-// 開閉を呼び出し側で持つ（開いた状態）
 export const Controlled: Story = {
   args: {
     title: "通報を受け付けました",
@@ -64,7 +61,6 @@ export const Controlled: Story = {
   },
 };
 
-// 画面全体のプレビュー（上部バーに閉じるボタン）
 export const Fullscreen: Story = {
   args: {
     title: "公開後の見え方",

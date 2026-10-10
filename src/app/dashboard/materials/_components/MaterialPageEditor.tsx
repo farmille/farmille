@@ -128,7 +128,6 @@ export function MaterialPageEditor({
             </section>
             <section>
               <h2>製品説明</h2>
-              {/* 見出しは h2 が見せているので、Field の見出しは読み上げ用にだけ置く */}
               <Field
                 label="製品説明"
                 hideLabel
@@ -155,10 +154,7 @@ export function MaterialPageEditor({
                 aria-label="施用タイミング"
                 className={timingOptions}
                 disabled={pending}
-                onValueChange={(values) =>
-                  // 選択肢の並び順で返るので、時期の番号は昇順のまま
-                  setContent({ ...content, timings: values.map(Number) })
-                }
+                onValueChange={(values) => setContent({ ...content, timings: values.map(Number) })}
                 options={TIMING_OPTIONS}
                 value={content.timings.map(String)}
                 variant="chips"

@@ -15,12 +15,6 @@ import { useFieldRequired, useResetKey } from "./field-context";
 import { selectTriggerRecipe } from "./recipes";
 import type { Option } from "./types";
 
-// popup.ts の選択肢には無効の見た目が無いので、選べない選択肢だけここで薄くする
-const optionStateStyle = css({
-  userSelect: "none",
-  _disabled: { opacity: "disabled", cursor: "not-allowed" },
-});
-
 const optionTextStyle = css({ display: "flex", flexDirection: "column", flex: "1", minW: "0" });
 
 const groupLabelStyle = css({
@@ -48,12 +42,10 @@ type SelectProps<V extends string> = {
   name?: string;
   disabled?: boolean;
   "aria-label"?: string;
-  /** 住所の都道府県などで、ブラウザの自動入力に値の種類を伝える。 */
   autoComplete?: string;
   className?: string;
 };
 
-/** ボタンを押して一覧から1つ選ぶ。トリガーの名前は囲む Field の見出しか aria-label。 */
 export function Select<V extends string>({
   options,
   placeholder,
@@ -106,7 +98,6 @@ export function Select<V extends string>({
   );
 }
 
-/** group が続く選択肢を1つの見出しの下にまとめる。 */
 function renderOptions<V extends string>(options: readonly Option<V>[]): ReactNode {
   const runs: { group?: string; options: Option<V>[] }[] = [];
   for (const option of options) {
@@ -131,14 +122,13 @@ function renderOptions<V extends string>(options: readonly Option<V>[]): ReactNo
 function SelectOption<V extends string>({ option }: { option: Option<V> }) {
   return (
     <BaseSelect.Item
-      className={cx(optionRecipe(), optionStateStyle)}
+      className={optionRecipe()}
       disabled={option.disabled}
       label={option.label}
       value={option.value}
     >
       <span className={optionTextStyle}>
         <BaseSelect.ItemText>{option.label}</BaseSelect.ItemText>
-        {/* 選択肢の名前を「ラベル 説明」として読ませる */}
         {option.description === undefined ? null : (
           <>
             {" "}

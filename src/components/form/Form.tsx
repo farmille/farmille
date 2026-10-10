@@ -18,10 +18,6 @@ type FormProps = {
   onSubmit?: FormEventHandler<HTMLFormElement>;
 };
 
-/**
- * 送信時に中の Field を検証し、最初の不備へフォーカスを移すフォーム（noValidate）。
- * レイアウトは持たないので、並べ方は呼び出し側の className で決める。
- */
 export function Form({ errors, children, ...rest }: FormProps) {
   // Base UI は errors の参照が変わるたびに取り込み直すので、描画ごとに作り直さない
   const baseErrors = useMemo(

@@ -114,7 +114,6 @@ const blankRow = (plotId: string): Row => ({
   value: "",
 });
 
-// 元に戻すは通知の表示中に押されるので、その時点の最新の入力を受け取って組み立てる
 function withPlots(
   input: UsageReportInput,
   plots: Plot[],

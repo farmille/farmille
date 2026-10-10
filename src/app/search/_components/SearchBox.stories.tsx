@@ -12,7 +12,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** 入力済みの検索欄にフォーカスし、↓キーで候補の一覧を開く。一覧は body 直下に出る。 */
 async function openSuggestions(canvasElement: HTMLElement) {
   await userEvent.click(within(canvasElement).getByRole("combobox", { name: "資材の検索条件" }));
   await userEvent.keyboard("{ArrowDown}");

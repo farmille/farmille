@@ -15,7 +15,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** 招待コードの欄を開いた状態。 */
 export const InviteCodeOpen: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

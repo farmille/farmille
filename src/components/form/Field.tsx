@@ -22,9 +22,7 @@ import {
 import type { Requirement, Visibility } from "./types";
 
 export type FieldProps = {
-  /** 送信名であり、Form の errors のキー。子の name より優先される。 */
   name?: string;
-  /** 省くのは、自分でラベルを持つ Checkbox を置くときだけ（必須/任意の札は Checkbox の行末に出る）。 */
   label?: ReactNode;
   /** 見出しを画面から隠し、読み上げとラベル検索には残す（Fieldset 内の姓・名など）。 */
   hideLabel?: boolean;
@@ -43,7 +41,6 @@ export type FieldProps = {
   children: ReactNode;
 };
 
-/** 見出し・案内・エラーを1つの入力に結びつける項目。 */
 export function Field({
   name,
   label,
@@ -109,7 +106,22 @@ export function Field({
   );
 }
 
-/** 見出しの行。札は label の外に置き、入力のアクセシブルな名前を見出しの文字だけにする。 */
+/** 囲む Field が無いときだけ自分の Field.Root で包み、Form の検証と errors の対象にする。 */
+export function EnsureFieldRoot({
+  name,
+  disabled,
+  className,
+  children,
+}: Pick<FieldProps, "name" | "disabled" | "className" | "children">) {
+  return useFieldContext().inRoot ? (
+    children
+  ) : (
+    <BaseField.Root className={className} disabled={disabled} name={name}>
+      {children}
+    </BaseField.Root>
+  );
+}
+
 export function LabelRow({
   size,
   requirement,
@@ -193,7 +205,6 @@ export function FieldErrorText({ error }: { error?: string }) {
       <BaseField.Validity>
         {({ validity }) =>
           VALIDITY_MESSAGES.some(([key]) => validity[key]) ? null : (
-            // サーバーのエラーと validate の結果はフォーカスを動かさずに届くので、role="alert" で読み上げる
             <BaseField.Error className={fieldErrorStyle} role="alert" />
           )
         }
@@ -239,7 +250,7 @@ export function Choice({
           <span>
             {label}
             {description === undefined ? null : (
-              // 枠付きの行でも説明を枠の中に置く。名前からは外し、aria-describedby で説明として読ませる
+              // 名前からは外し、aria-describedby で説明として読ませる
               <BaseField.Description
                 aria-hidden
                 className={choiceDescriptionStyle}

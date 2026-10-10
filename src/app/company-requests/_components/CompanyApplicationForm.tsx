@@ -366,7 +366,6 @@ function MaterialItem({
       <CheckboxGroup options={RELATION_OPTIONS} variant="chips" />
     </Fieldset>
   );
-  // 添付と URL のどちらか一方があればよいので、組だけを必須にし、中の2つは見出しを隠した任意の欄にする
   const evidence = (
     <Fieldset
       description={`${

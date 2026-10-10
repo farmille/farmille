@@ -8,7 +8,6 @@ import { css } from "../../../../styled-system/css";
 
 const noteStyle = css({ mt: "2" });
 
-// 同意の文は版付きで受付票に残るので、文言はそのままにし、必須は組（Fieldset）から受け継ぐ
 function ConsentRow({ name, text }: { name: string; text: string }) {
   return (
     <Field name={name}>

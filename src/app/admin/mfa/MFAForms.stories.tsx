@@ -21,7 +21,6 @@ export const Verification: Story = {
   args: { verifiedFactorId: "factor-storybook" },
 };
 
-// 認証アプリの6桁を入れた状態
 export const VerificationCodeFilled: Story = {
   args: { verifiedFactorId: "factor-storybook" },
   play: async ({ canvasElement }) => {
@@ -29,7 +28,6 @@ export const VerificationCodeFilled: Story = {
   },
 };
 
-// 6桁を送ってサーバーが受け付けなかった状態（Storybook の action は常にエラーを返す）
 export const VerificationRejected: Story = {
   args: { verifiedFactorId: "factor-storybook" },
   play: async ({ canvasElement }) => {

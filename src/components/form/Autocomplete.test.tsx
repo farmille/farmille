@@ -86,7 +86,6 @@ describe("Autocomplete", () => {
     await user.type(input, "JA");
     await user.keyboard("{ArrowDown}{ArrowDown}{Enter}");
     expect(pick).toHaveBeenCalledWith(affiliations[1]);
-    // 選んでも入力中の文字は変えない（変えるかは onPick 側で決める）
     expect(input).toHaveValue("JA");
     expect(input).toHaveAttribute("aria-expanded", "false");
 

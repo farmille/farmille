@@ -80,7 +80,6 @@ export const PartialSaveFailure: Story = {
 
 export const PartialSaveFailureManual: Story = { ...PartialSaveFailure, play: undefined };
 
-/** 全項目を埋めた下書きを提出し、受付の完了画面を出す。 */
 export const Submitted: Story = {
   args: {
     draft: {
@@ -103,7 +102,6 @@ export const Submitted: Story = {
   },
 };
 
-/** 入力の途中で閉じようとすると、下書きに保存するかを確かめる。 */
 export const LeaveConfirm: Story = {
   async play({ canvasElement }) {
     const canvas = within(canvasElement);

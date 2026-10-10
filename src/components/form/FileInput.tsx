@@ -50,10 +50,7 @@ function selectionText(fileNames: readonly string[]): string {
   return `${fileNames.length}件選択中：${fileNames.join("、")}`;
 }
 
-/**
- * ブラウザ固有の英語表示を出さず、選択状態を日本語で伝えるファイル入力。
- * Field の中では、隠した input が Field の見出しで読み上げられる。
- */
+/** ブラウザ固有の英語表示を出さず、選択状態を日本語で伝えるファイル入力。 */
 export function FileInput({ onChange, disabled, className, ...inputProps }: FileInputProps) {
   const required = useFieldRequired();
   const inputRef = useRef<HTMLInputElement>(null);

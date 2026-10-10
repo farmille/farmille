@@ -19,13 +19,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// 閉じた状態のトリガー
 export const Default: Story = {};
 
-// 未ログインで開いた状態
 export const GuestOpen: Story = { play: openMenu };
 
-// ログイン中にマイページを見ている状態で開いた状態
 export const MyPage: Story = {
   args: { myPageCurrent: true },
   beforeEach: () => {

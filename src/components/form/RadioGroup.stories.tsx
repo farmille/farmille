@@ -73,7 +73,6 @@ export const InFieldset: Story = {
   ),
 };
 
-/** 立場の選択。Fieldset の見出しが組の名前になる。 */
 export const CardsInFieldset: Story = {
   render: (args) => (
     <Fieldset

@@ -13,7 +13,6 @@ const optionOf = (crop: ReviewCropOption): Option => ({
   description: crop.groupName,
 });
 
-/** 感想口コミの作目。1つだけ選び、別の作目を選ぶと入れ替える。選んだ作目を cropIds で送る。 */
 export function ReviewCropPicker({
   crops,
   defaultCropIds,

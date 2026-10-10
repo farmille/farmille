@@ -7,14 +7,13 @@ export default defineConfig({
   preflight: true,
   include: ["./src/**/*.{js,jsx,ts,tsx}"],
   exclude: [],
-  // Base UI が状態を data 属性で出す。_invalid は :invalid も拾い、未入力の必須欄を表示直後から赤くするので使わない。
+  // _invalid は :invalid も拾い、未入力の必須欄を表示直後から赤くするので使わない。
   conditions: {
     extend: {
       startingStyle: "&[data-starting-style]",
       endingStyle: "&[data-ending-style]",
       panelOpen: "&[data-panel-open]",
       fieldInvalid: "&:is([data-invalid], [aria-invalid=true])",
-      // iOS Safari は 16px 未満の入力欄にフォーカスすると画面を拡大する
       touch: "@media (hover: none) and (pointer: coarse)",
     },
   },

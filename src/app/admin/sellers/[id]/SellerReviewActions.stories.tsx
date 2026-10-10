@@ -42,7 +42,6 @@ export const IssueLogin: Story = {
   async play({ canvasElement }) {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByLabelText("紐づける資材メーカー"));
-    // 選択肢の一覧は body 直下へ portal されるので、canvas の外から探す
     const popup = within(canvasElement.ownerDocument.body);
     await userEvent.click(await popup.findByRole("option", { name: "しおさい資材株式会社" }));
     await userEvent.click(canvas.getByRole("button", { name: "確認を完了してログインを発行" }));
@@ -91,7 +90,6 @@ export const ReissueInvite: Story = {
   },
 };
 
-/** 確認ダイアログは body 直下へ portal されるので、canvas の外から探す。 */
 const dialog = (canvasElement: HTMLElement) =>
   within(within(canvasElement.ownerDocument.body).getByRole("alertdialog"));
 
@@ -100,14 +98,12 @@ async function openConfirm(canvasElement: HTMLElement, triggerName: string) {
   await waitFor(() => expect(dialog(canvasElement).getByRole("heading")).toBeVisible());
 }
 
-/** 最後に送った FormData の中身（確認ダイアログを経ても送る項目が変わらないことを確かめる）。 */
 function lastSubmitted(): Record<string, FormDataEntryValue> {
   const call = mocked(sellerOperationAction).mock.lastCall;
   if (call === undefined) throw new Error("sellerOperationAction が呼ばれていません");
   return Object.fromEntries(call[1]);
 }
 
-// 却下の確認。理由は必須なので、空のまま確定すると送らずに入力欄のエラーを示す
 export const RejectConfirm: Story = {
   async play({ canvasElement }) {
     await openConfirm(canvasElement, "却下");
@@ -141,7 +137,6 @@ export const Rejected: Story = {
   },
 };
 
-// 凍結の確認
 export const SuspendConfirm: Story = {
   args: { status: "approved" },
   play: ({ canvasElement }) => openConfirm(canvasElement, "凍結する"),

@@ -238,7 +238,6 @@ export function ArticleForm({
       setUploadError(null);
       const hits = result.items.filter((item) => !materials.some((m) => m.id === item.id));
       setMaterialHits(hits);
-      // 検索ボタンを押すと入力欄から外れて一覧が閉じるので、結果が届いたら開き直す
       setMaterialListOpen(hits.length > 0);
     });
   }
@@ -289,7 +288,6 @@ export function ArticleForm({
           />
         </Field>
 
-        {/* 送信名を付けるとファイル入力も heroImageUrl で送られるので、サーバーのエラーも error で渡す */}
         <Field
           description="JPEG / PNG / WebP（5MB以下）。公開カードのカバーに使います。"
           error={fieldErrors.heroImageUrl ?? uploadError ?? undefined}
@@ -355,7 +353,6 @@ export function ArticleForm({
                       >
                         画像を挿入
                       </Button>
-                      {/* 選んだ画像はその場でアップロードして本文に差し込むので、選択中の表示を持つ FileInput は使わない */}
                       <input
                         accept="image/jpeg,image/png,image/webp"
                         className={css({ display: "none" })}

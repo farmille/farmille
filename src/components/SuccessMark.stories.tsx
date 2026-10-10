@@ -15,7 +15,6 @@ export const Soft: Story = {};
 
 export const Solid: Story = { args: { tone: "solid" } };
 
-// 完了した瞬間の入場（印 → 見出し → 本文 → 操作の順に 50ms ずつ）
 export const Entrance: Story = {
   render: () => (
     <div className={css({ textAlign: "center", pt: "10" })}>

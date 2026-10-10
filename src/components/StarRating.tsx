@@ -1,10 +1,10 @@
 "use client";
 
-import { Field as BaseField } from "@base-ui/react/field";
 import { Radio as BaseRadio } from "@base-ui/react/radio";
 import { RadioGroup as BaseRadioGroup } from "@base-ui/react/radio-group";
 
-import { useFieldContext, useResetKey } from "./form/field-context";
+import { EnsureFieldRoot } from "./form/Field";
+import { useFieldRequired, useResetKey } from "./form/field-context";
 import { Icon } from "./Icon";
 
 import { cva, css, cx } from "../../styled-system/css";
@@ -54,7 +54,6 @@ const valueRecipe = cva({
 
 const inputRowStyle = css({ display: "flex", gap: "2", alignItems: "center" });
 
-// 押下の縮みは globals.css が [role="radio"] に付ける
 const inputStarRecipe = cva({
   base: {
     display: "flex",
@@ -89,7 +88,6 @@ type StarDisplayProps = {
 
 type StarInputProps = {
   mode: "input";
-  /** 0 は未選択。 */
   value: number;
   onChange: (value: number) => void;
   className?: string;
@@ -132,17 +130,11 @@ export function StarRating(props: StarRatingProps) {
   );
 }
 
-/**
- * 1〜5の星のラジオ。組の中は矢印キーで移り、Tab で止まるのは1か所。
- * 各星の名前は数字だけにする（「4」を選ぶ）。必須かどうかは囲む Fieldset・Field で決まる。
- */
 function StarInput({ value, onChange, className, name }: StarInputProps) {
-  const { required, inRoot } = useFieldContext();
-  // 送信後の reset で隠れたラジオの checked が初期値へ戻るので、reset のたびに今の評価で作り直す
+  const required = useFieldRequired();
   const resetKey = useResetKey("");
   const rating = clampInt(value);
   const group = (
-    // 未選択を null で表し、選ぶ前から値を持つ（制御された）組にする
     <BaseRadioGroup<number | null>
       aria-label="評価"
       key={resetKey}
@@ -165,6 +157,5 @@ function StarInput({ value, onChange, className, name }: StarInputProps) {
     </BaseRadioGroup>
   );
 
-  // Field の外では自分の Field.Root を持ち、Form の検証と errors の対象にする
-  return inRoot ? group : <BaseField.Root name={name}>{group}</BaseField.Root>;
+  return <EnsureFieldRoot name={name}>{group}</EnsureFieldRoot>;
 }

@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { css, cx } from "../../styled-system/css";
 
-/** ピルを横に並べ、はみ出したら横にスクロールする列。 */
 export const pillRowStyle = css({
   display: "flex",
   gap: "1.5",
@@ -39,10 +38,6 @@ export type FilterPillOption = {
   current: boolean;
 };
 
-/**
- * 一覧を URL で絞り込むリンクの列。
- * 絞り込みはページ遷移なので、読み込み前でも押せるリンクにし、選択中を aria-current で示す。
- */
 export function FilterPills({
   "aria-label": ariaLabel,
   items,

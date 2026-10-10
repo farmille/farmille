@@ -12,21 +12,15 @@ import {
   popupPositionerStyle,
   popupRecipe,
 } from "@/components/popup";
-import { css, cva, cx } from "../../../styled-system/css";
+import { css, cx } from "../../../styled-system/css";
 import { useFieldRequired } from "./field-context";
 import type { Option } from "./types";
-
-/** 候補1行。popup.ts の見た目に、押せない候補の薄さを足す。 */
-export const optionItemStyle = cx(
-  optionRecipe(),
-  css({ userSelect: "none", _disabled: { opacity: "disabled", cursor: "not-allowed" } }),
-);
 
 const optionLabelStyle = css({ flex: "1", minW: "0" });
 
 const optionDetailStyle = css({ flexShrink: "0", textAlign: "end" });
 
-/** 候補が無いときの案内。候補があるあいだ Base UI は中身を空にするので、枠ごと消す。 */
+/** 候補があるあいだ Base UI は中身を空にするので、枠ごと消す。 */
 export const emptyStyle = css({
   px: "3",
   py: "2.5",
@@ -40,7 +34,6 @@ export function optionName(option: Option): string | undefined {
   return option.description === undefined ? undefined : `${option.label} ${option.description}`;
 }
 
-/** 候補の文字。説明は右寄せで小さく添える。 */
 export function OptionText({ option }: { option: Option }) {
   return (
     <>
@@ -52,10 +45,7 @@ export function OptionText({ option }: { option: Option }) {
   );
 }
 
-/**
- * 変換確定の Enter を候補の選択や送信に使わない。
- * Base UI は keyCode 229 しか見ないので、isComposing の Enter も Base UI に渡さない。
- */
+/** Base UI は keyCode 229 しか見ないので、isComposing の Enter も Base UI に渡さない。 */
 export function isComposingEnter(event: BaseUIEvent<KeyboardEvent<HTMLInputElement>>): boolean {
   if (!event.nativeEvent.isComposing && event.keyCode !== 229) return false;
   event.preventBaseUIHandler();
@@ -119,11 +109,9 @@ type ComboboxCommonProps = {
   options: readonly Option[];
   /** contains は入力した文字をラベルに含む候補だけを出す。preFiltered は options をそのまま出す（呼び出し側が絞る）。 */
   filterMode?: "contains" | "preFiltered";
-  /** サーバー検索などで入力中の文字を呼び出し側が持つときに渡す。 */
   inputValue?: string;
   onInputValueChange?: (value: string) => void;
   placeholder?: string;
-  /** 候補が0件のときの案内。決まった候補から選ぶ欄なので、一致しない理由を必ず示す。 */
   emptyMessage: string;
   name?: string;
   disabled?: boolean;
@@ -237,7 +225,7 @@ function MultipleCombobox({
   const enterGuard = useEnterGuard();
   const [uncontrolled, setUncontrolled] = useState<readonly Option[]>(defaultValue ?? []);
   const current = value ?? uncontrolled;
-  // Base UI は値の参照が変わるたびに Form のエラーを消すので、中身が同じ間は同じ配列を渡す
+  // Base UI は値の参照が変わるたびに Form のエラーを消す
   const selected = useMemo(() => [...current], [current]);
   const full = max !== undefined && selected.length >= max;
   const chips = chipRecipe({ size: "sm", removable: true });
@@ -298,7 +286,6 @@ function MultipleCombobox({
   );
 }
 
-/** 候補を選んでいない Enter で囲むフォームを送らない（入力中の文字は値にならない）。 */
 function useEnterGuard() {
   const highlighted = useRef(false);
   return {
@@ -322,14 +309,13 @@ function OptionPopup({
   return (
     <BaseCombobox.Portal>
       <BaseCombobox.Positioner className={popupPositionerStyle} sideOffset={4}>
-        {/* 打鍵ごとに描き直す一覧なので動かさない */}
         <BaseCombobox.Popup className={popupRecipe({ motion: "none" })}>
           <BaseCombobox.Empty className={emptyStyle}>{emptyMessage}</BaseCombobox.Empty>
           <BaseCombobox.List>
             {(option: Option) => (
               <BaseCombobox.Item
                 aria-label={optionName(option)}
-                className={optionItemStyle}
+                className={optionRecipe()}
                 disabled={isDisabled(option)}
                 key={option.value}
                 value={option}

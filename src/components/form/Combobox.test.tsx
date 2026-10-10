@@ -132,7 +132,6 @@ describe("Combobox", () => {
     await user.click(screen.getByRole("option", { name: "トマト なす科果菜類" }));
     await user.click(input);
     await user.click(screen.getByRole("option", { name: "きゅうり うり科果菜類" }));
-    // 複数選択は続けて選べるよう一覧を開いたままにする。閉じるとチップが操作できる
     await user.keyboard("{Escape}");
 
     expect(screen.getByRole("button", { name: "トマトを削除" })).toBeInTheDocument();

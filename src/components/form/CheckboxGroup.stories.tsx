@@ -32,7 +32,6 @@ export const Chips: Story = {
   args: { variant: "chips" },
 };
 
-/** 上限に達すると、選んでいない選択肢を押せなくする。 */
 export const ChipsAtLimit: Story = {
   args: { variant: "chips", limit: 2, defaultValue: ["before", "growing"] },
 };

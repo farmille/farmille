@@ -72,7 +72,6 @@ describe("ConfirmDialog", () => {
 
     await user.click(screen.getByRole("button", { name: "削除" }));
     const dialog = await screen.findByRole("alertdialog");
-    // 危険な操作なので最初のフォーカスはキャンセル
     await waitFor(() =>
       expect(within(dialog).getByRole("button", { name: "キャンセル" })).toHaveFocus(),
     );

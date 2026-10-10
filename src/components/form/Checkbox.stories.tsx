@@ -28,7 +28,6 @@ export const WithDescription: Story = {
   },
 };
 
-/** 同意欄。ラベルの無い Field に置くと、必須の札が行末に出る。 */
 export const TermsRow: Story = {
   render: (args) => (
     <Field name="terms" requirement="required">
@@ -70,7 +69,6 @@ export const Disabled: Story = {
   args: { disabled: true, defaultChecked: true },
 };
 
-// 長い注意書きへの同意（感想口コミの投稿前の確認など）
 export const NoteRow: Story = {
   render: (args) => (
     <Field name="pesticideAck" requirement="required">
@@ -82,7 +80,6 @@ export const NoteRow: Story = {
   ),
 };
 
-// チェックすると何かを消す選択肢（写真の削除など）
 export const DangerSmall: Story = {
   args: { children: "この写真を削除する", size: "sm", tone: "danger" },
 };

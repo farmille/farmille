@@ -42,7 +42,6 @@ type MaterialFormProps = {
 
 type ChoiceItem = { id: string; name: string };
 
-/** 分類マスタの1区分。区分名を小見出しにしたチップの複数選択。 */
 function ClassificationGroup({
   legend,
   name,
@@ -73,7 +72,6 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
     isEdit ? updateMaterialAction : createMaterialAction,
     initialMaterialFormState,
   );
-  // 分類 ID の不備（classifications）は、これまでどおり「効果」の欄に出す
   const errors = useMemo((): FieldErrors | undefined => {
     if (state.status !== "error" || state.fieldErrors === undefined) return undefined;
     const { classifications: classificationError, ...fieldErrors } = state.fieldErrors;

@@ -14,7 +14,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// 2要素認証を設定している運営が、認証アプリの6桁を入れた状態
 export const CodeFilled: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.type(within(canvasElement).getByLabelText("2要素認証コード"), "123456");

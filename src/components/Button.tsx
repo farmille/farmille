@@ -74,7 +74,7 @@ type ButtonProps = ButtonVariants &
     focusableWhenDisabled?: boolean;
   };
 
-/** プライマリ／ゴースト／危険の共通ボタン（モック .btn）。Base UI の render にも渡せる。 */
+/** プライマリ／ゴースト／危険の共通ボタン（モック .btn）。 */
 export function Button({ variant, size, className, type = "button", ...rest }: ButtonProps) {
   return (
     <BaseButton {...rest} className={cx(buttonRecipe({ variant, size }), className)} type={type} />

@@ -28,7 +28,6 @@ const controlSizes = {
   sm: { py: "2", fontSize: "sm" },
 } as const;
 
-/** 入力欄の見た目。Select のトリガーや Combobox の入力欄も同じ見た目にそろえる。 */
 export const controlRecipe = cva({
   base: controlBase,
   variants: { size: controlSizes },
@@ -46,7 +45,6 @@ export const textareaRecipe = cva({
   defaultVariants: { size: "md" },
 });
 
-/** Select のトリガー。sm は並び替えのように幅を中身に合わせる。 */
 export const selectTriggerRecipe = cva({
   base: {
     ...controlBase,
@@ -60,19 +58,16 @@ export const selectTriggerRecipe = cva({
   variants: {
     size: {
       md: controlSizes.md,
-      // トリガーはボタンなので、フォーカスしても iOS は拡大しない。並び替えなどの小さいトリガーは小さいままにする
       sm: { ...controlSizes.sm, w: "auto", _touch: { fontSize: "sm" } },
     },
   },
   defaultVariants: { size: "md" },
 });
 
-/** 縦に積む項目の間隔。見出しを隠した項目（姓・名など）は呼び出し側の行の一部なので、間隔は行に任せる。 */
 export const fieldRecipe = cva({
   base: { minW: "0" },
   variants: {
     spacing: {
-      // 隠した見出しは場所を取らないので、その直後の項目も先頭と同じく上を詰める
       stack: { mt: "5", _first: { mt: "0" }, "[data-visually-hidden] + &": { mt: "0" } },
       none: {},
     },
@@ -127,10 +122,8 @@ export const fieldErrorStyle = css({
 
 export const srOnlyStyle = css({ srOnly: true });
 
-/** 隠し input を外に出したときの位置の基準（ネイティブの検証吹き出しが選択肢を指す）。 */
 export const choiceItemStyle = css({ position: "relative" });
 
-/** チェックボックス・ラジオの行。チェック状態とフォーカスは中の button の data 属性から拾う。 */
 export const choiceRecipe = cva({
   base: {
     display: "flex",
@@ -163,7 +156,6 @@ export const choiceRecipe = cva({
         fontWeight: "bold",
         "&:has([data-checked])": { borderColor: "primary.600" },
       },
-      // 長い注意書きへの同意。太字の row だと重いので、地の色の枠に控えめな文字で置く
       note: {
         alignItems: "flex-start",
         gap: "2",
@@ -213,9 +205,7 @@ export const choiceRecipe = cva({
       },
     },
     size: { md: {}, sm: { gap: "1.5", fontSize: "sm" } },
-    // 写真の削除のように、チェックすると何かを消す選択肢
     tone: { default: {}, danger: { color: "accent.danger" } },
-    // 説明が付くと文字が2段になるので、印は1段目にそろえる
     described: { true: { alignItems: "flex-start" }, false: {} },
   },
   defaultVariants: { look: "inline", size: "md", tone: "default", described: false },
@@ -232,7 +222,6 @@ export const choiceGroupRecipe = cva({
   },
 });
 
-/** 選択肢の説明。見出しの文字の下に置く（行の太字や色は受け継がない）。 */
 export const choiceDescriptionStyle = css({
   display: "block",
   mt: "0.5",
@@ -242,7 +231,6 @@ export const choiceDescriptionStyle = css({
   lineHeight: "normal",
 });
 
-// 押下の縮みは包む label の行に付く（globals.css）。印の button まで縮むと二重になるので止める
 const markPress = { _active: { transform: "none" } } as const;
 
 export const checkboxBoxRecipe = cva({
@@ -264,8 +252,6 @@ export const checkboxBoxRecipe = cva({
         _checked: { bg: "primary.700", borderColor: "primary.700" },
         _fieldInvalid: { borderColor: "accent.danger" },
       },
-      // チップは枠の色でチェック状態を見せる。印は透明なままチップ全体に重ね、どこを押しても印が受ける
-      // （1px に畳むと label が押下を横取りし、getByRole("checkbox").check() も届かない）
       hidden: {
         position: "absolute",
         inset: "0",

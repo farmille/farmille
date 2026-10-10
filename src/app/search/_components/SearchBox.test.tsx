@@ -31,7 +31,6 @@ const props = {
 };
 const advanceSearch = () => act(() => vi.advanceTimersByTime(300));
 const searchInput = () => screen.getByRole("combobox", { name: "資材の検索条件" });
-/** 候補の一覧を開いて、読み上げ名（「名前 種類」）の候補を押す。 */
 function pickOption(name: string) {
   fireEvent.keyDown(searchInput(), { key: "ArrowDown" });
   fireEvent.click(screen.getByRole("option", { name }));

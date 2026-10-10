@@ -116,7 +116,6 @@ function ReviewRating({ error }: { error?: string }) {
   );
 }
 
-/** 感想口コミの総合評価。見出しが組の名前になり、選んだ数字を rating で送る。 */
 export const InFieldset: Story = {
   args: { mode: "input", value: 0, onChange: fn() },
   render: () => <ReviewRating />,

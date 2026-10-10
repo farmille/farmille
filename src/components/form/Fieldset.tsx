@@ -22,12 +22,6 @@ export type FieldsetProps = Omit<FieldProps, "label" | "hideLabel" | "labelSize"
   labelSize?: "md" | "sm";
 };
 
-/**
- * 複数の入力や、ラジオ・チェックボックスの組をまとめる見出し付きの枠。
- * name があるときだけ Field.Root で包み、組の送信名とエラーを持つ。
- * name が無ければ、中の Field がそれぞれ自分の name とエラーを持ち（本名＝姓＋名など）、
- * 組へのエラーは組の説明として下に出す（エラーの出し入れで包みが変わると、中の入力が作り直されるため）。
- */
 export function Fieldset({
   legend,
   hideLegend = false,
@@ -46,7 +40,6 @@ export function Fieldset({
   const required = requirement === undefined ? parent.required : requirement === "required";
   const rooted = name !== undefined;
   const id = useId();
-  // 案内は組の中の入力ではなく fieldset そのものの説明として読ませる
   const describedBy = [
     visibility === undefined ? null : `${id}-visibility`,
     lead === undefined ? null : `${id}-lead`,

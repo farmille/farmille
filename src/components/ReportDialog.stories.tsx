@@ -33,7 +33,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// モーダルは body 直下に出るので、canvas の外を探す
 const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);
 
 async function open(canvasElement: HTMLElement, triggerName: string) {
@@ -49,12 +48,11 @@ async function chooseReason(canvasElement: HTMLElement, reason: string) {
 // 通報導線のテキストリンクのみ（ダイアログは閉じた状態）
 export const Closed: Story = {};
 
-// play でモーダルを開いた状態（理由の選択＋自由記述フォーム）
+// play でモーダルを開いた状態（理由 select＋自由記述フォーム）
 export const Opened: Story = {
   play: ({ canvasElement }) => open(canvasElement, "通報する"),
 };
 
-// 通報理由の一覧を開いた状態。一覧はモーダルより手前に出る
 export const ReasonListOpen: Story = {
   play: async ({ canvasElement }) => {
     await open(canvasElement, "通報する");
@@ -63,7 +61,6 @@ export const ReasonListOpen: Story = {
   },
 };
 
-// 理由を選ばずに送ろうとした状態。送らずに理由の欄でエラーを示す
 export const ReasonMissing: Story = {
   args: {
     triggerLabel: "感想口コミを通報する",

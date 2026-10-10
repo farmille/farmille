@@ -239,11 +239,8 @@ export const tokens = {
     fast: { value: "160ms" },
     dialog: { value: "250ms" },
     toast: { value: "400ms" },
-    // 完了画面で見出し・本文・操作を順に出すときの1段ぶんの遅れ
     stagger: { value: "50ms" },
   },
-  // 重なり順。ヘッダー（30）より上に、モーダル・トーストの順で重ねる。一覧の面は、ダイアログの中で開いても
-  // 手前に出るようダイアログと同じ段に置く（後から置かれた方が DOM の順で手前に出る）
   zIndex: {
     dialog: { value: 50 },
     toast: { value: 60 },

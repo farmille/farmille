@@ -23,7 +23,6 @@ function textOf(value: FormDataEntryValue | null): string | null {
   return value === null || value instanceof File ? null : value;
 }
 
-// サーバーで弾かれ、送信値をそのまま返して再表示する（SignupForm と同じ流れ）
 function EchoForm({ onSubmit }: { onSubmit: (submitted: Submitted) => void }) {
   const [echo, formAction] = useActionState(
     (_previous: Submitted, formData: FormData): Submitted => {
@@ -61,7 +60,6 @@ test("送信後のフォームのリセットを越えて、チェックとラ�
   await waitFor(() => expect(submissions).toHaveLength(1));
   expect(submissions[0]).toEqual({ terms: "on", standpoint: "ja" });
 
-  // React が送信後にフォームを reset しても、再表示した値のまま送り直せる
   await act(async () => {
     fireEvent.click(screen.getByRole("button", { name: "送信" }));
   });
@@ -78,7 +76,6 @@ const CROPS = [
   { value: "strawberry", label: "いちご" },
 ] as const;
 
-// サーバーで弾かれた後と同じく、送信のたびに action が終わって React がフォームを reset する
 function RejectingForm({
   children,
   onSubmit,

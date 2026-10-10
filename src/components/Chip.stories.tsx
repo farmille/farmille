@@ -13,7 +13,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** 表示だけ（公開後の見え方の作物・効果など）。 */
 export const Static: Story = {
   args: { category: "作物" },
 };
@@ -22,7 +21,6 @@ export const Removable: Story = {
   args: { category: "なす科果菜類", onRemove: fn(), removeLabel: "トマトを削除" },
 };
 
-/** 検索欄の下に並べる大きいチップ。 */
 export const Medium: Story = {
   args: {
     size: "md",

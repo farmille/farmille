@@ -62,7 +62,6 @@ async function typeQuery(canvasElement: HTMLElement, text: string) {
 
 export const Default: Story = {};
 
-/** 入力した文字を含む候補を出す。候補を選ばずに Enter すると、入力した文字を確定する。 */
 export const Suggestions: Story = {
   play: async ({ canvasElement }) => {
     await typeQuery(canvasElement, "JA");
@@ -94,7 +93,6 @@ const tagStyle = css({
   fontWeight: "bold",
 });
 
-/** 検索欄の見た目。候補の中身は renderOption で描き分ける（読み上げ名は「ラベル 説明」）。 */
 export const Search: Story = {
   args: {
     "aria-label": "資材の検索条件",

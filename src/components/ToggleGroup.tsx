@@ -19,7 +19,6 @@ const toggleGroupRecipe = sva({
   base: { item: { fontFamily: "sans", _focusVisible: focusRing } },
   variants: {
     variant: {
-      // CheckboxGroup のチップと同じ見た目。チェックの代わりに押した状態（aria-pressed）で色を変える
       chips: {
         group: choiceGroupRecipe.raw({ variant: "chips" }),
         item: {
@@ -27,7 +26,6 @@ const toggleGroupRecipe = sva({
           _pressed: { borderColor: "primary.600", bg: "primary.soft", color: "primary.700" },
         },
       },
-      // 順に並ぶ段階を1本の線の上の点で示す。狭い画面では横に流し、右端を薄くして続きを示す
       timeline: {
         frame: {
           position: "relative",
@@ -148,7 +146,6 @@ export function ToggleGroup<V extends string>({
         disabled={disabled}
         multiple={multiple}
         onValueChange={(next) =>
-          // 押した順ではなく選択肢の並びで返す
           onValueChange(
             options.filter((option) => next.includes(option.value)).map((option) => option.value),
           )

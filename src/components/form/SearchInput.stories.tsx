@@ -20,12 +20,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** 右端の送信ボタンで囲むフォームを送る。 */
 export const WithSubmit: Story = {
   args: { submitLabel: "検索", defaultValue: "土づくり" },
 };
 
-/** 検索画面の上部に置く大きい検索欄。 */
 export const Large: Story = {
   args: {
     size: "lg",
@@ -47,7 +45,6 @@ export const Disabled: Story = {
 
 const photoBackdrop = css({ p: "4", bg: "primary.800" });
 
-/** 写真の上に置く暗いガラス面（ホームのヒーロー）。 */
 export const Glass: Story = {
   args: {
     size: "lg",

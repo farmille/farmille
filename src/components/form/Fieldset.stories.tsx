@@ -31,17 +31,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** name の無い組。中の Field がそれぞれ name とエラーを持つ。 */
 export const NameParts: Story = {};
 
-/** 組そのものへのエラー。error を渡すと組の下に出る。 */
 export const WithError: Story = {
   args: {
     error: "姓と名の両方を入力してください。",
   },
 };
 
-/** 小さな見出しの項目を束ねる。requirement を省いた中の Field は組の必須に従う。 */
 export const AddressParts: Story = {
   args: {
     legend: "住所",
@@ -60,7 +57,6 @@ export const AddressParts: Story = {
   },
 };
 
-/** 見出しを外側のカードが持つ同意欄。見出しと札は読み上げにだけ残し、必須は中の行が受け継ぐ。 */
 export const HiddenLegend: Story = {
   args: {
     legend: "ご申請にあたっての確認事項",

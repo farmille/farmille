@@ -5,7 +5,6 @@ import { token } from "../../styled-system/tokens";
 
 export { toast } from "sonner";
 
-// Sonner は出口の端から 400ms の ease で出入りする。入退場の動きは Sonner のまま使う
 const toastStyle = css({
   display: "flex",
   alignItems: "center",
@@ -48,7 +47,6 @@ const actionStyle = css({
   },
 });
 
-// top は AppBar の下、bottom は画面下に固定した操作バーの上に出す
 const placements = {
   top: { position: "top-center", offset: { top: token.var("spacing.16") } },
   bottom: { position: "bottom-center", offset: { bottom: token.var("spacing.20") } },

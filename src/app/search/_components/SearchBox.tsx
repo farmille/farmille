@@ -107,7 +107,6 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
     suggestions.find((filter) => selectedFilterKey(filter) === option.value);
 
   return (
-    // 変換中の入力で検索しないよう、入力欄から伝わる変換の開始・終了を受け取る
     <div
       aria-busy={isPending || undefined}
       onCompositionEnd={() => setComposing(false)}

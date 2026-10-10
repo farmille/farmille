@@ -11,7 +11,6 @@ type InputProps = Omit<ComponentPropsWithRef<"input">, "size" | "required" | "ar
   size?: "md" | "sm";
 };
 
-/** 単行の入力欄。必須かどうかは囲む Field の requirement で決まる。 */
 export function Input({ size, className, ...rest }: InputProps) {
   const required = useFieldRequired();
   return (

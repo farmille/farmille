@@ -64,7 +64,6 @@ export function GroupHeading({ title, note }: { title: string; note: string }) {
   );
 }
 
-/** 入力画面の通知は下端の操作バーの上に出す（上端は見出しと下書き保存のボタンを隠す）。 */
 export const reportToasterId = "report-wizard";
 
 export function ReportToaster() {

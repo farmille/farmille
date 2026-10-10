@@ -24,7 +24,6 @@ describe("DesktopAccountMenu", () => {
     fireEvent.keyDown(trigger, { key: "ArrowDown" });
     const myPage = screen.getByRole("menuitem", { name: "マイページ" });
     expect(myPage.getAttribute("aria-current")).toBe("page");
-    // Base UI はメニューを描いた次のフレームで先頭の項目へフォーカスを移す
     await waitFor(() => expect(document.activeElement).toBe(myPage));
     fireEvent.keyDown(myPage, { key: "Escape" });
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());

@@ -6,7 +6,7 @@ import { FilterPills } from "@/components";
 
 /**
  * 一覧の絞り込みをクエリ文字列で持つためのラッパー。
- * 今のクエリに param だけを差し替えたリンクを並べ、サーバー側で絞り込む。
+ * 見た目はキットの FilterPills のまま、選択時に URL を書き換えてサーバー側で絞り込む。
  */
 export function QueryFilter({
   ariaLabel,

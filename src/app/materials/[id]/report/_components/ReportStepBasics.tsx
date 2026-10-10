@@ -183,7 +183,6 @@ export function ReportStepBasics({
     setSearchOpen(false);
     setMaterialQuery("");
   }
-  // 候補・一覧のどの組でも、選んでいる作物を押した状態で示す（押し直すと外す）
   function cropToggles(members: CropOption[], className?: string) {
     return (
       <ToggleGroup
@@ -238,7 +237,6 @@ export function ReportStepBasics({
                 }))}
                 emptyMessage={materialQuery.trim() ? "見つかりません。" : undefined}
                 onPick={(option) => pickMaterial(option.value)}
-                // 候補を選ばずに Enter を押したときは、今と同じく先頭の候補にする
                 onSubmitText={() => pickMaterial(materials[0]?.id)}
               />
             </div>
