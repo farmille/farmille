@@ -3,22 +3,9 @@ import { fn } from "storybook/test";
 
 import { css } from "../../styled-system/css";
 import { Button } from "./Button";
+import { Field, FormActions, Input, Textarea } from "./form";
 import { FormPageShell } from "./FormPageShell";
-import { Input } from "./Input";
 import { SurfaceCard } from "./SurfaceCard";
-import { Textarea } from "./Textarea";
-
-const field = css({
-  mt: "5",
-  _first: { mt: "0" },
-});
-
-const label = css({
-  display: "block",
-  mb: "1.5",
-  fontSize: "md",
-  fontWeight: "bold",
-});
 
 const fixedFooter = css({
   position: "fixed",
@@ -53,27 +40,17 @@ export const Default: Story = {
   args: {
     children: (
       <form>
-        <div className={field}>
-          <label className={label} htmlFor="crop">
-            対象の作物
-          </label>
-          <Input id="crop" name="crop" defaultValue="トマト（施設）" />
-        </div>
-        <div className={field}>
-          <label className={label} htmlFor="body">
-            感想口コミ本文
-          </label>
-          <Textarea
-            id="body"
-            name="body"
-            defaultValue="定植前に土壌灌注で使用。うどんこ病の発生が例年より明らかに少なく、追肥との併用でも問題なかった。リピート予定。"
-          />
-        </div>
-        <div className={field}>
+        <Field label="対象の作物" name="crop">
+          <Input defaultValue="トマト（施設）" />
+        </Field>
+        <Field label="感想口コミ本文" name="body">
+          <Textarea defaultValue="定植前に土壌灌注で使用。うどんこ病の発生が例年より明らかに少なく、追肥との併用でも問題なかった。リピート予定。" />
+        </Field>
+        <FormActions>
           <Button type="submit" onClick={fn()}>
             投稿する
           </Button>
-        </div>
+        </FormActions>
       </form>
     ),
   },
@@ -86,22 +63,12 @@ export const WithFixedFooter: Story = {
     children: (
       <>
         <form>
-          <div className={field}>
-            <label className={label} htmlFor="material-name">
-              資材名
-            </label>
-            <Input id="material-name" name="material-name" placeholder="例：木酢液プレミアム" />
-          </div>
-          <div className={field}>
-            <label className={label} htmlFor="report-body">
-              実証詳細レポート
-            </label>
-            <Textarea
-              id="report-body"
-              name="report-body"
-              placeholder="散布時期・希釈倍率・効果の実感などを記録してください"
-            />
-          </div>
+          <Field label="資材名" name="material-name">
+            <Input placeholder="例：木酢液プレミアム" />
+          </Field>
+          <Field label="実証詳細レポート" name="report-body">
+            <Textarea placeholder="散布時期・希釈倍率・効果の実感などを記録してください" />
+          </Field>
         </form>
         <div className={fixedFooter}>
           <Button onClick={fn()}>次へ進む</Button>
