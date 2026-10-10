@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { css } from "../../styled-system/css";
 import { formDataString } from "@/lib/validation";
 import { FilterPills } from "./FilterPills";
-import { Icon } from "@/components/Icon";
+import { SearchInput } from "@/components/form";
 
 const FILTER_OPTIONS = [
   { value: "all", label: "すべて" },
@@ -41,25 +41,7 @@ export function ArticlesToolbar({ filter, q }: ArticlesToolbarProps) {
   return (
     <div>
       <form
-        className={css({
-          display: "flex",
-          alignItems: "center",
-          gap: "2",
-          bg: "surface.card",
-          borderWidth: "1.5px",
-          borderStyle: "solid",
-          borderColor: "border.strong",
-          borderRadius: "card",
-          px: "3",
-          py: "2.5",
-          mb: "3",
-          _focusWithin: {
-            borderColor: "primary.600",
-            outlineWidth: "2px",
-            outlineStyle: "solid",
-            outlineColor: "primary.200",
-          },
-        })}
+        className={css({ mb: "3" })}
         action="/articles"
         method="get"
         onSubmit={(event) => {
@@ -69,24 +51,8 @@ export function ArticlesToolbar({ filter, q }: ArticlesToolbarProps) {
           router.push(buildHref({ q: nextQ }));
         }}
       >
-        <Icon name="search" size="sm" className={css({ color: "text.subtle", flexShrink: "0" })} />
         {filter !== "all" ? <input type="hidden" name="type" value={filter} /> : null}
-        <input
-          className={css({
-            flex: "1",
-            borderWidth: "0",
-            bg: "transparent",
-            fontSize: "md",
-            fontFamily: "sans",
-            color: "text.default",
-            outline: "none",
-            _placeholder: { color: "text.subtle" },
-          })}
-          name="q"
-          defaultValue={q}
-          placeholder="記事を検索"
-          aria-label="記事を検索"
-        />
+        <SearchInput name="q" defaultValue={q} placeholder="記事を検索" aria-label="記事を検索" />
       </form>
 
       <FilterPills
