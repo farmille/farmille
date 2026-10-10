@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-report";
 
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
@@ -30,8 +28,6 @@ export function ReportStepResult({
   effects: ReportEffectOption[];
   materialEffectNames: string[];
 }) {
-  // エラーの有無で Fieldset の中身が作り直されても、開いた一覧が閉じないよう開閉はここで持つ
-  const [allOpen, setAllOpen] = useState(materialEffectNames.length === 0);
   const categories = [...new Set(effects.map((effect) => effect.categoryName))];
   // 効果タグは分類ごとの組に分かれるので、押した組の分だけ入れ替え、選んだ順は保つ
   function tagGroup(names: string[]) {
@@ -88,7 +84,7 @@ export function ReportStepResult({
             {tagGroup(materialEffectNames)}
           </Fieldset>
         )}
-        <Collapsible open={allOpen} onOpenChange={setAllOpen} className={css({ mt: "2.5" })}>
+        <Collapsible className={css({ mt: "2.5" })} defaultOpen={materialEffectNames.length === 0}>
           <CollapsibleTrigger variant="link">効果タグ一覧から選択</CollapsibleTrigger>
           <CollapsiblePanel>
             <div className={css({ pt: "1.5" })}>

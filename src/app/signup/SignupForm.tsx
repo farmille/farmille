@@ -126,7 +126,6 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         requirement="required"
         visibility="public"
       >
-        {/* 送信後のフォームのリセットで選択が外れないよう、再表示の値ごとに載せ替える */}
         <RadioGroup<string>
           defaultValue={values.standpoint}
           options={STANDPOINTS}

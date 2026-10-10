@@ -4,7 +4,7 @@ import { css, cva } from "../../styled-system/css";
  * Base UI の Positioner は位置合わせに transform を使い、重なりの文脈を作る。
  * Popup 側の z-index は Positioner の中でしか効かないので、重なり順は Positioner に置く。
  * ダイアログの中で開いた一覧はダイアログの Portal の末尾に置かれるので、ダイアログと同じ重なり順にして
- * 後に置かれた一覧を手前に出す（popup の 40 ではダイアログ本体の裏に隠れる）。
+ * 後に置かれた一覧を手前に出す。
  */
 export const popupPositionerStyle = css({ zIndex: "dialog", outline: "none" });
 

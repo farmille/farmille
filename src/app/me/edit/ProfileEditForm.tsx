@@ -147,7 +147,6 @@ export function ProfileEditForm({ profile, details, options }: ProfileEditFormPr
         label="地域の公開範囲"
         name="cityPublic"
       >
-        {/* 送信後のフォームのリセットでチェックが外れないよう、再表示の値ごとに載せ替える */}
         <Checkbox
           defaultChecked={cityPublic}
           description="チェックなしの場合は都道府県まで表示します"
