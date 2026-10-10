@@ -2,18 +2,17 @@
 
 import { useEffect, useState, useTransition } from "react";
 
+import { Chip } from "@/components/Chip";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
-import { Checkbox, Field, Fieldset, Input, Notice } from "@/components/form";
+import { Autocomplete, Checkbox, Field, Fieldset, Input, Notice } from "@/components/form";
 import { OptimizedImage } from "@/components/OptimizedImage";
+import { ToggleGroup } from "@/components/ToggleGroup";
 import { searchReportMaterialsAction } from "@/app/materials/[id]/report/new/actions";
 import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-report";
 import type { PostingMaterial } from "@/server/queries/materials";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
-import { css, cx } from "../../../../../../styled-system/css";
-
-import { ReportSearchField } from "./ReportSearchField";
-import { chipRecipe, chips, pillButtonRecipe } from "./ReportFormParts";
+import { css } from "../../../../../../styled-system/css";
 
 export type ReportMaterialSummary = {
   id: string;
@@ -61,25 +60,6 @@ const thumbImage = css({ objectFit: "cover" });
 const materialText = css({ flex: "1", minW: "0" });
 
 const manufacturer = css({ fontSize: "sm", color: "text.subtle" });
-
-const chipCategory = css({
-  mr: "1.5",
-  borderRadius: "pill",
-  bg: "surface.card",
-  px: "1.5",
-  fontSize: "xs",
-  color: "primary.800",
-});
-
-const removeButton = css({
-  ml: "2",
-  border: "none",
-  bg: "transparent",
-  p: "0",
-  color: "primary.800",
-  opacity: "0.7",
-  cursor: "pointer",
-});
 
 const tree = css({
   mt: "2",
@@ -182,77 +162,88 @@ export function ReportStepBasics({
   ]
     .map((group) => ({
       ...group,
-      crops: crops.filter((crop) => group.ids.includes(crop.id) && crop.id !== input.cropId),
+      crops: crops.filter((crop) => group.ids.includes(crop.id)),
     }))
     .filter((group) => group.crops.length > 0);
   const groups = [...new Set(crops.map((crop) => crop.groupName))];
-  function pickCrop(cropId: string) {
+  function pickCrop(cropId: string | null) {
     onChange({ ...input, cropId });
     setCropQuery("");
     setTreeOpen(false);
+  }
+  function pickMaterial(id: string | undefined) {
+    const item = materials.find((candidate) => candidate.id === id);
+    if (!item) return;
+    onMaterialChange({
+      id: item.id,
+      name: item.name,
+      manufacturerName: item.manufacturer_name,
+      imageUrl: null,
+    });
+    setSearchOpen(false);
+    setMaterialQuery("");
+  }
+  // 候補・一覧のどの組でも、選んでいる作物を押した状態で示す（押し直すと外す）
+  function cropToggles(members: CropOption[], className?: string) {
+    return (
+      <ToggleGroup
+        className={className}
+        options={members.map((crop) => ({ value: crop.id, label: crop.name }))}
+        value={input.cropId === null ? [] : [input.cropId]}
+        onValueChange={([cropId]) => pickCrop(cropId ?? null)}
+      />
+    );
   }
 
   return (
     <>
       <Fieldset legend="対象資材" requirement="required">
-        <div className={materialCard}>
-          <div className={thumb}>
-            {material.imageUrl ? (
-              <OptimizedImage
-                src={material.imageUrl}
-                alt=""
-                width={48}
-                height={48}
-                sizes="48px"
-                className={thumbImage}
+        <Collapsible open={searchOpen} onOpenChange={setSearchOpen}>
+          <div className={materialCard}>
+            <div className={thumb}>
+              {material.imageUrl ? (
+                <OptimizedImage
+                  src={material.imageUrl}
+                  alt=""
+                  width={48}
+                  height={48}
+                  sizes="48px"
+                  className={thumbImage}
+                />
+              ) : (
+                "NO IMAGE"
+              )}
+            </div>
+            <div className={materialText}>
+              <b>{material.name}</b>
+              <div className={manufacturer}>{material.manufacturerName}</div>
+            </div>
+            <CollapsibleTrigger variant="link">変更</CollapsibleTrigger>
+          </div>
+          <CollapsiblePanel>
+            <div className={css({ pt: "2" })}>
+              <Autocomplete
+                aria-label="資材を検索"
+                placeholder="資材名・メーカー名で検索"
+                filterMode="preFiltered"
+                value={materialQuery}
+                onValueChange={(value) => {
+                  setMaterialQuery(value);
+                  setMaterials([]);
+                }}
+                options={materials.map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                  description: item.manufacturer_name,
+                }))}
+                emptyMessage={materialQuery.trim() ? "見つかりません。" : undefined}
+                onPick={(option) => pickMaterial(option.value)}
+                // 候補を選ばずに Enter を押したときは、今と同じく先頭の候補にする
+                onSubmitText={() => pickMaterial(materials[0]?.id)}
               />
-            ) : (
-              "NO IMAGE"
-            )}
-          </div>
-          <div className={materialText}>
-            <b>{material.name}</b>
-            <div className={manufacturer}>{material.manufacturerName}</div>
-          </div>
-          <button
-            type="button"
-            className={pillButtonRecipe()}
-            aria-expanded={searchOpen}
-            onClick={() => setSearchOpen(!searchOpen)}
-          >
-            変更
-          </button>
-        </div>
-        {searchOpen && (
-          <ReportSearchField
-            ariaLabel="資材を検索"
-            placeholder="資材名・メーカー名で検索"
-            value={materialQuery}
-            onValueChange={(value) => {
-              setMaterialQuery(value);
-              setMaterials([]);
-            }}
-            items={materials.map((item) => ({
-              value: item.id,
-              label: `${item.name} ${item.manufacturer_name}`,
-              name: item.name,
-              note: item.manufacturer_name,
-            }))}
-            emptyMessage="見つかりません。"
-            onSelect={(id) => {
-              const item = materials.find((candidate) => candidate.id === id);
-              if (!item) return;
-              onMaterialChange({
-                id: item.id,
-                name: item.name,
-                manufacturerName: item.manufacturer_name,
-                imageUrl: null,
-              });
-              setSearchOpen(false);
-              setMaterialQuery("");
-            }}
-          />
-        )}
+            </div>
+          </CollapsiblePanel>
+        </Collapsible>
       </Fieldset>
 
       <Fieldset
@@ -261,51 +252,42 @@ export function ReportStepBasics({
         lead="1つ選んでください。複数の作物で使った場合は、作物ごとに別のレポートにしてください。"
         error={errors.cropId}
       >
-        <div className={cx(chips, css({ mb: "2" }))} aria-live="polite">
+        <div className={css({ mb: "2" })} aria-live="polite">
           {selectedCrop && (
-            <span className={chipRecipe({ state: "selected" })}>
-              <span className={chipCategory}>作物</span>
+            <Chip
+              category="作物"
+              size="md"
+              onRemove={() => onChange({ ...input, cropId: null })}
+              removeLabel={`${selectedCrop.name}を外す`}
+            >
               {selectedCrop.name}
-              <button
-                type="button"
-                className={removeButton}
-                aria-label={`${selectedCrop.name}を外す`}
-                onClick={() => onChange({ ...input, cropId: null })}
-              >
-                ×
-              </button>
-            </span>
+            </Chip>
           )}
         </div>
-        <ReportSearchField
-          ariaLabel="作目"
+        <Autocomplete
+          aria-label="作目"
           placeholder="作物名で検索　例）トマト、みかん"
+          filterMode="preFiltered"
           value={cropQuery}
           onValueChange={setCropQuery}
-          items={cropHits.map(({ crop, alias }) => ({
+          options={cropHits.map(({ crop, alias }) => ({
             value: crop.id,
-            label: `${crop.name} ${crop.groupName}`,
-            name: crop.name,
-            category: crop.groupName,
-            note: alias && `別名: ${alias}`,
+            label: crop.name,
+            description:
+              alias === undefined ? crop.groupName : `${crop.groupName}（別名: ${alias}）`,
           }))}
-          emptyMessage={`「${cropQuery.trim()}」に一致する作物がありません`}
-          onSelect={pickCrop}
+          emptyMessage={
+            cropQuery.trim() ? `「${cropQuery.trim()}」に一致する作物がありません` : undefined
+          }
+          onPick={(option) => pickCrop(option.value)}
+          onSubmitText={() => {
+            const [first] = cropHits;
+            if (first) pickCrop(first.crop.id);
+          }}
         />
         {suggestions.map((group) => (
           <Fieldset key={group.title} legend={group.title} labelSize="sm">
-            <div className={chips}>
-              {group.crops.map((crop) => (
-                <button
-                  key={crop.id}
-                  type="button"
-                  className={chipRecipe({ size: "sm" })}
-                  onClick={() => pickCrop(crop.id)}
-                >
-                  {crop.name}
-                </button>
-              ))}
-            </div>
+            {cropToggles(group.crops)}
           </Fieldset>
         ))}
         <Collapsible open={treeOpen} onOpenChange={setTreeOpen} className={css({ mt: "2.5" })}>
@@ -332,20 +314,7 @@ export function ReportStepBasics({
                       {group}
                       <span className={treeCount}>{members.length}品目</span>
                     </CollapsibleTrigger>
-                    <CollapsiblePanel>
-                      <div className={cx(chips, treeBody)}>
-                        {members.map((crop) => (
-                          <button
-                            key={crop.id}
-                            type="button"
-                            className={chipRecipe({ size: "xs" })}
-                            onClick={() => pickCrop(crop.id)}
-                          >
-                            {crop.name}
-                          </button>
-                        ))}
-                      </div>
-                    </CollapsiblePanel>
+                    <CollapsiblePanel>{cropToggles(members, treeBody)}</CollapsiblePanel>
                   </Collapsible>
                 );
               })}

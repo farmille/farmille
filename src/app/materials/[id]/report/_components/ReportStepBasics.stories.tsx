@@ -79,17 +79,58 @@ export const VarietyUnknown: Story = {
   args: { input: { ...blank, varietyUnknown: true } },
 };
 
+// 候補の一覧はポータルで body の直下に出る
+const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);
+
+/** 作物名で検索した候補の一覧。別名で当たった作物は説明に別名を添える。 */
+export const CropSearchOpen: Story = {
+  args: { input: blank },
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.type(canvas.getByLabelText("作目"), "トマ");
+    await page(canvasElement).findByRole("option", { name: "トマト なす科果菜類" });
+  },
+};
+
+/** 候補を選ぶと選んだ作物のチップが付き、候補・一覧のボタンも押した状態になる。 */
+export const CropPicked: Story = {
+  args: { input: blank },
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.type(canvas.getByLabelText("作目"), "きゅ");
+    await userEvent.click(
+      await page(canvasElement).findByRole("option", { name: "きゅうり うり科果菜類" }),
+    );
+    await expect(canvas.getByRole("button", { name: "きゅうりを外す" })).toBeVisible();
+    await expect(canvas.getByLabelText("作目")).toHaveValue("");
+    await expect(canvas.getByRole("button", { name: "きゅうり" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  },
+};
+
+/** 「変更」で開いた資材の検索と、サーバーから返った候補の一覧。 */
+export const MaterialSearchOpen: Story = {
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "変更" }));
+    await userEvent.type(canvas.getByRole("combobox", { name: "資材を検索" }), "根圏");
+    await page(canvasElement).findByRole("option", { name: "根圏サポートA ファーム技研" });
+  },
+};
+
 export const QueryChange: Story = {
   async play({ canvasElement, args }) {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: "変更" }));
     const input = canvas.getByRole("combobox", { name: "資材を検索" });
     await userEvent.type(input, "根圏");
-    await canvas.findByRole("option");
+    await page(canvasElement).findByRole("option");
     await fireEvent.change(input, { target: { value: "別の資材" } });
     await expect(await fireEvent.keyDown(input, { key: "Enter" })).toBe(false);
     await expect(args.onMaterialChange).not.toHaveBeenCalled();
-    await expect(canvas.queryByRole("option")).not.toBeInTheDocument();
+    await expect(page(canvasElement).queryByRole("option")).not.toBeInTheDocument();
   },
 };
 
@@ -106,7 +147,7 @@ export const StaleSearchResponse: Story = {
     await waitFor(() => expect(searchReportMaterialsAction).toHaveBeenCalledWith("新"));
     await userEvent.click(respond);
     await userEvent.click(input);
-    await expect(canvas.queryByRole("option")).not.toBeInTheDocument();
+    await expect(page(canvasElement).queryByRole("option")).not.toBeInTheDocument();
   },
   render: function DeferredSearchStory(args) {
     const [response] = useState(() =>
