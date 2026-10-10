@@ -22,20 +22,15 @@ import {
   SubmitButton,
   Textarea,
 } from "@/components/form";
-import {
-  describedBy,
-  FieldError,
-  formFieldStyle,
-  formLabelStyle,
-  RequiredBadge,
-} from "@/components/FormParts";
+import { formFieldStyle, formLabelStyle, RequiredBadge } from "@/components/FormParts";
 import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
 
 import { Icon } from "@/components/Icon";
+import { StarRating } from "@/components/StarRating";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { TextLink } from "@/components/TextLink";
 
-import { css, cva } from "../../../../../../styled-system/css";
+import { css } from "../../../../../../styled-system/css";
 import { ReviewCropPicker } from "./ReviewCropPicker";
 
 const REVIEW_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -89,22 +84,6 @@ const coverInputStyle = css({
   m: "0",
   opacity: "0",
   cursor: "pointer",
-});
-
-const starOptionRecipe = cva({
-  base: {
-    position: "relative",
-    display: "flex",
-    lineHeight: "none",
-    cursor: "pointer",
-    "&:has(input:focus-visible)": { ...focusRing, borderRadius: "mark" },
-  },
-  variants: {
-    on: {
-      true: { color: "accent.star" },
-      false: { color: "border.strong" },
-    },
-  },
 });
 
 const exampleSpacingStyle = css({ mt: "2" });
@@ -348,32 +327,9 @@ export function ReviewForm({
         />
       </div>
 
-      <fieldset
-        className={formFieldStyle}
-        aria-describedby={describedBy(fieldErrors?.rating && "review-rating-error")}
-      >
-        <legend className={formLabelStyle}>
-          総合評価
-          <RequiredBadge />
-        </legend>
-        <div className={css({ display: "flex", gap: "2" })}>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <label key={n} className={starOptionRecipe({ on: n <= rating })}>
-              <input
-                className={coverInputStyle}
-                type="radio"
-                name="rating"
-                value={n}
-                aria-label={`${n}`}
-                checked={rating === n}
-                onChange={() => setRating(n)}
-              />
-              <Icon name="star_filled" size="2xl" />
-            </label>
-          ))}
-        </div>
-        <FieldError id="review-rating-error" message={fieldErrors?.rating} />
-      </fieldset>
+      <Fieldset legend="総合評価" name="rating" requirement="required">
+        <StarRating mode="input" value={rating} onChange={setRating} />
+      </Fieldset>
 
       <Field
         name="body"
