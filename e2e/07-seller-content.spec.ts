@@ -12,7 +12,7 @@ import {
   seedCatalogMaterial,
   uniqueToken,
 } from "./support/test-data";
-import { loginAdminAndEnrollMfa, loginSeller } from "./support/ui";
+import { chooseOption, loginAdminAndEnrollMfa, loginSeller } from "./support/ui";
 
 test("書類確認で資材単位の編集権を付与し、原稿を表現確認後に公開する", async ({
   browser,
@@ -63,7 +63,11 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
       E2E_ADMIN_ACCOUNTS.materialGovernance,
       `/admin/materials/${material.id}`,
     );
-    await adminPage.getByLabel("編集権を付与するメーカー").selectOption(seller.id);
+    await chooseOption(
+      adminPage,
+      adminPage.getByLabel("編集権を付与するメーカー"),
+      `${seller.officialName}（${seller.loginId}）`,
+    );
     await adminPage
       .getByLabel("確認資料の保管先または受付番号")
       .fill(`E2E-DOCUMENT-${material.id}`);

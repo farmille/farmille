@@ -63,7 +63,7 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await expect(page.getByLabel("アバター")).toBeVisible();
     await expect(page.getByLabel("ハンドルネーム")).toBeVisible();
     await expect(page.getByRole("combobox", { name: /^都道府県/ })).toHaveCount(0);
-    await expect(page.getByText("主な作目", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("combobox", { name: "主な作目" })).toBeVisible();
     await page.goto("/me");
     const sellerApplyLink = page.getByRole("link", {
       name: "企業会員登録を申請",
