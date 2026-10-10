@@ -9,17 +9,12 @@ import {
 import type { CatalogSearch } from "@/server/queries/catalog-search";
 import type { SearchCatalog, SearchFilterItem } from "@/lib/material-search";
 import { cropAncestors } from "@/lib/catalog-search";
+import { chipRecipe as selectedChipRecipe } from "@/components/Chip";
+import { Icon } from "@/components/Icon";
 
 import { css, cva, cx } from "../../../../styled-system/css";
 
-import {
-  chipCategoryStyle,
-  chipList,
-  chipListStyle,
-  chipRemoveRecipe,
-  focusRing,
-  selectedChipRecipe,
-} from "./search-chips";
+import { chipList, chipListStyle, focusRing } from "./search-chips";
 import { SideSection, type SideFilterItem } from "./SideSection";
 
 const chipRecipe = cva({
@@ -68,6 +63,8 @@ const genreRowRecipe = cva({
     },
   },
 });
+
+const selectedChip = selectedChipRecipe({ size: "sm", removable: true });
 
 const countNoteStyle = css({ flex: "none", color: "text.subtle", fontSize: "xs" });
 
@@ -219,17 +216,18 @@ export function CatalogSidebar({
         {items.map((filter) => {
           const { href, key } = hrefFor(filter);
           return (
-            <span key={key} className={selectedChipRecipe({ size: "sm" })}>
-              <span className={chipCategoryStyle}>選択中</span>
+            // 外すのは URL の変更なので、Chip の外すボタン（JS の onRemove）ではなく同じ見た目のリンクにする
+            <span key={key} className={selectedChip.root}>
+              <span className={selectedChip.category}>選択中</span>
               {filter.name}
               <Link
                 href={href}
                 rel="nofollow"
                 scroll={false}
-                className={chipRemoveRecipe({ size: "sm" })}
+                className={selectedChip.remove}
                 aria-label={`${filter.name}の条件を外す`}
               >
-                ×
+                <Icon name="close" size="2xs" />
               </Link>
             </span>
           );
