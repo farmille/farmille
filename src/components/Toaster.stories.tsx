@@ -49,3 +49,19 @@ export const WithAction: Story = {
   ),
   play: openToast,
 };
+
+// 下端に操作バーを固定した画面が自分で置く出口。toasterId を付けた通知だけがここに出る
+export const AboveActionBar: Story = {
+  render: () => (
+    <>
+      <Button
+        size="sm"
+        onClick={() => toast("下書きを保存しました。", { toasterId: "story-actions" })}
+      >
+        通知を出す
+      </Button>
+      <Toaster id="story-actions" label="画面の通知" placement="bottom" />
+    </>
+  ),
+  play: openToast,
+};

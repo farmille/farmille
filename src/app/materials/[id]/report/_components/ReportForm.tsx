@@ -26,7 +26,7 @@ import { css, cva, cx } from "../../../../../../styled-system/css";
 import { ReportArticleEditor } from "./ReportArticleEditor";
 import type { ReportSection } from "./ReportArticleParts";
 import { ReportComparisonFields } from "./ReportComparisonFields";
-import { pillButtonRecipe, reportFrame } from "./ReportFormParts";
+import { pillButtonRecipe, reportFrame, ReportToaster, reportToasterId } from "./ReportFormParts";
 import { ReportPublishedView } from "./ReportPublishedView";
 import { ReportStepBasics, type ReportMaterialSummary } from "./ReportStepBasics";
 import { ReportStepConditions } from "./ReportStepConditions";
@@ -437,7 +437,7 @@ export function ReportForm({
         setErrors({});
         // 提出したときは完了画面が受付を伝えるので、通知は下書き保存だけに出す
         if (result.status === "pending") setSubmitted(true);
-        else toast(result.message);
+        else toast(result.message, { toasterId: reportToasterId });
         if (close) {
           setLeaving(false);
           router.push(`/materials/${input.materialId}`);
@@ -783,6 +783,7 @@ export function ReportForm({
           </div>
         )}
       </form>
+      <ReportToaster />
     </div>
   );
 }

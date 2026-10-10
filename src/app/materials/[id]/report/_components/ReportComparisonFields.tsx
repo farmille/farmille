@@ -24,7 +24,7 @@ import { toast } from "@/components/Toaster";
 
 import { css, cva, cx } from "../../../../../../styled-system/css";
 
-import { GroupHeading, pillButtonRecipe } from "./ReportFormParts";
+import { GroupHeading, pillButtonRecipe, reportToasterId } from "./ReportFormParts";
 import { ReportGraphEditor, editKey, readCell, type EditTarget } from "./ReportGraphEditor";
 
 type Measurement = UsageReportInput["measurements"][number];
@@ -267,7 +267,7 @@ export function ReportComparisonFields({
   function edit(target: EditTarget) {
     const card = cardOf(target.g);
     if (target.k === "val" && card && !card.measurement.name.trim()) {
-      toast("先に、左上の調査項目と単位を書きます", { duration: 1800 });
+      toast("先に、左上の調査項目と単位を書きます", { duration: 1800, toasterId: reportToasterId });
       setEd({ k: "axis", g: target.g });
       return;
     }
@@ -281,7 +281,7 @@ export function ReportComparisonFields({
   }
   function removePlot(plotId: string) {
     if (input.plots.length <= 2) {
-      toast("区は2つ以上必要です", { duration: 1800 });
+      toast("区は2つ以上必要です", { duration: 1800, toasterId: reportToasterId });
       return;
     }
     const index = input.plots.findIndex((plot) => plot.id === plotId);
@@ -302,6 +302,7 @@ export function ReportComparisonFields({
     );
     toast(`「${plot.name || "区"}」を削除しました`, {
       duration: 6000,
+      toasterId: reportToasterId,
       action: {
         label: "元に戻す",
         onClick: () => onChange((current) => restorePlot(current, plot, index, rows)),
@@ -324,6 +325,7 @@ export function ReportComparisonFields({
     const measurementIndex = input.measurements.indexOf(measurement);
     toast("グラフを削除しました", {
       duration: 6000,
+      toasterId: reportToasterId,
       action: {
         label: "元に戻す",
         onClick: () =>
@@ -421,7 +423,10 @@ export function ReportComparisonFields({
                         ...input,
                         plots: input.plots.map((plot) => ({ ...plot, scope })),
                       });
-                      toast("調査した範囲を全ての区に入れました", { duration: 1800 });
+                      toast("調査した範囲を全ての区に入れました", {
+                        duration: 1800,
+                        toasterId: reportToasterId,
+                      });
                     }}
                     onRemovePlot={removePlot}
                     onNext={next}
@@ -497,7 +502,10 @@ export function ReportComparisonFields({
                           ...input,
                           plots: input.plots.map((item) => ({ ...item, scope: plot.scope })),
                         });
-                        toast("調査した範囲を全ての区に入れました", { duration: 1800 });
+                        toast("調査した範囲を全ての区に入れました", {
+                          duration: 1800,
+                          toasterId: reportToasterId,
+                        });
                       }}
                     >
                       この範囲を全ての区に入れる

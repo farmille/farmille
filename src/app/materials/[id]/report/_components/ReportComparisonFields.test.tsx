@@ -2,9 +2,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { Toaster } from "@/components/Toaster";
-
 import { ReportComparisonFields } from "./ReportComparisonFields";
+import { ReportToaster } from "./ReportFormParts";
 import { filledReport } from "./reportStoryFixture";
 
 afterEach(cleanup);
@@ -20,7 +19,7 @@ function Harness() {
         manualUnits={new Set()}
         onManualUnit={() => undefined}
       />
-      <Toaster />
+      <ReportToaster />
     </>
   );
 }

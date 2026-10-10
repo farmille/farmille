@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { fn } from "storybook/test";
-import { Toaster } from "@/components/Toaster";
 import { createBlankUsageReport } from "@/lib/usage-report";
 import { ReportComparisonFields } from "./ReportComparisonFields";
-import { reportFrame } from "./ReportFormParts";
+import { reportFrame, ReportToaster } from "./ReportFormParts";
 const meta = {
   title: "App/Materials/Report/ReportComparisonFields",
   component: ReportComparisonFields,
@@ -12,7 +11,7 @@ const meta = {
     (Story) => (
       <div className={reportFrame}>
         {Story()}
-        <Toaster />
+        <ReportToaster />
       </div>
     ),
   ],

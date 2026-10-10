@@ -1,3 +1,5 @@
+import { Toaster } from "@/components/Toaster";
+
 import { css, cva } from "../../../../../../styled-system/css";
 
 export const reportFrame = css({ minH: "100dvh", fontSize: "md", lineHeight: "prose" });
@@ -106,4 +108,11 @@ export function GroupHeading({ title, note }: { title: string; note: string }) {
       <small className={groupNote}>{note}</small>
     </h3>
   );
+}
+
+/** 入力画面の通知は下端の操作バーの上に出す（上端は見出しと下書き保存のボタンを隠す）。 */
+export const reportToasterId = "report-wizard";
+
+export function ReportToaster() {
+  return <Toaster id={reportToasterId} label="レポートの通知" placement="bottom" />;
 }
