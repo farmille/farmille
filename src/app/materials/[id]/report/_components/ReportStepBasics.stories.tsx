@@ -139,10 +139,11 @@ export const QueryChange: Story = {
 export const StaleSearchResponse: Story = {
   async play({ canvasElement }) {
     const canvas = within(canvasElement);
+    // 一覧を開いている間は一覧の外が読み上げから隠れるので、ボタンは先に取っておく
+    const respond = canvas.getByRole("button", { name: "古い検索結果を返す" });
     await userEvent.click(canvas.getByRole("button", { name: "変更" }));
     const input = canvas.getByRole("combobox", { name: "資材を検索" });
     await userEvent.type(input, "旧");
-    const respond = canvas.getByRole("button", { name: "古い検索結果を返す" });
     await waitFor(() => expect(searchReportMaterialsAction).toHaveBeenCalledWith("旧"));
     await userEvent.clear(input);
     await userEvent.type(input, "新");

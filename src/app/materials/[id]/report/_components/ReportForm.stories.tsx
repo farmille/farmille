@@ -115,6 +115,8 @@ export const LeaveConfirm: Story = {
     await waitFor(() =>
       expect(within(dialog).getByRole("button", { name: "下書きを保存して閉じる" })).toHaveFocus(),
     );
-    await expect(within(dialog).getByRole("button", { name: "保存せずに閉じる" })).toBeVisible();
+    await waitFor(() =>
+      expect(within(dialog).getByRole("button", { name: "保存せずに閉じる" })).toBeVisible(),
+    );
   },
 };

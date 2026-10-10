@@ -51,7 +51,7 @@ export const Missing: Story = {
 export const PressTiming: Story = {
   async play({ canvasElement }) {
     const canvas = within(canvasElement);
-    const pressed = canvas.getByRole("button", { name: "生育初〜中期" });
+    const pressed = canvas.getByRole("button", { name: "開花・生殖成長開始期" });
     await userEvent.click(pressed);
     await expect(pressed).toHaveAttribute("aria-pressed", "true");
     await expect(canvas.getByRole("button", { name: "播種・定植時" })).toHaveAttribute(
