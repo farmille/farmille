@@ -20,13 +20,13 @@ const optionLabelStyle = css({ flex: "1", minW: "0" });
 
 const optionDetailStyle = css({ flexShrink: "0", textAlign: "end" });
 
-/** 候補があるあいだ Base UI は中身を空にするので、枠ごと消す。 */
+/** Base UI の Empty は読み上げのため隠さずに置く。候補があるあいだは中身が空になるので、余白だけを消す。 */
 export const emptyStyle = css({
   px: "3",
   py: "2.5",
   fontSize: "sm",
   color: "text.subtle",
-  "&:empty": { display: "none" },
+  "&:empty": { p: "0" },
 });
 
 /** 候補の読み上げ名は「ラベル 説明」。説明の無い候補は表示中の文字がそのまま名前になる。 */
