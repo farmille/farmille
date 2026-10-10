@@ -5,14 +5,17 @@ import { PREFECTURES } from "@/lib/prefectures";
 import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-report";
 
 import { Checkbox, Field, Fieldset, Input, Notice, Select, Textarea } from "@/components/form";
+import { ToggleGroup } from "@/components/ToggleGroup";
 
-import { css, cva } from "../../../../../../styled-system/css";
+import { css } from "../../../../../../styled-system/css";
 
 import { GroupHeading } from "./ReportFormParts";
 
 const DATE_PATTERN = /\d+\s*月\s*\d+\s*日|\d+\s*[/／]\s*\d+|\d+\s*日/;
 const toHalfWidth = (text: string) =>
   text.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
+
+const TIMING_OPTIONS = APPLICATION_TIMINGS.map((label, index) => ({ value: String(index), label }));
 
 const PREFECTURE_OPTIONS = PREFECTURES.map((prefecture) => ({
   value: String(prefecture.code),
@@ -22,91 +25,6 @@ const PREFECTURE_OPTIONS = PREFECTURES.map((prefecture) => ({
 const shortControl = css({ maxW: "64" });
 
 const cityInput = css({ display: "block", maxW: "64", mt: "1.5" });
-
-const timeline = css({
-  position: "relative",
-  tab: { _after: { display: "none" } },
-  _after: {
-    content: '""',
-    position: "absolute",
-    top: "0",
-    right: "0",
-    bottom: "0",
-    w: "9",
-    bgImage: "linear-gradient(to right, transparent, {colors.surface.page})",
-    pointerEvents: "none",
-  },
-});
-
-const timelineTrack = css({
-  position: "relative",
-  display: "flex",
-  alignItems: "flex-start",
-  overflowX: "auto",
-  pt: "1.5",
-  pb: "0.5",
-  scrollbarWidth: "none",
-  "&::-webkit-scrollbar": { display: "none" },
-  _before: {
-    content: '""',
-    position: "absolute",
-    top: "3.5",
-    left: "5",
-    right: "5",
-    h: "0.5",
-    bg: "border.strong",
-  },
-});
-
-const timelineStep = cva({
-  base: {
-    position: "relative",
-    flexGrow: "1",
-    flexShrink: "0",
-    flexBasis: "20",
-    border: "none",
-    bg: "transparent",
-    pt: "6.5",
-    fontSize: "xs",
-    lineHeight: "snug",
-    color: "text.subtle",
-    textAlign: "center",
-    cursor: "pointer",
-    userSelect: "none",
-    _before: {
-      content: '""',
-      position: "absolute",
-      top: "2",
-      left: "50%",
-      w: "4",
-      h: "4",
-      ml: "-2",
-      borderWidth: "2px",
-      borderStyle: "solid",
-      borderColor: "border.strong",
-      borderRadius: "pill",
-      bg: "surface.card",
-    },
-    _hover: { _before: { borderColor: "primary.700" } },
-  },
-  variants: {
-    on: {
-      true: {
-        color: "primary.800",
-        fontWeight: "extrabold",
-        _before: { bg: "primary.700", borderColor: "primary.700" },
-      },
-      false: {},
-    },
-  },
-});
-
-const timelineHint = css({
-  mt: "0.5",
-  fontSize: "xs",
-  color: "text.subtle",
-  tab: { display: "none" },
-});
 
 export function ReportStepConditions({
   input,
@@ -191,32 +109,13 @@ export function ReportStepConditions({
         lead="資材を使ったときの段階をタップします（複数選択できます）。"
         error={errors.timingStages}
       >
-        <div className={timeline}>
-          <div className={timelineTrack} role="group" aria-label="施用時期の段階">
-            {APPLICATION_TIMINGS.map((timing, index) => {
-              const on = input.timingStages.includes(index);
-              return (
-                <button
-                  key={timing}
-                  type="button"
-                  className={timelineStep({ on })}
-                  aria-pressed={on}
-                  onClick={() =>
-                    onChange({
-                      ...input,
-                      timingStages: on
-                        ? input.timingStages.filter((stage) => stage !== index)
-                        : [...input.timingStages, index].toSorted((a, b) => a - b),
-                    })
-                  }
-                >
-                  {timing}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        <div className={timelineHint}>横にスクロールすると続きの段階が出ます</div>
+        <ToggleGroup
+          multiple
+          aria-label="施用時期の段階"
+          options={TIMING_OPTIONS}
+          value={input.timingStages.map(String)}
+          onValueChange={(next) => onChange({ ...input, timingStages: next.map(Number) })}
+        />
       </Fieldset>
       <Field
         label="処理日・定植日・生育状況（必須）"

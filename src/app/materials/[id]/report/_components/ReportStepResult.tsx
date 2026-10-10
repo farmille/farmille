@@ -6,10 +6,9 @@ import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-repor
 
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
 import { Field, Fieldset, Input, Notice, Textarea } from "@/components/form";
+import { ToggleGroup } from "@/components/ToggleGroup";
 
 import { css } from "../../../../../../styled-system/css";
-
-import { chipRecipe, chips } from "./ReportFormParts";
 
 export type ReportEffectOption = { id: string; name: string; categoryName: string };
 
@@ -34,25 +33,23 @@ export function ReportStepResult({
   // エラーの有無で Fieldset の中身が作り直されても、開いた一覧が閉じないよう開閉はここで持つ
   const [allOpen, setAllOpen] = useState(materialEffectNames.length === 0);
   const categories = [...new Set(effects.map((effect) => effect.categoryName))];
-  function chip(name: string) {
-    const on = input.purposeTags.includes(name);
+  // 効果タグは分類ごとの組に分かれるので、押した組の分だけ入れ替え、選んだ順は保つ
+  function tagGroup(names: string[]) {
     return (
-      <button
-        key={name}
-        type="button"
-        className={chipRecipe({ state: on ? "on" : "idle" })}
-        aria-pressed={on}
-        onClick={() =>
+      <ToggleGroup
+        multiple
+        options={names.map((name) => ({ value: name, label: name }))}
+        value={input.purposeTags}
+        onValueChange={(next) =>
           onChange({
             ...input,
-            purposeTags: on
-              ? input.purposeTags.filter((tag) => tag !== name)
-              : [...input.purposeTags, name],
+            purposeTags: [
+              ...input.purposeTags.filter((tag) => !names.includes(tag) || next.includes(tag)),
+              ...next.filter((tag) => !input.purposeTags.includes(tag)),
+            ],
           })
         }
-      >
-        {name}
-      </button>
+      />
     );
   }
   return (
@@ -88,7 +85,7 @@ export function ReportStepResult({
       >
         {materialEffectNames.length > 0 && (
           <Fieldset legend="この資材に登録されている効果タグ" labelSize="sm">
-            <div className={chips}>{materialEffectNames.map(chip)}</div>
+            {tagGroup(materialEffectNames)}
           </Fieldset>
         )}
         <Collapsible open={allOpen} onOpenChange={setAllOpen} className={css({ mt: "2.5" })}>
@@ -97,15 +94,15 @@ export function ReportStepResult({
             <div className={css({ pt: "1.5" })}>
               {categories.map((category) => (
                 <Fieldset key={category} legend={category} labelSize="sm">
-                  <div className={chips}>
-                    {effects
+                  {tagGroup(
+                    effects
                       .filter(
                         (effect) =>
                           effect.categoryName === category &&
                           !materialEffectNames.includes(effect.name),
                       )
-                      .map((effect) => chip(effect.name))}
-                  </div>
+                      .map((effect) => effect.name),
+                  )}
                 </Fieldset>
               ))}
             </div>

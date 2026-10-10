@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { fn } from "storybook/test";
+import { expect, fn, userEvent, within } from "storybook/test";
 
 import { ReportCellEditor } from "./ReportCellEditor";
 import { ReportGraphEditor } from "./ReportGraphEditor";
@@ -59,6 +59,17 @@ export const Value: Story = {};
 export const BadValue: Story = { args: { graph: badGraph } };
 export const PlotName: Story = { args: { target: { k: "name", g: graph.id, p: plot.id } } };
 export const Axis: Story = { args: { target: { k: "axis", g: graph.id } } };
+// 単位の候補を押すと、その単位を手で選んだ単位として渡す
+export const AxisPickUnit: Story = {
+  args: Axis.args,
+  async play({ canvasElement, args }) {
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "%" }));
+    await expect(args.onManualUnit).toHaveBeenCalled();
+    await expect(args.onMeasurementChange).toHaveBeenCalledWith(
+      expect.objectContaining({ unit: "%" }),
+    );
+  },
+};
 export const TitleDesktop: Story = {
   args: { target: { k: "title", g: graph.id }, mobile: false },
 };

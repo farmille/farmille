@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
 
 import { Field, Input, Textarea } from "@/components/form";
+import { ToggleGroup } from "@/components/ToggleGroup";
 import type { UsageReportInput } from "@/lib/usage-report";
 
 import { css, cva, cx } from "../../../../../../styled-system/css";
@@ -30,6 +31,8 @@ export const UNITS = [
   "日",
   "SPAD",
 ];
+const UNIT_OPTIONS = UNITS.map((unit) => ({ value: unit, label: unit }));
+
 export const METRIC_UNIT = new Map<string, string>([
   ["可販果収量", "kg/10a"],
   ["1株あたり収量", "kg"],
@@ -122,31 +125,6 @@ const removeButton = css({
   cursor: "pointer",
   _hover: { color: "accent.danger" },
 });
-const unitChip = cva({
-  base: {
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.strong",
-    bg: "surface.card",
-    borderRadius: "pill",
-    py: "0.5",
-    px: "2.5",
-    fontSize: "sm",
-    cursor: "pointer",
-    color: "text.muted",
-  },
-  variants: {
-    on: {
-      true: {
-        bg: "primary.700",
-        borderColor: "primary.700",
-        color: "text.inverse",
-        fontWeight: "bold",
-      },
-    },
-  },
-});
-
 export function ReportCellEditor({
   target,
   graphNumber,
@@ -449,23 +427,14 @@ export function ReportCellEditor({
             </Field>
           </div>
         </div>
-        <div
-          className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}
-          role="group"
+        <ToggleGroup
           aria-label="単位の候補"
-        >
-          {UNITS.map((unit) => (
-            <button
-              key={unit}
-              type="button"
-              className={unitChip({ on: unit === measurement.unit })}
-              aria-pressed={unit === measurement.unit}
-              onClick={() => setUnit(unit)}
-            >
-              {unit}
-            </button>
-          ))}
-        </div>
+          className={css({ mt: "2" })}
+          options={UNIT_OPTIONS}
+          value={[measurement.unit]}
+          // 押してある単位を押し直しても外さない（手で選んだ単位として残す）
+          onValueChange={([unit]) => setUnit(unit ?? measurement.unit)}
+        />
         <div className={hint}>
           {measurement.unit ? `数値の単位は「${measurement.unit}」になります。` : ""}
         </div>
