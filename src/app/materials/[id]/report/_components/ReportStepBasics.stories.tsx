@@ -87,8 +87,10 @@ export const CropSearchOpen: Story = {
   args: { input: blank },
   async play({ canvasElement }) {
     const canvas = within(canvasElement);
-    await userEvent.type(canvas.getByLabelText("作目"), "トマ");
-    await page(canvasElement).findByRole("option", { name: "トマト なす科果菜類" });
+    await userEvent.type(canvas.getByLabelText("作目"), "ミニ");
+    await page(canvasElement).findByRole("option", {
+      name: "トマト なす科果菜類（別名: ミニトマト）",
+    });
   },
 };
 
