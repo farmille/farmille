@@ -129,7 +129,9 @@ async function gotoStory(page: Page, storyId: string): Promise<void> {
       () => {
         if (document.body.classList.contains("sb-show-errordisplay")) return true;
         const root = document.querySelector("#storybook-root");
-        return root !== null && root.childNodes.length > 0;
+        if (root !== null && root.childNodes.length > 0) return true;
+        // ダイアログは body 直下へ portal されるので、開いたダイアログだけを描く Story は root が空のまま
+        return document.querySelector('[role="dialog"], [role="alertdialog"]') !== null;
       },
       undefined,
       { timeout: RENDER_TIMEOUT },
