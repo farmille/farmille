@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/lib/usage-report";
 import type { RegisteredAddress } from "@/server/accounts/registered-address";
 import type { CropOption } from "@/server/queries/usage-report-form";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Notice } from "@/components/form";
 import { SuccessMark, completionStepRecipe } from "@/components/SuccessMark";
 import { toast } from "@/components/Toaster";
@@ -280,41 +281,6 @@ const stepCountNumber = css({ color: "text.default", fontVariantNumeric: "tabula
 
 const spacer = css({ flex: "1" });
 
-const modal = css({
-  position: "fixed",
-  inset: "0",
-  zIndex: "20",
-  display: "grid",
-  placeItems: "center",
-  bg: "scrim/40",
-  p: "5",
-});
-
-const modalBox = css({
-  w: "full",
-  maxW: "dialog",
-  borderRadius: "card",
-  bg: "surface.card",
-  px: "5.5",
-  pt: "5.5",
-  pb: "4.5",
-  boxShadow: "shadow.lift",
-  tab: { w: "fit-content", maxW: "full" },
-});
-
-const modalTitle = css({ fontSize: "lg", fontWeight: "extrabold" });
-
-const modalText = css({ mt: "1.5", fontSize: "sm", color: "text.muted" });
-
-const modalActions = css({
-  display: "flex",
-  flexDirection: "column-reverse",
-  alignItems: "stretch",
-  gap: "2",
-  mt: "4.5",
-  tab: { flexDirection: "row", alignItems: "center" },
-});
-
 const footButton = pillButtonRecipe({ tone: "quiet", size: "md", strong: true });
 
 type StepState = "todo" | "done" | "current";
@@ -364,7 +330,6 @@ export function ReportForm({
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [leaving, setLeaving] = useState(false);
-  const leaveSave = useRef<HTMLButtonElement>(null);
   const dirty = JSON.stringify(input) !== saved;
   const busy = pending || uploading;
   const cropName = crops.find((crop) => crop.id === input.cropId)?.name ?? "作物未選択";
@@ -378,15 +343,6 @@ export function ReportForm({
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty, submitted]);
-  useEffect(() => {
-    if (!leaving) return;
-    leaveSave.current?.focus();
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setLeaving(false);
-    };
-    document.addEventListener("keydown", escape);
-    return () => document.removeEventListener("keydown", escape);
-  }, [leaving]);
 
   const showError = useCallback((text: string) => setNotice({ text }), []);
   function showMissing(text: string, missing: UsageReportFieldErrors) {
@@ -402,7 +358,7 @@ export function ReportForm({
     setStep(Math.max(1, Math.min(TOTAL, next)));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  function save(submit: boolean, close = false) {
+  function save(submit: boolean) {
     if (submit) {
       const missing = validateUsageReportSubmission(input);
       setErrors(missing);
@@ -411,47 +367,48 @@ export function ReportForm({
         return;
       }
     }
-    startTransition(async () => {
-      try {
-        const result = submit
-          ? await submitUsageReportAction(input.materialId, input)
-          : await saveUsageReportDraftAction(input.materialId, input);
-        if (!result.ok) {
-          if (result.savedDraft !== undefined) {
-            const savedInput = { ...input, expectedUpdatedAt: result.savedDraft.updatedAt };
-            setInput(savedInput);
-            if (result.savedDraft.status === "complete") setSaved(JSON.stringify(savedInput));
-          }
-          if (Object.keys(result.fieldErrors).length > 0)
-            showMissing(result.message, result.fieldErrors);
-          else {
-            setErrors({});
-            showError(result.message);
-          }
-          return;
+    startTransition(() => persist(submit));
+  }
+  // 閉じる前の確認ダイアログは、保存が終わるまで開いたままにするので Promise を返す
+  async function persist(submit: boolean, close = false) {
+    try {
+      const result = submit
+        ? await submitUsageReportAction(input.materialId, input)
+        : await saveUsageReportDraftAction(input.materialId, input);
+      if (!result.ok) {
+        if (result.savedDraft !== undefined) {
+          const savedInput = { ...input, expectedUpdatedAt: result.savedDraft.updatedAt };
+          setInput(savedInput);
+          if (result.savedDraft.status === "complete") setSaved(JSON.stringify(savedInput));
         }
-        setNotice(null);
-        const savedInput = { ...input, expectedUpdatedAt: result.updatedAt };
-        setInput(savedInput);
-        setSaved(JSON.stringify(savedInput));
-        setErrors({});
-        // 提出したときは完了画面が受付を伝えるので、通知は下書き保存だけに出す
-        if (result.status === "pending") setSubmitted(true);
-        else toast(result.message, { toasterId: reportToasterId });
-        if (close) {
-          setLeaving(false);
-          router.push(`/materials/${input.materialId}`);
-        } else if (input.materialId !== material.id) {
-          router.replace(`/materials/${input.materialId}/report/new`);
+        if (Object.keys(result.fieldErrors).length > 0)
+          showMissing(result.message, result.fieldErrors);
+        else {
+          setErrors({});
+          showError(result.message);
         }
-      } catch (error) {
-        showError(
-          error instanceof Error
-            ? error.message
-            : "保存できませんでした。通信状態を確認して再度お試しください。",
-        );
+        return;
       }
-    });
+      setNotice(null);
+      const savedInput = { ...input, expectedUpdatedAt: result.updatedAt };
+      setInput(savedInput);
+      setSaved(JSON.stringify(savedInput));
+      setErrors({});
+      // 提出したときは完了画面が受付を伝えるので、通知は下書き保存だけに出す
+      if (result.status === "pending") setSubmitted(true);
+      else toast(result.message, { toasterId: reportToasterId });
+      if (close) {
+        router.push(`/materials/${input.materialId}`);
+      } else if (input.materialId !== material.id) {
+        router.replace(`/materials/${input.materialId}/report/new`);
+      }
+    } catch (error) {
+      showError(
+        error instanceof Error
+          ? error.message
+          : "保存できませんでした。通信状態を確認して再度お試しください。",
+      );
+    }
   }
   async function upload(file: File | undefined, section: ReportSection, document: boolean) {
     if (!file) return;
@@ -740,49 +697,22 @@ export function ReportForm({
           manufacturerName={currentMaterial.manufacturerName}
           cropName={cropName}
         />
-        {leaving && (
-          <div className={modal}>
-            <div
-              className={modalBox}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="report-leave-title"
-            >
-              <div className={modalTitle} id="report-leave-title">
-                入力途中の内容を下書きに保存しますか？
-              </div>
-              <div className={modalText}>
-                保存すると、マイページの「下書き」から続きを入力できます。
-              </div>
-              <div className={modalActions}>
-                <button
-                  type="button"
-                  className={footButton}
-                  disabled={busy}
-                  onClick={() => {
-                    setLeaving(false);
-                    router.push(`/materials/${input.materialId}`);
-                  }}
-                >
-                  保存せずに閉じる
-                </button>
-                <button type="button" className={footButton} onClick={() => setLeaving(false)}>
-                  入力に戻る
-                </button>
-                <button
-                  ref={leaveSave}
-                  type="button"
-                  className={pillButtonRecipe({ tone: "primary", size: "md", strong: true })}
-                  disabled={busy}
-                  onClick={() => save(false, true)}
-                >
-                  下書きを保存して閉じる
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </form>
+      <ConfirmDialog
+        open={leaving}
+        onOpenChange={setLeaving}
+        title="入力途中の内容を下書きに保存しますか？"
+        description="保存すると、マイページの「下書き」から続きを入力できます。"
+        confirmLabel="下書きを保存して閉じる"
+        pendingLabel="保存しています…"
+        cancelLabel="入力に戻る"
+        tone="primary"
+        alternative={{
+          label: "保存せずに閉じる",
+          onSelect: () => router.push(`/materials/${input.materialId}`),
+        }}
+        onConfirm={() => persist(false, true)}
+      />
       <ReportToaster />
     </div>
   );

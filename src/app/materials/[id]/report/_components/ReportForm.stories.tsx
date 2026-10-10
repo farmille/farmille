@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, mocked, userEvent, within } from "storybook/test";
+import { expect, mocked, userEvent, waitFor, within } from "storybook/test";
 import { saveUsageReportDraftAction } from "@/app/materials/[id]/report/new/actions";
 import { Toaster } from "@/components/Toaster";
 import { createBlankUsageReport } from "@/lib/usage-report";
@@ -62,8 +62,10 @@ export const PartialSaveFailure: Story = {
     await userEvent.click(canvas.getByRole("button", { name: "下書き保存" }));
     await canvas.findByText("使用目的の補足を保存できませんでした。再度保存してください。");
     await userEvent.click(canvas.getByRole("button", { name: "レポートを閉じる" }));
-    await expect(canvas.getByText("入力途中の内容を下書きに保存しますか？")).toBeVisible();
-    await userEvent.click(canvas.getByRole("button", { name: "入力に戻る" }));
+    const dialog = await within(canvasElement.ownerDocument.body).findByRole("alertdialog", {
+      name: "入力途中の内容を下書きに保存しますか？",
+    });
+    await userEvent.click(within(dialog).getByRole("button", { name: "入力に戻る" }));
     await userEvent.click(canvas.getByRole("button", { name: "下書き保存" }));
     await canvas.findByText("下書きを保存しました。");
     await expect(saveUsageReportDraftAction).toHaveBeenLastCalledWith(
@@ -98,5 +100,21 @@ export const Submitted: Story = {
     await userEvent.click(canvas.getByRole("button", { name: "5 写真・記事の確認" }));
     await userEvent.click(canvas.getByRole("button", { name: "公開に進む" }));
     await canvas.findByRole("heading", { name: "レポートを受け付けました" });
+  },
+};
+
+/** 入力の途中で閉じようとすると、下書きに保存するかを確かめる。 */
+export const LeaveConfirm: Story = {
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.type(canvas.getByPlaceholderText("品種名"), "桃太郎");
+    await userEvent.click(canvas.getByRole("button", { name: "レポートを閉じる" }));
+    const dialog = await within(canvasElement.ownerDocument.body).findByRole("alertdialog", {
+      name: "入力途中の内容を下書きに保存しますか？",
+    });
+    await waitFor(() =>
+      expect(within(dialog).getByRole("button", { name: "下書きを保存して閉じる" })).toHaveFocus(),
+    );
+    await expect(within(dialog).getByRole("button", { name: "保存せずに閉じる" })).toBeVisible();
   },
 };
