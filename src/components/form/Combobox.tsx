@@ -35,16 +35,6 @@ export const emptyStyle = css({
   "&:empty": { display: "none" },
 });
 
-/** 案内文の無い一覧は、候補が0件のあいだ空の枠を出さない。 */
-export const listPopupRecipe = cva({
-  variants: {
-    whenEmpty: {
-      hide: { "&[data-empty]": { display: "none" } },
-      show: {},
-    },
-  },
-});
-
 /** 候補の読み上げ名は「ラベル 説明」。説明の無い候補は表示中の文字がそのまま名前になる。 */
 export function optionName(option: Option): string | undefined {
   return option.description === undefined ? undefined : `${option.label} ${option.description}`;
@@ -133,8 +123,8 @@ type ComboboxCommonProps = {
   inputValue?: string;
   onInputValueChange?: (value: string) => void;
   placeholder?: string;
-  /** 候補が0件のときの案内。省くと0件のあいだ一覧を出さない。 */
-  emptyMessage?: string;
+  /** 候補が0件のときの案内。決まった候補から選ぶ欄なので、一致しない理由を必ず示す。 */
+  emptyMessage: string;
   name?: string;
   disabled?: boolean;
   "aria-label"?: string;
@@ -326,19 +316,14 @@ function OptionPopup({
   emptyMessage,
   isDisabled,
 }: {
-  emptyMessage?: string;
+  emptyMessage: string;
   isDisabled: (option: Option) => boolean;
 }) {
   return (
     <BaseCombobox.Portal>
       <BaseCombobox.Positioner className={popupPositionerStyle} sideOffset={4}>
         {/* 打鍵ごとに描き直す一覧なので動かさない */}
-        <BaseCombobox.Popup
-          className={cx(
-            popupRecipe({ motion: "none" }),
-            listPopupRecipe({ whenEmpty: emptyMessage === undefined ? "hide" : "show" }),
-          )}
-        >
+        <BaseCombobox.Popup className={popupRecipe({ motion: "none" })}>
           <BaseCombobox.Empty className={emptyStyle}>{emptyMessage}</BaseCombobox.Empty>
           <BaseCombobox.List>
             {(option: Option) => (

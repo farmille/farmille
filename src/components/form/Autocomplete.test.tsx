@@ -35,6 +35,48 @@ function Harness({
 }
 
 describe("Autocomplete", () => {
+  it("一致する候補が無いあいだは一覧を開かず、周りの部品を読み上げから隠さない", async () => {
+    const user = userEvent.setup();
+    function Host() {
+      const [text, setText] = useState("");
+      return (
+        <>
+          <Autocomplete
+            aria-label="所属"
+            onValueChange={setText}
+            options={[{ value: "ja", label: "JA青年部" }]}
+            value={text}
+          />
+          <button type="button">所属を追加</button>
+        </>
+      );
+    }
+    render(<Host />);
+
+    const input = screen.getByRole("combobox", { name: "所属" });
+    await user.type(input, "野菜研究サークル");
+
+    expect(input).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "所属を追加" })).toBeInTheDocument();
+  });
+
+  it("open を渡すと、一覧の開閉を呼び出し側が持てる（ボタンで検索した結果を出す）", () => {
+    render(
+      <Autocomplete
+        aria-label="資材を検索して追加"
+        filterMode="preFiltered"
+        onValueChange={() => undefined}
+        open
+        options={[{ value: "m1", label: "土づくり微生物資材", description: "グリーンバイオ" }]}
+        value="土づくり"
+      />,
+    );
+
+    expect(
+      screen.getByRole("option", { name: "土づくり微生物資材 グリーンバイオ" }),
+    ).toBeInTheDocument();
+  });
+
   it("矢印キーと Enter で候補を選び、Escape と外側のクリックで閉じる", async () => {
     const user = userEvent.setup();
     const pick = vi.fn();

@@ -49,8 +49,7 @@ describe("プロフィールのタグ編集", () => {
     const input = screen.getByRole("combobox", { name: "所属" });
     await user.type(input, "野菜研究サークル");
     expect(screen.queryByRole("option")).not.toBeInTheDocument();
-    // 入力中は Base UI が候補一覧の外を aria-hidden にする。マウスではそのまま押せる
-    await user.click(screen.getByRole("button", { name: "所属を追加", hidden: true }));
+    await user.click(screen.getByRole("button", { name: "所属を追加" }));
     expect(input).toHaveValue("");
     expect(input).toHaveAttribute("aria-expanded", "false");
     expect(container.querySelectorAll('input[name="affiliations"]')).toHaveLength(2);

@@ -113,10 +113,10 @@ test("送信後の reset を越えて、選んだ候補が画面と送信で食�
   render(
     <RejectingForm onSubmit={(formData) => submissions.push(formData)}>
       <Field label="作目" name="cropId">
-        <Combobox options={CROPS} />
+        <Combobox emptyMessage="一致する作物がありません" options={CROPS} />
       </Field>
       <Field label="比べた作目" name="compared">
-        <Combobox multiple options={CROPS} />
+        <Combobox emptyMessage="一致する作物がありません" multiple options={CROPS} />
       </Field>
     </RejectingForm>,
   );

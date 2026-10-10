@@ -1,19 +1,12 @@
 "use client";
 
 import { Autocomplete as BaseAutocomplete } from "@base-ui/react/autocomplete";
-import { useRef, type ReactNode } from "react";
+import { useRef, useState, type ReactNode, type Ref } from "react";
 
 import { Icon } from "@/components/Icon";
 import { popupPositionerStyle, popupRecipe } from "@/components/popup";
 import { cx } from "../../../styled-system/css";
-import {
-  emptyStyle,
-  isComposingEnter,
-  listPopupRecipe,
-  optionItemStyle,
-  optionName,
-  OptionText,
-} from "./Combobox";
+import { emptyStyle, isComposingEnter, optionItemStyle, optionName, OptionText } from "./Combobox";
 import { useFieldRequired } from "./field-context";
 import { controlRecipe } from "./recipes";
 import { searchBoxRecipe, searchFieldRecipe } from "./SearchInput";
@@ -40,6 +33,10 @@ type AutocompleteProps = {
   name?: string;
   maxLength?: number;
   disabled?: boolean;
+  /** 一覧の開閉を呼び出し側が持つとき（ボタンで検索して結果を出すなど）に渡す。 */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  inputRef?: Ref<HTMLInputElement>;
   "aria-label"?: string;
   className?: string;
 };
@@ -61,25 +58,47 @@ export function Autocomplete({
   name,
   maxLength,
   disabled,
+  open,
+  onOpenChange,
+  inputRef,
   "aria-label": ariaLabel,
   className,
 }: AutocompleteProps) {
   const required = useFieldRequired();
   const highlighted = useRef(false);
+  const filter = BaseAutocomplete.useFilter();
+  const [requestedOpen, setRequestedOpen] = useState(false);
+  const query = value.trim();
+  const visible =
+    filterMode === "preFiltered" || query === ""
+      ? options
+      : options.filter((option) => filter.contains(option, query, labelOf));
+  // 候補も案内も無い一覧は開かない。開いたままだと Base UI が周りを読み上げから隠し、aria-expanded も true のまま残る
+  const shown = (open ?? requestedOpen) && (visible.length > 0 || emptyMessage !== undefined);
 
   const input = (
     <BaseAutocomplete.Input
       aria-label={ariaLabel}
       className={size === "search" ? searchFieldRecipe() : cx(controlRecipe({ size }), className)}
       maxLength={maxLength}
+      // 一覧を出していないあいだに入力欄を離れたら、開く要求も取り下げる（後から候補が増えても勝手に開かない）
+      onBlur={() => {
+        if (shown) return;
+        setRequestedOpen(false);
+        onOpenChange?.(false);
+      }}
       onKeyDown={(event) => {
         if (event.key !== "Enter" || isComposingEnter(event)) return;
         // 候補を選んだ状態の Enter は Base UI が候補の選択として扱う
         if (highlighted.current || onSubmitText === undefined) return;
         event.preventDefault();
+        // 入力した文字で確定したので、候補の一覧は閉じる
+        setRequestedOpen(false);
+        onOpenChange?.(false);
         onSubmitText(value);
       }}
       placeholder={placeholder}
+      ref={inputRef}
       type={size === "search" ? "search" : "text"}
     />
   );
@@ -87,9 +106,9 @@ export function Autocomplete({
   return (
     <BaseAutocomplete.Root
       disabled={disabled}
-      filter={filterMode === "preFiltered" ? null : undefined}
+      filter={null}
       itemToStringValue={labelOf}
-      items={options}
+      items={visible}
       name={name}
       onItemHighlighted={(option) => {
         highlighted.current = option !== undefined;
@@ -98,6 +117,11 @@ export function Autocomplete({
         // 候補を選ぶと Base UI は入力欄を候補のラベルで埋める。文字をどうするかは onPick に任せる
         if (details.reason !== "item-press") onValueChange(next);
       }}
+      onOpenChange={(next) => {
+        setRequestedOpen(next);
+        onOpenChange?.(next);
+      }}
+      open={shown}
       required={required}
       value={value}
     >
@@ -112,12 +136,7 @@ export function Autocomplete({
       <BaseAutocomplete.Portal>
         <BaseAutocomplete.Positioner className={popupPositionerStyle} sideOffset={4}>
           {/* 打鍵ごとに描き直す一覧なので動かさない */}
-          <BaseAutocomplete.Popup
-            className={cx(
-              popupRecipe({ motion: "none" }),
-              listPopupRecipe({ whenEmpty: emptyMessage === undefined ? "hide" : "show" }),
-            )}
-          >
+          <BaseAutocomplete.Popup className={popupRecipe({ motion: "none" })}>
             <BaseAutocomplete.Empty className={emptyStyle}>{emptyMessage}</BaseAutocomplete.Empty>
             <BaseAutocomplete.List>
               {(option: Option) => (

@@ -28,7 +28,11 @@ describe("Combobox", () => {
     render(
       <Form onSubmit={captureSubmit(submitted)}>
         <Field label="作目" name="cropId" requirement="required">
-          <Combobox options={crops} placeholder="作物名を入力" />
+          <Combobox
+            emptyMessage="一致する作物がありません"
+            options={crops}
+            placeholder="作物名を入力"
+          />
         </Field>
         <button type="submit">送信</button>
       </Form>,
@@ -48,7 +52,14 @@ describe("Combobox", () => {
   it("入力した文字で候補を絞り、候補は「ラベル 説明」の名前で選べる", async () => {
     const user = userEvent.setup();
     const change = vi.fn();
-    render(<Combobox aria-label="作目" onValueChange={change} options={crops} />);
+    render(
+      <Combobox
+        emptyMessage="一致する作物がありません"
+        aria-label="作目"
+        onValueChange={change}
+        options={crops}
+      />,
+    );
 
     await user.type(screen.getByRole("combobox", { name: "作目" }), "トマ");
     expect(screen.getAllByRole("option")).toHaveLength(1);
@@ -64,7 +75,13 @@ describe("Combobox", () => {
     const submitted: FormData[] = [];
     render(
       <Form onSubmit={captureSubmit(submitted)}>
-        <Combobox aria-label="作目" name="cropId" onValueChange={change} options={crops} />
+        <Combobox
+          emptyMessage="一致する作物がありません"
+          aria-label="作目"
+          name="cropId"
+          onValueChange={change}
+          options={crops}
+        />
       </Form>,
     );
 
@@ -86,7 +103,7 @@ describe("Combobox", () => {
     render(
       <Form onSubmit={captureSubmit(submitted)}>
         <Field label="作目" name="cropId" requirement="required">
-          <Combobox options={crops} />
+          <Combobox emptyMessage="一致する作物がありません" options={crops} />
         </Field>
         <button type="submit">送信</button>
       </Form>,
@@ -104,7 +121,7 @@ describe("Combobox", () => {
     render(
       <Form onSubmit={captureSubmit(submitted)}>
         <Field label="主な作目" name="cropIds">
-          <Combobox max={2} multiple options={crops} />
+          <Combobox emptyMessage="一致する作物がありません" max={2} multiple options={crops} />
         </Field>
         <button type="submit">送信</button>
       </Form>,
@@ -141,6 +158,7 @@ describe("Combobox", () => {
       const [picked, setPicked] = useState<Option[]>([]);
       return (
         <Combobox
+          emptyMessage="一致する作物がありません"
           aria-label="資材"
           filterMode="preFiltered"
           inputValue={query}
