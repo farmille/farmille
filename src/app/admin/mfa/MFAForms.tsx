@@ -6,8 +6,7 @@ import { useActionState } from "react";
 import { initialMfaEnrollState } from "@/app/admin/_lib/action-state";
 import { startTotpEnrollmentAction, verifyTotpCodeAction } from "@/app/admin/mfa/actions";
 import { adminCodeStyle, adminInlineNoteStyle } from "@/app/admin/_components/AdminUI";
-import { controlStyle, Field } from "@/components/auth/Fields";
-import { FormActions, Notice, SubmitButton } from "@/components/form";
+import { Field, Form, FormActions, Notice, OtpInput, SubmitButton } from "@/components/form";
 import { initialAuthFormState } from "@/lib/auth/form-state";
 import { css } from "../../../../styled-system/css";
 
@@ -34,33 +33,22 @@ function VerifyForm({ factorId, next, label }: { factorId: string; next: string;
   const [state, formAction] = useActionState(verifyTotpCodeAction, initialAuthFormState);
 
   return (
-    <form action={formAction} className={stepStyle} noValidate>
+    <Form action={formAction} className={stepStyle}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       <input name="factorId" type="hidden" value={factorId} />
       <input name="next" type="hidden" value={next} />
       <Field
-        guide="認証アプリに表示されている6桁の数字を入力します。"
-        htmlFor="code"
+        description="認証アプリに表示されている6桁の数字を入力します。"
         label="認証コード"
+        name="code"
         requirement="required"
       >
-        <input
-          autoComplete="one-time-code"
-          className={controlStyle}
-          id="code"
-          inputMode="numeric"
-          maxLength={6}
-          name="code"
-          pattern="[0-9]{6}"
-          placeholder="123456"
-          required
-          type="text"
-        />
+        <OtpInput />
       </Field>
       <FormActions layout="row">
         <SubmitButton pendingLabel="確認中…">{label}</SubmitButton>
       </FormActions>
-    </form>
+    </Form>
   );
 }
 
@@ -103,7 +91,7 @@ export function AdminMfaForms({
   }
 
   return (
-    <form action={enrollAction} className={stepStyle}>
+    <Form action={enrollAction} className={stepStyle}>
       {enrollState.status === "error" ? <Notice tone="error">{enrollState.message}</Notice> : null}
       <p className={adminInlineNoteStyle}>
         運営アカウントは2要素認証（TOTP）が必須です。認証アプリを用意してから登録を始めてください。
@@ -113,6 +101,6 @@ export function AdminMfaForms({
           登録を始める
         </SubmitButton>
       </FormActions>
-    </form>
+    </Form>
   );
 }
