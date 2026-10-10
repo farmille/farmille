@@ -1,138 +1,61 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { FieldError } from "@/components/FormParts";
-import { Combobox } from "@/components/Combobox";
+import { Combobox, Field, type Option } from "@/components/form";
 import type { ReviewCropOption } from "@/server/queries/reviews";
 
-import { css } from "../../../../../../styled-system/css";
+const SUGGESTION_LIMIT = 9;
 
-const chipStyle = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1.5",
-  py: "1",
-  pr: "1.5",
-  pl: "3",
-  bg: "primary.100",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "primary.700/30",
-  borderRadius: "pill",
-  fontSize: "sm",
-  fontWeight: "semibold",
-  color: "primary.800",
+const optionOf = (crop: ReviewCropOption): Option => ({
+  value: crop.id,
+  label: crop.name,
+  description: crop.groupName,
 });
 
-const chipRemoveStyle = css({
-  display: "grid",
-  placeItems: "center",
-  w: "4",
-  h: "4",
-  p: "0",
-  bg: "primary.700/18",
-  borderRadius: "pill",
-  fontSize: "sm",
-  lineHeight: "none",
-  color: "primary.800",
-  cursor: "pointer",
-  _focusVisible: {
-    outlineWidth: "2px",
-    outlineStyle: "solid",
-    outlineColor: "primary.700",
-    outlineOffset: "1px",
-  },
-});
-
+/** 感想口コミの作目。1つだけ選び、別の作目を選ぶと入れ替える。選んだ作目を cropIds で送る。 */
 export function ReviewCropPicker({
   crops,
-  selectedCropIds,
-  error,
-  onAdd,
-  onRemove,
+  defaultCropIds,
 }: {
-  crops: ReviewCropOption[];
-  selectedCropIds: string[];
-  error?: string;
-  onAdd: (cropId: string) => void;
-  onRemove: (cropId: string) => void;
+  crops: readonly ReviewCropOption[];
+  defaultCropIds: readonly string[];
 }) {
   const [query, setQuery] = useState("");
-  const shownError = selectedCropIds.length === 0 ? error : undefined;
-  const selected = useMemo(() => new Set(selectedCropIds), [selectedCropIds]);
-  const cropById = useMemo(() => new Map(crops.map((crop) => [crop.id, crop])), [crops]);
+  const [selected, setSelected] = useState(() =>
+    defaultCropIds.flatMap((id) => crops.filter((crop) => crop.id === id).map(optionOf)),
+  );
   const normalizedQuery = query.trim().toLocaleLowerCase("ja");
-  const unselected = crops.filter((crop) => !selected.has(crop.id));
-  const suggestions = unselected
+  const suggestions = crops
     .filter(
       (crop) =>
-        normalizedQuery.length === 0 ||
-        crop.name.toLocaleLowerCase("ja").includes(normalizedQuery) ||
-        crop.groupName.toLocaleLowerCase("ja").includes(normalizedQuery) ||
-        crop.aliases.some((alias) => alias.toLocaleLowerCase("ja").includes(normalizedQuery)),
+        !selected.some((option) => option.value === crop.id) &&
+        (normalizedQuery.length === 0 ||
+          crop.name.toLocaleLowerCase("ja").includes(normalizedQuery) ||
+          crop.groupName.toLocaleLowerCase("ja").includes(normalizedQuery) ||
+          crop.aliases.some((alias) => alias.toLocaleLowerCase("ja").includes(normalizedQuery))),
     )
-    .slice(0, 9);
+    .slice(0, SUGGESTION_LIMIT)
+    .map(optionOf);
 
   return (
-    <>
+    <Field
+      description="作目を1つ選んでください。"
+      label="作目"
+      name="cropIds"
+      requirement="required"
+    >
       <Combobox
-        id="review-crop"
-        aria-label="作目"
-        aria-describedby={shownError === undefined ? "review-crop-selection" : "review-crop-error"}
-        aria-invalid={shownError === undefined ? undefined : true}
-        value={query}
-        onValueChange={setQuery}
-        placeholder="作物名を入力（例：みかん、デコポン）"
-        options={suggestions.map((crop) => ({
-          value: crop.id,
-          label: crop.name,
-          description: crop.groupName,
-        }))}
-        onSelect={(id) => {
-          onAdd(id);
-          setQuery("");
-        }}
         emptyMessage="一致する作物がありません。"
+        filterMode="preFiltered"
+        inputValue={query}
+        multiple
+        onInputValueChange={setQuery}
+        onValueChange={(next) => setSelected(next.slice(-1))}
+        options={suggestions}
+        placeholder="作物名を入力（例：みかん、デコポン）"
+        value={selected}
       />
-
-      <div
-        id="review-crop-selection"
-        className={css({ display: "flex", flexWrap: "wrap", gap: "2", mt: "2.5" })}
-        aria-live="polite"
-      >
-        {selectedCropIds.length > 0 ? (
-          selectedCropIds.map((cropId) => {
-            const crop = cropById.get(cropId);
-            if (crop === undefined) return null;
-
-            return (
-              <span key={crop.id} className={chipStyle}>
-                <input type="hidden" name="cropIds" value={crop.id} />
-                <span
-                  className={css({ fontSize: "2xs", fontWeight: "bold", color: "primary.800/65" })}
-                >
-                  {crop.groupName}
-                </span>
-                {crop.name}
-                <button
-                  className={chipRemoveStyle}
-                  type="button"
-                  aria-label={`${crop.name}を削除`}
-                  onClick={() => onRemove(crop.id)}
-                >
-                  ×
-                </button>
-              </span>
-            );
-          })
-        ) : (
-          <span className={css({ fontSize: "sm", color: "text.subtle" })}>
-            作目を1つ選んでください。
-          </span>
-        )}
-      </div>
-      <FieldError id="review-crop-error" message={shownError} />
-    </>
+    </Field>
   );
 }

@@ -22,7 +22,6 @@ import {
   SubmitButton,
   Textarea,
 } from "@/components/form";
-import { formFieldStyle, formLabelStyle, RequiredBadge } from "@/components/FormParts";
 import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
 
 import { Icon } from "@/components/Icon";
@@ -177,7 +176,6 @@ export function ReviewForm({
       ? createReviewAction.bind(null, material.id)
       : updateReviewAction.bind(null, material.id, reviewId);
   const [state, formAction, actionPending] = useActionState(action, initialActionState);
-  const [selectedCropIds, setSelectedCropIds] = useState(initialValues.cropIds);
   const [rating, setRating] = useState(initialValues.rating);
   // form action の後に React が未制御の入力を初期値へ戻すため、本文は state で保持してエラー時も消さない。
   const [body, setBody] = useState(initialValues.body);
@@ -308,24 +306,7 @@ export function ReviewForm({
         </div>
       </div>
 
-      <div className={formFieldStyle}>
-        <label className={formLabelStyle} htmlFor="review-crop">
-          作目
-          <RequiredBadge />
-          <span className={css({ fontSize: "xs", fontWeight: "normal", color: "text.subtle" })}>
-            1つ選択してください
-          </span>
-        </label>
-        <ReviewCropPicker
-          crops={crops}
-          selectedCropIds={selectedCropIds}
-          error={fieldErrors?.cropIds}
-          onAdd={(cropId) => setSelectedCropIds([cropId])}
-          onRemove={(cropId) =>
-            setSelectedCropIds((current) => current.filter((id) => id !== cropId))
-          }
-        />
-      </div>
+      <ReviewCropPicker crops={crops} defaultCropIds={initialValues.cropIds} />
 
       <Fieldset legend="総合評価" name="rating" requirement="required">
         <StarRating mode="input" value={rating} onChange={setRating} />

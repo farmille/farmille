@@ -1,5 +1,7 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, mocked, userEvent, waitFor, within } from "storybook/test";
 
+import { createReviewAction } from "@/app/materials/[id]/review/actions";
 import { css } from "../../../../../../styled-system/css";
 import { ReviewForm } from "./ReviewForm";
 
@@ -85,5 +87,38 @@ export const WithPhotos: Story = {
         { id: "photo-2", url: photoUrl, caption: null, sort_order: 1 },
       ],
     },
+  },
+};
+
+/** E2E と同じ操作で作目を選び直し、星を付けて送る。送信値は作目1つと評価の数字。 */
+export const SubmitsCropAndRating: Story = {
+  args: {
+    initialValues: {
+      cropIds: [],
+      rating: 0,
+      body: "",
+      pesticideAck: false,
+      photos: [],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    mocked(createReviewAction).mockClear();
+    const canvas = within(canvasElement);
+    const page = within(canvasElement.ownerDocument.body);
+    const cropSearch = canvas.getByRole("combobox", { name: "作目" });
+    await userEvent.type(cropSearch, "トマト");
+    await userEvent.click(await page.findByRole("option", { name: "トマト なす科果菜類" }));
+    await userEvent.type(cropSearch, "パプリカ");
+    await userEvent.click(await page.findByRole("option", { name: "ピーマン なす科果菜類" }));
+    await userEvent.click(canvas.getByRole("radio", { name: "4" }));
+    await userEvent.type(canvas.getByLabelText("感想口コミ本文"), "根張りがよくなりました。");
+    await userEvent.click(canvas.getByRole("checkbox", { name: /実際に使用した感想を/ }));
+    await userEvent.click(canvas.getByRole("button", { name: "投稿する" }));
+
+    await waitFor(() => expect(createReviewAction).toHaveBeenCalledTimes(1));
+    const formData = mocked(createReviewAction).mock.calls[0]?.[2];
+    if (!(formData instanceof FormData)) throw new TypeError("送信値が FormData ではありません。");
+    await expect(formData.getAll("cropIds")).toEqual(["crop-pepper"]);
+    await expect(formData.getAll("rating")).toEqual(["4"]);
   },
 };
