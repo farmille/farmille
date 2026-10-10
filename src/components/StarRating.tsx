@@ -4,7 +4,7 @@ import { Field as BaseField } from "@base-ui/react/field";
 import { Radio as BaseRadio } from "@base-ui/react/radio";
 import { RadioGroup as BaseRadioGroup } from "@base-ui/react/radio-group";
 
-import { useFieldContext } from "./form/field-context";
+import { useFieldContext, useResetKey } from "./form/field-context";
 import { Icon } from "./Icon";
 
 import { cva, css, cx } from "../../styled-system/css";
@@ -138,11 +138,14 @@ export function StarRating(props: StarRatingProps) {
  */
 function StarInput({ value, onChange, className, name }: StarInputProps) {
   const { required, inRoot } = useFieldContext();
+  // 送信後の reset で隠れたラジオの checked が初期値へ戻るので、reset のたびに今の評価で作り直す
+  const resetKey = useResetKey("");
   const rating = clampInt(value);
   const group = (
     // 未選択を null で表し、選ぶ前から値を持つ（制御された）組にする
     <BaseRadioGroup<number | null>
       aria-label="評価"
+      key={resetKey}
       className={cx(inputRowStyle, className)}
       name={name}
       onValueChange={(next) => onChange(next ?? 0)}

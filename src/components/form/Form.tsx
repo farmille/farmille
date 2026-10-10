@@ -1,7 +1,7 @@
 "use client";
 
 import { Form as BaseForm } from "@base-ui/react/form";
-import { useMemo, useState, type FormEventHandler, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEventHandler, type ReactNode } from "react";
 
 import { FormResetContext } from "./field-context";
 import type { FieldErrors } from "./types";
@@ -28,9 +28,18 @@ export function Form({ errors, children, ...rest }: FormProps) {
     () => (errors === undefined ? undefined : presentErrors(errors)),
     [errors],
   );
+  const formRef = useRef<HTMLFormElement>(null);
   const [resetCount, setResetCount] = useState(0);
+  // action の後の reset を React は commit 中に呼び、その間は onReset を配らないので、DOM の reset を直接聞く
+  useEffect(() => {
+    const form = formRef.current;
+    if (form === null) return;
+    const countReset = () => setResetCount((count) => count + 1);
+    form.addEventListener("reset", countReset);
+    return () => form.removeEventListener("reset", countReset);
+  }, []);
   return (
-    <BaseForm errors={baseErrors} onReset={() => setResetCount((count) => count + 1)} {...rest}>
+    <BaseForm errors={baseErrors} ref={formRef} {...rest}>
       <FormResetContext.Provider value={resetCount}>{children}</FormResetContext.Provider>
     </BaseForm>
   );
