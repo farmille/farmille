@@ -1,26 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { css, cx } from "../../../../../../styled-system/css";
+import { css } from "../../../../../../styled-system/css";
 
-import { GroupHeading, chipRecipe, chips, pillButtonRecipe, reportFrame } from "./ReportFormParts";
+import { GroupHeading, pillButtonRecipe, reportFrame } from "./ReportFormParts";
 
 function PartsPreview() {
   return (
     <div>
       <GroupHeading title="栽培条件" note="どこで・どんな環境で育てているか" />
-      <div className={cx(chips, css({ mt: "3" }))}>
-        <button type="button" className={chipRecipe()}>
-          樹勢改善
-        </button>
-        <button type="button" className={chipRecipe({ state: "on" })}>
-          根張りの改善
-        </button>
-        <span className={chipRecipe({ state: "selected" })}>トマト</span>
-        <button type="button" className={chipRecipe({ size: "sm" })}>
-          ピーマン
-        </button>
-      </div>
-      <div className={cx(chips, css({ mt: "3" }))}>
+      <div className={css({ display: "flex", flexWrap: "wrap", gap: "2", mt: "3" })}>
         <button type="button" className={pillButtonRecipe({ strong: true })}>
           下書き保存
         </button>

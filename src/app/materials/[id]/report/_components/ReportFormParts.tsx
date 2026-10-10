@@ -4,52 +4,6 @@ import { css, cva } from "../../../../../../styled-system/css";
 
 export const reportFrame = css({ minH: "100dvh", fontSize: "md", lineHeight: "prose" });
 
-export const chips = css({ display: "flex", flexWrap: "wrap", gap: "2" });
-
-export const chipRecipe = cva({
-  base: {
-    display: "inline-flex",
-    alignItems: "center",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.strong",
-    borderRadius: "pill",
-    bg: "surface.card",
-    color: "text.default",
-    px: "3.5",
-    py: "1.5",
-    fontSize: "md",
-    cursor: "pointer",
-    userSelect: "none",
-  },
-  variants: {
-    state: {
-      idle: {},
-      on: {
-        bg: "primary.700",
-        borderColor: "primary.700",
-        color: "text.inverse",
-        fontWeight: "bold",
-        _before: { content: '"✓ "', fontSize: "xs" },
-      },
-      selected: {
-        bg: "primary.100",
-        borderColor: "primary.700",
-        color: "primary.800",
-        fontWeight: "extrabold",
-        pr: "2",
-        cursor: "default",
-      },
-    },
-    size: {
-      md: {},
-      sm: { px: "3", fontSize: "sm" },
-      xs: { px: "2.5", py: "1", fontSize: "sm" },
-    },
-  },
-  defaultVariants: { state: "idle", size: "md" },
-});
-
 export const pillButtonRecipe = cva({
   base: {
     display: "inline-flex",

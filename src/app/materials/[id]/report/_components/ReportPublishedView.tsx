@@ -1,5 +1,6 @@
 "use client";
 
+import { Chip } from "@/components/Chip";
 import { Dialog } from "@/components/Dialog";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { REPORT_SECTIONS, type UsageReportInput } from "@/lib/usage-report";
@@ -18,22 +19,6 @@ import {
 const wrap = css({ maxW: "content.form", mx: "auto", px: "4", pt: "3.5", pb: "16" });
 const title = css({ fontSize: "2xl", lineHeight: "snug", fontWeight: "extrabold", m: "0" });
 const subtle = css({ color: "text.subtle", fontSize: "sm" });
-const chip = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1.5",
-  bg: "primary.100",
-  color: "primary.800",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "primary.700/30",
-  borderRadius: "pill",
-  py: "1",
-  px: "3",
-  fontSize: "sm",
-  fontWeight: "semibold",
-});
-const chipCategory = css({ fontSize: "2xs", opacity: "0.65", fontWeight: "bold" });
 const materialRef = css({
   mt: "3.5",
   py: "3",
@@ -159,16 +144,14 @@ export function ReportPublishedView({
             </span>
           </div>
           <div className={css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "3" })}>
-            <span className={chip}>
-              <span className={chipCategory}>作物</span>
+            <Chip category="作物">
               {cropName}
               {variety ? `（${variety}）` : ""}
-            </span>
+            </Chip>
             {input.purposeTags.map((tag) => (
-              <span key={tag} className={chip}>
-                <span className={chipCategory}>効果</span>
+              <Chip key={tag} category="効果">
                 {tag}
-              </span>
+              </Chip>
             ))}
           </div>
           <div className={materialRef}>
