@@ -15,11 +15,9 @@ import {
 
 import { Button, TextLink, buttonRecipe } from "@/components";
 import { Chip } from "@/components/Chip";
-import { Combobox } from "@/components/Combobox";
 import { Tabs } from "@/components/Tabs";
-// shortcut: 資材の検索欄は旧 Field・旧 Combobox のまま。キットの Autocomplete が入力欄の参照か開閉の指定を受け取れるようになったら移す
-import { Field as LegacyField } from "@/components/auth/Fields";
 import {
+  Autocomplete,
   Field,
   Fieldset,
   FileInput,
@@ -122,6 +120,7 @@ export function ArticleForm({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [searchPending, startSearch] = useTransition();
+  const [materialListOpen, setMaterialListOpen] = useState(false);
 
   const boundAction =
     mode === "create" ? createArticleAction : updateArticleAction.bind(null, articleId);
@@ -237,7 +236,10 @@ export function ArticleForm({
         return;
       }
       setUploadError(null);
-      setMaterialHits(result.items.filter((item) => !materials.some((m) => m.id === item.id)));
+      const hits = result.items.filter((item) => !materials.some((m) => m.id === item.id));
+      setMaterialHits(hits);
+      // 検索ボタンを押すと入力欄から外れて一覧が閉じるので、結果が届いたら開き直す
+      setMaterialListOpen(hits.length > 0);
     });
   }
 
@@ -419,36 +421,31 @@ export function ArticleForm({
       </Form>
 
       <div className={formLayout}>
-        <LegacyField
-          htmlFor="article-material-search"
-          label="資材を検索して追加"
-          requirement="optional"
-        >
-          <Combobox
-            id="article-material-search"
-            aria-label="資材を検索して追加"
-            showEmptyState={false}
-            ref={materialSearchRef}
-            value={materialQuery}
-            placeholder="資材名またはメーカー名"
+        <Field label="資材を検索して追加" requirement="optional">
+          <Autocomplete
+            disabled={busy}
+            filterMode="preFiltered"
+            inputRef={materialSearchRef}
+            onOpenChange={setMaterialListOpen}
+            onPick={(option) => {
+              const material = materialHits.find((item) => item.id === option.value);
+              if (material) addMaterial(material);
+            }}
+            onSubmitText={handleMaterialSearch}
             onValueChange={(value) => {
               setMaterialQuery(value);
               setMaterialHits([]);
             }}
-            onSubmitValue={handleMaterialSearch}
-            disabled={busy}
+            open={materialListOpen}
             options={materialHits.map((material) => ({
               value: material.id,
               label: material.name,
               description: material.manufacturer_name ?? undefined,
             }))}
-            onSelect={(id) => {
-              const material = materialHits.find((item) => item.id === id);
-              if (material) addMaterial(material);
-            }}
-            emptyMessage={searchPending ? "検索中…" : "検索を実行すると候補を表示します。"}
+            placeholder="資材名またはメーカー名"
+            value={materialQuery}
           />
-        </LegacyField>
+        </Field>
         <Button
           disabled={busy}
           size="sm"
