@@ -3,7 +3,7 @@
 import { Input as BaseInput } from "@base-ui/react/input";
 
 import { Icon } from "@/components/Icon";
-import { css, cva, cx } from "../../../styled-system/css";
+import { cva, cx } from "../../../styled-system/css";
 
 /** 枠の中に虫眼鏡と枠なしの入力欄を並べる検索欄。Autocomplete の size="search" も同じ枠を使う。 */
 export const searchBoxRecipe = cva({
@@ -14,20 +14,7 @@ export const searchBoxRecipe = cva({
     w: "100%",
     minW: "0",
     px: "3",
-    bg: "surface.card",
-    borderWidth: "1.5px",
-    borderStyle: "solid",
-    borderColor: "border.strong",
-    borderRadius: "button",
-    color: "text.subtle",
     cursor: "text",
-    // 送信ボタンにフォーカスしたときは枠を光らせず、入力欄のときだけ入力欄と同じ焦点の表現にする
-    "&:has(input:focus-visible)": {
-      borderColor: "primary.600",
-      outlineWidth: "2px",
-      outlineStyle: "solid",
-      outlineColor: "primary.200",
-    },
     "&:has(input:disabled)": { opacity: "disabled", cursor: "not-allowed" },
   },
   variants: {
@@ -35,51 +22,113 @@ export const searchBoxRecipe = cva({
       md: { minH: "11" },
       lg: { minH: "12" },
     },
+    surface: {
+      plain: {
+        bg: "surface.card",
+        borderWidth: "1.5px",
+        borderStyle: "solid",
+        borderColor: "border.strong",
+        borderRadius: "button",
+        color: "text.subtle",
+        // 送信ボタンにフォーカスしたときは枠を光らせず、入力欄のときだけ入力欄と同じ焦点の表現にする
+        "&:has(input:focus-visible)": {
+          borderColor: "primary.600",
+          outlineWidth: "2px",
+          outlineStyle: "solid",
+          outlineColor: "primary.200",
+        },
+      },
+      // 写真の上に置く暗いガラス面。ink の薄い透過にごく弱いぼかしを掛け、縁は白い髪の毛線で切る
+      glass: {
+        gap: "2.5",
+        px: "4",
+        bg: "scrim/24",
+        backdropFilter: "blur(3px)",
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: "text.inverse/35",
+        borderRadius: "pill",
+        boxShadow: "shadow.glass",
+        color: "text.inverse/90",
+        "&:has(input:focus-visible)": {
+          outlineWidth: "2px",
+          outlineStyle: "solid",
+          outlineColor: "text.inverse",
+          outlineOffset: "3px",
+        },
+        tab: { minH: "16", px: "6" },
+      },
+    },
   },
-  defaultVariants: { size: "md" },
+  defaultVariants: { size: "md", surface: "plain" },
 });
 
 /** 検索欄の中の入力。枠は searchBoxRecipe が持つ。 */
-export const searchFieldStyle = css({
-  flex: "1",
-  minW: "0",
-  alignSelf: "stretch",
-  p: "0",
-  bg: "transparent",
-  borderWidth: "0",
-  outline: "none",
-  color: "text.default",
-  fontFamily: "sans",
-  fontSize: "md",
-  appearance: "none",
-  _placeholder: { color: "text.subtle" },
-  _disabled: { cursor: "not-allowed" },
-  // iOS Safari は 16px 未満の入力欄にフォーカスすると画面を拡大する
-  _touch: { fontSize: "lg" },
-  "&::-webkit-search-cancel-button": { display: "none" },
-  "&::-webkit-search-decoration": { display: "none" },
+export const searchFieldRecipe = cva({
+  base: {
+    flex: "1",
+    minW: "0",
+    alignSelf: "stretch",
+    p: "0",
+    bg: "transparent",
+    borderWidth: "0",
+    outline: "none",
+    fontFamily: "sans",
+    fontSize: "md",
+    appearance: "none",
+    _disabled: { cursor: "not-allowed" },
+    // iOS Safari は 16px 未満の入力欄にフォーカスすると画面を拡大する
+    _touch: { fontSize: "lg" },
+    "&::-webkit-search-cancel-button": { display: "none" },
+    "&::-webkit-search-decoration": { display: "none" },
+  },
+  variants: {
+    surface: {
+      plain: { color: "text.default", _placeholder: { color: "text.subtle" } },
+      glass: {
+        fontSize: "lg",
+        fontWeight: "bold",
+        color: "text.inverse",
+        caretColor: "text.inverse",
+        _placeholder: { color: "text.inverse/90", fontWeight: "medium" },
+      },
+    },
+  },
+  defaultVariants: { surface: "plain" },
 });
 
-const submitStyle = css({
-  display: "grid",
-  placeItems: "center",
-  flexShrink: "0",
-  w: "8",
-  h: "8",
-  mr: "-1",
-  p: "0",
-  borderWidth: "0",
-  borderRadius: "pill",
-  bg: "primary.700",
-  color: "text.inverse",
-  cursor: "pointer",
-  _focusVisible: {
-    outlineWidth: "2px",
-    outlineStyle: "solid",
-    outlineColor: "primary.700",
-    outlineOffset: "2px",
+const submitRecipe = cva({
+  base: {
+    display: "grid",
+    placeItems: "center",
+    flexShrink: "0",
+    p: "0",
+    borderWidth: "0",
+    borderRadius: "pill",
+    color: "text.inverse",
+    cursor: "pointer",
+    _focusVisible: {
+      outlineWidth: "2px",
+      outlineStyle: "solid",
+      outlineColor: "primary.700",
+      outlineOffset: "2px",
+    },
+    _disabled: { opacity: "disabled", cursor: "not-allowed" },
   },
-  _disabled: { opacity: "disabled", cursor: "not-allowed" },
+  variants: {
+    surface: {
+      plain: { w: "8", h: "8", mr: "-1", bg: "primary.700" },
+      // 面と同じく透かし、写真の色を少し通す。矢印の白は UI 部品の 3：1 を下限にする
+      glass: {
+        w: "9",
+        h: "9",
+        bg: "primary.600/72",
+        backdropFilter: "blur(3px)",
+        tab: { w: "11", h: "11" },
+      },
+    },
+  },
+  defaultVariants: { surface: "plain" },
 });
 
 type SearchInputProps = {
@@ -92,6 +141,8 @@ type SearchInputProps = {
   /** 渡すと右端に送信ボタンを置き、この文言を読み上げ名にする。囲むフォームを送信する。 */
   submitLabel?: string;
   size?: "md" | "lg";
+  /** glass は写真の上に置く暗い透過の面（ホームのヒーロー）。 */
+  surface?: "plain" | "glass";
   maxLength?: number;
   disabled?: boolean;
   className?: string;
@@ -107,17 +158,18 @@ export function SearchInput({
   "aria-label": ariaLabel,
   submitLabel,
   size,
+  surface = "plain",
   maxLength,
   disabled,
   className,
 }: SearchInputProps) {
   return (
-    <div className={cx(searchBoxRecipe({ size }), className)}>
-      <Icon name="search" size="sm" />
+    <div className={cx(searchBoxRecipe({ size, surface }), className)}>
+      <Icon name="search" size={surface === "glass" ? "md" : "sm"} />
       <BaseInput
         aria-label={ariaLabel}
         autoComplete="off"
-        className={searchFieldStyle}
+        className={searchFieldRecipe({ surface })}
         defaultValue={defaultValue}
         disabled={disabled}
         enterKeyHint="search"
@@ -129,7 +181,12 @@ export function SearchInput({
         value={value}
       />
       {submitLabel === undefined ? null : (
-        <button aria-label={submitLabel} className={submitStyle} disabled={disabled} type="submit">
+        <button
+          aria-label={submitLabel}
+          className={submitRecipe({ surface })}
+          disabled={disabled}
+          type="submit"
+        >
           <Icon name="arrow_forward" size="sm" />
         </button>
       )}

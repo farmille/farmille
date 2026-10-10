@@ -16,7 +16,7 @@ import {
 } from "./Combobox";
 import { useFieldRequired } from "./field-context";
 import { controlRecipe } from "./recipes";
-import { searchBoxRecipe, searchFieldStyle } from "./SearchInput";
+import { searchBoxRecipe, searchFieldRecipe } from "./SearchInput";
 import type { Option } from "./types";
 
 type AutocompleteProps = {
@@ -70,7 +70,7 @@ export function Autocomplete({
   const input = (
     <BaseAutocomplete.Input
       aria-label={ariaLabel}
-      className={size === "search" ? searchFieldStyle : cx(controlRecipe({ size }), className)}
+      className={size === "search" ? searchFieldRecipe() : cx(controlRecipe({ size }), className)}
       maxLength={maxLength}
       onKeyDown={(event) => {
         if (event.key !== "Enter" || isComposingEnter(event)) return;

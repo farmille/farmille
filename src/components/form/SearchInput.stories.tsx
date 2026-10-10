@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn, userEvent, within } from "storybook/test";
 
+import { css } from "../../../styled-system/css";
 import { SearchInput } from "./SearchInput";
 
 const meta = {
@@ -42,4 +43,24 @@ export const Focused: Story = {
 
 export const Disabled: Story = {
   args: { submitLabel: "検索", disabled: true },
+};
+
+const photoBackdrop = css({ p: "4", bg: "primary.800" });
+
+/** 写真の上に置く暗いガラス面（ホームのヒーロー）。 */
+export const Glass: Story = {
+  args: {
+    size: "lg",
+    surface: "glass",
+    submitLabel: "検索",
+    placeholder: "作物・悩み・資材名から探す",
+    "aria-label": "資材を検索する。作物、悩み、資材名から探せます",
+  },
+  decorators: [
+    (Story) => (
+      <div className={photoBackdrop}>
+        <Story />
+      </div>
+    ),
+  ],
 };

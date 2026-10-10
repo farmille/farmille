@@ -20,6 +20,7 @@ export function HomeSearchEntry() {
         placeholder="作物・悩み・資材名から探す"
         size="lg"
         submitLabel="検索"
+        surface="glass"
       />
     </Form>
   );
