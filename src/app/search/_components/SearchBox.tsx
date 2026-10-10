@@ -1,9 +1,10 @@
 "use client";
 
-import { Icon } from "@/components/Icon";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 
+import { Chip } from "@/components/Chip";
+import { Autocomplete, type Option } from "@/components/form";
 import { TAG_CATEGORY_LABELS } from "@/components/TagChip";
 import {
   buildSearchHref,
@@ -13,14 +14,8 @@ import {
   type MaterialSortParam,
   type SelectedSearchFilter,
 } from "@/components/search/search-selection";
-import {
-  matchSearchCatalog,
-  type SearchCatalog,
-  type SearchFilterItem,
-} from "@/lib/material-search";
+import { matchSearchCatalog, type SearchCatalog } from "@/lib/material-search";
 import { css, cva } from "../../../../styled-system/css";
-
-import { chipCategoryStyle, chipRemoveRecipe, selectedChipRecipe } from "./search-chips";
 
 type SearchBoxProps = {
   initialQuery: string;
@@ -29,64 +24,7 @@ type SearchBoxProps = {
   catalog: SearchCatalog;
 };
 
-type Suggestion =
-  | { kind: "filter"; filter: SearchFilterItem }
-  | { kind: "maker"; name: string }
-  | { kind: "name"; name: string };
-
 const SUGGESTION_LIMIT = 8;
-
-function toSelected(suggestion: Suggestion): SelectedSearchFilter {
-  if (suggestion.kind === "filter") return searchFilterItemToSelected(suggestion.filter);
-  if (suggestion.kind === "maker") return { kind: "maker", name: suggestion.name };
-  return { kind: "name", name: suggestion.name };
-}
-
-const searchBoxStyle = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "2.5",
-  py: "3",
-  px: "3",
-  bg: "surface.card",
-  borderWidth: "1.5px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  borderRadius: "button",
-  _focusWithin: {
-    borderColor: "primary.700",
-    boxShadow: "0 0 0 3px token(colors.primary.700/16)",
-  },
-});
-
-const inputStyle = css({
-  flex: "1",
-  minW: "0",
-  borderWidth: "0",
-  bg: "transparent",
-  color: "text.default",
-  fontSize: "md",
-  outline: "none",
-  _placeholder: { color: "text.subtle" },
-});
-
-const suggestionStyle = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "2.5",
-  w: "full",
-  py: "2",
-  px: "1.5",
-  borderWidth: "0",
-  borderRadius: "input",
-  bg: "transparent",
-  color: "inherit",
-  fontSize: "md",
-  textAlign: "left",
-  cursor: "pointer",
-  _hover: { bg: "primary.soft" },
-  _active: { bg: "primary.soft" },
-});
 
 const tint = (hue: string) => ({
   bg: `color-mix(in srgb, ${hue} 15%, token(colors.surface.card))`,
@@ -151,119 +89,80 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
     startTransition(() => router.push(href, { scroll: false }));
   };
 
-  const addSuggestion = (suggestion: Suggestion) => {
-    const next = toSelected(suggestion);
-    if (selectedKeys.has(selectedFilterKey(next))) return;
-    navigate([...selected, next], "");
-  };
-
-  const suggestions = useMemo((): Suggestion[] => {
-    const keyword = query.trim();
+  const keyword = query.trim();
+  const suggestions = useMemo((): SelectedSearchFilter[] => {
     if (keyword.length === 0) return [];
     const matches = matchSearchCatalog(catalog, keyword);
-    const found: Suggestion[] = [];
-    for (const filter of matches.filters) {
-      if (selectedKeys.has(`${filter.category}:${filter.id}`)) continue;
-      found.push({ kind: "filter", filter });
-      if (found.length >= SUGGESTION_LIMIT) return found;
-    }
-    for (const name of matches.materialNames) {
-      if (selectedKeys.has(`name:${name}`)) continue;
-      found.push({ kind: "name", name });
-      if (found.length >= SUGGESTION_LIMIT) return found;
-    }
-    for (const name of matches.makerNames) {
-      if (selectedKeys.has(`maker:${name}`)) continue;
-      found.push({ kind: "maker", name });
-      if (found.length >= SUGGESTION_LIMIT) return found;
-    }
-    return found;
-  }, [catalog, query, selectedKeys]);
+    const candidates: SelectedSearchFilter[] = [
+      ...matches.filters.map(searchFilterItemToSelected),
+      ...matches.materialNames.map((name): SelectedSearchFilter => ({ kind: "name", name })),
+      ...matches.makerNames.map((name): SelectedSearchFilter => ({ kind: "maker", name })),
+    ];
+    return candidates
+      .filter((filter) => !selectedKeys.has(selectedFilterKey(filter)))
+      .slice(0, SUGGESTION_LIMIT);
+  }, [catalog, keyword, selectedKeys]);
+
+  const suggestionOf = (option: Option) =>
+    suggestions.find((filter) => selectedFilterKey(filter) === option.value);
 
   return (
-    <div aria-busy={isPending || undefined}>
-      <div className={searchBoxStyle}>
-        <span className={css({ display: "flex", color: "text.subtle" })}>
-          <Icon name="search" size="sm" />
-        </span>
-        <input
-          aria-label="資材の検索条件"
-          autoComplete="off"
-          className={inputStyle}
-          onChange={(event) => setInput({ ...input, value: event.target.value })}
-          onCompositionStart={() => setComposing(true)}
-          onCompositionEnd={() => setComposing(false)}
-          placeholder="作物・悩み・資材名を入力してください"
-          value={query}
-        />
-      </div>
+    // 変換中の入力で検索しないよう、入力欄から伝わる変換の開始・終了を受け取る
+    <div
+      aria-busy={isPending || undefined}
+      onCompositionEnd={() => setComposing(false)}
+      onCompositionStart={() => setComposing(true)}
+    >
+      <Autocomplete
+        aria-label="資材の検索条件"
+        emptyMessage={keyword.length > 0 ? `「${keyword}」に一致する候補がありません` : undefined}
+        filterMode="preFiltered"
+        onPick={(option) => {
+          const next = suggestionOf(option);
+          if (next !== undefined) navigate([...selected, next], "");
+        }}
+        onSubmitText={(text) => {
+          if (text.trim() !== initialQuery) navigate(selected, text);
+        }}
+        onValueChange={(value) => setInput({ ...input, value })}
+        options={suggestions.map((filter) => ({
+          value: selectedFilterKey(filter),
+          label: filter.name,
+          description: TAG_CATEGORY_LABELS[selectedFilterCategory(filter)],
+        }))}
+        placeholder="作物・悩み・資材名を入力してください"
+        renderOption={(option) => {
+          const filter = suggestionOf(option);
+          return (
+            <>
+              <span
+                className={categoryLabelRecipe({
+                  category: filter === undefined ? undefined : selectedFilterCategory(filter),
+                })}
+              >
+                {option.description}
+              </span>
+              <span>{option.label}</span>
+            </>
+          );
+        }}
+        size="search"
+        value={query}
+      />
 
       {selected.length > 0 ? (
         <div className={css({ display: "flex", flexWrap: "wrap", gap: "2", mt: "2.5" })}>
           {selected.map((filter, index) => (
-            <span className={selectedChipRecipe({ size: "md" })} key={selectedFilterKey(filter)}>
-              <span className={chipCategoryStyle}>
-                {TAG_CATEGORY_LABELS[selectedFilterCategory(filter)]}
-              </span>
-              {filter.name}
-              <button
-                type="button"
-                className={chipRemoveRecipe({ size: "md" })}
-                aria-label={`${filter.name}を外す`}
-                onClick={() => navigate(selected.filter((_, itemIndex) => itemIndex !== index))}
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-      ) : null}
-
-      {query.trim().length > 0 ? (
-        <div
-          className={css({
-            mt: "2.5",
-            overflow: "hidden",
-            bg: "surface.card",
-            borderWidth: "1px",
-            borderStyle: "solid",
-            borderColor: "border.default",
-            borderRadius: "button",
-            boxShadow: "shadow",
-          })}
-        >
-          {suggestions.length > 0 ? (
-            <div className={css({ p: "3" })}>
-              {suggestions.map((suggestion) => {
-                const next = toSelected(suggestion);
-                const category = selectedFilterCategory(next);
-                return (
-                  <button
-                    className={suggestionStyle}
-                    key={selectedFilterKey(next)}
-                    onClick={() => addSuggestion(suggestion)}
-                    type="button"
-                  >
-                    <span className={categoryLabelRecipe({ category })}>
-                      {TAG_CATEGORY_LABELS[category]}
-                    </span>
-                    <span>{next.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div
-              className={css({
-                p: "3.5",
-                color: "text.subtle",
-                fontSize: "md",
-                textAlign: "center",
-              })}
+            <Chip
+              category={TAG_CATEGORY_LABELS[selectedFilterCategory(filter)]}
+              key={selectedFilterKey(filter)}
+              onRemove={() => navigate(selected.filter((_, itemIndex) => itemIndex !== index))}
+              removeLabel={`${filter.name}を外す`}
+              size="md"
             >
-              「{query.trim()}」に一致する候補がありません
-            </div>
-          )}
+              {filter.name}
+            </Chip>
+          ))}
         </div>
       ) : null}
     </div>

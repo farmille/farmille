@@ -30,6 +30,12 @@ const props = {
   catalog: { filters: [], makers: [], materials: [{ name: "トマト資材", aliases: [] }] },
 };
 const advanceSearch = () => act(() => vi.advanceTimersByTime(300));
+const searchInput = () => screen.getByRole("combobox", { name: "資材の検索条件" });
+/** 候補の一覧を開いて、読み上げ名（「名前 種類」）の候補を押す。 */
+function pickOption(name: string) {
+  fireEvent.keyDown(searchInput(), { key: "ArrowDown" });
+  fireEvent.click(screen.getByRole("option", { name }));
+}
 
 describe("資材の入力検索", () => {
   beforeEach(() => {
@@ -43,7 +49,7 @@ describe("資材の入力検索", () => {
 
   it("入力が落ち着いたらURLを更新し、検索結果を取得する", async () => {
     renderSearch(<SearchBox {...props} />);
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "トマト" } });
+    fireEvent.change(searchInput(), { target: { value: "トマト" } });
     expect(router.replace).not.toHaveBeenCalled();
     await advanceSearch();
     expect(router.replace).toHaveBeenCalledWith(`/search?q=${encodeURIComponent("トマト")}`, {
@@ -52,7 +58,7 @@ describe("資材の入力検索", () => {
   });
   it("日本語変換の途中では検索しない", async () => {
     renderSearch(<SearchBox {...props} />);
-    const input = screen.getByRole("textbox");
+    const input = searchInput();
     fireEvent.compositionStart(input);
     fireEvent.change(input, { target: { value: "とまと" } });
     await advanceSearch();
@@ -63,7 +69,7 @@ describe("資材の入力検索", () => {
   });
   it("遅れて届いた結果で新しい入力やフォーカスを失わない", async () => {
     const view = renderSearch(<SearchBox {...props} />);
-    const input = screen.getByRole("textbox");
+    const input = searchInput();
     input.focus();
     fireEvent.change(input, { target: { value: "トマ" } });
     await advanceSearch();
@@ -79,9 +85,9 @@ describe("資材の入力検索", () => {
   it("別のURLの検索条件を入力欄にも反映する", () => {
     const view = renderSearch(<SearchBox {...props} initialQuery="トマト" />);
     view.rerender(<SearchBox {...props} initialQuery="いちご" />);
-    expect(screen.getByRole("textbox")).toHaveValue("いちご");
+    expect(searchInput()).toHaveValue("いちご");
     view.rerender(<SearchBox {...props} />);
-    expect(screen.getByRole("textbox")).toHaveValue("");
+    expect(searchInput()).toHaveValue("");
   });
   it("読みや別名で一致した候補を表示製品名として選べる", () => {
     renderSearch(
@@ -91,14 +97,26 @@ describe("資材の入力検索", () => {
         catalog={{ filters: [], makers: [], materials: [{ name: "ZEBA", aliases: ["ゼバ"] }] }}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "製品名 ZEBA" }));
+    pickOption("ZEBA 製品名");
     expect(router.push.mock.calls[0][0]).toContain("filters=name%3AZEBA");
   });
   it("候補選択はキーワードを消して確定した条件に置き換える", () => {
     renderSearch(<SearchBox {...props} initialQuery="トマト" />);
-    fireEvent.click(screen.getByRole("button", { name: "製品名 トマト資材" }));
-    expect(screen.getByRole("textbox")).toHaveValue("");
+    pickOption("トマト資材 製品名");
+    expect(searchInput()).toHaveValue("");
     expect(router.push).toHaveBeenCalled();
     expect(router.push.mock.calls[0][0]).not.toContain("q=");
+  });
+  it("候補を選ばない Enter は待たずに検索し、変換確定の Enter では検索しない", () => {
+    renderSearch(<SearchBox {...props} />);
+    const input = searchInput();
+    fireEvent.change(input, { target: { value: "トマト" } });
+    fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+    expect(router.push).not.toHaveBeenCalled();
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(router.push).toHaveBeenCalledWith(`/search?q=${encodeURIComponent("トマト")}`, {
+      scroll: false,
+    });
+    expect(router.replace).not.toHaveBeenCalled();
   });
 });
