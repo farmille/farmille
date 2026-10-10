@@ -26,6 +26,13 @@ const shortControl = css({ maxW: "64" });
 
 const cityInput = css({ display: "block", maxW: "64", mt: "1.5" });
 
+const timelineHint = css({
+  mt: "0.5",
+  fontSize: "xs",
+  color: "text.subtle",
+  tab: { display: "none" },
+});
+
 export function ReportStepConditions({
   input,
   onChange,
@@ -114,8 +121,10 @@ export function ReportStepConditions({
           aria-label="施用時期の段階"
           options={TIMING_OPTIONS}
           value={input.timingStages.map(String)}
+          variant="timeline"
           onValueChange={(next) => onChange({ ...input, timingStages: next.map(Number) })}
         />
+        <div className={timelineHint}>横にスクロールすると続きの段階が出ます</div>
       </Fieldset>
       <Field
         label="処理日・定植日・生育状況（必須）"

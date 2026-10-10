@@ -68,3 +68,22 @@ export const AtLimit: Story = {
 export const Disabled: Story = {
   args: { disabled: true },
 };
+
+/** 順に並ぶ段階を線の上の点で示す（施用時期）。狭い画面では横に流れる。 */
+export const Timeline: Story = {
+  args: {
+    "aria-label": "施用時期の段階",
+    variant: "timeline",
+    options: [
+      "栽培開始前",
+      "播種・定植時",
+      "播種・定植直後",
+      "生育初〜中期",
+      "開花・生殖成長開始期",
+      "着果・生育中期",
+      "生育後期〜収穫前",
+      "収穫後",
+    ].map((label, index) => ({ value: String(index), label })),
+    value: ["1", "3"],
+  },
+};
