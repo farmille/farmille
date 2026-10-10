@@ -197,3 +197,55 @@ jobs:
 
       - name: Run Playwright E2E
         run: pnpm exec playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+
+  production:
+    name: Migrate and deploy production
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [app, storybook, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    concurrency:
+      group: farmille-production
+      cancel-in-progress: false
+    env:
+      SUPABASE_PROJECT_ID: sajxnypkbybuzsqdguaa
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Reject an outdated production run
+        shell: bash
+        run: |
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "$GITHUB_SHA" || {
+            echo "::error::main has advanced. Deploy its latest successful CI run."
+            exit 1
+          }
+
+      - name: Validate deployment configuration
+        shell: bash
+        run: |
+          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing production configuration: $name"
+              exit 1
+            fi
+          done
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Apply production migrations
+        run: npx --yes supabase@2.120.0 db push --project-ref "$SUPABASE_PROJECT_ID" --skip-vault --yes
+
+      - name: Deploy production
+        run: npx --yes vercel@63.1.2 deploy --prod --yes --token "$VERCEL_TOKEN"
