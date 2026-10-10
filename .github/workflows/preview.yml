@@ -1,0 +1,68 @@
+name: Manual preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Open pull request number
+        required: true
+        type: string
+      database:
+        description: Use branch for migrations or isolated testing
+        required: true
+        default: shared
+        type: choice
+        options: [shared, branch]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: farmille-preview-pr-${{ inputs.pr }}
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ inputs.pr }}
+      DB_MODE: ${{ inputs.database }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          path: trusted
+          persist-credentials: false
+
+      - name: Validate pull request
+        id: pr
+        run: bash trusted/tools/ci/preview.sh prepare
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.pr.outputs.sha }}
+          path: source
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install deployment tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/preview-tools" supabase@2.120.0 vercel@63.1.2
+          echo "$RUNNER_TEMP/preview-tools/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Prepare database and deploy preview
+        run: bash trusted/tools/ci/preview.sh deploy
+        env:
+          PR_SHA: ${{ steps.pr.outputs.sha }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
