@@ -2,147 +2,30 @@
 
 import { useState } from "react";
 
-import { buttonRecipe } from "@/components/Button";
-import { Badge } from "@/components/Badge";
-import {
-  FieldError,
-  formFieldStyle,
-  formGuideRecipe,
-  formLabelStyle,
-} from "@/components/FormParts";
-import { Combobox } from "@/components/Combobox";
+import { Button } from "@/components/Button";
+import { Chip } from "@/components/Chip";
+import { Autocomplete, Combobox, Field, Fieldset, Notice, type Option } from "@/components/form";
+import { ToggleGroup } from "@/components/ToggleGroup";
 import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
-import { css, cva } from "../../../../styled-system/css";
+import { css } from "../../../../styled-system/css";
 
 const AFFILIATION_LIMIT = 20;
 const CROP_LIMIT = 50;
+const CROP_SUGGESTION_LIMIT = 20;
 
-const focusRing = {
-  outlineWidth: "2px",
-  outlineStyle: "solid",
-  outlineColor: "primary.700",
-  outlineOffset: "2px",
-} as const;
+const affiliationStack = css({ display: "flex", flexDirection: "column", gap: "2.5" });
 
-const selectedCrops = css({ display: "flex", flexWrap: "wrap", gap: "2", mb: "2" });
-
-const selectedCrop = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1.5",
-  pl: "3",
-  pr: "1.5",
-  py: "1",
-  bg: "primary.100",
-  color: "primary.800",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "primary.700/30",
-  borderRadius: "pill",
-  fontSize: "sm",
-  fontWeight: "semibold",
-});
-
-const selectedCropCategory = css({ color: "primary.800/65", fontSize: "2xs", fontWeight: "bold" });
-
-const removeCrop = css({
-  w: "4.5",
-  h: "4.5",
-  display: "grid",
-  placeItems: "center",
-  p: "0",
-  border: "none",
-  borderRadius: "pill",
-  bg: "primary.700/18",
-  color: "primary.800",
-  fontSize: "sm",
-  lineHeight: "none",
-  _focusVisible: { ...focusRing, outlineOffset: "1px" },
-});
-
-const affiliationOptions = css({ display: "flex", flexWrap: "wrap", gap: "2", mt: "2" });
-
-const affiliationOption = cva({
-  base: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "1.5",
-    px: "3.5",
-    py: "2",
-    bg: "surface.card",
-    color: "text.muted",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.strong",
-    borderRadius: "pill",
-    fontSize: "sm",
-    fontWeight: "semibold",
-    lineHeight: "tight",
-    cursor: "pointer",
-    _hover: { borderColor: "primary.700", color: "primary.800" },
-    _focusVisible: focusRing,
-    _disabled: { opacity: "disabled", cursor: "not-allowed" },
-  },
-  variants: {
-    state: {
-      off: {},
-      on: {
-        bg: "primary.700",
-        borderColor: "primary.700",
-        color: "text.inverse",
-        _hover: { borderColor: "primary.700", color: "text.inverse" },
-        _before: { content: '"✓"', fontSize: "xs", fontWeight: "black" },
-      },
-      custom: {
-        pr: "1.5",
-        bg: "primary.100",
-        borderColor: "primary.700",
-        color: "primary.800",
-        cursor: "default",
-      },
-    },
-  },
-});
-
-const customLabel = css({
-  px: "1.5",
-  py: "0.5",
-  bg: "surface.card",
-  color: "primary.800",
-  borderRadius: "pill",
-  fontSize: "xs",
-  fontWeight: "extrabold",
-});
-
-const removeAffiliation = css({
-  w: "5",
-  h: "5",
-  display: "grid",
-  placeItems: "center",
-  p: "0",
-  border: "none",
-  borderRadius: "pill",
-  bg: "scrim/8",
-  color: "primary.800",
-  fontSize: "sm",
-  lineHeight: "none",
-  cursor: "pointer",
-  _hover: { bg: "scrim/16" },
-});
+const chipRow = css({ display: "flex", flexWrap: "wrap", gap: "2" });
 
 const addRow = css({
   display: "flex",
   alignItems: "center",
   gap: "2",
-  mt: "2",
   "& > :first-child": { flex: "1", minW: "0" },
+  "& > :last-child": { flexShrink: "0" },
 });
 
-const addButton = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
-  flex: "0 0 auto",
-  px: "4",
-  _focusVisible: focusRing,
-});
+const normalize = (text: string) => text.normalize("NFKC").toLocaleLowerCase();
 
 export function ProfileTagsEditor({
   details,
@@ -152,22 +35,23 @@ export function ProfileTagsEditor({
   options: ProfileOptions;
 }) {
   const [cropQuery, setCropQuery] = useState("");
-  const [cropIds, setCropIds] = useState(details.crops.map((crop) => crop.id));
+  const [crops, setCrops] = useState<readonly Option[]>(() =>
+    details.crops.map((crop) => ({ value: crop.id, label: crop.name })),
+  );
   const [affiliation, setAffiliation] = useState("");
   const [affiliations, setAffiliations] = useState(details.affiliations);
   const [message, setMessage] = useState("");
-  const query = cropQuery.normalize("NFKC").toLocaleLowerCase();
-  const found = options.crops.filter((crop) =>
-    [crop.name, ...crop.aliases].some((name) =>
-      name.normalize("NFKC").toLocaleLowerCase().includes(query),
-    ),
+  const query = normalize(cropQuery);
+  const available = options.crops.filter(
+    (crop) =>
+      !crops.some((option) => option.value === crop.id) &&
+      [crop.name, ...crop.aliases].some((name) => normalize(name).includes(query)),
   );
-  const cropById = new Map([...details.crops, ...options.crops].map((crop) => [crop.id, crop]));
-  const available = found.filter((crop) => !cropIds.includes(crop.id));
   const affiliationFull = affiliations.length >= AFFILIATION_LIMIT;
+  const knownAffiliations = affiliations.filter((name) => options.affiliations.includes(name));
   const customAffiliations = affiliations.filter((name) => !options.affiliations.includes(name));
 
-  function addAffiliation(name = affiliation) {
+  function addAffiliation(name: string) {
     const value = name.trim();
     if (!value) return;
     if (affiliationFull) {
@@ -179,143 +63,103 @@ export function ProfileTagsEditor({
     setMessage("");
   }
 
-  function toggleAffiliation(name: string) {
-    if (affiliations.includes(name)) {
-      setAffiliations(affiliations.filter((value) => value !== name));
-      setMessage("");
-      return;
-    }
-    addAffiliation(name);
-  }
-
   return (
     <>
-      <div className={formFieldStyle}>
-        <label className={formLabelStyle} htmlFor="crop-search">
-          主な作目
-          <Badge variant="optional">任意</Badge>
-        </label>
-        <div className={selectedCrops} aria-label="選択済みの作目" role="group">
-          {cropIds.map((id) => {
-            const crop = cropById.get(id);
-            if (!crop) throw new Error("選択済みの作目が見つかりません。");
-            return (
-              <span key={id} className={selectedCrop}>
-                <input type="hidden" name="cropIds" value={id} />
-                <span className={selectedCropCategory}>作物</span>
-                {crop.name}
-                <button
-                  type="button"
-                  className={removeCrop}
-                  aria-label={`${crop.name}を削除`}
-                  onClick={() => setCropIds(cropIds.filter((value) => value !== id))}
-                >
-                  ×
-                </button>
-              </span>
-            );
-          })}
-        </div>
+      <Field
+        description={`作物名や別名で検索して選んでください。複数選べます（${CROP_LIMIT}件まで）。公開されます。${
+          available.length > CROP_SUGGESTION_LIMIT
+            ? `${available.length}件中${CROP_SUGGESTION_LIMIT}件を表示しています。`
+            : `${available.length}件の候補があります。`
+        }`}
+        label="主な作目"
+        name="cropIds"
+        requirement="optional"
+      >
         <Combobox
-          id="crop-search"
-          aria-label="主な作目"
-          aria-describedby="crop-search-guide"
-          value={cropQuery}
-          onValueChange={setCropQuery}
-          placeholder="作物名を入力（例：みかん、デコポン）"
-          disabled={cropIds.length >= CROP_LIMIT}
-          options={available.slice(0, 20).map((crop) => ({
+          emptyMessage="一致する作物がありません"
+          filterMode="preFiltered"
+          inputValue={cropQuery}
+          max={CROP_LIMIT}
+          multiple
+          onInputValueChange={setCropQuery}
+          onValueChange={setCrops}
+          options={available.slice(0, CROP_SUGGESTION_LIMIT).map((crop) => ({
             value: crop.id,
             label: crop.name,
             description: crop.crop_groups?.name,
           }))}
-          onSelect={(id) => {
-            setCropIds([...cropIds, id]);
-            setCropQuery("");
-          }}
-          emptyMessage="一致する作物がありません"
+          placeholder="作物名を入力（例：みかん、デコポン）"
+          value={crops}
         />
-        <div className={formGuideRecipe({ placement: "below" })} id="crop-search-guide">
-          作物名や別名で検索して選んでください。複数選べます（{CROP_LIMIT}件まで）。公開されます。
-          {available.length > 20
-            ? `${available.length}件中20件を表示しています。`
-            : `${available.length}件の候補があります。`}
-        </div>
-      </div>
+      </Field>
 
-      <div className={formFieldStyle}>
-        <label className={formLabelStyle} htmlFor="affiliation">
-          所属
-          <Badge variant="optional">任意</Badge>
-        </label>
-        <div className={formGuideRecipe()}>
-          当てはまるものを選んでください（複数可）。一覧にない所属は下の欄に入力して追加できます（
-          {AFFILIATION_LIMIT}件まで）。公開されます。
-        </div>
-        <div className={affiliationOptions}>
-          {options.affiliations.map((name) => {
-            const on = affiliations.includes(name);
-            return (
-              <button
-                key={name}
-                type="button"
-                className={affiliationOption({ state: on ? "on" : "off" })}
-                aria-pressed={on}
-                disabled={!on && affiliationFull}
-                onClick={() => toggleAffiliation(name)}
-              >
-                {name}
-              </button>
-            );
-          })}
-          {customAffiliations.map((name) => (
-            <span key={name} className={affiliationOption({ state: "custom" })}>
-              <span className={customLabel}>その他</span>
-              {name}
-              <button
-                type="button"
-                className={removeAffiliation}
-                aria-label={`${name}を削除`}
-                onClick={() => setAffiliations(affiliations.filter((value) => value !== name))}
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-        {affiliations.map((name) => (
-          <input key={name} type="hidden" name="affiliations" value={name} />
-        ))}
-        <div className={addRow}>
-          <Combobox
-            id="affiliation"
-            aria-label="所属"
-            value={affiliation}
-            maxLength={100}
-            placeholder="例）〇〇市トマト生産部会"
-            onValueChange={setAffiliation}
-            onSubmitValue={() => addAffiliation()}
-            closeOnSubmit
-            showEmptyState={false}
-            disabled={affiliationFull}
-            options={options.affiliations
-              .filter(
-                (name) =>
-                  !affiliations.includes(name) &&
-                  name
-                    .normalize("NFKC")
-                    .toLocaleLowerCase()
-                    .includes(affiliation.normalize("NFKC").toLocaleLowerCase()),
-              )
-              .map((name) => ({ value: name, label: name }))}
-            onSelect={addAffiliation}
+      <Fieldset
+        legend="所属"
+        lead={`当てはまるものを選んでください（複数可）。一覧にない所属は下の欄に入力して追加できます（${AFFILIATION_LIMIT}件まで）。公開されます。`}
+        requirement="optional"
+      >
+        <div className={affiliationStack}>
+          <ToggleGroup
+            aria-label="所属の候補"
+            // 上限は一覧外の所属と合わせた件数で数える
+            limit={AFFILIATION_LIMIT - customAffiliations.length}
+            multiple
+            onValueChange={(known) => {
+              setAffiliations((current) => [
+                ...current.filter(
+                  (name) => !options.affiliations.includes(name) || known.includes(name),
+                ),
+                ...known.filter((name) => !current.includes(name)),
+              ]);
+              setMessage("");
+            }}
+            options={options.affiliations.map((name) => ({ value: name, label: name }))}
+            value={knownAffiliations}
           />
-          <button type="button" className={addButton} onClick={() => addAffiliation()}>
-            所属を追加
-          </button>
+          {customAffiliations.length === 0 ? null : (
+            <div className={chipRow}>
+              {customAffiliations.map((name) => (
+                <Chip
+                  category="その他"
+                  key={name}
+                  onRemove={() => setAffiliations(affiliations.filter((value) => value !== name))}
+                  removeLabel={`${name}を削除`}
+                >
+                  {name}
+                </Chip>
+              ))}
+            </div>
+          )}
+          {affiliations.map((name) => (
+            <input key={name} type="hidden" name="affiliations" value={name} />
+          ))}
+          <div className={addRow}>
+            <Autocomplete
+              aria-label="所属"
+              disabled={affiliationFull}
+              filterMode="preFiltered"
+              maxLength={100}
+              onPick={(option) => addAffiliation(option.value)}
+              onSubmitText={addAffiliation}
+              onValueChange={setAffiliation}
+              options={options.affiliations
+                .filter(
+                  (name) =>
+                    !affiliations.includes(name) &&
+                    normalize(name).includes(normalize(affiliation)),
+                )
+                .map((name) => ({ value: name, label: name }))}
+              placeholder="例）〇〇市トマト生産部会"
+              value={affiliation}
+            />
+            <Button onClick={() => addAffiliation(affiliation)} size="sm" variant="ghost">
+              所属を追加
+            </Button>
+          </div>
+          {/* 上限の案内は送信を止めない */}
+          {message === "" ? null : <Notice tone="error">{message}</Notice>}
         </div>
-        <FieldError id="affiliation-error" message={message === "" ? undefined : message} />
-      </div>
+      </Fieldset>
     </>
   );
 }

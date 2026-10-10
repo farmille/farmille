@@ -48,8 +48,9 @@ describe("プロフィールのタグ編集", () => {
     );
     const input = screen.getByRole("combobox", { name: "所属" });
     await user.type(input, "野菜研究サークル");
-    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "所属を追加" }));
+    expect(screen.queryByRole("option")).not.toBeInTheDocument();
+    // 入力中は Base UI が候補一覧の外を aria-hidden にする。マウスではそのまま押せる
+    await user.click(screen.getByRole("button", { name: "所属を追加", hidden: true }));
     expect(input).toHaveValue("");
     expect(input).toHaveAttribute("aria-expanded", "false");
     expect(container.querySelectorAll('input[name="affiliations"]')).toHaveLength(2);
@@ -72,7 +73,8 @@ describe("プロフィールのタグ編集", () => {
         }}
       />,
     );
-    expect(screen.getByRole("combobox", { name: "主な作目" })).toBeDisabled();
+    // 上限に達しても選んだ作目は外せるよう、入力欄は無効ではなく読み取り専用にする
+    expect(screen.getByRole("combobox", { name: "主な作目" })).toHaveAttribute("readonly");
     expect(screen.getByRole("combobox", { name: "所属" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "所属を追加" }));
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
