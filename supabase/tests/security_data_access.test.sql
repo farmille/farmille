@@ -2,6 +2,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select no_plan();
 
+insert into public.manufacturers(name) values ('審査を経ないメーカー名');
 insert into public.materials(id,name,manufacturer_name) values
   ('cf110000-0000-4000-8000-000000000001','権限検証資材','デモ株式会社');
 insert into public.material_images(material_id,url) values
@@ -26,6 +27,8 @@ select throws_ok($$update public.seller_accounts set logo_url='https://example.t
   '42501',null,'manufacturer cannot replace published logo directly');
 select throws_ok($$update public.seller_accounts set website_url='https://example.test/new' where id=app.seller_id()$$,
   '42501',null,'manufacturer cannot replace published website directly');
+select throws_ok($$update public.seller_accounts set manufacturer_name='審査を経ないメーカー名' where id=app.seller_id()$$,
+  '42501',null,'manufacturer cannot change the material ownership name directly');
 select lives_ok($$select public.save_manufacturer_profile_version('審査する紹介文','','https://example.test',true)$$,
   'manufacturer can submit a profile for review');
 reset role;
