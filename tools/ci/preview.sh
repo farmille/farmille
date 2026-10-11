@@ -38,14 +38,18 @@ remove_branch() {
 case "${1:?Missing action}" in
   prepare)
     require_open
-    [[ "$DB_MODE" == shared || "$DB_MODE" == branch ]] || exit 1
+    [[ "$DB_MODE" == auto || "$DB_MODE" == shared || "$DB_MODE" == branch ]] || exit 1
     sha=$(pr | jq -er '.head.sha | select(test("^[a-f0-9]{40}$"))')
-    if [[ "$DB_MODE" == shared ]]; then
-      gh api --paginate "repos/$repo/pulls/$PR_NUMBER/files" |
-        jq -se 'add | all(.[]; ((.filename | startswith("supabase/migrations/")) or ((.previous_filename // "") | startswith("supabase/migrations/"))) | not)' >/dev/null || {
-          echo 'Migration changes require branch mode.' >&2; exit 1;
-        }
+    migrations=$(gh api --paginate "repos/$repo/pulls/$PR_NUMBER/files" |
+      jq -s 'add | any(.[]; (.filename | startswith("supabase/migrations/")) or ((.previous_filename // "") | startswith("supabase/migrations/")))')
+    if [[ "$DB_MODE" == auto ]]; then
+      DB_MODE=shared
+      if [[ "$migrations" == true ]]; then DB_MODE=branch; fi
+    elif [[ "$DB_MODE" == shared && "$migrations" == true ]]; then
+      echo 'Migration changes require branch mode.' >&2
+      exit 1
     fi
+    echo "database=$DB_MODE" >> "$GITHUB_OUTPUT"
     [[ "$(pr | jq -r .head.sha)" == "$sha" ]] || exit 1
     echo "sha=$sha" >> "$GITHUB_OUTPUT"
     ;;
@@ -124,15 +128,10 @@ case "${1:?Missing action}" in
     require_open
     [[ "$(pr | jq -r .head.sha)" == "$PR_SHA" ]] || exit 1
     # 管理tokenはVercelのビルド環境に渡さず、対象DBのアプリ用キーだけを指定する。
-    vercel deploy source --local-config "$GITHUB_WORKSPACE/trusted/vercel.json" --yes --token "$VERCEL_TOKEN" \
-      --env "NEXT_PUBLIC_SITE_URL=https://$alias" \
-      --build-env "NEXT_PUBLIC_SITE_URL=https://$alias" \
-      --env "NEXT_PUBLIC_SUPABASE_URL=https://$ref.supabase.co" \
-      --env "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$anon" \
-      --env "SUPABASE_SECRET_KEY=$secret" \
-      --build-env "NEXT_PUBLIC_SUPABASE_URL=https://$ref.supabase.co" \
-      --build-env "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$anon" \
-      --build-env "SUPABASE_SECRET_KEY=$secret" > "$task_dir/deployment.txt"
+    jq -n --arg site "https://$alias" --arg url "https://$ref.supabase.co" --arg anon "$anon" --arg secret "$secret" \
+      '{NEXT_PUBLIC_SITE_URL: $site, NEXT_PUBLIC_SUPABASE_URL: $url,
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: $anon, SUPABASE_SECRET_KEY: $secret}' > "$task_dir/env.json"
+    bash trusted/tools/ci/deploy.sh "$PR_SHA" preview "$task_dir/env.json" > "$task_dir/deployment.txt"
     deployment=$(cat "$task_dir/deployment.txt")
     [[ "$deployment" =~ ^https://[a-zA-Z0-9.-]+\.vercel\.app$ ]] || exit 1
     vercel alias set "$deployment" "$alias" --token "$VERCEL_TOKEN"
