@@ -1,11 +1,17 @@
 "use server";
 
+import * as v from "valibot";
 import { redirect } from "next/navigation";
 
 import type { AuthFormState, AuthFormValues } from "@/lib/auth/form-state";
 import { formDataString } from "@/lib/validation";
 import { safeNextPath } from "@/lib/auth/safe-next";
-import { registerGeneralUser, validateGeneralSignup } from "@/server/accounts/general";
+import {
+  getRegistrationIdentity,
+  requestRegistrationEmail,
+  registerGeneralUser,
+  validateGeneralSignup,
+} from "@/server/accounts/general";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 
 function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string> | undefined {
@@ -50,9 +56,17 @@ export async function signupAction(
   _previousState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  const next = safeNextPath(formData.get("next"));
+  const identity = await getRegistrationIdentity();
+  if (!identity.ok) {
+    if (identity.error === "internal")
+      return { status: "error", message: errorMessageJa[identity.error] };
+    const destination = `/signup/general?error=${identity.error}`;
+    redirect(next ? `${destination}&next=${encodeURIComponent(next)}` : destination);
+  }
   const validation = validateGeneralSignup({
     handle: formData.get("handle"),
-    email: formData.get("email"),
+    email: identity.data.email,
     password: formData.get("password"),
     standpoint: formData.get("standpoint"),
     familyName: formData.get("familyName"),
@@ -75,8 +89,7 @@ export async function signupAction(
     };
   }
 
-  const next = safeNextPath(formData.get("next"));
-  const result = await registerGeneralUser(validation.input, next);
+  const result = await registerGeneralUser(validation.input);
 
   if (!result.ok) {
     const message = errorMessageJa[result.error];
@@ -89,9 +102,27 @@ export async function signupAction(
     };
   }
 
-  if (result.data.signedIn && next) redirect(next);
-  const params = new URLSearchParams();
-  if (!result.data.signedIn) params.set("confirm", "1");
-  if (next) params.set("next", next);
-  redirect(params.size ? `/signup/done?${params}` : "/signup/done");
+  redirect(next ? `/signup/done?next=${encodeURIComponent(next)}` : "/signup/done");
+}
+
+export async function registrationEmailAction(
+  _state: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
+  const parsed = v.safeParse(
+    v.pipe(v.string(), v.trim(), v.email("メールアドレスの形式が正しくありません。")),
+    formData.get("email"),
+  );
+  if (!parsed.success)
+    return {
+      status: "error",
+      message: "メールアドレスの形式が正しくありません。",
+      fieldErrors: { email: "メールアドレスの形式が正しくありません。" },
+    };
+  const result = await requestRegistrationEmail(parsed.output, safeNextPath(formData.get("next")));
+  if (!result.ok) return { status: "error", message: errorMessageJa[result.error] };
+  return {
+    status: "done",
+    message: `${parsed.output}に認証メールを送信しました。メール内のリンクから登録情報を入力してください。`,
+  };
 }

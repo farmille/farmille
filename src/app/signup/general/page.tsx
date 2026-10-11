@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SignupForm } from "@/app/signup/SignupForm";
+import { RegistrationEmailForm } from "@/app/signup/RegistrationEmailForm";
 import { AuthScreen } from "@/components/auth/AuthScreen";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { safeNextPath } from "@/lib/auth/safe-next";
@@ -14,12 +14,22 @@ export const metadata: Metadata = {
 export default async function GeneralSignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  const next = safeNextPath((await searchParams).next);
+  const params = await searchParams;
+  const next = safeNextPath(params.next);
+  const error =
+    params.error === "expired_link"
+      ? "認証リンクの有効期限が切れているか、すでに使用されています。メールアドレスを入力して認証メールを再送してください。"
+      : params.error === "email_unavailable"
+        ? "このメールアドレスは登録済みです。ログイン画面からログインしてください。"
+        : undefined;
   return (
-    <AuthScreen lead="匿名で参加できます。実名や所属の公開は不要です。" title="一般ユーザー登録">
-      <SignupForm next={next} />
+    <AuthScreen
+      lead="まずメールアドレスを確認します。メール内のリンクから登録情報を入力してください。"
+      title="一般ユーザー登録"
+    >
+      <RegistrationEmailForm next={next} error={error} />
     </AuthScreen>
   );
 }

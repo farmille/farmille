@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, type ReactNode } from "react";
 
 import { signupAction } from "@/app/signup/actions";
 import {
@@ -38,12 +37,28 @@ const noteStyle = css({
   color: "text.muted",
 });
 
-export function SignupForm({ next = null }: { next?: string | null }) {
+export function SignupForm({
+  email,
+  termsContent,
+  next = null,
+}: {
+  email: string;
+  termsContent: ReactNode;
+  next?: string | null;
+}) {
   const [state, formAction] = useActionState(signupAction, initialAuthFormState);
   const values = submittedValuesOf(state);
 
   return (
     <Form action={formAction} errors={fieldErrorsOf(state)}>
+      <FormActions layout="links">
+        <TextLink
+          href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+          variant="plain"
+        >
+          すでに登録済みの方はログイン
+        </TextLink>
+      </FormActions>
       {next ? <input type="hidden" name="next" value={next} /> : null}
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
@@ -52,7 +67,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         title="投稿と実証詳細レポートの閲覧には、会員登録が必要です"
         tone="info"
       >
-        登録は無料・1分で完了します。
+        メールアドレスの確認ができました。残りの登録情報を入力してください。
       </Notice>
       <p className={css({ mb: "4.5", fontSize: "sm", color: "text.subtle" })}>
         ニックネームで参加できます。本名や連絡先が公開されることはありません。
@@ -97,7 +112,8 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       <Field label="メールアドレス" name="email" requirement="required" visibility="private">
         <Input
           autoComplete="email"
-          defaultValue={values.email}
+          value={email}
+          readOnly
           placeholder="you@example.com"
           type="email"
         />
@@ -149,35 +165,12 @@ export function SignupForm({ next = null }: { next?: string | null }) {
         />
       </Field>
 
-      <Field
-        description={
-          <>
-            規約・ガイドラインは別タブで開きます。個人情報の扱いは
-            <TextLink
-              href="/legal/privacy"
-              rel="noopener noreferrer"
-              target="_blank"
-              variant="plain"
-            >
-              プライバシーポリシー（別タブ）
-            </TextLink>
-            をご確認ください。
-          </>
-        }
-        name="terms"
-        requirement="required"
-      >
+      <Field name="terms" requirement="required">
         <Checkbox defaultChecked={values.terms === "on"} variant="row">
-          <Link href="/legal/terms" target="_blank" rel="noopener noreferrer">
-            総合利用規約
-          </Link>
-          ・
-          <Link href="/legal/posting" target="_blank" rel="noopener noreferrer">
-            投稿ガイドライン
-          </Link>
-          に同意する
+          利用規約・プライバシーポリシーに同意する
         </Checkbox>
       </Field>
+      {termsContent}
       <p className={noteStyle}>
         アイコン・主な作目・所属などは、あとからマイページで設定できます。
       </p>
@@ -185,25 +178,13 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       <FormActions>
         <SubmitButton pendingLabel="登録中…">登録する</SubmitButton>
       </FormActions>
-      <FormActions layout="links">
-        <TextLink
-          href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
-          variant="plain"
-        >
-          すでに一般ユーザーアカウントをお持ちの方はログイン
-        </TextLink>
-        <TextLink href="/signup" variant="plain">
-          登録方法を選び直す
-        </TextLink>
-      </FormActions>
-
       <div
         className={cx(
           surfaceCardRecipe({ padding: "cozy" }),
           css({ mt: "3.5", textAlign: "center" }),
         )}
       >
-        <div className={css({ fontSize: "sm", color: "text.subtle" })}>メーカー様はこちら</div>
+        <div className={css({ fontSize: "sm", color: "text.subtle" })}>メーカーの方はこちら</div>
         <TextLink
           className={css({ mt: "1.5", whiteSpace: "nowrap" })}
           href="/sellers/apply"

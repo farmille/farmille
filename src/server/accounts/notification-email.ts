@@ -29,14 +29,17 @@ export async function sendPendingRegistrationEmail(): Promise<void> {
   const session = await createServerSupabase();
   const { data, error } = await session.auth.getUser();
   if (error || !data.user?.email_confirmed_at || !data.user.email) return;
-  const user = data.user;
+  await sendRegistrationEmail(data.user.id, data.user.email);
+}
+
+export async function sendRegistrationEmail(userId: string, email: string): Promise<void> {
   const db = createAdminSupabase();
   const claimedAt = new Date().toISOString();
   const expiredClaim = new Date(Date.now() - 5 * 60 * 1000).toISOString();
   const claim = await db
     .from("registration_notifications")
     .update({ claimed_at: claimedAt })
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .is("sent_at", null)
     .or(`claimed_at.is.null,claimed_at.lt.${expiredClaim}`)
     .select("user_id")
@@ -49,9 +52,9 @@ export async function sendPendingRegistrationEmail(): Promise<void> {
   try {
     await nodemailer.createTransport(serverEnv.smtpUrl).sendMail({
       from: serverEnv.mailFrom,
-      to: v.parse(EmailSchema, user.email),
-      subject: "Farmille：会員登録が完了しました",
-      text: `Farmilleへの会員登録が完了しました。\n\nマイページから主な作目・所属・自己紹介を設定できます。\n${new URL("/me", clientEnv.siteUrl)}\n\n感想口コミや実証詳細レポートの投稿、お気に入りの保存にご利用ください。\n`,
+      to: v.parse(EmailSchema, email),
+      subject: "Farmille：一般会員登録が完了しました",
+      text: `Farmilleへの会員登録が完了しました。\n\n次のリンクからログインしてください。\n${new URL("/login", clientEnv.siteUrl)}\n\nログイン後、マイページから主な作目・所属・自己紹介を設定できます。\n\n感想口コミや実証詳細レポートの投稿、お気に入りの保存にご利用ください。\n`,
     });
   } catch (error) {
     console.error(
@@ -61,7 +64,7 @@ export async function sendPendingRegistrationEmail(): Promise<void> {
     const released = await db
       .from("registration_notifications")
       .update({ claimed_at: null })
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .eq("claimed_at", claimedAt);
     if (released.error)
       console.error("[notification-email] 送信待ちへの復帰に失敗", released.error);
@@ -70,7 +73,7 @@ export async function sendPendingRegistrationEmail(): Promise<void> {
   const marked = await db
     .from("registration_notifications")
     .update({ sent_at: new Date().toISOString() })
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("claimed_at", claimedAt);
   if (marked.error) console.error("[notification-email] 送信済み記録に失敗", marked.error);
 }

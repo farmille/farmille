@@ -16,19 +16,14 @@ export const metadata: Metadata = {
 export default async function SignupDonePage({
   searchParams,
 }: {
-  searchParams: Promise<{ confirm?: string; next?: string }>;
+  searchParams: Promise<{ next?: string }>;
 }) {
-  const { confirm, next: requestedNext } = await searchParams;
+  const { next: requestedNext } = await searchParams;
   const next = safeNextPath(requestedNext);
-  const needsEmailConfirmation = confirm === "1";
 
   return (
     <AuthScreen
-      lead={
-        needsEmailConfirmation
-          ? "確認メールを送信しました。メール内のリンクを開くと利用を開始できます。"
-          : "ようこそ。さっそく資材の感想口コミを読んでみましょう。"
-      }
+      lead="会員登録が完了しました。ログインしてご利用ください。"
       title="登録が完了しました"
     >
       <Notice tone="neutral">
@@ -36,26 +31,16 @@ export default async function SignupDonePage({
       </Notice>
 
       <FormActions>
-        {!needsEmailConfirmation && next ? (
-          <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href={next}>
-            実証詳細レポートに戻る
-          </Link>
-        ) : null}
-        <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/">
-          ホームへ
+        <Link
+          className={buttonRecipe({ variant: "primary", size: "md" })}
+          href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+        >
+          ログインする
         </Link>
+        <TextLink href="/" variant="plain">
+          ホームへ
+        </TextLink>
       </FormActions>
-
-      {needsEmailConfirmation ? (
-        <FormActions layout="links">
-          <TextLink
-            href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
-            variant="plain"
-          >
-            確認が済んだ方はログイン
-          </TextLink>
-        </FormActions>
-      ) : null}
     </AuthScreen>
   );
 }
