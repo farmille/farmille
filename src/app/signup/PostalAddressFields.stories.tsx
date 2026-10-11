@@ -11,7 +11,6 @@ const meta = {
   decorators: [fmDecorator],
   args: {
     values: { postalCode: "1000001", prefectureCode: "13", city: "千代田区" },
-    fieldErrors: {},
   },
 } satisfies Meta<typeof PostalAddressFields>;
 export default meta;

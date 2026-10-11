@@ -1,35 +1,33 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { fn } from "storybook/test";
 
 import { FilterPills, type FilterPillOption } from "./FilterPills";
 
-const CROP_OPTIONS: FilterPillOption[] = [
-  { value: "all", label: "すべて" },
-  { value: "tomato", label: "トマト" },
-  { value: "cucumber", label: "キュウリ" },
-  { value: "spinach", label: "ホウレンソウ" },
-  { value: "rice", label: "水稲" },
-];
+const CROPS = [
+  ["all", "すべて"],
+  ["tomato", "トマト"],
+  ["cucumber", "キュウリ"],
+  ["spinach", "ホウレンソウ"],
+  ["rice", "水稲"],
+  ["strawberry", "イチゴ"],
+  ["eggplant", "ナス"],
+  ["onion", "タマネギ"],
+  ["cabbage", "キャベツ"],
+] as const;
 
-const MANY_OPTIONS: FilterPillOption[] = [
-  { value: "all", label: "すべて" },
-  { value: "tomato", label: "トマト" },
-  { value: "cucumber", label: "キュウリ" },
-  { value: "spinach", label: "ホウレンソウ" },
-  { value: "rice", label: "水稲" },
-  { value: "strawberry", label: "イチゴ" },
-  { value: "eggplant", label: "ナス" },
-  { value: "onion", label: "タマネギ" },
-  { value: "cabbage", label: "キャベツ" },
-];
+function items(count: number, current: string): FilterPillOption[] {
+  return CROPS.slice(0, count).map(([value, label]) => ({
+    href: value === "all" ? "/articles" : `/articles?crop=${value}`,
+    label,
+    current: value === current,
+  }));
+}
 
 const meta = {
   title: "Components/FilterPills",
   component: FilterPills,
   args: {
-    options: CROP_OPTIONS,
-    value: "all",
-    onChange: fn(),
+    "aria-label": "作物で絞り込む",
+    items: items(5, "all"),
   },
 } satisfies Meta<typeof FilterPills>;
 
@@ -39,21 +37,13 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const Selected: Story = {
-  args: {
-    value: "tomato",
-  },
+  args: { items: items(5, "tomato") },
 };
 
 export const ManyOptions: Story = {
-  args: {
-    options: MANY_OPTIONS,
-    value: "cucumber",
-  },
+  args: { items: items(9, "cucumber") },
 };
 
 export const SingleOption: Story = {
-  args: {
-    options: [{ value: "all", label: "すべて" }],
-    value: "all",
-  },
+  args: { items: items(1, "all") },
 };

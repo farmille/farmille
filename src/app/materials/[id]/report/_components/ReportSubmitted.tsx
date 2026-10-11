@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { css } from "../../../../../../styled-system/css";
-import { Icon } from "@/components/Icon";
+import { SuccessMark } from "@/components/SuccessMark";
 import type { SubmittedUsageReport } from "@/server/queries/usage-report-form";
 
 const shell = css({
@@ -11,17 +11,6 @@ const shell = css({
   px: "4",
   py: "10",
   textAlign: "center",
-});
-
-const icon = css({
-  w: "20",
-  h: "20",
-  mx: "auto",
-  display: "grid",
-  placeItems: "center",
-  borderRadius: "pill",
-  bg: "primary.700",
-  color: "text.inverse",
 });
 
 const title = css({ mt: "4", fontSize: "2xl" });
@@ -91,9 +80,7 @@ export function ReportSubmitted({
 }) {
   return (
     <main className={shell}>
-      <div className={icon}>
-        <Icon name="check" size="2xl" />
-      </div>
+      <SuccessMark tone="solid" />
       <h1 className={title}>レポートは提出済みです</h1>
       <p className={description}>
         運営で確認後に公開されます。

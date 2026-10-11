@@ -1,11 +1,11 @@
 "use client";
 
-import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { useState } from "react";
 
 import { NoImage, Stars } from "@/app/materials/[id]/_components/CardParts";
 import { buttonRecipe } from "@/components/Button";
+import { SearchInput } from "@/components/form";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import type { PostingMaterialWithImage } from "@/server/queries/materials";
@@ -24,43 +24,6 @@ const focusRing = {
   outlineColor: "primary.700",
   outlineOffset: "2px",
 } as const;
-
-const searchBoxStyle = css({
-  display: "flex",
-  flex: "1",
-  alignItems: "center",
-  gap: "2",
-  minW: "0",
-  px: "3",
-  py: "2.5",
-  bg: "surface.card",
-  borderWidth: "1.5px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  borderRadius: "button",
-  _focusWithin: {
-    borderColor: "primary.700",
-    outlineWidth: "3px",
-    outlineStyle: "solid",
-    outlineColor: "primary.700/16",
-  },
-});
-
-const searchInputStyle = css({
-  flex: "1",
-  minW: "0",
-  bg: "transparent",
-  fontSize: "md",
-  color: "text.default",
-  outline: "none",
-  _placeholder: { color: "text.subtle" },
-});
-
-const searchButtonStyle = css(buttonRecipe.raw({ variant: "primary", size: "sm" }), {
-  flex: "0 0 auto",
-  minW: "0",
-  px: "4",
-});
 
 const pickRowStyle = css({
   display: "flex",
@@ -176,31 +139,16 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
         どの資材について書きますか？
       </p>
 
-      <form
-        method="get"
-        className={css({ display: "flex", alignItems: "center", gap: "2" })}
-        role="search"
-      >
+      <form method="get" role="search">
         {postType !== undefined ? <input type="hidden" name="type" value={postType} /> : null}
-        <div className={searchBoxStyle}>
-          <span className={css({ display: "flex", color: "text.subtle" })}>
-            <Icon name="search" size="sm" />
-          </span>
-          <input
-            id="pickInput"
-            className={searchInputStyle}
-            type="search"
-            name="q"
-            defaultValue={query}
-            maxLength={100}
-            placeholder="資材名・メーカー名で検索"
-            aria-label="資材名・メーカー名で検索"
-            autoComplete="off"
-          />
-        </div>
-        <button type="submit" className={searchButtonStyle}>
-          検索
-        </button>
+        <SearchInput
+          aria-label="資材名・メーカー名で検索"
+          defaultValue={query}
+          maxLength={100}
+          name="q"
+          placeholder="資材名・メーカー名で検索"
+          submitLabel="検索"
+        />
       </form>
 
       <div

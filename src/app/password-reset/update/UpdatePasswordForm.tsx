@@ -5,106 +5,78 @@ import { useActionState } from "react";
 
 import { updatePasswordAction } from "@/app/password-reset/update/actions";
 import { buttonRecipe } from "@/components/Button";
-import {
-  controlStyle,
-  Field,
-  FormMessage,
-  formActionsStyle,
-  linkRowStyle,
-  textLinkStyle,
-} from "@/components/auth/Fields";
-import { SubmitButton } from "@/components/auth/SubmitButton";
+import { Field, Form, FormActions, Input, Notice, OtpInput, SubmitButton } from "@/components/form";
+import { TextLink } from "@/components/TextLink";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState } from "@/lib/auth/form-state";
 
 export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
   const [state, formAction] = useActionState(updatePasswordAction, initialAuthFormState);
-  const fieldErrors = fieldErrorsOf(state);
 
   if (state.status === "done") {
     return (
       <>
-        <FormMessage tone="info">{state.message}</FormMessage>
-        <div className={formActionsStyle}>
+        <Notice tone="success">{state.message}</Notice>
+        <FormActions>
           <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/login">
             一般・運営のログインへ
           </Link>
           <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href="/sellers/login">
             メーカーのログインへ
           </Link>
-        </div>
+        </FormActions>
       </>
     );
   }
 
   return (
-    <form action={formAction} noValidate>
+    <Form action={formAction} errors={fieldErrorsOf(state)}>
       <input type="hidden" name="tokenHash" value={tokenHash} />
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
       <Field
-        error={fieldErrors.password}
-        guide={`${PASSWORD_MIN_LENGTH}文字以上で設定してください`}
-        htmlFor="password"
+        description={`${PASSWORD_MIN_LENGTH}文字以上で設定してください`}
         label="新しいパスワード"
+        name="password"
         requirement="required"
       >
-        <input
+        <Input
           autoComplete="new-password"
-          className={controlStyle}
-          id="password"
           minLength={PASSWORD_MIN_LENGTH}
-          name="password"
           placeholder="••••••••"
-          required
+          type="password"
+        />
+      </Field>
+
+      <Field label="新しいパスワード（確認）" name="passwordConfirmation" requirement="required">
+        <Input
+          autoComplete="new-password"
+          minLength={PASSWORD_MIN_LENGTH}
+          placeholder="••••••••"
           type="password"
         />
       </Field>
 
       <Field
-        error={fieldErrors.passwordConfirmation}
-        htmlFor="passwordConfirmation"
-        label="新しいパスワード（確認）"
-        requirement="required"
-      >
-        <input
-          autoComplete="new-password"
-          className={controlStyle}
-          id="passwordConfirmation"
-          minLength={PASSWORD_MIN_LENGTH}
-          name="passwordConfirmation"
-          placeholder="••••••••"
-          required
-          type="password"
-        />
-      </Field>
-
-      <Field
-        htmlFor="code"
+        description="運営など、2要素認証を設定している方は、認証アプリの6桁のコードを入力してください。"
         label="2要素認証コード"
-        guide="運営など、2要素認証を設定している方は、認証アプリの6桁のコードを入力してください。"
+        name="code"
       >
-        <input
-          className={controlStyle}
-          id="code"
-          name="code"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          maxLength={6}
-        />
+        <OtpInput />
       </Field>
-      <div className={formActionsStyle}>
-        <SubmitButton label="パスワードを変更する" pendingLabel="変更中…" />
-      </div>
 
-      <div className={linkRowStyle}>
-        <Link className={textLinkStyle} href="/login">
+      <FormActions>
+        <SubmitButton pendingLabel="変更中…">パスワードを変更する</SubmitButton>
+      </FormActions>
+
+      <FormActions layout="links">
+        <TextLink href="/login" variant="plain">
           一般・運営のログインへ
-        </Link>
-        <Link className={textLinkStyle} href="/sellers/login">
+        </TextLink>
+        <TextLink href="/sellers/login" variant="plain">
           メーカーのログインへ
-        </Link>
-      </div>
-    </form>
+        </TextLink>
+      </FormActions>
+    </Form>
   );
 }

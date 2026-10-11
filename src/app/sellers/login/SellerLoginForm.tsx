@@ -1,18 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 
 import { sellerLoginAction } from "@/app/sellers/login/actions";
-import {
-  controlStyle,
-  Field,
-  FormMessage,
-  formActionsStyle,
-  linkRowStyle,
-  textLinkStyle,
-} from "@/components/auth/Fields";
-import { SubmitButton } from "@/components/auth/SubmitButton";
+import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
+import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 
 export function SellerLoginForm({ next }: { next: string | null }) {
@@ -20,60 +12,48 @@ export function SellerLoginForm({ next }: { next: string | null }) {
   const values = submittedValuesOf(state);
 
   return (
-    <form action={formAction} noValidate>
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
+    <Form action={formAction}>
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {next === null ? null : <input name="next" type="hidden" value={next} />}
 
       <Field
-        guide="運営からの案内メールに記載されたID"
-        htmlFor="loginId"
+        description="運営からの案内メールに記載されたID"
         label="ログインID"
+        name="loginId"
         requirement="required"
       >
-        <input
+        <Input
           autoCapitalize="none"
           autoComplete="username"
-          className={controlStyle}
           defaultValue={values.loginId}
-          id="loginId"
-          name="loginId"
           placeholder="例）example-agri"
-          required
           spellCheck={false}
           type="text"
         />
       </Field>
 
-      <Field htmlFor="password" label="パスワード" requirement="required">
-        <input
-          autoComplete="current-password"
-          className={controlStyle}
-          id="password"
-          name="password"
-          placeholder="••••••••"
-          required
-          type="password"
-        />
+      <Field label="パスワード" name="password" requirement="required">
+        <Input autoComplete="current-password" placeholder="••••••••" type="password" />
       </Field>
 
-      <div className={formActionsStyle}>
-        <SubmitButton label="ログインする" pendingLabel="ログイン中…" />
-      </div>
+      <FormActions>
+        <SubmitButton pendingLabel="ログイン中…">ログインする</SubmitButton>
+      </FormActions>
 
-      <div className={linkRowStyle}>
-        <Link className={textLinkStyle} href="/sellers/password-reset">
+      <FormActions layout="links">
+        <TextLink href="/sellers/password-reset" variant="plain">
           パスワードをお忘れの方
-        </Link>
-        <Link className={textLinkStyle} href="/sellers/apply">
+        </TextLink>
+        <TextLink href="/sellers/apply" variant="plain">
           企業会員でない方（企業会員登録の申請へ）
-        </Link>
-        <Link className={textLinkStyle} href="/login">
+        </TextLink>
+        <TextLink href="/login" variant="plain">
           一般ユーザーの方のログイン
-        </Link>
-        <Link className={textLinkStyle} href="/signup">
+        </TextLink>
+        <TextLink href="/signup" variant="plain">
           登録方法を選び直す
-        </Link>
-      </div>
-    </form>
+        </TextLink>
+      </FormActions>
+    </Form>
   );
 }

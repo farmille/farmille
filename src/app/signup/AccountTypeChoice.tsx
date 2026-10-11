@@ -1,11 +1,15 @@
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components/Button";
+import { FormActions } from "@/components/form";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
+import { TextLink } from "@/components/TextLink";
 
-import { formTextLinkStyle } from "@/components/FormParts";
 import { css, cva } from "../../../styled-system/css";
-import { softCardStyle } from "./form-styles";
+
+const softCardStyle = css(surfaceCardRecipe.raw({ tone: "soft", padding: "cozy" }), {
+  borderColor: "primary.700/22",
+});
 
 const typeLabelRecipe = cva({
   base: {
@@ -70,24 +74,14 @@ export function AccountTypeChoice() {
         </section>
       </div>
 
-      <div
-        className={css({
-          mt: "4.5",
-          mb: "2",
-          fontSize: "sm",
-          lineHeight: "loose",
-          color: "text.muted",
-          textAlign: "center",
-        })}
-      >
-        <Link className={formTextLinkStyle} href="/login">
+      <FormActions layout="links">
+        <TextLink href="/login" variant="plain">
           一般ユーザーの方はログイン
-        </Link>
-        <br />
-        <Link className={formTextLinkStyle} href="/sellers/login">
+        </TextLink>
+        <TextLink href="/sellers/login" variant="plain">
           メーカーの方はログイン
-        </Link>
-      </div>
+        </TextLink>
+      </FormActions>
     </>
   );
 }

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { fn } from "storybook/test";
+import { expect, fn, userEvent, within } from "storybook/test";
 
 import { createBlankUsageReport } from "@/lib/usage-report";
 
@@ -47,5 +47,18 @@ export const AllEffects: Story = {
       observedChange: "結果・感想を入力してください",
       purposeTags: "使用目的を選んでください",
     },
+  },
+};
+
+export const PressTag: Story = {
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    const pressed = canvas.getByRole("button", { name: "水分吸収の改善" });
+    await userEvent.click(pressed);
+    await expect(pressed).toHaveAttribute("aria-pressed", "true");
+    await expect(canvas.getByRole("button", { name: "根張りの改善" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   },
 };

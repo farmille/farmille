@@ -1,56 +1,35 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
+
 import { sellerPasswordResetAction } from "@/app/sellers/password-reset/actions";
-import {
-  controlStyle,
-  Field,
-  FormMessage,
-  formActionsStyle,
-  textLinkStyle,
-} from "@/components/auth/Fields";
-import { SubmitButton } from "@/components/auth/SubmitButton";
+import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
+import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState } from "@/lib/auth/form-state";
 
 export function SellerPasswordResetForm() {
   const [state, action] = useActionState(sellerPasswordResetAction, initialAuthFormState);
   return (
-    <form action={action} noValidate>
+    <Form action={action}>
       {state.status === "done" ? (
-        <FormMessage tone="info">{state.message}</FormMessage>
+        <Notice tone="success">{state.message}</Notice>
       ) : (
         <>
-          {state.status === "error" ? (
-            <FormMessage tone="error">{state.message}</FormMessage>
-          ) : null}
-          <Field htmlFor="loginId" label="ログインID" requirement="required">
-            <input
-              className={controlStyle}
-              id="loginId"
-              name="loginId"
-              autoComplete="username"
-              required
-            />
+          {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
+          <Field label="ログインID" name="loginId" requirement="required">
+            <Input autoComplete="username" />
           </Field>
-          <Field htmlFor="email" label="登録済みの連絡先メールアドレス" requirement="required">
-            <input
-              className={controlStyle}
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-            />
+          <Field label="登録済みの連絡先メールアドレス" name="email" requirement="required">
+            <Input autoComplete="email" type="email" />
           </Field>
-          <div className={formActionsStyle}>
-            <SubmitButton label="再設定メールを送信" pendingLabel="送信中…" />
-          </div>
+          <FormActions>
+            <SubmitButton pendingLabel="送信中…">再設定メールを送信</SubmitButton>
+          </FormActions>
         </>
       )}
-      <Link className={textLinkStyle} href="/sellers/login">
+      <TextLink href="/sellers/login" variant="plain">
         メーカーログインへ戻る
-      </Link>
-    </form>
+      </TextLink>
+    </Form>
   );
 }

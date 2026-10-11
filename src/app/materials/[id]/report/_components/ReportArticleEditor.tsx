@@ -1,6 +1,6 @@
 "use client";
 
-import { Checkbox } from "@/components/Checkbox";
+import { Checkbox, Field, Fieldset, Input, Notice } from "@/components/form";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { SurfaceCard } from "@/components/SurfaceCard";
 import {
@@ -19,7 +19,7 @@ import {
   sectionHeading,
   type ReportSection,
 } from "./ReportArticleParts";
-import { Badge, Need, pillButtonRecipe } from "./ReportFormParts";
+import { pillButtonRecipe } from "./ReportFormParts";
 
 const groupHeading = cva({
   base: {
@@ -147,30 +147,7 @@ const thumb = cva({
   },
   defaultVariants: { kind: "image" },
 });
-const caption = cva({
-  base: {
-    w: "full",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderRadius: "input",
-    py: "1",
-    px: "2",
-    color: "inherit",
-    fontSize: "sm",
-  },
-  variants: {
-    preview: {
-      true: {
-        borderColor: "transparent",
-        bg: "transparent",
-        pointerEvents: "none",
-        textAlign: "center",
-        _placeholderShown: { display: "none" },
-      },
-      false: { borderColor: "border.strong", bg: "surface.card" },
-    },
-  },
-});
+const captionText = css({ m: "0", py: "1", px: "2", fontSize: "sm", textAlign: "center" });
 const removeOverlay = cva({
   base: {
     position: "absolute",
@@ -226,41 +203,6 @@ const documentCard = css({
   color: "text.subtle",
   fontSize: "sm",
   textAlign: "center",
-});
-const guide = css({ fontSize: "sm", color: "text.muted", mb: "1.5" });
-const fieldLabel = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "1.5",
-  mb: "1.5",
-  fontSize: "md",
-  fontWeight: "extrabold",
-});
-const check = css({
-  display: "flex",
-  flexWrap: "wrap",
-  alignItems: "center",
-  gap: "2.5",
-  fontSize: "md",
-  fontWeight: "bold",
-  py: "3",
-  px: "3",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "input",
-  bg: "surface.card",
-  cursor: "pointer",
-  tab: { flexWrap: "nowrap" },
-  "& a": { textDecoration: "underline" },
-});
-const checkNote = css({
-  ml: "7",
-  flex: "1 1 100%",
-  fontSize: "xs",
-  fontWeight: "normal",
-  color: "text.subtle",
-  tab: { ml: "auto", flex: "0 1 auto" },
 });
 const visuallyHidden = css({ srOnly: true });
 
@@ -437,10 +379,10 @@ export function ReportArticleEditor({
         </>
       )}
       {preview && missingLabels.length > 0 && (
-        <div className={css({ fontSize: "sm", color: "accent.danger", mb: "2.5" })}>
+        <Notice tone="warn" className={css({ mb: "2.5" })}>
           未入力の項目が{missingLabels.length}件あります（{missingLabels.join("、")}
           ）。公開に進むときに確認します。
-        </div>
+        </Notice>
       )}
       <div className={editor}>
         <span
@@ -502,21 +444,28 @@ export function ReportArticleEditor({
                         <video controls src={media.url} />
                       )}
                     </div>
-                    <input
-                      className={caption({ preview })}
-                      aria-label="写真の説明"
-                      placeholder="名前　例）処理区の株全体"
-                      readOnly={preview}
-                      value={media.caption}
-                      onChange={(event) =>
-                        onChange({
-                          ...input,
-                          media: input.media.map((item) =>
-                            item.id === media.id ? { ...item, caption: event.target.value } : item,
-                          ),
-                        })
-                      }
-                    />
+                    {preview ? (
+                      media.caption ? (
+                        <p className={captionText}>{media.caption}</p>
+                      ) : null
+                    ) : (
+                      <Input
+                        size="sm"
+                        aria-label="写真の説明"
+                        placeholder="名前　例）処理区の株全体"
+                        value={media.caption}
+                        onChange={(event) =>
+                          onChange({
+                            ...input,
+                            media: input.media.map((item) =>
+                              item.id === media.id
+                                ? { ...item, caption: event.target.value }
+                                : item,
+                            ),
+                          })
+                        }
+                      />
+                    )}
                     {!preview && (
                       <button
                         type="button"
@@ -558,13 +507,11 @@ export function ReportArticleEditor({
       </div>
 
       {!preview && (
-        <div className={css({ mt: "4.5" })}>
-          <div className={fieldLabel}>
-            関連資料 <Badge />
-          </div>
-          <div className={guide}>
-            試験成績書や配布資料などのPDFを添付します。記事の末尾に「関連資料」として掲載されます。
-          </div>
+        <Fieldset
+          legend="関連資料"
+          requirement="optional"
+          lead="試験成績書や配布資料などのPDFを添付します。記事の末尾に「関連資料」として掲載されます。"
+        >
           <div className={css({ display: "flex", flexWrap: "wrap", gap: "2" })}>
             {input.documents.map((document, index) => (
               <div key={document.id} className={documentCard}>
@@ -605,17 +552,18 @@ export function ReportArticleEditor({
             </label>
           </div>
           {input.documents.length > 0 && (
-            <label className={cx(check, css({ mt: "2.5" }))}>
+            <Field error={errors.documentsAck}>
               <Checkbox
+                variant="row"
+                description="資料を添付する場合は必須"
                 checked={input.documentsAck}
-                onChange={(event) => onChange({ ...input, documentsAck: event.target.checked })}
-              />
-              添付する資料は、秘密保持契約に反しないことを確認しました
-              <span className={checkNote}>資料を添付する場合は必須</span>
-              <Need message={errors.documentsAck} />
-            </label>
+                onCheckedChange={(documentsAck) => onChange({ ...input, documentsAck })}
+              >
+                添付する資料は、秘密保持契約に反しないことを確認しました
+              </Checkbox>
+            </Field>
           )}
-        </div>
+        </Fieldset>
       )}
       {!preview && <h3 className={groupHeading({ first: false })}>公開前の確認</h3>}
       <SurfaceCard padding="compact" className={css({ mt: "2" })}>
@@ -639,22 +587,18 @@ export function ReportArticleEditor({
             投稿はFarmille運営が内容を確認したうえで公開されます。確認の結果、修正をお願いすることがあります。
           </li>
         </ul>
-        <label className={cx(check, css({ mt: "2.5" }))}>
+        <Field requirement="required" error={errors.guidelineAck}>
           <Checkbox
+            variant="row"
             checked={input.guidelineAck}
-            onChange={(event) => onChange({ ...input, guidelineAck: event.target.checked })}
-          />
-          <span>
+            onCheckedChange={(guidelineAck) => onChange({ ...input, guidelineAck })}
+          >
             <a href="/legal/posting" target="_blank" rel="noreferrer">
               投稿ガイドライン
             </a>
             を確認し、上の内容に同意して公開します
-          </span>
-          <span className={css({ ml: "2" })}>
-            <Badge required />
-          </span>
-          <Need message={errors.guidelineAck} />
-        </label>
+          </Checkbox>
+        </Field>
       </SurfaceCard>
     </>
   );

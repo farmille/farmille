@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -17,13 +17,17 @@ import {
 } from "@/lib/usage-report";
 import type { RegisteredAddress } from "@/server/accounts/registered-address";
 import type { CropOption } from "@/server/queries/usage-report-form";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Notice } from "@/components/form";
+import { SuccessMark, completionStepRecipe } from "@/components/SuccessMark";
+import { toast } from "@/components/Toaster";
 
-import { css, cva } from "../../../../../../styled-system/css";
+import { css, cva, cx } from "../../../../../../styled-system/css";
 
 import { ReportArticleEditor } from "./ReportArticleEditor";
 import type { ReportSection } from "./ReportArticleParts";
 import { ReportComparisonFields } from "./ReportComparisonFields";
-import { pillButtonRecipe, reportFrame, toast } from "./ReportFormParts";
+import { pillButtonRecipe, reportFrame, ReportToaster, reportToasterId } from "./ReportFormParts";
 import { ReportPublishedView } from "./ReportPublishedView";
 import { ReportStepBasics, type ReportMaterialSummary } from "./ReportStepBasics";
 import { ReportStepConditions } from "./ReportStepConditions";
@@ -228,25 +232,17 @@ const stepLine = cva({
   variants: { state: { todo: {}, done: { bg: "primary.700" }, current: {} } },
 });
 
-const errorNotice = css({
-  mt: "3",
-  mx: "4.5",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "input",
-  bg: "surface.card",
-  px: "3",
-  py: "2.5",
-  fontSize: "sm",
-  fontWeight: "bold",
-});
+const errorNotice = css({ mt: "3", mx: "4.5" });
 
 const errorList = css({ mt: "1", pl: "4" });
 
 const fields = css({ minW: "0", m: "0", border: "none", p: "0" });
 
 const pane = css({ pt: "5.5", px: "4.5" });
+
+const donePane = css({ pt: "10", px: "4.5", textAlign: "center" });
+
+const doneMark = css({ mb: "4.5" });
 
 const doneTitle = css({ m: "0", fontSize: "xl", fontWeight: "extrabold", textWrap: "balance" });
 
@@ -285,46 +281,11 @@ const stepCountNumber = css({ color: "text.default", fontVariantNumeric: "tabula
 
 const spacer = css({ flex: "1" });
 
-const modal = css({
-  position: "fixed",
-  inset: "0",
-  zIndex: "20",
-  display: "grid",
-  placeItems: "center",
-  bg: "scrim/40",
-  p: "5",
-});
-
-const modalBox = css({
-  w: "full",
-  maxW: "dialog",
-  borderRadius: "card",
-  bg: "surface.card",
-  px: "5.5",
-  pt: "5.5",
-  pb: "4.5",
-  boxShadow: "shadow.lift",
-  tab: { w: "fit-content", maxW: "full" },
-});
-
-const modalTitle = css({ fontSize: "lg", fontWeight: "extrabold" });
-
-const modalText = css({ mt: "1.5", fontSize: "sm", color: "text.muted" });
-
-const modalActions = css({
-  display: "flex",
-  flexDirection: "column-reverse",
-  alignItems: "stretch",
-  gap: "2",
-  mt: "4.5",
-  tab: { flexDirection: "row", alignItems: "center" },
-});
-
 const footButton = pillButtonRecipe({ tone: "quiet", size: "md", strong: true });
 
 type StepState = "todo" | "done" | "current";
 
-type Notice = { kind: "ok" | "error"; text: string; items?: string[] } | null;
+type Failure = { text: string; items?: string[] } | null;
 
 export function ReportForm({
   material,
@@ -364,12 +325,11 @@ export function ReportForm({
   const [preview, setPreview] = useState(false);
   const [published, setPublished] = useState(false);
   const [errors, setErrors] = useState<UsageReportFieldErrors>({});
-  const [notice, setNotice] = useState<Notice>(null);
+  const [notice, setNotice] = useState<Failure>(null);
   const [pending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [leaving, setLeaving] = useState(false);
-  const leaveSave = useRef<HTMLButtonElement>(null);
   const dirty = JSON.stringify(input) !== saved;
   const busy = pending || uploading;
   const cropName = crops.find((crop) => crop.id === input.cropId)?.name ?? "作物未選択";
@@ -383,36 +343,22 @@ export function ReportForm({
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty, submitted]);
-  useEffect(() => {
-    if (notice?.kind !== "ok") return;
-    const timer = setTimeout(() => setNotice(null), 4000);
-    return () => clearTimeout(timer);
-  }, [notice]);
-  useEffect(() => {
-    if (!leaving) return;
-    leaveSave.current?.focus();
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setLeaving(false);
-    };
-    document.addEventListener("keydown", escape);
-    return () => document.removeEventListener("keydown", escape);
-  }, [leaving]);
 
-  const showError = useCallback((text: string) => setNotice({ kind: "error", text }), []);
+  const showError = useCallback((text: string) => setNotice({ text }), []);
   function showMissing(text: string, missing: UsageReportFieldErrors) {
     setErrors(missing);
     const first = Object.keys(missing).toSorted(
       (a, b) => reportErrorStep(a) - reportErrorStep(b),
     )[0];
     if (first) navigate(reportErrorStep(first));
-    setNotice({ kind: "error", text, items: missingMessages(missing) });
+    setNotice({ text, items: missingMessages(missing) });
   }
   function navigate(next: number) {
     if (next !== TOTAL) setPreview(false);
     setStep(Math.max(1, Math.min(TOTAL, next)));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  function save(submit: boolean, close = false) {
+  function save(submit: boolean) {
     if (submit) {
       const missing = validateUsageReportSubmission(input);
       setErrors(missing);
@@ -421,45 +367,46 @@ export function ReportForm({
         return;
       }
     }
-    startTransition(async () => {
-      try {
-        const result = submit
-          ? await submitUsageReportAction(input.materialId, input)
-          : await saveUsageReportDraftAction(input.materialId, input);
-        if (!result.ok) {
-          if (result.savedDraft !== undefined) {
-            const savedInput = { ...input, expectedUpdatedAt: result.savedDraft.updatedAt };
-            setInput(savedInput);
-            if (result.savedDraft.status === "complete") setSaved(JSON.stringify(savedInput));
-          }
-          if (Object.keys(result.fieldErrors).length > 0)
-            showMissing(result.message, result.fieldErrors);
-          else {
-            setErrors({});
-            showError(result.message);
-          }
-          return;
+    startTransition(() => persist(submit));
+  }
+  async function persist(submit: boolean, close = false) {
+    try {
+      const result = submit
+        ? await submitUsageReportAction(input.materialId, input)
+        : await saveUsageReportDraftAction(input.materialId, input);
+      if (!result.ok) {
+        if (result.savedDraft !== undefined) {
+          const savedInput = { ...input, expectedUpdatedAt: result.savedDraft.updatedAt };
+          setInput(savedInput);
+          if (result.savedDraft.status === "complete") setSaved(JSON.stringify(savedInput));
         }
-        setNotice({ kind: "ok", text: result.message });
-        const savedInput = { ...input, expectedUpdatedAt: result.updatedAt };
-        setInput(savedInput);
-        setSaved(JSON.stringify(savedInput));
-        setErrors({});
-        if (result.status === "pending") setSubmitted(true);
-        if (close) {
-          setLeaving(false);
-          router.push(`/materials/${input.materialId}`);
-        } else if (input.materialId !== material.id) {
-          router.replace(`/materials/${input.materialId}/report/new`);
+        if (Object.keys(result.fieldErrors).length > 0)
+          showMissing(result.message, result.fieldErrors);
+        else {
+          setErrors({});
+          showError(result.message);
         }
-      } catch (error) {
-        showError(
-          error instanceof Error
-            ? error.message
-            : "保存できませんでした。通信状態を確認して再度お試しください。",
-        );
+        return;
       }
-    });
+      setNotice(null);
+      const savedInput = { ...input, expectedUpdatedAt: result.updatedAt };
+      setInput(savedInput);
+      setSaved(JSON.stringify(savedInput));
+      setErrors({});
+      if (result.status === "pending") setSubmitted(true);
+      else toast(result.message, { toasterId: reportToasterId });
+      if (close) {
+        router.push(`/materials/${input.materialId}`);
+      } else if (input.materialId !== material.id) {
+        router.replace(`/materials/${input.materialId}/report/new`);
+      }
+    } catch (error) {
+      showError(
+        error instanceof Error
+          ? error.message
+          : "保存できませんでした。通信状態を確認して再度お試しください。",
+      );
+    }
   }
   async function upload(file: File | undefined, section: ReportSection, document: boolean) {
     if (!file) return;
@@ -526,12 +473,18 @@ export function ReportForm({
     return (
       <div className={reportFrame}>
         <div className={shell}>
-          <section className={pane}>
-            <h2 className={doneTitle}>レポートを受け付けました</h2>
-            <p className={doneText}>
+          <section className={donePane}>
+            <SuccessMark entrance className={doneMark} />
+            <h2 className={cx(doneTitle, completionStepRecipe({ step: 1 }))}>
+              レポートを受け付けました
+            </h2>
+            <p className={cx(doneText, completionStepRecipe({ step: 2 }))}>
               運営が内容を確認して公開します。修正をお願いする場合があります。
             </p>
-            <a className={pillButtonRecipe()} href={`/materials/${input.materialId}`}>
+            <a
+              className={cx(pillButtonRecipe(), completionStepRecipe({ step: 3 }))}
+              href={`/materials/${input.materialId}`}
+            >
               資材ページに戻る
             </a>
           </section>
@@ -547,6 +500,7 @@ export function ReportForm({
     <div className={reportFrame}>
       <form
         className={shell}
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
           if (step < TOTAL) navigate(step + 1);
@@ -628,8 +582,8 @@ export function ReportForm({
             })}
           </nav>
         </div>
-        {notice?.kind === "error" && (
-          <div className={errorNotice} role="alert">
+        {notice && (
+          <Notice tone="error" className={errorNotice}>
             {notice.text}
             {notice.items && notice.items.length > 0 && (
               <ul className={errorList}>
@@ -638,7 +592,7 @@ export function ReportForm({
                 ))}
               </ul>
             )}
-          </div>
+          </Notice>
         )}
         <fieldset disabled={busy} className={fields}>
           <section className={pane}>
@@ -733,63 +687,31 @@ export function ReportForm({
             </button>
           </div>
         </div>
-        {notice?.kind === "ok" && (
-          <div className={toast} role="status">
-            {notice.text}
-          </div>
-        )}
-        {published && (
-          <ReportPublishedView
-            input={input}
-            materialName={currentMaterial.name}
-            manufacturerName={currentMaterial.manufacturerName}
-            cropName={cropName}
-            onBack={() => setPublished(false)}
-          />
-        )}
-        {leaving && (
-          <div className={modal}>
-            <div
-              className={modalBox}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="report-leave-title"
-            >
-              <div className={modalTitle} id="report-leave-title">
-                入力途中の内容を下書きに保存しますか？
-              </div>
-              <div className={modalText}>
-                保存すると、マイページの「下書き」から続きを入力できます。
-              </div>
-              <div className={modalActions}>
-                <button
-                  type="button"
-                  className={footButton}
-                  disabled={busy}
-                  onClick={() => {
-                    setLeaving(false);
-                    router.push(`/materials/${input.materialId}`);
-                  }}
-                >
-                  保存せずに閉じる
-                </button>
-                <button type="button" className={footButton} onClick={() => setLeaving(false)}>
-                  入力に戻る
-                </button>
-                <button
-                  ref={leaveSave}
-                  type="button"
-                  className={pillButtonRecipe({ tone: "primary", size: "md", strong: true })}
-                  disabled={busy}
-                  onClick={() => save(false, true)}
-                >
-                  下書きを保存して閉じる
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <ReportPublishedView
+          open={published}
+          onOpenChange={setPublished}
+          input={input}
+          materialName={currentMaterial.name}
+          manufacturerName={currentMaterial.manufacturerName}
+          cropName={cropName}
+        />
       </form>
+      <ConfirmDialog
+        open={leaving}
+        onOpenChange={setLeaving}
+        title="入力途中の内容を下書きに保存しますか？"
+        description="保存すると、マイページの「下書き」から続きを入力できます。"
+        confirmLabel="下書きを保存して閉じる"
+        pendingLabel="保存しています…"
+        cancelLabel="入力に戻る"
+        tone="primary"
+        alternative={{
+          label: "保存せずに閉じる",
+          onSelect: () => router.push(`/materials/${input.materialId}`),
+        }}
+        onConfirm={() => persist(false, true)}
+      />
+      <ReportToaster />
     </div>
   );
 }

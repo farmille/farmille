@@ -5,14 +5,8 @@ import { useActionState } from "react";
 
 import { changePasswordAction } from "@/app/account/password/actions";
 import { buttonRecipe } from "@/components/Button";
-import {
-  controlStyle,
-  Field,
-  FormMessage,
-  formActionsStyle,
-  textLinkStyle,
-} from "@/components/auth/Fields";
-import { SubmitButton } from "@/components/auth/SubmitButton";
+import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
+import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState } from "@/lib/auth/form-state";
 
 export function ChangePasswordForm({
@@ -26,59 +20,36 @@ export function ChangePasswordForm({
   if (state.status === "done")
     return (
       <>
-        <FormMessage tone="info">{state.message}</FormMessage>
+        <Notice tone="success">{state.message}</Notice>
         <Link className={buttonRecipe({ variant: "ghost", size: "md" })} href={loginHref}>
           ログイン画面へ
         </Link>
       </>
     );
   return (
-    <form action={action} noValidate>
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
-      <Field htmlFor="currentPassword" label="現在のパスワード" requirement="required">
-        <input
-          className={controlStyle}
-          id="currentPassword"
-          name="currentPassword"
-          type="password"
-          autoComplete="current-password"
-          required
-        />
+    <Form action={action}>
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
+      <Field label="現在のパスワード" name="currentPassword" requirement="required">
+        <Input autoComplete="current-password" type="password" />
       </Field>
       <Field
-        htmlFor="password"
+        description="8〜128文字で、現在と異なるパスワードを設定してください。"
         label="新しいパスワード"
+        name="password"
         requirement="required"
-        guide="8〜128文字で、現在と異なるパスワードを設定してください。"
       >
-        <input
-          className={controlStyle}
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          minLength={8}
-          maxLength={128}
-          required
-        />
+        <Input autoComplete="new-password" maxLength={128} minLength={8} type="password" />
       </Field>
-      <Field htmlFor="passwordConfirmation" label="新しいパスワード（確認）" requirement="required">
-        <input
-          className={controlStyle}
-          id="passwordConfirmation"
-          name="passwordConfirmation"
-          type="password"
-          autoComplete="new-password"
-          required
-        />
+      <Field label="新しいパスワード（確認）" name="passwordConfirmation" requirement="required">
+        <Input autoComplete="new-password" type="password" />
       </Field>
       <p>変更すると、ログイン中の他の端末も順次ログアウトします。</p>
-      <div className={formActionsStyle}>
-        <SubmitButton label="パスワードを変更する" pendingLabel="変更中…" />
-      </div>
-      <Link className={textLinkStyle} href={resetHref}>
+      <FormActions>
+        <SubmitButton pendingLabel="変更中…">パスワードを変更する</SubmitButton>
+      </FormActions>
+      <TextLink href={resetHref} variant="plain">
         現在のパスワードをお忘れの方
-      </Link>
-    </form>
+      </TextLink>
+    </Form>
   );
 }

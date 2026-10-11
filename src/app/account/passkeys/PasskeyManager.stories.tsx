@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, userEvent, waitFor, within } from "storybook/test";
+
 import { PasskeyManager } from "./PasskeyManager";
 
 const meta = {
@@ -22,3 +24,13 @@ export const Registered: Story = {
   },
 };
 export const Admin: Story = { args: { admin: true } };
+
+export const DeleteConfirm: Story = {
+  args: Registered.args,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "削除" }));
+    await waitFor(() =>
+      expect(within(canvasElement.ownerDocument.body).getByRole("alertdialog")).toBeVisible(),
+    );
+  },
+};

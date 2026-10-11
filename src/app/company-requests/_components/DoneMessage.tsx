@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { Icon } from "@/components/Icon";
+import { SuccessMark, completionStepRecipe } from "@/components/SuccessMark";
 
 import { cva, css, cx } from "../../../../styled-system/css";
 
@@ -46,29 +46,15 @@ export function DoneMessage({
   children?: ReactNode;
   actions?: ReactNode;
 }) {
+  const step = (n: 1 | 2 | 3) => (check ? completionStepRecipe({ step: n }) : undefined);
   return (
     <section role={role} className={cx(doneRecipe({ spacing }), className)}>
-      {check ? (
-        <div
-          aria-hidden="true"
-          className={css({
-            display: "grid",
-            placeItems: "center",
-            w: "20",
-            h: "20",
-            mx: "auto",
-            mb: "4.5",
-            borderRadius: "pill",
-            bg: "primary.100",
-            color: "primary.700",
-          })}
-        >
-          <Icon name="check" size="2xl" />
-        </div>
-      ) : null}
-      <Heading className={css({ fontSize: "2xl" })}>{title}</Heading>
-      {children}
-      {actions === undefined ? null : <div className={doneActionsStyle}>{actions}</div>}
+      {check ? <SuccessMark entrance className={css({ mb: "4.5" })} /> : null}
+      <Heading className={cx(css({ fontSize: "2xl" }), step(1))}>{title}</Heading>
+      {children === undefined ? null : <div className={step(2)}>{children}</div>}
+      {actions === undefined ? null : (
+        <div className={cx(doneActionsStyle, step(3))}>{actions}</div>
+      )}
     </section>
   );
 }

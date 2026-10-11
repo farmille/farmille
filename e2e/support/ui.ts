@@ -20,6 +20,15 @@ async function waitForReactHydration(locator: Locator): Promise<void> {
     .toBe(true);
 }
 
+export async function chooseOption(
+  page: Page,
+  combobox: Locator,
+  optionName: string,
+): Promise<void> {
+  await combobox.click();
+  await page.getByRole("option", { name: optionName, exact: true }).click();
+}
+
 export async function signupGeneral(
   page: Page,
   input: { handle: string; email: string; password: string },
@@ -29,7 +38,7 @@ export async function signupGeneral(
   await page.getByLabel("本名（姓）").fill("試験");
   await page.getByLabel("本名（名）").fill("太郎");
   await page.getByLabel("郵便番号").fill("1000001");
-  await page.getByRole("combobox", { name: /^都道府県/ }).selectOption("13");
+  await chooseOption(page, page.getByRole("combobox", { name: /^都道府県/ }), "東京都");
   await page.getByLabel("市区町村").fill("千代田区");
   await page.getByLabel("番地", { exact: false }).fill("千代田1-1");
   await page.getByLabel("建物名・部屋番号").fill("試験ビル101号室");
@@ -126,7 +135,7 @@ export async function fillUsageReportForSubmission(page: Page): Promise<void> {
   await page.getByLabel(/^結果・感想/).fill("E2Eで観察した変化を具体的に記録しました。");
   await page.getByRole("button", { name: "樹勢改善", exact: true }).click();
   await page.getByRole("button", { name: "次へ", exact: true }).click();
-  await page.getByLabel(/^地域/).selectOption({ label: "東京都" });
+  await chooseOption(page, page.getByLabel(/^地域/), "東京都");
   await page.getByLabel(/^栽培環境/).fill("露地栽培で調査しました。");
   await page.getByRole("button", { name: "生育初〜中期", exact: true }).click();
   await page

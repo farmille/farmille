@@ -13,18 +13,20 @@ import {
   type ChangeEvent,
 } from "react";
 
+import { Button, TextLink, buttonRecipe } from "@/components";
+import { Chip } from "@/components/Chip";
+import { Tabs } from "@/components/Tabs";
 import {
-  Button,
+  Autocomplete,
+  Field,
+  Fieldset,
   FileInput,
-  FilterPills,
-  FormMessage,
+  Form,
+  FormActions,
   Input,
+  Notice,
   Textarea,
-  TextLink,
-  buttonRecipe,
-} from "@/components";
-import { Combobox } from "@/components/Combobox";
-import { Field } from "@/components/auth/Fields";
+} from "@/components/form";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { errorMessageJa } from "@/server/errors";
 import type { SellerArticleMaterial } from "@/server/queries/seller-articles";
@@ -48,13 +50,6 @@ const formLayout = css({
   display: "flex",
   flexDirection: "column",
   gap: "4",
-});
-
-const actionsRow = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "2.5",
-  mt: "2",
 });
 
 const previewBox = css({
@@ -82,19 +77,7 @@ const chipRow = css({
   gap: "2",
 });
 
-const chip = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "2",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  borderRadius: "pill",
-  bg: "primary.soft",
-  px: "3",
-  py: "1.5",
-  fontSize: "sm",
-});
+const manufacturerStyle = css({ color: "text.subtle", fontWeight: "normal" });
 
 type ArticleFormBaseProps = {
   sellerId: string;
@@ -137,6 +120,7 @@ export function ArticleForm({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [searchPending, startSearch] = useTransition();
+  const [materialListOpen, setMaterialListOpen] = useState(false);
 
   const boundAction =
     mode === "create" ? createArticleAction : updateArticleAction.bind(null, articleId);
@@ -252,7 +236,9 @@ export function ArticleForm({
         return;
       }
       setUploadError(null);
-      setMaterialHits(result.items.filter((item) => !materials.some((m) => m.id === item.id)));
+      const hits = result.items.filter((item) => !materials.some((m) => m.id === item.id));
+      setMaterialHits(hits);
+      setMaterialListOpen(hits.length > 0);
     });
   }
 
@@ -279,7 +265,12 @@ export function ArticleForm({
 
   return (
     <div className={formLayout}>
-      <form action={formAction} className={formLayout} id="article-editor-form">
+      <Form
+        action={formAction}
+        className={formLayout}
+        errors={fieldErrors}
+        id="article-editor-form"
+      >
         <input defaultValue={initialStatus} name="status" ref={statusInputRef} type="hidden" />
         <input name="heroImageUrl" type="hidden" value={heroImageUrl} />
         <input
@@ -288,14 +279,8 @@ export function ArticleForm({
           value={JSON.stringify(materials.map((material) => material.id))}
         />
 
-        <Field
-          error={fieldErrors.title}
-          htmlFor="article-title"
-          label="タイトル"
-          requirement="required"
-        >
+        <Field label="タイトル" name="title" requirement="required">
           <Input
-            id="article-title"
             name="title"
             onChange={(event) => setTitle(event.target.value)}
             placeholder="例）高温期の活用ガイド"
@@ -304,16 +289,14 @@ export function ArticleForm({
         </Field>
 
         <Field
+          description="JPEG / PNG / WebP（5MB以下）。公開カードのカバーに使います。"
           error={fieldErrors.heroImageUrl ?? uploadError ?? undefined}
-          guide="JPEG / PNG / WebP（5MB以下）。公開カードのカバーに使います。"
-          htmlFor="article-hero"
           label="ヒーロー画像"
           requirement="optional"
         >
           <FileInput
             accept="image/jpeg,image/png,image/webp"
             disabled={busy}
-            id="article-hero"
             onChange={(event) => {
               void handleHeroChange(event);
             }}
@@ -350,129 +333,114 @@ export function ArticleForm({
           )}
         </Field>
 
-        <Field
-          error={fieldErrors.body}
-          htmlFor="article-body"
-          label="本文（Markdown）"
-          requirement="required"
-        >
-          <FilterPills
+        <Field label="本文（Markdown）" name="body" requirement="required">
+          <Tabs
             aria-label="本文エディタ"
-            onChange={(value) => {
-              if (value === "write" || value === "preview") setEditorTab(value);
-            }}
-            options={[
-              { value: "write", label: "編集" },
-              { value: "preview", label: "プレビュー" },
+            onValueChange={setEditorTab}
+            tabs={[
+              {
+                value: "write",
+                label: "編集",
+                panel: (
+                  <>
+                    <div className={css({ mt: "3", display: "flex", gap: "2", flexWrap: "wrap" })}>
+                      <Button
+                        disabled={busy}
+                        onClick={() => bodyImageInputRef.current?.click()}
+                        size="sm"
+                        type="button"
+                        variant="ghost"
+                      >
+                        画像を挿入
+                      </Button>
+                      <input
+                        accept="image/jpeg,image/png,image/webp"
+                        className={css({ display: "none" })}
+                        onChange={(event) => {
+                          void handleBodyImageChange(event);
+                        }}
+                        ref={bodyImageInputRef}
+                        type="file"
+                      />
+                    </div>
+                    <Textarea
+                      className={css({ mt: "3", minH: "220px" })}
+                      name="body"
+                      onChange={(event) => setBody(event.target.value)}
+                      placeholder={
+                        "見出しや箇条書きを Markdown で書けます。\n画像は「画像を挿入」から追加できます。"
+                      }
+                      ref={bodyRef}
+                      value={body}
+                    />
+                  </>
+                ),
+              },
+              {
+                value: "preview",
+                label: "プレビュー",
+                panel: (
+                  <>
+                    <input name="body" type="hidden" value={body} />
+                    <div
+                      aria-live="polite"
+                      className={cx(css({ mt: "3" }), previewBox)}
+                      // プレビューは sanitize 済み HTML（renderMarkdownToHtml）のみを表示する。
+                      dangerouslySetInnerHTML={{ __html: previewHtml }}
+                    />
+                  </>
+                ),
+              },
             ]}
             value={editorTab}
           />
-          <div className={css({ mt: "3", display: "flex", gap: "2", flexWrap: "wrap" })}>
-            <Button
-              disabled={busy || editorTab !== "write"}
-              onClick={() => bodyImageInputRef.current?.click()}
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
-              画像を挿入
-            </Button>
-            <input
-              accept="image/jpeg,image/png,image/webp"
-              className={css({ display: "none" })}
-              onChange={(event) => {
-                void handleBodyImageChange(event);
-              }}
-              ref={bodyImageInputRef}
-              type="file"
-            />
-          </div>
-          {editorTab === "write" ? (
-            <Textarea
-              className={css({ mt: "3", minH: "220px" })}
-              id="article-body"
-              name="body"
-              onChange={(event) => setBody(event.target.value)}
-              placeholder={
-                "見出しや箇条書きを Markdown で書けます。\n画像は「画像を挿入」から追加できます。"
-              }
-              ref={bodyRef}
-              value={body}
-            />
-          ) : (
-            <>
-              <input name="body" type="hidden" value={body} />
-              <div
-                aria-live="polite"
-                className={cx(css({ mt: "3" }), previewBox)}
-                // プレビューは sanitize 済み HTML（renderMarkdownToHtml）のみを表示する。
-                dangerouslySetInnerHTML={{ __html: previewHtml }}
-              />
-            </>
-          )}
         </Field>
 
-        <Field
-          error={fieldErrors.materialIds}
-          guide="自社・他社を問わず資材マスタ全体から検索して複数選択できます。"
-          htmlFor="article-material-search"
-          label="紐づけ資材"
+        <Fieldset
+          description="自社・他社を問わず資材マスタ全体から検索して複数選択できます。"
+          legend="紐づけ資材"
+          name="materialIds"
           requirement="optional"
         >
           <div className={chipRow}>
             {materials.map((material) => (
-              <span className={chip} key={material.id}>
-                <span>
-                  {material.name}
-                  <span className={css({ color: "text.subtle", ml: "1" })}>
-                    / {material.manufacturer_name}
-                  </span>
-                </span>
-                <button
-                  className={css({
-                    borderWidth: "0",
-                    bg: "transparent",
-                    color: "accent.danger",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                    fontSize: "sm",
-                  })}
-                  onClick={() => removeMaterial(material.id)}
-                  type="button"
-                >
-                  外す
-                </button>
-              </span>
+              <Chip
+                key={material.id}
+                onRemove={() => removeMaterial(material.id)}
+                removeLabel={`${material.name}を外す`}
+              >
+                {material.name}
+                <span className={manufacturerStyle}>/ {material.manufacturer_name}</span>
+              </Chip>
             ))}
           </div>
-        </Field>
-      </form>
+        </Fieldset>
+      </Form>
 
       <div className={formLayout}>
-        <Field htmlFor="article-material-search" label="資材を検索して追加" requirement="optional">
-          <Combobox
-            id="article-material-search"
-            aria-label="資材を検索して追加"
-            showEmptyState={false}
-            ref={materialSearchRef}
-            value={materialQuery}
-            placeholder="資材名またはメーカー名"
+        <Field label="資材を検索して追加" requirement="optional">
+          <Autocomplete
+            disabled={busy}
+            filterMode="preFiltered"
+            inputRef={materialSearchRef}
+            onOpenChange={setMaterialListOpen}
+            onPick={(option) => {
+              const material = materialHits.find((item) => item.id === option.value);
+              if (material) addMaterial(material);
+            }}
+            onSubmitText={handleMaterialSearch}
             onValueChange={(value) => {
               setMaterialQuery(value);
               setMaterialHits([]);
             }}
-            onSubmitValue={handleMaterialSearch}
-            disabled={busy}
+            open={materialListOpen}
             options={materialHits.map((material) => ({
               value: material.id,
               label: material.name,
               description: material.manufacturer_name ?? undefined,
             }))}
-            onSelect={(id) => {
-              const material = materialHits.find((item) => item.id === id);
-              if (material) addMaterial(material);
-            }}
-            emptyMessage={searchPending ? "検索中…" : "検索を実行すると候補を表示します。"}
+            placeholder="資材名またはメーカー名"
+            value={materialQuery}
           />
         </Field>
         <Button
@@ -487,7 +455,7 @@ export function ArticleForm({
       </div>
 
       {state.status === "idle" ? null : (
-        <FormMessage status={state.status === "error" ? "error" : "success"}>
+        <Notice tone={state.status}>
           {state.message}
           {state.status === "success" &&
           state.published === true &&
@@ -497,10 +465,10 @@ export function ArticleForm({
               <TextLink href={`/articles/${state.articleId}`}>公開ページを確認</TextLink>
             </>
           ) : null}
-        </FormMessage>
+        </Notice>
       )}
 
-      <div className={actionsRow}>
+      <FormActions>
         <Button
           disabled={busy}
           onClick={() => submitWithStatus("draft")}
@@ -512,7 +480,7 @@ export function ArticleForm({
         <Button disabled={busy} onClick={() => submitWithStatus("published")} type="button">
           {busy ? "処理中…" : "公開する"}
         </Button>
-      </div>
+      </FormActions>
 
       <Link className={buttonRecipe({ variant: "ghost" })} href="/dashboard/articles">
         一覧に戻る

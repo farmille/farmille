@@ -1,11 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { Icon } from "@/components/Icon";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cx } from "../../../../styled-system/css";
-import { ImagePlaceholderIcon } from "@/components/FormParts";
 
 export function ArticleGrid({ children, className }: { children: ReactNode; className?: string }) {
   return (
@@ -28,6 +28,8 @@ const coverStyle = css({
   overflow: "hidden",
   "& img": { w: "full", h: "full", objectFit: "cover", display: "block" },
 });
+
+const placeholderIconStyle = css({ color: "primary.700" });
 
 const titleStyle = css({
   display: "block",
@@ -66,7 +68,7 @@ export function FeedCard({
             sizes="(min-width: 900px) 420px, 50vw"
           />
         ) : (
-          <ImagePlaceholderIcon />
+          <Icon className={placeholderIconStyle} name="image" size="lg" />
         )}
       </Link>
       <div className={css({ display: "flex", flexDirection: "column", flex: "1", p: "2.5" })}>

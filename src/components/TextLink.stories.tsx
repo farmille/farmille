@@ -33,3 +33,19 @@ export const LongLabel: Story = {
     children: "施設栽培トマトでの実証詳細レポート（うどんこ病対策・定植前土壌灌注）をすべて見る",
   },
 };
+
+export const Plain: Story = {
+  args: {
+    href: "/password-reset",
+    variant: "plain",
+    children: "パスワードを忘れた方",
+  },
+};
+
+export const Subtle: Story = {
+  args: {
+    href: "/me",
+    variant: "subtle",
+    children: "キャンセルしてマイページに戻る",
+  },
+};

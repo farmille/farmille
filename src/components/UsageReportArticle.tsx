@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { OptimizedImage } from "@/components/OptimizedImage";
-import { Input } from "@/components/Input";
-import { Textarea } from "@/components/Textarea";
+import { Input, Textarea } from "@/components/form";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { reportPlotColor } from "@/components/ReportPlotColor";
 import { PREFECTURES } from "@/lib/prefectures";

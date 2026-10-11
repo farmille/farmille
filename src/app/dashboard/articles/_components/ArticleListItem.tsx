@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { Badge, Button, ConfirmDialog, FormMessage, SurfaceCard, buttonRecipe } from "@/components";
+import { Badge, Button, ConfirmDialog, SurfaceCard, buttonRecipe } from "@/components";
+import { Notice } from "@/components/form";
 import { formatDateJa } from "@/components/format-date";
 import type { SellerArticleListItem } from "@/server/queries/seller-articles";
 import { css } from "../../../../../styled-system/css";
@@ -61,9 +62,9 @@ export function ArticleListItem({ article }: ArticleListItemProps) {
       </div>
 
       {state.status === "idle" ? null : (
-        <div className={css({ mt: "3" })}>
-          <FormMessage status={state.status}>{state.message}</FormMessage>
-        </div>
+        <Notice className={css({ mt: "3" })} tone={state.status}>
+          {state.message}
+        </Notice>
       )}
 
       <div className={rowActions}>
@@ -87,6 +88,7 @@ export function ArticleListItem({ article }: ArticleListItemProps) {
         <ConfirmDialog
           action={deleteArticleAction.bind(null, article.id)}
           confirmLabel="削除する"
+          pendingLabel="削除中…"
           description={
             isPublished ? (
               <>
@@ -97,8 +99,11 @@ export function ArticleListItem({ article }: ArticleListItemProps) {
             )
           }
           title="記事を削除しますか？"
-          triggerDisabled={pending}
-          triggerLabel="削除"
+          trigger={
+            <Button disabled={pending} size="sm" variant="danger">
+              削除
+            </Button>
+          }
         />
       </div>
     </SurfaceCard>

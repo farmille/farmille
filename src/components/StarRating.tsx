@@ -1,5 +1,10 @@
 "use client";
 
+import { Radio as BaseRadio } from "@base-ui/react/radio";
+import { RadioGroup as BaseRadioGroup } from "@base-ui/react/radio-group";
+
+import { EnsureFieldRoot } from "./form/Field";
+import { useFieldRequired, useResetKey } from "./form/field-context";
 import { Icon } from "./Icon";
 
 import { cva, css, cx } from "../../styled-system/css";
@@ -47,17 +52,28 @@ const valueRecipe = cva({
   },
 });
 
-const inputStar = css({
-  borderWidth: "0",
-  bg: "transparent",
-  padding: "0",
-  cursor: "pointer",
-  lineHeight: "none",
-  color: "accent.star",
-});
+const inputRowStyle = css({ display: "flex", gap: "2", alignItems: "center" });
 
-const inputStarOff = css({
-  color: "border.strong",
+const inputStarRecipe = cva({
+  base: {
+    display: "flex",
+    lineHeight: "none",
+    borderRadius: "mark",
+    cursor: "pointer",
+    outline: "none",
+    _focusVisible: {
+      outlineWidth: "2px",
+      outlineStyle: "solid",
+      outlineColor: "primary.700",
+      outlineOffset: "2px",
+    },
+  },
+  variants: {
+    on: {
+      true: { color: "accent.star" },
+      false: { color: "border.strong" },
+    },
+  },
 });
 
 type StarDisplayProps = {
@@ -75,6 +91,7 @@ type StarInputProps = {
   value: number;
   onChange: (value: number) => void;
   className?: string;
+  /** 送信名。囲む Fieldset・Field に name があればそちらが優先される。 */
   name?: string;
 };
 
@@ -87,34 +104,7 @@ function clampInt(n: number): number {
 
 /** 評価の星を表示し、入力時はタップで1〜5を選択する。 */
 export function StarRating(props: StarRatingProps) {
-  if (props.mode === "input") {
-    const value = clampInt(props.value);
-    return (
-      <div
-        className={cx(css({ display: "flex", gap: "0", alignItems: "center" }), props.className)}
-        role="radiogroup"
-        aria-label="評価"
-      >
-        {[1, 2, 3, 4, 5].map((n) => {
-          const on = n <= value;
-          return (
-            <button
-              key={n}
-              type="button"
-              role="radio"
-              aria-checked={n === value}
-              aria-label={`${n}`}
-              className={cx(inputStar, !on && inputStarOff)}
-              onClick={() => props.onChange(n)}
-            >
-              <Icon name="star_filled" size="2xl" />
-            </button>
-          );
-        })}
-        {props.name ? <input type="hidden" name={props.name} value={value} /> : null}
-      </div>
-    );
-  }
+  if (props.mode === "input") return <StarInput {...props} />;
 
   const value = clampInt(props.value);
   const showValue = props.showValue === true;
@@ -138,4 +128,34 @@ export function StarRating(props: StarRatingProps) {
       {showValue ? <span className={valueRecipe({ size: props.size })}>{formatted}</span> : null}
     </span>
   );
+}
+
+function StarInput({ value, onChange, className, name }: StarInputProps) {
+  const required = useFieldRequired();
+  const resetKey = useResetKey("");
+  const rating = clampInt(value);
+  const group = (
+    <BaseRadioGroup<number | null>
+      aria-label="評価"
+      key={resetKey}
+      className={cx(inputRowStyle, className)}
+      name={name}
+      onValueChange={(next) => onChange(next ?? 0)}
+      required={required}
+      value={rating === 0 ? null : rating}
+    >
+      {[1, 2, 3, 4, 5].map((n) => (
+        <BaseRadio.Root
+          aria-label={`${n}`}
+          className={inputStarRecipe({ on: n <= rating })}
+          key={n}
+          value={n}
+        >
+          <Icon name="star_filled" size="2xl" />
+        </BaseRadio.Root>
+      ))}
+    </BaseRadioGroup>
+  );
+
+  return <EnsureFieldRoot name={name}>{group}</EnsureFieldRoot>;
 }

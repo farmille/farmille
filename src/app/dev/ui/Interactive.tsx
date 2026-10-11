@@ -6,10 +6,10 @@ import { FilterPills } from "@/components/FilterPills";
 import { StarRating } from "@/components/StarRating";
 import { TagChip, type TagCategory } from "@/components/TagChip";
 
-const FILTER_OPTIONS = [
-  { value: "all", label: "すべて" },
-  { value: "report", label: "実証詳細レポート" },
-  { value: "other", label: "その他の記事" },
+const FILTER_ITEMS = [
+  { href: "/articles", label: "すべて", current: true },
+  { href: "/articles?type=report", label: "実証詳細レポート", current: false },
+  { href: "/articles?type=article", label: "記事", current: false },
 ];
 
 const SELECTED_TAGS: Array<{ cat: TagCategory; v: string }> = [
@@ -20,7 +20,6 @@ const SELECTED_TAGS: Array<{ cat: TagCategory; v: string }> = [
 
 /** /dev/ui 用のインタラクティブ見本。 */
 export function UiKitInteractiveDemos() {
-  const [filter, setFilter] = useState("all");
   const [stars, setStars] = useState(4);
   const [tags, setTags] = useState(SELECTED_TAGS);
 
@@ -28,7 +27,7 @@ export function UiKitInteractiveDemos() {
     <div className={css({ display: "flex", flexDirection: "column", gap: "4" })}>
       <div>
         <p className={css({ fontSize: "xs", color: "text.subtle", mb: "2" })}>FilterPills</p>
-        <FilterPills options={FILTER_OPTIONS} value={filter} onChange={setFilter} />
+        <FilterPills aria-label="コンテンツ種別" items={FILTER_ITEMS} />
       </div>
       <div>
         <p className={css({ fontSize: "xs", color: "text.subtle", mb: "2" })}>

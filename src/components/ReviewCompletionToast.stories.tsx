@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { css } from "../../styled-system/css";
 import { ReviewCompletionToast } from "./ReviewCompletionToast";
+import { Toaster } from "./Toaster";
 
 /**
  * このコンポーネントは URL の ?review= クエリだけを見て表示を決める。
@@ -31,6 +32,7 @@ const meta = {
     (Story) => (
       <div className={css({ position: "relative", minH: "160px", maxW: "375px" })}>
         <Story />
+        <Toaster />
       </div>
     ),
   ],

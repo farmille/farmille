@@ -10,8 +10,9 @@ import {
 } from "@/app/admin/_components/AdminUI";
 import { initialSellerActionState } from "@/app/admin/_lib/action-state";
 import { sellerOperationAction } from "@/app/admin/sellers/[id]/actions";
-import { Button, Input, Select, Textarea } from "@/components";
-import { FormMessage } from "@/components/auth/Fields";
+import { Button } from "@/components/Button";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Field, Input, Notice, Select, Textarea } from "@/components/form";
 import { css } from "../../../../../styled-system/css";
 
 const wrapStyle = css({
@@ -37,32 +38,7 @@ const credentialLabelStyle = css({
   color: "primary.700",
 });
 
-const confirmationStyle = css({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "stretch",
-  gap: "2.5",
-});
-
-const fieldLabelStyle = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "1.5",
-  fontSize: "sm",
-  fontWeight: "bold",
-  color: "text.muted",
-});
-
 type Operation = "approve" | "reject" | "suspend" | "reinstate" | "invite";
-
-/** 取り消せない操作は一度だけ確認を挟む（却下・凍結）。 */
-const CONFIRM_MESSAGES = {
-  reject: { note: "この申請を却下します。取り消せません。", label: "却下する" },
-  suspend: {
-    note: "このアカウントを凍結します。メーカーはログインできなくなります。",
-    label: "凍結する",
-  },
-} satisfies Record<"reject" | "suspend", { note: string; label: string }>;
 
 export function SellerReviewActions({
   sellerId,
@@ -80,10 +56,8 @@ export function SellerReviewActions({
     sellerOperationAction,
     initialSellerActionState,
   );
-  const [confirming, setConfirming] = useState<"reject" | "suspend" | null>(null);
-  const [rejectedReason, setRejectedReason] = useState("");
   const [submitting, setSubmitting] = useState<Operation | null>(null);
-  const [selectedManufacturer, setSelectedManufacturer] = useState("");
+  const [selectedManufacturer, setSelectedManufacturer] = useState<string | null>(null);
   const [newManufacturerName, setNewManufacturerName] = useState("");
 
   useEffect(() => {
@@ -93,67 +67,55 @@ export function SellerReviewActions({
     }
   }, [router, state.status]);
 
-  const submit = (operation: Operation): void => {
-    const formData = new FormData();
+  const submit = (operation: Operation, formData = new FormData()): void => {
     formData.set("sellerId", sellerId);
     formData.set("operation", operation);
     if (operation === "approve") {
       formData.set(
         "manufacturerName",
-        selectedManufacturer === "__new__" ? newManufacturerName : selectedManufacturer,
+        selectedManufacturer === "__new__" ? newManufacturerName : (selectedManufacturer ?? ""),
       );
       formData.set("createManufacturer", String(selectedManufacturer === "__new__"));
     }
-    if (operation === "reject") {
-      formData.set("rejectedReason", rejectedReason);
-    }
     setSubmitting(operation);
-    setConfirming(null);
     startTransition(() => {
       formAction(formData);
     });
   };
 
-  const confirmation = confirming === null ? null : CONFIRM_MESSAGES[confirming];
-
   return (
     <div className={wrapStyle}>
       {status === "applied" && state.status !== "approved" ? (
         <div className={wrapStyle}>
-          <label className={fieldLabelStyle}>
-            紐づける資材メーカー
+          <Field label="紐づける資材メーカー" labelSize="sm">
             <Select
-              value={selectedManufacturer}
-              onChange={(event) => setSelectedManufacturer(event.target.value)}
               disabled={pending}
-            >
-              <option value="">メーカーを選択してください</option>
-              {manufacturerNames.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-              <option value="__new__">該当なし：メーカーを追加</option>
-            </Select>
-          </label>
+              onValueChange={setSelectedManufacturer}
+              options={[
+                ...manufacturerNames.map((name) => ({ value: name, label: name })),
+                { value: "__new__", label: "該当なし：メーカーを追加" },
+              ]}
+              placeholder="メーカーを選択してください"
+              value={selectedManufacturer}
+            />
+          </Field>
           {selectedManufacturer === "__new__" ? (
-            <label className={fieldLabelStyle}>
-              新規メーカー名
+            <Field label="新規メーカー名" labelSize="sm">
               <Input
-                value={newManufacturerName}
-                onChange={(event) => setNewManufacturerName(event.target.value)}
-                maxLength={300}
                 disabled={pending}
+                maxLength={300}
+                onChange={(event) => setNewManufacturerName(event.target.value)}
+                value={newManufacturerName}
               />
-            </label>
+            </Field>
           ) : null}
           <p className={adminInlineNoteStyle}>
             アカウントの確認後にログインを発行します。この操作では編集権は付与されません。メーカーが提出する掲載・オーナー権限の申請と確認資料を審査してから、資材ごとに編集権を付与してください。
           </p>
         </div>
       ) : null}
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
-      {state.status === "done" ? <FormMessage tone="info">{state.message}</FormMessage> : null}
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
+      {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
 
       {state.status === "approved" ? (
         <div className={credentialsStyle}>
@@ -181,14 +143,14 @@ export function SellerReviewActions({
         </div>
       ) : null}
 
-      {state.status === "approved" ? null : confirmation === null ? (
+      {state.status === "approved" ? null : (
         <div className={adminActionsStyle}>
           {status === "applied" ? (
             <>
               <Button
                 disabled={
                   pending ||
-                  selectedManufacturer.length === 0 ||
+                  selectedManufacturer === null ||
                   (selectedManufacturer === "__new__" && newManufacturerName.trim().length === 0)
                 }
                 onClick={() => submit("approve")}
@@ -198,25 +160,37 @@ export function SellerReviewActions({
                   ? "共有ログインを発行中…"
                   : "確認を完了してログインを発行"}
               </Button>
-              <Button
-                disabled={pending}
-                onClick={() => setConfirming("reject")}
-                size="sm"
-                variant="danger"
+              <ConfirmDialog
+                action={(formData) => submit("reject", formData)}
+                cancelLabel="やめる"
+                confirmLabel="却下する"
+                description="この申請を却下します。取り消せません。"
+                title="この申請を却下しますか？"
+                trigger={
+                  <Button disabled={pending} size="sm" variant="danger">
+                    却下
+                  </Button>
+                }
               >
-                却下
-              </Button>
+                <Field label="却下理由" name="rejectedReason" requirement="required">
+                  <Textarea placeholder="申請者へ伝える判断理由を入力" />
+                </Field>
+              </ConfirmDialog>
             </>
           ) : null}
           {status === "approved" ? (
-            <Button
-              disabled={pending}
-              onClick={() => setConfirming("suspend")}
-              size="sm"
-              variant="danger"
-            >
-              凍結する
-            </Button>
+            <ConfirmDialog
+              cancelLabel="やめる"
+              confirmLabel="凍結する"
+              description="このアカウントを凍結します。メーカーはログインできなくなります。"
+              onConfirm={() => submit("suspend")}
+              title="このアカウントを凍結しますか？"
+              trigger={
+                <Button disabled={pending} size="sm" variant="danger">
+                  凍結する
+                </Button>
+              }
+            />
           ) : null}
           {status === "suspended" ? (
             <Button disabled={pending} onClick={() => submit("reinstate")} size="sm">
@@ -226,36 +200,6 @@ export function SellerReviewActions({
           <Button disabled={pending} onClick={() => submit("invite")} size="sm" variant="ghost">
             {inviteCode === null ? "招待コードを発行" : "招待コードを再発行"}
           </Button>
-        </div>
-      ) : (
-        <div className={confirmationStyle}>
-          <p className={adminInlineNoteStyle}>{confirmation.note}</p>
-          {confirming === "reject" ? (
-            <label className={fieldLabelStyle}>
-              却下理由
-              <Textarea
-                autoFocus
-                name="rejectedReason"
-                onChange={(event) => setRejectedReason(event.target.value)}
-                placeholder="申請者へ伝える判断理由を入力"
-                required
-                value={rejectedReason}
-              />
-            </label>
-          ) : null}
-          <div className={adminActionsStyle}>
-            <Button
-              disabled={pending || (confirming === "reject" && rejectedReason.trim().length === 0)}
-              onClick={() => submit(confirming ?? "reject")}
-              size="sm"
-              variant="danger"
-            >
-              {confirmation.label}
-            </Button>
-            <Button onClick={() => setConfirming(null)} size="sm" variant="ghost">
-              やめる
-            </Button>
-          </div>
         </div>
       )}
     </div>

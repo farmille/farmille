@@ -4,8 +4,8 @@ import { useActionState } from "react";
 
 import { initialAdminActionState, type AdminActionState } from "@/app/admin/_lib/action-state";
 import { cropOperationAction, tagOperationAction } from "@/app/admin/tags/actions";
-import { Button, Input, Select, TAG_CATEGORY_LABELS, toTagChipCategory } from "@/components";
-import { FormMessage } from "@/components/auth/Fields";
+import { Button, TAG_CATEGORY_LABELS, toTagChipCategory } from "@/components";
+import { Input, Notice, Select, SubmitButton } from "@/components/form";
 import type { AdminCropItem, AdminTagItem, CropGroupOption } from "@/server/admin/tags";
 import { css } from "../../../../../styled-system/css";
 
@@ -42,8 +42,8 @@ const usageStyle = css({
 });
 
 function StateMessage({ state }: { state: AdminActionState }) {
-  if (state.status === "error") return <FormMessage tone="error">{state.message}</FormMessage>;
-  if (state.status === "done") return <FormMessage tone="info">{state.message}</FormMessage>;
+  if (state.status === "error") return <Notice tone="error">{state.message}</Notice>;
+  if (state.status === "done") return <Notice tone="success">{state.message}</Notice>;
 
   return null;
 }
@@ -57,24 +57,35 @@ export function TagCreateForm({ categories }: { categories: string[] }) {
       <StateMessage state={state} />
       <form action={formAction} className={createRowStyle}>
         <input name="operation" type="hidden" value="create" />
-        <Select aria-label="分類" className={categorySelectStyle} name="category">
-          {categories.map((category) => (
-            <option key={category} value={category}>
-              {TAG_CATEGORY_LABELS[toTagChipCategory(category)]}
-            </option>
-          ))}
-        </Select>
-        <Input aria-label="タグ名" className={nameInputStyle} name="name" placeholder="タグ名" />
+        <Select
+          aria-label="分類"
+          className={categorySelectStyle}
+          defaultValue={categories[0]}
+          name="category"
+          options={categories.map((category) => ({
+            value: category,
+            label: TAG_CATEGORY_LABELS[toTagChipCategory(category)],
+          }))}
+          size="sm"
+        />
+        <Input
+          aria-label="タグ名"
+          className={nameInputStyle}
+          name="name"
+          placeholder="タグ名"
+          size="sm"
+        />
         <Input
           aria-label="並び順"
           className={sortInputStyle}
           defaultValue="0"
           name="sortOrder"
+          size="sm"
           type="number"
         />
-        <Button size="sm" type="submit">
+        <SubmitButton pendingLabel="追加中…" size="sm">
           追加
-        </Button>
+        </SubmitButton>
       </form>
     </div>
   );
@@ -95,12 +106,14 @@ export function TagRow({ tag }: { tag: AdminTagItem }) {
           className={nameInputStyle}
           defaultValue={tag.name}
           name="name"
+          size="sm"
         />
         <Input
           aria-label={`${tag.name} の並び順`}
           className={sortInputStyle}
           defaultValue={String(tag.sort_order)}
           name="sortOrder"
+          size="sm"
           type="number"
         />
         <span className={usageStyle}>使用 {tag.usageCount} 件</span>
@@ -131,30 +144,39 @@ export function CropCreateForm({ groups }: { groups: CropGroupOption[] }) {
       <StateMessage state={state} />
       <form action={formAction} className={createRowStyle}>
         <input name="operation" type="hidden" value="create" />
-        <Select aria-label="作物群" className={groupSelectStyle} name="groupId">
-          {groups.map((group) => (
-            <option key={group.id} value={group.id}>
-              {group.name}
-            </option>
-          ))}
-        </Select>
-        <Input aria-label="作物名" className={nameInputStyle} name="name" placeholder="作物名" />
+        <Select
+          aria-label="作物群"
+          className={groupSelectStyle}
+          defaultValue={groups[0]?.id}
+          name="groupId"
+          options={groups.map((group) => ({ value: group.id, label: group.name }))}
+          size="sm"
+        />
+        <Input
+          aria-label="作物名"
+          className={nameInputStyle}
+          name="name"
+          placeholder="作物名"
+          size="sm"
+        />
         <Input
           aria-label="表記ゆれ"
           className={aliasInputStyle}
           name="aliases"
           placeholder="表記ゆれ（カンマ区切り）"
+          size="sm"
         />
         <Input
           aria-label="並び順"
           className={sortInputStyle}
           defaultValue="0"
           name="sortOrder"
+          size="sm"
           type="number"
         />
-        <Button size="sm" type="submit">
+        <SubmitButton pendingLabel="追加中…" size="sm">
           追加
-        </Button>
+        </SubmitButton>
       </form>
     </div>
   );
@@ -175,6 +197,7 @@ export function CropRow({ crop }: { crop: AdminCropItem }) {
           className={nameInputStyle}
           defaultValue={crop.name}
           name="name"
+          size="sm"
         />
         <Input
           aria-label={`${crop.name} の表記ゆれ`}
@@ -182,12 +205,14 @@ export function CropRow({ crop }: { crop: AdminCropItem }) {
           defaultValue={crop.aliases.join("、")}
           name="aliases"
           placeholder="表記ゆれ（カンマ区切り）"
+          size="sm"
         />
         <Input
           aria-label={`${crop.name} の並び順`}
           className={sortInputStyle}
           defaultValue={String(crop.sort_order)}
           name="sortOrder"
+          size="sm"
           type="number"
         />
         <span className={usageStyle}>参照 {crop.usageCount} 件</span>

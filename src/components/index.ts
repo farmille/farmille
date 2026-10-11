@@ -39,12 +39,6 @@ export type { ButtonVariants } from "./Button";
 
 export { ConfirmDialog } from "./ConfirmDialog";
 
-export { Input } from "./Input";
-export { FileInput } from "./FileInput";
-export { Textarea } from "./Textarea";
-export { Select } from "./Select";
-export { Radio, RadioGroup } from "./Radio";
-
 export { EmptyState } from "./EmptyState";
 
 export { Pagination } from "./Pagination";
@@ -71,8 +65,6 @@ export type { DataListRow } from "./DataList";
 export { HelpfulButton } from "./HelpfulButton";
 export { helpfulPillRecipe } from "./helpful-pill";
 
-export { FormMessage } from "./FormMessage";
-export { PendingButton } from "./PendingButton";
 export { TextLink } from "./TextLink";
 
 export { Icon } from "./Icon";

@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/Button";
-import { FormMessage, formActionsStyle } from "@/components/auth/Fields";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { FormActions, Notice } from "@/components/form";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { passkeyErrorMessage } from "@/lib/auth/passkey-error";
 import { errorMessageJa } from "@/server/errors";
@@ -19,7 +20,6 @@ export function PasskeyManager({
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
-  const [deleting, setDeleting] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -38,7 +38,6 @@ export function PasskeyManager({
         setMessage(passkeyErrorMessage(error));
         return;
       }
-      setDeleting(null);
       setMessage(passkeyId === null ? "パスキーを登録しました。" : "パスキーを削除しました。");
       router.refresh();
     } catch {
@@ -50,13 +49,11 @@ export function PasskeyManager({
   }
 
   return (
-    <div className={formActionsStyle}>
+    <FormActions>
       {admin ? (
-        <FormMessage tone="info">
-          運営画面では、パスキーによるログイン後も2要素認証が必要です。
-        </FormMessage>
+        <Notice tone="info">運営画面では、パスキーによるログイン後も2要素認証が必要です。</Notice>
       ) : null}
-      {message ? <FormMessage tone={failed ? "error" : "info"}>{message}</FormMessage> : null}
+      {message ? <Notice tone={failed ? "error" : "success"}>{message}</Notice> : null}
       {passkeys.length === 0 ? <p>パスキーはまだ登録されていません。</p> : null}
       {passkeys.map((passkey) => (
         <div key={passkey.id}>
@@ -65,23 +62,18 @@ export function PasskeyManager({
             登録日：
             {new Date(passkey.created_at).toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })}
           </p>
-          {deleting === passkey.id ? (
-            <>
-              <FormMessage tone="info">
-                このパスキーではログインできなくなります。パスワードなど、別のログイン方法を確認してから削除してください。
-              </FormMessage>
-              <Button variant="danger" disabled={pending} onClick={() => change(passkey.id)}>
-                このパスキーを削除する
+          <ConfirmDialog
+            confirmLabel="このパスキーを削除する"
+            description="このパスキーではログインできなくなります。パスワードなど、別のログイン方法を確認してから削除してください。"
+            onConfirm={() => change(passkey.id)}
+            pendingLabel="削除中…"
+            title="パスキーを削除しますか？"
+            trigger={
+              <Button disabled={pending} variant="ghost">
+                削除
               </Button>
-              <Button variant="ghost" disabled={pending} onClick={() => setDeleting(null)}>
-                キャンセル
-              </Button>
-            </>
-          ) : (
-            <Button variant="ghost" disabled={pending} onClick={() => setDeleting(passkey.id)}>
-              削除
-            </Button>
-          )}
+            }
+          />
         </div>
       ))}
       <Button disabled={pending} onClick={() => change(null)}>
@@ -90,6 +82,6 @@ export function PasskeyManager({
       <p>
         パスワードでのログインも引き続き利用できます。端末のパスワード管理アプリに残ったパスキーは、必要に応じて端末側でも削除してください。
       </p>
-    </div>
+    </FormActions>
   );
 }

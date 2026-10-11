@@ -1,12 +1,22 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, mocked, userEvent, within } from "storybook/test";
+import { expect, mocked, userEvent, waitFor, within } from "storybook/test";
 import { saveUsageReportDraftAction } from "@/app/materials/[id]/report/new/actions";
+import { Toaster } from "@/components/Toaster";
 import { createBlankUsageReport } from "@/lib/usage-report";
 import { ReportForm } from "./ReportForm";
+import { filledReport } from "./reportStoryFixture";
 const draft = createBlankUsageReport("00000000-0000-4000-8000-000000000101");
 const meta = {
   title: "App/Materials/Report/ReportForm",
   component: ReportForm,
+  decorators: [
+    (Story) => (
+      <>
+        <Story />
+        <Toaster />
+      </>
+    ),
+  ],
   args: {
     material: {
       id: draft.materialId,
@@ -52,8 +62,10 @@ export const PartialSaveFailure: Story = {
     await userEvent.click(canvas.getByRole("button", { name: "下書き保存" }));
     await canvas.findByText("使用目的の補足を保存できませんでした。再度保存してください。");
     await userEvent.click(canvas.getByRole("button", { name: "レポートを閉じる" }));
-    await expect(canvas.getByText("入力途中の内容を下書きに保存しますか？")).toBeVisible();
-    await userEvent.click(canvas.getByRole("button", { name: "入力に戻る" }));
+    const dialog = await within(canvasElement.ownerDocument.body).findByRole("alertdialog", {
+      name: "入力途中の内容を下書きに保存しますか？",
+    });
+    await userEvent.click(within(dialog).getByRole("button", { name: "入力に戻る" }));
     await userEvent.click(canvas.getByRole("button", { name: "下書き保存" }));
     await canvas.findByText("下書きを保存しました。");
     await expect(saveUsageReportDraftAction).toHaveBeenLastCalledWith(
@@ -67,3 +79,42 @@ export const PartialSaveFailure: Story = {
 };
 
 export const PartialSaveFailureManual: Story = { ...PartialSaveFailure, play: undefined };
+
+export const Submitted: Story = {
+  args: {
+    draft: {
+      ...filledReport,
+      materialId: draft.materialId,
+      plots: filledReport.plots.map((plot) => ({
+        ...plot,
+        description: plot.description || "資材を2,000倍に希釈し、10aあたり200Lを葉面散布。",
+      })),
+      methodDetailsAck: true,
+      documentsAck: true,
+      guidelineAck: true,
+    },
+  },
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "5 写真・記事の確認" }));
+    await userEvent.click(canvas.getByRole("button", { name: "公開に進む" }));
+    await canvas.findByRole("heading", { name: "レポートを受け付けました" });
+  },
+};
+
+export const LeaveConfirm: Story = {
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.type(canvas.getByPlaceholderText("品種名"), "桃太郎");
+    await userEvent.click(canvas.getByRole("button", { name: "レポートを閉じる" }));
+    const dialog = await within(canvasElement.ownerDocument.body).findByRole("alertdialog", {
+      name: "入力途中の内容を下書きに保存しますか？",
+    });
+    await waitFor(() =>
+      expect(within(dialog).getByRole("button", { name: "下書きを保存して閉じる" })).toHaveFocus(),
+    );
+    await waitFor(() =>
+      expect(within(dialog).getByRole("button", { name: "保存せずに閉じる" })).toBeVisible(),
+    );
+  },
+};
