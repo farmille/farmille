@@ -172,7 +172,7 @@ export async function listRecentUsageReports({
   );
 }
 
-type UsageReportDetailQueryRow = UsageReportRow & {
+type UsageReportDetailQueryRow = Omit<UsageReportRow, "editor_note"> & {
   author: Pick<PublicProfileRow, "user_id" | "handle" | "avatar_url" | "standpoint"> | null;
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<
@@ -324,7 +324,11 @@ export async function getPublishedUsageReport(
   const { data, error } = await query
     .select(
       `
-      *,
+      id, material_id, author_user_id, title, status, crop_id, purpose_tags, purpose_note,
+      prefecture_code, field_name, variety, planting_date, cultivation_type, cultivation_tags,
+      growth_stage, climate_note, observed_change, negative_note, summary, pesticide_ack,
+      is_provided_sample, published_at, created_at, updated_at, form_version, variety_unknown,
+      publish_city, cultivation_environment, timing_note, method_details_ack, documents_ack,
       author:public_profiles!usage_reports_author_user_id_fkey (
         user_id,
         handle,

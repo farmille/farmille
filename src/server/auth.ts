@@ -4,7 +4,7 @@ import type { JwtPayload } from "@supabase/supabase-js";
 import * as v from "valibot";
 
 import { fail, succeed, type Result } from "@/server/result";
-import { createServerSupabase } from "@/server/supabase";
+import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 
 // 01 §4：一般ユーザー／メーカー／運営。JWT の app_metadata.account_type が正。
@@ -137,7 +137,24 @@ export async function requireGeneralUser(): Promise<Result<GeneralSession>> {
 }
 
 export async function requireSeller(): Promise<Result<SellerSession>> {
-  return authorizeSeller(await getSessionUser());
+  const session = authorizeSeller(await getSessionUser());
+  if (!session.ok) return session;
+
+  // 非公開のauth_user_idも照合し、発行済みJWTからの凍結・紐づけ変更の迂回を防ぐ。
+  const supabase = createAdminSupabase();
+  const { data, error } = await supabase
+    .from("seller_accounts")
+    .select("status")
+    .eq("id", session.data.sellerId)
+    .eq("auth_user_id", session.data.userId)
+    .maybeSingle();
+  if (error !== null) {
+    console.error("メーカーアカウントの確認に失敗しました", error);
+    return fail("internal");
+  }
+  if (data?.status !== "approved") return fail("forbidden");
+
+  return session;
 }
 
 export async function requireAdmin(): Promise<Result<AdminSession>> {
