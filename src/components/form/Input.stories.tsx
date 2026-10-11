@@ -8,7 +8,7 @@ const meta = {
   component: Input,
   args: {
     "aria-label": "作物名",
-    placeholder: "例）トマト",
+    placeholder: "トマト",
   },
 } satisfies Meta<typeof Input>;
 
@@ -35,4 +35,27 @@ export const Invalid: Story = {
 
 export const Disabled: Story = {
   args: { disabled: true, defaultValue: "ミニトマト" },
+};
+
+export const PasswordReveal: Story = {
+  args: {
+    "aria-label": "パスワード",
+    defaultValue: "farmille-pass",
+    placeholder: "••••••••",
+    revealable: true,
+    type: "password",
+  },
+};
+
+export const ReadOnly: Story = {
+  render: () => (
+    <>
+      <Field label="メールアドレス" name="email">
+        <Input name="email" readOnly type="email" value="farmer@example.test" />
+      </Field>
+      <Field label="ニックネーム" name="handle">
+        <Input defaultValue="農家の山田" name="handle" />
+      </Field>
+    </>
+  ),
 };

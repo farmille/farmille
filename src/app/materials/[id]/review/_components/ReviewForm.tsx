@@ -402,7 +402,7 @@ export function ReviewForm({
                     ),
                   );
                 }}
-                placeholder="例）散布前の様子"
+                placeholder="散布前の様子"
                 aria-label={`${photo.file.name}の説明`}
               />
               <button

@@ -484,7 +484,7 @@ export function ReportComparisonFields({
                       error={errors[`plots.${index}.scope`]}
                     >
                       <Input
-                        placeholder="例）1区10株、3反復"
+                        placeholder="1区10株、3反復"
                         value={plot.scope}
                         onChange={(event) => updatePlot(plot.id, { scope: event.target.value })}
                       />

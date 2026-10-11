@@ -130,7 +130,7 @@ export function ProfileTagsEditor({
                     normalize(name).includes(normalize(affiliation.trim())),
                 )
                 .map((name) => ({ value: name, label: name }))}
-              placeholder="例）〇〇市トマト生産部会"
+              placeholder="〇〇市トマト生産部会"
               value={affiliation}
             />
             <Button onClick={() => addAffiliation(affiliation)} size="sm" variant="ghost">

@@ -58,7 +58,7 @@ describe("Field", () => {
   it("案内と公開範囲を入力の説明に結びつける", () => {
     render(
       <Field
-        description="本名でなくてOKです"
+        description="本名でなくて構いません。"
         label="ニックネーム"
         lead="投稿に表示されます"
         name="handle"
@@ -69,7 +69,7 @@ describe("Field", () => {
     );
 
     expect(screen.getByRole("textbox", { name: "ニックネーム" })).toHaveAccessibleDescription(
-      /^(?=.*公開されません)(?=.*投稿に表示されます)(?=.*本名でなくてOKです)/,
+      /^(?=.*公開されません)(?=.*投稿に表示されます)(?=.*本名でなくて構いません。)/,
     );
   });
 

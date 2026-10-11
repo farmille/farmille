@@ -76,7 +76,7 @@ export const InFieldset: Story = {
 export const CardsInFieldset: Story = {
   render: (args) => (
     <Fieldset
-      description="立場は、投稿やマイページで肩書きとして表示されます。"
+      description="投稿やマイページで肩書きとして表示されます。"
       legend="あなたの立場"
       name="standpoint"
       requirement="required"

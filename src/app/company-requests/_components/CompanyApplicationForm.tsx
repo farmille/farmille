@@ -286,7 +286,7 @@ export function CompanyApplicationForm({
             />
           </Field>
           <Field label={SIGNER_LABELS[kind]} name="signerName" requirement="required">
-            <Input maxLength={200} placeholder="記入例）金子 太郎" />
+            <Input maxLength={200} placeholder="金子 太郎" />
           </Field>
         </SurfaceCard>
 

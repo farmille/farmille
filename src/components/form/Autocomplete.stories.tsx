@@ -43,7 +43,7 @@ const meta = {
     "aria-label": "所属",
     value: "",
     options: affiliations,
-    placeholder: "例）〇〇市トマト生産部会",
+    placeholder: "〇〇市トマト生産部会",
     onValueChange: fn(),
     onPick: fn(),
     onSubmitText: fn(),

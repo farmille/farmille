@@ -22,7 +22,7 @@ const screenStyle = css({
 const frameStyle = css({
   tab: {
     w: "100%",
-    maxW: "auth",
+    maxW: "content.form",
     my: "auto",
     mx: "auto",
     py: "10",

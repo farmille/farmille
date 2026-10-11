@@ -264,7 +264,7 @@ export function ReportStepBasics({
         </div>
         <Autocomplete
           aria-label="作目"
-          placeholder="作物名で検索　例）トマト、みかん"
+          placeholder="作物名で検索　トマト、みかん"
           filterMode="preFiltered"
           value={cropQuery}
           onValueChange={setCropQuery}

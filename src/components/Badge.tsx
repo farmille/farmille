@@ -50,7 +50,8 @@ const badgeRecipe = cva({
       },
       optional: {
         fontSize: "2xs",
-        px: "2",
+        lineHeight: "none",
+        px: "1.5",
         py: "0.5",
         bg: "surface.page",
         color: "text.subtle",
@@ -58,7 +59,8 @@ const badgeRecipe = cva({
       },
       required: {
         fontSize: "2xs",
-        px: "2",
+        lineHeight: "none",
+        px: "1.5",
         py: "0.5",
         bg: "accent.dangerSoft",
         color: "accent.danger",

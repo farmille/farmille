@@ -302,7 +302,7 @@ export function ReportCellEditor({
           data-first
           aria-label="区の名前（必須）"
           enterKeyHint="done"
-          placeholder={plotIndex === 0 ? "例）無処理区、対照区" : "例）処理区、使用区"}
+          placeholder={plotIndex === 0 ? "無処理区、対照区" : "処理区、使用区"}
           value={plot.name}
           onChange={(event) => onPlotChange(plot.id, { name: event.target.value })}
           onKeyDown={(event) => {
@@ -332,7 +332,7 @@ export function ReportCellEditor({
               <Input
                 size="sm"
                 className={css({ flex: "1 1 token(sizes.44)" })}
-                placeholder="例）1区10株、3反復"
+                placeholder="1区10株、3反復"
                 value={plot.scope}
                 onChange={(event) => onPlotChange(plot.id, { scope: event.target.value })}
                 onKeyDown={(event) => {
@@ -354,8 +354,8 @@ export function ReportCellEditor({
             <Textarea
               placeholder={
                 plotIndex === 0
-                  ? "例）〇〇は使っていない。かん水と施肥は処理区と同じ。"
-                  : "例）〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。"
+                  ? "〇〇は使っていない。かん水と施肥は処理区と同じ。"
+                  : "〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。"
               }
               value={plot.description}
               onChange={(event) => onPlotChange(plot.id, { description: event.target.value })}
@@ -398,7 +398,7 @@ export function ReportCellEditor({
                 data-first
                 list="metricList"
                 enterKeyHint="next"
-                placeholder="例）収量"
+                placeholder="収量"
                 value={measurement.name}
                 onChange={(event) => setName(event.target.value)}
                 onKeyDown={(event) => {
@@ -415,7 +415,7 @@ export function ReportCellEditor({
                 data-unit-input
                 list="unitList"
                 enterKeyHint="done"
-                placeholder="例）kg/10a"
+                placeholder="kg/10a"
                 value={measurement.unit}
                 onChange={(event) => setUnit(event.target.value)}
                 onKeyDown={(event) => {
@@ -467,8 +467,8 @@ export function ReportCellEditor({
             enterKeyHint="done"
             placeholder={
               measurement.graphs.length > 1
-                ? "例）11月、定植30日後"
-                : "例）トマト重量のBS使用区と未使用区の比較"
+                ? "11月、定植30日後"
+                : "トマト重量のBS使用区と未使用区の比較"
             }
             value={graph.heading}
             onChange={(event) => onGraphChange({ ...graph, heading: event.target.value })}

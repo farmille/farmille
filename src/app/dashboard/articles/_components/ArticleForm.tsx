@@ -282,7 +282,7 @@ export function ArticleForm({
           <Input
             name="title"
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="例）高温期の活用ガイド"
+            placeholder="高温期の活用ガイド"
             value={title}
           />
         </Field>

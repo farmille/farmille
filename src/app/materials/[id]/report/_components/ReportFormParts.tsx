@@ -12,7 +12,7 @@ export const pillButtonRecipe = cva({
     borderWidth: "1px",
     borderStyle: "solid",
     borderColor: "border.strong",
-    borderRadius: "pill",
+    borderRadius: "button",
     bg: "surface.card",
     color: "text.default",
     whiteSpace: "nowrap",

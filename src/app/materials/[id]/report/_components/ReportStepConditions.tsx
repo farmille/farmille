@@ -84,7 +84,7 @@ export function ReportStepConditions({
         <Input
           aria-label="市区町村"
           className={cityInput}
-          placeholder="市区町村　例）〇〇市"
+          placeholder="〇〇市"
           value={input.city}
           onChange={(event) => onChange({ ...input, city: event.target.value })}
         />

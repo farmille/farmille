@@ -31,7 +31,7 @@ const actionStyle = css({
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "text.inverse/60",
-  borderRadius: "pill",
+  borderRadius: "button",
   bg: "transparent",
   color: "text.inverse",
   fontFamily: "sans",

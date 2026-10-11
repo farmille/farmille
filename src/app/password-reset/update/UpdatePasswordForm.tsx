@@ -35,7 +35,7 @@ export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
       <Field
-        description={`${PASSWORD_MIN_LENGTH}文字以上で設定してください`}
+        description={`${PASSWORD_MIN_LENGTH}文字以上で設定してください。`}
         label="新しいパスワード"
         name="password"
         requirement="required"

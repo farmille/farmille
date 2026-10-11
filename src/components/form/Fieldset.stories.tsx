@@ -18,10 +18,10 @@ const meta = {
     children: (
       <div className={nameRow}>
         <Field hideLabel label="姓" name="familyName">
-          <Input placeholder="姓　例）山田" />
+          <Input placeholder="姓" />
         </Field>
         <Field hideLabel label="名" name="givenName">
-          <Input placeholder="名　例）太郎" />
+          <Input placeholder="名" />
         </Field>
       </div>
     ),
@@ -47,10 +47,10 @@ export const AddressParts: Story = {
     children: (
       <>
         <Field label="郵便番号" labelSize="sm" name="postalCode">
-          <Input inputMode="numeric" placeholder="例）3100011" />
+          <Input inputMode="numeric" placeholder="3100011" />
         </Field>
         <Field label="建物名・部屋番号" labelSize="sm" name="building" requirement="optional">
-          <Input placeholder="例）〇〇マンション101" />
+          <Input placeholder="〇〇マンション101" />
         </Field>
       </>
     ),

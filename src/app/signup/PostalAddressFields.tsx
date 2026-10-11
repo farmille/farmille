@@ -5,17 +5,15 @@ import { buttonRecipe } from "@/components/Button";
 import { Field, Fieldset, Input, Select } from "@/components/form";
 import { PREFECTURES } from "@/lib/prefectures";
 
-import { css, cva } from "../../../styled-system/css";
+import { css } from "../../../styled-system/css";
 import { findPostalAddress } from "./postal-action";
-
-const ZIP_GUIDE = "郵便番号を入れると、都道府県と市区町村（町域まで）が自動で入ります。";
 
 const PREFECTURE_OPTIONS = PREFECTURES.map((item) => ({
   value: String(item.code),
   label: item.name,
 }));
 
-const lookupButton = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
+const lookupButton = css(buttonRecipe.raw({ variant: "primary", size: "sm" }), {
   flex: "0 0 auto",
   minW: "0",
   px: "4",
@@ -25,14 +23,7 @@ const postalRowStyle = css({ display: "flex", alignItems: "center", flexWrap: "w
 
 const postalInputStyle = css({ flex: "1 1 token(sizes.44)", maxW: "80" });
 
-const zipNoteRecipe = cva({
-  variants: {
-    announced: {
-      true: { color: "primary.800" },
-      false: {},
-    },
-  },
-});
+const lookupStatusStyle = css({ color: "primary.800" });
 
 export function PostalAddressFields({ values }: { values: Record<string, string> }) {
   const [postal, setPostal] = useState(values.postalCode ?? "");
@@ -62,16 +53,14 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
   }
 
   return (
-    <Fieldset
-      description="※ 市区町村は、プロフィール設定で「市区町村も表示する」を選んだ場合のみ公開されます。郵便番号・番地・建物名は公開されません。"
-      legend="住所"
-      requirement="required"
-    >
+    <Fieldset legend="住所" requirement="required">
       <Field
         description={
-          <span className={zipNoteRecipe({ announced: message !== "" })} role="status">
-            {message || ZIP_GUIDE}
-          </span>
+          message === "" ? undefined : (
+            <span className={lookupStatusStyle} role="status">
+              {message}
+            </span>
+          )
         }
         label="郵便番号"
         labelSize="sm"
@@ -96,7 +85,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
                   : event.target.value,
               );
             }}
-            placeholder="例）310-0011"
+            placeholder="310-0011"
             value={postal}
           />
           <button type="button" className={lookupButton} disabled={pending} onClick={lookup}>
@@ -119,7 +108,13 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
         />
       </Field>
 
-      <Field label="市区町村" labelSize="sm" name="city" visibility="private">
+      <Field
+        description="プロフィール設定で「市区町村も表示する」を選んだ場合のみ公開されます。"
+        label="市区町村"
+        labelSize="sm"
+        name="city"
+        visibility="private"
+      >
         <Input
           autoComplete="address-level2"
           maxLength={100}
@@ -127,7 +122,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
             requestVersion.current++;
             setCity(event.target.value);
           }}
-          placeholder="例）水戸市笠原町"
+          placeholder="水戸市笠原町"
           value={city}
         />
       </Field>
@@ -137,7 +132,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
           autoComplete="address-line1"
           defaultValue={values.streetAddress}
           maxLength={200}
-          placeholder="例）978-6"
+          placeholder="978-6"
         />
       </Field>
 
@@ -152,7 +147,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
           autoComplete="address-line2"
           defaultValue={values.buildingName}
           maxLength={200}
-          placeholder="例）〇〇マンション101"
+          placeholder="〇〇マンション101"
         />
       </Field>
     </Fieldset>

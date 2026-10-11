@@ -26,7 +26,7 @@ export function SellerLoginForm({ next }: { next: string | null }) {
           autoCapitalize="none"
           autoComplete="username"
           defaultValue={values.loginId}
-          placeholder="例）example-agri"
+          placeholder="example-agri"
           spellCheck={false}
           type="text"
         />

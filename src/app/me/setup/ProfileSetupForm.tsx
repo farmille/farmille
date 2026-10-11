@@ -37,7 +37,6 @@ export function ProfileSetupForm() {
         <RadioGroup<string>
           defaultValue={values.standpoint}
           options={STANDPOINTS}
-          variant="cards"
         />
       </Fieldset>
       <FormActions>

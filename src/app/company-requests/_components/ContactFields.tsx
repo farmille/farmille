@@ -34,7 +34,7 @@ export function ContactFields({
         <Input
           defaultValue={defaults.companyName}
           maxLength={200}
-          placeholder="例）〇〇バイオ株式会社"
+          placeholder="〇〇バイオ株式会社"
         />
       </Field>
       <Field
@@ -48,7 +48,7 @@ export function ContactFields({
           inputMode="numeric"
           maxLength={13}
           pattern="[0-9]{13}"
-          placeholder="例）1234567890123"
+          placeholder="1234567890123"
         />
       </Field>
       <Field
@@ -70,7 +70,7 @@ export function ContactFields({
         requirement="required"
         visibility="private"
       >
-        <Input defaultValue={defaults.contactName} maxLength={200} placeholder="例）金子 太郎" />
+        <Input defaultValue={defaults.contactName} maxLength={200} placeholder="金子 太郎" />
       </Field>
       <Field
         label="部署名"
@@ -78,7 +78,7 @@ export function ContactFields({
         requirement="required"
         visibility="private"
       >
-        <Input defaultValue={defaults.department} maxLength={200} placeholder="例）営業部" />
+        <Input defaultValue={defaults.department} maxLength={200} placeholder="営業部" />
       </Field>
       <Field
         label="担当者メールアドレス"
@@ -102,7 +102,7 @@ export function ContactFields({
         <Input
           defaultValue={defaults.phone}
           maxLength={50}
-          placeholder="例）03-1234-5678"
+          placeholder="03-1234-5678"
           type="tel"
         />
       </Field>

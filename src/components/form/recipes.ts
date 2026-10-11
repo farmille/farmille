@@ -30,7 +30,15 @@ const controlSizes = {
 
 export const controlRecipe = cva({
   base: controlBase,
-  variants: { size: controlSizes },
+  variants: {
+    size: controlSizes,
+    reveal: {
+      true: { pe: "12" },
+    },
+    readOnly: {
+      true: { bg: "border.default", cursor: "default" },
+    },
+  },
   defaultVariants: { size: "md" },
 });
 
@@ -103,7 +111,13 @@ export const guideRecipe = cva({
 });
 
 export const visibilityRecipe = cva({
-  base: { display: "inline-flex", alignItems: "center", gap: "1", fontWeight: "bold" },
+  base: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "1",
+    fontWeight: "bold",
+    textStyle: "supporting",
+  },
   variants: {
     visibility: {
       public: { color: "primary.800" },
