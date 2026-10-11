@@ -1,14 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
-import SellerProceduresPage from "./page";
-
+import Page from "./not-found";
 const meta = {
-  title: "App/Sellers/SellerProceduresPage",
-  component: SellerProceduresPage,
+  title: "Pages/me/saved/compare/NotFound",
+  component: Page,
   parameters: { layout: "fullscreen" },
-} satisfies Meta<typeof SellerProceduresPage>;
-
+  args: {},
+} satisfies Meta<typeof Page>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-
 export const Default: Story = {};

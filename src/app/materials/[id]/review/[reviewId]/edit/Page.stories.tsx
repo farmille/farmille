@@ -1,0 +1,28 @@
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import Page from "./page";
+import { preparePageSession } from "../../../../../../../.storybook/page-session";
+
+const meta = {
+  title: "Pages/materials/[id]/review/[reviewId]/edit",
+  component: Page,
+  beforeEach: () => preparePageSession("general"),
+  parameters: {
+    layout: "fullscreen",
+    nextjs: {
+      navigation: {
+        pathname:
+          "/materials/00000000-0000-4000-8000-000000000101/review/11111111-1111-4111-8111-111111111111/edit",
+      },
+    },
+  },
+  args: {
+    searchParams: Promise.resolve({}),
+    params: Promise.resolve({
+      id: "00000000-0000-4000-8000-000000000101",
+      reviewId: "11111111-1111-4111-8111-111111111111",
+    }),
+  },
+} satisfies Meta<typeof Page>;
+export default meta;
+type Story = StoryObj<typeof meta>;
+export const Default: Story = {};

@@ -1,5 +1,7 @@
 import type { Preview } from "@storybook/nextjs-vite";
 import { sb } from "storybook/test";
+import { createElement, Fragment } from "react";
+import { Toaster } from "../src/components/Toaster";
 
 import "gen-interface-jp/400.css";
 import "gen-interface-jp/500.css";
@@ -12,6 +14,7 @@ import "../src/app/globals.css";
 
 // Supabase・next/headers に依存する server モジュールを __mocks__ 配下の実装へ差し替える
 sb.mock(import("../src/server/auth.ts"));
+sb.mock(import("../src/server/supabase.ts"));
 sb.mock(import("../src/app/company-requests/actions.ts"));
 sb.mock(import("../src/server/actions/helpful.ts"));
 sb.mock(import("../src/server/actions/post-actions.ts"));
@@ -46,6 +49,80 @@ sb.mock(import("../src/app/sellers/login/actions.ts"));
 sb.mock(import("../src/app/signup/actions.ts"));
 sb.mock(import("../src/app/signup/postal-action.ts"));
 sb.mock(import("../src/app/dashboard/profile/actions.ts"));
+
+sb.mock(import("../src/server/queries/home-materials.ts"));
+
+sb.mock(import("../src/server/accounts/passkeys.ts"));
+
+sb.mock(import("../src/server/admin/summary.ts"));
+
+sb.mock(import("../src/server/company-applications.ts"));
+
+sb.mock(import("../src/server/admin/materials.ts"));
+
+sb.mock(import("../src/server/admin/sellers.ts"));
+
+sb.mock(import("../src/server/queries/classifications.ts"));
+
+sb.mock(import("../src/server/material-page-audits.ts"));
+
+sb.mock(import("../src/server/admin/material-page-review.ts"));
+
+sb.mock(import("../src/server/material-page-editor.ts"));
+
+sb.mock(import("../src/server/manufacturer-profile.ts"));
+
+sb.mock(import("../src/server/admin/material-change-requests.ts"));
+
+sb.mock(import("../src/server/admin/mfa.ts"));
+
+sb.mock(import("../src/server/admin/published-posts.ts"));
+
+sb.mock(import("../src/server/admin/reports.ts"));
+
+sb.mock(import("../src/server/admin/tags.ts"));
+
+sb.mock(import("../src/server/admin/usage-reports.ts"));
+
+sb.mock(import("../src/server/queries/content-feed.ts"));
+
+sb.mock(import("../src/server/queries/helpful.ts"));
+
+sb.mock(import("../src/server/queries/articles.ts"));
+
+sb.mock(import("../src/server/queries/view-events.ts"));
+
+sb.mock(import("../src/server/queries/seller-dashboard.ts"));
+
+sb.mock(import("../src/server/company-application-evidence.ts"));
+
+sb.mock(import("../src/server/queries/seller-articles.ts"));
+
+sb.mock(import("../src/server/queries/material-content.ts"));
+
+sb.mock(import("../src/server/queries/materials.ts"));
+
+sb.mock(import("../src/server/queries/saved-materials.ts"));
+
+sb.mock(import("../src/server/accounts/registered-address.ts"));
+
+sb.mock(import("../src/server/queries/me-page.ts"));
+
+sb.mock(import("../src/server/queries/profile-details.ts"));
+
+sb.mock(import("../src/server/queries/profiles.ts"));
+
+sb.mock(import("../src/server/queries/catalog-search.ts"));
+
+sb.mock(import("../src/server/queries/public-sellers.ts"));
+
+sb.mock(import("../src/server/queries/public-profiles.ts"));
+
+sb.mock(import("../src/server/company-application-auth.ts"));
+
+sb.mock(import("../src/server/admin/guard.ts"));
+
+sb.mock(import("../src/server/usage-reports/structured.ts"));
 
 // 主要なブレークポイントの直前後をツールバーから連続して確認できるようにする。
 const viewports = {
@@ -82,6 +159,12 @@ const viewports = {
 };
 
 const preview: Preview = {
+  decorators: [
+    (Story, context) =>
+      context.title.startsWith("Pages/")
+        ? createElement(Fragment, null, createElement(Story), createElement(Toaster))
+        : createElement(Story),
+  ],
   parameters: {
     nextjs: { appDirectory: true },
     viewport: { options: viewports },

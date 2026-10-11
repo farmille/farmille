@@ -138,6 +138,16 @@ async function gotoStory(page: Page, storyId: string): Promise<void> {
     );
   }
 
+  if (storyId.startsWith("pages-") && !storyId.includes("-loading--")) {
+    await page.waitForFunction(
+      () =>
+        document.body.classList.contains("sb-show-errordisplay") ||
+        document.querySelector('#storybook-root [aria-busy="true"]') === null,
+      undefined,
+      { timeout: RENDER_TIMEOUT },
+    );
+  }
+
   await page.evaluate(async () => {
     await document.fonts.ready;
   });
