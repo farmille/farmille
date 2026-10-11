@@ -159,7 +159,9 @@ export async function getStructuredUsageReport(
 ) {
   const { data, error } = await supabase
     .from("usage_reports")
-    .select(`*,
+    .select(`id, updated_at, material_id, author_user_id, crop_id, variety, variety_unknown,
+    observed_change, purpose_tags, purpose_note, prefecture_code, publish_city,
+    cultivation_environment, timing_note, method_details_ack, documents_ack, pesticide_ack,
     locations:usage_report_private_locations(city),
     timings:usage_report_timings(stage),
     plots:usage_report_plots(*,steps:usage_report_plot_steps(*,targets:usage_report_step_targets(target))),
