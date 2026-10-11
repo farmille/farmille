@@ -1,6 +1,7 @@
 import { defineConfig } from "@pandacss/dev";
 
-import { semanticTokens, tokens } from "./src/theme/tokens";
+import { textStyles } from "./src/theme/textStyles";
+import { breakpoints, semanticTokens, tokens } from "./src/theme/tokens";
 
 // 値の正は docs/rebuild/02-screens.md §5（モック :root ライト側）。ダーク条件は置かない（D12）。
 export default defineConfig({
@@ -17,15 +18,18 @@ export default defineConfig({
       touch: "@media (hover: none) and (pointer: coarse)",
     },
   },
+  // トークンカタログは全 textStyle を実行時の名前で描くので、どこにも使われていない役割も出力する。
+  staticCss: { css: [{ properties: { textStyle: ["*"] } }] },
   theme: {
-    // sp（767px 以下）は base。tab 以上は PC 寄りの UI にし、pc は 768px 幅で成立しない密度だけを持つ。
-    breakpoints: { tab: "768px", pc: "1024px" },
+    breakpoints,
     tokens: {
       ...tokens,
       // Panda は sizes に無い数値を px のまま出力する（w: "8" → 8px）。寸法でも余白と同じ数値スケールと full を使えるようにする。
       sizes: { ...tokens.spacing, full: { value: "100%" }, ...tokens.sizes },
     },
     semanticTokens,
+    // extend にすると preset-panda の xs〜9xl（rem 指定）が残り、fontSizes と同じ名前で別の大きさになる。
+    textStyles,
     extend: {
       keyframes: { "skeleton-pulse": { "0%, 100%": { opacity: "1" }, "50%": { opacity: "0.5" } } },
     },
