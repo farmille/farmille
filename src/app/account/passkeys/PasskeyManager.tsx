@@ -11,6 +11,14 @@ import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { passkeyErrorMessage } from "@/lib/auth/passkey-error";
 import { errorMessageJa } from "@/server/errors";
 
+import { css } from "../../../../styled-system/css";
+
+const statusText = css({ textStyle: "body" });
+const passkeyRow = css({ display: "grid", gap: "1.5" });
+const passkeyName = css({ textStyle: "body" });
+const passkeyMeta = css({ textStyle: "supporting", color: "text.muted" });
+const helpText = css({ textStyle: "supporting", color: "text.subtle" });
+
 export function PasskeyManager({
   passkeys,
   admin,
@@ -54,11 +62,13 @@ export function PasskeyManager({
         <Notice tone="info">運営画面では、パスキーによるログイン後も2要素認証が必要です。</Notice>
       ) : null}
       {message ? <Notice tone={failed ? "error" : "success"}>{message}</Notice> : null}
-      {passkeys.length === 0 ? <p>パスキーはまだ登録されていません。</p> : null}
+      {passkeys.length === 0 ? (
+        <p className={statusText}>パスキーはまだ登録されていません。</p>
+      ) : null}
       {passkeys.map((passkey) => (
-        <div key={passkey.id}>
-          <p>{passkey.friendly_name || "パスキー"}</p>
-          <p>
+        <div key={passkey.id} className={passkeyRow}>
+          <p className={passkeyName}>{passkey.friendly_name || "パスキー"}</p>
+          <p className={passkeyMeta}>
             登録日：
             {new Date(passkey.created_at).toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })}
           </p>
@@ -79,7 +89,7 @@ export function PasskeyManager({
       <Button disabled={pending} onClick={() => change(null)}>
         {pending ? "処理中…" : "パスキーを登録する"}
       </Button>
-      <p>
+      <p className={helpText}>
         パスワードでのログインも引き続き利用できます。端末のパスワード管理アプリに残ったパスキーは、必要に応じて端末側でも削除してください。
       </p>
     </FormActions>

@@ -37,6 +37,7 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 - **anti-slop**：全ルールを `error` のまま適用する。違反は実コードの型と境界設計を直して解消し、ルールの無効化・警告化、ignore の追加、disable コメント、広い型への言い換えで回避しない
 - **vendored lint**：`tools/oxlint/` は lint 実装の取り込み先として扱い、診断を通す目的で内部実装を編集しない。`tools/oxlint/anti-slop/` は [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop) の commit `6d538555cb151d4121ed51a27db81890eacf8ae9` を取り込んだもの。更新時は upstream の差分をそのまま取り込み、ルールの変更が必要ならアプリ側の修正で対応できない根拠を先に示す
 - **スタイル**：色・余白・角丸・タイポの生値をコンポーネントに直書きしない。すべて Panda のトークン経由。条件分岐は recipe の variant として列挙し、実行時に決まる動的値をスタイルへ渡さない
+- **文字**：大きさと行高は `textStyle` の役割（`src/theme/textStyles.ts`、一覧は `/dev/tokens`）から選び、色は呼び出し側で足す。役割に無い組み合わせが3か所に出たら役割を足す
 - **UI 部品**：フォーム部品・ダイアログ・通知・開閉・候補つきの入力は、`src/components` の共通部品（フォーム部品は `src/components/form`）を使う。`@base-ui/react` と `sonner` は `src/components` の中でだけ import する（外からは ESLint の `no-restricted-imports` で止まる）。足りないものは共通部品に足し、画面ごとに作らない
 - **動き**：transform と opacity だけを動かし、ease-out にする。`prefers-reduced-motion` では位置を動かさず不透明度だけを変える。打鍵のたびに描き直す一覧や、何度も開け閉めする欄は動かさない
 - **状態とデータ取得**：取得は Server Components、変更は Server Actions か Route Handlers に寄せる。クライアント側の状態は入力フォームとトグルに限る
