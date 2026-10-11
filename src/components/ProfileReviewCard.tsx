@@ -60,8 +60,7 @@ const crops = css({
 
 const text = css({
   color: "text.muted",
-  fontSize: "md",
-  lineHeight: "relaxed",
+  textStyle: "body",
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });

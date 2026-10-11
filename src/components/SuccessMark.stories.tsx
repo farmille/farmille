@@ -24,7 +24,7 @@ export const Entrance: Story = {
       </h1>
       <p
         className={cx(
-          css({ mt: "2", fontSize: "md", color: "text.muted" }),
+          css({ mt: "2", textStyle: "supporting", color: "text.muted" }),
           completionStepRecipe({ step: 2 }),
         )}
       >

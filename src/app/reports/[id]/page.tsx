@@ -225,9 +225,8 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                   borderColor: "border.default",
                   borderRadius: "input",
                   bg: "surface.page",
-                  fontSize: "sm",
+                  textStyle: "note",
                   color: "text.muted",
-                  lineHeight: "normal",
                 })}
               >
                 <span

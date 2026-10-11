@@ -115,7 +115,7 @@ export function ReviewCard({
           <Icon name="person" size="sm" />
         )}
       </span>
-      <span className={css({ fontWeight: "bold", fontSize: "sm" })}>{handle}</span>
+      <span className={css({ textStyle: "body", fontWeight: "bold" })}>{handle}</span>
       {authorDetails ? (
         <span className={css({ color: "text.subtle", textStyle: "note" })}>{authorDetails}</span>
       ) : null}
@@ -164,7 +164,7 @@ export function ReviewCard({
       >
         <span className={cropChip}>{crop}</span>
       </div>
-      <p className={css({ fontSize: "sm", color: "text.muted", lineHeight: "relaxed" })}>{body}</p>
+      <p className={css({ textStyle: "body", color: "text.muted" })}>{body}</p>
       {displayedPhotoCount > 0 ? (
         <div
           className={css({

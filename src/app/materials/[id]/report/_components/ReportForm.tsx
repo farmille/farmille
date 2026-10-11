@@ -118,7 +118,7 @@ const title = css({
 
 const titleMaterial = css({
   display: "block",
-  fontSize: "sm",
+  textStyle: "supporting",
   fontWeight: "medium",
   color: "text.subtle",
   tab: { display: "inline", ml: "2" },
@@ -246,7 +246,7 @@ const doneMark = css({ mb: "4.5" });
 
 const doneTitle = css({ m: "0", fontSize: "xl", fontWeight: "extrabold", textWrap: "balance" });
 
-const doneText = css({ mt: "1", mb: "4", fontSize: "sm", color: "text.subtle" });
+const doneText = css({ mt: "1", mb: "4", textStyle: "supporting", color: "text.subtle" });
 
 const foot = css({
   position: "fixed",
@@ -272,7 +272,7 @@ const footInner = css({
 
 const stepCount = css({
   display: "none",
-  fontSize: "sm",
+  textStyle: "supporting",
   color: "text.subtle",
   tab: { display: "inline" },
 });

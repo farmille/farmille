@@ -26,7 +26,7 @@ const groupTitleStyle = css({
   pt: "2",
   px: "0.5",
   pb: "0.5",
-  fontSize: "xs",
+  textStyle: "body",
   fontWeight: "bold",
   color: "text.subtle",
 });

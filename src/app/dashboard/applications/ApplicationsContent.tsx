@@ -45,8 +45,7 @@ const PROCEDURES = [
 const pageTitle = css({ fontSize: "lg", mb: "2.5", tab: { fontSize: "3xl" } });
 
 const lead = css({
-  fontSize: "md",
-  lineHeight: "loose",
+  textStyle: "supporting",
   color: "text.muted",
   mt: "2",
   mb: "1.5",

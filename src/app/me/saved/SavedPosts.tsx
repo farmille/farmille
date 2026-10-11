@@ -90,7 +90,11 @@ export async function SavedPosts({ userId }: { userId: string }) {
             />
           );
         })}
-        {visible.length === 0 ? <p>まだ保存した投稿がありません。</p> : null}
+        {visible.length === 0 ? (
+          <p className={css({ textStyle: "supporting", color: "text.muted" })}>
+            まだ保存した投稿がありません。
+          </p>
+        ) : null}
       </div>
     </section>
   );

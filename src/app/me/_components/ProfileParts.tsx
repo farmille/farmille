@@ -14,10 +14,7 @@ const headingRow = css({
   tab: { mt: "14", mb: "5" },
 });
 
-const headingText = css({
-  fontSize: "lg",
-  tab: { fontSize: "3xl", letterSpacing: "0.01em" },
-});
+const headingText = css({ textStyle: "title" });
 
 const headingCount = css({
   color: "text.subtle",

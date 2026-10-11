@@ -1,4 +1,5 @@
 import { AdminShell } from "@/app/admin/_components/AdminShell";
+import { adminBodyStyle } from "@/app/admin/_components/AdminUI";
 import { requireAdminPage } from "@/app/admin/_lib/access";
 import { SurfaceCard, TextLink, EmptyState, formatDateJa } from "@/components";
 import {
@@ -24,7 +25,10 @@ export default async function ExpressionReviewsPage() {
           key={version.id}
           title={`${version.seller_accounts?.official_name}のプロフィール`}
         >
-          <TextLink href={`/admin/materials/expressions/profiles/${version.id}`}>
+          <TextLink
+            className={adminBodyStyle}
+            href={`/admin/materials/expressions/profiles/${version.id}`}
+          >
             会社紹介・ロゴ・リンクを確認
           </TextLink>
         </SurfaceCard>
@@ -38,7 +42,12 @@ export default async function ExpressionReviewsPage() {
             title={version.materials?.name}
             description={`${version.seller_accounts?.official_name}／${formatDateJa(version.created_at)}`}
           >
-            <TextLink href={`/admin/materials/expressions/${version.id}`}>原稿を確認</TextLink>
+            <TextLink
+              className={adminBodyStyle}
+              href={`/admin/materials/expressions/${version.id}`}
+            >
+              原稿を確認
+            </TextLink>
           </SurfaceCard>
         ))
       )}

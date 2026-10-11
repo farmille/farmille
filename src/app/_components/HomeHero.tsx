@@ -57,9 +57,9 @@ const label = css({
   gap: "3",
   m: "0",
   color: "text.inverse/90",
-  fontSize: "2xs",
+  textStyle: "note",
   letterSpacing: "0.24em",
-  tab: { fontSize: "xs", color: "text.inverse" },
+  tab: { color: "text.inverse" },
   _before: {
     content: '""',
     display: "block",

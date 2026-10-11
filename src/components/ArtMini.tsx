@@ -71,12 +71,10 @@ export function ArtMini({
         )}
       </div>
       <div className={css({ flex: "1", minW: "0" })}>
-        <div className={css({ fontSize: "sm", fontWeight: "bold", lineHeight: "snug" })}>
-          {title}
-        </div>
+        <div className={css({ textStyle: "body", fontWeight: "bold" })}>{title}</div>
         <div
           className={css({
-            fontSize: "2xs",
+            textStyle: "note",
             color: "text.muted",
             mt: "1",
             display: "flex",

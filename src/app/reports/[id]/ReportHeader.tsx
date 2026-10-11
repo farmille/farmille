@@ -86,7 +86,7 @@ export function ReportHeader({
         })}
       >
         <div className={css({ fontSize: "xs", color: "text.subtle" })}>対象資材</div>
-        <div className={css({ fontSize: "md", fontWeight: "extrabold" })}>
+        <div className={css({ textStyle: "body", fontWeight: "extrabold" })}>
           {report.material.name}
         </div>
         <div className={css({ fontSize: "sm", color: "text.subtle" })}>

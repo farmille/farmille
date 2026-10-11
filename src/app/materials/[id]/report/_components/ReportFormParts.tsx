@@ -2,7 +2,7 @@ import { Toaster } from "@/components/Toaster";
 
 import { css, cva } from "../../../../../../styled-system/css";
 
-export const reportFrame = css({ minH: "100dvh", fontSize: "md", lineHeight: "prose" });
+export const reportFrame = css({ minH: "100dvh", textStyle: "body" });
 
 export const pillButtonRecipe = cva({
   base: {
@@ -48,12 +48,11 @@ const groupHeading = css({
   display: "flex",
   alignItems: "baseline",
   gap: "2",
-  fontSize: "md",
+  textStyle: "title",
   fontWeight: "extrabold",
-  lineHeight: "prose",
 });
 
-const groupNote = css({ fontSize: "sm", fontWeight: "medium", color: "text.subtle" });
+const groupNote = css({ textStyle: "supporting", fontWeight: "medium", color: "text.subtle" });
 
 export function GroupHeading({ title, note }: { title: string; note: string }) {
   return (

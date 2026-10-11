@@ -117,7 +117,7 @@ export function SearchResults({
         groups.map((group) => (
           <section key={group.title ?? "results"}>
             {group.title ? (
-              <h2 className={css({ mt: "4", mb: "2", fontSize: "md", fontWeight: "bold" })}>
+              <h2 className={css({ mt: "4", mb: "2", textStyle: "title", fontWeight: "bold" })}>
                 {group.title} {group.items.length}件
               </h2>
             ) : null}

@@ -29,7 +29,7 @@ const formStyle = css({
 });
 
 const groupTitleStyle = css({
-  fontSize: "md",
+  textStyle: "title",
   fontWeight: "bold",
   color: "text.muted",
   mt: "2",

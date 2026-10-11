@@ -62,9 +62,7 @@ export function MaterialRefCard({
         {showTargetLabel ? (
           <div className={css({ fontSize: "2xs", color: "text.muted" })}>対象資材</div>
         ) : null}
-        <div className={css({ fontWeight: "bold", fontSize: "md", lineHeight: "snug" })}>
-          {name}
-        </div>
+        <div className={css({ textStyle: "body", fontWeight: "bold" })}>{name}</div>
         <div
           className={css({
             display: "flex",

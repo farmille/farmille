@@ -28,7 +28,7 @@ export const dialogRecipe = sva({
       transitionDuration: "dialog",
       transitionTimingFunction: "out",
     },
-    title: { m: "0" },
+    title: { m: "0", textStyle: "title" },
     description: { mt: "2", textStyle: "supporting", color: "text.muted" },
     actions: { display: "flex", gap: "2", mt: "4", "& > *": { flex: "1" } },
   },
@@ -63,7 +63,6 @@ export const dialogRecipe = sva({
             _motionReduce: { transform: "none" },
           },
         },
-        title: { textStyle: "title" },
       },
       fullscreen: {
         popup: {
@@ -90,7 +89,6 @@ export const dialogRecipe = sva({
           borderBottomStyle: "solid",
           borderBottomColor: "border.default",
         },
-        title: { fontSize: "sm" },
         description: { px: "4" },
       },
     },

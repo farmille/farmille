@@ -24,6 +24,7 @@ import {
   stepCardRecipe,
   stepLabelRecipe,
   stepLinkStyle,
+  stepTitleStyle,
 } from "./guide-styles";
 import {
   CONTACT_EMAIL,
@@ -233,10 +234,8 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             borderLeftWidth: "5px",
             borderLeftStyle: "solid",
             borderLeftColor: "primary.700",
-            fontSize: "xl",
+            textStyle: "title",
             fontWeight: "extrabold",
-            lineHeight: "snug",
-            pc: { fontSize: "3xl" },
           })}
         >
           企業会員登録とは
@@ -398,9 +397,8 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           const target = step.action === null ? null : stepLinks[step.action];
           return (
             <article className={stepCardRecipe({ actor: step.actor })} key={step.title}>
-              <h3 className={stepLabelRecipe({ actor: step.actor })}>
-                STEP{index + 1}　{step.title}
-              </h3>
+              <span className={stepLabelRecipe({ actor: step.actor })}>STEP{index + 1}</span>
+              <h3 className={stepTitleStyle}>{step.title}</h3>
               <div className={stepBodyRecipe({ actor: step.actor })}>{step.body}</div>
               {target === null ? null : (
                 <Link className={stepLinkStyle} href={target.href}>
@@ -576,7 +574,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         )}
         aria-labelledby="lpContact"
       >
-        <h2 className={css({ fontSize: "md", fontWeight: "extrabold" })} id="lpContact">
+        <h2 className={css({ textStyle: "title", fontWeight: "extrabold" })} id="lpContact">
           お問い合わせ
         </h2>
         <a
@@ -615,10 +613,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         })}
         aria-labelledby="lpApply"
       >
-        <h2
-          className={css({ fontSize: "xl", fontWeight: "extrabold", pc: { fontSize: "2xl" } })}
-          id="lpApply"
-        >
+        <h2 className={css({ textStyle: "title", fontWeight: "extrabold" })} id="lpApply">
           企業会員登録を申請する
         </h2>
         <div className={css({ mt: "2", fontSize: "sm", lineHeight: "prose" })}>
@@ -659,9 +654,8 @@ const guideCardTitleStyle = css({
   borderLeftWidth: "3px",
   borderLeftStyle: "solid",
   borderLeftColor: "primary.700",
-  fontSize: "md",
+  textStyle: "title",
   fontWeight: "extrabold",
-  lineHeight: "snug",
 });
 
 function GuideCard({
@@ -692,7 +686,12 @@ function PrepBox({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className={guideBoxStyle}>
       <h3
-        className={css({ mb: "2", fontSize: "md", fontWeight: "extrabold", color: "primary.800" })}
+        className={css({
+          mb: "2",
+          textStyle: "title",
+          fontWeight: "extrabold",
+          color: "primary.800",
+        })}
       >
         {title}
       </h3>
@@ -784,7 +783,7 @@ const requirementBoxStyle = css({
   borderStyle: "solid",
   borderColor: "border.default",
   borderRadius: "input",
-  "& h4": { mb: "1.5", fontSize: "sm", fontWeight: "extrabold", color: "primary.800" },
+  "& h4": { mb: "1.5", textStyle: "body", fontWeight: "extrabold", color: "primary.800" },
   "& ul": {
     pl: "4",
     fontSize: "sm",

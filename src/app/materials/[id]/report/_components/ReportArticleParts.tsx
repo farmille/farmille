@@ -61,7 +61,7 @@ const plotName = css({
   alignItems: "center",
   columnGap: "2.5",
   rowGap: "1.5",
-  fontSize: "md",
+  textStyle: "body",
 });
 const plotScope = css({
   fontSize: "sm",

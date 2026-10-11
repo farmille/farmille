@@ -145,7 +145,7 @@ export function MaterialCard({
         <div className={css({ px: "2.5", py: "2.5" })}>
           <div
             className={css({
-              fontSize: "sm",
+              textStyle: "body",
               fontWeight: "bold",
               minW: "0",
               overflow: "hidden",
@@ -157,7 +157,7 @@ export function MaterialCard({
           </div>
           <div
             className={css({
-              fontSize: "2xs",
+              textStyle: "note",
               color: "text.muted",
               mt: "0.5",
               display: "flex",
@@ -174,7 +174,7 @@ export function MaterialCard({
                 alignItems: "center",
                 gap: "1",
                 mt: "1",
-                fontSize: "2xs",
+                textStyle: "note",
               })}
             >
               <StarRating value={rating} />
@@ -243,7 +243,7 @@ export function MaterialCard({
         ) : null}
       </div>
       <div className={css({ flex: "1", minW: "0" })}>
-        <div className={css({ fontSize: "md", fontWeight: "bold" })}>{name}</div>
+        <div className={css({ textStyle: "body", fontWeight: "bold" })}>{name}</div>
         <div
           className={css({
             textStyle: "note",

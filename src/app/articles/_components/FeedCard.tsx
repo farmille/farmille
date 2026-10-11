@@ -33,9 +33,8 @@ const placeholderIconStyle = css({ color: "primary.700" });
 
 const titleStyle = css({
   display: "block",
-  fontSize: "sm",
+  textStyle: "body",
   fontWeight: "bold",
-  lineHeight: "snug",
   color: "inherit",
   textDecoration: "none",
 });

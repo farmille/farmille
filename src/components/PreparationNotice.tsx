@@ -39,8 +39,7 @@ export function PreparationNotice({
             display: "flex",
             alignItems: "center",
             gap: "2",
-            fontSize: "lg",
-            lineHeight: "relaxed",
+            textStyle: "title",
             fontWeight: "semibold",
           })}
         >

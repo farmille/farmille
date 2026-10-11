@@ -36,7 +36,7 @@ function SectionHead({ id, title, children }: { id: string; title: string; child
         pc: { mt: "14", mb: "5" },
       })}
     >
-      <h2 id={id} className={css({ fontSize: "lg", pc: { fontSize: "3xl" } })}>
+      <h2 id={id} className={css({ textStyle: "title" })}>
         {title}
       </h2>
       {children}

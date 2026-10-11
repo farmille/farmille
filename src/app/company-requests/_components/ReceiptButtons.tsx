@@ -38,8 +38,7 @@ export function ReceiptButtons({ id, sent }: { id: string; sent: boolean }) {
           flexDirection: "column",
           alignItems: "flex-start",
           gap: "3",
-          fontSize: "md",
-          lineHeight: "relaxed",
+          textStyle: "supporting",
         }),
       )}
     >

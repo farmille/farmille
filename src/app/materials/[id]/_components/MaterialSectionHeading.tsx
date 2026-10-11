@@ -24,8 +24,8 @@ const headingRecipe = cva({
 });
 
 const titleStyle = css({
-  fontSize: "lg",
-  pc: { fontSize: "3xl", letterSpacing: "0.01em" },
+  textStyle: "title",
+  pc: { letterSpacing: "0.01em" },
 });
 
 const countStyle = css({

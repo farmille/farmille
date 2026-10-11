@@ -18,7 +18,7 @@ const row = css(surfaceCardRecipe.raw({ padding: "flush" }), {
 
 const main = css({ flex: "1", minW: "0" });
 
-const title = css({ fontSize: "md" });
+const title = css({ textStyle: "title" });
 
 const description = css({
   fontSize: "sm",

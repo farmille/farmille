@@ -73,9 +73,8 @@ const titleStyle = css({
 });
 
 const descriptionStyle = css({
-  fontSize: "md",
+  textStyle: "supporting",
   color: "text.muted",
-  lineHeight: "relaxed",
   mt: "1.5",
 });
 

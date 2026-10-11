@@ -42,13 +42,12 @@ const stackStyle = css({ display: "flex", flexDirection: "column", gap: "4" });
 // fieldset 既定の枠と余白を外し、送信中は中の入力をまとめて無効にする。
 const fieldsetStyle = css({ borderWidth: "0", p: "0", m: "0", minW: "0" });
 
-const introTextStyle = css({ fontSize: "md", lineHeight: "relaxed" });
+const introTextStyle = css({ textStyle: "supporting" });
 
 const introListStyle = css({
   mt: "2.5",
   pl: "4.5",
-  fontSize: "md",
-  lineHeight: "relaxed",
+  textStyle: "supporting",
   listStyle: "disc",
 });
 

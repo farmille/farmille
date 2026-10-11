@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 const linkStyle = css({
+  textStyle: "body",
   color: "primary.700",
   fontWeight: "bold",
   textDecoration: "none",

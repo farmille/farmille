@@ -9,6 +9,10 @@ import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/compone
 import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState } from "@/lib/auth/form-state";
 
+import { css } from "../../../../styled-system/css";
+
+const logoutNote = css({ textStyle: "supporting", color: "text.muted" });
+
 export function ChangePasswordForm({
   loginHref,
   resetHref,
@@ -43,7 +47,7 @@ export function ChangePasswordForm({
       <Field label="新しいパスワード（確認）" name="passwordConfirmation" requirement="required">
         <Input autoComplete="new-password" type="password" />
       </Field>
-      <p>変更すると、ログイン中の他の端末も順次ログアウトします。</p>
+      <p className={logoutNote}>変更すると、ログイン中の他の端末も順次ログアウトします。</p>
       <FormActions>
         <SubmitButton pendingLabel="変更中…">パスワードを変更する</SubmitButton>
       </FormActions>

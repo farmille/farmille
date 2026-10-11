@@ -36,6 +36,7 @@ export default function CompareNotFound() {
             className={css({
               mt: "2",
               color: "primary.700",
+              textStyle: "body",
               fontWeight: "bold",
               textDecoration: "none",
             })}

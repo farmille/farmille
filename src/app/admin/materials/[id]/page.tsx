@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/app/admin/_components/AdminShell";
-import { Panel, adminInlineNoteStyle } from "@/app/admin/_components/AdminUI";
+import { Panel, adminBodyStyle, adminInlineNoteStyle } from "@/app/admin/_components/AdminUI";
 import { requireAdminPage } from "@/app/admin/_lib/access";
 import { ClaimForm } from "@/app/admin/materials/[id]/ClaimForm";
 import { MaterialForm } from "@/app/admin/materials/_components/MaterialForm";
@@ -80,7 +80,7 @@ export default async function AdminMaterialDetailPage({
           sellers={sellers.data}
         />
         {grants.map((grant) => (
-          <p key={grant.id}>
+          <p className={adminBodyStyle} key={grant.id}>
             {formatDateJa(grant.granted_at)}／{grant.revoked_at ? "取消済み" : "有効"}／書類：
             {grant.document_reference}
           </p>
@@ -90,7 +90,7 @@ export default async function AdminMaterialDetailPage({
       <Panel title="掲載後の確認・監査">
         <MaterialAuditForm materialId={id} />
         {audits.map((audit) => (
-          <p key={audit.id}>
+          <p className={adminBodyStyle} key={audit.id}>
             {formatDateJa(audit.created_at)}／{audit.note}
           </p>
         ))}

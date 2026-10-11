@@ -58,9 +58,8 @@ const cropsStyle = css({
   gap: "1.5",
 });
 const bodyStyle = css({
-  fontSize: "md",
+  textStyle: "body",
   color: "text.muted",
-  lineHeight: "relaxed",
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });

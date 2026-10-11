@@ -74,9 +74,7 @@ export function ArticleCard({
         )}
       </div>
       <div className={css({ px: "3.5", py: "3" })}>
-        <div className={css({ fontSize: "md", fontWeight: "bold", lineHeight: "snug" })}>
-          {title}
-        </div>
+        <div className={css({ textStyle: "body", fontWeight: "bold" })}>{title}</div>
         <div
           className={css({
             display: "flex",

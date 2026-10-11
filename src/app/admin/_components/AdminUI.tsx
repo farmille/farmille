@@ -128,6 +128,9 @@ export const adminFieldGridStyle = css({
   tab: { gridTemplateColumns: "1fr 1fr" },
 });
 
+/** 運営管理の一覧の行・単独のリンク行・状態の表示など、基本の文。 */
+export const adminBodyStyle = css({ textStyle: "body" });
+
 export const adminInlineNoteStyle = css({
   textStyle: "supporting",
   color: "text.subtle",

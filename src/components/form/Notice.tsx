@@ -7,7 +7,7 @@ const noticeRecipe = cva({
     px: "3",
     borderWidth: "1px",
     borderStyle: "solid",
-    textStyle: "supporting",
+    textStyle: "note",
   },
   variants: {
     tone: {
@@ -26,7 +26,6 @@ const noticeRecipe = cva({
         color: "primary.700",
         borderColor: "primary.600/30",
         fontWeight: "bold",
-        lineHeight: "normal",
       },
       info: {
         py: "3",
@@ -41,7 +40,6 @@ const noticeRecipe = cva({
         bg: "accent.warnSoft",
         color: "accent.warn",
         borderColor: "border.default",
-        textStyle: "note",
       },
       neutral: {
         py: "2.5",
@@ -49,7 +47,6 @@ const noticeRecipe = cva({
         bg: "surface.page",
         color: "text.muted",
         borderColor: "border.default",
-        textStyle: "note",
       },
     },
   },

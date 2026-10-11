@@ -72,13 +72,13 @@ const postStatus = css({
   "& a": { color: "primary.800", fontWeight: "bold", textDecoration: "none" },
 });
 
-const postTitle = css({ fontSize: "md", fontWeight: "bold", lineHeight: "snug" });
+const postTitle = css({ textStyle: "body", fontWeight: "bold" });
 
 const postCrop = css({ mt: "1", color: "text.subtle", textStyle: "note" });
 
 const savedList = css(surfaceCardRecipe.raw({ padding: "flush" }));
 
-const savedName = css({ mt: "0.5", fontSize: "md", fontWeight: "bold", lineHeight: "relaxed" });
+const savedName = css({ mt: "0.5", textStyle: "body", fontWeight: "bold" });
 
 const savedMaker = css({ mt: "0.5", color: "text.subtle", textStyle: "note" });
 

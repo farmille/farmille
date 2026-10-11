@@ -111,7 +111,7 @@ const closeButton = css({
   _hover: { bg: "surface.panel", color: "text.default" },
 });
 const row = css({ display: "flex", gap: "2", alignItems: "center" });
-const hint = css({ fontSize: "sm", color: "text.subtle", mt: "1.5" });
+const hint = css({ textStyle: "supporting", color: "text.subtle", mt: "1.5" });
 const nav = css({ display: "flex", gap: "1.5", mt: "2.5", alignItems: "center" });
 const doneButton = cx(pillButtonRecipe({ tone: "primary", strong: true }), css({ ml: "auto" }));
 const removeButton = css({
@@ -447,7 +447,7 @@ export function ReportCellEditor({
           グラフの題（任意）
           <span
             className={css({
-              fontSize: "sm",
+              textStyle: "supporting",
               color: "text.subtle",
               ml: "1.5",
               fontWeight: "normal",

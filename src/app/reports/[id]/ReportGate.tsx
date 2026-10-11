@@ -62,7 +62,7 @@ export function ReportGate({ reportPath }: { reportPath: string }) {
             textAlign: "center",
           })}
         >
-          <h2 className={css({ fontSize: "md", fontWeight: "extrabold" })}>
+          <h2 className={css({ textStyle: "title", fontWeight: "extrabold" })}>
             続きは無料会員登録で読めます（1分）
           </h2>
           <p className={css({ mt: "1", textStyle: "supporting", color: "text.subtle" })}>

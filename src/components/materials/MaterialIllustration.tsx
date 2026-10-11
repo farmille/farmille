@@ -14,7 +14,7 @@ export function MaterialIllustration({ imageUrl }: { imageUrl: string | null }) 
           borderWidth: "1px",
           borderColor: "border.default",
           color: "text.subtle",
-          fontSize: "xs",
+          textStyle: "note",
         })}
       >
         {imageUrl ? (
@@ -29,7 +29,7 @@ export function MaterialIllustration({ imageUrl }: { imageUrl: string | null }) 
           "NO IMAGE"
         )}
       </div>
-      <figcaption className={css({ mt: "1", color: "text.subtle", fontSize: "xs" })}>
+      <figcaption className={css({ mt: "1", color: "text.subtle", textStyle: "note" })}>
         容器のイメージ
       </figcaption>
     </figure>

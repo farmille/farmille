@@ -69,7 +69,7 @@ const applyLinkStyle = css({
 const chipsStyle = css({ mt: "2", display: "flex", flexWrap: "wrap", gap: "1" });
 const countsStyle = css({ mt: "1.5", textStyle: "note", color: "text.subtle" });
 const countLinkStyle = css({ whiteSpace: "nowrap", color: "inherit" });
-const countMinorStyle = css({ fontSize: "2xs", whiteSpace: "nowrap", color: "inherit" });
+const countMinorStyle = css({ textStyle: "note", whiteSpace: "nowrap", color: "inherit" });
 const savedMarkStyle = css({ color: "primary.800" });
 
 type MaterialHeroProps = {

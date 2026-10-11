@@ -5,7 +5,7 @@ import { css } from "../../../../../styled-system/css";
 const sectionStyle = css({ pt: "6" });
 const headingStyle = css({
   pb: "2",
-  fontSize: "md",
+  textStyle: "title",
   fontWeight: "extrabold",
   color: "text.muted",
   letterSpacing: "0.02em",

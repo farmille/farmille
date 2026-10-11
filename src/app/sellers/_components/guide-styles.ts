@@ -10,7 +10,7 @@ export const guideNarrowPageStyle = css({
 
 export const guideTitleStyle = css({ fontSize: "2xl", lineHeight: "snug" });
 
-const guideHeading = { fontSize: "xl", pc: { fontSize: "3xl" } } as const;
+const guideHeading = { textStyle: "title" } as const;
 
 export const guideHeadingStyle = css(guideHeading, { mt: "8", pc: { mt: "11" } });
 
@@ -62,6 +62,8 @@ export const stepCardRecipe = cva({
   defaultVariants: { actor: "maker" },
 });
 
+export const stepTitleStyle = css({ mt: "2", textStyle: "title", fontWeight: "extrabold" });
+
 export const stepLabelRecipe = cva({
   base: {
     display: "inline-block",
@@ -111,8 +113,7 @@ export const stepLinkStyle = css({
 export const questionStyle = css({
   display: "flex",
   gap: "2.5",
-  fontSize: "md",
+  textStyle: "title",
   fontWeight: "extrabold",
-  lineHeight: "normal",
   _before: { content: '"Q"', color: "primary.700", flexShrink: "0" },
 });

@@ -66,7 +66,7 @@ export function HomeFooter() {
               className={css({
                 m: "0",
                 mb: "3",
-                fontSize: "sm",
+                textStyle: "body",
                 color: "text.subtle",
               })}
             >

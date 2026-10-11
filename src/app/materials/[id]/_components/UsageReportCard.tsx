@@ -33,9 +33,8 @@ const cardRecipe = sva({
     body: { flex: "1", display: "flex", flexDirection: "column", px: "3.5", py: "3" },
     title: {
       display: "block",
-      fontSize: "md",
+      textStyle: "body",
       fontWeight: "bold",
-      lineHeight: "snug",
       color: "inherit",
       textDecoration: "none",
     },
@@ -47,7 +46,6 @@ const cardRecipe = sva({
         root: { flex: "0 0 74%", scrollSnapAlign: "start", pc: { flex: "none" } },
         cover: { aspectRatio: "image.landscape", pc: { aspectRatio: "image.wide" } },
         body: { px: "3", py: "2.5", pc: { px: "2.5", py: "2" } },
-        title: { fontSize: "sm" },
       },
     },
   },

@@ -56,15 +56,14 @@ const sectionHeading = cva({
     gap: "2",
     mt: "6.5",
     mb: "1",
-    fontSize: "md",
+    textStyle: "title",
     fontWeight: "extrabold",
-    lineHeight: "prose",
   },
   variants: { lead: { true: { mt: "1.5" }, false: {} } },
   defaultVariants: { lead: false },
 });
 
-const sectionGuide = css({ mb: "2.5", fontSize: "sm", color: "text.muted" });
+const sectionGuide = css({ mb: "2.5", textStyle: "supporting", color: "text.muted" });
 
 const emptyGraphs = css({
   mt: "3",
@@ -74,7 +73,7 @@ const emptyGraphs = css({
   borderRadius: "card",
   p: "4.5",
   textAlign: "center",
-  fontSize: "sm",
+  textStyle: "supporting",
   color: "text.subtle",
 });
 

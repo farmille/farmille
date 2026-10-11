@@ -21,7 +21,7 @@ export default function LegalIndexPage() {
         ホームへ戻る
       </Link>
       <h1 className={legalHeading({ level: "h1" })}>規約・ガイドライン</h1>
-      <p className={css({ fontSize: "lg", lineHeight: "relaxed", mb: "8" })}>
+      <p className={css({ textStyle: "supporting", color: "text.muted", mb: "8" })}>
         Farmilleをご利用の際は、各規約・ガイドラインをご確認ください。
       </p>
       <div
@@ -49,8 +49,7 @@ export default function LegalIndexPage() {
                         py: "4",
                         color: "primary.700",
                         textDecoration: "underline",
-                        fontSize: "lg",
-                        lineHeight: "relaxed",
+                        textStyle: "body",
                       })}
                     >
                       {document.title.replace(/^Farmille /, "")}

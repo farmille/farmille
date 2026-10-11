@@ -196,6 +196,8 @@ const tokenDescriptionStyle = css({ mt: "1", textStyle: "supporting", color: "te
 
 const textStyleSample = css({ color: "text.default" });
 
+const bodySample = css({ textStyle: "body" });
+
 const typeSample = css({
   color: "text.default",
   fontWeight: "semibold",
@@ -408,7 +410,9 @@ export function TypographyTokens() {
         <div className={tokenTable}>
           {fontWeights.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <span style={{ fontWeight: Number(token.value) }}>Farmille 農業資材感想口コミ</span>
+              <span className={bodySample} style={{ fontWeight: Number(token.value) }}>
+                Farmille 農業資材感想口コミ
+              </span>
             </TokenRow>
           ))}
         </div>
@@ -418,7 +422,7 @@ export function TypographyTokens() {
         <div className={tokenTable}>
           {lineHeights.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <span style={{ lineHeight: token.value }}>
+              <span className={bodySample} style={{ lineHeight: token.value }}>
                 使用した資材の特徴を記録する。
                 <br />
                 次の栽培で比較できる形に残す。

@@ -7,6 +7,7 @@ import {
   DescriptionList,
   OptionalValue,
   Panel,
+  adminBodyStyle,
   adminInlineNoteStyle,
   type DescriptionItem,
 } from "@/app/admin/_components/AdminUI";
@@ -133,10 +134,12 @@ export default async function AdminSellerDetailPage({
         note="会社名から抽出した候補です。所有権の確認結果ではありません。メーカーへ候補の正誤確認と、追加掲載を希望する資材の記入を依頼してください。"
       >
         {candidates.data.length === 0 ? (
-          <p>候補はありません。会社名の紐づけ、または新しい資材ページの用意を確認してください。</p>
+          <p className={adminInlineNoteStyle}>
+            候補はありません。会社名の紐づけ、または新しい資材ページの用意を確認してください。
+          </p>
         ) : (
           candidates.data.map((material) => (
-            <p key={material.id}>
+            <p className={adminBodyStyle} key={material.id}>
               <Link className={linkStyle} href={`/materials/${material.id}`}>
                 {material.name}
               </Link>
@@ -147,7 +150,7 @@ export default async function AdminSellerDetailPage({
             </p>
           ))
         )}
-        <p>
+        <p className={adminBodyStyle}>
           <Link className={linkStyle} href="/admin/company-applications">
             企業からの申請一覧
           </Link>
