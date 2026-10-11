@@ -1,6 +1,9 @@
-name: Manual preview
+name: Preview
 
 on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
   workflow_dispatch:
     inputs:
       pr:
@@ -10,28 +13,31 @@ on:
       database:
         description: Use branch for migrations or isolated testing
         required: true
-        default: shared
+        default: auto
         type: choice
-        options: [shared, branch]
+        options: [auto, shared, branch]
 
 permissions:
   contents: read
   pull-requests: read
 
 concurrency:
-  group: farmille-preview-pr-${{ inputs.pr }}
+  group: farmille-preview-pr-${{ inputs.pr || github.event.pull_request.number }}
   cancel-in-progress: false
 
 jobs:
   preview:
-    if: github.ref == 'refs/heads/main'
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
     env:
       GH_TOKEN: ${{ github.token }}
-      PR_NUMBER: ${{ inputs.pr }}
-      DB_MODE: ${{ inputs.database }}
+      PR_NUMBER: ${{ inputs.pr || github.event.pull_request.number }}
+      DB_MODE: ${{ inputs.database || 'auto' }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -62,6 +68,7 @@ jobs:
         run: bash trusted/tools/ci/preview.sh deploy
         env:
           PR_SHA: ${{ steps.pr.outputs.sha }}
+          DB_MODE: ${{ steps.pr.outputs.database }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}

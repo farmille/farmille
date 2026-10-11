@@ -38,14 +38,18 @@ remove_branch() {
 case "${1:?Missing action}" in
   prepare)
     require_open
-    [[ "$DB_MODE" == shared || "$DB_MODE" == branch ]] || exit 1
+    [[ "$DB_MODE" == auto || "$DB_MODE" == shared || "$DB_MODE" == branch ]] || exit 1
     sha=$(pr | jq -er '.head.sha | select(test("^[a-f0-9]{40}$"))')
-    if [[ "$DB_MODE" == shared ]]; then
-      gh api --paginate "repos/$repo/pulls/$PR_NUMBER/files" |
-        jq -se 'add | all(.[]; ((.filename | startswith("supabase/migrations/")) or ((.previous_filename // "") | startswith("supabase/migrations/"))) | not)' >/dev/null || {
-          echo 'Migration changes require branch mode.' >&2; exit 1;
-        }
+    migrations=$(gh api --paginate "repos/$repo/pulls/$PR_NUMBER/files" |
+      jq -s 'add | any(.[]; (.filename | startswith("supabase/migrations/")) or ((.previous_filename // "") | startswith("supabase/migrations/")))')
+    if [[ "$DB_MODE" == auto ]]; then
+      DB_MODE=shared
+      if [[ "$migrations" == true ]]; then DB_MODE=branch; fi
+    elif [[ "$DB_MODE" == shared && "$migrations" == true ]]; then
+      echo 'Migration changes require branch mode.' >&2
+      exit 1
     fi
+    echo "database=$DB_MODE" >> "$GITHUB_OUTPUT"
     [[ "$(pr | jq -r .head.sha)" == "$sha" ]] || exit 1
     echo "sha=$sha" >> "$GITHUB_OUTPUT"
     ;;
