@@ -243,6 +243,11 @@ jobs:
         with:
           node-version: 24
 
+      - name: Apply shared development migrations
+        env:
+          SUPABASE_PROJECT_ID: chgrudbattvmcjxhaskh
+        run: npx --yes supabase@2.120.0 db push --project-ref "$SUPABASE_PROJECT_ID" --skip-vault --yes
+
       - name: Apply production migrations
         run: npx --yes supabase@2.120.0 db push --project-ref "$SUPABASE_PROJECT_ID" --skip-vault --yes
 
