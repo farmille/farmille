@@ -46,7 +46,7 @@ export const textStyles = {
   },
   supporting: {
     description:
-      "見出し・操作・入力欄に添える副文。リード、カードやダイアログの説明、入力欄の補足、操作の下の注意書きに使う。色は text.muted か text.subtle を足す。図のキャプションには使わない。図のキャプションは sm と normal である。",
+      "見出し・操作・入力欄に添える副文。リード、カードやダイアログの説明、入力欄の補足、操作の下の注意書きに使う。色は text.muted か text.subtle を足す。図のキャプション（sm と normal）には使わない。",
     value: { fontSize: "sm", lineHeight: "relaxed" },
   },
   note: {
