@@ -31,51 +31,6 @@ body {
   .bdr_pill {
     corner-shape: round;
   }
-
-  /*
-   * 押下フィードバック。押せる要素すべてに同じ手応えを返す。
-   * 1日に何度も触る要素なので、知覚遅延を作らない範囲（0.98・160ms）に留める。
-   * transform は inline 要素に効かないため、本文中のテキストリンクは縮まず、
-   * ボタン・カード・ピルのようにブロック整形される要素だけが反応する。
-   */
-  button,
-  summary,
-  a[href],
-  [role="tab"],
-  [role="checkbox"]:not(label *),
-  [role="radio"]:not(label *),
-  label:has([role="checkbox"]),
-  label:has([role="radio"]) {
-    transition-property: transform, background-color, border-color, color, opacity;
-    transition-duration: var(--durations-fast);
-    transition-timing-function: var(--easings-out);
-  }
-
-  button:not(:disabled, [aria-disabled="true"], [data-disabled]):active,
-  summary:active,
-  a[href]:active,
-  [role="tab"]:not([aria-disabled="true"]):active,
-  [role="checkbox"]:not(label *, [aria-disabled="true"], [data-disabled]):active,
-  [role="radio"]:not(label *, [aria-disabled="true"], [data-disabled]):active,
-  label:has([role="checkbox"]):not(:has([data-disabled])):active,
-  label:has([role="radio"]):not(:has([data-disabled])):active {
-    transform: scale(0.98);
-  }
-
-  /* 視覚過敏の設定では動かさず、不透明度で押下を示す */
-  @media (prefers-reduced-motion: reduce) {
-    button:not(:disabled, [aria-disabled="true"], [data-disabled]):active,
-    summary:active,
-    a[href]:active,
-    [role="tab"]:not([aria-disabled="true"]):active,
-    [role="checkbox"]:not(label *, [aria-disabled="true"], [data-disabled]):active,
-    [role="radio"]:not(label *, [aria-disabled="true"], [data-disabled]):active,
-    label:has([role="checkbox"]):not(:has([data-disabled])):active,
-    label:has([role="radio"]):not(:has([data-disabled])):active {
-      transform: none;
-      opacity: 0.72;
-    }
-  }
 }
 
 /*
