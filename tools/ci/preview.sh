@@ -115,10 +115,20 @@ case "${1:?Missing action}" in
     elif [[ "$DB_MODE" != shared ]]; then
       exit 1
     fi
-    sb db push --project-ref "$ref" --workdir "$task_dir" --skip-vault --dry-run --yes --output-format json > "$task_dir/history.json"
-    jq -e '.upToDate == true' "$task_dir/history.json" >/dev/null
-    sb db query --linked --project-ref "$ref" --workdir "$task_dir" \
-      'select count(*) as materials from public.materials' > "$task_dir/tables.json"
+    printf '%s\n' "$task_dir"/supabase/migrations/*.sql | jq -Rsc '
+      split("\n")[:-1] | map(split("/")[-1] |
+        if test("^[0-9]+_.+\\.sql$") then capture("^(?<version>[0-9]+)_").version
+        else error("Invalid migration filename") end) | sort |
+      if length > 0 and length == (unique | length) then . else error("Invalid migration versions") end
+    ' > "$task_dir/expected-versions.json"
+    jq -n '{query: "select array(select version from supabase_migrations.schema_migrations order by version) as versions, (select count(*) from public.materials) as materials", read_only: true}' > "$task_dir/check-query.json"
+    curl --fail --silent --show-error --connect-timeout 10 --max-time 60 -X POST \
+      -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H 'Content-Type: application/json' \
+      --data-binary "@$task_dir/check-query.json" \
+      "https://api.supabase.com/v1/projects/$ref/database/query" > "$task_dir/history.json"
+    jq -e --slurpfile expected "$task_dir/expected-versions.json" '
+      length == 1 and .[0].versions == $expected[0] and (.[0].materials | type) == "number"
+    ' "$task_dir/history.json" >/dev/null
     curl --fail --silent --show-error -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
       "https://api.supabase.com/v1/projects/$ref/api-keys" > "$task_dir/keys.json"
     anon=$(jq -er '.[] | select(.name == "anon") | .api_key' "$task_dir/keys.json")
