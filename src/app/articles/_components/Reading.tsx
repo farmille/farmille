@@ -57,9 +57,8 @@ export const figureFrameRecipe = cva({
 });
 
 const headingStyle = css({
-  fontSize: "lg",
+  textStyle: "title",
   fontWeight: "extrabold",
-  lineHeight: "snug",
   mt: "6",
   mb: "2",
   pl: "2.5",
@@ -84,7 +83,7 @@ export function ReadingHeading({
   );
 }
 
-const proseText = { fontSize: "md", color: "text.muted", lineHeight: "prose" } as const;
+const proseText = { textStyle: "prose", color: "text.muted" } as const;
 
 export function ReadingProse({ text }: { text: string }) {
   return <p className={css(proseText, { whiteSpace: "pre-wrap" })}>{text}</p>;
@@ -95,7 +94,7 @@ const markdownStyle = css({
   "& p": { ...proseText, mt: "2" },
   "& :is(ul, ol)": { ...proseText, mt: "2", pl: "5" },
   "& > :first-child": { mt: "0" },
-  "& :is(h2, h3)": { fontSize: "lg", fontWeight: "extrabold", mt: "5.5", mb: "2" },
+  "& :is(h2, h3)": { textStyle: "title", fontWeight: "extrabold", mt: "5.5", mb: "2" },
   "& img": { maxW: "full", borderRadius: "media" },
   "& a": { color: "primary.800" },
 });

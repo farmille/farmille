@@ -96,7 +96,7 @@ export function MetricBars({ metrics }: MetricBarsProps) {
           alignItems: "center",
           gap: "1.5",
           mt: "2",
-          fontSize: "2xs",
+          textStyle: "note",
           color: "text.subtle",
         })}
       >

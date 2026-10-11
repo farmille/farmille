@@ -38,7 +38,7 @@ export async function RegistrationTerms() {
           {document.sections.map((section, index) => (
             <section key={index}>
               {section.heading ? (
-                <h3 className={css({ fontWeight: "bold", fontSize: "md", mt: "4", mb: "2" })}>
+                <h3 className={css({ fontWeight: "bold", textStyle: "title", mt: "4", mb: "2" })}>
                   {section.heading}
                 </h3>
               ) : null}

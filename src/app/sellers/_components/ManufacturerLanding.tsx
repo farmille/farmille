@@ -24,6 +24,7 @@ import {
   stepCardRecipe,
   stepLabelRecipe,
   stepLinkStyle,
+  stepTitleStyle,
 } from "./guide-styles";
 import {
   CONTACT_EMAIL,
@@ -139,7 +140,7 @@ const legendSwatchRecipe = cva({
 
 const guideListStyle = css({
   mt: "2.5",
-  "& li": { py: "1", fontSize: "md", lineHeight: "prose" },
+  "& li": { py: "1", textStyle: "prose" },
   "& li a": {
     color: "primary.800",
     fontWeight: "bold",
@@ -233,10 +234,8 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             borderLeftWidth: "5px",
             borderLeftStyle: "solid",
             borderLeftColor: "primary.700",
-            fontSize: "xl",
+            textStyle: "title",
             fontWeight: "extrabold",
-            lineHeight: "snug",
-            pc: { fontSize: "3xl" },
           })}
         >
           企業会員登録とは
@@ -398,9 +397,8 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           const target = step.action === null ? null : stepLinks[step.action];
           return (
             <article className={stepCardRecipe({ actor: step.actor })} key={step.title}>
-              <h3 className={stepLabelRecipe({ actor: step.actor })}>
-                STEP{index + 1}　{step.title}
-              </h3>
+              <span className={stepLabelRecipe({ actor: step.actor })}>STEP{index + 1}</span>
+              <h3 className={stepTitleStyle}>{step.title}</h3>
               <div className={stepBodyRecipe({ actor: step.actor })}>{step.body}</div>
               {target === null ? null : (
                 <Link className={stepLinkStyle} href={target.href}>
@@ -478,7 +476,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             </GuideCard>
           ))}
           <GuideCard id="lpGuideDelist" title="終売の反映・非表示にしたい" needId={false}>
-            <p className={css({ mt: "2", fontSize: "md", lineHeight: "prose" })}>
+            <p className={css({ mt: "2", textStyle: "prose" })}>
               終売・廃盤表示や資材ページの非表示のご依頼は{" "}
               <a className={guideLinkStyle} href={`mailto:${CONTACT_EMAIL}`}>
                 {CONTACT_EMAIL}
@@ -508,7 +506,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           資材オーナー権限とは？
         </h2>
         <div className={cx(guideCardStyle, css({ mt: "3.5", py: "4", px: "5" }))}>
-          <p className={css({ fontSize: "md", lineHeight: "prose", color: "text.default" })}>
+          <p className={css({ textStyle: "prose", color: "text.default" })}>
             Farmilleに掲載される資材ごとに1社に設定する権限で、資材情報の編集権限を含みます。当該資材の製造元・販売元・輸入元の企業様を対象に、パッケージの記載で貴社と資材の関係を確認したうえでお渡しします。権限をお渡しした資材は、企業会員ダッシュボードから製品説明・施用方法・試験結果などの情報を編集できます。
           </p>
         </div>
@@ -537,8 +535,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
                   position: "relative",
                   mt: "2",
                   pl: "6",
-                  fontSize: "md",
-                  lineHeight: "prose",
+                  textStyle: "prose",
                   color: "text.muted",
                   _before: {
                     content: '"A"',
@@ -577,7 +574,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         )}
         aria-labelledby="lpContact"
       >
-        <h2 className={css({ fontSize: "md", fontWeight: "extrabold" })} id="lpContact">
+        <h2 className={css({ textStyle: "title", fontWeight: "extrabold" })} id="lpContact">
           お問い合わせ
         </h2>
         <a
@@ -616,10 +613,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         })}
         aria-labelledby="lpApply"
       >
-        <h2
-          className={css({ fontSize: "xl", fontWeight: "extrabold", pc: { fontSize: "2xl" } })}
-          id="lpApply"
-        >
+        <h2 className={css({ textStyle: "title", fontWeight: "extrabold" })} id="lpApply">
           企業会員登録を申請する
         </h2>
         <div className={css({ mt: "2", fontSize: "sm", lineHeight: "prose" })}>
@@ -660,9 +654,8 @@ const guideCardTitleStyle = css({
   borderLeftWidth: "3px",
   borderLeftStyle: "solid",
   borderLeftColor: "primary.700",
-  fontSize: "md",
+  textStyle: "title",
   fontWeight: "extrabold",
-  lineHeight: "snug",
 });
 
 function GuideCard({
@@ -693,15 +686,19 @@ function PrepBox({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className={guideBoxStyle}>
       <h3
-        className={css({ mb: "2", fontSize: "md", fontWeight: "extrabold", color: "primary.800" })}
+        className={css({
+          mb: "2",
+          textStyle: "title",
+          fontWeight: "extrabold",
+          color: "primary.800",
+        })}
       >
         {title}
       </h3>
       <ol
         className={css({
           pl: "4.5",
-          fontSize: "md",
-          lineHeight: "prose",
+          textStyle: "prose",
           color: "text.muted",
           "& b": { color: "text.default" },
         })}
@@ -786,7 +783,7 @@ const requirementBoxStyle = css({
   borderStyle: "solid",
   borderColor: "border.default",
   borderRadius: "input",
-  "& h4": { mb: "1.5", fontSize: "sm", fontWeight: "extrabold", color: "primary.800" },
+  "& h4": { mb: "1.5", textStyle: "body", fontWeight: "extrabold", color: "primary.800" },
   "& ul": {
     pl: "4",
     fontSize: "sm",

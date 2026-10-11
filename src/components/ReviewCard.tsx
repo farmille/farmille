@@ -115,9 +115,9 @@ export function ReviewCard({
           <Icon name="person" size="sm" />
         )}
       </span>
-      <span className={css({ fontWeight: "bold", fontSize: "sm" })}>{handle}</span>
+      <span className={css({ textStyle: "body", fontWeight: "bold" })}>{handle}</span>
       {authorDetails ? (
-        <span className={css({ color: "text.subtle", fontSize: "xs" })}>{authorDetails}</span>
+        <span className={css({ color: "text.subtle", textStyle: "note" })}>{authorDetails}</span>
       ) : null}
     </>
   );
@@ -126,7 +126,7 @@ export function ReviewCard({
   return (
     <article className={cx(surfaceCardRecipe({ padding: "cozy" }), className)}>
       {materialName ? (
-        <div className={css({ fontSize: "xs", color: "text.subtle", mb: "1" })}>
+        <div className={css({ textStyle: "note", color: "text.subtle", mb: "1" })}>
           {materialName} の感想口コミ
         </div>
       ) : null}
@@ -164,7 +164,7 @@ export function ReviewCard({
       >
         <span className={cropChip}>{crop}</span>
       </div>
-      <p className={css({ fontSize: "sm", color: "text.muted", lineHeight: "relaxed" })}>{body}</p>
+      <p className={css({ textStyle: "body", color: "text.muted" })}>{body}</p>
       {displayedPhotoCount > 0 ? (
         <div
           className={css({

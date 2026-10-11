@@ -13,9 +13,10 @@ import {
 import { css } from "../../styled-system/css";
 
 const sectionStyle = css({ py: "5", borderBottomWidth: "1px", borderColor: "border.default" });
-const prose = css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere", lineHeight: "prose" });
-const sectionHeading = css({ fontSize: "lg", mb: "3" });
-const subHeading = css({ fontSize: "md", fontWeight: "bold", mb: "3" });
+const prose = css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere", textStyle: "prose" });
+const body = css({ textStyle: "body" });
+const sectionHeading = css({ textStyle: "title", mb: "3" });
+const subHeading = css({ textStyle: "body", fontWeight: "bold", mb: "3" });
 const graphCaption = css({ fontSize: "sm", fontWeight: "bold", mb: "2" });
 const photoGrid = css({
   display: "grid",
@@ -184,10 +185,10 @@ export function UsageReportArticle({
               ...input,
               observedChange,
             }))}
-          {section.value === "effects" && <p>{input.purposeTags.join(" ／ ")}</p>}
+          {section.value === "effects" && <p className={body}>{input.purposeTags.join(" ／ ")}</p>}
           {section.value === "conditions" && (
             <>
-              <p>
+              <p className={body}>
                 {PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name}{" "}
                 {input.showCity ? input.city : ""}
               </p>
@@ -195,7 +196,9 @@ export function UsageReportArticle({
                 ...input,
                 cultivationEnvironment,
               }))}
-              <p>{input.timingStages.map((stage) => APPLICATION_TIMINGS[stage]).join(" ／ ")}</p>
+              <p className={body}>
+                {input.timingStages.map((stage) => APPLICATION_TIMINGS[stage]).join(" ／ ")}
+              </p>
               {text(input.timingNote, "施用時期の本文", (timingNote) => ({ ...input, timingNote }))}
             </>
           )}
@@ -272,7 +275,7 @@ export function UsageReportArticle({
             </>
           )}
           {section.value === "documents" && (
-            <ul>
+            <ul className={body}>
               {input.documents.map((document) => (
                 <li key={document.id}>
                   {documentUrls?.find((item) => item.id === document.id) ? (

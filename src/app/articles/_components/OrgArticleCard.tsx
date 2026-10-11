@@ -34,7 +34,7 @@ export function OrgArticleCard({
           flexWrap: "wrap",
           gap: "1.5",
           mt: "1.5",
-          fontSize: "xs",
+          textStyle: "note",
           color: "text.muted",
         })}
       >

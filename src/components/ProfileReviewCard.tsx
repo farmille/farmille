@@ -14,7 +14,7 @@ import { Avatar, Chip, Stars } from "@/app/materials/[id]/_components/CardParts"
 
 const card = css(surfaceCardRecipe.raw({ padding: "cozy" }));
 
-const materialLine = css({ mb: "1", color: "text.subtle", fontSize: "xs" });
+const materialLine = css({ mb: "1", color: "text.subtle", textStyle: "note" });
 
 const headRow = css({
   display: "flex",
@@ -32,7 +32,7 @@ const authorLink = css({
   textDecoration: "none",
 });
 
-const authorName = css({ fontSize: "md", fontWeight: "bold", overflowWrap: "anywhere" });
+const authorName = css({ textStyle: "body", fontWeight: "bold", overflowWrap: "anywhere" });
 
 const authorLabel = css(badgeRecipe.raw({ variant: "type" }), {
   maxW: "100%",
@@ -60,8 +60,7 @@ const crops = css({
 
 const text = css({
   color: "text.muted",
-  fontSize: "md",
-  lineHeight: "relaxed",
+  textStyle: "body",
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });

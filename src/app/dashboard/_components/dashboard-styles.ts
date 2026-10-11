@@ -6,7 +6,7 @@ export const readingColumn = css({ maxW: "content.reading", mx: "auto" });
 export const workspaceColumn = css({ maxW: "content.workspace", mx: "auto" });
 
 export const sectionHeading = css({
-  fontSize: "md",
+  textStyle: "title",
   fontWeight: "extrabold",
   mt: "4.5",
   mb: "2",
@@ -14,9 +14,8 @@ export const sectionHeading = css({
 });
 
 export const sectionNote = css({
-  fontSize: "xs",
+  textStyle: "supporting",
   color: "text.subtle",
-  lineHeight: "prose",
   px: "0.5",
   pb: "2",
 });
@@ -42,7 +41,7 @@ export const logRow = css({
 export const logDate = css({
   flex: "none",
   color: "text.subtle",
-  fontSize: "xs",
+  textStyle: "note",
   fontVariantNumeric: "tabular-nums",
 });
 

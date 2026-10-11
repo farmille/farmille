@@ -10,7 +10,7 @@ const title = css({
   lineHeight: "relaxed",
   textWrap: "balance",
 });
-const copy = css({ fontSize: "md", color: "text.muted", lineHeight: "relaxed" });
+const copy = css({ textStyle: "supporting", color: "text.muted" });
 const textLink = css({ color: "primary.700", fontSize: "md", textDecoration: "none" });
 
 export function HomeInvitations({ showSignup }: { showSignup: boolean }) {

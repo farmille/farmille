@@ -23,7 +23,7 @@ export function PageNotice({
       >
         {title}
       </h1>
-      <p className={css({ mt: "3", color: "text.muted", fontSize: "sm", lineHeight: "relaxed" })}>
+      <p className={css({ mt: "3", color: "text.muted", textStyle: "supporting" })}>
         {description}
       </p>
       {children ? <div className={css({ mt: "6" })}>{children}</div> : null}

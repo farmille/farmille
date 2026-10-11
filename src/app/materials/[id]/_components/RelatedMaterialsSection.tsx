@@ -57,10 +57,10 @@ const imageStyle = css({
   bg: "surface.card",
 });
 const infoStyle = css({ p: "2.5" });
-const nameStyle = css({ fontSize: "md", fontWeight: "bold" });
+const nameStyle = css({ textStyle: "body", fontWeight: "bold" });
 const makerStyle = css({
   mt: "0.5",
-  fontSize: "xs",
+  textStyle: "note",
   color: "text.subtle",
   overflow: "hidden",
   textOverflow: "ellipsis",
@@ -68,7 +68,7 @@ const makerStyle = css({
 });
 const ratingStyle = css({ mt: "0.5", fontSize: "xs", color: "accent.star" });
 const reviewCountStyle = css({ color: "text.subtle", fontVariantNumeric: "tabular-nums" });
-const emptyStyle = css({ fontSize: "sm", color: "text.subtle" });
+const emptyStyle = css({ textStyle: "supporting", color: "text.subtle" });
 
 function StarText({ value }: { value: number }) {
   const filled = Math.min(5, Math.max(0, Math.round(value)));

@@ -53,10 +53,10 @@ export function HomeFooter() {
           >
             Farmille
           </Link>
-          <p className={css({ fontSize: "sm", color: "text.subtle", lineHeight: "relaxed" })}>
+          <p className={css({ textStyle: "supporting", color: "text.subtle" })}>
             生産者による生産者のための事例共有サイト
           </p>
-          <p className={css({ fontSize: "sm", color: "text.subtle", lineHeight: "relaxed" })}>
+          <p className={css({ textStyle: "supporting", color: "text.subtle" })}>
             BS資材を作物・効果から検索し、生産者の実証詳細レポートと感想口コミを確かめられます。
           </p>
         </div>
@@ -66,7 +66,7 @@ export function HomeFooter() {
               className={css({
                 m: "0",
                 mb: "3",
-                fontSize: "sm",
+                textStyle: "body",
                 color: "text.subtle",
               })}
             >
@@ -106,7 +106,7 @@ export function HomeFooter() {
           flexWrap: "wrap",
           justifyContent: "space-between",
           gap: "4",
-          fontSize: "xs",
+          textStyle: "note",
           color: "text.subtle",
         })}
       >

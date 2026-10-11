@@ -9,7 +9,7 @@ import { css } from "../../../styled-system/css";
 export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }) {
   return (
     <section aria-label="リンク・資料">
-      <h2 className={css({ fontSize: "lg", mb: "3" })}>リンク・資料</h2>
+      <h2 className={css({ textStyle: "title", mb: "3" })}>リンク・資料</h2>
       {[
         ...MATERIAL_LINK_GROUPS,
         ...(links.some((link) => link.group === null)
@@ -19,7 +19,9 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
         const items = links.filter((link) => link.group === group.value);
         return (
           <div key={group.value ?? "unclassified"} className={css({ mt: "3" })}>
-            <h3 className={css({ fontSize: "sm", fontWeight: "bold", mb: "2" })}>{group.label}</h3>
+            <h3 className={css({ textStyle: "body", fontWeight: "bold", mb: "2" })}>
+              {group.label}
+            </h3>
             {items.length === 0 ? (
               <p>−</p>
             ) : (
@@ -36,9 +38,9 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
                           borderColor: "primary.600",
                           borderRadius: "card",
                           overflowWrap: "anywhere",
-                          fontSize: "sm",
+                          textStyle: "supporting",
                         })
-                      : css({ mb: "2", overflowWrap: "anywhere", fontSize: "sm" })
+                      : css({ mb: "2", overflowWrap: "anywhere", textStyle: "supporting" })
                   }
                 >
                   {v.is(MaterialExternalUrlSchema, link.url) ? (
@@ -61,7 +63,7 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
                       <p className={css({ mt: "2", whiteSpace: "pre-wrap" })}>
                         {link.trial.summary || "概要は未入力です"}
                       </p>
-                      <p className={css({ mt: "2", color: "text.muted", fontSize: "xs" })}>
+                      <p className={css({ mt: "2", color: "text.muted", textStyle: "note" })}>
                         {[
                           link.trial.institution,
                           link.trial.year === null ? "" : `${link.trial.year}年`,

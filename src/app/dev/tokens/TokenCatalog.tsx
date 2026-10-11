@@ -1,12 +1,14 @@
 import { Icon } from "@/components/Icon";
 import type { ReactNode } from "react";
 
+import { textStyles } from "@/theme/textStyles";
 import { semanticTokens, tokens } from "@/theme/tokens";
 
-import { css } from "../../../../styled-system/css";
+import { css, cx } from "../../../../styled-system/css";
 
 type TokenLeaf = {
   readonly value: string;
+  readonly description?: string;
 };
 
 type TokenBranch = {
@@ -16,6 +18,7 @@ type TokenBranch = {
 type DisplayToken = {
   name: string;
   value: string;
+  description?: string;
 };
 
 type ColorDisplayToken = DisplayToken & {
@@ -34,7 +37,7 @@ function flattenTokenBranch(branch: TokenBranch, prefix = ""): DisplayToken[] {
       segment === "DEFAULT" ? prefix : prefix.length === 0 ? segment : `${prefix}.${segment}`;
 
     if (isTokenLeaf(node)) {
-      return [{ name, value: node.value }];
+      return [{ name, value: node.value, description: node.description }];
     }
 
     return flattenTokenBranch(node, name);
@@ -77,6 +80,11 @@ const radii = flattenTokenBranch(tokens.radii);
 const shadows = flattenTokenBranch(tokens.shadows);
 const sizes = flattenTokenBranch(tokens.sizes);
 const aspectRatios = flattenTokenBranch(tokens.aspectRatios);
+const textStyleTokens: DisplayToken[] = Object.entries(textStyles).map(([name, role]) => ({
+  name,
+  value: JSON.stringify(role.value),
+  description: role.description,
+}));
 
 const frame = css({
   minH: "100%",
@@ -99,8 +107,7 @@ const subtitleStyle = css({
   mt: "2",
   mb: "0",
   color: "text.muted",
-  fontSize: "sm",
-  lineHeight: "relaxed",
+  textStyle: "supporting",
 });
 
 const sectionStyle = css({ mt: "8" });
@@ -108,15 +115,14 @@ const sectionStyle = css({ mt: "8" });
 const sectionTitleStyle = css({
   m: "0",
   color: "text.default",
-  fontSize: "lg",
+  textStyle: "title",
 });
 
 const sectionLeadStyle = css({
   mt: "1.5",
   mb: "4",
   color: "text.muted",
-  fontSize: "sm",
-  lineHeight: "relaxed",
+  textStyle: "supporting",
 });
 
 const swatchGrid = css({
@@ -185,6 +191,12 @@ const tokenValueStyle = css({
   fontVariantNumeric: "tabular-nums",
   lineHeight: "normal",
 });
+
+const tokenDescriptionStyle = css({ mt: "1", textStyle: "supporting", color: "text.muted" });
+
+const textStyleSample = css({ color: "text.default" });
+
+const bodySample = css({ textStyle: "body" });
 
 const typeSample = css({
   color: "text.default",
@@ -291,6 +303,9 @@ function TokenRow({ token, children }: TokenRowProps) {
       <div>
         {children}
         <div className={tokenValueStyle}>{token.value}</div>
+        {token.description === undefined ? null : (
+          <p className={tokenDescriptionStyle}>{token.description}</p>
+        )}
       </div>
     </div>
   );
@@ -360,8 +375,25 @@ export function TypographyTokens() {
   return (
     <TokenDocFrame
       title="Typography"
-      subtitle="Gen Interface JP を基準にしたサイズ・ウェイト・行高。"
+      subtitle="文字は textStyle の役割から選ぶ。サイズ・ウェイト・行高は役割に無い組み合わせに使う。"
     >
+      <TokenSection
+        title="Text style"
+        lead="役割ごとの組み合わせ。色は含まないので、呼び出し側で足す。"
+      >
+        <div className={tokenTable}>
+          {textStyleTokens.map((token) => (
+            <TokenRow key={token.name} token={token}>
+              <span className={cx(textStyleSample, css({ textStyle: token.name }))}>
+                使用した資材の特徴を記録する。
+                <br />
+                次の栽培で比較できる形に残す。
+              </span>
+            </TokenRow>
+          ))}
+        </div>
+      </TokenSection>
+
       <TokenSection title="Font size" lead="日本語本文で実際の大きさと字面を確認する。">
         <div className={tokenTable}>
           {fontSizes.map((token) => (
@@ -378,7 +410,9 @@ export function TypographyTokens() {
         <div className={tokenTable}>
           {fontWeights.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <span style={{ fontWeight: Number(token.value) }}>Farmille 農業資材感想口コミ</span>
+              <span className={bodySample} style={{ fontWeight: Number(token.value) }}>
+                Farmille 農業資材感想口コミ
+              </span>
             </TokenRow>
           ))}
         </div>
@@ -388,7 +422,7 @@ export function TypographyTokens() {
         <div className={tokenTable}>
           {lineHeights.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <span style={{ lineHeight: token.value }}>
+              <span className={bodySample} style={{ lineHeight: token.value }}>
                 使用した資材の特徴を記録する。
                 <br />
                 次の栽培で比較できる形に残す。

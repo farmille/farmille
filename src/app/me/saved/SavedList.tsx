@@ -135,7 +135,7 @@ export function SavedList({ items }: SavedListProps) {
             className={css({
               m: "0",
               mb: "2",
-              fontSize: "sm",
+              textStyle: "supporting",
               color: "text.muted",
               textAlign: "center",
             })}

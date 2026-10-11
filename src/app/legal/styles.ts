@@ -27,6 +27,7 @@ export const legalHeading = cva({
 });
 
 export const legalLink = css({
+  textStyle: "body",
   color: "primary.700",
   textDecoration: "underline",
   textUnderlineOffset: "0.2em",
@@ -40,11 +41,10 @@ export const legalLink = css({
 });
 
 export const legalProse = css({
-  fontSize: "lg",
-  lineHeight: "loose",
+  textStyle: "prose",
   overflowWrap: "anywhere",
   "& p": { my: "4" },
-  "& h3": { fontSize: "lg", fontWeight: "bold", mt: "6", mb: "3" },
+  "& h3": { textStyle: "title", fontWeight: "bold", mt: "6", mb: "3" },
   "& ul": { listStyleType: "disc", pl: "6", my: "4" },
   "& ol": { listStyleType: "decimal", pl: "6", my: "4" },
   "& li": { mb: "3" },

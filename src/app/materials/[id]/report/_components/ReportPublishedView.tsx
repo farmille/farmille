@@ -18,7 +18,7 @@ import {
 
 const wrap = css({ maxW: "content.form", mx: "auto", px: "4", pt: "3.5", pb: "16" });
 const title = css({ fontSize: "2xl", lineHeight: "snug", fontWeight: "extrabold", m: "0" });
-const subtle = css({ color: "text.subtle", fontSize: "sm" });
+const subtle = css({ color: "text.subtle", textStyle: "note" });
 const materialRef = css({
   mt: "3.5",
   py: "3",
@@ -30,7 +30,7 @@ const materialRef = css({
   bg: "surface.card",
 });
 const sectionHeadingStyle = css({
-  fontSize: "lg",
+  textStyle: "title",
   mt: "6",
   mb: "2",
   pl: "2.5",
@@ -40,9 +40,8 @@ const sectionHeadingStyle = css({
   fontWeight: "extrabold",
 });
 const paragraph = css({
-  fontSize: "md",
+  textStyle: "prose",
   color: "text.muted",
-  lineHeight: "prose",
   whiteSpace: "pre-wrap",
 });
 const graphCard = css({
@@ -55,7 +54,7 @@ const graphCard = css({
   bg: "surface.card",
 });
 const graphCaption = css({
-  fontSize: "xs",
+  textStyle: "note",
   color: "text.subtle",
   mt: "3",
   pt: "2.5",
@@ -86,9 +85,8 @@ const compliance = css({
   borderColor: "border.default",
   borderRadius: "input",
   bg: "surface.page",
-  fontSize: "sm",
+  textStyle: "note",
   color: "text.muted",
-  lineHeight: "normal",
 });
 
 export function ReportPublishedView({
@@ -155,8 +153,10 @@ export function ReportPublishedView({
             ))}
           </div>
           <div className={materialRef}>
-            <div className={css({ color: "text.subtle", fontSize: "xs" })}>対象資材</div>
-            <div className={css({ fontWeight: "extrabold", fontSize: "md" })}>{materialName}</div>
+            <div className={css({ color: "text.subtle", textStyle: "note" })}>対象資材</div>
+            <div className={css({ fontWeight: "extrabold", textStyle: "body" })}>
+              {materialName}
+            </div>
             <div className={subtle}>{manufacturerName}</div>
           </div>
           {sections.map((section) => {
@@ -174,7 +174,7 @@ export function ReportPublishedView({
                   numericGroups(input).map((measurement) =>
                     measurement.graphs.map((graph) => (
                       <div key={graph.id} className={graphCard}>
-                        <div className={css({ fontSize: "sm", fontWeight: "extrabold" })}>
+                        <div className={css({ textStyle: "body", fontWeight: "extrabold" })}>
                           {graph.heading || measurement.name}
                           {measurement.unit && (
                             <span className={css({ color: "text.subtle", fontWeight: "normal" })}>

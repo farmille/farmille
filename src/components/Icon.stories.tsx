@@ -34,7 +34,7 @@ export const AllGlyphs: Story = {
       {iconNames.map((name) => (
         <div key={name} className={css({ display: "grid", justifyItems: "center", gap: "1" })}>
           <Icon {...args} name={name} size="lg" />
-          <span className={css({ fontSize: "xs" })}>{name}</span>
+          <span className={css({ textStyle: "note" })}>{name}</span>
         </div>
       ))}
     </div>

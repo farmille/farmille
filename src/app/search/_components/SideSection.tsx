@@ -102,7 +102,7 @@ export function SideSection({
                 borderColor: "border.default",
                 borderRadius: "pill",
                 color: "text.subtle",
-                fontSize: "xs",
+                textStyle: "note",
               })}
             >
               {filter?.empty}

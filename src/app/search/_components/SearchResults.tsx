@@ -69,7 +69,7 @@ export function SearchResults({
   return (
     <>
       <SearchAnalytics filterCount={selected.length} resultCount={items.length} sort={sort} />
-      <div className={css({ mt: "2.5", color: "text.muted", fontSize: "xs" })}>
+      <div className={css({ mt: "2.5", color: "text.muted", textStyle: "note" })}>
         {logic.length > 0 ? (
           <>
             絞り込み条件：<b className={css({ color: "primary.800" })}>{logic}</b>
@@ -102,7 +102,7 @@ export function SearchResults({
         <div
           className={css(surfaceCardRecipe.raw(), {
             color: "text.subtle",
-            fontSize: "sm",
+            textStyle: "supporting",
             textAlign: "center",
           })}
         >
@@ -117,7 +117,7 @@ export function SearchResults({
         groups.map((group) => (
           <section key={group.title ?? "results"}>
             {group.title ? (
-              <h2 className={css({ mt: "4", mb: "2", fontSize: "md", fontWeight: "bold" })}>
+              <h2 className={css({ mt: "4", mb: "2", textStyle: "title", fontWeight: "bold" })}>
                 {group.title} {group.items.length}件
               </h2>
             ) : null}

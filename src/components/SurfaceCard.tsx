@@ -57,8 +57,7 @@ export function SurfaceCard({
           className={css({
             m: "0",
             color: "text.default",
-            fontSize: "lg",
-            lineHeight: "snug",
+            textStyle: "title",
           })}
         >
           {title}
@@ -70,8 +69,7 @@ export function SurfaceCard({
             mt: title === undefined ? "0" : "1.5",
             mb: "0",
             color: "text.muted",
-            fontSize: "sm",
-            lineHeight: "relaxed",
+            textStyle: "supporting",
           })}
         >
           {description}

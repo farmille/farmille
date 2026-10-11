@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: MaterialArticlesPageProps): P
 }
 
 const visuallyHiddenStyle = css({ srOnly: true });
-const leadStyle = css({ mb: "3", fontSize: "sm", color: "text.subtle" });
+const leadStyle = css({ mb: "3", textStyle: "supporting", color: "text.subtle" });
 
 export default async function MaterialArticlesPage({ params }: MaterialArticlesPageProps) {
   const { id } = await params;

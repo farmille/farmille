@@ -74,15 +74,13 @@ export function ArticleCard({
         )}
       </div>
       <div className={css({ px: "3.5", py: "3" })}>
-        <div className={css({ fontSize: "md", fontWeight: "bold", lineHeight: "snug" })}>
-          {title}
-        </div>
+        <div className={css({ textStyle: "body", fontWeight: "bold" })}>{title}</div>
         <div
           className={css({
             display: "flex",
             alignItems: "center",
             gap: "1.5",
-            fontSize: "xs",
+            textStyle: "note",
             color: "text.muted",
             mt: "2",
             flexWrap: "wrap",
@@ -115,7 +113,7 @@ export function ArticleCard({
             justifyContent: "space-between",
             gap: "2",
             flexWrap: "wrap",
-            fontSize: "xs",
+            textStyle: "note",
             color: "text.subtle",
             mt: "2",
           })}

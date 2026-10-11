@@ -39,7 +39,7 @@ const rowStyle = css({
   borderColor: "border.default",
   _last: { borderBottomWidth: "0" },
 });
-const termStyle = css({ fontSize: "xs", color: "text.subtle" });
+const termStyle = css({ textStyle: "note", color: "text.subtle" });
 const valueStyle = css({
   m: "0",
   mt: "0.5",

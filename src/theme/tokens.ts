@@ -1,5 +1,11 @@
 import type { SemanticTokens, Tokens } from "@pandacss/dev";
 
+type DescribedToken = { value: string; description: string };
+type DescribedTokens = { [name: string]: DescribedToken | DescribedTokens };
+
+/** sp（767px 以下）は base。tab 以上は PC 寄りの UI にし、pc は 768px 幅で成立しない密度だけを持つ。 */
+export const breakpoints = { tab: "768px", pc: "1024px" };
+
 /**
  * Farmille のプリミティブトークン。
  * Panda の設定とトークンカタログが同じ元本を参照する。
@@ -95,22 +101,40 @@ export const tokens = {
   },
   // 02 §5 の8段（9.5 / 11 / 12 / 14 / 16 / 18 / 20 / 21）に xs〜3xl 相当の名前を付与
   fontSizes: {
-    "2xs": { value: "9.5px" },
-    xs: { value: "11px" },
-    sm: { value: "12px" },
-    md: { value: "14px" },
-    lg: { value: "16px" },
-    xl: { value: "18px" },
-    "2xl": { value: "20px" },
-    "3xl": { value: "21px" },
-    display: { value: "38px" },
-    // ホームのヒーロー見出し専用（ゴシックMB101 L）。通常UIの8段とは別枠で持つ
-    hero: {
-      DEFAULT: { value: "28px" },
-      md: { value: "44px" },
-      lg: { value: "64px" },
+    "2xs": {
+      value: "9.5px",
+      description: "バッジ・カードの小さなラベル・グラフの目盛り。文には使わない。",
     },
-  },
+    xs: { value: "11px", description: "日付・件数・出典などの注記と、注意書きの箱。" },
+    sm: { value: "12px", description: "見出しや操作に添える副文。小さいボタンとチップのラベル。" },
+    md: { value: "14px", description: "画面の本文と長文。ボタンと入力欄の文字。" },
+    lg: { value: "16px", description: "カード・ダイアログ・節の見出し。" },
+    xl: { value: "18px", description: "アプリバーの題名と、ページ内の大きめの小見出し。" },
+    "2xl": { value: "20px", description: "記事・レポートの見出しと、統計の数値。" },
+    "3xl": {
+      value: "21px",
+      description: "ページの題名（プロフィール名・規約・企業向けガイドの SP）。",
+    },
+    display: {
+      value: "38px",
+      description:
+        "評価平均の数値と、企業向けガイドの PC の題名。用途ごとに組み合わせが違うため役割にしない。",
+    },
+    // 通常UIの8段とは別枠で持つ
+    hero: {
+      DEFAULT: { value: "28px", description: "ホームのヒーロー見出し専用。SP の大きさ。" },
+      md: {
+        value: "44px",
+        description:
+          "ホームのヒーロー見出し専用。tab 以上の大きさ。この md はサイズの段名で、breakpoint ではない。",
+      },
+      lg: {
+        value: "64px",
+        description:
+          "ホームのヒーロー見出し専用。pc 以上の大きさ。この lg はサイズの段名で、breakpoint ではない。",
+      },
+    },
+  } satisfies DescribedTokens,
   // 公式npmパッケージをlayoutで読み込む（フォールバックは02 §5のスタック）
   fonts: {
     // Adobe Fonts の DNP秀英角ゴシック金 Std B（weight 600）
@@ -220,10 +244,17 @@ export const tokens = {
   fontWeights: {
     thin: { value: "100" },
     extralight: { value: "200" },
-    light: { value: "300" },
+    light: {
+      value: "300",
+      description: "ゴシックMB101 L が持つ唯一の太さ。ヒーロー見出しに使う。",
+    },
     normal: { value: "400" },
     medium: { value: "500" },
-    semibold: { value: "600" },
+    semibold: {
+      value: "600",
+      description:
+        "DNP秀英角ゴシック金 Std B が持つ唯一の太さ。h1・h2 は globals.css がこの太さにする。",
+    },
     bold: { value: "700" },
     extrabold: { value: "800" },
     black: { value: "900" },
@@ -246,15 +277,14 @@ export const tokens = {
     toast: { value: 60 },
   },
   lineHeights: {
-    none: { value: "1" },
-    tight: { value: "1.25" },
-    snug: { value: "1.375" },
-    normal: { value: "1.5" },
-    relaxed: { value: "1.625" },
-    // 記事・レポートなど、段落が続く長文の本文
-    prose: { value: "1.75" },
-    loose: { value: "2" },
-  },
+    none: { value: "1", description: "1行で収める数値・アイコン。" },
+    tight: { value: "1.25", description: "ボタンなど、詰めて組む操作部品の文字。" },
+    snug: { value: "1.375", description: "見出し。" },
+    normal: { value: "1.5", description: "本文と注記。html の既定値と同じ。" },
+    relaxed: { value: "1.625", description: "見出しや操作に添える副文と、ヒーロー見出し。" },
+    prose: { value: "1.75", description: "記事・レポートなど、段落が続く長文の本文。" },
+    loose: { value: "2", description: "規約や編集欄など、行間を大きく取る文。" },
+  } satisfies DescribedTokens,
 } satisfies Tokens;
 
 /** UI ではプリミティブよりこちらを優先して参照する。 */

@@ -59,7 +59,7 @@ const thumbImage = css({ objectFit: "cover" });
 
 const materialText = css({ flex: "1", minW: "0" });
 
-const manufacturer = css({ fontSize: "sm", color: "text.subtle" });
+const manufacturer = css({ textStyle: "supporting", color: "text.subtle" });
 
 const tree = css({
   mt: "2",

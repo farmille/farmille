@@ -123,7 +123,7 @@ export default function SellerProceduresPage() {
                 key={slug}
               >
                 <div>
-                  <div className={css({ fontSize: "md", fontWeight: "extrabold" })}>
+                  <div className={css({ textStyle: "body", fontWeight: "extrabold" })}>
                     {procedure.listTitle}
                   </div>
                   <span className={membershipRecipe({ needId: procedure.needId })}>
@@ -160,7 +160,7 @@ export default function SellerProceduresPage() {
             ✉
           </span>
           <div>
-            <div className={css({ fontSize: "md", fontWeight: "extrabold" })}>お問い合わせ</div>
+            <div className={css({ textStyle: "body", fontWeight: "extrabold" })}>お問い合わせ</div>
             <div
               className={css({ mt: "1", fontSize: "sm", lineHeight: "prose", color: "text.muted" })}
             >

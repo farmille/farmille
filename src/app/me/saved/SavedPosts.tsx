@@ -28,7 +28,7 @@ export async function SavedPosts({ userId }: { userId: string }) {
   const reportById = new Map(reports.data.map((report) => [report.id, report]));
   return (
     <section className={css({ mt: "6" })} aria-labelledby="saved-posts-heading">
-      <h2 id="saved-posts-heading" className={css({ fontSize: "lg", mb: "3" })}>
+      <h2 id="saved-posts-heading" className={css({ textStyle: "title", mb: "3" })}>
         保存した投稿
       </h2>
       <div className={css({ display: "grid", gap: "3" })}>
@@ -90,7 +90,11 @@ export async function SavedPosts({ userId }: { userId: string }) {
             />
           );
         })}
-        {visible.length === 0 ? <p>まだ保存した投稿がありません。</p> : null}
+        {visible.length === 0 ? (
+          <p className={css({ textStyle: "supporting", color: "text.muted" })}>
+            まだ保存した投稿がありません。
+          </p>
+        ) : null}
       </div>
     </section>
   );

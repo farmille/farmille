@@ -65,23 +65,6 @@ const bodyRecipe = cva({
   },
 });
 
-const titleRecipe = cva({
-  base: {
-    fontWeight: "bold",
-    lineHeight: "snug",
-  },
-  variants: {
-    layout: {
-      scroll: { fontSize: "sm", lineHeight: "snug" },
-      grid: { fontSize: "sm", lineHeight: "snug" },
-      list: { fontSize: "md" },
-    },
-  },
-  defaultVariants: {
-    layout: "list",
-  },
-});
-
 export type ReportCardProps = {
   title: string;
   author: string;
@@ -203,20 +186,22 @@ export function ReportCard({
       <div className={bodyRecipe({ layout })}>
         <Link
           href={href}
-          className={cx(
-            titleRecipe({ layout }),
-            css({ display: "block", color: "inherit", textDecoration: "none" }),
-          )}
+          className={css({
+            display: "block",
+            color: "inherit",
+            textDecoration: "none",
+            textStyle: "body",
+            fontWeight: "bold",
+          })}
         >
           {title}
         </Link>
         {summary ? (
           <p
             className={css({
-              fontSize: "sm",
+              textStyle: "supporting",
               color: "text.muted",
               lineClamp: 3,
-              lineHeight: "relaxed",
             })}
           >
             {summary}
@@ -227,7 +212,7 @@ export function ReportCard({
             display: "flex",
             alignItems: "center",
             gap: compact ? "1" : "1.5",
-            fontSize: compact ? "2xs" : "xs",
+            textStyle: "note",
             color: "text.muted",
             mt: compact ? "1.5" : "2",
             flexWrap: "wrap",
@@ -279,7 +264,7 @@ export function ReportCard({
             borderTopWidth: "1px",
             borderColor: "border.default",
             p: "3",
-            fontSize: "sm",
+            textStyle: "body",
             fontWeight: "bold",
             color: "primary.700",
             textDecoration: "none",

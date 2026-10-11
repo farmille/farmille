@@ -41,7 +41,7 @@ export function ArticleMaterialList({
               <Icon name="eco" size="lg" className={css({ color: "primary.700" })} />
             </span>
             <span className={css({ minW: "0" })}>
-              <span className={css({ display: "block", fontWeight: "bold", fontSize: "md" })}>
+              <span className={css({ display: "block", textStyle: "body", fontWeight: "bold" })}>
                 {material.name}
               </span>
               <span

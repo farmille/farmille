@@ -66,7 +66,7 @@ const genreRowRecipe = cva({
 
 const selectedChip = selectedChipRecipe({ size: "sm", removable: true });
 
-const countNoteStyle = css({ flex: "none", color: "text.subtle", fontSize: "xs" });
+const countNoteStyle = css({ flex: "none", color: "text.subtle", textStyle: "note" });
 
 const summaryBase = css.raw(focusRing, {
   display: "flex",

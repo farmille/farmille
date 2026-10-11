@@ -15,7 +15,7 @@ const wrapStyle = css({
 const tableStyle = css({
   w: "100%",
   borderCollapse: "collapse",
-  fontSize: "md",
+  textStyle: "body",
   whiteSpace: "nowrap",
 });
 
@@ -58,7 +58,7 @@ const emptyStyle = css({
   py: "8",
   textAlign: "center",
   color: "text.subtle",
-  fontSize: "md",
+  textStyle: "body",
 });
 
 export type DataTableColumn<Row> = {

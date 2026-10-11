@@ -53,14 +53,12 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
         )}
       </div>
       <div className={css({ flex: "1", minW: "0" })}>
-        <h1 id="seller-name" className={css({ fontSize: "lg" })}>
+        <h1 id="seller-name" className={css({ textStyle: "title" })}>
           {seller.officialName}
         </h1>
         <Badge className={css({ mt: "1" })}>メーカー</Badge>
         {seller.profileText ? (
-          <p
-            className={css({ mt: "2", fontSize: "sm", lineHeight: "relaxed", color: "text.muted" })}
-          >
+          <p className={css({ mt: "2", textStyle: "supporting", color: "text.muted" })}>
             {seller.profileText}
           </p>
         ) : null}

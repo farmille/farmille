@@ -14,18 +14,16 @@ export const materialPageStack = css({
   flexDirection: "column",
   gap: "6",
   minW: "0",
-  fontSize: "sm",
-  lineHeight: "relaxed",
-  "& h2": { fontSize: "lg", color: "primary.700", mb: "3" },
-  "& h3": { fontSize: "sm", fontWeight: "bold", mt: "3", mb: "2" },
+  textStyle: "body",
+  "& h2": { textStyle: "title", color: "primary.700", mb: "3" },
+  "& h3": { textStyle: "body", fontWeight: "bold", mt: "3", mb: "2" },
   "& > section": { pb: "5", borderBottomWidth: "1px", borderBottomColor: "border.default" },
   "& a": { color: "primary.700", overflowWrap: "anywhere" },
 });
 export const materialPageText = css({
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
-  lineHeight: "relaxed",
-  fontSize: "sm",
+  textStyle: "prose",
 });
 /** メーカー原稿の本文と資料をプレビューする。 */
 export function MaterialPageContent({

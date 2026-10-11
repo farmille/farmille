@@ -30,7 +30,7 @@ const authorLinkStyle = css({
   color: "inherit",
   textDecoration: "none",
 });
-const nameStyle = css({ fontSize: "md", fontWeight: "bold", overflowWrap: "anywhere" });
+const nameStyle = css({ textStyle: "body", fontWeight: "bold", overflowWrap: "anywhere" });
 const detailsStyle = css({
   maxW: "full",
   px: "2",
@@ -58,9 +58,8 @@ const cropsStyle = css({
   gap: "1.5",
 });
 const bodyStyle = css({
-  fontSize: "md",
+  textStyle: "body",
   color: "text.muted",
-  lineHeight: "relaxed",
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });

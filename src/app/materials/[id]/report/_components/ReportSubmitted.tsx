@@ -18,8 +18,7 @@ const title = css({ mt: "4", fontSize: "2xl" });
 const description = css({
   mt: "3",
   color: "text.muted",
-  fontSize: "md",
-  lineHeight: "relaxed",
+  textStyle: "supporting",
 });
 
 const reportList = css({
@@ -42,7 +41,7 @@ const reportRow = css({
   bg: "surface.card",
   px: "3",
   py: "3",
-  fontSize: "sm",
+  textStyle: "body",
 });
 
 const status = css({

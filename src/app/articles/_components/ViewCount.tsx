@@ -12,7 +12,7 @@ const viewCountRecipe = cva({
   variants: {
     size: {
       md: { fontSize: "sm", gap: "1.5" },
-      sm: { fontSize: "xs", gap: "1" },
+      sm: { textStyle: "note", gap: "1" },
     },
   },
   defaultVariants: { size: "md" },

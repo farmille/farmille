@@ -14,7 +14,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Tracked: Story = {
   render: (args) => (
-    <div className={css({ color: "text.muted", fontSize: "sm" })}>
+    <div className={css({ color: "text.muted", textStyle: "supporting" })}>
       <SearchAnalytics {...args} />
       検索イベントは Storybook 上でモック送信されます。
     </div>

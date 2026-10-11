@@ -15,7 +15,7 @@ const averageStyle = css({
   fontVariantNumeric: "tabular-nums",
 });
 const countStyle = css({
-  fontSize: "xs",
+  textStyle: "note",
   color: "text.subtle",
   fontVariantNumeric: "tabular-nums",
 });

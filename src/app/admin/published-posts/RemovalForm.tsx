@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { adminBodyStyle } from "@/app/admin/_components/AdminUI";
 import { initialAdminActionState } from "@/app/admin/_lib/action-state";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
 import { Checkbox, Field, Form, Notice, SubmitButton } from "@/components/form";
@@ -19,7 +20,7 @@ export function RemovalForm({ id, type }: { id: string; type: "review" | "usage_
         <Form action={action} className={formStyle}>
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="type" value={type} />
-          <p>
+          <p className={adminBodyStyle}>
             この投稿を非公開にします。公開ページと一覧から表示されなくなります。本文や添付データは保持されます。
           </p>
           <Field name="confirmed" requirement="required">

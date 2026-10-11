@@ -25,7 +25,7 @@ const meta = css({
   alignItems: "center",
   gap: "2",
   mt: "2",
-  fontSize: "xs",
+  textStyle: "note",
   color: "text.subtle",
 });
 

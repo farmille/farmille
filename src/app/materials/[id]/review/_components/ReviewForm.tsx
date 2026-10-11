@@ -299,9 +299,9 @@ export function ReviewForm({
       )}
 
       <div className={targetCardStyle}>
-        <div className={css({ fontSize: "xs", color: "text.subtle" })}>対象資材</div>
-        <div className={css({ fontSize: "md", fontWeight: "bold" })}>{material.name}</div>
-        <div className={css({ fontSize: "xs", color: "text.subtle", mt: "0.5" })}>
+        <div className={css({ textStyle: "note", color: "text.subtle" })}>対象資材</div>
+        <div className={css({ textStyle: "body", fontWeight: "bold" })}>{material.name}</div>
+        <div className={css({ textStyle: "note", color: "text.subtle", mt: "0.5" })}>
           {material.manufacturerName}
         </div>
       </div>

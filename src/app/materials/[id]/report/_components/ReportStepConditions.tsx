@@ -28,7 +28,7 @@ const cityInput = css({ display: "block", maxW: "64", mt: "1.5" });
 
 const timelineHint = css({
   mt: "0.5",
-  fontSize: "xs",
+  textStyle: "note",
   color: "text.subtle",
   tab: { display: "none" },
 });

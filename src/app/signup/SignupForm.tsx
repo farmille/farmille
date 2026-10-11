@@ -69,7 +69,7 @@ export function SignupForm({
       >
         メールアドレスの確認ができました。残りの登録情報を入力してください。
       </Notice>
-      <p className={css({ mb: "4.5", fontSize: "sm", color: "text.subtle" })}>
+      <p className={css({ mb: "4.5", textStyle: "supporting", color: "text.subtle" })}>
         ニックネームで参加できます。本名や連絡先が公開されることはありません。
       </p>
 
@@ -184,7 +184,9 @@ export function SignupForm({
           css({ mt: "3.5", textAlign: "center" }),
         )}
       >
-        <div className={css({ fontSize: "sm", color: "text.subtle" })}>メーカーの方はこちら</div>
+        <div className={css({ textStyle: "supporting", color: "text.subtle" })}>
+          メーカーの方はこちら
+        </div>
         <TextLink
           className={css({ mt: "1.5", whiteSpace: "nowrap" })}
           href="/sellers/apply"

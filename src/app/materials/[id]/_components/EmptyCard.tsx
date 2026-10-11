@@ -13,8 +13,8 @@ const wrapRecipe = cva({
   defaultVariants: { align: "start" },
 });
 
-const titleStyle = css({ fontSize: "md", fontWeight: "bold" });
-const descriptionStyle = css({ fontSize: "sm", color: "text.subtle" });
+const titleStyle = css({ textStyle: "body", fontWeight: "bold" });
+const descriptionStyle = css({ textStyle: "supporting", color: "text.subtle" });
 
 export function EmptyCard({
   title,

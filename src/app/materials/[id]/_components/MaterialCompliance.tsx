@@ -10,8 +10,7 @@ const noticeRecipe = cva({
     alignItems: "flex-start",
     gap: "2",
     p: "3",
-    fontSize: "sm",
-    lineHeight: "normal",
+    textStyle: "note",
     color: "text.muted",
     bg: "surface.page",
     borderWidth: "1px",
@@ -29,8 +28,7 @@ const checkStyle = css({ display: "flex", flex: "none", color: "primary.700" });
 const followUpStyle = css({ mt: "1.5" });
 const disclaimerStyle = css({
   mt: "2",
-  fontSize: "xs",
-  lineHeight: "prose",
+  textStyle: "supporting",
   color: "text.subtle",
 });
 const noticeLinkStyle = css({

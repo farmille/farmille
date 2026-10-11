@@ -57,9 +57,9 @@ const label = css({
   gap: "3",
   m: "0",
   color: "text.inverse/90",
-  fontSize: "2xs",
+  textStyle: "note",
   letterSpacing: "0.24em",
-  tab: { fontSize: "xs", color: "text.inverse" },
+  tab: { color: "text.inverse" },
   _before: {
     content: '""',
     display: "block",
@@ -74,17 +74,8 @@ const title = css({
   m: "0",
   mt: "6",
   color: "text.inverse",
-  fontSize: "hero",
-  fontWeight: "light",
-  lineHeight: "relaxed",
-  letterSpacing: "0.08em",
-  tab: {
-    mt: "8",
-    fontSize: "hero.md",
-  },
-  pc: {
-    fontSize: "hero.lg",
-  },
+  textStyle: "hero",
+  tab: { mt: "8" },
 });
 
 /** SP は左右いっぱいの正方形で見出しの下地になり、PC は全幅に敷く。角丸は付けない。 */

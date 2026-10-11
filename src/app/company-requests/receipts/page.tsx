@@ -5,9 +5,8 @@ import { css } from "../../../../styled-system/css";
 import { VerificationForm } from "../_components/VerificationForm";
 
 const leadStyle = css({
-  fontSize: "sm",
+  textStyle: "supporting",
   color: "text.subtle",
-  lineHeight: "relaxed",
   mb: "4.5",
 });
 

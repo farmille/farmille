@@ -3,7 +3,10 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
 import { Field, Notice, Textarea } from "@/components/form";
+import { css } from "../../../../../styled-system/css";
 import { hideMaterialPage } from "../editor-actions";
+
+const descriptionStyle = css({ textStyle: "supporting", color: "text.muted" });
 
 export function HideMaterialPageForm({ materialId }: { materialId: string }) {
   const [note, setNote] = useState("");
@@ -12,7 +15,7 @@ export function HideMaterialPageForm({ materialId }: { materialId: string }) {
   const router = useRouter();
   return (
     <div>
-      <p>
+      <p className={descriptionStyle}>
         この資材ページを非公開にします。原稿と投稿履歴は残します。再公開は運営へご連絡ください。
       </p>
       <Field label="非公開にする理由">

@@ -23,7 +23,7 @@ import { pillButtonRecipe } from "./ReportFormParts";
 
 const groupHeading = cva({
   base: {
-    fontSize: "md",
+    textStyle: "title",
     fontWeight: "extrabold",
     display: "flex",
     alignItems: "baseline",
@@ -74,8 +74,8 @@ const bodyInput = css({
   fontSize: "md",
   lineHeight: "loose",
 });
-const subHeading = css({ fontSize: "sm", color: "text.subtle", fontWeight: "bold", mt: "2" });
-const chartCaption = css({ fontSize: "xs", color: "text.subtle", mt: "1" });
+const subHeading = css({ textStyle: "body", color: "text.subtle", fontWeight: "bold", mt: "2" });
+const chartCaption = css({ textStyle: "note", color: "text.subtle", mt: "1" });
 const editor = css({
   mt: "3.5",
   bg: "surface.card",
@@ -305,7 +305,7 @@ export function ReportArticleEditor({
         <>
           {numericGroups(input).map((measurement) => (
             <div key={measurement.id}>
-              <div className={css({ fontSize: "xs", mt: "2", fontWeight: "bold" })}>
+              <div className={css({ textStyle: "body", mt: "2", fontWeight: "bold" })}>
                 {measurement.name || "調査項目未入力"}
                 {measurement.unit ? `（${measurement.unit}）` : ""}
               </div>
@@ -372,7 +372,7 @@ export function ReportArticleEditor({
       {!preview && (
         <>
           <h3 className={groupHeading({ first: true })}>記事の確認</h3>
-          <p className={css({ fontSize: "sm", color: "text.muted" })}>
+          <p className={css({ textStyle: "supporting", color: "text.muted" })}>
             入力内容から記事を組み立てています。見出しや本文は直接編集できます（前のステップを直すと、編集していない部分は自動で更新されます）。写真は各セクションの「＋
             写真を挿入」から選び、その場に置きます。
           </p>
@@ -412,7 +412,7 @@ export function ReportArticleEditor({
         >
           {materialName} 実証詳細レポート｜{cropName}
         </div>
-        <div className={css({ fontSize: "sm", color: "text.subtle", mt: "2", mb: "4.5" })}>
+        <div className={css({ textStyle: "supporting", color: "text.subtle", mt: "2", mb: "4.5" })}>
           {cropName}・{prefecture}
         </div>
         {sections.map((section) => (
