@@ -1,30 +1,33 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { getAddress } from "jposta";
 import * as v from "valibot";
 
-const AddressSchema = v.tuple([
-  v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(47)),
-  v.string(),
-]);
-const PostalMasterSchema = v.record(v.string(), v.array(AddressSchema));
-let master: Promise<v.InferOutput<typeof PostalMasterSchema>> | undefined;
+const PostalCodeSchema = v.pipe(v.string(), v.regex(/^\d{7}$/));
 
-/** 日本郵便の公開データをサイト内で検索し、入力された郵便番号を外部へ送らない。 */
+/** 既定の getAddress は同梱チャンクを読む。host を渡すと取得先が外部になる。 */
 export async function lookupPostalAddress(postalCode: string) {
-  const parsed = v.safeParse(v.pipe(v.string(), v.regex(/^\d{7}$/)), postalCode);
+  const parsed = v.safeParse(PostalCodeSchema, postalCode);
   if (!parsed.success) return { ok: false, message: "郵便番号を7桁で入力してください。" };
-  master ??= readFile(
-    path.join(process.cwd(), "src/server/data/postal-addresses.json"),
-    "utf8",
-  ).then((text) => v.parse(PostalMasterSchema, JSON.parse(text)));
-  const matches = (await master)[parsed.output];
-  if (!matches || matches.length === 0)
+  const address = await getAddress(parsed.output);
+  if (address === null) {
     return {
       ok: false,
       message: "住所が見つかりませんでした。都道府県と市区町村を入力してください。",
     };
+  }
   return {
     ok: true,
-    addresses: matches.map(([prefectureCode, city]) => ({ prefectureCode, city })),
+    addresses: [
+      {
+        prefectureCode: address.prefNum,
+        city: address.city,
+        town: fillableTown(address.area ?? ""),
+      },
+    ],
   };
+}
+
+/** 「以下に掲載がない場合」と「番地がくる場合」は番地の前に置く町名ではない。 */
+function fillableTown(town: string): string {
+  if (town === "以下に掲載がない場合" || town.includes("番地がくる場合")) return "";
+  return town;
 }

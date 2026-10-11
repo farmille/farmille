@@ -3,10 +3,19 @@ import Link from "next/link";
 
 import { buttonRecipe } from "@/components/Button";
 import { AuthScreen } from "@/components/auth/AuthScreen";
-import { FormActions, Notice } from "@/components/form";
+import { FormActions } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { safeNextPath } from "@/lib/auth/safe-next";
+
+import { css } from "../../../../styled-system/css";
+
+const leadStyle = css({
+  textStyle: "supporting",
+  color: "text.subtle",
+  mb: "4.5",
+  textAlign: "center",
+});
 
 export const metadata: Metadata = {
   title: "登録完了",
@@ -22,14 +31,8 @@ export default async function SignupDonePage({
   const next = safeNextPath(requestedNext);
 
   return (
-    <AuthScreen
-      lead="会員登録が完了しました。ログインしてご利用ください。"
-      title="登録が完了しました"
-    >
-      <Notice tone="neutral">
-        アイコン画像・一言プロフィール・主な作目は、マイページからあとで設定できます。
-      </Notice>
-
+    <AuthScreen title="登録が完了しました">
+      <p className={leadStyle}>会員登録が完了しました。ログインしてご利用ください。</p>
       <FormActions>
         <Link
           className={buttonRecipe({ variant: "primary", size: "md" })}

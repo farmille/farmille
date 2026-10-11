@@ -3,6 +3,7 @@ import { useRef, useState, useTransition } from "react";
 
 import { buttonRecipe } from "@/components/Button";
 import { Field, Fieldset, Input, Select } from "@/components/form";
+import { postalFill } from "@/lib/postal-fill";
 import { PREFECTURES } from "@/lib/prefectures";
 
 import { css } from "../../../styled-system/css";
@@ -25,30 +26,47 @@ const postalInputStyle = css({ flex: "1 1 token(sizes.44)", maxW: "80" });
 
 const lookupStatusStyle = css({ color: "primary.800" });
 
+function completePostalCode(value: string): string | null {
+  const digits = value.normalize("NFKC").replace(/-/g, "");
+  return /^\d{7}$/.test(digits) ? digits : null;
+}
+
 export function PostalAddressFields({ values }: { values: Record<string, string> }) {
   const [postal, setPostal] = useState(values.postalCode ?? "");
   const [prefecture, setPrefecture] = useState(values.prefectureCode ?? "");
   const [city, setCity] = useState(values.city ?? "");
+  const [street, setStreet] = useState(values.streetAddress ?? "");
   const [message, setMessage] = useState("");
   const [pending, startTransition] = useTransition();
   const requestVersion = useRef(0);
+  const autoTown = useRef("");
+  const postalCode = completePostalCode(postal);
   function lookup() {
+    if (postalCode === null) return;
     const version = ++requestVersion.current;
     startTransition(async () => {
-      const result = await findPostalAddress(postal.normalize("NFKC").replace(/-/g, ""));
+      const result = await findPostalAddress(postalCode);
       if (version !== requestVersion.current) return;
       if (!result.ok || !("addresses" in result) || result.addresses === undefined) {
         setMessage(result.message ?? "住所を検索できませんでした。");
         return;
       }
-      if (result.addresses.length !== 1) {
+      const fill = postalFill(result.addresses);
+      if (fill.status === "many-cities") {
         setMessage("複数の市区町村が該当します。お住まいの都道府県と市区町村を入力してください。");
         return;
       }
-      const address = result.addresses[0];
-      setPrefecture(String(address.prefectureCode));
-      setCity(address.city);
-      setMessage("都道府県と市区町村を入力しました。内容を確認してください。");
+      setPrefecture(String(fill.prefectureCode));
+      setCity(fill.city);
+      if (fill.status === "many-towns") {
+        setMessage("複数の町名が該当します。都道府県と市区町村を入力しました。番地を入力してください。");
+        return;
+      }
+      if (fill.status === "town" && (street === "" || street === autoTown.current)) {
+        autoTown.current = fill.town;
+        setStreet(fill.town);
+      }
+      setMessage("");
     });
   }
 
@@ -74,7 +92,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
             inputMode="numeric"
             maxLength={8}
             onBlur={() => {
-              if (/^\d{7}$/.test(postal.normalize("NFKC").replace(/-/g, ""))) lookup();
+              lookup();
             }}
             onChange={(event) => {
               requestVersion.current++;
@@ -88,7 +106,12 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
             placeholder="310-0011"
             value={postal}
           />
-          <button type="button" className={lookupButton} disabled={pending} onClick={lookup}>
+          <button
+            type="button"
+            className={lookupButton}
+            disabled={pending || postalCode === null}
+            onClick={lookup}
+          >
             {pending ? "住所を検索中…" : "住所を自動入力"}
           </button>
         </div>
@@ -122,7 +145,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
             requestVersion.current++;
             setCity(event.target.value);
           }}
-          placeholder="水戸市笠原町"
+          placeholder="水戸市"
           value={city}
         />
       </Field>
@@ -130,9 +153,14 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
       <Field label="番地" labelSize="sm" name="streetAddress" visibility="private">
         <Input
           autoComplete="address-line1"
-          defaultValue={values.streetAddress}
           maxLength={200}
-          placeholder="978-6"
+          onChange={(event) => {
+            requestVersion.current++;
+            autoTown.current = "";
+            setStreet(event.target.value);
+          }}
+          placeholder="久が原978-6"
+          value={street}
         />
       </Field>
 
