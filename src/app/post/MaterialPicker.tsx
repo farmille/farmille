@@ -135,7 +135,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
 
   return (
     <>
-      <p className={css({ mb: "3", fontSize: "sm", color: "text.subtle" })}>
+      <p className={css({ mb: "3", textStyle: "supporting", color: "text.subtle" })}>
         どの資材について書きますか？
       </p>
 
@@ -159,7 +159,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
           <div
             className={cx(
               surfaceCardRecipe({ padding: "cozy" }),
-              css({ textAlign: "center", fontSize: "sm", color: "text.subtle" }),
+              css({ textAlign: "center", textStyle: "supporting", color: "text.subtle" }),
             )}
           >
             条件に合う資材が見つかりませんでした。
@@ -179,14 +179,14 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                 <MaterialThumb src={material.imageUrl} size={44} />
               </span>
               <span className={css({ flex: "1", minW: "0" })}>
-                <span className={css({ display: "block", fontSize: "md", fontWeight: "bold" })}>
+                <span className={css({ display: "block", textStyle: "body", fontWeight: "bold" })}>
                   {material.name}
                 </span>
                 <span
                   className={css({
                     display: "block",
                     mt: "0.5",
-                    fontSize: "xs",
+                    textStyle: "note",
                     color: "text.subtle",
                   })}
                 >
@@ -200,7 +200,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                       flexWrap: "wrap",
                       gap: "1",
                       mt: "1",
-                      fontSize: "xs",
+                      textStyle: "note",
                       color: "text.subtle",
                     })}
                   >
@@ -248,7 +248,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
           borderStyle: "solid",
           borderColor: "border.default",
           borderRadius: "pill",
-          fontSize: "xs",
+          textStyle: "note",
           color: "text.subtle",
         })}
       >
@@ -263,7 +263,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
               alignItems: "center",
               gap: "2",
               mb: "2.5",
-              fontSize: "md",
+              textStyle: "body",
               fontWeight: "bold",
             })}
           >
@@ -275,7 +275,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
               <span
                 className={css({
                   display: "block",
-                  fontSize: "xs",
+                  textStyle: "note",
                   fontWeight: "normal",
                   color: "text.subtle",
                 })}

@@ -30,13 +30,11 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className={cx(wrapRecipe(), className)}>
-      <p className={css({ fontSize: "md", fontWeight: "bold", color: "text.muted", m: "0" })}>
+      <p className={css({ textStyle: "body", fontWeight: "bold", color: "text.muted", m: "0" })}>
         {title}
       </p>
       {description ? (
-        <p className={css({ fontSize: "sm", lineHeight: "relaxed", m: "0", maxW: "280px" })}>
-          {description}
-        </p>
+        <p className={css({ textStyle: "supporting", m: "0", maxW: "280px" })}>{description}</p>
       ) : null}
       {children}
     </div>

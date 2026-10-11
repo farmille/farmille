@@ -58,7 +58,7 @@ const avatar = css({
 
 const nameColumn = css({ flex: "1", minW: "44", pb: "0.5" });
 
-const name = css({ m: "0", fontSize: "lg", fontWeight: "extrabold" });
+const name = css({ m: "0", textStyle: "title", fontWeight: "extrabold" });
 
 const chipRow = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "1.5" } as const;
 
@@ -67,7 +67,7 @@ const regionRow = css(chipRow, { mt: "1" });
 const cropRow = css(chipRow, { mt: "2" });
 
 const label = cva({
-  base: { color: "text.subtle", fontSize: "xs" },
+  base: { color: "text.subtle", textStyle: "note" },
   variants: { spaced: { true: { ml: "1.5" }, false: {} } },
 });
 
@@ -97,8 +97,7 @@ const srOnly = css({ srOnly: true });
 
 const bio = css({
   mt: "3",
-  fontSize: "md",
-  lineHeight: "prose",
+  textStyle: "prose",
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });
@@ -144,7 +143,7 @@ const footRow = css({
   mt: "2",
 });
 
-const publicNote = css({ m: "0", color: "text.subtle", fontSize: "xs" });
+const publicNote = css({ m: "0", color: "text.subtle", textStyle: "note" });
 
 const publicLink = css({ ml: "auto", fontSize: "sm", fontWeight: "bold" });
 

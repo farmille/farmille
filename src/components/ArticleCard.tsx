@@ -82,7 +82,7 @@ export function ArticleCard({
             display: "flex",
             alignItems: "center",
             gap: "1.5",
-            fontSize: "xs",
+            textStyle: "note",
             color: "text.muted",
             mt: "2",
             flexWrap: "wrap",
@@ -115,7 +115,7 @@ export function ArticleCard({
             justifyContent: "space-between",
             gap: "2",
             flexWrap: "wrap",
-            fontSize: "xs",
+            textStyle: "note",
             color: "text.subtle",
             mt: "2",
           })}

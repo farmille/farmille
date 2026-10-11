@@ -30,7 +30,7 @@ const authorLinkStyle = css({
   color: "inherit",
   textDecoration: "none",
 });
-const nameStyle = css({ fontSize: "md", fontWeight: "bold", overflowWrap: "anywhere" });
+const nameStyle = css({ textStyle: "body", fontWeight: "bold", overflowWrap: "anywhere" });
 const detailsStyle = css({
   maxW: "full",
   px: "2",

@@ -41,7 +41,7 @@ const scrollStyle = css({
   },
 });
 const signupStyle = css({ mt: "2.5", textAlign: "center" });
-const signupTitleStyle = css({ fontSize: "md", fontWeight: "bold" });
+const signupTitleStyle = css({ textStyle: "body", fontWeight: "bold" });
 const signupActionsStyle = css({
   mt: "2",
   display: "flex",

@@ -18,7 +18,7 @@ const empty = css({
   borderRadius: "card",
   bg: "surface.card",
   color: "text.subtle",
-  fontSize: "md",
+  textStyle: "body",
 });
 
 export default function HomePage() {

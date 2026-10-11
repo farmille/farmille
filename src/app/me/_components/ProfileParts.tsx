@@ -60,9 +60,9 @@ export function ProfileSectionHeading({
 
 const emptyNote = css(surfaceCardRecipe.raw(), {
   color: "text.subtle",
-  fontSize: "sm",
+  textStyle: "supporting",
   textAlign: "center",
-  "& b": { display: "block", mb: "1", color: "text.muted", fontSize: "sm" },
+  "& b": { display: "block", mb: "1", color: "text.muted" },
 });
 
 export function EmptyNote({ title, description }: { title: string; description: string }) {

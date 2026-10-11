@@ -54,7 +54,7 @@ export function SignupForm({ next = null }: { next?: string | null }) {
       >
         登録は無料・1分で完了します。
       </Notice>
-      <p className={css({ mb: "4.5", fontSize: "sm", color: "text.subtle" })}>
+      <p className={css({ mb: "4.5", textStyle: "supporting", color: "text.subtle" })}>
         ニックネームで参加できます。本名や連絡先が公開されることはありません。
       </p>
 
@@ -203,7 +203,9 @@ export function SignupForm({ next = null }: { next?: string | null }) {
           css({ mt: "3.5", textAlign: "center" }),
         )}
       >
-        <div className={css({ fontSize: "sm", color: "text.subtle" })}>メーカー様はこちら</div>
+        <div className={css({ textStyle: "supporting", color: "text.subtle" })}>
+          メーカー様はこちら
+        </div>
         <TextLink
           className={css({ mt: "1.5", whiteSpace: "nowrap" })}
           href="/sellers/apply"

@@ -14,7 +14,7 @@ import { css } from "../../styled-system/css";
 
 const sectionStyle = css({ py: "5", borderBottomWidth: "1px", borderColor: "border.default" });
 const prose = css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere", lineHeight: "prose" });
-const sectionHeading = css({ fontSize: "lg", mb: "3" });
+const sectionHeading = css({ textStyle: "title", mb: "3" });
 const subHeading = css({ fontSize: "md", fontWeight: "bold", mb: "3" });
 const graphCaption = css({ fontSize: "sm", fontWeight: "bold", mb: "2" });
 const photoGrid = css({

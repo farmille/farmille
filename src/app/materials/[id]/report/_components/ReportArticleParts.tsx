@@ -75,10 +75,9 @@ const plotScope = css({
   px: "2",
 });
 const plotDescription = css({
-  fontSize: "md",
+  textStyle: "prose",
   color: "text.muted",
   mt: "1",
-  lineHeight: "prose",
   whiteSpace: "pre-wrap",
 });
 

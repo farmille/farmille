@@ -30,8 +30,7 @@ export function ApplicationReceipt({
         className={css({
           whiteSpace: "pre-wrap",
           overflowWrap: "anywhere",
-          fontSize: "md",
-          lineHeight: "prose",
+          textStyle: "prose",
           py: "6",
         })}
       >

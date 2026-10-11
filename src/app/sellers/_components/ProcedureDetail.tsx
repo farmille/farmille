@@ -78,7 +78,7 @@ export function ProcedureDetail({ procedure }: { procedure: Procedure }) {
       {procedure.steps.map((step, index) => (
         <article className={stepCardRecipe()} key={step.title}>
           <span className={stepLabelRecipe()}>STEP{index + 1}</span>
-          <h3 className={css({ mt: "2", fontSize: "lg", fontWeight: "extrabold" })}>
+          <h3 className={css({ mt: "2", textStyle: "title", fontWeight: "extrabold" })}>
             {step.title}
           </h3>
           <div className={stepBodyRecipe()}>{step.body}</div>

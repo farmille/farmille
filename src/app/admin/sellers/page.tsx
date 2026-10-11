@@ -100,7 +100,7 @@ export default async function AdminSellersPage({
           rowKey={(row) => row.id}
           rows={sellers.data}
         />
-        <p className={css({ mt: "2", fontSize: "sm", color: "text.subtle" })}>
+        <p className={css({ mt: "2", textStyle: "supporting", color: "text.subtle" })}>
           状態の内訳：{SELLER_STATUSES.map((value) => SELLER_STATUS_LABELS[value]).join("／")}
         </p>
       </Panel>

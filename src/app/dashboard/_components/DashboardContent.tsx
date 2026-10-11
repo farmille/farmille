@@ -163,7 +163,7 @@ const orgMark = css({
   flex: "none",
 });
 
-const orgName = css({ display: "inline", fontSize: "lg", fontWeight: "bold" });
+const orgName = css({ display: "inline", textStyle: "title", fontWeight: "bold" });
 
 const memberBadge = css({
   display: "inline-flex",
@@ -182,7 +182,7 @@ const memberBadge = css({
   px: "2",
 });
 
-const contactLine = css({ fontSize: "xs", mt: "0.5", color: "text.subtle" });
+const contactLine = css({ textStyle: "note", mt: "0.5", color: "text.subtle" });
 
 const kpiGrid = css({
   display: "grid",
@@ -249,7 +249,7 @@ const materialMaker = css({ fontSize: "xs", color: "text.subtle" });
 
 const emptyTitle = css({ fontSize: "sm", fontWeight: "bold" });
 
-const emptyText = css({ fontSize: "sm", color: "text.subtle", mt: "1" });
+const emptyText = css({ textStyle: "supporting", color: "text.subtle", mt: "1" });
 
 const accountActions = css({ display: "flex", flexWrap: "wrap", gap: "2", py: "3", px: "4" });
 

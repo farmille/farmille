@@ -24,7 +24,7 @@ const optionDetailStyle = css({ flexShrink: "0", textAlign: "end" });
 export const emptyStyle = css({
   px: "3",
   py: "2.5",
-  fontSize: "sm",
+  textStyle: "supporting",
   color: "text.subtle",
   "&:empty": { p: "0" },
 });

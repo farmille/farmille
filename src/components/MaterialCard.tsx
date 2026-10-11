@@ -246,7 +246,7 @@ export function MaterialCard({
         <div className={css({ fontSize: "md", fontWeight: "bold" })}>{name}</div>
         <div
           className={css({
-            fontSize: "xs",
+            textStyle: "note",
             color: "text.muted",
             display: "inline-flex",
             alignItems: "center",
@@ -262,7 +262,7 @@ export function MaterialCard({
               display: "flex",
               alignItems: "center",
               gap: "1.5",
-              fontSize: "xs",
+              textStyle: "note",
               color: "text.muted",
               mt: "1",
               flexWrap: "wrap",

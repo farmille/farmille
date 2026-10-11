@@ -71,7 +71,7 @@ export function MaterialRefCard({
             alignItems: "center",
             gap: "1",
             flexWrap: "wrap",
-            fontSize: "xs",
+            textStyle: "note",
             color: "text.muted",
             mt: "0.5",
           })}

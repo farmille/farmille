@@ -19,7 +19,7 @@ const currentLogoStyle = css({
   alignItems: "center",
   gap: "2",
   flexWrap: "wrap",
-  fontSize: "xs",
+  textStyle: "note",
   mt: "2",
   color: "text.subtle",
 });

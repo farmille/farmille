@@ -69,7 +69,7 @@ export function SearchResults({
   return (
     <>
       <SearchAnalytics filterCount={selected.length} resultCount={items.length} sort={sort} />
-      <div className={css({ mt: "2.5", color: "text.muted", fontSize: "xs" })}>
+      <div className={css({ mt: "2.5", color: "text.muted", textStyle: "note" })}>
         {logic.length > 0 ? (
           <>
             絞り込み条件：<b className={css({ color: "primary.800" })}>{logic}</b>
@@ -102,7 +102,7 @@ export function SearchResults({
         <div
           className={css(surfaceCardRecipe.raw(), {
             color: "text.subtle",
-            fontSize: "sm",
+            textStyle: "supporting",
             textAlign: "center",
           })}
         >

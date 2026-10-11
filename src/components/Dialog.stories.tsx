@@ -14,7 +14,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const body = (
-  <p className={css({ mt: "3", fontSize: "sm", lineHeight: "relaxed" })}>
+  <p className={css({ mt: "3", textStyle: "supporting" })}>
     通報内容は運営だけが確認します。投稿者に通報者が知らされることはありません。
   </p>
 );

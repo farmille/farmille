@@ -106,9 +106,9 @@ export function SearchResultCard({
         )}
       </div>
       <div className={css({ flex: "1", minW: "0" })}>
-        <div className={css({ color: "text.muted", fontSize: "xs" })}>{maker}</div>
-        <div className={css({ fontSize: "md", fontWeight: "bold" })}>{name}</div>
-        <div className={css({ mt: "1", fontSize: "xs" })}>
+        <div className={css({ color: "text.muted", textStyle: "note" })}>{maker}</div>
+        <div className={css({ textStyle: "body", fontWeight: "bold" })}>{name}</div>
+        <div className={css({ mt: "1", textStyle: "note" })}>
           {rating === null ? null : (
             <>
               <span className={css({ color: "accent.warn", fontWeight: "extrabold" })}>
@@ -125,7 +125,14 @@ export function SearchResultCard({
           </span>
         </div>
         {description ? (
-          <div className={css({ mt: "1", color: "text.muted", fontSize: "sm", lineClamp: "1" })}>
+          <div
+            className={css({
+              mt: "1",
+              color: "text.muted",
+              textStyle: "supporting",
+              lineClamp: "1",
+            })}
+          >
             {description}
           </div>
         ) : null}

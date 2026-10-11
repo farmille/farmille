@@ -74,13 +74,13 @@ const postStatus = css({
 
 const postTitle = css({ fontSize: "md", fontWeight: "bold", lineHeight: "snug" });
 
-const postCrop = css({ mt: "1", color: "text.subtle", fontSize: "xs" });
+const postCrop = css({ mt: "1", color: "text.subtle", textStyle: "note" });
 
 const savedList = css(surfaceCardRecipe.raw({ padding: "flush" }));
 
 const savedName = css({ mt: "0.5", fontSize: "md", fontWeight: "bold", lineHeight: "relaxed" });
 
-const savedMaker = css({ mt: "0.5", color: "text.subtle", fontSize: "xs" });
+const savedMaker = css({ mt: "0.5", color: "text.subtle", textStyle: "note" });
 
 export function LinkRow({ href, children }: { href: string; children: ReactNode }) {
   return (

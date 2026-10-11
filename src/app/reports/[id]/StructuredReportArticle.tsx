@@ -39,7 +39,7 @@ const plotStyles = {
     alignItems: "center",
     columnGap: "2.5",
     rowGap: "1.5",
-    fontSize: "md",
+    textStyle: "body",
   }),
   scope: css({
     px: "2",
@@ -54,9 +54,8 @@ const plotStyles = {
   }),
   description: css({
     mt: "1",
-    fontSize: "md",
+    textStyle: "prose",
     color: "text.muted",
-    lineHeight: "prose",
     whiteSpace: "pre-wrap",
   }),
 };

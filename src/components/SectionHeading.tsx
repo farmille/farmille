@@ -92,12 +92,12 @@ export function SectionHeading({
           {number}
         </span>
       ) : null}
-      <Heading className={css({ fontSize: "lg", m: "0" })}>{title}</Heading>
+      <Heading className={css({ textStyle: "title", m: "0" })}>{title}</Heading>
       {numbered && sub ? (
         <span
           className={css({
             ml: "auto",
-            fontSize: "xs",
+            textStyle: "note",
             color: "text.subtle",
             textAlign: "right",
           })}

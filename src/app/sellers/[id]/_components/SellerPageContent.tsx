@@ -117,7 +117,9 @@ export function SellerPageContent({ data }: { data: PublicSellerPageData }) {
                   )}
                 </div>
                 <div className={css({ px: "3", py: "2.5" })}>
-                  <div className={css({ fontSize: "md", fontWeight: "bold" })}>{material.name}</div>
+                  <div className={css({ textStyle: "body", fontWeight: "bold" })}>
+                    {material.name}
+                  </div>
                   <div className={css({ mt: "1", fontSize: "xs", color: "accent.star" })}>
                     <Stars value={material.averageRating ?? 0} />
                     <span className={css({ srOnly: true })}>
@@ -174,7 +176,7 @@ export function SellerPageContent({ data }: { data: PublicSellerPageData }) {
                     flexWrap: "wrap",
                     gap: "1.5",
                     mt: "1.5",
-                    fontSize: "xs",
+                    textStyle: "note",
                     color: "text.muted",
                   })}
                 >
@@ -205,10 +207,12 @@ export function SellerPageContent({ data }: { data: PublicSellerPageData }) {
           <div
             className={cx(
               surfaceCardRecipe(),
-              css({ textAlign: "center", color: "text.subtle", fontSize: "sm" }),
+              css({ textAlign: "center", color: "text.subtle", textStyle: "supporting" }),
             )}
           >
-            <b className={css({ display: "block", mb: "1", color: "text.muted", fontSize: "md" })}>
+            <b
+              className={css({ display: "block", mb: "1", color: "text.muted", textStyle: "body" })}
+            >
               公開中の記事はまだありません
             </b>
             記事が公開されると、ここに表示されます。

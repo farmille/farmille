@@ -21,14 +21,13 @@ const panelHeadStyle = css({
 });
 
 const panelTitleStyle = css({
-  fontSize: "lg",
+  textStyle: "title",
   m: "0",
 });
 
 const panelNoteStyle = css({
-  fontSize: "sm",
+  textStyle: "supporting",
   color: "text.subtle",
-  lineHeight: "relaxed",
 });
 
 /** 運営管理の区画。見出し＋補足＋中身。 */
@@ -130,9 +129,8 @@ export const adminFieldGridStyle = css({
 });
 
 export const adminInlineNoteStyle = css({
-  fontSize: "sm",
+  textStyle: "supporting",
   color: "text.subtle",
-  lineHeight: "relaxed",
 });
 
 export const adminCodeStyle = css({

@@ -139,7 +139,7 @@ const legendSwatchRecipe = cva({
 
 const guideListStyle = css({
   mt: "2.5",
-  "& li": { py: "1", fontSize: "md", lineHeight: "prose" },
+  "& li": { py: "1", textStyle: "prose" },
   "& li a": {
     color: "primary.800",
     fontWeight: "bold",
@@ -478,7 +478,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             </GuideCard>
           ))}
           <GuideCard id="lpGuideDelist" title="終売の反映・非表示にしたい" needId={false}>
-            <p className={css({ mt: "2", fontSize: "md", lineHeight: "prose" })}>
+            <p className={css({ mt: "2", textStyle: "prose" })}>
               終売・廃盤表示や資材ページの非表示のご依頼は{" "}
               <a className={guideLinkStyle} href={`mailto:${CONTACT_EMAIL}`}>
                 {CONTACT_EMAIL}
@@ -508,7 +508,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           資材オーナー権限とは？
         </h2>
         <div className={cx(guideCardStyle, css({ mt: "3.5", py: "4", px: "5" }))}>
-          <p className={css({ fontSize: "md", lineHeight: "prose", color: "text.default" })}>
+          <p className={css({ textStyle: "prose", color: "text.default" })}>
             Farmilleに掲載される資材ごとに1社に設定する権限で、資材情報の編集権限を含みます。当該資材の製造元・販売元・輸入元の企業様を対象に、パッケージの記載で貴社と資材の関係を確認したうえでお渡しします。権限をお渡しした資材は、企業会員ダッシュボードから製品説明・施用方法・試験結果などの情報を編集できます。
           </p>
         </div>
@@ -537,8 +537,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
                   position: "relative",
                   mt: "2",
                   pl: "6",
-                  fontSize: "md",
-                  lineHeight: "prose",
+                  textStyle: "prose",
                   color: "text.muted",
                   _before: {
                     content: '"A"',
@@ -700,8 +699,7 @@ function PrepBox({ title, children }: { title: string; children: ReactNode }) {
       <ol
         className={css({
           pl: "4.5",
-          fontSize: "md",
-          lineHeight: "prose",
+          textStyle: "prose",
           color: "text.muted",
           "& b": { color: "text.default" },
         })}

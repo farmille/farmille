@@ -95,7 +95,7 @@ export function PostActions({
         </span>
       </div>
       {error ? (
-        <p role="status" className={css({ fontSize: "xs", color: "text.muted" })}>
+        <p role="status" className={css({ textStyle: "note", color: "text.muted" })}>
           {error}
         </p>
       ) : null}

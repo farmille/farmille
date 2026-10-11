@@ -53,8 +53,7 @@ const appBarStyle = css({
 const titleStyle = css({
   flex: "1",
   minW: "0",
-  fontSize: "lg",
-  lineHeight: "snug",
+  textStyle: "title",
 });
 
 const bodyStyle = css({
@@ -67,9 +66,8 @@ const bodyStyle = css({
 });
 
 const leadStyle = css({
-  fontSize: "sm",
+  textStyle: "supporting",
   color: "text.subtle",
-  lineHeight: "relaxed",
   mb: "4.5",
 });
 

@@ -66,7 +66,7 @@ export function FeedReportCard({
         {crop ? <Chip>{crop}</Chip> : null}
         {publishedAt ? (
           <time
-            className={css({ ml: "auto", flexShrink: "0", fontSize: "xs" })}
+            className={css({ ml: "auto", flexShrink: "0", textStyle: "note" })}
             dateTime={publishedAt}
             title={formatDateJa(publishedAt)}
           >

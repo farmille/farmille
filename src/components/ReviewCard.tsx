@@ -117,7 +117,7 @@ export function ReviewCard({
       </span>
       <span className={css({ fontWeight: "bold", fontSize: "sm" })}>{handle}</span>
       {authorDetails ? (
-        <span className={css({ color: "text.subtle", fontSize: "xs" })}>{authorDetails}</span>
+        <span className={css({ color: "text.subtle", textStyle: "note" })}>{authorDetails}</span>
       ) : null}
     </>
   );
@@ -126,7 +126,7 @@ export function ReviewCard({
   return (
     <article className={cx(surfaceCardRecipe({ padding: "cozy" }), className)}>
       {materialName ? (
-        <div className={css({ fontSize: "xs", color: "text.subtle", mb: "1" })}>
+        <div className={css({ textStyle: "note", color: "text.subtle", mb: "1" })}>
           {materialName} の感想口コミ
         </div>
       ) : null}

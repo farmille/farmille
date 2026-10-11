@@ -45,7 +45,7 @@ const slot = css({
 const avatarCurrent = css({
   mt: "1",
   color: "text.subtle",
-  fontSize: "xs",
+  textStyle: "note",
   "& img": {
     display: "inline-block",
     w: "7",

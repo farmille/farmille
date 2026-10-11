@@ -65,7 +65,7 @@ export function ReportGate({ reportPath }: { reportPath: string }) {
           <h2 className={css({ fontSize: "md", fontWeight: "extrabold" })}>
             続きは無料会員登録で読めます（1分）
           </h2>
-          <p className={css({ mt: "1", fontSize: "sm", color: "text.subtle" })}>
+          <p className={css({ mt: "1", textStyle: "supporting", color: "text.subtle" })}>
             使用結果のグラフ・比較した区の詳細が見られます
           </p>
           <Link

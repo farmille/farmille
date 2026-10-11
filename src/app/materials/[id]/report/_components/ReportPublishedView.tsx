@@ -30,7 +30,7 @@ const materialRef = css({
   bg: "surface.card",
 });
 const sectionHeadingStyle = css({
-  fontSize: "lg",
+  textStyle: "title",
   mt: "6",
   mb: "2",
   pl: "2.5",
@@ -40,9 +40,8 @@ const sectionHeadingStyle = css({
   fontWeight: "extrabold",
 });
 const paragraph = css({
-  fontSize: "md",
+  textStyle: "prose",
   color: "text.muted",
-  lineHeight: "prose",
   whiteSpace: "pre-wrap",
 });
 const graphCard = css({
@@ -55,7 +54,7 @@ const graphCard = css({
   bg: "surface.card",
 });
 const graphCaption = css({
-  fontSize: "xs",
+  textStyle: "note",
   color: "text.subtle",
   mt: "3",
   pt: "2.5",

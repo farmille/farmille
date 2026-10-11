@@ -30,7 +30,13 @@ const groupTitleStyle = css({
   fontWeight: "bold",
   color: "text.subtle",
 });
-const emptyStyle = css({ pt: "1", px: "0.5", pb: "2", fontSize: "sm", color: "text.subtle" });
+const emptyStyle = css({
+  pt: "1",
+  px: "0.5",
+  pb: "2",
+  textStyle: "supporting",
+  color: "text.subtle",
+});
 const kindStyle = css({
   flex: "none",
   px: "1",
@@ -92,12 +98,11 @@ const testTitleStyle = css({
 });
 const testSummaryStyle = css({
   mt: "0.5",
-  fontSize: "sm",
-  lineHeight: "relaxed",
+  textStyle: "supporting",
   color: "text.muted",
   lineClamp: "2",
 });
-const testMetaStyle = css({ mt: "1", fontSize: "xs", color: "text.subtle" });
+const testMetaStyle = css({ mt: "1", textStyle: "note", color: "text.subtle" });
 const testOpenStyle = css({
   flex: "none",
   alignSelf: "center",

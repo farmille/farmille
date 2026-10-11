@@ -163,7 +163,7 @@ export function ReportGraphNote({ children }: { children: ReactNode }) {
         borderTopWidth: "1px",
         borderTopStyle: "solid",
         borderTopColor: "border.default",
-        fontSize: "xs",
+        textStyle: "note",
         color: "text.subtle",
       })}
     >

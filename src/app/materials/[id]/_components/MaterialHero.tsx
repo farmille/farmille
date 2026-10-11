@@ -34,7 +34,7 @@ const imageFrameStyle = css({
 });
 const photoStyle = css({ objectFit: "contain", bg: "surface.card" });
 const infoStyle = css({ flex: "1", minW: "0" });
-const nameStyle = css({ fontSize: "lg" });
+const nameStyle = css({ textStyle: "title" });
 const ratingStyle = css({
   mt: "1",
   color: "accent.warn",
@@ -67,7 +67,7 @@ const applyLinkStyle = css({
   textDecoration: "none",
 });
 const chipsStyle = css({ mt: "2", display: "flex", flexWrap: "wrap", gap: "1" });
-const countsStyle = css({ mt: "1.5", fontSize: "xs", color: "text.subtle" });
+const countsStyle = css({ mt: "1.5", textStyle: "note", color: "text.subtle" });
 const countLinkStyle = css({ whiteSpace: "nowrap", color: "inherit" });
 const countMinorStyle = css({ fontSize: "2xs", whiteSpace: "nowrap", color: "inherit" });
 const savedMarkStyle = css({ color: "primary.800" });

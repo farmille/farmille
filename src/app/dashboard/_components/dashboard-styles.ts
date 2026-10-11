@@ -42,7 +42,7 @@ export const logRow = css({
 export const logDate = css({
   flex: "none",
   color: "text.subtle",
-  fontSize: "xs",
+  textStyle: "note",
   fontVariantNumeric: "tabular-nums",
 });
 

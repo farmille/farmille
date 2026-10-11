@@ -6,12 +6,11 @@ import { css, cva } from "../../../../../styled-system/css";
 import { MaterialBox } from "./MaterialBox";
 
 const descriptionStyle = css({
-  fontSize: "md",
-  lineHeight: "prose",
+  textStyle: "prose",
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });
-const emptyStyle = css({ fontSize: "md", color: "text.subtle" });
+const emptyStyle = css({ textStyle: "body", color: "text.subtle" });
 const timelineScrollStyle = css({
   mt: "0.5",
   mx: "-1",
@@ -73,7 +72,7 @@ const labelRecipe = cva({
   },
 });
 const visuallyHiddenStyle = css({ srOnly: true });
-const noteStyle = css({ mt: "2.5", fontSize: "xs", lineHeight: "normal", color: "text.subtle" });
+const noteStyle = css({ mt: "2.5", textStyle: "note", color: "text.subtle" });
 
 export function MaterialDescriptionBox({ description }: { description: string | undefined }) {
   return (

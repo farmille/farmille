@@ -34,8 +34,7 @@ const hiddenInputStyle = css({ srOnly: true });
 const selectionStyle = css({
   m: "0",
   color: "text.subtle",
-  fontSize: "sm",
-  lineHeight: "relaxed",
+  textStyle: "supporting",
   overflowWrap: "anywhere",
 });
 

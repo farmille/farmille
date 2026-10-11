@@ -34,7 +34,7 @@ const favRecipe = cva({
   defaultVariants: { saved: false },
 });
 
-const noteStyle = css({ mt: "2", fontSize: "xs", color: "text.subtle" });
+const noteStyle = css({ mt: "2", textStyle: "note", color: "text.subtle" });
 
 type ToggleAction = (previous: SaveControlState, formData: FormData) => Promise<SaveControlState>;
 

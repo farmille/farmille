@@ -28,9 +28,9 @@ const typeLabelRecipe = cva({
   },
 });
 
-const titleStyle = css({ mt: "2", fontSize: "lg" });
-const leadStyle = css({ mt: "1", fontSize: "sm", lineHeight: "relaxed", color: "text.muted" });
-const noteStyle = css({ mt: "1", fontSize: "sm", lineHeight: "relaxed", color: "text.subtle" });
+const titleStyle = css({ mt: "2", textStyle: "title" });
+const leadStyle = css({ mt: "1", textStyle: "supporting", color: "text.muted" });
+const noteStyle = css({ mt: "1", textStyle: "supporting", color: "text.subtle" });
 const actionStyle = css({ mt: "3" });
 
 /** 一般ユーザーとメーカーを入力前に分け、異なる確認・ログイン方式を明示する。 */

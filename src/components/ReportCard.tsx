@@ -213,10 +213,9 @@ export function ReportCard({
         {summary ? (
           <p
             className={css({
-              fontSize: "sm",
+              textStyle: "supporting",
               color: "text.muted",
               lineClamp: 3,
-              lineHeight: "relaxed",
             })}
           >
             {summary}
