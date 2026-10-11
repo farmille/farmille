@@ -1,3 +1,4 @@
+import { clientEnv } from "@/env";
 import { APPLICATION_METHODS } from "@/lib/material-page-editor";
 import { unstable_cache } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
@@ -242,8 +243,8 @@ export async function listClassificationOptionsWithSupabase(
 // 分類マスタは運営のタグ管理でだけ変わり、その操作が updateTag で失効させる。
 // SQL で直接直した場合に備えて、1時間で取り直す。
 const fetchCachedClassificationOptions = unstable_cache(
-  async (): Promise<ClassificationOptions> => {
-    const result = await listClassificationOptionsWithSupabase(createPublicSupabase());
+  async (supabaseUrl: string): Promise<ClassificationOptions> => {
+    const result = await listClassificationOptionsWithSupabase(createPublicSupabase(supabaseUrl));
     // 失敗を値で返すとキャッシュに残るので、例外にして保存させない。
     if (!result.ok) throw new Error("分類マスタを取得できませんでした。");
     return result.data;
@@ -254,7 +255,7 @@ const fetchCachedClassificationOptions = unstable_cache(
 
 async function fetchClassificationOptions(): Promise<Result<ClassificationOptions>> {
   try {
-    return succeed(await fetchCachedClassificationOptions());
+    return succeed(await fetchCachedClassificationOptions(clientEnv.supabaseUrl));
   } catch (error) {
     unstable_rethrow(error);
     reportQueryError("分類マスタの取得に失敗", error);

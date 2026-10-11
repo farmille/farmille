@@ -1,3 +1,4 @@
+import { clientEnv } from "@/env";
 import { materialIllustrationUrl } from "@/lib/material-illustration";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
@@ -12,8 +13,8 @@ import { createPublicSupabase } from "@/server/supabase";
 // 公開・掲載終了と内容の変更は運営の操作が updateTag で失効させる。
 // 評価・口コミ数・保存数・使用レポート数は投稿のたびには失効させず、10分の遅れを許容する。
 const fetchCatalogMaterials = unstable_cache(
-  async () => {
-    const db = createPublicSupabase();
+  async (supabaseUrl: string) => {
+    const db = createPublicSupabase(supabaseUrl);
     const [counts, materials] = await Promise.all([
       db.rpc("catalog_material_counts"),
       selectAllRows((from, to) =>
@@ -44,7 +45,7 @@ const fetchCatalogMaterials = unstable_cache(
 
 async function fetchCatalogSearch() {
   const [snapshot, options] = await Promise.all([
-    fetchCatalogMaterials(),
+    fetchCatalogMaterials(clientEnv.supabaseUrl),
     listClassificationOptions(),
   ]);
   if (!options.ok) throw new Error("検索用の作物分類を取得できませんでした。");
@@ -60,7 +61,7 @@ export const getCatalogSearch = cache(fetchCatalogSearch);
 export type CatalogSearch = Awaited<ReturnType<typeof getCatalogSearch>>;
 
 export async function getMaterialSavedCount(materialId: string): Promise<number | null> {
-  const { counts } = await fetchCatalogMaterials();
+  const { counts } = await fetchCatalogMaterials(clientEnv.supabaseUrl);
   return counts.find((row) => row.material_id === materialId)?.saved_count ?? null;
 }
 
