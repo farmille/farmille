@@ -18,14 +18,18 @@ test("実証詳細レポートの下書き保存、提出、pending の公開側
   try {
     await loginGeneral(page, user, reportPath);
     await page.getByRole("button", { name: "下書き保存" }).click();
-    await expect(page.getByRole("status")).toHaveText("下書きを保存しました。");
+    await expect(page.getByRole("region", { name: "レポートの通知" })).toContainText(
+      "下書きを保存しました。",
+    );
     await page.goto("/me");
     await expect(page.getByText("作物未選択", { exact: true })).toBeVisible();
     await page.goto(reportPath);
     await page.getByLabel("作目").fill("トマト");
     await page.getByRole("option", { name: "トマト なす科果菜類", exact: true }).click();
     await page.getByRole("button", { name: "下書き保存" }).click();
-    await expect(page.getByRole("status")).toHaveText("下書きを保存しました。");
+    await expect(page.getByRole("region", { name: "レポートの通知" })).toContainText(
+      "下書きを保存しました。",
+    );
     await expect.poll(async () => (await usageReportByAuthor(user.id))?.status).toBe("draft");
 
     await fillUsageReportForSubmission(page);

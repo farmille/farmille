@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
 import { MaterialRegistrationBadges } from "@/components/materials/MaterialRegistrationBadges";
 import {
   APPLICATION_METHODS,
@@ -16,19 +17,7 @@ import { MaterialBox } from "./MaterialBox";
 import { Chip } from "./CardParts";
 
 const chipsStyle = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "0.5" });
-const usageMoreStyle = css({ mt: "1.5", "&[open] > summary::after": { content: '"▴"' } });
-const usageSummaryStyle = css({
-  cursor: "pointer",
-  fontSize: "sm",
-  color: "primary.800",
-  fontWeight: "semibold",
-  listStyle: "none",
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1",
-  "&::-webkit-details-marker": { display: "none" },
-  _after: { content: '"▾"', fontSize: "xs" },
-});
+const usageMoreStyle = css({ mt: "1.5" });
 const usageBlockStyle = css({
   mt: "1.5",
   px: "3",
@@ -119,14 +108,16 @@ export function MaterialDetailTable({
         <>
           {methods.length > 0 ? tags(methods.map(methodLabel)) : "−"}
           {usageBlocks.length > 0 ? (
-            <details className={usageMoreStyle}>
-              <summary className={usageSummaryStyle}>詳細を見る</summary>
-              {usageBlocks.map((usage, index) => (
-                <div key={index} className={usageBlockStyle}>
-                  {methodLabel(usage.method)}：{usage.detail}
-                </div>
-              ))}
-            </details>
+            <Collapsible className={usageMoreStyle}>
+              <CollapsibleTrigger variant="link">詳細を見る</CollapsibleTrigger>
+              <CollapsiblePanel hiddenUntilFound>
+                {usageBlocks.map((usage, index) => (
+                  <div key={index} className={usageBlockStyle}>
+                    {methodLabel(usage.method)}：{usage.detail}
+                  </div>
+                ))}
+              </CollapsiblePanel>
+            </Collapsible>
           ) : (
             <div className={usageEmptyStyle}>詳細：−</div>
           )}

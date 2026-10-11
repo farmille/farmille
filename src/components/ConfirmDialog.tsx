@@ -1,106 +1,153 @@
 "use client";
 
-import { useId, useRef, type ReactNode } from "react";
+import { AlertDialog } from "@base-ui/react/alert-dialog";
+import { useRef, useState, useTransition, type ReactElement, type ReactNode } from "react";
 
-import { buttonRecipe } from "@/components/Button";
-import { dialogPanel } from "@/components/dialog-panel";
-import { css, cx } from "../../styled-system/css";
+import { Button, buttonRecipe } from "./Button";
+import { dialogRecipe } from "./Dialog";
+import { Form } from "./form/Form";
+import { css, cva, cx } from "../../styled-system/css";
 
-type ConfirmDialogProps = {
-  title: string;
-  description: ReactNode;
+const actionsLayoutRecipe = cva({
+  base: {},
+  variants: { layout: { row: {}, stack: { flexDirection: "column" } } },
+});
+
+const fieldsStyle = css({ mt: "4" });
+
+const closeButtonStyle = buttonRecipe({ variant: "ghost", size: "md" });
+
+type ConfirmDialogOwnership =
+  | { trigger: ReactElement; open?: undefined; onOpenChange?: undefined; pending?: undefined }
+  | {
+      trigger?: undefined;
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      /** 呼び出し側が進めている処理の最中。ボタンを押せなくし、確認ボタンの文言を pendingLabel にする。 */
+      pending?: boolean;
+    };
+
+type ConfirmDialogConfirmation =
+  | {
+      /** form action として渡す。確認ボタンは submit になる。 */
+      action: (formData: FormData) => void | Promise<void>;
+      onConfirm?: undefined;
+      /** フォームに含める入力（理由の Textarea や hidden input）。 */
+      children?: ReactNode;
+    }
+  | { action?: undefined; onConfirm: () => void | Promise<void>; children?: undefined };
+
+export type ConfirmDialogProps = {
+  title: ReactNode;
+  description?: ReactNode;
   confirmLabel: string;
+  /** 処理中の確認ボタンの文言。省くと confirmLabel のまま押せなくなる。 */
+  pendingLabel?: string;
   cancelLabel?: string;
-  confirmVariant?: "danger" | "primary";
-  triggerLabel: string;
-  triggerVariant?: "danger" | "ghost" | "primary";
-  triggerSize?: "sm" | "md";
-  triggerDisabled?: boolean;
-  /** form action として渡す。確認ボタンは submit になる。 */
-  action?: (formData: FormData) => void | Promise<void>;
-  onConfirm?: () => void;
-};
+  /** 確認ボタンの色。最初のフォーカスは danger ならキャンセル、primary なら確認ボタンに置く。 */
+  tone?: "danger" | "primary";
+  /** 3つ目の選択肢（例：保存せずに閉じる）。選ぶと onSelect を呼んで閉じる。 */
+  alternative?: { label: string; onSelect: () => void };
+} & ConfirmDialogOwnership &
+  ConfirmDialogConfirmation;
 
-/**
- * 削除・危険操作の確認ダイアログ。
- * action があれば form submit、なければ onConfirm を呼ぶ。
- */
-export function ConfirmDialog({
-  title,
-  description,
-  confirmLabel,
-  cancelLabel = "キャンセル",
-  confirmVariant = "danger",
-  triggerLabel,
-  triggerVariant = "danger",
-  triggerSize = "sm",
-  triggerDisabled = false,
-  action,
-  onConfirm,
-}: ConfirmDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const titleId = useId();
+export function ConfirmDialog(props: ConfirmDialogProps) {
+  const {
+    title,
+    description,
+    confirmLabel,
+    pendingLabel = confirmLabel,
+    cancelLabel = "キャンセル",
+    tone = "danger",
+    alternative,
+  } = props;
+  const [ownOpen, setOwnOpen] = useState(false);
+  const [confirming, startConfirming] = useTransition();
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+  const styles = dialogRecipe({ size: "panel" });
+  const open = props.trigger === undefined ? props.open : ownOpen;
+  const setOpen = props.trigger === undefined ? props.onOpenChange : setOwnOpen;
+  const busy = confirming || props.pending === true;
+
+  // 失敗は transition から一番近いエラー境界へ届く（Next の redirect もそこで処理される）
+  function confirm(work: () => void | Promise<void>, closeWhenDone: boolean): void {
+    startConfirming(async () => {
+      await work();
+      if (closeWhenDone) setOpen(false);
+    });
+  }
+
+  const actions = (
+    <div
+      className={cx(
+        styles.actions,
+        actionsLayoutRecipe({ layout: alternative === undefined ? "row" : "stack" }),
+      )}
+    >
+      {alternative === undefined ? null : (
+        <AlertDialog.Close
+          className={closeButtonStyle}
+          disabled={busy}
+          onClick={alternative.onSelect}
+        >
+          {alternative.label}
+        </AlertDialog.Close>
+      )}
+      <AlertDialog.Close className={closeButtonStyle} disabled={busy} ref={cancelRef}>
+        {cancelLabel}
+      </AlertDialog.Close>
+      <Button
+        disabled={busy}
+        focusableWhenDisabled={busy}
+        onClick={props.action === undefined ? () => confirm(props.onConfirm, true) : undefined}
+        ref={confirmRef}
+        type={props.action === undefined ? "button" : "submit"}
+        variant={tone}
+      >
+        {busy ? pendingLabel : confirmLabel}
+      </Button>
+    </div>
+  );
 
   return (
-    <>
-      <button
-        type="button"
-        className={buttonRecipe({ variant: triggerVariant, size: triggerSize })}
-        disabled={triggerDisabled}
-        onClick={() => dialogRef.current?.showModal()}
-      >
-        {triggerLabel}
-      </button>
-
-      <dialog ref={dialogRef} aria-labelledby={titleId} className={dialogPanel}>
-        <h2 id={titleId} className={css({ m: "0", fontSize: "lg" })}>
-          {title}
-        </h2>
-        <div
-          className={css({
-            mt: "2",
-            mb: "4",
-            fontSize: "sm",
-            color: "text.muted",
-            lineHeight: "relaxed",
-          })}
+    <AlertDialog.Root
+      onOpenChange={(next) => {
+        if (next || !busy) setOpen(next);
+      }}
+      open={open}
+    >
+      {props.trigger === undefined ? null : <AlertDialog.Trigger render={props.trigger} />}
+      <AlertDialog.Portal>
+        <AlertDialog.Backdrop className={styles.backdrop} />
+        <AlertDialog.Popup
+          className={styles.popup}
+          initialFocus={tone === "danger" ? cancelRef : confirmRef}
         >
-          {description}
-        </div>
-        <div className={css({ display: "flex", gap: "2" })}>
-          <button
-            type="button"
-            className={cx(buttonRecipe({ variant: "ghost", size: "md" }), css({ flex: "1" }))}
-            onClick={() => dialogRef.current?.close()}
-          >
-            {cancelLabel}
-          </button>
-          {action !== undefined ? (
-            <form action={action} className={css({ flex: "1" })}>
-              <button
-                type="submit"
-                className={buttonRecipe({ variant: confirmVariant, size: "md" })}
-              >
-                {confirmLabel}
-              </button>
-            </form>
+          <AlertDialog.Title className={styles.title}>{title}</AlertDialog.Title>
+          {description === undefined ? null : (
+            <AlertDialog.Description className={styles.description} render={<div />}>
+              {description}
+            </AlertDialog.Description>
+          )}
+          {props.action === undefined ? (
+            actions
           ) : (
-            <button
-              type="button"
-              className={cx(
-                buttonRecipe({ variant: confirmVariant, size: "md" }),
-                css({ flex: "1" }),
-              )}
-              onClick={() => {
-                dialogRef.current?.close();
-                onConfirm?.();
+            <Form
+              onSubmit={(event) => {
+                event.preventDefault();
+                const formData = new FormData(event.currentTarget);
+                confirm(() => props.action(formData), props.trigger !== undefined);
               }}
             >
-              {confirmLabel}
-            </button>
+              {props.children === undefined ? null : (
+                <div className={fieldsStyle}>{props.children}</div>
+              )}
+              {actions}
+            </Form>
           )}
-        </div>
-      </dialog>
-    </>
+        </AlertDialog.Popup>
+      </AlertDialog.Portal>
+    </AlertDialog.Root>
   );
 }

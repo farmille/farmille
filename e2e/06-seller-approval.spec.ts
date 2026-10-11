@@ -11,7 +11,7 @@ import {
   sellerLoginIdByOfficialName,
   uniqueToken,
 } from "./support/test-data";
-import { loginAdminAndEnrollMfa } from "./support/ui";
+import { chooseOption, loginAdminAndEnrollMfa } from "./support/ui";
 
 async function captureAccountScreen(page: Page, filename: string): Promise<void> {
   if (process.env.CAPTURE_ACCOUNT_FLOW !== "1") return;
@@ -74,10 +74,18 @@ for (const mode of ["existing", "new"]) {
         page.getByRole("button", { name: "確認を完了してログインを発行" }),
       ).toBeDisabled();
       if (mode === "new") {
-        await page.getByLabel("紐づける資材メーカー").selectOption("__new__");
+        await chooseOption(
+          page,
+          page.getByLabel("紐づける資材メーカー"),
+          "該当なし：メーカーを追加",
+        );
         await page.getByLabel("新規メーカー名").fill(newManufacturerName);
       } else {
-        await page.getByLabel("紐づける資材メーカー").selectOption(material.manufacturer_name);
+        await chooseOption(
+          page,
+          page.getByLabel("紐づける資材メーカー"),
+          material.manufacturer_name,
+        );
       }
       await captureAccountScreen(
         page,

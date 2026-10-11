@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, userEvent, waitFor, within } from "storybook/test";
+
 import { ProfileTagsEditor } from "./ProfileTagsEditor";
 const meta = {
   title: "App/Me/ProfileTagsEditor",
@@ -41,4 +43,52 @@ const meta = {
 } satisfies Meta<typeof ProfileTagsEditor>;
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);
+
 export const Default: Story = {};
+
+export const CropSearch: Story = {
+  play: async ({ canvasElement }) => {
+    await userEvent.type(within(canvasElement).getByRole("combobox", { name: "主な作目" }), "トマ");
+    await waitFor(() =>
+      expect(
+        page(canvasElement).getByRole("option", { name: "トマト なす科果菜類" }),
+      ).toBeVisible(),
+    );
+  },
+};
+
+export const AffiliationPicked: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: "JA青年部" }));
+    await expect(canvas.getByRole("button", { name: "JA青年部" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  },
+};
+
+export const AffiliationSuggestions: Story = {
+  play: async ({ canvasElement }) => {
+    await userEvent.type(within(canvasElement).getByRole("combobox", { name: "所属" }), "JA");
+    await waitFor(() =>
+      expect(page(canvasElement).getByRole("option", { name: "JA青年部" })).toBeVisible(),
+    );
+  },
+};
+
+export const AtLimits: Story = {
+  args: {
+    details: {
+      ...meta.args.details,
+      crops: Array.from({ length: 50 }, (_, i) => ({
+        id: `crop-${i}`,
+        name: `作目${i}`,
+        aliases: [],
+      })),
+      affiliations: Array.from({ length: 20 }, (_, i) => `所属${i}`),
+    },
+  },
+};

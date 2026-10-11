@@ -41,28 +41,51 @@ body {
   button,
   summary,
   a[href],
-  [role="tab"] {
+  [role="tab"],
+  [role="checkbox"]:not(label *),
+  [role="radio"]:not(label *),
+  label:has([role="checkbox"]),
+  label:has([role="radio"]) {
     transition-property: transform, background-color, border-color, color, opacity;
     transition-duration: var(--durations-fast);
     transition-timing-function: var(--easings-out);
   }
 
-  button:not(:disabled):active,
+  button:not(:disabled, [aria-disabled="true"], [data-disabled]):active,
   summary:active,
   a[href]:active,
-  [role="tab"]:not([aria-disabled="true"]):active {
+  [role="tab"]:not([aria-disabled="true"]):active,
+  [role="checkbox"]:not(label *, [aria-disabled="true"], [data-disabled]):active,
+  [role="radio"]:not(label *, [aria-disabled="true"], [data-disabled]):active,
+  label:has([role="checkbox"]):not(:has([data-disabled])):active,
+  label:has([role="radio"]):not(:has([data-disabled])):active {
     transform: scale(0.98);
   }
 
   /* 視覚過敏の設定では動かさず、不透明度で押下を示す */
   @media (prefers-reduced-motion: reduce) {
-    button:not(:disabled):active,
+    button:not(:disabled, [aria-disabled="true"], [data-disabled]):active,
     summary:active,
     a[href]:active,
-    [role="tab"]:not([aria-disabled="true"]):active {
+    [role="tab"]:not([aria-disabled="true"]):active,
+    [role="checkbox"]:not(label *, [aria-disabled="true"], [data-disabled]):active,
+    [role="radio"]:not(label *, [aria-disabled="true"], [data-disabled]):active,
+    label:has([role="checkbox"]):not(:has([data-disabled])):active,
+    label:has([role="radio"]):not(:has([data-disabled])):active {
       transform: none;
       opacity: 0.72;
     }
+  }
+}
+
+/*
+ * Sonner は視覚過敏の設定で transition を !important で消し、不透明度の手がかりまで無くす。
+ * Sonner の規則より詳細度を上げて上書きする。
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toaster] [data-sonner-toast] {
+    transform: none !important;
+    transition: opacity var(--durations-toast) var(--easings-soft) !important;
   }
 }
 

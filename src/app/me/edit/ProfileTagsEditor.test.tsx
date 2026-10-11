@@ -48,7 +48,7 @@ describe("プロフィールのタグ編集", () => {
     );
     const input = screen.getByRole("combobox", { name: "所属" });
     await user.type(input, "野菜研究サークル");
-    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("option")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "所属を追加" }));
     expect(input).toHaveValue("");
     expect(input).toHaveAttribute("aria-expanded", "false");
@@ -72,7 +72,7 @@ describe("プロフィールのタグ編集", () => {
         }}
       />,
     );
-    expect(screen.getByRole("combobox", { name: "主な作目" })).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "主な作目" })).toHaveAttribute("readonly");
     expect(screen.getByRole("combobox", { name: "所属" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "所属を追加" }));
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();

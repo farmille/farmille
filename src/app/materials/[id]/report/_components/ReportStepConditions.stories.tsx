@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { fn } from "storybook/test";
+import { expect, fn, userEvent, within } from "storybook/test";
 
 import { createBlankUsageReport } from "@/lib/usage-report";
 
@@ -44,5 +44,18 @@ export const Missing: Story = {
       cultivationEnvironment: "栽培環境を入力してください",
       timingStages: "施用時期の段階を選んでください",
     },
+  },
+};
+
+export const PressTiming: Story = {
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    const pressed = canvas.getByRole("button", { name: "開花・生殖成長開始期" });
+    await userEvent.click(pressed);
+    await expect(pressed).toHaveAttribute("aria-pressed", "true");
+    await expect(canvas.getByRole("button", { name: "播種・定植時" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   },
 };

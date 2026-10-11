@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { SearchBox } from "./SearchBox";
 import { storyIds, storySearchCatalog } from "./story-fixtures";
@@ -11,6 +12,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+async function openSuggestions(canvasElement: HTMLElement) {
+  await userEvent.click(within(canvasElement).getByRole("combobox", { name: "資材の検索条件" }));
+  await userEvent.keyboard("{ArrowDown}");
+  return within(canvasElement.ownerDocument.body);
+}
+
 export const Empty: Story = {};
 export const WithSelection: Story = {
   args: {
@@ -21,5 +28,19 @@ export const WithSelection: Story = {
     ],
   },
 };
-export const Suggestions: Story = { args: { initialQuery: "ト" } };
-export const NoSuggestion: Story = { args: { initialQuery: "該当なし" } };
+export const Suggestions: Story = {
+  args: { initialQuery: "ト" },
+  play: async ({ canvasElement }) => {
+    const page = await openSuggestions(canvasElement);
+    await waitFor(() => expect(page.getAllByRole("option").length).toBeGreaterThan(0));
+  },
+};
+export const NoSuggestion: Story = {
+  args: { initialQuery: "該当なし" },
+  play: async ({ canvasElement }) => {
+    const page = await openSuggestions(canvasElement);
+    await waitFor(() =>
+      expect(page.getByText("「該当なし」に一致する候補がありません")).toBeVisible(),
+    );
+  },
+};

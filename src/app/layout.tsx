@@ -2,6 +2,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import Script from "next/script";
 
+import { Toaster } from "@/components/Toaster";
 import { createRootMetadata } from "@/lib/seo";
 
 import "gen-interface-jp/400.css";
@@ -41,7 +42,10 @@ export default function RootLayout({
 
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Toaster />
+      </body>
       <Script id="adobe-fonts" strategy="afterInteractive">
         {adobeFontsLoader}
       </Script>

@@ -28,3 +28,29 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
+export const TrialAndRegistration: Story = {
+  args: {
+    initialContent: {
+      ...meta.args.initialContent,
+      links: [
+        {
+          group: "public_trial",
+          title: "県試験場の試験報告",
+          url: "https://example.com/trial.pdf",
+          trial: {
+            crops: "トマト",
+            summary: "高温期の着果率を比較しました。",
+            institution: "県農業試験場",
+            year: 2025,
+            pageCount: 12,
+          },
+        },
+      ],
+      registrations: [{ kind: "pesticide", companyName: "農薬登録会社", effects: "" }],
+      relatedCompanies: ["製造会社"],
+    },
+  },
+};
+export const Pending: Story = {
+  args: { pendingVersion: "22222222-2222-4222-8222-222222222222" },
+};

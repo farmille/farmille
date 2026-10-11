@@ -4,7 +4,7 @@ Farmille は、BS資材（生物・微生物農業資材）を農家が評価し
 
 ## 設計資料
 
-設計の正は [`docs/rebuild/`](docs/rebuild/00-overview.md) です。実装や運用に関する判断では、このディレクトリの設計資料を参照してください。
+機能ごとの仕様は [`docs/rebuild/`](docs/rebuild/) の `*-SPEC.md`、用語は [`CONTEXT.md`](CONTEXT.md)、運用の記録と手順は [`docs/ops/`](docs/ops/) にあります。
 
 ## セットアップ
 
@@ -67,7 +67,7 @@ farmille/
 │   └── migrations/      # v2 系の migration
 ├── tools/migration/     # 資材マスタ移行スクリプト
 ├── docs/
-│   ├── rebuild/         # 設計資料、入力資料、タスク指示書
+│   ├── rebuild/         # 機能ごとの仕様（*-SPEC.md）
 │   └── ops/             # 運用記録
 ├── panda.config.ts
 ├── package.json

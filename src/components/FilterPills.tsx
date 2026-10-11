@@ -1,89 +1,64 @@
-"use client";
+import Link from "next/link";
 
-import { cva, css, cx } from "../../styled-system/css";
+import { css, cx } from "../../styled-system/css";
 
-const row = css({
+export const pillRowStyle = css({
   display: "flex",
   gap: "1.5",
   overflowX: "auto",
   pb: "1",
 });
 
-const pillRecipe = cva({
-  base: {
-    flexShrink: "0",
-    fontSize: "sm",
-    px: "3",
-    py: "1.5",
-    borderRadius: "pill",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.strong",
-    bg: "surface.card",
-    color: "text.muted",
-    cursor: "pointer",
-    fontFamily: "sans",
-  },
-  variants: {
-    active: {
-      true: {
-        bg: "primary.700",
-        borderColor: "primary.600",
-        color: "text.inverse",
-        fontWeight: "semibold",
-      },
-      false: {},
-    },
-  },
-  defaultVariants: {
-    active: false,
+/** 絞り込みのピル（fpill）。リンクは aria-current、タブは aria-selected で選択中の見た目になる。 */
+export const pillStyle = css({
+  flexShrink: "0",
+  fontSize: "sm",
+  px: "3",
+  py: "1.5",
+  borderRadius: "pill",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.strong",
+  bg: "surface.card",
+  color: "text.muted",
+  cursor: "pointer",
+  fontFamily: "sans",
+  textDecoration: "none",
+  "&:is([aria-current=page], [aria-selected=true])": {
+    bg: "primary.700",
+    borderColor: "primary.600",
+    color: "text.inverse",
+    fontWeight: "semibold",
   },
 });
 
 export type FilterPillOption = {
-  value: string;
+  href: string;
   label: string;
+  current: boolean;
 };
 
-type FilterPillsProps = {
-  options: FilterPillOption[];
-  value: string;
-  onChange: (value: string) => void;
-  className?: string;
-  "aria-label"?: string;
-};
-
-/** 記事一覧のフィルタピル（fpill）。 */
 export function FilterPills({
-  options,
-  value,
-  onChange,
+  "aria-label": ariaLabel,
+  items,
   className,
-  "aria-label": ariaLabel = "フィルタ",
-}: FilterPillsProps) {
+}: {
+  "aria-label": string;
+  items: readonly FilterPillOption[];
+  className?: string;
+}) {
   return (
-    <div
-      className={cx(css({ overflowX: "auto" }), className)}
-      role="tablist"
-      aria-label={ariaLabel}
-    >
-      <div className={row}>
-        {options.map((opt) => {
-          const active = opt.value === value;
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              className={pillRecipe({ active })}
-              onClick={() => onChange(opt.value)}
-            >
-              {opt.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <nav aria-label={ariaLabel} className={cx(pillRowStyle, className)}>
+      {items.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={pillStyle}
+          aria-current={item.current ? "page" : undefined}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </nav>
   );
 }

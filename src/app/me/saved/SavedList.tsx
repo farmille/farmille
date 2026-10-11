@@ -1,11 +1,10 @@
 "use client";
 
-import { Checkbox } from "@/components/Checkbox";
-
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button, EmptyState, MaterialCard } from "@/components";
+import { Checkbox, Notice } from "@/components/form";
 import { COMPARE_MATERIAL_LIMITS } from "@/lib/compare-limits";
 import type { SavedMaterialItem } from "@/server/queries/saved-materials";
 import { css } from "../../../../styled-system/css";
@@ -40,16 +39,6 @@ const footer = css({
   borderTopWidth: "1px",
   borderTopStyle: "solid",
   borderTopColor: "border.default",
-});
-
-const checkboxLabel = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "2",
-  fontSize: "sm",
-  fontWeight: "bold",
-  color: "text.muted",
-  cursor: "pointer",
 });
 
 type SavedListProps = {
@@ -114,13 +103,12 @@ export function SavedList({ items }: SavedListProps) {
       <div className={stack}>
         {items.map((item) => (
           <div key={item.savedId} className={row}>
-            <label className={checkboxLabel}>
-              <Checkbox
-                checked={selected.includes(item.materialId)}
-                onChange={() => toggle(item.materialId)}
-              />
+            <Checkbox
+              checked={selected.includes(item.materialId)}
+              onCheckedChange={() => toggle(item.materialId)}
+            >
               比較に含める
-            </label>
+            </Checkbox>
             <MaterialCard
               variant="list"
               name={item.name}
@@ -156,19 +144,9 @@ export function SavedList({ items }: SavedListProps) {
           </p>
         ) : null}
         {error !== null ? (
-          <p
-            className={css({
-              m: "0",
-              mb: "2",
-              fontSize: "sm",
-              color: "accent.warn",
-              fontWeight: "bold",
-              textAlign: "center",
-            })}
-            role="alert"
-          >
+          <Notice className={css({ mb: "2", textAlign: "center" })} tone="error">
             {error}
-          </p>
+          </Notice>
         ) : null}
         <Button type="button" disabled={!canCompare} onClick={goCompare}>
           比較する

@@ -6,7 +6,7 @@ import { adminActionsStyle } from "@/app/admin/_components/AdminUI";
 import { initialAdminActionState } from "@/app/admin/_lib/action-state";
 import { processContentReportAction } from "@/app/admin/reports/actions";
 import { Button } from "@/components";
-import { FormMessage } from "@/components/auth/Fields";
+import { Notice } from "@/components/form";
 import type { ContentReportTargetType } from "@/server/admin/reports";
 import { css } from "../../../../styled-system/css";
 
@@ -46,8 +46,8 @@ export function ReportActions({
 
   return (
     <div className={wrapStyle}>
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
-      {state.status === "done" ? <FormMessage tone="info">{state.message}</FormMessage> : null}
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
+      {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
       <div className={adminActionsStyle}>
         <Button disabled={pending} onClick={() => submit("resolved")} size="sm">
           {resolveLabel}

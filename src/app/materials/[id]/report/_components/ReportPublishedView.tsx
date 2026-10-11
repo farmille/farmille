@@ -1,5 +1,7 @@
 "use client";
 
+import { Chip } from "@/components/Chip";
+import { Dialog } from "@/components/Dialog";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { REPORT_SECTIONS, type UsageReportInput } from "@/lib/usage-report";
 
@@ -13,53 +15,10 @@ import {
   sectionHeading,
   type ReportSection,
 } from "./ReportArticleParts";
-import { pillButtonRecipe } from "./ReportFormParts";
 
-const overlay = css({
-  position: "fixed",
-  inset: "0",
-  zIndex: "30",
-  bg: "surface.page",
-  overflow: "auto",
-});
-const wrap = css({ maxW: "content.form", mx: "auto", px: "4", pb: "16" });
-const topBar = css({
-  position: "sticky",
-  top: "0",
-  zIndex: "2",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: "2.5",
-  bg: "surface.card",
-  borderBottomWidth: "1px",
-  borderBottomStyle: "solid",
-  borderBottomColor: "border.default",
-  py: "2.5",
-  px: "4",
-  mx: "-4",
-  mb: "3.5",
-  fontSize: "sm",
-  color: "text.muted",
-});
+const wrap = css({ maxW: "content.form", mx: "auto", px: "4", pt: "3.5", pb: "16" });
 const title = css({ fontSize: "2xl", lineHeight: "snug", fontWeight: "extrabold", m: "0" });
 const subtle = css({ color: "text.subtle", fontSize: "sm" });
-const chip = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1.5",
-  bg: "primary.100",
-  color: "primary.800",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "primary.700/30",
-  borderRadius: "pill",
-  py: "1",
-  px: "3",
-  fontSize: "sm",
-  fontWeight: "semibold",
-});
-const chipCategory = css({ fontSize: "2xs", opacity: "0.65", fontWeight: "bold" });
 const materialRef = css({
   mt: "3.5",
   py: "3",
@@ -133,17 +92,19 @@ const compliance = css({
 });
 
 export function ReportPublishedView({
+  open,
+  onOpenChange,
   input,
   materialName,
   manufacturerName,
   cropName,
-  onBack,
 }: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   input: UsageReportInput;
   materialName: string;
   manufacturerName: string;
   cropName: string;
-  onBack: () => void;
 }) {
   const variety = input.varietyUnknown ? "" : input.variety.trim();
   const today = new Date();
@@ -164,14 +125,15 @@ export function ReportPublishedView({
     (section) => section.value !== "documents" || input.documents.length > 0,
   );
   return (
-    <div className={overlay}>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="fullscreen"
+      title="公開後の見え方"
+      description="資材ページや検索から開いたときの記事"
+      closeLabel="プレビューに戻る"
+    >
       <div className={wrap}>
-        <div className={topBar}>
-          <span>公開後の見え方（資材ページや検索から開いたときの記事）</span>
-          <button type="button" className={pillButtonRecipe({ strong: true })} onClick={onBack}>
-            プレビューに戻る
-          </button>
-        </div>
         <div>
           <h1 className={title}>
             {materialName} 実証詳細レポート｜{cropName}
@@ -182,16 +144,14 @@ export function ReportPublishedView({
             </span>
           </div>
           <div className={css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "3" })}>
-            <span className={chip}>
-              <span className={chipCategory}>作物</span>
+            <Chip category="作物">
               {cropName}
               {variety ? `（${variety}）` : ""}
-            </span>
+            </Chip>
             {input.purposeTags.map((tag) => (
-              <span key={tag} className={chip}>
-                <span className={chipCategory}>効果</span>
+              <Chip key={tag} category="効果">
                 {tag}
-              </span>
+              </Chip>
             ))}
           </div>
           <div className={materialRef}>
@@ -260,6 +220,6 @@ export function ReportPublishedView({
           </div>
         </div>
       </div>
-    </div>
+    </Dialog>
   );
 }

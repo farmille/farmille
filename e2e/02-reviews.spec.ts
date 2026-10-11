@@ -36,7 +36,12 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
       .check();
     await page.getByRole("button", { name: "投稿する" }).click();
 
-    await expect(page).toHaveURL(new RegExp(`/materials/${material.id}\\?review=posted`));
+    await expect(
+      page.getByRole("region", { name: "通知" }).getByText("感想口コミを投稿しました。"),
+    ).toBeVisible();
+    await expect(page).toHaveURL(
+      (url) => url.pathname === `/materials/${material.id}` && !url.searchParams.has("review"),
+    );
     const postedCard = page.getByRole("article").filter({ hasText: body });
     await expect(postedCard.getByText(body, { exact: true })).toBeVisible();
     await expect(postedCard.getByText("ミニトマト", { exact: true })).toBeVisible();
@@ -81,7 +86,7 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
 
     const updatedCard = page.getByRole("article").filter({ hasText: updatedBody });
     await updatedCard.getByRole("button", { name: "削除" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "削除する" }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "削除する" }).click();
 
     await expect(page.getByText(updatedBody, { exact: true })).toHaveCount(0);
     await expect.poll(async () => await reviewByAuthor(user.id)).toBeNull();

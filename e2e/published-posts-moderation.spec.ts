@@ -48,7 +48,7 @@ test("運営が公開済み投稿を非公開化し、本文を保持する", as
       const card = page
         .locator("section")
         .filter({ has: page.getByRole("link", { name: title, exact: true }) });
-      await card.locator("summary").click();
+      await card.getByRole("button", { name: "公開から削除する" }).click();
       await card.getByRole("button", { name: "非公開にする", exact: true }).click();
       await expect(card.getByRole("checkbox")).not.toBeChecked();
       await expect(card).toBeVisible();

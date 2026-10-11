@@ -1,0 +1,99 @@
+"use client";
+
+import { Checkbox as BaseCheckbox } from "@base-ui/react/checkbox";
+import { CheckboxGroup as BaseCheckboxGroup } from "@base-ui/react/checkbox-group";
+import { useMemo, useState } from "react";
+
+import { Icon } from "@/components/Icon";
+import { cx } from "../../../styled-system/css";
+import { Choice, EnsureFieldRoot } from "./Field";
+import { useFieldContext, useResetKey } from "./field-context";
+import { checkboxBoxRecipe, checkIndicatorStyle, choiceGroupRecipe } from "./recipes";
+import type { Option } from "./types";
+
+type CheckboxGroupProps<V extends string> = {
+  options: readonly Option<V>[];
+  variant?: "list" | "chips";
+  value?: readonly V[];
+  defaultValue?: readonly V[];
+  onValueChange?: (value: V[]) => void;
+  /** 選べる数の上限。上限に達すると、選んでいない選択肢を押せなくする。 */
+  limit?: number;
+  name?: string;
+  disabled?: boolean;
+  "aria-label"?: string;
+  className?: string;
+};
+
+export function CheckboxGroup<V extends string>(props: CheckboxGroupProps<V>) {
+  const resetKey = useResetKey((props.defaultValue ?? []).join("\u001f"));
+  return <CheckboxGroupBody<V> key={resetKey} {...props} />;
+}
+
+function CheckboxGroupBody<V extends string>({
+  options,
+  variant = "list",
+  value,
+  defaultValue,
+  onValueChange,
+  limit,
+  name,
+  disabled,
+  "aria-label": ariaLabel,
+  className,
+}: CheckboxGroupProps<V>) {
+  const { inRoot } = useFieldContext();
+  const [uncontrolled, setUncontrolled] = useState<readonly V[]>(defaultValue ?? []);
+  const current = value ?? uncontrolled;
+  // Base UI は value の参照が変わるたびに Form のエラーを消す
+  const groupValue = useMemo(() => [...current], [current]);
+  const full = limit !== undefined && current.length >= limit;
+
+  function handleValueChange(next: readonly string[]): void {
+    const picked = options
+      .filter((option) => next.includes(option.value))
+      .map((option) => option.value);
+    setUncontrolled(picked);
+    onValueChange?.(picked);
+  }
+
+  const group = (
+    <BaseCheckboxGroup
+      aria-label={ariaLabel}
+      className={cx(choiceGroupRecipe({ variant }), inRoot ? className : undefined)}
+      disabled={disabled}
+      onValueChange={handleValueChange}
+      value={groupValue}
+    >
+      {options.map((option) => (
+        <Choice
+          description={option.description}
+          disabled={option.disabled === true || (full && !current.includes(option.value))}
+          key={option.value}
+          label={option.label}
+          look={variant === "chips" ? "chip" : "inline"}
+        >
+          {(frame) => (
+            <BaseCheckbox.Root
+              className={checkboxBoxRecipe({ look: variant === "chips" ? "hidden" : "box" })}
+              name={name}
+              nativeButton
+              render={frame}
+              value={option.value}
+            >
+              <BaseCheckbox.Indicator className={checkIndicatorStyle}>
+                <Icon name="check" size="xs" />
+              </BaseCheckbox.Indicator>
+            </BaseCheckbox.Root>
+          )}
+        </Choice>
+      ))}
+    </BaseCheckboxGroup>
+  );
+
+  return (
+    <EnsureFieldRoot className={className} disabled={disabled} name={name}>
+      {group}
+    </EnsureFieldRoot>
+  );
+}

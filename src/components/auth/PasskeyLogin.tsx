@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/Button";
-import { FormMessage, formActionsStyle } from "@/components/auth/Fields";
+import { FormActions, Notice } from "@/components/form";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { passkeyErrorMessage } from "@/lib/auth/passkey-error";
 import { errorMessageJa } from "@/server/errors";
@@ -33,11 +33,11 @@ export function PasskeyLogin({ next }: { next: string | null }) {
   }
 
   return (
-    <div className={formActionsStyle}>
-      {message ? <FormMessage tone="error">{message}</FormMessage> : null}
+    <FormActions>
+      {message ? <Notice tone="error">{message}</Notice> : null}
       <Button variant="ghost" disabled={pending} onClick={signIn}>
         {pending ? "端末で認証してください…" : "パスキーでログイン"}
       </Button>
-    </div>
+    </FormActions>
   );
 }

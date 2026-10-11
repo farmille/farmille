@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import heroPhoto from "@/app/_components/home-hero-rice-field.webp";
 import { Badge } from "@/components/Badge";
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
 import {
   MANUFACTURER_ONBOARDING_STEPS,
   type ManufacturerOnboardingAction,
@@ -736,71 +737,31 @@ function MemberActionRows({
   );
 }
 
-const detailsRecipe = cva({
-  base: {
-    "& summary": {
-      display: "flex",
-      alignItems: "center",
-      gap: "2.5",
-      listStyle: "none",
-      cursor: "pointer",
-      _before: {
-        content: '""',
-        w: "1.5",
-        h: "1.5",
-        ml: "0.5",
-        borderRightWidth: "2px",
-        borderBottomWidth: "2px",
-        borderStyle: "solid",
-        borderTopWidth: "0",
-        borderLeftWidth: "0",
-        transform: "rotate(-45deg)",
-        transitionProperty: "transform",
-        transitionDuration: "fast",
-      },
-    },
-    "& summary::-webkit-details-marker": { display: "none" },
-    "&[open] summary::before": { transform: "rotate(45deg)" },
-  },
+const guideDetailsRecipe = cva({
   variants: {
     inline: {
       false: {
         mt: "3",
+        pt: "1",
         borderTopWidth: "1px",
         borderTopStyle: "solid",
         borderTopColor: "border.default",
-        "& summary": {
-          pt: "2.5",
-          pb: "0.5",
-          fontSize: "md",
-          fontWeight: "bold",
-          color: "primary.800",
-          _before: { borderColor: "primary.800" },
-        },
       },
-      true: {
-        mt: "0.5",
-        mb: "1.5",
-        ml: "7",
-        "& summary": {
-          py: "0.5",
-          fontSize: "sm",
-          fontWeight: "semibold",
-          color: "text.muted",
-          _before: { borderColor: "text.subtle" },
-        },
-        "&[open] summary": { color: "primary.800" },
-      },
+      true: { mt: "0.5", mb: "1.5", ml: "7" },
     },
   },
 });
 
 function GuideDetails({ slug, inline }: { slug: ProcedureSlug; inline: boolean }) {
   return (
-    <details className={detailsRecipe({ inline })}>
-      <summary>対象となる企業様・ご準備いただくもの</summary>
-      <ProcedureRequirements slug={slug} spacing={inline ? "tight" : "standard"} />
-    </details>
+    <Collapsible className={guideDetailsRecipe({ inline })}>
+      <CollapsibleTrigger variant={inline ? "link" : "section"}>
+        対象となる企業様・ご準備いただくもの
+      </CollapsibleTrigger>
+      <CollapsiblePanel hiddenUntilFound>
+        <ProcedureRequirements slug={slug} spacing={inline ? "tight" : "standard"} />
+      </CollapsiblePanel>
+    </Collapsible>
   );
 }
 

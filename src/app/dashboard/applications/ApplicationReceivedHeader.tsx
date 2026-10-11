@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components";
-import { Icon } from "@/components/Icon";
+import { SuccessMark, completionStepRecipe } from "@/components/SuccessMark";
 
-import { css } from "../../../../styled-system/css";
+import { css, cx } from "../../../../styled-system/css";
 
 const wrap = css({
   textAlign: "center",
@@ -13,18 +13,6 @@ const wrap = css({
   _print: { display: "none" },
 });
 
-const checkMark = css({
-  w: "20",
-  h: "20",
-  borderRadius: "pill",
-  bg: "primary.100",
-  color: "primary.700",
-  display: "grid",
-  placeItems: "center",
-  mx: "auto",
-  mb: "4.5",
-});
-
 const kindTitle = css({ fontSize: "md", color: "text.muted", mt: "2", lineHeight: "prose" });
 
 const actions = css({ mt: "4.5", display: "flex", flexDirection: "column", gap: "2.5" });
@@ -32,12 +20,14 @@ const actions = css({ mt: "4.5", display: "flex", flexDirection: "column", gap: 
 export function ApplicationReceivedHeader({ title }: { title: string | null }) {
   return (
     <div className={wrap}>
-      <div className={checkMark} aria-hidden="true">
-        <Icon name="check" size="2xl" />
-      </div>
-      <h1 className={css({ fontSize: "2xl" })}>ご申請を受け付けました</h1>
-      {title === null ? null : <p className={kindTitle}>{title}</p>}
-      <div className={actions}>
+      <SuccessMark entrance className={css({ mb: "4.5" })} />
+      <h1 className={cx(css({ fontSize: "2xl" }), completionStepRecipe({ step: 1 }))}>
+        ご申請を受け付けました
+      </h1>
+      {title === null ? null : (
+        <p className={cx(kindTitle, completionStepRecipe({ step: 2 }))}>{title}</p>
+      )}
+      <div className={cx(actions, completionStepRecipe({ step: 3 }))}>
         <Link className={buttonRecipe({ variant: "ghost" })} href="/dashboard/applications">
           各種お手続きへ戻る
         </Link>

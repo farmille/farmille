@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, userEvent, within } from "storybook/test";
 
 import { ArticleForm } from "./ArticleForm";
 
@@ -38,5 +39,21 @@ export const Create: Story = {
     initialTitle: "",
     initialBody: "",
     initialMaterials: [],
+  },
+};
+
+export const MaterialSearch: Story = {
+  args: Create.args,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const page = within(canvasElement.ownerDocument.body);
+    await userEvent.type(canvas.getByRole("combobox", { name: "資材を検索して追加" }), "土づくり");
+    await userEvent.click(canvas.getByRole("button", { name: "検索" }));
+    await userEvent.click(
+      await page.findByRole("option", { name: "土づくり微生物資材 グリーンバイオ株式会社" }),
+    );
+    await expect(
+      canvas.getByRole("button", { name: "土づくり微生物資材を外す" }),
+    ).toBeInTheDocument();
   },
 };

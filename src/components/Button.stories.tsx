@@ -52,6 +52,14 @@ export const Disabled: Story = {
   },
 };
 
+export const FocusableWhenDisabled: Story = {
+  args: {
+    disabled: true,
+    focusableWhenDisabled: true,
+    children: "送信中…",
+  },
+};
+
 /** 短いラベルと横並び時の幅を確認する。 */
 export const ShortLabels: Story = {
   render: () => (

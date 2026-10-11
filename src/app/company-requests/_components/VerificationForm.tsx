@@ -5,9 +5,7 @@ import { useState, type FormEvent } from "react";
 import { receiptAccessSchema } from "@/lib/company-application";
 import { errorMessageJa } from "@/server/errors";
 
-import { Field, FormMessage, formActionsStyle } from "@/components/auth/Fields";
-import { Button } from "@/components/Button";
-import { Input } from "@/components/Input";
+import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 
 import { requestReceiptVerification } from "../actions";
 
@@ -44,32 +42,19 @@ export function VerificationForm() {
     }
   }
   return (
-    <form onSubmit={submit}>
-      <Field htmlFor="receiptNumber" label="受付番号" requirement="required">
-        <Input
-          id="receiptNumber"
-          inputMode="numeric"
-          name="receiptNumber"
-          pattern="[0-9]+"
-          required
-        />
+    <Form onSubmit={submit}>
+      <Field label="受付番号" name="receiptNumber" requirement="required">
+        <Input inputMode="numeric" pattern="[0-9]+" />
       </Field>
-      <Field htmlFor="intakeEmail" label="担当者メールアドレス" requirement="required">
-        <Input
-          id="intakeEmail"
-          maxLength={254}
-          name="email"
-          placeholder="tanto@example.co.jp"
-          required
-          type="email"
-        />
+      <Field label="担当者メールアドレス" name="email" requirement="required">
+        <Input maxLength={254} placeholder="tanto@example.co.jp" type="email" />
       </Field>
-      {message ? <FormMessage tone={failed ? "error" : "info"}>{message}</FormMessage> : null}
-      <div className={formActionsStyle}>
-        <Button disabled={busy} type="submit">
-          {busy ? "送信しています…" : "確認メールを送信"}
-        </Button>
-      </div>
-    </form>
+      {message ? <Notice tone={failed ? "error" : "success"}>{message}</Notice> : null}
+      <FormActions>
+        <SubmitButton pending={busy} pendingLabel="送信しています…">
+          確認メールを送信
+        </SubmitButton>
+      </FormActions>
+    </Form>
   );
 }

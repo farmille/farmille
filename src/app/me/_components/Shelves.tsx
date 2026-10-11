@@ -6,7 +6,6 @@ import { Badge } from "@/components/Badge";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { ProfileReviewCard } from "@/components/ProfileReviewCard";
-import { RequiredBadge } from "@/components/FormParts";
 import { UsageReportCard } from "@/app/materials/[id]/_components/UsageReportCard";
 import type { HelpfulItem, OwnPostItem } from "@/server/queries/me-page";
 import type { OwnProfile } from "@/server/queries/profiles";
@@ -101,11 +100,11 @@ function UsageReportStatus({
     case "draft":
       return <Badge variant="optional">下書き</Badge>;
     case "pending":
-      return <RequiredBadge>調整中</RequiredBadge>;
+      return <Badge variant="required">調整中</Badge>;
     case "published":
       return <Badge variant="published">公開済み</Badge>;
     case "declined":
-      return <RequiredBadge>差し戻し</RequiredBadge>;
+      return <Badge variant="required">差し戻し</Badge>;
   }
 }
 

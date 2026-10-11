@@ -3,203 +3,131 @@
 import { useActionState, useState } from "react";
 
 import { sellerApplyAction } from "@/app/sellers/apply/actions";
-import { Button } from "@/components/Button";
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
+import { Field, Form, FormActions, Input, Notice, SubmitButton, Textarea } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
-import {
-  controlStyle,
-  Field,
-  FormMessage,
-  formActionsStyle,
-  HintBox,
-} from "@/components/auth/Fields";
-import { SubmitButton } from "@/components/auth/SubmitButton";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
+
+import { css } from "../../../../styled-system/css";
+
+const noteStyle = css({ mt: "2" });
+
+const inviteStyle = css({ mt: "5" });
+
+const invitePanelBodyStyle = css({ pt: "3" });
 
 export function SellerApplyForm() {
   const [state, formAction] = useActionState(sellerApplyAction, initialAuthFormState);
-  const fieldErrors = fieldErrorsOf(state);
   const values = submittedValuesOf(state);
   const hadInvite =
     state.status === "error" && values.inviteCode !== undefined && values.inviteCode.length > 0;
   const [inviteOpen, setInviteOpen] = useState(hadInvite);
 
-  // エラー後の再表示で select の defaultValue を効かせるため、送信値ごとに form を載せ替える。
-  const formKey = state.status === "error" ? `error:${values.officialName ?? ""}` : "idle";
-
   return (
-    <form action={formAction} key={formKey} noValidate>
-      {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
+    <Form action={formAction} errors={fieldErrorsOf(state)}>
+      {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
-      <Field
-        error={fieldErrors.officialName}
-        htmlFor="officialName"
-        label="法人名"
-        requirement="required"
-      >
-        <input
+      <Field label="法人名" name="officialName" requirement="required">
+        <Input
           autoComplete="organization"
-          className={controlStyle}
           defaultValue={values.officialName}
-          id="officialName"
-          name="officialName"
           placeholder="〇〇株式会社"
-          required
-          type="text"
         />
       </Field>
 
       <Field
-        error={fieldErrors.corporateNumber}
-        htmlFor="corporateNumber"
+        description="13桁の法人番号を入力してください。"
         label="法人番号"
+        name="corporateNumber"
         requirement="required"
-        guide="13桁の法人番号を入力してください。"
       >
-        <input
-          className={controlStyle}
-          defaultValue={values.corporateNumber}
-          id="corporateNumber"
-          inputMode="numeric"
-          maxLength={13}
-          name="corporateNumber"
-          required
-        />
+        <Input defaultValue={values.corporateNumber} inputMode="numeric" maxLength={13} />
       </Field>
 
-      <HintBox>
+      <Notice className={noteStyle} tone="neutral">
         ログインIDは運営が発行します。パスワードは、ご案内する設定用ページで設定してください。
-      </HintBox>
+      </Notice>
 
       <Field
-        error={fieldErrors.contactEmail}
-        guide="ご担当者のメールアドレスを入力してください。公開されません。確認後、このアドレスにログインIDとパスワード設定用のご案内をお送りします。"
-        htmlFor="contactEmail"
+        description="ご担当者のメールアドレスを入力してください。公開されません。確認後、このアドレスにログインIDとパスワード設定用のご案内をお送りします。"
         label="連絡先メールアドレス"
+        name="contactEmail"
         requirement="required"
       >
-        <input
+        <Input
           autoComplete="email"
-          className={controlStyle}
           defaultValue={values.contactEmail}
-          id="contactEmail"
-          name="contactEmail"
           placeholder="contact@example.com"
-          required
           type="email"
         />
       </Field>
 
       <Field
-        error={fieldErrors.contactName}
-        guide="公開されません"
-        htmlFor="contactName"
+        description="公開されません"
         label="ご担当者名・部署"
+        name="contactName"
         requirement="required"
       >
-        <input
-          autoComplete="name"
-          className={controlStyle}
-          defaultValue={values.contactName}
-          id="contactName"
-          name="contactName"
-          placeholder="担当 太郎"
-          required
-          type="text"
-        />
+        <Input autoComplete="name" defaultValue={values.contactName} placeholder="担当 太郎" />
       </Field>
 
-      <Field
-        error={fieldErrors.location}
-        htmlFor="location"
-        label="本社・主な拠点の所在地"
-        requirement="optional"
-      >
-        <input
+      <Field label="本社・主な拠点の所在地" name="location" requirement="optional">
+        <Input
           autoComplete="street-address"
-          className={controlStyle}
           defaultValue={values.location}
-          id="location"
-          name="location"
           placeholder="東京都〇〇区…"
-          type="text"
         />
       </Field>
 
       <Field
-        error={fieldErrors.contactPhone}
-        guide="公開されません。確認が必要な場合の連絡に使用します。"
-        htmlFor="contactPhone"
+        description="公開されません。確認が必要な場合の連絡に使用します。"
         label="ご担当者電話番号"
+        name="contactPhone"
         requirement="required"
       >
-        <input
-          autoComplete="tel"
-          className={controlStyle}
-          defaultValue={values.contactPhone}
-          id="contactPhone"
-          maxLength={20}
-          name="contactPhone"
-          required
-          type="tel"
-        />
+        <Input autoComplete="tel" defaultValue={values.contactPhone} maxLength={20} type="tel" />
       </Field>
 
       <Field
-        error={fieldErrors.materialRequestNotes}
-        guide="掲載済みで編集したい資材、またはこれから掲載したい資材の正式名称を記入してください。"
-        htmlFor="materialRequestNotes"
+        description="掲載済みで編集したい資材、またはこれから掲載したい資材の正式名称を記入してください。"
         label="備考：掲載・編集を希望する資材"
+        name="materialRequestNotes"
         requirement="optional"
       >
-        <textarea
-          className={controlStyle}
-          defaultValue={values.materialRequestNotes}
-          id="materialRequestNotes"
-          maxLength={2000}
-          name="materialRequestNotes"
-          rows={4}
-        />
+        <Textarea defaultValue={values.materialRequestNotes} maxLength={2000} rows={4} />
       </Field>
 
-      <Field
-        error={fieldErrors.websiteUrl}
-        htmlFor="websiteUrl"
-        label="公式サイトURL"
-        requirement="optional"
-      >
-        <input
+      <Field label="公式サイトURL" name="websiteUrl" requirement="optional">
+        <Input
           autoComplete="url"
-          className={controlStyle}
           defaultValue={values.websiteUrl}
-          id="websiteUrl"
-          name="websiteUrl"
           placeholder="https://…"
           type="url"
         />
       </Field>
 
-      {inviteOpen ? (
-        <Field
-          error={fieldErrors.inviteCode}
-          htmlFor="inviteCode"
-          label="招待コード"
-          requirement="optional"
-        >
-          <input
-            autoCapitalize="none"
-            autoComplete="off"
-            className={controlStyle}
-            defaultValue={values.inviteCode}
-            id="inviteCode"
-            name="inviteCode"
-            placeholder="案内に記載のコード"
-            spellCheck={false}
-            type="text"
-          />
-        </Field>
-      ) : null}
+      <Collapsible className={inviteStyle} onOpenChange={setInviteOpen} open={inviteOpen}>
+        <CollapsibleTrigger variant="link">
+          {inviteOpen
+            ? "招待コード入力を閉じる"
+            : "Farmilleからのご案内で登録される方はこちら（招待コード入力）"}
+        </CollapsibleTrigger>
+        <CollapsiblePanel>
+          <div className={invitePanelBodyStyle}>
+            <Field label="招待コード" name="inviteCode" requirement="optional">
+              <Input
+                autoCapitalize="none"
+                autoComplete="off"
+                defaultValue={values.inviteCode}
+                placeholder="案内に記載のコード"
+                spellCheck={false}
+              />
+            </Field>
+          </div>
+        </CollapsiblePanel>
+      </Collapsible>
 
-      <HintBox>
+      <Notice className={noteStyle} tone="neutral">
         申請前に
         <TextLink href="/legal/manufacturer" rel="noopener noreferrer" target="_blank">
           Farmille企業向けサービス利用規約（別タブ）
@@ -209,19 +137,10 @@ export function SellerApplyForm() {
           各規約・ガイドライン（別タブ）
         </TextLink>
         をご確認ください。
-      </HintBox>
-      <div className={formActionsStyle}>
-        <SubmitButton label="申請する" pendingLabel="申請中…" />
-        <Button
-          aria-expanded={inviteOpen}
-          onClick={() => setInviteOpen((open) => !open)}
-          variant="ghost"
-        >
-          {inviteOpen
-            ? "招待コード入力を閉じる"
-            : "Farmilleからのご案内で登録される方はこちら（招待コード入力）"}
-        </Button>
-      </div>
-    </form>
+      </Notice>
+      <FormActions>
+        <SubmitButton pendingLabel="申請中…">申請する</SubmitButton>
+      </FormActions>
+    </Form>
   );
 }

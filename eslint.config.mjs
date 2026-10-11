@@ -3,6 +3,21 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import oxlint from "eslint-plugin-oxlint";
 
+const iconLibraryImports = {
+  group: [
+    "react-icons",
+    "react-icons/*",
+    "lucide",
+    "lucide/*",
+    "lucide-react",
+    "lucide-react/*",
+    "@mui/icons-material",
+    "@mui/icons-material/*",
+  ],
+  message:
+    "SVG アイコンライブラリは使わない。src/components/Icon.tsx（Material Icons フォント）に glyph を足して使う。",
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -31,23 +46,22 @@ const eslintConfig = defineConfig([
   {
     // アイコンは Google Material Icons（material-icons パッケージのフォント）を共通 Icon 経由で使う。
     rules: {
+      "no-restricted-imports": ["error", { patterns: [iconLibraryImports] }],
+    },
+  },
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/components/**"],
+    rules: {
       "no-restricted-imports": [
         "error",
         {
           patterns: [
+            iconLibraryImports,
             {
-              group: [
-                "react-icons",
-                "react-icons/*",
-                "lucide",
-                "lucide/*",
-                "lucide-react",
-                "lucide-react/*",
-                "@mui/icons-material",
-                "@mui/icons-material/*",
-              ],
+              group: ["@base-ui/react", "@base-ui/react/*", "sonner"],
               message:
-                "SVG アイコンライブラリは使わない。src/components/Icon.tsx（Material Icons フォント）に glyph を足して使う。",
+                "Base UI と Sonner は src/components の共通部品の中だけで使う。画面からは @/components/form などの部品を使う。",
             },
           ],
         },

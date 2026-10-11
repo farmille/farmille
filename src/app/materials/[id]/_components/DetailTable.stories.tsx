@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { userEvent, within } from "storybook/test";
 
 import { MaterialDetailTable } from "./DetailTable";
 import { materialDetail } from "./story-fixtures";
@@ -51,5 +52,12 @@ export const ManufacturerContent: Story = {
         { method: "other", detail: "表示しない補足" },
       ],
     },
+  },
+};
+
+export const ManufacturerContentUsageOpen: Story = {
+  args: ManufacturerContent.args,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "詳細を見る" }));
   },
 };

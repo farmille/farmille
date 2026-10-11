@@ -239,6 +239,11 @@ export const tokens = {
     fast: { value: "160ms" },
     dialog: { value: "250ms" },
     toast: { value: "400ms" },
+    stagger: { value: "50ms" },
+  },
+  zIndex: {
+    dialog: { value: 50 },
+    toast: { value: 60 },
   },
   lineHeights: {
     none: { value: "1" },

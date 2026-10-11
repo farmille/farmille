@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { DesktopAccountMenu } from "./DesktopAccountMenu";
 
@@ -17,16 +17,28 @@ describe("DesktopAccountMenu", () => {
     expect(screen.queryByRole("menuitem", { name: "ログアウト" })).toBeNull();
   });
 
-  it("分割されたセッションCookieで会員メニューを表示する", () => {
+  it("分割されたセッションCookieで会員メニューを表示する", async () => {
     document.cookie = "sb-project-auth-token.0=session; path=/";
     render(<DesktopAccountMenu myPageCurrent={true} />);
     const trigger = screen.getByRole("button", { name: "アカウント" });
     fireEvent.keyDown(trigger, { key: "ArrowDown" });
     const myPage = screen.getByRole("menuitem", { name: "マイページ" });
     expect(myPage.getAttribute("aria-current")).toBe("page");
-    expect(document.activeElement).toBe(myPage);
+    await waitFor(() => expect(document.activeElement).toBe(myPage));
     fireEvent.keyDown(myPage, { key: "Escape" });
-    expect(screen.queryByRole("menu")).toBeNull();
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
     expect(document.activeElement).toBe(trigger);
+  });
+
+  it("ログアウトは /logout への POST フォームで送る", () => {
+    document.cookie = "sb-project-auth-token=session; path=/";
+    render(<DesktopAccountMenu myPageCurrent={false} />);
+    fireEvent.click(screen.getByRole("button", { name: "アカウント" }));
+    const logout = screen.getByRole("menuitem", { name: "ログアウト" });
+    if (!(logout instanceof HTMLButtonElement))
+      throw new Error("ログアウトが送信ボタンではありません。");
+    expect(logout.type).toBe("submit");
+    expect(logout.form?.getAttribute("action")).toBe("/logout");
+    expect(logout.form?.getAttribute("method")).toBe("post");
   });
 });

@@ -33,14 +33,47 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);
+
+async function open(canvasElement: HTMLElement, triggerName: string) {
+  await userEvent.click(within(canvasElement).getByRole("button", { name: triggerName }));
+  await waitFor(() => expect(page(canvasElement).getByRole("dialog")).toBeVisible());
+}
+
+async function chooseReason(canvasElement: HTMLElement, reason: string) {
+  await userEvent.click(page(canvasElement).getByRole("combobox", { name: "通報理由" }));
+  await userEvent.click(await page(canvasElement).findByRole("option", { name: reason }));
+}
+
 // 通報導線のテキストリンクのみ（ダイアログは閉じた状態）
 export const Closed: Story = {};
 
 // play でモーダルを開いた状態（理由 select＋自由記述フォーム）
 export const Opened: Story = {
+  play: ({ canvasElement }) => open(canvasElement, "通報する"),
+};
+
+export const ReasonListOpen: Story = {
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "通報する" }));
+    await open(canvasElement, "通報する");
+    await userEvent.click(page(canvasElement).getByRole("combobox", { name: "通報理由" }));
+    await waitFor(() => expect(page(canvasElement).getByRole("listbox")).toBeVisible());
+  },
+};
+
+export const ReasonMissing: Story = {
+  args: {
+    triggerLabel: "感想口コミを通報する",
+  },
+  play: async ({ canvasElement }) => {
+    await open(canvasElement, "感想口コミを通報する");
+    await userEvent.click(page(canvasElement).getByRole("button", { name: "通報する" }));
+    await waitFor(() =>
+      expect(page(canvasElement).getByRole("combobox", { name: "通報理由" })).toHaveAttribute(
+        "aria-invalid",
+        "true",
+      ),
+    );
   },
 };
 
@@ -51,11 +84,14 @@ export const SubmitSuccess: Story = {
     triggerLabel: "感想口コミを通報する",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "感想口コミを通報する" }));
-    await userEvent.selectOptions(canvas.getByLabelText("通報理由"), "spam");
-    await userEvent.click(canvas.getByRole("button", { name: "通報する" }));
-    await waitFor(() => expect(canvas.getByText("通報を受け付けました")).toBeInTheDocument());
+    await open(canvasElement, "感想口コミを通報する");
+    await chooseReason(canvasElement, "スパム・宣伝目的");
+    await userEvent.click(page(canvasElement).getByRole("button", { name: "通報する" }));
+    await waitFor(() =>
+      expect(
+        page(canvasElement).getByRole("dialog", { name: "通報を受け付けました" }),
+      ).toBeVisible(),
+    );
   },
 };
 
@@ -66,10 +102,13 @@ export const SubmitError: Story = {
     triggerLabel: "感想口コミを通報する",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "感想口コミを通報する" }));
-    await userEvent.selectOptions(canvas.getByLabelText("通報理由"), "inappropriate");
-    await userEvent.click(canvas.getByRole("button", { name: "通報する" }));
-    await waitFor(() => expect(canvas.getByRole("alert")).toBeInTheDocument());
+    await open(canvasElement, "感想口コミを通報する");
+    await chooseReason(canvasElement, "不適切な内容");
+    await userEvent.click(page(canvasElement).getByRole("button", { name: "通報する" }));
+    await waitFor(() =>
+      expect(page(canvasElement).getByRole("alert")).toHaveTextContent(
+        "この感想口コミはすでに通報済みです。",
+      ),
+    );
   },
 };

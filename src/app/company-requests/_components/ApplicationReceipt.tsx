@@ -1,6 +1,7 @@
 import type { ApplicationReceipt as Receipt } from "@/server/company-applications";
 import { applicationReceiptLines } from "@/lib/company-application-receipt";
 import { SectionHeading, TextLink } from "@/components";
+import { Notice } from "@/components/form";
 import { ReceiptButtons } from "./ReceiptButtons";
 import { css, cx } from "../../../../styled-system/css";
 export function ApplicationReceipt({
@@ -16,11 +17,13 @@ export function ApplicationReceipt({
         <p>
           ご申請を受け付けました。お手続きが完了した場合やご提出資料に不足がある場合は、担当者メールアドレス宛にご連絡します。
         </p>
-        <p role="status">
-          {receipt.delivery.sent_at
-            ? "控えメールを送信しました。"
-            : "受付済みです。控えメールは未送信です。下のボタンから再送できます。"}
-        </p>
+        {receipt.delivery.sent_at ? (
+          <Notice tone="success">控えメールを送信しました。</Notice>
+        ) : (
+          <Notice tone="warn">
+            受付済みです。控えメールは未送信です。下のボタンから再送できます。
+          </Notice>
+        )}
         <ReceiptButtons id={receipt.application.id} sent={receipt.delivery.sent_at !== null} />
       </div>
       <div

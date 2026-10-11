@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
 import {
   createReportGraph,
@@ -11,40 +17,20 @@ import {
 } from "@/lib/usage-report";
 
 import { METRIC_UNIT, ReportCellEditor, UNITS } from "./ReportCellEditor";
-import { Checkbox } from "@/components/Checkbox";
+import { Badge } from "@/components/Badge";
+import { Checkbox, Field, Input, Notice, Textarea } from "@/components/form";
 import { reportPlotColor } from "@/components/ReportPlotColor";
-import { inputRecipe } from "@/components/Input";
-import { textareaRecipe } from "@/components/Textarea";
+import { toast } from "@/components/Toaster";
 
 import { css, cva, cx } from "../../../../../../styled-system/css";
 
-import {
-  Badge,
-  Example,
-  GroupHeading,
-  Need,
-  checkRow,
-  pillButtonRecipe,
-  toast as toastStyle,
-} from "./ReportFormParts";
+import { GroupHeading, pillButtonRecipe, reportToasterId } from "./ReportFormParts";
 import { ReportGraphEditor, editKey, readCell, type EditTarget } from "./ReportGraphEditor";
 
 type Measurement = UsageReportInput["measurements"][number];
 type Graph = Measurement["graphs"][number];
 type Plot = UsageReportInput["plots"][number];
 type Row = Graph["rows"][number];
-
-type Toast =
-  | { kind: "info"; message: string }
-  | {
-      kind: "graph";
-      message: string;
-      measurement: Measurement;
-      graph: Graph;
-      measurementIndex: number;
-      graphIndex: number;
-    }
-  | { kind: "plot"; message: string; plot: Plot; index: number; rows: Map<string, Row> };
 
 export const PLOT_GUIDE =
   "資材の使い方（施用方法・希釈倍率・使用量・回数など）と、あれば他の区と違う条件を記入してください。資材を使っていない区は「資材なし」と書き、他の区と違う条件があれば記入してください。";
@@ -119,27 +105,7 @@ const plotGrid = css({
   tab: { gridTemplateColumns: "{sizes.44} 1fr" },
 });
 
-const smallLabel = css({
-  display: "block",
-  mb: "0.5",
-  fontSize: "sm",
-  fontWeight: "bold",
-  color: "text.subtle",
-});
-
-const longArea = css(textareaRecipe.raw({}), { minH: "24" });
-
-const undoButton = css({
-  border: "none",
-  bg: "transparent",
-  p: "0",
-  fontSize: "sm",
-  fontWeight: "extrabold",
-  color: "primary.300",
-  textDecoration: "underline",
-  whiteSpace: "nowrap",
-  cursor: "pointer",
-});
+const errorGap = css({ mt: "2" });
 
 const blankRow = (plotId: string): Row => ({
   id: crypto.randomUUID(),
@@ -147,6 +113,64 @@ const blankRow = (plotId: string): Row => ({
   label: "",
   value: "",
 });
+
+function withPlots(
+  input: UsageReportInput,
+  plots: Plot[],
+  restored?: Map<string, Row>,
+): UsageReportInput {
+  return {
+    ...input,
+    plots,
+    measurements: input.measurements.map((measurement) => ({
+      ...measurement,
+      graphs: measurement.graphs.map((graph) => ({
+        ...graph,
+        rows: plots.map((plot) => {
+          const saved = restored?.get(graph.id);
+          return (
+            graph.rows.find((row) => row.plotId === plot.id) ??
+            (saved && saved.plotId === plot.id ? saved : blankRow(plot.id))
+          );
+        }),
+      })),
+    })),
+  };
+}
+
+function restorePlot(
+  input: UsageReportInput,
+  plot: Plot,
+  index: number,
+  rows: Map<string, Row>,
+): UsageReportInput {
+  const plots = [...input.plots];
+  plots.splice(index, 0, plot);
+  return withPlots(input, plots, rows);
+}
+
+function restoreGraph(
+  input: UsageReportInput,
+  measurement: Measurement,
+  measurementIndex: number,
+  removed: Graph,
+  graphIndex: number,
+): UsageReportInput {
+  const graph = {
+    ...removed,
+    rows: input.plots.map(
+      (plot) => removed.rows.find((row) => row.plotId === plot.id) ?? blankRow(plot.id),
+    ),
+  };
+  const measurements = [...input.measurements];
+  const existing = measurements.find((item) => item.id === measurement.id);
+  if (existing) {
+    const graphs = [...existing.graphs];
+    graphs.splice(graphIndex, 0, graph);
+    measurements[measurements.indexOf(existing)] = { ...existing, graphs };
+  } else measurements.splice(measurementIndex, 0, { ...measurement, graphs: [graph] });
+  return { ...input, measurements };
+}
 
 export function ReportComparisonFields({
   input,
@@ -156,21 +180,14 @@ export function ReportComparisonFields({
   onManualUnit,
 }: {
   input: UsageReportInput;
-  onChange: (input: UsageReportInput) => void;
+  onChange: Dispatch<SetStateAction<UsageReportInput>>;
   errors: UsageReportFieldErrors;
   manualUnits: ReadonlySet<string>;
   onManualUnit: (id: string) => void;
 }) {
   const mobile = useMobile();
   const [ed, setEd] = useState<EditTarget | null>(null);
-  const [toast, setToast] = useState<Toast | null>(null);
   const [periodHints, setPeriodHints] = useState<ReadonlySet<string>>(new Set());
-
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), toast.kind === "info" ? 1800 : 6000);
-    return () => clearTimeout(timer);
-  }, [toast]);
 
   useEffect(() => {
     if (!ed) return;
@@ -208,26 +225,6 @@ export function ReportComparisonFields({
       plots: input.plots.map((plot) => (plot.id === id ? { ...plot, ...values } : plot)),
     });
   }
-  function withPlots(plots: Plot[], restored?: Map<string, Row>): UsageReportInput {
-    return {
-      ...input,
-      plots,
-      measurements: input.measurements.map((measurement) => ({
-        ...measurement,
-        graphs: measurement.graphs.map((graph) => ({
-          ...graph,
-          rows: plots.map((plot) => {
-            const saved = restored?.get(graph.id);
-            return (
-              graph.rows.find((row) => row.plotId === plot.id) ??
-              (saved && saved.plotId === plot.id ? saved : blankRow(plot.id))
-            );
-          }),
-        })),
-      })),
-    };
-  }
-
   function sequence(): EditTarget[] {
     return cards.flatMap(({ graph }, index) => [
       { k: "axis", g: graph.id },
@@ -269,7 +266,7 @@ export function ReportComparisonFields({
   function edit(target: EditTarget) {
     const card = cardOf(target.g);
     if (target.k === "val" && card && !card.measurement.name.trim()) {
-      setToast({ kind: "info", message: "先に、左上の調査項目と単位を書きます" });
+      toast("先に、左上の調査項目と単位を書きます", { duration: 1800, toasterId: reportToasterId });
       setEd({ k: "axis", g: target.g });
       return;
     }
@@ -278,12 +275,12 @@ export function ReportComparisonFields({
 
   function addPlot(graphId: string) {
     const plot = createReportPlot();
-    onChange(withPlots([...input.plots, plot]));
+    onChange(withPlots(input, [...input.plots, plot]));
     setEd({ k: "name", g: graphId, p: plot.id });
   }
   function removePlot(plotId: string) {
     if (input.plots.length <= 2) {
-      setToast({ kind: "info", message: "区は2つ以上必要です" });
+      toast("区は2つ以上必要です", { duration: 1800, toasterId: reportToasterId });
       return;
     }
     const index = input.plots.findIndex((plot) => plot.id === plotId);
@@ -296,13 +293,19 @@ export function ReportComparisonFields({
         if (row) rows.set(graph.id, row);
       }
     setEd(null);
-    onChange(withPlots(input.plots.filter((item) => item.id !== plotId)));
-    setToast({
-      kind: "plot",
-      message: `「${plot.name || "区"}」を削除しました`,
-      plot,
-      index,
-      rows,
+    onChange(
+      withPlots(
+        input,
+        input.plots.filter((item) => item.id !== plotId),
+      ),
+    );
+    toast(`「${plot.name || "区"}」を削除しました`, {
+      duration: 6000,
+      toasterId: reportToasterId,
+      action: {
+        label: "元に戻す",
+        onClick: () => onChange((current) => restorePlot(current, plot, index, rows)),
+      },
     });
   }
   function removeGraph(measurement: Measurement, graphIndex: number) {
@@ -318,39 +321,18 @@ export function ReportComparisonFields({
           )
         : input.measurements.filter((item) => item.id !== measurement.id),
     });
-    setToast({
-      kind: "graph",
-      message: "グラフを削除しました",
-      measurement,
-      graph,
-      graphIndex,
-      measurementIndex: input.measurements.indexOf(measurement),
+    const measurementIndex = input.measurements.indexOf(measurement);
+    toast("グラフを削除しました", {
+      duration: 6000,
+      toasterId: reportToasterId,
+      action: {
+        label: "元に戻す",
+        onClick: () =>
+          onChange((current) =>
+            restoreGraph(current, measurement, measurementIndex, graph, graphIndex),
+          ),
+      },
     });
-  }
-  function undo() {
-    if (!toast || toast.kind === "info") return;
-    if (toast.kind === "plot") {
-      const plots = [...input.plots];
-      plots.splice(toast.index, 0, toast.plot);
-      onChange(withPlots(plots, toast.rows));
-    } else {
-      const graph = {
-        ...toast.graph,
-        rows: input.plots.map(
-          (plot) => toast.graph.rows.find((row) => row.plotId === plot.id) ?? blankRow(plot.id),
-        ),
-      };
-      const measurements = [...input.measurements];
-      const existing = measurements.find((item) => item.id === toast.measurement.id);
-      if (existing) {
-        const graphs = [...existing.graphs];
-        graphs.splice(toast.graphIndex, 0, graph);
-        measurements[measurements.indexOf(existing)] = { ...existing, graphs };
-      } else
-        measurements.splice(toast.measurementIndex, 0, { ...toast.measurement, graphs: [graph] });
-      onChange({ ...input, measurements });
-    }
-    setToast(null);
   }
   function addPeriod(measurement: Measurement, graphIndex: number) {
     const graph = createReportGraph(input.plots);
@@ -381,17 +363,21 @@ export function ReportComparisonFields({
       <div>
         <div>
           <h3 className={sectionHeading({ lead: true })}>
-            結果のグラフ <Badge required />
-            <Need message={errors.measurements} />
+            結果のグラフ <Badge variant="required">必須</Badge>
           </h3>
           <p className={sectionGuide}>
             グラフの ✎ の付いた欄を押して書き込みます。書き終えたら Enter で次の欄へ進みます。
           </p>
+          {errors.measurements && <Notice tone="error">{errors.measurements}</Notice>}
           {cards.length === 0 && (
             <div className={emptyGraphs}>グラフがありません。下のボタンから追加します。</div>
           )}
           {cards.map(({ measurement, graph, graphIndex }, index) => {
             const measurementIndex = input.measurements.indexOf(measurement);
+            const nameError = errors[`measurements.${measurementIndex}.name`];
+            const valueError =
+              errors[`measurements.${measurementIndex}.values`] ??
+              errors[`measurements.${measurementIndex}.plots`];
             return (
               <ReportGraphEditor
                 key={graph.id}
@@ -408,14 +394,16 @@ export function ReportComparisonFields({
                 onAddPeriod={() => addPeriod(measurement, graphIndex)}
                 periodHint={periodHints.has(measurement.id) || measurement.graphs.length > 1}
               >
-                <Need block message={errors[`measurements.${measurementIndex}.name`]} />
-                <Need
-                  block
-                  message={
-                    errors[`measurements.${measurementIndex}.values`] ??
-                    errors[`measurements.${measurementIndex}.plots`]
-                  }
-                />
+                {nameError && (
+                  <Notice tone="error" className={errorGap}>
+                    {nameError}
+                  </Notice>
+                )}
+                {valueError && (
+                  <Notice tone="error" className={errorGap}>
+                    {valueError}
+                  </Notice>
+                )}
                 {ed?.g === graph.id && (
                   <ReportCellEditor
                     target={ed}
@@ -434,7 +422,10 @@ export function ReportComparisonFields({
                         ...input,
                         plots: input.plots.map((plot) => ({ ...plot, scope })),
                       });
-                      setToast({ kind: "info", message: "調査した範囲を全ての区に入れました" });
+                      toast("調査した範囲を全ての区に入れました", {
+                        duration: 1800,
+                        toasterId: reportToasterId,
+                      });
                     }}
                     onRemovePlot={removePlot}
                     onNext={next}
@@ -467,110 +458,112 @@ export function ReportComparisonFields({
 
         <div>
           <h3 className={sectionHeading({ lead: true })}>
-            区の説明 <Badge required />
-            <Need message={errors.plots} />
+            区の説明 <Badge variant="required">必須</Badge>
           </h3>
           <p className={sectionGuide}>
             グラフの区ごとに、調査した範囲と、この区の説明。{PLOT_GUIDE}
           </p>
-          {input.plots.map((plot, index) => (
-            <div key={plot.id} className={plotCard}>
-              <div className={plotHead}>
-                <span className={cx(swatch, reportPlotColor(index))} />
-                {plot.name || "（区の名前）"}
-                <Need message={errors[`plots.${index}.name`]} />
-              </div>
-              <div className={plotGrid}>
-                <div>
-                  <label className={smallLabel} htmlFor={`plot-scope-${plot.id}`}>
-                    調査した範囲（必須）
-                  </label>
-                  <input
-                    id={`plot-scope-${plot.id}`}
-                    className={inputRecipe()}
-                    placeholder="例）1区10株、3反復"
-                    value={plot.scope}
-                    onChange={(event) => updatePlot(plot.id, { scope: event.target.value })}
-                  />
-                  <Need block message={errors[`plots.${index}.scope`]} />
-                  <button
-                    type="button"
-                    className={cx(
-                      pillButtonRecipe({ tone: "quiet", size: "xs", strong: true }),
-                      css({ mt: "1.5" }),
-                    )}
-                    onClick={() => {
-                      onChange({
-                        ...input,
-                        plots: input.plots.map((item) => ({ ...item, scope: plot.scope })),
-                      });
-                      setToast({ kind: "info", message: "調査した範囲を全ての区に入れました" });
-                    }}
-                  >
-                    この範囲を全ての区に入れる
-                  </button>
+          {errors.plots && <Notice tone="error">{errors.plots}</Notice>}
+          {input.plots.map((plot, index) => {
+            const nameError = errors[`plots.${index}.name`];
+            return (
+              <div key={plot.id} className={plotCard}>
+                <div className={plotHead}>
+                  <span className={cx(swatch, reportPlotColor(index))} />
+                  {plot.name || "（区の名前）"}
                 </div>
-                <div>
-                  <label className={smallLabel} htmlFor={`plot-desc-${plot.id}`}>
-                    この区の説明（必須）
-                  </label>
-                  <textarea
-                    id={`plot-desc-${plot.id}`}
-                    className={longArea}
-                    placeholder={PLOT_GUIDE}
-                    value={plot.description}
-                    onChange={(event) => updatePlot(plot.id, { description: event.target.value })}
-                  />
-                  <Need block message={errors[`plots.${index}.description`]} />
-                  <Example compact>
-                    {index === 0
-                      ? "〇〇は使っていない。かん水と施肥は処理区と同じ。"
-                      : "〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。元肥は慣行の75%に減らした。"}
-                  </Example>
+                {nameError && (
+                  <Notice tone="error" className={errorGap}>
+                    {nameError}
+                  </Notice>
+                )}
+                <div className={plotGrid}>
+                  <div>
+                    <Field
+                      label="調査した範囲（必須）"
+                      labelSize="sm"
+                      error={errors[`plots.${index}.scope`]}
+                    >
+                      <Input
+                        placeholder="例）1区10株、3反復"
+                        value={plot.scope}
+                        onChange={(event) => updatePlot(plot.id, { scope: event.target.value })}
+                      />
+                    </Field>
+                    <button
+                      type="button"
+                      className={cx(
+                        pillButtonRecipe({ tone: "quiet", size: "xs", strong: true }),
+                        css({ mt: "1.5" }),
+                      )}
+                      onClick={() => {
+                        onChange({
+                          ...input,
+                          plots: input.plots.map((item) => ({ ...item, scope: plot.scope })),
+                        });
+                        toast("調査した範囲を全ての区に入れました", {
+                          duration: 1800,
+                          toasterId: reportToasterId,
+                        });
+                      }}
+                    >
+                      この範囲を全ての区に入れる
+                    </button>
+                  </div>
+                  <div>
+                    <Field
+                      label="この区の説明（必須）"
+                      labelSize="sm"
+                      error={errors[`plots.${index}.description`]}
+                    >
+                      <Textarea
+                        placeholder={PLOT_GUIDE}
+                        value={plot.description}
+                        onChange={(event) =>
+                          updatePlot(plot.id, { description: event.target.value })
+                        }
+                      />
+                    </Field>
+                    <Notice tone="neutral" title="記入例" className={css({ mt: "1.5" })}>
+                      {index === 0
+                        ? "〇〇は使っていない。かん水と施肥は処理区と同じ。"
+                        : "〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。元肥は慣行の75%に減らした。"}
+                    </Notice>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-        <label className={cx(checkRow, css({ mt: "3" }))}>
+        <Field requirement="required" error={errors.methodDetailsAck}>
           <Checkbox
+            variant="row"
             checked={input.methodDetailsAck}
-            onChange={(event) => onChange({ ...input, methodDetailsAck: event.target.checked })}
-          />
-          資材を使った区の説明に、施用方法・希釈倍率・使用量・回数を明記しました <Badge required />
-          <Need message={errors.methodDetailsAck} />
-        </label>
+            onCheckedChange={(methodDetailsAck) => onChange({ ...input, methodDetailsAck })}
+          >
+            資材を使った区の説明に、施用方法・希釈倍率・使用量・回数を明記しました
+          </Checkbox>
+        </Field>
         <h3 className={sectionHeading()}>
-          グラフにしにくい調査結果 <Badge />
+          グラフにしにくい調査結果 <Badge variant="optional">任意</Badge>
         </h3>
         <p className={sectionGuide}>
           数値にしにくい変化や様子、区ごとの違いなど。±や＊を使った場合の意味もここに書けます。
         </p>
         {(textMeasurements.length > 0 ? textMeasurements : [undefined]).map((measurement) => (
-          <textarea
+          <Textarea
             key={measurement?.id ?? "qualitative"}
-            className={longArea}
             aria-label={measurement?.name || "グラフにしにくい調査結果"}
             placeholder="グラフにしにくい変化や様子"
             value={measurement?.body ?? ""}
             onChange={(event) => updateText(measurement, event.target.value)}
           />
         ))}
-        <Example>
+        <Notice tone="neutral" title="記入例" className={css({ mt: "2" })}>
           ・処理区では11月以降も葉色が濃く、成り疲れが見られなかった。無処理区は12月に入って草勢が落ち、下葉の黄化が目立った。
           <br />
           ・奇形（花芽飛び）の発生節数は、処理区が平均1.2節、無処理区が2.5節（平均値±標準誤差、n=30、5%水準で有意差あり）。
-        </Example>
-        {toast && (
-          <div className={toastStyle} role="status">
-            <span>{toast.message}</span>
-            {toast.kind !== "info" && (
-              <button type="button" className={undoButton} onClick={undo}>
-                元に戻す
-              </button>
-            )}
-          </div>
-        )}
+        </Notice>
       </div>
       <datalist id="metricList">
         {[...METRIC_UNIT.keys()].map((name) => (

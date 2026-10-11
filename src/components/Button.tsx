@@ -1,3 +1,6 @@
+import { Button as BaseButton } from "@base-ui/react/button";
+import type { ComponentPropsWithRef } from "react";
+
 import { cva, cx, type RecipeVariantProps } from "../../styled-system/css";
 
 const buttonRecipe = cva({
@@ -65,23 +68,16 @@ const buttonRecipe = cva({
 export type ButtonVariants = RecipeVariantProps<typeof buttonRecipe>;
 
 type ButtonProps = ButtonVariants &
-  Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "color"> & {
+  Omit<ComponentPropsWithRef<"button">, "color" | "className"> & {
     className?: string;
+    /** 押せない間もフォーカスを残す（送信中のボタンなど）。aria-disabled で無効を伝える。 */
+    focusableWhenDisabled?: boolean;
   };
 
 /** プライマリ／ゴースト／危険の共通ボタン（モック .btn）。 */
-export function Button({
-  variant,
-  size,
-  className,
-  type = "button",
-  children,
-  ...rest
-}: ButtonProps) {
+export function Button({ variant, size, className, type = "button", ...rest }: ButtonProps) {
   return (
-    <button type={type} className={cx(buttonRecipe({ variant, size }), className)} {...rest}>
-      {children}
-    </button>
+    <BaseButton {...rest} className={cx(buttonRecipe({ variant, size }), className)} type={type} />
   );
 }
 

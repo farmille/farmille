@@ -3,11 +3,18 @@ import { useState } from "react";
 import { fn } from "storybook/test";
 import { createBlankUsageReport } from "@/lib/usage-report";
 import { ReportComparisonFields } from "./ReportComparisonFields";
-import { reportFrame } from "./ReportFormParts";
+import { reportFrame, ReportToaster } from "./ReportFormParts";
 const meta = {
   title: "App/Materials/Report/ReportComparisonFields",
   component: ReportComparisonFields,
-  decorators: [(Story) => <div className={reportFrame}>{Story()}</div>],
+  decorators: [
+    (Story) => (
+      <div className={reportFrame}>
+        {Story()}
+        <ReportToaster />
+      </div>
+    ),
+  ],
   args: {
     input: createBlankUsageReport("11111111-1111-4111-8111-111111111111"),
     errors: {},

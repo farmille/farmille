@@ -12,7 +12,7 @@ import {
   deleteMaterial,
   genresByNames,
 } from "./support/test-data";
-import { loginAdminAndEnrollMfa } from "./support/ui";
+import { chooseOption, loginAdminAndEnrollMfa } from "./support/ui";
 
 test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷移", async ({ page, browser }) => {
   const [crops, genres] = await Promise.all([
@@ -100,7 +100,7 @@ test("@smoke タグ AND／OR、並び替え、検索結果から詳細への遷�
     const resultLinks = page.locator('main a[href^="/materials/"]');
     await expect(resultLinks.first()).toContainText(reviewHeavy.name);
 
-    await page.getByLabel("並び替え").selectOption("rating");
+    await chooseOption(page, page.getByLabel("並び替え"), "★が高い順");
     await expect(page).toHaveURL(/sort=rating/);
     await expect(resultLinks.first()).toContainText(ratingHigh.name);
     await resultLinks.first().click();

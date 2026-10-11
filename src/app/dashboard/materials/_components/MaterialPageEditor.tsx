@@ -1,13 +1,20 @@
 "use client";
 
-import { Checkbox, checkboxChipStyle } from "@/components/Checkbox";
-
 import { useState, useTransition } from "react";
 import { MaterialIllustration } from "@/components/materials/MaterialIllustration";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
-import { Button, Select } from "@/components";
-import { Field, FormMessage, controlStyle } from "@/components/auth/Fields";
+import { Button } from "@/components";
+import {
+  Checkbox,
+  CheckboxGroup,
+  Field,
+  FormActions,
+  Input,
+  Notice,
+  Select,
+  Textarea,
+} from "@/components/form";
 import { MaterialPageContent, materialPageStack } from "@/components/materials/MaterialPageContent";
 import {
   APPLICATION_METHODS,
@@ -21,9 +28,7 @@ import { BS_GUIDELINE_TITLE, BS_GUIDELINE_URL } from "@/lib/manufacturer-policy"
 import { saveMaterialPage, withdrawMaterialPage } from "../editor-actions";
 import { css } from "../../../../../styled-system/css";
 
-const actions = css({ display: "flex", gap: "2", flexWrap: "wrap" });
-const timingOptions = css({ display: "flex", flexWrap: "wrap", gap: "2", mt: "3" });
-const timingOption = checkboxChipStyle;
+const timingOptions = css({ mt: "3" });
 const row = css({
   display: "flex",
   flexDirection: "column",
@@ -35,6 +40,11 @@ const row = css({
   borderRadius: "card",
 });
 const fieldset = css({ border: "0", p: "0", m: "0", minW: "0" });
+const TIMING_OPTIONS = APPLICATION_TIMINGS.map((label, index) => ({ value: String(index), label }));
+const LINK_GROUP_OPTIONS = [
+  { value: "", label: "分類を選択してください" },
+  ...MATERIAL_LINK_GROUPS,
+] as const;
 
 export function MaterialPageEditor({
   materialId,
@@ -52,7 +62,7 @@ export function MaterialPageEditor({
   const [content, setContent] = useState(initialContent);
   const [version, setVersion] = useState(expectedVersion);
   const [preview, setPreview] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -65,15 +75,16 @@ export function MaterialPageEditor({
         submit,
       });
       if (!result.ok) {
-        setMessage(result.message);
+        setMessage({ tone: "error", text: result.message });
         return;
       }
       setVersion(submit ? null : result.versionId);
-      setMessage(
-        submit
+      setMessage({
+        tone: "success",
+        text: submit
           ? "表現確認へ送りました。公開中の内容はまだ変わりません。"
           : "下書きを保存しました。",
-      );
+      });
       router.refresh();
     });
   }
@@ -81,15 +92,19 @@ export function MaterialPageEditor({
   if (pendingVersion)
     return (
       <div className={materialPageStack}>
-        <FormMessage tone="info">表現確認中です。公開内容は確認完了後に変わります。</FormMessage>
+        <Notice tone="info">表現確認中です。公開内容は確認完了後に変わります。</Notice>
         <MaterialPageContent content={content} imageUrl={imageUrl} />
-        {message ? <FormMessage tone="info">{message}</FormMessage> : null}
+        {message ? <Notice tone={message.tone}>{message.text}</Notice> : null}
         <Button
           disabled={pending}
           onClick={() =>
             startTransition(async () => {
               if (await withdrawMaterialPage(pendingVersion)) router.refresh();
-              else setMessage("取り下げできませんでした。再読み込みして状態を確認してください。");
+              else
+                setMessage({
+                  tone: "error",
+                  text: "取り下げできませんでした。再読み込みして状態を確認してください。",
+                });
             })
           }
         >
@@ -101,7 +116,7 @@ export function MaterialPageEditor({
   return (
     <div className={materialPageStack}>
       <p>枠の中を編集すると、同じ項目が資材ページに表示されます。下書きは公開されません。</p>
-      {message ? <FormMessage tone="info">{message}</FormMessage> : null}
+      {message ? <Notice tone={message.tone}>{message.text}</Notice> : null}
       {preview ? (
         <MaterialPageContent content={content} imageUrl={imageUrl} />
       ) : (
@@ -113,41 +128,37 @@ export function MaterialPageEditor({
             </section>
             <section>
               <h2>製品説明</h2>
-              <textarea
-                aria-label="製品説明"
-                className={controlStyle}
-                rows={7}
-                value={content.description}
-                onChange={(event) => setContent({ ...content, description: event.target.value })}
-              />
-              <p>
-                <a href={BS_GUIDELINE_URL} target="_blank" rel="noreferrer">
-                  {BS_GUIDELINE_TITLE}
-                </a>
-                に沿ってご記入ください。公開前に運営が表現を確認します。
-              </p>
+              <Field
+                label="製品説明"
+                hideLabel
+                description={
+                  <>
+                    <a href={BS_GUIDELINE_URL} target="_blank" rel="noreferrer">
+                      {BS_GUIDELINE_TITLE}
+                    </a>
+                    に沿ってご記入ください。公開前に運営が表現を確認します。
+                  </>
+                }
+              >
+                <Textarea
+                  rows={7}
+                  value={content.description}
+                  onChange={(event) => setContent({ ...content, description: event.target.value })}
+                />
+              </Field>
             </section>
             <section>
               <h2>施用タイミング</h2>
               <p>共通の目安となる時期を複数選択できます。</p>
-              <div className={timingOptions}>
-                {APPLICATION_TIMINGS.map((label, index) => (
-                  <label className={timingOption} key={label}>
-                    <Checkbox
-                      checked={content.timings.includes(index)}
-                      onChange={(event) =>
-                        setContent({
-                          ...content,
-                          timings: event.target.checked
-                            ? [...content.timings, index].sort((a, b) => a - b)
-                            : content.timings.filter((timing) => timing !== index),
-                        })
-                      }
-                    />
-                    {label}
-                  </label>
-                ))}
-              </div>
+              <CheckboxGroup
+                aria-label="施用タイミング"
+                className={timingOptions}
+                disabled={pending}
+                onValueChange={(values) => setContent({ ...content, timings: values.map(Number) })}
+                options={TIMING_OPTIONS}
+                value={content.timings.map(String)}
+                variant="chips"
+              />
             </section>
             <section>
               <h2>リンク・資料</h2>
@@ -157,29 +168,19 @@ export function MaterialPageEditor({
                   {content.links.map((link, index) =>
                     link.group === group.value ? (
                       <div className={row} key={index}>
-                        <label>
-                          資料の分類
+                        <Field label="資料の分類" labelSize="sm">
                           <Select
+                            disabled={pending}
+                            options={LINK_GROUP_OPTIONS}
                             value={link.group ?? ""}
-                            onChange={(event) => {
-                              const value = v.parse(
-                                v.picklist([
-                                  "",
-                                  "overview",
-                                  "safety",
-                                  "technical",
-                                  "public_trial",
-                                  "other_trial",
-                                ]),
-                                event.target.value,
-                              );
+                            onValueChange={(value) => {
                               setContent({
                                 ...content,
                                 links: content.links.map((entry, i) =>
                                   i === index
                                     ? {
                                         ...entry,
-                                        group: value === "" ? null : value,
+                                        group: value === "" || value === null ? null : value,
                                         trial:
                                           value === "public_trial" || value === "other_trial"
                                             ? (entry.trial ?? {
@@ -195,19 +196,10 @@ export function MaterialPageEditor({
                                 ),
                               });
                             }}
-                          >
-                            <option value="">分類を選択してください</option>
-                            {MATERIAL_LINK_GROUPS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </Select>
-                        </label>
-                        <label>
-                          資料名
-                          <input
-                            className={controlStyle}
+                          />
+                        </Field>
+                        <Field label="資料名" labelSize="sm">
+                          <Input
                             value={link.title}
                             onChange={(event) =>
                               setContent({
@@ -218,11 +210,9 @@ export function MaterialPageEditor({
                               })
                             }
                           />
-                        </label>
-                        <label>
-                          資料URL
-                          <input
-                            className={controlStyle}
+                        </Field>
+                        <Field label="資料URL" labelSize="sm">
+                          <Input
                             type="url"
                             value={link.url}
                             onChange={(event) =>
@@ -234,7 +224,7 @@ export function MaterialPageEditor({
                               })
                             }
                           />
-                        </label>
+                        </Field>
                         {link.trial ? (
                           <>
                             {(
@@ -244,10 +234,8 @@ export function MaterialPageEditor({
                                 { key: "institution", label: "試験の実施機関（任意）" },
                               ] as const
                             ).map((field) => (
-                              <label key={field.key}>
-                                {field.label}
-                                <textarea
-                                  className={controlStyle}
+                              <Field key={field.key} label={field.label} labelSize="sm">
+                                <Textarea
                                   rows={field.key === "summary" ? 3 : 1}
                                   value={link.trial?.[field.key] ?? ""}
                                   onChange={(event) =>
@@ -267,7 +255,7 @@ export function MaterialPageEditor({
                                     })
                                   }
                                 />
-                              </label>
+                              </Field>
                             ))}
                             {(
                               [
@@ -279,10 +267,8 @@ export function MaterialPageEditor({
                                 },
                               ] as const
                             ).map((field) => (
-                              <label key={field.key}>
-                                {field.label}
-                                <input
-                                  className={controlStyle}
+                              <Field key={field.key} label={field.label} labelSize="sm">
+                                <Input
                                   type="number"
                                   min={1}
                                   max={field.max}
@@ -308,7 +294,7 @@ export function MaterialPageEditor({
                                     })
                                   }
                                 />
-                              </label>
+                              </Field>
                             ))}
                           </>
                         ) : null}
@@ -361,15 +347,13 @@ export function MaterialPageEditor({
               <h2>施用方法</h2>
               {content.usages.map((usage, index) => (
                 <div className={row} key={index}>
-                  <label>
-                    施用方法
+                  <Field label="施用方法" labelSize="sm">
                     <Select
+                      disabled={pending}
+                      options={APPLICATION_METHODS}
                       value={usage.method}
-                      onChange={(event) => {
-                        const method = v.parse(
-                          v.picklist(["spray", "drench", "mix", "soak", "coat", "other"]),
-                          event.target.value,
-                        );
+                      onValueChange={(method) => {
+                        if (method === null) return;
                         setContent({
                           ...content,
                           usages: content.usages.map((entry, i) =>
@@ -377,18 +361,10 @@ export function MaterialPageEditor({
                           ),
                         });
                       }}
-                    >
-                      {APPLICATION_METHODS.map((method) => (
-                        <option value={method.value} key={method.value}>
-                          {method.label}
-                        </option>
-                      ))}
-                    </Select>
-                  </label>
-                  <label>
-                    詳細
-                    <textarea
-                      className={controlStyle}
+                    />
+                  </Field>
+                  <Field label="詳細" labelSize="sm">
+                    <Textarea
                       rows={3}
                       value={usage.detail}
                       onChange={(event) =>
@@ -400,7 +376,7 @@ export function MaterialPageEditor({
                         })
                       }
                     />
-                  </label>
+                  </Field>
                   <Button
                     variant="ghost"
                     onClick={() =>
@@ -428,20 +404,16 @@ export function MaterialPageEditor({
             </section>
             <section>
               <h2>製品詳細</h2>
-              <Field label="主な成分" htmlFor="material-components">
-                <textarea
-                  id="material-components"
-                  className={controlStyle}
+              <Field label="主な成分">
+                <Textarea
                   value={content.mainComponents}
                   onChange={(event) =>
                     setContent({ ...content, mainComponents: event.target.value })
                   }
                 />
               </Field>
-              <Field label="作用機作" htmlFor="material-mechanism">
-                <textarea
-                  id="material-mechanism"
-                  className={controlStyle}
+              <Field label="作用機作">
+                <Textarea
                   rows={4}
                   value={content.mechanism}
                   onChange={(event) => setContent({ ...content, mechanism: event.target.value })}
@@ -457,32 +429,27 @@ export function MaterialPageEditor({
                 );
                 return (
                   <div className={row} key={kind.value}>
-                    <label className={timingOption}>
-                      <Checkbox
-                        checked={Boolean(registration)}
-                        onChange={(event) =>
-                          setContent({
-                            ...content,
-                            registrations: event.target.checked
-                              ? [
-                                  ...content.registrations,
-                                  { kind: kind.value, companyName: "", effects: "" },
-                                ]
-                              : content.registrations.filter((entry) => entry.kind !== kind.value),
-                          })
-                        }
-                      />
+                    <Checkbox
+                      checked={Boolean(registration)}
+                      disabled={pending}
+                      onCheckedChange={(checked) =>
+                        setContent({
+                          ...content,
+                          registrations: checked
+                            ? [
+                                ...content.registrations,
+                                { kind: kind.value, companyName: "", effects: "" },
+                              ]
+                            : content.registrations.filter((entry) => entry.kind !== kind.value),
+                        })
+                      }
+                    >
                       {kind.label}
-                    </label>
+                    </Checkbox>
                     {registration ? (
                       <>
-                        <Field
-                          label={kind.companyLabel}
-                          htmlFor={`registration-${kind.value}-company`}
-                        >
-                          <input
-                            id={`registration-${kind.value}-company`}
-                            className={controlStyle}
+                        <Field label={kind.companyLabel}>
+                          <Input
                             value={registration.companyName}
                             onChange={(event) =>
                               setContent({
@@ -496,13 +463,8 @@ export function MaterialPageEditor({
                             }
                           />
                         </Field>
-                        <Field
-                          label={kind.effectsLabel}
-                          htmlFor={`registration-${kind.value}-effects`}
-                        >
-                          <textarea
-                            id={`registration-${kind.value}-effects`}
-                            className={controlStyle}
+                        <Field label={kind.effectsLabel}>
+                          <Textarea
                             rows={3}
                             value={registration.effects}
                             onChange={(event) =>
@@ -526,9 +488,8 @@ export function MaterialPageEditor({
               <p>有機JAS適合など、上記以外の情報を1件ずつ記入してください。</p>
               {content.certifications.map((title, index) => (
                 <div className={row} key={index}>
-                  <input
+                  <Input
                     aria-label={`登録・認証${index + 1}`}
-                    className={controlStyle}
                     value={title}
                     onChange={(event) =>
                       setContent({
@@ -566,10 +527,8 @@ export function MaterialPageEditor({
               <p>掲載する会社名を1社ずつ記入してください。</p>
               {content.relatedCompanies.map((company, index) => (
                 <div className={row} key={index}>
-                  <label>
-                    関係会社{index + 1}
-                    <input
-                      className={controlStyle}
+                  <Field label={`関係会社${index + 1}`} labelSize="sm">
+                    <Input
                       value={company}
                       onChange={(event) =>
                         setContent({
@@ -580,7 +539,7 @@ export function MaterialPageEditor({
                         })
                       }
                     />
-                  </label>
+                  </Field>
                   <Button
                     variant="ghost"
                     onClick={() =>
@@ -606,7 +565,7 @@ export function MaterialPageEditor({
           </div>
         </fieldset>
       )}
-      <div className={actions}>
+      <FormActions>
         <Button disabled={pending} onClick={() => save(true)}>
           保存して表現確認へ送る
         </Button>
@@ -618,9 +577,10 @@ export function MaterialPageEditor({
           disabled={pending}
           onClick={() => {
             if (!preview && !v.is(MaterialPageContentSchema, content)) {
-              setMessage(
-                "プレビューの前に、資料のタイトル・URLと登録・認証の空欄を確認してください。",
-              );
+              setMessage({
+                tone: "error",
+                text: "プレビューの前に、資料のタイトル・URLと登録・認証の空欄を確認してください。",
+              });
               return;
             }
             setPreview(!preview);
@@ -628,7 +588,7 @@ export function MaterialPageEditor({
         >
           {preview ? "編集に戻る" : "プレビュー"}
         </Button>
-      </div>
+      </FormActions>
       <p>
         保存すると変更履歴に記録されます。メーカーが掲載内容の管理と責任を持ち、運営は表現の確認と監査を行います。
       </p>
