@@ -41,8 +41,8 @@ export function createAdminSupabase(): SupabaseClient<Database> {
  * 公開データの読み取り用。cookie を読まないので、リクエストをまたぐキャッシュの中で使える。
  * anon ロールで読むため、RLS で全員に公開されている行だけが返る。
  */
-export function createPublicSupabase(): SupabaseClient<Database> {
-  return createClient<Database>(clientEnv.supabaseUrl, clientEnv.supabasePublishableKey, {
+export function createPublicSupabase(supabaseUrl: string): SupabaseClient<Database> {
+  return createClient<Database>(supabaseUrl, clientEnv.supabasePublishableKey, {
     auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
   });
 }
