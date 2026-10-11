@@ -163,8 +163,7 @@ export function VisibilityText({ visibility }: { visibility: Visibility }) {
     </>
   ) : (
     <>
-      <Icon name="lock" size="2xs" />
-      <span aria-hidden="true">非公開</span>
+      <Icon name="visibility_off" size="2xs" />
       <span className={srOnlyStyle}>公開されません</span>
     </>
   );

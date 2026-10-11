@@ -56,6 +56,25 @@ describe("プロフィールのタグ編集", () => {
     await user.click(screen.getByRole("button", { name: "野菜研究サークルを削除" }));
     expect(container.querySelectorAll('input[name="affiliations"]')).toHaveLength(1);
   });
+  it("所属は空欄で候補を出さず、入力と削除に応じて候補を変える", async () => {
+    const user = userEvent.setup();
+    render(
+      <form>
+        <ProfileTagsEditor {...meta.args} details={{ ...meta.args.details, affiliations: [] }} />
+      </form>,
+    );
+    const input = screen.getByRole("combobox", { name: "所属" });
+    await user.click(input);
+    expect(screen.queryByRole("option")).not.toBeInTheDocument();
+    await user.type(input, "JA");
+    expect(screen.getByRole("option", { name: "JA青年部" })).toBeVisible();
+    await user.clear(input);
+    expect(screen.queryByRole("option")).not.toBeInTheDocument();
+    await user.type(input, "JA");
+    await user.click(screen.getByRole("option", { name: "JA青年部" }));
+    expect(screen.getByRole("button", { name: "JA青年部を削除" })).toBeVisible();
+    expect(input).toHaveValue("");
+  });
   it("作目50件と所属20件の上限を保つ", () => {
     const crops = Array.from({ length: 50 }, (_, i) => ({
       id: `crop-${i}`,

@@ -33,6 +33,21 @@ describe("認証メールの署名検証", () => {
     expect(url.searchParams.get("next")).toBe("/reports/sample");
   });
 
+  it("登録確認と再送メールは登録情報の入力へ戻る", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://www.farmille.com");
+    for (const type of ["signup", "magiclink"]) {
+      const url = new URL(
+        confirmationUrl(
+          "test-hash",
+          type,
+          "https://www.farmille.com/auth/confirm?registration=1&next=%2Freports%2Fsample",
+        ),
+      );
+      expect(url.searchParams.get("registration")).toBe("1");
+      expect(url.searchParams.get("next")).toBe("/reports/sample");
+    }
+  });
+
   it("外部サイトと認証画面への戻り先を確認メールへ持ち込まない", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://www.farmille.com");
     for (const destination of [

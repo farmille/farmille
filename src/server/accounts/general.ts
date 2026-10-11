@@ -1,14 +1,15 @@
-import { sendPendingRegistrationEmail } from "./notification-email";
+import { sendRegistrationEmail } from "./notification-email";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import * as v from "valibot";
 
 import { clientEnv } from "@/env";
 import { generalRegistrationSchema } from "@/lib/auth/registration-schema";
-import { safeNextPath } from "@/lib/auth/safe-next";
 import { toErrorCode } from "@/server/accounts/auth-errors";
 import { fail, succeed, type Result } from "@/server/result";
-import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
+import { createAdminSupabase, createIsolatedAuthClient } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
+
+import { readRegistrationProof, clearRegistrationProof } from "./registration-proof";
 
 export type GeneralSignupInput = v.InferOutput<typeof generalRegistrationSchema>;
 export type GeneralSignupFieldErrors = Partial<Record<keyof GeneralSignupInput, string>>;
@@ -51,73 +52,99 @@ async function isHandleTaken(
   return succeed(data !== null);
 }
 
-/** この登録処理で作成した Auth ユーザーだけを補償削除する。 */
-async function rollbackAuthUser(admin: SupabaseClient<Database>, userId: string): Promise<void> {
-  const { error } = await admin.auth.admin.deleteUser(userId);
-
-  if (error !== null) {
-    console.error(`[auth] 補償削除に失敗しました user_id=${userId}: ${error.message}`);
-  }
+/** メールだけで本人確認を開始する。通常のセッションcookieは作らない。 */
+export async function requestRegistrationEmail(
+  email: string,
+  next: string | null,
+): Promise<Result<null>> {
+  const redirectTo = new URL("/auth/confirm", clientEnv.siteUrl);
+  redirectTo.searchParams.set("registration", "1");
+  if (next) redirectTo.searchParams.set("next", next);
+  const { error } = await createIsolatedAuthClient().auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: redirectTo.toString(), shouldCreateUser: true },
+  });
+  return error ? fail(toErrorCode(error, "registrationEmail")) : succeed(null);
 }
 
-/** 一般登録後、メール確認済みの本人へ登録完了メールを送る。 */
-export async function registerGeneralUser(
-  input: GeneralSignupInput,
-  next: string | null = null,
-): Promise<Result<GeneralSignupResult>> {
-  const admin = createAdminSupabase();
-  const supabase = await createServerSupabase();
-  const emailRedirectTo = new URL(
-    `/auth/confirm?next=${encodeURIComponent(safeNextPath(next) ?? "/")}`,
-    clientEnv.siteUrl,
-  ).toString();
-  const result = await registerGeneralUserWithSupabase(input, admin, supabase, emailRedirectTo);
-  if (result.ok && result.data.signedIn) await sendPendingRegistrationEmail();
+const AccountMetadataSchema = v.object({ account_type: v.optional(v.string()) });
+
+/** 確認済みで会員種別を持たない本人にだけ、第2段階を許可する。 */
+export async function registrationIdentity(userId: string, admin: SupabaseClient<Database>) {
+  const { data, error } = await admin.auth.admin.getUserById(userId);
+  if (error) return fail(toErrorCode(error, "registrationIdentity"));
+  const user = data.user;
+  if (!user?.email_confirmed_at || !user.email) return fail("expired_link");
+  const metadata = v.safeParse(AccountMetadataSchema, user.app_metadata);
+  if (!metadata.success || metadata.output.account_type !== undefined)
+    return fail("email_unavailable");
+  return succeed({ userId: user.id, email: user.email });
+}
+
+export async function getRegistrationIdentity() {
+  const proof = await readRegistrationProof();
+  if (!proof) return fail("expired_link");
+  const result = await registrationIdentity(proof.userId, createAdminSupabase());
+  if (result.ok && result.data.email !== proof.email) return fail("expired_link");
   return result;
 }
 
-/** 新規作成が確定したIDにだけ登録情報を保存し、保存後にメール確認へ進む。 */
+/** 今回確保したプロフィールだけを取り消し、確認済みメールは保持する。 */
+async function rollbackProfile(admin: SupabaseClient<Database>, userId: string) {
+  const notification = await admin
+    .from("registration_notifications")
+    .delete()
+    .eq("user_id", userId);
+  if (notification.error)
+    throw new Error("登録通知の取り消しに失敗しました。", { cause: notification.error });
+  const profile = await admin.from("profiles").delete().eq("user_id", userId);
+  if (profile.error)
+    throw new Error("登録情報の取り消しに失敗しました。", { cause: profile.error });
+}
+
+export async function registerGeneralUser(
+  input: GeneralSignupInput,
+): Promise<Result<GeneralSignupResult>> {
+  const identity = await getRegistrationIdentity();
+  if (!identity.ok) return identity;
+  const result = await registerGeneralUserWithSupabase(
+    input,
+    createAdminSupabase(),
+    identity.data.userId,
+  );
+  if (result.ok) {
+    await sendRegistrationEmail(identity.data.userId, identity.data.email);
+    await clearRegistrationProof();
+  }
+  return result;
+}
+
+/** プロフィールの一意制約で同時送信を止め、すべて保存してから会員権限を与える。 */
 export async function registerGeneralUserWithSupabase(
   input: GeneralSignupInput,
   admin: SupabaseClient<Database>,
-  supabase: SupabaseClient<Database>,
-  emailRedirectTo: string,
+  userId: string,
 ): Promise<Result<GeneralSignupResult>> {
+  const identity = await registrationIdentity(userId, admin);
+  if (!identity.ok) return identity;
+  if (input.email !== identity.data.email) return fail("expired_link");
   const handleTaken = await isHandleTaken(admin, input.handle);
   if (!handleTaken.ok) return handleTaken;
   if (handleTaken.data) return fail("handle_taken");
 
-  // createUser は未確認メールの重複も拒否する。返されたIDだけを補償削除の対象にする。
-  const { data: created, error: createError } = await admin.auth.admin.createUser({
-    email: input.email,
-    password: input.password,
-    email_confirm: false,
-    app_metadata: { account_type: "general" },
-  });
-  if (createError !== null) return fail(toErrorCode(createError, "createUser"));
-  const user = created.user;
-  if (user === null) return fail("internal");
-
-  const { error: profileError } = await admin.from("profiles").insert({
-    user_id: user.id,
+  const profile = await admin.from("profiles").insert({
+    user_id: userId,
     handle: input.handle,
     standpoint: input.standpoint,
     prefecture_code: input.prefectureCode,
   });
-
-  if (profileError !== null) {
-    await rollbackAuthUser(admin, user.id);
-
-    // handle の unique 制約。重複確認との競合で後勝ちした場合にここへ来る。
-    if (profileError.code === "23505") return fail("handle_taken");
-
-    console.error(`[auth] profiles の作成に失敗: ${profileError.code} ${profileError.message}`);
-
+  if (profile.error) {
+    if (profile.error.code === "23505") return fail("handle_taken");
+    console.error("[auth] 登録情報の保存に失敗", profile.error.code);
     return fail("internal");
   }
-
-  const { error: contactError } = await admin.from("profile_contact_details").insert({
-    user_id: user.id,
+  const contact = await admin.from("profile_contact_details").insert({
+    user_id: userId,
     family_name: input.familyName,
     given_name: input.givenName,
     phone: input.phone || null,
@@ -126,32 +153,18 @@ export async function registerGeneralUserWithSupabase(
     street_address: input.streetAddress,
     building_name: input.buildingName || null,
   });
-  if (contactError !== null) {
-    console.error("[auth] 非公開連絡先の保存に失敗", contactError.code);
-    await rollbackAuthUser(admin, user.id);
+  if (contact.error) {
+    await rollbackProfile(admin, userId);
+    console.error("[auth] 非公開連絡先の保存に失敗", contact.error.code);
     return fail("internal");
   }
-
-  // 確認メールの送信とセッションの発行は、Supabaseのメール確認設定に従う。
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: input.email,
+  const updated = await admin.auth.admin.updateUserById(userId, {
     password: input.password,
-    options: { emailRedirectTo },
+    app_metadata: { account_type: "general" },
   });
-  if (signUpError !== null) {
-    await rollbackAuthUser(admin, user.id);
-    return fail(toErrorCode(signUpError, "signUp"));
+  if (updated.error) {
+    await rollbackProfile(admin, userId);
+    return fail(toErrorCode(updated.error, "completeRegistration"));
   }
-
-  if (signUpData.user?.id !== user.id) {
-    console.error("[auth] 登録したユーザーと認証結果のIDが一致しません。");
-    if (signUpData.session !== null) {
-      const { error } = await supabase.auth.signOut({ scope: "local" });
-      if (error !== null) console.error("[auth] 登録セッションの破棄に失敗", error.code);
-    }
-    await rollbackAuthUser(admin, user.id);
-    return fail("internal");
-  }
-
-  return succeed({ userId: user.id, signedIn: signUpData.session !== null });
+  return succeed({ userId, signedIn: false });
 }

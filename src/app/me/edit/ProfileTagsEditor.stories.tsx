@@ -62,11 +62,11 @@ export const CropSearch: Story = {
 export const AffiliationPicked: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "JA青年部" }));
-    await expect(canvas.getByRole("button", { name: "JA青年部" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    const input = canvas.getByRole("combobox", { name: "所属" });
+    await userEvent.type(input, "JA");
+    await userEvent.click(await page(canvasElement).findByRole("option", { name: "JA青年部" }));
+    await expect(canvas.getByRole("button", { name: "JA青年部を削除" })).toBeVisible();
+    await expect(input).toHaveValue("");
   },
 };
 

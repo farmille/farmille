@@ -89,9 +89,14 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
             }}
             onChange={(event) => {
               requestVersion.current++;
-              setPostal(event.target.value);
+              const value = event.target.value.normalize("NFKC").replaceAll("-", "");
+              setPostal(
+                /^\d{7}$/.test(value)
+                  ? `${value.slice(0, 3)}-${value.slice(3)}`
+                  : event.target.value,
+              );
             }}
-            placeholder="例）3100011"
+            placeholder="例）310-0011"
             value={postal}
           />
           <button type="button" className={lookupButton} disabled={pending} onClick={lookup}>

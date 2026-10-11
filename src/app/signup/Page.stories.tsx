@@ -7,7 +7,7 @@ const meta = {
   component: Page,
   beforeEach: () => preparePageSession("general"),
   parameters: { layout: "fullscreen", nextjs: { navigation: { pathname: "/signup" } } },
-  args: {},
+  args: { searchParams: Promise.resolve({}) },
 } satisfies Meta<typeof Page>;
 export default meta;
 type Story = StoryObj<typeof meta>;
