@@ -59,7 +59,9 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
       setPrefecture(String(fill.prefectureCode));
       setCity(fill.city);
       if (fill.status === "many-towns") {
-        setMessage("複数の町名が該当します。都道府県と市区町村を入力しました。番地を入力してください。");
+        setMessage(
+          "複数の町名が該当します。都道府県と市区町村を入力しました。番地を入力してください。",
+        );
         return;
       }
       if (fill.status === "town" && (street === "" || street === autoTown.current)) {

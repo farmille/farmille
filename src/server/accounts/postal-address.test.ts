@@ -26,9 +26,12 @@ describe("郵便番号の住所検索", () => {
     expect((await lookupPostalAddress("0000000")).ok).toBe(false);
   });
   it("町名が1つのときだけ番地まで入れ、複数なら市区町村で止める", () => {
-    expect(
-      postalFill([{ prefectureCode: 13, city: "大田区", town: "久が原" }]),
-    ).toEqual({ status: "town", prefectureCode: 13, city: "大田区", town: "久が原" });
+    expect(postalFill([{ prefectureCode: 13, city: "大田区", town: "久が原" }])).toEqual({
+      status: "town",
+      prefectureCode: 13,
+      city: "大田区",
+      town: "久が原",
+    });
     expect(postalFill([{ prefectureCode: 1, city: "札幌市中央区", town: "" }])).toEqual({
       status: "city",
       prefectureCode: 1,

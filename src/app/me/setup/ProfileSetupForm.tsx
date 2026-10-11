@@ -34,10 +34,7 @@ export function ProfileSetupForm() {
         <Input autoComplete="nickname" defaultValue={values.handle} maxLength={HANDLE_MAX_LENGTH} />
       </Field>
       <Fieldset legend="あなたの立場" name="standpoint" requirement="required" visibility="public">
-        <RadioGroup<string>
-          defaultValue={values.standpoint}
-          options={STANDPOINTS}
-        />
+        <RadioGroup<string> defaultValue={values.standpoint} options={STANDPOINTS} />
       </Fieldset>
       <FormActions>
         <SubmitButton pendingLabel="設定中…">設定してマイページへ</SubmitButton>

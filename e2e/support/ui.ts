@@ -55,7 +55,7 @@ export async function signupGeneral(
   await page.getByLabel("番地", { exact: false }).fill("千代田1-1");
   await page.getByLabel("建物名・部屋番号").fill("試験ビル101号室");
   await page.getByRole("checkbox", { name: /利用規約/ }).check();
-  await page.getByLabel("パスワード").fill(input.password);
+  await page.getByLabel("パスワード", { exact: true }).fill(input.password);
   await page.getByRole("radio", { name: "生産者", exact: true }).check();
   const submitButton = page.getByRole("button", { name: "登録する" });
   await waitForReactHydration(submitButton);
