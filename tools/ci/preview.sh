@@ -134,7 +134,12 @@ case "${1:?Missing action}" in
     bash trusted/tools/ci/deploy.sh "$PR_SHA" preview "$task_dir/env.json" > "$task_dir/deployment.txt"
     deployment=$(cat "$task_dir/deployment.txt")
     [[ "$deployment" =~ ^https://[a-zA-Z0-9.-]+\.vercel\.app$ ]] || exit 1
-    vercel alias set "$deployment" "$alias" --token "$VERCEL_TOKEN"
+    jq -n --arg alias "$alias" '{alias: $alias}' > "$task_dir/alias-request.json"
+    curl --fail --silent --show-error --connect-timeout 10 --max-time 30 -X POST \
+      -H "Authorization: Bearer $VERCEL_TOKEN" -H 'Content-Type: application/json' \
+      --data-binary "@$task_dir/alias-request.json" \
+      "https://api.vercel.com/v2/deployments/${deployment#https://}/aliases?teamId=$VERCEL_ORG_ID" > "$task_dir/alias.json"
+    jq -e --arg alias "$alias" '.alias == $alias and .error == null' "$task_dir/alias.json" >/dev/null
     finished=true
     {
       echo "### PR #$PR_NUMBER Preview"
