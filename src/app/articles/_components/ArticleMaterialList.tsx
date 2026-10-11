@@ -8,10 +8,11 @@ import { css } from "../../../../styled-system/css";
 import { Stars } from "../../materials/[id]/_components/CardParts";
 import { ReadingHeading } from "./Reading";
 
-const materialLink = css(surfaceCardRecipe.raw({ tone: "soft", padding: "compact" }), {
+const materialLink = css(surfaceCardRecipe.raw({ padding: "compact" }), {
   display: "flex",
   alignItems: "center",
   gap: "3",
+  bg: "transparent",
   color: "inherit",
   textDecoration: "none",
 });
@@ -24,7 +25,7 @@ export function ArticleMaterialList({
   return (
     <section aria-labelledby="article-materials-heading">
       <ReadingHeading id="article-materials-heading">この記事で紹介した資材</ReadingHeading>
-      <div className={css({ display: "flex", flexDirection: "column", gap: "2.5" })}>
+      <div className={css({ display: "flex", flexDirection: "column", gap: "3", my: "4" })}>
         {materials.map((material) => (
           <Link key={material.id} href={`/materials/${material.id}`} className={materialLink}>
             <span

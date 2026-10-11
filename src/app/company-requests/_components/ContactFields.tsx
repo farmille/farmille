@@ -99,12 +99,7 @@ export function ContactFields({
         requirement="required"
         visibility="private"
       >
-        <Input
-          defaultValue={defaults.phone}
-          maxLength={50}
-          placeholder="03-1234-5678"
-          type="tel"
-        />
+        <Input defaultValue={defaults.phone} maxLength={50} placeholder="03-1234-5678" type="tel" />
       </Field>
     </>
   );

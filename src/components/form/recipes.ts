@@ -36,7 +36,15 @@ export const controlRecipe = cva({
       true: { pe: "12" },
     },
     readOnly: {
-      true: { bg: "border.default", cursor: "default" },
+      true: {
+        bg: "border.default/30",
+        cursor: "default",
+        _focus: {
+          outlineWidth: "0",
+          outlineStyle: "none",
+          borderColor: "border.strong",
+        },
+      },
     },
   },
   defaultVariants: { size: "md" },
@@ -115,7 +123,7 @@ export const visibilityRecipe = cva({
     display: "inline-flex",
     alignItems: "center",
     gap: "1",
-    fontWeight: "bold",
+    fontWeight: "normal",
     textStyle: "supporting",
   },
   variants: {

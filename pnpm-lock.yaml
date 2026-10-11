@@ -48,6 +48,9 @@ importers:
       input-otp:
         specifier: 1.5.0
         version: 1.5.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      jposta:
+        specifier: ^0.4.16
+        version: 0.4.16
       material-icons:
         specifier: ^1.13.14
         version: 1.13.14
@@ -3703,6 +3706,9 @@ packages:
 
   jose@6.2.4:
     resolution: {integrity: sha512-N8acGzVsQy6M/fjFcxtysNc4Q379TcM5dM/qKkNtsHFji88yANnXTr7BLeP75iPnFwBfQzM/jg2BZ9+HZrHCZA==}
+
+  jposta@0.4.16:
+    resolution: {integrity: sha512-ACLX3DK/jipFTZ+rMpZ7Z3EmKInB51Sbx6tO7TGA9hYEnBnpZd9h7b1TRuHnbgab9caxX/GWq467glep0OphsQ==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -8924,6 +8930,8 @@ snapshots:
     optional: true
 
   jose@6.2.4: {}
+
+  jposta@0.4.16: {}
 
   js-tokens@4.0.0: {}
 

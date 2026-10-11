@@ -177,7 +177,10 @@ export function SignupForm({
         <SubmitButton pendingLabel="登録中…">登録する</SubmitButton>
       </FormActions>
       <p className={makerLinkStyle}>
-        メーカーの方は<TextLink href="/sellers/apply" variant="plain">企業会員登録申請へ</TextLink>
+        メーカーの方は
+        <TextLink href="/sellers/apply" variant="plain">
+          企業会員登録申請へ
+        </TextLink>
       </p>
     </Form>
   );
