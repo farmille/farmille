@@ -61,7 +61,7 @@ jobs:
 
       - name: Install deployment tools
         run: |
-          npm install --prefix "$RUNNER_TEMP/preview-tools" supabase@2.120.0 vercel@63.1.2
+          npm install --prefix "$RUNNER_TEMP/preview-tools" supabase@2.120.0
           echo "$RUNNER_TEMP/preview-tools/node_modules/.bin" >> "$GITHUB_PATH"
 
       - name: Prepare database and deploy preview
