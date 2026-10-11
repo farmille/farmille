@@ -124,15 +124,10 @@ case "${1:?Missing action}" in
     require_open
     [[ "$(pr | jq -r .head.sha)" == "$PR_SHA" ]] || exit 1
     # 管理tokenはVercelのビルド環境に渡さず、対象DBのアプリ用キーだけを指定する。
-    vercel deploy source --local-config "$GITHUB_WORKSPACE/trusted/vercel.json" --yes --token "$VERCEL_TOKEN" \
-      --env "NEXT_PUBLIC_SITE_URL=https://$alias" \
-      --build-env "NEXT_PUBLIC_SITE_URL=https://$alias" \
-      --env "NEXT_PUBLIC_SUPABASE_URL=https://$ref.supabase.co" \
-      --env "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$anon" \
-      --env "SUPABASE_SECRET_KEY=$secret" \
-      --build-env "NEXT_PUBLIC_SUPABASE_URL=https://$ref.supabase.co" \
-      --build-env "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$anon" \
-      --build-env "SUPABASE_SECRET_KEY=$secret" > "$task_dir/deployment.txt"
+    jq -n --arg site "https://$alias" --arg url "https://$ref.supabase.co" --arg anon "$anon" --arg secret "$secret" \
+      '{NEXT_PUBLIC_SITE_URL: $site, NEXT_PUBLIC_SUPABASE_URL: $url,
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: $anon, SUPABASE_SECRET_KEY: $secret}' > "$task_dir/env.json"
+    bash trusted/tools/ci/deploy.sh "$PR_SHA" preview "$task_dir/env.json" > "$task_dir/deployment.txt"
     deployment=$(cat "$task_dir/deployment.txt")
     [[ "$deployment" =~ ^https://[a-zA-Z0-9.-]+\.vercel\.app$ ]] || exit 1
     vercel alias set "$deployment" "$alias" --token "$VERCEL_TOKEN"
