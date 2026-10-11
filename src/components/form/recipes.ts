@@ -231,10 +231,7 @@ export const choiceDescriptionStyle = css({
   lineHeight: "normal",
 });
 
-const markPress = { _active: { transform: "none" } } as const;
-
 export const checkboxBoxRecipe = cva({
-  base: markPress,
   variants: {
     look: {
       box: {
@@ -273,7 +270,6 @@ export const checkboxBoxRecipe = cva({
 export const checkIndicatorStyle = css({ display: "flex" });
 
 export const radioDotStyle = css({
-  ...markPress,
   flex: "0 0 auto",
   w: "4.5",
   h: "4.5",
