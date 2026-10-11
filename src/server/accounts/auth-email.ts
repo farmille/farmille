@@ -63,9 +63,11 @@ export function confirmationUrl(tokenHash: string, type: string, redirectTo?: st
   );
   url.searchParams.set("token_hash", tokenHash);
   if (type !== "recovery") url.searchParams.set("type", type);
-  if (type === "signup" && redirectTo) {
+  if (["signup", "magiclink"].includes(type) && redirectTo) {
     const destination = new URL(v.parse(v.pipe(v.string(), v.url()), redirectTo));
     if (destination.origin === url.origin && destination.pathname === "/auth/confirm") {
+      if (destination.searchParams.get("registration") === "1")
+        url.searchParams.set("registration", "1");
       const next = safeNextPath(destination.searchParams.get("next"));
       if (next) url.searchParams.set("next", next);
     }
@@ -108,7 +110,7 @@ export async function deliverAuthEmail(input: AuthEmail): Promise<void> {
   const recovery = data.email_action_type === "recovery";
   await send(
     to,
-    recovery ? "パスワードの再設定" : "アカウントの確認",
-    `${recovery ? "次のリンクから新しいパスワードを設定してください。" : "次のリンクからアカウントを確認してください。"}\n\n${confirmationUrl(data.token_hash, data.email_action_type, data.redirect_to)}`,
+    recovery ? "パスワードの再設定" : "メールアドレスの確認",
+    `${recovery ? "次のリンクから新しいパスワードを設定してください。" : "次のリンクからメールアドレスを確認し、登録情報を入力してください。リンクの有効期限は1時間です。"}\n\n${confirmationUrl(data.token_hash, data.email_action_type, data.redirect_to)}`,
   );
 }

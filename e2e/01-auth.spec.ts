@@ -19,34 +19,12 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
 
   try {
     await page.goto("/signup");
-    await expect(page.getByRole("heading", { name: "アカウントを作成" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "一般ユーザー登録へ" })).toHaveAttribute(
-      "href",
-      "/signup/general",
-    );
-    await expect(page.getByRole("link", { name: "メーカー向けページへ" })).toHaveAttribute(
-      "href",
-      "/sellers",
-    );
-    await captureAccountScreen(page, "01-account-choice.png");
-
-    await page.goto("/signup/general");
     await expect(page.getByRole("heading", { name: "一般ユーザー登録" })).toBeVisible();
-    await expect(page.getByRole("combobox", { name: /^都道府県/ })).toBeVisible();
-    await expect(page.getByText(/^あなたの立場必須\s*公開されます$/)).toBeVisible();
-    await expect(page.getByRole("radio")).toHaveCount(4);
-    await expect(page.getByRole("radio", { name: "生産者", exact: true })).toBeVisible();
-    await expect(
-      page.getByRole("radio", { name: "JAグループ職員（営農指導員など）", exact: true }),
-    ).toBeVisible();
-    await expect(page.getByRole("radio", { name: /^行政関係者/ })).toBeVisible();
-    await expect(
-      page.getByRole("radio", {
-        name: "その他（メーカー関係者、専門家、大学研究員など）",
-        exact: true,
-      }),
-    ).toBeVisible();
-    await expect(page.getByText("メーカー関係者", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "メーカーの方はこちら" })).toHaveAttribute(
+      "href",
+      "/sellers/apply",
+    );
+    await expect(page.getByLabel("ニックネーム")).toHaveCount(0);
     await captureAccountScreen(page, "02-general-signup.png");
 
     await signupGeneral(page, { handle, email, password });
@@ -55,6 +33,8 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await captureAccountScreen(page, "07-general-signup-done.png");
 
     await page.goto("/me");
+    await expect(page).toHaveURL(/\/login\?next=%2Fme/);
+    await loginGeneral(page, { email, password, id: "", handle }, "/me");
     await expect(page.getByText(handle, { exact: true })).toBeVisible();
     await captureAccountScreen(page, "09-mypage.png");
     await page.getByRole("link", { name: "表示情報を編集" }).click();
@@ -100,7 +80,7 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await expect(
       page.getByRole("alert").filter({ hasText: "このハンドルネームはすでに使われています。" }),
     ).toHaveCount(2);
-    await expect(page).toHaveURL(/\/signup\/general$/);
+    await expect(page).toHaveURL(/\/signup\/complete$/);
     await expect(page.getByLabel("番地", { exact: false })).toHaveValue("千代田1-1");
     await expect(page.getByLabel("建物名・部屋番号")).toHaveValue("試験ビル101号室");
   } finally {

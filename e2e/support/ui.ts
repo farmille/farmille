@@ -1,3 +1,4 @@
+import { registrationMail, registrationLink } from "./registration-mail";
 import { expect, type Locator, type Page } from "@playwright/test";
 import { captureScreenFlow } from "./screen-flow";
 import { TOTP } from "otpauth";
@@ -34,16 +35,26 @@ export async function signupGeneral(
   input: { handle: string; email: string; password: string },
 ): Promise<void> {
   await page.goto("/signup/general");
+  await page.getByLabel("メールアドレス").fill(input.email);
+  await page.getByRole("button", { name: "認証メールを送信" }).click();
+  await expect(page.getByText("メールをご確認ください", { exact: true })).toBeVisible();
+  const mail = await registrationMail(input.email, "Farmille：メールアドレスの確認");
+  await page.goto(registrationLink(mail.Text));
+  await expect(page).toHaveURL(/\/signup\/complete/);
+  await expect(page.getByLabel("メールアドレス")).toHaveValue(input.email);
+  await expect(page.getByLabel("メールアドレス")).toHaveAttribute("readonly");
+  await expect(page.getByRole("region", { name: "利用規約・プライバシーポリシー" })).toBeVisible();
+  await expect(page.getByText("非公開", { exact: true })).toHaveCount(0);
   await page.getByLabel("ニックネーム").fill(input.handle);
   await page.getByLabel("本名（姓）").fill("試験");
   await page.getByLabel("本名（名）").fill("太郎");
   await page.getByLabel("郵便番号").fill("1000001");
+  await expect(page.getByLabel("郵便番号")).toHaveValue("100-0001");
   await chooseOption(page, page.getByRole("combobox", { name: /^都道府県/ }), "東京都");
   await page.getByLabel("市区町村").fill("千代田区");
   await page.getByLabel("番地", { exact: false }).fill("千代田1-1");
   await page.getByLabel("建物名・部屋番号").fill("試験ビル101号室");
   await page.getByRole("checkbox", { name: /利用規約/ }).check();
-  await page.getByLabel("メールアドレス").fill(input.email);
   await page.getByLabel("パスワード").fill(input.password);
   await page.getByRole("radio", { name: "生産者", exact: true }).check();
   const submitButton = page.getByRole("button", { name: "登録する" });

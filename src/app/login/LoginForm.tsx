@@ -41,7 +41,7 @@ export function LoginForm({ next }: { next: string | null }) {
           href={next ? `/signup/general?next=${encodeURIComponent(next)}` : "/signup"}
           variant="plain"
         >
-          アカウントをお持ちでない方は登録方法を選ぶ
+          アカウントをお持ちでない方は会員登録
         </TextLink>
         <TextLink
           href={next ? `/sellers/login?next=${encodeURIComponent(next)}` : "/sellers/login"}

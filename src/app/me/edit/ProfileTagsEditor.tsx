@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Button } from "@/components/Button";
 import { Chip } from "@/components/Chip";
 import { Autocomplete, Combobox, Field, Fieldset, Notice, type Option } from "@/components/form";
-import { ToggleGroup } from "@/components/ToggleGroup";
 import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
 import { css } from "../../../../styled-system/css";
 
@@ -48,8 +47,6 @@ export function ProfileTagsEditor({
       [crop.name, ...crop.aliases].some((name) => normalize(name).includes(query)),
   );
   const affiliationFull = affiliations.length >= AFFILIATION_LIMIT;
-  const knownAffiliations = affiliations.filter((name) => options.affiliations.includes(name));
-  const customAffiliations = affiliations.filter((name) => !options.affiliations.includes(name));
 
   function addAffiliation(name: string) {
     const value = name.trim();
@@ -95,31 +92,15 @@ export function ProfileTagsEditor({
 
       <Fieldset
         legend="所属"
-        lead={`当てはまるものを選んでください（複数可）。一覧にない所属は下の欄に入力して追加できます（${AFFILIATION_LIMIT}件まで）。公開されます。`}
+        lead={`所属名を入力し、候補から選んでください（複数可）。候補にない所属も追加できます（${AFFILIATION_LIMIT}件まで）。公開されます。`}
         requirement="optional"
       >
         <div className={affiliationStack}>
-          <ToggleGroup
-            aria-label="所属の候補"
-            limit={AFFILIATION_LIMIT - customAffiliations.length}
-            multiple
-            onValueChange={(known) => {
-              setAffiliations((current) => [
-                ...current.filter(
-                  (name) => !options.affiliations.includes(name) || known.includes(name),
-                ),
-                ...known.filter((name) => !current.includes(name)),
-              ]);
-              setMessage("");
-            }}
-            options={options.affiliations.map((name) => ({ value: name, label: name }))}
-            value={knownAffiliations}
-          />
-          {customAffiliations.length === 0 ? null : (
+          {affiliations.length === 0 ? null : (
             <div className={chipRow}>
-              {customAffiliations.map((name) => (
+              {affiliations.map((name) => (
                 <Chip
-                  category="その他"
+                  category="所属"
                   key={name}
                   onRemove={() => setAffiliations(affiliations.filter((value) => value !== name))}
                   removeLabel={`${name}を削除`}
@@ -144,8 +125,9 @@ export function ProfileTagsEditor({
               options={options.affiliations
                 .filter(
                   (name) =>
+                    affiliation.trim() !== "" &&
                     !affiliations.includes(name) &&
-                    normalize(name).includes(normalize(affiliation)),
+                    normalize(name).includes(normalize(affiliation.trim())),
                 )
                 .map((name) => ({ value: name, label: name }))}
               placeholder="例）〇〇市トマト生産部会"
