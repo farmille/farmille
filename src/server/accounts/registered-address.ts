@@ -2,7 +2,7 @@ import { requireGeneralUser, type GeneralSession } from "@/server/auth";
 import { fail, succeed, type Result } from "@/server/result";
 import { createAdminSupabase } from "@/server/supabase";
 
-export type RegisteredAddress = { prefectureCode: number | null; city: string };
+export type RegisteredAddress = { prefectureCode: number | null };
 
 export type RegisteredAddressStore = {
   findByUserId(userId: string): Promise<Result<RegisteredAddress | null>>;
@@ -13,7 +13,7 @@ export function adminRegisteredAddressStore(): RegisteredAddressStore {
     async findByUserId(userId) {
       const { data, error } = await createAdminSupabase()
         .from("profiles")
-        .select("prefecture_code,contact:profile_contact_details(city)")
+        .select("prefecture_code")
         .eq("user_id", userId)
         .maybeSingle();
       if (error !== null) {
@@ -21,7 +21,7 @@ export function adminRegisteredAddressStore(): RegisteredAddressStore {
         return fail("internal");
       }
       if (data === null) return succeed(null);
-      return succeed({ prefectureCode: data.prefecture_code, city: data.contact?.city ?? "" });
+      return succeed({ prefectureCode: data.prefecture_code });
     },
   };
 }

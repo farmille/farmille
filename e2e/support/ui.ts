@@ -51,8 +51,7 @@ export async function signupGeneral(
   await page.getByLabel("郵便番号").fill("1000001");
   await expect(page.getByLabel("郵便番号")).toHaveValue("100-0001");
   await chooseOption(page, page.getByRole("combobox", { name: /^都道府県/ }), "東京都");
-  await page.getByLabel("市区町村").fill("千代田区");
-  await page.getByLabel("番地", { exact: false }).fill("千代田1-1");
+  await page.getByLabel("市区町村・番地").fill("千代田区千代田1-1");
   await page.getByLabel("建物名・部屋番号").fill("試験ビル101号室");
   await page.getByRole("checkbox", { name: /利用規約/ }).check();
   await page.getByLabel("パスワード", { exact: true }).fill(input.password);

@@ -28,12 +28,11 @@ function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string
 function submittedValues(formData: FormData): AuthFormValues {
   const values: AuthFormValues = {};
 
-  for (const name of ["handle", "bio", "links", "cityPublic"]) {
+  for (const name of ["handle", "bio", "links"]) {
     const value = formDataString(formData.get(name));
     if (value !== null) values[name] = value;
   }
 
-  values.cityPublic = formData.get("cityPublic") === "on" ? "on" : "off";
   return values;
 }
 
@@ -58,7 +57,6 @@ export async function updateProfileAction(
   const validation = v.safeParse(ProfileDetailsInputSchema, {
     handle: formData.get("handle"),
     bio: formData.get("bio"),
-    cityPublic: formData.get("cityPublic") === "on",
     affiliations: formData.getAll("affiliations"),
     cropIds: formData.getAll("cropIds"),
     links: (formDataString(formData.get("links")) ?? "")

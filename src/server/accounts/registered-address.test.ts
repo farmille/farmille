@@ -20,17 +20,17 @@ function memoryStore(rows: Record<string, RegisteredAddress>) {
 }
 
 const rows = {
-  self: { prefectureCode: 8, city: "水戸市" },
-  other: { prefectureCode: 13, city: "千代田区" },
+  self: { prefectureCode: 8 },
+  other: { prefectureCode: 13 },
 };
 
 describe("loadRegisteredAddress", () => {
-  it("セッションの本人の都道府県と市区町村だけを返す", async () => {
+  it("セッションの本人の都道府県だけを返す", async () => {
     const { store, reads } = memoryStore(rows);
 
     expect(await loadRegisteredAddress(succeed({ userId: "self" }), store)).toEqual({
       ok: true,
-      data: { prefectureCode: 8, city: "水戸市" },
+      data: { prefectureCode: 8 },
     });
     expect(reads).toEqual(["self"]);
   });

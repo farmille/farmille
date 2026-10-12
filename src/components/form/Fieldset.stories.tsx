@@ -43,7 +43,7 @@ export const AddressParts: Story = {
   args: {
     legend: "住所",
     visibility: undefined,
-    lead: "郵便番号・市区町村・番地・建物名は公開されません。",
+    lead: "郵便番号、市区町村・番地、建物名は公開されません。",
     children: (
       <>
         <Field label="郵便番号" labelSize="sm" name="postalCode">

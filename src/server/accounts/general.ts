@@ -149,8 +149,7 @@ export async function registerGeneralUserWithSupabase(
     given_name: input.givenName,
     phone: input.phone || null,
     postal_code: input.postalCode,
-    city: input.city,
-    street_address: input.streetAddress,
+    city_street: input.cityStreet,
     building_name: input.buildingName || null,
   });
   if (contact.error) {

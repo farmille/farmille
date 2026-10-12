@@ -14,8 +14,7 @@ const input: GeneralSignupInput = {
   phone: "",
   postalCode: "1000001",
   prefectureCode: 13,
-  city: "千代田区",
-  streetAddress: "千代田1-1",
+  cityStreet: "千代田区千代田1-1",
   buildingName: "",
   terms: "on",
 };
@@ -94,7 +93,11 @@ describe("メール確認後の一般登録", () => {
         `PUT /auth/v1/admin/users/${userId}`,
       ],
     );
-    expect(await requests[3].json()).toMatchObject({ user_id: userId, postal_code: "1000001" });
+    expect(await requests[3].json()).toMatchObject({
+      user_id: userId,
+      postal_code: "1000001",
+      city_street: "千代田区千代田1-1",
+    });
     expect(await requests[4].json()).toMatchObject({ app_metadata: { account_type: "general" } });
   });
   it("同時送信の敗者は既存プロフィールを削除しない", async () => {

@@ -37,12 +37,10 @@ export function ReportStepConditions({
   input,
   onChange,
   errors,
-  registeredCity,
 }: {
   input: UsageReportInput;
   onChange: (input: UsageReportInput) => void;
   errors: UsageReportFieldErrors;
-  registeredCity: string;
 }) {
   const missingDate =
     input.timingNote.trim().length > 0 && !DATE_PATTERN.test(toHalfWidth(input.timingNote));
@@ -70,13 +68,7 @@ export function ReportStepConditions({
         className={css({ mt: "2" })}
         description="チェックなしの場合は都道府県まで表示します"
         checked={input.showCity}
-        onCheckedChange={(showCity) =>
-          onChange({
-            ...input,
-            showCity,
-            city: showCity && input.city.trim() === "" ? registeredCity : input.city,
-          })
-        }
+        onCheckedChange={(showCity) => onChange({ ...input, showCity })}
       >
         市区町村も表示する
       </Checkbox>

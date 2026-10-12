@@ -242,13 +242,7 @@ export function ProfileCard({
                 {prefecture ? (
                   <>
                     <span className={label({ spaced: false })}>地域</span>
-                    <Chip>
-                      {prefecture}
-                      {details.city ? ` ${details.city}` : ""}
-                    </Chip>
-                    {editable && !details.cityPublic ? (
-                      <TodoHint placement="inline">市区町村まで公開する場合はこちら</TodoHint>
-                    ) : null}
+                    <Chip>{prefecture}</Chip>
                   </>
                 ) : null}
                 {details.affiliations.length > 0 ? (
@@ -316,10 +310,7 @@ export function ProfileCard({
         {editable || publicProfileHref ? (
           <div className={footRow}>
             {editable ? (
-              <p className={publicNote}>
-                {details.cityPublic ? "市区町村まで公開中" : "都道府県まで公開中"}
-                。本名・連絡先は公開されません。
-              </p>
+              <p className={publicNote}>都道府県まで公開中。本名・連絡先は公開されません。</p>
             ) : null}
             {publicProfileHref ? (
               <Link href={publicProfileHref} className={publicLink}>

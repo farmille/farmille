@@ -40,8 +40,7 @@ function submittedValues(formData: FormData): AuthFormValues {
     "phone",
     "postalCode",
     "prefectureCode",
-    "city",
-    "streetAddress",
+    "cityStreet",
     "buildingName",
     "terms",
   ]) {
@@ -74,8 +73,7 @@ export async function signupAction(
     phone: formData.get("phone"),
     postalCode: formData.get("postalCode"),
     prefectureCode: formData.get("prefectureCode"),
-    city: formData.get("city"),
-    streetAddress: formData.get("streetAddress"),
+    cityStreet: formData.get("cityStreet"),
     buildingName: formData.get("buildingName"),
     terms: formData.get("terms"),
   });
