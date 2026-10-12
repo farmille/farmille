@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import * as v from "valibot";
 import { clientEnv, serverEnv } from "@/env";
+import { registrationCompleteEmail, sellerWelcomeEmail } from "@/lib/account-email";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
 
 const EmailSchema = v.pipe(v.string(), v.email());
@@ -14,8 +15,7 @@ export async function sendSellerWelcome(
     await nodemailer.createTransport(serverEnv.smtpUrl).sendMail({
       from: serverEnv.mailFrom,
       to: v.parse(EmailSchema, to),
-      subject: "Farmille：企業会員のご案内",
-      text: `企業会員登録の申請を承認しました。\n\nログインID：${loginId}\nパスワード設定：${passwordSetupUrl}\n\nメーカーのログイン画面：${new URL("/sellers/login", clientEnv.siteUrl)}\n\nパスワード設定リンクの期限が切れた場合は、ログイン画面の「パスワードをお忘れの方」から再発行してください。\n資材の編集権については、運営から別途ご案内します。\n`,
+      ...sellerWelcomeEmail(loginId, passwordSetupUrl, clientEnv.siteUrl),
     });
     return true;
   } catch (error) {
@@ -53,8 +53,7 @@ export async function sendRegistrationEmail(userId: string, email: string): Prom
     await nodemailer.createTransport(serverEnv.smtpUrl).sendMail({
       from: serverEnv.mailFrom,
       to: v.parse(EmailSchema, email),
-      subject: "Farmille：一般会員登録が完了しました",
-      text: `Farmilleへの会員登録が完了しました。\n\n次のリンクからログインしてください。\n${new URL("/login", clientEnv.siteUrl)}\n\nログイン後、マイページから主な作目・所属・自己紹介を設定できます。\n\n感想口コミや実証詳細レポートの投稿、お気に入りの保存にご利用ください。\n`,
+      ...registrationCompleteEmail(clientEnv.siteUrl),
     });
   } catch (error) {
     console.error(

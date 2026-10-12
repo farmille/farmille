@@ -26,12 +26,19 @@ test("メール確認、登録完了、ログインと所属の入力", async ({
     await page.getByLabel("メールアドレス").fill(email);
     await page.getByRole("button", { name: "認証メールを送信" }).click();
     await expect(page.getByText("メールをご確認ください", { exact: true })).toBeVisible();
-    const first = await registrationMail(email, "Farmille：メールアドレスの確認");
+    const first = await registrationMail(
+      email,
+      "【Farmille】メールアドレスの確認（会員登録はまだ完了していません）",
+    );
     await expect(page.getByLabel("メールアドレス")).toHaveValue(email);
     // ローカルAuthの再送間隔（1秒）を超えてから、別のリンクを発行する。
     await page.waitForTimeout(1100);
     await page.getByRole("button", { name: "認証メールを再送" }).click();
-    const second = await registrationMail(email, "Farmille：メールアドレスの確認", first.id);
+    const second = await registrationMail(
+      email,
+      "【Farmille】メールアドレスの確認（会員登録はまだ完了していません）",
+      first.id,
+    );
     const link = registrationLink(second.Text);
     await page.goto(registrationLink(first.Text));
     await expect(page).toHaveURL(/error=expired_link/);
@@ -59,7 +66,7 @@ test("メール確認、登録完了、ログインと所属の入力", async ({
     await expect(page).toHaveURL(/error=expired_link/);
     await signupGeneral(page, { handle, email, password });
     await expect(page).toHaveURL(/\/signup\/done$/);
-    const welcome = await registrationMail(email, "Farmille：一般会員登録が完了しました");
+    const welcome = await registrationMail(email, "【Farmille】会員登録が完了しました");
     expect(welcome.From.Address).toBe("noreply@example.test");
     expect(welcome.Text).toContain("http://localhost:3007/login");
     await page.goto("/me");
