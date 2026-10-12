@@ -38,7 +38,10 @@ export async function signupGeneral(
   await page.getByLabel("メールアドレス").fill(input.email);
   await page.getByRole("button", { name: "認証メールを送信" }).click();
   await expect(page.getByText("メールをご確認ください", { exact: true })).toBeVisible();
-  const mail = await registrationMail(input.email, "Farmille：メールアドレスの確認");
+  const mail = await registrationMail(
+    input.email,
+    "【Farmille】メールアドレスの確認（会員登録はまだ完了していません）",
+  );
   await page.goto(registrationLink(mail.Text));
   await expect(page).toHaveURL(/\/signup\/complete/);
   await expect(page.getByLabel("メールアドレス")).toHaveValue(input.email);

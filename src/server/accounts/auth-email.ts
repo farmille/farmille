@@ -3,6 +3,11 @@ import { Webhook } from "standardwebhooks";
 import * as v from "valibot";
 
 import { clientEnv, serverEnv } from "@/env";
+import {
+  passwordResetEmail,
+  registrationVerificationEmail,
+  type AccountEmail,
+} from "@/lib/account-email";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import { createAdminSupabase } from "@/server/supabase";
 
@@ -107,10 +112,10 @@ export async function deliverAuthEmail(input: AuthEmail): Promise<void> {
     );
     return;
   }
-  const recovery = data.email_action_type === "recovery";
-  await send(
-    to,
-    recovery ? "パスワードの再設定" : "メールアドレスの確認",
-    `${recovery ? "次のリンクから新しいパスワードを設定してください。" : "次のリンクからメールアドレスを確認し、登録情報を入力してください。リンクの有効期限は1時間です。"}\n\n${confirmationUrl(data.token_hash, data.email_action_type, data.redirect_to)}`,
-  );
+  const link = confirmationUrl(data.token_hash, data.email_action_type, data.redirect_to);
+  const mail: AccountEmail =
+    data.email_action_type === "recovery"
+      ? passwordResetEmail(link, clientEnv.siteUrl)
+      : registrationVerificationEmail(link, clientEnv.siteUrl);
+  await transport.sendMail({ from: serverEnv.mailFrom, to, ...mail });
 }
