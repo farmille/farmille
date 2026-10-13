@@ -74,6 +74,12 @@ case "${1:?Missing action}" in
     mkdir -p "$task_dir/supabase"
     cp trusted/supabase/config.toml "$task_dir/supabase/config.toml"
     # PR内の設定・hook・スクリプトはrunnerで実行しない。専用DBへSQLだけ渡す。
+    # config.toml が参照するメール雛形は trusted から置く。PRのファイルは渡さない。
+    templates=trusted/docs/email-templates
+    [[ ! -L "$templates" && -d "$templates" ]] || exit 1
+    [[ -z "$(find "$templates" -type l -print -quit)" ]] || exit 1
+    mkdir -p "$task_dir/docs"
+    cp -R "$templates" "$task_dir/docs/email-templates"
     [[ ! -L source/supabase && -d source/supabase/migrations && ! -L source/supabase/migrations ]] || exit 1
     [[ -z "$(find source/supabase/migrations -type l -print -quit)" ]] || exit 1
     cp -R source/supabase/migrations "$task_dir/supabase/migrations"
