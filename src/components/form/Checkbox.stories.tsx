@@ -8,7 +8,7 @@ const meta = {
   title: "Components/Form/Checkbox",
   component: Checkbox,
   args: {
-    children: "市区町村も表示する",
+    children: "メールでお知らせを受け取る",
   },
 } satisfies Meta<typeof Checkbox>;
 
@@ -24,7 +24,7 @@ export const InlineChecked: Story = {
 export const WithDescription: Story = {
   args: {
     defaultChecked: true,
-    description: "都道府県に加えて、プロフィールに市区町村が表示されます。",
+    description: "必要な連絡だけを送ります。",
   },
 };
 

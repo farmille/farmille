@@ -3,7 +3,6 @@
 import { useActionState } from "react";
 
 import {
-  Checkbox,
   Field,
   FileInput,
   Form,
@@ -68,8 +67,6 @@ type ProfileEditFormProps = {
 export function ProfileEditForm({ profile, details, options }: ProfileEditFormProps) {
   const [state, formAction] = useActionState(updateProfileAction, initialAuthFormState);
   const values = submittedValuesOf(state);
-  const cityPublic =
-    values.cityPublic === undefined ? details.cityPublic : values.cityPublic === "on";
 
   return (
     <Form action={formAction} errors={fieldErrorsOf(state)}>
@@ -140,20 +137,6 @@ export function ProfileEditForm({ profile, details, options }: ProfileEditFormPr
           placeholder="https://"
           rows={3}
         />
-      </Field>
-
-      <Field
-        description="本名・電話番号・郵便番号は公開されません。"
-        label="地域の公開範囲"
-        name="cityPublic"
-      >
-        <Checkbox
-          defaultChecked={cityPublic}
-          description="チェックなしの場合は都道府県まで表示します"
-          variant="row"
-        >
-          市区町村も表示する
-        </Checkbox>
       </Field>
 
       <FormActions>

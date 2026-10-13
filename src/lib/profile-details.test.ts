@@ -5,13 +5,12 @@ import { ProfileDetailsInputSchema } from "./profile-details";
 const profile = {
   handle: "農家",
   bio: "",
-  cityPublic: false,
   affiliations: [],
   cropIds: [],
   links: [],
 };
 describe("公開プロフィールの入力境界", () => {
-  it("自己紹介やタグは任意で、市区町村非公開を保存できる", () => {
+  it("自己紹介やタグは任意で保存できる", () => {
     expect(v.safeParse(ProfileDetailsInputSchema, profile).success).toBe(true);
   });
   it.each(["javascript:alert(1)", "data:text/html,test", "ftp://example.com", "https://"])(

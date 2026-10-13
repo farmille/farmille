@@ -34,12 +34,11 @@ function completePostalCode(value: string): string | null {
 export function PostalAddressFields({ values }: { values: Record<string, string> }) {
   const [postal, setPostal] = useState(values.postalCode ?? "");
   const [prefecture, setPrefecture] = useState(values.prefectureCode ?? "");
-  const [city, setCity] = useState(values.city ?? "");
-  const [street, setStreet] = useState(values.streetAddress ?? "");
+  const [cityStreet, setCityStreet] = useState(values.cityStreet ?? "");
   const [message, setMessage] = useState("");
   const [pending, startTransition] = useTransition();
   const requestVersion = useRef(0);
-  const autoTown = useRef("");
+  const lastAutofill = useRef("");
   const postalCode = completePostalCode(postal);
   function lookup() {
     if (postalCode === null) return;
@@ -53,20 +52,20 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
       }
       const fill = postalFill(result.addresses);
       if (fill.status === "many-cities") {
-        setMessage("複数の市区町村が該当します。お住まいの都道府県と市区町村を入力してください。");
+        setMessage("複数の市区町村が該当します。都道府県と市区町村・番地を入力してください。");
         return;
       }
       setPrefecture(String(fill.prefectureCode));
-      setCity(fill.city);
       if (fill.status === "many-towns") {
         setMessage(
-          "複数の町名が該当します。都道府県と市区町村を入力しました。番地を入力してください。",
+          "複数の町名が該当します。都道府県を入力しました。市区町村・番地を入力してください。",
         );
         return;
       }
-      if (fill.status === "town" && (street === "" || street === autoTown.current)) {
-        autoTown.current = fill.town;
-        setStreet(fill.town);
+      const next = fill.status === "town" ? fill.city + fill.town : fill.city;
+      if (cityStreet === "" || cityStreet === lastAutofill.current) {
+        lastAutofill.current = next;
+        setCityStreet(next);
       }
       setMessage("");
     });
@@ -133,36 +132,17 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
         />
       </Field>
 
-      <Field
-        description="プロフィール設定で「市区町村も表示する」を選んだ場合のみ公開されます。"
-        label="市区町村"
-        labelSize="sm"
-        name="city"
-        visibility="private"
-      >
-        <Input
-          autoComplete="address-level2"
-          maxLength={100}
-          onChange={(event) => {
-            requestVersion.current++;
-            setCity(event.target.value);
-          }}
-          placeholder="水戸市"
-          value={city}
-        />
-      </Field>
-
-      <Field label="番地" labelSize="sm" name="streetAddress" visibility="private">
+      <Field label="市区町村・番地" labelSize="sm" name="cityStreet" visibility="private">
         <Input
           autoComplete="address-line1"
-          maxLength={200}
+          maxLength={300}
           onChange={(event) => {
             requestVersion.current++;
-            autoTown.current = "";
-            setStreet(event.target.value);
+            lastAutofill.current = "";
+            setCityStreet(event.target.value);
           }}
-          placeholder="久が原978-6"
-          value={street}
+          placeholder="水戸市久が原978-6"
+          value={cityStreet}
         />
       </Field>
 

@@ -10,7 +10,7 @@ const meta = {
   component: PostalAddressFields,
   decorators: [fmDecorator],
   args: {
-    values: { postalCode: "1000001", prefectureCode: "13", city: "千代田区" },
+    values: { postalCode: "1000001", prefectureCode: "13", cityStreet: "千代田区千代田" },
   },
 } satisfies Meta<typeof PostalAddressFields>;
 export default meta;

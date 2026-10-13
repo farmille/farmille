@@ -623,12 +623,7 @@ export function ReportForm({
               />
             )}
             {step === 3 && (
-              <ReportStepConditions
-                input={input}
-                onChange={setInput}
-                errors={errors}
-                registeredCity={registeredAddress.city}
-              />
+              <ReportStepConditions input={input} onChange={setInput} errors={errors} />
             )}
             {step === 4 && (
               <ReportComparisonFields

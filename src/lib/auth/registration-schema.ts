@@ -43,8 +43,7 @@ export const generalRegistrationSchema = v.object({
     v.regex(/^(?:[1-9]|[1-3][0-9]|4[0-7])$/, "都道府県を選択してください。"),
     v.transform(Number),
   ),
-  city: requiredText("市区町村", 100),
-  streetAddress: requiredText("番地", 200),
+  cityStreet: requiredText("市区町村・番地", 300),
   buildingName: optionalText(200),
   password: v.pipe(
     v.string(),

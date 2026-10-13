@@ -12,8 +12,6 @@ const meta = {
       standpoint: "farmer",
       prefecture_code: 8,
       bio: "",
-      city: null,
-      cityPublic: false,
       affiliations: [],
       crops: [],
       links: [],

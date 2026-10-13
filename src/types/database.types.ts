@@ -3015,34 +3015,31 @@ export type Database = {
       profile_contact_details: {
         Row: {
           building_name: string | null
-          city: string
+          city_street: string
           family_name: string
           given_name: string
           phone: string | null
           postal_code: string
-          street_address: string | null
           terms_accepted_at: string
           user_id: string
         }
         Insert: {
           building_name?: string | null
-          city: string
+          city_street: string
           family_name: string
           given_name: string
           phone?: string | null
           postal_code: string
-          street_address?: string | null
           terms_accepted_at?: string
           user_id: string
         }
         Update: {
           building_name?: string | null
-          city?: string
+          city_street?: string
           family_name?: string
           given_name?: string
           phone?: string | null
           postal_code?: string
-          street_address?: string | null
           terms_accepted_at?: string
           user_id?: string
         }
@@ -3106,17 +3103,14 @@ export type Database = {
       profile_details: {
         Row: {
           bio: string
-          city_public: boolean
           user_id: string
         }
         Insert: {
           bio?: string
-          city_public?: boolean
           user_id: string
         }
         Update: {
           bio?: string
-          city_public?: boolean
           user_id?: string
         }
         Relationships: [
@@ -4260,7 +4254,6 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
-          city: string | null
           created_at: string | null
           handle: string | null
           prefecture_code: number | null
@@ -4581,7 +4574,6 @@ export type Database = {
         Args: {
           p_affiliations: string[]
           p_bio: string
-          p_city_public: boolean
           p_crop_ids: string[]
           p_handle: string
           p_links: string[]

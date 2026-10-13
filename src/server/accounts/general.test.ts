@@ -12,8 +12,7 @@ const validRaw = {
   phone: "",
   postalCode: "1000001",
   prefectureCode: "13",
-  city: "千代田区",
-  streetAddress: "千代田1-1",
+  cityStreet: "千代田区千代田1-1",
   buildingName: "",
   terms: "on",
 };
@@ -39,12 +38,23 @@ describe("validateGeneralSignup", () => {
     });
   });
 
-  it("番地は必須で、建物名は任意とし、前後の空白と長さを検証する", () => {
+  it("市区町村・番地は必須で、建物名は任意とし、前後の空白と長さを検証する", () => {
     expect(
-      validateGeneralSignup({ ...validRaw, streetAddress: "  1-1  ", buildingName: "  本館101  " }),
-    ).toMatchObject({ ok: true, input: { streetAddress: "1-1", buildingName: "本館101" } });
-    for (const streetAddress of [null, "", "　 ", "あ".repeat(201)]) {
-      expect(validateGeneralSignup({ ...validRaw, streetAddress })).toMatchObject({ ok: false });
+      validateGeneralSignup({
+        ...validRaw,
+        cityStreet: "  千代田区千代田1-1  ",
+        buildingName: "  本館101  ",
+      }),
+    ).toMatchObject({
+      ok: true,
+      input: { cityStreet: "千代田区千代田1-1", buildingName: "本館101" },
+    });
+    expect(validateGeneralSignup({ ...validRaw, cityStreet: "あ".repeat(300) })).toMatchObject({
+      ok: true,
+      input: { cityStreet: "あ".repeat(300) },
+    });
+    for (const cityStreet of [null, "", "　 ", "あ".repeat(301)]) {
+      expect(validateGeneralSignup({ ...validRaw, cityStreet })).toMatchObject({ ok: false });
     }
     expect(validateGeneralSignup({ ...validRaw, buildingName: "あ".repeat(201) })).toMatchObject({
       ok: false,

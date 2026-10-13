@@ -4,14 +4,12 @@ export const getProfileDetails = fn<
 >(async () => ({
   ok: true,
   data: {
-    cityPublic: false,
     affiliations: [],
     crops: [],
     links: [],
     standpoint: "farmer",
     prefecture_code: 8,
     bio: "茨城県でトマトと葉物を栽培しています。",
-    city: "水戸市",
   },
 })).mockName("getProfileDetails");
 export const getProfileOptions = fn<

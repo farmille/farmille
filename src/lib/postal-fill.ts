@@ -6,7 +6,6 @@ export type PostalFill =
   | { status: "town"; prefectureCode: number; city: string; town: string }
   | { status: "many-towns"; prefectureCode: number; city: string };
 
-/** 一意な市区町村までは入れ、町名が1つに決まるときだけ番地へ渡す。 */
 export function postalFill(addresses: readonly PostalHit[]): PostalFill {
   const cities = unique(addresses, (address) => `${address.prefectureCode}\u0000${address.city}`);
   const city = cities[0];

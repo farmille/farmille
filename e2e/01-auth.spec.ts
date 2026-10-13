@@ -81,7 +81,7 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
       page.getByRole("alert").filter({ hasText: "このハンドルネームはすでに使われています。" }),
     ).toHaveCount(2);
     await expect(page).toHaveURL(/\/signup\/complete$/);
-    await expect(page.getByLabel("番地", { exact: false })).toHaveValue("千代田1-1");
+    await expect(page.getByLabel("市区町村・番地")).toHaveValue("千代田区千代田1-1");
     await expect(page.getByLabel("建物名・部屋番号")).toHaveValue("試験ビル101号室");
   } finally {
     await deleteAuthUsersByEmail(email);

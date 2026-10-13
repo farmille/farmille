@@ -38,7 +38,7 @@ const meta = {
     favoriteCropIds: [],
     materialCropIds: [],
     draft,
-    registeredAddress: { prefectureCode: 45, city: "宮崎市" },
+    registeredAddress: { prefectureCode: 45 },
   },
 } satisfies Meta<typeof ReportForm>;
 export default meta;

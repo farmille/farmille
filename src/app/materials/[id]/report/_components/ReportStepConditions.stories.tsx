@@ -25,7 +25,6 @@ const meta = {
     },
     onChange: fn(),
     errors: {},
-    registeredCity: "宮崎市",
   },
   render: function ConditionsStory(args) {
     const [input, setInput] = useState(args.input);

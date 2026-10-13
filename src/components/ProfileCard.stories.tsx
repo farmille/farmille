@@ -12,8 +12,6 @@ const emptyDetails = {
   standpoint: "farmer",
   prefecture_code: null,
   bio: "",
-  city: null,
-  cityPublic: false,
   affiliations: [],
   crops: [],
   links: [],
@@ -23,8 +21,6 @@ const fullDetails = {
   standpoint: "farmer",
   prefecture_code: 22,
   bio: "静岡で施設トマトといちごを育てています。土づくりと微生物資材の使い方を記録しています。",
-  city: "浜松市",
-  cityPublic: true,
   affiliations: ["JA青年部", "浜松トマト研究会"],
   crops: [
     { id: "10000000-0000-4000-8000-000000000001", name: "トマト", aliases: [] },
@@ -60,7 +56,6 @@ export const OwnFilled: Story = {
     editable: true,
     avatarUrl: avatar,
     publicProfileHref: "/users/00000000-0000-4000-8000-000000000301",
-    details: { ...fullDetails, cityPublic: false },
   },
 };
 

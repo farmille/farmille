@@ -3,16 +3,14 @@ import { selectAllRows } from "@/server/pagination";
 import { createServerSupabase } from "@/server/supabase";
 import { fail, succeed, type Result } from "@/server/result";
 
-/** 公開可能な情報だけを取得する。市区町村の公開判定はDBビューが行う。 */
 export async function getProfileDetails(userId: string) {
   const supabase = await createServerSupabase();
-  const [profile, details, affiliations, crops, links] = await Promise.all([
+  const [profile, affiliations, crops, links] = await Promise.all([
     supabase
       .from("public_profiles")
-      .select("standpoint,prefecture_code,bio,city")
+      .select("standpoint,prefecture_code,bio")
       .eq("user_id", userId)
       .single(),
-    supabase.from("profile_details").select("city_public").eq("user_id", userId).maybeSingle(),
     supabase.from("profile_affiliations").select("name").eq("user_id", userId).order("sort_order"),
     supabase
       .from("profile_crops")
@@ -21,13 +19,7 @@ export async function getProfileDetails(userId: string) {
       .order("sort_order"),
     supabase.from("profile_links").select("url").eq("user_id", userId).order("sort_order"),
   ]);
-  const errors = [
-    profile.error,
-    details.error,
-    affiliations.error,
-    crops.error,
-    links.error,
-  ].filter(Boolean);
+  const errors = [profile.error, affiliations.error, crops.error, links.error].filter(Boolean);
   if (
     errors.length > 0 ||
     profile.data === null ||
@@ -40,7 +32,6 @@ export async function getProfileDetails(userId: string) {
   }
   return succeed({
     ...profile.data,
-    cityPublic: details.data?.city_public ?? false,
     affiliations: affiliations.data.map((row) => row.name),
     crops: crops.data.map((row) => row.crops),
     links: links.data.map((row) => row.url),
@@ -83,7 +74,6 @@ export async function saveProfileDetails(input: ProfileDetailsInput): Promise<Re
   const { error } = await supabase.rpc("save_profile_details", {
     p_handle: input.handle,
     p_bio: input.bio,
-    p_city_public: input.cityPublic,
     p_affiliations: input.affiliations,
     p_crop_ids: input.cropIds,
     p_links: input.links,
