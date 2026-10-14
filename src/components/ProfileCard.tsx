@@ -1,9 +1,9 @@
 import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
+import { Avatar } from "@/components/Avatar";
 import { Badge } from "@/components/Badge";
 import { buttonRecipe } from "@/components/Button";
-import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { PREFECTURES } from "@/lib/prefectures";
 import { STANDPOINTS } from "@/lib/standpoints";
@@ -11,11 +11,6 @@ import type { ProfileDetails } from "@/server/queries/profile-details";
 import { css, cva } from "../../styled-system/css";
 
 import { Chip } from "@/app/materials/[id]/_components/CardParts";
-
-function initials(name: string): string {
-  const text = name.trim();
-  return text ? text.slice(0, 1).toUpperCase() : "?";
-}
 
 function linkLabel(url: string): string {
   const parsed = URL.parse(url);
@@ -34,26 +29,16 @@ const content = css({ px: "4.5", pb: "4" });
 
 const headRow = css({ display: "flex", alignItems: "flex-end", flexWrap: "wrap", gap: "3.5" });
 
-const avatar = css({
+// カバー画像に重なるので、背景色の縁を回して輪郭を切る。
+const avatarFrame = css({
   flex: "0 0 auto",
   alignSelf: "flex-start",
-  w: "20",
-  h: "20",
   mt: "-8",
-  display: "inline-grid",
-  placeItems: "center",
-  overflow: "hidden",
+  display: "inline-flex",
   borderWidth: "3px",
   borderStyle: "solid",
   borderColor: "surface.card",
   borderRadius: "pill",
-  bg: "primary.100",
-  color: "primary.800",
-  fontSize: "3xl",
-  fontWeight: "bold",
-  lineHeight: "none",
-  letterSpacing: "0.02em",
-  "& img": { display: "block", w: "100%", h: "100%", objectFit: "cover" },
 });
 
 const nameColumn = css({ flex: "1", minW: "44", pb: "0.5" });
@@ -225,12 +210,8 @@ export function ProfileCard({
       <div className={cover} aria-hidden="true" />
       <div className={content}>
         <div className={headRow}>
-          <span className={avatar} aria-hidden="true">
-            {avatarUrl ? (
-              <Image alt="" src={avatarUrl} width={76} height={76} sizes="76px" />
-            ) : (
-              initials(handle)
-            )}
+          <span className={avatarFrame}>
+            <Avatar name={handle} src={avatarUrl} size="xl" />
           </span>
           <div className={nameColumn}>
             <h1 className={name} id="profile-handle">

@@ -30,6 +30,12 @@ importers:
       '@base-ui/react':
         specifier: 1.8.0
         version: 1.8.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@humation/assets-humation-1':
+        specifier: 1.0.3
+        version: 1.0.3
+      '@humation/react':
+        specifier: 1.0.3
+        version: 1.0.3(react@19.2.4)
       '@next/third-parties':
         specifier: ^16.3.8
         version: 16.3.8(next@16.3.8(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.0)(@types/node@20.19.39)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
@@ -607,6 +613,20 @@ packages:
   '@humanwhocodes/retry@0.4.3':
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
+
+  '@humation/assets-humation-1@1.0.3':
+    resolution: {integrity: sha512-wZrNdi6/T/mwjStq6tRxxF9JJ713yc5W+edesHqLnOXcwZ2ffumoKkzqjRv1qW+MUPvTwdkxkyG3sbgaqFXMuw==}
+    engines: {node: '>=18.0.0'}
+
+  '@humation/core@1.0.3':
+    resolution: {integrity: sha512-m161o5C1/aVNN1gtgt8txTHOkbHBy0FZM8kAmkG9uTSM7+Ub1a1m99slAsE5y83pOLPkRIeV1ecgxzBFfZf3bQ==}
+    engines: {node: '>=18.0.0'}
+
+  '@humation/react@1.0.3':
+    resolution: {integrity: sha512-SxNU5dMuPhb+vYKitWbqjjjXDyWv7W/4iazdiKUXRm86O3bR1oG4y6Wxw4QgAWE78ew1Kw3I/bLQcUUizlhz+A==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -5716,6 +5736,17 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/retry@0.4.3': {}
+
+  '@humation/assets-humation-1@1.0.3':
+    dependencies:
+      '@humation/core': 1.0.3
+
+  '@humation/core@1.0.3': {}
+
+  '@humation/react@1.0.3(react@19.2.4)':
+    dependencies:
+      '@humation/core': 1.0.3
+      react: 19.2.4
 
   '@img/colour@1.1.0':
     optional: true

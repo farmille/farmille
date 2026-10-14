@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { Avatar } from "@/components/Avatar";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { ReportDialog } from "@/components/ReportDialog";
 import { ReviewOwnerActions } from "@/components/ReviewOwnerActions";
@@ -13,7 +14,7 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cx } from "../../../../../styled-system/css";
 
-import { Avatar, Chip, Stars } from "./CardParts";
+import { Chip, Stars } from "./CardParts";
 
 const cardStyle = css({ scrollMarginTop: "16" });
 const headStyle = css({
@@ -109,7 +110,7 @@ export function MaterialReviewCard({
   const details = publicProfileLabel(review.author);
   const author = (
     <>
-      <Avatar name={handle} src={review.author?.avatar_url} size={30} />
+      <Avatar name={handle} src={review.author?.avatar_url} size="sm" />
       <span className={nameStyle}>{handle}</span>
     </>
   );

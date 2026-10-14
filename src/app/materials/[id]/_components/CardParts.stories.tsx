@@ -3,8 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { css } from "../../../../../styled-system/css";
 
-import { Avatar, Chip, NoImage, Stars } from "./CardParts";
-import { storyImageUrl } from "./story-fixtures";
+import { Chip, NoImage, Stars } from "./CardParts";
 
 const row = css({ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "3", mb: "4" });
 const imageBox = css({ w: "24", h: "16" });
@@ -24,21 +23,6 @@ export const StarValues: Story = {
       <Stars value={0} />
       <Stars value={3.4} />
       <Stars value={5} />
-    </div>
-  ),
-};
-
-export const Avatars: Story = {
-  render: () => (
-    <div className={row}>
-      <Avatar name="株式会社グリーンバイオ" />
-      <Avatar name="北のトマト農家" size={32} />
-      <Avatar name="northfarm" size={30} />
-      <Avatar name="北のトマト農家" extraSmall />
-      <Avatar name="写真あり" src={storyImageUrl} />
-      <Avatar name="写真あり" src={storyImageUrl} size={30} />
-      <Avatar name="写真あり" src={storyImageUrl} extraSmall />
-      <Avatar name="" />
     </div>
   ),
 };

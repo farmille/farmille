@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Avatar } from "./Avatar";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 
@@ -21,18 +22,6 @@ const cropChip = css({
   color: "primary.700",
   fontWeight: "semibold",
   whiteSpace: "nowrap",
-});
-
-const avatar = css({
-  w: "30px",
-  aspectRatio: "image.square",
-  borderRadius: "pill",
-  bg: "primary.200",
-  display: "grid",
-  placeItems: "center",
-  flexShrink: "0",
-  overflow: "hidden",
-  color: "primary.700",
 });
 
 export type ReviewCardProps = {
@@ -95,26 +84,7 @@ export function ReviewCard({
   const resolvedPath = currentPath ?? (materialId !== undefined ? `/materials/${materialId}` : "/");
   const author = (
     <>
-      <span className={avatar}>
-        {avatarSrc ? (
-          <Image
-            alt=""
-            className={css({
-              display: "block",
-              w: "100%",
-              h: "100%",
-              objectFit: "cover",
-              borderRadius: "pill",
-            })}
-            height={30}
-            sizes="30px"
-            src={avatarSrc}
-            width={30}
-          />
-        ) : (
-          <Icon name="person" size="sm" />
-        )}
-      </span>
+      <Avatar name={handle} src={avatarSrc} size="sm" />
       <span className={css({ textStyle: "body", fontWeight: "bold" })}>{handle}</span>
       {authorDetails ? (
         <span className={css({ color: "text.subtle", textStyle: "note" })}>{authorDetails}</span>
