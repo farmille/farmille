@@ -62,7 +62,7 @@ const labelRecipe = cva({
     mt: "2",
     fontSize: "2xs",
     lineHeight: "snug",
-    letterSpacing: "0.01em",
+    letterSpacing: "body",
   },
   variants: {
     on: {
