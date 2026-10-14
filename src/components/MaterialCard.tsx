@@ -15,6 +15,13 @@ const scrollCard = cva({
     flexShrink: "0",
     w: "card.materialMobile",
     tab: { w: "card.material" },
+    // 影は持たず、淡い灰色の細い縁で囲んだ面に画像をはめ込む
+    bg: "surface.panel",
+    borderWidth: "2px",
+    borderColor: "border.subtle",
+    p: "0.5",
+    // 画像枠（media 12px）と同心円にする。16px - (縁 2px + 余白 2px) = 12px
+    borderRadius: "banner",
   },
 });
 
@@ -32,6 +39,7 @@ const listCard = cva({
 const imgBox = css({
   aspectRatio: "image.landscape",
   bg: "surface.card",
+  borderRadius: "media",
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
@@ -137,12 +145,12 @@ export function MaterialCard({
     return (
       <Link
         href={href}
-        className={cx(surfaceCardRecipe({ padding: "flush" }), scrollCard(), className)}
+        className={cx(scrollCard(), className)}
         data-ui="material-card"
         data-variant="scroll"
       >
         <MaterialImage src={imageSrc} alt={alt} className={imgBox} preload={preload} />
-        <div className={css({ px: "2.5", py: "2.5" })}>
+        <div className={css({ px: "2", py: "2.5" })}>
           <div
             className={css({
               textStyle: "body",
