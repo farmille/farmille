@@ -80,7 +80,7 @@ export function UiCatalog() {
   return (
     <main className={page}>
       <div className={css({ px: "4", pt: "6", pb: "2" })}>
-        <h1 className={css({ fontSize: "3xl", letterSpacing: "body" })}>UI Kit</h1>
+        <h1 className={css({ fontSize: "3xl" })}>UI Kit</h1>
         <p className={css({ textStyle: "supporting", color: "text.muted", mt: "2" })}>
           T-21 共通コンポーネント。375px 幅でモックと並べて比較する。用語は
           D8（感想口コミ／実証詳細レポート）。

@@ -100,7 +100,6 @@ const frame = css({
 const titleStyle = css({
   m: "0",
   fontSize: "3xl",
-  letterSpacing: "body",
 });
 
 const subtitleStyle = css({

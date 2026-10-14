@@ -202,7 +202,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             className={css({
               fontSize: "xs",
               fontWeight: "extrabold",
-              letterSpacing: "body",
               color: "text.muted",
             })}
           >
@@ -213,7 +212,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               mt: "2.5",
               fontSize: "3xl",
               lineHeight: "snug",
-              letterSpacing: "body",
               color: "text.default",
               pc: { fontSize: "display" },
             })}
@@ -275,7 +273,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             mb: "1.5",
             fontSize: "sm",
             fontWeight: "extrabold",
-            letterSpacing: "body",
             color: "text.subtle",
           })}
         >
@@ -309,7 +306,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             mt: "9",
             fontSize: "xs",
             fontWeight: "extrabold",
-            letterSpacing: "body",
             color: "primary.800",
           })}
         >
@@ -583,7 +579,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             mt: "1",
             fontSize: "lg",
             fontWeight: "extrabold",
-            letterSpacing: "body",
             color: "primary.800",
             wordBreak: "break-all",
             textDecoration: "none",

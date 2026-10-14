@@ -8,7 +8,6 @@ const headingStyle = css({
   textStyle: "title",
   fontWeight: "extrabold",
   color: "text.muted",
-  letterSpacing: "body",
 });
 
 export function MaterialBox({

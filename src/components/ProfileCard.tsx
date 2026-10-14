@@ -52,7 +52,6 @@ const avatar = css({
   fontSize: "3xl",
   fontWeight: "bold",
   lineHeight: "none",
-  letterSpacing: "body",
   "& img": { display: "block", w: "100%", h: "100%", objectFit: "cover" },
 });
 

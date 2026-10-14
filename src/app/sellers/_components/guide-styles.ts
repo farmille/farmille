@@ -72,7 +72,6 @@ export const stepLabelRecipe = cva({
     borderRadius: "mark",
     fontSize: "xs",
     fontWeight: "extrabold",
-    letterSpacing: "body",
   },
   variants: {
     actor: {
