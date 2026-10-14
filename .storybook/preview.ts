@@ -163,6 +163,7 @@ const viewports = {
 const ROUTE_STORY_FILE = /\/(Page|Error|NotFound|Loading)\.stories\.tsx$/;
 
 const preview: Preview = {
+  tags: ["autodocs"],
   decorators: [
     (Story, context) =>
       ROUTE_STORY_FILE.test(context.parameters.fileName)

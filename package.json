@@ -50,6 +50,7 @@
     "@oxlint/plugins": "1.78.0",
     "@pandacss/dev": "~1.11.5",
     "@playwright/test": "1.62.0",
+    "@storybook/addon-docs": "10.5.7",
     "@storybook/nextjs-vite": "10.5.7",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
