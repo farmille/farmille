@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 
 import { CheckboxGroup } from "./CheckboxGroup";
-import { Fieldset } from "./Fieldset";
 
 const timings = [
   { value: "before", label: "栽培開始前" },
@@ -15,7 +14,7 @@ const meta = {
   title: "Components/Form/CheckboxGroup",
   component: CheckboxGroup,
   args: {
-    "aria-label": "使用時期",
+    label: "使用時期",
     name: "timings",
     options: timings,
     defaultValue: ["planting"],
@@ -37,11 +36,7 @@ export const ChipsAtLimit: Story = {
 };
 
 export const InFieldset: Story = {
-  render: (args) => (
-    <Fieldset legend="使用時期" name="timings" requirement="required">
-      <CheckboxGroup {...args} aria-label={undefined} name={undefined} variant="chips" />
-    </Fieldset>
-  ),
+  args: { requirement: "required", variant: "chips" },
 };
 
 export const Disabled: Story = {

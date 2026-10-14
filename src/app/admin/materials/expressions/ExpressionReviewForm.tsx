@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
-import { Field, Notice, Textarea } from "@/components/form";
+import { Notice, Textarea } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { reviewMaterialPageAction, reviewManufacturerProfileAction } from "./actions";
 
@@ -28,12 +28,13 @@ export function ExpressionReviewForm({
   }
   return (
     <div className={materialPageStack}>
-      <Field
+      <Textarea
         description="メーカーにも表示されます。修正を求める場合は、該当箇所と理由を記入してください。"
         label="確認メモ・修正が必要な箇所"
-      >
-        <Textarea onChange={(event) => setNote(event.target.value)} rows={4} value={note} />
-      </Field>
+        onChange={(event) => setNote(event.target.value)}
+        rows={4}
+        value={note}
+      />
       {result === null ? null : (
         <Notice tone={result.ok ? "success" : "error"}>{result.message}</Notice>
       )}

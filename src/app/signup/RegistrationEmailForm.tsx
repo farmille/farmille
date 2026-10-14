@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { registrationEmailAction } from "./actions";
-import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
+import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState, fieldErrorsOf } from "@/lib/auth/form-state";
 
@@ -33,15 +33,17 @@ export function RegistrationEmailForm({
         </Notice>
       ) : null}
       {next ? <input type="hidden" name="next" value={next} /> : null}
-      <Field label="メールアドレス" name="email" requirement="required" visibility="private">
-        <Input
-          autoComplete="email"
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-        />
-      </Field>
+      <Input
+        label="メールアドレス"
+        name="email"
+        requirement="required"
+        visibility="private"
+        autoComplete="email"
+        type="email"
+        placeholder="you@example.com"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+      />
       <FormActions>
         <SubmitButton pendingLabel="送信中…">
           {state.status === "done" ? "認証メールを再送" : "認証メールを送信"}

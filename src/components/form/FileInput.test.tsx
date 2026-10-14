@@ -2,13 +2,12 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { Field } from "./Field";
 import { FileInput } from "./FileInput";
 
 describe("FileInput", () => {
   it("選択したファイル名を日本語の状態表示へ反映する", async () => {
     const user = userEvent.setup();
-    render(<FileInput aria-label="画像ファイル" multiple />);
+    render(<FileInput hideLabel label="画像ファイル" multiple />);
 
     expect(screen.getByText("ファイルが選択されていません")).toBeInTheDocument();
     await user.upload(screen.getByLabelText("画像ファイル"), [
@@ -22,7 +21,7 @@ describe("FileInput", () => {
     const user = userEvent.setup();
     render(
       <form aria-label="画像フォーム">
-        <FileInput aria-label="画像ファイル" name="image" />
+        <FileInput hideLabel label="画像ファイル" name="image" />
       </form>,
     );
 
@@ -40,7 +39,8 @@ describe("FileInput", () => {
     const user = userEvent.setup();
     render(
       <FileInput
-        aria-label="画像ファイル"
+        hideLabel
+        label="画像ファイル"
         onChange={(event) => {
           event.currentTarget.value = "";
         }}
@@ -54,11 +54,14 @@ describe("FileInput", () => {
     expect(screen.getByText("ファイルが選択されていません")).toBeInTheDocument();
   });
 
-  it("Field の中では見出しで名前が付き、requirement で必須になる", () => {
+  it("label で名前が付き、requirement で必須になる", () => {
     render(
-      <Field label="確認資料" name="evidence" requirement="required">
-        <FileInput accept="application/pdf" />
-      </Field>,
+      <FileInput
+        accept="application/pdf"
+        label="確認資料"
+        name="evidence"
+        requirement="required"
+      />,
     );
 
     const input = screen.getByLabelText("確認資料");

@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 
 import { Chip } from "@/components/Chip";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
-import { Autocomplete, Checkbox, Field, Fieldset, Input, Notice } from "@/components/form";
+import { Autocomplete, Checkbox, Fieldset, Input, Notice } from "@/components/form";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { ToggleGroup } from "@/components/ToggleGroup";
 import { searchReportMaterialsAction } from "@/app/materials/[id]/report/new/actions";
@@ -222,7 +222,8 @@ export function ReportStepBasics({
           <CollapsiblePanel>
             <div className={css({ pt: "2" })}>
               <Autocomplete
-                aria-label="資材を検索"
+                hideLabel
+                label="資材を検索"
                 placeholder="資材名・メーカー名で検索"
                 filterMode="preFiltered"
                 value={materialQuery}
@@ -263,7 +264,8 @@ export function ReportStepBasics({
           )}
         </div>
         <Autocomplete
-          aria-label="作目"
+          hideLabel
+          label="作目"
           placeholder="作物名で検索　トマト、みかん"
           filterMode="preFiltered"
           value={cropQuery}
@@ -321,14 +323,15 @@ export function ReportStepBasics({
         </Collapsible>
       </Fieldset>
 
-      <Field label="品種" requirement="required" error={errors.variety}>
-        <Input
-          placeholder="品種名"
-          disabled={input.varietyUnknown}
-          value={input.variety}
-          onChange={(event) => onChange({ ...input, variety: event.target.value })}
-        />
-      </Field>
+      <Input
+        label="品種"
+        requirement="required"
+        error={errors.variety}
+        placeholder="品種名"
+        disabled={input.varietyUnknown}
+        value={input.variety}
+        onChange={(event) => onChange({ ...input, variety: event.target.value })}
+      />
       <Notice tone="neutral" title="記入例" className={css({ mt: "2" })}>
         ・アイコ
         <br />

@@ -73,98 +73,92 @@ export function SignupForm({
         ニックネームで参加できます。本名や連絡先が公開されることはありません。
       </p>
 
-      <Field label="メールアドレス" name="email" requirement="required" visibility="private">
-        <Input
-          autoComplete="email"
-          value={email}
-          readOnly
-          placeholder="you@example.com"
-          type="email"
-        />
-      </Field>
+      <Input
+        label="メールアドレス"
+        name="email"
+        requirement="required"
+        visibility="private"
+        autoComplete="email"
+        value={email}
+        readOnly
+        placeholder="you@example.com"
+        type="email"
+      />
 
-      <Field
+      <Input
         description="本名でなくて構いません。"
         label="ニックネーム"
         name="handle"
         requirement="required"
         visibility="public"
-      >
-        <Input
-          autoComplete="nickname"
-          defaultValue={values.handle}
-          maxLength={HANDLE_MAX_LENGTH}
-          placeholder="農家の山田"
-        />
-      </Field>
+        autoComplete="nickname"
+        defaultValue={values.handle}
+        maxLength={HANDLE_MAX_LENGTH}
+        placeholder="農家の山田"
+      />
 
       <Fieldset legend="本名" requirement="required" visibility="private">
         <div className={nameRowStyle}>
-          <Field className={namePartStyle} hideLabel label="本名（姓）" name="familyName">
-            <Input
-              autoComplete="family-name"
-              defaultValue={values.familyName}
-              maxLength={80}
-              placeholder="姓"
-            />
-          </Field>
-          <Field className={namePartStyle} hideLabel label="本名（名）" name="givenName">
-            <Input
-              autoComplete="given-name"
-              defaultValue={values.givenName}
-              maxLength={80}
-              placeholder="名"
-            />
-          </Field>
+          <Input
+            fieldClassName={namePartStyle}
+            hideLabel
+            label="本名（姓）"
+            name="familyName"
+            autoComplete="family-name"
+            defaultValue={values.familyName}
+            maxLength={80}
+            placeholder="姓"
+          />
+          <Input
+            fieldClassName={namePartStyle}
+            hideLabel
+            label="本名（名）"
+            name="givenName"
+            autoComplete="given-name"
+            defaultValue={values.givenName}
+            maxLength={80}
+            placeholder="名"
+          />
         </div>
       </Fieldset>
 
-      <Field
+      <Input
         description="確認が必要な場合の連絡に使用します。公開されません。"
         label="電話番号"
         name="phone"
         requirement="optional"
         visibility="private"
-      >
-        <Input
-          autoComplete="tel"
-          defaultValue={values.phone}
-          maxLength={20}
-          placeholder="090-1234-5678"
-          type="tel"
-        />
-      </Field>
+        autoComplete="tel"
+        defaultValue={values.phone}
+        maxLength={20}
+        placeholder="090-1234-5678"
+        type="tel"
+      />
 
-      <Fieldset
+      <RadioGroup<string>
         description="投稿やマイページで肩書きとして表示されます。"
-        legend="あなたの立場"
+        label="あなたの立場"
         name="standpoint"
         requirement="required"
         visibility="public"
-      >
-        <RadioGroup<string>
-          className={standpointGroupStyle}
-          defaultValue={values.standpoint}
-          options={STANDPOINTS}
-        />
-      </Fieldset>
+        className={standpointGroupStyle}
+        defaultValue={values.standpoint}
+        options={STANDPOINTS}
+      />
 
       <PostalAddressFields values={values} />
 
-      <Field
+      <Input
         description={`${PASSWORD_MIN_LENGTH}文字以上で設定してください。`}
         label="パスワード"
         name="password"
         requirement="required"
-      >
-        <Input
-          autoComplete="new-password"
-          minLength={PASSWORD_MIN_LENGTH}
-          placeholder="••••••••"
-          revealable
-          type="password"
-        />
-      </Field>
+        autoComplete="new-password"
+        minLength={PASSWORD_MIN_LENGTH}
+        placeholder="••••••••"
+        revealable
+        type="password"
+      />
 
       <Field name="terms" requirement="required">
         <Checkbox defaultChecked={values.terms === "on"} variant="row">

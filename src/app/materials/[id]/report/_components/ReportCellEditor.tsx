@@ -256,6 +256,7 @@ export function ReportCellEditor({
         >
           <div className={row}>
             <Input
+              label={null}
               data-first
               className={css({ flex: "1", minW: "0" })}
               inputMode="decimal"
@@ -300,7 +301,8 @@ export function ReportCellEditor({
         </div>
         <Input
           data-first
-          aria-label="区の名前（必須）"
+          hideLabel
+          label="区の名前（必須）"
           enterKeyHint="done"
           placeholder={plotIndex === 0 ? "無処理区、対照区" : "処理区、使用区"}
           value={plot.name}
@@ -330,6 +332,7 @@ export function ReportCellEditor({
               })}
             >
               <Input
+                label={null}
                 size="sm"
                 className={css({ flex: "1 1 token(sizes.44)" })}
                 placeholder="1区10株、3反復"
@@ -350,17 +353,17 @@ export function ReportCellEditor({
               </button>
             </div>
           </Field>
-          <Field label="この区の説明" labelSize="sm">
-            <Textarea
-              placeholder={
-                plotIndex === 0
-                  ? "〇〇は使っていない。かん水と施肥は処理区と同じ。"
-                  : "〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。"
-              }
-              value={plot.description}
-              onChange={(event) => onPlotChange(plot.id, { description: event.target.value })}
-            />
-          </Field>
+          <Textarea
+            label="この区の説明"
+            labelSize="sm"
+            placeholder={
+              plotIndex === 0
+                ? "〇〇は使っていない。かん水と施肥は処理区と同じ。"
+                : "〇〇を1,000倍に希釈し（希釈倍率）、10aあたり200L（使用量）を葉面散布（施用方法）。7日おきに3回（回数）。"
+            }
+            value={plot.description}
+            onChange={(event) => onPlotChange(plot.id, { description: event.target.value })}
+          />
         </div>
         <div className={nav}>
           {plots.length > 2 && (
@@ -393,38 +396,38 @@ export function ReportCellEditor({
         </div>
         <div className={row}>
           <div className={css({ flex: "1", minW: "0" })}>
-            <Field label="調査項目" labelSize="sm">
-              <Input
-                data-first
-                list="metricList"
-                enterKeyHint="next"
-                placeholder="収量"
-                value={measurement.name}
-                onChange={(event) => setName(event.target.value)}
-                onKeyDown={(event) => {
-                  if (!isEnter(event)) return;
-                  event.preventDefault();
-                  ref.current?.querySelector<HTMLInputElement>("[data-unit-input]")?.focus();
-                }}
-              />
-            </Field>
+            <Input
+              label="調査項目"
+              labelSize="sm"
+              data-first
+              list="metricList"
+              enterKeyHint="next"
+              placeholder="収量"
+              value={measurement.name}
+              onChange={(event) => setName(event.target.value)}
+              onKeyDown={(event) => {
+                if (!isEnter(event)) return;
+                event.preventDefault();
+                ref.current?.querySelector<HTMLInputElement>("[data-unit-input]")?.focus();
+              }}
+            />
           </div>
           <div className={css({ flex: "0 0 token(sizes.32)" })}>
-            <Field label="単位（任意）" labelSize="sm">
-              <Input
-                data-unit-input
-                list="unitList"
-                enterKeyHint="done"
-                placeholder="kg/10a"
-                value={measurement.unit}
-                onChange={(event) => setUnit(event.target.value)}
-                onKeyDown={(event) => {
-                  if (!isEnter(event)) return;
-                  event.preventDefault();
-                  onNext(target);
-                }}
-              />
-            </Field>
+            <Input
+              label="単位（任意）"
+              labelSize="sm"
+              data-unit-input
+              list="unitList"
+              enterKeyHint="done"
+              placeholder="kg/10a"
+              value={measurement.unit}
+              onChange={(event) => setUnit(event.target.value)}
+              onKeyDown={(event) => {
+                if (!isEnter(event)) return;
+                event.preventDefault();
+                onNext(target);
+              }}
+            />
           </div>
         </div>
         <ToggleGroup
@@ -457,28 +460,25 @@ export function ReportCellEditor({
           </span>
           {close}
         </div>
-        <Field
+        <Input
           label="グラフの題（任意）"
           hideLabel
           description="グラフの上に出る題です。書かないときは、調査項目がそのまま題になります。"
-        >
-          <Input
-            data-first
-            enterKeyHint="done"
-            placeholder={
-              measurement.graphs.length > 1
-                ? "11月、定植30日後"
-                : "トマト重量のBS使用区と未使用区の比較"
-            }
-            value={graph.heading}
-            onChange={(event) => onGraphChange({ ...graph, heading: event.target.value })}
-            onKeyDown={(event) => {
-              if (!isEnter(event)) return;
-              event.preventDefault();
-              onNext(target);
-            }}
-          />
-        </Field>
+          data-first
+          enterKeyHint="done"
+          placeholder={
+            measurement.graphs.length > 1
+              ? "11月、定植30日後"
+              : "トマト重量のBS使用区と未使用区の比較"
+          }
+          value={graph.heading}
+          onChange={(event) => onGraphChange({ ...graph, heading: event.target.value })}
+          onKeyDown={(event) => {
+            if (!isEnter(event)) return;
+            event.preventDefault();
+            onNext(target);
+          }}
+        />
         <div className={nav}>{done}</div>
       </>
     );

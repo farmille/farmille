@@ -6,6 +6,7 @@ import { useState, type ComponentPropsWithRef } from "react";
 import { Icon, type IconName } from "@/components/Icon";
 import { css, cx } from "../../../styled-system/css";
 import { useFieldRequired } from "./field-context";
+import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 import { controlRecipe } from "./recipes";
 
 const revealShell = css({ position: "relative", display: "block", w: "100%" });
@@ -37,12 +38,23 @@ const revealState = {
   visible: { type: "text", label: "パスワードを隠す", icon: "visibility_off" },
 } as const satisfies Record<string, { type: "password" | "text"; label: string; icon: IconName }>;
 
-type InputProps = Omit<ComponentPropsWithRef<"input">, "size" | "required" | "aria-invalid"> & {
+type InputBodyProps = Omit<ComponentPropsWithRef<"input">, "size" | "required" | "aria-invalid"> & {
   size?: "md" | "sm";
   revealable?: boolean;
 };
 
-export function Input({
+type InputProps = InputBodyProps & Labeling;
+
+export function Input(props: InputProps) {
+  const [labeling, inputProps] = splitLabeling(props);
+  return (
+    <Labeled disabled={inputProps.disabled} labeling={labeling} name={inputProps.name}>
+      <InputBody {...inputProps} />
+    </Labeled>
+  );
+}
+
+function InputBody({
   size,
   className,
   revealable = false,
@@ -50,7 +62,7 @@ export function Input({
   disabled,
   readOnly,
   ...rest
-}: InputProps) {
+}: InputBodyProps) {
   const required = useFieldRequired();
   const [shown, setShown] = useState(false);
   const state = revealState[shown ? "visible" : "hidden"];

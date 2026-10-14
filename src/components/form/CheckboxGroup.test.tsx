@@ -4,7 +4,6 @@ import type { FormEvent } from "react";
 import { describe, expect, it } from "vitest";
 
 import { CheckboxGroup } from "./CheckboxGroup";
-import { Fieldset } from "./Fieldset";
 import { Form } from "./Form";
 
 const timings = [
@@ -21,14 +20,12 @@ function captureSubmit(sink: FormData[]) {
 }
 
 describe("CheckboxGroup", () => {
-  it("チェックした値を選択肢の順に1件ずつ Fieldset の name で送る", async () => {
+  it("チェックした値を選択肢の順に1件ずつ name で送る", async () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
       <Form onSubmit={captureSubmit(submitted)}>
-        <Fieldset legend="使用時期" name="timings">
-          <CheckboxGroup options={timings} variant="chips" />
-        </Fieldset>
+        <CheckboxGroup label="使用時期" name="timings" options={timings} variant="chips" />
         <button type="submit">保存</button>
       </Form>,
     );
@@ -45,7 +42,8 @@ describe("CheckboxGroup", () => {
     const changes: string[][] = [];
     render(
       <CheckboxGroup
-        aria-label="比べる資材"
+        hideLabel
+        label="比べる資材"
         limit={2}
         name="compare"
         onValueChange={(value) => changes.push(value)}

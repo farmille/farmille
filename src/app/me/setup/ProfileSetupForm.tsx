@@ -2,16 +2,7 @@
 
 import { useActionState } from "react";
 
-import {
-  Field,
-  Fieldset,
-  Form,
-  FormActions,
-  Input,
-  Notice,
-  RadioGroup,
-  SubmitButton,
-} from "@/components/form";
+import { Form, FormActions, Input, Notice, RadioGroup, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { HANDLE_MAX_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
@@ -24,18 +15,24 @@ export function ProfileSetupForm() {
   return (
     <Form action={formAction} errors={fieldErrorsOf(state)}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
-      <Field
+      <Input
         description="本名でなくても構いません。"
         label="ハンドルネーム"
         name="handle"
         requirement="required"
         visibility="public"
-      >
-        <Input autoComplete="nickname" defaultValue={values.handle} maxLength={HANDLE_MAX_LENGTH} />
-      </Field>
-      <Fieldset legend="あなたの立場" name="standpoint" requirement="required" visibility="public">
-        <RadioGroup<string> defaultValue={values.standpoint} options={STANDPOINTS} />
-      </Fieldset>
+        autoComplete="nickname"
+        defaultValue={values.handle}
+        maxLength={HANDLE_MAX_LENGTH}
+      />
+      <RadioGroup<string>
+        label="あなたの立場"
+        name="standpoint"
+        requirement="required"
+        visibility="public"
+        defaultValue={values.standpoint}
+        options={STANDPOINTS}
+      />
       <FormActions>
         <SubmitButton pendingLabel="設定中…">設定してマイページへ</SubmitButton>
       </FormActions>

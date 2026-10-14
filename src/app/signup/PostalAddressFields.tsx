@@ -88,6 +88,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
       >
         <div className={postalRowStyle}>
           <Input
+            label={null}
             autoComplete="postal-code"
             className={postalInputStyle}
             inputMode="numeric"
@@ -118,48 +119,49 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
         </div>
       </Field>
 
-      <Field label="都道府県" labelSize="sm" name="prefectureCode" visibility="public">
-        <Select
-          autoComplete="address-level1"
-          className={css({ maxW: "56" })}
-          onValueChange={(value) => {
-            requestVersion.current++;
-            setPrefecture(value ?? "");
-          }}
-          options={PREFECTURE_OPTIONS}
-          placeholder="選択してください"
-          value={prefecture === "" ? null : prefecture}
-        />
-      </Field>
+      <Select
+        label="都道府県"
+        labelSize="sm"
+        name="prefectureCode"
+        visibility="public"
+        autoComplete="address-level1"
+        className={css({ maxW: "56" })}
+        onValueChange={(value) => {
+          requestVersion.current++;
+          setPrefecture(value ?? "");
+        }}
+        options={PREFECTURE_OPTIONS}
+        placeholder="選択してください"
+        value={prefecture === "" ? null : prefecture}
+      />
 
-      <Field label="市区町村・番地" labelSize="sm" name="cityStreet" visibility="private">
-        <Input
-          autoComplete="address-line1"
-          maxLength={300}
-          onChange={(event) => {
-            requestVersion.current++;
-            lastAutofill.current = "";
-            setCityStreet(event.target.value);
-          }}
-          placeholder="水戸市久が原978-6"
-          value={cityStreet}
-        />
-      </Field>
+      <Input
+        label="市区町村・番地"
+        labelSize="sm"
+        name="cityStreet"
+        visibility="private"
+        autoComplete="address-line1"
+        maxLength={300}
+        onChange={(event) => {
+          requestVersion.current++;
+          lastAutofill.current = "";
+          setCityStreet(event.target.value);
+        }}
+        placeholder="水戸市久が原978-6"
+        value={cityStreet}
+      />
 
-      <Field
+      <Input
         label="建物名・部屋番号"
         labelSize="sm"
         name="buildingName"
         requirement="optional"
         visibility="private"
-      >
-        <Input
-          autoComplete="address-line2"
-          defaultValue={values.buildingName}
-          maxLength={200}
-          placeholder="〇〇マンション101"
-        />
-      </Field>
+        autoComplete="address-line2"
+        defaultValue={values.buildingName}
+        maxLength={200}
+        placeholder="〇〇マンション101"
+      />
     </Fieldset>
   );
 }

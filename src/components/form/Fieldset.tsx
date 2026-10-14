@@ -74,7 +74,9 @@ export function Fieldset({
           {lead}
         </p>
       )}
-      <FieldContext.Provider value={{ required, inRoot: rooted }}>{children}</FieldContext.Provider>
+      <FieldContext.Provider value={{ required, inRoot: rooted, inField: false }}>
+        {children}
+      </FieldContext.Provider>
       {description === undefined ? null : (
         <p className={guideRecipe({ placement: "below" })} id={`${id}-description`}>
           {description}

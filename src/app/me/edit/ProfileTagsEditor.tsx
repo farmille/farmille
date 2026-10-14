@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/Button";
 import { Chip } from "@/components/Chip";
-import { Autocomplete, Combobox, Field, Fieldset, Notice, type Option } from "@/components/form";
+import { Autocomplete, Combobox, Fieldset, Notice, type Option } from "@/components/form";
 import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
 import { css } from "../../../../styled-system/css";
 
@@ -62,7 +62,7 @@ export function ProfileTagsEditor({
 
   return (
     <>
-      <Field
+      <Combobox
         description={`作物名や別名で検索して選んでください。複数選べます（${CROP_LIMIT}件まで）。公開されます。${
           available.length > CROP_SUGGESTION_LIMIT
             ? `${available.length}件中${CROP_SUGGESTION_LIMIT}件を表示しています。`
@@ -71,24 +71,21 @@ export function ProfileTagsEditor({
         label="主な作目"
         name="cropIds"
         requirement="optional"
-      >
-        <Combobox
-          emptyMessage="一致する作物がありません"
-          filterMode="preFiltered"
-          inputValue={cropQuery}
-          max={CROP_LIMIT}
-          multiple
-          onInputValueChange={setCropQuery}
-          onValueChange={setCrops}
-          options={available.slice(0, CROP_SUGGESTION_LIMIT).map((crop) => ({
-            value: crop.id,
-            label: crop.name,
-            description: crop.crop_groups?.name,
-          }))}
-          placeholder="作物名を入力（例：みかん、デコポン）"
-          value={crops}
-        />
-      </Field>
+        emptyMessage="一致する作物がありません"
+        filterMode="preFiltered"
+        inputValue={cropQuery}
+        max={CROP_LIMIT}
+        multiple
+        onInputValueChange={setCropQuery}
+        onValueChange={setCrops}
+        options={available.slice(0, CROP_SUGGESTION_LIMIT).map((crop) => ({
+          value: crop.id,
+          label: crop.name,
+          description: crop.crop_groups?.name,
+        }))}
+        placeholder="作物名を入力（例：みかん、デコポン）"
+        value={crops}
+      />
 
       <Fieldset
         legend="所属"
@@ -115,7 +112,8 @@ export function ProfileTagsEditor({
           ))}
           <div className={addRow}>
             <Autocomplete
-              aria-label="所属"
+              hideLabel
+              label="所属"
               disabled={affiliationFull}
               filterMode="preFiltered"
               maxLength={100}

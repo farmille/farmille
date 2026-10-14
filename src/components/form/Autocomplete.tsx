@@ -8,11 +8,12 @@ import { optionRecipe, popupPositionerStyle, popupRecipe } from "@/components/po
 import { cx } from "../../../styled-system/css";
 import { emptyStyle, isComposingEnter, optionName, OptionText } from "./Combobox";
 import { useFieldRequired } from "./field-context";
+import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 import { controlRecipe } from "./recipes";
 import { searchBoxRecipe, searchFieldRecipe } from "./SearchInput";
 import type { Option } from "./types";
 
-type AutocompleteProps = {
+type AutocompleteBodyProps = {
   value: string;
   onValueChange: (value: string) => void;
   options: readonly Option[];
@@ -34,13 +35,23 @@ type AutocompleteProps = {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   inputRef?: Ref<HTMLInputElement>;
-  "aria-label"?: string;
   className?: string;
 };
 
+type AutocompleteProps = AutocompleteBodyProps & Labeling;
+
 const labelOf = (option: Option) => option.label;
 
-export function Autocomplete({
+export function Autocomplete(props: AutocompleteProps) {
+  const [labeling] = splitLabeling(props);
+  return (
+    <Labeled disabled={props.disabled} labeling={labeling} name={props.name}>
+      <AutocompleteBody {...props} />
+    </Labeled>
+  );
+}
+
+function AutocompleteBody({
   value,
   onValueChange,
   options,
@@ -57,9 +68,8 @@ export function Autocomplete({
   open,
   onOpenChange,
   inputRef,
-  "aria-label": ariaLabel,
   className,
-}: AutocompleteProps) {
+}: AutocompleteBodyProps) {
   const required = useFieldRequired();
   const highlighted = useRef(false);
   const filter = BaseAutocomplete.useFilter();
@@ -74,7 +84,6 @@ export function Autocomplete({
 
   const input = (
     <BaseAutocomplete.Input
-      aria-label={ariaLabel}
       className={size === "search" ? searchFieldRecipe() : cx(controlRecipe({ size }), className)}
       maxLength={maxLength}
       onBlur={() => {

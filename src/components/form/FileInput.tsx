@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type InputHTMLAttributes
 import { buttonRecipe } from "@/components/Button";
 import { css, cx } from "../../../styled-system/css";
 import { useFieldRequired } from "./field-context";
+import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 
 const rootStyle = css({
   display: "flex",
@@ -38,10 +39,12 @@ const selectionStyle = css({
   overflowWrap: "anywhere",
 });
 
-type FileInputProps = Omit<
+type FileInputBodyProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "type" | "required" | "aria-invalid"
 >;
+
+type FileInputProps = FileInputBodyProps & Labeling;
 
 function selectionText(fileNames: readonly string[]): string {
   if (fileNames.length === 0) return "ファイルが選択されていません";
@@ -50,7 +53,16 @@ function selectionText(fileNames: readonly string[]): string {
 }
 
 /** ブラウザ固有の英語表示を出さず、選択状態を日本語で伝えるファイル入力。 */
-export function FileInput({ onChange, disabled, className, ...inputProps }: FileInputProps) {
+export function FileInput(props: FileInputProps) {
+  const [labeling, inputProps] = splitLabeling(props);
+  return (
+    <Labeled disabled={inputProps.disabled} labeling={labeling} name={inputProps.name}>
+      <FileInputBody {...inputProps} />
+    </Labeled>
+  );
+}
+
+function FileInputBody({ onChange, disabled, className, ...inputProps }: FileInputBodyProps) {
   const required = useFieldRequired();
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileNames, setFileNames] = useState<string[]>([]);

@@ -31,7 +31,8 @@ export function SortSelect({ selected, sort, query }: SortSelectProps) {
       size="sm"
       options={SORT_OPTIONS}
       value={sort}
-      aria-label="並び替え"
+      hideLabel
+      label="並び替え"
       disabled={isPending}
       onValueChange={(next) => {
         if (next === null) return;

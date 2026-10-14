@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn, userEvent, within } from "storybook/test";
 
-import { Field } from "./Field";
 import { Select } from "./Select";
 
 const crops = [
@@ -22,7 +21,7 @@ const meta = {
   title: "Components/Form/Select",
   component: Select,
   args: {
-    "aria-label": "作物",
+    label: "作物",
     options: crops,
     placeholder: "作物を選択してください",
     onValueChange: fn(),
@@ -44,7 +43,7 @@ export const Selected: Story = {
 
 export const Compact: Story = {
   args: {
-    "aria-label": "並び替え",
+    label: "並び替え",
     size: "sm",
     defaultValue: "reviews",
     options: [
@@ -66,11 +65,7 @@ export const GroupsAndDescriptions: Story = {
 };
 
 export const Invalid: Story = {
-  render: (args) => (
-    <Field error="作物を選んでください。" label="作物" requirement="required">
-      <Select {...args} aria-label={undefined} />
-    </Field>
-  ),
+  args: { error: "作物を選んでください。", requirement: "required" },
 };
 
 export const Disabled: Story = {

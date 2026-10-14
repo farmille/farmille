@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 
-import { Field, Form, FormActions, Input, Notice, RadioGroup, SubmitButton } from "../form";
+import { Form, FormActions, Input, Notice, RadioGroup, SubmitButton } from "../form";
 import { TextLink } from "../TextLink";
 import { AuthScreen } from "./AuthScreen";
 
@@ -10,12 +10,14 @@ const submitAction = fn(async () => {});
 
 const loginForm = (
   <Form action={submitAction}>
-    <Field label="メールアドレス" name="email" requirement="required">
-      <Input placeholder="yamada@example.com" type="email" />
-    </Field>
-    <Field label="パスワード" name="password" requirement="required">
-      <Input type="password" />
-    </Field>
+    <Input
+      label="メールアドレス"
+      name="email"
+      placeholder="yamada@example.com"
+      requirement="required"
+      type="email"
+    />
+    <Input label="パスワード" name="password" requirement="required" type="password" />
     <FormActions>
       <SubmitButton pendingLabel="ログイン中…">ログイン</SubmitButton>
     </FormActions>
@@ -32,36 +34,39 @@ const loginForm = (
 
 const signupForm = (
   <Form action={submitAction}>
-    <Field
+    <Input
       description="感想口コミに表示される名前です。実名を避けることをおすすめします。"
       label="ハンドルネーム"
       name="handle"
+      placeholder="トマト農家12年目"
       requirement="required"
-    >
-      <Input placeholder="トマト農家12年目" />
-    </Field>
-    <Field label="メールアドレス" name="email" requirement="required">
-      <Input placeholder="yamada@example.com" type="email" />
-    </Field>
-    <Field
+    />
+    <Input
+      label="メールアドレス"
+      name="email"
+      placeholder="yamada@example.com"
+      requirement="required"
+      type="email"
+    />
+    <Input
       description="8文字以上で、英字と数字を組み合わせてください。"
       label="パスワード"
       name="password"
       requirement="required"
-    >
-      <Input type="password" />
-    </Field>
-    <Field label="栽培形態" name="cultivation" requirement="optional">
-      <RadioGroup
-        defaultValue="greenhouse"
-        options={[
-          { value: "greenhouse", label: "施設栽培（ハウス・温室）" },
-          { value: "openfield", label: "露地栽培" },
-          { value: "both", label: "両方" },
-        ]}
-        variant="cards"
-      />
-    </Field>
+      type="password"
+    />
+    <RadioGroup
+      defaultValue="greenhouse"
+      label="栽培形態"
+      name="cultivation"
+      options={[
+        { value: "greenhouse", label: "施設栽培（ハウス・温室）" },
+        { value: "openfield", label: "露地栽培" },
+        { value: "both", label: "両方" },
+      ]}
+      requirement="optional"
+      variant="cards"
+    />
     <Notice tone="warn">投稿は匿名です。プロフィールに実名や連絡先を書かないでください。</Notice>
     <FormActions>
       <SubmitButton pendingLabel="送信中…">登録する</SubmitButton>

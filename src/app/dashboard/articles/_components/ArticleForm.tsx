@@ -278,14 +278,14 @@ export function ArticleForm({
           value={JSON.stringify(materials.map((material) => material.id))}
         />
 
-        <Field label="タイトル" name="title" requirement="required">
-          <Input
-            name="title"
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="高温期の活用ガイド"
-            value={title}
-          />
-        </Field>
+        <Input
+          label="タイトル"
+          name="title"
+          requirement="required"
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="高温期の活用ガイド"
+          value={title}
+        />
 
         <Field
           description="JPEG / PNG / WebP（5MB以下）。公開カードのカバーに使います。"
@@ -294,6 +294,7 @@ export function ArticleForm({
           requirement="optional"
         >
           <FileInput
+            label={null}
             accept="image/jpeg,image/png,image/webp"
             disabled={busy}
             onChange={(event) => {
@@ -363,6 +364,7 @@ export function ArticleForm({
                       />
                     </div>
                     <Textarea
+                      label={null}
                       className={css({ mt: "3", minH: "220px" })}
                       name="body"
                       onChange={(event) => setBody(event.target.value)}
@@ -417,31 +419,31 @@ export function ArticleForm({
       </Form>
 
       <div className={formLayout}>
-        <Field label="資材を検索して追加" requirement="optional">
-          <Autocomplete
-            disabled={busy}
-            filterMode="preFiltered"
-            inputRef={materialSearchRef}
-            onOpenChange={setMaterialListOpen}
-            onPick={(option) => {
-              const material = materialHits.find((item) => item.id === option.value);
-              if (material) addMaterial(material);
-            }}
-            onSubmitText={handleMaterialSearch}
-            onValueChange={(value) => {
-              setMaterialQuery(value);
-              setMaterialHits([]);
-            }}
-            open={materialListOpen}
-            options={materialHits.map((material) => ({
-              value: material.id,
-              label: material.name,
-              description: material.manufacturer_name ?? undefined,
-            }))}
-            placeholder="資材名またはメーカー名"
-            value={materialQuery}
-          />
-        </Field>
+        <Autocomplete
+          label="資材を検索して追加"
+          requirement="optional"
+          disabled={busy}
+          filterMode="preFiltered"
+          inputRef={materialSearchRef}
+          onOpenChange={setMaterialListOpen}
+          onPick={(option) => {
+            const material = materialHits.find((item) => item.id === option.value);
+            if (material) addMaterial(material);
+          }}
+          onSubmitText={handleMaterialSearch}
+          onValueChange={(value) => {
+            setMaterialQuery(value);
+            setMaterialHits([]);
+          }}
+          open={materialListOpen}
+          options={materialHits.map((material) => ({
+            value: material.id,
+            label: material.name,
+            description: material.manufacturer_name ?? undefined,
+          }))}
+          placeholder="資材名またはメーカー名"
+          value={materialQuery}
+        />
         <Button
           disabled={busy}
           size="sm"

@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { receiptAccessSchema } from "@/lib/company-application";
 import { errorMessageJa } from "@/server/errors";
 
-import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
+import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 
 import { requestReceiptVerification } from "../actions";
 
@@ -43,12 +43,21 @@ export function VerificationForm() {
   }
   return (
     <Form onSubmit={submit}>
-      <Field label="受付番号" name="receiptNumber" requirement="required">
-        <Input inputMode="numeric" pattern="[0-9]+" />
-      </Field>
-      <Field label="担当者メールアドレス" name="email" requirement="required">
-        <Input maxLength={254} placeholder="tanto@example.co.jp" type="email" />
-      </Field>
+      <Input
+        label="受付番号"
+        name="receiptNumber"
+        requirement="required"
+        inputMode="numeric"
+        pattern="[0-9]+"
+      />
+      <Input
+        label="担当者メールアドレス"
+        name="email"
+        requirement="required"
+        maxLength={254}
+        placeholder="tanto@example.co.jp"
+        type="email"
+      />
       {message ? <Notice tone={failed ? "error" : "success"}>{message}</Notice> : null}
       <FormActions>
         <SubmitButton pending={busy} pendingLabel="送信しています…">

@@ -288,10 +288,11 @@ export function UiCatalog() {
           <Button variant="primary" size="sm">
             感想口コミをすべて見る（32件）
           </Button>
-          <Input aria-label="キーワード" placeholder="作物・悩み・資材名を入力" />
-          <Textarea aria-label="本文" placeholder="本文を入力" />
+          <Input hideLabel label="キーワード" placeholder="作物・悩み・資材名を入力" />
+          <Textarea hideLabel label="本文" placeholder="本文を入力" />
           <Select
-            aria-label="作物"
+            hideLabel
+            label="作物"
             options={[
               { value: "tomato", label: "ミニトマト" },
               { value: "strawberry", label: "いちご" },

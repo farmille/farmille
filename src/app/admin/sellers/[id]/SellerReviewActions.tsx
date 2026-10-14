@@ -12,7 +12,7 @@ import { initialSellerActionState } from "@/app/admin/_lib/action-state";
 import { sellerOperationAction } from "@/app/admin/sellers/[id]/actions";
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { Field, Input, Notice, Select, Textarea } from "@/components/form";
+import { Input, Notice, Select, Textarea } from "@/components/form";
 import { css } from "../../../../../styled-system/css";
 
 const wrapStyle = css({
@@ -87,27 +87,27 @@ export function SellerReviewActions({
     <div className={wrapStyle}>
       {status === "applied" && state.status !== "approved" ? (
         <div className={wrapStyle}>
-          <Field label="紐づける資材メーカー" labelSize="sm">
-            <Select
-              disabled={pending}
-              onValueChange={setSelectedManufacturer}
-              options={[
-                ...manufacturerNames.map((name) => ({ value: name, label: name })),
-                { value: "__new__", label: "該当なし：メーカーを追加" },
-              ]}
-              placeholder="メーカーを選択してください"
-              value={selectedManufacturer}
-            />
-          </Field>
+          <Select
+            label="紐づける資材メーカー"
+            labelSize="sm"
+            disabled={pending}
+            onValueChange={setSelectedManufacturer}
+            options={[
+              ...manufacturerNames.map((name) => ({ value: name, label: name })),
+              { value: "__new__", label: "該当なし：メーカーを追加" },
+            ]}
+            placeholder="メーカーを選択してください"
+            value={selectedManufacturer}
+          />
           {selectedManufacturer === "__new__" ? (
-            <Field label="新規メーカー名" labelSize="sm">
-              <Input
-                disabled={pending}
-                maxLength={300}
-                onChange={(event) => setNewManufacturerName(event.target.value)}
-                value={newManufacturerName}
-              />
-            </Field>
+            <Input
+              label="新規メーカー名"
+              labelSize="sm"
+              disabled={pending}
+              maxLength={300}
+              onChange={(event) => setNewManufacturerName(event.target.value)}
+              value={newManufacturerName}
+            />
           ) : null}
           <p className={adminInlineNoteStyle}>
             アカウントの確認後にログインを発行します。この操作では編集権は付与されません。メーカーが提出する掲載・オーナー権限の申請と確認資料を審査してから、資材ごとに編集権を付与してください。
@@ -172,9 +172,12 @@ export function SellerReviewActions({
                   </Button>
                 }
               >
-                <Field label="却下理由" name="rejectedReason" requirement="required">
-                  <Textarea placeholder="申請者へ伝える判断理由を入力" />
-                </Field>
+                <Textarea
+                  label="却下理由"
+                  name="rejectedReason"
+                  requirement="required"
+                  placeholder="申請者へ伝える判断理由を入力"
+                />
               </ConfirmDialog>
             </>
           ) : null}

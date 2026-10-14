@@ -8,10 +8,16 @@ type FieldContextValue = {
   required: boolean;
   /** Base UI の Field.Root の内側か。Field.Item・Field.Label・Field.Description は Field.Root の外では使えない。 */
   inRoot: boolean;
+  /** Field の中か。Field の label が中の入力欄の名前になる（Fieldset の中では false）。 */
+  inField: boolean;
   requirement?: Requirement;
 };
 
-export const FieldContext = createContext<FieldContextValue>({ required: false, inRoot: false });
+export const FieldContext = createContext<FieldContextValue>({
+  required: false,
+  inRoot: false,
+  inField: false,
+});
 
 export function useFieldContext(): FieldContextValue {
   return useContext(FieldContext);

@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { initialAdminActionState } from "@/app/admin/_lib/action-state";
 import { updateUsageReportEditorialAction } from "@/app/admin/usage-reports/[id]/actions";
 import { Button } from "@/components";
-import { Field, Form, FormActions, Input, Notice, Textarea } from "@/components/form";
+import { Form, FormActions, Input, Notice, Textarea } from "@/components/form";
 import type { UsageReportEditorialDetail } from "@/server/admin/usage-reports";
 
 export function UsageReportEditorialForm({ report }: { report: UsageReportEditorialDetail }) {
@@ -20,17 +20,23 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
 
-      <Field label="タイトル" labelSize="sm" name="title" requirement="required">
-        <Input defaultValue={report.title} disabled={!editable} />
-      </Field>
-      <Field
+      <Input
+        label="タイトル"
+        labelSize="sm"
+        name="title"
+        requirement="required"
+        defaultValue={report.title}
+        disabled={!editable}
+      />
+      <Textarea
         label={report.formVersion === 2 ? "結果・感想" : "観察した変化"}
         labelSize="sm"
         name="observedChange"
         requirement="required"
-      >
-        <Textarea defaultValue={report.observedChange} disabled={!editable} size="lg" />
-      </Field>
+        defaultValue={report.observedChange}
+        disabled={!editable}
+        size="lg"
+      />
       {report.formVersion === 2 ? (
         <>
           <input name="negativeNote" type="hidden" value="" />
@@ -38,15 +44,25 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
         </>
       ) : (
         <>
-          <Field label="悪影響・気になった点" labelSize="sm" name="negativeNote">
-            <Textarea defaultValue={report.negativeNote ?? ""} disabled={!editable} />
-          </Field>
-          <Field label="まとめ" labelSize="sm" name="summary" requirement="required">
-            <Textarea defaultValue={report.summary} disabled={!editable} size="lg" />
-          </Field>
+          <Textarea
+            label="悪影響・気になった点"
+            labelSize="sm"
+            name="negativeNote"
+            defaultValue={report.negativeNote ?? ""}
+            disabled={!editable}
+          />
+          <Textarea
+            label="まとめ"
+            labelSize="sm"
+            name="summary"
+            requirement="required"
+            defaultValue={report.summary}
+            disabled={!editable}
+            size="lg"
+          />
         </>
       )}
-      <Field
+      <Textarea
         description={
           editable
             ? "差し戻す場合は、投稿者が対応できる理由を編集局メモへ必ず入力する。"
@@ -55,9 +71,9 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
         label="編集局メモ（内部）"
         labelSize="sm"
         name="editorNote"
-      >
-        <Textarea defaultValue={report.editorNote ?? ""} disabled={!editable} />
-      </Field>
+        defaultValue={report.editorNote ?? ""}
+        disabled={!editable}
+      />
 
       <input name="reportId" type="hidden" value={report.id} />
       <FormActions layout="row">

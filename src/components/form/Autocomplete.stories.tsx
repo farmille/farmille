@@ -40,7 +40,7 @@ const meta = {
   title: "Components/Form/Autocomplete",
   component: Autocomplete,
   args: {
-    "aria-label": "所属",
+    label: "所属",
     value: "",
     options: affiliations,
     placeholder: "〇〇市トマト生産部会",
@@ -95,7 +95,8 @@ const tagStyle = css({
 
 export const Search: Story = {
   args: {
-    "aria-label": "資材の検索条件",
+    hideLabel: true,
+    label: "資材の検索条件",
     size: "search",
     options: searchSuggestions,
     placeholder: "作物・悩み・資材名を入力してください",

@@ -23,7 +23,8 @@ export function ReviewSortSelect({ sort }: { sort: ReviewSort }) {
         name="sort"
         options={REVIEW_SORT_OPTIONS}
         value={value}
-        aria-label="感想口コミの並び替え"
+        hideLabel
+        label="感想口コミの並び替え"
         onValueChange={(next) => {
           if (next === null) return;
           // 隠し input に選んだ値が入ってから送信する

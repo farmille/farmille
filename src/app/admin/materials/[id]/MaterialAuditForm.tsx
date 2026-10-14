@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
-import { Field, Notice, Select, Textarea, type Option } from "@/components/form";
+import { Notice, Select, Textarea, type Option } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { recordMaterialAuditAction } from "./audit-actions";
 
@@ -22,21 +22,21 @@ export function MaterialAuditForm({ materialId }: { materialId: string }) {
   const router = useRouter();
   return (
     <div className={materialPageStack}>
-      <Field label="掲載後の確認結果">
-        <Select
-          onValueChange={(value) => {
-            if (value !== null) setOutcome(value);
-          }}
-          options={AUDIT_OUTCOMES}
-          value={outcome}
-        />
-      </Field>
-      <Field
+      <Select
+        label="掲載後の確認結果"
+        onValueChange={(value) => {
+          if (value !== null) setOutcome(value);
+        }}
+        options={AUDIT_OUTCOMES}
+        value={outcome}
+      />
+      <Textarea
         description="メーカーにも表示されます。修正依頼の場合は該当箇所を記入し、案内メールでも連絡してください。"
         label="確認した内容と理由"
-      >
-        <Textarea onChange={(event) => setNote(event.target.value)} rows={4} value={note} />
-      </Field>
+        onChange={(event) => setNote(event.target.value)}
+        rows={4}
+        value={note}
+      />
       {outcome === "hidden" ? (
         <p>保存すると資材ページを非公開にします。原稿と投稿履歴は保持します。</p>
       ) : null}

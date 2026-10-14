@@ -1,13 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { Field } from "./Field";
 import { Input } from "./Input";
 
 const meta = {
   title: "Components/Form/Input",
   component: Input,
   args: {
-    "aria-label": "作物名",
+    label: "作物名",
     placeholder: "トマト",
   },
 } satisfies Meta<typeof Input>;
@@ -22,15 +21,27 @@ export const Filled: Story = {
 };
 
 export const Small: Story = {
-  args: { size: "sm", "aria-label": "写真の説明", placeholder: "写真の説明（任意）" },
+  args: { size: "sm", label: "写真の説明", placeholder: "写真の説明（任意）" },
+};
+
+export const WithGuidance: Story = {
+  args: {
+    label: "ニックネーム",
+    name: "handle",
+    requirement: "required",
+    visibility: "public",
+    lead: "投稿やマイページに表示されます。",
+    description: "本名でなくて構いません。",
+    placeholder: "農家の山田",
+  },
+};
+
+export const HiddenLabel: Story = {
+  args: { hideLabel: true, label: "写真の説明", placeholder: "写真の説明（任意）" },
 };
 
 export const Invalid: Story = {
-  render: (args) => (
-    <Field error="作物名を入力してください。" label="作物名" requirement="required">
-      <Input {...args} aria-label={undefined} />
-    </Field>
-  ),
+  args: { error: "作物名を入力してください。", requirement: "required" },
 };
 
 export const Disabled: Story = {
@@ -39,7 +50,7 @@ export const Disabled: Story = {
 
 export const PasswordReveal: Story = {
   args: {
-    "aria-label": "パスワード",
+    label: "パスワード",
     defaultValue: "farmille-pass",
     placeholder: "••••••••",
     revealable: true,
@@ -50,12 +61,14 @@ export const PasswordReveal: Story = {
 export const ReadOnly: Story = {
   render: () => (
     <>
-      <Field label="メールアドレス" name="email">
-        <Input name="email" readOnly type="email" value="farmer@example.test" />
-      </Field>
-      <Field label="ニックネーム" name="handle">
-        <Input defaultValue="農家の山田" name="handle" />
-      </Field>
+      <Input
+        label="メールアドレス"
+        name="email"
+        readOnly
+        type="email"
+        value="farmer@example.test"
+      />
+      <Input defaultValue="農家の山田" label="ニックネーム" name="handle" />
     </>
   ),
 };

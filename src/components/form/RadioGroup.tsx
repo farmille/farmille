@@ -6,10 +6,11 @@ import { RadioGroup as BaseRadioGroup } from "@base-ui/react/radio-group";
 import { cx } from "../../../styled-system/css";
 import { Choice, EnsureFieldRoot } from "./Field";
 import { useFieldContext, useResetKey } from "./field-context";
+import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 import { choiceGroupRecipe, radioDotStyle } from "./recipes";
 import type { Option } from "./types";
 
-type RadioGroupProps<V extends string> = {
+type RadioGroupBodyProps<V extends string> = {
   options: readonly Option<V>[];
   variant?: "list" | "cards";
   value?: V;
@@ -17,11 +18,21 @@ type RadioGroupProps<V extends string> = {
   onValueChange?: (value: V) => void;
   name?: string;
   disabled?: boolean;
-  "aria-label"?: string;
   className?: string;
 };
 
-export function RadioGroup<V extends string>({
+type RadioGroupProps<V extends string> = RadioGroupBodyProps<V> & Labeling;
+
+export function RadioGroup<V extends string>(props: RadioGroupProps<V>) {
+  const [labeling] = splitLabeling(props);
+  return (
+    <Labeled disabled={props.disabled} kind="group" labeling={labeling} name={props.name}>
+      <RadioGroupBody<V> {...props} />
+    </Labeled>
+  );
+}
+
+function RadioGroupBody<V extends string>({
   options,
   variant = "list",
   value,
@@ -29,15 +40,13 @@ export function RadioGroup<V extends string>({
   onValueChange,
   name,
   disabled,
-  "aria-label": ariaLabel,
   className,
-}: RadioGroupProps<V>) {
+}: RadioGroupBodyProps<V>) {
   const { required, inRoot } = useFieldContext();
   const resetKey = useResetKey(defaultValue ?? "");
   const group = (
     <BaseRadioGroup<V>
       key={resetKey}
-      aria-label={ariaLabel}
       className={cx(choiceGroupRecipe({ variant }), inRoot ? className : undefined)}
       defaultValue={defaultValue}
       disabled={disabled}

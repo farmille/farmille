@@ -3,7 +3,7 @@
 import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-report";
 
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
-import { Field, Fieldset, Input, Notice, Textarea } from "@/components/form";
+import { Fieldset, Input, Notice, Textarea } from "@/components/form";
 import { ToggleGroup } from "@/components/ToggleGroup";
 
 import { css } from "../../../../../../styled-system/css";
@@ -49,7 +49,7 @@ export function ReportStepResult({
   }
   return (
     <>
-      <Field
+      <Textarea
         label="結果・感想"
         requirement="required"
         lead={
@@ -59,14 +59,11 @@ export function ReportStepResult({
           </>
         }
         error={errors.observedChange}
-      >
-        <Textarea
-          size="lg"
-          placeholder="結果と感想"
-          value={input.observedChange}
-          onChange={(event) => onChange({ ...input, observedChange: event.target.value })}
-        />
-      </Field>
+        size="lg"
+        placeholder="結果と感想"
+        value={input.observedChange}
+        onChange={(event) => onChange({ ...input, observedChange: event.target.value })}
+      />
       <Notice tone="neutral" title="記入例" className={css({ mt: "2" })}>
         {RESULT_EXAMPLE[0]}
         <br />
@@ -104,14 +101,15 @@ export function ReportStepResult({
           </CollapsiblePanel>
         </Collapsible>
       </Fieldset>
-      <Field label="使用目的の補足（任意）" hideLabel className={css({ mt: "2.5" })}>
-        <Input
-          placeholder="補足（任意）"
-          maxLength={500}
-          value={input.purposeNote}
-          onChange={(event) => onChange({ ...input, purposeNote: event.target.value })}
-        />
-      </Field>
+      <Input
+        label="使用目的の補足（任意）"
+        hideLabel
+        fieldClassName={css({ mt: "2.5" })}
+        placeholder="補足（任意）"
+        maxLength={500}
+        value={input.purposeNote}
+        onChange={(event) => onChange({ ...input, purposeNote: event.target.value })}
+      />
       <Notice tone="neutral" title="記入例" className={css({ mt: "2" })}>
         ・灌水量を変えずに樹勢を維持したかった
         <br />

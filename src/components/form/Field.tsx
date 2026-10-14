@@ -91,6 +91,7 @@ export function Field({
         value={{
           required,
           inRoot: true,
+          inField: true,
           requirement: label === undefined ? requirement : undefined,
         }}
       >

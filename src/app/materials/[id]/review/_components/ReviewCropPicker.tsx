@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Combobox, Field, type Option } from "@/components/form";
+import { Combobox, type Option } from "@/components/form";
 import type { ReviewCropOption } from "@/server/queries/reviews";
 
 const SUGGESTION_LIMIT = 9;
@@ -38,23 +38,20 @@ export function ReviewCropPicker({
     .map(optionOf);
 
   return (
-    <Field
+    <Combobox
       description="作目を1つ選んでください。"
       label="作目"
       name="cropIds"
       requirement="required"
-    >
-      <Combobox
-        emptyMessage="一致する作物がありません。"
-        filterMode="preFiltered"
-        inputValue={query}
-        multiple
-        onInputValueChange={setQuery}
-        onValueChange={(next) => setSelected(next.slice(-1))}
-        options={suggestions}
-        placeholder="作物名を入力（例：みかん、デコポン）"
-        value={selected}
-      />
-    </Field>
+      emptyMessage="一致する作物がありません。"
+      filterMode="preFiltered"
+      inputValue={query}
+      multiple
+      onInputValueChange={setQuery}
+      onValueChange={(next) => setSelected(next.slice(-1))}
+      options={suggestions}
+      placeholder="作物名を入力（例：みかん、デコポン）"
+      value={selected}
+    />
   );
 }

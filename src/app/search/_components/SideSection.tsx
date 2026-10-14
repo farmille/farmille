@@ -63,7 +63,8 @@ export function SideSection({
           type="search"
           size="sm"
           className={filterInputStyle}
-          aria-label={filter.label}
+          hideLabel
+          label={filter.label}
           placeholder={filter.placeholder}
           autoComplete="off"
           value={query}

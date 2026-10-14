@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { ConfirmDialog } from "./ConfirmDialog";
-import { Field } from "./form/Field";
 import { Input } from "./form/Input";
 
 function RejectDialog({ submitted }: { submitted: FormData[] }) {
@@ -19,9 +18,7 @@ function RejectDialog({ submitted }: { submitted: FormData[] }) {
     >
       <input defaultValue="application-1" name="applicationId" type="hidden" />
       {/* happy-dom の textarea は willValidate を持たず Base UI が検証しないので、ここでは Input で確かめる（Textarea は Story で確認） */}
-      <Field label="却下の理由" name="reason" requirement="required">
-        <Input />
-      </Field>
+      <Input label="却下の理由" name="reason" requirement="required" />
     </ConfirmDialog>
   );
 }

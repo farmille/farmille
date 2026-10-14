@@ -22,7 +22,8 @@ function Harness({
   return (
     <>
       <Autocomplete
-        aria-label="所属"
+        hideLabel
+        label="所属"
         onPick={onPick}
         onSubmitText={onSubmitText}
         onValueChange={setValue}
@@ -42,7 +43,8 @@ describe("Autocomplete", () => {
       return (
         <>
           <Autocomplete
-            aria-label="所属"
+            hideLabel
+            label="所属"
             onValueChange={setText}
             options={[{ value: "ja", label: "JA青年部" }]}
             value={text}
@@ -63,8 +65,9 @@ describe("Autocomplete", () => {
   it("open を渡すと、一覧の開閉を呼び出し側が持てる（ボタンで検索した結果を出す）", () => {
     render(
       <Autocomplete
-        aria-label="資材を検索して追加"
         filterMode="preFiltered"
+        hideLabel
+        label="資材を検索して追加"
         onValueChange={() => undefined}
         open
         options={[{ value: "m1", label: "土づくり微生物資材", description: "グリーンバイオ" }]}
@@ -152,7 +155,8 @@ describe("Autocomplete", () => {
           }}
         >
           <Autocomplete
-            aria-label="資材の検索条件"
+            hideLabel
+            label="資材の検索条件"
             name="q"
             onValueChange={setValue}
             options={[{ value: "tomato", label: "トマト", description: "作物" }]}
