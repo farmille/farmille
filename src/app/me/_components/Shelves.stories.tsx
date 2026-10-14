@@ -5,7 +5,7 @@ import { HelpfulShelf, PostsShelf, SavedShelf } from "./Shelves";
 import { helpfulItems, ownPosts, ownProfile, savedMaterials } from "./story-fixtures";
 
 const meta = {
-  title: "App/Me/Shelves",
+  title: "Pages/me/Shelves",
   component: PostsShelf,
   args: { profile: ownProfile, posts: ownPosts },
 } satisfies Meta<typeof PostsShelf>;

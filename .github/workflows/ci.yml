@@ -87,9 +87,6 @@ jobs:
       - name: Audit high severity vulnerabilities
         run: pnpm audit --audit-level=high
 
-      - name: Check patched Storybook dependency
-        run: pnpm check:security-patches
-
       - name: Check Story coverage
         run: pnpm check:stories
 

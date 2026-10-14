@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DescriptionList, OptionalValue, Panel } from "./AdminUI";
 
 const meta = {
-  title: "App/Admin/AdminUi",
+  title: "Pages/admin/AdminUI",
   component: Panel,
   args: {
     title: "申請内容",

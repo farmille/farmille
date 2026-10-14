@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ChangePasswordForm } from "./ChangePasswordForm";
 const meta = {
-  title: "App/Auth/ChangePasswordForm",
+  title: "Pages/account/password/ChangePasswordForm",
   component: ChangePasswordForm,
   args: { loginHref: "/login", resetHref: "/password-reset" },
 } satisfies Meta<typeof ChangePasswordForm>;

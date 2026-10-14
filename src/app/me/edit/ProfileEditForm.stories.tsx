@@ -1,12 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { Avatar } from "@/components/Avatar";
+
 import { ownProfile } from "../_components/story-fixtures";
 import { ProfileEditForm } from "./ProfileEditForm";
 
 const meta = {
-  title: "App/Me/ProfileEditForm",
+  title: "Pages/me/edit/ProfileEditForm",
   component: ProfileEditForm,
   args: {
+    avatar: <Avatar name={ownProfile.handle} src={ownProfile.avatarUrl} size="xs" />,
     profile: ownProfile,
     details: {
       standpoint: "farmer",

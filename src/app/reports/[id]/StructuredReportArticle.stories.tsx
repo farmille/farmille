@@ -6,7 +6,7 @@ import { StructuredReportArticle } from "./StructuredReportArticle";
 import { structuredReport } from "./story-fixtures";
 
 const meta = {
-  title: "Reports/StructuredReportArticle",
+  title: "Pages/reports/[id]/StructuredReportArticle",
   component: StructuredReportArticle,
   decorators: [(Story) => readingFrame(Story())],
   args: {

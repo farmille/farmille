@@ -5,7 +5,7 @@ import { css } from "../../../../styled-system/css";
 import { SellerLoginPanel } from "./SellerLoginPanel";
 
 const meta = {
-  title: "App/Sellers/SellerLoginPanel",
+  title: "Pages/sellers/login/SellerLoginPanel",
   component: SellerLoginPanel,
   parameters: { layout: "fullscreen" },
   decorators: [(Story) => <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>],

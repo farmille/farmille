@@ -4,7 +4,7 @@ import { css } from "../../../../styled-system/css";
 import { ContactFields } from "./ContactFields";
 import { emptyContact } from "./ContactFields";
 const meta = {
-  title: "CompanyApplications/ContactFields",
+  title: "Pages/company-requests/ContactFields",
   component: ContactFields,
   parameters: { nextjs: { appDirectory: true } },
   args: { defaults: emptyContact },

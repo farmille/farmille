@@ -4,7 +4,7 @@ import { MaterialCard } from "./MaterialCard";
 import { MaterialCardRail } from "./MaterialCardRail";
 
 const meta = {
-  title: "Components/MaterialCardRail",
+  title: "Pages/Shared/MaterialCardRail",
   component: MaterialCardRail,
   args: {
     children: null,

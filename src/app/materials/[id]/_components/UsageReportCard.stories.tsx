@@ -9,7 +9,7 @@ import { storyImageUrl } from "./story-fixtures";
 const reportId = "00000000-0000-4000-8000-000000000851";
 
 const meta = {
-  title: "App/Materials/UsageReportCard",
+  title: "Pages/materials/[id]/UsageReportCard",
   component: UsageReportCard,
   decorators: [(Story) => <div className={css({ maxW: "80" })}>{Story()}</div>],
   args: {

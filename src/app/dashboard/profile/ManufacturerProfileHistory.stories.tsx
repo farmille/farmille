@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ManufacturerProfileHistory } from "./ManufacturerProfileHistory";
 
 const meta = {
-  title: "Manufacturer/ProfileHistory",
+  title: "Pages/dashboard/profile/ManufacturerProfileHistory",
   component: ManufacturerProfileHistory,
   args: {
     versions: [

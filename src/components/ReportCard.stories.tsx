@@ -16,7 +16,7 @@ const sampleAvatar =
   );
 
 const meta = {
-  title: "Components/ReportCard",
+  title: "Pages/Shared/ReportCard",
   component: ReportCard,
   args: {
     title: "ツチイキルをトマト施設栽培で3か月使ってみた",

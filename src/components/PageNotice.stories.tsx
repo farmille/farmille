@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PageNotice } from "./PageNotice";
 import { Button } from "./Button";
 const meta = {
-  title: "Components/PageNotice",
+  title: "Components/Feedback/PageNotice",
   component: PageNotice,
   args: {
     title: "ページが見つかりません",

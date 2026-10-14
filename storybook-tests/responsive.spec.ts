@@ -44,21 +44,22 @@ function skipUnlessFirstShard(): void {
 
 const SCREENSHOT_WIDTHS = [375, 1440] as const;
 const REPRESENTATIVE_STORY_IDS = [
-  "app-admin-adminshell--default",
-  "app-admin-materials-materialform--edit",
-  "app-materials-detailtable--official",
-  "app-materials-materialhero--signed-in",
-  "app-materials-report-reportform--draft",
-  "app-materials-materialreviewssection--default",
-  "app-me-saved-comparetable--three-materials",
-  "app-me-shelves--all-sections",
-  "app-sellers-manufacturerlanding--default",
+  "pages-admin-adminshell--default",
+  "pages-admin-materials-materialform--edit",
+  "pages-materials-id-detailtable--official",
+  "pages-materials-id-materialhero--signed-in",
+  "pages-materials-id-report-reportform--draft",
+  "pages-materials-id-materialreviewssection--default",
+  "pages-me-saved-compare-comparetable--three-materials",
+  "pages-me-shelves--all-sections",
+  "pages-sellers-manufacturerlanding--default",
 ] as const;
 
 const StoryIndexEntrySchema = v.object({
   id: v.string(),
   name: v.string(),
   title: v.string(),
+  importPath: v.string(),
   type: v.picklist(["story", "docs"]),
 });
 const StoryIndexSchema = v.object({
@@ -104,12 +105,22 @@ async function fetchSortedStories(request: APIRequestContext): Promise<StoryInde
 
 // 「何も描画しない」ことが仕様の Story。Pagination は1ページ以下・MetricBars は0件で非表示。
 const NULL_RENDER_STORY_IDS: ReadonlySet<string> = new Set([
-  "app-materials-ratingsummary--no-reviews",
-  "components-metricbars--empty",
-  "components-pagination--single-page",
+  "pages-materials-id-ratingsummary--no-reviews",
+  "components-display-metricbars--empty",
+  "components-navigation-pagination--single-page",
 ]);
 
-async function gotoStory(page: Page, storyId: string): Promise<void> {
+// Pages 配下にはルート画面の Story と、画面に依存する部品の Story が混在する。
+// 非同期画面の描画完了を待つのは、ルート画面（Page・Error・NotFound）の Story だけにする。
+function isAsyncScreenStory(story: StoryIndexEntry): boolean {
+  return /\/(Page|Error|NotFound)\.stories\.tsx$/.test(story.importPath);
+}
+
+async function gotoStory(
+  page: Page,
+  storyId: string,
+  settleAsyncScreen: boolean = false,
+): Promise<void> {
   await page.goto(`/iframe.html?id=${encodeURIComponent(storyId)}&viewMode=story`, {
     waitUntil: "domcontentloaded",
   });
@@ -138,7 +149,7 @@ async function gotoStory(page: Page, storyId: string): Promise<void> {
     );
   }
 
-  if (storyId.startsWith("pages-") && !storyId.includes("-loading--")) {
+  if (settleAsyncScreen) {
     await page.waitForFunction(
       () =>
         document.body.classList.contains("sb-show-errordisplay") ||
@@ -205,7 +216,7 @@ async function collectResponsiveFailures(
     await page.setViewportSize({ width: currentWidth, height: VIEWPORT_HEIGHT });
 
     try {
-      await gotoStory(page, story.id);
+      await gotoStory(page, story.id, isAsyncScreenStory(story));
     } catch (error) {
       failures.push({
         storyId: story.id,
@@ -348,7 +359,7 @@ test("自分のレビューの操作ボタンが狭い画面でも収まる", as
   skipUnlessFirstShard();
   for (const width of [320, 360, 375]) {
     await page.setViewportSize({ width, height: 812 });
-    await gotoStory(page, "components-reviewcard--own-review");
+    await gotoStory(page, "pages-shared-reviewcard--own-review");
     await expect(page.getByRole("button", { name: "削除", exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width + OVERFLOW_TOLERANCE,
@@ -364,7 +375,7 @@ test("自分のレビューの操作ボタンが狭い画面でも収まる", as
 
 test("BottomNav は tab 未満で固定され、tab 以上では非表示になる", async ({ page }) => {
   skipUnlessFirstShard();
-  const storyId = "components-bottomnav--viewport-fixed";
+  const storyId = "pages-shared-bottomnav--viewport-fixed";
   await page.setViewportSize({ width: 375, height: 812 });
   await gotoStory(page, storyId);
 
@@ -401,7 +412,7 @@ test("BottomNav は tab 未満で固定され、tab 以上では非表示にな�
 test("AppBar は tab 境界でモバイル版と PC 版を相互排他にする", async ({ page }) => {
   skipUnlessFirstShard();
   await page.setViewportSize({ width: 375, height: 812 });
-  await gotoStory(page, "components-appbar--home");
+  await gotoStory(page, "pages-shared-appbar--home");
 
   const mobileAppBar = page.locator('[data-ui="mobile-app-bar"]');
   const desktopSiteHeader = page.locator('[data-ui="desktop-site-header"]');
@@ -420,7 +431,7 @@ test("AppBar は tab 境界でモバイル版と PC 版を相互排他にする"
 test("FormPageShell は PC で用途別の有限幅を持つ", async ({ page }) => {
   skipUnlessFirstShard();
   await page.setViewportSize({ width: 1440, height: 900 });
-  await gotoStory(page, "components-formpageshell--default");
+  await gotoStory(page, "components-layout-formpageshell--default");
 
   const main = page.locator("main");
   await expect(main).toHaveCSS("max-width", "704px");
@@ -433,32 +444,32 @@ test("画像枠は画面幅が変わっても用途別のアスペクト比を�
   skipUnlessFirstShard();
   const cases = [
     {
-      storyId: "components-materialcard--scroll",
+      storyId: "pages-shared-materialcard--scroll",
       selector: '[data-ui="material-card-image"]',
       expectedRatio: 4 / 3,
     },
     {
-      storyId: "components-materialcard--list",
+      storyId: "pages-shared-materialcard--list",
       selector: '[data-ui="material-card-image"]',
       expectedRatio: 1,
     },
     {
-      storyId: "components-reportcard--scroll",
+      storyId: "pages-shared-reportcard--scroll",
       selector: '[data-ui="report-card-image"]',
       expectedRatio: 4 / 3,
     },
     {
-      storyId: "components-reportcard--grid-with-cover",
+      storyId: "pages-shared-reportcard--grid-with-cover",
       selector: '[data-ui="report-card-image"]',
       expectedRatio: 16 / 9,
     },
     {
-      storyId: "components-reportcard--list-with-cover",
+      storyId: "pages-shared-reportcard--list-with-cover",
       selector: '[data-ui="report-card-image"]',
       expectedRatio: 16 / 9,
     },
     {
-      storyId: "components-articlecard--with-cover",
+      storyId: "pages-shared-articlecard--with-cover",
       selector: '[data-ui="article-card-image"]',
       expectedRatio: 16 / 9,
     },
@@ -495,7 +506,7 @@ test("横送り用の資材カードはPCで過度に拡大しない", async ({ 
 
   for (const testCase of cases) {
     await page.setViewportSize({ width: testCase.width, height: VIEWPORT_HEIGHT });
-    await gotoStory(page, "components-materialcard--scroll");
+    await gotoStory(page, "pages-shared-materialcard--scroll");
 
     const card = page.locator('[data-ui="material-card"][data-variant="scroll"]');
     await expect(card).toBeVisible();
@@ -534,8 +545,8 @@ test("代表的な複雑 Story のスクリーンショットを 375px と 1440p
 
 test("口コミ0件の評価サマリーは表示しない", async ({ page }) => {
   skipUnlessFirstShard();
-  await gotoStory(page, "app-materials-ratingsummary--default");
+  await gotoStory(page, "pages-materials-id-ratingsummary--default");
   await expect(page.locator("#storybook-root")).toContainText("18件");
-  await gotoStory(page, "app-materials-ratingsummary--no-reviews");
+  await gotoStory(page, "pages-materials-id-ratingsummary--no-reviews");
   await expect(page.locator("#storybook-root")).toBeEmpty();
 });

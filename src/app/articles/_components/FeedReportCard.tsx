@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 
+import { Avatar } from "@/components/Avatar";
 import { formatDateJa } from "@/components/format-date";
 
 import { css } from "../../../../styled-system/css";
-import { Avatar, Chip } from "../../materials/[id]/_components/CardParts";
+import { Chip } from "../../materials/[id]/_components/CardParts";
 import { FeedCard } from "./FeedCard";
 
 const shortDate = new Intl.DateTimeFormat("ja-JP", {
@@ -49,7 +50,7 @@ export function FeedReportCard({
           color: "text.subtle",
         })}
       >
-        <Avatar name={author} src={avatarSrc} extraSmall />
+        <Avatar name={author} src={avatarSrc} size="xs" />
         <b
           className={css({
             fontWeight: "normal",

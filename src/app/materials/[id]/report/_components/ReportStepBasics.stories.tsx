@@ -37,7 +37,7 @@ const crops = [
 ];
 
 const meta = {
-  title: "App/Materials/Report/ReportStepBasics",
+  title: "Pages/materials/[id]/report/ReportStepBasics",
   component: ReportStepBasics,
   decorators: [(Story) => <div className={reportFrame}>{Story()}</div>],
   args: {

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ReportActions } from "./ReportActions";
 
 const meta = {
-  title: "App/Admin/Reports/ReportActions",
+  title: "Pages/admin/reports/ReportActions",
   component: ReportActions,
   args: {
     reportId: "00000000-0000-4000-8000-000000000401",

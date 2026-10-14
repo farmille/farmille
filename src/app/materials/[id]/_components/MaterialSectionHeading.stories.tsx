@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialSectionHeading } from "./MaterialSectionHeading";
 
 const meta = {
-  title: "App/Materials/MaterialSectionHeading",
+  title: "Pages/materials/[id]/MaterialSectionHeading",
   component: MaterialSectionHeading,
   args: { title: "感想口コミ", spacing: "section" },
 } satisfies Meta<typeof MaterialSectionHeading>;

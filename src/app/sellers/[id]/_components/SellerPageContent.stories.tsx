@@ -63,7 +63,7 @@ const data = {
 } satisfies PublicSellerPageData;
 
 const meta = {
-  title: "App/Sellers/SellerPageContent",
+  title: "Pages/sellers/[id]/SellerPageContent",
   component: SellerPageContent,
   parameters: { layout: "fullscreen" },
   decorators: [(Story) => <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>],

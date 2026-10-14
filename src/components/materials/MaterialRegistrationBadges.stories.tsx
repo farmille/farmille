@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialRegistrationBadges } from "./MaterialRegistrationBadges";
 
 const meta = {
-  title: "Materials/RegistrationBadges",
+  title: "Pages/Shared/MaterialRegistrationBadges",
   component: MaterialRegistrationBadges,
   args: {
     registrations: [

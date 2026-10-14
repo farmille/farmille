@@ -4,7 +4,7 @@ import { expect, userEvent, within } from "storybook/test";
 import { AdminMfaForms } from "./MFAForms";
 
 const meta = {
-  title: "App/Admin/MfaForms",
+  title: "Pages/admin/mfa/MFAForms",
   component: AdminMfaForms,
   args: {
     verifiedFactorId: null,

@@ -75,7 +75,7 @@ const signupForm = (
 );
 
 const meta = {
-  title: "Components/Auth/AuthScreen",
+  title: "Pages/Shared/AuthScreen",
   component: AuthScreen,
   args: {
     title: "ログイン",

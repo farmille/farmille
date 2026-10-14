@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Avatar } from "./Avatar";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { PostActions } from "./PostActions";
@@ -112,37 +113,7 @@ export function ReportCard({
   const compact = layout === "scroll" || layout === "grid";
   const authorContent = (
     <>
-      <span
-        className={css({
-          w: compact ? "18px" : "26px",
-          aspectRatio: "image.square",
-          borderRadius: "pill",
-          bg: "primary.200",
-          display: "grid",
-          placeItems: "center",
-          color: "primary.700",
-          flexShrink: "0",
-          overflow: "hidden",
-        })}
-      >
-        {avatarSrc ? (
-          <Image
-            alt=""
-            className={css({
-              display: "block",
-              w: "100%",
-              h: "100%",
-              objectFit: "cover",
-            })}
-            height={26}
-            sizes={compact ? "18px" : "26px"}
-            src={avatarSrc}
-            width={26}
-          />
-        ) : (
-          <Icon name="person" size={compact ? "2xs" : "xs"} />
-        )}
-      </span>
+      <Avatar name={author} src={avatarSrc} size={compact ? "2xs" : "xs"} />
       <span>{author}</span>
     </>
   );

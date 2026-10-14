@@ -4,7 +4,7 @@ import { RelatedMaterialsView } from "./RelatedMaterialsSection";
 import { relatedMaterials } from "./story-fixtures";
 
 const meta = {
-  title: "App/Materials/RelatedMaterialsSection",
+  title: "Pages/materials/[id]/RelatedMaterialsSection",
   component: RelatedMaterialsView,
   args: { related: relatedMaterials },
 } satisfies Meta<typeof RelatedMaterialsView>;

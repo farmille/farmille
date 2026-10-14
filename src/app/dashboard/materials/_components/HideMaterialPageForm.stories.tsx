@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { HideMaterialPageForm } from "./HideMaterialPageForm";
 const meta = {
-  title: "Manufacturer/HideMaterialPage",
+  title: "Pages/dashboard/materials/HideMaterialPageForm",
   component: HideMaterialPageForm,
   parameters: { nextjs: { appDirectory: true } },
   args: { materialId: "11111111-1111-4111-8111-111111111111" },

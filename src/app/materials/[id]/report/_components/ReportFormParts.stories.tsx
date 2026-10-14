@@ -39,7 +39,7 @@ function PartsPreview() {
 }
 
 const meta = {
-  title: "App/Materials/Report/ReportFormParts",
+  title: "Pages/materials/[id]/report/ReportFormParts",
   component: GroupHeading,
   decorators: [(Story) => <div className={reportFrame}>{Story()}</div>],
   args: { title: "栽培条件", note: "どこで・どんな環境で育てているか" },

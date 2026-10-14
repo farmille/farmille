@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { EmptyNote, ProfileSectionHeading } from "./ProfileParts";
 
 const meta = {
-  title: "App/Me/ProfileParts",
+  title: "Pages/me/ProfileParts",
   component: ProfileSectionHeading,
   args: { id: "heading", children: "これまでの投稿" },
 } satisfies Meta<typeof ProfileSectionHeading>;

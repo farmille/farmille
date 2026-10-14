@@ -1,6 +1,6 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import { notFound } from "next/navigation";
 
-import { AppBar } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { errorMessageJa } from "@/server/errors";
 import { listMaterialsForCompare } from "@/server/queries/saved-materials";
@@ -66,7 +66,7 @@ export default async function MeSavedComparePage({ searchParams }: ComparePagePr
 
   return (
     <div className={shell}>
-      <AppBar chrome="public" active="me" title="資材比較" backHref="/me/saved" />
+      <SiteAppBar chrome="public" active="me" title="資材比較" backHref="/me/saved" />
       <main className={body}>
         <CompareTable materials={result.data} />
       </main>

@@ -12,7 +12,7 @@ const photo = (n: number, caption: string | null) => ({
 });
 
 const meta = {
-  title: "Reports/ReportFigures",
+  title: "Pages/reports/[id]/ReportFigures",
   component: ReportFigures,
   decorators: [(Story) => readingFrame(Story())],
   args: { media: [photo(1, "使用区の株（7月20日）")] },

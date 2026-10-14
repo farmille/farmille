@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialPageContent } from "./MaterialPageContent";
 const meta = {
-  title: "Materials/PageContent",
+  title: "Pages/Shared/MaterialPageContent",
   component: MaterialPageContent,
   parameters: { nextjs: { appDirectory: true } },
   args: {

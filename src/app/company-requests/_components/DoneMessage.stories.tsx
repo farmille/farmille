@@ -5,7 +5,7 @@ import Link from "next/link";
 import { DoneMessage } from "./DoneMessage";
 
 const meta = {
-  title: "CompanyApplications/DoneMessage",
+  title: "Pages/company-requests/DoneMessage",
   component: DoneMessage,
   args: { title: "ご申請を受け付けました" },
 } satisfies Meta<typeof DoneMessage>;

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SurfaceCard } from "./SurfaceCard";
 
 const meta = {
-  title: "Components/SurfaceCard",
+  title: "Components/Layout/SurfaceCard",
   component: SurfaceCard,
   args: {
     title: "使用のポイント",

@@ -1,5 +1,6 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import { SavedPosts } from "./SavedPosts";
-import { AppBar } from "@/components";
+
 import { BottomNav } from "@/components/BottomNav";
 import { errorMessageJa } from "@/server/errors";
 import { listSavedMaterials } from "@/server/queries/saved-materials";
@@ -45,7 +46,7 @@ export default async function MeSavedPage() {
 
   return (
     <div className={shell}>
-      <AppBar chrome="public" active="me" title="お気に入り（★）" backHref="/me" />
+      <SiteAppBar chrome="public" active="me" title="お気に入り（★）" backHref="/me" />
       <main className={body}>
         <h1 className={css({ textStyle: "title", mb: "3" })}>お気に入りの資材</h1>
         <SavedList items={result.data} />

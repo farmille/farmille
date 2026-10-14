@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { Avatar } from "@/components/Avatar";
 import { badgeRecipe } from "@/components/Badge";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { ReportDialog } from "@/components/ReportDialog";
@@ -10,7 +11,7 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 
 import { css } from "../../styled-system/css";
 
-import { Avatar, Chip, Stars } from "@/app/materials/[id]/_components/CardParts";
+import { Chip, Stars } from "@/app/materials/[id]/_components/CardParts";
 
 const card = css(surfaceCardRecipe.raw({ padding: "cozy" }));
 
@@ -118,7 +119,7 @@ export function ProfileReviewCard({
 }: ProfileReviewCardProps) {
   const head = (
     <>
-      <Avatar name={author.handle} src={author.avatarUrl} size={30} />
+      <Avatar name={author.handle} src={author.avatarUrl} size="sm" />
       <span className={authorName}>{author.handle}</span>
     </>
   );

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { EmptyCard } from "./EmptyCard";
 
 const meta = {
-  title: "App/Materials/EmptyCard",
+  title: "Pages/materials/[id]/EmptyCard",
   component: EmptyCard,
   args: {
     title: "まだ感想口コミがありません",

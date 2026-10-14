@@ -4,7 +4,7 @@ import { MaterialReportsView } from "./MaterialReportsSection";
 import { materialDetail, materialReports } from "./story-fixtures";
 
 const meta = {
-  title: "App/Materials/MaterialReportsSection",
+  title: "Pages/materials/[id]/MaterialReportsSection",
   component: MaterialReportsView,
   args: {
     material: materialDetail,

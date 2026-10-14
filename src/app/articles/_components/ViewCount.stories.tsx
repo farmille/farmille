@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ViewCount } from "./ViewCount";
 
 const meta = {
-  title: "Articles/ViewCount",
+  title: "Pages/articles/ViewCount",
   component: ViewCount,
   args: { count: 12345 },
 } satisfies Meta<typeof ViewCount>;

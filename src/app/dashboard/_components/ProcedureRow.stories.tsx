@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ProcedureRow } from "./ProcedureRow";
 
 const meta = {
-  title: "Dashboard/ProcedureRow",
+  title: "Pages/dashboard/ProcedureRow",
   component: ProcedureRow,
   args: {
     heading: "h3",

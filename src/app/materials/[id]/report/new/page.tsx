@@ -1,8 +1,9 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { css } from "../../../../../../styled-system/css";
-import { AppBar } from "@/components/AppBar";
+
 import { getOwnRegisteredAddress } from "@/server/accounts/registered-address";
 import { errorMessageJa } from "@/server/errors";
 import { requireGeneralUser } from "@/server/auth";
@@ -62,7 +63,7 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
   if (formData.submitted.length > 0) {
     return (
       <div className={shell}>
-        <AppBar
+        <SiteAppBar
           chrome="public"
           active="post"
           title="実証詳細レポート"

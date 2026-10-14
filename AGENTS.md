@@ -45,6 +45,7 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 - **エラー表示**：例外を握り潰さない。404・403・500 をユーザーに意味の伝わる日本語で出し分ける（`error.tsx`・`not-found.tsx` を必ず置く）
 - **完了の定義**：型チェックと lint が通っただけでは完了としない。**375px の実画面で対象フローを操作し、スクリーンショットを添えて初めて完了**
 - **共通化**：同じ UI パターンを3回書く前に共通コンポーネント化する。ページ内に長大なインライン JSX と業務ロジックを同居させない
+- **Story の title**：画面に依存しない基礎部品は `Components/<役割>/<名前>`、画面に依存する部品は置き場のルートに沿って `Pages/<ルート>/<名前>`、複数画面で使うが基礎部品と言えないものは `Pages/Shared/<名前>`、デザイントークンは `Tokens`。ルート画面の Story（`Page`・`Error`・`NotFound`・`Loading`）は `Pages/<ルート>`。基礎部品を整えたら、`Pages/Shared` から `Components` へ移す
 - **ファイル名と Story**：独自コンポーネントの `.tsx` ファイル名は PascalCase にする（例：`ProfileEditForm.tsx`）。Story は `ProfileEditForm.stories.tsx` として、すべての独自コンポーネントに置く（`pnpm check:stories` で確かめる）。`page.tsx`・`layout.tsx`・`error.tsx`・`not-found.tsx` など、App Router の予約ファイルだけは小文字のままにする
 
 ## 構造の決まり
@@ -73,7 +74,7 @@ pnpm build-storybook && pnpm test:storybook:responsive
 pnpm test:e2e
 ```
 
-E2E はローカルの Supabase を起動し、CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数を入れてから流す。CI はこれらに加えて `pnpm audit --audit-level=high` と `pnpm check:security-patches` を回す。すべて緑になっても完了ではない（実装規約の「完了の定義」を参照）。
+E2E はローカルの Supabase を起動し、CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数を入れてから流す。CI はこれらに加えて `pnpm audit --audit-level=high` を回す。すべて緑になっても完了ではない（実装規約の「完了の定義」を参照）。
 
 ## 依存の監査
 

@@ -3,7 +3,7 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { ProfileTagsEditor } from "./ProfileTagsEditor";
 const meta = {
-  title: "App/Me/ProfileTagsEditor",
+  title: "Pages/me/edit/ProfileTagsEditor",
   component: ProfileTagsEditor,
   args: {
     details: {

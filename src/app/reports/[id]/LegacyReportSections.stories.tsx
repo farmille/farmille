@@ -6,7 +6,7 @@ import { LegacyReportSections } from "./LegacyReportSections";
 import { legacyReport } from "./story-fixtures";
 
 const meta = {
-  title: "Reports/LegacyReportSections",
+  title: "Pages/reports/[id]/LegacyReportSections",
   component: LegacyReportSections,
   decorators: [(Story) => readingFrame(Story())],
   args: { report: legacyReport, coverId: null },

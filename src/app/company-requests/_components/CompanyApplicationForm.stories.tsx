@@ -4,7 +4,7 @@ import { css } from "../../../../styled-system/css";
 import { CompanyApplicationForm } from "./CompanyApplicationForm";
 import { emptyContact } from "./ContactFields";
 const meta = {
-  title: "CompanyApplications/CompanyApplicationForm",
+  title: "Pages/company-requests/CompanyApplicationForm",
   component: CompanyApplicationForm,
   parameters: { nextjs: { appDirectory: true } },
   args: {

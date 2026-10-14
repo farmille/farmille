@@ -8,7 +8,7 @@ import { ReportArticleEditor } from "./ReportArticleEditor";
 import { filledReport } from "./reportStoryFixture";
 
 const meta = {
-  title: "App/Materials/Report/ReportArticleEditor",
+  title: "Pages/materials/[id]/report/ReportArticleEditor",
   component: ReportArticleEditor,
   args: {
     input: filledReport,

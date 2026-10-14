@@ -4,7 +4,7 @@ import { userEvent, within } from "storybook/test";
 import { ReviewOwnerActions } from "./ReviewOwnerActions";
 
 const meta = {
-  title: "Components/ReviewOwnerActions",
+  title: "Pages/Shared/ReviewOwnerActions",
   component: ReviewOwnerActions,
   args: {
     materialId: "material-001",

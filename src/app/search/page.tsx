@@ -1,7 +1,8 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-import { AppBar, EmptyState } from "@/components";
+import { EmptyState } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import {
   formatLogicHint,
@@ -51,7 +52,7 @@ const main = css({
 function SearchPageShell({ searchQuery, children }: { searchQuery?: string; children: ReactNode }) {
   return (
     <div className={shell}>
-      <AppBar
+      <SiteAppBar
         chrome="public"
         active="search"
         title="BS資材を探す"

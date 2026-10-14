@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ApplicationsContent } from "./ApplicationsContent";
 
 const meta = {
-  title: "Dashboard/ApplicationsContent",
+  title: "Pages/dashboard/applications/ApplicationsContent",
   component: ApplicationsContent,
   args: {
     receipts: [

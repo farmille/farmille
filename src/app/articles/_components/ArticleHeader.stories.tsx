@@ -5,7 +5,7 @@ import { readingFrame } from "./story-frame";
 import { ArticleHeader } from "./ArticleHeader";
 
 const meta = {
-  title: "Articles/ArticleHeader",
+  title: "Pages/articles/ArticleHeader",
   component: ArticleHeader,
   decorators: [(Story) => readingFrame(Story())],
   args: {

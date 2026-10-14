@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ApplicationReceivedHeader } from "./ApplicationReceivedHeader";
 
 const meta = {
-  title: "Dashboard/ApplicationReceivedHeader",
+  title: "Pages/dashboard/applications/ApplicationReceivedHeader",
   component: ApplicationReceivedHeader,
   args: { title: "資材掲載・資材オーナー権限申請フォーム" },
 } satisfies Meta<typeof ApplicationReceivedHeader>;

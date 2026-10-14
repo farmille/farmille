@@ -1,7 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { userEvent, within } from "storybook/test";
 
+import { Avatar } from "./Avatar";
 import { DesktopAccountMenu } from "./DesktopAccountMenu";
+
+const photo =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="152" height="152"><rect width="152" height="152" fill="#C8E6C9"/><circle cx="76" cy="60" r="28" fill="#2E7D32"/></svg>',
+  );
 
 const SESSION_COOKIE = "sb-storybook-auth-token";
 
@@ -10,7 +17,7 @@ async function openMenu({ canvasElement }: { canvasElement: HTMLElement }) {
 }
 
 const meta = {
-  title: "Components/DesktopAccountMenu",
+  title: "Pages/Shared/DesktopAccountMenu",
   component: DesktopAccountMenu,
   args: { myPageCurrent: false },
   parameters: { layout: "centered" },
@@ -32,4 +39,9 @@ export const MyPage: Story = {
     };
   },
   play: openMenu,
+};
+
+/** 設定した画像があるときは、人型アイコンの代わりにその画像を出す。 */
+export const WithAvatar: Story = {
+  args: { avatar: <Avatar name="緑の畑" src={photo} size="md" /> },
 };

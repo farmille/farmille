@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { LoginForm } from "./LoginForm";
 
 const meta = {
-  title: "App/Auth/LoginForm",
+  title: "Pages/login/LoginForm",
   component: LoginForm,
   args: { next: null },
 } satisfies Meta<typeof LoginForm>;

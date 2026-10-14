@@ -1,7 +1,8 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import { Suspense } from "react";
 import { SkeletonList } from "@/components/SkeletonList";
 
-import { AppBar, MaterialCard, SectionHeading } from "@/components";
+import { MaterialCard, SectionHeading } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { getSessionUser } from "@/server/auth";
 import { listHomeMaterials } from "@/server/queries/home-materials";
@@ -31,7 +32,7 @@ export default function HomePage() {
         fontFamily: "sans",
       })}
     >
-      <AppBar chrome="public" active="home" variant="home" overlapNoticeImage />
+      <SiteAppBar chrome="public" active="home" variant="home" overlapNoticeImage />
       <main>
         <HomeHero />
         <div

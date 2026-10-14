@@ -11,7 +11,7 @@ const toggleAction = fn(
 );
 
 const meta = {
-  title: "App/Materials/SaveControl",
+  title: "Pages/materials/[id]/SaveControl",
   component: SaveControl,
   args: {
     materialId: "00000000-0000-4000-8000-000000000101",

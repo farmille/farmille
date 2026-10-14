@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { Avatar } from "@/components/Avatar";
 import { Icon } from "@/components/Icon";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 
 import { css, sva } from "../../../../../styled-system/css";
 
-import { Avatar, Chip } from "./CardParts";
+import { Chip } from "./CardParts";
 
 const cardRecipe = sva({
   slots: ["root", "cover", "body", "title"],
@@ -113,7 +114,7 @@ export function UsageReportCard({
           {title}
         </Link>
         <div className={bylineStyle}>
-          <Avatar name={author} src={avatarSrc} extraSmall />
+          <Avatar name={author} src={avatarSrc} size="xs" />
           <b className={authorStyle}>{author}</b>
           {crop ? <Chip>{crop}</Chip> : null}
         </div>

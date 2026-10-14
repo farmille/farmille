@@ -1,16 +1,10 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { Suspense } from "react";
 import { SkeletonList } from "@/components/SkeletonList";
 import type { Metadata } from "next";
 
-import {
-  AppBar,
-  ArticleCard,
-  ArticlesToolbar,
-  EmptyState,
-  Pagination,
-  ReportCard,
-} from "@/components";
+import { ArticleCard, ArticlesToolbar, EmptyState, Pagination, ReportCard } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
@@ -112,7 +106,7 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
 
   return (
     <div className={shell}>
-      <AppBar chrome="public" active="articles" title="記事を読む" backHref="/" />
+      <SiteAppBar chrome="public" active="articles" title="記事を読む" backHref="/" />
       <main className={main}>
         <h1 className={pageTitle}>記事を読む</h1>
         <ArticlesToolbar filter={filter} q={q} />

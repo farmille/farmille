@@ -36,7 +36,7 @@ const report: UsageReportEditorialDetail = {
 };
 
 const meta = {
-  title: "App/Admin/UsageReports/EditorialForm",
+  title: "Pages/admin/usage-reports/[id]/EditorialForm",
   component: UsageReportEditorialForm,
   args: { report },
 } satisfies Meta<typeof UsageReportEditorialForm>;

@@ -16,7 +16,7 @@ const sellers = [
 ];
 
 const meta = {
-  title: "App/Admin/Materials/ClaimForm",
+  title: "Pages/admin/materials/[id]/ClaimForm",
   component: ClaimForm,
   args: {
     currentSellerId: sellers[0].id,

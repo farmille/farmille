@@ -5,7 +5,7 @@ import { RatingSummary } from "./RatingSummary";
 import { detailedReview, materialReviews, withdrawnReview } from "./story-fixtures";
 
 const meta = {
-  title: "App/Materials/MaterialReviewsSection",
+  title: "Pages/materials/[id]/MaterialReviewsSection",
   component: MaterialReviewsSection,
   args: {
     materialPath: "/materials/storybook",

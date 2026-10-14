@@ -12,7 +12,7 @@ const filled = filledReport.measurements[0];
 if (!measurement?.graphs[0] || !filled?.graphs[0])
   throw new Error("グラフの初期データがありません。");
 const meta = {
-  title: "App/Materials/Report/ReportGraphEditor",
+  title: "Pages/materials/[id]/report/ReportGraphEditor",
   component: ReportGraphEditor,
   args: {
     measurement,

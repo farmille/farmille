@@ -5,7 +5,7 @@ import { ReportPublishedView } from "./ReportPublishedView";
 import { filledReport } from "./reportStoryFixture";
 
 const meta = {
-  title: "App/Materials/Report/ReportPublishedView",
+  title: "Pages/materials/[id]/report/ReportPublishedView",
   component: ReportPublishedView,
   args: {
     open: true,

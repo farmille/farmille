@@ -2,7 +2,7 @@
 
 import { Menu } from "@base-ui/react/menu";
 import Link from "next/link";
-import { useId, useState } from "react";
+import { Suspense, useId, useState, type ReactNode } from "react";
 
 import { Icon } from "@/components/Icon";
 import { css } from "../../styled-system/css";
@@ -99,7 +99,15 @@ function hasAuthSession(): boolean {
   });
 }
 
-export function DesktopAccountMenu({ myPageCurrent }: { myPageCurrent: boolean }) {
+const personIcon = <Icon name="person" size="md" />;
+
+type DesktopAccountMenuProps = {
+  myPageCurrent: boolean;
+  /** ボタンに出す本人の画像。サーバー側で取得して描いたものを受け取る。無ければ人型アイコン。 */
+  avatar?: ReactNode;
+};
+
+export function DesktopAccountMenu({ myPageCurrent, avatar }: DesktopAccountMenuProps) {
   const [signedIn, setSignedIn] = useState(false);
   const logoutFormId = useId();
   const entries = signedIn ? MEMBER_ENTRIES : GUEST_ENTRIES;
@@ -111,7 +119,7 @@ export function DesktopAccountMenu({ myPageCurrent }: { myPageCurrent: boolean }
       }}
     >
       <Menu.Trigger className={trigger} aria-label="アカウント">
-        <Icon name="person" size="md" />
+        <Suspense fallback={personIcon}>{avatar ?? personIcon}</Suspense>
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner align="end" sideOffset={6} className={popupPositionerStyle}>

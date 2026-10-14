@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { HomeHero } from "./HomeHero";
 
 const meta = {
-  title: "App/Home/HomeHero",
+  title: "Pages/Home/HomeHero",
   component: HomeHero,
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof HomeHero>;

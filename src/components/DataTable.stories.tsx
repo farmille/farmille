@@ -51,7 +51,7 @@ const wideColumns: DataTableColumn<MaterialRow>[] = [
 ];
 
 const meta = {
-  title: "Components/DataTable",
+  title: "Components/Display/DataTable",
   component: DataTable<MaterialRow>,
   args: {
     columns,

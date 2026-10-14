@@ -5,7 +5,7 @@ import { removePublishedPostAction } from "./actions";
 import { RemovalForm } from "./RemovalForm";
 
 const meta = {
-  title: "App/Admin/PublishedPosts/RemovalForm",
+  title: "Pages/admin/published-posts/RemovalForm",
   component: RemovalForm,
   args: { id: "00000000-0000-4000-8000-000000000401", type: "review" },
 } satisfies Meta<typeof RemovalForm>;

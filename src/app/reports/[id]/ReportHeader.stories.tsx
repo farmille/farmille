@@ -6,7 +6,7 @@ import { ReportHeader } from "./ReportHeader";
 import { legacyReport } from "./story-fixtures";
 
 const meta = {
-  title: "Reports/ReportHeader",
+  title: "Pages/reports/[id]/ReportHeader",
   component: ReportHeader,
   decorators: [(Story) => readingFrame(Story())],
   args: {

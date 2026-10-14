@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SellerAccessDenied } from "./AccessDenied";
 
 const meta = {
-  title: "App/Dashboard/SellerAccessDenied",
+  title: "Pages/dashboard/AccessDenied",
   component: SellerAccessDenied,
   args: { backHref: "/" },
 } satisfies Meta<typeof SellerAccessDenied>;

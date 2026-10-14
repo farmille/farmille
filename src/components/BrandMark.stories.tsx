@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BrandMark } from "./BrandMark";
 
-const meta = { title: "Components/BrandMark", component: BrandMark } satisfies Meta<
+const meta = { title: "Components/Display/BrandMark", component: BrandMark } satisfies Meta<
   typeof BrandMark
 >;
 export default meta;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, type ReactNode } from "react";
 
 import {
   Field,
@@ -12,7 +12,6 @@ import {
   SubmitButton,
   Textarea,
 } from "@/components/form";
-import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { TextLink } from "@/components/TextLink";
 import { HANDLE_MAX_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
@@ -43,28 +42,24 @@ const slot = css({
 
 const avatarCurrent = css({
   mt: "1",
+  display: "flex",
+  alignItems: "center",
+  gap: "1.5",
   color: "text.subtle",
   textStyle: "note",
-  "& img": {
-    display: "inline-block",
-    w: "7",
-    h: "7",
-    mr: "1.5",
-    borderRadius: "pill",
-    objectFit: "cover",
-    verticalAlign: "middle",
-  },
 });
 
 const srOnly = css({ srOnly: true });
 
 type ProfileEditFormProps = {
+  /** 現在のアイコン。Avatar は絵柄のデータが大きいため、サーバー側で描いて受け取る。 */
+  avatar: ReactNode;
   profile: OwnProfile;
   details: ProfileDetails;
   options: ProfileOptions;
 };
 
-export function ProfileEditForm({ profile, details, options }: ProfileEditFormProps) {
+export function ProfileEditForm({ avatar, profile, details, options }: ProfileEditFormProps) {
   const [state, formAction] = useActionState(updateProfileAction, initialAuthFormState);
   const values = submittedValuesOf(state);
 
@@ -86,14 +81,10 @@ export function ProfileEditForm({ profile, details, options }: ProfileEditFormPr
             <FileInput accept="image/jpeg,image/png,image/webp" />
           </Field>
           <div className={avatarCurrent}>
-            {profile.avatarUrl ? (
-              <>
-                <Image alt="" src={profile.avatarUrl} width={28} height={28} sizes="28px" />
-                現在：設定した画像を表示中
-              </>
-            ) : (
-              `現在：頭文字「${profile.handle.trim().slice(0, 1)}」を表示中`
-            )}
+            {avatar}
+            {profile.avatarUrl
+              ? "現在：設定した画像を表示中"
+              : "現在：自動で選ばれたイラストを表示中"}
           </div>
         </div>
       </div>

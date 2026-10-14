@@ -12,7 +12,7 @@ const article = {
 };
 
 const meta = {
-  title: "App/Dashboard/Articles/ArticleListItem",
+  title: "Pages/dashboard/articles/ArticleListItem",
   component: ArticleListItem,
   args: { article },
   parameters: {

@@ -44,6 +44,12 @@ h6 {
     --corner-superellipse: 1.4;
   }
 
+  /* scrollbar-width は継承されないので、スクロール領域ごとに効くよう * に指定する。 */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--colors-text-subtle) transparent;
+  }
+
   /* 角丸を持つ要素と疑似要素の角を滑らかにつなぐ。 */
   :where(*),
   :where(*)::before,

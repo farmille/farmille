@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialIllustration } from "./MaterialIllustration";
 
 const meta = {
-  title: "Materials/MaterialIllustration",
+  title: "Pages/Shared/MaterialIllustration",
   component: MaterialIllustration,
   args: { imageUrl: "/images/container-shapes/5.png" },
 } satisfies Meta<typeof MaterialIllustration>;

@@ -7,7 +7,7 @@ import { ManufacturerLanding } from "./ManufacturerLanding";
 const canvas = css({ p: "4", bg: "surface.panel" });
 
 const meta = {
-  title: "App/Sellers/ManufacturerLanding",
+  title: "Pages/sellers/ManufacturerLanding",
   component: ManufacturerLanding,
   args: { applyHref: "/sellers/apply" },
   parameters: { layout: "fullscreen" },

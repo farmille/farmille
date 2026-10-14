@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ArticlesToolbar } from "./ArticlesToolbar";
 
 const meta = {
-  title: "Components/ArticlesToolbar",
+  title: "Pages/Shared/ArticlesToolbar",
   component: ArticlesToolbar,
   args: {
     filter: "all",

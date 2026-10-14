@@ -9,7 +9,7 @@ const materialPhoto =
   );
 
 const meta = {
-  title: "Components/OptimizedImage",
+  title: "Components/Display/OptimizedImage",
   component: OptimizedImage,
   args: {
     src: materialPhoto,

@@ -4,7 +4,7 @@ import { css } from "../../../../styled-system/css";
 
 import { EvidenceFields } from "./EvidenceFields";
 const meta = {
-  title: "CompanyApplications/EvidenceFields",
+  title: "Pages/company-requests/EvidenceFields",
   component: EvidenceFields,
   parameters: { nextjs: { appDirectory: true } },
   args: {

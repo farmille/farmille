@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { QueryFilter } from "./QueryFilter";
 
 const meta = {
-  title: "App/Admin/QueryFilter",
+  title: "Pages/admin/QueryFilter",
   component: QueryFilter,
   args: {
     ariaLabel: "確認状態で絞り込む",

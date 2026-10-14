@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SectionHeading } from "./SectionHeading";
 
 const meta = {
-  title: "Components/SectionHeading",
+  title: "Components/Layout/SectionHeading",
   component: SectionHeading,
   args: {
     title: "人気の資材",

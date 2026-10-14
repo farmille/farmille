@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PreparationNotice } from "./PreparationNotice";
 
 const meta = {
-  title: "Components/PreparationNotice",
+  title: "Components/Feedback/PreparationNotice",
   component: PreparationNotice,
 } satisfies Meta<typeof PreparationNotice>;
 

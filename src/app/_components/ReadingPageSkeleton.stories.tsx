@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ReadingPageSkeleton } from "./ReadingPageSkeleton";
 const meta = {
-  title: "App/ReadingPageSkeleton",
+  title: "Pages/Home/ReadingPageSkeleton",
   component: ReadingPageSkeleton,
   args: { title: "実証詳細レポート", variant: "report" },
   parameters: { layout: "fullscreen" },

@@ -4,7 +4,7 @@ import { Panel } from "./AdminUI";
 import { AdminShell } from "./AdminShell";
 
 const meta = {
-  title: "App/Admin/AdminShell",
+  title: "Pages/admin/AdminShell",
   component: AdminShell,
   args: {
     title: "メーカー確認",

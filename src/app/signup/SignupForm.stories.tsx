@@ -7,7 +7,7 @@ import { SignupForm } from "./SignupForm";
 const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
 
 const meta = {
-  title: "App/Auth/SignupForm",
+  title: "Pages/signup/SignupForm",
   component: SignupForm,
   decorators: [fmDecorator],
   args: { email: "farmer@example.test", termsContent: <RegistrationTerms /> },

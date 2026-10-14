@@ -31,7 +31,7 @@ const cropError = { cropIds: "作物を1つ以上選んでください。" };
 const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
 
 const meta = {
-  title: "App/Materials/Review/ReviewCropPicker",
+  title: "Pages/materials/[id]/review/ReviewCropPicker",
   component: ReviewCropPicker,
   decorators: [fmDecorator],
   args: {

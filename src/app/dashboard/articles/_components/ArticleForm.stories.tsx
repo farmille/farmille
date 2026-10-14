@@ -4,7 +4,7 @@ import { expect, userEvent, within } from "storybook/test";
 import { ArticleForm } from "./ArticleForm";
 
 const meta = {
-  title: "App/Dashboard/Articles/ArticleForm",
+  title: "Pages/dashboard/articles/ArticleForm",
   component: ArticleForm,
   args: {
     sellerId: "00000000-0000-4000-8000-000000000201",

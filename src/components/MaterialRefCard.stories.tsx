@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialRefCard } from "./MaterialRefCard";
 
 const meta = {
-  title: "Components/MaterialRefCard",
+  title: "Pages/Shared/MaterialRefCard",
   component: MaterialRefCard,
   args: {
     href: "/materials/mat-001",

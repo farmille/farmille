@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialDescriptionBox, MaterialTimingBox } from "./MaterialOverview";
 
 const meta = {
-  title: "App/Materials/MaterialOverview",
+  title: "Pages/materials/[id]/MaterialOverview",
   component: MaterialDescriptionBox,
   args: {
     description:

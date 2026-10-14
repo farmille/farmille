@@ -16,7 +16,7 @@ const initialValues = {
 const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
 
 const meta = {
-  title: "App/Materials/Review/ReviewForm",
+  title: "Pages/materials/[id]/review/ReviewForm",
   component: ReviewForm,
   decorators: [fmDecorator],
   args: {

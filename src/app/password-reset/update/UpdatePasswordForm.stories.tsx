@@ -4,7 +4,7 @@ import { userEvent, within } from "storybook/test";
 import { UpdatePasswordForm } from "./UpdatePasswordForm";
 
 const meta = {
-  title: "App/Auth/UpdatePasswordForm",
+  title: "Pages/password-reset/update/UpdatePasswordForm",
   component: UpdatePasswordForm,
   args: { tokenHash: "storybook-token-not-valid-for-authentication" },
 } satisfies Meta<typeof UpdatePasswordForm>;

@@ -10,7 +10,7 @@ const organizationRows: DataListRow[] = [
 ];
 
 const meta = {
-  title: "Components/DataList",
+  title: "Components/Display/DataList",
   component: DataList,
   args: {
     rows: organizationRows,

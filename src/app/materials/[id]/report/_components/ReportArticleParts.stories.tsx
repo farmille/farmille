@@ -7,7 +7,7 @@ const graph = filledReport.measurements[0]?.graphs[0];
 if (!graph) throw new Error("グラフの初期データがありません。");
 
 const meta = {
-  title: "App/Materials/Report/ReportArticleParts",
+  title: "Pages/materials/[id]/report/ReportArticleParts",
   component: PlotList,
   args: { plots: filledReport.plots },
 } satisfies Meta<typeof PlotList>;

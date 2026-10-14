@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import ReceiptAccessPage from "./page";
 
 const meta = {
-  title: "CompanyApplications/ReceiptAccessPage",
+  title: "Pages/company-requests/receipts/ReceiptAccessPage",
   component: ReceiptAccessPage,
 } satisfies Meta<typeof ReceiptAccessPage>;
 export default meta;

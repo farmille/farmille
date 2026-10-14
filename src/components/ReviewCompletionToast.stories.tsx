@@ -26,7 +26,7 @@ function withReviewQuery(value: "posted" | "updated" | "deleted" | null) {
 }
 
 const meta = {
-  title: "Components/ReviewCompletionToast",
+  title: "Pages/Shared/ReviewCompletionToast",
   component: ReviewCompletionToast,
   decorators: [
     (Story) => (

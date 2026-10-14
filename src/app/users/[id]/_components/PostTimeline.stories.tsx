@@ -4,7 +4,7 @@ import { PostTimeline } from "./PostTimeline";
 import { publicPosts, publicProfile } from "./story-fixtures";
 
 const meta = {
-  title: "App/Users/PostTimeline",
+  title: "Pages/users/[id]/PostTimeline",
   component: PostTimeline,
   args: { profile: publicProfile, posts: publicPosts, viewerUserId: null },
 } satisfies Meta<typeof PostTimeline>;

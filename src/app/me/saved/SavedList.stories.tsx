@@ -4,7 +4,7 @@ import { savedMaterials } from "../_components/story-fixtures";
 import { SavedList } from "./SavedList";
 
 const meta = {
-  title: "App/Me/Saved/SavedList",
+  title: "Pages/me/saved/SavedList",
   component: SavedList,
   args: { items: savedMaterials },
 } satisfies Meta<typeof SavedList>;

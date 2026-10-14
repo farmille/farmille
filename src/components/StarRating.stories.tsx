@@ -6,7 +6,7 @@ import { Fieldset } from "./form/Fieldset";
 import { StarRating } from "./StarRating";
 
 const meta = {
-  title: "Components/StarRating",
+  title: "Components/Display/StarRating",
   component: StarRating,
 } satisfies Meta<typeof StarRating>;
 

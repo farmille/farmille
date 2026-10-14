@@ -30,7 +30,7 @@ const materials = [
 const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
 
 const meta = {
-  title: "App/Post/MaterialPicker",
+  title: "Pages/post/MaterialPicker",
   component: MaterialPicker,
   decorators: [fmDecorator],
   args: { materials, query: "" },

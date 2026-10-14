@@ -8,7 +8,7 @@ import {
 } from "./MaterialCompliance";
 
 const meta = {
-  title: "App/Materials/MaterialCompliance",
+  title: "Pages/materials/[id]/MaterialCompliance",
   component: MaterialPageCompliance,
   args: { makerVerified: true },
 } satisfies Meta<typeof MaterialPageCompliance>;

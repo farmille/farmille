@@ -5,7 +5,7 @@ import { ArticleGrid } from "./FeedCard";
 import { OrgArticleCard } from "./OrgArticleCard";
 
 const meta = {
-  title: "Articles/OrgArticleCard",
+  title: "Pages/articles/OrgArticleCard",
   component: OrgArticleCard,
   decorators: [(Story) => <ArticleGrid>{Story()}</ArticleGrid>],
   args: {

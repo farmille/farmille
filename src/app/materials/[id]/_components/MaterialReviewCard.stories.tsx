@@ -8,7 +8,7 @@ import { detailedReview, materialReviews, withdrawnReview } from "./story-fixtur
 const review = materialReviews[0];
 
 const meta = {
-  title: "App/Materials/MaterialReviewCard",
+  title: "Pages/materials/[id]/MaterialReviewCard",
   component: MaterialReviewCard,
   args: {
     review,

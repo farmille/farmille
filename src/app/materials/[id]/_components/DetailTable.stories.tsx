@@ -5,7 +5,7 @@ import { MaterialDetailTable } from "./DetailTable";
 import { materialDetail } from "./story-fixtures";
 
 const meta = {
-  title: "App/Materials/DetailTable",
+  title: "Pages/materials/[id]/DetailTable",
   component: MaterialDetailTable,
   args: { material: materialDetail },
 } satisfies Meta<typeof MaterialDetailTable>;

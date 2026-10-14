@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { UiKitInteractiveDemos } from "./Interactive";
 
 const meta = {
-  title: "App/Dev/UiKitInteractiveDemos",
+  title: "Pages/dev/ui/Interactive",
   component: UiKitInteractiveDemos,
 } satisfies Meta<typeof UiKitInteractiveDemos>;
 

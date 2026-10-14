@@ -21,7 +21,7 @@ const duplicateErrorAction = fn(
 ).mockName("createReportActionError");
 
 const meta = {
-  title: "Components/ReportDialog",
+  title: "Pages/Shared/ReportDialog",
   component: ReportDialog,
   args: {
     action: successAction,

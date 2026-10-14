@@ -1,10 +1,10 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { AppBar } from "@/components";
 import { HelpfulButton } from "@/components/HelpfulButton";
 import { ReportDialog } from "@/components/ReportDialog";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
@@ -137,7 +137,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
       />
-      <AppBar
+      <SiteAppBar
         chrome="public"
         active="articles"
         title={article.title}

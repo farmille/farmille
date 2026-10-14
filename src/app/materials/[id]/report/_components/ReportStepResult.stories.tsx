@@ -16,7 +16,7 @@ const effects = [
 ];
 
 const meta = {
-  title: "App/Materials/Report/ReportStepResult",
+  title: "Pages/materials/[id]/report/ReportStepResult",
   component: ReportStepResult,
   decorators: [(Story) => <div className={reportFrame}>{Story()}</div>],
   args: {

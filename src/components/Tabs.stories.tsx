@@ -35,7 +35,7 @@ function EditorTabs({ initial }: { initial: "write" | "preview" }) {
 }
 
 const meta = {
-  title: "Components/Tabs",
+  title: "Components/Navigation/Tabs",
   component: EditorTabs,
   args: { initial: "write" },
 } satisfies Meta<typeof EditorTabs>;
