@@ -1,17 +1,25 @@
 @layer reset, base, tokens, recipes, utilities;
 
-/* 英数字だけを自前配信の Inter にし、記号と日本語は各役割の書体を使う。 */
+/* 見出しの英数字も Gen Interface JP の元の字形を使う（700 の配信サブセット）。 */
 @font-face {
-  font-family: "Inter Latin";
+  font-family: "Gen Interface JP Latin";
   font-style: normal;
+  font-weight: 700;
   font-display: swap;
-  font-weight: 100 900;
-  src: url("@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2");
-  unicode-range: U+0030-0039, U+0041-005A, U+0061-007A;
+  src: url("gen-interface-jp/w/normal/700/117.woff2") format("woff2");
+  unicode-range: U+004E;
+}
+
+@font-face {
+  font-family: "Gen Interface JP Latin";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("gen-interface-jp/w/normal/700/118.woff2") format("woff2");
+  unicode-range: U+0030-0039, U+0041-004D, U+004F-005A, U+0061-007A;
 }
 
 body {
-  /* 本文は Gen Interface JP、英数字は Inter。 */
   font-family: var(--fonts-sans);
   letter-spacing: var(--letter-spacings-body);
   text-autospace: normal;
