@@ -158,10 +158,14 @@ const viewports = {
   },
 };
 
+// ルート画面（page / error / not-found / loading）の Story だけに通知の置き場を足す。
+// Story の title は部品の置き場でも Pages 配下に入るため、title では見分けない。
+const ROUTE_STORY_FILE = /\/(Page|Error|NotFound|Loading)\.stories\.tsx$/;
+
 const preview: Preview = {
   decorators: [
     (Story, context) =>
-      context.title.startsWith("Pages/")
+      ROUTE_STORY_FILE.test(context.parameters.fileName)
         ? createElement(Fragment, null, createElement(Story), createElement(Toaster))
         : createElement(Story),
   ],

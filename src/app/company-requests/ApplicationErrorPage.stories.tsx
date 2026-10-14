@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 import ApplicationErrorPage from "./error";
 
 const meta = {
-  title: "CompanyApplications/ApplicationErrorPage",
+  title: "Pages/company-requests/ApplicationErrorPage",
   component: ApplicationErrorPage,
   args: { unstable_retry: fn() },
 } satisfies Meta<typeof ApplicationErrorPage>;

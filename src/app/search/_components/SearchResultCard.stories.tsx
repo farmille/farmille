@@ -5,7 +5,7 @@ import { SearchResultCard } from "./SearchResultCard";
 import { storyThumbnail } from "./story-fixtures";
 
 const meta = {
-  title: "App/Search/SearchResultCard",
+  title: "Pages/search/SearchResultCard",
   component: SearchResultCard,
   decorators: [(Story) => <div className={css({ p: "4" })}>{Story()}</div>],
   args: {

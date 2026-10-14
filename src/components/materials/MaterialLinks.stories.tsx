@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialLinks } from "./MaterialLinks";
 
 const meta = {
-  title: "Materials/Links",
+  title: "Pages/Shared/MaterialLinks",
   component: MaterialLinks,
   args: {
     links: [

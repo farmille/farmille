@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { DashboardTabs } from "./DashboardTabs";
 const meta = {
-  title: "Dashboard/DashboardTabs",
+  title: "Pages/dashboard/DashboardTabs",
   component: DashboardTabs,
   args: { active: "dash" },
 } satisfies Meta<typeof DashboardTabs>;

@@ -16,7 +16,7 @@ const sampleAvatar =
   );
 
 const meta = {
-  title: "Components/ReviewCard",
+  title: "Pages/Shared/ReviewCard",
   component: ReviewCard,
   args: {
     handle: "トマト農家12年目",

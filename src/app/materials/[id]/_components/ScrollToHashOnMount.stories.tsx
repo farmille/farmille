@@ -7,7 +7,7 @@ import { ScrollToHashOnMount } from "./ScrollToHashOnMount";
 const noteStyle = css({ color: "text.subtle", fontSize: "sm" });
 
 const meta = {
-  title: "App/Materials/ScrollToHashOnMount",
+  title: "Pages/materials/[id]/ScrollToHashOnMount",
   component: ScrollToHashOnMount,
   args: { targetId: "reviews-heading", trigger: 1 },
   render: (args) => (

@@ -10,7 +10,7 @@ import { reportFrame } from "./ReportFormParts";
 const blank = createBlankUsageReport("00000000-0000-4000-8000-000000000101");
 
 const meta = {
-  title: "App/Materials/Report/ReportStepConditions",
+  title: "Pages/materials/[id]/report/ReportStepConditions",
   component: ReportStepConditions,
   decorators: [(Story) => <div className={reportFrame}>{Story()}</div>],
   args: {

@@ -4,7 +4,7 @@ import { css } from "../../styled-system/css";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "./Collapsible";
 
 const meta = {
-  title: "Components/Collapsible",
+  title: "Components/Display/Collapsible",
   component: Collapsible,
   args: { children: null },
 } satisfies Meta<typeof Collapsible>;

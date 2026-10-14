@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { RequestDecisionForm } from "./RequestDecisionForm";
 
 const meta = {
-  title: "App/Admin/Materials/RequestDecisionForm",
+  title: "Pages/admin/materials/requests/[id]/RequestDecisionForm",
   component: RequestDecisionForm,
   args: {
     requestId: "00000000-0000-4000-8000-000000000501",

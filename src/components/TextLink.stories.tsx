@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TextLink } from "./TextLink";
 
 const meta = {
-  title: "Components/TextLink",
+  title: "Components/Actions/TextLink",
   component: TextLink,
   args: {
     children: "資材の詳細を見る",

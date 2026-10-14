@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SkeletonList } from "./SkeletonList";
 const meta = {
-  title: "Components/SkeletonList",
+  title: "Components/Feedback/SkeletonList",
   component: SkeletonList,
   args: { variant: "materials", label: "資材を読み込んでいます" },
 } satisfies Meta<typeof SkeletonList>;

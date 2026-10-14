@@ -8,7 +8,7 @@ const sampleLogo =
   );
 
 const meta = {
-  title: "Manufacturer/ProfileEditor",
+  title: "Pages/dashboard/profile/ManufacturerProfileEditor",
   component: ManufacturerProfileEditor,
   parameters: { nextjs: { appDirectory: true } },
   args: {

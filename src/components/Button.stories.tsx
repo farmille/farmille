@@ -4,7 +4,7 @@ import { css } from "../../styled-system/css";
 import { Button } from "./Button";
 
 const meta = {
-  title: "Components/Button",
+  title: "Components/Actions/Button",
   component: Button,
   args: {
     children: "保存する",

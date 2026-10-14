@@ -151,7 +151,7 @@ function materialCards(count: number) {
 }
 
 const meta = {
-  title: "App/Home/MaterialMarquee",
+  title: "Pages/Home/HomeMaterialMarquee",
   component: HomeMaterialMarquee,
   // ページコンテナと同じ左右余白を与え、フレームの負マージンを画面幅に収める。
   decorators: [

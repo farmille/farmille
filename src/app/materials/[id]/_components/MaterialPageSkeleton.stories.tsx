@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialPageSkeleton } from "./MaterialPageSkeleton";
 const meta = {
-  title: "App/MaterialPageSkeleton",
+  title: "Pages/materials/[id]/MaterialPageSkeleton",
   component: MaterialPageSkeleton,
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof MaterialPageSkeleton>;

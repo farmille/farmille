@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ArticleGrid, FeedCard } from "./FeedCard";
 
 const meta = {
-  title: "Articles/FeedCard",
+  title: "Pages/articles/FeedCard",
   component: FeedCard,
   decorators: [
     (Story) => (

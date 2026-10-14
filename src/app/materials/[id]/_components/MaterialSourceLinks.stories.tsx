@@ -4,7 +4,7 @@ import { MaterialSourceLinks } from "./MaterialSourceLinks";
 import { materialLinks } from "./story-fixtures";
 
 const meta = {
-  title: "App/Materials/MaterialSourceLinks",
+  title: "Pages/materials/[id]/MaterialSourceLinks",
   component: MaterialSourceLinks,
   args: { links: materialLinks },
 } satisfies Meta<typeof MaterialSourceLinks>;

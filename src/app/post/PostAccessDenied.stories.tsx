@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PostAccessDenied } from "./PostAccessDenied";
 
 const meta = {
-  title: "App/Post/PostAccessDenied",
+  title: "Pages/post/PostAccessDenied",
   component: PostAccessDenied,
   args: { accountType: "seller" },
   parameters: { layout: "fullscreen" },

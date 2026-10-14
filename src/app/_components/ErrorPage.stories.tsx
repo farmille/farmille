@@ -6,7 +6,7 @@ import { ErrorPage } from "./ErrorPage";
 const sampleError = new Error("資材データの取得に失敗しました。");
 
 const meta = {
-  title: "App/ErrorPage",
+  title: "Pages/Home/ErrorPage",
   component: ErrorPage,
   args: {
     error: sampleError,

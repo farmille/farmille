@@ -4,7 +4,7 @@ import { userEvent, within } from "storybook/test";
 import { HomeSearchEntry } from "./HomeSearchEntry";
 
 const meta = {
-  title: "Components/Search/HomeSearchEntry",
+  title: "Pages/Shared/HomeSearchEntry",
   component: HomeSearchEntry,
 } satisfies Meta<typeof HomeSearchEntry>;
 

@@ -6,7 +6,7 @@ import { css } from "../../styled-system/css";
 import { FabBar } from "./FabBar";
 
 const meta = {
-  title: "Components/FabBar",
+  title: "Pages/Shared/FabBar",
   component: FabBar,
   decorators: [
     (Story) => (

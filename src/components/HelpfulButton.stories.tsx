@@ -13,7 +13,7 @@ const toggleHelpful = fn(
 ).mockName("action");
 
 const meta = {
-  title: "Components/HelpfulButton",
+  title: "Pages/Shared/HelpfulButton",
   component: HelpfulButton,
   args: {
     action: toggleHelpful,

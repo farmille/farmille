@@ -4,7 +4,7 @@ import { css } from "../../../../styled-system/css";
 import { expect, userEvent, within } from "storybook/test";
 import { VerificationForm } from "./VerificationForm";
 const meta = {
-  title: "CompanyApplications/VerificationForm",
+  title: "Pages/company-requests/VerificationForm",
   component: VerificationForm,
   parameters: { nextjs: { appDirectory: true } },
   args: {},

@@ -18,7 +18,7 @@ const reports = [
 ];
 
 const meta = {
-  title: "App/Materials/Report/ReportSubmitted",
+  title: "Pages/materials/[id]/report/ReportSubmitted",
   component: ReportSubmitted,
   args: {
     materialId: "00000000-0000-4000-8000-000000000101",

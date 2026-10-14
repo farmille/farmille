@@ -9,7 +9,7 @@ const sampleImage =
   );
 
 const meta = {
-  title: "Components/ArticleCard",
+  title: "Pages/Shared/ArticleCard",
   component: ArticleCard,
   args: {
     title: "施設トマトにおける高温対策の実践",

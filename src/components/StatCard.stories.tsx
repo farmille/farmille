@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { StatCard } from "./StatCard";
 
 const meta = {
-  title: "Components/StatCard",
+  title: "Components/Display/StatCard",
   component: StatCard,
   args: {
     value: 128,

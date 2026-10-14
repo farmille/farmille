@@ -14,7 +14,7 @@ const seller = {
 } satisfies PublicSellerPageData["seller"];
 
 const meta = {
-  title: "App/Sellers/SellerHeader",
+  title: "Pages/sellers/[id]/SellerHeader",
   component: SellerHeader,
   args: { seller },
   decorators: [(Story) => <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>],

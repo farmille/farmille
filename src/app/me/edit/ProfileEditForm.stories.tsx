@@ -4,7 +4,7 @@ import { ownProfile } from "../_components/story-fixtures";
 import { ProfileEditForm } from "./ProfileEditForm";
 
 const meta = {
-  title: "App/Me/ProfileEditForm",
+  title: "Pages/me/edit/ProfileEditForm",
   component: ProfileEditForm,
   args: {
     profile: ownProfile,

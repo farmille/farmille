@@ -3,7 +3,7 @@ import { css } from "../../styled-system/css";
 import { Icon, iconNames, type IconProps } from "./Icon";
 
 const meta = {
-  title: "Components/Icon",
+  title: "Components/Display/Icon",
   component: Icon,
   args: { name: "star_filled" },
 } satisfies Meta<typeof Icon>;

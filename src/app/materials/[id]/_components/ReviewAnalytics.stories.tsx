@@ -7,7 +7,7 @@ import { ReviewAnalytics } from "./ReviewAnalytics";
 const noteStyle = css({ color: "text.subtle", fontSize: "sm" });
 
 const meta = {
-  title: "App/Materials/ReviewAnalytics",
+  title: "Pages/materials/[id]/ReviewAnalytics",
   component: ReviewAnalytics,
   args: {
     materialId: "00000000-0000-4000-8000-000000000101",

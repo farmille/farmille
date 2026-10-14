@@ -5,7 +5,7 @@ import { readingFrame } from "../../articles/_components/story-frame";
 import { ReportBars, ReportGraphNote } from "./ReportBars";
 
 const meta = {
-  title: "Reports/ReportBars",
+  title: "Pages/reports/[id]/ReportBars",
   component: ReportBars,
   decorators: [(Story) => readingFrame(Story())],
   args: {

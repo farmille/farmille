@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PasskeyLogin } from "./PasskeyLogin";
 
 const meta = {
-  title: "Auth/PasskeyLogin",
+  title: "Pages/Shared/PasskeyLogin",
   component: PasskeyLogin,
   args: { next: null },
 } satisfies Meta<typeof PasskeyLogin>;

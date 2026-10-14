@@ -5,7 +5,7 @@ import { Button } from "./Button";
 import { EmptyState } from "./EmptyState";
 
 const meta = {
-  title: "Components/EmptyState",
+  title: "Components/Feedback/EmptyState",
   component: EmptyState,
 } satisfies Meta<typeof EmptyState>;
 

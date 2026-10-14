@@ -4,7 +4,7 @@ import { userEvent, within } from "storybook/test";
 import { SideSection } from "./SideSection";
 
 const meta = {
-  title: "App/Search/SideSection",
+  title: "Pages/search/SideSection",
   component: SideSection,
   args: {
     title: "作物で探す",

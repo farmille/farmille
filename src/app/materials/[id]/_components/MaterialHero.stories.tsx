@@ -12,7 +12,7 @@ const toggleAction = fn(
 );
 
 const meta = {
-  title: "App/Materials/MaterialHero",
+  title: "Pages/materials/[id]/MaterialHero",
   component: MaterialHero,
   args: {
     material: materialDetail,

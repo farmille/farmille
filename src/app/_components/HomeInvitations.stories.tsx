@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { HomeInvitations } from "./HomeInvitations";
 const meta = {
-  title: "App/Home/Invitations",
+  title: "Pages/Home/HomeInvitations",
   component: HomeInvitations,
   args: { showSignup: true },
 } satisfies Meta<typeof HomeInvitations>;

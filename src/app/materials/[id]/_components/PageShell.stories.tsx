@@ -5,7 +5,7 @@ import { SurfaceCard } from "@/components";
 import { MaterialPageShell } from "./PageShell";
 
 const meta = {
-  title: "App/Materials/MaterialPageShell",
+  title: "Pages/materials/[id]/PageShell",
   component: MaterialPageShell,
   args: {
     title: "感想口コミを書く",

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ApplicationReceipt } from "./ApplicationReceipt";
 const id = "11111111-1111-4111-8111-111111111111";
 const meta = {
-  title: "CompanyApplications/Receipt",
+  title: "Pages/company-requests/ApplicationReceipt",
   component: ApplicationReceipt,
   parameters: { nextjs: { appDirectory: true } },
   args: {

@@ -7,7 +7,7 @@ import { CropCreateForm, CropRow, TagCreateForm, TagRow } from "./MasterForms";
 const stackStyle = css({ display: "grid", gap: "5" });
 
 const meta = {
-  title: "App/Admin/Tags/MasterForms",
+  title: "Pages/admin/tags/MasterForms",
   component: TagCreateForm,
   args: {
     categories: ["concern", "condition"],

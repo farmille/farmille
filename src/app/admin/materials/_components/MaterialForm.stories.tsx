@@ -108,7 +108,7 @@ const material: AdminMaterialDetail = {
 };
 
 const meta = {
-  title: "App/Admin/Materials/MaterialForm",
+  title: "Pages/admin/materials/MaterialForm",
   component: MaterialForm,
   args: { classifications, material },
 } satisfies Meta<typeof MaterialForm>;

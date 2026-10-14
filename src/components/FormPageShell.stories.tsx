@@ -24,7 +24,7 @@ const fixedFooter = css({
 });
 
 const meta = {
-  title: "Components/FormPageShell",
+  title: "Components/Layout/FormPageShell",
   component: FormPageShell,
   args: {
     chrome: "public",

@@ -30,7 +30,7 @@ const fullDetails = {
 };
 
 const meta = {
-  title: "Components/ProfileCard",
+  title: "Pages/Shared/ProfileCard",
   component: ProfileCard,
   args: {
     handle: "緑の畑",

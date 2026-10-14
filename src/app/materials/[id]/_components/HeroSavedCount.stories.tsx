@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { HeroCount } from "./HeroSavedCount";
 
 const meta = {
-  title: "App/Materials/HeroSavedCount",
+  title: "Pages/materials/[id]/HeroSavedCount",
   component: HeroCount,
   args: { children: "12" },
 } satisfies Meta<typeof HeroCount>;

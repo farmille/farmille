@@ -9,7 +9,7 @@ import { FeedReportCard } from "./FeedReportCard";
 const reportId = "71000000-0000-4000-8000-000000000101";
 
 const meta = {
-  title: "Articles/FeedReportCard",
+  title: "Pages/articles/FeedReportCard",
   component: FeedReportCard,
   decorators: [(Story) => <ArticleGrid>{Story()}</ArticleGrid>],
   args: {

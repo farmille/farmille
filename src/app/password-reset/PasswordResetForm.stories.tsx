@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PasswordResetForm } from "./PasswordResetForm";
 
 const meta = {
-  title: "App/Auth/PasswordResetForm",
+  title: "Pages/password-reset/PasswordResetForm",
   component: PasswordResetForm,
 } satisfies Meta<typeof PasswordResetForm>;
 

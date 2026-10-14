@@ -4,7 +4,7 @@ import { css, cx } from "../../styled-system/css";
 import { SuccessMark, completionStepRecipe } from "./SuccessMark";
 
 const meta = {
-  title: "Components/SuccessMark",
+  title: "Components/Feedback/SuccessMark",
   component: SuccessMark,
 } satisfies Meta<typeof SuccessMark>;
 

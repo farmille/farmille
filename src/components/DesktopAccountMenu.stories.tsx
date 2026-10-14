@@ -10,7 +10,7 @@ async function openMenu({ canvasElement }: { canvasElement: HTMLElement }) {
 }
 
 const meta = {
-  title: "Components/DesktopAccountMenu",
+  title: "Pages/Shared/DesktopAccountMenu",
   component: DesktopAccountMenu,
   args: { myPageCurrent: false },
   parameters: { layout: "centered" },

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ReviewSortSelect } from "./ReviewSortSelect";
 
 const meta = {
-  title: "App/Materials/ReviewSortSelect",
+  title: "Pages/materials/[id]/reviews/ReviewSortSelect",
   component: ReviewSortSelect,
   args: { sort: "newest" },
 } satisfies Meta<typeof ReviewSortSelect>;

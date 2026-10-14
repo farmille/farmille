@@ -4,7 +4,7 @@ import { SearchResults } from "./SearchResults";
 import { storyCatalog, storyIds } from "./story-fixtures";
 
 const meta = {
-  title: "App/Search/SearchResults",
+  title: "Pages/search/SearchResults",
   component: SearchResults,
   args: {
     catalog: storyCatalog,

@@ -4,7 +4,7 @@ import { ReadingHeading, ReadingMarkdown, ReadingProse } from "./Reading";
 import { readingFrame } from "./story-frame";
 
 const meta = {
-  title: "Articles/Reading",
+  title: "Pages/articles/Reading",
   component: ReadingProse,
   decorators: [(Story) => readingFrame(Story())],
   args: { text: "使用区は午後の萎れが軽かった。\n収穫終盤まで葉色が保たれた。" },

@@ -5,7 +5,7 @@ import { SurfaceCard } from "@/components/SurfaceCard";
 import { MaterialBox } from "./MaterialBox";
 
 const meta = {
-  title: "App/Materials/MaterialBox",
+  title: "Pages/materials/[id]/MaterialBox",
   component: MaterialBox,
   args: {
     headingId: "storybook-box-heading",

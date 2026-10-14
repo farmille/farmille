@@ -22,7 +22,7 @@ input.measurements = input.measurements.map((measurement) => ({
   })),
 }));
 const meta = {
-  title: "Components/UsageReportArticle",
+  title: "Pages/Shared/UsageReportArticle",
   component: UsageReportArticle,
   args: { input },
 } satisfies Meta<typeof UsageReportArticle>;

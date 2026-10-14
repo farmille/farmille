@@ -28,7 +28,7 @@ function StatefulToggleGroup(args: ComponentProps<typeof ToggleGroup>) {
 }
 
 const meta = {
-  title: "Components/ToggleGroup",
+  title: "Components/Actions/ToggleGroup",
   component: ToggleGroup,
   args: {
     "aria-label": "使用目的",

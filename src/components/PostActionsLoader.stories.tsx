@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PostActionsLoader } from "./PostActionsLoader";
 
 const meta = {
-  title: "Components/PostActionsLoader",
+  title: "Pages/Shared/PostActionsLoader",
   component: PostActionsLoader,
   args: {
     target: "review",

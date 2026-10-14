@@ -23,7 +23,7 @@ function items(count: number, current: string): FilterPillOption[] {
 }
 
 const meta = {
-  title: "Components/FilterPills",
+  title: "Components/Navigation/FilterPills",
   component: FilterPills,
   args: {
     "aria-label": "作物で絞り込む",

@@ -5,7 +5,7 @@ import { CatalogSidebar } from "./CatalogSidebar";
 import { storyCatalog, storyIds, storySearchCatalog } from "./story-fixtures";
 
 const meta = {
-  title: "App/Search/CatalogSidebar",
+  title: "Pages/search/CatalogSidebar",
   component: CatalogSidebar,
   args: {
     catalog: storyCatalog,

@@ -14,7 +14,7 @@ const viewportStage = css({
 });
 
 const meta = {
-  title: "Components/BottomNav",
+  title: "Pages/Shared/BottomNav",
   component: BottomNav,
   args: {
     active: "home",

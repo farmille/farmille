@@ -7,7 +7,7 @@ import { ReportForm } from "./ReportForm";
 import { filledReport } from "./reportStoryFixture";
 const draft = createBlankUsageReport("00000000-0000-4000-8000-000000000101");
 const meta = {
-  title: "App/Materials/Report/ReportForm",
+  title: "Pages/materials/[id]/report/ReportForm",
   component: ReportForm,
   decorators: [
     (Story) => (

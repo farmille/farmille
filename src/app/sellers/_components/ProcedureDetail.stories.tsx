@@ -6,7 +6,7 @@ import { PROCEDURES } from "./manufacturer-guide";
 import { ProcedureDetail } from "./ProcedureDetail";
 
 const meta = {
-  title: "App/Sellers/ProcedureDetail",
+  title: "Pages/sellers/ProcedureDetail",
   component: ProcedureDetail,
   parameters: { layout: "fullscreen" },
   decorators: [(Story) => <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>],

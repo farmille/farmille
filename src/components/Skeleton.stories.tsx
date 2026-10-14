@@ -9,7 +9,7 @@ import {
 import { SkeletonList, SearchResultsSkeleton } from "./SkeletonList";
 
 const meta = {
-  title: "Components/Skeleton",
+  title: "Components/Feedback/Skeleton",
   component: Skeleton,
   parameters: { layout: "padded" },
 } satisfies Meta<typeof Skeleton>;

@@ -5,7 +5,7 @@ import { css } from "../../styled-system/css";
 import { Chip } from "./Chip";
 
 const meta = {
-  title: "Components/Chip",
+  title: "Components/Display/Chip",
   component: Chip,
   args: { children: "トマト" },
 } satisfies Meta<typeof Chip>;

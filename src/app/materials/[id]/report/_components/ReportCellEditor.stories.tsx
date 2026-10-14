@@ -15,7 +15,7 @@ const badGraph = {
 };
 
 const meta = {
-  title: "App/Materials/Report/ReportCellEditor",
+  title: "Pages/materials/[id]/report/ReportCellEditor",
   component: ReportCellEditor,
   args: {
     target: { k: "val", g: graph.id, p: plot.id },

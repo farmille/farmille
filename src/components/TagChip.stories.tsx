@@ -5,7 +5,7 @@ import { css } from "../../styled-system/css";
 import { TagChip } from "./TagChip";
 
 const meta = {
-  title: "Components/TagChip",
+  title: "Pages/Shared/TagChip",
   component: TagChip,
   args: {
     label: "トマト（施設）",

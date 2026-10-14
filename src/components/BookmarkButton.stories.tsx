@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BookmarkButton } from "./BookmarkButton";
 const meta = {
-  title: "Components/BookmarkButton",
+  title: "Components/Actions/BookmarkButton",
   component: BookmarkButton,
   args: { saved: false, action: async (saved: boolean) => saved },
 } satisfies Meta<typeof BookmarkButton>;

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { RatingSummary } from "./RatingSummary";
 
 const meta = {
-  title: "App/Materials/RatingSummary",
+  title: "Pages/materials/[id]/RatingSummary",
   component: RatingSummary,
   args: {
     average: 4.2,

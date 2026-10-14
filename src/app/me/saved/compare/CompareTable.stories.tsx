@@ -4,7 +4,7 @@ import { compareMaterials } from "../../_components/story-fixtures";
 import { CompareTable } from "./CompareTable";
 
 const meta = {
-  title: "App/Me/Saved/CompareTable",
+  title: "Pages/me/saved/compare/CompareTable",
   component: CompareTable,
   args: { materials: compareMaterials },
 } satisfies Meta<typeof CompareTable>;

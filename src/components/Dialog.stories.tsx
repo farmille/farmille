@@ -6,7 +6,7 @@ import { Button } from "./Button";
 import { Dialog, DialogActions, DialogClose } from "./Dialog";
 
 const meta = {
-  title: "Components/Dialog",
+  title: "Components/Dialog/Dialog",
   component: Dialog,
 } satisfies Meta<typeof Dialog>;
 

@@ -4,7 +4,7 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
 import { PasskeyManager } from "./PasskeyManager";
 
 const meta = {
-  title: "App/Auth/PasskeyManager",
+  title: "Pages/account/passkeys/PasskeyManager",
   component: PasskeyManager,
   args: { passkeys: [], admin: false },
   parameters: { nextjs: { appDirectory: true } },

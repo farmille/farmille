@@ -5,7 +5,7 @@ import { createBlankUsageReport } from "@/lib/usage-report";
 import { ReportComparisonFields } from "./ReportComparisonFields";
 import { reportFrame, ReportToaster } from "./ReportFormParts";
 const meta = {
-  title: "App/Materials/Report/ReportComparisonFields",
+  title: "Pages/materials/[id]/report/ReportComparisonFields",
   component: ReportComparisonFields,
   decorators: [
     (Story) => (

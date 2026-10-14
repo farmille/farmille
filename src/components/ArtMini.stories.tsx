@@ -9,7 +9,7 @@ const sampleImage =
   );
 
 const meta = {
-  title: "Components/ArtMini",
+  title: "Components/Display/ArtMini",
   component: ArtMini,
   args: {
     title: "土壌診断から始める減農薬栽培",

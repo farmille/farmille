@@ -5,7 +5,7 @@ import { readingFrame } from "../../articles/_components/story-frame";
 import { ReportGate } from "./ReportGate";
 
 const meta = {
-  title: "Reports/ReportGate",
+  title: "Pages/reports/[id]/ReportGate",
   component: ReportGate,
   decorators: [(Story) => readingFrame(Story())],
   args: { reportPath: "/reports/73000000-0000-4000-8000-000000000051" },

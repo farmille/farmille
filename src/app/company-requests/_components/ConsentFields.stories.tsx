@@ -3,7 +3,7 @@ import { css } from "../../../../styled-system/css";
 
 import { ConsentFields } from "./ConsentFields";
 const meta = {
-  title: "CompanyApplications/ConsentFields",
+  title: "Pages/company-requests/ConsentFields",
   component: ConsentFields,
   parameters: { nextjs: { appDirectory: true } },
   args: { kind: "registration" },

@@ -4,7 +4,7 @@ import { css } from "../../../../styled-system/css";
 import { SearchAnalytics } from "./SearchAnalytics";
 
 const meta = {
-  title: "App/Search/SearchAnalytics",
+  title: "Pages/search/SearchAnalytics",
   component: SearchAnalytics,
   args: { filterCount: 2, resultCount: 18, sort: "reviews" },
 } satisfies Meta<typeof SearchAnalytics>;

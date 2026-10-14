@@ -10,7 +10,7 @@ const row = css({ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 
 const imageBox = css({ w: "24", h: "16" });
 
 const meta = {
-  title: "App/Materials/CardParts",
+  title: "Pages/materials/[id]/CardParts",
   component: Stars,
   args: { value: 4 },
 } satisfies Meta<typeof Stars>;

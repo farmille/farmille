@@ -23,7 +23,7 @@ const manyMetrics: MetricBarItem[] = [
 ];
 
 const meta = {
-  title: "Components/MetricBars",
+  title: "Components/Display/MetricBars",
   component: MetricBars,
   args: {
     metrics: fewMetrics,

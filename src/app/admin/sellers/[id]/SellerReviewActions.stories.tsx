@@ -5,7 +5,7 @@ import { sellerOperationAction } from "./actions";
 import { SellerReviewActions } from "./SellerReviewActions";
 
 const meta = {
-  title: "App/Admin/Sellers/SellerReviewActions",
+  title: "Pages/admin/sellers/[id]/SellerReviewActions",
   component: SellerReviewActions,
   args: {
     sellerId: "00000000-0000-4000-8000-000000000201",

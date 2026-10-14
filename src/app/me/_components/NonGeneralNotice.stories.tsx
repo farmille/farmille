@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { NonGeneralNotice } from "./NonGeneralNotice";
 
 const meta = {
-  title: "App/Me/NonGeneralNotice",
+  title: "Pages/me/NonGeneralNotice",
   component: NonGeneralNotice,
   args: { accountType: "seller" },
   parameters: { layout: "fullscreen" },

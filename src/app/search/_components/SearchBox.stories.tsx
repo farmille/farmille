@@ -5,7 +5,7 @@ import { SearchBox } from "./SearchBox";
 import { storyIds, storySearchCatalog } from "./story-fixtures";
 
 const meta = {
-  title: "App/Search/SearchBox",
+  title: "Pages/search/SearchBox",
   component: SearchBox,
   args: { initialQuery: "", selected: [], sort: "reviews", catalog: storySearchCatalog },
 } satisfies Meta<typeof SearchBox>;

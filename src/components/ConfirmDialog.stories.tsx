@@ -7,7 +7,7 @@ import { Field } from "./form/Field";
 import { Textarea } from "./form/Textarea";
 
 const meta = {
-  title: "Components/ConfirmDialog",
+  title: "Components/Dialog/ConfirmDialog",
   component: ConfirmDialog,
 } satisfies Meta<typeof ConfirmDialog>;
 

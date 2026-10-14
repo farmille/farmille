@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PublicationStatusForm } from "./PublicationStatusForm";
 
 const meta = {
-  title: "App/Admin/Materials/PublicationStatusForm",
+  title: "Pages/admin/materials/[id]/PublicationStatusForm",
   component: PublicationStatusForm,
   args: {
     materialId: "00000000-0000-4000-8000-000000000101",

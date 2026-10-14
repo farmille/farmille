@@ -13,7 +13,7 @@ import {
 } from "./TokenCatalog";
 
 const meta = {
-  title: "Design System/Tokens",
+  title: "Tokens",
   component: TokenCatalog,
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof TokenCatalog>;

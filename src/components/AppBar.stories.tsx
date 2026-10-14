@@ -4,7 +4,7 @@ import { userEvent, within } from "storybook/test";
 import { AppBar } from "./AppBar";
 
 const meta = {
-  title: "Components/AppBar",
+  title: "Pages/Shared/AppBar",
   component: AppBar,
 } satisfies Meta<typeof AppBar>;
 

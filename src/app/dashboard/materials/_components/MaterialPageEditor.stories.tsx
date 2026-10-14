@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialPageEditor } from "./MaterialPageEditor";
 const meta = {
-  title: "Manufacturer/MaterialPageEditor",
+  title: "Pages/dashboard/materials/MaterialPageEditor",
   component: MaterialPageEditor,
   parameters: { nextjs: { appDirectory: true } },
   args: {

@@ -5,7 +5,7 @@ import { css } from "../../../../styled-system/css";
 import { SellerApplyForm } from "./SellerApplyForm";
 
 const meta = {
-  title: "App/Sellers/SellerApplyForm",
+  title: "Pages/sellers/apply/SellerApplyForm",
   component: SellerApplyForm,
   decorators: [(Story) => <div className={css({ p: "4", bg: "surface.panel" })}>{Story()}</div>],
 } satisfies Meta<typeof SellerApplyForm>;
