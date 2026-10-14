@@ -137,9 +137,9 @@ export const tokens = {
   } satisfies DescribedTokens,
   // 公式npmパッケージをlayoutで読み込む（フォールバックは02 §5のスタック）
   fonts: {
-    // Adobe Fonts の DNP秀英角ゴシック金 Std B（weight 600）
-    shueiGothicKin: {
-      value: '"dnp-shuei-gothic-kin-std", var(--fonts-sans)',
+    // Adobe Fonts のりょうゴシック PlusN B（weight 700）
+    ryoGothic: {
+      value: '"Inter Latin", "ryo-gothic-plusn", var(--fonts-sans)',
     },
     // Adobe Fonts の Farmille Web プロジェクトで配信するゴシックMB101 L（weight 300）
     gothicMb101: {
@@ -150,9 +150,10 @@ export const tokens = {
     materialIconsOutlined: { value: '"Material Icons Outlined"' },
     sans: {
       value:
-        '"Gen Interface JP", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif',
+        '"Inter Latin", "Gen Interface JP", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif',
     },
   },
+  letterSpacings: { body: { value: "0.04em" } },
   // preset-panda の数値 spacing を明示し、既定色を復活させず余白スケールだけを維持する
   spacing: {
     0: { value: "0rem" },
