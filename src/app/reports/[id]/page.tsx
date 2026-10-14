@@ -1,10 +1,10 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
 import { after } from "next/server";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { AppBar } from "@/components";
 import { FabBar } from "@/components/FabBar";
 import { HelpfulButton } from "@/components/HelpfulButton";
 import { helpfulPillRecipe } from "@/components/helpful-pill";
@@ -175,7 +175,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(reportJsonLd) }}
       />
-      <AppBar
+      <SiteAppBar
         chrome="public"
         active="articles"
         title={report.title}

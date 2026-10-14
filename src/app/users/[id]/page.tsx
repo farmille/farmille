@@ -1,3 +1,4 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import { getProfileDetails } from "@/server/queries/profile-details";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import type { Metadata } from "next";
@@ -13,7 +14,7 @@ import { errorMessageJa } from "@/server/errors";
 import { REPORT_REASON_OPTIONS } from "@/server/mutations/reports";
 import { getPublicProfilePage, type PublicProfilePageData } from "@/server/queries/public-profiles";
 import type { Result } from "@/server/result";
-import { AppBar } from "@/components";
+
 import { ReportDialog } from "@/components/ReportDialog";
 import { css } from "../../../../styled-system/css";
 
@@ -101,7 +102,7 @@ export default async function UserPage({ params }: UserPageProps) {
 
   return (
     <div className={shell}>
-      <AppBar chrome="public" title={data.profile.handle} backHref="/" />
+      <SiteAppBar chrome="public" title={data.profile.handle} backHref="/" />
       <main className={body}>
         <ProfileCard
           handle={data.profile.handle}

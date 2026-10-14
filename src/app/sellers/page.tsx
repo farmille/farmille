@@ -1,7 +1,8 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import type { Metadata } from "next";
 
 import { HomeFooter } from "@/app/_components/HomeFooter";
-import { AppBar } from "@/components";
+
 import { BottomNav } from "@/components/BottomNav";
 import { createPageMetadata } from "@/lib/seo";
 
@@ -48,7 +49,7 @@ export default async function ManufacturerPage({ searchParams }: ManufacturerPag
 
   return (
     <div className={shell}>
-      <AppBar
+      <SiteAppBar
         chrome="public"
         active="home"
         title="メーカーの方へ"

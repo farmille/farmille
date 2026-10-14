@@ -1,5 +1,6 @@
 import Form from "next/form";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { cva, css, cx } from "../../styled-system/css";
 import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
 import { BrandMark } from "@/components/BrandMark";
@@ -244,6 +245,8 @@ type AppBarBaseProps = {
   active?: AppBarActive;
   /** PC ヘッダーの検索入力欄の初期値。`/search` が現在の q を渡す。未指定なら空。 */
   searchQuery?: string;
+  /** アカウントボタンに出す本人の画像。サーバー側で描いたものを受け取る（SiteAppBar が渡す）。 */
+  accountAvatar?: ReactNode;
 };
 
 type AppBarHomeProps = AppBarBaseProps & {
@@ -298,9 +301,11 @@ function MobileAppBar(props: AppBarProps) {
 function DesktopSiteHeader({
   active,
   searchQuery,
+  accountAvatar,
 }: {
   active?: AppBarActive;
   searchQuery?: string;
+  accountAvatar?: ReactNode;
 }) {
   return (
     <header className={desktopHeader} data-ui="desktop-site-header">
@@ -321,7 +326,7 @@ function DesktopSiteHeader({
           />
         </Form>
         <nav className={desktopPublicActions} aria-label="PCメインナビ">
-          <DesktopAccountMenu myPageCurrent={active === "me"} />
+          <DesktopAccountMenu myPageCurrent={active === "me"} avatar={accountAvatar} />
         </nav>
       </div>
     </header>
@@ -387,7 +392,11 @@ export function AppBar(props: AppBarProps) {
       <MobileAppBar {...props} />
       {props.chrome === "public" ? (
         <>
-          <DesktopSiteHeader active={props.active} searchQuery={props.searchQuery} />
+          <DesktopSiteHeader
+            active={props.active}
+            searchQuery={props.searchQuery}
+            accountAvatar={props.accountAvatar}
+          />
           <PreparationNotice overlapImage={props.overlapNoticeImage} />
           {props.variant === "home" ? null : <DesktopContextBar {...props} />}
         </>

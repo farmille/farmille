@@ -1,7 +1,8 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import Link from "next/link";
 
 import { ProfileCard } from "@/components/ProfileCard";
-import { AppBar } from "@/components";
+
 import { BottomNav } from "@/components/BottomNav";
 import { publicProfileLabel } from "@/lib/public-profile-label";
 import { errorMessageJa } from "@/server/errors";
@@ -106,7 +107,7 @@ export default async function MePage({
 
   return (
     <div className={shell}>
-      <AppBar chrome="public" active="me" title="マイページ" />
+      <SiteAppBar chrome="public" active="me" title="マイページ" />
       <main className={body}>
         <ProfileCard
           handle={data.profile.handle}

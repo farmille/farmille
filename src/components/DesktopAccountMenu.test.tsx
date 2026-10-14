@@ -41,4 +41,16 @@ describe("DesktopAccountMenu", () => {
     expect(logout.form?.getAttribute("action")).toBe("/logout");
     expect(logout.form?.getAttribute("method")).toBe("post");
   });
+
+  it("本人の画像を受け取ると人型アイコンの代わりに出し、受け取らなければ人型アイコンを出す", () => {
+    const { container, rerender } = render(
+      <DesktopAccountMenu myPageCurrent={false} avatar={<i data-testid="avatar" />} />,
+    );
+    expect(screen.getByTestId("avatar")).toBeDefined();
+    expect(container.querySelector('[data-icon="person"]')).toBeNull();
+
+    rerender(<DesktopAccountMenu myPageCurrent={false} />);
+    expect(screen.queryByTestId("avatar")).toBeNull();
+    expect(container.querySelector('[data-icon="person"]')).not.toBeNull();
+  });
 });

@@ -1,8 +1,8 @@
+import { SiteAppBar } from "@/components/SiteAppBar";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
-import { AppBar } from "@/components";
 import { createPageMetadata } from "@/lib/seo";
 import { errorMessageJa } from "@/server/errors";
 import { getPublicSellerPage, type PublicSellerPageData } from "@/server/queries/public-sellers";
@@ -77,7 +77,7 @@ export default async function SellerPage({ params }: SellerPageProps) {
 
   return (
     <div className={shell}>
-      <AppBar chrome="public" active="search" title={data.seller.officialName} backHref="/" />
+      <SiteAppBar chrome="public" active="search" title={data.seller.officialName} backHref="/" />
       <main className={body}>
         <SellerPageContent data={data} />
       </main>
