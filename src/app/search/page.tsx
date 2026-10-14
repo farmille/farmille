@@ -49,16 +49,10 @@ const main = css({
   tab: { px: "5", pt: "6", pb: "8" },
 });
 
-function SearchPageShell({ searchQuery, children }: { searchQuery?: string; children: ReactNode }) {
+function SearchPageShell({ children }: { children: ReactNode }) {
   return (
     <div className={shell}>
-      <SiteAppBar
-        chrome="public"
-        active="search"
-        title="BS資材を探す"
-        backHref="/"
-        searchQuery={searchQuery}
-      />
+      <SiteAppBar chrome="public" active="search" title="BS資材を探す" backHref="/" />
       <main className={main}>{children}</main>
       <BottomNav active="search" />
     </div>
@@ -109,7 +103,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (!filtersResult.ok) {
     return (
-      <SearchPageShell searchQuery={initialQuery}>
+      <SearchPageShell>
         <SearchPageHeading />
         <EmptyState
           title="指定された検索条件が見つかりません"
@@ -131,7 +125,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     : undefined;
 
   return (
-    <SearchPageShell searchQuery={initialQuery}>
+    <SearchPageShell>
       <SearchPageHeading />
       <SearchBox
         initialQuery={initialQuery}

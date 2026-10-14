@@ -1,10 +1,8 @@
-import Form from "next/form";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cva, css, cx } from "../../styled-system/css";
 import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
 import { BrandMark } from "@/components/BrandMark";
-import { SearchInput } from "@/components/form";
 import { Icon } from "@/components/Icon";
 import { PreparationNotice } from "@/components/PreparationNotice";
 
@@ -121,9 +119,8 @@ const desktopPublicActions = css({
   alignItems: "center",
   gap: "1.5",
   flexShrink: "0",
+  ml: "auto",
 });
-
-const desktopSearch = css({ flex: "1", minW: "0", maxW: "480px", m: "0" });
 
 const desktopNavLink = cva({
   base: {
@@ -243,8 +240,6 @@ type AppBarBaseProps = {
   chrome: AppChrome;
   overlapNoticeImage?: boolean;
   active?: AppBarActive;
-  /** PC ヘッダーの検索入力欄の初期値。`/search` が現在の q を渡す。未指定なら空。 */
-  searchQuery?: string;
   /** アカウントボタンに出す本人の画像。サーバー側で描いたものを受け取る（SiteAppBar が渡す）。 */
   accountAvatar?: ReactNode;
 };
@@ -300,11 +295,9 @@ function MobileAppBar(props: AppBarProps) {
 
 function DesktopSiteHeader({
   active,
-  searchQuery,
   accountAvatar,
 }: {
   active?: AppBarActive;
-  searchQuery?: string;
   accountAvatar?: ReactNode;
 }) {
   return (
@@ -314,17 +307,6 @@ function DesktopSiteHeader({
           <BrandMark />
           <span className={desktopBrandName}>Farmille</span>
         </Link>
-        <Form action="/search" aria-label="ヘッダー検索" className={desktopSearch} role="search">
-          <SearchInput
-            // q が変わったとき（同じ画面での再送信や履歴の前後移動）に入力欄を作り直して反映する
-            key={searchQuery}
-            aria-label="資材を検索"
-            defaultValue={searchQuery}
-            name="q"
-            placeholder="作物・悩み・資材名から資材を検索"
-            submitLabel="検索"
-          />
-        </Form>
         <nav className={desktopPublicActions} aria-label="PCメインナビ">
           <DesktopAccountMenu myPageCurrent={active === "me"} avatar={accountAvatar} />
         </nav>
@@ -392,11 +374,7 @@ export function AppBar(props: AppBarProps) {
       <MobileAppBar {...props} />
       {props.chrome === "public" ? (
         <>
-          <DesktopSiteHeader
-            active={props.active}
-            searchQuery={props.searchQuery}
-            accountAvatar={props.accountAvatar}
-          />
+          <DesktopSiteHeader active={props.active} accountAvatar={props.accountAvatar} />
           <PreparationNotice overlapImage={props.overlapNoticeImage} />
           {props.variant === "home" ? null : <DesktopContextBar {...props} />}
         </>

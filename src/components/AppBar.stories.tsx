@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { userEvent, within } from "storybook/test";
 
 import { AppBar } from "./AppBar";
 
@@ -18,20 +17,14 @@ export const Home: Story = {
   },
 };
 
-// PCヘッダーは tab（768px）以上でしか表示しないため、検索入力欄の確認はこの Story だけで行う。
-export const HomeSearchTyped: Story = {
+// PCヘッダーは tab（768px）以上でしか表示しない。ブランドは左、アカウントボタンは右に寄せる。
+export const HomeDesktop: Story = {
   args: {
     chrome: "public",
     variant: "home",
   },
   globals: {
     viewport: { value: "desktop1440", isRotated: false },
-  },
-  play: async ({ canvasElement }) => {
-    await userEvent.type(
-      within(canvasElement).getByRole("searchbox", { name: "資材を検索" }),
-      "トマト",
-    );
   },
 };
 
@@ -76,21 +69,6 @@ export const BackNoTitle: Story = {
   args: {
     chrome: "public",
     variant: "back",
-  },
-};
-
-// `/search` に `q` 付きで着地した状態。ヘッダーの入力欄に現在の `q` が入る。
-export const SearchPageWithQuery: Story = {
-  args: {
-    chrome: "public",
-    variant: "back",
-    active: "search",
-    title: "BS資材を探す",
-    backHref: "/",
-    searchQuery: "トマト",
-  },
-  globals: {
-    viewport: { value: "desktop1440", isRotated: false },
   },
 };
 
