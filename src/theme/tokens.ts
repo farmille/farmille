@@ -38,6 +38,8 @@ export const tokens = {
     bg: { value: "#FCFCFB" },
     panel: { value: "#FDFDFC" },
     card: { value: "#FFFFFF" },
+    // ページ背景よりわずかに沈む灰色。影の代わりにカードの縁へ細く引く
+    mist: { value: "#F7F7F5" },
     // ink 3段（本文 / 副文 / 補助）
     ink: { value: "#1E231F" },
     ink2: { value: "#4C534D" },
@@ -316,6 +318,7 @@ export const semanticTokens = {
       card: { value: "{colors.card}" },
     },
     border: {
+      subtle: { value: "{colors.mist}" },
       default: { value: "{colors.line}" },
       strong: { value: "{colors.line.strong}" },
     },
