@@ -32,7 +32,7 @@ type TextRole = {
 export const textStyles = {
   title: {
     description:
-      "カード・ダイアログ・認証画面・節の見出し。h1・h2 の書体と太さは globals.css が要素に当てるので、ここでは大きさと行高だけを決める。",
+      "カード・ダイアログ・認証画面・節の見出し。h1〜h6 の書体と太さは globals.css が要素に当てるので、ここでは大きさと行高だけを決める。",
     value: { fontSize: "lg", lineHeight: "snug" },
   },
   body: {
