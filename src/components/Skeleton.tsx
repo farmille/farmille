@@ -64,9 +64,19 @@ const card = css({
   boxShadow: "shadow",
 });
 
+// MaterialCard の scroll variant と同じ、影のない細い縁の面
+const scrollCard = css({
+  bg: "surface.panel",
+  borderWidth: "2px",
+  borderColor: "border.subtle",
+  borderRadius: "banner",
+  p: "0.5",
+  overflow: "hidden",
+});
+
 export function MaterialCardSkeleton({ variant = "list" }: { variant?: "list" | "scroll" }) {
   return (
-    <div className={card}>
+    <div className={variant === "scroll" ? scrollCard : card}>
       {variant === "scroll" ? <Skeleton variant="product" /> : null}
       <div className={css({ display: "flex", gap: "3", p: "3", alignItems: "start" })}>
         {variant === "list" ? <Skeleton variant="thumbnail" /> : null}

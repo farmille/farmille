@@ -8,6 +8,10 @@ import { css, cva, cx } from "../../../styled-system/css";
 const LOOP_MS = 55_000;
 /** カーソルを乗せている間の再生速度。 */
 const HOVER_RATE = 0.25;
+/** 再生速度が目標へ寄る時定数。乗せたときも外したときも、この長さで滑らかに変わる。 */
+const RATE_EASE_MS = 200;
+/** 目標との差がこれ未満になったら、目標へ揃えて補間を終える。 */
+const RATE_SETTLE = 0.005;
 /** これを超えて動いたらタップではなく横ドラッグとして扱う。 */
 const DRAG_THRESHOLD_PX = 4;
 
@@ -65,8 +69,18 @@ function wrapTime(time: number): number {
 }
 
 /**
+ * 再生速度を目標へ指数的に寄せた次の値。段差なく加減速する。
+ * 途中で目標が変わっても現在の速度から続くので、乗せ外しを素早く繰り返しても速度が跳ばない。
+ */
+export function easeRate(current: number, target: number, elapsedMs: number): number {
+  const gap = target - current;
+  if (Math.abs(gap) < RATE_SETTLE) return target;
+  return current + gap * (1 - Math.exp(-elapsedMs / RATE_EASE_MS));
+}
+
+/**
  * 掲載資材の横並びを左へ流し続ける。
- * カーソルを乗せると減速し、ホイール・ドラッグ・キーボードフォーカスで位置を動かせる。
+ * カーソルを乗せると滑らかに減速し、ホイール・ドラッグ・キーボードフォーカスで位置を動かせる。
  * 視覚過敏の設定・アニメーション非対応・カードが画面内に収まる場合は手動スクロールに落とす。
  */
 export function HomeMaterialMarquee({ children }: { children: ReactNode }) {
@@ -109,13 +123,29 @@ export function HomeMaterialMarquee({ children }: { children: ReactNode }) {
     let dragging = false;
     let suppressClick = false;
 
+    let targetRate = 1;
+    let rateFrame = 0;
+    let lastTick = 0;
+    const stepRate = (now: number) => {
+      const next = easeRate(animation.playbackRate, targetRate, Math.max(0, now - lastTick));
+      lastTick = now;
+      animation.playbackRate = next;
+      rateFrame = next === targetRate ? 0 : requestAnimationFrame(stepRate);
+    };
+    const easeRateTo = (rate: number) => {
+      targetRate = rate;
+      if (rateFrame !== 0) return;
+      lastTick = performance.now();
+      rateFrame = requestAnimationFrame(stepRate);
+    };
+
     const handlePointerEnter = (event: PointerEvent) => {
       // タッチのタップで減速したまま戻らなくなるのを避ける。
       if (event.pointerType !== "mouse") return;
-      animation.updatePlaybackRate(HOVER_RATE);
+      easeRateTo(HOVER_RATE);
     };
     const handlePointerLeave = () => {
-      animation.updatePlaybackRate(1);
+      easeRateTo(1);
     };
 
     const handleWheel = (event: WheelEvent) => {
@@ -208,6 +238,7 @@ export function HomeMaterialMarquee({ children }: { children: ReactNode }) {
       frameElement.removeEventListener("dragstart", handleDragStart);
       frameElement.removeEventListener("focusin", handleFocusIn);
       frameElement.removeEventListener("focusout", handleFocusOut);
+      cancelAnimationFrame(rateFrame);
       animation.cancel();
     };
   }, [mode]);
