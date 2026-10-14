@@ -139,7 +139,7 @@ export const tokens = {
   fonts: {
     // Adobe Fonts のりょうゴシック PlusN B（weight 700）
     ryoGothic: {
-      value: '"Inter Latin", "ryo-gothic-plusn", var(--fonts-sans)',
+      value: '"Gen Interface JP Latin", "ryo-gothic-plusn", var(--fonts-sans)',
     },
     // Adobe Fonts の Farmille Web プロジェクトで配信するゴシックMB101 L（weight 300）
     gothicMb101: {
@@ -150,7 +150,7 @@ export const tokens = {
     materialIconsOutlined: { value: '"Material Icons Outlined"' },
     sans: {
       value:
-        '"Inter Latin", "Gen Interface JP", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif',
+        '"Gen Interface JP", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif',
     },
   },
   letterSpacings: { body: { value: "0.04em" } },

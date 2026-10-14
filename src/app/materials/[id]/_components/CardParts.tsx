@@ -21,7 +21,6 @@ const noImageStyle = css({
   color: "text.subtle",
   fontSize: "2xs",
   fontWeight: "bold",
-  letterSpacing: "0.08em",
   bg: "surface.page",
   borderRadius: "input",
 });
