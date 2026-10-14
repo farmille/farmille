@@ -49,11 +49,10 @@ export function PreparationNotice({
         <div
           className={css({
             pt: "3",
-            fontSize: "md",
-            lineHeight: "relaxed",
+            textStyle: "body",
             display: "flex",
             flexDirection: "column",
-            gap: "2",
+            gap: "1",
           })}
         >
           <p className={css({ m: "0" })}>Farmilleは現在準備中です。</p>
