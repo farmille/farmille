@@ -14,7 +14,6 @@ overrides:
   ws: ">=8.21.0"
 
 patchedDependencies:
-  image-size@2.0.2: patches/image-size@2.0.2.patch
   minimatch@3.1.5: patches/minimatch@3.1.5.patch
 
 allowBuilds:
@@ -24,10 +23,7 @@ allowBuilds:
   unrs-resolver: false
 
 auditConfig:
-  # image-size@2.0.2 はローカルパッチと check:security-patches で対策を検証する。
   ignoreGhsas:
-    - GHSA-w3rx-r6r6-pgpr
-    - GHSA-5p2g-fcmc-qvqq
     # braces は修正版が未公開（2026-10-03 時点の最新は 3.0.3）。Panda と eslint-config-next の
     # fast-glob 経由でビルド時に使われ、展開する glob はリポジトリ内の設定値だけなので外部入力は届かない。
     - GHSA-vfj7-8cjw-p6xm

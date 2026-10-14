@@ -74,7 +74,7 @@ pnpm build-storybook && pnpm test:storybook:responsive
 pnpm test:e2e
 ```
 
-E2E はローカルの Supabase を起動し、CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数を入れてから流す。CI はこれらに加えて `pnpm audit --audit-level=high` と `pnpm check:security-patches` を回す。すべて緑になっても完了ではない（実装規約の「完了の定義」を参照）。
+E2E はローカルの Supabase を起動し、CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数を入れてから流す。CI はこれらに加えて `pnpm audit --audit-level=high` を回す。すべて緑になっても完了ではない（実装規約の「完了の定義」を参照）。
 
 ## 依存の監査
 
