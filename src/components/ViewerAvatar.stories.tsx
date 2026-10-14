@@ -41,6 +41,7 @@ export const WithImage: Story = {
   },
 };
 
+/** 画像を設定していない人には、表示名から決まる Humation のイラストを出す。 */
 export const WithoutImage: Story = {
   beforeEach: () => {
     mocked(getSessionUser).mockResolvedValue(general);
