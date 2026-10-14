@@ -41,6 +41,19 @@ export const SignedInWithImage: Story = {
   },
 };
 
+/** 画像を設定していない人は、表示名から決まる Humation のイラストになる。 */
+export const SignedInWithoutImage: Story = {
+  beforeEach: () => {
+    mocked(getSessionUser).mockResolvedValue({
+      userId: ownProfile.userId,
+      accountType: "general",
+      sellerId: null,
+      aal: "aal1",
+    });
+    mocked(getOwnProfile).mockResolvedValue({ ok: true, data: ownProfile });
+  },
+};
+
 export const SignedOut: Story = {
   beforeEach: () => {
     mocked(getSessionUser).mockResolvedValue(null);
