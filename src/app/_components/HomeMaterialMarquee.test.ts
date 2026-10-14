@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { MaterialCard } from "@/components/MaterialCard";
-import { HomeMaterialMarquee } from "./HomeMaterialMarquee";
+import { HomeMaterialMarquee, easeRate } from "./HomeMaterialMarquee";
 
 afterEach(cleanup);
 
@@ -26,6 +26,31 @@ function cards() {
     }),
   );
 }
+
+describe("再生速度の補間", () => {
+  it("目標へ向かって単調に近づき、1フレームで目標へ飛ばない", () => {
+    const frame = 16;
+    let rate = 1;
+    for (let tick = 0; tick < 200; tick += 1) {
+      const next = easeRate(rate, 0.25, frame);
+      expect(next).toBeLessThan(rate);
+      expect(next).toBeGreaterThanOrEqual(0.25);
+      rate = next;
+      if (rate === 0.25) break;
+    }
+    expect(rate).toBe(0.25);
+  });
+
+  it("加速側も同じく滑らかに戻り、目標を超えない", () => {
+    const next = easeRate(0.25, 1, 16);
+    expect(next).toBeGreaterThan(0.25);
+    expect(next).toBeLessThan(1);
+  });
+
+  it("目標との差がごく小さければ目標へ揃える", () => {
+    expect(easeRate(0.253, 0.25, 16)).toBe(0.25);
+  });
+});
 
 describe("掲載資材のマーキー", () => {
   // happy-dom には Element.prototype.animate が無く、幅も 0 を返すので必ず静止表示になる。
