@@ -222,7 +222,7 @@ export const choiceRecipe = cva({
         "&:has([data-checked])": {
           borderColor: "primary.600",
           bg: "primary.soft",
-          color: "primary.700",
+          color: "primary.800",
         },
       },
     },

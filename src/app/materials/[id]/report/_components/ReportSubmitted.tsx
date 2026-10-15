@@ -48,7 +48,7 @@ const status = css({
   flexShrink: "0",
   borderRadius: "pill",
   bg: "primary.soft",
-  color: "primary.700",
+  color: "primary.800",
   px: "2.5",
   py: "1",
   fontSize: "xs",

@@ -38,7 +38,7 @@ const coverRecipe = cva({
     display: "grid",
     placeItems: "center",
     overflow: "hidden",
-    color: "primary.700",
+    color: "primary.800",
   },
   variants: {
     layout: {

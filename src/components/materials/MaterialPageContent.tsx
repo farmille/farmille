@@ -15,10 +15,12 @@ export const materialPageStack = css({
   gap: "6",
   minW: "0",
   textStyle: "body",
-  "& h2": { textStyle: "title", color: "primary.700", mb: "3" },
+  "& h2": { textStyle: "title", mb: "3" },
   "& h3": { textStyle: "body", fontWeight: "bold", mt: "3", mb: "2" },
   "& > section": { pb: "5", borderBottomWidth: "1px", borderBottomColor: "border.default" },
-  "& a": { color: "primary.700", overflowWrap: "anywhere" },
+  "& a": { overflowWrap: "anywhere" },
+  // 色は原稿の素の要素にだけ付け、カードやリンク部品が自分で決めた色を上書きしない
+  "& h2:not([class]), & a:not([class])": { color: "primary.700" },
 });
 export const materialPageText = css({
   whiteSpace: "pre-wrap",

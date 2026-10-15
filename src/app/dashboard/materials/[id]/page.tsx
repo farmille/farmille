@@ -64,7 +64,11 @@ export default async function SellerMaterialPage({ params }: { params: Promise<{
               },
               {
                 label: "公開ページ",
-                value: <TextLink href={`/materials/${id}`}>公開中の内容を見る</TextLink>,
+                value: (
+                  <TextLink href={`/materials/${id}`} variant="inlineOnSoft">
+                    公開中の内容を見る
+                  </TextLink>
+                ),
               },
             ]}
           />

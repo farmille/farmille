@@ -12,6 +12,13 @@ const textLinkRecipe = cva({
         textDecoration: "underline",
         textUnderlineOffset: "2px",
       },
+      /** primary.soft の面に置く本文リンク。700 では AA に届かないため一段濃くする。 */
+      inlineOnSoft: {
+        color: "primary.800",
+        fontWeight: "bold",
+        textDecoration: "underline",
+        textUnderlineOffset: "2px",
+      },
       plain: {
         display: "inline-block",
         color: "primary.700",

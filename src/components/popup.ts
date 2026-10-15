@@ -60,7 +60,7 @@ export const optionRecipe = cva({
     cursor: "default",
     outline: "none",
     userSelect: "none",
-    _highlighted: { bg: "primary.soft", color: "primary.700" },
+    _highlighted: { bg: "primary.soft", color: "primary.800" },
     _selected: { fontWeight: "bold" },
     _disabled: { opacity: "disabled", cursor: "not-allowed" },
   },

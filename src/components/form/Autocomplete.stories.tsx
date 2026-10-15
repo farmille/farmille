@@ -88,7 +88,7 @@ const tagStyle = css({
   px: "1.5",
   borderRadius: "mark",
   bg: "primary.soft",
-  color: "primary.700",
+  color: "primary.800",
   fontSize: "xs",
   fontWeight: "bold",
 });

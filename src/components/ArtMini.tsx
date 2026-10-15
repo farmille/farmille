@@ -24,7 +24,7 @@ const thumb = css({
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
-  color: "primary.700",
+  color: "primary.800",
 });
 
 export type ArtMiniProps = {

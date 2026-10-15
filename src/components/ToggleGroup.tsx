@@ -23,7 +23,7 @@ const toggleGroupRecipe = sva({
         group: choiceGroupRecipe.raw({ variant: "chips" }),
         item: {
           ...choiceRecipe.raw({ look: "chip" }),
-          _pressed: { borderColor: "primary.600", bg: "primary.soft", color: "primary.700" },
+          _pressed: { borderColor: "primary.600", bg: "primary.soft", color: "primary.800" },
         },
       },
       timeline: {

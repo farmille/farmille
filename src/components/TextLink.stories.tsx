@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
+import { css } from "../../styled-system/css";
 import { TextLink } from "./TextLink";
 
 const meta = {
@@ -32,6 +33,21 @@ export const LongLabel: Story = {
     href: "/reports/tomato-field-2026",
     children: "施設栽培トマトでの実証詳細レポート（うどんこ病対策・定植前土壌灌注）をすべて見る",
   },
+};
+
+export const InlineOnSoft: Story = {
+  args: {
+    href: "/materials/bacillus-tsuchiikiru",
+    variant: "inlineOnSoft",
+    children: "公開中の内容を見る",
+  },
+  decorators: [
+    (Story) => (
+      <div className={css({ p: "4", bg: "primary.soft", borderRadius: "card" })}>
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export const Plain: Story = {

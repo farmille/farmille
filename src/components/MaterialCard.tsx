@@ -201,7 +201,7 @@ export function MaterialCard({
                     px: "2",
                     py: "1",
                     bg: "primary.soft",
-                    color: "primary.700",
+                    color: "primary.800",
                     borderRadius: "pill",
                   })}
                 >
@@ -318,7 +318,7 @@ export function MaterialCard({
                   px: "2",
                   py: "1",
                   bg: "primary.soft",
-                  color: "primary.700",
+                  color: "primary.800",
                   borderRadius: "pill",
                 })}
               >

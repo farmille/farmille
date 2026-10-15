@@ -55,14 +55,14 @@ const item = css({
   textDecoration: "none",
   whiteSpace: "nowrap",
   cursor: "pointer",
-  _highlighted: { bg: "primary.soft", color: "primary.700" },
+  _highlighted: { bg: "primary.soft", color: "primary.800" },
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.600",
     outlineOffset: "2px",
   },
-  "&[aria-current=page]": { bg: "primary.soft", color: "primary.700" },
+  "&[aria-current=page]": { bg: "primary.soft", color: "primary.800" },
 });
 
 type AccountMenuLink = {

@@ -134,7 +134,7 @@ const desktopNavLink = cva({
     fontWeight: "bold",
     textDecoration: "none",
     whiteSpace: "nowrap",
-    _hover: { bg: "primary.soft", color: "primary.700" },
+    _hover: { bg: "primary.soft", color: "primary.800" },
     _focusVisible: {
       outlineWidth: "2px",
       outlineStyle: "solid",
@@ -144,7 +144,7 @@ const desktopNavLink = cva({
   },
   variants: {
     active: {
-      true: { bg: "primary.soft", color: "primary.700" },
+      true: { bg: "primary.soft", color: "primary.800" },
       false: {},
     },
   },
