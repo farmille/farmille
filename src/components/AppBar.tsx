@@ -236,12 +236,15 @@ const workspaceTitle = css({
 export type AppChrome = "public" | "seller";
 export type AppBarActive = "home" | "search" | "post" | "articles" | "me";
 
+/** PCヘッダー右端に出す、閲覧者に応じたアカウント欄。会員の画像はサーバー側で描いたものを受け取る（SiteAppBar が渡す）。 */
+export type AppBarAccount = { kind: "guest" } | { kind: "member"; avatar: ReactNode };
+
 type AppBarBaseProps = {
   chrome: AppChrome;
   overlapNoticeImage?: boolean;
   active?: AppBarActive;
-  /** アカウントボタンに出す本人の画像。サーバー側で描いたものを受け取る（SiteAppBar が渡す）。 */
-  accountAvatar?: ReactNode;
+  /** 未指定は閲覧者を確かめていない画面（エラー・読み込み中など）で、開いた時点で項目を切り替えるメニューを出す。 */
+  account?: AppBarAccount;
 };
 
 type AppBarHomeProps = AppBarBaseProps & {
@@ -295,10 +298,10 @@ function MobileAppBar(props: AppBarProps) {
 
 function DesktopSiteHeader({
   active,
-  accountAvatar,
+  account,
 }: {
   active?: AppBarActive;
-  accountAvatar?: ReactNode;
+  account?: AppBarAccount;
 }) {
   return (
     <header className={desktopHeader} data-ui="desktop-site-header">
@@ -308,7 +311,18 @@ function DesktopSiteHeader({
           <span className={desktopBrandName}>Farmille</span>
         </Link>
         <nav className={desktopPublicActions} aria-label="PCメインナビ">
-          <DesktopAccountMenu myPageCurrent={active === "me"} avatar={accountAvatar} />
+          {account?.kind === "guest" ? (
+            <>
+              <Link href="/login" className={desktopAction({ emphasis: "secondary" })}>
+                ログイン
+              </Link>
+              <Link href="/signup/general" className={desktopAction({ emphasis: "primary" })}>
+                新規登録
+              </Link>
+            </>
+          ) : (
+            <DesktopAccountMenu myPageCurrent={active === "me"} member={account} />
+          )}
         </nav>
       </div>
     </header>
@@ -374,7 +388,7 @@ export function AppBar(props: AppBarProps) {
       <MobileAppBar {...props} />
       {props.chrome === "public" ? (
         <>
-          <DesktopSiteHeader active={props.active} accountAvatar={props.accountAvatar} />
+          <DesktopSiteHeader active={props.active} account={props.account} />
           <PreparationNotice overlapImage={props.overlapNoticeImage} />
           {props.variant === "home" ? null : <DesktopContextBar {...props} />}
         </>

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { Pagination } from "@/components/Pagination";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
+import { getViewerAccount } from "@/components/SiteAppBar";
 import { createReviewListJsonLd, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { getReviewRatingDistribution } from "@/server/queries/material-content";
@@ -72,10 +73,11 @@ export default async function MaterialReviewsPage({
   const { sort, page } = parseReviewSearchParams(requestedSearchParams);
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
-  const [material, reviewsResult, distributionResult] = await Promise.all([
+  const [material, reviewsResult, distributionResult, account] = await Promise.all([
     loadMaterialOrNotFound(id),
     listReviewsByMaterial(id, { sort, page, viewerUserId }),
     getReviewRatingDistribution(id),
+    getViewerAccount(),
   ]);
   const reviews = unwrapQueryResult(reviewsResult);
   const distribution = unwrapQueryResult(distributionResult);
@@ -105,7 +107,11 @@ export default async function MaterialReviewsPage({
   };
 
   return (
-    <MaterialPageShell title={`${material.name}の感想口コミ`} backHref={materialPath}>
+    <MaterialPageShell
+      title={`${material.name}の感想口コミ`}
+      backHref={materialPath}
+      account={account}
+    >
       {reviewListJsonLd === null ? null : (
         <script
           type="application/ld+json"

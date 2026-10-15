@@ -6,6 +6,7 @@ import { Suspense } from "react";
 
 import { MaterialPageShell } from "./_components/PageShell";
 import { FabBar } from "@/components/FabBar";
+import { getViewerAccount } from "@/components/SiteAppBar";
 import { SkeletonList } from "@/components/SkeletonList";
 import { RatingSkeleton, SkeletonRegion } from "@/components/Skeleton";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
@@ -129,11 +130,13 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
     notFound();
   }
 
-  const [material, { sessionUser, viewerUserId, savedResult }, publishedPage] = await Promise.all([
-    loadMaterialOrNotFound(id),
-    loadViewer(id),
-    getPublishedMaterialPage(id),
-  ]);
+  const [material, { sessionUser, viewerUserId, savedResult }, publishedPage, account] =
+    await Promise.all([
+      loadMaterialOrNotFound(id),
+      loadViewer(id),
+      getPublishedMaterialPage(id),
+      getViewerAccount(),
+    ]);
   const isGeneralUser = viewerUserId !== null;
   // after() の中では cookies() が使えないため、Supabase クライアントは先に作る。
   const viewEventSupabase = await createServerSupabase();
@@ -167,6 +170,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
       title={material.name}
       backHref="/"
       hasFab={material.publication_status === "published"}
+      account={account}
     >
       <ReviewAnalytics materialId={material.id} submitted={query.review === "posted"} />
       <script

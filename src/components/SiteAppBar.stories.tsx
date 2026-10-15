@@ -54,6 +54,7 @@ export const SignedInWithoutImage: Story = {
   },
 };
 
+/** 未ログインの人には、アカウントボタンの代わりにログインと新規登録を出す。 */
 export const SignedOut: Story = {
   beforeEach: () => {
     mocked(getSessionUser).mockResolvedValue(null);

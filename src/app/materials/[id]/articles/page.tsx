@@ -1,6 +1,7 @@
 import { MaterialPageShell } from "../_components/PageShell";
 
 import { PostActionsLoader } from "@/components/PostActionsLoader";
+import { getViewerAccount } from "@/components/SiteAppBar";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -44,10 +45,11 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
     notFound();
   }
 
-  const [material, reportsResult, articlesResult] = await Promise.all([
+  const [material, reportsResult, articlesResult, account] = await Promise.all([
     loadMaterialOrNotFound(id),
     listPublishedUsageReportsByMaterial(id),
     listPublishedArticlesByMaterial(id),
+    getViewerAccount(),
   ]);
   const reports = unwrapQueryResult(reportsResult);
   const articles = unwrapQueryResult(articlesResult);
@@ -55,7 +57,7 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
   const isEmpty = reports.items.length === 0 && articles.items.length === 0;
 
   return (
-    <MaterialPageShell title={`${material.name}の記事`} backHref={materialPath}>
+    <MaterialPageShell title={`${material.name}の記事`} backHref={materialPath} account={account}>
       <h1 className={visuallyHiddenStyle}>{material.name} の記事・実証詳細レポート</h1>
       <div className={leadStyle}>
         この資材に紐づく、生産者の実証詳細レポートとメーカーによる記事です。
