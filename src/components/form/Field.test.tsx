@@ -21,7 +21,7 @@ describe("Field", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Field label="ニックネーム" name="handle" requirement="required" visibility="public">
           <Input label={null} />
         </Field>
@@ -75,7 +75,7 @@ describe("Field", () => {
   it("Form の errors を role=alert で出して入力の説明に結び、入力を変えると消す", async () => {
     const user = userEvent.setup();
     render(
-      <Form errors={{ handle: "このハンドルネームはすでに使われています。" }}>
+      <Form persist={false} errors={{ handle: "このハンドルネームはすでに使われています。" }}>
         <Field label="ニックネーム" name="handle">
           <Input defaultValue="山田" label={null} />
         </Field>
@@ -111,7 +111,7 @@ describe("Field", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Field label="感想口コミ本文" name="body" requirement="required">
           <Textarea label={null} rows={4} />
         </Field>
@@ -132,7 +132,7 @@ describe("Field", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Field label="メールアドレス" name="email" requirement="required">
           <Input label={null} type="email" />
         </Field>
@@ -151,7 +151,7 @@ describe("Field", () => {
   it("ブラウザの検証エラーは閲覧環境の言語によらず日本語で1つだけ出し、alert にはしない", async () => {
     const user = userEvent.setup();
     render(
-      <Form onSubmit={captureSubmit([])}>
+      <Form persist={false} onSubmit={captureSubmit([])}>
         <Field label="ニックネーム" name="handle" requirement="required">
           <Input label={null} />
         </Field>

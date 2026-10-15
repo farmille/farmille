@@ -19,6 +19,7 @@ const meta = {
   component: Form,
   args: {
     action: noopSubmit,
+    persist: false,
     children: (
       <>
         <Input

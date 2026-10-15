@@ -30,7 +30,7 @@ export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
   }
 
   return (
-    <Form action={formAction} errors={fieldErrorsOf(state)}>
+    <Form action={formAction} errors={fieldErrorsOf(state)} persist={false}>
       <input type="hidden" name="tokenHash" value={tokenHash} />
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 

@@ -11,6 +11,12 @@ export { FormActions } from "./FormActions";
 export { Input } from "./Input";
 export { Notice } from "./Notice";
 export { OtpInput } from "./OtpInput";
+export {
+  usePersistedInput,
+  useRestoredField,
+  useRestoredText,
+  type RestoredFields,
+} from "./persisted-input";
 export { RadioGroup } from "./RadioGroup";
 export { controlRecipe } from "./recipes";
 export { SearchInput } from "./SearchInput";

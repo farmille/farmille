@@ -74,7 +74,7 @@ export function Fieldset({
           {lead}
         </p>
       )}
-      <FieldContext.Provider value={{ required, inRoot: rooted, inField: false }}>
+      <FieldContext.Provider value={{ required, inRoot: rooted, inField: false, name }}>
         {children}
       </FieldContext.Provider>
       {description === undefined ? null : (

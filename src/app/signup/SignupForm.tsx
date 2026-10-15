@@ -50,7 +50,7 @@ export function SignupForm({
   const values = submittedValuesOf(state);
 
   return (
-    <Form action={formAction} errors={fieldErrorsOf(state)}>
+    <Form action={formAction} errors={fieldErrorsOf(state)} persist="signup">
       <FormActions layout="links">
         <TextLink
           href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}

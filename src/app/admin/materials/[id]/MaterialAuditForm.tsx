@@ -1,8 +1,9 @@
 "use client";
 import { useState, useTransition } from "react";
+import * as v from "valibot";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
-import { Notice, Select, Textarea, type Option } from "@/components/form";
+import { Notice, Select, Textarea, usePersistedInput, type Option } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { recordMaterialAuditAction } from "./audit-actions";
 
@@ -17,9 +18,16 @@ const AUDIT_OUTCOMES: readonly Option<AuditOutcome>[] = [
 export function MaterialAuditForm({ materialId }: { materialId: string }) {
   const [outcome, setOutcome] = useState<AuditOutcome>("checked");
   const [note, setNote] = useState("");
+  const [recordedNote, setRecordedNote] = useState("");
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  usePersistedInput({
+    name: "material-audit",
+    schema: v.string(),
+    unsaved: note === recordedNote ? null : note,
+    restore: setNote,
+  });
   return (
     <div className={materialPageStack}>
       <Select
@@ -49,7 +57,10 @@ export function MaterialAuditForm({ materialId }: { materialId: string }) {
           startTransition(async () => {
             const next = await recordMaterialAuditAction({ materialId, outcome, note });
             setResult(next);
-            if (next.ok) router.refresh();
+            if (next.ok) {
+              setRecordedNote(note);
+              router.refresh();
+            }
           })
         }
       >

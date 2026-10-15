@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Combobox, type Option } from "@/components/form";
+import { Combobox, useRestoredField, type Option } from "@/components/form";
 import type { ReviewCropOption } from "@/server/queries/reviews";
 
 const SUGGESTION_LIMIT = 9;
@@ -20,9 +20,12 @@ export function ReviewCropPicker({
   crops: readonly ReviewCropOption[];
   defaultCropIds: readonly string[];
 }) {
+  const restoredCropIds = useRestoredField("cropIds");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(() =>
-    defaultCropIds.flatMap((id) => crops.filter((crop) => crop.id === id).map(optionOf)),
+    (restoredCropIds ?? defaultCropIds).flatMap((id) =>
+      crops.filter((crop) => crop.id === id).map(optionOf),
+    ),
   );
   const normalizedQuery = query.trim().toLocaleLowerCase("ja");
   const suggestions = crops

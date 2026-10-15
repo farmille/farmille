@@ -25,7 +25,7 @@ export function ClaimForm({
   const [state, formAction] = useActionState(setMaterialSellerAction, initialMaterialFormState);
 
   return (
-    <Form action={formAction}>
+    <Form action={formAction} persist={false}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
       <Field

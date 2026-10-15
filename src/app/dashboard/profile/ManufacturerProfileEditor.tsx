@@ -4,7 +4,15 @@ import { useRouter } from "next/navigation";
 import * as v from "valibot";
 import { SellerHeader } from "@/app/sellers/[id]/_components/SellerHeader";
 import { Button } from "@/components";
-import { Field, FileInput, FormActions, Input, Notice, Textarea } from "@/components/form";
+import {
+  Field,
+  FileInput,
+  FormActions,
+  Input,
+  Notice,
+  Textarea,
+  usePersistedInput,
+} from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import {
@@ -14,6 +22,12 @@ import {
 import { css } from "../../../../styled-system/css";
 import { saveManufacturerProfile, withdrawManufacturerProfile, uploadLogo } from "./actions";
 
+// 書きかけの URL も戻せるよう、保存時の URL 検査はかけず形だけを確かめる
+const ProfileInputSchema = v.object({
+  profileText: v.string(),
+  logoUrl: v.string(),
+  websiteUrl: v.string(),
+});
 const currentLogoStyle = css({
   display: "flex",
   alignItems: "center",
@@ -48,11 +62,21 @@ export function ManufacturerProfileEditor({
   pendingVersion: string | null;
 }) {
   const [content, setContent] = useState(initialContent);
+  const [savedContent, setSavedContent] = useState(() => JSON.stringify(initialContent));
   const [versionId, setVersionId] = useState(expectedVersion);
   const [preview, setPreview] = useState(false);
   const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  usePersistedInput({
+    name: "manufacturer-profile",
+    schema: ProfileInputSchema,
+    unsaved: pendingVersion || JSON.stringify(content) === savedContent ? null : content,
+    // 表現確認中は編集できないので、保存前の入力を戻さない
+    restore: (restored) => {
+      if (!pendingVersion) setContent(restored);
+    },
+  });
   function save(submit: boolean) {
     startTransition(async () => {
       const result = await saveManufacturerProfile({ content, expectedVersion: versionId, submit });
@@ -61,6 +85,7 @@ export function ManufacturerProfileEditor({
         return;
       }
       setVersionId(submit ? null : result.versionId);
+      setSavedContent(JSON.stringify(content));
       setMessage({
         tone: "success",
         text: submit

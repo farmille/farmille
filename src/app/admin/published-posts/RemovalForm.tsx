@@ -17,7 +17,7 @@ export function RemovalForm({ id, type }: { id: string; type: "review" | "usage_
     <Collapsible>
       <CollapsibleTrigger>公開から削除する</CollapsibleTrigger>
       <CollapsiblePanel>
-        <Form action={action} className={formStyle}>
+        <Form action={action} className={formStyle} persist={false}>
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="type" value={type} />
           <p className={adminBodyStyle}>

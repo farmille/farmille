@@ -10,7 +10,7 @@ import { Input } from "./Input";
 describe("Fieldset", () => {
   it("name の無い組は中の Field がそれぞれ自分の name とエラーを持つ", () => {
     render(
-      <Form errors={{ givenName: "名を入力してください。" }}>
+      <Form persist={false} errors={{ givenName: "名を入力してください。" }}>
         <Fieldset legend="本名" lead="姓と名を分けて入力します" visibility="private">
           <Field hideLabel label="姓" name="familyName">
             <Input label={null} />

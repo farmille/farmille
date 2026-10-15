@@ -2,7 +2,7 @@
 import { useRef, useState, useTransition } from "react";
 
 import { buttonRecipe } from "@/components/Button";
-import { Field, Fieldset, Input, Select } from "@/components/form";
+import { Field, Fieldset, Input, Select, useRestoredText } from "@/components/form";
 import { postalFill } from "@/lib/postal-fill";
 import { PREFECTURES } from "@/lib/prefectures";
 
@@ -32,9 +32,12 @@ function completePostalCode(value: string): string | null {
 }
 
 export function PostalAddressFields({ values }: { values: Record<string, string> }) {
-  const [postal, setPostal] = useState(values.postalCode ?? "");
-  const [prefecture, setPrefecture] = useState(values.prefectureCode ?? "");
-  const [cityStreet, setCityStreet] = useState(values.cityStreet ?? "");
+  const restoredPostal = useRestoredText("postalCode");
+  const restoredPrefecture = useRestoredText("prefectureCode");
+  const restoredCityStreet = useRestoredText("cityStreet");
+  const [postal, setPostal] = useState(restoredPostal ?? values.postalCode ?? "");
+  const [prefecture, setPrefecture] = useState(restoredPrefecture ?? values.prefectureCode ?? "");
+  const [cityStreet, setCityStreet] = useState(restoredCityStreet ?? values.cityStreet ?? "");
   const [message, setMessage] = useState("");
   const [pending, startTransition] = useTransition();
   const requestVersion = useRef(0);

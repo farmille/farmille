@@ -9,7 +9,7 @@ import { AuthScreen } from "./AuthScreen";
 const submitAction = fn(async () => {});
 
 const loginForm = (
-  <Form action={submitAction}>
+  <Form action={submitAction} persist={false}>
     <Input
       label="メールアドレス"
       name="email"
@@ -33,7 +33,7 @@ const loginForm = (
 );
 
 const signupForm = (
-  <Form action={submitAction}>
+  <Form action={submitAction} persist={false}>
     <Input
       description="感想口コミに表示される名前です。実名を避けることをおすすめします。"
       label="ハンドルネーム"

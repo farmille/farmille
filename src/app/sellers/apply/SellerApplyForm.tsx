@@ -24,7 +24,7 @@ export function SellerApplyForm() {
   const [inviteOpen, setInviteOpen] = useState(hadInvite);
 
   return (
-    <Form action={formAction} errors={fieldErrorsOf(state)}>
+    <Form action={formAction} errors={fieldErrorsOf(state)} persist="seller-apply">
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
       <Input

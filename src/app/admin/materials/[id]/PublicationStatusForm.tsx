@@ -23,7 +23,7 @@ export function PublicationStatusForm({
   );
 
   return (
-    <Form action={formAction}>
+    <Form action={formAction} persist={false}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
       <RadioGroup

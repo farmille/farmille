@@ -4,7 +4,14 @@ import { useState } from "react";
 
 import { Button } from "@/components/Button";
 import { Chip } from "@/components/Chip";
-import { Autocomplete, Combobox, Fieldset, Notice, type Option } from "@/components/form";
+import {
+  Autocomplete,
+  Combobox,
+  Fieldset,
+  Notice,
+  useRestoredField,
+  type Option,
+} from "@/components/form";
 import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
 import { css } from "../../../../styled-system/css";
 
@@ -33,12 +40,22 @@ export function ProfileTagsEditor({
   details: ProfileDetails;
   options: ProfileOptions;
 }) {
+  const restoredCropIds = useRestoredField("cropIds");
+  const restoredAffiliations = useRestoredField("affiliations");
   const [cropQuery, setCropQuery] = useState("");
   const [crops, setCrops] = useState<readonly Option[]>(() =>
-    details.crops.map((crop) => ({ value: crop.id, label: crop.name })),
+    restoredCropIds === undefined
+      ? details.crops.map((crop) => ({ value: crop.id, label: crop.name }))
+      : restoredCropIds.flatMap((id) =>
+          options.crops
+            .filter((crop) => crop.id === id)
+            .map((crop) => ({ value: crop.id, label: crop.name })),
+        ),
   );
   const [affiliation, setAffiliation] = useState("");
-  const [affiliations, setAffiliations] = useState(details.affiliations);
+  const [affiliations, setAffiliations] = useState<readonly string[]>(
+    restoredAffiliations ?? details.affiliations,
+  );
   const [message, setMessage] = useState("");
   const query = normalize(cropQuery);
   const available = options.crops.filter(

@@ -9,6 +9,7 @@ import { cx } from "../../../styled-system/css";
 import { Choice, EnsureFieldRoot } from "./Field";
 import { useFieldContext, useResetKey } from "./field-context";
 import { Labeled, splitLabeling, type Labeling } from "./Labeled";
+import { restoredChoices, useRestoredField } from "./persisted-input";
 import { checkboxBoxRecipe, checkIndicatorStyle, choiceGroupRecipe } from "./recipes";
 import type { Option } from "./types";
 
@@ -37,8 +38,14 @@ export function CheckboxGroup<V extends string>(props: CheckboxGroupProps<V>) {
 }
 
 function CheckboxGroupWithReset<V extends string>(props: CheckboxGroupBodyProps<V>) {
-  const resetKey = useResetKey((props.defaultValue ?? []).join("\u001f"));
-  return <CheckboxGroupBody<V> key={resetKey} {...props} />;
+  const field = useFieldContext();
+  const restored = useRestoredField(props.name ?? field.name);
+  const initial =
+    props.value === undefined && restored !== undefined
+      ? restoredChoices(props.options, restored)
+      : props.defaultValue;
+  const resetKey = useResetKey((initial ?? []).join("\u001f"));
+  return <CheckboxGroupBody<V> key={resetKey} {...props} defaultValue={initial} />;
 }
 
 function CheckboxGroupBody<V extends string>({

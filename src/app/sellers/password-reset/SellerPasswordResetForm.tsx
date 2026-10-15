@@ -10,7 +10,7 @@ import { initialAuthFormState } from "@/lib/auth/form-state";
 export function SellerPasswordResetForm() {
   const [state, action] = useActionState(sellerPasswordResetAction, initialAuthFormState);
   return (
-    <Form action={action}>
+    <Form action={action} persist={false}>
       {state.status === "done" ? (
         <Notice tone="success">{state.message}</Notice>
       ) : (

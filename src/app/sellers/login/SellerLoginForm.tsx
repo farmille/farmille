@@ -12,7 +12,7 @@ export function SellerLoginForm({ next }: { next: string | null }) {
   const values = submittedValuesOf(state);
 
   return (
-    <Form action={formAction}>
+    <Form action={formAction} persist={false}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {next === null ? null : <input name="next" type="hidden" value={next} />}
 

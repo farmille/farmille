@@ -11,6 +11,7 @@ import { createAuthBrowserClient } from "@/lib/auth/browser";
 import {
   createBlankUsageReport,
   reportErrorStep,
+  UsageReportInputSchema,
   validateUsageReportSubmission,
   type UsageReportFieldErrors,
   type UsageReportInput,
@@ -18,7 +19,7 @@ import {
 import type { RegisteredAddress } from "@/server/accounts/registered-address";
 import type { CropOption } from "@/server/queries/usage-report-form";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { Notice } from "@/components/form";
+import { Notice, usePersistedInput } from "@/components/form";
 import { SuccessMark, completionStepRecipe } from "@/components/SuccessMark";
 import { toast } from "@/components/Toaster";
 
@@ -333,6 +334,20 @@ export function ReportForm({
   const dirty = JSON.stringify(input) !== saved;
   const busy = pending || uploading;
   const cropName = crops.find((crop) => crop.id === input.cropId)?.name ?? "作物未選択";
+
+  // 下書き保存の前に閉じても、同じタブで開き直せば保存前の入力に戻る
+  usePersistedInput({
+    name: "report",
+    schema: UsageReportInputSchema,
+    unsaved: dirty && !submitted ? input : null,
+    restore: (restored) => {
+      if (restored.materialId !== material.id) return;
+      setInput(restored);
+      setManualUnits(
+        new Set(restored.measurements.filter((item) => item.unit).map((item) => item.id)),
+      );
+    },
+  });
 
   useEffect(() => {
     if (!dirty || submitted) return;

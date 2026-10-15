@@ -7,6 +7,7 @@ import { cx } from "../../../styled-system/css";
 import { Choice, EnsureFieldRoot } from "./Field";
 import { useFieldContext, useResetKey } from "./field-context";
 import { Labeled, splitLabeling, type Labeling } from "./Labeled";
+import { restoredChoices, useRestoredField } from "./persisted-input";
 import { choiceGroupRecipe, radioDotStyle } from "./recipes";
 import type { Option } from "./types";
 
@@ -42,17 +43,22 @@ function RadioGroupBody<V extends string>({
   disabled,
   className,
 }: RadioGroupBodyProps<V>) {
-  const { required, inRoot } = useFieldContext();
-  const resetKey = useResetKey(defaultValue ?? "");
+  const field = useFieldContext();
+  const restored = useRestoredField(name ?? field.name);
+  const initial =
+    value === undefined && restored !== undefined
+      ? (restoredChoices(options, restored)[0] ?? defaultValue)
+      : defaultValue;
+  const resetKey = useResetKey(initial ?? "");
   const group = (
     <BaseRadioGroup<V>
       key={resetKey}
-      className={cx(choiceGroupRecipe({ variant }), inRoot ? className : undefined)}
-      defaultValue={defaultValue}
+      className={cx(choiceGroupRecipe({ variant }), field.inRoot ? className : undefined)}
+      defaultValue={initial}
       disabled={disabled}
       name={name}
       onValueChange={onValueChange}
-      required={required}
+      required={field.required}
       value={value}
     >
       {options.map((option) => (

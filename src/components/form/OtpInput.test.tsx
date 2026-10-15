@@ -18,7 +18,7 @@ describe("OtpInput", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <OtpInput label="認証コード" name="code" requirement="required" />
         <button type="submit">登録を完了する</button>
       </Form>,
@@ -40,7 +40,7 @@ describe("OtpInput", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <OtpInput label="認証コード" name="code" requirement="required" />
         <button type="submit">登録を完了する</button>
       </Form>,

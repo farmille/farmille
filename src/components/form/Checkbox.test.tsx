@@ -74,7 +74,7 @@ describe("Checkbox", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Field name="terms" requirement="required">
           <Terms />
         </Field>
@@ -94,7 +94,7 @@ describe("Checkbox", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Checkbox defaultChecked name="removePhoto" value="photo-1">
           この写真を削除する
         </Checkbox>

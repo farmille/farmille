@@ -42,7 +42,7 @@ export function VerificationForm() {
     }
   }
   return (
-    <Form onSubmit={submit}>
+    <Form onSubmit={submit} persist="receipt-verification">
       <Input
         label="受付番号"
         name="receiptNumber"

@@ -54,7 +54,7 @@ export const EmptyWithProfileSuggestions: Story = {
 export const WithError: Story = {
   args: { defaultCropIds: [] },
   render: (args) => (
-    <Form errors={cropError}>
+    <Form errors={cropError} persist={false}>
       <ReviewCropPicker {...args} />
     </Form>
   ),

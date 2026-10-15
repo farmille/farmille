@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { Icon } from "@/components/Icon";
 import { Choice, EnsureFieldRoot, RequirementBadge } from "./Field";
 import { useFieldContext, useResetKey } from "./field-context";
+import { useRestoredField } from "./persisted-input";
 import { checkboxBoxRecipe, checkIndicatorStyle } from "./recipes";
 
 type CheckboxProps = {
@@ -39,8 +40,15 @@ export function Checkbox({
   onCheckedChange,
   className,
 }: CheckboxProps) {
-  const { required, inRoot, requirement } = useFieldContext();
-  const resetKey = useResetKey(String(defaultChecked === true));
+  const field = useFieldContext();
+  const { required, inRoot, requirement } = field;
+  const restored = useRestoredField(name ?? field.name);
+  // 送信値を決めていないチェックは、ブラウザの既定どおり "on" で送られる
+  const initialChecked =
+    checked === undefined && restored !== undefined
+      ? restored.includes(value ?? "on")
+      : defaultChecked;
+  const resetKey = useResetKey(String(initialChecked === true));
   const choice = (
     <Choice
       className={inRoot ? className : undefined}
@@ -66,7 +74,7 @@ export function Checkbox({
           key={resetKey}
           checked={checked}
           className={checkboxBoxRecipe({ size })}
-          defaultChecked={defaultChecked}
+          defaultChecked={initialChecked}
           name={name}
           nativeButton
           onCheckedChange={onCheckedChange}
