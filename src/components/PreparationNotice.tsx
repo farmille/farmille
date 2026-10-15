@@ -53,6 +53,8 @@ export function PreparationNotice({
             display: "flex",
             flexDirection: "column",
             gap: "1",
+            // tab 以上は文を横に並べる。3文が収まる幅なら一行になり、収まらなければ折り返す。
+            tab: { flexDirection: "row", flexWrap: "wrap", columnGap: "3" },
           })}
         >
           <p className={css({ m: "0" })}>Farmilleは現在準備中です。</p>
