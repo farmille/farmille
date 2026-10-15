@@ -46,7 +46,7 @@ const chipRecipe = cva({
     category: {
       crop: {
         bg: "primary.200",
-        color: "primary.700",
+        color: "primary.800",
         borderColor: "primary.600/30",
       },
       concern: {

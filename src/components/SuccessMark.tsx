@@ -12,7 +12,7 @@ const successMarkRecipe = cva({
   },
   variants: {
     tone: {
-      soft: { bg: "primary.100", color: "primary.700" },
+      soft: { bg: "primary.100", color: "primary.800" },
       solid: { bg: "primary.700", color: "text.inverse" },
     },
     entrance: {

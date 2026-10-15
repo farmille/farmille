@@ -48,7 +48,11 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
                       href={link.url}
                       target="_blank"
                       rel="noreferrer"
-                      className={css({ color: "primary.700", textDecoration: "underline" })}
+                      className={
+                        link.trial
+                          ? css({ color: "primary.800", textDecoration: "underline" })
+                          : css({ color: "primary.700", textDecoration: "underline" })
+                      }
                     >
                       {link.title || "資料名は未入力です"}
                     </a>
