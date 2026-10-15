@@ -14,7 +14,7 @@ export function RequestDecisionForm({ requestId }: { requestId: string }) {
   );
 
   return (
-    <Form action={formAction}>
+    <Form action={formAction} persist="request-decision">
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
       <Textarea

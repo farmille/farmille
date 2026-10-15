@@ -23,7 +23,7 @@ describe("RadioGroup", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <RadioGroup
           label="あなたの立場"
           name="standpoint"
@@ -71,7 +71,7 @@ describe("RadioGroup", () => {
 
   it("name のある組は見出しで組に名前を付け、組のエラーを選択肢の説明に結ぶ", () => {
     render(
-      <Form errors={{ standpoint: "立場を選んでください。" }}>
+      <Form persist={false} errors={{ standpoint: "立場を選んでください。" }}>
         <RadioGroup
           label="あなたの立場"
           name="standpoint"

@@ -64,7 +64,7 @@ export function ReportDialog({
           <DialogClose>閉じる</DialogClose>
         </DialogActions>
       ) : (
-        <Form action={formAction} className={formStyle}>
+        <Form action={formAction} className={formStyle} persist={false}>
           <Select
             label="通報理由"
             labelSize="sm"

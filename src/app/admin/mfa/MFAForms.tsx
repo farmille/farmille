@@ -33,7 +33,7 @@ function VerifyForm({ factorId, next, label }: { factorId: string; next: string;
   const [state, formAction] = useActionState(verifyTotpCodeAction, initialAuthFormState);
 
   return (
-    <Form action={formAction} className={stepStyle}>
+    <Form action={formAction} className={stepStyle} persist={false}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       <input name="factorId" type="hidden" value={factorId} />
       <input name="next" type="hidden" value={next} />
@@ -89,7 +89,7 @@ export function AdminMfaForms({
   }
 
   return (
-    <Form action={enrollAction} className={stepStyle}>
+    <Form action={enrollAction} className={stepStyle} persist={false}>
       {enrollState.status === "error" ? <Notice tone="error">{enrollState.message}</Notice> : null}
       <p className={adminInlineNoteStyle}>
         運営アカウントは2要素認証（TOTP）が必須です。認証アプリを用意してから登録を始めてください。

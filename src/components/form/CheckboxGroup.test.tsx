@@ -24,7 +24,7 @@ describe("CheckboxGroup", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <CheckboxGroup label="使用時期" name="timings" options={timings} variant="chips" />
         <button type="submit">保存</button>
       </Form>,

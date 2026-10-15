@@ -36,6 +36,7 @@ describe("StarRating（入力）", () => {
       const [value, setValue] = useState(0);
       return (
         <Form
+          persist={false}
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
             submitted.push(new FormData(event.currentTarget));

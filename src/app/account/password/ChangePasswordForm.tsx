@@ -31,7 +31,7 @@ export function ChangePasswordForm({
       </>
     );
   return (
-    <Form action={action}>
+    <Form action={action} persist={false}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       <Input
         label="現在のパスワード"

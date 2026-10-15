@@ -1,8 +1,9 @@
 "use client";
 import { useState, useTransition } from "react";
+import * as v from "valibot";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
-import { Notice, Textarea } from "@/components/form";
+import { Notice, Textarea, usePersistedInput } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { reviewMaterialPageAction, reviewManufacturerProfileAction } from "./actions";
 
@@ -14,16 +15,26 @@ export function ExpressionReviewForm({
   kind?: "material" | "profile";
 }) {
   const [note, setNote] = useState("");
+  const [recordedNote, setRecordedNote] = useState("");
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  usePersistedInput({
+    name: "expression-review",
+    schema: v.string(),
+    unsaved: note === recordedNote ? null : note,
+    restore: setNote,
+  });
   function submit(publish: boolean) {
     startTransition(async () => {
       const next = await (
         kind === "material" ? reviewMaterialPageAction : reviewManufacturerProfileAction
       )({ versionId, publish, note });
       setResult(next);
-      if (next.ok) router.refresh();
+      if (next.ok) {
+        setRecordedNote(note);
+        router.refresh();
+      }
     });
   }
   return (

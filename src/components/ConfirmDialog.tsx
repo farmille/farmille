@@ -139,6 +139,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
                 const formData = new FormData(event.currentTarget);
                 confirm(() => props.action(formData), props.trigger !== undefined);
               }}
+              persist={false}
             >
               {props.children === undefined ? null : (
                 <div className={fieldsStyle}>{props.children}</div>

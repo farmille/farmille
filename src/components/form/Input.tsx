@@ -5,8 +5,9 @@ import { useState, type ComponentPropsWithRef } from "react";
 
 import { Icon, type IconName } from "@/components/Icon";
 import { css, cx } from "../../../styled-system/css";
-import { useFieldRequired } from "./field-context";
+import { useFieldContext } from "./field-context";
 import { Labeled, splitLabeling, type Labeling } from "./Labeled";
+import { useRestoredText } from "./persisted-input";
 import { controlRecipe } from "./recipes";
 
 const revealShell = css({ position: "relative", display: "block", w: "100%" });
@@ -61,14 +62,19 @@ function InputBody({
   type,
   disabled,
   readOnly,
+  defaultValue,
   ...rest
 }: InputBodyProps) {
-  const required = useFieldRequired();
+  const { required, name } = useFieldContext();
+  const restored = useRestoredText(rest.name ?? name);
   const [shown, setShown] = useState(false);
   const state = revealState[shown ? "visible" : "hidden"];
   const input = (
     <BaseInput
       {...rest}
+      // パスワードは表示中に type が text になるので、type ではなく印で控えから外す
+      data-persist={revealable ? "never" : undefined}
+      defaultValue={rest.value === undefined ? (restored ?? defaultValue) : defaultValue}
       className={cx(
         controlRecipe({
           size,

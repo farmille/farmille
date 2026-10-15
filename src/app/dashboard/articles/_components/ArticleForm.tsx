@@ -7,11 +7,13 @@ import { useRouter } from "next/navigation";
 import {
   useActionState,
   useEffect,
+  useMemo,
   useRef,
   useState,
   useTransition,
   type ChangeEvent,
 } from "react";
+import * as v from "valibot";
 
 import { Button, TextLink, buttonRecipe } from "@/components";
 import { Chip } from "@/components/Chip";
@@ -26,6 +28,7 @@ import {
   Input,
   Notice,
   Textarea,
+  usePersistedInput,
 } from "@/components/form";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { errorMessageJa } from "@/server/errors";
@@ -93,6 +96,13 @@ function isImageFile(file: File): file is File & { type: keyof typeof fileExtens
   return file.type in fileExtensionByType;
 }
 
+const ArticleInputSchema = v.object({
+  title: v.string(),
+  body: v.string(),
+  heroImageUrl: v.string(),
+  materials: v.array(v.object({ id: v.string(), name: v.string(), manufacturer_name: v.string() })),
+});
+
 export function ArticleForm({
   sellerId,
   mode,
@@ -129,6 +139,29 @@ export function ArticleForm({
     initialSellerArticleFormState,
   );
   const fieldErrors = sellerArticleFieldErrors(state);
+
+  const input = useMemo(
+    () => ({ title, body, heroImageUrl, materials }),
+    [title, body, heroImageUrl, materials],
+  );
+  const [savedInput, setSavedInput] = useState(() => JSON.stringify(input));
+  const [settledState, setSettledState] = useState(state);
+  if (state !== settledState) {
+    setSettledState(state);
+    if (state.status === "success") setSavedInput(JSON.stringify(input));
+  }
+  // 送信中は控えを消し、公開後のリダイレクトで画面が外れても書きかけを残さない。失敗したら控え直す
+  usePersistedInput({
+    name: "article",
+    schema: ArticleInputSchema,
+    unsaved: pending || JSON.stringify(input) === savedInput ? null : input,
+    restore: (saved) => {
+      setTitle(saved.title);
+      setBody(saved.body);
+      setHeroImageUrl(saved.heroImageUrl);
+      setMaterials(saved.materials);
+    },
+  });
 
   useEffect(() => {
     if (state.status === "success" && state.articleId !== undefined && mode === "create") {
@@ -269,6 +302,7 @@ export function ArticleForm({
         className={formLayout}
         errors={fieldErrors}
         id="article-editor-form"
+        persist={false}
       >
         <input defaultValue={initialStatus} name="status" ref={statusInputRef} type="hidden" />
         <input name="heroImageUrl" type="hidden" value={heroImageUrl} />

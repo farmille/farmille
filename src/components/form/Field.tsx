@@ -93,6 +93,7 @@ export function Field({
           inRoot: true,
           inField: true,
           requirement: label === undefined ? requirement : undefined,
+          name,
         }}
       >
         {children}

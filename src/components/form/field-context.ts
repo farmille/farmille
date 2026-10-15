@@ -11,6 +11,8 @@ type FieldContextValue = {
   /** Field の中か。Field の label が中の入力欄の名前になる（Fieldset の中では false）。 */
   inField: boolean;
   requirement?: Requirement;
+  /** 囲む Field（name 付きの Fieldset）の name。label={null} の部品は自分の name の代わりにこれで送られる。 */
+  name?: string;
 };
 
 export const FieldContext = createContext<FieldContextValue>({

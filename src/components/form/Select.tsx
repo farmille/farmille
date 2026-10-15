@@ -11,8 +11,9 @@ import {
   popupRecipe,
 } from "@/components/popup";
 import { css, cx } from "../../../styled-system/css";
-import { useFieldRequired, useResetKey } from "./field-context";
+import { useFieldContext, useResetKey } from "./field-context";
 import { Labeled, splitLabeling, type Labeling } from "./Labeled";
+import { restoredChoices, useRestoredField } from "./persisted-input";
 import { selectTriggerRecipe } from "./recipes";
 import type { Option } from "./types";
 
@@ -69,19 +70,24 @@ function SelectBody<V extends string>({
   autoComplete,
   className,
 }: SelectBodyProps<V>) {
-  const required = useFieldRequired();
-  const resetKey = useResetKey(defaultValue ?? "");
+  const field = useFieldContext();
+  const restored = useRestoredField(name ?? field.name);
+  const initial =
+    value === undefined && restored !== undefined
+      ? (restoredChoices(options, restored)[0] ?? defaultValue)
+      : defaultValue;
+  const resetKey = useResetKey(initial ?? "");
 
   return (
     <BaseSelect.Root<V>
       key={resetKey}
       autoComplete={autoComplete}
-      defaultValue={defaultValue}
+      defaultValue={initial}
       disabled={disabled}
       items={options}
       name={name}
       onValueChange={onValueChange}
-      required={required}
+      required={field.required}
       value={value}
     >
       <BaseSelect.Trigger className={cx(selectTriggerRecipe({ size }), className)}>

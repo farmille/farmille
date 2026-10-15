@@ -25,7 +25,7 @@ describe("Combobox", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Combobox
           emptyMessage="一致する作物がありません"
           label="作目"
@@ -75,7 +75,7 @@ describe("Combobox", () => {
     const change = vi.fn();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Combobox
           emptyMessage="一致する作物がありません"
           hideLabel
@@ -103,7 +103,7 @@ describe("Combobox", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Combobox
           emptyMessage="一致する作物がありません"
           label="作目"
@@ -125,7 +125,7 @@ describe("Combobox", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Combobox
           emptyMessage="一致する作物がありません"
           label="主な作目"

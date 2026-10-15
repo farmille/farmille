@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { initialAdminActionState, type AdminActionState } from "@/app/admin/_lib/action-state";
 import { cropOperationAction, tagOperationAction } from "@/app/admin/tags/actions";
 import { Button, TAG_CATEGORY_LABELS, toTagChipCategory } from "@/components";
-import { Input, Notice, Select, SubmitButton } from "@/components/form";
+import { Form, Input, Notice, Select, SubmitButton } from "@/components/form";
 import type { AdminCropItem, AdminTagItem, CropGroupOption } from "@/server/admin/tags";
 import { css } from "../../../../../styled-system/css";
 
@@ -55,7 +55,7 @@ export function TagCreateForm({ categories }: { categories: string[] }) {
   return (
     <div>
       <StateMessage state={state} />
-      <form action={formAction} className={createRowStyle}>
+      <Form action={formAction} className={createRowStyle} persist="tag-create">
         <input name="operation" type="hidden" value="create" />
         <Select
           hideLabel
@@ -89,7 +89,7 @@ export function TagCreateForm({ categories }: { categories: string[] }) {
         <SubmitButton pendingLabel="追加中…" size="sm">
           追加
         </SubmitButton>
-      </form>
+      </Form>
     </div>
   );
 }
@@ -147,7 +147,7 @@ export function CropCreateForm({ groups }: { groups: CropGroupOption[] }) {
   return (
     <div>
       <StateMessage state={state} />
-      <form action={formAction} className={createRowStyle}>
+      <Form action={formAction} className={createRowStyle} persist="crop-create">
         <input name="operation" type="hidden" value="create" />
         <Select
           hideLabel
@@ -186,7 +186,7 @@ export function CropCreateForm({ groups }: { groups: CropGroupOption[] }) {
         <SubmitButton pendingLabel="追加中…" size="sm">
           追加
         </SubmitButton>
-      </form>
+      </Form>
     </div>
   );
 }

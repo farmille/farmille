@@ -91,7 +91,7 @@ export const GroupError: Story = {
     variant: "cards",
   },
   render: (args) => (
-    <Form errors={{ standpoint: "立場を選んでください。" }}>
+    <Form errors={{ standpoint: "立場を選んでください。" }} persist={false}>
       <RadioGroup {...args} />
     </Form>
   ),

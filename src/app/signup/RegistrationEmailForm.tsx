@@ -16,7 +16,12 @@ export function RegistrationEmailForm({
   const [state, action] = useActionState(registrationEmailAction, initialAuthFormState);
   const [email, setEmail] = useState("");
   return (
-    <Form action={action} errors={fieldErrorsOf(state)}>
+    <Form
+      action={action}
+      errors={fieldErrorsOf(state)}
+      onRestore={(restored) => setEmail(restored.get("email")?.[0] ?? "")}
+      persist="registration-email"
+    >
       <FormActions layout="links">
         <TextLink
           href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}

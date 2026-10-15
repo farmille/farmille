@@ -95,7 +95,7 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
   const selectedSearchTagIds = submitted?.searchTagIds ?? material?.searchTagIds ?? [];
 
   return (
-    <Form action={formAction} className={formStyle} errors={errors}>
+    <Form action={formAction} className={formStyle} errors={errors} persist="material">
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
       {isEdit ? <input name="materialId" type="hidden" value={material.id} /> : null}

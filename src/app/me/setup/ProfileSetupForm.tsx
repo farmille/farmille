@@ -13,7 +13,7 @@ export function ProfileSetupForm() {
   const [state, formAction] = useActionState(setupProfileAction, initialAuthFormState);
   const values = submittedValuesOf(state);
   return (
-    <Form action={formAction} errors={fieldErrorsOf(state)}>
+    <Form action={formAction} errors={fieldErrorsOf(state)} persist="profile-setup">
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       <Input
         description="本名でなくても構いません。"

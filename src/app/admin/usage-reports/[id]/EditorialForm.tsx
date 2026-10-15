@@ -16,7 +16,7 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
   const editable = report.status === "pending";
 
   return (
-    <Form action={formAction}>
+    <Form action={formAction} persist="editorial">
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
 

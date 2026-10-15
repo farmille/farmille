@@ -4,6 +4,7 @@ import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { startTransition, useActionState, useEffect, useMemo, useState } from "react";
+import * as v from "valibot";
 
 import {
   createReviewAction,
@@ -21,6 +22,7 @@ import {
   Notice,
   SubmitButton,
   Textarea,
+  type RestoredFields,
 } from "@/components/form";
 import type { ReviewCropOption, ReviewPhoto } from "@/server/queries/reviews";
 
@@ -34,6 +36,14 @@ import { ReviewCropPicker } from "./ReviewCropPicker";
 
 const REVIEW_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 const REVIEW_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+
+const RestoredRatingSchema = v.pipe(
+  v.string(),
+  v.toNumber(),
+  v.integer(),
+  v.minValue(1),
+  v.maxValue(5),
+);
 
 type PendingPhoto = {
   key: string;
@@ -245,6 +255,16 @@ export function ReviewForm({
     setPendingPhotos((current) => [...current, ...additions]);
   }
 
+  // 写真のファイルはブラウザの仕様で戻せないので、選び直してもらう
+  function restore(restored: RestoredFields) {
+    const restoredRating = v.safeParse(RestoredRatingSchema, restored.get("rating")?.[0]);
+    if (restoredRating.success) setRating(restoredRating.output);
+    const restoredBody = restored.get("body")?.[0];
+    if (restoredBody !== undefined) setBody(restoredBody);
+    const restoredAck = restored.get("pesticideAck");
+    if (restoredAck !== undefined) setPesticideAck(restoredAck.length > 0);
+  }
+
   async function submit(formData: FormData) {
     setUploading(true);
     setLocalError(null);
@@ -281,7 +301,7 @@ export function ReviewForm({
   }
 
   return (
-    <Form action={submit} errors={fieldErrors}>
+    <Form action={submit} errors={fieldErrors} onRestore={restore} persist="review">
       {existingReviewNotice ? (
         <Notice className={noticeSpacingStyle} tone="info">
           この資材には投稿済みの感想口コミがあります。内容を編集できます。

@@ -13,6 +13,7 @@ import {
   Notice,
   Select,
   Textarea,
+  usePersistedInput,
 } from "@/components/form";
 import { MaterialPageContent, materialPageStack } from "@/components/materials/MaterialPageContent";
 import {
@@ -59,11 +60,21 @@ export function MaterialPageEditor({
   imageUrl: string | null;
 }) {
   const [content, setContent] = useState(initialContent);
+  const [savedContent, setSavedContent] = useState(() => JSON.stringify(initialContent));
   const [version, setVersion] = useState(expectedVersion);
   const [preview, setPreview] = useState(false);
   const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  usePersistedInput({
+    name: "material-page",
+    schema: MaterialPageContentSchema,
+    unsaved: pendingVersion || JSON.stringify(content) === savedContent ? null : content,
+    // 表現確認中は編集できないので、保存前の入力を戻さない
+    restore: (restored) => {
+      if (!pendingVersion) setContent(restored);
+    },
+  });
 
   function save(submit: boolean) {
     startTransition(async () => {
@@ -78,6 +89,7 @@ export function MaterialPageEditor({
         return;
       }
       setVersion(submit ? null : result.versionId);
+      setSavedContent(JSON.stringify(content));
       setMessage({
         tone: "success",
         text: submit

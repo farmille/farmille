@@ -12,6 +12,7 @@ import {
   evidenceExplanation,
   successionExplanation,
   historyExplanation,
+  uuidSchema,
   type SubmittableKind,
 } from "@/lib/company-application";
 import { errorMessageJa } from "@/server/errors";
@@ -29,6 +30,7 @@ import {
   RadioGroup,
   SubmitButton,
   Textarea,
+  type RestoredFields,
 } from "@/components/form";
 import { SectionHeading } from "@/components/SectionHeading";
 import { SurfaceCard } from "@/components/SurfaceCard";
@@ -57,6 +59,8 @@ const TARGET_OPTIONS = [
   { value: "new", label: "資材情報の新規掲載" },
   { value: "existing", label: "掲載済み資材の資材オーナー権限" },
 ] as const satisfies readonly { value: ItemRow["target"]; label: string }[];
+
+const TargetSchema = v.picklist(TARGET_OPTIONS.map((option) => option.value));
 
 const noteStyle = css({ mt: "2" });
 
@@ -108,9 +112,8 @@ export function CompanyApplicationForm({
   recipient: string;
 }) {
   const router = useRouter();
-  const [rows, setRows] = useState<ItemRow[]>([
-    { id: intentId, target: kind === "registration" ? "new" : "existing" },
-  ]);
+  const defaultTarget = kind === "registration" ? "new" : "existing";
+  const [rows, setRows] = useState<ItemRow[]>([{ id: intentId, target: defaultTarget }]);
   const [counts, setCounts] = useState<Map<string, number>>(new Map());
   const [uploads, setUploads] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -120,6 +123,16 @@ export function CompanyApplicationForm({
   const onBusy = (busy: boolean) => setUploads((count) => count + (busy ? 1 : -1));
   function countFiles(key: string, count: number) {
     setCounts((previous) => new Map(previous).set(key, count));
+  }
+  // 資材の欄の名前は行 ID を含むので、控えの行 ID で行を作り直してから欄に値を戻す。添付資料は付け直してもらう
+  function restoreRows(restored: RestoredFields) {
+    const restoredRows = [...restored.keys()].flatMap((name) => {
+      const id = /^(.+)\.materialName$/.exec(name)?.[1];
+      if (!v.is(uuidSchema, id)) return [];
+      const target = v.safeParse(TargetSchema, restored.get(`${id}.target`)?.[0]);
+      return [{ id, target: target.success ? target.output : defaultTarget }];
+    });
+    if (restoredRows.length > 0) setRows(restoredRows);
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -178,7 +191,7 @@ export function CompanyApplicationForm({
     }
   }
   return (
-    <Form onSubmit={submit}>
+    <Form onRestore={restoreRows} onSubmit={submit} persist="application">
       <fieldset className={cx(fieldsetStyle, stackStyle)} disabled={submitting}>
         <IntroCard text={copy.introduction} />
         <Notice tone="neutral">
@@ -222,7 +235,7 @@ export function CompanyApplicationForm({
             onClick={() =>
               setRows((previous) => [
                 ...previous,
-                { id: crypto.randomUUID(), target: kind === "registration" ? "new" : "existing" },
+                { id: crypto.randomUUID(), target: defaultTarget },
               ])
             }
             variant="ghost"

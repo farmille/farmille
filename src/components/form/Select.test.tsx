@@ -23,7 +23,7 @@ describe("Select", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Select
           autoComplete="address-level1"
           label="都道府県"
@@ -55,7 +55,7 @@ describe("Select", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
-      <Form onSubmit={captureSubmit(submitted)}>
+      <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Select
           label="都道府県"
           name="prefectureCode"
