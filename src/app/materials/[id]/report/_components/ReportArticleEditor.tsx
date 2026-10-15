@@ -451,7 +451,8 @@ export function ReportArticleEditor({
                     ) : (
                       <Input
                         size="sm"
-                        aria-label="写真の説明"
+                        hideLabel
+                        label="写真の説明"
                         placeholder="処理区の株全体"
                         value={media.caption}
                         onChange={(event) =>

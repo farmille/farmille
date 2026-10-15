@@ -29,7 +29,7 @@ const searchFormStyle = css({
   mb: "3",
 });
 
-const searchInputStyle = css({ maxW: "320px" });
+const searchInputStyle = css({ w: "100%", maxW: "320px" });
 
 const headerActionsStyle = css({
   display: "flex",
@@ -98,8 +98,9 @@ export default async function AdminMaterialsPage({
         </div>
         <form action="/admin/materials" className={searchFormStyle} method="get">
           <Input
-            aria-label="資材名・メーカー名で検索"
-            className={searchInputStyle}
+            hideLabel
+            label="資材名・メーカー名で検索"
+            fieldClassName={searchInputStyle}
             defaultValue={keyword}
             name="q"
             placeholder="資材名・メーカー名で検索"

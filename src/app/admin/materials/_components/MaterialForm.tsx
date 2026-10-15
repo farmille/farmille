@@ -1,13 +1,12 @@
 "use client";
 
-import { useActionState, useMemo, type ReactNode } from "react";
+import { useActionState, useMemo } from "react";
 
 import { adminFieldGridStyle } from "@/app/admin/_components/AdminUI";
 import { initialMaterialFormState } from "@/app/admin/_lib/action-state";
 import { createMaterialAction, updateMaterialAction } from "@/app/admin/materials/actions";
 import {
   CheckboxGroup,
-  Field,
   Fieldset,
   Form,
   FormActions,
@@ -42,26 +41,31 @@ type MaterialFormProps = {
 
 type ChoiceItem = { id: string; name: string };
 
+type FormErrorState = {
+  errors: FieldErrors | undefined;
+  classificationError: string | undefined;
+};
+
 function ClassificationGroup({
   legend,
   name,
   items,
   selectedIds,
 }: {
-  legend: ReactNode;
+  legend: string;
   name: string;
   items: readonly ChoiceItem[];
   selectedIds: readonly string[];
 }) {
   return (
-    <Fieldset labelSize="sm" legend={legend}>
-      <CheckboxGroup
-        defaultValue={selectedIds}
-        name={name}
-        options={items.map((item) => ({ value: item.id, label: item.name }))}
-        variant="chips"
-      />
-    </Fieldset>
+    <CheckboxGroup
+      labelSize="sm"
+      label={legend}
+      defaultValue={selectedIds}
+      name={name}
+      options={items.map((item) => ({ value: item.id, label: item.name }))}
+      variant="chips"
+    />
   );
 }
 
@@ -72,10 +76,12 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
     isEdit ? updateMaterialAction : createMaterialAction,
     initialMaterialFormState,
   );
-  const errors = useMemo((): FieldErrors | undefined => {
-    if (state.status !== "error" || state.fieldErrors === undefined) return undefined;
-    const { classifications: classificationError, ...fieldErrors } = state.fieldErrors;
-    return { ...fieldErrors, effectIds: classificationError };
+  const { errors, classificationError } = useMemo((): FormErrorState => {
+    if (state.status !== "error" || state.fieldErrors === undefined) {
+      return { errors: undefined, classificationError: undefined };
+    }
+    const { classifications, ...fieldErrors } = state.fieldErrors;
+    return { errors: fieldErrors, classificationError: classifications };
   }, [state]);
   // エラー時は送信値を優先し、無ければ保存済みの値（新規登録は空）に戻す。
   const submitted = state.status === "error" ? state.values : undefined;
@@ -100,35 +106,41 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
 
       <p className={groupTitleStyle}>分類・検索層（Farmille 所有）</p>
       <div className={adminFieldGridStyle}>
-        <Field label="資材名" name="name" requirement="required">
-          <Input defaultValue={valueOf("name", material?.name)} />
-        </Field>
-        <Field
+        <Input
+          label="資材名"
+          name="name"
+          requirement="required"
+          defaultValue={valueOf("name", material?.name)}
+        />
+        <Input
           description="未 claim でも表示するマスタ由来の表示名。"
           label="メーカー名"
           name="manufacturerName"
           requirement="required"
-        >
-          <Input defaultValue={valueOf("manufacturerName", material?.manufacturer_name)} />
-        </Field>
-        <Field label="組成タイプ" name="compositionTypeId" requirement="optional">
-          <Select
-            defaultValue={valueOf("compositionTypeId", material?.composition_type_id)}
-            options={[
-              { value: "", label: "未設定" },
-              ...classifications.compositionTypes.map((option) => ({
-                value: option.id,
-                label: option.name,
-              })),
-            ]}
-          />
-        </Field>
-        <Field label="販売状況" name="salesStatus" requirement="optional">
-          <Input defaultValue={valueOf("salesStatus", material?.sales_status)} />
-        </Field>
+          defaultValue={valueOf("manufacturerName", material?.manufacturer_name)}
+        />
+        <Select
+          label="組成タイプ"
+          name="compositionTypeId"
+          requirement="optional"
+          defaultValue={valueOf("compositionTypeId", material?.composition_type_id)}
+          options={[
+            { value: "", label: "未設定" },
+            ...classifications.compositionTypes.map((option) => ({
+              value: option.id,
+              label: option.name,
+            })),
+          ]}
+        />
+        <Input
+          label="販売状況"
+          name="salesStatus"
+          requirement="optional"
+          defaultValue={valueOf("salesStatus", material?.sales_status)}
+        />
       </div>
 
-      <Fieldset legend="効果" name="effectIds" requirement="optional">
+      <Fieldset error={classificationError} legend="効果" requirement="optional">
         {classifications.effectCategories.map((category) => (
           <ClassificationGroup
             items={classifications.effects.filter((effect) => effect.categoryId === category.id)}
@@ -143,11 +155,13 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
       <Fieldset legend="対象作物（Farmille正規化）" requirement="optional">
         {[...new Set(classifications.crops.map((crop) => crop.groupId))].map((groupId) => {
           const crops = classifications.crops.filter((crop) => crop.groupId === groupId);
+          const [first] = crops;
+          if (first === undefined) return null;
           return (
             <ClassificationGroup
               items={crops}
               key={groupId}
-              legend={crops[0]?.groupName}
+              legend={first.groupName}
               name="cropIds"
               selectedIds={selectedCropIds}
             />
@@ -155,21 +169,17 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
         })}
       </Fieldset>
 
-      <Fieldset
-        legend="資材ジャンル（JBSA材料8分類）"
+      <CheckboxGroup
+        label="資材ジャンル（JBSA材料8分類）"
         name="ingredientCategoryIds"
         requirement="optional"
-      >
-        <CheckboxGroup
-          defaultValue={selectedIngredientCategoryIds}
-          name="ingredientCategoryIds"
-          options={classifications.ingredientCategories.map((category) => ({
-            value: category.id,
-            label: category.name,
-          }))}
-          variant="chips"
-        />
-      </Fieldset>
+        defaultValue={selectedIngredientCategoryIds}
+        options={classifications.ingredientCategories.map((category) => ({
+          value: category.id,
+          label: category.name,
+        }))}
+        variant="chips"
+      />
 
       <Fieldset legend="個別材料" requirement="optional">
         {classifications.ingredientCategories.map((category) => (
@@ -206,33 +216,60 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
       <p className={groupTitleStyle}>
         一次情報層（claim 済みメーカーが編集する。ここでは初期値を入れる）
       </p>
-      <Field label="紹介文" name="description" requirement="optional">
-        <Textarea defaultValue={valueOf("description", material?.description)} rows={4} />
-      </Field>
-      <Field label="一般用途" name="generalUse" requirement="optional">
-        <Textarea defaultValue={valueOf("generalUse", material?.general_use)} rows={4} />
-      </Field>
+      <Textarea
+        label="紹介文"
+        name="description"
+        requirement="optional"
+        defaultValue={valueOf("description", material?.description)}
+        rows={4}
+      />
+      <Textarea
+        label="一般用途"
+        name="generalUse"
+        requirement="optional"
+        defaultValue={valueOf("generalUse", material?.general_use)}
+        rows={4}
+      />
       <div className={adminFieldGridStyle}>
-        <Field label="主成分" name="mainComponents" requirement="optional">
-          <Input defaultValue={valueOf("mainComponents", material?.main_components)} />
-        </Field>
-        <Field label="作用機作" name="mechanism" requirement="optional">
-          <Input defaultValue={valueOf("mechanism", material?.mechanism)} />
-        </Field>
-        <Field label="価格帯" name="priceRange" requirement="optional">
-          <Input defaultValue={valueOf("priceRange", material?.price_range)} />
-        </Field>
+        <Input
+          label="主成分"
+          name="mainComponents"
+          requirement="optional"
+          defaultValue={valueOf("mainComponents", material?.main_components)}
+        />
+        <Input
+          label="作用機作"
+          name="mechanism"
+          requirement="optional"
+          defaultValue={valueOf("mechanism", material?.mechanism)}
+        />
+        <Input
+          label="価格帯"
+          name="priceRange"
+          requirement="optional"
+          defaultValue={valueOf("priceRange", material?.price_range)}
+        />
       </div>
-      <Field label="使い方" name="usageText" requirement="optional">
-        <Textarea defaultValue={valueOf("usageText", material?.usage_text)} rows={4} />
-      </Field>
+      <Textarea
+        label="使い方"
+        name="usageText"
+        requirement="optional"
+        defaultValue={valueOf("usageText", material?.usage_text)}
+        rows={4}
+      />
       <div className={adminFieldGridStyle}>
-        <Field label="公式 URL" name="officialUrl" requirement="optional">
-          <Input defaultValue={valueOf("officialUrl", material?.official_url)} />
-        </Field>
-        <Field label="カタログ URL" name="catalogUrl" requirement="optional">
-          <Input defaultValue={valueOf("catalogUrl", material?.catalog_url)} />
-        </Field>
+        <Input
+          label="公式 URL"
+          name="officialUrl"
+          requirement="optional"
+          defaultValue={valueOf("officialUrl", material?.official_url)}
+        />
+        <Input
+          label="カタログ URL"
+          name="catalogUrl"
+          requirement="optional"
+          defaultValue={valueOf("catalogUrl", material?.catalog_url)}
+        />
       </div>
 
       <FormActions layout="row">

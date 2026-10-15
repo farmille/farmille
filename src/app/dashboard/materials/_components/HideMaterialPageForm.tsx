@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
-import { Field, Notice, Textarea } from "@/components/form";
+import { Notice, Textarea } from "@/components/form";
 import { css } from "../../../../../styled-system/css";
 import { hideMaterialPage } from "../editor-actions";
 
@@ -18,9 +18,11 @@ export function HideMaterialPageForm({ materialId }: { materialId: string }) {
       <p className={descriptionStyle}>
         この資材ページを非公開にします。原稿と投稿履歴は残します。再公開は運営へご連絡ください。
       </p>
-      <Field label="非公開にする理由">
-        <Textarea value={note} onChange={(event) => setNote(event.target.value)} />
-      </Field>
+      <Textarea
+        label="非公開にする理由"
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+      />
       {message ? <Notice tone="error">{message}</Notice> : null}
       <Button
         variant="danger"

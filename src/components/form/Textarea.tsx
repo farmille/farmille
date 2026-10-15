@@ -5,13 +5,25 @@ import type { ComponentPropsWithRef } from "react";
 
 import { cx } from "../../../styled-system/css";
 import { useFieldRequired } from "./field-context";
+import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 import { textareaRecipe } from "./recipes";
 
-type TextareaProps = Omit<ComponentPropsWithRef<"textarea">, "required" | "aria-invalid"> & {
+type TextareaBodyProps = Omit<ComponentPropsWithRef<"textarea">, "required" | "aria-invalid"> & {
   size?: "md" | "lg";
 };
 
-export function Textarea({
+type TextareaProps = TextareaBodyProps & Labeling;
+
+export function Textarea(props: TextareaProps) {
+  const [labeling, textareaProps] = splitLabeling(props);
+  return (
+    <Labeled disabled={textareaProps.disabled} labeling={labeling} name={textareaProps.name}>
+      <TextareaBody {...textareaProps} />
+    </Labeled>
+  );
+}
+
+function TextareaBody({
   size,
   className,
   value,
@@ -21,7 +33,7 @@ export function Textarea({
   disabled,
   "aria-describedby": describedBy,
   ...textareaProps
-}: TextareaProps) {
+}: TextareaBodyProps) {
   const required = useFieldRequired();
   // Field.Control は input 用の型なので、値と結びつけに使う属性だけを渡し、残りは textarea に付ける
   return (

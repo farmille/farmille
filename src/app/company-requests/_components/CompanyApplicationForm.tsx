@@ -239,12 +239,13 @@ export function CompanyApplicationForm({
         {kind === "transfer_in" ? (
           <>
             <SurfaceCard title="移行の経緯">
-              <Field label="申請の経緯" name="background" requirement="required">
-                <Textarea
-                  maxLength={10000}
-                  placeholder="例：事業譲渡により当該資材に関する事業を承継した"
-                />
-              </Field>
+              <Textarea
+                label="申請の経緯"
+                name="background"
+                requirement="required"
+                maxLength={10000}
+                placeholder="例：事業譲渡により当該資材に関する事業を承継した"
+              />
             </SurfaceCard>
             <SurfaceCard title="経緯を確認できる資料">
               <Notice className={noteStyle} tone="warn">
@@ -279,15 +280,20 @@ export function CompanyApplicationForm({
         <ConsentFields kind={kind} />
 
         <SurfaceCard title="署名">
-          <Field label="申請日" name="applicationDate" requirement="required">
-            <Input
-              defaultValue={new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" })}
-              type="date"
-            />
-          </Field>
-          <Field label={SIGNER_LABELS[kind]} name="signerName" requirement="required">
-            <Input maxLength={200} placeholder="金子 太郎" />
-          </Field>
+          <Input
+            label="申請日"
+            name="applicationDate"
+            requirement="required"
+            defaultValue={new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" })}
+            type="date"
+          />
+          <Input
+            label={SIGNER_LABELS[kind]}
+            name="signerName"
+            requirement="required"
+            maxLength={200}
+            placeholder="金子 太郎"
+          />
         </SurfaceCard>
 
         <Notice tone="neutral">
@@ -335,35 +341,36 @@ function MaterialItem({
 }) {
   const field = (name: string) => `${row.id}.${name}`;
   const materialName = (
-    <Field
+    <Input
       description="※パッケージ記載の正式名称"
       label="資材名"
       name={field("materialName")}
       requirement="required"
-    >
-      <Input maxLength={300} placeholder="パッケージ記載の正式名称" />
-    </Field>
+      maxLength={300}
+      placeholder="パッケージ記載の正式名称"
+    />
   );
   const materialUrl =
     row.target === "existing" ? (
-      <Field
+      <Input
         description={kind === "registration" ? "掲載済み資材の場合は必須です。" : undefined}
         label="FarmilleページURL"
         name={field("materialUrl")}
         requirement="required"
-      >
-        <Input maxLength={2000} placeholder="https://www.farmille.com/materials/…" type="url" />
-      </Field>
+        maxLength={2000}
+        placeholder="https://www.farmille.com/materials/…"
+        type="url"
+      />
     ) : null;
   const relations = (
-    <Fieldset
+    <CheckboxGroup
       description={relationExplanation}
-      legend="当該資材との関係（複数選択可）"
+      label="当該資材との関係（複数選択可）"
       name={field("relations")}
       requirement="required"
-    >
-      <CheckboxGroup options={RELATION_OPTIONS} variant="chips" />
-    </Fieldset>
+      options={RELATION_OPTIONS}
+      variant="chips"
+    />
   );
   const evidence = (
     <Fieldset
@@ -391,18 +398,15 @@ function MaterialItem({
         />
       </Field>
       <p className={orStyle}>または</p>
-      <Field
+      <Input
         hideLabel
         label="パッケージが確認できる製品ページURL"
         name={field("evidenceUrl")}
         requirement="optional"
-      >
-        <Input
-          maxLength={2000}
-          placeholder="パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL（https://）"
-          type="url"
-        />
-      </Field>
+        maxLength={2000}
+        placeholder="パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL（https://）"
+        type="url"
+      />
     </Fieldset>
   );
 
@@ -411,15 +415,25 @@ function MaterialItem({
       {kind === "registration" ? (
         <>
           <SectionHeading title="2-1. 申請内容" />
-          <Fieldset legend="申請内容" name={field("target")} requirement="required">
-            <RadioGroup onValueChange={onTarget} options={TARGET_OPTIONS} value={row.target} />
-          </Fieldset>
+          <RadioGroup
+            label="申請内容"
+            name={field("target")}
+            requirement="required"
+            onValueChange={onTarget}
+            options={TARGET_OPTIONS}
+            value={row.target}
+          />
           <SectionHeading title="2-2. 対象資材" />
           {materialName}
           {materialUrl}
-          <Field label="製品公式ページURL" name={field("officialUrl")} requirement="optional">
-            <Input maxLength={2000} placeholder="https://" type="url" />
-          </Field>
+          <Input
+            label="製品公式ページURL"
+            name={field("officialUrl")}
+            requirement="optional"
+            maxLength={2000}
+            placeholder="https://"
+            type="url"
+          />
           <SectionHeading title="2-3. 当該資材との関係" />
           {relations}
           <SectionHeading title="2-4. パッケージが確認できる資料" />
@@ -435,19 +449,19 @@ function MaterialItem({
           {kind === "transfer_in" ? (
             <>
               <SectionHeading title="2-2. 当該資材の現在の資材オーナー企業" />
-              <Field label="法人名" name={field("ownerName")} requirement="required">
-                <Input maxLength={200} />
-              </Field>
-              <Field
+              <Input
+                label="法人名"
+                name={field("ownerName")}
+                requirement="required"
+                maxLength={200}
+              />
+              <Textarea
                 label="その他、分かる情報"
                 name={field("ownerInformation")}
                 requirement="optional"
-              >
-                <Textarea
-                  maxLength={10000}
-                  placeholder="担当部署・担当者名・連絡先など、分かる範囲で"
-                />
-              </Field>
+                maxLength={10000}
+                placeholder="担当部署・担当者名・連絡先など、分かる範囲で"
+              />
             </>
           ) : null}
           <SectionHeading

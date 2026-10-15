@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 
 import { loginAction } from "@/app/login/actions";
-import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
+import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 
@@ -16,18 +16,24 @@ export function LoginForm({ next }: { next: string | null }) {
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {next === null ? null : <input name="next" type="hidden" value={next} />}
 
-      <Field label="メールアドレス" name="email" requirement="required">
-        <Input
-          autoComplete="email"
-          defaultValue={values.email}
-          placeholder="you@example.com"
-          type="email"
-        />
-      </Field>
+      <Input
+        label="メールアドレス"
+        name="email"
+        requirement="required"
+        autoComplete="email"
+        defaultValue={values.email}
+        placeholder="you@example.com"
+        type="email"
+      />
 
-      <Field label="パスワード" name="password" requirement="required">
-        <Input autoComplete="current-password" placeholder="••••••••" type="password" />
-      </Field>
+      <Input
+        label="パスワード"
+        name="password"
+        requirement="required"
+        autoComplete="current-password"
+        placeholder="••••••••"
+        type="password"
+      />
 
       <FormActions>
         <SubmitButton pendingLabel="ログイン中…">ログインする</SubmitButton>

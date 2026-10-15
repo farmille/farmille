@@ -478,17 +478,14 @@ export function ReportComparisonFields({
                 )}
                 <div className={plotGrid}>
                   <div>
-                    <Field
+                    <Input
                       label="調査した範囲（必須）"
                       labelSize="sm"
                       error={errors[`plots.${index}.scope`]}
-                    >
-                      <Input
-                        placeholder="1区10株、3反復"
-                        value={plot.scope}
-                        onChange={(event) => updatePlot(plot.id, { scope: event.target.value })}
-                      />
-                    </Field>
+                      placeholder="1区10株、3反復"
+                      value={plot.scope}
+                      onChange={(event) => updatePlot(plot.id, { scope: event.target.value })}
+                    />
                     <button
                       type="button"
                       className={cx(
@@ -510,19 +507,14 @@ export function ReportComparisonFields({
                     </button>
                   </div>
                   <div>
-                    <Field
+                    <Textarea
                       label="この区の説明（必須）"
                       labelSize="sm"
                       error={errors[`plots.${index}.description`]}
-                    >
-                      <Textarea
-                        placeholder={PLOT_GUIDE}
-                        value={plot.description}
-                        onChange={(event) =>
-                          updatePlot(plot.id, { description: event.target.value })
-                        }
-                      />
-                    </Field>
+                      placeholder={PLOT_GUIDE}
+                      value={plot.description}
+                      onChange={(event) => updatePlot(plot.id, { description: event.target.value })}
+                    />
                     <Notice tone="neutral" title="記入例" className={css({ mt: "1.5" })}>
                       {index === 0
                         ? "〇〇は使っていない。かん水と施肥は処理区と同じ。"
@@ -552,7 +544,8 @@ export function ReportComparisonFields({
         {(textMeasurements.length > 0 ? textMeasurements : [undefined]).map((measurement) => (
           <Textarea
             key={measurement?.id ?? "qualitative"}
-            aria-label={measurement?.name || "グラフにしにくい調査結果"}
+            hideLabel
+            label={measurement?.name || "グラフにしにくい調査結果"}
             placeholder="グラフにしにくい変化や様子"
             value={measurement?.body ?? ""}
             onChange={(event) => updateText(measurement, event.target.value)}

@@ -5,7 +5,7 @@ import { useActionState } from "react";
 
 import { updatePasswordAction } from "@/app/password-reset/update/actions";
 import { buttonRecipe } from "@/components/Button";
-import { Field, Form, FormActions, Input, Notice, OtpInput, SubmitButton } from "@/components/form";
+import { Form, FormActions, Input, Notice, OtpInput, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState } from "@/lib/auth/form-state";
@@ -34,36 +34,32 @@ export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
       <input type="hidden" name="tokenHash" value={tokenHash} />
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
-      <Field
+      <Input
         description={`${PASSWORD_MIN_LENGTH}文字以上で設定してください。`}
         label="新しいパスワード"
         name="password"
         requirement="required"
-      >
-        <Input
-          autoComplete="new-password"
-          minLength={PASSWORD_MIN_LENGTH}
-          placeholder="••••••••"
-          type="password"
-        />
-      </Field>
+        autoComplete="new-password"
+        minLength={PASSWORD_MIN_LENGTH}
+        placeholder="••••••••"
+        type="password"
+      />
 
-      <Field label="新しいパスワード（確認）" name="passwordConfirmation" requirement="required">
-        <Input
-          autoComplete="new-password"
-          minLength={PASSWORD_MIN_LENGTH}
-          placeholder="••••••••"
-          type="password"
-        />
-      </Field>
+      <Input
+        label="新しいパスワード（確認）"
+        name="passwordConfirmation"
+        requirement="required"
+        autoComplete="new-password"
+        minLength={PASSWORD_MIN_LENGTH}
+        placeholder="••••••••"
+        type="password"
+      />
 
-      <Field
+      <OtpInput
         description="運営など、2要素認証を設定している方は、認証アプリの6桁のコードを入力してください。"
         label="2要素認証コード"
         name="code"
-      >
-        <OtpInput />
-      </Field>
+      />
 
       <FormActions>
         <SubmitButton pendingLabel="変更中…">パスワードを変更する</SubmitButton>

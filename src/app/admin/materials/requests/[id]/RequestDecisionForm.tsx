@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { initialAdminActionState } from "@/app/admin/_lib/action-state";
 import { resolveMaterialChangeRequestAction } from "@/app/admin/materials/requests/actions";
 import { Button } from "@/components";
-import { Field, Form, FormActions, Notice, Textarea } from "@/components/form";
+import { Form, FormActions, Notice, Textarea } from "@/components/form";
 
 export function RequestDecisionForm({ requestId }: { requestId: string }) {
   const [state, formAction, pending] = useActionState(
@@ -17,14 +17,12 @@ export function RequestDecisionForm({ requestId }: { requestId: string }) {
     <Form action={formAction}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
-      <Field
+      <Textarea
         description="却下する場合は理由が必須です。メーカーの申請詳細にも表示されます。"
         label="メーカーへの連絡メモ"
         name="reviewNote"
         requirement="optional"
-      >
-        <Textarea />
-      </Field>
+      />
       <input name="requestId" type="hidden" value={requestId} />
       <FormActions layout="row">
         <Button disabled={pending} name="decision" type="submit" value="approve">

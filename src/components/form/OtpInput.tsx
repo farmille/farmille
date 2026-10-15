@@ -5,8 +5,8 @@ import { OTPInput, OTPInputContext, REGEXP_ONLY_DIGITS, type SlotProps } from "i
 import { useContext, useState } from "react";
 
 import { css, cva } from "../../../styled-system/css";
-import { EnsureFieldRoot } from "./Field";
 import { useFieldRequired } from "./field-context";
+import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 
 const CODE_LENGTH = 6;
 
@@ -56,25 +56,33 @@ const slotRecipe = cva({
 
 const caretStyle = css({ w: "0.5", h: "6", bg: "text.default" });
 
-type OtpInputProps = {
+type OtpInputBodyProps = {
   /** 送信名。囲む Field に name があればそちらが優先される。 */
   name?: string;
   disabled?: boolean;
-  /** Field の見出しが無いときの名前。 */
-  "aria-label"?: string;
 };
+
+type OtpInputProps = OtpInputBodyProps & Labeling;
 
 /**
  * 認証アプリの6桁のコード。見た目は6つの枠だが、入力欄は1つ（貼り付け・SMS の自動入力・読み上げが効く）。
- * Field の見出しがこの入力欄の名前になり、必須かどうかは Field の requirement で決まる。
+ * label がこの入力欄の名前になり、必須かどうかは requirement で決まる。
  */
-export function OtpInput({ name, disabled, "aria-label": ariaLabel }: OtpInputProps) {
+export function OtpInput(props: OtpInputProps) {
+  const [labeling] = splitLabeling(props);
+  return (
+    <Labeled disabled={props.disabled} labeling={labeling} name={props.name}>
+      <OtpInputBody {...props} />
+    </Labeled>
+  );
+}
+
+function OtpInputBody({ name, disabled }: OtpInputBodyProps) {
   const required = useFieldRequired();
   const [code, setCode] = useState("");
 
-  const control = (
+  return (
     <BaseField.Control
-      aria-label={ariaLabel}
       disabled={disabled}
       minLength={CODE_LENGTH}
       name={name}
@@ -97,8 +105,6 @@ export function OtpInput({ name, disabled, "aria-label": ariaLabel }: OtpInputPr
       value={code}
     />
   );
-
-  return <EnsureFieldRoot name={name}>{control}</EnsureFieldRoot>;
 }
 
 function Slots({ invalid, disabled }: { invalid: boolean; disabled: boolean }) {

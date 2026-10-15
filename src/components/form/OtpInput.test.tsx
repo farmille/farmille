@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import type { FormEvent } from "react";
 import { describe, expect, it } from "vitest";
 
-import { Field } from "./Field";
 import { Form } from "./Form";
 import { OtpInput } from "./OtpInput";
 
@@ -15,14 +14,12 @@ function captureSubmit(sink: FormData[]) {
 }
 
 describe("OtpInput", () => {
-  it("Field の見出しが1つの入力欄の名前になり、数字だけを Field の name で送る", async () => {
+  it("label が1つの入力欄の名前になり、数字だけを name で送る", async () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
       <Form onSubmit={captureSubmit(submitted)}>
-        <Field label="認証コード" name="code" requirement="required">
-          <OtpInput />
-        </Field>
+        <OtpInput label="認証コード" name="code" requirement="required" />
         <button type="submit">登録を完了する</button>
       </Form>,
     );
@@ -44,9 +41,7 @@ describe("OtpInput", () => {
     const submitted: FormData[] = [];
     render(
       <Form onSubmit={captureSubmit(submitted)}>
-        <Field label="認証コード" name="code" requirement="required">
-          <OtpInput />
-        </Field>
+        <OtpInput label="認証コード" name="code" requirement="required" />
         <button type="submit">登録を完了する</button>
       </Form>,
     );

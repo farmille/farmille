@@ -3,7 +3,6 @@
 import { useActionState, type ReactNode } from "react";
 
 import {
-  Field,
   FileInput,
   Form,
   FormActions,
@@ -69,7 +68,7 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
 
       <div className={slots}>
         <div className={slot}>
-          <Field
+          <FileInput
             description="JPEG / PNG / WebP ・ 2MBまで"
             label={
               <>
@@ -77,9 +76,8 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
               </>
             }
             name="avatar"
-          >
-            <FileInput accept="image/jpeg,image/png,image/webp" />
-          </Field>
+            accept="image/jpeg,image/png,image/webp"
+          />
           <div className={avatarCurrent}>
             {avatar}
             {profile.avatarUrl
@@ -89,7 +87,7 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
         </div>
       </div>
 
-      <Field
+      <Input
         description="本名でなくてOKです"
         label={
           <>
@@ -98,37 +96,32 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
         }
         name="handle"
         requirement="required"
-      >
-        <Input
-          autoComplete="nickname"
-          defaultValue={values.handle ?? profile.handle}
-          maxLength={HANDLE_MAX_LENGTH}
-        />
-      </Field>
+        autoComplete="nickname"
+        defaultValue={values.handle ?? profile.handle}
+        maxLength={HANDLE_MAX_LENGTH}
+      />
 
-      <Field
+      <Textarea
         description="2000文字以内。公開されます。"
         label="自己紹介"
         name="bio"
         requirement="optional"
-      >
-        <Textarea defaultValue={values.bio ?? details.bio ?? ""} maxLength={2000} rows={5} />
-      </Field>
+        defaultValue={values.bio ?? details.bio ?? ""}
+        maxLength={2000}
+        rows={5}
+      />
 
       <ProfileTagsEditor details={details} options={options} />
 
-      <Field
+      <Textarea
         label="リンク"
         lead="自己紹介に表示するリンクを、1行に1件入力してください（10件まで）。公開されます。"
         name="links"
         requirement="optional"
-      >
-        <Textarea
-          defaultValue={values.links ?? details.links.join("\n")}
-          placeholder="https://"
-          rows={3}
-        />
-      </Field>
+        defaultValue={values.links ?? details.links.join("\n")}
+        placeholder="https://"
+        rows={3}
+      />
 
       <FormActions>
         <SubmitButton pendingLabel="保存中…">保存する</SubmitButton>

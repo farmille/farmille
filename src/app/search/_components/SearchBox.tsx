@@ -113,7 +113,8 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
       onCompositionStart={() => setComposing(true)}
     >
       <Autocomplete
-        aria-label="資材の検索条件"
+        hideLabel
+        label="資材の検索条件"
         emptyMessage={keyword.length > 0 ? `「${keyword}」に一致する候補がありません` : undefined}
         filterMode="preFiltered"
         onPick={(option) => {

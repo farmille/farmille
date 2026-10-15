@@ -8,7 +8,13 @@ describe("Input", () => {
   it("目のボタンでパスワードの表示と非表示を切り替える", async () => {
     const user = userEvent.setup();
     render(
-      <Input aria-label="パスワード" defaultValue="farmille-pass" revealable type="password" />,
+      <Input
+        defaultValue="farmille-pass"
+        hideLabel
+        label="パスワード"
+        revealable
+        type="password"
+      />,
     );
 
     const field = screen.getByLabelText("パスワード");

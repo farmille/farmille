@@ -98,6 +98,7 @@ export function ManufacturerProfileEditor({
             description="JPEG・PNG・WebP、2MBまで。保存後、表現確認を経て公開されます。"
           >
             <FileInput
+              label={null}
               accept="image/jpeg,image/png,image/webp"
               onChange={(event) => {
                 const file = event.target.files?.[0];
@@ -145,22 +146,20 @@ export function ManufacturerProfileEditor({
               )}
             </div>
           </Field>
-          <Field label="会社紹介">
-            <Textarea
-              rows={7}
-              value={content.profileText}
-              onChange={(event) => setContent({ ...content, profileText: event.target.value })}
-              disabled={pending}
-            />
-          </Field>
-          <Field label="公式サイトURL">
-            <Input
-              type="url"
-              value={content.websiteUrl}
-              onChange={(event) => setContent({ ...content, websiteUrl: event.target.value })}
-              disabled={pending}
-            />
-          </Field>
+          <Textarea
+            label="会社紹介"
+            rows={7}
+            value={content.profileText}
+            onChange={(event) => setContent({ ...content, profileText: event.target.value })}
+            disabled={pending}
+          />
+          <Input
+            label="公式サイトURL"
+            type="url"
+            value={content.websiteUrl}
+            onChange={(event) => setContent({ ...content, websiteUrl: event.target.value })}
+            disabled={pending}
+          />
         </>
       )}
       <FormActions>

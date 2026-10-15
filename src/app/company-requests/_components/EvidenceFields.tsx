@@ -120,6 +120,7 @@ export function EvidenceFields({
       <FileInput
         accept="image/jpeg,image/png,application/pdf"
         disabled={busy || files.length >= 5}
+        label={null}
         multiple
         onChange={(event) => {
           void upload(event.currentTarget.files);

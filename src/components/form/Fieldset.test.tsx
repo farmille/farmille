@@ -13,10 +13,10 @@ describe("Fieldset", () => {
       <Form errors={{ givenName: "名を入力してください。" }}>
         <Fieldset legend="本名" lead="姓と名を分けて入力します" visibility="private">
           <Field hideLabel label="姓" name="familyName">
-            <Input />
+            <Input label={null} />
           </Field>
           <Field hideLabel label="名" name="givenName">
-            <Input />
+            <Input label={null} />
           </Field>
         </Fieldset>
       </Form>,
@@ -45,14 +45,14 @@ describe("Fieldset", () => {
   it("name の無い組にエラーを出し入れしても、中の入力は作り直されない", () => {
     const { rerender } = render(
       <Fieldset legend="使用作物">
-        <Input aria-label="作物名" defaultValue="トマト" />
+        <Input defaultValue="トマト" hideLabel label="作物名" />
       </Fieldset>,
     );
     const input = screen.getByRole("textbox", { name: "作物名" });
 
     rerender(
       <Fieldset error="使用作物を選んでください" legend="使用作物">
-        <Input aria-label="作物名" defaultValue="トマト" />
+        <Input defaultValue="トマト" hideLabel label="作物名" />
       </Fieldset>,
     );
 

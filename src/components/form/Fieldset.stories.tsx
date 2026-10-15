@@ -8,6 +8,8 @@ import { Input } from "./Input";
 
 const nameRow = css({ display: "flex", gap: "2" });
 
+const namePart = css({ flex: "1" });
+
 const meta = {
   title: "Components/Form/Fieldset",
   component: Fieldset,
@@ -17,12 +19,8 @@ const meta = {
     visibility: "private",
     children: (
       <div className={nameRow}>
-        <Field hideLabel label="姓" name="familyName">
-          <Input placeholder="姓" />
-        </Field>
-        <Field hideLabel label="名" name="givenName">
-          <Input placeholder="名" />
-        </Field>
+        <Input fieldClassName={namePart} hideLabel label="姓" name="familyName" placeholder="姓" />
+        <Input fieldClassName={namePart} hideLabel label="名" name="givenName" placeholder="名" />
       </div>
     ),
   },
@@ -46,12 +44,20 @@ export const AddressParts: Story = {
     lead: "郵便番号、市区町村・番地、建物名は公開されません。",
     children: (
       <>
-        <Field label="郵便番号" labelSize="sm" name="postalCode">
-          <Input inputMode="numeric" placeholder="3100011" />
-        </Field>
-        <Field label="建物名・部屋番号" labelSize="sm" name="building" requirement="optional">
-          <Input placeholder="〇〇マンション101" />
-        </Field>
+        <Input
+          inputMode="numeric"
+          label="郵便番号"
+          labelSize="sm"
+          name="postalCode"
+          placeholder="3100011"
+        />
+        <Input
+          label="建物名・部屋番号"
+          labelSize="sm"
+          name="building"
+          placeholder="〇〇マンション101"
+          requirement="optional"
+        />
       </>
     ),
   },

@@ -5,7 +5,7 @@ import { useActionState } from "react";
 
 import { changePasswordAction } from "@/app/account/password/actions";
 import { buttonRecipe } from "@/components/Button";
-import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
+import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState } from "@/lib/auth/form-state";
 
@@ -33,20 +33,30 @@ export function ChangePasswordForm({
   return (
     <Form action={action}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
-      <Field label="現在のパスワード" name="currentPassword" requirement="required">
-        <Input autoComplete="current-password" type="password" />
-      </Field>
-      <Field
+      <Input
+        label="現在のパスワード"
+        name="currentPassword"
+        requirement="required"
+        autoComplete="current-password"
+        type="password"
+      />
+      <Input
         description="8〜128文字で、現在と異なるパスワードを設定してください。"
         label="新しいパスワード"
         name="password"
         requirement="required"
-      >
-        <Input autoComplete="new-password" maxLength={128} minLength={8} type="password" />
-      </Field>
-      <Field label="新しいパスワード（確認）" name="passwordConfirmation" requirement="required">
-        <Input autoComplete="new-password" type="password" />
-      </Field>
+        autoComplete="new-password"
+        maxLength={128}
+        minLength={8}
+        type="password"
+      />
+      <Input
+        label="新しいパスワード（確認）"
+        name="passwordConfirmation"
+        requirement="required"
+        autoComplete="new-password"
+        type="password"
+      />
       <p className={logoutNote}>変更すると、ログイン中の他の端末も順次ログアウトします。</p>
       <FormActions>
         <SubmitButton pendingLabel="変更中…">パスワードを変更する</SubmitButton>

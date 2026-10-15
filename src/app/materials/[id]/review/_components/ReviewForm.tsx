@@ -325,6 +325,7 @@ export function ReviewForm({
         }
       >
         <Textarea
+          label={null}
           size="lg"
           value={body}
           onChange={(event) => setBody(event.target.value)}
@@ -366,7 +367,8 @@ export function ReviewForm({
                 name={`existingPhotoCaption-${photo.id}`}
                 defaultValue={photo.caption ?? ""}
                 placeholder="写真の説明"
-                aria-label="既存写真の説明"
+                hideLabel
+                label="既存写真の説明"
               />
               <Checkbox
                 className={photoRemoveCheckStyle}
@@ -403,7 +405,8 @@ export function ReviewForm({
                   );
                 }}
                 placeholder="散布前の様子"
-                aria-label={`${photo.file.name}の説明`}
+                hideLabel
+                label={`${photo.file.name}の説明`}
               />
               <button
                 type="button"

@@ -14,6 +14,7 @@ import {
 } from "@/components/popup";
 import { css, cx } from "../../../styled-system/css";
 import { useFieldRequired } from "./field-context";
+import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 import type { Option } from "./types";
 
 const optionLabelStyle = css({ flex: "1", minW: "0" });
@@ -115,7 +116,6 @@ type ComboboxCommonProps = {
   emptyMessage: string;
   name?: string;
   disabled?: boolean;
-  "aria-label"?: string;
   className?: string;
 };
 
@@ -140,7 +140,7 @@ type MultipleProps = {
   max?: number;
 };
 
-type ComboboxProps = ComboboxCommonProps & (SingleProps | MultipleProps);
+type ComboboxProps = ComboboxCommonProps & (SingleProps | MultipleProps) & Labeling;
 
 const sameOption = (item: Option, value: Option) => item.value === value.value;
 const labelOf = (option: Option) => option.label;
@@ -151,7 +151,12 @@ const valueOf = (option: Option) => option.value;
  * name（または囲む Field の name）があると、選んだ値ごとに送信値を持つ。
  */
 export function Combobox(props: ComboboxProps) {
-  return props.multiple === true ? <MultipleCombobox {...props} /> : <SingleCombobox {...props} />;
+  const [labeling] = splitLabeling(props);
+  return (
+    <Labeled disabled={props.disabled} labeling={labeling} name={props.name}>
+      {props.multiple === true ? <MultipleCombobox {...props} /> : <SingleCombobox {...props} />}
+    </Labeled>
+  );
 }
 
 function SingleCombobox({
@@ -163,7 +168,6 @@ function SingleCombobox({
   emptyMessage,
   name,
   disabled,
-  "aria-label": ariaLabel,
   className,
   value,
   defaultValue,
@@ -191,7 +195,6 @@ function SingleCombobox({
     >
       <BaseCombobox.InputGroup className={cx(groupStyle, className)}>
         <BaseCombobox.Input
-          aria-label={ariaLabel}
           className={inputStyle}
           onKeyDown={enterGuard.onKeyDown}
           placeholder={placeholder}
@@ -214,7 +217,6 @@ function MultipleCombobox({
   emptyMessage,
   name,
   disabled,
-  "aria-label": ariaLabel,
   className,
   value,
   defaultValue,
@@ -264,7 +266,6 @@ function MultipleCombobox({
             </BaseCombobox.Chip>
           ))}
           <BaseCombobox.Input
-            aria-label={ariaLabel}
             className={inputStyle}
             onKeyDown={enterGuard.onKeyDown}
             placeholder={selected.length > 0 ? undefined : placeholder}

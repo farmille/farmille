@@ -23,7 +23,7 @@ describe("Field", () => {
     render(
       <Form onSubmit={captureSubmit(submitted)}>
         <Field label="ニックネーム" name="handle" requirement="required" visibility="public">
-          <Input name="ignored" />
+          <Input label={null} />
         </Field>
         <button type="submit">送信</button>
       </Form>,
@@ -36,17 +36,16 @@ describe("Field", () => {
 
     expect(submitted).toHaveLength(1);
     expect(submitted[0]?.get("handle")).toBe("農家の山田");
-    expect(submitted[0]?.has("ignored")).toBe(false);
   });
 
   it("requirement を省いた Field は囲む Fieldset の必須に従い、任意なら必須を外す", () => {
     render(
       <Fieldset legend="本名" requirement="required">
         <Field hideLabel label="姓" name="familyName">
-          <Input />
+          <Input label={null} />
         </Field>
         <Field label="ミドルネーム" name="middleName" requirement="optional">
-          <Input />
+          <Input label={null} />
         </Field>
       </Fieldset>,
     );
@@ -64,7 +63,7 @@ describe("Field", () => {
         name="handle"
         visibility="private"
       >
-        <Input />
+        <Input label={null} />
       </Field>,
     );
 
@@ -78,7 +77,7 @@ describe("Field", () => {
     render(
       <Form errors={{ handle: "このハンドルネームはすでに使われています。" }}>
         <Field label="ニックネーム" name="handle">
-          <Input defaultValue="山田" />
+          <Input defaultValue="山田" label={null} />
         </Field>
       </Form>,
     );
@@ -97,7 +96,7 @@ describe("Field", () => {
   it("画面側で判定したエラーは Form の外でも出す", () => {
     render(
       <Field error="数値を入力してください" label="調査した範囲" name="range">
-        <Input />
+        <Input label={null} />
       </Field>,
     );
 
@@ -114,7 +113,7 @@ describe("Field", () => {
     render(
       <Form onSubmit={captureSubmit(submitted)}>
         <Field label="感想口コミ本文" name="body" requirement="required">
-          <Textarea rows={4} />
+          <Textarea label={null} rows={4} />
         </Field>
         <button type="submit">送信</button>
       </Form>,
@@ -135,7 +134,7 @@ describe("Field", () => {
     render(
       <Form onSubmit={captureSubmit(submitted)}>
         <Field label="メールアドレス" name="email" requirement="required">
-          <Input type="email" />
+          <Input label={null} type="email" />
         </Field>
         <button type="submit">送信</button>
       </Form>,
@@ -154,10 +153,10 @@ describe("Field", () => {
     render(
       <Form onSubmit={captureSubmit([])}>
         <Field label="ニックネーム" name="handle" requirement="required">
-          <Input />
+          <Input label={null} />
         </Field>
         <Field label="パスワード" name="password" requirement="required">
-          <Input type="password" />
+          <Input label={null} type="password" />
         </Field>
         <button type="submit">送信</button>
       </Form>,

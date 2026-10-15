@@ -4,7 +4,6 @@ import { useState, type FormEvent } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Combobox } from "./Combobox";
-import { Field } from "./Field";
 import { Form } from "./Form";
 import type { Option } from "./types";
 
@@ -22,18 +21,19 @@ function captureSubmit(sink: FormData[]) {
 }
 
 describe("Combobox", () => {
-  it("見出しで名前が付き、矢印キーと Enter で選んだ値を Field の name で送る", async () => {
+  it("label で名前が付き、矢印キーと Enter で選んだ値を name で送る", async () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
       <Form onSubmit={captureSubmit(submitted)}>
-        <Field label="作目" name="cropId" requirement="required">
-          <Combobox
-            emptyMessage="一致する作物がありません"
-            options={crops}
-            placeholder="作物名を入力"
-          />
-        </Field>
+        <Combobox
+          emptyMessage="一致する作物がありません"
+          label="作目"
+          name="cropId"
+          options={crops}
+          placeholder="作物名を入力"
+          requirement="required"
+        />
         <button type="submit">送信</button>
       </Form>,
     );
@@ -55,7 +55,8 @@ describe("Combobox", () => {
     render(
       <Combobox
         emptyMessage="一致する作物がありません"
-        aria-label="作目"
+        hideLabel
+        label="作目"
         onValueChange={change}
         options={crops}
       />,
@@ -77,7 +78,8 @@ describe("Combobox", () => {
       <Form onSubmit={captureSubmit(submitted)}>
         <Combobox
           emptyMessage="一致する作物がありません"
-          aria-label="作目"
+          hideLabel
+          label="作目"
           name="cropId"
           onValueChange={change}
           options={crops}
@@ -102,9 +104,13 @@ describe("Combobox", () => {
     const submitted: FormData[] = [];
     render(
       <Form onSubmit={captureSubmit(submitted)}>
-        <Field label="作目" name="cropId" requirement="required">
-          <Combobox emptyMessage="一致する作物がありません" options={crops} />
-        </Field>
+        <Combobox
+          emptyMessage="一致する作物がありません"
+          label="作目"
+          name="cropId"
+          options={crops}
+          requirement="required"
+        />
         <button type="submit">送信</button>
       </Form>,
     );
@@ -120,9 +126,14 @@ describe("Combobox", () => {
     const submitted: FormData[] = [];
     render(
       <Form onSubmit={captureSubmit(submitted)}>
-        <Field label="主な作目" name="cropIds">
-          <Combobox emptyMessage="一致する作物がありません" max={2} multiple options={crops} />
-        </Field>
+        <Combobox
+          emptyMessage="一致する作物がありません"
+          label="主な作目"
+          max={2}
+          multiple
+          name="cropIds"
+          options={crops}
+        />
         <button type="submit">送信</button>
       </Form>,
     );
@@ -158,7 +169,8 @@ describe("Combobox", () => {
       return (
         <Combobox
           emptyMessage="一致する作物がありません"
-          aria-label="資材"
+          hideLabel
+          label="資材"
           filterMode="preFiltered"
           inputValue={query}
           multiple

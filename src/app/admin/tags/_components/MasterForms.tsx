@@ -30,7 +30,7 @@ const createRowStyle = css({
 
 const nameInputStyle = css({ flex: "1", minW: "140px", maxW: "260px" });
 const aliasInputStyle = css({ flex: "1", minW: "160px", maxW: "300px" });
-const sortInputStyle = css({ w: "80px" });
+const sortInputStyle = css({ w: "80px", flexShrink: "0" });
 const categorySelectStyle = css({ w: "120px" });
 const groupSelectStyle = css({ w: "160px" });
 
@@ -58,7 +58,8 @@ export function TagCreateForm({ categories }: { categories: string[] }) {
       <form action={formAction} className={createRowStyle}>
         <input name="operation" type="hidden" value="create" />
         <Select
-          aria-label="分類"
+          hideLabel
+          label="分類"
           className={categorySelectStyle}
           defaultValue={categories[0]}
           name="category"
@@ -69,15 +70,17 @@ export function TagCreateForm({ categories }: { categories: string[] }) {
           size="sm"
         />
         <Input
-          aria-label="タグ名"
-          className={nameInputStyle}
+          hideLabel
+          label="タグ名"
+          fieldClassName={nameInputStyle}
           name="name"
           placeholder="タグ名"
           size="sm"
         />
         <Input
-          aria-label="並び順"
-          className={sortInputStyle}
+          hideLabel
+          label="並び順"
+          fieldClassName={sortInputStyle}
           defaultValue="0"
           name="sortOrder"
           size="sm"
@@ -102,15 +105,17 @@ export function TagRow({ tag }: { tag: AdminTagItem }) {
         <input name="tagId" type="hidden" value={tag.id} />
         <span className={usageStyle}>{TAG_CATEGORY_LABELS[toTagChipCategory(tag.category)]}</span>
         <Input
-          aria-label={`${tag.name} の名前`}
-          className={nameInputStyle}
+          hideLabel
+          label={`${tag.name} の名前`}
+          fieldClassName={nameInputStyle}
           defaultValue={tag.name}
           name="name"
           size="sm"
         />
         <Input
-          aria-label={`${tag.name} の並び順`}
-          className={sortInputStyle}
+          hideLabel
+          label={`${tag.name} の並び順`}
+          fieldClassName={sortInputStyle}
           defaultValue={String(tag.sort_order)}
           name="sortOrder"
           size="sm"
@@ -145,7 +150,8 @@ export function CropCreateForm({ groups }: { groups: CropGroupOption[] }) {
       <form action={formAction} className={createRowStyle}>
         <input name="operation" type="hidden" value="create" />
         <Select
-          aria-label="作物群"
+          hideLabel
+          label="作物群"
           className={groupSelectStyle}
           defaultValue={groups[0]?.id}
           name="groupId"
@@ -153,22 +159,25 @@ export function CropCreateForm({ groups }: { groups: CropGroupOption[] }) {
           size="sm"
         />
         <Input
-          aria-label="作物名"
-          className={nameInputStyle}
+          hideLabel
+          label="作物名"
+          fieldClassName={nameInputStyle}
           name="name"
           placeholder="作物名"
           size="sm"
         />
         <Input
-          aria-label="表記ゆれ"
-          className={aliasInputStyle}
+          hideLabel
+          label="表記ゆれ"
+          fieldClassName={aliasInputStyle}
           name="aliases"
           placeholder="表記ゆれ（カンマ区切り）"
           size="sm"
         />
         <Input
-          aria-label="並び順"
-          className={sortInputStyle}
+          hideLabel
+          label="並び順"
+          fieldClassName={sortInputStyle}
           defaultValue="0"
           name="sortOrder"
           size="sm"
@@ -193,23 +202,26 @@ export function CropRow({ crop }: { crop: AdminCropItem }) {
         <input name="cropId" type="hidden" value={crop.id} />
         <span className={usageStyle}>{crop.groupName}</span>
         <Input
-          aria-label={`${crop.name} の名前`}
-          className={nameInputStyle}
+          hideLabel
+          label={`${crop.name} の名前`}
+          fieldClassName={nameInputStyle}
           defaultValue={crop.name}
           name="name"
           size="sm"
         />
         <Input
-          aria-label={`${crop.name} の表記ゆれ`}
-          className={aliasInputStyle}
+          hideLabel
+          label={`${crop.name} の表記ゆれ`}
+          fieldClassName={aliasInputStyle}
           defaultValue={crop.aliases.join("、")}
           name="aliases"
           placeholder="表記ゆれ（カンマ区切り）"
           size="sm"
         />
         <Input
-          aria-label={`${crop.name} の並び順`}
-          className={sortInputStyle}
+          hideLabel
+          label={`${crop.name} の並び順`}
+          fieldClassName={sortInputStyle}
           defaultValue={String(crop.sort_order)}
           name="sortOrder"
           size="sm"

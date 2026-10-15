@@ -36,6 +36,7 @@ export function ClaimForm({
       >
         {/* 更新後に再検証された claim 先を確実に反映させるため、値が変わったら作り直す。 */}
         <Select
+          label={null}
           defaultValue={currentSellerId ?? ""}
           key={currentSellerId ?? "unclaimed"}
           options={[
@@ -47,13 +48,12 @@ export function ClaimForm({
           ]}
         />
       </Field>
-      <Field
+      <Input
         description="付与時は必須です。確認資料の保管先または受付番号を記入してください。公開されません。"
         label="確認資料の保管先または受付番号"
         name="documentReference"
-      >
-        <Input maxLength={2000} />
-      </Field>
+        maxLength={2000}
+      />
       <input name="materialId" type="hidden" value={materialId} />
       <FormActions layout="row">
         <SubmitButton pendingLabel="更新中…">編集権を更新する</SubmitButton>

@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 
 import { sellerLoginAction } from "@/app/sellers/login/actions";
-import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
+import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 
@@ -16,25 +16,27 @@ export function SellerLoginForm({ next }: { next: string | null }) {
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {next === null ? null : <input name="next" type="hidden" value={next} />}
 
-      <Field
+      <Input
         description="運営からの案内メールに記載されたID"
         label="ログインID"
         name="loginId"
         requirement="required"
-      >
-        <Input
-          autoCapitalize="none"
-          autoComplete="username"
-          defaultValue={values.loginId}
-          placeholder="example-agri"
-          spellCheck={false}
-          type="text"
-        />
-      </Field>
+        autoCapitalize="none"
+        autoComplete="username"
+        defaultValue={values.loginId}
+        placeholder="example-agri"
+        spellCheck={false}
+        type="text"
+      />
 
-      <Field label="パスワード" name="password" requirement="required">
-        <Input autoComplete="current-password" placeholder="••••••••" type="password" />
-      </Field>
+      <Input
+        label="パスワード"
+        name="password"
+        requirement="required"
+        autoComplete="current-password"
+        placeholder="••••••••"
+        type="password"
+      />
 
       <FormActions>
         <SubmitButton pendingLabel="ログイン中…">ログインする</SubmitButton>

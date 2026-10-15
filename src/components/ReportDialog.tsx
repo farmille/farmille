@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 
 import { Dialog, DialogActions, DialogClose } from "@/components/Dialog";
-import { Field, Form, Notice, Select, SubmitButton, Textarea } from "@/components/form";
+import { Form, Notice, Select, SubmitButton, Textarea } from "@/components/form";
 import type { ReportActionState } from "@/server/actions/reports";
 import { css, cx } from "../../styled-system/css";
 
@@ -65,12 +65,20 @@ export function ReportDialog({
         </DialogActions>
       ) : (
         <Form action={formAction} className={formStyle}>
-          <Field label="通報理由" labelSize="sm" name="reasonCode" requirement="required">
-            <Select options={reasonOptions} placeholder="選択してください" />
-          </Field>
-          <Field label="詳細（任意）" labelSize="sm" name="detail">
-            <Textarea placeholder="具体的な内容があればご記入ください" />
-          </Field>
+          <Select
+            label="通報理由"
+            labelSize="sm"
+            name="reasonCode"
+            requirement="required"
+            options={reasonOptions}
+            placeholder="選択してください"
+          />
+          <Textarea
+            label="詳細（任意）"
+            labelSize="sm"
+            name="detail"
+            placeholder="具体的な内容があればご記入ください"
+          />
           {state.status === "error" ? (
             <Notice className={errorStyle} tone="error">
               {state.message}

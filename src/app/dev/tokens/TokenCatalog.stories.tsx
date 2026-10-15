@@ -66,14 +66,8 @@ export const MixedScriptSpacing: Story = {
       <p>夏の高温期に使った資材を記録する。</p>
       <p>トマトにABC資材を10kg使用。2026年の収量を比較する。</p>
       <p className={css({ fontVariantNumeric: "tabular-nums" })}>収量 12345kg ／ 67890kg</p>
-      <label>
-        資材名
-        <Input aria-label="資材名" defaultValue="ABC資材2026" />
-      </label>
-      <label>
-        使用メモ
-        <Textarea aria-label="使用メモ" defaultValue="トマトにABC資材を10kg使用しました。" />
-      </label>
+      <Input defaultValue="ABC資材2026" label="資材名" />
+      <Textarea defaultValue="トマトにABC資材を10kg使用しました。" label="使用メモ" />
     </section>
   ),
 };

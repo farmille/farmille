@@ -3,7 +3,6 @@ import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 import { Button } from "./Button";
 import { ConfirmDialog } from "./ConfirmDialog";
-import { Field } from "./form/Field";
 import { Textarea } from "./form/Textarea";
 
 const meta = {
@@ -94,9 +93,12 @@ export const ActionWithRequiredReason: Story = {
     trigger: deleteTrigger,
     action: fn((_formData: FormData) => undefined).mockName("rejectAction"),
     children: (
-      <Field label="却下の理由" name="reason" requirement="required">
-        <Textarea placeholder="申請者に伝える理由を入力してください" />
-      </Field>
+      <Textarea
+        label="却下の理由"
+        name="reason"
+        placeholder="申請者に伝える理由を入力してください"
+        requirement="required"
+      />
     ),
   },
   play: async ({ canvasElement }) => {

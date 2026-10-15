@@ -1,13 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { userEvent, within } from "storybook/test";
 
-import { Field } from "./Field";
 import { OtpInput } from "./OtpInput";
 
 const meta = {
   title: "Components/Form/OtpInput",
   component: OtpInput,
-  args: { "aria-label": "認証コード", name: "code" },
+  args: { label: "認証コード", name: "code" },
 } satisfies Meta<typeof OtpInput>;
 
 export default meta;
@@ -28,29 +27,14 @@ export const Filled: Story = {
 };
 
 export const InField: Story = {
-  render: () => (
-    <Field
-      description="認証アプリに表示されている6桁の数字を入力します。"
-      label="認証コード"
-      name="code"
-      requirement="required"
-    >
-      <OtpInput />
-    </Field>
-  ),
+  args: {
+    description: "認証アプリに表示されている6桁の数字を入力します。",
+    requirement: "required",
+  },
 };
 
 export const Invalid: Story = {
-  render: () => (
-    <Field
-      error="認証コードが正しくありません。"
-      label="認証コード"
-      name="code"
-      requirement="required"
-    >
-      <OtpInput />
-    </Field>
-  ),
+  args: { error: "認証コードが正しくありません。", requirement: "required" },
 };
 
 export const Disabled: Story = {

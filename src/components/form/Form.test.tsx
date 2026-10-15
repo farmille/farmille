@@ -37,9 +37,12 @@ function EchoForm({ onSubmit }: { onSubmit: (submitted: Submitted) => void }) {
   );
   return (
     <Form action={formAction}>
-      <Fieldset legend="立場" name="standpoint">
-        <RadioGroup defaultValue={echo.standpoint ?? undefined} options={STANDPOINTS} />
-      </Fieldset>
+      <RadioGroup
+        defaultValue={echo.standpoint ?? undefined}
+        label="立場"
+        name="standpoint"
+        options={STANDPOINTS}
+      />
       <Field name="terms">
         <Checkbox defaultChecked={echo.terms === "on"}>利用規約に同意する</Checkbox>
       </Field>
@@ -109,12 +112,19 @@ test("送信後の reset を越えて、選んだ候補が画面と送信で食�
   const submissions: FormData[] = [];
   render(
     <RejectingForm onSubmit={(formData) => submissions.push(formData)}>
-      <Field label="作目" name="cropId">
-        <Combobox emptyMessage="一致する作物がありません" options={CROPS} />
-      </Field>
-      <Field label="比べた作目" name="compared">
-        <Combobox emptyMessage="一致する作物がありません" multiple options={CROPS} />
-      </Field>
+      <Combobox
+        emptyMessage="一致する作物がありません"
+        label="作目"
+        name="cropId"
+        options={CROPS}
+      />
+      <Combobox
+        emptyMessage="一致する作物がありません"
+        label="比べた作目"
+        multiple
+        name="compared"
+        options={CROPS}
+      />
     </RejectingForm>,
   );
 
@@ -136,9 +146,7 @@ test("送信後の reset を越えて、認証コードの枠と送る値が食�
   const submissions: FormData[] = [];
   render(
     <RejectingForm onSubmit={(formData) => submissions.push(formData)}>
-      <Field label="認証コード" name="code">
-        <OtpInput />
-      </Field>
+      <OtpInput label="認証コード" name="code" />
     </RejectingForm>,
   );
 

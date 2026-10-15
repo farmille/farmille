@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 import { Combobox } from "./Combobox";
-import { Field } from "./Field";
 import type { Option } from "./types";
 
 const tomato: Option = { value: "tomato", label: "トマト", description: "なす科果菜類" };
@@ -24,7 +23,7 @@ const meta = {
   title: "Components/Form/Combobox",
   component: Combobox,
   args: {
-    "aria-label": "作目",
+    label: "作目",
     options: crops,
     placeholder: "作物名を入力（例：みかん、デコポン）",
     emptyMessage: "一致する作物がありません。",
@@ -84,24 +83,15 @@ export const MultipleAtMax: Story = {
 };
 
 export const InField: Story = {
-  render: (args) => (
-    <Field
-      description="作物名や別名で検索して選んでください。"
-      label="作目"
-      name="cropId"
-      requirement="required"
-    >
-      <Combobox {...args} aria-label={undefined} />
-    </Field>
-  ),
+  args: {
+    description: "作物名や別名で検索して選んでください。",
+    name: "cropId",
+    requirement: "required",
+  },
 };
 
 export const Invalid: Story = {
-  render: (args) => (
-    <Field error="作目を1つ選んでください。" label="作目" name="cropId" requirement="required">
-      <Combobox {...args} aria-label={undefined} />
-    </Field>
-  ),
+  args: { error: "作目を1つ選んでください。", name: "cropId", requirement: "required" },
 };
 
 export const Disabled: Story = {

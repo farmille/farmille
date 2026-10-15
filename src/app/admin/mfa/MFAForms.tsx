@@ -6,7 +6,7 @@ import { useActionState } from "react";
 import { initialMfaEnrollState } from "@/app/admin/_lib/action-state";
 import { startTotpEnrollmentAction, verifyTotpCodeAction } from "@/app/admin/mfa/actions";
 import { adminCodeStyle, adminInlineNoteStyle } from "@/app/admin/_components/AdminUI";
-import { Field, Form, FormActions, Notice, OtpInput, SubmitButton } from "@/components/form";
+import { Form, FormActions, Notice, OtpInput, SubmitButton } from "@/components/form";
 import { initialAuthFormState } from "@/lib/auth/form-state";
 import { css } from "../../../../styled-system/css";
 
@@ -37,14 +37,12 @@ function VerifyForm({ factorId, next, label }: { factorId: string; next: string;
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       <input name="factorId" type="hidden" value={factorId} />
       <input name="next" type="hidden" value={next} />
-      <Field
+      <OtpInput
         description="認証アプリに表示されている6桁の数字を入力します。"
         label="認証コード"
         name="code"
         requirement="required"
-      >
-        <OtpInput />
-      </Field>
+      />
       <FormActions layout="row">
         <SubmitButton pendingLabel="確認中…">{label}</SubmitButton>
       </FormActions>

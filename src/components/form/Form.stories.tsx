@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { Field } from "./Field";
 import { Form } from "./Form";
 import { FormActions } from "./FormActions";
 import { Input } from "./Input";
@@ -22,12 +21,22 @@ const meta = {
     action: noopSubmit,
     children: (
       <>
-        <Field label="メールアドレス" name="email" requirement="required" visibility="private">
-          <Input autoComplete="email" placeholder="you@example.com" type="email" />
-        </Field>
-        <Field label="都道府県" name="prefectureCode" requirement="required">
-          <Select options={prefectures} placeholder="選択してください" />
-        </Field>
+        <Input
+          autoComplete="email"
+          label="メールアドレス"
+          name="email"
+          placeholder="you@example.com"
+          requirement="required"
+          type="email"
+          visibility="private"
+        />
+        <Select
+          label="都道府県"
+          name="prefectureCode"
+          options={prefectures}
+          placeholder="選択してください"
+          requirement="required"
+        />
         <FormActions>
           <SubmitButton pendingLabel="登録中…">登録する</SubmitButton>
         </FormActions>
@@ -50,12 +59,21 @@ export const ServerErrors: Story = {
     children: (
       <>
         <Notice tone="error">入力内容を確認してください。</Notice>
-        <Field label="メールアドレス" name="email" requirement="required" visibility="private">
-          <Input defaultValue="yamada@example.com" type="email" />
-        </Field>
-        <Field label="都道府県" name="prefectureCode" requirement="required">
-          <Select options={prefectures} placeholder="選択してください" />
-        </Field>
+        <Input
+          defaultValue="yamada@example.com"
+          label="メールアドレス"
+          name="email"
+          requirement="required"
+          type="email"
+          visibility="private"
+        />
+        <Select
+          label="都道府県"
+          name="prefectureCode"
+          options={prefectures}
+          placeholder="選択してください"
+          requirement="required"
+        />
         <FormActions>
           <SubmitButton pendingLabel="登録中…">登録する</SubmitButton>
         </FormActions>

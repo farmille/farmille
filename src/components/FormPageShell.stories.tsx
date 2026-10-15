@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 
 import { css } from "../../styled-system/css";
 import { Button } from "./Button";
-import { Field, FormActions, Input, Textarea } from "./form";
+import { FormActions, Input, Textarea } from "./form";
 import { FormPageShell } from "./FormPageShell";
 import { SurfaceCard } from "./SurfaceCard";
 
@@ -40,12 +40,12 @@ export const Default: Story = {
   args: {
     children: (
       <form>
-        <Field label="対象の作物" name="crop">
-          <Input defaultValue="トマト（施設）" />
-        </Field>
-        <Field label="感想口コミ本文" name="body">
-          <Textarea defaultValue="定植前に土壌灌注で使用。うどんこ病の発生が例年より明らかに少なく、追肥との併用でも問題なかった。リピート予定。" />
-        </Field>
+        <Input defaultValue="トマト（施設）" label="対象の作物" name="crop" />
+        <Textarea
+          defaultValue="定植前に土壌灌注で使用。うどんこ病の発生が例年より明らかに少なく、追肥との併用でも問題なかった。リピート予定。"
+          label="感想口コミ本文"
+          name="body"
+        />
         <FormActions>
           <Button type="submit" onClick={fn()}>
             投稿する
@@ -63,12 +63,12 @@ export const WithFixedFooter: Story = {
     children: (
       <>
         <form>
-          <Field label="資材名" name="material-name">
-            <Input placeholder="例：木酢液プレミアム" />
-          </Field>
-          <Field label="実証詳細レポート" name="report-body">
-            <Textarea placeholder="散布時期・希釈倍率・効果の実感などを記録してください" />
-          </Field>
+          <Input label="資材名" name="material-name" placeholder="例：木酢液プレミアム" />
+          <Textarea
+            label="実証詳細レポート"
+            name="report-body"
+            placeholder="散布時期・希釈倍率・効果の実感などを記録してください"
+          />
         </form>
         <div className={fixedFooter}>
           <Button onClick={fn()}>次へ進む</Button>

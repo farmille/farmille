@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 
 import { requestPasswordResetAction } from "@/app/password-reset/actions";
-import { Field, Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
+import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState } from "@/lib/auth/form-state";
 
@@ -15,9 +15,14 @@ export function PasswordResetForm() {
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
 
-      <Field label="メールアドレス" name="email" requirement="required">
-        <Input autoComplete="email" placeholder="you@example.com" type="email" />
-      </Field>
+      <Input
+        label="メールアドレス"
+        name="email"
+        requirement="required"
+        autoComplete="email"
+        placeholder="you@example.com"
+        type="email"
+      />
 
       <FormActions>
         <SubmitButton pendingLabel="送信中…">再設定メールを送る</SubmitButton>

@@ -12,6 +12,7 @@ import {
 } from "@/components/popup";
 import { css, cx } from "../../../styled-system/css";
 import { useFieldRequired, useResetKey } from "./field-context";
+import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 import { selectTriggerRecipe } from "./recipes";
 import type { Option } from "./types";
 
@@ -32,7 +33,7 @@ const triggerIconStyle = css({ display: "flex", color: "text.subtle" });
 
 const checkStyle = css({ display: "flex", color: "primary.700" });
 
-type SelectProps<V extends string> = {
+type SelectBodyProps<V extends string> = {
   options: readonly Option<V>[];
   placeholder?: string;
   value?: V | null;
@@ -41,12 +42,22 @@ type SelectProps<V extends string> = {
   size?: "md" | "sm";
   name?: string;
   disabled?: boolean;
-  "aria-label"?: string;
   autoComplete?: string;
   className?: string;
 };
 
-export function Select<V extends string>({
+type SelectProps<V extends string> = SelectBodyProps<V> & Labeling;
+
+export function Select<V extends string>(props: SelectProps<V>) {
+  const [labeling, selectProps] = splitLabeling(props);
+  return (
+    <Labeled disabled={selectProps.disabled} labeling={labeling} name={selectProps.name}>
+      <SelectBody<V> {...selectProps} />
+    </Labeled>
+  );
+}
+
+function SelectBody<V extends string>({
   options,
   placeholder,
   value,
@@ -55,10 +66,9 @@ export function Select<V extends string>({
   size,
   name,
   disabled,
-  "aria-label": ariaLabel,
   autoComplete,
   className,
-}: SelectProps<V>) {
+}: SelectBodyProps<V>) {
   const required = useFieldRequired();
   const resetKey = useResetKey(defaultValue ?? "");
 
@@ -74,10 +84,7 @@ export function Select<V extends string>({
       required={required}
       value={value}
     >
-      <BaseSelect.Trigger
-        aria-label={ariaLabel}
-        className={cx(selectTriggerRecipe({ size }), className)}
-      >
+      <BaseSelect.Trigger className={cx(selectTriggerRecipe({ size }), className)}>
         <BaseSelect.Value className={valueStyle} placeholder={placeholder} />
         <BaseSelect.Icon className={triggerIconStyle}>
           <Icon name="expand_more" size={size === "sm" ? "sm" : "md"} />

@@ -4,7 +4,7 @@ import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-report";
 
-import { Checkbox, Field, Fieldset, Input, Notice, Select, Textarea } from "@/components/form";
+import { Checkbox, Fieldset, Input, Notice, Select, Textarea } from "@/components/form";
 import { ToggleGroup } from "@/components/ToggleGroup";
 
 import { css } from "../../../../../../styled-system/css";
@@ -47,22 +47,19 @@ export function ReportStepConditions({
   return (
     <>
       <GroupHeading title="栽培条件" note="どこで・どんな環境で育てているか" />
-      <Field
+      <Select
         label="地域"
         requirement="required"
         lead="アカウント登録時の住所が入っています。今回の圃場が別の場所なら変更してください。"
         error={errors.prefectureCode}
-      >
-        <Select
-          className={shortControl}
-          options={PREFECTURE_OPTIONS}
-          placeholder="都道府県を選択"
-          value={input.prefectureCode === null ? null : String(input.prefectureCode)}
-          onValueChange={(value) =>
-            onChange({ ...input, prefectureCode: value === null ? null : Number(value) })
-          }
-        />
-      </Field>
+        className={shortControl}
+        options={PREFECTURE_OPTIONS}
+        placeholder="都道府県を選択"
+        value={input.prefectureCode === null ? null : String(input.prefectureCode)}
+        onValueChange={(value) =>
+          onChange({ ...input, prefectureCode: value === null ? null : Number(value) })
+        }
+      />
       <Checkbox
         variant="row"
         className={css({ mt: "2" })}
@@ -74,7 +71,8 @@ export function ReportStepConditions({
       </Checkbox>
       {input.showCity && (
         <Input
-          aria-label="市区町村"
+          hideLabel
+          label="市区町村"
           className={cityInput}
           placeholder="〇〇市"
           value={input.city}
@@ -82,18 +80,15 @@ export function ReportStepConditions({
         />
       )}
 
-      <Field
+      <Textarea
         label="栽培環境"
         requirement="required"
         lead="露地栽培か施設栽培か、養液の使用など、栽培環境を記入してください。"
         error={errors.cultivationEnvironment}
-      >
-        <Textarea
-          placeholder="栽培環境"
-          value={input.cultivationEnvironment}
-          onChange={(event) => onChange({ ...input, cultivationEnvironment: event.target.value })}
-        />
-      </Field>
+        placeholder="栽培環境"
+        value={input.cultivationEnvironment}
+        onChange={(event) => onChange({ ...input, cultivationEnvironment: event.target.value })}
+      />
       <Notice tone="neutral" title="記入例" className={css({ mt: "2" })}>
         ・露地栽培。黒マルチを敷き、雨よけはしていません。
         <br />
@@ -118,7 +113,7 @@ export function ReportStepConditions({
         />
         <div className={timelineHint}>横にスクロールすると続きの段階が出ます</div>
       </Fieldset>
-      <Field
+      <Textarea
         label="処理日・定植日・生育状況（必須）"
         hideLabel
         requirement="required"
@@ -129,14 +124,11 @@ export function ReportStepConditions({
           </>
         }
         error={errors.timingNote}
-        className={css({ mt: "3" })}
-      >
-        <Textarea
-          placeholder="処理日・定植日・そのときの生育状況"
-          value={input.timingNote}
-          onChange={(event) => onChange({ ...input, timingNote: event.target.value })}
-        />
-      </Field>
+        fieldClassName={css({ mt: "3" })}
+        placeholder="処理日・定植日・そのときの生育状況"
+        value={input.timingNote}
+        onChange={(event) => onChange({ ...input, timingNote: event.target.value })}
+      />
       {/* 入力のたびに出し入れする注意なので、読み上げ領域は常に置いておく */}
       <div role="status">
         {missingDate && (

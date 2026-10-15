@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import type { FormEvent } from "react";
 import { describe, expect, it } from "vitest";
 
-import { Fieldset } from "./Fieldset";
 import { Form } from "./Form";
 import { RadioGroup } from "./RadioGroup";
 
@@ -20,14 +19,18 @@ function captureSubmit(sink: FormData[]) {
 }
 
 describe("RadioGroup", () => {
-  it("必須の組は未選択なら送信を止め、選ぶと Fieldset の name で送る", async () => {
+  it("必須の組は未選択なら送信を止め、選ぶと name で送る", async () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
       <Form onSubmit={captureSubmit(submitted)}>
-        <Fieldset legend="あなたの立場" name="standpoint" requirement="required">
-          <RadioGroup options={standpoints} variant="cards" />
-        </Fieldset>
+        <RadioGroup
+          label="あなたの立場"
+          name="standpoint"
+          options={standpoints}
+          requirement="required"
+          variant="cards"
+        />
         <button type="submit">登録する</button>
       </Form>,
     );
@@ -48,7 +51,8 @@ describe("RadioGroup", () => {
   it("説明は名前に入れず、選択肢の説明として読ませる", () => {
     render(
       <RadioGroup
-        aria-label="申請内容"
+        hideLabel
+        label="申請内容"
         name="target"
         options={[
           {
@@ -68,9 +72,12 @@ describe("RadioGroup", () => {
   it("name のある組は見出しで組に名前を付け、組のエラーを選択肢の説明に結ぶ", () => {
     render(
       <Form errors={{ standpoint: "立場を選んでください。" }}>
-        <Fieldset legend="あなたの立場" name="standpoint" requirement="required">
-          <RadioGroup options={[{ value: "farmer", label: "生産者" }]} />
-        </Fieldset>
+        <RadioGroup
+          label="あなたの立場"
+          name="standpoint"
+          options={[{ value: "farmer", label: "生産者" }]}
+          requirement="required"
+        />
       </Form>,
     );
 

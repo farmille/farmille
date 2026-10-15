@@ -1,13 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { Field } from "./Field";
 import { Textarea } from "./Textarea";
 
 const meta = {
   title: "Components/Form/Textarea",
   component: Textarea,
   args: {
-    "aria-label": "コメント",
+    label: "コメント",
     placeholder: "気づいたことを自由に書いてください",
   },
 } satisfies Meta<typeof Textarea>;
@@ -29,11 +28,12 @@ export const Filled: Story = {
 };
 
 export const Invalid: Story = {
-  render: (args) => (
-    <Field error="感想を入力してください。" label="感想口コミ本文" requirement="required">
-      <Textarea {...args} aria-label={undefined} size="lg" />
-    </Field>
-  ),
+  args: {
+    error: "感想を入力してください。",
+    label: "感想口コミ本文",
+    requirement: "required",
+    size: "lg",
+  },
 };
 
 export const Disabled: Story = {

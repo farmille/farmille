@@ -8,10 +8,11 @@ import { Icon } from "@/components/Icon";
 import { cx } from "../../../styled-system/css";
 import { Choice, EnsureFieldRoot } from "./Field";
 import { useFieldContext, useResetKey } from "./field-context";
+import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 import { checkboxBoxRecipe, checkIndicatorStyle, choiceGroupRecipe } from "./recipes";
 import type { Option } from "./types";
 
-type CheckboxGroupProps<V extends string> = {
+type CheckboxGroupBodyProps<V extends string> = {
   options: readonly Option<V>[];
   variant?: "list" | "chips";
   value?: readonly V[];
@@ -21,11 +22,21 @@ type CheckboxGroupProps<V extends string> = {
   limit?: number;
   name?: string;
   disabled?: boolean;
-  "aria-label"?: string;
   className?: string;
 };
 
+type CheckboxGroupProps<V extends string> = CheckboxGroupBodyProps<V> & Labeling;
+
 export function CheckboxGroup<V extends string>(props: CheckboxGroupProps<V>) {
+  const [labeling] = splitLabeling(props);
+  return (
+    <Labeled disabled={props.disabled} kind="group" labeling={labeling} name={props.name}>
+      <CheckboxGroupWithReset<V> {...props} />
+    </Labeled>
+  );
+}
+
+function CheckboxGroupWithReset<V extends string>(props: CheckboxGroupBodyProps<V>) {
   const resetKey = useResetKey((props.defaultValue ?? []).join("\u001f"));
   return <CheckboxGroupBody<V> key={resetKey} {...props} />;
 }
@@ -39,9 +50,8 @@ function CheckboxGroupBody<V extends string>({
   limit,
   name,
   disabled,
-  "aria-label": ariaLabel,
   className,
-}: CheckboxGroupProps<V>) {
+}: CheckboxGroupBodyProps<V>) {
   const { inRoot } = useFieldContext();
   const [uncontrolled, setUncontrolled] = useState<readonly V[]>(defaultValue ?? []);
   const current = value ?? uncontrolled;
@@ -59,7 +69,6 @@ function CheckboxGroupBody<V extends string>({
 
   const group = (
     <BaseCheckboxGroup
-      aria-label={ariaLabel}
       className={cx(choiceGroupRecipe({ variant }), inRoot ? className : undefined)}
       disabled={disabled}
       onValueChange={handleValueChange}

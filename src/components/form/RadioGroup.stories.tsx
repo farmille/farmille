@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 
-import { Fieldset } from "./Fieldset";
 import { Form } from "./Form";
 import { RadioGroup } from "./RadioGroup";
 
@@ -35,7 +34,7 @@ const meta = {
   title: "Components/Form/RadioGroup",
   component: RadioGroup,
   args: {
-    "aria-label": "申請内容",
+    label: "申請内容",
     name: "target",
     options: targets,
     onValueChange: fn(),
@@ -52,12 +51,12 @@ export const ListChecked: Story = {
 };
 
 export const Cards: Story = {
-  args: { "aria-label": "栽培形態", name: "cultivation", options: cultivation, variant: "cards" },
+  args: { label: "栽培形態", name: "cultivation", options: cultivation, variant: "cards" },
 };
 
 export const CardsChecked: Story = {
   args: {
-    "aria-label": "栽培形態",
+    label: "栽培形態",
     name: "cultivation",
     options: cultivation,
     defaultValue: "house",
@@ -66,39 +65,34 @@ export const CardsChecked: Story = {
 };
 
 export const InFieldset: Story = {
-  render: (args) => (
-    <Fieldset legend="申請内容" name="target" requirement="required">
-      <RadioGroup {...args} aria-label={undefined} defaultValue="new" />
-    </Fieldset>
-  ),
+  args: { defaultValue: "new", requirement: "required" },
 };
 
 export const CardsInFieldset: Story = {
-  render: (args) => (
-    <Fieldset
-      description="投稿やマイページで肩書きとして表示されます。"
-      legend="あなたの立場"
-      name="standpoint"
-      requirement="required"
-      visibility="public"
-    >
-      <RadioGroup
-        {...args}
-        aria-label={undefined}
-        defaultValue="farmer"
-        options={standpoints}
-        variant="cards"
-      />
-    </Fieldset>
-  ),
+  args: {
+    description: "投稿やマイページで肩書きとして表示されます。",
+    label: "あなたの立場",
+    name: "standpoint",
+    requirement: "required",
+    visibility: "public",
+    defaultValue: "farmer",
+    options: standpoints,
+    variant: "cards",
+  },
 };
 
 export const GroupError: Story = {
+  args: {
+    label: "あなたの立場",
+    name: "standpoint",
+    requirement: "required",
+    visibility: "public",
+    options: standpoints,
+    variant: "cards",
+  },
   render: (args) => (
     <Form errors={{ standpoint: "立場を選んでください。" }}>
-      <Fieldset legend="あなたの立場" name="standpoint" requirement="required" visibility="public">
-        <RadioGroup {...args} aria-label={undefined} options={standpoints} variant="cards" />
-      </Fieldset>
+      <RadioGroup {...args} />
     </Form>
   ),
 };

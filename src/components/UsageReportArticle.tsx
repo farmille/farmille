@@ -145,7 +145,8 @@ export function UsageReportArticle({
   function text(value: string, label: string, update: (value: string) => UsageReportInput) {
     return onChange ? (
       <Textarea
-        aria-label={label}
+        hideLabel
+        label={label}
         value={value}
         onChange={(event) => onChange(update(event.target.value))}
       />
@@ -159,7 +160,8 @@ export function UsageReportArticle({
         <section key={section.value} className={sectionStyle}>
           {onChange ? (
             <Input
-              aria-label={`${section.title}の見出し`}
+              hideLabel
+              label={`${section.title}の見出し`}
               value={
                 input.headings.find((item) => item.section === section.value)?.title ??
                 section.title
@@ -312,7 +314,8 @@ export function UsageReportArticle({
                   )}
                   {onChange ? (
                     <Input
-                      aria-label="写真の説明"
+                      hideLabel
+                      label="写真の説明"
                       value={media.caption}
                       onChange={(event) =>
                         onChange({

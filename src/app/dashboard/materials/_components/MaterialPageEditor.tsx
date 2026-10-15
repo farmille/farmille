@@ -8,7 +8,6 @@ import { Button } from "@/components";
 import {
   Checkbox,
   CheckboxGroup,
-  Field,
   FormActions,
   Input,
   Notice,
@@ -128,7 +127,7 @@ export function MaterialPageEditor({
             </section>
             <section>
               <h2>製品説明</h2>
-              <Field
+              <Textarea
                 label="製品説明"
                 hideLabel
                 description={
@@ -139,26 +138,27 @@ export function MaterialPageEditor({
                     に沿ってご記入ください。公開前に運営が表現を確認します。
                   </>
                 }
-              >
-                <Textarea
-                  rows={7}
-                  value={content.description}
-                  onChange={(event) => setContent({ ...content, description: event.target.value })}
-                />
-              </Field>
+                rows={7}
+                value={content.description}
+                onChange={(event) => setContent({ ...content, description: event.target.value })}
+              />
             </section>
             <section>
               <h2>施用タイミング</h2>
               <p>共通の目安となる時期を複数選択できます。</p>
-              <CheckboxGroup
-                aria-label="施用タイミング"
-                className={timingOptions}
-                disabled={pending}
-                onValueChange={(values) => setContent({ ...content, timings: values.map(Number) })}
-                options={TIMING_OPTIONS}
-                value={content.timings.map(String)}
-                variant="chips"
-              />
+              <div className={timingOptions}>
+                <CheckboxGroup
+                  hideLabel
+                  label="施用タイミング"
+                  disabled={pending}
+                  onValueChange={(values) =>
+                    setContent({ ...content, timings: values.map(Number) })
+                  }
+                  options={TIMING_OPTIONS}
+                  value={content.timings.map(String)}
+                  variant="chips"
+                />
+              </div>
             </section>
             <section>
               <h2>リンク・資料</h2>
@@ -168,63 +168,63 @@ export function MaterialPageEditor({
                   {content.links.map((link, index) =>
                     link.group === group.value ? (
                       <div className={row} key={index}>
-                        <Field label="資料の分類" labelSize="sm">
-                          <Select
-                            disabled={pending}
-                            options={LINK_GROUP_OPTIONS}
-                            value={link.group ?? ""}
-                            onValueChange={(value) => {
-                              setContent({
-                                ...content,
-                                links: content.links.map((entry, i) =>
-                                  i === index
-                                    ? {
-                                        ...entry,
-                                        group: value === "" || value === null ? null : value,
-                                        trial:
-                                          value === "public_trial" || value === "other_trial"
-                                            ? (entry.trial ?? {
-                                                crops: "",
-                                                summary: "",
-                                                institution: "",
-                                                year: null,
-                                                pageCount: null,
-                                              })
-                                            : null,
-                                      }
-                                    : entry,
-                                ),
-                              });
-                            }}
-                          />
-                        </Field>
-                        <Field label="資料名" labelSize="sm">
-                          <Input
-                            value={link.title}
-                            onChange={(event) =>
-                              setContent({
-                                ...content,
-                                links: content.links.map((entry, i) =>
-                                  i === index ? { ...entry, title: event.target.value } : entry,
-                                ),
-                              })
-                            }
-                          />
-                        </Field>
-                        <Field label="資料URL" labelSize="sm">
-                          <Input
-                            type="url"
-                            value={link.url}
-                            onChange={(event) =>
-                              setContent({
-                                ...content,
-                                links: content.links.map((entry, i) =>
-                                  i === index ? { ...entry, url: event.target.value } : entry,
-                                ),
-                              })
-                            }
-                          />
-                        </Field>
+                        <Select
+                          label="資料の分類"
+                          labelSize="sm"
+                          disabled={pending}
+                          options={LINK_GROUP_OPTIONS}
+                          value={link.group ?? ""}
+                          onValueChange={(value) => {
+                            setContent({
+                              ...content,
+                              links: content.links.map((entry, i) =>
+                                i === index
+                                  ? {
+                                      ...entry,
+                                      group: value === "" || value === null ? null : value,
+                                      trial:
+                                        value === "public_trial" || value === "other_trial"
+                                          ? (entry.trial ?? {
+                                              crops: "",
+                                              summary: "",
+                                              institution: "",
+                                              year: null,
+                                              pageCount: null,
+                                            })
+                                          : null,
+                                    }
+                                  : entry,
+                              ),
+                            });
+                          }}
+                        />
+                        <Input
+                          label="資料名"
+                          labelSize="sm"
+                          value={link.title}
+                          onChange={(event) =>
+                            setContent({
+                              ...content,
+                              links: content.links.map((entry, i) =>
+                                i === index ? { ...entry, title: event.target.value } : entry,
+                              ),
+                            })
+                          }
+                        />
+                        <Input
+                          label="資料URL"
+                          labelSize="sm"
+                          type="url"
+                          value={link.url}
+                          onChange={(event) =>
+                            setContent({
+                              ...content,
+                              links: content.links.map((entry, i) =>
+                                i === index ? { ...entry, url: event.target.value } : entry,
+                              ),
+                            })
+                          }
+                        />
                         {link.trial ? (
                           <>
                             {(
@@ -234,28 +234,29 @@ export function MaterialPageEditor({
                                 { key: "institution", label: "試験の実施機関（任意）" },
                               ] as const
                             ).map((field) => (
-                              <Field key={field.key} label={field.label} labelSize="sm">
-                                <Textarea
-                                  rows={field.key === "summary" ? 3 : 1}
-                                  value={link.trial?.[field.key] ?? ""}
-                                  onChange={(event) =>
-                                    setContent({
-                                      ...content,
-                                      links: content.links.map((entry, i) =>
-                                        i === index && entry.trial
-                                          ? {
-                                              ...entry,
-                                              trial: {
-                                                ...entry.trial,
-                                                [field.key]: event.target.value,
-                                              },
-                                            }
-                                          : entry,
-                                      ),
-                                    })
-                                  }
-                                />
-                              </Field>
+                              <Textarea
+                                key={field.key}
+                                label={field.label}
+                                labelSize="sm"
+                                rows={field.key === "summary" ? 3 : 1}
+                                value={link.trial?.[field.key] ?? ""}
+                                onChange={(event) =>
+                                  setContent({
+                                    ...content,
+                                    links: content.links.map((entry, i) =>
+                                      i === index && entry.trial
+                                        ? {
+                                            ...entry,
+                                            trial: {
+                                              ...entry.trial,
+                                              [field.key]: event.target.value,
+                                            },
+                                          }
+                                        : entry,
+                                    ),
+                                  })
+                                }
+                              />
                             ))}
                             {(
                               [
@@ -267,34 +268,35 @@ export function MaterialPageEditor({
                                 },
                               ] as const
                             ).map((field) => (
-                              <Field key={field.key} label={field.label} labelSize="sm">
-                                <Input
-                                  type="number"
-                                  min={1}
-                                  max={field.max}
-                                  step={1}
-                                  value={link.trial?.[field.key] ?? ""}
-                                  onChange={(event) =>
-                                    setContent({
-                                      ...content,
-                                      links: content.links.map((entry, i) =>
-                                        i === index && entry.trial
-                                          ? {
-                                              ...entry,
-                                              trial: {
-                                                ...entry.trial,
-                                                [field.key]:
-                                                  event.target.value === ""
-                                                    ? null
-                                                    : event.target.valueAsNumber,
-                                              },
-                                            }
-                                          : entry,
-                                      ),
-                                    })
-                                  }
-                                />
-                              </Field>
+                              <Input
+                                key={field.key}
+                                label={field.label}
+                                labelSize="sm"
+                                type="number"
+                                min={1}
+                                max={field.max}
+                                step={1}
+                                value={link.trial?.[field.key] ?? ""}
+                                onChange={(event) =>
+                                  setContent({
+                                    ...content,
+                                    links: content.links.map((entry, i) =>
+                                      i === index && entry.trial
+                                        ? {
+                                            ...entry,
+                                            trial: {
+                                              ...entry.trial,
+                                              [field.key]:
+                                                event.target.value === ""
+                                                  ? null
+                                                  : event.target.valueAsNumber,
+                                            },
+                                          }
+                                        : entry,
+                                    ),
+                                  })
+                                }
+                              />
                             ))}
                           </>
                         ) : null}
@@ -347,36 +349,36 @@ export function MaterialPageEditor({
               <h2>施用方法</h2>
               {content.usages.map((usage, index) => (
                 <div className={row} key={index}>
-                  <Field label="施用方法" labelSize="sm">
-                    <Select
-                      disabled={pending}
-                      options={APPLICATION_METHODS}
-                      value={usage.method}
-                      onValueChange={(method) => {
-                        if (method === null) return;
-                        setContent({
-                          ...content,
-                          usages: content.usages.map((entry, i) =>
-                            i === index ? { ...entry, method } : entry,
-                          ),
-                        });
-                      }}
-                    />
-                  </Field>
-                  <Field label="詳細" labelSize="sm">
-                    <Textarea
-                      rows={3}
-                      value={usage.detail}
-                      onChange={(event) =>
-                        setContent({
-                          ...content,
-                          usages: content.usages.map((entry, i) =>
-                            i === index ? { ...entry, detail: event.target.value } : entry,
-                          ),
-                        })
-                      }
-                    />
-                  </Field>
+                  <Select
+                    label="施用方法"
+                    labelSize="sm"
+                    disabled={pending}
+                    options={APPLICATION_METHODS}
+                    value={usage.method}
+                    onValueChange={(method) => {
+                      if (method === null) return;
+                      setContent({
+                        ...content,
+                        usages: content.usages.map((entry, i) =>
+                          i === index ? { ...entry, method } : entry,
+                        ),
+                      });
+                    }}
+                  />
+                  <Textarea
+                    label="詳細"
+                    labelSize="sm"
+                    rows={3}
+                    value={usage.detail}
+                    onChange={(event) =>
+                      setContent({
+                        ...content,
+                        usages: content.usages.map((entry, i) =>
+                          i === index ? { ...entry, detail: event.target.value } : entry,
+                        ),
+                      })
+                    }
+                  />
                   <Button
                     variant="ghost"
                     onClick={() =>
@@ -404,21 +406,17 @@ export function MaterialPageEditor({
             </section>
             <section>
               <h2>製品詳細</h2>
-              <Field label="主な成分">
-                <Textarea
-                  value={content.mainComponents}
-                  onChange={(event) =>
-                    setContent({ ...content, mainComponents: event.target.value })
-                  }
-                />
-              </Field>
-              <Field label="作用機作">
-                <Textarea
-                  rows={4}
-                  value={content.mechanism}
-                  onChange={(event) => setContent({ ...content, mechanism: event.target.value })}
-                />
-              </Field>
+              <Textarea
+                label="主な成分"
+                value={content.mainComponents}
+                onChange={(event) => setContent({ ...content, mainComponents: event.target.value })}
+              />
+              <Textarea
+                label="作用機作"
+                rows={4}
+                value={content.mechanism}
+                onChange={(event) => setContent({ ...content, mechanism: event.target.value })}
+              />
             </section>
             <section>
               <h2>登録・認証</h2>
@@ -448,37 +446,35 @@ export function MaterialPageEditor({
                     </Checkbox>
                     {registration ? (
                       <>
-                        <Field label={kind.companyLabel}>
-                          <Input
-                            value={registration.companyName}
-                            onChange={(event) =>
-                              setContent({
-                                ...content,
-                                registrations: content.registrations.map((entry) =>
-                                  entry.kind === kind.value
-                                    ? { ...entry, companyName: event.target.value }
-                                    : entry,
-                                ),
-                              })
-                            }
-                          />
-                        </Field>
-                        <Field label={kind.effectsLabel}>
-                          <Textarea
-                            rows={3}
-                            value={registration.effects}
-                            onChange={(event) =>
-                              setContent({
-                                ...content,
-                                registrations: content.registrations.map((entry) =>
-                                  entry.kind === kind.value
-                                    ? { ...entry, effects: event.target.value }
-                                    : entry,
-                                ),
-                              })
-                            }
-                          />
-                        </Field>
+                        <Input
+                          label={kind.companyLabel}
+                          value={registration.companyName}
+                          onChange={(event) =>
+                            setContent({
+                              ...content,
+                              registrations: content.registrations.map((entry) =>
+                                entry.kind === kind.value
+                                  ? { ...entry, companyName: event.target.value }
+                                  : entry,
+                              ),
+                            })
+                          }
+                        />
+                        <Textarea
+                          label={kind.effectsLabel}
+                          rows={3}
+                          value={registration.effects}
+                          onChange={(event) =>
+                            setContent({
+                              ...content,
+                              registrations: content.registrations.map((entry) =>
+                                entry.kind === kind.value
+                                  ? { ...entry, effects: event.target.value }
+                                  : entry,
+                              ),
+                            })
+                          }
+                        />
                       </>
                     ) : null}
                   </div>
@@ -489,7 +485,8 @@ export function MaterialPageEditor({
               {content.certifications.map((title, index) => (
                 <div className={row} key={index}>
                   <Input
-                    aria-label={`登録・認証${index + 1}`}
+                    hideLabel
+                    label={`登録・認証${index + 1}`}
                     value={title}
                     onChange={(event) =>
                       setContent({
@@ -527,19 +524,19 @@ export function MaterialPageEditor({
               <p>掲載する会社名を1社ずつ記入してください。</p>
               {content.relatedCompanies.map((company, index) => (
                 <div className={row} key={index}>
-                  <Field label={`関係会社${index + 1}`} labelSize="sm">
-                    <Input
-                      value={company}
-                      onChange={(event) =>
-                        setContent({
-                          ...content,
-                          relatedCompanies: content.relatedCompanies.map((name, i) =>
-                            i === index ? event.target.value : name,
-                          ),
-                        })
-                      }
-                    />
-                  </Field>
+                  <Input
+                    label={`関係会社${index + 1}`}
+                    labelSize="sm"
+                    value={company}
+                    onChange={(event) =>
+                      setContent({
+                        ...content,
+                        relatedCompanies: content.relatedCompanies.map((name, i) =>
+                          i === index ? event.target.value : name,
+                        ),
+                      })
+                    }
+                  />
                   <Button
                     variant="ghost"
                     onClick={() =>

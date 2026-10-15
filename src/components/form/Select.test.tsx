@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import type { FormEvent } from "react";
 import { describe, expect, it } from "vitest";
 
-import { Field } from "./Field";
 import { Form } from "./Form";
 import { Select } from "./Select";
 
@@ -20,18 +19,19 @@ function captureSubmit(sink: FormData[]) {
 }
 
 describe("Select", () => {
-  it("選んだ値を Field の name で送り、トリガーは見出しで名前が付く", async () => {
+  it("選んだ値を name で送り、トリガーは label で名前が付く", async () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     render(
       <Form onSubmit={captureSubmit(submitted)}>
-        <Field label="都道府県" name="prefectureCode" requirement="required">
-          <Select
-            autoComplete="address-level1"
-            options={prefectures}
-            placeholder="選択してください"
-          />
-        </Field>
+        <Select
+          autoComplete="address-level1"
+          label="都道府県"
+          name="prefectureCode"
+          options={prefectures}
+          placeholder="選択してください"
+          requirement="required"
+        />
         <button type="submit">送信</button>
       </Form>,
     );
@@ -56,9 +56,13 @@ describe("Select", () => {
     const submitted: FormData[] = [];
     render(
       <Form onSubmit={captureSubmit(submitted)}>
-        <Field label="都道府県" name="prefectureCode" requirement="required">
-          <Select options={prefectures} placeholder="選択してください" />
-        </Field>
+        <Select
+          label="都道府県"
+          name="prefectureCode"
+          options={prefectures}
+          placeholder="選択してください"
+          requirement="required"
+        />
         <button type="submit">送信</button>
       </Form>,
     );
@@ -76,7 +80,8 @@ describe("Select", () => {
     const user = userEvent.setup();
     render(
       <Select
-        aria-label="作目"
+        hideLabel
+        label="作目"
         options={[
           { value: "tomato", label: "トマト", description: "なす科果菜類" },
           { value: "cucumber", label: "きゅうり", description: "うり科果菜類" },
