@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { cva, css, cx } from "../../styled-system/css";
-import { AppBar, type AppBarActive, type AppChrome } from "./AppBar";
+import { AppBar, type AppBarAccount, type AppBarActive, type AppChrome } from "./AppBar";
 
 const shell = css({
   minH: "100dvh",
@@ -53,6 +53,7 @@ type FormPageShellProps = {
   children: ReactNode;
   chrome: AppChrome;
   active?: AppBarActive;
+  account?: AppBarAccount;
   hasFixedFooter?: boolean;
   variant?: "form" | "material";
   hasFab?: boolean;
@@ -65,6 +66,7 @@ export function FormPageShell({
   children,
   chrome,
   active,
+  account,
   hasFixedFooter = false,
   variant = "form",
   hasFab = false,
@@ -73,7 +75,7 @@ export function FormPageShell({
 
   return (
     <div className={shell}>
-      <AppBar chrome={chrome} active={active} title={title} backHref={backHref} />
+      <AppBar chrome={chrome} active={active} account={account} title={title} backHref={backHref} />
       <main
         className={cx(
           mainWidthRecipe({ width: chrome === "seller" ? "seller" : variant }),

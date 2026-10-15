@@ -28,6 +28,18 @@ export const HomeDesktop: Story = {
   },
 };
 
+// 未ログインの閲覧者には、アカウントボタンの代わりにログインと新規登録を並べる。
+export const HomeDesktopGuest: Story = {
+  args: {
+    chrome: "public",
+    variant: "home",
+    account: { kind: "guest" },
+  },
+  globals: {
+    viewport: { value: "desktop1440", isRotated: false },
+  },
+};
+
 export const HomeWithSearchHref: Story = {
   args: {
     chrome: "public",

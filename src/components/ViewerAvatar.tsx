@@ -1,6 +1,6 @@
 import { Icon } from "@/components/Icon";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
-import { getSessionUser } from "@/server/auth";
+import type { SessionUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { getOwnProfile } from "@/server/queries/profiles";
 
@@ -8,11 +8,10 @@ import { Avatar } from "./Avatar";
 
 /**
  * アカウントボタンに出す、本人のアバター。設定した画像があればその画像、無ければ他の画面と同じ Humation のイラスト。
- * 未ログインと、表示情報を持たないアカウント（メーカー）は人型アイコンのまま。
+ * 表示情報を持たないアカウント（メーカー）は人型アイコンのまま。
  */
-export async function ViewerAvatar() {
-  const session = await getSessionUser();
-  if (session === null || !canUseGeneralFeatures(session.accountType)) {
+export async function ViewerAvatar({ session }: { session: SessionUser }) {
+  if (!canUseGeneralFeatures(session.accountType)) {
     return <Icon name="person" size="md" />;
   }
 
