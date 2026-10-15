@@ -321,7 +321,7 @@ function DesktopSiteHeader({
               </Link>
             </>
           ) : (
-            <DesktopAccountMenu myPageCurrent={active === "me"} avatar={account?.avatar} />
+            <DesktopAccountMenu myPageCurrent={active === "me"} member={account} />
           )}
         </nav>
       </div>

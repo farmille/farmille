@@ -41,7 +41,8 @@ export const MyPage: Story = {
   play: openMenu,
 };
 
-/** 設定した画像があるときは、人型アイコンの代わりにその画像を出す。 */
+/** サーバーが会員と確かめた閲覧者には本人の画像を出し、開くと cookie が無くても会員の項目を出す。 */
 export const WithAvatar: Story = {
-  args: { avatar: <Avatar name="緑の畑" src={photo} size="md" /> },
+  args: { member: { avatar: <Avatar name="緑の畑" src={photo} size="md" /> } },
+  play: openMenu,
 };

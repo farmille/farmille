@@ -103,14 +103,17 @@ const personIcon = <Icon name="person" size="md" />;
 
 type DesktopAccountMenuProps = {
   myPageCurrent: boolean;
-  /** ボタンに出す本人の画像。サーバー側で取得して描いたものを受け取る。無ければ人型アイコン。 */
-  avatar?: ReactNode;
+  /**
+   * サーバー側で会員と確かめた閲覧者。渡されたら cookie を読まずに会員の項目を出し、ボタンに本人の画像を出す。
+   * 未指定のときは人型アイコンにし、開いた時点の cookie で項目を決める。
+   */
+  member?: { avatar: ReactNode };
 };
 
-export function DesktopAccountMenu({ myPageCurrent, avatar }: DesktopAccountMenuProps) {
+export function DesktopAccountMenu({ myPageCurrent, member }: DesktopAccountMenuProps) {
   const [signedIn, setSignedIn] = useState(false);
   const logoutFormId = useId();
-  const entries = signedIn ? MEMBER_ENTRIES : GUEST_ENTRIES;
+  const entries = member !== undefined || signedIn ? MEMBER_ENTRIES : GUEST_ENTRIES;
 
   return (
     <Menu.Root
@@ -119,7 +122,7 @@ export function DesktopAccountMenu({ myPageCurrent, avatar }: DesktopAccountMenu
       }}
     >
       <Menu.Trigger className={trigger} aria-label="アカウント">
-        <Suspense fallback={personIcon}>{avatar ?? personIcon}</Suspense>
+        <Suspense fallback={personIcon}>{member?.avatar ?? personIcon}</Suspense>
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner align="end" sideOffset={6} className={popupPositionerStyle}>
