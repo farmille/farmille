@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import { HomeSearchEntry } from "@/components/search/HomeSearchEntry";
 import { css } from "../../../styled-system/css";
+import { HomeHeroModel } from "./HomeHeroModel";
 import heroPhoto from "./home-hero-rice-field.webp";
 
 /** ヒーローだけ本文書体からゴシックMB101 L（weight 300）へ切り替える。 */
@@ -146,6 +147,20 @@ const phrase = css({
   display: "inline-block",
 });
 
+/**
+ * 回転するボトルの置き場。SP は見出しの右の空きに、tab 以上は写真の右側で検索欄の上に置く。
+ * 見出しと検索欄に重ならない範囲を写真に対する割合で取る。
+ */
+const model = css({
+  position: "absolute",
+  top: "21%",
+  bottom: "23%",
+  right: "0",
+  w: "30%",
+  tab: { top: "14%", bottom: "24%", right: "2%", w: "34%" },
+  pc: { top: "14%", bottom: "27%", right: "11%", w: "34%" },
+});
+
 /** 写真の内側に置く。SP は下辺に寄せて全幅、PC は写真の右下に浮かせる。 */
 const search = css({
   position: "absolute",
@@ -194,6 +209,9 @@ export function HomeHero() {
             />
           </div>
           <div aria-hidden className={scrim} />
+          <div className={model}>
+            <HomeHeroModel />
+          </div>
           <div className={search}>
             <HomeSearchEntry />
           </div>

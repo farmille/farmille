@@ -44,6 +44,7 @@
     "remark-rehype": "^11.1.2",
     "sonner": "2.0.8",
     "standardwebhooks": "^1.1.1",
+    "three": "0.186.1",
     "unified": "^11.0.5",
     "valibot": "1.4.2"
   },
@@ -61,6 +62,7 @@
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "0.186.0",
     "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",

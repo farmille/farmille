@@ -274,6 +274,8 @@ export const tokens = {
     dialog: { value: "250ms" },
     toast: { value: "400ms" },
     stagger: { value: "50ms" },
+    // ホームの 3D モデルが描き終わってから写真の上に浮かび上がる長さ
+    heroModel: { value: "700ms" },
   },
   zIndex: {
     dialog: { value: 50 },
