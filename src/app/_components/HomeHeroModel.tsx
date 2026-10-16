@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { css } from "../../../styled-system/css";
 
-/** 描き終わるまでは透明にし、最初の1枚が出たら浮かび上がらせる。写真の上の操作は妨げない。 */
 const frame = css({
   w: "full",
   h: "full",
@@ -18,7 +17,6 @@ const frame = css({
 
 const canvasStyle = css({ display: "block", w: "full", h: "full" });
 
-/** WebGL2 が使えない端末では three.js を読み込まず、写真だけのヒーローのままにする。 */
 function canUseWebgl2(): boolean {
   const context = document.createElement("canvas").getContext("webgl2");
   if (context === null) return false;
@@ -26,10 +24,6 @@ function canUseWebgl2(): boolean {
   return true;
 }
 
-/**
- * ヒーローの写真に重ねて、BS 資材のボトルを回して見せる。飾りなので支援技術からは隠す。
- * three.js はホームの表示を待たせないよう、描画を始めるときに別チャンクで読み込む。
- */
 export function HomeHeroModel() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [ready, setReady] = useState(false);

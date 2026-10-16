@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { spinAngle } from "./bottle-scene";
+import { poseAt, spinAngle } from "./bottle-scene";
 
 const FRAME_MS = 16;
 
@@ -20,6 +20,25 @@ describe("ボトルの回転", () => {
     expect(speedAt(0)).toBeGreaterThan(steady * 3);
     for (const elapsed of [5_000, 15_000, 60_000]) {
       expect(speedAt(elapsed)).toBeCloseTo(steady, 10);
+    }
+  });
+});
+
+describe("ボトルの姿勢", () => {
+  it("登場の動きは行き過ぎず、立った姿勢から落ち着いたあとの傾きと高さの間に収まる", () => {
+    const steady = Array.from({ length: 1_000 }, (_, index) => poseAt(10_000 + index * FRAME_MS));
+    const lean = steady[0].lean;
+    const highest = Math.max(...steady.map((pose) => pose.lift));
+    const start = poseAt(0);
+    expect(start.lean).toBe(0);
+    expect(steady.every((pose) => pose.lean === lean)).toBe(true);
+
+    for (let elapsed = 0; elapsed < 10_000; elapsed += FRAME_MS) {
+      const pose = poseAt(elapsed);
+      expect(pose.lean).toBeGreaterThanOrEqual(0);
+      expect(pose.lean).toBeLessThanOrEqual(lean);
+      expect(pose.lift).toBeGreaterThanOrEqual(start.lift);
+      expect(pose.lift).toBeLessThanOrEqual(highest);
     }
   });
 });

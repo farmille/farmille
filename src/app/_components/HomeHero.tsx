@@ -147,16 +147,12 @@ const phrase = css({
   display: "inline-block",
 });
 
-/**
- * 回転するボトルの置き場。SP は見出しの右の空きに、tab 以上は写真の右側で検索欄の上に置く。
- * 見出しと検索欄に重ならない範囲を写真に対する割合で取る。
- */
 const model = css({
   position: "absolute",
   top: "21%",
   bottom: "23%",
   right: "0",
-  w: "30%",
+  w: "28%",
   tab: { top: "14%", bottom: "24%", right: "2%", w: "34%" },
   pc: { top: "14%", bottom: "27%", right: "11%", w: "34%" },
 });
