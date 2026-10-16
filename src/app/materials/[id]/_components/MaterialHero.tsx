@@ -128,11 +128,11 @@ export function MaterialHero({
         )}
         {material.manufacturer_verified_at === null ? (
           <div className={unverifiedStyle}>
-            国内での販売を代表する立場にあるとFarmille運営が調査・認識した企業を表示しています。相違がある場合は、
-            <Link href="/sellers/apply" className={applyLinkStyle}>
-              企業会員登録
-            </Link>
-            からご連絡ください。
+            公開情報をもとにFarmilleが調査し、当該資材の国内の主な販売元を掲載しています。相違がある場合は、
+            <a href="mailto:contact@farmille.com" className={applyLinkStyle}>
+              contact@farmille.com
+            </a>
+            までご連絡ください。
           </div>
         ) : null}
         {material.ingredientCategories.length > 0 ? (

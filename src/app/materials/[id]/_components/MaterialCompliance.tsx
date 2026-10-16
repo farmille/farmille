@@ -31,6 +31,10 @@ const disclaimerStyle = css({
   textStyle: "supporting",
   color: "text.subtle",
 });
+const noticeHeadingStyle = css({ fontWeight: "bold", color: "text.muted" });
+const listStyle = css({ listStyle: "none" });
+// 製品情報の直後に寄せる（main の gap 8 から詰めて、間を 3 にする）
+const pointerStyle = css({ mt: "-5", textStyle: "supporting", color: "text.subtle" });
 const noticeLinkStyle = css({
   color: "inherit",
   textDecoration: "underline",
@@ -59,52 +63,55 @@ function CheckedNotice({
   );
 }
 
-export function MaterialPageCompliance({ makerVerified }: { makerVerified: boolean }) {
+const CONTACT_EMAIL = "contact@farmille.com";
+
+function ContactEmail() {
   return (
-    <CheckedNotice spacing="near">
-      {makerVerified
-        ? "製品情報は企業会員（資材オーナー企業）が記入・管理しています。掲載情報は効果を保証するものではありません。"
-        : "このページはFarmille運営が、メーカーの公開資料（製品ページ・パンフレット・SDS等）をもとに作成したもので、メーカーによる内容の確認は受けていません。誤記や最新でない内容を含むことがあり、効果を保証するものではありません。"}
-      使用前に必ずメーカー公式情報をご確認ください。{" "}
-      <Link className={noticeLinkStyle} href="/legal/disclaimer">
-        免責事項 →
-      </Link>
-      {makerVerified ? null : (
-        <div className={followUpStyle}>
-          メーカーご担当者様：内容の修正や掲載に関するご要望は{" "}
-          <Link className={noticeLinkStyle} href="/sellers/procedures">
-            こちら →
-          </Link>
-        </div>
-      )}
-    </CheckedNotice>
+    <a className={textLinkStyle} href={`mailto:${CONTACT_EMAIL}`}>
+      {CONTACT_EMAIL}
+    </a>
+  );
+}
+
+export function MaterialNoticePointer() {
+  return (
+    <p className={pointerStyle}>
+      ※掲載情報に関する注意事項は、ページ下部の「掲載情報についてのご案内」に記載しています。
+    </p>
   );
 }
 
 export function MaterialSpecDisclaimer() {
   return (
-    <section aria-label="掲載情報と投稿についての注意事項" className={disclaimerStyle}>
+    <section aria-labelledby="material-notice-heading" className={disclaimerStyle}>
+      <h2 id="material-notice-heading" className={noticeHeadingStyle}>
+        掲載情報についてのご案内
+      </h2>
+      <div className={followUpStyle}>掲載している商品情報</div>
+      <ul className={listStyle}>
+        <li>・農薬・肥料・土壌改良資材等に関する登録・届出・表示情報</li>
+        <li>
+          ・期待効果・資材ジャンル（Farmilleが独自に、バイオスティミュラント資材として整理・解釈）
+        </li>
+        <li>
+          ・製品説明・主な成分・対象作物・施用方法・技術・作用機作・関係会社・その他の製品情報
+        </li>
+      </ul>
       <div>
-        「−」の項目は、メーカーによる確認が済んでいない項目、またはメーカーの意向で掲載していない項目です。
-        <Link className={textLinkStyle} href="/sellers/procedures">
-          メーカーご担当者様はご連絡ください →
-        </Link>
+        は、各事業者から提供を受けた情報、または特定時点のウェブサイト等での公開情報をもとに、Farmilleが調査・分類しております。そのため、誤記や最新でない内容を含む場合があります。大変申し訳ありません。
       </div>
       <div className={followUpStyle}>
-        掲載している商品情報（農薬・肥料・土壌改良資材等に関する登録・届出・表示情報を含みます）は、各事業者によって提供・編集を受けた情報、Farmilleによる調査、または各事業者のウェブサイト等にて公開されている特定時点の情報をもとに作成したものです。当サイトに掲載している情報には、誤記や最新でない内容を含む可能性があり、その正確性・完全性・最新性を保証するものではありません。
+        お気づきの点がありましたら、
+        <ContactEmail />
+        までご連絡ください。内容を確認させていただきます。
       </div>
       <div className={followUpStyle}>
-        作物・効果・施用方法の分類は、農林水産省の通知（30消安第6281号）・JBSAの公式分類等を参考に、Farmilleがバイオスティミュラント資材として整理・解釈したものです。これらの分類や記載は、当該資材の効果を検証・保証するものではありません。
+        ※メーカーご担当者様へ：掲載内容のお問い合わせ、資材ページの非公開（終売・廃盤などの表示を含みます）のご依頼は、
+        <ContactEmail />
+        で承ります。確認のうえ、迅速な対応に努めます。
       </div>
       <div className={followUpStyle}>
-        商品の使用にあたっては、当該製品についてメーカー公式サイトなどの公式情報を必ずご確認のうえ、製品の表示や使用条件に従ってご使用ください。
-      </div>
-      <div className={followUpStyle}>
-        また、農薬、肥料、土壌改良資材等として法令上の登録・届出・表示その他の規制がある資材については、当該法令およびそれに基づく製品表示・使用条件等をご確認のうえ、それらに従ってご使用ください。ご利用の前に
-        <Link className={textLinkStyle} href="/legal">
-          規約・ガイドライン
-        </Link>
-        をご確認ください。
+        実際の効果は、作物・気象・土壌などの条件によって異なる場合があります。商品の使用にあたっては、当該製品についてメーカー公式サイトなどの公式情報を必ずご確認のうえ、製品の表示・使用条件・使用上の注意など（農薬・肥料・土壌改良資材等として法令上の規制がある資材は、その法令に基づく表示・使用条件を含みます）に従ってご使用ください。
       </div>
     </section>
   );
@@ -113,9 +120,9 @@ export function MaterialSpecDisclaimer() {
 export function PostsCompliance() {
   return (
     <CheckedNotice spacing="section">
-      実証詳細レポート・感想口コミは、投稿した生産者個人の圃場・条件での体験と見解です。ほかの圃場・作物・気象条件で同じ結果が得られることや、薬害等が生じないことを保証するものではありません。{" "}
-      <Link className={noticeLinkStyle} href="/legal/disclaimer">
-        免責事項 →
+      実証詳細レポート・感想口コミは、投稿した生産者の圃場・条件での体験と見解です。条件によって効果や薬害等の出方は異なるため、ご自身の栽培条件と照らし合わせてご覧ください。{" "}
+      <Link className={noticeLinkStyle} href="/legal/terms">
+        利用規約 →
       </Link>
     </CheckedNotice>
   );

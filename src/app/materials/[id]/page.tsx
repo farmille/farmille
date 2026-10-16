@@ -26,7 +26,7 @@ import { css } from "../../../../styled-system/css";
 import { MaterialDetailTable } from "./_components/DetailTable";
 import {
   ArchivedNotice,
-  MaterialPageCompliance,
+  MaterialNoticePointer,
   MaterialSpecDisclaimer,
   PostsCompliance,
 } from "./_components/MaterialCompliance";
@@ -200,11 +200,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
         }
       />
       {material.publication_status === "archived" ? <ArchivedNotice /> : null}
-      <MaterialPageCompliance
-        makerVerified={
-          material.manufacturer_verified_at !== null && publishedPage?.origin !== "catalog"
-        }
-      />
+      <MaterialNoticePointer />
 
       <MaterialDescriptionBox description={publishedPage?.content.description} />
       <MaterialTimingBox timings={publishedPage?.content.timings ?? []} />
@@ -212,7 +208,6 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
         links={publishedPage ? publishedPage.content.links : materialSourceLinks(material)}
       />
       <MaterialDetailTable material={material} content={publishedPage?.content} />
-      <MaterialSpecDisclaimer />
 
       <PostsCompliance />
       <Suspense
@@ -248,6 +243,7 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
       >
         <RelatedMaterialsSection material={material} />
       </Suspense>
+      <MaterialSpecDisclaimer />
 
       {material.publication_status === "published" ? (
         <FabBar

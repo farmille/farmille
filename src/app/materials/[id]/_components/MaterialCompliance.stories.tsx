@@ -2,28 +2,23 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import {
   ArchivedNotice,
-  MaterialPageCompliance,
+  MaterialNoticePointer,
   MaterialSpecDisclaimer,
   PostsCompliance,
 } from "./MaterialCompliance";
 
 const meta = {
   title: "Pages/materials/[id]/MaterialCompliance",
-  component: MaterialPageCompliance,
-  args: { makerVerified: true },
-} satisfies Meta<typeof MaterialPageCompliance>;
+  component: MaterialSpecDisclaimer,
+} satisfies Meta<typeof MaterialSpecDisclaimer>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const MakerVerified: Story = {};
+export const SpecDisclaimer: Story = {};
 
-export const OperatorWritten: Story = {
-  args: { makerVerified: false },
-};
-
-export const SpecDisclaimer: Story = {
-  render: () => <MaterialSpecDisclaimer />,
+export const NoticePointer: Story = {
+  render: () => <MaterialNoticePointer />,
 };
 
 export const Posts: Story = {

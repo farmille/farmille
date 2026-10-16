@@ -31,9 +31,9 @@ describe("MaterialHero", () => {
     expect(
       screen.queryByRole("link", { name: material.manufacturer_name }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "企業会員登録" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "contact@farmille.com" })).toHaveAttribute(
       "href",
-      "/sellers/apply",
+      "mailto:contact@farmille.com",
     );
   });
   it("メーカー確認済みの資材では会社名の注記を出さない", () => {
