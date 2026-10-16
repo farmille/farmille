@@ -55,3 +55,25 @@ test("WebGL が使えない端末では、ボトルを出さずに写真のヒ�
     await browser.close();
   }
 });
+
+test("WebGL の確認が通っても描き始められないときは、エラーを出さずに写真のヒーローのまま使える", async ({
+  page,
+}) => {
+  await page.addInitScript((selector) => {
+    new MutationObserver(() => {
+      const canvas = document.querySelector(selector);
+      if (canvas instanceof HTMLCanvasElement) canvas.getContext("2d");
+    }).observe(document, { childList: true, subtree: true });
+  }, `${MODEL} canvas`);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  const failed = page.waitForEvent("console", (message) =>
+    message.text().includes("Error creating WebGL context"),
+  );
+  await page.goto("/");
+  await failed;
+
+  await expect(page.getByRole("search", { name: "資材検索" })).toBeVisible();
+  await expect(page.locator(MODEL)).not.toHaveAttribute("data-ready");
+  expect(errors).toEqual([]);
+});

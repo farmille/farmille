@@ -66,7 +66,7 @@ const SCALE_TICKS = 11;
 const LIQUID_RADIUS = 0.47;
 const LIQUID_LEVEL = 1.32;
 const PIVOT = 1.2;
-const SHADOW_SIZE = 1.5;
+const SHADOW_SIZE = 1.2;
 
 const LEAN = (18 * Math.PI) / 180;
 const FLOAT = 0.3;
@@ -652,19 +652,14 @@ export function mountBottleScene(canvas: HTMLCanvasElement, onFirstFrame: () => 
     { ...STILL, lift: FLOAT - BOB },
   ]) {
     place(pose);
-    for (const mesh of [glassFront, cap]) {
+    shadow.updateMatrixWorld();
+    for (const mesh of [glassFront, cap, shadow]) {
       const position = mesh.geometry.getAttribute("position");
       for (let index = 0; index < position.count; index += 1) {
         point.fromBufferAttribute(position, index).applyMatrix4(mesh.matrixWorld);
         grow(bounds, point.applyMatrix4(camera.matrixWorldInverse));
       }
     }
-  }
-  for (const [x, z] of [
-    [-0.45, -0.45],
-    [0.45, 0.45],
-  ]) {
-    grow(bounds, point.set(x, 0, z).applyMatrix4(camera.matrixWorldInverse));
   }
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");

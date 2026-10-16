@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useRef, useState } from "react";
 
 import { css } from "../../../styled-system/css";
@@ -33,10 +34,12 @@ export function HomeHeroModel() {
     if (!canvas || !canUseWebgl2()) return;
     let unmount: (() => void) | null = null;
     let cancelled = false;
-    void import("./bottle-scene").then(({ mountBottleScene }) => {
-      if (cancelled) return;
-      unmount = mountBottleScene(canvas, () => setReady(true));
-    });
+    void import("./bottle-scene")
+      .then(({ mountBottleScene }) => {
+        if (cancelled) return;
+        unmount = mountBottleScene(canvas, () => setReady(true));
+      })
+      .catch(Sentry.captureException);
     return () => {
       cancelled = true;
       unmount?.();
