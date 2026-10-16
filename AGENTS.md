@@ -40,7 +40,7 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 - **文字**：大きさと行高は `textStyle` の役割（`src/theme/textStyles.ts`、一覧は `/dev/tokens`）から選び、色は呼び出し側で足す。役割に無い組み合わせが3か所に出たら役割を足す
 - **UI 部品**：フォーム部品・ダイアログ・通知・開閉・候補つきの入力は、`src/components` の共通部品（フォーム部品は `src/components/form`）を使う。`@base-ui/react` と `sonner` は `src/components` の中でだけ import する（外からは ESLint の `no-restricted-imports` で止まる）。足りないものは共通部品に足し、画面ごとに作らない
 - **入力欄のラベル**：`Input`・`Textarea`・`Select`・`Combobox`・`Autocomplete`・`FileInput`・`OtpInput`・`CheckboxGroup`・`RadioGroup` は `label` が必須で、見出し・必須/任意・案内・エラーを部品の props で受け取る（`<Input label="ニックネーム" name="handle" requirement="required" />`）。画面に出さない名前は `hideLabel`、枠の className は `fieldClassName`。`Field`・`Fieldset` は、1つの見出しで複数の要素をまとめるときだけ使い、中の部品には `label={null}` を付ける
-- **動き**：transform と opacity だけを動かし、ease-out にする。`prefers-reduced-motion` では位置を動かさず不透明度だけを変える。打鍵のたびに描き直す一覧や、何度も開け閉めする欄は動かさない
+- **動き**：transform と opacity だけを動かし、ease-out にする。`prefers-reduced-motion` では位置を動かさず不透明度だけを変える。打鍵のたびに描き直す一覧や、何度も開け閉めする欄は動かさない。WebGL で描く 3D の飾り（ホームのボトル）だけは canvas を毎フレーム描き直してよいが、画面外では描画を止め、`prefers-reduced-motion` では止めた1枚だけを描く
 - **状態とデータ取得**：取得は Server Components、変更は Server Actions か Route Handlers に寄せる。クライアント側の状態は入力フォームとトグルに限る
 - **fail fast**：環境変数・必須パラメータが無い場合はフォールバックせずエラーにする。`?? "http://localhost:3000"` のような既定値を書かない
 - **エラー表示**：例外を握り潰さない。404・403・500 をユーザーに意味の伝わる日本語で出し分ける（`error.tsx`・`not-found.tsx` を必ず置く）
