@@ -6,10 +6,19 @@ import {
   transferInReceipt,
   transferOutReceipt,
 } from "./story-fixtures";
+import { css } from "../../../../styled-system/css";
 const meta = {
   title: "Pages/company-requests/ApplicationReceipt",
   component: ApplicationReceipt,
   parameters: { nextjs: { appDirectory: true } },
+  // 受付票の画面と同じく、読みやすい幅の列に置く。
+  decorators: [
+    (Story) => (
+      <div className={css({ maxW: "content.reading", mx: "auto" })}>
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof ApplicationReceipt>;
 export default meta;
 type Story = StoryObj<typeof meta>;

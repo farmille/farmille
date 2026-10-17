@@ -19,7 +19,12 @@ export type ReceiptParty = {
   details: ReceiptField[];
 };
 
-export type ReceiptItem = { name: string; fields: ReceiptField[] };
+export type ReceiptItem = {
+  name: string;
+  /** 資材ごとの申請内容。掲載・権限申請の資材だけが持ち、受付票では資材名と並べて見せる。 */
+  request: string | null;
+  fields: ReceiptField[];
+};
 
 export type ReceiptAttachment = {
   id: string;
@@ -101,8 +106,8 @@ const receiptItem = (item: ApplicationReceipt["items"][number]): ReceiptItem => 
   const removal = item.company_application_removal_items;
   return {
     name: item.material_name,
+    request: registration && targetLabels[v.parse(targetSchema, registration.target)],
     fields: receiptFields([
-      ["申請内容", registration && targetLabels[v.parse(targetSchema, registration.target)]],
       ["FarmilleページURL", item.material_url],
       ["製品公式ページURL", registration?.official_url],
       [
@@ -198,6 +203,7 @@ export function applicationReceiptLines(
     ...receiptDocument.items.flatMap((item, index) => [
       "",
       `対象資材 ${index + 1}：${item.name}`,
+      ...(item.request === null ? [] : [`申請内容：${item.request}`]),
       ...item.fields.map(fieldLine),
     ]),
     ...(receiptDocument.destination
