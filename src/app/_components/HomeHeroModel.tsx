@@ -1,7 +1,7 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { css } from "../../../styled-system/css";
 
@@ -26,18 +26,21 @@ function canUseWebgl2(): boolean {
 }
 
 export function HomeHeroModel() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    const wrapper = wrapperRef.current;
     const canvas = canvasRef.current;
-    if (!canvas || !canUseWebgl2()) return;
+    if (!wrapper || !canvas || !canUseWebgl2()) return;
     let unmount: (() => void) | null = null;
     let cancelled = false;
     void import("./bottle-scene")
       .then(({ mountBottleScene }) => {
         if (cancelled) return;
-        unmount = mountBottleScene(canvas, () => setReady(true));
+        unmount = mountBottleScene(canvas, () => {
+          wrapper.dataset.ready = "";
+        });
       })
       .catch(Sentry.captureException);
     return () => {
@@ -47,12 +50,7 @@ export function HomeHeroModel() {
   }, []);
 
   return (
-    <div
-      aria-hidden="true"
-      data-ui="home-hero-model"
-      data-ready={ready ? "" : undefined}
-      className={frame}
-    >
+    <div ref={wrapperRef} aria-hidden="true" data-ui="home-hero-model" className={frame}>
       <canvas ref={canvasRef} className={canvasStyle} />
     </div>
   );
