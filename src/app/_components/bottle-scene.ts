@@ -1,26 +1,39 @@
+import * as Sentry from "@sentry/nextjs";
 import {
   BackSide,
   CanvasTexture,
   CircleGeometry,
   Color,
   CubicBezierCurve,
+  CustomBlending,
   CylinderGeometry,
   DataTexture,
+  DirectionalLight,
   DoubleSide,
+  Float32BufferAttribute,
   FrontSide,
   Group,
+  HalfFloatType,
   LatheGeometry,
   LinearFilter,
   Mesh,
   MeshBasicMaterial,
+  MeshMatcapMaterial,
+  MeshStandardMaterial,
+  NeutralToneMapping,
+  OneFactor,
+  OneMinusSrcAlphaFactor,
   OrthographicCamera,
+  PerspectiveCamera,
   Plane,
   PlaneGeometry,
+  PMREMGenerator,
   SRGBColorSpace,
   Scene,
-  ShaderMaterial,
+  SphereGeometry,
   Vector2,
   Vector3,
+  WebGLRenderTarget,
   WebGLRenderer,
   type Side,
 } from "three";
@@ -28,42 +41,54 @@ import {
 import { token } from "../../../styled-system/tokens";
 
 const palette = {
-  glass: token("colors.card"),
-  label: token("colors.green.50"),
-  band: token("colors.green.700"),
+  paper: token("colors.card"),
+  band: token("colors.green.800"),
+  bandText: token("colors.green.50"),
   leaf: token("colors.green.500"),
-  vein: token("colors.green.800"),
-  title: token("colors.ink2"),
-  text: token("colors.ink3"),
+  leafDeep: token("colors.green.700"),
+  title: token("colors.green.900"),
+  text: token("colors.ink2"),
+  fine: token("colors.ink3"),
   waveLight: token("colors.green.300"),
   waveDeep: token("colors.green.600"),
-  liquid: token("colors.amber"),
-  capLine: token("colors.ink3"),
   barcode: token("colors.ink"),
+  liquid: token("colors.amber"),
+  cap: token("colors.card"),
+  labelInside: token("colors.mist"),
   shadow: token("colors.ink"),
+  sky: token("colors.line.strong"),
+  horizon: token("colors.amber.soft"),
+  ground: token("colors.green.900"),
+  softbox: token("colors.amber.soft"),
+  sun: token("colors.star"),
 };
+
+const LABEL_FONT = token("fonts.sans");
 
 const BODY_RADIUS = 0.5;
 const BASE_CORNER = 0.09;
 const WALL_TOP = 1.55;
 const NECK_RADIUS = 0.215;
-const NECK_RING_BOTTOM = 2.065;
-const NECK_RING_TOP = 2.1;
+const SHOULDER_TOP = 2.04;
+const GROOVES = [0.19, 1.5];
+const GROOVE_DEPTH = 0.012;
+const SUPPORT_RING_RADIUS = 0.252;
+const SUPPORT_RING_BOTTOM = 2.055;
+const SUPPORT_RING_TOP = 2.075;
+const NECK_TOP = 2.14;
+const TAMPER_BAND_BOTTOM = 2.085;
+const TAMPER_BAND_TOP = 2.11;
+const CAP_RADIUS = 0.255;
+const CAP_BOTTOM = 2.118;
+const CAP_TOP = 2.45;
+const CAP_BEVEL = 0.03;
+const KNURL_RIDGES = 48;
 const LABEL_RADIUS = 0.503;
 const LABEL_BOTTOM = 0.26;
 const LABEL_TOP = 1.18;
 const FRONT_LABEL_ARC = Math.PI * 1.12;
 const BACK_LABEL_ARC = Math.PI * 0.6;
-const CAP_RADIUS = 0.255;
-const CAP_BOTTOM = 2.115;
-const CAP_TOP = 2.45;
-const CAP_BEVEL = 0.03;
-const KNURL_RIDGES = 48;
-const SCALE_ANGLE = (FRONT_LABEL_ARC / 2 + Math.PI - BACK_LABEL_ARC / 2) / 2;
-const SCALE_BOTTOM = 0.4;
-const SCALE_STEP = 0.1;
-const SCALE_TICKS = 11;
-const LIQUID_RADIUS = 0.47;
+const LIQUID_RADIUS = 0.486;
 const LIQUID_LEVEL = 1.32;
 const PIVOT = 1.2;
 const SHADOW_SIZE = 1.2;
@@ -74,6 +99,9 @@ const DROP = 0.18;
 const BOB = 0.035;
 const BOB_MS = 4_800;
 const CAMERA_ELEVATION = (24 * Math.PI) / 180;
+const VIEW = new Vector3(0, Math.sin(CAMERA_ELEVATION), Math.cos(CAMERA_ELEVATION));
+const CAMERA_DISTANCE = 9;
+const CAMERA_TARGET = new Vector3(0, PIVOT + FLOAT, 0);
 const FIT_MARGIN = 1.08;
 
 const TURN_MS = 14_000;
@@ -81,6 +109,15 @@ const INTRO_MS = 1_800;
 const INTRO_TURN = Math.PI * 0.7;
 const REST_ANGLE = -0.35;
 const MAX_FRAME_MS = 100;
+
+const MATCAP_SIZE = 256;
+const ENVIRONMENT_SIZE = 64;
+const SUN = new Vector3(6, 2.5, -3);
+const LIGHTS = [
+  { position: new Vector3(-4.5, 2.5, 3.5), width: 2.4, height: 8, round: false, intensity: 16 },
+  { position: new Vector3(4, 2, 2.5), width: 1.2, height: 8, round: false, intensity: 3 },
+  { position: new Vector3(6, 4, -5), width: 5, height: 5, round: true, intensity: 24 },
+];
 
 interface Pose {
   spin: number;
@@ -107,133 +144,31 @@ export function poseAt(elapsedMs: number): Pose {
   };
 }
 
-const VERTEX_SHADER = `
-varying vec3 vLocal;
-varying vec3 vNormal;
-varying vec2 vUv;
-#include <clipping_planes_pars_vertex>
-void main() {
-  vLocal = position;
-  vUv = uv;
-  vNormal = normalize(normalMatrix * normal);
-  vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-  gl_Position = projectionMatrix * mvPosition;
-  #include <clipping_planes_vertex>
-}
+const GLASS_EDGE = `
+diffuseColor.a = mix(diffuseColor.a, 1.0, 0.7 * pow(1.0 - saturate(dot(normal, viewDir)), 3.0));
+#include <opaque_fragment>
 `;
 
-const FRAGMENT_COMMON = `
-varying vec3 vLocal;
-varying vec3 vNormal;
-varying vec2 vUv;
-#include <clipping_planes_pars_fragment>
-const vec3 LIGHT = vec3(0.48, 0.62, 0.62);
-float hairline(float distance) {
-  float width = max(fwidth(distance), 1e-5);
-  return 1.0 - smoothstep(0.5 * width, 1.5 * width, abs(distance));
-}
-vec3 facingNormal() {
-  vec3 normal = normalize(vNormal);
-  return gl_FrontFacing ? normal : -normal;
-}
-float outline(vec3 normal) {
-  float facing = abs(normal.z);
-  return 1.0 - smoothstep(0.0, max(1.5 * fwidth(facing), 1e-4), facing);
-}
-float paper(vec3 normal, float shade) {
-  return mix(shade, 1.0, max(dot(normal, normalize(LIGHT)), 0.0));
-}
+const tint = new Color(palette.liquid);
+const TINT = `vec3(${tint.r.toFixed(4)}, ${tint.g.toFixed(4)}, ${tint.b.toFixed(4)})`;
+
+const LIQUID_SIDE = `
+float facing = saturate(dot(normal, viewDir));
+float thickness = mix(2.6, 0.9, facing);
+vec3 throughLiquid = pow(${TINT}, vec3(thickness)) * 1.1;
+vec3 sunRim = pow(${TINT}, vec3(0.5)) * pow(1.0 - facing, 2.0) * saturate(normal.x) * 0.9;
+outgoingLight = throughLiquid + sunRim;
+diffuseColor.a = mix(0.98, 0.9, facing);
+#include <opaque_fragment>
 `;
 
-const GLASS_SHADER = `
-${FRAGMENT_COMMON}
-uniform vec3 uColor;
-uniform float uFill;
-uniform float uRim;
-uniform float uLine;
-uniform float uRings[4];
-uniform float uScaleAngle;
-uniform vec3 uScale;
-float scaleTicks() {
-  float turn = atan(vLocal.x, vLocal.z) - uScaleAngle;
-  float across = atan(sin(turn), cos(turn)) * length(vLocal.xz);
-  float rung = (vLocal.y - uScale.x) / uScale.y;
-  float index = floor(rung + 0.5);
-  float reach = mix(0.035, 0.075, step(mod(index, 5.0), 0.5));
-  float along = 1.0 - smoothstep(0.5, 1.5, abs(rung - index) * uScale.y / max(fwidth(vLocal.y), 1e-5));
-  float span = 1.0 - smoothstep(reach - 0.004, reach + 0.004, abs(across));
-  return along * span * step(0.0, index) * step(index, uScale.z - 1.0) * step(abs(across), 0.3);
-}
-void main() {
-  vec3 normal = facingNormal();
-  float rim = pow(1.0 - abs(normal.z), 2.5);
-  float glint = pow(max(dot(normal, normalize(LIGHT + vec3(0.0, 0.0, 1.0))), 0.0), 60.0);
-  float ink = max(outline(normal), scaleTicks());
-  for (int index = 0; index < 4; index += 1) ink = max(ink, hairline(vLocal.y - uRings[index]));
-  gl_FragColor = vec4(uColor, max(mix(uFill, uRim, rim) + 0.6 * glint, ink * uLine));
-  #include <colorspace_fragment>
-}
-`;
-
-const LABEL_SHADER = `
-${FRAGMENT_COMMON}
-uniform sampler2D uMap;
-uniform vec2 uSize;
-uniform vec3 uEdge;
-void main() {
-  vec3 normal = facingNormal();
-  vec2 inset = min(vUv, 1.0 - vUv) * uSize;
-  float edge = max(max(hairline(inset.x), hairline(inset.y)), outline(normal));
-  vec3 paint = texture2D(uMap, vUv).rgb * paper(normal, 0.8);
-  gl_FragColor = vec4(mix(paint, uEdge, edge), 0.94);
-  #include <colorspace_fragment>
-}
-`;
-
-const LIQUID_SHADER = `
-${FRAGMENT_COMMON}
-uniform vec3 uColor;
-void main() {
-  #include <clipping_planes_fragment>
-  float rim = pow(1.0 - abs(facingNormal().z), 2.0);
-  gl_FragColor = vec4(uColor, mix(0.3, 0.72, rim));
-  #include <colorspace_fragment>
-}
-`;
-
-const SURFACE_SHADER = `
-${FRAGMENT_COMMON}
-uniform vec3 uColor;
-uniform vec3 uShine;
-void main() {
-  float edge = hairline(1.0 - 2.0 * length(vUv - 0.5));
-  gl_FragColor = vec4(mix(uColor, uShine, 0.3 + 0.6 * edge), max(0.5, 0.9 * edge));
-  #include <colorspace_fragment>
-}
-`;
-
-const CAP_SHADER = `
-${FRAGMENT_COMMON}
-uniform vec3 uColor;
-uniform vec3 uLine;
-uniform float uRings[2];
-uniform float uRidges;
-float knurl() {
-  float front = atan(vLocal.x, vLocal.z);
-  float back = atan(-vLocal.x, -vLocal.z);
-  float width = min(fwidth(front), fwidth(back)) * uRidges / 6.2831853;
-  float phase = front * uRidges / 6.2831853;
-  float distance = abs(fract(phase) - 0.5);
-  float inBand = step(uRings[0], vLocal.y) * step(vLocal.y, uRings[1]);
-  return inBand * (1.0 - smoothstep(0.5 * width, 1.5 * width, distance));
-}
-void main() {
-  vec3 normal = facingNormal();
-  float ink = max(outline(normal), 0.55 * knurl());
-  for (int index = 0; index < 2; index += 1) ink = max(ink, hairline(vLocal.y - uRings[index]));
-  gl_FragColor = vec4(mix(uColor * paper(normal, 0.78), uLine, 0.75 * ink), 1.0);
-  #include <colorspace_fragment>
-}
+const LIQUID_TOP = `
+float far = smoothstep(0.0, 1.0, vUv.y);
+float meniscus = smoothstep(0.43, 0.5, length(vUv - 0.5));
+outgoingLight += pow(${TINT}, vec3(mix(2.2, 1.1, far))) * mix(0.55, 1.0, far)
+  + pow(${TINT}, vec3(0.6)) * meniscus * 0.6;
+diffuseColor.a = 0.97;
+#include <opaque_fragment>
 `;
 
 function arc(
@@ -250,22 +185,27 @@ function arc(
   });
 }
 
+function groove(y: number): Vector2[] {
+  return arc(BODY_RADIUS, y, GROOVE_DEPTH, -Math.PI / 2, -Math.PI * 1.5, 8);
+}
+
 function bodyProfile(): Vector2[] {
   const shoulder = new CubicBezierCurve(
     new Vector2(BODY_RADIUS, WALL_TOP),
     new Vector2(BODY_RADIUS, WALL_TOP + 0.33),
     new Vector2(NECK_RADIUS, WALL_TOP + 0.25),
-    new Vector2(NECK_RADIUS, WALL_TOP + 0.49),
+    new Vector2(NECK_RADIUS, SHOULDER_TOP),
   );
   return [
     new Vector2(0, 0),
-    ...arc(BODY_RADIUS - BASE_CORNER, BASE_CORNER, BASE_CORNER, -Math.PI / 2, 0, 8),
-    ...shoulder.getPoints(24),
-    new Vector2(0.24, NECK_RING_BOTTOM),
-    new Vector2(0.24, NECK_RING_TOP),
-    new Vector2(NECK_RADIUS, CAP_BOTTOM - 0.005),
-    new Vector2(NECK_RADIUS, CAP_BOTTOM + 0.06),
-    new Vector2(0, CAP_BOTTOM + 0.06),
+    ...arc(BODY_RADIUS - BASE_CORNER, BASE_CORNER, BASE_CORNER, -Math.PI / 2, 0, 12),
+    ...GROOVES.flatMap(groove),
+    ...shoulder.getPoints(40),
+    new Vector2(SUPPORT_RING_RADIUS, SUPPORT_RING_BOTTOM),
+    new Vector2(SUPPORT_RING_RADIUS, SUPPORT_RING_TOP),
+    new Vector2(NECK_RADIUS, SUPPORT_RING_TOP),
+    new Vector2(NECK_RADIUS, NECK_TOP),
+    new Vector2(0, NECK_TOP),
   ];
 }
 
@@ -274,8 +214,17 @@ function liquidProfile(): Vector2[] {
   const corner = BASE_CORNER - floor;
   return [
     new Vector2(0, floor),
-    ...arc(LIQUID_RADIUS - corner, floor + corner, corner, -Math.PI / 2, 0, 8),
+    ...arc(LIQUID_RADIUS - corner, floor + corner, corner, -Math.PI / 2, 0, 12),
     new Vector2(LIQUID_RADIUS, WALL_TOP),
+  ];
+}
+
+function tamperBandProfile(): Vector2[] {
+  return [
+    new Vector2(NECK_RADIUS, TAMPER_BAND_BOTTOM),
+    new Vector2(CAP_RADIUS - 0.006, TAMPER_BAND_BOTTOM),
+    new Vector2(CAP_RADIUS - 0.006, TAMPER_BAND_TOP),
+    new Vector2(NECK_RADIUS, TAMPER_BAND_TOP),
   ];
 }
 
@@ -289,146 +238,181 @@ function knurledCapGeometry(): LatheGeometry {
       new Vector2(CAP_RADIUS, knurlBottom),
       new Vector2(CAP_RADIUS, knurlTop),
       new Vector2(CAP_RADIUS, CAP_TOP - CAP_BEVEL),
-      ...arc(CAP_RADIUS - CAP_BEVEL, CAP_TOP - CAP_BEVEL, CAP_BEVEL, 0, Math.PI / 2, 6),
+      ...arc(CAP_RADIUS - CAP_BEVEL, CAP_TOP - CAP_BEVEL, CAP_BEVEL, 0, Math.PI / 2, 8),
       new Vector2(0, CAP_TOP),
     ],
-    192,
+    288,
   );
   const position = geometry.getAttribute("position");
+  const shade = new Float32Array(position.count * 3).fill(1);
   for (let index = 0; index < position.count; index += 1) {
     const y = position.getY(index);
     if (y < knurlBottom - 1e-6 || y > knurlTop + 1e-6) continue;
     const x = position.getX(index);
     const z = position.getZ(index);
-    const ridge = 1 + 0.018 * Math.sin(Math.atan2(x, z) * KNURL_RIDGES);
-    position.setXYZ(index, x * ridge, y, z * ridge);
+    const ridge = Math.abs(Math.sin((Math.atan2(x, z) * KNURL_RIDGES) / 2));
+    position.setXYZ(index, x * (1 + 0.018 * ridge), y, z * (1 + 0.018 * ridge));
+    shade.fill(0.72 + 0.28 * ridge, index * 3, index * 3 + 3);
   }
+  geometry.setAttribute("color", new Float32BufferAttribute(shade, 3));
   geometry.computeVertexNormals();
   return geometry;
 }
 
-function bar(
+function leaf(
   context: CanvasRenderingContext2D,
-  centerX: number,
+  x: number,
+  y: number,
+  size: number,
+  angle: number,
+  color: string,
+): void {
+  context.save();
+  context.translate(x, y);
+  context.rotate(angle);
+  context.fillStyle = color;
+  context.beginPath();
+  context.moveTo(0, 0);
+  context.bezierCurveTo(size * 0.45, -size * 0.2, size * 0.5, -size * 0.8, 0, -size);
+  context.bezierCurveTo(-size * 0.5, -size * 0.8, -size * 0.45, -size * 0.2, 0, 0);
+  context.fill();
+  context.strokeStyle = palette.paper;
+  context.globalAlpha = 0.55;
+  context.lineWidth = size * 0.04;
+  context.lineCap = "round";
+  context.beginPath();
+  context.moveTo(0, -size * 0.08);
+  context.quadraticCurveTo(size * 0.04, -size * 0.5, 0, -size * 0.88);
+  context.stroke();
+  context.restore();
+}
+
+function fineLines(
+  context: CanvasRenderingContext2D,
+  left: number,
   top: number,
-  length: number,
-  thickness: number,
+  width: number,
+  lineHeight: number,
+  lengths: number[],
+): void {
+  context.fillStyle = palette.fine;
+  for (const [index, length] of lengths.entries()) {
+    const y = top + index * lineHeight;
+    let x = left;
+    let word = 0;
+    while (x < left + width * length) {
+      const wordWidth = lineHeight * (0.9 + ((index * 7 + word * 13) % 5) * 0.45);
+      context.fillRect(x, y, Math.min(wordWidth, left + width * length - x), lineHeight * 0.42);
+      x += wordWidth + lineHeight * 0.32;
+      word += 1;
+    }
+  }
+}
+
+function band(context: CanvasRenderingContext2D, width: number, height: number): void {
+  context.fillStyle = palette.band;
+  context.fillRect(0, 0, width, height * 0.15);
+  context.fillStyle = palette.bandText;
+  context.font = `700 ${height * 0.048}px ${LABEL_FONT}`;
+  context.letterSpacing = `${height * 0.018}px`;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText("BIOSTIMULANT", width / 2, height * 0.077);
+  context.letterSpacing = "0px";
+}
+
+function wave(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  left: number,
+  right: number,
   color: string,
 ): void {
   context.fillStyle = color;
   context.beginPath();
-  context.roundRect(centerX - length / 2, top, length, thickness, thickness / 2);
+  context.moveTo(0, height);
+  context.lineTo(0, height * (1 - left));
+  context.bezierCurveTo(
+    width * 0.35,
+    height * (1 - left - 0.04),
+    width * 0.65,
+    height * (1 - right + 0.06),
+    width,
+    height * (1 - right),
+  );
+  context.lineTo(width, height);
+  context.closePath();
   context.fill();
 }
 
 function drawFrontLabel(context: CanvasRenderingContext2D, width: number, height: number): void {
   const centerX = width / 2;
-  context.fillStyle = palette.label;
+  context.fillStyle = palette.paper;
   context.fillRect(0, 0, width, height);
-  context.fillStyle = palette.band;
-  context.fillRect(0, 0, width, height * 0.12);
+  band(context, width, height);
 
-  const leaf = height * 0.085;
-  context.save();
-  context.translate(centerX, height * 0.27);
-  context.rotate(Math.PI / 4);
-  context.fillStyle = palette.leaf;
-  context.beginPath();
-  context.moveTo(0, -leaf);
-  context.quadraticCurveTo(leaf * 0.95, 0, 0, leaf);
-  context.quadraticCurveTo(-leaf * 0.95, 0, 0, -leaf);
-  context.fill();
-  context.strokeStyle = palette.vein;
-  context.lineWidth = leaf * 0.09;
-  context.lineCap = "round";
-  context.beginPath();
-  context.moveTo(0, -leaf * 0.65);
-  context.lineTo(0, leaf * 1.3);
-  context.stroke();
-  context.restore();
+  leaf(context, centerX - height * 0.012, height * 0.36, height * 0.15, -0.5, palette.leaf);
+  leaf(context, centerX + height * 0.012, height * 0.36, height * 0.12, 0.62, palette.leafDeep);
 
-  bar(context, centerX, height * 0.4, width * 0.29, height * 0.06, palette.title);
-  bar(context, centerX, height * 0.5, width * 0.18, height * 0.035, palette.text);
-  context.globalAlpha = 0.45;
-  for (const [index, length] of [0.33, 0.3, 0.22].entries()) {
-    bar(
-      context,
-      centerX,
-      height * (0.6 + index * 0.05),
-      width * length,
-      height * 0.022,
-      palette.text,
-    );
-  }
-  context.globalAlpha = 1;
+  context.textAlign = "center";
+  context.textBaseline = "alphabetic";
+  context.fillStyle = palette.title;
+  context.font = `700 ${height * 0.17}px ${LABEL_FONT}`;
+  context.fillText("BS資材", centerX, height * 0.56);
+  context.fillStyle = palette.text;
+  context.font = `400 ${height * 0.044}px ${LABEL_FONT}`;
+  context.fillText("植物の力を引き出す液体資材", centerX, height * 0.645);
+  context.fillStyle = palette.leafDeep;
+  context.fillRect(centerX - height * 0.2, height * 0.68, height * 0.4, height * 0.004);
+  context.fillStyle = palette.text;
+  context.font = `700 ${height * 0.05}px ${LABEL_FONT}`;
+  context.fillText("500mL", centerX, height * 0.75);
 
-  const wave = (left: number, right: number, color: string) => {
-    context.fillStyle = color;
-    context.beginPath();
-    context.moveTo(0, height);
-    context.lineTo(0, height * (1 - left));
-    context.bezierCurveTo(
-      width * 0.4,
-      height * (1 - left),
-      width * 0.6,
-      height * (1 - right),
-      width,
-      height * (1 - right),
-    );
-    context.lineTo(width, height);
-    context.closePath();
-    context.fill();
-  };
-  wave(0.07, 0.27, palette.waveLight);
-  wave(0.03, 0.17, palette.waveDeep);
+  wave(context, width, height, 0.1, 0.2, palette.waveLight);
+  wave(context, width, height, 0.06, 0.13, palette.waveDeep);
 }
 
 function drawBackLabel(context: CanvasRenderingContext2D, width: number, height: number): void {
-  const centerX = width / 2;
-  context.fillStyle = palette.label;
+  const left = width * 0.12;
+  context.fillStyle = palette.paper;
   context.fillRect(0, 0, width, height);
-  context.fillStyle = palette.band;
-  context.fillRect(0, 0, width, height * 0.12);
+  band(context, width, height);
 
-  bar(context, centerX, height * 0.2, width * 0.5, height * 0.045, palette.title);
-  context.globalAlpha = 0.45;
-  for (const [index, length] of [0.74, 0.68, 0.74, 0.6, 0.74, 0.7, 0.46].entries()) {
-    bar(
-      context,
-      centerX,
-      height * (0.31 + index * 0.055),
-      width * length,
-      height * 0.02,
-      palette.text,
-    );
-  }
-  context.globalAlpha = 1;
+  context.textAlign = "left";
+  context.textBaseline = "alphabetic";
+  context.fillStyle = palette.text;
+  context.font = `700 ${height * 0.05}px ${LABEL_FONT}`;
+  context.fillText("使用方法", left, height * 0.25);
+  fineLines(context, left, height * 0.3, width * 0.76, height * 0.034, [1, 0.94, 1, 0.7]);
+  context.font = `700 ${height * 0.05}px ${LABEL_FONT}`;
+  context.fillText("成分", left, height * 0.5);
+  fineLines(context, left, height * 0.55, width * 0.76, height * 0.034, [0.9, 1, 0.55]);
 
   const modules = [2, 1, 1, 2, 3, 1, 1, 1, 2, 2, 1, 3, 1, 1, 2, 1, 3, 2, 1, 1, 1, 2, 2, 1, 1, 3, 2];
   const unit = (width * 0.44) / modules.reduce((sum, module) => sum + module, 0);
-  let x = centerX - width * 0.22;
+  let x = width / 2 - width * 0.22;
   context.fillStyle = palette.barcode;
   for (const [index, module] of modules.entries()) {
-    if (index % 2 === 0) context.fillRect(x, height * 0.75, module * unit, height * 0.15);
+    if (index % 2 === 0) context.fillRect(x, height * 0.72, module * unit, height * 0.13);
     x += module * unit;
   }
 }
 
-function labelArtwork(
-  renderer: WebGLRenderer,
-  arc: number,
-  draw: (context: CanvasRenderingContext2D, width: number, height: number) => void,
-): CanvasTexture {
+function labelCanvas(arc: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
-  canvas.height = 576;
+  canvas.height = 1024;
   canvas.width = Math.round((canvas.height * LABEL_RADIUS * arc) / (LABEL_TOP - LABEL_BOTTOM));
+  return canvas;
+}
+
+function paint(
+  canvas: HTMLCanvasElement,
+  draw: (context: CanvasRenderingContext2D, width: number, height: number) => void,
+): void {
   const context = canvas.getContext("2d");
   if (!context) throw new Error("ラベルを描く 2D コンテキストを作れませんでした。");
   draw(context, canvas.width, canvas.height);
-  const texture = new CanvasTexture(canvas);
-  texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-  return texture;
 }
 
 function labelGeometry(arc: number, facing: number): CylinderGeometry {
@@ -436,7 +420,7 @@ function labelGeometry(arc: number, facing: number): CylinderGeometry {
     LABEL_RADIUS,
     LABEL_RADIUS,
     LABEL_TOP - LABEL_BOTTOM,
-    96,
+    128,
     1,
     true,
     facing - arc / 2,
@@ -452,8 +436,7 @@ function shadowTexture(): DataTexture {
   for (let y = 0; y < size; y += 1) {
     for (let x = 0; x < size; x += 1) {
       const distance = Math.hypot(x + 0.5 - size / 2, y + 0.5 - size / 2) / (size / 2);
-      const fade = Math.min(Math.max((1 - distance) / 0.7, 0), 1);
-      const alpha = fade * fade * (3 - 2 * fade);
+      const alpha = Math.exp(-((distance / 0.42) ** 2)) * Math.max(0, 1 - distance);
       data.fill(Math.round(alpha * 255), (y * size + x) * 4, (y * size + x) * 4 + 4);
     }
   }
@@ -463,6 +446,96 @@ function shadowTexture(): DataTexture {
   return texture;
 }
 
+function eveningFieldEnvironment(renderer: WebGLRenderer): WebGLRenderTarget {
+  const scene = new Scene();
+  const domeRadius = 30;
+  const dome = new SphereGeometry(domeRadius, 64, 32);
+  const sky = new Color(palette.sky);
+  const horizon = new Color(palette.horizon);
+  const ground = new Color(palette.ground);
+  const color = new Color();
+  const position = dome.getAttribute("position");
+  const colors: number[] = [];
+  for (let index = 0; index < position.count; index += 1) {
+    const height = position.getY(index) / domeRadius;
+    if (height >= 0) color.lerpColors(horizon, sky, Math.sqrt(height));
+    else color.lerpColors(horizon, ground, Math.min(1, -height * 5));
+    color.multiplyScalar(height >= 0 ? 0.8 - 0.3 * height : 0.8);
+    colors.push(color.r, color.g, color.b);
+  }
+  dome.setAttribute("color", new Float32BufferAttribute(colors, 3));
+  const domeMaterial = new MeshBasicMaterial({ side: BackSide, vertexColors: true });
+  scene.add(new Mesh(dome, domeMaterial));
+
+  const lightGeometry = (round: boolean) => {
+    const geometry = new PlaneGeometry(1, 1, 24, 24);
+    const corners = geometry.getAttribute("position");
+    const falloff: number[] = [];
+    for (let index = 0; index < corners.count; index += 1) {
+      const across = Math.cos(corners.getX(index) * Math.PI);
+      const along = Math.cos(corners.getY(index) * Math.PI);
+      const value = round ? (across * along) ** 2 : across * along ** 0.35;
+      falloff.push(value, value, value);
+    }
+    geometry.setAttribute("color", new Float32BufferAttribute(falloff, 3));
+    return geometry;
+  };
+  const lightGeometries = [lightGeometry(false), lightGeometry(true)];
+  const lightMaterials = LIGHTS.map(
+    (light) =>
+      new MeshBasicMaterial({
+        color: new Color(light.round ? palette.sun : palette.softbox).multiplyScalar(
+          light.intensity,
+        ),
+        side: DoubleSide,
+        vertexColors: true,
+      }),
+  );
+  for (const [index, { position: at, width, height, round }] of LIGHTS.entries()) {
+    const light = new Mesh(lightGeometries[round ? 1 : 0], lightMaterials[index]);
+    light.position.copy(at);
+    light.scale.set(width, height, 1);
+    light.lookAt(CAMERA_TARGET);
+    scene.add(light);
+  }
+
+  const generator = new PMREMGenerator(renderer);
+  const target = generator.fromScene(scene, 0, 0.1, 100, { size: ENVIRONMENT_SIZE });
+  generator.dispose();
+  dome.dispose();
+  domeMaterial.dispose();
+  for (const geometry of lightGeometries) geometry.dispose();
+  for (const material of lightMaterials) material.dispose();
+  return target;
+}
+
+function bakeMatcaps(renderer: WebGLRenderer) {
+  const environment = eveningFieldEnvironment(renderer);
+  const scene = new Scene();
+  scene.environment = environment.texture;
+  const sun = new DirectionalLight(new Color(palette.sun).lerp(new Color(palette.softbox), 0.5), 3);
+  sun.position.copy(SUN);
+  const sphere = new Mesh(new SphereGeometry(1, 128, 64));
+  scene.add(sun, sphere);
+  const camera = new OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+  camera.position.copy(VIEW).multiplyScalar(5);
+  camera.lookAt(0, 0, 0);
+  const bake = (finish: MeshStandardMaterial) => {
+    const target = new WebGLRenderTarget(MATCAP_SIZE, MATCAP_SIZE, { type: HalfFloatType });
+    sphere.material = finish;
+    renderer.setRenderTarget(target);
+    renderer.render(scene, camera);
+    finish.dispose();
+    return target;
+  };
+  const clear = bake(new MeshStandardMaterial({ color: new Color(0, 0, 0), roughness: 0.04 }));
+  const satin = bake(new MeshStandardMaterial({ roughness: 0.4 }));
+  renderer.setRenderTarget(null);
+  sphere.geometry.dispose();
+  environment.dispose();
+  return { clear, satin };
+}
+
 interface Bounds {
   minX: number;
   maxX: number;
@@ -470,24 +543,31 @@ interface Bounds {
   maxY: number;
 }
 
-function grow(bounds: Bounds, point: Vector3): void {
-  bounds.minX = Math.min(bounds.minX, point.x);
-  bounds.maxX = Math.max(bounds.maxX, point.x);
-  bounds.minY = Math.min(bounds.minY, point.y);
-  bounds.maxY = Math.max(bounds.maxY, point.y);
+function grow(bounds: Bounds, camera: PerspectiveCamera, point: Vector3): void {
+  point.applyMatrix4(camera.matrixWorldInverse);
+  const depth = -point.z;
+  bounds.minX = Math.min(bounds.minX, point.x / depth);
+  bounds.maxX = Math.max(bounds.maxX, point.x / depth);
+  bounds.minY = Math.min(bounds.minY, point.y / depth);
+  bounds.maxY = Math.max(bounds.maxY, point.y / depth);
 }
 
-function frameCamera(camera: OrthographicCamera, bounds: Bounds, width: number, height: number) {
+function frameCamera(camera: PerspectiveCamera, bounds: Bounds, width: number, height: number) {
   const aspect = width / height;
-  const halfHeight =
+  const half =
     (FIT_MARGIN * Math.max(bounds.maxY - bounds.minY, (bounds.maxX - bounds.minX) / aspect)) / 2;
   const centerX = (bounds.minX + bounds.maxX) / 2;
   const centerY = (bounds.minY + bounds.maxY) / 2;
-  camera.left = centerX - halfHeight * aspect;
-  camera.right = centerX + halfHeight * aspect;
-  camera.top = centerY + halfHeight;
-  camera.bottom = centerY - halfHeight;
-  camera.updateProjectionMatrix();
+  const { near, far } = camera;
+  camera.projectionMatrix.makePerspective(
+    (centerX - half * aspect) * near,
+    (centerX + half * aspect) * near,
+    (centerY + half) * near,
+    (centerY - half) * near,
+    near,
+    far,
+  );
+  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
 }
 
 type Motion = "spin" | "still";
@@ -501,97 +581,99 @@ export function mountBottleScene(canvas: HTMLCanvasElement, onFirstFrame: () => 
   });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.localClippingEnabled = true;
+  renderer.toneMapping = NeutralToneMapping;
 
   const owned: { dispose(): void }[] = [];
   const keep = <Resource extends { dispose(): void }>(resource: Resource): Resource => {
     owned.push(resource);
     return resource;
   };
-  const shader = (fragmentShader: string, side: Side, uniforms: ShaderMaterial["uniforms"]) =>
-    keep(
-      new ShaderMaterial({
-        vertexShader: VERTEX_SHADER,
-        fragmentShader,
-        uniforms,
+
+  const matcaps = bakeMatcaps(renderer);
+  const clear = keep(matcaps.clear).texture;
+  const satin = keep(matcaps.satin).texture;
+
+  const glass = (side: Side) => {
+    const material = keep(
+      new MeshMatcapMaterial({
+        matcap: clear,
         side,
         transparent: true,
         depthWrite: false,
+        opacity: side === BackSide ? 0.04 : 0.08,
+        blending: CustomBlending,
+        blendSrc: OneFactor,
+        blendDst: OneMinusSrcAlphaFactor,
+        blendSrcAlpha: OneFactor,
+        blendDstAlpha: OneMinusSrcAlphaFactor,
       }),
     );
-
-  const glassRings = { value: [BASE_CORNER, WALL_TOP, NECK_RING_BOTTOM, NECK_RING_TOP] };
-  const glassScale = {
-    uScaleAngle: { value: SCALE_ANGLE },
-    uScale: { value: new Vector3(SCALE_BOTTOM, SCALE_STEP, SCALE_TICKS) },
-  };
-  const bodyGeometry = keep(new LatheGeometry(bodyProfile(), 96));
-  const glassBack = new Mesh(
-    bodyGeometry,
-    shader(GLASS_SHADER, BackSide, {
-      uColor: { value: new Color(palette.glass) },
-      uFill: { value: 0.04 },
-      uRim: { value: 0.16 },
-      uLine: { value: 0.32 },
-      uRings: glassRings,
-      ...glassScale,
-    }),
-  );
-  const glassFront = new Mesh(
-    bodyGeometry,
-    shader(GLASS_SHADER, FrontSide, {
-      uColor: { value: new Color(palette.glass) },
-      uFill: { value: 0.08 },
-      uRim: { value: 0.5 },
-      uLine: { value: 0.9 },
-      uRings: glassRings,
-      ...glassScale,
-    }),
-  );
-
-  const level = new Plane(new Vector3(0, -1, 0), 0);
-  const liquidMaterial = shader(LIQUID_SHADER, DoubleSide, {
-    uColor: { value: new Color(palette.liquid) },
-  });
-  liquidMaterial.clipping = true;
-  liquidMaterial.clippingPlanes = [level];
-  const liquid = new Mesh(keep(new LatheGeometry(liquidProfile(), 64)), liquidMaterial);
-  const surfaceGeometry = keep(new CircleGeometry(1, 96));
-  surfaceGeometry.rotateX(-Math.PI / 2);
-  const surface = new Mesh(
-    surfaceGeometry,
-    shader(SURFACE_SHADER, DoubleSide, {
-      uColor: { value: new Color(palette.liquid) },
-      uShine: { value: new Color(palette.glass) },
-    }),
-  );
-
-  const labelMaterial = (arc: number, map: CanvasTexture) => {
-    const material = shader(LABEL_SHADER, FrontSide, {
-      uMap: { value: map },
-      uSize: { value: new Vector2(LABEL_RADIUS * arc, LABEL_TOP - LABEL_BOTTOM) },
-      uEdge: { value: new Color(palette.band) },
-    });
-    material.depthWrite = true;
+    material.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <opaque_fragment>",
+        GLASS_EDGE,
+      );
+    };
     return material;
   };
-  const frontLabel = new Mesh(
-    keep(labelGeometry(FRONT_LABEL_ARC, 0)),
-    labelMaterial(FRONT_LABEL_ARC, keep(labelArtwork(renderer, FRONT_LABEL_ARC, drawFrontLabel))),
-  );
-  const backLabel = new Mesh(
-    keep(labelGeometry(BACK_LABEL_ARC, Math.PI)),
-    labelMaterial(BACK_LABEL_ARC, keep(labelArtwork(renderer, BACK_LABEL_ARC, drawBackLabel))),
-  );
+  const bodyGeometry = keep(new LatheGeometry(bodyProfile(), 128));
+  const glassBack = new Mesh(bodyGeometry, glass(BackSide));
+  const glassFront = new Mesh(bodyGeometry, glass(FrontSide));
 
-  const capMaterial = shader(CAP_SHADER, FrontSide, {
-    uColor: { value: new Color(palette.glass) },
-    uLine: { value: new Color(palette.capLine) },
-    uRings: { value: [CAP_BOTTOM + 0.02, CAP_TOP - CAP_BEVEL - 0.01] },
-    uRidges: { value: KNURL_RIDGES },
-  });
-  capMaterial.transparent = false;
-  capMaterial.depthWrite = true;
-  const cap = new Mesh(keep(knurledCapGeometry()), capMaterial);
+  const level = new Plane(new Vector3(0, -1, 0), 0);
+  const liquidSide = keep(
+    new MeshMatcapMaterial({ transparent: true, depthWrite: false, clippingPlanes: [level] }),
+  );
+  liquidSide.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <opaque_fragment>",
+      LIQUID_SIDE,
+    );
+  };
+  const liquid = new Mesh(keep(new LatheGeometry(liquidProfile(), 96)), liquidSide);
+  const surfaceGeometry = keep(new CircleGeometry(1, 96));
+  surfaceGeometry.rotateX(-Math.PI / 2);
+  const liquidTop = keep(
+    new MeshMatcapMaterial({
+      matcap: clear,
+      transparent: true,
+      depthWrite: false,
+      side: DoubleSide,
+    }),
+  );
+  liquidTop.defines = { ...liquidTop.defines, USE_UV: "" };
+  liquidTop.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace("#include <opaque_fragment>", LIQUID_TOP);
+  };
+  const surface = new Mesh(surfaceGeometry, liquidTop);
+
+  const frontCanvas = labelCanvas(FRONT_LABEL_ARC);
+  const backCanvas = labelCanvas(BACK_LABEL_ARC);
+  const labelTexture = (source: HTMLCanvasElement) => {
+    const texture = keep(new CanvasTexture(source));
+    texture.colorSpace = SRGBColorSpace;
+    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    return texture;
+  };
+  const frontTexture = labelTexture(frontCanvas);
+  const backTexture = labelTexture(backCanvas);
+  const print = (map: CanvasTexture) => keep(new MeshMatcapMaterial({ map, matcap: satin }));
+  const labelInside = keep(
+    new MeshMatcapMaterial({ color: palette.labelInside, matcap: satin, side: BackSide }),
+  );
+  const frontLabelGeometry = keep(labelGeometry(FRONT_LABEL_ARC, 0));
+  const backLabelGeometry = keep(labelGeometry(BACK_LABEL_ARC, Math.PI));
+  const labels = [
+    new Mesh(frontLabelGeometry, print(frontTexture)),
+    new Mesh(frontLabelGeometry, labelInside),
+    new Mesh(backLabelGeometry, print(backTexture)),
+    new Mesh(backLabelGeometry, labelInside),
+  ];
+
+  const plastic = (vertexColors: boolean) =>
+    keep(new MeshMatcapMaterial({ color: palette.cap, matcap: satin, vertexColors }));
+  const cap = new Mesh(keep(knurledCapGeometry()), plastic(true));
+  const tamperBand = new Mesh(keep(new LatheGeometry(tamperBandProfile(), 96)), plastic(false));
 
   const shadowGeometry = keep(new PlaneGeometry(SHADOW_SIZE, SHADOW_SIZE));
   shadowGeometry.rotateX(-Math.PI / 2);
@@ -605,21 +687,13 @@ export function mountBottleScene(canvas: HTMLCanvasElement, onFirstFrame: () => 
   );
   const shadow = new Mesh(shadowGeometry, shadowFilm);
 
-  for (const [order, mesh] of [
-    shadow,
-    frontLabel,
-    backLabel,
-    glassBack,
-    liquid,
-    surface,
-    glassFront,
-  ].entries()) {
+  for (const [order, mesh] of [shadow, glassBack, liquid, surface, glassFront].entries()) {
     mesh.renderOrder = order;
   }
 
   const spin = new Group();
   spin.position.y = -PIVOT;
-  spin.add(cap, frontLabel, backLabel, glassBack, liquid, glassFront);
+  spin.add(cap, tamperBand, ...labels, glassBack, liquid, glassFront);
   const tilt = new Group();
   tilt.add(spin);
   const scene = new Scene();
@@ -639,9 +713,9 @@ export function mountBottleScene(canvas: HTMLCanvasElement, onFirstFrame: () => 
     shadowFilm.opacity = 0.6 - 0.6 * pose.lift;
   };
 
-  const camera = new OrthographicCamera(-1, 1, 1, -1, 0.1, 40);
-  camera.position.set(0, 10 * Math.sin(CAMERA_ELEVATION), 10 * Math.cos(CAMERA_ELEVATION));
-  camera.lookAt(0, 0, 0);
+  const camera = new PerspectiveCamera(20, 1, 0.1, 40);
+  camera.position.copy(VIEW).multiplyScalar(CAMERA_DISTANCE).add(CAMERA_TARGET);
+  camera.lookAt(CAMERA_TARGET);
   camera.updateMatrixWorld();
 
   const bounds: Bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
@@ -657,7 +731,7 @@ export function mountBottleScene(canvas: HTMLCanvasElement, onFirstFrame: () => 
       const position = mesh.geometry.getAttribute("position");
       for (let index = 0; index < position.count; index += 1) {
         point.fromBufferAttribute(position, index).applyMatrix4(mesh.matrixWorld);
-        grow(bounds, point.applyMatrix4(camera.matrixWorldInverse));
+        grow(bounds, camera, point);
       }
     }
   }
@@ -721,12 +795,28 @@ export function mountBottleScene(canvas: HTMLCanvasElement, onFirstFrame: () => 
 
   place(STILL);
   resize();
-  void renderer.compileAsync(scene, camera).then(() => {
-    if (disposed) return;
-    compiled = true;
-    sizeObserver.observe(canvas);
-    viewObserver.observe(canvas);
-  });
+  const fonts = ["400", "700"].map((weight) =>
+    document.fonts.load(
+      `${weight} 48px ${LABEL_FONT}`,
+      "BIOSTIMULANT BS資材植物の力を引き出す液体使用方法成分500mL",
+    ),
+  );
+  void Promise.all(fonts)
+    .then(() => {
+      if (disposed) return;
+      paint(frontCanvas, drawFrontLabel);
+      paint(backCanvas, drawBackLabel);
+      frontTexture.needsUpdate = true;
+      backTexture.needsUpdate = true;
+      return renderer.compileAsync(scene, camera);
+    })
+    .then(() => {
+      if (disposed) return;
+      compiled = true;
+      sizeObserver.observe(canvas);
+      viewObserver.observe(canvas);
+    })
+    .catch(Sentry.captureException);
 
   return () => {
     disposed = true;
