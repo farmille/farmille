@@ -81,11 +81,17 @@ const entryLinkRecipe = cva({
 const timelineClip =
   "polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%)";
 
+// 高さ32px・矢じり10px の外形から、斜めの辺も含めて垂直に1.5px内側へ寄せた形。斜辺の横方向のずれは 1.5 × √(10² + 16²) ÷ 16 ≒ 1.77px
+const timelineInnerClip =
+  "polygon(2.71px 1.5px, calc(100% - 10.83px) 1.5px, calc(100% - 1.77px) 50%, calc(100% - 10.83px) calc(100% - 1.5px), 2.71px calc(100% - 1.5px), 11.77px 50%)";
+
 const chevronRecipe = cva({
   base: {
     position: "relative",
-    display: "block",
-    py: "2",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    h: "8",
     px: "1",
     fontSize: "xs",
     fontWeight: "extrabold",
@@ -100,9 +106,9 @@ const chevronRecipe = cva({
         _before: {
           content: '""',
           position: "absolute",
-          inset: "1.5px",
+          inset: "0",
           bg: "surface.card",
-          clipPath: timelineClip,
+          clipPath: timelineInnerClip,
         },
         "& b": { position: "relative" },
       },
