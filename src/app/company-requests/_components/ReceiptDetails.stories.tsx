@@ -7,6 +7,7 @@ import {
   transferInReceipt,
   transferOutReceipt,
 } from "./story-fixtures";
+const transferOut = applicationReceiptDocument(transferOutReceipt);
 const meta = {
   title: "Pages/company-requests/ReceiptDetails",
   component: ReceiptDetails,
@@ -19,7 +20,7 @@ export const Registration: Story = {
 };
 /** 移行先企業を、申請者と同じ並びで載せる。 */
 export const TransferOut: Story = {
-  args: { receiptDocument: applicationReceiptDocument(transferOutReceipt) },
+  args: { receiptDocument: transferOut },
 };
 /** 移行の経緯の改行と、申請全体に付けた資料を載せる。 */
 export const TransferIn: Story = {
@@ -31,5 +32,17 @@ export const Removal: Story = {
     receiptDocument: applicationReceiptDocument(removalReceipt, {
       omitMissingCorporateNumber: true,
     }),
+  },
+};
+/** 同意日時が変わったところで確認事項のまとまりを分け、まとまりの間を確認事項どうしより広く空ける。 */
+export const TwoConsentGroups: Story = {
+  args: {
+    receiptDocument: {
+      ...transferOut,
+      consents: transferOut.consents.flatMap((group) => [
+        { ...group, texts: group.texts.slice(0, 2) },
+        { ...group, acceptedAt: "2026/10/08 14:20:05（日本時間）", texts: group.texts.slice(2, 4) },
+      ]),
+    },
   },
 };

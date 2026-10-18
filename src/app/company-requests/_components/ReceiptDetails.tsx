@@ -54,6 +54,18 @@ const paragraphText = css({
 
 const mutedText = css({ textStyle: "supporting", color: "text.muted", overflowWrap: "anywhere" });
 
+// 「版」「同意日時」のように、短いラベルと値の組を1つの単位として折り返す。
+const factsStyle = css({
+  display: "flex",
+  flexWrap: "wrap",
+  columnGap: "4",
+  textStyle: "supporting",
+  color: "text.muted",
+  breakAfter: "avoid",
+});
+
+const factStyle = css({ display: "inline-flex", flexWrap: "wrap", columnGap: "2" });
+
 const plainList = css({
   listStyle: "none",
   m: "0",
@@ -69,6 +81,15 @@ function DetailSection({ title, children }: { title: string; children: ReactNode
       <h3 className={sectionTitle}>{title}</h3>
       <div className={sectionBody}>{children}</div>
     </section>
+  );
+}
+
+function Fact({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <span className={factStyle}>
+      <span>{label}</span>
+      <span>{children}</span>
+    </span>
   );
 }
 
@@ -101,7 +122,7 @@ function Attachments({ attachments }: { attachments: ReceiptAttachment[] }) {
             </TextLink>
           </p>
           <p className={mutedText}>
-            {file.owner}／{file.purpose}・{sizeFormat.format(Math.ceil(file.byteSize / 1024))}KB
+            {file.owner}／{file.purpose}・{sizeFormat.format(file.byteSize)} バイト
           </p>
         </li>
       ))}
@@ -110,32 +131,41 @@ function Attachments({ attachments }: { attachments: ReceiptAttachment[] }) {
 }
 
 function Consents({ groups }: { groups: ReceiptConsentGroup[] }) {
-  return groups.map((group, groupIndex) => (
-    <div className={css({ display: "flex", flexDirection: "column", gap: "2" })} key={groupIndex}>
-      <p className={mutedText}>
-        版 {group.version}・同意日時 {group.acceptedAt}
-      </p>
-      <ul className={plainList}>
-        {group.texts.map((text, index) => (
-          <li
-            className={css({ display: "flex", gap: "2", breakInside: "avoid" })}
-            key={`${index}-${text}`}
-          >
-            <Icon
-              name="check_box"
-              size="sm"
-              className={css({
-                mt: "0.5",
-                color: "primary.700",
-                _print: { color: "text.default" },
-              })}
-            />
-            <span className={paragraphText}>{text}</span>
-          </li>
-        ))}
-      </ul>
+  return (
+    // まとまりの間は確認事項どうしより広く空け、次の版と同意日時が前の確認事項に付いて見えないようにする。
+    <div className={css({ display: "flex", flexDirection: "column", gap: "5" })}>
+      {groups.map((group, groupIndex) => (
+        <div
+          className={css({ display: "flex", flexDirection: "column", gap: "2" })}
+          key={groupIndex}
+        >
+          <p className={factsStyle}>
+            <Fact label="版">{group.version}</Fact>
+            <Fact label="同意日時">{group.acceptedAt}</Fact>
+          </p>
+          <ul className={plainList}>
+            {group.texts.map((text, index) => (
+              <li
+                className={css({ display: "flex", gap: "2", breakInside: "avoid" })}
+                key={`${index}-${text}`}
+              >
+                <Icon
+                  name="check_box"
+                  size="sm"
+                  className={css({
+                    mt: "0.5",
+                    color: "primary.700",
+                    _print: { color: "text.default" },
+                  })}
+                />
+                <span className={paragraphText}>{text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
-  ));
+  );
 }
 
 /** 申請者の識別情報・移行先・経緯・添付資料・確認事項を、見出しと中身の2列で並べる。 */

@@ -38,7 +38,7 @@ const numberStyle = css({
   fontVariantNumeric: "tabular-nums",
 });
 
-// 資材名と申請内容は、並ぶ幅が無ければ申請内容を資材名の下へ折り返す。
+// tab 以上と印刷では資材名と申請内容を並べ、並ぶ幅が無ければ申請内容を資材名の下へ折り返す。
 const mainLine = css({
   display: "flex",
   flexWrap: "wrap",
@@ -50,17 +50,18 @@ const mainLine = css({
 
 const nameStyle = css({
   flexGrow: "1",
-  flexBasis: "56",
+  // tab 未満は資材名を幅いっぱいにし、どの資材も申請内容を資材名の下に置く（短い申請内容だけが右に並ぶのを避ける）。
+  flexBasis: { base: "full", tab: "56", _print: "56" },
   textStyle: "body",
   fontWeight: "bold",
   overflowWrap: "anywhere",
 });
 
-// 折り返しても右端に寄せ、見出しの「申請内容」と同じ列に見せる。
+// tab 未満は資材名の左端にそろえ、tab 以上と印刷では見出しの「申請内容」と同じ右端の列に置く。印刷の A4 は約 680px で tab より狭いので、_print にも書く。
 const requestStyle = css({
-  ml: "auto",
+  ml: { base: "0", tab: "auto", _print: "auto" },
   textStyle: "body",
-  textAlign: "end",
+  textAlign: { base: "start", tab: "end", _print: "end" },
   overflowWrap: "anywhere",
 });
 
@@ -99,7 +100,13 @@ export function ReceiptItems({
             <span className={numberStyle}>{index + 1}</span>
             <div className={mainLine}>
               <p className={nameStyle}>{item.name}</p>
-              {item.request === null ? null : <p className={requestStyle}>{item.request}</p>}
+              {item.request === null ? null : (
+                <p className={requestStyle}>
+                  {/* 見出しの「申請内容」は読み上げないので、値ごとに見出しを持たせる。 */}
+                  <span className={css({ srOnly: true })}>申請内容：</span>
+                  {item.request}
+                </p>
+              )}
             </div>
             {item.fields.length === 0 ? null : (
               <ReceiptFields fields={item.fields} className={css({ gridColumn: "2" })} />

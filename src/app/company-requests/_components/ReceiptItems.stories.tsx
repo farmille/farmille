@@ -11,7 +11,7 @@ const meta = {
 } satisfies Meta<typeof ReceiptItems>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-/** 掲載・権限申請は、資材ごとの申請内容を右の列に置く。 */
+/** 掲載・権限申請は、資材ごとの申請内容をスマホでは資材名の下に、tab 以上と印刷では右の列に置く。 */
 export const Registration: Story = {
   args: { items: registration.items, attachmentCount: registration.attachments.length },
 };
