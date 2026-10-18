@@ -61,7 +61,7 @@ export function registrationCompleteEmail(siteUrl: string): AccountEmail {
       ],
       ["▼ログインはこちら", new URL("/login", siteUrl).toString()],
       [
-        "ログイン後、マイページから主な作目・所属・自己紹介などを設定できます。",
+        "ログイン後、マイページから栽培作目・所属・自己紹介などを設定できます。",
         "作物や悩みから資材を探せるほか、使った資材の体験を感想口コミや実証詳細レポートとして投稿できます。",
         "ぜひ、ご自身の体験を共有してください。",
       ],
@@ -103,7 +103,7 @@ export function sellerWelcomeEmail(
         "このたびはFarmilleの企業会員登録をお申し込みいただき、ありがとうございます。",
         "申請内容を確認し、企業会員登録を承認いたしましたので、ログイン情報をご案内いたします。",
       ],
-      ["■ログイン情報", `ログインID：${loginId}`],
+      ["■ログイン情報", `Farmille企業会員ID：${loginId}`],
       ["下記のリンクから、パスワードを設定してください。"],
       ["▼パスワードを設定する", passwordSetupUrl, `※リンクの有効期限は${LINK_LIFETIME}です。`],
       [

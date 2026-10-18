@@ -241,7 +241,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         <p className={css({ mt: "4", fontSize: "md", lineHeight: "loose", color: "text.muted" })}>
           Farmilleでは、生産者により適切な資材情報を届けるために、各資材の製造元・販売元・輸入元にあたるメーカー様に、企業会員のご登録をお願いしています。ご登録いただいた企業様に、資材ごとに
           <b className={highlightStyle}>
-            「資材オーナー権限」（資材ごとに1社に設定する権限で、資材情報の編集権限を含みます）
+            「資材オーナー権限」（資材ごとに1社に設定する権限で、製品情報を編集できます）
           </b>
           をお渡しし、製品説明・施用方法・資料などの情報の更新と共有をお願いいたします。すでにFarmilleに掲載されている資材も、これから掲載する資材も対象で、
           <b className={highlightStyle}>申請・掲載・編集は無料です。</b>
@@ -442,7 +442,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           <li>資材名（パッケージ記載の正式名称）</li>
           <li>FarmilleページURL（掲載済み資材の場合）</li>
           <li>当該資材との関係（製造元・販売元・輸入元）</li>
-          <li>FarmilleアカウントID（企業会員登録後に運営が発行します）</li>
+          <li>Farmille企業会員ID（企業会員登録後に運営が発行します）</li>
         </PrepBox>
       </section>
 
@@ -471,9 +471,9 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               <GuideDetails slug="owner" inline={false} />
             </GuideCard>
           ))}
-          <GuideCard id="lpGuideDelist" title="終売の反映・非表示にしたい" needId={false}>
+          <GuideCard id="lpGuideDelist" title="終売の反映・非公開にしたい" needId={false}>
             <p className={css({ mt: "2", textStyle: "prose" })}>
-              終売・廃盤表示や資材ページの非表示のご依頼は{" "}
+              終売表示や資材ページの非公開のご依頼は{" "}
               <a className={guideLinkStyle} href={`mailto:${CONTACT_EMAIL}`}>
                 {CONTACT_EMAIL}
               </a>{" "}
@@ -503,7 +503,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         </h2>
         <div className={cx(guideCardStyle, css({ mt: "3.5", py: "4", px: "5" }))}>
           <p className={css({ textStyle: "prose", color: "text.default" })}>
-            Farmilleに掲載される資材ごとに1社に設定する権限で、資材情報の編集権限を含みます。当該資材の製造元・販売元・輸入元の企業様を対象に、パッケージの記載で貴社と資材の関係を確認したうえでお渡しします。権限をお渡しした資材は、企業会員ダッシュボードから製品説明・施用方法・試験結果などの情報を編集できます。
+            Farmilleに掲載される資材ごとに1社に設定する権限で、製品情報を編集できます。当該資材の製造元・販売元・輸入元の企業様を対象に、パッケージの記載で貴社と資材の関係を確認したうえでお渡しします。権限をお渡しした資材は、企業会員ダッシュボードから製品説明・施用方法・試験結果などの情報を編集できます。
           </p>
         </div>
       </section>
@@ -612,7 +612,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           企業会員登録を申請する
         </h2>
         <div className={css({ mt: "2", fontSize: "sm", lineHeight: "prose" })}>
-          申請内容を確認し、ご登録のメールアドレスへFarmilleアカウントIDとログインのご案内をお送りします。
+          申請内容を確認し、ご登録のメールアドレスへFarmille企業会員IDとログインのご案内をお送りします。
           <b>申請・掲載・編集は無料です。</b>
         </div>
         <div

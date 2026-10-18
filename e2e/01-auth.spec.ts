@@ -37,13 +37,13 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await loginGeneral(page, { email, password, id: "", handle }, "/me");
     await expect(page.getByText(handle, { exact: true })).toBeVisible();
     await captureAccountScreen(page, "09-mypage.png");
-    await page.getByRole("link", { name: "表示情報を編集" }).click();
+    await page.getByRole("link", { name: "プロフィール公開情報を編集" }).click();
     await expect(page).toHaveURL(/\/me\/edit$/);
-    await expect(page.getByRole("heading", { name: "表示情報編集" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "プロフィール公開情報編集" })).toBeVisible();
     await expect(page.getByLabel("アバター")).toBeVisible();
     await expect(page.getByLabel("ハンドルネーム")).toBeVisible();
     await expect(page.getByRole("combobox", { name: /^都道府県/ })).toHaveCount(0);
-    await expect(page.getByRole("combobox", { name: "主な作目" })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: "栽培作目" })).toBeVisible();
     await page.goto("/me");
     const sellerApplyLink = page.getByRole("link", {
       name: "企業会員登録を申請",

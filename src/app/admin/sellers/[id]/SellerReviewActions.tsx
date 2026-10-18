@@ -110,7 +110,7 @@ export function SellerReviewActions({
             />
           ) : null}
           <p className={adminInlineNoteStyle}>
-            アカウントの確認後にログインを発行します。この操作では編集権は付与されません。メーカーが提出する掲載・オーナー権限の申請と確認資料を審査してから、資材ごとに編集権を付与してください。
+            アカウントの確認後にログインを発行します。この操作では資材オーナー権限は付与されません。メーカーが提出する掲載・オーナー権限の申請と確認資料を審査してから、資材ごとに資材オーナー権限を付与してください。
           </p>
         </div>
       ) : null}
@@ -119,9 +119,11 @@ export function SellerReviewActions({
 
       {state.status === "approved" ? (
         <div className={credentialsStyle}>
-          <p className={credentialLabelStyle}>ログインIDとパスワード設定用の案内を発行しました。</p>
+          <p className={credentialLabelStyle}>
+            Farmille企業会員IDとパスワード設定用の案内を発行しました。
+          </p>
           <div className={css({ display: "grid", gap: "2" })}>
-            <span className={adminInlineNoteStyle}>ログインID</span>
+            <span className={adminInlineNoteStyle}>Farmille企業会員ID</span>
             <span className={adminCodeStyle}>{state.credentials.loginId}</span>
           </div>
           <div className={css({ display: "grid", gap: "2" })}>
@@ -130,8 +132,8 @@ export function SellerReviewActions({
           </div>
           <p className={adminInlineNoteStyle}>
             {state.credentials.emailSent
-              ? "ログインIDとパスワード設定用URLを申請時の連絡先へ送信しました。メーカーはログイン後、掲載・オーナー権限の申請フォームから手続きできます。"
-              : "承認は完了しましたが、案内メールを送信できませんでした。上記のログインIDとURLを申請時の連絡先へ送付してください。期限切れの場合はメーカーのパスワード再設定画面から再送できます。"}
+              ? "Farmille企業会員IDとパスワード設定用URLを申請時の連絡先へ送信しました。メーカーはログイン後、掲載・オーナー権限の申請フォームから手続きできます。"
+              : "承認は完了しましたが、案内メールを送信できませんでした。上記のFarmille企業会員IDとURLを申請時の連絡先へ送付してください。期限切れの場合はメーカーのパスワード再設定画面から再送できます。"}
           </p>
         </div>
       ) : null}

@@ -65,15 +65,15 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
     );
     await chooseOption(
       adminPage,
-      adminPage.getByLabel("編集権を付与するメーカー"),
+      adminPage.getByLabel("資材オーナー権限を付与する企業会員"),
       `${seller.officialName}（${seller.loginId}）`,
     );
     await adminPage
       .getByLabel("確認資料の保管先または受付番号")
       .fill(`E2E-DOCUMENT-${material.id}`);
-    await adminPage.getByRole("button", { name: "編集権を更新する" }).click();
+    await adminPage.getByRole("button", { name: "資材オーナー権限を更新する" }).click();
     await expect(
-      adminPage.getByText("書類確認の記録を保存し、この資材の編集権を付与しました。"),
+      adminPage.getByText("書類確認の記録を保存し、この資材の資材オーナー権限を付与しました。"),
     ).toBeVisible();
     expect((await getMaterial(material.id)).seller_id).toBe(seller.id);
     expect((await getMaterial(otherMaterial.id)).seller_id).toBeNull();

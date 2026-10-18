@@ -25,7 +25,7 @@ export default async function ManufacturerProfilePage() {
         <DashboardTabs active="profile" />
         <h1 className={visuallyHidden}>メーカープロフィールの編集</h1>
         <p className={sectionNote}>
-          メーカーページに表示される、会社としての情報です。製品ごとの情報は「製品情報」で管理します。会社紹介・ロゴ・公式サイトをメーカーページに掲載できます。法人名や担当者の変更は運営へご連絡ください。
+          メーカーページに表示される会社情報を編集できます。会社紹介・ロゴ・公式サイトをメーカーページに掲載できます。法人名や担当者の変更は運営へご連絡ください。
         </p>
         <ManufacturerProfileEditor
           sellerId={seller.id}

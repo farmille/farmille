@@ -29,8 +29,8 @@ export function ClaimForm({
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
       <Field
-        description="申請と確認資料で、このメーカーにこの資材の編集権を渡してよいことを確認してください。会社名が一致するだけでは付与できません。"
-        label="編集権を付与するメーカー"
+        description="申請と確認資料で、このメーカーにこの資材の資材オーナー権限を渡してよいことを確認してください。会社名が一致するだけでは付与できません。"
+        label="資材オーナー権限を付与する企業会員"
         name="sellerId"
         requirement="optional"
       >
@@ -40,7 +40,7 @@ export function ClaimForm({
           defaultValue={currentSellerId ?? ""}
           key={currentSellerId ?? "unclaimed"}
           options={[
-            { value: "", label: "編集権なし（取り消す）" },
+            { value: "", label: "資材オーナー権限なし（取り消す）" },
             ...sellers.map((seller) => ({
               value: seller.id,
               label: `${seller.official_name}（${seller.login_id}）`,
@@ -56,7 +56,7 @@ export function ClaimForm({
       />
       <input name="materialId" type="hidden" value={materialId} />
       <FormActions layout="row">
-        <SubmitButton pendingLabel="更新中…">編集権を更新する</SubmitButton>
+        <SubmitButton pendingLabel="更新中…">資材オーナー権限を更新する</SubmitButton>
       </FormActions>
     </Form>
   );

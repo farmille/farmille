@@ -67,8 +67,8 @@ const targetLabels = {
 } as const;
 const requestTypeSchema = v.picklist(["hidden", "discontinued"]);
 const requestTypeLabels = {
-  hidden: "資材ページの非表示",
-  discontinued: "終売・廃盤の表示",
+  hidden: "資材ページの非公開",
+  discontinued: "終売の表示",
 } as const;
 const purposeLabels = {
   package: "パッケージ資料",
@@ -93,7 +93,7 @@ const receiptParty = (
   contactName: company.contact_name,
   details: receiptFields([
     ["法人番号", corporateNumber],
-    ["FarmilleアカウントID", company.account_id],
+    ["Farmille企業会員ID", company.account_id],
     ["担当者メールアドレス", company.email],
     ["電話番号", company.phone],
     ["会社概要URL", companyUrl],

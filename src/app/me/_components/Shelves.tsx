@@ -100,7 +100,7 @@ function UsageReportStatus({
     case "draft":
       return <Badge variant="optional">下書き</Badge>;
     case "pending":
-      return <Badge variant="required">調整中</Badge>;
+      return <Badge variant="required">運営で確認中</Badge>;
     case "published":
       return <Badge variant="published">公開済み</Badge>;
     case "declined":

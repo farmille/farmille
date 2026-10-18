@@ -47,7 +47,7 @@ export function SellerApplyForm() {
       />
 
       <Notice className={noteStyle} tone="neutral">
-        ログインIDは運営が発行します。パスワードは、ご案内する設定用ページで設定してください。
+        Farmille企業会員IDは運営が発行します。パスワードは、ご案内する設定用ページで設定してください。
       </Notice>
 
       <Input

@@ -52,10 +52,10 @@ export default async function MeEditPage() {
 
   return (
     <div className={shell}>
-      <SiteAppBar chrome="public" active="me" title="表示情報編集" backHref="/me" />
+      <SiteAppBar chrome="public" active="me" title="プロフィール公開情報編集" backHref="/me" />
       <main className={body}>
         <div className={css({ maxW: "content.form", mx: "auto" })}>
-          <h1 className={css({ srOnly: true })}>表示情報編集</h1>
+          <h1 className={css({ srOnly: true })}>プロフィール公開情報編集</h1>
           <ProfileEditForm
             avatar={
               <Avatar

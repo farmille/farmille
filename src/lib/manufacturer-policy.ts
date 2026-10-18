@@ -30,7 +30,7 @@ export const MANUFACTURER_ONBOARDING_STEPS = [
   {
     actor: "maker",
     action: "dashboard",
-    title: "資材情報の登録・編集",
+    title: "製品情報の登録・編集",
     body: "権限をお渡しした資材について、企業会員ダッシュボードで製品説明・施用方法・資料・作用機作などを入力し、公開を申請します。下書き保存とプレビューが使えます。公開前に運営が表現を確認し、必要な場合はご連絡します。",
   },
 ] as const;

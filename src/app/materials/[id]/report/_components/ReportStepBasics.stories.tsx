@@ -72,7 +72,7 @@ export const Default: Story = {};
 export const Missing: Story = {
   args: {
     input: blank,
-    errors: { cropId: "使用作物を選んでください", variety: "品種を入力してください" },
+    errors: { cropId: "使用対象作目を選んでください", variety: "品種を入力してください" },
   },
 };
 export const VarietyUnknown: Story = {

@@ -53,7 +53,7 @@ const columns: DataTableColumn<AdminMaterialListItem>[] = [
   {
     key: "publication_status",
     header: "公開状態",
-    cell: (row) => (row.publication_status === "published" ? "公開中" : "掲載終了"),
+    cell: (row) => (row.publication_status === "published" ? "公開中" : "非公開"),
   },
   {
     key: "claim",

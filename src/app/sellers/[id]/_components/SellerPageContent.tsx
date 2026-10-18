@@ -70,13 +70,13 @@ export function SellerPageContent({ data }: { data: PublicSellerPageData }) {
       <div
         className={css({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2.5", mt: "3.5" })}
       >
-        <StatCard value={data.materialCount} label="掲載製品" />
+        <StatCard value={data.materialCount} label="掲載資材" />
         <StatCard value={data.helpfulCount} label="参考になった" />
       </div>
 
       {data.materialCount > 0 ? (
         <section aria-labelledby="seller-materials-heading">
-          <SectionHead id="seller-materials-heading" title="掲載製品">
+          <SectionHead id="seller-materials-heading" title="掲載資材">
             {showAllMaterials ? (
               <Link className={moreLinkStyle} href={materialsHref}>
                 すべて見る
@@ -133,7 +133,7 @@ export function SellerPageContent({ data }: { data: PublicSellerPageData }) {
           {showAllMaterials ? (
             <div className={css({ mt: "2.5" })}>
               <Link className={moreLinkStyle} href={materialsHref}>
-                掲載製品 {data.materialCount}件をすべて見る →
+                掲載資材 {data.materialCount}件をすべて見る →
               </Link>
             </div>
           ) : null}

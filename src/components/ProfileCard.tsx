@@ -241,7 +241,7 @@ export function ProfileCard({
           </div>
           {editable ? (
             <Link className={editLink} href="/me/edit">
-              プロフィールを編集<span className={srOnly}>（表示情報を編集）</span>
+              プロフィールを編集<span className={srOnly}>（プロフィール公開情報を編集）</span>
             </Link>
           ) : null}
         </div>
@@ -257,7 +257,7 @@ export function ProfileCard({
 
         {details.crops.length > 0 ? (
           <div className={cropRow}>
-            <span className={label({ spaced: false })}>主な作目</span>
+            <span className={label({ spaced: false })}>栽培作目</span>
             {details.crops.map((crop) => (
               <Chip key={crop.id} wrap>
                 {crop.name}
@@ -266,8 +266,8 @@ export function ProfileCard({
           </div>
         ) : editable ? (
           <div className={css({ mt: "2", fontSize: "sm" })}>
-            <span className={label({ spaced: false })}>主な作目</span>{" "}
-            <TodoHint placement="afterLabel">主な作目を追加する</TodoHint>
+            <span className={label({ spaced: false })}>栽培作目</span>{" "}
+            <TodoHint placement="afterLabel">栽培作目を追加する</TodoHint>
           </div>
         ) : null}
 

@@ -173,7 +173,7 @@ export function SignupForm({
       <p className={makerLinkStyle}>
         メーカーの方は
         <TextLink href="/sellers/apply" variant="plain">
-          企業会員登録申請へ
+          企業会員登録の申請へ
         </TextLink>
       </p>
     </Form>

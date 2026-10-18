@@ -107,7 +107,7 @@ for (const mode of ["existing", "new"]) {
         )
         .toBe(true);
       await expect(
-        page.getByText("ログインIDとパスワード設定用の案内を発行しました。"),
+        page.getByText("Farmille企業会員IDとパスワード設定用の案内を発行しました。"),
       ).toBeVisible({
         timeout: 30_000,
       });
@@ -116,7 +116,7 @@ for (const mode of ["existing", "new"]) {
       });
       await expect(page.getByText(/^発行済み（.+）$/)).toBeVisible({ timeout: 30_000 });
 
-      const loginIdBlock = page.getByText("ログインID", { exact: true }).locator("..");
+      const loginIdBlock = page.getByText("Farmille企業会員ID", { exact: true }).locator("..");
       const passwordBlock = page.getByText("パスワード設定用URL", { exact: true }).locator("..");
       const issuedLoginId = (await loginIdBlock.locator("span").nth(1).textContent())?.trim();
       const setupUrl = (await passwordBlock.locator("span").nth(1).textContent())?.trim();
@@ -140,7 +140,7 @@ for (const mode of ["existing", "new"]) {
       await expect(page.getByText("パスワードを変更しました。", { exact: true })).toBeVisible();
       await page.goto("/sellers/login");
       await captureAccountScreen(page, "05-seller-login.png");
-      await page.getByLabel("ログインID").fill(issuedLoginId);
+      await page.getByLabel("Farmille企業会員ID").fill(issuedLoginId);
       await page.getByLabel("パスワード").fill(issuedPassword);
       await page.getByRole("button", { name: "ログインする" }).click();
 

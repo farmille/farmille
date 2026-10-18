@@ -90,7 +90,7 @@ export default async function AdminMaterialChangeRequestsPage({
     <AdminShell
       backHref="/admin/materials"
       backLabel="資材の管理"
-      description="メーカーから届いた新規登録・情報変更・掲載終了を、公開内容と比較して処理する。"
+      description="メーカーから届いた新規登録・情報変更・非公開を、公開内容と比較して処理する。"
       title="資材変更申請"
     >
       <Panel note={`${requests.data.length} 件`} title="申請一覧">
