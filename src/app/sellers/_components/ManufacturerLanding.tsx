@@ -48,7 +48,7 @@ const OWNER_GUIDES = [
   { id: "lpGuideExisting", title: "掲載されている自社資材の情報を確認・編集したい" },
 ] as const;
 
-const highlightStyle = css({ color: "primary.800", fontWeight: "extrabold" });
+const highlightStyle = css({ color: "text.brand", fontWeight: "extrabold" });
 
 const entryLinkRecipe = cva({
   base: {
@@ -69,7 +69,7 @@ const entryLinkRecipe = cva({
       primary: { bg: "primary.700", color: "text.inverse" },
       outline: {
         bg: "surface.card",
-        color: "primary.800",
+        color: "text.brand",
         borderWidth: "1.5px",
         borderStyle: "solid",
         borderColor: "primary.700",
@@ -102,7 +102,7 @@ const chevronRecipe = cva({
       maker: { bg: "accent.manufacturer", color: "text.inverse" },
       farmille: {
         bg: "primary.800",
-        color: "primary.800",
+        color: "text.brand",
         _before: {
           content: '""',
           position: "absolute",
@@ -148,7 +148,7 @@ const guideListStyle = css({
   mt: "2.5",
   "& li": { py: "1", textStyle: "prose" },
   "& li a": {
-    color: "primary.800",
+    color: "text.brand",
     fontWeight: "bold",
     textDecoration: "underline",
     textUnderlineOffset: "3px",
@@ -291,7 +291,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               py: "1",
               fontSize: "md",
               fontWeight: "bold",
-              color: "primary.800",
+              color: "text.brand",
               textDecoration: "none",
               _before: { content: '"›"', mr: "2", color: "text.subtle" },
             })}
@@ -312,7 +312,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             mt: "9",
             fontSize: "xs",
             fontWeight: "extrabold",
-            color: "primary.800",
+            color: "text.brand",
           })}
         >
           初めてFarmilleに資材を掲載いただくメーカー様向け
@@ -349,7 +349,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               <span aria-hidden="true" className={legendSwatchRecipe({ actor: "maker" })} />
               メーカー様作業
             </span>
-            <span className={css({ color: "primary.800" })}>
+            <span className={css({ color: "text.brand" })}>
               <span aria-hidden="true" className={legendSwatchRecipe({ actor: "farmille" })} />
               Farmille側作業
             </span>
@@ -585,7 +585,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             mt: "1",
             fontSize: "lg",
             fontWeight: "extrabold",
-            color: "primary.800",
+            color: "text.brand",
             wordBreak: "break-all",
             textDecoration: "none",
             pc: { fontSize: "xl" },
@@ -633,7 +633,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               py: "3",
               px: "4.5",
               bg: "surface.card",
-              color: "primary.800",
+              color: "text.brand",
               borderRadius: "button",
               fontSize: "md",
               fontWeight: "extrabold",
@@ -691,7 +691,7 @@ function PrepBox({ title, children }: { title: string; children: ReactNode }) {
           mb: "2",
           textStyle: "title",
           fontWeight: "extrabold",
-          color: "primary.800",
+          color: "text.brand",
         })}
       >
         {title}
@@ -784,7 +784,7 @@ const requirementBoxStyle = css({
   borderStyle: "solid",
   borderColor: "border.default",
   borderRadius: "input",
-  "& h4": { mb: "1.5", textStyle: "body", fontWeight: "extrabold", color: "primary.800" },
+  "& h4": { mb: "1.5", textStyle: "body", fontWeight: "extrabold", color: "text.brand" },
   "& ul": {
     pl: "4",
     fontSize: "sm",

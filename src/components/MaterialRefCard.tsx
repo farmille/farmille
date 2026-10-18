@@ -53,7 +53,7 @@ export function MaterialRefCard({
           display: "grid",
           placeItems: "center",
           flexShrink: "0",
-          color: "primary.800",
+          color: "text.brandOnSoft",
         })}
       >
         <Icon name="image" size="md" />

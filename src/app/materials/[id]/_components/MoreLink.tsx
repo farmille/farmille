@@ -5,7 +5,7 @@ import { css } from "../../../../../styled-system/css";
 
 const moreLinkStyle = css({
   fontSize: "sm",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
   whiteSpace: "nowrap",
 });

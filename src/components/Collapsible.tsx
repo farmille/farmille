@@ -44,14 +44,14 @@ const triggerRecipe = sva({
           fontSize: "md",
           fontWeight: "bold",
         },
-        icon: { ml: "auto", color: "primary.700" },
+        icon: { ml: "auto", color: "text.brand" },
       },
       link: {
         trigger: {
           display: "inline-flex",
           gap: "1",
           p: "0",
-          color: "primary.800",
+          color: "text.brand",
           fontSize: "sm",
           fontWeight: "semibold",
         },

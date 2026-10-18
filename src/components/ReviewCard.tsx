@@ -19,7 +19,7 @@ const cropChip = css({
   py: "0.5",
   borderRadius: "pill",
   bg: "primary.200",
-  color: "primary.800",
+  color: "text.brandOnSoft",
   fontWeight: "semibold",
   whiteSpace: "nowrap",
 });
@@ -174,7 +174,7 @@ export function ReviewCard({
                     display: "grid",
                     placeItems: "center",
                     flexShrink: "0",
-                    color: "primary.800",
+                    color: "text.brandOnSoft",
                   })}
                 >
                   <Icon name="image" size="md" />

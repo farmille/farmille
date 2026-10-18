@@ -66,7 +66,7 @@ const documentList = css({
   fontSize: "md",
   color: "text.muted",
   lineHeight: "prose",
-  "& a": { color: "primary.800" },
+  "& a": { color: "text.brand" },
 });
 
 function graphRows(graph: Graph, plots: UsageReportInput["plots"]): ReportBarRow[] {

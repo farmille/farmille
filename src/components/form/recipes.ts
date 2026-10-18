@@ -128,7 +128,7 @@ export const visibilityRecipe = cva({
   },
   variants: {
     visibility: {
-      public: { color: "primary.800" },
+      public: { color: "text.brand" },
       private: { color: "text.subtle" },
     },
   },
@@ -222,7 +222,7 @@ export const choiceRecipe = cva({
         "&:has([data-checked])": {
           borderColor: "primary.600",
           bg: "primary.soft",
-          color: "primary.800",
+          color: "text.brandOnSoft",
         },
       },
     },

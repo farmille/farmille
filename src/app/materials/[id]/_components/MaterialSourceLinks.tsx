@@ -67,7 +67,7 @@ const openLinkStyle = css({
   p: "1",
   fontSize: "sm",
   fontWeight: "bold",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
   whiteSpace: "nowrap",
 });
@@ -91,7 +91,7 @@ const testTitleStyle = css({
   lineHeight: "snug",
   color: "text.default",
   _groupHover: {
-    color: "primary.800",
+    color: "text.brand",
     textDecoration: "underline",
     textUnderlineOffset: "2px",
   },
@@ -113,7 +113,7 @@ const testOpenStyle = css({
   py: "1",
   fontSize: "xs",
   fontWeight: "bold",
-  color: "primary.800",
+  color: "text.brand",
   whiteSpace: "nowrap",
   bg: "surface.card",
   borderWidth: "1px",

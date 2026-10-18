@@ -43,7 +43,7 @@ const chipRecipe = cva({
   },
   variants: {
     tone: {
-      green: { bg: "primary.100", color: "primary.800" },
+      green: { bg: "primary.100", color: "text.brandOnSoft" },
       grey: {
         bg: "surface.page",
         color: "text.muted",

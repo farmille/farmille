@@ -69,7 +69,7 @@ const postStatus = css({
   gap: "2",
   mb: "1.5",
   fontSize: "sm",
-  "& a": { color: "primary.800", fontWeight: "bold", textDecoration: "none" },
+  "& a": { color: "text.brand", fontWeight: "bold", textDecoration: "none" },
 });
 
 const postTitle = css({ textStyle: "body", fontWeight: "bold" });

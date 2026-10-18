@@ -76,7 +76,7 @@ const itemRecipe = cva({
   },
   variants: {
     active: {
-      true: { color: "primary.700" },
+      true: { color: "text.brand" },
       false: { color: "text.subtle" },
     },
   },

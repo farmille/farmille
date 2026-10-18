@@ -49,7 +49,7 @@ export function OrgArticleCard({
             flexShrink: "0",
             fontSize: "2xs",
             fontWeight: "extrabold",
-            color: "primary.800",
+            color: "text.brandOnSoft",
           })}
           aria-hidden="true"
         >

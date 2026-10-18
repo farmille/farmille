@@ -64,7 +64,7 @@ const backLink = css({
   display: "block",
   mt: "3.5",
   fontSize: "sm",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
   whiteSpace: "nowrap",
 });

@@ -21,18 +21,18 @@ export const pillButtonRecipe = cva({
   },
   variants: {
     tone: {
-      plain: { _hover: { borderColor: "primary.700", color: "primary.800" } },
+      plain: { _hover: { borderColor: "primary.700", color: "text.brand" } },
       quiet: {
         color: "text.muted",
-        _hover: { borderColor: "primary.700", color: "primary.800" },
+        _hover: { borderColor: "primary.700", color: "text.brand" },
       },
       dashed: {
         borderStyle: "dashed",
         color: "text.muted",
-        _hover: { borderColor: "primary.700", color: "primary.800" },
+        _hover: { borderColor: "primary.700", color: "text.brand" },
       },
       primary: { bg: "primary.700", borderColor: "primary.700", color: "text.inverse" },
-      soft: { bg: "primary.soft", borderColor: "primary.700", color: "primary.800" },
+      soft: { bg: "primary.soft", borderColor: "primary.700", color: "text.brandOnSoft" },
     },
     size: {
       xs: { px: "2.5", py: "0.5", fontSize: "sm" },

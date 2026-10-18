@@ -311,6 +311,10 @@ export const semanticTokens = {
       subtle: { value: "{colors.ink3}" },
       // 濃色の面や写真の上に置く文字
       inverse: { value: "{colors.card}" },
+      // 白い面とページ地に置く緑の文字
+      brand: { value: "{colors.green.700}" },
+      // primary.soft・100・200 の淡い緑の面に置く緑の文字。brand のままでは AA に届かない
+      brandOnSoft: { value: "{colors.green.800}" },
     },
     surface: {
       page: { value: "{colors.bg}" },

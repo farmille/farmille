@@ -104,7 +104,7 @@ const chipsStyle = css({
 
 const iconStyle = css({ display: "flex", flexShrink: "0", color: "text.subtle" });
 
-const checkStyle = css({ display: "flex", flexShrink: "0", color: "primary.700" });
+const checkStyle = css({ display: "flex", flexShrink: "0", color: "text.brand" });
 
 type ComboboxCommonProps = {
   options: readonly Option[];

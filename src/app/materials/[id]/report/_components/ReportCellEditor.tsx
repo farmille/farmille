@@ -89,7 +89,7 @@ const panel = cva({
 const heading = css({
   fontSize: "sm",
   fontWeight: "extrabold",
-  color: "primary.800",
+  color: "text.brand",
   mb: "1.5",
   display: "flex",
   gap: "1.5",

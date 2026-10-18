@@ -32,7 +32,7 @@ const buttonRecipe = cva({
       },
       ghost: {
         bg: "surface.card",
-        color: "primary.700",
+        color: "text.brand",
         borderColor: "border.strong",
       },
       danger: {

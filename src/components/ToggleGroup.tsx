@@ -23,7 +23,7 @@ const toggleGroupRecipe = sva({
         group: choiceGroupRecipe.raw({ variant: "chips" }),
         item: {
           ...choiceRecipe.raw({ look: "chip" }),
-          _pressed: { borderColor: "primary.600", bg: "primary.soft", color: "primary.800" },
+          _pressed: { borderColor: "primary.600", bg: "primary.soft", color: "text.brandOnSoft" },
         },
       },
       timeline: {
@@ -90,7 +90,7 @@ const toggleGroupRecipe = sva({
           },
           _hover: { _before: { borderColor: "primary.700" } },
           _pressed: {
-            color: "primary.800",
+            color: "text.brand",
             fontWeight: "extrabold",
             _before: { bg: "primary.700", borderColor: "primary.700" },
           },

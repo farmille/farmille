@@ -171,7 +171,7 @@ const chart = css({
 const linkButton = css({
   borderWidth: "0",
   bg: "transparent",
-  color: "primary.800",
+  color: "text.brand",
   fontSize: "sm",
   fontWeight: "bold",
   cursor: "pointer",

@@ -234,7 +234,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                     display: "flex",
                     flexShrink: "0",
                     mt: "0.5",
-                    color: "primary.700",
+                    color: "text.brand",
                   })}
                 >
                   <Icon name="check" size="sm" />

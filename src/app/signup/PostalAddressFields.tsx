@@ -24,7 +24,7 @@ const postalRowStyle = css({ display: "flex", alignItems: "center", flexWrap: "w
 
 const postalInputStyle = css({ flex: "1 1 token(sizes.44)", maxW: "80" });
 
-const lookupStatusStyle = css({ color: "primary.800" });
+const lookupStatusStyle = css({ color: "text.brand" });
 
 function completePostalCode(value: string): string | null {
   const digits = value.normalize("NFKC").replace(/-/g, "");

@@ -44,7 +44,7 @@ const logo = css({
   alignItems: "center",
   gap: "1.5",
   flex: "1",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
   minW: "0",
 });
@@ -96,7 +96,7 @@ const desktopBrand = css({
   display: "inline-flex",
   alignItems: "center",
   gap: "2",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
   flexShrink: "0",
 });
@@ -134,7 +134,7 @@ const desktopNavLink = cva({
     fontWeight: "bold",
     textDecoration: "none",
     whiteSpace: "nowrap",
-    _hover: { bg: "primary.soft", color: "primary.800" },
+    _hover: { bg: "primary.soft", color: "text.brandOnSoft" },
     _focusVisible: {
       outlineWidth: "2px",
       outlineStyle: "solid",
@@ -144,7 +144,7 @@ const desktopNavLink = cva({
   },
   variants: {
     active: {
-      true: { bg: "primary.soft", color: "primary.800" },
+      true: { bg: "primary.soft", color: "text.brandOnSoft" },
       false: {},
     },
   },
@@ -169,7 +169,7 @@ const desktopAction = cva({
       primary: { bg: "primary.700", color: "surface.card" },
       secondary: {
         bg: "surface.card",
-        color: "primary.700",
+        color: "text.brand",
         borderWidth: "1px",
         borderStyle: "solid",
         borderColor: "border.strong",

@@ -44,7 +44,7 @@ const brand = css({
   display: "flex",
   alignItems: "center",
   gap: "1.5",
-  color: "primary.700",
+  color: "text.brand",
   textStyle: "title",
   fontWeight: "extrabold",
 });

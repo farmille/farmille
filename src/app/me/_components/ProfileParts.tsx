@@ -23,7 +23,7 @@ const headingCount = css({
 });
 
 export const moreLinkStyle = css({
-  color: "primary.700",
+  color: "text.brand",
   fontSize: "sm",
   textDecoration: "none",
   whiteSpace: "nowrap",

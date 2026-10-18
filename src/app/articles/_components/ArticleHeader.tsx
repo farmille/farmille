@@ -41,7 +41,7 @@ export function ArticleHeader({
               overflow: "hidden",
               fontSize: "sm",
               fontWeight: "extrabold",
-              color: "primary.800",
+              color: "text.brandOnSoft",
               "& img": { w: "full", h: "full", objectFit: "cover", display: "block" },
             })}
             aria-hidden="true"
