@@ -54,6 +54,10 @@ export const textStyles = {
       "日付・件数・出典など、本文を補う短い注記と、注意書きの箱。チップやバッジのラベルには使わない。",
     value: { fontSize: "xs", lineHeight: "normal" },
   },
+  welcome: {
+    description: "初回ログインの案内の最初のシート（Farmilleへようこそ）の見出し専用。",
+    value: { fontSize: "welcome", lineHeight: "snug" },
+  },
   hero: {
     description:
       "ホームのヒーロー見出し専用。ゴシックMB101 L の細字で組み、画面幅に応じて hero、hero.md、hero.lg の順に大きくする。md と lg はサイズの段名で、breakpoint ではない。",

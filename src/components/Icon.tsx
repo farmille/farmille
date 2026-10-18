@@ -23,6 +23,7 @@ const glyphs = {
   check: { ligature: "check", face: "filled" },
   arrow_forward: { ligature: "arrow_forward", face: "filled" },
   arrow_back: { ligature: "arrow_back", face: "filled" },
+  arrow_downward: { ligature: "arrow_downward", face: "filled" },
   north_east: { ligature: "north_east", face: "filled" },
   close: { ligature: "close", face: "filled" },
   star: { ligature: "star_border", face: "filled" },
@@ -33,6 +34,7 @@ const glyphs = {
   location_on: { ligature: "location_on", face: "outlined" },
   eco: { ligature: "eco", face: "outlined" },
   warning: { ligature: "warning", face: "filled" },
+  edit: { ligature: "edit", face: "outlined" },
 } as const;
 
 // 一辺 = フォントサイズ。フォント読み込み前に ligature の文字列で幅が広がらないよう箱を固定して切り取る。

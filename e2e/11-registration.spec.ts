@@ -72,6 +72,7 @@ test("メール確認、登録完了、ログインと所属の入力", async ({
     await page.goto("/me");
     await expect(page).toHaveURL(/\/login\?next=%2Fme/);
     await loginGeneral(page, { email, password, id: "", handle }, "/me");
+    await page.getByRole("button", { name: "チュートリアルを終了" }).click();
     await page.getByRole("link", { name: "表示情報を編集" }).click();
     const affiliation = page.getByRole("combobox", { name: "所属", exact: true });
     await affiliation.click();

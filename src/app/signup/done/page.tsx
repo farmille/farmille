@@ -8,6 +8,8 @@ import { TextLink } from "@/components/TextLink";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 import { safeNextPath } from "@/lib/auth/safe-next";
 
+import { OnboardingArm } from "./OnboardingArm";
+
 import { css } from "../../../../styled-system/css";
 
 const leadStyle = css({
@@ -32,6 +34,7 @@ export default async function SignupDonePage({
 
   return (
     <AuthScreen title="登録が完了しました">
+      <OnboardingArm />
       <p className={leadStyle}>会員登録が完了しました。ログインしてご利用ください。</p>
       <FormActions>
         <Link
