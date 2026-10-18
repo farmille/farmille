@@ -149,9 +149,7 @@ export function ReceiptSheet({ receiptDocument }: { receiptDocument: Application
         <div className={css({ flexGrow: "1", flexBasis: "56" })}>
           <p className={css({ textStyle: "title", fontWeight: "bold" })}>{applicant.companyName}</p>
           <p className={css({ textStyle: "body", mt: "1" })}>
-            {[applicant.department, `${applicant.contactName} 様`]
-              .filter((part) => part !== "")
-              .join("　")}
+            {applicant.department}　{applicant.contactName} 様
           </p>
         </div>
         <ReceiptFields

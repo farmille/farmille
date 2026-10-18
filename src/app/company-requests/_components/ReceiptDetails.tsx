@@ -98,7 +98,7 @@ function PartyName({ party }: { party: ReceiptParty }) {
     <p className={detailText}>
       <span className={css({ fontWeight: "bold" })}>{party.companyName}</span>
       {"\n"}
-      {[party.department, party.contactName].filter((part) => part !== "").join("　")}
+      {party.department}　{party.contactName}
     </p>
   );
 }
