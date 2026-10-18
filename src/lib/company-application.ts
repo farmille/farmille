@@ -56,8 +56,9 @@ const item = {
   materialUrl: httpUrlSchema,
   evidenceUrl: optionalUrl,
 };
+export const relationSchema = v.picklist(["manufacturer", "seller", "importer"]);
 const relations = v.pipe(
-  v.array(v.picklist(["manufacturer", "seller", "importer"])),
+  v.array(relationSchema),
   v.minLength(1),
   v.maxLength(3),
   v.check((values) => new Set(values).size === values.length),

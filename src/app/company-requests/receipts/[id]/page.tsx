@@ -1,5 +1,4 @@
 import { FormPageShell } from "@/components/FormPageShell";
-import { SurfaceCard } from "@/components/SurfaceCard";
 import { readCompanyApplication } from "@/server/company-applications";
 
 import { ApplicationReceipt } from "../../_components/ApplicationReceipt";
@@ -12,15 +11,8 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   return (
     <FormPageShell chrome="public" title="申請受付票" backHref="/company-requests/receipts">
       <div className={css({ maxW: "content.reading", mx: "auto" })}>
-        <DoneMessage
-          as="h1"
-          className="application-print-hidden"
-          spacing="compact"
-          title="ご申請を受け付けました"
-        />
-        <SurfaceCard padding="standard">
-          <ApplicationReceipt receipt={receipt} hideMissingCorporateNumber />
-        </SurfaceCard>
+        <DoneMessage as="h1" spacing="compact" title="ご申請を受け付けました" />
+        <ApplicationReceipt receipt={receipt} hideMissingCorporateNumber />
       </div>
     </FormPageShell>
   );

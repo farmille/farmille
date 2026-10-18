@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { mocked } from "storybook/test";
+import { readCompanyApplication } from "@/server/company-applications";
 import Page from "./page";
+import { removalReceipt } from "../../_components/story-fixtures";
 import { preparePageSession } from "../../../../../.storybook/page-session";
 
 const meta = {
@@ -16,4 +19,9 @@ const meta = {
 } satisfies Meta<typeof Page>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-export const Default: Story = {};
+/** この画面で開くのは、旧フォームD（終売・非表示）の受付票だけ。 */
+export const Default: Story = {
+  beforeEach: () => {
+    mocked(readCompanyApplication).mockResolvedValue(removalReceipt);
+  },
+};

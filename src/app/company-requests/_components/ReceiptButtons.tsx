@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { css, cx } from "../../../../styled-system/css";
+import { css } from "../../../../styled-system/css";
 import { Button } from "@/components";
 import { Notice } from "@/components/form";
 import { retryApplicationMail } from "../actions";
@@ -31,16 +31,13 @@ export function ReceiptButtons({ id, sent }: { id: string; sent: boolean }) {
   }
   return (
     <div
-      className={cx(
-        "application-print-hidden",
-        css({
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          gap: "3",
-          textStyle: "supporting",
-        }),
-      )}
+      className={css({
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: "3",
+        textStyle: "supporting",
+      })}
     >
       <Button type="button" onClick={() => window.print()}>
         受付票を印刷・PDF保存

@@ -21,6 +21,7 @@ const glyphs = {
   add: { ligature: "add", face: "filled" },
   image: { ligature: "image", face: "outlined" },
   check: { ligature: "check", face: "filled" },
+  check_box: { ligature: "check_box", face: "outlined" },
   arrow_forward: { ligature: "arrow_forward", face: "filled" },
   arrow_back: { ligature: "arrow_back", face: "filled" },
   north_east: { ligature: "north_east", face: "filled" },

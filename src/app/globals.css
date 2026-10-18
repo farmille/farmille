@@ -74,16 +74,29 @@ h6 {
   }
 }
 
+/* 申請受付票は A4 縦で印刷する。名前付きページにして、ほかの画面の印刷設定は変えない。 */
+@page application-receipt {
+  size: A4 portrait;
+  margin: 16mm 15mm;
+}
+
 @media print {
-  body:has(.application-receipt) header,
-  body:has(.application-receipt) nav,
-  body:has(.application-receipt) footer,
-  body:has(.application-receipt) #preparation-notice,
-  body:has(.application-receipt) [data-ui="desktop-context-bar"],
-  .application-print-hidden {
+  /* 受付票の画面では用紙だけを印刷する。用紙の祖先と中身のほかはすべて消す。 */
+  body:has(.application-receipt)
+    :not(:has(.application-receipt), .application-receipt, .application-receipt *) {
     display: none !important;
   }
+  /* 用紙の外側の余白と背景は、@page の余白に任せる。 */
+  body:has(.application-receipt),
+  body:has(.application-receipt) :has(.application-receipt) {
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    min-height: 0;
+    background: none;
+  }
   .application-receipt {
+    page: application-receipt;
     color: var(--colors-text-default);
     overflow: visible;
   }
