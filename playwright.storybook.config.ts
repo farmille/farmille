@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Storybook dev サーバー（6006）と衝突しないよう、静的ビルドの配信は専用ポートで行う
+// Storybook dev サーバー（pnpm storybook の 6076）と衝突しないよう、静的ビルドの配信は専用ポートで行う
 const STORYBOOK_STATIC_PORT = 6106;
 const STORYBOOK_URL = `http://127.0.0.1:${STORYBOOK_STATIC_PORT}`;
 

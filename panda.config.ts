@@ -3,7 +3,7 @@ import { defineConfig } from "@pandacss/dev";
 import { textStyles } from "./src/theme/textStyles";
 import { breakpoints, semanticTokens, tokens } from "./src/theme/tokens";
 
-// 値の正は docs/rebuild/02-screens.md §5（モック :root ライト側）。ダーク条件は置かない（D12）。
+// ダーク条件は置かない。
 export default defineConfig({
   preflight: true,
   include: ["./src/**/*.{js,jsx,ts,tsx}"],
