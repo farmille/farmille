@@ -7,8 +7,10 @@ import { createAuthBrowserClient } from "@/lib/auth/browser";
 import {
   PROFILE_SAVED_SEARCH,
   clearOnboarding,
+  isMaterialPage,
   isOnboardingPending,
   onboardingShowsOn,
+  onboardingSkipHref,
   onboardingStepAfterNavigation,
   readOnboardingStep,
   skipOnboardingSection,
@@ -16,6 +18,7 @@ import {
   type OnboardingStep,
 } from "@/lib/onboarding";
 import { finishOnboardingAction } from "@/server/actions/onboarding";
+import { errorMessageJa } from "@/server/errors";
 
 import { toast } from "../Toaster";
 import { TourBar } from "./TourBar";
@@ -34,22 +37,35 @@ function subscribe(listener: () => void) {
   };
 }
 // localStorage を使えないブラウザ（保存を拒否する設定など）では、進み具合を持てないので案内を出さない
-function readStep(): OnboardingStep | null {
+function readStep(userId: string | null): OnboardingStep | null {
+  if (userId === null) return null;
   try {
-    return readOnboardingStep(window.localStorage);
+    return readOnboardingStep(window.localStorage, userId);
   } catch {
     return null;
   }
 }
 const readNothing = () => null;
-function saveStep(step: OnboardingStep | null) {
+function saveStep(userId: string, step: OnboardingStep | null) {
   try {
     if (step === null) clearOnboarding(window.localStorage);
-    else writeOnboardingStep(window.localStorage, step);
+    else writeOnboardingStep(window.localStorage, userId, step);
   } catch {
     return;
   }
   listeners.forEach((listener) => listener());
+}
+
+/**
+ * 案内を待っているアカウントなら、その利用者の id を返す。
+ * 手元のセッションは別の端末で案内を終えた後も古い印を持つので、印があるときはサーバーで今の利用者を確かめる。
+ */
+async function pendingUserId(): Promise<string | null> {
+  const auth = createAuthBrowserClient().auth;
+  const { data } = await auth.getSession();
+  if (!isOnboardingPending(data.session?.user ?? null)) return null;
+  const { user } = (await auth.getUser()).data;
+  return user !== null && isOnboardingPending(user) ? user.id : null;
 }
 
 /** data-tour の目印が画面に出るまで待つ（画面の移動直後や読み込み中は、まだない）。 */
@@ -82,11 +98,15 @@ const THANKS_SHOWN = 1600;
  * 案内を終えた印をアカウントに残し、セッションを取り直してから、このブラウザの進み具合を消す。
  * 取り直す前に消すと、古いセッションの印を見て案内を最初から出し直してしまう。
  */
-async function finishOnboarding(): Promise<boolean> {
+async function finishOnboarding(userId: string): Promise<boolean> {
   try {
-    await finishOnboardingAction();
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : FINISH_FAILED);
+    const result = await finishOnboardingAction();
+    if (!result.ok) {
+      toast.error(errorMessageJa[result.error]);
+      return false;
+    }
+  } catch {
+    toast.error(FINISH_FAILED);
     return false;
   }
   const { error } = await createAuthBrowserClient().auth.refreshSession();
@@ -94,7 +114,7 @@ async function finishOnboarding(): Promise<boolean> {
     toast.error(FINISH_FAILED);
     return false;
   }
-  saveStep(null);
+  saveStep(userId, null);
   return true;
 }
 
@@ -103,24 +123,21 @@ async function finishOnboarding(): Promise<boolean> {
  * 登録後に案内を終えていない一般会員でログインしているときだけ、実際の画面の上に案内を重ねる。
  */
 export function OnboardingTour() {
-  const step = useSyncExternalStore(subscribe, readStep, readNothing);
   const pathname = usePathname();
   const router = useRouter();
-  const [pending, setPending] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const step = useSyncExternalStore(subscribe, () => readStep(userId), readNothing);
   const [thanks, setThanks] = useState(false);
 
-  // 案内を待っているアカウントで、このブラウザにまだ進み具合が無ければ、ようこそから始める。
-  // 終えた直後に古い判定で始め直さないよう、取り直したセッションの判定だけで決める
+  // 案内を待っているアカウントで、このブラウザにまだその人の進み具合が無ければ、ようこそから始める。
+  // 終えた直後に古い判定で始め直さないよう、取り直した判定だけで決める
   useEffect(() => {
     let alive = true;
-    void createAuthBrowserClient()
-      .auth.getSession()
-      .then(({ data }) => {
-        if (!alive) return;
-        const next = isOnboardingPending(data.session);
-        setPending(next);
-        if (next && step === null) saveStep("welcome");
-      });
+    void pendingUserId().then((id) => {
+      if (!alive) return;
+      setUserId(id);
+      if (id !== null && readStep(id) === null) saveStep(id, "welcome");
+    });
     return () => {
       alive = false;
     };
@@ -128,10 +145,10 @@ export function OnboardingTour() {
 
   // 画面を移ったことで進む段階（資材ページが開いた・投稿画面が開いた）
   useEffect(() => {
-    if (step === null || !pending) return;
+    if (step === null || userId === null) return;
     const after = onboardingStepAfterNavigation(step, pathname);
-    if (after !== null) saveStep(after);
-  }, [step, pathname, pending]);
+    if (after !== null) saveStep(userId, after);
+  }, [step, pathname, userId]);
 
   // お礼を短く出してからホームへ戻る。終えた印は「閉じる」の時点で残してある
   useEffect(() => {
@@ -143,17 +160,23 @@ export function OnboardingTour() {
     return () => window.clearTimeout(leave);
   }, [thanks, router]);
 
-  const go = useCallback((next: OnboardingStep) => saveStep(next), []);
+  const go = useCallback(
+    (next: OnboardingStep) => {
+      if (userId !== null) saveStep(userId, next);
+    },
+    [userId],
+  );
   const push = useCallback((href: string) => router.push(href), [router]);
   const end = useCallback(async () => {
-    if (await finishOnboarding()) toast("チュートリアルを終了しました。");
-  }, []);
+    if (userId !== null && (await finishOnboarding(userId)))
+      toast("チュートリアルを終了しました。");
+  }, [userId]);
   const complete = useCallback(async () => {
-    if (await finishOnboarding()) setThanks(true);
-  }, []);
+    if (userId !== null && (await finishOnboarding(userId))) setThanks(true);
+  }, [userId]);
 
   if (thanks) return <TourSaved title="ありがとうございました" />;
-  if (step === null || !pending || !onboardingShowsOn(step, pathname)) return null;
+  if (step === null || !onboardingShowsOn(step, pathname)) return null;
   return (
     <TourStep
       key={step}
@@ -178,7 +201,13 @@ type TourStepProps = {
 
 /** 段階ごとの案内。段階が変わるたびに作り直し、たたんだ状態などを持ち越さない。 */
 function TourStep({ step, pathname, go, end, complete, push }: TourStepProps) {
-  const skip = () => go(skipOnboardingSection(step));
+  // 次の段階の案内が出る画面へ移り、スキップした画面に取り残さない
+  const skip = () => {
+    const next = skipOnboardingSection(step);
+    go(next);
+    const href = onboardingSkipHref(next, pathname);
+    if (href !== null) push(href);
+  };
   switch (step) {
     case "welcome":
       return (
@@ -235,7 +264,8 @@ function TourStep({ step, pathname, go, end, complete, push }: TourStepProps) {
           body="使用した資材の感想を、ほかの生産者と共有できます。"
           section={{ current: 3, total: 3 }}
           primaryLabel="次へ"
-          onPrimary={() => go("reviewLink")}
+          // 投稿の入口では「感想口コミを書く」を示す資材ページが無いので、そのまま終わりのシートへ
+          onPrimary={() => go(isMaterialPage(pathname) ? "reviewLink" : "finish")}
           onSkipStep={skip}
           onEnd={end}
         />
@@ -509,8 +539,9 @@ function ScrollStep({ go, skip, end }: StepControls & { go: (next: OnboardingSte
       if (reports.getBoundingClientRect().top < window.innerHeight * SECTION_SEEN)
         go("reviewIntro");
     };
-    // 目印が出た時点で、もう見えている（スクロール位置が戻された）こともある
-    onScroll();
+    // スクロール位置が戻されて、目印が出た時点でもう見えていることもある。
+    // 読み込み直後（まだスクロールしていない）は上の要素が描き終わっておらず位置が浅く出るので、判定しない
+    if (window.scrollY > 0) onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [go, reports]);
