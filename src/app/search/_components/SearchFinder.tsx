@@ -14,27 +14,60 @@ import { css, cx } from "../../../../styled-system/css";
 import apple from "./photos/apple.webp";
 import cabbage from "./photos/cabbage.webp";
 import cucumber from "./photos/cucumber.webp";
+import eggplant from "./photos/eggplant.webp";
 import grape from "./photos/grape.webp";
+import greenPepper from "./photos/green-pepper.webp";
+import lettuce from "./photos/lettuce.webp";
+import onion from "./photos/onion.webp";
+import potato from "./photos/potato.webp";
 import rice from "./photos/rice.webp";
+import soybean from "./photos/soybean.webp";
+import spinach from "./photos/spinach.webp";
 import strawberry from "./photos/strawberry.webp";
 import tea from "./photos/tea.webp";
 import tomato from "./photos/tomato.webp";
+import welshOnion from "./photos/welsh-onion.webp";
 import { filterChipRecipe, focusRing } from "./search-chips";
-import { finderCrops, finderEffects, type FinderChoice, type FinderScope } from "./search-finder";
+import {
+  finderCrops,
+  finderEffects,
+  type FinderChoice,
+  type FinderCrop,
+  type FinderScope,
+} from "./search-finder";
 
-/** 写真は Unsplash の写真（Unsplash ライセンス）を幅 1200px 以下の WebP にしたもの。並びは掲載資材の多い順。 */
-const CROP_PHOTOS: ReadonlyArray<readonly [string, StaticImageData]> = [
+/**
+ * 作物名（または別名）で引く写真。並べる作物はデータで決まり、写真の有無では選ばない。
+ * 写真は Unsplash の写真（Unsplash ライセンス）を幅 1200px 以下の WebP にしたもの。
+ */
+const CROP_PHOTOS = new Map<string, StaticImageData>([
   ["トマト", tomato],
   ["稲", rice],
   ["いちご", strawberry],
   ["きゅうり", cucumber],
+  ["なす", eggplant],
+  ["たまねぎ", onion],
+  ["ほうれんそう", spinach],
+  ["ねぎ", welshOnion],
+  ["だいず", soybean],
   ["キャベツ", cabbage],
+  ["ばれいしょ", potato],
+  ["ピーマン", greenPepper],
   ["ぶどう", grape],
+  ["レタス", lettuce],
   ["りんご", apple],
   ["茶", tea],
-];
+]);
 
+const CROP_LIMIT = 12;
 const EFFECT_LIMIT = 8;
+
+function photoOf(crop: FinderCrop) {
+  return (
+    CROP_PHOTOS.get(crop.name) ??
+    crop.aliases.map((alias) => CROP_PHOTOS.get(alias)).find((photo) => photo !== undefined)
+  );
+}
 
 const root = css({
   mt: "3",
@@ -110,7 +143,7 @@ const stepNumber = css({
   fontWeight: "bold",
 });
 
-/** SP は横に流し、PC は8つを1行に並べる。 */
+/** SP とタブレットは横に流し、PC は6つずつ2行に並べる。 */
 const cropList = css({
   display: "flex",
   gap: "2",
@@ -127,7 +160,8 @@ const cropList = css({
   tab: { mx: "-5", px: "5" },
   pc: {
     display: "grid",
-    gridTemplateColumns: "repeat(8, minmax(0, 1fr))",
+    gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
+    rowGap: "3",
     mx: "0",
     px: "0",
     overflowX: "visible",
@@ -162,6 +196,18 @@ const cropPhotoFrame = css({
   pc: { w: "20", h: "20" },
 });
 
+/** 写真を用意していない作物は、写真と同じ大きさの丸に作物名の頭文字を置く。 */
+const cropInitial = css({
+  w: "full",
+  h: "full",
+  display: "grid",
+  placeItems: "center",
+  bg: "primary.soft",
+  color: "text.brandOnSoft",
+  textStyle: "title",
+  fontWeight: "bold",
+});
+
 const cropName = css({
   textStyle: "supporting",
   fontWeight: "bold",
@@ -184,6 +230,26 @@ type SearchFinderProps = {
   resultCount: number;
 };
 
+function CropPhoto({ crop }: { crop: FinderCrop }) {
+  const photo = photoOf(crop);
+  if (photo === undefined)
+    return (
+      <span aria-hidden="true" className={cropInitial}>
+        {crop.name.slice(0, 1)}
+      </span>
+    );
+  return (
+    <Image
+      alt=""
+      className={bandPhoto}
+      fill
+      placeholder="blur"
+      sizes="(min-width: 1024px) 80px, 56px"
+      src={photo}
+    />
+  );
+}
+
 function toSelected(choice: FinderChoice): SelectedSearchFilter {
   return { kind: "filter", category: choice.category, id: choice.id, name: choice.name };
 }
@@ -196,21 +262,12 @@ function isSame(filter: SelectedSearchFilter, choice: FinderChoice) {
 }
 
 export function SearchFinder({ scope, selected, sort, query, resultCount }: SearchFinderProps) {
-  const crops = finderCrops(
-    scope,
-    CROP_PHOTOS.map(([name]) => name),
-  );
+  const crops = finderCrops(scope, CROP_LIMIT);
   const effects = finderEffects(scope, EFFECT_LIMIT);
-  const photos = new Map(CROP_PHOTOS);
-  const photoOf = (key: string) => {
-    const photo = photos.get(key);
-    if (photo === undefined) throw new Error(`作物の写真がありません: ${key}`);
-    return photo;
-  };
-  // 写真を用意していない作物（たまねぎ等）を選んでいても、見出しはその作物にする。写真だけ既定に戻す。
+  // 作物分類だけを選んでいても、見出しはその条件にする。写真がない作物なら帯は既定の写真に戻す。
   const selectedCrop = selected.find(isCropFilter);
   const activeCrop = crops.find((crop) => crop.active);
-  const bandSource = activeCrop ? photoOf(activeCrop.key) : heroPhoto;
+  const bandSource = (activeCrop && photoOf(activeCrop)) ?? heroPhoto;
 
   // 作物は1つだけ選ぶ。別の作物を押したら入れ替え、選択中の作物を押したら外す。
   const cropHref = (choice: FinderChoice) => {
@@ -265,14 +322,7 @@ export function SearchFinder({ scope, selected, sort, query, resultCount }: Sear
                 scroll={false}
               >
                 <span className={cropPhotoFrame}>
-                  <Image
-                    alt=""
-                    className={bandPhoto}
-                    fill
-                    placeholder="blur"
-                    sizes="(min-width: 1024px) 80px, 56px"
-                    src={photoOf(crop.key)}
-                  />
+                  <CropPhoto crop={crop} />
                 </span>
                 <span className={cropName}>{crop.name}</span>
                 <span className={count}>{crop.count}件</span>

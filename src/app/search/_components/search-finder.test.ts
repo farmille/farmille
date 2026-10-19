@@ -12,22 +12,38 @@ const scope = (filters: FinderScope["filters"]): FinderScope => ({
 });
 
 describe("検索の2段階の絞り込み", () => {
-  it("作物の件数は分類としての記載も数え、マスタにない作物は出さない", () => {
-    const crops = finderCrops(scope([]), ["トマト", "ぶどう", "たまねぎ"]);
+  it("作物名として記載のある作物だけを並べ、件数には分類への記載も含める", () => {
+    const crops = finderCrops(scope([]), 12);
     expect(crops.map((crop) => [crop.name, crop.count])).toEqual([
-      ["トマト", 2],
       ["たまねぎ", 2],
+      ["トマト", 2],
     ]);
   });
 
-  it("名前で見つからない作物は別名で引き、表示はマスタの名前にする", () => {
-    const [onion] = finderCrops(scope([]), ["玉ねぎ"]);
-    expect(onion).toEqual(expect.objectContaining({ key: "玉ねぎ", name: "たまねぎ", count: 2 }));
+  it("並びは作物名としての記載数で決め、分類への記載だけの作物は出さない", () => {
+    const tomato = storyCatalog.crops.find((crop) => crop.id === storyIds.tomato);
+    if (tomato === undefined) throw new Error("見本のトマトがありません。");
+    const catalog = {
+      ...storyCatalog,
+      materials: [
+        ...storyCatalog.materials,
+        { ...storyCatalog.materials[1], id: "tomato-2", material_crops: [{ crop_id: tomato.id }] },
+      ],
+      crops: [
+        ...storyCatalog.crops,
+        { ...tomato, id: "pepper", name: "ピーマン", aliases: [], sort_order: 3 },
+      ],
+    };
+    const crops = finderCrops({ ...scope([]), catalog }, 12);
+    expect(crops.map((crop) => crop.name)).toEqual(["トマト", "たまねぎ"]);
   });
 
-  it("作物を選んでいても、作物の件数は作物の条件を外して数える", () => {
-    const crops = finderCrops(scope([{ category: "crop", id: storyIds.tomato }]), ["トマト"]);
-    expect(crops).toEqual([expect.objectContaining({ name: "トマト", count: 2, active: true })]);
+  it("上限を超えても選択中の作物は残し、件数は作物の条件を外して数える", () => {
+    const crops = finderCrops(scope([{ category: "crop", id: storyIds.tomato }]), 1);
+    expect(crops.map((crop) => [crop.name, crop.count, crop.active])).toEqual([
+      ["たまねぎ", 2, false],
+      ["トマト", 2, true],
+    ]);
   });
 
   it("効果の件数は選んだ作物の中で数え、該当しない効果は出さない", () => {

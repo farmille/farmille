@@ -30,3 +30,18 @@ export const CropSelected: Story = {
     resultCount: 2,
   },
 };
+
+/** 写真を用意していない作物は、同じ大きさの丸に頭文字を置く。 */
+export const CropWithoutPhoto: Story = {
+  args: {
+    scope: {
+      ...scope,
+      catalog: {
+        ...storyCatalog,
+        crops: storyCatalog.crops.map((crop) =>
+          crop.id === storyIds.onion ? { ...crop, name: "らっきょう", aliases: [] } : crop,
+        ),
+      },
+    },
+  },
+};
