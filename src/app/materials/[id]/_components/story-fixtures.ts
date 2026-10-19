@@ -1,5 +1,5 @@
 import type { MaterialPageContent } from "@/lib/material-page-editor";
-import type { PublishedUsageReport } from "@/server/queries/material-content";
+import type { PublishedUsageReport, UsageReportChart } from "@/server/queries/material-content";
 import type {
   MaterialDetail,
   MaterialEvidence,
@@ -272,3 +272,13 @@ export const materialLinks: MaterialPageContent["links"] = [
     trial: { crops: "", summary: "", institution: "", year: null, pageCount: null },
   },
 ];
+
+export const storyReportChart = {
+  title: "可販果収量",
+  unit: "t/10a",
+  prefecture: "熊本県",
+  rows: [
+    { id: "row-1", label: "無処理区", valueText: "18.2", value: 18.2, error: null, colorIndex: 0 },
+    { id: "row-2", label: "処理区", valueText: "20.1±0.4", value: 20.1, error: 0.4, colorIndex: 1 },
+  ],
+} satisfies UsageReportChart;

@@ -15,6 +15,7 @@ import { css } from "../../../../../styled-system/css";
 
 import { EmptyCard } from "../_components/EmptyCard";
 import { MaterialReviewCard } from "../_components/MaterialReviewCard";
+import { reviewGridStyle } from "../_components/MaterialReviewsSection";
 import { RatingSummary } from "../_components/RatingSummary";
 import { isMaterialId, loadMaterialOrNotFound, materialMetadata } from "../material-page-data";
 import { unwrapQueryResult } from "../query-result";
@@ -35,7 +36,6 @@ const countStyle = css({
   color: "text.subtle",
   fontVariantNumeric: "tabular-nums",
 });
-const listStyle = css({ display: "flex", flexDirection: "column", gap: "2.5" });
 
 type MaterialReviewsPageProps = {
   params: Promise<{ id: string }>;
@@ -133,7 +133,7 @@ export default async function MaterialReviewsPage({
       </div>
 
       {reviews.items.length > 0 ? (
-        <div className={listStyle}>
+        <div className={reviewGridStyle}>
           {reviews.items.map((review) => (
             <MaterialReviewCard
               key={review.id}

@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { prefectureName } from "@/lib/prefectures";
+import { firstReportChart, type ReportChartPreview } from "@/lib/usage-report";
 
 import { selectAllRows } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
@@ -246,6 +248,62 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
       };
     }),
   });
+}
+
+export type UsageReportChart = ReportChartPreview & { prefecture: string | null };
+
+/**
+ * 一覧カードに添えるグラフと都道府県。定量データは会員だけが読めるので、
+ * ログインしていない閲覧者からは呼ばない（RLS でも返らない）。構造化前のレポートは対象外。
+ */
+export async function listUsageReportCharts(
+  reportIds: string[],
+): Promise<Result<Map<string, UsageReportChart>>> {
+  if (reportIds.length === 0) return succeed(new Map());
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("usage_reports")
+    .select(
+      `id, prefecture_code,
+      plots:usage_report_plots(id, name, sort_order),
+      measurements:usage_report_measurements(kind, name, unit, sort_order,
+        graphs:usage_report_graphs(heading, sort_order,
+          rows:usage_report_graph_rows(id, plot_id, label, value_text, sort_order)))`,
+    )
+    .in("id", reportIds)
+    .eq("form_version", 2);
+
+  if (error !== null) {
+    reportQueryError("レポートのグラフの取得に失敗", error);
+    return fail("internal");
+  }
+
+  const byOrder = (left: { sort_order: number }, right: { sort_order: number }) =>
+    left.sort_order - right.sort_order;
+  const charts = new Map<string, UsageReportChart>();
+  for (const report of data) {
+    const chart = firstReportChart(
+      report.measurements.toSorted(byOrder).map((measurement) => ({
+        ...measurement,
+        graphs: measurement.graphs.toSorted(byOrder).map((graph) => ({
+          heading: graph.heading,
+          rows: graph.rows.toSorted(byOrder).map((row) => ({
+            id: row.id,
+            plotId: row.plot_id,
+            label: row.label,
+            value: row.value_text,
+          })),
+        })),
+      })),
+      report.plots.toSorted(byOrder),
+    );
+    if (chart === null) continue;
+    charts.set(report.id, {
+      ...chart,
+      prefecture: report.prefecture_code === null ? null : prefectureName(report.prefecture_code),
+    });
+  }
+  return succeed(charts);
 }
 
 export async function listPublishedArticlesByMaterial(

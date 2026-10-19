@@ -1,23 +1,9 @@
 import type { ReactNode } from "react";
 
 import { reportPlotColor } from "@/components/ReportPlotColor";
+import { reportBarDomain, type ReportBarRow } from "@/lib/usage-report";
 
 import { css, cx } from "../../../../styled-system/css";
-
-export type ReportBarRow = {
-  id: string;
-  label: string;
-  valueText: string;
-  value: number;
-  error: number | null;
-  colorIndex: number;
-};
-
-function domain(rows: ReportBarRow[], unit: string) {
-  const min = Math.min(0, ...rows.map((row) => row.value - (row.error ?? 0)));
-  const max = Math.max(unit === "%" ? 100 : 0, ...rows.map((row) => row.value + (row.error ?? 0)));
-  return { min, max: max === min ? min + 1 : max };
-}
 
 const whisker = {
   content: '""',
@@ -49,7 +35,7 @@ export function ReportBars({
   unit: string;
   rows: ReportBarRow[];
 }) {
-  const { min, max } = domain(rows, unit);
+  const { min, max } = reportBarDomain(rows, unit);
   const position = (value: number) => ((value - min) / (max - min)) * 100;
   return (
     <figure

@@ -173,6 +173,74 @@ export function parseReportNumber(raw: string): { value: number; error: number |
     ? { value, error }
     : null;
 }
+export type ReportBarRow = {
+  id: string;
+  label: string;
+  valueText: string;
+  value: number;
+  error: number | null;
+  colorIndex: number;
+};
+
+/** 棒の目盛りの範囲。0 と誤差の端を含め、% は 100 まで取る。 */
+export function reportBarDomain(rows: ReportBarRow[], unit: string) {
+  const min = Math.min(0, ...rows.map((row) => row.value - (row.error ?? 0)));
+  const max = Math.max(unit === "%" ? 100 : 0, ...rows.map((row) => row.value + (row.error ?? 0)));
+  return { min, max: max === min ? min + 1 : max };
+}
+
+type ReportGraph = UsageReportInput["measurements"][number]["graphs"][number];
+
+/** 数値として読めない行は描かない。区の色は区の並び順で決め、区を持たない行は行の順で決める。 */
+export function reportGraphRows(
+  graph: Pick<ReportGraph, "rows">,
+  plots: Pick<UsageReportInput["plots"][number], "id" | "name">[],
+): ReportBarRow[] {
+  return graph.rows.flatMap((row, index) => {
+    const parsed = parseReportNumber(row.value);
+    if (parsed === null) return [];
+    const plotIndex = row.plotId ? plots.findIndex((plot) => plot.id === row.plotId) : -1;
+    return [
+      {
+        id: row.id,
+        label: (plotIndex >= 0 ? plots[plotIndex]?.name : "") || row.label || `区 ${index + 1}`,
+        valueText: row.value.trim(),
+        value: parsed.value,
+        error: parsed.error,
+        colorIndex: plotIndex >= 0 ? plotIndex : index,
+      },
+    ];
+  });
+}
+export type ReportChartPreview = { title: string; unit: string; rows: ReportBarRow[] };
+
+/** DB の kind は文字列のまま受け、numeric だけをグラフにする。 */
+type ChartMeasurement = Pick<UsageReportInput["measurements"][number], "name" | "unit"> & {
+  kind: string;
+  graphs: (Pick<ReportGraph, "rows"> & { heading: string })[];
+};
+
+/** 一覧のカードに出す1枚。数値の測定項目を上から見て、2区以上の値が読める最初のグラフを選ぶ。 */
+export function firstReportChart(
+  measurements: ChartMeasurement[],
+  plots: Pick<UsageReportInput["plots"][number], "id" | "name">[],
+): ReportChartPreview | null {
+  for (const measurement of measurements) {
+    if (measurement.kind !== "numeric") continue;
+    for (const graph of measurement.graphs) {
+      const rows = reportGraphRows(graph, plots);
+      if (rows.length < 2) continue;
+      const heading = graph.heading.trim();
+      return {
+        title: heading ? `${measurement.name.trim()}・${heading}` : measurement.name.trim(),
+        unit: measurement.unit.trim(),
+        rows,
+      };
+    }
+  }
+  return null;
+}
+
 export function validateUsageReportSubmission(input: UsageReportInput) {
   const errors: UsageReportFieldErrors = {};
   const required = (key: string, valid: boolean, message = "※ ここを入力してください") => {

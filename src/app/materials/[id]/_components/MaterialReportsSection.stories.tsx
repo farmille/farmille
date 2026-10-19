@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { MaterialReportsView } from "./MaterialReportsSection";
-import { materialDetail, materialReports } from "./story-fixtures";
+import { materialDetail, materialReports, storyReportChart } from "./story-fixtures";
 
 const meta = {
   title: "Pages/materials/[id]/MaterialReportsSection",
@@ -11,6 +11,7 @@ const meta = {
     reports: { items: materialReports, total: 5 },
     articleTotal: 0,
     signedIn: true,
+    charts: new Map(materialReports.map((report) => [report.id, storyReportChart])),
   },
 } satisfies Meta<typeof MaterialReportsView>;
 
@@ -20,9 +21,9 @@ type Story = StoryObj<typeof meta>;
 export const SignedIn: Story = {};
 
 export const SignedOutWithArticles: Story = {
-  args: { signedIn: false, articleTotal: 2 },
+  args: { signedIn: false, articleTotal: 2, charts: null },
 };
 
 export const Empty: Story = {
-  args: { reports: { items: [], total: 0 }, signedIn: false },
+  args: { reports: { items: [], total: 0 }, signedIn: false, charts: null },
 };
