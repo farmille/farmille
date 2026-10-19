@@ -20,6 +20,11 @@ describe("検索の2段階の絞り込み", () => {
     ]);
   });
 
+  it("名前で見つからない作物は別名で引き、表示はマスタの名前にする", () => {
+    const [onion] = finderCrops(scope([]), ["玉ねぎ"]);
+    expect(onion).toEqual(expect.objectContaining({ key: "玉ねぎ", name: "たまねぎ", count: 2 }));
+  });
+
   it("作物を選んでいても、作物の件数は作物の条件を外して数える", () => {
     const crops = finderCrops(scope([{ category: "crop", id: storyIds.tomato }]), ["トマト"]);
     expect(crops).toEqual([expect.objectContaining({ name: "トマト", count: 2, active: true })]);

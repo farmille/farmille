@@ -32,15 +32,26 @@ function materialsWithout(scope: FinderScope, drop: (filter: SearchFilterRef) =>
   );
 }
 
-/** 写真を用意した作物を、マスタに載っているものだけ表示順のまま返す。 */
-export function finderCrops(scope: FinderScope, names: readonly string[]): FinderChoice[] {
+export type FinderCrop = FinderChoice & {
+  /** 呼び出し側が渡した名前。写真との対応に使う。 */
+  key: string;
+};
+
+/**
+ * 写真を用意した作物を、マスタにあるものだけ渡した順に返す。
+ * 環境によって「稲」が作物名にも「水稲」の別名にもなるので、名前で見つからなければ別名で引く。
+ */
+export function finderCrops(scope: FinderScope, names: readonly string[]): FinderCrop[] {
   const base = materialsWithout(scope, isCropDimension);
-  return names.flatMap((name) => {
-    const crop = scope.catalog.crops.find((item) => item.name === name);
+  return names.flatMap((key) => {
+    const crop =
+      scope.catalog.crops.find((item) => item.name === key) ??
+      scope.catalog.crops.find((item) => item.aliases.includes(key));
     if (crop === undefined) return [];
     const ref: SearchFilterRef = { category: "crop", id: crop.id };
     return [
       {
+        key,
         category: "crop",
         id: crop.id,
         name: crop.name,

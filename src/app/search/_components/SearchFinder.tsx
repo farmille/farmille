@@ -188,6 +188,9 @@ function toSelected(choice: FinderChoice): SelectedSearchFilter {
   return { kind: "filter", category: choice.category, id: choice.id, name: choice.name };
 }
 
+const isCropFilter = (filter: SelectedSearchFilter) =>
+  filter.kind === "filter" && (filter.category === "crop" || filter.category === "crop_group");
+
 function isSame(filter: SelectedSearchFilter, choice: FinderChoice) {
   return filter.kind === "filter" && filter.category === choice.category && filter.id === choice.id;
 }
@@ -198,19 +201,20 @@ export function SearchFinder({ scope, selected, sort, query, resultCount }: Sear
     CROP_PHOTOS.map(([name]) => name),
   );
   const effects = finderEffects(scope, EFFECT_LIMIT);
+  const photos = new Map(CROP_PHOTOS);
+  const photoOf = (key: string) => {
+    const photo = photos.get(key);
+    if (photo === undefined) throw new Error(`作物の写真がありません: ${key}`);
+    return photo;
+  };
+  // 写真を用意していない作物（たまねぎ等）を選んでいても、見出しはその作物にする。写真だけ既定に戻す。
+  const selectedCrop = selected.find(isCropFilter);
   const activeCrop = crops.find((crop) => crop.active);
-  const photoOf = (name: string) => CROP_PHOTOS.find(([cropName]) => cropName === name)?.[1];
-  const bandSource = (activeCrop && photoOf(activeCrop.name)) ?? heroPhoto;
+  const bandSource = activeCrop ? photoOf(activeCrop.key) : heroPhoto;
 
   // 作物は1つだけ選ぶ。別の作物を押したら入れ替え、選択中の作物を押したら外す。
   const cropHref = (choice: FinderChoice) => {
-    const others = selected.filter(
-      (filter) =>
-        !(
-          filter.kind === "filter" &&
-          (filter.category === "crop" || filter.category === "crop_group")
-        ),
-    );
+    const others = selected.filter((filter) => !isCropFilter(filter));
     return buildSearchHref({
       filters: choice.active ? others : [...others, toSelected(choice)],
       sort,
@@ -242,7 +246,7 @@ export function SearchFinder({ scope, selected, sort, query, resultCount }: Sear
         <div className={bandText}>
           <p className={kicker}>作物と悩みから探す</p>
           <h2 className={bandTitle} id="search-finder-title">
-            {activeCrop ? `${activeCrop.name}に使える資材` : "育てている作物を選んでください"}
+            {selectedCrop ? `${selectedCrop.name}に使える資材` : "育てている作物を選んでください"}
           </h2>
         </div>
       </div>
@@ -251,35 +255,30 @@ export function SearchFinder({ scope, selected, sort, query, resultCount }: Sear
           <span className={stepNumber}>1</span>育てている作物
         </p>
         <ul className={cropList} aria-label="育てている作物">
-          {crops.map((crop) => {
-            const photo = photoOf(crop.name);
-            return (
-              <li key={crop.id}>
-                <Link
-                  aria-current={crop.active ? "true" : undefined}
-                  className={cropLink}
-                  href={cropHref(crop)}
-                  rel="nofollow"
-                  scroll={false}
-                >
-                  <span className={cropPhotoFrame}>
-                    {photo ? (
-                      <Image
-                        alt=""
-                        className={bandPhoto}
-                        fill
-                        placeholder="blur"
-                        sizes="(min-width: 1024px) 80px, 56px"
-                        src={photo}
-                      />
-                    ) : null}
-                  </span>
-                  <span className={cropName}>{crop.name}</span>
-                  <span className={count}>{crop.count}件</span>
-                </Link>
-              </li>
-            );
-          })}
+          {crops.map((crop) => (
+            <li key={crop.id}>
+              <Link
+                aria-current={crop.active ? "true" : undefined}
+                className={cropLink}
+                href={cropHref(crop)}
+                rel="nofollow"
+                scroll={false}
+              >
+                <span className={cropPhotoFrame}>
+                  <Image
+                    alt=""
+                    className={bandPhoto}
+                    fill
+                    placeholder="blur"
+                    sizes="(min-width: 1024px) 80px, 56px"
+                    src={photoOf(crop.key)}
+                  />
+                </span>
+                <span className={cropName}>{crop.name}</span>
+                <span className={count}>{crop.count}件</span>
+              </Link>
+            </li>
+          ))}
         </ul>
         <p className={step}>
           <span className={stepNumber}>2</span>気になること
