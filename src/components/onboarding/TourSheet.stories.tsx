@@ -33,7 +33,7 @@ export const Section: Story = {
 
 export const Finish: Story = {
   args: {
-    title: "チュートリアルは以上です",
+    title: "チュートリアルはこれで完了です",
     body: "使用したことのある資材があれば、感想口コミを記入してみてください。プロフィールの変更はマイページから、感想口コミの投稿は画面下の「＋」から、いつでもできます。",
     primaryLabel: "閉じる",
     onEnd: undefined,
