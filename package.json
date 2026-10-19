@@ -20,6 +20,8 @@
     "build-storybook": "storybook build",
     "check:component-file-names": "node scripts/check-component-file-names.mjs",
     "check:stories": "node scripts/check-story-coverage.mjs",
+    "check:migrations": "bash tools/dev/check-migrations.sh",
+    "setup:worktree": "bash tools/dev/setup-worktree.sh",
     "test:storybook:responsive": "playwright test --config=playwright.storybook.config.ts"
   },
   "dependencies": {

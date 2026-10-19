@@ -131,3 +131,6 @@ if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
 else
   log "CLAUDE_ENV_FILE が無いので export は省きました。"
 fi
+
+# 既存のボリュームから起動した DB には、後から足された migration が入らない。
+bash tools/dev/check-migrations.sh

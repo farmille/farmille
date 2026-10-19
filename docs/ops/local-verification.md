@@ -2,6 +2,44 @@
 
 刷新後のアプリを手元で動かして全画面を確認するための手順。所要5分（初回のみ Supabase の起動に数分）。
 
+## 0. worktree の準備
+
+新しい worktree では、最初に次を流す。
+
+```bash
+pnpm setup:worktree
+```
+
+- 本体チェックアウトの `.env.local` を worktree 直下へ写す。worktree に `.env.local` が既にあれば上書きしない。Claude の起動ラッパーで立てた dev サーバーは worktree の外を読めないため、写しが要る
+- `src/env.ts` の必須値（`pnpm build` が要る `NEXT_PUBLIC_SITE_URL` を含む）がそろっているかを確かめ、足りなければ止まる
+- `pnpm install --frozen-lockfile`（Panda の codegen を含む）と Playwright の Chromium の導入
+- 最後に `pnpm check:migrations` を流す
+
+`pnpm check:migrations` は、`NEXT_PUBLIC_SUPABASE_URL` のポートを公開している Supabase のコンテナを Docker から探し、適用済みの migration と `supabase/migrations/` を突き合わせる。接続先は環境変数を優先し、無ければ `.env.local` の値を使う。遅れていれば未適用のファイルと適用のコマンドを出して非0で終わる。DB には何も適用しない。
+
+- ホームが `container_type_id` 不在などの「internal」で落ちたら、まずこれを流す。既存のボリュームから起動した Supabase には、後から足した migration が入らない
+- ローカルの DB は worktree 間で共有しているので、適用はユーザーの確認を取ってから行う
+- 手元の Supabase が `127.0.0.1:58321`／`58322` のような別ポート（colima VM への ssh 転送）で動いていても、コマンドが出す `--db-url` をそのまま使える
+
+### E2E
+
+`playwright.config.ts` の決まりで、E2E は `127.0.0.1:54321` の Supabase（`supabase/config.toml` で起動したもの）にだけ流せる。global-setup が E2E 用のデータを消して運営アカウントを作るので、ほかの DB には流さない。`.env.local` が別のポートを指していても、CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数を export すればそちらが優先される。`pnpm check:migrations` も export した接続先を確かめる。
+
+```bash
+npx --yes supabase@2.120.0 start -x studio,edge-runtime,realtime,imgproxy,logflare,vector
+eval "$(npx --yes supabase@2.120.0 status -o env)"
+export NEXT_PUBLIC_SUPABASE_URL="$API_URL" NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" SUPABASE_SECRET_KEY="$SERVICE_ROLE_KEY"
+export SMTP_URL="smtp://127.0.0.1:54325" MAIL_FROM="Farmille <noreply@example.test>" \
+  AUTH_EMAIL_HOOK_SECRET="v1,whsec_bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ=="
+pnpm check:migrations
+psql "$DB_URL" -tAc "select count(*) from materials"   # 0 件なら次の行で資材マスタを入れる
+psql "$DB_URL" -v ON_ERROR_STOP=1 -f tools/migration/materials-v2-seed.sql
+pnpm test:e2e
+```
+
+- `supabase start` は worktree 間で共有している DB を起動する。起動と migration の適用は、ユーザーの確認を取ってから行う
+- `NEXT_PUBLIC_SITE_URL` は `playwright.config.ts` が `http://localhost:3007` に固定するので export しなくてよい
+
 ## 1. 起動
 
 ```bash
