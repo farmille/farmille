@@ -11,12 +11,14 @@ import {
   parseSortParam,
   resolveSelectedFilters,
 } from "@/components/search/search-selection";
+import { filterCatalog } from "@/lib/catalog-search";
 import { createPageMetadata } from "@/lib/seo";
 import { matchSearchCatalog } from "@/lib/material-search";
 import { getCatalogSearch, listSearchSuggestions } from "@/server/queries/catalog-search";
 import { CatalogSidebar } from "./_components/CatalogSidebar";
 import { listSearchFiltersByRefs } from "@/server/queries/classifications";
 import { SearchBox } from "./_components/SearchBox";
+import { SearchFinder } from "./_components/SearchFinder";
 import { css } from "../../../styled-system/css";
 import { SearchResults } from "./_components/SearchResults";
 
@@ -123,6 +125,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const keywordMatches = initialQuery
     ? matchSearchCatalog(catalogResult.data, initialQuery)
     : undefined;
+  const scope = { catalog, filters, makerNames, materialNames, keyword: keywordMatches };
+  const resultCount = filterCatalog(
+    catalog,
+    filters,
+    makerNames,
+    materialNames,
+    keywordMatches,
+  ).length;
 
   return (
     <SearchPageShell>
@@ -132,6 +142,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         selected={selected}
         sort={sort}
         catalog={catalogResult.data}
+      />
+      <SearchFinder
+        scope={scope}
+        selected={selected}
+        sort={sort}
+        query={initialQuery}
+        resultCount={resultCount}
       />
       <div
         className={css({
@@ -151,7 +168,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           sort={sort}
           query={initialQuery}
         />
-        <div className={css({ minW: "0" })}>
+        <div className={css({ minW: "0", scrollMarginTop: "16" })} id="search-results">
           <SearchResults
             catalog={catalog}
             filters={filters}
