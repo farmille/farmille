@@ -24,7 +24,7 @@ export default async function SellerMaterialsPage() {
         {result.data.materials.length === 0 ? (
           <EmptyState
             title="編集できる資材はまだありません"
-            description="既存の紐づけがある場合も、編集権の書類確認が必要です。運営からの案内をご確認ください。公開中の製品情報は維持されています。"
+            description="既存の紐づけがある場合も、資材オーナー権限の書類確認が必要です。運営からの案内をご確認ください。公開中の製品情報は維持されています。"
           />
         ) : (
           result.data.materials.map((material) => (

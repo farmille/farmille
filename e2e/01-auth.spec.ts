@@ -120,7 +120,7 @@ test("未ログインの保護ページと safe-next の回帰", async ({ page }
 
     await page.goto("/dashboard");
     await expect(
-      page.getByRole("heading", { name: "企業会員のログインIDでログインしてください" }),
+      page.getByRole("heading", { name: "Farmille企業会員IDでログインしてください" }),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "メーカーログインへ" })).toHaveAttribute(
       "href",
