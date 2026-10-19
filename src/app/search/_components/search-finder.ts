@@ -1,4 +1,4 @@
-import { filterCatalog, matchesCatalogFilter } from "@/lib/catalog-search";
+import { filterCatalog } from "@/lib/catalog-search";
 import type { SearchFilterRef, matchSearchCatalog } from "@/lib/material-search";
 import type { CatalogSearch } from "@/server/queries/catalog-search";
 
@@ -14,7 +14,7 @@ export type FinderChoice = {
   category: "crop" | "effect";
   id: string;
   name: string;
-  /** 自分と同じ軸の条件を外し、ほかの条件は保ったときの該当件数。 */
+  /** 自分と同じ軸の条件を外し、ほかの条件は保ったときの件数。作物は作物名としての記載数（finderCrops）。 */
   count: number;
   active: boolean;
 };
@@ -38,12 +38,11 @@ export type FinderCrop = FinderChoice & {
 };
 
 /**
- * 今の条件で、資材に作物名として記載のある数が多い作物から limit 件を選ぶ。選択中の作物は件数によらず残す。
- * 選ぶときは個別の記載だけを数える。分類（野菜類など）への記載まで数えると、
- * その分類の作物がすべて同じだけ上がり、記載の少ない作物が上位に混ざるため。
- * 表示する件数は押した先の結果と揃えて分類への記載も含め、並びはその件数の多い順にする。
+ * 今の条件で、資材に作物名として記載のある作物を、その数が多い順にすべて返す。選択中の作物は記載がなくても残す。
+ * 件数は作物名としての記載だけを数え、検索結果の「〇〇の記載がある資材」と揃える。
+ * 分類（野菜類など）への記載まで数えると、その分類の作物がすべて同じだけ上がり、記載の少ない作物が先頭に混ざるため。
  */
-export function finderCrops(scope: FinderScope, limit: number): FinderCrop[] {
+export function finderCrops(scope: FinderScope): FinderCrop[] {
   const base = materialsWithout(scope, isCropDimension);
   const direct = new Map<string, number>();
   for (const material of base)
@@ -54,19 +53,16 @@ export function finderCrops(scope: FinderScope, limit: number): FinderCrop[] {
   );
   return scope.catalog.crops
     .filter((crop) => direct.has(crop.id) || active.has(crop.id))
-    .toSorted((a, b) => (direct.get(b.id) ?? 0) - (direct.get(a.id) ?? 0))
-    .filter((crop, index) => index < limit || active.has(crop.id))
-    .map((crop): FinderCrop => {
-      const ref: SearchFilterRef = { category: "crop", id: crop.id };
-      return {
+    .map(
+      (crop): FinderCrop => ({
         category: "crop",
         id: crop.id,
         name: crop.name,
         aliases: crop.aliases,
-        count: base.filter((material) => matchesCatalogFilter(material, ref, scope.catalog)).length,
+        count: direct.get(crop.id) ?? 0,
         active: active.has(crop.id),
-      };
-    })
+      }),
+    )
     .toSorted((a, b) => b.count - a.count);
 }
 

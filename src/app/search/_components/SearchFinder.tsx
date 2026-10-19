@@ -59,7 +59,6 @@ const CROP_PHOTOS = new Map<string, StaticImageData>([
   ["茶", tea],
 ]);
 
-const CROP_LIMIT = 12;
 const EFFECT_LIMIT = 8;
 
 function photoOf(crop: FinderCrop) {
@@ -143,7 +142,7 @@ const stepNumber = css({
   fontWeight: "bold",
 });
 
-/** SP とタブレットは横に流し、PC は6つずつ2行に並べる。 */
+/** 記載のある作物をすべて1行で横に流す。PC はマウスでも動かせるよう細いスクロールバーを出す。 */
 const cropList = css({
   display: "flex",
   gap: "2",
@@ -157,19 +156,14 @@ const cropList = css({
   scrollSnapType: "x proximity",
   scrollbarWidth: "none",
   "&::-webkit-scrollbar": { display: "none" },
+  // 右端を薄くし、続きがあることを示す。black と transparent はマスクのアルファ指定であり配色ではない。
+  maskImage: "linear-gradient(90deg, black 85%, transparent)",
   tab: { mx: "-5", px: "5" },
-  pc: {
-    display: "grid",
-    gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
-    rowGap: "3",
-    mx: "0",
-    px: "0",
-    overflowX: "visible",
-  },
+  pc: { scrollbarWidth: "thin" },
 });
 
 const cropLink = css(focusRing, {
-  w: "16",
+  w: "20",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -178,7 +172,7 @@ const cropLink = css(focusRing, {
   color: "text.default",
   textDecoration: "none",
   scrollSnapAlign: "start",
-  pc: { w: "auto" },
+  pc: { w: "24" },
 });
 
 const cropPhotoFrame = css({
@@ -208,9 +202,13 @@ const cropInitial = css({
   fontWeight: "bold",
 });
 
+/** 「西洋芝（ベントグラス）」のような長い名前も2行で収める。 */
 const cropName = css({
   textStyle: "supporting",
   fontWeight: "bold",
+  textAlign: "center",
+  overflowWrap: "anywhere",
+  lineClamp: "2",
   "[aria-current=true] > &": { color: "text.brand" },
 });
 
@@ -262,7 +260,7 @@ function isSame(filter: SelectedSearchFilter, choice: FinderChoice) {
 }
 
 export function SearchFinder({ scope, selected, sort, query, resultCount }: SearchFinderProps) {
-  const crops = finderCrops(scope, CROP_LIMIT);
+  const crops = finderCrops(scope);
   const effects = finderEffects(scope, EFFECT_LIMIT);
   // 作物分類だけを選んでいても、見出しはその条件にする。写真がない作物なら帯は既定の写真に戻す。
   const selectedCrop = selected.find(isCropFilter);
@@ -325,7 +323,7 @@ export function SearchFinder({ scope, selected, sort, query, resultCount }: Sear
                   <CropPhoto crop={crop} />
                 </span>
                 <span className={cropName}>{crop.name}</span>
-                <span className={count}>{crop.count}件</span>
+                <span className={count}>記載 {crop.count}件</span>
               </Link>
             </li>
           ))}
