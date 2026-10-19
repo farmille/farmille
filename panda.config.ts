@@ -31,7 +31,17 @@ export default defineConfig({
     // extend にすると preset-panda の xs〜9xl（rem 指定）が残り、fontSizes と同じ名前で別の大きさになる。
     textStyles,
     extend: {
-      keyframes: { "skeleton-pulse": { "0%, 100%": { opacity: "1" }, "50%": { opacity: "0.5" } } },
+      keyframes: {
+        "skeleton-pulse": { "0%, 100%": { opacity: "1" }, "50%": { opacity: "0.5" } },
+        "tour-nudge": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(4px)" },
+        },
+        "tour-ring": {
+          "0%": { transform: "scale(1)", opacity: "0.9" },
+          "100%": { transform: "scale(1.12, 1.35)", opacity: "0" },
+        },
+      },
     },
   },
   outdir: "styled-system",

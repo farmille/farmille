@@ -12,6 +12,7 @@ import {
   useRestoredField,
   type Option,
 } from "@/components/form";
+import { fieldRecipe } from "@/components/form/recipes";
 import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
 import { css } from "../../../../styled-system/css";
 
@@ -79,30 +80,34 @@ export function ProfileTagsEditor({
 
   return (
     <>
-      <Combobox
-        description={`作物名や別名で検索して選んでください。複数選べます（${CROP_LIMIT}件まで）。公開されます。${
-          available.length > CROP_SUGGESTION_LIMIT
-            ? `${available.length}件中${CROP_SUGGESTION_LIMIT}件を表示しています。`
-            : `${available.length}件の候補があります。`
-        }`}
-        label="主な作目"
-        name="cropIds"
-        requirement="optional"
-        emptyMessage="一致する作物がありません"
-        filterMode="preFiltered"
-        inputValue={cropQuery}
-        max={CROP_LIMIT}
-        multiple
-        onInputValueChange={setCropQuery}
-        onValueChange={setCrops}
-        options={available.slice(0, CROP_SUGGESTION_LIMIT).map((crop) => ({
-          value: crop.id,
-          label: crop.name,
-          description: crop.crop_groups?.name,
-        }))}
-        placeholder="作物名を入力（例：みかん、デコポン）"
-        value={crops}
-      />
+      {/* 初回ログインの案内が光らせる欄（docs/rebuild/onboarding-tour-SPEC.md）。
+          中の Field は先頭の子になって上の余白を失うので、包む側に欄どうしの余白を付ける */}
+      <div data-tour="profile-crops" className={fieldRecipe({ spacing: "stack" })}>
+        <Combobox
+          description={`作物名や別名で検索して選んでください。複数選べます（${CROP_LIMIT}件まで）。公開されます。${
+            available.length > CROP_SUGGESTION_LIMIT
+              ? `${available.length}件中${CROP_SUGGESTION_LIMIT}件を表示しています。`
+              : `${available.length}件の候補があります。`
+          }`}
+          label="主な作目"
+          name="cropIds"
+          requirement="optional"
+          emptyMessage="一致する作物がありません"
+          filterMode="preFiltered"
+          inputValue={cropQuery}
+          max={CROP_LIMIT}
+          multiple
+          onInputValueChange={setCropQuery}
+          onValueChange={setCrops}
+          options={available.slice(0, CROP_SUGGESTION_LIMIT).map((crop) => ({
+            value: crop.id,
+            label: crop.name,
+            description: crop.crop_groups?.name,
+          }))}
+          placeholder="作物名を入力（例：みかん、デコポン）"
+          value={crops}
+        />
+      </div>
 
       <Fieldset
         legend="所属"

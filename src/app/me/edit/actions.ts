@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 
 import type { AuthFormState, AuthFormValues } from "@/lib/auth/form-state";
 import { AVATAR_MAX_BYTES } from "@/lib/avatar-rules";
+import { PROFILE_SAVED_SEARCH } from "@/lib/onboarding";
 import { formDataString } from "@/lib/validation";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 import { requireGeneralUser } from "@/server/auth";
@@ -119,5 +120,5 @@ export async function updateProfileAction(
   revalidatePath("/me");
   revalidatePath("/me/edit");
   revalidatePath(`/users/${session.data.userId}`);
-  redirect("/me");
+  redirect(`/me${PROFILE_SAVED_SEARCH}`);
 }

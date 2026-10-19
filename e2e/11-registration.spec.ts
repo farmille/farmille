@@ -72,6 +72,7 @@ test("メール確認、登録完了、ログインと所属の入力", async ({
     await page.goto("/me");
     await expect(page).toHaveURL(/\/login\?next=%2Fme/);
     await loginGeneral(page, { email, password, id: "", handle }, "/me");
+    await page.getByRole("button", { name: "チュートリアルを終了" }).click();
     await page.getByRole("link", { name: "表示情報を編集" }).click();
     const affiliation = page.getByRole("combobox", { name: "所属", exact: true });
     await affiliation.click();
@@ -86,7 +87,7 @@ test("メール確認、登録完了、ログインと所属の入力", async ({
     await affiliation.clear();
     await expect(page.getByRole("option")).toHaveCount(0);
     await page.getByRole("button", { name: "保存する", exact: true }).click();
-    await expect(page).toHaveURL(/\/me$/);
+    await expect(page).toHaveURL(/\/me\?saved=profile$/);
     await expect(page.getByText(selectedName, { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "ログアウト" }).click();
     await loginGeneral(page, { email, password, id: "", handle }, "/me");

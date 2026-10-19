@@ -98,7 +98,9 @@ describe("メール確認後の一般登録", () => {
       postal_code: "1000001",
       city_street: "千代田区千代田1-1",
     });
-    expect(await requests[4].json()).toMatchObject({ app_metadata: { account_type: "general" } });
+    expect(await requests[4].json()).toMatchObject({
+      app_metadata: { account_type: "general", onboarding: "pending" },
+    });
   });
   it("同時送信の敗者は既存プロフィールを削除しない", async () => {
     const { admin, requests } = client([

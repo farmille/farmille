@@ -108,6 +108,9 @@ const NULL_RENDER_STORY_IDS: ReadonlySet<string> = new Set([
   "pages-materials-id-ratingsummary--no-reviews",
   "components-display-metricbars--empty",
   "components-navigation-pagination--single-page",
+  // 初回ログインの案内は、印（localStorage）と一般会員のセッションがないときは何も描かない
+  "pages-shared-onboardingtour--without-mark",
+  "pages-signup-done-onboardingarm--default",
 ]);
 
 // Pages 配下にはルート画面の Story と、画面に依存する部品の Story が混在する。

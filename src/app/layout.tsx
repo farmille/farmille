@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 
 import { Toaster } from "@/components/Toaster";
+import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { createRootMetadata } from "@/lib/seo";
 
 import "gen-interface-jp/400.css";
@@ -44,6 +45,7 @@ export default function RootLayout({
     <html lang="ja">
       <body>
         {children}
+        <OnboardingTour />
         <Toaster />
       </body>
       <Script id="adobe-fonts" strategy="afterInteractive">
