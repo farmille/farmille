@@ -1,7 +1,7 @@
 import { reportPlotColor } from "@/components/ReportPlotColor";
 import { reportBarDomain, type ReportChartPreview } from "@/lib/usage-report";
 
-import { css, cx } from "../../../../../styled-system/css";
+import { css } from "../../../../../styled-system/css";
 
 const frame = css({
   m: "0",
@@ -27,14 +27,13 @@ const rowStyle = css({
 });
 
 const labelStyle = css({ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" });
-const trackStyle = css({ position: "relative", display: "block", h: "2.5" });
-const barStyle = css({
-  position: "absolute",
-  top: "0",
-  bottom: "0",
+/** 棒は SVG の属性で描き、実行時の値を style に流さない。横 0〜100 を目盛りの範囲に当てる。 */
+const trackStyle = css({
   display: "block",
+  w: "full",
+  h: "2.5",
+  overflow: "hidden",
   borderRadius: "bar",
-  bg: "currentColor",
 });
 const valueStyle = css({ fontWeight: "bold", fontVariantNumeric: "tabular-nums" });
 
@@ -59,12 +58,20 @@ export function ReportCardChart({ chart }: { chart: ReportChartPreview }) {
             aria-label={`${row.label} ${row.valueText}${chart.unit ? ` ${chart.unit}` : ""}`}
           >
             <span className={labelStyle}>{row.label}</span>
-            <span className={trackStyle} aria-hidden="true">
-              <i
-                className={cx(barStyle, reportPlotColor(row.colorIndex))}
-                style={{ left: `${Math.min(zero, end)}%`, width: `${Math.abs(end - zero)}%` }}
+            <svg
+              aria-hidden="true"
+              className={trackStyle}
+              preserveAspectRatio="none"
+              viewBox="0 0 100 1"
+            >
+              <rect
+                className={reportPlotColor(row.colorIndex)}
+                height="1"
+                width={Math.abs(end - zero)}
+                x={Math.min(zero, end)}
+                y="0"
               />
-            </span>
+            </svg>
             <b className={valueStyle} aria-hidden="true">
               {row.valueText}
             </b>

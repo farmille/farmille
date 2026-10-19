@@ -15,12 +15,15 @@ const lockedStyle = css({
   color: "text.subtle",
 });
 
-/** 定量データは会員だけに返すので、ログインしていない閲覧者にはグラフの代わりにこれを出す。 */
+/**
+ * 定量データは会員だけに返すので、ログインしていない閲覧者にはグラフの代わりにこれを出す。
+ * カードにグラフが出るかは未ログインでは判定できないため、本文の数値が読めることだけを伝える。
+ */
 export function ReportChartLoginNote() {
   return (
     <p className={lockedStyle}>
       <Icon name="lock" size="xs" />
-      比較のグラフはログインすると表示されます
+      区ごとの比較の数値は、ログインすると読めます
     </p>
   );
 }
