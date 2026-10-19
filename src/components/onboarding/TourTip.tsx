@@ -9,16 +9,19 @@ import {
   type RefObject,
 } from "react";
 
-import { Button } from "@/components/Button";
+import { css, cva, cx } from "../../../styled-system/css";
+import { TourCardBody } from "./TourCardBody";
+import { riseStyle, useCardHandoff, useEntered, useHandoff } from "./tour-motion";
 
-import { css, cx } from "../../../styled-system/css";
-import { TourEndButton } from "./TourEndButton";
-import { TourLabel } from "./TourLabel";
-import { riseStyle, sentenceStyle, sentences, useEntered } from "./tour-motion";
+// 画面に固定・貼り付く対象には画面へ、ページの中の対象にはページへ留め、ページの中の対象はスクロールで遅れずに一緒に動くようにする
+const anchorRecipe = cva({
+  variants: {
+    anchor: { viewport: { position: "fixed" }, page: { position: "absolute" } },
+  },
+});
 
 // 光らせる枠。周りを暗くする幕は枠の影で描き、画面の操作はさえぎらない（pointer-events: none）
 const spotStyle = css({
-  position: "fixed",
   zIndex: "guide",
   top: "var(--tour-spot-top)",
   left: "var(--tour-spot-left)",
@@ -47,7 +50,6 @@ const spotStyle = css({
 });
 
 const cardStyle = css({
-  position: "fixed",
   zIndex: "guide",
   left: "3",
   right: "3",
@@ -66,34 +68,31 @@ const cardStyle = css({
   boxShadow: "shadow.lift",
 });
 
-const headStyle = css({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  // 狭い画面では「チュートリアルを終了」を次の行へ送り、はみ出さないようにする
-  flexWrap: "wrap",
-  gap: "2",
-  minH: "10",
-  // 見出し行だけ左右の余白を詰め、ラベルと終了ボタンを1行に収める
-  mx: "-2",
-  "& > :last-child": { ml: "auto" },
-});
-const titleStyle = css({ textStyle: "body", fontWeight: "bold" });
-const bodyStyle = css({ textStyle: "supporting", color: "text.muted" });
-const rowStyle = css({ display: "flex", justifyContent: "flex-end", gap: "2", mt: "1" });
-
 // 実行時に決まる位置は CSS 変数で渡し、スタイル側は var() で受ける
 type TourVars = CSSProperties & { [key: `--tour-${string}`]: string };
 
-type Box = { top: number; left: number; width: number; height: number; cardTop: number };
+type Anchor = "viewport" | "page";
+
+type Box = {
+  anchor: Anchor;
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+  cardTop: number;
+};
 
 const PAD = 8;
 const GAP = 12;
 
-/** 画面に固定された要素（下部の固定バーなど）か。固定されていなければスクロールで見える位置に出す。 */
+/**
+ * 画面に固定された要素（下部の固定バー）か、スクロールで画面に貼り付く要素（検索欄）か。
+ * どちらでもなければ、ページと一緒にスクロールする。
+ */
 function isFixed(element: Element): boolean {
   for (let node: Element | null = element; node !== null; node = node.parentElement) {
-    if (getComputedStyle(node).position === "fixed") return true;
+    const position = getComputedStyle(node).position;
+    if (position === "fixed" || position === "sticky") return true;
   }
   return false;
 }
@@ -119,26 +118,51 @@ function useBringIntoView(target: Element | null) {
   }, [target]);
 }
 
-/** 光らせる対象の位置を測り、スクロールや画面の大きさが変わるたびに追いかける。 */
+/**
+ * 光らせる対象の位置を測る。画面に固定・貼り付く対象は画面の座標で測り、スクロールのたびに測り直す。
+ * ページの中の対象はページの座標で測り、スクロールにはブラウザがそのまま追従させる（測り直すのは大きさが変わったときだけ）。
+ */
 function useSpot(target: Element | null, card: RefObject<HTMLElement | null>): Box | null {
   const [box, setBox] = useState<Box | null>(null);
   useLayoutEffect(() => {
     if (target === null) return;
+    const anchor: Anchor = isFixed(target) ? "viewport" : "page";
     let frame = 0;
     const measure = () => {
       frame = 0;
       const r = target.getBoundingClientRect();
-      const viewport = window.innerHeight;
-      const top = Math.max(6, r.top - PAD);
-      const bottom = Math.min(viewport - 6, r.bottom + PAD);
       const cardHeight = card.current?.offsetHeight ?? 160;
+      if (anchor === "viewport") {
+        const viewport = window.innerHeight;
+        const top = Math.max(6, r.top - PAD);
+        const bottom = Math.min(viewport - 6, r.bottom + PAD);
+        const below = bottom + GAP;
+        const cardTop =
+          below + cardHeight < viewport - GAP ? below : Math.max(GAP, top - GAP - cardHeight);
+        setBox({
+          anchor,
+          top,
+          left: Math.max(6, r.left - PAD),
+          width: r.width + PAD * 2,
+          height: bottom - top,
+          cardTop,
+        });
+        return;
+      }
+      const top = r.top + window.scrollY - PAD;
+      const bottom = r.bottom + window.scrollY + PAD;
+      // ページに置いた枠は横スクロールを生むので、左右は画面の幅に収める
+      const left = Math.max(6, r.left - PAD);
+      const right = Math.min(document.documentElement.clientWidth - 6, r.right + PAD);
       const below = bottom + GAP;
+      const page = document.documentElement.scrollHeight;
       const cardTop =
-        below + cardHeight < viewport - GAP ? below : Math.max(GAP, top - GAP - cardHeight);
+        below + cardHeight < page - GAP ? below : Math.max(GAP, top - GAP - cardHeight);
       setBox({
+        anchor,
         top,
-        left: Math.max(6, r.left - PAD),
-        width: r.width + PAD * 2,
+        left: left + window.scrollX,
+        width: right - left,
         height: bottom - top,
         cardTop,
       });
@@ -147,10 +171,14 @@ function useSpot(target: Element | null, card: RefObject<HTMLElement | null>): B
       if (frame === 0) frame = requestAnimationFrame(measure);
     };
     measure();
-    window.addEventListener("scroll", schedule, { capture: true, passive: true });
+    if (anchor === "viewport") {
+      window.addEventListener("scroll", schedule, { capture: true, passive: true });
+    }
     window.addEventListener("resize", schedule);
+    // ページの中の対象は、上の要素が読み込まれて位置がずれたときにも測り直す
     const observer = new ResizeObserver(schedule);
     observer.observe(target);
+    observer.observe(document.body);
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", schedule, { capture: true });
@@ -190,9 +218,14 @@ export function TourTip({
   const card = useRef<HTMLElement>(null);
   useBringIntoView(target);
   const box = useSpot(target, card);
-  const entered = useEntered();
+  const handoff = useHandoff();
+  const entered = useEntered(handoff.continuing);
+  const lit = useEntered(handoff.dimmed);
+  useCardHandoff(card, box !== null, true);
   if (target === null) return null;
   const state = entered && box !== null ? "" : undefined;
+  const spotState = lit && box !== null ? "" : undefined;
+  const anchor = anchorRecipe({ anchor: box?.anchor ?? "viewport" });
   const vars: TourVars = {
     "--tour-spot-top": `${box?.top ?? 0}px`,
     "--tour-spot-left": `${box?.left ?? 0}px`,
@@ -203,46 +236,31 @@ export function TourTip({
   return (
     <>
       <div
-        className={spotStyle}
+        className={cx(anchor, spotStyle)}
         style={vars}
-        data-entered={state}
+        data-entered={spotState}
         data-pulse={pulse ? "" : undefined}
         aria-hidden="true"
       />
       <section
         ref={card}
         data-tour-tip=""
-        className={cx(cardStyle, riseStyle)}
+        className={cx(anchor, cardStyle, riseStyle)}
         style={vars}
         data-entered={state}
         role="dialog"
         aria-modal="false"
         aria-labelledby="tour-tip-title"
       >
-        <div className={headStyle}>
-          {section ? <TourLabel section={section} /> : <span />}
-          <TourEndButton onEnd={onEnd} />
-        </div>
-        <h3 id="tour-tip-title" className={titleStyle}>
-          {title}
-        </h3>
-        <p className={bodyStyle}>
-          {sentences(body).map((line) => (
-            <span key={line} className={sentenceStyle}>
-              {line}
-            </span>
-          ))}
-        </p>
-        <div className={rowStyle}>
-          <Button variant="ghost" size="sm" onClick={onSkipStep}>
-            この手順をスキップ
-          </Button>
-          {primary ? (
-            <Button size="sm" onClick={primary.onClick}>
-              {primary.label}
-            </Button>
-          ) : null}
-        </div>
+        <TourCardBody
+          section={section}
+          title={title}
+          titleId="tour-tip-title"
+          body={body}
+          primary={primary}
+          onSkipStep={onSkipStep}
+          onEnd={onEnd}
+        />
       </section>
     </>
   );

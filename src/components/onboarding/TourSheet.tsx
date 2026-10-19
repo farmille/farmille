@@ -11,7 +11,9 @@ import {
   sentenceStyle,
   sentences,
   useBottomSpace,
+  useCardHandoff,
   useEntered,
+  useHandoff,
 } from "./tour-motion";
 
 const scrimStyle = css({
@@ -55,10 +57,7 @@ const headStyle = css({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  // 狭い画面では「チュートリアルを終了」を次の行へ送り、はみ出さないようにする
-  flexWrap: "wrap",
   gap: "2",
-  minH: "10",
   // 見出し行だけ左右の余白を詰め、ラベルと終了ボタンを1行に収める
   mx: "-3",
   "& > :last-child": { ml: "auto" },
@@ -112,13 +111,16 @@ export function TourSheet({
   onSkipStep,
   onEnd,
 }: TourSheetProps) {
-  const entered = useEntered();
+  const handoff = useHandoff();
+  const entered = useEntered(handoff.continuing);
+  const dimmed = useEntered(handoff.dimmed);
   const state = entered ? "" : undefined;
   const { ref, spaceStyle } = useBottomSpace<HTMLElement>();
+  useCardHandoff(ref, true, true);
   return (
     <>
       <div aria-hidden="true" className={bottomSpaceStyle} style={spaceStyle} />
-      <div className={scrimStyle} data-entered={state} aria-hidden="true" />
+      <div className={scrimStyle} data-entered={dimmed ? "" : undefined} aria-hidden="true" />
       <section
         ref={ref}
         data-tour-sheet=""

@@ -5,22 +5,18 @@ import { Icon } from "@/components/Icon";
 import { css } from "../../../styled-system/css";
 
 const endStyle = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "0.5",
+  w: "10",
+  h: "10",
+  display: "grid",
+  placeItems: "center",
   flexShrink: 0,
-  minH: "10",
-  px: "2.5",
-  whiteSpace: "nowrap",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  borderRadius: "pill",
-  bg: "surface.card",
-  color: "text.default",
-  fontSize: "sm",
-  fontWeight: "bold",
-  boxShadow: "overlay",
+  // 押せる範囲は 40px のまま、外側の余白を詰めて、見える × を見出し行の角に寄せる
+  m: "-2",
+  padding: "0",
+  borderWidth: "0",
+  borderRadius: "button",
+  bg: "transparent",
+  color: "text.muted",
   cursor: "pointer",
   _focusVisible: { outlineWidth: "2px", outlineStyle: "solid", outlineColor: "primary.700" },
 });
@@ -28,9 +24,8 @@ const endStyle = css({
 /** 案内そのものを終える。シートと吹き出しの右上に、どの場面でも出す。 */
 export function TourEndButton({ onEnd }: { onEnd: () => void }) {
   return (
-    <button type="button" className={endStyle} onClick={onEnd}>
-      <Icon name="close" size="xs" />
-      チュートリアルを終了
+    <button type="button" className={endStyle} onClick={onEnd} aria-label="チュートリアルを終了">
+      <Icon name="close" size="md" />
     </button>
   );
 }

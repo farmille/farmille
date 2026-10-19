@@ -2,14 +2,14 @@
 
 import { css, cx } from "../../../styled-system/css";
 import { Icon } from "../Icon";
-import { TourLabel } from "./TourLabel";
+import { TourCardBody } from "./TourCardBody";
 import {
   bottomSpaceStyle,
   riseStyle,
-  sentenceStyle,
-  sentences,
   useBottomSpace,
+  useCardHandoff,
   useEntered,
+  useHandoff,
 } from "./tour-motion";
 
 const barStyle = css({
@@ -21,18 +21,16 @@ const barStyle = css({
   mx: "auto",
   maxW: "guide",
   display: "flex",
-  flexWrap: "wrap",
-  alignItems: "center",
+  flexDirection: "column",
   gap: "2",
-  pl: "4",
-  pr: "2.5",
+  px: "4.5",
   pt: "3",
-  pb: "2.5",
+  pb: "3.5",
   bg: "surface.card",
   color: "text.default",
-  borderWidth: "2px",
+  borderWidth: "1px",
   borderStyle: "solid",
-  borderColor: "primary.700",
+  borderColor: "border.default",
   borderRadius: "card",
   boxShadow: "shadow.lift",
 });
@@ -84,46 +82,6 @@ const hintButtonStyle = css({
   },
 });
 const nudgeStyle = css({ animation: "tourNudge", _motionReduce: { animation: "none" } });
-const titleStyle = css({ flex: "1 1 100%", minW: "0", textStyle: "body", fontWeight: "bold" });
-
-// ラベルだけを1行目に置く
-const labelRowStyle = css({ flex: "1 1 100%", display: "flex" });
-const messageStyle = css({ flex: "1 1 100%", minW: "0", textStyle: "supporting" });
-const buttonBase = {
-  minH: "9",
-  px: "3",
-  borderRadius: "button",
-  fontSize: "sm",
-  fontWeight: "bold",
-  cursor: "pointer",
-  _focusVisible: { outlineWidth: "2px", outlineStyle: "solid", outlineColor: "primary.700" },
-} as const;
-const skipStyle = css({
-  ...buttonBase,
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  bg: "surface.card",
-  color: "primary.700",
-});
-// 案内を終える。枠で囲み、押せるボタンだと分かるようにする（色はスキップより控えめ）
-const endStyle = css({
-  ...buttonBase,
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.strong",
-  bg: "surface.card",
-  color: "text.default",
-});
-// 帯の主ボタン（保存する）は右端に置き、いちばん目立たせる
-const actionStyle = css({
-  ...buttonBase,
-  ml: "auto",
-  px: "4",
-  bg: "primary.700",
-  color: "text.inverse",
-});
-
 export type TourBarProps = {
   /** 3段階のどこにいるか。帯の上に「チュートリアル中　1 / 3」と出す */
   section?: number;
@@ -147,8 +105,9 @@ export function TourBar({
   action,
   scrollHint,
 }: TourBarProps) {
-  const entered = useEntered();
+  const entered = useEntered(useHandoff().continuing);
   const { ref, spaceStyle } = useBottomSpace<HTMLDivElement>();
+  useCardHandoff(ref, true, false);
   return (
     <>
       <div aria-hidden="true" className={bottomSpaceStyle} style={spaceStyle} />
@@ -158,11 +117,6 @@ export function TourBar({
         data-entered={entered ? "" : undefined}
         role="status"
       >
-        {section ? (
-          <span className={labelRowStyle}>
-            <TourLabel section={section} />
-          </span>
-        ) : null}
         {scrollHint ? (
           <span className={hintStyle}>
             <button type="button" className={hintButtonStyle} onClick={scrollHint.onClick}>
@@ -171,25 +125,14 @@ export function TourBar({
             </button>
           </span>
         ) : null}
-        {title ? <p className={titleStyle}>{title}</p> : null}
-        <p className={messageStyle}>
-          {sentences(message).map((line) => (
-            <span key={line} className={sentenceStyle}>
-              {line}
-            </span>
-          ))}
-        </p>
-        <button type="button" className={skipStyle} onClick={onSkipStep}>
-          この手順をスキップ
-        </button>
-        <button type="button" className={endStyle} onClick={onEnd}>
-          チュートリアルを終了
-        </button>
-        {action ? (
-          <button type="button" className={actionStyle} onClick={action.onClick}>
-            {action.label}
-          </button>
-        ) : null}
+        <TourCardBody
+          section={section}
+          title={title}
+          body={message}
+          primary={action}
+          onSkipStep={onSkipStep}
+          onEnd={onEnd}
+        />
       </div>
     </>
   );

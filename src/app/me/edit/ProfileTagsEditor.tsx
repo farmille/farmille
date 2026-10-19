@@ -12,6 +12,7 @@ import {
   useRestoredField,
   type Option,
 } from "@/components/form";
+import { fieldRecipe } from "@/components/form/recipes";
 import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
 import { css } from "../../../../styled-system/css";
 
@@ -79,8 +80,9 @@ export function ProfileTagsEditor({
 
   return (
     <>
-      {/* 初回ログインの案内が光らせる欄（docs/rebuild/onboarding-tour-SPEC.md） */}
-      <div data-tour="profile-crops">
+      {/* 初回ログインの案内が光らせる欄（docs/rebuild/onboarding-tour-SPEC.md）。
+          中の Field は先頭の子になって上の余白を失うので、包む側に欄どうしの余白を付ける */}
+      <div data-tour="profile-crops" className={fieldRecipe({ spacing: "stack" })}>
         <Combobox
           description={`作物名や別名で検索して選んでください。複数選べます（${CROP_LIMIT}件まで）。公開されます。${
             available.length > CROP_SUGGESTION_LIMIT
