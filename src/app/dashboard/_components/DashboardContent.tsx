@@ -55,7 +55,7 @@ const infoValueRecipe = cva({
     fontSize: "sm",
     lineHeight: "relaxed",
     overflowWrap: "anywhere",
-    "& a": { color: "primary.800", textDecoration: "underline" },
+    "& a": { color: "text.brand", textDecoration: "underline" },
   },
   variants: {
     empty: {
@@ -159,7 +159,7 @@ const orgMark = css({
   placeItems: "center",
   fontSize: "md",
   fontWeight: "extrabold",
-  color: "primary.800",
+  color: "text.brandOnSoft",
   flex: "none",
 });
 
@@ -204,7 +204,7 @@ const kpi = css({
 const kpiValue = css({
   fontSize: "3xl",
   fontWeight: "extrabold",
-  color: "primary.800",
+  color: "text.brand",
   fontVariantNumeric: "tabular-nums",
 });
 
@@ -239,7 +239,7 @@ const materialStatusRecipe = cva({
   },
   variants: {
     verified: {
-      true: { bg: "primary.100", color: "primary.800" },
+      true: { bg: "primary.100", color: "text.brandOnSoft" },
       false: { bg: "accent.dangerSoft", color: "accent.danger" },
     },
   },

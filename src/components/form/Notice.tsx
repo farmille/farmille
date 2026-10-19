@@ -23,7 +23,7 @@ const noticeRecipe = cva({
         py: "2.5",
         borderRadius: "input",
         bg: "primary.soft",
-        color: "primary.800",
+        color: "text.brandOnSoft",
         borderColor: "primary.600/30",
         fontWeight: "bold",
       },
@@ -31,7 +31,7 @@ const noticeRecipe = cva({
         py: "3",
         borderRadius: "input",
         bg: "primary.soft",
-        color: "primary.800",
+        color: "text.brandOnSoft",
         borderColor: "primary.700/22",
       },
       warn: {

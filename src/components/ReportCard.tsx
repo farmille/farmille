@@ -38,7 +38,7 @@ const coverRecipe = cva({
     display: "grid",
     placeItems: "center",
     overflow: "hidden",
-    color: "primary.800",
+    color: "text.brandOnSoft",
   },
   variants: {
     layout: {
@@ -237,7 +237,7 @@ export function ReportCard({
             p: "3",
             textStyle: "body",
             fontWeight: "bold",
-            color: "primary.700",
+            color: "text.brand",
             textDecoration: "none",
           })}
         >

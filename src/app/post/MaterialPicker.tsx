@@ -225,7 +225,7 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
                     flex: "0 0 auto",
                     fontSize: "sm",
                     fontWeight: "bold",
-                    color: "primary.800",
+                    color: "text.brandOnSoft",
                   })}
                 >
                   選択中

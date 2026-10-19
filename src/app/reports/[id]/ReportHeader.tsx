@@ -28,7 +28,7 @@ const tagStyle = css({
   borderColor: "primary.700/30",
   borderRadius: "pill",
   bg: "primary.100",
-  color: "primary.800",
+  color: "text.brandOnSoft",
   fontSize: "sm",
   fontWeight: "semibold",
 });

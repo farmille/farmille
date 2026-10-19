@@ -55,7 +55,7 @@ const td = css({
 });
 
 const materialLink = css({
-  color: "primary.700",
+  color: "text.brand",
   fontWeight: "bold",
   textDecoration: "none",
 });

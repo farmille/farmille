@@ -21,7 +21,7 @@ const cover = css({
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
-  color: "primary.800",
+  color: "text.brandOnSoft",
 });
 
 export type ArticleCardProps = {
@@ -96,7 +96,7 @@ export function ArticleCard({
               placeItems: "center",
               fontSize: "2xs",
               fontWeight: "extrabold",
-              color: "primary.800",
+              color: "text.brandOnSoft",
               flexShrink: "0",
             })}
           >

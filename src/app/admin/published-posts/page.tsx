@@ -36,7 +36,7 @@ export default async function PublishedPostsPage() {
               textStyle: "body",
               whiteSpace: "pre-wrap",
               overflowWrap: "anywhere",
-              color: "primary.700",
+              color: "text.brand",
               mb: "3",
             })}
           >

@@ -27,7 +27,7 @@ export function BookmarkButton({ saved, action }: BookmarkButtonProps) {
         borderRadius: "button",
         border: "none",
         bg: "transparent",
-        color: "primary.700",
+        color: "text.brand",
         cursor: "pointer",
         _disabled: { cursor: "default", opacity: "0.5" },
       })}

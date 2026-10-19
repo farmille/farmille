@@ -15,7 +15,7 @@ export const chipRecipe = sva({
       pl: "3",
       pr: "3",
       bg: "primary.100",
-      color: "primary.800",
+      color: "text.brandOnSoft",
       borderWidth: "1px",
       borderStyle: "solid",
       borderColor: "primary.700/30",
@@ -42,7 +42,7 @@ export const chipRecipe = sva({
       borderWidth: "0",
       borderRadius: "pill",
       bg: "primary.700/18",
-      color: "primary.800",
+      color: "text.brandOnSoft",
       cursor: "pointer",
       _focusVisible: {
         outlineWidth: "2px",

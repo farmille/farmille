@@ -49,7 +49,7 @@ export const logText = css({
   flex: "1",
   minW: "0",
   color: "text.muted",
-  "& a": { color: "primary.800", textDecoration: "underline" },
+  "& a": { color: "text.brand", textDecoration: "underline" },
 });
 
 export const visuallyHidden = css({ srOnly: true });
@@ -73,7 +73,7 @@ export const pillButtonRecipe = cva({
   },
   variants: {
     tone: {
-      primary: { color: "primary.800" },
+      primary: { color: "text.brand" },
       ghost: { color: "text.muted" },
     },
   },

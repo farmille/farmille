@@ -78,7 +78,7 @@ export function ReportGate({ reportPath }: { reportPath: string }) {
             <Link
               className={css({
                 fontSize: "sm",
-                color: "primary.700",
+                color: "text.brand",
                 textDecoration: "none",
                 whiteSpace: "nowrap",
               })}

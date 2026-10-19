@@ -74,7 +74,7 @@ const evidenceRecipe = cva({
   },
   variants: {
     tone: {
-      direct: { bg: "primary.100", color: "primary.800", borderColor: "primary.700/30" },
+      direct: { bg: "primary.100", color: "text.brandOnSoft", borderColor: "primary.700/30" },
       group: { bg: "surface.page", color: "text.muted", borderColor: "border.default" },
     },
   },
@@ -120,7 +120,7 @@ export function SearchResultCard({
           <span className={css({ color: "text.subtle" })}>
             {rating === null ? "" : " ・ "}実証詳細レポート{" "}
             <b className={reportCountRecipe({ emphasized: reportCount > 0 })}>{reportCount}</b> 件
-            ・ <span className={css({ color: "primary.800" })}>★</span> お気に入り{" "}
+            ・ <span className={css({ color: "text.brand" })}>★</span> お気に入り{" "}
             <b className={cx(tabularNums, css({ color: "text.default" }))}>{savedCount}</b>
           </span>
         </div>

@@ -96,7 +96,7 @@ const markdownStyle = css({
   "& > :first-child": { mt: "0" },
   "& :is(h2, h3)": { textStyle: "title", fontWeight: "extrabold", mt: "5.5", mb: "2" },
   "& img": { maxW: "full", borderRadius: "media" },
-  "& a": { color: "primary.800" },
+  "& a": { color: "text.brand" },
 });
 
 export function ReadingMarkdown({ html }: { html: string }) {

@@ -32,7 +32,7 @@ const valueStyle = css({ flex: "1", minW: "0", truncate: true });
 
 const triggerIconStyle = css({ display: "flex", color: "text.subtle" });
 
-const checkStyle = css({ display: "flex", color: "primary.700" });
+const checkStyle = css({ display: "flex", color: "text.brand" });
 
 type SelectBodyProps<V extends string> = {
   options: readonly Option<V>[];

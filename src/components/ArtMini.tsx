@@ -24,7 +24,7 @@ const thumb = css({
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
-  color: "primary.800",
+  color: "text.brandOnSoft",
 });
 
 export type ArtMiniProps = {

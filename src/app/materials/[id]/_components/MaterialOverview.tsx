@@ -65,7 +65,7 @@ const labelRecipe = cva({
   },
   variants: {
     on: {
-      true: { color: "primary.800", fontWeight: "bold" },
+      true: { color: "text.brand", fontWeight: "bold" },
       false: { color: "text.subtle" },
     },
   },

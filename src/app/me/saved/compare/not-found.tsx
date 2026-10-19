@@ -35,7 +35,7 @@ export default function CompareNotFound() {
             href="/me/saved"
             className={css({
               mt: "2",
-              color: "primary.700",
+              color: "text.brand",
               textStyle: "body",
               fontWeight: "bold",
               textDecoration: "none",

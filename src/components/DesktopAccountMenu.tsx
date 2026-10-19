@@ -20,7 +20,7 @@ const trigger = css({
   borderStyle: "solid",
   borderColor: "border.strong",
   bg: "surface.card",
-  color: "primary.700",
+  color: "text.brand",
   cursor: "pointer",
   _hover: { bg: "primary.soft" },
   "&[aria-expanded=true]": { bg: "primary.soft" },
@@ -55,14 +55,14 @@ const item = css({
   textDecoration: "none",
   whiteSpace: "nowrap",
   cursor: "pointer",
-  _highlighted: { bg: "primary.soft", color: "primary.800" },
+  _highlighted: { bg: "primary.soft", color: "text.brandOnSoft" },
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.600",
     outlineOffset: "2px",
   },
-  "&[aria-current=page]": { bg: "primary.soft", color: "primary.800" },
+  "&[aria-current=page]": { bg: "primary.soft", color: "text.brandOnSoft" },
 });
 
 type AccountMenuLink = {

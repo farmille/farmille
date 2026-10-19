@@ -46,7 +46,7 @@ export function ProcedureDetail({ procedure }: { procedure: Procedure }) {
             },
           })}
         >
-          <div className={css({ fontSize: "lg", fontWeight: "extrabold", color: "primary.800" })}>
+          <div className={css({ fontSize: "lg", fontWeight: "extrabold", color: "text.brand" })}>
             {procedure.needId ? "会員登録が必要です" : "会員登録は不要です"}
           </div>
           <div

@@ -24,7 +24,7 @@ const noticeRecipe = cva({
     },
   },
 });
-const checkStyle = css({ display: "flex", flex: "none", color: "primary.700" });
+const checkStyle = css({ display: "flex", flex: "none", color: "text.brand" });
 const followUpStyle = css({ mt: "1.5" });
 const disclaimerStyle = css({
   mt: "2",
@@ -41,7 +41,7 @@ const noticeLinkStyle = css({
   whiteSpace: "nowrap",
 });
 const textLinkStyle = css({
-  color: "primary.800",
+  color: "text.brand",
   fontWeight: "semibold",
   textDecoration: "none",
 });
