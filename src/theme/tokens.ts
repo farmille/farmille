@@ -69,6 +69,8 @@ export const tokens = {
         value: "0 1px 2px rgba(30,35,31,.05), 0 4px 14px rgba(30,35,31,.06)",
       },
       lift: { value: "0 8px 30px rgba(30,35,31,.16)" },
+      // 初回ログインの案内で光らせる枠。枠の外を暗くし、枠のふちを白く縁取る
+      spotlight: { value: "0 0 0 9999px rgba(30,35,31,.45), 0 0 0 3px #FFFFFF" },
       // 写真の上に置く半透明の面。上辺の内側ハイライトでガラスの厚みを出す
       glass: {
         value: "inset 0 1px 0 rgba(255,255,255,.65), 0 10px 32px rgba(30,35,31,.18)",
@@ -116,6 +118,10 @@ export const tokens = {
     "3xl": {
       value: "21px",
       description: "ページの題名（プロフィール名・規約・企業向けガイドの SP）。",
+    },
+    welcome: {
+      value: "26px",
+      description: "初回ログインの案内の最初のシート（Farmilleへようこそ）の見出し専用。",
     },
     display: {
       value: "38px",
@@ -235,6 +241,8 @@ export const tokens = {
       material: { value: "15rem" },
     },
     dialog: { value: "24rem" },
+    // 初回ログインの案内（シート・吹き出し・帯）。PCでは文が1〜2行に収まる幅まで広げる
+    guide: { value: "34rem" },
     auth: { value: "26.875rem" },
     content: {
       form: { value: "44rem" },
@@ -268,7 +276,13 @@ export const tokens = {
     // トーストだけUI標準より柔らかいカーブにする
     soft: { value: "ease" },
   },
-  animations: { skeletonPulse: { value: "skeleton-pulse 1.6s ease-in-out infinite" } },
+  animations: {
+    skeletonPulse: { value: "skeleton-pulse 1.6s ease-in-out infinite" },
+    // 初回ログインの案内で、下へスクロールできることを示す矢印
+    tourNudge: { value: "tour-nudge 1.4s {easings.out} infinite" },
+    // 押してほしいボタンの周りに広がる輪
+    tourRing: { value: "tour-ring 1.6s {easings.out} infinite" },
+  },
   durations: {
     fast: { value: "160ms" },
     dialog: { value: "250ms" },
@@ -276,6 +290,8 @@ export const tokens = {
     stagger: { value: "50ms" },
   },
   zIndex: {
+    // 初回ログインの案内。下部ナビ・固定バー（20〜25）より上、ダイアログと候補一覧（50）より下
+    guide: { value: 40 },
     dialog: { value: 50 },
     toast: { value: 60 },
   },

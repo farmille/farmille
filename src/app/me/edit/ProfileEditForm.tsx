@@ -63,7 +63,12 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
   const values = submittedValuesOf(state);
 
   return (
-    <Form action={formAction} errors={fieldErrorsOf(state)} persist="profile">
+    <Form
+      action={formAction}
+      errors={fieldErrorsOf(state)}
+      persist="profile"
+      data-tour="profile-form"
+    >
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
       <div className={slots}>

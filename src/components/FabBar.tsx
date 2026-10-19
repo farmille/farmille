@@ -128,7 +128,7 @@ export async function FabBar({
         <Link href={reportHref} className={reportLink}>
           実証詳細レポートを書く
         </Link>
-        <Link href={reviewHref} className={reviewLink}>
+        <Link href={reviewHref} className={reviewLink} data-tour="review-link">
           感想口コミを書く
         </Link>
       </div>

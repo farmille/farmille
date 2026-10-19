@@ -109,6 +109,7 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
   return (
     <div
       aria-busy={isPending || undefined}
+      data-tour="search-box"
       onCompositionEnd={() => setComposing(false)}
       onCompositionStart={() => setComposing(true)}
     >

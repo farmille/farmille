@@ -17,6 +17,7 @@ sb.mock(import("../src/server/auth.ts"));
 sb.mock(import("../src/server/supabase.ts"));
 sb.mock(import("../src/app/company-requests/actions.ts"));
 sb.mock(import("../src/server/actions/helpful.ts"));
+sb.mock(import("../src/server/actions/onboarding.ts"));
 sb.mock(import("../src/server/actions/post-actions.ts"));
 sb.mock(import("../src/server/queries/post-actions.ts"));
 sb.mock(import("../src/server/queries/reviews.ts"));

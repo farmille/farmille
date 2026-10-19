@@ -4,6 +4,7 @@ import * as v from "valibot";
 
 import { clientEnv } from "@/env";
 import { generalRegistrationSchema } from "@/lib/auth/registration-schema";
+import { ONBOARDING_PENDING } from "@/lib/onboarding";
 import { toErrorCode } from "@/server/accounts/auth-errors";
 import { fail, succeed, type Result } from "@/server/result";
 import { createAdminSupabase, createIsolatedAuthClient } from "@/server/supabase";
@@ -159,7 +160,7 @@ export async function registerGeneralUserWithSupabase(
   }
   const updated = await admin.auth.admin.updateUserById(userId, {
     password: input.password,
-    app_metadata: { account_type: "general" },
+    app_metadata: { account_type: "general", onboarding: ONBOARDING_PENDING },
   });
   if (updated.error) {
     await rollbackProfile(admin, userId);
