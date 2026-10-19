@@ -273,8 +273,6 @@ export const tokens = {
   // モーション。UIの標準カーブと、要素ごとの継続時間を1か所に持つ
   easings: {
     out: { value: "cubic-bezier(0.23, 1, 0.32, 1)" },
-    // 画面の中で位置を移すときのカーブ（案内のカードが次の段階の位置へ移るときなど）
-    inOut: { value: "cubic-bezier(0.77, 0, 0.175, 1)" },
     // トーストだけUI標準より柔らかいカーブにする
     soft: { value: "ease" },
   },

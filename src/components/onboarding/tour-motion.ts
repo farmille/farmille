@@ -67,7 +67,7 @@ function moveFrom(card: HTMLElement, from: DOMRect) {
         { transform: `translate(${from.left - to.left}px, ${from.top - to.top}px)` },
         { transform: "translate(0, 0)" },
       ],
-      { duration: MOVE_MS, easing: token("easings.inOut") },
+      { duration: MOVE_MS, easing: token("easings.out") },
     );
   }
   for (const child of card.children) {
