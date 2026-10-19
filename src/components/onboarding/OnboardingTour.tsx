@@ -5,8 +5,9 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import {
+  PROFILE_SAVED_SEARCH,
   clearOnboarding,
-  isGeneralSession,
+  isOnboardingPending,
   onboardingShowsOn,
   onboardingStepAfterNavigation,
   readOnboardingStep,
@@ -14,6 +15,7 @@ import {
   writeOnboardingStep,
   type OnboardingStep,
 } from "@/lib/onboarding";
+import { finishOnboardingAction } from "@/server/actions/onboarding";
 
 import { toast } from "../Toaster";
 import { TourBar } from "./TourBar";
@@ -31,13 +33,22 @@ function subscribe(listener: () => void) {
     window.removeEventListener("storage", listener);
   };
 }
+// localStorage を使えないブラウザ（保存を拒否する設定など）では、進み具合を持てないので案内を出さない
 function readStep(): OnboardingStep | null {
-  return readOnboardingStep(window.localStorage);
+  try {
+    return readOnboardingStep(window.localStorage);
+  } catch {
+    return null;
+  }
 }
 const readNothing = () => null;
 function saveStep(step: OnboardingStep | null) {
-  if (step === null) clearOnboarding(window.localStorage);
-  else writeOnboardingStep(window.localStorage, step);
+  try {
+    if (step === null) clearOnboarding(window.localStorage);
+    else writeOnboardingStep(window.localStorage, step);
+  } catch {
+    return;
+  }
   listeners.forEach((listener) => listener());
 }
 
@@ -63,26 +74,52 @@ function useTourTarget(name: string | null): Element | null {
 // 実証詳細レポートの見出しが画面の上から半分より上に来たら、見たものとして次へ進む
 const SECTION_SEEN = 0.5;
 const SECTION_OFFSET = 72;
+const FINISH_FAILED = "チュートリアルを終了できませんでした。時間を置いて再度お試しください。";
 // 最後のお礼を出しておく時間
 const THANKS_SHOWN = 1600;
 
 /**
+ * 案内を終えた印をアカウントに残し、セッションを取り直してから、このブラウザの進み具合を消す。
+ * 取り直す前に消すと、古いセッションの印を見て案内を最初から出し直してしまう。
+ */
+async function finishOnboarding(): Promise<boolean> {
+  try {
+    await finishOnboardingAction();
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : FINISH_FAILED);
+    return false;
+  }
+  const { error } = await createAuthBrowserClient().auth.refreshSession();
+  if (error) {
+    toast.error(FINISH_FAILED);
+    return false;
+  }
+  saveStep(null);
+  return true;
+}
+
+/**
  * 初回ログインの案内（docs/rebuild/onboarding-tour-SPEC.md）。
- * 登録完了画面で残した印があり、一般会員でログインしているときだけ、実際の画面の上に案内を重ねる。
+ * 登録後に案内を終えていない一般会員でログインしているときだけ、実際の画面の上に案内を重ねる。
  */
 export function OnboardingTour() {
   const step = useSyncExternalStore(subscribe, readStep, readNothing);
   const pathname = usePathname();
   const router = useRouter();
-  const [general, setGeneral] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [thanks, setThanks] = useState(false);
 
+  // 案内を待っているアカウントで、このブラウザにまだ進み具合が無ければ、ようこそから始める。
+  // 終えた直後に古い判定で始め直さないよう、取り直したセッションの判定だけで決める
   useEffect(() => {
-    if (step === null) return;
     let alive = true;
     void createAuthBrowserClient()
       .auth.getSession()
       .then(({ data }) => {
-        if (alive) setGeneral(isGeneralSession(data.session));
+        if (!alive) return;
+        const next = isOnboardingPending(data.session);
+        setPending(next);
+        if (next && step === null) saveStep("welcome");
       });
     return () => {
       alive = false;
@@ -91,41 +128,56 @@ export function OnboardingTour() {
 
   // 画面を移ったことで進む段階（資材ページが開いた・投稿画面が開いた）
   useEffect(() => {
-    if (step === null || !general) return;
+    if (step === null || !pending) return;
     const after = onboardingStepAfterNavigation(step, pathname);
     if (after !== null) saveStep(after);
-  }, [step, pathname, general]);
+  }, [step, pathname, pending]);
 
-  const go = useCallback((next: OnboardingStep | null) => saveStep(next), []);
+  // お礼を短く出してからホームへ戻る。終えた印は「閉じる」の時点で残してある
+  useEffect(() => {
+    if (!thanks) return;
+    const leave = window.setTimeout(() => {
+      setThanks(false);
+      router.push("/");
+    }, THANKS_SHOWN);
+    return () => window.clearTimeout(leave);
+  }, [thanks, router]);
+
+  const go = useCallback((next: OnboardingStep) => saveStep(next), []);
   const push = useCallback((href: string) => router.push(href), [router]);
-  const end = useCallback(() => {
-    saveStep(null);
-    toast("チュートリアルを終了しました。");
+  const end = useCallback(async () => {
+    if (await finishOnboarding()) toast("チュートリアルを終了しました。");
+  }, []);
+  const complete = useCallback(async () => {
+    if (await finishOnboarding()) setThanks(true);
   }, []);
 
-  useEffect(() => {
-    if (step === null || !general) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") end();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [step, general, end]);
-
-  if (step === null || !general || !onboardingShowsOn(step, pathname)) return null;
-  return <TourStep key={step} step={step} pathname={pathname} go={go} end={end} push={push} />;
+  if (thanks) return <TourSaved title="ありがとうございました" />;
+  if (step === null || !pending || !onboardingShowsOn(step, pathname)) return null;
+  return (
+    <TourStep
+      key={step}
+      step={step}
+      pathname={pathname}
+      go={go}
+      end={end}
+      complete={complete}
+      push={push}
+    />
+  );
 }
 
 type TourStepProps = {
   step: OnboardingStep;
   pathname: string;
-  go: (next: OnboardingStep | null) => void;
+  go: (next: OnboardingStep) => void;
   end: () => void;
+  complete: () => void;
   push: (href: string) => void;
 };
 
 /** 段階ごとの案内。段階が変わるたびに作り直し、たたんだ状態などを持ち越さない。 */
-function TourStep({ step, pathname, go, end, push }: TourStepProps) {
+function TourStep({ step, pathname, go, end, complete, push }: TourStepProps) {
   const skip = () => go(skipOnboardingSection(step));
   switch (step) {
     case "welcome":
@@ -201,48 +253,34 @@ function TourStep({ step, pathname, go, end, push }: TourStepProps) {
         />
       );
     case "finish":
-      return <FinishStep go={go} push={push} />;
+      return (
+        <TourSheet
+          title="チュートリアルはこれで完了です"
+          body="使用したことのある資材があれば、感想口コミを記入してみてください。プロフィールの変更はマイページから、感想口コミの投稿は画面下の「＋」から、いつでもできます。"
+          primaryLabel="閉じる"
+          onPrimary={complete}
+        />
+      );
   }
-}
-
-/** 最後のシート。「閉じる」でお礼を短く出してから、ホームへ戻って案内を終える。 */
-function FinishStep({ go, push }: Pick<TourStepProps, "go" | "push">) {
-  const [thanks, setThanks] = useState(false);
-  useEffect(() => {
-    if (!thanks) return;
-    const leave = window.setTimeout(() => {
-      push("/");
-      go(null);
-    }, THANKS_SHOWN);
-    return () => window.clearTimeout(leave);
-  }, [thanks, go, push]);
-  if (thanks) return <TourSaved title="ありがとうございました" />;
-  return (
-    <TourSheet
-      title="チュートリアルはこれで完了です"
-      body="使用したことのある資材があれば、感想口コミを記入してみてください。プロフィールの変更はマイページから、感想口コミの投稿は画面下の「＋」から、いつでもできます。"
-      primaryLabel="閉じる"
-      onPrimary={() => setThanks(true)}
-    />
-  );
 }
 
 type StepControls = { skip: () => void; end: () => void };
 
 const SEARCH_BOX = "search-box";
+const INTERACTIVE =
+  "a[href], button, input, select, textarea, label, [role=button], [role=combobox], [tabindex]:not([tabindex='-1'])";
+
 /**
- * 入力が目的の場面で、案内の外を押したときの扱い。どこを押しても入力欄を開いて次へ進める。
- * 目印の外のリンクやボタンは、押した先へ移ったり別の欄に入力が移ったりしないよう、本来の動きを止める。
+ * 入力が目的の場面で、案内の外を押したときの扱い。どこを押しても説明をたたんで次へ進める。
+ * リンクやボタンは本来の動きのまま通し、何もないところを押したときだけ入力欄を開く。
  */
 function takeBackgroundTap(event: MouseEvent, target: Element | null): boolean {
   if (!(event.target instanceof Element)) return false;
   if (event.target.closest("[data-tour-sheet], [data-tour-tip], [role=status]") !== null)
     return false;
-  if (target?.contains(event.target) !== true) {
-    event.preventDefault();
-    event.stopPropagation();
+  if (target?.contains(event.target) !== true && event.target.closest(INTERACTIVE) === null) {
+    target?.querySelector<HTMLElement>("input:not([type=hidden]), textarea")?.focus();
   }
-  target?.querySelector<HTMLElement>("input:not([type=hidden]), textarea")?.focus();
   return true;
 }
 
@@ -414,9 +452,14 @@ function ProfileStep({
     return () => document.removeEventListener("submit", onSubmit, true);
   }, [go]);
 
-  // 保存できるとマイページへ移る。そこで保存したことを伝えてから、検索画面へ移って次の段階の案内を出す
+  // 保存できるとマイページへ移る。そこで保存したことを伝えてから、検索画面へ移って次の段階の案内を出す。
+  // 保存できずにキャンセルなどでマイページへ移ったときは、プロフィールの段階へ戻す
   useEffect(() => {
     if (step !== "profileSaving" || pathname !== "/me") return;
+    if (window.location.search !== PROFILE_SAVED_SEARCH) {
+      go("profile");
+      return;
+    }
     const show = window.setTimeout(() => setSaved(true), 0);
     const leave = window.setTimeout(() => {
       go("searchIntro");
@@ -466,6 +509,8 @@ function ScrollStep({ go, skip, end }: StepControls & { go: (next: OnboardingSte
       if (reports.getBoundingClientRect().top < window.innerHeight * SECTION_SEEN)
         go("reviewIntro");
     };
+    // 目印が出た時点で、もう見えている（スクロール位置が戻された）こともある
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [go, reports]);

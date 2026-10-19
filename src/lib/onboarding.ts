@@ -2,9 +2,15 @@ import type { Session } from "@supabase/supabase-js";
 import * as v from "valibot";
 
 /**
- * 初回ログインの案内（docs/rebuild/onboarding-tour-SPEC.md）の進み具合。
- * 登録完了画面を開いたブラウザの localStorage にだけ置き、サーバーには持たない。
+ * 初回ログインの案内（docs/rebuild/onboarding-tour-SPEC.md）を待っているアカウントの印。
+ * 一般会員の登録完了時に app_metadata.onboarding へ入れ、案内を終えたら消す。
  */
+export const ONBOARDING_PENDING = "pending";
+
+/** プロフィールを保存できたときだけ、マイページへ戻る URL に付ける。案内はこれを見て次の段階へ進む。 */
+export const PROFILE_SAVED_SEARCH = "?saved=profile";
+
+/** 案内の進み具合。案内中のブラウザの localStorage に置く。 */
 export const ONBOARDING_STORAGE_KEY = "farmille:onboarding";
 
 export const onboardingSteps = [
@@ -67,6 +73,8 @@ export function onboardingShowsOn(step: OnboardingStep, pathname: string): boole
     case "materialScroll":
     case "reviewLink":
       return materialPath.test(pathname);
+    case "finish":
+      return reviewFormPath.test(pathname);
     default:
       return true;
   }
@@ -109,8 +117,12 @@ export function clearOnboarding(storage: Storage): void {
   storage.removeItem(ONBOARDING_STORAGE_KEY);
 }
 
-/** 案内を出すのは一般会員だけ。Supabase のセッション（auth.getSession の結果）の利用者区分で判定する。 */
-export function isGeneralSession(session: Session | null): boolean {
+/** 案内を出すのは、登録後に案内を終えていない一般会員だけ。Supabase のセッション（auth.getSession の結果）で判定する。 */
+export function isOnboardingPending(session: Session | null): boolean {
   if (session === null) return false;
-  return v.is(v.literal("general"), session.user.app_metadata.account_type);
+  const metadata = session.user.app_metadata;
+  return (
+    v.is(v.literal("general"), metadata.account_type) &&
+    v.is(v.literal(ONBOARDING_PENDING), metadata.onboarding)
+  );
 }

@@ -3,8 +3,8 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { OnboardingTour } from "./OnboardingTour";
 
 /**
- * 案内は、登録完了画面で残した印（localStorage）と一般会員のセッションがあるときだけ出る。
- * Storybook には両方ないので何も描かない。各場面の見た目は TourSheet・TourTip・TourBar・TourSaved を見る。
+ * 案内は、登録後に案内を終えていない一般会員のセッションがあるときだけ出る。
+ * Storybook にはセッションがないので何も描かない。各場面の見た目は TourSheet・TourTip・TourBar・TourSaved を見る。
  */
 const meta = {
   title: "Pages/Shared/OnboardingTour",

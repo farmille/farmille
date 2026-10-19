@@ -279,9 +279,9 @@ export const tokens = {
   animations: {
     skeletonPulse: { value: "skeleton-pulse 1.6s ease-in-out infinite" },
     // 初回ログインの案内で、下へスクロールできることを示す矢印
-    tourNudge: { value: "tour-nudge 1.4s ease-in-out infinite" },
+    tourNudge: { value: "tour-nudge 1.4s {easings.out} infinite" },
     // 押してほしいボタンの周りに広がる輪
-    tourRing: { value: "tour-ring 1.6s cubic-bezier(0.23, 1, 0.32, 1) infinite" },
+    tourRing: { value: "tour-ring 1.6s {easings.out} infinite" },
   },
   durations: {
     fast: { value: "160ms" },

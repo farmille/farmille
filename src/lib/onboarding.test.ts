@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   ONBOARDING_STORAGE_KEY,
   clearOnboarding,
-  isGeneralSession,
+  isOnboardingPending,
   onboardingShowsOn,
   onboardingStepAfterNavigation,
   readOnboardingStep,
@@ -12,7 +12,7 @@ import {
   writeOnboardingStep,
 } from "./onboarding";
 
-function sessionOf(accountType: string): Session {
+function sessionOf(appMetadata: Record<string, string>): Session {
   return {
     access_token: "token",
     refresh_token: "refresh",
@@ -22,7 +22,7 @@ function sessionOf(accountType: string): Session {
       id: "user-1",
       aud: "authenticated",
       created_at: "2026-10-17T00:00:00Z",
-      app_metadata: { account_type: accountType },
+      app_metadata: appMetadata,
       user_metadata: {},
     },
   };
@@ -78,6 +78,9 @@ describe("初回ログインの案内の進み具合", () => {
     expect(onboardingShowsOn("reviewLink", "/materials/abc")).toBe(true);
     expect(onboardingShowsOn("reviewLink", "/materials/abc/review/new")).toBe(false);
     expect(onboardingShowsOn("welcome", "/")).toBe(true);
+    expect(onboardingShowsOn("finish", "/materials/abc/review/new")).toBe(true);
+    expect(onboardingShowsOn("finish", "/materials/abc")).toBe(false);
+    expect(onboardingShowsOn("finish", "/")).toBe(false);
   });
 
   it("資材ページや投稿画面が開いたら次の段階へ進む", () => {
@@ -89,9 +92,14 @@ describe("初回ログインの案内の進み具合", () => {
     );
   });
 
-  it("一般会員のセッションだけを案内の対象にする", () => {
-    expect(isGeneralSession(sessionOf("general"))).toBe(true);
-    expect(isGeneralSession(sessionOf("seller"))).toBe(false);
-    expect(isGeneralSession(null)).toBe(false);
+  it("案内を終えていない一般会員のセッションだけを案内の対象にする", () => {
+    expect(isOnboardingPending(sessionOf({ account_type: "general", onboarding: "pending" }))).toBe(
+      true,
+    );
+    expect(isOnboardingPending(sessionOf({ account_type: "general" }))).toBe(false);
+    expect(isOnboardingPending(sessionOf({ account_type: "seller", onboarding: "pending" }))).toBe(
+      false,
+    );
+    expect(isOnboardingPending(null)).toBe(false);
   });
 });
