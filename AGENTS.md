@@ -7,7 +7,7 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 | 置き場 | 内容 |
 |---|---|
 | `docs/rebuild/*-SPEC.md` | 機能ごとの仕様 |
-| `CONTEXT.md` | ドメインの用語 |
+| `GLOSSARY.md` | ドメインの用語 |
 | `docs/ui-terminology.md` | 画面の表記 |
 | `docs/ops/` | 運用の記録と手順。鍵の扱いと Supabase の既知の落とし穴は `docs/ops/security-notes.md`、手元での確認は `docs/ops/local-verification.md` |
 
@@ -40,7 +40,6 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 - **文字**：大きさと行高は `textStyle` の役割（`src/theme/textStyles.ts`、一覧は `/dev/tokens`）から選び、色は呼び出し側で足す。役割に無い組み合わせが3か所に出たら役割を足す
 - **UI 部品**：フォーム部品・ダイアログ・通知・開閉・候補つきの入力は、`src/components` の共通部品（フォーム部品は `src/components/form`）を使う。`@base-ui/react` と `sonner` は `src/components` の中でだけ import する（外からは ESLint の `no-restricted-imports` で止まる）。足りないものは共通部品に足し、画面ごとに作らない
 - **入力欄のラベル**：`Input`・`Textarea`・`Select`・`Combobox`・`Autocomplete`・`FileInput`・`OtpInput`・`CheckboxGroup`・`RadioGroup` は `label` が必須で、見出し・必須/任意・案内・エラーを部品の props で受け取る（`<Input label="ニックネーム" name="handle" requirement="required" />`）。画面に出さない名前は `hideLabel`、枠の className は `fieldClassName`。`Field`・`Fieldset` は、1つの見出しで複数の要素をまとめるときだけ使い、中の部品には `label={null}` を付ける
-- **動き**：transform と opacity だけを動かし、ease-out にする。`prefers-reduced-motion` では位置を動かさず不透明度だけを変える。打鍵のたびに描き直す一覧や、何度も開け閉めする欄は動かさない
 - **状態とデータ取得**：取得は Server Components、変更は Server Actions か Route Handlers に寄せる。クライアント側の状態は入力フォームとトグルに限る
 - **fail fast**：環境変数・必須パラメータが無い場合はフォールバックせずエラーにする。`?? "http://localhost:3000"` のような既定値を書かない
 - **エラー表示**：例外を握り潰さない。404・403・500 をユーザーに意味の伝わる日本語で出し分ける（`error.tsx`・`not-found.tsx` を必ず置く）
@@ -56,7 +55,7 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 - Route Handlers（`src/app/api/`）はフォーム POST・Webhook・外部から叩かれるものだけに絞る。画面内の読み取りは Server Components から `src/server/` を直接呼ぶ
 - 環境変数は `src/env.ts` の1箇所で起動時に検証する。ホスティング固有の環境変数をコードで参照しない
 - エラーレスポンスは `{ok: false, error: "<code>"}` に統一する。エラーコード → 日本語文言の辞書は `src/server/errors.ts` の1箇所に置く
-- migration は適用済みファイルの編集禁止・修正は常に新規ファイル。リリース前に `supabase db diff --linked` で無差分を確認する
+- migration は適用済みファイルの編集禁止・修正は常に新規ファイル。main への push 後に CI（`.github/workflows/ci.yml` の deploy ジョブ）が dev と本番へ適用する
 
 ## 型生成（`pnpm gen:types`）
 
@@ -79,18 +78,7 @@ E2E はローカルの Supabase を起動し、CI の E2E ジョブ（`.github/w
 
 ## 依存の監査
 
-着手時と PR 作成時に流す。`npm audit` は使わない（pnpm に揃える）。
-
-```bash
-pnpm audit --audit-level=high                  # high 以上の既知脆弱性を抽出
-pnpm audit --json | jq '.advisories'           # 詳細を JSON で
-pnpm outdated                                   # major upgrade 候補の把握
-```
-
-- `critical`／`high` が出たら PR を止める（hotfix で先に塞ぐか、別 PR で固定する）
-- `moderate` 以下は起票して次のスプリントで対応する
-- 直接依存が原因の脆弱性は最優先、推移依存は upstream の修正待ちでもよい
-- 月次で `gh dependabot alerts list` を確認する
+CI が `pnpm audit --audit-level=high` で止める。`npm audit` は使わない（pnpm に揃える）。`critical`／`high` は hotfix で先に塞ぐか、別 PR で固定する。`moderate` 以下は起票する。
 
 補助の grep 監査：
 
@@ -104,17 +92,10 @@ grep -rn "supabase\.\(from\|rpc\)(" src --exclude-dir=server
 
 ## ディレクトリ
 
-- リポジトリ直下：Next.js 16 の設定・依存関係・実行コマンド
-- `src/app/`：ルーティングと画面
-- `src/server/`：ドメインロジック・Supabase アクセス
-- `src/components/`：共通 UI（Panda の recipe）。フォーム部品は `src/components/form/`。`styled-system/` は gitignore し、`pnpm install` と CI で codegen する
+- `styled-system/`：Panda の生成物。gitignore し、`pnpm install` と CI で codegen する
 - `supabase/migrations/`：v2 系の migration（`config.toml` も併せてコミットする）
-- `e2e/`：Playwright の E2E
-- `storybook-tests/`：Storybook のレスポンシブ検査
-- `scripts/`：検査用のスクリプト（ファイル名・Story の網羅・依存のパッチ確認など）
 - `tools/migration/`：資材マスタの移行スクリプト。`legacy/` は旧実装の参照実装と退避した旧 migration（移行の検証用）
-- `docs/`：「資料の置き場」を参照。`docs/email-templates/` は Supabase Auth のメールテンプレート
-- `.github/workflows/`：CI
+- `docs/email-templates/`：Supabase Auth のメールテンプレート
 
 ## 止まって確認する条件
 
