@@ -23,12 +23,12 @@ const label = cva({
     m: "0",
     textStyle: "eyebrow",
     textTransform: "uppercase",
-    _before: { content: '""', w: "6", h: "1px", bg: "currentColor" },
+    _before: { content: '""', w: "6", h: "[1px]", bg: "currentColor" },
   },
   variants: {
     tone: {
       ink: { color: "text.brand" },
-      inverse: { color: "primary.200" },
+      inverse: { color: "text.brandOnForest" },
     },
   },
 });
@@ -60,14 +60,14 @@ const stroke = cva({
   base: {
     w: "24",
     h: "3",
-    fill: "none",
-    strokeWidth: "3",
+    fill: "[none]",
+    strokeWidth: "[3]",
     strokeLinecap: "round",
     transformOrigin: "left center",
-    transitionProperty: "transform",
+    transitionProperty: "[transform]",
     transitionDuration: "reveal",
     transitionTimingFunction: "out",
-    transitionDelay: "calc(token(durations.revealStep) * 2)",
+    transitionDelay: "[calc({durations.revealStep} * 2)]",
     _scripted: { _motionSafe: { transform: "scaleX(0)" } },
     _revealedWithin: { transform: "scaleX(1)" },
   },

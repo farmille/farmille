@@ -18,14 +18,14 @@ const scroll = css({
 
 const table = css({
   borderCollapse: "collapse",
-  minW: "100%",
+  minW: "full",
   fontSize: "sm",
 });
 
 const th = css({
   position: "sticky",
   left: "0",
-  zIndex: "1",
+  zIndex: "local.1",
   bg: "surface.page",
   color: "text.subtle",
   fontWeight: "bold",
@@ -50,8 +50,8 @@ const td = css({
   borderBottomStyle: "solid",
   borderBottomColor: "border.default",
   verticalAlign: "top",
-  minW: "140px",
-  maxW: "180px",
+  minW: "[140px]",
+  maxW: "[180px]",
 });
 
 const materialLink = css({

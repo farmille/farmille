@@ -30,7 +30,7 @@ const meta = {
   component: ReviewCompletionToast,
   decorators: [
     (Story) => (
-      <div className={css({ position: "relative", minH: "160px", maxW: "375px" })}>
+      <div className={css({ position: "relative", minH: "[160px]", maxW: "phone" })}>
         <Story />
         <Toaster />
       </div>

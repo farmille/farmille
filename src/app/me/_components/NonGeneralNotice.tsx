@@ -10,7 +10,7 @@ import { css, cx } from "../../../../styled-system/css";
 import { moreLinkStyle } from "./ProfileParts";
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   display: "flex",
   flexDirection: "column",
   bg: "surface.page",
@@ -20,7 +20,7 @@ const shell = css({
 
 const body = css({
   flex: "1",
-  w: "100%",
+  w: "full",
   maxW: "content.form",
   mx: "auto",
   px: "4",

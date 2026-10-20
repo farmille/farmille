@@ -22,8 +22,8 @@ const sheet = css(surfaceCardRecipe.raw({ padding: "flush" }), {
   // 長音記号や小書きの仮名を行頭に置かない（「フォ／ーム」を避ける）。短い文は、対応するブラウザでは文節の切れ目で行の長さをならして折り返す（「くだ／さい。」を避ける）。
   lineBreak: "strict",
   wordBreak: "auto-phrase",
-  textWrap: "pretty",
-  _print: { borderWidth: "0", borderRadius: "0", boxShadow: "none", p: "0", gap: "8" },
+  textWrap: "[pretty]",
+  _print: { borderWidth: "0", borderRadius: "[0]", boxShadow: "[none]", p: "0", gap: "8" },
 });
 
 const letterhead = css({

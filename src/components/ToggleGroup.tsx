@@ -11,7 +11,7 @@ const focusRing = {
   outlineWidth: "2px",
   outlineStyle: "solid",
   outlineColor: "primary.700",
-  outlineOffset: "2px",
+  outlineOffset: "0.5",
 } as const;
 
 const toggleGroupRecipe = sva({
@@ -36,7 +36,7 @@ const toggleGroupRecipe = sva({
             right: "0",
             bottom: "0",
             w: "9",
-            bgImage: "linear-gradient(to right, transparent, {colors.surface.page})",
+            bgImage: "[linear-gradient(to right, transparent, {colors.surface.page})]",
             pointerEvents: "none",
           },
           tab: { _after: { display: "none" } },
@@ -78,7 +78,7 @@ const toggleGroupRecipe = sva({
             content: '""',
             position: "absolute",
             top: "2",
-            left: "50%",
+            left: "[50%]",
             w: "4",
             h: "4",
             ml: "-2",

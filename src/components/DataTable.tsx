@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { cva, css, cx } from "../../styled-system/css";
 
 const wrapStyle = css({
-  w: "100%",
+  w: "full",
   overflowX: "auto",
   bg: "surface.card",
   borderWidth: "1px",
@@ -13,7 +13,7 @@ const wrapStyle = css({
 });
 
 const tableStyle = css({
-  w: "100%",
+  w: "full",
   borderCollapse: "collapse",
   textStyle: "body",
   whiteSpace: "nowrap",

@@ -151,3 +151,19 @@ export async function searchMaterialsForArticleLink(
   const materials: SellerArticleMaterial[] = data;
   return succeed(materials);
 }
+
+/** 記事に紐づく資材の ID。資材ページの再検証に使うので、取得に失敗したら空にする。 */
+export async function listArticleMaterialIds(articleId: string): Promise<string[]> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("article_materials")
+    .select("material_id")
+    .eq("article_id", articleId);
+
+  if (error !== null || data === null) {
+    console.error("[dashboard/articles] 紐づけ資材の再検証用取得に失敗", error);
+    return [];
+  }
+
+  return data.map((row) => row.material_id);
+}

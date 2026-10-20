@@ -51,11 +51,17 @@ const introText = css({ display: "flex", flexDirection: "column", gap: "8" });
 /** 写真3枚を大小と上下にずらして重ねる。枠の縦横比で全体の高さを決める。 */
 const collage = css({ position: "relative", aspectRatio: "image.portrait" });
 
-const collageMain = css({ position: "absolute", top: "0", right: "0", w: "64%" });
+const collageMain = css({ position: "absolute", top: "0", right: "0", w: "[64%]" });
 
-const collageSub = css({ position: "absolute", top: "46%", left: "0", zIndex: "1", w: "56%" });
+const collageSub = css({
+  position: "absolute",
+  top: "[46%]",
+  left: "0",
+  zIndex: "local.1",
+  w: "[56%]",
+});
 
-const collageAccent = css({ position: "absolute", right: "4%", bottom: "0", w: "34%" });
+const collageAccent = css({ position: "absolute", right: "[4%]", bottom: "0", w: "[34%]" });
 
 const essay = css({ m: "0", textStyle: "essay", color: "text.default" });
 
@@ -99,7 +105,7 @@ const writtenLine = cva({
       inset: "0",
       bg: "surface.paper",
       transform: "translateX(101%)",
-      transitionProperty: "transform",
+      transitionProperty: "[transform]",
       transitionDuration: "write",
       transitionTimingFunction: "out",
     },
@@ -108,10 +114,10 @@ const writtenLine = cva({
   },
   variants: {
     order: {
-      first: { _after: { transitionDelay: "token(durations.revealStep)" } },
+      first: { _after: { transitionDelay: "revealStep" } },
       second: {
         _after: {
-          transitionDelay: "calc(token(durations.revealStep) + token(durations.reveal))",
+          transitionDelay: "[calc({durations.revealStep} + {durations.reveal})]",
         },
       },
     },
@@ -127,7 +133,7 @@ const signupButton = css(buttonRecipe.raw({ size: "md" }), {
   borderRadius: "pill",
   fontSize: "lg",
   boxShadow: "shadow.lift",
-  transitionProperty: "transform",
+  transitionProperty: "[transform]",
   transitionDuration: "fast",
   transitionTimingFunction: "out",
   _active: { transform: "scale(0.97)" },

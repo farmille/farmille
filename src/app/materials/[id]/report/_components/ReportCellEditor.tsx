@@ -63,7 +63,7 @@ const isEnter = (event: KeyboardEvent) => event.key === "Enter" && !event.native
 const panel = cva({
   base: {
     position: "fixed",
-    zIndex: "20",
+    zIndex: "fixedBar",
     bg: "surface.card",
     borderStyle: "solid",
     borderColor: "primary.700",
@@ -80,7 +80,7 @@ const panel = cva({
         borderWidth: "0",
         borderTopWidth: "1.5px",
         borderTopRadius: "banner",
-        pb: "calc(token(spacing.3) + env(safe-area-inset-bottom))",
+        pb: "[calc(token(spacing.3) + env(safe-area-inset-bottom))]",
       },
       false: { w: "80", borderWidth: "1.5px", borderRadius: "card" },
     },
@@ -334,7 +334,7 @@ export function ReportCellEditor({
               <Input
                 label={null}
                 size="sm"
-                className={css({ flex: "1 1 token(sizes.44)" })}
+                className={css({ flex: "[1 1 token(sizes.44)]" })}
                 placeholder="1区10株、3反復"
                 value={plot.scope}
                 onChange={(event) => onPlotChange(plot.id, { scope: event.target.value })}
@@ -412,7 +412,7 @@ export function ReportCellEditor({
               }}
             />
           </div>
-          <div className={css({ flex: "0 0 token(sizes.32)" })}>
+          <div className={css({ flex: "[0 0 token(sizes.32)]" })}>
             <Input
               label="単位（任意）"
               labelSize="sm"

@@ -11,24 +11,24 @@ const hero = css({
   position: "relative",
   overflow: "hidden",
   isolation: "isolate",
-  h: "calc(100svh - token(spacing.32))",
-  minH: "32rem",
+  h: "[calc(100svh - {spacing.32})]",
+  minH: "[32rem]",
   bg: "surface.forest",
-  tab: { h: "calc(100svh - token(spacing.16))", minH: "36rem", maxH: "60rem" },
+  tab: { h: "[calc(100svh - {spacing.16})]", minH: "[36rem]", maxH: "[60rem]" },
 });
 
 /** 写真は画面から出ていくあいだ遅れて下がる。下がった分が見えないよう、上へはみ出して描く。 */
 const photoDrift = css({
   position: "absolute",
-  top: "-16%",
+  top: "[-16%]",
   right: "0",
   bottom: "0",
   left: "0",
-  zIndex: "-1",
+  zIndex: "[-1]",
   _scrollTimeline: {
     _motionSafe: {
       animationName: "hero-drift",
-      animationTimingFunction: "linear",
+      animationTimingFunction: "[linear]",
       animationFillMode: "both",
       animationTimeline: "view()",
       animationRange: "exit 0% exit 100%",
@@ -44,7 +44,7 @@ const photo = css({
 
 const inner = css({
   position: "relative",
-  h: "100%",
+  h: "full",
   maxW: "content.wide",
   mx: "auto",
   px: "5",
@@ -63,15 +63,15 @@ const tagline = css({
 const brand = css({
   position: "absolute",
   left: "5",
-  bottom: "calc(token(spacing.10) + token(spacing.6))",
+  bottom: "[calc({spacing.10} + {spacing.6})]",
   m: "0",
   color: "text.inverse",
   fontSize: "display",
   fontWeight: "bold",
   lineHeight: "none",
   textShadow: "shadow.photoText",
-  tab: { left: "8", bottom: "calc(token(spacing.16) + token(spacing.10))" },
-  pc: { bottom: "calc(token(spacing.24) + token(spacing.8))" },
+  tab: { left: "8", bottom: "[calc({spacing.16} + {spacing.10})]" },
+  pc: { bottom: "[calc({spacing.24} + {spacing.8})]" },
 });
 
 const brandReading = css({
@@ -85,7 +85,7 @@ const brandReading = css({
 const badge = css({
   position: "absolute",
   right: "4",
-  bottom: "calc(token(spacing.10) + token(spacing.3))",
+  bottom: "[calc({spacing.10} + {spacing.3})]",
   display: "grid",
   placeItems: "center",
   w: "28",
@@ -95,27 +95,27 @@ const badge = css({
   color: "text.brand",
   textDecoration: "none",
   boxShadow: "shadow.lift",
-  transitionProperty: "transform",
+  transitionProperty: "[transform]",
   transitionDuration: "fast",
   transitionTimingFunction: "out",
-  _motionSafe: { animation: "heroBadge", animationDelay: "calc(token(durations.intro) * 3)" },
+  _motionSafe: { animation: "heroBadge", animationDelay: "[calc({durations.intro} * 3)]" },
   _active: { transform: "scale(0.97)" },
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "text.inverse",
-    outlineOffset: "3px",
+    outlineOffset: "[3px]",
   },
   "@media (hover: hover) and (pointer: fine)": { _hover: { transform: "scale(1.04)" } },
-  tab: { right: "8", bottom: "calc(token(spacing.16) + token(spacing.4))", w: "36", h: "36" },
-  pc: { right: "12", bottom: "calc(token(spacing.24) + token(spacing.2))" },
+  tab: { right: "8", bottom: "[calc({spacing.16} + {spacing.4})]", w: "36", h: "36" },
+  pc: { right: "12", bottom: "[calc({spacing.24} + {spacing.2})]" },
 });
 
 const ring = css({
   position: "absolute",
   inset: "1.5",
-  w: "calc(100% - token(spacing.3))",
-  h: "calc(100% - token(spacing.3))",
+  w: "[calc(100% - {spacing.3})]",
+  h: "[calc(100% - {spacing.3})]",
   fill: "currentColor",
   fontSize: "2xs",
   fontWeight: "bold",

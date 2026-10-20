@@ -43,7 +43,7 @@ const materialCard = css({
 });
 
 const thumb = css({
-  flex: "0 0 auto",
+  flex: "none",
   display: "grid",
   placeItems: "center",
   w: "12",

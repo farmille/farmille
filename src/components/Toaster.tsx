@@ -43,7 +43,7 @@ const actionStyle = css({
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "text.inverse",
-    outlineOffset: "2px",
+    outlineOffset: "0.5",
   },
 });
 

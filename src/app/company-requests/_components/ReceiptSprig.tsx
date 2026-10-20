@@ -32,7 +32,7 @@ const leafOutline = (length: number, width: number, side: number) => {
 const leafVein = (length: number, width: number, side: number) =>
   `M0 ${round(-length * 0.08)}Q${round(width * side * 0.05)} ${round(-length * 0.5)} 0 ${round(-length * 0.88)}`;
 
-const line = css({ fill: "none", stroke: "primary.600", _print: { stroke: "primary.700" } });
+const line = css({ fill: "[none]", stroke: "primary.600", _print: { stroke: "primary.700" } });
 const leafFill = css({
   fill: "primary.soft",
   stroke: "primary.600",

@@ -41,7 +41,7 @@ const section = css({
   tab: { pt: "20", pb: "28" },
 });
 
-const hills = css({ position: "absolute", left: "0", right: "0", bottom: "calc(100% - 1px)" });
+const hills = css({ position: "absolute", left: "0", right: "0", bottom: "[calc(100% - 1px)]" });
 
 const container = css({
   maxW: "content.wide",
@@ -92,7 +92,7 @@ const sheet = cva({
 const tape = css({
   position: "absolute",
   top: "-3",
-  left: "50%",
+  left: "[50%]",
   w: "24",
   h: "6",
   bgColor: "primary.300/55",
@@ -106,12 +106,12 @@ const ruled = css({
   textStyle: "letter",
   color: "text.default",
   bgImage:
-    "repeating-linear-gradient(to bottom, transparent 0, transparent calc(1lh - 1px), {colors.border.default} calc(1lh - 1px), {colors.border.default} 1lh)",
+    "[repeating-linear-gradient(to bottom, transparent 0, transparent calc(1lh - 1px), {colors.border.default} calc(1lh - 1px), {colors.border.default} 1lh)]",
 });
 
 const quote = css({ m: "0" });
 
-const paragraph = css({ m: "0", textIndent: "1em" });
+const paragraph = css({ m: "0", textIndent: "[1em]" });
 
 /** 肩書きは語の区切り（空白）でだけ折り返し、入りきらないときに限って語中で折る。 */
 const signature = css({

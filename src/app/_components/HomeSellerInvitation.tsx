@@ -54,7 +54,7 @@ const action = css(buttonRecipe.raw({ size: "md" }), {
   gap: "2",
   borderRadius: "pill",
   flexShrink: "0",
-  transitionProperty: "transform",
+  transitionProperty: "[transform]",
   transitionDuration: "fast",
   transitionTimingFunction: "out",
   _active: { transform: "scale(0.97)" },

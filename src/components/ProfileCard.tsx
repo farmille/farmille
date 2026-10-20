@@ -22,7 +22,7 @@ const card = css(surfaceCardRecipe.raw({ padding: "flush" }), { overflow: "hidde
 const cover = css({
   h: "36",
   bgImage:
-    "linear-gradient(120deg, token(colors.primary.100), token(colors.primary.soft) 55%, token(colors.surface.page))",
+    "[linear-gradient(120deg, {colors.primary.100}, {colors.primary.soft} 55%, {colors.surface.page})]",
 });
 
 const content = css({ px: "4.5", pb: "4" });
@@ -31,7 +31,7 @@ const headRow = css({ display: "flex", alignItems: "flex-end", flexWrap: "wrap",
 
 // カバー画像に重なるので、背景色の縁を回して輪郭を切る。
 const avatarFrame = css({
-  flex: "0 0 auto",
+  flex: "none",
   alignSelf: "flex-start",
   mt: "-8",
   display: "inline-flex",
@@ -43,7 +43,7 @@ const avatarFrame = css({
 
 const nameColumn = css({ flex: "1", minW: "44", pb: "0.5" });
 
-const name = css({ m: "0", textStyle: "title", fontWeight: "extrabold" });
+const name = css({ m: "0", textStyle: "title" });
 
 const chipRow = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "1.5" } as const;
 
@@ -74,7 +74,7 @@ const affiliation = css({
 });
 
 const editLink = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
-  flex: "0 0 auto",
+  flex: "none",
   px: "4",
 });
 
@@ -153,7 +153,7 @@ const todoHint = cva({
 });
 
 const todoIcon = css({
-  flex: "0 0 auto",
+  flex: "none",
   w: "4",
   h: "4",
   display: "grid",

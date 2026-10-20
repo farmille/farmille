@@ -10,7 +10,7 @@ const cardRecipe = cva({
   base: {
     overflow: "hidden",
     textDecoration: "none",
-    color: "inherit",
+    color: "[inherit]",
     display: "block",
   },
 });
@@ -60,8 +60,8 @@ export function ArticleCard({
             alt=""
             className={css({
               display: "block",
-              w: "100%",
-              h: "100%",
+              w: "full",
+              h: "full",
               objectFit: "cover",
             })}
             height={360}
@@ -88,8 +88,8 @@ export function ArticleCard({
         >
           <span
             className={css({
-              w: "18px",
-              h: "18px",
+              w: "[18px]",
+              h: "[18px]",
               borderRadius: "mark",
               bg: "primary.soft",
               display: "grid",

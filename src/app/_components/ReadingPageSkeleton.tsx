@@ -10,11 +10,11 @@ export function ReadingPageSkeleton({
   variant?: "article" | "report";
 }) {
   return (
-    <div className={css({ minH: "100dvh", bg: "surface.page", pb: "6" })}>
+    <div className={css({ minH: "dvh", bg: "surface.page", pb: "6" })}>
       <AppBar chrome="public" active="articles" title={title} backHref="/articles" />
       <main
         className={css({
-          w: "100%",
+          w: "full",
           maxW: "content.reading",
           mx: "auto",
           px: "3.5",

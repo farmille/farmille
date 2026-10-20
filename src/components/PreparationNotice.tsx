@@ -4,7 +4,7 @@ import { css, cva } from "../../styled-system/css";
 const noticeStyle = cva({
   base: {
     position: "relative",
-    zIndex: "2",
+    zIndex: "local.2",
     bg: "primary.700",
     color: "text.inverse",
     borderBottomRadius: "banner",

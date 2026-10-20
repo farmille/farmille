@@ -13,7 +13,7 @@ const materialLink = css(surfaceCardRecipe.raw({ padding: "compact" }), {
   alignItems: "center",
   gap: "3",
   bg: "transparent",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
 });
 

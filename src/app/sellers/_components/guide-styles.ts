@@ -62,7 +62,7 @@ export const stepCardRecipe = cva({
   defaultVariants: { actor: "maker" },
 });
 
-export const stepTitleStyle = css({ mt: "2", textStyle: "title", fontWeight: "extrabold" });
+export const stepTitleStyle = css({ mt: "2", textStyle: "title" });
 
 export const stepLabelRecipe = cva({
   base: {
@@ -113,6 +113,5 @@ export const questionStyle = css({
   display: "flex",
   gap: "2.5",
   textStyle: "title",
-  fontWeight: "extrabold",
   _before: { content: '"Q"', color: "text.brand", flexShrink: "0" },
 });

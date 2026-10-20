@@ -10,15 +10,15 @@ const mobileAppBar = css({
   bg: "surface.paper/88",
   position: "sticky",
   top: "0",
-  zIndex: "10",
-  backdropFilter: "blur(10px)",
+  zIndex: "appBar",
+  backdropFilter: "[blur({blurs.bar})]",
   borderBottomWidth: "1px",
   borderBottomStyle: "solid",
   borderBottomColor: "border.default",
   display: "flex",
   alignItems: "center",
   gap: "2.5",
-  pt: "max(token(spacing.3), env(safe-area-inset-top))",
+  pt: "[max(token(spacing.3), env(safe-area-inset-top))]",
   px: "3.5",
   pb: "2.5",
   tab: { display: "none" },
@@ -72,9 +72,9 @@ const desktopHeader = css({
     display: "block",
     position: "sticky",
     top: "0",
-    zIndex: "30",
+    zIndex: "header",
     bg: "surface.paper/94",
-    backdropFilter: "blur(12px)",
+    backdropFilter: "[blur(12px)]",
     borderBottomWidth: "1px",
     borderBottomStyle: "solid",
     borderBottomColor: "border.default",
@@ -82,7 +82,7 @@ const desktopHeader = css({
 });
 
 const desktopHeaderInner = css({
-  w: "100%",
+  w: "full",
   minH: "16",
   px: "6",
   display: "flex",
@@ -138,7 +138,7 @@ const desktopNavLink = cva({
       outlineWidth: "2px",
       outlineStyle: "solid",
       outlineColor: "primary.600",
-      outlineOffset: "2px",
+      outlineOffset: "0.5",
     },
   },
   variants: {
@@ -190,7 +190,7 @@ const desktopContext = css({
 });
 
 const desktopContextInner = css({
-  w: "100%",
+  w: "full",
   maxW: "content.wide",
   mx: "auto",
   px: "5",

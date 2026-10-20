@@ -3,7 +3,7 @@ import Form from "next/form";
 import { SearchInput } from "@/components/form";
 import { css } from "../../../styled-system/css";
 
-const entry = css({ display: "block", w: "100%", m: "0" });
+const entry = css({ display: "block", w: "full", m: "0" });
 
 export function HomeSearchEntry() {
   return (

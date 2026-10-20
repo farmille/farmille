@@ -11,7 +11,7 @@ export default function MaterialNotFound() {
       <EmptyState
         title="資材が見つかりません"
         description="指定された資材は存在しないか、公開が終了した可能性があります。"
-        className={css({ minH: "60dvh" })}
+        className={css({ minH: "notFound" })}
       >
         <Link
           href="/"

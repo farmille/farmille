@@ -8,7 +8,7 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
   return (
     <div
       className={css({
-        minH: "100dvh",
+        minH: "dvh",
         bg: "surface.page",
         color: "text.default",
         fontFamily: "sans",

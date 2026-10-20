@@ -32,13 +32,13 @@ type ArticleDetailPageProps = {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   bg: "surface.page",
   pb: "6",
 });
 
 const main = css({
-  w: "100%",
+  w: "full",
   maxW: "content.reading",
   mx: "auto",
   px: "3.5",

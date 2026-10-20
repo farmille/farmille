@@ -59,7 +59,7 @@ export function FeedReportCard({
             overflow: "hidden",
             textOverflow: "ellipsis",
             minW: "0",
-            maxW: "calc(100% - token(sizes.9))",
+            maxW: "[calc(100% - token(sizes.9))]",
           })}
         >
           {author}

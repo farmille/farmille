@@ -28,7 +28,7 @@ const authorLinkStyle = css({
   display: "inline-flex",
   alignItems: "center",
   gap: "2",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
 });
 const nameStyle = css({ textStyle: "body", fontWeight: "bold", overflowWrap: "anywhere" });

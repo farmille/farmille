@@ -9,8 +9,8 @@ import { css } from "../../styled-system/css";
 import { popupPositionerStyle, popupRecipe } from "./popup";
 
 const trigger = css({
-  w: "{spacing.10}",
-  h: "{spacing.10}",
+  w: "10",
+  h: "10",
   display: "grid",
   placeItems: "center",
   flexShrink: "0",
@@ -28,7 +28,7 @@ const trigger = css({
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.600",
-    outlineOffset: "2px",
+    outlineOffset: "0.5",
   },
 });
 
@@ -41,7 +41,7 @@ const panel = css(popupRecipe.raw({ motion: "scale" }), {
 const item = css({
   display: "flex",
   alignItems: "center",
-  minH: "{spacing.10}",
+  minH: "10",
   px: "3",
   borderRadius: "button",
   borderWidth: "0",
@@ -60,7 +60,7 @@ const item = css({
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.600",
-    outlineOffset: "2px",
+    outlineOffset: "0.5",
   },
   "&[aria-current=page]": { bg: "primary.soft", color: "text.brandOnSoft" },
 });

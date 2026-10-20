@@ -32,7 +32,7 @@ const band = cva({
       content: '""',
       position: "absolute",
       inset: "0",
-      zIndex: "-1",
+      zIndex: "[-1]",
       bgColor: "primary.700",
       layerStyle: "wash",
       transformOrigin: "top",
@@ -43,7 +43,7 @@ const band = cva({
       load: { _motionSafe: { _before: { animation: "heroBand" } } },
       scroll: {
         _before: {
-          transitionProperty: "transform",
+          transitionProperty: "[transform]",
           transitionDuration: "reveal",
           transitionTimingFunction: "out",
         },
@@ -69,7 +69,7 @@ const band = cva({
       step: "second",
       css: {
         _motionSafe: {
-          _before: { animationDelay: "calc(token(durations.intro) + token(durations.revealStep))" },
+          _before: { animationDelay: "[calc({durations.intro} + {durations.revealStep})]" },
         },
       },
     },
@@ -79,7 +79,7 @@ const band = cva({
       css: {
         _motionSafe: {
           _before: {
-            animationDelay: "calc(token(durations.intro) + token(durations.revealStep) * 2)",
+            animationDelay: "[calc({durations.intro} + {durations.revealStep} * 2)]",
           },
         },
       },
@@ -88,7 +88,7 @@ const band = cva({
     {
       motion: "scroll",
       step: "third",
-      css: { _before: { transitionDelay: "calc(token(durations.revealStep) * 2)" } },
+      css: { _before: { transitionDelay: "[calc({durations.revealStep} * 2)]" } },
     },
   ],
 });
@@ -100,7 +100,7 @@ const bandText = cva({
     motion: {
       load: { _motionSafe: { animation: "heroBandText" } },
       scroll: {
-        transitionProperty: "opacity",
+        transitionProperty: "[opacity]",
         transitionDuration: "reveal",
         transitionTimingFunction: "out",
         _scripted: { _motionSafe: { opacity: "0" } },
@@ -113,14 +113,14 @@ const bandText = cva({
     {
       motion: "load",
       step: "first",
-      css: { _motionSafe: { animationDelay: "calc(token(durations.intro) * 2)" } },
+      css: { _motionSafe: { animationDelay: "[calc({durations.intro} * 2)]" } },
     },
     {
       motion: "load",
       step: "second",
       css: {
         _motionSafe: {
-          animationDelay: "calc(token(durations.intro) * 2 + token(durations.revealStep))",
+          animationDelay: "[calc({durations.intro} * 2 + {durations.revealStep})]",
         },
       },
     },
@@ -129,7 +129,7 @@ const bandText = cva({
       step: "third",
       css: {
         _motionSafe: {
-          animationDelay: "calc(token(durations.intro) * 2 + token(durations.revealStep) * 2)",
+          animationDelay: "[calc({durations.intro} * 2 + {durations.revealStep} * 2)]",
         },
       },
     },
@@ -137,13 +137,13 @@ const bandText = cva({
     {
       motion: "scroll",
       step: "second",
-      css: { transitionDelay: "calc(token(durations.intro) + token(durations.revealStep))" },
+      css: { transitionDelay: "[calc({durations.intro} + {durations.revealStep})]" },
     },
     {
       motion: "scroll",
       step: "third",
       css: {
-        transitionDelay: "calc(token(durations.intro) + token(durations.revealStep) * 2)",
+        transitionDelay: "[calc({durations.intro} + {durations.revealStep} * 2)]",
       },
     },
   ],

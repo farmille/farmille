@@ -13,7 +13,7 @@ const ROOT_MARGIN = "0px 0px -12% 0px";
  */
 const revealRecipe = cva({
   base: {
-    transitionProperty: "opacity, transform",
+    transitionProperty: "[opacity, transform]",
     transitionDuration: "reveal",
     transitionTimingFunction: "out",
     _scripted: { opacity: "0" },
@@ -30,10 +30,10 @@ const revealRecipe = cva({
     },
     delay: {
       "0": {},
-      "1": { transitionDelay: "token(durations.revealStep)" },
-      "2": { transitionDelay: "calc(token(durations.revealStep) * 2)" },
-      "3": { transitionDelay: "calc(token(durations.revealStep) * 3)" },
-      "4": { transitionDelay: "calc(token(durations.revealStep) * 4)" },
+      "1": { transitionDelay: "revealStep" },
+      "2": { transitionDelay: "[calc({durations.revealStep} * 2)]" },
+      "3": { transitionDelay: "[calc({durations.revealStep} * 3)]" },
+      "4": { transitionDelay: "[calc({durations.revealStep} * 4)]" },
     },
   },
   defaultVariants: { effect: "rise", delay: "0" },

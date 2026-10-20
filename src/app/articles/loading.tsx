@@ -5,7 +5,7 @@ import { css } from "../../../styled-system/css";
 
 export default function ArticlesLoading() {
   return (
-    <div className={css({ minH: "100dvh", bg: "surface.page" })}>
+    <div className={css({ minH: "dvh", bg: "surface.page" })}>
       <AppBar chrome="public" active="articles" title="記事を読む" backHref="/" />
       <main
         className={css({

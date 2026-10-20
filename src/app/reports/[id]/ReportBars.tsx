@@ -31,7 +31,9 @@ const whisker = {
 
 const errorStyle = css({
   position: "absolute",
-  top: "50%",
+  top: "[50%]",
+  left: "var(--error-start)",
+  w: "var(--error-width)",
   h: "0",
   borderTopWidth: "1.5px",
   borderTopStyle: "solid",
@@ -116,19 +118,24 @@ export function ReportBars({
                       top: "0",
                       bottom: "0",
                       display: "block",
+                      left: "var(--bar-start)",
+                      w: "var(--bar-width)",
                       borderRadius: "bar",
                       bg: "currentColor",
                     }),
                     reportPlotColor(row.colorIndex),
                   )}
-                  style={{ left: `${Math.min(zero, end)}%`, width: `${Math.abs(end - zero)}%` }}
+                  style={{
+                    "--bar-start": `${Math.min(zero, end)}%`,
+                    "--bar-width": `${Math.abs(end - zero)}%`,
+                  }}
                 />
                 {row.error !== null ? (
                   <span
                     className={errorStyle}
                     style={{
-                      left: `${position(row.value - row.error)}%`,
-                      width: `${position(row.value + row.error) - position(row.value - row.error)}%`,
+                      "--error-start": `${position(row.value - row.error)}%`,
+                      "--error-width": `${position(row.value + row.error) - position(row.value - row.error)}%`,
                     }}
                   />
                 ) : null}

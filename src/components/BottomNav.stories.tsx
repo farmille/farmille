@@ -6,7 +6,7 @@ import { css } from "../../styled-system/css";
 import { BottomNav } from "./BottomNav";
 
 const viewportStage = css({
-  minH: "150dvh",
+  minH: "[150dvh]",
   display: "flex",
   flexDirection: "column",
   justifyContent: "flex-end",

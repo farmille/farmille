@@ -21,7 +21,7 @@ const section = css({
   pc: { scrollMarginTop: "40" },
 });
 
-const hills = css({ position: "absolute", left: "0", right: "0", bottom: "calc(100% - 1px)" });
+const hills = css({ position: "absolute", left: "0", right: "0", bottom: "[calc(100% - 1px)]" });
 
 const container = css({
   maxW: "content.medium",
@@ -44,7 +44,7 @@ const lead = css({
 
 const phrase = css({ display: "inline-block" });
 
-const searchBox = css({ w: "100%", maxW: "content.form" });
+const searchBox = css({ w: "full", maxW: "content.form" });
 
 const materials = css({
   display: "flex",
@@ -55,7 +55,7 @@ const materials = css({
 });
 
 const materialsHeader = css({
-  w: "100%",
+  w: "full",
   maxW: "content.wide",
   mx: "auto",
   px: "5",
@@ -70,7 +70,7 @@ const allLink = css({
   display: "inline-flex",
   alignItems: "center",
   gap: "1",
-  color: "primary.200",
+  color: "text.brandOnForest",
   fontSize: "sm",
   fontWeight: "bold",
   textDecoration: "none",
@@ -79,7 +79,7 @@ const allLink = css({
 });
 
 /** 流れる資材カードは、自身の負の余白でこの左右の余白を打ち消して画面端まで届く。 */
-const marquee = css({ w: "100%", px: "4", tab: { px: "5" } });
+const marquee = css({ w: "full", px: "4", tab: { px: "5" } });
 
 /** 検索欄と、流れる掲載資材を置く深い緑の節。資材の一覧は children で受け取る。 */
 export function HomeSearch({ children }: { children: ReactNode }) {

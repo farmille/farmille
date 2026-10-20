@@ -18,7 +18,7 @@ import { HomeSearch } from "./_components/HomeSearch";
 import { HomeSellerInvitation } from "./_components/HomeSellerInvitation";
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   bg: "surface.paper",
   color: "text.default",
   fontFamily: "sans",
@@ -47,7 +47,7 @@ const footerHills = css({
   position: "absolute",
   left: "0",
   right: "0",
-  bottom: "calc(100% - 1px)",
+  bottom: "[calc(100% - 1px)]",
 });
 
 const footerInner = css({ maxW: "content.wide", mx: "auto", px: "5", tab: { px: "8" } });

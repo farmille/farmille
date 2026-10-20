@@ -20,7 +20,7 @@ export const byline = {
     display: "inline-flex",
     alignItems: "center",
     gap: "2",
-    color: "inherit",
+    color: "[inherit]",
     textDecoration: "none",
   }),
   name: css({ fontWeight: "bold", color: "text.default" }),
@@ -94,7 +94,7 @@ const markdownStyle = css({
   "& p": { ...proseText, mt: "2" },
   "& :is(ul, ol)": { ...proseText, mt: "2", pl: "5" },
   "& > :first-child": { mt: "0" },
-  "& :is(h2, h3)": { textStyle: "title", fontWeight: "extrabold", mt: "5.5", mb: "2" },
+  "& :is(h2, h3)": { textStyle: "title", mt: "5.5", mb: "2" },
   "& img": { maxW: "full", borderRadius: "media" },
   "& a": { color: "text.brand" },
 });

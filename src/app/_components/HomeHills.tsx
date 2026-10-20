@@ -3,7 +3,7 @@ import { css, cva, cx } from "../../../styled-system/css";
 /** 下がった奥の層が枠の下へはみ出して次の節に線を引かないよう、下端だけで切る。上は双葉のために開けておく。 */
 const frame = css({
   position: "relative",
-  w: "100%",
+  w: "full",
   h: "10",
   pointerEvents: "none",
   clipPath: "inset(-100% 0 0 0)",
@@ -30,7 +30,7 @@ const backLayer = cva({
     _scrollTimeline: {
       _motionSafe: {
         animationName: "hill-rise",
-        animationTimingFunction: "linear",
+        animationTimingFunction: "[linear]",
         animationFillMode: "both",
         animationTimeline: "view()",
         animationRange: "entry 0% cover 50%",
@@ -39,7 +39,7 @@ const backLayer = cva({
   },
   variants: {
     into: {
-      paper: { bgColor: "primary.200", opacity: "0.85" },
+      paper: { bgColor: "primary.200", opacity: "[0.85]" },
       forest: { bgColor: "primary.700" },
     },
   },
@@ -58,7 +58,7 @@ const frontLayer = cva({
       forest: {
         bgColor: "surface.forest",
         layerStyle: "wash",
-        bgPosition: "0 calc(100% - 1px - token(spacing.0.5))",
+        bgPosition: "[0 calc(100% - 1px - {spacing.0.5})]",
       },
     },
   },
@@ -70,7 +70,7 @@ const sprout = cva({
     position: "absolute",
     w: "6",
     // 揺れの transform と重ならないよう、中心合わせは translate で持つ
-    translate: "-50% 0",
+    translate: "[-50% 0]",
     transformOrigin: "50% 100%",
     tab: { w: "8" },
     pc: { w: "10" },
@@ -82,18 +82,18 @@ const sprout = cva({
       forest: { fill: "primary.400", stroke: "primary.400" },
     },
     spot: {
-      near: { left: "32.6%", bottom: "38.75%" },
+      near: { left: "[32.6%]", bottom: "[38.75%]" },
       // 半周期ずらして、二つの双葉が揃って揺れないようにする
       far: {
-        left: "87.6%",
-        bottom: "47.5%",
-        _motionSafe: { animationDelay: "calc(token(durations.sway) / -2)" },
+        left: "[87.6%]",
+        bottom: "[47.5%]",
+        _motionSafe: { animationDelay: "[calc({durations.sway} / -2)]" },
       },
     },
   },
 });
 
-const stem = css({ fill: "none", strokeWidth: "2.5", strokeLinecap: "round" });
+const stem = css({ fill: "[none]", strokeWidth: "[2.5]", strokeLinecap: "round" });
 
 function Sprout({ into, spot }: { into: HillsInto; spot: "near" | "far" }) {
   return (
