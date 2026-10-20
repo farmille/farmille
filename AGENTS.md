@@ -74,12 +74,12 @@ UI を変えたときは、Storybook のレスポンシブ検査（全 Story を
 
 ```bash
 pnpm build-storybook && pnpm test:storybook:responsive
-pnpm test:e2e
+pnpm test:e2e:local
 ```
 
 レスポンシブ検査は `storybook-static/` を 6106 番で配信して検査する。6106 番を別のプロセス（dev Storybook や別 worktree の検査）が使っていると `is already used` のエラーで止まるので、そのプロセスが終わってから流す。dev Storybook は `pnpm storybook`（6076 番）で起動する。
 
-E2E はローカルの Supabase を起動し、CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数を入れてから流す。CI はこれらに加えて `pnpm audit --audit-level=high` を回す。すべて緑になっても完了ではない（実装規約の「完了の定義」を参照）。
+`pnpm test:e2e:local` は、54321 のローカル Supabase の起動の確認・CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数・migration の突き合わせ・資材マスタの投入をまとめて行ってから E2E を流す（中身は `docs/ops/local-verification.md`）。Supabase の起動と migration の適用はユーザーに確認してから行う。CI はこれらに加えて `pnpm audit --audit-level=high` を回す。すべて緑になっても完了ではない（実装規約の「完了の定義」を参照）。
 
 ## 依存の監査
 

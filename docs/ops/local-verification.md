@@ -26,22 +26,19 @@ pnpm setup:worktree
 
 ### E2E
 
-`playwright.config.ts` の決まりで、E2E は `127.0.0.1:54321` の Supabase（`supabase/config.toml` で起動したもの）にだけ流せる。global-setup が E2E 用のデータを消して運営アカウントを作るので、ほかの DB には流さない。`.env.local` が別のポートを指していても、CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数を export すればそちらが優先される。`pnpm check:migrations` も export した接続先を確かめる。
-
 ```bash
-npx --yes supabase@2.120.0 start -x studio,edge-runtime,realtime,imgproxy,logflare,vector
-eval "$(npx --yes supabase@2.120.0 status -o env)"
-export NEXT_PUBLIC_SUPABASE_URL="$API_URL" NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" SUPABASE_SECRET_KEY="$SERVICE_ROLE_KEY"
-export SMTP_URL="smtp://127.0.0.1:54325" MAIL_FROM="Farmille <noreply@example.test>" \
-  AUTH_EMAIL_HOOK_SECRET="v1,whsec_bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ=="
-pnpm check:migrations
-psql "$DB_URL" -tAc "select count(*) from materials"   # 0 件なら次の行で資材マスタを入れる
-psql "$DB_URL" -v ON_ERROR_STOP=1 -f tools/migration/materials-v2-seed.sql
-pnpm test:e2e
+pnpm test:e2e:local
 ```
 
-- `supabase start` は worktree 間で共有している DB を起動する。起動と migration の適用は、ユーザーの確認を取ってから行う
-- `NEXT_PUBLIC_SITE_URL` は `playwright.config.ts` が `http://localhost:3007` に固定するので export しなくてよい
+`playwright.config.ts` の決まりで、E2E は `127.0.0.1:54321` の Supabase（`supabase/config.toml` で起動したもの）にだけ流せる。global-setup が E2E 用のデータを消して運営アカウントを作るので、ほかの DB には流さない。`pnpm test:e2e:local`（`tools/dev/e2e-local.sh`）は次を順に行い、途中で止まれば理由と手順を出して非0で終わる。
+
+- `supabase status` で 54321 のスタックが起動しているかを確かめる
+- CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数を export する。`.env.local` が `58321` など別のスタックを指していても、export した値が優先される
+- `pnpm check:migrations` で、export した接続先の migration がこのチェックアウトと合っているかを確かめる
+- 資材マスタが無ければ `tools/migration/materials-v2-seed.sql` を入れる
+- `pnpm exec playwright test` を流す。引数はそのまま渡す（例：`pnpm test:e2e:local e2e/04-search.spec.ts`）
+
+Supabase の起動・停止と migration の適用は、スクリプトの中では行わない。DB のボリューム `supabase_db_farmille` は worktree 間で共有しているので、ユーザーの確認を取ってから、スクリプトが出すコマンドで行う。既存のボリュームから起動したスタックには、後から足した migration が入らない。
 
 ## 1. 起動
 
