@@ -2,9 +2,9 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { HomeConcept } from "./HomeConcept";
-import { HomeFooter } from "./HomeFooter";
 import { HomeLetters, supportLetters } from "./HomeLetters";
 import { HomeSellerInvitation } from "./HomeSellerInvitation";
+import { SiteFooter } from "./SiteFooter";
 
 afterEach(cleanup);
 describe("ホームの導線", () => {
@@ -29,7 +29,7 @@ describe("ホームの導線", () => {
     expect(screen.queryByText(/農林水産省/)).toBeNull();
   });
   it("フッターにダミーリンクを置かない", () => {
-    render(createElement(HomeFooter));
+    render(createElement(SiteFooter));
     expect(screen.getByRole("link", { name: "メーカー登録申請" }).getAttribute("href")).toBe(
       "/sellers/apply",
     );

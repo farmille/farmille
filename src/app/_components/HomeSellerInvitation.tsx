@@ -5,14 +5,12 @@ import { Icon } from "@/components/Icon";
 import { css } from "../../../styled-system/css";
 import { Reveal } from "./Reveal";
 
-/** 下にはフッターの丘が重なるので、丘の高さ（10・16・24）に余白を足した分だけ空ける。 */
 const section = css({
   maxW: "content.wide",
   mx: "auto",
   px: "5",
-  pb: "24",
-  tab: { px: "8", pb: "32" },
-  pc: { pb: "40" },
+  pb: "14",
+  tab: { px: "8", pb: "16" },
 });
 
 const card = css({

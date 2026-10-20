@@ -6,6 +6,9 @@ import { Toaster } from "@/components/Toaster";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { createRootMetadata } from "@/lib/seo";
 
+import { css } from "../../styled-system/css";
+import { SiteFooter } from "./_components/SiteFooter";
+
 import "gen-interface-jp/400.css";
 import "gen-interface-jp/500.css";
 import "gen-interface-jp/600.css";
@@ -44,7 +47,9 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body>
-        {children}
+        {/* 中身が短い画面でも、フッターを画面の下端より上へ上げない */}
+        <div className={css({ minH: "dvh" })}>{children}</div>
+        <SiteFooter />
         <OnboardingTour />
         <Toaster />
       </body>

@@ -665,7 +665,7 @@ export function ReportForm({
             )}
           </section>
         </fieldset>
-        <div className={foot}>
+        <div className={foot} data-ui="report-form-bar">
           <div className={footInner}>
             <button
               type="button"
