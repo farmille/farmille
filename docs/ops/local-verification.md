@@ -15,7 +15,10 @@ pnpm setup:worktree
 - `pnpm install --frozen-lockfile`（Panda の codegen を含む）と Playwright の Chromium の導入
 - 最後に `pnpm check:migrations` を流す
 
-`pnpm check:migrations` は、`NEXT_PUBLIC_SUPABASE_URL` のポートを公開している Supabase のコンテナを Docker から探し、適用済みの migration と `supabase/migrations/` を突き合わせる。接続先は環境変数を優先し、無ければ `.env.local` の値を使う。遅れていれば未適用のファイルと適用のコマンドを出して非0で終わる。DB には何も適用しない。
+`pnpm check:migrations` は、`NEXT_PUBLIC_SUPABASE_URL` のポートを公開している Supabase のコンテナを Docker から探し、適用済みの migration と `supabase/migrations/` を突き合わせる。接続先は環境変数を優先し、無ければ `.env.local` の値を使う。DB には何も適用しない。
+
+- 遅れていれば、未適用のファイルと適用のコマンドを出して非0で終わる。適用済みの最新より古いファイルが残っているときは、コマンドに `--include-all` が付く
+- このチェックアウトに無い migration が DB にあるとき（別の worktree で適用したもの）も非0で終わる。この状態では `migration up` が履歴の不一致で止まるので、適用のコマンドは出さない。そのファイルが main にあれば worktree を main に追随させ、無ければ DB の扱いをユーザーと決める
 
 - ホームが `container_type_id` 不在などの「internal」で落ちたら、まずこれを流す。既存のボリュームから起動した Supabase には、後から足した migration が入らない
 - ローカルの DB は worktree 間で共有しているので、適用はユーザーの確認を取ってから行う

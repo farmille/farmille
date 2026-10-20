@@ -28,7 +28,8 @@ else
 fi
 
 # src/env.ts の getter をすべて読み、アプリが起動時に要る値がそろっているかを同じ規則で確かめる。
-node --env-file="$ENV_LOCAL" --input-type=module -e '
+# シェルから引き継いだ値が .env.local の欠けを隠さないよう、環境変数を空にして読む。
+env -i PATH="$PATH" HOME="$HOME" node --env-file="$ENV_LOCAL" --input-type=module -e '
   const { clientEnv, serverEnv } = await import("./src/env.ts");
   try {
     for (const env of [clientEnv, serverEnv]) for (const name of Object.keys(env)) env[name];
