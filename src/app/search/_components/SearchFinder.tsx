@@ -157,8 +157,8 @@ const cropList = css({
   listStyle: "none",
   overflowX: "auto",
   scrollSnapType: "[x proximity]",
+  // ::-webkit-scrollbar で消すと Safari の PC で戻せないため、scrollbar-width だけで出し分ける
   scrollbarWidth: "none",
-  "&::-webkit-scrollbar": { display: "none" },
   // 右端を薄くし、続きがあることを示す。black と transparent はマスクのアルファ指定であり配色ではない。
   maskImage: "linear-gradient(90deg, black 85%, transparent)",
   tab: { mx: "-5", px: "5" },
@@ -255,6 +255,9 @@ function toSelected(choice: FinderChoice): SelectedSearchFilter {
   return { kind: "filter", category: choice.category, id: choice.id, name: choice.name };
 }
 
+const isEffectFilter = (filter: SelectedSearchFilter) =>
+  filter.kind === "filter" && filter.category === "effect";
+
 const isCropFilter = (filter: SelectedSearchFilter) =>
   filter.kind === "filter" && (filter.category === "crop" || filter.category === "crop_group");
 
@@ -270,23 +273,18 @@ export function SearchFinder({ scope, selected, sort, query, resultCount }: Sear
   const activeCrop = crops.find((crop) => crop.active);
   const bandSource = (activeCrop && photoOf(activeCrop)) ?? heroPhoto;
 
-  // 作物は1つだけ選ぶ。別の作物を押したら入れ替え、選択中の作物を押したら外す。
-  const cropHref = (choice: FinderChoice) => {
-    const others = selected.filter((filter) => !isCropFilter(filter));
-    return buildSearchHref({
-      filters: choice.active ? others : [...others, toSelected(choice)],
-      sort,
-      query,
-    });
-  };
-  const effectHref = (choice: FinderChoice) =>
+  // 作物も効果も1つだけ選ぶ。別のものを押したら同じ軸の条件を入れ替え、選択中のものを押したら外す。
+  // チップの件数は同じ軸の条件を外して数えているので、入れ替えた先の結果件数と一致する。
+  const hrefFor = (choice: FinderChoice, sameAxis: (filter: SelectedSearchFilter) => boolean) =>
     buildSearchHref({
       filters: choice.active
         ? selected.filter((filter) => !isSame(filter, choice))
-        : [...selected, toSelected(choice)],
+        : [...selected.filter((filter) => !sameAxis(filter)), toSelected(choice)],
       sort,
       query,
     });
+  const cropHref = (choice: FinderChoice) => hrefFor(choice, isCropFilter);
+  const effectHref = (choice: FinderChoice) => hrefFor(choice, isEffectFilter);
 
   return (
     <section aria-labelledby="search-finder-title" className={root}>
