@@ -109,10 +109,10 @@ export const textStyles = {
     value: { fontSize: { base: "md", tab: "lg" }, lineHeight: "loose", letterSpacing: "0.06em" },
   },
   letter: {
-    description:
-      "ホームの応援メッセージの本文。手書きの教科書体で組み、便箋の罫線と同じ行送りにする。",
+    description: "ホームの応援メッセージの本文。明朝体で組み、便箋の罫線と同じ行送りにする。",
     value: {
-      fontFamily: "handwriting",
+      fontFamily: "shipporiMincho",
+      fontWeight: "normal",
       fontSize: { base: "md", tab: "lg" },
       lineHeight: "loose",
       letterSpacing: "0.04em",

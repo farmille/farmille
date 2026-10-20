@@ -186,9 +186,9 @@ export const tokens = {
     gothicMb101: {
       value: '"a-otf-gothic-mb101-pr6n", var(--fonts-sans)',
     },
+    // Adobe Fonts のしっぽり明朝 Regular。ホームの応援メッセージに使う。
+    shipporiMincho: { value: '"shippori-mincho", serif' },
     // material-icons パッケージの icon font。ligature で glyph を描く（共通 Icon が使う）
-    // ホームの応援メッセージ。ペンで書いたような教科書体（@fontsource/klee-one）
-    handwriting: { value: '"Klee One", var(--fonts-sans)' },
     materialIcons: { value: '"Material Icons"' },
     materialIconsOutlined: { value: '"Material Icons Outlined"' },
     sans: {

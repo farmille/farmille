@@ -1,5 +1,3 @@
-import "@fontsource/klee-one/400.css";
-
 import { css, cva } from "../../../styled-system/css";
 import { HomeHills } from "./HomeHills";
 import { HomeSectionTitle } from "./HomeSectionTitle";
