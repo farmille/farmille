@@ -55,7 +55,6 @@ export const OwnFilled: Story = {
   args: {
     editable: true,
     avatarUrl: avatar,
-    publicProfileHref: "/users/00000000-0000-4000-8000-000000000301",
   },
 };
 
@@ -63,7 +62,6 @@ export const OwnEmpty: Story = {
   args: {
     editable: true,
     details: { ...emptyDetails, prefecture_code: 8 },
-    publicProfileHref: "/users/00000000-0000-4000-8000-000000000301",
     stats: [
       { label: "実証詳細レポート", value: 0 },
       { label: "感想口コミ", value: 0 },

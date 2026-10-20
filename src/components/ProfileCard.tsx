@@ -27,7 +27,8 @@ const cover = css({
 
 const content = css({ px: "4.5", pb: "4" });
 
-const headRow = css({ display: "flex", alignItems: "flex-end", flexWrap: "wrap", gap: "3.5" });
+// 名前の列はカバー画像の下端から余白を取って始める（アバターの下端にそろえると名前がカバーに寄りすぎる）。
+const headRow = css({ display: "flex", alignItems: "flex-start", flexWrap: "wrap", gap: "3.5" });
 
 // カバー画像に重なるので、背景色の縁を回して輪郭を切る。
 const avatarFrame = css({
@@ -41,9 +42,17 @@ const avatarFrame = css({
   borderRadius: "pill",
 });
 
-const nameColumn = css({ flex: "1", minW: "44", pb: "0.5" });
+const nameColumn = css({ flex: "1", minW: "44", pt: "4" });
 
-const name = css({ m: "0", textStyle: "title" });
+const name = css({
+  m: "0",
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  columnGap: "2.5",
+  rowGap: "1",
+  textStyle: "title",
+});
 
 const chipRow = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "1.5" } as const;
 
@@ -76,6 +85,7 @@ const affiliation = css({
 const editLink = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   flex: "none",
   px: "4",
+  mt: "3",
 });
 
 const srOnly = css({ srOnly: true });
@@ -86,8 +96,6 @@ const bio = css({
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });
-
-const emptyRow = css({ mt: "3", fontSize: "sm" });
 
 const linkRow = css({
   display: "flex",
@@ -119,80 +127,14 @@ const statRow = css({
   "& b": { fontVariantNumeric: "tabular-nums" },
 });
 
-const footRow = css({
-  display: "flex",
-  alignItems: "baseline",
-  justifyContent: "space-between",
-  flexWrap: "wrap",
-  gap: "2.5",
-  mt: "2",
-});
-
-const publicNote = css({ m: "0", color: "text.subtle", textStyle: "note" });
-
-const publicLink = css({ ml: "auto", fontSize: "sm", fontWeight: "bold" });
-
-const todoHint = cva({
-  base: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "1.5",
-    color: "text.brand",
-    fontSize: "sm",
-    fontWeight: "bold",
-    textDecoration: "none",
-    _hover: { textDecoration: "underline" },
-  },
-  variants: {
-    placement: {
-      block: { mt: "1" },
-      afterLabel: { mt: "0.5" },
-      inline: { ml: "1", fontSize: "xs" },
-    },
-  },
-});
-
-const todoIcon = css({
-  flex: "none",
-  w: "4",
-  h: "4",
-  display: "grid",
-  placeItems: "center",
-  borderWidth: "1.5px",
-  borderStyle: "dashed",
-  borderColor: "primary.700",
-  borderRadius: "pill",
-  color: "text.brand",
-  fontSize: "xs",
-  fontWeight: "black",
-  lineHeight: "none",
-});
-
 type ProfileCardProps = {
   handle: string;
   avatarUrl: string | null;
   details: ProfileDetails;
   stats: ReadonlyArray<{ label: string; value: number }>;
+  /** 本人のマイページでは「プロフィールを編集」だけを足す。表示する中身は公開プロフィールと同じ。 */
   editable?: boolean;
-  publicProfileHref?: string;
 };
-
-function TodoHint({
-  children,
-  placement = "block",
-}: {
-  children: string;
-  placement?: "block" | "afterLabel" | "inline";
-}) {
-  return (
-    <Link className={todoHint({ placement })} href="/me/edit">
-      <span className={todoIcon} aria-hidden="true">
-        ＋
-      </span>
-      {children}
-    </Link>
-  );
-}
 
 export function ProfileCard({
   handle,
@@ -200,7 +142,6 @@ export function ProfileCard({
   details,
   stats,
   editable = false,
-  publicProfileHref,
 }: ProfileCardProps) {
   const standpoint = STANDPOINTS.find((item) => item.value === details.standpoint)?.label;
   const prefecture = PREFECTURES.find((item) => item.code === details.prefecture_code)?.name;
@@ -215,9 +156,9 @@ export function ProfileCard({
           </span>
           <div className={nameColumn}>
             <h1 className={name} id="profile-handle">
-              <span>{handle}</span> {standpoint ? <Badge variant="type">{standpoint}</Badge> : null}
+              <span>{handle}</span>
+              {standpoint ? <Badge variant="type">{standpoint}</Badge> : null}
             </h1>
-            {editable && !avatarUrl ? <TodoHint>プロフィール画像を設定する</TodoHint> : null}
             {prefecture || details.affiliations.length > 0 ? (
               <div className={regionRow}>
                 {prefecture ? (
@@ -246,14 +187,7 @@ export function ProfileCard({
           ) : null}
         </div>
 
-        {details.bio ? (
-          <p className={bio}>{details.bio}</p>
-        ) : editable ? (
-          <div className={emptyRow}>
-            <span className={label({ spaced: false })}>自己紹介</span>{" "}
-            <TodoHint placement="afterLabel">自己紹介を追加する</TodoHint>
-          </div>
-        ) : null}
+        {details.bio ? <p className={bio}>{details.bio}</p> : null}
 
         {details.crops.length > 0 ? (
           <div className={cropRow}>
@@ -263,11 +197,6 @@ export function ProfileCard({
                 {crop.name}
               </Chip>
             ))}
-          </div>
-        ) : editable ? (
-          <div className={css({ mt: "2", fontSize: "sm" })}>
-            <span className={label({ spaced: false })}>主な作目</span>{" "}
-            <TodoHint placement="afterLabel">主な作目を追加する</TodoHint>
           </div>
         ) : null}
 
@@ -288,18 +217,6 @@ export function ProfileCard({
             </span>
           ))}
         </div>
-        {editable || publicProfileHref ? (
-          <div className={footRow}>
-            {editable ? (
-              <p className={publicNote}>都道府県まで公開中。本名・連絡先は公開されません。</p>
-            ) : null}
-            {publicProfileHref ? (
-              <Link href={publicProfileHref} className={publicLink}>
-                公開プロフィールを見る →
-              </Link>
-            ) : null}
-          </div>
-        ) : null}
       </div>
     </section>
   );

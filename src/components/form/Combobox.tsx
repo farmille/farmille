@@ -93,13 +93,13 @@ const inputStyle = css({
   _touch: { fontSize: "lg" },
 });
 
+// 選んだ候補は入力欄の外（上）に並べ、文字を打つ欄と見分けがつくようにする。
 const chipsStyle = css({
   display: "flex",
-  flex: "1",
   flexWrap: "wrap",
   alignItems: "center",
   gap: "1.5",
-  minW: "0",
+  mb: "2",
 });
 
 const iconStyle = css({ display: "flex", flexShrink: "0", color: "text.subtle" });
@@ -147,7 +147,7 @@ const labelOf = (option: Option) => option.label;
 const valueOf = (option: Option) => option.value;
 
 /**
- * 決まった候補から選ぶ入力欄。multiple では選んだ候補を入力欄の中のチップで示す。
+ * 決まった候補から選ぶ入力欄。multiple では選んだ候補を入力欄の上にチップで並べ、入力欄は検索欄として独立させる。
  * name（または囲む Field の name）があると、選んだ値ごとに送信値を持つ。
  */
 export function Combobox(props: ComboboxProps) {
@@ -252,7 +252,7 @@ function MultipleCombobox({
       required={required}
       value={selected}
     >
-      <BaseCombobox.InputGroup className={cx(groupStyle, className)}>
+      {selected.length > 0 ? (
         <BaseCombobox.Chips className={chipsStyle}>
           {selected.map((option) => (
             <BaseCombobox.Chip className={chips.root} key={option.value}>
@@ -265,13 +265,18 @@ function MultipleCombobox({
               </BaseCombobox.ChipRemove>
             </BaseCombobox.Chip>
           ))}
-          <BaseCombobox.Input
-            className={inputStyle}
-            onKeyDown={enterGuard.onKeyDown}
-            placeholder={selected.length > 0 ? undefined : placeholder}
-            readOnly={full}
-          />
         </BaseCombobox.Chips>
+      ) : null}
+      <BaseCombobox.InputGroup className={cx(groupStyle, className)}>
+        <span className={iconStyle} aria-hidden="true">
+          <Icon name="search" size="sm" />
+        </span>
+        <BaseCombobox.Input
+          className={inputStyle}
+          onKeyDown={enterGuard.onKeyDown}
+          placeholder={placeholder}
+          readOnly={full}
+        />
         <BaseCombobox.Icon className={iconStyle}>
           <Icon name="expand_more" size="sm" />
         </BaseCombobox.Icon>
