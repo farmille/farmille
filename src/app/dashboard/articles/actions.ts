@@ -13,8 +13,10 @@ import {
   updateSellerArticle,
   validateArticleInput,
 } from "@/server/mutations/articles";
-import { searchMaterialsForArticleLink } from "@/server/queries/seller-articles";
-import { createServerSupabase } from "@/server/supabase";
+import {
+  listArticleMaterialIds,
+  searchMaterialsForArticleLink,
+} from "@/server/queries/seller-articles";
 
 function errorState(code: ErrorCode, fieldErrors?: Record<string, string>): SellerArticleFormState {
   return {
@@ -46,21 +48,6 @@ function revalidateArticlePaths(articleId: string, materialIds: string[]): void 
     revalidatePath(`/materials/${materialId}`);
     revalidatePath(`/materials/${materialId}/articles`);
   }
-}
-
-async function materialIdsForArticle(articleId: string): Promise<string[]> {
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase
-    .from("article_materials")
-    .select("material_id")
-    .eq("article_id", articleId);
-
-  if (error !== null || data === null) {
-    console.error("[dashboard/articles] 紐づけ資材の再検証用取得に失敗", error);
-    return [];
-  }
-
-  return data.map((row) => row.material_id);
 }
 
 export async function createArticleAction(
@@ -151,7 +138,7 @@ export async function setArticleStatusAction(
   const result = await setSellerArticleStatus(authorization.sellerId, articleId, status);
   if (!result.ok) return errorState(result.error);
 
-  const materialIds = await materialIdsForArticle(articleId);
+  const materialIds = await listArticleMaterialIds(articleId);
   revalidateArticlePaths(articleId, materialIds);
 
   return {
@@ -171,7 +158,7 @@ export async function deleteArticleAction(articleId: string): Promise<void> {
     redirect(`/sellers/login?next=${encodeURIComponent("/dashboard/articles")}`);
   }
 
-  const materialIds = await materialIdsForArticle(articleId);
+  const materialIds = await listArticleMaterialIds(articleId);
   const result = await deleteSellerArticle(session.data.sellerId, articleId);
   if (!result.ok) {
     throw new Error(errorMessageJa[result.error]);
