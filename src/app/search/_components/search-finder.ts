@@ -88,3 +88,12 @@ export function finderEffects(scope: FinderScope, limit: number): FinderChoice[]
       active: active.has(effect.id),
     }));
 }
+
+/** サイドバーからは作物を複数選べる（どれかに当てはまる資材を出す）ので、見出しにも全部が分かるように出す。 */
+export function finderHeading(cropNames: string[]): string {
+  const [first, second, ...rest] = cropNames;
+  if (first === undefined) return "育てている作物を選んでください";
+  if (second === undefined) return `${first}に使える資材`;
+  if (rest.length === 0) return `${first}・${second}に使える資材`;
+  return `${first}ほか${rest.length + 1}品目に使える資材`;
+}

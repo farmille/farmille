@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { cropEvidence, filterCatalog } from "@/lib/catalog-search";
 
-import { finderCrops, finderEffects, type FinderScope } from "./search-finder";
+import { finderCrops, finderEffects, finderHeading, type FinderScope } from "./search-finder";
 import { storyCatalog, storyIds } from "./story-fixtures";
 
 const scope = (filters: FinderScope["filters"]): FinderScope => ({
@@ -70,5 +70,12 @@ describe("検索の2段階の絞り込み", () => {
     expect(effects).toEqual([
       expect.objectContaining({ name: "養分吸収の改善", count: 2, active: true }),
     ]);
+  });
+
+  it("見出しは選んでいる作物をすべて表す", () => {
+    expect(finderHeading([])).toBe("育てている作物を選んでください");
+    expect(finderHeading(["トマト"])).toBe("トマトに使える資材");
+    expect(finderHeading(["トマト", "たまねぎ"])).toBe("トマト・たまねぎに使える資材");
+    expect(finderHeading(["トマト", "たまねぎ", "なす"])).toBe("トマトほか2品目に使える資材");
   });
 });

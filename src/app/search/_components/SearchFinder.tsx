@@ -31,6 +31,7 @@ import { filterChipRecipe, focusRing } from "./search-chips";
 import {
   finderCrops,
   finderEffects,
+  finderHeading,
   type FinderChoice,
   type FinderCrop,
   type FinderScope,
@@ -50,6 +51,8 @@ const CROP_PHOTOS = new Map<string, StaticImageData>([
   ["ほうれんそう", spinach],
   ["ねぎ", welshOnion],
   ["だいず", soybean],
+  // 初期データ（seed_masters）では別名なしの「大豆」なので、両方の表記で引く
+  ["大豆", soybean],
   ["キャベツ", cabbage],
   ["ばれいしょ", potato],
   ["ピーマン", greenPepper],
@@ -262,8 +265,8 @@ function isSame(filter: SelectedSearchFilter, choice: FinderChoice) {
 export function SearchFinder({ scope, selected, sort, query, resultCount }: SearchFinderProps) {
   const crops = finderCrops(scope);
   const effects = finderEffects(scope, EFFECT_LIMIT);
-  // 作物分類だけを選んでいても、見出しはその条件にする。写真がない作物なら帯は既定の写真に戻す。
-  const selectedCrop = selected.find(isCropFilter);
+  // 作物分類や複数の作物を選んでいても、見出しは選んだ条件から作る。写真がない作物なら帯は既定の写真に戻す。
+  const selectedCrops = selected.filter(isCropFilter).map((filter) => filter.name);
   const activeCrop = crops.find((crop) => crop.active);
   const bandSource = (activeCrop && photoOf(activeCrop)) ?? heroPhoto;
 
@@ -301,7 +304,7 @@ export function SearchFinder({ scope, selected, sort, query, resultCount }: Sear
         <div className={bandText}>
           <p className={kicker}>作物と悩みから探す</p>
           <h2 className={bandTitle} id="search-finder-title">
-            {selectedCrop ? `${selectedCrop.name}に使える資材` : "育てている作物を選んでください"}
+            {finderHeading(selectedCrops)}
           </h2>
         </div>
       </div>
