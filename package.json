@@ -14,6 +14,7 @@
     "check": "pnpm lint && pnpm exec tsc --noEmit && pnpm exec vitest run",
     "test": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:local": "bash tools/dev/e2e-local.sh",
     "gen:types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/database.types.ts",
     "gen:types:dev": "npx supabase gen types typescript --linked > src/types/database.types.ts",
     "storybook": "storybook dev -p 6076",
