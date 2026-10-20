@@ -28,7 +28,7 @@ const scrollStyle = css({
   pt: "0.5",
   pb: "1.5",
   overflowX: "auto",
-  scrollSnapType: "x mandatory",
+  scrollSnapType: "[x mandatory]",
   scrollbarWidth: "none",
   "&::-webkit-scrollbar": { display: "none" },
   pc: {

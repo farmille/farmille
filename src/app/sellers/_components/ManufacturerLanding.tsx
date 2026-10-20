@@ -188,7 +188,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             content: '""',
             position: "absolute",
             inset: "0",
-            zIndex: "1",
+            zIndex: "local.1",
             bg: "surface.card/60",
           },
         })}
@@ -203,7 +203,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         >
           <Image alt="" fill priority sizes="100vw" src={heroPhoto} />
         </div>
-        <div className={css({ position: "relative", zIndex: "2", py: "8", px: "5" })}>
+        <div className={css({ position: "relative", zIndex: "local.2", py: "8", px: "5" })}>
           <div
             className={css({
               fontSize: "xs",

@@ -97,7 +97,7 @@ export function useCardHandoff(
 
 /** 案内の部品の出方。transform と opacity だけを動かし、動きを減らす設定では不透明度だけを変える。 */
 export const riseStyle = css({
-  transitionProperty: "opacity, transform",
+  transitionProperty: "[opacity, transform]",
   transitionDuration: "dialog",
   transitionTimingFunction: "out",
   opacity: "0",

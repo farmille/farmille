@@ -36,7 +36,7 @@ const stackStyle = css({
 });
 
 const reasonStyle = css({
-  maxW: "360px",
+  maxW: "[360px]",
   lineHeight: "relaxed",
   whiteSpace: "pre-wrap",
 });

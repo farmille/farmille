@@ -17,7 +17,7 @@ const successMarkRecipe = cva({
     },
     entrance: {
       true: {
-        transitionProperty: "opacity, transform",
+        transitionProperty: "[opacity, transform]",
         transitionDuration: "dialog",
         transitionTimingFunction: "out",
         _starting: { opacity: "0", _motionSafe: { transform: "scale(0.9)" } },
@@ -30,16 +30,16 @@ const successMarkRecipe = cva({
 
 export const completionStepRecipe = cva({
   base: {
-    transitionProperty: "opacity, transform",
+    transitionProperty: "[opacity, transform]",
     transitionDuration: "dialog",
     transitionTimingFunction: "out",
     _starting: { opacity: "0", _motionSafe: { transform: "translateY({spacing.2})" } },
   },
   variants: {
     step: {
-      1: { _motionSafe: { transitionDelay: "calc({durations.stagger} * 1)" } },
-      2: { _motionSafe: { transitionDelay: "calc({durations.stagger} * 2)" } },
-      3: { _motionSafe: { transitionDelay: "calc({durations.stagger} * 3)" } },
+      1: { _motionSafe: { transitionDelay: "[calc({durations.stagger} * 1)]" } },
+      2: { _motionSafe: { transitionDelay: "[calc({durations.stagger} * 2)]" } },
+      3: { _motionSafe: { transitionDelay: "[calc({durations.stagger} * 3)]" } },
     },
   },
 });

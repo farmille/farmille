@@ -18,7 +18,7 @@ import { HelpfulShelf, PostsShelf, SavedShelf } from "./_components/Shelves";
 import { resolveMeAccess } from "./_lib/access";
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   display: "flex",
   flexDirection: "column",
   bg: "surface.page",
@@ -28,7 +28,7 @@ const shell = css({
 
 const body = css({
   flex: "1",
-  w: "100%",
+  w: "full",
   maxW: "content.medium",
   mx: "auto",
   px: "4",
@@ -49,7 +49,7 @@ const tabRow = css({
 
 const tabPill = cva({
   base: {
-    flex: "0 0 auto",
+    flex: "none",
     px: "3",
     py: "1.5",
     bg: "surface.card",
@@ -64,7 +64,7 @@ const tabPill = cva({
       outlineWidth: "2px",
       outlineStyle: "solid",
       outlineColor: "primary.700",
-      outlineOffset: "2px",
+      outlineOffset: "0.5",
     },
   },
   variants: {

@@ -26,7 +26,7 @@ export const popupRecipe = cva({
   variants: {
     motion: {
       scale: {
-        transitionProperty: "opacity, transform",
+        transitionProperty: "[opacity, transform]",
         transitionDuration: "fast",
         transitionTimingFunction: "out",
         _startingStyle: {
@@ -39,7 +39,7 @@ export const popupRecipe = cva({
           transform: "scale(0.95)",
           _motionReduce: { transform: "none" },
         },
-        "&[data-instant]": { transitionDuration: "0s" },
+        "&[data-instant]": { transitionDuration: "[0s]" },
       },
       none: {},
     },

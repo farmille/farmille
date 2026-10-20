@@ -11,7 +11,11 @@ export const breakpoints = { tab: "768px", pc: "1024px" };
  * Panda の設定とトークンカタログが同じ元本を参照する。
  */
 export const tokens = {
-  blurs: { reportGate: { value: "4px" } },
+  blurs: {
+    reportGate: { value: "4px" },
+    // 画面の上下に固定する半透明の帯（アプリバー・下部ナビ・操作の帯）
+    bar: { value: "10px" },
+  },
   colors: {
     green: {
       50: { value: "#EBFAF1" },
@@ -86,6 +90,8 @@ export const tokens = {
   // 無効化した操作部品は形を保ったまま薄くする
   opacity: {
     disabled: { value: "0.6" },
+    // チップや見出しに添える小さな分類のラベル
+    label: { value: "0.65" },
   },
   // 画像枠は用途ごとに比率を固定し、画面幅や取得画像の寸法で高さを変えない。
   aspectRatios: {
@@ -233,6 +239,10 @@ export const tokens = {
       materialMobile: { value: "9.375rem" },
       material: { value: "15rem" },
     },
+    // SP の確認幅。Story と開発用の見本を SP の幅で囲む
+    phone: { value: "375px" },
+    // 見つからない画面で、案内を画面の中ほどに置く高さ
+    notFound: { value: "60dvh" },
     dialog: { value: "24rem" },
     // 初回ログインの案内（シート・吹き出し・帯）。PCでは文が1〜2行に収まる幅まで広げる
     guide: { value: "34rem" },
@@ -282,8 +292,19 @@ export const tokens = {
     toast: { value: "400ms" },
     stagger: { value: "50ms" },
   },
+  // 重なり順。local は1つの囲みの中だけの順で、2 は 1 の上に重ねるときに使う
   zIndex: {
-    // 初回ログインの案内。下部ナビ・固定バー（20〜25）より上、ダイアログと候補一覧（50）より下
+    local: { 1: { value: 1 }, 2: { value: 2 } },
+    // 入力画面の上下に貼り付く見出しと操作の帯
+    formBar: { value: 5 },
+    // SP のアプリバー
+    appBar: { value: 10 },
+    // 画面の下に固定する操作の帯と、入力のパネル
+    fixedBar: { value: 20 },
+    bottomNav: { value: 25 },
+    // tab 以上のヘッダー
+    header: { value: 30 },
+    // 初回ログインの案内。ヘッダー・下部ナビ・固定の帯より上、ダイアログと候補一覧より下
     guide: { value: 40 },
     dialog: { value: 50 },
     toast: { value: 60 },

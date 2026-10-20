@@ -2,7 +2,7 @@ import { Toaster } from "@/components/Toaster";
 
 import { css, cva } from "../../../../../../styled-system/css";
 
-export const reportFrame = css({ minH: "100dvh", textStyle: "body" });
+export const reportFrame = css({ minH: "dvh", textStyle: "body" });
 
 export const pillButtonRecipe = cva({
   base: {

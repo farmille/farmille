@@ -31,7 +31,7 @@ const whisker = {
 
 const errorStyle = css({
   position: "absolute",
-  top: "50%",
+  top: "[50%]",
   left: "var(--error-start)",
   w: "var(--error-width)",
   h: "0",

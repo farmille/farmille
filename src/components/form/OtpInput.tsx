@@ -11,7 +11,7 @@ import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 const CODE_LENGTH = 6;
 
 // 透明な1つの入力欄が枠の上に重なる。枠の外まで押せないよう、幅は枠の並びに合わせる
-const containerStyle = css({ w: "fit-content", maxW: "100%" });
+const containerStyle = css({ w: "[fit-content]", maxW: "full" });
 
 const slotsStyle = css({ display: "flex", gap: "2" });
 

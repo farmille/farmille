@@ -6,7 +6,7 @@ const rail = css({
   display: "flex",
   gap: "2.5",
   overflowX: "auto",
-  scrollSnapType: "x mandatory",
+  scrollSnapType: "[x mandatory]",
   pb: "1.5",
   scrollbarWidth: "none",
   "&::-webkit-scrollbar": { display: "none" },

@@ -6,7 +6,7 @@ import { css } from "../../../styled-system/css";
 // モック（reference/mockup-sp-19screens.html）の .appbar / .body 相当。
 // sp は上詰め、tab 以上はタイトルとフォームを画面中央に置く。
 const screenStyle = css({
-  minH: "100dvh",
+  minH: "dvh",
   bg: "surface.panel",
   color: "text.default",
   mx: "auto",
@@ -21,7 +21,7 @@ const screenStyle = css({
 
 const frameStyle = css({
   tab: {
-    w: "100%",
+    w: "full",
     maxW: "content.form",
     my: "auto",
     mx: "auto",
@@ -32,13 +32,13 @@ const frameStyle = css({
 const appBarStyle = css({
   position: "sticky",
   top: "0",
-  zIndex: "10",
+  zIndex: "appBar",
   display: "flex",
   alignItems: "center",
   gap: "2.5",
   px: "3.5",
   pt: "4",
-  pb: "calc(var(--spacing-2\\.5) + var(--spacing-0\\.5) / 2)",
+  pb: "[calc(var(--spacing-2\\.5) + var(--spacing-0\\.5) / 2)]",
   bg: "surface.panel",
   borderBottomWidth: "1px",
   borderBottomStyle: "solid",

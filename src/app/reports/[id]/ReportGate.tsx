@@ -23,7 +23,7 @@ export function ReportGate({ reportPath }: { reportPath: string }) {
     >
       <div
         className={css({
-          filter: "blur({blurs.reportGate})",
+          filter: "[blur({blurs.reportGate})]",
           pointerEvents: "none",
           userSelect: "none",
         })}

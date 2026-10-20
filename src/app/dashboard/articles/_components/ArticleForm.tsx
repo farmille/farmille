@@ -63,13 +63,13 @@ const previewBox = css({
   bg: "surface.card",
   px: "3",
   py: "3",
-  minH: "180px",
+  minH: "[180px]",
   textStyle: "prose",
   "& h1, & h2, & h3": { mt: "3", mb: "2" },
   "& h2": { textStyle: "title" },
   "& h3": { fontWeight: "extrabold" },
   "& p": { my: "2" },
-  "& img": { maxW: "100%", borderRadius: "card", my: "2" },
+  "& img": { maxW: "full", borderRadius: "card", my: "2" },
   "& ul, & ol": { pl: "5", my: "2" },
 });
 
@@ -340,7 +340,7 @@ export function ArticleForm({
               <Image
                 alt=""
                 className={css({
-                  w: "100%",
+                  w: "full",
                   aspectRatio: "image.wide",
                   display: "block",
                   objectFit: "cover",
@@ -399,7 +399,7 @@ export function ArticleForm({
                     </div>
                     <Textarea
                       label={null}
-                      className={css({ mt: "3", minH: "220px" })}
+                      className={css({ mt: "3", minH: "[220px]" })}
                       name="body"
                       onChange={(event) => setBody(event.target.value)}
                       placeholder={

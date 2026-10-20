@@ -6,7 +6,7 @@ import { css } from "../../../../styled-system/css";
 
 // 運営管理はモック基準外（D4）。PC 想定の素直な1カラムで、キット部品を並べるだけにする。
 const shellStyle = css({
-  minH: "100dvh",
+  minH: "dvh",
   bg: "surface.page",
   color: "text.default",
   fontFamily: "sans",

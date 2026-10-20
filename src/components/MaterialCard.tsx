@@ -10,7 +10,7 @@ const scrollCard = cva({
     scrollSnapAlign: "start",
     overflow: "hidden",
     textDecoration: "none",
-    color: "inherit",
+    color: "[inherit]",
     display: "block",
     flexShrink: "0",
     w: "card.materialMobile",
@@ -32,7 +32,7 @@ const listCard = cva({
     // 本文が複数行でもサムネをカード上端に置く
     alignItems: "start",
     textDecoration: "none",
-    color: "inherit",
+    color: "[inherit]",
   },
 });
 
@@ -47,7 +47,7 @@ const imgBox = css({
 });
 
 const listImg = css({
-  w: "62px",
+  w: "[62px]",
   aspectRatio: "image.square",
   borderRadius: "media",
   bg: "surface.card",
@@ -105,8 +105,8 @@ function MaterialImage({
             imageLayer,
             css({
               display: "block",
-              w: "100%",
-              h: "100%",
+              w: "full",
+              h: "full",
               objectFit: "contain",
             }),
           )}
@@ -237,8 +237,8 @@ export function MaterialCard({
               imageLayer,
               css({
                 display: "block",
-                w: "100%",
-                h: "100%",
+                w: "full",
+                h: "full",
                 objectFit: "contain",
               }),
             )}

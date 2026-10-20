@@ -36,7 +36,7 @@ const tagStyle = css({
 function Tag({ category, label }: { category: string; label: string }) {
   return (
     <span className={tagStyle}>
-      <span className={css({ fontSize: "2xs", fontWeight: "bold", opacity: "0.65" })}>
+      <span className={css({ fontSize: "2xs", fontWeight: "bold", opacity: "label" })}>
         {category}
       </span>
       {label}
@@ -81,7 +81,7 @@ export function ReportHeader({
           borderColor: "border.default",
           borderRadius: "card",
           bg: "surface.card",
-          color: "inherit",
+          color: "[inherit]",
           textDecoration: "none",
         })}
       >

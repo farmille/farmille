@@ -20,11 +20,11 @@ import { Input, Select, Textarea } from "@/components/form";
 import { UiKitInteractiveDemos } from "./Interactive";
 
 const page = css({
-  minH: "100vh",
+  minH: "screen",
   bg: "surface.page",
   color: "text.default",
   fontFamily: "sans",
-  maxW: "375px",
+  maxW: "phone",
   mx: "auto",
   pb: "10",
 });
@@ -66,7 +66,7 @@ const phoneChrome = css({
   borderColor: "border.default",
   borderRadius: "card",
   overflow: "hidden",
-  minH: "200px",
+  minH: "[200px]",
 });
 
 const label = css({
@@ -111,7 +111,7 @@ export function UiCatalog() {
       <section className={section}>
         <h2 className={sectionTitle}>FabBar</h2>
         <p className={sectionLead}>実証詳細レポート＋感想口コミの固定バー。</p>
-        <div className={cx(phoneChrome, css({ position: "relative", h: "88px" }))}>
+        <div className={cx(phoneChrome, css({ position: "relative", h: "[88px]" }))}>
           <FabBar />
         </div>
       </section>

@@ -138,7 +138,7 @@ export const adminInlineNoteStyle = css({
 
 export const adminCodeStyle = css({
   display: "inline-block",
-  fontFamily: "monospace",
+  fontFamily: "[monospace]",
   fontSize: "lg",
   fontWeight: "bold",
   bg: "surface.page",

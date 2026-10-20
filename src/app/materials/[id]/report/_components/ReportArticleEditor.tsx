@@ -65,12 +65,12 @@ const bodyText = cva({
 });
 const bodyInput = css({
   display: "block",
-  w: "calc(100% + token(spacing.4))",
+  w: "[calc(100% + token(spacing.4))]",
   borderWidth: "0",
   bg: "transparent",
   resize: "none",
   fieldSizing: "content",
-  color: "inherit",
+  color: "[inherit]",
   fontSize: "md",
   lineHeight: "loose",
 });
@@ -99,7 +99,7 @@ const sectionTitle = cva({
   base: {
     display: "block",
     w: "full",
-    color: "inherit",
+    color: "[inherit]",
     fontSize: "lg",
     fontWeight: "extrabold",
     lineHeight: "prose",
@@ -129,7 +129,7 @@ const image = cva({
     gap: "1.5",
     p: "1.5",
   },
-  variants: { preview: { true: { w: "min(100%, token(sizes.96))" }, false: { w: "40" } } },
+  variants: { preview: { true: { w: "[min(100%, token(sizes.96))]" }, false: { w: "40" } } },
 });
 const thumb = cva({
   base: {
@@ -170,7 +170,7 @@ const fileButton = css({
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.700",
-    outlineOffset: "2px",
+    outlineOffset: "0.5",
   },
 });
 const addDocument = css({

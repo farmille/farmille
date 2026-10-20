@@ -54,7 +54,7 @@ import {
 import { unwrapQueryResult } from "./query-result";
 
 const breadcrumbStyle = css({ mb: "2.5", fontSize: "xs", color: "text.subtle" });
-const crumbLinkStyle = css({ color: "inherit", textDecoration: "underline" });
+const crumbLinkStyle = css({ color: "[inherit]", textDecoration: "underline" });
 
 type MaterialPageProps = {
   params: Promise<{ id: string }>;

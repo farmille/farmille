@@ -12,7 +12,7 @@ const cardRecipe = cva({
   base: {
     overflow: "hidden",
     textDecoration: "none",
-    color: "inherit",
+    color: "[inherit]",
     display: "block",
   },
   variants: {
@@ -125,7 +125,7 @@ export function ReportCard({
       <Link
         href={href}
         aria-label={title}
-        className={css({ display: "block", color: "inherit", textDecoration: "none" })}
+        className={css({ display: "block", color: "[inherit]", textDecoration: "none" })}
       >
         <div className={coverRecipe({ layout })} data-ui="report-card-image">
           {coverSrc ? (
@@ -133,8 +133,8 @@ export function ReportCard({
               alt=""
               className={css({
                 display: "block",
-                w: "100%",
-                h: "100%",
+                w: "full",
+                h: "full",
                 objectFit: "cover",
               })}
               height={480}
@@ -159,7 +159,7 @@ export function ReportCard({
           href={href}
           className={css({
             display: "block",
-            color: "inherit",
+            color: "[inherit]",
             textDecoration: "none",
             textStyle: "body",
             fontWeight: "bold",
@@ -196,7 +196,7 @@ export function ReportCard({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: compact ? "1" : "1.5",
-                color: "inherit",
+                color: "[inherit]",
                 textDecoration: "none",
               })}
             >

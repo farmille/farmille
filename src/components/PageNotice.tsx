@@ -17,7 +17,7 @@ export function PageNotice({
           m: "0",
           color: "text.default",
           fontSize: "lg",
-          fontWeight: "800",
+          fontWeight: "extrabold",
           lineHeight: "normal",
         })}
       >

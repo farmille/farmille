@@ -17,7 +17,7 @@ const barStyle = css({
   zIndex: "guide",
   left: "3",
   right: "3",
-  bottom: "calc(token(spacing.3) + env(safe-area-inset-bottom, 0px))",
+  bottom: "[calc(token(spacing.3) + env(safe-area-inset-bottom, 0px))]",
   mx: "auto",
   maxW: "guide",
   display: "flex",
@@ -38,7 +38,7 @@ const barStyle = css({
 // 帯の上に出す「下へスクロール」。押すと画面を下へ送る
 const hintStyle = css({
   position: "absolute",
-  bottom: "calc(100% + token(spacing.3))",
+  bottom: "[calc(100% + token(spacing.3))]",
   left: "0",
   right: "0",
   display: "flex",
@@ -64,7 +64,7 @@ const hintButtonStyle = css({
     content: '""',
     position: "absolute",
     inset: "0",
-    borderRadius: "inherit",
+    borderRadius: "[inherit]",
     borderWidth: "3px",
     borderStyle: "solid",
     borderColor: "primary.700",
@@ -78,7 +78,7 @@ const hintButtonStyle = css({
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.700",
-    outlineOffset: "2px",
+    outlineOffset: "0.5",
   },
 });
 const nudgeStyle = css({ animation: "tourNudge", _motionReduce: { animation: "none" } });

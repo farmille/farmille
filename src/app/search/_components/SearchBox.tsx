@@ -26,10 +26,11 @@ type SearchBoxProps = {
 
 const SUGGESTION_LIMIT = 8;
 
-const tint = (hue: string) => ({
-  bg: `color-mix(in srgb, ${hue} 15%, token(colors.surface.card))`,
-  color: `color-mix(in srgb, ${hue} 68%, token(colors.text.default))`,
-});
+const tint = (hue: string) =>
+  ({
+    bg: `[color-mix(in srgb, ${hue} 15%, token(colors.surface.card))]`,
+    color: `[color-mix(in srgb, ${hue} 68%, token(colors.text.default))]`,
+  }) as const;
 
 const categoryLabelRecipe = cva({
   base: {
@@ -42,7 +43,7 @@ const categoryLabelRecipe = cva({
   },
   variants: {
     category: {
-      crop: tint("token(colors.primary.700)"),
+      crop: tint("token(colors.text.brand)"),
       concern: tint("token(colors.tag.concern)"),
       effect: tint("token(colors.tag.effect)"),
       cond: tint("token(colors.tag.cond)"),

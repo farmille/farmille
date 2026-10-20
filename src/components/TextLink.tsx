@@ -37,7 +37,7 @@ const textLinkRecipe = cva({
           outlineWidth: "2px",
           outlineStyle: "solid",
           outlineColor: "primary.700",
-          outlineOffset: "2px",
+          outlineOffset: "0.5",
         },
       },
     },

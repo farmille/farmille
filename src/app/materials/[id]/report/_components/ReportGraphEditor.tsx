@@ -96,10 +96,15 @@ const slotBox = cva({
     },
   },
 });
-const ring = css({ fill: "none", stroke: "accent.star", strokeWidth: "3" });
-const label = css({ fill: "text.subtle", fontSize: "xs", fontWeight: "semibold", opacity: "0.85" });
+const ring = css({ fill: "[none]", stroke: "accent.star", strokeWidth: "3" });
+const label = css({
+  fill: "text.subtle",
+  fontSize: "xs",
+  fontWeight: "semibold",
+  opacity: "[0.85]",
+});
 const ghost = cva({
-  base: { fill: "text.subtle", fontWeight: "semibold", opacity: "0.8" },
+  base: { fill: "text.subtle", fontWeight: "semibold", opacity: "[0.8]" },
   variants: { size: { xs: { fontSize: "xs" }, sm: { fontSize: "sm" }, md: { fontSize: "md" } } },
 });
 const pen = css({ fill: "primary.800", fontSize: "sm", fontWeight: "extrabold" });

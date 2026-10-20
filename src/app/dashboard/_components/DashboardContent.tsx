@@ -40,7 +40,7 @@ const infoRow = css({
 });
 
 const infoLabel = css({
-  flex: "1 0 100%",
+  flex: "[1 0 100%]",
   fontSize: "sm",
   color: "text.muted",
   fontWeight: "bold",

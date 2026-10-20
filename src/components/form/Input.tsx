@@ -10,7 +10,7 @@ import { Labeled, splitLabeling, type Labeling } from "./Labeled";
 import { useRestoredText } from "./persisted-input";
 import { controlRecipe } from "./recipes";
 
-const revealShell = css({ position: "relative", display: "block", w: "100%" });
+const revealShell = css({ position: "relative", display: "block", w: "full" });
 
 const revealButton = css({
   position: "absolute",

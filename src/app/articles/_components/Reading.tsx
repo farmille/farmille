@@ -20,7 +20,7 @@ export const byline = {
     display: "inline-flex",
     alignItems: "center",
     gap: "2",
-    color: "inherit",
+    color: "[inherit]",
     textDecoration: "none",
   }),
   name: css({ fontWeight: "bold", color: "text.default" }),

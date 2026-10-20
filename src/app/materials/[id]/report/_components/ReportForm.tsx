@@ -89,7 +89,7 @@ const shell = css({ maxW: "content.medium", mx: "auto", pb: "28" });
 const head = css({
   position: "sticky",
   top: "0",
-  zIndex: "5",
+  zIndex: "formBar",
   borderBottomWidth: "1px",
   borderBottomStyle: "solid",
   borderBottomColor: "border.default",
@@ -107,7 +107,7 @@ const headTop = css({
 });
 
 const title = css({
-  flex: "1 1 100%",
+  flex: "[1 1 100%]",
   minW: "0",
   overflow: "hidden",
   textOverflow: "ellipsis",
@@ -164,7 +164,7 @@ const stepButton = css({
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.700",
-    outlineOffset: "2px",
+    outlineOffset: "0.5",
     borderRadius: "mark",
   },
 });
@@ -172,8 +172,8 @@ const stepButton = css({
 const stepNumber = cva({
   base: {
     position: "relative",
-    zIndex: "1",
-    flex: "0 0 auto",
+    zIndex: "local.1",
+    flex: "none",
     display: "grid",
     placeItems: "center",
     w: "6.5",
@@ -225,8 +225,8 @@ const stepLine = cva({
   base: {
     position: "absolute",
     top: "3",
-    left: "50%",
-    right: "-50%",
+    left: "[50%]",
+    right: "[-50%]",
     h: "0.5",
     bg: "border.strong",
   },
@@ -254,7 +254,7 @@ const foot = css({
   right: "0",
   bottom: "0",
   left: "0",
-  zIndex: "5",
+  zIndex: "formBar",
   borderTopWidth: "1px",
   borderTopStyle: "solid",
   borderTopColor: "border.default",

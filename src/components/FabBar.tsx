@@ -7,11 +7,11 @@ import { ReviewCompletionToast } from "./ReviewCompletionToast";
 
 const fabBarRecipe = cva({
   base: {
-    zIndex: "20",
+    zIndex: "fixedBar",
     display: "flex",
     gap: "2",
     bg: "card/90",
-    backdropFilter: "blur(10px)",
+    backdropFilter: "[blur({blurs.bar})]",
     borderWidth: "1px",
     borderStyle: "solid",
     borderColor: "border.default",
@@ -28,7 +28,7 @@ const fabBarRecipe = cva({
         bottom: "3",
         tab: {
           position: "static",
-          w: "100%",
+          w: "full",
           maxW: "content.form",
           ml: "auto",
           mt: "6",
@@ -43,10 +43,10 @@ const fabBarRecipe = cva({
         mx: "auto",
         tab: {
           position: "sticky",
-          left: "auto",
-          right: "auto",
+          left: "[auto]",
+          right: "[auto]",
           bottom: "4",
-          w: "100%",
+          w: "full",
           maxW: "content.form",
           mx: "auto",
           mt: "6",
@@ -58,7 +58,7 @@ const fabBarRecipe = cva({
       site: {
         borderRadius: "banner",
         tab: {
-          left: "auto",
+          left: "[auto]",
           right: "7",
           bottom: "6",
           w: "auth",
@@ -89,7 +89,7 @@ const fabLink = {
   whiteSpace: "nowrap",
 } as const;
 
-const reportLink = css(buttonRecipe.raw({ variant: "primary" }), fabLink, { flex: "1.3" });
+const reportLink = css(buttonRecipe.raw({ variant: "primary" }), fabLink, { flex: "[1.3]" });
 
 const reviewLink = css(buttonRecipe.raw({ variant: "ghost" }), fabLink, { flex: "1" });
 

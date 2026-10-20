@@ -31,6 +31,28 @@ const textColorRules = [
   },
 ];
 
+// strictTokens の角括弧（"[50%]"）を、色の生値の抜け道にしない。
+const colorProperty =
+  "/^(color|bg|background|fill|stroke|gradientFrom|gradientTo|gradientVia)$|Color$/";
+const rawColor = "/#[0-9a-fA-F]{3,8}\\b|\\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch)\\(/";
+const colorReference = "/token\\(colors\\.|\\{colors\\./";
+const colorValueRules = [
+  {
+    selector: `Property[key.name=${colorProperty}] Literal[value=/^\\[(?!(inherit|none)\\]$)/]:not([value=${colorReference}])`,
+    message:
+      "色は角括弧で生値を書かず、トークンを使う。角括弧はキーワード（[inherit]・[none]）と、token(colors.…) を混ぜた式（color-mix など）にだけ使う。",
+  },
+  {
+    selector: `Property[key.name=${colorProperty}] > TemplateLiteral:not(:has(TemplateElement[value.raw=${colorReference}])) > TemplateElement[value.raw=/^\\[/]`,
+    message:
+      "色は角括弧で生値を書かず、トークンを使う。角括弧はキーワード（[inherit]・[none]）と、token(colors.…) を混ぜた式（color-mix など）にだけ使う。",
+  },
+  {
+    selector: `Property[key.name=${colorProperty}] :matches(Literal[value=${rawColor}], TemplateElement[value.raw=${rawColor}])`,
+    message: "色の生値（#fff・rgb() など）を書かない。トークンを使う。",
+  },
+];
+
 const styleAttributeRules = [
   {
     selector: "JSXAttribute[name.name='style'] > JSXExpressionContainer > :not(ObjectExpression)",
@@ -119,6 +141,7 @@ const eslintConfig = defineConfig([
     rules: {
       "no-restricted-syntax": restrictedSyntax(
         textColorRules,
+        colorValueRules,
         styleAttributeRules,
         supabaseQueryRules,
         secretKeyRules,
@@ -128,7 +151,11 @@ const eslintConfig = defineConfig([
   {
     files: ["src/server/**"],
     rules: {
-      "no-restricted-syntax": restrictedSyntax(textColorRules, styleAttributeRules),
+      "no-restricted-syntax": restrictedSyntax(
+        textColorRules,
+        colorValueRules,
+        styleAttributeRules,
+      ),
     },
   },
   {
@@ -136,8 +163,21 @@ const eslintConfig = defineConfig([
     rules: {
       "no-restricted-syntax": restrictedSyntax(
         textColorRules,
+        colorValueRules,
         styleAttributeRules,
         supabaseQueryRules,
+      ),
+    },
+  },
+  {
+    // トークンの定義そのものは色の生値を持つ。
+    files: ["src/theme/**"],
+    rules: {
+      "no-restricted-syntax": restrictedSyntax(
+        textColorRules,
+        styleAttributeRules,
+        supabaseQueryRules,
+        secretKeyRules,
       ),
     },
   },

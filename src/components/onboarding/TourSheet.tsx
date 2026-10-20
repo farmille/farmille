@@ -23,7 +23,7 @@ const scrimStyle = css({
   bg: "scrim/45",
   // 幕は見た目だけ。案内を読まずに画面を操作する人もいるので、画面の操作はさえぎらない
   pointerEvents: "none",
-  transitionProperty: "opacity",
+  transitionProperty: "[opacity]",
   transitionDuration: "dialog",
   transitionTimingFunction: "out",
   opacity: "0",
@@ -35,7 +35,7 @@ const sheetStyle = css({
   zIndex: "guide",
   left: "3",
   right: "3",
-  bottom: "calc(token(spacing.3) + env(safe-area-inset-bottom, 0px))",
+  bottom: "[calc(token(spacing.3) + env(safe-area-inset-bottom, 0px))]",
   mx: "auto",
   maxW: "guide",
   display: "flex",

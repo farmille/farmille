@@ -18,7 +18,7 @@ const buttonRecipe = cva({
     textDecoration: "none",
     borderRadius: "button",
     lineHeight: "tight",
-    maxW: "100%",
+    maxW: "full",
     textAlign: "center",
     overflowWrap: "anywhere",
     _disabled: { opacity: "disabled", cursor: "not-allowed" },
@@ -43,7 +43,7 @@ const buttonRecipe = cva({
     },
     size: {
       md: {
-        w: "100%",
+        w: "full",
         px: "6",
         minW: "button.md",
         py: "3",

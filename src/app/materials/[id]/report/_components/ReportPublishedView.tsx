@@ -213,9 +213,7 @@ export function ReportPublishedView({
             );
           })}
           <div className={compliance}>
-            <span className={css({ color: "text.brand", flex: "0 0 auto", display: "flex" })}>
-              ✓
-            </span>
+            <span className={css({ color: "text.brand", flex: "none", display: "flex" })}>✓</span>
             この実証詳細レポートは、投稿した生産者個人の圃場・条件での体験と見解です。ほかの圃場・作物・気象条件で同じ結果が得られることや、薬害等が生じないことを保証するものではありません。
           </div>
         </div>

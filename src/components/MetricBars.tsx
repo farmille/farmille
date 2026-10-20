@@ -122,7 +122,7 @@ function MetricRow({
       <span className={css({ color: "text.muted", fontSize: "2xs" })}>{label}</span>
       <div
         className={css({
-          h: "17px",
+          h: "[17px]",
           bg: "surface.page",
           borderRadius: "bar",
           overflow: "hidden",
@@ -131,7 +131,7 @@ function MetricRow({
         <div
           className={css({
             w: "var(--bar-width)",
-            h: "100%",
+            h: "full",
             borderRadius: "bar",
             bg: variant === "treated" ? "primary.600" : "border.strong",
           })}

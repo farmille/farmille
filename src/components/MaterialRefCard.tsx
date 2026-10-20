@@ -39,14 +39,14 @@ export function MaterialRefCard({
           p: "3",
           bg: "primary.100",
           textDecoration: "none",
-          color: "inherit",
+          color: "[inherit]",
         }),
         className,
       )}
     >
       <div
         className={css({
-          w: "44px",
+          w: "[44px]",
           aspectRatio: "image.square",
           borderRadius: "media",
           bg: "primary.100",

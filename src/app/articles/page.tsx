@@ -25,7 +25,7 @@ type ArticlesPageProps = {
 };
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   display: "flex",
   flexDirection: "column",
   bg: "surface.page",
@@ -35,7 +35,7 @@ const shell = css({
 
 const main = css({
   flex: "1",
-  w: "100%",
+  w: "full",
   maxW: "content.wide",
   mx: "auto",
   px: "3.5",
@@ -45,10 +45,10 @@ const main = css({
 
 const pageTitle = css({
   position: "absolute",
-  w: "1px",
-  h: "1px",
+  w: "[1px]",
+  h: "[1px]",
   p: "0",
-  m: "-1px",
+  m: "[-1px]",
   overflow: "hidden",
   clip: "rect(0 0 0 0)",
   whiteSpace: "nowrap",

@@ -7,7 +7,7 @@ export default function UserNotFound() {
   return (
     <div
       className={css({
-        minH: "100dvh",
+        minH: "dvh",
         bg: "surface.panel",
         color: "text.default",
         fontFamily: "sans",
@@ -18,7 +18,7 @@ export default function UserNotFound() {
         <EmptyState
           title="プロフィールが見つかりません"
           description="指定されたユーザーは存在しないか、プロフィールを利用できません。"
-          className={css({ minH: "60dvh" })}
+          className={css({ minH: "notFound" })}
         >
           <Link
             href="/"

@@ -80,14 +80,20 @@ const radii = flattenTokenBranch(tokens.radii);
 const shadows = flattenTokenBranch(tokens.shadows);
 const sizes = flattenTokenBranch(tokens.sizes);
 const aspectRatios = flattenTokenBranch(tokens.aspectRatios);
-const textStyleTokens: DisplayToken[] = Object.entries(textStyles).map(([name, role]) => ({
-  name,
-  value: JSON.stringify(role.value),
-  description: role.description,
-}));
+function isTextStyleName(name: string): name is keyof typeof textStyles {
+  return Object.hasOwn(textStyles, name);
+}
+
+const textStyleTokens = Object.keys(textStyles)
+  .filter(isTextStyleName)
+  .map((name) => ({
+    name,
+    value: JSON.stringify(textStyles[name].value),
+    description: textStyles[name].description,
+  }));
 
 const frame = css({
-  minH: "100%",
+  minH: "full",
   bg: "surface.page",
   color: "text.default",
   fontFamily: "sans",
