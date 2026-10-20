@@ -64,6 +64,8 @@ Supabase の DB スキーマから `src/types/database.types.ts` を再生成す
 
 ## 検証
 
+新しい worktree では、最初に `pnpm setup:worktree` を流す（`.env.local` の写し・install・migration の遅れの確認。中身は `docs/ops/local-verification.md`）。
+
 ```bash
 pnpm lint && pnpm format:check && pnpm exec tsc --noEmit && pnpm exec vitest run && pnpm check:stories && pnpm build
 ```
@@ -131,4 +133,5 @@ grep -rn "supabase\.\(from\|rpc\)(" src --exclude-dir=server
 - **型エラーが出る** … migration 適用後に `pnpm gen:types` を流したか確認する。解消しない場合は migration ファイル自体を確認する
 - **Panda のスタイルが効かない** … `panda.config.ts` を変更したら codegen の手動再実行が必要（CI は codegen → tsc の順）。動的値をスタイルへ渡していると静的解析で生成漏れになる
 - **環境変数が無いと言われる** … `src/env.ts` は意図的に fail fast。既定値で逃げず `.env.local` に値を入れる
+- **ホームが「internal」で落ちる** … `pnpm check:migrations` でローカル DB の migration の遅れを確かめる。DB は worktree 間で共有しているので、適用はユーザーに確認してから
 - **lint の指摘が二重に出る** … oxlint と ESLint の役割分担（`eslint-plugin-oxlint` で oxlint 実装済みルールを off）を確認する
