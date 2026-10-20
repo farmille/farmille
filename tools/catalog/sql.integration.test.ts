@@ -9,7 +9,7 @@ import { SnapshotSchema, snapshotQuery } from "./snapshot.ts";
 
 const databaseUrl = process.env.CATALOG_TEST_DATABASE_URL;
 it.skipIf(!databaseUrl)(
-  "実DBで本文と保存を保持し、再実行・削除維持・競合時のロールバックを確認する",
+  "実DBで本文と保存を保持し、再実行・削除維持・競合時のロールバック・修正待ちの原稿の保護を確認する",
   () => {
     if (!databaseUrl) throw new Error("CATALOG_TEST_DATABASE_URL が必要です。");
     const address = new URL(databaseUrl);
@@ -188,6 +188,16 @@ it.skipIf(!databaseUrl)(
       expect(execute(`select description from public.materials where id='${id}'`).trim()).toBe(
         "メーカーの説明",
       );
+      execute(`insert into public.material_page_versions(material_id,seller_id,grant_id,base_revision,status)
+        select '${id}',g.seller_id,g.id,m.content_revision,'returned'
+          from public.material_editor_grants g join public.materials m on m.id=g.material_id
+          where g.material_id='${id}' and g.revoked_at is null;`);
+      source.製品[0].表示製品名 = `改訂された取り込み検証 ${id}`;
+      expect(makePlan().conflicts.map((row) => [row.key, row.reason])).toEqual([
+        [`material/${id}/name`, "メーカー原稿（returned）があるため変更できません。"],
+      ]);
+      execute(`update public.materials set content_revision=content_revision+1 where id='${id}';`);
+      expect(makePlan().conflicts).toEqual([]);
     } finally {
       execute(`begin;
       update public.materials set published_page_version_id=null where id='${id}';
