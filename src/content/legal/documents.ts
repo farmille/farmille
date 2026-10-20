@@ -1,3 +1,5 @@
+// 原稿「Farmille 規約・ガイドライン 第1版」（https://docs.google.com/document/d/1WBws2Rt7coIv89GjEGaO-9IPjgkIcec3MF2ikvy6OFI/edit）の本文をそのまま載せる。
+// 総合利用規約第9条（投稿の権利を会社へ帰属）と投稿ガイドライン第13項（投稿者に著作権が残る）は食い違うが、運営の指定で原文のまま掲載している。
 export const legalDocuments = [
   {
     slug: "terms",

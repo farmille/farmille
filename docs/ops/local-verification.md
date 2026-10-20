@@ -1,6 +1,6 @@
 # ローカル検証手順
 
-刷新後のアプリを手元で動かして全画面を確認するための手順。所要5分（初回のみ Supabase の起動に数分）。
+刷新後のアプリを手元で動かして全画面を確認するための手順。
 
 ## 0. worktree の準備
 
@@ -43,28 +43,30 @@ Supabase の起動・停止と migration の適用は、スクリプトの中で
 ## 1. 起動
 
 ```bash
-cd /Users/shun/Documents/farmille/farmille
-npx supabase start -x studio,analytics,vector,edge-runtime,functions,inbucket,imgproxy,realtime
+npx --yes supabase@2.120.0 start -x studio,edge-runtime,realtime,imgproxy,logflare,vector
+cp .env.example .env.local   # 初回のみ
 pnpm dev
 ```
 
-- Docker のディスクに余裕がある場合は `-x` 以下を外して Studio 込みで起動してよい
-- `.env.local` はローカル既定値で作成済み（gitignore 対象）。値がずれたら `npx supabase status` の `ANON_KEY` / `SERVICE_ROLE_KEY` と突き合わせる
-- ブラウザで http://localhost:3000 。**スマホ幅（375px）で見るのが正**（Chrome DevTools のデバイスツールバー → iPhone SE 等）
+- `.env.local` の `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`・`SUPABASE_SECRET_KEY` は、`npx supabase status` の `API_URL`・`ANON_KEY`・`SERVICE_ROLE_KEY` に合わせる。必須の変数は `src/env.ts` が起動時に検証する。`pnpm build` も `NEXT_PUBLIC_SITE_URL` が無いと失敗する
+- worktree（`.claude/worktrees/` 配下）では、worktree 直下に `.env.local` を置く。Claude の起動ラッパーは worktree の外のファイルを読めない
+- ブラウザで http://localhost:3007 。**スマホ幅（375px）で見るのが正**
 
 ## 2. データを入れ直したいとき
 
 ```bash
-# スキーマごと初期化 → 資材15件 → 運用待ちデータ（審査中・編集局待ち・未処理通報）
-npx supabase db reset
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -f tools/migration/materials-v2-seed.sql
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -f tools/dev/seed-demo.sql
+# スキーマと supabase/seed.sql（一般・メーカーのデモアカウント）を初期化
+npx --yes supabase@2.120.0 db reset
+PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f tools/migration/materials-v2-seed.sql
+PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f tools/dev/seed-home-demo.sql
+PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f tools/dev/seed-demo.sql
+node --env-file=.env.local tools/dev/create-local-admin.ts admin@example.com   # 運営アカウントを作る
 node --env-file=.env.local tools/dev/seed-demo.ts   # デモアカウントのパスワードを揃える
 ```
 
 ## 3. ログイン情報（ローカル専用）
 
-パスワードはすべて `Farmille#Local2026`。
+`seed-demo.ts` を流すと、パスワードはすべて `Farmille#Local2026` になる。
 
 | 役割 | 入口 | ID |
 |---|---|---|
@@ -89,33 +91,32 @@ PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres \
 | ホーム | `/` |
 | 資材検索 | `/search` |
 | 資材詳細 | `/materials/11111111-1111-4111-8111-111111111111` |
-| レビュー全件 | 資材詳細の「レビューをすべて見る」 |
-| 関連記事 | 資材詳細の「その他の記事」 |
-| 使用レポート | `/reports/55555555-5555-4555-8555-555555555555` |
+| 感想口コミ全件 | 資材詳細の「もっと見る（全N件）」 |
+| メーカーの記事 | 資材詳細の「メーカーの記事」 |
+| 実証詳細レポート | `/reports/55555555-5555-4555-8555-555555555555` |
 | 記事一覧・詳細 | `/articles` |
 | メーカーページ | `/sellers/33333333-3333-4333-8333-333333333333` |
 | 公開プロフィール | `/users/22222222-2222-4222-8222-222222222222` |
 | 登録・ログイン | `/signup`・`/login`・`/password-reset` |
 | メーカー申請 | `/sellers/apply` |
 
-**一般ユーザー（`shiosai@example.com`）**：マイページ `/me`（自分の投稿・検討リスト・参考になった の3棚）／プロフィール編集 `/me/edit`／検討リスト `/me/saved` → 比較 `/me/saved/compare`／投稿 `/post` → レビュー・使用レポート
+**一般ユーザー（`shiosai@example.com`）**：マイページ `/me`／プロフィール編集 `/me/edit`／お気に入り `/me/saved` → 比較 `/me/saved/compare`／投稿 `/post`
 
-**メーカー（`demo-maker`）**：ダッシュボード `/dashboard` → 自社資材の確認・追加／変更／掲載終了申請・エビデンス管理／記事管理 `/dashboard/articles`
+**メーカー（`demo-maker`）**：ダッシュボード `/dashboard` → 製品情報の管理 `/dashboard/materials`／各種お手続き `/dashboard/applications`／記事管理 `/dashboard/articles`／会社紹介 `/dashboard/profile`
 
-**運営（`admin@example.com`＋TOTP）**：`/admin`／メーカー審査 `/admin/sellers`（審査中1件）／資材 `/admin/materials`／タグ `/admin/tags`／通報 `/admin/reports`（未処理1件）／編集局 `/admin/usage-reports`（確認待ち1件）
+**運営（`admin@example.com`＋TOTP）**：`/admin`／メーカー確認 `/admin/sellers`／企業からの申請 `/admin/company-applications`／資材の登録・編集 `/admin/materials`／製品情報の表現確認 `/admin/materials/expressions`／タグ・作物マスタ `/admin/tags`／通報 `/admin/reports`／実証詳細レポート編集局 `/admin/usage-reports`
 
 ## 5. 通した方がよいフロー
 
-1. 未ログインで資材詳細 →「レビューを書く」→ ログインへ誘導される
-2. 一般ユーザーでレビュー投稿 → 資材詳細の評価・件数が変わる → 編集 → 削除で戻る
-3. 使用レポートを下書き保存 → 提出 → 運営の編集局で公開 → `/reports/[id]` に出る
-4. `/sellers/apply` から申請 → 運営が承認 → 発行された ID とパスワードで `/sellers/login`
-5. メーカーで資材変更を申請 → 運営が承認 → 公開側の資材詳細に反映される
-6. レビューを通報 → 運営が対応 → 対象が公開側から消える
+1. 未ログインで資材詳細 →「感想口コミを書く」→ ログインへ誘導される
+2. 一般ユーザーで感想口コミを投稿 → 資材詳細の評価・件数が変わる → 編集 → 削除で戻る
+3. 実証詳細レポートを下書き保存 → 提出 → 運営の編集局で公開 → `/reports/[id]` に出る
+4. `/sellers/apply` から申請 → 運営が承認 → Mailpit に届いた案内でパスワードを設定し、ログイン ID で `/sellers/login`
+5. メーカーで資材ページの原稿を保存 → 表現確認へ送信 → 運営が `/admin/materials/expressions` で公開 → 公開側の資材詳細に反映される
+6. 感想口コミを通報 → 運営が対応 → 対象が公開側から消える
 
 ## 6. 既知の挙動
 
-- 資材マスタはローカル開発用の15件のみ（本番相当の381件は `supabase login` 後に投入する。`docs/ops/cutover-runbook.md` §1.3）
-- 一部の資材画像は外部サイトへの直リンクで、リンク切れだと代替アイコンが出る（Storage へのリホストは本番投入時に実施）
+- 資材マスタはローカル開発用の14資材だけ（`tools/migration/README.md`）
 - 存在しない資材 ID を開くと画面には「資材が見つかりません」と出るが、HTTP ステータスは 200 になる（Next.js のストリーミング配信の仕様。SEO 上の扱いは要検討事項として記録）
-- メール確認・パスワード再設定のメールは Mailpit（http://127.0.0.1:54324 ）で受け取る。上の `-x` 付き起動では Mailpit を除外しているため、メールを見るときは除外指定から `inbucket` を外して起動する
+- メール確認・パスワード再設定のメールは Mailpit（http://127.0.0.1:54324 ）で受け取る
