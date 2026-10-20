@@ -146,7 +146,28 @@ describe("一覧カードのグラフ", () => {
         expect.objectContaining({ label: "処理区", value: 20.1, error: 0.4, colorIndex: 1 }),
         expect.objectContaining({ label: "無処理区", value: 18.2, colorIndex: 0 }),
       ],
+      hiddenRowCount: 0,
     });
+  });
+
+  it("区が多いときは先頭の3区だけを出し、残りの数を持つ", () => {
+    const many = Array.from({ length: 5 }, (_, index) => ({
+      id: `p${index}`,
+      name: `区${index + 1}`,
+    }));
+    const chart = firstReportChart(
+      [
+        {
+          kind: "numeric",
+          name: "収量",
+          unit: "kg",
+          graphs: [{ heading: "", rows: many.map((plot) => row(`r-${plot.id}`, plot.id, "10")) }],
+        },
+      ],
+      many,
+    );
+    expect(chart?.rows.map((item) => item.label)).toEqual(["区1", "区2", "区3"]);
+    expect(chart?.hiddenRowCount).toBe(2);
   });
 
   it("読めるグラフがなければ null", () => {

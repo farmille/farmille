@@ -284,6 +284,7 @@ export const storyReportChart = {
     { id: "row-1", label: "無処理区", valueText: "18.2", value: 18.2, error: null, colorIndex: 0 },
     { id: "row-2", label: "処理区", valueText: "20.1±0.4", value: 20.1, error: 0.4, colorIndex: 1 },
   ],
+  hiddenRowCount: 0,
 } satisfies ReportChartPreview;
 
 export const storyReportDetail = {

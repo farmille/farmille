@@ -36,6 +36,7 @@ const trackStyle = css({
   borderRadius: "bar",
 });
 const valueStyle = css({ fontWeight: "bold", fontVariantNumeric: "tabular-nums" });
+const moreStyle = css({ m: "0", mt: "1.5", textStyle: "note", color: "text.subtle" });
 
 /** 一覧カード用の小さな横棒。区の色はレポート本文のグラフと揃える。 */
 export function ReportCardChart({ chart }: { chart: ReportChartPreview }) {
@@ -78,6 +79,9 @@ export function ReportCardChart({ chart }: { chart: ReportChartPreview }) {
           </div>
         );
       })}
+      {chart.hiddenRowCount > 0 ? (
+        <p className={moreStyle}>ほか{chart.hiddenRowCount}区はレポートで読めます</p>
+      ) : null}
     </figure>
   );
 }

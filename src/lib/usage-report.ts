@@ -212,7 +212,16 @@ export function reportGraphRows(
     ];
   });
 }
-export type ReportChartPreview = { title: string; unit: string; rows: ReportBarRow[] };
+/** 区は20まで作れるので、カードには先頭の区だけを出し、残りは数で伝える。全区はレポート本文のグラフで読む。 */
+const PREVIEW_ROW_LIMIT = 3;
+
+export type ReportChartPreview = {
+  title: string;
+  unit: string;
+  rows: ReportBarRow[];
+  /** カードに出さなかった区の数。 */
+  hiddenRowCount: number;
+};
 
 /** DB の kind は文字列のまま受け、numeric だけをグラフにする。 */
 type ChartMeasurement = Pick<UsageReportInput["measurements"][number], "name" | "unit"> & {
@@ -234,7 +243,8 @@ export function firstReportChart(
       return {
         title: heading ? `${measurement.name.trim()}・${heading}` : measurement.name.trim(),
         unit: measurement.unit.trim(),
-        rows,
+        rows: rows.slice(0, PREVIEW_ROW_LIMIT),
+        hiddenRowCount: Math.max(0, rows.length - PREVIEW_ROW_LIMIT),
       };
     }
   }

@@ -27,6 +27,12 @@ export const Percent: Story = {
         { id: "b", label: "処理区A", valueText: "78.5", value: 78.5, error: null, colorIndex: 1 },
         { id: "c", label: "処理区B", valueText: "80.2", value: 80.2, error: null, colorIndex: 2 },
       ],
+      hiddenRowCount: 0,
     },
   },
+};
+
+/** 区が4つ以上あるときは先頭の3区だけを出し、残りの数を添える。 */
+export const ManyPlots: Story = {
+  args: { chart: { ...storyReportChart, hiddenRowCount: 5 } },
 };
