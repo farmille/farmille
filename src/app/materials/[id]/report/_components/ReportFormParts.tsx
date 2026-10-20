@@ -49,7 +49,6 @@ const groupHeading = css({
   alignItems: "baseline",
   gap: "2",
   textStyle: "title",
-  fontWeight: "extrabold",
 });
 
 const groupNote = css({ textStyle: "supporting", fontWeight: "medium", color: "text.subtle" });

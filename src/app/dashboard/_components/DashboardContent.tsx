@@ -221,7 +221,7 @@ const checklist = css({
   pb: "2.5",
 });
 
-const checklistHeading = css({ textStyle: "title", fontWeight: "extrabold", pt: "2.5", pb: "1" });
+const checklistHeading = css({ textStyle: "title", pt: "2.5", pb: "1" });
 
 const plainList = css({ listStyle: "none", m: "0", p: "0" });
 

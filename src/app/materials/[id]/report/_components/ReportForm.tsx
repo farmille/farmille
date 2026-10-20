@@ -245,7 +245,7 @@ const donePane = css({ pt: "10", px: "4.5", textAlign: "center" });
 
 const doneMark = css({ mb: "4.5" });
 
-const doneTitle = css({ m: "0", fontSize: "xl", fontWeight: "extrabold", textWrap: "balance" });
+const doneTitle = css({ m: "0", fontSize: "xl", textWrap: "balance" });
 
 const doneText = css({ mt: "1", mb: "4", textStyle: "supporting", color: "text.subtle" });
 

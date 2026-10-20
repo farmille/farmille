@@ -43,7 +43,7 @@ const avatarFrame = css({
 
 const nameColumn = css({ flex: "1", minW: "44", pb: "0.5" });
 
-const name = css({ m: "0", textStyle: "title", fontWeight: "extrabold" });
+const name = css({ m: "0", textStyle: "title" });
 
 const chipRow = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "1.5" } as const;
 

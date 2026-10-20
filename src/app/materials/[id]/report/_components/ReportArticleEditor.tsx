@@ -24,7 +24,6 @@ import { pillButtonRecipe } from "./ReportFormParts";
 const groupHeading = cva({
   base: {
     textStyle: "title",
-    fontWeight: "extrabold",
     display: "flex",
     alignItems: "baseline",
     gap: "2",

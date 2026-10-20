@@ -4,7 +4,7 @@ import { Avatar } from "@/components/Avatar";
 import { formatDateJa } from "@/components/format-date";
 import type { PublishedUsageReportDetail } from "@/server/queries/usage-reports";
 
-import { css, cx } from "../../../../styled-system/css";
+import { css } from "../../../../styled-system/css";
 import { articleTitle, byline } from "../../articles/_components/Reading";
 
 type ReportHeaderProps = {
@@ -52,7 +52,7 @@ export function ReportHeader({
 }: ReportHeaderProps) {
   return (
     <>
-      <h1 className={cx(articleTitle, css({ fontWeight: "extrabold" }))}>{report.title}</h1>
+      <h1 className={articleTitle}>{report.title}</h1>
       <div className={byline.row}>
         <Link href={`/users/${report.author.userId}`} className={byline.link}>
           <Avatar name={report.author.handle} src={report.author.avatarUrl} size="sm" />

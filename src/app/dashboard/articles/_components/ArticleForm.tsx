@@ -67,7 +67,6 @@ const previewBox = css({
   textStyle: "prose",
   "& h1, & h2, & h3": { mt: "3", mb: "2" },
   "& h2": { textStyle: "title" },
-  "& h3": { fontWeight: "extrabold" },
   "& p": { my: "2" },
   "& img": { maxW: "full", borderRadius: "card", my: "2" },
   "& ul, & ol": { pl: "5", my: "2" },

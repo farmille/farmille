@@ -7,7 +7,6 @@ export const workspaceColumn = css({ maxW: "content.workspace", mx: "auto" });
 
 export const sectionHeading = css({
   textStyle: "title",
-  fontWeight: "extrabold",
   mt: "4.5",
   mb: "2",
   mx: "0.5",

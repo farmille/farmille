@@ -266,8 +266,7 @@ export const tokens = {
     medium: { value: "500" },
     semibold: {
       value: "600",
-      description:
-        "DNP秀英角ゴシック金 Std B が持つ唯一の太さ。h1・h2 は globals.css がこの太さにする。",
+      description: "DNP秀英角ゴシック金 Std B が持つ唯一の太さ。",
     },
     bold: { value: "700" },
     extrabold: { value: "800" },

@@ -17,7 +17,7 @@ import {
 } from "./ReportArticleParts";
 
 const wrap = css({ maxW: "content.form", mx: "auto", px: "4", pt: "3.5", pb: "16" });
-const title = css({ fontSize: "2xl", lineHeight: "snug", fontWeight: "extrabold", m: "0" });
+const title = css({ fontSize: "2xl", lineHeight: "snug", m: "0" });
 const subtle = css({ color: "text.subtle", textStyle: "note" });
 const materialRef = css({
   mt: "3.5",
@@ -37,7 +37,6 @@ const sectionHeadingStyle = css({
   borderLeftWidth: "3px",
   borderLeftStyle: "solid",
   borderLeftColor: "primary.700",
-  fontWeight: "extrabold",
 });
 const paragraph = css({
   textStyle: "prose",
