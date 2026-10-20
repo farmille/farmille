@@ -12,14 +12,14 @@ import { css } from "../../../../styled-system/css";
 import { SellerPageContent } from "./_components/SellerPageContent";
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   bg: "surface.page",
   color: "text.default",
   fontFamily: "sans",
 });
 
 const body = css({
-  w: "100%",
+  w: "full",
   maxW: "content.wide",
   mx: "auto",
   px: "4",

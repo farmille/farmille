@@ -26,7 +26,7 @@ const photoGrid = css({
 });
 const muted = css({ color: "text.muted", fontSize: "sm" });
 const chart = css({
-  width: "100%",
+  width: "full",
   height: "reportGraph.horizontal",
   display: "block",
   overflow: "visible",
@@ -307,10 +307,10 @@ export function UsageReportArticle({
                       width={600}
                       height={400}
                       sizes="(max-width: 640px) 45vw, 300px"
-                      className={css({ w: "100%", height: "auto", borderRadius: "card" })}
+                      className={css({ w: "full", height: "auto", borderRadius: "card" })}
                     />
                   ) : (
-                    <video controls src={media.url} className={css({ w: "100%" })} />
+                    <video controls src={media.url} className={css({ w: "full" })} />
                   )}
                   {onChange ? (
                     <Input

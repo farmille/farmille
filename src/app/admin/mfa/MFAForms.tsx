@@ -17,7 +17,7 @@ const stepStyle = css({
 });
 
 const qrStyle = css({
-  w: "180px",
+  w: "[180px]",
   aspectRatio: "image.square",
   display: "block",
   bg: "surface.card",

@@ -32,7 +32,7 @@ const scrollStyle = css({
   pt: "0.5",
   pb: "1.5",
   overflowX: "auto",
-  scrollSnapType: "x mandatory",
+  scrollSnapType: "[x mandatory]",
   scrollbarWidth: "none",
   "&::-webkit-scrollbar": { display: "none" },
   pc: {
@@ -94,7 +94,7 @@ export function MaterialReportsView({
   const next = encodeURIComponent(materialPath);
 
   return (
-    <section aria-labelledby="usage-reports-heading">
+    <section aria-labelledby="usage-reports-heading" data-tour="material-reports">
       <ReportsHeading count={reports.total} moreHref={`${materialPath}/articles`} />
       {reports.items.length > 0 ? (
         <div className={scrollStyle}>

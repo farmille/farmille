@@ -35,7 +35,13 @@ const trackStyle = css({
   borderRadius: "pill",
   overflow: "hidden",
 });
-const fillStyle = css({ display: "block", h: "full", bg: "accent.star", borderRadius: "pill" });
+const fillStyle = css({
+  display: "block",
+  w: "var(--bar-width)",
+  h: "full",
+  bg: "accent.star",
+  borderRadius: "pill",
+});
 const percentStyle = css({ w: "6.5", textAlign: "right" });
 
 type RatingSummaryProps = {
@@ -50,7 +56,7 @@ function BarRow({ rating, count, total }: { rating: number; count: number; total
     <div className={rowStyle} role="img" aria-label={`星${rating}の感想口コミ ${count}件`}>
       <span>★{rating}</span>
       <div className={trackStyle}>
-        <span className={fillStyle} style={{ width: `${percent}%` }} />
+        <span className={fillStyle} style={{ "--bar-width": `${percent}%` }} />
       </div>
       <span className={percentStyle}>{percent}%</span>
     </div>

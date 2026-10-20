@@ -188,7 +188,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             content: '""',
             position: "absolute",
             inset: "0",
-            zIndex: "1",
+            zIndex: "local.1",
             bg: "surface.card/60",
           },
         })}
@@ -203,7 +203,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         >
           <Image alt="" fill priority sizes="100vw" src={heroPhoto} />
         </div>
-        <div className={css({ position: "relative", zIndex: "2", py: "8", px: "5" })}>
+        <div className={css({ position: "relative", zIndex: "local.2", py: "8", px: "5" })}>
           <div
             className={css({
               fontSize: "xs",
@@ -239,7 +239,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             borderLeftStyle: "solid",
             borderLeftColor: "primary.700",
             textStyle: "title",
-            fontWeight: "extrabold",
           })}
         >
           企業会員登録とは
@@ -576,7 +575,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         )}
         aria-labelledby="lpContact"
       >
-        <h2 className={css({ textStyle: "title", fontWeight: "extrabold" })} id="lpContact">
+        <h2 className={css({ textStyle: "title" })} id="lpContact">
           お問い合わせ
         </h2>
         <a
@@ -614,7 +613,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         })}
         aria-labelledby="lpApply"
       >
-        <h2 className={css({ textStyle: "title", fontWeight: "extrabold" })} id="lpApply">
+        <h2 className={css({ textStyle: "title" })} id="lpApply">
           企業会員登録を申請する
         </h2>
         <div className={css({ mt: "2", fontSize: "sm", lineHeight: "prose" })}>
@@ -656,7 +655,6 @@ const guideCardTitleStyle = css({
   borderLeftStyle: "solid",
   borderLeftColor: "primary.700",
   textStyle: "title",
-  fontWeight: "extrabold",
 });
 
 function GuideCard({
@@ -690,7 +688,6 @@ function PrepBox({ title, children }: { title: string; children: ReactNode }) {
         className={css({
           mb: "2",
           textStyle: "title",
-          fontWeight: "extrabold",
           color: "text.brand",
         })}
       >
@@ -784,7 +781,7 @@ const requirementBoxStyle = css({
   borderStyle: "solid",
   borderColor: "border.default",
   borderRadius: "input",
-  "& h4": { mb: "1.5", textStyle: "body", fontWeight: "extrabold", color: "text.brand" },
+  "& h4": { mb: "1.5", textStyle: "body", color: "text.brand" },
   "& ul": {
     pl: "4",
     fontSize: "sm",

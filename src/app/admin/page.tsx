@@ -39,7 +39,7 @@ const menuLinkStyle = css({
 
 const statLinkStyle = css({
   display: "block",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
   borderRadius: "button",
   _focusVisible: {

@@ -114,7 +114,7 @@ export default function SellerProceduresPage() {
                   css({
                     justifyContent: "space-between",
                     minH: "24",
-                    color: "inherit",
+                    color: "[inherit]",
                     textDecoration: "none",
                     _hover: { borderColor: "primary.700" },
                   }),

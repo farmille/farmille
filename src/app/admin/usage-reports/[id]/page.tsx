@@ -45,8 +45,8 @@ const mediaGridStyle = css({
 });
 
 const mediaStyle = css({
-  w: "100%",
-  maxH: "360px",
+  w: "full",
+  maxH: "[360px]",
   objectFit: "contain",
   bg: "surface.panel",
   borderRadius: "card",

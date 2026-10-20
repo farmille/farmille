@@ -106,7 +106,7 @@ const chipRecipe = cva({
 
 const catMini = css({
   fontSize: "2xs",
-  opacity: "0.65",
+  opacity: "label",
   fontWeight: "bold",
 });
 
@@ -114,8 +114,8 @@ const removeBtn = css({
   borderWidth: "0",
   bg: "primary.600/18",
   color: "text.brand",
-  w: "17px",
-  h: "17px",
+  w: "[17px]",
+  h: "[17px]",
   borderRadius: "pill",
   display: "grid",
   placeItems: "center",

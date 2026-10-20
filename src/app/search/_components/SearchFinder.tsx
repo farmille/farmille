@@ -153,13 +153,13 @@ const cropList = css({
   pb: "1.5",
   listStyle: "none",
   overflowX: "auto",
-  scrollSnapType: "x proximity",
+  scrollSnapType: "[x proximity]",
   scrollbarWidth: "none",
   "&::-webkit-scrollbar": { display: "none" },
   // 右端を薄くし、続きがあることを示す。black と transparent はマスクのアルファ指定であり配色ではない。
   maskImage: "linear-gradient(90deg, black 85%, transparent)",
   tab: { mx: "-5", px: "5" },
-  pc: { scrollbarWidth: "thin" },
+  pc: { scrollbarWidth: "[thin]" },
 });
 
 const cropLink = css(focusRing, {
@@ -185,7 +185,7 @@ const cropPhotoFrame = css({
   outlineWidth: "2px",
   outlineStyle: "solid",
   outlineColor: "transparent",
-  outlineOffset: "2px",
+  outlineOffset: "0.5",
   "[aria-current=true] > &": { outlineColor: "primary.600" },
   pc: { w: "20", h: "20" },
 });

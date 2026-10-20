@@ -14,7 +14,8 @@ const config: StorybookConfig = {
   viteFinal: async (config) =>
     mergeConfig(config, {
       resolve: { alias: { "next/server": path.resolve(".storybook/next-server.ts") } },
-      server: { watch: { ignored: ["**/.claude/**"] } },
+      // 除外はこのリポジトリ直下の .claude だけにする。"**/.claude/**" だと .claude/worktrees/<name>/ の中の全ファイルが外れ、HMR が効かない
+      server: { watch: { ignored: [`${path.resolve(".claude")}/**`] } },
     }),
   features: {
     // BottomNav / FabBar 等の非同期サーバーコンポーネントをプレビューで描画する

@@ -29,14 +29,14 @@ const authorLink = css({
   display: "inline-flex",
   alignItems: "center",
   gap: "2",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
 });
 
 const authorName = css({ textStyle: "body", fontWeight: "bold", overflowWrap: "anywhere" });
 
 const authorLabel = css(badgeRecipe.raw({ variant: "type" }), {
-  maxW: "100%",
+  maxW: "full",
   whiteSpace: "normal",
   overflowWrap: "anywhere",
 });
@@ -76,7 +76,7 @@ const photos = css({
 });
 
 const photo = css({
-  flex: "0 0 auto",
+  flex: "none",
   w: "16",
   h: "16",
   display: "grid",
@@ -84,7 +84,7 @@ const photo = css({
   overflow: "hidden",
   borderRadius: "media",
   bg: "primary.soft",
-  "& img": { display: "block", w: "100%", h: "100%", objectFit: "cover" },
+  "& img": { display: "block", w: "full", h: "full", objectFit: "cover" },
 });
 
 const foot = css({

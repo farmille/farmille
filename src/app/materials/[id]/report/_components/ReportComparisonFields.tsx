@@ -57,7 +57,6 @@ const sectionHeading = cva({
     mt: "6.5",
     mb: "1",
     textStyle: "title",
-    fontWeight: "extrabold",
   },
   variants: { lead: { true: { mt: "1.5" }, false: {} } },
   defaultVariants: { lead: false },

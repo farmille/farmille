@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   display: "flex",
   flexDirection: "column",
   bg: "surface.page",
@@ -42,7 +42,7 @@ const shell = css({
 
 const main = css({
   flex: "1",
-  w: "100%",
+  w: "full",
   maxW: "content.wide",
   mx: "auto",
   px: "4",

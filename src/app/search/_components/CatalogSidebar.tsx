@@ -32,7 +32,7 @@ const genreRowRecipe = cva({
   variants: {
     active: {
       true: { bg: "primary.100", color: "text.brandOnSoft" },
-      false: { color: "inherit", _hover: { bg: "primary.soft" } },
+      false: { color: "[inherit]", _hover: { bg: "primary.soft" } },
     },
   },
 });
@@ -231,7 +231,7 @@ export function CatalogSidebar({
           borderColor: "border.default",
           borderRadius: "button",
           overflow: "hidden",
-          pc: { maxH: "calc(100vh - token(spacing.24))", overflowY: "auto" },
+          pc: { maxH: "[calc(100vh - token(spacing.24))]", overflowY: "auto" },
         })}
       >
         {conditionCount > 0 ? (

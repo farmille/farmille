@@ -19,7 +19,7 @@ const hero = css({
   tab: {
     display: "flex",
     alignItems: "center",
-    minH: "700px",
+    minH: "[700px]",
     pt: "0",
     pb: "0",
   },
@@ -30,7 +30,7 @@ const inner = css({
   position: "relative",
   display: "grid",
   gridTemplateColumns: "minmax(0, 1fr)",
-  w: "100%",
+  w: "full",
   maxW: "content.wide",
   mx: "auto",
   px: "5",
@@ -44,7 +44,7 @@ const inner = css({
 
 const intro = css({
   position: "relative",
-  zIndex: "1",
+  zIndex: "local.1",
   gridArea: "1 / 1",
   alignSelf: "start",
   pt: "8",
@@ -58,13 +58,13 @@ const label = css({
   m: "0",
   color: "text.inverse/90",
   textStyle: "note",
-  letterSpacing: "0.24em",
+  letterSpacing: "[0.24em]",
   tab: { color: "text.inverse" },
   _before: {
     content: '""',
     display: "block",
-    w: "32px",
-    h: "1px",
+    w: "[32px]",
+    h: "[1px]",
     bg: "primary.600",
     flexShrink: "0",
   },
@@ -92,7 +92,7 @@ const figure = css({
     w: "auto",
     h: "auto",
     m: "0",
-    aspectRatio: "auto",
+    aspectRatio: "[auto]",
   },
 });
 
@@ -102,7 +102,7 @@ const photoFrame = css({
   left: "0",
   right: "0",
   bottom: "0",
-  h: "140%",
+  h: "[140%]",
   tab: { top: "0", h: "auto" },
 });
 
@@ -130,15 +130,15 @@ const scrim = css({
 
 const lead = css({
   position: "relative",
-  zIndex: "1",
+  zIndex: "local.1",
   gridArea: "2 / 1",
   mt: "8",
   mb: "0",
   color: "text.muted",
   fontSize: "sm",
   lineHeight: "loose",
-  letterSpacing: "0.06em",
-  tab: { fontSize: "md", maxW: "480px", color: "text.inverse/90" },
+  letterSpacing: "[0.06em]",
+  tab: { fontSize: "md", maxW: "[480px]", color: "text.inverse/90" },
 });
 
 /** 日本語が語中で折り返さないよう、文節ごとに inline-block で区切る。 */
@@ -155,14 +155,14 @@ const search = css({
   tab: {
     left: "8",
     right: "8",
-    bottom: "8%",
+    bottom: "[8%]",
     w: "auto",
   },
   pc: {
-    left: "auto",
-    right: "8%",
-    bottom: "12%",
-    w: "min(540px, 58%)",
+    left: "[auto]",
+    right: "[8%]",
+    bottom: "[12%]",
+    w: "[min(540px, 58%)]",
   },
 });
 

@@ -34,7 +34,7 @@ export function EmptyState({
         {title}
       </p>
       {description ? (
-        <p className={css({ textStyle: "supporting", m: "0", maxW: "280px" })}>{description}</p>
+        <p className={css({ textStyle: "supporting", m: "0", maxW: "[280px]" })}>{description}</p>
       ) : null}
       {children}
     </div>

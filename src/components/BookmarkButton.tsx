@@ -29,7 +29,7 @@ export function BookmarkButton({ saved, action }: BookmarkButtonProps) {
         bg: "transparent",
         color: "text.brand",
         cursor: "pointer",
-        _disabled: { cursor: "default", opacity: "0.5" },
+        _disabled: { cursor: "default", opacity: "[0.5]" },
       })}
       onPressedChange={(next) => {
         if (action === undefined) return;

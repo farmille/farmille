@@ -9,7 +9,8 @@ const VIEWPORT_WIDTHS = [
 const VIEWPORT_HEIGHT = 1000;
 const OVERFLOW_TOLERANCE = 1;
 const RENDER_TIMEOUT = 15_000;
-const SHARD_COUNT = 4;
+// 全 Story をこの数のテストに分ける。1 テストを timeout（600 秒）に収め、CI の各 shard は自分の分のテストだけを流す。
+const CHUNK_COUNT = 12;
 const MAX_REPORTED_FAILURES = 50;
 
 // CI の matrix で Story の検査を複数ジョブに分ける。未指定なら 1 ジョブで全 Story を検査する。
@@ -26,6 +27,10 @@ const CiShardSchema = v.pipe(
   v.check(
     ({ current, total }) => current <= total,
     "STORYBOOK_RESPONSIVE_SHARD の current は total 以下にする",
+  ),
+  v.check(
+    ({ total }) => total <= CHUNK_COUNT,
+    `STORYBOOK_RESPONSIVE_SHARD の total は ${CHUNK_COUNT} 以下にする`,
   ),
 );
 type CiShard = v.InferOutput<typeof CiShardSchema>;
@@ -108,6 +113,9 @@ const NULL_RENDER_STORY_IDS: ReadonlySet<string> = new Set([
   "pages-materials-id-ratingsummary--no-reviews",
   "components-display-metricbars--empty",
   "components-navigation-pagination--single-page",
+  // 初回ログインの案内は、印（localStorage）と一般会員のセッションがないときは何も描かない
+  "pages-shared-onboardingtour--without-mark",
+  "pages-signup-done-onboardingarm--default",
 ]);
 
 // Pages 配下にはルート画面の Story と、画面に依存する部品の Story が混在する。
@@ -316,17 +324,16 @@ async function collectResponsiveFailures(
   return failures;
 }
 
-for (let shardIndex = 0; shardIndex < SHARD_COUNT; shardIndex += 1) {
-  test(`全 Story が段階的な画面幅で横にはみ出さない（CI shard ${CI_SHARD.current}/${CI_SHARD.total}・worker ${shardIndex + 1}/${SHARD_COUNT}）`, async ({
+for (let chunkIndex = 0; chunkIndex < CHUNK_COUNT; chunkIndex += 1) {
+  if (chunkIndex % CI_SHARD.total !== CI_SHARD.current - 1) continue;
+
+  test(`全 Story が段階的な画面幅で横にはみ出さない（CI shard ${CI_SHARD.current}/${CI_SHARD.total}・chunk ${chunkIndex + 1}/${CHUNK_COUNT}）`, async ({
     page,
     request,
   }, testInfo) => {
     const allStories = await fetchSortedStories(request);
-    const ciShardStories = allStories.filter(
-      (_, index) => index % CI_SHARD.total === CI_SHARD.current - 1,
-    );
-    const stories = ciShardStories.filter((_, index) => index % SHARD_COUNT === shardIndex);
-    expect(stories.length, "shard に検査対象の Story が割り当てられること").toBeGreaterThan(0);
+    const stories = allStories.filter((_, index) => index % CHUNK_COUNT === chunkIndex);
+    expect(stories.length, "chunk に検査対象の Story が割り当てられること").toBeGreaterThan(0);
 
     const failures = await collectResponsiveFailures(page, stories);
 
@@ -334,10 +341,9 @@ for (let shardIndex = 0; shardIndex < SHARD_COUNT; shardIndex += 1) {
       body: JSON.stringify(
         {
           ciShard: `${CI_SHARD.current}/${CI_SHARD.total}`,
-          worker: `${shardIndex + 1}/${SHARD_COUNT}`,
+          chunk: `${chunkIndex + 1}/${CHUNK_COUNT}`,
           storiesInIndex: allStories.length,
-          storiesInCiShard: ciShardStories.length,
-          storiesInShard: stories.length,
+          storiesInChunk: stories.length,
           widths: VIEWPORT_WIDTHS,
           checks: stories.length * VIEWPORT_WIDTHS.length,
           failures,

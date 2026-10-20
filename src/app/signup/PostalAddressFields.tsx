@@ -15,14 +15,14 @@ const PREFECTURE_OPTIONS = PREFECTURES.map((item) => ({
 }));
 
 const lookupButton = css(buttonRecipe.raw({ variant: "primary", size: "sm" }), {
-  flex: "0 0 auto",
+  flex: "none",
   minW: "0",
   px: "4",
 });
 
 const postalRowStyle = css({ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "2" });
 
-const postalInputStyle = css({ flex: "1 1 token(sizes.44)", maxW: "80" });
+const postalInputStyle = css({ flex: "[1 1 token(sizes.44)]", maxW: "80" });
 
 const lookupStatusStyle = css({ color: "text.brand" });
 

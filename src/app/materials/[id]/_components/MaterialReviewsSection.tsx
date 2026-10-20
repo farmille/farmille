@@ -22,7 +22,7 @@ export const reviewGridStyle = css({
 const listStyle = cx(reviewGridStyle, css({ mt: "2.5" }));
 const emptyStyle = css({ mt: "2.5" });
 const moreStyle = css({ mt: "3", textAlign: "center" });
-const ellipsisStyle = css({ mb: "0.5", color: "text.subtle", letterSpacing: "0.2em" });
+const ellipsisStyle = css({ mb: "0.5", color: "text.subtle", letterSpacing: "[0.2em]" });
 
 export function ReviewsHeading({ count }: { count?: number }) {
   return (

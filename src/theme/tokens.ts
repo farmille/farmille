@@ -11,7 +11,11 @@ export const breakpoints = { tab: "768px", pc: "1024px" };
  * Panda の設定とトークンカタログが同じ元本を参照する。
  */
 export const tokens = {
-  blurs: { reportGate: { value: "4px" } },
+  blurs: {
+    reportGate: { value: "4px" },
+    // 画面の上下に固定する半透明の帯（アプリバー・下部ナビ・操作の帯）
+    bar: { value: "10px" },
+  },
   colors: {
     green: {
       50: { value: "#EBFAF1" },
@@ -49,14 +53,7 @@ export const tokens = {
       DEFAULT: { value: "#E7E5DE" },
       strong: { value: "#D8D6CD" },
     },
-    // タグ分類色（モック TAG_CATS）と危険操作色（T-22）
-    tag: {
-      concern: { value: "{colors.orange}" },
-      effect: { value: "{colors.teal}" },
-      type: { value: "{colors.violet}" },
-      name: { value: "{colors.terracotta}" },
-      cond: { value: "{colors.blue}" },
-    },
+    // 危険操作色（T-22）
     danger: {
       DEFAULT: { value: "#C0392B" },
       soft: { value: "#FDECEC" },
@@ -69,6 +66,8 @@ export const tokens = {
         value: "0 1px 2px rgba(30,35,31,.05), 0 4px 14px rgba(30,35,31,.06)",
       },
       lift: { value: "0 8px 30px rgba(30,35,31,.16)" },
+      // 初回ログインの案内で光らせる枠。枠の外を暗くし、枠のふちを白く縁取る
+      spotlight: { value: "0 0 0 9999px rgba(30,35,31,.45), 0 0 0 3px #FFFFFF" },
       // 写真の上に置く半透明の面。上辺の内側ハイライトでガラスの厚みを出す
       glass: {
         value: "inset 0 1px 0 rgba(255,255,255,.65), 0 10px 32px rgba(30,35,31,.18)",
@@ -91,6 +90,8 @@ export const tokens = {
   // 無効化した操作部品は形を保ったまま薄くする
   opacity: {
     disabled: { value: "0.6" },
+    // チップや見出しに添える小さな分類のラベル
+    label: { value: "0.65" },
   },
   // 画像枠は用途ごとに比率を固定し、画面幅や取得画像の寸法で高さを変えない。
   aspectRatios: {
@@ -116,6 +117,10 @@ export const tokens = {
     "3xl": {
       value: "21px",
       description: "ページの題名（プロフィール名・規約・企業向けガイドの SP）。",
+    },
+    welcome: {
+      value: "26px",
+      description: "初回ログインの案内の最初のシート（Farmilleへようこそ）の見出し専用。",
     },
     display: {
       value: "38px",
@@ -234,7 +239,13 @@ export const tokens = {
       materialMobile: { value: "9.375rem" },
       material: { value: "15rem" },
     },
+    // SP の確認幅。Story と開発用の見本を SP の幅で囲む
+    phone: { value: "375px" },
+    // 見つからない画面で、案内を画面の中ほどに置く高さ
+    notFound: { value: "60dvh" },
     dialog: { value: "24rem" },
+    // 初回ログインの案内（シート・吹き出し・帯）。PCでは文が1〜2行に収まる幅まで広げる
+    guide: { value: "34rem" },
     auth: { value: "26.875rem" },
     content: {
       form: { value: "44rem" },
@@ -255,8 +266,7 @@ export const tokens = {
     medium: { value: "500" },
     semibold: {
       value: "600",
-      description:
-        "DNP秀英角ゴシック金 Std B が持つ唯一の太さ。h1・h2 は globals.css がこの太さにする。",
+      description: "DNP秀英角ゴシック金 Std B が持つ唯一の太さ。",
     },
     bold: { value: "700" },
     extrabold: { value: "800" },
@@ -268,14 +278,33 @@ export const tokens = {
     // トーストだけUI標準より柔らかいカーブにする
     soft: { value: "ease" },
   },
-  animations: { skeletonPulse: { value: "skeleton-pulse 1.6s ease-in-out infinite" } },
+  animations: {
+    skeletonPulse: { value: "skeleton-pulse 1.6s ease-in-out infinite" },
+    // 初回ログインの案内で、下へスクロールできることを示す矢印
+    tourNudge: { value: "tour-nudge 1.4s {easings.out} infinite" },
+    // 押してほしいボタンの周りに広がる輪
+    tourRing: { value: "tour-ring 1.6s {easings.out} infinite" },
+  },
   durations: {
     fast: { value: "160ms" },
     dialog: { value: "250ms" },
     toast: { value: "400ms" },
     stagger: { value: "50ms" },
   },
+  // 重なり順。local は1つの囲みの中だけの順で、2 は 1 の上に重ねるときに使う
   zIndex: {
+    local: { 1: { value: 1 }, 2: { value: 2 } },
+    // 入力画面の上下に貼り付く見出しと操作の帯
+    formBar: { value: 5 },
+    // SP のアプリバー
+    appBar: { value: 10 },
+    // 画面の下に固定する操作の帯と、入力のパネル
+    fixedBar: { value: 20 },
+    bottomNav: { value: 25 },
+    // tab 以上のヘッダー
+    header: { value: 30 },
+    // 初回ログインの案内。ヘッダー・下部ナビ・固定の帯より上、ダイアログと候補一覧より下
+    guide: { value: 40 },
     dialog: { value: 50 },
     toast: { value: 60 },
   },
@@ -337,6 +366,14 @@ export const semanticTokens = {
     },
     // モーダルの背面や写真の上に敷く半透明の幕。不透明度は使う側で指定する
     scrim: { value: "{colors.ink}" },
+    // タグ分類色（モック TAG_CATS）。分類チップの文字・枠・淡い面に使う
+    tag: {
+      concern: { value: "{colors.orange}" },
+      effect: { value: "{colors.teal}" },
+      type: { value: "{colors.violet}" },
+      name: { value: "{colors.terracotta}" },
+      cond: { value: "{colors.blue}" },
+    },
     // 実証データのグラフで区ごとに割り当てる系列色
     chart: {
       1: { value: "{colors.ink3}" },

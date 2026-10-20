@@ -5,7 +5,7 @@ import { css } from "../../../styled-system/css";
 
 const entry = css({
   display: "block",
-  w: "100%",
+  w: "full",
   m: "0",
   // ヒーローのゴシックMB101（weight 300 のみ）を継承すると太字が合成されるため本文書体に戻す
   fontFamily: "sans",

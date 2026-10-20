@@ -10,7 +10,7 @@ const meta = {
   component: FabBar,
   decorators: [
     (Story) => (
-      <div className={css({ position: "relative", minH: "160px", maxW: "375px" })}>
+      <div className={css({ position: "relative", minH: "[160px]", maxW: "phone" })}>
         <Story />
       </div>
     ),
