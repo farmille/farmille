@@ -250,6 +250,9 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
   });
 }
 
+const CARD_CHART_MEASUREMENT_LIMIT = 5;
+const CARD_CHART_GRAPH_LIMIT = 3;
+
 /** グラフにできる測定がないレポートでも、都道府県は出せるように分けて持つ。 */
 export type UsageReportCardDetail = { chart: ReportChartPreview | null; prefecture: string | null };
 
@@ -272,7 +275,14 @@ export async function listUsageReportCardDetails(
           rows:usage_report_graph_rows(id, plot_id, label, value_text, sort_order)))`,
     )
     .in("id", reportIds)
-    .eq("form_version", 2);
+    .eq("form_version", 2)
+    // カードに出すのは最初に読めた1枚だけなので、数値の測定と各測定のグラフを先頭から少しだけ取る。
+    // 区（行）は全件取り、カードに出さなかった区の数を正しく数える（区は1レポートで最大20）。
+    .eq("measurements.kind", "numeric")
+    .order("sort_order", { referencedTable: "measurements" })
+    .limit(CARD_CHART_MEASUREMENT_LIMIT, { referencedTable: "measurements" })
+    .order("sort_order", { referencedTable: "measurements.graphs" })
+    .limit(CARD_CHART_GRAPH_LIMIT, { referencedTable: "measurements.graphs" });
 
   if (error !== null) {
     reportQueryError("レポートのグラフの取得に失敗", error);
