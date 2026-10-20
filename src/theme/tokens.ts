@@ -323,14 +323,10 @@ export const tokens = {
     tourNudge: { value: "tour-nudge 1.4s {easings.out} infinite" },
     // 押してほしいボタンの周りに広がる輪
     tourRing: { value: "tour-ring 1.6s {easings.out} infinite" },
-    // ホームのヒーロー。写真を寄りから引き、見出しの帯を上から順に開く。
-    // 終わった後は値を残さず、ホバーや押下の transform を妨げない（backwards）
+    // ホームのヒーロー。写真を寄りから引き、見出しの帯を上から順に開く。終わった後は値を残さない（backwards）
     heroZoom: { value: "hero-zoom 2.4s {easings.out} backwards" },
     heroBand: { value: "band-unroll 900ms {easings.out} backwards" },
     heroBandText: { value: "fade-in 700ms {easings.out} backwards" },
-    heroBadge: { value: "hero-badge 0.8s {easings.out} backwards" },
-    // 検索への案内の輪の文字をゆっくり回す
-    ringSpin: { value: "ring-spin 40s linear infinite" },
     sproutSway: { value: "sprout-sway {durations.sway} {easings.inOut} infinite alternate" },
   },
   durations: {

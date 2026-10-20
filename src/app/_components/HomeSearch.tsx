@@ -8,7 +8,7 @@ import { HomeHills } from "./HomeHills";
 import { HomeSectionTitle } from "./HomeSectionTitle";
 import { Reveal } from "./Reveal";
 
-/** 前の節の下端に丘を重ね、深い緑の地へつなぐ。ヒーローの案内から飛んだときは、ヘッダーと丘の分だけ上に余白を残す。 */
+/** 前の節の下端に丘を重ね、深い緑の地へつなぐ。 */
 const section = css({
   position: "relative",
   bgColor: "surface.forest",
@@ -16,9 +16,7 @@ const section = css({
   color: "text.inverse",
   pt: "16",
   pb: "28",
-  scrollMarginTop: "24",
-  tab: { pt: "20", pb: "36", scrollMarginTop: "32" },
-  pc: { scrollMarginTop: "40" },
+  tab: { pt: "20", pb: "36" },
 });
 
 const hills = css({ position: "absolute", left: "0", right: "0", bottom: "[calc(100% - 1px)]" });

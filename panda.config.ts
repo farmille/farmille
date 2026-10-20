@@ -69,11 +69,6 @@ export default defineConfig({
         // 縦書きの帯の地を上から下へ伸ばし、文字はあとから浮かべる
         "band-unroll": { from: { transform: "scaleY(0)" }, to: { transform: "scaleY(1)" } },
         "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
-        "hero-badge": {
-          from: { opacity: "0", transform: "scale(0.94)" },
-          to: { opacity: "1", transform: "scale(1)" },
-        },
-        "ring-spin": { to: { transform: "rotate(1turn)" } },
         // ヒーローの写真を、画面から出ていくあいだ本文より遅れて動かす
         "hero-drift": {
           from: { transform: "translateY(0)" },
