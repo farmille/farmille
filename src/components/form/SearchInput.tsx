@@ -36,24 +36,15 @@ export const searchBoxRecipe = cva({
           outlineColor: "primary.200",
         },
       },
-      glass: {
-        gap: "2.5",
-        px: "4",
-        bg: "scrim/24",
-        backdropFilter: "blur(3px)",
-        borderWidth: "1px",
-        borderStyle: "solid",
-        borderColor: "text.inverse/35",
+      raised: {
+        gap: "3",
+        pl: "5",
+        pr: "2",
+        bg: "surface.card",
         borderRadius: "pill",
-        boxShadow: "shadow.glass",
-        color: "text.inverse/90",
-        "&:has(input:focus-visible)": {
-          outlineWidth: "2px",
-          outlineStyle: "solid",
-          outlineColor: "text.inverse",
-          outlineOffset: "3px",
-        },
-        tab: { minH: "16", px: "6" },
+        boxShadow: "shadow.lift",
+        color: "text.brand",
+        tab: { minH: "16", pl: "6", pr: "2.5" },
       },
     },
   },
@@ -81,12 +72,10 @@ export const searchFieldRecipe = cva({
   variants: {
     surface: {
       plain: { color: "text.default", _placeholder: { color: "text.subtle" } },
-      glass: {
+      raised: {
         fontSize: "lg",
-        fontWeight: "bold",
-        color: "text.inverse",
-        caretColor: "text.inverse",
-        _placeholder: { color: "text.inverse/90", fontWeight: "medium" },
+        color: "text.default",
+        _placeholder: { color: "text.subtle" },
       },
     },
   },
@@ -114,12 +103,16 @@ const submitRecipe = cva({
   variants: {
     surface: {
       plain: { w: "8", h: "8", mr: "-1", bg: "primary.700" },
-      glass: {
-        w: "9",
-        h: "9",
-        bg: "primary.600/72",
-        backdropFilter: "blur(3px)",
-        tab: { w: "11", h: "11" },
+      raised: {
+        w: "10",
+        h: "10",
+        bg: "primary.700",
+        transitionProperty: "transform",
+        transitionDuration: "fast",
+        transitionTimingFunction: "out",
+        _active: { transform: "scale(0.94)" },
+        "@media (hover: hover) and (pointer: fine)": { _hover: { bg: "primary.800" } },
+        tab: { w: "12", h: "12" },
       },
     },
   },
@@ -136,8 +129,8 @@ type SearchInputProps = {
   /** 渡すと右端に送信ボタンを置き、この文言を読み上げ名にする。囲むフォームを送信する。 */
   submitLabel?: string;
   size?: "md" | "lg";
-  /** glass は写真の上に置く暗い透過の面（ホームのヒーロー）。 */
-  surface?: "plain" | "glass";
+  /** raised は色のついた地の上に浮かせる白い面（ホームの検索の節）。 */
+  surface?: "plain" | "raised";
   maxLength?: number;
   disabled?: boolean;
   className?: string;
@@ -159,7 +152,7 @@ export function SearchInput({
 }: SearchInputProps) {
   return (
     <div className={cx(searchBoxRecipe({ size, surface }), className)}>
-      <Icon name="search" size={surface === "glass" ? "md" : "sm"} />
+      <Icon name="search" size={surface === "raised" ? "lg" : "sm"} />
       <BaseInput
         aria-label={ariaLabel}
         autoComplete="off"
@@ -181,7 +174,7 @@ export function SearchInput({
           disabled={disabled}
           type="submit"
         >
-          <Icon name="arrow_forward" size="sm" />
+          <Icon name="arrow_forward" size={surface === "raised" ? "md" : "sm"} />
         </button>
       )}
     </div>

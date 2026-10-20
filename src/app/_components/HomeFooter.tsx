@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { css } from "../../../styled-system/css";
+import { css, cva } from "../../../styled-system/css";
 
 const groups = [
   { title: "さがす", links: [{ label: "BS資材検索", href: "/search" }] },
@@ -21,18 +21,61 @@ const groups = [
   },
 ];
 
-export function HomeFooter() {
+export type FooterTone = "plain" | "forest";
+
+/** plain は通常の画面の地、forest はホームの深い緑の帯の上に置く。 */
+const footer = cva({
+  base: { mt: "12", pt: "8", pb: "24", tab: { pb: "8" } },
+  variants: {
+    tone: {
+      plain: { borderTopWidth: "1px", borderColor: "border.default" },
+      forest: { mt: "0", pt: "0" },
+    },
+  },
+});
+
+const brand = cva({
+  base: { fontSize: "xl", fontWeight: "bold", textDecoration: "none" },
+  variants: { tone: { plain: { color: "text.default" }, forest: { color: "text.inverse" } } },
+});
+
+const description = cva({
+  base: { textStyle: "supporting" },
+  variants: { tone: { plain: { color: "text.subtle" }, forest: { color: "text.inverse" } } },
+});
+
+const groupTitle = cva({
+  base: { m: "0", mb: "3", textStyle: "body" },
+  variants: { tone: { plain: { color: "text.subtle" }, forest: { color: "text.inverse" } } },
+});
+
+const link = cva({
+  base: { fontSize: "sm", textDecoration: "none" },
+  variants: { tone: { plain: { color: "text.muted" }, forest: { color: "text.inverse" } } },
+});
+
+const legal = cva({
+  base: {
+    borderTopWidth: "1px",
+    mt: "8",
+    pt: "5",
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: "4",
+    textStyle: "note",
+  },
+  variants: {
+    tone: {
+      plain: { borderColor: "border.default", color: "text.subtle" },
+      forest: { borderColor: "primary.700", color: "text.inverse" },
+    },
+  },
+});
+
+export function HomeFooter({ tone = "plain" }: { tone?: FooterTone }) {
   return (
-    <footer
-      className={css({
-        mt: "12",
-        pt: "8",
-        pb: "24",
-        borderTopWidth: "1px",
-        borderColor: "border.default",
-        tab: { pb: "8" },
-      })}
-    >
+    <footer className={footer({ tone })}>
       <div
         className={css({
           display: "grid",
@@ -42,36 +85,17 @@ export function HomeFooter() {
         })}
       >
         <div className={css({ gridColumn: "1 / -1", tab: { gridColumn: "auto" } })}>
-          <Link
-            href="/"
-            className={css({
-              fontSize: "xl",
-              fontWeight: "bold",
-              color: "text.default",
-              textDecoration: "none",
-            })}
-          >
+          <Link href="/" className={brand({ tone })}>
             Farmille
           </Link>
-          <p className={css({ textStyle: "supporting", color: "text.subtle" })}>
-            生産者による生産者のための事例共有サイト
-          </p>
-          <p className={css({ textStyle: "supporting", color: "text.subtle" })}>
+          <p className={description({ tone })}>生産者による生産者のための事例共有サイト</p>
+          <p className={description({ tone })}>
             BS資材を作物・効果から検索し、生産者の実証詳細レポートと感想口コミを確かめられます。
           </p>
         </div>
         {groups.map((group) => (
           <nav key={group.title} aria-label={group.title}>
-            <h2
-              className={css({
-                m: "0",
-                mb: "3",
-                textStyle: "body",
-                color: "text.subtle",
-              })}
-            >
-              {group.title}
-            </h2>
+            <h2 className={groupTitle({ tone })}>{group.title}</h2>
             <ul
               className={css({
                 listStyle: "none",
@@ -82,13 +106,10 @@ export function HomeFooter() {
                 gap: "1",
               })}
             >
-              {group.links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className={css({ fontSize: "sm", color: "text.muted", textDecoration: "none" })}
-                  >
-                    {link.label}
+              {group.links.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className={link({ tone })}>
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -96,20 +117,7 @@ export function HomeFooter() {
           </nav>
         ))}
       </div>
-      <div
-        className={css({
-          borderTopWidth: "1px",
-          borderColor: "border.default",
-          mt: "8",
-          pt: "5",
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          gap: "4",
-          textStyle: "note",
-          color: "text.subtle",
-        })}
-      >
+      <div className={legal({ tone })}>
         <span>© {new Date().getFullYear()} Farmille</span>
         <div className={css({ display: "flex", flexWrap: "wrap", gap: "4" })}>
           <Link href="/legal/privacy">プライバシーポリシー</Link>

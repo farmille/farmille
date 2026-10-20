@@ -7,10 +7,10 @@ import { Icon } from "@/components/Icon";
 import { PreparationNotice } from "@/components/PreparationNotice";
 
 const mobileAppBar = css({
+  bg: "surface.paper/88",
   position: "sticky",
   top: "0",
   zIndex: "10",
-  bg: "panel/88",
   backdropFilter: "blur(10px)",
   borderBottomWidth: "1px",
   borderBottomStyle: "solid",
@@ -73,7 +73,7 @@ const desktopHeader = css({
     position: "sticky",
     top: "0",
     zIndex: "30",
-    bg: "card/94",
+    bg: "surface.paper/94",
     backdropFilter: "blur(12px)",
     borderBottomWidth: "1px",
     borderBottomStyle: "solid",
@@ -83,13 +83,12 @@ const desktopHeader = css({
 
 const desktopHeaderInner = css({
   w: "100%",
-  maxW: "content.wide",
-  mx: "auto",
   minH: "16",
-  px: "5",
+  px: "6",
   display: "flex",
   alignItems: "center",
   gap: "3",
+  pc: { px: "10" },
 });
 
 const desktopBrand = css({
@@ -241,7 +240,8 @@ export type AppBarAccount = { kind: "guest" } | { kind: "member"; avatar: ReactN
 
 type AppBarBaseProps = {
   chrome: AppChrome;
-  overlapNoticeImage?: boolean;
+  /** false で公開準備中のお知らせを出さない。 */
+  preparationNotice?: boolean;
   active?: AppBarActive;
   /** 未指定は閲覧者を確かめていない画面（エラー・読み込み中など）で、開いた時点で項目を切り替えるメニューを出す。 */
   account?: AppBarAccount;
@@ -389,7 +389,7 @@ export function AppBar(props: AppBarProps) {
       {props.chrome === "public" ? (
         <>
           <DesktopSiteHeader active={props.active} account={props.account} />
-          <PreparationNotice overlapImage={props.overlapNoticeImage} />
+          {props.preparationNotice === false ? null : <PreparationNotice />}
           {props.variant === "home" ? null : <DesktopContextBar {...props} />}
         </>
       ) : (

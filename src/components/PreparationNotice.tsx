@@ -13,24 +13,16 @@ const noticeStyle = cva({
     py: "3",
   },
   variants: {
-    overlapImage: { true: { mb: "-4" }, false: {} },
     roundedTop: { true: { borderTopRadius: "banner" }, false: {} },
   },
 });
 
-/** 下端を次のセクションに重ね、角丸の背後にもその背景を見せる。 */
-export function PreparationNotice({
-  overlapImage = false,
-  roundedTop = false,
-}: {
-  overlapImage?: boolean;
-  roundedTop?: boolean;
-}) {
+export function PreparationNotice({ roundedTop = false }: { roundedTop?: boolean }) {
   return (
     <aside
       id="preparation-notice"
       aria-label="公開準備中のお知らせ"
-      className={noticeStyle({ overlapImage, roundedTop })}
+      className={noticeStyle({ roundedTop })}
     >
       <div className={css({ maxW: "content.wide", mx: "auto" })}>
         <p

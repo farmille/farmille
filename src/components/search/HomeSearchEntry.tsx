@@ -3,13 +3,7 @@ import Form from "next/form";
 import { SearchInput } from "@/components/form";
 import { css } from "../../../styled-system/css";
 
-const entry = css({
-  display: "block",
-  w: "100%",
-  m: "0",
-  // ヒーローのゴシックMB101（weight 300 のみ）を継承すると太字が合成されるため本文書体に戻す
-  fontFamily: "sans",
-});
+const entry = css({ display: "block", w: "100%", m: "0" });
 
 export function HomeSearchEntry() {
   return (
@@ -20,7 +14,7 @@ export function HomeSearchEntry() {
         placeholder="作物・悩み・資材名から探す"
         size="lg"
         submitLabel="検索"
-        surface="glass"
+        surface="raised"
       />
     </Form>
   );
