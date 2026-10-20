@@ -151,7 +151,9 @@ const cropList = css({
   gap: "2",
   m: "0",
   mx: "-4",
-  px: "4",
+  ps: "4",
+  // 右端のぼかしの幅（85%〜）より広い余白を末尾に取り、最後までスクロールしたら最後の作物がはっきり見えるようにする
+  pe: "[20%]",
   pt: "1",
   pb: "1.5",
   listStyle: "none",
@@ -161,7 +163,7 @@ const cropList = css({
   scrollbarWidth: "none",
   // 右端を薄くし、続きがあることを示す。black と transparent はマスクのアルファ指定であり配色ではない。
   maskImage: "linear-gradient(90deg, black 85%, transparent)",
-  tab: { mx: "-5", px: "5" },
+  tab: { mx: "-5", ps: "5" },
   pc: { scrollbarWidth: "[thin]" },
 });
 
@@ -216,7 +218,6 @@ const cropName = css({
 });
 
 const count = css({ textStyle: "note", color: "text.subtle", fontVariantNumeric: "tabular-nums" });
-const activeCount = css({ textStyle: "note", fontVariantNumeric: "tabular-nums" });
 
 const effectList = css({ display: "flex", flexWrap: "wrap", gap: "2" });
 
@@ -344,7 +345,8 @@ export function SearchFinder({ scope, selected, sort, query, resultCount }: Sear
             >
               {effect.active ? <span aria-hidden="true">✓</span> : null}
               {effect.name}
-              <span className={effect.active ? activeCount : count}>{effect.count}件</span>
+              {/* 選択中のチップは押すと外れるので、押した先と食い違う件数は出さない。件数は下のボタンと結果に出る */}
+              {effect.active ? null : <span className={count}>{effect.count}件</span>}
             </Link>
           ))}
         </div>
