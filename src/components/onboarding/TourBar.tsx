@@ -106,11 +106,11 @@ export function TourBar({
   scrollHint,
 }: TourBarProps) {
   const entered = useEntered(useHandoff().continuing);
-  const { ref, spaceStyle } = useBottomSpace<HTMLDivElement>();
+  const { ref, space } = useBottomSpace<HTMLDivElement>();
   useCardHandoff(ref, true, false);
   return (
     <>
-      <div aria-hidden="true" className={bottomSpaceStyle} style={spaceStyle} />
+      <div aria-hidden="true" className={bottomSpaceStyle} style={{ "--tour-space": space }} />
       <div
         ref={ref}
         className={cx(barStyle, riseStyle)}

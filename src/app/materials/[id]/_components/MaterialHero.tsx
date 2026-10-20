@@ -52,7 +52,7 @@ const makerBase = {
 const makerLinkStyle = css(makerBase, {
   color: "text.brand",
   textDecoration: "underline",
-  textDecorationColor: "primary.700/40",
+  textDecorationColor: "text.brand/40",
 });
 const makerTextStyle = css(makerBase, { color: "text.muted" });
 const unverifiedStyle = css({

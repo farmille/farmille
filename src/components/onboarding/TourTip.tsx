@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type RefObject,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 
 import { css, cva, cx } from "../../../styled-system/css";
 import { TourCardBody } from "./TourCardBody";
@@ -67,9 +60,6 @@ const cardStyle = css({
   borderRadius: "card",
   boxShadow: "shadow.lift",
 });
-
-// 実行時に決まる位置は CSS 変数で渡し、スタイル側は var() で受ける
-type TourVars = CSSProperties & { [key: `--tour-${string}`]: string };
 
 type Anchor = "viewport" | "page";
 
@@ -226,18 +216,17 @@ export function TourTip({
   const state = entered && box !== null ? "" : undefined;
   const spotState = lit && box !== null ? "" : undefined;
   const anchor = anchorRecipe({ anchor: box?.anchor ?? "viewport" });
-  const vars: TourVars = {
-    "--tour-spot-top": `${box?.top ?? 0}px`,
-    "--tour-spot-left": `${box?.left ?? 0}px`,
-    "--tour-spot-width": `${box?.width ?? 0}px`,
-    "--tour-spot-height": `${box?.height ?? 0}px`,
-    "--tour-card-top": `${box?.cardTop ?? 0}px`,
-  };
+  // 実行時に決まる位置は CSS 変数で渡し、スタイル側は var() で受ける
   return (
     <>
       <div
         className={cx(anchor, spotStyle)}
-        style={vars}
+        style={{
+          "--tour-spot-top": `${box?.top ?? 0}px`,
+          "--tour-spot-left": `${box?.left ?? 0}px`,
+          "--tour-spot-width": `${box?.width ?? 0}px`,
+          "--tour-spot-height": `${box?.height ?? 0}px`,
+        }}
         data-entered={spotState}
         data-pulse={pulse ? "" : undefined}
         aria-hidden="true"
@@ -246,7 +235,7 @@ export function TourTip({
         ref={card}
         data-tour-tip=""
         className={cx(anchor, cardStyle, riseStyle)}
-        style={vars}
+        style={{ "--tour-card-top": `${box?.cardTop ?? 0}px` }}
         data-entered={state}
         role="dialog"
         aria-modal="false"

@@ -130,11 +130,12 @@ function MetricRow({
       >
         <div
           className={css({
+            w: "var(--bar-width)",
             h: "100%",
             borderRadius: "bar",
             bg: variant === "treated" ? "primary.600" : "border.strong",
           })}
-          style={{ width: `${widthPercent}%` }}
+          style={{ "--bar-width": `${widthPercent}%` }}
         />
       </div>
       <span

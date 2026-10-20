@@ -115,11 +115,11 @@ export function TourSheet({
   const entered = useEntered(handoff.continuing);
   const dimmed = useEntered(handoff.dimmed);
   const state = entered ? "" : undefined;
-  const { ref, spaceStyle } = useBottomSpace<HTMLElement>();
+  const { ref, space } = useBottomSpace<HTMLElement>();
   useCardHandoff(ref, true, true);
   return (
     <>
-      <div aria-hidden="true" className={bottomSpaceStyle} style={spaceStyle} />
+      <div aria-hidden="true" className={bottomSpaceStyle} style={{ "--tour-space": space }} />
       <div className={scrimStyle} data-entered={dimmed ? "" : undefined} aria-hidden="true" />
       <section
         ref={ref}

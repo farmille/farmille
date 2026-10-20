@@ -36,8 +36,8 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 - **アイコン**：SVG アイコン・lucide・react-icons は使わない。Google Material Icons を `material-icons` パッケージのフォントから読み、共通 `Icon`（`src/components/Icon.tsx`）経由で使う。足りない glyph は `Icon` に追加する（ロゴ・グラフ・イラストの SVG は対象外）
 - **anti-slop**：全ルールを `error` のまま適用する。違反は実コードの型と境界設計を直して解消し、ルールの無効化・警告化、ignore の追加、disable コメント、広い型への言い換えで回避しない
 - **vendored lint**：`tools/oxlint/` は lint 実装の取り込み先として扱い、診断を通す目的で内部実装を編集しない。`tools/oxlint/anti-slop/` は [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop) の commit `6d538555cb151d4121ed51a27db81890eacf8ae9` を取り込んだもの。更新時は upstream の差分をそのまま取り込み、ルールの変更が必要ならアプリ側の修正で対応できない根拠を先に示す
-- **スタイル**：色・余白・角丸・タイポの生値をコンポーネントに直書きしない。すべて Panda のトークン経由。条件分岐は recipe の variant として列挙し、実行時に決まる動的値をスタイルへ渡さない
-- **文字**：大きさと行高は `textStyle` の役割（`src/theme/textStyles.ts`、一覧は `/dev/tokens`）から選び、色は呼び出し側で足す。役割に無い組み合わせが3か所に出たら役割を足す
+- **スタイル**：色・余白・角丸・タイポの生値をコンポーネントに直書きしない。すべて Panda のトークン経由。条件分岐は recipe の variant として列挙し、実行時に決まる動的値をスタイルへ渡さない。棒の長さや計測した位置のように実行時にしか決まらない値は、`style` 属性へ CSS 変数（`style={{ "--bar-width": … }}`）だけで渡し、`css()` の側で `var()` を使って受ける
+- **文字**：大きさと行高は `textStyle` の役割（`src/theme/textStyles.ts`、一覧は `/dev/tokens`）から選び、色は呼び出し側で足す。文字色はパレットの段（`primary.700`・`ink2` など）ではなく、置く面に合わせた役割トークン（`text.brand`・`text.brandOnSoft` など）から選ぶ。役割に無い組み合わせが3か所に出たら役割を足す
 - **UI 部品**：フォーム部品・ダイアログ・通知・開閉・候補つきの入力は、`src/components` の共通部品（フォーム部品は `src/components/form`）を使う。`@base-ui/react` と `sonner` は `src/components` の中でだけ import する（外からは ESLint の `no-restricted-imports` で止まる）。足りないものは共通部品に足し、画面ごとに作らない
 - **入力欄のラベル**：`Input`・`Textarea`・`Select`・`Combobox`・`Autocomplete`・`FileInput`・`OtpInput`・`CheckboxGroup`・`RadioGroup` は `label` が必須で、見出し・必須/任意・案内・エラーを部品の props で受け取る（`<Input label="ニックネーム" name="handle" requirement="required" />`）。画面に出さない名前は `hideLabel`、枠の className は `fieldClassName`。`Field`・`Fieldset` は、1つの見出しで複数の要素をまとめるときだけ使い、中の部品には `label={null}` を付ける
 - **動き**：transform と opacity だけを動かし、ease-out にする。`prefers-reduced-motion` では位置を動かさず不透明度だけを変える。打鍵のたびに描き直す一覧や、何度も開け閉めする欄は動かさない
@@ -52,7 +52,7 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 ## 構造の決まり
 
 - `src/server/` がドメインロジックと Supabase アクセスの唯一の置き場。`SUPABASE_SECRET_KEY` はここからのみ参照する
-- UI・クライアントコンポーネントから `supabase.from()` を直接呼ばない（`auth.*`／`storage.*` のクライアント利用のみ可）
+- 画面・クライアントコンポーネント・Server Actions から Supabase のテーブルと RPC（`.from()`・`.rpc()`）を直接呼ばない（`auth.*`／`storage.*` のクライアント利用のみ可）。この節の2項目と、「スタイル」「文字」の CSS 変数・文字色の決まりは `pnpm lint`（`eslint.config.mjs` の `no-restricted-syntax`）が検査する
 - Route Handlers（`src/app/api/`）はフォーム POST・Webhook・外部から叩かれるものだけに絞る。画面内の読み取りは Server Components から `src/server/` を直接呼ぶ
 - 環境変数は `src/env.ts` の1箇所で起動時に検証する。ホスティング固有の環境変数をコードで参照しない
 - エラーレスポンスは `{ok: false, error: "<code>"}` に統一する。エラーコード → 日本語文言の辞書は `src/server/errors.ts` の1箇所に置く
@@ -91,16 +91,6 @@ pnpm outdated                                   # major upgrade 候補の把握
 - `moderate` 以下は起票して次のスプリントで対応する
 - 直接依存が原因の脆弱性は最優先、推移依存は upstream の修正待ちでもよい
 - 月次で `gh dependabot alerts list` を確認する
-
-補助の grep 監査：
-
-```bash
-# サーバー専用の値がクライアント側へ漏れていないか（定義元の src/env.ts と src/server 以外は 0 件）
-grep -rn "SUPABASE_SECRET_KEY\|SERVICE_KEY\|JWT_SECRET" src --exclude-dir=server --exclude=env.ts
-
-# 二層防御の原則違反（0 件。auth.* / storage.* は許容）
-grep -rn "supabase\.\(from\|rpc\)(" src --exclude-dir=server
-```
 
 ## ディレクトリ
 

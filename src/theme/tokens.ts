@@ -49,14 +49,7 @@ export const tokens = {
       DEFAULT: { value: "#E7E5DE" },
       strong: { value: "#D8D6CD" },
     },
-    // タグ分類色（モック TAG_CATS）と危険操作色（T-22）
-    tag: {
-      concern: { value: "{colors.orange}" },
-      effect: { value: "{colors.teal}" },
-      type: { value: "{colors.violet}" },
-      name: { value: "{colors.terracotta}" },
-      cond: { value: "{colors.blue}" },
-    },
+    // 危険操作色（T-22）
     danger: {
       DEFAULT: { value: "#C0392B" },
       soft: { value: "#FDECEC" },
@@ -353,6 +346,14 @@ export const semanticTokens = {
     },
     // モーダルの背面や写真の上に敷く半透明の幕。不透明度は使う側で指定する
     scrim: { value: "{colors.ink}" },
+    // タグ分類色（モック TAG_CATS）。分類チップの文字・枠・淡い面に使う
+    tag: {
+      concern: { value: "{colors.orange}" },
+      effect: { value: "{colors.teal}" },
+      type: { value: "{colors.violet}" },
+      name: { value: "{colors.terracotta}" },
+      cond: { value: "{colors.blue}" },
+    },
     // 実証データのグラフで区ごとに割り当てる系列色
     chart: {
       1: { value: "{colors.ink3}" },

@@ -141,6 +141,7 @@ const swatchCard = css({
 
 const swatchPaint = css({
   aspectRatio: "image.landscape",
+  bg: "var(--swatch-color)",
   borderBottomWidth: "1px",
   borderBottomColor: "border.default",
 });
@@ -195,11 +196,14 @@ const tokenDescriptionStyle = css({ mt: "1", textStyle: "supporting", color: "te
 
 const textStyleSample = css({ color: "text.default" });
 
-const bodySample = css({ textStyle: "body" });
+const weightSample = css({ textStyle: "body", fontWeight: "var(--sample-font-weight)" });
+
+const leadingSample = css({ textStyle: "body", lineHeight: "var(--sample-line-height)" });
 
 const typeSample = css({
   color: "text.default",
   fontWeight: "semibold",
+  fontSize: "var(--sample-font-size)",
 });
 
 const spacingTrack = css({
@@ -210,6 +214,8 @@ const spacingTrack = css({
 });
 
 const spacingBar = css({
+  w: "var(--sample-width)",
+  maxW: "full",
   h: "full",
   bg: "primary.600",
 });
@@ -217,6 +223,7 @@ const spacingBar = css({
 const radiusSample = css({
   w: "16",
   h: "12",
+  borderRadius: "var(--sample-radius)",
   borderWidth: "1px",
   borderColor: "primary.600",
   bg: "primary.200",
@@ -225,6 +232,7 @@ const radiusSample = css({
 const elevationSample = css({
   w: "20",
   h: "12",
+  boxShadow: "var(--sample-shadow)",
   borderWidth: "1px",
   borderColor: "border.default",
   borderRadius: "card",
@@ -239,6 +247,8 @@ const sizeTrack = css({
 });
 
 const sizeBar = css({
+  w: "var(--sample-width)",
+  maxW: "full",
   h: "full",
   bg: "primary.600",
 });
@@ -246,6 +256,7 @@ const sizeBar = css({
 const ratioSample = css({
   w: "24",
   maxW: "full",
+  aspectRatio: "var(--sample-ratio)",
   borderWidth: "1px",
   borderColor: "primary.600",
   borderRadius: "input",
@@ -323,7 +334,7 @@ function ColorGrid({ items }: ColorGridProps) {
             aria-label={`${item.name} の色見本`}
             className={swatchPaint}
             role="img"
-            style={{ backgroundColor: item.color }}
+            style={{ "--swatch-color": item.color }}
           />
           <div className={swatchMeta}>
             <code className={tokenNameStyle}>{item.name}</code>
@@ -397,7 +408,7 @@ export function TypographyTokens() {
         <div className={tokenTable}>
           {fontSizes.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <span className={typeSample} style={{ fontSize: token.value }}>
+              <span className={typeSample} style={{ "--sample-font-size": token.value }}>
                 畑の状態を記録する
               </span>
             </TokenRow>
@@ -409,7 +420,7 @@ export function TypographyTokens() {
         <div className={tokenTable}>
           {fontWeights.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <span className={bodySample} style={{ fontWeight: Number(token.value) }}>
+              <span className={weightSample} style={{ "--sample-font-weight": token.value }}>
                 Farmille 農業資材感想口コミ
               </span>
             </TokenRow>
@@ -421,7 +432,7 @@ export function TypographyTokens() {
         <div className={tokenTable}>
           {lineHeights.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <span className={bodySample} style={{ lineHeight: token.value }}>
+              <span className={leadingSample} style={{ "--sample-line-height": token.value }}>
                 使用した資材の特徴を記録する。
                 <br />
                 次の栽培で比較できる形に残す。
@@ -442,7 +453,7 @@ export function SpacingTokens() {
           {spacing.map((token) => (
             <TokenRow key={token.name} token={token}>
               <div className={spacingTrack}>
-                <div className={spacingBar} style={{ maxWidth: "100%", width: token.value }} />
+                <div className={spacingBar} style={{ "--sample-width": token.value }} />
               </div>
             </TokenRow>
           ))}
@@ -459,7 +470,7 @@ export function RadiusTokens() {
         <div className={tokenTable}>
           {radii.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <div className={radiusSample} style={{ borderRadius: token.value }} />
+              <div className={radiusSample} style={{ "--sample-radius": token.value }} />
             </TokenRow>
           ))}
         </div>
@@ -475,7 +486,7 @@ export function ElevationTokens() {
         <div className={tokenTable}>
           {shadows.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <div className={elevationSample} style={{ boxShadow: token.value }} />
+              <div className={elevationSample} style={{ "--sample-shadow": token.value }} />
             </TokenRow>
           ))}
         </div>
@@ -492,7 +503,7 @@ export function SizeTokens() {
           {sizes.map((token) => (
             <TokenRow key={token.name} token={token}>
               <div className={sizeTrack}>
-                <div className={sizeBar} style={{ maxWidth: "100%", width: token.value }} />
+                <div className={sizeBar} style={{ "--sample-width": token.value }} />
               </div>
             </TokenRow>
           ))}
@@ -509,7 +520,7 @@ export function AspectRatioTokens() {
         <div className={tokenTable}>
           {aspectRatios.map((token) => (
             <TokenRow key={token.name} token={token}>
-              <div className={ratioSample} style={{ aspectRatio: token.value }} />
+              <div className={ratioSample} style={{ "--sample-ratio": token.value }} />
             </TokenRow>
           ))}
         </div>
