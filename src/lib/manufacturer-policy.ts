@@ -7,7 +7,7 @@ export const MANUFACTURER_ONBOARDING_STEPS = [
     actor: "maker",
     action: "register",
     title: "企業会員登録",
-    body: "まずは企業会員登録の申請をお願いいたします。運営が法人情報を確認のうえ、ご登録のメールアドレス宛にログインIDとパスワード設定のご案内をお送りします。",
+    body: "まずは企業会員登録の申請をお願いいたします。運営が法人情報を確認のうえ、ご登録のメールアドレス宛にFarmille企業会員IDとパスワード設定のご案内をお送りします。",
   },
   {
     actor: "maker",

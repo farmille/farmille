@@ -51,7 +51,7 @@ export function SellerApplyForm() {
       </Notice>
 
       <Input
-        description="ご担当者のメールアドレスを入力してください。公開されません。確認後、このアドレスにログインIDとパスワード設定用のご案内をお送りします。"
+        description="ご担当者のメールアドレスを入力してください。公開されません。確認後、このアドレスにFarmille企業会員IDとパスワード設定用のご案内をお送りします。"
         label="連絡先メールアドレス"
         name="contactEmail"
         requirement="required"
