@@ -5,10 +5,10 @@ import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import {
   listPublishedArticlesByMaterial,
-  listUsageReportCharts,
+  listUsageReportCardDetails,
   type MaterialContentList,
   type PublishedUsageReport,
-  type UsageReportChart,
+  type UsageReportCardDetail,
 } from "@/server/queries/material-content";
 import type { MaterialDetail } from "@/server/queries/materials";
 
@@ -80,7 +80,7 @@ type MaterialReportsViewProps = {
   articleTotal: number;
   signedIn: boolean;
   /** ログイン中だけ渡す。null のときはグラフの代わりにログインの案内を出す。 */
-  charts: Map<string, UsageReportChart> | null;
+  details: Map<string, UsageReportCardDetail> | null;
 };
 
 export function MaterialReportsView({
@@ -88,7 +88,7 @@ export function MaterialReportsView({
   reports,
   articleTotal,
   signedIn,
-  charts,
+  details,
 }: MaterialReportsViewProps) {
   const materialPath = `/materials/${material.id}`;
   const next = encodeURIComponent(materialPath);
@@ -99,7 +99,7 @@ export function MaterialReportsView({
       {reports.items.length > 0 ? (
         <div className={scrollStyle}>
           {reports.items.map((report) => {
-            const chart = charts?.get(report.id);
+            const detail = details?.get(report.id);
             return (
               <UsageReportCard
                 key={report.id}
@@ -109,12 +109,12 @@ export function MaterialReportsView({
                 avatarSrc={report.author?.avatar_url}
                 coverSrc={report.coverImage?.url}
                 crop={report.crop?.name}
-                place={chart?.prefecture}
+                place={detail?.prefecture}
                 figure={
-                  charts === null ? (
+                  details === null ? (
                     <ReportChartLoginNote />
-                  ) : chart ? (
-                    <ReportCardChart chart={chart} />
+                  ) : detail?.chart ? (
+                    <ReportCardChart chart={detail.chart} />
                   ) : null
                 }
                 layout="scroll"
@@ -173,8 +173,8 @@ export async function MaterialReportsSection({
     listPublishedArticlesByMaterial(material.id),
   ]);
   const reports = unwrapQueryResult(reportsResult);
-  const charts = signedIn
-    ? unwrapQueryResult(await listUsageReportCharts(reports.items.map((report) => report.id)))
+  const details = signedIn
+    ? unwrapQueryResult(await listUsageReportCardDetails(reports.items.map((report) => report.id)))
     : null;
   return (
     <MaterialReportsView
@@ -182,7 +182,7 @@ export async function MaterialReportsSection({
       reports={reports}
       articleTotal={unwrapQueryResult(articlesResult).total}
       signedIn={signedIn}
-      charts={charts}
+      details={details}
     />
   );
 }

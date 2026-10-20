@@ -250,15 +250,16 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
   });
 }
 
-export type UsageReportChart = ReportChartPreview & { prefecture: string | null };
+/** グラフにできる測定がないレポートでも、都道府県は出せるように分けて持つ。 */
+export type UsageReportCardDetail = { chart: ReportChartPreview | null; prefecture: string | null };
 
 /**
- * 一覧カードに添えるグラフと都道府県。定量データは会員だけが読めるので、
+ * 一覧カードに添えるグラフと都道府県。定量データと地域は会員だけが読めるので、
  * ログインしていない閲覧者からは呼ばない（RLS でも返らない）。構造化前のレポートは対象外。
  */
-export async function listUsageReportCharts(
+export async function listUsageReportCardDetails(
   reportIds: string[],
-): Promise<Result<Map<string, UsageReportChart>>> {
+): Promise<Result<Map<string, UsageReportCardDetail>>> {
   if (reportIds.length === 0) return succeed(new Map());
   const supabase = await createServerSupabase();
   const { data, error } = await supabase
@@ -280,7 +281,7 @@ export async function listUsageReportCharts(
 
   const byOrder = (left: { sort_order: number }, right: { sort_order: number }) =>
     left.sort_order - right.sort_order;
-  const charts = new Map<string, UsageReportChart>();
+  const details = new Map<string, UsageReportCardDetail>();
   for (const report of data) {
     const chart = firstReportChart(
       report.measurements.toSorted(byOrder).map((measurement) => ({
@@ -297,13 +298,12 @@ export async function listUsageReportCharts(
       })),
       report.plots.toSorted(byOrder),
     );
-    if (chart === null) continue;
-    charts.set(report.id, {
-      ...chart,
+    details.set(report.id, {
+      chart,
       prefecture: report.prefecture_code === null ? null : prefectureName(report.prefecture_code),
     });
   }
-  return succeed(charts);
+  return succeed(details);
 }
 
 export async function listPublishedArticlesByMaterial(

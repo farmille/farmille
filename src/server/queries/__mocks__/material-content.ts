@@ -1,5 +1,8 @@
 import { fn } from "storybook/test";
-import { materialReports, storyReportChart } from "@/app/materials/[id]/_components/story-fixtures";
+import {
+  materialReports,
+  storyReportDetail,
+} from "@/app/materials/[id]/_components/story-fixtures";
 export const listPublishedUsageReportsByMaterial = fn<
   typeof import("@/server/queries/material-content").listPublishedUsageReportsByMaterial
 >(async () => ({
@@ -31,9 +34,9 @@ export const getReviewRatingDistribution = fn<
 >(async () => ({ ok: true, data: { total: 0, stars: [] } })).mockName(
   "getReviewRatingDistribution",
 );
-export const listUsageReportCharts = fn<
-  typeof import("@/server/queries/material-content").listUsageReportCharts
+export const listUsageReportCardDetails = fn<
+  typeof import("@/server/queries/material-content").listUsageReportCardDetails
 >(async (reportIds) => ({
   ok: true,
-  data: new Map(reportIds.map((id) => [id, storyReportChart])),
-})).mockName("listUsageReportCharts");
+  data: new Map(reportIds.map((id) => [id, storyReportDetail])),
+})).mockName("listUsageReportCardDetails");
