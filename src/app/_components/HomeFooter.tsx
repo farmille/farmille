@@ -1,4 +1,6 @@
 import Link from "next/link";
+
+import { TextLink } from "@/components/TextLink";
 import { css, cva } from "../../../styled-system/css";
 
 const groups = [
@@ -49,8 +51,18 @@ const groupTitle = cva({
   variants: { tone: { plain: { color: "text.subtle" }, forest: { color: "text.inverse" } } },
 });
 
-const link = cva({
-  base: { fontSize: "sm", textDecoration: "none" },
+/** リンクの色と大きさは一覧に持たせ、TextLink の nav がそれを受け継ぐ。 */
+const linkList = cva({
+  base: {
+    listStyle: "none",
+    m: "0",
+    p: "0",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: "1",
+    fontSize: "sm",
+  },
   variants: { tone: { plain: { color: "text.muted" }, forest: { color: "text.inverse" } } },
 });
 
@@ -89,28 +101,16 @@ export function HomeFooter({ tone = "plain" }: { tone?: FooterTone }) {
             Farmille
           </Link>
           <p className={description({ tone })}>生産者による生産者のための事例共有サイト</p>
-          <p className={description({ tone })}>
-            BS資材を作物・効果から検索し、生産者の実証詳細レポートと感想口コミを確かめられます。
-          </p>
         </div>
         {groups.map((group) => (
           <nav key={group.title} aria-label={group.title}>
             <h2 className={groupTitle({ tone })}>{group.title}</h2>
-            <ul
-              className={css({
-                listStyle: "none",
-                m: "0",
-                p: "0",
-                display: "flex",
-                flexDirection: "column",
-                gap: "1",
-              })}
-            >
+            <ul className={linkList({ tone })}>
               {group.links.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className={link({ tone })}>
+                  <TextLink href={item.href} variant="nav">
                     {item.label}
-                  </Link>
+                  </TextLink>
                 </li>
               ))}
             </ul>
@@ -120,10 +120,16 @@ export function HomeFooter({ tone = "plain" }: { tone?: FooterTone }) {
       <div className={legal({ tone })}>
         <span>© {new Date().getFullYear()} Farmille</span>
         <div className={css({ display: "flex", flexWrap: "wrap", gap: "4" })}>
-          <Link href="/legal/privacy">プライバシーポリシー</Link>
-          <Link href="/legal">規約・ガイドライン</Link>
+          <TextLink href="/legal/privacy" variant="nav">
+            プライバシーポリシー
+          </TextLink>
+          <TextLink href="/legal" variant="nav">
+            規約・ガイドライン
+          </TextLink>
           <span>お問い合わせフォーム（準備中）</span>
-          <a href="mailto:contact@farmille.com">contact@farmille.com</a>
+          <TextLink href="mailto:contact@farmille.com" variant="nav">
+            contact@farmille.com
+          </TextLink>
         </div>
       </div>
     </footer>

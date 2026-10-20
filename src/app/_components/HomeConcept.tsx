@@ -65,12 +65,8 @@ const collageAccent = css({ position: "absolute", right: "[4%]", bottom: "0", w:
 
 const essay = css({ m: "0", textStyle: "essay", color: "text.default" });
 
-const prose = css({
-  display: "flex",
-  flexDirection: "column",
-  gap: "6",
-  maxW: "content.reading",
-});
+/** 問いかけに続く本文。段落ごとに現す。 */
+const prose = css({ display: "flex", flexDirection: "column", gap: "6" });
 
 const closing = css({
   display: "flex",
@@ -166,11 +162,23 @@ export function HomeConcept({ showSignup }: { showSignup: boolean }) {
                 </>
               }
             />
-            <Reveal>
-              <p className={essay}>
-                気候変動の影響がすさまじい昨今、「バイオスティミュラント（BS）資材」への期待が高まっています。しかし、いざ使おうと思っても、どの資材が自分の悩みに合うのか分からない。大切な作物に使うからこそ、新しい挑戦には迷いがつきものです。
-              </p>
-            </Reveal>
+            <div className={prose}>
+              <Reveal>
+                <p className={essay}>
+                  気候変動の影響がすさまじい昨今、「バイオスティミュラント（BS）資材」への期待が高まっています。しかし、いざ使おうと思っても、どの資材が自分の悩みに合うのか分からない。大切な作物に使うからこそ、新しい挑戦には迷いがつきものです。
+                </p>
+              </Reveal>
+              <Reveal>
+                <p className={essay}>
+                  「Farmille（ファーミル）」は、そんなバイオスティミュラント（BS）資材について、全国の生産者や技術者が現場の知恵を持ち寄る場所。
+                </p>
+              </Reveal>
+              <Reveal>
+                <p className={essay}>
+                  これまでなら、自分の畑だけで何年もかけて答えを探すしかなかったところを、全国の仲間と経験を持ち寄り、1年で確かめ合う。
+                </p>
+              </Reveal>
+            </div>
           </div>
           <div className={collage}>
             <HomePhoto
@@ -199,15 +207,6 @@ export function HomeConcept({ showSignup }: { showSignup: boolean }) {
             />
           </div>
         </div>
-
-        <Reveal className={prose}>
-          <p className={essay}>
-            「Farmille（ファーミル）」は、そんなバイオスティミュラント（BS）資材について、全国の生産者や技術者が現場の知恵を持ち寄る場所。
-          </p>
-          <p className={essay}>
-            これまでなら、自分の畑だけで何年もかけて答えを探すしかなかったところを、全国の仲間と経験を持ち寄り、1年で確かめ合う。
-          </p>
-        </Reveal>
 
         <div className={closing}>
           <Reveal>

@@ -1,8 +1,8 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Icon } from "@/components/Icon";
 import { HomeSearchEntry } from "@/components/search/HomeSearchEntry";
+import { TextLink } from "@/components/TextLink";
 import { css } from "../../../styled-system/css";
 import { HomeHills } from "./HomeHills";
 import { HomeSectionTitle } from "./HomeSectionTitle";
@@ -63,19 +63,11 @@ const materialsHeader = css({
   alignItems: "baseline",
   justifyContent: "flex-end",
   gap: "4",
-  tab: { px: "8" },
-});
-
-const allLink = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1",
-  color: "text.brandOnForest",
+  color: "text.inverse",
   fontSize: "sm",
   fontWeight: "bold",
-  textDecoration: "none",
   whiteSpace: "nowrap",
-  "@media (hover: hover) and (pointer: fine)": { _hover: { color: "text.inverse" } },
+  tab: { px: "8" },
 });
 
 /** 流れる資材カードは、自身の負の余白でこの左右の余白を打ち消して画面端まで届く。 */
@@ -107,10 +99,9 @@ export function HomeSearch({ children }: { children: ReactNode }) {
       </div>
       <Reveal className={materials} effect="fade">
         <div className={materialsHeader}>
-          <Link className={allLink} href="/search">
-            すべての資材を見る
-            <Icon name="arrow_forward" size="sm" />
-          </Link>
+          <TextLink href="/search" variant="nav">
+            すべての資材を見る <Icon name="arrow_forward" size="sm" />
+          </TextLink>
         </div>
         <div className={marquee}>{children}</div>
       </Reveal>

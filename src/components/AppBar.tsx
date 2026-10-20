@@ -5,6 +5,7 @@ import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
 import { BrandMark } from "@/components/BrandMark";
 import { Icon } from "@/components/Icon";
 import { PreparationNotice } from "@/components/PreparationNotice";
+import { TextLink } from "@/components/TextLink";
 
 const mobileAppBar = css({
   bg: "surface.paper/88",
@@ -113,12 +114,37 @@ const desktopNav = css({
   ml: "auto",
 });
 
+/** 公開画面の主な行き先。参考にした森林組合のサイトのように、文字だけを並べる。 */
+const siteMenu = [
+  { label: "資材をさがす", href: "/search", active: "search" },
+  { label: "記事", href: "/articles", active: "articles" },
+  { label: "投稿する", href: "/post", active: "post" },
+  { label: "メーカーの方へ", href: "/sellers", active: null },
+] as const satisfies readonly { label: string; href: string; active: AppBarActive | null }[];
+
+const desktopSiteMenuNav = css({ ml: "auto" });
+
+const desktopSiteMenu = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "5",
+  m: "0",
+  p: "0",
+  listStyle: "none",
+  color: "text.brandOnSoft",
+  fontSize: "md",
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
+  pc: { gap: "8" },
+});
+
 const desktopPublicActions = css({
   display: "flex",
   alignItems: "center",
   gap: "1.5",
   flexShrink: "0",
-  ml: "auto",
+  ml: "6",
+  pc: { ml: "10" },
 });
 
 const desktopNavLink = cva({
@@ -310,6 +336,21 @@ function DesktopSiteHeader({
           <BrandMark />
           <span className={desktopBrandName}>Farmille</span>
         </Link>
+        <nav aria-label="サイトメニュー" className={desktopSiteMenuNav}>
+          <ul className={desktopSiteMenu}>
+            {siteMenu.map((item) => (
+              <li key={item.href}>
+                <TextLink
+                  aria-current={item.active !== null && active === item.active ? "page" : undefined}
+                  href={item.href}
+                  variant="nav"
+                >
+                  {item.label}
+                </TextLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
         <nav className={desktopPublicActions} aria-label="PCメインナビ">
           {account?.kind === "guest" ? (
             <>

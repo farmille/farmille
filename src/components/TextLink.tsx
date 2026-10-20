@@ -26,6 +26,37 @@ const textLinkRecipe = cva({
         textDecoration: "none",
         _hover: { textDecoration: "underline" },
       },
+      /**
+       * メニューやフッターに並べる文字だけのリンク。色と大きさは置き場所から受け継ぐ。
+       * ホバーと現在地（aria-current）では、左端から下線を伸ばす。
+       */
+      nav: {
+        position: "relative",
+        display: "inline-block",
+        color: "[inherit]",
+        textDecoration: "none",
+        _after: {
+          content: '""',
+          position: "absolute",
+          left: "0",
+          right: "0",
+          bottom: "-0.5",
+          h: "[1px]",
+          bg: "currentColor",
+          transform: "scaleX(0)",
+          transformOrigin: "left center",
+          transitionProperty: "[transform]",
+          transitionDuration: "dialog",
+          transitionTimingFunction: "out",
+          // 視覚効果を減らす設定では伸ばさず、線を薄く現すだけにする
+          _motionReduce: { transform: "scaleX(1)", opacity: "0", transitionProperty: "[opacity]" },
+        },
+        "@media (hover: hover) and (pointer: fine)": {
+          _hover: { _after: { transform: "scaleX(1)", opacity: "1" } },
+        },
+        _focusVisible: { _after: { transform: "scaleX(1)", opacity: "1" } },
+        "&[aria-current=page]": { _after: { transform: "scaleX(1)", opacity: "1" } },
+      },
       subtle: {
         display: "block",
         p: "1",

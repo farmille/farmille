@@ -87,7 +87,7 @@ export default defineConfig({
         // 丘に立つ双葉を、根元を軸にゆっくり揺らす
         "sprout-sway": { from: { transform: "rotate(-6deg)" }, to: { transform: "rotate(6deg)" } },
         // 丘の奥の層を手前より遅らせて持ち上げる
-        "hill-rise": { from: { transform: "translateY(18%)" }, to: { transform: "translateY(0)" } },
+        "hill-rise": { from: { transform: "translateY(55%)" }, to: { transform: "translateY(0)" } },
       },
     },
   },
