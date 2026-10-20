@@ -13,7 +13,7 @@ const materialLink = css(surfaceCardRecipe.raw({ padding: "compact" }), {
   alignItems: "center",
   gap: "3",
   bg: "transparent",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
 });
 
@@ -39,7 +39,7 @@ export function ArticleMaterialList({
                 flexShrink: "0",
               })}
             >
-              <Icon name="eco" size="lg" className={css({ color: "primary.700" })} />
+              <Icon name="eco" size="lg" className={css({ color: "text.brandOnSoft" })} />
             </span>
             <span className={css({ minW: "0" })}>
               <span className={css({ display: "block", textStyle: "body", fontWeight: "bold" })}>

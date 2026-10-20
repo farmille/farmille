@@ -50,8 +50,8 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
                       rel="noreferrer"
                       className={
                         link.trial
-                          ? css({ color: "primary.800", textDecoration: "underline" })
-                          : css({ color: "primary.700", textDecoration: "underline" })
+                          ? css({ color: "text.brandOnSoft", textDecoration: "underline" })
+                          : css({ color: "text.brand", textDecoration: "underline" })
                       }
                     >
                       {link.title || "資料名は未入力です"}

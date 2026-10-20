@@ -87,3 +87,33 @@ export const getMaterialEditor = fn<
   expectedVersion: "",
   pendingVersion: "",
 })).mockName("getMaterialEditor");
+export const saveMaterialPageVersion = fn<
+  typeof import("@/server/material-page-editor").saveMaterialPageVersion
+>(async () => ({
+  data: "11111111-1111-4111-8111-111111111111",
+  error: null,
+  count: null,
+  status: 200,
+  statusText: "OK",
+  success: true,
+})).mockName("saveMaterialPageVersion");
+export const withdrawMaterialPageVersion = fn<
+  typeof import("@/server/material-page-editor").withdrawMaterialPageVersion
+>(async () => ({
+  data: undefined,
+  error: null,
+  count: null,
+  status: 204,
+  statusText: "No Content",
+  success: true,
+})).mockName("withdrawMaterialPageVersion");
+export const hideOwnedMaterialPage = fn<
+  typeof import("@/server/material-page-editor").hideOwnedMaterialPage
+>(async () => ({
+  data: undefined,
+  error: null,
+  count: null,
+  status: 204,
+  statusText: "No Content",
+  success: true,
+})).mockName("hideOwnedMaterialPage");

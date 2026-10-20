@@ -9,16 +9,16 @@ import { PreparationNotice } from "@/components/PreparationNotice";
 const mobileAppBar = css({
   position: "sticky",
   top: "0",
-  zIndex: "10",
+  zIndex: "appBar",
   bg: "panel/88",
-  backdropFilter: "blur(10px)",
+  backdropFilter: "[blur({blurs.bar})]",
   borderBottomWidth: "1px",
   borderBottomStyle: "solid",
   borderBottomColor: "border.default",
   display: "flex",
   alignItems: "center",
   gap: "2.5",
-  pt: "max(token(spacing.3), env(safe-area-inset-top))",
+  pt: "[max(token(spacing.3), env(safe-area-inset-top))]",
   px: "3.5",
   pb: "2.5",
   tab: { display: "none" },
@@ -44,7 +44,7 @@ const logo = css({
   alignItems: "center",
   gap: "1.5",
   flex: "1",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
   minW: "0",
 });
@@ -72,9 +72,9 @@ const desktopHeader = css({
     display: "block",
     position: "sticky",
     top: "0",
-    zIndex: "30",
+    zIndex: "header",
     bg: "card/94",
-    backdropFilter: "blur(12px)",
+    backdropFilter: "[blur(12px)]",
     borderBottomWidth: "1px",
     borderBottomStyle: "solid",
     borderBottomColor: "border.default",
@@ -82,7 +82,7 @@ const desktopHeader = css({
 });
 
 const desktopHeaderInner = css({
-  w: "100%",
+  w: "full",
   maxW: "content.wide",
   mx: "auto",
   minH: "16",
@@ -96,7 +96,7 @@ const desktopBrand = css({
   display: "inline-flex",
   alignItems: "center",
   gap: "2",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
   flexShrink: "0",
 });
@@ -134,17 +134,17 @@ const desktopNavLink = cva({
     fontWeight: "bold",
     textDecoration: "none",
     whiteSpace: "nowrap",
-    _hover: { bg: "primary.soft", color: "primary.800" },
+    _hover: { bg: "primary.soft", color: "text.brandOnSoft" },
     _focusVisible: {
       outlineWidth: "2px",
       outlineStyle: "solid",
       outlineColor: "primary.600",
-      outlineOffset: "2px",
+      outlineOffset: "0.5",
     },
   },
   variants: {
     active: {
-      true: { bg: "primary.soft", color: "primary.800" },
+      true: { bg: "primary.soft", color: "text.brandOnSoft" },
       false: {},
     },
   },
@@ -169,7 +169,7 @@ const desktopAction = cva({
       primary: { bg: "primary.700", color: "surface.card" },
       secondary: {
         bg: "surface.card",
-        color: "primary.700",
+        color: "text.brand",
         borderWidth: "1px",
         borderStyle: "solid",
         borderColor: "border.strong",
@@ -191,7 +191,7 @@ const desktopContext = css({
 });
 
 const desktopContextInner = css({
-  w: "100%",
+  w: "full",
   maxW: "content.wide",
   mx: "auto",
   px: "5",

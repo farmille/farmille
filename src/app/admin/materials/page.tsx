@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 const linkStyle = css({
-  color: "primary.700",
+  color: "text.brand",
   fontWeight: "bold",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },
@@ -29,7 +29,7 @@ const searchFormStyle = css({
   mb: "3",
 });
 
-const searchInputStyle = css({ w: "100%", maxW: "320px" });
+const searchInputStyle = css({ w: "full", maxW: "[320px]" });
 
 const headerActionsStyle = css({
   display: "flex",

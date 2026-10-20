@@ -78,7 +78,7 @@ const focusRing = {
   outlineWidth: "2px",
   outlineStyle: "solid",
   outlineColor: "primary.700",
-  outlineOffset: "2px",
+  outlineOffset: "0.5",
 } as const;
 
 const noticeSpacingStyle = css({ mb: "3.5" });
@@ -118,7 +118,7 @@ const photoImageStyle = css({ display: "block", w: "full", h: "full", objectFit:
 
 const photoCaptionStyle = css({ mt: "1.5" });
 
-const photoPlaceholderIconStyle = css({ color: "primary.700" });
+const photoPlaceholderIconStyle = css({ color: "text.brandOnSoft" });
 
 const photoRemoveCheckStyle = css({ mt: "1" });
 

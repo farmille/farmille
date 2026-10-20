@@ -31,7 +31,7 @@ const headRow = css({ display: "flex", alignItems: "flex-end", flexWrap: "wrap",
 
 // カバー画像に重なるので、背景色の縁を回して輪郭を切る。
 const avatarFrame = css({
-  flex: "0 0 auto",
+  flex: "none",
   alignSelf: "flex-start",
   mt: "-8",
   display: "inline-flex",
@@ -43,7 +43,7 @@ const avatarFrame = css({
 
 const nameColumn = css({ flex: "1", minW: "44", pb: "0.5" });
 
-const name = css({ m: "0", textStyle: "title", fontWeight: "extrabold" });
+const name = css({ m: "0", textStyle: "title" });
 
 const chipRow = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "1.5" } as const;
 
@@ -74,7 +74,7 @@ const affiliation = css({
 });
 
 const editLink = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
-  flex: "0 0 auto",
+  flex: "none",
   px: "4",
 });
 
@@ -99,7 +99,7 @@ const linkRow = css({
     display: "inline-flex",
     alignItems: "center",
     gap: "1",
-    color: "primary.800",
+    color: "text.brand",
     fontWeight: "semibold",
     textDecoration: "none",
     overflowWrap: "anywhere",
@@ -137,7 +137,7 @@ const todoHint = cva({
     display: "inline-flex",
     alignItems: "center",
     gap: "1.5",
-    color: "primary.800",
+    color: "text.brand",
     fontSize: "sm",
     fontWeight: "bold",
     textDecoration: "none",
@@ -153,7 +153,7 @@ const todoHint = cva({
 });
 
 const todoIcon = css({
-  flex: "0 0 auto",
+  flex: "none",
   w: "4",
   h: "4",
   display: "grid",
@@ -162,7 +162,7 @@ const todoIcon = css({
   borderStyle: "dashed",
   borderColor: "primary.700",
   borderRadius: "pill",
-  color: "primary.800",
+  color: "text.brand",
   fontSize: "xs",
   fontWeight: "black",
   lineHeight: "none",

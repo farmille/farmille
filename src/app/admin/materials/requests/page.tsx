@@ -22,7 +22,7 @@ import { css } from "../../../../../styled-system/css";
 export const metadata: Metadata = { title: "資材変更申請" };
 
 const linkStyle = css({
-  color: "primary.700",
+  color: "text.brand",
   fontWeight: "bold",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },

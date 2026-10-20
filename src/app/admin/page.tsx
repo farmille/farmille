@@ -32,14 +32,14 @@ const menuListStyle = css({
 const menuLinkStyle = css({
   fontSize: "lg",
   fontWeight: "bold",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },
 });
 
 const statLinkStyle = css({
   display: "block",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
   borderRadius: "button",
   _focusVisible: {

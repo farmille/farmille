@@ -44,7 +44,7 @@ const membershipRecipe = cva({
   },
   variants: {
     needId: {
-      true: { color: "primary.800", fontWeight: "bold", _before: { bg: "primary.700" } },
+      true: { color: "text.brand", fontWeight: "bold", _before: { bg: "primary.700" } },
       false: { color: "text.subtle", fontWeight: "medium", _before: { bg: "border.strong" } },
     },
   },
@@ -78,7 +78,7 @@ export default function SellerProceduresPage() {
                       <Link
                         className={css({
                           mr: "3.5",
-                          color: "primary.700",
+                          color: "text.brand",
                           textDecoration: "underline",
                         })}
                         href={target.href}
@@ -114,7 +114,7 @@ export default function SellerProceduresPage() {
                   css({
                     justifyContent: "space-between",
                     minH: "24",
-                    color: "inherit",
+                    color: "[inherit]",
                     textDecoration: "none",
                     _hover: { borderColor: "primary.700" },
                   }),
@@ -152,7 +152,7 @@ export default function SellerProceduresPage() {
               px: "2",
               borderRadius: "button",
               bg: "primary.100",
-              color: "primary.800",
+              color: "text.brandOnSoft",
               fontSize: "xl",
             })}
             aria-hidden="true"
@@ -166,7 +166,7 @@ export default function SellerProceduresPage() {
             >
               お問い合わせはこちらまで
               <a href={`mailto:${CONTACT_EMAIL}`}>
-                <b className={css({ color: "primary.800", fontSize: "md" })}>{CONTACT_EMAIL}</b>
+                <b className={css({ color: "text.brand", fontSize: "md" })}>{CONTACT_EMAIL}</b>
               </a>
             </div>
           </div>

@@ -18,7 +18,7 @@ function sellerMaterialsHref(officialName: string): string {
 
 const moreLinkStyle = css({
   fontSize: "sm",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
   whiteSpace: "nowrap",
 });
@@ -45,7 +45,7 @@ function SectionHead({ id, title, children }: { id: string; title: string; child
 }
 
 const productCardStyle = css({
-  flex: "0 0 auto",
+  flex: "none",
   w: "card.materialMobile",
   overflow: "hidden",
   bg: "surface.card",
@@ -54,7 +54,7 @@ const productCardStyle = css({
   borderColor: "border.default",
   borderRadius: "card",
   boxShadow: "shadow",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
 });
 
@@ -149,7 +149,7 @@ export function SellerPageContent({ data }: { data: PublicSellerPageData }) {
             borderRadius: "media",
             px: "3.5",
             py: "3",
-            color: "primary.800",
+            color: "text.brandOnSoft",
             fontSize: "sm",
             fontWeight: "semibold",
           })}
@@ -190,7 +190,7 @@ export function SellerPageContent({ data }: { data: PublicSellerPageData }) {
                       h: "4.5",
                       borderRadius: "mark",
                       bg: "primary.100",
-                      color: "primary.800",
+                      color: "text.brandOnSoft",
                       fontSize: "2xs",
                       fontWeight: "extrabold",
                     })}

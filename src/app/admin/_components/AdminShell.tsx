@@ -6,7 +6,7 @@ import { css } from "../../../../styled-system/css";
 
 // 運営管理はモック基準外（D4）。PC 想定の素直な1カラムで、キット部品を並べるだけにする。
 const shellStyle = css({
-  minH: "100dvh",
+  minH: "dvh",
   bg: "surface.page",
   color: "text.default",
   fontFamily: "sans",
@@ -33,7 +33,7 @@ const headerInnerStyle = css({
 const brandStyle = css({
   fontSize: "md",
   fontWeight: "extrabold",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
 });
 
@@ -48,7 +48,7 @@ const navLinkStyle = css({
   fontSize: "md",
   color: "text.muted",
   textDecoration: "none",
-  _hover: { color: "primary.700", textDecoration: "underline" },
+  _hover: { color: "text.brand", textDecoration: "underline" },
 });
 
 const mainStyle = css({
@@ -61,7 +61,7 @@ const mainStyle = css({
 const backLinkStyle = css({
   display: "inline-block",
   fontSize: "md",
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "none",
   mb: "2",
   _hover: { textDecoration: "underline" },

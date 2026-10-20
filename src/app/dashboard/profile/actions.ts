@@ -3,7 +3,10 @@ import * as v from "valibot";
 import { revalidatePath } from "next/cache";
 import { SaveManufacturerProfileSchema } from "@/lib/manufacturer-profile";
 import { requireSeller } from "@/server/auth";
-import { createServerSupabase } from "@/server/supabase";
+import {
+  saveManufacturerProfileVersion,
+  withdrawManufacturerProfileVersion,
+} from "@/server/manufacturer-profile";
 import { uploadManufacturerLogo } from "@/server/manufacturer-logo";
 
 export async function uploadLogo(formData: FormData) {
@@ -20,14 +23,7 @@ export async function saveManufacturerProfile(
   const parsed = v.safeParse(SaveManufacturerProfileSchema, input);
   if (!parsed.success)
     return { ok: false as const, message: "紹介文とURLの入力を確認してください。" };
-  const db = await createServerSupabase();
-  const { data, error } = await db.rpc("save_manufacturer_profile_version", {
-    p_profile_text: parsed.output.content.profileText,
-    p_logo_url: parsed.output.content.logoUrl,
-    p_website_url: parsed.output.content.websiteUrl,
-    p_submit: parsed.output.submit,
-    p_expected_version: parsed.output.expectedVersion ?? undefined,
-  });
+  const { data, error } = await saveManufacturerProfileVersion(parsed.output);
   if (error) {
     console.error("[manufacturer-profile] 保存に失敗", error);
     return {
@@ -44,8 +40,7 @@ export async function saveManufacturerProfile(
 
 export async function withdrawManufacturerProfile(id: string) {
   if (!(await requireSeller()).ok || !v.is(v.pipe(v.string(), v.uuid()), id)) return false;
-  const db = await createServerSupabase();
-  const { error } = await db.rpc("withdraw_manufacturer_profile_version", { p_version_id: id });
+  const { error } = await withdrawManufacturerProfileVersion(id);
   if (error) {
     console.error("[manufacturer-profile] 取り下げに失敗", error);
     return false;

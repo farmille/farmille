@@ -42,7 +42,7 @@ type ReportDetailPageProps = {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   bg: "surface.page",
   position: "relative",
   pb: "24",
@@ -50,7 +50,7 @@ const shell = css({
 });
 
 const main = css({
-  w: "100%",
+  w: "full",
   maxW: "content.reading",
   mx: "auto",
   px: "3.5",
@@ -234,7 +234,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
                     display: "flex",
                     flexShrink: "0",
                     mt: "0.5",
-                    color: "primary.700",
+                    color: "text.brand",
                   })}
                 >
                   <Icon name="check" size="sm" />

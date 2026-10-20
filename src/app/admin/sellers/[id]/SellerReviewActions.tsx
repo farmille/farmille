@@ -35,7 +35,7 @@ const credentialsStyle = css({
 const credentialLabelStyle = css({
   fontSize: "sm",
   fontWeight: "bold",
-  color: "primary.700",
+  color: "text.brand",
 });
 
 type Operation = "approve" | "reject" | "suspend" | "reinstate" | "invite";

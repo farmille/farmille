@@ -26,7 +26,7 @@ export default function HomePage() {
   return (
     <div
       className={css({
-        minH: "100dvh",
+        minH: "dvh",
         bg: "surface.page",
         color: "text.default",
         fontFamily: "sans",

@@ -11,12 +11,12 @@ const rowRecipe = cva({
     gap: "2.5",
     alignItems: "start",
     textDecoration: "none",
-    color: "inherit",
+    color: "[inherit]",
   },
 });
 
 const thumb = css({
-  w: "70px",
+  w: "[70px]",
   aspectRatio: "image.landscape",
   borderRadius: "media",
   bg: "primary.100",
@@ -24,7 +24,7 @@ const thumb = css({
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
-  color: "primary.800",
+  color: "text.brandOnSoft",
 });
 
 export type ArtMiniProps = {
@@ -57,8 +57,8 @@ export function ArtMini({
             alt=""
             className={css({
               display: "block",
-              w: "100%",
-              h: "100%",
+              w: "full",
+              h: "full",
               objectFit: "cover",
             })}
             height={52}

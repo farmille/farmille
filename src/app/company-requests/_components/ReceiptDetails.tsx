@@ -154,7 +154,7 @@ function Consents({ groups }: { groups: ReceiptConsentGroup[] }) {
                   size="sm"
                   className={css({
                     mt: "0.5",
-                    color: "primary.700",
+                    color: "text.brand",
                     _print: { color: "text.default" },
                   })}
                 />

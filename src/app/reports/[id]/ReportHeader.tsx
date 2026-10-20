@@ -4,7 +4,7 @@ import { Avatar } from "@/components/Avatar";
 import { formatDateJa } from "@/components/format-date";
 import type { PublishedUsageReportDetail } from "@/server/queries/usage-reports";
 
-import { css, cx } from "../../../../styled-system/css";
+import { css } from "../../../../styled-system/css";
 import { articleTitle, byline } from "../../articles/_components/Reading";
 
 type ReportHeaderProps = {
@@ -28,7 +28,7 @@ const tagStyle = css({
   borderColor: "primary.700/30",
   borderRadius: "pill",
   bg: "primary.100",
-  color: "primary.800",
+  color: "text.brandOnSoft",
   fontSize: "sm",
   fontWeight: "semibold",
 });
@@ -36,7 +36,7 @@ const tagStyle = css({
 function Tag({ category, label }: { category: string; label: string }) {
   return (
     <span className={tagStyle}>
-      <span className={css({ fontSize: "2xs", fontWeight: "bold", opacity: "0.65" })}>
+      <span className={css({ fontSize: "2xs", fontWeight: "bold", opacity: "label" })}>
         {category}
       </span>
       {label}
@@ -52,7 +52,7 @@ export function ReportHeader({
 }: ReportHeaderProps) {
   return (
     <>
-      <h1 className={cx(articleTitle, css({ fontWeight: "extrabold" }))}>{report.title}</h1>
+      <h1 className={articleTitle}>{report.title}</h1>
       <div className={byline.row}>
         <Link href={`/users/${report.author.userId}`} className={byline.link}>
           <Avatar name={report.author.handle} src={report.author.avatarUrl} size="sm" />
@@ -81,7 +81,7 @@ export function ReportHeader({
           borderColor: "border.default",
           borderRadius: "card",
           bg: "surface.card",
-          color: "inherit",
+          color: "[inherit]",
           textDecoration: "none",
         })}
       >

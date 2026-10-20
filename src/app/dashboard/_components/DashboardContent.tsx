@@ -40,7 +40,7 @@ const infoRow = css({
 });
 
 const infoLabel = css({
-  flex: "1 0 100%",
+  flex: "[1 0 100%]",
   fontSize: "sm",
   color: "text.muted",
   fontWeight: "bold",
@@ -55,7 +55,7 @@ const infoValueRecipe = cva({
     fontSize: "sm",
     lineHeight: "relaxed",
     overflowWrap: "anywhere",
-    "& a": { color: "primary.800", textDecoration: "underline" },
+    "& a": { color: "text.brand", textDecoration: "underline" },
   },
   variants: {
     empty: {
@@ -159,7 +159,7 @@ const orgMark = css({
   placeItems: "center",
   fontSize: "md",
   fontWeight: "extrabold",
-  color: "primary.800",
+  color: "text.brandOnSoft",
   flex: "none",
 });
 
@@ -204,7 +204,7 @@ const kpi = css({
 const kpiValue = css({
   fontSize: "3xl",
   fontWeight: "extrabold",
-  color: "primary.800",
+  color: "text.brand",
   fontVariantNumeric: "tabular-nums",
 });
 
@@ -221,7 +221,7 @@ const checklist = css({
   pb: "2.5",
 });
 
-const checklistHeading = css({ textStyle: "title", fontWeight: "extrabold", pt: "2.5", pb: "1" });
+const checklistHeading = css({ textStyle: "title", pt: "2.5", pb: "1" });
 
 const plainList = css({ listStyle: "none", m: "0", p: "0" });
 
@@ -239,7 +239,7 @@ const materialStatusRecipe = cva({
   },
   variants: {
     verified: {
-      true: { bg: "primary.100", color: "primary.800" },
+      true: { bg: "primary.100", color: "text.brandOnSoft" },
       false: { bg: "accent.dangerSoft", color: "accent.danger" },
     },
   },

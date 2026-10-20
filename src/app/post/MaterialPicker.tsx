@@ -22,7 +22,7 @@ const focusRing = {
   outlineWidth: "2px",
   outlineStyle: "solid",
   outlineColor: "primary.700",
-  outlineOffset: "2px",
+  outlineOffset: "0.5",
 } as const;
 
 const pickRowStyle = css({
@@ -37,7 +37,7 @@ const pickRowStyle = css({
   borderColor: "border.default",
   borderRadius: "card",
   boxShadow: "shadow",
-  color: "inherit",
+  color: "[inherit]",
   textAlign: "left",
   cursor: "pointer",
   _pressed: { borderColor: "primary.700", bg: "primary.soft" },
@@ -45,7 +45,7 @@ const pickRowStyle = css({
 });
 
 const pickRingStyle = css({
-  flex: "0 0 auto",
+  flex: "none",
   w: "4.5",
   h: "4.5",
   p: "0.5",
@@ -60,7 +60,7 @@ const pickRingStyle = css({
 const thumbRecipeBase = {
   display: "grid",
   placeItems: "center",
-  flex: "0 0 auto",
+  flex: "none",
   overflow: "hidden",
   borderRadius: "media",
 } as const;
@@ -80,12 +80,12 @@ const footerThumbStyle = css(thumbRecipeBase, {
 const footerStyle = css({
   position: "sticky",
   bottom: "0",
-  zIndex: "20",
+  zIndex: "fixedBar",
   mt: "3.5",
   mx: "-4",
   pt: "3.5",
   px: "4",
-  pb: "calc(token(spacing.4) + env(safe-area-inset-bottom, 0px))",
+  pb: "[calc(token(spacing.4) + env(safe-area-inset-bottom, 0px))]",
   bg: "surface.card",
   borderTopWidth: "1px",
   borderTopStyle: "solid",
@@ -222,10 +222,10 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
               {material.id === selectedId ? (
                 <span
                   className={css({
-                    flex: "0 0 auto",
+                    flex: "none",
                     fontSize: "sm",
                     fontWeight: "bold",
-                    color: "primary.800",
+                    color: "text.brandOnSoft",
                   })}
                 >
                   選択中

@@ -35,6 +35,10 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await page.goto("/me");
     await expect(page).toHaveURL(/\/login\?next=%2Fme/);
     await loginGeneral(page, { email, password, id: "", handle }, "/me");
+    // 登録完了画面を開いたブラウザでは、初回ログインの案内が出る。ここでは終了して先へ進む
+    await expect(page.getByRole("heading", { name: "Farmilleへようこそ" })).toBeVisible();
+    await page.getByRole("button", { name: "チュートリアルを終了" }).click();
+    await expect(page.getByRole("heading", { name: "Farmilleへようこそ" })).toHaveCount(0);
     await expect(page.getByText(handle, { exact: true })).toBeVisible();
     await captureAccountScreen(page, "09-mypage.png");
     await page.getByRole("link", { name: "プロフィール公開情報を編集" }).click();
@@ -72,6 +76,8 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await page.getByLabel("パスワード").fill(password);
     await page.getByRole("button", { name: "ログインする" }).click();
     await expect(page).toHaveURL("/");
+    // チュートリアルを終了した後のログインでは、案内は出ない
+    await expect(page.getByRole("heading", { name: "Farmilleへようこそ" })).toHaveCount(0);
 
     await page.goto("/me");
     await page.getByRole("button", { name: "ログアウト" }).click();

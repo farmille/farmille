@@ -50,9 +50,9 @@ const makerBase = {
   fontSize: "sm",
 } as const;
 const makerLinkStyle = css(makerBase, {
-  color: "primary.700",
+  color: "text.brand",
   textDecoration: "underline",
-  textDecorationColor: "primary.700/40",
+  textDecorationColor: "text.brand/40",
 });
 const makerTextStyle = css(makerBase, { color: "text.muted" });
 const unverifiedStyle = css({
@@ -62,15 +62,15 @@ const unverifiedStyle = css({
   color: "text.subtle",
 });
 const applyLinkStyle = css({
-  color: "primary.800",
+  color: "text.brand",
   fontWeight: "semibold",
   textDecoration: "none",
 });
 const chipsStyle = css({ mt: "2", display: "flex", flexWrap: "wrap", gap: "1" });
 const countsStyle = css({ mt: "1.5", textStyle: "note", color: "text.subtle" });
-const countLinkStyle = css({ whiteSpace: "nowrap", color: "inherit" });
-const countMinorStyle = css({ textStyle: "note", whiteSpace: "nowrap", color: "inherit" });
-const savedMarkStyle = css({ color: "primary.800" });
+const countLinkStyle = css({ whiteSpace: "nowrap", color: "[inherit]" });
+const countMinorStyle = css({ textStyle: "note", whiteSpace: "nowrap", color: "[inherit]" });
+const savedMarkStyle = css({ color: "text.brand" });
 
 type MaterialHeroProps = {
   material: MaterialDetail;

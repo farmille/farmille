@@ -6,7 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { css } from "../../../../../styled-system/css";
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   display: "flex",
   flexDirection: "column",
   bg: "surface.page",
@@ -14,7 +14,7 @@ const shell = css({
 
 const body = css({
   flex: "1",
-  w: "100%",
+  w: "full",
   maxW: "content.form",
   mx: "auto",
   px: "4",
@@ -35,7 +35,7 @@ export default function CompareNotFound() {
             href="/me/saved"
             className={css({
               mt: "2",
-              color: "primary.700",
+              color: "text.brand",
               textStyle: "body",
               fontWeight: "bold",
               textDecoration: "none",

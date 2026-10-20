@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 };
 
 const linkStyle = css({
-  color: "primary.700",
+  color: "text.brand",
   fontWeight: "bold",
   textDecoration: "none",
   _hover: { textDecoration: "underline" },
@@ -45,8 +45,8 @@ const mediaGridStyle = css({
 });
 
 const mediaStyle = css({
-  w: "100%",
-  maxH: "360px",
+  w: "full",
+  maxH: "[360px]",
   objectFit: "contain",
   bg: "surface.panel",
   borderRadius: "card",

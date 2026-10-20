@@ -6,7 +6,7 @@ import { css } from "../../../styled-system/css";
 
 export default function SearchLoading() {
   return (
-    <div className={css({ minH: "100dvh", bg: "surface.page" })}>
+    <div className={css({ minH: "dvh", bg: "surface.page" })}>
       <AppBar chrome="public" active="search" title="BS資材を探す" backHref="/" />
       <main
         className={css({

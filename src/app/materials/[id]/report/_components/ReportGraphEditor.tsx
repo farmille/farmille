@@ -96,10 +96,15 @@ const slotBox = cva({
     },
   },
 });
-const ring = css({ fill: "none", stroke: "accent.star", strokeWidth: "3" });
-const label = css({ fill: "text.subtle", fontSize: "xs", fontWeight: "semibold", opacity: "0.85" });
+const ring = css({ fill: "[none]", stroke: "accent.star", strokeWidth: "3" });
+const label = css({
+  fill: "text.subtle",
+  fontSize: "xs",
+  fontWeight: "semibold",
+  opacity: "[0.85]",
+});
 const ghost = cva({
-  base: { fill: "text.subtle", fontWeight: "semibold", opacity: "0.8" },
+  base: { fill: "text.subtle", fontWeight: "semibold", opacity: "[0.8]" },
   variants: { size: { xs: { fontSize: "xs" }, sm: { fontSize: "sm" }, md: { fontSize: "md" } } },
 });
 const pen = css({ fill: "primary.800", fontSize: "sm", fontWeight: "extrabold" });
@@ -163,6 +168,7 @@ const removeGraph = css({
 const chart = css({
   display: "block",
   w: "full",
+  minW: "var(--chart-min-width)",
   h: "auto",
   overflow: "visible",
   fill: "text.muted",
@@ -171,7 +177,7 @@ const chart = css({
 const linkButton = css({
   borderWidth: "0",
   bg: "transparent",
-  color: "primary.800",
+  color: "text.brand",
   fontSize: "sm",
   fontWeight: "bold",
   cursor: "pointer",
@@ -301,7 +307,7 @@ export function ReportGraphEditor({
         <svg
           className={chart}
           viewBox={`0 0 ${W} ${H}`}
-          style={{ minWidth: mobile ? W : 0 }}
+          style={{ "--chart-min-width": mobile ? `${W}px` : "0px" }}
           role="group"
           aria-label={`グラフ${graphNumber}の入力`}
         >
@@ -334,7 +340,7 @@ export function ReportGraphEditor({
                 </text>
                 <text
                   className={css({ fontWeight: "extrabold" })}
-                  style={{ fontSize: titleSize }}
+                  fontSize={titleSize}
                   x="80"
                   y="23"
                 >
@@ -350,7 +356,7 @@ export function ReportGraphEditor({
                 <text x="14" y="22" className={label}>
                   グラフの題
                 </text>
-                <text style={{ fontSize: titleFont }} x="80" y="22" className={ghost()}>
+                <text fontSize={titleFont} x="80" y="22" className={ghost()}>
                   {titleExample}
                 </text>
                 <text x={sw - 2} y="22" textAnchor="end" className={pen}>
@@ -375,7 +381,7 @@ export function ReportGraphEditor({
                 </text>
                 <text
                   className={css({ fontWeight: "bold" })}
-                  style={{ fontSize: axisSize }}
+                  fontSize={axisSize}
                   x="80"
                   y={y0 + 19}
                 >

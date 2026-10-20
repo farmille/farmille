@@ -40,7 +40,7 @@ export const helpfulPillRecipe = cva({
     voted: {
       true: {
         bg: "primary.soft",
-        color: "primary.800",
+        color: "text.brandOnSoft",
         borderColor: "primary.600",
       },
       false: {},

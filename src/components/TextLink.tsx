@@ -7,21 +7,21 @@ const textLinkRecipe = cva({
   variants: {
     variant: {
       inline: {
-        color: "primary.700",
+        color: "text.brand",
         fontWeight: "bold",
         textDecoration: "underline",
         textUnderlineOffset: "2px",
       },
-      /** primary.soft の面に置く本文リンク。700 では AA に届かないため一段濃くする。 */
+      /** primary.soft の面に置く本文リンク。 */
       inlineOnSoft: {
-        color: "primary.800",
+        color: "text.brandOnSoft",
         fontWeight: "bold",
         textDecoration: "underline",
         textUnderlineOffset: "2px",
       },
       plain: {
         display: "inline-block",
-        color: "primary.700",
+        color: "text.brand",
         fontSize: "sm",
         textDecoration: "none",
         _hover: { textDecoration: "underline" },
@@ -37,7 +37,7 @@ const textLinkRecipe = cva({
           outlineWidth: "2px",
           outlineStyle: "solid",
           outlineColor: "primary.700",
-          outlineOffset: "2px",
+          outlineOffset: "0.5",
         },
       },
     },

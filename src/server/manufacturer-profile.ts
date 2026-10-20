@@ -1,3 +1,6 @@
+import type * as v from "valibot";
+
+import type { SaveManufacturerProfileSchema } from "@/lib/manufacturer-profile";
 import { createServerSupabase } from "@/server/supabase";
 
 export async function getManufacturerProfileEditor(sellerId: string) {
@@ -30,4 +33,22 @@ export async function getManufacturerProfileVersion(id: string) {
     .maybeSingle();
   if (error) throw new Error("保存したメーカープロフィールを取得できませんでした。");
   return data;
+}
+
+export async function saveManufacturerProfileVersion(
+  input: v.InferOutput<typeof SaveManufacturerProfileSchema>,
+) {
+  const db = await createServerSupabase();
+  return db.rpc("save_manufacturer_profile_version", {
+    p_profile_text: input.content.profileText,
+    p_logo_url: input.content.logoUrl,
+    p_website_url: input.content.websiteUrl,
+    p_submit: input.submit,
+    p_expected_version: input.expectedVersion ?? undefined,
+  });
+}
+
+export async function withdrawManufacturerProfileVersion(versionId: string) {
+  const db = await createServerSupabase();
+  return db.rpc("withdraw_manufacturer_profile_version", { p_version_id: versionId });
 }

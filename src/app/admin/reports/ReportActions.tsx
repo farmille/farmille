@@ -14,7 +14,7 @@ const wrapStyle = css({
   display: "flex",
   flexDirection: "column",
   gap: "2",
-  minW: "220px",
+  minW: "[220px]",
 });
 
 /** 1件の通報に対する解決・却下操作。 */

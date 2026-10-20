@@ -40,7 +40,7 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
           overflow: "hidden",
           borderRadius: "media",
           bg: "primary.100",
-          color: "primary.800",
+          color: "text.brandOnSoft",
           fontSize: "xl",
           fontWeight: "extrabold",
           "& img": { w: "full", h: "full", objectFit: "cover" },
@@ -74,7 +74,7 @@ export function SellerHeader({ seller }: SellerHeaderProps) {
           >
             {websiteUrl === null ? null : (
               <a
-                className={cx(linkRowStyle, css({ color: "primary.700", textDecoration: "none" }))}
+                className={cx(linkRowStyle, css({ color: "text.brand", textDecoration: "none" }))}
                 href={websiteUrl}
                 target="_blank"
                 rel="noreferrer"

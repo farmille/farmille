@@ -42,7 +42,7 @@ const groupSummaryStyle = css({
   fontSize: "md",
   fontWeight: "bold",
   cursor: "pointer",
-  "&::marker": { color: "primary.700" },
+  "&::marker": { color: "text.brand" },
 });
 
 function MasterGroup({

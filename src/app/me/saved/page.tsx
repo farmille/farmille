@@ -11,7 +11,7 @@ import { resolveMeAccess } from "../_lib/access";
 import { SavedList } from "./SavedList";
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   display: "flex",
   flexDirection: "column",
   bg: "surface.page",
@@ -21,7 +21,7 @@ const shell = css({
 
 const body = css({
   flex: "1",
-  w: "100%",
+  w: "full",
   maxW: "content.medium",
   mx: "auto",
   px: "4",

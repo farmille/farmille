@@ -24,6 +24,7 @@ const glyphs = {
   check_box: { ligature: "check_box", face: "outlined" },
   arrow_forward: { ligature: "arrow_forward", face: "filled" },
   arrow_back: { ligature: "arrow_back", face: "filled" },
+  arrow_downward: { ligature: "arrow_downward", face: "filled" },
   north_east: { ligature: "north_east", face: "filled" },
   close: { ligature: "close", face: "filled" },
   star: { ligature: "star_border", face: "filled" },
@@ -34,6 +35,7 @@ const glyphs = {
   location_on: { ligature: "location_on", face: "outlined" },
   eco: { ligature: "eco", face: "outlined" },
   warning: { ligature: "warning", face: "filled" },
+  edit: { ligature: "edit", face: "outlined" },
 } as const;
 
 // 一辺 = フォントサイズ。フォント読み込み前に ligature の文字列で幅が広がらないよう箱を固定して切り取る。
@@ -43,8 +45,8 @@ const iconRecipe = cva({
     flexShrink: "0",
     verticalAlign: "middle",
     overflow: "hidden",
-    lineHeight: "1",
-    letterSpacing: "normal",
+    lineHeight: "none",
+    letterSpacing: "[normal]",
     textTransform: "none",
     whiteSpace: "nowrap",
     direction: "ltr",
@@ -58,13 +60,13 @@ const iconRecipe = cva({
   },
   variants: {
     size: {
-      "2xs": { width: "icon.2xs", height: "icon.2xs", fontSize: "token(sizes.icon.2xs)" },
-      xs: { width: "icon.xs", height: "icon.xs", fontSize: "token(sizes.icon.xs)" },
-      sm: { width: "icon.sm", height: "icon.sm", fontSize: "token(sizes.icon.sm)" },
-      md: { width: "icon.md", height: "icon.md", fontSize: "token(sizes.icon.md)" },
-      lg: { width: "icon.lg", height: "icon.lg", fontSize: "token(sizes.icon.lg)" },
-      xl: { width: "icon.xl", height: "icon.xl", fontSize: "token(sizes.icon.xl)" },
-      "2xl": { width: "icon.2xl", height: "icon.2xl", fontSize: "token(sizes.icon.2xl)" },
+      "2xs": { width: "icon.2xs", height: "icon.2xs", fontSize: "[token(sizes.icon.2xs)]" },
+      xs: { width: "icon.xs", height: "icon.xs", fontSize: "[token(sizes.icon.xs)]" },
+      sm: { width: "icon.sm", height: "icon.sm", fontSize: "[token(sizes.icon.sm)]" },
+      md: { width: "icon.md", height: "icon.md", fontSize: "[token(sizes.icon.md)]" },
+      lg: { width: "icon.lg", height: "icon.lg", fontSize: "[token(sizes.icon.lg)]" },
+      xl: { width: "icon.xl", height: "icon.xl", fontSize: "[token(sizes.icon.xl)]" },
+      "2xl": { width: "icon.2xl", height: "icon.2xl", fontSize: "[token(sizes.icon.2xl)]" },
     },
     face: {
       filled: { fontFamily: "materialIcons" },

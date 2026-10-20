@@ -32,7 +32,7 @@ export const Entrance: Story = {
       </p>
       <p
         className={cx(
-          css({ mt: "6", fontSize: "sm", color: "primary.700" }),
+          css({ mt: "6", fontSize: "sm", color: "text.brand" }),
           completionStepRecipe({ step: 3 }),
         )}
       >

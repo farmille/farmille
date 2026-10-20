@@ -39,21 +39,21 @@ export function MaterialRefCard({
           p: "3",
           bg: "primary.100",
           textDecoration: "none",
-          color: "inherit",
+          color: "[inherit]",
         }),
         className,
       )}
     >
       <div
         className={css({
-          w: "44px",
+          w: "[44px]",
           aspectRatio: "image.square",
           borderRadius: "media",
           bg: "primary.100",
           display: "grid",
           placeItems: "center",
           flexShrink: "0",
-          color: "primary.800",
+          color: "text.brandOnSoft",
         })}
       >
         <Icon name="image" size="md" />

@@ -28,11 +28,11 @@ const createRowStyle = css({
   pb: "3",
 });
 
-const nameInputStyle = css({ flex: "1", minW: "140px", maxW: "260px" });
-const aliasInputStyle = css({ flex: "1", minW: "160px", maxW: "300px" });
-const sortInputStyle = css({ w: "80px", flexShrink: "0" });
-const categorySelectStyle = css({ w: "120px" });
-const groupSelectStyle = css({ w: "160px" });
+const nameInputStyle = css({ flex: "1", minW: "[140px]", maxW: "[260px]" });
+const aliasInputStyle = css({ flex: "1", minW: "[160px]", maxW: "[300px]" });
+const sortInputStyle = css({ w: "[80px]", flexShrink: "0" });
+const categorySelectStyle = css({ w: "[120px]" });
+const groupSelectStyle = css({ w: "[160px]" });
 
 const usageStyle = css({
   fontSize: "sm",

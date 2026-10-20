@@ -29,13 +29,13 @@ const coverStyle = css({
   "& img": { w: "full", h: "full", objectFit: "cover", display: "block" },
 });
 
-const placeholderIconStyle = css({ color: "primary.700" });
+const placeholderIconStyle = css({ color: "text.brandOnSoft" });
 
 const titleStyle = css({
   display: "block",
   textStyle: "body",
   fontWeight: "bold",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
 });
 

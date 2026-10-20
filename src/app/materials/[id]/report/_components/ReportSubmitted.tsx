@@ -5,7 +5,7 @@ import { SuccessMark } from "@/components/SuccessMark";
 import type { SubmittedUsageReport } from "@/server/queries/usage-report-form";
 
 const shell = css({
-  w: "100%",
+  w: "full",
   maxW: "content.form",
   mx: "auto",
   px: "4",
@@ -48,7 +48,7 @@ const status = css({
   flexShrink: "0",
   borderRadius: "pill",
   bg: "primary.soft",
-  color: "primary.800",
+  color: "text.brandOnSoft",
   px: "2.5",
   py: "1",
   fontSize: "xs",

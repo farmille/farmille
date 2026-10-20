@@ -29,7 +29,7 @@ const badgeRecipe = cva({
         px: "2.5",
         py: "0.5",
         bg: "primary.soft",
-        color: "primary.800",
+        color: "text.brandOnSoft",
         borderColor: "transparent",
       },
       published: {
@@ -37,7 +37,7 @@ const badgeRecipe = cva({
         px: "2",
         py: "0.5",
         bg: "primary.soft",
-        color: "primary.800",
+        color: "text.brandOnSoft",
         borderColor: "transparent",
       },
       draft: {

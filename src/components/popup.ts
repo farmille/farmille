@@ -26,7 +26,7 @@ export const popupRecipe = cva({
   variants: {
     motion: {
       scale: {
-        transitionProperty: "opacity, transform",
+        transitionProperty: "[opacity, transform]",
         transitionDuration: "fast",
         transitionTimingFunction: "out",
         _startingStyle: {
@@ -39,7 +39,7 @@ export const popupRecipe = cva({
           transform: "scale(0.95)",
           _motionReduce: { transform: "none" },
         },
-        "&[data-instant]": { transitionDuration: "0s" },
+        "&[data-instant]": { transitionDuration: "[0s]" },
       },
       none: {},
     },
@@ -60,7 +60,7 @@ export const optionRecipe = cva({
     cursor: "default",
     outline: "none",
     userSelect: "none",
-    _highlighted: { bg: "primary.soft", color: "primary.800" },
+    _highlighted: { bg: "primary.soft", color: "text.brandOnSoft" },
     _selected: { fontWeight: "bold" },
     _disabled: { opacity: "disabled", cursor: "not-allowed" },
   },

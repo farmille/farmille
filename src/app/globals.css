@@ -19,27 +19,28 @@
   unicode-range: U+0030-0039, U+0041-004D, U+004F-005A, U+0061-007A;
 }
 
-body {
-  font-family: var(--fonts-sans);
-  letter-spacing: var(--letter-spacings-body);
-  text-autospace: normal;
-  background: var(--colors-surface-page);
-  color: var(--colors-text-default);
-  -webkit-font-smoothing: antialiased;
-}
-
-/* 通常の見出しはりょうゴシック B。hero は textStyle の書体を使う。 */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--fonts-ryo-gothic);
-  font-weight: var(--font-weights-bold);
-}
-
+/* 要素の既定はレイヤーの中に置き、css() の指定が要素の既定より勝つようにする。 */
 @layer base {
+  body {
+    font-family: var(--fonts-sans);
+    letter-spacing: var(--letter-spacings-body);
+    text-autospace: normal;
+    background: var(--colors-surface-page);
+    color: var(--colors-text-default);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 通常の見出しはりょうゴシック B。css() で書体と太さを変えられる。 */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--fonts-ryo-gothic);
+    font-weight: var(--font-weights-bold);
+  }
+
   :root {
     --corner-superellipse: 1.4;
   }

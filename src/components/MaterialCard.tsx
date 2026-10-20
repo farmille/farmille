@@ -10,7 +10,7 @@ const scrollCard = cva({
     scrollSnapAlign: "start",
     overflow: "hidden",
     textDecoration: "none",
-    color: "inherit",
+    color: "[inherit]",
     display: "block",
     flexShrink: "0",
     w: "card.materialMobile",
@@ -32,7 +32,7 @@ const listCard = cva({
     // 本文が複数行でもサムネをカード上端に置く
     alignItems: "start",
     textDecoration: "none",
-    color: "inherit",
+    color: "[inherit]",
   },
 });
 
@@ -43,11 +43,11 @@ const imgBox = css({
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
-  color: "primary.700",
+  color: "text.brand",
 });
 
 const listImg = css({
-  w: "62px",
+  w: "[62px]",
   aspectRatio: "image.square",
   borderRadius: "media",
   bg: "surface.card",
@@ -58,7 +58,7 @@ const listImg = css({
   borderStyle: "solid",
   borderColor: "border.default",
   overflow: "hidden",
-  color: "primary.700",
+  color: "text.brand",
 });
 
 /** 通常画像と読み込み失敗時のプレースホルダーを同じグリッドセルに重ねる。 */
@@ -105,8 +105,8 @@ function MaterialImage({
             imageLayer,
             css({
               display: "block",
-              w: "100%",
-              h: "100%",
+              w: "full",
+              h: "full",
               objectFit: "contain",
             }),
           )}
@@ -201,7 +201,7 @@ export function MaterialCard({
                     px: "2",
                     py: "1",
                     bg: "primary.soft",
-                    color: "primary.800",
+                    color: "text.brandOnSoft",
                     borderRadius: "pill",
                   })}
                 >
@@ -237,8 +237,8 @@ export function MaterialCard({
               imageLayer,
               css({
                 display: "block",
-                w: "100%",
-                h: "100%",
+                w: "full",
+                h: "full",
                 objectFit: "contain",
               }),
             )}
@@ -318,7 +318,7 @@ export function MaterialCard({
                   px: "2",
                   py: "1",
                   bg: "primary.soft",
-                  color: "primary.800",
+                  color: "text.brandOnSoft",
                   borderRadius: "pill",
                 })}
               >
@@ -332,7 +332,7 @@ export function MaterialCard({
             {evidenceBadges.map((label) => (
               <span
                 key={label}
-                className={css({ fontSize: "xs", fontWeight: "bold", color: "primary.700" })}
+                className={css({ fontSize: "xs", fontWeight: "bold", color: "text.brand" })}
               >
                 {label}
               </span>

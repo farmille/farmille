@@ -46,7 +46,7 @@ const chipRecipe = cva({
     category: {
       crop: {
         bg: "primary.200",
-        color: "primary.800",
+        color: "text.brandOnSoft",
         borderColor: "primary.600/30",
       },
       concern: {
@@ -106,16 +106,16 @@ const chipRecipe = cva({
 
 const catMini = css({
   fontSize: "2xs",
-  opacity: "0.65",
+  opacity: "label",
   fontWeight: "bold",
 });
 
 const removeBtn = css({
   borderWidth: "0",
   bg: "primary.600/18",
-  color: "primary.700",
-  w: "17px",
-  h: "17px",
+  color: "text.brand",
+  w: "[17px]",
+  h: "[17px]",
   borderRadius: "pill",
   display: "grid",
   placeItems: "center",

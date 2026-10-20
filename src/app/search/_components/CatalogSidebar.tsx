@@ -39,7 +39,7 @@ const chipRecipe = cva({
         color: "text.inverse",
         fontWeight: "bold",
       },
-      false: { bg: "surface.card", borderColor: "border.strong", color: "inherit" },
+      false: { bg: "surface.card", borderColor: "border.strong", color: "[inherit]" },
     },
   },
 });
@@ -58,8 +58,8 @@ const genreRowRecipe = cva({
   },
   variants: {
     active: {
-      true: { bg: "primary.100", color: "primary.800" },
-      false: { color: "inherit", _hover: { bg: "primary.soft" } },
+      true: { bg: "primary.100", color: "text.brandOnSoft" },
+      false: { color: "[inherit]", _hover: { bg: "primary.soft" } },
     },
   },
 });
@@ -151,12 +151,12 @@ export function CatalogSidebar({
         <span
           className={
             active
-              ? css({ flex: "none", color: "primary.800", fontSize: "xs", fontWeight: "bold" })
+              ? css({ flex: "none", color: "text.brandOnSoft", fontSize: "xs", fontWeight: "bold" })
               : css({
                   flex: "none",
                   color: "text.subtle",
                   fontWeight: "bold",
-                  _groupHover: { color: "primary.800" },
+                  _groupHover: { color: "text.brandOnSoft" },
                 })
           }
           aria-hidden="true"
@@ -258,7 +258,7 @@ export function CatalogSidebar({
           borderColor: "border.default",
           borderRadius: "button",
           overflow: "hidden",
-          pc: { maxH: "calc(100vh - token(spacing.24))", overflowY: "auto" },
+          pc: { maxH: "[calc(100vh - token(spacing.24))]", overflowY: "auto" },
         })}
       >
         {conditionCount > 0 ? (
@@ -319,7 +319,7 @@ export function CatalogSidebar({
                 <span
                   className={css({
                     display: "inline-block",
-                    color: "primary.700",
+                    color: "text.brand",
                     fontSize: "xs",
                     "details[open] > summary &": { transform: "rotate(90deg)" },
                   })}
@@ -388,7 +388,7 @@ export function CatalogSidebar({
                 >
                   <summary className={cropSummaryStyle}>
                     <span
-                      className={css({ color: "primary.700", fontSize: "xs" })}
+                      className={css({ color: "text.brand", fontSize: "xs" })}
                       aria-hidden="true"
                     >
                       ▸

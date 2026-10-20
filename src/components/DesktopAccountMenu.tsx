@@ -9,8 +9,8 @@ import { css } from "../../styled-system/css";
 import { popupPositionerStyle, popupRecipe } from "./popup";
 
 const trigger = css({
-  w: "{spacing.10}",
-  h: "{spacing.10}",
+  w: "10",
+  h: "10",
   display: "grid",
   placeItems: "center",
   flexShrink: "0",
@@ -20,7 +20,7 @@ const trigger = css({
   borderStyle: "solid",
   borderColor: "border.strong",
   bg: "surface.card",
-  color: "primary.700",
+  color: "text.brand",
   cursor: "pointer",
   _hover: { bg: "primary.soft" },
   "&[aria-expanded=true]": { bg: "primary.soft" },
@@ -28,7 +28,7 @@ const trigger = css({
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.600",
-    outlineOffset: "2px",
+    outlineOffset: "0.5",
   },
 });
 
@@ -41,7 +41,7 @@ const panel = css(popupRecipe.raw({ motion: "scale" }), {
 const item = css({
   display: "flex",
   alignItems: "center",
-  minH: "{spacing.10}",
+  minH: "10",
   px: "3",
   borderRadius: "button",
   borderWidth: "0",
@@ -55,14 +55,14 @@ const item = css({
   textDecoration: "none",
   whiteSpace: "nowrap",
   cursor: "pointer",
-  _highlighted: { bg: "primary.soft", color: "primary.800" },
+  _highlighted: { bg: "primary.soft", color: "text.brandOnSoft" },
   _focusVisible: {
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.600",
-    outlineOffset: "2px",
+    outlineOffset: "0.5",
   },
-  "&[aria-current=page]": { bg: "primary.soft", color: "primary.800" },
+  "&[aria-current=page]": { bg: "primary.soft", color: "text.brandOnSoft" },
 });
 
 type AccountMenuLink = {

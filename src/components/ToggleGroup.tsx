@@ -11,7 +11,7 @@ const focusRing = {
   outlineWidth: "2px",
   outlineStyle: "solid",
   outlineColor: "primary.700",
-  outlineOffset: "2px",
+  outlineOffset: "0.5",
 } as const;
 
 const toggleGroupRecipe = sva({
@@ -23,7 +23,7 @@ const toggleGroupRecipe = sva({
         group: choiceGroupRecipe.raw({ variant: "chips" }),
         item: {
           ...choiceRecipe.raw({ look: "chip" }),
-          _pressed: { borderColor: "primary.600", bg: "primary.soft", color: "primary.800" },
+          _pressed: { borderColor: "primary.600", bg: "primary.soft", color: "text.brandOnSoft" },
         },
       },
       timeline: {
@@ -78,7 +78,7 @@ const toggleGroupRecipe = sva({
             content: '""',
             position: "absolute",
             top: "2",
-            left: "50%",
+            left: "[50%]",
             w: "4",
             h: "4",
             ml: "-2",
@@ -90,7 +90,7 @@ const toggleGroupRecipe = sva({
           },
           _hover: { _before: { borderColor: "primary.700" } },
           _pressed: {
-            color: "primary.800",
+            color: "text.brand",
             fontWeight: "extrabold",
             _before: { bg: "primary.700", borderColor: "primary.700" },
           },

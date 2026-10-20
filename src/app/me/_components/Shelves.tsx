@@ -21,7 +21,7 @@ const linkRow = css({
   gap: "2",
   px: "3.5",
   py: "3",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
   borderBottomWidth: "1px",
   borderBottomStyle: "solid",
@@ -42,10 +42,10 @@ const postList = cva({
         pt: "0.5",
         pb: "1.5",
         overflowX: "auto",
-        scrollSnapType: "x mandatory",
+        scrollSnapType: "[x mandatory]",
         scrollbarWidth: "none",
         "&::-webkit-scrollbar": { display: "none" },
-        "& > *": { flex: "0 0 74%", scrollSnapAlign: "start" },
+        "& > *": { flex: "[0 0 74%]", scrollSnapAlign: "start" },
         tab: {
           display: "grid",
           gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
@@ -69,7 +69,7 @@ const postStatus = css({
   gap: "2",
   mb: "1.5",
   fontSize: "sm",
-  "& a": { color: "primary.800", fontWeight: "bold", textDecoration: "none" },
+  "& a": { color: "text.brand", fontWeight: "bold", textDecoration: "none" },
 });
 
 const postTitle = css({ textStyle: "body", fontWeight: "bold" });

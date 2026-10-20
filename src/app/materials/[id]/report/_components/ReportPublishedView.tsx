@@ -17,7 +17,7 @@ import {
 } from "./ReportArticleParts";
 
 const wrap = css({ maxW: "content.form", mx: "auto", px: "4", pt: "3.5", pb: "16" });
-const title = css({ fontSize: "2xl", lineHeight: "snug", fontWeight: "extrabold", m: "0" });
+const title = css({ fontSize: "2xl", lineHeight: "snug", m: "0" });
 const subtle = css({ color: "text.subtle", textStyle: "note" });
 const materialRef = css({
   mt: "3.5",
@@ -37,7 +37,6 @@ const sectionHeadingStyle = css({
   borderLeftWidth: "3px",
   borderLeftStyle: "solid",
   borderLeftColor: "primary.700",
-  fontWeight: "extrabold",
 });
 const paragraph = css({
   textStyle: "prose",
@@ -213,9 +212,7 @@ export function ReportPublishedView({
             );
           })}
           <div className={compliance}>
-            <span className={css({ color: "primary.700", flex: "0 0 auto", display: "flex" })}>
-              ✓
-            </span>
+            <span className={css({ color: "text.brand", flex: "none", display: "flex" })}>✓</span>
             この実証詳細レポートは、投稿した生産者個人の圃場・条件での体験と見解です。ほかの圃場・作物・気象条件で同じ結果が得られることや、薬害等が生じないことを保証するものではありません。
           </div>
         </div>

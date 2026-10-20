@@ -57,7 +57,7 @@ const groupStyle = css({
   display: "flex",
   alignItems: "center",
   gap: "2",
-  w: "100%",
+  w: "full",
   px: "3",
   py: "1",
   bg: "surface.card",
@@ -84,7 +84,7 @@ const inputStyle = css({
   bg: "transparent",
   borderWidth: "0",
   outline: "none",
-  color: "inherit",
+  color: "[inherit]",
   fontFamily: "sans",
   fontSize: "md",
   _placeholder: { color: "text.subtle" },
@@ -104,7 +104,7 @@ const chipsStyle = css({
 
 const iconStyle = css({ display: "flex", flexShrink: "0", color: "text.subtle" });
 
-const checkStyle = css({ display: "flex", flexShrink: "0", color: "primary.700" });
+const checkStyle = css({ display: "flex", flexShrink: "0", color: "text.brand" });
 
 type ComboboxCommonProps = {
   options: readonly Option[];

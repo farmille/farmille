@@ -20,7 +20,7 @@ export const materialPageStack = css({
   "& > section": { pb: "5", borderBottomWidth: "1px", borderBottomColor: "border.default" },
   "& a": { overflowWrap: "anywhere" },
   // 色は原稿の素の要素にだけ付け、カードやリンク部品が自分で決めた色を上書きしない
-  "& h2:not([class]), & a:not([class])": { color: "primary.700" },
+  "& h2:not([class]), & a:not([class])": { color: "text.brand" },
 });
 export const materialPageText = css({
   whiteSpace: "pre-wrap",

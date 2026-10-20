@@ -110,7 +110,13 @@ const bar = css({
   "& > span:first-child": { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
   "& > b": { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" },
 });
-const barFill = css({ display: "block", h: "4", borderRadius: "bar", bg: "currentColor" });
+const barFill = css({
+  display: "block",
+  w: "var(--bar-width)",
+  h: "4",
+  borderRadius: "bar",
+  bg: "currentColor",
+});
 
 export function ReportBars({
   graph,
@@ -137,7 +143,7 @@ export function ReportBars({
           <span>
             <i
               className={cx(barFill, reportPlotColor(index))}
-              style={{ width: `${Math.max(4, (cell.value / max) * 100)}%` }}
+              style={{ "--bar-width": `${Math.max(4, (cell.value / max) * 100)}%` }}
             />
           </span>
           <b>{cell.label}</b>

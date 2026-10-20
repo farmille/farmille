@@ -28,7 +28,7 @@ const authorLinkStyle = css({
   display: "inline-flex",
   alignItems: "center",
   gap: "2",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
 });
 const nameStyle = css({ textStyle: "body", fontWeight: "bold", overflowWrap: "anywhere" });
@@ -38,7 +38,7 @@ const detailsStyle = css({
   py: "0.5",
   fontSize: "2xs",
   fontWeight: "bold",
-  color: "primary.800",
+  color: "text.brandOnSoft",
   bg: "primary.100",
   borderRadius: "pill",
   overflowWrap: "anywhere",

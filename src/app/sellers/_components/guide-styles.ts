@@ -35,7 +35,7 @@ export const guideCardStyle = css(guideCard);
 export const guideBoxStyle = css(guideCard, { mt: "3", py: "4", px: "4.5" });
 
 export const guideLinkStyle = css({
-  color: "primary.800",
+  color: "text.brand",
   fontWeight: "bold",
   textDecoration: "underline",
   textUnderlineOffset: "3px",
@@ -62,7 +62,7 @@ export const stepCardRecipe = cva({
   defaultVariants: { actor: "maker" },
 });
 
-export const stepTitleStyle = css({ mt: "2", textStyle: "title", fontWeight: "extrabold" });
+export const stepTitleStyle = css({ mt: "2", textStyle: "title" });
 
 export const stepLabelRecipe = cva({
   base: {
@@ -104,7 +104,7 @@ export const stepLinkStyle = css({
   mr: "3",
   fontSize: "md",
   fontWeight: "bold",
-  color: "primary.800",
+  color: "text.brand",
   textDecoration: "underline",
   textUnderlineOffset: "3px",
 });
@@ -113,6 +113,5 @@ export const questionStyle = css({
   display: "flex",
   gap: "2.5",
   textStyle: "title",
-  fontWeight: "extrabold",
-  _before: { content: '"Q"', color: "primary.700", flexShrink: "0" },
+  _before: { content: '"Q"', color: "text.brand", flexShrink: "0" },
 });

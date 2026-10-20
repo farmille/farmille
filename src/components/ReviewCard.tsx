@@ -19,7 +19,7 @@ const cropChip = css({
   py: "0.5",
   borderRadius: "pill",
   bg: "primary.200",
-  color: "primary.800",
+  color: "text.brandOnSoft",
   fontWeight: "semibold",
   whiteSpace: "nowrap",
 });
@@ -108,7 +108,7 @@ export function ReviewCard({
               display: "inline-flex",
               alignItems: "center",
               gap: "2",
-              color: "inherit",
+              color: "[inherit]",
               textDecoration: "none",
             })}
           >
@@ -154,7 +154,7 @@ export function ReviewCard({
                   height={72}
                   unoptimized
                   className={css({
-                    w: "72px",
+                    w: "[72px]",
                     aspectRatio: "image.square",
                     display: "block",
                     borderRadius: "media",
@@ -167,14 +167,14 @@ export function ReviewCard({
                 <div
                   key={index}
                   className={css({
-                    w: "72px",
+                    w: "[72px]",
                     aspectRatio: "image.square",
                     borderRadius: "media",
                     bg: "primary.100",
                     display: "grid",
                     placeItems: "center",
                     flexShrink: "0",
-                    color: "primary.800",
+                    color: "text.brandOnSoft",
                   })}
                 >
                   <Icon name="image" size="md" />
@@ -192,7 +192,7 @@ export function ReviewCard({
           mt: "2.5",
         })}
       >
-        <div className={css({ w: "100%" })}>
+        <div className={css({ w: "full" })}>
           {actions ?? (
             <PostActions
               id={reviewId}

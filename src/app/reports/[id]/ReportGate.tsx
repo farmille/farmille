@@ -23,7 +23,7 @@ export function ReportGate({ reportPath }: { reportPath: string }) {
     >
       <div
         className={css({
-          filter: "blur({blurs.reportGate})",
+          filter: "[blur({blurs.reportGate})]",
           pointerEvents: "none",
           userSelect: "none",
         })}
@@ -62,9 +62,7 @@ export function ReportGate({ reportPath }: { reportPath: string }) {
             textAlign: "center",
           })}
         >
-          <h2 className={css({ textStyle: "title", fontWeight: "extrabold" })}>
-            続きは無料会員登録で読めます（1分）
-          </h2>
+          <h2 className={css({ textStyle: "title" })}>続きは無料会員登録で読めます（1分）</h2>
           <p className={css({ mt: "1", textStyle: "supporting", color: "text.subtle" })}>
             使用結果のグラフ・比較した区の詳細が見られます
           </p>
@@ -78,7 +76,7 @@ export function ReportGate({ reportPath }: { reportPath: string }) {
             <Link
               className={css({
                 fontSize: "sm",
-                color: "primary.700",
+                color: "text.brand",
                 textDecoration: "none",
                 whiteSpace: "nowrap",
               })}

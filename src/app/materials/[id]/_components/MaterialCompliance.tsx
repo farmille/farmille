@@ -24,7 +24,7 @@ const noticeRecipe = cva({
     },
   },
 });
-const checkStyle = css({ display: "flex", flex: "none", color: "primary.700" });
+const checkStyle = css({ display: "flex", flex: "none", color: "text.brand" });
 const followUpStyle = css({ mt: "1.5" });
 const disclaimerStyle = css({
   mt: "2",
@@ -36,12 +36,12 @@ const listStyle = css({ listStyle: "none" });
 // 製品情報の直後に寄せる（main の gap 8 から詰めて、間を 3 にする）
 const pointerStyle = css({ mt: "-5", textStyle: "supporting", color: "text.subtle" });
 const noticeLinkStyle = css({
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "underline",
   whiteSpace: "nowrap",
 });
 const textLinkStyle = css({
-  color: "primary.800",
+  color: "text.brand",
   fontWeight: "semibold",
   textDecoration: "none",
 });

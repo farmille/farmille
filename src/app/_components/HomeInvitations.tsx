@@ -11,7 +11,7 @@ const title = css({
   textWrap: "balance",
 });
 const copy = css({ textStyle: "supporting", color: "text.muted" });
-const textLink = css({ color: "primary.700", fontSize: "md", textDecoration: "none" });
+const textLink = css({ color: "text.brand", fontSize: "md", textDecoration: "none" });
 
 export function HomeInvitations({ showSignup }: { showSignup: boolean }) {
   return (

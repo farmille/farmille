@@ -21,7 +21,7 @@ const timelineScrollStyle = css({
 const timelineStyle = css({
   position: "relative",
   display: "flex",
-  minW: "min-content",
+  minW: "[min-content]",
   m: "0",
   pt: "1.5",
   px: "1",
@@ -41,7 +41,7 @@ const stageStyle = css({ position: "relative", flex: "1", minW: "20", textAlign:
 const dotRecipe = cva({
   base: {
     position: "relative",
-    zIndex: "1",
+    zIndex: "local.1",
     display: "block",
     w: "3",
     h: "3",
@@ -65,7 +65,7 @@ const labelRecipe = cva({
   },
   variants: {
     on: {
-      true: { color: "primary.800", fontWeight: "bold" },
+      true: { color: "text.brand", fontWeight: "bold" },
       false: { color: "text.subtle" },
     },
   },

@@ -110,7 +110,7 @@ export function SectionHeading({
           href={href}
           className={css({
             fontSize: "sm",
-            color: "primary.700",
+            color: "text.brand",
             textDecoration: "none",
             whiteSpace: "nowrap",
           })}

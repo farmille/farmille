@@ -48,7 +48,7 @@ const OWNER_GUIDES = [
   { id: "lpGuideExisting", title: "掲載されている自社資材の情報を確認・編集したい" },
 ] as const;
 
-const highlightStyle = css({ color: "primary.800", fontWeight: "extrabold" });
+const highlightStyle = css({ color: "text.brand", fontWeight: "extrabold" });
 
 const entryLinkRecipe = cva({
   base: {
@@ -69,7 +69,7 @@ const entryLinkRecipe = cva({
       primary: { bg: "primary.700", color: "text.inverse" },
       outline: {
         bg: "surface.card",
-        color: "primary.800",
+        color: "text.brand",
         borderWidth: "1.5px",
         borderStyle: "solid",
         borderColor: "primary.700",
@@ -81,11 +81,17 @@ const entryLinkRecipe = cva({
 const timelineClip =
   "polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%)";
 
+// 高さ32px・矢じり10px の外形から、斜めの辺も含めて垂直に1.5px内側へ寄せた形。斜辺の横方向のずれは 1.5 × √(10² + 16²) ÷ 16 ≒ 1.77px
+const timelineInnerClip =
+  "polygon(2.71px 1.5px, calc(100% - 10.83px) 1.5px, calc(100% - 1.77px) 50%, calc(100% - 10.83px) calc(100% - 1.5px), 2.71px calc(100% - 1.5px), 11.77px 50%)";
+
 const chevronRecipe = cva({
   base: {
     position: "relative",
-    display: "block",
-    py: "2",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    h: "8",
     px: "1",
     fontSize: "xs",
     fontWeight: "extrabold",
@@ -96,13 +102,13 @@ const chevronRecipe = cva({
       maker: { bg: "accent.manufacturer", color: "text.inverse" },
       farmille: {
         bg: "primary.800",
-        color: "primary.800",
+        color: "text.brand",
         _before: {
           content: '""',
           position: "absolute",
-          inset: "1.5px",
+          inset: "0",
           bg: "surface.card",
-          clipPath: timelineClip,
+          clipPath: timelineInnerClip,
         },
         "& b": { position: "relative" },
       },
@@ -142,7 +148,7 @@ const guideListStyle = css({
   mt: "2.5",
   "& li": { py: "1", textStyle: "prose" },
   "& li a": {
-    color: "primary.800",
+    color: "text.brand",
     fontWeight: "bold",
     textDecoration: "underline",
     textUnderlineOffset: "3px",
@@ -182,7 +188,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             content: '""',
             position: "absolute",
             inset: "0",
-            zIndex: "1",
+            zIndex: "local.1",
             bg: "surface.card/60",
           },
         })}
@@ -197,7 +203,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         >
           <Image alt="" fill priority sizes="100vw" src={heroPhoto} />
         </div>
-        <div className={css({ position: "relative", zIndex: "2", py: "8", px: "5" })}>
+        <div className={css({ position: "relative", zIndex: "local.2", py: "8", px: "5" })}>
           <div
             className={css({
               fontSize: "xs",
@@ -233,7 +239,6 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             borderLeftStyle: "solid",
             borderLeftColor: "primary.700",
             textStyle: "title",
-            fontWeight: "extrabold",
           })}
         >
           企業会員登録とは
@@ -285,7 +290,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               py: "1",
               fontSize: "md",
               fontWeight: "bold",
-              color: "primary.800",
+              color: "text.brand",
               textDecoration: "none",
               _before: { content: '"›"', mr: "2", color: "text.subtle" },
             })}
@@ -306,7 +311,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             mt: "9",
             fontSize: "xs",
             fontWeight: "extrabold",
-            color: "primary.800",
+            color: "text.brand",
           })}
         >
           初めてFarmilleに資材を掲載いただくメーカー様向け
@@ -343,7 +348,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               <span aria-hidden="true" className={legendSwatchRecipe({ actor: "maker" })} />
               メーカー様作業
             </span>
-            <span className={css({ color: "primary.800" })}>
+            <span className={css({ color: "text.brand" })}>
               <span aria-hidden="true" className={legendSwatchRecipe({ actor: "farmille" })} />
               Farmille側作業
             </span>
@@ -570,7 +575,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         )}
         aria-labelledby="lpContact"
       >
-        <h2 className={css({ textStyle: "title", fontWeight: "extrabold" })} id="lpContact">
+        <h2 className={css({ textStyle: "title" })} id="lpContact">
           お問い合わせ
         </h2>
         <a
@@ -579,7 +584,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
             mt: "1",
             fontSize: "lg",
             fontWeight: "extrabold",
-            color: "primary.800",
+            color: "text.brand",
             wordBreak: "break-all",
             textDecoration: "none",
             pc: { fontSize: "xl" },
@@ -608,7 +613,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
         })}
         aria-labelledby="lpApply"
       >
-        <h2 className={css({ textStyle: "title", fontWeight: "extrabold" })} id="lpApply">
+        <h2 className={css({ textStyle: "title" })} id="lpApply">
           企業会員登録を申請する
         </h2>
         <div className={css({ mt: "2", fontSize: "sm", lineHeight: "prose" })}>
@@ -627,7 +632,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               py: "3",
               px: "4.5",
               bg: "surface.card",
-              color: "primary.800",
+              color: "text.brand",
               borderRadius: "button",
               fontSize: "md",
               fontWeight: "extrabold",
@@ -650,7 +655,6 @@ const guideCardTitleStyle = css({
   borderLeftStyle: "solid",
   borderLeftColor: "primary.700",
   textStyle: "title",
-  fontWeight: "extrabold",
 });
 
 function GuideCard({
@@ -684,8 +688,7 @@ function PrepBox({ title, children }: { title: string; children: ReactNode }) {
         className={css({
           mb: "2",
           textStyle: "title",
-          fontWeight: "extrabold",
-          color: "primary.800",
+          color: "text.brand",
         })}
       >
         {title}
@@ -778,7 +781,7 @@ const requirementBoxStyle = css({
   borderStyle: "solid",
   borderColor: "border.default",
   borderRadius: "input",
-  "& h4": { mb: "1.5", textStyle: "body", fontWeight: "extrabold", color: "primary.800" },
+  "& h4": { mb: "1.5", textStyle: "body", color: "text.brand" },
   "& ul": {
     pl: "4",
     fontSize: "sm",

@@ -7,7 +7,6 @@ export const workspaceColumn = css({ maxW: "content.workspace", mx: "auto" });
 
 export const sectionHeading = css({
   textStyle: "title",
-  fontWeight: "extrabold",
   mt: "4.5",
   mb: "2",
   mx: "0.5",
@@ -49,7 +48,7 @@ export const logText = css({
   flex: "1",
   minW: "0",
   color: "text.muted",
-  "& a": { color: "primary.800", textDecoration: "underline" },
+  "& a": { color: "text.brand", textDecoration: "underline" },
 });
 
 export const visuallyHidden = css({ srOnly: true });
@@ -73,7 +72,7 @@ export const pillButtonRecipe = cva({
   },
   variants: {
     tone: {
-      primary: { color: "primary.800" },
+      primary: { color: "text.brand" },
       ghost: { color: "text.muted" },
     },
   },
