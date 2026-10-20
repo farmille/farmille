@@ -1,5 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
+// デプロイ後の本番検証。通常の E2E とは分け、実行ごとに専用のアカウント・メーカー・資材を作って片付ける。
+// FARMILLE_RELEASE_TEST_URL=https://www.farmille.com FARMILLE_RELEASE_SECRET_FILE=<接続キーのファイル> pnpm exec playwright test --config playwright.release.config.ts
+// 認証情報を残さないよう、trace・動画・自動スクリーンショットは保存しない。
 const baseURL = process.env.FARMILLE_RELEASE_TEST_URL;
 if (
   baseURL !== "https://www.farmille.com" &&

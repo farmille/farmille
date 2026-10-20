@@ -4,7 +4,7 @@ Farmille は、BS資材（生物・微生物農業資材）を農家が評価し
 
 ## 設計資料
 
-機能ごとの仕様は [`docs/rebuild/`](docs/rebuild/) の `*-SPEC.md`、用語は [`CONTEXT.md`](CONTEXT.md)、運用の記録と手順は [`docs/ops/`](docs/ops/) にあります。
+機能ごとの仕様は [`docs/rebuild/`](docs/rebuild/) の `*-SPEC.md`、用語は [`GLOSSARY.md`](GLOSSARY.md)、運用の記録と手順は [`docs/ops/`](docs/ops/) にあります。
 
 ## セットアップ
 
@@ -27,31 +27,9 @@ pnpm dev
 
 ## スクリプト
 
-| コマンド             | 用途                                        |
-| -------------------- | ------------------------------------------- |
-| `pnpm dev`           | 開発サーバーを起動する                      |
-| `pnpm build`         | 本番用にビルドする                          |
-| `pnpm start`         | ビルド済みアプリを起動する                  |
-| `pnpm lint`          | oxlint と ESLint を実行する                 |
-| `pnpm format`        | oxfmt でファイルを整形する                  |
-| `pnpm format:check`  | oxfmt による整形差分の有無を確認する        |
-| `pnpm check`         | lint、型検査、テストをまとめて実行する      |
-| `pnpm test`          | Vitest を監視モードで実行する               |
-| `pnpm gen:types`     | 接続先の Supabase から型定義を生成する      |
-| `pnpm gen:types:dev` | linked 状態の Supabase から型定義を生成する |
+コマンドの一覧は `package.json` の `scripts` にあります。検証の手順は [`AGENTS.md`](AGENTS.md) の「検証」を参照してください。
 
 `pnpm install` の完了後に Panda CSS のコード生成が自動で実行されます。生成物は `styled-system/` に出力され、Git の管理対象には含まれません。`gen:types` の生成物は format と lint の対象外です。
-
-## 検証
-
-```bash
-pnpm lint
-pnpm format:check
-pnpm exec tsc --noEmit
-pnpm exec vitest run
-pnpm build
-pnpm audit --audit-level=high
-```
 
 ## ディレクトリ構成
 

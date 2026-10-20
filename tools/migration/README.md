@@ -31,8 +31,8 @@ node --test tools/migration/convert-materials-v2.test.mjs
 ローカルスタックを軽量構成で起動し、v2 migration を適用してからシード SQL を実行する。
 
 ```bash
-npx supabase start -x studio,analytics,vector,edge-runtime,functions,inbucket,imgproxy,realtime
-npx supabase db reset
+npx --yes supabase@2.120.0 start -x studio,edge-runtime,realtime,imgproxy,logflare,vector
+npx --yes supabase@2.120.0 db reset
 psql postgresql://postgres:postgres@127.0.0.1:54322/postgres \
   -v ON_ERROR_STOP=1 \
   -f tools/migration/materials-v2-seed.sql
@@ -107,15 +107,4 @@ node tools/migration/convert-materials-v2.mjs \
 - `products.technology_action`、`disease_pest_info`、`expected_effects_farmille`、`precautions`、`storage_shelf_life`、`notes`：v2 に一意な対応先がないため未投入
 - `product_images.source_page_url`：資材の公式ページとは限らないため `materials.official_url` へ流用しない
 
-## フル資材マスタへの差し替え
-
-フル資材マスタは本番 DB と gitignore 済み Excel にあり、現時点のリポジトリには含まれていない。T-06 でリモートアクセスが可能になった後、旧テーブルを JSON またはテーブル別 CSV として取得し、`--input` で差し替える。件数は固定値と比較せず、ダンプから抽出した入力件数、重複統合数、投入後の一意資材件数を照合する。
-
-フル投入前に次の作業が必要である。
-
-- 変換レポートで重複、タグ対応の欠落、要確認フィールドを確認する
-- 承認済みのリモート投入手順を別途用意し、ローカルで同じダンプを2回投入して冪等性を確認する
-- `product_sources` を取得し、`material_sources` へ追補する変換を追加する
-- SDS、公式 PDF、試験資料の扱いを決め、必要なデータを `material_evidences` へ追補する
-
-本タスクの `materials-v2-seed.sql` はローカル開発用であり、リモート DB には接続しない。
+`materials-v2-seed.sql` はローカル開発用であり、リモート DB には接続しない。本番の資材マスタは 2026-09-08 の切替で移行済みで、以後の取り込みは `tools/catalog/` を使う。
