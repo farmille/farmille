@@ -36,7 +36,7 @@ type Story = StoryObj<typeof meta>;
 export const WithPrimary: Story = {
   args: {
     section: 1,
-    title: "主な作目を選択",
+    title: "栽培作目を選択",
     body: "栽培している作目を候補から選び（複数選択可）、「保存する」を押してください。",
     primary: { label: "入力する", onClick: fn() },
   },
