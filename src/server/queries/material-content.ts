@@ -256,16 +256,8 @@ const CARD_CHART_GRAPH_LIMIT = 3;
 /** グラフにできる測定がないレポートでも、都道府県は出せるように分けて持つ。 */
 export type UsageReportCardDetail = { chart: ReportChartPreview | null; prefecture: string | null };
 
-/**
- * 一覧カードに添えるグラフと都道府県。定量データと地域は会員だけが読めるので、
- * ログインしていない閲覧者からは呼ばない（RLS でも返らない）。構造化前のレポートは対象外。
- */
-export async function listUsageReportCardDetails(
-  reportIds: string[],
-): Promise<Result<Map<string, UsageReportCardDetail>>> {
-  if (reportIds.length === 0) return succeed(new Map());
-  const supabase = await createServerSupabase();
-  const { data, error } = await supabase
+function selectCardRows(supabase: SupabaseClient<Database>, reportIds: string[], bounded: boolean) {
+  const query = supabase
     .from("usage_reports")
     .select(
       `id, prefecture_code,
@@ -276,42 +268,84 @@ export async function listUsageReportCardDetails(
     )
     .in("id", reportIds)
     .eq("form_version", 2)
-    // カードに出すのは最初に読めた1枚だけなので、数値の測定と各測定のグラフを先頭から少しだけ取る。
-    // 区（行）は全件取り、カードに出さなかった区の数を正しく数える（区は1レポートで最大20）。
-    .eq("measurements.kind", "numeric")
+    .eq("measurements.kind", "numeric");
+  if (!bounded) return query;
+  // 区（行）は全件取り、カードに出さなかった区の数を正しく数える（区は1レポートで最大20）。
+  return query
     .order("sort_order", { referencedTable: "measurements" })
     .limit(CARD_CHART_MEASUREMENT_LIMIT, { referencedTable: "measurements" })
     .order("sort_order", { referencedTable: "measurements.graphs" })
     .limit(CARD_CHART_GRAPH_LIMIT, { referencedTable: "measurements.graphs" });
+}
 
-  if (error !== null) {
-    reportQueryError("レポートのグラフの取得に失敗", error);
+type CardRowsReport = NonNullable<Awaited<ReturnType<typeof selectCardRows>>["data"]>[number];
+
+function cardChart(report: CardRowsReport) {
+  const byOrder = (left: { sort_order: number }, right: { sort_order: number }) =>
+    left.sort_order - right.sort_order;
+  return firstReportChart(
+    report.measurements.toSorted(byOrder).map((measurement) => ({
+      ...measurement,
+      graphs: measurement.graphs.toSorted(byOrder).map((graph) => ({
+        heading: graph.heading,
+        rows: graph.rows.toSorted(byOrder).map((row) => ({
+          id: row.id,
+          plotId: row.plot_id,
+          label: row.label,
+          value: row.value_text,
+        })),
+      })),
+    })),
+    report.plots.toSorted(byOrder),
+  );
+}
+
+/** 上限まで取れていたら、その先に読めるグラフが残っているかもしれない。 */
+function mayHaveMore(report: CardRowsReport) {
+  return (
+    report.measurements.length >= CARD_CHART_MEASUREMENT_LIMIT ||
+    report.measurements.some((measurement) => measurement.graphs.length >= CARD_CHART_GRAPH_LIMIT)
+  );
+}
+
+/**
+ * 一覧カードに添えるグラフと都道府県。定量データと地域は会員だけが読めるので、
+ * ログインしていない閲覧者からは呼ばない（RLS でも返らない）。構造化前のレポートは対象外。
+ * カードに出すのは最初に読めた1枚だけなので、先頭の測定とグラフだけを取る。
+ * その範囲に読めるグラフがなく、上限まで取れていたレポートだけを、上限なしで取り直す。
+ */
+export async function listUsageReportCardDetails(
+  reportIds: string[],
+): Promise<Result<Map<string, UsageReportCardDetail>>> {
+  if (reportIds.length === 0) return succeed(new Map());
+  const supabase = await createServerSupabase();
+  const first = await selectCardRows(supabase, reportIds, true);
+  if (first.error !== null) {
+    reportQueryError("レポートのグラフの取得に失敗", first.error);
     return fail("internal");
   }
 
-  const byOrder = (left: { sort_order: number }, right: { sort_order: number }) =>
-    left.sort_order - right.sort_order;
   const details = new Map<string, UsageReportCardDetail>();
-  for (const report of data) {
-    const chart = firstReportChart(
-      report.measurements.toSorted(byOrder).map((measurement) => ({
-        ...measurement,
-        graphs: measurement.graphs.toSorted(byOrder).map((graph) => ({
-          heading: graph.heading,
-          rows: graph.rows.toSorted(byOrder).map((row) => ({
-            id: row.id,
-            plotId: row.plot_id,
-            label: row.label,
-            value: row.value_text,
-          })),
-        })),
-      })),
-      report.plots.toSorted(byOrder),
-    );
+  const retry: string[] = [];
+  for (const report of first.data) {
+    const chart = cardChart(report);
+    if (chart === null && mayHaveMore(report)) retry.push(report.id);
     details.set(report.id, {
       chart,
       prefecture: report.prefecture_code === null ? null : prefectureName(report.prefecture_code),
     });
+  }
+  if (retry.length === 0) return succeed(details);
+
+  const full = await selectCardRows(supabase, retry, false);
+  if (full.error !== null) {
+    reportQueryError("レポートのグラフの取得に失敗", full.error);
+    return fail("internal");
+  }
+  for (const report of full.data) {
+    const detail = details.get(report.id);
+    if (detail === undefined) continue;
+    details.set(report.id, { ...detail, chart: cardChart(report) });
   }
   return succeed(details);
 }
