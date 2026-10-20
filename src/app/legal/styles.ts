@@ -36,7 +36,7 @@ export const legalLink = css({
     outlineWidth: "2px",
     outlineStyle: "solid",
     outlineColor: "primary.600",
-    outlineOffset: "2px",
+    outlineOffset: "0.5",
   },
 });
 

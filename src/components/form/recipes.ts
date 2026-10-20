@@ -1,7 +1,7 @@
 import { css, cva } from "../../../styled-system/css";
 
 const controlBase = {
-  w: "100%",
+  w: "full",
   borderWidth: "1px",
   borderStyle: "solid",
   borderColor: "border.strong",
@@ -54,8 +54,8 @@ export const textareaRecipe = cva({
   base: { ...controlBase, ...controlSizes.md, lineHeight: "relaxed", resize: "vertical" },
   variants: {
     size: {
-      md: { minH: "84px" },
-      lg: { minH: "120px" },
+      md: { minH: "[84px]" },
+      lg: { minH: "[120px]" },
     },
   },
   defaultVariants: { size: "md" },
@@ -158,9 +158,9 @@ export const choiceRecipe = cva({
       outlineWidth: "2px",
       outlineStyle: "solid",
       outlineColor: "primary.700",
-      outlineOffset: "2px",
+      outlineOffset: "0.5",
     },
-    "& a": { color: "inherit", textDecoration: "underline" },
+    "& a": { color: "[inherit]", textDecoration: "underline" },
   },
   variants: {
     look: {
@@ -193,7 +193,7 @@ export const choiceRecipe = cva({
       },
       card: {
         alignItems: "center",
-        px: "calc(var(--spacing-3) + var(--spacing-0\\.5) / 2)",
+        px: "[calc(var(--spacing-3) + var(--spacing-0\\.5) / 2)]",
         py: "3",
         bg: "surface.card",
         borderWidth: "1px",
@@ -259,7 +259,7 @@ export const checkboxBoxRecipe = cva({
       box: {
         display: "grid",
         placeItems: "center",
-        flex: "0 0 auto",
+        flex: "none",
         p: "0",
         bg: "surface.card",
         color: "text.inverse",
@@ -292,7 +292,7 @@ export const checkboxBoxRecipe = cva({
 export const checkIndicatorStyle = css({ display: "flex" });
 
 export const radioDotStyle = css({
-  flex: "0 0 auto",
+  flex: "none",
   w: "4.5",
   h: "4.5",
   p: "0",
@@ -305,7 +305,7 @@ export const radioDotStyle = css({
   _checked: {
     borderColor: "primary.600",
     bg: "primary.600",
-    boxShadow: "inset 0 0 0 3px {colors.surface.card}",
+    boxShadow: "[inset 0 0 0 3px {colors.surface.card}]",
   },
   _fieldInvalid: { borderColor: "accent.danger" },
 });

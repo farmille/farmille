@@ -2,7 +2,11 @@ import { materialIllustrationUrl } from "@/lib/material-illustration";
 import { materialSourceLinks } from "@/lib/material-links";
 import * as v from "valibot";
 
-import { MaterialPageContentSchema, type MaterialPageContent } from "@/lib/material-page-editor";
+import {
+  MaterialPageContentSchema,
+  type MaterialPageContent,
+  type SaveMaterialPageSchema,
+} from "@/lib/material-page-editor";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
@@ -168,4 +172,24 @@ export async function getMaterialEditor(materialId: string, sellerId: string) {
     expectedVersion: latest?.status === "draft" ? latest.id : null,
     pendingVersion: latest?.status === "pending" ? latest.id : null,
   };
+}
+
+export async function saveMaterialPageVersion(input: v.InferOutput<typeof SaveMaterialPageSchema>) {
+  const db = await createServerSupabase();
+  return db.rpc("save_material_page_version", {
+    p_material_id: input.materialId,
+    p_expected_version: input.expectedVersion ?? undefined,
+    p_content: input.content,
+    p_submit: input.submit,
+  });
+}
+
+export async function withdrawMaterialPageVersion(versionId: string) {
+  const db = await createServerSupabase();
+  return db.rpc("withdraw_material_page_version", { p_version_id: versionId });
+}
+
+export async function hideOwnedMaterialPage(materialId: string, note: string) {
+  const db = await createServerSupabase();
+  return db.rpc("hide_owned_material_page", { p_material_id: materialId, p_note: note });
 }

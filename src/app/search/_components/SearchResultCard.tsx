@@ -28,7 +28,7 @@ const cardStyle = css(surfaceCardRecipe.raw({ padding: "flush" }), {
   gap: "3",
   py: "3",
   px: "3.5",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
 });
 

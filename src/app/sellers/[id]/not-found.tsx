@@ -7,7 +7,7 @@ export default function SellerNotFound() {
   return (
     <div
       className={css({
-        minH: "100dvh",
+        minH: "dvh",
         bg: "surface.panel",
         color: "text.default",
         fontFamily: "sans",
@@ -18,7 +18,7 @@ export default function SellerNotFound() {
         <EmptyState
           title="メーカーが見つかりません"
           description="指定されたメーカーは存在しないか、現在公開されていません。"
-          className={css({ minH: "60dvh" })}
+          className={css({ minH: "notFound" })}
         >
           <Link
             href="/"

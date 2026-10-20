@@ -39,20 +39,20 @@ const frame = cva({
           mx: "0",
           maskImage: "none",
           cursor: "auto",
-          scrollSnapType: "x mandatory",
+          scrollSnapType: "[x mandatory]",
           touchAction: "auto",
           userSelect: "auto",
         },
       },
       static: {
         overflowX: "auto",
-        scrollSnapType: "x mandatory",
+        scrollSnapType: "[x mandatory]",
       },
     },
   },
 });
 
-const track = css({ display: "flex", w: "max-content", willChange: "transform" });
+const track = css({ display: "flex", w: "[max-content]", willChange: "transform" });
 
 /** 末尾の余白をカード間の gap と揃えると、-50% の折り返しが2セット目の先頭に一致する。 */
 const cardSet = css({ display: "flex", gap: "3", pr: "3" });

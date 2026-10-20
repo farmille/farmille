@@ -78,7 +78,7 @@ const focusRing = {
   outlineWidth: "2px",
   outlineStyle: "solid",
   outlineColor: "primary.700",
-  outlineOffset: "2px",
+  outlineOffset: "0.5",
 } as const;
 
 const noticeSpacingStyle = css({ mb: "3.5" });

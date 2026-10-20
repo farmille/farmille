@@ -1,11 +1,4 @@
-import {
-  type CSSProperties,
-  type RefObject,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { css } from "../../../styled-system/css";
 import { token } from "../../../styled-system/tokens";
@@ -104,7 +97,7 @@ export function useCardHandoff(
 
 /** 案内の部品の出方。transform と opacity だけを動かし、動きを減らす設定では不透明度だけを変える。 */
 export const riseStyle = css({
-  transitionProperty: "opacity, transform",
+  transitionProperty: "[opacity, transform]",
   transitionDuration: "dialog",
   transitionTimingFunction: "out",
   opacity: "0",
@@ -119,7 +112,8 @@ export const riseStyle = css({
  */
 export type BottomSpace<T extends HTMLElement> = {
   ref: RefObject<T | null>;
-  spaceStyle: CSSProperties & { "--tour-space": string };
+  /** 余白の高さ。CSS 変数 --tour-space に渡す */
+  space: string;
 };
 
 export function useBottomSpace<T extends HTMLElement>(): BottomSpace<T> {
@@ -138,7 +132,7 @@ export function useBottomSpace<T extends HTMLElement>(): BottomSpace<T> {
       window.removeEventListener("resize", measure);
     };
   }, []);
-  return { ref, spaceStyle: { "--tour-space": `${Math.max(0, height)}px` } };
+  return { ref, space: `${Math.max(0, height)}px` };
 }
 
 /** ページの最後に置く余白。高さは useBottomSpace で決める */

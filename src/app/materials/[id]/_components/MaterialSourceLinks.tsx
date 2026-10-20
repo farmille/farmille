@@ -77,7 +77,7 @@ const testRowStyle = css({
   gap: "2.5",
   px: "0.5",
   py: "2.5",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
   borderTopWidth: "1px",
   borderColor: "border.default",

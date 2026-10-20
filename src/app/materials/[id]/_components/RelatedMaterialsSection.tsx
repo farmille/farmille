@@ -32,9 +32,9 @@ const scrollStyle = css({
 });
 const cardStyle = css({
   display: "block",
-  flex: "0 0 token(sizes.card.materialMobile)",
+  flex: "[0 0 token(sizes.card.materialMobile)]",
   overflow: "hidden",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
   bg: "surface.card",
   borderWidth: "1px",

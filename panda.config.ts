@@ -6,6 +6,9 @@ import { breakpoints, semanticTokens, tokens } from "./src/theme/tokens";
 // ダーク条件は置かない。
 export default defineConfig({
   preflight: true,
+  // トークンに無い値を型エラーにする。トークンにしない1回きりの値は "[50%]" のように角括弧で書く。
+  strictTokens: true,
+  strictPropertyValues: true,
   include: ["./src/**/*.{js,jsx,ts,tsx}"],
   exclude: [],
   // _invalid は :invalid も拾い、未入力の必須欄を表示直後から赤くするので使わない。
@@ -24,8 +27,21 @@ export default defineConfig({
     breakpoints,
     tokens: {
       ...tokens,
+      // CSS のキーワードに当たる値。パレットではないので tokens.ts とトークンカタログには載せない。
+      colors: {
+        ...tokens.colors,
+        transparent: { value: "transparent" },
+        currentColor: { value: "currentColor" },
+      },
       // Panda は sizes に無い数値を px のまま出力する（w: "8" → 8px）。寸法でも余白と同じ数値スケールと full を使えるようにする。
-      sizes: { ...tokens.spacing, full: { value: "100%" }, ...tokens.sizes },
+      sizes: {
+        ...tokens.spacing,
+        full: { value: "100%" },
+        none: { value: "none" },
+        ...tokens.sizes,
+      },
+      animations: { none: { value: "none" }, ...tokens.animations },
+      opacity: { 0: { value: "0" }, 1: { value: "1" }, ...tokens.opacity },
     },
     semanticTokens,
     // extend にすると preset-panda の xs〜9xl（rem 指定）が残り、fontSizes と同じ名前で別の大きさになる。

@@ -4,7 +4,7 @@ import { cva, css, cx } from "../../styled-system/css";
 import { AppBar, type AppBarAccount, type AppBarActive, type AppChrome } from "./AppBar";
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   display: "flex",
   flexDirection: "column",
   bg: "surface.page",
@@ -15,7 +15,7 @@ const shell = css({
 const mainWidthRecipe = cva({
   base: {
     flex: "1",
-    w: "100%",
+    w: "full",
     mx: "auto",
     bg: "surface.panel",
   },

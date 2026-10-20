@@ -14,7 +14,7 @@ const navSlotRecipe = cva({
       container: {},
       viewport: {
         // fixed で通常フローから外れる SP だけ、本文末尾が隠れない高さを確保する。
-        minH: "calc(var(--spacing-16) + env(safe-area-inset-bottom, 0px))",
+        minH: "[calc(var(--spacing-16) + env(safe-area-inset-bottom, 0px))]",
       },
     },
   },
@@ -28,14 +28,14 @@ const navRecipe = cva({
     display: "flex",
     alignItems: "stretch",
     bg: "card/94",
-    backdropFilter: "blur(10px)",
+    backdropFilter: "[blur({blurs.bar})]",
     borderTopWidth: "1px",
     borderTopStyle: "solid",
     borderTopColor: "border.default",
     px: "1.5",
     pt: "1.5",
-    pb: "calc(10px + env(safe-area-inset-bottom, 0px))",
-    zIndex: "25",
+    pb: "[calc(10px + env(safe-area-inset-bottom, 0px))]",
+    zIndex: "bottomNav",
   },
   variants: {
     placement: {
@@ -86,7 +86,7 @@ const itemRecipe = cva({
 });
 
 const postSlot = css({
-  flex: "0 0 62px",
+  flex: "[0 0 62px]",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",

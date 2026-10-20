@@ -18,7 +18,7 @@ type ReportFormPageProps = {
 };
 
 const shell = css({
-  minH: "100dvh",
+  minH: "dvh",
   bg: "surface.page",
   pb: "8",
 });

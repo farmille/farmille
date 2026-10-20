@@ -35,7 +35,7 @@ const titleStyle = css({
   display: "block",
   textStyle: "body",
   fontWeight: "bold",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
 });
 

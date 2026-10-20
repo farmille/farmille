@@ -45,7 +45,7 @@ function SectionHead({ id, title, children }: { id: string; title: string; child
 }
 
 const productCardStyle = css({
-  flex: "0 0 auto",
+  flex: "none",
   w: "card.materialMobile",
   overflow: "hidden",
   bg: "surface.card",
@@ -54,7 +54,7 @@ const productCardStyle = css({
   borderColor: "border.default",
   borderRadius: "card",
   boxShadow: "shadow",
-  color: "inherit",
+  color: "[inherit]",
   textDecoration: "none",
 });
 
