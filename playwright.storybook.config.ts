@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Storybook dev サーバー（pnpm storybook の 6076）と衝突しないよう、静的ビルドの配信は専用ポートで行う
+// dev Storybook（pnpm storybook の 6076）と衝突しないよう、静的ビルドの配信は専用ポートで行う
 const STORYBOOK_STATIC_PORT = 6106;
 const STORYBOOK_URL = `http://127.0.0.1:${STORYBOOK_STATIC_PORT}`;
 
@@ -26,7 +26,8 @@ export default defineConfig({
   webServer: {
     command: `node scripts/storybook-static-server.mjs ${STORYBOOK_STATIC_PORT}`,
     url: `${STORYBOOK_URL}/index.json`,
-    reuseExistingServer: !process.env.CI,
+    // 使用中のポートは再利用せず止める。dev Storybook や別 worktree の配信を検査して passed を返すのを防ぐ
+    reuseExistingServer: false,
     timeout: 30_000,
     stdout: "pipe",
     stderr: "pipe",
