@@ -5,14 +5,18 @@ import heroPhoto from "./home-hero-rice-field.webp";
 import { HomeHills } from "./HomeHills";
 import { HomeVerticalCopy } from "./HomeVerticalCopy";
 
-/** SP は上下のバーを除いた高さ、tab 以上はヘッダーを除いた高さに収める。 */
+/**
+ * SP は上下のバーを除いた高さ、tab 以上はヘッダーを除いた高さに収める。
+ * はみ出しは clip で切る。hidden はスクロールコンテナになり、写真と丘の view() がヒーローを基準にして動かなくなる。
+ */
 const hero = css({
   position: "relative",
-  overflow: "hidden",
+  overflow: "clip",
   isolation: "isolate",
   h: "[calc(100svh - {spacing.32})]",
   minH: "[32rem]",
   bg: "surface.forest",
+  containerType: "size",
   tab: { h: "[calc(100svh - {spacing.16})]", minH: "[36rem]", maxH: "[60rem]" },
 });
 
@@ -50,13 +54,25 @@ const inner = css({
   tab: { px: "8" },
 });
 
-/** 縦書きの一文は右上に置く。 */
+/**
+ * 縦書きの一文は右上に置く。画面の低い PC でも最も長い2本目の帯（14字、字送りを含め約16字ぶん）が
+ * 丘にかからないよう、文字はヒーローの高さに合わせて詰める。引く値は上の余白・帯の段差・帯の余白・丘の高さと
+ * すき間の合計で、大きさの上限は hero の役割のまま。
+ */
 const tagline = css({
   position: "absolute",
   top: "6",
   right: "5",
-  tab: { top: "16", right: "10" },
-  pc: { top: "20", right: "16" },
+  tab: {
+    top: "16",
+    right: "10",
+    "& > span": { fontSize: "[min({fontSizes.hero.md}, calc((100cqh - 14.5rem) / 16))]" },
+  },
+  pc: {
+    top: "20",
+    right: "16",
+    "& > span": { fontSize: "[min({fontSizes.hero.lg}, calc((100cqh - 16.25rem) / 16))]" },
+  },
 });
 
 const brand = css({

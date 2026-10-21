@@ -3,8 +3,9 @@ import Image, { type StaticImageData } from "next/image";
 import { css, cva } from "../../../styled-system/css";
 import { Reveal } from "./Reveal";
 
+/** hidden はスクロールコンテナになり、中の写真の view() が枠を基準にして動かなくなるので clip で切る。 */
 const frame = cva({
-  base: { position: "relative", overflow: "hidden", bg: "primary.100" },
+  base: { position: "relative", overflow: "clip", bg: "primary.100" },
   variants: {
     ratio: {
       portrait: { aspectRatio: "image.portrait" },
