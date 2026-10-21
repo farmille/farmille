@@ -41,8 +41,9 @@ const band = css({
   pt: "10",
   pb: bottomBarRoom,
   tab: { pt: "12", pb: "8" },
-  // レポート入力の送信帯だけは PC でも画面下に固定される
+  // レポート入力の送信帯と、資材・レポート詳細の FAB は PC でも画面下に固定される
   "body:has([data-ui=report-form-bar]) &": { tab: { pb: bottomBarRoom } },
+  "body:has([data-ui=responsive-fab-bar]) &": { tab: { pb: bottomBarRoom } },
 });
 
 const inner = css({ maxW: "content.wide", mx: "auto", px: "5", tab: { px: "8" } });
