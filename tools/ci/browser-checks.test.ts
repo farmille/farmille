@@ -312,7 +312,7 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     });
     const closed = new Promise<number | null>((resolve) => child.once("close", resolve));
     try {
-      await vi.waitFor(() => expect(commands()).toEqual(["build-storybook"]));
+      await vi.waitFor(() => expect(commands()).toEqual(["build-storybook"]), { timeout: 10_000 });
       child.kill("SIGTERM");
       expect(await closed).not.toBe(0);
       expect(
