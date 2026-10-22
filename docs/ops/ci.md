@@ -2,7 +2,7 @@
 
 ## 開発環境の初回設定
 
-各PCのcloneで、依存を入れた後にhookを登録する。
+各PCのcloneで、レビュー済みの信頼できるcheckoutから依存を入れ、hookを登録する。
 
 ```bash
 pnpm install --frozen-lockfile
@@ -12,9 +12,17 @@ pnpm setup:hooks
 
 Node.jsは`.node-version`、pnpmは`package.json`のバージョンを使う。Linuxでブラウザの共有ライブラリが不足する場合は`pnpm exec playwright install --with-deps chromium`を実行する。DockerとPostgreSQLの`psql`も必要になる。
 
-`pnpm setup:hooks`は`core.hooksPath=.githooks`をclone内に登録する。同じcloneから作ったworktreeにも設定が適用され、各worktreeの`.githooks/pre-push`を使う。別のhooksPathや標準ディレクトリの実行可能なhookがある場合は、統合を案内して停止する。新しいworktreeの`pnpm setup:worktree`にも登録処理を含む。
+`pnpm setup:hooks`はGit共通ディレクトリ内の`farmille-hooks/pre-push`に固定のhookを設置し、そのディレクトリの絶対パスを`core.hooksPath`に登録する。同じcloneのworktreeもこのhookを共有する。checkout先の`.githooks`に追加されたhookは実行しない。既存の`.githooks`設定は移行できる。独自のhookや別のhooksPathがある場合は、上書きせず停止する。
 
-hook本体はGitで共有するが、登録設定はcloneされない。別PC・別cloneでは再度登録する。hookをまだ含まない古いブランチはmainの変更を取り込む必要がある。Git GUIからpushする場合も、GUIの実行環境からNode.jsとpnpmを呼び出せるようにする。
+push時は、現在のworktreeにある`tools/ci/browser-checks.ts`・`tools/ci/selection.ts`・`package.json`・`pnpm-lock.yaml`のSHA-256を登録時の値と照合し、一致した場合だけ検査コードを実行する。内容が変わった場合やファイルが無い場合はpushを止める。検査コードのシンボリックリンクや、`tools`・`tools/ci`内に置かれた`package.json`・`node_modules`も拒否し、検証したファイルと実際の読み込み先を一致させる。通常の`pnpm setup:hooks`や`pnpm setup:worktree`では登録済みの内容を更新しない。対象ファイルとhookの変更をレビューした後、信頼できるcheckoutから次を実行する。
+
+```bash
+pnpm setup:hooks --trust-current
+```
+
+信頼の登録・更新は同じcloneの全worktreeに適用される。異なる検査コードや依存設定を持つworktreeでは再び照合が必要になる。登録したコードからは各worktreeのbuild・testを実行するため、未信頼ブランチを安全に実行するための隔離機能ではない。依存のインストール・セットアップ・pushは、対象のコードを信頼できると確認してから行う。
+
+hookのソースはGitで共有するが、設置済みのhookと登録設定はcloneされない。別PC・別cloneでは再度登録する。hookをまだ含まない古いブランチはmainの変更を取り込む必要がある。Git GUIからpushする場合も、GUIの実行環境からNode.jsとpnpmを呼び出せるようにする。
 
 E2Eは検証専用のSupabase（127.0.0.1:54321）を使う。Dockerを起動し、[ローカル検証手順](local-verification.md) に従ってSupabaseとmigrationを準備する。hookはDBを自動起動したりmigrationを適用したりせず、不足があればpushを止めて手順を表示する。E2E用アカウントの更新と、未投入の資材マスタの投入はE2E実行時に行う。
 

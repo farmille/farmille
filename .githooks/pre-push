@@ -1,4 +1,0 @@
-#!/usr/bin/env sh
-set -eu
-cd "$(git rev-parse --show-toplevel)"
-exec node tools/ci/browser-checks.ts pre-push

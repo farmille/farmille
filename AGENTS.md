@@ -72,7 +72,7 @@ pnpm exec playwright install chromium
 pnpm setup:hooks
 ```
 
-`git config --get core.hooksPath`が`.githooks`になっていることを確認する。既存のhookがある場合は上書きせず、登録コマンドの案内に従って統合する。Node.jsとpnpmはリポジトリ指定のバージョンを使い、E2E用にDocker・psql・54321番の検証専用Supabaseを準備する。hookはSupabaseの起動やmigrationの適用を自動では行わない。設定と検査対象の詳細は[CIとpush前の検査](docs/ops/ci.md)を参照する。
+`git config --get core.hooksPath`がGit共通ディレクトリ内の`farmille-hooks`への絶対パスになっていることを確認する。初回登録は信頼できるcheckoutで行う。登録済みの検査コード・依存設定と異なる場合はpushが止まる。変更をレビューした後、`pnpm setup:hooks --trust-current`で明示的に登録内容を更新する。既存のhookがある場合は上書きせず、登録コマンドの案内に従って統合する。Node.jsとpnpmはリポジトリ指定のバージョンを使い、E2E用にDocker・psql・54321番の検証専用Supabaseを準備する。hookはSupabaseの起動やmigrationの適用を自動では行わない。設定と検査対象の詳細は[CIとpush前の検査](docs/ops/ci.md)を参照する。
 
 新しいworktreeでは、最初に`pnpm setup:worktree`を流す（`.env.local`の写し・hook登録・依存とChromiumの導入・migrationの遅れの確認）。手順は[ローカル検証手順](docs/ops/local-verification.md)を参照する。
 
