@@ -57,7 +57,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: trusted/.node-version
 
       - name: Install deployment tools
         run: |
