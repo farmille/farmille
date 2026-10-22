@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# このDBはrunner内だけで使うため、新しいコミットが来たら古い検査を止める。
+concurrency:
+  group: farmille-migration-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   migration:
     name: Reset local Supabase database

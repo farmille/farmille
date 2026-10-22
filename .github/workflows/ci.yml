@@ -9,14 +9,26 @@ on:
 permissions:
   contents: read
 
+# PR は最新コミットの検査だけを残す。main は実行中の本番移行を止めず、待機分を最新にまとめる。
+concurrency:
+  group: farmille-ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   app:
     name: Application quality gates
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      storybook: ${{ steps.plan.outputs.storybook }}
+      run-storybook: ${{ steps.plan.outputs.run-storybook }}
+      e2e: ${{ steps.plan.outputs.e2e }}
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
@@ -32,6 +44,19 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Select checks for this change
+        id: plan
+        run: node tools/ci/plan.ts "$EVENT_NAME" "$BASE_SHA"
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+      - name: Audit high severity vulnerabilities
+        run: pnpm audit --audit-level=high
+
+      - name: Check Story coverage
+        run: pnpm check:stories
 
       - name: Lint
         run: pnpm lint
@@ -51,7 +76,27 @@ jobs:
           # CI 用の公開ダミー値。コード側にフォールバックは置かない方針のため CI 設定で与える。
           NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
 
+      - name: Build Storybook once for all shards
+        if: steps.plan.outputs.run-storybook == 'true'
+        run: pnpm build-storybook
+
+      - name: Archive Storybook
+        if: steps.plan.outputs.run-storybook == 'true'
+        run: tar -czf "$RUNNER_TEMP/storybook-static.tar.gz" storybook-static
+
+      - name: Share Storybook build
+        if: steps.plan.outputs.run-storybook == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: storybook-build
+          path: ${{ runner.temp }}/storybook-static.tar.gz
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+
   storybook:
+    needs: app
+    if: needs.app.outputs.run-storybook == 'true'
     name: Storybook and responsive checks (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -79,16 +124,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Storybook
-        id: build-storybook
-        run: pnpm build-storybook
-        background: true
+      - name: Download Storybook build
+        uses: actions/download-artifact@v8
+        with:
+          name: storybook-build
+          path: ${{ runner.temp }}
 
-      - name: Audit high severity vulnerabilities
-        run: pnpm audit --audit-level=high
-
-      - name: Check Story coverage
-        run: pnpm check:stories
+      - name: Extract Storybook build
+        run: tar -xzf "$RUNNER_TEMP/storybook-static.tar.gz"
 
       - name: Select Ubuntu package mirror
         run: |
@@ -98,12 +141,10 @@ jobs:
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Wait for Storybook build
-        wait: build-storybook
-
       - name: Check responsive layouts
         run: pnpm test:storybook:responsive
         env:
+          STORYBOOK_RESPONSIVE_SELECTION: ${{ needs.app.outputs.storybook }}
           STORYBOOK_RESPONSIVE_SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
 
       - name: Upload responsive check artifacts
@@ -119,6 +160,8 @@ jobs:
           if-no-files-found: ignore
 
   e2e:
+    needs: app
+    if: needs.app.outputs.e2e == 'true'
     name: Playwright E2E (${{ matrix.shard }}/${{ strategy.job-total }})
     env:
       SMTP_URL: "smtp://127.0.0.1:54325"
@@ -180,6 +223,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Test database authorization
+        if: matrix.shard == 1
         run: npx --yes supabase@latest test db
 
       - name: Seed material master
