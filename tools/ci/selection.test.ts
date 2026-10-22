@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createCiPlan, selectStoryFiles } from "./selection.ts";
+import { createBrowserCheckPlan, selectStoryFiles } from "./selection.ts";
 
 let root: string;
 
@@ -36,17 +36,17 @@ beforeEach(() => {
 
 afterEach(() => fs.rmSync(root, { recursive: true, force: true }));
 
-describe("CI の検査対象", () => {
-  it("main では資料だけの変更でも全検査を実行する", () => {
-    expect(createCiPlan(root, ["docs/ops/runbook.md"], true)).toMatchObject({
+describe("ブラウザ検査の対象", () => {
+  it("全件指定では資料だけの変更でも全検査を実行する", () => {
+    expect(createBrowserCheckPlan(root, ["docs/ops/runbook.md"], true)).toMatchObject({
       storybook: { mode: "all" },
       e2e: true,
     });
   });
 
-  it("PR の資料・エージェント設定だけなら画面検査を起動しない", () => {
+  it("差分が資料・エージェント設定だけなら画面検査を起動しない", () => {
     expect(
-      createCiPlan(
+      createBrowserCheckPlan(
         root,
         ["docs/rebuild/catalog-SPEC.md", "AGENTS.md", ".codex/skills/example/SKILL.md"],
         false,
@@ -58,14 +58,16 @@ describe("CI の検査対象", () => {
   });
 
   it("Supabase のメール雛形は資料扱いせず全検査する", () => {
-    expect(createCiPlan(root, ["docs/email-templates/confirm-signup.html"], false)).toMatchObject({
+    expect(
+      createBrowserCheckPlan(root, ["docs/email-templates/confirm-signup.html"], false),
+    ).toMatchObject({
       storybook: { mode: "all" },
       e2e: true,
     });
   });
 
   it("変更した部品を再export経由で使う別ルートの Story も選ぶ", () => {
-    expect(createCiPlan(root, ["src/app/articles/Reading.tsx"], false)).toEqual({
+    expect(createBrowserCheckPlan(root, ["src/app/articles/Reading.tsx"], false)).toEqual({
       storybook: {
         mode: "selected",
         files: ["src/app/articles/Reading.stories.tsx", "src/app/reports/Report.stories.tsx"],
@@ -75,7 +77,7 @@ describe("CI の検査対象", () => {
   });
 
   it("Story だけの変更なら対象 Story の全幅検査を残し、E2E を省く", () => {
-    expect(createCiPlan(root, ["src/app/me/Profile.stories.tsx"], false)).toEqual({
+    expect(createBrowserCheckPlan(root, ["src/app/me/Profile.stories.tsx"], false)).toEqual({
       storybook: { mode: "selected", files: ["src/app/me/Profile.stories.tsx"] },
       e2e: false,
     });
@@ -86,16 +88,19 @@ describe("CI の検査対象", () => {
     "export const load = () => import(`../articles/Reading`);",
   ])("namespace再exportとテンプレートリテラルのimportも追跡する：%s", (source) => {
     write("src/app/reports/Report.tsx", source);
-    expect(createCiPlan(root, ["src/app/articles/Reading.tsx"], false).storybook).toEqual({
-      mode: "selected",
-      files: ["src/app/articles/Reading.stories.tsx", "src/app/reports/Report.stories.tsx"],
-    });
+    expect(createBrowserCheckPlan(root, ["src/app/articles/Reading.tsx"], false).storybook).toEqual(
+      {
+        mode: "selected",
+        files: ["src/app/articles/Reading.stories.tsx", "src/app/reports/Report.stories.tsx"],
+      },
+    );
   });
 
   it("複数変更の一部だけ利用先を特定できても残りを無検査にしない", () => {
     write("src/app/new/page.tsx", "export default function Page() { return null; }");
     expect(
-      createCiPlan(root, ["src/app/me/Profile.tsx", "src/app/new/page.tsx"], false).storybook.mode,
+      createBrowserCheckPlan(root, ["src/app/me/Profile.tsx", "src/app/new/page.tsx"], false)
+        .storybook.mode,
     ).toBe("all");
   });
 
@@ -105,10 +110,12 @@ describe("CI の検査対象", () => {
       "export const load = () => import('../articles/Reading'); import './cycle';",
     );
     write("src/app/reports/cycle.ts", "import './Report';");
-    expect(createCiPlan(root, ["src/app/articles/Reading.tsx"], false).storybook).toEqual({
-      mode: "selected",
-      files: ["src/app/articles/Reading.stories.tsx", "src/app/reports/Report.stories.tsx"],
-    });
+    expect(createBrowserCheckPlan(root, ["src/app/articles/Reading.tsx"], false).storybook).toEqual(
+      {
+        mode: "selected",
+        files: ["src/app/articles/Reading.stories.tsx", "src/app/reports/Report.stories.tsx"],
+      },
+    );
   });
 
   it.each([
@@ -128,24 +135,28 @@ describe("CI の検査対象", () => {
     "unknown.config.ts",
   ])("影響を限定できない %s は全Storyを検査する", (file) => {
     write(file, "");
-    expect(createCiPlan(root, [file], false).storybook.mode).toBe("all");
+    expect(createBrowserCheckPlan(root, [file], false).storybook.mode).toBe("all");
   });
 
   it("削除・rename前のパスがあれば全Storyを検査する", () => {
     expect(
-      createCiPlan(root, ["src/app/old/Removed.tsx", "src/app/me/Profile.tsx"], false).storybook
-        .mode,
+      createBrowserCheckPlan(root, ["src/app/old/Removed.tsx", "src/app/me/Profile.tsx"], false)
+        .storybook.mode,
     ).toBe("all");
   });
 
   it("静的に解決できないローカルimportがあれば対象を絞らない", () => {
     write("src/app/reports/Report.tsx", "import './Missing';");
-    expect(createCiPlan(root, ["src/app/me/Profile.tsx"], false).storybook.mode).toBe("all");
+    expect(createBrowserCheckPlan(root, ["src/app/me/Profile.tsx"], false).storybook.mode).toBe(
+      "all",
+    );
   });
 
   it("計算された動的importがあれば対象を絞らない", () => {
     write("src/app/reports/Report.tsx", "export const load = (name: string) => import(name);");
-    expect(createCiPlan(root, ["src/app/me/Profile.tsx"], false).storybook.mode).toBe("all");
+    expect(createBrowserCheckPlan(root, ["src/app/me/Profile.tsx"], false).storybook.mode).toBe(
+      "all",
+    );
   });
 
   it("通常のCSS importは局所変更の選別を妨げない", () => {
@@ -156,20 +167,24 @@ describe("CI の検査対象", () => {
       "src/app/me/Profile.tsx",
       "import image from './photo.webp'; export const Profile = image;",
     );
-    expect(createCiPlan(root, ["src/app/me/Profile.tsx"], false).storybook.mode).toBe("selected");
+    expect(createBrowserCheckPlan(root, ["src/app/me/Profile.tsx"], false).storybook.mode).toBe(
+      "selected",
+    );
   });
 
   it("Story を持たない変更も無検査にはしない", () => {
     write("src/app/new/page.tsx", "export default function Page() { return null; }");
-    expect(createCiPlan(root, ["src/app/new/page.tsx"], false).storybook.mode).toBe("all");
+    expect(createBrowserCheckPlan(root, ["src/app/new/page.tsx"], false).storybook.mode).toBe(
+      "all",
+    );
   });
 
   it("E2E 自身の変更では E2E だけを、単体テストの変更では画面検査を省く", () => {
-    expect(createCiPlan(root, ["e2e/search.spec.ts"], false)).toMatchObject({
+    expect(createBrowserCheckPlan(root, ["e2e/search.spec.ts"], false)).toMatchObject({
       storybook: { mode: "none" },
       e2e: true,
     });
-    expect(createCiPlan(root, ["src/lib/search.test.ts"], false)).toMatchObject({
+    expect(createBrowserCheckPlan(root, ["src/lib/search.test.ts"], false)).toMatchObject({
       storybook: { mode: "none" },
       e2e: false,
     });
@@ -177,7 +192,7 @@ describe("CI の検査対象", () => {
 
   it("不正な tsconfig は選別を成功扱いせず失敗する", () => {
     write("tsconfig.json", "invalid");
-    expect(() => createCiPlan(root, ["src/app/me/Profile.tsx"], false)).toThrow();
+    expect(() => createBrowserCheckPlan(root, ["src/app/me/Profile.tsx"], false)).toThrow();
   });
 });
 

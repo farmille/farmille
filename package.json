@@ -23,7 +23,9 @@
     "check:stories": "node scripts/check-story-coverage.mjs",
     "check:migrations": "bash tools/dev/check-migrations.sh",
     "setup:worktree": "bash tools/dev/setup-worktree.sh",
-    "test:storybook:responsive": "playwright test --config=playwright.storybook.config.ts"
+    "test:storybook:responsive": "playwright test --config=playwright.storybook.config.ts",
+    "setup:hooks": "bash tools/dev/setup-hooks.sh",
+    "test:browser:local": "node tools/ci/browser-checks.ts all"
   },
   "dependencies": {
     "@base-ui/react": "1.8.0",

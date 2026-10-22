@@ -64,7 +64,17 @@ Supabase の DB スキーマから `src/types/database.types.ts` を再生成す
 
 ## 検証
 
-新しい worktree では、最初に `pnpm setup:worktree` を流す（`.env.local` の写し・install・migration の遅れの確認。中身は `docs/ops/local-verification.md`）。
+開発環境を準備するときは、cloneごとに1回、次を実行してpush前のhookを登録する。同じcloneで`git push`を使うCodex・Claude Code・IDEは設定を共有する。別PC・別cloneでは再登録が必要になる。
+
+```bash
+pnpm install --frozen-lockfile
+pnpm exec playwright install chromium
+pnpm setup:hooks
+```
+
+`git config --get core.hooksPath`が`.githooks`になっていることを確認する。既存のhookがある場合は上書きせず、登録コマンドの案内に従って統合する。Node.jsとpnpmはリポジトリ指定のバージョンを使い、E2E用にDocker・psql・54321番の検証専用Supabaseを準備する。hookはSupabaseの起動やmigrationの適用を自動では行わない。設定と検査対象の詳細は[CIとpush前の検査](docs/ops/ci.md)を参照する。
+
+新しいworktreeでは、最初に`pnpm setup:worktree`を流す（`.env.local`の写し・hook登録・依存とChromiumの導入・migrationの遅れの確認）。手順は[ローカル検証手順](docs/ops/local-verification.md)を参照する。
 
 ```bash
 pnpm lint && pnpm format:check && pnpm exec tsc --noEmit && pnpm exec vitest run && pnpm check:stories && pnpm build
@@ -73,13 +83,14 @@ pnpm lint && pnpm format:check && pnpm exec tsc --noEmit && pnpm exec vitest run
 UI を変えたときは、Storybook のレスポンシブ検査（全 Story を 320〜1440px の 13 幅で横にはみ出さないこと）と E2E も流す。
 
 ```bash
-pnpm build-storybook && pnpm test:storybook:responsive
-pnpm test:e2e:local
+pnpm test:browser:local
 ```
+
+`pnpm test:browser:local`はStorybookのビルド・全Storyのレスポンシブ検査・E2Eを順番に実行する。別worktreeとの同時実行を避けるため、全件検査にはこのコマンドを使う。
 
 レスポンシブ検査は `storybook-static/` を 6106 番で配信して検査する。6106 番を別のプロセス（dev Storybook や別 worktree の検査）が使っていると `is already used` のエラーで止まるので、そのプロセスが終わってから流す。dev Storybook は `pnpm storybook`（6076 番）で起動する。
 
-`pnpm test:e2e:local` は、54321 のローカル Supabase の起動の確認・CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数・migration の突き合わせ・資材マスタの投入をまとめて行ってから E2E を流す（中身は `docs/ops/local-verification.md`）。Supabase の起動と migration の適用はユーザーに確認してから行う。CI はこれらに加えて `pnpm audit --audit-level=high` を回す。すべて緑になっても完了ではない（実装規約の「完了の定義」を参照）。
+`pnpm test:e2e:local` は、54321 のローカル Supabase の起動の確認・手動の Browser checks（`.github/workflows/browser-checks.yml`）でも使う環境変数・migration の突き合わせ・資材マスタの投入をまとめて行ってから E2E を流す（中身は `docs/ops/local-verification.md`）。Supabase の起動と migration の適用はユーザーに確認してから行う。push 前の hook は差分に応じてブラウザ検査を実行する（初回に `pnpm setup:hooks`）。自動 CI は lint・形式・型・単体テスト・ビルド・Story の有無・依存の監査・DB 権限を検査する。すべて緑になっても完了ではない（実装規約の「完了の定義」を参照）。
 
 ## 依存の監査
 

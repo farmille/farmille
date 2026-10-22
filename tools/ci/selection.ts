@@ -13,7 +13,7 @@ export const StorySelectionSchema = v.variant("mode", [
 ]);
 export type StorySelection = v.InferOutput<typeof StorySelectionSchema>;
 
-export type CiPlan = {
+export type BrowserCheckPlan = {
   storybook: StorySelection;
   e2e: boolean;
 };
@@ -175,8 +175,12 @@ function affectedStories(root: string, changedFiles: string[]): StorySelection {
   return { mode: "selected", files: stories };
 }
 
-export function createCiPlan(root: string, changedFiles: string[], full: boolean): CiPlan {
-  if (full) return { storybook: { mode: "all", reason: "main は全件検査" }, e2e: true };
+export function createBrowserCheckPlan(
+  root: string,
+  changedFiles: string[],
+  full: boolean,
+): BrowserCheckPlan {
+  if (full) return { storybook: { mode: "all", reason: "全件検査を指定" }, e2e: true };
 
   const e2e = changedFiles.some(
     (file) => !isDocumentation(file) && !isStoryOnly(file) && !isUnitTest(file),
