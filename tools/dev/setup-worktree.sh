@@ -40,6 +40,7 @@ env -i PATH="$PATH" HOME="$HOME" node --env-file="$ENV_LOCAL" --input-type=modul
 '
 log "${ENV_LOCAL} に必須の値がそろっています。"
 
+pnpm setup:hooks
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium
 log "依存（Panda の codegen を含む）と Playwright の Chromium を入れました。"

@@ -12,6 +12,8 @@ Node.js 24.22.1 以降の 24 系と pnpm 11 を使用します。開発環境と
 
 ```bash
 pnpm install
+pnpm exec playwright install chromium
+pnpm setup:hooks
 cp .env.example .env.local
 ```
 
@@ -22,6 +24,8 @@ cp .env.example .env.local
 ```bash
 pnpm dev
 ```
+
+push 前に Storybook と E2E の検査が実行されます。検証用 Supabase の準備と、別 PC・worktree への設定は [CI と push 前の検査](docs/ops/ci.md) を参照してください。
 
 バックエンド用の別プロセスはありません。画面は `src/app/`、ドメインロジックと Supabase アクセスは `src/server/` にあります。
 

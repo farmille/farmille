@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 手元で E2E を流す。supabase/config.toml の Supabase（127.0.0.1:54321）へ CI の E2E ジョブと同じ環境変数で向け、
+# 手元で E2E を流す。supabase/config.toml の Supabase（127.0.0.1:54321）へ検証用の環境変数で向け、
 # migration の遅れを確かめ、資材マスタが無ければ入れてから、引数をそのまま playwright test に渡す。
 # Supabase の起動・停止と migration の適用はしない。足りなければ手順を出して非0で終わる。
 
