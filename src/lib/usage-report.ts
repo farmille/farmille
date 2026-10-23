@@ -63,7 +63,7 @@ export const UsageReportInputSchema = v.object({
     v.array(
       v.object({
         id: uuid,
-        kind: v.picklist(["numeric", "text"]),
+        kind: v.picklist(["numeric", "text", "image"]),
         name: short,
         unit: short,
         body,
@@ -80,6 +80,7 @@ export const UsageReportInputSchema = v.object({
         mediaType: v.picklist(["photo", "video"]),
         section,
         caption: short,
+        measurementId: v.optional(v.nullable(uuid)),
       }),
     ),
     v.maxLength(30),
@@ -193,21 +194,9 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   required("plots", input.plots.length >= 2, "※ 2区以上を入力してください");
   input.plots.forEach((plot, i) => {
     required(`plots.${i}.name`, plot.name.trim().length > 0);
-    required(`plots.${i}.scope`, plot.scope.trim().length > 0);
     required(`plots.${i}.description`, plot.description.trim().length > 0);
   });
-  required(
-    "measurements",
-    input.measurements.some(
-      (measurement) =>
-        measurement.kind === "numeric" &&
-        measurement.name.trim().length > 0 &&
-        measurement.graphs.some((graph) =>
-          graph.rows.some((row) => parseReportNumber(row.value) !== null),
-        ),
-    ),
-    "※ 調査項目と数値を入力したグラフを1つ以上追加してください",
-  );
+  required("measurements", input.measurements.length > 0, "※ 調査項目を1つ以上追加してください");
   input.measurements.forEach((measurement, i) => {
     required(
       `measurements.${i}.name`,
@@ -216,13 +205,8 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
     );
     required(
       `measurements.${i}.values`,
-      measurement.kind === "text"
-        ? measurement.body.trim().length > 0
-        : measurement.graphs.length > 0 &&
-            measurement.graphs.every(({ rows }) =>
-              rows.some(({ value }) => parseReportNumber(value) !== null),
-            ),
-      "※ 各区の数値、または文章を入力してください",
+      reportMeasurementHasResult(measurement, input.media),
+      "※ 各区の数値、資料のグラフ・表、または文章を入力してください",
     );
     if (measurement.kind === "numeric") {
       required(
@@ -246,6 +230,24 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   );
   required("guidelineAck", input.guidelineAck, "※ 投稿ガイドラインへの同意が必要です");
   return errors;
+}
+function reportMeasurementHasResult(
+  measurement: UsageReportInput["measurements"][number],
+  media: UsageReportInput["media"],
+): boolean {
+  switch (measurement.kind) {
+    case "text":
+      return measurement.body.trim().length > 0;
+    case "image":
+      return media.some((item) => item.measurementId === measurement.id);
+    case "numeric":
+      return (
+        measurement.graphs.length > 0 &&
+        measurement.graphs.every(({ rows }) =>
+          rows.some(({ value }) => parseReportNumber(value) !== null),
+        )
+      );
+  }
 }
 export function reportErrorStep(key: string): number {
   if (key === "cropId" || key === "materialId" || key === "variety") return 1;
