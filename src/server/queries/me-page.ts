@@ -159,7 +159,7 @@ async function getHelpfulCounts(
   return succeed(counts);
 }
 
-async function listOwnPosts(
+export async function listOwnPostsWithSupabase(
   supabase: SupabaseClient<Database>,
   userId: string,
 ): Promise<Result<{ posts: OwnPostItem[]; reviewCount: number; helpfulReceivedCount: number }>> {
@@ -293,10 +293,11 @@ async function listOwnPosts(
       right.createdAt.localeCompare(left.createdAt) || left.id.localeCompare(right.id),
   );
 
-  const helpfulReceivedCount = [
-    ...reviewHelpful.data.values(),
-    ...reportHelpful.data.values(),
-  ].reduce((total, count) => total + count, 0);
+  const helpfulReceivedCount = posts.reduce(
+    (total, post) =>
+      post.kind === "review" || post.status === "published" ? total + post.helpfulCount : total,
+    0,
+  );
 
   return succeed({
     posts: posts.slice(0, SHELF_LIMIT),
@@ -447,7 +448,7 @@ export async function getMyPageData(userId: string): Promise<Result<MyPageData>>
   const supabase = await createServerSupabase();
   const [profileResult, postsResult, savedResult, helpfulResult] = await Promise.all([
     getOwnProfile(userId),
-    listOwnPosts(supabase, userId),
+    listOwnPostsWithSupabase(supabase, userId),
     listSavedMaterials(userId, { limit: SHELF_LIMIT }),
     listHelpfulItems(supabase, userId),
   ]);
