@@ -6,7 +6,7 @@ import { css } from "../../../../styled-system/css";
 
 /** マイページだけに出す、未設定の項目の案内。1行で、全部そろったら出さない。 */
 export type ProfileSetupNoticeProps = {
-  /** 表示情報編集で入れられる項目のうち、空のもの。表示順は編集画面の並びに合わせる。 */
+  /** プロフィール公開情報編集で入れられる項目のうち、空のもの。表示順は編集画面の並びに合わせる。 */
   missing: readonly ProfileSetupItem[];
 };
 
@@ -14,7 +14,7 @@ export type ProfileSetupItem = "bio" | "crops" | "affiliations" | "links";
 
 const ITEM_LABELS = {
   bio: "自己紹介",
-  crops: "主な作目",
+  crops: "栽培作目",
   affiliations: "所属",
   links: "リンク",
 } as const satisfies Record<ProfileSetupItem, string>;
@@ -31,7 +31,7 @@ const row = css({
 
 const text = css({ flex: "none" });
 
-// 未設定の項目は押せるボタンで並べる。押すと表示情報編集へ。
+// 未設定の項目は押せるボタンで並べる。押すとプロフィール公開情報編集へ。
 const itemButton = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   px: "3",
   py: "1.5",
