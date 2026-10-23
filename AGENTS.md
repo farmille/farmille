@@ -82,7 +82,7 @@ pnpm setup:hooks
 pnpm lint && pnpm format:check && pnpm exec tsc --noEmit && pnpm exec vitest run && pnpm check:stories && pnpm build
 ```
 
-UI を変えたときは、Storybook のレスポンシブ検査（全 Story を 320〜1440px の 13 幅で横にはみ出さないこと）と E2E も流す。
+UI を変えたときは、push 前の hook が差分に応じて選ぶブラウザ検査を流す。選ばれた Story は 320〜1440px の 13 幅を検査する。CSSだけの変更では E2E を省き、hook・lint・資料だけの変更ではブラウザ検査を省く。検査対象の詳細は [CIとpush前の検査](docs/ops/ci.md) に従う。全件検査が必要な場合は次を使う。
 
 ```bash
 pnpm test:browser:local
