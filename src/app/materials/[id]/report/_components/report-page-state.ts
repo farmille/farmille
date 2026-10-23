@@ -31,7 +31,15 @@ export function itemsFromInput(input: UsageReportInput): ReportPageItem[] {
       .filter((media) => media.measurementId === measurement.id && media.mediaType === "photo")
       .map(({ id, url, caption }) => ({ id, url, caption }));
     if (measurement.kind === "image")
-      return [{ id: measurement.id, mode: "file", name: measurement.name, body: measurement.body, images }];
+      return [
+        {
+          id: measurement.id,
+          mode: "file",
+          name: measurement.name,
+          body: measurement.body,
+          images,
+        },
+      ];
     if (measurement.kind === "text")
       return [
         {
@@ -102,7 +110,12 @@ export function reportPageChecks(
 ): ReportPageCheck[] {
   const images = reportPageHasImages(items);
   const checks: ReportPageCheck[] = [
-    { key: "materialId", label: "資材", ok: input.materialId !== "", target: "report-prop-material" },
+    {
+      key: "materialId",
+      label: "資材",
+      ok: input.materialId !== "",
+      target: "report-prop-material",
+    },
     { key: "cropId", label: "作物", ok: input.cropId !== null, target: "report-prop-crop" },
     {
       key: "variety",
@@ -146,7 +159,12 @@ export function reportPageChecks(
       ok: input.timingNote.trim() !== "",
       target: "report-timing-note",
     },
-    { key: "timingAck", label: "処理日を記入した確認", ok: acks.timing, target: "report-timing-ack" },
+    {
+      key: "timingAck",
+      label: "処理日を記入した確認",
+      ok: acks.timing,
+      target: "report-timing-ack",
+    },
     {
       key: "plots",
       label: "比べた区",
@@ -170,7 +188,12 @@ export function reportPageChecks(
   ];
   if (images) {
     checks.push(
-      { key: "privacyAck", label: "写り込みの確認", ok: acks.privacy, target: "report-privacy-ack" },
+      {
+        key: "privacyAck",
+        label: "写り込みの確認",
+        ok: acks.privacy,
+        target: "report-privacy-ack",
+      },
       {
         key: "documentsAck",
         label: "秘密保持の確認",

@@ -140,7 +140,7 @@ export const dialogRecipe = sva({
           cursor: "pointer",
           _hover: { bg: "surface.panel", color: "text.default" },
         },
-        body: { flex: "1", minH: "0", overflow: "auto", pb: "4" },
+        body: { flex: "1", minH: "0", overflow: "auto", scrollbarGutter: "stable", pb: "4" },
         foot: {
           flex: "none",
           display: "flex",

@@ -88,3 +88,7 @@ export const Timeline: Story = {
 export const Stages: Story = {
   args: { ...Timeline.args, variant: "stages" },
 };
+
+export const Checks: Story = {
+  args: { variant: "checks", multiple: true },
+};

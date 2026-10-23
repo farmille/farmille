@@ -26,6 +26,38 @@ const toggleGroupRecipe = sva({
           _pressed: { borderColor: "primary.600", bg: "primary.soft", color: "text.brandOnSoft" },
         },
       },
+      // 複数選ぶチップ。押せることと選んだことが分かるよう、チップの頭にチェック欄を出す
+      checks: {
+        group: choiceGroupRecipe.raw({ variant: "chips" }),
+        item: {
+          ...choiceRecipe.raw({ look: "chip" }),
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "1.5",
+          _before: {
+            content: '""',
+            flex: "none",
+            display: "grid",
+            placeItems: "center",
+            w: "4",
+            h: "4",
+            borderWidth: "1.5px",
+            borderStyle: "solid",
+            borderColor: "border.strong",
+            borderRadius: "mark",
+            bg: "surface.card",
+            fontSize: "xs",
+            lineHeight: "none",
+            color: "text.inverse",
+          },
+          _pressed: {
+            borderColor: "primary.600",
+            bg: "primary.soft",
+            color: "text.brandOnSoft",
+            _before: { content: '"✓"', bg: "primary.700", borderColor: "primary.700" },
+          },
+        },
+      },
       timeline: {
         frame: {
           position: "relative",
@@ -97,7 +129,6 @@ const toggleGroupRecipe = sva({
           _disabled: { opacity: "disabled", cursor: "not-allowed" },
         },
       },
-    },
       // 栽培の順に並ぶ段階を、スマホでは縦の1本の線、PCでは横の1本の線に並べる（ポップアップの中で使う）
       stages: {
         group: {
@@ -160,9 +191,9 @@ const toggleGroupRecipe = sva({
             pt: "8",
             fontSize: "sm",
             textAlign: "center",
-            _after: { top: "3.5", bottom: "auto", left: "0", right: "0", w: "auto", h: "0.5" },
+            _after: { top: "3.5", bottom: "[auto]", left: "0", right: "0", w: "auto", h: "0.5" },
             "&:first-child::after": { top: "3.5", left: "[50%]" },
-            "&:last-child::after": { bottom: "auto", right: "[50%]" },
+            "&:last-child::after": { bottom: "[auto]", right: "[50%]" },
             _before: { left: "[50%]", top: "1.5", mt: "0", ml: "-2.5" },
           },
         },
@@ -181,7 +212,7 @@ type ToggleGroupProps<V extends string> = {
   /** multiple で押せる数の上限。達すると、押していない選択肢を押せなくする。 */
   limit?: number;
   /** timeline は順に並ぶ段階（施用時期など）を線の上の点で示す。stages はスマホで縦、PCで横の線。 */
-  variant?: "chips" | "timeline" | "stages";
+  variant?: "chips" | "checks" | "timeline" | "stages";
   disabled?: boolean;
   "aria-label"?: string;
   "aria-labelledby"?: string;

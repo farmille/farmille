@@ -31,7 +31,12 @@ const row = css({
   scrollMarginTop: "20",
 });
 
-const key = css({ fontWeight: "bold", textStyle: "body", color: "text.default", whiteSpace: "nowrap" });
+const key = css({
+  fontWeight: "bold",
+  textStyle: "body",
+  color: "text.default",
+  whiteSpace: "nowrap",
+});
 
 const mark = css({ ml: "0.5", color: "accent.danger", fontWeight: "normal" });
 
@@ -41,7 +46,8 @@ const valueRecipe = cva({
     display: "flex",
     flexWrap: "wrap",
     alignItems: "center",
-    gap: "1 2.5",
+    rowGap: "1",
+    columnGap: "2.5",
     minW: "0",
     minH: "10",
     px: "3",
@@ -73,7 +79,13 @@ const valueRecipe = cva({
   defaultVariants: { kind: "button", missing: false },
 });
 
-const chevron = css({ position: "absolute", right: "2", top: "[50%]", transform: "translateY(-50%)", color: "text.muted" });
+const chevron = css({
+  position: "absolute",
+  right: "2",
+  top: "[50%]",
+  transform: "translateY(-50%)",
+  color: "text.muted",
+});
 
 const empty = css({ color: "text.muted" });
 
@@ -127,11 +139,25 @@ const itemRecipe = cva({
 
 const note = css({ m: "0", mt: "1.5", textStyle: "supporting", color: "text.muted" });
 
-const group = css({ mt: "3.5", mb: "1.5", textStyle: "supporting", fontWeight: "bold", color: "text.muted" });
+const group = css({
+  mt: "3.5",
+  mb: "1.5",
+  textStyle: "supporting",
+  fontWeight: "bold",
+  color: "text.muted",
+});
 
-const searchBox = css({ position: "sticky", top: "0", zIndex: "local.1", bg: "surface.card", pb: "1" });
+const searchBox = css({
+  position: "sticky",
+  top: "0",
+  zIndex: "local.1",
+  bg: "surface.card",
+  pb: "1",
+});
 
 const stages = css({ pt: "1" });
+
+const doneButton = css({ w: "auto", minW: "button.sm" });
 
 function Row({
   id,
@@ -232,25 +258,25 @@ export function ReportPageProperties({
 
   const crop = crops.find((item) => item.id === input.cropId);
   const sameMaterial = input.materialId === pageMaterialId;
-  const fromMaterial = sameMaterial ? crops.filter((item) => materialCropIds.includes(item.id)) : [];
+  const fromMaterial = sameMaterial
+    ? crops.filter((item) => materialCropIds.includes(item.id))
+    : [];
   const mine = crops.filter(
     (item) => favoriteCropIds.includes(item.id) && !fromMaterial.some((x) => x.id === item.id),
   );
   const ownEffects = sameMaterial ? materialEffectNames : [];
   const effectGroups = [...new Set(effects.map((effect) => effect.categoryName))];
   const effectOption = (name: string) => ({ value: name, label: name });
+  // 組ごとの ToggleGroup が返すのはその組の選択だけなので、ほかの組の選択は残して入れ替える
   const toggleEffects = (names: string[], selected: string[]) => {
     onChange((current) => ({
       ...current,
-      purposeTags: [
-        ...current.purposeTags.filter((tag) => !names.includes(tag)),
-        ...selected.filter((tag) => !current.purposeTags.includes(tag)),
-      ].filter((tag, index, all) => all.indexOf(tag) === index),
+      purposeTags: [...current.purposeTags.filter((tag) => !names.includes(tag)), ...selected],
     }));
   };
-  const cropRow = (item: CropOption) => (
+  const cropRow = (item: CropOption, group = "") => (
     <button
-      key={item.id}
+      key={`${group}:${item.id}`}
       type="button"
       className={itemRecipe({ current: item.id === input.cropId })}
       onClick={() => {
@@ -260,21 +286,35 @@ export function ReportPageProperties({
     >
       {item.name}
       {item.id === input.cropId ? "  ✓" : ""}
-      {item.aliases.length > 0 && <span className={css({ display: "block", textStyle: "supporting", color: "text.muted" })}>{item.aliases.join("・")}</span>}
+      {item.aliases.length > 0 && (
+        <span className={css({ display: "block", textStyle: "supporting", color: "text.muted" })}>
+          {item.aliases.join("・")}
+        </span>
+      )}
     </button>
   );
 
   return (
     <div className={list}>
       <Row id="report-prop-material" label="資材" required>
-        <button type="button" className={valueRecipe({ missing: missing.has("materialId") })} onClick={() => open("material")}>
+        <button
+          type="button"
+          className={valueRecipe({ missing: missing.has("materialId") })}
+          aria-label={`資材：${material.name}`}
+          onClick={() => open("material")}
+        >
           <span>{material.name}</span>
           <span className={sub}>{material.manufacturerName}</span>
           <Icon name="chevron_right" className={chevron} />
         </button>
       </Row>
       <Row id="report-prop-crop" label="作物" required>
-        <button type="button" className={valueRecipe({ missing: missing.has("cropId") })} onClick={() => open("crop")}>
+        <button
+          type="button"
+          className={valueRecipe({ missing: missing.has("cropId") })}
+          aria-label={`作物：${crop?.name ?? "未選択"}`}
+          onClick={() => open("crop")}
+        >
           {crop ? <span>{crop.name}</span> : <span className={empty}>作物を選ぶ</span>}
           <Icon name="chevron_right" className={chevron} />
         </button>
@@ -287,14 +327,20 @@ export function ReportPageProperties({
               aria-label="品種"
               placeholder="例）アイコ"
               value={input.variety}
-              onChange={(event) => onChange((current) => ({ ...current, variety: event.target.value }))}
+              onChange={(event) =>
+                onChange((current) => ({ ...current, variety: event.target.value }))
+              }
             />
           )}
           <Checkbox
             size="sm"
             checked={input.varietyUnknown}
             onCheckedChange={(varietyUnknown) =>
-              onChange((current) => ({ ...current, varietyUnknown, variety: varietyUnknown ? "" : current.variety }))
+              onChange((current) => ({
+                ...current,
+                varietyUnknown,
+                variety: varietyUnknown ? "" : current.variety,
+              }))
             }
           >
             不明・なし
@@ -302,7 +348,12 @@ export function ReportPageProperties({
         </div>
       </Row>
       <Row id="report-prop-purpose" label="使用目的" required>
-        <button type="button" className={valueRecipe({ missing: missing.has("purposeTags") })} onClick={() => open("purpose")}>
+        <button
+          type="button"
+          className={valueRecipe({ missing: missing.has("purposeTags") })}
+          aria-label={`使用目的：${input.purposeTags.join("、") || "未選択"}`}
+          onClick={() => open("purpose")}
+        >
           {input.purposeTags.length > 0 ? (
             <>
               {input.purposeTags.map((tag) => (
@@ -310,7 +361,9 @@ export function ReportPageProperties({
                   {tag}
                 </span>
               ))}
-              {input.purposeNote.trim() && <span className={`${line} ${sub}`}>補足：{input.purposeNote}</span>}
+              {input.purposeNote.trim() && (
+                <span className={`${line} ${sub}`}>補足：{input.purposeNote}</span>
+              )}
             </>
           ) : (
             <span className={empty}>期待した効果を選ぶ</span>
@@ -328,7 +381,10 @@ export function ReportPageProperties({
             options={PREFECTURES.map((item) => ({ value: String(item.code), label: item.name }))}
             value={input.prefectureCode === null ? null : String(input.prefectureCode)}
             onValueChange={(value) =>
-              onChange((current) => ({ ...current, prefectureCode: value === null ? null : Number(value) }))
+              onChange((current) => ({
+                ...current,
+                prefectureCode: value === null ? null : Number(value),
+              }))
             }
           />
           {input.showCity && (
@@ -337,7 +393,9 @@ export function ReportPageProperties({
               aria-label="市区町村"
               placeholder="市区町村"
               value={input.city}
-              onChange={(event) => onChange((current) => ({ ...current, city: event.target.value }))}
+              onChange={(event) =>
+                onChange((current) => ({ ...current, city: event.target.value }))
+              }
             />
           )}
           <Checkbox
@@ -350,7 +408,12 @@ export function ReportPageProperties({
         </div>
       </Row>
       <Row id="report-prop-stages" label="施用時期" required>
-        <button type="button" className={valueRecipe({ missing: missing.has("timingStages") })} onClick={() => open("stages")}>
+        <button
+          type="button"
+          className={valueRecipe({ missing: missing.has("timingStages") })}
+          aria-label={`施用時期：${input.timingStages.length > 0 ? `${input.timingStages.length}段階` : "未選択"}`}
+          onClick={() => open("stages")}
+        >
           {input.timingStages.length > 0 ? (
             input.timingStages
               .toSorted((a, b) => a - b)
@@ -372,55 +435,99 @@ export function ReportPageProperties({
         </div>
       </Row>
 
-      <Dialog open={picker === "material"} onOpenChange={(next) => !next && setPicker("")} size="sheet" title="資材を選ぶ">
+      <Dialog
+        open={picker === "material"}
+        onOpenChange={(next) => !next && setPicker("")}
+        size="sheet"
+        title="資材を選ぶ"
+      >
         <div className={searchBox}>
-          <SearchInput aria-label="資材を検索" placeholder="資材名・メーカー名で検索" value={query} onValueChange={setQuery} />
-          <p className={note}>資材ページの「実証詳細レポートを書く」から来た場合は、その資材が入っています。</p>
+          <SearchInput
+            aria-label="資材を検索"
+            placeholder="資材名・メーカー名で検索"
+            value={query}
+            onValueChange={setQuery}
+          />
+          <p className={note}>
+            資材ページの「実証詳細レポートを書く」から来た場合は、その資材が入っています。
+          </p>
         </div>
         <div className={listHead}>{query.trim() ? "検索結果" : "選んでいる資材"}</div>
         {!query.trim() && (
-          <button type="button" className={itemRecipe({ current: true })} onClick={() => setPicker("")}>
-            {material.name}  ✓
-            <span className={css({ display: "block", textStyle: "supporting", color: "text.muted" })}>{material.manufacturerName}</span>
+          <button
+            type="button"
+            className={itemRecipe({ current: true })}
+            onClick={() => setPicker("")}
+          >
+            {material.name} ✓
+            <span
+              className={css({ display: "block", textStyle: "supporting", color: "text.muted" })}
+            >
+              {material.manufacturerName}
+            </span>
           </button>
         )}
-        {query.trim() !== "" && materials.length === 0 && <p className={note}>見つかりません。資材名かメーカー名の一部で検索してください。</p>}
+        {query.trim() !== "" && materials.length === 0 && (
+          <p className={note}>見つかりません。資材名かメーカー名の一部で検索してください。</p>
+        )}
         {materials.map((item) => (
           <button
             key={item.id}
             type="button"
             className={itemRecipe({ current: item.id === input.materialId })}
             onClick={() => {
-              onMaterialChange({ id: item.id, name: item.name, manufacturerName: item.manufacturer_name });
+              onMaterialChange({
+                id: item.id,
+                name: item.name,
+                manufacturerName: item.manufacturer_name,
+              });
               setPicker("");
             }}
           >
             {item.name}
-            <span className={css({ display: "block", textStyle: "supporting", color: "text.muted" })}>{item.manufacturer_name}</span>
+            <span
+              className={css({ display: "block", textStyle: "supporting", color: "text.muted" })}
+            >
+              {item.manufacturer_name}
+            </span>
           </button>
         ))}
       </Dialog>
 
-      <Dialog open={picker === "crop"} onOpenChange={(next) => !next && setPicker("")} size="sheet" title="作物を選ぶ">
+      <Dialog
+        open={picker === "crop"}
+        onOpenChange={(next) => !next && setPicker("")}
+        size="sheet"
+        title="作物を選ぶ"
+      >
         <div className={searchBox}>
-          <SearchInput aria-label="作物を検索" placeholder="作物名で検索　例）トマト、みかん" value={query} onValueChange={setQuery} />
-          <p className={note}>1つ選びます。複数の作物で使った場合は、作物ごとに別のレポートにしてください。</p>
+          <SearchInput
+            aria-label="作物を検索"
+            placeholder="作物名で検索　例）トマト、みかん"
+            value={query}
+            onValueChange={setQuery}
+          />
+          <p className={note}>
+            1つ選びます。複数の作物で使った場合は、作物ごとに別のレポートにしてください。
+          </p>
         </div>
         {query.trim() ? (
           <>
-            {crops.filter((item) => cropMatches(item, query)).map(cropRow)}
+            {crops.filter((item) => cropMatches(item, query)).map((item) => cropRow(item))}
             {!crops.some((item) => cropMatches(item, query)) && (
-              <p className={note}>「{query.trim()}」に一致する作物がありません。別の呼び方でも検索できます。</p>
+              <p className={note}>
+                「{query.trim()}」に一致する作物がありません。別の呼び方でも検索できます。
+              </p>
             )}
           </>
         ) : (
           <>
             {fromMaterial.length > 0 && <div className={listHead}>この資材の登録作物</div>}
-            {fromMaterial.map(cropRow)}
+            {fromMaterial.map((item) => cropRow(item, "material"))}
             {mine.length > 0 && <div className={listHead}>あなたの作物</div>}
-            {mine.map(cropRow)}
+            {mine.map((item) => cropRow(item, "mine"))}
             <div className={listHead}>すべての作物</div>
-            {crops.map(cropRow)}
+            {crops.map((item) => cropRow(item, "all"))}
           </>
         )}
       </Dialog>
@@ -430,13 +537,18 @@ export function ReportPageProperties({
         onOpenChange={(next) => !next && setPicker("")}
         size="sheet"
         title="使用目的を選ぶ"
-        footer={<DialogClose variant="primary">完了</DialogClose>}
+        footer={
+          <DialogClose variant="primary" className={doneButton}>
+            完了
+          </DialogClose>
+        }
       >
         {ownEffects.length > 0 && (
           <>
             <div className={group}>この資材に登録されている効果</div>
             <ToggleGroup
               multiple
+              variant="checks"
               aria-label="この資材に登録されている効果"
               options={ownEffects.map(effectOption)}
               value={input.purposeTags.filter((tag) => ownEffects.includes(tag))}
@@ -454,6 +566,7 @@ export function ReportPageProperties({
               <div className={group}>{name}</div>
               <ToggleGroup
                 multiple
+                variant="checks"
                 aria-label={name}
                 options={names.map(effectOption)}
                 value={input.purposeTags.filter((tag) => names.includes(tag))}
@@ -468,7 +581,9 @@ export function ReportPageProperties({
           requirement="optional"
           placeholder="例）高温期の萎れを軽くしたかった"
           value={input.purposeNote}
-          onChange={(event) => onChange((current) => ({ ...current, purposeNote: event.target.value }))}
+          onChange={(event) =>
+            onChange((current) => ({ ...current, purposeNote: event.target.value }))
+          }
         />
       </Dialog>
 
@@ -479,7 +594,11 @@ export function ReportPageProperties({
         wide
         fit
         title="施用時期を選ぶ"
-        footer={<DialogClose variant="primary">完了</DialogClose>}
+        footer={
+          <DialogClose variant="primary" className={doneButton}>
+            完了
+          </DialogClose>
+        }
       >
         <ToggleGroup
           multiple
@@ -488,11 +607,12 @@ export function ReportPageProperties({
           aria-label="施用時期"
           options={APPLICATION_TIMINGS.map((label, index) => ({ value: String(index), label }))}
           value={input.timingStages.map(String)}
-          onValueChange={(selected) => onChange((current) => ({ ...current, timingStages: selected.map(Number) }))}
+          onValueChange={(selected) =>
+            onChange((current) => ({ ...current, timingStages: selected.map(Number) }))
+          }
         />
         <p className={note}>栽培の順に並んでいます。複数選べます。</p>
       </Dialog>
     </div>
   );
 }
-

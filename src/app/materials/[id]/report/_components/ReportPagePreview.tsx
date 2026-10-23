@@ -12,7 +12,15 @@ import { css, cx } from "../../../../../../styled-system/css";
 
 import type { ReportPageItem } from "./report-page-state";
 
-const wrap = css({ maxW: "content.form", mx: "auto", px: "4", pt: "3.5", pb: "16", bg: "surface.card", minH: "full" });
+const wrap = css({
+  maxW: "content.form",
+  mx: "auto",
+  px: "4",
+  pt: "3.5",
+  pb: "16",
+  bg: "surface.card",
+  minH: "full",
+});
 
 const missingBox = css({
   mb: "3",
@@ -27,7 +35,15 @@ const missingBox = css({
 
 const title = css({ m: "0", fontSize: "2xl", lineHeight: "snug" });
 
-const byline = css({ mt: "2", display: "flex", flexWrap: "wrap", gap: "1 2.5", textStyle: "note", color: "text.muted" });
+const byline = css({
+  mt: "2",
+  display: "flex",
+  flexWrap: "wrap",
+  rowGap: "1",
+  columnGap: "2.5",
+  textStyle: "note",
+  color: "text.muted",
+});
 
 const author = css({ fontWeight: "bold", color: "text.default" });
 
@@ -63,7 +79,8 @@ const none = css({ m: "0", textStyle: "prose", color: "text.muted" });
 const facts = css({
   display: "grid",
   gridTemplateColumns: "[7.5em minmax(0, 1fr)]",
-  gap: "1 2.5",
+  rowGap: "1",
+  columnGap: "2.5",
   m: "0",
   textStyle: "prose",
   "& dt": { color: "text.muted" },
@@ -72,7 +89,14 @@ const facts = css({
 
 const plot = css({ display: "flex", gap: "2", mt: "2" });
 
-const plotDot = css({ flex: "none", w: "2.5", h: "2.5", mt: "2.5", borderRadius: "pill", bg: "[currentColor]" });
+const plotDot = css({
+  flex: "none",
+  w: "2.5",
+  h: "2.5",
+  mt: "2.5",
+  borderRadius: "pill",
+  bg: "currentColor",
+});
 
 const figure = css({ m: "0", my: "2", "& img": { w: "full", h: "auto" } });
 
@@ -108,7 +132,8 @@ export function ReportPagePreview({
 }) {
   const today = new Date();
   const variety = input.varietyUnknown ? "" : input.variety.trim();
-  const prefecture = PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name ?? "（未選択）";
+  const prefecture =
+    PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name ?? "（未選択）";
   const city = input.showCity && input.city.trim() ? ` ${input.city.trim()}` : "";
   const stages = input.timingStages
     .toSorted((a, b) => a - b)
@@ -126,7 +151,8 @@ export function ReportPagePreview({
       <article className={wrap}>
         {missing.length > 0 && (
           <p className={missingBox}>
-            未記入の項目が{missing.length}件あります（{missing.join("、")}）。投稿するときに確認します。
+            未記入の項目が{missing.length}件あります（{missing.join("、")}
+            ）。投稿するときに確認します。
           </p>
         )}
         <h1 className={title}>{heading}</h1>

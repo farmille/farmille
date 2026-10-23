@@ -10,10 +10,21 @@ export const docHeadingRecipe = cva({
   defaultVariants: { level: 2, missing: false },
 });
 
-export const requirementMark = css({ ml: "2", fontSize: "sm", fontWeight: "normal", color: "accent.danger" });
+export const requirementMark = css({
+  ml: "2",
+  fontSize: "sm",
+  fontWeight: "normal",
+  color: "accent.danger",
+});
 
 /** 見出しの下の案内。薄字にしない。 */
-export const docLead = css({ m: "0", mt: "1", textStyle: "body", lineHeight: "relaxed", color: "text.default" });
+export const docLead = css({
+  m: "0",
+  mt: "1",
+  textStyle: "body",
+  lineHeight: "relaxed",
+  color: "text.default",
+});
 
 /** 案内の中の大事な一文。 */
 export const docLeadMark = css({
