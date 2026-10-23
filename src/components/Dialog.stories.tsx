@@ -76,3 +76,23 @@ export const Fullscreen: Story = {
     ),
   },
 };
+
+export const Sheet: Story = {
+  args: {
+    title: "使用目的を選ぶ",
+    size: "sheet",
+    open: true,
+    onOpenChange: fn(),
+    footer: <DialogClose variant="primary">完了</DialogClose>,
+    children: (
+      <div className={css({ display: "grid", gap: "3" })}>
+        {body}
+        {body}
+      </div>
+    ),
+  },
+};
+
+export const SheetWide: Story = {
+  args: { ...Sheet.args, title: "施用時期を選ぶ", wide: true, fit: true },
+};
