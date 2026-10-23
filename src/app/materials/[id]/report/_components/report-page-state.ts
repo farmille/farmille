@@ -17,6 +17,64 @@ export type ReportPageItem = {
   images: ReportPageImage[];
 };
 
+/** 1つのレポートに入れられる写真・画像の数（保存の入力の上限と同じ）。 */
+export const REPORT_IMAGE_LIMIT = 30;
+
+/** 文章の欄と、短い欄の文字数の上限（保存の入力の上限と同じ）。 */
+export const REPORT_BODY_MAX = 20000;
+export const REPORT_SHORT_MAX = 500;
+
+/** 調査項目 itemId に入れられる画像の数。旧形式の節ごとの写真とほかの項目の画像を引く。 */
+export function reportImageRoom(
+  input: UsageReportInput,
+  items: ReportPageItem[],
+  itemId: string,
+): number {
+  const sectionPhotos = input.media.filter(
+    (media) => media.measurementId === undefined || media.measurementId === null,
+  ).length;
+  const others = items
+    .filter((item) => item.id !== itemId && item.mode === "file")
+    .reduce((sum, item) => sum + item.images.length, 0);
+  return Math.max(0, REPORT_IMAGE_LIMIT - sectionPhotos - others);
+}
+
+/** 文字数の上限を超えている欄の名前（保存すると入力の検証で落ちるので、先に欄を示す）。 */
+export function reportOverLimit(input: UsageReportInput, items: ReportPageItem[]): string[] {
+  const over = (label: string, value: string, max: number) => (value.length > max ? [label] : []);
+  return [
+    ...over("品種", input.variety, REPORT_SHORT_MAX),
+    ...over("使用目的の補足", input.purposeNote, REPORT_SHORT_MAX),
+    ...over("市区町村", input.city, REPORT_SHORT_MAX),
+    ...over("結果・感想", input.observedChange, REPORT_BODY_MAX),
+    ...over("栽培環境", input.cultivationEnvironment, REPORT_BODY_MAX),
+    ...over("処理日と生育状況", input.timingNote, REPORT_BODY_MAX),
+    ...input.plots.flatMap((plot, index) => [
+      ...over(`区${index + 1}の名前`, plot.name, REPORT_SHORT_MAX),
+      ...over(`区${index + 1}の説明`, plot.description, REPORT_BODY_MAX),
+    ]),
+    ...items.flatMap((item, index) => [
+      ...over(`調査項目${index + 1}の名前`, item.name, REPORT_SHORT_MAX),
+      ...over(
+        `調査項目${index + 1}の${item.mode === "file" ? "補足説明" : "区ごとの結果"}`,
+        item.body,
+        REPORT_BODY_MAX,
+      ),
+      ...item.images.flatMap((image, k) =>
+        over(`調査項目${index + 1}の${k + 1}枚目の画像のタイトル`, image.caption, REPORT_SHORT_MAX),
+      ),
+    ]),
+  ];
+}
+
+/** 上限に近づいた欄に出す一言。余裕があるあいだは出さない。 */
+export function reportLengthNote(value: string, max: number): string | undefined {
+  if (value.length < max * 0.9) return undefined;
+  return value.length >= max
+    ? `上限の${max.toLocaleString("ja-JP")}字に達しました。`
+    : `あと${(max - value.length).toLocaleString("ja-JP")}字まで書けます。`;
+}
+
 /** DB に列を持たず、画面でだけ確かめるチェック。 */
 export type ReportPageAcks = { timing: boolean; privacy: boolean };
 

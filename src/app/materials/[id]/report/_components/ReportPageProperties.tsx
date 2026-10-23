@@ -15,7 +15,7 @@ import type { CropOption } from "@/server/queries/usage-report-form";
 
 import { css, cva } from "../../../../../../styled-system/css";
 
-import type { ReportMaterialSummary } from "./report-page-state";
+import { REPORT_SHORT_MAX, type ReportMaterialSummary } from "./report-page-state";
 
 export type ReportEffectOption = { id: string; name: string; categoryName: string };
 
@@ -325,6 +325,7 @@ export function ReportPageProperties({
             <input
               className={inline}
               aria-label="品種"
+              maxLength={REPORT_SHORT_MAX}
               placeholder="例）アイコ"
               value={input.variety}
               onChange={(event) =>
@@ -391,6 +392,7 @@ export function ReportPageProperties({
             <input
               className={inline}
               aria-label="市区町村"
+              maxLength={REPORT_SHORT_MAX}
               placeholder="市区町村"
               value={input.city}
               onChange={(event) =>
@@ -580,6 +582,7 @@ export function ReportPageProperties({
           label="補足"
           requirement="optional"
           placeholder="例）高温期の萎れを軽くしたかった"
+          maxLength={REPORT_SHORT_MAX}
           value={input.purposeNote}
           onChange={(event) =>
             onChange((current) => ({ ...current, purposeNote: event.target.value }))

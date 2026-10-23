@@ -7,7 +7,7 @@ import { ReportPdfPagePicker } from "./ReportPdfPagePicker";
 const meta = {
   title: "Pages/materials/[id]/report/ReportPdfPagePicker",
   component: ReportPdfPagePicker,
-  args: { doc: null, name: "試験成績書.pdf", onPick: fn(), onCancel: fn() },
+  args: { doc: null, name: "試験成績書.pdf", max: 30, onPick: fn(), onCancel: fn() },
 } satisfies Meta<typeof ReportPdfPagePicker>;
 
 export default meta;

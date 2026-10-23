@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -11,7 +11,6 @@ import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Checkbox, Notice, Textarea, usePersistedInput } from "@/components/form";
 import { Icon } from "@/components/Icon";
-import { SuccessMark, completionStepRecipe } from "@/components/SuccessMark";
 import { toast } from "@/components/Toaster";
 import {
   createBlankUsageReport,
@@ -32,6 +31,10 @@ import { ReportPageProperties, type ReportEffectOption } from "./ReportPagePrope
 import {
   inputWithItems,
   itemsFromInput,
+  REPORT_BODY_MAX,
+  reportImageRoom,
+  reportLengthNote,
+  reportOverLimit,
   reportPageChecks,
   reportPageHasImages,
   reportPageTitle,
@@ -164,10 +167,6 @@ const doneWrap = css({
   textAlign: "center",
 });
 
-const doneTitle = css({ m: "0", mt: "4.5", fontSize: "xl", textWrap: "balance" });
-
-const doneText = css({ mt: "1", mb: "4", textStyle: "supporting", color: "text.subtle" });
-
 function focusTarget(id: string) {
   const element = document.getElementById(id);
   if (element === null) return;
@@ -218,21 +217,37 @@ export function ReportPageForm({
   const [submitted, setSubmitted] = useState(false);
   const [fileItem, setFileItem] = useState<{ item: ReportPageItem; isNew: boolean } | null>(null);
   const [pending, startTransition] = useTransition();
+  // 連打で保存・提出が二重に送られないよう、送信中は ref で止める（state の disabled は次の描画まで効かない）
+  const sending = useRef(false);
   const dirty = JSON.stringify(payload) !== saved;
+  const reportPath = `/materials/${material.id}/report/new`;
 
   const update = useCallback(
     (next: (current: UsageReportInput) => UsageReportInput) => setInput((current) => next(current)),
     [],
   );
-  const showError = useCallback((message: string) => setFailure(message), []);
+  // 失敗は画面の下の欄に残し、スマホでも気づけるよう通知でも出す
+  const showError = useCallback((message: string) => {
+    setFailure(message);
+    toast.error(message.split("\n")[0], { toasterId: reportToasterId });
+  }, []);
 
   // 下書き保存の前に閉じても、同じタブで開き直せば保存前の入力に戻る
+  // 資材ページから画面内の遷移で開くと、最初の描画ではまだ URL が遷移前なので、控えの置き場は URL を固定する
   usePersistedInput({
     name: "report",
+    path: reportPath,
     schema: UsageReportInputSchema,
     unsaved: dirty && !submitted ? payload : null,
     restore: (restored) => {
       if (restored.materialId !== material.id) return;
+      // 控えのあとに別の画面で下書きが更新されていたら、控えは戻さない（戻すと保存のたびに競合する）
+      if (restored.expectedUpdatedAt !== input.expectedUpdatedAt) {
+        setFailure(
+          "別の画面で更新された下書きを開きました。この画面で保存していなかった入力は戻していません。",
+        );
+        return;
+      }
       setInput(restored);
       setItems(itemsFromInput(restored));
     },
@@ -257,8 +272,15 @@ export function ReportPageForm({
   const done = checks.length - missing.length;
 
   async function persist(submit: boolean, close = false) {
+    if (sending.current) return;
+    sending.current = true;
     try {
       const body = inputWithItems(input, items);
+      const over = reportOverLimit(body, items);
+      if (over.length > 0) {
+        showError(`文字数の上限を超えている欄があります：${over.join("、")}`);
+        return;
+      }
       const result = submit
         ? await submitUsageReportAction(body.materialId, body)
         : await saveUsageReportDraftAction(body.materialId, body);
@@ -276,8 +298,11 @@ export function ReportPageForm({
       setFailure(null);
       setInput((current) => ({ ...current, expectedUpdatedAt: result.updatedAt }));
       setSaved(JSON.stringify({ ...body, expectedUpdatedAt: result.updatedAt }));
-      if (result.status === "pending") setSubmitted(true);
-      else {
+      if (result.status === "pending") {
+        // 提出後の画面はサーバーの「提出済み」に揃える
+        setSubmitted(true);
+        router.refresh();
+      } else {
         const now = new Date();
         toast(
           `下書きを保存しました（${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}）`,
@@ -289,12 +314,13 @@ export function ReportPageForm({
       if (close) router.push(`/materials/${body.materialId}`);
       else if (body.materialId !== material.id)
         router.replace(`/materials/${body.materialId}/report/new`);
-    } catch (error) {
+    } catch {
+      // 通信の失敗などはブラウザの英語の文言になるので、そのまま出さない
       showError(
-        error instanceof Error
-          ? error.message
-          : "保存できませんでした。通信状態を確認して再度お試しください。",
+        "保存できませんでした。入力内容はそのまま残っています。通信状態を確認して再度お試しください。",
       );
+    } finally {
+      sending.current = false;
     }
   }
 
@@ -307,21 +333,9 @@ export function ReportPageForm({
   if (submitted)
     return (
       <div className={reportFrame}>
-        <section className={doneWrap}>
-          <SuccessMark entrance />
-          <h2 className={cx(doneTitle, completionStepRecipe({ step: 1 }))}>
-            レポートを受け付けました
-          </h2>
-          <p className={cx(doneText, completionStepRecipe({ step: 2 }))}>
-            運営の確認のあと、このページの形で公開されます。修正をお願いする場合があります。
-          </p>
-          <a
-            className={cx(pillButtonRecipe(), completionStepRecipe({ step: 3 }))}
-            href={`/materials/${input.materialId}`}
-          >
-            資材ページに戻る
-          </a>
-        </section>
+        <p className={doneWrap} role="status">
+          提出しています…
+        </p>
       </div>
     );
 
@@ -413,6 +427,8 @@ export function ReportPageForm({
           example={
             "いつ頃から・どこに・どんな変化があったか。良くなかった点も\n例）2回目の使用から数日後、午後の葉の萎れが使用前よりやや軽くなった。収量が増えるような変化は確認できなかったが、暑い時期の萎れを抑える補助としては手応えがあった。薬害（葉焼け・変色）は見られなかった。"
           }
+          maxLength={REPORT_BODY_MAX}
+          description={reportLengthNote(input.observedChange, REPORT_BODY_MAX)}
           value={input.observedChange}
           onChange={(event) =>
             update((current) => ({ ...current, observedChange: event.target.value }))
@@ -430,6 +446,8 @@ export function ReportPageForm({
           example={
             "露地か施設か、養液の使用など\n例）パイプハウスで土耕栽培。無加温で、灌水チューブで週2回かん水している。"
           }
+          maxLength={REPORT_BODY_MAX}
+          description={reportLengthNote(input.cultivationEnvironment, REPORT_BODY_MAX)}
           value={input.cultivationEnvironment}
           onChange={(event) =>
             update((current) => ({ ...current, cultivationEnvironment: event.target.value }))
@@ -447,6 +465,8 @@ export function ReportPageForm({
           example={
             "資材を使った日（〇月〇日）は必ず。定植日・生育状況も\n例）3月6日に定植。開花してすぐの6月5日に施用。7日おきに3回。"
           }
+          maxLength={REPORT_BODY_MAX}
+          description={reportLengthNote(input.timingNote, REPORT_BODY_MAX)}
           value={input.timingNote}
           onChange={(event) =>
             update((current) => ({ ...current, timingNote: event.target.value }))
@@ -568,6 +588,7 @@ export function ReportPageForm({
           isNew={fileItem.isNew}
           userId={userId}
           reportId={input.reportId}
+          imageLimit={reportImageRoom(input, items, fileItem.item.id)}
           onClose={() => setFileItem(null)}
           onDelete={(id) => {
             setItems((current) => {

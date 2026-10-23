@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useCallback, useRef, useState, type PointerEvent } from "react";
 
 import { Button } from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
@@ -169,13 +169,17 @@ export function ReportImageEditor({
   const view = useRef<HTMLCanvasElement>(null);
   const top = stack.at(-1) ?? null;
 
-  useEffect(() => {
-    const canvas = view.current;
-    if (canvas === null || top === null) return;
-    canvas.width = top.width;
-    canvas.height = top.height;
-    canvas.getContext("2d")?.drawImage(top, 0, 0);
-  }, [top]);
+  // ポップアップの中身は後から描かれるので、canvas が置かれた時と画像が変わった時の両方で描く
+  const drawTo = useCallback(
+    (canvas: HTMLCanvasElement | null) => {
+      view.current = canvas;
+      if (canvas === null || top === null) return;
+      canvas.width = top.width;
+      canvas.height = top.height;
+      canvas.getContext("2d")?.drawImage(top, 0, 0);
+    },
+    [top],
+  );
 
   function push(next: HTMLCanvasElement) {
     setStack((previous) => [...previous, next]);
@@ -279,7 +283,7 @@ export function ReportImageEditor({
         </div>
         <div className={picture}>
           <div className={frame}>
-            <canvas ref={view} className={canvasStyle} aria-label="編集中の画像" role="img" />
+            <canvas ref={drawTo} className={canvasStyle} aria-label="編集中の画像" role="img" />
             <div
               className={overlay}
               onPointerDown={onDown}
