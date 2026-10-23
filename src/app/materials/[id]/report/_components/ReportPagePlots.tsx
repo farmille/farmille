@@ -7,6 +7,7 @@ import { createReportPlot, type UsageReportInput } from "@/lib/usage-report";
 
 import { css, cx } from "../../../../../../styled-system/css";
 
+import { REPORT_BODY_MAX, REPORT_SHORT_MAX, reportLengthNote } from "./report-page-state";
 import { addButton, docLead, docLeadMark, labelStyle, removeButton } from "./report-page-styles";
 
 const plotStyle = css({ mt: "4" });
@@ -72,6 +73,7 @@ export function ReportPagePlots({
             <Input
               label={<span className={labelStyle}>区の名前</span>}
               placeholder={index === 0 ? "例）無処理区" : index === 1 ? "例）処理区" : "例）〇〇区"}
+              maxLength={REPORT_SHORT_MAX}
               value={plot.name}
               error={missing && plot.name.trim() === "" ? "区の名前を記入してください" : undefined}
               onChange={(event) => update(plot.id, { name: event.target.value })}
@@ -81,6 +83,8 @@ export function ReportPagePlots({
               label={<span className={labelStyle}>区の説明</span>}
               size="document"
               example={EXAMPLES[Math.min(index, 1)]}
+              maxLength={REPORT_BODY_MAX}
+              description={reportLengthNote(plot.description, REPORT_BODY_MAX)}
               value={plot.description}
               error={
                 missing && plot.description.trim() === "" ? "区の説明を記入してください" : undefined

@@ -23,7 +23,12 @@ import {
   renderPdfPage,
   uploadReportImage,
 } from "./report-page-images";
-import type { ReportPageImage, ReportPageItem } from "./report-page-state";
+import {
+  REPORT_IMAGE_LIMIT,
+  REPORT_SHORT_MAX,
+  type ReportPageImage,
+  type ReportPageItem,
+} from "./report-page-state";
 
 /** 差し込み中の画像。dirty は、まだ保存していない（新しい・編集した）画像。 */
 type DraftImage = {
@@ -90,6 +95,16 @@ const pick = css({
   cursor: "pointer",
   "&:focus-within": { outlineWidth: "2px", outlineStyle: "solid", outlineColor: "primary.700" },
   "& input": { position: "absolute", w: "[1px]", h: "[1px]", opacity: "0", overflow: "hidden" },
+  "&[data-disabled]": { color: "text.muted", cursor: "not-allowed" },
+});
+
+const rejectList = css({
+  m: "0",
+  mt: "2",
+  pl: "5",
+  listStyleType: "disc",
+  textStyle: "supporting",
+  color: "accent.danger",
 });
 
 const status = css({ mt: "2", textStyle: "supporting", color: "text.muted" });
@@ -121,6 +136,7 @@ export function ReportItemFileDialog({
   isNew,
   userId,
   reportId,
+  imageLimit,
   onCommit,
   onDelete,
   onClose,
@@ -129,6 +145,8 @@ export function ReportItemFileDialog({
   isNew: boolean;
   userId: string;
   reportId: string;
+  /** この調査項目に入れられる画像の数（レポート全体の上限から、ほかの項目の画像を引いた数）。 */
+  imageLimit: number;
   onCommit: (item: ReportPageItem) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
@@ -136,7 +154,9 @@ export function ReportItemFileDialog({
   // 項目ごとに呼び出し側が作り直す（key）ので、最初の状態はその項目の画像
   const [images, setImages] = useState<DraftImage[]>(() => item.images.map(fromSaved));
   const [open, setOpen] = useState(true);
+  // 進み具合（読み込み中など）と、追加できなかった理由は分けて持つ。理由は次のファイルの読み込みで消さない
   const [message, setMessage] = useState("");
+  const [rejected, setRejected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [asking, setAsking] = useState(false);
   const [editing, setEditing] = useState<DraftImage | null>(null);
@@ -144,8 +164,13 @@ export function ReportItemFileDialog({
     doc: PDFDocumentProxy;
     name: string;
     resolve: (pages: number[]) => void;
+    max: number;
   } | null>(null);
   const live = useRef(true);
+  const committing = useRef(false);
+  // 読み込み中に増えた枚数も数えるため、追加を始めた時の枚数から ref で数える
+  const count = useRef(0);
+  const full = images.length >= imageLimit;
 
   const changed =
     images.length !== item.images.length ||
@@ -158,6 +183,7 @@ export function ReportItemFileDialog({
 
   function add(canvas: HTMLCanvasElement) {
     if (!live.current) return;
+    count.current += 1;
     setImages((previous) => [
       ...previous,
       {
@@ -173,8 +199,17 @@ export function ReportItemFileDialog({
   }
 
   async function addFiles(files: File[]) {
+    count.current = images.length;
+    setRejected([]);
+    const reject = (text: string) => setRejected((previous) => [...previous, text]);
     for (const file of files) {
       if (!live.current) return;
+      if (count.current >= imageLimit) {
+        reject(
+          `画像はレポート全体で${REPORT_IMAGE_LIMIT}枚までのため、「${file.name}」は追加できませんでした。`,
+        );
+        continue;
+      }
       if (isPdf(file)) {
         setMessage(`「${file.name}」を開いています…`);
         try {
@@ -186,7 +221,7 @@ export function ReportItemFileDialog({
           } else {
             setMessage("");
             const pages = await new Promise<number[]>((resolve) =>
-              setPdf({ doc, name: file.name, resolve }),
+              setPdf({ doc, name: file.name, resolve, max: imageLimit - count.current }),
             );
             for (const [index, page] of pages.entries()) {
               if (!live.current) return;
@@ -196,14 +231,13 @@ export function ReportItemFileDialog({
           }
           setMessage("");
         } catch {
-          setMessage(`「${file.name}」を開けませんでした。`);
+          setMessage("");
+          reject(`「${file.name}」を開けませんでした。`);
         }
         continue;
       }
       if (!isImage(file)) {
-        setMessage(
-          `「${file.name}」は写真（JPEG・PNG・WebP）でもPDFでもないため、追加できません。`,
-        );
+        reject(`「${file.name}」は写真（JPEG・PNG・WebP）でもPDFでもないため、追加できません。`);
         continue;
       }
       setMessage(`「${file.name}」を読み込んでいます…`);
@@ -211,9 +245,8 @@ export function ReportItemFileDialog({
         add(await canvasFromImageFile(file));
         setMessage("");
       } catch {
-        setMessage(
-          `「${file.name}」を読み込めませんでした。JPEG・PNG で保存し直すと追加できます。`,
-        );
+        setMessage("");
+        reject(`「${file.name}」を読み込めませんでした。JPEG・PNG で保存し直すと追加できます。`);
       }
     }
   }
@@ -237,29 +270,39 @@ export function ReportItemFileDialog({
   }
 
   async function commit() {
+    // 連打で二重に保存しない（state の disabled は次の描画まで効かない）
+    if (committing.current) return;
+    committing.current = true;
     setSaving(true);
+    let current = images;
     try {
-      const saved: ReportPageImage[] = [];
-      for (const [index, image] of images.entries()) {
-        setMessage(`画像を保存しています（${index + 1}/${images.length}）…`);
-        if (!image.dirty || image.canvas === null) {
-          if (image.url !== null)
-            saved.push({ id: image.id, url: image.url, caption: image.caption });
-          continue;
-        }
-        // 編集した画像は別の画像として保存し直す（保存済みの画像は上書きしない）
-        const id = image.url === null ? image.id : crypto.randomUUID();
-        saved.push({
-          id,
-          url: await uploadReportImage(image.canvas, userId, reportId, id),
-          caption: image.caption,
-        });
+      for (const [index, image] of current.entries()) {
+        if (!image.dirty || image.canvas === null) continue;
+        setMessage(`画像を保存しています（${index + 1}/${current.length}）…`);
+        // 保存はいつも新しい名前で行う（途中で失敗した画像を送り直しても、同じ名前とぶつからない）
+        const id = crypto.randomUUID();
+        const url = await uploadReportImage(image.canvas, userId, reportId, id);
+        // 保存できた画像はすぐ控える。あとの画像で失敗しても、押し直したときに送り直さない
+        current = current.map((x) =>
+          x.id === image.id ? { ...x, id, url, dirty: false, preview: x.preview } : x,
+        );
+        setImages(current);
       }
+      setMessage("");
       live.current = false;
-      onCommit({ ...item, mode: "file", images: saved });
+      onCommit({
+        ...item,
+        mode: "file",
+        images: current.flatMap((image) =>
+          image.url === null ? [] : [{ id: image.id, url: image.url, caption: image.caption }],
+        ),
+      });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "画像を保存できませんでした。");
+      setMessage(
+        `${error instanceof Error ? error.message : "画像を保存できませんでした。"}保存できた画像はそのまま残っています。`,
+      );
     } finally {
+      committing.current = false;
       setSaving(false);
     }
   }
@@ -306,7 +349,10 @@ export function ReportItemFileDialog({
           グラフ・表の画像・PDF<span className={required}>必須</span>
         </div>
         <p className={lead}>
-          写真（JPEG・PNG・WebP）とPDFを、何枚でも選べます。PDFは使うページを選べます。
+          写真（JPEG・PNG・WebP）とPDFを選べます。PDFは使うページを選べます。
+          <br />
+          画像はレポート全体で{REPORT_IMAGE_LIMIT}枚まで（この調査項目にはあと
+          {Math.max(0, imageLimit - images.length)}枚）。
           <br />
           氏名や連絡先が写っていたら、「画像を編集する」の塗りつぶしで隠してください。
         </p>
@@ -325,6 +371,7 @@ export function ReportItemFileDialog({
               label="画像のタイトル"
               requirement="optional"
               placeholder="例）図1 可販果収量"
+              maxLength={REPORT_SHORT_MAX}
               value={image.caption}
               onChange={(event) =>
                 setImages((previous) =>
@@ -344,10 +391,13 @@ export function ReportItemFileDialog({
             </Button>
           </div>
         ))}
-        <label className={pick}>
+        <label className={pick} data-disabled={full ? "" : undefined}>
           <Icon name="add" size="sm" />
-          {images.length > 0 ? "写真・PDFを追加" : "写真・PDFを選ぶ"}（複数可）
+          {full
+            ? `画像は${REPORT_IMAGE_LIMIT}枚まで入っています`
+            : `${images.length > 0 ? "写真・PDFを追加" : "写真・PDFを選ぶ"}（複数可）`}
           <input
+            disabled={full}
             type="file"
             accept="image/jpeg,image/png,image/webp,application/pdf"
             multiple
@@ -362,6 +412,13 @@ export function ReportItemFileDialog({
           <p className={status} role="status">
             {message}
           </p>
+        )}
+        {rejected.length > 0 && (
+          <ul className={rejectList} role="alert">
+            {rejected.map((text) => (
+              <li key={text}>{text}</li>
+            ))}
+          </ul>
         )}
         <p className={status}>
           グラフ・表だけでは伝わらないことは、ページに戻ってから補足説明に書けます。
@@ -391,6 +448,7 @@ export function ReportItemFileDialog({
         key={`pdf:${pdf?.name ?? ""}`}
         doc={pdf?.doc ?? null}
         name={pdf?.name ?? ""}
+        max={pdf?.max ?? 0}
         onCancel={() => {
           pdf?.resolve([]);
           setPdf(null);

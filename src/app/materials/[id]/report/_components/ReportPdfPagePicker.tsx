@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 
 import { Button } from "@/components/Button";
@@ -8,7 +8,7 @@ import { Dialog } from "@/components/Dialog";
 
 import { css, cva } from "../../../../../../styled-system/css";
 
-import { PDF_PAGE_LIMIT, renderPdfThumb } from "./report-page-images";
+import { renderPdfThumb } from "./report-page-images";
 
 const grid = css({
   display: "grid",
@@ -29,6 +29,7 @@ const pageRecipe = cva({
     textAlign: "center",
     fontSize: "sm",
     cursor: "pointer",
+    _disabled: { opacity: "disabled", cursor: "not-allowed" },
     "& img": { display: "block", w: "full", borderRadius: "input" },
   },
   variants: {
@@ -66,31 +67,46 @@ const bar = css({
 export function ReportPdfPagePicker({
   doc,
   name,
+  max,
   onPick,
   onCancel,
 }: {
   doc: PDFDocumentProxy | null;
   name: string;
+  /** 選べるページ数（レポートの画像の残り）。 */
+  max: number;
   onPick: (pages: number[]) => void;
   onCancel: () => void;
 }) {
   const [thumbs, setThumbs] = useState<Record<number, string>>({});
   const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
-  const count = doc === null ? 0 : Math.min(doc.numPages, PDF_PAGE_LIMIT);
+  const count = doc === null ? 0 : doc.numPages;
+  const full = selected.size >= max;
 
+  // 縮小画像は1本の順番待ちで描く。同じページを同時に2回描くと pdf.js が止まるため、
+  // 効果が作り直されても（開発時の二重実行など）描画は続きから1本だけにする
+  const queue = useRef<{ doc: PDFDocumentProxy; stopped: boolean } | null>(null);
   useEffect(() => {
     if (doc === null) return;
-    let active = true;
+    const running = queue.current;
+    if (running !== null && running.doc === doc) {
+      running.stopped = false;
+      return () => {
+        running.stopped = true;
+      };
+    }
+    const state = { doc, stopped: false };
+    queue.current = state;
     void (async () => {
-      for (let page = 1; page <= Math.min(doc.numPages, PDF_PAGE_LIMIT); page++) {
+      for (let page = 1; page <= doc.numPages; page++) {
         const canvas = await renderPdfThumb(doc, page);
-        if (!active) return;
+        if (state.stopped) return;
         const url = canvas.toDataURL("image/jpeg", 0.7);
         setThumbs((previous) => ({ ...previous, [page]: url }));
       }
     })();
     return () => {
-      active = false;
+      state.stopped = true;
     };
   }, [doc]);
 
@@ -111,6 +127,7 @@ export function ReportPdfPagePicker({
             key={page}
             type="button"
             aria-pressed={selected.has(page)}
+            disabled={full && !selected.has(page)}
             className={pageRecipe({ on: selected.has(page) })}
             onClick={() =>
               setSelected((previous) => {
@@ -131,7 +148,10 @@ export function ReportPdfPagePicker({
         ))}
       </div>
       <div className={bar}>
-        <span>{selected.size}ページを選んでいます</span>
+        <span>
+          {selected.size}ページを選んでいます（あと{Math.max(0, max - selected.size)}
+          ページ選べます）
+        </span>
         <Button
           variant="primary"
           size="sm"

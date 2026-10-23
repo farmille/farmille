@@ -8,8 +8,6 @@ const MAX_SIDE = 2400;
 const SAVE_SIDE = 1600;
 /** PDF のページ選びに出す縮小画像の長い辺。 */
 const THUMB_SIDE = 280;
-/** PDF から選べるページ数の上限。 */
-export const PDF_PAGE_LIMIT = 40;
 
 export function makeCanvas(width: number, height: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
@@ -114,7 +112,21 @@ export async function openPdf(file: File): Promise<PDFDocumentProxy> {
   return pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
 }
 
-export async function renderPdfPage(
+// 同じ PDF のページを同時に描くと pdf.js が止まることがあるので、PDFごとに1つずつ順に描く
+const pdfQueues = new WeakMap<PDFDocumentProxy, Promise<unknown>>();
+
+export function renderPdfPage(
+  doc: PDFDocumentProxy,
+  pageNumber: number,
+  max = MAX_SIDE,
+): Promise<HTMLCanvasElement> {
+  const previous = pdfQueues.get(doc) ?? Promise.resolve();
+  const next = previous.catch(() => undefined).then(() => drawPdfPage(doc, pageNumber, max));
+  pdfQueues.set(doc, next);
+  return next;
+}
+
+async function drawPdfPage(
   doc: PDFDocumentProxy,
   pageNumber: number,
   max = MAX_SIDE,

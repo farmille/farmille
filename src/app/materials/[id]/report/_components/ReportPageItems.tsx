@@ -6,7 +6,14 @@ import { OptimizedImage } from "@/components/OptimizedImage";
 
 import { css, cva } from "../../../../../../styled-system/css";
 
-import { createReportPageItem, reportPageItemDone, type ReportPageItem } from "./report-page-state";
+import {
+  createReportPageItem,
+  REPORT_BODY_MAX,
+  REPORT_SHORT_MAX,
+  reportLengthNote,
+  reportPageItemDone,
+  type ReportPageItem,
+} from "./report-page-state";
 import { addButton, docLead, labelStyle, removeButton } from "./report-page-styles";
 
 const block = css({
@@ -174,6 +181,7 @@ export function ReportPageItems({
               label={`調査項目${index + 1}の名前`}
               hideLabel
               placeholder="例）可販果率"
+              maxLength={REPORT_SHORT_MAX}
               value={item.name}
               error={missing && item.name.trim() === "" ? "調査項目を記入してください" : undefined}
               onChange={(event) => update(item.id, { name: event.target.value })}
@@ -210,6 +218,8 @@ export function ReportPageItems({
                 requirement="required"
                 size="document"
                 example={TEXT_EXAMPLE}
+                maxLength={REPORT_BODY_MAX}
+                description={reportLengthNote(item.body, REPORT_BODY_MAX)}
                 value={item.body}
                 error={
                   missing && item.body.trim() === "" ? "区ごとの結果を記入してください" : undefined
@@ -244,6 +254,8 @@ export function ReportPageItems({
                   requirement="optional"
                   size="document"
                   example={NOTE_EXAMPLE}
+                  maxLength={REPORT_BODY_MAX}
+                  description={reportLengthNote(item.body, REPORT_BODY_MAX)}
                   value={item.body}
                   onChange={(event) => update(item.id, { body: event.target.value })}
                 />
