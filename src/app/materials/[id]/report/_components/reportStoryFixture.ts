@@ -1,6 +1,6 @@
 import { createBlankUsageReport, type UsageReportInput } from "@/lib/usage-report";
 
-const photo = (fill: string) =>
+export const storyPhoto = (fill: string) =>
   `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="400" height="300" fill="${fill}"/><circle cx="200" cy="170" r="70" fill="#6a9a5b"/></svg>`,
   )}`;
@@ -14,29 +14,22 @@ const plots: UsageReportInput["plots"] = [
   {
     ...control,
     name: "無処理区",
-    scope: "1区10株、3反復",
+    scope: "",
     description: "資材は使っていない。かん水と施肥は処理区と同じ。",
   },
   {
     ...treated,
     name: "処理区",
-    scope: "1区10株、3反復",
+    scope: "",
     description: "資材を1,000倍に希釈し、10aあたり200Lを葉面散布。7日おきに3回。",
   },
   {
     ...extra,
     name: "倍量区（2,000倍）",
-    scope: "1区10株",
-    description: "",
+    scope: "",
+    description: "資料を参照",
   },
 ];
-
-const row = (plotId: string, value: string) => ({
-  id: crypto.randomUUID(),
-  plotId,
-  label: "",
-  value,
-});
 
 export const filledReport: UsageReportInput = {
   ...blank,
@@ -56,43 +49,30 @@ export const filledReport: UsageReportInput = {
   measurements: [
     {
       id: "44444444-4444-4444-8444-444444444444",
-      kind: "numeric",
+      kind: "image",
       name: "可販果収量",
-      unit: "kg/10a",
-      body: "",
-      graphs: [
-        {
-          id: "55555555-5555-4555-8555-555555555555",
-          heading: "定植90日後",
-          rows: plots.map((plot, index) =>
-            row(plot.id, ["1,100", "1,250±40", "1,180"][index] ?? ""),
-          ),
-        },
-      ],
+      unit: "",
+      body: "表1の「区A」が無処理区、「区B」が処理区。",
+      graphs: [],
     },
     {
       id: "66666666-6666-4666-8666-666666666666",
       kind: "text",
-      name: "そのほかの観察",
+      name: "裂果率",
       unit: "",
-      body: "処理区は根張りがよく、引き抜いたときに細根が多かった。",
+      body: "収穫期間の裂果率は、処理区が6%で、無処理区（11%）より5ポイント低かった。",
       graphs: [],
     },
   ],
   media: [
     {
       id: "77777777-7777-4777-8777-777777777777",
-      url: photo("#e8f0dc"),
+      url: storyPhoto("#e8f0dc"),
       mediaType: "photo",
-      section: "results",
-      caption: "処理区の株全体",
+      section: "measurements",
+      caption: "図1 可販果収量",
+      measurementId: "44444444-4444-4444-8444-444444444444",
     },
   ],
-  documents: [
-    {
-      id: "88888888-8888-4888-8888-888888888888",
-      path: "reports/trial.pdf",
-      name: "試験成績書_2026.pdf",
-    },
-  ],
+  documents: [],
 };

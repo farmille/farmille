@@ -7,10 +7,11 @@ import { css } from "../../../../../../styled-system/css";
 import { getOwnRegisteredAddress } from "@/server/accounts/registered-address";
 import { errorMessageJa } from "@/server/errors";
 import { requireGeneralUser } from "@/server/auth";
+import { getOwnProfile } from "@/server/queries/profiles";
 import { getStructuredReportFormData } from "@/server/usage-reports/structured";
 
 import { loadMaterialOrNotFound, materialMetadata } from "../../material-page-data";
-import { ReportForm } from "../_components/ReportForm";
+import { ReportPageForm } from "../_components/ReportPageForm";
 import { ReportSubmitted } from "../_components/ReportSubmitted";
 
 type ReportFormPageProps = {
@@ -45,10 +46,11 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
     throw new Error(errorMessageJa[session.error]);
   }
 
-  const [material, formDataResult, addressResult] = await Promise.all([
+  const [material, formDataResult, addressResult, profileResult] = await Promise.all([
     loadMaterialOrNotFound(id),
     getStructuredReportFormData(id, session.data.userId),
     getOwnRegisteredAddress(),
+    getOwnProfile(session.data.userId),
   ]);
 
   if (!formDataResult.ok) {
@@ -56,6 +58,9 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
   }
   if (!addressResult.ok) {
     throw new Error(errorMessageJa[addressResult.error]);
+  }
+  if (!profileResult.ok) {
+    throw new Error(errorMessageJa[profileResult.error]);
   }
   if (material.publication_status !== "published") notFound();
 
@@ -76,14 +81,14 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
 
   return (
     <main>
-      <ReportForm
+      <ReportPageForm
         material={{
           id: material.id,
           name: material.name,
           manufacturerName: material.manufacturer_name,
-          imageUrl: material.imageUrl,
         }}
         userId={session.data.userId}
+        authorName={profileResult.data.handle}
         crops={formData.crops}
         draft={formData.draft}
         effects={formData.effects}
@@ -91,7 +96,6 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
         favoriteCropIds={formData.favoriteCropIds}
         materialCropIds={formData.materialCropIds}
         registeredAddress={addressResult.data}
-        initialDocumentUrls={formData.documentUrls}
       />
     </main>
   );

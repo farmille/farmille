@@ -37,8 +37,6 @@ test("お気に入り保存、マイページ一覧、比較表", async ({ page 
     for (const material of materials) {
       await expect(page.getByText(material.name, { exact: true })).toBeVisible();
     }
-    await page.goto(`/materials/${materials[0].id}/report/new`);
-    await expect(page.locator('img[src*="container-shapes"]')).toBeVisible();
   } finally {
     await deleteAuthUsersByEmail(user.email);
     for (const material of materials) {
