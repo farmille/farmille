@@ -104,7 +104,7 @@ export const SubmitsCropAndRating: Story = {
     mocked(createReviewAction).mockClear();
     const canvas = within(canvasElement);
     const page = within(canvasElement.ownerDocument.body);
-    const cropSearch = canvas.getByRole("combobox", { name: "作目" });
+    const cropSearch = canvas.getByRole("combobox", { name: "使用対象作目" });
     await userEvent.type(cropSearch, "トマト");
     await userEvent.click(await page.findByRole("option", { name: "トマト なす科果菜類" }));
     await userEvent.type(cropSearch, "パプリカ");

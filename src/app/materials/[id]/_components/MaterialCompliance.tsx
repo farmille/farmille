@@ -131,7 +131,7 @@ export function PostsCompliance() {
 export function ArchivedNotice() {
   return (
     <div className={noticeRecipe({ spacing: "near" })}>
-      この資材は掲載を終了しています。過去の情報と投稿は参照できますが、新しい感想口コミや実証詳細レポートは投稿できません。
+      この資材は非公開です。過去の情報と投稿は参照できますが、新しい感想口コミや実証詳細レポートは投稿できません。
     </div>
   );
 }
