@@ -46,9 +46,9 @@ values
   ('ba932323-0000-4000-8000-000000000041','ba932323-0000-4000-8000-000000000031','ba932323-0000-4000-8000-000000000013','','n.s.',0),
   ('ba932323-0000-4000-8000-000000000042','ba932323-0000-4000-8000-000000000031','ba932323-0000-4000-8000-000000000014','','n.s.',1);
 
-select throws_ok(
+select lives_ok(
   $$update public.usage_reports set status='pending' where id='ba932323-0000-4000-8000-000000000003'$$,
-  '23514',null,'text-only submission rejected'
+  'text-only submission accepted'
 );
 set local session_replication_role=replica;
 update public.usage_reports

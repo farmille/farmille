@@ -229,6 +229,7 @@ export async function getStructuredUsageReport(
       mediaType: item.media_type,
       section: item.placement,
       caption: item.caption ?? "",
+      measurementId: item.measurement_id,
     })),
     documents: data.documents
       .toSorted(byOrder)

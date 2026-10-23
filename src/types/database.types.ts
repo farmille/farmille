@@ -3826,6 +3826,7 @@ export type Database = {
           caption: string | null
           created_at: string
           id: string
+          measurement_id: string | null
           media_type: string
           placement: string | null
           sort_order: number
@@ -3837,6 +3838,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           id?: string
+          measurement_id?: string | null
           media_type: string
           placement?: string | null
           sort_order?: number
@@ -3848,6 +3850,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           id?: string
+          measurement_id?: string | null
           media_type?: string
           placement?: string | null
           sort_order?: number
@@ -3856,6 +3859,13 @@ export type Database = {
           usage_report_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "usage_report_media_measurement_fkey"
+            columns: ["measurement_id", "usage_report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_report_measurements"
+            referencedColumns: ["id", "report_id"]
+          },
           {
             foreignKeyName: "usage_report_media_usage_report_id_fkey"
             columns: ["usage_report_id"]
