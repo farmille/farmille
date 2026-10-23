@@ -39,7 +39,7 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await expect(page.getByRole("heading", { name: "Farmilleへようこそ" })).toBeVisible();
     await page.getByRole("button", { name: "チュートリアルを終了" }).click();
     await expect(page.getByRole("heading", { name: "Farmilleへようこそ" })).toHaveCount(0);
-    await expect(page.getByText(handle, { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: handle })).toBeVisible();
     await captureAccountScreen(page, "09-mypage.png");
     await page.getByRole("link", { name: "表示情報を編集" }).click();
     await expect(page).toHaveURL(/\/me\/edit$/);

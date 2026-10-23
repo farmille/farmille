@@ -91,7 +91,7 @@ test("メール確認、登録完了、ログインと所属の入力", async ({
     await expect(page.getByText(selectedName, { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "ログアウト" }).click();
     await loginGeneral(page, { email, password, id: "", handle }, "/me");
-    await expect(page.getByText(handle, { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: handle })).toBeVisible();
   } finally {
     await deleteAuthUsersByEmail(email);
   }
