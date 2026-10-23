@@ -30,7 +30,10 @@ export function HideMaterialPageForm({ materialId }: { materialId: string }) {
         onClick={() =>
           startTransition(async () => {
             if (await hideMaterialPage({ materialId, note })) router.refresh();
-            else setMessage("非公開にできませんでした。編集権と通信状態を確認してください。");
+            else
+              setMessage(
+                "非公開にできませんでした。資材オーナー権限と通信状態を確認してください。",
+              );
           })
         }
       >

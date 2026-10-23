@@ -15,7 +15,7 @@ const groups = [
     title: "メーカーの方",
     links: [
       { label: "メーカー掲載の流れ", href: "/sellers" },
-      { label: "メーカー登録申請", href: "/sellers/apply" },
+      { label: "企業会員登録の申請", href: "/sellers/apply" },
       { label: "製品情報の管理", href: "/dashboard" },
     ],
   },

@@ -147,7 +147,7 @@ describe("カタログ再取り込み", () => {
     expect(plan.conflicts[0].reason).toContain("旧UUID");
     expect(plan.productMap.get(productId)).toBe(id);
   });
-  it("編集権または確認記録のあるメーカー名は変更しない", () => {
+  it("資材オーナー権限または確認記録のあるメーカー名は変更しない", () => {
     const snapshot = importedSnapshot();
     snapshot.materials[0].manufacturer_verified_at = "2026-10-10T00:00:00Z";
     const incoming = source();

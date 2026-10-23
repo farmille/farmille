@@ -286,7 +286,7 @@ export function DashboardContent({ seller, materials }: SellerDashboardData) {
           <div className={kpiGrid}>
             <div className={kpi}>
               <div className={kpiValue}>{materials.length}</div>
-              <div className={kpiLabel}>掲載製品</div>
+              <div className={kpiLabel}>掲載資材</div>
             </div>
             <div className={kpi}>
               <div className={kpiValue}>{verifiedCount}</div>
@@ -348,7 +348,7 @@ export function DashboardContent({ seller, materials }: SellerDashboardData) {
               )
             }
           />
-          <InfoRow label="ログインID" value={seller.login_id} />
+          <InfoRow label="Farmille企業会員ID" value={seller.login_id} />
           <InfoRow label="担当者" value={seller.contact_name} />
           <InfoRow
             label="連絡先メール"
@@ -369,7 +369,7 @@ export function DashboardContent({ seller, materials }: SellerDashboardData) {
             href="/dashboard/materials"
             actionLabel="資材管理を開く"
           >
-            編集権のある製品の編集、下書き保存、プレビュー、表現確認の状況確認を行います。
+            資材オーナー権限のある製品情報の編集、下書き保存、プレビュー、表現確認の状況確認を行います。
           </ProcedureRow>
           <ProcedureRow
             heading="h3"
@@ -405,7 +405,7 @@ export function DashboardContent({ seller, materials }: SellerDashboardData) {
             <div className={surfaceCardRecipe()}>
               <b className={emptyTitle}>公開中の自社資材はありません</b>
               <p className={emptyText}>
-                編集権の書類確認が完了すると、資材ごとに編集できるようになります。
+                資材オーナー権限の書類確認が完了すると、資材ごとに製品情報の編集が可能になります。
               </p>
             </div>
           ) : (
@@ -415,7 +415,7 @@ export function DashboardContent({ seller, materials }: SellerDashboardData) {
                   <div className={infoValueRecipe({ empty: false })}>
                     <Link href={`/dashboard/materials/${material.id}`}>
                       {material.publication_status === "archived"
-                        ? `${material.name}（掲載終了）`
+                        ? `${material.name}（非公開）`
                         : material.name}
                     </Link>
                     <div className={materialMaker}>

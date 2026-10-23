@@ -296,7 +296,7 @@ export const removalReceipt: ApplicationReceipt = {
         item_id: id(410),
         request_type: "hidden",
         reason:
-          "取引先限定の業務用製品で、一般の農家向けには販売していません。\n販売店への問い合わせが増えているため、資材ページを非表示にしてください。",
+          "取引先限定の業務用製品で、一般の農家向けには販売していません。\n販売店への問い合わせが増えているため、資材ページを非公開にしてください。",
         disclose_reason: false,
       },
       company_application_evidence_links: [

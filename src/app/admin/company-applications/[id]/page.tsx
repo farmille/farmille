@@ -15,7 +15,7 @@ export default async function AdminReceiptPage({ params }: { params: Promise<{ i
     >
       <ApplicationReceipt receipt={receipt} />
       <p className={adminBodyStyle}>
-        <Link href="/admin/materials">資材・編集権の管理を開く</Link>
+        <Link href="/admin/materials">資材・資材オーナー権限の管理を開く</Link>
       </p>
     </AdminShell>
   );

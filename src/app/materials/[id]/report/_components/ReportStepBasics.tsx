@@ -246,7 +246,7 @@ export function ReportStepBasics({
       </Fieldset>
 
       <Fieldset
-        legend="使用作物"
+        legend="使用対象作目"
         requirement="required"
         lead="1つ選んでください。複数の作物で使った場合は、作物ごとに別のレポートにしてください。"
         error={errors.cropId}
@@ -265,7 +265,7 @@ export function ReportStepBasics({
         </div>
         <Autocomplete
           hideLabel
-          label="作目"
+          label="使用対象作目"
           placeholder="作物名で検索　トマト、みかん"
           filterMode="preFiltered"
           value={cropQuery}

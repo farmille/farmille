@@ -25,7 +25,7 @@ export const CustomPageTitle: Story = {
   args: {
     pageTitle: "資材詳細",
     backHref: "/materials/101",
-    title: "資材情報を表示できません",
+    title: "製品情報を表示できません",
     description: "対象の資材が見つからないか、通信エラーが発生しました。",
   },
 };

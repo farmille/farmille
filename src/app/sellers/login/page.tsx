@@ -35,7 +35,7 @@ export default async function SellerLoginPage({
   const destinationLabel = destinationLabelOf(destination);
 
   return (
-    <AuthScreen lead="企業会員のログインIDでサインインします。" title="メーカーログイン">
+    <AuthScreen lead="Farmille企業会員IDでサインインします。" title="メーカーログイン">
       <SellerLoginPanel
         destinationLabel={destinationLabel}
         next={destination}

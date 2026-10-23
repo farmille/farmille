@@ -55,7 +55,7 @@ const name = css({ m: "0", textStyle: "title", overflowWrap: "anywhere" });
 
 const standpointBadge = css({ ml: "2", verticalAlign: "[0.2em]", whiteSpace: "nowrap" });
 
-// 「地域」「所属」「主な作目」は見出しの幅をそろえ、値（チップ）の始まりを縦一列にする。
+// 「地域」「所属」「栽培作目」は見出しの幅をそろえ、値（チップ）の始まりを縦一列にする。
 const labeledRow = cva({
   base: { display: "flex", alignItems: "flex-start", gap: "2" },
   variants: { spacing: { tight: { mt: "1.5" }, loose: { mt: "3" } } },
@@ -173,7 +173,7 @@ export function ProfileCard({
           </span>
           {editable ? (
             <Link className={editLink} href="/me/edit">
-              プロフィールを編集<span className={srOnly}>（表示情報を編集）</span>
+              プロフィールを編集<span className={srOnly}>（プロフィール公開情報を編集）</span>
             </Link>
           ) : null}
         </div>
@@ -212,7 +212,7 @@ export function ProfileCard({
 
         {details.crops.length > 0 ? (
           <div className={labeledRow({ spacing: "loose" })}>
-            <span className={label}>主な作目</span>
+            <span className={label}>栽培作目</span>
             <div className={values}>
               {details.crops.map((crop) => (
                 <Chip key={crop.id} wrap>

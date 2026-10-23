@@ -128,7 +128,7 @@ describe("Combobox", () => {
       <Form persist={false} onSubmit={captureSubmit(submitted)}>
         <Combobox
           emptyMessage="一致する作物がありません"
-          label="主な作目"
+          label="栽培作目"
           max={2}
           multiple
           name="cropIds"
@@ -138,7 +138,7 @@ describe("Combobox", () => {
       </Form>,
     );
 
-    const input = screen.getByRole("combobox", { name: "主な作目" });
+    const input = screen.getByRole("combobox", { name: "栽培作目" });
     await user.click(input);
     await user.click(screen.getByRole("option", { name: "トマト なす科果菜類" }));
     await user.click(input);
@@ -167,13 +167,13 @@ describe("Combobox", () => {
       <Combobox
         defaultValue={[crops[0], crops[2]]}
         emptyMessage="一致する作物がありません"
-        label="主な作目"
+        label="栽培作目"
         multiple
         options={crops}
       />,
     );
 
-    await user.click(screen.getByRole("combobox", { name: "主な作目" }));
+    await user.click(screen.getByRole("combobox", { name: "栽培作目" }));
     await user.keyboard("{Escape}{ArrowLeft}");
 
     expect(screen.getByText("きゅうり", { exact: true })).toHaveFocus();
@@ -185,13 +185,13 @@ describe("Combobox", () => {
       <Combobox
         defaultValue={[crops[0], crops[2]]}
         emptyMessage="一致する作物がありません"
-        label="主な作目"
+        label="栽培作目"
         multiple
         options={crops}
       />,
     );
 
-    await user.click(screen.getByRole("combobox", { name: "主な作目" }));
+    await user.click(screen.getByRole("combobox", { name: "栽培作目" }));
     await user.keyboard("{Escape}{Backspace}");
 
     expect(screen.queryByRole("button", { name: "きゅうりを削除" })).not.toBeInTheDocument();

@@ -72,7 +72,7 @@ export const Default: Story = {};
 export const Missing: Story = {
   args: {
     input: blank,
-    errors: { cropId: "使用作物を選んでください", variety: "品種を入力してください" },
+    errors: { cropId: "使用対象作目を選んでください", variety: "品種を入力してください" },
   },
 };
 export const VarietyUnknown: Story = {
@@ -85,7 +85,7 @@ export const CropSearchOpen: Story = {
   args: { input: blank },
   async play({ canvasElement }) {
     const canvas = within(canvasElement);
-    await userEvent.type(canvas.getByLabelText("作目"), "ミニ");
+    await userEvent.type(canvas.getByLabelText("使用対象作目"), "ミニ");
     await page(canvasElement).findByRole("option", {
       name: "トマト なす科果菜類（別名: ミニトマト）",
     });
@@ -96,12 +96,12 @@ export const CropPicked: Story = {
   args: { input: blank },
   async play({ canvasElement }) {
     const canvas = within(canvasElement);
-    await userEvent.type(canvas.getByLabelText("作目"), "きゅ");
+    await userEvent.type(canvas.getByLabelText("使用対象作目"), "きゅ");
     await userEvent.click(
       await page(canvasElement).findByRole("option", { name: "きゅうり うり科果菜類" }),
     );
     await expect(canvas.getByRole("button", { name: "きゅうりを外す" })).toBeVisible();
-    await expect(canvas.getByLabelText("作目")).toHaveValue("");
+    await expect(canvas.getByLabelText("使用対象作目")).toHaveValue("");
     await expect(canvas.getByRole("button", { name: "きゅうり" })).toHaveAttribute(
       "aria-pressed",
       "true",

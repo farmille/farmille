@@ -56,7 +56,7 @@ const introListStyle = css({
 const RELATION_OPTIONS = Object.entries(relationLabels).map(([value, label]) => ({ value, label }));
 
 const TARGET_OPTIONS = [
-  { value: "new", label: "資材情報の新規掲載" },
+  { value: "new", label: "資材の新規掲載" },
   { value: "existing", label: "掲載済み資材の資材オーナー権限" },
 ] as const satisfies readonly { value: ItemRow["target"]; label: string }[];
 

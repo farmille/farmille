@@ -42,8 +42,8 @@ export function ReviewCropPicker({
 
   return (
     <Combobox
-      description="作目を1つ選んでください。"
-      label="作目"
+      description="使用対象作目を1つ選んでください。"
+      label="使用対象作目"
       name="cropIds"
       requirement="required"
       emptyMessage="一致する作物がありません。"

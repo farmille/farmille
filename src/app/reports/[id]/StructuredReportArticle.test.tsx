@@ -45,7 +45,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
       "使用結果の詳細：可販果率",
     ]);
     expect(screen.getByText("耐暑性改善、しおれ軽減")).toBeInTheDocument();
-    expect(screen.getByText(/使用作物：ミニトマト（アイコ）/)).toBeInTheDocument();
+    expect(screen.getByText(/使用対象作目：ミニトマト（アイコ）/)).toBeInTheDocument();
     expect(screen.getByText("1,000倍で散布")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "対照区 74 %" })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "使用区 82±3 a %" })).toBeInTheDocument();

@@ -13,7 +13,7 @@ describe("プロフィールのタグ編集", () => {
       </form>,
     );
     await user.click(screen.getByRole("button", { name: "いちごを削除" }));
-    await user.type(screen.getByRole("combobox", { name: "主な作目" }), "苺");
+    await user.type(screen.getByRole("combobox", { name: "栽培作目" }), "苺");
     await user.keyboard("{ArrowDown}{Enter}");
     expect(container.querySelector('input[name="cropIds"]')).toHaveValue(
       meta.args.details.crops[0].id,
@@ -91,7 +91,7 @@ describe("プロフィールのタグ編集", () => {
         }}
       />,
     );
-    expect(screen.getByRole("combobox", { name: "主な作目" })).toHaveAttribute("readonly");
+    expect(screen.getByRole("combobox", { name: "栽培作目" })).toHaveAttribute("readonly");
     expect(screen.getByRole("combobox", { name: "所属" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "所属を追加" }));
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
