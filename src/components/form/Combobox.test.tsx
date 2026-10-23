@@ -161,6 +161,43 @@ describe("Combobox", () => {
     expect(input).not.toHaveAttribute("readonly");
   });
 
+  it("複数選択の空の入力欄では左矢印で最後のチップへ移動できる", async () => {
+    const user = userEvent.setup();
+    render(
+      <Combobox
+        defaultValue={[crops[0], crops[2]]}
+        emptyMessage="一致する作物がありません"
+        label="主な作目"
+        multiple
+        options={crops}
+      />,
+    );
+
+    await user.click(screen.getByRole("combobox", { name: "主な作目" }));
+    await user.keyboard("{Escape}{ArrowLeft}");
+
+    expect(screen.getByText("きゅうり", { exact: true })).toHaveFocus();
+  });
+
+  it("複数選択の空の入力欄ではBackspaceで最後の選択を外せる", async () => {
+    const user = userEvent.setup();
+    render(
+      <Combobox
+        defaultValue={[crops[0], crops[2]]}
+        emptyMessage="一致する作物がありません"
+        label="主な作目"
+        multiple
+        options={crops}
+      />,
+    );
+
+    await user.click(screen.getByRole("combobox", { name: "主な作目" }));
+    await user.keyboard("{Escape}{Backspace}");
+
+    expect(screen.queryByRole("button", { name: "きゅうりを削除" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "トマトを削除" })).toBeInTheDocument();
+  });
+
   it("サーバー検索で候補が入れ替わっても、選んだ候補のラベルを保つ", async () => {
     const user = userEvent.setup();
     function ServerSearch() {
