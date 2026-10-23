@@ -5,8 +5,10 @@ import { PostActionsLoader } from "@/components/PostActionsLoader";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import {
   listPublishedArticlesByMaterial,
+  listUsageReportCardDetails,
   type MaterialContentList,
   type PublishedUsageReport,
+  type UsageReportCardDetail,
 } from "@/server/queries/material-content";
 import type { MaterialDetail } from "@/server/queries/materials";
 
@@ -17,6 +19,8 @@ import { unwrapQueryResult } from "../query-result";
 import { EmptyCard } from "./EmptyCard";
 import { HeroCount } from "./HeroSavedCount";
 import { MaterialSectionHeading } from "./MaterialSectionHeading";
+import { ReportCardChart } from "./ReportCardChart";
+import { ReportChartLoginNote } from "./ReportChartLoginNote";
 import { UsageReportCard } from "./UsageReportCard";
 import { MoreLink } from "./MoreLink";
 
@@ -75,6 +79,8 @@ type MaterialReportsViewProps = {
   reports: MaterialContentList<PublishedUsageReport>;
   articleTotal: number;
   signedIn: boolean;
+  /** ログイン中だけ渡す。null のときはグラフの代わりにログインの案内を出す。 */
+  details: Map<string, UsageReportCardDetail> | null;
 };
 
 export function MaterialReportsView({
@@ -82,6 +88,7 @@ export function MaterialReportsView({
   reports,
   articleTotal,
   signedIn,
+  details,
 }: MaterialReportsViewProps) {
   const materialPath = `/materials/${material.id}`;
   const next = encodeURIComponent(materialPath);
@@ -91,26 +98,37 @@ export function MaterialReportsView({
       <ReportsHeading count={reports.total} moreHref={`${materialPath}/articles`} />
       {reports.items.length > 0 ? (
         <div className={scrollStyle}>
-          {reports.items.map((report) => (
-            <UsageReportCard
-              key={report.id}
-              href={`/reports/${report.id}`}
-              title={report.title ?? `${material.name} 実証詳細レポート`}
-              author={report.author?.handle ?? "退会したユーザー"}
-              avatarSrc={report.author?.avatar_url}
-              coverSrc={report.coverImage?.url}
-              crop={report.crop?.name}
-              layout="scroll"
-              actions={
-                <PostActionsLoader
-                  target="usage_report"
-                  id={report.id}
-                  currentPath={`/reports/${report.id}`}
-                  helpfulCount={report.helpfulCount}
-                />
-              }
-            />
-          ))}
+          {reports.items.map((report) => {
+            const detail = details?.get(report.id);
+            return (
+              <UsageReportCard
+                key={report.id}
+                href={`/reports/${report.id}`}
+                title={report.title ?? `${material.name} 実証詳細レポート`}
+                author={report.author?.handle ?? "退会したユーザー"}
+                avatarSrc={report.author?.avatar_url}
+                coverSrc={report.coverImage?.url}
+                crop={report.crop?.name}
+                place={detail?.prefecture}
+                figure={
+                  details === null ? (
+                    <ReportChartLoginNote />
+                  ) : detail?.chart ? (
+                    <ReportCardChart chart={detail.chart} />
+                  ) : null
+                }
+                layout="scroll"
+                actions={
+                  <PostActionsLoader
+                    target="usage_report"
+                    id={report.id}
+                    currentPath={`/reports/${report.id}`}
+                    helpfulCount={report.helpfulCount}
+                  />
+                }
+              />
+            );
+          })}
         </div>
       ) : (
         <EmptyCard
@@ -154,12 +172,17 @@ export async function MaterialReportsSection({
     loadMaterialReports(material.id),
     listPublishedArticlesByMaterial(material.id),
   ]);
+  const reports = unwrapQueryResult(reportsResult);
+  const details = signedIn
+    ? unwrapQueryResult(await listUsageReportCardDetails(reports.items.map((report) => report.id)))
+    : null;
   return (
     <MaterialReportsView
       material={material}
-      reports={unwrapQueryResult(reportsResult)}
+      reports={reports}
       articleTotal={unwrapQueryResult(articlesResult).total}
       signedIn={signedIn}
+      details={details}
     />
   );
 }

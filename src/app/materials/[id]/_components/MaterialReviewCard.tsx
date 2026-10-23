@@ -17,12 +17,26 @@ import { css, cx } from "../../../../../styled-system/css";
 import { Chip, Stars } from "./CardParts";
 
 const cardStyle = css({ scrollMarginTop: "16" });
-const headStyle = css({
+/** 1枚目の写真は大きく見せ、畑の様子から読めるようにする。 */
+const coverStyle = css({
+  position: "relative",
+  mb: "3",
+  overflow: "hidden",
+  aspectRatio: "image.landscape",
+  bg: "primary.soft",
+  borderRadius: "media",
+});
+const authorRowStyle = css({
+  mt: "3",
+  pt: "2.5",
   display: "flex",
   alignItems: "center",
   flexWrap: "wrap",
   gap: "2",
   rowGap: "1",
+  borderTopWidth: "1px",
+  borderTopStyle: "solid",
+  borderTopColor: "border.default",
 });
 const authorLinkStyle = css({
   display: "inline-flex",
@@ -43,24 +57,29 @@ const detailsStyle = css({
   borderRadius: "pill",
   overflowWrap: "anywhere",
 });
-const ratingStyle = css({ mt: "2", display: "flex", alignItems: "center", gap: "1.5" });
+const ratingStyle = css({
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: "1.5",
+  rowGap: "1",
+});
 const scoreStyle = css({
   color: "accent.warn",
   fontSize: "md",
   fontWeight: "extrabold",
   fontVariantNumeric: "tabular-nums",
 });
-const cropsStyle = css({
-  mt: "1",
-  mb: "1.5",
-  display: "flex",
-  alignItems: "center",
-  flexWrap: "wrap",
-  gap: "1.5",
-});
+/** 本文は生産者の言葉として、左に線を引いた引用の形で組む。 */
 const bodyStyle = css({
-  textStyle: "body",
-  color: "text.muted",
+  m: "0",
+  mt: "2",
+  pl: "3",
+  borderLeftWidth: "2px",
+  borderLeftStyle: "solid",
+  borderLeftColor: "primary.200",
+  textStyle: "prose",
+  color: "text.default",
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });
@@ -114,36 +133,35 @@ export function MaterialReviewCard({
       <span className={nameStyle}>{handle}</span>
     </>
   );
+  const [cover, ...photos] = review.photos;
   return (
     <article
       className={cx(surfaceCardRecipe({ padding: "cozy" }), cardStyle)}
       id={`review-${review.id}`}
     >
-      <div className={headStyle}>
-        {review.author?.user_id ? (
-          <Link href={`/users/${review.author.user_id}`} className={authorLinkStyle}>
-            {author}
-          </Link>
-        ) : (
-          author
-        )}
-        {details ? <span className={detailsStyle}>{details}</span> : null}
-      </div>
+      {cover ? (
+        <div className={coverStyle}>
+          <Image
+            src={cover.url}
+            alt={cover.caption ?? "感想口コミ写真"}
+            fill
+            sizes="(min-width: 1024px) 420px, 92vw"
+            className={photoImageStyle}
+            unoptimized
+          />
+        </div>
+      ) : null}
       <div className={ratingStyle}>
         <Stars value={review.rating} />
         <span className={scoreStyle}>{review.rating.toFixed(1)}</span>
+        {review.crops.map((crop) => (
+          <Chip key={crop.id}>{crop.name}</Chip>
+        ))}
       </div>
-      {review.crops.length > 0 ? (
-        <div className={cropsStyle}>
-          {review.crops.map((crop) => (
-            <Chip key={crop.id}>{crop.name}</Chip>
-          ))}
-        </div>
-      ) : null}
-      <div className={bodyStyle}>{review.body}</div>
-      {review.photos.length > 0 ? (
+      <blockquote className={bodyStyle}>{review.body}</blockquote>
+      {photos.length > 0 ? (
         <div className={photosStyle}>
-          {review.photos.map((photo) => (
+          {photos.map((photo) => (
             <div key={photo.id} className={photoStyle}>
               <Image
                 src={photo.url}
@@ -157,6 +175,16 @@ export function MaterialReviewCard({
           ))}
         </div>
       ) : null}
+      <div className={authorRowStyle}>
+        {review.author?.user_id ? (
+          <Link href={`/users/${review.author.user_id}`} className={authorLinkStyle}>
+            {author}
+          </Link>
+        ) : (
+          author
+        )}
+        {details ? <span className={detailsStyle}>{details}</span> : null}
+      </div>
       <div className={footStyle}>
         <div className={actionsStyle}>{actions}</div>
         {canManage ? (

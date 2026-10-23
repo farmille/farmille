@@ -22,9 +22,10 @@ type SearchResultCardProps = {
   preload?: boolean;
 };
 
+/** 本文の行数によらず、写真はカードの左上にそろえる。 */
 const cardStyle = css(surfaceCardRecipe.raw({ padding: "flush" }), {
   display: "flex",
-  alignItems: "center",
+  alignItems: "flex-start",
   gap: "3",
   py: "3",
   px: "3.5",
@@ -171,7 +172,11 @@ export function SearchResultCard({
           </div>
         ) : null}
       </div>
-      <Icon name="chevron_right" size="sm" className={css({ color: "text.subtle" })} />
+      <Icon
+        name="chevron_right"
+        size="sm"
+        className={css({ alignSelf: "center", color: "text.subtle" })}
+      />
     </Link>
   );
 }

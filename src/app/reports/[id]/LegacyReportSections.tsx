@@ -1,7 +1,7 @@
 import { formatDateJa } from "@/components/format-date";
 import type { PublishedUsageReportDetail } from "@/server/queries/usage-reports";
 
-import { prefectureName } from "./prefecture-name";
+import { prefectureName } from "@/lib/prefectures";
 import { ReadingHeading, ReadingProse } from "../../articles/_components/Reading";
 import { ReportBars, ReportGraphNote } from "./ReportBars";
 import { ReportFigures, type ReportFigureMedia } from "./ReportFigures";

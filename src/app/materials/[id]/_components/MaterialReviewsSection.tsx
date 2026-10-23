@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { PostActionsLoader } from "@/components/PostActionsLoader";
 import type { ReviewListItem } from "@/server/queries/reviews";
 
-import { css } from "../../../../../styled-system/css";
+import { css, cx } from "../../../../../styled-system/css";
 
 import { EmptyCard } from "./EmptyCard";
 import { MaterialSectionHeading } from "./MaterialSectionHeading";
@@ -11,7 +11,15 @@ import { MaterialReviewCard } from "./MaterialReviewCard";
 import { MoreLink } from "./MoreLink";
 import { ScrollToHashOnMount } from "./ScrollToHashOnMount";
 
-const listStyle = css({ mt: "2.5", display: "flex", flexDirection: "column", gap: "2.5" });
+/** PC では2列に並べ、写真つきの口コミと文章だけの口コミを並べて見比べられるようにする。 */
+export const reviewGridStyle = css({
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr)",
+  alignItems: "start",
+  gap: "2.5",
+  pc: { gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "3" },
+});
+const listStyle = cx(reviewGridStyle, css({ mt: "2.5" }));
 const emptyStyle = css({ mt: "2.5" });
 const moreStyle = css({ mt: "3", textAlign: "center" });
 const ellipsisStyle = css({ mb: "0.5", color: "text.subtle", letterSpacing: "[0.2em]" });

@@ -6,17 +6,16 @@ import { PREFECTURES } from "@/lib/prefectures";
 import {
   REPORT_SECTIONS,
   groupReportMeasurements,
-  parseReportNumber,
+  reportGraphRows,
   type UsageReportInput,
 } from "@/lib/usage-report";
 
 import { css, cx } from "../../../../styled-system/css";
 import { ReadingHeading, ReadingProse } from "../../articles/_components/Reading";
-import { ReportBars, ReportGraphNote, type ReportBarRow } from "./ReportBars";
+import { ReportBars, ReportGraphNote } from "./ReportBars";
 import { ReportFigures } from "./ReportFigures";
 
 type Section = (typeof REPORT_SECTIONS)[number]["value"];
-type Graph = UsageReportInput["measurements"][number]["graphs"][number];
 
 const plotStyles = {
   list: css({ display: "flex", flexDirection: "column", gap: "2.5", mt: "2.5" }),
@@ -68,24 +67,6 @@ const documentList = css({
   lineHeight: "prose",
   "& a": { color: "text.brand" },
 });
-
-function graphRows(graph: Graph, plots: UsageReportInput["plots"]): ReportBarRow[] {
-  return graph.rows.flatMap((row, index) => {
-    const parsed = parseReportNumber(row.value);
-    if (parsed === null) return [];
-    const plotIndex = row.plotId ? plots.findIndex((plot) => plot.id === row.plotId) : -1;
-    return [
-      {
-        id: row.id,
-        label: (plotIndex >= 0 ? plots[plotIndex]?.name : "") || row.label || `区 ${index + 1}`,
-        valueText: row.value.trim(),
-        value: parsed.value,
-        error: parsed.error,
-        colorIndex: plotIndex >= 0 ? plotIndex : index,
-      },
-    ];
-  });
-}
 
 export function StructuredReportArticle({
   input,
@@ -180,7 +161,7 @@ export function StructuredReportArticle({
               <Fragment key={section}>
                 {numericGroups.map((measurement) => {
                   const graphs = measurement.graphs
-                    .map((graph) => ({ graph, rows: graphRows(graph, input.plots) }))
+                    .map((graph) => ({ graph, rows: reportGraphRows(graph, input.plots) }))
                     .filter(({ rows }) => rows.length > 0);
                   return (
                     <Fragment key={measurement.id}>

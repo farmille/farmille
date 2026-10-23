@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import * as v from "valibot";
 import {
+  firstReportChart,
   createBlankUsageReport,
   groupReportMeasurements,
   parseReportNumber,
@@ -109,5 +110,69 @@ describe("実証詳細レポート", () => {
     expect(first.graphs).toHaveLength(1);
     first.graphs[0]!.rows[0]!.plotId = null;
     expect(validateUsageReportSubmission(input)["measurements.0.plots"]).toBeDefined();
+  });
+});
+
+describe("一覧カードのグラフ", () => {
+  const plots = [
+    { id: "p1", name: "無処理区" },
+    { id: "p2", name: "処理区" },
+  ];
+  const row = (id: string, plotId: string, value: string) => ({ id, plotId, label: "", value });
+
+  it("文章の項目と1区しか読めないグラフを飛ばし、区の順で色を決める", () => {
+    const chart = firstReportChart(
+      [
+        { kind: "text", name: "様子", unit: "", graphs: [] },
+        {
+          kind: "numeric",
+          name: "草丈",
+          unit: "cm",
+          graphs: [{ heading: "", rows: [row("a", "p1", "未計測"), row("b", "p2", "40")] }],
+        },
+        {
+          kind: "numeric",
+          name: "可販果収量",
+          unit: "t/10a",
+          graphs: [{ heading: "6月", rows: [row("c", "p2", "20.1±0.4"), row("d", "p1", "18.2")] }],
+        },
+      ],
+      plots,
+    );
+    expect(chart).toEqual({
+      title: "可販果収量・6月",
+      unit: "t/10a",
+      rows: [
+        expect.objectContaining({ label: "処理区", value: 20.1, error: 0.4, colorIndex: 1 }),
+        expect.objectContaining({ label: "無処理区", value: 18.2, colorIndex: 0 }),
+      ],
+      hiddenRowCount: 0,
+    });
+  });
+
+  it("区が多いときは先頭の3区だけを出し、残りの数を持つ", () => {
+    const many = Array.from({ length: 5 }, (_, index) => ({
+      id: `p${index}`,
+      name: `区${index + 1}`,
+    }));
+    const chart = firstReportChart(
+      [
+        {
+          kind: "numeric",
+          name: "収量",
+          unit: "kg",
+          graphs: [{ heading: "", rows: many.map((plot) => row(`r-${plot.id}`, plot.id, "10")) }],
+        },
+      ],
+      many,
+    );
+    expect(chart?.rows.map((item) => item.label)).toEqual(["区1", "区2", "区3"]);
+    expect(chart?.hiddenRowCount).toBe(2);
+  });
+
+  it("読めるグラフがなければ null", () => {
+    expect(
+      firstReportChart([{ kind: "numeric", name: "収量", unit: "", graphs: [] }], plots),
+    ).toBeNull();
   });
 });

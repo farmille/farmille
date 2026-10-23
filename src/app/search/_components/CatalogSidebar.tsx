@@ -14,35 +14,8 @@ import { Icon } from "@/components/Icon";
 
 import { css, cva, cx } from "../../../../styled-system/css";
 
-import { chipList, chipListStyle, focusRing } from "./search-chips";
+import { chipList, chipListStyle, filterChipRecipe as chipRecipe, focusRing } from "./search-chips";
 import { SideSection, type SideFilterItem } from "./SideSection";
-
-const chipRecipe = cva({
-  base: {
-    ...focusRing,
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "1.5",
-    py: "1",
-    px: "3",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderRadius: "pill",
-    fontSize: "sm",
-    textDecoration: "none",
-  },
-  variants: {
-    active: {
-      true: {
-        bg: "primary.700",
-        borderColor: "primary.700",
-        color: "text.inverse",
-        fontWeight: "bold",
-      },
-      false: { bg: "surface.card", borderColor: "border.strong", color: "[inherit]" },
-    },
-  },
-});
 
 const genreRowRecipe = cva({
   base: {

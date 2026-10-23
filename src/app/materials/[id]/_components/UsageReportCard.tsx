@@ -54,6 +54,17 @@ const cardRecipe = sva({
 });
 
 const coverImageStyle = css({ display: "block", w: "full", h: "full", objectFit: "cover" });
+/** 作物と地域を題名の上に置き、どの畑の記録かを先に伝える。 */
+const kickerStyle = css({
+  mb: "1.5",
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: "2",
+  textStyle: "note",
+  color: "text.subtle",
+});
+const placeStyle = css({ display: "inline-flex", alignItems: "center", gap: "0.5" });
 const bylineStyle = css({
   mt: "auto",
   pt: "2",
@@ -78,6 +89,10 @@ type UsageReportCardProps = {
   avatarSrc?: string | null;
   coverSrc?: string;
   crop?: string | null;
+  /** 都道府県。会員にだけ渡す。 */
+  place?: string | null;
+  /** 題名の下に添える比較のグラフ。 */
+  figure?: ReactNode;
   actions: ReactNode;
   layout?: "stack" | "scroll";
 };
@@ -89,6 +104,8 @@ export function UsageReportCard({
   avatarSrc,
   coverSrc,
   crop,
+  place,
+  figure,
   actions,
   layout,
 }: UsageReportCardProps) {
@@ -110,13 +127,24 @@ export function UsageReportCard({
         )}
       </Link>
       <div className={classes.body}>
+        {crop || place ? (
+          <div className={kickerStyle}>
+            {crop ? <Chip>{crop}</Chip> : null}
+            {place ? (
+              <span className={placeStyle}>
+                <Icon name="location_on" size="2xs" />
+                {place}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
         <Link href={href} className={classes.title}>
           {title}
         </Link>
+        {figure}
         <div className={bylineStyle}>
           <Avatar name={author} src={avatarSrc} size="xs" />
           <b className={authorStyle}>{author}</b>
-          {crop ? <Chip>{crop}</Chip> : null}
         </div>
         {actions}
       </div>
