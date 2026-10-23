@@ -27,8 +27,14 @@ const cover = css({
 
 const content = css({ px: "4.5", pb: "4" });
 
-// 名前の列はカバー画像の下端から余白を取って始める（アバターの下端にそろえると名前がカバーに寄りすぎる）。
-const headRow = css({ display: "flex", alignItems: "flex-start", flexWrap: "wrap", gap: "3.5" });
+// アバターの行：左にカバーへ重なるアバター、右端に「プロフィールを編集」。
+// 名前や所属の長さで編集ボタンの位置が動かないよう、名前の列はこの行の下に全幅で置く。
+const headRow = css({
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: "3",
+});
 
 // カバー画像に重なるので、背景色の縁を回して輪郭を切る。
 const avatarFrame = css({
@@ -42,27 +48,37 @@ const avatarFrame = css({
   borderRadius: "pill",
 });
 
-const nameColumn = css({ flex: "1", minW: "44", pt: "4" });
+const nameColumn = css({ mt: "3" });
 
-const name = css({
-  m: "0",
+// 立場バッジは名前の文字の流れに入れ、名前が折り返しても最後の文字のすぐ後ろに続ける。
+const name = css({ m: "0", textStyle: "title", overflowWrap: "anywhere" });
+
+const standpointBadge = css({ ml: "2", verticalAlign: "[0.2em]", whiteSpace: "nowrap" });
+
+// 「地域」「所属」「主な作目」は見出しの幅をそろえ、値（チップ）の始まりを縦一列にする。
+const labeledRow = cva({
+  base: { display: "flex", alignItems: "flex-start", gap: "2" },
+  variants: { spacing: { tight: { mt: "1.5" }, loose: { mt: "3" } } },
+});
+
+const label = css({
+  flex: "none",
+  w: "14",
+  minH: "7",
+  display: "flex",
+  alignItems: "center",
+  color: "text.subtle",
+  textStyle: "note",
+});
+
+const values = css({
+  flex: "1",
+  minW: "0",
   display: "flex",
   alignItems: "center",
   flexWrap: "wrap",
-  columnGap: "2.5",
-  rowGap: "1",
-  textStyle: "title",
-});
-
-const chipRow = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "1.5" } as const;
-
-const regionRow = css(chipRow, { mt: "1" });
-
-const cropRow = css(chipRow, { mt: "2" });
-
-const label = cva({
-  base: { color: "text.subtle", textStyle: "note" },
-  variants: { spaced: { true: { ml: "1.5" }, false: {} } },
+  gap: "1.5",
+  minH: "7",
 });
 
 const affiliation = css({
@@ -86,6 +102,7 @@ const editLink = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   flex: "none",
   px: "4",
   mt: "3",
+  whiteSpace: "nowrap",
 });
 
 const srOnly = css({ srOnly: true });
@@ -154,49 +171,55 @@ export function ProfileCard({
           <span className={avatarFrame}>
             <Avatar name={handle} src={avatarUrl} size="xl" />
           </span>
-          <div className={nameColumn}>
-            <h1 className={name} id="profile-handle">
-              <span>{handle}</span>
-              {standpoint ? <Badge variant="type">{standpoint}</Badge> : null}
-            </h1>
-            {prefecture || details.affiliations.length > 0 ? (
-              <div className={regionRow}>
-                {prefecture ? (
-                  <>
-                    <span className={label({ spaced: false })}>地域</span>
-                    <Chip>{prefecture}</Chip>
-                  </>
-                ) : null}
-                {details.affiliations.length > 0 ? (
-                  <>
-                    <span className={label({ spaced: true })}>所属</span>
-                    {details.affiliations.map((affiliationName) => (
-                      <span key={affiliationName} className={affiliation}>
-                        {affiliationName}
-                      </span>
-                    ))}
-                  </>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
           {editable ? (
             <Link className={editLink} href="/me/edit">
               プロフィールを編集<span className={srOnly}>（表示情報を編集）</span>
             </Link>
           ) : null}
         </div>
+        <div className={nameColumn}>
+          <h1 className={name} id="profile-handle">
+            {handle}
+            {standpoint ? (
+              <Badge variant="type" className={standpointBadge}>
+                {standpoint}
+              </Badge>
+            ) : null}
+          </h1>
+          {prefecture ? (
+            <div className={labeledRow({ spacing: "tight" })}>
+              <span className={label}>地域</span>
+              <div className={values}>
+                <Chip>{prefecture}</Chip>
+              </div>
+            </div>
+          ) : null}
+          {details.affiliations.length > 0 ? (
+            <div className={labeledRow({ spacing: "tight" })}>
+              <span className={label}>所属</span>
+              <div className={values}>
+                {details.affiliations.map((affiliationName) => (
+                  <span key={affiliationName} className={affiliation}>
+                    {affiliationName}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
 
         {details.bio ? <p className={bio}>{details.bio}</p> : null}
 
         {details.crops.length > 0 ? (
-          <div className={cropRow}>
-            <span className={label({ spaced: false })}>主な作目</span>
-            {details.crops.map((crop) => (
-              <Chip key={crop.id} wrap>
-                {crop.name}
-              </Chip>
-            ))}
+          <div className={labeledRow({ spacing: "loose" })}>
+            <span className={label}>主な作目</span>
+            <div className={values}>
+              {details.crops.map((crop) => (
+                <Chip key={crop.id} wrap>
+                  {crop.name}
+                </Chip>
+              ))}
+            </div>
           </div>
         ) : null}
 
