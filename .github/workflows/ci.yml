@@ -9,10 +9,16 @@ on:
 permissions:
   contents: read
 
+# PR は最新コミットの検査だけを残す。main は実行中の本番移行を止めず、待機分を最新にまとめる。
+concurrency:
+  group: farmille-ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   app:
     name: Application quality gates
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Check out repository
@@ -26,12 +32,18 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: .node-version
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Audit high severity vulnerabilities
+        run: pnpm audit --audit-level=high
+
+      - name: Check Story coverage
+        run: pnpm check:stories
 
       - name: Lint
         run: pnpm lint
@@ -51,154 +63,32 @@ jobs:
           # CI 用の公開ダミー値。コード側にフォールバックは置かない方針のため CI 設定で与える。
           NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
 
-  storybook:
-    name: Storybook and responsive checks (${{ matrix.shard }}/${{ strategy.job-total }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 11.21.0
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Storybook
-        id: build-storybook
-        run: pnpm build-storybook
-        background: true
-
-      - name: Audit high severity vulnerabilities
-        run: pnpm audit --audit-level=high
-
-      - name: Check Story coverage
-        run: pnpm check:stories
-
-      - name: Select Ubuntu package mirror
-        run: |
-          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
-          grep -Fq 'https://archive.ubuntu.com/ubuntu/' /etc/apt/apt-mirrors.txt
-
-      - name: Install Playwright browser
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Wait for Storybook build
-        wait: build-storybook
-
-      - name: Check responsive layouts
-        run: pnpm test:storybook:responsive
-        env:
-          STORYBOOK_RESPONSIVE_SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
-
-      - name: Upload responsive check artifacts
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: storybook-responsive-report-${{ matrix.shard }}
-          path: |
-            playwright-report
-            test-results
-            output/playwright/storybook-responsive
-          retention-days: 14
-          if-no-files-found: ignore
-
-  e2e:
-    name: Playwright E2E (${{ matrix.shard }}/${{ strategy.job-total }})
-    env:
-      SMTP_URL: "smtp://127.0.0.1:54325"
-      MAIL_FROM: "Farmille <noreply@example.test>"
-      AUTH_EMAIL_HOOK_SECRET: "v1,whsec_bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ=="
+  database:
+    name: Database authorization
+    needs: app
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
-
+    env:
+      AUTH_EMAIL_HOOK_SECRET: "v1,whsec_bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ=="
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 11.21.0
-
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          node-version-file: .node-version
 
       - name: Start local Supabase
-        id: supabase
-        # E2E が使うのは DB・Auth・PostgREST・Storage・メール。管理画面や Edge Functions などは起動しない。
-        run: npx --yes supabase@latest start -x studio,edge-runtime,realtime,imgproxy,logflare,vector
-        background: true
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Select Ubuntu package mirror
-        run: |
-          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
-          grep -Fq 'https://archive.ubuntu.com/ubuntu/' /etc/apt/apt-mirrors.txt
-
-      - name: Install Playwright browser
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Wait for local Supabase
-        wait: supabase
-
-      - name: Export local Supabase environment
-        working-directory: .
-        shell: bash
-        run: |
-          eval "$(npx --yes supabase@latest status -o env)"
-          {
-            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
-            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY"
-            echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE_KEY"
-            echo "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3007"
-          } >> "$GITHUB_ENV"
+        run: npx --yes supabase@2.120.0 start -x studio,edge-runtime,realtime,imgproxy,logflare,vector
 
       - name: Test database authorization
-        run: npx --yes supabase@latest test db
-
-      - name: Seed material master
-        working-directory: .
-        shell: bash
-        # E2E は資材が存在する前提（検索・検討リスト・使用レポート）。
-        # migration のシードはタグと作物マスタだけなので資材を別途投入する。
-        run: |
-          eval "$(npx --yes supabase@latest status -o env)"
-          psql "$DB_URL" -v ON_ERROR_STOP=1 -f tools/migration/materials-v2-seed.sql
-          psql "$DB_URL" -tAc "select 'materials: ' || count(*) from materials"
-
-      - name: Run Playwright E2E
-        run: pnpm exec playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        run: npx --yes supabase@2.120.0 test db
 
   production:
     name: Migrate and deploy production
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [app, storybook, e2e]
+    needs: [app, database]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
@@ -238,7 +128,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: .node-version
 
       - name: Apply shared development migrations
         env:

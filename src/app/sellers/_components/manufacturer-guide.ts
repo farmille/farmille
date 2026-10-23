@@ -1,5 +1,5 @@
 export const CONTACT_EMAIL = "contact@farmille.com";
-export const REMOVAL_CONTACT_SENTENCE = `終売・廃盤表示や資材ページの非表示のご依頼は ${CONTACT_EMAIL} で受け付けます。`;
+export const REMOVAL_CONTACT_SENTENCE = `終売表示や資材ページの非公開のご依頼は ${CONTACT_EMAIL} で受け付けます。`;
 export const OWNER_APPLICATION_HREF = "/dashboard/applications/new/registration";
 
 export type ProcedureSlug = "owner" | "transfer-out" | "transfer-in";
@@ -27,7 +27,7 @@ export const PROCEDURES = {
     slug: "owner",
     title: "資材オーナー権限の申請",
     listTitle: "資材オーナー権限を申請する（新規掲載・掲載済み資材）",
-    lead: "貴社の資材について、資材オーナー権限（資材ごとに1社に設定する権限で、資材情報の編集権限を含みます）を申請します。新しく掲載する資材も、すでにFarmilleに掲載されている資材も同じ申請です。",
+    lead: "貴社の資材について、資材オーナー権限（資材ごとに1社に設定する権限で、製品情報を編集できます）を申請します。新しく掲載する資材も、すでにFarmilleに掲載されている資材も同じ申請です。",
     needId: true,
     formHref: OWNER_APPLICATION_HREF,
     formLabel: "資材オーナー権限の申請フォームへ",
@@ -48,7 +48,7 @@ export const PROCEDURES = {
       "資材オーナー権限は、1資材につき1社に付与されます。すでに別の会社が資材オーナー企業になっている資材に申請している場合は、確認のうえ当事者間での話し合いをお願いすることがあります。",
     ],
     prep: [
-      ["法人番号（13桁）とFarmilleアカウントID", ""],
+      ["法人番号（13桁）とFarmille企業会員ID", ""],
       ["ご担当者の氏名・部署名・メールアドレス・電話番号", ""],
       ["資材名（パッケージ記載の正式名称）", ""],
       ["掲載済み資材の場合：FarmilleページのURL", "製品公式ページのURLは任意です"],
@@ -69,7 +69,7 @@ export const PROCEDURES = {
     steps: [
       {
         title: "ログインし、「各種お手続き」から申請フォームにご記入ください",
-        body: "対象資材ごとに、FarmilleページURLと資材名、移行先企業の法人名・法人番号・FarmilleアカウントID・ご担当者の連絡先を記入します。あわせて、移行先企業名が当該資材のパッケージに記載されていることが分かる資料（パッケージ・ラベルの画像、または製品ページURL）を添えます。",
+        body: "対象資材ごとに、FarmilleページURLと資材名、移行先企業の法人名・法人番号・Farmille企業会員ID・ご担当者の連絡先を記入します。あわせて、移行先企業名が当該資材のパッケージに記載されていることが分かる資料（パッケージ・ラベルの画像、または製品ページURL）を添えます。",
       },
       {
         title: "運営が、移行先企業の関与をパッケージで確認します",
@@ -82,7 +82,7 @@ export const PROCEDURES = {
     ],
     conds: [
       "貴社が、対象資材の資材オーナー企業であること。",
-      "移行先企業もFarmilleアカウントIDを持っていること。未開設の場合は、先に移行先企業にアカウント開設を依頼してください。",
+      "移行先企業もFarmille企業会員IDを持っていること。未開設の場合は、先に移行先企業にアカウント開設を依頼してください。",
       "資材オーナー権限を移行することについて、移行先企業から承諾を得ていること。",
       "既存の編集権限の委託がある場合、移行の完了をもって解除されること。",
       "本申請を行う担当者が、所属法人から必要な権限を付与されていること。",
@@ -90,14 +90,14 @@ export const PROCEDURES = {
     prep: [
       ["対象資材のFarmilleページURLと資材名", ""],
       [
-        "移行先企業の法人名・法人番号・FarmilleアカウントID・ご担当者の連絡先",
+        "移行先企業の法人名・法人番号・Farmille企業会員ID・ご担当者の連絡先",
         "事前に移行先企業へご確認ください",
       ],
       [
         "移行先企業の関与を確認できる資料",
         "移行先企業名が記載されたパッケージ・ラベルの画像 or 製品ページURL（必須）。パッケージに記載がない場合は、契約書の写し・官報公告・プレスリリース等（関係のない機密情報・個人情報はマスキング可）",
       ],
-      ["貴社の法人番号（13桁）とFarmilleアカウントID", ""],
+      ["貴社の法人番号（13桁）とFarmille企業会員ID", ""],
     ],
   },
   "transfer-in": {
@@ -142,7 +142,7 @@ export const PROCEDURES = {
         "移行の経緯と、経緯を確認できる資料",
         "現在の資材オーナー企業の同意がわかるメールの写し、官報公告、プレスリリース、契約書の写し等。できるだけ添付してください",
       ],
-      ["法人番号（13桁）とFarmilleアカウントID", ""],
+      ["法人番号（13桁）とFarmille企業会員ID", ""],
     ],
   },
 } as const satisfies Record<ProcedureSlug, Procedure>;
@@ -172,7 +172,7 @@ export const MEMBER_ACTIONS: ReadonlyArray<MemberAction> = [
     note: "（企業会員ダッシュボードから）",
   },
   {
-    title: "資材を終売・非表示にする",
+    title: "資材を終売・非公開にする",
     href: `mailto:${CONTACT_EMAIL}`,
     note: `（${CONTACT_EMAIL} で受け付けます）`,
   },
@@ -208,8 +208,8 @@ export const GUIDE_FAQS: ReadonlyArray<Faq> = [
   },
   {
     question: "資材ページを削除してもらえますか？",
-    answer: `販売を終了した資材には「終売・廃盤」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非表示」にします。${REMOVAL_CONTACT_SENTENCE}なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。`,
-    links: [{ href: "#lpGuideDelist", label: "終売・非表示のご依頼について →" }],
+    answer: `販売を終了した資材には「終売」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非公開」にします。${REMOVAL_CONTACT_SENTENCE}なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。`,
+    links: [{ href: "#lpGuideDelist", label: "終売・非公開のご依頼について →" }],
   },
   {
     question: "販売代理店や卸売業者でも申請できますか？",
@@ -236,7 +236,7 @@ export const GUIDE_FAQS: ReadonlyArray<Faq> = [
     links: [],
   },
   {
-    question: "非表示にした後、再び掲載できますか？",
+    question: "非公開にした後、再び掲載できますか？",
     answer:
       "可能です。関係する会社間で掲載についての合意をいただいたうえで、あらためて資材オーナー権限をご申請ください。",
     links: [{ href: "#lpGuideNew", label: "資材オーナー権限の申請について →" }],
@@ -246,7 +246,7 @@ export const GUIDE_FAQS: ReadonlyArray<Faq> = [
 export const PROCEDURE_FAQS: ReadonlyArray<Faq> = [
   {
     question: "資材ページを削除してもらえますか？",
-    answer: `販売を終了した資材には「終売・廃盤」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非表示」にします。${REMOVAL_CONTACT_SENTENCE}なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。`,
+    answer: `販売を終了した資材には「終売」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非公開」にします。${REMOVAL_CONTACT_SENTENCE}なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。`,
     links: [],
   },
   {
@@ -258,7 +258,7 @@ export const PROCEDURE_FAQS: ReadonlyArray<Faq> = [
   {
     question: "資材オーナー権限とは何ですか？",
     answer:
-      "Farmilleに掲載される資材ごとに1社に設定する権限で、資材情報の編集権限を含みます。製造元・販売元・輸入元の企業様に、資材ごとにお渡しします。編集権限だけを代理店等に委託することもできます。",
+      "Farmilleに掲載される資材ごとに1社に設定する権限で、製品情報を編集できます。製造元・販売元・輸入元の企業様に、資材ごとにお渡しします。編集権限だけを代理店等に委託することもできます。",
     links: [{ href: "/sellers/procedures/owner", label: "申請の流れ・条件 →" }],
   },
   {
@@ -283,7 +283,7 @@ export const PROCEDURE_FAQS: ReadonlyArray<Faq> = [
     links: [],
   },
   {
-    question: "非表示にした後、再び掲載できますか？",
+    question: "非公開にした後、再び掲載できますか？",
     answer:
       "可能です。関係する会社間で掲載についての合意をいただいたうえで、あらためて資材オーナー権限をご申請ください。",
     links: [{ href: "/sellers/procedures/owner", label: "資材オーナー権限の申請 →" }],

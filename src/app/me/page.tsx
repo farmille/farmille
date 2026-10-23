@@ -14,6 +14,7 @@ import { css, cva } from "../../../styled-system/css";
 import { AccountActions } from "./_components/AccountActions";
 import { NonGeneralNotice } from "./_components/NonGeneralNotice";
 import { ProfileSectionHeading } from "./_components/ProfileParts";
+import { missingProfileItems, ProfileSetupNotice } from "./_components/ProfileSetupNotice";
 import { HelpfulShelf, PostsShelf, SavedShelf } from "./_components/Shelves";
 import { resolveMeAccess } from "./_lib/access";
 
@@ -114,13 +115,13 @@ export default async function MePage({
           avatarUrl={data.profile.avatarUrl}
           details={details.data}
           editable
-          publicProfileHref={`/users/${data.profile.userId}`}
           stats={[
             { label: "実証詳細レポート", value: reportCount },
             { label: "感想口コミ", value: data.reviewCount },
-            { label: "お気に入り", value: data.savedMaterials.length },
+            { label: "参考になった", value: data.helpfulReceivedCount },
           ]}
         />
+        <ProfileSetupNotice missing={missingProfileItems(details.data)} />
 
         <ProfileSectionHeading id="me-posts-heading">これまでの投稿</ProfileSectionHeading>
         <nav aria-label="投稿の種類" className={tabRow}>

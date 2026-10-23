@@ -93,13 +93,13 @@ const inputStyle = css({
   _touch: { fontSize: "lg" },
 });
 
+const multipleStyle = css({ display: "flex", flexDirection: "column", gap: "2" });
+
 const chipsStyle = css({
   display: "flex",
-  flex: "1",
   flexWrap: "wrap",
   alignItems: "center",
   gap: "1.5",
-  minW: "0",
 });
 
 const iconStyle = css({ display: "flex", flexShrink: "0", color: "text.subtle" });
@@ -147,7 +147,7 @@ const labelOf = (option: Option) => option.label;
 const valueOf = (option: Option) => option.value;
 
 /**
- * 決まった候補から選ぶ入力欄。multiple では選んだ候補を入力欄の中のチップで示す。
+ * 決まった候補から選ぶ入力欄。multiple では選んだ候補を入力欄の上にチップで並べ、入力欄は検索欄として独立させる。
  * name（または囲む Field の name）があると、選んだ値ごとに送信値を持つ。
  */
 export function Combobox(props: ComboboxProps) {
@@ -252,30 +252,37 @@ function MultipleCombobox({
       required={required}
       value={selected}
     >
-      <BaseCombobox.InputGroup className={cx(groupStyle, className)}>
-        <BaseCombobox.Chips className={chipsStyle}>
-          {selected.map((option) => (
-            <BaseCombobox.Chip className={chips.root} key={option.value}>
-              {option.label}
-              <BaseCombobox.ChipRemove
-                aria-label={`${option.label}を削除`}
-                className={chips.remove}
-              >
-                <Icon name="close" size="2xs" />
-              </BaseCombobox.ChipRemove>
-            </BaseCombobox.Chip>
-          ))}
+      <BaseCombobox.Chips className={multipleStyle}>
+        {selected.length > 0 ? (
+          <div className={chipsStyle}>
+            {selected.map((option) => (
+              <BaseCombobox.Chip className={chips.root} key={option.value}>
+                {option.label}
+                <BaseCombobox.ChipRemove
+                  aria-label={`${option.label}を削除`}
+                  className={chips.remove}
+                >
+                  <Icon name="close" size="2xs" />
+                </BaseCombobox.ChipRemove>
+              </BaseCombobox.Chip>
+            ))}
+          </div>
+        ) : null}
+        <BaseCombobox.InputGroup className={cx(groupStyle, className)}>
+          <span className={iconStyle} aria-hidden="true">
+            <Icon name="search" size="sm" />
+          </span>
           <BaseCombobox.Input
             className={inputStyle}
             onKeyDown={enterGuard.onKeyDown}
-            placeholder={selected.length > 0 ? undefined : placeholder}
+            placeholder={placeholder}
             readOnly={full}
           />
-        </BaseCombobox.Chips>
-        <BaseCombobox.Icon className={iconStyle}>
-          <Icon name="expand_more" size="sm" />
-        </BaseCombobox.Icon>
-      </BaseCombobox.InputGroup>
+          <BaseCombobox.Icon className={iconStyle}>
+            <Icon name="expand_more" size="sm" />
+          </BaseCombobox.Icon>
+        </BaseCombobox.InputGroup>
+      </BaseCombobox.Chips>
       <OptionPopup
         emptyMessage={emptyMessage}
         isDisabled={(option) =>

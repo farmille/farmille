@@ -27,14 +27,14 @@ export function PublicationStatusForm({
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
       <RadioGroup
-        description="掲載終了にすると一般ユーザーには資材が表示されなくなります。データは保持され、担当メーカーと運営は引き続き確認できます。"
+        description="非公開にすると一般ユーザーには資材が表示されなくなります。データは保持され、担当メーカーと運営は引き続き確認できます。"
         label="公開状態"
         name="publicationStatus"
         requirement="required"
         defaultValue={current}
         options={[
           { value: "published", label: "公開中" },
-          { value: "archived", label: "掲載終了" },
+          { value: "archived", label: "非公開" },
         ]}
       />
       <input name="materialId" type="hidden" value={materialId} />

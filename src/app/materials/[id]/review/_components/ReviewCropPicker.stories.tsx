@@ -63,7 +63,10 @@ export const WithError: Story = {
 export const Searching: Story = {
   args: { defaultCropIds: ["crop-tomato"] },
   play: async ({ canvasElement }) => {
-    await userEvent.type(within(canvasElement).getByRole("combobox", { name: "作目" }), "プチ");
+    await userEvent.type(
+      within(canvasElement).getByRole("combobox", { name: "使用対象作目" }),
+      "プチ",
+    );
     await waitFor(() =>
       expect(
         page(canvasElement).getByRole("option", { name: "ミニトマト なす科果菜類" }),
@@ -76,7 +79,7 @@ export const Replaced: Story = {
   args: { defaultCropIds: ["crop-tomato"] },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.type(canvas.getByRole("combobox", { name: "作目" }), "ミニトマト");
+    await userEvent.type(canvas.getByRole("combobox", { name: "使用対象作目" }), "ミニトマト");
     await userEvent.click(
       await page(canvasElement).findByRole("option", { name: "ミニトマト なす科果菜類" }),
     );

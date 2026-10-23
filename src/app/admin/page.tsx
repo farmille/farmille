@@ -58,7 +58,7 @@ const MENU_ITEMS = [
   {
     href: "/admin/company-applications",
     label: "企業からの申請",
-    description: "資材掲載・オーナー権限の移行・終売や非表示の受付内容と添付を確認する。",
+    description: "資材掲載・オーナー権限の移行・終売や非公開の受付内容と添付を確認する。",
   },
   {
     href: "/me",
@@ -88,7 +88,7 @@ const MENU_ITEMS = [
   {
     href: "/admin/materials/requests",
     label: "資材変更申請",
-    description: "メーカーから届いた新規登録・情報変更・掲載終了申請を確認する。",
+    description: "メーカーから届いた新規登録・情報変更・非公開の申請を確認する。",
   },
   {
     href: "/admin/tags",

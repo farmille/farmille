@@ -87,7 +87,7 @@ export function MaterialSpecDisclaimer() {
       <h2 id="material-notice-heading" className={noticeHeadingStyle}>
         掲載情報についてのご案内
       </h2>
-      <div className={followUpStyle}>掲載している商品情報</div>
+      <div className={followUpStyle}>掲載している製品情報</div>
       <ul className={listStyle}>
         <li>・農薬・肥料・土壌改良資材等に関する登録・届出・表示情報</li>
         <li>
@@ -106,12 +106,12 @@ export function MaterialSpecDisclaimer() {
         までご連絡ください。内容を確認させていただきます。
       </div>
       <div className={followUpStyle}>
-        ※メーカーご担当者様へ：掲載内容のお問い合わせ、資材ページの非公開（終売・廃盤などの表示を含みます）のご依頼は、
+        ※メーカーご担当者様へ：掲載内容のお問い合わせ、終売表示、資材ページの非公開のご依頼は、
         <ContactEmail />
-        で承ります。確認のうえ、迅速な対応に努めます。
+        で承ります。終売表示では資材ページを残し、非公開では一般の利用者が閲覧できなくなります。確認のうえ、迅速な対応に努めます。
       </div>
       <div className={followUpStyle}>
-        実際の効果は、作物・気象・土壌などの条件によって異なる場合があります。商品の使用にあたっては、当該製品についてメーカー公式サイトなどの公式情報を必ずご確認のうえ、製品の表示・使用条件・使用上の注意など（農薬・肥料・土壌改良資材等として法令上の規制がある資材は、その法令に基づく表示・使用条件を含みます）に従ってご使用ください。
+        実際の効果は、作物・気象・土壌などの条件によって異なる場合があります。資材の使用にあたっては、当該製品についてメーカー公式サイトなどの公式情報を必ずご確認のうえ、製品の表示・使用条件・使用上の注意など（農薬・肥料・土壌改良資材等として法令上の規制がある資材は、その法令に基づく表示・使用条件を含みます）に従ってご使用ください。
       </div>
     </section>
   );
@@ -131,7 +131,7 @@ export function PostsCompliance() {
 export function ArchivedNotice() {
   return (
     <div className={noticeRecipe({ spacing: "near" })}>
-      この資材は掲載を終了しています。過去の情報と投稿は参照できますが、新しい感想口コミや実証詳細レポートは投稿できません。
+      この資材は非公開です。過去の情報と投稿は参照できますが、新しい感想口コミや実証詳細レポートは投稿できません。
     </div>
   );
 }

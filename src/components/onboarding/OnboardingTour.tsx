@@ -224,7 +224,7 @@ function TourStep({ step, pathname, go, end, complete, push }: TourStepProps) {
       return (
         <TourSheet
           title="プロフィールの設定"
-          body="主な作目を登録すると、作目に合った資材やレポートを見つけやすくなります。"
+          body="栽培作目を登録すると、作目に合った資材やレポートを見つけやすくなります。"
           section={{ current: 1, total: 3 }}
           primaryLabel="プロフィール画面へ"
           onPrimary={() => {
@@ -455,7 +455,7 @@ function InputStep({
   );
 }
 
-/** プロフィール：主な作目を示し、帯か画面の「保存する」で保存できたら、保存したことを伝えて次の段階へ。 */
+/** プロフィール：栽培作目を示し、帯か画面の「保存する」で保存できたら、保存したことを伝えて次の段階へ。 */
 function ProfileStep({
   step,
   pathname,
@@ -505,9 +505,9 @@ function ProfileStep({
   return (
     <InputStep
       target="profile-crops"
-      title="主な作目を選択"
+      title="栽培作目を選択"
       body="栽培している作目を候補から選び（複数選択可）、「保存する」を押してください。"
-      message="主な作目を選んで「保存する」を押してください（複数選択可）。所属や自己紹介も入力できます。"
+      message="栽培作目を選んで「保存する」を押してください（複数選択可）。所属や自己紹介も入力できます。"
       startCollapsed={step === "profileSaving"}
       section={1}
       action={{

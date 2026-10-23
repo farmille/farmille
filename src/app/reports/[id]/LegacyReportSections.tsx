@@ -31,7 +31,7 @@ export function LegacyReportSections({
   const envLines = [
     report.prefectureCode !== null ? `地域：${prefectureName(report.prefectureCode)}` : null,
     report.fieldName !== null && report.fieldName.length > 0 ? `圃場名：${report.fieldName}` : null,
-    `使用作物：${report.crop.name}${report.variety ? `（品種：${report.variety}）` : ""}`,
+    `使用対象作目：${report.crop.name}${report.variety ? `（品種：${report.variety}）` : ""}`,
     report.plantingDate !== null ? `定植時期：${formatDateJa(report.plantingDate)}ごろ` : null,
     [
       report.cultivationType,

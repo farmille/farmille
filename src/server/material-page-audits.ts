@@ -50,6 +50,6 @@ export async function listMaterialEditorGrants(materialId: string) {
     .select("id,seller_id,document_reference,granted_at,revoked_at")
     .eq("material_id", materialId)
     .order("granted_at", { ascending: false });
-  if (error) throw new Error("編集権の書類確認履歴を取得できませんでした。");
+  if (error) throw new Error("資材オーナー権限の書類確認履歴を取得できませんでした。");
   return data;
 }
