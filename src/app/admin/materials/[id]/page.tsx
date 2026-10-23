@@ -70,7 +70,7 @@ export default async function AdminMaterialDetailPage({
         note={
           material.data.sellerName === null
             ? "資材オーナー権限は未付与です。既存の紐づけがあった場合も書類確認が必要です。"
-            : `資材オーナー権限を付与した企業会員：${material.data.sellerName}`
+            : `資材オーナー権限を付与したメーカー：${material.data.sellerName}`
         }
         title="資材オーナー権限と所有権の書類確認"
       >

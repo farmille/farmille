@@ -8,7 +8,7 @@ import {
 } from "@/server/accounts/seller";
 
 describe("syntheticSellerEmail", () => {
-  it("ログイン ID を固定ドメインの合成メールへ解決する", () => {
+  it("Farmille企業会員ID を固定ドメインの合成メールへ解決する", () => {
     expect(syntheticSellerEmail("example-agri")).toBe(`example-agri@${SELLER_EMAIL_DOMAIN}`);
     expect(SELLER_EMAIL_DOMAIN).toBe("sellers.farmille.internal");
   });

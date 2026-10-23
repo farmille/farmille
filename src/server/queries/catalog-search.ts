@@ -10,7 +10,7 @@ import { listClassificationOptions, listSearchFilters } from "@/server/queries/c
 import { succeed, type Result } from "@/server/result";
 import { createPublicSupabase } from "@/server/supabase";
 
-// 公開・掲載終了と内容の変更は運営の操作が updateTag で失効させる。
+// 公開・非公開と内容の変更は運営の操作が updateTag で失効させる。
 // 評価・口コミ数・保存数・使用レポート数は投稿のたびには失効させず、10分の遅れを許容する。
 const fetchCatalogMaterials = unstable_cache(
   async (supabaseUrl: string) => {

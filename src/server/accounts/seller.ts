@@ -27,7 +27,7 @@ export function syntheticSellerEmail(loginId: string): string | null {
   return LOGIN_ID_PATTERN.test(normalized) ? `${normalized}@${SELLER_EMAIL_DOMAIN}` : null;
 }
 
-/** 申請者が入力する連絡先を検証し、ログインIDはサーバー側で発行する。 */
+/** 申請者が入力する連絡先を検証し、Farmille企業会員IDはサーバー側で発行する。 */
 type SellerApplyFormValues = { [Key in keyof SellerApplyInput]: FormDataEntryValue | null };
 export function validateSellerApply(raw: SellerApplyFormValues): SellerApplyValidation {
   const result = v.safeParse(manufacturerRegistrationSchema, raw);
@@ -145,7 +145,7 @@ export async function applySellerAccount(
 
 /**
  * メーカーログイン（02 §2 `/sellers/login`）。
- * ログイン ID → seller_accounts（approved かつ共有ログイン発行済み）→ 合成メールで認証。
+ * Farmille企業会員ID → seller_accounts（approved かつ共有ログイン発行済み）→ 合成メールで認証。
  * どの段階で落ちても同じエラーコードを返し、ID とパスワードのどちらが誤りかを推測させない。
  */
 export async function signInSellerWithLoginId(

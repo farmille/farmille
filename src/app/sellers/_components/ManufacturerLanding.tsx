@@ -244,7 +244,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           企業会員登録とは
         </h2>
         <p className={css({ mt: "4", fontSize: "md", lineHeight: "loose", color: "text.muted" })}>
-          Farmilleでは、生産者により適切な資材情報を届けるために、各資材の製造元・販売元・輸入元にあたるメーカー様に、企業会員のご登録をお願いしています。ご登録いただいた企業様に、資材ごとに
+          Farmilleでは、生産者により適切な製品情報を届けるために、各資材の製造元・販売元・輸入元にあたるメーカー様に、企業会員のご登録をお願いしています。ご登録いただいた企業様に、資材ごとに
           <b className={highlightStyle}>
             「資材オーナー権限」（資材ごとに1社に設定する権限で、製品情報を編集できます）
           </b>
@@ -443,7 +443,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
           </li>
         </PrepBox>
         <PrepBox title="資材オーナー権限の申請フォームにご入力いただく項目">
-          <li>申請内容（資材情報の新規掲載／掲載済み資材の資材オーナー権限）</li>
+          <li>申請内容（資材の新規掲載／掲載済み資材の資材オーナー権限）</li>
           <li>資材名（パッケージ記載の正式名称）</li>
           <li>FarmilleページURL（掲載済み資材の場合）</li>
           <li>当該資材との関係（製造元・販売元・輸入元）</li>
@@ -469,7 +469,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
                 </li>
                 <li>
                   <span className={listNumberStyle}>３．</span>
-                  <Link href="/dashboard/materials">資材情報の確認・編集</Link>
+                  <Link href="/dashboard/materials">製品情報の確認・編集</Link>
                   （企業会員ダッシュボードから）
                 </li>
               </ol>

@@ -62,7 +62,7 @@ type ReceiptCompany = Pick<
 
 const targetSchema = v.picklist(["new", "existing"]);
 const targetLabels = {
-  new: "資材情報の新規掲載",
+  new: "資材の新規掲載",
   existing: "掲載済み資材の資材オーナー権限",
 } as const;
 const requestTypeSchema = v.picklist(["hidden", "discontinued"]);

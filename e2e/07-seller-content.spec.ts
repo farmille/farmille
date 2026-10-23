@@ -14,7 +14,7 @@ import {
 } from "./support/test-data";
 import { chooseOption, loginAdminAndEnrollMfa, loginSeller } from "./support/ui";
 
-test("書類確認で資材単位の編集権を付与し、原稿を表現確認後に公開する", async ({
+test("書類確認で資材単位の資材オーナー権限を付与し、原稿を表現確認後に公開する", async ({
   browser,
   page,
 }) => {
@@ -57,7 +57,9 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
     await expect(page.getByRole("img", { name: `${material.name}の容器イメージ` })).toBeVisible();
     await loginSeller(page, seller);
     await page.goto(`/dashboard/materials/${material.id}`);
-    await expect(page.getByText("編集権の書類確認が必要です", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("資材オーナー権限の書類確認が必要です", { exact: true }),
+    ).toBeVisible();
     await loginAdminAndEnrollMfa(
       adminPage,
       E2E_ADMIN_ACCOUNTS.materialGovernance,
@@ -65,7 +67,7 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
     );
     await chooseOption(
       adminPage,
-      adminPage.getByLabel("資材オーナー権限を付与する企業会員"),
+      adminPage.getByLabel("資材オーナー権限を付与するメーカー"),
       `${seller.officialName}（${seller.loginId}）`,
     );
     await adminPage
@@ -78,7 +80,9 @@ test("書類確認で資材単位の編集権を付与し、原稿を表現確�
     expect((await getMaterial(material.id)).seller_id).toBe(seller.id);
     expect((await getMaterial(otherMaterial.id)).seller_id).toBeNull();
     await page.goto(`/dashboard/materials/${otherMaterial.id}`);
-    await expect(page.getByText("編集権の書類確認が必要です", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("資材オーナー権限の書類確認が必要です", { exact: true }),
+    ).toBeVisible();
     await page.goto(`/dashboard/materials/${material.id}`);
     await expect(page.getByRole("img", { name: "容器のイメージ", exact: true })).toBeVisible();
     await expect(page.locator('input[type="file"]')).toHaveCount(0);

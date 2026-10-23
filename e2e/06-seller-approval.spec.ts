@@ -50,7 +50,7 @@ for (const mode of ["existing", "new"]) {
       await page.getByLabel("法人名", { exact: false }).fill(officialName);
       await expect(page.getByLabel("種別")).toHaveCount(0);
       await expect(page.getByText(/JA|農業法人|専門家/)).toHaveCount(0);
-      await expect(page.getByLabel("ご希望のログインID")).toHaveCount(0);
+      await expect(page.getByLabel("ご希望のFarmille企業会員ID")).toHaveCount(0);
       await page.getByLabel("法人番号").fill("1234567890123");
       await page.getByLabel("ご担当者電話番号").fill("090-1234-5678");
       await page.getByLabel("連絡先メールアドレス").fill(`${loginId}@example.test`);
@@ -147,10 +147,12 @@ for (const mode of ["existing", "new"]) {
       await expect(page).toHaveURL(/\/dashboard$/);
       await expect(page.getByRole("heading", { name: officialName })).toBeVisible();
       await expect(page.getByText("確認済み", { exact: true })).toBeVisible();
-      // アカウント確認や会社名の一致だけでは資材の編集権を渡さない。
+      // アカウント確認や会社名の一致だけでは資材の資材オーナー権限を渡さない。
       expect((await getMaterial(material.id)).seller_id).toBeNull();
       await page.goto(`/dashboard/materials/${material.id}`);
-      await expect(page.getByText("編集権の書類確認が必要です", { exact: true })).toBeVisible();
+      await expect(
+        page.getByText("資材オーナー権限の書類確認が必要です", { exact: true }),
+      ).toBeVisible();
       await page.goto("/dashboard");
       await captureAccountScreen(page, "10-dashboard.png");
 

@@ -19,7 +19,7 @@ import { ProcedureRow } from "../_components/ProcedureRow";
 const PROCEDURES = [
   {
     title: "自社の資材を掲載する／掲載済みの自社資材を管理する",
-    description: "資材情報の新規掲載と、掲載済み資材の資材オーナー権限の申請。",
+    description: "資材の新規掲載と、掲載済み資材の資材オーナー権限の申請。",
     needs: "資材ごとのパッケージ画像 or 製品ページURL、法人番号、掲載済み資材はそのページURL",
     href: "/dashboard/applications/new/registration",
     label: "申請フォーム A",

@@ -30,7 +30,7 @@ export function ClaimForm({
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
       <Field
         description="申請と確認資料で、このメーカーにこの資材の資材オーナー権限を渡してよいことを確認してください。会社名が一致するだけでは付与できません。"
-        label="資材オーナー権限を付与する企業会員"
+        label="資材オーナー権限を付与するメーカー"
         name="sellerId"
         requirement="optional"
       >

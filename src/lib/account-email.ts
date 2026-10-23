@@ -111,7 +111,7 @@ export function sellerWelcomeEmail(
         new URL("/sellers/password-reset", siteUrl).toString(),
       ],
       ["▼メーカーログイン画面", new URL("/sellers/login", siteUrl).toString()],
-      ["資材の編集権については、運営から別途ご案内いたします。"],
+      ["資材オーナー権限については、運営から別途ご案内いたします。"],
     ),
   };
 }

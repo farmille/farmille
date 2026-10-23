@@ -265,7 +265,7 @@ export function ReportStepBasics({
         </div>
         <Autocomplete
           hideLabel
-          label="作目"
+          label="使用対象作目"
           placeholder="作物名で検索　トマト、みかん"
           filterMode="preFiltered"
           value={cropQuery}

@@ -200,7 +200,7 @@ export function HomeHero() {
         </div>
 
         <p className={lead}>
-          <span className={phrase}>資材情報と、</span>
+          <span className={phrase}>製品情報と、</span>
           <span className={phrase}>実際に使った人の感想口コミ・実証詳細レポートを、</span>
           <span className={phrase}>ひとつの場所で比べられます。</span>
         </p>

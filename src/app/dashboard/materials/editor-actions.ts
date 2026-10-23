@@ -29,7 +29,7 @@ export async function saveMaterialPage(input: v.InferOutput<typeof SaveMaterialP
         error.code === "40001"
           ? "別の画面で原稿が更新されました。入力を控えてから再読み込みしてください。"
           : error.code === "42501"
-            ? "この資材は編集権の書類確認が必要です。"
+            ? "この資材は資材オーナー権限の書類確認が必要です。"
             : "原稿を保存できませんでした。入力を残していますので、内容を確認して再度お試しください。",
     };
   }

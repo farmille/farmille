@@ -33,8 +33,8 @@ export default async function SellerMaterialPage({ params }: { params: Promise<{
     return (
       <FormPageShell chrome="seller" backHref="/dashboard/materials" title="製品情報の管理">
         <EmptyState
-          title="編集権の書類確認が必要です"
-          description="この資材はまだ編集できません。掲載・オーナー権限の申請と資料を確認した後、運営が資材ごとに編集権を付与します。公開中の情報は引き続き閲覧できます。"
+          title="資材オーナー権限の書類確認が必要です"
+          description="この資材はまだ編集できません。掲載・オーナー権限の申請と資料を確認した後、運営が資材ごとに資材オーナー権限を付与します。公開中の情報は引き続き閲覧できます。"
         />
       </FormPageShell>
     );

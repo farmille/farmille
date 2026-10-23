@@ -44,7 +44,7 @@ describe("一般会員の登録とパスワード再設定のメール", () => {
     expect(mail.text.endsWith(footer)).toBe(true);
   });
 
-  it("企業会員の案内はログインIDと設定リンク、期限、再発行とログインの入口を載せる", () => {
+  it("企業会員の案内はFarmille企業会員IDと設定リンク、期限、再発行とログインの入口を載せる", () => {
     const setup = `${siteUrl}/password-reset/update?token_hash=abc`;
     const mail = sellerWelcomeEmail("example-agri", setup, siteUrl);
     expect(mail.subject).toBe("【Farmille】企業会員登録のご案内（ログイン情報）");

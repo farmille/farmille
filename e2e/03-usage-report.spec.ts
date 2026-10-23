@@ -24,7 +24,7 @@ test("実証詳細レポートの下書き保存、提出、pending の公開側
     await page.goto("/me");
     await expect(page.getByText("作物未選択", { exact: true })).toBeVisible();
     await page.goto(reportPath);
-    await page.getByRole("combobox", { name: "作目", exact: true }).fill("トマト");
+    await page.getByRole("combobox", { name: "使用対象作目", exact: true }).fill("トマト");
     await page.getByRole("option", { name: "トマト なす科果菜類", exact: true }).click();
     await page.getByRole("button", { name: "下書き保存" }).click();
     await expect(page.getByRole("region", { name: "レポートの通知" })).toContainText(
