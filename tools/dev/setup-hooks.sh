@@ -55,7 +55,7 @@ for file in tools/ci/browser-checks.ts tools/ci/selection.ts package.json pnpm-l
   digest=$(shasum -a 256 "$file")
   printf "verify_hash '%s' '%s'\n" "${digest%% *}" "$file" >> "$temporary/pre-push"
 done
-printf '%s\n' 'exec node tools/ci/browser-checks.ts pre-push' >> "$temporary/pre-push"
+printf '%s\n' 'exec node tools/ci/browser-checks.ts pre-push "$@"' >> "$temporary/pre-push"
 
 if [ -f "$hooks_dir/pre-push" ] && ! cmp -s "$temporary/pre-push" "$hooks_dir/pre-push" && \
   [ "${1:-}" != "--trust-current" ]; then

@@ -190,6 +190,45 @@ describe("ブラウザ検査の対象", () => {
     });
   });
 
+  it.each([
+    "tools/ci/browser-checks.ts",
+    "tools/ci/selection.ts",
+    "tools/ci/selection.test.ts",
+    "tools/dev/pre-push.sh",
+    "tools/dev/setup-hooks.sh",
+    "tools/oxlint/anti-slop/index.ts",
+    "eslint.config.mjs",
+    ".github/workflows/ci.yml",
+  ])("開発ツール %s だけならブラウザ検査を省く", (file) => {
+    expect(createBrowserCheckPlan(root, [file], false)).toMatchObject({
+      storybook: { mode: "none" },
+      e2e: false,
+    });
+  });
+
+  it("CSSだけならStorybookを実行し、E2Eを省く", () => {
+    expect(createBrowserCheckPlan(root, ["src/app/globals.css"], false)).toMatchObject({
+      storybook: { mode: "all" },
+      e2e: false,
+    });
+  });
+
+  it("CSSと実行コードが混在すればE2Eを残す", () => {
+    expect(
+      createBrowserCheckPlan(root, ["src/app/globals.css", "src/app/me/Profile.tsx"], false),
+    ).toMatchObject({ storybook: { mode: "all" }, e2e: true });
+  });
+
+  it.each(["tools/dev/e2e-local.sh", "tools/dev/check-migrations.sh", "e2e/fixtures/style.css"])(
+    "E2Eの準備処理 %s はE2Eで検査する",
+    (file) => {
+      expect(createBrowserCheckPlan(root, [file], false)).toMatchObject({
+        storybook: { mode: "none" },
+        e2e: true,
+      });
+    },
+  );
+
   it("不正な tsconfig は選別を成功扱いせず失敗する", () => {
     write("tsconfig.json", "invalid");
     expect(() => createBrowserCheckPlan(root, ["src/app/me/Profile.tsx"], false)).toThrow();
