@@ -93,13 +93,13 @@ const inputStyle = css({
   _touch: { fontSize: "lg" },
 });
 
-// 選んだ候補は入力欄の外（上）に並べ、文字を打つ欄と見分けがつくようにする。
+const multipleStyle = css({ display: "flex", flexDirection: "column", gap: "2" });
+
 const chipsStyle = css({
   display: "flex",
   flexWrap: "wrap",
   alignItems: "center",
   gap: "1.5",
-  mb: "2",
 });
 
 const iconStyle = css({ display: "flex", flexShrink: "0", color: "text.subtle" });
@@ -252,35 +252,37 @@ function MultipleCombobox({
       required={required}
       value={selected}
     >
-      {selected.length > 0 ? (
-        <BaseCombobox.Chips className={chipsStyle}>
-          {selected.map((option) => (
-            <BaseCombobox.Chip className={chips.root} key={option.value}>
-              {option.label}
-              <BaseCombobox.ChipRemove
-                aria-label={`${option.label}を削除`}
-                className={chips.remove}
-              >
-                <Icon name="close" size="2xs" />
-              </BaseCombobox.ChipRemove>
-            </BaseCombobox.Chip>
-          ))}
-        </BaseCombobox.Chips>
-      ) : null}
-      <BaseCombobox.InputGroup className={cx(groupStyle, className)}>
-        <span className={iconStyle} aria-hidden="true">
-          <Icon name="search" size="sm" />
-        </span>
-        <BaseCombobox.Input
-          className={inputStyle}
-          onKeyDown={enterGuard.onKeyDown}
-          placeholder={placeholder}
-          readOnly={full}
-        />
-        <BaseCombobox.Icon className={iconStyle}>
-          <Icon name="expand_more" size="sm" />
-        </BaseCombobox.Icon>
-      </BaseCombobox.InputGroup>
+      <BaseCombobox.Chips className={multipleStyle}>
+        {selected.length > 0 ? (
+          <div className={chipsStyle}>
+            {selected.map((option) => (
+              <BaseCombobox.Chip className={chips.root} key={option.value}>
+                {option.label}
+                <BaseCombobox.ChipRemove
+                  aria-label={`${option.label}を削除`}
+                  className={chips.remove}
+                >
+                  <Icon name="close" size="2xs" />
+                </BaseCombobox.ChipRemove>
+              </BaseCombobox.Chip>
+            ))}
+          </div>
+        ) : null}
+        <BaseCombobox.InputGroup className={cx(groupStyle, className)}>
+          <span className={iconStyle} aria-hidden="true">
+            <Icon name="search" size="sm" />
+          </span>
+          <BaseCombobox.Input
+            className={inputStyle}
+            onKeyDown={enterGuard.onKeyDown}
+            placeholder={placeholder}
+            readOnly={full}
+          />
+          <BaseCombobox.Icon className={iconStyle}>
+            <Icon name="expand_more" size="sm" />
+          </BaseCombobox.Icon>
+        </BaseCombobox.InputGroup>
+      </BaseCombobox.Chips>
       <OptionPopup
         emptyMessage={emptyMessage}
         isDisabled={(option) =>
