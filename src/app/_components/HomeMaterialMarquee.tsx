@@ -28,7 +28,9 @@ const frame = cva({
         mx: "-4",
         tab: { mx: "-5" },
         // 両端のフェード。transparent と black はマスクのアルファ指定であり配色ではない。
-        maskImage: "linear-gradient(90deg, transparent, black 6%, black 94%, transparent)",
+        // 濃さは smoothstep（両端の傾きが 0 の S 字）で変え、端と内側の境目を線として見せない。
+        maskImage:
+          "linear-gradient(90deg, transparent 0%, rgb(0 0 0 / 0.043) 0.75%, rgb(0 0 0 / 0.156) 1.5%, rgb(0 0 0 / 0.316) 2.25%, rgb(0 0 0 / 0.500) 3%, rgb(0 0 0 / 0.684) 3.75%, rgb(0 0 0 / 0.844) 4.5%, rgb(0 0 0 / 0.957) 5.25%, black 6%, black 94%, rgb(0 0 0 / 0.957) 94.75%, rgb(0 0 0 / 0.844) 95.5%, rgb(0 0 0 / 0.684) 96.25%, rgb(0 0 0 / 0.500) 97%, rgb(0 0 0 / 0.316) 97.75%, rgb(0 0 0 / 0.156) 98.5%, rgb(0 0 0 / 0.043) 99.25%, transparent 100%)",
         cursor: "grab",
         // 縦スクロールはブラウザに任せ、横方向のドラッグだけ受け取る。
         touchAction: "pan-y",

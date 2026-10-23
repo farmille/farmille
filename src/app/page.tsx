@@ -2,66 +2,55 @@ import { SiteAppBar } from "@/components/SiteAppBar";
 import { Suspense } from "react";
 import { SkeletonList } from "@/components/SkeletonList";
 
-import { MaterialCard, SectionHeading } from "@/components";
+import { MaterialCard } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { getSessionUser } from "@/server/auth";
 import { listHomeMaterials } from "@/server/queries/home-materials";
 import { css } from "../../styled-system/css";
+import { HomeConcept } from "./_components/HomeConcept";
 import { HomeHero } from "./_components/HomeHero";
-import { HomeInvitations } from "./_components/HomeInvitations";
+import { HomeLetters } from "./_components/HomeLetters";
 import { HomeMaterialMarquee } from "./_components/HomeMaterialMarquee";
-import { HomeFooter } from "./_components/HomeFooter";
+import { HomeMission } from "./_components/HomeMission";
+import { HomeSearch } from "./_components/HomeSearch";
+import { HomeSellerInvitation } from "./_components/HomeSellerInvitation";
+
+const shell = css({
+  minH: "dvh",
+  bg: "surface.paper",
+  color: "text.default",
+  fontFamily: "sans",
+});
 
 const empty = css({
+  mx: "4",
   p: "5",
-  borderWidth: "1px",
-  borderColor: "border.default",
   borderRadius: "card",
   bg: "surface.card",
   color: "text.subtle",
   textStyle: "body",
+  tab: { mx: "5" },
 });
 
-export default function HomePage() {
+export default async function HomePage() {
+  // SiteAppBar と同じリクエスト内のキャッシュを使うので、問い合わせは増えない。
+  const session = await getSessionUser();
   return (
-    <div
-      className={css({
-        minH: "dvh",
-        bg: "surface.page",
-        color: "text.default",
-        fontFamily: "sans",
-      })}
-    >
-      <SiteAppBar chrome="public" active="home" variant="home" overlapNoticeImage />
+    <div className={shell} data-ui="home">
+      <SiteAppBar chrome="public" active="home" variant="home" preparationNotice={false} />
       <main>
         <HomeHero />
-        <div
-          className={css({
-            maxW: "content.wide",
-            mx: "auto",
-            px: "4",
-            pt: "8",
-            tab: { px: "5", pt: "10" },
-          })}
-        >
-          <div className={css({ display: "flex", flexDirection: "column", gap: "12" })}>
-            <section aria-label="掲載資材一覧">
-              <SectionHeading as="h1" title="掲載資材一覧" href="/search" linkLabel="すべて見る" />
-              <Suspense
-                fallback={
-                  <SkeletonList variant="materialScroll" label="掲載資材を読み込んでいます" />
-                }
-              >
-                <HomeMaterials />
-              </Suspense>
-            </section>
-
-            <Suspense fallback={null}>
-              <HomeAccountInvitations />
-            </Suspense>
-          </div>
-          <HomeFooter />
-        </div>
+        <HomeConcept showSignup={session === null} />
+        <HomeSearch>
+          <Suspense
+            fallback={<SkeletonList variant="materialScroll" label="掲載資材を読み込んでいます" />}
+          >
+            <HomeMaterials />
+          </Suspense>
+        </HomeSearch>
+        <HomeLetters />
+        <HomeMission />
+        <HomeSellerInvitation />
       </main>
       <BottomNav active="home" />
     </div>
@@ -70,32 +59,25 @@ export default function HomePage() {
 
 async function HomeMaterials() {
   const materialsResult = await listHomeMaterials();
+  if (materialsResult.length === 0) {
+    return <p className={empty}>表示できる資材がまだありません。</p>;
+  }
   return (
-    <>
-      <HomeMaterialMarquee>
-        {materialsResult.map((material) => (
-          <MaterialCard
-            key={material.id}
-            variant="scroll"
-            name={material.name}
-            maker={material.manufacturer_name}
-            rating={material.avg_rating ?? 0}
-            reviewCount={material.review_count}
-            categories={material.categories}
-            official={material.manufacturer_verified_at !== null}
-            imageSrc={material.imageUrl ?? undefined}
-            href={`/materials/${material.id}`}
-          />
-        ))}
-      </HomeMaterialMarquee>
-      {materialsResult.length === 0 ? (
-        <p className={empty}>表示できる資材がまだありません。</p>
-      ) : null}
-    </>
+    <HomeMaterialMarquee>
+      {materialsResult.map((material) => (
+        <MaterialCard
+          key={material.id}
+          variant="scroll"
+          name={material.name}
+          maker={material.manufacturer_name}
+          rating={material.avg_rating ?? 0}
+          reviewCount={material.review_count}
+          categories={material.categories}
+          official={material.manufacturer_verified_at !== null}
+          imageSrc={material.imageUrl ?? undefined}
+          href={`/materials/${material.id}`}
+        />
+      ))}
+    </HomeMaterialMarquee>
   );
-}
-
-async function HomeAccountInvitations() {
-  const session = await getSessionUser();
-  return <HomeInvitations showSignup={session === null} />;
 }

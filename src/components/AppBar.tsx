@@ -5,12 +5,13 @@ import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
 import { BrandMark } from "@/components/BrandMark";
 import { Icon } from "@/components/Icon";
 import { PreparationNotice } from "@/components/PreparationNotice";
+import { TextLink } from "@/components/TextLink";
 
 const mobileAppBar = css({
+  bg: "surface.paper/88",
   position: "sticky",
   top: "0",
   zIndex: "appBar",
-  bg: "panel/88",
   backdropFilter: "[blur({blurs.bar})]",
   borderBottomWidth: "1px",
   borderBottomStyle: "solid",
@@ -73,7 +74,7 @@ const desktopHeader = css({
     position: "sticky",
     top: "0",
     zIndex: "header",
-    bg: "card/94",
+    bg: "surface.paper/94",
     backdropFilter: "[blur(12px)]",
     borderBottomWidth: "1px",
     borderBottomStyle: "solid",
@@ -83,13 +84,12 @@ const desktopHeader = css({
 
 const desktopHeaderInner = css({
   w: "full",
-  maxW: "content.wide",
-  mx: "auto",
   minH: "16",
-  px: "5",
+  px: "6",
   display: "flex",
   alignItems: "center",
   gap: "3",
+  pc: { px: "10" },
 });
 
 const desktopBrand = css({
@@ -114,12 +114,37 @@ const desktopNav = css({
   ml: "auto",
 });
 
+/** 公開画面の主な行き先。参考にした森林組合のサイトのように、文字だけを並べる。 */
+const siteMenu = [
+  { label: "資材をさがす", href: "/search", active: "search" },
+  { label: "記事", href: "/articles", active: "articles" },
+  { label: "投稿する", href: "/post", active: "post" },
+  { label: "メーカーの方へ", href: "/sellers", active: null },
+] as const satisfies readonly { label: string; href: string; active: AppBarActive | null }[];
+
+const desktopSiteMenuNav = css({ ml: "auto" });
+
+const desktopSiteMenu = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "5",
+  m: "0",
+  p: "0",
+  listStyle: "none",
+  color: "text.brandOnSoft",
+  fontSize: "md",
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
+  pc: { gap: "8" },
+});
+
 const desktopPublicActions = css({
   display: "flex",
   alignItems: "center",
   gap: "1.5",
   flexShrink: "0",
-  ml: "auto",
+  ml: "6",
+  pc: { ml: "10" },
 });
 
 const desktopNavLink = cva({
@@ -241,7 +266,8 @@ export type AppBarAccount = { kind: "guest" } | { kind: "member"; avatar: ReactN
 
 type AppBarBaseProps = {
   chrome: AppChrome;
-  overlapNoticeImage?: boolean;
+  /** false で公開準備中のお知らせを出さない。 */
+  preparationNotice?: boolean;
   active?: AppBarActive;
   /** 未指定は閲覧者を確かめていない画面（エラー・読み込み中など）で、開いた時点で項目を切り替えるメニューを出す。 */
   account?: AppBarAccount;
@@ -310,6 +336,21 @@ function DesktopSiteHeader({
           <BrandMark />
           <span className={desktopBrandName}>Farmille</span>
         </Link>
+        <nav aria-label="サイトメニュー" className={desktopSiteMenuNav}>
+          <ul className={desktopSiteMenu}>
+            {siteMenu.map((item) => (
+              <li key={item.href}>
+                <TextLink
+                  aria-current={item.active !== null && active === item.active ? "page" : undefined}
+                  href={item.href}
+                  variant="nav"
+                >
+                  {item.label}
+                </TextLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
         <nav className={desktopPublicActions} aria-label="PCメインナビ">
           {account?.kind === "guest" ? (
             <>
@@ -389,7 +430,7 @@ export function AppBar(props: AppBarProps) {
       {props.chrome === "public" ? (
         <>
           <DesktopSiteHeader active={props.active} account={props.account} />
-          <PreparationNotice overlapImage={props.overlapNoticeImage} />
+          {props.preparationNotice === false ? null : <PreparationNotice />}
           {props.variant === "home" ? null : <DesktopContextBar {...props} />}
         </>
       ) : (
