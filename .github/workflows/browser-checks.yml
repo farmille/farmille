@@ -1,0 +1,66 @@
+name: Browser checks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: farmille-browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    name: Full Storybook and E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SITE_URL: "http://localhost:3007"
+      SMTP_URL: "smtp://127.0.0.1:54325"
+      MAIL_FROM: "Farmille <noreply@example.test>"
+      AUTH_EMAIL_HOOK_SECRET: "v1,whsec_bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ=="
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.21.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Select Ubuntu package mirror
+        run: |
+          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+          grep -Fq 'https://archive.ubuntu.com/ubuntu/' /etc/apt/apt-mirrors.txt
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Start local Supabase
+        run: npx --yes supabase@2.120.0 start -x studio,edge-runtime,realtime,imgproxy,logflare,vector
+
+      - name: Run full browser checks
+        run: pnpm test:browser:local
+
+      - name: Upload failed browser checks
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: browser-checks-report
+          path: |
+            playwright-report
+            test-results
+            output/playwright/storybook-responsive
+          retention-days: 7
+          if-no-files-found: ignore

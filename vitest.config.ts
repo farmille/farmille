@@ -20,6 +20,7 @@ export default defineConfig({
     include: [
       "src/**/*.{test,spec}.{ts,tsx}",
       "tools/catalog/**/*.test.ts",
+      "tools/ci/**/*.test.ts",
       "src/**/__tests__/**/*.{ts,tsx}",
       "src/__tests__/**/*.{test,spec}.{ts,tsx}",
     ],
