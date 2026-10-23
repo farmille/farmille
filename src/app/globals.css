@@ -21,6 +21,10 @@
 
 /* 要素の既定はレイヤーの中に置き、css() の指定が要素の既定より勝つようにする。 */
 @layer base {
+  ::selection {
+    background: color-mix(in srgb, var(--colors-primary-300) 35%, transparent);
+  }
+
   body {
     font-family: var(--fonts-sans);
     letter-spacing: var(--letter-spacings-body);
