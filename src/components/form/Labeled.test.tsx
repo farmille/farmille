@@ -63,7 +63,7 @@ describe("ラベルを内蔵した入力部品", () => {
       <>
         <Textarea label="感想" />
         <Select label="作目" options={options} />
-        <Combobox emptyMessage="候補がありません" label="主な作目" options={options} />
+        <Combobox emptyMessage="候補がありません" label="栽培作目" options={options} />
         <Autocomplete label="資材" onValueChange={() => {}} options={options} value="" />
         <OtpInput label="認証コード" />
         <FileInput label="確認資料" />
@@ -72,7 +72,7 @@ describe("ラベルを内蔵した入力部品", () => {
 
     expect(screen.getByRole("textbox", { name: "感想" })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "作目" })).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "主な作目" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "栽培作目" })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "資材" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "認証コード" })).toBeInTheDocument();
     expect(screen.getByLabelText("確認資料", { exact: false })).toHaveAttribute("type", "file");
