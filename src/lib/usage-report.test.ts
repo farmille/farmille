@@ -58,11 +58,57 @@ describe("実証詳細レポート", () => {
       kind: "text",
     }));
     expect(validateUsageReportSubmission(input)["measurements.0.values"]).toBeDefined();
-    expect(validateUsageReportSubmission(input).measurements).toBeDefined();
+    expect(validateUsageReportSubmission(input).measurements).toBeUndefined();
     input.documents = [
       { id: crypto.randomUUID(), path: "owner/report/document.pdf", name: "成績書.pdf" },
     ];
     expect(validateUsageReportSubmission(input).documentsAck).toBeDefined();
+  });
+  it("ページ版：区の調査範囲は任意で、資料のグラフ・表の画像だけでも提出できる", () => {
+    const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
+    input.cropId = "22222222-2222-4222-8222-222222222222";
+    input.varietyUnknown = true;
+    input.prefectureCode = 8;
+    input.observedChange = "変化はありませんでした。";
+    input.purposeTags = ["耐暑性改善"];
+    input.cultivationEnvironment = "露地";
+    input.timingStages = [3];
+    input.timingNote = "9月1日に散布しました。";
+    input.plots = input.plots.map((plot, index) => ({
+      ...plot,
+      name: `区${index + 1}`,
+      description: "10株を調査",
+    }));
+    const measurement = {
+      id: crypto.randomUUID(),
+      kind: "image" as const,
+      name: "収量",
+      unit: "",
+      body: "",
+      graphs: [],
+    };
+    input.measurements = [measurement];
+    input.methodDetailsAck = true;
+    input.guidelineAck = true;
+    expect(validateUsageReportSubmission(input)["measurements.0.values"]).toBeDefined();
+    input.media = [
+      {
+        id: crypto.randomUUID(),
+        url: "https://example.supabase.co/storage/v1/object/public/report-media/owner/graph.png",
+        mediaType: "photo",
+        section: "measurements",
+        caption: "",
+        measurementId: measurement.id,
+      },
+    ];
+    expect(v.safeParse(UsageReportInputSchema, input).success).toBe(true);
+    expect(validateUsageReportSubmission(input)).toEqual({});
+    input.media = input.media.map((item) => ({ ...item, measurementId: null }));
+    expect(validateUsageReportSubmission(input)["measurements.0.values"]).toBeDefined();
+    input.measurements = [];
+    expect(validateUsageReportSubmission(input).measurements).toBe(
+      "※ 調査項目を1つ以上追加してください",
+    );
   });
   it("都道府県と品種は提出時に必須で、品種は「不明」のチェックで不要になる", () => {
     const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
