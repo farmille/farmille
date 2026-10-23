@@ -21,7 +21,8 @@ const head = css({
   display: "flex",
   flexWrap: "wrap",
   alignItems: "center",
-  gap: "0.5 2",
+  rowGap: "0.5",
+  columnGap: "2",
   fontWeight: "bold",
   "& > *": { flex: "none", whiteSpace: "nowrap" },
 });
@@ -77,9 +78,20 @@ const option = css({
 
 const optionTitle = css({ display: "block", fontWeight: "bold", textStyle: "body" });
 
-const optionText = css({ display: "block", mt: "0.5", textStyle: "supporting", color: "text.muted" });
+const optionText = css({
+  display: "block",
+  mt: "0.5",
+  textStyle: "supporting",
+  color: "text.muted",
+});
 
-const optionChevron = css({ position: "absolute", right: "3", top: "[50%]", transform: "translateY(-50%)", color: "text.muted" });
+const optionChevron = css({
+  position: "absolute",
+  right: "3",
+  top: "[50%]",
+  transform: "translateY(-50%)",
+  color: "text.muted",
+});
 
 const figures = css({ display: "grid", gap: "2.5", mt: "2" });
 
@@ -130,12 +142,18 @@ export function ReportPageItems({
             <div className={head}>
               <span>調査項目{index + 1}</span>
               {item.mode !== "" && (
-                <span className={modeName}>・{item.mode === "file" ? "資料のグラフ・表" : "文章"}</span>
+                <span className={modeName}>
+                  ・{item.mode === "file" ? "資料のグラフ・表" : "文章"}
+                </span>
               )}
               {item.mode !== "" && !done && <span className={unfinished}>書きかけ</span>}
               <span className={spacer} />
               {item.mode === "file" ? (
-                <button type="button" className={changeButton} onClick={() => onOpenFile(item, false)}>
+                <button
+                  type="button"
+                  className={changeButton}
+                  onClick={() => onOpenFile(item, false)}
+                >
                   画像・PDFの変更
                 </button>
               ) : (
@@ -171,7 +189,11 @@ export function ReportPageItems({
                     </span>
                     <Icon name="chevron_right" className={optionChevron} />
                   </button>
-                  <button type="button" className={option} onClick={() => update(item.id, { mode: "text" })}>
+                  <button
+                    type="button"
+                    className={option}
+                    onClick={() => update(item.id, { mode: "text" })}
+                  >
                     <span className={optionTitle}>文章で書く</span>
                     <span className={optionText}>区ごとの数値と違いを文章で書きます</span>
                     <Icon name="chevron_right" className={optionChevron} />
@@ -182,20 +204,25 @@ export function ReportPageItems({
             )}
             {item.mode === "text" && (
               <Textarea
+                id={`report-item-text-${item.id}`}
                 fieldClassName={css({ mt: "3" })}
                 label={<span className={labelStyle}>区ごとの結果</span>}
                 requirement="required"
                 size="document"
                 example={TEXT_EXAMPLE}
                 value={item.body}
-                error={missing && item.body.trim() === "" ? "区ごとの結果を記入してください" : undefined}
+                error={
+                  missing && item.body.trim() === "" ? "区ごとの結果を記入してください" : undefined
+                }
                 onChange={(event) => update(item.id, { body: event.target.value })}
               />
             )}
             {item.mode === "file" && (
               <>
                 <div className={figures}>
-                  {item.images.length === 0 && <p className={errorText}>グラフ・表が入っていません</p>}
+                  {item.images.length === 0 && (
+                    <p className={errorText}>グラフ・表が入っていません</p>
+                  )}
                   {item.images.map((image) => (
                     <figure key={image.id} className={figure}>
                       <OptimizedImage
@@ -205,7 +232,9 @@ export function ReportPageItems({
                         height={540}
                         sizes="(max-width: 720px) 100vw, 720px"
                       />
-                      {image.caption && <figcaption className={caption}>{image.caption}</figcaption>}
+                      {image.caption && (
+                        <figcaption className={caption}>{image.caption}</figcaption>
+                      )}
                     </figure>
                   ))}
                 </div>

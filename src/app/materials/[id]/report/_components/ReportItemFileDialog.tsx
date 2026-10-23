@@ -89,7 +89,7 @@ const pick = css({
   color: "text.brand",
   cursor: "pointer",
   "&:focus-within": { outlineWidth: "2px", outlineStyle: "solid", outlineColor: "primary.700" },
-  "& input": { position: "absolute", w: "1px", h: "1px", opacity: "0", overflow: "hidden" },
+  "& input": { position: "absolute", w: "[1px]", h: "[1px]", opacity: "0", overflow: "hidden" },
 });
 
 const status = css({ mt: "2", textStyle: "supporting", color: "text.muted" });
@@ -125,7 +125,7 @@ export function ReportItemFileDialog({
   onDelete,
   onClose,
 }: {
-  item: ReportPageItem | null;
+  item: ReportPageItem;
   isNew: boolean;
   userId: string;
   reportId: string;
@@ -133,8 +133,9 @@ export function ReportItemFileDialog({
   onDelete: (id: string) => void;
   onClose: () => void;
 }) {
-  const [images, setImages] = useState<DraftImage[]>([]);
-  const [openedFor, setOpenedFor] = useState<string | null>(null);
+  // 項目ごとに呼び出し側が作り直す（key）ので、最初の状態はその項目の画像
+  const [images, setImages] = useState<DraftImage[]>(() => item.images.map(fromSaved));
+  const [open, setOpen] = useState(true);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [asking, setAsking] = useState(false);
@@ -146,24 +147,14 @@ export function ReportItemFileDialog({
   } | null>(null);
   const live = useRef(true);
 
-  // 開くたびに、その項目の画像から始める
-  if (item !== null && openedFor !== item.id) {
-    setOpenedFor(item.id);
-    setImages(item.images.map(fromSaved));
-    setMessage("");
-    live.current = true;
-  }
-  if (item === null && openedFor !== null) setOpenedFor(null);
-
   const changed =
-    item !== null &&
-    (images.length !== item.images.length ||
-      images.some(
-        (image, index) =>
-          image.dirty ||
-          image.id !== item.images[index]?.id ||
-          image.caption !== item.images[index]?.caption,
-      ));
+    images.length !== item.images.length ||
+    images.some(
+      (image, index) =>
+        image.dirty ||
+        image.id !== item.images[index]?.id ||
+        image.caption !== item.images[index]?.caption,
+    );
 
   function add(canvas: HTMLCanvasElement) {
     if (!live.current) return;
@@ -210,7 +201,9 @@ export function ReportItemFileDialog({
         continue;
       }
       if (!isImage(file)) {
-        setMessage(`「${file.name}」は写真（JPEG・PNG・WebP）でもPDFでもないため、追加できません。`);
+        setMessage(
+          `「${file.name}」は写真（JPEG・PNG・WebP）でもPDFでもないため、追加できません。`,
+        );
         continue;
       }
       setMessage(`「${file.name}」を読み込んでいます…`);
@@ -218,7 +211,9 @@ export function ReportItemFileDialog({
         add(await canvasFromImageFile(file));
         setMessage("");
       } catch {
-        setMessage(`「${file.name}」を読み込めませんでした。JPEG・PNG で保存し直すと追加できます。`);
+        setMessage(
+          `「${file.name}」を読み込めませんでした。JPEG・PNG で保存し直すと追加できます。`,
+        );
       }
     }
   }
@@ -242,19 +237,23 @@ export function ReportItemFileDialog({
   }
 
   async function commit() {
-    if (item === null) return;
     setSaving(true);
     try {
       const saved: ReportPageImage[] = [];
       for (const [index, image] of images.entries()) {
         setMessage(`画像を保存しています（${index + 1}/${images.length}）…`);
         if (!image.dirty || image.canvas === null) {
-          if (image.url !== null) saved.push({ id: image.id, url: image.url, caption: image.caption });
+          if (image.url !== null)
+            saved.push({ id: image.id, url: image.url, caption: image.caption });
           continue;
         }
         // 編集した画像は別の画像として保存し直す（保存済みの画像は上書きしない）
         const id = image.url === null ? image.id : crypto.randomUUID();
-        saved.push({ id, url: await uploadReportImage(image.canvas, userId, reportId, id), caption: image.caption });
+        saved.push({
+          id,
+          url: await uploadReportImage(image.canvas, userId, reportId, id),
+          caption: image.caption,
+        });
       }
       live.current = false;
       onCommit({ ...item, mode: "file", images: saved });
@@ -269,14 +268,15 @@ export function ReportItemFileDialog({
     live.current = false;
     pdf?.resolve([]);
     setPdf(null);
+    setOpen(false);
     onClose();
   }
 
-  const title = `${item?.name.trim() || "調査項目"}：資料のグラフ・表を差し込む`;
+  const title = `${item.name.trim() || "調査項目"}：資料のグラフ・表を差し込む`;
   return (
     <>
       <Dialog
-        open={item !== null}
+        open={open}
         onOpenChange={(open) => {
           if (open || saving) return;
           if (changed) setAsking(true);
@@ -286,7 +286,7 @@ export function ReportItemFileDialog({
         title={title}
         footer={
           <>
-            {!isNew && item !== null && (
+            {!isNew && (
               <button type="button" className={deleteButton} onClick={() => onDelete(item.id)}>
                 この調査項目を削除
               </button>
@@ -328,11 +328,18 @@ export function ReportItemFileDialog({
               value={image.caption}
               onChange={(event) =>
                 setImages((previous) =>
-                  previous.map((x) => (x.id === image.id ? { ...x, caption: event.target.value } : x)),
+                  previous.map((x) =>
+                    x.id === image.id ? { ...x, caption: event.target.value } : x,
+                  ),
                 )
               }
             />
-            <Button variant="primary" size="md" className={editButton} onClick={() => void startEdit(image)}>
+            <Button
+              variant="primary"
+              size="md"
+              className={editButton}
+              onClick={() => void startEdit(image)}
+            >
               画像を編集する（回転・切り取り・塗りつぶし）
             </Button>
           </div>
@@ -356,7 +363,9 @@ export function ReportItemFileDialog({
             {message}
           </p>
         )}
-        <p className={status}>グラフ・表だけでは伝わらないことは、ページに戻ってから補足説明に書けます。</p>
+        <p className={status}>
+          グラフ・表だけでは伝わらないことは、ページに戻ってから補足説明に書けます。
+        </p>
       </Dialog>
       <ConfirmDialog
         open={asking}
@@ -379,6 +388,7 @@ export function ReportItemFileDialog({
         }}
       />
       <ReportPdfPagePicker
+        key={`pdf:${pdf?.name ?? ""}`}
         doc={pdf?.doc ?? null}
         name={pdf?.name ?? ""}
         onCancel={() => {
@@ -391,6 +401,7 @@ export function ReportItemFileDialog({
         }}
       />
       <ReportImageEditor
+        key={editing === null ? "editor" : `editor:${editing.id}:${editing.preview.length}`}
         open={editing !== null}
         original={editing?.original ?? null}
         current={editing?.canvas ?? null}

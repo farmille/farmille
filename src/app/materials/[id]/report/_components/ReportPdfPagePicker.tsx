@@ -33,7 +33,12 @@ const pageRecipe = cva({
   },
   variants: {
     on: {
-      true: { borderColor: "primary.600", bg: "primary.soft", color: "text.brandOnSoft", fontWeight: "bold" },
+      true: {
+        borderColor: "primary.600",
+        bg: "primary.soft",
+        color: "text.brandOnSoft",
+        fontWeight: "bold",
+      },
       false: {},
     },
   },
@@ -57,7 +62,7 @@ const bar = css({
   textStyle: "supporting",
 });
 
-/** 複数ページの PDF から、差し込むページを選ぶ。ページの絵を描いている途中でも選べる。 */
+/** 複数ページの PDF から、差し込むページを選ぶ。ページの絵を描いている途中でも選べる。PDFごとに呼び出し側が作り直す（key）。 */
 export function ReportPdfPagePicker({
   doc,
   name,
@@ -74,8 +79,6 @@ export function ReportPdfPagePicker({
   const count = doc === null ? 0 : Math.min(doc.numPages, PDF_PAGE_LIMIT);
 
   useEffect(() => {
-    setThumbs({});
-    setSelected(new Set());
     if (doc === null) return;
     let active = true;
     void (async () => {

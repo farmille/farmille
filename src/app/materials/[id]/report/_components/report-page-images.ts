@@ -56,7 +56,17 @@ export type Rect = { x: number; y: number; w: number; h: number };
 
 export function cropCanvas(source: HTMLCanvasElement, rect: Rect): HTMLCanvasElement {
   const canvas = makeCanvas(rect.w, rect.h);
-  context(canvas).drawImage(source, rect.x, rect.y, rect.w, rect.h, 0, 0, canvas.width, canvas.height);
+  context(canvas).drawImage(
+    source,
+    rect.x,
+    rect.y,
+    rect.w,
+    rect.h,
+    0,
+    0,
+    canvas.width,
+    canvas.height,
+  );
   return canvas;
 }
 

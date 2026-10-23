@@ -62,7 +62,7 @@ export const textareaRecipe = cva({
         px: "0",
         py: "0",
         borderWidth: "0",
-        borderRadius: "0",
+        borderRadius: "[0]",
         bg: "transparent",
         resize: "none",
         overflow: "hidden",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 
 import { Button } from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
@@ -8,12 +8,7 @@ import { Icon } from "@/components/Icon";
 
 import { css, cva } from "../../../../../../styled-system/css";
 
-import {
-  cropCanvas,
-  redactCanvas,
-  rotateCanvas,
-  type Rect,
-} from "./report-page-images";
+import { cropCanvas, redactCanvas, rotateCanvas, type Rect } from "./report-page-images";
 
 const stage = css({
   display: "flex",
@@ -134,23 +129,17 @@ type Drag =
 type Point = { x: number; y: number };
 
 function rectBetween(a: Point, b: Point): Rect {
-  return { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(a.x - b.x), h: Math.abs(a.y - b.y) };
-}
-
-function boxStyle(rect: Rect, canvas: HTMLCanvasElement): CSSProperties {
   return {
-    "--box-x": `${(rect.x / canvas.width) * 100}%`,
-    "--box-y": `${(rect.y / canvas.height) * 100}%`,
-    "--box-w": `${(rect.w / canvas.width) * 100}%`,
-    "--box-h": `${(rect.h / canvas.height) * 100}%`,
+    x: Math.min(a.x, b.x),
+    y: Math.min(a.y, b.y),
+    w: Math.abs(a.x - b.x),
+    h: Math.abs(a.y - b.y),
   };
 }
 
-function pointStyle(point: Point, canvas: HTMLCanvasElement): CSSProperties {
-  return {
-    "--box-x": `${(point.x / canvas.width) * 100}%`,
-    "--box-y": `${(point.y / canvas.height) * 100}%`,
-  };
+/** 画像の幅・高さに対する割合（%）。 */
+function pct(value: number, total: number) {
+  return `${(value / total) * 100}%`;
 }
 
 /**
@@ -170,20 +159,15 @@ export function ReportImageEditor({
   onDone: (canvas: HTMLCanvasElement) => void;
   onCancel: () => void;
 }) {
-  const [stack, setStack] = useState<HTMLCanvasElement[]>([]);
+  // 開くたびに呼び出し側が作り直す（key）ので、最初の状態は開いたときの画像
+  const [stack, setStack] = useState<HTMLCanvasElement[]>(() =>
+    current === null ? [] : [current],
+  );
   const [mode, setMode] = useState<Mode>("");
   const [crop, setCrop] = useState<Rect | null>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
   const view = useRef<HTMLCanvasElement>(null);
   const top = stack.at(-1) ?? null;
-
-  useEffect(() => {
-    if (!open || current === null) return;
-    setStack([current]);
-    setMode("");
-    setCrop(null);
-    setDrag(null);
-  }, [open, current]);
 
   useEffect(() => {
     const canvas = view.current;
@@ -250,11 +234,17 @@ export function ReportImageEditor({
     if (drag === null || top === null) return;
     setDrag(null);
     if (drag.kind === "redact") {
-      if (drag.rect !== null && drag.rect.w > 6 && drag.rect.h > 6) push(redactCanvas(top, drag.rect));
+      if (drag.rect !== null && drag.rect.w > 6 && drag.rect.h > 6)
+        push(redactCanvas(top, drag.rect));
       return;
     }
     if (crop !== null && (crop.w < 20 || crop.h < 20))
-      setCrop({ x: top.width * 0.05, y: top.height * 0.05, w: top.width * 0.9, h: top.height * 0.9 });
+      setCrop({
+        x: top.width * 0.05,
+        y: top.height * 0.05,
+        w: top.width * 0.9,
+        h: top.height * 0.9,
+      });
   }
 
   const message =
@@ -300,7 +290,16 @@ export function ReportImageEditor({
               {top !== null && mode === "crop" && crop !== null && (
                 <>
                   <div className={clip}>
-                    <div data-move className={boxRecipe({ kind: "crop" })} style={boxStyle(crop, top)} />
+                    <div
+                      data-move
+                      className={boxRecipe({ kind: "crop" })}
+                      style={{
+                        "--box-x": pct(crop.x, top.width),
+                        "--box-y": pct(crop.y, top.height),
+                        "--box-w": pct(crop.w, top.width),
+                        "--box-h": pct(crop.h, top.height),
+                      }}
+                    />
                   </div>
                   {(
                     [
@@ -310,12 +309,25 @@ export function ReportImageEditor({
                       ["se", crop.x + crop.w, crop.y + crop.h],
                     ] as const
                   ).map(([corner, x, y]) => (
-                    <div key={corner} data-corner={corner} className={handle} style={pointStyle({ x, y }, top)} />
+                    <div
+                      key={corner}
+                      data-corner={corner}
+                      className={handle}
+                      style={{ "--box-x": pct(x, top.width), "--box-y": pct(y, top.height) }}
+                    />
                   ))}
                 </>
               )}
               {top !== null && drag?.kind === "redact" && drag.rect !== null && (
-                <div className={boxRecipe({ kind: "redact" })} style={boxStyle(drag.rect, top)} />
+                <div
+                  className={boxRecipe({ kind: "redact" })}
+                  style={{
+                    "--box-x": pct(drag.rect.x, top.width),
+                    "--box-y": pct(drag.rect.y, top.height),
+                    "--box-w": pct(drag.rect.w, top.width),
+                    "--box-h": pct(drag.rect.h, top.height),
+                  }}
+                />
               )}
             </div>
           </div>
@@ -324,11 +336,19 @@ export function ReportImageEditor({
         <div className={tools}>
           {mode === "" && (
             <>
-              <button type="button" className={toolRecipe()} onClick={() => top && push(rotateCanvas(top, -1))}>
+              <button
+                type="button"
+                className={toolRecipe()}
+                onClick={() => top && push(rotateCanvas(top, -1))}
+              >
                 <Icon name="rotate_left" size="sm" />
                 左に回転
               </button>
-              <button type="button" className={toolRecipe()} onClick={() => top && push(rotateCanvas(top, 1))}>
+              <button
+                type="button"
+                className={toolRecipe()}
+                onClick={() => top && push(rotateCanvas(top, 1))}
+              >
                 <Icon name="rotate_right" size="sm" />
                 右に回転
               </button>
@@ -381,7 +401,11 @@ export function ReportImageEditor({
             </button>
           )}
           {mode === "redact" && (
-            <button type="button" className={toolRecipe({ tone: "primary" })} onClick={() => setMode("")}>
+            <button
+              type="button"
+              className={toolRecipe({ tone: "primary" })}
+              onClick={() => setMode("")}
+            >
               塗りつぶしを終える
             </button>
           )}

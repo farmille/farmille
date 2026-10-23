@@ -143,45 +143,34 @@ export async function loginAdminAndEnrollMfa(
 }
 
 export async function fillUsageReportForSubmission(page: Page): Promise<void> {
-  await page.getByRole("checkbox", { name: /品種が不明/ }).check();
-  await page.getByRole("button", { name: "次へ", exact: true }).click();
-  await page.getByLabel(/^結果・感想/).fill("E2Eで観察した変化を具体的に記録しました。");
+  await page.getByRole("checkbox", { name: "不明・なし", exact: true }).check();
+  await page.getByRole("button", { name: /^使用目的：/ }).click();
   await page.getByRole("button", { name: "樹勢改善", exact: true }).click();
-  await page.getByRole("button", { name: "次へ", exact: true }).click();
-  await chooseOption(page, page.getByLabel(/^地域/), "東京都");
-  await page.getByLabel(/^栽培環境/).fill("露地栽培で調査しました。");
+  await page.getByRole("button", { name: "完了", exact: true }).click();
+  await chooseOption(page, page.getByRole("combobox", { name: "都道府県" }), "東京都");
+  await page.getByRole("button", { name: /^施用時期：/ }).click();
   await page.getByRole("button", { name: "生育初〜中期", exact: true }).click();
+  await page.getByRole("button", { name: "完了", exact: true }).click();
   await page
-    .getByLabel("処理日・定植日・生育状況（必須）")
+    .getByLabel("結果・感想", { exact: true })
+    .fill("E2Eで観察した変化を具体的に記録しました。");
+  await page.getByLabel("栽培環境", { exact: true }).fill("露地栽培で調査しました。");
+  await page
+    .getByLabel("処理日と生育状況", { exact: true })
     .fill("9月1日に定植、9月10日に施用しました。");
-  await page.getByRole("button", { name: "次へ", exact: true }).click();
-  await page.getByRole("button", { name: "グラフ1の調査項目を編集", exact: true }).click();
-  await page.getByRole("combobox", { name: "調査項目", exact: true }).fill("活着率");
-  await page.getByRole("combobox", { name: "調査項目", exact: true }).press("Enter");
-  await page.getByLabel("単位（任意）", { exact: true }).press("Enter");
-  const graph = page.getByRole("region", { name: "グラフ 1", exact: true });
-  for (const name of ["処理区", "無処理区"]) {
-    await graph.getByLabel("区の名前（必須）", { exact: true }).fill(name);
-    await graph.getByLabel("区の名前（必須）", { exact: true }).press("Enter");
+  await page.getByRole("checkbox", { name: "資材を使った日（処理日）を記入した" }).check();
+  for (const [index, [name, description]] of [
+    ["処理区", "10株。1000倍、200L/10aを1回葉面散布しました。"],
+    ["無処理区", "10株。資材なし。ほかは同じ条件です。"],
+  ].entries()) {
+    await page.getByLabel("区の名前").nth(index).fill(name);
+    await page.getByLabel("区の説明").nth(index).fill(description);
   }
-  for (const [index, value] of ["90±2 a", "80±3 b"].entries()) {
-    const field = page.getByLabel(`グラフ1の区${index + 1}の数値`, { exact: true });
-    await field.fill(value);
-    await field.press("Enter");
-  }
-  for (const index of [0, 1]) {
-    await page
-      .getByLabel(/^調査した範囲/)
-      .nth(index)
-      .fill("10株");
-    await page
-      .getByLabel(/^この区の説明/)
-      .nth(index)
-      .fill(
-        index === 0 ? "1000倍、200L/10aを1回葉面散布しました。" : "資材なし。ほかは同じ条件です。",
-      );
-  }
-  await page.getByLabel(/資材を使った区の説明に/).check();
-  await page.getByRole("button", { name: "次へ", exact: true }).click();
-  await page.getByLabel(/投稿ガイドラインを確認し/).check();
+  await page.getByLabel("調査項目1の名前", { exact: true }).fill("活着率");
+  await page.getByRole("button", { name: /^文章で書く/ }).click();
+  await page
+    .getByLabel(/^区ごとの結果/)
+    .fill("定植14日後の活着率は、処理区が90%で、無処理区（80%）より10ポイント高かった。");
+  await page.getByRole("checkbox", { name: /資材を使った区の説明に/ }).check();
+  await page.getByRole("checkbox", { name: /投稿ガイドラインを確認し/ }).check();
 }

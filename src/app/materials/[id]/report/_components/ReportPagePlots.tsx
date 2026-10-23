@@ -13,7 +13,7 @@ const plotStyle = css({ mt: "4" });
 
 const plotHead = css({ display: "flex", alignItems: "center", gap: "2", fontWeight: "bold" });
 
-const dot = css({ w: "2.5", h: "2.5", borderRadius: "pill", bg: "[currentColor]" });
+const dot = css({ w: "2.5", h: "2.5", borderRadius: "pill", bg: "currentColor" });
 
 const fields = css({ pl: "4.5", mt: "1" });
 
@@ -51,8 +51,7 @@ export function ReportPagePlots({
       {plots.map((plot, index) => (
         <div key={plot.id} className={plotStyle}>
           <div className={plotHead}>
-            <span className={cx(dot, reportPlotColor(index))} aria-hidden="true" />
-            区{index + 1}
+            <span className={cx(dot, reportPlotColor(index))} aria-hidden="true" />区{index + 1}
             {index >= 2 && (
               <button
                 type="button"
@@ -94,7 +93,9 @@ export function ReportPagePlots({
       <button
         type="button"
         className={addButton}
-        onClick={() => onChange((current) => ({ ...current, plots: [...current.plots, createReportPlot()] }))}
+        onClick={() =>
+          onChange((current) => ({ ...current, plots: [...current.plots, createReportPlot()] }))
+        }
       >
         <Icon name="add" size="sm" />
         区を追加
