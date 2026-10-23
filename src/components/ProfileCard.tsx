@@ -27,7 +27,14 @@ const cover = css({
 
 const content = css({ px: "4.5", pb: "4" });
 
-const headRow = css({ display: "flex", alignItems: "flex-end", flexWrap: "wrap", gap: "3.5" });
+// アバターの行：左にカバーへ重なるアバター、右端に「プロフィールを編集」。
+// 名前や所属の長さで編集ボタンの位置が動かないよう、名前の列はこの行の下に全幅で置く。
+const headRow = css({
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: "3",
+});
 
 // カバー画像に重なるので、背景色の縁を回して輪郭を切る。
 const avatarFrame = css({
@@ -41,19 +48,37 @@ const avatarFrame = css({
   borderRadius: "pill",
 });
 
-const nameColumn = css({ flex: "1", minW: "44", pb: "0.5" });
+const nameColumn = css({ mt: "3" });
 
-const name = css({ m: "0", textStyle: "title" });
+// 立場バッジは名前の文字の流れに入れ、名前が折り返しても最後の文字のすぐ後ろに続ける。
+const name = css({ m: "0", textStyle: "title", overflowWrap: "anywhere" });
 
-const chipRow = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "1.5" } as const;
+const standpointBadge = css({ ml: "2", verticalAlign: "[0.2em]", whiteSpace: "nowrap" });
 
-const regionRow = css(chipRow, { mt: "1" });
+// 「地域」「所属」「栽培作目」は見出しの幅をそろえ、値（チップ）の始まりを縦一列にする。
+const labeledRow = cva({
+  base: { display: "flex", alignItems: "flex-start", gap: "2" },
+  variants: { spacing: { tight: { mt: "1.5" }, loose: { mt: "3" } } },
+});
 
-const cropRow = css(chipRow, { mt: "2" });
+const label = css({
+  flex: "none",
+  w: "14",
+  minH: "7",
+  display: "flex",
+  alignItems: "center",
+  color: "text.subtle",
+  textStyle: "note",
+});
 
-const label = cva({
-  base: { color: "text.subtle", textStyle: "note" },
-  variants: { spaced: { true: { ml: "1.5" }, false: {} } },
+const values = css({
+  flex: "1",
+  minW: "0",
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: "1.5",
+  minH: "7",
 });
 
 const affiliation = css({
@@ -76,6 +101,8 @@ const affiliation = css({
 const editLink = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
   flex: "none",
   px: "4",
+  mt: "3",
+  whiteSpace: "nowrap",
 });
 
 const srOnly = css({ srOnly: true });
@@ -86,8 +113,6 @@ const bio = css({
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });
-
-const emptyRow = css({ mt: "3", fontSize: "sm" });
 
 const linkRow = css({
   display: "flex",
@@ -119,80 +144,14 @@ const statRow = css({
   "& b": { fontVariantNumeric: "tabular-nums" },
 });
 
-const footRow = css({
-  display: "flex",
-  alignItems: "baseline",
-  justifyContent: "space-between",
-  flexWrap: "wrap",
-  gap: "2.5",
-  mt: "2",
-});
-
-const publicNote = css({ m: "0", color: "text.subtle", textStyle: "note" });
-
-const publicLink = css({ ml: "auto", fontSize: "sm", fontWeight: "bold" });
-
-const todoHint = cva({
-  base: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "1.5",
-    color: "text.brand",
-    fontSize: "sm",
-    fontWeight: "bold",
-    textDecoration: "none",
-    _hover: { textDecoration: "underline" },
-  },
-  variants: {
-    placement: {
-      block: { mt: "1" },
-      afterLabel: { mt: "0.5" },
-      inline: { ml: "1", fontSize: "xs" },
-    },
-  },
-});
-
-const todoIcon = css({
-  flex: "none",
-  w: "4",
-  h: "4",
-  display: "grid",
-  placeItems: "center",
-  borderWidth: "1.5px",
-  borderStyle: "dashed",
-  borderColor: "primary.700",
-  borderRadius: "pill",
-  color: "text.brand",
-  fontSize: "xs",
-  fontWeight: "black",
-  lineHeight: "none",
-});
-
 type ProfileCardProps = {
   handle: string;
   avatarUrl: string | null;
   details: ProfileDetails;
   stats: ReadonlyArray<{ label: string; value: number }>;
+  /** 本人のマイページでは「プロフィールを編集」だけを足す。表示する中身は公開プロフィールと同じ。 */
   editable?: boolean;
-  publicProfileHref?: string;
 };
-
-function TodoHint({
-  children,
-  placement = "block",
-}: {
-  children: string;
-  placement?: "block" | "afterLabel" | "inline";
-}) {
-  return (
-    <Link className={todoHint({ placement })} href="/me/edit">
-      <span className={todoIcon} aria-hidden="true">
-        ＋
-      </span>
-      {children}
-    </Link>
-  );
-}
 
 export function ProfileCard({
   handle,
@@ -200,7 +159,6 @@ export function ProfileCard({
   details,
   stats,
   editable = false,
-  publicProfileHref,
 }: ProfileCardProps) {
   const standpoint = STANDPOINTS.find((item) => item.value === details.standpoint)?.label;
   const prefecture = PREFECTURES.find((item) => item.code === details.prefecture_code)?.name;
@@ -213,61 +171,55 @@ export function ProfileCard({
           <span className={avatarFrame}>
             <Avatar name={handle} src={avatarUrl} size="xl" />
           </span>
-          <div className={nameColumn}>
-            <h1 className={name} id="profile-handle">
-              <span>{handle}</span> {standpoint ? <Badge variant="type">{standpoint}</Badge> : null}
-            </h1>
-            {editable && !avatarUrl ? <TodoHint>プロフィール画像を設定する</TodoHint> : null}
-            {prefecture || details.affiliations.length > 0 ? (
-              <div className={regionRow}>
-                {prefecture ? (
-                  <>
-                    <span className={label({ spaced: false })}>地域</span>
-                    <Chip>{prefecture}</Chip>
-                  </>
-                ) : null}
-                {details.affiliations.length > 0 ? (
-                  <>
-                    <span className={label({ spaced: true })}>所属</span>
-                    {details.affiliations.map((affiliationName) => (
-                      <span key={affiliationName} className={affiliation}>
-                        {affiliationName}
-                      </span>
-                    ))}
-                  </>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
           {editable ? (
             <Link className={editLink} href="/me/edit">
               プロフィールを編集<span className={srOnly}>（プロフィール公開情報を編集）</span>
             </Link>
           ) : null}
         </div>
+        <div className={nameColumn}>
+          <h1 className={name} id="profile-handle">
+            {handle}
+            {standpoint ? (
+              <Badge variant="type" className={standpointBadge}>
+                {standpoint}
+              </Badge>
+            ) : null}
+          </h1>
+          {prefecture ? (
+            <div className={labeledRow({ spacing: "tight" })}>
+              <span className={label}>地域</span>
+              <div className={values}>
+                <Chip>{prefecture}</Chip>
+              </div>
+            </div>
+          ) : null}
+          {details.affiliations.length > 0 ? (
+            <div className={labeledRow({ spacing: "tight" })}>
+              <span className={label}>所属</span>
+              <div className={values}>
+                {details.affiliations.map((affiliationName) => (
+                  <span key={affiliationName} className={affiliation}>
+                    {affiliationName}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
 
-        {details.bio ? (
-          <p className={bio}>{details.bio}</p>
-        ) : editable ? (
-          <div className={emptyRow}>
-            <span className={label({ spaced: false })}>自己紹介</span>{" "}
-            <TodoHint placement="afterLabel">自己紹介を追加する</TodoHint>
-          </div>
-        ) : null}
+        {details.bio ? <p className={bio}>{details.bio}</p> : null}
 
         {details.crops.length > 0 ? (
-          <div className={cropRow}>
-            <span className={label({ spaced: false })}>栽培作目</span>
-            {details.crops.map((crop) => (
-              <Chip key={crop.id} wrap>
-                {crop.name}
-              </Chip>
-            ))}
-          </div>
-        ) : editable ? (
-          <div className={css({ mt: "2", fontSize: "sm" })}>
-            <span className={label({ spaced: false })}>栽培作目</span>{" "}
-            <TodoHint placement="afterLabel">栽培作目を追加する</TodoHint>
+          <div className={labeledRow({ spacing: "loose" })}>
+            <span className={label}>栽培作目</span>
+            <div className={values}>
+              {details.crops.map((crop) => (
+                <Chip key={crop.id} wrap>
+                  {crop.name}
+                </Chip>
+              ))}
+            </div>
           </div>
         ) : null}
 
@@ -288,18 +240,6 @@ export function ProfileCard({
             </span>
           ))}
         </div>
-        {editable || publicProfileHref ? (
-          <div className={footRow}>
-            {editable ? (
-              <p className={publicNote}>都道府県まで公開中。本名・連絡先は公開されません。</p>
-            ) : null}
-            {publicProfileHref ? (
-              <Link href={publicProfileHref} className={publicLink}>
-                公開プロフィールを見る →
-              </Link>
-            ) : null}
-          </div>
-        ) : null}
       </div>
     </section>
   );
