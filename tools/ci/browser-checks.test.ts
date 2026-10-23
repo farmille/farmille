@@ -245,10 +245,46 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     expect(push("feature").status).toBe(0);
     expect(commands()).toEqual(["test:e2e:local"]);
   });
-  it("runs every check for a new branch", () => {
+  it("runs every check for a new branch without a known main", () => {
     commit("README.md");
     expect(push("HEAD:refs/heads/new").status).toBe(0);
     expect(commands()).toHaveLength(3);
+  });
+  it("selects checks from main for the first push of a branch", () => {
+    git("update-ref", "refs/remotes/origin/main", base);
+    commit("README.md");
+    const result = push("HEAD:refs/heads/new");
+    expect(result.status, result.stderr).toBe(0);
+    expect(commands()).toEqual([]);
+  });
+  it("keeps Storybook and skips E2E for CSS on a new branch", () => {
+    git("update-ref", "refs/remotes/origin/main", base);
+    commit("src/app/globals.css");
+    expect(push("HEAD:refs/heads/new").status).toBe(0);
+    expect(commands()).toEqual(["build-storybook", "test:storybook:responsive"]);
+  });
+  it("uses the merge base when main has unrelated changes", () => {
+    git("checkout", "-b", "main");
+    const main = commit("package.json");
+    git("update-ref", "refs/remotes/origin/main", main);
+    git("checkout", "feature");
+    commit("README.md");
+    expect(push("HEAD:refs/heads/new").status).toBe(0);
+    expect(commands()).toEqual([]);
+  });
+  it("skips browser checks for reviewed hook-only updates", () => {
+    fs.appendFileSync(path.join(repo, "tools/ci/selection.ts"), "\n");
+    git("add", "tools/ci/selection.ts");
+    git("commit", "-m", "hook-only change");
+    expect(setup("--trust-current").status).toBe(0);
+    expect(push("feature").status).toBe(0);
+    expect(commands()).toEqual([]);
+  });
+  it("uses the outgoing diff for main updates", () => {
+    git("-c", "core.hooksPath=/dev/null", "push", "origin", "HEAD:main");
+    commit("README.md");
+    expect(push("HEAD:main").status).toBe(0);
+    expect(commands()).toEqual([]);
   });
   it("allows deletion with an unrelated dirty working tree", () => {
     write("scratch.txt", "unsaved");
