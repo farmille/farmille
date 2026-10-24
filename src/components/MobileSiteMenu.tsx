@@ -46,6 +46,8 @@ const line = cva({
     transitionProperty: "[transform]",
     transitionDuration: "menu",
     transitionTimingFunction: "out",
+    // 視覚効果を減らす設定では、線を動かさず × をそのまま見せる
+    _motionReduce: { transitionProperty: "[none]" },
   },
   variants: {
     tone: {
@@ -99,7 +101,8 @@ const label = cva({
 
 /**
  * 深い緑の面を、ボタンを中心に円で広げて開き、同じ円で閉じる。円の中心はヘッダーの右の余白と上の余白
- * （ノッチを含む）からボタンの中心に合わせ、開くと画面の対角より少し大きく広がる。
+ * （ノッチを含む）からボタンの中心に合わせる。中心が画面の中にあれば、隅までの距離はどの縦横比でも
+ * 長い辺の √2 倍以下なので、半径を 145vmax にして面全体を必ず覆う。
  * 視覚効果を減らす設定では円を使わず、不透明度だけを変える。
  */
 const panel = css({
@@ -114,7 +117,7 @@ const panel = css({
   color: "text.inverse",
   outline: "none",
   clipPath:
-    "[circle(115vmax at calc(100% - {spacing.3.5} - {spacing.14} / 2) calc(max({spacing.3}, env(safe-area-inset-top)) + {spacing.11} / 2))]",
+    "[circle(145vmax at calc(100% - {spacing.3.5} - {spacing.14} / 2) calc(max({spacing.3}, env(safe-area-inset-top)) + {spacing.11} / 2))]",
   transitionProperty: "[clip-path]",
   transitionDuration: "menu",
   transitionTimingFunction: "out",
