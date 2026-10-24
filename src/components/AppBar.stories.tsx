@@ -40,14 +40,6 @@ export const HomeDesktopGuest: Story = {
   },
 };
 
-export const HomeWithSearchHref: Story = {
-  args: {
-    chrome: "public",
-    variant: "home",
-    searchHref: "/search?category=microbial",
-  },
-};
-
 export const Back: Story = {
   args: {
     chrome: "public",

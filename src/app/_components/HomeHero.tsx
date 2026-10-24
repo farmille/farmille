@@ -6,15 +6,15 @@ import { HomeHills } from "./HomeHills";
 import { HomeVerticalCopy } from "./HomeVerticalCopy";
 
 /**
- * SP は上下のバーを除いた高さ、tab 以上はヘッダーを除いた高さに収める。
+ * SP は画面の高さではなく幅に合わせた縦長の比率（幅の1.4倍）にし、上下のバーを除いた高さを超えない。
+ * 縦書きの一文が収まる 32rem を下限にする。tab 以上はヘッダーを除いた高さに収める。
  * はみ出しは clip で切る。hidden はスクロールコンテナになり、写真と丘の view() がヒーローを基準にして動かなくなる。
  */
 const hero = css({
   position: "relative",
   overflow: "clip",
   isolation: "isolate",
-  h: "[calc(100svh - {spacing.32})]",
-  minH: "[32rem]",
+  h: "[clamp(32rem, 140vw, 100svh - {spacing.32})]",
   bg: "surface.forest",
   containerType: "size",
   tab: { h: "[calc(100svh - {spacing.16})]", minH: "[36rem]", maxH: "[60rem]" },

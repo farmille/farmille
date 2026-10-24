@@ -4,6 +4,7 @@ import { cva, css, cx } from "../../styled-system/css";
 import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
 import { BrandMark } from "@/components/BrandMark";
 import { Icon } from "@/components/Icon";
+import { MobileSiteMenu } from "@/components/MobileSiteMenu";
 import { PreparationNotice } from "@/components/PreparationNotice";
 import { TextLink } from "@/components/TextLink";
 
@@ -114,7 +115,7 @@ const desktopNav = css({
   ml: "auto",
 });
 
-/** 公開画面の主な行き先。参考にした森林組合のサイトのように、文字だけを並べる。 */
+/** 公開画面の主な行き先。PC のヘッダーには文字だけを並べ、SP ではメニューに同じ順で並べる。 */
 const siteMenu = [
   { label: "資材をさがす", href: "/search", active: "search" },
   { label: "記事", href: "/articles", active: "articles" },
@@ -275,7 +276,6 @@ type AppBarBaseProps = {
 
 type AppBarHomeProps = AppBarBaseProps & {
   variant: "home";
-  searchHref?: string;
 };
 
 type AppBarBackProps = AppBarBaseProps & {
@@ -296,9 +296,14 @@ function MobileAppBar(props: AppBarProps) {
           <BrandMark />
           <b className={logoText}>Farmille</b>
         </Link>
-        <Link href={props.searchHref ?? "/search"} className={iconButton} aria-label="検索">
-          <Icon name="search" size="sm" />
-        </Link>
+        <MobileSiteMenu
+          links={siteMenu.map((item) => ({
+            label: item.label,
+            href: item.href,
+            current: item.active !== null && props.active === item.active,
+          }))}
+          member={props.account?.kind === "member"}
+        />
       </header>
     );
   }
