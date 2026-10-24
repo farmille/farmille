@@ -142,8 +142,14 @@ export async function loginAdminAndEnrollMfa(
   return secret;
 }
 
-export async function fillUsageReportForSubmission(page: Page): Promise<void> {
-  await page.getByRole("checkbox", { name: "不明・なし", exact: true }).check();
+/** 提出に要る欄を埋める。品種を渡さなければ「不明・なし」にする。区は既定の2区のまま説明だけ書く。 */
+export async function fillUsageReportForSubmission(
+  page: Page,
+  variety: string | null = null,
+): Promise<void> {
+  if (variety === null)
+    await page.getByRole("checkbox", { name: "不明・なし", exact: true }).check();
+  else await page.getByLabel("品種", { exact: true }).fill(variety);
   await page.getByRole("button", { name: /^使用目的：/ }).click();
   await page.getByRole("button", { name: "樹勢改善", exact: true }).click();
   await page.getByRole("button", { name: "完了", exact: true }).click();
@@ -159,11 +165,11 @@ export async function fillUsageReportForSubmission(page: Page): Promise<void> {
     .getByLabel("処理日と生育状況", { exact: true })
     .fill("9月1日に定植、9月10日に施用しました。");
   await page.getByRole("checkbox", { name: "資材を使った日（処理日）を記入した" }).check();
-  for (const [index, [name, description]] of [
-    ["処理区", "10株。1000倍、200L/10aを1回葉面散布しました。"],
-    ["無処理区", "10株。資材なし。ほかは同じ条件です。"],
+  await expect(page.getByLabel("区の名前").nth(0)).toHaveValue("無処理区");
+  for (const [index, description] of [
+    "10株。資材なし。ほかは同じ条件です。",
+    "10株。1000倍、200L/10aを1回葉面散布しました。",
   ].entries()) {
-    await page.getByLabel("区の名前").nth(index).fill(name);
     await page.getByLabel("区の説明").nth(index).fill(description);
   }
   await page.getByLabel("調査項目1の名前", { exact: true }).fill("活着率");

@@ -14,6 +14,10 @@ type UsageReportSelection = Pick<
   Database["public"]["Tables"]["usage_reports"]["Row"],
   "author_user_id" | "id" | "material_id" | "status" | "title"
 >;
+type UsageReportPlotSelection = Pick<
+  Database["public"]["Tables"]["usage_report_plots"]["Row"],
+  "name" | "treatment" | "variety_id"
+>;
 type ProfileReference = Pick<Database["public"]["Tables"]["profiles"]["Row"], "user_id">;
 type CropSelection = Pick<Database["public"]["Tables"]["crops"]["Row"], "id" | "name">;
 type ProductTypeSelection = Pick<
@@ -79,6 +83,12 @@ const UsageReportSchema = v.object({
   title: v.nullable(v.string()),
   status: v.string(),
 }) satisfies v.GenericSchema<UsageReportSelection>;
+const UsageReportPlotSchema = v.object({
+  name: v.string(),
+  treatment: v.nullable(v.string()),
+  variety_id: v.nullable(UuidSchema),
+}) satisfies v.GenericSchema<UsageReportPlotSelection>;
+const NamedSchema = v.object({ id: UuidSchema, name: v.string() });
 const IdSchema = v.object({ id: UuidSchema });
 const ProfileReferenceSchema = v.object({
   user_id: UuidSchema,
@@ -734,6 +744,30 @@ export async function usageReportByAuthor(authorUserId: string): Promise<UsageRe
   });
   const rows = await restSelect(UsageReportSchema, "usage_reports", params);
   return rows[0] ?? null;
+}
+
+/** 区を並び順に、「品種／使った資材」の形で返す。品種が無い区は「-」。 */
+export async function usageReportPlots(reportId: string): Promise<string[]> {
+  const [plots, varieties] = await Promise.all([
+    restSelect(
+      UsageReportPlotSchema,
+      "usage_report_plots",
+      new URLSearchParams({
+        select: "name,treatment,variety_id",
+        report_id: `eq.${reportId}`,
+        order: "sort_order",
+      }),
+    ),
+    restSelect(
+      NamedSchema,
+      "usage_report_varieties",
+      new URLSearchParams({ select: "id,name", report_id: `eq.${reportId}` }),
+    ),
+  ]);
+  return plots.map(
+    (plot) =>
+      `${varieties.find(({ id }) => id === plot.variety_id)?.name ?? "-"}／${plot.treatment ?? "-"}`,
+  );
 }
 
 export async function cropsByNames(names: string[]): Promise<v.InferOutput<typeof CropSchema>[]> {
