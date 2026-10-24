@@ -10,6 +10,7 @@ import { searchReportMaterialsAction } from "@/app/materials/[id]/report/new/act
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import { withSingleVariety, type UsageReportInput } from "@/lib/usage-report";
+import { reportPlotEdits, withAutoPlotNames } from "@/lib/usage-report-plots";
 import type { PostingMaterial } from "@/server/queries/materials";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
@@ -321,29 +322,42 @@ export function ReportPageProperties({
       </Row>
       <Row id="report-prop-variety" label="品種" required>
         <div className={valueRecipe({ kind: "field", missing: missing.has("variety") })}>
-          {!input.varietyUnknown && (
-            <input
-              className={inline}
-              aria-label="品種"
-              maxLength={REPORT_SHORT_MAX}
-              placeholder="例）アイコ"
-              value={input.varieties[0]?.name ?? ""}
-              onChange={(event) =>
-                onChange((current) => withSingleVariety(current, event.target.value, false))
+          {!input.varietyUnknown &&
+            (input.varieties.length > 0 ? input.varieties : [null]).map((variety, index) => (
+              <input
+                key={variety?.id ?? "new"}
+                className={inline}
+                aria-label={input.varieties.length > 1 ? `品種${index + 1}` : "品種"}
+                maxLength={REPORT_SHORT_MAX}
+                placeholder="例）アイコ"
+                value={variety?.name ?? ""}
+                onChange={(event) => {
+                  const name = event.target.value;
+                  onChange((current) =>
+                    variety === null
+                      ? withAutoPlotNames(
+                          current,
+                          withSingleVariety(current, name, false),
+                          material.name,
+                        )
+                      : reportPlotEdits.renameVariety(current, variety.id, name, material.name),
+                  );
+                }}
+              />
+            ))}
+          {input.varieties.length <= 1 && (
+            <Checkbox
+              size="sm"
+              checked={input.varietyUnknown}
+              onCheckedChange={(varietyUnknown) =>
+                onChange((current) =>
+                  reportPlotEdits.setVarietyUnknown(current, varietyUnknown, material.name),
+                )
               }
-            />
+            >
+              不明・なし
+            </Checkbox>
           )}
-          <Checkbox
-            size="sm"
-            checked={input.varietyUnknown}
-            onCheckedChange={(varietyUnknown) =>
-              onChange((current) =>
-                withSingleVariety(current, current.varieties[0]?.name ?? "", varietyUnknown),
-              )
-            }
-          >
-            不明・なし
-          </Checkbox>
         </div>
       </Row>
       <Row id="report-prop-purpose" label="使用目的" required>

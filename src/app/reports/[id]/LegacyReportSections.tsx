@@ -1,9 +1,9 @@
 import { formatDateJa } from "@/components/format-date";
+import { ReportBars, ReportGraphNote } from "@/components/ReportBars";
 import type { PublishedUsageReportDetail } from "@/server/queries/usage-reports";
 
 import { prefectureName } from "./prefecture-name";
 import { ReadingHeading, ReadingProse } from "../../articles/_components/Reading";
-import { ReportBars, ReportGraphNote } from "./ReportBars";
 import { ReportFigures, type ReportFigureMedia } from "./ReportFigures";
 
 function formatMetricValue(value: number): string {
@@ -111,28 +111,34 @@ export function LegacyReportSections({
               key={metric.id}
               title={metric.metricName}
               unit={metric.unit ?? ""}
-              rows={[
-                metric.untreatedValue === null
-                  ? null
-                  : {
-                      id: `${metric.id}-untreated`,
-                      label: "対照区",
-                      valueText: formatMetricValue(metric.untreatedValue),
-                      value: metric.untreatedValue,
-                      error: null,
-                      colorIndex: 0,
-                    },
-                metric.treatedValue === null
-                  ? null
-                  : {
-                      id: `${metric.id}-treated`,
-                      label: "処理区",
-                      valueText: formatMetricValue(metric.treatedValue),
-                      value: metric.treatedValue,
-                      error: null,
-                      colorIndex: 1,
-                    },
-              ].filter((row) => row !== null)}
+              groups={[
+                {
+                  key: "all",
+                  heading: null,
+                  rows: [
+                    metric.untreatedValue === null
+                      ? null
+                      : {
+                          id: `${metric.id}-untreated`,
+                          label: "対照区",
+                          valueText: formatMetricValue(metric.untreatedValue),
+                          value: metric.untreatedValue,
+                          error: null,
+                          series: "1" as const,
+                        },
+                    metric.treatedValue === null
+                      ? null
+                      : {
+                          id: `${metric.id}-treated`,
+                          label: "処理区",
+                          valueText: formatMetricValue(metric.treatedValue),
+                          value: metric.treatedValue,
+                          error: null,
+                          series: "2" as const,
+                        },
+                  ].filter((row) => row !== null),
+                },
+              ]}
             />
           ))}
           <ReportGraphNote>グラフは Farmille編集部が作成しています</ReportGraphNote>

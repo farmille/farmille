@@ -3,6 +3,7 @@ import {
   withSingleVariety,
   type UsageReportInput,
 } from "@/lib/usage-report";
+import { reportPlotEdits, withAutoPlotNames } from "@/lib/usage-report-plots";
 
 export const storyPhoto = (fill: string) =>
   `data:image/svg+xml,${encodeURIComponent(
@@ -78,4 +79,56 @@ export const filledReport: UsageReportInput = {
     },
   ],
   documents: [],
+};
+
+export const storyMaterialName = "スキーポン";
+
+const twoVarieties = reportPlotEdits.addComparedMaterial(
+  reportPlotEdits.addVariety(
+    withAutoPlotNames(
+      filledReport,
+      {
+        ...filledReport,
+        plots: filledReport.plots.slice(0, 2).map((plot) => ({ ...plot, name: "" })),
+      },
+      storyMaterialName,
+    ),
+    "アイコ",
+    storyMaterialName,
+  ),
+  "ノビテク",
+  storyMaterialName,
+);
+const yields = ["856±105 A", "1126±139 B", "852±39 A", "808±71 B", "1062±123 A", "968±134 A"];
+
+/** 品種2つ・比較した資材1つの6区と、PDF読み取りで入るような数値のグラフを持つレポート。 */
+export const varietyReport: UsageReportInput = {
+  ...twoVarieties,
+  commonPlotDescription: "1区5株、4反復。かん水と施肥は全区同じ。",
+  plots: twoVarieties.plots.map((plot) => ({
+    ...plot,
+    description: plot.treatment?.kind === "untreated" ? "資材なし" : "1,000倍で葉面散布。",
+  })),
+  measurements: [
+    ...filledReport.measurements,
+    {
+      id: "88888888-8888-4888-8888-888888888888",
+      kind: "numeric",
+      name: "可販重量",
+      unit: "g",
+      body: "末尾の英字は、品種内で資材を比べた有意差。",
+      graphs: [
+        {
+          id: "99999999-9999-4999-8999-999999999999",
+          heading: "収穫時の可販重量",
+          rows: twoVarieties.plots.map((plot, index) => ({
+            id: `aaaaaaaa-aaaa-4aaa-8aaa-${String(index).padStart(12, "0")}`,
+            plotId: plot.id,
+            label: "",
+            value: yields[index] ?? "",
+          })),
+        },
+      ],
+    },
+  ],
 };

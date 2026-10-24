@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { ReportPageForm } from "./ReportPageForm";
-import { filledReport } from "./reportStoryFixture";
+import { filledReport, varietyReport } from "./reportStoryFixture";
 
 const crops = [
   {
@@ -58,3 +58,5 @@ type Story = StoryObj<typeof meta>;
 export const Blank: Story = {};
 
 export const Draft: Story = { args: { draft: filledReport } };
+
+export const Varieties: Story = { args: { draft: varietyReport } };

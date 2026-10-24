@@ -206,6 +206,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               {report.structured !== null ? (
                 <StructuredReportArticle
                   input={report.structured}
+                  materialName={report.material.name}
                   cropLabel={cropLabel}
                   documentUrls={report.documentUrls}
                 />

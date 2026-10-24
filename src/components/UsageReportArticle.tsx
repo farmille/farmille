@@ -2,14 +2,15 @@ import type { ReactNode } from "react";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { Input, Textarea } from "@/components/form";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
-import { reportPlotColor } from "@/components/ReportPlotColor";
+import { ReportBars, reportBarGroups, ReportGraphNote } from "@/components/ReportBars";
+import { ReportPlotList } from "@/components/ReportPlotList";
 import { PREFECTURES } from "@/lib/prefectures";
 import {
   REPORT_SECTIONS,
   groupReportMeasurements,
-  parseReportNumber,
   type UsageReportInput,
 } from "@/lib/usage-report";
+import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
 import { css } from "../../styled-system/css";
 
 const sectionStyle = css({ py: "5", borderBottomWidth: "1px", borderColor: "border.default" });
@@ -17,7 +18,6 @@ const prose = css({ whiteSpace: "pre-wrap", overflowWrap: "anywhere", textStyle:
 const body = css({ textStyle: "body" });
 const sectionHeading = css({ textStyle: "title", mb: "3" });
 const subHeading = css({ textStyle: "body", fontWeight: "bold", mb: "3" });
-const graphCaption = css({ fontSize: "sm", fontWeight: "bold", mb: "2" });
 const photoGrid = css({
   display: "grid",
   gridTemplateColumns: "repeat(2,minmax(0,1fr))",
@@ -25,119 +25,16 @@ const photoGrid = css({
   mt: "3",
 });
 const muted = css({ color: "text.muted", fontSize: "sm" });
-const chart = css({
-  width: "full",
-  height: "reportGraph.horizontal",
-  display: "block",
-  overflow: "visible",
-});
-
-export function ReportGraph({
-  graph,
-  plots,
-  unit,
-}: {
-  graph: UsageReportInput["measurements"][number]["graphs"][number];
-  plots: UsageReportInput["plots"];
-  unit: string;
-}) {
-  const rows = graph.rows.flatMap((row, index) => {
-    const parsed = parseReportNumber(row.value);
-    return parsed === null
-      ? []
-      : [
-          {
-            ...row,
-            index: row.plotId
-              ? Math.max(
-                  0,
-                  plots.findIndex((plot) => plot.id === row.plotId),
-                )
-              : index,
-            parsed,
-            label:
-              plots.find((plot) => plot.id === row.plotId)?.name || row.label || `区 ${index + 1}`,
-          },
-        ];
-  });
-  const minimum = Math.min(0, ...rows.map(({ parsed }) => parsed.value - (parsed.error ?? 0)));
-  const maximum = Math.max(
-    unit === "%" ? 100 : 0,
-    ...rows.map(({ parsed }) => parsed.value + (parsed.error ?? 0)),
-  );
-  const range = maximum - minimum || 1;
-  const x = (value: number) => 5 + ((value - minimum) / range) * 290;
-  return (
-    <figure>
-      {graph.heading && <figcaption className={graphCaption}>{graph.heading}</figcaption>}
-      {rows.map((row) => (
-        <div key={row.id}>
-          <div
-            className={css({
-              display: "flex",
-              justifyContent: "space-between",
-              gap: "2",
-              fontSize: "sm",
-            })}
-          >
-            <span className={css({ lineClamp: "2", overflowWrap: "anywhere" })}>{row.label}</span>
-            <span>
-              {row.value} {unit}
-            </span>
-          </div>
-          <svg
-            className={chart}
-            viewBox="0 0 300 30"
-            role="img"
-            aria-label={`${row.label} ${row.value} ${unit}`}
-          >
-            <line x1={x(0)} x2={x(0)} y1="0" y2="30" stroke="currentColor" />
-            <rect
-              className={reportPlotColor(row.index)}
-              x={Math.min(x(0), x(row.parsed.value))}
-              y="5"
-              width={Math.abs(x(row.parsed.value) - x(0))}
-              height="20"
-            />
-            {row.parsed.error !== null && (
-              <g stroke="currentColor">
-                <line
-                  x1={x(row.parsed.value - row.parsed.error)}
-                  x2={x(row.parsed.value + row.parsed.error)}
-                  y1="15"
-                  y2="15"
-                />
-                <line
-                  x1={x(row.parsed.value - row.parsed.error)}
-                  x2={x(row.parsed.value - row.parsed.error)}
-                  y1="9"
-                  y2="21"
-                />
-                <line
-                  x1={x(row.parsed.value + row.parsed.error)}
-                  x2={x(row.parsed.value + row.parsed.error)}
-                  y1="9"
-                  y2="21"
-                />
-              </g>
-            )}
-          </svg>
-        </div>
-      ))}
-      {rows.length > 0 && (
-        <p className={muted}>グラフは投稿されたデータからFarmilleが自動生成しています。</p>
-      )}
-    </figure>
-  );
-}
-
 export function UsageReportArticle({
   input,
+  materialName,
   onChange,
   renderSectionTools,
   documentUrls,
 }: {
   input: UsageReportInput;
+  /** 投稿した資材の名前。区の資材の表示に使う。 */
+  materialName: string;
   onChange?: (input: UsageReportInput) => void;
   renderSectionTools?: (section: UsageReportInput["media"][number]["section"]) => ReactNode;
   documentUrls?: { id: string; url: string }[];
@@ -154,6 +51,7 @@ export function UsageReportArticle({
       <p className={prose}>{value}</p>
     );
   }
+  const layout = reportPlotLayout(input, materialName);
   return (
     <div>
       {REPORT_SECTIONS.map((section) => (
@@ -204,41 +102,9 @@ export function UsageReportArticle({
               {text(input.timingNote, "施用時期の本文", (timingNote) => ({ ...input, timingNote }))}
             </>
           )}
-          {section.value === "plots" &&
-            input.plots.map((plot, index) => (
-              <div
-                key={plot.id}
-                className={css({
-                  mt: "3",
-                  p: "3",
-                  borderWidth: "1px",
-                  borderColor: "border.default",
-                  borderRadius: "card",
-                })}
-              >
-                <h3 className={subHeading}>
-                  <span aria-hidden="true" className={reportPlotColor(index)}>
-                    ●{" "}
-                  </span>
-                  {plot.name || "区名未入力"}{" "}
-                  <span
-                    className={css({
-                      fontSize: "sm",
-                      fontWeight: "normal",
-                      bg: "surface.page",
-                      borderWidth: "1px",
-                      borderColor: "border.default",
-                      borderRadius: "pill",
-                      px: "2",
-                      py: "1",
-                    })}
-                  >
-                    {plot.scope}
-                  </span>
-                </h3>
-                <p className={prose}>{plot.description}</p>
-              </div>
-            ))}
+          {section.value === "plots" && (
+            <ReportPlotList layout={layout} commonDescription={input.commonPlotDescription} />
+          )}
           {section.value === "measurements" && (
             <>
               {groupReportMeasurements(input.measurements).map((measurement) => (
@@ -248,13 +114,19 @@ export function UsageReportArticle({
                     {measurement.unit ? `（${measurement.unit}）` : ""}
                   </h3>
                   {measurement.graphs.map((graph) => (
-                    <ReportGraph
+                    <ReportBars
                       key={graph.id}
-                      graph={graph}
-                      plots={input.plots}
+                      title={graph.heading || measurement.name}
                       unit={measurement.unit}
+                      groups={reportBarGroups(graphSections(graph, input.plots, layout))}
+                      legend={layout.legend}
                     />
                   ))}
+                  {measurement.graphs.length > 0 && (
+                    <ReportGraphNote>
+                      グラフは投稿されたデータからFarmilleが自動生成しています。
+                    </ReportGraphNote>
+                  )}
                 </div>
               ))}
               {input.measurements

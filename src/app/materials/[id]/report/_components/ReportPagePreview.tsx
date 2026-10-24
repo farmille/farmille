@@ -3,12 +3,14 @@
 import { Chip } from "@/components/Chip";
 import { Dialog } from "@/components/Dialog";
 import { OptimizedImage } from "@/components/OptimizedImage";
-import { reportPlotColor } from "@/components/ReportPlotColor";
+import { ReportBars, reportBarGroups, ReportGraphNote } from "@/components/ReportBars";
+import { ReportPlotList } from "@/components/ReportPlotList";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
+import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
 
-import { css, cx } from "../../../../../../styled-system/css";
+import { css } from "../../../../../../styled-system/css";
 
 import { reportPageItemImages, type ReportPageItem } from "./report-page-state";
 
@@ -87,17 +89,6 @@ const facts = css({
   "& dd": { m: "0", whiteSpace: "pre-wrap" },
 });
 
-const plot = css({ display: "flex", gap: "2", mt: "2" });
-
-const plotDot = css({
-  flex: "none",
-  w: "2.5",
-  h: "2.5",
-  mt: "2.5",
-  borderRadius: "pill",
-  bg: "currentColor",
-});
-
 const figure = css({ m: "0", my: "2", "& img": { w: "full", h: "auto" } });
 
 const caption = css({ textAlign: "center", textStyle: "supporting", color: "text.muted" });
@@ -140,6 +131,7 @@ export function ReportPagePreview({
     .map((stage) => APPLICATION_TIMINGS[stage])
     .join("、");
   const shown = items.filter((item) => item.mode !== "");
+  const layout = reportPlotLayout(input, materialName);
   return (
     <Dialog
       open={open}
@@ -211,15 +203,11 @@ export function ReportPagePreview({
 
         <h2 className={h2}>比較・使用結果</h2>
         <h3 className={h3}>比べた区</h3>
-        {input.plots.map((item, index) => (
-          <div key={item.id} className={plot}>
-            <span className={cx(plotDot, reportPlotColor(index))} aria-hidden="true" />
-            <div>
-              <b>{item.name.trim() || `区${index + 1}`}</b>
-              <Text value={item.description} empty="（説明が未記入）" />
-            </div>
-          </div>
-        ))}
+        <ReportPlotList
+          layout={layout}
+          commonDescription={input.commonPlotDescription}
+          emptyDescription="（説明が未記入）"
+        />
         {shown.length === 0 && <p className={none}>（調査項目ごとの結果が未記入）</p>}
         {shown.map((item) => (
           <section key={item.id}>
@@ -236,6 +224,22 @@ export function ReportPagePreview({
                 {image.caption && <figcaption className={caption}>{image.caption}</figcaption>}
               </figure>
             ))}
+            {item.mode === "numeric" && (
+              <>
+                {item.graphs.map((graph) => (
+                  <ReportBars
+                    key={graph.id}
+                    title={graph.heading || item.name}
+                    unit={item.unit}
+                    groups={reportBarGroups(graphSections(graph, input.plots, layout))}
+                    legend={layout.legend}
+                  />
+                ))}
+                <ReportGraphNote>
+                  グラフは投稿されたデータからFarmilleが自動生成しています
+                </ReportGraphNote>
+              </>
+            )}
             {(item.mode === "text" || item.body.trim() !== "") && <Text value={item.body} />}
           </section>
         ))}

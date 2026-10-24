@@ -32,6 +32,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
   it("見本の節の順に見出しを並べ、比較した区とグラフを出す", () => {
     render(
       <StructuredReportArticle
+        materialName="ハイパーバイオ"
         input={sampleReport()}
         cropLabel="ミニトマト（アイコ）"
         documentUrls={[]}
@@ -60,7 +61,12 @@ describe("実証詳細レポート（新形式）の記事", () => {
     input.prefectureCode = 8;
     input.city = "水戸市";
     const { rerender } = render(
-      <StructuredReportArticle input={input} cropLabel="ミニトマト" documentUrls={[]} />,
+      <StructuredReportArticle
+        input={input}
+        materialName="ハイパーバイオ"
+        cropLabel="ミニトマト"
+        documentUrls={[]}
+      />,
     );
     expect(
       screen.getByText((_, element) =>
@@ -73,6 +79,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
     expect(screen.queryByText(/水戸市/)).toBeNull();
     rerender(
       <StructuredReportArticle
+        materialName="ハイパーバイオ"
         input={{ ...input, showCity: true }}
         cropLabel="ミニトマト"
         documentUrls={[]}

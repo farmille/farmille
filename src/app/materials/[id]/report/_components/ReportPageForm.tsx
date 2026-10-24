@@ -17,6 +17,7 @@ import {
   UsageReportInputSchema,
   type UsageReportInput,
 } from "@/lib/usage-report";
+import { withAutoPlotNames } from "@/lib/usage-report-plots";
 import type { RegisteredAddress } from "@/server/accounts/registered-address";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
@@ -31,6 +32,7 @@ import { ReportPageProperties, type ReportEffectOption } from "./ReportPagePrope
 import {
   inputWithItems,
   itemsFromInput,
+  itemsWithPlots,
   REPORT_BODY_MAX,
   reportImageRoom,
   reportLengthNote,
@@ -202,8 +204,10 @@ export function ReportPageForm({
 }) {
   const router = useRouter();
   const [input, setInput] = useState(() => {
-    const base = draft ?? createBlankUsageReport(material.id);
-    return { ...base, prefectureCode: base.prefectureCode ?? registeredAddress.prefectureCode };
+    // ページ版では数値のグラフを手で作らないので、新しいレポートは入れ方を選ぶ前の調査項目から始める
+    const base = draft ?? { ...createBlankUsageReport(material.id), measurements: [] };
+    const named = withAutoPlotNames(base, base, material.name);
+    return { ...named, prefectureCode: named.prefectureCode ?? registeredAddress.prefectureCode };
   });
   const [items, setItems] = useState<ReportPageItem[]>(() => itemsFromInput(input));
   const [acks, setAcks] = useState<ReportPageAcks>({ timing: false, privacy: false });
@@ -226,6 +230,11 @@ export function ReportPageForm({
     (next: (current: UsageReportInput) => UsageReportInput) => setInput((current) => next(current)),
     [],
   );
+  // 区を変えたら、数値の調査項目のグラフの行も区にそろえる
+  const changePlots = useCallback((next: UsageReportInput) => {
+    setInput(next);
+    setItems((current) => itemsWithPlots(current, next.plots));
+  }, []);
   // 失敗は画面の下の欄に残し、スマホでも気づけるよう通知でも出す
   const showError = useCallback((message: string) => {
     setFailure(message);
@@ -403,7 +412,14 @@ export function ReportPageForm({
             pageMaterialId={material.id}
             onMaterialChange={(next) => {
               setCurrentMaterial(next);
-              setInput((current) => ({ ...current, materialId: next.id }));
+              setInput((current) =>
+                withAutoPlotNames(
+                  current,
+                  { ...current, materialId: next.id },
+                  currentMaterial.name,
+                  next.name,
+                ),
+              );
             }}
             crops={crops}
             favoriteCropIds={favoriteCropIds}
@@ -487,7 +503,12 @@ export function ReportPageForm({
         <h3 className={heading("plots", 3)} id="report-plots">
           比べた区
         </h3>
-        <ReportPagePlots plots={input.plots} onChange={update} missing={missingKeys.has("plots")} />
+        <ReportPagePlots
+          input={input}
+          postedName={currentMaterial.name}
+          onChange={changePlots}
+          missing={missingKeys.has("plots")}
+        />
 
         <h3 className={heading("measurements", 3)} id="report-items">
           調査項目ごとの結果

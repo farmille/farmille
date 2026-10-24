@@ -215,7 +215,11 @@ export default async function AdminUsageReportDetailPage({
 
       {data.structured !== null ? (
         <Panel title="記事の内容">
-          <UsageReportArticle input={data.structured} documentUrls={data.documentUrls} />
+          <UsageReportArticle
+            input={data.structured}
+            materialName={data.material.name}
+            documentUrls={data.documentUrls}
+          />
         </Panel>
       ) : (
         <>

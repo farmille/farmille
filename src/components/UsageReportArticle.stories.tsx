@@ -24,7 +24,7 @@ input.measurements = input.measurements.map((measurement) => ({
 const meta = {
   title: "Pages/Shared/UsageReportArticle",
   component: UsageReportArticle,
-  args: { input },
+  args: { input, materialName: "ハイパーバイオ" },
 } satisfies Meta<typeof UsageReportArticle>;
 export default meta;
 type Story = StoryObj<typeof meta>;
