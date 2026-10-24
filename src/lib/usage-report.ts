@@ -115,6 +115,7 @@ export const UsageReportInputSchema = v.object({
   methodDetailsAck: v.boolean(),
   documentsAck: v.boolean(),
   guidelineAck: v.boolean(),
+  pdfValuesChecked: v.boolean(),
 });
 export type UsageReportInput = v.InferOutput<typeof UsageReportInputSchema>;
 export type ReportPlotTreatment = v.InferOutput<typeof plotTreatment>;
@@ -194,6 +195,7 @@ export function createBlankUsageReport(materialId: string): UsageReportInput {
     methodDetailsAck: false,
     documentsAck: false,
     guidelineAck: false,
+    pdfValuesChecked: false,
   };
 }
 /** 品種を1つだけ入れる画面の値を、品種の一覧の1件目に写す。2件目以降と区の品種は残し、品種の無い区だけ1件目にする。不明なら品種を空にし、区の品種も外す。 */
@@ -245,7 +247,10 @@ export function reportNeedsMaterialAcks(
     input.media.some((media) => (media.measurementId ?? null) !== null)
   );
 }
-export function validateUsageReportSubmission(input: UsageReportInput) {
+export function validateUsageReportSubmission(
+  input: UsageReportInput,
+  context: { pdfReadingApplied: boolean },
+) {
   const errors: UsageReportFieldErrors = {};
   const required = (key: string, valid: boolean, message = "※ ここを入力してください") => {
     if (!valid) errors[key] = message;
@@ -332,6 +337,11 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
     "※ 資料の公開権限を確認してください",
   );
   required("guidelineAck", input.guidelineAck, "※ 投稿ガイドラインへの同意が必要です");
+  required(
+    "pdfValuesChecked",
+    !context.pdfReadingApplied || input.pdfValuesChecked,
+    "※ PDF読み取りで入った値を、元のPDFと照らし合わせて確かめてください",
+  );
   return errors;
 }
 /** 調査項目に結果が入っているか。数値の項目は、どのグラフにも数として読める値が1つ以上要る。 */

@@ -343,7 +343,7 @@ function screenCheck(key: CheckKey, input: UsageReportInput, acks: ReportPageAck
 
 /** 記入状況の行。input は調査項目を書き戻した保存の入力（inputWithItems）。 */
 export function reportPageChecks(input: UsageReportInput, acks: ReportPageAcks): ReportPageCheck[] {
-  const errors = Object.keys(validateUsageReportSubmission(input));
+  const errors = Object.keys(validateUsageReportSubmission(input, { pdfReadingApplied: false }));
   const materialAcks = reportNeedsMaterialAcks(input);
   return SUBMISSION_CHECKS.flatMap(({ key, label, target, errors: pattern }) => {
     if ((key === "privacyAck" || key === "documentsAck") && !materialAcks) return [];

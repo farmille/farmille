@@ -115,6 +115,7 @@ export const structuredReport: UsageReportInput = {
   methodDetailsAck: true,
   documentsAck: true,
   guidelineAck: true,
+  pdfValuesChecked: false,
 };
 
 export const legacyReport: PublishedUsageReportDetail = {
