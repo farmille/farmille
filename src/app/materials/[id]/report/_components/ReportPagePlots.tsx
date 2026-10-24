@@ -98,7 +98,13 @@ export function ReportPagePlots({
         type="button"
         className={addButton}
         onClick={() =>
-          onChange((current) => ({ ...current, plots: [...current.plots, createReportPlot()] }))
+          onChange((current) => ({
+            ...current,
+            plots: [
+              ...current.plots,
+              createReportPlot(current.varieties[0]?.id ?? null, { kind: "posted" }),
+            ],
+          }))
         }
       >
         <Icon name="add" size="sm" />

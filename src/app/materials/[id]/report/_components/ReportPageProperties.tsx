@@ -9,7 +9,7 @@ import { ToggleGroup } from "@/components/ToggleGroup";
 import { searchReportMaterialsAction } from "@/app/materials/[id]/report/new/actions";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
-import type { UsageReportInput } from "@/lib/usage-report";
+import { withSingleVariety, type UsageReportInput } from "@/lib/usage-report";
 import type { PostingMaterial } from "@/server/queries/materials";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
@@ -327,9 +327,9 @@ export function ReportPageProperties({
               aria-label="品種"
               maxLength={REPORT_SHORT_MAX}
               placeholder="例）アイコ"
-              value={input.variety}
+              value={input.varieties[0]?.name ?? ""}
               onChange={(event) =>
-                onChange((current) => ({ ...current, variety: event.target.value }))
+                onChange((current) => withSingleVariety(current, event.target.value, false))
               }
             />
           )}
@@ -337,11 +337,9 @@ export function ReportPageProperties({
             size="sm"
             checked={input.varietyUnknown}
             onCheckedChange={(varietyUnknown) =>
-              onChange((current) => ({
-                ...current,
-                varietyUnknown,
-                variety: varietyUnknown ? "" : current.variety,
-              }))
+              onChange((current) =>
+                withSingleVariety(current, current.varieties[0]?.name ?? "", varietyUnknown),
+              )
             }
           >
             不明・なし

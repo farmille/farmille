@@ -6,7 +6,7 @@ import { OptimizedImage } from "@/components/OptimizedImage";
 import { reportPlotColor } from "@/components/ReportPlotColor";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
-import type { UsageReportInput } from "@/lib/usage-report";
+import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
 
 import { css, cx } from "../../../../../../styled-system/css";
 
@@ -131,7 +131,7 @@ export function ReportPagePreview({
   missing: string[];
 }) {
   const today = new Date();
-  const variety = input.varietyUnknown ? "" : input.variety.trim();
+  const variety = input.varietyUnknown ? "" : reportVarietyNames(input);
   const prefecture =
     PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name ?? "（未選択）";
   const city = input.showCity && input.city.trim() ? ` ${input.city.trim()}` : "";

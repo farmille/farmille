@@ -1,4 +1,4 @@
-import type { UsageReportInput } from "@/lib/usage-report";
+import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
 
 export type ReportMaterialSummary = { id: string; name: string; manufacturerName: string };
 
@@ -43,7 +43,7 @@ export function reportImageRoom(
 export function reportOverLimit(input: UsageReportInput, items: ReportPageItem[]): string[] {
   const over = (label: string, value: string, max: number) => (value.length > max ? [label] : []);
   return [
-    ...over("品種", input.variety, REPORT_SHORT_MAX),
+    ...input.varieties.flatMap((variety) => over("品種", variety.name, REPORT_SHORT_MAX)),
     ...over("使用目的の補足", input.purposeNote, REPORT_SHORT_MAX),
     ...over("市区町村", input.city, REPORT_SHORT_MAX),
     ...over("結果・感想", input.observedChange, REPORT_BODY_MAX),
@@ -178,7 +178,7 @@ export function reportPageChecks(
     {
       key: "variety",
       label: "品種",
-      ok: input.varietyUnknown || input.variety.trim() !== "",
+      ok: input.varietyUnknown || reportVarietyNames(input) !== "",
       target: "report-prop-variety",
     },
     {
