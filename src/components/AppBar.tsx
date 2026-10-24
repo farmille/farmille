@@ -123,6 +123,13 @@ const siteMenu = [
   { label: "メーカーの方へ", href: "/sellers", active: null },
 ] as const satisfies readonly { label: string; href: string; active: AppBarActive | null }[];
 
+/** 投稿は一般向けの機能なので、企業会員には「投稿する」を出さない（BottomNav と同じ条件）。 */
+function siteMenuFor(account?: AppBarAccount) {
+  return account?.kind === "member" && !account.canPost
+    ? siteMenu.filter((item) => item.active !== "post")
+    : siteMenu;
+}
+
 const desktopSiteMenuNav = css({ ml: "auto" });
 
 const desktopSiteMenu = css({
@@ -263,7 +270,14 @@ export type AppChrome = "public" | "seller";
 export type AppBarActive = "home" | "search" | "post" | "articles" | "me";
 
 /** PCヘッダー右端に出す、閲覧者に応じたアカウント欄。会員の画像はサーバー側で描いたものを受け取る（SiteAppBar が渡す）。 */
-export type AppBarAccount = { kind: "guest" } | { kind: "member"; avatar: ReactNode };
+export type AppBarAccount =
+  | { kind: "guest" }
+  | {
+      kind: "member";
+      avatar: ReactNode;
+      /** 一般向けの機能（投稿）を使える会員か。企業会員は使えない。 */
+      canPost: boolean;
+    };
 
 type AppBarBaseProps = {
   chrome: AppChrome;
@@ -297,7 +311,7 @@ function MobileAppBar(props: AppBarProps) {
           <b className={logoText}>Farmille</b>
         </Link>
         <MobileSiteMenu
-          links={siteMenu.map((item) => ({
+          links={siteMenuFor(props.account).map((item) => ({
             label: item.label,
             href: item.href,
             current: item.active !== null && props.active === item.active,
@@ -343,7 +357,7 @@ function DesktopSiteHeader({
         </Link>
         <nav aria-label="サイトメニュー" className={desktopSiteMenuNav}>
           <ul className={desktopSiteMenu}>
-            {siteMenu.map((item) => (
+            {siteMenuFor(account).map((item) => (
               <li key={item.href}>
                 <TextLink
                   aria-current={item.active !== null && active === item.active ? "page" : undefined}
