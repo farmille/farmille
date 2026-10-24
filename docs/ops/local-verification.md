@@ -23,6 +23,7 @@ pnpm setup:worktree
 
 - ホームが `container_type_id` 不在などの「internal」で落ちたら、まずこれを流す。既存のボリュームから起動した Supabase には、後から足した migration が入らない
 - ローカルの DB は worktree 間で共有している。適用は確認を取らずに行ってよい
+- 別の worktree にしか無い migration を当てると、他の worktree の `pnpm check:migrations` はその版を「このチェックアウトに無い」として止まる。その migration を入れたブランチが main に入れば、main に追随すると解ける。急ぐ場合は、そのブランチを取り込んで確かめる
 - 手元の Supabase が `127.0.0.1:58321`／`58322` のような別ポート（colima VM への ssh 転送）で動いていても、コマンドが出す `--db-url` をそのまま使える
 
 ### push 前の検査
