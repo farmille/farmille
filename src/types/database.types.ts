@@ -2955,6 +2955,69 @@ export type Database = {
           },
         ]
       }
+      pdf_readings: {
+        Row: {
+          created_at: string
+          error_code: string | null
+          finished_at: string | null
+          id: string
+          input_tokens: number | null
+          material_id: string | null
+          model: string | null
+          output_tokens: number | null
+          report_id: string | null
+          speed: string | null
+          status: string
+          upload_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_code?: string | null
+          finished_at?: string | null
+          id?: string
+          input_tokens?: number | null
+          material_id?: string | null
+          model?: string | null
+          output_tokens?: number | null
+          report_id?: string | null
+          speed?: string | null
+          status?: string
+          upload_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_code?: string | null
+          finished_at?: string | null
+          id?: string
+          input_tokens?: number | null
+          material_id?: string | null
+          model?: string | null
+          output_tokens?: number | null
+          report_id?: string | null
+          speed?: string | null
+          status?: string
+          upload_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdf_readings_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pdf_readings_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_types: {
         Row: {
           created_at: string
@@ -3948,6 +4011,35 @@ export type Database = {
           },
         ]
       }
+      usage_report_pdf_reading_fields: {
+        Row: {
+          field_key: string
+          quote: string
+          reading_id: string
+          value: string
+        }
+        Insert: {
+          field_key: string
+          quote: string
+          reading_id: string
+          value: string
+        }
+        Update: {
+          field_key?: string
+          quote?: string
+          reading_id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_pdf_reading_fields_reading_id_fkey"
+            columns: ["reading_id"]
+            isOneToOne: false
+            referencedRelation: "pdf_readings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_report_plot_steps: {
         Row: {
           id: string
@@ -4157,6 +4249,7 @@ export type Database = {
           method_details_ack: boolean
           negative_note: string | null
           observed_change: string
+          pdf_values_checked: boolean
           pesticide_ack: boolean
           planting_date: string | null
           prefecture_code: number | null
@@ -4192,6 +4285,7 @@ export type Database = {
           method_details_ack?: boolean
           negative_note?: string | null
           observed_change: string
+          pdf_values_checked?: boolean
           pesticide_ack: boolean
           planting_date?: string | null
           prefecture_code?: number | null
@@ -4227,6 +4321,7 @@ export type Database = {
           method_details_ack?: boolean
           negative_note?: string | null
           observed_change?: string
+          pdf_values_checked?: boolean
           pesticide_ack?: boolean
           planting_date?: string | null
           prefecture_code?: number | null
@@ -4417,6 +4512,10 @@ export type Database = {
       }
     }
     Functions: {
+      apply_pdf_reading: {
+        Args: { p_fields: Json; p_reading_id: string; p_user_id: string }
+        Returns: undefined
+      }
       approve_material_change_request: {
         Args: {
           p_request_id: string
@@ -4469,6 +4568,18 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_pdf_reading: {
+        Args: {
+          p_material_id: string
+          p_report_id: string
+          p_upload_path: string
+          p_user_id: string
+        }
+        Returns: {
+          reading_id: string
+          remaining: number
+        }[]
+      }
       confirm_company_application_access: {
         Args: { p_session_hash: string; p_token_hash: string }
         Returns: string
@@ -4500,9 +4611,26 @@ export type Database = {
         }
         Returns: undefined
       }
+      finish_pdf_reading: {
+        Args: {
+          p_error_code?: string
+          p_input_tokens?: number
+          p_model?: string
+          p_output_tokens?: number
+          p_reading_id: string
+          p_speed?: string
+          p_status: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       hide_owned_material_page: {
         Args: { p_material_id: string; p_note: string }
         Returns: undefined
+      }
+      list_expired_pdf_reading_uploads: {
+        Args: { p_limit: number }
+        Returns: string[]
       }
       list_usage_report_previews: {
         Args: never
@@ -4526,6 +4654,7 @@ export type Database = {
           method_details_ack: boolean
           negative_note: string | null
           observed_change: string
+          pdf_values_checked: boolean
           pesticide_ack: boolean
           planting_date: string | null
           prefecture_code: number | null
@@ -4547,6 +4676,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      pdf_reading_remaining: {
+        Args: { p_user_id: string }
+        Returns: number
       }
       record_material_page_audit: {
         Args: {

@@ -29,7 +29,7 @@ create function pg_temp.report_input(p_report text default 'ca932323-0000-4000-8
     ]'::jsonb,
     'measurements','[{"id":"ca932323-0000-4000-8000-000000000031","kind":"text","name":"観察","unit":"","body":"差が見られた","graphs":[]}]'::jsonb,
     'media','[]'::jsonb,'documents','[]'::jsonb,'headings','[]'::jsonb,
-    'methodDetailsAck',true,'documentsAck',false,'guidelineAck',true)
+    'methodDetailsAck',true,'documentsAck',false,'guidelineAck',true,'pdfValuesChecked',false)
 $$;
 create function pg_temp.many(p_count integer,p_variety boolean) returns jsonb language sql as $$
   select jsonb_agg(case when p_variety

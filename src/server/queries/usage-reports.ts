@@ -173,7 +173,7 @@ export async function listRecentUsageReports({
   );
 }
 
-type UsageReportDetailQueryRow = Omit<UsageReportRow, "editor_note"> & {
+type UsageReportDetailQueryRow = Omit<UsageReportRow, "editor_note" | "pdf_values_checked"> & {
   author: Pick<PublicProfileRow, "user_id" | "handle" | "avatar_url" | "standpoint"> | null;
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<
