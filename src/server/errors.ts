@@ -23,6 +23,13 @@ export const ERROR_CODES = [
   // メーカー申請（T-41）
   "login_id_taken",
   "invalid_invite_code",
+  // PDF読み取り
+  "pdf_reading_limit",
+  "captcha_failed",
+  "pdf_invalid",
+  "pdf_too_large",
+  "pdf_too_many_pages",
+  "pdf_reading_failed",
 ] as const;
 
 export const ErrorCodeSchema = v.picklist(ERROR_CODES);
@@ -54,6 +61,15 @@ export const errorMessageJa = {
   already_reported: "この投稿はすでに通報済みで、対応中です。",
   login_id_taken: "このFarmille企業会員IDはすでに使われています。別のIDを指定してください。",
   invalid_invite_code: "招待コードが正しくありません。",
+  pdf_reading_limit:
+    "今月のPDF読み取りの回数の上限に達しました。来月1日から再び使えます。入力した内容はそのまま残っています。手入力で続けられます。",
+  captcha_failed:
+    "ロボットによる操作ではないことを確認できませんでした。ページを再読み込みして、もう一度お試しください。",
+  pdf_invalid: "PDFを開けませんでした。パスワードの付いていないPDFファイルを選んでください。",
+  pdf_too_large: "PDFが大きすぎます。20MB以下のファイルを選んでください。",
+  pdf_too_many_pages: "PDFのページが多すぎます。40ページ以下のファイルを選んでください。",
+  pdf_reading_failed:
+    "PDFを読み取れませんでした。入力した内容はそのまま残っています。手入力で続けられます。",
 } satisfies Record<ErrorCode, string>;
 
 /** メーカーダッシュボードの Server Action が返す成功文言。 */
