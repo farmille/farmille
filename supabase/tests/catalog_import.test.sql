@@ -22,7 +22,7 @@ select is((select count(*)::integer from public.container_types), 11, '匿名で
 select is((select count(*)::integer from public.material_name_aliases where material_id='a9e478c7-f471-4a09-a1f0-a6a6b4d80a01'),
   1, '公開資材の別名を検索できる');
 select is((select count(*)::integer from public.material_name_aliases where material_id='a9e478c7-f471-4a09-a1f0-a6a6b4d80a02'),
-  0, '掲載終了した資材の別名を公開しない');
+  0, '非公開の資材の別名を公開しない');
 select throws_ok($$select * from public.catalog_import_baselines$$, '42501', null, '取り込み基準値を公開しない');
 select throws_ok($$insert into public.material_name_aliases values('a9e478c7-f471-4a09-a1f0-a6a6b4d80a01','追加')$$,
   '42501', null, '匿名で別名を追加できない');
@@ -35,7 +35,7 @@ insert into public.catalog_import_runs(id,source_sha256,plan_sha256)
   values('a9e478c7-f471-4a09-a1f0-a6a6b4d80a03',repeat('a',64),repeat('b',64));
 select throws_ok($$insert into public.material_page_versions(material_id,base_revision,status)
   values('a9e478c7-f471-4a09-a1f0-a6a6b4d80a01',0,'published')$$,
-  '23514',null,'メーカー版はメーカーと編集権を必要とする');
+  '23514',null,'メーカー版はメーカーと資材オーナー権限を必要とする');
 select throws_ok($$insert into public.material_page_versions(material_id,base_revision,status,origin,catalog_import_run_id)
   values('a9e478c7-f471-4a09-a1f0-a6a6b4d80a01',0,'pending','catalog','a9e478c7-f471-4a09-a1f0-a6a6b4d80a03')$$,
   '23514',null,'取り込み版をメーカーの確認待ち原稿にしない');
@@ -65,9 +65,9 @@ update public.materials set publication_status='archived',archived_at=now() wher
 select set_config('request.jwt.claims','{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated","app_metadata":{"account_type":"seller","seller_id":"33333333-3333-4333-8333-333333333333"}}',true);
 set local role authenticated;
 select is((select count(*)::integer from public.material_page_versions where id='a9e478c7-f471-4a09-a1f0-a6a6b4d80a04'),1,
-  '編集権があれば掲載終了した資材の取り込み版も編集の初期値に使える');
+  '資材オーナー権限があれば非公開の資材の取り込み版も編集の初期値に使える');
 select is((select count(*)::integer from public.material_page_links where version_id='a9e478c7-f471-4a09-a1f0-a6a6b4d80a04'),1,
-  '編集権があれば取り込んだ資料を読み取れる');
+  '資材オーナー権限があれば取り込んだ資料を読み取れる');
 select lives_ok($$select public.save_material_page_version('a9e478c7-f471-4a09-a1f0-a6a6b4d80a01',
   '{"description":"既存の本文","mainComponents":"","mechanism":"","links":[],"images":[],"usages":[],"timings":[],"certifications":[],"registrations":[],"relatedCompanies":[]}'::jsonb,true,null)$$,
   'メーカーは取り込んだ資料を削除して表現確認に送れる');
@@ -86,7 +86,7 @@ update public.material_editor_grants set revoked_at=now(),revoked_by='a9e478c7-f
   where material_id='a9e478c7-f471-4a09-a1f0-a6a6b4d80a01';
 set local role authenticated;
 select is((select count(*)::integer from public.material_page_links where version_id='a9e478c7-f471-4a09-a1f0-a6a6b4d80a04'),0,
-  '編集権の取消後は掲載終了した資料を読み取れない');
+  '資材オーナー権限の取消後は非公開の資料を読み取れない');
 reset role;
 
 select * from finish();

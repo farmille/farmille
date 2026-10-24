@@ -51,7 +51,7 @@ export function ContactFields({
       />
       <Input
         description="Farmilleが発行したIDをご入力ください。"
-        label="FarmilleアカウントID"
+        label="Farmille企業会員ID"
         name={`${prefix}accountId`}
         requirement="required"
         defaultValue={defaults.accountId}

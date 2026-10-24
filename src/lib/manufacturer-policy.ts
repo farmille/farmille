@@ -1,5 +1,5 @@
 /**
- * 公開前の表現確認と、編集権付与前の確認は別の工程として案内する。
+ * 公開前の表現確認と、資材オーナー権限付与前の確認は別の工程として案内する。
  * actor は作業の担い手、action は手順から案内する画面。
  */
 export const MANUFACTURER_ONBOARDING_STEPS = [
@@ -7,7 +7,7 @@ export const MANUFACTURER_ONBOARDING_STEPS = [
     actor: "maker",
     action: "register",
     title: "企業会員登録",
-    body: "まずは企業会員登録の申請をお願いいたします。運営が法人情報を確認のうえ、ご登録のメールアドレス宛にログインIDとパスワード設定のご案内をお送りします。",
+    body: "まずは企業会員登録の申請をお願いいたします。運営が法人情報を確認のうえ、ご登録のメールアドレス宛にFarmille企業会員IDとパスワード設定のご案内をお送りします。",
   },
   {
     actor: "maker",
@@ -30,7 +30,7 @@ export const MANUFACTURER_ONBOARDING_STEPS = [
   {
     actor: "maker",
     action: "dashboard",
-    title: "資材情報の登録・編集",
+    title: "製品情報の登録・編集",
     body: "権限をお渡しした資材について、企業会員ダッシュボードで製品説明・施用方法・資料・作用機作などを入力し、公開を申請します。下書き保存とプレビューが使えます。公開前に運営が表現を確認し、必要な場合はご連絡します。",
   },
 ] as const;

@@ -28,15 +28,18 @@ E2Eは検証専用のSupabase（127.0.0.1:54321）を使う。Dockerを起動し
 
 ## push前の検査
 
-`tools/ci/browser-checks.ts`はGitから渡された送信先のSHAと送信するHEADの差分を取り、`tools/ci/selection.ts`で対象を決める。新規ブランチ・新規タグ・mainへのpushと、比較元のcommitがローカルに無い場合は全件検査する。削除だけのpushでは検査しない。
+`tools/ci/browser-checks.ts`はGitから渡された送信先のSHAと送信するHEADの差分を取り、`tools/ci/selection.ts`で対象を決める。新規ブランチは送信先のリモート追跡ブランチ `main` とのmerge-baseから差分を取る。mainへのpushも通常の更新と同じ差分判定を使う。新規タグと、比較元のcommitやmainとの分岐点を取得できない場合は全件検査する。削除だけのpushでは検査しない。
 
 | 変更内容 | Storybook | E2E |
 |---|---|---|
-| 資料・エージェント設定・単体テストだけ | 省く | 省く |
+| 資料・エージェント設定・単体テスト・hook・lint・GitHub設定だけ | 省く | 省く |
 | Story・Storybookの設定や検査だけ | 対象Storyまたは全件 | 省く |
-| E2Eのテストや設定だけ | 省く | 全件 |
+| E2Eのテスト・設定・ローカル起動やmigration確認スクリプトだけ | 省く | 全件 |
 | `src/app`内の画面・部品 | importの利用先にあるStory | 全件 |
-| 共通部品・テーマ・画像・CSS・依存・未知のファイル | 全件 | 全件 |
+| CSSだけ | 全件 | 省く |
+| 共通部品・テーマ・画像・依存・未知のファイル | 全件 | 全件 |
+
+複数種類の変更があれば、それぞれに必要な検査を実行する。開発ツールの除外対象は `tools/ci/selection.ts` に列挙し、未知のスクリプトを一律に除外しない。hook自身の動作はGitを使う統合テストで検証する。
 
 Supabaseが使う`docs/email-templates`は資料扱いにしない。画面の選別では静的import・再export・文字列の動的importをたどり、別ルートの利用先も含める。削除・rename・Nextのlayoutやerrorなどの暗黙の親画面・mock・型宣言の変更、依存を解決できない変更は全件検査する。
 

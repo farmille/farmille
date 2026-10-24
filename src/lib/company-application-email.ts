@@ -8,7 +8,7 @@ const applicationNames = {
   registration: "資材掲載・資材オーナー権限申請",
   transfer_out: "資材オーナー権限の移行申請（現資材オーナー企業）",
   transfer_in: "資材オーナー権限の移行申請（引き継ぎ先企業）",
-  removal: "資材ページに関する申請（終売・廃盤／非表示）",
+  removal: "資材ページに関する申請（終売／非公開）",
 } as const;
 const signature =
   "ご不明な点がございましたら、本メールへのご返信、または下記までお問い合わせください。\n\nファーミル株式会社 代表取締役社長 奥田朗盛\ncontact@farmille.com";

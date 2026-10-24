@@ -119,7 +119,7 @@ test("一般・メーカー・運営の本番フローと承認後の非公開�
       .textContent();
     if (!issuedPassword) throw new Error("発行パスワードを取得できません");
     await page.goto("/sellers/login");
-    await page.getByLabel("ログインID").fill(token);
+    await page.getByLabel("Farmille企業会員ID").fill(token);
     await page.getByLabel("パスワード").fill(issuedPassword.trim());
     await page.getByRole("button", { name: "ログインする" }).click();
     await expect(page).toHaveURL(/\/dashboard$/);

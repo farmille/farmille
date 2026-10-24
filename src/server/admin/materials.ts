@@ -242,7 +242,7 @@ export async function createMaterial(input: MaterialInput): Promise<Result<{ id:
   });
 }
 
-/** 運営が用意する、編集権移行前の資材情報を更新する。 */
+/** 運営が用意する、資材オーナー権限移行前の製品情報を更新する。 */
 export async function updateMaterial(
   materialId: string,
   input: MaterialInput,
@@ -416,7 +416,7 @@ export async function setMaterialSeller(
         return fail("internal");
       }
       if (seller === null) return fail("not_found");
-      // 確認中・却下・凍結中の組織に一次情報の編集権を渡さない。
+      // 確認中・却下・凍結中の組織に一次情報の資材オーナー権限を渡さない。
       if (seller.status !== "approved") return fail("conflict");
     }
 
@@ -441,7 +441,7 @@ export async function setMaterialSeller(
   });
 }
 
-/** 運営による公開状態の直接変更。掲載終了でも行と投稿履歴は保持する。 */
+/** 運営による公開状態の直接変更。非公開でも行と投稿履歴は保持する。 */
 export async function setMaterialPublicationStatus(
   materialId: string,
   status: "published" | "archived",

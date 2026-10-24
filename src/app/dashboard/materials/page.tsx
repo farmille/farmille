@@ -12,19 +12,19 @@ export default async function SellerMaterialsPage() {
     return <SellerAccessDenied backHref="/dashboard" />;
   }
   const result = await getSellerMaterialsPageData(session.data.sellerId);
-  if (!result.ok) throw new Error("製品一覧を取得できませんでした。");
+  if (!result.ok) throw new Error("資材一覧を取得できませんでした。");
   return (
     <FormPageShell chrome="seller" backHref="/dashboard" title="製品情報の管理">
       <div className={materialPageStack}>
         <SurfaceCard title={result.data.sellerName}>
           <p>
-            編集権を付与された製品を選び、公開ページと同じ構成で情報を編集できます。下書き・プレビュー・変更履歴は各製品から開けます。
+            掲載中の資材の製品情報を編集できます。下書き・プレビュー・変更履歴は各資材から開けます。
           </p>
         </SurfaceCard>
         {result.data.materials.length === 0 ? (
           <EmptyState
-            title="編集できる製品はまだありません"
-            description="既存の紐づけがある場合も、編集権の書類確認が必要です。運営からの案内をご確認ください。公開中の製品情報は維持されています。"
+            title="編集できる資材はまだありません"
+            description="既存の紐づけがある場合も、資材オーナー権限の書類確認が必要です。運営からの案内をご確認ください。公開中の製品情報は維持されています。"
           />
         ) : (
           result.data.materials.map((material) => (
@@ -41,7 +41,7 @@ export default async function SellerMaterialsPage() {
             />
           ))
         )}
-        <SurfaceCard title="掲載・編集する製品を追加する">
+        <SurfaceCard title="掲載・編集する資材を追加する">
           <p>
             フォームAから新規掲載または掲載済み資材のオーナー権限を申請してください。運営が申請と確認資料を審査します。申請・掲載・編集は無料です。
           </p>

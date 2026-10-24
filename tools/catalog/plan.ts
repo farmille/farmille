@@ -89,7 +89,7 @@ export function planCatalog(
     const material = snapshot.materials.find((row) => row.id === previous.material_id);
     const blocked =
       material && (material.protected_references > 0 || material.seller_id)
-        ? "旧UUIDに投稿・編集権・原稿などがあるため、対応先を変更できません。"
+        ? "旧UUIDに投稿・資材オーナー権限・原稿などがあるため、対応先を変更できません。"
         : undefined;
     if (
       !choose(
@@ -153,7 +153,7 @@ export function planCatalog(
             ? `メーカー原稿（${existing.working_version.status}）があるため変更できません。`
             : field === "manufacturer_name" &&
                 (existing.seller_id || existing.manufacturer_verified_at)
-              ? "編集権またはメーカー確認記録があるため、メーカーの変更は運営の変更手続きで行ってください。"
+              ? "資材オーナー権限またはメーカー確認記録があるため、メーカーの変更は運営の変更手続きで行ってください。"
               : undefined,
         );
       if (!useSource && existing) Object.assign(fields, { [field]: existing.fields[field] });

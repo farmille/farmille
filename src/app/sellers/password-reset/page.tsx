@@ -8,7 +8,7 @@ export default function SellerPasswordResetPage() {
   return (
     <AuthScreen
       title="メーカーのパスワード再設定"
-      lead="ログインIDと登録済みの連絡先を入力してください。連絡先が利用できない場合は運営へお問い合わせください。"
+      lead="Farmille企業会員IDと登録済みの連絡先を入力してください。連絡先が利用できない場合は運営へお問い合わせください。"
     >
       <SellerPasswordResetForm />
     </AuthScreen>

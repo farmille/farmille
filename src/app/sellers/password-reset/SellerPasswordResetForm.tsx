@@ -16,7 +16,12 @@ export function SellerPasswordResetForm() {
       ) : (
         <>
           {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
-          <Input label="ログインID" name="loginId" requirement="required" autoComplete="username" />
+          <Input
+            label="Farmille企業会員ID"
+            name="loginId"
+            requirement="required"
+            autoComplete="username"
+          />
           <Input
             label="登録済みの連絡先メールアドレス"
             name="email"

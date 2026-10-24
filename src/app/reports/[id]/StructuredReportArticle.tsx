@@ -105,7 +105,7 @@ export function StructuredReportArticle({
     prefecture
       ? `地域：${prefecture}${input.showCity && input.city.trim() ? input.city.trim() : ""}`
       : null,
-    `使用作物：${cropLabel}`,
+    `使用対象作目：${cropLabel}`,
     input.cultivationEnvironment.trim() ? `栽培環境：${input.cultivationEnvironment.trim()}` : null,
     stages ? `施用時期：${stages}` : null,
     input.timingNote.trim() || null,

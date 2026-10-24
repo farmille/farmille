@@ -39,7 +39,7 @@ const TOTAL = STEPS.length;
 
 function missingLabels(errors: UsageReportFieldErrors) {
   const label = (key: string) => {
-    if (key === "cropId") return "使用作物";
+    if (key === "cropId") return "使用対象作目";
     if (key === "variety") return "品種";
     if (key === "prefectureCode") return "都道府県";
     if (key === "observedChange") return "結果・感想";
@@ -57,7 +57,7 @@ function missingLabels(errors: UsageReportFieldErrors) {
 
 function missingMessages(errors: UsageReportFieldErrors) {
   const message = (key: string) => {
-    if (key === "cropId") return "使用作物を選んでください";
+    if (key === "cropId") return "使用対象作目を選んでください";
     if (key === "variety") return "品種を入力するか、「品種が不明」にチェックしてください";
     if (key === "observedChange") return "結果・感想を入力してください";
     if (key === "purposeTags") return "使用目的を選んでください";

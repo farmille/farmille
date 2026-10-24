@@ -112,7 +112,7 @@ for (const role of ["general", "seller", "admin"] as const) {
       if (seller) {
         if (process.env.CAPTURE_SCREEN_FLOW === "1")
           await captureScreenFlow(page, "63-seller-password-reset.png");
-        await page.getByLabel(/^ログインID/).fill(seller.loginId);
+        await page.getByLabel(/^Farmille企業会員ID/).fill(seller.loginId);
         await page.getByLabel("登録済みの連絡先メールアドレス").fill(email);
         await page.getByRole("button", { name: "再設定メールを送信", exact: true }).click();
       } else {

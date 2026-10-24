@@ -45,7 +45,7 @@ const columns: DataTableColumn<SellerListItem>[] = [
       </Link>
     ),
   },
-  { key: "login_id", header: "ログインID", cell: (row) => row.login_id },
+  { key: "login_id", header: "Farmille企業会員ID", cell: (row) => row.login_id },
   {
     key: "status",
     header: "状態",
@@ -78,7 +78,7 @@ export default async function AdminSellersPage({
     <AdminShell
       backHref="/admin"
       backLabel="運営管理ホーム"
-      description="メーカー申請を確認し、承認したアカウントに共有ログインを発行します。"
+      description="企業会員登録の申請を確認し、承認したアカウントに共有ログインを発行します。"
       title="メーカー確認"
     >
       <Panel note={`${sellers.data.length} 件`} title="申請・アカウント一覧">

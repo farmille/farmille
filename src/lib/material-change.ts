@@ -19,7 +19,7 @@ export type MaterialChangeType = (typeof MATERIAL_CHANGE_TYPES)[number];
 export const MATERIAL_CHANGE_TYPE_LABELS = {
   create: "新規登録",
   update: "情報変更",
-  archive: "掲載終了",
+  archive: "非公開",
 } satisfies Record<MaterialChangeType, string>;
 
 export function isMaterialChangeRequestStatus(

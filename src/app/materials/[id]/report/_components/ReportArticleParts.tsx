@@ -23,7 +23,7 @@ export function conditionLines(input: UsageReportInput, cropName: string) {
   const variety = input.varietyUnknown ? "不明" : input.variety.trim() || "−";
   return [
     `地域：${prefecture}${input.showCity && input.city.trim() ? input.city.trim() : ""}`,
-    `使用作物：${cropName}（品種：${variety}）`,
+    `使用対象作目：${cropName}（品種：${variety}）`,
     `施用時期：${input.timingStages.map((stage) => APPLICATION_TIMINGS[stage]).join("、") || "−"}`,
   ].join("\n");
 }

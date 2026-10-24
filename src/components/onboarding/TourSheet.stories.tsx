@@ -24,7 +24,7 @@ export const Welcome: Story = {
 export const Section: Story = {
   args: {
     title: "プロフィールの設定",
-    body: "主な作目を登録すると、作目に合った資材やレポートを見つけやすくなります。",
+    body: "栽培作目を登録すると、作目に合った資材やレポートを見つけやすくなります。",
     section: { current: 1, total: 3 },
     primaryLabel: "プロフィール画面へ",
     onSkipStep: fn(),

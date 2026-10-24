@@ -46,7 +46,7 @@ export const IssueLogin: Story = {
     await userEvent.click(await popup.findByRole("option", { name: "しおさい資材株式会社" }));
     await userEvent.click(canvas.getByRole("button", { name: "確認を完了してログインを発行" }));
     await expect(
-      await canvas.findByText("ログインIDとパスワード設定用の案内を発行しました。"),
+      await canvas.findByText("Farmille企業会員IDとパスワード設定用の案内を発行しました。"),
     ).toBeVisible();
   },
 };
