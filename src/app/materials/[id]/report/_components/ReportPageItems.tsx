@@ -126,6 +126,31 @@ const TEXT_EXAMPLE =
 const NOTE_EXAMPLE =
   "グラフ・表だけでは伝わらないこと\n例）表1の「区A」が無処理区、「区B」が処理区。処理区は〇〇の1,000倍液を7日おきに3回散布した。";
 
+/** 数値の調査項目のグラフ。数値として読める値が1つも無ければ、その旨を出す。 */
+function ReportNumericGraphs({
+  item,
+  plots,
+  layout,
+}: {
+  item: ReportPageNumericItem;
+  plots: UsageReportInput["plots"];
+  layout: ReportPlotLayout;
+}) {
+  const charts = item.graphs
+    .map((graph) => ({ graph, groups: reportBarGroups(graphSections(graph, plots, layout)) }))
+    .filter(({ groups }) => groups.length > 0);
+  if (charts.length === 0) return <p className={errorText}>グラフにできる数値が入っていません</p>;
+  return charts.map(({ graph, groups }) => (
+    <ReportBars
+      key={graph.id}
+      title={graph.heading || item.name}
+      unit={item.unit}
+      groups={groups}
+      legend={layout.legend}
+    />
+  ));
+}
+
 /** 調査項目ごとの結果：調査項目を先に書き、項目ごとに入れ方を選ぶ。 */
 export function ReportPageItems({
   items,
@@ -299,18 +324,7 @@ export function ReportPageItems({
             )}
             {item.mode === "numeric" && (
               <>
-                {item.graphs.map((graph) => (
-                  <ReportBars
-                    key={graph.id}
-                    title={graph.heading || item.name}
-                    unit={item.unit}
-                    groups={reportBarGroups(graphSections(graph, plots, layout))}
-                    legend={layout.legend}
-                  />
-                ))}
-                {item.graphs.every(
-                  (graph) => reportBarGroups(graphSections(graph, plots, layout)).length === 0,
-                ) && <p className={errorText}>グラフにできる数値が入っていません</p>}
+                <ReportNumericGraphs item={item} plots={plots} layout={layout} />
                 <Textarea
                   fieldClassName={css({ mt: "3" })}
                   label={<span className={labelStyle}>補足説明</span>}
