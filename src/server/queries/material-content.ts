@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { selectAllRows } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
+import { pickReportCover } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
@@ -33,7 +34,7 @@ type UsageReportMedia = Pick<UsageReportMediaRow, "id" | "url" | "media_type" | 
 type UsageReportQueryRow = UsageReportFields & {
   author: UsageReportAuthor | null;
   crop: UsageReportCrop | null;
-  media: UsageReportMedia[];
+  media: (UsageReportMedia & Pick<UsageReportMediaRow, "measurement_id">)[];
 };
 
 export type PublishedUsageReport = UsageReportFields & {
@@ -83,10 +84,6 @@ const IN_FILTER_CHUNK_SIZE = 100;
 
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/material-content] ${operation}`, error);
-}
-
-function byMediaOrder(left: UsageReportMedia, right: UsageReportMedia): number {
-  return left.sort_order - right.sort_order || left.id.localeCompare(right.id);
 }
 
 function byPublishedAtDesc(left: ArticleQueryRow, right: ArticleQueryRow): number {
@@ -196,7 +193,8 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
           id,
           url,
           media_type,
-          sort_order
+          sort_order,
+          measurement_id
         )
       `,
     )
@@ -235,8 +233,7 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
   return succeed({
     total: count,
     items: rows.map(({ media, ...report }) => {
-      const sortedMedia = media.toSorted(byMediaOrder);
-      const coverImage = sortedMedia.find(({ media_type }) => media_type === "photo") ?? null;
+      const coverImage = pickReportCover(media);
 
       return {
         ...report,

@@ -1,3 +1,5 @@
+import type { Database } from "@/types/database.types";
+
 export const CULTIVATION_TYPES = [
   { value: "open_field", label: "露地栽培" },
   { value: "facility", label: "施設栽培" },
@@ -30,4 +32,18 @@ export function mediaPlacementLabel(placement: string | null): string | null {
   }
 
   return option.label;
+}
+
+type ReportCoverCandidate = Pick<
+  Database["public"]["Tables"]["usage_report_media"]["Row"],
+  "id" | "media_type" | "sort_order" | "measurement_id"
+>;
+
+/** 一覧の表紙にする写真。調査項目に差し込んだ資料のグラフ・表の画像は、閲覧者がログインしていても使わない。 */
+export function pickReportCover<Media extends ReportCoverCandidate>(media: Media[]): Media | null {
+  return (
+    media
+      .filter((item) => item.media_type === "photo" && item.measurement_id === null)
+      .toSorted((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id))[0] ?? null
+  );
 }

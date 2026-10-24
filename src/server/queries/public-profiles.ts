@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { fail, succeed, type Result } from "@/server/result";
 import { reviewCropLabel, type ReviewCropRelation } from "@/server/reviews/crop-relations";
 import { createServerSupabase } from "@/server/supabase";
+import { pickReportCover } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
 type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
@@ -30,7 +31,7 @@ type ProfileReportQueryRow = Pick<
 > & {
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
-  media: Pick<UsageReportMediaRow, "id" | "url" | "media_type" | "sort_order">[];
+  media: Pick<UsageReportMediaRow, "id" | "url" | "media_type" | "sort_order" | "measurement_id">[];
 };
 
 export type PublicProfilePost =
@@ -200,7 +201,8 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
             id,
             url,
             media_type,
-            sort_order
+            sort_order,
+            measurement_id
           )
         `,
       )
@@ -277,10 +279,7 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
       return fail("internal");
     }
 
-    const cover =
-      report.media
-        .toSorted(bySortOrder)
-        .find(({ media_type: mediaType }) => mediaType === "photo") ?? null;
+    const cover = pickReportCover(report.media);
 
     posts.push({
       kind: "usage_report",

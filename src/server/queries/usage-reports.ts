@@ -6,6 +6,7 @@ import {
 } from "@/server/usage-reports/structured";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSessionUser } from "@/server/auth";
+import { pickReportCover } from "@/server/usage-reports/model";
 
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
@@ -42,7 +43,7 @@ type RecentReportQueryRow = Pick<
   author: Pick<PublicProfileRow, "handle"> | null;
   crop: Pick<CropRow, "name"> | null;
   material: Pick<MaterialRow, "name"> | null;
-  media: Pick<MediaRow, "url" | "media_type" | "sort_order">[];
+  media: Pick<MediaRow, "id" | "url" | "media_type" | "sort_order" | "measurement_id">[];
 };
 
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
@@ -84,9 +85,11 @@ export async function listRecentUsageReports({
         name
       ),
       media:usage_report_media (
+        id,
         url,
         media_type,
-        sort_order
+        sort_order,
+        measurement_id
       )
     `,
     )
@@ -143,9 +146,7 @@ export async function listRecentUsageReports({
       return fail("internal");
     }
 
-    const cover = row.media
-      .filter((m) => m.media_type === "photo")
-      .toSorted((a, b) => a.sort_order - b.sort_order)[0];
+    const cover = pickReportCover(row.media);
 
     items.push({
       id: row.id,
@@ -153,7 +154,7 @@ export async function listRecentUsageReports({
       publishedAt: row.published_at,
       helpfulCount: helpfulById.get(row.id) ?? 0,
       coverUrl:
-        cover === undefined
+        cover === null
           ? null
           : row.form_version === 2
             ? reportMediaUrl(cover.url, row.author_user_id)

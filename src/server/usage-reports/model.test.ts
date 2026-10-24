@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { mediaPlacementLabel } from "@/server/usage-reports/model";
+import { mediaPlacementLabel, pickReportCover } from "@/server/usage-reports/model";
 
 describe("実証詳細レポートのメディア配置表示", () => {
   it.each([
@@ -21,5 +21,33 @@ describe("実証詳細レポートのメディア配置表示", () => {
 
   it("未知の保存値をそのまま表示しない", () => {
     expect(() => mediaPlacementLabel("unknown")).toThrow("未対応のメディア配置です：unknown");
+  });
+});
+
+describe("実証詳細レポートの一覧の表紙", () => {
+  const photo = (id: string, sortOrder: number, measurementId: string | null = null) => ({
+    id,
+    media_type: "photo",
+    sort_order: sortOrder,
+    measurement_id: measurementId,
+  });
+
+  it("調査項目に差し込んだ画像は、並び順が先でも表紙にしない", () => {
+    const cover = pickReportCover([
+      photo("graph", 0, "measurement-1"),
+      { ...photo("video", 1), media_type: "video" },
+      photo("field-b", 3),
+      photo("field-a", 2),
+    ]);
+    expect(cover?.id).toBe("field-a");
+  });
+
+  it("調査項目の画像と動画しかなければ表紙は無い", () => {
+    expect(
+      pickReportCover([
+        photo("graph", 0, "measurement-1"),
+        { ...photo("video", 1), media_type: "video" },
+      ]),
+    ).toBeNull();
   });
 });
