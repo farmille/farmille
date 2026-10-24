@@ -165,6 +165,36 @@ describe("実証詳細レポート", () => {
       validateUsageReportSubmission({ ...unknown, varieties: named.varieties }).varieties,
     ).toBe("※ 「品種が不明、または品種がない」のときは品種を入れないでください");
   });
+  it("1つの品種の入力欄で名前を変えても、他の品種と区の品種は残る", () => {
+    const blank = createBlankUsageReport(materialId);
+    const aiko = { id: crypto.randomUUID(), name: "アイコ" };
+    const momotaro = { id: crypto.randomUUID(), name: "桃太郎" };
+    const [first, second] = blank.plots;
+    if (first === undefined || second === undefined) throw new Error("区が2つありません。");
+    const input: UsageReportInput = {
+      ...blank,
+      varieties: [aiko, momotaro],
+      plots: [
+        { ...first, varietyId: aiko.id },
+        { ...second, varietyId: momotaro.id },
+        { ...second, id: crypto.randomUUID(), varietyId: null },
+      ],
+    };
+    const renamed = withSingleVariety(input, "アイコ改", false);
+    expect(renamed.varieties).toEqual([{ id: aiko.id, name: "アイコ改" }, momotaro]);
+    expect(renamed.plots.map((plot) => plot.varietyId)).toEqual([aiko.id, momotaro.id, aiko.id]);
+    expect(
+      Object.keys(validateUsageReportSubmission(renamed)).filter((key) => /variet/.test(key)),
+    ).toEqual([]);
+  });
+  it("品種が不明の状態から外すと、品種を1件作って全区に割り当てる", () => {
+    const unknown = withSingleVariety(createBlankUsageReport(materialId), "", true);
+    const known = withSingleVariety(unknown, "", false);
+    const [variety] = known.varieties;
+    expect(known.varietyUnknown).toBe(false);
+    expect(known.varieties).toEqual([{ id: expect.any(String), name: "" }]);
+    expect(known.plots.map((plot) => plot.varietyId)).toEqual([variety?.id, variety?.id]);
+  });
   it("新しいレポートは品種1つと、無処理・投稿した資材の2区から始まる", () => {
     const input = createBlankUsageReport(materialId);
     const [variety] = input.varieties;

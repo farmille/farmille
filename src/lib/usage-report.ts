@@ -185,7 +185,7 @@ export function createBlankUsageReport(materialId: string): UsageReportInput {
     guidelineAck: false,
   };
 }
-/** 品種を1つだけ入れる画面の値を、品種の一覧と全区に写す。不明なら品種を空にし、区の品種も外す。 */
+/** 品種を1つだけ入れる画面の値を、品種の一覧の1件目に写す。2件目以降と区の品種は残し、品種の無い区だけ1件目にする。不明なら品種を空にし、区の品種も外す。 */
 export function withSingleVariety(
   input: UsageReportInput,
   name: string,
@@ -198,12 +198,13 @@ export function withSingleVariety(
       varieties: [],
       plots: input.plots.map((plot) => ({ ...plot, varietyId: null })),
     };
-  const variety = { id: input.varieties[0]?.id ?? crypto.randomUUID(), name };
+  const [first, ...rest] = input.varieties;
+  const variety = { id: first?.id ?? crypto.randomUUID(), name };
   return {
     ...input,
     varietyUnknown: false,
-    varieties: [variety],
-    plots: input.plots.map((plot) => ({ ...plot, varietyId: variety.id })),
+    varieties: [variety, ...rest],
+    plots: input.plots.map((plot) => ({ ...plot, varietyId: plot.varietyId ?? variety.id })),
   };
 }
 export function reportVarietyNames(input: Pick<UsageReportInput, "varieties">): string {
