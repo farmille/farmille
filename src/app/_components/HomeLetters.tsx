@@ -1,5 +1,4 @@
 import { css, cva } from "../../../styled-system/css";
-import { HomeHills } from "./HomeHills";
 import { HomeSectionTitle } from "./HomeSectionTitle";
 import { Reveal } from "./Reveal";
 
@@ -33,15 +32,11 @@ const placements = [
   { tilt: "right", delay: "1" },
 ] as const;
 
-/** 前の節の下端に丘を重ね、紙の地へ戻す。 */
 const section = css({
-  position: "relative",
   pt: "16",
   pb: "24",
   tab: { pt: "20", pb: "28" },
 });
-
-const hills = css({ position: "absolute", left: "0", right: "0", bottom: "[calc(100% - 1px)]" });
 
 const container = css({
   maxW: "content.wide",
@@ -126,7 +121,6 @@ const signature = css({
 export function HomeLetters() {
   return (
     <section aria-labelledby="letters-heading" className={section}>
-      <HomeHills className={hills} into="paper" sprouts />
       <div className={container}>
         <HomeSectionTitle
           align="center"

@@ -9,7 +9,8 @@ import { listHomeMaterials } from "@/server/queries/home-materials";
 import { css } from "../../styled-system/css";
 import { HomeConcept } from "./_components/HomeConcept";
 import { HomeHero } from "./_components/HomeHero";
-import { HomeLetters } from "./_components/HomeLetters";
+// 応援メッセージ（便箋）の文面は仮のもので、寄稿を本人に確認できるまで公開しない。戻すときはこの import と、main の中の <HomeLetters /> のコメントを外す
+// import { HomeLetters } from "./_components/HomeLetters";
 import { HomeMaterialMarquee } from "./_components/HomeMaterialMarquee";
 import { HomeMission } from "./_components/HomeMission";
 import { HomeSearch } from "./_components/HomeSearch";
@@ -48,7 +49,8 @@ export default async function HomePage() {
             <HomeMaterials />
           </Suspense>
         </HomeSearch>
-        <HomeLetters />
+        {/* 応援メッセージ（便箋）は公開まで出さない。理由は import の注記を参照 */}
+        {/* <HomeLetters /> */}
         <HomeMission />
         <HomeSellerInvitation />
       </main>

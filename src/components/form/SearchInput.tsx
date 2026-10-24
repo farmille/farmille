@@ -44,6 +44,10 @@ export const searchBoxRecipe = cva({
         borderRadius: "pill",
         boxShadow: "shadow.lift",
         color: "text.brand",
+        // くっきりした輪は描かず、フォーカス中だけ面のまわりに淡い緑の光をにじませる
+        "&:has(input:focus-visible)": {
+          boxShadow: "[{shadows.shadow.lift}, 0 0 24px 2px token(colors.primary.300)]",
+        },
         tab: { minH: "16", pl: "6", pr: "2.5" },
       },
     },

@@ -6,7 +6,7 @@ import { HomeSectionTitle } from "./HomeSectionTitle";
 import { HomeVerticalCopy } from "./HomeVerticalCopy";
 import { Reveal } from "./Reveal";
 
-const section = css({ pt: "8", pb: "24", tab: { pt: "12", pb: "28" } });
+const section = css({ pt: "16", pb: "24", tab: { pt: "20", pb: "28" } });
 
 /** SP は見出し・写真・本文の順に積み、pc は写真を左に置いて見出しと本文を右にまとめる。 */
 const container = css({

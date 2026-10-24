@@ -8,7 +8,7 @@ import { HomeHills } from "./HomeHills";
 import { HomeSectionTitle } from "./HomeSectionTitle";
 import { Reveal } from "./Reveal";
 
-/** 前の節の下端に丘を重ね、深い緑の地へつなぐ。 */
+/** 前の節の下端に丘を重ねて深い緑の地へつなぎ、自分の下端でも丘を立てて紙の地へ戻す。 */
 const section = css({
   position: "relative",
   bgColor: "surface.forest",
@@ -19,7 +19,14 @@ const section = css({
   tab: { pt: "20", pb: "36" },
 });
 
-const hills = css({ position: "absolute", left: "0", right: "0", bottom: "[calc(100% - 1px)]" });
+const entryHills = css({
+  position: "absolute",
+  left: "0",
+  right: "0",
+  bottom: "[calc(100% - 1px)]",
+});
+
+const exitHills = css({ position: "absolute", left: "0", right: "0", bottom: "0" });
 
 const container = css({
   maxW: "content.medium",
@@ -75,7 +82,7 @@ const marquee = css({ w: "full", px: "4", tab: { px: "5" } });
 export function HomeSearch({ children }: { children: ReactNode }) {
   return (
     <section aria-labelledby="search-heading" className={section} id="search">
-      <HomeHills className={hills} into="forest" sprouts />
+      <HomeHills className={entryHills} into="forest" sprouts />
       <div className={container}>
         <HomeSectionTitle
           align="center"
@@ -103,6 +110,7 @@ export function HomeSearch({ children }: { children: ReactNode }) {
         </div>
         <div className={marquee}>{children}</div>
       </Reveal>
+      <HomeHills className={exitHills} into="paper" sprouts />
     </section>
   );
 }
