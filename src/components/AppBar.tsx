@@ -57,6 +57,20 @@ const logoText = css({
   color: "text.default",
 });
 
+/** SP の公開画面で、サイトヘッダーの下に置く「戻る」と画面名の行。上に固定せず、本文と一緒に流れる。 */
+const mobileContext = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2.5",
+  px: "3.5",
+  py: "1.5",
+  bg: "surface.panel",
+  borderBottomWidth: "1px",
+  borderBottomStyle: "solid",
+  borderBottomColor: "border.default",
+  tab: { display: "none" },
+});
+
 const mobileTitle = css({
   fontSize: "lg",
   fontWeight: "bold",
@@ -302,31 +316,38 @@ type AppBarBackProps = AppBarBaseProps & {
 
 export type AppBarProps = AppBarHomeProps | AppBarBackProps;
 
-function MobileAppBar(props: AppBarProps) {
-  if (props.variant === "home") {
-    return (
-      <header className={mobileAppBar} data-ui="mobile-app-bar">
-        <Link href="/" className={logo}>
-          <BrandMark />
-          <b className={logoText}>Farmille</b>
-        </Link>
-        <MobileSiteMenu
-          links={siteMenuFor(props.account).map((item) => ({
-            label: item.label,
-            href: item.href,
-            current: item.active !== null && props.active === item.active,
-          }))}
-          member={props.account?.kind === "member"}
-        />
-      </header>
-    );
-  }
-
-  const backHref = props.backHref ?? "/";
-
+/** SP のサイトヘッダー。ロゴと、PC のヘッダーと同じ項目を並べるメニュー。 */
+function MobileSiteBar({ active, account }: Pick<AppBarBaseProps, "active" | "account">) {
   return (
     <header className={mobileAppBar} data-ui="mobile-app-bar">
-      <Link href={backHref} className={iconButton} aria-label="戻る">
+      <Link href="/" className={logo}>
+        <BrandMark />
+        <b className={logoText}>Farmille</b>
+      </Link>
+      <MobileSiteMenu
+        links={siteMenuFor(account).map((item) => ({
+          label: item.label,
+          href: item.href,
+          current: item.active !== null && active === item.active,
+        }))}
+        member={account?.kind === "member"}
+      />
+    </header>
+  );
+}
+
+/**
+ * SP の公開画面は PC と同じく、サイトヘッダーの下に「戻る」と画面名を置く。
+ * メーカー向けの画面は、「戻る」と画面名をそのまま上に固定する。
+ */
+function MobileAppBar(props: AppBarProps) {
+  if (props.variant === "home") {
+    return <MobileSiteBar active={props.active} account={props.account} />;
+  }
+
+  const backRow = (
+    <>
+      <Link href={props.backHref ?? "/"} className={iconButton} aria-label="戻る">
         <Icon name="chevron_left" size="md" />
       </Link>
       <div className={mobileTitle}>{props.title ?? ""}</div>
@@ -337,6 +358,23 @@ function MobileAppBar(props: AppBarProps) {
       ) : (
         <span className={cx(iconButton, css({ visibility: "hidden" }))} aria-hidden />
       )}
+    </>
+  );
+
+  if (props.chrome === "public") {
+    return (
+      <>
+        <MobileSiteBar active={props.active} account={props.account} />
+        <div className={mobileContext} data-ui="mobile-context-bar">
+          {backRow}
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <header className={mobileAppBar} data-ui="mobile-app-bar">
+      {backRow}
     </header>
   );
 }

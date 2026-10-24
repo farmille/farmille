@@ -27,6 +27,9 @@ const groups = [
 /** 画面下に固定したバー（下部ナビ・FAB・レポート入力の送信帯）の高さ。フッターの末尾がその下に隠れないよう空ける。 */
 const bottomBarRoom = "[calc({spacing.16} + env(safe-area-inset-bottom, 0px) + {spacing.8})]";
 
+/** ログイン・会員登録などの Auth 系の画面は、手続きに集中できるようフッターを出さない。 */
+const footer = css({ "body:has([data-ui=auth-screen]) &": { display: "none" } });
+
 /** 丘を帯の上端に 1px 重ね、質感の継ぎ目を帯の上端にそろえる。 */
 const hills = css({ mb: "[-1px]" });
 
@@ -85,10 +88,10 @@ const legal = css({
   color: "text.inverse",
 });
 
-/** 全画面の末尾に置くフッター。丘の稜線から深い緑の帯へつなぐ。 */
+/** Auth 系を除く全画面の末尾に置くフッター。丘の稜線から深い緑の帯へつなぐ。 */
 export function SiteFooter() {
   return (
-    <footer>
+    <footer className={footer}>
       <HomeHills className={hills} into="forest" sprouts />
       <div className={band}>
         <div className={inner}>
