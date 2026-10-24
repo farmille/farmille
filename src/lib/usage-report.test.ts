@@ -5,13 +5,42 @@ import {
   groupReportMeasurements,
   parseReportNumber,
   reportErrorStep,
+  reportVarietyNames,
   UsageReportInputSchema,
   validateUsageReportSubmission,
+  withSingleVariety,
+  type UsageReportInput,
 } from "./usage-report";
+
+const materialId = "11111111-1111-4111-8111-111111111111";
+
+function submittableReport(): UsageReportInput {
+  const input = withSingleVariety(createBlankUsageReport(materialId), "アイコ", false);
+  return {
+    ...input,
+    cropId: "22222222-2222-4222-8222-222222222222",
+    prefectureCode: 8,
+    observedChange: "変化はありませんでした。",
+    purposeTags: ["耐暑性改善"],
+    cultivationEnvironment: "露地",
+    timingStages: [3],
+    timingNote: "9月1日に散布しました。",
+    plots: input.plots.map((plot, index) => ({
+      ...plot,
+      name: `区${index + 1}`,
+      description: "10株を調査",
+    })),
+    measurements: [
+      { id: crypto.randomUUID(), kind: "text", name: "観察", unit: "", body: "差なし", graphs: [] },
+    ],
+    methodDetailsAck: true,
+    guidelineAck: true,
+  };
+}
 
 describe("実証詳細レポート", () => {
   it("下書きは空欄を保持し、公開時に不足を返す", () => {
-    const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
+    const input = createBlankUsageReport(materialId);
     expect(v.safeParse(UsageReportInputSchema, input).success).toBe(true);
     const errors = validateUsageReportSubmission(input);
     expect(errors.cropId).toBeDefined();
@@ -27,9 +56,8 @@ describe("実証詳細レポート", () => {
     expect(parseReportNumber("1,234,567")).toEqual({ value: 1234567, error: null });
   });
   it("ゼロの数値を有効とし、文章や添付資料の未確認を提出前に検出する", () => {
-    const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
+    const input = withSingleVariety(createBlankUsageReport(materialId), "", true);
     input.cropId = "22222222-2222-4222-8222-222222222222";
-    input.varietyUnknown = true;
     input.prefectureCode = 8;
     input.observedChange = "変化はありませんでした。";
     input.purposeTags = ["耐暑性改善"];
@@ -65,9 +93,8 @@ describe("実証詳細レポート", () => {
     expect(validateUsageReportSubmission(input).documentsAck).toBeDefined();
   });
   it("ページ版：区の調査範囲は任意で、資料のグラフ・表の画像だけでも提出できる", () => {
-    const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
+    const input = withSingleVariety(createBlankUsageReport(materialId), "", true);
     input.cropId = "22222222-2222-4222-8222-222222222222";
-    input.varietyUnknown = true;
     input.prefectureCode = 8;
     input.observedChange = "変化はありませんでした。";
     input.purposeTags = ["耐暑性改善"];
@@ -111,24 +138,134 @@ describe("実証詳細レポート", () => {
     );
   });
   it("都道府県と品種は提出時に必須で、品種は「不明」のチェックで不要になる", () => {
-    const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
-    const errors = validateUsageReportSubmission(input);
+    const blank = createBlankUsageReport(materialId);
+    const errors = validateUsageReportSubmission(blank);
     expect(errors.prefectureCode).toBe("※ 都道府県を選んでください");
-    expect(errors.variety).toBeDefined();
+    expect(errors["varieties.0.name"]).toBe("※ 品種を入力してください");
     expect(reportErrorStep("prefectureCode")).toBe(3);
-    expect(reportErrorStep("variety")).toBe(1);
-    input.prefectureCode = 8;
-    input.variety = "  ";
-    expect(validateUsageReportSubmission(input).prefectureCode).toBeUndefined();
-    expect(validateUsageReportSubmission(input).variety).toBeDefined();
-    input.variety = "アイコ";
-    expect(validateUsageReportSubmission(input).variety).toBeUndefined();
-    input.variety = "";
-    input.varietyUnknown = true;
-    expect(validateUsageReportSubmission(input).variety).toBeUndefined();
+    expect(reportErrorStep("varieties.0.name")).toBe(1);
+    expect(validateUsageReportSubmission({ ...blank, prefectureCode: 8 }).prefectureCode).toBe(
+      undefined,
+    );
+    expect(
+      validateUsageReportSubmission(withSingleVariety(blank, "  ", false))["varieties.0.name"],
+    ).toBeDefined();
+    const named = withSingleVariety(blank, "アイコ", false);
+    expect(named.varieties).toEqual([{ id: blank.varieties[0]?.id, name: "アイコ" }]);
+    expect(validateUsageReportSubmission(named)["varieties.0.name"]).toBeUndefined();
+    const unknown = withSingleVariety(named, "", true);
+    expect(unknown.varieties).toEqual([]);
+    expect(unknown.plots.map((plot) => plot.varietyId)).toEqual([null, null]);
+    const unknownErrors = validateUsageReportSubmission(unknown);
+    expect(Object.keys(unknownErrors).filter((key) => /variet/.test(key))).toEqual([]);
+    expect(validateUsageReportSubmission({ ...named, varieties: [] }).varieties).toBe(
+      "※ 品種を入力するか、「品種が不明、または品種がない」にチェックしてください",
+    );
+    expect(
+      validateUsageReportSubmission({ ...unknown, varieties: named.varieties }).varieties,
+    ).toBe("※ 「品種が不明、または品種がない」のときは品種を入れないでください");
+  });
+  it("新しいレポートは品種1つと、無処理・投稿した資材の2区から始まる", () => {
+    const input = createBlankUsageReport(materialId);
+    const [variety] = input.varieties;
+    expect(input.varieties).toEqual([{ id: expect.any(String), name: "" }]);
+    expect(input.comparedMaterials).toEqual([]);
+    expect(input.commonPlotDescription).toBe("");
+    expect(input.plots.map((plot) => [plot.varietyId, plot.treatment])).toEqual([
+      [variety?.id, { kind: "untreated" }],
+      [variety?.id, { kind: "posted" }],
+    ]);
+    expect(v.safeParse(UsageReportInputSchema, input).success).toBe(true);
+  });
+  it("提出できるレポートは、区ごとに品種と使った資材を持つ", () => {
+    const input = submittableReport();
+    expect(validateUsageReportSubmission(input)).toEqual({});
+    const [untreated, posted] = input.plots;
+    if (!untreated || !posted) throw new Error("区の初期データがありません。");
+    expect(
+      validateUsageReportSubmission({
+        ...input,
+        plots: [{ ...untreated, treatment: null }, posted],
+      }),
+    ).toEqual({ "plots.0.treatment": "※ 区で使った資材を選んでください" });
+    expect(
+      validateUsageReportSubmission({
+        ...input,
+        plots: [untreated, { ...posted, varietyId: null }],
+      }),
+    ).toEqual({ "plots.1.variety": "※ 区の品種を選んでください" });
+    expect(
+      validateUsageReportSubmission({
+        ...input,
+        plots: [untreated, { ...posted, treatment: { kind: "untreated" } }],
+      }),
+    ).toEqual({ "plots.posted": "※ 投稿する資材を使った区を1つ以上入れてください" });
+    const compared = { id: crypto.randomUUID(), name: " " };
+    expect(
+      validateUsageReportSubmission({
+        ...input,
+        comparedMaterials: [compared],
+        plots: [
+          { ...untreated, treatment: { kind: "compared", comparedMaterialId: compared.id } },
+          posted,
+        ],
+      }),
+    ).toEqual({ "comparedMaterials.0.name": "※ 比較した資材の名前を入力してください" });
+    expect(reportErrorStep("comparedMaterials.0.name")).toBe(4);
+    expect(reportErrorStep("plots.posted")).toBe(4);
+  });
+  it("区の説明は、区ごとか全区に共通の説明のどちらかがあればよい", () => {
+    const input = submittableReport();
+    const blankDescriptions = input.plots.map((plot) => ({ ...plot, description: " " }));
+    expect(validateUsageReportSubmission({ ...input, plots: blankDescriptions })).toEqual({
+      "plots.0.description": "※ ここを入力してください",
+      "plots.1.description": "※ ここを入力してください",
+    });
+    expect(
+      validateUsageReportSubmission({
+        ...input,
+        plots: blankDescriptions,
+        commonPlotDescription: "各区10株、3反復",
+      }),
+    ).toEqual({});
+  });
+  it("区・品種・比較した資材は40まで", () => {
+    const input = submittableReport();
+    const [posted] = input.plots.slice(1);
+    if (!posted) throw new Error("区の初期データがありません。");
+    const plots = (count: number) =>
+      Array.from({ length: count }, () => ({ ...posted, id: crypto.randomUUID() }));
+    expect(v.safeParse(UsageReportInputSchema, { ...input, plots: plots(40) }).success).toBe(true);
+    expect(v.safeParse(UsageReportInputSchema, { ...input, plots: plots(41) }).success).toBe(false);
+    const names = (count: number) =>
+      Array.from({ length: count }, () => ({ id: crypto.randomUUID(), name: "品種" }));
+    expect(v.safeParse(UsageReportInputSchema, { ...input, varieties: names(41) }).success).toBe(
+      false,
+    );
+    expect(
+      v.safeParse(UsageReportInputSchema, { ...input, comparedMaterials: names(41) }).success,
+    ).toBe(false);
+  });
+  it("比較した資材の区は、比較した資材を指す", () => {
+    const input = submittableReport();
+    const [untreated, posted] = input.plots;
+    if (!untreated || !posted) throw new Error("区の初期データがありません。");
+    const plots = [{ ...untreated, treatment: { kind: "compared" } }, posted];
+    expect(v.safeParse(UsageReportInputSchema, { ...input, plots }).success).toBe(false);
+  });
+  it("品種の表示は、空でない品種名を順につなぐ", () => {
+    expect(
+      reportVarietyNames({
+        varieties: [
+          { id: crypto.randomUUID(), name: " 新藍 " },
+          { id: crypto.randomUUID(), name: "" },
+          { id: crypto.randomUUID(), name: "初恋" },
+        ],
+      }),
+    ).toBe("新藍・初恋");
   });
   it("使用目的の補足は任意で、500字を超えると形式エラーにする", () => {
-    const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
+    const input = createBlankUsageReport(materialId);
     expect(input.purposeNote).toBe("");
     expect(validateUsageReportSubmission(input).purposeNote).toBeUndefined();
     input.purposeNote = "高温期の萎れを軽くしたかった";
@@ -137,7 +274,7 @@ describe("実証詳細レポート", () => {
     expect(v.safeParse(UsageReportInputSchema, input).success).toBe(false);
   });
   it("同じ調査項目と単位のグラフを入力を変えずにまとめる", () => {
-    const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
+    const input = createBlankUsageReport(materialId);
     const first = input.measurements[0]!;
     const second = {
       ...first,

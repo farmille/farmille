@@ -1,4 +1,4 @@
-import type { UsageReportInput } from "@/lib/usage-report";
+import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
 import {
   getStructuredUsageReport,
   getReportDocumentUrls,
@@ -329,6 +329,7 @@ export async function getPublishedUsageReport(
       growth_stage, climate_note, observed_change, negative_note, summary, pesticide_ack,
       is_provided_sample, published_at, created_at, updated_at, form_version, variety_unknown,
       publish_city, cultivation_environment, timing_note, method_details_ack, documents_ack,
+      common_plot_description,
       author:public_profiles!usage_reports_author_user_id_fkey (
         user_id,
         handle,
@@ -448,7 +449,7 @@ export async function getPublishedUsageReport(
     purposeNote: row.purpose_note,
     prefectureCode: row.prefecture_code,
     fieldName: row.field_name,
-    variety: row.variety,
+    variety: structured.data === null ? row.variety : reportVarietyNames(structured.data) || null,
     plantingDate: row.planting_date,
     cultivationType: row.cultivation_type,
     cultivationTags: row.cultivation_tags,

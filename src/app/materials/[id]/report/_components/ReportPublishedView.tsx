@@ -3,7 +3,7 @@
 import { Chip } from "@/components/Chip";
 import { Dialog } from "@/components/Dialog";
 import { OptimizedImage } from "@/components/OptimizedImage";
-import { REPORT_SECTIONS, type UsageReportInput } from "@/lib/usage-report";
+import { REPORT_SECTIONS, reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
 
 import { css } from "../../../../../../styled-system/css";
 import {
@@ -103,7 +103,7 @@ export function ReportPublishedView({
   manufacturerName: string;
   cropName: string;
 }) {
-  const variety = input.varietyUnknown ? "" : input.variety.trim();
+  const variety = input.varietyUnknown ? "" : reportVarietyNames(input);
   const today = new Date();
   function body(section: ReportSection) {
     if (section === "results") return input.observedChange;

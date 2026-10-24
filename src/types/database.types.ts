@@ -3654,6 +3654,35 @@ export type Database = {
           },
         ]
       }
+      usage_report_compared_materials: {
+        Row: {
+          id: string
+          name: string
+          report_id: string
+          sort_order: number
+        }
+        Insert: {
+          id: string
+          name: string
+          report_id: string
+          sort_order: number
+        }
+        Update: {
+          id?: string
+          name?: string
+          report_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_compared_materials_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_report_documents: {
         Row: {
           id: string
@@ -3953,36 +3982,59 @@ export type Database = {
       }
       usage_report_plots: {
         Row: {
+          compared_material_id: string | null
           description: string
           id: string
           name: string
           report_id: string
           sort_order: number
           survey_scope: string
+          treatment: string | null
+          variety_id: string | null
         }
         Insert: {
+          compared_material_id?: string | null
           description: string
           id: string
           name: string
           report_id: string
           sort_order: number
           survey_scope: string
+          treatment?: string | null
+          variety_id?: string | null
         }
         Update: {
+          compared_material_id?: string | null
           description?: string
           id?: string
           name?: string
           report_id?: string
           sort_order?: number
           survey_scope?: string
+          treatment?: string | null
+          variety_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "usage_report_plots_compared_material_fkey"
+            columns: ["compared_material_id", "report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_report_compared_materials"
+            referencedColumns: ["id", "report_id"]
+          },
           {
             foreignKeyName: "usage_report_plots_report_id_fkey"
             columns: ["report_id"]
             isOneToOne: false
             referencedRelation: "usage_reports"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usage_report_plots_variety_fkey"
+            columns: ["variety_id", "report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_report_varieties"
+            referencedColumns: ["id", "report_id"]
           },
         ]
       }
@@ -4055,10 +4107,40 @@ export type Database = {
           },
         ]
       }
+      usage_report_varieties: {
+        Row: {
+          id: string
+          name: string
+          report_id: string
+          sort_order: number
+        }
+        Insert: {
+          id: string
+          name: string
+          report_id: string
+          sort_order: number
+        }
+        Update: {
+          id?: string
+          name?: string
+          report_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_report_varieties_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "usage_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_reports: {
         Row: {
           author_user_id: string
           climate_note: string | null
+          common_plot_description: string
           created_at: string
           crop_id: string | null
           cultivation_environment: string
@@ -4093,6 +4175,7 @@ export type Database = {
         Insert: {
           author_user_id: string
           climate_note?: string | null
+          common_plot_description?: string
           created_at?: string
           crop_id?: string | null
           cultivation_environment?: string
@@ -4127,6 +4210,7 @@ export type Database = {
         Update: {
           author_user_id?: string
           climate_note?: string | null
+          common_plot_description?: string
           created_at?: string
           crop_id?: string | null
           cultivation_environment?: string
@@ -4425,6 +4509,7 @@ export type Database = {
         Returns: {
           author_user_id: string
           climate_note: string | null
+          common_plot_description: string
           created_at: string
           crop_id: string | null
           cultivation_environment: string

@@ -272,7 +272,7 @@ export function ReportComparisonFields({
   }
 
   function addPlot(graphId: string) {
-    const plot = createReportPlot();
+    const plot = createReportPlot(input.varieties[0]?.id ?? null, { kind: "posted" });
     onChange(withPlots(input, [...input.plots, plot]));
     setEd({ k: "name", g: graphId, p: plot.id });
   }
