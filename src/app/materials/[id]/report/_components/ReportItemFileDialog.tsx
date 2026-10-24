@@ -27,6 +27,7 @@ import {
   REPORT_IMAGE_LIMIT,
   REPORT_SHORT_MAX,
   type ReportPageImage,
+  reportPageItemImages,
   type ReportPageItem,
 } from "./report-page-state";
 
@@ -152,7 +153,8 @@ export function ReportItemFileDialog({
   onClose: () => void;
 }) {
   // 項目ごとに呼び出し側が作り直す（key）ので、最初の状態はその項目の画像
-  const [images, setImages] = useState<DraftImage[]>(() => item.images.map(fromSaved));
+  const saved = reportPageItemImages(item);
+  const [images, setImages] = useState<DraftImage[]>(() => saved.map(fromSaved));
   const [open, setOpen] = useState(true);
   // 進み具合（読み込み中など）と、追加できなかった理由は分けて持つ。理由は次のファイルの読み込みで消さない
   const [message, setMessage] = useState("");
@@ -173,12 +175,10 @@ export function ReportItemFileDialog({
   const full = images.length >= imageLimit;
 
   const changed =
-    images.length !== item.images.length ||
+    images.length !== saved.length ||
     images.some(
       (image, index) =>
-        image.dirty ||
-        image.id !== item.images[index]?.id ||
-        image.caption !== item.images[index]?.caption,
+        image.dirty || image.id !== saved[index]?.id || image.caption !== saved[index]?.caption,
     );
 
   function add(canvas: HTMLCanvasElement) {

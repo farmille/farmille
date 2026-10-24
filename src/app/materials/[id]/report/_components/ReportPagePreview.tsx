@@ -10,7 +10,7 @@ import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
 
 import { css, cx } from "../../../../../../styled-system/css";
 
-import type { ReportPageItem } from "./report-page-state";
+import { reportPageItemImages, type ReportPageItem } from "./report-page-state";
 
 const wrap = css({
   maxW: "content.form",
@@ -224,7 +224,7 @@ export function ReportPagePreview({
         {shown.map((item) => (
           <section key={item.id}>
             <h3 className={h3}>使用結果の詳細：{item.name.trim() || "調査項目"}</h3>
-            {item.images.map((image) => (
+            {reportPageItemImages(item).map((image) => (
               <figure key={image.id} className={figure}>
                 <OptimizedImage
                   src={image.url}

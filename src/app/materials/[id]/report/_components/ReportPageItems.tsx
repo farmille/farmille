@@ -128,8 +128,8 @@ export function ReportPageItems({
   onOpenFile: (item: ReportPageItem, isNew: boolean) => void;
   missing: boolean;
 }) {
-  const update = (id: string, patch: Partial<ReportPageItem>) =>
-    onChange((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+  const update = (id: string, next: (item: ReportPageItem) => ReportPageItem) =>
+    onChange((current) => current.map((item) => (item.id === id ? next(item) : item)));
   const remove = (id: string) =>
     onChange((current) => {
       const rest = current.filter((item) => item.id !== id);
@@ -184,7 +184,9 @@ export function ReportPageItems({
               maxLength={REPORT_SHORT_MAX}
               value={item.name}
               error={missing && item.name.trim() === "" ? "調査項目を記入してください" : undefined}
-              onChange={(event) => update(item.id, { name: event.target.value })}
+              onChange={(event) =>
+                update(item.id, (current) => ({ ...current, name: event.target.value }))
+              }
             />
             {item.mode === "" && (
               <>
@@ -200,7 +202,14 @@ export function ReportPageItems({
                   <button
                     type="button"
                     className={option}
-                    onClick={() => update(item.id, { mode: "text" })}
+                    onClick={() =>
+                      update(item.id, (current) => ({
+                        id: current.id,
+                        mode: "text",
+                        name: current.name,
+                        body: current.body,
+                      }))
+                    }
                   >
                     <span className={optionTitle}>文章で書く</span>
                     <span className={optionText}>区ごとの数値と違いを文章で書きます</span>
@@ -224,7 +233,9 @@ export function ReportPageItems({
                 error={
                   missing && item.body.trim() === "" ? "区ごとの結果を記入してください" : undefined
                 }
-                onChange={(event) => update(item.id, { body: event.target.value })}
+                onChange={(event) =>
+                  update(item.id, (current) => ({ ...current, body: event.target.value }))
+                }
               />
             )}
             {item.mode === "file" && (
@@ -257,7 +268,9 @@ export function ReportPageItems({
                   maxLength={REPORT_BODY_MAX}
                   description={reportLengthNote(item.body, REPORT_BODY_MAX)}
                   value={item.body}
-                  onChange={(event) => update(item.id, { body: event.target.value })}
+                  onChange={(event) =>
+                    update(item.id, (current) => ({ ...current, body: event.target.value }))
+                  }
                 />
               </>
             )}

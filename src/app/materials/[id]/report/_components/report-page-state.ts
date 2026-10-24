@@ -1,21 +1,29 @@
-import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
+import { validateUsageReportSubmission, type UsageReportInput } from "@/lib/usage-report";
+import { graphWithPlots } from "@/lib/usage-report-plots";
 
 export type ReportMaterialSummary = { id: string; name: string; manufacturerName: string };
 
 /** 調査項目に差し込んだ画像（編集後の画像だけを保存する）。 */
 export type ReportPageImage = { id: string; url: string; caption: string };
 
+type ReportGraph = UsageReportInput["measurements"][number]["graphs"][number];
+type ReportPageItemBase = { id: string; name: string; body: string };
+
 /**
  * ページ版の調査項目。入れ方を選ぶ前は mode が空。
- * file は資料のグラフ・表の画像と補足説明、text は区ごとの結果の文章。
+ * file は資料のグラフ・表の画像と補足説明、text は区ごとの結果の文章、
+ * numeric は PDF読み取りなどで入った数値のグラフ（ページ版では表示と値の修正だけ）。
  */
-export type ReportPageItem = {
-  id: string;
-  mode: "" | "file" | "text";
-  name: string;
-  body: string;
-  images: ReportPageImage[];
-};
+export type ReportPageItem =
+  | (ReportPageItemBase & { mode: "" | "text" })
+  | (ReportPageItemBase & { mode: "file"; images: ReportPageImage[] })
+  | (ReportPageItemBase & { mode: "numeric"; unit: string; graphs: ReportGraph[] });
+
+export type ReportPageNumericItem = Extract<ReportPageItem, { mode: "numeric" }>;
+
+export function reportPageItemImages(item: ReportPageItem): ReportPageImage[] {
+  return item.mode === "file" ? item.images : [];
+}
 
 /** 1つのレポートに入れられる写真・画像の数（保存の入力の上限と同じ）。 */
 export const REPORT_IMAGE_LIMIT = 30;
@@ -34,8 +42,8 @@ export function reportImageRoom(
     (media) => media.measurementId === undefined || media.measurementId === null,
   ).length;
   const others = items
-    .filter((item) => item.id !== itemId && item.mode === "file")
-    .reduce((sum, item) => sum + item.images.length, 0);
+    .filter((item) => item.id !== itemId)
+    .reduce((sum, item) => sum + reportPageItemImages(item).length, 0);
   return Math.max(0, REPORT_IMAGE_LIMIT - sectionPhotos - others);
 }
 
@@ -44,11 +52,15 @@ export function reportOverLimit(input: UsageReportInput, items: ReportPageItem[]
   const over = (label: string, value: string, max: number) => (value.length > max ? [label] : []);
   return [
     ...input.varieties.flatMap((variety) => over("品種", variety.name, REPORT_SHORT_MAX)),
+    ...input.comparedMaterials.flatMap((material) =>
+      over("比較した資材", material.name, REPORT_SHORT_MAX),
+    ),
     ...over("使用目的の補足", input.purposeNote, REPORT_SHORT_MAX),
     ...over("市区町村", input.city, REPORT_SHORT_MAX),
     ...over("結果・感想", input.observedChange, REPORT_BODY_MAX),
     ...over("栽培環境", input.cultivationEnvironment, REPORT_BODY_MAX),
     ...over("処理日と生育状況", input.timingNote, REPORT_BODY_MAX),
+    ...over("全区に共通の説明", input.commonPlotDescription, REPORT_BODY_MAX),
     ...input.plots.flatMap((plot, index) => [
       ...over(`区${index + 1}の名前`, plot.name, REPORT_SHORT_MAX),
       ...over(`区${index + 1}の説明`, plot.description, REPORT_BODY_MAX),
@@ -56,13 +68,28 @@ export function reportOverLimit(input: UsageReportInput, items: ReportPageItem[]
     ...items.flatMap((item, index) => [
       ...over(`調査項目${index + 1}の名前`, item.name, REPORT_SHORT_MAX),
       ...over(
-        `調査項目${index + 1}の${item.mode === "file" ? "補足説明" : "区ごとの結果"}`,
+        `調査項目${index + 1}の${item.mode === "text" ? "区ごとの結果" : "補足説明"}`,
         item.body,
         REPORT_BODY_MAX,
       ),
-      ...item.images.flatMap((image, k) =>
+      ...reportPageItemImages(item).flatMap((image, k) =>
         over(`調査項目${index + 1}の${k + 1}枚目の画像のタイトル`, image.caption, REPORT_SHORT_MAX),
       ),
+      ...(item.mode === "numeric"
+        ? [
+            ...over(`調査項目${index + 1}の単位`, item.unit, REPORT_SHORT_MAX),
+            ...item.graphs.flatMap((graph, k) => [
+              ...over(
+                `調査項目${index + 1}の${k + 1}つ目のグラフの題`,
+                graph.heading,
+                REPORT_SHORT_MAX,
+              ),
+              ...graph.rows.flatMap((row) =>
+                over(`調査項目${index + 1}の${k + 1}つ目のグラフの値`, row.value, REPORT_SHORT_MAX),
+              ),
+            ]),
+          ]
+        : []),
     ]),
   ];
 }
@@ -79,37 +106,37 @@ export function reportLengthNote(value: string, max: number): string | undefined
 export type ReportPageAcks = { timing: boolean; privacy: boolean };
 
 export function createReportPageItem(): ReportPageItem {
-  return { id: crypto.randomUUID(), mode: "", name: "", body: "", images: [] };
+  return { id: crypto.randomUUID(), mode: "", name: "", body: "" };
 }
 
-/** 保存済みの入力から調査項目を作る。5段階版の数値グラフは読み込まない。 */
+/** 保存済みの入力から調査項目を作る。 */
 export function itemsFromInput(input: UsageReportInput): ReportPageItem[] {
-  const items = input.measurements.flatMap((measurement): ReportPageItem[] => {
-    const images = input.media
-      .filter((media) => media.measurementId === measurement.id && media.mediaType === "photo")
-      .map(({ id, url, caption }) => ({ id, url, caption }));
-    if (measurement.kind === "image")
-      return [
-        {
-          id: measurement.id,
+  const items = input.measurements.map((measurement): ReportPageItem => {
+    const { id, name, body } = measurement;
+    switch (measurement.kind) {
+      case "image":
+        return {
+          id,
           mode: "file",
-          name: measurement.name,
-          body: measurement.body,
-          images,
-        },
-      ];
-    if (measurement.kind === "text")
-      return [
-        {
-          id: measurement.id,
-          // 入れ方を選んだだけで本文が空の項目は、選ぶ前に戻して開く
-          mode: measurement.body.trim() ? "text" : "",
-          name: measurement.name,
-          body: measurement.body,
-          images: [],
-        },
-      ];
-    return [];
+          name,
+          body,
+          images: input.media
+            .filter((media) => media.measurementId === id && media.mediaType === "photo")
+            .map((media) => ({ id: media.id, url: media.url, caption: media.caption })),
+        };
+      case "text":
+        // 入れ方を選んだだけで本文が空の項目は、選ぶ前に戻して開く
+        return { id, mode: body.trim() ? "text" : "", name, body };
+      case "numeric":
+        return {
+          id,
+          mode: "numeric",
+          name,
+          body,
+          unit: measurement.unit,
+          graphs: measurement.graphs,
+        };
+    }
   });
   return items.length > 0 ? items : [createReportPageItem()];
 }
@@ -119,154 +146,181 @@ export function inputWithItems(input: UsageReportInput, items: ReportPageItem[])
   return {
     ...input,
     plots: input.plots.map((plot) => ({ ...plot, scope: "" })),
-    measurements: items.map((item) => ({
-      id: item.id,
-      kind: item.mode === "file" ? ("image" as const) : ("text" as const),
-      name: item.name,
-      unit: "",
-      body: item.body,
-      graphs: [],
-    })),
+    measurements: items.map((item) => {
+      const { id, name, body } = item;
+      switch (item.mode) {
+        case "numeric":
+          return { id, kind: "numeric", name, unit: item.unit, body, graphs: item.graphs };
+        case "file":
+          return { id, kind: "image", name, unit: "", body, graphs: [] };
+        case "":
+        case "text":
+          return { id, kind: "text", name, unit: "", body, graphs: [] };
+      }
+    }),
     media: [
       ...input.media.filter(
         (media) => media.measurementId === undefined || media.measurementId === null,
       ),
       ...items.flatMap((item) =>
-        item.mode === "file"
-          ? item.images.map((image) => ({
-              id: image.id,
-              url: image.url,
-              mediaType: "photo" as const,
-              section: "measurements" as const,
-              caption: image.caption,
-              measurementId: item.id,
-            }))
-          : [],
+        reportPageItemImages(item).map((image) => ({
+          id: image.id,
+          url: image.url,
+          mediaType: "photo" as const,
+          section: "measurements" as const,
+          caption: image.caption,
+          measurementId: item.id,
+        })),
       ),
     ],
   };
 }
 
+/** 区を変えたあと、数値の調査項目のグラフの行を区にそろえる。変わらなければ同じ配列を返す。 */
+export function itemsWithPlots(
+  items: ReportPageItem[],
+  plots: UsageReportInput["plots"],
+): ReportPageItem[] {
+  let changed = false;
+  const next = items.map((item) => {
+    if (item.mode !== "numeric") return item;
+    const graphs = item.graphs.map((graph) => graphWithPlots(graph, plots));
+    if (graphs.every((graph, index) => graph === item.graphs[index])) return item;
+    changed = true;
+    return { ...item, graphs };
+  });
+  return changed ? next : items;
+}
+
 export function reportPageItemDone(item: ReportPageItem): boolean {
   if (item.name.trim() === "") return false;
-  if (item.mode === "text") return item.body.trim() !== "";
-  if (item.mode === "file") return item.images.length > 0;
-  return false;
+  switch (item.mode) {
+    case "text":
+      return item.body.trim() !== "";
+    case "file":
+      return item.images.length > 0;
+    case "numeric":
+      return item.graphs.some((graph) => graph.rows.some((row) => row.value.trim() !== ""));
+    case "":
+      return false;
+  }
 }
 
 export function reportPageHasImages(items: ReportPageItem[]): boolean {
-  return items.some((item) => item.mode === "file" && item.images.length > 0);
+  return items.some((item) => reportPageItemImages(item).length > 0);
 }
 
 /** 記入状況の1行。target は未記入のときに移る先（画面の要素の id）。 */
 export type ReportPageCheck = { key: string; label: string; ok: boolean; target: string };
+
+/**
+ * 記入状況の行と、行に当たる提出の検査（validateUsageReportSubmission）のキー。
+ * 並びは画面の上からの順で、最初の未記入の項目へ移るときにこの順に探す。
+ */
+const SUBMISSION_CHECKS = [
+  { key: "cropId", label: "作物", target: "report-prop-crop", errors: /^cropId$/ },
+  { key: "variety", label: "品種", target: "report-prop-variety", errors: /^varieties/ },
+  { key: "purposeTags", label: "使用目的", target: "report-prop-purpose", errors: /^purposeTags$/ },
+  {
+    key: "prefectureCode",
+    label: "地域",
+    target: "report-prop-region",
+    errors: /^prefectureCode$/,
+  },
+  {
+    key: "timingStages",
+    label: "施用時期",
+    target: "report-prop-stages",
+    errors: /^timingStages$/,
+  },
+  {
+    key: "observedChange",
+    label: "結果・感想",
+    target: "report-observed-change",
+    errors: /^observedChange$/,
+  },
+  {
+    key: "cultivationEnvironment",
+    label: "栽培環境",
+    target: "report-environment",
+    errors: /^cultivationEnvironment$/,
+  },
+  {
+    key: "timingNote",
+    label: "処理日と生育状況",
+    target: "report-timing-note",
+    errors: /^timingNote$/,
+  },
+  { key: "timingAck", label: "処理日を記入した確認", target: "report-timing-ack", errors: null },
+  {
+    key: "plots",
+    label: "比べた区",
+    target: "report-plots",
+    errors: /^(plots|comparedMaterials)/,
+  },
+  {
+    key: "measurements",
+    label: "調査項目ごとの結果",
+    target: "report-items",
+    errors: /^measurements/,
+  },
+  {
+    key: "methodDetailsAck",
+    label: "施用方法などを記入した確認",
+    target: "report-method-ack",
+    errors: /^methodDetailsAck$/,
+  },
+  { key: "privacyAck", label: "写り込みの確認", target: "report-privacy-ack", errors: null },
+  {
+    key: "documentsAck",
+    label: "秘密保持の確認",
+    target: "report-documents-ack",
+    errors: /^documentsAck$/,
+  },
+  {
+    key: "guidelineAck",
+    label: "公開の同意",
+    target: "report-guideline-ack",
+    errors: /^guidelineAck$/,
+  },
+] as const satisfies { key: string; label: string; target: string; errors: RegExp | null }[];
+
+type CheckKey = (typeof SUBMISSION_CHECKS)[number]["key"];
+
+/** 提出の検査のほかに、画面でだけ確かめること。 */
+function screenCheck(
+  key: CheckKey,
+  input: UsageReportInput,
+  acks: ReportPageAcks,
+  images: boolean,
+): boolean {
+  switch (key) {
+    case "prefectureCode":
+      return !input.showCity || input.city.trim() !== "";
+    case "timingAck":
+      return acks.timing;
+    case "privacyAck":
+      return acks.privacy;
+    case "documentsAck":
+      return !images || input.documentsAck;
+    default:
+      return true;
+  }
+}
 
 export function reportPageChecks(
   input: UsageReportInput,
   items: ReportPageItem[],
   acks: ReportPageAcks,
 ): ReportPageCheck[] {
+  const errors = Object.keys(validateUsageReportSubmission(input));
   const images = reportPageHasImages(items);
-  const checks: ReportPageCheck[] = [
-    {
-      key: "materialId",
-      label: "資材",
-      ok: input.materialId !== "",
-      target: "report-prop-material",
-    },
-    { key: "cropId", label: "作物", ok: input.cropId !== null, target: "report-prop-crop" },
-    {
-      key: "variety",
-      label: "品種",
-      ok: input.varietyUnknown || reportVarietyNames(input) !== "",
-      target: "report-prop-variety",
-    },
-    {
-      key: "purposeTags",
-      label: "使用目的",
-      ok: input.purposeTags.length > 0,
-      target: "report-prop-purpose",
-    },
-    {
-      key: "prefectureCode",
-      label: "地域",
-      ok: input.prefectureCode !== null && (!input.showCity || input.city.trim() !== ""),
-      target: "report-prop-region",
-    },
-    {
-      key: "timingStages",
-      label: "施用時期",
-      ok: input.timingStages.length > 0,
-      target: "report-prop-stages",
-    },
-    {
-      key: "observedChange",
-      label: "結果・感想",
-      ok: input.observedChange.trim() !== "",
-      target: "report-observed-change",
-    },
-    {
-      key: "cultivationEnvironment",
-      label: "栽培環境",
-      ok: input.cultivationEnvironment.trim() !== "",
-      target: "report-environment",
-    },
-    {
-      key: "timingNote",
-      label: "処理日と生育状況",
-      ok: input.timingNote.trim() !== "",
-      target: "report-timing-note",
-    },
-    {
-      key: "timingAck",
-      label: "処理日を記入した確認",
-      ok: acks.timing,
-      target: "report-timing-ack",
-    },
-    {
-      key: "plots",
-      label: "比べた区",
-      ok:
-        input.plots.length >= 2 &&
-        input.plots.every((plot) => plot.name.trim() !== "" && plot.description.trim() !== ""),
-      target: "report-plots",
-    },
-    {
-      key: "measurements",
-      label: "調査項目ごとの結果",
-      ok: items.length > 0 && items.every(reportPageItemDone),
-      target: "report-items",
-    },
-    {
-      key: "methodDetailsAck",
-      label: "施用方法などを記入した確認",
-      ok: input.methodDetailsAck,
-      target: "report-method-ack",
-    },
-  ];
-  if (images) {
-    checks.push(
-      {
-        key: "privacyAck",
-        label: "写り込みの確認",
-        ok: acks.privacy,
-        target: "report-privacy-ack",
-      },
-      {
-        key: "documentsAck",
-        label: "秘密保持の確認",
-        ok: input.documentsAck,
-        target: "report-documents-ack",
-      },
-    );
-  }
-  checks.push({
-    key: "guidelineAck",
-    label: "公開の同意",
-    ok: input.guidelineAck,
-    target: "report-guideline-ack",
+  return SUBMISSION_CHECKS.flatMap(({ key, label, target, errors: pattern }) => {
+    if ((key === "privacyAck" || key === "documentsAck") && !images && input.documents.length === 0)
+      return [];
+    const valid = pattern === null || !errors.some((error) => pattern.test(error));
+    return [{ key, label, target, ok: valid && screenCheck(key, input, acks, images) }];
   });
-  return checks;
 }
 
 export function reportPageTitle(materialName: string, cropName: string | null): string {
