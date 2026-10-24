@@ -15,12 +15,12 @@ values('ba932323-0000-4000-8000-000000000002','グラフ提出検証','検証会
 
 insert into public.usage_reports(
   id,material_id,author_user_id,crop_id,observed_change,summary,purpose_tags,cultivation_environment,
-  timing_note,method_details_ack,pesticide_ack,form_version
+  timing_note,method_details_ack,pesticide_ack,form_version,variety_unknown
 )
 select
   id,'ba932323-0000-4000-8000-000000000002','ba932323-0000-4000-8000-000000000001',
   (select id from public.crops limit 1),'結果を記入','結果の要約',array[(select name from public.effects limit 1)],
-  '露地','9月20日に施用',true,true,2
+  '露地','9月20日に施用',true,true,2,true
 from (values
   ('ba932323-0000-4000-8000-000000000003'::uuid),
   ('ba932323-0000-4000-8000-000000000004'::uuid)
@@ -29,12 +29,12 @@ insert into public.usage_report_timings(report_id,stage)
 values
   ('ba932323-0000-4000-8000-000000000003',3),
   ('ba932323-0000-4000-8000-000000000004',3);
-insert into public.usage_report_plots(id,report_id,name,survey_scope,description,sort_order)
+insert into public.usage_report_plots(id,report_id,name,survey_scope,description,sort_order,treatment)
 values
-  ('ba932323-0000-4000-8000-000000000011','ba932323-0000-4000-8000-000000000003','処理区','10株','1000倍を3回',0),
-  ('ba932323-0000-4000-8000-000000000012','ba932323-0000-4000-8000-000000000003','無処理区','10株','資材なし',1),
-  ('ba932323-0000-4000-8000-000000000013','ba932323-0000-4000-8000-000000000004','処理区','10株','1000倍を3回',0),
-  ('ba932323-0000-4000-8000-000000000014','ba932323-0000-4000-8000-000000000004','無処理区','10株','資材なし',1);
+  ('ba932323-0000-4000-8000-000000000011','ba932323-0000-4000-8000-000000000003','処理区','10株','1000倍を3回',0,'posted'),
+  ('ba932323-0000-4000-8000-000000000012','ba932323-0000-4000-8000-000000000003','無処理区','10株','資材なし',1,'untreated'),
+  ('ba932323-0000-4000-8000-000000000013','ba932323-0000-4000-8000-000000000004','処理区','10株','1000倍を3回',0,'posted'),
+  ('ba932323-0000-4000-8000-000000000014','ba932323-0000-4000-8000-000000000004','無処理区','10株','資材なし',1,'untreated');
 insert into public.usage_report_measurements(id,report_id,kind,name,unit,body,sort_order)
 values
   ('ba932323-0000-4000-8000-000000000021','ba932323-0000-4000-8000-000000000003','text','観察結果','','差が見られた',0),
