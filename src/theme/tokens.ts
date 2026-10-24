@@ -332,6 +332,8 @@ export const tokens = {
   durations: {
     fast: { value: "160ms" },
     dialog: { value: "250ms" },
+    // SP のメニューの面を、ボタンを中心に円で広げて開く
+    menu: { value: "600ms" },
     toast: { value: "400ms" },
     stagger: { value: "50ms" },
     // ホームのスクロールで現れる要素。並んだ要素は revealStep ずつ遅らせる

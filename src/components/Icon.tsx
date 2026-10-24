@@ -27,7 +27,6 @@ const glyphs = {
   arrow_downward: { ligature: "arrow_downward", face: "filled" },
   north_east: { ligature: "north_east", face: "filled" },
   close: { ligature: "close", face: "filled" },
-  menu: { ligature: "menu", face: "filled" },
   star: { ligature: "star_border", face: "filled" },
   star_filled: { ligature: "star", face: "filled" },
   public: { ligature: "language", face: "outlined" },

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { MobileSiteMenu } from "./MobileSiteMenu";
@@ -28,6 +28,17 @@ describe("MobileSiteMenu", () => {
     fireEvent.click(screen.getByRole("link", { name: "記事" }));
     expect(screen.getByRole("button", { name: "メニュー" }).getAttribute("aria-expanded")).toBe(
       "false",
+    );
+  });
+
+  it("× のボタンで閉じる", async () => {
+    render(<MobileSiteMenu links={links} member={false} />);
+    fireEvent.click(screen.getByRole("button", { name: "メニュー" }));
+    fireEvent.click(await screen.findByRole("button", { name: "メニューを閉じる" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "メニュー" }).getAttribute("aria-expanded")).toBe(
+        "false",
+      ),
     );
   });
 });
