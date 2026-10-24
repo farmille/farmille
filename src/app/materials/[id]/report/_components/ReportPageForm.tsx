@@ -17,7 +17,7 @@ import {
   UsageReportInputSchema,
   type UsageReportInput,
 } from "@/lib/usage-report";
-import { withAutoPlotNames } from "@/lib/usage-report-plots";
+import { reportPlotLayout, withAutoPlotNames } from "@/lib/usage-report-plots";
 import type { RegisteredAddress } from "@/server/accounts/registered-address";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
@@ -25,6 +25,7 @@ import { css, cx } from "../../../../../../styled-system/css";
 
 import { pillButtonRecipe, reportFrame, ReportToaster, reportToasterId } from "./ReportFormParts";
 import { ReportItemFileDialog } from "./ReportItemFileDialog";
+import { ReportNumericItemDialog } from "./ReportNumericItemDialog";
 import { ReportPageItems } from "./ReportPageItems";
 import { ReportPagePlots } from "./ReportPagePlots";
 import { ReportPagePreview } from "./ReportPagePreview";
@@ -43,6 +44,7 @@ import {
   type ReportMaterialSummary,
   type ReportPageAcks,
   type ReportPageItem,
+  type ReportPageNumericItem,
 } from "./report-page-state";
 import { docHeadingRecipe, requirementMark } from "./report-page-styles";
 
@@ -220,6 +222,7 @@ export function ReportPageForm({
   const [leaving, setLeaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [fileItem, setFileItem] = useState<{ item: ReportPageItem; isNew: boolean } | null>(null);
+  const [numericItem, setNumericItem] = useState<ReportPageNumericItem | null>(null);
   const [pending, startTransition] = useTransition();
   // 連打で保存・提出が二重に送られないよう、送信中は ref で止める（state の disabled は次の描画まで効かない）
   const sending = useRef(false);
@@ -279,6 +282,7 @@ export function ReportPageForm({
   const title = reportPageTitle(currentMaterial.name, cropName);
   const images = reportPageHasImages(items);
   const done = checks.length - missing.length;
+  const layout = reportPlotLayout(input, currentMaterial.name);
 
   async function persist(submit: boolean, close = false) {
     if (sending.current) return;
@@ -515,6 +519,9 @@ export function ReportPageForm({
         </h3>
         <ReportPageItems
           items={items}
+          plots={input.plots}
+          layout={layout}
+          onEditNumeric={setNumericItem}
           onChange={setItems}
           missing={missingKeys.has("measurements")}
           onOpenFile={(item, isNew) => setFileItem({ item, isNew })}
@@ -621,6 +628,19 @@ export function ReportPageForm({
           onCommit={(next) => {
             setItems((current) => current.map((item) => (item.id === next.id ? next : item)));
             setFileItem(null);
+          }}
+        />
+      )}
+      {numericItem !== null && (
+        <ReportNumericItemDialog
+          key={numericItem.id}
+          item={numericItem}
+          plots={input.plots}
+          layout={layout}
+          onClose={() => setNumericItem(null)}
+          onCommit={(next) => {
+            setItems((current) => current.map((item) => (item.id === next.id ? next : item)));
+            setNumericItem(null);
           }}
         />
       )}
