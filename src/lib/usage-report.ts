@@ -225,6 +225,15 @@ export function parseReportNumber(raw: string): { value: number; error: number |
     ? { value, error }
     : null;
 }
+/** 写り込みと秘密保持の確認が要るか。関連資料（PDF）か、調査項目に差し込んだ画像があるとき。 */
+export function reportNeedsMaterialAcks(
+  input: Pick<UsageReportInput, "documents" | "media">,
+): boolean {
+  return (
+    input.documents.length > 0 ||
+    input.media.some((media) => (media.measurementId ?? null) !== null)
+  );
+}
 export function validateUsageReportSubmission(input: UsageReportInput) {
   const errors: UsageReportFieldErrors = {};
   const required = (key: string, valid: boolean, message = "※ ここを入力してください") => {
@@ -302,7 +311,7 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   required("methodDetailsAck", input.methodDetailsAck, "※ 使用方法の記載を確認してください");
   required(
     "documentsAck",
-    input.documents.length === 0 || input.documentsAck,
+    !reportNeedsMaterialAcks(input) || input.documentsAck,
     "※ 資料の公開権限を確認してください",
   );
   required("guidelineAck", input.guidelineAck, "※ 投稿ガイドラインへの同意が必要です");

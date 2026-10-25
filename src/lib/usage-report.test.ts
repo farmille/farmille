@@ -92,7 +92,7 @@ describe("実証詳細レポート", () => {
     ];
     expect(validateUsageReportSubmission(input).documentsAck).toBeDefined();
   });
-  it("ページ版：区の調査範囲は任意で、資料のグラフ・表の画像だけでも提出できる", () => {
+  it("ページ版：区の調査範囲は任意で、資料のグラフ・表の画像だけでも、秘密保持を確認すれば提出できる", () => {
     const input = withSingleVariety(createBlankUsageReport(materialId), "", true);
     input.cropId = "22222222-2222-4222-8222-222222222222";
     input.prefectureCode = 8;
@@ -129,6 +129,8 @@ describe("実証詳細レポート", () => {
       },
     ];
     expect(v.safeParse(UsageReportInputSchema, input).success).toBe(true);
+    expect(Object.keys(validateUsageReportSubmission(input))).toEqual(["documentsAck"]);
+    input.documentsAck = true;
     expect(validateUsageReportSubmission(input)).toEqual({});
     input.media = input.media.map((item) => ({ ...item, measurementId: null }));
     expect(validateUsageReportSubmission(input)["measurements.0.values"]).toBeDefined();

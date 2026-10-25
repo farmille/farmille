@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(36);
+select plan(39);
 
 insert into auth.users(id) values('ca932323-0000-4000-8000-000000000001'),('ca932323-0000-4000-8000-000000000009');
 insert into public.profiles(user_id,handle,standpoint)
@@ -108,6 +108,30 @@ update public.usage_reports set status='pending' where id='ca932323-0000-4000-80
 set local session_replication_role=origin;
 select lives_ok($$update public.usage_reports set status='published',published_at=now() where id='ca932323-0000-4000-8000-000000000005'$$,'submitted legacy report can be published without the new rules');
 select is((select variety from public.list_usage_report_previews() where id='ca932323-0000-4000-8000-000000000005'),'桃太郎','preview reads the v2 variety from the child table');
+
+-- 調査項目に差し込んだ画像があれば、関連資料と同じく、提出に秘密保持の確認が要る。下書きの保存では要らない。
+insert into storage.objects(bucket_id,name)
+values('report-media','ca932323-0000-4000-8000-000000000001/ca932323-0000-4000-8000-000000000007/graph.png');
+create function pg_temp.image_input(p_ack boolean) returns jsonb language sql as $$
+  select pg_temp.report_input('ca932323-0000-4000-8000-000000000007')||jsonb_build_object(
+    'varieties','[{"id":"ca932323-0000-4000-8000-000000000711","name":"新藍"}]'::jsonb,
+    'comparedMaterials','[]'::jsonb,
+    'plots','[
+      {"id":"ca932323-0000-4000-8000-000000000721","name":"無処理区","scope":"","description":"資材なし","steps":[],"varietyId":"ca932323-0000-4000-8000-000000000711","treatment":{"kind":"untreated"}},
+      {"id":"ca932323-0000-4000-8000-000000000722","name":"処理区","scope":"","description":"1000倍を3回","steps":[],"varietyId":"ca932323-0000-4000-8000-000000000711","treatment":{"kind":"posted"}}
+    ]'::jsonb,
+    'measurements','[{"id":"ca932323-0000-4000-8000-000000000731","kind":"image","name":"収量","unit":"","body":"","graphs":[]}]'::jsonb,
+    'media',jsonb_build_array(jsonb_build_object('id','ca932323-0000-4000-8000-000000000741',
+      'url','https://example.test/storage/v1/object/public/report-media/ca932323-0000-4000-8000-000000000001/ca932323-0000-4000-8000-000000000007/graph.png',
+      'mediaType','photo','section','measurements','caption','','measurementId','ca932323-0000-4000-8000-000000000731')),
+    'documentsAck',p_ack)
+$$;
+select set_config('request.jwt.claims','{"sub":"ca932323-0000-4000-8000-000000000001","role":"authenticated","app_metadata":{"account_type":"general"}}',true);
+set local role authenticated;
+select lives_ok($$select public.save_usage_report(pg_temp.image_input(false),false)$$,'a draft with an inserted image saves without the confidentiality check');
+select throws_ok($$select public.save_usage_report(pg_temp.image_input(false),true)$$,'23514',null,'an inserted image needs the confidentiality check to submit');
+select lives_ok($$select public.save_usage_report(pg_temp.image_input(true),true)$$,'a checked report with an inserted image submits');
+reset role;
 
 select * from finish();
 rollback;

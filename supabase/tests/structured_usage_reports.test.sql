@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(46);
+select plan(47);
 select ok(app.report_value_is_numeric('-1.2±0.4 ＊'),'negative annotated number accepted');
 select ok(app.report_value_is_numeric('0'),'zero accepted');
 select ok(not app.report_value_is_numeric('n.s.'),'non numeric prefix rejected');
@@ -85,7 +85,8 @@ select throws_ok($$select public.save_usage_report(pg_temp.page_input(false),tru
 select throws_ok($$select public.save_usage_report(jsonb_set(pg_temp.page_input(),'{media,0,measurementId}','"aa932323-0000-4000-8000-000000000021"'),false)$$,'23514',null,'picture cannot point to another report measurement');
 select throws_ok($$select public.save_usage_report(jsonb_set(pg_temp.page_input(),'{media,0,mediaType}','"video"'),false)$$,'23514',null,'measurement picture must be a photo');
 select lives_ok($$select public.save_usage_report(pg_temp.page_input() #- '{media,0,measurementId}',false)$$,'media without measurementId key saves as before');
-select lives_ok($$select public.save_usage_report(pg_temp.page_input(),true)$$,'page version submits without survey scope or numeric graph');
+select throws_ok($$select public.save_usage_report(pg_temp.page_input(),true)$$,'23514',null,'an inserted picture needs the confidentiality check to submit');
+select lives_ok($$select public.save_usage_report(pg_temp.page_input()||'{"documentsAck":true}'::jsonb,true)$$,'page version submits without survey scope or numeric graph');
 select is((select measurement_id from public.usage_report_media where id='aa932323-0000-4000-8000-000000000052'),'aa932323-0000-4000-8000-000000000051'::uuid,'picture keeps its measurement');
 select is((select string_agg(survey_scope,'') from public.usage_report_plots where report_id='aa932323-0000-4000-8000-000000000005'),'','empty survey scope accepted');
 reset role;
