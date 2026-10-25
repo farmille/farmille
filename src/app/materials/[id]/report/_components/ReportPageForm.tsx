@@ -152,6 +152,8 @@ const reading = css({
   mt: "4",
 });
 
+const readingButton = css({ gap: "1.5" });
+
 const readingNote = css({ textStyle: "note", color: "text.muted" });
 
 const divider = css({ mt: "4", h: "[1px]", bg: "border.default" });
@@ -479,7 +481,7 @@ export function ReportPageForm({
           <div className={reading}>
             <button
               type="button"
-              className={pillButtonRecipe({ tone: "soft", strong: true })}
+              className={cx(pillButtonRecipe({ tone: "soft", strong: true }), readingButton)}
               disabled={pending}
               onClick={() => setReadingOpen(true)}
             >
