@@ -1,8 +1,6 @@
 import { SiteAppBar } from "@/components/SiteAppBar";
 import type { Metadata } from "next";
 
-import { HomeFooter } from "@/app/_components/HomeFooter";
-
 import { BottomNav } from "@/components/BottomNav";
 import { createPageMetadata } from "@/lib/seo";
 
@@ -57,7 +55,6 @@ export default async function ManufacturerPage({ searchParams }: ManufacturerPag
       />
       <main className={main}>
         <ManufacturerLanding applyHref={applyHref} />
-        <HomeFooter />
       </main>
       <BottomNav active="home" />
     </div>

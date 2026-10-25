@@ -43,19 +43,19 @@ export const Disabled: Story = {
   args: { submitLabel: "検索", disabled: true },
 };
 
-const photoBackdrop = css({ p: "4", bg: "primary.800" });
+const forestBackdrop = css({ p: "4", bg: "surface.forest" });
 
-export const Glass: Story = {
+export const Raised: Story = {
   args: {
     size: "lg",
-    surface: "glass",
+    surface: "raised",
     submitLabel: "検索",
     placeholder: "作物・悩み・資材名から探す",
     "aria-label": "資材を検索する。作物、悩み、資材名から探せます",
   },
   decorators: [
     (Story) => (
-      <div className={photoBackdrop}>
+      <div className={forestBackdrop}>
         <Story />
       </div>
     ),

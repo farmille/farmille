@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { HomeFooter } from "./HomeFooter";
-const meta = { title: "Pages/Home/HomeFooter", component: HomeFooter } satisfies Meta<
-  typeof HomeFooter
+import { SiteFooter } from "./SiteFooter";
+const meta = { title: "Pages/Shared/SiteFooter", component: SiteFooter } satisfies Meta<
+  typeof SiteFooter
 >;
 export default meta;
 type Story = StoryObj<typeof meta>;

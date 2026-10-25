@@ -34,6 +34,11 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* ホームは紙の地のまま、末尾の共通フッターの丘へつなぐ。 */
+  body:has([data-ui="home"]) {
+    background: var(--colors-surface-paper);
+  }
+
   /* 通常の見出しはりょうゴシック B。css() で書体と太さを変えられる。 */
   h1,
   h2,

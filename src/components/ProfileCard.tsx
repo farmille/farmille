@@ -22,7 +22,7 @@ const card = css(surfaceCardRecipe.raw({ padding: "flush" }), { overflow: "hidde
 const cover = css({
   h: "36",
   bgImage:
-    "linear-gradient(120deg, token(colors.primary.100), token(colors.primary.soft) 55%, token(colors.surface.page))",
+    "[linear-gradient(120deg, {colors.primary.100}, {colors.primary.soft} 55%, {colors.surface.page})]",
 });
 
 const content = css({ px: "4.5", pb: "4" });

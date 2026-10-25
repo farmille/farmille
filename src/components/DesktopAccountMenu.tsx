@@ -84,7 +84,7 @@ const GUEST_ENTRIES = [
   { kind: "link", href: "/signup/general", label: "新規会員登録", myPage: false },
 ] as const satisfies readonly AccountMenuEntry[];
 
-const MEMBER_ENTRIES = [
+export const MEMBER_ENTRIES = [
   { kind: "link", href: "/me", label: "マイページ", myPage: true },
   { kind: "link", href: "/account/passkeys", label: "パスキーを管理", myPage: false },
   { kind: "link", href: "/account/password", label: "パスワードを変更", myPage: false },
@@ -92,7 +92,7 @@ const MEMBER_ENTRIES = [
   { kind: "link", href: "/sellers?from=me", label: "企業会員登録を申請", myPage: false },
 ] as const satisfies readonly AccountMenuEntry[];
 
-function hasAuthSession(): boolean {
+export function hasAuthSession(): boolean {
   return document.cookie.split("; ").some((part) => {
     const name = part.split("=")[0] ?? "";
     return /^sb-.+-auth-token(?:\.\d+)?$/.test(name);

@@ -13,7 +13,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// 写真の上に重ねる前提の白文字なので、単体 Story は背景が白いまま読みにくくてよい。
 // 送信すると Storybook の iframe ごと /search へ遷移してしまうため、play は入力までにとどめる。
 export const Typed: Story = {
   play: async ({ canvasElement }) => {
