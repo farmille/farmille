@@ -163,16 +163,87 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     expect(commands()).toEqual([]);
   });
   it("updates trust only when explicitly requested", () => {
-    const hook = path.join(repo, ".git/farmille-hooks/pre-push");
-    const original = fs.readFileSync(hook, "utf8");
+    const trusted = path.join(repo, ".git/farmille-hooks/trusted");
+    const original = fs.readFileSync(trusted, "utf8");
     write("package.json", '{"type":"module","private":true}\n');
     git("add", "package.json");
     git("commit", "-m", "reviewed package change");
-    expect(setup().status).not.toBe(0);
-    expect(fs.readFileSync(hook, "utf8")).toBe(original);
+    const result = setup();
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("登録済み");
+    expect(fs.readFileSync(trusted, "utf8")).toBe(original);
     expect(setup("--trust-current").status).toBe(0);
     expect(push("feature").status).toBe(0);
     expect(commands()).toHaveLength(3);
+  });
+  it("keeps earlier trusted sets when another set is registered", () => {
+    write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# feature\n");
+    git("commit", "-am", "feature dependency");
+    expect(setup("--trust-current").status).toBe(0);
+    git("checkout", "-b", "other", base);
+    write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# other\n");
+    git("commit", "-am", "other dependency");
+    expect(setup("--trust-current").status).toBe(0);
+    expect(push("other").status).toBe(0);
+    git("checkout", "feature");
+    const result = push("feature");
+    expect(result.status, result.stderr).toBe(0);
+  });
+  it("passes files identical to origin/main without registration and rejects others", () => {
+    const trusted = path.join(repo, ".git/farmille-hooks/trusted");
+    const original = fs.readFileSync(trusted, "utf8");
+    write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# main\n");
+    git("commit", "-am", "main dependency");
+    git("update-ref", "refs/remotes/origin/main", git("rev-parse", "HEAD"));
+    const merged = commit("README.md");
+    const result = push("feature");
+    expect(result.status, result.stderr).toBe(0);
+    expect(fs.readFileSync(trusted, "utf8")).toBe(original);
+    expect(commands()).toHaveLength(3);
+
+    write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# unreviewed\n");
+    git("commit", "-am", "unreviewed dependency");
+    const rejected = push("feature");
+    expect(rejected.status).not.toBe(0);
+    expect(rejected.stderr).toContain("pnpm-lock.yaml が origin/main と異なり、登録済み");
+    expect(commands()).toHaveLength(3);
+    expect(git("--git-dir", remote, "rev-parse", "refs/heads/feature")).toBe(merged);
+  });
+  it("keeps only the 20 most recently registered sets", () => {
+    const trusted = path.join(repo, ".git/farmille-hooks/trusted");
+    const lines = () => fs.readFileSync(trusted, "utf8").trim().split("\n");
+    const fixture = lines()[0];
+    fs.appendFileSync(
+      trusted,
+      Array.from({ length: 19 }, (_, index) => `stale ${index}\n`).join(""),
+    );
+    write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# reviewed\n");
+    git("commit", "-am", "reviewed dependency");
+    expect(setup("--trust-current").status).toBe(0);
+    const reviewed = lines()[19];
+    git("checkout", "-b", "old", base);
+    const evicted = push("old");
+    expect(evicted.status).not.toBe(0);
+    expect(evicted.stderr).toContain("登録済み");
+
+    expect(setup("--trust-current").status).toBe(0);
+    git("checkout", "feature");
+    expect(setup("--trust-current").status).toBe(0);
+    expect(lines()).toHaveLength(20);
+    expect(lines()[0]).toBe("stale 1");
+    expect(lines().slice(-2)).toEqual([fixture, reviewed]);
+  });
+  it("migrates a hook with embedded hashes only when trust is requested", () => {
+    fs.writeFileSync(
+      path.join(repo, ".git/farmille-hooks/pre-push"),
+      "#!/usr/bin/env sh\n# Farmille managed pre-push v1\nverify_hash 'old' 'package.json'\n",
+    );
+    fs.rmSync(path.join(repo, ".git/farmille-hooks/trusted"));
+    expect(setup().status).not.toBe(0);
+    expect(setup("--trust-current").status).toBe(0);
+    commit("README.md");
+    const result = push("feature");
+    expect(result.status, result.stderr).toBe(0);
   });
   it("migrates the legacy hook configuration", () => {
     write(

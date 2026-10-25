@@ -36,7 +36,7 @@ const toggleGroupRecipe = sva({
             right: "0",
             bottom: "0",
             w: "9",
-            bgImage: "linear-gradient(to right, transparent, {colors.surface.page})",
+            bgImage: "[linear-gradient(to right, transparent, {colors.surface.page})]",
             pointerEvents: "none",
           },
           tab: { _after: { display: "none" } },

@@ -4,24 +4,8 @@ import { getSessionUser } from "@/server/auth";
 import { cva, css } from "../../styled-system/css";
 import { Icon, type IconName } from "@/components/Icon";
 
-const navSlotRecipe = cva({
-  base: {
-    flexShrink: "0",
-    tab: { display: "none" },
-  },
-  variants: {
-    placement: {
-      container: {},
-      viewport: {
-        // fixed で通常フローから外れる SP だけ、本文末尾が隠れない高さを確保する。
-        minH: "[calc(var(--spacing-16) + env(safe-area-inset-bottom, 0px))]",
-      },
-    },
-  },
-  defaultVariants: {
-    placement: "viewport",
-  },
-});
+// 固定した SP のナビに隠れない余白は、画面末尾の SiteFooter が空ける。
+const navSlot = css({ flexShrink: "0", tab: { display: "none" } });
 
 const navRecipe = cva({
   base: {
@@ -131,7 +115,7 @@ export async function BottomNav({ active, placement = "viewport" }: BottomNavPro
   const showPost = session === null || canUseGeneralFeatures(session.accountType);
 
   return (
-    <div className={navSlotRecipe({ placement })} data-ui="mobile-bottom-nav">
+    <div className={navSlot} data-ui="mobile-bottom-nav">
       <nav className={navRecipe({ placement })} aria-label="メインナビ">
         {ITEMS.slice(0, 2).map(({ id, href, label, name }) => (
           <Link

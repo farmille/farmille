@@ -65,3 +65,11 @@ export const Subtle: Story = {
     children: "キャンセルしてマイページに戻る",
   },
 };
+
+export const Nav: Story = {
+  args: { href: "/search", variant: "nav", children: "資材をさがす" },
+};
+
+export const NavCurrent: Story = {
+  args: { href: "/search", variant: "nav", children: "資材をさがす", "aria-current": "page" },
+};

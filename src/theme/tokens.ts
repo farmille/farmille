@@ -6,11 +6,31 @@ type DescribedTokens = { [name: string]: DescribedToken | DescribedTokens };
 /** sp（767px 以下）は base。tab 以上は PC 寄りの UI にし、pc は 768px 幅で成立しない密度だけを持つ。 */
 export const breakpoints = { tab: "768px", pc: "1024px" };
 
+/** ホームの丘の稜線。幅 1440・高さ 160 の枠いっぱいに引き伸ばし、面を切り抜く型にする。 */
+const hillRidges = {
+  back: "M0 160V86C120 58 262 38 420 56C566 73 652 98 792 88C934 78 1012 34 1162 30C1292 26 1382 50 1440 62V160Z",
+  front:
+    "M0 160V118C150 92 300 80 470 98C612 113 722 128 862 116C1012 103 1122 78 1262 84C1352 88 1402 100 1440 108V160Z",
+};
+
+function ridgeMask(path: string) {
+  return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 160' preserveAspectRatio='none'><path d='${path}'/></svg>`;
+}
+
 /**
  * Farmille のプリミティブトークン。
  * Panda の設定とトークンカタログが同じ元本を参照する。
  */
 export const tokens = {
+  assets: {
+    // 色の面に重ねる水彩紙の質感。灰色の濃淡で、平均の明るさは中間にそろえてある。
+    // 上下左右の端がつながり、継ぎ目なく敷き詰められる（2倍の解像度で書き出したもの）
+    wash: { value: { type: "url", value: "/textures/wash.webp" } },
+    hill: {
+      back: { value: { type: "svg", value: ridgeMask(hillRidges.back) } },
+      front: { value: { type: "svg", value: ridgeMask(hillRidges.front) } },
+    },
+  },
   blurs: {
     reportGate: { value: "4px" },
     // 画面の上下に固定する半透明の帯（アプリバー・下部ナビ・操作の帯）
@@ -42,6 +62,8 @@ export const tokens = {
     bg: { value: "#FCFCFB" },
     panel: { value: "#FDFDFC" },
     card: { value: "#FFFFFF" },
+    // ホームの地。生成りの紙のような、わずかに黄みを帯びた白
+    paper: { value: "#F3F1E8" },
     // ページ背景よりわずかに沈む灰色。影の代わりにカードの縁へ細く引く
     mist: { value: "#F7F7F5" },
     // ink 3段（本文 / 副文 / 補助）
@@ -66,12 +88,10 @@ export const tokens = {
         value: "0 1px 2px rgba(30,35,31,.05), 0 4px 14px rgba(30,35,31,.06)",
       },
       lift: { value: "0 8px 30px rgba(30,35,31,.16)" },
+      // 写真の上に置く白い文字の影。明るい空にかかっても文字の輪郭を保つ
+      photoText: { value: "0 2px 18px rgba(30,35,31,.45)" },
       // 初回ログインの案内で光らせる枠。枠の外を暗くし、枠のふちを白く縁取る
       spotlight: { value: "0 0 0 9999px rgba(30,35,31,.45), 0 0 0 3px #FFFFFF" },
-      // 写真の上に置く半透明の面。上辺の内側ハイライトでガラスの厚みを出す
-      glass: {
-        value: "inset 0 1px 0 rgba(255,255,255,.65), 0 10px 32px rgba(30,35,31,.18)",
-      },
     },
   },
   radii: {
@@ -128,17 +148,30 @@ export const tokens = {
         "評価平均の数値と、企業向けガイドの PC の題名。用途ごとに組み合わせが違うため役割にしない。",
     },
     // 通常UIの8段とは別枠で持つ
-    hero: {
-      DEFAULT: { value: "28px", description: "ホームのヒーロー見出し専用。SP の大きさ。" },
+    headline: {
+      DEFAULT: { value: "24px", description: "ホームの節の見出し専用。SP の大きさ。" },
       md: {
-        value: "44px",
+        value: "30px",
         description:
-          "ホームのヒーロー見出し専用。tab 以上の大きさ。この md はサイズの段名で、breakpoint ではない。",
+          "ホームの節の見出し専用。tab 以上の大きさ。この md はサイズの段名で、breakpoint ではない。",
       },
       lg: {
-        value: "64px",
+        value: "36px",
         description:
-          "ホームのヒーロー見出し専用。pc 以上の大きさ。この lg はサイズの段名で、breakpoint ではない。",
+          "ホームの節の見出し専用。pc 以上の大きさ。この lg はサイズの段名で、breakpoint ではない。",
+      },
+    },
+    hero: {
+      DEFAULT: { value: "22px", description: "ホームのヒーローの縦書きの一文専用。SP の大きさ。" },
+      md: {
+        value: "30px",
+        description:
+          "ホームのヒーローの縦書きの一文専用。tab 以上の大きさ。この md はサイズの段名で、breakpoint ではない。",
+      },
+      lg: {
+        value: "36px",
+        description:
+          "ホームのヒーローの縦書きの一文専用。pc 以上の大きさ。この lg はサイズの段名で、breakpoint ではない。",
       },
     },
   } satisfies DescribedTokens,
@@ -152,6 +185,8 @@ export const tokens = {
     gothicMb101: {
       value: '"a-otf-gothic-mb101-pr6n", var(--fonts-sans)',
     },
+    // Adobe Fonts のしっぽり明朝 Regular。ホームの応援メッセージに使う。
+    shipporiMincho: { value: '"shippori-mincho", serif' },
     // material-icons パッケージの icon font。ligature で glyph を描く（共通 Icon が使う）
     materialIcons: { value: '"Material Icons"' },
     materialIconsOutlined: { value: '"Material Icons Outlined"' },
@@ -210,6 +245,8 @@ export const tokens = {
       plot: { value: "6rem" },
     },
     imagePreview: { value: "10rem" },
+    // 水彩紙の質感を敷き詰める1枚の大きさ。画像は 2 倍の解像度で持つ
+    texture: { value: "800px" },
     // 短いラベルでも操作対象として横幅を確保する。
     button: {
       sm: { value: "96px" },
@@ -275,6 +312,8 @@ export const tokens = {
   // モーション。UIの標準カーブと、要素ごとの継続時間を1か所に持つ
   easings: {
     out: { value: "cubic-bezier(0.23, 1, 0.32, 1)" },
+    // 往復し続ける揺れ（ホームの丘に立つ双葉）。折り返す両端で減速させる
+    inOut: { value: "cubic-bezier(0.77, 0, 0.175, 1)" },
     // トーストだけUI標準より柔らかいカーブにする
     soft: { value: "ease" },
   },
@@ -284,12 +323,28 @@ export const tokens = {
     tourNudge: { value: "tour-nudge 1.4s {easings.out} infinite" },
     // 押してほしいボタンの周りに広がる輪
     tourRing: { value: "tour-ring 1.6s {easings.out} infinite" },
+    // ホームのヒーロー。写真を寄りから引き、見出しの帯を上から順に開く。終わった後は値を残さない（backwards）
+    heroZoom: { value: "hero-zoom 2.4s {easings.out} backwards" },
+    heroBand: { value: "band-unroll 900ms {easings.out} backwards" },
+    heroBandText: { value: "fade-in 700ms {easings.out} backwards" },
+    sproutSway: { value: "sprout-sway {durations.sway} {easings.inOut} infinite alternate" },
   },
   durations: {
     fast: { value: "160ms" },
     dialog: { value: "250ms" },
+    // SP のメニューの面を、ボタンを中心に円で広げて開く
+    menu: { value: "600ms" },
     toast: { value: "400ms" },
     stagger: { value: "50ms" },
+    // ホームのスクロールで現れる要素。並んだ要素は revealStep ずつ遅らせる
+    reveal: { value: "1000ms" },
+    revealStep: { value: "120ms" },
+    // コンセプトの問いかけを、1行ずつ左から書いていくように見せる
+    write: { value: "1400ms" },
+    // ヒーローの一文が動き出すまでの間。ほかの演出もこの倍数で順に続ける
+    intro: { value: "300ms" },
+    // 双葉が片側へ揺れきるまでの時間
+    sway: { value: "3.2s" },
   },
   // 重なり順。local は1つの囲みの中だけの順で、2 は 1 の上に重ねるときに使う
   zIndex: {
@@ -344,11 +399,16 @@ export const semanticTokens = {
       brand: { value: "{colors.green.700}" },
       // primary.soft・100・200 の淡い緑の面に置く緑の文字。brand のままでは AA に届かない
       brandOnSoft: { value: "{colors.green.800}" },
+      // ホームの深い緑の面（surface.forest）に置く、淡い緑の小見出しやリンク
+      brandOnForest: { value: "{colors.green.200}" },
     },
     surface: {
       page: { value: "{colors.bg}" },
       panel: { value: "{colors.panel}" },
       card: { value: "{colors.card}" },
+      // ホームの紙の地と、それを区切る深い緑の帯
+      paper: { value: "{colors.paper}" },
+      forest: { value: "{colors.green.800}" },
     },
     border: {
       subtle: { value: "{colors.mist}" },

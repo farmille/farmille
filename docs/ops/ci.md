@@ -14,17 +14,36 @@ Node.jsは`.node-version`、pnpmは`package.json`のバージョンを使う。L
 
 `pnpm setup:hooks`はGit共通ディレクトリ内の`farmille-hooks/pre-push`に固定のhookを設置し、そのディレクトリの絶対パスを`core.hooksPath`に登録する。同じcloneのworktreeもこのhookを共有する。checkout先の`.githooks`に追加されたhookは実行しない。既存の`.githooks`設定は移行できる。独自のhookや別のhooksPathがある場合は、上書きせず停止する。
 
-push時は、現在のworktreeにある`tools/ci/browser-checks.ts`・`tools/ci/selection.ts`・`package.json`・`pnpm-lock.yaml`のSHA-256を登録時の値と照合し、一致した場合だけ検査コードを実行する。内容が変わった場合やファイルが無い場合はpushを止める。検査コードのシンボリックリンクや、`tools`・`tools/ci`内に置かれた`package.json`・`node_modules`も拒否し、検証したファイルと実際の読み込み先を一致させる。通常の`pnpm setup:hooks`や`pnpm setup:worktree`では登録済みの内容を更新しない。対象ファイルとhookの変更をレビューした後、信頼できるcheckoutから次を実行する。
+push時は、現在のworktreeにある`tools/ci/browser-checks.ts`・`tools/ci/selection.ts`・`package.json`・`pnpm-lock.yaml`の4ファイルを照合し、信頼できる場合だけ検査コードを実行する。4ファイルがすべて`origin/main`（`refs/remotes/origin/main`）の中身と同じなら、登録なしで通す。mainに取り込まれた内容はレビュー済みとして扱う。比べるのはcheckoutにあるファイルのバイト列そのもので、改行の変換やGitのフィルターは適用しない（`.gitattributes`はブランチ側の中身のため）。`core.autocrlf`などでcheckoutの中身がmainのblobと異なる環境では一致せず、登録が要る。1つでも異なる場合は、4ファイルのSHA-256の組が`farmille-hooks/trusted`の一覧のどれかと一致したときだけ通す。どれとも一致しない場合は、`origin/main`と異なるファイルを表示してpushを止める。ファイルが無い場合も止める。検査コードのシンボリックリンクや、`tools`・`tools/ci`内に置かれた`package.json`・`node_modules`も拒否し、検証したファイルと実際の読み込み先を一致させる。
+
+依存や検査コードを変えたブランチだけが登録を要する。対象ファイルの変更をレビューした後、信頼できるcheckoutから次を実行し、今の組を一覧に足す。
 
 ```bash
 pnpm setup:hooks --trust-current
 ```
 
-信頼の登録・更新は同じcloneの全worktreeに適用される。異なる検査コードや依存設定を持つworktreeでは再び照合が必要になる。登録したコードからは各worktreeのbuild・testを実行するため、未信頼ブランチを安全に実行するための隔離機能ではない。依存のインストール・セットアップ・pushは、対象のコードを信頼できると確認してから行う。
+一覧は同じcloneの全worktreeで共有する。`--trust-current`は今の組を一覧の末尾に足し（登録済みの組は末尾へ移す）、登録の新しい20組だけを残す。ほかのブランチが登録した組は消えないため、ブランチを切り替えるたびに登録し直す必要はない。上限は、後で問題が見つかった依存の組をいつまでも通さないために置く。一覧から消えた組のブランチは、もう一度登録する。複数のworktreeで同時に`--trust-current`を実行すると、片方の登録が失われることがある。pushが止まったら、もう一度登録する。
+
+通常の`pnpm setup:hooks`や`pnpm setup:worktree`は一覧に組を足さない。今のcheckoutの組が信頼されていなければ、pushと同じ理由を表示して止まる。初回の登録だけは、今の組を一覧に入れる。
+
+`origin/main`は`git fetch`で取得した時点の中身を使う。mainで依存や検査コードが更新されると、それより前のmainから分かれたブランチは一致しなくなる。mainを取り込むか、`--trust-current`で登録する。
+
+登録したコードからは各worktreeのbuild・testを実行するため、未信頼ブランチを安全に実行するための隔離機能ではない。依存のインストール・セットアップ・pushは、対象のコードを信頼できると確認してから行う。
 
 hookのソースはGitで共有するが、設置済みのhookと登録設定はcloneされない。別PC・別cloneでは再度登録する。hookをまだ含まない古いブランチはmainの変更を取り込む必要がある。Git GUIからpushする場合も、GUIの実行環境からNode.jsとpnpmを呼び出せるようにする。
 
 E2Eは検証専用のSupabase（127.0.0.1:54321）を使う。Dockerを起動し、[ローカル検証手順](local-verification.md) に従ってSupabaseとmigrationを準備する。hookはSupabaseを自動起動せず、起動していなければpushを止めて手順を表示する。E2Eの直前に、54321のDBをpushするブランチのmigrationと`supabase/seed.sql`で作り直す（入っていたデータは消える）。別のworktreeで当てたmigrationがDBに残っていても、E2Eはそのブランチのスキーマで流れる。E2E用アカウントの更新と資材マスタの投入は、作り直した後に行う。
+
+### 1組だけを登録する古いhookからの移行
+
+一覧を使う前に登録したcloneでは、`farmille-hooks/pre-push`に4ファイルのハッシュを1組だけ埋め込んだ古いhookが動き続ける。古いhookは一覧も`origin/main`も見ないため、登録した組と異なるブランチのpushは止まる。この仕組みがmainに入った後、cloneごとに1回、mainの最新を取り込んだ信頼できるcheckoutから次を実行する。
+
+```bash
+git fetch origin main
+pnpm setup:hooks --trust-current
+```
+
+hookの中身が変わるため、移行するまでは、この仕組みを含むブランチの通常の`pnpm setup:hooks`と`pnpm setup:worktree`が「登録済みの内容と異なります」で止まる。移行後は、この仕組みを含まない古いブランチの`pnpm setup:hooks`と`pnpm setup:worktree`が、一覧のファイル（`farmille-hooks/trusted`）を管理対象外のhookとみなして止まる。古いブランチでhookを登録し直すときは、先にmainを取り込む。pushは設置済みの新しいhookが照合するため、古いブランチのままでも、4ファイルが`origin/main`か一覧と一致すれば通る。
 
 ## push前の検査
 

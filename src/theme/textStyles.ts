@@ -60,13 +60,62 @@ export const textStyles = {
   },
   hero: {
     description:
-      "ホームのヒーロー見出し専用。ゴシックMB101 L の細字で組み、画面幅に応じて hero、hero.md、hero.lg の順に大きくする。md と lg はサイズの段名で、breakpoint ではない。",
+      "ホームのヒーローの縦書きの一文専用。ゴシックMB101 L の細字で組み、画面幅に応じて hero、hero.md、hero.lg の順に大きくする。md と lg はサイズの段名で、breakpoint ではない。",
     value: {
       fontFamily: "gothicMb101",
       fontSize: { base: "hero", tab: "hero.md", pc: "hero.lg" },
       fontWeight: "light",
-      lineHeight: "relaxed",
+      lineHeight: "none",
+      letterSpacing: "0.14em",
+    },
+  },
+  headline: {
+    description:
+      "ホームの節の見出し。画面幅に応じて headline、headline.md、headline.lg の順に大きくする。",
+    value: {
+      fontSize: { base: "headline", tab: "headline.md", pc: "headline.lg" },
+      lineHeight: "snug",
       letterSpacing: "0.08em",
+    },
+  },
+  voice: {
+    description:
+      "ホームで生産者の問いかけを大きく見せる一文（コンセプトの問いかけ）。ゴシックMB101 L の細字で組み、大きさは headline と同じ段を使う。",
+    value: {
+      fontFamily: "gothicMb101",
+      fontSize: { base: "headline", tab: "headline.md", pc: "headline.lg" },
+      fontWeight: "light",
+      lineHeight: "relaxed",
+      letterSpacing: "0.06em",
+    },
+  },
+  statement: {
+    description:
+      "ホームで本文より一段強く言い切る文（コンセプトの答えや締めの一文、二つの道の比較）。りょうゴシックで組む。",
+    value: {
+      fontFamily: "ryoGothic",
+      fontSize: { base: "lg", tab: "xl" },
+      fontWeight: "bold",
+      lineHeight: "loose",
+      letterSpacing: "0.06em",
+    },
+  },
+  eyebrow: {
+    description: "ホームの節の見出しに添える英字の小見出し。",
+    value: { fontSize: "xs", lineHeight: "normal", fontWeight: "bold", letterSpacing: "0.24em" },
+  },
+  essay: {
+    description: "ホームの理念や想いなど、行間を広く取って読ませる文。",
+    value: { fontSize: { base: "md", tab: "lg" }, lineHeight: "loose", letterSpacing: "0.06em" },
+  },
+  letter: {
+    description: "ホームの応援メッセージの本文。明朝体で組み、便箋の罫線と同じ行送りにする。",
+    value: {
+      fontFamily: "shipporiMincho",
+      fontWeight: "normal",
+      fontSize: { base: "md", tab: "lg" },
+      lineHeight: "loose",
+      letterSpacing: "0.04em",
     },
   },
 } satisfies Record<string, TextRole>;
