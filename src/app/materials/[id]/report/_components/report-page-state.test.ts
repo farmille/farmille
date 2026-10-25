@@ -14,6 +14,7 @@ import {
   itemsFromInput,
   itemsWithPlots,
   reportPageChecks,
+  reportPageNeedsMaterialAcks,
   type ReportPageItem,
 } from "./report-page-state";
 import { filledReport } from "./reportStoryFixture";
@@ -134,6 +135,28 @@ describe("記入状況", () => {
       .filter((check) => !check.ok)
       .map((check) => check.key);
     expect(keys).toEqual(["privacyAck", "documentsAck"]);
+  });
+
+  it("関連資料のPDFだけを持つ下書きも、写り込みと秘密保持の確認が要り、確認すれば提出できる", () => {
+    const input = {
+      ...filledReport,
+      methodDetailsAck: true,
+      guidelineAck: true,
+      measurements: filledReport.measurements.filter((measurement) => measurement.kind === "text"),
+      media: [],
+      documents: [
+        { id: crypto.randomUUID(), path: "user/report/document.pdf", name: "成績書.pdf" },
+      ],
+    };
+    const items = itemsFromInput(input);
+    const payload = inputWithItems(input, items);
+    expect(reportPageNeedsMaterialAcks(payload, items)).toBe(true);
+    const missing = (checked: UsageReportInput, privacy: boolean) =>
+      reportPageChecks(checked, items, { timing: true, privacy })
+        .filter((check) => !check.ok)
+        .map((check) => check.key);
+    expect(missing(payload, false)).toEqual(["privacyAck", "documentsAck"]);
+    expect(missing({ ...payload, documentsAck: true }, true)).toEqual([]);
   });
 
   it("区の説明は、全区に共通の説明があれば区ごとには要らない", () => {

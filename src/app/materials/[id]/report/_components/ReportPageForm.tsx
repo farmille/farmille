@@ -39,7 +39,7 @@ import {
   reportLengthNote,
   reportOverLimit,
   reportPageChecks,
-  reportPageHasImages,
+  reportPageNeedsMaterialAcks,
   reportPageTitle,
   type ReportMaterialSummary,
   type ReportPageAcks,
@@ -280,7 +280,7 @@ export function ReportPageForm({
   const missingKeys = new Set(tried ? missing.map((check) => check.key) : []);
   const cropName = crops.find((crop) => crop.id === input.cropId)?.name ?? null;
   const title = reportPageTitle(currentMaterial.name, cropName);
-  const images = reportPageHasImages(items);
+  const materialAcks = reportPageNeedsMaterialAcks(payload, items);
   const done = checks.length - missing.length;
   const layout = reportPlotLayout(input, currentMaterial.name);
 
@@ -540,7 +540,7 @@ export function ReportPageForm({
             資材を使った区の説明に、施用方法・希釈倍率・使用量・回数などを記入した（または「資料を参照」と書いた）
           </Checkbox>
         </div>
-        {images && (
+        {materialAcks && (
           <>
             <div id="report-privacy-ack" className={ackClass("privacyAck")}>
               <Checkbox

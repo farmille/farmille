@@ -206,8 +206,12 @@ export function reportPageItemDone(item: ReportPageItem): boolean {
   }
 }
 
-export function reportPageHasImages(items: ReportPageItem[]): boolean {
-  return items.some((item) => reportPageItemImages(item).length > 0);
+/** 写り込みと秘密保持の確認が要るか。調査項目に画像を差し込んだか、既存の関連資料（PDF）があるとき。 */
+export function reportPageNeedsMaterialAcks(
+  input: UsageReportInput,
+  items: ReportPageItem[],
+): boolean {
+  return input.documents.length > 0 || items.some((item) => reportPageItemImages(item).length > 0);
 }
 
 /** 記入状況の1行。target は未記入のときに移る先（画面の要素の id）。 */
@@ -288,12 +292,7 @@ const SUBMISSION_CHECKS = [
 type CheckKey = (typeof SUBMISSION_CHECKS)[number]["key"];
 
 /** 提出の検査のほかに、画面でだけ確かめること。 */
-function screenCheck(
-  key: CheckKey,
-  input: UsageReportInput,
-  acks: ReportPageAcks,
-  images: boolean,
-): boolean {
+function screenCheck(key: CheckKey, input: UsageReportInput, acks: ReportPageAcks): boolean {
   switch (key) {
     case "prefectureCode":
       return !input.showCity || input.city.trim() !== "";
@@ -302,7 +301,7 @@ function screenCheck(
     case "privacyAck":
       return acks.privacy;
     case "documentsAck":
-      return !images || input.documentsAck;
+      return input.documentsAck;
     default:
       return true;
   }
@@ -314,12 +313,11 @@ export function reportPageChecks(
   acks: ReportPageAcks,
 ): ReportPageCheck[] {
   const errors = Object.keys(validateUsageReportSubmission(input));
-  const images = reportPageHasImages(items);
+  const materialAcks = reportPageNeedsMaterialAcks(input, items);
   return SUBMISSION_CHECKS.flatMap(({ key, label, target, errors: pattern }) => {
-    if ((key === "privacyAck" || key === "documentsAck") && !images && input.documents.length === 0)
-      return [];
+    if ((key === "privacyAck" || key === "documentsAck") && !materialAcks) return [];
     const valid = pattern === null || !errors.some((error) => pattern.test(error));
-    return [{ key, label, target, ok: valid && screenCheck(key, input, acks, images) }];
+    return [{ key, label, target, ok: valid && screenCheck(key, input, acks) }];
   });
 }
 
