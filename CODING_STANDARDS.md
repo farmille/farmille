@@ -1,0 +1,69 @@
+# Farmilleのコーディング規約
+
+「共通」を読み、DB・サーバー処理・UI・lint・依存・設定・テストのうち、作業に該当する節を読む。検証コマンドとpush前の検査は[CIとpush前の検査](docs/ops/ci.md)、起動・DB操作は[ローカル検証手順](docs/ops/local-verification.md)に従う。
+
+## 共通
+
+- データ設計を最優先する（DOA）。データモデルは第3正規形を守り、JSONBで正規化を省略しない。UIもデータ設計に合わせる。
+- DB・APIの戻り値は`src/types/database.types.ts`から派生させる。`any`やページごとの重複型を作らない。
+- JSON・フォーム入力など実行時まで内容が保証できない値はValibotで検証し、`InferOutput`から型を導出する。`as`、`JsonObject`、`Record<string, unknown>`、手書きの`typeof`判定を型の根拠にしない。
+- 必須の環境変数・パラメータが欠けたらエラーにする。暗黙の既定値へフォールバックしない。環境変数は`src/env.ts`で起動時に検証し、ホスティング固有の環境変数を直接参照しない。
+- anti-slopは全ルールを`error`のまま適用する。違反は型と境界の設計で解消する。ルール無効化・警告化・ignore・disableコメント・広い型への言い換えで回避しない。
+
+## サーバー処理を変更する
+
+- ドメインロジック・Supabaseのテーブル/RPCアクセス・`SUPABASE_SECRET_KEY`の参照は`src/server/`に置く。画面・クライアント部品・Server Actionsから`.from()`・`.rpc()`を直接呼ばない。クライアントからの`auth.*`・`storage.*`利用は可。
+- 画面の読み取りはServer Componentsから`src/server/`を呼ぶ。変更はServer ActionsかRoute Handlersで行い、クライアントの状態は入力フォームとトグルに限る。
+- `src/app/api/`のRoute HandlersはフォームPOST・Webhook・外部からの呼び出しに使う。
+- エラーレスポンスは`{ok: false, error: "<code>"}`に揃え、日本語文言は`src/server/errors.ts`で管理する。例外は握り潰さず、画面では404・403・500を出し分ける。`error.tsx`・`not-found.tsx`を置く。
+
+## DB・migrationを変更する
+
+- 破壊的なALTERより、新テーブルへのデータ移行を経て旧テーブルを削除する方法を選ぶ。スキーマ変更を伴うタスクは単独のPRに分ける。
+- 適用済みmigrationは維持し、修正は`supabase/migrations/`へ新規ファイルで追加する。`supabase/config.toml`も併せてコミットする。
+- devへのmigration適用、マスタデータのseed変更、カラムの追加・削除・型変更の直後に`pnpm gen:types`を実行する。migrationを含むPRには`src/types/database.types.ts`の生成差分を含める。型チェックの成功だけではDB実体との一致を確認できない。
+- ローカルDBの起動・適用・E2Eによる再作成と停止の条件は、[ローカル検証手順](docs/ops/local-verification.md)に従う。dev・本番への適用経路は[CIとpush前の検査](docs/ops/ci.md)を参照する。
+
+## UIを変更する
+
+画面のデータ取得・更新、状態、エラー表示を変える場合は、[サーバー処理](#サーバー処理を変更する)も読む。
+
+### 共通部品
+
+- フォーム・ダイアログ・通知・開閉・候補つき入力は`src/components`の共通部品（フォームは`src/components/form`）を使い、不足する機能はそこへ追加する。`@base-ui/react`・`sonner`のimportは`src/components`内に限る。
+- 同じUIパターンを3回書く前に共通部品へまとめる。ページ内で長大なJSXと業務ロジックを混在させない。
+- アイコンは`material-icons`のフォントを共通`Icon`（`src/components/Icon.tsx`）経由で使う。不足するglyphは`Icon`へ追加する。SVGアイコン・lucide・react-iconsは使わない。ロゴ・グラフ・イラストのSVGは可。
+- `Input`・`Textarea`・`Select`・`Combobox`・`Autocomplete`・`FileInput`・`OtpInput`・`CheckboxGroup`・`RadioGroup`は`label`を必須とし、必須/任意・案内・エラーも部品のpropsへ渡す。ラベルを隠す場合は`hideLabel`、枠には`fieldClassName`を使う。
+- `Field`・`Fieldset`は1つの見出しで複数要素をまとめる場合に使い、中の部品は`label={null}`にする。
+
+### スタイルと文字
+
+- 色・余白・角丸・タイポはPandaのトークンを使う。条件分岐はrecipeのvariantで列挙する。棒の長さや計測位置など実行時にしか決まらない値は、`style`属性のCSS変数だけで渡し、`css()`側の`var()`で受ける。
+- 1回だけ使う寸法・`calc()`・CSSキーワードは角括弧で指定する。3か所以上に現れるデザイン値はトークンにする。色の生値は角括弧にも書かない。色の角括弧指定は`[inherit]`・`[none]`と`token(colors.…)`を使う式に限る。
+- 文字の大きさ・行高は`src/theme/textStyles.ts`の`textStyle`を使う。色は呼び出し側から、置く面に対応した役割トークンで指定する。パレットの段を直接指定しない。役割にない組み合わせが3か所に現れたら役割を足す。役割の一覧は`/dev/tokens`で確認する。
+- `panda.config.ts`を変更したらcodegenを再実行する。`styled-system/`は生成物として扱う。
+
+### コンポーネントとStory
+
+独自コンポーネントの`.tsx`ファイル名はPascalCaseとし、すべてに同名の`.stories.tsx`を置く。App Routerの予約ファイルだけは小文字のままにする。Storyのtitleは次に揃える。
+
+| 対象                                       | title                      |
+| ------------------------------------------ | -------------------------- |
+| 画面に依存しない基礎部品                   | `Components/<役割>/<名前>` |
+| 画面に依存する部品                         | `Pages/<ルート>/<名前>`    |
+| 複数画面で使う、基礎部品以外の部品         | `Pages/Shared/<名前>`      |
+| デザイントークン                           | `Tokens`                   |
+| ルート画面のPage・Error・NotFound・Loading | `Pages/<ルート>`           |
+
+基礎部品として整えたものは`Pages/Shared`から`Components`へ移す。
+
+375pxの実画面で対象フローを操作し、スクリーンショットを添える。型チェック・lintの成功だけではUIの検証を終えない。
+
+## lint・依存・設定・テストを変更する
+
+Pandaの設定を変更する場合は、[スタイルと文字](#スタイルと文字)も読む。
+
+- `tools/oxlint/`は取り込んだlint実装として扱い、診断を通すために編集しない。anti-slopは[dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop)のcommit `6d538555cb151d4121ed51a27db81890eacf8ae9`を基準とし、更新はupstreamの差分をそのまま取り込む。ルール変更が必要な場合は、アプリ側で修正できない根拠を先に示す。
+- 依存の監査はpnpmを使う。`critical`・`high`はhotfixで先に塞ぐか別PRで固定し、`moderate`以下は起票する。
+
+lintの診断が重複するときは`eslint.config.mjs`でoxlintとESLintの役割分担を確認する。

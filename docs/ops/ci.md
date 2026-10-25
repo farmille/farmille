@@ -53,6 +53,12 @@ Storybookのビルド・レスポンシブ検査・E2Eは順番に実行する�
 
 ## 自動CIと手動検査
 
+コード変更後は、次の品質検査を実行する。
+
+```bash
+pnpm lint && pnpm format:check && pnpm exec tsc --noEmit && pnpm exec vitest run && pnpm check:stories && pnpm build
+```
+
 自動CIのApplication quality gatesは、lint・形式・型・単体テスト・依存の監査・Storyの有無・アプリのビルドを検査する。成功後にDatabase authorizationがローカルSupabaseでDB権限を検査する。mainでは、この2ジョブの成功後にDB移行と本番デプロイを行う。migration変更時のDBリセット検査も継続する。
 
 ブラウザ検査をGitHub上で全件実行する場合は、Actionsの **Browser checks** から **Run workflow** を選び、対象ブランチを指定する。失敗時の成果物は7日間保存する。このworkflowはmainに取り込まれた後に手動実行できる。

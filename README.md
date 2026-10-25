@@ -31,7 +31,7 @@ push 前に Storybook と E2E の検査が実行されます。検証用 Supabas
 
 ## スクリプト
 
-コマンドの一覧は `package.json` の `scripts` にあります。検証の手順は [`AGENTS.md`](AGENTS.md) の「検証」を参照してください。
+コマンドの一覧は `package.json` の `scripts` にあります。品質検査とpush前の手順は[CIとpush前の検査](docs/ops/ci.md)、環境準備と実画面の確認は[ローカル検証手順](docs/ops/local-verification.md)を参照してください。
 
 `pnpm install` の完了後に Panda CSS のコード生成が自動で実行されます。生成物は `styled-system/` に出力され、Git の管理対象には含まれません。`gen:types` の生成物は format と lint の対象外です。
 
