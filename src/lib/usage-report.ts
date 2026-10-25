@@ -13,6 +13,7 @@ export const REPORT_SECTIONS = [
 ] as const;
 const section = v.picklist(REPORT_SECTIONS.map(({ value }) => value));
 export const REPORT_PLOT_LIMIT = 40;
+export const REPORT_MEASUREMENT_LIMIT = 30;
 const named = v.object({ id: uuid, name: short });
 const plotTreatment = v.variant("kind", [
   v.object({ kind: v.literal("posted") }),
@@ -81,7 +82,7 @@ export const UsageReportInputSchema = v.object({
         graphs: v.pipe(v.array(graph), v.maxLength(20)),
       }),
     ),
-    v.maxLength(30),
+    v.maxLength(REPORT_MEASUREMENT_LIMIT),
   ),
   media: v.pipe(
     v.array(

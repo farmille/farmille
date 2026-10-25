@@ -4,7 +4,7 @@ import { Input, Textarea } from "@/components/form";
 import { Icon } from "@/components/Icon";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { ReportBars, reportBarGroups } from "@/components/ReportBars";
-import type { UsageReportInput } from "@/lib/usage-report";
+import { REPORT_MEASUREMENT_LIMIT, type UsageReportInput } from "@/lib/usage-report";
 import { graphSections, type ReportPlotLayout } from "@/lib/usage-report-plots";
 
 import { css, cva } from "../../../../../../styled-system/css";
@@ -111,6 +111,8 @@ const figure = css({ m: "0", "& img": { w: "full", h: "auto", maxH: "96", object
 const caption = css({ textAlign: "center", textStyle: "supporting", color: "text.muted" });
 
 const errorText = css({ m: "0", mt: "1", textStyle: "supporting", color: "accent.danger" });
+
+const limitNote = css({ m: "0", mt: "3", textStyle: "supporting", color: "text.muted" });
 
 const nameRecipe = cva({ base: { mt: "1" } });
 
@@ -343,14 +345,27 @@ export function ReportPageItems({
           </div>
         );
       })}
-      <button
-        type="button"
-        className={addButton}
-        onClick={() => onChange((current) => [...current, createReportPageItem()])}
-      >
-        <Icon name="add" size="sm" />
-        調査項目を追加
-      </button>
+      {items.length < REPORT_MEASUREMENT_LIMIT ? (
+        <button
+          type="button"
+          className={addButton}
+          onClick={() =>
+            onChange((current) =>
+              current.length < REPORT_MEASUREMENT_LIMIT
+                ? [...current, createReportPageItem()]
+                : current,
+            )
+          }
+        >
+          <Icon name="add" size="sm" />
+          調査項目を追加
+        </button>
+      ) : (
+        <p className={limitNote} role="status">
+          調査項目は{REPORT_MEASUREMENT_LIMIT}
+          件まで入れられます。足すときは、不要な項目を削除してください。
+        </p>
+      )}
     </>
   );
 }

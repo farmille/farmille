@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 
+import { REPORT_MEASUREMENT_LIMIT } from "@/lib/usage-report";
 import { reportPlotLayout } from "@/lib/usage-report-plots";
 
 import { ReportPageItems } from "./ReportPageItems";
@@ -33,5 +34,16 @@ export const NumericGraph: Story = {
     items: itemsFromInput(varietyReport),
     plots: varietyReport.plots,
     layout: reportPlotLayout(varietyReport, storyMaterialName),
+  },
+};
+
+export const AtLimit: Story = {
+  args: {
+    items: Array.from({ length: REPORT_MEASUREMENT_LIMIT }, (_, index) => ({
+      ...createReportPageItem(),
+      mode: "text" as const,
+      name: `調査項目${index + 1}`,
+      body: "区の間に大きな差はなかった。",
+    })),
   },
 };
