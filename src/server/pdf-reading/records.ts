@@ -138,7 +138,7 @@ export async function recordPdfReadingApplied(
   return succeed(null);
 }
 
-/** レポートの最新の適用済みの読み取りで入れた値と引用。supabase は本人の接続（RLS で本人の記録だけが見える）。 */
+/** レポートで最後に適用した読み取りで入れた値と引用。supabase は本人の接続（RLS で本人の記録だけが見える）。 */
 export async function getReportPdfReadingMarks(
   reportId: string,
   supabase: Db,
@@ -148,7 +148,7 @@ export async function getReportPdfReadingMarks(
     .select("fields:usage_report_pdf_reading_fields(field_key,value,quote)")
     .eq("report_id", reportId)
     .eq("status", "applied")
-    .order("created_at", { ascending: false })
+    .order("applied_at", { ascending: false })
     .limit(1);
   if (error !== null) return dbFailure(error, "印の取得");
   const rows = v.safeParse(

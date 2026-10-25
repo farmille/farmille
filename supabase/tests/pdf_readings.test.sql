@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(59);
+select plan(63);
 
 insert into auth.users(id) values
   ('db932323-0000-4000-8000-000000000001'),('db932323-0000-4000-8000-000000000007'),
@@ -173,9 +173,9 @@ reset role;
 
 -- 確認の列が無かったころに提出されたレポート（確認は false）に、適用済みの読み取りがあっても公開できる。
 update public.usage_reports set pdf_values_checked=false where id='db932323-0000-4000-8000-000000000004';
-insert into public.pdf_readings(user_id,report_id,material_id,upload_path,status,model,speed,input_tokens,output_tokens,finished_at)
+insert into public.pdf_readings(user_id,report_id,material_id,upload_path,status,model,speed,input_tokens,output_tokens,finished_at,applied_at)
 values('db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000004','db932323-0000-4000-8000-000000000002',
-  pg_temp.path('000000000001',5,'9001'),'applied','claude-opus-5-5','fast',1,1,now());
+  pg_temp.path('000000000001',5,'9001'),'applied','claude-opus-5-5','fast',1,1,now(),now());
 select lives_ok($$update public.usage_reports set status='published',published_at=now() where id='db932323-0000-4000-8000-000000000004'$$,
   'publishing a submitted report does not need the check');
 select is((select count(*)::integer from public.list_usage_report_previews() where id='db932323-0000-4000-8000-000000000004'),1,'previews still list published reports');
@@ -212,6 +212,28 @@ select isnt((select updated_at from public.usage_reports where id='db932323-0000
   'clearing the check updates the report, so set_updated_at advances updated_at');
 select is((select updated_at from public.usage_reports where id='db932323-0000-4000-8000-000000000042'),'2026-01-01T00:00:00Z'::timestamptz,
   'an unchecked report is not updated and keeps updated_at');
+
+-- 印は最後に適用した読み取りから出す。確保は A が先、適用は B が先。
+insert into public.usage_reports(id,material_id,author_user_id,observed_change,summary,pesticide_ack,form_version)
+values('db932323-0000-4000-8000-000000000043','db932323-0000-4000-8000-000000000002','db932323-0000-4000-8000-000000000001','','',false,2);
+insert into public.pdf_readings(id,user_id,report_id,material_id,upload_path,status,model,speed,input_tokens,output_tokens,finished_at,created_at)
+values
+  ('db932323-0000-4000-8000-000000000061','db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000043','db932323-0000-4000-8000-000000000002',
+    pg_temp.path('000000000001',61,'9001'),'succeeded','claude-opus-5-5','fast',1,1,now(),now()-interval '2 minutes'),
+  ('db932323-0000-4000-8000-000000000062','db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000043','db932323-0000-4000-8000-000000000002',
+    pg_temp.path('000000000001',62,'9001'),'succeeded','claude-opus-5-5','fast',1,1,now(),now()-interval '1 minute');
+set local role service_role;
+select lives_ok($$select public.apply_pdf_reading('db932323-0000-4000-8000-000000000062','db932323-0000-4000-8000-000000000001',
+  '[{"fieldKey":"observedChange","value":"Bの値","quote":"B"}]')$$,'reading B, claimed later, is applied first');
+select lives_ok($$select public.apply_pdf_reading('db932323-0000-4000-8000-000000000061','db932323-0000-4000-8000-000000000001',
+  '[{"fieldKey":"observedChange","value":"Aの値","quote":"A"}]')$$,'reading A, claimed earlier, is applied last');
+reset role;
+select is((select f.value from public.pdf_readings r join public.usage_report_pdf_reading_fields f on f.reading_id=r.id
+  where r.report_id='db932323-0000-4000-8000-000000000043' and r.status='applied' order by r.applied_at desc limit 1),
+  'Aの値','marks come from the reading applied last, not the one claimed last');
+select throws_ok($$insert into public.pdf_readings(user_id,upload_path,status,model,speed,input_tokens,output_tokens,finished_at)
+  values('db932323-0000-4000-8000-000000000001',pg_temp.path('000000000001',63,'9001'),'applied','claude-opus-5-5','fast',1,1,now())$$,
+  '23514',null,'an applied reading needs applied_at');
 
 select * from finish();
 rollback;

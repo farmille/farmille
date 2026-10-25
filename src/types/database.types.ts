@@ -2957,6 +2957,7 @@ export type Database = {
       }
       pdf_readings: {
         Row: {
+          applied_at: string | null
           created_at: string
           error_code: string | null
           finished_at: string | null
@@ -2972,6 +2973,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          applied_at?: string | null
           created_at?: string
           error_code?: string | null
           finished_at?: string | null
@@ -2987,6 +2989,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          applied_at?: string | null
           created_at?: string
           error_code?: string | null
           finished_at?: string | null

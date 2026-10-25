@@ -223,7 +223,7 @@ describe("適用の記録", () => {
 });
 
 describe("印の読み出し", () => {
-  it("レポートの最新の適用済みの読み取りで入れた値と引用を返す", async () => {
+  it("レポートで最後に適用した読み取りで入れた値と引用を返す", async () => {
     const { client, sent } = fakeSupabase(
       json([
         {
@@ -240,7 +240,7 @@ describe("印の読み出し", () => {
     expect(sent[0]?.path).toBe("/rest/v1/pdf_readings");
     expect(sent[0]?.query.get("report_id")).toBe(`eq.${reportId}`);
     expect(sent[0]?.query.get("status")).toBe("eq.applied");
-    expect(sent[0]?.query.get("order")).toBe("created_at.desc");
+    expect(sent[0]?.query.get("order")).toBe("applied_at.desc");
     expect(sent[0]?.query.get("limit")).toBe("1");
   });
 

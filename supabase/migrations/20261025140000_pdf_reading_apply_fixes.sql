@@ -12,6 +12,13 @@ revoke all on function app.assert_usage_report_pdf_submission(public.usage_repor
 comment on column public.usage_reports.pdf_values_checked is
   'PDF読み取りで入った値を元の PDF と照らし合わせて確かめたことの確認。成功したか適用済みの読み取りがあるレポートは、下書きから提出するときに必須。';
 
+-- 印は適用した順で最新の1件を選ぶ。既存の applied の行は、終わった時刻（無ければ確保した時刻）で埋める。
+alter table public.pdf_readings add column applied_at timestamptz;
+update public.pdf_readings set applied_at=coalesce(finished_at,created_at) where status='applied';
+alter table public.pdf_readings add constraint pdf_readings_applied_at_check
+  check ((status='applied')=(applied_at is not null));
+
+-- 適用の時刻は、同じトランザクションで続けて適用しても順が付くよう clock_timestamp で入れる。
 -- 写した値で確かめ直してもらうため、適用したら確認を外す。確認していない行まで更新すると、set_updated_at で
 -- updated_at が進み、画面が持つ更新日時と食い違って次の保存が競合になるので、確認済みの行だけを更新する。
 create or replace function public.apply_pdf_reading(p_reading_id uuid,p_user_id uuid,p_fields jsonb)
@@ -21,7 +28,7 @@ begin
   if jsonb_typeof(p_fields) is distinct from 'array' or jsonb_array_length(p_fields)>2000 then
     raise exception 'invalid_body' using errcode='22023';
   end if;
-  update public.pdf_readings r set status='applied'
+  update public.pdf_readings r set status='applied',applied_at=clock_timestamp()
   where r.id=p_reading_id and r.user_id=p_user_id and r.status='succeeded' and r.report_id is not null
   returning r.report_id into target_report;
   if not found then raise exception 'conflict' using errcode='40001'; end if;
