@@ -1,4 +1,8 @@
-import { validateUsageReportSubmission, type UsageReportInput } from "@/lib/usage-report";
+import {
+  reportNeedsMaterialAcks,
+  validateUsageReportSubmission,
+  type UsageReportInput,
+} from "@/lib/usage-report";
 import { graphWithPlots } from "@/lib/usage-report-plots";
 
 export type ReportMaterialSummary = { id: string; name: string; manufacturerName: string };
@@ -212,14 +216,6 @@ export function reportPageItemDone(item: ReportPageItem): boolean {
   }
 }
 
-/** 写り込みと秘密保持の確認が要るか。調査項目に画像を差し込んだか、既存の関連資料（PDF）があるとき。 */
-export function reportPageNeedsMaterialAcks(
-  input: UsageReportInput,
-  items: ReportPageItem[],
-): boolean {
-  return input.documents.length > 0 || items.some((item) => reportPageItemImages(item).length > 0);
-}
-
 /** 記入状況の1行。target は未記入のときに移る先（画面の要素の id）。 */
 export type ReportPageCheck = { key: string; label: string; ok: boolean; target: string };
 
@@ -306,20 +302,15 @@ function screenCheck(key: CheckKey, input: UsageReportInput, acks: ReportPageAck
       return acks.timing;
     case "privacyAck":
       return acks.privacy;
-    case "documentsAck":
-      return input.documentsAck;
     default:
       return true;
   }
 }
 
-export function reportPageChecks(
-  input: UsageReportInput,
-  items: ReportPageItem[],
-  acks: ReportPageAcks,
-): ReportPageCheck[] {
+/** 記入状況の行。input は調査項目を書き戻した保存の入力（inputWithItems）。 */
+export function reportPageChecks(input: UsageReportInput, acks: ReportPageAcks): ReportPageCheck[] {
   const errors = Object.keys(validateUsageReportSubmission(input));
-  const materialAcks = reportPageNeedsMaterialAcks(input, items);
+  const materialAcks = reportNeedsMaterialAcks(input);
   return SUBMISSION_CHECKS.flatMap(({ key, label, target, errors: pattern }) => {
     if ((key === "privacyAck" || key === "documentsAck") && !materialAcks) return [];
     const valid = pattern === null || !errors.some((error) => pattern.test(error));

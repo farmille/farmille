@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createBlankUsageReport,
+  reportNeedsMaterialAcks,
   UsageReportInputSchema,
   validateUsageReportSubmission,
   type UsageReportInput,
@@ -14,7 +15,6 @@ import {
   itemsFromInput,
   itemsWithPlots,
   reportPageChecks,
-  reportPageNeedsMaterialAcks,
   type ReportPageItem,
 } from "./report-page-state";
 import { filledReport } from "./reportStoryFixture";
@@ -114,7 +114,7 @@ describe("ページ版の調査項目", () => {
     if (file?.mode !== "file") throw new Error("記入例の調査項目がありません。");
     const items: ReportPageItem[] = [{ ...file, images: [] }];
     const back = inputWithItems(filledReport, items);
-    const check = reportPageChecks(back, items, acks).find((c) => c.key === "measurements");
+    const check = reportPageChecks(back, acks).find((c) => c.key === "measurements");
     expect(check?.ok).toBe(false);
   });
 });
@@ -123,7 +123,7 @@ describe("記入状況", () => {
   it("空のレポートは確認のチェックを含めて未記入", () => {
     const blank = createBlankUsageReport(crypto.randomUUID());
     const items = itemsFromInput(blank);
-    const missing = reportPageChecks(inputWithItems(blank, items), items, {
+    const missing = reportPageChecks(inputWithItems(blank, items), {
       timing: false,
       privacy: false,
     })
@@ -137,7 +137,7 @@ describe("記入状況", () => {
   it("画像を差し込んだら写り込みと秘密保持の確認が要る", () => {
     const input = { ...filledReport, methodDetailsAck: true, guidelineAck: true };
     const items = itemsFromInput(input);
-    const keys = reportPageChecks(inputWithItems(input, items), items, {
+    const keys = reportPageChecks(inputWithItems(input, items), {
       timing: true,
       privacy: false,
     })
@@ -159,9 +159,9 @@ describe("記入状況", () => {
     };
     const items = itemsFromInput(input);
     const payload = inputWithItems(input, items);
-    expect(reportPageNeedsMaterialAcks(payload, items)).toBe(true);
+    expect(reportNeedsMaterialAcks(payload)).toBe(true);
     const missing = (checked: UsageReportInput, privacy: boolean) =>
-      reportPageChecks(checked, items, { timing: true, privacy })
+      reportPageChecks(checked, { timing: true, privacy })
         .filter((check) => !check.ok)
         .map((check) => check.key);
     expect(missing(payload, false)).toEqual(["privacyAck", "documentsAck"]);
@@ -175,7 +175,7 @@ describe("記入状況", () => {
       plots: filledReport.plots.map((plot) => ({ ...plot, description: "" })),
     };
     const items = itemsFromInput(input);
-    const plots = reportPageChecks(inputWithItems(input, items), items, acks).find(
+    const plots = reportPageChecks(inputWithItems(input, items), acks).find(
       (check) => check.key === "plots",
     );
     expect(plots?.ok).toBe(true);
@@ -190,7 +190,7 @@ describe("記入状況", () => {
     };
     const items = itemsFromInput(input);
     const payload = inputWithItems(input, items);
-    expect(reportPageChecks(payload, items, acks).every((check) => check.ok)).toBe(true);
+    expect(reportPageChecks(payload, acks).every((check) => check.ok)).toBe(true);
     expect(validateUsageReportSubmission(payload)).toEqual({});
   });
 });

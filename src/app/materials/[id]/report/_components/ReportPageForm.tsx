@@ -14,6 +14,7 @@ import { Icon } from "@/components/Icon";
 import { toast } from "@/components/Toaster";
 import {
   createBlankUsageReport,
+  reportNeedsMaterialAcks,
   UsageReportInputSchema,
   type UsageReportInput,
 } from "@/lib/usage-report";
@@ -41,7 +42,6 @@ import {
   reportLengthNote,
   reportOverLimit,
   reportPageChecks,
-  reportPageNeedsMaterialAcks,
   reportPageTitle,
   type ReportMaterialSummary,
   type ReportPageAcks,
@@ -280,12 +280,12 @@ export function ReportPageForm({
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty, submitted]);
 
-  const checks = reportPageChecks(payload, items, acks);
+  const checks = reportPageChecks(payload, acks);
   const missing = checks.filter((check) => !check.ok);
   const missingKeys = new Set(tried ? missing.map((check) => check.key) : []);
   const cropName = crops.find((crop) => crop.id === input.cropId)?.name ?? null;
   const title = reportPageTitle(currentMaterial.name, cropName);
-  const materialAcks = reportPageNeedsMaterialAcks(payload, items);
+  const materialAcks = reportNeedsMaterialAcks(payload);
   const done = checks.length - missing.length;
   const layout = reportPlotLayout(input, currentMaterial.name);
 
