@@ -97,16 +97,12 @@ const sub = css({ textStyle: "supporting", color: "text.muted" });
 
 const line = css({ display: "block", flexBasis: "full" });
 
-const inline = css({
+// 折り返す幅の 7em を、欄の文字の大きさで測る（行の文字より大きいので、外枠にも同じ大きさを置く）
+const inlineField = css({
   flex: "[1 1 7em]",
   minW: "0",
-  border: "none",
-  bg: "transparent",
-  p: "0",
   fontSize: "md",
   _touch: { fontSize: "lg" },
-  _focus: { outline: "none" },
-  _placeholder: { color: "text.muted" },
 });
 
 const listHead = css({
@@ -341,10 +337,12 @@ export function ReportPageProperties({
         <div className={valueRecipe({ kind: "field", missing: missing.has("variety") })}>
           {!input.varietyUnknown &&
             (input.varieties.length > 0 ? input.varieties : [null]).map((variety, index) => (
-              <input
+              <Input
                 key={variety?.id ?? "new"}
-                className={inline}
-                aria-label={input.varieties.length > 1 ? `品種${index + 1}` : "品種"}
+                label={input.varieties.length > 1 ? `品種${index + 1}` : "品種"}
+                hideLabel
+                size="inline"
+                fieldClassName={inlineField}
                 maxLength={REPORT_SHORT_MAX}
                 placeholder="例）アイコ"
                 value={variety?.name ?? ""}
@@ -418,9 +416,11 @@ export function ReportPageProperties({
             }
           />
           {input.showCity && (
-            <input
-              className={inline}
-              aria-label="市区町村"
+            <Input
+              label="市区町村"
+              hideLabel
+              size="inline"
+              fieldClassName={inlineField}
               maxLength={REPORT_SHORT_MAX}
               placeholder="市区町村"
               value={input.city}

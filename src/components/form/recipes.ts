@@ -31,7 +31,20 @@ const controlSizes = {
 export const controlRecipe = cva({
   base: controlBase,
   variants: {
-    size: controlSizes,
+    size: {
+      ...controlSizes,
+      // 行の中に書き込む欄：枠と余白を出さず、置いた行の背景にそろえる（属性の行の品種・市区町村など）
+      inline: {
+        borderWidth: "0",
+        borderRadius: "[0]",
+        bg: "transparent",
+        px: "0",
+        py: "0",
+        fontSize: "md",
+        _placeholder: { color: "text.muted" },
+        _focus: { outlineWidth: "0", outlineStyle: "none" },
+      },
+    },
     reveal: {
       true: { pe: "12" },
     },

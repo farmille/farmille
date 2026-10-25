@@ -36,6 +36,11 @@ export const WithGuidance: Story = {
   },
 };
 
+/** 行の中に置く欄。枠を出さず、置いた行の背景にそろえる。 */
+export const Inline: Story = {
+  args: { size: "inline", hideLabel: true, label: "品種", placeholder: "例）アイコ" },
+};
+
 export const HiddenLabel: Story = {
   args: { hideLabel: true, label: "写真の説明", placeholder: "写真の説明（任意）" },
 };
