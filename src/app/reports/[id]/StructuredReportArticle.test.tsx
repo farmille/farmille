@@ -55,6 +55,52 @@ describe("実証詳細レポート（新形式）の記事", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText("施用方法")).toBeNull();
   });
+  it("画像の調査項目は、項目名・画像・補足説明を調査項目の並びで出し、節の最後に画像を重ねて出さない", () => {
+    const input = sampleReport();
+    const image = {
+      id: crypto.randomUUID(),
+      kind: "image" as const,
+      name: "果実の断面",
+      unit: "",
+      body: "使用区は果肉が厚かった。",
+      graphs: [],
+    };
+    const text = {
+      ...image,
+      id: crypto.randomUUID(),
+      kind: "text" as const,
+      name: "食味",
+      body: "皮が薄く感じた。",
+    };
+    input.measurements = [image, ...input.measurements, text];
+    input.media = [
+      {
+        id: crypto.randomUUID(),
+        url: "https://example.test/storage/v1/object/public/report-media/u/r/a.jpg",
+        mediaType: "photo",
+        section: "measurements",
+        caption: "図1 果実の断面",
+        measurementId: image.id,
+      },
+    ];
+    render(
+      <StructuredReportArticle
+        materialName="ハイパーバイオ"
+        input={input}
+        cropLabel="ミニトマト"
+        documentUrls={[]}
+      />,
+    );
+    expect(
+      screen
+        .getAllByRole("heading", { level: 2 })
+        .map((h) => h.textContent)
+        .filter((text) => text?.startsWith("使用結果の詳細")),
+    ).toEqual(["使用結果の詳細：果実の断面", "使用結果の詳細：可販果率", "使用結果の詳細：食味"]);
+    expect(screen.getAllByRole("img", { name: "図1 果実の断面" })).toHaveLength(1);
+    expect(screen.getByText("図1 果実の断面", { selector: "figcaption" })).toBeInTheDocument();
+    expect(screen.getByText("使用区は果肉が厚かった。")).toBeInTheDocument();
+  });
   it("使用目的の補足を効果タグの次の行に出し、市区町村は公開を選んだ場合だけ都道府県の直後に出す", () => {
     const input = sampleReport();
     input.purposeNote = "高温期の萎れを軽くしたかった";

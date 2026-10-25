@@ -13,7 +13,7 @@ import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
 
 import { css } from "../../../../styled-system/css";
 import { ReadingHeading, ReadingProse } from "../../articles/_components/Reading";
-import { ReportFigures } from "./ReportFigures";
+import { ReportFigures, ReportItemImages } from "./ReportFigures";
 
 type Section = (typeof REPORT_SECTIONS)[number]["value"];
 
@@ -41,7 +41,9 @@ export function StructuredReportArticle({
   const layout = reportPlotLayout(input, materialName);
   const heading = (section: Section, fallback: string) =>
     input.headings.find((item) => item.section === section)?.title || fallback;
-  const mediaOf = (section: Section) => input.media.filter((media) => media.section === section);
+  // 調査項目に差し込んだ画像は項目ごとに出し、節の最後には調査項目に属さない旧形式の写真だけを出す
+  const mediaOf = (section: Section) =>
+    input.media.filter((media) => media.section === section && !media.measurementId);
   const prefecture = PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name;
   const stages = input.timingStages.map((stage) => APPLICATION_TIMINGS[stage]).join("、");
   const conditionLines = [
@@ -54,9 +56,6 @@ export function StructuredReportArticle({
     input.timingNote.trim() || null,
   ].filter((line): line is string => line !== null);
   const numericGroups = groupReportMeasurements(input.measurements);
-  const textMeasurements = input.measurements.filter(
-    (measurement) => measurement.kind === "text" && measurement.body.trim(),
-  );
 
   return (
     <>
@@ -103,7 +102,14 @@ export function StructuredReportArticle({
           case "measurements":
             return (
               <Fragment key={section}>
-                {numericGroups.map((measurement) => {
+                {input.measurements.map((item) => {
+                  // 同じ名前と単位の数値の調査項目は、最初の項目のところにグラフをまとめて出す
+                  const measurement =
+                    item.kind === "numeric"
+                      ? numericGroups.find((group) => group.id === item.id)
+                      : item;
+                  if (measurement === undefined) return null;
+                  if (measurement.kind === "text" && !measurement.body.trim()) return null;
                   const graphs = measurement.graphs
                     .map((graph) => ({
                       graph,
@@ -115,6 +121,12 @@ export function StructuredReportArticle({
                       <ReadingHeading>
                         {h}：{measurement.name || "調査項目未入力"}
                       </ReadingHeading>
+                      <ReportItemImages
+                        media={input.media.filter(
+                          (media) => media.measurementId === measurement.id,
+                        )}
+                        alt={measurement.name}
+                      />
                       {graphs.map(({ graph, groups }) => (
                         <ReportBars
                           key={graph.id}
@@ -129,17 +141,10 @@ export function StructuredReportArticle({
                           グラフは投稿されたデータからFarmilleが自動生成しています
                         </ReportGraphNote>
                       ) : null}
+                      {measurement.body.trim() ? <ReadingProse text={measurement.body} /> : null}
                     </Fragment>
                   );
                 })}
-                {textMeasurements.map((measurement) => (
-                  <Fragment key={measurement.id}>
-                    <ReadingHeading>
-                      {h}：{measurement.name}
-                    </ReadingHeading>
-                    <ReadingProse text={measurement.body} />
-                  </Fragment>
-                ))}
                 <ReportFigures media={media} />
               </Fragment>
             );

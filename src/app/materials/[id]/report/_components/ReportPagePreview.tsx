@@ -1,8 +1,8 @@
 "use client";
 
+import { ReportItemImages } from "@/app/reports/[id]/ReportFigures";
 import { Chip } from "@/components/Chip";
 import { Dialog } from "@/components/Dialog";
-import { OptimizedImage } from "@/components/OptimizedImage";
 import { ReportBars, reportBarGroups, ReportGraphNote } from "@/components/ReportBars";
 import { ReportPlotList } from "@/components/ReportPlotList";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
@@ -88,10 +88,6 @@ const facts = css({
   "& dt": { color: "text.muted" },
   "& dd": { m: "0", whiteSpace: "pre-wrap" },
 });
-
-const figure = css({ m: "0", my: "2", "& img": { w: "full", h: "auto" } });
-
-const caption = css({ textAlign: "center", textStyle: "supporting", color: "text.muted" });
 
 function Text({ value, empty = "（未記入）" }: { value: string; empty?: string }) {
   return value.trim() ? <p className={prose}>{value.trim()}</p> : <p className={none}>{empty}</p>;
@@ -212,18 +208,7 @@ export function ReportPagePreview({
         {shown.map((item) => (
           <section key={item.id}>
             <h3 className={h3}>使用結果の詳細：{item.name.trim() || "調査項目"}</h3>
-            {reportPageItemImages(item).map((image) => (
-              <figure key={image.id} className={figure}>
-                <OptimizedImage
-                  src={image.url}
-                  alt={image.caption || item.name}
-                  width={720}
-                  height={540}
-                  sizes="(max-width: 720px) 100vw, 720px"
-                />
-                {image.caption && <figcaption className={caption}>{image.caption}</figcaption>}
-              </figure>
-            ))}
+            <ReportItemImages media={reportPageItemImages(item)} alt={item.name} />
             {item.mode === "numeric" && (
               <>
                 {item.graphs.map((graph) => (

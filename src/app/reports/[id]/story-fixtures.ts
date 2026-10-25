@@ -72,6 +72,14 @@ export const structuredReport: UsageReportInput = {
       ],
     },
     {
+      id: id(27),
+      kind: "image",
+      name: "果実の断面",
+      unit: "",
+      body: "使用区は果肉が厚かった。",
+      graphs: [],
+    },
+    {
       id: id(26),
       kind: "text",
       name: "食味",
@@ -90,6 +98,14 @@ export const structuredReport: UsageReportInput = {
     },
     { id: id(32), url: photo, mediaType: "photo", section: "plots", caption: "対照区" },
     { id: id(33), url: photo, mediaType: "photo", section: "plots", caption: "使用区" },
+    {
+      id: id(34),
+      url: photo,
+      mediaType: "photo",
+      section: "measurements",
+      caption: "図1 果実の断面",
+      measurementId: id(27),
+    },
   ],
   documents: [
     { id: id(41), path: "docs/a.pdf", name: "収量調査の記録.pdf" },
