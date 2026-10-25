@@ -139,6 +139,20 @@ describe("実証詳細レポート", () => {
       "※ 調査項目を1つ以上追加してください",
     );
   });
+  it("どの区からも指されていない品種は、名前を示して提出を断る", () => {
+    const input = withSingleVariety(createBlankUsageReport(materialId), "新藍", false);
+    const aiko = { id: crypto.randomUUID(), name: "アイコ" };
+    input.varieties = [...input.varieties, aiko];
+    expect(validateUsageReportSubmission(input)["varieties.1.plots"]).toBe(
+      "※ 品種「アイコ」の区がありません。区を足すか、品種を外してください",
+    );
+    expect(validateUsageReportSubmission(input)["varieties.0.plots"]).toBeUndefined();
+    input.plots = [
+      ...input.plots,
+      { ...input.plots[0]!, id: crypto.randomUUID(), varietyId: aiko.id },
+    ];
+    expect(validateUsageReportSubmission(input)["varieties.1.plots"]).toBeUndefined();
+  });
   it("都道府県と品種は提出時に必須で、品種は「不明」のチェックで不要になる", () => {
     const blank = createBlankUsageReport(materialId);
     const errors = validateUsageReportSubmission(blank);

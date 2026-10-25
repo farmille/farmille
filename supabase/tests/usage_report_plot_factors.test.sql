@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(39);
+select plan(40);
 
 insert into auth.users(id) values('ca932323-0000-4000-8000-000000000001'),('ca932323-0000-4000-8000-000000000009');
 insert into public.profiles(user_id,handle,standpoint)
@@ -62,6 +62,8 @@ select throws_ok($$select public.save_usage_report(jsonb_set(pg_temp.report_inpu
 select throws_ok($$select public.save_usage_report(jsonb_set(pg_temp.report_input(),'{comparedMaterials,0,name}','""'),true)$$,'23514',null,'compared material name required');
 select throws_ok($$select public.save_usage_report(jsonb_set(pg_temp.report_input(),'{varietyUnknown}','true'),true)$$,'23514',null,'unknown variety cannot keep varieties');
 select throws_ok($$select public.save_usage_report(jsonb_set(jsonb_set(jsonb_set(pg_temp.report_input(),'{plots,0,description}','""'),'{plots,1,description}','""'),'{plots,2,description}','""'),true)$$,'23514',null,'plot description or common description required');
+select throws_ok($$select public.save_usage_report(pg_temp.report_input()||'{"varieties":[{"id":"ca932323-0000-4000-8000-000000000011","name":"新藍"},{"id":"ca932323-0000-4000-8000-000000000013","name":"初恋"}]}'::jsonb,true)$$,
+  '23514',null,'a variety that no plot points to cannot be submitted');
 
 select lives_ok($$select public.save_usage_report(jsonb_build_object('reportId','ca932323-0000-4000-8000-000000000004','expectedUpdatedAt',null)||(pg_temp.report_input()-'reportId'-'expectedUpdatedAt')
   ||'{"varieties":[{"id":"ca932323-0000-4000-8000-000000000041","name":"別の品種"}],"comparedMaterials":[{"id":"ca932323-0000-4000-8000-000000000042","name":"別の資材"}],"plots":[],"measurements":[]}'::jsonb,false)$$,'another report keeps its own varieties');

@@ -249,6 +249,12 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   );
   input.varieties.forEach((variety, i) => {
     required(`varieties.${i}.name`, variety.name.trim().length > 0, "※ 品種を入力してください");
+    // 組み合わせの表で品種の区をすべて外すと品種だけが残り、作物の表示には出るのに区とグラフには出ない
+    required(
+      `varieties.${i}.plots`,
+      input.varietyUnknown || input.plots.some((plot) => plot.varietyId === variety.id),
+      `※ 品種「${variety.name.trim() || "（品種名未入力）"}」の区がありません。区を足すか、品種を外してください`,
+    );
   });
   input.comparedMaterials.forEach((material, i) => {
     required(
