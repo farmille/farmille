@@ -90,6 +90,26 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
   });
   afterEach(() => fs.rmSync(root, { recursive: true, force: true }));
 
+  it.each(["C", process.platform === "darwin" ? "en_US.UTF-8" : "C.UTF-8"])(
+    "reports untrusted files and registers them under %s",
+    (locale) => {
+      env.LC_ALL = locale;
+      git("update-ref", "refs/remotes/origin/main", base);
+      write("package.json", '{"type":"module","private":true}\n');
+      write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# reviewed change\n");
+      git("add", "package.json", "pnpm-lock.yaml");
+      git("commit", "-m", "change dependency settings");
+      const rejected = push("feature");
+      expect(rejected.status).not.toBe(0);
+      expect(rejected.stderr).toContain("package.json・pnpm-lock.yaml が origin/main と異なり");
+      expect(commands()).toEqual([]);
+      const registered = setup("--trust-current");
+      expect(registered.stderr).toBe("");
+      expect(registered.status).toBe(0);
+      expect(push("feature").status).toBe(0);
+    },
+  );
+
   it("does not execute checkout-controlled post-checkout hooks", () => {
     write(".githooks/post-checkout", "#!/bin/sh\nprintf compromised > .git/checkout-marker\n");
     fs.chmodSync(path.join(repo, ".githooks/post-checkout"), 0o755);
