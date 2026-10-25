@@ -1,8 +1,11 @@
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
+import { createBlankUsageReport } from "./usage-report";
 import {
+  effectivePdfReadingMarks,
   PDF_READING_FIELD_PATHS,
+  pdfReadingFieldValue,
   PdfReadingFieldKeySchema,
   PdfReadingFieldsSchema,
   PdfReadingUploadPathSchema,
@@ -75,5 +78,36 @@ describe("PDF の一時置き場の場所", () => {
     expect(v.is(PdfReadingUploadPathSchema, `${plotId}/成績書.pdf`)).toBe(false);
     expect(v.is(PdfReadingUploadPathSchema, `${plotId}/sub/${graphId}.pdf`)).toBe(false);
     expect(v.is(PdfReadingUploadPathSchema, `${graphId}.pdf`)).toBe(false);
+  });
+});
+
+describe("pdfReadingFieldValue", () => {
+  const input = {
+    ...createBlankUsageReport(plotId),
+    timingStages: [4, 1],
+    purposeTags: ["収量改善", "耐暑性改善"],
+  };
+  const [first] = input.plots;
+
+  it("欄の今の値を比較用の文字列で返す", () => {
+    expect(pdfReadingFieldValue(input, "timingStages")).toBe("1,4");
+    expect(pdfReadingFieldValue(input, "purposeTags")).toBe("収量改善\n耐暑性改善");
+    expect(pdfReadingFieldValue(input, "cropId")).toBe("");
+    expect(pdfReadingFieldValue(input, `plots.${first?.id}.treatment`)).toBe("untreated");
+  });
+
+  it("対象の区や行が無ければ undefined を返す", () => {
+    expect(pdfReadingFieldValue(input, `plots.${rowId}.name`)).toBeUndefined();
+    expect(
+      pdfReadingFieldValue(input, `measurements.${plotId}.graphs.${graphId}.rows.${rowId}.value`),
+    ).toBeUndefined();
+  });
+
+  it("印は記録の値と今の値が同じ欄だけに残る", () => {
+    const marks = [
+      { fieldKey: "timingStages" as const, value: "1,4", quote: "" },
+      { fieldKey: "cropId" as const, value: graphId, quote: "" },
+    ];
+    expect(effectivePdfReadingMarks(marks, input)).toEqual([marks[0]]);
   });
 });
