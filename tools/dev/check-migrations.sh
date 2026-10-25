@@ -61,6 +61,6 @@ include_all=""
 [[ "${pending[0]%%_*}" > "${applied##*$'\n'}" ]] || include_all=" --include-all"
 db_port=$(docker port "$db" 5432/tcp)
 db_port=${db_port%%$'\n'*}
-log "DB は worktree 間で共有しているので、適用は確認を取ってから次で行います。"
+log "次で適用します（確認は不要。DB は worktree 間で共有しているので、他の worktree にも反映されます）。"
 printf '  npx --yes supabase@2.120.0 migration up%s --db-url "postgresql://postgres:postgres@127.0.0.1:%s/postgres?sslmode=disable"\n' "$include_all" "${db_port##*:}"
 exit 1

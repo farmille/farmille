@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -22,7 +22,7 @@ function EditorTabs() {
 }
 
 describe("Tabs", () => {
-  it("選んだタブのパネルだけを出す", () => {
+  it("選んだタブのパネルだけを出す", async () => {
     render(<EditorTabs />);
     expect(screen.getByRole("tablist", { name: "本文エディタ" })).toBeDefined();
     expect(screen.getByRole("tab", { name: "編集" }).getAttribute("aria-selected")).toBe("true");
@@ -32,7 +32,7 @@ describe("Tabs", () => {
     expect(screen.getByRole("tab", { name: "プレビュー" }).getAttribute("aria-selected")).toBe(
       "true",
     );
+    await waitFor(() => expect(screen.queryByText("編集欄")).toBeNull());
     expect(screen.getByRole("tabpanel").textContent).toBe("プレビュー欄");
-    expect(screen.queryByText("編集欄")).toBeNull();
   });
 });
