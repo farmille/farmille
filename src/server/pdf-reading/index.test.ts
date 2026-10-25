@@ -49,7 +49,13 @@ const output: ReportReadingOutput = {
 function makeRequest(
   input: UsageReportInput = createBlankUsageReport(materialId),
 ): PdfReadingRequest {
-  return { input, uploadPath, recaptchaToken: "token", scope: "", consent: true };
+  return {
+    input,
+    uploadPath,
+    recaptchaToken: "token",
+    trial: "試験2の処理区がこの資材",
+    consent: true,
+  };
 }
 
 function fakeDeps(
@@ -183,9 +189,10 @@ describe("readPdfIntoDraft", () => {
     });
   });
 
-  it("要求の形が違うか他人の PDF なら、何も触らず数えない", async () => {
+  it("要求の形が違う・読み取る試験が空・他人の PDF なら、何も触らず数えない", async () => {
     for (const request of [
       { ...makeRequest(), consent: false },
+      { ...makeRequest(), trial: " 　" },
       { ...makeRequest(), uploadPath: `8e3f5f88-9f5b-4f76-8a3b-6d4c9c3fad44/${userId}.pdf` },
     ]) {
       const { deps, calls } = fakeDeps();

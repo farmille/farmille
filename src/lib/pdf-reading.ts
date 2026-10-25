@@ -69,8 +69,8 @@ export const PdfReadingUploadPathSchema = v.pipe(
   v.regex(new RegExp(`^${UUID}/${UUID}\\.pdf$`, "u")),
 );
 
-/** PDFの大きさ・ページ数と、読み取る範囲の文字数の上限。ブラウザとサーバーで同じ値を使う。 */
-export const PDF_READING_LIMITS = { bytes: 20 * 1024 * 1024, pages: 40, scope: 200 } as const;
+/** PDFの大きさ・ページ数と、読み取る試験の文字数の上限。ブラウザとサーバーで同じ値を使う。 */
+export const PDF_READING_LIMITS = { bytes: 20 * 1024 * 1024, pages: 40, trial: 200 } as const;
 
 /** reCAPTCHA v3 のトークンを取るときの action。サーバーの検証でも同じ値を求める。 */
 export const PDF_READING_RECAPTCHA_ACTION = "pdf_reading";
@@ -79,11 +79,29 @@ export const PDF_READING_RECAPTCHA_ACTION = "pdf_reading";
 export const PDF_READING_CONSENT =
   "PDFの読み取りにはAnthropic社のAIモデルを使用しています。PDFはモデルの学習には用いられませんが、同社によりデータサーバー内に最大30日（規約違反の疑いがある場合を除く）データが保管されることがあります。Farmilleの運営がPDFを閲覧することはありません。";
 
+export const PDF_READING_TRIAL_REQUIRED = "読み取る試験を書いてください";
+
+/** 読み取る試験が空（前後の空白だけを含む）なら、欄の下に出す文言を返す。 */
+export function pdfReadingTrialError(trial: string): string | undefined {
+  return trial.trim() === "" ? PDF_READING_TRIAL_REQUIRED : undefined;
+}
+
+/** 読み取る試験の書き始め。作物と品種が入っていれば「作物・品種の」の形で入れておく。 */
+export function pdfReadingTrialDraft(cropName: string | null, varietyNames: string[]): string {
+  const names = [cropName ?? "", ...varietyNames].map((name) => name.trim()).filter(Boolean);
+  return names.length === 0 ? "" : `${names.join("・")}の`;
+}
+
 export const PdfReadingRequestSchema = v.object({
   input: UsageReportInputSchema,
   uploadPath: PdfReadingUploadPathSchema,
   recaptchaToken: v.pipe(v.string(), v.minLength(1), v.maxLength(4000)),
-  scope: v.pipe(v.string(), v.maxLength(PDF_READING_LIMITS.scope)),
+  trial: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, PDF_READING_TRIAL_REQUIRED),
+    v.maxLength(PDF_READING_LIMITS.trial),
+  ),
   consent: v.literal(true),
 });
 export type PdfReadingRequest = v.InferOutput<typeof PdfReadingRequestSchema>;

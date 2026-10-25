@@ -5,7 +5,11 @@ import { createBlankUsageReport } from "./usage-report";
 import {
   effectivePdfReadingMarks,
   PDF_READING_FIELD_PATHS,
+  PDF_READING_TRIAL_REQUIRED,
   pdfReadingFieldValue,
+  PdfReadingRequestSchema,
+  pdfReadingTrialDraft,
+  pdfReadingTrialError,
   PdfReadingFieldKeySchema,
   PdfReadingFieldsSchema,
   PdfReadingUploadPathSchema,
@@ -69,6 +73,42 @@ describe("PDF読み取りの欄の経路", () => {
       }));
     expect(v.is(PdfReadingFieldsSchema, many(2000))).toBe(true);
     expect(v.is(PdfReadingFieldsSchema, many(2001))).toBe(false);
+  });
+});
+
+describe("読み取る試験", () => {
+  const request = {
+    input: createBlankUsageReport(plotId),
+    uploadPath: `${plotId}/${graphId}.pdf`,
+    recaptchaToken: "token",
+    consent: true,
+  };
+
+  it("空か空白だけなら、画面でもサーバーでも断る", () => {
+    for (const trial of ["", "  ", "　\n"]) {
+      expect(pdfReadingTrialError(trial), JSON.stringify(trial)).toBe(PDF_READING_TRIAL_REQUIRED);
+      expect(v.is(PdfReadingRequestSchema, { ...request, trial }), JSON.stringify(trial)).toBe(
+        false,
+      );
+    }
+  });
+
+  it("書いてあれば通し、サーバーでは前後の空白を除いて200字まで受ける", () => {
+    expect(pdfReadingTrialError("試験2")).toBeUndefined();
+    const parsed = v.parse(PdfReadingRequestSchema, { ...request, trial: " 試験2 " });
+    expect(parsed.trial).toBe("試験2");
+    expect(v.is(PdfReadingRequestSchema, { ...request, trial: "あ".repeat(200) })).toBe(true);
+    expect(v.is(PdfReadingRequestSchema, { ...request, trial: "あ".repeat(201) })).toBe(false);
+  });
+
+  it("書き始めは、入っている作物と品種から作る", () => {
+    expect(pdfReadingTrialDraft("トルコギキョウ", ["プリマラベンダー"])).toBe(
+      "トルコギキョウ・プリマラベンダーの",
+    );
+    expect(pdfReadingTrialDraft("キャベツ", ["新藍", "初恋"])).toBe("キャベツ・新藍・初恋の");
+    expect(pdfReadingTrialDraft("キャベツ", [" "])).toBe("キャベツの");
+    expect(pdfReadingTrialDraft(null, ["新藍"])).toBe("新藍の");
+    expect(pdfReadingTrialDraft(null, [])).toBe("");
   });
 });
 

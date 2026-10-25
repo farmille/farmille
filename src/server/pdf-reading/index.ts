@@ -143,7 +143,7 @@ async function sendToModel(
       system: REPORT_READING_SYSTEM,
       instructions: reportReadingInstructions(
         catalog.data.material,
-        request.scope,
+        request.trial,
         catalog.data.catalog,
       ),
       deadline: started + DEADLINE_MS,

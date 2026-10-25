@@ -15,7 +15,7 @@ function list(values: readonly string[]): string {
 /** レポートの下書きを作るための指示。候補の一覧は毎回同じ順に並べる。 */
 export function reportReadingInstructions(
   material: ReadingMaterial,
-  scope: string,
+  trial: string,
   catalog: Pick<ReadingCatalog, "crops" | "effectNames">,
 ): string {
   const names = [material.name, ...material.aliases].filter((name) => name.trim() !== "");
@@ -25,14 +25,16 @@ export function reportReadingInstructions(
 - 名前：${names.join("、")}
 - メーカー：${material.manufacturerName}
 
-# 読み取る範囲
-${scope.trim() === "" ? "指定なし。PDFの中で投稿した資材を使った区と、その区と比べた区（無処理・対照・比較した資材）をすべて読む。" : `投稿者の指定：「${scope.trim()}」。この指定に合う試験・区だけを読む。`}
-- PDFに作物が複数あるときは、範囲の指定に合う作物、指定がなければ投稿した資材が出てくる作物の1つにしぼる。
-- 投稿した資材を使った試験が見つからなければ outcome を "no_matching_trial" にし、ほかは空にする。
+# 読み取る試験
+投稿者の指定：「${trial.trim()}」
+- この指定に合う試験の区と、その区と比べた区（無処理・対照・比較した資材）を読む。指定に合わない試験の区は読まない。
+- 指定にPDFの中での資材の呼び名とこの資材の関係（例：「高活性腐植資材区がこの資材」）があれば、その呼び名の区を投稿した資材の区（"posted"）として扱う。
+- PDFに作物が複数あるときは、指定に合う作物にしぼる。
+- 指定に合う試験に投稿した資材の区が見つからなければ、outcome を "no_matching_trial" にし、ほかは空にする。
 
 # 区（plots）
 - 区は「試した品種」と「使った資材」の組み合わせ1つ。比べた区をすべて入れる。
-- treatment：投稿した資材（名前・別名・表記の揺れを含む）を使った区は "posted"、資材を使わない区（無処理・対照・慣行のみ）は "untreated"、別の資材を使った区は "compared"。
+- treatment：投稿した資材（名前・別名・表記の揺れと、指定で投稿した資材と示された呼び名を含む）を使った区は "posted"、資材を使わない区（無処理・対照・慣行のみ）は "untreated"、別の資材を使った区は "compared"。
 - compared の区は comparedMaterials にその資材を入れ、comparedMaterialKey でその key を指す。ほかの区の comparedMaterialKey は空文字。
 - 品種が分かるときは varieties に入れ、varietyKey でその key を指す。品種が書かれていなければ varieties は空、varietyKey は空文字。
 - 品種の name は品種名だけにする。作物名・系統・括弧の注記は付けない（例：「夏秋ギク『精の一世』早生系」なら「精の一世」）。
