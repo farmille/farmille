@@ -15,7 +15,7 @@ export type PdfExtractionUsage = {
   outputTokens: number;
 };
 
-/** refusal は拒否、max_tokens は途中で止まった（入力が多すぎる場合も含む）、deadline は期限切れ、server_error は 5xx。 */
+/** max_tokens は、出力が上限で止まった場合と入力がコンテキストに収まらない場合。 */
 export type PdfExtractionError =
   | "refusal"
   | "max_tokens"
@@ -38,8 +38,8 @@ export type PdfExtractionRequest<TSchema extends v.GenericSchema> = {
   deadline: number;
 };
 
-/** Valibot のスキーマを、構造化出力に渡す JSON Schema にする。 */
 export function outputJsonSchema(schema: v.GenericSchema): Anthropic.JSONOutputFormat["schema"] {
+  // $schema は構造化出力が受け付けるキーワードに無いので外す
   return Object.fromEntries(
     Object.entries(toJsonSchema(schema)).filter(([key]) => key !== "$schema"),
   );
@@ -86,7 +86,6 @@ function parseOutput<TSchema extends v.GenericSchema>(
   return { ok: true, output: output.output, usage };
 }
 
-// 例外の種類ごとの失敗の理由。上から順に当てはめ、どれでもなければ failed。
 const FAILURES = [
   [Anthropic.APIUserAbortError, "deadline"],
   [Anthropic.APIConnectionTimeoutError, "deadline"],
@@ -142,7 +141,6 @@ export async function extractFromPdf<TSchema extends v.GenericSchema>(
         .finalMessage();
       return parseOutput(message, request.schema, speed);
     } catch (error) {
-      // fast mode の 429 と、容量不足の 529 だけ通常の速度でやり直す
       const fastUnavailable =
         error instanceof Anthropic.RateLimitError ||
         (error instanceof Anthropic.APIError && error.status === 529);

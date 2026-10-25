@@ -20,7 +20,6 @@ import { css } from "../../../../../../styled-system/css";
 
 import { countPdfPages, isPdf, uploadPdfForReading } from "./report-page-images";
 
-/** 送る前の確認と、送ってからの段階。段階ごとに画面の文言とできる操作が決まる。 */
 type Phase = "idle" | "checking" | "uploading" | "verifying" | "reading";
 
 const STEPS = [
