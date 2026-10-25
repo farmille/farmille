@@ -18,7 +18,13 @@ import {
 
 import { css, cx } from "../../../../../../styled-system/css";
 
-import { REPORT_BODY_MAX, REPORT_SHORT_MAX, reportLengthNote } from "./report-page-state";
+import { ReportPdfReadingMark } from "./ReportPdfReadingMark";
+import {
+  plotMarkFields,
+  REPORT_BODY_MAX,
+  REPORT_SHORT_MAX,
+  reportLengthNote,
+} from "./report-page-state";
 import { addButton, docLead, docLeadMark, labelStyle, removeButton } from "./report-page-styles";
 
 type Plot = UsageReportInput["plots"][number];
@@ -308,6 +314,7 @@ export function ReportPagePlots({
             error={missing && !described ? "区の説明を記入してください" : undefined}
             onChange={(event) => update(plot.id, { description: event.target.value })}
           />
+          <ReportPdfReadingMark fields={plotMarkFields(plot.id)} />
         </div>
       </div>
     );
@@ -390,6 +397,12 @@ export function ReportPagePlots({
           );
         })}
       </div>
+      <ReportPdfReadingMark
+        fields={input.comparedMaterials.map(({ id, name }) => ({
+          key: `comparedMaterials.${id}.name`,
+          label: name.trim() || "比較した資材",
+        }))}
+      />
       <Adder
         label="足す比較した資材の名前"
         placeholder="比較した資材の名前"
@@ -476,6 +489,7 @@ export function ReportPagePlots({
           onChange={(event) => change({ ...input, commonPlotDescription: event.target.value })}
         />
       )}
+      {common && <ReportPdfReadingMark fields={[{ key: "commonPlotDescription" }]} />}
 
       {plan.showMatrix && <p className={fieldLabel}>区（{input.plots.length}）</p>}
       {layout.groups.map((group) => (

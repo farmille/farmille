@@ -16,7 +16,15 @@ import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
 
 import { css } from "../../../../../../styled-system/css";
 
-import { reportLegacyMedia, reportPageItemImages, type ReportPageItem } from "./report-page-state";
+import { ReportPdfReadingMark } from "./ReportPdfReadingMark";
+import {
+  itemMarkFields,
+  plotMarkFields,
+  reportLegacyMedia,
+  reportPageItemImages,
+  type ReportMarkField,
+  type ReportPageItem,
+} from "./report-page-state";
 
 const wrap = css({
   maxW: "content.form",
@@ -147,6 +155,32 @@ export function ReportPagePreview({
     <ReportFigures media={reportLegacyMedia(input).filter((media) => media.section === section)} />
   );
   const documentMedia = reportLegacyMedia(input).filter((media) => media.section === "documents");
+  // 印は投稿者のプレビューにだけ出す（公開記事の部品には渡さない）
+  const conditionMarks: ReportMarkField[] = [
+    { key: "prefectureCode", label: "地域" },
+    { key: "cropId", label: "使用作物" },
+    ...input.varieties.map(
+      ({ id }): ReportMarkField => ({ key: `varieties.${id}.name`, label: "品種" }),
+    ),
+    { key: "cultivationEnvironment", label: "栽培環境" },
+    { key: "timingStages", label: "施用時期" },
+    { key: "timingNote", label: "処理日と生育状況" },
+  ];
+  const plotMarks: ReportMarkField[] = [
+    { key: "commonPlotDescription", label: "全区に共通の説明" },
+    ...input.comparedMaterials.map(
+      ({ id }): ReportMarkField => ({
+        key: `comparedMaterials.${id}.name`,
+        label: "比較した資材",
+      }),
+    ),
+    ...input.plots.flatMap((plot, index) =>
+      plotMarkFields(plot.id).map((field) => ({
+        ...field,
+        label: `${plot.name.trim() || `区${index + 1}`}の${field.label ?? ""}`,
+      })),
+    ),
+  ];
   return (
     <Dialog
       open={open}
@@ -191,10 +225,12 @@ export function ReportPagePreview({
 
         <h2 className={h2}>{reportSectionHeading(input, "results")}</h2>
         <Text value={input.observedChange} />
+        <ReportPdfReadingMark fields={[{ key: "observedChange" }]} />
         {legacy("results")}
 
         <h2 className={h2}>{reportSectionHeading(input, "effects")}</h2>
         <Text value={input.purposeTags.join("、")} empty="（未選択）" />
+        <ReportPdfReadingMark fields={[{ key: "purposeTags" }]} />
         {input.purposeNote.trim() && <Text value={input.purposeNote} />}
         {legacy("effects")}
 
@@ -217,6 +253,7 @@ export function ReportPagePreview({
           <dt>処理日と生育状況</dt>
           <dd>{input.timingNote.trim() || "（未記入）"}</dd>
         </dl>
+        <ReportPdfReadingMark fields={conditionMarks} />
         {legacy("conditions")}
 
         <h2 className={h2}>比較・使用結果</h2>
@@ -226,6 +263,7 @@ export function ReportPagePreview({
           commonDescription={input.commonPlotDescription}
           emptyDescription="（説明が未記入）"
         />
+        <ReportPdfReadingMark fields={plotMarks} />
         {legacy("plots")}
         {shown.length === 0 && <p className={none}>（調査項目ごとの結果が未記入）</p>}
         {shown.map((item) => (
@@ -233,6 +271,7 @@ export function ReportPagePreview({
             <h3 className={h3}>
               {reportSectionHeading(input, "measurements")}：{item.name.trim() || "調査項目"}
             </h3>
+            <ReportPdfReadingMark fields={itemMarkFields(item, input.plots)} />
             <ReportItemImages media={reportPageItemImages(item)} alt={item.name} />
             {item.mode === "numeric" && (
               <>

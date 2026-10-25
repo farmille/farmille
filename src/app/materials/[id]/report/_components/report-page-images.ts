@@ -139,6 +139,27 @@ export async function openPdf(file: File): Promise<PDFDocumentProxy> {
   return pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
 }
 
+/** PDF のページ数。PDF読み取りで送る前に、上限を超えていないかを確かめる。 */
+export async function countPdfPages(file: File): Promise<number> {
+  const doc = await openPdf(file);
+  try {
+    return doc.numPages;
+  } finally {
+    await doc.destroy();
+  }
+}
+
+/** PDF読み取りに使う PDF を、本人のフォルダの一時置き場へ上げて場所を返す。読み取りの後にサーバーが消す。 */
+export async function uploadPdfForReading(file: File, userId: string): Promise<string> {
+  const path = `${userId}/${crypto.randomUUID()}.pdf`;
+  const { error } = await createAuthBrowserClient()
+    .storage.from("pdf-reading-sources")
+    .upload(path, file, { contentType: "application/pdf", upsert: false });
+  if (error !== null)
+    throw new Error("PDFを送れませんでした。通信状態を確認して、もう一度お試しください。");
+  return path;
+}
+
 // 同じ PDF のページを同時に描くと pdf.js が止まることがあるので、PDFごとに1つずつ順に描く
 const pdfQueues = new WeakMap<PDFDocumentProxy, Promise<unknown>>();
 

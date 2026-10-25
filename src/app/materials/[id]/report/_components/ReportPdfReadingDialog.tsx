@@ -1,0 +1,223 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import { readPdfIntoReportAction } from "@/app/materials/[id]/report/new/actions";
+import { Button } from "@/components/Button";
+import { Dialog } from "@/components/Dialog";
+import { Checkbox, FileInput, Input, Notice } from "@/components/form";
+import {
+  PDF_READING_CONSENT,
+  PDF_READING_LIMITS,
+  PDF_READING_RECAPTCHA_ACTION,
+  type PdfReadingResult,
+} from "@/lib/pdf-reading";
+import { executeRecaptcha, loadRecaptcha } from "@/lib/recaptcha-client";
+import type { UsageReportInput } from "@/lib/usage-report";
+import { errorMessageJa } from "@/server/errors";
+
+import { css } from "../../../../../../styled-system/css";
+
+import { countPdfPages, isPdf, uploadPdfForReading } from "./report-page-images";
+
+/** 送る前の確認と、送ってからの段階。段階ごとに画面の文言とできる操作が決まる。 */
+type Phase = "idle" | "checking" | "uploading" | "verifying" | "reading";
+
+const STEPS = [
+  { phase: "uploading", label: "PDFを送っています" },
+  { phase: "verifying", label: "ロボットによる操作でないことを確かめています" },
+  { phase: "reading", label: "PDFを読み取っています（十数秒〜1分ほど）" },
+] as const satisfies { phase: Phase; label: string }[];
+
+const LIMIT_MESSAGE = `PDFは${PDF_READING_LIMITS.bytes / 1024 / 1024}MB以下・${PDF_READING_LIMITS.pages}ページ以下のものを選んでください。`;
+
+const body = css({ display: "grid", gap: "4" });
+
+const lead = css({ m: "0", textStyle: "body", color: "text.default" });
+
+const count = css({ m: "0", textStyle: "supporting", fontWeight: "bold", color: "text.brand" });
+
+const steps = css({
+  m: "0",
+  pl: "5",
+  display: "grid",
+  gap: "1",
+  textStyle: "supporting",
+  color: "text.muted",
+  "& [aria-current=step]": { color: "text.default", fontWeight: "bold" },
+});
+
+const elapsed = css({ m: "0", textStyle: "note", color: "text.muted" });
+
+export function ReportPdfReadingDialog({
+  open,
+  onOpenChange,
+  materialId,
+  userId,
+  siteKey,
+  remaining,
+  input,
+  replaces,
+  onRead,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  materialId: string;
+  userId: string;
+  siteKey: string;
+  remaining: number;
+  /** 今の画面の入力。読み取りの前にサーバーの下書きへ保存してから写す。 */
+  input: UsageReportInput;
+  /** 区か数値の調査項目に入力があり、読み取りで置き換わるか。 */
+  replaces: boolean;
+  onRead: (result: PdfReadingResult) => void;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [scope, setScope] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [problem, setProblem] = useState<string | null>(null);
+  const [startedAt, setStartedAt] = useState(0);
+  const [now, setNow] = useState(0);
+  const busy = phase !== "idle" && phase !== "checking";
+
+  useEffect(() => {
+    if (!open) return;
+    // reCAPTCHA の script はこの画面を開いたときだけ読み込む。失敗は送るときに知らせる
+    loadRecaptcha(siteKey).catch(() => undefined);
+  }, [open, siteKey]);
+
+  useEffect(() => {
+    if (!busy) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [busy]);
+
+  async function choose(next: File | undefined) {
+    setFile(null);
+    setProblem(null);
+    if (next === undefined) return;
+    if (!isPdf(next) || next.size > PDF_READING_LIMITS.bytes) {
+      setProblem(isPdf(next) ? LIMIT_MESSAGE : "PDFファイルを選んでください。");
+      return;
+    }
+    setPhase("checking");
+    try {
+      const pages = await countPdfPages(next);
+      if (pages > PDF_READING_LIMITS.pages) setProblem(LIMIT_MESSAGE);
+      else setFile(next);
+    } catch {
+      setProblem(errorMessageJa.pdf_invalid);
+    } finally {
+      setPhase("idle");
+    }
+  }
+
+  async function read() {
+    if (file === null || !consent || busy) return;
+    setProblem(null);
+    setStartedAt(Date.now());
+    setNow(Date.now());
+    let result: PdfReadingResult;
+    try {
+      setPhase("uploading");
+      const uploadPath = await uploadPdfForReading(file, userId);
+      setPhase("verifying");
+      // トークンの有効期限は2分なので、PDF を上げ終えてから取る
+      const recaptchaToken = await executeRecaptcha(siteKey, PDF_READING_RECAPTCHA_ACTION);
+      setPhase("reading");
+      result = await readPdfIntoReportAction(materialId, {
+        input,
+        uploadPath,
+        recaptchaToken,
+        scope: scope.trim(),
+        consent: true,
+      });
+    } catch {
+      // 通信の失敗などはブラウザの英語の文言になるので、そのまま出さない
+      result = {
+        ok: false,
+        error: "internal",
+        message: errorMessageJa.pdf_reading_failed,
+        remaining: null,
+      };
+    } finally {
+      setPhase("idle");
+    }
+    if (!result.ok) setProblem(result.message);
+    onRead(result);
+  }
+
+  const used = remaining <= 0;
+  const step = STEPS.findIndex((item) => item.phase === phase);
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        // 読み取りの途中では閉じない（結果を入力に写すまで編集を止める）
+        if (!busy) onOpenChange(next);
+      }}
+      size="sheet"
+      title="PDF読み取り"
+      closeLabel="PDF読み取りを閉じる"
+      footer={
+        <Button
+          variant="primary"
+          size="sm"
+          disabled={file === null || !consent || busy || used}
+          onClick={() => void read()}
+        >
+          {busy ? "読み取っています…" : replaces ? "置き換えて読み取る" : "読み取る"}
+        </Button>
+      }
+    >
+      <div className={body}>
+        <p className={lead}>
+          試験成績書のPDFから、区・数値のグラフ・栽培条件などを読み取って下書きに入れます。入った値は、元のPDFと照らし合わせて確かめてください。
+        </p>
+        <p className={count}>今月あと{Math.max(remaining, 0)}回</p>
+        {used && <Notice tone="warn">{errorMessageJa.pdf_reading_limit}</Notice>}
+        <FileInput
+          label="PDF"
+          requirement="required"
+          description={LIMIT_MESSAGE}
+          accept="application/pdf,.pdf"
+          disabled={busy}
+          onChange={(event) => void choose(event.currentTarget.files?.[0])}
+        />
+        <Input
+          label="読み取る範囲"
+          requirement="optional"
+          description="空のときは、投稿する資材を使った区と、比べた区をすべて読みます。"
+          placeholder="例）キャベツの新藍だけ"
+          maxLength={PDF_READING_LIMITS.scope}
+          value={scope}
+          disabled={busy}
+          onChange={(event) => setScope(event.target.value)}
+        />
+        <Checkbox checked={consent} disabled={busy} onCheckedChange={setConsent}>
+          {PDF_READING_CONSENT}
+        </Checkbox>
+        {replaces && (
+          <Notice tone="warn">
+            いま入力してある区と数値の調査項目は、PDFの内容に置き換わります。ほかの欄は、空の欄にだけ入ります。
+          </Notice>
+        )}
+        {phase === "checking" && <p className={elapsed}>PDFを確かめています…</p>}
+        {busy && (
+          <div role="status">
+            <ol className={steps}>
+              {STEPS.map((item, index) => (
+                <li key={item.phase} aria-current={index === step ? "step" : undefined}>
+                  {index < step ? `${item.label}（済）` : item.label}
+                </li>
+              ))}
+            </ol>
+            <p className={elapsed}>{Math.max(0, Math.round((now - startedAt) / 1000))}秒経過</p>
+          </div>
+        )}
+        {problem !== null && <Notice tone="error">{problem}</Notice>}
+      </div>
+    </Dialog>
+  );
+}

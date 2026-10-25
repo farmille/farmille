@@ -1,5 +1,6 @@
 import * as v from "valibot";
 
+import type { PdfReadingFieldKey } from "@/lib/pdf-reading";
 import {
   reportMeasurementHasResult,
   reportNeedsMaterialAcks,
@@ -7,7 +8,7 @@ import {
   validateUsageReportSubmission,
   type UsageReportInput,
 } from "@/lib/usage-report";
-import { graphWithPlots } from "@/lib/usage-report-plots";
+import { defaultPlotName, graphWithPlots } from "@/lib/usage-report-plots";
 
 const ReportMaterialSummarySchema = v.object({
   id: v.pipe(v.string(), v.uuid()),
@@ -318,6 +319,12 @@ const SUBMISSION_CHECKS = [
     errors: /^documentsAck$/,
   },
   {
+    key: "pdfValuesChecked",
+    label: "PDF読み取りの値の確認",
+    target: "report-pdf-ack",
+    errors: /^pdfValuesChecked$/,
+  },
+  {
     key: "guidelineAck",
     label: "公開の同意",
     target: "report-guideline-ack",
@@ -341,14 +348,20 @@ function screenCheck(key: CheckKey, input: UsageReportInput, acks: ReportPageAck
   }
 }
 
-/** 記入状況の行。input は調査項目を書き戻した保存の入力（inputWithItems）。 */
-export function reportPageChecks(input: UsageReportInput, acks: ReportPageAcks): ReportPageCheck[] {
-  const errors = Object.keys(
-    validateUsageReportSubmission(input, { pdfValuesCheckRequired: false }),
-  );
+/**
+ * 記入状況の行。input は調査項目を書き戻した保存の入力（inputWithItems）。
+ * pdfValuesCheckRequired は、PDF読み取りの値を元のPDFと照らし合わせた確認を提出に求めるか。
+ */
+export function reportPageChecks(
+  input: UsageReportInput,
+  acks: ReportPageAcks,
+  pdfValuesCheckRequired: boolean,
+): ReportPageCheck[] {
+  const errors = Object.keys(validateUsageReportSubmission(input, { pdfValuesCheckRequired }));
   const materialAcks = reportNeedsMaterialAcks(input);
   return SUBMISSION_CHECKS.flatMap(({ key, label, target, errors: pattern }) => {
     if ((key === "privacyAck" || key === "documentsAck") && !materialAcks) return [];
+    if (key === "pdfValuesChecked" && !pdfValuesCheckRequired) return [];
     const valid = pattern === null || !errors.some((error) => pattern.test(error));
     return [
       {
@@ -400,4 +413,66 @@ export function otherOpenReport(
 
 export function reportPageTitle(materialName: string, cropName: string | null): string {
   return `${materialName} 実証詳細レポート｜${cropName ?? "作物"}`;
+}
+
+/**
+ * PDF読み取りで置き換わる入力があるか。区（品種・比較した資材・区の説明や書き換えた名前）か、
+ * 数値の調査項目に入力があれば true。自動で付いた区の名前だけなら置き換えても失うものはない。
+ */
+export function reportPdfReadingReplaces(
+  input: UsageReportInput,
+  items: ReportPageItem[],
+  postedName: string,
+): boolean {
+  return (
+    input.varieties.some(({ name }) => name.trim() !== "") ||
+    input.comparedMaterials.length > 0 ||
+    input.plots.some(
+      (plot) =>
+        plot.description.trim() !== "" ||
+        (plot.name.trim() !== "" && plot.name !== defaultPlotName(plot, input, postedName)),
+    ) ||
+    items.some((item) => item.mode === "numeric")
+  );
+}
+
+/** PDF読み取りの印を出す欄。label は引用の一覧で、どの欄の根拠かを示す。 */
+export type ReportMarkField = { key: PdfReadingFieldKey; label?: string };
+
+export function plotMarkFields(plotId: string): ReportMarkField[] {
+  return [
+    { key: `plots.${plotId}.treatment`, label: "使った資材" },
+    { key: `plots.${plotId}.name`, label: "区の名前" },
+    { key: `plots.${plotId}.description`, label: "区の説明" },
+  ];
+}
+
+/** 調査項目の印を出す欄。数値の調査項目は、単位・グラフの題・区ごとの値も含める。 */
+export function itemMarkFields(
+  item: ReportPageItem,
+  plots: UsageReportInput["plots"],
+): ReportMarkField[] {
+  const base: ReportMarkField[] = [
+    { key: `measurements.${item.id}.name`, label: "調査項目名" },
+    { key: `measurements.${item.id}.body`, label: "補足説明" },
+  ];
+  if (item.mode !== "numeric") return base;
+  return [
+    ...base,
+    { key: `measurements.${item.id}.unit`, label: "単位" },
+    ...item.graphs.flatMap((graph, index): ReportMarkField[] => {
+      const title = item.graphs.length > 1 ? `グラフ${index + 1}` : "グラフ";
+      return [
+        { key: `measurements.${item.id}.graphs.${graph.id}.heading`, label: `${title}の題` },
+        ...graph.rows.map((row): ReportMarkField => {
+          const at = plots.findIndex(({ id }) => id === row.plotId);
+          const name = plots[at]?.name.trim() || `区${at + 1}`;
+          return {
+            key: `measurements.${item.id}.graphs.${graph.id}.rows.${row.id}.value`,
+            label: `${title}・${name}`,
+          };
+        }),
+      ];
+    }),
+  ];
 }
