@@ -74,7 +74,7 @@ pnpm exec playwright install chromium
 pnpm setup:hooks
 ```
 
-`git config --get core.hooksPath`がGit共通ディレクトリ内の`farmille-hooks`への絶対パスになっていることを確認する。初回登録は信頼できるcheckoutで行う。登録済みの検査コード・依存設定と異なる場合はpushが止まる。変更をレビューした後、`pnpm setup:hooks --trust-current`で明示的に登録内容を更新する。既存のhookがある場合は上書きせず、登録コマンドの案内に従って統合する。Node.jsとpnpmはリポジトリ指定のバージョンを使い、E2E用にDocker・psql・54321番の検証専用Supabaseを準備する。hookはSupabaseの起動やmigrationの適用を自動では行わない。設定と検査対象の詳細は[CIとpush前の検査](docs/ops/ci.md)を参照する。
+`git config --get core.hooksPath`がGit共通ディレクトリ内の`farmille-hooks`への絶対パスになっていることを確認する。初回登録は信頼できるcheckoutで行う。登録済みの検査コード・依存設定と異なる場合はpushが止まる。変更をレビューした後、`pnpm setup:hooks --trust-current`で明示的に登録内容を更新する。既存のhookがある場合は上書きせず、登録コマンドの案内に従って統合する。Node.jsとpnpmはリポジトリ指定のバージョンを使い、E2E用にDocker・psql・54321番の検証専用Supabaseを準備する。hookはSupabaseの起動を自動では行わず、E2Eの直前に54321のDBをそのブランチのmigrationで作り直す。設定と検査対象の詳細は[CIとpush前の検査](docs/ops/ci.md)を参照する。
 
 新しいworktreeでは、最初に`pnpm setup:worktree`を流す（`.env.local`の写し・hook登録・依存とChromiumの導入・migrationの遅れの確認）。手順は[ローカル検証手順](docs/ops/local-verification.md)を参照する。
 
@@ -92,7 +92,7 @@ pnpm test:browser:local
 
 レスポンシブ検査は `storybook-static/` を 6106 番で配信して検査する。6106 番を別のプロセス（dev Storybook や別 worktree の検査）が使っていると `is already used` のエラーで止まるので、そのプロセスが終わってから流す。dev Storybook は `pnpm storybook`（6076 番）で起動する。
 
-`pnpm test:e2e:local` は、54321 のローカル Supabase の起動の確認・手動の Browser checks（`.github/workflows/browser-checks.yml`）でも使う環境変数・migration の突き合わせ・資材マスタの投入をまとめて行ってから E2E を流す（中身は `docs/ops/local-verification.md`）。ローカル Supabase の起動と migration の適用は、確認を取らずに行ってよい。停止は他の worktree の作業を止めるので、ユーザーに確認してから行う。push 前の hook は差分に応じてブラウザ検査を実行する（初回に `pnpm setup:hooks`）。自動 CI は lint・形式・型・単体テスト・ビルド・Story の有無・依存の監査・DB 権限を検査する。すべて緑になっても完了ではない（実装規約の「完了の定義」を参照）。
+`pnpm test:e2e:local` は、54321 のローカル Supabase の起動の確認・手動の Browser checks（`.github/workflows/browser-checks.yml`）でも使う環境変数・DB の作り直し（そのブランチの migration と seed）・資材マスタの投入をまとめて行ってから E2E を流す（中身は `docs/ops/local-verification.md`）。54321 の DB は E2E 専用で、流すたびに消える。ローカル Supabase の起動と migration の適用は、確認を取らずに行ってよい。停止は他の worktree の作業を止めるので、ユーザーに確認してから行う。push 前の hook は差分に応じてブラウザ検査を実行する（初回に `pnpm setup:hooks`）。自動 CI は lint・形式・型・単体テスト・ビルド・Story の有無・依存の監査・DB 権限を検査する。すべて緑になっても完了ではない（実装規約の「完了の定義」を参照）。
 
 ## 依存の監査
 

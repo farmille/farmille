@@ -23,7 +23,7 @@ pnpm setup:worktree
 
 - ホームが `container_type_id` 不在などの「internal」で落ちたら、まずこれを流す。既存のボリュームから起動した Supabase には、後から足した migration が入らない
 - ローカルの DB は worktree 間で共有している。適用は確認を取らずに行ってよい
-- 別の worktree にしか無い migration を当てると、他の worktree の `pnpm check:migrations` はその版を「このチェックアウトに無い」として止まる。その migration を入れたブランチが main に入れば、main に追随すると解ける。急ぐ場合は、そのブランチを取り込んで確かめる
+- 別の worktree にしか無い migration を当てると、他の worktree の `pnpm check:migrations` はその版を「このチェックアウトに無い」として止まる。その migration を入れたブランチが main に入れば、main に追随すると解ける。急ぐ場合は、そのブランチを取り込んで確かめる。E2E は DB を作り直すので、この状態でも止まらない
 - 手元の Supabase が `127.0.0.1:58321`／`58322` のような別ポート（colima VM への ssh 転送）で動いていても、コマンドが出す `--db-url` をそのまま使える
 
 ### push 前の検査
@@ -40,11 +40,13 @@ pnpm test:e2e:local
 
 - `supabase status` で 54321 のスタックが起動しているかを確かめる
 - 手動の Browser checks（`.github/workflows/browser-checks.yml`）でも使う環境変数を export する。`.env.local` が `58321` など別のスタックを指していても、export した値が優先される
-- `pnpm check:migrations` で、export した接続先の migration がこのチェックアウトと合っているかを確かめる
+- `supabase db reset` で、54321 の DB をこのチェックアウトの migration と `supabase/seed.sql` で作り直し、`pnpm check:migrations` で合っていることを確かめる
 - 資材マスタが無ければ `tools/migration/materials-v2-seed.sql` を入れる
 - `pnpm exec playwright test` を流す。引数はそのまま渡す（例：`pnpm test:e2e:local e2e/04-search.spec.ts`）
 
-Supabase の起動・停止と migration の適用は、スクリプトの中では行わない。起動と migration の適用は、スクリプトが出すコマンドで、確認を取らずに行ってよい。DB のボリューム `supabase_db_farmille` は worktree 間で共有しているので、停止だけはユーザーに確認してから行う。既存のボリュームから起動したスタックには、後から足した migration が入らない。
+Supabase の起動・停止は、スクリプトの中では行わない。起動は、スクリプトが出すコマンドで、確認を取らずに行ってよい。DB のボリューム `supabase_db_farmille` は worktree 間で共有しているので、停止だけはユーザーに確認してから行う。
+
+54321 の DB は E2E 専用として扱い、E2E のたびに作り直す。別のブランチの migration が当たっていても E2E は止まらないが、手で入れたデータやデモアカウントのパスワードは消える。開発中の画面で 54321 を使っているときは、E2E のあとに `pnpm check:migrations` と「2. データを入れ直したいとき」で戻す。
 
 ## 1. 起動
 
