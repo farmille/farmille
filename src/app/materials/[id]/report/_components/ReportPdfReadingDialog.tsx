@@ -10,6 +10,7 @@ import {
   PDF_READING_CONSENT,
   PDF_READING_LIMITS,
   PDF_READING_RECAPTCHA_ACTION,
+  pdfReadingTrialError,
   type PdfReadingResult,
 } from "@/lib/pdf-reading";
 import { executeRecaptcha, loadRecaptcha } from "@/lib/recaptcha-client";
@@ -48,9 +49,13 @@ const steps = css({
 
 const elapsed = css({ m: "0", textStyle: "note", color: "text.muted" });
 
+const TRIAL_GUIDE =
+  "PDFの中での資材の呼び名とこの資材の関係（例：高活性腐植資材区がこの資材）、作物と品種（例：キャベツの新藍）、試験の番号（例：試験2）を書きます。";
+
+/** 開くたびに呼び出し側が作り直す（読み取る試験の書き始めは、開いたときの作物と品種から作る）。 */
 export function ReportPdfReadingDialog({
-  open,
-  onOpenChange,
+  onClose,
+  defaultTrial,
   materialId,
   userId,
   siteKey,
@@ -59,8 +64,9 @@ export function ReportPdfReadingDialog({
   replaces,
   onRead,
 }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
+  /** 読み取る試験の書き始め。作物と品種が無ければ空。 */
+  defaultTrial: string;
   materialId: string;
   userId: string;
   siteKey: string;
@@ -72,7 +78,8 @@ export function ReportPdfReadingDialog({
   onRead: (result: PdfReadingResult) => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
-  const [scope, setScope] = useState("");
+  const [trial, setTrial] = useState(defaultTrial);
+  const [tried, setTried] = useState(false);
   const [consent, setConsent] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [problem, setProblem] = useState<string | null>(null);
@@ -81,10 +88,9 @@ export function ReportPdfReadingDialog({
   const busy = phase !== "idle" && phase !== "checking";
 
   useEffect(() => {
-    if (!open) return;
     // reCAPTCHA の script はこの画面を開いたときだけ読み込む。失敗は送るときに知らせる
     loadRecaptcha(siteKey).catch(() => undefined);
-  }, [open, siteKey]);
+  }, [siteKey]);
 
   useEffect(() => {
     if (!busy) return;
@@ -113,7 +119,8 @@ export function ReportPdfReadingDialog({
   }
 
   async function read() {
-    if (file === null || !consent || busy) return;
+    setTried(true);
+    if (file === null || !consent || busy || pdfReadingTrialError(trial) !== undefined) return;
     setProblem(null);
     setStartedAt(Date.now());
     setNow(Date.now());
@@ -129,7 +136,7 @@ export function ReportPdfReadingDialog({
         input,
         uploadPath,
         recaptchaToken,
-        scope: scope.trim(),
+        trial: trial.trim(),
         consent: true,
       });
     } catch {
@@ -151,10 +158,10 @@ export function ReportPdfReadingDialog({
   const step = STEPS.findIndex((item) => item.phase === phase);
   return (
     <Dialog
-      open={open}
+      open
       onOpenChange={(next) => {
         // 読み取りの途中では閉じない（結果を入力に写すまで編集を止める）
-        if (!busy) onOpenChange(next);
+        if (!next && !busy) onClose();
       }}
       size="sheet"
       title="PDF読み取り"
@@ -185,21 +192,22 @@ export function ReportPdfReadingDialog({
           onChange={(event) => void choose(event.currentTarget.files?.[0])}
         />
         <Input
-          label="読み取る範囲"
-          requirement="optional"
-          description="空のときは、投稿する資材を使った区と、比べた区をすべて読みます。"
-          placeholder="例）キャベツの新藍だけ"
-          maxLength={PDF_READING_LIMITS.scope}
-          value={scope}
+          label="読み取る試験"
+          requirement="required"
+          description={TRIAL_GUIDE}
+          placeholder="例）キャベツの新藍。試験2の高活性腐植資材区がこの資材"
+          maxLength={PDF_READING_LIMITS.trial}
+          value={trial}
+          error={tried ? pdfReadingTrialError(trial) : undefined}
           disabled={busy}
-          onChange={(event) => setScope(event.target.value)}
+          onChange={(event) => setTrial(event.target.value)}
         />
         <Checkbox checked={consent} disabled={busy} onCheckedChange={setConsent}>
           {PDF_READING_CONSENT}
         </Checkbox>
         {replaces && (
           <Notice tone="warn">
-            いま入力してある区と数値の調査項目は、PDFの内容に置き換わります。ほかの欄は、空の欄にだけ入ります。
+            いま入力してある区・数値の調査項目・都道府県は、PDFの内容に置き換わります。ほかの欄は、空の欄にだけ入ります。
           </Notice>
         )}
         {phase === "checking" && <p className={elapsed}>PDFを確かめています…</p>}

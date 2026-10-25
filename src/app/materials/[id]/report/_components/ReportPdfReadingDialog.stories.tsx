@@ -8,8 +8,8 @@ const meta = {
   title: "Pages/materials/[id]/report/ReportPdfReadingDialog",
   component: ReportPdfReadingDialog,
   args: {
-    open: true,
-    onOpenChange: fn(),
+    onClose: fn(),
+    defaultTrial: "",
     materialId: filledReport.materialId,
     userId: "00000000-0000-4000-8000-000000000001",
     siteKey: "storybook-site-key",
@@ -24,6 +24,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+/** レポートに作物と品種があるときは、読み取る試験の書き始めに入れておく。 */
+export const TrialDraft: Story = { args: { defaultTrial: "トマト・桃太郎の" } };
 
 /** 区か数値の調査項目に入力があり、読み取ると置き換わる。 */
 export const Replaces: Story = { args: { replaces: true } };

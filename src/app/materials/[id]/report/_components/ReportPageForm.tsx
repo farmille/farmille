@@ -14,6 +14,7 @@ import { Icon } from "@/components/Icon";
 import { toast } from "@/components/Toaster";
 import {
   effectivePdfReadingMarks,
+  pdfReadingTrialDraft,
   type PdfReadingField,
   type PdfReadingResult,
 } from "@/lib/pdf-reading";
@@ -784,17 +785,22 @@ export function ReportPageForm({
           }}
           onConfirm={() => persist(false, true)}
         />
-        <ReportPdfReadingDialog
-          open={readingOpen}
-          onOpenChange={setReadingOpen}
-          materialId={material.id}
-          userId={userId}
-          siteKey={pdfReading.siteKey}
-          remaining={remaining}
-          input={payload}
-          replaces={reportPdfReadingReplaces(payload, items, currentMaterial.name)}
-          onRead={applyReading}
-        />
+        {readingOpen && (
+          <ReportPdfReadingDialog
+            onClose={() => setReadingOpen(false)}
+            defaultTrial={pdfReadingTrialDraft(
+              cropName,
+              input.varietyUnknown ? [] : input.varieties.map(({ name }) => name),
+            )}
+            materialId={material.id}
+            userId={userId}
+            siteKey={pdfReading.siteKey}
+            remaining={remaining}
+            input={payload}
+            replaces={reportPdfReadingReplaces(payload, items, currentMaterial.name)}
+            onRead={applyReading}
+          />
+        )}
         <ReportToaster />
       </div>
     </ReportPdfReadingMarks>
