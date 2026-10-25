@@ -101,13 +101,19 @@ describe("applyPdfReading", () => {
 
   it("作物・都道府県・使用目的は候補と完全に一致したときだけ入れる", () => {
     const { input, fields } = applied(
-      base(),
+      base({ prefectureCode: 13 }),
       reading({ crop: "チリメンキャベツ", prefecture: "埼玉", purposes: ["収量の改善"] }),
     );
     expect(input.cropId).toBe(cropId);
-    expect(input.prefectureCode).toBeNull();
+    expect(input.prefectureCode).toBe(13);
     expect(input.purposeTags).toEqual([]);
     expect(fields.map(({ fieldKey }) => fieldKey)).not.toContain("prefectureCode");
+  });
+
+  it("都道府県は、登録住所から入った値や選んだ値があっても PDF の試験地で置き換える", () => {
+    const { input, fields } = applied(base({ prefectureCode: 13 }));
+    expect(input.prefectureCode).toBe(11);
+    expect(fields.map(({ fieldKey }) => fieldKey)).toContain("prefectureCode");
   });
 
   it("品種・比較した資材・区を読み取った内容で置き換える", () => {

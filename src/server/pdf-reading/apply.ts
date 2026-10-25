@@ -83,7 +83,7 @@ function resolver(entries: { key: string }[], ids: string[]) {
 
 /**
  * 読み取った内容を下書きに写す。
- * 作物などの単独の欄は空のときだけ入れ、品種・比較した資材・区は置き換える。
+ * 作物などの単独の欄は空のときだけ入れ、都道府県・品種・比較した資材・区は置き換える。
  * base の数値の調査項目は古い区を指しているので外し、画像と文章の調査項目は残して後ろに読み取った調査項目を足す。
  */
 export function applyPdfReading(
@@ -146,10 +146,8 @@ function mapReading(
       : [];
   if (purposeTags.length > 0) note("purposeTags", "purposes");
 
-  const prefecture =
-    base.prefectureCode === null
-      ? PREFECTURES.find(({ name }) => name === normalized(output.prefecture))
-      : undefined;
+  // 都道府県は試験地を表すので、登録住所から先に入った値や選んだ値があっても PDF の値で置き換える
+  const prefecture = PREFECTURES.find(({ name }) => name === normalized(output.prefecture));
   if (prefecture !== undefined) note("prefectureCode", "prefecture");
 
   const timingStages =
