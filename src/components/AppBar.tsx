@@ -138,10 +138,17 @@ const siteMenu = [
 ] as const satisfies readonly { label: string; href: string; active: AppBarActive | null }[];
 
 /** 投稿は一般向けの機能なので、企業会員には「投稿する」を出さない（BottomNav と同じ条件）。 */
+function cannotPost(account?: AppBarAccount) {
+  return account?.kind === "member" && !account.canPost;
+}
+
 function siteMenuFor(account?: AppBarAccount) {
-  return account?.kind === "member" && !account.canPost
-    ? siteMenu.filter((item) => item.active !== "post")
-    : siteMenu;
+  return cannotPost(account) ? siteMenu.filter((item) => item.active !== "post") : siteMenu;
+}
+
+/** ルートレイアウトのフッターは閲覧者を知らないので、ヘッダーの目印を見て投稿のリンクを隠す。 */
+function postMarker(account?: AppBarAccount) {
+  return cannotPost(account) ? "false" : undefined;
 }
 
 const desktopSiteMenuNav = css({ ml: "auto" });
@@ -330,7 +337,7 @@ function MobileSiteBar({ active, account }: Pick<AppBarBaseProps, "active" | "ac
           href: item.href,
           current: item.active !== null && active === item.active,
         }))}
-        member={account?.kind === "member"}
+        member={account === undefined ? undefined : account.kind === "member"}
       />
     </header>
   );
@@ -387,7 +394,11 @@ function DesktopSiteHeader({
   account?: AppBarAccount;
 }) {
   return (
-    <header className={desktopHeader} data-ui="desktop-site-header">
+    <header
+      className={desktopHeader}
+      data-can-post={postMarker(account)}
+      data-ui="desktop-site-header"
+    >
       <div className={desktopHeaderInner}>
         <Link href="/" className={desktopBrand}>
           <BrandMark />
@@ -450,7 +461,11 @@ function DesktopSellerHeader(props: AppBarProps) {
   const title = props.variant === "home" ? "メーカーダッシュボード" : (props.title ?? "");
 
   return (
-    <header className={desktopHeader} data-ui="desktop-seller-header">
+    <header
+      className={desktopHeader}
+      data-can-post={postMarker(props.account)}
+      data-ui="desktop-seller-header"
+    >
       <div className={desktopHeaderInner}>
         <Link href="/dashboard" className={desktopBrand}>
           <BrandMark />

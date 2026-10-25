@@ -10,7 +10,7 @@ const groups = [
     title: "参加する",
     links: [
       { label: "新規会員登録", href: "/signup/general" },
-      { label: "実証詳細レポートを投稿", href: "/post?type=report" },
+      { label: "実証詳細レポートを投稿", href: "/post?type=report", generalOnly: true },
       { label: "マイページ", href: "/me" },
     ],
   },
@@ -61,6 +61,12 @@ const brand = css({
 const description = css({ textStyle: "supporting", color: "text.inverse" });
 
 const groupTitle = css({ m: "0", mb: "3", textStyle: "body", color: "text.inverse" });
+
+/**
+ * 投稿は一般向けの機能なので、ヘッダーが「投稿できない会員」の目印を付けた画面では出さない
+ * （このフッターはルートレイアウトにあり、閲覧者を読むと静的な画面まで毎回描画になるため）。
+ */
+const generalOnlyItem = css({ "body:has([data-can-post=false]) &": { display: "none" } });
 
 /** リンクの色と大きさは一覧に持たせ、TextLink の nav がそれを受け継ぐ。 */
 const linkList = css({
@@ -114,7 +120,10 @@ export function SiteFooter() {
                 <h2 className={groupTitle}>{group.title}</h2>
                 <ul className={linkList}>
                   {group.links.map((item) => (
-                    <li key={item.href}>
+                    <li
+                      className={"generalOnly" in item ? generalOnlyItem : undefined}
+                      key={item.href}
+                    >
                       <TextLink href={item.href} variant="nav">
                         {item.label}
                       </TextLink>

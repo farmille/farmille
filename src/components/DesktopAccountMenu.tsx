@@ -92,7 +92,7 @@ export const MEMBER_ENTRIES = [
   { kind: "link", href: "/sellers?from=me", label: "企業会員登録を申請", myPage: false },
 ] as const satisfies readonly AccountMenuEntry[];
 
-function hasAuthSession(): boolean {
+export function hasAuthSession(): boolean {
   return document.cookie.split("; ").some((part) => {
     const name = part.split("=")[0] ?? "";
     return /^sb-.+-auth-token(?:\.\d+)?$/.test(name);

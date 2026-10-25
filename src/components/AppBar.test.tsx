@@ -30,5 +30,18 @@ describe("AppBar のサイトメニュー", () => {
     );
     expect(screen.queryByRole("link", { name: "投稿する" })).toBeNull();
     expect(screen.getByRole("link", { name: "記事" })).toBeTruthy();
+    // ルートレイアウトのフッターは、この目印で投稿のリンクを隠す
+    expect(document.querySelector('[data-can-post="false"]')).not.toBeNull();
+  });
+
+  it("投稿できる閲覧者には、フッターの投稿のリンクを隠す目印を付けない", () => {
+    render(
+      <AppBar
+        account={{ kind: "member", avatar: null, canPost: true }}
+        chrome="public"
+        variant="home"
+      />,
+    );
+    expect(document.querySelector("[data-can-post]")).toBeNull();
   });
 });

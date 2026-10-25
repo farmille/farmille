@@ -31,6 +31,25 @@ describe("MobileSiteMenu", () => {
     );
   });
 
+  it("会員か未判定のときは、開いた時点のログインの cookie で項目を決める", async () => {
+    render(<MobileSiteMenu links={links} />);
+    fireEvent.click(screen.getByRole("button", { name: "メニュー" }));
+    expect(await screen.findByRole("link", { name: "ログイン" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "メニューを閉じる" }));
+    document.cookie = "sb-local-auth-token=1";
+    try {
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "メニュー" }).getAttribute("aria-expanded")).toBe(
+          "false",
+        ),
+      );
+      fireEvent.click(screen.getByRole("button", { name: "メニュー" }));
+      expect(await screen.findByRole("button", { name: "ログアウト" })).toBeTruthy();
+    } finally {
+      document.cookie = "sb-local-auth-token=; max-age=0";
+    }
+  });
+
   it("× のボタンで閉じる", async () => {
     render(<MobileSiteMenu links={links} member={false} />);
     fireEvent.click(screen.getByRole("button", { name: "メニュー" }));

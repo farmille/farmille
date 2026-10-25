@@ -7,7 +7,7 @@ import { useRef, useState } from "react";
 import { css, cva } from "../../styled-system/css";
 import { BrandMark } from "./BrandMark";
 import { buttonRecipe } from "./Button";
-import { MEMBER_ENTRIES } from "./DesktopAccountMenu";
+import { hasAuthSession, MEMBER_ENTRIES } from "./DesktopAccountMenu";
 import { Icon } from "./Icon";
 
 export type MobileSiteMenuLink = { label: string; href: string; current: boolean };
@@ -218,19 +218,30 @@ const loginAction = css(buttonRecipe.raw({ variant: "ghost" }), {
 
 type MobileSiteMenuProps = {
   links: readonly MobileSiteMenuLink[];
-  /** 会員にはアカウントの項目を、未ログインにはログインと新規登録を出す。 */
-  member: boolean;
+  /**
+   * 会員にはアカウントの項目を、未ログインにはログインと新規登録を出す。
+   * 未指定は閲覧者を確かめていない画面（読み込み中・404 など）で、開いた時点の cookie で決める。
+   */
+  member?: boolean;
 };
 
 /** SP ヘッダーの右端に置くメニュー。PC ヘッダーと同じサイトメニューとアカウントの項目を、深い緑の面に並べる。 */
 export function MobileSiteMenu({ links, member }: MobileSiteMenuProps) {
   const [open, setOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const isMember = member ?? signedIn;
   // 同じ画面へのリンクでは画面が切り替わらないので、押したら自分で閉じる
   const close = () => setOpen(false);
 
   return (
-    <BaseDialog.Root onOpenChange={setOpen} open={open}>
+    <BaseDialog.Root
+      onOpenChange={(next) => {
+        if (next && member === undefined) setSignedIn(hasAuthSession());
+        setOpen(next);
+      }}
+      open={open}
+    >
       <BaseDialog.Trigger aria-label="メニュー" className={menuButton}>
         <span aria-hidden className={lines}>
           <span className={line({ tone: "paper", place: "top" })} />
@@ -278,7 +289,7 @@ export function MobileSiteMenu({ links, member }: MobileSiteMenuProps) {
                 ))}
               </ul>
             </nav>
-            {member ? (
+            {isMember ? (
               <section aria-label="アカウント">
                 <ul className={list}>
                   {MEMBER_ENTRIES.map((entry) =>
