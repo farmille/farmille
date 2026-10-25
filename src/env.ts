@@ -47,4 +47,14 @@ export const serverEnv = {
       process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY,
     );
   },
+  get anthropicApiKey(): string {
+    return requireEnv("ANTHROPIC_API_KEY", process.env.ANTHROPIC_API_KEY);
+  },
+  get recaptchaSecretKey(): string {
+    return requireEnv("RECAPTCHA_SECRET_KEY", process.env.RECAPTCHA_SECRET_KEY);
+  },
+  // ブラウザに出してよい値だが NEXT_PUBLIC_ ではないので、ページから props で渡す。
+  get recaptchaSiteKey(): string {
+    return requireEnv("RECAPTCHA_SITE_KEY", process.env.RECAPTCHA_SITE_KEY);
+  },
 };
