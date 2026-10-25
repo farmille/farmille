@@ -14,7 +14,7 @@ Node.jsは`.node-version`、pnpmは`package.json`のバージョンを使う。L
 
 `pnpm setup:hooks`はGit共通ディレクトリ内の`farmille-hooks/pre-push`に固定のhookを設置し、そのディレクトリの絶対パスを`core.hooksPath`に登録する。同じcloneのworktreeもこのhookを共有する。checkout先の`.githooks`に追加されたhookは実行しない。既存の`.githooks`設定は移行できる。独自のhookや別のhooksPathがある場合は、上書きせず停止する。
 
-push時は、現在のworktreeにある`tools/ci/browser-checks.ts`・`tools/ci/selection.ts`・`package.json`・`pnpm-lock.yaml`の4ファイルを照合し、信頼できる場合だけ検査コードを実行する。4ファイルがすべて`origin/main`（`refs/remotes/origin/main`）の中身と同じなら、登録なしで通す。mainに取り込まれた内容はレビュー済みとして扱う。1つでも異なる場合は、4ファイルのSHA-256の組が`farmille-hooks/trusted`の一覧のどれかと一致したときだけ通す。どれとも一致しない場合は、`origin/main`と異なるファイルを表示してpushを止める。ファイルが無い場合も止める。検査コードのシンボリックリンクや、`tools`・`tools/ci`内に置かれた`package.json`・`node_modules`も拒否し、検証したファイルと実際の読み込み先を一致させる。
+push時は、現在のworktreeにある`tools/ci/browser-checks.ts`・`tools/ci/selection.ts`・`package.json`・`pnpm-lock.yaml`の4ファイルを照合し、信頼できる場合だけ検査コードを実行する。4ファイルがすべて`origin/main`（`refs/remotes/origin/main`）の中身と同じなら、登録なしで通す。mainに取り込まれた内容はレビュー済みとして扱う。比べるのはcheckoutにあるファイルのバイト列そのもので、改行の変換やGitのフィルターは適用しない（`.gitattributes`はブランチ側の中身のため）。`core.autocrlf`などでcheckoutの中身がmainのblobと異なる環境では一致せず、登録が要る。1つでも異なる場合は、4ファイルのSHA-256の組が`farmille-hooks/trusted`の一覧のどれかと一致したときだけ通す。どれとも一致しない場合は、`origin/main`と異なるファイルを表示してpushを止める。ファイルが無い場合も止める。検査コードのシンボリックリンクや、`tools`・`tools/ci`内に置かれた`package.json`・`node_modules`も拒否し、検証したファイルと実際の読み込み先を一致させる。
 
 依存や検査コードを変えたブランチだけが登録を要する。対象ファイルの変更をレビューした後、信頼できるcheckoutから次を実行し、今の組を一覧に足す。
 

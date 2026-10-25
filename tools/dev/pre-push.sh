@@ -16,6 +16,8 @@ for directory in tools tools/ci; do
   done
 done
 
+# 照合の途中で fetch されても、4ファイルを同じ main の commit と比べる。
+main=$(git rev-parse -q --verify 'refs/remotes/origin/main^{commit}') || main=
 current=
 differs=
 for file in tools/ci/browser-checks.ts tools/ci/selection.ts package.json pnpm-lock.yaml; do
@@ -26,7 +28,7 @@ for file in tools/ci/browser-checks.ts tools/ci/selection.ts package.json pnpm-l
   digest=$(shasum -a 256 "$file") || exit 1
   current="${current:+$current }${digest%% *}"
   blob=$(git hash-object --no-filters -- "$file")
-  if [ "$blob" != "$(git rev-parse -q --verify "refs/remotes/origin/main:$file")" ]; then
+  if [ -z "$main" ] || [ "$blob" != "$(git rev-parse -q --verify "$main:$file")" ]; then
     differs="${differs:+$differs・}$file"
   fi
 done
