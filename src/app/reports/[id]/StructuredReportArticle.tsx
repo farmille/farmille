@@ -6,7 +6,7 @@ import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import {
   REPORT_SECTIONS,
-  groupReportMeasurements,
+  reportMeasurementGroups,
   type UsageReportInput,
 } from "@/lib/usage-report";
 import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
@@ -55,7 +55,6 @@ export function StructuredReportArticle({
     stages ? `施用時期：${stages}` : null,
     input.timingNote.trim() || null,
   ].filter((line): line is string => line !== null);
-  const numericGroups = groupReportMeasurements(input.measurements);
 
   return (
     <>
@@ -102,46 +101,50 @@ export function StructuredReportArticle({
           case "measurements":
             return (
               <Fragment key={section}>
-                {input.measurements.map((item) => {
-                  // 同じ名前と単位の数値の調査項目は、最初の項目のところにグラフをまとめて出す
-                  const measurement =
-                    item.kind === "numeric"
-                      ? numericGroups.find((group) => group.id === item.id)
-                      : item;
-                  if (measurement === undefined) return null;
-                  if (measurement.kind === "text" && !measurement.body.trim()) return null;
-                  const graphs = measurement.graphs
-                    .map((graph) => ({
-                      graph,
-                      groups: reportBarGroups(graphSections(graph, input.plots, layout)),
-                    }))
-                    .filter(({ groups }) => groups.length > 0);
+                {reportMeasurementGroups(input.measurements).map((group) => {
+                  const [first] = group;
+                  if (first === undefined || (first.kind === "text" && !first.body.trim()))
+                    return null;
                   return (
-                    <Fragment key={measurement.id}>
+                    <Fragment key={first.id}>
                       <ReadingHeading>
-                        {h}：{measurement.name || "調査項目未入力"}
+                        {h}：{first.name || "調査項目未入力"}
                       </ReadingHeading>
-                      <ReportItemImages
-                        media={input.media.filter(
-                          (media) => media.measurementId === measurement.id,
-                        )}
-                        alt={measurement.name}
-                      />
-                      {graphs.map(({ graph, groups }) => (
-                        <ReportBars
-                          key={graph.id}
-                          title={graph.heading || measurement.name}
-                          unit={measurement.unit}
-                          groups={groups}
-                          legend={layout.legend}
-                        />
-                      ))}
-                      {graphs.length > 0 ? (
-                        <ReportGraphNote>
-                          グラフは投稿されたデータからFarmilleが自動生成しています
-                        </ReportGraphNote>
-                      ) : null}
-                      {measurement.body.trim() ? <ReadingProse text={measurement.body} /> : null}
+                      {group.map((measurement) => {
+                        const graphs = measurement.graphs
+                          .map((graph) => ({
+                            graph,
+                            groups: reportBarGroups(graphSections(graph, input.plots, layout)),
+                          }))
+                          .filter(({ groups }) => groups.length > 0);
+                        return (
+                          <Fragment key={measurement.id}>
+                            <ReportItemImages
+                              media={input.media.filter(
+                                (media) => media.measurementId === measurement.id,
+                              )}
+                              alt={measurement.name}
+                            />
+                            {graphs.map(({ graph, groups }) => (
+                              <ReportBars
+                                key={graph.id}
+                                title={graph.heading || measurement.name}
+                                unit={measurement.unit}
+                                groups={groups}
+                                legend={layout.legend}
+                              />
+                            ))}
+                            {graphs.length > 0 ? (
+                              <ReportGraphNote>
+                                グラフは投稿されたデータからFarmilleが自動生成しています
+                              </ReportGraphNote>
+                            ) : null}
+                            {measurement.body.trim() ? (
+                              <ReadingProse text={measurement.body} />
+                            ) : null}
+                          </Fragment>
+                        );
+                      })}
                     </Fragment>
                   );
                 })}

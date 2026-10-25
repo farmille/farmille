@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as v from "valibot";
 import {
   createBlankUsageReport,
-  groupReportMeasurements,
+  reportMeasurementGroups,
   parseReportNumber,
   reportErrorStep,
   reportVarietyNames,
@@ -319,7 +319,7 @@ describe("実証詳細レポート", () => {
     input.purposeNote = "あ".repeat(501);
     expect(v.safeParse(UsageReportInputSchema, input).success).toBe(false);
   });
-  it("同じ調査項目と単位のグラフを入力を変えずにまとめる", () => {
+  it("同じ調査項目と単位の数値の項目を、最初の項目の位置に入力を変えずにまとめる", () => {
     const input = createBlankUsageReport(materialId);
     const first = input.measurements[0]!;
     const second = {
@@ -332,9 +332,13 @@ describe("実証詳細レポート", () => {
     first.name = "収量";
     first.unit = "kg";
     const differentUnit = { ...second, id: crypto.randomUUID(), unit: "g" };
-    const groups = groupReportMeasurements([first, second, differentUnit]);
-    expect(groups).toHaveLength(2);
-    expect(groups[0]?.graphs).toHaveLength(2);
+    const text = { ...first, id: crypto.randomUUID(), kind: "text" as const, graphs: [] };
+    const groups = reportMeasurementGroups([first, text, second, differentUnit]);
+    expect(groups.map((group) => group.map(({ id }) => id))).toEqual([
+      [first.id, second.id],
+      [text.id],
+      [differentUnit.id],
+    ]);
     expect(first.graphs).toHaveLength(1);
     first.graphs[0]!.rows[0]!.plotId = null;
     expect(validateUsageReportSubmission(input)["measurements.0.plots"]).toBeDefined();

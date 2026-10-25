@@ -357,17 +357,29 @@ export function reportErrorStep(key: string): number {
   return 5;
 }
 
-export function groupReportMeasurements(measurements: UsageReportInput["measurements"]) {
-  const groups: UsageReportInput["measurements"] = [];
+/**
+ * 記事に出す調査項目の組。同じ名前と単位の数値の調査項目は、最初の項目の位置に1つの組としてまとめ、
+ * 項目ごとのグラフと補足説明は組の中に残す。ほかの調査項目は1件ずつの組にする。
+ */
+export function reportMeasurementGroups(
+  measurements: UsageReportInput["measurements"],
+): UsageReportInput["measurements"][] {
+  const groups: UsageReportInput["measurements"][] = [];
+  const numeric = new Map<string, UsageReportInput["measurements"]>();
   for (const measurement of measurements) {
-    if (measurement.kind !== "numeric") continue;
-    const group = groups.find(
-      (item) =>
-        item.name.trim() === measurement.name.trim() &&
-        item.unit.trim() === measurement.unit.trim(),
-    );
-    if (group) group.graphs.push(...measurement.graphs);
-    else groups.push({ ...measurement, graphs: [...measurement.graphs] });
+    if (measurement.kind !== "numeric") {
+      groups.push([measurement]);
+      continue;
+    }
+    const key = JSON.stringify([measurement.name.trim(), measurement.unit.trim()]);
+    const group = numeric.get(key);
+    if (group !== undefined) {
+      group.push(measurement);
+      continue;
+    }
+    const created = [measurement];
+    numeric.set(key, created);
+    groups.push(created);
   }
   return groups;
 }

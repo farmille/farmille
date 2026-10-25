@@ -101,6 +101,34 @@ describe("実証詳細レポート（新形式）の記事", () => {
     expect(screen.getByText("図1 果実の断面", { selector: "figcaption" })).toBeInTheDocument();
     expect(screen.getByText("使用区は果肉が厚かった。")).toBeInTheDocument();
   });
+  it("同じ名前と単位の数値の項目は1つの見出しにまとめ、項目ごとの補足説明を残す", () => {
+    const input = sampleReport();
+    const [first] = input.measurements;
+    if (first === undefined) throw new Error("調査項目が必要です");
+    first.body = "1回目の調査。";
+    const second = {
+      ...first,
+      id: crypto.randomUUID(),
+      body: "2回目の調査。",
+      graphs: first.graphs.map((graph) => ({ ...graph, id: crypto.randomUUID() })),
+    };
+    input.measurements = [first, second];
+    render(
+      <StructuredReportArticle
+        materialName="ハイパーバイオ"
+        input={input}
+        cropLabel="ミニトマト"
+        documentUrls={[]}
+      />,
+    );
+    expect(
+      screen
+        .getAllByRole("heading", { level: 2 })
+        .filter((h) => h.textContent?.includes("可販果率")),
+    ).toHaveLength(1);
+    expect(screen.getByText("1回目の調査。")).toBeInTheDocument();
+    expect(screen.getByText("2回目の調査。")).toBeInTheDocument();
+  });
   it("使用目的の補足を効果タグの次の行に出し、市区町村は公開を選んだ場合だけ都道府県の直後に出す", () => {
     const input = sampleReport();
     input.purposeNote = "高温期の萎れを軽くしたかった";
