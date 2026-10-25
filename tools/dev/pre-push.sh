@@ -29,7 +29,7 @@ for file in tools/ci/browser-checks.ts tools/ci/selection.ts package.json pnpm-l
   current="${current:+$current }${digest%% *}"
   blob=$(git hash-object --no-filters -- "$file")
   if [ -z "$main" ] || [ "$blob" != "$(git rev-parse -q --verify "$main:$file")" ]; then
-    differs="${differs:+$differs・}$file"
+    differs="${differs:+${differs}・}$file"
   fi
 done
 # origin/main と同じ内容なら登録なしで通し、異なる場合は登録済みの組のどれかと一致すれば通す。
