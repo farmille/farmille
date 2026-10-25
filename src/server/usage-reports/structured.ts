@@ -22,6 +22,15 @@ export function reportMediaUrl(value: string, authorId: string): string {
   return url.href;
 }
 
+const REPORT_MEDIA_PREFIX = "/storage/v1/object/public/report-media/";
+
+/** report-media の中の、userId のフォルダのオブジェクト名。保存の RPC と同じく、URL のパスをそのまま使う。 */
+function ownMediaPath(value: string, userId: string): string | null {
+  const url = URL.parse(value);
+  if (url === null || !url.pathname.startsWith(`${REPORT_MEDIA_PREFIX}${userId}/`)) return null;
+  return url.pathname.slice(REPORT_MEDIA_PREFIX.length);
+}
+
 function ownedMediaUrl(value: string, userId: string): boolean {
   const url = URL.parse(value);
   return (
@@ -44,6 +53,9 @@ export type UsageReportSaveStore = {
     purposeNote: string,
     expectedUpdatedAt: string,
   ): Promise<SaveStepResult<{ updatedAt: string }>>;
+  /** 保存前にそのレポートが参照している写真・画像の URL。読めなければ null。 */
+  savedMediaUrls(reportId: string): Promise<string[] | null>;
+  removeMedia(paths: string[]): Promise<void>;
 };
 
 const SAVE_FAILED =
@@ -84,17 +96,66 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
       if (data === null) return { ok: false, message: SAVE_CONFLICT };
       return { ok: true, updatedAt: data.updated_at };
     },
+    async savedMediaUrls(reportId) {
+      const { data, error } = await supabase
+        .from("usage_report_media")
+        .select("url")
+        .eq("usage_report_id", reportId);
+      if (error !== null) {
+        console.error("[usage-reports] 保存前の写真の参照を読めませんでした", error);
+        return null;
+      }
+      return data.map((row) => row.url);
+    },
+    async removeMedia(paths) {
+      const { data, error } = await supabase.storage.from("report-media").remove(paths);
+      if (error !== null || data.length !== paths.length) {
+        console.error("[usage-reports] 参照しなくなった写真を消せませんでした", error ?? paths);
+      }
+    },
   };
+}
+
+/**
+ * 保存で参照しなくなった画像（差し替え前の画像や消した写真）を消す。report-media は公開の置き場なので、
+ * 塗りつぶす前の画像が URL で読めるまま残る。消せなくても保存は済んでいるので、ログだけ残す。
+ */
+async function removeUnreferencedMedia(
+  before: string[] | null,
+  input: UsageReportInput,
+  userId: string,
+  store: UsageReportSaveStore,
+) {
+  if (before === null) return;
+  const kept = new Set(input.media.map((media) => ownMediaPath(media.url, userId)));
+  const stale = [
+    ...new Set(
+      before.flatMap((url) => {
+        const path = ownMediaPath(url, userId);
+        return path === null || kept.has(path) ? [] : [path];
+      }),
+    ),
+  ];
+  if (stale.length === 0) return;
+  try {
+    await store.removeMedia(stale);
+  } catch (error) {
+    console.error("[usage-reports] 参照しなくなった写真を消せませんでした", error);
+  }
 }
 
 export async function runUsageReportSave(
   input: UsageReportInput,
   submit: boolean,
   store: UsageReportSaveStore,
+  userId: string,
 ): Promise<UsageReportActionResult> {
   const { purposeNote, ...rpcInput } = input;
+  const before = await store.savedMediaUrls(input.reportId);
   const draft = await store.saveReport(rpcInput, false);
   if (!draft.ok) return { ok: false, message: draft.message, fieldErrors: {} };
+  // 下書きの保存で写真の参照は入れ替わっている。補足の書き込みや提出が失敗しても、前の参照には戻らない
+  await removeUnreferencedMedia(before, input, userId, store);
   const note = await store.savePurposeNote(input.reportId, purposeNote.trim(), draft.updatedAt);
   if (!note.ok)
     return {
@@ -150,7 +211,7 @@ export async function saveStructuredUsageReport(
       fieldErrors: {},
     };
   }
-  return runUsageReportSave(input, submit, supabaseSaveStore(await createServerSupabase()));
+  return runUsageReportSave(input, submit, supabaseSaveStore(await createServerSupabase()), userId);
 }
 
 export async function getStructuredUsageReport(
