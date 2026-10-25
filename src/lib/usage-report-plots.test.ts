@@ -106,8 +106,25 @@ describe("区の組み合わせ", () => {
   });
 
   it("同じ資材の区を足すと、2つ目から番号が付く", () => {
-    const input = reportPlotEdits.addPostedPlot(blank(), posted);
-    expect(names(input)).toEqual(["無処理区", "ヒートインパクト区", "ヒートインパクト区（2）"]);
+    const input = blank();
+    const varietyId = input.varieties[0]?.id ?? null;
+    const added = reportPlotEdits.addPlot(input, varietyId, { kind: "posted" }, posted);
+    expect(names(added)).toEqual(["無処理区", "ヒートインパクト区", "ヒートインパクト区（2）"]);
+  });
+
+  it("表を出す組み合わせでも、選んだ品種と資材の区を組み合わせの並びの位置に足し、名前を付ける", () => {
+    const input = reportPlotEdits.addVariety(blank(), "アイコ", posted);
+    const [first, second] = input.varieties;
+    if (first === undefined || second === undefined) throw new Error("品種が2つ要ります");
+    const added = reportPlotEdits.addPlot(input, first.id, { kind: "posted" }, posted);
+    expect(names(added)).toEqual([
+      "新藍・無処理",
+      "新藍・ヒートインパクト",
+      "新藍・ヒートインパクト（2）",
+      "アイコ・無処理",
+      "アイコ・ヒートインパクト",
+    ]);
+    expect(added.plots[2]?.varietyId).toBe(first.id);
   });
 
   it("品種が不明・なしなら品種は0件で、区の品種は空", () => {

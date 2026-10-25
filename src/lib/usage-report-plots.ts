@@ -278,10 +278,14 @@ export const reportPlotEdits = {
     return withAutoPlotNames(input, next, postedName);
   },
 
-  /** 投稿した資材の区を1つ足す（量や回数の違いを分ける区）。 */
-  addPostedPlot(input: UsageReportInput, postedName: string): UsageReportInput {
-    const varietyId = plotRows(input)[0]?.id ?? null;
-    const next = insertPlots(input, [{ varietyId, treatment: { kind: "posted" } }], postedName);
+  /** 品種と使った資材の区を1つ足す。同じ組み合わせの区も足せる（量や回数の違いを分ける区）。 */
+  addPlot(
+    input: UsageReportInput,
+    varietyId: string | null,
+    treatment: ReportPlotTreatment,
+    postedName: string,
+  ): UsageReportInput {
+    const next = insertPlots(input, [{ varietyId, treatment }], postedName);
     return withAutoPlotNames(input, next, postedName);
   },
 

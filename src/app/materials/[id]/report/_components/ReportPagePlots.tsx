@@ -12,6 +12,7 @@ import {
   plotPlan,
   reportPlotEdits,
   reportPlotLayout,
+  type ReportPlotPlan,
   type ReportPlotSeries,
 } from "@/lib/usage-report-plots";
 
@@ -62,6 +63,18 @@ const dot = css({ w: "2.5", h: "2.5", borderRadius: "pill", bg: "currentColor" }
 const fields = css({ pl: "4.5", mt: "1" });
 
 const visuallyHidden = css({ srOnly: true });
+
+const plotAdder = css({
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: "2",
+  mt: "2",
+});
+
+const plotAdderSelect = css({ flex: "[1 1 9em]", minW: "0" });
+
+const NO_VARIETY = "none";
 
 const EXAMPLES = {
   untreated:
@@ -114,6 +127,70 @@ function Adder({
         {action}
       </Button>
     </div>
+  );
+}
+
+/** 組み合わせの表を出している間に、品種と使った資材を選んで区を1つ足す欄。量や回数だけを変えた区もここで分ける。 */
+function PlotAdder({
+  plan,
+  onAdd,
+}: {
+  plan: ReportPlotPlan;
+  onAdd: (varietyId: string | null, material: ReportPlotPlan["materials"][number]) => void;
+}) {
+  const varieties = plan.rows.map((variety) => ({
+    value: variety?.id ?? NO_VARIETY,
+    label: variety === null ? "品種なし" : variety.name.trim() || "（品種名未入力）",
+  }));
+  const [variety, setVariety] = useState<string | null>(null);
+  const [material, setMaterial] = useState<string | null>(null);
+  // 選んでいた品種や資材を外したら、先頭の品種と投稿した資材に戻す
+  const varietyValue =
+    varieties.find((option) => option.value === variety)?.value ?? varieties[0]?.value;
+  const chosen =
+    plan.materials.find((item) => item.key === material) ??
+    plan.materials.find((item) => item.treatment.kind === "posted");
+  return (
+    <>
+      <p className={fieldLabel}>区を1つ足す</p>
+      <p className={note}>
+        品種と使った資材を選んで足します。同じ組み合わせで量や回数だけを変えた区も足せます。
+      </p>
+      <div className={plotAdder}>
+        {varieties.length > 1 && (
+          <Select
+            label="足す区の品種"
+            hideLabel
+            fieldClassName={plotAdderSelect}
+            options={varieties}
+            value={varietyValue ?? null}
+            onValueChange={setVariety}
+          />
+        )}
+        <Select
+          label="足す区で使った資材"
+          hideLabel
+          fieldClassName={plotAdderSelect}
+          options={plan.materials.map(({ key, name }) => ({ value: key, label: name }))}
+          value={chosen?.key ?? null}
+          onValueChange={setMaterial}
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={chosen === undefined}
+          onClick={() => {
+            if (chosen === undefined) return;
+            onAdd(
+              varietyValue === undefined || varietyValue === NO_VARIETY ? null : varietyValue,
+              chosen,
+            );
+          }}
+        >
+          区を追加
+        </Button>
+      </div>
+    </>
   );
 }
 
@@ -378,16 +455,33 @@ export function ReportPagePlots({
           {group.plots.map(({ plot, series }) => plotCard(plot, series))}
         </div>
       ))}
-      {!plan.showMatrix && !plan.full && (
-        <button
-          type="button"
-          className={addButton}
-          onClick={() => onChange(reportPlotEdits.addPostedPlot(input, postedName))}
-        >
-          <Icon name="add" size="sm" />
-          区を追加
-        </button>
-      )}
+      {!plan.full &&
+        (plan.showMatrix ? (
+          <PlotAdder
+            plan={plan}
+            onAdd={(varietyId, material) =>
+              onChange(reportPlotEdits.addPlot(input, varietyId, material.treatment, postedName))
+            }
+          />
+        ) : (
+          <button
+            type="button"
+            className={addButton}
+            onClick={() =>
+              onChange(
+                reportPlotEdits.addPlot(
+                  input,
+                  plan.rows[0]?.id ?? null,
+                  { kind: "posted" },
+                  postedName,
+                ),
+              )
+            }
+          >
+            <Icon name="add" size="sm" />
+            区を追加
+          </button>
+        ))}
     </>
   );
 }
