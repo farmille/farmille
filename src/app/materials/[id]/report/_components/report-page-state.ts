@@ -32,15 +32,20 @@ export const REPORT_IMAGE_LIMIT = 30;
 export const REPORT_BODY_MAX = 20000;
 export const REPORT_SHORT_MAX = 500;
 
+/** 調査項目に属さない、以前の入力画面で節ごとに添えた写真・動画。公開記事では節の最後に出る。 */
+export function reportLegacyMedia(input: UsageReportInput): UsageReportInput["media"] {
+  return input.media.filter(
+    (media) => media.measurementId === undefined || media.measurementId === null,
+  );
+}
+
 /** 調査項目 itemId に入れられる画像の数。旧形式の節ごとの写真とほかの項目の画像を引く。 */
 export function reportImageRoom(
   input: UsageReportInput,
   items: ReportPageItem[],
   itemId: string,
 ): number {
-  const sectionPhotos = input.media.filter(
-    (media) => media.measurementId === undefined || media.measurementId === null,
-  ).length;
+  const sectionPhotos = reportLegacyMedia(input).length;
   const others = items
     .filter((item) => item.id !== itemId)
     .reduce((sum, item) => sum + reportPageItemImages(item).length, 0);
@@ -158,9 +163,7 @@ export function inputWithItems(input: UsageReportInput, items: ReportPageItem[])
       }
     }),
     media: [
-      ...input.media.filter(
-        (media) => media.measurementId === undefined || media.measurementId === null,
-      ),
+      ...reportLegacyMedia(input),
       ...items.flatMap((item) =>
         reportPageItemImages(item).map((image) => ({
           id: image.id,

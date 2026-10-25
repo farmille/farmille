@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 
 import { ReportPagePreview } from "./ReportPagePreview";
 import { itemsFromInput } from "./report-page-state";
-import { filledReport, varietyReport } from "./reportStoryFixture";
+import { filledReport, legacyMediaReport, varietyReport } from "./reportStoryFixture";
 
 const meta = {
   title: "Pages/materials/[id]/report/ReportPagePreview",
@@ -32,4 +32,8 @@ export const WithMissing: Story = { args: { missing: ["処理日を記入した�
 
 export const ByVariety: Story = {
   args: { input: varietyReport, items: itemsFromInput(varietyReport) },
+};
+
+export const LegacyMedia: Story = {
+  args: { input: legacyMediaReport, items: itemsFromInput(legacyMediaReport) },
 };

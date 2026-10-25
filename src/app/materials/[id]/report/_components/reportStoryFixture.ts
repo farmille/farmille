@@ -83,6 +83,35 @@ export const filledReport: UsageReportInput = {
 
 export const storyMaterialName = "スキーポン";
 
+/** 以前の入力画面で節ごとに写真を添え、関連資料のPDFもある下書き。 */
+export const legacyMediaReport: UsageReportInput = {
+  ...filledReport,
+  media: [
+    ...filledReport.media,
+    {
+      id: "77777777-7777-4777-8777-777777777778",
+      url: storyPhoto("#f3e6d0"),
+      mediaType: "photo",
+      section: "results",
+      caption: "使用区の株（7月20日）",
+    },
+    {
+      id: "77777777-7777-4777-8777-777777777779",
+      url: storyPhoto("#dfe9f3"),
+      mediaType: "photo",
+      section: "documents",
+      caption: "",
+    },
+  ],
+  documents: [
+    {
+      id: "77777777-7777-4777-8777-77777777777a",
+      path: "00000000-0000-4000-8000-000000000001/report/document.pdf",
+      name: "収量調査の記録.pdf",
+    },
+  ],
+};
+
 const twoVarieties = reportPlotEdits.addComparedMaterial(
   reportPlotEdits.addVariety(
     withAutoPlotNames(

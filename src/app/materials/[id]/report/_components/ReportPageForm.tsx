@@ -25,6 +25,7 @@ import { css, cx } from "../../../../../../styled-system/css";
 
 import { pillButtonRecipe, reportFrame, ReportToaster, reportToasterId } from "./ReportFormParts";
 import { ReportItemFileDialog } from "./ReportItemFileDialog";
+import { ReportLegacyMedia } from "./ReportLegacyMedia";
 import { ReportNumericItemDialog } from "./ReportNumericItemDialog";
 import { ReportPageItems } from "./ReportPageItems";
 import { ReportPagePlots } from "./ReportPagePlots";
@@ -36,6 +37,7 @@ import {
   itemsWithPlots,
   REPORT_BODY_MAX,
   reportImageRoom,
+  reportLegacyMedia,
   reportLengthNote,
   reportOverLimit,
   reportPageChecks,
@@ -525,6 +527,16 @@ export function ReportPageForm({
           onChange={setItems}
           missing={missingKeys.has("measurements")}
           onOpenFile={(item, isNew) => setFileItem({ item, isNew })}
+        />
+
+        <ReportLegacyMedia
+          media={reportLegacyMedia(input)}
+          onRemove={(id) =>
+            update((current) => ({
+              ...current,
+              media: current.media.filter((media) => media.id !== id),
+            }))
+          }
         />
 
         <h2 className={heading("acks")}>

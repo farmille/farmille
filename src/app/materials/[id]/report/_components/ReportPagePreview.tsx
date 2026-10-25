@@ -1,6 +1,6 @@
 "use client";
 
-import { ReportItemImages } from "@/app/reports/[id]/ReportFigures";
+import { ReportFigures, ReportItemImages } from "@/app/reports/[id]/ReportFigures";
 import { Chip } from "@/components/Chip";
 import { Dialog } from "@/components/Dialog";
 import { ReportBars, reportBarGroups, ReportGraphNote } from "@/components/ReportBars";
@@ -12,7 +12,7 @@ import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
 
 import { css } from "../../../../../../styled-system/css";
 
-import { reportPageItemImages, type ReportPageItem } from "./report-page-state";
+import { reportLegacyMedia, reportPageItemImages, type ReportPageItem } from "./report-page-state";
 
 const wrap = css({
   maxW: "content.form",
@@ -78,6 +78,8 @@ const prose = css({ m: "0", textStyle: "prose", whiteSpace: "pre-wrap" });
 
 const none = css({ m: "0", textStyle: "prose", color: "text.muted" });
 
+const documentList = css({ m: "0", pl: "4.5", textStyle: "prose", color: "text.muted" });
+
 const facts = css({
   display: "grid",
   gridTemplateColumns: "[7.5em minmax(0, 1fr)]",
@@ -128,6 +130,11 @@ export function ReportPagePreview({
     .join("、");
   const shown = items.filter((item) => item.mode !== "");
   const layout = reportPlotLayout(input, materialName);
+  // 以前の入力画面で節ごとに添えた写真は、公開記事と同じく節の最後に出す
+  const legacy = (section: UsageReportInput["media"][number]["section"]) => (
+    <ReportFigures media={reportLegacyMedia(input).filter((media) => media.section === section)} />
+  );
+  const documentMedia = reportLegacyMedia(input).filter((media) => media.section === "documents");
   return (
     <Dialog
       open={open}
@@ -172,10 +179,12 @@ export function ReportPagePreview({
 
         <h2 className={h2}>結果・感想</h2>
         <Text value={input.observedChange} />
+        {legacy("results")}
 
         <h2 className={h2}>期待した効果</h2>
         <Text value={input.purposeTags.join("、")} empty="（未選択）" />
         {input.purposeNote.trim() && <Text value={input.purposeNote} />}
+        {legacy("effects")}
 
         <h2 className={h2}>栽培条件・施用時期</h2>
         <dl className={facts}>
@@ -196,6 +205,7 @@ export function ReportPagePreview({
           <dt>処理日と生育状況</dt>
           <dd>{input.timingNote.trim() || "（未記入）"}</dd>
         </dl>
+        {legacy("conditions")}
 
         <h2 className={h2}>比較・使用結果</h2>
         <h3 className={h3}>比べた区</h3>
@@ -204,6 +214,7 @@ export function ReportPagePreview({
           commonDescription={input.commonPlotDescription}
           emptyDescription="（説明が未記入）"
         />
+        {legacy("plots")}
         {shown.length === 0 && <p className={none}>（調査項目ごとの結果が未記入）</p>}
         {shown.map((item) => (
           <section key={item.id}>
@@ -228,6 +239,20 @@ export function ReportPagePreview({
             {(item.mode === "text" || item.body.trim() !== "") && <Text value={item.body} />}
           </section>
         ))}
+        {legacy("measurements")}
+        {(input.documents.length > 0 || documentMedia.length > 0) && (
+          <>
+            <h2 className={h2}>関連資料</h2>
+            {input.documents.length > 0 && (
+              <ul className={documentList}>
+                {input.documents.map((document) => (
+                  <li key={document.id}>{document.name}</li>
+                ))}
+              </ul>
+            )}
+            <ReportFigures media={documentMedia} />
+          </>
+        )}
       </article>
     </Dialog>
   );
