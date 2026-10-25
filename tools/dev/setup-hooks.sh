@@ -41,6 +41,9 @@ if [ -L "$hooks_dir" ]; then
 fi
 for hook in "$hooks_dir"/* "$hooks_dir"/.[!.]* "$hooks_dir"/..?*; do
   [ -e "$hook" ] || [ -L "$hook" ] || continue
+  if [ "$hook" = "$hooks_dir/trusted" ] && [ -f "$hook" ] && [ ! -L "$hook" ]; then
+    continue
+  fi
   if [ "$hook" != "$hooks_dir/pre-push" ] || [ -L "$hook" ] || \
     ! grep -qx '# Farmille managed pre-push v1' "$hook"; then
     printf '[setup-hooks] 管理対象外の hook があります：%s。上書きせず停止します。\n' "$hook" >&2
@@ -51,10 +54,6 @@ done
 temporary=$(mktemp -d "$common_dir/farmille-hooks.XXXXXX")
 trap 'rm -rf "$temporary"' EXIT
 cat tools/dev/pre-push.sh > "$temporary/pre-push"
-for file in tools/ci/browser-checks.ts tools/ci/selection.ts package.json pnpm-lock.yaml; do
-  digest=$(shasum -a 256 "$file")
-  printf "verify_hash '%s' '%s'\n" "${digest%% *}" "$file" >> "$temporary/pre-push"
-done
 printf '%s\n' 'exec node tools/ci/browser-checks.ts pre-push "$@"' >> "$temporary/pre-push"
 
 if [ -f "$hooks_dir/pre-push" ] && ! cmp -s "$temporary/pre-push" "$hooks_dir/pre-push" && \
@@ -63,6 +62,20 @@ if [ -f "$hooks_dir/pre-push" ] && ! cmp -s "$temporary/pre-push" "$hooks_dir/pr
   exit 1
 fi
 mkdir -p "$hooks_dir"
+# 初回の登録と --trust-current だけが、今の検査コード・依存設定の組を信頼した組の一覧に足す。
+if [ ! -f "$hooks_dir/pre-push" ] || [ "${1:-}" = "--trust-current" ]; then
+  current=
+  for file in tools/ci/browser-checks.ts tools/ci/selection.ts package.json pnpm-lock.yaml; do
+    digest=$(shasum -a 256 "$file")
+    current="${current:+$current }${digest%% *}"
+  done
+  # 同じ組は末尾へ移し、登録の新しい 20 組だけを残す。
+  {
+    if [ -f "$hooks_dir/trusted" ]; then grep -vxF "$current" "$hooks_dir/trusted" || [ "$?" -eq 1 ]; fi
+    printf '%s\n' "$current"
+  } | tail -n 20 > "$temporary/trusted"
+  mv "$temporary/trusted" "$hooks_dir/trusted"
+fi
 chmod 755 "$temporary/pre-push"
 mv "$temporary/pre-push" "$hooks_dir/pre-push"
 git config --local core.hooksPath "$hooks_dir"
@@ -70,4 +83,6 @@ if [ "$(git config --get core.hooksPath)" != "$hooks_dir" ]; then
   printf '[setup-hooks] worktree 固有の core.hooksPath を確認してください。\n' >&2
   exit 1
 fi
+# 今の checkout が信頼されていなければ、push と同じ理由を表示して止まる。
+sh tools/dev/pre-push.sh
 printf '[setup-hooks] push 前の検査を登録しました：%s\n' "$hooks_dir"
