@@ -168,6 +168,21 @@ describe("記入状況", () => {
     expect(missing({ ...payload, documentsAck: true }, true)).toEqual([]);
   });
 
+  it("区の無い品種は、比べた区の行に品種名を添えて未記入にする", () => {
+    const input = {
+      ...filledReport,
+      varieties: [...filledReport.varieties, { id: crypto.randomUUID(), name: "アイコ" }],
+    };
+    const items = itemsFromInput(input);
+    const checks = reportPageChecks(inputWithItems(input, items), acks);
+    expect(checks.find((check) => check.key === "plots")).toMatchObject({
+      ok: false,
+      label: "比べた区（品種「アイコ」の区が無い）",
+      target: "report-plots",
+    });
+    expect(checks.find((check) => check.key === "variety")?.ok).toBe(true);
+  });
+
   it("区の説明は、全区に共通の説明があれば区ごとには要らない", () => {
     const input = {
       ...filledReport,

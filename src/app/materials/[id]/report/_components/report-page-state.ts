@@ -225,7 +225,12 @@ export type ReportPageCheck = { key: string; label: string; ok: boolean; target:
  */
 const SUBMISSION_CHECKS = [
   { key: "cropId", label: "作物", target: "report-prop-crop", errors: /^cropId$/ },
-  { key: "variety", label: "品種", target: "report-prop-variety", errors: /^varieties/ },
+  {
+    key: "variety",
+    label: "品種",
+    target: "report-prop-variety",
+    errors: /^varieties(\.\d+\.name)?$/,
+  },
   { key: "purposeTags", label: "使用目的", target: "report-prop-purpose", errors: /^purposeTags$/ },
   {
     key: "prefectureCode",
@@ -262,7 +267,7 @@ const SUBMISSION_CHECKS = [
     key: "plots",
     label: "比べた区",
     target: "report-plots",
-    errors: /^(plots|comparedMaterials)/,
+    errors: /^(plots|comparedMaterials|varieties\.\d+\.plots$)/,
   },
   {
     key: "measurements",
@@ -314,8 +319,25 @@ export function reportPageChecks(input: UsageReportInput, acks: ReportPageAcks):
   return SUBMISSION_CHECKS.flatMap(({ key, label, target, errors: pattern }) => {
     if ((key === "privacyAck" || key === "documentsAck") && !materialAcks) return [];
     const valid = pattern === null || !errors.some((error) => pattern.test(error));
-    return [{ key, label, target, ok: valid && screenCheck(key, input, acks) }];
+    return [
+      {
+        key,
+        label: key === "plots" ? `${label}${varietiesWithoutPlots(input, errors)}` : label,
+        target,
+        ok: valid && screenCheck(key, input, acks),
+      },
+    ];
   });
+}
+
+/** 区の無い品種の名前を、比べた区の行に添える。区の無い品種は提出の検査（varieties.<i>.plots）が決める。 */
+function varietiesWithoutPlots(input: UsageReportInput, errors: string[]): string {
+  const names = errors.flatMap((error) => {
+    const index = /^varieties\.(\d+)\.plots$/.exec(error)?.[1];
+    const variety = index === undefined ? undefined : input.varieties[Number(index)];
+    return variety === undefined ? [] : [`「${variety.name.trim() || "品種名未入力"}」`];
+  });
+  return names.length > 0 ? `（品種${names.join("")}の区が無い）` : "";
 }
 
 export function reportPageTitle(materialName: string, cropName: string | null): string {
