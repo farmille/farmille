@@ -10,7 +10,7 @@ import {
   listExpiredPdfReadingUploads,
   recordPdfReadingApplied,
   recordPdfReadingResult,
-  reportHasAppliedPdfReading,
+  reportNeedsPdfValuesCheck,
 } from "./records";
 
 const userId = "5b0c2c55-6c2e-4c43-9d0e-3a1f6f0c7a11";
@@ -261,16 +261,16 @@ describe("印の読み出し", () => {
   });
 });
 
-describe("適用済みの読み取りの有無", () => {
-  it("適用済みの読み取りが1件でもあれば true を返す", async () => {
+describe("提出時に読み取った値の確認が要るか", () => {
+  it("成功か適用済みの読み取りが1件でもあれば true を返す", async () => {
     const applied = fakeSupabase(json([{ id: readingId }]));
-    expect(await reportHasAppliedPdfReading(reportId, applied.client)).toEqual({
+    expect(await reportNeedsPdfValuesCheck(reportId, applied.client)).toEqual({
       ok: true,
       data: true,
     });
-    expect(applied.sent[0]?.query.get("status")).toBe("eq.applied");
+    expect(applied.sent[0]?.query.get("status")).toBe("in.(succeeded,applied)");
     const none = fakeSupabase(json([]));
-    expect(await reportHasAppliedPdfReading(reportId, none.client)).toEqual({
+    expect(await reportNeedsPdfValuesCheck(reportId, none.client)).toEqual({
       ok: true,
       data: false,
     });

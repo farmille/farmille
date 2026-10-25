@@ -249,7 +249,7 @@ export function reportNeedsMaterialAcks(
 }
 export function validateUsageReportSubmission(
   input: UsageReportInput,
-  context: { pdfReadingApplied: boolean },
+  context: { pdfValuesCheckRequired: boolean },
 ) {
   const errors: UsageReportFieldErrors = {};
   const required = (key: string, valid: boolean, message = "※ ここを入力してください") => {
@@ -339,7 +339,7 @@ export function validateUsageReportSubmission(
   required("guidelineAck", input.guidelineAck, "※ 投稿ガイドラインへの同意が必要です");
   required(
     "pdfValuesChecked",
-    !context.pdfReadingApplied || input.pdfValuesChecked,
+    !context.pdfValuesCheckRequired || input.pdfValuesChecked,
     "※ PDF読み取りで入った値を、元のPDFと照らし合わせて確かめてください",
   );
   return errors;

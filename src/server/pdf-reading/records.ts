@@ -171,8 +171,11 @@ export async function getReportPdfReadingMarks(
   );
 }
 
-/** レポートに適用済みの読み取りがあるか。提出時の確認が要るかどうかを決める。supabase は本人の接続。 */
-export async function reportHasAppliedPdfReading(
+/**
+ * 提出時に読み取った値の確認が要るか。DB の提出の検査と同じく、適用済みに加えて succeeded も数える
+ * （値を写す保存のあと、適用の記録の前に落ちると succeeded のまま残る）。supabase は本人の接続。
+ */
+export async function reportNeedsPdfValuesCheck(
   reportId: string,
   supabase: Db,
 ): Promise<Result<boolean>> {
@@ -180,7 +183,7 @@ export async function reportHasAppliedPdfReading(
     .from("pdf_readings")
     .select("id")
     .eq("report_id", reportId)
-    .eq("status", "applied")
+    .in("status", ["succeeded", "applied"])
     .limit(1);
   if (error !== null) return dbFailure(error, "読み取りの有無の取得");
   return succeed(data.length > 0);

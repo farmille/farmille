@@ -240,7 +240,7 @@ describe("記入状況", () => {
     const items = itemsFromInput(input);
     const payload = inputWithItems(input, items);
     expect(reportPageChecks(payload, acks).every((check) => check.ok)).toBe(true);
-    expect(validateUsageReportSubmission(payload, { pdfReadingApplied: false })).toEqual({});
+    expect(validateUsageReportSubmission(payload, { pdfValuesCheckRequired: false })).toEqual({});
   });
 });
 

@@ -8,7 +8,7 @@ import {
   type UsageReportActionResult,
 } from "@/lib/usage-report";
 import { createServerSupabase } from "@/server/supabase";
-import { reportHasAppliedPdfReading } from "@/server/pdf-reading/records";
+import { reportNeedsPdfValuesCheck } from "@/server/pdf-reading/records";
 import { fail, succeed } from "@/server/result";
 import { clientEnv } from "@/env";
 import type { Database } from "@/types/database.types";
@@ -225,12 +225,12 @@ export async function saveStructuredUsageReport(
     return { ok: false, message: "入力内容を確認してください。", fieldErrors: {} };
   const input = parsed.output;
   const supabase = await createServerSupabase();
-  const pdfReading = submit
-    ? await reportHasAppliedPdfReading(input.reportId, supabase)
+  const pdfCheck = submit
+    ? await reportNeedsPdfValuesCheck(input.reportId, supabase)
     : succeed(false);
-  if (!pdfReading.ok) return { ok: false, message: SAVE_FAILED, fieldErrors: {} };
+  if (!pdfCheck.ok) return { ok: false, message: SAVE_FAILED, fieldErrors: {} };
   const fieldErrors = submit
-    ? validateUsageReportSubmission(input, { pdfReadingApplied: pdfReading.data })
+    ? validateUsageReportSubmission(input, { pdfValuesCheckRequired: pdfCheck.data })
     : {};
   if (Object.keys(fieldErrors).length > 0)
     return { ok: false, message: "未入力の必須項目があります。", fieldErrors };
@@ -378,11 +378,11 @@ export async function getStructuredReportFormData(materialId: string, userId: st
   const draft =
     draftRow === undefined ? succeed(null) : await getStructuredUsageReport(draftRow.id, supabase);
   if (!draft.ok) return draft;
-  const pdfReading =
+  const pdfCheck =
     draft.data === null
       ? succeed(false)
-      : await reportHasAppliedPdfReading(draft.data.reportId, supabase);
-  if (!pdfReading.ok) return pdfReading;
+      : await reportNeedsPdfValuesCheck(draft.data.reportId, supabase);
+  if (!pdfCheck.ok) return pdfCheck;
   const documents =
     draft.data === null ? succeed([]) : await getReportDocumentUrls(draft.data, supabase);
   if (!documents.ok) return documents;
@@ -393,7 +393,7 @@ export async function getStructuredReportFormData(materialId: string, userId: st
     favoriteCropIds: favorites.data.map((item) => item.crop_id),
     materialCropIds: materialCrops.data.map((item) => item.crop_id),
     draft: draft.data,
-    pdfReadingApplied: pdfReading.data,
+    pdfValuesCheckRequired: pdfCheck.data,
     submitted: reports.data
       .filter((row) => row.status === "pending")
       .map((row) => {

@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(53);
+select plan(54);
 
 insert into auth.users(id) values
   ('db932323-0000-4000-8000-000000000001'),('db932323-0000-4000-8000-000000000007'),
@@ -143,7 +143,10 @@ select throws_ok($$select public.save_usage_report(pg_temp.report_input('db93232
   '23514',null,'a report with an applied reading needs the check to submit');
 select lives_ok($$select public.save_usage_report(pg_temp.report_input('db932323-0000-4000-8000-000000000003','8001',true),true)$$,'checked report submits');
 select is((select status||'/'||pdf_values_checked from public.usage_reports where id='db932323-0000-4000-8000-000000000003'),'pending/true','submitted with the check');
-select lives_ok($$select public.save_usage_report(pg_temp.report_input('db932323-0000-4000-8000-000000000004','8002'),true)$$,'a reading that was not applied does not need the check');
+select throws_ok($$select public.save_usage_report(pg_temp.report_input('db932323-0000-4000-8000-000000000004','8002'),true)$$,
+  '23514',null,'a succeeded reading not yet recorded as applied still needs the check');
+select lives_ok($$select public.save_usage_report(pg_temp.report_input('db932323-0000-4000-8000-000000000004','8002',true),true)$$,
+  'checked report with a succeeded reading submits');
 reset role;
 
 set local role service_role;
@@ -168,7 +171,8 @@ set local role anon;
 select throws_ok($$select * from public.pdf_readings$$,'42501',null,'anonymous cannot query reading records');
 reset role;
 
--- 確認の列が無かったころに提出されたレポートに、適用済みの読み取りがあっても公開できる。
+-- 確認の列が無かったころに提出されたレポート（確認は false）に、適用済みの読み取りがあっても公開できる。
+update public.usage_reports set pdf_values_checked=false where id='db932323-0000-4000-8000-000000000004';
 insert into public.pdf_readings(user_id,report_id,material_id,upload_path,status,model,speed,input_tokens,output_tokens,finished_at)
 values('db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000004','db932323-0000-4000-8000-000000000002',
   pg_temp.path('000000000001',5,'9001'),'applied','claude-opus-5-5','fast',1,1,now());

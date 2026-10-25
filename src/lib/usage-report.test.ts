@@ -13,7 +13,7 @@ import {
 } from "./usage-report";
 
 const materialId = "11111111-1111-4111-8111-111111111111";
-const noPdfReading = { pdfReadingApplied: false };
+const noPdfReading = { pdfValuesCheckRequired: false };
 
 function submittableReport(): UsageReportInput {
   const input = withSingleVariety(createBlankUsageReport(materialId), "アイコ", false);
@@ -376,11 +376,11 @@ describe("実証詳細レポート", () => {
       validateUsageReportSubmission(input, noPdfReading)["measurements.0.plots"],
     ).toBeDefined();
   });
-  it("PDF読み取りを適用したレポートだけ、読み取った値の確認を提出の必須にする", () => {
+  it("PDF読み取りの値が入りうるレポートだけ、読み取った値の確認を提出の必須にする", () => {
     const input = submittableReport();
-    const applied = { pdfReadingApplied: true };
-    expect(validateUsageReportSubmission(input, applied).pdfValuesChecked).toBeDefined();
-    expect(validateUsageReportSubmission({ ...input, pdfValuesChecked: true }, applied)).toEqual(
+    const required = { pdfValuesCheckRequired: true };
+    expect(validateUsageReportSubmission(input, required).pdfValuesChecked).toBeDefined();
+    expect(validateUsageReportSubmission({ ...input, pdfValuesChecked: true }, required)).toEqual(
       {},
     );
     expect(validateUsageReportSubmission(input, noPdfReading)).toEqual({});
