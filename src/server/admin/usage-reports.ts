@@ -1,4 +1,4 @@
-import type { UsageReportInput } from "@/lib/usage-report";
+import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
 import {
   getStructuredUsageReport,
   getReportDocumentUrls,
@@ -296,7 +296,7 @@ export async function getUsageReportEditorialDetail(
       purposeNote: row.purpose_note,
       prefectureCode: row.prefecture_code,
       fieldName: row.field_name,
-      variety: row.variety,
+      variety: structured.data === null ? row.variety : reportVarietyNames(structured.data) || null,
       plantingDate: row.planting_date,
       cultivationType: row.cultivation_type,
       cultivationTags: row.cultivation_tags,

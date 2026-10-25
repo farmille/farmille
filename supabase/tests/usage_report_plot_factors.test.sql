@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(34);
+select plan(36);
 
 insert into auth.users(id) values('ca932323-0000-4000-8000-000000000001'),('ca932323-0000-4000-8000-000000000009');
 insert into public.profiles(user_id,handle,standpoint)
@@ -81,7 +81,8 @@ set local role anon;
 select throws_ok($$select * from public.usage_report_compared_materials$$,'42501',null,'anonymous cannot query compared materials');
 reset role;
 
--- 品種と資材を持たない既存の v2 レポート。
+-- 品種と資材を持たない既存の v2 レポート。移す前の状態を作るため、親の列の制約をこのトランザクションの中だけ外す。
+alter table public.usage_reports drop constraint usage_reports_v2_variety_in_children;
 insert into public.usage_reports(id,material_id,author_user_id,crop_id,observed_change,summary,purpose_tags,cultivation_environment,timing_note,method_details_ack,pesticide_ack,form_version,variety)
 values('ca932323-0000-4000-8000-000000000005','ca932323-0000-4000-8000-000000000002','ca932323-0000-4000-8000-000000000001',(select id from public.crops limit 1),'結果を記入','結果の要約',array[(select name from public.effects limit 1)],'露地','9月20日に施用',true,true,2,'桃太郎');
 insert into public.usage_report_timings(report_id,stage) values('ca932323-0000-4000-8000-000000000005',3);
@@ -96,7 +97,10 @@ values('ca932323-0000-4000-8000-000000000006','ca932323-0000-4000-8000-000000000
 select lives_ok($$select app.copy_usage_report_varieties()$$,'v2 varieties are copied to the child table');
 select is((select string_agg(v.name||':'||(select count(*) from public.usage_report_plots p where p.variety_id=v.id),',') from public.usage_report_varieties v where v.report_id='ca932323-0000-4000-8000-000000000005'),'桃太郎:2','copied variety is linked to every plot');
 select is((select count(*)::integer from public.usage_report_varieties where report_id='ca932323-0000-4000-8000-000000000006'),0,'unknown variety is not copied');
+select is((select count(variety)::integer from public.usage_reports where id in ('ca932323-0000-4000-8000-000000000005','ca932323-0000-4000-8000-000000000006')),0,'moved and unknown v2 varieties leave the parent column empty');
 do $$ begin perform app.copy_usage_report_varieties(); end $$;
+alter table public.usage_reports add constraint usage_reports_v2_variety_in_children check (form_version<>2 or variety is null);
+select throws_ok($$update public.usage_reports set variety='桃太郎' where id='ca932323-0000-4000-8000-000000000005'$$,'23514',null,'v2 report cannot keep a variety in the parent column');
 select is((select count(*)::integer from public.usage_report_varieties where report_id='ca932323-0000-4000-8000-000000000005'),1,'copying twice keeps one variety');
 select throws_ok($$update public.usage_reports set status='pending' where id='ca932323-0000-4000-8000-000000000005'$$,'23514',null,'legacy draft needs the material of each plot before submit');
 set local session_replication_role=replica;
