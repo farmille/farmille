@@ -16,15 +16,20 @@ import { ReportPdfPagePicker } from "./ReportPdfPagePicker";
 import {
   canvasFromImageFile,
   canvasFromUrl,
+  fileTooLarge,
   fitCanvas,
   isImage,
   isPdf,
+  megabytes,
   openPdf,
+  pdfTooLong,
   renderPdfPage,
   uploadReportImage,
 } from "./report-page-images";
 import {
   REPORT_IMAGE_LIMIT,
+  REPORT_PDF_LIMITS,
+  REPORT_PHOTO_LIMITS,
   REPORT_SHORT_MAX,
   type ReportPageImage,
   reportPageItemImages,
@@ -211,10 +216,22 @@ export function ReportItemFileDialog({
         continue;
       }
       if (isPdf(file)) {
+        const tooLarge = fileTooLarge(file);
+        if (tooLarge !== null) {
+          reject(tooLarge);
+          continue;
+        }
         setMessage(`「${file.name}」を開いています…`);
         try {
           const doc = await openPdf(file);
           if (!live.current) return;
+          const tooLong = pdfTooLong(file.name, doc.numPages);
+          if (tooLong !== null) {
+            setMessage("");
+            void doc.destroy();
+            reject(tooLong);
+            continue;
+          }
           if (doc.numPages === 1) {
             setMessage("ページを画像にしています…");
             add(await renderPdfPage(doc, 1));
@@ -238,6 +255,11 @@ export function ReportItemFileDialog({
       }
       if (!isImage(file)) {
         reject(`「${file.name}」は写真（JPEG・PNG・WebP）でもPDFでもないため、追加できません。`);
+        continue;
+      }
+      const tooLarge = fileTooLarge(file);
+      if (tooLarge !== null) {
+        reject(tooLarge);
         continue;
       }
       setMessage(`「${file.name}」を読み込んでいます…`);
@@ -349,7 +371,9 @@ export function ReportItemFileDialog({
           グラフ・表の画像・PDF<span className={required}>必須</span>
         </div>
         <p className={lead}>
-          写真（JPEG・PNG・WebP）とPDFを選べます。PDFは使うページを選べます。
+          写真（JPEG・PNG・WebP、{megabytes(REPORT_PHOTO_LIMITS.bytes)}まで）とPDF（
+          {megabytes(REPORT_PDF_LIMITS.bytes)}・{REPORT_PDF_LIMITS.pages}
+          ページまで）を選べます。PDFは使うページを選べます。
           <br />
           画像はレポート全体で{REPORT_IMAGE_LIMIT}枚まで（この調査項目にはあと
           {Math.max(0, imageLimit - images.length)}枚）。

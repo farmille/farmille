@@ -2,6 +2,8 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 
+import { REPORT_PDF_LIMITS, REPORT_PHOTO_LIMITS } from "./report-page-state";
+
 /** 差し込む画像の長い辺の上限。写真・PDF のページはこの大きさまで縮めてから扱う。 */
 const MAX_SIDE = 2400;
 /** 保存する画像の長い辺の上限。 */
@@ -94,12 +96,31 @@ export async function canvasFromUrl(url: string): Promise<HTMLCanvasElement> {
   return canvasFromImageFile(await response.blob());
 }
 
-export function isPdf(file: File): boolean {
+type PickedFile = Pick<File, "name" | "size" | "type">;
+
+export function isPdf(file: PickedFile): boolean {
   return file.type === "application/pdf" || /\.pdf$/i.test(file.name);
 }
 
-export function isImage(file: File): boolean {
+export function isImage(file: PickedFile): boolean {
   return ["image/jpeg", "image/png", "image/webp"].includes(file.type);
+}
+
+export const megabytes = (bytes: number) => `${bytes / 1024 / 1024}MB`;
+
+/** 読み込む前に大きさを確かめる。上限を超えていれば、追加できない理由を返す。 */
+export function fileTooLarge(file: PickedFile): string | null {
+  const limit = isPdf(file) ? REPORT_PDF_LIMITS.bytes : REPORT_PHOTO_LIMITS.bytes;
+  return file.size > limit
+    ? `「${file.name}」は${megabytes(limit)}を超えているため、追加できません。`
+    : null;
+}
+
+/** 開いた PDF のページ数を確かめる。上限を超えていれば、追加できない理由を返す。 */
+export function pdfTooLong(name: string, pages: number): string | null {
+  return pages > REPORT_PDF_LIMITS.pages
+    ? `「${name}」は${REPORT_PDF_LIMITS.pages}ページを超えているため、追加できません。使うページだけのPDFにすると追加できます。`
+    : null;
 }
 
 export async function openPdf(file: File): Promise<PDFDocumentProxy> {
