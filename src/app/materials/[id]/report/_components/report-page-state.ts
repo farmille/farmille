@@ -145,7 +145,6 @@ export function itemsFromInput(input: UsageReportInput): ReportPageItem[] {
 export function inputWithItems(input: UsageReportInput, items: ReportPageItem[]): UsageReportInput {
   return {
     ...input,
-    plots: input.plots.map((plot) => ({ ...plot, scope: "" })),
     measurements: items.map((item) => {
       const { id, name, body } = item;
       switch (item.mode) {

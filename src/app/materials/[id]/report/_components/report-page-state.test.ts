@@ -84,6 +84,15 @@ describe("ページ版の調査項目", () => {
     expect(v.safeParse(UsageReportInputSchema, back).success).toBe(true);
   });
 
+  it("画面に欄の無い区の調査範囲も、書き戻して保存の入力に残す", () => {
+    const input = {
+      ...filledReport,
+      plots: filledReport.plots.map((plot, index) => ({ ...plot, scope: `${(index + 1) * 10}株` })),
+    };
+    const back = inputWithItems(input, itemsFromInput(input));
+    expect(back.plots.map((plot) => plot.scope)).toEqual(["10株", "20株", "30株"]);
+  });
+
   it("区を変えると、数値のグラフの行を区ごとに1行にそろえ、残る区の値はそのまま", () => {
     const input = { ...filledReport, measurements: [numericMeasurement(filledReport.plots)] };
     const items = itemsFromInput(input);
