@@ -91,6 +91,7 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
         authorName={profileResult.data.handle}
         crops={formData.crops}
         draft={formData.draft}
+        documentUrls={formData.documentUrls}
         effects={formData.effects}
         materialEffectNames={material.effects.map((effect) => effect.name)}
         favoriteCropIds={formData.favoriteCropIds}

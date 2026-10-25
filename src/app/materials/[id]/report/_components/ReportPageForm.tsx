@@ -193,6 +193,7 @@ export function ReportPageForm({
   favoriteCropIds,
   materialCropIds,
   draft,
+  documentUrls,
   registeredAddress,
 }: {
   material: ReportMaterialSummary;
@@ -204,6 +205,8 @@ export function ReportPageForm({
   favoriteCropIds: string[];
   materialCropIds: string[];
   draft: UsageReportInput | null;
+  /** 下書きの関連資料（PDF）を開く署名付き URL。 */
+  documentUrls: { id: string; url: string }[];
   registeredAddress: RegisteredAddress;
 }) {
   const router = useRouter();
@@ -666,6 +669,7 @@ export function ReportPageForm({
         manufacturerName={currentMaterial.manufacturerName}
         cropName={cropName}
         authorName={authorName}
+        documentUrls={documentUrls}
         missing={[...new Set(missing.map((check) => check.label))]}
       />
       <ConfirmDialog

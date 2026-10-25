@@ -19,6 +19,7 @@ const meta = {
     manufacturerName: "ファーム技研",
     cropName: "トマト",
     authorName: "しおさい農園",
+    documentUrls: [],
     missing: [],
   },
 } satisfies Meta<typeof ReportPagePreview>;
@@ -35,5 +36,12 @@ export const ByVariety: Story = {
 };
 
 export const LegacyMedia: Story = {
-  args: { input: legacyMediaReport, items: itemsFromInput(legacyMediaReport) },
+  args: {
+    input: legacyMediaReport,
+    items: itemsFromInput(legacyMediaReport),
+    documentUrls: legacyMediaReport.documents.map(({ id }) => ({
+      id,
+      url: "https://example.com/report-document.pdf",
+    })),
+  },
 };

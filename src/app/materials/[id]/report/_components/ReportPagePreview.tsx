@@ -78,7 +78,13 @@ const prose = css({ m: "0", textStyle: "prose", whiteSpace: "pre-wrap" });
 
 const none = css({ m: "0", textStyle: "prose", color: "text.muted" });
 
-const documentList = css({ m: "0", pl: "4.5", textStyle: "prose", color: "text.muted" });
+const documentList = css({
+  m: "0",
+  pl: "4.5",
+  textStyle: "prose",
+  color: "text.muted",
+  "& a": { color: "text.brand" },
+});
 
 const facts = css({
   display: "grid",
@@ -106,6 +112,7 @@ export function ReportPagePreview({
   manufacturerName,
   cropName,
   authorName,
+  documentUrls,
   missing,
 }: {
   open: boolean;
@@ -117,6 +124,7 @@ export function ReportPagePreview({
   manufacturerName: string;
   cropName: string | null;
   authorName: string;
+  documentUrls: { id: string; url: string }[];
   missing: string[];
 }) {
   const today = new Date();
@@ -245,9 +253,20 @@ export function ReportPagePreview({
             <h2 className={h2}>関連資料</h2>
             {input.documents.length > 0 && (
               <ul className={documentList}>
-                {input.documents.map((document) => (
-                  <li key={document.id}>{document.name}</li>
-                ))}
+                {input.documents.map((document) => {
+                  const url = documentUrls.find((item) => item.id === document.id)?.url;
+                  return (
+                    <li key={document.id}>
+                      {url ? (
+                        <a href={url} target="_blank" rel="noreferrer">
+                          {document.name}
+                        </a>
+                      ) : (
+                        document.name
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
             <ReportFigures media={documentMedia} />

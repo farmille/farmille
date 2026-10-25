@@ -48,6 +48,7 @@ const meta = {
     favoriteCropIds: ["22222222-2222-4222-8222-222222222224"],
     materialCropIds: ["22222222-2222-4222-8222-222222222223"],
     draft: null,
+    documentUrls: [],
     registeredAddress: { prefectureCode: 8 },
   },
 } satisfies Meta<typeof ReportPageForm>;
