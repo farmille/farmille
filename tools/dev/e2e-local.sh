@@ -34,6 +34,15 @@ log "接続先：${API_URL}"
 
 # 54321 の DB は worktree 間で共有しているので、別のブランチの migration が当たっていることがある。
 # E2E 専用として毎回このチェックアウトの migration と seed で作り直し、このブランチのスキーマで検査する。
+# db reset は Storage と Auth を動かしたまま DB を作り直すので、一時の migration と常駐のサービスの migration が
+# 同じスキーマで競合して、ときどき失敗する（supabase/cli#6445）。先に止めておき、作り直しの最後に CLI が起こし直す。
+# 途中で失敗したときは、止めたサービスを起こし直してから終える。
+project_id=$(sed -n 's/^project_id = "\(.*\)"$/\1/p' supabase/config.toml)
+racing=$(docker ps -q --filter "name=^supabase_storage_${project_id}$" --filter "name=^supabase_auth_${project_id}$")
+if [ -n "$racing" ]; then
+  trap 'docker start $racing >/dev/null' EXIT
+  docker stop $racing >/dev/null
+fi
 log "DB をこのチェックアウトの migration と seed で作り直します（54321 に入っていたデータは消えます）。"
 npx --yes "$SUPABASE_CLI" db reset --local --yes
 bash tools/dev/check-migrations.sh
