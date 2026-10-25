@@ -70,6 +70,6 @@ lintの診断が重複するときは`eslint.config.mjs`でoxlintとESLintの役
 
 ## PRを作成・更新する
 
-- PRタイトルは[Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)に準じ、`type: 説明`または`type(scope): 説明`にする。区切りのコロン・括弧は半角とし、コロンの後に半角スペースを置く。
-- typeは変更の目的に合わせる。機能追加は`feat`、不具合修正は`fix`、文書は`docs`、動作を変えない構造整理は`refactor`、検証は`test`、CIは`ci`、ビルド・依存は`build`、その他の保守は`chore`を使う。scopeは対象を絞るときだけ付ける。
+- PRタイトルは[Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)に準じ、原則として`type(scope): 説明`にする。区切りのコロン・括弧は半角とし、コロンの後に半角スペースを置く。
+- typeは変更の目的に合わせる。機能追加は`feat`、不具合修正は`fix`、文書は`docs`、動作を変えない構造整理は`refactor`、検証は`test`、CIは`ci`、ビルド・依存は`build`、その他の保守は`chore`を使う。scopeは`reports`・`search`・`agents`・`hooks`のように、変更対象の機能や領域を表す短い英語名にする。リポジトリ全体にまたがり対象を絞れない場合だけscopeを省略し、`type: 説明`にする。
 - 説明は日本語で、PR全体の変更を具体的に表す。例は`feat(reports): 実証詳細レポートの区に品種を持たせる`、`fix(hooks): macOSでのhook登録エラーを解消する`。互換性を壊す変更にはコロンの直前に`!`を付け、影響と移行方法をPR本文へ書く。
