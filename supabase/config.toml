@@ -85,7 +85,9 @@ allowed_cidrs_v6 = ["::/0"]
 # enabled = true
 
 [realtime]
-enabled = true
+# アプリは realtime を使わず、起動時も `-x realtime` で外す。有効のままだと `supabase db reset` が
+# realtime を起こし直そうとして、手元に無い image を取りに行く。
+enabled = false
 # Bind realtime via either IPv4 or IPv6. (default: IPv4)
 # ip_version = "IPv6"
 # The maximum length in bytes of HTTP request headers. (default: 4096)

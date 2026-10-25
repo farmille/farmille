@@ -24,7 +24,7 @@ pnpm setup:hooks --trust-current
 
 hookのソースはGitで共有するが、設置済みのhookと登録設定はcloneされない。別PC・別cloneでは再度登録する。hookをまだ含まない古いブランチはmainの変更を取り込む必要がある。Git GUIからpushする場合も、GUIの実行環境からNode.jsとpnpmを呼び出せるようにする。
 
-E2Eは検証専用のSupabase（127.0.0.1:54321）を使う。Dockerを起動し、[ローカル検証手順](local-verification.md) に従ってSupabaseとmigrationを準備する。hookはDBを自動起動したりmigrationを適用したりせず、不足があればpushを止めて手順を表示する。E2E用アカウントの更新と、未投入の資材マスタの投入はE2E実行時に行う。
+E2Eは検証専用のSupabase（127.0.0.1:54321）を使う。Dockerを起動し、[ローカル検証手順](local-verification.md) に従ってSupabaseとmigrationを準備する。hookはSupabaseを自動起動せず、起動していなければpushを止めて手順を表示する。E2Eの直前に、54321のDBをpushするブランチのmigrationと`supabase/seed.sql`で作り直す（入っていたデータは消える）。別のworktreeで当てたmigrationがDBに残っていても、E2Eはそのブランチのスキーマで流れる。E2E用アカウントの更新と資材マスタの投入は、作り直した後に行う。
 
 ## push前の検査
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 手元で E2E を流す。supabase/config.toml の Supabase（127.0.0.1:54321）へ検証用の環境変数で向け、
-# migration の遅れを確かめ、資材マスタが無ければ入れてから、引数をそのまま playwright test に渡す。
-# Supabase の起動・停止と migration の適用はしない。足りなければ手順を出して非0で終わる。
+# DB をこのチェックアウトの migration と seed で作り直し、資材マスタを入れてから、引数をそのまま playwright test に渡す。
+# Supabase の起動・停止はしない。起動していなければ手順を出して非0で終わる。
 
 set -euo pipefail
 
@@ -32,6 +32,10 @@ export SMTP_URL="smtp://127.0.0.1:54325" MAIL_FROM="Farmille <noreply@example.te
   AUTH_EMAIL_HOOK_SECRET="v1,whsec_bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ=="
 log "接続先：${API_URL}"
 
+# 54321 の DB は worktree 間で共有しているので、別のブランチの migration が当たっていることがある。
+# E2E 専用として毎回このチェックアウトの migration と seed で作り直し、このブランチのスキーマで検査する。
+log "DB をこのチェックアウトの migration と seed で作り直します（54321 に入っていたデータは消えます）。"
+npx --yes "$SUPABASE_CLI" db reset --local --yes
 bash tools/dev/check-migrations.sh
 
 has_material=$(psql "$DB_URL" -X -tA -v ON_ERROR_STOP=1 \
