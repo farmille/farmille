@@ -3,8 +3,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
-import { ReportReadingOutputSchema } from "./apply";
 import { extractFromPdf, outputJsonSchema } from "./claude";
+import { PlotGroupsSchema, SingleFieldsSchema, SkeletonSchema, ValuesSchema } from "./stages";
 
 const schema = v.strictObject({ answer: v.string() });
 const pdf = new TextEncoder().encode("%PDF-1.4");
@@ -77,7 +77,21 @@ function clock(...times: number[]) {
   return () => times.shift() ?? 0;
 }
 
-const request = { pdf, schema, system: "system", instructions: "指示", deadline: 110_000 };
+const fastOpus = {
+  model: "claude-opus-5-5",
+  speed: "fast",
+  effort: "high",
+  adaptiveThinking: true,
+  maxTokens: 64000,
+} as const;
+const request = {
+  model: fastOpus,
+  pdf,
+  schema,
+  system: "system",
+  instructions: "指示",
+  deadline: 110_000,
+};
 
 describe("extractFromPdf", () => {
   it("PDF を document で渡し、fast mode と構造化出力で受ける", async () => {
@@ -118,7 +132,7 @@ describe("extractFromPdf", () => {
     );
     const result = await extractFromPdf(client, request, clock(0, 5_000));
     expect(result.ok && result.usage.speed).toBe("standard");
-    expect(sent.map(({ speed }) => speed)).toEqual(["fast", "standard"]);
+    expect(sent.map(({ speed }) => speed)).toEqual(["fast", undefined]);
   });
 
   it("通常の速度でも 429 なら、それ以上やり直さない", async () => {
@@ -170,6 +184,48 @@ describe("extractFromPdf", () => {
       expect(result.usage?.outputTokens).toBe(300);
     }
   });
+
+  it("通常の速度のモデルは speed を送らず、429 でもやり直さない", async () => {
+    const { client, sent } = fakeClient(apiError(429));
+    const sonnet = { ...fastOpus, model: "claude-sonnet-5-5", speed: "standard" } as const;
+    expect(await extractFromPdf(client, { ...request, model: sonnet }, clock(0))).toEqual({
+      ok: false,
+      error: "failed",
+      usage: null,
+    });
+    expect(sent.map(({ speed }) => speed)).toEqual([undefined]);
+  });
+
+  it("adaptiveThinking が false なら thinking を送らず、effort と max_tokens は設定のまま送る", async () => {
+    const { client, sent } = fakeClient(sse('{"answer":"a"}', "end_turn", "standard"));
+    const model = {
+      ...fastOpus,
+      speed: "standard",
+      effort: "low",
+      adaptiveThinking: false,
+      maxTokens: 32000,
+    } as const;
+    await extractFromPdf(client, { ...request, model }, clock(0));
+    const body = v.parse(
+      v.object({
+        thinking: v.optional(v.unknown()),
+        max_tokens: v.number(),
+        output_config: v.object({ effort: v.string() }),
+      }),
+      JSON.parse(sent[0]?.body ?? "{}"),
+    );
+    expect(body.thinking).toBeUndefined();
+    expect(body.max_tokens).toBe(32000);
+    expect(body.output_config.effort).toBe("low");
+  });
+
+  it("外から打ち切られたら、期限の前でも止める", async () => {
+    const { client } = fakeClient("hang");
+    const controller = new AbortController();
+    const pending = extractFromPdf(client, { ...request, signal: controller.signal }, clock(0));
+    controller.abort();
+    expect(await pending).toEqual({ ok: false, error: "deadline", usage: null });
+  });
 });
 
 type JsonNode = { [key: string]: JsonValue };
@@ -197,31 +253,39 @@ function nodes(value: JsonValue): JsonNode[] {
   return [value, ...Object.values(value).flatMap(nodes)];
 }
 
-describe("レポートの読み取りの出力スキーマ", () => {
-  it("構造化出力の制約を満たす（省略可・null 許容・数や長さの制約を使わない）", () => {
-    const json = v.parse(JsonValueSchema, outputJsonSchema(ReportReadingOutputSchema));
-    const all = nodes(json);
-    const objects = all.filter((node) => node.type === "object");
-    expect(objects.length).toBeGreaterThan(5);
-    for (const node of objects) {
-      expect(node.additionalProperties).toBe(false);
-      expect(node.required).toEqual(Object.keys(v.parse(JsonNodeSchema, node.properties)));
-    }
-    const banned = [
-      "anyOf",
-      "oneOf",
-      "allOf",
-      "minimum",
-      "maximum",
-      "minLength",
-      "maxLength",
-      "maxItems",
-      "$schema",
-    ];
-    for (const node of all) {
-      for (const key of banned) expect(node, key).not.toHaveProperty(key);
-      expect(Array.isArray(node.type), "型の配列（null 許容）").toBe(false);
-      expect(node.type).not.toBe("null");
-    }
-  });
+describe("レポートの読み取りの段ごとの出力スキーマ", () => {
+  it.each([
+    ["骨組み", SkeletonSchema],
+    ["単独の欄", SingleFieldsSchema],
+    ["値", ValuesSchema],
+    ["区の説明", PlotGroupsSchema],
+  ])(
+    "%s は構造化出力の制約を満たす（省略可・null 許容・数や長さの制約を使わない）",
+    (_, schema) => {
+      const json = v.parse(JsonValueSchema, outputJsonSchema(schema));
+      const all = nodes(json);
+      const objects = all.filter((node) => node.type === "object");
+      expect(objects.length).toBeGreaterThan(1);
+      for (const node of objects) {
+        expect(node.additionalProperties).toBe(false);
+        expect(node.required).toEqual(Object.keys(v.parse(JsonNodeSchema, node.properties)));
+      }
+      const banned = [
+        "anyOf",
+        "oneOf",
+        "allOf",
+        "minimum",
+        "maximum",
+        "minLength",
+        "maxLength",
+        "maxItems",
+        "$schema",
+      ];
+      for (const node of all) {
+        for (const key of banned) expect(node, key).not.toHaveProperty(key);
+        expect(Array.isArray(node.type), "型の配列（null 許容）").toBe(false);
+        expect(node.type).not.toBe("null");
+      }
+    },
+  );
 });

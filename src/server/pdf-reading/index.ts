@@ -27,7 +27,6 @@ import type { Database } from "@/types/database.types";
 
 import {
   applyPdfReading,
-  ReportReadingOutputSchema,
   type AppliedField,
   type AppliedReading,
   type ReadingCatalog,
@@ -35,7 +34,7 @@ import {
 } from "./apply";
 import { extractFromPdf, type PdfExtraction } from "./claude";
 import { inspectPdf, type PdfInspection } from "./pdf";
-import { REPORT_READING_SYSTEM, reportReadingInstructions, type ReadingMaterial } from "./prompt";
+import type { ReadingMaterial } from "./prompt";
 import { verifyRecaptcha } from "./recaptcha";
 import {
   claimPdfReading,
@@ -47,6 +46,7 @@ import {
   type PdfReadingClaim,
   type PdfReadingOutcome,
 } from "./records";
+import { readReportPdf, type ReportReadingRequest } from "./stages";
 
 const PDF_BUCKET = "pdf-reading-sources";
 /** 読み取りの開始からの期限。関数の上限（maxDuration 120秒）までに保存を終える。 */
@@ -77,12 +77,7 @@ export type PdfReadingDeps = {
     finish(outcome: PdfReadingOutcome): Promise<Result<null>>;
     applied(application: PdfReadingApplication): Promise<Result<null>>;
   };
-  extract(request: {
-    pdf: Uint8Array;
-    system: string;
-    instructions: string;
-    deadline: number;
-  }): Promise<PdfExtraction<ReportReadingOutput>>;
+  read(request: ReportReadingRequest): Promise<PdfExtraction<ReportReadingOutput>>;
   now(): number;
   newId(): string;
 };
@@ -138,14 +133,11 @@ async function sendToModel(
     } catch (error) {
       console.error("[pdf-reading] 期限切れの PDF の掃除に失敗", error);
     }
-    const extraction = await deps.extract({
+    const extraction = await deps.read({
       pdf,
-      system: REPORT_READING_SYSTEM,
-      instructions: reportReadingInstructions(
-        catalog.data.material,
-        request.trial,
-        catalog.data.catalog,
-      ),
+      material: catalog.data.material,
+      trial: request.trial,
+      catalog: catalog.data.catalog,
       deadline: started + DEADLINE_MS,
     });
     return { reading: reading.data, catalog: catalog.data.catalog, extraction };
@@ -331,8 +323,7 @@ export async function createPdfReadingDeps(userId: string): Promise<PdfReadingDe
       finish: (outcome) => recordPdfReadingResult(outcome, admin),
       applied: (application) => recordPdfReadingApplied(application, admin),
     },
-    extract: (request) =>
-      extractFromPdf(anthropic, { ...request, schema: ReportReadingOutputSchema }),
+    read: (request) => readReportPdf((call) => extractFromPdf(anthropic, call), request),
     now: Date.now,
     newId: () => crypto.randomUUID(),
   };

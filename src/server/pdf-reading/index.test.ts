@@ -146,8 +146,8 @@ function fakeDeps(
         return succeed(null);
       },
     },
-    async extract() {
-      calls.push("extract");
+    async read() {
+      calls.push("read");
       return overrides.extraction ?? { ok: true, output, usage };
     },
     now: () => 0,
@@ -168,7 +168,7 @@ describe("readPdfIntoDraft", () => {
       "save",
       "claim",
       "sweep",
-      "extract",
+      "read",
       "discard",
       "load",
       "finish",
@@ -219,7 +219,7 @@ describe("readPdfIntoDraft", () => {
       const { deps, calls, saved } = fakeDeps(overrides);
       const result = await readPdfIntoDraft(makeRequest(), userId, deps);
       expect(result.ok ? null : result.error).toBe(error);
-      expect(calls).not.toContain("extract");
+      expect(calls).not.toContain("read");
       expect(calls).not.toContain("finish");
       expect(calls).toContain("discard");
       expect(saved.length).toBeLessThanOrEqual(1);

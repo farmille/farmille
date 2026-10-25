@@ -2,11 +2,19 @@ import Anthropic from "@anthropic-ai/sdk";
 import { toJsonSchema } from "@valibot/to-json-schema";
 import * as v from "valibot";
 
-export const PDF_READING_MODEL = "claude-opus-5-5";
-// 思考と出力の合計の上限。ストリーミングで受けるので、HTTP の待ち時間の上限には当たらない。
-const MAX_TOKENS = 64000;
-
 type Speed = "fast" | "standard";
+
+/** 1回の呼び出しのモデルと設定。 */
+export type ExtractionModel = {
+  model: string;
+  /** fast は 429 と容量不足（529）のときだけ、通常の速度で1回やり直す。 */
+  speed: Speed;
+  effort: "low" | "medium" | "high" | "xhigh" | "max";
+  /** false は thinking を送らず、モデルの既定に任せる（Sonnet 5.5 と Opus 5.5 の既定は adaptive）。 */
+  adaptiveThinking: boolean;
+  /** 思考と出力の合計の上限。ストリーミングで受けるので、HTTP の待ち時間の上限には当たらない。 */
+  maxTokens: number;
+};
 
 export type PdfExtractionUsage = {
   model: string;
@@ -29,6 +37,7 @@ export type PdfExtraction<T> =
   | { ok: false; error: PdfExtractionError; usage: PdfExtractionUsage | null };
 
 export type PdfExtractionRequest<TSchema extends v.GenericSchema> = {
+  model: ExtractionModel;
   pdf: Uint8Array;
   /** モデルに返させる形。構造化出力の制約に合わせ、オブジェクトは v.strictObject、null 許容と省略可は使わない。 */
   schema: TSchema;
@@ -36,6 +45,8 @@ export type PdfExtractionRequest<TSchema extends v.GenericSchema> = {
   instructions: string;
   /** この時刻（ミリ秒）を過ぎたら打ち切る。通常の速度でのやり直しにも同じ期限を使う。 */
   deadline: number;
+  /** 期限より前に外から打ち切るとき（同時に呼んだほかの呼び出しが失敗したときなど）。 */
+  signal?: AbortSignal;
 };
 
 export function outputJsonSchema(schema: v.GenericSchema): Anthropic.JSONOutputFormat["schema"] {
@@ -94,19 +105,19 @@ const FAILURES = [
 
 /**
  * PDF を document ブロックで渡し、schema の形の構造化出力で受ける。
- * fast mode で送り、429 か容量不足のときだけ通常の速度で1回やり直す。SDK の自動再試行は使わない。
+ * fast mode なら、429 か容量不足のときだけ通常の速度で1回やり直す。SDK の自動再試行は使わない。
  */
 export async function extractFromPdf<TSchema extends v.GenericSchema>(
   client: Anthropic,
   request: PdfExtractionRequest<TSchema>,
   now: () => number = Date.now,
 ): Promise<PdfExtraction<v.InferOutput<TSchema>>> {
-  const params = {
-    model: PDF_READING_MODEL,
-    max_tokens: MAX_TOKENS,
-    thinking: { type: "adaptive" },
+  const { model } = request;
+  const params: Anthropic.MessageStreamParams = {
+    model: model.model,
+    max_tokens: model.maxTokens,
     output_config: {
-      effort: "high",
+      effort: model.effort,
       format: { type: "json_schema", schema: outputJsonSchema(request.schema) },
     },
     system: request.system,
@@ -126,18 +137,25 @@ export async function extractFromPdf<TSchema extends v.GenericSchema>(
         ],
       },
     ],
-  } satisfies Anthropic.MessageStreamParams;
+  };
+  if (model.adaptiveThinking) params.thinking = { type: "adaptive" };
 
-  for (const speed of ["fast", "standard"] as const) {
+  const speeds: Speed[] = model.speed === "fast" ? ["fast", "standard"] : ["standard"];
+  for (const speed of speeds) {
     const remaining = request.deadline - now();
-    if (remaining <= 0) return { ok: false, error: "deadline", usage: null };
+    if (remaining <= 0 || request.signal?.aborted)
+      return { ok: false, error: "deadline", usage: null };
+    // timeout は応答の始まりまでしか効かないので、本文の受信も含めて signal で期限を守る
+    const timeout = AbortSignal.timeout(remaining);
+    const signal =
+      request.signal === undefined ? timeout : AbortSignal.any([timeout, request.signal]);
     try {
-      // timeout は応答の始まりまでしか効かないので、本文の受信も含めて signal で期限を守る
       const message = await client.messages
-        .stream(
-          { ...params, speed },
-          { maxRetries: 0, timeout: remaining, signal: AbortSignal.timeout(remaining) },
-        )
+        .stream(speed === "fast" ? { ...params, speed } : params, {
+          maxRetries: 0,
+          timeout: remaining,
+          signal,
+        })
         .finalMessage();
       return parseOutput(message, request.schema, speed);
     } catch (error) {
