@@ -61,6 +61,14 @@ const QUOTE_MAX = 1000;
 
 const normalized = (value: string) => value.normalize("NFKC").trim();
 
+/** 残す調査項目。数値の調査項目は古い区を指すので外し、名前も本文も無い文章の項目（入れ方を選ぶ前の空の項目）も外す。 */
+function kept(measurement: UsageReportInput["measurements"][number]): boolean {
+  if (measurement.kind === "numeric") return false;
+  return (
+    measurement.kind !== "text" || measurement.name.trim() !== "" || measurement.body.trim() !== ""
+  );
+}
+
 /** 鍵の参照切れを表す。写像の途中で見つけたら全体を失敗にする。 */
 class BrokenKey extends Error {}
 
@@ -107,7 +115,8 @@ function mapReading(
 ): AppliedReading {
   const evidence = new Map<string, string>();
   for (const { ref, quote, page } of output.evidence) {
-    const cited = page >= 1 ? `${quote.trim()}（${Math.trunc(page)}ページ）` : quote.trim();
+    const text = quote.trim() === "" ? "" : `「${quote.trim()}」`;
+    const cited = page >= 1 ? `${text}（${Math.trunc(page)}ページ）` : text;
     if (!evidence.has(ref)) evidence.set(ref, cited.slice(0, QUOTE_MAX));
   }
   const fields: AppliedField[] = [];
@@ -270,10 +279,7 @@ function mapReading(
       timingNote: fill("timingNote"),
       commonPlotDescription: fill("commonPlotDescription"),
       observedChange: fill("observedChange"),
-      measurements: [
-        ...base.measurements.filter((measurement) => measurement.kind !== "numeric"),
-        ...measurements,
-      ],
+      measurements: [...base.measurements.filter(kept), ...measurements],
       pdfValuesChecked: false,
     },
     fields,

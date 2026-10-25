@@ -46,3 +46,10 @@ export const getReportMaterialClassificationsAction = fn<
 export const findOtherReportForMaterialAction = fn<Actions["findOtherReportForMaterialAction"]>(
   async () => ({ ok: true, data: null }),
 );
+
+export const readPdfIntoReportAction = fn<Actions["readPdfIntoReportAction"]>(async () => ({
+  ok: false,
+  error: "pdf_reading_failed",
+  message: "PDFを読み取れませんでした。入力した内容はそのまま残っています。手入力で続けられます。",
+  remaining: 7,
+}));

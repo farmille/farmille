@@ -93,7 +93,10 @@ describe("applyPdfReading", () => {
     const keys = fields.map(({ fieldKey }) => fieldKey);
     expect(keys).not.toContain("cropId");
     expect(keys).not.toContain("observedChange");
-    expect(fields).toContainEqual({ fieldKey: "timingNote", quote: "定植：7月25日（1ページ）" });
+    expect(fields).toContainEqual({
+      fieldKey: "timingNote",
+      quote: "「定植：7月25日」（1ページ）",
+    });
   });
 
   it("作物・都道府県・使用目的は候補と完全に一致したときだけ入れる", () => {
@@ -147,7 +150,7 @@ describe("applyPdfReading", () => {
     expect(input.plots.every((item) => item.varietyId === null)).toBe(true);
   });
 
-  it("数値の調査項目は置き換え、画像と文章の調査項目と写真は残す", () => {
+  it("数値の調査項目と空の項目は置き換え、画像と文章の調査項目と写真は残す", () => {
     const blank = base();
     const textItem = {
       id: crypto.randomUUID(),
@@ -173,7 +176,12 @@ describe("applyPdfReading", () => {
     };
     const { input } = applied({
       ...blank,
-      measurements: [...blank.measurements, textItem, imageItem],
+      measurements: [
+        ...blank.measurements,
+        { ...textItem, id: crypto.randomUUID(), name: "", body: "" },
+        textItem,
+        imageItem,
+      ],
       media: [photo],
     });
     expect(input.measurements.map(({ kind, name }) => [kind, name])).toEqual([
@@ -260,11 +268,11 @@ describe("applyPdfReading", () => {
       marks.map(({ fieldKey }) => fieldKey).filter((fieldKey) => fieldKey !== nameKey),
     );
     expect(marks.find(({ fieldKey }) => fieldKey === nameKey)?.quote).toBe(
-      "ヒートインパクト500倍（2ページ）",
+      "「ヒートインパクト500倍」（2ページ）",
     );
     const row = input.measurements.at(-1)?.graphs[0]?.rows[0];
     expect(marks.find(({ fieldKey }) => fieldKey.endsWith(`${row?.id}.value`))?.quote).toBe(
-      "表2 可販重量（3ページ）",
+      "「表2 可販重量」（3ページ）",
     );
   });
 });

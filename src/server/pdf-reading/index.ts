@@ -338,7 +338,11 @@ export async function createPdfReadingDeps(userId: string): Promise<PdfReadingDe
   };
 }
 
-/** 今月の残り回数。画面の入口に出す。 */
-export function getPdfReadingQuota(userId: string): Promise<Result<number>> {
-  return getPdfReadingRemaining(userId, createAdminSupabase());
+/** 画面の入口に出す今月の残り回数と、ブラウザで reCAPTCHA を動かすサイトキー。 */
+export async function getPdfReadingEntry(
+  userId: string,
+): Promise<Result<{ remaining: number; siteKey: string }>> {
+  const remaining = await getPdfReadingRemaining(userId, createAdminSupabase());
+  if (!remaining.ok) return remaining;
+  return succeed({ remaining: remaining.data, siteKey: serverEnv.recaptchaSiteKey });
 }

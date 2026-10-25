@@ -179,7 +179,7 @@ describe("readPdfIntoDraft", () => {
     expect(recorded).toContainEqual({
       fieldKey: "cultivationEnvironment",
       value: "施設",
-      quote: "ハウス（1ページ）",
+      quote: "「ハウス」（1ページ）",
     });
   });
 

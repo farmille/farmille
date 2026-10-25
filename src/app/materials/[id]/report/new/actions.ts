@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as v from "valibot";
 import { fail, succeed } from "@/server/result";
+import type { PdfReadingRequest, PdfReadingResult } from "@/lib/pdf-reading";
+import { createPdfReadingDeps, readPdfIntoDraft } from "@/server/pdf-reading";
 
 import { isMaterialId } from "@/app/materials/[id]/material-page-data";
 import { otherOpenReport } from "@/app/materials/[id]/report/_components/report-page-state";
 import { requireGeneralUser } from "@/server/auth";
-import { errorMessageJa } from "@/server/errors";
+import { errorMessageJa, type ErrorCode } from "@/server/errors";
 import {
   getStructuredReportFormData,
   saveStructuredUsageReport,
@@ -70,6 +72,33 @@ export async function submitUsageReportAction(
   droppedMediaUrls: string[],
 ): Promise<UsageReportActionResult> {
   return runMutation(materialId, "submit", payload, droppedMediaUrls);
+}
+
+function pdfReadingRefused(error: ErrorCode, message = errorMessageJa[error]): PdfReadingResult {
+  return { ok: false, error, message, remaining: null };
+}
+
+/** 試験成績書の PDF を読み取り、下書きに写して保存する。読み取りの画面があるページの maxDuration（120秒）で動く。 */
+export async function readPdfIntoReportAction(
+  materialId: string,
+  request: PdfReadingRequest,
+): Promise<PdfReadingResult> {
+  const reportPath = `/materials/${materialId}/report/new`;
+  if (!isMaterialId(materialId)) return pdfReadingRefused("not_found");
+  const session = await requireGeneralUser();
+  if (!session.ok) {
+    if (session.error === "unauthorized") {
+      redirect(`/login?next=${encodeURIComponent(reportPath)}`);
+    }
+    return pdfReadingRefused(session.error);
+  }
+  if (!v.is(v.object({ input: v.object({ materialId: v.literal(materialId) }) }), request)) {
+    return pdfReadingRefused("invalid_body", "対象資材を選び直してください。");
+  }
+  const userId = session.data.userId;
+  const result = await readPdfIntoDraft(request, userId, await createPdfReadingDeps(userId));
+  if (result.ok) revalidatePath(reportPath);
+  return result;
 }
 
 export async function searchReportMaterialsAction(query: string) {

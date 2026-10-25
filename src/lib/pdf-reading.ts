@@ -72,6 +72,9 @@ export const PdfReadingUploadPathSchema = v.pipe(
 /** PDFの大きさ・ページ数と、読み取る範囲の文字数の上限。ブラウザとサーバーで同じ値を使う。 */
 export const PDF_READING_LIMITS = { bytes: 20 * 1024 * 1024, pages: 40, scope: 200 } as const;
 
+/** reCAPTCHA v3 のトークンを取るときの action。サーバーの検証でも同じ値を求める。 */
+export const PDF_READING_RECAPTCHA_ACTION = "pdf_reading";
+
 /** 読み取りの前に必ずチェックしてもらう同意の文言。仕様書（pdf-reading-SPEC.md）の文言のまま変えない。 */
 export const PDF_READING_CONSENT =
   "PDFの読み取りにはAnthropic社のAIモデルを使用しています。PDFはモデルの学習には用いられませんが、同社によりデータサーバー内に最大30日（規約違反の疑いがある場合を除く）データが保管されることがあります。Farmilleの運営がPDFを閲覧することはありません。";

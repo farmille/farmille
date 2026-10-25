@@ -8,7 +8,7 @@ import {
   type UsageReportActionResult,
 } from "@/lib/usage-report";
 import { createServerSupabase } from "@/server/supabase";
-import { reportNeedsPdfValuesCheck } from "@/server/pdf-reading/records";
+import { getReportPdfReadingMarks, reportNeedsPdfValuesCheck } from "@/server/pdf-reading/records";
 import { fail, succeed } from "@/server/result";
 import { clientEnv } from "@/env";
 import type { Database } from "@/types/database.types";
@@ -383,6 +383,11 @@ export async function getStructuredReportFormData(materialId: string, userId: st
       ? succeed(false)
       : await reportNeedsPdfValuesCheck(draft.data.reportId, supabase);
   if (!pdfCheck.ok) return pdfCheck;
+  const pdfReadingMarks =
+    draft.data === null
+      ? succeed([])
+      : await getReportPdfReadingMarks(draft.data.reportId, supabase);
+  if (!pdfReadingMarks.ok) return pdfReadingMarks;
   const documents =
     draft.data === null ? succeed([]) : await getReportDocumentUrls(draft.data, supabase);
   if (!documents.ok) return documents;
@@ -394,6 +399,7 @@ export async function getStructuredReportFormData(materialId: string, userId: st
     materialCropIds: materialCrops.data.map((item) => item.crop_id),
     draft: draft.data,
     pdfValuesCheckRequired: pdfCheck.data,
+    pdfReadingMarks: pdfReadingMarks.data,
     submitted: reports.data
       .filter((row) => row.status === "pending")
       .map((row) => {

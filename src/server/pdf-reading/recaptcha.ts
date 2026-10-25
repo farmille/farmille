@@ -1,6 +1,7 @@
 import * as v from "valibot";
 
-export const RECAPTCHA_ACTION = "pdf_reading";
+import { PDF_READING_RECAPTCHA_ACTION } from "@/lib/pdf-reading";
+
 const MIN_SCORE = 0.5;
 const VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 
@@ -39,5 +40,7 @@ export async function verifyRecaptcha(
   }
   const { success, score, action } = result.output;
   if (!success) console.error("[pdf-reading] reCAPTCHA が拒否", result.output["error-codes"]);
-  return success && action === RECAPTCHA_ACTION && score !== undefined && score >= MIN_SCORE;
+  return (
+    success && action === PDF_READING_RECAPTCHA_ACTION && score !== undefined && score >= MIN_SCORE
+  );
 }
