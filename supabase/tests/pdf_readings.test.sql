@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(54);
+select plan(59);
 
 insert into auth.users(id) values
   ('db932323-0000-4000-8000-000000000001'),('db932323-0000-4000-8000-000000000007'),
@@ -188,6 +188,30 @@ set local role service_role;
 select is(array(select u from public.list_expired_pdf_reading_uploads(1000) u where u like 'db932323-%'),
   array[pg_temp.path('000000000009',1,'9002')],'only PDFs left for more than a day are listed for removal');
 reset role;
+
+-- 適用すると確認を外す。確認していないレポートは更新せず、updated_at を変えない（画面の更新日時と食い違わない）。
+insert into public.usage_reports(id,material_id,author_user_id,observed_change,summary,pesticide_ack,form_version,pdf_values_checked,updated_at)
+values
+  ('db932323-0000-4000-8000-000000000041','db932323-0000-4000-8000-000000000002','db932323-0000-4000-8000-000000000001','','',false,2,true,'2026-01-01T00:00:00Z'),
+  ('db932323-0000-4000-8000-000000000042','db932323-0000-4000-8000-000000000002','db932323-0000-4000-8000-000000000001','','',false,2,false,'2026-01-01T00:00:00Z');
+insert into public.pdf_readings(id,user_id,report_id,material_id,upload_path,status,model,speed,input_tokens,output_tokens,finished_at)
+values
+  ('db932323-0000-4000-8000-000000000051','db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000041','db932323-0000-4000-8000-000000000002',
+    pg_temp.path('000000000001',41,'9001'),'succeeded','claude-opus-5-5','fast',1,1,now()),
+  ('db932323-0000-4000-8000-000000000052','db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000042','db932323-0000-4000-8000-000000000002',
+    pg_temp.path('000000000001',42,'9001'),'succeeded','claude-opus-5-5','fast',1,1,now());
+set local role service_role;
+select lives_ok($$select public.apply_pdf_reading('db932323-0000-4000-8000-000000000051','db932323-0000-4000-8000-000000000001','[]')$$,
+  'a reading is applied to a checked report');
+select lives_ok($$select public.apply_pdf_reading('db932323-0000-4000-8000-000000000052','db932323-0000-4000-8000-000000000001','[]')$$,
+  'a reading is applied to an unchecked report');
+reset role;
+select is((select pdf_values_checked from public.usage_reports where id='db932323-0000-4000-8000-000000000041'),false,
+  'applying a reading clears the check');
+select isnt((select updated_at from public.usage_reports where id='db932323-0000-4000-8000-000000000041'),'2026-01-01T00:00:00Z'::timestamptz,
+  'clearing the check updates the report, so set_updated_at advances updated_at');
+select is((select updated_at from public.usage_reports where id='db932323-0000-4000-8000-000000000042'),'2026-01-01T00:00:00Z'::timestamptz,
+  'an unchecked report is not updated and keeps updated_at');
 
 select * from finish();
 rollback;
