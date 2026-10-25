@@ -6,7 +6,10 @@ import { Checkbox, Input, SearchInput, Select } from "@/components/form";
 import { DialogClose, Dialog } from "@/components/Dialog";
 import { Icon } from "@/components/Icon";
 import { ToggleGroup } from "@/components/ToggleGroup";
-import { searchReportMaterialsAction } from "@/app/materials/[id]/report/new/actions";
+import {
+  getReportMaterialClassificationsAction,
+  searchReportMaterialsAction,
+} from "@/app/materials/[id]/report/new/actions";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import { withSingleVariety, type UsageReportInput } from "@/lib/usage-report";
@@ -227,6 +230,11 @@ export function ReportPageProperties({
   const [picker, setPicker] = useState<Picker>("");
   const [query, setQuery] = useState("");
   const [materials, setMaterials] = useState<PostingMaterial[]>([]);
+  // 資材ごとの登録作物と効果。資材を選び直したら、その資材の分を読み込んで足す
+  const [classes, setClasses] = useState(
+    () =>
+      new Map([[pageMaterialId, { cropIds: materialCropIds, effectNames: materialEffectNames }]]),
+  );
   const [, startSearch] = useTransition();
 
   useEffect(() => {
@@ -251,6 +259,17 @@ export function ReportPageProperties({
     };
   }, [picker, query, onMessage]);
 
+  async function loadClasses(materialId: string) {
+    if (classes.has(materialId)) return;
+    try {
+      const result = await getReportMaterialClassificationsAction(materialId);
+      if (result.ok) setClasses((current) => new Map(current).set(materialId, result.data));
+      else onMessage("選んだ資材の登録作物と効果を読み込めませんでした。");
+    } catch {
+      onMessage("選んだ資材の登録作物と効果を読み込めませんでした。通信状態を確認してください。");
+    }
+  }
+
   function open(next: Picker) {
     setQuery("");
     setMaterials([]);
@@ -258,14 +277,12 @@ export function ReportPageProperties({
   }
 
   const crop = crops.find((item) => item.id === input.cropId);
-  const sameMaterial = input.materialId === pageMaterialId;
-  const fromMaterial = sameMaterial
-    ? crops.filter((item) => materialCropIds.includes(item.id))
-    : [];
+  const own = classes.get(input.materialId);
+  const fromMaterial = crops.filter((item) => own !== undefined && own.cropIds.includes(item.id));
   const mine = crops.filter(
     (item) => favoriteCropIds.includes(item.id) && !fromMaterial.some((x) => x.id === item.id),
   );
-  const ownEffects = sameMaterial ? materialEffectNames : [];
+  const ownEffects = own?.effectNames ?? [];
   const effectGroups = [...new Set(effects.map((effect) => effect.categoryName))];
   const effectOption = (name: string) => ({ value: name, label: name });
   // 組ごとの ToggleGroup が返すのはその組の選択だけなので、ほかの組の選択は残して入れ替える
@@ -496,6 +513,7 @@ export function ReportPageProperties({
                 manufacturerName: item.manufacturer_name,
               });
               setPicker("");
+              void loadClasses(item.id);
             }}
           >
             {item.name}

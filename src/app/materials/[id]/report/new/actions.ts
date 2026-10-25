@@ -3,13 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import * as v from "valibot";
-import { fail } from "@/server/result";
+import { fail, succeed } from "@/server/result";
 
 import { isMaterialId } from "@/app/materials/[id]/material-page-data";
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { saveStructuredUsageReport } from "@/server/usage-reports/structured";
-import { searchPostingMaterials } from "@/server/queries/materials";
+import { getMaterial, searchPostingMaterials } from "@/server/queries/materials";
 import type { UsageReportActionResult, UsageReportInput } from "@/lib/usage-report";
 
 async function runMutation(
@@ -63,4 +63,16 @@ export async function searchReportMaterialsAction(query: string) {
   const parsed = v.safeParse(v.string(), query);
   if (!parsed.success) return fail("invalid_body");
   return searchPostingMaterials(parsed.output);
+}
+
+/** 資材を選び直したときに、作物と使用目的の候補に出す、その資材の登録作物と効果。 */
+export async function getReportMaterialClassificationsAction(materialId: string) {
+  const parsed = v.safeParse(v.string(), materialId);
+  if (!parsed.success || !isMaterialId(parsed.output)) return fail("invalid_body");
+  const material = await getMaterial(parsed.output);
+  if (!material.ok) return material;
+  return succeed({
+    cropIds: material.data.targetCrops.map((crop) => crop.id),
+    effectNames: material.data.effects.map((effect) => effect.name),
+  });
 }
