@@ -24,8 +24,8 @@ test("実証詳細レポートの下書き保存、提出、pending の公開側
     await page.goto("/me");
     await expect(page.getByText("作物未選択", { exact: true })).toBeVisible();
     await page.goto(reportPath);
-    await page.getByRole("button", { name: /^作物：/ }).click();
-    await page.getByRole("searchbox", { name: "作物を検索" }).fill("トマト");
+    await page.getByRole("button", { name: /^使用対象作目：/ }).click();
+    await page.getByRole("searchbox", { name: "使用対象作目を検索" }).fill("トマト");
     await page
       .getByRole("button", { name: /^トマト/ })
       .first()

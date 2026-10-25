@@ -31,7 +31,7 @@ export async function getPublishedMaterialPage(materialId: string) {
   };
 }
 
-/** 読み取りもRLSを通し、公開版または有効な編集権のある版だけを返す。 */
+/** 読み取りもRLSを通し、公開版または有効な資材オーナー権限のある版だけを返す。 */
 export async function getMaterialPageVersion(versionId: string) {
   const db = await createServerSupabase();
   const { data, error } = await db

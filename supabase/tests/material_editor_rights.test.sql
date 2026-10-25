@@ -3,7 +3,7 @@ create extension if not exists pgtap with schema extensions;
 select plan(16);
 
 insert into auth.users(id) values('ba8b2af4-a8b5-4b31-9d13-578f15bba739') on conflict (id) do nothing;
-insert into public.materials(id,name,manufacturer_name) values('ba8b2af4-a8b5-4b31-9d13-578f15bba741','編集権テスト専用資材','デモ株式会社');
+insert into public.materials(id,name,manufacturer_name) values('ba8b2af4-a8b5-4b31-9d13-578f15bba741','資材オーナー権限テスト専用資材','デモ株式会社');
 select is((select count(*)::integer from public.materials where id='ba8b2af4-a8b5-4b31-9d13-578f15bba741' and seller_id is not null),0,'initial material has no automatic editing rights');
 select set_config('request.jwt.claims','{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated","app_metadata":{"account_type":"seller","seller_id":"33333333-3333-4333-8333-333333333333"}}',true);
 set local role authenticated;

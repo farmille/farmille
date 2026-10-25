@@ -47,12 +47,12 @@ export const errorMessageJa = {
     "このメールアドレスでは登録できません。登録済みの場合はログインをお試しください。",
   // ID とパスワードのどちらが誤りかを判別させない文言にする。
   invalid_credentials: "メールアドレスまたはパスワードが正しくありません。",
-  seller_invalid_credentials: "ログイン ID またはパスワードが正しくありません。",
+  seller_invalid_credentials: "Farmille企業会員IDまたはパスワードが正しくありません。",
   weak_password: "パスワードは8文字以上で入力してください。",
   rate_limited: "リクエストが多すぎます。しばらく待ってから再度お試しください。",
   expired_link: "リンクが無効か、有効期限が切れています。もう一度やり直してください。",
   already_reported: "この投稿はすでに通報済みで、対応中です。",
-  login_id_taken: "このログイン ID はすでに使われています。別の ID を指定してください。",
+  login_id_taken: "このFarmille企業会員IDはすでに使われています。別のIDを指定してください。",
   invalid_invite_code: "招待コードが正しくありません。",
 } satisfies Record<ErrorCode, string>;
 

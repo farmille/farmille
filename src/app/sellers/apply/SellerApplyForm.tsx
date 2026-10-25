@@ -47,11 +47,11 @@ export function SellerApplyForm() {
       />
 
       <Notice className={noteStyle} tone="neutral">
-        ログインIDは運営が発行します。パスワードは、ご案内する設定用ページで設定してください。
+        Farmille企業会員IDは運営が発行します。パスワードは、ご案内する設定用ページで設定してください。
       </Notice>
 
       <Input
-        description="ご担当者のメールアドレスを入力してください。公開されません。確認後、このアドレスにログインIDとパスワード設定用のご案内をお送りします。"
+        description="ご担当者のメールアドレスを入力してください。公開されません。確認後、このアドレスにFarmille企業会員IDとパスワード設定用のご案内をお送りします。"
         label="連絡先メールアドレス"
         name="contactEmail"
         requirement="required"

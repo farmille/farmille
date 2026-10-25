@@ -174,7 +174,7 @@ export function reportPageChecks(
       ok: input.materialId !== "",
       target: "report-prop-material",
     },
-    { key: "cropId", label: "作物", ok: input.cropId !== null, target: "report-prop-crop" },
+    { key: "cropId", label: "使用対象作目", ok: input.cropId !== null, target: "report-prop-crop" },
     {
       key: "variety",
       label: "品種",
@@ -270,5 +270,5 @@ export function reportPageChecks(
 }
 
 export function reportPageTitle(materialName: string, cropName: string | null): string {
-  return `${materialName} 実証詳細レポート｜${cropName ?? "作物"}`;
+  return `${materialName} 実証詳細レポート｜${cropName ?? "使用対象作目"}`;
 }

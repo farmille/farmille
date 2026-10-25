@@ -18,7 +18,7 @@ export function SellerLoginForm({ next }: { next: string | null }) {
 
       <Input
         description="運営からの案内メールに記載されたID"
-        label="ログインID"
+        label="Farmille企業会員ID"
         name="loginId"
         requirement="required"
         autoCapitalize="none"

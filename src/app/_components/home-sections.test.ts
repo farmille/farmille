@@ -25,7 +25,7 @@ describe("ホーム下部の導線", () => {
   });
   it("フッターにダミーリンクを置かない", () => {
     render(createElement(HomeFooter));
-    expect(screen.getByRole("link", { name: "メーカー登録申請" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "企業会員登録の申請" }).getAttribute("href")).toBe(
       "/sellers/apply",
     );
     for (const link of screen.getAllByRole("link")) expect(link.getAttribute("href")).not.toBe("#");

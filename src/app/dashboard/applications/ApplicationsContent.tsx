@@ -19,7 +19,7 @@ import { ProcedureRow } from "../_components/ProcedureRow";
 const PROCEDURES = [
   {
     title: "自社の資材を掲載する／掲載済みの自社資材を管理する",
-    description: "資材情報の新規掲載と、掲載済み資材の資材オーナー権限の申請。",
+    description: "資材の新規掲載と、掲載済み資材の資材オーナー権限の申請。",
     needs: "資材ごとのパッケージ画像 or 製品ページURL、法人番号、掲載済み資材はそのページURL",
     href: "/dashboard/applications/new/registration",
     label: "申請フォーム A",
@@ -28,7 +28,7 @@ const PROCEDURES = [
     title: "資材オーナー権限を別の会社に引き渡す",
     description: "貴社が資材オーナー企業になっている資材について、権限を別の会社に移す申請。",
     needs:
-      "対象資材のページURL、移行先の法人番号・FarmilleアカウントID・担当者連絡先、移行先企業名が載ったパッケージ画像 or 製品ページURL",
+      "対象資材のページURL、移行先の法人番号・Farmille企業会員ID・担当者連絡先、移行先企業名が載ったパッケージ画像 or 製品ページURL",
     href: "/dashboard/applications/new/transfer_out",
     label: "申請フォーム B",
   },
@@ -79,11 +79,11 @@ export function ApplicationsContent({
       <div className={workspaceColumn}>
         <h1 className={pageTitle}>各種お手続き</h1>
         <p className={lead}>
-          資材の掲載・資材オーナー権限の移行に関するお手続きは、以下の申請フォームから行います。申請後、内容を確認のうえ結果をメールでお知らせします。終売・廃盤表示や資材ページの非表示のご依頼は{" "}
+          資材の掲載・資材オーナー権限の移行に関するお手続きは、以下の申請フォームから行います。申請後、内容を確認のうえ結果をメールでお知らせします。終売表示や資材ページの非公開のご依頼は{" "}
           <TextLink href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</TextLink> で受け付けます。
         </p>
         <p className={requirementNote}>
-          どの申請にも、貴社のFarmilleアカウントIDと、資材ごとのパッケージ画像（貴社名の記載箇所）または製品ページのURLが必要です。
+          どの申請にも、貴社のFarmille企業会員IDと、資材ごとのパッケージ画像（貴社名の記載箇所）または製品ページのURLが必要です。
         </p>
         <div className={procedureStack}>
           {PROCEDURES.map((item) => (

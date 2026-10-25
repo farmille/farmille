@@ -18,7 +18,7 @@ fail() {
 
 if ! status_env=$(npx --yes "$SUPABASE_CLI" status -o env); then
   log "supabase/config.toml の Supabase（${LOCAL_API_URL}）が起動していません。"
-  log "DB のボリュームは worktree 間で共有しているので、起動は確認を取ってから次で行います。"
+  log "次で起動します（確認は不要）。"
   printf '  npx --yes %s start -x studio,edge-runtime,realtime,imgproxy,logflare,vector\n' "$SUPABASE_CLI"
   exit 1
 fi

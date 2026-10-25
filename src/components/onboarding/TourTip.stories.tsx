@@ -23,7 +23,7 @@ function WithTarget(props: Omit<TourTipProps, "target">) {
   return (
     <>
       <div ref={setTarget} className={fieldStyle}>
-        主な作目
+        栽培作目
       </div>
       <TourTip {...props} target={target} />
     </>
@@ -42,7 +42,7 @@ type Story = StoryObj<typeof meta>;
 
 export const WithPrimary: Story = {
   args: {
-    title: "主な作目を選択",
+    title: "栽培作目を選択",
     body: "栽培している作目を候補から選び（複数選択可）、「保存する」を押してください。",
     primary: { label: "入力する", onClick: fn() },
   },

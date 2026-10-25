@@ -24,7 +24,7 @@ export type AdminTagItem = Pick<TagRow, "id" | "name" | "category" | "sort_order
 
 export type AdminCropItem = Pick<CropRow, "id" | "name" | "aliases" | "sort_order" | "group_id"> & {
   groupName: string;
-  /** 感想口コミ・実証詳細レポート・主な作目からの参照数の合計。 */
+  /** 感想口コミ・実証詳細レポート・栽培作目からの参照数の合計。 */
   usageCount: number;
 };
 

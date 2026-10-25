@@ -31,7 +31,7 @@ export const WithSave: Story = {
   args: {
     section: 1,
     message:
-      "主な作目を選んで「保存する」を押してください（複数選択可）。所属や自己紹介も入力できます。",
+      "栽培作目を選んで「保存する」を押してください（複数選択可）。所属や自己紹介も入力できます。",
     action: { label: "保存する", onClick: fn() },
   },
 };

@@ -25,7 +25,7 @@ const list = css({ display: "grid", gap: "1.5" });
 
 const row = css({
   display: "grid",
-  gridTemplateColumns: "[6.5em minmax(0, 1fr)]",
+  gridTemplateColumns: "[7.5em minmax(0, 1fr)]",
   columnGap: "2.5",
   alignItems: "center",
   scrollMarginTop: "20",
@@ -308,14 +308,14 @@ export function ReportPageProperties({
           <Icon name="chevron_right" className={chevron} />
         </button>
       </Row>
-      <Row id="report-prop-crop" label="作物" required>
+      <Row id="report-prop-crop" label="使用対象作目" required>
         <button
           type="button"
           className={valueRecipe({ missing: missing.has("cropId") })}
-          aria-label={`作物：${crop?.name ?? "未選択"}`}
+          aria-label={`使用対象作目：${crop?.name ?? "未選択"}`}
           onClick={() => open("crop")}
         >
-          {crop ? <span>{crop.name}</span> : <span className={empty}>作物を選ぶ</span>}
+          {crop ? <span>{crop.name}</span> : <span className={empty}>使用対象作目を選ぶ</span>}
           <Icon name="chevron_right" className={chevron} />
         </button>
       </Row>
@@ -500,11 +500,11 @@ export function ReportPageProperties({
         open={picker === "crop"}
         onOpenChange={(next) => !next && setPicker("")}
         size="sheet"
-        title="作物を選ぶ"
+        title="使用対象作目を選ぶ"
       >
         <div className={searchBox}>
           <SearchInput
-            aria-label="作物を検索"
+            aria-label="使用対象作目を検索"
             placeholder="作物名で検索　例）トマト、みかん"
             value={query}
             onValueChange={setQuery}
@@ -526,7 +526,7 @@ export function ReportPageProperties({
           <>
             {fromMaterial.length > 0 && <div className={listHead}>この資材の登録作物</div>}
             {fromMaterial.map((item) => cropRow(item, "material"))}
-            {mine.length > 0 && <div className={listHead}>あなたの作物</div>}
+            {mine.length > 0 && <div className={listHead}>あなたの栽培作目</div>}
             {mine.map((item) => cropRow(item, "mine"))}
             <div className={listHead}>すべての作物</div>
             {crops.map((item) => cropRow(item, "all"))}

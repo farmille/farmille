@@ -48,7 +48,7 @@ export const Default: Story = {};
 
 export const CropSearch: Story = {
   play: async ({ canvasElement }) => {
-    await userEvent.type(within(canvasElement).getByRole("combobox", { name: "主な作目" }), "トマ");
+    await userEvent.type(within(canvasElement).getByRole("combobox", { name: "栽培作目" }), "トマ");
     await waitFor(() =>
       expect(
         page(canvasElement).getByRole("option", { name: "トマト なす科果菜類" }),

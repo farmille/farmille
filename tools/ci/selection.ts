@@ -29,7 +29,31 @@ function isDocumentation(file: string): boolean {
 
 function isUnitTest(file: string): boolean {
   return (
-    file.startsWith("src/") && (/\.(?:test|spec)\.tsx?$/.test(file) || file.includes("/__tests__/"))
+    /^(?:src|tools|scripts)\//.test(file) &&
+    (/\.(?:test|spec)\.[cm]?[jt]sx?$/.test(file) || file.includes("/__tests__/"))
+  );
+}
+
+// 開発支援の変更は単体テスト・lintで確認し、実画面の検査から外す。
+function isDevelopmentOnly(file: string): boolean {
+  return (
+    file.startsWith("tools/oxlint/") ||
+    file.startsWith(".github/") ||
+    [
+      "tools/ci/browser-checks.ts",
+      "tools/ci/selection.ts",
+      "tools/dev/pre-push.sh",
+      "tools/dev/setup-hooks.sh",
+      "tools/dev/setup-worktree.sh",
+      "tools/dev/claude-session-git-check.sh",
+      "tools/dev/claude-session-start.sh",
+      "scripts/check-component-file-names.mjs",
+      "scripts/check-story-coverage.mjs",
+      "eslint.config.mjs",
+      ".oxlintrc.json",
+      ".oxfmtrc.json",
+      "vitest.config.ts",
+    ].includes(file)
   );
 }
 
@@ -44,7 +68,12 @@ function isStoryOnly(file: string): boolean {
 }
 
 function isE2eOnly(file: string): boolean {
-  return file.startsWith("e2e/") || file === "playwright.config.ts";
+  return (
+    file.startsWith("e2e/") ||
+    file === "playwright.config.ts" ||
+    file === "tools/dev/e2e-local.sh" ||
+    file === "tools/dev/check-migrations.sh"
+  );
 }
 
 function sourceFiles(directory: string): string[] {
@@ -183,10 +212,16 @@ export function createBrowserCheckPlan(
   if (full) return { storybook: { mode: "all", reason: "全件検査を指定" }, e2e: true };
 
   const e2e = changedFiles.some(
-    (file) => !isDocumentation(file) && !isStoryOnly(file) && !isUnitTest(file),
+    (file) =>
+      !isDocumentation(file) &&
+      !isDevelopmentOnly(file) &&
+      !isStoryOnly(file) &&
+      !isUnitTest(file) &&
+      (!file.endsWith(".css") || isE2eOnly(file)),
   );
   const storyChanges = changedFiles.filter(
-    (file) => !isDocumentation(file) && !isE2eOnly(file) && !isUnitTest(file),
+    (file) =>
+      !isDocumentation(file) && !isDevelopmentOnly(file) && !isE2eOnly(file) && !isUnitTest(file),
   );
   if (storyChanges.length === 0) {
     return { storybook: { mode: "none", reason: "画面に影響する変更なし" }, e2e };

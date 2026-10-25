@@ -9,7 +9,8 @@ const meta = {
     title: "製品情報の管理",
     href: "/dashboard/materials",
     actionLabel: "資材管理を開く",
-    children: "編集権のある製品の編集、下書き保存、プレビュー、表現確認の状況確認を行います。",
+    children:
+      "資材オーナー権限のある製品情報の編集、下書き保存、プレビュー、表現確認の状況確認を行います。",
   },
 } satisfies Meta<typeof ProcedureRow>;
 export default meta;

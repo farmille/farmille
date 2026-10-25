@@ -57,14 +57,14 @@ describe("RadioGroup", () => {
         options={[
           {
             value: "new",
-            label: "資材情報の新規掲載",
+            label: "資材の新規掲載",
             description: "Farmille にまだ載っていない資材を新しく掲載します。",
           },
         ]}
       />,
     );
 
-    expect(screen.getByRole("radio", { name: "資材情報の新規掲載" })).toHaveAccessibleDescription(
+    expect(screen.getByRole("radio", { name: "資材の新規掲載" })).toHaveAccessibleDescription(
       "Farmille にまだ載っていない資材を新しく掲載します。",
     );
   });

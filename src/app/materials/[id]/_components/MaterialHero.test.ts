@@ -10,16 +10,16 @@ describe("MaterialHero", () => {
     const material = {
       ...materialDetail,
       manufacturer_name: "旧掲載会社",
-      representativeSeller: { id: "maker-id", official_name: "編集権を持つメーカー" },
+      representativeSeller: { id: "maker-id", official_name: "資材オーナー権限を持つメーカー" },
     };
     render(createElement(MaterialHero, { material, saved: null }));
-    expect(screen.getByRole("link", { name: "編集権を持つメーカー" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "資材オーナー権限を持つメーカー" })).toHaveAttribute(
       "href",
       "/sellers/maker-id",
     );
     expect(screen.queryByText("旧掲載会社")).not.toBeInTheDocument();
   });
-  it("編集権のない資材は従来の会社名をリンクなしで表示する", () => {
+  it("資材オーナー権限のない資材は従来の会社名をリンクなしで表示する", () => {
     const material = {
       ...materialDetail,
       seller_id: null,

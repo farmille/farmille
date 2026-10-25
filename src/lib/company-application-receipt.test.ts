@@ -38,7 +38,7 @@ it("新規掲載の資材には FarmilleページURL を出さず、空の製品
 
 it("申請内容は掲載・権限申請の資材だけが持ち、ほかの項目と分けて持つ", () => {
   expect(applicationReceiptDocument(registrationReceipt).items.map((item) => item.request)).toEqual(
-    ["資材情報の新規掲載", "掲載済み資材の資材オーナー権限"],
+    ["資材の新規掲載", "掲載済み資材の資材オーナー権限"],
   );
   for (const receipt of [transferOutReceipt, transferInReceipt, removalReceipt]) {
     expect(applicationReceiptDocument(receipt).items.map((item) => item.request)).toEqual([null]);
@@ -50,7 +50,7 @@ it("控えメールでは、申請内容を資材名のすぐ下に書く", () =
   const first = lines.indexOf("対象資材 1：土壌改良微生物資材 みどりの土");
   expect(lines.slice(first, first + 4)).toEqual([
     "対象資材 1：土壌改良微生物資材 みどりの土",
-    "申請内容：資材情報の新規掲載",
+    "申請内容：資材の新規掲載",
     "製品公式ページURL：https://midori-nozai.example.com/products/midori-no-tsuchi",
     "関係：製造元",
   ]);
@@ -143,7 +143,7 @@ it("控えメールの受付票は、申請者・資材・移行先・添付資�
     "部署名：事業管理部",
     "担当者名：高橋健一",
     "法人番号：3430001234567",
-    "FarmilleアカウントID：hokuto-agri",
+    "Farmille企業会員ID：hokuto-agri",
     "担当者メールアドレス：takahashi@hokuto-agri.example.com",
     "電話番号：011-234-5678",
     "",
@@ -155,7 +155,7 @@ it("控えメールの受付票は、申請者・資材・移行先・添付資�
     "部署名：製品企画部",
     "担当者名：中村由紀",
     "法人番号：8010001234567",
-    "FarmilleアカウントID：towa-green",
+    "Farmille企業会員ID：towa-green",
     "担当者メールアドレス：nakamura@towa-green.example.com",
     "電話番号：03-5678-1234",
     "",

@@ -69,10 +69,10 @@ export default async function AdminMaterialDetailPage({
       <Panel
         note={
           material.data.sellerName === null
-            ? "編集権は未付与です。既存の紐づけがあった場合も書類確認が必要です。"
-            : `編集権を付与したメーカー：${material.data.sellerName}`
+            ? "資材オーナー権限は未付与です。既存の紐づけがあった場合も書類確認が必要です。"
+            : `資材オーナー権限を付与したメーカー：${material.data.sellerName}`
         }
-        title="編集権と所有権の書類確認"
+        title="資材オーナー権限と所有権の書類確認"
       >
         <ClaimForm
           currentSellerId={material.data.seller_id}
@@ -103,7 +103,7 @@ export default async function AdminMaterialDetailPage({
         />
       </Panel>
 
-      <Panel title="資材情報">
+      <Panel title="製品情報">
         {material.data.seller_id !== null || material.data.published_page_version_id !== null ? (
           <p className={adminInlineNoteStyle}>
             この資材の原稿はメーカーが管理します。内容の修正はメーカーへ依頼し、提出された原稿を

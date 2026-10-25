@@ -79,7 +79,7 @@ export async function loginGeneral(page: Page, user: GeneralUser, next = "/"): P
 
 export async function loginSeller(page: Page, seller: SellerAccount): Promise<void> {
   await page.goto("/sellers/login");
-  await page.getByLabel("ログインID").fill(seller.loginId);
+  await page.getByLabel("Farmille企業会員ID").fill(seller.loginId);
   await page.getByLabel("パスワード").fill(seller.password);
   const submitButton = page.getByRole("button", { name: "ログインする" });
   await waitForReactHydration(submitButton);

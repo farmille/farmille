@@ -196,7 +196,7 @@ export function ReportPagePreview({
             {prefecture}
             {city}
           </dd>
-          <dt>使用作物</dt>
+          <dt>使用対象作目</dt>
           <dd>
             {cropName ?? "（未選択）"}
             {variety ? `（${variety}）` : ""}

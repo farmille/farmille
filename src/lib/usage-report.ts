@@ -179,7 +179,7 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   const required = (key: string, valid: boolean, message = "※ ここを入力してください") => {
     if (!valid) errors[key] = message;
   };
-  required("cropId", input.cropId !== null, "※ 使用作物を選んでください");
+  required("cropId", input.cropId !== null, "※ 使用対象作目を選んでください");
   required(
     "variety",
     input.varietyUnknown || input.variety.trim().length > 0,

@@ -44,12 +44,26 @@ function pushPlan(): { plan: BrowserCheckPlan; head: string } | null {
         "push 対象が現在の HEAD と異なります。対象のブランチに移動して個別に push してください。",
       );
     }
-    // 新規 ref・main・比較元を持たない clone は、差分を推測せず全件検査する。
-    if (remoteSha === zeroSha || remoteRef === "refs/heads/main") {
-      full = true;
-      continue;
+    let comparison = remoteSha;
+    if (remoteSha === zeroSha) {
+      // 初回 push は送信先 main との分岐点から、ブランチ固有の変更を調べる。
+      const remote = process.argv[3];
+      const mergeBase =
+        remoteRef.startsWith("refs/heads/") && remote
+          ? spawnSync("git", ["merge-base", head, `refs/remotes/${remote}/main`], {
+              encoding: "utf8",
+              stdio: ["ignore", "pipe", "ignore"],
+            })
+          : null;
+      if (!mergeBase || mergeBase.status !== 0) {
+        full = true;
+        continue;
+      }
+      comparison = v.parse(sha, mergeBase.stdout.trim());
     }
-    const base = spawnSync("git", ["cat-file", "-e", `${remoteSha}^{commit}`], { stdio: "ignore" });
+    const base = spawnSync("git", ["cat-file", "-e", `${comparison}^{commit}`], {
+      stdio: "ignore",
+    });
     if (base.error) throw base.error;
     if (base.status !== 0) {
       full = true;
@@ -60,7 +74,7 @@ function pushPlan(): { plan: BrowserCheckPlan; head: string } | null {
       "--name-only",
       "--no-renames",
       "-z",
-      remoteSha,
+      comparison,
       head,
       "--",
     ]).split("\0")) {

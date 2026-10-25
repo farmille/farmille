@@ -42,7 +42,7 @@ export async function setMaterialPublicationStatusAction(
   revalidatePath(`/materials/${materialId}`);
   return {
     status: "done",
-    message: status === "published" ? "資材を公開状態へ戻しました。" : "資材を掲載終了にしました。",
+    message: status === "published" ? "資材を公開状態へ戻しました。" : "資材を非公開にしました。",
   };
 }
 
@@ -197,7 +197,7 @@ export async function setMaterialSellerAction(
     if (result.error === "conflict") {
       return {
         status: "error",
-        message: "アカウントの確認が完了したメーカーにだけ編集権を付与できます。",
+        message: "アカウントの確認が完了したメーカーにだけ資材オーナー権限を付与できます。",
       };
     }
 
@@ -212,7 +212,7 @@ export async function setMaterialSellerAction(
     status: "done",
     message:
       nextSellerId === null
-        ? "編集権を取り消しました。公開中の情報は保持しています。"
-        : "書類確認の記録を保存し、この資材の編集権を付与しました。",
+        ? "資材オーナー権限を取り消しました。公開中の情報は保持しています。"
+        : "書類確認の記録を保存し、この資材の資材オーナー権限を付与しました。",
   };
 }
