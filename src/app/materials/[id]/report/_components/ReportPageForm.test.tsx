@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   AppRouterContext,
   type AppRouterInstance,
@@ -32,7 +32,7 @@ const chosenMaterial = {
   manufacturerName: "ファーム技研",
 };
 
-function renderForm() {
+function renderForm(draft = filledReport) {
   return render(
     <ReportPageForm
       material={pageMaterial}
@@ -43,7 +43,7 @@ function renderForm() {
       materialEffectNames={[]}
       favoriteCropIds={[]}
       materialCropIds={[]}
-      draft={filledReport}
+      draft={draft}
       documentUrls={[]}
       registeredAddress={{ prefectureCode: 8 }}
     />,
@@ -72,5 +72,35 @@ describe("保存前の入力の控え", () => {
       screen.getByRole("button", { name: `資材：${chosenMaterial.name}` }),
     ).toBeInTheDocument();
     expect(window.sessionStorage.getItem(key)).toContain("書きかけの感想");
+  });
+});
+
+describe("保存と提出の最中", () => {
+  afterEach(() => window.sessionStorage.clear());
+
+  function pageOf() {
+    const title = document.querySelector("h1");
+    if (title === null) throw new Error("タイトルがありません。");
+    return title;
+  }
+
+  it("下書き保存が終わるまで、フォームを編集できない", async () => {
+    renderForm();
+    expect(pageOf().closest("[inert]")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "下書き保存" }));
+    expect(pageOf().closest("[inert]")).not.toBeNull();
+    await waitFor(() => expect(pageOf().closest("[inert]")).toBeNull());
+  });
+
+  it("投稿が終わるまで、フォームを編集できない", async () => {
+    renderForm({ ...filledReport, methodDetailsAck: true, documentsAck: true, guidelineAck: true });
+    for (const name of [
+      "資材を使った日（処理日）を記入した",
+      "差し込んだグラフ・表に、氏名や連絡先などが写っていないか確認した",
+    ])
+      fireEvent.click(screen.getByRole("checkbox", { name }));
+    fireEvent.click(screen.getByRole("button", { name: "投稿する" }));
+    expect(pageOf().closest("[inert]")).not.toBeNull();
+    await waitFor(() => expect(pageOf().closest("[inert]")).toBeNull());
   });
 });

@@ -404,7 +404,8 @@ export function ReportPageForm({
         </div>
       </div>
 
-      <div className={page}>
+      {/* 保存や提出は押した時点の入力を送るので、その間に変えた入力が黙って失われないよう、終わるまで編集を止める */}
+      <div className={page} inert={pending}>
         <div className={cover} aria-hidden="true">
           <span className={coverIcon}>
             <Icon name="eco" size="xl" />
