@@ -27,6 +27,7 @@ const errorStatus = {
   not_found: 404,
   invalid_body: 400,
   conflict: 409,
+  active_report_exists: 409,
   aal2_required: 403,
   internal: 500,
   handle_taken: 409,

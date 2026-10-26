@@ -1,3 +1,4 @@
+import { errorMessageJa } from "@/server/errors";
 import { listClassificationOptions } from "@/server/queries/classifications";
 import * as v from "valibot";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -74,7 +75,15 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
       });
       if (error !== null) {
         console.error("[usage-reports] 保存に失敗", error);
-        return { ok: false, message: error.code === "40001" ? SAVE_CONFLICT : SAVE_FAILED };
+        return {
+          ok: false,
+          message:
+            error.code === "23505" && error.message === "active_report_exists"
+              ? errorMessageJa.active_report_exists
+              : error.code === "40001"
+                ? SAVE_CONFLICT
+                : SAVE_FAILED,
+        };
       }
       const saved = data[0];
       if (saved === undefined || (saved.status !== "draft" && saved.status !== "pending")) {

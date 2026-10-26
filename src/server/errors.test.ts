@@ -12,6 +12,7 @@ describe("errorMessageJa", () => {
       "not_found",
       "invalid_body",
       "conflict",
+      "active_report_exists",
       "aal2_required",
       "internal",
       // 認証（T-13）
