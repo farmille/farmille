@@ -16,6 +16,7 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment: production
     strategy:
       fail-fast: false
       matrix:
