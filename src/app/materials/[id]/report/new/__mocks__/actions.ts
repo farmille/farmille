@@ -53,4 +53,5 @@ export const readPdfIntoReportAction = fn<Actions["readPdfIntoReportAction"]>(as
   message: "PDFを読み取れませんでした。入力した内容はそのまま残っています。手入力で続けられます。",
   remaining: 7,
   savedDraft: null,
+  pdfValuesCheckRequired: false,
 }));

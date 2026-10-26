@@ -239,6 +239,7 @@ describe("readPdfIntoDraft", () => {
         message: errorMessageJa.invalid_body,
         remaining: 8,
         savedDraft: null,
+        pdfValuesCheckRequired: false,
       });
       expect(calls).toEqual(["remaining"]);
     }
@@ -341,6 +342,27 @@ describe("readPdfIntoDraft", () => {
     expect(twice.calls).not.toContain("applied");
   });
 
+  it("読み取りの成功を記録した後の失敗だけ、提出時に PDF との照合の確認が要ると返す", async () => {
+    const afterSuccess = await readPdfIntoDraft(
+      makeRequest(),
+      userId,
+      fakeDeps({ saves: ["ok", "conflict", "conflict"] }).deps,
+    );
+    expect(afterSuccess.ok ? null : afterSuccess.pdfValuesCheckRequired).toBe(true);
+    const beforeSending = await readPdfIntoDraft(
+      makeRequest(),
+      userId,
+      fakeDeps({ human: false }).deps,
+    );
+    expect(beforeSending.ok ? null : beforeSending.pdfValuesCheckRequired).toBe(false);
+    const noMatch = await readPdfIntoDraft(
+      makeRequest(),
+      userId,
+      fakeDeps({ extraction: { ok: true, output: { ...output, plots: [] }, usage } }).deps,
+    );
+    expect(noMatch.ok ? null : noMatch.pdfValuesCheckRequired).toBe(false);
+  });
+
   it("先行保存の失敗は、保存の文言のまま返す", async () => {
     const { deps } = fakeDeps({ saves: ["conflict"] });
     const result = await readPdfIntoDraft(makeRequest(), userId, deps);
@@ -375,6 +397,7 @@ describe("readPdfIntoDraft", () => {
           reportId: request.input.reportId,
           updatedAt: "2026-10-25T00:00:01.000Z",
         },
+        pdfValuesCheckRequired: false,
       });
       expect(finished).toEqual([{ status: "failed", errorCode: reason }]);
       expect(calls.indexOf("discard")).toBeLessThan(calls.indexOf("finish"));
