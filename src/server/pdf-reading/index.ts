@@ -162,6 +162,7 @@ async function sendToModel(
       trial: request.trial,
       catalog: catalog.data.catalog,
       deadline: started + DEADLINE_MS,
+      pages: inspection.pages,
     });
     return { draft, reading: reading.data, catalog: catalog.data.catalog, extraction };
   } finally {

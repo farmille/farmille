@@ -122,6 +122,7 @@ const request = {
   trial: "キャベツの全品種の全区",
   catalog: { crops: [{ id: "c1", name: "キャベツ", aliases: [] }], effectNames: ["収量の増加"] },
   deadline: Number.MAX_SAFE_INTEGER,
+  pages: 4,
 };
 
 describe("readReportPdf", () => {
@@ -297,6 +298,20 @@ describe("readReportPdf", () => {
     const result = await readReportPdf(extract, request);
     expect(calls.filter(({ stage }) => stage === "values")).toHaveLength(2);
     expect(result.ok ? null : result.error).toBe("invalid_output");
+  });
+
+  it("根拠のページは、0（記載なし）か PDF のページ数までの整数だけを通す", async () => {
+    const cite = (page: number) => ({
+      single: { ...answers.single, evidence: [{ ref: "crop", quote: "キャベツ", page }] },
+    });
+    for (const page of [0, 1, 4]) {
+      const result = await readReportPdf(fakeExtract(new Map(), cite(page)).extract, request);
+      expect(result.ok, `${page}ページ`).toBe(true);
+    }
+    for (const page of [5, 999, 1.8, -1]) {
+      const result = await readReportPdf(fakeExtract(new Map(), cite(page)).extract, request);
+      expect(result.ok ? null : result.error, `${page}ページ`).toBe("invalid_output");
+    }
   });
 
   it("骨組みが該当なしなら、値と区の説明を呼ばずに該当なしを返す", async () => {
