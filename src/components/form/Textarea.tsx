@@ -45,10 +45,12 @@ function TextareaBody({
   example,
   placeholder,
   "aria-describedby": describedBy,
+  ref: forwardedRef,
   ...textareaProps
 }: TextareaBodyProps) {
   const field = useFieldContext();
   const restored = useRestoredText(name ?? field.name);
+  // 自動で伸ばすための内側の ref。呼び出し側の ref は Field.Control に渡し、Base UI が両方に要素を渡す
   const ref = useRef<HTMLTextAreaElement>(null);
   const grows = size === "document";
   useLayoutEffect(() => {
@@ -75,6 +77,7 @@ function TextareaBody({
       disabled={disabled}
       id={id}
       name={name}
+      ref={forwardedRef}
       render={
         <textarea
           {...textareaProps}
