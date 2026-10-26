@@ -32,6 +32,8 @@
 
 親レコードはform_versionで入力形式を区別し、新形式を2とする。品種、比較した資材、区、施用手順、対象、調査項目、グラフ、値、見出し、施用時期、資料は子テーブルに保存する。form_version=2の品種は親レコードのvariety列に書かない（判断の経緯は[ADR 0002](../adr/0002-plot-variety-and-material.md)）。JSONは検証済みの入力をRPCへ渡す用途に限る。型と検証はsrc/lib/usage-report.ts、DB操作はsrc/server/usage-reports/structured.tsに置く。
 
+PDFから入力欄を埋める操作と、その回数・PDFの扱い・提出時の確認は[PDF読み取り](pdf-reading-SPEC.md)に定める。
+
 ## 感想口コミ
 
 比較区の有無と購入場所の入力は廃止する。既存の保存値は保持し、新規入力や集計表示には利用しない。使用対象作目、感想、評価、写真、投稿前の同意は投稿・編集の両方で扱う。

@@ -51,6 +51,7 @@ export const getUsageReportEditorialDetail = fn<
       methodDetailsAck: false,
       documentsAck: false,
       guidelineAck: false,
+      pdfValuesChecked: false,
     },
     documentUrls: [],
     id: "11111111-1111-4111-8111-111111111111",

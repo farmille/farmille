@@ -8,6 +8,7 @@ import {
   type UsageReportActionResult,
 } from "@/lib/usage-report";
 import { createServerSupabase } from "@/server/supabase";
+import { reportNeedsPdfValuesCheck } from "@/server/pdf-reading/records";
 import { fail, succeed } from "@/server/result";
 import { clientEnv } from "@/env";
 import type { Database } from "@/types/database.types";
@@ -223,7 +224,14 @@ export async function saveStructuredUsageReport(
   if (!parsed.success || !dropped.success)
     return { ok: false, message: "入力内容を確認してください。", fieldErrors: {} };
   const input = parsed.output;
-  const fieldErrors = submit ? validateUsageReportSubmission(input) : {};
+  const supabase = await createServerSupabase();
+  const pdfCheck = submit
+    ? await reportNeedsPdfValuesCheck(input.reportId, supabase)
+    : succeed(false);
+  if (!pdfCheck.ok) return { ok: false, message: SAVE_FAILED, fieldErrors: {} };
+  const fieldErrors = submit
+    ? validateUsageReportSubmission(input, { pdfValuesCheckRequired: pdfCheck.data })
+    : {};
   if (Object.keys(fieldErrors).length > 0)
     return { ok: false, message: "未入力の必須項目があります。", fieldErrors };
   if (input.media.some((item) => !ownedMediaUrl(item.url, userId))) {
@@ -233,13 +241,7 @@ export async function saveStructuredUsageReport(
       fieldErrors: {},
     };
   }
-  return runUsageReportSave(
-    input,
-    submit,
-    supabaseSaveStore(await createServerSupabase()),
-    userId,
-    dropped.output,
-  );
+  return runUsageReportSave(input, submit, supabaseSaveStore(supabase), userId, dropped.output);
 }
 
 export async function getStructuredUsageReport(
@@ -251,6 +253,7 @@ export async function getStructuredUsageReport(
     .select(`id, updated_at, material_id, author_user_id, crop_id, variety_unknown,
     common_plot_description, observed_change, purpose_tags, purpose_note, prefecture_code, publish_city,
     cultivation_environment, timing_note, method_details_ack, documents_ack, pesticide_ack,
+    pdf_values_checked,
     locations:usage_report_private_locations(city),
     timings:usage_report_timings(stage),
     varieties:usage_report_varieties(*), comparedMaterials:usage_report_compared_materials(*),
@@ -337,6 +340,7 @@ export async function getStructuredUsageReport(
     methodDetailsAck: data.method_details_ack,
     documentsAck: data.documents_ack,
     guidelineAck: data.pesticide_ack,
+    pdfValuesChecked: data.pdf_values_checked,
   });
   if (!parsed.success) {
     console.error("[usage-reports] 保存内容の形式が不正", v.summarize(parsed.issues));
@@ -374,6 +378,11 @@ export async function getStructuredReportFormData(materialId: string, userId: st
   const draft =
     draftRow === undefined ? succeed(null) : await getStructuredUsageReport(draftRow.id, supabase);
   if (!draft.ok) return draft;
+  const pdfCheck =
+    draft.data === null
+      ? succeed(false)
+      : await reportNeedsPdfValuesCheck(draft.data.reportId, supabase);
+  if (!pdfCheck.ok) return pdfCheck;
   const documents =
     draft.data === null ? succeed([]) : await getReportDocumentUrls(draft.data, supabase);
   if (!documents.ok) return documents;
@@ -384,6 +393,7 @@ export async function getStructuredReportFormData(materialId: string, userId: st
     favoriteCropIds: favorites.data.map((item) => item.crop_id),
     materialCropIds: materialCrops.data.map((item) => item.crop_id),
     draft: draft.data,
+    pdfValuesCheckRequired: pdfCheck.data,
     submitted: reports.data
       .filter((row) => row.status === "pending")
       .map((row) => {

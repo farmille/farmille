@@ -27,6 +27,13 @@ describe("errorMessageJa", () => {
       // メーカー申請（T-41）
       "login_id_taken",
       "invalid_invite_code",
+      // PDF読み取り
+      "pdf_reading_limit",
+      "captcha_failed",
+      "pdf_invalid",
+      "pdf_too_large",
+      "pdf_too_many_pages",
+      "pdf_reading_failed",
     ];
 
     expect(Object.keys(errorMessageJa)).toEqual(codes);
