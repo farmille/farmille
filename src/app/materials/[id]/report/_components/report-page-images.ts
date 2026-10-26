@@ -3,8 +3,9 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 import * as Sentry from "@sentry/nextjs";
 
 import { createAuthBrowserClient } from "@/lib/auth/browser";
+import { REPORT_PDF_LIMITS } from "@/lib/usage-report";
 
-import { REPORT_PDF_LIMITS, REPORT_PHOTO_LIMITS } from "./report-page-state";
+import { REPORT_PHOTO_LIMITS } from "./report-page-state";
 
 /** 差し込む画像の長い辺の上限。写真・PDF のページはこの大きさまで縮めてから扱う。 */
 const MAX_SIDE = 2400;

@@ -51,8 +51,7 @@ export function reportPageItemImages(item: ReportPageItem): ReportPageImage[] {
 /** 1つのレポートに入れられる写真・画像の数（保存の入力の上限と同じ）。 */
 export const REPORT_IMAGE_LIMIT = 30;
 
-/** 差し込む前に読み込める PDF と写真の上限。読み込む前に大きさを、PDF は読み込んだ後にページ数を確かめる。 */
-export const REPORT_PDF_LIMITS = { bytes: 20 * 1024 * 1024, pages: 40 } as const;
+/** 差し込む前に読み込める写真の上限。PDF の上限は REPORT_PDF_LIMITS（@/lib/usage-report）。 */
 export const REPORT_PHOTO_LIMITS = { bytes: 50 * 1024 * 1024 } as const;
 
 /** 文章の欄と、短い欄の文字数の上限（保存の入力の上限と同じ）。 */

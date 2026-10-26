@@ -1,4 +1,4 @@
-import { PDF_READING_LIMITS } from "@/lib/pdf-reading";
+import { REPORT_PDF_LIMITS } from "@/lib/usage-report";
 
 export type PdfInspection =
   | { ok: true; pages: number }
@@ -8,7 +8,7 @@ const SIGNATURE = "%PDF-";
 
 /** AI に送る前に、PDF であること・暗号化されていないこと・大きさとページ数の上限を確かめる。 */
 export async function inspectPdf(bytes: Uint8Array): Promise<PdfInspection> {
-  if (bytes.byteLength > PDF_READING_LIMITS.bytes) return { ok: false, error: "pdf_too_large" };
+  if (bytes.byteLength > REPORT_PDF_LIMITS.bytes) return { ok: false, error: "pdf_too_large" };
   const data = Buffer.from(bytes);
   if (!data.subarray(0, SIGNATURE.length).equals(Buffer.from(SIGNATURE)))
     return { ok: false, error: "pdf_invalid" };
@@ -19,7 +19,7 @@ export async function inspectPdf(bytes: Uint8Array): Promise<PdfInspection> {
   const task = getDocument({ data: new Uint8Array(bytes), isEvalSupported: false });
   try {
     const { numPages } = await task.promise;
-    return numPages > PDF_READING_LIMITS.pages
+    return numPages > REPORT_PDF_LIMITS.pages
       ? { ok: false, error: "pdf_too_many_pages" }
       : { ok: true, pages: numPages };
   } catch (error) {

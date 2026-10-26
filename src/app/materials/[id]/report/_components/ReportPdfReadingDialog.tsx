@@ -8,13 +8,13 @@ import { Dialog } from "@/components/Dialog";
 import { Checkbox, FileInput, Input, Notice } from "@/components/form";
 import {
   PDF_READING_CONSENT,
-  PDF_READING_LIMITS,
   PDF_READING_RECAPTCHA_ACTION,
+  PDF_READING_TRIAL_MAX,
   pdfReadingTrialError,
   type PdfReadingResult,
 } from "@/lib/pdf-reading";
 import { executeRecaptcha, loadRecaptcha } from "@/lib/recaptcha-client";
-import type { UsageReportInput } from "@/lib/usage-report";
+import { REPORT_PDF_LIMITS, type UsageReportInput } from "@/lib/usage-report";
 import { errorMessageJa } from "@/server/errors";
 
 import { css } from "../../../../../../styled-system/css";
@@ -29,7 +29,7 @@ const STEPS = [
   { phase: "reading", label: "PDFを読み取っています（十数秒〜1分ほど）" },
 ] as const satisfies { phase: Phase; label: string }[];
 
-const LIMIT_MESSAGE = `PDFは${PDF_READING_LIMITS.bytes / 1024 / 1024}MB以下・${PDF_READING_LIMITS.pages}ページ以下のものを選んでください。`;
+const LIMIT_MESSAGE = `PDFは${REPORT_PDF_LIMITS.bytes / 1024 / 1024}MB以下・${REPORT_PDF_LIMITS.pages}ページ以下のものを選んでください。`;
 
 const body = css({ display: "grid", gap: "4" });
 
@@ -102,14 +102,14 @@ export function ReportPdfReadingDialog({
     setFile(null);
     setProblem(null);
     if (next === undefined) return;
-    if (!isPdf(next) || next.size > PDF_READING_LIMITS.bytes) {
+    if (!isPdf(next) || next.size > REPORT_PDF_LIMITS.bytes) {
       setProblem(isPdf(next) ? LIMIT_MESSAGE : "PDFファイルを選んでください。");
       return;
     }
     setPhase("checking");
     try {
       const pages = await countPdfPages(next);
-      if (pages > PDF_READING_LIMITS.pages) setProblem(LIMIT_MESSAGE);
+      if (pages > REPORT_PDF_LIMITS.pages) setProblem(LIMIT_MESSAGE);
       else setFile(next);
     } catch {
       setProblem(errorMessageJa.pdf_invalid);
@@ -196,7 +196,7 @@ export function ReportPdfReadingDialog({
           requirement="required"
           description={TRIAL_GUIDE}
           placeholder="例）キャベツの新藍。試験2の高活性腐植資材区がこの資材"
-          maxLength={PDF_READING_LIMITS.trial}
+          maxLength={PDF_READING_TRIAL_MAX}
           value={trial}
           error={tried ? pdfReadingTrialError(trial) : undefined}
           disabled={busy}

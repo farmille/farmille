@@ -69,8 +69,8 @@ export const PdfReadingUploadPathSchema = v.pipe(
   v.regex(new RegExp(`^${UUID}/${UUID}\\.pdf$`, "u")),
 );
 
-/** PDFの大きさ・ページ数と、読み取る試験の文字数の上限。ブラウザとサーバーで同じ値を使う。 */
-export const PDF_READING_LIMITS = { bytes: 20 * 1024 * 1024, pages: 40, trial: 200 } as const;
+/** 読み取る試験の文字数の上限。PDF の大きさとページ数の上限は REPORT_PDF_LIMITS（@/lib/usage-report）。 */
+export const PDF_READING_TRIAL_MAX = 200;
 
 /** reCAPTCHA v3 のトークンを取るときの action。サーバーの検証でも同じ値を求める。 */
 export const PDF_READING_RECAPTCHA_ACTION = "pdf_reading";
@@ -100,7 +100,7 @@ export const PdfReadingRequestSchema = v.object({
     v.string(),
     v.trim(),
     v.minLength(1, PDF_READING_TRIAL_REQUIRED),
-    v.maxLength(PDF_READING_LIMITS.trial),
+    v.maxLength(PDF_READING_TRIAL_MAX),
   ),
   consent: v.literal(true),
 });
