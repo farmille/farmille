@@ -146,6 +146,7 @@ export function ReportPdfReadingDialog({
         error: "internal",
         message: errorMessageJa.pdf_reading_failed,
         remaining: null,
+        savedDraft: null,
       };
     } finally {
       setPhase("idle");

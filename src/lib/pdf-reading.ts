@@ -106,10 +106,19 @@ export const PdfReadingRequestSchema = v.object({
 });
 export type PdfReadingRequest = v.InferOutput<typeof PdfReadingRequestSchema>;
 
-/** 読み取りの結果。成功なら保存済みの下書きと入れた欄、失敗なら画面に出す文言。どちらも今月の残り回数を添える（取れなければ null）。 */
+/**
+ * 読み取りの結果。成功なら保存済みの下書きと入れた欄、失敗なら画面に出す文言。どちらも今月の残り回数を添える（取れなければ null）。
+ * 失敗の savedDraft は、読み取りの前に今の入力を下書きへ保存できていたときのレポートと更新日時。画面はこれを取り込み、次の保存を競合させない。
+ */
 export type PdfReadingResult =
   | { ok: true; input: UsageReportInput; marks: PdfReadingField[]; remaining: number }
-  | { ok: false; error: ErrorCode; message: string; remaining: number | null };
+  | {
+      ok: false;
+      error: ErrorCode;
+      message: string;
+      remaining: number | null;
+      savedDraft: { reportId: string; updatedAt: string } | null;
+    };
 
 type FieldPath = (typeof PDF_READING_FIELD_PATHS)[number];
 type FieldValue = (input: UsageReportInput, ids: string[]) => string | undefined;

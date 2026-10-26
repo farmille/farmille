@@ -83,17 +83,19 @@ export type PdfReadingDeps = {
 };
 
 type Failure = Extract<PdfReadingResult, { ok: false }>;
+type SavedDraft = Failure["savedDraft"];
 type Stopped = { stopped: ErrorCode; message?: string };
 
 async function failure(
   error: ErrorCode,
   deps: PdfReadingDeps,
+  savedDraft: SavedDraft,
   message: string = errorMessageJa[error],
   remaining?: number,
 ): Promise<Failure> {
-  if (remaining !== undefined) return { ok: false, error, message, remaining };
+  if (remaining !== undefined) return { ok: false, error, message, remaining, savedDraft };
   const left = await deps.quota.remaining();
-  return { ok: false, error, message, remaining: left.ok ? left.data : null };
+  return { ok: false, error, message, remaining: left.ok ? left.data : null, savedDraft };
 }
 
 /** AI に送るまでの段階。ここで止めた分は回数に数えない（回数の確保より前で止めるため）。PDF はどこで抜けても消す。 */
@@ -103,31 +105,36 @@ async function sendToModel(
   started: number,
   deps: PdfReadingDeps,
 ): Promise<
-  | Stopped
+  // draft は、止めた時点で先行保存が済んでいればその結果
+  | (Stopped & { draft: SavedDraft })
   | {
+      draft: NonNullable<SavedDraft>;
       reading: { readingId: string; remaining: number };
       catalog: ReadingCatalog;
       extraction: PdfExtraction<ReportReadingOutput>;
     }
 > {
   try {
-    if (!(await deps.verifyHuman(request.recaptchaToken))) return { stopped: "captcha_failed" };
+    if (!(await deps.verifyHuman(request.recaptchaToken)))
+      return { stopped: "captcha_failed", draft: null };
     const pdf = await deps.pdfs.take(request.uploadPath);
-    if (pdf === null) return { stopped: "pdf_invalid" };
+    if (pdf === null) return { stopped: "pdf_invalid", draft: null };
     const inspection = await deps.inspect(pdf);
-    if (!inspection.ok) return { stopped: inspection.error };
+    if (!inspection.ok) return { stopped: inspection.error, draft: null };
     const catalog = await deps.catalog(request.input.materialId);
-    if (!catalog.ok) return { stopped: catalog.error };
+    if (!catalog.ok) return { stopped: catalog.error, draft: null };
     // 未保存の入力を残し、新しいレポートなら下書きの行を作る（回数の確保は下書きの行を指す）
-    const draft = await deps.drafts.save(request.input);
-    if (!draft.ok) return { stopped: "conflict", message: draft.message };
+    const saved = await deps.drafts.save(request.input);
+    if (!saved.ok) return { stopped: "conflict", message: saved.message, draft: null };
+    // ここから後で止めても、画面はこの更新日時を取り込む（下書きの updated_at が進んだため）
+    const draft = { reportId: saved.reportId, updatedAt: saved.updatedAt };
     const reading = await deps.quota.claim({
       userId,
       reportId: request.input.reportId,
       materialId: request.input.materialId,
       uploadPath: request.uploadPath,
     });
-    if (!reading.ok) return { stopped: reading.error };
+    if (!reading.ok) return { stopped: reading.error, draft };
     try {
       await deps.pdfs.sweepExpired();
     } catch (error) {
@@ -140,7 +147,7 @@ async function sendToModel(
       catalog: catalog.data.catalog,
       deadline: started + DEADLINE_MS,
     });
-    return { reading: reading.data, catalog: catalog.data.catalog, extraction };
+    return { draft, reading: reading.data, catalog: catalog.data.catalog, extraction };
   } finally {
     try {
       await deps.pdfs.discard(request.uploadPath);
@@ -188,13 +195,13 @@ export async function readPdfIntoDraft(
   const started = deps.now();
   // Server Action の引数は型どおりとは限らないので、ここで検証する
   const parsed = v.safeParse(PdfReadingRequestSchema, untrusted);
-  if (!parsed.success) return failure("invalid_body", deps);
+  if (!parsed.success) return failure("invalid_body", deps, null);
   const request = parsed.output;
-  if (request.uploadPath.split("/")[0] !== userId) return failure("invalid_body", deps);
+  if (request.uploadPath.split("/")[0] !== userId) return failure("invalid_body", deps, null);
 
   const sent = await sendToModel(request, userId, started, deps);
-  if ("stopped" in sent) return failure(sent.stopped, deps, sent.message);
-  const { reading, catalog, extraction } = sent;
+  if ("stopped" in sent) return failure(sent.stopped, deps, sent.draft, sent.message);
+  const { draft, reading, catalog, extraction } = sent;
   const finish = (outcome: { status: "succeeded" } | { status: "failed"; errorCode: string }) => {
     const usage = extraction.usage;
     return deps.quota.finish(
@@ -212,8 +219,9 @@ export async function readPdfIntoDraft(
           },
     );
   };
+  // 先行保存の後なので、どの失敗でも先行保存の更新日時を返す
   const counted = (error: ErrorCode, message?: string) =>
-    failure(error, deps, message, reading.remaining);
+    failure(error, deps, draft, message, reading.remaining);
 
   if (!extraction.ok) {
     await finish({ status: "failed", errorCode: extraction.error });

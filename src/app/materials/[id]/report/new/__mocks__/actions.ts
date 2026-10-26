@@ -52,4 +52,5 @@ export const readPdfIntoReportAction = fn<Actions["readPdfIntoReportAction"]>(as
   error: "pdf_reading_failed",
   message: "PDFを読み取れませんでした。入力した内容はそのまま残っています。手入力で続けられます。",
   remaining: 7,
+  savedDraft: null,
 }));

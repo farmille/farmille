@@ -203,6 +203,7 @@ describe("readPdfIntoDraft", () => {
         error: "invalid_body",
         message: errorMessageJa.invalid_body,
         remaining: 8,
+        savedDraft: null,
       });
       expect(calls).toEqual(["remaining"]);
     }
@@ -223,6 +224,51 @@ describe("readPdfIntoDraft", () => {
       expect(calls).not.toContain("finish");
       expect(calls).toContain("discard");
       expect(saved.length).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("先行保存より前に止めたら、保存した下書きは返さない", async () => {
+    for (const overrides of [{ human: false }, { pdf: null }, { saves: ["conflict" as const] }]) {
+      const { deps } = fakeDeps(overrides);
+      const result = await readPdfIntoDraft(makeRequest(), userId, deps);
+      expect(result.ok ? undefined : result.savedDraft).toBeNull();
+    }
+  });
+
+  it("先行保存の後で止めたら、どの失敗でも先行保存の更新日時を返す", async () => {
+    const long = {
+      ...output,
+      plots: output.plots.map((plot) => ({ ...plot, description: "あ".repeat(20001) })),
+    };
+    const cases = [
+      [{ claim: "pdf_reading_limit" as const }, "pdf_reading_limit"],
+      [
+        { extraction: { ok: false as const, error: "server_error" as const, usage: null } },
+        "pdf_reading_failed",
+      ],
+      [
+        {
+          extraction: {
+            ok: true as const,
+            output: { ...output, outcome: "no_matching_trial" as const },
+            usage,
+          },
+        },
+        "pdf_reading_no_match",
+      ],
+      [{ extraction: { ok: true as const, output: long, usage } }, "pdf_reading_incomplete"],
+      [{ saves: ["ok" as const, "conflict" as const, "conflict" as const] }, "conflict"],
+    ] as const;
+    for (const [overrides, error] of cases) {
+      const { deps } = fakeDeps(overrides);
+      const request = makeRequest();
+      const result = await readPdfIntoDraft(request, userId, deps);
+      if (result.ok) throw new Error("失敗するはず");
+      expect(result.error).toBe(error);
+      expect(result.savedDraft).toEqual({
+        reportId: request.input.reportId,
+        updatedAt: "2026-10-25T00:00:01.000Z",
+      });
     }
   });
 
@@ -248,8 +294,15 @@ describe("readPdfIntoDraft", () => {
       const { deps, calls, saved, finished } = fakeDeps({
         extraction: { ok: false, error: reason, usage: null },
       });
-      const result = await readPdfIntoDraft(makeRequest(), userId, deps);
-      expect(result).toEqual({ ok: false, error, message: errorMessageJa[error], remaining: 7 });
+      const request = makeRequest();
+      const result = await readPdfIntoDraft(request, userId, deps);
+      expect(result).toEqual({
+        ok: false,
+        error,
+        message: errorMessageJa[error],
+        remaining: 7,
+        savedDraft: { reportId: request.input.reportId, updatedAt: "2026-10-25T00:00:01.000Z" },
+      });
       expect(finished).toEqual([{ status: "failed", errorCode: reason }]);
       expect(calls.indexOf("discard")).toBeLessThan(calls.indexOf("finish"));
       expect(saved).toHaveLength(1);

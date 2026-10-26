@@ -394,7 +394,15 @@ export function ReportPageForm({
   // 読み取りの結果はサーバーの下書きに保存済みなので、画面の入力と保存済みの控えをまとめて置き換える
   function applyReading(result: PdfReadingResult) {
     if (result.remaining !== null) setRemaining(result.remaining);
-    if (!result.ok) return;
+    if (!result.ok) {
+      // 読み取りの前に今の入力を下書きへ保存していれば、その更新日時に揃える（揃えないと次の保存が競合する）
+      const draft = result.savedDraft;
+      if (draft === null) return;
+      const stamp = { reportId: draft.reportId, expectedUpdatedAt: draft.updatedAt };
+      setInput((current) => ({ ...current, ...stamp }));
+      setSaved(JSON.stringify({ ...inputWithItems(input, items), ...stamp }));
+      return;
+    }
     const nextItems = itemsFromInput(result.input);
     setInput(result.input);
     setItems(nextItems);
