@@ -231,6 +231,8 @@ export function ReportPageForm({
   const [pending, startTransition] = useTransition();
   // 連打で保存・提出が二重に送られないよう、送信中は ref で止める（state の disabled は次の描画まで効かない）
   const sending = useRef(false);
+  // この画面の入力に入った画像。保存の前に外れた分は、保存のあとにサーバーが置き場から消す
+  const shownMedia = useRef(new Set<string>());
   const dirty = JSON.stringify(payload) !== saved;
   const reportPath = `/materials/${material.id}/report/new`;
 
@@ -271,6 +273,10 @@ export function ReportPageForm({
   });
 
   useEffect(() => {
+    for (const media of payload.media) shownMedia.current.add(media.url);
+  });
+
+  useEffect(() => {
     if (!dirty || submitted) return;
     const warn = (event: BeforeUnloadEvent) => {
       event.preventDefault();
@@ -299,9 +305,14 @@ export function ReportPageForm({
         showError(`文字数の上限を超えている欄があります：${over.join("、")}`);
         return;
       }
+      const kept = new Set(body.media.map((media) => media.url));
+      const dropped = [...shownMedia.current].filter((url) => !kept.has(url));
       const result = submit
-        ? await submitUsageReportAction(body.materialId, body)
-        : await saveUsageReportDraftAction(body.materialId, body);
+        ? await submitUsageReportAction(body.materialId, body, dropped)
+        : await saveUsageReportDraftAction(body.materialId, body, dropped);
+      // 下書きが保存できていれば、外れた画像はサーバーが消している
+      if (result.ok || result.savedDraft !== undefined)
+        for (const url of dropped) shownMedia.current.delete(url);
       if (!result.ok) {
         if (result.savedDraft !== undefined) {
           const savedUpdatedAt = result.savedDraft.updatedAt;

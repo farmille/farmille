@@ -203,7 +203,7 @@ export async function uploadReportImage(
 
 /**
  * 上げたがページに入れなかった画像を report-media から消す。公開の置き場なので、捨てた画像が URL で
- * 読めるまま残らないようにする。消せなかった分は、下書きを保存するときにサーバーが消す。
+ * 読めるまま残らないようにする。消せなかったときは Sentry に送る。
  */
 export async function removeReportImages(paths: string[]): Promise<void> {
   if (paths.length === 0) return;

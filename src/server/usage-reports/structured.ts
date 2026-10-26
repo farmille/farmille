@@ -55,8 +55,6 @@ export type UsageReportSaveStore = {
   ): Promise<SaveStepResult<{ updatedAt: string }>>;
   /** 保存前にそのレポートが参照している写真・画像の URL。読めなければ null。 */
   savedMediaUrls(reportId: string): Promise<string[] | null>;
-  /** report-media のフォルダに置いてあるオブジェクトの名前（フォルダ込み）。読めなければ null。 */
-  listMediaFolder(folder: string): Promise<string[] | null>;
   removeMedia(paths: string[]): Promise<void>;
 };
 
@@ -109,17 +107,6 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
       }
       return data.map((row) => row.url);
     },
-    async listMediaFolder(folder) {
-      const { data, error } = await supabase.storage
-        .from("report-media")
-        .list(folder, { limit: 1000 });
-      if (error !== null) {
-        console.error("[usage-reports] 下書きの画像の置き場を読めませんでした", error);
-        return null;
-      }
-      // フォルダの行は id が null
-      return data.flatMap((item) => (item.id === null ? [] : [`${folder}/${item.name}`]));
-    },
     async removeMedia(paths) {
       const { data, error } = await supabase.storage.from("report-media").remove(paths);
       if (error !== null || data.length !== paths.length) {
@@ -131,20 +118,26 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
 
 /**
  * 保存で参照しなくなった画像を消す。前に DB が参照していた画像（差し替え前の画像や消した写真）と、
- * 下書きのフォルダに上げたまま一度も保存しなかった画像（保存せずに捨てた差し込み）の両方を数える。
+ * 保存した画面の入力に入っていて保存の前に外れた画像（保存せずに差し替えた差し込み）の両方を数える。
+ * 別の画面で上げてまだ保存していない画像は数えない。
  * report-media は公開の置き場なので、塗りつぶす前の画像が URL で読めるまま残る。
  * 消せなくても保存は済んでいるので、ログだけ残す。
  */
 async function removeUnreferencedMedia(
-  before: { savedUrls: string[] | null; folderPaths: string[] | null },
+  before: { savedUrls: string[] | null; droppedUrls: string[] },
   input: UsageReportInput,
   userId: string,
   store: UsageReportSaveStore,
 ) {
   const kept = new Set(input.media.map((media) => ownMediaPath(media.url, userId)));
+  // 外れた画像は画面から届くので、このレポートの置き場のものに限る
+  const dropped = before.droppedUrls.flatMap((url) => {
+    const path = ownMediaPath(url, userId);
+    return path?.startsWith(`${userId}/${input.reportId}/`) ? [path] : [];
+  });
   const candidates = [
     ...(before.savedUrls ?? []).map((url) => ownMediaPath(url, userId)),
-    ...(before.folderPaths ?? []),
+    ...dropped,
   ];
   const stale = [
     ...new Set(
@@ -166,14 +159,13 @@ export async function runUsageReportSave(
   submit: boolean,
   store: UsageReportSaveStore,
   userId: string,
+  droppedMediaUrls: string[],
 ): Promise<UsageReportActionResult> {
   const { purposeNote, ...rpcInput } = input;
-  // 置き場は保存の前に読む。保存の最中に別の画面で上げた画像は数えないので、保存前に消すことはない
-  const [savedUrls, folderPaths] = await Promise.all([
-    store.savedMediaUrls(input.reportId),
-    store.listMediaFolder(`${userId}/${input.reportId}`),
-  ]);
-  const before = { savedUrls, folderPaths };
+  const before = {
+    savedUrls: await store.savedMediaUrls(input.reportId),
+    droppedUrls: droppedMediaUrls,
+  };
   const draft = await store.saveReport(rpcInput, false);
   if (!draft.ok) return { ok: false, message: draft.message, fieldErrors: {} };
   // 下書きの保存で写真の参照は入れ替わっている。補足の書き込みや提出が失敗しても、前の参照には戻らない
@@ -214,13 +206,21 @@ export async function runUsageReportSave(
   };
 }
 
+/** 保存した画面の入力に入っていて、保存の前に外れた画像の URL。 */
+const DroppedMediaUrlsSchema = v.pipe(
+  v.array(v.pipe(v.string(), v.maxLength(4000))),
+  v.maxLength(200),
+);
+
 export async function saveStructuredUsageReport(
   raw: UsageReportInput,
   userId: string,
   submit: boolean,
+  rawDroppedMediaUrls: string[],
 ): Promise<UsageReportActionResult> {
   const parsed = v.safeParse(UsageReportInputSchema, raw);
-  if (!parsed.success)
+  const dropped = v.safeParse(DroppedMediaUrlsSchema, rawDroppedMediaUrls);
+  if (!parsed.success || !dropped.success)
     return { ok: false, message: "入力内容を確認してください。", fieldErrors: {} };
   const input = parsed.output;
   const fieldErrors = submit ? validateUsageReportSubmission(input) : {};
@@ -233,7 +233,13 @@ export async function saveStructuredUsageReport(
       fieldErrors: {},
     };
   }
-  return runUsageReportSave(input, submit, supabaseSaveStore(await createServerSupabase()), userId);
+  return runUsageReportSave(
+    input,
+    submit,
+    supabaseSaveStore(await createServerSupabase()),
+    userId,
+    dropped.output,
+  );
 }
 
 export async function getStructuredUsageReport(

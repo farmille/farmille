@@ -20,6 +20,7 @@ async function runMutation(
   materialId: string,
   mode: "draft" | "submit",
   payload: UsageReportInput,
+  droppedMediaUrls: string[],
 ): Promise<UsageReportActionResult> {
   const reportPath = `/materials/${materialId}/report/new`;
   if (!isMaterialId(materialId)) {
@@ -41,7 +42,12 @@ async function runMutation(
   if (payload.materialId !== materialId) {
     return { ok: false, message: "対象資材を選び直してください。", fieldErrors: {} };
   }
-  const result = await saveStructuredUsageReport(payload, session.data.userId, mode === "submit");
+  const result = await saveStructuredUsageReport(
+    payload,
+    session.data.userId,
+    mode === "submit",
+    droppedMediaUrls,
+  );
 
   if (result.ok) {
     revalidatePath(reportPath);
@@ -49,18 +55,21 @@ async function runMutation(
   return result;
 }
 
+/** droppedMediaUrls は、この画面の入力に入っていて保存の前に外した画像。保存のあとに置き場から消す。 */
 export async function saveUsageReportDraftAction(
   materialId: string,
   payload: UsageReportInput,
+  droppedMediaUrls: string[],
 ): Promise<UsageReportActionResult> {
-  return runMutation(materialId, "draft", payload);
+  return runMutation(materialId, "draft", payload, droppedMediaUrls);
 }
 
 export async function submitUsageReportAction(
   materialId: string,
   payload: UsageReportInput,
+  droppedMediaUrls: string[],
 ): Promise<UsageReportActionResult> {
-  return runMutation(materialId, "submit", payload);
+  return runMutation(materialId, "submit", payload, droppedMediaUrls);
 }
 
 export async function searchReportMaterialsAction(query: string) {
