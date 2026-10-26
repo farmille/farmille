@@ -189,7 +189,8 @@ export function ReportPdfReadingDialog({
           requirement="required"
           description={LIMIT_MESSAGE}
           accept="application/pdf,.pdf"
-          disabled={busy}
+          // ページ数の確認中に選び直すと、先の確認が後から終わって別の PDF が選ばれることがあるので止める
+          disabled={busy || phase === "checking"}
           onChange={(event) => void choose(event.currentTarget.files?.[0])}
         />
         <Input
