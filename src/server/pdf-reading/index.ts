@@ -358,7 +358,8 @@ export async function createPdfReadingDeps(userId: string): Promise<PdfReadingDe
     inspect: inspectPdf,
     catalog: (materialId) => loadReadingCatalog(materialId, supabase),
     drafts: {
-      save: (input) => saveStructuredUsageReport(input, userId, false),
+      // 画面で外した画像は、画面が覚えていて次の保存で渡すので、ここでは渡さない
+      save: (input) => saveStructuredUsageReport(input, userId, false, []),
       load: (reportId) => getStructuredUsageReport(reportId, supabase),
     },
     quota: {
