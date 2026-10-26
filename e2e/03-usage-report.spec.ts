@@ -125,3 +125,36 @@ test("品種と比較した資材を足し、試した組み合わせの表か�
     await deleteMaterial(material.id);
   }
 });
+
+test("2つのタブの新規下書きは1件だけ保存し、競合したタブの入力を残す", async ({ page }) => {
+  const user = await createGeneralUser("usageconflict");
+  const material = await createMaterial("usageconflict");
+  const reportPath = `/materials/${material.id}/report/new`;
+  try {
+    await loginGeneral(page, user, reportPath);
+    const second = await page.context().newPage();
+    await second.goto(reportPath);
+    await expect(second.getByRole("button", { name: "下書き保存" })).toBeVisible();
+    await page.getByRole("button", { name: "下書き保存" }).click();
+    await expect(page.getByRole("region", { name: "レポートの通知" })).toContainText(
+      "下書きを保存しました",
+    );
+    const saved = await usageReportByAuthor(user.id);
+    if (saved === null) throw new Error("先に保存した下書きがありません。");
+    await second
+      .getByRole("textbox", { name: "結果・感想", exact: true })
+      .fill("別のタブで入力した観察結果");
+    await second.getByRole("button", { name: "下書き保存" }).click();
+    await expect(second.getByRole("region", { name: "レポートの通知" })).toContainText(
+      "この資材には下書きまたは確認中のレポートがあります",
+    );
+    await expect(second.getByRole("textbox", { name: "結果・感想", exact: true })).toHaveValue(
+      "別のタブで入力した観察結果",
+    );
+    expect((await usageReportByAuthor(user.id))?.id).toBe(saved.id);
+    await second.close();
+  } finally {
+    await deleteAuthUsersByEmail(user.email);
+    await deleteMaterial(material.id);
+  }
+});
