@@ -14,9 +14,20 @@ Node.jsは`.node-version`、pnpmは`package.json`のバージョンを使う。L
 
 `pnpm setup:hooks`はGit共通ディレクトリ内の`farmille-hooks/pre-push`に固定のhookを設置し、そのディレクトリの絶対パスを`core.hooksPath`に登録する。同じcloneのworktreeもこのhookを共有する。checkout先の`.githooks`に追加されたhookは実行しない。既存の`.githooks`設定は移行できる。独自のhookや別のhooksPathがある場合は、上書きせず停止する。
 
-push時は、現在のworktreeにある`tools/ci/browser-checks.ts`・`tools/ci/selection.ts`・`package.json`・`pnpm-lock.yaml`の4ファイルを照合し、信頼できる場合だけ検査コードを実行する。4ファイルがすべて`origin/main`（`refs/remotes/origin/main`）の中身と同じなら、登録なしで通す。mainに取り込まれた内容はレビュー済みとして扱う。比べるのはcheckoutにあるファイルのバイト列そのもので、改行の変換やGitのフィルターは適用しない（`.gitattributes`はブランチ側の中身のため）。`core.autocrlf`などでcheckoutの中身がmainのblobと異なる環境では一致せず、登録が要る。1つでも異なる場合は、4ファイルのSHA-256の組が`farmille-hooks/trusted`の一覧のどれかと一致したときだけ通す。どれとも一致しない場合は、`origin/main`と異なるファイルを表示してpushを止める。ファイルが無い場合も止める。検査コードのシンボリックリンクや、`tools`・`tools/ci`内に置かれた`package.json`・`node_modules`も拒否し、検証したファイルと実際の読み込み先を一致させる。
+push時は、現在のworktreeにある検査コード・依存設定（`tools/ci/browser-checks.ts`・`tools/ci/selection.ts`・`package.json`・`pnpm-lock.yaml`）と、pnpmの方針を決める設定（`pnpm-workspace.yaml`・`.npmrc`・`.pnpmfile.cjs`・`.pnpmfile.mjs`）を照合し、信頼できる場合だけ検査コードを実行する。これらがすべて`origin/main`（`refs/remotes/origin/main`）の中身と同じなら、登録なしで通す。mainに取り込まれた内容はレビュー済みとして扱う。比べるのはcheckoutにあるファイルのバイト列そのもので、改行の変換やGitのフィルターは適用しない（`.gitattributes`はブランチ側の中身のため）。`core.autocrlf`などでcheckoutの中身がmainのblobと異なる環境では一致せず、登録が要る。1つでも異なる場合は、SHA-256の組が`farmille-hooks/trusted`の一覧のどれかと一致したときに通す。無いpnpmの設定ファイルは「-」として組に入れる。どれとも一致しなければ、依存だけの変更に当たるかを調べ、当たらなければ`origin/main`と異なるファイルを表示してpushを止める。検査コード・依存設定のファイルが無い場合も止める。検査コードのシンボリックリンクや、`tools`・`tools/ci`内に置かれた`package.json`・`node_modules`も拒否し、検証したファイルと実際の読み込み先を一致させる。
 
-依存や検査コードを変えたブランチだけが登録を要する。対象ファイルの変更をレビューした後、信頼できるcheckoutから次を実行し、今の組を一覧に足す。
+依存だけが`origin/main`と異なるブランチは、登録の代わりにpnpmのsupply-chainの方針で検査する。次をすべて満たす場合が当たる。
+
+- `tools/ci/browser-checks.ts`・`tools/ci/selection.ts`とpnpmの方針を決める設定が`origin/main`と同じ（mainに無いファイルは無いまま）
+- `package.json`は`dependencies`・`devDependencies`・`optionalDependencies`を除けば`origin/main`と同じで、依存の指定に`:`と`/`を含まない（git・URL・`link:`・`file:`・`npm:`の別名を使わない）
+- `pnpm-lock.yaml`の`packages`のどの項目にも、integrity（`sha512-…`などのハッシュ）だけの`resolution`がある（registryから入れる依存だけ）
+- `pnpm-lock.yaml`の`patchedDependencies`（パッチのハッシュ）が`origin/main`と同じ
+
+当たる場合は`pnpm install --frozen-lockfile --lockfile-only`を実行し、通ればpushを続ける。pnpm 11はinstallのたびに、lockfileの全項目へ`minimumReleaseAge`（既定は公開から1440分）などの方針をかけ直し、方針に反する項目があれば止まる。このコマンドは`node_modules`とlockfileを変えず、installのscriptsも実行しない。パッチの中身はlockfileのハッシュと照合される。環境変数（`pnpm_config_*`）は`pnpm-workspace.yaml`より優先されるため、`trustLockfile=false`と`minimumReleaseAge=1440`をコマンドの引数で固定する。`pnpm-workspace.yaml`で`minimumReleaseAge`を決めるときは、`tools/dev/pre-push.sh`の値も合わせる。
+
+依存を足したworktreeでは、pushより前の`pnpm install`・単体テスト・buildで依存のコードが動くため、push前の登録では依存のコードの実行を防げない。依存の安全は、pnpmの方針（公開からの日数、`allowBuilds`にないinstall scriptsの拒否、git・tarballから入れる推移依存の拒否）と、上のpush前の検査で守る。push前の照合では、検査を弱める変更と、pnpmの方針そのものの変更を登録の対象にする。`overrides`・`allowBuilds`・`minimumReleaseAgeExclude`を変えると`pnpm-workspace.yaml`が変わるため、登録が要る。
+
+検査コード、`package.json`の依存以外の欄、pnpmの方針、パッチを変えたブランチと、registry以外から依存を入れるブランチが登録を要する。pnpmの方針の検査に通らない依存は、方針を外してよいと判断した場合だけ登録する。対象ファイルの変更をレビューした後、信頼できるcheckoutから次を実行し、今の組を一覧に足す。
 
 ```bash
 pnpm setup:hooks --trust-current
@@ -24,9 +35,11 @@ pnpm setup:hooks --trust-current
 
 一覧は同じcloneの全worktreeで共有する。`--trust-current`は今の組を一覧の末尾に足し（登録済みの組は末尾へ移す）、登録の新しい20組だけを残す。ほかのブランチが登録した組は消えないため、ブランチを切り替えるたびに登録し直す必要はない。上限は、後で問題が見つかった依存の組をいつまでも通さないために置く。一覧から消えた組のブランチは、もう一度登録する。複数のworktreeで同時に`--trust-current`を実行すると、片方の登録が失われることがある。pushが止まったら、もう一度登録する。
 
-通常の`pnpm setup:hooks`や`pnpm setup:worktree`は一覧に組を足さない。今のcheckoutの組が信頼されていなければ、pushと同じ理由を表示して止まる。初回の登録だけは、今の組を一覧に入れる。
+通常の`pnpm setup:hooks`や`pnpm setup:worktree`は一覧に組を足さない。今のcheckoutがpushの照合に通らなければ、pushと同じ理由を表示して止まる。初回の登録だけは、今の組を一覧に入れる。
 
-`origin/main`は`git fetch`で取得した時点の中身を使う。mainで依存や検査コードが更新されると、それより前のmainから分かれたブランチは一致しなくなる。mainを取り込むか、`--trust-current`で登録する。
+`tools/dev/pre-push.sh`が変わっても、設置済みのhookは古い内容のまま動く。新しい内容を含むブランチでは、通常の`pnpm setup:hooks`と`pnpm setup:worktree`が「登録済みの内容と異なります」で止まる。変更がmainに入った後、cloneごとに1回、mainの最新を取り込んだ信頼できるcheckoutから`pnpm setup:hooks --trust-current`を実行する。照合する組にpnpmの設定を加える前に登録した組は、新しいhookでは一致しない。依存だけのブランチは登録なしで通り、それ以外のブランチはもう一度登録する。
+
+`origin/main`は`git fetch`で取得した時点の中身を使う。mainで検査コード、`package.json`の依存以外の欄、pnpmの設定が更新されると、それより前のmainから分かれたブランチは一致しなくなる。mainを取り込むか、`--trust-current`で登録する。mainで依存だけが更新された場合は、依存だけの変更として検査する。
 
 登録したコードからは各worktreeのbuild・testを実行するため、未信頼ブランチを安全に実行するための隔離機能ではない。依存のインストール・セットアップ・pushは、対象のコードを信頼できると確認してから行う。
 

@@ -65,7 +65,12 @@ mkdir -p "$hooks_dir"
 # 初回の登録と --trust-current だけが、今の検査コード・依存設定の組を信頼した組の一覧に足す。
 if [ ! -f "$hooks_dir/pre-push" ] || [ "${1:-}" = "--trust-current" ]; then
   current=
-  for file in tools/ci/browser-checks.ts tools/ci/selection.ts package.json pnpm-lock.yaml; do
+  for file in tools/ci/browser-checks.ts tools/ci/selection.ts package.json pnpm-lock.yaml \
+    pnpm-workspace.yaml .npmrc .pnpmfile.cjs .pnpmfile.mjs; do
+    # pnpm の設定ファイルは無くてもよく、無ければ「-」として組に入れる。
+    case "$file" in
+      pnpm-workspace.yaml | .*) [ -e "$file" ] || { current="${current:+$current }-"; continue; } ;;
+    esac
     digest=$(shasum -a 256 "$file")
     current="${current:+$current }${digest%% *}"
   done

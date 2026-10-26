@@ -49,6 +49,9 @@ function commands(): string[] {
   return fs.existsSync(log) ? fs.readFileSync(log, "utf8").trim().split("\n") : [];
 }
 
+const policyCheck =
+  "install --frozen-lockfile --lockfile-only --config.trust-lockfile=false --config.minimum-release-age=1440";
+
 describe("Git pre-push integration", { timeout: 20_000 }, () => {
   beforeEach(() => {
     root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "farmille-hook-test-")));
@@ -95,13 +98,15 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     (locale) => {
       env.LC_ALL = locale;
       git("update-ref", "refs/remotes/origin/main", base);
+      fs.appendFileSync(path.join(repo, "tools/ci/selection.ts"), "\n");
       write("package.json", '{"type":"module","private":true}\n');
-      write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# reviewed change\n");
-      git("add", "package.json", "pnpm-lock.yaml");
-      git("commit", "-m", "change dependency settings");
+      git("add", "tools/ci/selection.ts", "package.json");
+      git("commit", "-m", "change checks and package settings");
       const rejected = push("feature");
       expect(rejected.status).not.toBe(0);
-      expect(rejected.stderr).toContain("package.json・pnpm-lock.yaml が origin/main と異なり");
+      expect(rejected.stderr).toContain(
+        "tools/ci/selection.ts・package.json が origin/main と異なり",
+      );
       expect(commands()).toEqual([]);
       const registered = setup("--trust-current");
       expect(registered.stderr).toBe("");
@@ -221,14 +226,143 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     expect(fs.readFileSync(trusted, "utf8")).toBe(original);
     expect(commands()).toHaveLength(3);
 
-    write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# unreviewed\n");
-    git("commit", "-am", "unreviewed dependency");
+    fs.appendFileSync(path.join(repo, "tools/ci/selection.ts"), "\n");
+    git("commit", "-am", "unreviewed check change");
     const rejected = push("feature");
     expect(rejected.status).not.toBe(0);
-    expect(rejected.stderr).toContain("pnpm-lock.yaml が origin/main と異なり、登録済み");
+    expect(rejected.stderr).toContain("tools/ci/selection.ts が origin/main と異なり、登録済み");
     expect(commands()).toHaveLength(3);
     expect(git("--git-dir", remote, "rev-parse", "refs/heads/feature")).toBe(merged);
   });
+  it("passes dependency-only changes that pnpm's supply-chain policy accepts", () => {
+    const trusted = path.join(repo, ".git/farmille-hooks/trusted");
+    const original = fs.readFileSync(trusted, "utf8");
+    git("update-ref", "refs/remotes/origin/main", base);
+    write("package.json", '{"type":"module","dependencies":{"pdfjs-dist":"4.10.38"}}\n');
+    write(
+      "pnpm-lock.yaml",
+      [
+        "lockfileVersion: 9.0",
+        "importers:",
+        "  .:",
+        "    dependencies:",
+        "      resolution:",
+        "        specifier: 1.0.0",
+        "        version: 1.0.0",
+        "packages:",
+        "  pdfjs-dist@4.10.38:",
+        "    resolution: {integrity: sha512-pdfjs}",
+        "    peerDependencies:",
+        "      resolution: ^1.0.0",
+        "  resolution@1.0.0:",
+        "    resolution: {integrity: sha512-resolution}",
+        "",
+      ].join("\n"),
+    );
+    git("commit", "-am", "add dependency");
+    const head = git("rev-parse", "HEAD");
+    const result = push("feature");
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout).toContain("pnpm の supply-chain の方針の検査に通りました");
+    expect(commands()).toEqual([
+      policyCheck,
+      "build-storybook",
+      "test:storybook:responsive",
+      "test:e2e:local",
+    ]);
+    expect(fs.readFileSync(trusted, "utf8")).toBe(original);
+    expect(git("--git-dir", remote, "rev-parse", "refs/heads/feature")).toBe(head);
+  });
+  it("rejects dependency-only changes that pnpm's supply-chain policy rejects", () => {
+    git("update-ref", "refs/remotes/origin/main", base);
+    fakePnpm('[ "$1" != install ] || { echo ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION; exit 1; }');
+    write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# fresh release\n");
+    git("commit", "-am", "fresh dependency");
+    const result = push("feature");
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION");
+    expect(result.stderr).toContain("方針の検査に通りません");
+    expect(commands()).toEqual([policyCheck]);
+    expect(git("--git-dir", remote, "rev-parse", "refs/heads/feature")).toBe(base);
+  });
+  it.each([
+    ["pnpm-workspace.yaml", "minimumReleaseAge: 0\n", "pnpm-workspace.yaml"],
+    [".npmrc", "registry=https://registry.example.test/\n", ".npmrc"],
+    [".pnpmfile.cjs", "module.exports = { hooks: {} };\n", ".pnpmfile.cjs"],
+    [".pnpmfile.mjs", "export const hooks = {};\n", ".pnpmfile.mjs"],
+    [
+      "package.json",
+      '{"type":"module","scripts":{"test:e2e:local":"true"},"dependencies":{"pdfjs-dist":"4.10.38"}}\n',
+      "package.json",
+    ],
+    [
+      "package.json",
+      '{"type":"module","dependencies":{"valibot":"link:./untrusted"}}\n',
+      "registry 以外",
+    ],
+    [
+      "pnpm-lock.yaml",
+      "lockfileVersion: 9.0\npackages:\n  x@1.0.0:\n    resolution: {integrity: sha512-x, tarball: https://example.test/x.tgz}\n",
+      "registry 以外",
+    ],
+    [
+      "pnpm-lock.yaml",
+      "lockfileVersion: 9.0\npackages:\n  x@1.0.0:\n    engines: {node: '>=18'}\n",
+      "integrity の無い",
+    ],
+    [
+      "pnpm-lock.yaml",
+      "lockfileVersion: 9.0\npackages:\n  x@1.0.0:\n    resolution: {integrity: null}\n",
+      "integrity の無い",
+    ],
+    [
+      "pnpm-lock.yaml",
+      "lockfileVersion: 9.0\npackages:\n    x@1.0.0:\n        resolution: {tarball: https://example.test/x.tgz}\n",
+      "registry 以外",
+    ],
+    [
+      "pnpm-lock.yaml",
+      "lockfileVersion: 9.0\npatchedDependencies:\n  minimatch@3.1.5: changed\n",
+      "パッチの変更",
+    ],
+  ])("requires registration when a dependency change also touches %s", (file, content, message) => {
+    git("update-ref", "refs/remotes/origin/main", base);
+    write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# dependency change\n");
+    write(file, content);
+    git("add", ".");
+    git("commit", "-m", "dependency change with policy input");
+    const result = push("feature");
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(message);
+    expect(result.stderr).toContain("登録済み");
+    expect(commands()).toEqual([]);
+    expect(git("--git-dir", remote, "rev-parse", "refs/heads/feature")).toBe(base);
+  });
+  it.each([
+    ["pnpm-workspace.yaml", "scriptShell: /usr/bin/true\n"],
+    [".npmrc", "registry=https://registry.example.test/\n"],
+    [".pnpmfile.cjs", "module.exports = { hooks: {} };\n"],
+  ])(
+    "requires registration for %s even when the other files match origin/main",
+    (file, content) => {
+      git("update-ref", "refs/remotes/origin/main", base);
+      write(file, content);
+      git("add", file);
+      git("commit", "-m", "change pnpm settings");
+      const rejected = push("feature");
+      expect(rejected.status).not.toBe(0);
+      expect(rejected.stderr).toContain(`${file} が origin/main と異なり、登録済み`);
+      expect(commands()).toEqual([]);
+      expect(setup("--trust-current").status).toBe(0);
+      expect(push("feature").status).toBe(0);
+
+      fs.appendFileSync(path.join(repo, file), "# changed after registration\n");
+      git("commit", "-am", "change pnpm settings again");
+      const changed = push("feature");
+      expect(changed.status).not.toBe(0);
+      expect(changed.stderr).toContain(`${file} が origin/main と異なり、登録済み`);
+    },
+  );
   it("keeps only the 20 most recently registered sets", () => {
     const trusted = path.join(repo, ".git/farmille-hooks/trusted");
     const lines = () => fs.readFileSync(trusted, "utf8").trim().split("\n");
