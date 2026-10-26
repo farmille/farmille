@@ -317,8 +317,8 @@ export function ReportItemFileDialog({
   }
 
   async function commit() {
-    // 連打で二重に保存しない（state の disabled は次の描画まで効かない）
-    if (committing.current) return;
+    // 連打で二重に保存しない（state の disabled は次の描画まで効かない）。読み込み中に確定すると、読み終えた画像が入らない
+    if (committing.current || readingNow.current) return;
     committing.current = true;
     setSaving(true);
     let current = images;
@@ -399,7 +399,7 @@ export function ReportItemFileDialog({
             <Button
               variant="primary"
               size="sm"
-              disabled={saving || images.length === 0}
+              disabled={saving || reading || images.length === 0}
               onClick={() => void commit()}
             >
               {saving ? "保存しています…" : isNew ? "ページに入れる" : "変更を反映する"}

@@ -72,6 +72,49 @@ describe("画像の保存中の操作", () => {
     expect(screen.getByRole("button", { name: /画像を編集する/ })).toBeDisabled();
     expect(input).toBeDisabled();
   });
+
+  it("ファイルの読み込みが終わるまで、ページに入れられない", async () => {
+    // 1枚目はすぐ読み込み、2枚目は読み込みの途中で止めておく
+    let calls = 0;
+    vi.stubGlobal("createImageBitmap", async () => {
+      calls += 1;
+      if (calls > 1) await new Promise(() => {});
+      return { width: 400, height: 300, close: () => {} };
+    });
+    Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+      configurable: true,
+      value: () => ({
+        fillStyle: "",
+        fillRect: () => {},
+        drawImage: () => {},
+        imageSmoothingQuality: "high",
+      }),
+    });
+    render(
+      <ReportItemFileDialog
+        item={{ id: crypto.randomUUID(), mode: "file", name: "可販果収量", body: "", images: [] }}
+        isNew
+        userId={crypto.randomUUID()}
+        reportId={crypto.randomUUID()}
+        imageLimit={30}
+        onCommit={vi.fn()}
+        onDelete={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    );
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    if (input === null) throw new Error("ファイルの選択欄がありません。");
+    fireEvent.change(input, {
+      target: {
+        files: [
+          new File(["x"], "1.png", { type: "image/png" }),
+          new File(["x"], "2.png", { type: "image/png" }),
+        ],
+      },
+    });
+    await screen.findByRole("img", { name: "1枚目の画像" });
+    expect(screen.getByRole("button", { name: "ページに入れる" })).toBeDisabled();
+  });
 });
 
 describe("上げたがページに入れなかった画像", () => {
