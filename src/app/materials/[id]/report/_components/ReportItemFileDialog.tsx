@@ -86,6 +86,7 @@ const removeButton = css({
   color: "text.inverse",
   cursor: "pointer",
   _hover: { bg: "scrim/80" },
+  _disabled: { opacity: "disabled", cursor: "not-allowed" },
 });
 
 const editButton = css({ mt: "2.5" });
@@ -123,6 +124,7 @@ const deleteButton = css({
   fontWeight: "bold",
   color: "accent.danger",
   cursor: "pointer",
+  _disabled: { opacity: "disabled", cursor: "not-allowed" },
 });
 
 function previewOf(canvas: HTMLCanvasElement) {
@@ -164,6 +166,7 @@ export function ReportItemFileDialog({
   // 進み具合（読み込み中など）と、追加できなかった理由は分けて持つ。理由は次のファイルの読み込みで消さない
   const [message, setMessage] = useState("");
   const [rejected, setRejected] = useState<string[]>([]);
+  // 保存中に消す・題を変える・編集すると、保存を始めたときの画像で閉じて黙って失われるので、保存中は操作を止める
   const [saving, setSaving] = useState(false);
   const [asking, setAsking] = useState(false);
   const [editing, setEditing] = useState<DraftImage | null>(null);
@@ -371,7 +374,12 @@ export function ReportItemFileDialog({
         footer={
           <>
             {!isNew && (
-              <button type="button" className={deleteButton} onClick={() => onDelete(item.id)}>
+              <button
+                type="button"
+                className={deleteButton}
+                disabled={saving}
+                onClick={() => onDelete(item.id)}
+              >
                 この調査項目を削除
               </button>
             )}
@@ -405,6 +413,7 @@ export function ReportItemFileDialog({
               type="button"
               className={removeButton}
               aria-label={`${index + 1}枚目の画像を削除`}
+              disabled={saving}
               onClick={() => setImages((previous) => previous.filter((x) => x.id !== image.id))}
             >
               <Icon name="close" size="sm" />
@@ -415,6 +424,7 @@ export function ReportItemFileDialog({
               requirement="optional"
               placeholder="例）図1 可販果収量"
               maxLength={REPORT_SHORT_MAX}
+              disabled={saving}
               value={image.caption}
               onChange={(event) =>
                 setImages((previous) =>
@@ -428,13 +438,14 @@ export function ReportItemFileDialog({
               variant="primary"
               size="md"
               className={editButton}
+              disabled={saving}
               onClick={() => void startEdit(image)}
             >
               画像を編集する（回転・切り取り・塗りつぶし）
             </Button>
           </div>
         ))}
-        <label className={pick} data-disabled={full || reading ? "" : undefined}>
+        <label className={pick} data-disabled={full || reading || saving ? "" : undefined}>
           <Icon name="add" size="sm" />
           {full
             ? `画像は${REPORT_IMAGE_LIMIT}枚まで入っています`
@@ -442,7 +453,7 @@ export function ReportItemFileDialog({
               ? "読み込みが終わると、次の写真・PDFを選べます"
               : `${images.length > 0 ? "写真・PDFを追加" : "写真・PDFを選ぶ"}（複数可）`}
           <input
-            disabled={full || reading}
+            disabled={full || reading || saving}
             type="file"
             accept="image/jpeg,image/png,image/webp,application/pdf"
             multiple
