@@ -98,6 +98,18 @@ export function applyPdfReading(
     !output.plots.some((plot) => plot.treatment === "posted")
   )
     return { ok: false, error: "pdf_reading_no_match" };
+  // key が重なると Map が先の要素を黙って上書きし、値が別の区に付くので、写す前に断る
+  const keys = [
+    ...output.varieties,
+    ...output.comparedMaterials,
+    ...output.plots,
+    ...output.measurements,
+    ...output.graphs,
+  ].map(({ key }) => key);
+  if (new Set(keys).size !== keys.length) {
+    console.error("[pdf-reading] 読み取った内容の鍵が重なっている");
+    return { ok: false, error: "pdf_reading_failed" };
+  }
   try {
     return { ok: true, ...mapReading(base, output, catalog, newId) };
   } catch (error) {

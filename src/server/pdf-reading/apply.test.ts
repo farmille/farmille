@@ -247,6 +247,44 @@ describe("applyPdfReading", () => {
     }
   });
 
+  it("品種・比較した資材・区・調査項目・グラフの鍵が重なっていれば失敗にする", () => {
+    const [posted, untreated] = reading().plots;
+    if (posted === undefined || untreated === undefined) throw new Error("区が足りない");
+    for (const bad of [
+      reading({ plots: [posted, { ...untreated, key: "p1" }] }),
+      reading({
+        varieties: [
+          { key: "v1", name: "新藍" },
+          { key: "v1", name: "彩峰" },
+        ],
+      }),
+      reading({
+        comparedMaterials: [
+          { key: "m1", name: "資材B" },
+          { key: "m1", name: "資材C" },
+        ],
+      }),
+      reading({
+        measurements: [
+          { key: "k1", name: "結球重", unit: "g", body: "" },
+          { key: "k1", name: "球径", unit: "cm", body: "" },
+        ],
+      }),
+      reading({
+        graphs: [
+          { key: "g1", measurementKey: "k1", heading: "1回目" },
+          { key: "g1", measurementKey: "k1", heading: "2回目" },
+        ],
+      }),
+      reading({ plots: [posted, { ...untreated, key: "v1" }] }),
+    ]) {
+      expect(applyPdfReading(base(), bad, catalog, ids())).toEqual({
+        ok: false,
+        error: "pdf_reading_failed",
+      });
+    }
+  });
+
   it("写すたびに PDF と照らし合わせた確認を外す", () => {
     expect(applied(base({ pdfValuesChecked: true })).input.pdfValuesChecked).toBe(false);
   });
