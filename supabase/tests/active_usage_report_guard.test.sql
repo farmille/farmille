@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(9);
+select plan(12);
 
 insert into auth.users(id) values('ca932323-0000-4000-8000-000000000001'),('ca932323-0000-4000-8000-000000000009');
 insert into public.profiles(user_id,handle,standpoint)
@@ -51,6 +51,17 @@ select set_config('request.jwt.claims','{"sub":"ca932323-0000-4000-8000-00000000
 set local role authenticated;
 select lives_ok($$select public.save_usage_report(pg_temp.blank('ca932323-0000-4000-8000-000000000008'),false)$$,'different author can use same material');
 select is((select count(*) from public.usage_reports where author_user_id=auth.uid()),1::bigint,'only own report is visible');
+reset role;
+update public.usage_reports set status='published',published_at=now() where id='ca932323-0000-4000-8000-000000000003';
+select set_config('request.jwt.claims','{"sub":"ca932323-0000-4000-8000-000000000001","role":"authenticated","app_metadata":{"account_type":"general"}}',true);
+set local role authenticated;
+select lives_ok($$select public.save_usage_report(pg_temp.blank('ca932323-0000-4000-8000-000000000010'),false)$$,'published reports do not block new drafts');
+reset role;
+insert into public.usage_reports(id,material_id,author_user_id,observed_change,summary,pesticide_ack,form_version)
+values('ca932323-0000-4000-8000-000000000013','ca932323-0000-4000-8000-000000000002','ca932323-0000-4000-8000-000000000001','','',false,2);
+set local role authenticated;
+select lives_ok($$select public.save_usage_report(pg_temp.blank('ca932323-0000-4000-8000-000000000010'),false)$$,'preexisting duplicate does not prevent editing own draft');
+select throws_ok($$select public.save_usage_report(pg_temp.blank('ca932323-0000-4000-8000-000000000014'),false)$$,'23505','active_report_exists','preexisting duplicates cannot grow');
 reset role;
 select * from finish();
 rollback;
