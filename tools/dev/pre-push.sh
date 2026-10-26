@@ -76,13 +76,14 @@ if [ -n "$differs" ] && ! grep -qsxF "$current" "$trusted"; then
       if (JSON.stringify(current) !== JSON.stringify(main)) process.exitCode = 1;
     ' || differs="${differs:+${differs}・}package.json"
     # pnpm が書く lockfile では、registry の依存の項目ごとに integrity だけの resolution が1行入る。
+    # 字下げや書き方が違う項目は、その1行を持たないので止まる（同じキーの重複は pnpm が拒否する）。
     # パッチの中身は frozen の検査で lockfile のハッシュと照合されるので、ハッシュの欄を main と比べる。
     patches='/^patchedDependencies:/ { keep = 1; print; next } /^[^ ]/ { keep = 0 } keep'
     if ! awk '
-      /resolution/ && !/^    resolution: [{]integrity: [^,}]*[}]$/ { bad = 1 }
-      /^[^ ]/ { if (open) bad = 1; open = 0; packages = ($0 == "packages:") }
-      packages && /^  [^ ]/ { if (open) bad = 1; open = 1 }
-      packages && /^    resolution: / { open = 0 }
+      /^[^ ]/ { if (open) bad = 1; open = 0; seen = 0; packages = ($0 == "packages:") }
+      packages && /^  [^ ]/ { if (open) bad = 1; open = 1; seen = 1 }
+      packages && /^   / && !seen { bad = 1 }
+      packages && /^    resolution:/ { if (!/^    resolution: [{]integrity: [^,}]*[}]$/) bad = 1; open = 0 }
       END { exit bad || open }
     ' pnpm-lock.yaml ||
       [ "$(awk "$patches" pnpm-lock.yaml)" != "$(git cat-file blob "$main:pnpm-lock.yaml" | awk "$patches")" ]; then

@@ -241,7 +241,23 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     write("package.json", '{"type":"module","dependencies":{"pdfjs-dist":"4.10.38"}}\n');
     write(
       "pnpm-lock.yaml",
-      "lockfileVersion: 9.0\npackages:\n  pdfjs-dist@4.10.38:\n    resolution: {integrity: sha512-pdfjs}\n",
+      [
+        "lockfileVersion: 9.0",
+        "importers:",
+        "  .:",
+        "    dependencies:",
+        "      resolution:",
+        "        specifier: 1.0.0",
+        "        version: 1.0.0",
+        "packages:",
+        "  pdfjs-dist@4.10.38:",
+        "    resolution: {integrity: sha512-pdfjs}",
+        "    peerDependencies:",
+        "      resolution: ^1.0.0",
+        "  resolution@1.0.0:",
+        "    resolution: {integrity: sha512-resolution}",
+        "",
+      ].join("\n"),
     );
     git("commit", "-am", "add dependency");
     const head = git("rev-parse", "HEAD");
@@ -293,6 +309,11 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
       "pnpm-lock.yaml",
       "lockfileVersion: 9.0\npackages:\n  x@1.0.0:\n    engines: {node: '>=18'}\n",
       "integrity の無い",
+    ],
+    [
+      "pnpm-lock.yaml",
+      "lockfileVersion: 9.0\npackages:\n    x@1.0.0:\n        resolution: {tarball: https://example.test/x.tgz}\n",
+      "registry 以外",
     ],
     [
       "pnpm-lock.yaml",
