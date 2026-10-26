@@ -31,7 +31,20 @@ const controlSizes = {
 export const controlRecipe = cva({
   base: controlBase,
   variants: {
-    size: controlSizes,
+    size: {
+      ...controlSizes,
+      // 行の中に書き込む欄：枠と余白を出さず、置いた行の背景にそろえる（属性の行の品種・市区町村など）
+      inline: {
+        borderWidth: "0",
+        borderRadius: "[0]",
+        bg: "transparent",
+        px: "0",
+        py: "0",
+        fontSize: "md",
+        _placeholder: { color: "text.muted" },
+        _focus: { outlineWidth: "0", outlineStyle: "none" },
+      },
+    },
     reveal: {
       true: { pe: "12" },
     },
@@ -56,9 +69,47 @@ export const textareaRecipe = cva({
     size: {
       md: { minH: "[84px]" },
       lg: { minH: "[120px]" },
+      // 文書に書き込む欄：枠を出さず1行から始め、書いた分だけ伸びる。書き始めたら下に線を出す
+      document: {
+        minH: "0",
+        px: "0",
+        py: "0",
+        borderWidth: "0",
+        borderRadius: "[0]",
+        bg: "transparent",
+        resize: "none",
+        overflow: "hidden",
+        fontSize: "lg",
+        lineHeight: "prose",
+        _focus: { outlineWidth: "0", outlineStyle: "none" },
+        "&:not(:placeholder-shown)": {
+          pb: "1.5",
+          borderBottomWidth: "1px",
+          borderBottomColor: "border.strong",
+        },
+        "&:not(:placeholder-shown):focus": { borderBottomColor: "primary.300" },
+      },
     },
   },
   defaultVariants: { size: "md" },
+});
+
+// 記入例は欄の下の段落として常に出しておく。空のときは欄の1行目に重ね、書き始めると下へずらすだけ（消して出し直さない）
+export const textareaExampleStyle = css({
+  m: "0",
+  mt: "[calc(-1lh)]",
+  fontSize: "lg",
+  lineHeight: "prose",
+  whiteSpace: "pre-line",
+  color: "text.subtle",
+  cursor: "text",
+  pointerEvents: "none",
+  transitionProperty: "[margin-top]",
+  transitionDuration: "fast",
+  transitionTimingFunction: "soft",
+  "textarea:not(:placeholder-shown) + &": { mt: "2" },
+  "[data-invalid] + &, textarea[aria-invalid=true] + &": { color: "accent.danger" },
+  _motionReduce: { transitionProperty: "[none]" },
 });
 
 export const selectTriggerRecipe = cva({

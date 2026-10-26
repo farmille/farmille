@@ -12,7 +12,18 @@ export const REPORT_SECTIONS = [
   { value: "documents", title: "関連資料" },
 ] as const;
 const section = v.picklist(REPORT_SECTIONS.map(({ value }) => value));
+export type ReportSection = (typeof REPORT_SECTIONS)[number]["value"];
+/** 記事の節の見出し。保存済みの見出しがあればそれを、無ければ決まった見出しを使う。 */
+export function reportSectionHeading(
+  input: Pick<UsageReportInput, "headings">,
+  section: ReportSection,
+): string {
+  const fallback = REPORT_SECTIONS.find(({ value }) => value === section);
+  if (fallback === undefined) throw new Error(`記事の節が見つかりません：${section}`);
+  return input.headings.find((item) => item.section === section)?.title || fallback.title;
+}
 export const REPORT_PLOT_LIMIT = 40;
+export const REPORT_MEASUREMENT_LIMIT = 30;
 const named = v.object({ id: uuid, name: short });
 const plotTreatment = v.variant("kind", [
   v.object({ kind: v.literal("posted") }),
@@ -81,7 +92,7 @@ export const UsageReportInputSchema = v.object({
         graphs: v.pipe(v.array(graph), v.maxLength(20)),
       }),
     ),
-    v.maxLength(30),
+    v.maxLength(REPORT_MEASUREMENT_LIMIT),
   ),
   media: v.pipe(
     v.array(
@@ -323,7 +334,8 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   required("guidelineAck", input.guidelineAck, "※ 投稿ガイドラインへの同意が必要です");
   return errors;
 }
-function reportMeasurementHasResult(
+/** 調査項目に結果が入っているか。数値の項目は、どのグラフにも数として読める値が1つ以上要る。 */
+export function reportMeasurementHasResult(
   measurement: UsageReportInput["measurements"][number],
   media: UsageReportInput["media"],
 ): boolean {
@@ -356,17 +368,29 @@ export function reportErrorStep(key: string): number {
   return 5;
 }
 
-export function groupReportMeasurements(measurements: UsageReportInput["measurements"]) {
-  const groups: UsageReportInput["measurements"] = [];
+/**
+ * 記事に出す調査項目の組。同じ名前と単位の数値の調査項目は、最初の項目の位置に1つの組としてまとめ、
+ * 項目ごとのグラフと補足説明は組の中に残す。ほかの調査項目は1件ずつの組にする。
+ */
+export function reportMeasurementGroups(
+  measurements: UsageReportInput["measurements"],
+): UsageReportInput["measurements"][] {
+  const groups: UsageReportInput["measurements"][] = [];
+  const numeric = new Map<string, UsageReportInput["measurements"]>();
   for (const measurement of measurements) {
-    if (measurement.kind !== "numeric") continue;
-    const group = groups.find(
-      (item) =>
-        item.name.trim() === measurement.name.trim() &&
-        item.unit.trim() === measurement.unit.trim(),
-    );
-    if (group) group.graphs.push(...measurement.graphs);
-    else groups.push({ ...measurement, graphs: [...measurement.graphs] });
+    if (measurement.kind !== "numeric") {
+      groups.push([measurement]);
+      continue;
+    }
+    const key = JSON.stringify([measurement.name.trim(), measurement.unit.trim()]);
+    const group = numeric.get(key);
+    if (group !== undefined) {
+      group.push(measurement);
+      continue;
+    }
+    const created = [measurement];
+    numeric.set(key, created);
+    groups.push(created);
   }
   return groups;
 }

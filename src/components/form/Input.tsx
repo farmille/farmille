@@ -40,7 +40,7 @@ const revealState = {
 } as const satisfies Record<string, { type: "password" | "text"; label: string; icon: IconName }>;
 
 type InputBodyProps = Omit<ComponentPropsWithRef<"input">, "size" | "required" | "aria-invalid"> & {
-  size?: "md" | "sm";
+  size?: "md" | "sm" | "inline";
   revealable?: boolean;
 };
 

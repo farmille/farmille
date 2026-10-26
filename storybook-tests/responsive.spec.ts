@@ -60,7 +60,7 @@ const REPRESENTATIVE_STORY_IDS = [
   "pages-admin-materials-materialform--edit",
   "pages-materials-id-detailtable--official",
   "pages-materials-id-materialhero--signed-in",
-  "pages-materials-id-report-reportform--draft",
+  "pages-materials-id-report-reportpageform--draft",
   "pages-materials-id-materialreviewssection--default",
   "pages-me-saved-compare-comparetable--three-materials",
   "pages-me-shelves--all-sections",
@@ -120,6 +120,7 @@ const NULL_RENDER_STORY_IDS: ReadonlySet<string> = new Set([
   "pages-materials-id-ratingsummary--no-reviews",
   "components-display-metricbars--empty",
   "components-navigation-pagination--single-page",
+  "pages-materials-id-report-reportpdfpagepicker--closed",
   // 初回ログインの案内は、印（localStorage）と一般会員のセッションがないときは何も描かない
   "pages-shared-onboardingtour--without-mark",
   "pages-signup-done-onboardingarm--default",

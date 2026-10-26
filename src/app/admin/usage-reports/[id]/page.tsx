@@ -13,9 +13,10 @@ import {
 } from "@/app/admin/_components/AdminUI";
 import { requireAdminPage } from "@/app/admin/_lib/access";
 import { UsageReportEditorialForm } from "@/app/admin/usage-reports/[id]/EditorialForm";
-import { UsageReportArticle } from "@/components/UsageReportArticle";
+import { StructuredReportArticle } from "@/app/reports/[id]/StructuredReportArticle";
 import { DataTable, formatDateJa, type DataTableColumn } from "@/components";
 import { isPrefectureCode, PREFECTURES } from "@/lib/prefectures";
+import { reportVarietyNames } from "@/lib/usage-report";
 import {
   EDITORIAL_REPORT_STATUS_LABELS,
   getUsageReportEditorialDetail,
@@ -165,6 +166,7 @@ export default async function AdminUsageReportDetailPage({
   }
 
   const data = report.data;
+  const varieties = data.structured === null ? "" : reportVarietyNames(data.structured);
 
   return (
     <AdminShell
@@ -215,7 +217,12 @@ export default async function AdminUsageReportDetailPage({
 
       {data.structured !== null ? (
         <Panel title="記事の内容">
-          <UsageReportArticle input={data.structured} documentUrls={data.documentUrls} />
+          <StructuredReportArticle
+            input={data.structured}
+            materialName={data.material.name}
+            cropLabel={`${data.crop.name}${varieties ? `（${varieties}）` : ""}`}
+            documentUrls={data.documentUrls}
+          />
         </Panel>
       ) : (
         <>

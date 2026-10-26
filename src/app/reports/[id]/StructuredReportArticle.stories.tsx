@@ -11,6 +11,7 @@ const meta = {
   decorators: [(Story) => readingFrame(Story())],
   args: {
     input: structuredReport,
+    materialName: "ハイパーバイオ",
     cropLabel: "ミニトマト（アイコ）",
     documentUrls: [
       { id: "73000000-0000-4000-8000-000000000041", url: "https://example.com/a.pdf" },

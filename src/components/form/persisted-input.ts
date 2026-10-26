@@ -21,9 +21,12 @@ const FieldsSchema = v.pipe(
   v.transform((record): RestoredFields => new Map(Object.entries(record))),
 );
 
-/** 入力の控えはタブを閉じるまで残す。ページの URL ごとに分け、同じページの複数のフォームは名前で分ける。 */
-export function persistKey(name: string): string {
-  return `farmille:input:${window.location.pathname}#${name}`;
+/**
+ * 入力の控えはタブを閉じるまで残す。ページの URL ごとに分け、同じページの複数のフォームは名前で分ける。
+ * path を渡すとその URL で分ける（画面内の遷移で開いた直後は、location がまだ遷移前の URL のため）。
+ */
+export function persistKey(name: string, path = window.location.pathname): string {
+  return `farmille:input:${path}#${name}`;
 }
 
 export function readPersisted<T>(key: string, schema: v.GenericSchema<unknown, T>): T | null {
@@ -137,13 +140,14 @@ const notReadOnServer = () => undefined;
 export function useStoredOnce<T>(
   name: string | false,
   read: (key: string) => T | null,
+  path?: string,
 ): Stored<T> | undefined {
   const [snapshot] = useState(() => {
     let stored: Stored<T> | undefined;
     return () => {
       if (name === false) return undefined;
       if (stored === undefined) {
-        const key = persistKey(name);
+        const key = persistKey(name, path);
         stored = { key, saved: read(key) };
       }
       return stored;
@@ -159,16 +163,19 @@ export function useStoredOnce<T>(
  */
 export function usePersistedInput<T>({
   name,
+  path,
   schema,
   unsaved,
   restore,
 }: {
   name: string;
+  /** 控えを分けるページの URL。省くと表示したときの URL。 */
+  path?: string;
   schema: v.GenericSchema<unknown, T>;
   unsaved: T | null;
   restore: (saved: T) => void;
 }): void {
-  const stored = useStoredOnce(name, (key) => readPersisted(key, schema));
+  const stored = useStoredOnce(name, (key) => readPersisted(key, schema), path);
   const restoreSaved = useEffectEvent(restore);
 
   useEffect(() => {
