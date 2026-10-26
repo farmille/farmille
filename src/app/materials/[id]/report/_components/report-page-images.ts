@@ -10,6 +10,8 @@ const MAX_SIDE = 2400;
 const SAVE_SIDE = 1600;
 /** PDF のページ選びに出す縮小画像の長い辺。 */
 const THUMB_SIDE = 280;
+/** 画像は JPEG で保存するので、透明な部分はこの色の紙に描いたものにする（塗らないと黒になる）。 */
+const PAPER = "white";
 
 export function makeCanvas(width: number, height: number): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
@@ -33,6 +35,8 @@ export function fitCanvas(
   const scale = Math.min(1, max / Math.max(width, height));
   const canvas = makeCanvas(width * scale, height * scale);
   const ctx = context(canvas);
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
   return canvas;
@@ -157,7 +161,7 @@ async function drawPdfPage(
   const viewport = page.getViewport({ scale: max / Math.max(base.width, base.height) });
   const canvas = makeCanvas(viewport.width, viewport.height);
   const ctx = context(canvas);
-  ctx.fillStyle = "white";
+  ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   await page.render({ canvasContext: ctx, viewport }).promise;
   return canvas;

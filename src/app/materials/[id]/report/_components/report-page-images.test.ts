@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
-import { fileTooLarge, pdfTooLong } from "./report-page-images";
+import { fileTooLarge, fitCanvas, pdfTooLong } from "./report-page-images";
 import { REPORT_PDF_LIMITS, REPORT_PHOTO_LIMITS } from "./report-page-state";
 
 describe("差し込む資料の大きさとページ数", () => {
@@ -22,5 +22,31 @@ describe("差し込む資料の大きさとページ数", () => {
     expect(pdfTooLong("成績書.pdf", REPORT_PDF_LIMITS.pages + 1)).toContain(
       "「成績書.pdf」は40ページを超えているため、追加できません。",
     );
+  });
+});
+
+describe("写真の取り込み", () => {
+  const getContext = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "getContext");
+  afterEach(() => {
+    if (getContext !== undefined)
+      Object.defineProperty(HTMLCanvasElement.prototype, "getContext", getContext);
+  });
+
+  it("透過の画像は、白の紙に描いてから取り込む（JPEG にしても透明な部分が黒くならない）", () => {
+    // happy-dom は描けないので、描く手順だけを控える
+    const calls: string[] = [];
+    Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+      configurable: true,
+      value: () => ({
+        set fillStyle(color: string) {
+          calls.push(`fill:${color}`);
+        },
+        fillRect: () => calls.push("fillRect"),
+        drawImage: () => calls.push("drawImage"),
+        imageSmoothingQuality: "high",
+      }),
+    });
+    fitCanvas(document.createElement("canvas"), 400, 300);
+    expect(calls).toEqual(["fill:white", "fillRect", "drawImage"]);
   });
 });

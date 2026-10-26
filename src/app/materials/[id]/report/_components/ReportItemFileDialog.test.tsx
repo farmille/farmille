@@ -41,7 +41,12 @@ describe("画像の保存中の操作", () => {
     vi.stubGlobal("createImageBitmap", async () => ({ width: 400, height: 300, close: () => {} }));
     Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
       configurable: true,
-      value: () => ({ drawImage: () => {}, imageSmoothingQuality: "high" }),
+      value: () => ({
+        fillStyle: "",
+        fillRect: () => {},
+        drawImage: () => {},
+        imageSmoothingQuality: "high",
+      }),
     });
     render(
       <ReportItemFileDialog
