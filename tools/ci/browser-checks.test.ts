@@ -312,6 +312,11 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     ],
     [
       "pnpm-lock.yaml",
+      "lockfileVersion: 9.0\npackages:\n  x@1.0.0:\n    resolution: {integrity: null}\n",
+      "integrity の無い",
+    ],
+    [
+      "pnpm-lock.yaml",
       "lockfileVersion: 9.0\npackages:\n    x@1.0.0:\n        resolution: {tarball: https://example.test/x.tgz}\n",
       "registry 以外",
     ],

@@ -83,7 +83,7 @@ if [ -n "$differs" ] && ! grep -qsxF "$current" "$trusted"; then
       /^[^ ]/ { if (open) bad = 1; open = 0; seen = 0; packages = ($0 == "packages:") }
       packages && /^  [^ ]/ { if (open) bad = 1; open = 1; seen = 1 }
       packages && /^   / && !seen { bad = 1 }
-      packages && /^    resolution:/ { if (!/^    resolution: [{]integrity: [^,}]*[}]$/) bad = 1; open = 0 }
+      packages && /^    resolution:/ { if (!/^    resolution: [{]integrity: sha(1|256|384|512)-[A-Za-z0-9+\/]+=*[}]$/) bad = 1; open = 0 }
       END { exit bad || open }
     ' pnpm-lock.yaml ||
       [ "$(awk "$patches" pnpm-lock.yaml)" != "$(git cat-file blob "$main:pnpm-lock.yaml" | awk "$patches")" ]; then

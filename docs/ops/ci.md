@@ -20,7 +20,7 @@ push時は、現在のworktreeにある検査コード・依存設定（`tools/c
 
 - `tools/ci/browser-checks.ts`・`tools/ci/selection.ts`とpnpmの方針を決める設定が`origin/main`と同じ（mainに無いファイルは無いまま）
 - `package.json`は`dependencies`・`devDependencies`・`optionalDependencies`を除けば`origin/main`と同じで、依存の指定に`:`と`/`を含まない（git・URL・`link:`・`file:`・`npm:`の別名を使わない）
-- `pnpm-lock.yaml`の`packages`のどの項目にも、integrityだけの`resolution`がある（registryから入れる依存だけ）
+- `pnpm-lock.yaml`の`packages`のどの項目にも、integrity（`sha512-…`などのハッシュ）だけの`resolution`がある（registryから入れる依存だけ）
 - `pnpm-lock.yaml`の`patchedDependencies`（パッチのハッシュ）が`origin/main`と同じ
 
 当たる場合は`pnpm install --frozen-lockfile --lockfile-only`を実行し、通ればpushを続ける。pnpm 11はinstallのたびに、lockfileの全項目へ`minimumReleaseAge`（既定は公開から1440分）などの方針をかけ直し、方針に反する項目があれば止まる。このコマンドは`node_modules`とlockfileを変えず、installのscriptsも実行しない。パッチの中身はlockfileのハッシュと照合される。環境変数（`pnpm_config_*`）は`pnpm-workspace.yaml`より優先されるため、`trustLockfile=false`と`minimumReleaseAge=1440`をコマンドの引数で固定する。`pnpm-workspace.yaml`で`minimumReleaseAge`を決めるときは、`tools/dev/pre-push.sh`の値も合わせる。
