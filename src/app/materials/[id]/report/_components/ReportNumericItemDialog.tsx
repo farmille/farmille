@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/Button";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Dialog } from "@/components/Dialog";
 import { Input } from "@/components/form";
 import { reportPlotColor } from "@/components/ReportPlotColor";
@@ -43,10 +44,13 @@ export function ReportNumericItemDialog({
   onClose: () => void;
 }) {
   // 開くたびに呼び出し側が作り直す（key）ので、最初の状態は区にそろえた調査項目
-  const [draft, setDraft] = useState<ReportPageNumericItem>(() => ({
+  const [initial] = useState<ReportPageNumericItem>(() => ({
     ...item,
     graphs: item.graphs.map((graph) => graphWithPlots(graph, plots)),
   }));
+  const [draft, setDraft] = useState(initial);
+  const [asking, setAsking] = useState(false);
+  const changed = JSON.stringify(draft) !== JSON.stringify(initial);
   const order = new Map(plots.map((plot, index) => [plot.id, index]));
   const updateGraph = (
     graphId: string,
@@ -60,90 +64,108 @@ export function ReportNumericItemDialog({
     }));
 
   return (
-    <Dialog
-      open
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-      size="sheet"
-      title={`${item.name.trim() || "調査項目"}：数値を直す`}
-      closeLabel="直さずに閉じる"
-      footer={
-        <Button variant="primary" size="sm" onClick={() => onCommit(draft)}>
-          ページに入れる
-        </Button>
-      }
-    >
-      <Input
-        label={<span className={labelStyle}>調査項目名</span>}
-        maxLength={REPORT_SHORT_MAX}
-        value={draft.name}
-        onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
+    <>
+      <Dialog
+        open
+        onOpenChange={(open) => {
+          if (open) return;
+          // 直した値を確かめずに捨てないよう、変えたときだけ確かめる
+          if (changed) setAsking(true);
+          else onClose();
+        }}
+        size="sheet"
+        title={`${item.name.trim() || "調査項目"}：数値を直す`}
+        closeLabel="直さずに閉じる"
+        footer={
+          <Button variant="primary" size="sm" onClick={() => onCommit(draft)}>
+            ページに入れる
+          </Button>
+        }
+      >
+        <Input
+          label={<span className={labelStyle}>調査項目名</span>}
+          maxLength={REPORT_SHORT_MAX}
+          value={draft.name}
+          onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
+        />
+        <Input
+          fieldClassName={css({ mt: "3" })}
+          label={<span className={labelStyle}>単位</span>}
+          maxLength={REPORT_SHORT_MAX}
+          placeholder="例）g"
+          value={draft.unit}
+          onChange={(event) => setDraft((current) => ({ ...current, unit: event.target.value }))}
+        />
+        {draft.graphs.map((graph, graphIndex) => (
+          <div key={graph.id} className={graphBlock}>
+            <Input
+              label={
+                <span className={labelStyle}>
+                  {draft.graphs.length > 1 ? `グラフ${graphIndex + 1}の題` : "グラフの題"}
+                </span>
+              }
+              maxLength={REPORT_SHORT_MAX}
+              placeholder={draft.name || "例）収穫時の可販重量"}
+              value={graph.heading}
+              onChange={(event) => {
+                const heading = event.target.value;
+                updateGraph(graph.id, (current) => ({ ...current, heading }));
+              }}
+            />
+            <p className={note}>
+              区ごとの値は、資料のとおりに書きます（例：1126±139
+              B）。先頭の数値と±の誤差が棒になります。
+            </p>
+            {graph.rows.map((row) => {
+              const index = order.get(row.plotId ?? "") ?? -1;
+              const plot = plots[index];
+              const name = plot?.name.trim() || `区${index + 1}`;
+              return (
+                <Input
+                  key={row.id}
+                  fieldClassName={css({ mt: "3" })}
+                  label={
+                    <span className={cx(labelStyle, rowLabel)}>
+                      <span
+                        className={cx(
+                          dot,
+                          reportPlotColor({ series: layout.series(row.plotId, index) }),
+                        )}
+                        aria-hidden="true"
+                      />
+                      {name}
+                    </span>
+                  }
+                  maxLength={REPORT_SHORT_MAX}
+                  value={row.value}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    updateGraph(graph.id, (current) => ({
+                      ...current,
+                      rows: current.rows.map((item) =>
+                        item.id === row.id ? { ...item, value } : item,
+                      ),
+                    }));
+                  }}
+                />
+              );
+            })}
+          </div>
+        ))}
+      </Dialog>
+      <ConfirmDialog
+        open={asking}
+        onOpenChange={setAsking}
+        title="記入をやめますか？"
+        description="ここで変えた内容は反映されず、変更前のままになります。"
+        confirmLabel="記入をやめる"
+        cancelLabel="記入を続ける"
+        tone="primary"
+        onConfirm={() => {
+          setAsking(false);
+          onClose();
+        }}
       />
-      <Input
-        fieldClassName={css({ mt: "3" })}
-        label={<span className={labelStyle}>単位</span>}
-        maxLength={REPORT_SHORT_MAX}
-        placeholder="例）g"
-        value={draft.unit}
-        onChange={(event) => setDraft((current) => ({ ...current, unit: event.target.value }))}
-      />
-      {draft.graphs.map((graph, graphIndex) => (
-        <div key={graph.id} className={graphBlock}>
-          <Input
-            label={
-              <span className={labelStyle}>
-                {draft.graphs.length > 1 ? `グラフ${graphIndex + 1}の題` : "グラフの題"}
-              </span>
-            }
-            maxLength={REPORT_SHORT_MAX}
-            placeholder={draft.name || "例）収穫時の可販重量"}
-            value={graph.heading}
-            onChange={(event) => {
-              const heading = event.target.value;
-              updateGraph(graph.id, (current) => ({ ...current, heading }));
-            }}
-          />
-          <p className={note}>
-            区ごとの値は、資料のとおりに書きます（例：1126±139
-            B）。先頭の数値と±の誤差が棒になります。
-          </p>
-          {graph.rows.map((row) => {
-            const index = order.get(row.plotId ?? "") ?? -1;
-            const plot = plots[index];
-            const name = plot?.name.trim() || `区${index + 1}`;
-            return (
-              <Input
-                key={row.id}
-                fieldClassName={css({ mt: "3" })}
-                label={
-                  <span className={cx(labelStyle, rowLabel)}>
-                    <span
-                      className={cx(
-                        dot,
-                        reportPlotColor({ series: layout.series(row.plotId, index) }),
-                      )}
-                      aria-hidden="true"
-                    />
-                    {name}
-                  </span>
-                }
-                maxLength={REPORT_SHORT_MAX}
-                value={row.value}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  updateGraph(graph.id, (current) => ({
-                    ...current,
-                    rows: current.rows.map((item) =>
-                      item.id === row.id ? { ...item, value } : item,
-                    ),
-                  }));
-                }}
-              />
-            );
-          })}
-        </div>
-      ))}
-    </Dialog>
+    </>
   );
 }
