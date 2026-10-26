@@ -97,6 +97,8 @@ pnpm lint && pnpm format:check && pnpm exec tsc --noEmit && pnpm exec vitest run
 
 PRの新しいcommitが届いたら古いCIを止める。mainの実行中のDB移行とデプロイは中断せず、待機分を最新の1件にまとめる。PreviewとDB cleanupは既存の直列実行を維持する。
 
+PreviewはベースがmainのPRごとに、PRのcommitをVercelのプレビューへ配備する。gh stackで積み重ねたPRでは、GitHubがmain向けのworkflowをスタックの全PRで動かす。PR自身のベースがmainでない上のPRでは、Previewのジョブをskipする。下のPRがmergeされ、上のPRがmainへrebaseされた後のpushでプレビューができる。pushが無いままベースがmainに変わった場合は、Actionsの **Preview** から **Run workflow** を選び、PR番号を指定する。ベースがmainでないPRを指定すると、理由を表示して止まる。
+
 Git hookは`git push --no-verify`、未登録のclone、GitHub上の編集やmergeでは実行されない。サーバー側の必須チェックにはならないため、ブラウザ検査の実行結果をPRに残す。GitHubの必須チェックに旧Storybook・E2Eジョブを登録している場合は、削除したチェック名がmergeを妨げないよう設定を更新する。
 
 ## 手元で全件検査する
