@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# このDBはrunner内だけで使うため、新しいコミットが来たら古い検査を止める。
+concurrency:
+  group: farmille-migration-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   migration:
     name: Reset local Supabase database
@@ -20,7 +25,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: .node-version
 
       - name: Start local Supabase
         run: npx --yes supabase@latest start

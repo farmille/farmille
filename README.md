@@ -8,10 +8,12 @@ Farmille は、BS資材（生物・微生物農業資材）を農家が評価し
 
 ## セットアップ
 
-Node.js 24 と pnpm 11 を使用します。リポジトリのルートで依存関係をインストールし、環境変数のひな型をコピーします。
+Node.js 24.22.1 以降の 24 系と pnpm 11 を使用します。開発環境と CI のバージョンは `.node-version` に揃えます。リポジトリのルートで依存関係をインストールし、環境変数のひな型をコピーします。
 
 ```bash
 pnpm install
+pnpm exec playwright install chromium
+pnpm setup:hooks
 cp .env.example .env.local
 ```
 
@@ -23,11 +25,13 @@ cp .env.example .env.local
 pnpm dev
 ```
 
+push 前に Storybook と E2E の検査が実行されます。検証用 Supabase の準備と、別 PC・worktree への設定は [CI と push 前の検査](docs/ops/ci.md) を参照してください。
+
 バックエンド用の別プロセスはありません。画面は `src/app/`、ドメインロジックと Supabase アクセスは `src/server/` にあります。
 
 ## スクリプト
 
-コマンドの一覧は `package.json` の `scripts` にあります。検証の手順は [`AGENTS.md`](AGENTS.md) の「検証」を参照してください。
+コマンドの一覧は `package.json` の `scripts` にあります。品質検査とpush前の手順は[CIとpush前の検査](docs/ops/ci.md)、環境準備と実画面の確認は[ローカル検証手順](docs/ops/local-verification.md)を参照してください。
 
 `pnpm install` の完了後に Panda CSS のコード生成が自動で実行されます。生成物は `styled-system/` に出力され、Git の管理対象には含まれません。`gen:types` の生成物は format と lint の対象外です。
 

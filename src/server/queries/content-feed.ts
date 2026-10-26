@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
+import { pickReportCover } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
@@ -59,7 +60,7 @@ type ReportFeedRow = Pick<
   author: Pick<PublicProfileRow, "handle"> | null;
   crop: Pick<CropRow, "name"> | null;
   material: { name: string } | null;
-  media: Pick<UsageReportMediaRow, "url" | "media_type" | "sort_order">[];
+  media: Pick<UsageReportMediaRow, "id" | "url" | "media_type" | "sort_order" | "measurement_id">[];
 };
 
 const FEED_FETCH_LIMIT = 1_000;
@@ -198,9 +199,11 @@ async function fetchPublishedReports(
         name
       ),
       media:usage_report_media (
+        id,
         url,
         media_type,
-        sort_order
+        sort_order,
+        measurement_id
       )
     `,
     )
@@ -259,9 +262,7 @@ function toReportItem(
     return fail("internal");
   }
 
-  const cover = row.media
-    .filter((m) => m.media_type === "photo")
-    .toSorted((a, b) => a.sort_order - b.sort_order)[0];
+  const cover = pickReportCover(row.media);
 
   return succeed({
     kind: "report",
@@ -271,7 +272,7 @@ function toReportItem(
     helpfulCount,
     viewCount,
     coverUrl:
-      cover === undefined
+      cover === null
         ? null
         : row.form_version === 2
           ? reportMediaUrl(cover.url, row.author_user_id)

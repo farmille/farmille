@@ -9,8 +9,10 @@ export const structuredReport: UsageReportInput = {
   expectedUpdatedAt: null,
   materialId: id(2),
   cropId: id(3),
-  variety: "アイコ",
   varietyUnknown: false,
+  varieties: [{ id: id(4), name: "アイコ" }],
+  comparedMaterials: [],
+  commonPlotDescription: "",
   observedChange:
     "使用区は午後の萎れが軽く、梅雨明けの高温でも株の勢いが落ちにくかった。\n収穫終盤まで葉色が保たれた。",
   purposeTags: ["耐暑性改善", "しおれ軽減"],
@@ -22,15 +24,33 @@ export const structuredReport: UsageReportInput = {
   timingStages: [1, 2],
   timingNote: "定植後1週間ごとに3回",
   plots: [
-    { id: id(11), name: "対照区", scope: "10株", description: "資材なし", steps: [] },
+    {
+      id: id(11),
+      name: "対照区",
+      scope: "10株",
+      description: "資材なし",
+      varietyId: id(4),
+      treatment: { kind: "untreated" },
+      steps: [],
+    },
     {
       id: id(12),
       name: "使用区",
       scope: "10株",
       description: "1,000倍で散布\n2回目以降は500倍",
+      varietyId: id(4),
+      treatment: { kind: "posted" },
       steps: [{ id: id(13), method: "spray", targets: ["葉"], otherText: "" }],
     },
-    { id: id(14), name: "倍量区", scope: "", description: "", steps: [] },
+    {
+      id: id(14),
+      name: "倍量区",
+      scope: "",
+      description: "",
+      varietyId: id(4),
+      treatment: { kind: "posted" },
+      steps: [],
+    },
   ],
   measurements: [
     {
@@ -52,6 +72,14 @@ export const structuredReport: UsageReportInput = {
       ],
     },
     {
+      id: id(27),
+      kind: "image",
+      name: "果実の断面",
+      unit: "",
+      body: "使用区は果肉が厚かった。",
+      graphs: [],
+    },
+    {
       id: id(26),
       kind: "text",
       name: "食味",
@@ -70,6 +98,14 @@ export const structuredReport: UsageReportInput = {
     },
     { id: id(32), url: photo, mediaType: "photo", section: "plots", caption: "対照区" },
     { id: id(33), url: photo, mediaType: "photo", section: "plots", caption: "使用区" },
+    {
+      id: id(34),
+      url: photo,
+      mediaType: "photo",
+      section: "measurements",
+      caption: "図1 果実の断面",
+      measurementId: id(27),
+    },
   ],
   documents: [
     { id: id(41), path: "docs/a.pdf", name: "収量調査の記録.pdf" },
@@ -79,6 +115,7 @@ export const structuredReport: UsageReportInput = {
   methodDetailsAck: true,
   documentsAck: true,
   guidelineAck: true,
+  pdfValuesChecked: false,
 };
 
 export const legacyReport: PublishedUsageReportDetail = {

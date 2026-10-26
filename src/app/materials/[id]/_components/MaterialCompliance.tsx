@@ -32,7 +32,6 @@ const disclaimerStyle = css({
   color: "text.subtle",
 });
 const noticeHeadingStyle = css({ fontWeight: "bold", color: "text.muted" });
-const listStyle = css({ listStyle: "none" });
 // 製品情報の直後に寄せる（main の gap 8 から詰めて、間を 3 にする）
 const pointerStyle = css({ mt: "-5", textStyle: "supporting", color: "text.subtle" });
 const noticeLinkStyle = css({
@@ -87,31 +86,24 @@ export function MaterialSpecDisclaimer() {
       <h2 id="material-notice-heading" className={noticeHeadingStyle}>
         掲載情報についてのご案内
       </h2>
-      <div className={followUpStyle}>掲載している商品情報</div>
-      <ul className={listStyle}>
-        <li>・農薬・肥料・土壌改良資材等に関する登録・届出・表示情報</li>
-        <li>
-          ・期待効果・資材ジャンル（Farmilleが独自に、バイオスティミュラント資材として整理・解釈）
-        </li>
-        <li>
-          ・製品説明・主な成分・対象作物・施用方法・技術・作用機作・関係会社・その他の製品情報
-        </li>
-      </ul>
-      <div>
-        は、各事業者から提供を受けた情報、または特定時点のウェブサイト等での公開情報をもとに、Farmilleが調査・分類しております。そのため、誤記や最新でない内容を含む場合があります。大変申し訳ありません。
+      <div className={followUpStyle}>
+        掲載している商品情報は、各事業者から提供を受けた情報、または特定時点でウェブサイト等に公開されていた情報をもとに、Farmilleが調査・整理したものです。そのため、誤りや最新でない情報が含まれる場合があります。
+      </div>
+      <div className={followUpStyle}>
+        商品情報に記載する効果に関する情報は、Farmilleがバイオスティミュラントの観点から整理したものです。農薬・肥料・土壌改良資材等としての効果や、法令上認められた効能・効果を示すものではありません。
       </div>
       <div className={followUpStyle}>
         お気づきの点がありましたら、
         <ContactEmail />
-        までご連絡ください。内容を確認させていただきます。
+        までご連絡ください。内容を確認いたします。
       </div>
       <div className={followUpStyle}>
-        ※メーカーご担当者様へ：掲載内容のお問い合わせ、資材ページの非公開（終売・廃盤などの表示を含みます）のご依頼は、
+        ※メーカーご担当者様へ：掲載内容に関するお問い合わせ、資材ページの非公開（終売・廃盤などの表示を含みます）のご依頼は、
         <ContactEmail />
-        で承ります。確認のうえ、迅速な対応に努めます。
+        で承ります。また、企業会員登録も同じメールアドレスからお申し込みいただけます。確認のうえ、対応いたします。
       </div>
       <div className={followUpStyle}>
-        実際の効果は、作物・気象・土壌などの条件によって異なる場合があります。商品の使用にあたっては、当該製品についてメーカー公式サイトなどの公式情報を必ずご確認のうえ、製品の表示・使用条件・使用上の注意など（農薬・肥料・土壌改良資材等として法令上の規制がある資材は、その法令に基づく表示・使用条件を含みます）に従ってご使用ください。
+        実際の効果は、作物・気象・土壌などの条件によって異なります。商品の使用にあたっては、メーカー公式サイトなどの公式情報をご確認のうえ、製品の表示・使用条件・使用上の注意に従ってください。農薬・肥料・土壌改良資材等として法令上の規制がある資材については、法令に基づく表示・使用条件もご確認ください。
       </div>
     </section>
   );
@@ -131,7 +123,7 @@ export function PostsCompliance() {
 export function ArchivedNotice() {
   return (
     <div className={noticeRecipe({ spacing: "near" })}>
-      この資材は掲載を終了しています。過去の情報と投稿は参照できますが、新しい感想口コミや実証詳細レポートは投稿できません。
+      この資材は非公開です。過去の情報と投稿は参照できますが、新しい感想口コミや実証詳細レポートは投稿できません。
     </div>
   );
 }

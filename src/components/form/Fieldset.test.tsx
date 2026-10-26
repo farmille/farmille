@@ -44,22 +44,22 @@ describe("Fieldset", () => {
 
   it("name の無い組にエラーを出し入れしても、中の入力は作り直されない", () => {
     const { rerender } = render(
-      <Fieldset legend="使用作物">
+      <Fieldset legend="使用対象作目">
         <Input defaultValue="トマト" hideLabel label="作物名" />
       </Fieldset>,
     );
     const input = screen.getByRole("textbox", { name: "作物名" });
 
     rerender(
-      <Fieldset error="使用作物を選んでください" legend="使用作物">
+      <Fieldset error="使用対象作目を選んでください" legend="使用対象作目">
         <Input defaultValue="トマト" hideLabel label="作物名" />
       </Fieldset>,
     );
 
     expect(screen.getByRole("textbox", { name: "作物名" })).toBe(input);
-    expect(screen.getByRole("alert")).toHaveTextContent("使用作物を選んでください");
-    expect(screen.getByRole("group", { name: "使用作物" })).toHaveAccessibleDescription(
-      "使用作物を選んでください",
+    expect(screen.getByRole("alert")).toHaveTextContent("使用対象作目を選んでください");
+    expect(screen.getByRole("group", { name: "使用対象作目" })).toHaveAccessibleDescription(
+      "使用対象作目を選んでください",
     );
   });
 });

@@ -1,63 +1,21 @@
 import { Fragment } from "react";
 
-import { reportPlotColor } from "@/components/ReportPlotColor";
+import { ReportBars, reportBarGroups, ReportGraphNote } from "@/components/ReportBars";
+import { ReportPlotList } from "@/components/ReportPlotList";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import {
   REPORT_SECTIONS,
-  groupReportMeasurements,
-  reportGraphRows,
+  reportMeasurementGroups,
+  reportSectionHeading,
+  type ReportSection,
   type UsageReportInput,
 } from "@/lib/usage-report";
+import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
 
-import { css, cx } from "../../../../styled-system/css";
+import { css } from "../../../../styled-system/css";
 import { ReadingHeading, ReadingProse } from "../../articles/_components/Reading";
-import { ReportBars, ReportGraphNote } from "./ReportBars";
-import { ReportFigures } from "./ReportFigures";
-
-type Section = (typeof REPORT_SECTIONS)[number]["value"];
-
-const plotStyles = {
-  list: css({ display: "flex", flexDirection: "column", gap: "2.5", mt: "2.5" }),
-  row: css({
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "2.5",
-    px: "3",
-    py: "2.5",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.default",
-    borderRadius: "input",
-    bg: "surface.card",
-  }),
-  dot: css({ flexShrink: "0", w: "3", h: "3", mt: "1", borderRadius: "pill", bg: "currentColor" }),
-  name: css({
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    columnGap: "2.5",
-    rowGap: "1.5",
-    textStyle: "body",
-  }),
-  scope: css({
-    px: "2",
-    py: "0.5",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "border.default",
-    borderRadius: "pill",
-    bg: "surface.page",
-    fontSize: "xs",
-    color: "text.muted",
-  }),
-  description: css({
-    mt: "1",
-    textStyle: "prose",
-    color: "text.muted",
-    whiteSpace: "pre-wrap",
-  }),
-};
+import { ReportFigures, ReportItemImages } from "./ReportFigures";
 
 const documentList = css({
   m: "0",
@@ -70,37 +28,37 @@ const documentList = css({
 
 export function StructuredReportArticle({
   input,
+  materialName,
   cropLabel,
   documentUrls,
 }: {
   input: UsageReportInput;
+  /** 投稿した資材の名前。区の資材の表示に使う。 */
+  materialName: string;
   cropLabel: string;
   documentUrls: { id: string; url: string }[];
 }) {
-  const heading = (section: Section, fallback: string) =>
-    input.headings.find((item) => item.section === section)?.title || fallback;
-  const mediaOf = (section: Section) => input.media.filter((media) => media.section === section);
+  const layout = reportPlotLayout(input, materialName);
+  // 調査項目に差し込んだ画像は項目ごとに出し、節の最後には調査項目に属さない旧形式の写真だけを出す
+  const mediaOf = (section: ReportSection) =>
+    input.media.filter((media) => media.section === section && !media.measurementId);
   const prefecture = PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name;
   const stages = input.timingStages.map((stage) => APPLICATION_TIMINGS[stage]).join("、");
   const conditionLines = [
     prefecture
       ? `地域：${prefecture}${input.showCity && input.city.trim() ? input.city.trim() : ""}`
       : null,
-    `使用作物：${cropLabel}`,
+    `使用対象作目：${cropLabel}`,
     input.cultivationEnvironment.trim() ? `栽培環境：${input.cultivationEnvironment.trim()}` : null,
     stages ? `施用時期：${stages}` : null,
     input.timingNote.trim() || null,
   ].filter((line): line is string => line !== null);
-  const numericGroups = groupReportMeasurements(input.measurements);
-  const textMeasurements = input.measurements.filter(
-    (measurement) => measurement.kind === "text" && measurement.body.trim(),
-  );
 
   return (
     <>
-      {REPORT_SECTIONS.map(({ value: section, title }) => {
+      {REPORT_SECTIONS.map(({ value: section }) => {
         const media = mediaOf(section);
-        const h = heading(section, title);
+        const h = reportSectionHeading(input, section);
         switch (section) {
           case "results":
             return (
@@ -134,64 +92,60 @@ export function StructuredReportArticle({
             return (
               <Fragment key={section}>
                 <ReadingHeading>{h}</ReadingHeading>
-                <div className={plotStyles.list}>
-                  {input.plots.map((plot, index) => (
-                    <div key={plot.id} className={plotStyles.row}>
-                      <span
-                        className={cx(plotStyles.dot, reportPlotColor(index))}
-                        aria-hidden="true"
-                      />
-                      <div className={css({ minW: "0", flex: "1" })}>
-                        <div className={plotStyles.name}>
-                          <b>{plot.name || "区名未入力"}</b>
-                          {plot.scope ? (
-                            <span className={plotStyles.scope}>{plot.scope}</span>
-                          ) : null}
-                        </div>
-                        <div className={plotStyles.description}>{plot.description || "−"}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <ReportPlotList layout={layout} commonDescription={input.commonPlotDescription} />
                 <ReportFigures media={media} />
               </Fragment>
             );
           case "measurements":
             return (
               <Fragment key={section}>
-                {numericGroups.map((measurement) => {
-                  const graphs = measurement.graphs
-                    .map((graph) => ({ graph, rows: reportGraphRows(graph, input.plots) }))
-                    .filter(({ rows }) => rows.length > 0);
+                {reportMeasurementGroups(input.measurements).map((group) => {
+                  const [first] = group;
+                  if (first === undefined || (first.kind === "text" && !first.body.trim()))
+                    return null;
                   return (
-                    <Fragment key={measurement.id}>
+                    <Fragment key={first.id}>
                       <ReadingHeading>
-                        {h}：{measurement.name || "調査項目未入力"}
+                        {h}：{first.name || "調査項目未入力"}
                       </ReadingHeading>
-                      {graphs.map(({ graph, rows }) => (
-                        <ReportBars
-                          key={graph.id}
-                          title={graph.heading || measurement.name}
-                          unit={measurement.unit}
-                          rows={rows}
-                        />
-                      ))}
-                      {graphs.length > 0 ? (
-                        <ReportGraphNote>
-                          グラフは投稿されたデータからFarmilleが自動生成しています
-                        </ReportGraphNote>
-                      ) : null}
+                      {group.map((measurement) => {
+                        const graphs = measurement.graphs
+                          .map((graph) => ({
+                            graph,
+                            groups: reportBarGroups(graphSections(graph, input.plots, layout)),
+                          }))
+                          .filter(({ groups }) => groups.length > 0);
+                        return (
+                          <Fragment key={measurement.id}>
+                            <ReportItemImages
+                              media={input.media.filter(
+                                (media) => media.measurementId === measurement.id,
+                              )}
+                              alt={measurement.name}
+                            />
+                            {graphs.map(({ graph, groups }) => (
+                              <ReportBars
+                                key={graph.id}
+                                title={graph.heading || measurement.name}
+                                unit={measurement.unit}
+                                groups={groups}
+                                legend={layout.legend}
+                              />
+                            ))}
+                            {graphs.length > 0 ? (
+                              <ReportGraphNote>
+                                グラフは投稿されたデータからFarmilleが自動生成しています
+                              </ReportGraphNote>
+                            ) : null}
+                            {measurement.body.trim() ? (
+                              <ReadingProse text={measurement.body} />
+                            ) : null}
+                          </Fragment>
+                        );
+                      })}
                     </Fragment>
                   );
                 })}
-                {textMeasurements.map((measurement) => (
-                  <Fragment key={measurement.id}>
-                    <ReadingHeading>
-                      {h}：{measurement.name}
-                    </ReadingHeading>
-                    <ReadingProse text={measurement.body} />
-                  </Fragment>
-                ))}
                 <ReportFigures media={media} />
               </Fragment>
             );

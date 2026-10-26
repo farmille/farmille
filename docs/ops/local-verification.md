@@ -13,6 +13,7 @@ pnpm setup:worktree
 - 本体チェックアウトの `.env.local` を worktree 直下へ写す。worktree に `.env.local` が既にあれば上書きしない。Claude の起動ラッパーで立てた dev サーバーは worktree の外を読めないため、写しが要る
 - `src/env.ts` の必須値（`pnpm build` が要る `NEXT_PUBLIC_SITE_URL` を含む）がそろっているかを確かめ、足りなければ止まる
 - `pnpm install --frozen-lockfile`（Panda の codegen を含む）と Playwright の Chromium の導入
+- `pnpm setup:hooks` で push 前の検査を登録する
 - 最後に `pnpm check:migrations` を流す
 
 `pnpm check:migrations` は、`NEXT_PUBLIC_SUPABASE_URL` のポートを公開している Supabase のコンテナを Docker から探し、適用済みの migration と `supabase/migrations/` を突き合わせる。接続先は環境変数を優先し、無ければ `.env.local` の値を使う。DB には何も適用しない。
@@ -21,8 +22,13 @@ pnpm setup:worktree
 - このチェックアウトに無い migration が DB にあるとき（別の worktree で適用したもの）も非0で終わる。この状態では `migration up` が履歴の不一致で止まるので、適用のコマンドは出さない。そのファイルが main にあれば worktree を main に追随させ、無ければ DB の扱いをユーザーと決める
 
 - ホームが `container_type_id` 不在などの「internal」で落ちたら、まずこれを流す。既存のボリュームから起動した Supabase には、後から足した migration が入らない
-- ローカルの DB は worktree 間で共有しているので、適用はユーザーの確認を取ってから行う
+- ローカルの DB は worktree 間で共有している。適用は確認を取らずに行ってよい
+- 別の worktree にしか無い migration を当てると、他の worktree の `pnpm check:migrations` はその版を「このチェックアウトに無い」として止まる。その migration を入れたブランチが main に入れば、main に追随すると解ける。急ぐ場合は、そのブランチを取り込んで確かめる。E2E は DB を作り直すので、この状態でも止まらない
 - 手元の Supabase が `127.0.0.1:58321`／`58322` のような別ポート（colima VM への ssh 転送）で動いていても、コマンドが出す `--db-url` をそのまま使える
+
+### push 前の検査
+
+既存の clone では `pnpm setup:hooks` を1回実行する。以後、push 前に必要な Storybook・E2E 検査が走る。全件を手動で確かめるときは `pnpm test:browser:local` を使う。初回設定と検査対象の決め方は [CI と push 前の検査](ci.md) を参照する。
 
 ### E2E
 
@@ -33,12 +39,14 @@ pnpm test:e2e:local
 `playwright.config.ts` の決まりで、E2E は `127.0.0.1:54321` の Supabase（`supabase/config.toml` で起動したもの）にだけ流せる。global-setup が E2E 用のデータを消して運営アカウントを作るので、ほかの DB には流さない。`pnpm test:e2e:local`（`tools/dev/e2e-local.sh`）は次を順に行い、途中で止まれば理由と手順を出して非0で終わる。
 
 - `supabase status` で 54321 のスタックが起動しているかを確かめる
-- CI の E2E ジョブ（`.github/workflows/ci.yml`）と同じ環境変数を export する。`.env.local` が `58321` など別のスタックを指していても、export した値が優先される
-- `pnpm check:migrations` で、export した接続先の migration がこのチェックアウトと合っているかを確かめる
+- 手動の Browser checks（`.github/workflows/browser-checks.yml`）でも使う環境変数を export する。`.env.local` が `58321` など別のスタックを指していても、export した値が優先される
+- `supabase db reset` で、54321 の DB をこのチェックアウトの migration と `supabase/seed.sql` で作り直し、`pnpm check:migrations` で合っていることを確かめる
 - 資材マスタが無ければ `tools/migration/materials-v2-seed.sql` を入れる
 - `pnpm exec playwright test` を流す。引数はそのまま渡す（例：`pnpm test:e2e:local e2e/04-search.spec.ts`）
 
-Supabase の起動・停止と migration の適用は、スクリプトの中では行わない。DB のボリューム `supabase_db_farmille` は worktree 間で共有しているので、ユーザーの確認を取ってから、スクリプトが出すコマンドで行う。既存のボリュームから起動したスタックには、後から足した migration が入らない。
+Supabase の起動・停止は、スクリプトの中では行わない。起動は、スクリプトが出すコマンドで、確認を取らずに行ってよい。DB のボリューム `supabase_db_farmille` は worktree 間で共有していることに注意する。
+
+54321 の DB は E2E 専用として扱い、E2E のたびに作り直す。別のブランチの migration が当たっていても E2E は止まらないが、手で入れたデータやデモアカウントのパスワードは消える。開発中の画面で 54321 を使っているときは、E2E のあとに `pnpm check:migrations` と「2. データを入れ直したいとき」で戻す。
 
 ## 1. 起動
 
@@ -50,7 +58,7 @@ pnpm dev
 
 - `.env.local` の `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`・`SUPABASE_SECRET_KEY` は、`npx supabase status` の `API_URL`・`ANON_KEY`・`SERVICE_ROLE_KEY` に合わせる。必須の変数は `src/env.ts` が起動時に検証する。`pnpm build` も `NEXT_PUBLIC_SITE_URL` が無いと失敗する
 - worktree（`.claude/worktrees/` 配下）では、worktree 直下に `.env.local` を置く。Claude の起動ラッパーは worktree の外のファイルを読めない
-- ブラウザで http://localhost:3007 。**スマホ幅（375px）で見るのが正**
+- ブラウザで http://localhost:3007 。
 
 ## 2. データを入れ直したいとき
 

@@ -81,7 +81,7 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
   const newPhotos = parseNewPhotos(formData.get("newPhotos"));
 
   if (!cropIdsResult.success) {
-    fieldErrors.cropIds = "作目を1つ選んでください。";
+    fieldErrors.cropIds = "使用対象作目を1つ選んでください。";
   }
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     fieldErrors.rating = "星を1〜5から選択してください。";

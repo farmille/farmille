@@ -39,6 +39,16 @@ const errorStatus = {
   already_reported: 409,
   login_id_taken: 409,
   invalid_invite_code: 400,
+  pdf_reading_limit: 429,
+  captcha_failed: 400,
+  pdf_invalid: 400,
+  pdf_too_large: 413,
+  pdf_too_many_pages: 422,
+  pdf_reading_failed: 502,
+  pdf_reading_no_match: 422,
+  pdf_reading_incomplete: 422,
+  pdf_reading_material_changed: 409,
+  pdf_reading_unrecorded: 500,
 } satisfies Record<ErrorCode, number>;
 
 export function succeed<T>(data: T): Success<T> {

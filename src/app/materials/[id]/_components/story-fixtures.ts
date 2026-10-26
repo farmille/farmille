@@ -1,5 +1,5 @@
 import type { MaterialPageContent } from "@/lib/material-page-editor";
-import type { ReportChartPreview } from "@/lib/usage-report";
+import type { ReportChartPreview } from "@/lib/usage-report-plots";
 import type {
   PublishedUsageReport,
   UsageReportCardDetail,
@@ -281,8 +281,8 @@ export const storyReportChart = {
   title: "可販果収量",
   unit: "t/10a",
   rows: [
-    { id: "row-1", label: "無処理区", valueText: "18.2", value: 18.2, error: null, colorIndex: 0 },
-    { id: "row-2", label: "処理区", valueText: "20.1±0.4", value: 20.1, error: 0.4, colorIndex: 1 },
+    { id: "row-1", label: "無処理区", valueText: "18.2", value: 18.2, error: null, series: "1" },
+    { id: "row-2", label: "処理区", valueText: "20.1±0.4", value: 20.1, error: 0.4, series: "2" },
   ],
   hiddenRowCount: 0,
 } satisfies ReportChartPreview;

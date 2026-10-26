@@ -38,6 +38,7 @@
     "styled-system/**/*.ts",
     "storybook-tests/**/*.ts",
     "tools/dev/**/*.ts",
+    "tools/ci/**/*.ts",
     "tools/catalog/**/*.ts"
   ],
   "exclude": ["node_modules", "docs", "output", "supabase", "tools/migration", "tools/oxlint"]

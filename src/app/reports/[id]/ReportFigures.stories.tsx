@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { readingFrame } from "../../articles/_components/story-frame";
 
-import { ReportFigures } from "./ReportFigures";
+import { ReportFigures, ReportItemImages } from "./ReportFigures";
 
 const photo = (n: number, caption: string | null) => ({
   id: `p${n}`,
@@ -23,4 +23,10 @@ export const Single: Story = {};
 export const Pair: Story = { args: { media: [photo(1, "対照区"), photo(2, "使用区")] } };
 export const GridOfThree: Story = {
   args: { media: [photo(1, "対照区"), photo(2, null), photo(3, "使用区の葉の様子")], grid: true },
+};
+/** 調査項目に差し込んだ資料のグラフ・表は、切り取らずに全体を出す。 */
+export const ItemImages: Story = {
+  render: () => (
+    <ReportItemImages media={[photo(1, "図1 可販果収量"), photo(2, null)]} alt="可販果収量" />
+  ),
 };

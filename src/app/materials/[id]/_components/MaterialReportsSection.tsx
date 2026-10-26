@@ -133,7 +133,7 @@ export function MaterialReportsView({
       ) : (
         <EmptyCard
           title="公開中の実証詳細レポートはまだありません"
-          description="投稿された実証詳細レポートは、編集部の確認後に公開されます。"
+          description="投稿された実証詳細レポートは、運営の確認後に公開されます。"
         />
       )}
       {!signedIn && reports.items.length > 0 ? (

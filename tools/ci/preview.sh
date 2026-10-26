@@ -11,7 +11,12 @@ alias="farmille-preview-pr-$PR_NUMBER-farmille.vercel.app"
 sb() { supabase "$@"; }
 pr() { gh api "repos/$repo/pulls/$PR_NUMBER"; }
 require_open() {
-  pr | jq -e --arg repo "$repo" '.state == "open" and .head.repo.full_name == $repo and .base.ref == "main"' >/dev/null
+  local item
+  item=$(pr)
+  jq -e --arg repo "$repo" '.state == "open" and .head.repo.full_name == $repo' <<< "$item" >/dev/null ||
+    { echo "::error::PR #$PR_NUMBER must be open and come from $repo."; return 1; }
+  jq -e '.base.ref == "main"' <<< "$item" >/dev/null ||
+    { echo "::error::PR #$PR_NUMBER targets $(jq -r .base.ref <<< "$item"), not main. A stacked PR gets a preview after the PRs below it merge."; return 1; }
 }
 branch() {
   curl --fail --silent --show-error -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \

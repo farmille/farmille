@@ -43,6 +43,8 @@ export const getStructuredReportFormData = fn<
       materialId: "00000000-0000-4000-8000-000000000101",
       cropId: "00000000-0000-4000-8000-000000000304",
     },
+    pdfValuesCheckRequired: false,
+    pdfReadingMarks: [],
     submitted: [],
   },
 })).mockName("getStructuredReportFormData");

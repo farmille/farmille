@@ -17,7 +17,10 @@ export async function sellerPasswordResetAction(
     email: form.get("email"),
   });
   if (!parsed.success)
-    return { status: "error", message: "ログインIDと連絡先メールアドレスを確認してください。" };
+    return {
+      status: "error",
+      message: "Farmille企業会員IDと連絡先メールアドレスを確認してください。",
+    };
   const result = await requestSellerPasswordReset(parsed.output);
   if (!result.ok) return { status: "error", message: errorMessageJa[result.error] };
   return {

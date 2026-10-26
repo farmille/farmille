@@ -1,3 +1,4 @@
+import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
 import { getSessionUser } from "@/server/auth";
 
 import { AppBar, type AppBarAccount, type AppBarProps } from "./AppBar";
@@ -7,7 +8,11 @@ import { ViewerAvatar } from "./ViewerAvatar";
 export async function getViewerAccount(): Promise<AppBarAccount> {
   const session = await getSessionUser();
   if (session === null) return { kind: "guest" };
-  return { kind: "member", avatar: <ViewerAvatar session={session} /> };
+  return {
+    kind: "member",
+    avatar: <ViewerAvatar session={session} />,
+    canPost: canUseGeneralFeatures(session.accountType),
+  };
 }
 
 /**

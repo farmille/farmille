@@ -19,7 +19,7 @@ const meta = {
 } satisfies Meta<typeof Page>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-/** この画面で開くのは、旧フォームD（終売・非表示）の受付票だけ。 */
+/** この画面で開くのは、旧フォームD（終売・非公開）の受付票だけ。 */
 export const Default: Story = {
   beforeEach: () => {
     mocked(readCompanyApplication).mockResolvedValue(removalReceipt);

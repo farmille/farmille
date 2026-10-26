@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
   agentRules: false,
   // jposta は同梱チャンクを相対 import する。バンドルするとその経路が壊れる。
-  serverExternalPackages: ["jposta"],
+  // pdfjs-dist もサーバーでは worker（pdf.worker.mjs）を相対 import するので、バンドルしない。
+  serverExternalPackages: ["jposta", "pdfjs-dist"],
   // アプリ層セキュリティヘッダ (SEC-02)。strict CSP は Sentry/GA/inline を壊しうるため
   // v1 では nosniff / clickjacking / HSTS / referrer / permissions に限定。CSP は別途。
   async headers() {

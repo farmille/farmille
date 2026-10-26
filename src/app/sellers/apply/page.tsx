@@ -40,7 +40,7 @@ export default async function SellerApplyPage({ searchParams }: SellerApplyPageP
     >
       <h1 className={css({ srOnly: true })}>企業会員登録の申請</h1>
       <p className={leadStyle}>
-        農業資材メーカー専用の企業会員アカウントです。内容を確認し、ログインIDとパスワード設定のご案内をメールでお送りします。ログイン後、掲載・オーナー権限の申請フォームから対象資材と確認資料をご提出ください。運営が確認した資材ごとに編集権をお渡しします。申請・掲載・編集は無料です。
+        農業資材メーカー専用の企業会員アカウントです。内容を確認し、Farmille企業会員IDとパスワード設定のご案内をメールでお送りします。ログイン後、貴社の資材について資材オーナー権限を申請いただけます。運営が確認した資材ごとに資材オーナー権限をお渡しし、製品情報の編集が可能になります。申請・掲載・編集は無料です。
       </p>
       <SellerApplyForm />
     </FormPageShell>

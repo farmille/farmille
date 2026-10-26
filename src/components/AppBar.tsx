@@ -4,13 +4,15 @@ import { cva, css, cx } from "../../styled-system/css";
 import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
 import { BrandMark } from "@/components/BrandMark";
 import { Icon } from "@/components/Icon";
+import { MobileSiteMenu } from "@/components/MobileSiteMenu";
 import { PreparationNotice } from "@/components/PreparationNotice";
+import { TextLink } from "@/components/TextLink";
 
 const mobileAppBar = css({
+  bg: "surface.paper/88",
   position: "sticky",
   top: "0",
   zIndex: "appBar",
-  bg: "panel/88",
   backdropFilter: "[blur({blurs.bar})]",
   borderBottomWidth: "1px",
   borderBottomStyle: "solid",
@@ -55,6 +57,20 @@ const logoText = css({
   color: "text.default",
 });
 
+/** SP の公開画面で、サイトヘッダーの下に置く「戻る」と画面名の行。上に固定せず、本文と一緒に流れる。 */
+const mobileContext = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2.5",
+  px: "3.5",
+  py: "1.5",
+  bg: "surface.panel",
+  borderBottomWidth: "1px",
+  borderBottomStyle: "solid",
+  borderBottomColor: "border.default",
+  tab: { display: "none" },
+});
+
 const mobileTitle = css({
   fontSize: "lg",
   fontWeight: "bold",
@@ -73,7 +89,7 @@ const desktopHeader = css({
     position: "sticky",
     top: "0",
     zIndex: "header",
-    bg: "card/94",
+    bg: "surface.paper/94",
     backdropFilter: "[blur(12px)]",
     borderBottomWidth: "1px",
     borderBottomStyle: "solid",
@@ -83,13 +99,12 @@ const desktopHeader = css({
 
 const desktopHeaderInner = css({
   w: "full",
-  maxW: "content.wide",
-  mx: "auto",
   minH: "16",
-  px: "5",
+  px: "6",
   display: "flex",
   alignItems: "center",
   gap: "3",
+  pc: { px: "10" },
 });
 
 const desktopBrand = css({
@@ -114,12 +129,51 @@ const desktopNav = css({
   ml: "auto",
 });
 
+/** 公開画面の主な行き先。PC のヘッダーには文字だけを並べ、SP ではメニューに同じ順で並べる。 */
+const siteMenu = [
+  { label: "資材をさがす", href: "/search", active: "search" },
+  { label: "記事", href: "/articles", active: "articles" },
+  { label: "投稿する", href: "/post", active: "post" },
+  { label: "メーカーの方へ", href: "/sellers", active: null },
+] as const satisfies readonly { label: string; href: string; active: AppBarActive | null }[];
+
+/** 投稿は一般向けの機能なので、企業会員には「投稿する」を出さない（BottomNav と同じ条件）。 */
+function cannotPost(account?: AppBarAccount) {
+  return account?.kind === "member" && !account.canPost;
+}
+
+function siteMenuFor(account?: AppBarAccount) {
+  return cannotPost(account) ? siteMenu.filter((item) => item.active !== "post") : siteMenu;
+}
+
+/** ルートレイアウトのフッターは閲覧者を知らないので、ヘッダーの目印を見て投稿のリンクを隠す。 */
+function postMarker(account?: AppBarAccount) {
+  return cannotPost(account) ? "false" : undefined;
+}
+
+const desktopSiteMenuNav = css({ ml: "auto" });
+
+const desktopSiteMenu = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "5",
+  m: "0",
+  p: "0",
+  listStyle: "none",
+  color: "text.brandOnSoft",
+  fontSize: "md",
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
+  pc: { gap: "8" },
+});
+
 const desktopPublicActions = css({
   display: "flex",
   alignItems: "center",
   gap: "1.5",
   flexShrink: "0",
-  ml: "auto",
+  ml: "6",
+  pc: { ml: "10" },
 });
 
 const desktopNavLink = cva({
@@ -237,11 +291,19 @@ export type AppChrome = "public" | "seller";
 export type AppBarActive = "home" | "search" | "post" | "articles" | "me";
 
 /** PCヘッダー右端に出す、閲覧者に応じたアカウント欄。会員の画像はサーバー側で描いたものを受け取る（SiteAppBar が渡す）。 */
-export type AppBarAccount = { kind: "guest" } | { kind: "member"; avatar: ReactNode };
+export type AppBarAccount =
+  | { kind: "guest" }
+  | {
+      kind: "member";
+      avatar: ReactNode;
+      /** 一般向けの機能（投稿）を使える会員か。企業会員は使えない。 */
+      canPost: boolean;
+    };
 
 type AppBarBaseProps = {
   chrome: AppChrome;
-  overlapNoticeImage?: boolean;
+  /** false で公開準備中のお知らせを出さない。 */
+  preparationNotice?: boolean;
   active?: AppBarActive;
   /** 未指定は閲覧者を確かめていない画面（エラー・読み込み中など）で、開いた時点で項目を切り替えるメニューを出す。 */
   account?: AppBarAccount;
@@ -249,7 +311,6 @@ type AppBarBaseProps = {
 
 type AppBarHomeProps = AppBarBaseProps & {
   variant: "home";
-  searchHref?: string;
 };
 
 type AppBarBackProps = AppBarBaseProps & {
@@ -262,26 +323,38 @@ type AppBarBackProps = AppBarBaseProps & {
 
 export type AppBarProps = AppBarHomeProps | AppBarBackProps;
 
-function MobileAppBar(props: AppBarProps) {
-  if (props.variant === "home") {
-    return (
-      <header className={mobileAppBar} data-ui="mobile-app-bar">
-        <Link href="/" className={logo}>
-          <BrandMark />
-          <b className={logoText}>Farmille</b>
-        </Link>
-        <Link href={props.searchHref ?? "/search"} className={iconButton} aria-label="検索">
-          <Icon name="search" size="sm" />
-        </Link>
-      </header>
-    );
-  }
-
-  const backHref = props.backHref ?? "/";
-
+/** SP のサイトヘッダー。ロゴと、PC のヘッダーと同じ項目を並べるメニュー。 */
+function MobileSiteBar({ active, account }: Pick<AppBarBaseProps, "active" | "account">) {
   return (
     <header className={mobileAppBar} data-ui="mobile-app-bar">
-      <Link href={backHref} className={iconButton} aria-label="戻る">
+      <Link href="/" className={logo}>
+        <BrandMark />
+        <b className={logoText}>Farmille</b>
+      </Link>
+      <MobileSiteMenu
+        links={siteMenuFor(account).map((item) => ({
+          label: item.label,
+          href: item.href,
+          current: item.active !== null && active === item.active,
+        }))}
+        member={account === undefined ? undefined : account.kind === "member"}
+      />
+    </header>
+  );
+}
+
+/**
+ * SP の公開画面は PC と同じく、サイトヘッダーの下に「戻る」と画面名を置く。
+ * メーカー向けの画面は、「戻る」と画面名をそのまま上に固定する。
+ */
+function MobileAppBar(props: AppBarProps) {
+  if (props.variant === "home") {
+    return <MobileSiteBar active={props.active} account={props.account} />;
+  }
+
+  const backRow = (
+    <>
+      <Link href={props.backHref ?? "/"} className={iconButton} aria-label="戻る">
         <Icon name="chevron_left" size="md" />
       </Link>
       <div className={mobileTitle}>{props.title ?? ""}</div>
@@ -292,6 +365,23 @@ function MobileAppBar(props: AppBarProps) {
       ) : (
         <span className={cx(iconButton, css({ visibility: "hidden" }))} aria-hidden />
       )}
+    </>
+  );
+
+  if (props.chrome === "public") {
+    return (
+      <>
+        <MobileSiteBar active={props.active} account={props.account} />
+        <div className={mobileContext} data-ui="mobile-context-bar">
+          {backRow}
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <header className={mobileAppBar} data-ui="mobile-app-bar">
+      {backRow}
     </header>
   );
 }
@@ -304,12 +394,31 @@ function DesktopSiteHeader({
   account?: AppBarAccount;
 }) {
   return (
-    <header className={desktopHeader} data-ui="desktop-site-header">
+    <header
+      className={desktopHeader}
+      data-can-post={postMarker(account)}
+      data-ui="desktop-site-header"
+    >
       <div className={desktopHeaderInner}>
         <Link href="/" className={desktopBrand}>
           <BrandMark />
           <span className={desktopBrandName}>Farmille</span>
         </Link>
+        <nav aria-label="サイトメニュー" className={desktopSiteMenuNav}>
+          <ul className={desktopSiteMenu}>
+            {siteMenuFor(account).map((item) => (
+              <li key={item.href}>
+                <TextLink
+                  aria-current={item.active !== null && active === item.active ? "page" : undefined}
+                  href={item.href}
+                  variant="nav"
+                >
+                  {item.label}
+                </TextLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
         <nav className={desktopPublicActions} aria-label="PCメインナビ">
           {account?.kind === "guest" ? (
             <>
@@ -352,7 +461,11 @@ function DesktopSellerHeader(props: AppBarProps) {
   const title = props.variant === "home" ? "メーカーダッシュボード" : (props.title ?? "");
 
   return (
-    <header className={desktopHeader} data-ui="desktop-seller-header">
+    <header
+      className={desktopHeader}
+      data-can-post={postMarker(props.account)}
+      data-ui="desktop-seller-header"
+    >
       <div className={desktopHeaderInner}>
         <Link href="/dashboard" className={desktopBrand}>
           <BrandMark />
@@ -389,7 +502,7 @@ export function AppBar(props: AppBarProps) {
       {props.chrome === "public" ? (
         <>
           <DesktopSiteHeader active={props.active} account={props.account} />
-          <PreparationNotice overlapImage={props.overlapNoticeImage} />
+          {props.preparationNotice === false ? null : <PreparationNotice />}
           {props.variant === "home" ? null : <DesktopContextBar {...props} />}
         </>
       ) : (

@@ -1,5 +1,6 @@
 import { reportPlotColor } from "@/components/ReportPlotColor";
-import { reportBarDomain, type ReportChartPreview } from "@/lib/usage-report";
+import { reportBarDomain } from "@/components/ReportBars";
+import type { ReportChartPreview } from "@/lib/usage-report-plots";
 
 import { css } from "../../../../../styled-system/css";
 
@@ -66,7 +67,7 @@ export function ReportCardChart({ chart }: { chart: ReportChartPreview }) {
               viewBox="0 0 100 1"
             >
               <rect
-                className={reportPlotColor(row.colorIndex)}
+                className={reportPlotColor({ series: row.series })}
                 height="1"
                 width={Math.abs(end - zero)}
                 x={Math.min(zero, end)}

@@ -1,8 +1,6 @@
 import { SiteAppBar } from "@/components/SiteAppBar";
 import type { Metadata } from "next";
 
-import { HomeFooter } from "@/app/_components/HomeFooter";
-
 import { BottomNav } from "@/components/BottomNav";
 import { createPageMetadata } from "@/lib/seo";
 
@@ -33,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPageMetadata({
     title: "企業様向け利用ガイド",
     description:
-      "メーカーの企業会員登録、資材掲載・編集、オーナー権限の移行の申請方法と必要資料、終売・非表示のご依頼先をご案内します。",
+      "メーカーの企業会員登録、資材掲載・編集、オーナー権限の移行の申請方法と必要資料、終売・非公開のご依頼先をご案内します。",
     path: "/sellers",
   });
 }
@@ -57,7 +55,6 @@ export default async function ManufacturerPage({ searchParams }: ManufacturerPag
       />
       <main className={main}>
         <ManufacturerLanding applyHref={applyHref} />
-        <HomeFooter />
       </main>
       <BottomNav active="home" />
     </div>

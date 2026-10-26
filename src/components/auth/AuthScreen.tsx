@@ -81,7 +81,7 @@ export function AuthScreen({
   children: ReactNode;
 }) {
   return (
-    <main className={screenStyle}>
+    <main className={screenStyle} data-ui="auth-screen">
       <div className={frameStyle}>
         <header className={appBarStyle}>
           <h1 className={titleStyle}>{title}</h1>

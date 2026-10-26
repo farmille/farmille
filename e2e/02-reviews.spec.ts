@@ -24,7 +24,7 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
   try {
     await loginGeneral(page, user);
     await page.goto(`/materials/${material.id}/review/new`);
-    const cropSearch = page.getByRole("combobox", { name: "作目", exact: true });
+    const cropSearch = page.getByRole("combobox", { name: "使用対象作目", exact: true });
     await cropSearch.fill("トマト");
     await page.getByRole("option", { name: "トマト なす科果菜類", exact: true }).click();
     await cropSearch.fill("ミニトマト");

@@ -35,3 +35,22 @@ export const searchReportMaterialsAction = fn<Actions["searchReportMaterialsActi
     },
   ],
 }));
+
+export const getReportMaterialClassificationsAction = fn<
+  Actions["getReportMaterialClassificationsAction"]
+>(async () => ({
+  ok: true,
+  data: { cropIds: ["22222222-2222-4222-8222-222222222223"], effectNames: ["発根促進"] },
+}));
+
+export const findOtherReportForMaterialAction = fn<Actions["findOtherReportForMaterialAction"]>(
+  async () => ({ ok: true, data: null }),
+);
+
+export const readPdfIntoReportAction = fn<Actions["readPdfIntoReportAction"]>(async () => ({
+  ok: false,
+  error: "pdf_reading_failed",
+  message: "PDFを読み取れませんでした。入力した内容はそのまま残っています。手入力で続けられます。",
+  remaining: 7,
+  savedDraft: null,
+}));

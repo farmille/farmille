@@ -1,10 +1,17 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { prefectureName } from "@/lib/prefectures";
-import { firstReportChart, type ReportChartPreview } from "@/lib/usage-report";
+import * as v from "valibot";
+import { ReportPlotTreatmentSchema } from "@/lib/usage-report";
+import {
+  firstReportChart,
+  reportPlotSeries,
+  type ReportChartPreview,
+} from "@/lib/usage-report-plots";
 
 import { selectAllRows } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
+import { pickReportCover } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
@@ -35,7 +42,7 @@ type UsageReportMedia = Pick<UsageReportMediaRow, "id" | "url" | "media_type" | 
 type UsageReportQueryRow = UsageReportFields & {
   author: UsageReportAuthor | null;
   crop: UsageReportCrop | null;
-  media: UsageReportMedia[];
+  media: (UsageReportMedia & Pick<UsageReportMediaRow, "measurement_id">)[];
 };
 
 export type PublishedUsageReport = UsageReportFields & {
@@ -85,10 +92,6 @@ const IN_FILTER_CHUNK_SIZE = 100;
 
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
   console.error(`[server/queries/material-content] ${operation}`, error);
-}
-
-function byMediaOrder(left: UsageReportMedia, right: UsageReportMedia): number {
-  return left.sort_order - right.sort_order || left.id.localeCompare(right.id);
 }
 
 function byPublishedAtDesc(left: ArticleQueryRow, right: ArticleQueryRow): number {
@@ -198,7 +201,8 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
           id,
           url,
           media_type,
-          sort_order
+          sort_order,
+          measurement_id
         )
       `,
     )
@@ -237,8 +241,7 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
   return succeed({
     total: count,
     items: rows.map(({ media, ...report }) => {
-      const sortedMedia = media.toSorted(byMediaOrder);
-      const coverImage = sortedMedia.find(({ media_type }) => media_type === "photo") ?? null;
+      const coverImage = pickReportCover(media);
 
       return {
         ...report,
@@ -261,7 +264,8 @@ function selectCardRows(supabase: SupabaseClient<Database>, reportIds: string[],
     .from("usage_reports")
     .select(
       `id, prefecture_code,
-      plots:usage_report_plots(id, name, sort_order),
+      plots:usage_report_plots(id, name, sort_order, treatment, compared_material_id),
+      comparedMaterials:usage_report_compared_materials(id, name, sort_order),
       measurements:usage_report_measurements(kind, name, unit, sort_order,
         graphs:usage_report_graphs(heading, sort_order,
           rows:usage_report_graph_rows(id, plot_id, label, value_text, sort_order)))`,
@@ -280,9 +284,25 @@ function selectCardRows(supabase: SupabaseClient<Database>, reportIds: string[],
 
 type CardRowsReport = NonNullable<Awaited<ReturnType<typeof selectCardRows>>["data"]>[number];
 
+/** 区の色を本文のグラフと揃えるため、区で使った資材と比較した資材の並びから系列色を決める。 */
 function cardChart(report: CardRowsReport) {
   const byOrder = (left: { sort_order: number }, right: { sort_order: number }) =>
     left.sort_order - right.sort_order;
+  const plots = report.plots.toSorted(byOrder).map((plot) => ({
+    id: plot.id,
+    name: plot.name,
+    treatment:
+      plot.treatment === null
+        ? null
+        : v.parse(ReportPlotTreatmentSchema, {
+            kind: plot.treatment,
+            comparedMaterialId: plot.compared_material_id,
+          }),
+  }));
+  const series = reportPlotSeries({
+    plots,
+    comparedMaterials: report.comparedMaterials.toSorted(byOrder),
+  });
   return firstReportChart(
     report.measurements.toSorted(byOrder).map((measurement) => ({
       ...measurement,
@@ -296,7 +316,8 @@ function cardChart(report: CardRowsReport) {
         })),
       })),
     })),
-    report.plots.toSorted(byOrder),
+    plots,
+    series,
   );
 }
 

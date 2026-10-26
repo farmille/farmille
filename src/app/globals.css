@@ -21,6 +21,10 @@
 
 /* 要素の既定はレイヤーの中に置き、css() の指定が要素の既定より勝つようにする。 */
 @layer base {
+  ::selection {
+    background: color-mix(in srgb, var(--colors-primary-300) 35%, transparent);
+  }
+
   body {
     font-family: var(--fonts-sans);
     letter-spacing: var(--letter-spacings-body);
@@ -28,6 +32,11 @@
     background: var(--colors-surface-page);
     color: var(--colors-text-default);
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* ホームは紙の地のまま、末尾の共通フッターの丘へつなぐ。 */
+  body:has([data-ui="home"]) {
+    background: var(--colors-surface-paper);
   }
 
   /* 通常の見出しはりょうゴシック B。css() で書体と太さを変えられる。 */

@@ -142,7 +142,7 @@ export const snapshotQuery = `select jsonb_build_object(
   'protected_references',${protectedReferences.map(([table, column]) => `(select count(*) from public.${table} r where r.${column}=m.id)`).join("+")},
   'working_version',(select jsonb_build_object('id',w.id,'status',w.status,'base_revision',w.base_revision)
     from public.material_page_versions w where w.material_id=m.id and w.origin='manufacturer'
-    and w.status in ('draft','pending')
+    and (w.status in ('draft','pending') or (w.status='returned' and w.base_revision=m.content_revision))
     and not exists(select 1 from public.material_page_versions newer where newer.material_id=m.id and newer.origin='manufacturer' and newer.created_at>w.created_at)
     order by w.created_at desc limit 1),
   'fields',jsonb_build_object(

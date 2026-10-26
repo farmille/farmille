@@ -31,7 +31,7 @@ export const Reviews: Story = {
 };
 export const MaterialHero: Story = {
   render: () => (
-    <SkeletonRegion label="資材情報を読み込んでいます">
+    <SkeletonRegion label="製品情報を読み込んでいます">
       <MaterialHeroSkeleton />
     </SkeletonRegion>
   ),

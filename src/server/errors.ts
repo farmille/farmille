@@ -23,6 +23,17 @@ export const ERROR_CODES = [
   // メーカー申請（T-41）
   "login_id_taken",
   "invalid_invite_code",
+  // PDF読み取り
+  "pdf_reading_limit",
+  "captcha_failed",
+  "pdf_invalid",
+  "pdf_too_large",
+  "pdf_too_many_pages",
+  "pdf_reading_failed",
+  "pdf_reading_no_match",
+  "pdf_reading_incomplete",
+  "pdf_reading_material_changed",
+  "pdf_reading_unrecorded",
 ] as const;
 
 export const ErrorCodeSchema = v.picklist(ERROR_CODES);
@@ -47,13 +58,34 @@ export const errorMessageJa = {
     "このメールアドレスでは登録できません。登録済みの場合はログインをお試しください。",
   // ID とパスワードのどちらが誤りかを判別させない文言にする。
   invalid_credentials: "メールアドレスまたはパスワードが正しくありません。",
-  seller_invalid_credentials: "ログイン ID またはパスワードが正しくありません。",
+  seller_invalid_credentials: "Farmille企業会員IDまたはパスワードが正しくありません。",
   weak_password: "パスワードは8文字以上で入力してください。",
   rate_limited: "リクエストが多すぎます。しばらく待ってから再度お試しください。",
   expired_link: "リンクが無効か、有効期限が切れています。もう一度やり直してください。",
   already_reported: "この投稿はすでに通報済みで、対応中です。",
-  login_id_taken: "このログイン ID はすでに使われています。別の ID を指定してください。",
+  login_id_taken: "このFarmille企業会員IDはすでに使われています。別のIDを指定してください。",
   invalid_invite_code: "招待コードが正しくありません。",
+  pdf_reading_limit:
+    "今月のPDF読み取りの回数の上限に達しました。来月1日から再び使えます。入力した内容はそのまま残っています。手入力で続けられます。",
+  captcha_failed:
+    "ロボットによる操作ではないことを確認できませんでした。ページを再読み込みして、もう一度お試しください。入力した内容はそのまま残っています。手入力で続けられます。",
+  pdf_invalid:
+    "PDFを開けませんでした。パスワードの付いていないPDFファイルを選んでください。入力した内容はそのまま残っています。手入力で続けられます。",
+  pdf_too_large:
+    "PDFが大きすぎます。20MB以下のファイルを選んでください。入力した内容はそのまま残っています。手入力で続けられます。",
+  pdf_too_many_pages:
+    "PDFのページが多すぎます。40ページ以下のファイルを選んでください。入力した内容はそのまま残っています。手入力で続けられます。",
+  pdf_reading_failed:
+    "PDFを読み取れませんでした。入力した内容はそのまま残っています。手入力で続けられます。",
+  pdf_reading_no_match:
+    "PDFの中に、投稿する資材を使った試験が見つかりませんでした。読み取る試験に、PDFでの資材の呼び名と試験の番号を書いてお試しいただくか、手入力で記入してください。入力した内容はそのまま残っています。",
+  pdf_reading_incomplete:
+    "PDFの内容が多く、最後まで読み取れませんでした。読み取る試験で作物・品種・試験をしぼって、もう一度お試しください。入力した内容はそのまま残っています。手入力で続けられます。",
+  pdf_reading_material_changed:
+    "読み取りの間に、別の画面でこの下書きの資材が変わったため、読み取った内容を入れませんでした。入力した内容はそのまま残っています。手入力で続けられます。",
+  // 値は下書きに入っているので、ほかの PDF読み取りの文言と違い「入力はそのまま」とは書かない
+  pdf_reading_unrecorded:
+    "読み取った値は下書きに入りましたが、根拠の記録に失敗したため、「PDF読み取り」の印と引用を出せません。入った値は、元のPDFと照らし合わせて確かめてください。",
 } satisfies Record<ErrorCode, string>;
 
 /** メーカーダッシュボードの Server Action が返す成功文言。 */

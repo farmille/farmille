@@ -23,9 +23,9 @@ export const Percent: Story = {
       title: "整粒歩合",
       unit: "%",
       rows: [
-        { id: "a", label: "無処理区", valueText: "71.0", value: 71, error: null, colorIndex: 0 },
-        { id: "b", label: "処理区A", valueText: "78.5", value: 78.5, error: null, colorIndex: 1 },
-        { id: "c", label: "処理区B", valueText: "80.2", value: 80.2, error: null, colorIndex: 2 },
+        { id: "a", label: "無処理区", valueText: "71.0", value: 71, error: null, series: "1" },
+        { id: "b", label: "処理区A", valueText: "78.5", value: 78.5, error: null, series: "2" },
+        { id: "c", label: "処理区B", valueText: "80.2", value: 80.2, error: null, series: "3" },
       ],
       hiddenRowCount: 0,
     },

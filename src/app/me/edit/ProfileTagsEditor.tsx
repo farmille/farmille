@@ -89,7 +89,7 @@ export function ProfileTagsEditor({
               ? `${available.length}件中${CROP_SUGGESTION_LIMIT}件を表示しています。`
               : `${available.length}件の候補があります。`
           }`}
-          label="主な作目"
+          label="栽培作目"
           name="cropIds"
           requirement="optional"
           emptyMessage="一致する作物がありません"

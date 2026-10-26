@@ -1,7 +1,6 @@
 import { SiteAppBar } from "@/components/SiteAppBar";
 import type { ReactNode } from "react";
 
-import { HomeFooter } from "@/app/_components/HomeFooter";
 import { css } from "../../../styled-system/css";
 
 export default function LegalLayout({ children }: { children: ReactNode }) {
@@ -19,7 +18,6 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
         <main className={css({ maxW: "content.reading", mx: "auto", py: "8", tab: { py: "12" } })}>
           {children}
         </main>
-        <HomeFooter />
       </div>
     </div>
   );

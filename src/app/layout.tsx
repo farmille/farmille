@@ -6,6 +6,9 @@ import { Toaster } from "@/components/Toaster";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { createRootMetadata } from "@/lib/seo";
 
+import { css } from "../../styled-system/css";
+import { SiteFooter } from "./_components/SiteFooter";
+
 import "gen-interface-jp/400.css";
 import "gen-interface-jp/500.css";
 import "gen-interface-jp/600.css";
@@ -23,7 +26,7 @@ const adobeFontsLoader = String.raw`
       scriptTimeout: 3000,
       async: true
     },
-    h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js?v=20261014-ryo';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+    h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js?v=20261020-shippori';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
   })(document);
 `;
 
@@ -44,7 +47,9 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body>
-        {children}
+        {/* 中身が短い画面でも、フッターを画面の下端より上へ上げない */}
+        <div className={css({ minH: "dvh" })}>{children}</div>
+        <SiteFooter />
         <OnboardingTour />
         <Toaster />
       </body>

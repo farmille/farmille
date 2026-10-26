@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 手元で E2E を流す。supabase/config.toml の Supabase（127.0.0.1:54321）へ CI の E2E ジョブと同じ環境変数で向け、
-# migration の遅れを確かめ、資材マスタが無ければ入れてから、引数をそのまま playwright test に渡す。
-# Supabase の起動・停止と migration の適用はしない。足りなければ手順を出して非0で終わる。
+# 手元で E2E を流す。supabase/config.toml の Supabase（127.0.0.1:54321）へ検証用の環境変数で向け、
+# DB をこのチェックアウトの migration と seed で作り直し、資材マスタを入れてから、引数をそのまま playwright test に渡す。
+# Supabase の起動・停止はしない。起動していなければ手順を出して非0で終わる。
 
 set -euo pipefail
 
@@ -18,7 +18,7 @@ fail() {
 
 if ! status_env=$(npx --yes "$SUPABASE_CLI" status -o env); then
   log "supabase/config.toml の Supabase（${LOCAL_API_URL}）が起動していません。"
-  log "DB のボリュームは worktree 間で共有しているので、起動は確認を取ってから次で行います。"
+  log "次で起動します（確認は不要）。"
   printf '  npx --yes %s start -x studio,edge-runtime,realtime,imgproxy,logflare,vector\n' "$SUPABASE_CLI"
   exit 1
 fi
@@ -32,6 +32,19 @@ export SMTP_URL="smtp://127.0.0.1:54325" MAIL_FROM="Farmille <noreply@example.te
   AUTH_EMAIL_HOOK_SECRET="v1,whsec_bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ=="
 log "接続先：${API_URL}"
 
+# 54321 の DB は worktree 間で共有しているので、別のブランチの migration が当たっていることがある。
+# E2E 専用として毎回このチェックアウトの migration と seed で作り直し、このブランチのスキーマで検査する。
+# db reset は Storage と Auth を動かしたまま DB を作り直すので、一時の migration と常駐のサービスの migration が
+# 同じスキーマで競合して、ときどき失敗する（supabase/cli#6445）。先に止めておき、作り直しの最後に CLI が起こし直す。
+# 途中で失敗したときは、止めたサービスを起こし直してから終える。
+project_id=$(sed -n 's/^project_id = "\(.*\)"$/\1/p' supabase/config.toml)
+racing=$(docker ps -q --filter "name=^supabase_storage_${project_id}$" --filter "name=^supabase_auth_${project_id}$")
+if [ -n "$racing" ]; then
+  trap 'docker start $racing >/dev/null' EXIT
+  docker stop $racing >/dev/null
+fi
+log "DB をこのチェックアウトの migration と seed で作り直します（54321 に入っていたデータは消えます）。"
+npx --yes "$SUPABASE_CLI" db reset --local --yes
 bash tools/dev/check-migrations.sh
 
 has_material=$(psql "$DB_URL" -X -tA -v ON_ERROR_STOP=1 \

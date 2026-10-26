@@ -31,6 +31,30 @@ export function ReportFigure({ media }: { media: ReportFigureMedia }) {
   );
 }
 
+const itemFigure = css({ m: "0", mt: "3.5", "& img": { w: "full", h: "auto" } });
+
+/** 調査項目に差し込んだ資料のグラフ・表。表の端が切れないよう、枠で切り取らずに全体を出す。 */
+export function ReportItemImages({
+  media,
+  alt,
+}: {
+  media: Pick<ReportFigureMedia, "id" | "url" | "caption">[];
+  alt: string;
+}) {
+  return media.map((item) => (
+    <figure key={item.id} className={itemFigure}>
+      <Image
+        alt={item.caption || alt}
+        src={item.url}
+        width={720}
+        height={540}
+        sizes="(max-width: 800px) 100vw, 768px"
+      />
+      {item.caption ? <figcaption className={captionStyle}>{item.caption}</figcaption> : null}
+    </figure>
+  ));
+}
+
 export function ReportFigures({
   media,
   grid = false,

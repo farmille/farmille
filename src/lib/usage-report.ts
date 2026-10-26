@@ -12,19 +12,48 @@ export const REPORT_SECTIONS = [
   { value: "documents", title: "関連資料" },
 ] as const;
 const section = v.picklist(REPORT_SECTIONS.map(({ value }) => value));
+export type ReportSection = (typeof REPORT_SECTIONS)[number]["value"];
+/** 記事の節の見出し。保存済みの見出しがあればそれを、無ければ決まった見出しを使う。 */
+export function reportSectionHeading(
+  input: Pick<UsageReportInput, "headings">,
+  section: ReportSection,
+): string {
+  const fallback = REPORT_SECTIONS.find(({ value }) => value === section);
+  if (fallback === undefined) throw new Error(`記事の節が見つかりません：${section}`);
+  return input.headings.find((item) => item.section === section)?.title || fallback.title;
+}
+export const REPORT_PLOT_LIMIT = 40;
+export const REPORT_MEASUREMENT_LIMIT = 30;
+
+/** レポートに差し込む PDF と、PDF読み取りに使う PDF の上限。ブラウザとサーバーで同じ値を使う。 */
+export const REPORT_PDF_LIMITS = { bytes: 20 * 1024 * 1024, pages: 40 } as const;
+const named = v.object({ id: uuid, name: short });
+export const ReportPlotTreatmentSchema = v.variant("kind", [
+  v.object({ kind: v.literal("posted") }),
+  v.object({ kind: v.literal("untreated") }),
+  v.object({ kind: v.literal("compared"), comparedMaterialId: uuid }),
+]);
 const graphRow = v.object({ id: uuid, plotId: v.nullable(uuid), label: short, value: short });
 const graph = v.object({
   id: uuid,
   heading: short,
   rows: v.pipe(v.array(graphRow), v.maxLength(50)),
 });
+/** 保存した画面の入力に入っていて、保存の前に外れた画像の URL。保存のあとに置き場から消す。 */
+export const DroppedMediaUrlsSchema = v.pipe(
+  v.array(v.pipe(v.string(), v.maxLength(4000))),
+  v.maxLength(200),
+);
+
 export const UsageReportInputSchema = v.object({
   reportId: uuid,
   expectedUpdatedAt: v.nullable(v.pipe(v.string(), v.isoTimestamp())),
   materialId: uuid,
   cropId: v.nullable(uuid),
-  variety: short,
   varietyUnknown: v.boolean(),
+  varieties: v.pipe(v.array(named), v.maxLength(REPORT_PLOT_LIMIT)),
+  comparedMaterials: v.pipe(v.array(named), v.maxLength(REPORT_PLOT_LIMIT)),
+  commonPlotDescription: body,
   observedChange: body,
   purposeTags: v.pipe(v.array(short), v.maxLength(30)),
   purposeNote: short,
@@ -44,6 +73,8 @@ export const UsageReportInputSchema = v.object({
         name: short,
         scope: short,
         description: body,
+        varietyId: v.nullable(uuid),
+        treatment: v.nullable(ReportPlotTreatmentSchema),
         steps: v.pipe(
           v.array(
             v.object({
@@ -57,20 +88,20 @@ export const UsageReportInputSchema = v.object({
         ),
       }),
     ),
-    v.maxLength(20),
+    v.maxLength(REPORT_PLOT_LIMIT),
   ),
   measurements: v.pipe(
     v.array(
       v.object({
         id: uuid,
-        kind: v.picklist(["numeric", "text"]),
+        kind: v.picklist(["numeric", "text", "image"]),
         name: short,
         unit: short,
         body,
         graphs: v.pipe(v.array(graph), v.maxLength(20)),
       }),
     ),
-    v.maxLength(30),
+    v.maxLength(REPORT_MEASUREMENT_LIMIT),
   ),
   media: v.pipe(
     v.array(
@@ -80,6 +111,7 @@ export const UsageReportInputSchema = v.object({
         mediaType: v.picklist(["photo", "video"]),
         section,
         caption: short,
+        measurementId: v.optional(v.nullable(uuid)),
       }),
     ),
     v.maxLength(30),
@@ -92,8 +124,10 @@ export const UsageReportInputSchema = v.object({
   methodDetailsAck: v.boolean(),
   documentsAck: v.boolean(),
   guidelineAck: v.boolean(),
+  pdfValuesChecked: v.boolean(),
 });
 export type UsageReportInput = v.InferOutput<typeof UsageReportInputSchema>;
+export type ReportPlotTreatment = v.InferOutput<typeof ReportPlotTreatmentSchema>;
 export type UsageReportFieldErrors = { [key: string]: string };
 export type UsageReportActionResult =
   | { ok: true; status: "draft" | "pending"; reportId: string; updatedAt: string; message: string }
@@ -103,12 +137,17 @@ export type UsageReportActionResult =
       fieldErrors: UsageReportFieldErrors;
       savedDraft?: { updatedAt: string; status: "partial" | "complete" };
     };
-export function createReportPlot(): UsageReportInput["plots"][number] {
+export function createReportPlot(
+  varietyId: string | null,
+  treatment: ReportPlotTreatment,
+): UsageReportInput["plots"][number] {
   return {
     id: crypto.randomUUID(),
     name: "",
     scope: "",
     description: "",
+    varietyId,
+    treatment,
     steps: [],
   };
 }
@@ -134,14 +173,20 @@ export function createReportMeasurement(
   };
 }
 export function createBlankUsageReport(materialId: string): UsageReportInput {
-  const plots = [createReportPlot(), createReportPlot()];
+  const variety = { id: crypto.randomUUID(), name: "" };
+  const plots = [
+    createReportPlot(variety.id, { kind: "untreated" }),
+    createReportPlot(variety.id, { kind: "posted" }),
+  ];
   return {
     reportId: crypto.randomUUID(),
     expectedUpdatedAt: null,
     materialId,
     cropId: null,
-    variety: "",
     varietyUnknown: false,
+    varieties: [variety],
+    comparedMaterials: [],
+    commonPlotDescription: "",
     observedChange: "",
     purposeTags: [],
     purposeNote: "",
@@ -159,7 +204,36 @@ export function createBlankUsageReport(materialId: string): UsageReportInput {
     methodDetailsAck: false,
     documentsAck: false,
     guidelineAck: false,
+    pdfValuesChecked: false,
   };
+}
+/** 品種を1つだけ入れる画面の値を、品種の一覧の1件目に写す。2件目以降と区の品種は残し、品種の無い区だけ1件目にする。不明なら品種を空にし、区の品種も外す。 */
+export function withSingleVariety(
+  input: UsageReportInput,
+  name: string,
+  unknown: boolean,
+): UsageReportInput {
+  if (unknown)
+    return {
+      ...input,
+      varietyUnknown: true,
+      varieties: [],
+      plots: input.plots.map((plot) => ({ ...plot, varietyId: null })),
+    };
+  const [first, ...rest] = input.varieties;
+  const variety = { id: first?.id ?? crypto.randomUUID(), name };
+  return {
+    ...input,
+    varietyUnknown: false,
+    varieties: [variety, ...rest],
+    plots: input.plots.map((plot) => ({ ...plot, varietyId: plot.varietyId ?? variety.id })),
+  };
+}
+export function reportVarietyNames(input: Pick<UsageReportInput, "varieties">): string {
+  return input.varieties
+    .map(({ name }) => name.trim())
+    .filter((name) => name.length > 0)
+    .join("・");
 }
 export function parseReportNumber(raw: string): { value: number; error: number | null } | null {
   const match = raw
@@ -173,95 +247,47 @@ export function parseReportNumber(raw: string): { value: number; error: number |
     ? { value, error }
     : null;
 }
-export type ReportBarRow = {
-  id: string;
-  label: string;
-  valueText: string;
-  value: number;
-  error: number | null;
-  colorIndex: number;
-};
-
-/** 棒の目盛りの範囲。0 と誤差の端を含め、% は 100 まで取る。 */
-export function reportBarDomain(rows: ReportBarRow[], unit: string) {
-  const min = Math.min(0, ...rows.map((row) => row.value - (row.error ?? 0)));
-  const max = Math.max(unit === "%" ? 100 : 0, ...rows.map((row) => row.value + (row.error ?? 0)));
-  return { min, max: max === min ? min + 1 : max };
+/** 写り込みと秘密保持の確認が要るか。関連資料（PDF）か、調査項目に差し込んだ画像があるとき。 */
+export function reportNeedsMaterialAcks(
+  input: Pick<UsageReportInput, "documents" | "media">,
+): boolean {
+  return (
+    input.documents.length > 0 ||
+    input.media.some((media) => (media.measurementId ?? null) !== null)
+  );
 }
-
-type ReportGraph = UsageReportInput["measurements"][number]["graphs"][number];
-
-/** 数値として読めない行は描かない。区の色は区の並び順で決め、区を持たない行は行の順で決める。 */
-export function reportGraphRows(
-  graph: Pick<ReportGraph, "rows">,
-  plots: Pick<UsageReportInput["plots"][number], "id" | "name">[],
-): ReportBarRow[] {
-  return graph.rows.flatMap((row, index) => {
-    const parsed = parseReportNumber(row.value);
-    if (parsed === null) return [];
-    const plotIndex = row.plotId ? plots.findIndex((plot) => plot.id === row.plotId) : -1;
-    return [
-      {
-        id: row.id,
-        label: (plotIndex >= 0 ? plots[plotIndex]?.name : "") || row.label || `区 ${index + 1}`,
-        valueText: row.value.trim(),
-        value: parsed.value,
-        error: parsed.error,
-        colorIndex: plotIndex >= 0 ? plotIndex : index,
-      },
-    ];
-  });
-}
-/** 区は20まで作れるので、カードには先頭の区だけを出し、残りは数で伝える。全区はレポート本文のグラフで読む。 */
-const PREVIEW_ROW_LIMIT = 3;
-
-export type ReportChartPreview = {
-  title: string;
-  unit: string;
-  rows: ReportBarRow[];
-  /** カードに出さなかった区の数。 */
-  hiddenRowCount: number;
-};
-
-/** DB の kind は文字列のまま受け、numeric だけをグラフにする。 */
-type ChartMeasurement = Pick<UsageReportInput["measurements"][number], "name" | "unit"> & {
-  kind: string;
-  graphs: (Pick<ReportGraph, "rows"> & { heading: string })[];
-};
-
-/** 一覧のカードに出す1枚。数値の測定項目を上から見て、2区以上の値が読める最初のグラフを選ぶ。 */
-export function firstReportChart(
-  measurements: ChartMeasurement[],
-  plots: Pick<UsageReportInput["plots"][number], "id" | "name">[],
-): ReportChartPreview | null {
-  for (const measurement of measurements) {
-    if (measurement.kind !== "numeric") continue;
-    for (const graph of measurement.graphs) {
-      const rows = reportGraphRows(graph, plots);
-      if (rows.length < 2) continue;
-      const heading = graph.heading.trim();
-      return {
-        title: heading ? `${measurement.name.trim()}・${heading}` : measurement.name.trim(),
-        unit: measurement.unit.trim(),
-        rows: rows.slice(0, PREVIEW_ROW_LIMIT),
-        hiddenRowCount: Math.max(0, rows.length - PREVIEW_ROW_LIMIT),
-      };
-    }
-  }
-  return null;
-}
-
-export function validateUsageReportSubmission(input: UsageReportInput) {
+export function validateUsageReportSubmission(
+  input: UsageReportInput,
+  context: { pdfValuesCheckRequired: boolean },
+) {
   const errors: UsageReportFieldErrors = {};
   const required = (key: string, valid: boolean, message = "※ ここを入力してください") => {
     if (!valid) errors[key] = message;
   };
-  required("cropId", input.cropId !== null, "※ 使用作物を選んでください");
+  required("cropId", input.cropId !== null, "※ 使用対象作目を選んでください");
   required(
-    "variety",
-    input.varietyUnknown || input.variety.trim().length > 0,
-    "※ 品種を入力するか、「品種が不明、または品種がない」にチェックしてください",
+    "varieties",
+    input.varietyUnknown ? input.varieties.length === 0 : input.varieties.length > 0,
+    input.varietyUnknown
+      ? "※ 「品種が不明、または品種がない」のときは品種を入れないでください"
+      : "※ 品種を入力するか、「品種が不明、または品種がない」にチェックしてください",
   );
+  input.varieties.forEach((variety, i) => {
+    required(`varieties.${i}.name`, variety.name.trim().length > 0, "※ 品種を入力してください");
+    // 組み合わせの表で品種の区をすべて外すと品種だけが残り、作物の表示には出るのに区とグラフには出ない
+    required(
+      `varieties.${i}.plots`,
+      input.varietyUnknown || input.plots.some((plot) => plot.varietyId === variety.id),
+      `※ 品種「${variety.name.trim() || "（品種名未入力）"}」の区がありません。区を足すか、品種を外してください`,
+    );
+  });
+  input.comparedMaterials.forEach((material, i) => {
+    required(
+      `comparedMaterials.${i}.name`,
+      material.name.trim().length > 0,
+      "※ 比較した資材の名前を入力してください",
+    );
+  });
   required("observedChange", input.observedChange.trim().length > 0);
   required("purposeTags", input.purposeTags.length > 0);
   required("prefectureCode", input.prefectureCode !== null, "※ 都道府県を選んでください");
@@ -271,21 +297,23 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   required("plots", input.plots.length >= 2, "※ 2区以上を入力してください");
   input.plots.forEach((plot, i) => {
     required(`plots.${i}.name`, plot.name.trim().length > 0);
-    required(`plots.${i}.scope`, plot.scope.trim().length > 0);
-    required(`plots.${i}.description`, plot.description.trim().length > 0);
+    required(
+      `plots.${i}.description`,
+      plot.description.trim().length > 0 || input.commonPlotDescription.trim().length > 0,
+    );
+    required(
+      `plots.${i}.variety`,
+      input.varietyUnknown === (plot.varietyId === null),
+      "※ 区の品種を選んでください",
+    );
+    required(`plots.${i}.treatment`, plot.treatment !== null, "※ 区で使った資材を選んでください");
   });
   required(
-    "measurements",
-    input.measurements.some(
-      (measurement) =>
-        measurement.kind === "numeric" &&
-        measurement.name.trim().length > 0 &&
-        measurement.graphs.some((graph) =>
-          graph.rows.some((row) => parseReportNumber(row.value) !== null),
-        ),
-    ),
-    "※ 調査項目と数値を入力したグラフを1つ以上追加してください",
+    "plots.posted",
+    input.plots.some((plot) => plot.treatment?.kind === "posted"),
+    "※ 投稿する資材を使った区を1つ以上入れてください",
   );
+  required("measurements", input.measurements.length > 0, "※ 調査項目を1つ以上追加してください");
   input.measurements.forEach((measurement, i) => {
     required(
       `measurements.${i}.name`,
@@ -294,13 +322,8 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
     );
     required(
       `measurements.${i}.values`,
-      measurement.kind === "text"
-        ? measurement.body.trim().length > 0
-        : measurement.graphs.length > 0 &&
-            measurement.graphs.every(({ rows }) =>
-              rows.some(({ value }) => parseReportNumber(value) !== null),
-            ),
-      "※ 各区の数値、または文章を入力してください",
+      reportMeasurementHasResult(measurement, input.media),
+      "※ 各区の数値、資料のグラフ・表、または文章を入力してください",
     );
     if (measurement.kind === "numeric") {
       required(
@@ -319,33 +342,74 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   required("methodDetailsAck", input.methodDetailsAck, "※ 使用方法の記載を確認してください");
   required(
     "documentsAck",
-    input.documents.length === 0 || input.documentsAck,
+    !reportNeedsMaterialAcks(input) || input.documentsAck,
     "※ 資料の公開権限を確認してください",
   );
   required("guidelineAck", input.guidelineAck, "※ 投稿ガイドラインへの同意が必要です");
+  required(
+    "pdfValuesChecked",
+    !context.pdfValuesCheckRequired || input.pdfValuesChecked,
+    "※ PDF読み取りで入った値を、元のPDFと照らし合わせて確かめてください",
+  );
   return errors;
 }
+/** 調査項目に結果が入っているか。数値の項目は、どのグラフにも数として読める値が1つ以上要る。 */
+export function reportMeasurementHasResult(
+  measurement: UsageReportInput["measurements"][number],
+  media: UsageReportInput["media"],
+): boolean {
+  switch (measurement.kind) {
+    case "text":
+      return measurement.body.trim().length > 0;
+    case "image":
+      return media.some((item) => item.measurementId === measurement.id);
+    case "numeric":
+      return (
+        measurement.graphs.length > 0 &&
+        measurement.graphs.every(({ rows }) =>
+          rows.some(({ value }) => parseReportNumber(value) !== null),
+        )
+      );
+  }
+}
 export function reportErrorStep(key: string): number {
-  if (key === "cropId" || key === "materialId" || key === "variety") return 1;
+  if (key === "cropId" || key === "materialId" || key.startsWith("varieties")) return 1;
   if (key === "observedChange" || key === "purposeTags") return 2;
   if (["prefectureCode", "cultivationEnvironment", "timingStages", "timingNote"].includes(key))
     return 3;
-  if (key.startsWith("plots") || key.startsWith("measurements") || key === "methodDetailsAck")
+  if (
+    key.startsWith("plots") ||
+    key.startsWith("comparedMaterials") ||
+    key.startsWith("measurements") ||
+    key === "methodDetailsAck"
+  )
     return 4;
   return 5;
 }
 
-export function groupReportMeasurements(measurements: UsageReportInput["measurements"]) {
-  const groups: UsageReportInput["measurements"] = [];
+/**
+ * 記事に出す調査項目の組。同じ名前と単位の数値の調査項目は、最初の項目の位置に1つの組としてまとめ、
+ * 項目ごとのグラフと補足説明は組の中に残す。ほかの調査項目は1件ずつの組にする。
+ */
+export function reportMeasurementGroups(
+  measurements: UsageReportInput["measurements"],
+): UsageReportInput["measurements"][] {
+  const groups: UsageReportInput["measurements"][] = [];
+  const numeric = new Map<string, UsageReportInput["measurements"]>();
   for (const measurement of measurements) {
-    if (measurement.kind !== "numeric") continue;
-    const group = groups.find(
-      (item) =>
-        item.name.trim() === measurement.name.trim() &&
-        item.unit.trim() === measurement.unit.trim(),
-    );
-    if (group) group.graphs.push(...measurement.graphs);
-    else groups.push({ ...measurement, graphs: [...measurement.graphs] });
+    if (measurement.kind !== "numeric") {
+      groups.push([measurement]);
+      continue;
+    }
+    const key = JSON.stringify([measurement.name.trim(), measurement.unit.trim()]);
+    const group = numeric.get(key);
+    if (group !== undefined) {
+      group.push(measurement);
+      continue;
+    }
+    const created = [measurement];
+    numeric.set(key, created);
+    groups.push(created);
   }
   return groups;
 }

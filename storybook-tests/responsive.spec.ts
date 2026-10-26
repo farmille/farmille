@@ -2,6 +2,8 @@ import path from "node:path";
 import { expect, test } from "@playwright/test";
 import type { APIRequestContext, Page, TestInfo } from "@playwright/test";
 import * as v from "valibot";
+import type { StorySelection } from "../tools/ci/selection.ts";
+import { selectStoryFiles, StorySelectionSchema } from "../tools/ci/selection.ts";
 
 const VIEWPORT_WIDTHS = [
   320, 360, 375, 390, 414, 480, 640, 767, 768, 900, 1024, 1280, 1440,
@@ -41,6 +43,11 @@ function resolveCiShard(): CiShard {
 }
 
 const CI_SHARD = resolveCiShard();
+const selectionInput = process.env.STORYBOOK_RESPONSIVE_SELECTION;
+const STORY_SELECTION: StorySelection =
+  selectionInput === undefined
+    ? { mode: "all", reason: "ローカル実行は全件検査" }
+    : v.parse(StorySelectionSchema, JSON.parse(selectionInput));
 
 // 個別部品の検査は CI の最初の shard だけが受け持つ。2 番目以降は全 Story の検査に専念する。
 function skipUnlessFirstShard(): void {
@@ -53,7 +60,7 @@ const REPRESENTATIVE_STORY_IDS = [
   "pages-admin-materials-materialform--edit",
   "pages-materials-id-detailtable--official",
   "pages-materials-id-materialhero--signed-in",
-  "pages-materials-id-report-reportform--draft",
+  "pages-materials-id-report-reportpageform--draft",
   "pages-materials-id-materialreviewssection--default",
   "pages-me-saved-compare-comparetable--three-materials",
   "pages-me-shelves--all-sections",
@@ -113,6 +120,7 @@ const NULL_RENDER_STORY_IDS: ReadonlySet<string> = new Set([
   "pages-materials-id-ratingsummary--no-reviews",
   "components-display-metricbars--empty",
   "components-navigation-pagination--single-page",
+  "pages-materials-id-report-reportpdfpagepicker--closed",
   // 初回ログインの案内は、印（localStorage）と一般会員のセッションがないときは何も描かない
   "pages-shared-onboardingtour--without-mark",
   "pages-signup-done-onboardingarm--default",
@@ -332,7 +340,19 @@ for (let chunkIndex = 0; chunkIndex < CHUNK_COUNT; chunkIndex += 1) {
     request,
   }, testInfo) => {
     const allStories = await fetchSortedStories(request);
-    const stories = allStories.filter((_, index) => index % CHUNK_COUNT === chunkIndex);
+    const selectedFiles = selectStoryFiles(
+      STORY_SELECTION,
+      allStories.map((story) => story.importPath),
+    );
+    const selectedStories = allStories.filter((story) =>
+      selectedFiles.has(story.importPath.replace(/^\.\//, "")),
+    );
+    const stories = selectedStories.filter((_, index) => index % CHUNK_COUNT === chunkIndex);
+    // 少数の Story を選んだ PR では空の chunk がある。manifest の照合後にだけ省く。
+    test.skip(
+      STORY_SELECTION.mode === "selected" && stories.length === 0,
+      "この chunk への割り当てなし",
+    );
     expect(stories.length, "chunk に検査対象の Story が割り当てられること").toBeGreaterThan(0);
 
     const failures = await collectResponsiveFailures(page, stories);
@@ -343,6 +363,7 @@ for (let chunkIndex = 0; chunkIndex < CHUNK_COUNT; chunkIndex += 1) {
           ciShard: `${CI_SHARD.current}/${CI_SHARD.total}`,
           chunk: `${chunkIndex + 1}/${CHUNK_COUNT}`,
           storiesInIndex: allStories.length,
+          storiesSelected: selectedStories.length,
           storiesInChunk: stories.length,
           widths: VIEWPORT_WIDTHS,
           checks: stories.length * VIEWPORT_WIDTHS.length,
