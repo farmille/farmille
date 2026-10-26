@@ -148,6 +148,8 @@ export function ReportPdfReadingDialog({
         trial: trial.trim(),
         consent: true,
       });
+      // 読み取りの前に断られると、サーバーは PDF を消さない（消してあれば何もしない）
+      if (!result.ok) await discardPdfForReading(uploadPath);
     } catch {
       if (unsent !== null) await discardPdfForReading(unsent);
       // 通信の失敗などはブラウザの英語の文言になるので、そのまま出さない
