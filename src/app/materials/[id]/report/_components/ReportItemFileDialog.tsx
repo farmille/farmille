@@ -23,6 +23,7 @@ import {
   megabytes,
   openPdf,
   pdfTooLong,
+  removeReportImages,
   renderPdfPage,
   uploadReportImage,
 } from "./report-page-images";
@@ -178,6 +179,8 @@ export function ReportItemFileDialog({
   } | null>(null);
   const live = useRef(true);
   const committing = useRef(false);
+  // このポップアップで上げた画像。ページに入れずに捨てたら、公開の置き場からその場で消す
+  const uploaded = useRef<{ url: string; path: string }[]>([]);
   // 読み込み中に次のファイルを選ぶと、枚数の上限の判定を同時に通り抜けるので、終わるまで選択欄を止める
   const [reading, setReading] = useState(false);
   const readingNow = useRef(false);
@@ -325,7 +328,8 @@ export function ReportItemFileDialog({
         setMessage(`画像を保存しています（${index + 1}/${current.length}）…`);
         // 保存はいつも新しい名前で行う（途中で失敗した画像を送り直しても、同じ名前とぶつからない）
         const id = crypto.randomUUID();
-        const url = await uploadReportImage(image.canvas, userId, reportId, id);
+        const { url, path } = await uploadReportImage(image.canvas, userId, reportId, id);
+        uploaded.current.push({ url, path });
         // 保存できた画像はすぐ控える。あとの画像で失敗しても、押し直したときに送り直さない
         current = current.map((x) =>
           x.id === image.id ? { ...x, id, url, dirty: false, preview: x.preview } : x,
@@ -334,13 +338,12 @@ export function ReportItemFileDialog({
       }
       setMessage("");
       live.current = false;
-      onCommit({
-        ...item,
-        mode: "file",
-        images: current.flatMap((image) =>
-          image.url === null ? [] : [{ id: image.id, url: image.url, caption: image.caption }],
-        ),
-      });
+      const committed = current.flatMap((image) =>
+        image.url === null ? [] : [{ id: image.id, url: image.url, caption: image.caption }],
+      );
+      // 前の保存で上げたあと、ページに入れる前に消した画像
+      void discardUploads(new Set(committed.map((image) => image.url)));
+      onCommit({ ...item, mode: "file", images: committed });
     } catch (error) {
       setMessage(
         `${error instanceof Error ? error.message : "画像を保存できませんでした。"}保存できた画像はそのまま残っています。`,
@@ -351,11 +354,18 @@ export function ReportItemFileDialog({
     }
   }
 
+  function discardUploads(kept: ReadonlySet<string> = new Set()) {
+    const paths = uploaded.current.filter(({ url }) => !kept.has(url)).map(({ path }) => path);
+    uploaded.current = [];
+    return removeReportImages(paths);
+  }
+
   function close() {
     live.current = false;
     pdf?.resolve([]);
     setPdf(null);
     setOpen(false);
+    void discardUploads();
     onClose();
   }
 
@@ -378,7 +388,10 @@ export function ReportItemFileDialog({
                 type="button"
                 className={deleteButton}
                 disabled={saving}
-                onClick={() => onDelete(item.id)}
+                onClick={() => {
+                  void discardUploads();
+                  onDelete(item.id);
+                }}
               >
                 この調査項目を削除
               </button>

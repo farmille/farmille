@@ -41,11 +41,13 @@ describe("実証詳細レポートの保存手順", () => {
       conflictNote?: boolean;
       conflictDraft?: boolean;
       savedMedia?: string[];
+      folder?: string[];
       failRemove?: boolean;
     } = {},
   ) {
     const calls: string[] = [];
     const removed: string[][] = [];
+    const listed: string[] = [];
     const rpcInputs: Array<{ keys: string[]; expectedUpdatedAt: string | null }> = [];
     const store: UsageReportSaveStore = {
       async saveReport(input, submit) {
@@ -67,12 +69,16 @@ describe("実証詳細レポートの保存手順", () => {
       async savedMediaUrls() {
         return options.savedMedia ?? [];
       },
+      async listMediaFolder(folder) {
+        listed.push(folder);
+        return options.folder ?? [];
+      },
       async removeMedia(paths) {
         removed.push(paths);
         if (options.failRemove) throw new Error("storage down");
       },
     };
-    return { store, calls, rpcInputs, removed };
+    return { store, calls, rpcInputs, removed, listed };
   }
 
   it("下書き保存は RPC のあとに使用目的の補足を書き込み、RPC には補足を渡さない", async () => {
@@ -132,6 +138,27 @@ describe("実証詳細レポートの保存手順", () => {
     );
     expect(result).toMatchObject({ ok: true });
     expect(removed).toEqual([[`${userId}/report/before-redaction.jpg`]]);
+  });
+
+  it("下書きのフォルダに上げたまま一度も保存しなかった画像も、保存のときに消す", async () => {
+    const input = completeReport();
+    const folder = `${userId}/${input.reportId}`;
+    const kept = `https://storage.example.test/storage/v1/object/public/report-media/${folder}/kept.jpg`;
+    input.media = [
+      {
+        id: crypto.randomUUID(),
+        url: kept,
+        mediaType: "photo",
+        section: "measurements",
+        caption: "",
+      },
+    ];
+    const { store, removed, listed } = fakeStore({
+      folder: [`${folder}/kept.jpg`, `${folder}/discarded.jpg`],
+    });
+    await runUsageReportSave(input, false, store, userId);
+    expect(listed).toEqual([folder]);
+    expect(removed).toEqual([[`${folder}/discarded.jpg`]]);
   });
 
   it("参照が変わらなければ何も消さない", async () => {

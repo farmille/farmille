@@ -55,6 +55,8 @@ export type UsageReportSaveStore = {
   ): Promise<SaveStepResult<{ updatedAt: string }>>;
   /** 保存前にそのレポートが参照している写真・画像の URL。読めなければ null。 */
   savedMediaUrls(reportId: string): Promise<string[] | null>;
+  /** report-media のフォルダに置いてあるオブジェクトの名前（フォルダ込み）。読めなければ null。 */
+  listMediaFolder(folder: string): Promise<string[] | null>;
   removeMedia(paths: string[]): Promise<void>;
 };
 
@@ -107,6 +109,17 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
       }
       return data.map((row) => row.url);
     },
+    async listMediaFolder(folder) {
+      const { data, error } = await supabase.storage
+        .from("report-media")
+        .list(folder, { limit: 1000 });
+      if (error !== null) {
+        console.error("[usage-reports] 下書きの画像の置き場を読めませんでした", error);
+        return null;
+      }
+      // フォルダの行は id が null
+      return data.flatMap((item) => (item.id === null ? [] : [`${folder}/${item.name}`]));
+    },
     async removeMedia(paths) {
       const { data, error } = await supabase.storage.from("report-media").remove(paths);
       if (error !== null || data.length !== paths.length) {
@@ -117,23 +130,27 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
 }
 
 /**
- * 保存で参照しなくなった画像（差し替え前の画像や消した写真）を消す。report-media は公開の置き場なので、
- * 塗りつぶす前の画像が URL で読めるまま残る。消せなくても保存は済んでいるので、ログだけ残す。
+ * 保存で参照しなくなった画像を消す。前に DB が参照していた画像（差し替え前の画像や消した写真）と、
+ * 下書きのフォルダに上げたまま一度も保存しなかった画像（保存せずに捨てた差し込み）の両方を数える。
+ * report-media は公開の置き場なので、塗りつぶす前の画像が URL で読めるまま残る。
+ * 消せなくても保存は済んでいるので、ログだけ残す。
  */
 async function removeUnreferencedMedia(
-  before: string[] | null,
+  before: { savedUrls: string[] | null; folderPaths: string[] | null },
   input: UsageReportInput,
   userId: string,
   store: UsageReportSaveStore,
 ) {
-  if (before === null) return;
   const kept = new Set(input.media.map((media) => ownMediaPath(media.url, userId)));
+  const candidates = [
+    ...(before.savedUrls ?? []).map((url) => ownMediaPath(url, userId)),
+    ...(before.folderPaths ?? []),
+  ];
   const stale = [
     ...new Set(
-      before.flatMap((url) => {
-        const path = ownMediaPath(url, userId);
-        return path === null || kept.has(path) ? [] : [path];
-      }),
+      candidates.flatMap((path) =>
+        path === null || !path.startsWith(`${userId}/`) || kept.has(path) ? [] : [path],
+      ),
     ),
   ];
   if (stale.length === 0) return;
@@ -151,7 +168,12 @@ export async function runUsageReportSave(
   userId: string,
 ): Promise<UsageReportActionResult> {
   const { purposeNote, ...rpcInput } = input;
-  const before = await store.savedMediaUrls(input.reportId);
+  // 置き場は保存の前に読む。保存の最中に別の画面で上げた画像は数えないので、保存前に消すことはない
+  const [savedUrls, folderPaths] = await Promise.all([
+    store.savedMediaUrls(input.reportId),
+    store.listMediaFolder(`${userId}/${input.reportId}`),
+  ]);
+  const before = { savedUrls, folderPaths };
   const draft = await store.saveReport(rpcInput, false);
   if (!draft.ok) return { ok: false, message: draft.message, fieldErrors: {} };
   // 下書きの保存で写真の参照は入れ替わっている。補足の書き込みや提出が失敗しても、前の参照には戻らない

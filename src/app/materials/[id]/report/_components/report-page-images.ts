@@ -1,5 +1,7 @@
 import type { PDFDocumentProxy } from "pdfjs-dist";
 
+import * as Sentry from "@sentry/nextjs";
+
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 
 import { REPORT_PDF_LIMITS, REPORT_PHOTO_LIMITS } from "./report-page-state";
@@ -182,13 +184,13 @@ function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   });
 }
 
-/** 編集後の画像を report-media に保存し、公開URLを返す。元の写真・PDF は保存しない。 */
+/** 編集後の画像を report-media に保存し、公開URLと置き場のパスを返す。元の写真・PDF は保存しない。 */
 export async function uploadReportImage(
   canvas: HTMLCanvasElement,
   userId: string,
   reportId: string,
   imageId: string,
-): Promise<string> {
+): Promise<{ url: string; path: string }> {
   const blob = await canvasBlob(fitCanvas(canvas, canvas.width, canvas.height, SAVE_SIDE));
   const client = createAuthBrowserClient();
   const path = `${userId}/${reportId}/${imageId}.jpg`;
@@ -196,5 +198,15 @@ export async function uploadReportImage(
     .from("report-media")
     .upload(path, blob, { contentType: "image/jpeg", upsert: false });
   if (error !== null) throw new Error("画像を保存できませんでした。もう一度お試しください。");
-  return client.storage.from("report-media").getPublicUrl(path).data.publicUrl;
+  return { url: client.storage.from("report-media").getPublicUrl(path).data.publicUrl, path };
+}
+
+/**
+ * 上げたがページに入れなかった画像を report-media から消す。公開の置き場なので、捨てた画像が URL で
+ * 読めるまま残らないようにする。消せなかった分は、下書きを保存するときにサーバーが消す。
+ */
+export async function removeReportImages(paths: string[]): Promise<void> {
+  if (paths.length === 0) return;
+  const { error } = await createAuthBrowserClient().storage.from("report-media").remove(paths);
+  if (error !== null) Sentry.captureException(error);
 }

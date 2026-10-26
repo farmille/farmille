@@ -73,3 +73,90 @@ describe("画像の保存中の操作", () => {
     expect(input).toBeDisabled();
   });
 });
+
+describe("上げたがページに入れなかった画像", () => {
+  const descriptors = {
+    getContext: Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "getContext"),
+    toBlob: Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "toBlob"),
+  };
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    for (const [name, descriptor] of Object.entries(descriptors))
+      if (descriptor !== undefined)
+        Object.defineProperty(HTMLCanvasElement.prototype, name, descriptor);
+  });
+
+  it("途中まで上げた後にポップアップを捨てると、上げた画像を置き場から消す", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://storage.example.test");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "test-publishable-key");
+    // happy-dom は画像を描けず、置き場も無いので、描く手順と置き場への通信だけを差し替える
+    vi.stubGlobal("createImageBitmap", async () => ({ width: 400, height: 300, close: () => {} }));
+    Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+      configurable: true,
+      value: () => ({
+        fillStyle: "",
+        fillRect: () => {},
+        drawImage: () => {},
+        imageSmoothingQuality: "high",
+      }),
+    });
+    Object.defineProperty(HTMLCanvasElement.prototype, "toBlob", {
+      configurable: true,
+      value: (done: (blob: Blob | null) => void) => done(new Blob(["x"], { type: "image/jpeg" })),
+    });
+    const userId = crypto.randomUUID();
+    const reportId = crypto.randomUUID();
+    const folder = `/storage/v1/object/report-media/${userId}/${reportId}/`;
+    const requests: { method: string; url: string; body: string }[] = [];
+    let uploads = 0;
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init);
+      requests.push({ method: request.method, url: request.url, body: await request.text() });
+      if (request.method === "DELETE") return Response.json([]);
+      if (new URL(request.url).pathname.startsWith(folder)) uploads += 1;
+      // 2枚目の保存は失敗させ、途中まで上げた状態を作る
+      return uploads === 1
+        ? Response.json({ Key: "report-media/uploaded.jpg" })
+        : Response.json({ message: "failed" }, { status: 500 });
+    });
+    render(
+      <ReportItemFileDialog
+        item={{ id: crypto.randomUUID(), mode: "file", name: "可販果収量", body: "", images: [] }}
+        isNew={false}
+        userId={userId}
+        reportId={reportId}
+        imageLimit={30}
+        onCommit={vi.fn()}
+        onDelete={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    );
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    if (input === null) throw new Error("ファイルの選択欄がありません。");
+    fireEvent.change(input, {
+      target: {
+        files: [
+          new File(["x"], "1.png", { type: "image/png" }),
+          new File(["x"], "2.png", { type: "image/png" }),
+        ],
+      },
+    });
+    await screen.findByRole("img", { name: "2枚目の画像" });
+    fireEvent.click(screen.getByRole("button", { name: "変更を反映する" }));
+    await screen.findByText(/保存できた画像はそのまま残っています/);
+    const uploaded = requests.find(
+      (request) => request.method === "POST" && new URL(request.url).pathname.startsWith(folder),
+    );
+    if (uploaded === undefined) throw new Error("1枚目の画像を上げていません。");
+    const uploadedPath = new URL(uploaded.url).pathname.replace(
+      "/storage/v1/object/report-media/",
+      "",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "閉じる" }));
+    fireEvent.click(await screen.findByRole("button", { name: "記入をやめる" }));
+    await waitFor(() =>
+      expect(requests.find((request) => request.method === "DELETE")?.body).toContain(uploadedPath),
+    );
+  });
+});
