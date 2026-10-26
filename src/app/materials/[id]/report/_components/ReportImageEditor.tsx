@@ -171,7 +171,9 @@ export function ReportImageEditor({
   const view = useRef<HTMLCanvasElement>(null);
   const top = stack.at(-1) ?? null;
 
-  useReportLeaveWarning(open && (top !== current || crop !== null || drag !== null));
+  useReportLeaveWarning(
+    open && (top !== current || (mode === "crop" && crop !== null) || drag !== null),
+  );
 
   // ポップアップの中身は後から描かれるので、canvas が置かれた時と画像が変わった時の両方で描く
   const drawTo = useCallback(
