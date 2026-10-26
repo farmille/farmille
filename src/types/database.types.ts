@@ -3916,6 +3916,25 @@ export type Database = {
           },
         ]
       }
+      report_media_cleanup: {
+        Row: {
+          claimed_at: string
+          object_id: string
+          path: string
+        }
+        ComputedFields: never
+        Insert: {
+          claimed_at?: string
+          object_id: string
+          path: string
+        }
+        Update: {
+          claimed_at?: string
+          object_id?: string
+          path?: string
+        }
+        Relationships: []
+      }
       usage_report_media: {
         Row: {
           caption: string | null
@@ -4551,6 +4570,14 @@ export type Database = {
       check_company_application_rate: {
         Args: { p_key_hash: string; p_limit: number }
         Returns: boolean
+      }
+      claim_expired_report_media: {
+        Args: {
+          p_limit?: number
+        }
+        Returns: {
+          path: string
+        }[]
       }
       claim_expired_company_application_uploads: {
         Args: never
