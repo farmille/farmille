@@ -15,6 +15,7 @@ import {
   itemsFromInput,
   itemsWithPlots,
   reportPageChecks,
+  reportPageItemDone,
   type ReportPageItem,
 } from "./report-page-state";
 import { filledReport } from "./reportStoryFixture";
@@ -107,6 +108,37 @@ describe("ページ版の調査項目", () => {
       [plots[2]?.id, ""],
     ]);
     expect(itemsWithPlots(next, plots)).toBe(next);
+  });
+
+  it("数値の項目は、どのグラフにも数として読める値が入るまで書きかけ", () => {
+    const measurement = numericMeasurement(filledReport.plots);
+    const [first] = measurement.graphs;
+    if (first === undefined) throw new Error("記入例のグラフがありません。");
+    const withSecond = (value: string) =>
+      itemsFromInput({
+        ...filledReport,
+        measurements: [
+          {
+            ...measurement,
+            graphs: [
+              first,
+              {
+                ...first,
+                id: crypto.randomUUID(),
+                rows: first.rows.map((row) => ({ ...row, id: crypto.randomUUID(), value })),
+              },
+            ],
+          },
+        ],
+      })[0];
+    const done = (value: string) => {
+      const item = withSecond(value);
+      if (item === undefined) throw new Error("調査項目がありません。");
+      return reportPageItemDone(item);
+    };
+    expect(done("")).toBe(false);
+    expect(done("abc")).toBe(false);
+    expect(done("12.5")).toBe(true);
   });
 
   it("画像を消した資料の項目は未完成", () => {

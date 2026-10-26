@@ -1,6 +1,7 @@
 import * as v from "valibot";
 
 import {
+  reportMeasurementHasResult,
   reportNeedsMaterialAcks,
   UsageReportInputSchema,
   validateUsageReportSubmission,
@@ -227,7 +228,18 @@ export function reportPageItemDone(item: ReportPageItem): boolean {
     case "file":
       return item.images.length > 0;
     case "numeric":
-      return item.graphs.some((graph) => graph.rows.some((row) => row.value.trim() !== ""));
+      // 提出の検査と同じく、どのグラフにも数として読める値が要る
+      return reportMeasurementHasResult(
+        {
+          id: item.id,
+          kind: "numeric",
+          name: item.name,
+          unit: item.unit,
+          body: item.body,
+          graphs: item.graphs,
+        },
+        [],
+      );
     case "":
       return false;
   }

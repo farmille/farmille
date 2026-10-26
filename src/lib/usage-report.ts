@@ -334,7 +334,8 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   required("guidelineAck", input.guidelineAck, "※ 投稿ガイドラインへの同意が必要です");
   return errors;
 }
-function reportMeasurementHasResult(
+/** 調査項目に結果が入っているか。数値の項目は、どのグラフにも数として読める値が1つ以上要る。 */
+export function reportMeasurementHasResult(
   measurement: UsageReportInput["measurements"][number],
   media: UsageReportInput["media"],
 ): boolean {
