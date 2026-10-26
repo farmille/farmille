@@ -92,7 +92,10 @@ type SavedDraft = Failure["savedDraft"];
 type Stopped = { stopped: ErrorCode; message?: string };
 
 /** 保存に失敗しても、本体だけ保存して下書きの更新日時が進んでいれば、画面が揃える先を返す。 */
-function partialDraft(reportId: string, result: UsageReportActionResult): SavedDraft {
+function partialDraft(
+  reportId: string,
+  result: UsageReportActionResult,
+): { saved: "partial"; reportId: string; updatedAt: string } | null {
   if (result.ok || result.savedDraft === undefined) return null;
   return { saved: "partial", reportId, updatedAt: result.savedDraft.updatedAt };
 }
@@ -263,10 +266,14 @@ export async function readPdfIntoDraft(
 
   let saved = await deps.drafts.save(applied.input, []);
   if (!saved.ok) {
-    latest = partialDraft(request.input.reportId, saved) ?? latest;
-    // 別の画面の保存と重なったときや一部だけ保存したときは、最新の下書きに写し直して1回だけやり直す
-    applied = await applyToLatest(request, extraction.output, catalog, deps);
-    if ("stopped" in applied) return counted(applied.stopped);
+    const partial = partialDraft(request.input.reportId, saved);
+    latest = partial ?? latest;
+    if (partial === null) {
+      applied = await applyToLatest(request, extraction.output, catalog, deps);
+      if ("stopped" in applied) return counted(applied.stopped);
+    } else {
+      applied = { ...applied, input: { ...applied.input, expectedUpdatedAt: partial.updatedAt } };
+    }
     saved = await deps.drafts.save(applied.input, []);
   }
   if (!saved.ok) {

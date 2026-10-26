@@ -322,9 +322,12 @@ describe("readPdfIntoDraft", () => {
     expect(calls).not.toContain("claim");
   });
 
-  it("読み取った値の保存が一部だけで終わったら、写し直して1回やり直し、だめなら最後に進んだ更新日時を返す", async () => {
+  it("読み取った値の保存が一部だけで終わったら、同じ値を進んだ更新日時で1回保存し直し、だめなら最後に進んだ更新日時を返す", async () => {
     const once = fakeDeps({ saves: ["ok", "partial", "ok"] });
-    expect((await readPdfIntoDraft(makeRequest(), userId, once.deps)).ok).toBe(true);
+    const saved = await readPdfIntoDraft(makeRequest(), userId, once.deps);
+    if (!saved.ok) throw new Error(saved.message);
+    expect(saved.marks.map(({ fieldKey }) => fieldKey)).toContain("cultivationEnvironment");
+    expect(once.saved[2]?.expectedUpdatedAt).toBe("2026-10-25T00:00:02.000Z");
 
     const twice = fakeDeps({ saves: ["ok", "partial", "partial"] });
     const request = makeRequest();
