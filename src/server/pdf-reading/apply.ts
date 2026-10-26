@@ -295,6 +295,8 @@ function mapReading(
       observedChange: fill("observedChange"),
       measurements: [...base.measurements.filter(kept), ...measurements],
       pdfValuesChecked: false,
+      // 区を作り直したので、区の説明に施用方法などを書いた確認はやり直してもらう
+      methodDetailsAck: false,
     },
     fields,
   };

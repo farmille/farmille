@@ -301,6 +301,10 @@ describe("applyPdfReading", () => {
     expect(applied(base({ pdfValuesChecked: true })).input.pdfValuesChecked).toBe(false);
   });
 
+  it("区を作り直すので、施用方法などを記入した確認を外す", () => {
+    expect(applied(base({ methodDetailsAck: true })).input.methodDetailsAck).toBe(false);
+  });
+
   it("記録した値は今の値と一致し、値を直した欄の印だけが外れる", () => {
     const { input, fields } = applied(base());
     const marks = fields.map(({ fieldKey, quote }) => ({
