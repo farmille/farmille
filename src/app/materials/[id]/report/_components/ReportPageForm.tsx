@@ -333,6 +333,17 @@ export function ReportPageForm({
   const done = checks.length - missing.length;
   const layout = reportPlotLayout(input, currentMaterial.name);
 
+  /** この画面の入力に入っていて、current から外れた画像。保存で渡すと、サーバーが置き場から消す。 */
+  function droppedMedia(current: UsageReportInput): string[] {
+    const kept = new Set(current.media.map((media) => media.url));
+    return [...shownMedia.current].filter((url) => !kept.has(url));
+  }
+
+  /** 下書きの保存が済んだら、渡した画像はサーバーが消している。 */
+  function forgetDropped(urls: string[]) {
+    for (const url of urls) shownMedia.current.delete(url);
+  }
+
   async function persist(submit: boolean, close = false) {
     if (sending.current) return;
     sending.current = true;
@@ -343,14 +354,11 @@ export function ReportPageForm({
         showError(`文字数の上限を超えている欄があります：${over.join("、")}`);
         return;
       }
-      const kept = new Set(body.media.map((media) => media.url));
-      const dropped = [...shownMedia.current].filter((url) => !kept.has(url));
+      const dropped = droppedMedia(body);
       const result = submit
         ? await submitUsageReportAction(body.materialId, body, dropped)
         : await saveUsageReportDraftAction(body.materialId, body, dropped);
-      // 下書きが保存できていれば、外れた画像はサーバーが消している
-      if (result.ok || result.savedDraft !== undefined)
-        for (const url of dropped) shownMedia.current.delete(url);
+      if (result.ok || result.savedDraft !== undefined) forgetDropped(dropped);
       if (!result.ok) {
         if (result.savedDraft !== undefined) {
           const savedUpdatedAt = result.savedDraft.updatedAt;
@@ -403,6 +411,9 @@ export function ReportPageForm({
 
   function applyReading(result: PdfReadingResult) {
     if (result.remaining !== null) setRemaining(result.remaining);
+    // 読み取りの間は編集できないので、外した画像は読み取りに渡したときのまま
+    if (result.ok || result.savedDraft !== null)
+      forgetDropped(droppedMedia(inputWithItems(input, items)));
     if (!result.ok) {
       // 失敗しても、サーバーの下書きを保存した分には揃える（揃えないと次の保存が競合する）
       const draft = result.savedDraft;
@@ -814,6 +825,7 @@ export function ReportPageForm({
             siteKey={pdfReading.siteKey}
             remaining={remaining}
             input={payload}
+            droppedMediaUrls={() => droppedMedia(payload)}
             replaces={reportPdfReadingReplaces(payload, items, currentMaterial.name)}
             onRead={applyReading}
           />

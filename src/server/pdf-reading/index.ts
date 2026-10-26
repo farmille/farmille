@@ -71,7 +71,7 @@ export type PdfReadingDeps = {
     materialId: string,
   ): Promise<Result<{ catalog: ReadingCatalog; material: ReadingMaterial }>>;
   drafts: {
-    save(input: UsageReportInput): Promise<UsageReportActionResult>;
+    save(input: UsageReportInput, droppedMediaUrls: string[]): Promise<UsageReportActionResult>;
     load(reportId: string): Promise<Result<UsageReportInput | null>>;
   };
   quota: {
@@ -135,7 +135,7 @@ async function sendToModel(
     const catalog = await deps.catalog(request.input.materialId);
     if (!catalog.ok) return { stopped: catalog.error, draft: null };
     // 未保存の入力を残し、新しいレポートなら下書きの行を作る（回数の確保は下書きの行を指す）
-    const saved = await deps.drafts.save(request.input);
+    const saved = await deps.drafts.save(request.input, request.droppedMediaUrls);
     if (!saved.ok)
       return {
         stopped: "conflict",
@@ -260,13 +260,13 @@ export async function readPdfIntoDraft(
   const finished = await finish({ status: "succeeded" });
   if (!finished.ok) return counted("internal");
 
-  let saved = await deps.drafts.save(applied.input);
+  let saved = await deps.drafts.save(applied.input, []);
   if (!saved.ok) {
     latest = partialDraft(request.input.reportId, saved) ?? latest;
     // 別の画面の保存と重なったときや一部だけ保存したときは、最新の下書きに写し直して1回だけやり直す
     applied = await applyToLatest(request, extraction.output, catalog, deps);
     if ("stopped" in applied) return counted(applied.stopped);
-    saved = await deps.drafts.save(applied.input);
+    saved = await deps.drafts.save(applied.input, []);
   }
   if (!saved.ok) {
     latest = partialDraft(request.input.reportId, saved) ?? latest;
@@ -358,8 +358,8 @@ export async function createPdfReadingDeps(userId: string): Promise<PdfReadingDe
     inspect: inspectPdf,
     catalog: (materialId) => loadReadingCatalog(materialId, supabase),
     drafts: {
-      // 画面で外した画像は、画面が覚えていて次の保存で渡すので、ここでは渡さない
-      save: (input) => saveStructuredUsageReport(input, userId, false, []),
+      save: (input, droppedMediaUrls) =>
+        saveStructuredUsageReport(input, userId, false, droppedMediaUrls),
       load: (reportId) => getStructuredUsageReport(reportId, supabase),
     },
     quota: {

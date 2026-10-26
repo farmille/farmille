@@ -15,6 +15,7 @@ const meta = {
     siteKey: "storybook-site-key",
     remaining: 8,
     input: filledReport,
+    droppedMediaUrls: () => [],
     replaces: false,
     onRead: fn(),
   },

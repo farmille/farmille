@@ -79,6 +79,7 @@ describe("PDF読み取りの欄の経路", () => {
 describe("読み取る試験", () => {
   const request = {
     input: createBlankUsageReport(plotId),
+    droppedMediaUrls: [],
     uploadPath: `${plotId}/${graphId}.pdf`,
     recaptchaToken: "token",
     consent: true,

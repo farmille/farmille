@@ -51,6 +51,7 @@ function makeRequest(
 ): PdfReadingRequest {
   return {
     input,
+    droppedMediaUrls: [],
     uploadPath,
     recaptchaToken: "token",
     trial: "試験2の処理区がこの資材",
@@ -75,6 +76,7 @@ function fakeDeps(
 ) {
   const calls: string[] = [];
   const saved: UsageReportInput[] = [];
+  const dropped: string[][] = [];
   const finished: Array<{ status: string; errorCode?: string }> = [];
   const recorded: Array<{ fieldKey: string; value: string }> = [];
   const saves = [...(overrides.saves ?? ["ok", "ok"])];
@@ -112,8 +114,9 @@ function fakeDeps(
       });
     },
     drafts: {
-      async save(input) {
+      async save(input, droppedMediaUrls) {
         calls.push("save");
+        dropped.push(droppedMediaUrls);
         const outcome = saves.shift() ?? "ok";
         if (outcome === "conflict")
           return { ok: false, message: "別の画面で下書きが更新されています。", fieldErrors: {} };
@@ -173,7 +176,7 @@ function fakeDeps(
       calls.push("pause");
     },
   };
-  return { deps, calls, saved, finished, recorded };
+  return { deps, calls, saved, finished, recorded, dropped };
 }
 
 describe("readPdfIntoDraft", () => {
@@ -207,6 +210,18 @@ describe("readPdfIntoDraft", () => {
       value: "施設",
       quote: "「ハウス」（1ページ）",
     });
+  });
+
+  it("画面で外した画像は、読み取りの前の保存にだけ渡す", async () => {
+    const { deps, dropped } = fakeDeps();
+    const url = `https://storage.example.test/storage/v1/object/public/report-media/${userId}/r/old.jpg`;
+    const result = await readPdfIntoDraft(
+      { ...makeRequest(), droppedMediaUrls: [url] },
+      userId,
+      deps,
+    );
+    expect(result.ok).toBe(true);
+    expect(dropped).toEqual([[url], []]);
   });
 
   it("要求の形が違う・読み取る試験が空・他人の PDF なら、何も触らず数えない", async () => {

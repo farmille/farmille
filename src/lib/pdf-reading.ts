@@ -2,7 +2,11 @@ import * as v from "valibot";
 
 import type { ErrorCode } from "@/server/errors";
 
-import { UsageReportInputSchema, type UsageReportInput } from "./usage-report";
+import {
+  DroppedMediaUrlsSchema,
+  UsageReportInputSchema,
+  type UsageReportInput,
+} from "./usage-report";
 import { treatmentKey } from "./usage-report-plots";
 
 /** PDF読み取りで値を入れられる欄の経路。`{id}` には区・調査項目・グラフ・行などの id が入る。 */
@@ -94,6 +98,8 @@ export function pdfReadingTrialDraft(cropName: string | null, varietyNames: stri
 
 export const PdfReadingRequestSchema = v.object({
   input: UsageReportInputSchema,
+  /** 画面の入力から外した画像。読み取りの前に入力を下書きへ保存するときに渡し、置き場から消す。 */
+  droppedMediaUrls: DroppedMediaUrlsSchema,
   uploadPath: PdfReadingUploadPathSchema,
   recaptchaToken: v.pipe(v.string(), v.minLength(1), v.maxLength(4000)),
   trial: v.pipe(

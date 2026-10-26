@@ -39,6 +39,12 @@ const graph = v.object({
   heading: short,
   rows: v.pipe(v.array(graphRow), v.maxLength(50)),
 });
+/** 保存した画面の入力に入っていて、保存の前に外れた画像の URL。保存のあとに置き場から消す。 */
+export const DroppedMediaUrlsSchema = v.pipe(
+  v.array(v.pipe(v.string(), v.maxLength(4000))),
+  v.maxLength(200),
+);
+
 export const UsageReportInputSchema = v.object({
   reportId: uuid,
   expectedUpdatedAt: v.nullable(v.pipe(v.string(), v.isoTimestamp())),

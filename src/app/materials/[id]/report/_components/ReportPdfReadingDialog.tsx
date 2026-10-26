@@ -66,6 +66,7 @@ export function ReportPdfReadingDialog({
   siteKey,
   remaining,
   input,
+  droppedMediaUrls,
   replaces,
   onRead,
 }: {
@@ -78,6 +79,8 @@ export function ReportPdfReadingDialog({
   remaining: number;
   /** 今の画面の入力。読み取りの前にサーバーの下書きへ保存してから写す。 */
   input: UsageReportInput;
+  /** 画面の入力から外した画像。読み取りの前の保存で、サーバーが置き場から消す。 */
+  droppedMediaUrls: () => string[];
   /** 区か数値の調査項目に入力があり、読み取りで置き換わるか。 */
   replaces: boolean;
   onRead: (result: PdfReadingResult) => void;
@@ -143,6 +146,7 @@ export function ReportPdfReadingDialog({
       unsent = null;
       result = await readPdfIntoReportAction(materialId, {
         input,
+        droppedMediaUrls: droppedMediaUrls(),
         uploadPath,
         recaptchaToken,
         trial: trial.trim(),

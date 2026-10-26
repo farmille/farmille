@@ -2,6 +2,7 @@ import { listClassificationOptions } from "@/server/queries/classifications";
 import * as v from "valibot";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
+  DroppedMediaUrlsSchema,
   UsageReportInputSchema,
   validateUsageReportSubmission,
   type UsageReportInput,
@@ -206,12 +207,6 @@ export async function runUsageReportSave(
     message: "実証詳細レポートを提出しました。運営が確認後に公開します。",
   };
 }
-
-/** 保存した画面の入力に入っていて、保存の前に外れた画像の URL。 */
-const DroppedMediaUrlsSchema = v.pipe(
-  v.array(v.pipe(v.string(), v.maxLength(4000))),
-  v.maxLength(200),
-);
 
 export async function saveStructuredUsageReport(
   raw: UsageReportInput,
