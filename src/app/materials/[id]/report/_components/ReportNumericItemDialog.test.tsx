@@ -40,3 +40,19 @@ describe("数値を直すポップアップを閉じるとき", () => {
     expect(onClose).toHaveBeenCalled();
   });
 });
+
+it("数値を直した間だけページの離脱を警告する", () => {
+  renderDialog();
+  const before = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(before);
+  expect(before.defaultPrevented).toBe(false);
+  const unit = screen.getByRole("textbox", { name: "単位" });
+  fireEvent.change(unit, { target: { value: "kg" } });
+  const changed = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(changed);
+  expect(changed.defaultPrevented).toBe(true);
+  fireEvent.change(unit, { target: { value: "g" } });
+  const restored = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(restored);
+  expect(restored.defaultPrevented).toBe(false);
+});
