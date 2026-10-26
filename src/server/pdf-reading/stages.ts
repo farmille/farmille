@@ -149,7 +149,8 @@ export type CopiedValues = {
 
 /**
  * 段ごとの出力を、applyPdfReading が受ける形にまとめる。
- * 区や調査項目の key の参照切れと、根拠がその段で書けない key を指しているもの（区の説明は品種・資材・区、値は渡したグラフだけ）は失敗にする。
+ * 区や調査項目の key の参照切れと、その段で書けない key を指しているもの（区の説明の根拠は品種・資材・区、
+ * 値と根拠は渡したグラフ、補足は渡したグラフの調査項目だけ）は失敗にする。
  */
 export function mergeStages(
   skeleton: Skeleton,
@@ -165,7 +166,13 @@ export function mergeStages(
   if (plotGroups.evidence.some(({ ref }) => !namedKeys.has(ref))) return { ok: false };
   for (const { graphs, output } of copied) {
     const graphKeys = new Set(graphs.map((graph) => graph.key));
-    if (output.evidence.some(({ ref }) => !graphKeys.has(ref))) return { ok: false };
+    const ownerKeys = new Set(graphs.map((graph) => graph.measurementKey));
+    if (
+      output.values.some(({ graphKey }) => !graphKeys.has(graphKey)) ||
+      output.bodies.some(({ key }) => !ownerKeys.has(key)) ||
+      output.evidence.some(({ ref }) => !graphKeys.has(ref))
+    )
+      return { ok: false };
   }
   const values = copied.map(({ output }) => output);
   const descriptions = new Map<string, string>();
