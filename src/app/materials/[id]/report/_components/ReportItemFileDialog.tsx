@@ -175,6 +175,9 @@ export function ReportItemFileDialog({
   } | null>(null);
   const live = useRef(true);
   const committing = useRef(false);
+  // 読み込み中に次のファイルを選ぶと、枚数の上限の判定を同時に通り抜けるので、終わるまで選択欄を止める
+  const [reading, setReading] = useState(false);
+  const readingNow = useRef(false);
   // 読み込み中に増えた枚数も数えるため、追加を始めた時の枚数から ref で数える
   const count = useRef(0);
   const full = images.length >= imageLimit;
@@ -204,6 +207,18 @@ export function ReportItemFileDialog({
   }
 
   async function addFiles(files: File[]) {
+    if (readingNow.current) return;
+    readingNow.current = true;
+    setReading(true);
+    try {
+      await readFiles(files);
+    } finally {
+      readingNow.current = false;
+      setReading(false);
+    }
+  }
+
+  async function readFiles(files: File[]) {
     count.current = images.length;
     setRejected([]);
     const reject = (text: string) => setRejected((previous) => [...previous, text]);
@@ -415,13 +430,15 @@ export function ReportItemFileDialog({
             </Button>
           </div>
         ))}
-        <label className={pick} data-disabled={full ? "" : undefined}>
+        <label className={pick} data-disabled={full || reading ? "" : undefined}>
           <Icon name="add" size="sm" />
           {full
             ? `画像は${REPORT_IMAGE_LIMIT}枚まで入っています`
-            : `${images.length > 0 ? "写真・PDFを追加" : "写真・PDFを選ぶ"}（複数可）`}
+            : reading
+              ? "読み込みが終わると、次の写真・PDFを選べます"
+              : `${images.length > 0 ? "写真・PDFを追加" : "写真・PDFを選ぶ"}（複数可）`}
           <input
-            disabled={full}
+            disabled={full || reading}
             type="file"
             accept="image/jpeg,image/png,image/webp,application/pdf"
             multiple
