@@ -161,6 +161,8 @@ function mapReading(
   // 都道府県は試験地を表すので、登録住所から先に入った値や選んだ値があっても PDF の値で置き換える
   const prefecture = PREFECTURES.find(({ name }) => name === normalized(output.prefecture));
   if (prefecture !== undefined) note("prefectureCode", "prefecture");
+  // 市区町村は PDF から読まないので、都道府県が変わるなら前の都道府県の市区町村を外す
+  const movedPrefecture = prefecture !== undefined && prefecture.code !== base.prefectureCode;
 
   const timingStages =
     base.timingStages.length === 0
@@ -284,6 +286,8 @@ function mapReading(
       cropId: crop?.id ?? base.cropId,
       purposeTags: purposeTags.length > 0 ? purposeTags : base.purposeTags,
       prefectureCode: prefecture?.code ?? base.prefectureCode,
+      city: movedPrefecture ? "" : base.city,
+      showCity: movedPrefecture ? false : base.showCity,
       timingStages: timingStages.length > 0 ? timingStages : base.timingStages,
       cultivationEnvironment: fill("cultivationEnvironment"),
       timingNote: fill("timingNote"),

@@ -116,6 +116,18 @@ describe("applyPdfReading", () => {
     expect(fields.map(({ fieldKey }) => fieldKey)).toContain("prefectureCode");
   });
 
+  it("都道府県が変わるときだけ、前の市区町村を外す", () => {
+    const moved = applied(base({ prefectureCode: 13, city: "八王子市", showCity: true })).input;
+    expect(moved).toMatchObject({ prefectureCode: 11, city: "", showCity: false });
+    const same = applied(base({ prefectureCode: 11, city: "熊谷市", showCity: true })).input;
+    expect(same).toMatchObject({ prefectureCode: 11, city: "熊谷市", showCity: true });
+    const unread = applied(
+      base({ prefectureCode: 13, city: "八王子市", showCity: true }),
+      reading({ prefecture: "" }),
+    ).input;
+    expect(unread).toMatchObject({ prefectureCode: 13, city: "八王子市", showCity: true });
+  });
+
   it("品種・比較した資材・区を読み取った内容で置き換える", () => {
     const output = reading({
       varieties: [
