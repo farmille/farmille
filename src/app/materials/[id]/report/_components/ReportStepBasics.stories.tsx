@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { expect, fireEvent, fn, mocked, userEvent, waitFor, within } from "storybook/test";
 
 import { searchReportMaterialsAction } from "@/app/materials/[id]/report/new/actions";
-import { createBlankUsageReport } from "@/lib/usage-report";
+import { createBlankUsageReport, withSingleVariety } from "@/lib/usage-report";
 
 import { ReportStepBasics } from "./ReportStepBasics";
 import { reportFrame } from "./ReportFormParts";
@@ -41,7 +41,7 @@ const meta = {
   component: ReportStepBasics,
   decorators: [(Story) => <div className={reportFrame}>{Story()}</div>],
   args: {
-    input: { ...blank, cropId: crops[0]?.id ?? null, variety: "桃太郎" },
+    input: { ...withSingleVariety(blank, "桃太郎", false), cropId: crops[0]?.id ?? null },
     onChange: fn(),
     errors: {},
     material: {
@@ -72,11 +72,14 @@ export const Default: Story = {};
 export const Missing: Story = {
   args: {
     input: blank,
-    errors: { cropId: "使用対象作目を選んでください", variety: "品種を入力してください" },
+    errors: {
+      cropId: "使用対象作目を選んでください",
+      "varieties.0.name": "品種を入力してください",
+    },
   },
 };
 export const VarietyUnknown: Story = {
-  args: { input: { ...blank, varietyUnknown: true } },
+  args: { input: withSingleVariety(blank, "", true) },
 };
 
 const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);

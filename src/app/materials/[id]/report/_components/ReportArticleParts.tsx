@@ -4,6 +4,7 @@ import { PREFECTURES } from "@/lib/prefectures";
 import {
   REPORT_SECTIONS,
   groupReportMeasurements,
+  reportVarietyNames,
   type UsageReportInput,
 } from "@/lib/usage-report";
 
@@ -20,7 +21,7 @@ export function sectionHeading(input: UsageReportInput, section: ReportSection) 
 
 export function conditionLines(input: UsageReportInput, cropName: string) {
   const prefecture = PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name ?? "−";
-  const variety = input.varietyUnknown ? "不明" : input.variety.trim() || "−";
+  const variety = input.varietyUnknown ? "不明" : reportVarietyNames(input) || "−";
   return [
     `地域：${prefecture}${input.showCity && input.city.trim() ? input.city.trim() : ""}`,
     `使用対象作目：${cropName}（品種：${variety}）`,

@@ -1,4 +1,8 @@
-import { createBlankUsageReport, type UsageReportInput } from "@/lib/usage-report";
+import {
+  createBlankUsageReport,
+  withSingleVariety,
+  type UsageReportInput,
+} from "@/lib/usage-report";
 
 const photo = (fill: string) =>
   `data:image/svg+xml,${encodeURIComponent(
@@ -8,7 +12,7 @@ const photo = (fill: string) =>
 const blank = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
 const [control, treated] = blank.plots;
 if (!control || !treated) throw new Error("区の初期データがありません。");
-const extra = { ...control, id: "33333333-3333-4333-8333-333333333333" };
+const extra = { ...treated, id: "33333333-3333-4333-8333-333333333333" };
 
 const plots: UsageReportInput["plots"] = [
   {
@@ -39,9 +43,8 @@ const row = (plotId: string, value: string) => ({
 });
 
 export const filledReport: UsageReportInput = {
-  ...blank,
+  ...withSingleVariety(blank, "桃太郎", false),
   cropId: "22222222-2222-4222-8222-222222222222",
-  variety: "桃太郎",
   observedChange:
     "定植から30日ほどで、処理区のほうが葉色が濃く、草勢が揃って見えた。\n収穫期に入ってからも裂果が少なく、可販果の割合が上がった実感がある。",
   purposeTags: ["収量向上", "品質向上"],

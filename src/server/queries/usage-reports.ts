@@ -1,4 +1,4 @@
-import type { UsageReportInput } from "@/lib/usage-report";
+import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
 import {
   getStructuredUsageReport,
   getReportDocumentUrls,
@@ -6,6 +6,7 @@ import {
 } from "@/server/usage-reports/structured";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSessionUser } from "@/server/auth";
+import { pickReportCover } from "@/server/usage-reports/model";
 
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
@@ -42,7 +43,7 @@ type RecentReportQueryRow = Pick<
   author: Pick<PublicProfileRow, "handle"> | null;
   crop: Pick<CropRow, "name"> | null;
   material: Pick<MaterialRow, "name"> | null;
-  media: Pick<MediaRow, "url" | "media_type" | "sort_order">[];
+  media: Pick<MediaRow, "id" | "url" | "media_type" | "sort_order" | "measurement_id">[];
 };
 
 function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): void {
@@ -84,9 +85,11 @@ export async function listRecentUsageReports({
         name
       ),
       media:usage_report_media (
+        id,
         url,
         media_type,
-        sort_order
+        sort_order,
+        measurement_id
       )
     `,
     )
@@ -143,9 +146,7 @@ export async function listRecentUsageReports({
       return fail("internal");
     }
 
-    const cover = row.media
-      .filter((m) => m.media_type === "photo")
-      .toSorted((a, b) => a.sort_order - b.sort_order)[0];
+    const cover = pickReportCover(row.media);
 
     items.push({
       id: row.id,
@@ -153,7 +154,7 @@ export async function listRecentUsageReports({
       publishedAt: row.published_at,
       helpfulCount: helpfulById.get(row.id) ?? 0,
       coverUrl:
-        cover === undefined
+        cover === null
           ? null
           : row.form_version === 2
             ? reportMediaUrl(cover.url, row.author_user_id)
@@ -329,6 +330,7 @@ export async function getPublishedUsageReport(
       growth_stage, climate_note, observed_change, negative_note, summary, pesticide_ack,
       is_provided_sample, published_at, created_at, updated_at, form_version, variety_unknown,
       publish_city, cultivation_environment, timing_note, method_details_ack, documents_ack,
+      common_plot_description,
       author:public_profiles!usage_reports_author_user_id_fkey (
         user_id,
         handle,
@@ -448,7 +450,7 @@ export async function getPublishedUsageReport(
     purposeNote: row.purpose_note,
     prefectureCode: row.prefecture_code,
     fieldName: row.field_name,
-    variety: row.variety,
+    variety: structured.data === null ? row.variety : reportVarietyNames(structured.data) || null,
     plantingDate: row.planting_date,
     cultivationType: row.cultivation_type,
     cultivationTags: row.cultivation_tags,

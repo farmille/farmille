@@ -12,6 +12,13 @@ export const REPORT_SECTIONS = [
   { value: "documents", title: "関連資料" },
 ] as const;
 const section = v.picklist(REPORT_SECTIONS.map(({ value }) => value));
+export const REPORT_PLOT_LIMIT = 40;
+const named = v.object({ id: uuid, name: short });
+const plotTreatment = v.variant("kind", [
+  v.object({ kind: v.literal("posted") }),
+  v.object({ kind: v.literal("untreated") }),
+  v.object({ kind: v.literal("compared"), comparedMaterialId: uuid }),
+]);
 const graphRow = v.object({ id: uuid, plotId: v.nullable(uuid), label: short, value: short });
 const graph = v.object({
   id: uuid,
@@ -23,8 +30,10 @@ export const UsageReportInputSchema = v.object({
   expectedUpdatedAt: v.nullable(v.pipe(v.string(), v.isoTimestamp())),
   materialId: uuid,
   cropId: v.nullable(uuid),
-  variety: short,
   varietyUnknown: v.boolean(),
+  varieties: v.pipe(v.array(named), v.maxLength(REPORT_PLOT_LIMIT)),
+  comparedMaterials: v.pipe(v.array(named), v.maxLength(REPORT_PLOT_LIMIT)),
+  commonPlotDescription: body,
   observedChange: body,
   purposeTags: v.pipe(v.array(short), v.maxLength(30)),
   purposeNote: short,
@@ -44,6 +53,8 @@ export const UsageReportInputSchema = v.object({
         name: short,
         scope: short,
         description: body,
+        varietyId: v.nullable(uuid),
+        treatment: v.nullable(plotTreatment),
         steps: v.pipe(
           v.array(
             v.object({
@@ -57,13 +68,13 @@ export const UsageReportInputSchema = v.object({
         ),
       }),
     ),
-    v.maxLength(20),
+    v.maxLength(REPORT_PLOT_LIMIT),
   ),
   measurements: v.pipe(
     v.array(
       v.object({
         id: uuid,
-        kind: v.picklist(["numeric", "text"]),
+        kind: v.picklist(["numeric", "text", "image"]),
         name: short,
         unit: short,
         body,
@@ -80,6 +91,7 @@ export const UsageReportInputSchema = v.object({
         mediaType: v.picklist(["photo", "video"]),
         section,
         caption: short,
+        measurementId: v.optional(v.nullable(uuid)),
       }),
     ),
     v.maxLength(30),
@@ -94,6 +106,7 @@ export const UsageReportInputSchema = v.object({
   guidelineAck: v.boolean(),
 });
 export type UsageReportInput = v.InferOutput<typeof UsageReportInputSchema>;
+export type ReportPlotTreatment = v.InferOutput<typeof plotTreatment>;
 export type UsageReportFieldErrors = { [key: string]: string };
 export type UsageReportActionResult =
   | { ok: true; status: "draft" | "pending"; reportId: string; updatedAt: string; message: string }
@@ -103,12 +116,17 @@ export type UsageReportActionResult =
       fieldErrors: UsageReportFieldErrors;
       savedDraft?: { updatedAt: string; status: "partial" | "complete" };
     };
-export function createReportPlot(): UsageReportInput["plots"][number] {
+export function createReportPlot(
+  varietyId: string | null,
+  treatment: ReportPlotTreatment,
+): UsageReportInput["plots"][number] {
   return {
     id: crypto.randomUUID(),
     name: "",
     scope: "",
     description: "",
+    varietyId,
+    treatment,
     steps: [],
   };
 }
@@ -134,14 +152,20 @@ export function createReportMeasurement(
   };
 }
 export function createBlankUsageReport(materialId: string): UsageReportInput {
-  const plots = [createReportPlot(), createReportPlot()];
+  const variety = { id: crypto.randomUUID(), name: "" };
+  const plots = [
+    createReportPlot(variety.id, { kind: "untreated" }),
+    createReportPlot(variety.id, { kind: "posted" }),
+  ];
   return {
     reportId: crypto.randomUUID(),
     expectedUpdatedAt: null,
     materialId,
     cropId: null,
-    variety: "",
     varietyUnknown: false,
+    varieties: [variety],
+    comparedMaterials: [],
+    commonPlotDescription: "",
     observedChange: "",
     purposeTags: [],
     purposeNote: "",
@@ -161,6 +185,34 @@ export function createBlankUsageReport(materialId: string): UsageReportInput {
     guidelineAck: false,
   };
 }
+/** 品種を1つだけ入れる画面の値を、品種の一覧の1件目に写す。2件目以降と区の品種は残し、品種の無い区だけ1件目にする。不明なら品種を空にし、区の品種も外す。 */
+export function withSingleVariety(
+  input: UsageReportInput,
+  name: string,
+  unknown: boolean,
+): UsageReportInput {
+  if (unknown)
+    return {
+      ...input,
+      varietyUnknown: true,
+      varieties: [],
+      plots: input.plots.map((plot) => ({ ...plot, varietyId: null })),
+    };
+  const [first, ...rest] = input.varieties;
+  const variety = { id: first?.id ?? crypto.randomUUID(), name };
+  return {
+    ...input,
+    varietyUnknown: false,
+    varieties: [variety, ...rest],
+    plots: input.plots.map((plot) => ({ ...plot, varietyId: plot.varietyId ?? variety.id })),
+  };
+}
+export function reportVarietyNames(input: Pick<UsageReportInput, "varieties">): string {
+  return input.varieties
+    .map(({ name }) => name.trim())
+    .filter((name) => name.length > 0)
+    .join("・");
+}
 export function parseReportNumber(raw: string): { value: number; error: number | null } | null {
   const match = raw
     .trim()
@@ -173,6 +225,15 @@ export function parseReportNumber(raw: string): { value: number; error: number |
     ? { value, error }
     : null;
 }
+/** 写り込みと秘密保持の確認が要るか。関連資料（PDF）か、調査項目に差し込んだ画像があるとき。 */
+export function reportNeedsMaterialAcks(
+  input: Pick<UsageReportInput, "documents" | "media">,
+): boolean {
+  return (
+    input.documents.length > 0 ||
+    input.media.some((media) => (media.measurementId ?? null) !== null)
+  );
+}
 export function validateUsageReportSubmission(input: UsageReportInput) {
   const errors: UsageReportFieldErrors = {};
   const required = (key: string, valid: boolean, message = "※ ここを入力してください") => {
@@ -180,10 +241,28 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   };
   required("cropId", input.cropId !== null, "※ 使用対象作目を選んでください");
   required(
-    "variety",
-    input.varietyUnknown || input.variety.trim().length > 0,
-    "※ 品種を入力するか、「品種が不明、または品種がない」にチェックしてください",
+    "varieties",
+    input.varietyUnknown ? input.varieties.length === 0 : input.varieties.length > 0,
+    input.varietyUnknown
+      ? "※ 「品種が不明、または品種がない」のときは品種を入れないでください"
+      : "※ 品種を入力するか、「品種が不明、または品種がない」にチェックしてください",
   );
+  input.varieties.forEach((variety, i) => {
+    required(`varieties.${i}.name`, variety.name.trim().length > 0, "※ 品種を入力してください");
+    // 組み合わせの表で品種の区をすべて外すと品種だけが残り、作物の表示には出るのに区とグラフには出ない
+    required(
+      `varieties.${i}.plots`,
+      input.varietyUnknown || input.plots.some((plot) => plot.varietyId === variety.id),
+      `※ 品種「${variety.name.trim() || "（品種名未入力）"}」の区がありません。区を足すか、品種を外してください`,
+    );
+  });
+  input.comparedMaterials.forEach((material, i) => {
+    required(
+      `comparedMaterials.${i}.name`,
+      material.name.trim().length > 0,
+      "※ 比較した資材の名前を入力してください",
+    );
+  });
   required("observedChange", input.observedChange.trim().length > 0);
   required("purposeTags", input.purposeTags.length > 0);
   required("prefectureCode", input.prefectureCode !== null, "※ 都道府県を選んでください");
@@ -193,21 +272,23 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   required("plots", input.plots.length >= 2, "※ 2区以上を入力してください");
   input.plots.forEach((plot, i) => {
     required(`plots.${i}.name`, plot.name.trim().length > 0);
-    required(`plots.${i}.scope`, plot.scope.trim().length > 0);
-    required(`plots.${i}.description`, plot.description.trim().length > 0);
+    required(
+      `plots.${i}.description`,
+      plot.description.trim().length > 0 || input.commonPlotDescription.trim().length > 0,
+    );
+    required(
+      `plots.${i}.variety`,
+      input.varietyUnknown === (plot.varietyId === null),
+      "※ 区の品種を選んでください",
+    );
+    required(`plots.${i}.treatment`, plot.treatment !== null, "※ 区で使った資材を選んでください");
   });
   required(
-    "measurements",
-    input.measurements.some(
-      (measurement) =>
-        measurement.kind === "numeric" &&
-        measurement.name.trim().length > 0 &&
-        measurement.graphs.some((graph) =>
-          graph.rows.some((row) => parseReportNumber(row.value) !== null),
-        ),
-    ),
-    "※ 調査項目と数値を入力したグラフを1つ以上追加してください",
+    "plots.posted",
+    input.plots.some((plot) => plot.treatment?.kind === "posted"),
+    "※ 投稿する資材を使った区を1つ以上入れてください",
   );
+  required("measurements", input.measurements.length > 0, "※ 調査項目を1つ以上追加してください");
   input.measurements.forEach((measurement, i) => {
     required(
       `measurements.${i}.name`,
@@ -216,13 +297,8 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
     );
     required(
       `measurements.${i}.values`,
-      measurement.kind === "text"
-        ? measurement.body.trim().length > 0
-        : measurement.graphs.length > 0 &&
-            measurement.graphs.every(({ rows }) =>
-              rows.some(({ value }) => parseReportNumber(value) !== null),
-            ),
-      "※ 各区の数値、または文章を入力してください",
+      reportMeasurementHasResult(measurement, input.media),
+      "※ 各区の数値、資料のグラフ・表、または文章を入力してください",
     );
     if (measurement.kind === "numeric") {
       required(
@@ -241,18 +317,41 @@ export function validateUsageReportSubmission(input: UsageReportInput) {
   required("methodDetailsAck", input.methodDetailsAck, "※ 使用方法の記載を確認してください");
   required(
     "documentsAck",
-    input.documents.length === 0 || input.documentsAck,
+    !reportNeedsMaterialAcks(input) || input.documentsAck,
     "※ 資料の公開権限を確認してください",
   );
   required("guidelineAck", input.guidelineAck, "※ 投稿ガイドラインへの同意が必要です");
   return errors;
 }
+function reportMeasurementHasResult(
+  measurement: UsageReportInput["measurements"][number],
+  media: UsageReportInput["media"],
+): boolean {
+  switch (measurement.kind) {
+    case "text":
+      return measurement.body.trim().length > 0;
+    case "image":
+      return media.some((item) => item.measurementId === measurement.id);
+    case "numeric":
+      return (
+        measurement.graphs.length > 0 &&
+        measurement.graphs.every(({ rows }) =>
+          rows.some(({ value }) => parseReportNumber(value) !== null),
+        )
+      );
+  }
+}
 export function reportErrorStep(key: string): number {
-  if (key === "cropId" || key === "materialId" || key === "variety") return 1;
+  if (key === "cropId" || key === "materialId" || key.startsWith("varieties")) return 1;
   if (key === "observedChange" || key === "purposeTags") return 2;
   if (["prefectureCode", "cultivationEnvironment", "timingStages", "timingNote"].includes(key))
     return 3;
-  if (key.startsWith("plots") || key.startsWith("measurements") || key === "methodDetailsAck")
+  if (
+    key.startsWith("plots") ||
+    key.startsWith("comparedMaterials") ||
+    key.startsWith("measurements") ||
+    key === "methodDetailsAck"
+  )
     return 4;
   return 5;
 }

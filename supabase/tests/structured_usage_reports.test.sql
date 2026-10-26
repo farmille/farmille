@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(37);
+select plan(47);
 select ok(app.report_value_is_numeric('-1.2±0.4 ＊'),'negative annotated number accepted');
 select ok(app.report_value_is_numeric('0'),'zero accepted');
 select ok(not app.report_value_is_numeric('n.s.'),'non numeric prefix rejected');
@@ -10,9 +10,9 @@ insert into public.profiles(user_id,handle,standpoint) values('aa932323-0000-400
 insert into public.materials(id,name,manufacturer_name,publication_status) values('aa932323-0000-4000-8000-000000000002','構造化レポート検証','検証会社','published');
 insert into storage.objects(bucket_id,name) values('report-documents','aa932323-0000-4000-8000-000000000001/sample.pdf');
 create function pg_temp.report_input(complete boolean default false) returns jsonb language sql as $$
- select '{"reportId": "aa932323-0000-4000-8000-000000000003", "expectedUpdatedAt": null, "materialId": "aa932323-0000-4000-8000-000000000002", "cropId": null, "variety": "", "varietyUnknown": false, "observedChange": "", "purposeTags": [], "prefectureCode": null, "city": "非公開の市", "showCity": false, "cultivationEnvironment": "", "timingStages": [], "timingNote": "", "plots": [], "measurements": [], "media": [], "documents": [], "headings": [], "methodDetailsAck": false, "documentsAck": false, "guidelineAck": false}'::jsonb
+ select '{"reportId": "aa932323-0000-4000-8000-000000000003", "expectedUpdatedAt": null, "materialId": "aa932323-0000-4000-8000-000000000002", "cropId": null, "varietyUnknown": false, "varieties": [], "comparedMaterials": [], "commonPlotDescription": "", "observedChange": "", "purposeTags": [], "prefectureCode": null, "city": "非公開の市", "showCity": false, "cultivationEnvironment": "", "timingStages": [], "timingNote": "", "plots": [], "measurements": [], "media": [], "documents": [], "headings": [], "methodDetailsAck": false, "documentsAck": false, "guidelineAck": false}'::jsonb
  || jsonb_build_object('expectedUpdatedAt',(select updated_at from public.usage_reports where id='aa932323-0000-4000-8000-000000000003'))
- || case when complete then '{"observedChange": "結果を記入", "cultivationEnvironment": "露地", "purposeTags": [], "timingStages": [3], "timingNote": "9月20日に施用", "plots": [{"id": "aa932323-0000-4000-8000-000000000011", "name": "処理区", "scope": "10株", "description": "1000倍を3回", "steps": [{"id": "aa932323-0000-4000-8000-000000000013", "method": "spray", "targets": ["茎葉"], "otherText": ""}]}, {"id": "aa932323-0000-4000-8000-000000000012", "name": "無処理区", "scope": "10株", "description": "資材なし", "steps": []}], "measurements": [{"id": "aa932323-0000-4000-8000-000000000021", "kind": "numeric", "name": "草丈", "unit": "cm", "body": "切替前の文章を保持", "graphs": [{"id": "aa932323-0000-4000-8000-000000000022", "heading": "9月", "rows": [{"id": "aa932323-0000-4000-8000-000000000023", "plotId": "aa932323-0000-4000-8000-000000000011", "label": "", "value": "41.7±0.8 a"}, {"id": "aa932323-0000-4000-8000-000000000024", "plotId": "aa932323-0000-4000-8000-000000000012", "label": "", "value": "0"}]}]}], "methodDetailsAck": true, "guidelineAck": true}'::jsonb || jsonb_build_object('cropId',(select id from public.crops limit 1),'purposeTags',jsonb_build_array((select name from public.effects limit 1))) else '{}'::jsonb end;
+ || case when complete then '{"observedChange": "結果を記入", "cultivationEnvironment": "露地", "purposeTags": [], "timingStages": [3], "timingNote": "9月20日に施用", "varieties": [{"id": "aa932323-0000-4000-8000-000000000061", "name": "桃太郎"}], "plots": [{"id": "aa932323-0000-4000-8000-000000000011", "name": "処理区", "scope": "10株", "description": "1000倍を3回", "varietyId": "aa932323-0000-4000-8000-000000000061", "treatment": {"kind": "posted"}, "steps": [{"id": "aa932323-0000-4000-8000-000000000013", "method": "spray", "targets": ["茎葉"], "otherText": ""}]}, {"id": "aa932323-0000-4000-8000-000000000012", "name": "無処理区", "scope": "10株", "description": "資材なし", "varietyId": "aa932323-0000-4000-8000-000000000061", "treatment": {"kind": "untreated"}, "steps": []}], "measurements": [{"id": "aa932323-0000-4000-8000-000000000021", "kind": "numeric", "name": "草丈", "unit": "cm", "body": "切替前の文章を保持", "graphs": [{"id": "aa932323-0000-4000-8000-000000000022", "heading": "9月", "rows": [{"id": "aa932323-0000-4000-8000-000000000023", "plotId": "aa932323-0000-4000-8000-000000000011", "label": "", "value": "41.7±0.8 a"}, {"id": "aa932323-0000-4000-8000-000000000024", "plotId": "aa932323-0000-4000-8000-000000000012", "label": "", "value": "0"}]}]}], "methodDetailsAck": true, "guidelineAck": true}'::jsonb || jsonb_build_object('cropId',(select id from public.crops limit 1),'purposeTags',jsonb_build_array((select name from public.effects limit 1))) else '{}'::jsonb end;
 $$;
 select set_config('request.jwt.claims','{"sub":"aa932323-0000-4000-8000-000000000001","role":"authenticated","app_metadata":{"account_type":"general"}}',true);
 set local role authenticated;
@@ -68,6 +68,30 @@ select is((select count(*)::integer from storage.objects where bucket_id='report
 select is((select cultivation_environment from public.list_usage_report_previews() where id='aa932323-0000-4000-8000-000000000003'),'','anonymous preview masks new body columns');
 select throws_ok($$select * from public.usage_report_plots where report_id='aa932323-0000-4000-8000-000000000003'$$,'42501',null,'anonymous cannot query structured detail');
 reset role;
+select set_config('request.jwt.claims','{"sub":"aa932323-0000-4000-8000-000000000001","role":"authenticated","app_metadata":{"account_type":"general"}}',true);
+insert into storage.objects(bucket_id,name) values('report-media','aa932323-0000-4000-8000-000000000001/graph.png');
+create function pg_temp.page_input(p_media boolean default true) returns jsonb language sql as $$
+ select pg_temp.report_input(true)
+ || jsonb_build_object('reportId','aa932323-0000-4000-8000-000000000005',
+   'varieties','[{"id":"aa932323-0000-4000-8000-000000000062","name":"桃太郎"}]'::jsonb,
+   'plots','[{"id":"aa932323-0000-4000-8000-000000000053","name":"処理区","scope":"","description":"10株を調査、1000倍を3回","varietyId":"aa932323-0000-4000-8000-000000000062","treatment":{"kind":"posted"},"steps":[]},{"id":"aa932323-0000-4000-8000-000000000054","name":"無処理区","scope":"","description":"10株を調査、資材なし","varietyId":"aa932323-0000-4000-8000-000000000062","treatment":{"kind":"untreated"},"steps":[]}]'::jsonb,
+   'expectedUpdatedAt',(select updated_at from public.usage_reports where id='aa932323-0000-4000-8000-000000000005'),
+   'measurements','[{"id":"aa932323-0000-4000-8000-000000000051","kind":"image","name":"収量","unit":"","body":"","graphs":[]}]'::jsonb,
+   'media',case when p_media then '[{"id":"aa932323-0000-4000-8000-000000000052","url":"http://127.0.0.1:54321/storage/v1/object/public/report-media/aa932323-0000-4000-8000-000000000001/graph.png","mediaType":"photo","section":"measurements","caption":"","measurementId":"aa932323-0000-4000-8000-000000000051"}]'::jsonb else '[]'::jsonb end)
+$$;
+set local role authenticated;
+select lives_ok($$select public.save_usage_report(pg_temp.page_input(false),false)$$,'page draft saves an image measurement without pictures');
+select throws_ok($$select public.save_usage_report(pg_temp.page_input(false),true)$$,'23514',null,'image measurement requires a picture to submit');
+select throws_ok($$select public.save_usage_report(jsonb_set(pg_temp.page_input(),'{media,0,measurementId}','"aa932323-0000-4000-8000-000000000021"'),false)$$,'23514',null,'picture cannot point to another report measurement');
+select throws_ok($$select public.save_usage_report(jsonb_set(pg_temp.page_input(),'{media,0,mediaType}','"video"'),false)$$,'23514',null,'measurement picture must be a photo');
+select lives_ok($$select public.save_usage_report(pg_temp.page_input() #- '{media,0,measurementId}',false)$$,'media without measurementId key saves as before');
+select throws_ok($$select public.save_usage_report(pg_temp.page_input(),true)$$,'23514',null,'an inserted picture needs the confidentiality check to submit');
+select lives_ok($$select public.save_usage_report(pg_temp.page_input()||'{"documentsAck":true}'::jsonb,true)$$,'page version submits without survey scope or numeric graph');
+select is((select measurement_id from public.usage_report_media where id='aa932323-0000-4000-8000-000000000052'),'aa932323-0000-4000-8000-000000000051'::uuid,'picture keeps its measurement');
+select is((select string_agg(survey_scope,'') from public.usage_report_plots where report_id='aa932323-0000-4000-8000-000000000005'),'','empty survey scope accepted');
+reset role;
+update public.usage_reports set status='published',published_at=now() where id='aa932323-0000-4000-8000-000000000005';
+select is(app.public_usage_report_cover_id('aa932323-0000-4000-8000-000000000005'),null::uuid,'measurement picture is not used as the cover');
 select lives_ok($$delete from public.usage_reports where id='aa932323-0000-4000-8000-000000000003'$$,'deleting report cascades nested graph rows safely');
 select * from finish();
 rollback;

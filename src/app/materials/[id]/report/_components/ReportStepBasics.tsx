@@ -8,7 +8,11 @@ import { Autocomplete, Checkbox, Fieldset, Input, Notice } from "@/components/fo
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { ToggleGroup } from "@/components/ToggleGroup";
 import { searchReportMaterialsAction } from "@/app/materials/[id]/report/new/actions";
-import type { UsageReportFieldErrors, UsageReportInput } from "@/lib/usage-report";
+import {
+  withSingleVariety,
+  type UsageReportFieldErrors,
+  type UsageReportInput,
+} from "@/lib/usage-report";
 import type { PostingMaterial } from "@/server/queries/materials";
 import type { CropOption } from "@/server/queries/usage-report-form";
 
@@ -326,11 +330,11 @@ export function ReportStepBasics({
       <Input
         label="品種"
         requirement="required"
-        error={errors.variety}
+        error={errors["varieties.0.name"] ?? errors.varieties}
         placeholder="品種名"
         disabled={input.varietyUnknown}
-        value={input.variety}
-        onChange={(event) => onChange({ ...input, variety: event.target.value })}
+        value={input.varieties[0]?.name ?? ""}
+        onChange={(event) => onChange(withSingleVariety(input, event.target.value, false))}
       />
       <Notice tone="neutral" title="記入例" className={css({ mt: "2" })}>
         ・アイコ
@@ -344,9 +348,7 @@ export function ReportStepBasics({
         className={css({ mt: "2" })}
         description="チェックすると品種の記入は不要です"
         checked={input.varietyUnknown}
-        onCheckedChange={(varietyUnknown) =>
-          onChange({ ...input, varietyUnknown, variety: varietyUnknown ? "" : input.variety })
-        }
+        onCheckedChange={(varietyUnknown) => onChange(withSingleVariety(input, "", varietyUnknown))}
       >
         品種が不明、または品種がない
       </Checkbox>

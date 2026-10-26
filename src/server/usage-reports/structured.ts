@@ -159,11 +159,12 @@ export async function getStructuredUsageReport(
 ) {
   const { data, error } = await supabase
     .from("usage_reports")
-    .select(`id, updated_at, material_id, author_user_id, crop_id, variety, variety_unknown,
-    observed_change, purpose_tags, purpose_note, prefecture_code, publish_city,
+    .select(`id, updated_at, material_id, author_user_id, crop_id, variety_unknown,
+    common_plot_description, observed_change, purpose_tags, purpose_note, prefecture_code, publish_city,
     cultivation_environment, timing_note, method_details_ack, documents_ack, pesticide_ack,
     locations:usage_report_private_locations(city),
     timings:usage_report_timings(stage),
+    varieties:usage_report_varieties(*), comparedMaterials:usage_report_compared_materials(*),
     plots:usage_report_plots(*,steps:usage_report_plot_steps(*,targets:usage_report_step_targets(target))),
     measurements:usage_report_measurements(*,graphs:usage_report_graphs(*,rows:usage_report_graph_rows(*))),
     media:usage_report_media(*), documents:usage_report_documents(*), headings:usage_report_headings(*)
@@ -183,8 +184,12 @@ export async function getStructuredUsageReport(
     expectedUpdatedAt: data.updated_at,
     materialId: data.material_id,
     cropId: data.crop_id,
-    variety: data.variety ?? "",
     varietyUnknown: data.variety_unknown,
+    varieties: data.varieties.toSorted(byOrder).map(({ id, name }) => ({ id, name })),
+    comparedMaterials: data.comparedMaterials
+      .toSorted(byOrder)
+      .map(({ id, name }) => ({ id, name })),
+    commonPlotDescription: data.common_plot_description,
     observedChange: data.observed_change,
     purposeTags: data.purpose_tags,
     purposeNote: data.purpose_note ?? "",
@@ -199,6 +204,11 @@ export async function getStructuredUsageReport(
       name: plot.name,
       scope: plot.survey_scope,
       description: plot.description,
+      varietyId: plot.variety_id,
+      treatment:
+        plot.treatment === null
+          ? null
+          : { kind: plot.treatment, comparedMaterialId: plot.compared_material_id },
       steps: plot.steps.toSorted(byOrder).map((step) => ({
         id: step.id,
         method: step.method,
@@ -229,6 +239,7 @@ export async function getStructuredUsageReport(
       mediaType: item.media_type,
       section: item.placement,
       caption: item.caption ?? "",
+      measurementId: item.measurement_id,
     })),
     documents: data.documents
       .toSorted(byOrder)
