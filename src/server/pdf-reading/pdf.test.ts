@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import { inspectPdf } from "./pdf";
 
@@ -18,6 +18,11 @@ function pdfWithPages(count: number, trailer = ""): Uint8Array {
 }
 
 describe("inspectPdf", () => {
+  // pdf.js の legacy build は初めての読み込みに数秒かかり、ほかの検査と重なると最初のテストが時間切れになる
+  beforeAll(async () => {
+    await import("pdfjs-dist/legacy/build/pdf.mjs");
+  }, 30_000);
+
   it("40ページまでの PDF はページ数を返す", async () => {
     expect(await inspectPdf(pdfWithPages(3))).toEqual({ ok: true, pages: 3 });
     expect(await inspectPdf(pdfWithPages(40))).toEqual({ ok: true, pages: 40 });
