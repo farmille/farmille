@@ -6,9 +6,13 @@ import * as v from "valibot";
 import { fail, succeed } from "@/server/result";
 
 import { isMaterialId } from "@/app/materials/[id]/material-page-data";
+import { otherOpenReport } from "@/app/materials/[id]/report/_components/report-page-state";
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
-import { saveStructuredUsageReport } from "@/server/usage-reports/structured";
+import {
+  getStructuredReportFormData,
+  saveStructuredUsageReport,
+} from "@/server/usage-reports/structured";
 import { getMaterial, searchPostingMaterials } from "@/server/queries/materials";
 import type { UsageReportActionResult, UsageReportInput } from "@/lib/usage-report";
 
@@ -75,4 +79,21 @@ export async function getReportMaterialClassificationsAction(materialId: string)
     cropIds: material.data.targetCrops.map((crop) => crop.id),
     effectNames: material.data.effects.map((effect) => effect.name),
   });
+}
+
+/**
+ * 資材を選び直す前に、選んだ資材に同じ利用者の下書きか確認中のレポートがあるかを確かめる。
+ * 切り替えて保存すると同じ資材に下書きが2つでき、前の下書きを開けなくなる。今の下書きは数えない。
+ */
+export async function findOtherReportForMaterialAction(materialId: string, reportId: string) {
+  const parsed = v.safeParse(
+    v.object({ materialId: v.pipe(v.string(), v.uuid()), reportId: v.pipe(v.string(), v.uuid()) }),
+    { materialId, reportId },
+  );
+  if (!parsed.success || !isMaterialId(parsed.output.materialId)) return fail("invalid_body");
+  const session = await requireGeneralUser();
+  if (!session.ok) return fail(session.error);
+  const formData = await getStructuredReportFormData(parsed.output.materialId, session.data.userId);
+  if (!formData.ok) return formData;
+  return succeed(otherOpenReport(formData.data, parsed.output.reportId));
 }

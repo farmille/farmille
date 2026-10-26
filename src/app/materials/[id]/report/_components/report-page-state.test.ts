@@ -14,6 +14,7 @@ import {
   inputWithItems,
   itemsFromInput,
   itemsWithPlots,
+  otherOpenReport,
   reportPageChecks,
   reportPageItemDone,
   type ReportPageItem,
@@ -239,5 +240,20 @@ describe("記入状況", () => {
     const payload = inputWithItems(input, items);
     expect(reportPageChecks(payload, acks).every((check) => check.ok)).toBe(true);
     expect(validateUsageReportSubmission(payload)).toEqual({});
+  });
+});
+
+describe("資材を選び直す前の確かめ", () => {
+  const reportId = crypto.randomUUID();
+  it("確認中のレポートか、今の下書きでない下書きがあれば、切り替えない", () => {
+    expect(otherOpenReport({ draft: null, submitted: [{}] }, reportId)).toBe("pending");
+    expect(
+      otherOpenReport({ draft: { reportId: crypto.randomUUID() }, submitted: [] }, reportId),
+    ).toBe("draft");
+  });
+
+  it("下書きが無いか、今の下書きなら切り替える", () => {
+    expect(otherOpenReport({ draft: null, submitted: [] }, reportId)).toBeNull();
+    expect(otherOpenReport({ draft: { reportId }, submitted: [] }, reportId)).toBeNull();
   });
 });

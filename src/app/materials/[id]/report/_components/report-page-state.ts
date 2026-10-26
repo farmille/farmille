@@ -369,6 +369,18 @@ function varietiesWithoutPlots(input: UsageReportInput, errors: string[]): strin
   return names.length > 0 ? `（品種${names.join("")}の区が無い）` : "";
 }
 
+/**
+ * 選び直した資材にある、同じ利用者の別のレポート。確認中のレポートか、今の下書きでない下書き。
+ * あれば資材を切り替えない（切り替えて保存すると同じ資材に下書きが2つでき、前の下書きを開けなくなる）。
+ */
+export function otherOpenReport(
+  existing: { draft: { reportId: string } | null; submitted: readonly unknown[] },
+  reportId: string,
+): "draft" | "pending" | null {
+  if (existing.submitted.length > 0) return "pending";
+  return existing.draft !== null && existing.draft.reportId !== reportId ? "draft" : null;
+}
+
 export function reportPageTitle(materialName: string, cropName: string | null): string {
   return `${materialName} 実証詳細レポート｜${cropName ?? "作物"}`;
 }

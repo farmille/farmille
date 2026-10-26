@@ -2,11 +2,13 @@
 
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 
-import { Checkbox, Input, SearchInput, Select } from "@/components/form";
+import { Checkbox, Input, Notice, SearchInput, Select } from "@/components/form";
 import { DialogClose, Dialog } from "@/components/Dialog";
 import { Icon } from "@/components/Icon";
+import { TextLink } from "@/components/TextLink";
 import { ToggleGroup } from "@/components/ToggleGroup";
 import {
+  findOtherReportForMaterialAction,
   getReportMaterialClassificationsAction,
   searchReportMaterialsAction,
 } from "@/app/materials/[id]/report/new/actions";
@@ -226,6 +228,11 @@ export function ReportPageProperties({
   const [picker, setPicker] = useState<Picker>("");
   const [query, setQuery] = useState("");
   const [materials, setMaterials] = useState<PostingMaterial[]>([]);
+  // 選んだ資材に同じ利用者の下書きか確認中のレポートがあって、切り替えなかった資材
+  const [blocked, setBlocked] = useState<{
+    material: PostingMaterial;
+    report: "draft" | "pending";
+  } | null>(null);
   // 資材ごとの登録作物と効果。資材を選び直したら、その資材の分を読み込んで足す
   const [classes, setClasses] = useState(
     () =>
@@ -266,9 +273,31 @@ export function ReportPageProperties({
     }
   }
 
+  async function pickMaterial(item: PostingMaterial) {
+    setBlocked(null);
+    try {
+      const result = await findOtherReportForMaterialAction(item.id, input.reportId);
+      if (!result.ok) {
+        onMessage("選んだ資材のレポートを確かめられませんでした。");
+        return;
+      }
+      if (result.data !== null) {
+        setBlocked({ material: item, report: result.data });
+        return;
+      }
+    } catch {
+      onMessage("選んだ資材のレポートを確かめられませんでした。通信状態を確認してください。");
+      return;
+    }
+    onMaterialChange({ id: item.id, name: item.name, manufacturerName: item.manufacturer_name });
+    setPicker("");
+    void loadClasses(item.id);
+  }
+
   function open(next: Picker) {
     // 控えから戻した資材は、まだ登録作物と効果を読んでいないので、候補を開くときに読む
     if (next === "crop" || next === "purpose") void loadClasses(input.materialId);
+    setBlocked(null);
     setQuery("");
     setMaterials([]);
     setPicker(next);
@@ -485,6 +514,17 @@ export function ReportPageProperties({
             資材ページの「実証詳細レポートを書く」から来た場合は、その資材が入っています。
           </p>
         </div>
+        {blocked !== null && (
+          <Notice tone="warn" className={css({ mt: "2" })}>
+            {blocked.report === "draft"
+              ? `「${blocked.material.name}」には、書きかけの実証詳細レポートがあります。切り替えると同じ資材の下書きが2つになるため、資材は切り替えていません。`
+              : `「${blocked.material.name}」には、運営が確認中の実証詳細レポートがあります。確認が終わるまで、この資材のレポートは新しく書けないため、資材は切り替えていません。`}
+            <br />
+            <TextLink href={`/materials/${blocked.material.id}/report/new`}>
+              {blocked.report === "draft" ? "その下書きを開く" : "確認中のレポートを見る"}
+            </TextLink>
+          </Notice>
+        )}
         <div className={listHead}>{query.trim() ? "検索結果" : "選んでいる資材"}</div>
         {!query.trim() && (
           <button
@@ -508,15 +548,7 @@ export function ReportPageProperties({
             key={item.id}
             type="button"
             className={itemRecipe({ current: item.id === input.materialId })}
-            onClick={() => {
-              onMaterialChange({
-                id: item.id,
-                name: item.name,
-                manufacturerName: item.manufacturer_name,
-              });
-              setPicker("");
-              void loadClasses(item.id);
-            }}
+            onClick={() => (item.id === input.materialId ? setPicker("") : void pickMaterial(item))}
           >
             {item.name}
             <span
