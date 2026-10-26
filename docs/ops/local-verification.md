@@ -44,7 +44,7 @@ pnpm test:e2e:local
 - 資材マスタが無ければ `tools/migration/materials-v2-seed.sql` を入れる
 - `pnpm exec playwright test` を流す。引数はそのまま渡す（例：`pnpm test:e2e:local e2e/04-search.spec.ts`）
 
-Supabase の起動・停止は、スクリプトの中では行わない。起動は、スクリプトが出すコマンドで、確認を取らずに行ってよい。DB のボリューム `supabase_db_farmille` は worktree 間で共有しているので、停止だけはユーザーに確認してから行う。
+Supabase の起動・停止は、スクリプトの中では行わない。起動は、スクリプトが出すコマンドで、確認を取らずに行ってよい。DB のボリューム `supabase_db_farmille` は worktree 間で共有していることに注意する。
 
 54321 の DB は E2E 専用として扱い、E2E のたびに作り直す。別のブランチの migration が当たっていても E2E は止まらないが、手で入れたデータやデモアカウントのパスワードは消える。開発中の画面で 54321 を使っているときは、E2E のあとに `pnpm check:migrations` と「2. データを入れ直したいとき」で戻す。
 
@@ -58,7 +58,7 @@ pnpm dev
 
 - `.env.local` の `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`・`SUPABASE_SECRET_KEY` は、`npx supabase status` の `API_URL`・`ANON_KEY`・`SERVICE_ROLE_KEY` に合わせる。必須の変数は `src/env.ts` が起動時に検証する。`pnpm build` も `NEXT_PUBLIC_SITE_URL` が無いと失敗する
 - worktree（`.claude/worktrees/` 配下）では、worktree 直下に `.env.local` を置く。Claude の起動ラッパーは worktree の外のファイルを読めない
-- ブラウザで http://localhost:3007 。**スマホ幅（375px）で見るのが正**
+- ブラウザで http://localhost:3007 。
 
 ## 2. データを入れ直したいとき
 
