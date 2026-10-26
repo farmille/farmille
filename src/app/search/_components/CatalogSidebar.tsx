@@ -14,35 +14,10 @@ import { Icon } from "@/components/Icon";
 
 import { css, cva, cx } from "../../../../styled-system/css";
 
-import { chipList, chipListStyle, focusRing } from "./search-chips";
+import { chipList, chipListStyle, chipRecipe, focusRing } from "./search-chips";
+import { SearchBox } from "./SearchBox";
+import { SearchFilterSheet } from "./SearchFilterSheet";
 import { SideSection, type SideFilterItem } from "./SideSection";
-
-const chipRecipe = cva({
-  base: {
-    ...focusRing,
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "1.5",
-    py: "1",
-    px: "3",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderRadius: "pill",
-    fontSize: "sm",
-    textDecoration: "none",
-  },
-  variants: {
-    active: {
-      true: {
-        bg: "primary.700",
-        borderColor: "primary.700",
-        color: "text.inverse",
-        fontWeight: "bold",
-      },
-      false: { bg: "surface.card", borderColor: "border.strong", color: "[inherit]" },
-    },
-  },
-});
 
 const genreRowRecipe = cva({
   base: {
@@ -99,12 +74,14 @@ export function CatalogSidebar({
   selected,
   sort,
   query,
+  resultCount,
 }: {
   catalog: CatalogSearch;
   search: SearchCatalog;
   selected: SelectedSearchFilter[];
   sort: MaterialSortParam;
   query: string;
+  resultCount: number;
 }) {
   const selectedKeys = new Set(selected.map(selectedFilterKey));
   function hrefFor(filter: SelectedSearchFilter) {
@@ -247,10 +224,214 @@ export function CatalogSidebar({
   }
   const conditionCount = selected.length + (query ? 1 : 0);
 
-  return (
-    <aside aria-label="資材の絞り込み" className={css({ pc: { position: "sticky", top: "20" } })}>
+  const makerItems: SideFilterItem[] = search.makers.map((name) => ({
+    key: `maker:${name}`,
+    terms: [name],
+    node: chip({ kind: "maker", name }),
+  }));
+  const sections = (
+    <>
       <div
         className={css({
+          mt: "1",
+          pt: "1.5",
+          px: "3",
+          pb: "0.5",
+          color: "text.muted",
+          fontSize: "xs",
+        })}
+      >
+        作物 × 効果 など、条件を組み合わせて検索できます
+      </div>
+      <SideSection
+        sectionKey="effect"
+        title="効果分類で探す"
+        selected={selectedChips(isFilter("effect"))}
+        filter={{
+          label: "効果名で検索",
+          placeholder: "効果名で検索（例：耐暑）",
+          empty: "該当する効果がありません",
+          items: filterItems(search.filters.filter((filter) => filter.category === "effect")),
+        }}
+      >
+        {effectGroups.map((group) => (
+          <details key={group.id}>
+            <summary className={effectSummaryStyle}>
+              <span
+                className={css({
+                  display: "inline-block",
+                  color: "text.brand",
+                  fontSize: "xs",
+                  "details[open] > summary &": { transform: "rotate(90deg)" },
+                })}
+                aria-hidden="true"
+              >
+                ▸
+              </span>
+              <span className={css({ flex: "1", minW: "0" })}>{group.name}</span>
+              <span className={countNoteStyle}>{group.effects.length}効果</span>
+            </summary>
+            <div className={css(chipList, { pr: "1.5", pb: "2.5", pl: "6" })}>
+              {group.effects.map((effect) =>
+                chip({ kind: "filter", category: "effect", id: effect.id, name: effect.name }),
+              )}
+            </div>
+          </details>
+        ))}
+      </SideSection>
+      <SideSection
+        sectionKey="genre"
+        title="資材ジャンルで探す"
+        selected={selectedChips(isFilter("genre"))}
+      >
+        <div>
+          {genres.map((genre) => row({ ...genre, kind: "filter" }, genreCounts.get(genre.id) ?? 0))}
+        </div>
+      </SideSection>
+      <SideSection
+        sectionKey="crop"
+        title="作物で探す"
+        selected={selectedChips(isFilter("crop", "crop_group"))}
+        filter={{
+          label: "作物名で検索",
+          placeholder: "作物名で検索（例：トマト、柿）",
+          empty: "該当する作物がありません",
+          items: filterItems(
+            search.filters.filter(
+              (filter) => filter.category === "crop" || filter.category === "crop_group",
+            ),
+          ),
+        }}
+        note="文字検索はすべての作目・別名が対象です。下のタグ一覧は、資材に記載のある作目だけを表示しています。"
+      >
+        {catalog.groups
+          .filter((group) => group.hierarchy_level === "major")
+          .map((major) => {
+            const groups = catalog.groups.filter((group) => group.parent_id === major.id);
+            const visible = catalog.crops.filter(
+              (crop) =>
+                cropCounts.has(crop.id) &&
+                cropAncestors(crop.groupId, catalog.groups).includes(major.id),
+            );
+            if (
+              !visible.length &&
+              !groupCounts.has(major.id) &&
+              !groups.some((group) => groupCounts.has(group.id))
+            )
+              return null;
+            return (
+              <details
+                key={major.id}
+                className={css({
+                  py: "0.5",
+                  borderTopWidth: "1px",
+                  borderTopStyle: "solid",
+                  borderTopColor: "border.default",
+                  _firstOfType: { borderTopWidth: "0" },
+                })}
+              >
+                <summary className={cropSummaryStyle}>
+                  <span className={css({ color: "text.brand", fontSize: "xs" })} aria-hidden="true">
+                    ▸
+                  </span>
+                  <span className={css({ flex: "1", minW: "0" })}>{major.name}</span>
+                  <span className={cx(countNoteStyle, css({ whiteSpace: "nowrap" }))}>
+                    記載あり {visible.length}品目
+                  </span>
+                </summary>
+                <div className={chipListStyle}>
+                  {groupChip(major)}
+                  {visible
+                    .filter(
+                      (crop) =>
+                        crop.groupId === major.id ||
+                        (visible.length <= 8 && !groupCounts.has(crop.groupId)),
+                    )
+                    .map(cropChip)}
+                </div>
+                {groups.map((group) => {
+                  const crops = visible.filter((crop) => crop.groupId === group.id);
+                  if ((!crops.length || visible.length <= 8) && !groupCounts.has(group.id))
+                    return null;
+                  return (
+                    <div key={group.id}>
+                      <p
+                        className={css({
+                          mt: "2",
+                          mb: "1.5",
+                          color: "text.muted",
+                          fontSize: "sm",
+                          fontWeight: "bold",
+                        })}
+                      >
+                        {group.name}
+                      </p>
+                      <div className={chipListStyle}>
+                        {groupChip(group)}
+                        {crops.map(cropChip)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </details>
+            );
+          })}
+      </SideSection>
+      <SideSection
+        sectionKey="maker"
+        title={`メーカーから探す（全${search.makers.length}社）`}
+        selected={selectedChips((filter) => filter.kind === "maker")}
+        filter={{
+          label: "メーカー名で絞り込み",
+          placeholder: "メーカー名で絞り込み",
+          empty: "該当するメーカーがありません",
+          items: makerItems,
+        }}
+      >
+        <div className={chipListStyle}>
+          {search.makers.map((name) => chip({ kind: "maker", name }))}
+        </div>
+      </SideSection>
+      <SideSection
+        sectionKey="method"
+        title="施用方法で探す"
+        selected={selectedChips(isFilter("method"))}
+      >
+        <div className={chipListStyle}>
+          {search.filters.filter((filter) => filter.category === "method").map(tag)}
+        </div>
+      </SideSection>
+    </>
+  );
+
+  return (
+    <aside aria-label="資材の絞り込み" className={css({ pc: { position: "sticky", top: "20" } })}>
+      <SearchFilterSheet
+        resultCount={resultCount}
+        searchBox={
+          <SearchBox initialQuery={query} selected={selected} sort={sort} catalog={search} />
+        }
+        categories={[
+          { key: "effect", label: "効果分類", count: selected.filter(isFilter("effect")).length },
+          { key: "genre", label: "資材ジャンル", count: selected.filter(isFilter("genre")).length },
+          {
+            key: "crop",
+            label: "作物",
+            count: selected.filter(isFilter("crop", "crop_group")).length,
+          },
+          {
+            key: "maker",
+            label: "メーカー",
+            count: selected.filter((filter) => filter.kind === "maker").length,
+          },
+          { key: "method", label: "施用方法", count: selected.filter(isFilter("method")).length },
+        ]}
+      >
+        {sections}
+      </SearchFilterSheet>
+      <div
+        className={css({
+          display: "none",
           mt: "2.5",
           bg: "surface.card",
           borderWidth: "1px",
@@ -258,7 +439,11 @@ export function CatalogSidebar({
           borderColor: "border.default",
           borderRadius: "button",
           overflow: "hidden",
-          pc: { maxH: "[calc(100vh - token(spacing.24))]", overflowY: "auto" },
+          pc: {
+            display: "block",
+            maxH: "[calc(100vh - token(spacing.24))]",
+            overflowY: "auto",
+          },
         })}
       >
         {conditionCount > 0 ? (
@@ -291,174 +476,7 @@ export function CatalogSidebar({
             </Link>
           </div>
         ) : null}
-        <div
-          className={css({
-            mt: "2.5",
-            pt: "2",
-            px: "3",
-            pb: "0.5",
-            color: "text.muted",
-            fontSize: "xs",
-          })}
-        >
-          作物 × 効果 など、条件を組み合わせて検索できます
-        </div>
-        <SideSection
-          title="効果分類で探す"
-          selected={selectedChips(isFilter("effect"))}
-          filter={{
-            label: "効果名で検索",
-            placeholder: "効果名で検索（例：耐暑）",
-            empty: "該当する効果がありません",
-            items: filterItems(search.filters.filter((filter) => filter.category === "effect")),
-          }}
-        >
-          {effectGroups.map((group) => (
-            <details key={group.id}>
-              <summary className={effectSummaryStyle}>
-                <span
-                  className={css({
-                    display: "inline-block",
-                    color: "text.brand",
-                    fontSize: "xs",
-                    "details[open] > summary &": { transform: "rotate(90deg)" },
-                  })}
-                  aria-hidden="true"
-                >
-                  ▸
-                </span>
-                <span className={css({ flex: "1", minW: "0" })}>{group.name}</span>
-                <span className={countNoteStyle}>{group.effects.length}効果</span>
-              </summary>
-              <div className={css(chipList, { pr: "1.5", pb: "2.5", pl: "6" })}>
-                {group.effects.map((effect) =>
-                  chip({ kind: "filter", category: "effect", id: effect.id, name: effect.name }),
-                )}
-              </div>
-            </details>
-          ))}
-        </SideSection>
-        <SideSection title="資材ジャンルで探す" selected={selectedChips(isFilter("genre"))}>
-          <div>
-            {genres.map((genre) =>
-              row({ ...genre, kind: "filter" }, genreCounts.get(genre.id) ?? 0),
-            )}
-          </div>
-        </SideSection>
-        <SideSection
-          title="作物で探す"
-          selected={selectedChips(isFilter("crop", "crop_group"))}
-          filter={{
-            label: "作物名で検索",
-            placeholder: "作物名で検索（例：トマト、柿）",
-            empty: "該当する作物がありません",
-            items: filterItems(
-              search.filters.filter(
-                (filter) => filter.category === "crop" || filter.category === "crop_group",
-              ),
-            ),
-          }}
-          note="文字検索はすべての作目・別名が対象です。下のタグ一覧は、資材に記載のある作目だけを表示しています。"
-        >
-          {catalog.groups
-            .filter((group) => group.hierarchy_level === "major")
-            .map((major) => {
-              const groups = catalog.groups.filter((group) => group.parent_id === major.id);
-              const visible = catalog.crops.filter(
-                (crop) =>
-                  cropCounts.has(crop.id) &&
-                  cropAncestors(crop.groupId, catalog.groups).includes(major.id),
-              );
-              if (
-                !visible.length &&
-                !groupCounts.has(major.id) &&
-                !groups.some((group) => groupCounts.has(group.id))
-              )
-                return null;
-              return (
-                <details
-                  key={major.id}
-                  className={css({
-                    py: "0.5",
-                    borderTopWidth: "1px",
-                    borderTopStyle: "solid",
-                    borderTopColor: "border.default",
-                    _firstOfType: { borderTopWidth: "0" },
-                  })}
-                >
-                  <summary className={cropSummaryStyle}>
-                    <span
-                      className={css({ color: "text.brand", fontSize: "xs" })}
-                      aria-hidden="true"
-                    >
-                      ▸
-                    </span>
-                    <span className={css({ flex: "1", minW: "0" })}>{major.name}</span>
-                    <span className={cx(countNoteStyle, css({ whiteSpace: "nowrap" }))}>
-                      記載あり {visible.length}品目
-                    </span>
-                  </summary>
-                  <div className={chipListStyle}>
-                    {groupChip(major)}
-                    {visible
-                      .filter(
-                        (crop) =>
-                          crop.groupId === major.id ||
-                          (visible.length <= 8 && !groupCounts.has(crop.groupId)),
-                      )
-                      .map(cropChip)}
-                  </div>
-                  {groups.map((group) => {
-                    const crops = visible.filter((crop) => crop.groupId === group.id);
-                    if ((!crops.length || visible.length <= 8) && !groupCounts.has(group.id))
-                      return null;
-                    return (
-                      <div key={group.id}>
-                        <p
-                          className={css({
-                            mt: "2",
-                            mb: "1.5",
-                            color: "text.muted",
-                            fontSize: "sm",
-                            fontWeight: "bold",
-                          })}
-                        >
-                          {group.name}
-                        </p>
-                        <div className={chipListStyle}>
-                          {groupChip(group)}
-                          {crops.map(cropChip)}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </details>
-              );
-            })}
-        </SideSection>
-        <SideSection
-          title={`メーカーから探す（全${search.makers.length}社）`}
-          selected={selectedChips((filter) => filter.kind === "maker")}
-          filter={{
-            label: "メーカー名で絞り込み",
-            placeholder: "メーカー名で絞り込み",
-            empty: "該当するメーカーがありません",
-            items: search.makers.map((name) => ({
-              key: `maker:${name}`,
-              terms: [name],
-              node: chip({ kind: "maker", name }),
-            })),
-          }}
-        >
-          <div className={chipListStyle}>
-            {search.makers.map((name) => chip({ kind: "maker", name }))}
-          </div>
-        </SideSection>
-        <SideSection title="施用方法で探す" selected={selectedChips(isFilter("method"))}>
-          <div className={chipListStyle}>
-            {search.filters.filter((filter) => filter.category === "method").map(tag)}
-          </div>
-        </SideSection>
+        {sections}
       </div>
     </aside>
   );

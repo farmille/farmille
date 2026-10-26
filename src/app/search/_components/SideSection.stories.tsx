@@ -33,6 +33,7 @@ export const Open: Story = {
 export const NoFilter: Story = { args: { filter: undefined, note: undefined } };
 export const NoMatch: Story = {
   play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole("button", { name: /作物で探す/ }));
     await userEvent.type(within(canvasElement).getByRole("searchbox"), "該当なし");
   },
 };
