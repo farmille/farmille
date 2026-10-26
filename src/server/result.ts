@@ -48,6 +48,7 @@ const errorStatus = {
   pdf_reading_no_match: 422,
   pdf_reading_incomplete: 422,
   pdf_reading_material_changed: 409,
+  pdf_reading_unrecorded: 500,
 } satisfies Record<ErrorCode, number>;
 
 export function succeed<T>(data: T): Success<T> {

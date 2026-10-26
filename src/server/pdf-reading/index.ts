@@ -54,6 +54,9 @@ const DEADLINE_MS = 110_000;
 /** Server Action の本文と保存の RPC の上限（1MB）より小さく保つ。 */
 const INPUT_BYTES_MAX = 1_000_000;
 const SWEEP_LIMIT = 100;
+/** 適用の記録に失敗したときのやり直しの回数と間隔。 */
+const RECORD_RETRIES = 2;
+const RECORD_RETRY_MS = 500;
 
 export type PdfReadingDeps = {
   verifyHuman(token: string): Promise<boolean>;
@@ -80,6 +83,8 @@ export type PdfReadingDeps = {
   read(request: ReportReadingRequest): Promise<PdfExtraction<ReportReadingOutput>>;
   now(): number;
   newId(): string;
+  /** 適用の記録をやり直す前に待つ。 */
+  pause(ms: number): Promise<void>;
 };
 
 type Failure = Extract<PdfReadingResult, { ok: false }>;
@@ -108,7 +113,7 @@ async function sendToModel(
   // draft は、止めた時点で先行保存が済んでいればその結果
   | (Stopped & { draft: SavedDraft })
   | {
-      draft: NonNullable<SavedDraft>;
+      draft: Extract<SavedDraft, { saved: "input" }>;
       reading: { readingId: string; remaining: number };
       catalog: ReadingCatalog;
       extraction: PdfExtraction<ReportReadingOutput>;
@@ -127,7 +132,7 @@ async function sendToModel(
     const saved = await deps.drafts.save(request.input);
     if (!saved.ok) return { stopped: "conflict", message: saved.message, draft: null };
     // ここから後で止めても、画面はこの更新日時を取り込む（下書きの updated_at が進んだため）
-    const draft = { reportId: saved.reportId, updatedAt: saved.updatedAt };
+    const draft = { saved: "input" as const, reportId: saved.reportId, updatedAt: saved.updatedAt };
     const reading = await deps.quota.claim({
       userId,
       reportId: request.input.reportId,
@@ -254,14 +259,24 @@ export async function readPdfIntoDraft(
 
   const input = { ...applied.input, expectedUpdatedAt: saved.updatedAt };
   const fields = recordedFields(input, applied.fields);
-  const recorded = await deps.quota.applied({ readingId: reading.readingId, userId, fields });
-  if (!recorded.ok) console.error("[pdf-reading] 適用の記録に失敗", recorded.error);
-  return {
-    ok: true,
-    input,
-    marks: recorded.ok ? fields : [],
-    remaining: reading.remaining,
-  };
+  const application = { readingId: reading.readingId, userId, fields };
+  let recorded = await deps.quota.applied(application);
+  for (let retry = 0; retry < RECORD_RETRIES && !recorded.ok; retry += 1) {
+    await deps.pause(RECORD_RETRY_MS);
+    recorded = await deps.quota.applied(application);
+  }
+  if (!recorded.ok) {
+    // 値は下書きに保存済みなので、画面は読み取った入力に置き換える。succeeded のままなので提出時の確認は要る
+    console.error("[pdf-reading] 適用の記録に失敗", recorded.error);
+    return failure(
+      "pdf_reading_unrecorded",
+      deps,
+      { saved: "read", input },
+      undefined,
+      reading.remaining,
+    );
+  }
+  return { ok: true, input, marks: fields, remaining: reading.remaining };
 }
 
 async function loadReadingCatalog(
@@ -339,6 +354,7 @@ export async function createPdfReadingDeps(userId: string): Promise<PdfReadingDe
     read: (request) => readReportPdf((call) => extractFromPdf(anthropic, call), request),
     now: Date.now,
     newId: () => crypto.randomUUID(),
+    pause: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
   };
 }
 

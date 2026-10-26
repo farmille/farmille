@@ -391,24 +391,31 @@ export function ReportPageForm({
     }
   }
 
-  // 読み取りの結果はサーバーの下書きに保存済みなので、画面の入力と保存済みの控えをまとめて置き換える
+  // 読み取った値はサーバーの下書きに保存済みなので、画面の入力と保存済みの控えをまとめて置き換える
+  function adoptRead(next: UsageReportInput, marks: PdfReadingField[]) {
+    const nextItems = itemsFromInput(next);
+    setInput(next);
+    setItems(nextItems);
+    setSaved(JSON.stringify(inputWithItems(next, nextItems)));
+    setReadMarks(marks);
+    setCheckRequired(true);
+  }
+
   function applyReading(result: PdfReadingResult) {
     if (result.remaining !== null) setRemaining(result.remaining);
     if (!result.ok) {
-      // 読み取りの前に今の入力を下書きへ保存していれば、その更新日時に揃える（揃えないと次の保存が競合する）
+      // 失敗しても、サーバーの下書きを保存した分には揃える（揃えないと次の保存が競合する）
       const draft = result.savedDraft;
-      if (draft === null) return;
-      const stamp = { reportId: draft.reportId, expectedUpdatedAt: draft.updatedAt };
-      setInput((current) => ({ ...current, ...stamp }));
-      setSaved(JSON.stringify({ ...inputWithItems(input, items), ...stamp }));
+      if (draft?.saved === "input") {
+        const stamp = { reportId: draft.reportId, expectedUpdatedAt: draft.updatedAt };
+        setInput((current) => ({ ...current, ...stamp }));
+        setSaved(JSON.stringify({ ...inputWithItems(input, items), ...stamp }));
+      }
+      // 値は入ったが根拠の記録に失敗したので、印は出さない（文言はダイアログに出したまま）
+      if (draft?.saved === "read") adoptRead(draft.input, []);
       return;
     }
-    const nextItems = itemsFromInput(result.input);
-    setInput(result.input);
-    setItems(nextItems);
-    setSaved(JSON.stringify(inputWithItems(result.input, nextItems)));
-    setReadMarks(result.marks);
-    setCheckRequired(true);
+    adoptRead(result.input, result.marks);
     setFailure(null);
     setReadingOpen(false);
     toast("PDF読み取りの内容を下書きに保存しました。元のPDFと照らし合わせて確かめてください。", {

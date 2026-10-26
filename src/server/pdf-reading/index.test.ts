@@ -68,6 +68,8 @@ function fakeDeps(
     sweep?: "throws";
     /** 読み取りの間に、別の画面で下書きの資材をこの id に変えて保存した。 */
     materialChangedTo?: string;
+    /** 適用の記録の結果を、呼ばれた順に返す（足りなければ成功）。 */
+    applies?: ReadonlyArray<"ok" | "fails">;
   } = {},
 ) {
   const calls: string[] = [];
@@ -75,6 +77,7 @@ function fakeDeps(
   const finished: Array<{ status: string; errorCode?: string }> = [];
   const recorded: Array<{ fieldKey: string; value: string }> = [];
   const saves = [...(overrides.saves ?? ["ok", "ok"])];
+  const applies = [...(overrides.applies ?? [])];
   let draft: UsageReportInput | null = null;
   let id = 0;
   let clock = 0;
@@ -146,6 +149,7 @@ function fakeDeps(
       },
       async applied(application) {
         calls.push("applied");
+        if ((applies.shift() ?? "ok") === "fails") return fail("internal");
         recorded.push(...application.fields);
         return succeed(null);
       },
@@ -156,6 +160,9 @@ function fakeDeps(
     },
     now: () => 0,
     newId: () => `00000000-0000-4000-8000-${String((id += 1)).padStart(12, "0")}`,
+    async pause() {
+      calls.push("pause");
+    },
   };
   return { deps, calls, saved, finished, recorded };
 }
@@ -270,6 +277,7 @@ describe("readPdfIntoDraft", () => {
       if (result.ok) throw new Error("失敗するはず");
       expect(result.error).toBe(error);
       expect(result.savedDraft).toEqual({
+        saved: "input",
         reportId: request.input.reportId,
         updatedAt: "2026-10-25T00:00:01.000Z",
       });
@@ -305,7 +313,11 @@ describe("readPdfIntoDraft", () => {
         error,
         message: errorMessageJa[error],
         remaining: 7,
-        savedDraft: { reportId: request.input.reportId, updatedAt: "2026-10-25T00:00:01.000Z" },
+        savedDraft: {
+          saved: "input",
+          reportId: request.input.reportId,
+          updatedAt: "2026-10-25T00:00:01.000Z",
+        },
       });
       expect(finished).toEqual([{ status: "failed", errorCode: reason }]);
       expect(calls.indexOf("discard")).toBeLessThan(calls.indexOf("finish"));
@@ -343,6 +355,35 @@ describe("readPdfIntoDraft", () => {
     const result = await readPdfIntoDraft(makeRequest(), userId, deps);
     expect(result.ok ? null : result.error).toBe("pdf_reading_incomplete");
     expect(saved).toHaveLength(1);
+  });
+
+  it("適用の記録に失敗したら、間をおいて2回までやり直す", async () => {
+    const { deps, calls, recorded } = fakeDeps({ applies: ["fails", "fails"] });
+    const result = await readPdfIntoDraft(makeRequest(), userId, deps);
+    expect(calls.slice(calls.indexOf("applied"))).toEqual([
+      "applied",
+      "pause",
+      "applied",
+      "pause",
+      "applied",
+    ]);
+    if (!result.ok) throw new Error(result.message);
+    expect(result.marks).toEqual(recorded);
+    expect(result.marks.length).toBeGreaterThan(0);
+  });
+
+  it("3回とも記録できなければ、値は下書きに入ったまま、根拠を記録できなかった失敗を返す", async () => {
+    const { deps, calls, finished } = fakeDeps({ applies: ["fails", "fails", "fails"] });
+    const result = await readPdfIntoDraft(makeRequest(), userId, deps);
+    expect(calls.filter((call) => call === "applied")).toHaveLength(3);
+    expect(finished).toEqual([{ status: "succeeded", errorCode: undefined }]);
+    if (result.ok) throw new Error("失敗するはず");
+    expect(result.error).toBe("pdf_reading_unrecorded");
+    expect(result.message).toBe(errorMessageJa.pdf_reading_unrecorded);
+    expect(result.remaining).toBe(7);
+    if (result.savedDraft?.saved !== "read") throw new Error("読み取った入力を返していない");
+    expect(result.savedDraft.input.cultivationEnvironment).toBe("施設");
+    expect(result.savedDraft.input.expectedUpdatedAt).toBe("2026-10-25T00:00:02.000Z");
   });
 
   it("保存が別の保存と重なったら、最新の下書きに写し直して1回だけやり直す", async () => {
