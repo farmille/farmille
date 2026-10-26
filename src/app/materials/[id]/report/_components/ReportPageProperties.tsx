@@ -21,7 +21,7 @@ import type { CropOption } from "@/server/queries/usage-report-form";
 
 import { css, cva } from "../../../../../../styled-system/css";
 
-import { REPORT_SHORT_MAX, type ReportMaterialSummary } from "./report-page-state";
+import { latestRequests, REPORT_SHORT_MAX, type ReportMaterialSummary } from "./report-page-state";
 
 export type ReportEffectOption = { id: string; name: string; categoryName: string };
 
@@ -228,6 +228,11 @@ export function ReportPageProperties({
   const [picker, setPicker] = useState<Picker>("");
   const [query, setQuery] = useState("");
   const [materials, setMaterials] = useState<PostingMaterial[]>([]);
+  const [materialChecks] = useState(latestRequests);
+  const closeMaterialPicker = () => {
+    materialChecks.cancel();
+    setPicker("");
+  };
   // 選んだ資材に同じ利用者の下書きか確認中のレポートがあって、切り替えなかった資材
   const [blocked, setBlocked] = useState<{
     material: PostingMaterial;
@@ -274,9 +279,12 @@ export function ReportPageProperties({
   }
 
   async function pickMaterial(item: PostingMaterial) {
+    // 確かめている間に別の資材を押すと応答が前後するので、最後に押した資材の応答だけを使う
+    const request = materialChecks.start();
     setBlocked(null);
     try {
       const result = await findOtherReportForMaterialAction(item.id, input.reportId);
+      if (!materialChecks.isLatest(request)) return;
       if (!result.ok) {
         onMessage("選んだ資材のレポートを確かめられませんでした。");
         return;
@@ -286,7 +294,8 @@ export function ReportPageProperties({
         return;
       }
     } catch {
-      onMessage("選んだ資材のレポートを確かめられませんでした。通信状態を確認してください。");
+      if (materialChecks.isLatest(request))
+        onMessage("選んだ資材のレポートを確かめられませんでした。通信状態を確認してください。");
       return;
     }
     onMaterialChange({ id: item.id, name: item.name, manufacturerName: item.manufacturer_name });
@@ -499,7 +508,7 @@ export function ReportPageProperties({
 
       <Dialog
         open={picker === "material"}
-        onOpenChange={(next) => !next && setPicker("")}
+        onOpenChange={(next) => !next && closeMaterialPicker()}
         size="sheet"
         title="資材を選ぶ"
       >
@@ -530,7 +539,7 @@ export function ReportPageProperties({
           <button
             type="button"
             className={itemRecipe({ current: true })}
-            onClick={() => setPicker("")}
+            onClick={closeMaterialPicker}
           >
             {material.name} ✓
             <span
@@ -548,7 +557,9 @@ export function ReportPageProperties({
             key={item.id}
             type="button"
             className={itemRecipe({ current: item.id === input.materialId })}
-            onClick={() => (item.id === input.materialId ? setPicker("") : void pickMaterial(item))}
+            onClick={() =>
+              item.id === input.materialId ? closeMaterialPicker() : void pickMaterial(item)
+            }
           >
             {item.name}
             <span

@@ -14,6 +14,7 @@ import {
   inputWithItems,
   itemsFromInput,
   itemsWithPlots,
+  latestRequests,
   otherOpenReport,
   reportPageChecks,
   reportPageItemDone,
@@ -255,5 +256,21 @@ describe("資材を選び直す前の確かめ", () => {
   it("下書きが無いか、今の下書きなら切り替える", () => {
     expect(otherOpenReport({ draft: null, submitted: [] }, reportId)).toBeNull();
     expect(otherOpenReport({ draft: { reportId }, submitted: [] }, reportId)).toBeNull();
+  });
+});
+
+describe("続けて選んだ資材の確かめ", () => {
+  it("応答が前後しても、最後に選んだ資材の応答だけを使い、閉じたらどれも使わない", () => {
+    const requests = latestRequests();
+    const chosen: string[] = [];
+    const a = requests.start();
+    const b = requests.start();
+    // B の応答が先に返り、A の応答が後から返る
+    if (requests.isLatest(b)) chosen.push("B");
+    if (requests.isLatest(a)) chosen.push("A");
+    expect(chosen).toEqual(["B"]);
+    const c = requests.start();
+    requests.cancel();
+    expect(requests.isLatest(c)).toBe(false);
   });
 });

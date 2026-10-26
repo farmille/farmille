@@ -370,6 +370,21 @@ function varietiesWithoutPlots(input: UsageReportInput, errors: string[]): strin
 }
 
 /**
+ * 続けて始めた問い合わせのうち、最後に始めたものかを見分ける番号。
+ * 前の問い合わせの応答が後から返っても使わない。cancel は、どの応答も使わないようにする。
+ */
+export function latestRequests() {
+  let latest = 0;
+  return {
+    start: () => ++latest,
+    isLatest: (request: number) => request === latest,
+    cancel: () => {
+      latest += 1;
+    },
+  };
+}
+
+/**
  * 選び直した資材にある、同じ利用者の別のレポート。確認中のレポートか、今の下書きでない下書き。
  * あれば資材を切り替えない（切り替えて保存すると同じ資材に下書きが2つでき、前の下書きを開けなくなる）。
  */
