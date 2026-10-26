@@ -1,11 +1,28 @@
+import * as v from "valibot";
+
 import {
   reportNeedsMaterialAcks,
+  UsageReportInputSchema,
   validateUsageReportSubmission,
   type UsageReportInput,
 } from "@/lib/usage-report";
 import { graphWithPlots } from "@/lib/usage-report-plots";
 
-export type ReportMaterialSummary = { id: string; name: string; manufacturerName: string };
+const ReportMaterialSummarySchema = v.object({
+  id: v.pipe(v.string(), v.uuid()),
+  name: v.string(),
+  manufacturerName: v.string(),
+});
+export type ReportMaterialSummary = v.InferOutput<typeof ReportMaterialSummarySchema>;
+
+/**
+ * 保存前の入力の控え。控えは開いた画面の資材の URL に置くので、資材を選び直した入力も戻せるよう、
+ * 選んだ資材の表示に使う名前も持つ。資材と入力の資材が食い違う控えは読まずに捨てる。
+ */
+export const ReportPageBackupSchema = v.pipe(
+  v.object({ material: ReportMaterialSummarySchema, input: UsageReportInputSchema }),
+  v.check((backup) => backup.material.id === backup.input.materialId),
+);
 
 /** 調査項目に差し込んだ画像（編集後の画像だけを保存する）。 */
 export type ReportPageImage = { id: string; url: string; caption: string };

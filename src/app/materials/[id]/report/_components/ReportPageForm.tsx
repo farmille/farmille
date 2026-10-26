@@ -15,7 +15,6 @@ import { toast } from "@/components/Toaster";
 import {
   createBlankUsageReport,
   reportNeedsMaterialAcks,
-  UsageReportInputSchema,
   type UsageReportInput,
 } from "@/lib/usage-report";
 import { reportPlotLayout, withAutoPlotNames } from "@/lib/usage-report-plots";
@@ -37,6 +36,7 @@ import {
   itemsFromInput,
   itemsWithPlots,
   REPORT_BODY_MAX,
+  ReportPageBackupSchema,
   reportImageRoom,
   reportLegacyMedia,
   reportLengthNote,
@@ -254,19 +254,19 @@ export function ReportPageForm({
   usePersistedInput({
     name: "report",
     path: reportPath,
-    schema: UsageReportInputSchema,
-    unsaved: dirty && !submitted ? payload : null,
-    restore: (restored) => {
-      if (restored.materialId !== material.id) return;
+    schema: ReportPageBackupSchema,
+    unsaved: dirty && !submitted ? { material: currentMaterial, input: payload } : null,
+    restore: (backup) => {
       // 控えのあとに別の画面で下書きが更新されていたら、控えは戻さない（戻すと保存のたびに競合する）
-      if (restored.expectedUpdatedAt !== input.expectedUpdatedAt) {
+      if (backup.input.expectedUpdatedAt !== input.expectedUpdatedAt) {
         setFailure(
           "別の画面で更新された下書きを開きました。この画面で保存していなかった入力は戻していません。",
         );
         return;
       }
-      setInput(restored);
-      setItems(itemsFromInput(restored));
+      setCurrentMaterial(backup.material);
+      setInput(backup.input);
+      setItems(itemsFromInput(backup.input));
     },
   });
 

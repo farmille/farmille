@@ -267,6 +267,8 @@ export function ReportPageProperties({
   }
 
   function open(next: Picker) {
+    // 控えから戻した資材は、まだ登録作物と効果を読んでいないので、候補を開くときに読む
+    if (next === "crop" || next === "purpose") void loadClasses(input.materialId);
     setQuery("");
     setMaterials([]);
     setPicker(next);
