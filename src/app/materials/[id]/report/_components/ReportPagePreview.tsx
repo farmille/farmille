@@ -7,7 +7,11 @@ import { ReportBars, reportBarGroups, ReportGraphNote } from "@/components/Repor
 import { ReportPlotList } from "@/components/ReportPlotList";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
-import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
+import {
+  reportSectionHeading,
+  reportVarietyNames,
+  type UsageReportInput,
+} from "@/lib/usage-report";
 import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
 
 import { css } from "../../../../../../styled-system/css";
@@ -185,16 +189,16 @@ export function ReportPagePreview({
           <div className={css({ textStyle: "note", color: "text.muted" })}>{manufacturerName}</div>
         </div>
 
-        <h2 className={h2}>結果・感想</h2>
+        <h2 className={h2}>{reportSectionHeading(input, "results")}</h2>
         <Text value={input.observedChange} />
         {legacy("results")}
 
-        <h2 className={h2}>期待した効果</h2>
+        <h2 className={h2}>{reportSectionHeading(input, "effects")}</h2>
         <Text value={input.purposeTags.join("、")} empty="（未選択）" />
         {input.purposeNote.trim() && <Text value={input.purposeNote} />}
         {legacy("effects")}
 
-        <h2 className={h2}>栽培条件・施用時期</h2>
+        <h2 className={h2}>{reportSectionHeading(input, "conditions")}</h2>
         <dl className={facts}>
           <dt>地域</dt>
           <dd>
@@ -216,7 +220,7 @@ export function ReportPagePreview({
         {legacy("conditions")}
 
         <h2 className={h2}>比較・使用結果</h2>
-        <h3 className={h3}>比べた区</h3>
+        <h3 className={h3}>{reportSectionHeading(input, "plots")}</h3>
         <ReportPlotList
           layout={layout}
           commonDescription={input.commonPlotDescription}
@@ -226,7 +230,9 @@ export function ReportPagePreview({
         {shown.length === 0 && <p className={none}>（調査項目ごとの結果が未記入）</p>}
         {shown.map((item) => (
           <section key={item.id}>
-            <h3 className={h3}>使用結果の詳細：{item.name.trim() || "調査項目"}</h3>
+            <h3 className={h3}>
+              {reportSectionHeading(input, "measurements")}：{item.name.trim() || "調査項目"}
+            </h3>
             <ReportItemImages media={reportPageItemImages(item)} alt={item.name} />
             {item.mode === "numeric" && (
               <>
@@ -250,7 +256,7 @@ export function ReportPagePreview({
         {legacy("measurements")}
         {(input.documents.length > 0 || documentMedia.length > 0) && (
           <>
-            <h2 className={h2}>関連資料</h2>
+            <h2 className={h2}>{reportSectionHeading(input, "documents")}</h2>
             {input.documents.length > 0 && (
               <ul className={documentList}>
                 {input.documents.map((document) => {

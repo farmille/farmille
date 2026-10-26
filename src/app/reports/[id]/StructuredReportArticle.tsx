@@ -7,6 +7,8 @@ import { PREFECTURES } from "@/lib/prefectures";
 import {
   REPORT_SECTIONS,
   reportMeasurementGroups,
+  reportSectionHeading,
+  type ReportSection,
   type UsageReportInput,
 } from "@/lib/usage-report";
 import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
@@ -14,8 +16,6 @@ import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
 import { css } from "../../../../styled-system/css";
 import { ReadingHeading, ReadingProse } from "../../articles/_components/Reading";
 import { ReportFigures, ReportItemImages } from "./ReportFigures";
-
-type Section = (typeof REPORT_SECTIONS)[number]["value"];
 
 const documentList = css({
   m: "0",
@@ -39,10 +39,8 @@ export function StructuredReportArticle({
   documentUrls: { id: string; url: string }[];
 }) {
   const layout = reportPlotLayout(input, materialName);
-  const heading = (section: Section, fallback: string) =>
-    input.headings.find((item) => item.section === section)?.title || fallback;
   // 調査項目に差し込んだ画像は項目ごとに出し、節の最後には調査項目に属さない旧形式の写真だけを出す
-  const mediaOf = (section: Section) =>
+  const mediaOf = (section: ReportSection) =>
     input.media.filter((media) => media.section === section && !media.measurementId);
   const prefecture = PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name;
   const stages = input.timingStages.map((stage) => APPLICATION_TIMINGS[stage]).join("、");
@@ -58,9 +56,9 @@ export function StructuredReportArticle({
 
   return (
     <>
-      {REPORT_SECTIONS.map(({ value: section, title }) => {
+      {REPORT_SECTIONS.map(({ value: section }) => {
         const media = mediaOf(section);
-        const h = heading(section, title);
+        const h = reportSectionHeading(input, section);
         switch (section) {
           case "results":
             return (

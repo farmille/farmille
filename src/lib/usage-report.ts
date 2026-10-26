@@ -12,6 +12,16 @@ export const REPORT_SECTIONS = [
   { value: "documents", title: "関連資料" },
 ] as const;
 const section = v.picklist(REPORT_SECTIONS.map(({ value }) => value));
+export type ReportSection = (typeof REPORT_SECTIONS)[number]["value"];
+/** 記事の節の見出し。保存済みの見出しがあればそれを、無ければ決まった見出しを使う。 */
+export function reportSectionHeading(
+  input: Pick<UsageReportInput, "headings">,
+  section: ReportSection,
+): string {
+  const fallback = REPORT_SECTIONS.find(({ value }) => value === section);
+  if (fallback === undefined) throw new Error(`記事の節が見つかりません：${section}`);
+  return input.headings.find((item) => item.section === section)?.title || fallback.title;
+}
 export const REPORT_PLOT_LIMIT = 40;
 export const REPORT_MEASUREMENT_LIMIT = 30;
 const named = v.object({ id: uuid, name: short });
