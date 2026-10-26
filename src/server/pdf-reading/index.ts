@@ -157,16 +157,21 @@ async function sendToModel(
   }
 }
 
-/** 下書きの最新の内容に読み取りを写し、保存できる大きさかを確かめる。 */
+/**
+ * 下書きの最新の内容に読み取りを写し、保存できる大きさかを確かめる。
+ * 読み取りの間に別の画面で資材が変わっていたら、読み取った資材の区や値を新しい資材の下書きに写さない。
+ */
 async function applyToLatest(
-  reportId: string,
+  request: PdfReadingRequest,
   output: ReportReadingOutput,
   catalog: ReadingCatalog,
   deps: PdfReadingDeps,
 ): Promise<Stopped | AppliedReading> {
-  const latest = await deps.drafts.load(reportId);
+  const latest = await deps.drafts.load(request.input.reportId);
   if (!latest.ok) return { stopped: latest.error };
   if (latest.data === null) return { stopped: "not_found" };
+  if (latest.data.materialId !== request.input.materialId)
+    return { stopped: "pdf_reading_material_changed" };
   const applied = applyPdfReading(latest.data, output, catalog, () => deps.newId());
   if (!applied.ok) return { stopped: applied.error };
   const fits =
@@ -230,7 +235,7 @@ export async function readPdfIntoDraft(
     );
   }
 
-  let applied = await applyToLatest(request.input.reportId, extraction.output, catalog, deps);
+  let applied = await applyToLatest(request, extraction.output, catalog, deps);
   if ("stopped" in applied) {
     await finish({ status: "failed", errorCode: applied.stopped });
     return counted(applied.stopped);
@@ -241,7 +246,7 @@ export async function readPdfIntoDraft(
   let saved = await deps.drafts.save(applied.input);
   if (!saved.ok) {
     // 別の画面の保存と重なったときは、最新の下書きに写し直して1回だけやり直す
-    applied = await applyToLatest(request.input.reportId, extraction.output, catalog, deps);
+    applied = await applyToLatest(request, extraction.output, catalog, deps);
     if ("stopped" in applied) return counted(applied.stopped);
     saved = await deps.drafts.save(applied.input);
   }

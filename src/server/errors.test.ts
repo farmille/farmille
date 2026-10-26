@@ -36,6 +36,7 @@ describe("errorMessageJa", () => {
       "pdf_reading_failed",
       "pdf_reading_no_match",
       "pdf_reading_incomplete",
+      "pdf_reading_material_changed",
     ];
 
     expect(Object.keys(errorMessageJa)).toEqual(codes);

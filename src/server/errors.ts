@@ -32,6 +32,7 @@ export const ERROR_CODES = [
   "pdf_reading_failed",
   "pdf_reading_no_match",
   "pdf_reading_incomplete",
+  "pdf_reading_material_changed",
 ] as const;
 
 export const ErrorCodeSchema = v.picklist(ERROR_CODES);
@@ -79,6 +80,8 @@ export const errorMessageJa = {
     "PDFの中に、投稿する資材を使った試験が見つかりませんでした。読み取る試験に、PDFでの資材の呼び名と試験の番号を書いてお試しいただくか、手入力で記入してください。入力した内容はそのまま残っています。",
   pdf_reading_incomplete:
     "PDFの内容が多く、最後まで読み取れませんでした。読み取る試験で作物・品種・試験をしぼって、もう一度お試しください。入力した内容はそのまま残っています。手入力で続けられます。",
+  pdf_reading_material_changed:
+    "読み取りの間に、別の画面でこの下書きの資材が変わったため、読み取った内容を入れませんでした。入力した内容はそのまま残っています。手入力で続けられます。",
 } satisfies Record<ErrorCode, string>;
 
 /** メーカーダッシュボードの Server Action が返す成功文言。 */

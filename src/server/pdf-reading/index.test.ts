@@ -66,6 +66,8 @@ function fakeDeps(
     extraction?: PdfExtraction<ReportReadingOutput>;
     saves?: ReadonlyArray<"ok" | "conflict">;
     sweep?: "throws";
+    /** 読み取りの間に、別の画面で下書きの資材をこの id に変えて保存した。 */
+    materialChangedTo?: string;
   } = {},
 ) {
   const calls: string[] = [];
@@ -118,7 +120,9 @@ function fakeDeps(
       },
       async load() {
         calls.push("load");
-        return succeed(draft);
+        const { materialChangedTo } = overrides;
+        if (draft === null || materialChangedTo === undefined) return succeed(draft);
+        return succeed({ ...draft, materialId: materialChangedTo });
       },
     },
     quota: {
@@ -317,6 +321,17 @@ describe("readPdfIntoDraft", () => {
     expect(result.ok ? null : result.error).toBe("pdf_reading_no_match");
     expect(finished).toEqual([{ status: "failed", errorCode: "pdf_reading_no_match" }]);
     expect(saved).toHaveLength(1);
+  });
+
+  it("読み取りの間に下書きの資材が変わっていたら、数えたうえで写さずに失敗にする", async () => {
+    const { deps, saved, finished, calls } = fakeDeps({
+      materialChangedTo: "00000000-0000-4000-8000-000000000999",
+    });
+    const result = await readPdfIntoDraft(makeRequest(), userId, deps);
+    expect(result.ok ? null : result.error).toBe("pdf_reading_material_changed");
+    expect(finished).toEqual([{ status: "failed", errorCode: "pdf_reading_material_changed" }]);
+    expect(saved).toHaveLength(1);
+    expect(calls).not.toContain("applied");
   });
 
   it("保存できない大きさになるなら、範囲をしぼるよう返す", async () => {

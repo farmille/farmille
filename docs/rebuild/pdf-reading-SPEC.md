@@ -93,6 +93,7 @@ PDFは非公開の置き場`pdf-reading-sources`に、本人のフォルダ（`<
 | AI | 途中で止まった（`max_tokens`） | 数える | `pdf_reading_incomplete` |
 | 写像 | 投稿した資材の試験が無い | 数える | `pdf_reading_no_match` |
 | 写像 | 保存できない大きさ（入力の上限か1MB） | 数える | `pdf_reading_incomplete` |
+| 写像 | 読み取りの間に、別の画面で下書きの資材が変わった | 数える | `pdf_reading_material_changed` |
 | 保存 | 競合（読み直して1回やり直しても） | 数える | `conflict` |
 
 どの文言にも、入力した内容が残っていて手入力で続けられることを入れる。
