@@ -136,13 +136,20 @@ describe("区の組み合わせ", () => {
     expect(reportPlotEdits.addVariety(added, "新藍", posted)).toBe(added);
   });
 
-  it("区は40まで", () => {
-    let input = blank();
-    for (const name of ["A", "B", "C", "D", "E", "F", "G", "H", "I"])
-      input = reportPlotEdits.addComparedMaterial(input, name, posted);
-    for (let i = 0; i < 4; i += 1) input = reportPlotEdits.addVariety(input, `品種${i}`, posted);
-    expect(input.plots).toHaveLength(REPORT_PLOT_LIMIT);
-    expect(plotPlan(input, posted).full).toBe(true);
+  it("要る区が上限に収まらない追加は断り、品種も資材も区も足さない", () => {
+    let input = reportPlotEdits.addVariety(blank(), "アイコ", posted);
+    for (let i = 0; i < 17; i += 1)
+      input = reportPlotEdits.addComparedMaterial(input, `資材${i}`, posted);
+    const [first] = input.varieties;
+    input = reportPlotEdits.addPlot(input, first?.id ?? null, { kind: "posted" }, posted);
+    expect(input.plots).toHaveLength(REPORT_PLOT_LIMIT - 1);
+    // 品種が2つなので、比較した資材を1つ足すと区が2つ増える
+    expect(reportPlotEdits.addComparedMaterial(input, "ノビテク", posted)).toBe(input);
+    expect(reportPlotEdits.addVariety(input, "千果", posted)).toBe(input);
+    const full = reportPlotEdits.addPlot(input, first?.id ?? null, { kind: "posted" }, posted);
+    expect(full.plots).toHaveLength(REPORT_PLOT_LIMIT);
+    expect(plotPlan(full, posted).full).toBe(true);
+    expect(reportPlotEdits.addPlot(full, first?.id ?? null, { kind: "posted" }, posted)).toBe(full);
   });
 });
 

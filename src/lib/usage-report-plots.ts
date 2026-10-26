@@ -157,16 +157,16 @@ function plotOrder(input: UsageReportInput, postedName: string) {
   };
 }
 
-/** 組み合わせの区を、品種と資材の並びの位置に足す。40区を超える分は足さない。 */
+/** 組み合わせの区を、品種と資材の並びの位置に足す。全部が上限に収まらなければ1つも足さず null を返す。 */
 function insertPlots(
   input: UsageReportInput,
   combos: { varietyId: string | null; treatment: ReportPlotTreatment }[],
   postedName: string,
-): UsageReportInput {
+): UsageReportInput | null {
+  if (input.plots.length + combos.length > REPORT_PLOT_LIMIT) return null;
   const order = plotOrder(input, postedName);
   let plots = input.plots;
   for (const { varietyId, treatment } of combos) {
-    if (plots.length >= REPORT_PLOT_LIMIT) break;
     const plot = createReportPlot(varietyId, treatment);
     const at = plots.findIndex((item) => order(item) > order(plot));
     plots = at < 0 ? [...plots, plot] : plots.toSpliced(at, 0, plot);
@@ -174,7 +174,10 @@ function insertPlots(
   return { ...input, plots };
 }
 
-/** 区の組み合わせを変える操作。どれも変えた後に自動の名前を付け直す。 */
+/**
+ * 区の組み合わせを変える操作。どれも変えた後に自動の名前を付け直す。
+ * 区を足す操作は、要る区が上限に収まらなければ品種・資材・区のどれも足さず、渡した input をそのまま返す。
+ */
 export const reportPlotEdits = {
   toggle(
     input: UsageReportInput,
@@ -187,7 +190,7 @@ export const reportPlotEdits = {
     const next = checked
       ? insertPlots(input, [{ varietyId, treatment }], postedName)
       : { ...input, plots: input.plots.filter((plot) => plotComboKey(plot) !== key) };
-    return withAutoPlotNames(input, next, postedName);
+    return next === null ? input : withAutoPlotNames(input, next, postedName);
   },
 
   /** 品種を足し、その品種で今ある資材の区をすべて作る。 */
@@ -203,7 +206,7 @@ export const reportPlotEdits = {
       })),
       postedName,
     );
-    return withAutoPlotNames(input, next, postedName);
+    return next === null ? input : withAutoPlotNames(input, next, postedName);
   },
 
   /** 品種とその品種の区を外す。品種は1つ以上残す。 */
@@ -259,7 +262,7 @@ export const reportPlotEdits = {
       plotRows(added).map((variety) => ({ varietyId: variety?.id ?? null, treatment })),
       postedName,
     );
-    return withAutoPlotNames(input, next, postedName);
+    return next === null ? input : withAutoPlotNames(input, next, postedName);
   },
 
   removeComparedMaterial(
@@ -286,7 +289,7 @@ export const reportPlotEdits = {
     postedName: string,
   ): UsageReportInput {
     const next = insertPlots(input, [{ varietyId, treatment }], postedName);
-    return withAutoPlotNames(input, next, postedName);
+    return next === null ? input : withAutoPlotNames(input, next, postedName);
   },
 
   removePlot(input: UsageReportInput, plotId: string, postedName: string): UsageReportInput {

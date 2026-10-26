@@ -76,6 +76,11 @@ const plotAdderSelect = css({ flex: "[1 1 9em]", minW: "0" });
 
 const NO_VARIETY = "none";
 
+const limitError = css({ m: "0", mt: "1.5", textStyle: "supporting", color: "accent.danger" });
+
+/** 区の上限で断った追加。どの操作の下に案内を出すかに使う。 */
+type Refusal = "品種" | "比較した資材" | "区";
+
 const EXAMPLES = {
   untreated:
     "調査した範囲と、資材の使い方（使っていなければ「資材なし」）\n例）1区10株、3反復。資材なし。かん水と施肥は処理区と同じ。",
@@ -96,14 +101,14 @@ function Adder({
   placeholder: string;
   action: string;
   disabled: boolean;
-  onAdd: (name: string) => void;
+  /** 足せたら true。断られたら書いた名前を残す。 */
+  onAdd: (name: string) => boolean;
 }) {
   const [value, setValue] = useState("");
   const add = () => {
     const name = value.trim();
     if (name === "" || disabled) return;
-    onAdd(name);
-    setValue("");
+    if (onAdd(name)) setValue("");
   };
   return (
     <div className={adder}>
@@ -210,12 +215,33 @@ export function ReportPagePlots({
   onChange: (next: UsageReportInput) => void;
   missing: boolean;
 }) {
+  const [refused, setRefused] = useState<Refusal | null>(null);
+  const change = (next: UsageReportInput) => {
+    setRefused(null);
+    onChange(next);
+  };
+  // 区を足す操作は、要る区が上限に収まらないと、渡した input をそのまま返す
+  const add = (next: UsageReportInput, what: Refusal) => {
+    if (next === input) {
+      setRefused(what);
+      return false;
+    }
+    change(next);
+    return true;
+  };
+  const refusal = (what: Refusal) =>
+    refused === what && (
+      <p className={limitError} role="alert">
+        {what}を足すと区が{REPORT_PLOT_LIMIT}
+        を超えるため、足せません。区を減らしてから足してください。
+      </p>
+    );
   const plan = plotPlan(input, postedName);
   const layout = reportPlotLayout(input, postedName);
   const common = plan.showMatrix || input.commonPlotDescription.trim() !== "";
   const numbered = new Map(input.plots.map((plot, index) => [plot.id, index + 1]));
   const update = (id: string, patch: Partial<Pick<Plot, "name" | "description">>) =>
-    onChange({
+    change({
       ...input,
       plots: input.plots.map((plot) => (plot.id === id ? { ...plot, ...patch } : plot)),
     });
@@ -237,7 +263,7 @@ export function ReportPagePlots({
               type="button"
               className={removeButton}
               aria-label={`区${number}を削除`}
-              onClick={() => onChange(reportPlotEdits.removePlot(input, plot.id, postedName))}
+              onClick={() => change(reportPlotEdits.removePlot(input, plot.id, postedName))}
             >
               <Icon name="close" />
             </button>
@@ -257,7 +283,7 @@ export function ReportPagePlots({
               onValueChange={(key) => {
                 const material = plan.materials.find((item) => item.key === key);
                 if (material !== undefined)
-                  onChange(
+                  change(
                     reportPlotEdits.setTreatment(input, plot.id, material.treatment, postedName),
                   );
               }}
@@ -311,7 +337,7 @@ export function ReportPagePlots({
                 <Chip
                   key={variety.id}
                   onRemove={() =>
-                    onChange(reportPlotEdits.removeVariety(input, variety.id, postedName))
+                    change(reportPlotEdits.removeVariety(input, variety.id, postedName))
                   }
                   removeLabel={`${name}を外す`}
                 >
@@ -327,8 +353,9 @@ export function ReportPagePlots({
             placeholder="品種名"
             action="品種を足す"
             disabled={input.varieties.length >= REPORT_PLOT_LIMIT}
-            onAdd={(name) => onChange(reportPlotEdits.addVariety(input, name, postedName))}
+            onAdd={(name) => add(reportPlotEdits.addVariety(input, name, postedName), "品種")}
           />
+          {refusal("品種")}
         </>
       )}
 
@@ -346,7 +373,7 @@ export function ReportPagePlots({
             <Chip
               key={key}
               onRemove={() =>
-                onChange(
+                change(
                   reportPlotEdits.removeComparedMaterial(
                     input,
                     treatment.comparedMaterialId,
@@ -368,8 +395,11 @@ export function ReportPagePlots({
         placeholder="比較した資材の名前"
         action="比較した資材を足す"
         disabled={input.comparedMaterials.length >= REPORT_PLOT_LIMIT}
-        onAdd={(name) => onChange(reportPlotEdits.addComparedMaterial(input, name, postedName))}
+        onAdd={(name) =>
+          add(reportPlotEdits.addComparedMaterial(input, name, postedName), "比較した資材")
+        }
       />
+      {refusal("比較した資材")}
 
       {plan.showMatrix && (
         <>
@@ -402,7 +432,7 @@ export function ReportPagePlots({
                               checked={checked}
                               disabled={!checked && plan.full}
                               onCheckedChange={(next) =>
-                                onChange(
+                                add(
                                   reportPlotEdits.toggle(
                                     input,
                                     variety?.id ?? null,
@@ -410,6 +440,7 @@ export function ReportPagePlots({
                                     next,
                                     postedName,
                                   ),
+                                  "区",
                                 )
                               }
                             >
@@ -442,7 +473,7 @@ export function ReportPagePlots({
           maxLength={REPORT_BODY_MAX}
           description={reportLengthNote(input.commonPlotDescription, REPORT_BODY_MAX)}
           value={input.commonPlotDescription}
-          onChange={(event) => onChange({ ...input, commonPlotDescription: event.target.value })}
+          onChange={(event) => change({ ...input, commonPlotDescription: event.target.value })}
         />
       )}
 
@@ -460,7 +491,7 @@ export function ReportPagePlots({
           <PlotAdder
             plan={plan}
             onAdd={(varietyId, material) =>
-              onChange(reportPlotEdits.addPlot(input, varietyId, material.treatment, postedName))
+              add(reportPlotEdits.addPlot(input, varietyId, material.treatment, postedName), "区")
             }
           />
         ) : (
@@ -468,13 +499,14 @@ export function ReportPagePlots({
             type="button"
             className={addButton}
             onClick={() =>
-              onChange(
+              add(
                 reportPlotEdits.addPlot(
                   input,
                   plan.rows[0]?.id ?? null,
                   { kind: "posted" },
                   postedName,
                 ),
+                "区",
               )
             }
           >
@@ -482,6 +514,7 @@ export function ReportPagePlots({
             区を追加
           </button>
         ))}
+      {refusal("区")}
     </>
   );
 }
