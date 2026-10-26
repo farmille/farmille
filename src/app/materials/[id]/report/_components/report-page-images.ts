@@ -161,6 +161,21 @@ export async function uploadPdfForReading(file: File, userId: string): Promise<s
   return path;
 }
 
+/**
+ * 上げた PDF を、読み取りの Server Action を呼ぶ前に止めたときに消す（呼んだ後はサーバーが消す）。
+ * 消せなくても読み取りの失敗の表示は変えないので、例外にせず記録だけ残す。
+ */
+export async function discardPdfForReading(path: string): Promise<void> {
+  try {
+    const { error } = await createAuthBrowserClient()
+      .storage.from("pdf-reading-sources")
+      .remove([path]);
+    if (error !== null) console.error("[pdf-reading] 上げた PDF を消せなかった", error);
+  } catch (error) {
+    console.error("[pdf-reading] 上げた PDF を消せなかった", error);
+  }
+}
+
 // 同じ PDF のページを同時に描くと pdf.js が止まることがあるので、PDFごとに1つずつ順に描く
 const pdfQueues = new WeakMap<PDFDocumentProxy, Promise<unknown>>();
 

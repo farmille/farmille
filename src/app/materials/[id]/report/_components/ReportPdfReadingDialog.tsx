@@ -19,7 +19,12 @@ import { errorMessageJa } from "@/server/errors";
 
 import { css } from "../../../../../../styled-system/css";
 
-import { countPdfPages, isPdf, uploadPdfForReading } from "./report-page-images";
+import {
+  countPdfPages,
+  discardPdfForReading,
+  isPdf,
+  uploadPdfForReading,
+} from "./report-page-images";
 
 type Phase = "idle" | "checking" | "uploading" | "verifying" | "reading";
 
@@ -125,13 +130,17 @@ export function ReportPdfReadingDialog({
     setStartedAt(Date.now());
     setNow(Date.now());
     let result: PdfReadingResult;
+    // Server Action を呼ぶ前に止めたら、上げた PDF はサーバーが消さないので、ここで消す
+    let unsent: string | null = null;
     try {
       setPhase("uploading");
       const uploadPath = await uploadPdfForReading(file, userId);
+      unsent = uploadPath;
       setPhase("verifying");
       // トークンの有効期限は2分なので、PDF を上げ終えてから取る
       const recaptchaToken = await executeRecaptcha(siteKey, PDF_READING_RECAPTCHA_ACTION);
       setPhase("reading");
+      unsent = null;
       result = await readPdfIntoReportAction(materialId, {
         input,
         uploadPath,
@@ -140,6 +149,7 @@ export function ReportPdfReadingDialog({
         consent: true,
       });
     } catch {
+      if (unsent !== null) await discardPdfForReading(unsent);
       // 通信の失敗などはブラウザの英語の文言になるので、そのまま出さない
       result = {
         ok: false,
