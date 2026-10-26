@@ -29,13 +29,22 @@ same_as_main() {
 }
 current=
 differs=
-for file in tools/ci/browser-checks.ts tools/ci/selection.ts package.json pnpm-lock.yaml; do
-  if [ ! -f "$file" ] || [ -L "$file" ]; then
-    printf '[pre-push] 検査コード・依存設定は通常のファイルである必要があります：%s\n' "$file" >&2
-    exit 1
+for file in tools/ci/browser-checks.ts tools/ci/selection.ts package.json pnpm-lock.yaml \
+  pnpm-workspace.yaml .npmrc .pnpmfile.cjs .pnpmfile.mjs; do
+  digest=
+  # pnpm の設定ファイルは無くてもよく、無ければ「-」として組に入れる。
+  case "$file" in
+    pnpm-workspace.yaml | .*) [ -e "$file" ] || [ -L "$file" ] || digest=- ;;
+  esac
+  if [ -z "$digest" ]; then
+    if [ ! -f "$file" ] || [ -L "$file" ]; then
+      printf '[pre-push] 検査コード・依存設定は通常のファイルである必要があります：%s\n' "$file" >&2
+      exit 1
+    fi
+    digest=$(shasum -a 256 "$file") || exit 1
+    digest=${digest%% *}
   fi
-  digest=$(shasum -a 256 "$file") || exit 1
-  current="${current:+$current }${digest%% *}"
+  current="${current:+$current }$digest"
   if [ -z "$main" ] || ! same_as_main "$file"; then
     differs="${differs:+${differs}・}$file"
   fi
@@ -66,9 +75,18 @@ if [ -n "$differs" ] && ! grep -qsxF "$current" "$trusted"; then
       }
       if (JSON.stringify(current) !== JSON.stringify(main)) process.exitCode = 1;
     ' || differs="${differs:+${differs}・}package.json"
-    # pnpm が書く lockfile では、registry の依存の resolution は integrity だけになる。
-    if grep resolution pnpm-lock.yaml | grep -qv '^ *resolution: {integrity: [^,}]*}$'; then
-      printf '[pre-push] pnpm-lock.yaml に registry 以外から入れる依存があります。\n' >&2
+    # pnpm が書く lockfile では、registry の依存の項目ごとに integrity だけの resolution が1行入る。
+    # パッチの中身は frozen の検査で lockfile のハッシュと照合されるので、ハッシュの欄を main と比べる。
+    patches='/^patchedDependencies:/ { keep = 1; print; next } /^[^ ]/ { keep = 0 } keep'
+    if ! awk '
+      /resolution/ && !/^    resolution: [{]integrity: [^,}]*[}]$/ { bad = 1 }
+      /^[^ ]/ { if (open) bad = 1; open = 0; packages = ($0 == "packages:") }
+      packages && /^  [^ ]/ { if (open) bad = 1; open = 1 }
+      packages && /^    resolution: / { open = 0 }
+      END { exit bad || open }
+    ' pnpm-lock.yaml ||
+      [ "$(awk "$patches" pnpm-lock.yaml)" != "$(git cat-file blob "$main:pnpm-lock.yaml" | awk "$patches")" ]; then
+      printf '[pre-push] pnpm-lock.yaml に、registry 以外から入れる依存、integrity の無い依存、パッチの変更のどれかがあります。\n' >&2
       differs="${differs:+${differs}・}pnpm-lock.yaml"
     fi
   fi
@@ -77,7 +95,10 @@ if [ -n "$differs" ] && ! grep -qsxF "$current" "$trusted"; then
     exit 1
   fi
   # node_modules と lockfile を変えず、install の scripts も動かさずに、lockfile の全項目へ方針をかけ直す。
-  if ! output=$(pnpm install --frozen-lockfile --lockfile-only 2>&1); then
+  # 環境変数やグローバル設定で緩めないよう、pnpm 11 の既定の方針を引数で固定する（pnpm-workspace.yaml は上書きしていない）。
+  # shortcut: 公開からの日数は既定の1440分に固定。pnpm-workspace.yaml で minimumReleaseAge を決めたら、ここも合わせる。
+  if ! output=$(pnpm install --frozen-lockfile --lockfile-only \
+    --config.trust-lockfile=false --config.minimum-release-age=1440 2>&1); then
     printf '%s\n[pre-push] 依存の変更が pnpm の supply-chain の方針の検査に通りません。上の表示を確かめ、方針を外してよいと判断した場合だけ、信頼できる checkout で pnpm setup:hooks --trust-current を実行してください。\n' "$output" >&2
     exit 1
   fi
