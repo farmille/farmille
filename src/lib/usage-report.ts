@@ -24,6 +24,9 @@ export function reportSectionHeading(
 }
 export const REPORT_PLOT_LIMIT = 40;
 export const REPORT_MEASUREMENT_LIMIT = 30;
+
+/** レポートに差し込む PDF と、PDF読み取りに使う PDF の上限。ブラウザとサーバーで同じ値を使う。 */
+export const REPORT_PDF_LIMITS = { bytes: 20 * 1024 * 1024, pages: 40 } as const;
 const named = v.object({ id: uuid, name: short });
 const plotTreatment = v.variant("kind", [
   v.object({ kind: v.literal("posted") }),
@@ -36,6 +39,12 @@ const graph = v.object({
   heading: short,
   rows: v.pipe(v.array(graphRow), v.maxLength(50)),
 });
+/** 保存した画面の入力に入っていて、保存の前に外れた画像の URL。保存のあとに置き場から消す。 */
+export const DroppedMediaUrlsSchema = v.pipe(
+  v.array(v.pipe(v.string(), v.maxLength(4000))),
+  v.maxLength(200),
+);
+
 export const UsageReportInputSchema = v.object({
   reportId: uuid,
   expectedUpdatedAt: v.nullable(v.pipe(v.string(), v.isoTimestamp())),

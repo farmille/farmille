@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 
+import { REPORT_PDF_LIMITS } from "@/lib/usage-report";
+
 import { fileTooLarge, fitCanvas, pdfTooLong } from "./report-page-images";
-import { REPORT_PDF_LIMITS, REPORT_PHOTO_LIMITS } from "./report-page-state";
+import { REPORT_PHOTO_LIMITS } from "./report-page-state";
 
 describe("差し込む資料の大きさとページ数", () => {
   it("PDF は20MBまで、写真は50MBまで読み込める", () => {

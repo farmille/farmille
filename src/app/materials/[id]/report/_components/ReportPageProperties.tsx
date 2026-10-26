@@ -21,7 +21,13 @@ import type { CropOption } from "@/server/queries/usage-report-form";
 
 import { css, cva } from "../../../../../../styled-system/css";
 
-import { latestRequests, REPORT_SHORT_MAX, type ReportMaterialSummary } from "./report-page-state";
+import { ReportPdfReadingMark } from "./ReportPdfReadingMark";
+import {
+  latestRequests,
+  REPORT_SHORT_MAX,
+  type ReportMarkField,
+  type ReportMaterialSummary,
+} from "./report-page-state";
 
 export type ReportEffectOption = { id: string; name: string; categoryName: string };
 
@@ -45,6 +51,8 @@ const key = css({
 });
 
 const mark = css({ ml: "0.5", color: "accent.danger", fontWeight: "normal" });
+
+const readMark = css({ gridColumn: "2" });
 
 const valueRecipe = cva({
   base: {
@@ -165,11 +173,14 @@ function Row({
   id,
   label,
   required,
+  marks = [],
   children,
 }: {
   id: string;
   label: string;
   required: boolean;
+  /** PDF読み取りの印を出す欄。 */
+  marks?: ReportMarkField[];
   children: ReactNode;
 }) {
   return (
@@ -183,6 +194,9 @@ function Row({
         )}
       </div>
       {children}
+      <div className={readMark}>
+        <ReportPdfReadingMark fields={marks} />
+      </div>
     </div>
   );
 }
@@ -362,7 +376,7 @@ export function ReportPageProperties({
           <Icon name="chevron_right" className={chevron} />
         </button>
       </Row>
-      <Row id="report-prop-crop" label="作物" required>
+      <Row id="report-prop-crop" label="作物" required marks={[{ key: "cropId" }]}>
         <button
           type="button"
           className={valueRecipe({ missing: missing.has("cropId") })}
@@ -373,7 +387,15 @@ export function ReportPageProperties({
           <Icon name="chevron_right" className={chevron} />
         </button>
       </Row>
-      <Row id="report-prop-variety" label="品種" required>
+      <Row
+        id="report-prop-variety"
+        label="品種"
+        required
+        marks={input.varieties.map(({ id, name }) => ({
+          key: `varieties.${id}.name`,
+          label: name.trim() || "品種",
+        }))}
+      >
         <div className={valueRecipe({ kind: "field", missing: missing.has("variety") })}>
           {!input.varietyUnknown &&
             (input.varieties.length > 0 ? input.varieties : [null]).map((variety, index) => (
@@ -415,7 +437,7 @@ export function ReportPageProperties({
           )}
         </div>
       </Row>
-      <Row id="report-prop-purpose" label="使用目的" required>
+      <Row id="report-prop-purpose" label="使用目的" required marks={[{ key: "purposeTags" }]}>
         <button
           type="button"
           className={valueRecipe({ missing: missing.has("purposeTags") })}
@@ -439,7 +461,7 @@ export function ReportPageProperties({
           <Icon name="chevron_right" className={chevron} />
         </button>
       </Row>
-      <Row id="report-prop-region" label="地域" required>
+      <Row id="report-prop-region" label="地域" required marks={[{ key: "prefectureCode" }]}>
         <div className={valueRecipe({ kind: "field", missing: missing.has("prefectureCode") })}>
           <Select
             label="都道府県"
@@ -478,7 +500,7 @@ export function ReportPageProperties({
           </Checkbox>
         </div>
       </Row>
-      <Row id="report-prop-stages" label="施用時期" required>
+      <Row id="report-prop-stages" label="施用時期" required marks={[{ key: "timingStages" }]}>
         <button
           type="button"
           className={valueRecipe({ missing: missing.has("timingStages") })}

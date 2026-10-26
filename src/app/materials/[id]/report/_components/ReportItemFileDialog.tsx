@@ -8,6 +8,7 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Dialog } from "@/components/Dialog";
 import { Icon } from "@/components/Icon";
 import { Input } from "@/components/form";
+import { REPORT_PDF_LIMITS } from "@/lib/usage-report";
 
 import { css } from "../../../../../../styled-system/css";
 
@@ -29,7 +30,6 @@ import {
 } from "./report-page-images";
 import {
   REPORT_IMAGE_LIMIT,
-  REPORT_PDF_LIMITS,
   REPORT_PHOTO_LIMITS,
   REPORT_SHORT_MAX,
   type ReportPageImage,

@@ -9,8 +9,10 @@ import { graphSections, type ReportPlotLayout } from "@/lib/usage-report-plots";
 
 import { css, cva } from "../../../../../../styled-system/css";
 
+import { ReportPdfReadingMark } from "./ReportPdfReadingMark";
 import {
   createReportPageItem,
+  itemMarkFields,
   REPORT_BODY_MAX,
   REPORT_SHORT_MAX,
   reportLengthNote,
@@ -238,6 +240,7 @@ export function ReportPageItems({
                 update(item.id, (current) => ({ ...current, name: event.target.value }))
               }
             />
+            <ReportPdfReadingMark fields={itemMarkFields(item, plots)} />
             {item.mode === "" && (
               <>
                 <p className={choose}>結果の入れ方を選ぶ</p>

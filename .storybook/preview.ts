@@ -25,6 +25,7 @@ sb.mock(import("../src/server/queries/usage-reports.ts"));
 sb.mock(import("../src/server/actions/reports.ts"));
 sb.mock(import("../src/env.ts"));
 sb.mock(import("../src/lib/analytics/events.ts"));
+sb.mock(import("../src/lib/recaptcha-client.ts"));
 sb.mock(import("../src/app/admin/materials/actions.ts"));
 sb.mock(import("../src/app/admin/materials/requests/actions.ts"));
 sb.mock(import("../src/app/admin/mfa/actions.ts"));
@@ -124,6 +125,8 @@ sb.mock(import("../src/server/company-application-auth.ts"));
 sb.mock(import("../src/server/admin/guard.ts"));
 
 sb.mock(import("../src/server/usage-reports/structured.ts"));
+
+sb.mock(import("../src/server/pdf-reading/index.ts"));
 
 // 主要なブレークポイントの直前後をツールバーから連続して確認できるようにする。
 const viewports = {

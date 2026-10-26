@@ -7,12 +7,16 @@ import { css } from "../../../../../../styled-system/css";
 import { getOwnRegisteredAddress } from "@/server/accounts/registered-address";
 import { errorMessageJa } from "@/server/errors";
 import { requireGeneralUser } from "@/server/auth";
+import { getPdfReadingEntry } from "@/server/pdf-reading";
 import { getOwnProfile } from "@/server/queries/profiles";
 import { getStructuredReportFormData } from "@/server/usage-reports/structured";
 
 import { loadMaterialOrNotFound, materialMetadata } from "../../material-page-data";
 import { ReportPageForm } from "../_components/ReportPageForm";
 import { ReportSubmitted } from "../_components/ReportSubmitted";
+
+// PDF読み取りの Server Action もこのページの上限で動く（読み取りの期限は開始から110秒）
+export const maxDuration = 120;
 
 type ReportFormPageProps = {
   params: Promise<{ id: string }>;
@@ -46,12 +50,15 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
     throw new Error(errorMessageJa[session.error]);
   }
 
-  const [material, formDataResult, addressResult, profileResult] = await Promise.all([
-    loadMaterialOrNotFound(id),
-    getStructuredReportFormData(id, session.data.userId),
-    getOwnRegisteredAddress(),
-    getOwnProfile(session.data.userId),
-  ]);
+  const [material, formDataResult, addressResult, profileResult, readingResult] = await Promise.all(
+    [
+      loadMaterialOrNotFound(id),
+      getStructuredReportFormData(id, session.data.userId),
+      getOwnRegisteredAddress(),
+      getOwnProfile(session.data.userId),
+      getPdfReadingEntry(session.data.userId),
+    ],
+  );
 
   if (!formDataResult.ok) {
     throw new Error(errorMessageJa[formDataResult.error]);
@@ -61,6 +68,9 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
   }
   if (!profileResult.ok) {
     throw new Error(errorMessageJa[profileResult.error]);
+  }
+  if (!readingResult.ok) {
+    throw new Error(errorMessageJa[readingResult.error]);
   }
   if (material.publication_status !== "published") notFound();
 
@@ -97,6 +107,11 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
         favoriteCropIds={formData.favoriteCropIds}
         materialCropIds={formData.materialCropIds}
         registeredAddress={addressResult.data}
+        pdfReading={{
+          ...readingResult.data,
+          marks: formData.pdfReadingMarks,
+          checkRequired: formData.pdfValuesCheckRequired,
+        }}
       />
     </main>
   );

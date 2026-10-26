@@ -50,6 +50,7 @@ const meta = {
     draft: null,
     documentUrls: [],
     registeredAddress: { prefectureCode: 8 },
+    pdfReading: { siteKey: "storybook-site-key", remaining: 8, marks: [], checkRequired: false },
   },
 } satisfies Meta<typeof ReportPageForm>;
 

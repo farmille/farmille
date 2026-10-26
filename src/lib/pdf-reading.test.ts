@@ -1,8 +1,15 @@
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
+import { createBlankUsageReport } from "./usage-report";
 import {
+  effectivePdfReadingMarks,
   PDF_READING_FIELD_PATHS,
+  PDF_READING_TRIAL_REQUIRED,
+  pdfReadingFieldValue,
+  PdfReadingRequestSchema,
+  pdfReadingTrialDraft,
+  pdfReadingTrialError,
   PdfReadingFieldKeySchema,
   PdfReadingFieldsSchema,
   PdfReadingUploadPathSchema,
@@ -69,11 +76,79 @@ describe("PDF読み取りの欄の経路", () => {
   });
 });
 
+describe("読み取る試験", () => {
+  const request = {
+    input: createBlankUsageReport(plotId),
+    droppedMediaUrls: [],
+    uploadPath: `${plotId}/${graphId}.pdf`,
+    recaptchaToken: "token",
+    consent: true,
+  };
+
+  it("空か空白だけなら、画面でもサーバーでも断る", () => {
+    for (const trial of ["", "  ", "　\n"]) {
+      expect(pdfReadingTrialError(trial), JSON.stringify(trial)).toBe(PDF_READING_TRIAL_REQUIRED);
+      expect(v.is(PdfReadingRequestSchema, { ...request, trial }), JSON.stringify(trial)).toBe(
+        false,
+      );
+    }
+  });
+
+  it("書いてあれば通し、サーバーでは前後の空白を除いて200字まで受ける", () => {
+    expect(pdfReadingTrialError("試験2")).toBeUndefined();
+    const parsed = v.parse(PdfReadingRequestSchema, { ...request, trial: " 試験2 " });
+    expect(parsed.trial).toBe("試験2");
+    expect(v.is(PdfReadingRequestSchema, { ...request, trial: "あ".repeat(200) })).toBe(true);
+    expect(v.is(PdfReadingRequestSchema, { ...request, trial: "あ".repeat(201) })).toBe(false);
+  });
+
+  it("書き始めは、入っている作物と品種から作る", () => {
+    expect(pdfReadingTrialDraft("トルコギキョウ", ["プリマラベンダー"])).toBe(
+      "トルコギキョウ・プリマラベンダーの",
+    );
+    expect(pdfReadingTrialDraft("キャベツ", ["新藍", "初恋"])).toBe("キャベツ・新藍・初恋の");
+    expect(pdfReadingTrialDraft("キャベツ", [" "])).toBe("キャベツの");
+    expect(pdfReadingTrialDraft(null, ["新藍"])).toBe("新藍の");
+    expect(pdfReadingTrialDraft(null, [])).toBe("");
+  });
+});
+
 describe("PDF の一時置き場の場所", () => {
   it("利用者のフォルダの直下にある、id を名前にした PDF だけを受け付ける", () => {
     expect(v.is(PdfReadingUploadPathSchema, `${plotId}/${graphId}.pdf`)).toBe(true);
     expect(v.is(PdfReadingUploadPathSchema, `${plotId}/成績書.pdf`)).toBe(false);
     expect(v.is(PdfReadingUploadPathSchema, `${plotId}/sub/${graphId}.pdf`)).toBe(false);
     expect(v.is(PdfReadingUploadPathSchema, `${graphId}.pdf`)).toBe(false);
+  });
+});
+
+describe("pdfReadingFieldValue", () => {
+  const input = {
+    ...createBlankUsageReport(plotId),
+    timingStages: [4, 1],
+    purposeTags: ["収量改善", "耐暑性改善"],
+  };
+  const [first] = input.plots;
+
+  it("欄の今の値を比較用の文字列で返す", () => {
+    expect(pdfReadingFieldValue(input, "timingStages")).toBe("1,4");
+    expect(pdfReadingFieldValue(input, "purposeTags")).toBe("収量改善\n耐暑性改善");
+    expect(pdfReadingFieldValue(input, "cropId")).toBe("");
+    expect(pdfReadingFieldValue(input, `plots.${first?.id}.treatment`)).toBe("untreated");
+  });
+
+  it("対象の区や行が無ければ undefined を返す", () => {
+    expect(pdfReadingFieldValue(input, `plots.${rowId}.name`)).toBeUndefined();
+    expect(
+      pdfReadingFieldValue(input, `measurements.${plotId}.graphs.${graphId}.rows.${rowId}.value`),
+    ).toBeUndefined();
+  });
+
+  it("印は記録の値と今の値が同じ欄だけに残る", () => {
+    const marks = [
+      { fieldKey: "timingStages" as const, value: "1,4", quote: "" },
+      { fieldKey: "cropId" as const, value: graphId, quote: "" },
+    ];
+    expect(effectivePdfReadingMarks(marks, input)).toEqual([marks[0]]);
   });
 });

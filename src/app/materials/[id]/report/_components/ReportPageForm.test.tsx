@@ -46,6 +46,7 @@ function renderForm(draft = filledReport) {
       draft={draft}
       documentUrls={[]}
       registeredAddress={{ prefectureCode: 8 }}
+      pdfReading={{ siteKey: "test-site-key", remaining: 10, marks: [], checkRequired: false }}
     />,
     {
       wrapper: ({ children }: { children: ReactNode }) => (

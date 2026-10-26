@@ -45,6 +45,10 @@ const errorStatus = {
   pdf_too_large: 413,
   pdf_too_many_pages: 422,
   pdf_reading_failed: 502,
+  pdf_reading_no_match: 422,
+  pdf_reading_incomplete: 422,
+  pdf_reading_material_changed: 409,
+  pdf_reading_unrecorded: 500,
 } satisfies Record<ErrorCode, number>;
 
 export function succeed<T>(data: T): Success<T> {

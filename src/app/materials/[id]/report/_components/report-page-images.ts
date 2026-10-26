@@ -3,8 +3,9 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 import * as Sentry from "@sentry/nextjs";
 
 import { createAuthBrowserClient } from "@/lib/auth/browser";
+import { REPORT_PDF_LIMITS } from "@/lib/usage-report";
 
-import { REPORT_PDF_LIMITS, REPORT_PHOTO_LIMITS } from "./report-page-state";
+import { REPORT_PHOTO_LIMITS } from "./report-page-state";
 
 /** 差し込む画像の長い辺の上限。写真・PDF のページはこの大きさまで縮めてから扱う。 */
 const MAX_SIDE = 2400;
@@ -137,6 +138,42 @@ export async function openPdf(file: File): Promise<PDFDocumentProxy> {
     import.meta.url,
   ).toString();
   return pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+}
+
+/** PDF のページ数。PDF読み取りで送る前に、上限を超えていないかを確かめる。 */
+export async function countPdfPages(file: File): Promise<number> {
+  const doc = await openPdf(file);
+  try {
+    return doc.numPages;
+  } finally {
+    await doc.destroy();
+  }
+}
+
+/** PDF読み取りに使う PDF を、本人のフォルダの一時置き場へ上げて場所を返す。読み取りの後にサーバーが消す。 */
+export async function uploadPdfForReading(file: File, userId: string): Promise<string> {
+  const path = `${userId}/${crypto.randomUUID()}.pdf`;
+  const { error } = await createAuthBrowserClient()
+    .storage.from("pdf-reading-sources")
+    .upload(path, file, { contentType: "application/pdf", upsert: false });
+  if (error !== null)
+    throw new Error("PDFを送れませんでした。通信状態を確認して、もう一度お試しください。");
+  return path;
+}
+
+/**
+ * 上げた PDF を、読み取りの Server Action を呼ぶ前に止めたときに消す（呼んだ後はサーバーが消す）。
+ * 消せなくても読み取りの失敗の表示は変えないので、例外にせず記録だけ残す。
+ */
+export async function discardPdfForReading(path: string): Promise<void> {
+  try {
+    const { error } = await createAuthBrowserClient()
+      .storage.from("pdf-reading-sources")
+      .remove([path]);
+    if (error !== null) console.error("[pdf-reading] 上げた PDF を消せなかった", error);
+  } catch (error) {
+    console.error("[pdf-reading] 上げた PDF を消せなかった", error);
+  }
 }
 
 // 同じ PDF のページを同時に描くと pdf.js が止まることがあるので、PDFごとに1つずつ順に描く
