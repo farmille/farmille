@@ -239,27 +239,31 @@ export function ReportItemFileDialog({
         setMessage(`「${file.name}」を開いています…`);
         try {
           const doc = await openPdf(file);
-          if (!live.current) return;
-          const tooLong = pdfTooLong(file.name, doc.numPages);
-          if (tooLong !== null) {
-            setMessage("");
-            void doc.destroy();
-            reject(tooLong);
-            continue;
-          }
-          if (doc.numPages === 1) {
-            setMessage("ページを画像にしています…");
-            add(await renderPdfPage(doc, 1));
-          } else {
-            setMessage("");
-            const pages = await new Promise<number[]>((resolve) =>
-              setPdf({ doc, name: file.name, resolve, max: imageLimit - count.current }),
-            );
-            for (const [index, page] of pages.entries()) {
-              if (!live.current) return;
-              setMessage(`ページを画像にしています（${index + 1}/${pages.length}）…`);
-              add(await renderPdfPage(doc, page));
+          // 上限超え・途中で閉じた・描画の失敗のどれで抜けても、pdf.js の文書と worker を残さない
+          try {
+            if (!live.current) return;
+            const tooLong = pdfTooLong(file.name, doc.numPages);
+            if (tooLong !== null) {
+              setMessage("");
+              reject(tooLong);
+              continue;
             }
+            if (doc.numPages === 1) {
+              setMessage("ページを画像にしています…");
+              add(await renderPdfPage(doc, 1));
+            } else {
+              setMessage("");
+              const pages = await new Promise<number[]>((resolve) =>
+                setPdf({ doc, name: file.name, resolve, max: imageLimit - count.current }),
+              );
+              for (const [index, page] of pages.entries()) {
+                if (!live.current) return;
+                setMessage(`ページを画像にしています（${index + 1}/${pages.length}）…`);
+                add(await renderPdfPage(doc, page));
+              }
+            }
+          } finally {
+            void doc.destroy();
           }
           setMessage("");
         } catch {
