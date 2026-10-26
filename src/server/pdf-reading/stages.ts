@@ -54,7 +54,19 @@ const VALUES_PER_CALL = 50;
 const MAX_VALUE_CALLS = 8;
 
 const key = v.string();
-const evidence = v.array(v.strictObject({ ref: v.string(), quote: v.string(), page: v.number() }));
+const cited = { quote: v.string(), page: v.number() };
+const evidence = v.array(v.strictObject({ ref: v.string(), ...cited }));
+/** 単独の欄の根拠が指せる欄。ほかの ref はほかの段の根拠より先にまとめられ、別の欄の引用になるので断る。 */
+const SINGLE_FIELD_REFS = [
+  "crop",
+  "prefecture",
+  "purposes",
+  "timingStages",
+  "cultivationEnvironment",
+  "timingNote",
+  "commonPlotDescription",
+  "observedChange",
+] as const;
 
 export const SkeletonSchema = v.strictObject({
   outcome: v.picklist(["read", "no_matching_trial"]),
@@ -83,7 +95,7 @@ export const SingleFieldsSchema = v.strictObject({
   timingNote: v.string(),
   commonPlotDescription: v.string(),
   observedChange: v.string(),
-  evidence,
+  evidence: v.array(v.strictObject({ ref: v.picklist(SINGLE_FIELD_REFS), ...cited })),
 });
 
 export const ValuesSchema = v.strictObject({
@@ -129,15 +141,33 @@ export function valueChunks(skeleton: Pick<Skeleton, "graphs" | "plots">): Skele
 
 type Merged = { ok: true; output: ReportReadingOutput } | { ok: false };
 
-/** 段ごとの出力を、applyPdfReading が受ける形にまとめる。区や調査項目の key の参照切れは失敗にする。 */
+/** 値の呼び出し1本の出力と、その呼び出しに渡したグラフ。 */
+export type CopiedValues = {
+  graphs: Skeleton["graphs"];
+  output: v.InferOutput<typeof ValuesSchema>;
+};
+
+/**
+ * 段ごとの出力を、applyPdfReading が受ける形にまとめる。
+ * 区や調査項目の key の参照切れと、根拠がその段で書けない key を指しているもの（区の説明は品種・資材・区、値は渡したグラフだけ）は失敗にする。
+ */
 export function mergeStages(
   skeleton: Skeleton,
   single: v.InferOutput<typeof SingleFieldsSchema>,
   plotGroups: v.InferOutput<typeof PlotGroupsSchema>,
-  values: v.InferOutput<typeof ValuesSchema>[],
+  copied: CopiedValues[],
 ): Merged {
   const plotKeys = new Set(skeleton.plots.map((plot) => plot.key));
   const measurementKeys = new Set(skeleton.measurements.map((measurement) => measurement.key));
+  const namedKeys = new Set(
+    [...skeleton.varieties, ...skeleton.comparedMaterials, ...skeleton.plots].map(({ key }) => key),
+  );
+  if (plotGroups.evidence.some(({ ref }) => !namedKeys.has(ref))) return { ok: false };
+  for (const { graphs, output } of copied) {
+    const graphKeys = new Set(graphs.map((graph) => graph.key));
+    if (output.evidence.some(({ ref }) => !graphKeys.has(ref))) return { ok: false };
+  }
+  const values = copied.map(({ output }) => output);
   const descriptions = new Map<string, string>();
   const plotEvidence: ReportReadingOutput["evidence"] = [];
   for (const group of plotGroups.groups) {
@@ -264,18 +294,25 @@ export async function readReportPdf(
   const [plotGroups, values, single] = await Promise.all([
     call(STAGE_MODELS.copy, PlotGroupsSchema, plotInstructions(skeleton.output)),
     Promise.all(
-      valueChunks(skeleton.output).map((graphs) =>
-        call(STAGE_MODELS.copy, ValuesSchema, valueInstructions(skeleton.output, graphs)),
-      ),
+      valueChunks(skeleton.output).map(async (graphs) => ({
+        graphs,
+        result: await call(
+          STAGE_MODELS.copy,
+          ValuesSchema,
+          valueInstructions(skeleton.output, graphs),
+        ),
+      })),
     ),
     singlePending,
   ]);
-  const copied = values.flatMap((chunk) => (chunk.ok ? [chunk.output] : []));
+  const copied = values.flatMap(({ graphs, result }) =>
+    result.ok ? [{ graphs, output: result.output }] : [],
+  );
   if (!single.ok || !plotGroups.ok || copied.length !== values.length)
     return failed(skeleton.usage, failures[0] ?? "failed");
   const merged = mergeStages(skeleton.output, single.output, plotGroups.output, copied);
   if (!merged.ok) {
-    console.error("[pdf-reading] 段の出力の key が骨組みに無い");
+    console.error("[pdf-reading] 段の出力の key や根拠の ref が、骨組みやその段に無い");
     return failed(skeleton.usage, "invalid_output");
   }
   return { ok: true, output: merged.output, usage: total(skeleton.usage) };

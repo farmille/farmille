@@ -108,7 +108,10 @@ function fakeExtract(
     await new Promise((resolve) => setTimeout(resolve, 0));
     log.push(`end:${stage}`);
     if (behavior !== "answer") return { ok: false, error: behavior, usage };
-    return { ok: true, output: v.parse(request.schema, overrides[stage] ?? answers[stage]), usage };
+    // extractFromPdf と同じく、スキーマに合わない出力は invalid_output にする
+    const parsed = v.safeParse(request.schema, overrides[stage] ?? answers[stage]);
+    if (!parsed.success) return { ok: false, error: "invalid_output", usage };
+    return { ok: true, output: parsed.output, usage };
   };
   return { extract, log, calls };
 }
@@ -230,6 +233,36 @@ describe("readReportPdf", () => {
       const result = await readReportPdf(extract, request);
       expect(result.ok ? null : result.error).toBe("invalid_output");
     }
+  });
+
+  it("根拠がその段で書けない key を指していれば、出力の不正として失敗にする", async () => {
+    const evidence = (ref: string) => [{ ref, quote: "引用", page: 1 }];
+    const cases = [
+      { single: { ...answers.single, evidence: evidence("g1") } },
+      { plots: { ...answers.plots, evidence: evidence("g1") } },
+      { values: { ...answers.values, evidence: evidence("p1") } },
+    ];
+    for (const overrides of cases) {
+      const result = await readReportPdf(fakeExtract(new Map(), overrides).extract, request);
+      expect(result.ok ? null : result.error).toBe("invalid_output");
+    }
+  });
+
+  it("値の根拠は、その呼び出しに渡したグラフだけを指せる", async () => {
+    // グラフ2つ×区30の60件なので、値はグラフ1つずつの2本に分かれる
+    const plots = Array.from({ length: 30 }, (_, index) =>
+      plot(`p${index + 1}`, index === 0 ? "posted" : "untreated"),
+    );
+    const groups = [{ plotKeys: plots.map(({ key }) => key), description: "", quote: "", page: 1 }];
+    const overrides = {
+      skeleton: { ...answers.skeleton, plots },
+      plots: { groups, evidence: [] },
+      values: { values: [], bodies: [], evidence: [{ ref: "g1", quote: "表3", page: 4 }] },
+    };
+    const { extract, calls } = fakeExtract(new Map(), overrides);
+    const result = await readReportPdf(extract, request);
+    expect(calls.filter(({ stage }) => stage === "values")).toHaveLength(2);
+    expect(result.ok ? null : result.error).toBe("invalid_output");
   });
 
   it("骨組みが該当なしなら、値と区の説明を呼ばずに該当なしを返す", async () => {
