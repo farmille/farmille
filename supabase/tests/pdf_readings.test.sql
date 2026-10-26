@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(63);
+select plan(65);
 
 insert into auth.users(id) values
   ('db932323-0000-4000-8000-000000000001'),('db932323-0000-4000-8000-000000000007'),
@@ -234,6 +234,17 @@ select is((select f.value from public.pdf_readings r join public.usage_report_pd
 select throws_ok($$insert into public.pdf_readings(user_id,upload_path,status,model,speed,input_tokens,output_tokens,finished_at)
   values('db932323-0000-4000-8000-000000000001',pg_temp.path('000000000001',63,'9001'),'applied','claude-opus-5-5','fast',1,1,now())$$,
   '23514',null,'an applied reading needs applied_at');
+
+-- 写す保存と適用の間に提出されたら、提出したレポートの確認を外さない。
+insert into public.pdf_readings(id,user_id,report_id,material_id,upload_path,status,model,speed,input_tokens,output_tokens,finished_at)
+values('db932323-0000-4000-8000-000000000071','db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000003','db932323-0000-4000-8000-000000000002',
+  pg_temp.path('000000000001',71,'9001'),'succeeded','claude-opus-5-5','fast',1,1,now());
+set local role service_role;
+select lives_ok($$select public.apply_pdf_reading('db932323-0000-4000-8000-000000000071','db932323-0000-4000-8000-000000000001','[]')$$,
+  'a reading is applied to a report submitted after the values were copied');
+reset role;
+select is((select status||'/'||pdf_values_checked from public.usage_reports where id='db932323-0000-4000-8000-000000000003'),
+  'pending/true','applying keeps the check of a submitted report');
 
 select * from finish();
 rollback;
