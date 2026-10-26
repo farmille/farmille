@@ -108,11 +108,13 @@ export type PdfReadingRequest = v.InferOutput<typeof PdfReadingRequestSchema>;
 
 /**
  * 失敗した時点で、サーバーの下書きをどこまで保存したか。画面はこれに揃え、次の保存を競合させない。
- * - input：読み取りの前に今の入力を保存した。画面の入力はそのままで、レポートと更新日時だけを揃える
+ * - input：読み取りの前に今の入力を保存した。画面の入力はそのままで、レポートと更新日時を揃え、保存済みとして扱う
+ * - partial：下書きの更新日時は進んだが、画面の入力はすべては保存されていない（使用目的の補足だけ失敗したなど）。
+ *   更新日時だけを揃え、入力は未保存のまま残す
  * - read：読み取った値まで保存した（input は更新日時つき）。画面の入力をこれに置き換える
  */
 export type PdfReadingSavedDraft =
-  | { saved: "input"; reportId: string; updatedAt: string }
+  | { saved: "input" | "partial"; reportId: string; updatedAt: string }
   | { saved: "read"; input: UsageReportInput };
 
 /** 読み取りの結果。成功なら保存済みの下書きと入れた欄、失敗なら画面に出す文言。どちらも今月の残り回数を添える（取れなければ null）。 */

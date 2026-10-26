@@ -91,6 +91,12 @@ type Failure = Extract<PdfReadingResult, { ok: false }>;
 type SavedDraft = Failure["savedDraft"];
 type Stopped = { stopped: ErrorCode; message?: string };
 
+/** 保存に失敗しても、本体だけ保存して下書きの更新日時が進んでいれば、画面が揃える先を返す。 */
+function partialDraft(reportId: string, result: UsageReportActionResult): SavedDraft {
+  if (result.ok || result.savedDraft === undefined) return null;
+  return { saved: "partial", reportId, updatedAt: result.savedDraft.updatedAt };
+}
+
 async function failure(
   error: ErrorCode,
   deps: PdfReadingDeps,
@@ -113,7 +119,7 @@ async function sendToModel(
   // draft は、止めた時点で先行保存が済んでいればその結果
   | (Stopped & { draft: SavedDraft })
   | {
-      draft: Extract<SavedDraft, { saved: "input" }>;
+      draft: NonNullable<SavedDraft> & { saved: "input" };
       reading: { readingId: string; remaining: number };
       catalog: ReadingCatalog;
       extraction: PdfExtraction<ReportReadingOutput>;
@@ -130,7 +136,12 @@ async function sendToModel(
     if (!catalog.ok) return { stopped: catalog.error, draft: null };
     // 未保存の入力を残し、新しいレポートなら下書きの行を作る（回数の確保は下書きの行を指す）
     const saved = await deps.drafts.save(request.input);
-    if (!saved.ok) return { stopped: "conflict", message: saved.message, draft: null };
+    if (!saved.ok)
+      return {
+        stopped: "conflict",
+        message: saved.message,
+        draft: partialDraft(request.input.reportId, saved),
+      };
     // ここから後で止めても、画面はこの更新日時を取り込む（下書きの updated_at が進んだため）
     const draft = { saved: "input" as const, reportId: saved.reportId, updatedAt: saved.updatedAt };
     const reading = await deps.quota.claim({
@@ -229,9 +240,10 @@ export async function readPdfIntoDraft(
           },
     );
   };
-  // 先行保存の後なので、どの失敗でも先行保存の更新日時を返す
+  // 先行保存の後なので、どの失敗でも、その時点で最後に進んだ下書きの更新日時を返す
+  let latest: SavedDraft = draft;
   const counted = (error: ErrorCode, message?: string) =>
-    failure(error, deps, draft, message, reading.remaining);
+    failure(error, deps, latest, message, reading.remaining);
 
   if (!extraction.ok) {
     await finish({ status: "failed", errorCode: extraction.error });
@@ -250,12 +262,16 @@ export async function readPdfIntoDraft(
 
   let saved = await deps.drafts.save(applied.input);
   if (!saved.ok) {
-    // 別の画面の保存と重なったときは、最新の下書きに写し直して1回だけやり直す
+    latest = partialDraft(request.input.reportId, saved) ?? latest;
+    // 別の画面の保存と重なったときや一部だけ保存したときは、最新の下書きに写し直して1回だけやり直す
     applied = await applyToLatest(request, extraction.output, catalog, deps);
     if ("stopped" in applied) return counted(applied.stopped);
     saved = await deps.drafts.save(applied.input);
   }
-  if (!saved.ok) return counted("conflict", saved.message);
+  if (!saved.ok) {
+    latest = partialDraft(request.input.reportId, saved) ?? latest;
+    return counted("conflict", saved.message);
+  }
 
   const input = { ...applied.input, expectedUpdatedAt: saved.updatedAt };
   const fields = recordedFields(input, applied.fields);

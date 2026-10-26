@@ -406,10 +406,12 @@ export function ReportPageForm({
     if (!result.ok) {
       // 失敗しても、サーバーの下書きを保存した分には揃える（揃えないと次の保存が競合する）
       const draft = result.savedDraft;
-      if (draft?.saved === "input") {
+      if (draft?.saved === "input" || draft?.saved === "partial") {
         const stamp = { reportId: draft.reportId, expectedUpdatedAt: draft.updatedAt };
         setInput((current) => ({ ...current, ...stamp }));
-        setSaved(JSON.stringify({ ...inputWithItems(input, items), ...stamp }));
+        // 一部だけ保存したときは、入力を未保存のまま残す（保存し直してもらう）
+        if (draft.saved === "input")
+          setSaved(JSON.stringify({ ...inputWithItems(input, items), ...stamp }));
       }
       // 値は入ったが根拠の記録に失敗したので、印は出さない（文言はダイアログに出したまま）
       if (draft?.saved === "read") adoptRead(draft.input, []);

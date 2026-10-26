@@ -64,7 +64,8 @@ function fakeDeps(
     pdf?: Uint8Array | null;
     claim?: "pdf_reading_limit";
     extraction?: PdfExtraction<ReportReadingOutput>;
-    saves?: ReadonlyArray<"ok" | "conflict">;
+    /** 下書きの保存の結果を、呼ばれた順に返す。partial は本体だけ保存して使用目的の補足に失敗した。 */
+    saves?: ReadonlyArray<"ok" | "conflict" | "partial">;
     sweep?: "throws";
     /** 読み取りの間に、別の画面で下書きの資材をこの id に変えて保存した。 */
     materialChangedTo?: string;
@@ -113,12 +114,20 @@ function fakeDeps(
     drafts: {
       async save(input) {
         calls.push("save");
-        if ((saves.shift() ?? "ok") === "conflict")
+        const outcome = saves.shift() ?? "ok";
+        if (outcome === "conflict")
           return { ok: false, message: "別の画面で下書きが更新されています。", fieldErrors: {} };
         clock += 1;
         const updatedAt = `2026-10-25T00:00:0${clock}.000Z`;
         draft = { ...input, expectedUpdatedAt: updatedAt };
         saved.push(input);
+        if (outcome === "partial")
+          return {
+            ok: false,
+            message: "使用目的の補足を保存できませんでした。",
+            fieldErrors: {},
+            savedDraft: { updatedAt, status: "partial" },
+          };
         return { ok: true, status: "draft", reportId: input.reportId, updatedAt, message: "" };
       },
       async load() {
@@ -282,6 +291,36 @@ describe("readPdfIntoDraft", () => {
         updatedAt: "2026-10-25T00:00:01.000Z",
       });
     }
+  });
+
+  it("先行保存が一部だけ保存して失敗したら、進んだ更新日時を返し、入力は未保存として扱わせる", async () => {
+    const { deps, calls } = fakeDeps({ saves: ["partial"] });
+    const request = makeRequest();
+    const result = await readPdfIntoDraft(request, userId, deps);
+    if (result.ok) throw new Error("失敗するはず");
+    expect(result.message).toBe("使用目的の補足を保存できませんでした。");
+    expect(result.savedDraft).toEqual({
+      saved: "partial",
+      reportId: request.input.reportId,
+      updatedAt: "2026-10-25T00:00:01.000Z",
+    });
+    expect(calls).not.toContain("claim");
+  });
+
+  it("読み取った値の保存が一部だけで終わったら、写し直して1回やり直し、だめなら最後に進んだ更新日時を返す", async () => {
+    const once = fakeDeps({ saves: ["ok", "partial", "ok"] });
+    expect((await readPdfIntoDraft(makeRequest(), userId, once.deps)).ok).toBe(true);
+
+    const twice = fakeDeps({ saves: ["ok", "partial", "partial"] });
+    const request = makeRequest();
+    const result = await readPdfIntoDraft(request, userId, twice.deps);
+    if (result.ok) throw new Error("失敗するはず");
+    expect(result.savedDraft).toEqual({
+      saved: "partial",
+      reportId: request.input.reportId,
+      updatedAt: "2026-10-25T00:00:03.000Z",
+    });
+    expect(twice.calls).not.toContain("applied");
   });
 
   it("先行保存の失敗は、保存の文言のまま返す", async () => {
