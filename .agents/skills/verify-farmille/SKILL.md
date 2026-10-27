@@ -16,10 +16,14 @@ Node.js 24.22.1以上25未満（`.node-version`と`package.json`の`engines`）�
 既存の作業と分離する場合は、以下をリポジトリ直下から実行する。コピーには`rsync`を使う。ソースの未コミット変更もコピーに含める。コピーの作成中に別の編集が入った場合は、検証対象の変更を確認してからコピーを作り直す。
 
 ```bash
+(
+set -eu
 VERIFY_REPO="$PWD"
 VERIFY_APP=$(mktemp -d /tmp/farmille-verify.XXXXXX)
 VERIFY_EVIDENCE="$VERIFY_REPO/output/verification/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$VERIFY_EVIDENCE"
+printf '%s\n' "$VERIFY_APP" > "$VERIFY_EVIDENCE/app-path.txt"
+printf 'VERIFY_APP=%s\nVERIFY_EVIDENCE=%s\n' "$VERIFY_APP" "$VERIFY_EVIDENCE"
 rsync -a --exclude=node_modules --exclude=.git --exclude=.next \
   --exclude=.codex --exclude=.claude --exclude=.ok --exclude=output \
   --exclude=test-results --exclude=playwright-report --exclude=storybook-static \
@@ -29,18 +33,17 @@ cp -R docs/email-templates "$VERIFY_APP/docs/"
 cp .env.local "$VERIFY_APP/.env.local"
 git rev-parse HEAD > "$VERIFY_EVIDENCE/revision.txt"
 git status --short > "$VERIFY_EVIDENCE/worktree-status.txt"
-printf '%s\n' "$VERIFY_APP" > "$VERIFY_EVIDENCE/app-path.txt"
-printf 'VERIFY_APP=%s\nVERIFY_EVIDENCE=%s\n' "$VERIFY_APP" "$VERIFY_EVIDENCE"
 cd "$VERIFY_APP"
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium
+)
 ```
 
 `docs`は、手元にだけある`docs/drafts/`（本番の識別子を含むため`.gitignore`で除外している）を写さないために除外する。`supabase/config.toml`のメールテンプレートは`docs/email-templates`を参照し、無いとSupabase CLIが設定エラーで止まるため、このディレクトリだけを写す。
 
-シェルの変数と作業ディレクトリは、コマンドの実行が分かれると引き継がれないことがある。出力された`VERIFY_APP`と`VERIFY_EVIDENCE`の実値を控え、以後のコマンドでは毎回この2つを代入し直してから実行する。
+ブロックはサブシェルの`set -eu`で動き、最初に失敗したコマンドで止まって非0で終わる。`||`や`if`の中に入れると`set -e`が効かないため、単独で実行する。変数と作業ディレクトリは呼び出し元に残らない。出力された`VERIFY_APP`と`VERIFY_EVIDENCE`の実値を控え、以後のコマンドでは毎回この2つを代入し直してから実行する。
 
-`pnpm install`のprepareがPandaのコードとNext.jsのルート型を生成する。`node_modules`は共有・リンクしない。Linuxでブラウザの共有ライブラリが足りなければ`pnpm exec playwright install --with-deps chromium`を使う。インストールが失敗したら起動せず、原因と終了コードを記録してCleanupへ進む。
+`pnpm install`のprepareがPandaのコードとNext.jsのルート型を生成する。`node_modules`は共有・リンクしない。Linuxでブラウザの共有ライブラリが足りなければ`pnpm exec playwright install --with-deps chromium`を使う。ブロックが非0で終わったら起動せず、原因と終了コードを記録してCleanupへ進む。コピー先のパスはコピーより前に`app-path.txt`へ記録している。
 
 コピー先で環境変数の存在と接続先だけを確認する。
 
