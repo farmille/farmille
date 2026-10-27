@@ -13,7 +13,6 @@ type MarqueeMaterial = {
   rating: number;
   reviewCount: number;
   category: string;
-  official: boolean;
 };
 
 const materials: MarqueeMaterial[] = [
@@ -23,7 +22,6 @@ const materials: MarqueeMaterial[] = [
     rating: 4.2,
     reviewCount: 128,
     category: "土壌改良",
-    official: true,
   },
   {
     name: "根活バチルス",
@@ -31,7 +29,6 @@ const materials: MarqueeMaterial[] = [
     rating: 3.9,
     reviewCount: 86,
     category: "微生物資材",
-    official: false,
   },
   {
     name: "菌根王 ハイパワー",
@@ -39,7 +36,6 @@ const materials: MarqueeMaterial[] = [
     rating: 4.5,
     reviewCount: 212,
     category: "菌根菌",
-    official: true,
   },
   {
     name: "トリコデルマ PRO",
@@ -47,7 +43,6 @@ const materials: MarqueeMaterial[] = [
     rating: 4.0,
     reviewCount: 47,
     category: "病害抑制",
-    official: false,
   },
   {
     name: "海藻アミノ 有機一番",
@@ -55,7 +50,6 @@ const materials: MarqueeMaterial[] = [
     rating: 4.3,
     reviewCount: 154,
     category: "液肥",
-    official: true,
   },
   {
     name: "フルボ酸パワーZ",
@@ -63,7 +57,6 @@ const materials: MarqueeMaterial[] = [
     rating: 3.7,
     reviewCount: 33,
     category: "腐植資材",
-    official: false,
   },
   {
     name: "乳酸菌ブースト 5号",
@@ -71,7 +64,6 @@ const materials: MarqueeMaterial[] = [
     rating: 4.1,
     reviewCount: 61,
     category: "発酵資材",
-    official: false,
   },
   {
     name: "ケイ酸リッチ 粒状",
@@ -79,7 +71,6 @@ const materials: MarqueeMaterial[] = [
     rating: 3.8,
     reviewCount: 19,
     category: "ミネラル",
-    official: true,
   },
   {
     name: "土壌線虫ガード",
@@ -87,7 +78,6 @@ const materials: MarqueeMaterial[] = [
     rating: 4.4,
     reviewCount: 98,
     category: "線虫対策",
-    official: true,
   },
   {
     name: "光合成細菌 レッドソイル",
@@ -95,7 +85,6 @@ const materials: MarqueeMaterial[] = [
     rating: 4.6,
     reviewCount: 175,
     category: "微生物資材",
-    official: false,
   },
   {
     name: "堆肥速成アクセル",
@@ -103,7 +92,6 @@ const materials: MarqueeMaterial[] = [
     rating: 3.6,
     reviewCount: 27,
     category: "堆肥化促進",
-    official: false,
   },
   {
     name: "うまみ果実 カルシウム",
@@ -111,7 +99,6 @@ const materials: MarqueeMaterial[] = [
     rating: 4.2,
     reviewCount: 73,
     category: "葉面散布",
-    official: true,
   },
   {
     name: "水稲根張り酵母",
@@ -119,7 +106,6 @@ const materials: MarqueeMaterial[] = [
     rating: 4.0,
     reviewCount: 52,
     category: "水稲",
-    official: false,
   },
   {
     name: "アゾト窒素固定ペレット",
@@ -127,7 +113,6 @@ const materials: MarqueeMaterial[] = [
     rating: 3.9,
     reviewCount: 41,
     category: "窒素固定",
-    official: true,
   },
 ];
 
@@ -143,7 +128,6 @@ function materialCards(count: number) {
         rating={material.rating}
         reviewCount={material.reviewCount}
         categories={[material.category]}
-        official={material.official}
         imageSrc={thumbnail}
         href={`/materials/${encodeURIComponent(material.name)}`}
       />

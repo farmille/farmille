@@ -72,10 +72,9 @@ async function HomeMaterials() {
           variant="scroll"
           name={material.name}
           maker={material.manufacturer_name}
-          rating={material.avg_rating ?? 0}
+          rating={material.avg_rating}
           reviewCount={material.review_count}
           categories={material.categories}
-          official={material.manufacturer_verified_at !== null}
           imageSrc={material.imageUrl ?? undefined}
           href={`/materials/${material.id}`}
         />
