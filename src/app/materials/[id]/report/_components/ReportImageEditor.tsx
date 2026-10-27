@@ -10,6 +10,8 @@ import { css, cva } from "../../../../../../styled-system/css";
 
 import { cropCanvas, redactCanvas, rotateCanvas, type Rect } from "./report-page-images";
 
+import { useReportLeaveWarning } from "./use-report-leave-warning";
+
 const stage = css({
   display: "flex",
   flexDirection: "column",
@@ -168,6 +170,10 @@ export function ReportImageEditor({
   const [drag, setDrag] = useState<Drag | null>(null);
   const view = useRef<HTMLCanvasElement>(null);
   const top = stack.at(-1) ?? null;
+
+  useReportLeaveWarning(
+    open && (top !== current || (mode === "crop" && crop !== null) || drag !== null),
+  );
 
   // ポップアップの中身は後から描かれるので、canvas が置かれた時と画像が変わった時の両方で描く
   const drawTo = useCallback(

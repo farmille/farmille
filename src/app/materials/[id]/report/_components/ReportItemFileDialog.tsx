@@ -48,6 +48,8 @@ type DraftImage = {
   original: HTMLCanvasElement | null;
 };
 
+import { useReportLeaveWarning } from "./use-report-leave-warning";
+
 const lead = css({ m: "0", textStyle: "supporting", color: "text.default" });
 
 const heading = css({ fontWeight: "bold", textStyle: "body" });
@@ -194,6 +196,8 @@ export function ReportItemFileDialog({
       (image, index) =>
         image.dirty || image.id !== saved[index]?.id || image.caption !== saved[index]?.caption,
     );
+
+  useReportLeaveWarning(open && (changed || reading || saving));
 
   function add(canvas: HTMLCanvasElement) {
     if (!live.current) return;
