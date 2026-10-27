@@ -146,6 +146,7 @@ export const legacyReport: PublishedUsageReportDetail = {
     manufacturerName: "グリーンバイオ株式会社",
     isOfficial: true,
     avgRating: 4.2,
+    imageUrl: "/images/container-shapes/1.png",
   },
   media: [
     {

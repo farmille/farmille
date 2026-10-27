@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { EmptyState, FormPageShell, MaterialCard, SurfaceCard, TextLink } from "@/components";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
+import { materialIllustrationUrl } from "@/lib/material-illustration";
 import { requireSeller } from "@/server/auth";
 import { getSellerMaterialsPageData } from "@/server/queries/seller-dashboard";
 import { SellerAccessDenied } from "../_components/AccessDenied";
@@ -38,6 +39,7 @@ export default async function SellerMaterialsPage() {
               }
               maker={material.manufacturer_name}
               rating={material.avg_rating}
+              imageSrc={materialIllustrationUrl(material.container_type_id) ?? undefined}
               href={`/dashboard/materials/${material.id}`}
             />
           ))

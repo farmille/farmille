@@ -78,6 +78,7 @@ export function ReportHeader({
           name={report.material.name}
           maker={report.material.manufacturerName}
           rating={report.material.avgRating}
+          imageSrc={report.material.imageUrl ?? undefined}
         />
       </div>
     </>

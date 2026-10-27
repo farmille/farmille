@@ -1,4 +1,5 @@
 import { MaterialCard } from "@/components/MaterialCard";
+import { materialIllustrationUrl } from "@/lib/material-illustration";
 import type { PublishedArticleDetail } from "@/server/queries/articles";
 
 import { css } from "../../../../styled-system/css";
@@ -21,6 +22,7 @@ export function ArticleMaterialList({
             name={material.name}
             maker={material.manufacturer_name}
             rating={material.avg_rating}
+            imageSrc={materialIllustrationUrl(material.container_type_id) ?? undefined}
           />
         ))}
       </div>
