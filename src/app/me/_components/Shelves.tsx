@@ -143,7 +143,8 @@ export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: Po
                 helpfulCount={post.helpfulCount}
               />
             }
-            reportReturnPath={`/materials/${post.materialId}`}
+            canManage
+            reportReturnPath="/me"
           />
         ) : post.status === "published" ? (
           <UsageReportCard
@@ -244,6 +245,7 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
                     helpfulCount={item.helpfulCount}
                   />
                 }
+                canManage={false}
                 reportReturnPath="/me"
               />
             ) : (

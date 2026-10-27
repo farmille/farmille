@@ -22,6 +22,7 @@ const meta = {
     },
     author: { handle: "緑の畑", label: "生産者・静岡県" },
     actions: <span>参考になった 12</span>,
+    canManage: false,
     reportReturnPath: "/materials/material-1",
   },
 } satisfies Meta<typeof ProfileReviewCard>;
@@ -54,6 +55,6 @@ export const WithPhotos: Story = {
   },
 };
 
-export const WithoutReport: Story = {
-  args: { reportReturnPath: undefined, review: { ...meta.args.review, cropName: "", body: "" } },
+export const OwnReview: Story = {
+  args: { canManage: true },
 };

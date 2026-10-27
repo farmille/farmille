@@ -3,11 +3,8 @@ import type { ReactNode } from "react";
 
 import { Avatar } from "@/components/Avatar";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
-import { ReportDialog } from "@/components/ReportDialog";
-import { ReviewOwnerActions } from "@/components/ReviewOwnerActions";
+import { ReviewViewerActions } from "@/components/ReviewViewerActions";
 import { publicProfileLabel } from "@/lib/public-profile-label";
-import { createReportAction } from "@/server/actions/reports";
-import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 import type { ReviewListItem } from "@/server/queries/reviews";
 
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
@@ -159,15 +156,12 @@ export function MaterialReviewCard({
       ) : null}
       <div className={footStyle}>
         <div className={actionsStyle}>{actions}</div>
-        {canManage ? (
-          <ReviewOwnerActions reviewId={review.id} materialId={review.material_id} />
-        ) : (
-          <ReportDialog
-            action={createReportAction.bind(null, "review", review.id, currentPath)}
-            reasonOptions={REPORT_REASON_OPTIONS}
-            title="この感想口コミを通報する"
-          />
-        )}
+        <ReviewViewerActions
+          reviewId={review.id}
+          materialId={review.material_id}
+          canManage={canManage}
+          reportReturnPath={currentPath}
+        />
       </div>
     </article>
   );
