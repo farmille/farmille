@@ -14,7 +14,7 @@ import { errorMessageJa } from "@/server/errors";
 import { css } from "../../../styled-system/css";
 import { RegisteredContactForm } from "./RegisteredContactForm";
 
-export const metadata: Metadata = { title: "登録情報", robots: NO_INDEX_ROBOTS };
+export const metadata: Metadata = { title: "設定", robots: NO_INDEX_ROBOTS };
 
 const LOGIN_PATH = "/login?next=%2Faccount";
 
@@ -74,9 +74,9 @@ export default async function AccountPage() {
 
   return (
     <div className={shell}>
-      <SiteAppBar chrome="public" active="me" title="登録情報" backHref="/me" />
+      <SiteAppBar chrome="public" active="me" title="設定" backHref="/me" />
       <main className={body}>
-        <h1 className={css({ srOnly: true })}>登録情報</h1>
+        <h1 className={css({ srOnly: true })}>設定</h1>
         <Notice tone="info">
           この画面の情報はサイトに公開されません。都道府県は、プロフィールの地域として公開されます。
         </Notice>

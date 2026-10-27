@@ -46,7 +46,7 @@ export async function getOwnRegisteredAddress(): Promise<Result<RegisteredAddres
   return loadRegisteredAddress(await requireGeneralUser(), adminRegisteredAddressStore());
 }
 
-/** 登録情報の画面で変更する、本名・電話番号・住所。都道府県だけはプロフィールの地域として公開する。 */
+/** 設定の画面（/account）で変更する、本名・電話番号・住所。都道府県だけはプロフィールの地域として公開する。 */
 export type RegisteredContactInput = v.InferOutput<typeof registeredContactSchema>;
 
 export type RegisteredContact = {
