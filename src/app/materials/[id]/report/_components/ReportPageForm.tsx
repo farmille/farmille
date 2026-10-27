@@ -58,6 +58,7 @@ import {
   type ReportPageNumericItem,
 } from "./report-page-state";
 import { docHeadingRecipe, requirementMark } from "./report-page-styles";
+import { useReportLeaveWarning } from "./use-report-leave-warning";
 
 const bar = css({
   position: "sticky",
@@ -313,15 +314,7 @@ export function ReportPageForm({
     for (const media of payload.media) shownMedia.current.add(media.url);
   });
 
-  useEffect(() => {
-    if (!dirty || submitted) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty, submitted]);
+  useReportLeaveWarning(dirty && !submitted);
 
   const checks = reportPageChecks(payload, acks, checkRequired);
   const marks = effectivePdfReadingMarks(readMarks, payload);
