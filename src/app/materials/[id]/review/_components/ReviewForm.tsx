@@ -99,12 +99,24 @@ const exampleSpacingStyle = css({ mt: "2" });
 
 const photoGridStyle = css({
   display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: "2.5",
-  tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+  // スマホでは写真・説明・解除を1枚ずつ縦に並べ、タブレット以上で横に並べる
+  gridTemplateColumns: "minmax(0, 1fr)",
+  gap: "4",
+  tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "2.5" },
+});
+
+// 写真1枚ごとのまとまり（画像・説明・削除）を枠で囲む
+const photoItemStyle = css({
+  p: "2.5",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "card",
+  bg: "surface.card",
 });
 
 const photoFrameStyle = css({
+  position: "relative",
   display: "grid",
   placeItems: "center",
   w: "full",
@@ -122,16 +134,23 @@ const photoPlaceholderIconStyle = css({ color: "text.brandOnSoft" });
 
 const photoRemoveCheckStyle = css({ mt: "1" });
 
+// 選んだ写真を外すボタン。写真の右上に重ねる
 const photoRemoveStyle = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "1.5",
-  mt: "1",
+  position: "absolute",
+  top: "1.5",
+  right: "1.5",
+  display: "grid",
+  placeItems: "center",
+  w: "8",
+  h: "8",
   p: "0",
-  bg: "transparent",
-  fontSize: "sm",
-  color: "accent.danger",
+  border: "none",
+  borderRadius: "pill",
+  bg: "surface.card",
+  color: "text.default",
+  boxShadow: "overlay",
   cursor: "pointer",
+  _focusVisible: focusRing,
 });
 
 const photoAddStyle = css({
@@ -369,7 +388,7 @@ export function ReviewForm({
       >
         <div className={photoGridStyle}>
           {initialValues.photos.map((photo) => (
-            <div key={photo.id}>
+            <div key={photo.id} className={photoItemStyle}>
               <input type="hidden" name="existingPhotoId" value={photo.id} />
               <div className={photoFrameStyle}>
                 <Image
@@ -386,9 +405,9 @@ export function ReviewForm({
                 className={photoCaptionStyle}
                 name={`existingPhotoCaption-${photo.id}`}
                 defaultValue={photo.caption ?? ""}
-                placeholder="写真の説明"
-                hideLabel
-                label="既存写真の説明"
+                placeholder="例）散布前の様子"
+                label="タイトル"
+                requirement="optional"
               />
               <Checkbox
                 className={photoRemoveCheckStyle}
@@ -402,7 +421,7 @@ export function ReviewForm({
             </div>
           ))}
           {pendingPhotos.map((photo) => (
-            <div key={photo.key}>
+            <div key={photo.key} className={photoItemStyle}>
               <div className={photoFrameStyle}>
                 <Image
                   className={photoImageStyle}
@@ -412,6 +431,16 @@ export function ReviewForm({
                   height={180}
                   unoptimized
                 />
+                <button
+                  type="button"
+                  className={photoRemoveStyle}
+                  aria-label={`${photo.file.name}を外す`}
+                  onClick={() =>
+                    setPendingPhotos((current) => current.filter((item) => item.key !== photo.key))
+                  }
+                >
+                  <Icon name="close" />
+                </button>
               </div>
               <Input
                 size="sm"
@@ -424,19 +453,10 @@ export function ReviewForm({
                     ),
                   );
                 }}
-                placeholder="散布前の様子"
-                hideLabel
-                label={`${photo.file.name}の説明`}
+                placeholder="例）散布前の様子"
+                label="タイトル"
+                requirement="optional"
               />
-              <button
-                type="button"
-                className={photoRemoveStyle}
-                onClick={() =>
-                  setPendingPhotos((current) => current.filter((item) => item.key !== photo.key))
-                }
-              >
-                選択を解除
-              </button>
             </div>
           ))}
           <label className={photoAddStyle}>
