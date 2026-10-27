@@ -11,7 +11,7 @@ const meta = {
     note: "文字検索はすべての作目・別名が対象です。",
     filter: {
       label: "作物名で検索",
-      placeholder: "作物名で検索（例：ミニトマト、柿）",
+      placeholder: "作物名で検索（例：ミニトマト、いちご）",
       empty: "該当する作物がありません",
       items: [
         { key: "tomato", terms: ["トマト", "ミニトマト"], node: <span>トマト</span> },
