@@ -9,11 +9,11 @@ description: FarmilleのWeb UIを実操作で検証する。検索、資材詳�
 
 ## Launch
 
-Node.js 24、pnpm 11を使う。通常の起動はリポジトリ直下の`pnpm dev`で、ポートは3007。必須設定は`src/env.ts`、ひな型は`.env.example`を参照する。秘密値をログや証跡へ出さない。
+Node.js 24.22.1以上25未満（`.node-version`と`package.json`の`engines`）とpnpm 11を使う。範囲外のNode.jsでは`engineStrict`により`pnpm install`が止まる。通常の起動はリポジトリ直下の`pnpm dev`で、ポートは3007。必須設定は`src/env.ts`、ひな型は`.env.example`を参照する。秘密値をログや証跡へ出さない。
 
 起動前に`ps -axo pid,ppid,command`と`lsof -nP -iTCP -sTCP:LISTEN`で既存プロセスを確認する。同じチェックアウトのNext.jsを二重起動しない。別ポートだけでは`.next`を分離できない。
 
-既存の作業と分離する場合は、以下をリポジトリ直下から実行する。ソースの未コミット変更もコピーに含める。コピーの作成中に別の編集が入った場合は、検証対象の変更を確認してからコピーを作り直す。
+既存の作業と分離する場合は、以下をリポジトリ直下から実行する。コピーには`rsync`を使う。ソースの未コミット変更もコピーに含める。コピーの作成中に別の編集が入った場合は、検証対象の変更を確認してからコピーを作り直す。
 
 ```bash
 VERIFY_REPO="$PWD"
@@ -23,21 +23,25 @@ mkdir -p "$VERIFY_EVIDENCE"
 rsync -a --exclude=node_modules --exclude=.git --exclude=.next \
   --exclude=.codex --exclude=.claude --exclude=.ok --exclude=output \
   --exclude=test-results --exclude=playwright-report --exclude=storybook-static \
-  --exclude=docs --exclude=tools/migration --exclude='.env*' ./ "$VERIFY_APP/"
+  --exclude=docs --exclude='.env*' ./ "$VERIFY_APP/"
 cp .env.local "$VERIFY_APP/.env.local"
 git rev-parse HEAD > "$VERIFY_EVIDENCE/revision.txt"
 git status --short > "$VERIFY_EVIDENCE/worktree-status.txt"
 printf '%s\n' "$VERIFY_APP" > "$VERIFY_EVIDENCE/app-path.txt"
+printf 'VERIFY_APP=%s\nVERIFY_EVIDENCE=%s\n' "$VERIFY_APP" "$VERIFY_EVIDENCE"
 cd "$VERIFY_APP"
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium
 ```
+
+シェルの変数と作業ディレクトリは、コマンドの実行が分かれると引き継がれないことがある。出力された`VERIFY_APP`と`VERIFY_EVIDENCE`の実値を控え、以後のコマンドでは毎回この2つを代入し直してから実行する。
 
 `pnpm install`のprepareがPandaのコードとNext.jsのルート型を生成する。`node_modules`は共有・リンクしない。Linuxでブラウザの共有ライブラリが足りなければ`pnpm exec playwright install --with-deps chromium`を使う。インストールが失敗したら起動せず、原因と終了コードを記録してCleanupへ進む。
 
 コピー先で環境変数の存在と接続先だけを確認する。
 
 ```bash
+cd "$VERIFY_APP"
 node --env-file=.env.local -e '
 for (const key of ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "SUPABASE_SECRET_KEY", "NEXT_PUBLIC_SITE_URL"]) {
   if (!process.env[key]) throw new Error(key + " が未設定です");
@@ -77,9 +81,9 @@ curl --fail --silent --show-error --max-time 60 \
   --write-out '%{http_code}\n' http://127.0.0.1:3107/
 ```
 
-リスナーのPIDを`lsof -a -p PID -d cwd`で照合し、`app-path.txt`に記録したコピーを指すことを確認する。PIDには直前に得た実値を入れる。起動ログのNext.jsバージョンがコピーの`package.json`と一致し、ホームがHTTP 200で、ブラウザにFarmilleと資材検索欄が表示された場合だけ操作へ進む。
+リスナーのPIDを`lsof -a -p PID -d cwd`で照合し、`app-path.txt`に記録したコピーを指すことを確認する。PIDには直前に得た実値を入れる。Linuxの`lsof`は`next-server (v16.x)`のような括弧を含むプロセス名を読めず、リスナーもcwdも表示しないことがある。その場合は`ps`で得た`next-server`のPIDを`readlink /proc/PID/cwd`で照合し、Cleanupでのリスナーの消失は`curl`の接続失敗で確かめる。起動ログのNext.jsバージョンがコピーの`package.json`と一致し、ホームがHTTP 200で、ブラウザにFarmilleと資材検索欄が表示された場合だけ操作へ進む。
 
-`GET /`が500なら、同じPTYのログにある最初のエラーを確認する。環境変数、Supabase接続、コンパイルを切り分け、秘密値を伏せて記録する。`container_type_id`不在などの「internal」なら、`pnpm check:migrations`でmigrationの遅れを確かめる。このコマンドはDBに何も適用しない。出力された適用コマンドの扱いは`docs/ops/local-verification.md`に従う。認証が必要な機能では、画面上のアカウント種別とログイン状態も確認する。
+`GET /`が500のときと、200でも画面が「ページを表示できませんでした」のときは、同じPTYのログにある最初のエラーを確認する。Supabaseに接続できない場合も、ホームは200のままこの画面になる。環境変数、Supabase接続、コンパイルを切り分け、秘密値を伏せて記録する。`container_type_id`不在などの「internal」なら、`pnpm check:migrations`でmigrationの遅れを確かめる。このコマンドはDBに何も適用しない。出力された適用コマンドの扱いは`docs/ops/local-verification.md`に従う。認証が必要な機能では、画面上のアカウント種別とログイン状態も確認する。
 
 ## Drive
 
@@ -101,14 +105,19 @@ async function record(name) {
 }
 try {
   await page.goto("http://127.0.0.1:3107/");
+  await page.getByRole("search", { name: "資材検索" }).waitFor({ state: "visible" });
   await record("search-01-home");
   // 機能マップの操作を続け、操作のたびに record する
+} catch (error) {
+  await record("failure");
+  throw error;
 } finally {
   await browser.close();
 }
 ```
 
 ```bash
+cd "$VERIFY_APP"
 VERIFY_EVIDENCE="$VERIFY_EVIDENCE" node verify-search.mjs
 ```
 

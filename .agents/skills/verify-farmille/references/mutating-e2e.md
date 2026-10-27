@@ -15,9 +15,11 @@ pnpm test:e2e:local e2e/05-saved.spec.ts
 pnpm test:e2e:local e2e/11-report-reading.spec.ts
 ```
 
-テスト設定は`pnpm build && pnpm start --port 3007`を起動する。`PLAYWRIGHT_EXTERNAL_WEB_SERVER=1`は自分が起動して確認したサーバーだけに使う。
+分離コピーを作った場合は、E2Eもコピー先（`cd "$VERIFY_APP"`）で流し、元のチェックアウトに`.next`や`test-results/`を書かない。コピーには`pnpm test:e2e:local`が使う`tools/migration/materials-v2-seed.sql`も含まれている。
 
-テストは375×812のChromiumで動く。操作前後の証跡が足りない場合は、このスキルのPlaywrightスクリプトで補う。テスト完了後は`test-results/`の必要なスクリーンショットとtraceを`output/verification/<実行日時>/`へコピーし、次の実行で失われないようにする。
+テスト設定は`pnpm build && pnpm start --port 3007`を起動する。`reuseExistingServer`が`false`のため、3007を使っているプロセス（通常の`pnpm dev`など）があるとテストは始まらずに失敗する。そのプロセスは止めずに、ユーザーに確認する。`PLAYWRIGHT_EXTERNAL_WEB_SERVER=1`は自分が起動して確認したサーバーだけに使う。
+
+テストは375×812のChromiumで動く。操作前後の証跡が足りない場合は、このスキルのPlaywrightスクリプトで補う。テスト完了後は、実行したディレクトリの`test-results/`から必要なスクリーンショットとtraceを証跡ディレクトリ（`output/verification/<実行日時>/`）へコピーする。コピー先の`test-results/`はCleanupで消える。
 
 E2Eを使わずにこのスキルのスクリプトで投稿や保存をする場合も、書き込み先は`.env.local`の接続先になる。更新してよいDBかを先に確かめる。
 

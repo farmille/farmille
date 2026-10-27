@@ -21,7 +21,7 @@
 
 - 追加：各資材詳細で`page.getByRole("button", {name:"お気に入りに追加"}).click()`を実行する。「お気に入りから解除」へ変わることを確認する。
 - 一覧：マイページからお気に入り一覧を開く。保存した2件の資材名が表示され、再読込後も残ることを確認する。
-- 比較：資材ごとに`page.getByRole("link", {name:資材名}).locator("..").getByRole("checkbox", {name:"比較に含める"}).check()`を実行し、`page.getByRole("button", {name:"比較する"}).click()`を押す。比較できるのは2〜4件。`/me/saved/compare`への遷移、tableの表示、2件の資材名を確認する。
+- 比較：資材ごとに`page.locator('a[href="/materials/<実ID>"]').locator("..").getByRole("checkbox", {name:"比較に含める"}).check()`を実行し、`page.getByRole("button", {name:"比較する"}).click()`を押す。比較できるのは2〜4件。`/me/saved/compare`への遷移、tableの表示、2件の資材名を確認する。
 - 解除：各資材詳細の「お気に入りから解除」、または`/me/saved`の「リストから外す」を押し、一覧を再読込して対象が消えたことを確認する。通した入口を記録する。
 
 ## Gotchas
