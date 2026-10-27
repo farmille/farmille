@@ -139,9 +139,9 @@ export function MaterialHero({
         ) : null}
         {material.ingredientCategories.length > 0 ? (
           <div className={chipsStyle}>
-            {[...new Set(material.ingredientCategories.map(({ name }) => name))].map((name) => (
-              <Chip key={name} size="xs">
-                {name}
+            {material.ingredientCategories.map((genre) => (
+              <Chip key={genre.id} fullLabel={genre.name} size="xs">
+                {genre.short_name}
               </Chip>
             ))}
           </div>

@@ -14,7 +14,7 @@ type ChipProps = {
   children: ReactNode;
   /** 名前の前に小さく添える種類（作物・効果など）。 */
   category?: string;
-  /** children が略称のときの正式名称。ホバーで出し、読み上げにも使う。 */
+  /** children が略称のときの正式名称。children と異なるときだけ、ホバーで出し、読み上げにも使う。 */
   fullLabel?: string;
   tone?: "brand" | "neutral";
   size?: "md" | "sm" | "xs";
@@ -40,13 +40,14 @@ export function Chip({
   removeLabel,
 }: ChipProps) {
   const styles = chipRecipe({ tone, size, removable: onRemove !== undefined });
+  const fullName = fullLabel === children ? undefined : fullLabel;
   const labelRef = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
 
   function handleOpenChange(next: boolean): void {
     const label = labelRef.current;
     const truncated = label !== null && label.scrollWidth > label.clientWidth;
-    setOpen(next && (fullLabel !== undefined || truncated));
+    setOpen(next && (fullName !== undefined || truncated));
   }
 
   return (
@@ -54,18 +55,18 @@ export function Chip({
       {category === undefined ? null : <span className={styles.category}>{category}</span>}
       <Tooltip.Root open={open} onOpenChange={handleOpenChange}>
         <Tooltip.Trigger delay={300} render={<span ref={labelRef} className={styles.label} />}>
-          {fullLabel === undefined ? (
+          {fullName === undefined ? (
             children
           ) : (
             <>
               <span aria-hidden="true">{children}</span>
-              <span className={visuallyHidden}>{fullLabel}</span>
+              <span className={visuallyHidden}>{fullName}</span>
             </>
           )}
         </Tooltip.Trigger>
         <Tooltip.Portal>
           <Tooltip.Positioner className={popupPositionerStyle} sideOffset={6}>
-            <Tooltip.Popup className={chipTooltipStyle}>{fullLabel ?? children}</Tooltip.Popup>
+            <Tooltip.Popup className={chipTooltipStyle}>{fullName ?? children}</Tooltip.Popup>
           </Tooltip.Positioner>
         </Tooltip.Portal>
       </Tooltip.Root>

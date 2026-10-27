@@ -5,6 +5,7 @@ import { surfaceCardRecipe } from "./SurfaceCard";
 import { Icon } from "@/components/Icon";
 import { Chip } from "./Chip";
 import { StarRating } from "./StarRating";
+import type { Database } from "@/types/database.types";
 
 const scrollCard = cva({
   base: {
@@ -99,6 +100,12 @@ const tagRowStyle = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "1.
 
 const RICH_CATEGORY_LIMIT = 3;
 
+/** 資材ジャンル。チップには略称を出し、正式名称はホバーと読み上げに使う。 */
+export type MaterialGenre = Pick<
+  Database["public"]["Tables"]["ingredient_categories"]["Row"],
+  "name" | "short_name"
+>;
+
 type MaterialCardBase = {
   href: string;
   name: string;
@@ -116,7 +123,7 @@ export type MaterialCardProps = MaterialCardBase &
         /** 横スクロール用 */
         variant: "scroll";
         reviewCount: number;
-        categories?: readonly string[];
+        categories?: readonly MaterialGenre[];
       }
     | {
         /** 一覧・参照用。資材名・メーカー・評価だけを出す */
@@ -131,7 +138,7 @@ export type MaterialCardProps = MaterialCardBase &
         reportCount: number;
         savedCount: number;
         description?: string;
-        categories: readonly string[];
+        categories: readonly MaterialGenre[];
         /** direct は作物そのものの記載、groups は作物群としての記載 */
         evidence: { direct: readonly string[]; groups: readonly string[] };
       }
@@ -233,9 +240,9 @@ export function MaterialCard(props: MaterialCardProps) {
           ) : null}
           {props.categories ? (
             <div className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}>
-              {props.categories.map((category) => (
-                <Chip key={category} size="xs">
-                  {category}
+              {props.categories.map((genre) => (
+                <Chip key={genre.name} fullLabel={genre.name} size="xs">
+                  {genre.short_name}
                 </Chip>
               ))}
             </div>
@@ -330,9 +337,9 @@ function RichTags({
     <>
       {shownCategories.length > 0 ? (
         <div className={tagRowStyle}>
-          {shownCategories.map((category) => (
-            <Chip key={category} size="xs" tone="neutral">
-              {category}
+          {shownCategories.map((genre) => (
+            <Chip key={genre.name} fullLabel={genre.name} size="xs" tone="neutral">
+              {genre.short_name}
             </Chip>
           ))}
         </div>
