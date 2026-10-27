@@ -120,7 +120,6 @@ export function StarRating(props: StarRatingProps) {
           <Icon
             key={n}
             name={n <= value ? "star_filled" : "star"}
-            // sm は本文（md=14px）の横に置く。Material アイコンの内余白を見込んで 16px。
             size={props.size === "lg" ? "md" : "sm"}
           />
         ))}

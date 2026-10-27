@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import Link from "next/link";
@@ -152,7 +153,8 @@ export function MaterialHero({
             ・ 感想口コミ <HeroCount>{material.review_count}件</HeroCount>
           </a>{" "}
           <span className={countMinorStyle}>
-            ・ <span className={savedMarkStyle}>★</span> お気に入り {savedCount}
+            ・ <Icon name="star_filled" size="xs" className={savedMarkStyle} /> お気に入り{" "}
+            {savedCount}
           </span>
         </div>
         <SaveControl

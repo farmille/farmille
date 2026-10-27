@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components/Button";
@@ -82,7 +83,7 @@ export function ReportGate({ reportPath }: { reportPath: string }) {
               })}
               href={`/login?next=${next}`}
             >
-              ログインはこちら →
+              ログインはこちら <Icon name="arrow_forward" size="xs" />
             </Link>
           </div>
         </div>

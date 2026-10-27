@@ -458,7 +458,8 @@ export function ReviewForm({
                   <br />
                 </>
               ) : null}
-              ＋<br />
+              <Icon name="add" size="sm" />
+              <br />
               追加
             </span>
           </label>

@@ -1,3 +1,5 @@
+import { Icon } from "./Icon";
+
 import { Toaster as Sonner } from "sonner";
 
 import { css } from "../../styled-system/css";
@@ -72,6 +74,22 @@ export function Toaster({ id, placement = "top", label = "通知" }: ToasterProp
       position={position}
       customAriaLabel={label}
       duration={4000}
+      icons={{
+        success: <Icon name="check" />,
+        info: <Icon name="info" />,
+        warning: <Icon name="warning" />,
+        error: <Icon name="error" />,
+        loading: (
+          <Icon
+            name="loader"
+            className={css({
+              animation: "[icon-spin 1s linear infinite]",
+              _motionReduce: { animation: "none" },
+            })}
+          />
+        ),
+        close: <Icon name="close" size="sm" />,
+      }}
       offset={offset}
       mobileOffset={offset}
       toastOptions={{

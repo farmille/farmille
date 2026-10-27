@@ -353,7 +353,7 @@ export function ReportPageProperties({
       }}
     >
       {item.name}
-      {item.id === input.cropId ? "  ✓" : ""}
+      {item.id === input.cropId ? <Icon name="check" size="xs" /> : null}
       {item.aliases.length > 0 && (
         <span className={css({ display: "block", textStyle: "supporting", color: "text.muted" })}>
           {item.aliases.join("・")}
@@ -563,7 +563,7 @@ export function ReportPageProperties({
             className={itemRecipe({ current: true })}
             onClick={closeMaterialPicker}
           >
-            {material.name} ✓
+            {material.name} <Icon name="check" size="xs" />
             <span
               className={css({ display: "block", textStyle: "supporting", color: "text.muted" })}
             >

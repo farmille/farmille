@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Icon } from "@/components/Icon";
 import { FormPageShell } from "@/components/FormPageShell";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { createPageMetadata } from "@/lib/seo";
@@ -84,7 +85,7 @@ export default function SellerProceduresPage() {
                         href={target.href}
                         key={target.href}
                       >
-                        {target.label}
+                        {target.label} <Icon name="arrow_forward" size="xs" />
                       </Link>
                     ))}
                   </div>

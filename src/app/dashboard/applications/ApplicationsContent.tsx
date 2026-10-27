@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { FormPageShell } from "@/components/FormPageShell";
@@ -131,7 +132,7 @@ export function ApplicationsContent({
         </section>
 
         <Link className={backLink} href="/dashboard">
-          ← 企業会員ダッシュボードへ
+          <Icon name="arrow_back" size="sm" /> 企業会員ダッシュボードへ
         </Link>
       </div>
     </FormPageShell>

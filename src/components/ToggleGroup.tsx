@@ -3,6 +3,8 @@
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup as BaseToggleGroup } from "@base-ui/react/toggle-group";
 
+import { Icon } from "./Icon";
+
 import { cx, sva } from "../../styled-system/css";
 import { choiceGroupRecipe, choiceRecipe } from "./form/recipes";
 import type { Option } from "./form/types";
@@ -34,11 +36,8 @@ const toggleGroupRecipe = sva({
           display: "inline-flex",
           alignItems: "center",
           gap: "1.5",
-          _before: {
-            content: '""',
+          "& > svg": {
             flex: "none",
-            display: "grid",
-            placeItems: "center",
             w: "4",
             h: "4",
             borderWidth: "1.5px",
@@ -46,15 +45,13 @@ const toggleGroupRecipe = sva({
             borderColor: "border.strong",
             borderRadius: "mark",
             bg: "surface.card",
-            fontSize: "xs",
-            lineHeight: "none",
-            color: "text.inverse",
+            color: "transparent",
           },
           _pressed: {
             borderColor: "primary.600",
             bg: "primary.soft",
             color: "text.brandOnSoft",
-            _before: { content: '"✓"', bg: "primary.700", borderColor: "primary.700" },
+            "& > svg": { color: "text.inverse", bg: "primary.700", borderColor: "primary.700" },
           },
         },
       },
@@ -260,6 +257,7 @@ export function ToggleGroup<V extends string>({
             key={option.value}
             value={option.value}
           >
+            {variant === "checks" ? <Icon name="check" size="xs" /> : null}
             {option.label}
           </Toggle>
         ))}

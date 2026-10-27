@@ -32,7 +32,7 @@
 
 - フォーム・ダイアログ・通知・開閉・候補つき入力は`src/components`の共通部品（フォームは`src/components/form`）を使い、不足する機能はそこへ追加する。`@base-ui/react`・`sonner`のimportは`src/components`内に限る。
 - 同じUIパターンを3回書く前に共通部品へまとめる。ページ内で長大なJSXと業務ロジックを混在させない。
-- アイコンは`material-icons`のフォントを共通`Icon`（`src/components/Icon.tsx`）経由で使う。不足するglyphは`Icon`へ追加する。SVGアイコン・lucide・react-iconsは使わない。ロゴ・グラフ・イラストのSVGは可。
+- アイコンは`@tabler/icons-react`を共通`Icon`（`src/components/Icon.tsx`）経由で使う。不足するアイコンは`Icon`へ追加する。文字記号によるアイコンや他のアイコンライブラリは使わない。ロゴ・グラフ・イラストのSVGは可。
 - `Input`・`Textarea`・`Select`・`Combobox`・`Autocomplete`・`FileInput`・`OtpInput`・`CheckboxGroup`・`RadioGroup`は`label`を必須とし、必須/任意・案内・エラーも部品のpropsへ渡す。ラベルを隠す場合は`hideLabel`、枠には`fieldClassName`を使う。
 - `Field`・`Fieldset`は1つの見出しで複数要素をまとめる場合に使い、中の部品は`label={null}`にする。
 
