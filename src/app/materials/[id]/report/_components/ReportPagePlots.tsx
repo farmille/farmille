@@ -305,9 +305,8 @@ export function ReportPagePlots({
           />
           <Textarea
             fieldClassName={css({ mt: "3" })}
-            label={<span className={labelStyle}>区の説明</span>}
-            size="document"
-            example={example}
+            label="区の説明"
+            placeholder={example}
             maxLength={REPORT_BODY_MAX}
             description={reportLengthNote(plot.description, REPORT_BODY_MAX)}
             value={plot.description}
@@ -477,10 +476,9 @@ export function ReportPagePlots({
       {common && (
         <Textarea
           fieldClassName={css({ mt: "4" })}
-          label={<span className={labelStyle}>全区に共通の説明</span>}
+          label="全区に共通の説明"
           requirement="optional"
-          size="document"
-          example={
+          placeholder={
             "全区で同じ条件。区ごとの説明には違いだけを書きます\n例）1区5株、4反復。かん水と施肥は全区同じ。"
           }
           maxLength={REPORT_BODY_MAX}

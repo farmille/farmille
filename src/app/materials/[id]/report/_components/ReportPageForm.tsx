@@ -549,15 +549,12 @@ export function ReportPageForm({
           </div>
           <div className={divider} />
 
-          <h2 className={heading("observedChange")} id="h-observed-change">
-            結果・感想<span className={requirementMark}>必須</span>
-          </h2>
           <Textarea
             id="report-observed-change"
             label="結果・感想"
-            hideLabel
-            size="document"
-            example={
+            requirement="required"
+            error={missingKeys.has("observedChange") ? "結果・感想を記入してください" : undefined}
+            placeholder={
               "いつ頃から・どこに・どんな変化があったか。良くなかった点も\n例）2回目の使用から数日後、午後の葉の萎れが使用前よりやや軽くなった。収量が増えるような変化は確認できなかったが、暑い時期の萎れを抑える補助としては手応えがあった。薬害（葉焼け・変色）は見られなかった。"
             }
             maxLength={REPORT_BODY_MAX}
@@ -569,15 +566,14 @@ export function ReportPageForm({
           />
           <ReportPdfReadingMark fields={[{ key: "observedChange" }]} />
 
-          <h2 className={heading("cultivationEnvironment")}>
-            栽培環境<span className={requirementMark}>必須</span>
-          </h2>
           <Textarea
             id="report-environment"
             label="栽培環境"
-            hideLabel
-            size="document"
-            example={
+            requirement="required"
+            error={
+              missingKeys.has("cultivationEnvironment") ? "栽培環境を記入してください" : undefined
+            }
+            placeholder={
               "露地か施設か、養液の使用など\n例）パイプハウスで土耕栽培。無加温で、灌水チューブで週2回かん水している。"
             }
             maxLength={REPORT_BODY_MAX}
@@ -589,15 +585,12 @@ export function ReportPageForm({
           />
           <ReportPdfReadingMark fields={[{ key: "cultivationEnvironment" }]} />
 
-          <h2 className={heading("timingNote")}>
-            処理日と生育状況<span className={requirementMark}>必須</span>
-          </h2>
           <Textarea
             id="report-timing-note"
             label="処理日と生育状況"
-            hideLabel
-            size="document"
-            example={
+            requirement="required"
+            error={missingKeys.has("timingNote") ? "処理日と生育状況を記入してください" : undefined}
+            placeholder={
               "資材を使った日（〇月〇日）は必ず。定植日・生育状況も\n例）3月6日に定植。開花してすぐの6月5日に施用。7日おきに3回。"
             }
             maxLength={REPORT_BODY_MAX}

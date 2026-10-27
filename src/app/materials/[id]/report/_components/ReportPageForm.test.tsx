@@ -61,6 +61,27 @@ function renderForm(draft = filledReport, readingAvailable = true) {
   );
 }
 
+describe("文章の入力欄", () => {
+  it("標準ラベルとplaceholderを使い、未入力なら欄にエラーを表示する", () => {
+    renderForm({ ...filledReport, observedChange: "", cultivationEnvironment: "", timingNote: "" });
+    const labels = ["結果・感想", "栽培環境", "処理日と生育状況"];
+    for (const label of labels) {
+      const field = screen.getByRole("textbox", { name: label });
+      expect(field).toBeRequired();
+      expect(field).toHaveAttribute("placeholder", expect.stringContaining("例）"));
+      expect(screen.getByText(label, { selector: "label" })).toBeVisible();
+      expect(screen.queryByRole("heading", { name: new RegExp(label) })).not.toBeInTheDocument();
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: "投稿する" }));
+
+    for (const label of labels) {
+      expect(screen.getByRole("textbox", { name: label })).toHaveAttribute("aria-invalid", "true");
+      expect(screen.getByText(`${label}を記入してください`)).toBeVisible();
+    }
+  });
+});
+
 describe("保存前の入力の控え", () => {
   afterEach(() => window.sessionStorage.clear());
 
