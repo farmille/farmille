@@ -2,13 +2,13 @@
 
 import { Fragment, useActionState } from "react";
 
-import { saveRegisteredContactAction } from "@/app/account/actions";
+import { saveRegisteredContactAction } from "@/app/account/contact/actions";
 import { ContactNameFields } from "@/app/signup/ContactNameFields";
 import { PostalAddressFields } from "@/app/signup/PostalAddressFields";
 import { Form, FormActions, Notice, SubmitButton } from "@/components/form";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 
-import { css } from "../../../styled-system/css";
+import { css } from "../../../../styled-system/css";
 
 const savedNoticeStyle = css({ mt: "3" });
 

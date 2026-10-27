@@ -53,7 +53,7 @@ export async function saveRegisteredContactAction(
 
   const result = await saveOwnRegisteredContact(validation.input);
   if (!result.ok) {
-    if (result.error === "unauthorized") redirect("/login?next=%2Faccount");
+    if (result.error === "unauthorized") redirect("/login?next=%2Faccount%2Fcontact");
     return {
       status: "error",
       message: errorMessageJa[result.error],
@@ -62,6 +62,7 @@ export async function saveRegisteredContactAction(
   }
 
   revalidatePath("/account");
+  revalidatePath("/account/contact");
   revalidatePath("/me");
   return { status: "done", message: "登録情報を保存しました。" };
 }

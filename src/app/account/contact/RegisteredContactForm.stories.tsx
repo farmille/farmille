@@ -1,14 +1,14 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, mocked, userEvent, waitFor, within } from "storybook/test";
 
-import { css } from "../../../styled-system/css";
+import { css } from "../../../../styled-system/css";
 import { saveRegisteredContactAction } from "./actions";
 import { RegisteredContactForm } from "./RegisteredContactForm";
 
 const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
 
 const meta = {
-  title: "Pages/account/RegisteredContactForm",
+  title: "Pages/account/contact/RegisteredContactForm",
   component: RegisteredContactForm,
   decorators: [fmDecorator],
   args: {
