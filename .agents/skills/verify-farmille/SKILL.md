@@ -5,7 +5,7 @@ description: FarmilleのWeb UIを実操作で検証する。検索、資材詳�
 
 # Verify Farmille
 
-最初に[機能マップ](features/README.md)を読み、対象機能と入口を選ぶ。操作はCodex in-app Browserで行う。既存のPlaywrightテストは操作手順の参照先として使う。
+最初に[機能マップ](features/README.md)を読み、対象機能と入口を選ぶ。画面はリポジトリのPlaywright（`@playwright/test`のChromium）をNode.jsのスクリプトから動かして操作する。既存のE2Eは操作手順の参照先として使う。
 
 ## Launch
 
@@ -30,9 +30,10 @@ git status --short > "$VERIFY_EVIDENCE/worktree-status.txt"
 printf '%s\n' "$VERIFY_APP" > "$VERIFY_EVIDENCE/app-path.txt"
 cd "$VERIFY_APP"
 pnpm install --frozen-lockfile
+pnpm exec playwright install chromium
 ```
 
-`pnpm install`のprepareがPandaのコードとNext.jsのルート型を生成する。`node_modules`は共有・リンクしない。インストールが失敗したら起動せず、原因と終了コードを記録してCleanupへ進む。
+`pnpm install`のprepareがPandaのコードとNext.jsのルート型を生成する。`node_modules`は共有・リンクしない。Linuxでブラウザの共有ライブラリが足りなければ`pnpm exec playwright install --with-deps chromium`を使う。インストールが失敗したら起動せず、原因と終了コードを記録してCleanupへ進む。
 
 コピー先で環境変数の存在と接続先だけを確認する。
 
@@ -60,7 +61,9 @@ NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3107 pnpm dev --hostname 127.0.0.1 --port 
 
 `Ready`を確認してDoctorを実行する。起動ログだけで成功と判定しない。画面のコンパイルは最初のリクエスト時に起きる。
 
-Supabaseは`supabase/config.toml`のAPIポートを確認する。2026-10-03の設定は58321、seedは無効。既存のローカルDBに公開資材が入っていることを前提とする。アプリのコピーはDBとブラウザのCookieを分離しない。公開画面の読み取りでもDB停止や別作業のデータ変更を受けるため、接続エラーが出たら対象の検証を中断して証跡を残す。データがなければ空状態を検証し、資材詳細などは未確認として記録する。共有DBのreset、migration適用、seed投入をこのスキルの起動処理に含めない。
+接続先のSupabaseは`.env.local`の`NEXT_PUBLIC_SUPABASE_URL`で決まり、そのoriginを証跡に記録する。`supabase/config.toml`のスタックはAPIが54321、DBが54322で、`supabase db reset`のときに`supabase/seed.sql`（一般・メーカーのデモアカウント）を入れる。資材マスタとホームのデモデータは、`docs/ops/local-verification.md`の「2. データを入れ直したいとき」で入る。`.env.local`が58321など別ポートのスタックを指していてもよい。54321のDBはE2E（push前の検査と`pnpm test:e2e:local`）のたびに作り直され、手で入れたデータは消える。
+
+アプリのコピーはDBを分離しない。公開画面の読み取りでもDB停止や別作業のデータ変更を受けるため、接続エラーが出たら対象の検証を中断して証跡を残す。データがなければ空状態を検証し、資材詳細などは未確認として記録する。`db reset`とデータの投入は共有DBの中身を消すため、このスキルの起動処理に含めず、ユーザーの承認なしに実行しない。
 
 ## Doctor
 
@@ -76,19 +79,44 @@ curl --fail --silent --show-error --max-time 60 \
 
 リスナーのPIDを`lsof -a -p PID -d cwd`で照合し、`app-path.txt`に記録したコピーを指すことを確認する。PIDには直前に得た実値を入れる。起動ログのNext.jsバージョンがコピーの`package.json`と一致し、ホームがHTTP 200で、ブラウザにFarmilleと資材検索欄が表示された場合だけ操作へ進む。
 
-`GET /`が500なら、同じPTYのログにある最初のエラーを確認する。環境変数、Supabase接続、コンパイルを切り分け、秘密値を伏せて記録する。認証が必要な機能では、画面上のアカウント種別とログイン状態も確認する。
+`GET /`が500なら、同じPTYのログにある最初のエラーを確認する。環境変数、Supabase接続、コンパイルを切り分け、秘密値を伏せて記録する。`container_type_id`不在などの「internal」なら、`pnpm check:migrations`でmigrationの遅れを確かめる。このコマンドはDBに何も適用しない。出力された適用コマンドの扱いは`docs/ops/local-verification.md`に従う。認証が必要な機能では、画面上のアカウント種別とログイン状態も確認する。
 
 ## Drive
 
-`computer-use-coordination`を読み、バックグラウンドの専用タブを使う。新規cuaセッションの最初の呼び出しは次の1行だけにする。
+E2Eの設定（`playwright.config.ts`）は3007・54321・global-setupに固定されているため使わない。コピー先の直下に機能ごとのスクリプト（例：`verify-search.mjs`）を置き、コピー先から実行する。`@playwright/test`はコピー先の`node_modules`から読み込まれる。
 
 ```javascript
-let tab = await cua.createBrowserTab("iab", "http://127.0.0.1:3107/", { visible: false });
+import fs from "node:fs/promises";
+import { chromium } from "@playwright/test";
+
+const evidence = process.env.VERIFY_EVIDENCE;
+if (!evidence) throw new Error("VERIFY_EVIDENCE が未設定です");
+const browser = await chromium.launch();
+const context = await browser.newContext({ viewport: { width: 375, height: 812 } });
+const page = await context.newPage();
+async function record(name) {
+  await page.screenshot({ path: `${evidence}/${name}.jpg`, type: "jpeg" });
+  await fs.writeFile(`${evidence}/${name}.aria.yml`, await page.locator("body").ariaSnapshot());
+  console.log(name, page.url());
+}
+try {
+  await page.goto("http://127.0.0.1:3107/");
+  await record("search-01-home");
+  // 機能マップの操作を続け、操作のたびに record する
+} finally {
+  await browser.close();
+}
 ```
 
-返されたブラウザIDを指定して`cua.getBrowser`を取得する。viewport capabilityのdocumentationを読み、`set({width:375,height:812})`を実行する。既にcuaを利用中なら既存のブラウザバインディングを再利用する。
+```bash
+VERIFY_EVIDENCE="$VERIFY_EVIDENCE" node verify-search.mjs
+```
 
-機能マップのセレクターを現在のAXまたはDOMスナップショットと照合し、`tab.playwright`から操作する。各操作の後に`tab.getAXState()`を読み、URLと表示内容を確認する。遷移中なら`waitForURL`に加え、期待する入力欄の`waitFor({state:"visible"})`で読込完了を待つ。URLが変わってもスケルトン表示中の場合がある。見つからないラベルを推測で置換しない。DOMの読み取りは許容するが、内部状態やイベントを直接変更して操作を代用しない。
+1つの機能を1つのスクリプトにまとめる。初回は入口を開いてariaスナップショットを読み、機能マップのlocatorが現在の画面と合うことを確かめてから操作を足す。失敗したらスナップショットを読み直し、スクリプトを直して最初から流す。
+
+遷移は`page.waitForURL`に加え、期待する要素の`waitFor({state:"visible"})`で読込完了を待つ。URLが変わってもスケルトン表示中の場合がある。SSR直後の未hydrationのボタンは押しても動かないことがあるため、`e2e/support/ui.ts`の`waitForReactHydration`と同じ確認をしてから押す。見つからないラベルを推測で置換しない。DOMの読み取りは許容するが、`page.evaluate`で内部状態やイベントを直接変更して操作を代用しない。
+
+ログインが要る機能は、同じスクリプトの中で画面からログインする。メールアドレスとパスワードは環境変数で渡し、スクリプト・ログ・証跡に書かない。`storageState`などの認証stateをファイルへ保存しない。
 
 まず[検索](features/search.md)のホーム検索、並び替え、入力の変更、検索解除、下部ナビ、リロードを通す。各入口の結果を別々に記録する。
 
@@ -98,8 +126,9 @@ let tab = await cua.createBrowserTab("iab", "http://127.0.0.1:3107/", { visible:
 
 証跡は`output/verification/<実行日時>/`へ残す。コピー先の中に置かない。
 
-- 操作前後の375pxスクリーンショットをJPEGで保存する。cuaの`tab.screenshot({fullPage:false})`のバイト列をファイルへ書き出す。
-- AXまたはDOMスナップショット、操作したラベル、入力値、URL、期待値と実際の表示を保存する。スクリーンショットだけで操作成功と判断しない。
+- 操作前後の375pxスクリーンショットをJPEGで保存する。
+- ariaスナップショット、操作したlocator、入力値、URL、期待値と実際の表示を保存する。スクリーンショットだけで操作成功と判断しない。
+- 実行したスクリプトと、その標準出力・終了コードを保存する。
 - 起動ログ、Doctorの結果、リビジョン、未コミット変更の一覧を保存する。HTTPの結果はUI検証の代用にしない。
 - 投稿や保存はリロードと別の表示箇所で永続化を確認する。必要なDB読み取りは、承認済みのテスト用接続先に限定する。
 - 外部サービスのモックは既存の本番境界に限る。dry-runという名前だけで副作用なしと判断せず、通信、生成ファイル、DB更新を確認する。
@@ -107,26 +136,18 @@ let tab = await cua.createBrowserTab("iab", "http://127.0.0.1:3107/", { visible:
 
 結果は`result.md`に、機能ID・入口・操作・期待値・観測結果・成功／失敗／skip・未確認事項を記載する。画面幅をDOMから確認し、横方向のはみ出しも記録する。スクリーンショットを目視し、ローディング画面やエラー画面を成功証跡にしない。
 
-cua内での保存は次の形を使う。`evidence`にはLaunchで作った証跡ディレクトリの絶対パスを渡す。
-
-```javascript
-let fs = await import("node:fs/promises");
-await fs.writeFile(evidence + "/search.jpg", await tab.screenshot({ fullPage: false }));
-await fs.writeFile(evidence + "/search.txt", await tab.playwright.domSnapshot());
-```
-
 ## Cleanup
 
 成功・失敗のどちらでも実行する。
 
-1. 作成したブラウザタブだけを閉じ、変更したviewportを`reset()`で戻す。
+1. スクリプトが終了し、起動したChromiumが残っていないことを`ps -axo pid,ppid,command`で確認する。残っていれば、この実行のスクリプトから起動したものだけを止める。
 2. 起動したPTYのセッションIDへCtrl-Cを送り、終了コードを確認する。プロセス名でkillしない。元からある開発サーバーやSupabaseを止めない。
 3. `lsof -nP -iTCP:3107 -sTCP:LISTEN`で自分のリスナーが消えたことを確認する。残っていればPIDと作業ディレクトリを照合する。
-4. この実行で作った`app-path.txt`のコピー先だけを削除する。削除前に`/tmp/farmille-verify.*`配下であることを確認する。元リポジトリと証跡ディレクトリは削除しない。
+4. 実行したスクリプトを証跡へコピーしてから、この実行で作った`app-path.txt`のコピー先だけを削除する。削除前に`/tmp/farmille-verify.*`配下であることを確認する。元リポジトリと証跡ディレクトリは削除しない。
 5. `test -s "$VERIFY_EVIDENCE/result.md"`と`find "$VERIFY_EVIDENCE" -name '*.jpg' -size +0c`で証跡が残っていることを確認する。失敗時もログと失敗画面を残す。
 
 ## Helpers
 
-このスキル専用の実行ファイルはない。起動は`pnpm dev`、閲覧はcua、HTTP診断は`curl`を使う。既存テストの入口と制約は[DB更新を伴う検証](references/mutating-e2e.md)にまとめている。
+このスキル専用の実行ファイルはない。起動は`pnpm dev`、画面操作はPlaywrightのスクリプト、HTTP診断は`curl`を使う。既存テストの入口と制約は[DB更新を伴う検証](references/mutating-e2e.md)にまとめている。
 
 画面やラベルを変更したら`/maintain-verification-skill`で機能マップを更新する。
