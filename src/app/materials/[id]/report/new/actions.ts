@@ -75,7 +75,14 @@ export async function submitUsageReportAction(
 }
 
 function pdfReadingRefused(error: ErrorCode, message = errorMessageJa[error]): PdfReadingResult {
-  return { ok: false, error, message, remaining: null, savedDraft: null };
+  return {
+    ok: false,
+    error,
+    message,
+    remaining: null,
+    savedDraft: null,
+    pdfValuesCheckRequired: false,
+  };
 }
 
 /** 試験成績書の PDF を読み取り、下書きに写して保存する。読み取りの画面があるページの maxDuration（120秒）で動く。 */

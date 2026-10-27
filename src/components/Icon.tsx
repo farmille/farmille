@@ -5,6 +5,7 @@ import { cva, cx, type RecipeVariantProps } from "../../styled-system/css";
 // 塗りと線が別名（*_border）の glyph は ligature 名で出し分ける。書体は glyph ごとに固定する。
 const glyphs = {
   search: { ligature: "search", face: "filled" },
+  tune: { ligature: "tune", face: "filled" },
   bookmark: { ligature: "bookmark_border", face: "outlined" },
   bookmark_filled: { ligature: "bookmark", face: "filled" },
   visibility: { ligature: "visibility", face: "outlined" },

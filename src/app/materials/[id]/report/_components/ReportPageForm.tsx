@@ -58,6 +58,7 @@ import {
   type ReportPageNumericItem,
 } from "./report-page-state";
 import { docHeadingRecipe, requirementMark } from "./report-page-styles";
+import { useReportLeaveWarning } from "./use-report-leave-warning";
 
 const bar = css({
   position: "sticky",
@@ -236,8 +237,8 @@ export function ReportPageForm({
    * checkRequired は、読み取りの値を元のPDFと照らし合わせた確認を提出に求めるか。
    */
   pdfReading: {
-    siteKey: string;
-    remaining: number;
+    siteKey: string | null;
+    remaining: number | null;
     marks: PdfReadingField[];
     checkRequired: boolean;
   };
@@ -313,15 +314,7 @@ export function ReportPageForm({
     for (const media of payload.media) shownMedia.current.add(media.url);
   });
 
-  useEffect(() => {
-    if (!dirty || submitted) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty, submitted]);
+  useReportLeaveWarning(dirty && !submitted);
 
   const checks = reportPageChecks(payload, acks, checkRequired);
   const marks = effectivePdfReadingMarks(readMarks, payload);
@@ -415,6 +408,7 @@ export function ReportPageForm({
     if (result.ok || result.savedDraft !== null)
       forgetDropped(droppedMedia(inputWithItems(input, items)));
     if (!result.ok) {
+      if (result.pdfValuesCheckRequired) setCheckRequired(true);
       // 失敗しても、サーバーの下書きを保存した分には揃える（揃えないと次の保存が競合する）
       const draft = result.savedDraft;
       if (draft?.saved === "input" || draft?.saved === "partial") {
@@ -511,13 +505,19 @@ export function ReportPageForm({
             <button
               type="button"
               className={cx(pillButtonRecipe({ tone: "soft", strong: true }), readingButton)}
-              disabled={pending}
+              disabled={pending || remaining === null}
               onClick={() => setReadingOpen(true)}
             >
               <Icon name="picture_as_pdf" size="sm" />
-              PDF読み取り（今月あと{Math.max(remaining, 0)}回）
+              {remaining === null
+                ? "PDF読み取り（いまは使えません）"
+                : `PDF読み取り（今月あと${Math.max(remaining, 0)}回）`}
             </button>
-            <span className={readingNote}>試験成績書のPDFから区・グラフ・栽培条件を入れます</span>
+            <span className={readingNote}>
+              {remaining === null
+                ? "残り回数を取得できませんでした。手入力で続けられます。再読み込みすると再確認します。"
+                : "試験成績書のPDFから区・グラフ・栽培条件を入れます"}
+            </span>
           </div>
 
           <div className={props}>
@@ -813,7 +813,7 @@ export function ReportPageForm({
           }}
           onConfirm={() => persist(false, true)}
         />
-        {readingOpen && (
+        {readingOpen && remaining !== null && pdfReading.siteKey !== null && (
           <ReportPdfReadingDialog
             onClose={() => setReadingOpen(false)}
             defaultTrial={pdfReadingTrialDraft(

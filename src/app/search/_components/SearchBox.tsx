@@ -160,7 +160,7 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
               key={selectedFilterKey(filter)}
               onRemove={() => navigate(selected.filter((_, itemIndex) => itemIndex !== index))}
               removeLabel={`${filter.name}を外す`}
-              size="md"
+              size="sm"
             >
               {filter.name}
             </Chip>

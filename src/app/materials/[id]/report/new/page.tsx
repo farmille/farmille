@@ -69,9 +69,6 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
   if (!profileResult.ok) {
     throw new Error(errorMessageJa[profileResult.error]);
   }
-  if (!readingResult.ok) {
-    throw new Error(errorMessageJa[readingResult.error]);
-  }
   if (material.publication_status !== "published") notFound();
 
   const formData = formDataResult.data;
@@ -108,7 +105,7 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
         materialCropIds={formData.materialCropIds}
         registeredAddress={addressResult.data}
         pdfReading={{
-          ...readingResult.data,
+          ...(readingResult.ok ? readingResult.data : { remaining: null, siteKey: null }),
           marks: formData.pdfReadingMarks,
           checkRequired: formData.pdfValuesCheckRequired,
         }}

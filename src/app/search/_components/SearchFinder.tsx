@@ -27,7 +27,7 @@ import strawberry from "./photos/strawberry.webp";
 import tea from "./photos/tea.webp";
 import tomato from "./photos/tomato.webp";
 import welshOnion from "./photos/welsh-onion.webp";
-import { filterChipRecipe, focusRing } from "./search-chips";
+import { chipRecipe, focusRing } from "./search-chips";
 import {
   finderCrops,
   finderEffects,
@@ -337,7 +337,7 @@ export function SearchFinder({ scope, selected, sort, query, resultCount }: Sear
           {effects.map((effect) => (
             <Link
               aria-current={effect.active ? "true" : undefined}
-              className={filterChipRecipe({ active: effect.active })}
+              className={chipRecipe({ active: effect.active })}
               href={effectHref(effect)}
               key={effect.id}
               rel="nofollow"

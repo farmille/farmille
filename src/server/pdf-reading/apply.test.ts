@@ -245,6 +245,7 @@ describe("applyPdfReading", () => {
     if (posted === undefined || untreated === undefined) throw new Error("区が足りない");
     for (const bad of [
       reading({ plots: [{ ...posted, varietyKey: "v9" }, untreated] }),
+      reading({ varieties: [], plots: [{ ...posted, varietyKey: "v1" }, untreated] }),
       reading({
         plots: [posted, { ...untreated, treatment: "compared", comparedMaterialKey: "m9" }],
       }),
@@ -295,6 +296,19 @@ describe("applyPdfReading", () => {
         error: "pdf_reading_failed",
       });
     }
+  });
+
+  it("同じグラフと区に違う値が2つあれば失敗にし、同じ値の重なりは1つの値として写す", () => {
+    const value = { graphKey: "g1", plotKey: "p1", value: "1126±139 B" };
+    const conflicting = reading({ values: [value, { ...value, value: "980±120 A" }] });
+    expect(applyPdfReading(base(), conflicting, catalog, ids())).toEqual({
+      ok: false,
+      error: "pdf_reading_failed",
+    });
+    const { input } = applied(base(), reading({ values: [value, { ...value }] }));
+    const [measurement] = input.measurements;
+    const graph = measurement?.kind === "numeric" ? measurement.graphs[0] : undefined;
+    expect(graph?.rows.map((row) => row.value)).toEqual(["1126±139 B", ""]);
   });
 
   it("写すたびに PDF と照らし合わせた確認を外す", () => {

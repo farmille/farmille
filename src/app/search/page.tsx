@@ -167,6 +167,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           selected={selected}
           sort={sort}
           query={initialQuery}
+          resultCount={resultCount}
         />
         <div className={css({ minW: "0", scrollMarginTop: "16" })} id="search-results">
           <SearchResults
