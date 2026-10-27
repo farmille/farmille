@@ -23,7 +23,7 @@
 前提条件：公開資材が1件以上ある。ホームと検索画面の現在のariaスナップショットで以下のラベルを確認する。
 
 - ホーム検索：`page.getByRole("search", {name:"資材検索"}).getByRole("searchbox").fill("トマト")`を実行し、同じsearch内の`getByRole("button", {name:"検索", exact:true}).click()`で送信する。URLの`q=トマト`と結果欄の「該当 N 件」を確認する。
-- 並び替え：Base UIのSelectなので`selectOption`は使えない。`page.getByLabel("並び替え").click()`で開き、`page.getByRole("option", {name:"評価が高い順", exact:true}).click()`で選ぶ（`e2e/support/ui.ts`の`chooseOption`と同じ操作）。URLの`sort=rating`と選択表示を確認し、表示カードの評価が降順か確認する。比較できる複数件がなければ順序の確認だけskipとする。
+- 並び替え：Base UIのSelectなので`selectOption`は使えない。`page.getByLabel("並び替え").click()`で開き、`page.getByRole("option", {name:"評価が高い順", exact:true}).click()`で選ぶ（`e2e/support/ui.ts`の`chooseOption`と同じ操作）。URLの`sort=rating`と選択表示を確認する。作物の条件（作物の分類を選んだときや、「トマト」のように入力が作物名に一致したとき）があると、結果は見出し「「<作物名>」の記載がある資材 N件」と「作物分類として記載のある資材 N件」の2群に分かれ、並び順は群ごとに適用される。この場合は全カードを通した順序を期待せず、見出しごとの`section`（`page.locator("section").filter({has: page.getByRole("heading", {level:2, name:/記載(が|の)ある資材/})})`）内でカードの評価が降順か確認する。全体の順序は、`e2e/04-search.spec.ts`と同じく作物を含まない条件（資材名・メーカー・資材ジャンルなど）で確かめる。評価の表示がないカード（感想口コミ0件）は各群の末尾に来る。比較できる複数件がなければ順序の確認だけskipとする。
 - 空結果：`page.getByRole("combobox", {name:"資材の検索条件"}).fill("検証用該当なし987654321")`を実行する。「条件に合う資材が見つかりませんでした」と0件を確認する。検索は入力の300ms後にURLが更新されるため、結果が更新された状態を読む。入力欄の下に出る「…に一致する候補がありません」は候補の案内で、検索結果ではない。
 - 解除：同じ入力を`fill("")`で消す。`q`がURLから消え、資材カードが再表示されることを確認する。選んだ分類は、チップの「<名前>を外す」で1件ずつ外すか、375pxでは結果の上の「すべての条件をクリア」で全部外す。
 - ナビ：ホームへ戻り、`page.getByRole("navigation", {name:"メインナビ"}).getByRole("link", {name:"探す", exact:true}).click()`を実行する。`/search`への遷移を確認する。

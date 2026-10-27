@@ -24,6 +24,8 @@ rsync -a --exclude=node_modules --exclude=.git --exclude=.next \
   --exclude=.codex --exclude=.claude --exclude=.ok --exclude=output \
   --exclude=test-results --exclude=playwright-report --exclude=storybook-static \
   --exclude=docs --exclude='.env*' ./ "$VERIFY_APP/"
+mkdir -p "$VERIFY_APP/docs"
+cp -R docs/email-templates "$VERIFY_APP/docs/"
 cp .env.local "$VERIFY_APP/.env.local"
 git rev-parse HEAD > "$VERIFY_EVIDENCE/revision.txt"
 git status --short > "$VERIFY_EVIDENCE/worktree-status.txt"
@@ -33,6 +35,8 @@ cd "$VERIFY_APP"
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium
 ```
+
+`docs`は、手元にだけある`docs/drafts/`（本番の識別子を含むため`.gitignore`で除外している）を写さないために除外する。`supabase/config.toml`のメールテンプレートは`docs/email-templates`を参照し、無いとSupabase CLIが設定エラーで止まるため、このディレクトリだけを写す。
 
 シェルの変数と作業ディレクトリは、コマンドの実行が分かれると引き継がれないことがある。出力された`VERIFY_APP`と`VERIFY_EVIDENCE`の実値を控え、以後のコマンドでは毎回この2つを代入し直してから実行する。
 

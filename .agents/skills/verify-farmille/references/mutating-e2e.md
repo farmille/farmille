@@ -15,7 +15,7 @@ pnpm test:e2e:local e2e/05-saved.spec.ts
 pnpm test:e2e:local e2e/11-report-reading.spec.ts
 ```
 
-分離コピーを作った場合は、E2Eもコピー先（`cd "$VERIFY_APP"`）で流し、元のチェックアウトに`.next`や`test-results/`を書かない。コピーには`pnpm test:e2e:local`が使う`tools/migration/materials-v2-seed.sql`も含まれている。
+分離コピーを作った場合は、E2Eもコピー先（`cd "$VERIFY_APP"`）で流し、元のチェックアウトに`.next`や`test-results/`を書かない。コピーには`pnpm test:e2e:local`が使う`tools/migration/materials-v2-seed.sql`と、Supabaseのメールテンプレート（`docs/email-templates`）も含まれている。
 
 テスト設定は`pnpm build && pnpm start --port 3007`を起動する。`reuseExistingServer`が`false`のため、3007を使っているプロセス（通常の`pnpm dev`など）があるとテストは始まらずに失敗する。そのプロセスは止めずに、ユーザーに確認する。`PLAYWRIGHT_EXTERNAL_WEB_SERVER=1`は自分が起動して確認したサーバーだけに使う。
 
