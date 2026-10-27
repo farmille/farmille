@@ -294,7 +294,7 @@ export function CatalogSidebar({
         selected={selectedChips(isFilter("crop", "crop_group"))}
         filter={{
           label: "作物名で検索",
-          placeholder: "作物名で検索（例：トマト、柿）",
+          placeholder: "作物名で検索（例：ミニトマト、柿）",
           empty: "該当する作物がありません",
           items: filterItems(
             search.filters.filter(
