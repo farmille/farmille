@@ -10,7 +10,7 @@ const scrollCard = cva({
     scrollSnapAlign: "start",
     overflow: "hidden",
     textDecoration: "none",
-    color: "[inherit]",
+    color: "text.default",
     display: "block",
     flexShrink: "0",
     w: "card.materialMobile",
@@ -31,7 +31,7 @@ const rowCard = css({
   // 本文が複数行でもサムネをカード上端に置く
   alignItems: "start",
   textDecoration: "none",
-  color: "[inherit]",
+  color: "text.default",
 });
 
 const imageBoxRecipe = cva({
