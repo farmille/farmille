@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cva, css, cx } from "../../styled-system/css";
 import { surfaceCardRecipe } from "./SurfaceCard";
 import { Icon } from "@/components/Icon";
+import { Chip } from "./Chip";
 import { StarRating } from "./StarRating";
 
 const scrollCard = cva({
@@ -75,44 +76,6 @@ const IMAGE_SIZES = {
 
 /** 通常画像と読み込み失敗時のプレースホルダーを同じグリッドセルに重ねる。 */
 const imageLayer = css({ gridArea: "1 / 1" });
-
-const categoryPillStyle = css({
-  fontSize: "2xs",
-  px: "2",
-  py: "1",
-  bg: "primary.soft",
-  color: "text.brandOnSoft",
-  borderRadius: "pill",
-});
-
-const tagRecipe = cva({
-  base: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "1",
-    minW: "0",
-    maxW: "full",
-    px: "2",
-    py: "0.5",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderRadius: "pill",
-    fontSize: "xs",
-    fontWeight: "semibold",
-    overflowWrap: "anywhere",
-  },
-  variants: {
-    tone: {
-      neutral: { bg: "surface.page", color: "text.muted", borderColor: "border.default" },
-      evidence: {
-        bg: "primary.100",
-        color: "text.brandOnSoft",
-        borderColor: "primary.700/30",
-        fontWeight: "bold",
-      },
-    },
-  },
-});
 
 const reportCountRecipe = cva({
   base: { fontWeight: "extrabold", fontVariantNumeric: "tabular-nums" },
@@ -271,9 +234,9 @@ export function MaterialCard(props: MaterialCardProps) {
           {props.categories ? (
             <div className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}>
               {props.categories.map((category) => (
-                <span key={category} className={categoryPillStyle}>
+                <Chip key={category} size="xs">
                   {category}
-                </span>
+                </Chip>
               ))}
             </div>
           ) : null}
@@ -368,9 +331,9 @@ function RichTags({
       {shownCategories.length > 0 ? (
         <div className={tagRowStyle}>
           {shownCategories.map((category) => (
-            <span key={category} className={tagRecipe({ tone: "neutral" })}>
+            <Chip key={category} size="xs" tone="neutral">
               {category}
-            </span>
+            </Chip>
           ))}
         </div>
       ) : null}
@@ -378,18 +341,17 @@ function RichTags({
       {evidence.direct.length > 0 ? (
         <div className={tagRowStyle}>
           {evidence.direct.map((crop) => (
-            <span key={crop} className={tagRecipe({ tone: "evidence" })}>
-              <Icon name="check" size="xs" />
-              {crop}の記載あり
-            </span>
+            <Chip key={crop} size="xs">
+              <Icon name="check" size="xs" /> {crop}の記載あり
+            </Chip>
           ))}
         </div>
       ) : evidence.groups.length > 0 ? (
         <div className={tagRowStyle}>
           {evidence.groups.map((group) => (
-            <span key={group} className={tagRecipe({ tone: "neutral" })}>
+            <Chip key={group} size="xs" tone="neutral">
               {group}として記載
-            </span>
+            </Chip>
           ))}
         </div>
       ) : null}

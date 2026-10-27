@@ -4,7 +4,7 @@ import { Avatar } from "@/components/Avatar";
 import { formatDateJa } from "@/components/format-date";
 
 import { css } from "../../../../styled-system/css";
-import { Chip } from "../../materials/[id]/_components/CardParts";
+import { Chip } from "@/components/Chip";
 import { FeedCard } from "./FeedCard";
 
 const shortDate = new Intl.DateTimeFormat("ja-JP", {
@@ -64,7 +64,7 @@ export function FeedReportCard({
         >
           {author}
         </b>
-        {crop ? <Chip>{crop}</Chip> : null}
+        {crop ? <Chip size="xs">{crop}</Chip> : null}
         {publishedAt ? (
           <time
             className={css({ ml: "auto", flexShrink: "0", textStyle: "note" })}

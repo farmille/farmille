@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Avatar } from "@/components/Avatar";
+import { Chip } from "@/components/Chip";
 import { formatDateJa } from "@/components/format-date";
 import { MaterialCard } from "@/components/MaterialCard";
 import type { PublishedUsageReportDetail } from "@/server/queries/usage-reports";
@@ -17,33 +18,6 @@ type ReportHeaderProps = {
   standpointLabel: string | undefined;
   materialPath: string;
 };
-
-const tagStyle = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1.5",
-  px: "2.5",
-  py: "1",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "primary.700/30",
-  borderRadius: "pill",
-  bg: "primary.100",
-  color: "text.brandOnSoft",
-  fontSize: "sm",
-  fontWeight: "semibold",
-});
-
-function Tag({ category, label }: { category: string; label: string }) {
-  return (
-    <span className={tagStyle}>
-      <span className={css({ fontSize: "2xs", fontWeight: "bold", opacity: "label" })}>
-        {category}
-      </span>
-      {label}
-    </span>
-  );
-}
 
 export function ReportHeader({
   report,
@@ -65,9 +39,11 @@ export function ReportHeader({
         {standpointLabel ? <span className={byline.sub}>{standpointLabel}</span> : null}
       </div>
       <div className={css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "3" })}>
-        <Tag category="作物" label={cropLabel} />
+        <Chip category="作物">{cropLabel}</Chip>
         {report.purposeTags.map((tag) => (
-          <Tag key={tag} category="効果" label={tag} />
+          <Chip key={tag} category="効果">
+            {tag}
+          </Chip>
         ))}
       </div>
       <div className={css({ mt: "3.5" })}>

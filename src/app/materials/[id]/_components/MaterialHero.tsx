@@ -10,7 +10,8 @@ import { css } from "../../../../../styled-system/css";
 
 import type { SaveControlState } from "../actions";
 import { HeroCount } from "./HeroSavedCount";
-import { Chip, NoImage, Stars } from "./CardParts";
+import { Chip } from "@/components/Chip";
+import { NoImage, Stars } from "./CardParts";
 import { SaveControl } from "./SaveControl";
 
 const heroStyle = css(surfaceCardRecipe.raw({ padding: "flush" }), {
@@ -139,7 +140,7 @@ export function MaterialHero({
         {material.ingredientCategories.length > 0 ? (
           <div className={chipsStyle}>
             {[...new Set(material.ingredientCategories.map(({ name }) => name))].map((name) => (
-              <Chip key={name} wrap>
+              <Chip key={name} size="xs">
                 {name}
               </Chip>
             ))}

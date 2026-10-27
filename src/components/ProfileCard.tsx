@@ -10,7 +10,7 @@ import { STANDPOINTS } from "@/lib/standpoints";
 import type { ProfileDetails } from "@/server/queries/profile-details";
 import { css, cva } from "../../styled-system/css";
 
-import { Chip } from "@/app/materials/[id]/_components/CardParts";
+import { Chip } from "@/components/Chip";
 
 function linkLabel(url: string): string {
   const parsed = URL.parse(url);
@@ -190,7 +190,7 @@ export function ProfileCard({
             <div className={labeledRow({ spacing: "tight" })}>
               <span className={label}>地域</span>
               <div className={values}>
-                <Chip>{prefecture}</Chip>
+                <Chip size="xs">{prefecture}</Chip>
               </div>
             </div>
           ) : null}
@@ -215,7 +215,7 @@ export function ProfileCard({
             <span className={label}>栽培作目</span>
             <div className={values}>
               {details.crops.map((crop) => (
-                <Chip key={crop.id} wrap>
+                <Chip key={crop.id} size="xs">
                   {crop.name}
                 </Chip>
               ))}

@@ -14,7 +14,8 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cx } from "../../../../../styled-system/css";
 
-import { Chip, Stars } from "./CardParts";
+import { Chip } from "@/components/Chip";
+import { Stars } from "./CardParts";
 
 const cardStyle = css({ scrollMarginTop: "16" });
 const headStyle = css({
@@ -136,7 +137,9 @@ export function MaterialReviewCard({
       {review.crops.length > 0 ? (
         <div className={cropsStyle}>
           {review.crops.map((crop) => (
-            <Chip key={crop.id}>{crop.name}</Chip>
+            <Chip key={crop.id} size="xs">
+              {crop.name}
+            </Chip>
           ))}
         </div>
       ) : null}

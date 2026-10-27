@@ -11,7 +11,8 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 
 import { css } from "../../styled-system/css";
 
-import { Chip, Stars } from "@/app/materials/[id]/_components/CardParts";
+import { Stars } from "@/app/materials/[id]/_components/CardParts";
+import { Chip } from "@/components/Chip";
 
 const card = css(surfaceCardRecipe.raw({ padding: "cozy" }));
 
@@ -146,7 +147,7 @@ export function ProfileReviewCard({
       </div>
       {review.cropName ? (
         <div className={crops}>
-          <Chip>{review.cropName}</Chip>
+          <Chip size="xs">{review.cropName}</Chip>
         </div>
       ) : null}
       {review.body ? <div className={text}>{review.body}</div> : null}

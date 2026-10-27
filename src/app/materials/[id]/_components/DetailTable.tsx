@@ -14,7 +14,7 @@ import { css, cx } from "../../../../../styled-system/css";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { MaterialBox } from "./MaterialBox";
-import { Chip } from "./CardParts";
+import { Chip } from "@/components/Chip";
 
 const chipsStyle = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "0.5" });
 const usageMoreStyle = css({ mt: "1.5" });
@@ -57,13 +57,13 @@ function methodLabel(method: string): string {
   return APPLICATION_METHODS.find((item) => item.value === method)?.label ?? method;
 }
 
-function tags(names: readonly string[], tone?: "grey"): ReactNode {
+function tags(names: readonly string[], tone?: "neutral"): ReactNode {
   const unique = [...new Set(names)];
   if (unique.length === 0) return "−";
   return (
     <div className={chipsStyle}>
       {unique.map((name) => (
-        <Chip key={name} tone={tone}>
+        <Chip key={name} size="xs" tone={tone}>
           {name}
         </Chip>
       ))}
@@ -94,7 +94,7 @@ export function MaterialDetailTable({
       label: "資材ジャンル",
       value: tags(
         material.ingredientCategories.map(({ name }) => name),
-        "grey",
+        "neutral",
       ),
     },
     { label: "主な成分", value: material.main_components || "−" },

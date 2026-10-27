@@ -176,7 +176,7 @@ describe("Combobox", () => {
     await user.click(screen.getByRole("combobox", { name: "栽培作目" }));
     await user.keyboard("{Escape}{ArrowLeft}");
 
-    expect(screen.getByText("きゅうり", { exact: true })).toHaveFocus();
+    expect(document.activeElement).toHaveTextContent(/^きゅうり$/);
   });
 
   it("複数選択の空の入力欄ではBackspaceで最後の選択を外せる", async () => {
