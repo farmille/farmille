@@ -346,6 +346,7 @@ export function ReportPageProperties({
     <button
       key={`${group}:${item.id}`}
       type="button"
+      aria-pressed={item.id === input.cropId}
       className={itemRecipe({ current: item.id === input.cropId })}
       onClick={() => {
         onChange((current) => ({ ...current, cropId: item.id }));
@@ -560,6 +561,7 @@ export function ReportPageProperties({
         {!query.trim() && (
           <button
             type="button"
+            aria-pressed={true}
             className={itemRecipe({ current: true })}
             onClick={closeMaterialPicker}
           >
@@ -578,6 +580,7 @@ export function ReportPageProperties({
           <button
             key={item.id}
             type="button"
+            aria-pressed={item.id === input.materialId}
             className={itemRecipe({ current: item.id === input.materialId })}
             onClick={() =>
               item.id === input.materialId ? closeMaterialPicker() : void pickMaterial(item)
