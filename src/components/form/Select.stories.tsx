@@ -48,7 +48,7 @@ export const Compact: Story = {
     defaultValue: "reviews",
     options: [
       { value: "reviews", label: "感想口コミが多い順" },
-      { value: "rating", label: "★が高い順" },
+      { value: "rating", label: "評価が高い順" },
       { value: "newest", label: "新着順" },
     ],
   },

@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import type { ReactNode } from "react";
 
 import { PostActionsLoader } from "@/components/PostActionsLoader";
@@ -79,7 +80,9 @@ export function MaterialReviewsSection({
           <div className={ellipsisStyle} aria-hidden="true">
             ・・・
           </div>
-          <MoreLink href={`${materialPath}/reviews`}>もっと見る（全{total}件） →</MoreLink>
+          <MoreLink href={`${materialPath}/reviews`}>
+            もっと見る（全{total}件） <Icon name="arrow_forward" size="xs" />
+          </MoreLink>
         </div>
       ) : null}
     </section>

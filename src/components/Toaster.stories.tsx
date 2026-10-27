@@ -62,3 +62,17 @@ export const AboveActionBar: Story = {
   ),
   play: openToast,
 };
+
+export const StatusIcons: Story = {
+  render: () => (
+    <>
+      <Button onClick={() => toast.success("保存しました。", { duration: Infinity })}>
+        成功通知を出す
+      </Button>
+      <Button onClick={() => toast.loading("処理中です。", { duration: Infinity })}>
+        処理中の通知を出す
+      </Button>
+      <Toaster />
+    </>
+  ),
+};

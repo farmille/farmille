@@ -103,7 +103,7 @@ export function CatalogSidebar({
         className={chipRecipe({ active })}
         scroll={false}
       >
-        {active ? <span aria-hidden="true">✓</span> : null}
+        {active ? <Icon name="check" size="xs" /> : null}
         {label}
       </Link>
     );
@@ -138,7 +138,13 @@ export function CatalogSidebar({
           }
           aria-hidden="true"
         >
-          {active ? "✓ 選択中" : "＋"}
+          {active ? (
+            <>
+              <Icon name="check" size="xs" /> 選択中
+            </>
+          ) : (
+            <Icon name="add" size="xs" />
+          )}
         </span>
       </Link>
     );

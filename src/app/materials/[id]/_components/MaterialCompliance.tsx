@@ -114,7 +114,7 @@ export function PostsCompliance() {
     <CheckedNotice spacing="section">
       実証詳細レポート・感想口コミは、投稿した生産者の圃場・条件での体験と見解です。条件によって効果や薬害等の出方は異なるため、ご自身の栽培条件と照らし合わせてご覧ください。{" "}
       <Link className={noticeLinkStyle} href="/legal/terms">
-        利用規約 →
+        利用規約 <Icon name="arrow_forward" size="xs" />
       </Link>
     </CheckedNotice>
   );

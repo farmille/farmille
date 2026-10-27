@@ -10,7 +10,7 @@ describe("実証詳細レポートの会員登録案内（見本の表示）", (
       "href",
       "/signup/general?next=%2Freports%2Ftest-report",
     );
-    expect(screen.getByRole("link", { name: "ログインはこちら →" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "ログインはこちら" })).toHaveAttribute(
       "href",
       "/login?next=%2Freports%2Ftest-report",
     );

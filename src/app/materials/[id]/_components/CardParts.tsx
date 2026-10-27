@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import { css, cva, cx } from "../../../../../styled-system/css";
 
 const starsStyle = css({ color: "accent.star", fontSize: "md" });
@@ -6,8 +7,9 @@ export function Stars({ value }: { value: number }) {
   const filled = Math.min(5, Math.max(0, Math.round(value)));
   return (
     <span className={starsStyle} role="img" aria-label={`5段階中${filled}`}>
-      {"★".repeat(filled)}
-      {"☆".repeat(5 - filled)}
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Icon key={n} name={n <= filled ? "star_filled" : "star"} size="sm" />
+      ))}
     </span>
   );
 }

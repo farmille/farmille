@@ -112,7 +112,8 @@ export function SearchResultCard({
           {rating === null ? null : (
             <>
               <span className={css({ color: "accent.warn", fontWeight: "extrabold" })}>
-                ★ <span className={tabularNums}>{rating.toFixed(1)}</span>
+                <Icon name="star_filled" size="xs" />{" "}
+                <span className={tabularNums}>{rating.toFixed(1)}</span>
               </span>
               <span className={css({ color: "text.subtle" })}>（{reviewCount}）</span>
             </>
@@ -120,7 +121,8 @@ export function SearchResultCard({
           <span className={css({ color: "text.subtle" })}>
             {rating === null ? "" : " ・ "}実証詳細レポート{" "}
             <b className={reportCountRecipe({ emphasized: reportCount > 0 })}>{reportCount}</b> 件
-            ・ <span className={css({ color: "text.brand" })}>★</span> お気に入り{" "}
+            ・ <Icon name="star_filled" size="xs" className={css({ color: "text.brand" })} />{" "}
+            お気に入り{" "}
             <b className={cx(tabularNums, css({ color: "text.default" }))}>{savedCount}</b>
           </span>
         </div>
@@ -158,7 +160,7 @@ export function SearchResultCard({
           <div className={css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "1.5" })}>
             {directEvidence.map((crop) => (
               <span key={crop} className={evidenceRecipe({ tone: "direct" })}>
-                ✓ {crop}の記載あり
+                <Icon name="check" size="xs" /> {crop}の記載あり
               </span>
             ))}
             {directEvidence.length === 0

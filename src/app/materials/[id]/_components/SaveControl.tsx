@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { useActionState } from "react";
 
@@ -66,7 +67,7 @@ function SaveToggleForm({
         aria-label={state.saved ? "お気に入りから解除" : "お気に入りに追加"}
         aria-pressed={state.saved}
       >
-        <span aria-hidden="true">{state.saved ? "★" : "☆"}</span>
+        <Icon name={state.saved ? "star_filled" : "star"} size="sm" />
         {state.saved ? "お気に入り済み" : "お気に入り"}
       </button>
     </form>
@@ -89,7 +90,7 @@ export function SaveControl({
 
     return (
       <Link href={loginHref} className={favRecipe()}>
-        <span aria-hidden="true">☆</span>
+        <Icon name="star" size="sm" />
         ログインしてお気に入りに保存
       </Link>
     );

@@ -13,7 +13,7 @@ describe("未設定の項目の案内", () => {
   it("空の項目をボタンで並べ、プロフィール公開情報編集へ進める", () => {
     render(<ProfileSetupNotice missing={["links", "crops", "bio"]} />);
     const links = screen.getAllByRole("link");
-    expect(links.map((link) => link.textContent)).toEqual(["＋自己紹介", "＋栽培作目", "＋リンク"]);
+    expect(links.map((link) => link.textContent)).toEqual(["自己紹介", "栽培作目", "リンク"]);
     expect(links.every((link) => link.getAttribute("href") === "/me/edit")).toBe(true);
   });
 
