@@ -163,4 +163,4 @@ VERIFY_EVIDENCE="$VERIFY_EVIDENCE" node verify-search.mjs
 
 このスキル専用の実行ファイルはない。起動は`pnpm dev`、画面操作はPlaywrightのスクリプト、HTTP診断は`curl`を使う。既存テストの入口と制約は[DB更新を伴う検証](references/mutating-e2e.md)にまとめている。
 
-画面やラベルを変更したら`/maintain-verification-skill`で機能マップを更新する。
+画面やラベルを変更したら`/maintain-verification-skill`で機能マップを更新する。このコマンドはリポジトリには無く、Cursorのpstackプラグイン（[cursor/plugins](https://github.com/cursor/plugins)の`pstack/skills/maintain-verification-skill`）が提供する。pstackが使えない環境では、変更した画面に対応する`features/`のファイルを現行のソースとariaスナップショットに合わせて直し、表を変えたら[機能マップ](features/README.md)も更新する。
