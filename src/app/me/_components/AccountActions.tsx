@@ -23,11 +23,6 @@ export function AccountActions({ admin = false }: { admin?: boolean }) {
           ログアウト
         </button>
       </form>
-      {!admin ? (
-        <Link className={action} href="/sellers?from=me">
-          企業会員登録を申請
-        </Link>
-      ) : null}
     </div>
   );
 }
