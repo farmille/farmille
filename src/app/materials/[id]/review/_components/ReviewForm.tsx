@@ -93,7 +93,7 @@ const coverInputStyle = css({
   cursor: "pointer",
 });
 
-const exampleSpacingStyle = css({ mt: "2" });
+const exampleSpacingStyle = css({ mb: "2" });
 
 const confirmListStyle = css({
   m: "0",
@@ -380,6 +380,12 @@ export function ReviewForm({
           </>
         }
       >
+        {/* 記入例は入力欄の上に置き、エラーが入力欄の真下に出るようにする */}
+        <div className={exampleSpacingStyle} id="review-body-example">
+          <Notice tone="neutral" title="記入例">
+            トマト（ハウス栽培）で、定植後から2週間おきに灌水と合わせて使いました。1ヶ月ほどで根張りがしっかりしてきて、高温が続いた時期も葉のしおれが少なかったように感じます。
+          </Notice>
+        </div>
         <Textarea
           label={null}
           size="lg"
@@ -388,11 +394,6 @@ export function ReviewForm({
           placeholder="自由に記入してください"
           aria-describedby="review-body-example"
         />
-        <div className={exampleSpacingStyle} id="review-body-example">
-          <Notice tone="neutral" title="記入例">
-            トマト（ハウス栽培）で、定植後から2週間おきに灌水と合わせて使いました。1ヶ月ほどで根張りがしっかりしてきて、高温が続いた時期も葉のしおれが少なかったように感じます。
-          </Notice>
-        </div>
       </Field>
 
       <Fieldset
