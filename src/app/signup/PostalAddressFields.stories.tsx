@@ -6,7 +6,7 @@ import { PostalAddressFields } from "./PostalAddressFields";
 const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
 
 const meta = {
-  title: "Pages/signup/PostalAddressFields",
+  title: "Pages/Shared/PostalAddressFields",
   component: PostalAddressFields,
   decorators: [fmDecorator],
   args: {

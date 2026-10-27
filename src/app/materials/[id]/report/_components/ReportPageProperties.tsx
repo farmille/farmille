@@ -13,7 +13,7 @@ import {
   searchReportMaterialsAction,
 } from "@/app/materials/[id]/report/new/actions";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
-import { PREFECTURES } from "@/lib/prefectures";
+import { PREFECTURE_OPTIONS } from "@/lib/prefectures";
 import { withSingleVariety, type UsageReportInput } from "@/lib/usage-report";
 import { reportPlotEdits, withAutoPlotNames } from "@/lib/usage-report-plots";
 import type { PostingMaterial } from "@/server/queries/materials";
@@ -468,7 +468,7 @@ export function ReportPageProperties({
             hideLabel
             size="sm"
             placeholder="都道府県"
-            options={PREFECTURES.map((item) => ({ value: String(item.code), label: item.name }))}
+            options={PREFECTURE_OPTIONS}
             value={input.prefectureCode === null ? null : String(input.prefectureCode)}
             onValueChange={(value) =>
               onChange((current) => ({

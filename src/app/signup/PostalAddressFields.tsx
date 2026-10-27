@@ -4,15 +4,10 @@ import { useRef, useState, useTransition } from "react";
 import { buttonRecipe } from "@/components/Button";
 import { Field, Fieldset, Input, Select, useRestoredText } from "@/components/form";
 import { postalFill } from "@/lib/postal-fill";
-import { PREFECTURES } from "@/lib/prefectures";
+import { PREFECTURE_OPTIONS } from "@/lib/prefectures";
 
 import { css } from "../../../styled-system/css";
 import { findPostalAddress } from "./postal-action";
-
-const PREFECTURE_OPTIONS = PREFECTURES.map((item) => ({
-  value: String(item.code),
-  label: item.name,
-}));
 
 const lookupButton = css(buttonRecipe.raw({ variant: "primary", size: "sm" }), {
   flex: "none",

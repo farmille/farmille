@@ -6,7 +6,6 @@ import { signupAction } from "@/app/signup/actions";
 import {
   Checkbox,
   Field,
-  Fieldset,
   Form,
   FormActions,
   Input,
@@ -20,13 +19,10 @@ import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/au
 import { STANDPOINTS } from "@/lib/standpoints";
 
 import { css } from "../../../styled-system/css";
+import { ContactNameFields } from "./ContactNameFields";
 import { PostalAddressFields } from "./PostalAddressFields";
 
 const introStyle = css({ mt: "5", mb: "3", textAlign: "center" });
-
-const nameRowStyle = css({ display: "flex", gap: "2" });
-
-const namePartStyle = css({ flex: "1" });
 
 const makerLinkStyle = css({
   mt: "3.5",
@@ -97,43 +93,7 @@ export function SignupForm({
         placeholder="農家の山田"
       />
 
-      <Fieldset legend="本名" requirement="required" visibility="private">
-        <div className={nameRowStyle}>
-          <Input
-            fieldClassName={namePartStyle}
-            hideLabel
-            label="本名（姓）"
-            name="familyName"
-            autoComplete="family-name"
-            defaultValue={values.familyName}
-            maxLength={80}
-            placeholder="姓"
-          />
-          <Input
-            fieldClassName={namePartStyle}
-            hideLabel
-            label="本名（名）"
-            name="givenName"
-            autoComplete="given-name"
-            defaultValue={values.givenName}
-            maxLength={80}
-            placeholder="名"
-          />
-        </div>
-      </Fieldset>
-
-      <Input
-        description="確認が必要な場合の連絡に使用します。公開されません。"
-        label="電話番号"
-        name="phone"
-        requirement="optional"
-        visibility="private"
-        autoComplete="tel"
-        defaultValue={values.phone}
-        maxLength={20}
-        placeholder="090-1234-5678"
-        type="tel"
-      />
+      <ContactNameFields values={values} />
 
       <RadioGroup<string>
         description="投稿やマイページで肩書きとして表示されます。"

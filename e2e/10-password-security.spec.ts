@@ -74,6 +74,9 @@ for (const role of ["general", "seller", "admin"] as const) {
           page,
           role === "admin" ? "53-admin-home.png" : seller ? "10-dashboard.png" : "09-mypage.png",
         );
+      // 一般会員はマイページの「登録情報」からパスワードの変更へ進む
+      if (role === "general")
+        await page.getByRole("link", { name: "登録情報", exact: true }).click();
       await page.getByRole("link", { name: "パスワードを変更", exact: true }).click();
       await expect(
         page.getByRole("heading", { name: "パスワードの変更", exact: true }),
