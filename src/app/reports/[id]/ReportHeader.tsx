@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Avatar } from "@/components/Avatar";
 import { formatDateJa } from "@/components/format-date";
+import { MaterialCard } from "@/components/MaterialCard";
 import type { PublishedUsageReportDetail } from "@/server/queries/usage-reports";
 
 import { css } from "../../../../styled-system/css";
@@ -69,30 +70,17 @@ export function ReportHeader({
           <Tag key={tag} category="効果" label={tag} />
         ))}
       </div>
-      <Link
-        href={materialPath}
-        className={css({
-          display: "block",
-          mt: "3.5",
-          px: "3.5",
-          py: "3",
-          borderWidth: "1px",
-          borderStyle: "solid",
-          borderColor: "border.default",
-          borderRadius: "card",
-          bg: "surface.card",
-          color: "[inherit]",
-          textDecoration: "none",
-        })}
-      >
-        <div className={css({ fontSize: "xs", color: "text.subtle" })}>対象資材</div>
-        <div className={css({ textStyle: "body", fontWeight: "extrabold" })}>
-          {report.material.name}
-        </div>
-        <div className={css({ fontSize: "sm", color: "text.subtle" })}>
-          {report.material.manufacturerName}
-        </div>
-      </Link>
+      <div className={css({ mt: "3.5" })}>
+        <div className={css({ mb: "1.5", textStyle: "note", color: "text.subtle" })}>対象資材</div>
+        <MaterialCard
+          variant="list"
+          href={materialPath}
+          name={report.material.name}
+          maker={report.material.manufacturerName}
+          rating={report.material.avgRating}
+          imageSrc={report.material.imageUrl ?? undefined}
+        />
+      </div>
     </>
   );
 }

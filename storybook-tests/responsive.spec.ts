@@ -481,6 +481,11 @@ test("画像枠は画面幅が変わっても用途別のアスペクト比を�
       expectedRatio: 1,
     },
     {
+      storyId: "pages-shared-materialcard--rich",
+      selector: '[data-ui="material-card-image"]',
+      expectedRatio: 1,
+    },
+    {
       storyId: "pages-shared-reportcard--scroll",
       selector: '[data-ui="report-card-image"]',
       expectedRatio: 4 / 3,

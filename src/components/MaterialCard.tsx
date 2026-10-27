@@ -10,7 +10,7 @@ const scrollCard = cva({
     scrollSnapAlign: "start",
     overflow: "hidden",
     textDecoration: "none",
-    color: "[inherit]",
+    color: "text.default",
     display: "block",
     flexShrink: "0",
     w: "card.materialMobile",
@@ -25,78 +25,171 @@ const scrollCard = cva({
   },
 });
 
-const listCard = cva({
+const rowCard = css({
+  display: "flex",
+  gap: "3",
+  // 本文が複数行でもサムネをカード上端に置く
+  alignItems: "start",
+  textDecoration: "none",
+  color: "text.default",
+});
+
+const imageBoxRecipe = cva({
   base: {
-    display: "flex",
-    gap: "3",
-    // 本文が複数行でもサムネをカード上端に置く
-    alignItems: "start",
-    textDecoration: "none",
-    color: "[inherit]",
+    display: "grid",
+    placeItems: "center",
+    overflow: "hidden",
+    bg: "surface.card",
+    borderRadius: "media",
+    color: "text.brand",
+  },
+  variants: {
+    variant: {
+      scroll: { aspectRatio: "image.landscape" },
+      list: {
+        w: "[62px]",
+        aspectRatio: "image.square",
+        flexShrink: "0",
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: "border.default",
+      },
+      rich: {
+        w: "20",
+        tab: { w: "28" },
+        aspectRatio: "image.square",
+        flexShrink: "0",
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: "border.default",
+      },
+    },
   },
 });
 
-const imgBox = css({
-  aspectRatio: "image.landscape",
-  bg: "surface.card",
-  borderRadius: "media",
-  display: "grid",
-  placeItems: "center",
-  overflow: "hidden",
-  color: "text.brand",
-});
-
-const listImg = css({
-  w: "[62px]",
-  aspectRatio: "image.square",
-  borderRadius: "media",
-  bg: "surface.card",
-  display: "grid",
-  placeItems: "center",
-  flexShrink: "0",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "border.default",
-  overflow: "hidden",
-  color: "text.brand",
-});
+const IMAGE_SIZES = {
+  scroll: { width: 600, height: 450, sizes: "(max-width: 767px) 150px, 240px" },
+  list: { width: 62, height: 62, sizes: "62px" },
+  rich: { width: 112, height: 112, sizes: "(max-width: 767px) 80px, 112px" },
+} as const;
 
 /** 通常画像と読み込み失敗時のプレースホルダーを同じグリッドセルに重ねる。 */
 const imageLayer = css({ gridArea: "1 / 1" });
 
-export type MaterialCardProps = {
+const categoryPillStyle = css({
+  fontSize: "2xs",
+  px: "2",
+  py: "1",
+  bg: "primary.soft",
+  color: "text.brandOnSoft",
+  borderRadius: "pill",
+});
+
+const tagRecipe = cva({
+  base: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "1",
+    minW: "0",
+    maxW: "full",
+    px: "2",
+    py: "0.5",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderRadius: "pill",
+    fontSize: "xs",
+    fontWeight: "semibold",
+    overflowWrap: "anywhere",
+  },
+  variants: {
+    tone: {
+      neutral: { bg: "surface.page", color: "text.muted", borderColor: "border.default" },
+      evidence: {
+        bg: "primary.100",
+        color: "text.brandOnSoft",
+        borderColor: "primary.700/30",
+        fontWeight: "bold",
+      },
+    },
+  },
+});
+
+const reportCountRecipe = cva({
+  base: { fontWeight: "extrabold", fontVariantNumeric: "tabular-nums" },
+  variants: {
+    emphasized: {
+      true: { color: "accent.warn", fontSize: "md" },
+      false: { color: "text.default" },
+    },
+  },
+});
+
+const countStyle = css({
+  fontWeight: "extrabold",
+  color: "text.default",
+  fontVariantNumeric: "tabular-nums",
+});
+
+const noWrapStyle = css({ whiteSpace: "nowrap" });
+
+const tagRowStyle = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "1.5" });
+
+const RICH_CATEGORY_LIMIT = 3;
+
+type MaterialCardBase = {
+  href: string;
   name: string;
   maker: string;
-  rating: number;
-  reviewCount: number;
-  articleCount?: number;
-  savedCount?: number;
-  categories?: string[];
-  evidenceBadges?: string[];
-  description?: string;
-  official?: boolean;
-  href?: string;
+  /** 感想口コミの平均評価。感想口コミが無ければ null */
+  rating: number | null;
   imageSrc?: string;
-  imageAlt?: string;
-  /** 横スクロール用（prod-card）／一覧用（mat-card） */
-  variant?: "scroll" | "list";
   preload?: boolean;
   className?: string;
 };
 
+export type MaterialCardProps = MaterialCardBase &
+  (
+    | {
+        /** 横スクロール用 */
+        variant: "scroll";
+        reviewCount: number;
+        categories?: readonly string[];
+      }
+    | {
+        /** 一覧・参照用。資材名・メーカー・評価だけを出す */
+        variant: "list";
+        reviewCount?: number;
+        description?: string;
+      }
+    | {
+        /** 検索結果用。件数・資材ジャンル・作物の記載まで出す */
+        variant: "rich";
+        reviewCount: number;
+        reportCount: number;
+        savedCount: number;
+        description?: string;
+        categories: readonly string[];
+        /** direct は作物そのものの記載、groups は作物群としての記載 */
+        evidence: { direct: readonly string[]; groups: readonly string[] };
+      }
+  );
+
+type MaterialCardVariant = MaterialCardProps["variant"];
+
 function MaterialImage({
   src,
   alt,
-  className,
+  variant,
   preload,
 }: {
   src?: string;
   alt: string;
-  className: string;
+  variant: MaterialCardVariant;
   preload: boolean;
 }) {
+  const size = IMAGE_SIZES[variant];
   return (
-    <div className={className} data-ui="material-card-image">
+    <div className={imageBoxRecipe({ variant })} data-ui="material-card-image">
       <Icon name="image" size="lg" className={imageLayer} />
       {src ? (
         <Image
@@ -110,38 +203,22 @@ function MaterialImage({
               objectFit: "contain",
             }),
           )}
-          height={450}
+          height={size.height}
           preload={preload}
-          sizes="(max-width: 767px) 150px, 240px"
+          sizes={size.sizes}
           src={src}
-          width={600}
+          width={size.width}
         />
       ) : null}
     </div>
   );
 }
 
-/** 資材カード。横スクロール用と一覧用。 */
-export function MaterialCard({
-  name,
-  maker,
-  rating,
-  reviewCount,
-  articleCount,
-  savedCount,
-  categories,
-  evidenceBadges,
-  description,
-  href = "#",
-  imageSrc,
-  imageAlt,
-  variant = "list",
-  preload = false,
-  className,
-}: MaterialCardProps) {
-  const alt = imageAlt ?? name;
+/** 資材カード。横スクロール用（scroll）、一覧・参照用（list）、検索結果用（rich）。 */
+export function MaterialCard(props: MaterialCardProps) {
+  const { href, name, maker, rating, imageSrc, preload = false, className, variant } = props;
 
-  if (variant === "scroll") {
+  if (props.variant === "scroll") {
     return (
       <Link
         href={href}
@@ -149,7 +226,7 @@ export function MaterialCard({
         data-ui="material-card"
         data-variant="scroll"
       >
-        <MaterialImage src={imageSrc} alt={alt} className={imgBox} preload={preload} />
+        <MaterialImage src={imageSrc} alt={name} variant="scroll" preload={preload} />
         <div className={css({ px: "2", py: "2.5" })}>
           <div
             className={css({
@@ -175,7 +252,7 @@ export function MaterialCard({
           >
             {maker}
           </div>
-          {reviewCount > 0 ? (
+          {rating !== null ? (
             <div
               className={css({
                 display: "flex",
@@ -187,25 +264,15 @@ export function MaterialCard({
             >
               <StarRating value={rating} />
               <span className={css({ color: "text.subtle", fontVariantNumeric: "tabular-nums" })}>
-                {reviewCount}件
+                {props.reviewCount}件
               </span>
             </div>
           ) : null}
-          {categories ? (
+          {props.categories ? (
             <div className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}>
-              {categories.map((name) => (
-                <span
-                  key={name}
-                  className={css({
-                    fontSize: "2xs",
-                    px: "2",
-                    py: "1",
-                    bg: "primary.soft",
-                    color: "text.brandOnSoft",
-                    borderRadius: "pill",
-                  })}
-                >
-                  {name}
+              {props.categories.map((category) => (
+                <span key={category} className={categoryPillStyle}>
+                  {category}
                 </span>
               ))}
             </div>
@@ -215,130 +282,72 @@ export function MaterialCard({
     );
   }
 
-  const countParts = [
-    ...(reviewCount > 0 ? [`感想口コミ ${reviewCount}件`] : []),
-    ...(articleCount !== undefined ? [`実証詳細レポート ${articleCount}件`] : []),
-    ...(savedCount !== undefined ? [`お気に入り ${savedCount}件`] : []),
-  ];
-
   return (
     <Link
       href={href}
-      className={cx(surfaceCardRecipe({ padding: "compact" }), listCard(), className)}
+      className={cx(surfaceCardRecipe({ padding: "compact" }), rowCard, className)}
       data-ui="material-card"
-      data-variant="list"
+      data-variant={variant}
     >
-      <div className={listImg} data-ui="material-card-image">
-        <Icon name="image" size="lg" className={imageLayer} />
-        {imageSrc ? (
-          <Image
-            alt={alt}
-            className={cx(
-              imageLayer,
-              css({
-                display: "block",
-                w: "full",
-                h: "full",
-                objectFit: "contain",
-              }),
-            )}
-            height={62}
-            preload={preload}
-            sizes="62px"
-            src={imageSrc}
-            width={62}
-          />
-        ) : null}
-      </div>
+      <MaterialImage src={imageSrc} alt={name} variant={variant} preload={preload} />
       <div className={css({ flex: "1", minW: "0" })}>
         <div className={css({ textStyle: "body", fontWeight: "bold" })}>{name}</div>
-        <div
-          className={css({
-            textStyle: "note",
-            color: "text.muted",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "1",
-            mt: "0.5",
-          })}
-        >
-          {maker}
-        </div>
-        {reviewCount > 0 || countParts.length > 0 ? (
+        <div className={css({ textStyle: "note", color: "text.muted", mt: "0.5" })}>{maker}</div>
+        {rating !== null || props.reviewCount !== undefined ? (
           <div
             className={css({
               display: "flex",
               alignItems: "center",
               gap: "1.5",
               textStyle: "note",
-              color: "text.muted",
+              color: "text.subtle",
               mt: "1",
               flexWrap: "wrap",
             })}
           >
-            {reviewCount > 0 ? (
+            {rating !== null ? (
               <>
                 <StarRating value={rating} />
-                <span
-                  className={css({
-                    fontWeight: "extrabold",
-                    color: "text.default",
-                    fontVariantNumeric: "tabular-nums",
-                  })}
-                >
-                  {rating.toFixed(1)}
-                </span>
+                <span className={countStyle}>{rating.toFixed(1)}</span>
               </>
             ) : null}
-            {countParts.length > 0 ? (
-              <span className={css({ color: "text.subtle" })}>{countParts.join(" ・ ")}</span>
+            {props.reviewCount !== undefined ? (
+              <span>
+                感想口コミ <b className={countStyle}>{props.reviewCount}</b>件
+              </span>
             ) : null}
           </div>
         ) : null}
-        {description ? (
+        {props.variant === "rich" ? (
+          <div className={css({ textStyle: "note", color: "text.subtle", mt: "1" })}>
+            <span className={noWrapStyle}>
+              実証詳細レポート{" "}
+              <b className={reportCountRecipe({ emphasized: props.reportCount > 0 })}>
+                {props.reportCount}
+              </b>
+              件
+            </span>
+            {" ・ "}
+            <span className={noWrapStyle}>
+              お気に入り <b className={countStyle}>{props.savedCount}</b>件
+            </span>
+          </div>
+        ) : null}
+        {props.description ? (
           <p
             className={css({
-              fontSize: "sm",
+              textStyle: "supporting",
               color: "text.muted",
               mt: "1",
-              lineHeight: "tight",
-              lineClamp: 1,
+              lineClamp: "1",
             })}
           >
-            {description}
+            {props.description}
           </p>
         ) : null}
-        {categories && (
-          <div className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}>
-            {categories.map((name) => (
-              <span
-                key={name}
-                className={css({
-                  fontSize: "2xs",
-                  px: "2",
-                  py: "1",
-                  bg: "primary.soft",
-                  color: "text.brandOnSoft",
-                  borderRadius: "pill",
-                })}
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-        )}
-        {evidenceBadges && (
-          <div className={css({ display: "flex", flexWrap: "wrap", gap: "1", mt: "2" })}>
-            {evidenceBadges.map((label) => (
-              <span
-                key={label}
-                className={css({ fontSize: "xs", fontWeight: "bold", color: "text.brand" })}
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-        )}
+        {props.variant === "rich" ? (
+          <RichTags categories={props.categories} evidence={props.evidence} />
+        ) : null}
       </div>
       <Icon
         name="chevron_right"
@@ -346,5 +355,44 @@ export function MaterialCard({
         className={css({ color: "text.subtle", flexShrink: "0", alignSelf: "center" })}
       />
     </Link>
+  );
+}
+
+function RichTags({
+  categories,
+  evidence,
+}: Pick<Extract<MaterialCardProps, { variant: "rich" }>, "categories" | "evidence">) {
+  const shownCategories = categories.slice(0, RICH_CATEGORY_LIMIT);
+  return (
+    <>
+      {shownCategories.length > 0 ? (
+        <div className={tagRowStyle}>
+          {shownCategories.map((category) => (
+            <span key={category} className={tagRecipe({ tone: "neutral" })}>
+              {category}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {/* 作物そのものの記載があれば、作物群としての記載は出さない */}
+      {evidence.direct.length > 0 ? (
+        <div className={tagRowStyle}>
+          {evidence.direct.map((crop) => (
+            <span key={crop} className={tagRecipe({ tone: "evidence" })}>
+              <Icon name="check" size="xs" />
+              {crop}の記載あり
+            </span>
+          ))}
+        </div>
+      ) : evidence.groups.length > 0 ? (
+        <div className={tagRowStyle}>
+          {evidence.groups.map((group) => (
+            <span key={group} className={tagRecipe({ tone: "neutral" })}>
+              {group}として記載
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </>
   );
 }

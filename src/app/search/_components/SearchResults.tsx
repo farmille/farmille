@@ -3,12 +3,12 @@ import type { SearchFilterRef, matchSearchCatalog } from "@/lib/material-search"
 import type { MaterialSortParam, SelectedSearchFilter } from "@/components/search/search-selection";
 import type { CatalogSearch } from "@/server/queries/catalog-search";
 
+import { MaterialCard } from "@/components/MaterialCard";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { css } from "../../../../styled-system/css";
 
 import { SortSelect } from "./SortSelect";
 import { SearchAnalytics } from "./SearchAnalytics";
-import { SearchResultCard } from "./SearchResultCard";
 
 export function SearchResults({
   catalog,
@@ -126,21 +126,21 @@ export function SearchResults({
                 const counts = catalog.counts.find((row) => row.material_id === material.id);
                 if (!counts) throw new Error("資材の集計が見つかりませんでした。");
                 return (
-                  <SearchResultCard
+                  <MaterialCard
                     key={material.id}
+                    variant="rich"
                     href={`/materials/${material.id}`}
                     name={material.name}
                     maker={material.manufacturer_name}
-                    rating={material.review_count > 0 ? material.avg_rating : null}
+                    rating={material.avg_rating}
                     reviewCount={material.review_count}
                     reportCount={counts.report_count}
                     savedCount={counts.saved_count}
-                    description={material.description}
+                    description={material.description ?? undefined}
                     categories={material.material_ingredient_categories.map(
                       (row) => row.ingredient_categories.name,
                     )}
-                    directEvidence={evidence.direct}
-                    groupEvidence={evidence.groups}
+                    evidence={evidence}
                     imageSrc={material.imageUrl ?? undefined}
                     preload={index === 0}
                   />

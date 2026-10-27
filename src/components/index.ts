@@ -46,8 +46,6 @@ export { Pagination } from "./Pagination";
 export { MetricBars } from "./MetricBars";
 export type { MetricBarItem } from "./MetricBars";
 
-export { MaterialRefCard } from "./MaterialRefCard";
-
 export { ArticlesToolbar } from "./ArticlesToolbar";
 
 export { DataTable } from "./DataTable";
