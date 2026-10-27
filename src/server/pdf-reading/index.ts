@@ -92,7 +92,10 @@ type SavedDraft = Failure["savedDraft"];
 type Stopped = { stopped: ErrorCode; message?: string };
 
 /** 保存に失敗しても、本体だけ保存して下書きの更新日時が進んでいれば、画面が揃える先を返す。 */
-function partialDraft(reportId: string, result: UsageReportActionResult): SavedDraft {
+function partialDraft(
+  reportId: string,
+  result: UsageReportActionResult,
+): { saved: "partial"; reportId: string; updatedAt: string } | null {
   if (result.ok || result.savedDraft === undefined) return null;
   return { saved: "partial", reportId, updatedAt: result.savedDraft.updatedAt };
 }
@@ -103,10 +106,12 @@ async function failure(
   savedDraft: SavedDraft,
   message: string = errorMessageJa[error],
   remaining?: number,
+  pdfValuesCheckRequired = false,
 ): Promise<Failure> {
-  if (remaining !== undefined) return { ok: false, error, message, remaining, savedDraft };
+  const failed = { ok: false as const, error, message, savedDraft, pdfValuesCheckRequired };
+  if (remaining !== undefined) return { ...failed, remaining };
   const left = await deps.quota.remaining();
-  return { ok: false, error, message, remaining: left.ok ? left.data : null, savedDraft };
+  return { ...failed, remaining: left.ok ? left.data : null };
 }
 
 /** AI に送るまでの段階。ここで止めた分は回数に数えない（回数の確保より前で止めるため）。PDF はどこで抜けても消す。 */
@@ -162,6 +167,7 @@ async function sendToModel(
       trial: request.trial,
       catalog: catalog.data.catalog,
       deadline: started + DEADLINE_MS,
+      pages: inspection.pages,
     });
     return { draft, reading: reading.data, catalog: catalog.data.catalog, extraction };
   } finally {
@@ -242,8 +248,9 @@ export async function readPdfIntoDraft(
   };
   // 先行保存の後なので、どの失敗でも、その時点で最後に進んだ下書きの更新日時を返す
   let latest: SavedDraft = draft;
+  let pdfValuesCheckRequired = false;
   const counted = (error: ErrorCode, message?: string) =>
-    failure(error, deps, latest, message, reading.remaining);
+    failure(error, deps, latest, message, reading.remaining, pdfValuesCheckRequired);
 
   if (!extraction.ok) {
     await finish({ status: "failed", errorCode: extraction.error });
@@ -259,13 +266,18 @@ export async function readPdfIntoDraft(
   }
   const finished = await finish({ status: "succeeded" });
   if (!finished.ok) return counted("internal");
+  pdfValuesCheckRequired = true;
 
   let saved = await deps.drafts.save(applied.input, []);
   if (!saved.ok) {
-    latest = partialDraft(request.input.reportId, saved) ?? latest;
-    // 別の画面の保存と重なったときや一部だけ保存したときは、最新の下書きに写し直して1回だけやり直す
-    applied = await applyToLatest(request, extraction.output, catalog, deps);
-    if ("stopped" in applied) return counted(applied.stopped);
+    const partial = partialDraft(request.input.reportId, saved);
+    latest = partial ?? latest;
+    if (partial === null) {
+      applied = await applyToLatest(request, extraction.output, catalog, deps);
+      if ("stopped" in applied) return counted(applied.stopped);
+    } else {
+      applied = { ...applied, input: { ...applied.input, expectedUpdatedAt: partial.updatedAt } };
+    }
     saved = await deps.drafts.save(applied.input, []);
   }
   if (!saved.ok) {
@@ -290,6 +302,7 @@ export async function readPdfIntoDraft(
       { saved: "read", input },
       undefined,
       reading.remaining,
+      true,
     );
   }
   return { ok: true, input, marks: fields, remaining: reading.remaining };

@@ -415,6 +415,7 @@ export function ReportPageForm({
     if (result.ok || result.savedDraft !== null)
       forgetDropped(droppedMedia(inputWithItems(input, items)));
     if (!result.ok) {
+      if (result.pdfValuesCheckRequired) setCheckRequired(true);
       // 失敗しても、サーバーの下書きを保存した分には揃える（揃えないと次の保存が競合する）
       const draft = result.savedDraft;
       if (draft?.saved === "input" || draft?.saved === "partial") {

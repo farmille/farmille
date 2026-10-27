@@ -9,6 +9,7 @@ import type { CropOption } from "@/server/queries/usage-report-form";
 // 構造化出力に渡す形。入れ子が深く項目が多いと文法のコンパイルが断られるので、
 // 一覧は平らに並べて key で指し合い、根拠の引用は evidence にまとめる。
 // null 許容と省略可は使わず、無い値は空文字・空配列・page 0 で表す。
+export const NO_PAGE = 0;
 const key = v.string();
 export const ReportReadingOutputSchema = v.strictObject({
   outcome: v.picklist(["read", "no_matching_trial"]),
@@ -98,6 +99,15 @@ export function applyPdfReading(
     !output.plots.some((plot) => plot.treatment === "posted")
   )
     return { ok: false, error: "pdf_reading_no_match" };
+  const cells = new Map<string, string>();
+  for (const { graphKey, plotKey, value } of output.values) {
+    const cell = JSON.stringify([graphKey, plotKey]);
+    if (cells.has(cell) && cells.get(cell) !== value.trim()) {
+      console.error("[pdf-reading] 同じグラフと区に違う値がある");
+      return { ok: false, error: "pdf_reading_failed" };
+    }
+    cells.set(cell, value.trim());
+  }
   // key が重なると Map が先の要素を黙って上書きし、値が別の区に付くので、写す前に断る
   const keys = [
     ...output.varieties,
@@ -128,7 +138,7 @@ function mapReading(
   const evidence = new Map<string, string>();
   for (const { ref, quote, page } of output.evidence) {
     const text = quote.trim() === "" ? "" : `「${quote.trim()}」`;
-    const cited = page >= 1 ? `${text}（${Math.trunc(page)}ページ）` : text;
+    const cited = page === NO_PAGE ? text : `${text}（${page}ページ）`;
     if (!evidence.has(ref)) evidence.set(ref, cited.slice(0, QUOTE_MAX));
   }
   const fields: AppliedField[] = [];
@@ -209,8 +219,7 @@ function mapReading(
       name: plot.name.trim(),
       scope: "",
       description: plot.description.trim(),
-      varietyId:
-        varieties.length === 0 || plot.varietyKey === "" ? null : varietyId(plot.varietyKey),
+      varietyId: plot.varietyKey === "" ? null : varietyId(plot.varietyKey),
       treatment,
       steps: [],
     };

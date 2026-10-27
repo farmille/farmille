@@ -239,6 +239,7 @@ describe("readPdfIntoDraft", () => {
         message: errorMessageJa.invalid_body,
         remaining: 8,
         savedDraft: null,
+        pdfValuesCheckRequired: false,
       });
       expect(calls).toEqual(["remaining"]);
     }
@@ -322,9 +323,12 @@ describe("readPdfIntoDraft", () => {
     expect(calls).not.toContain("claim");
   });
 
-  it("読み取った値の保存が一部だけで終わったら、写し直して1回やり直し、だめなら最後に進んだ更新日時を返す", async () => {
+  it("読み取った値の保存が一部だけで終わったら、同じ値を進んだ更新日時で1回保存し直し、だめなら最後に進んだ更新日時を返す", async () => {
     const once = fakeDeps({ saves: ["ok", "partial", "ok"] });
-    expect((await readPdfIntoDraft(makeRequest(), userId, once.deps)).ok).toBe(true);
+    const saved = await readPdfIntoDraft(makeRequest(), userId, once.deps);
+    if (!saved.ok) throw new Error(saved.message);
+    expect(saved.marks.map(({ fieldKey }) => fieldKey)).toContain("cultivationEnvironment");
+    expect(once.saved[2]?.expectedUpdatedAt).toBe("2026-10-25T00:00:02.000Z");
 
     const twice = fakeDeps({ saves: ["ok", "partial", "partial"] });
     const request = makeRequest();
@@ -336,6 +340,27 @@ describe("readPdfIntoDraft", () => {
       updatedAt: "2026-10-25T00:00:03.000Z",
     });
     expect(twice.calls).not.toContain("applied");
+  });
+
+  it("読み取りの成功を記録した後の失敗だけ、提出時に PDF との照合の確認が要ると返す", async () => {
+    const afterSuccess = await readPdfIntoDraft(
+      makeRequest(),
+      userId,
+      fakeDeps({ saves: ["ok", "conflict", "conflict"] }).deps,
+    );
+    expect(afterSuccess.ok ? null : afterSuccess.pdfValuesCheckRequired).toBe(true);
+    const beforeSending = await readPdfIntoDraft(
+      makeRequest(),
+      userId,
+      fakeDeps({ human: false }).deps,
+    );
+    expect(beforeSending.ok ? null : beforeSending.pdfValuesCheckRequired).toBe(false);
+    const noMatch = await readPdfIntoDraft(
+      makeRequest(),
+      userId,
+      fakeDeps({ extraction: { ok: true, output: { ...output, plots: [] }, usage } }).deps,
+    );
+    expect(noMatch.ok ? null : noMatch.pdfValuesCheckRequired).toBe(false);
   });
 
   it("先行保存の失敗は、保存の文言のまま返す", async () => {
@@ -372,6 +397,7 @@ describe("readPdfIntoDraft", () => {
           reportId: request.input.reportId,
           updatedAt: "2026-10-25T00:00:01.000Z",
         },
+        pdfValuesCheckRequired: false,
       });
       expect(finished).toEqual([{ status: "failed", errorCode: reason }]);
       expect(calls.indexOf("discard")).toBeLessThan(calls.indexOf("finish"));
