@@ -67,6 +67,7 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
       action={formAction}
       errors={fieldErrorsOf(state)}
       persist="profile"
+      revealFirstError
       data-tour="profile-form"
     >
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}

@@ -50,7 +50,7 @@ export function SignupForm({
   const values = submittedValuesOf(state);
 
   return (
-    <Form action={formAction} errors={fieldErrorsOf(state)} persist="signup">
+    <Form action={formAction} errors={fieldErrorsOf(state)} persist="signup" revealFirstError>
       <FormActions layout="links">
         <TextLink
           href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
@@ -155,7 +155,7 @@ export function SignupForm({
         requirement="required"
         autoComplete="new-password"
         minLength={PASSWORD_MIN_LENGTH}
-        placeholder="••••••••"
+        placeholder={`${PASSWORD_MIN_LENGTH}文字以上`}
         revealable
         type="password"
       />
