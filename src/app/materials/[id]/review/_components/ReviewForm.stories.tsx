@@ -111,7 +111,6 @@ export const SubmitsCropAndRating: Story = {
     await userEvent.click(await page.findByRole("option", { name: "ピーマン なす科果菜類" }));
     await userEvent.click(canvas.getByRole("radio", { name: "4" }));
     await userEvent.type(canvas.getByLabelText("感想口コミ本文"), "根張りがよくなりました。");
-    await userEvent.click(canvas.getByRole("checkbox", { name: /実際に使用した感想を/ }));
     await userEvent.click(canvas.getByRole("button", { name: "投稿する" }));
 
     await waitFor(() => expect(createReviewAction).toHaveBeenCalledTimes(1));
@@ -119,5 +118,7 @@ export const SubmitsCropAndRating: Story = {
     if (!(formData instanceof FormData)) throw new TypeError("送信値が FormData ではありません。");
     await expect(formData.getAll("cropIds")).toEqual(["crop-pepper"]);
     await expect(formData.getAll("rating")).toEqual(["4"]);
+    // 確認事項はチェックを置かず、投稿したことをもって同意として送る
+    await expect(formData.getAll("pesticideAck")).toEqual(["on"]);
   },
 };

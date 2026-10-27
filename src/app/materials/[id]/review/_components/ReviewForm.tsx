@@ -95,6 +95,8 @@ const coverInputStyle = css({
 
 const exampleSpacingStyle = css({ mb: "2" });
 
+const srOnlyStyle = css({ srOnly: true });
+
 const confirmListStyle = css({
   m: "0",
   pl: "5",
@@ -405,9 +407,10 @@ export function ReviewForm({
         description="1枚あたり5MB以下の jpeg・png・webp を選択できます。"
       >
         <div className={photoGridStyle}>
-          {initialValues.photos.map((photo) => {
+          {initialValues.photos.map((photo, index) => {
             const removed = removedPhotoIds.includes(photo.id);
-            const photoName = photo.caption ?? "感想口コミ写真";
+            // 読み上げで写真を区別できるよう、何枚目かを名前に入れる
+            const photoName = `${index + 1}枚目の写真`;
             return (
               <div key={photo.id} className={photoItemStyle}>
                 <input type="hidden" name="existingPhotoId" value={photo.id} />
@@ -416,7 +419,7 @@ export function ReviewForm({
                   <Image
                     className={photoImageStyle}
                     src={photo.url}
-                    alt={photoName}
+                    alt={photo.caption ?? photoName}
                     width={240}
                     height={180}
                     unoptimized
@@ -425,7 +428,7 @@ export function ReviewForm({
                   <button
                     type="button"
                     className={photoRemoveStyle}
-                    aria-label={removed ? `${photoName}の削除を取り消す` : `${photoName}を削除する`}
+                    aria-label={`${photoName}を削除する`}
                     aria-pressed={removed}
                     onClick={() =>
                       setRemovedPhotoIds((current) =>
@@ -442,13 +445,17 @@ export function ReviewForm({
                   name={`existingPhotoCaption-${photo.id}`}
                   defaultValue={photo.caption ?? ""}
                   placeholder="例）散布前の様子"
-                  label="タイトル"
+                  label={
+                    <>
+                      タイトル<span className={srOnlyStyle}>（{photoName}）</span>
+                    </>
+                  }
                   requirement="optional"
                 />
               </div>
             );
           })}
-          {pendingPhotos.map((photo) => (
+          {pendingPhotos.map((photo, index) => (
             <div key={photo.key} className={photoItemStyle}>
               <div className={photoFrameStyle}>
                 <Image
@@ -462,7 +469,7 @@ export function ReviewForm({
                 <button
                   type="button"
                   className={photoRemoveStyle}
-                  aria-label={`${photo.file.name}を外す`}
+                  aria-label={`${initialValues.photos.length + index + 1}枚目の写真を外す`}
                   onClick={() =>
                     setPendingPhotos((current) => current.filter((item) => item.key !== photo.key))
                   }
@@ -482,7 +489,14 @@ export function ReviewForm({
                   );
                 }}
                 placeholder="例）散布前の様子"
-                label="タイトル"
+                label={
+                  <>
+                    タイトル
+                    <span className={srOnlyStyle}>
+                      （{initialValues.photos.length + index + 1}枚目の写真）
+                    </span>
+                  </>
+                }
                 requirement="optional"
               />
             </div>
