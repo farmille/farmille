@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import {
   AppRouterContext,
   type AppRouterInstance,
@@ -32,7 +32,7 @@ const chosenMaterial = {
   manufacturerName: "ファーム技研",
 };
 
-function renderForm(draft = filledReport) {
+function renderForm(draft = filledReport, readingAvailable = true) {
   return render(
     <ReportPageForm
       material={pageMaterial}
@@ -46,7 +46,12 @@ function renderForm(draft = filledReport) {
       draft={draft}
       documentUrls={[]}
       registeredAddress={{ prefectureCode: 8 }}
-      pdfReading={{ siteKey: "test-site-key", remaining: 10, marks: [], checkRequired: false }}
+      pdfReading={{
+        siteKey: "test-site-key",
+        remaining: readingAvailable ? 10 : null,
+        marks: [],
+        checkRequired: false,
+      }}
     />,
     {
       wrapper: ({ children }: { children: ReactNode }) => (
@@ -103,5 +108,26 @@ describe("保存と提出の最中", () => {
     fireEvent.click(screen.getByRole("button", { name: "投稿する" }));
     expect(pageOf().closest("[inert]")).not.toBeNull();
     await waitFor(() => expect(pageOf().closest("[inert]")).toBeNull());
+  });
+});
+
+describe("PDF読み取りの回数取得障害", () => {
+  it("読み取りだけを止め、下書きの編集とプレビューを続けられる", async () => {
+    renderForm(filledReport, false);
+    expect(screen.getByRole("button", { name: "PDF読み取り（いまは使えません）" })).toBeDisabled();
+    expect(
+      screen.getByText(
+        "残り回数を取得できませんでした。手入力で続けられます。再読み込みすると再確認します。",
+      ),
+    ).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("textbox", { name: "結果・感想" }), {
+      target: { value: "手入力で続けた結果" },
+    });
+    expect(screen.getByRole("textbox", { name: "結果・感想" })).toHaveValue("手入力で続けた結果");
+    fireEvent.click(screen.getByRole("button", { name: "プレビュー" }));
+    expect(
+      await screen.findByRole("heading", { name: "プレビュー（公開後の見え方）" }),
+    ).toBeInTheDocument();
+    expect(within(screen.getByRole("dialog")).getByText("手入力で続けた結果")).toBeInTheDocument();
   });
 });

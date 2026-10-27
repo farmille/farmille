@@ -237,8 +237,8 @@ export function ReportPageForm({
    * checkRequired は、読み取りの値を元のPDFと照らし合わせた確認を提出に求めるか。
    */
   pdfReading: {
-    siteKey: string;
-    remaining: number;
+    siteKey: string | null;
+    remaining: number | null;
     marks: PdfReadingField[];
     checkRequired: boolean;
   };
@@ -505,13 +505,19 @@ export function ReportPageForm({
             <button
               type="button"
               className={cx(pillButtonRecipe({ tone: "soft", strong: true }), readingButton)}
-              disabled={pending}
+              disabled={pending || remaining === null}
               onClick={() => setReadingOpen(true)}
             >
               <Icon name="picture_as_pdf" size="sm" />
-              PDF読み取り（今月あと{Math.max(remaining, 0)}回）
+              {remaining === null
+                ? "PDF読み取り（いまは使えません）"
+                : `PDF読み取り（今月あと${Math.max(remaining, 0)}回）`}
             </button>
-            <span className={readingNote}>試験成績書のPDFから区・グラフ・栽培条件を入れます</span>
+            <span className={readingNote}>
+              {remaining === null
+                ? "残り回数を取得できませんでした。手入力で続けられます。再読み込みすると再確認します。"
+                : "試験成績書のPDFから区・グラフ・栽培条件を入れます"}
+            </span>
           </div>
 
           <div className={props}>
@@ -807,7 +813,7 @@ export function ReportPageForm({
           }}
           onConfirm={() => persist(false, true)}
         />
-        {readingOpen && (
+        {readingOpen && remaining !== null && pdfReading.siteKey !== null && (
           <ReportPdfReadingDialog
             onClose={() => setReadingOpen(false)}
             defaultTrial={pdfReadingTrialDraft(
