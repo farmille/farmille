@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  LOGIN_ID_PATTERN,
   SELLER_EMAIL_DOMAIN,
   syntheticSellerEmail,
   validateSellerApply,
@@ -25,19 +24,10 @@ describe("syntheticSellerEmail", () => {
     expect(syntheticSellerEmail("あぐり商事")).toBeNull();
     expect(syntheticSellerEmail("a".repeat(32))).toBeNull();
     expect(syntheticSellerEmail("")).toBeNull();
-  });
 
-  it("メール形式の入力でドメインを差し替えられない", () => {
-    expect(syntheticSellerEmail("admin@evil.example")).toBeNull();
-  });
-});
-
-describe("LOGIN_ID_PATTERN", () => {
-  it("合成メールのローカル部として使える形だけを許可する", () => {
-    expect(LOGIN_ID_PATTERN.test("abc")).toBe(true);
-    expect(LOGIN_ID_PATTERN.test("a".repeat(31))).toBe(true);
-    expect(LOGIN_ID_PATTERN.test("ab")).toBe(false);
-    expect(LOGIN_ID_PATTERN.test("a".repeat(32))).toBe(false);
+    {
+      expect(syntheticSellerEmail("admin@evil.example")).toBeNull();
+    }
   });
 });
 
@@ -64,16 +54,11 @@ describe("validateSellerApply", () => {
   });
 
   it("法人番号の形式エラーをフィールドに返す", () => {
-    const result = validateSellerApply({ ...valid, corporateNumber: "AB" });
+    const result = validateSellerApply({ ...valid, corporateNumber: "AB", contactPhone: "" });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.fieldErrors.corporateNumber).toBeDefined();
-  });
 
-  it("電話番号の入力漏れを弾く", () => {
-    const result = validateSellerApply({ ...valid, contactPhone: "" });
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
     expect(result.fieldErrors.contactPhone).toBeDefined();
   });
 

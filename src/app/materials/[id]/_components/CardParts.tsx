@@ -1,5 +1,5 @@
 import { Icon } from "@/components/Icon";
-import { css, cva, cx } from "../../../../../styled-system/css";
+import { css, cx } from "../../../../../styled-system/css";
 
 const starsStyle = css({ color: "accent.star", fontSize: "md" });
 
@@ -33,42 +33,4 @@ export function NoImage({ className }: { className?: string }) {
       NO IMAGE
     </div>
   );
-}
-
-const chipRecipe = cva({
-  base: {
-    fontSize: "xs",
-    px: "2",
-    py: "0.5",
-    borderRadius: "pill",
-    fontWeight: "semibold",
-  },
-  variants: {
-    tone: {
-      green: { bg: "primary.100", color: "text.brandOnSoft" },
-      grey: {
-        bg: "surface.page",
-        color: "text.muted",
-        borderWidth: "1px",
-        borderColor: "border.default",
-      },
-    },
-    wrap: {
-      false: { whiteSpace: "nowrap" },
-      true: { whiteSpace: "normal", minW: "0", maxW: "full", overflowWrap: "anywhere" },
-    },
-  },
-  defaultVariants: { tone: "green", wrap: false },
-});
-
-export function Chip({
-  children,
-  tone,
-  wrap,
-}: {
-  children: React.ReactNode;
-  tone?: "grey";
-  wrap?: boolean;
-}) {
-  return <span className={chipRecipe({ tone, wrap })}>{children}</span>;
 }

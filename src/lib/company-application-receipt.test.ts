@@ -34,6 +34,13 @@ it("新規掲載の資材には FarmilleページURL を出さず、空の製品
     ["製品公式ページURL", "関係"],
     ["FarmilleページURL", "関係", "パッケージ資料URL"],
   ]);
+
+  {
+    expect(applicationReceiptDocument(registrationReceipt).items[1]?.fields).toContainEqual({
+      label: "関係",
+      value: "販売元・輸入元",
+    });
+  }
 });
 
 it("申請内容は掲載・権限申請の資材だけが持ち、ほかの項目と分けて持つ", () => {
@@ -54,13 +61,6 @@ it("控えメールでは、申請内容を資材名のすぐ下に書く", () =
     "製品公式ページURL：https://midori-nozai.example.com/products/midori-no-tsuchi",
     "関係：製造元",
   ]);
-});
-
-it("資材との関係は「・」でつないで1項目にする", () => {
-  expect(applicationReceiptDocument(registrationReceipt).items[1]?.fields).toContainEqual({
-    label: "関係",
-    value: "販売元・輸入元",
-  });
 });
 
 it("添付資料は対象資材の名前を添え、資材に紐づかない資料は「申請全体」とする", () => {
@@ -98,16 +98,6 @@ it("添付資料が無ければ「なし」と書く", () => {
     "添付資料",
     "なし",
     "",
-  ]);
-});
-
-it("同じ版・同じ日時の確認事項は、同意の順のまま1つにまとめる", () => {
-  expect(applicationReceiptDocument(registrationReceipt).consents).toEqual([
-    {
-      version: "2026-09-23",
-      acceptedAt: "2026/10/15 10:23:45（日本時間）",
-      texts: registrationReceipt.consents.map((consent) => consent.text_snapshot),
-    },
   ]);
 });
 

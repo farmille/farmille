@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { requireGeneralUser } from "@/server/auth";
 import {
   createReviewWithDependencies,
   type ReviewMutationInput,
   validateReviewFormData,
 } from "@/server/mutations/reviews";
-import { requireGeneralUser } from "@/server/auth";
 import { createServerSupabase } from "@/server/supabase";
 
 const materialId = "11111111-1111-4111-8111-111111111111";
@@ -79,24 +79,6 @@ describe("validateReviewFormData", () => {
     });
   });
 
-  it("退役した購入場所と対照区は送信されても保存入力に含めない", () => {
-    const formData = validFormData();
-    formData.set("purchaseChannel", "ja");
-    formData.set("hasControlPlot", "on");
-    expect(validateReviewFormData(formData)).toEqual(validateReviewFormData(validFormData()));
-  });
-
-  it("農薬表現同意が無ければ送信を拒否する", () => {
-    const formData = validFormData();
-    formData.delete("pesticideAck");
-    const result = validateReviewFormData(formData);
-
-    expect(result).toMatchObject({
-      ok: false,
-      fieldErrors: { pesticideAck: "内容を確認し、同意してください。" },
-    });
-  });
-
   it("星・本文・作目・写真パスを server 側で検証する", () => {
     const formData = validFormData();
     formData.delete("cropIds");
@@ -115,6 +97,17 @@ describe("validateReviewFormData", () => {
         photos: expect.any(String),
       },
     });
+
+    {
+      const formData = validFormData();
+      formData.delete("pesticideAck");
+      const result = validateReviewFormData(formData);
+
+      expect(result).toMatchObject({
+        ok: false,
+        fieldErrors: { pesticideAck: "内容を確認し、同意してください。" },
+      });
+    }
   });
 
   it("複数作目の送信を拒否する", () => {

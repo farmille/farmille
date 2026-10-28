@@ -17,13 +17,14 @@ describe("PasswordChangeSchema", () => {
     expect(
       v.safeParse(PasswordChangeSchema, { ...input, passwordConfirmation: "different" }).success,
     ).toBe(false);
-  });
-  it("同じパスワードへの変更と長さの範囲外を拒否する", () => {
-    for (const password of ["old-password", "short", "a".repeat(129)]) {
-      expect(
-        v.safeParse(PasswordChangeSchema, { ...input, password, passwordConfirmation: password })
-          .success,
-      ).toBe(false);
+
+    {
+      for (const password of ["old-password", "short", "a".repeat(129)]) {
+        expect(
+          v.safeParse(PasswordChangeSchema, { ...input, password, passwordConfirmation: password })
+            .success,
+        ).toBe(false);
+      }
     }
   });
 });

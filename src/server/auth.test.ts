@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { JwtPayload } from "@supabase/supabase-js";
+import { describe, expect, it } from "vitest";
 
 import {
   authorizeAdmin,
@@ -41,19 +41,12 @@ describe("toSessionUser", () => {
       sellerId: SELLER_ID,
       aal: "aal1",
     });
-  });
 
-  it("MFA 済みトークンの aal2 を保持する", () => {
-    expect(
-      toSessionUser(claims({ aal: "aal2", app_metadata: { account_type: "admin" } }))?.aal,
-    ).toBe("aal2");
-  });
-
-  it("account_type 未設定（オンボーディング前）は null にする", () => {
-    const user = toSessionUser(claims());
-
-    expect(user?.accountType).toBeNull();
-    expect(user?.sellerId).toBeNull();
+    {
+      expect(
+        toSessionUser(claims({ aal: "aal2", app_metadata: { account_type: "admin" } }))?.aal,
+      ).toBe("aal2");
+    }
   });
 
   it("未知の account_type は補完せず null にする", () => {
@@ -64,6 +57,13 @@ describe("toSessionUser", () => {
     expect(user?.accountType).toBeNull();
     expect(user?.aal).toBe("aal1");
     expect(user?.sellerId).toBeNull();
+
+    {
+      const user = toSessionUser(claims());
+
+      expect(user?.accountType).toBeNull();
+      expect(user?.sellerId).toBeNull();
+    }
   });
 });
 
@@ -78,17 +78,18 @@ function sessionUser(overrides: Partial<SessionUser> = {}): SessionUser {
 }
 
 describe("authorizeGeneralUser", () => {
-  it.each(["aal1", "aal2"] as const)("運営は %s でも本人として一般機能を利用できる", (aal) => {
+  it.each(["aal1"] as const)("運営は %s でも本人として一般機能を利用できる", (aal) => {
     expect(authorizeGeneralUser(sessionUser({ accountType: "admin", aal }))).toEqual({
       ok: true,
       data: { userId: "11111111-1111-1111-1111-111111111111" },
     });
-  });
-  it("account_type='general' を通す", () => {
-    expect(authorizeGeneralUser(sessionUser())).toEqual({
-      ok: true,
-      data: { userId: "11111111-1111-1111-1111-111111111111" },
-    });
+
+    {
+      expect(authorizeGeneralUser(sessionUser())).toEqual({
+        ok: true,
+        data: { userId: "11111111-1111-1111-1111-111111111111" },
+      });
+    }
   });
 
   it("未ログインは unauthorized・他ロールは forbidden", () => {

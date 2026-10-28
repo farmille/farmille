@@ -7,7 +7,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 
 import { css, sva } from "../../../../../styled-system/css";
 
-import { Chip } from "./CardParts";
+import { CropLine } from "@/components/CropLine";
 
 const cardRecipe = sva({
   slots: ["root", "cover", "body", "title"],
@@ -116,7 +116,7 @@ export function UsageReportCard({
         <div className={bylineStyle}>
           <Avatar name={author} src={avatarSrc} size="xs" />
           <b className={authorStyle}>{author}</b>
-          {crop ? <Chip>{crop}</Chip> : null}
+          {crop ? <CropLine crops={[crop]} /> : null}
         </div>
         {actions}
       </div>

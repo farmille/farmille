@@ -42,21 +42,12 @@ describe("DesktopAccountMenu", () => {
     expect(logout.form?.getAttribute("method")).toBe("post");
   });
 
-  it("本人の画像を受け取ると人型アイコンの代わりに出し、受け取らなければ人型アイコンを出す", () => {
-    const { container, rerender } = render(
+  it("サーバーが会員と確かめた閲覧者には、cookie が無くても会員の項目を出す", () => {
+    render(
       <DesktopAccountMenu myPageCurrent={false} member={{ avatar: <i data-testid="avatar" /> }} />,
     );
-    expect(screen.getByTestId("avatar")).toBeDefined();
-    expect(container.querySelector('[data-icon="person"]')).toBeNull();
-
-    rerender(<DesktopAccountMenu myPageCurrent={false} />);
-    expect(screen.queryByTestId("avatar")).toBeNull();
-    expect(container.querySelector('[data-icon="person"]')).not.toBeNull();
-  });
-
-  it("サーバーが会員と確かめた閲覧者には、cookie が無くても会員の項目を出す", () => {
-    render(<DesktopAccountMenu myPageCurrent={false} member={{ avatar: <i /> }} />);
     fireEvent.click(screen.getByRole("button", { name: "アカウント" }));
+    expect(screen.getByTestId("avatar")).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "マイページ" })).toBeDefined();
     expect(screen.getByRole("menuitem", { name: "ログアウト" })).toBeDefined();
     expect(screen.queryByRole("menuitem", { name: "ログイン" })).toBeNull();

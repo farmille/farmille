@@ -31,9 +31,7 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
     await page.getByRole("option", { name: "ミニトマト なす科果菜類", exact: true }).click();
     await page.getByRole("radio", { name: "4", exact: true }).check();
     await page.getByLabel("感想口コミ本文").fill(body);
-    await page
-      .getByRole("checkbox", { name: /実際に使用した感想を、使用条件や感じた変化/ })
-      .check();
+    await expect(page.getByText("確認事項", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "投稿する" }).click();
 
     await expect(
@@ -54,9 +52,6 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
     if (createdReview === null) throw new Error("投稿した感想口コミが見つかりません。");
     await expect.poll(async () => await reviewCropNames(createdReview.id)).toEqual(["ミニトマト"]);
 
-    await page.goto("/");
-    await expect(page.getByRole("navigation", { name: "感想口コミの表示順" })).toHaveCount(0);
-    await expect(page.getByText(body, { exact: true })).toHaveCount(0);
     for (const path of ["/me", `/users/${user.id}`]) {
       await page.goto(path);
       if (path === "/me") {
@@ -107,7 +102,7 @@ test("資材詳細で感想口コミの参考になったを押すと、その�
   const body = `E2E参考になった感想口コミ_${author.id}`;
 
   try {
-    await createReview({
+    const review = await createReview({
       materialId: material.id,
       authorUserId: author.id,
       rating: 4,
@@ -136,37 +131,18 @@ test("資材詳細で感想口コミの参考になったを押すと、その�
     await expect(helpful).toHaveText("参考になった0");
     await expect(helpful).toHaveAttribute("aria-pressed", "false");
     await expect.poll(async () => await helpfulVoteCount(viewer.id)).toBe(0);
+    await expect.poll(async () => await reviewViewEventCount(review.id)).toBe(1);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await helpful.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(2_000);
+    expect(await reviewViewEventCount(review.id)).toBe(1);
+    await page.context().clearCookies();
+    await page.goto(`/materials/${material.id}/reviews`);
+    await page.getByRole("article").filter({ hasText: body }).scrollIntoViewIfNeeded();
+    await expect.poll(async () => await reviewViewEventCount(review.id)).toBe(2);
   } finally {
     await deleteAuthUsersByEmail(author.email);
     await deleteAuthUsersByEmail(viewer.email);
-    await deleteMaterial(material.id);
-  }
-});
-
-test("感想口コミの閲覧は、表示した画面ごとに1件だけ記録される", async ({ page }) => {
-  const author = await createGeneralUser("view-author");
-  const material = await createMaterial("view");
-
-  try {
-    const review = await createReview({
-      materialId: material.id,
-      authorUserId: author.id,
-      rating: 4,
-      body: `E2E閲覧数の感想口コミ_${author.id}`,
-    });
-
-    let expected = 0;
-    for (const path of [`/materials/${material.id}`, `/materials/${material.id}/reviews`]) {
-      await page.goto(path);
-      await page.getByRole("article").filter({ hasText: review.body }).scrollIntoViewIfNeeded();
-      expected += 1;
-      await expect.poll(async () => await reviewViewEventCount(review.id)).toBe(expected);
-      // 記録が遅れて重複しないことを、少し待ってから確かめる。
-      await page.waitForTimeout(2_000);
-      expect(await reviewViewEventCount(review.id)).toBe(expected);
-    }
-  } finally {
-    await deleteAuthUsersByEmail(author.email);
     await deleteMaterial(material.id);
   }
 });

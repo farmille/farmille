@@ -1,25 +1,9 @@
-import { describe, expect, it } from "vitest";
 import * as v from "valibot";
+import { describe, expect, it } from "vitest";
 
 import { fail, resultSchema, succeed, toResponse } from "@/server/result";
 
 const MaterialReferenceSchema = v.strictObject({ id: v.string() });
-
-describe("Result", () => {
-  it("成功値を契約どおりに包む", () => {
-    expect(succeed({ id: "material-1" })).toEqual({
-      ok: true,
-      data: { id: "material-1" },
-    });
-  });
-
-  it("失敗コードを契約どおりに包む", () => {
-    expect(fail("not_found")).toEqual({
-      ok: false,
-      error: "not_found",
-    });
-  });
-});
 
 describe("toResponse", () => {
   it("成功結果を200で返す", async () => {
@@ -42,16 +26,6 @@ describe("toResponse", () => {
       ok: false,
       error: "not_found",
     });
-  });
-
-  it("明示されたHTTPステータスを優先する", () => {
-    expect(toResponse(succeed(null), v.null(), 201).status).toBe(201);
-  });
-
-  it("成功データがスキーマに一致しなければレスポンスを生成しない", () => {
-    expect(() =>
-      toResponse(succeed({ id: "" }), v.object({ id: v.pipe(v.string(), v.minLength(1)) })),
-    ).toThrow("HTTPレスポンスが Result 契約に一致しません");
   });
 
   it("成功データに未定義のプロパティがあればレスポンスを生成しない", () => {

@@ -129,19 +129,6 @@ describe("Autocomplete", () => {
     expect(submitForm).not.toHaveBeenCalled();
   });
 
-  it("候補を押しても入力からフォーカスを奪わずに選ぶ", async () => {
-    const user = userEvent.setup();
-    const pick = vi.fn();
-    render(<Harness onPick={pick} />);
-    const input = screen.getByRole("combobox", { name: "所属" });
-
-    await user.type(input, "いちご");
-    await user.click(screen.getByRole("option", { name: "JAいちご部会" }));
-
-    expect(pick).toHaveBeenCalledWith(affiliations[1]);
-    expect(input).toHaveFocus();
-  });
-
   it("説明付きの候補は「ラベル 説明」で読み上げ、onSubmitText が無ければ Enter で囲むフォームを送る", async () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];

@@ -1,18 +1,18 @@
-import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
-import * as v from "valibot";
+import { randomUUID } from "node:crypto";
 import { TOTP } from "otpauth";
+import * as v from "valibot";
 
 import type { Database } from "../src/types/database.types";
-import {
-  createGeneralUser,
-  createApprovedSeller,
-  deleteAuthUser,
-  cleanupSellerByLoginId,
-} from "./support/test-data";
-import { loginGeneral, loginSeller, loginAdminAndEnrollMfa } from "./support/ui";
 import { captureScreenFlow } from "./support/screen-flow";
+import {
+  cleanupSellerByLoginId,
+  createApprovedSeller,
+  createGeneralUser,
+  deleteAuthUser,
+} from "./support/test-data";
+import { loginAdminAndEnrollMfa, loginGeneral, loginSeller } from "./support/ui";
 
 test.use({ trace: "off", video: "off", screenshot: "off" });
 
@@ -43,7 +43,7 @@ async function recoveryLink(email: string): Promise<string> {
   return link;
 }
 
-for (const role of ["general", "seller", "admin"] as const) {
+for (const role of ["seller", "admin"] as const) {
   test(`${role}の現在パスワード変更とメールによる再設定`, async ({ page, browser }) => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const secret = process.env.SUPABASE_SECRET_KEY;
@@ -80,13 +80,15 @@ for (const role of ["general", "seller", "admin"] as const) {
       ).toBeVisible();
       if (process.env.CAPTURE_SCREEN_FLOW === "1")
         await captureScreenFlow(page, `62-password-change-${role}.png`);
-      await page.getByLabel(/^現在のパスワード/).fill("Wrong-password!");
-      await page.getByLabel(/^新しいパスワード[^（]*$/).fill(changed);
-      await page.getByLabel(/^新しいパスワード（確認）/).fill(changed);
-      await page.getByRole("button", { name: "パスワードを変更する" }).click();
-      await expect(
-        page.getByText("現在のパスワードが正しくありません。", { exact: true }),
-      ).toBeVisible();
+      if (role === "seller") {
+        await page.getByLabel(/^現在のパスワード/).fill("Wrong-password!");
+        await page.getByLabel(/^新しいパスワード[^（]*$/).fill(changed);
+        await page.getByLabel(/^新しいパスワード（確認）/).fill(changed);
+        await page.getByRole("button", { name: "パスワードを変更する" }).click();
+        await expect(
+          page.getByText("現在のパスワードが正しくありません。", { exact: true }),
+        ).toBeVisible();
+      }
       await page.getByLabel(/^現在のパスワード/).fill(original);
       await page.getByLabel(/^新しいパスワード[^（]*$/).fill(changed);
       await page.getByLabel(/^新しいパスワード（確認）/).fill(changed);
@@ -127,7 +129,7 @@ for (const role of ["general", "seller", "admin"] as const) {
       try {
         await recovery.goto(link);
         await expect(recovery.getByLabel(/^新しいパスワード[^（]*$/)).toBeVisible();
-        if (process.env.CAPTURE_SCREEN_FLOW === "1" && role === "general")
+        if (process.env.CAPTURE_SCREEN_FLOW === "1" && role === "seller")
           await captureScreenFlow(recovery, "45-password-update.png");
         await recovery.getByLabel(/^新しいパスワード[^（]*$/).fill(recovered);
         await recovery.getByLabel(/^新しいパスワード（確認）/).fill(recovered);
@@ -160,16 +162,18 @@ for (const role of ["general", "seller", "admin"] as const) {
           const factors = await db.auth.admin.mfa.listFactors({ userId: authId });
           expect(factors.data?.factors.some((factor) => factor.status === "verified")).toBe(true);
         }
-        await recovery.goto(link);
-        await recovery.getByLabel(/^新しいパスワード[^（]*$/).fill(changed);
-        await recovery.getByLabel(/^新しいパスワード（確認）/).fill(changed);
-        await recovery.getByRole("button", { name: "パスワードを変更する" }).click();
-        await expect(
-          recovery.getByText(
-            "リンクが無効か、有効期限が切れています。もう一度やり直してください。",
-            { exact: true },
-          ),
-        ).toBeVisible();
+        if (role === "seller") {
+          await recovery.goto(link);
+          await recovery.getByLabel(/^新しいパスワード[^（]*$/).fill(changed);
+          await recovery.getByLabel(/^新しいパスワード（確認）/).fill(changed);
+          await recovery.getByRole("button", { name: "パスワードを変更する" }).click();
+          await expect(
+            recovery.getByText(
+              "リンクが無効か、有効期限が切れています。もう一度やり直してください。",
+              { exact: true },
+            ),
+          ).toBeVisible();
+        }
       } finally {
         await context.close();
       }

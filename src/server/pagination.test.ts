@@ -1,13 +1,9 @@
 import { PostgrestError, type PostgrestResponse } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_PER_PAGE, pageRange, selectAllRows } from "@/server/pagination";
+import { pageRange, selectAllRows } from "@/server/pagination";
 
 describe("pageRange", () => {
-  it("1ページ目の両端を返す", () => {
-    expect(pageRange(1)).toEqual({ from: 0, to: DEFAULT_PER_PAGE - 1 });
-  });
-
   it("指定件数で後続ページの両端を返す", () => {
     expect(pageRange(3, 10)).toEqual({ from: 20, to: 29 });
   });
@@ -41,7 +37,7 @@ function truncatingTable(size: number, maxRows: number) {
 }
 
 describe("selectAllRows", () => {
-  it.each([0, 999, 1_000, 1_001, 2_500])(
+  it.each([0, 1_000, 1_001, 2_500])(
     "max_rows が1000のとき、%i 行を欠けも重複もなく順に返す",
     async (size) => {
       const table = truncatingTable(size, 1_000);

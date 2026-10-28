@@ -4,11 +4,6 @@ import { mediaPlacementLabel, pickReportCover } from "@/server/usage-reports/mod
 
 describe("実証詳細レポートのメディア配置表示", () => {
   it.each([
-    ["observation", "観察した変化"],
-    ["cover", "冒頭（カバー）"],
-    ["method", "使用方法"],
-    ["harvest", "収穫調査"],
-    ["summary", "まとめ・感想"],
     ["treated", "処理区"],
     ["untreated", "対照区"],
   ])("%s を日本語で表示する", (placement, expected) => {

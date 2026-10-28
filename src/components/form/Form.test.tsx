@@ -112,11 +112,21 @@ async function submitTwice(submissions: FormData[]): Promise<void> {
   }
 }
 
-test("送信後の reset を越えて、選んだ候補が画面と送信で食い違わない", async () => {
+test("送信後の reset を越えて、候補・認証コード・星が画面と送信で食い違わない", async () => {
+  function Stars() {
+    const [rating, setRating] = useState(0);
+    return (
+      <Fieldset legend="評価" name="rating">
+        <StarRating mode="input" onChange={setRating} value={rating} />
+      </Fieldset>
+    );
+  }
   const user = userEvent.setup();
   const submissions: FormData[] = [];
   render(
     <RejectingForm onSubmit={(formData) => submissions.push(formData)}>
+      <OtpInput label="認証コード" name="code" />
+      <Stars />
       <Combobox
         emptyMessage="一致する作物がありません"
         label="作目"
@@ -133,6 +143,8 @@ test("送信後の reset を越えて、選んだ候補が画面と送信で食�
     </RejectingForm>,
   );
 
+  await user.type(screen.getByLabelText("認証コード"), "123456");
+  fireEvent.click(screen.getByRole("radio", { name: "4" }));
   await user.click(screen.getByRole("combobox", { name: "作目" }));
   await user.click(screen.getByRole("option", { name: "いちご" }));
   await user.click(screen.getByRole("combobox", { name: "比べた作目" }));
@@ -141,25 +153,13 @@ test("送信後の reset を越えて、選んだ候補が画面と送信で食�
   await submitTwice(submissions);
 
   expect(submissions[1]?.get("cropId")).toBe("strawberry");
+  expect(submissions[1]?.get("code")).toBe("123456");
+  expect(screen.getByLabelText("認証コード")).toHaveValue("123456");
+  expect(submissions[1]?.get("rating")).toBe("4");
+  expect(screen.getByRole("radio", { name: "4" })).toHaveAttribute("aria-checked", "true");
   expect(submissions[1]?.getAll("compared")).toEqual(["tomato"]);
   expect(screen.getByRole("combobox", { name: "作目" })).toHaveValue("いちご");
   expect(screen.getByRole("button", { name: "トマトを削除" })).toBeInTheDocument();
-});
-
-test("送信後の reset を越えて、認証コードの枠と送る値が食い違わない", async () => {
-  const user = userEvent.setup();
-  const submissions: FormData[] = [];
-  render(
-    <RejectingForm onSubmit={(formData) => submissions.push(formData)}>
-      <OtpInput label="認証コード" name="code" />
-    </RejectingForm>,
-  );
-
-  await user.type(screen.getByLabelText("認証コード"), "123456");
-  await submitTwice(submissions);
-
-  expect(submissions[1]?.get("code")).toBe("123456");
-  expect(screen.getByLabelText("認証コード")).toHaveValue("123456");
 });
 
 test("値を返さないフォームでは、送信後の reset でチェックが画面と送信の両方で外れる", async () => {
@@ -181,30 +181,6 @@ test("値を返さないフォームでは、送信後の reset でチェック�
     "aria-checked",
     "false",
   );
-});
-
-test("送信後の reset を越えて、選んだ星が画面と送信で食い違わない", async () => {
-  const submissions: FormData[] = [];
-  function Stars() {
-    const [rating, setRating] = useState(0);
-    return (
-      <Fieldset legend="評価" name="rating">
-        <StarRating mode="input" onChange={setRating} value={rating} />
-      </Fieldset>
-    );
-  }
-  render(
-    <RejectingForm onSubmit={(formData) => submissions.push(formData)}>
-      <Stars />
-    </RejectingForm>,
-  );
-
-  fireEvent.click(screen.getByRole("radio", { name: "4" }));
-  await submitTwice(submissions);
-
-  expect(submissions[0]?.get("rating")).toBe("4");
-  expect(submissions[1]?.get("rating")).toBe("4");
-  expect(screen.getByRole("radio", { name: "4" })).toHaveAttribute("aria-checked", "true");
 });
 
 const SIZES = [

@@ -1,9 +1,9 @@
 "use client";
 
 import { ReportFigures, ReportItemImages } from "@/app/reports/[id]/ReportFigures";
-import { Chip } from "@/components/Chip";
 import { Dialog } from "@/components/Dialog";
 import { ReportBars, reportBarGroups, ReportGraphNote } from "@/components/ReportBars";
+import { ReportFacts } from "@/components/ReportFacts";
 import { ReportPlotList } from "@/components/ReportPlotList";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
@@ -61,7 +61,7 @@ const byline = css({
 
 const author = css({ fontWeight: "bold", color: "text.default" });
 
-const chips = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "3" });
+const summary = css({ mt: "3" });
 
 const materialRef = css({
   mt: "3.5",
@@ -202,21 +202,13 @@ export function ReportPagePreview({
           <span>
             {today.getFullYear()}年{today.getMonth() + 1}月{today.getDate()}日
           </span>
-          <span>生産者</span>
         </div>
-        <div className={chips}>
-          {cropName !== null && (
-            <Chip category="作物">
-              {cropName}
-              {variety ? `（${variety}）` : ""}
-            </Chip>
-          )}
-          {input.purposeTags.map((tag) => (
-            <Chip key={tag} category="効果">
-              {tag}
-            </Chip>
-          ))}
-        </div>
+        <ReportFacts
+          crop={cropName === null ? null : `${cropName}${variety ? `（${variety}）` : ""}`}
+          effects={input.purposeTags}
+          standpoint="生産者"
+          className={summary}
+        />
         <div className={materialRef}>
           <div className={css({ textStyle: "note", color: "text.muted" })}>対象資材</div>
           <b>{materialName}</b>

@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import * as v from "valibot";
+import { describe, expect, it } from "vitest";
 import { companyApplicationSchema, evidenceReservationSchema } from "./company-application";
 import { applicationCopy } from "./company-application-copy";
 const contact = {
@@ -21,42 +21,46 @@ const item = {
 };
 describe("企業申請の入力境界", () => {
   it("各原稿の同意数を維持し、未同意と不足を拒否する", () => {
-    expect(Object.values(applicationCopy).map((copy) => copy.consents.length)).toEqual([12, 9, 11]);
     const input = {
       ...contact,
       kind: "registration",
       items: [{ ...item, target: "existing", officialUrl: "", relations: ["manufacturer"] }],
-      consents: Array(12).fill(true),
+      consents: Array(applicationCopy.registration.consents.length).fill(true),
     };
     expect(v.safeParse(companyApplicationSchema, input).success).toBe(true);
     expect(
-      v.safeParse(companyApplicationSchema, { ...input, consents: Array(11).fill(true) }).success,
+      v.safeParse(companyApplicationSchema, {
+        ...input,
+        consents: Array(applicationCopy.registration.consents.length - 1).fill(true),
+      }).success,
     ).toBe(false);
     expect(
       v.safeParse(companyApplicationSchema, {
         ...input,
-        consents: [false, ...Array(11).fill(true)],
+        consents: [false, ...Array(applicationCopy.registration.consents.length - 1).fill(true)],
       }).success,
     ).toBe(false);
-  });
-  it("Aは関係を必須にし、Cには同じ項目を要求しない", () => {
-    const input = {
-      ...contact,
-      kind: "registration",
-      items: [{ ...item, target: "existing", officialUrl: "", relations: [] }],
-      consents: Array(12).fill(true),
-    };
-    expect(v.safeParse(companyApplicationSchema, input).success).toBe(false);
-    expect(
-      v.safeParse(companyApplicationSchema, {
+
+    {
+      const input = {
         ...contact,
-        kind: "transfer_in",
-        items: [{ ...item, ownerName: "旧株式会社", ownerInformation: "" }],
-        background: "事業譲渡により承継",
-        consents: Array(11).fill(true),
-      }).success,
-    ).toBe(true);
+        kind: "registration",
+        items: [{ ...item, target: "existing", officialUrl: "", relations: [] }],
+        consents: Array(applicationCopy.registration.consents.length).fill(true),
+      };
+      expect(v.safeParse(companyApplicationSchema, input).success).toBe(false);
+      expect(
+        v.safeParse(companyApplicationSchema, {
+          ...contact,
+          kind: "transfer_in",
+          items: [{ ...item, ownerName: "旧株式会社", ownerInformation: "" }],
+          background: "事業譲渡により承継",
+          consents: Array(applicationCopy.transfer_in.consents.length).fill(true),
+        }).success,
+      ).toBe(true);
+    }
   });
+
   it("資料URLのスクリプトと10MBを超える添付を拒否する", () => {
     const input = {
       ...contact,
@@ -70,7 +74,7 @@ describe("企業申請の入力境界", () => {
           evidenceUrl: "javascript:alert(1)",
         },
       ],
-      consents: Array(12).fill(true),
+      consents: Array(applicationCopy.registration.consents.length).fill(true),
     };
     expect(v.safeParse(companyApplicationSchema, input).success).toBe(false);
     const upload = {

@@ -26,10 +26,13 @@ describe("inspectPdf", () => {
   it("40ページまでの PDF はページ数を返す", async () => {
     expect(await inspectPdf(pdfWithPages(3))).toEqual({ ok: true, pages: 3 });
     expect(await inspectPdf(pdfWithPages(40))).toEqual({ ok: true, pages: 40 });
-  });
 
-  it("41ページ以上は止める", async () => {
-    expect(await inspectPdf(pdfWithPages(41))).toEqual({ ok: false, error: "pdf_too_many_pages" });
+    {
+      expect(await inspectPdf(pdfWithPages(41))).toEqual({
+        ok: false,
+        error: "pdf_too_many_pages",
+      });
+    }
   });
 
   it("20MB を超えるものは開かずに止める", async () => {

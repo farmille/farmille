@@ -1,11 +1,11 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SearchBox } from "./SearchBox";
 import {
   AppRouterContext,
   type AppRouterInstance,
 } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import type { ReactElement, ReactNode } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SearchBox } from "./SearchBox";
 
 const router = {
   push: vi.fn(),
@@ -88,7 +88,8 @@ describe("資材の入力検索", () => {
     view.rerender(<SearchBox {...props} />);
     expect(searchInput()).toHaveValue("");
   });
-  it("読みや別名で一致した候補を表示製品名として選べる", () => {
+
+  it("候補選択はキーワードを消して確定した条件に置き換える", () => {
     renderSearch(
       <SearchBox
         {...props}
@@ -98,10 +99,6 @@ describe("資材の入力検索", () => {
     );
     pickOption("ZEBA 製品名");
     expect(router.push.mock.calls[0][0]).toContain("filters=name%3AZEBA");
-  });
-  it("候補選択はキーワードを消して確定した条件に置き換える", () => {
-    renderSearch(<SearchBox {...props} initialQuery="トマト" />);
-    pickOption("トマト資材 製品名");
     expect(searchInput()).toHaveValue("");
     expect(router.push).toHaveBeenCalled();
     expect(router.push.mock.calls[0][0]).not.toContain("q=");

@@ -68,7 +68,9 @@ export const SnapshotSchema = v.object({
     }),
   ),
   effects: v.array(v.object({ id, name: v.string(), sort_order: v.number(), category_id: id })),
-  ingredient_categories: v.array(v.object({ id, name: v.string(), sort_order: v.number() })),
+  ingredient_categories: v.array(
+    v.object({ id, name: v.string(), short_name: v.string(), sort_order: v.number() }),
+  ),
 });
 export type CatalogSnapshot = v.InferOutput<typeof SnapshotSchema>;
 export type LiveMaterial = CatalogSnapshot["materials"][number];
@@ -169,5 +171,5 @@ export const snapshotQuery = `select jsonb_build_object(
 'crop_groups',${aggregate("select id,name,parent_id,hierarchy_level,sort_order,is_active from public.crop_groups order by id")},
 'crops',${aggregate("select id,name,group_id,aliases,sort_order,is_active from public.crops order by id")},
 'effects',${aggregate("select id,name,sort_order,category_id from public.effects order by id")},
-'ingredient_categories',${aggregate("select id,name,sort_order from public.ingredient_categories order by id")}
+'ingredient_categories',${aggregate("select id,name,short_name,sort_order from public.ingredient_categories order by id")}
 )`;
