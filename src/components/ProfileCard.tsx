@@ -28,9 +28,7 @@ const name = css({
   mt: "3",
   mb: "0",
   textAlign: "center",
-  fontSize: "3xl",
-  fontWeight: "bold",
-  lineHeight: "snug",
+  textStyle: "title",
   overflowWrap: "anywhere",
 });
 
