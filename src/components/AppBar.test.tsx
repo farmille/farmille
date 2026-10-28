@@ -34,4 +34,17 @@ describe("AppBar のサイトメニュー", () => {
     // ルートレイアウトのフッターは、この目印で投稿のリンクを隠す
     expect(document.querySelector('[data-can-post="false"]')).not.toBeNull();
   });
+  it("ログイン中は、フッターの会員登録のリンクを隠す目印を付ける", () => {
+    render(
+      <AppBar
+        account={{ kind: "member", avatar: null, canPost: true }}
+        chrome="public"
+        variant="home"
+      />,
+    );
+    expect(document.querySelector('[data-signed-in="true"]')).not.toBeNull();
+    cleanup();
+    render(<AppBar account={{ kind: "guest" }} chrome="public" variant="home" />);
+    expect(document.querySelector("[data-signed-in]")).toBeNull();
+  });
 });

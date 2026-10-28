@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { Suspense } from "react";
 
-import { MaterialPageShell } from "./_components/PageShell";
+import { MaterialPageShell } from "../_components/PageShell";
 import { FabBar } from "@/components/FabBar";
 import { getViewerAccount } from "@/components/SiteAppBar";
 import { SkeletonList } from "@/components/SkeletonList";
@@ -21,37 +21,36 @@ import { isMaterialSaved } from "@/server/queries/saved-materials";
 import { recordViewEvent } from "@/server/queries/view-events";
 import { createServerSupabase } from "@/server/supabase";
 
-import { css } from "../../../../styled-system/css";
+import { css } from "../../../../../styled-system/css";
 
-import { MaterialDetailTable } from "./_components/DetailTable";
+import { MaterialDetailTable } from "../_components/DetailTable";
 import {
   ArchivedNotice,
   MaterialNoticePointer,
   MaterialSpecDisclaimer,
   PostsCompliance,
-} from "./_components/MaterialCompliance";
-import { HeroCount, HeroSavedCount } from "./_components/HeroSavedCount";
-import { MaterialHero } from "./_components/MaterialHero";
-import { MaterialDescriptionBox, MaterialTimingBox } from "./_components/MaterialOverview";
-import { MaterialPageSkeleton } from "./_components/MaterialPageSkeleton";
+} from "../_components/MaterialCompliance";
+import { HeroCount, HeroSavedCount } from "../_components/HeroSavedCount";
+import { MaterialHero } from "../_components/MaterialHero";
+import { MaterialDescriptionBox, MaterialTimingBox } from "../_components/MaterialOverview";
 import {
   HeroReportCount,
   MaterialReportsSection,
   ReportsHeading,
-} from "./_components/MaterialReportsSection";
-import { MaterialReviewsSection, ReviewsHeading } from "./_components/MaterialReviewsSection";
-import { MaterialSourceLinks } from "./_components/MaterialSourceLinks";
-import { RelatedHeading, RelatedMaterialsSection } from "./_components/RelatedMaterialsSection";
-import { RatingSummary } from "./_components/RatingSummary";
-import { ReviewAnalytics } from "./_components/ReviewAnalytics";
-import { toggleSavedMaterialAction } from "./actions";
+} from "../_components/MaterialReportsSection";
+import { MaterialReviewsSection, ReviewsHeading } from "../_components/MaterialReviewsSection";
+import { MaterialSourceLinks } from "../_components/MaterialSourceLinks";
+import { RelatedHeading, RelatedMaterialsSection } from "../_components/RelatedMaterialsSection";
+import { RatingSummary } from "../_components/RatingSummary";
+import { ReviewAnalytics } from "../_components/ReviewAnalytics";
+import { toggleSavedMaterialAction } from "../actions";
 import {
   isMaterialId,
   loadMaterialOrNotFound,
   materialDescription,
   materialMetadata,
-} from "./material-page-data";
-import { unwrapQueryResult } from "./query-result";
+} from "../material-page-data";
+import { unwrapQueryResult } from "../query-result";
 
 const breadcrumbStyle = css({ mb: "2.5", fontSize: "xs", color: "text.subtle" });
 const crumbLinkStyle = css({ color: "[inherit]", textDecoration: "underline" });
@@ -123,7 +122,7 @@ async function MaterialReviews({
   );
 }
 
-async function MaterialContent({ params, searchParams }: MaterialPageProps) {
+export default async function MaterialPage({ params, searchParams }: MaterialPageProps) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
 
   if (!isMaterialId(id)) {
@@ -254,14 +253,5 @@ async function MaterialContent({ params, searchParams }: MaterialPageProps) {
         />
       ) : null}
     </MaterialPageShell>
-  );
-}
-
-// この詳細画面だけの初期表示。投稿フォームや感想口コミ一覧には継承しない。
-export default function MaterialPage(props: MaterialPageProps) {
-  return (
-    <Suspense fallback={<MaterialPageSkeleton />}>
-      <MaterialContent {...props} />
-    </Suspense>
   );
 }

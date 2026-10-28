@@ -9,14 +9,14 @@ import { errorMessageJa } from "@/server/errors";
 import { getSessionUser } from "@/server/auth";
 import { getMyPageData } from "@/server/queries/me-page";
 import { getProfileDetails } from "@/server/queries/profile-details";
-import { css, cva } from "../../../styled-system/css";
+import { css, cva } from "../../../../styled-system/css";
 
-import { AccountActions } from "./_components/AccountActions";
-import { NonGeneralNotice } from "./_components/NonGeneralNotice";
-import { ProfileSectionHeading } from "./_components/ProfileParts";
-import { missingProfileItems, ProfileSetupNotice } from "./_components/ProfileSetupNotice";
-import { HelpfulShelf, PostsShelf, SavedShelf } from "./_components/Shelves";
-import { resolveMeAccess } from "./_lib/access";
+import { AccountActions } from "../_components/AccountActions";
+import { NonGeneralNotice } from "../_components/NonGeneralNotice";
+import { ProfileSectionHeading } from "../_components/ProfileParts";
+import { missingProfileItems, ProfileSetupNotice } from "../_components/ProfileSetupNotice";
+import { HelpfulShelf, PostsShelf, SavedShelf } from "../_components/Shelves";
+import { resolveMeAccess } from "../_lib/access";
 
 const shell = css({
   minH: "dvh",

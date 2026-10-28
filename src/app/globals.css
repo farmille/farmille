@@ -29,6 +29,10 @@
     font-family: var(--fonts-sans);
     letter-spacing: var(--letter-spacings-body);
     text-autospace: normal;
+    /* 日本語を文節で折り返す（html の lang="ja" が前提）。対応していないブラウザは従来どおり文字単位で折り返す。 */
+    word-break: auto-phrase;
+    /* URL や長い英数字は区切りが無く枠からはみ出すので、収まらないときだけ途中で折り返す。 */
+    overflow-wrap: break-word;
     background: var(--colors-surface-page);
     color: var(--colors-text-default);
     -webkit-font-smoothing: antialiased;
