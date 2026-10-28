@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 import { Avatar } from "@/components/Avatar";
-import { Chip } from "@/components/Chip";
 import { formatDateJa } from "@/components/format-date";
 import { MaterialCard } from "@/components/MaterialCard";
+import { ReportFacts } from "@/components/ReportFacts";
 import type { PublishedUsageReportDetail } from "@/server/queries/usage-reports";
 
 import { css } from "../../../../styled-system/css";
@@ -36,16 +36,13 @@ export function ReportHeader({
         <time className={byline.sub} dateTime={report.publishedAt}>
           {formatDateJa(report.publishedAt)}
         </time>
-        {standpointLabel ? <span className={byline.sub}>{standpointLabel}</span> : null}
       </div>
-      <div className={css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "3" })}>
-        <Chip category="作物">{cropLabel}</Chip>
-        {report.purposeTags.map((tag) => (
-          <Chip key={tag} category="効果">
-            {tag}
-          </Chip>
-        ))}
-      </div>
+      <ReportFacts
+        crop={cropLabel}
+        effects={report.purposeTags}
+        standpoint={standpointLabel}
+        className={css({ mt: "3" })}
+      />
       <div className={css({ mt: "3.5" })}>
         <div className={css({ mb: "1.5", textStyle: "note", color: "text.subtle" })}>対象資材</div>
         <MaterialCard

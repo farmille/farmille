@@ -8,9 +8,7 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { PREFECTURES } from "@/lib/prefectures";
 import { STANDPOINTS } from "@/lib/standpoints";
 import type { ProfileDetails } from "@/server/queries/profile-details";
-import { css, cva } from "../../styled-system/css";
-
-import { Chip } from "@/components/Chip";
+import { css, cva, cx } from "../../styled-system/css";
 
 function linkLabel(url: string): string {
   const parsed = URL.parse(url);
@@ -79,6 +77,14 @@ const values = css({
   flexWrap: "wrap",
   gap: "1.5",
   minH: "7",
+});
+
+// 作物名の途中ではなく「、」の位置で折り返す
+const textValue = css({
+  textStyle: "supporting",
+  color: "text.default",
+  wordBreak: "keep-all",
+  overflowWrap: "anywhere",
 });
 
 const affiliation = css({
@@ -189,9 +195,7 @@ export function ProfileCard({
           {prefecture ? (
             <div className={labeledRow({ spacing: "tight" })}>
               <span className={label}>地域</span>
-              <div className={values}>
-                <Chip size="xs">{prefecture}</Chip>
-              </div>
+              <div className={cx(values, textValue)}>{prefecture}</div>
             </div>
           ) : null}
           {details.affiliations.length > 0 ? (
@@ -213,12 +217,8 @@ export function ProfileCard({
         {details.crops.length > 0 ? (
           <div className={labeledRow({ spacing: "loose" })}>
             <span className={label}>栽培作目</span>
-            <div className={values}>
-              {details.crops.map((crop) => (
-                <Chip key={crop.id} size="xs">
-                  {crop.name}
-                </Chip>
-              ))}
+            <div className={cx(values, textValue)}>
+              {details.crops.map((crop) => crop.name).join("、")}
             </div>
           </div>
         ) : null}

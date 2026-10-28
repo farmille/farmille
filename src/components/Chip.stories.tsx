@@ -31,36 +31,19 @@ export const Medium: Story = {
   },
 };
 
-export const Small: Story = {
+export const Wrapping: Story = {
   render: () => (
-    <div className={css({ display: "flex", flexWrap: "wrap", gap: "1.5" })}>
-      <Chip size="xs">トマト</Chip>
-      <Chip size="xs" tone="neutral">
-        微生物
+    <div className={css({ display: "flex", flexWrap: "wrap", gap: "2" })}>
+      <Chip category="作物" onRemove={fn()} removeLabel="たまねぎを外す" size="md">
+        たまねぎ
       </Chip>
+      <Chip category="効果" onRemove={fn()} removeLabel="養分吸収の改善を外す" size="md">
+        養分吸収の改善
+      </Chip>
+      <Chip category="メーカー" onRemove={fn()} removeLabel="みどり化成工業を外す" size="md">
+        みどり化成工業
+      </Chip>
+      <Chip>微生物資材「グリーンバイオ・スーパーアクティブ土壌改良剤」</Chip>
     </div>
   ),
-};
-
-export const Truncated: Story = {
-  render: () => (
-    <div className={css({ display: "flex", flexWrap: "wrap", gap: "1.5", w: "[200px]", p: "2" })}>
-      <Chip category="作物" onRemove={fn()} removeLabel="西洋芝を外す">
-        西洋芝（ケンタッキーブルーグラス）
-      </Chip>
-      <Chip size="xs" tone="neutral">
-        アミノ酸、ペプチド、タンパク質加水分解物
-      </Chip>
-      <Chip size="xs">あぶらな科野菜（花蕾及び茎）として記載</Chip>
-    </div>
-  ),
-};
-
-export const ShortName: Story = {
-  args: {
-    size: "xs",
-    tone: "neutral",
-    children: "アミノ酸",
-    fullLabel: "アミノ酸、ペプチド、タンパク質加水分解物",
-  },
 };

@@ -4,7 +4,7 @@ import { Combobox as BaseCombobox } from "@base-ui/react/combobox";
 import type { BaseUIEvent } from "@base-ui/react/types";
 import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 
-import { chipRecipe } from "@/components/chip-recipe";
+import { chipRecipe } from "@/components/Chip";
 import { Icon } from "@/components/Icon";
 import {
   optionDescriptionStyle,
@@ -257,7 +257,7 @@ function MultipleCombobox({
           <div className={chipsStyle}>
             {selected.map((option) => (
               <BaseCombobox.Chip className={chips.root} key={option.value}>
-                <span className={chips.label}>{option.label}</span>
+                {option.label}
                 <BaseCombobox.ChipRemove
                   aria-label={`${option.label}を削除`}
                   className={chips.remove}
