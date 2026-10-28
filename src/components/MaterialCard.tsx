@@ -142,6 +142,7 @@ export type MaterialCardProps = MaterialCardBase &
         /** 横スクロール用 */
         variant: "scroll";
         reviewCount: number;
+        /** 資材ジャンルの略称 */
         categories?: readonly string[];
       }
     | {
@@ -157,6 +158,7 @@ export type MaterialCardProps = MaterialCardBase &
         reportCount: number;
         savedCount: number;
         description?: string;
+        /** 資材ジャンルの略称 */
         categories: readonly string[];
         /** direct は作物そのものの記載、groups は作物群としての記載 */
         evidence: { direct: readonly string[]; groups: readonly string[] };

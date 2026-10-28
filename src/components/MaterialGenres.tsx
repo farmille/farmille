@@ -1,10 +1,13 @@
 import { css, cx } from "../../styled-system/css";
 
 const genresStyle = css({ textStyle: "note", fontWeight: "bold", color: "text.brand" });
-const restStyle = css({ fontWeight: "normal", color: "text.subtle" });
+// 略称の途中では折り返さず、区切りの位置で折り返す
+const nameStyle = css({ whiteSpace: "nowrap" });
+const restStyle = css({ fontWeight: "normal", color: "text.subtle", whiteSpace: "nowrap" });
 const visuallyHidden = css({ srOnly: true });
 
 type MaterialGenresProps = {
+  /** 資材ジャンルの略称 */
   names: readonly string[];
   /** 並べる数の上限。超えた分は「ほか n」とまとめる */
   max?: number;
@@ -19,7 +22,12 @@ export function MaterialGenres({ names, max, className }: MaterialGenresProps) {
   return (
     <div className={cx(genresStyle, className)}>
       <span className={visuallyHidden}>資材ジャンル：</span>
-      {shown.join(" ／ ")}
+      {shown.map((name, index) => (
+        <span key={name}>
+          {index > 0 ? " ／ " : null}
+          <span className={nameStyle}>{name}</span>
+        </span>
+      ))}
       {rest > 0 ? <span className={restStyle}> ほか{rest}</span> : null}
     </div>
   );

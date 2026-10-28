@@ -7,6 +7,7 @@ import {
   parseFiltersQuery,
   parseQueryParam,
   parseSortParam,
+  selectedFilterChipName,
   type SelectedSearchFilter,
 } from "./search-selection";
 
@@ -40,6 +41,29 @@ describe("search-selection", () => {
     ];
 
     expect(formatLogicHint(filters)).toBe("ミニトマト または いちご かつ 高温対策");
+  });
+
+  it("選んだ資材ジャンルのチップは略称にし、文言化には資材ジャンル名を使う", () => {
+    const genre: SelectedSearchFilter = {
+      kind: "filter",
+      id: "1",
+      name: "アミノ酸、ペプチド、タンパク質加水分解物",
+      shortName: "アミノ酸",
+      category: "genre",
+    };
+    const crop: SelectedSearchFilter = {
+      kind: "filter",
+      id: "2",
+      name: "トマト",
+      category: "crop",
+    };
+
+    expect(selectedFilterChipName(genre)).toBe("アミノ酸");
+    expect(selectedFilterChipName(crop)).toBe("トマト");
+    expect(selectedFilterChipName({ kind: "maker", name: "ICL JAPAN" })).toBe("ICL JAPAN");
+    expect(formatLogicHint([crop, genre])).toBe(
+      "トマト かつ アミノ酸、ペプチド、タンパク質加水分解物",
+    );
   });
 
   it("filters クエリを分類・メーカー・資材名に分解する", () => {

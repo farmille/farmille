@@ -167,7 +167,7 @@ export function UiCatalog() {
           reportCount={5}
           savedCount={14}
           description="高温期の草勢維持に定評。施設園芸を中心に導入実績多数。"
-          categories={["微生物資材"]}
+          categories={["微生物", "アミノ酸"]}
           evidence={{ direct: ["トマト"], groups: [] }}
         />
       </section>

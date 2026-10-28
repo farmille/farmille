@@ -46,7 +46,10 @@ export const storyCatalog: CatalogSearch = {
       material_crop_groups: [{ crop_group_id: BULBS }],
       material_effects: [{ effect_id: NUTRIENT }],
       material_ingredient_categories: [
-        { ingredient_category_id: MICROBE, ingredient_categories: { name: "微生物資材" } },
+        {
+          ingredient_category_id: MICROBE,
+          ingredient_categories: { short_name: "微生物" },
+        },
       ],
     }),
     material(21, {
@@ -61,12 +64,13 @@ export const storyCatalog: CatalogSearch = {
       material_crop_groups: [{ crop_group_id: FRUIT_VEGETABLES }],
       material_effects: [{ effect_id: NUTRIENT }, { effect_id: HEAT }],
       material_ingredient_categories: [
-        { ingredient_category_id: MICROBE, ingredient_categories: { name: "微生物資材" } },
+        {
+          ingredient_category_id: MICROBE,
+          ingredient_categories: { short_name: "微生物" },
+        },
         {
           ingredient_category_id: SEAWEED,
-          ingredient_categories: {
-            name: "海藻・海藻抽出物（アルギン酸・ラミナリンなどを含むもの）",
-          },
+          ingredient_categories: { short_name: "海藻" },
         },
       ],
     }),
@@ -79,9 +83,7 @@ export const storyCatalog: CatalogSearch = {
       material_ingredient_categories: [
         {
           ingredient_category_id: SEAWEED,
-          ingredient_categories: {
-            name: "海藻・海藻抽出物（アルギン酸・ラミナリンなどを含むもの）",
-          },
+          ingredient_categories: { short_name: "海藻" },
         },
       ],
     }),
@@ -149,11 +151,19 @@ export const storySearchCatalog: SearchCatalog = {
     { category: "crop_group", id: BULBS, name: "鱗茎類", aliases: [], sort_order: 1 },
     { category: "effect", id: NUTRIENT, name: "養分吸収の改善", aliases: [], sort_order: 1 },
     { category: "effect", id: HEAT, name: "耐暑性改善", aliases: ["暑さ対策"], sort_order: 2 },
-    { category: "genre", id: MICROBE, name: "微生物資材", aliases: [], sort_order: 1 },
+    {
+      category: "genre",
+      id: MICROBE,
+      name: "微生物",
+      shortName: "微生物",
+      aliases: [],
+      sort_order: 1,
+    },
     {
       category: "genre",
       id: SEAWEED,
-      name: "海藻・海藻抽出物（アルギン酸・ラミナリンなどを含むもの）",
+      name: "海藻、海藻抽出物",
+      shortName: "海藻",
       aliases: [],
       sort_order: 2,
     },
@@ -167,4 +177,10 @@ export const storySearchCatalog: SearchCatalog = {
   })),
 };
 
-export const storyIds = { onion: ONION, tomato: TOMATO, nutrient: NUTRIENT, microbe: MICROBE };
+export const storyIds = {
+  onion: ONION,
+  tomato: TOMATO,
+  nutrient: NUTRIENT,
+  microbe: MICROBE,
+  seaweed: SEAWEED,
+};

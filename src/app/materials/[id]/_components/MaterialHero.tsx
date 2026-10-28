@@ -114,7 +114,7 @@ export function MaterialHero({
       </div>
       <div className={infoStyle}>
         <MaterialGenres
-          names={[...new Set(material.ingredientCategories.map(({ name }) => name))]}
+          names={material.ingredientCategories.map((genre) => genre.short_name)}
           className={genresStyle}
         />
         <h1 id="material-name" className={nameStyle}>

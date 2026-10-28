@@ -1210,6 +1210,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          short_name: string
           sort_order: number
           updated_at: string
         }
@@ -1217,6 +1218,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          short_name: string
           sort_order?: number
           updated_at?: string
         }
@@ -1224,6 +1226,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          short_name?: string
           sort_order?: number
           updated_at?: string
         }
