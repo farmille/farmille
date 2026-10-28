@@ -41,8 +41,11 @@ jobs:
           : "${SUPABASE_ACCESS_TOKEN:?}"
           keys=$(curl --fail --silent --show-error --connect-timeout 10 --max-time 60 \
             -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-            "https://api.supabase.com/v1/projects/$PROJECT_REF/api-keys")
-          secret=$(jq -er '.[] | select(.name == "service_role") | .api_key' <<<"$keys")
+            "https://api.supabase.com/v1/projects/$PROJECT_REF/api-keys?reveal=true")
+          # legacy の service_role JWT は無効化する予定なので、service_role 権限の新しい secret key を使う。
+          secret=$(jq -er 'first(.[] | select(.type == "secret"
+            and ((.secret_jwt_template.role // "") | ascii_downcase) == "service_role") | .api_key)' <<<"$keys") ||
+            { echo "::error::${PROJECT_REF} に service_role 権限の secret key（sb_secret_…）がありません。"; exit 1; }
           echo "::add-mask::$secret"
           export NEXT_PUBLIC_SUPABASE_URL="https://$PROJECT_REF.supabase.co" SUPABASE_SECRET_KEY="$secret"
           unset SUPABASE_ACCESS_TOKEN keys secret
