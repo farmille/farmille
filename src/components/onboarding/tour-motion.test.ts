@@ -1,6 +1,7 @@
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { fixedPostBarHeight } from "./tour-motion";
+import { fixedPostBarHeight, useBottomSpace } from "./tour-motion";
 
 afterEach(() => {
   document.body.replaceChildren();
@@ -27,5 +28,16 @@ describe("案内が避ける、画面の下の投稿のバー", () => {
   it("画面に固定されていないバーは避けない", () => {
     addPostBar("static", window.innerHeight - 76);
     expect(fixedPostBarHeight()).toBe(0);
+  });
+});
+
+describe("案内の置き場所", () => {
+  it("案内を出した後に投稿のバーが描かれても、バーの上へ持ち上げる", async () => {
+    const { result } = renderHook(() => useBottomSpace<HTMLDivElement>());
+    expect(result.current.clear).toBe("0px");
+
+    act(() => addPostBar("fixed", window.innerHeight - 76));
+
+    await waitFor(() => expect(result.current.clear).toBe("76px"));
   });
 });

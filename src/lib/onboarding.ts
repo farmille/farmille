@@ -110,6 +110,7 @@ export function onboardingSkipHref(next: OnboardingStep, pathname: string): stri
 }
 
 const stepsBeforeReviewForm: readonly OnboardingStep[] = [
+  "searchIntro",
   "search",
   "materialScroll",
   "reviewIntro",

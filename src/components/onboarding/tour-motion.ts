@@ -134,15 +134,19 @@ export function useBottomSpace<T extends HTMLElement>(): BottomSpace<T> {
   const [height, setHeight] = useState(0);
   // 最初の描画から持ち上げておき、案内がバーの下から跳ね上がらないようにする
   const [barHeight, setBarHeight] = useState(fixedPostBarHeight);
-  // 資材ページはバーを読み込み後に描くので、ページの大きさが変わるたびに測り直す
+  // 資材ページはバーを読み込み後に描く。固定したバーが加わってもページの大きさは変わらないので、
+  // ページの大きさの変化に加えて、要素の追加と削除でも測り直す
   useLayoutEffect(() => {
     const measure = () => setBarHeight(fixedPostBarHeight());
     measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(document.body);
+    const resizes = new ResizeObserver(measure);
+    resizes.observe(document.body);
+    const mutations = new MutationObserver(measure);
+    mutations.observe(document.body, { childList: true, subtree: true });
     window.addEventListener("resize", measure);
     return () => {
-      observer.disconnect();
+      resizes.disconnect();
+      mutations.disconnect();
       window.removeEventListener("resize", measure);
     };
   }, []);

@@ -108,7 +108,13 @@ describe("初回ログインの案内の進み具合", () => {
   });
 
   it("案内の途中で自分から投稿画面を開いたときも、終了へ進む", () => {
-    for (const step of ["search", "materialScroll", "reviewIntro", "reviewLink"] as const) {
+    for (const step of [
+      "searchIntro",
+      "search",
+      "materialScroll",
+      "reviewIntro",
+      "reviewLink",
+    ] as const) {
       expect(onboardingStepAfterNavigation(step, "/materials/abc/review/new")).toBe("finish");
     }
     expect(onboardingStepAfterNavigation("materialScroll", "/materials/abc")).toBeNull();
@@ -116,7 +122,7 @@ describe("初回ログインの案内の進み具合", () => {
   });
 
   it("プロフィールまでの段階と終了は、投稿画面が開いても動かさない", () => {
-    for (const step of ["welcome", "profile", "profileSaving", "searchIntro", "finish"] as const) {
+    for (const step of ["welcome", "profileIntro", "profile", "profileSaving", "finish"] as const) {
       expect(onboardingStepAfterNavigation(step, "/materials/abc/review/new")).toBeNull();
     }
   });
