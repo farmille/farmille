@@ -83,11 +83,11 @@ describe("validateGeneralSignup", () => {
 
     expect(validateGeneralSignup({ ...validRaw, standpoint: "maker_related" })).toMatchObject({
       ok: false,
-      fieldErrors: { standpoint: "あなたの立場を選択してください。" },
+      fieldErrors: { standpoint: "あなたの属性を選択してください。" },
     });
     expect(validateGeneralSignup({ ...validRaw, standpoint: null })).toMatchObject({
       ok: false,
-      fieldErrors: { standpoint: "あなたの立場を選択してください。" },
+      fieldErrors: { standpoint: "あなたの属性を選択してください。" },
     });
   });
 
