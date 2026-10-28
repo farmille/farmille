@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { CatalogSearch } from "@/server/queries/catalog-search";
 import { cropAncestors, cropEvidence, filterCatalog } from "./catalog-search";
+import { matchSearchCatalog, type SearchCatalog } from "./material-search";
 
 const base: CatalogSearch["materials"][number] = {
   id: "direct",
@@ -49,6 +50,7 @@ const catalog: CatalogSearch = {
     { id: "middle", name: "鱗茎類", parent_id: "major", hierarchy_level: "middle", sort_order: 2 },
   ],
   effects: [],
+  searchTags: [],
   counts: [],
 };
 
@@ -101,5 +103,67 @@ describe("作物階層を使った資材検索", () => {
     expect(() => cropAncestors("major", [{ ...catalog.groups[0], parent_id: "major" }])).toThrow(
       "循環",
     );
+  });
+});
+
+describe("悩みの同義語と効果分類を使った資材検索", () => {
+  const concern = {
+    id: "heat",
+    name: "高温対策",
+    category: "concern",
+    sort_order: 1,
+    aliases: ["暑さ対策", "高温障害"],
+    effectIds: ["heat-effect"],
+  };
+  const search: SearchCatalog = {
+    filters: [{ ...concern, category: "concern" }],
+    makers: [],
+    materials: [],
+  };
+  const data: CatalogSearch = {
+    ...catalog,
+    searchTags: [concern],
+    materials: [
+      { ...base, id: "effect", material_effects: [{ effect_id: "heat-effect" }] },
+      { ...base, id: "direct", material_search_tags: [{ search_tag_id: "heat" }] },
+      {
+        ...base,
+        id: "both",
+        material_effects: [{ effect_id: "heat-effect" }],
+        material_search_tags: [{ search_tag_id: "heat" }],
+      },
+      { ...base, id: "unrelated" },
+    ],
+  };
+
+  it("同義語の入力と悩みタグの選択から同じ資材を重複なく返す", () => {
+    const expected = ["effect", "direct", "both"];
+    for (const query of ["高温対策", "暑さ対策", "高温障害"]) {
+      expect(
+        filterCatalog(data, [], [], [], matchSearchCatalog(search, query)).map(
+          (material) => material.id,
+        ),
+      ).toEqual(expected);
+    }
+    expect(
+      filterCatalog(data, [{ category: "concern", id: "heat" }], [], []).map(
+        (material) => material.id,
+      ),
+    ).toEqual(expected);
+  });
+
+  it("選択済みの作物・メーカー条件を満たさない資材を追加しない", () => {
+    const keyword = matchSearchCatalog(search, "暑さ対策");
+    expect(filterCatalog(data, [{ category: "crop", id: "missing" }], [], [], keyword)).toEqual([]);
+    expect(filterCatalog(data, [], ["別のメーカー"], [], keyword)).toEqual([]);
+    expect(filterCatalog(data, [], [], [], matchSearchCatalog(search, "病害虫"))).toEqual([]);
+  });
+
+  it("栽培条件は効果分類から推測しない", () => {
+    expect(
+      filterCatalog(data, [{ category: "condition", id: "heat" }], [], []).map(
+        (material) => material.id,
+      ),
+    ).toEqual(["direct", "both"]);
   });
 });

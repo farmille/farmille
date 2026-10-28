@@ -55,6 +55,7 @@ async function fetchCatalogSearch() {
     crops: options.data.crops.toSorted((left, right) => left.sort_order - right.sort_order),
     groups: options.data.cropGroups,
     effects: options.data.effects,
+    searchTags: options.data.searchTags,
   };
 }
 export const getCatalogSearch = cache(fetchCatalogSearch);

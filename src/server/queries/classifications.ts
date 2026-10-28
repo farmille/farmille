@@ -59,7 +59,12 @@ export type ClassificationOptions = {
   ingredientCategories: Array<Pick<IngredientCategoryRow, "id" | "name" | "sort_order">>;
   ingredients: IngredientOption[];
   productTypes: Array<Pick<ProductTypeRow, "id" | "name" | "sort_order">>;
-  searchTags: Array<Pick<SearchTagRow, "id" | "name" | "category" | "sort_order">>;
+  searchTags: Array<
+    Pick<SearchTagRow, "id" | "name" | "category" | "sort_order"> & {
+      aliases: string[];
+      effectIds: string[];
+    }
+  >;
 };
 
 const CATEGORY_ORDER = new Map<SearchFilterCategory, number>(
@@ -108,7 +113,11 @@ export async function listClassificationOptionsWithSupabase(
     supabase.from("ingredient_categories").select("id, name, sort_order"),
     supabase.from("ingredients").select("id, category_id, name, sort_order"),
     supabase.from("product_types").select("id, name, sort_order"),
-    supabase.from("search_tags").select("id, name, category, sort_order"),
+    supabase
+      .from("search_tags")
+      .select(
+        "id, name, category, sort_order, search_tag_aliases(name), search_tag_effects(effect_id)",
+      ),
   ]);
 
   const error =
@@ -234,9 +243,15 @@ export async function listClassificationOptionsWithSupabase(
       (left, right) => left.categorySortOrder - right.categorySortOrder || bySortOrder(left, right),
     ),
     productTypes: productTypeRows.toSorted(bySortOrder),
-    searchTags: searchTagRows.toSorted(
-      (left, right) => left.category.localeCompare(right.category) || bySortOrder(left, right),
-    ),
+    searchTags: searchTagRows
+      .map(({ search_tag_aliases, search_tag_effects, ...tag }) => ({
+        ...tag,
+        aliases: search_tag_aliases.map((alias) => alias.name),
+        effectIds: search_tag_effects.map((effect) => effect.effect_id),
+      }))
+      .toSorted(
+        (left, right) => left.category.localeCompare(right.category) || bySortOrder(left, right),
+      ),
   });
 }
 
@@ -249,7 +264,7 @@ const fetchCachedClassificationOptions = unstable_cache(
     if (!result.ok) throw new Error("分類マスタを取得できませんでした。");
     return result.data;
   },
-  ["classification-options"],
+  ["classification-options-with-search-vocabulary"],
   { tags: [CACHE_TAGS.classifications], revalidate: 3600 },
 );
 
@@ -302,7 +317,7 @@ async function fetchSearchFilters(): Promise<Result<SearchFilterItem[]>> {
       return {
         id: tag.id,
         name: tag.name,
-        aliases: [],
+        aliases: tag.aliases,
         sort_order: tag.sort_order,
         category: tag.category,
       };

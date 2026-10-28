@@ -18,7 +18,7 @@ export function isTagCategory(value: string | null): value is TagCategoryValue {
 }
 
 export type AdminTagItem = Pick<TagRow, "id" | "name" | "category" | "sort_order"> & {
-  /** material_search_tags からの参照数。1 件以上なら削除できない。 */
+  /** 資材・効果分類との関連数。1 件以上なら削除できない。 */
   usageCount: number;
 };
 
@@ -50,7 +50,7 @@ function countBy(ids: (string | null)[]): Map<string, number> {
 
 export async function listAdminTags(): Promise<Result<AdminTagItem[]>> {
   return withAdmin(async ({ supabase }) => {
-    const [tagsResult, usageResult] = await Promise.all([
+    const [tagsResult, usageResult, effectsResult] = await Promise.all([
       supabase
         .from("search_tags")
         .select("id, name, category, sort_order")
@@ -59,6 +59,14 @@ export async function listAdminTags(): Promise<Result<AdminTagItem[]>> {
         .order("name", { ascending: true }),
       selectAllRows((from, to) =>
         supabase.from("material_search_tags").select("search_tag_id").order("id").range(from, to),
+      ),
+      selectAllRows((from, to) =>
+        supabase
+          .from("search_tag_effects")
+          .select("search_tag_id")
+          .order("search_tag_id")
+          .order("effect_id")
+          .range(from, to),
       ),
     ]);
 
@@ -70,8 +78,14 @@ export async function listAdminTags(): Promise<Result<AdminTagItem[]>> {
       reportError("タグ参照数の取得に失敗", usageResult.error);
       return fail("internal");
     }
+    if (effectsResult.error !== null) {
+      reportError("タグの効果分類の取得に失敗", effectsResult.error);
+      return fail("internal");
+    }
 
-    const usage = countBy(usageResult.data.map((row) => row.search_tag_id));
+    const usage = countBy(
+      [...usageResult.data, ...effectsResult.data].map((row) => row.search_tag_id),
+    );
 
     return succeed(tagsResult.data.map((tag) => ({ ...tag, usageCount: usage.get(tag.id) ?? 0 })));
   });
@@ -123,7 +137,7 @@ export async function renameTag(
 }
 
 /**
- * タグの削除。使用中（material_search_tags から参照あり）は削除しない。
+ * タグの削除。資材・効果分類と関連づくタグは削除しない。
  */
 export async function deleteTag(tagId: string): Promise<Result<null>> {
   return withAdmin(async ({ supabase }) => {
@@ -137,6 +151,16 @@ export async function deleteTag(tagId: string): Promise<Result<null>> {
       return fail("internal");
     }
     if ((count ?? 0) > 0) return fail("conflict");
+
+    const effects = await supabase
+      .from("search_tag_effects")
+      .select("effect_id", { count: "exact", head: true })
+      .eq("search_tag_id", tagId);
+    if (effects.error !== null) {
+      reportError("タグの効果分類の確認に失敗", effects.error);
+      return fail("internal");
+    }
+    if ((effects.count ?? 0) > 0) return fail("conflict");
 
     const { data, error } = await supabase
       .from("search_tags")
