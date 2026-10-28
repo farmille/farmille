@@ -121,6 +121,24 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     expect(changed.stderr).toContain("登録済み");
   });
 
+  it.each(["tools/ci/browser-checks.ts", "tools/ci/selection.ts"])(
+    "rejects changes to %s before executing them",
+    (file) => {
+      write(
+        file,
+        'import fs from "node:fs"; fs.writeFileSync(".git/runner-marker", "compromised");\n',
+      );
+      git("add", file);
+      git("commit", "-m", "replace runner");
+      const result = push("feature");
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain("登録済み");
+      expect(fs.existsSync(path.join(repo, ".git/runner-marker"))).toBe(false);
+      expect(commands()).toEqual([]);
+      expect(git("--git-dir", remote, "rev-parse", "refs/heads/feature")).toBe(base);
+    },
+  );
+
   it("rejects a symlinked runner before it imports from an untrusted directory", () => {
     write(
       "untrusted/browser-checks.ts",
