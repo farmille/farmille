@@ -53,7 +53,12 @@ export const listClassificationOptions = fn<
       },
     ],
     ingredientCategories: [
-      { id: "11111111-1111-4111-8111-111111111111", name: "微生物資材", sort_order: 3 },
+      {
+        id: "11111111-1111-4111-8111-111111111111",
+        name: "微生物",
+        short_name: "微生物",
+        sort_order: 3,
+      },
     ],
     ingredients: [
       {
@@ -61,7 +66,7 @@ export const listClassificationOptions = fn<
         name: "バチルス属菌",
         sort_order: 3,
         categoryId: "11111111-1111-4111-8111-111111111111",
-        categoryName: "微生物資材",
+        categoryName: "微生物",
         categorySortOrder: 3,
       },
     ],

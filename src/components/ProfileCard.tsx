@@ -7,9 +7,7 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { PREFECTURES } from "@/lib/prefectures";
 import { STANDPOINTS } from "@/lib/standpoints";
 import type { ProfileDetails } from "@/server/queries/profile-details";
-import { css, cva } from "../../styled-system/css";
-
-import { Chip } from "@/app/materials/[id]/_components/CardParts";
+import { css, cva, cx } from "../../styled-system/css";
 
 function linkLabel(url: string): string {
   const parsed = URL.parse(url);
@@ -32,7 +30,7 @@ const name = css({
   overflowWrap: "anywhere",
 });
 
-// 「属性」「地域」「所属」「栽培作目」は見出しの幅をそろえ、値（チップ）の始まりを縦一列にする。
+// 「属性」「地域」「所属」「栽培作目」は見出しの幅をそろえ、値の始まりを縦一列にする。
 const labeledRow = cva({
   base: { display: "flex", alignItems: "flex-start", gap: "2" },
   variants: { spacing: { tight: { mt: "1.5" }, loose: { mt: "3" } } },
@@ -56,6 +54,14 @@ const values = css({
   flexWrap: "wrap",
   gap: "1.5",
   minH: "7",
+});
+
+// 作物名の途中ではなく「、」の位置で折り返す
+const textValue = css({
+  textStyle: "supporting",
+  color: "text.default",
+  wordBreak: "keep-all",
+  overflowWrap: "anywhere",
 });
 
 const affiliation = css({
@@ -179,18 +185,14 @@ export function ProfileCard({
             {standpoint ? (
               <div className={labeledRow({ spacing: "loose" })}>
                 <span className={label}>属性</span>
-                <div className={values}>
-                  <Chip wrap>{standpoint}</Chip>
-                </div>
+                <div className={cx(values, textValue)}>{standpoint}</div>
               </div>
             ) : null}
 
             {prefecture ? (
               <div className={labeledRow({ spacing: standpoint ? "tight" : "loose" })}>
                 <span className={label}>地域</span>
-                <div className={values}>
-                  <Chip>{prefecture}</Chip>
-                </div>
+                <div className={cx(values, textValue)}>{prefecture}</div>
               </div>
             ) : null}
 
@@ -210,12 +212,8 @@ export function ProfileCard({
             {details.crops.length > 0 ? (
               <div className={labeledRow({ spacing: "loose" })}>
                 <span className={label}>栽培作目</span>
-                <div className={values}>
-                  {details.crops.map((crop) => (
-                    <Chip key={crop.id} wrap>
-                      {crop.name}
-                    </Chip>
-                  ))}
+                <div className={cx(values, textValue)}>
+                  {details.crops.map((crop) => crop.name).join("、")}
                 </div>
               </div>
             ) : null}

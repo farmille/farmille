@@ -7,6 +7,7 @@ import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination
 import {
   listClassificationOptions,
   type ClassificationOptions,
+  type IngredientCategoryOption,
 } from "@/server/queries/classifications";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
@@ -111,7 +112,7 @@ export type MaterialDetail = MaterialDetailFields & {
   effects: MaterialEffect[];
   imageUrl: string | null;
   evidences: MaterialEvidence[];
-  ingredientCategories: MaterialClassification[];
+  ingredientCategories: IngredientCategoryOption[];
   ingredients: MaterialIngredient[];
   productTypes: MaterialClassification[];
   searchTags: MaterialSearchTag[];
@@ -418,7 +419,7 @@ export async function getMaterialWithSupabase(
   const searchTagById = new Map(options.searchTags.map((searchTag) => [searchTag.id, searchTag]));
   const effects: MaterialEffect[] = [];
   const targetCrops: MaterialTargetCrop[] = [];
-  const ingredientCategories: MaterialClassification[] = [];
+  const ingredientCategories: IngredientCategoryOption[] = [];
   const ingredients: MaterialIngredient[] = [];
   const productTypes: MaterialClassification[] = [];
   const searchTags: MaterialSearchTag[] = [];

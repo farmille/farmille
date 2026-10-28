@@ -113,7 +113,7 @@ it("資材ジャンルは同じ分類内をOR、作目との間をANDで絞る",
       {
         ...base,
         material_ingredient_categories: [
-          { ingredient_category_id: "seaweed", ingredient_categories: { name: "海藻" } },
+          { ingredient_category_id: "seaweed", ingredient_categories: { short_name: "海藻" } },
         ],
       },
       catalog.materials[1],

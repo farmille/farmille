@@ -11,7 +11,8 @@ import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 
 import { css } from "../../styled-system/css";
 
-import { Chip, Stars } from "@/app/materials/[id]/_components/CardParts";
+import { Stars } from "@/app/materials/[id]/_components/CardParts";
+import { CropLine } from "@/components/CropLine";
 
 const card = css(surfaceCardRecipe.raw({ padding: "cozy" }));
 
@@ -50,14 +51,7 @@ const score = css({
   fontVariantNumeric: "tabular-nums",
 });
 
-const crops = css({
-  display: "flex",
-  alignItems: "center",
-  flexWrap: "wrap",
-  gap: "1.5",
-  mt: "1",
-  mb: "1.5",
-});
+const crops = css({ mt: "1", mb: "1.5", textStyle: "note", color: "text.muted" });
 
 const text = css({
   color: "text.muted",
@@ -146,7 +140,7 @@ export function ProfileReviewCard({
       </div>
       {review.cropName ? (
         <div className={crops}>
-          <Chip>{review.cropName}</Chip>
+          <CropLine crops={[review.cropName]} />
         </div>
       ) : null}
       {review.body ? <div className={text}>{review.body}</div> : null}

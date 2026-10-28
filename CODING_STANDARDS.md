@@ -32,6 +32,7 @@
 
 - フォーム・ダイアログ・通知・開閉・候補つき入力は`src/components`の共通部品（フォームは`src/components/form`）を使い、不足する機能はそこへ追加する。`@base-ui/react`・`sonner`のimportは`src/components`内に限る。
 - 同じUIパターンを3回書く前に共通部品へまとめる。ページ内で長大なJSXと業務ロジックを混在させない。
+- `Chip`は選んだ項目と外せる項目に使う。見るだけの作物・効果・資材ジャンルはチップにせず文字で並べる。カードで項目名を付けずに出す作物は`CropLine`、実証詳細レポートの見出しの要点は`ReportFacts`、資材名に添える資材ジャンルは`MaterialGenres`を使う。「栽培作目」「対象作物」のように項目名が付く行や表では、アイコンを付けずに名前だけを並べる。
 - アイコンは`@tabler/icons-react`を共通`Icon`（`src/components/Icon.tsx`）経由で使う。不足するアイコンは`Icon`へ追加する。文字記号によるアイコンや他のアイコンライブラリは使わない。ロゴ・グラフ・イラストのSVGは可。
 - `Input`・`Textarea`・`Select`・`Combobox`・`Autocomplete`・`FileInput`・`OtpInput`・`CheckboxGroup`・`RadioGroup`は`label`を必須とし、必須/任意・案内・エラーも部品のpropsへ渡す。ラベルを隠す場合は`hideLabel`、枠には`fieldClassName`を使う。
 - `Field`・`Fieldset`は1つの見出しで複数要素をまとめる場合に使い、中の部品は`label={null}`にする。

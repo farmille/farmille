@@ -47,6 +47,11 @@ export type IngredientOption = Pick<IngredientRow, "id" | "name" | "sort_order">
   categorySortOrder: number;
 };
 
+export type IngredientCategoryOption = Pick<
+  IngredientCategoryRow,
+  "id" | "name" | "short_name" | "sort_order"
+>;
+
 export type ClassificationOptions = {
   compositionTypes: Array<Pick<CompositionTypeRow, "id" | "name" | "sort_order">>;
   crops: CropOption[];
@@ -56,7 +61,7 @@ export type ClassificationOptions = {
   >;
   effectCategories: Array<Pick<EffectCategoryRow, "id" | "name" | "sort_order">>;
   effects: EffectOption[];
-  ingredientCategories: Array<Pick<IngredientCategoryRow, "id" | "name" | "sort_order">>;
+  ingredientCategories: IngredientCategoryOption[];
   ingredients: IngredientOption[];
   productTypes: Array<Pick<ProductTypeRow, "id" | "name" | "sort_order">>;
   searchTags: Array<
@@ -110,7 +115,7 @@ export async function listClassificationOptionsWithSupabase(
     ),
     supabase.from("effect_categories").select("id, name, sort_order"),
     supabase.from("effects").select("id, category_id, name, sort_order"),
-    supabase.from("ingredient_categories").select("id, name, sort_order"),
+    supabase.from("ingredient_categories").select("id, name, short_name, sort_order"),
     supabase.from("ingredients").select("id, category_id, name, sort_order"),
     supabase.from("product_types").select("id, name, sort_order"),
     supabase
@@ -332,6 +337,7 @@ async function fetchSearchFilters(): Promise<Result<SearchFilterItem[]>> {
     ...options.data.ingredientCategories.map((genre) => ({
       id: genre.id,
       name: genre.name,
+      shortName: genre.short_name,
       aliases: [],
       sort_order: genre.sort_order,
       category: "genre" as const,
