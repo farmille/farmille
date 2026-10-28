@@ -95,7 +95,7 @@ pnpm lint && pnpm format:check && pnpm exec tsc --noEmit && pnpm exec vitest run
 
 自動CIのApplication quality gatesは、lint・形式・型・単体テスト・依存の監査・Storyの有無・アプリのビルドを検査する。成功後にDatabase authorizationがローカルSupabaseでDB権限を検査する。mainでは、この2ジョブの成功後にDB移行と本番デプロイを行う。migration変更時のDBリセット検査も継続する。
 
-DB移行の`supabase db push`は`--include-all`を付けず、適用済みの最新より古い未適用の版があると止まる。migrationを含むPRでは、Migration orderがPRで足したmigrationの版がmainの最新より後かを確かめる。mainにmigrationが入ると、Migration order recheckが、migrationを含む開いたPRのMigration orderを再実行し、その時点のmainと比べ直す。失敗したPRは、mainを取り込み、版を付け直す。
+DB移行の`supabase db push`は`--include-all`を付けず、適用済みの最新より古い未適用の版があると止まる。main向けのPRでは、Migration orderがPRで足したmigrationの版がmainの最新より後かを確かめる。Previewと同じく、検査はmainのcheckoutから動かし、PRのcheckoutはファイル名を読むだけにする。積んだPRのbaseがmainに変わったときも検査する。mainにmigrationが入ると、Migration order recheckが、main向けの開いたPRのMigration orderを再実行し、その時点のmainと比べ直す。失敗したPRは、mainを取り込み、版を付け直す。
 
 ブラウザ検査をGitHub上で全件実行する場合は、Actionsの **Browser checks** から **Run workflow** を選び、対象ブランチを指定する。失敗時の成果物は7日間保存する。このworkflowはmainに取り込まれた後に手動実行できる。
 

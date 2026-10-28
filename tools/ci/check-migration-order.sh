@@ -1,44 +1,45 @@
 #!/usr/bin/env bash
-# このチェックアウトにあって比べる ref に無い migration の版が、その ref の最新の版より後かを確かめる。
+# PR の checkout にあって main の checkout に無い migration の版が、main の最新の版より後かを確かめる。
 # 本番の supabase db push は --include-all を付けないため、main の最新より古い未適用の版があると止まる。
-# 使い方：bash tools/ci/check-migration-order.sh origin/main
+# PR の checkout はファイル名を読むだけで、中のコードは実行しない。
+# 使い方：bash tools/ci/check-migration-order.sh <main の checkout> <PR の checkout>
 
 set -euo pipefail
 
-cd "$(dirname "${BASH_SOURCE[0]}")/../.."
+main_dir=${1:?main の checkout を渡してください。}
+pr_dir=${2:?PR の checkout を渡してください。}
 
-base=${1:?比べる ref（例：origin/main）を渡してください。}
-
-log() { printf '[check-migration-order] %s\n' "$*"; }
+log() { printf '[check-migration-order] %s\n' "$*" >&2; }
 fail() {
   log "$*"
   exit 1
 }
 
-version_of() {
-  [[ "$1" =~ ^([0-9]{14})_[^/]+\.sql$ ]] || fail "版を読めない migration のファイル名です：$1"
-  printf '%s\n' "${BASH_REMATCH[1]}"
+versions() {
+  local dir=$1/supabase/migrations file name
+  [ -d "$dir" ] || fail "${dir} がありません。"
+  for file in "$dir"/*.sql; do
+    name=${file##*/}
+    [[ "$name" =~ ^([0-9]{14})_[^/]+\.sql$ ]] || fail "版を読めない migration のファイル名です：${file}"
+    printf '%s %s\n' "${BASH_REMATCH[1]}" "$name"
+  done
 }
 
-git rev-parse --verify --quiet "${base}^{commit}" >/dev/null || fail "${base} がありません。git fetch origin main を先に実行してください。"
-
-base_versions=$(git ls-tree --name-only "$base" supabase/migrations/ |
-  while read -r file; do version_of "${file##*/}"; done | sort)
-latest=$(tail -n 1 <<<"$base_versions")
-[ -n "$latest" ] || fail "${base} に migration がありません。"
+main_versions=$(versions "$main_dir" | cut -d ' ' -f 1 | sort)
+pr_versions=$(versions "$pr_dir" | sort)
+latest=$(tail -n 1 <<<"$main_versions")
 
 stale=()
-for file in supabase/migrations/*.sql; do
-  version=$(version_of "${file##*/}")
-  grep -qx "$version" <<<"$base_versions" && continue
-  [[ "$version" > "$latest" ]] || stale+=("$file")
-done
+while read -r version name; do
+  grep -qx "$version" <<<"$main_versions" && continue
+  [[ "$version" > "$latest" ]] || stale+=("supabase/migrations/${name}")
+done <<<"$pr_versions"
 
 if [ "${#stale[@]}" -gt 0 ]; then
-  log "${base} に無い次の migration の版が、${base} の最新（${latest}）より前です。"
-  printf '  %s\n' "${stale[@]}"
+  log "main に無い次の migration の版が、main の最新（${latest}）より前です。"
+  printf '  %s\n' "${stale[@]}" >&2
   log "本番の supabase db push は古い版を当てずに止まるので、このまま main に入ると本番への migration とデプロイが止まります。"
-  log "${base} を取り込み、ファイル名の版を ${latest} より後に付け直してください。"
+  log "main を取り込み、ファイル名の版を ${latest} より後に付け直してください。"
   exit 1
 fi
-log "${base} に無い migration は、すべて ${base} の最新（${latest}）より後の版です。"
+log "main に無い migration は、すべて main の最新（${latest}）より後の版です。"

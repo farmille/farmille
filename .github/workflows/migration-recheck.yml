@@ -1,7 +1,8 @@
 name: Migration order recheck
 
 # main に migration が入ると、先に検査を通した PR の migration が main の最新より古くなることがある。
-# 開いている PR の Migration order を再実行し、main の最新と比べ直す。
+# main 向けの開いている PR すべての Migration order を再実行し、main の最新と比べ直す。
+# 変更ファイルの一覧は件数に上限があるため使わず、migration を含むかの判定も Migration order に任せる。
 on:
   push:
     branches:
@@ -35,22 +36,12 @@ jobs:
           failed=0
           while read -r number sha; do
             [ -n "$number" ] || continue
-            # gh pr list の files は先頭100件だけなので、変更ファイルは REST API で全ページ取る。
-            migrations=$(gh api --paginate "repos/$GH_REPO/pulls/$number/files" --jq '.[]
-              | select((.filename | startswith("supabase/migrations/"))
-                or ((.previous_filename // "") | startswith("supabase/migrations/")))
-              | .filename')
-            [ -n "$migrations" ] || continue
-            run=$(gh run list --workflow migrations.yml --event pull_request --commit "$sha" --limit 1 \
+            run=$(gh run list --workflow migration-order.yml --event pull_request_target --commit "$sha" --limit 1 \
               --json databaseId --jq '.[0].databaseId // empty')
-            job=""
-            if [ -n "$run" ]; then
-              job=$(gh run view "$run" --json jobs --jq '.jobs[] | select(.name == "Migration order") | .databaseId')
-            fi
-            if [ -z "$job" ]; then
+            if [ -z "$run" ]; then
               echo "::error::PR #$number（$sha）の Migration order が見つかりません。PR に push して検査を流し直してください。"
               failed=1
-            elif gh run rerun "$run" --job "$job"; then
+            elif gh run rerun "$run"; then
               echo "PR #$number の Migration order を再実行しました（run $run）。"
             else
               echo "::error::PR #$number の Migration order を再実行できませんでした（run $run）。"
