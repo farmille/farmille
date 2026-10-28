@@ -1,6 +1,7 @@
 name: Migration order recheck
 
 # main に migration が入ると、先に検査を通した PR の migration が main の最新より古くなることがある。
+# 検査のスクリプトやワークフローを直したときも、先に検査を通した PR に新しい検査を当てる。
 # main 向けの開いている PR すべての Migration order を再実行し、main の最新と比べ直す。
 # 変更ファイルの一覧は件数に上限があるため使わず、migration を含むかの判定も Migration order に任せる。
 on:
@@ -9,6 +10,8 @@ on:
       - "main"
     paths:
       - "supabase/migrations/**"
+      - "tools/ci/check-migration-order.sh"
+      - ".github/workflows/migration-order.yml"
   workflow_dispatch:
 
 permissions:
