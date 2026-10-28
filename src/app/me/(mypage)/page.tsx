@@ -17,6 +17,7 @@ import { ProfileSectionHeading } from "../_components/ProfileParts";
 import { missingProfileItems, ProfileSetupNotice } from "../_components/ProfileSetupNotice";
 import { HelpfulShelf, PostsShelf, SavedShelf } from "../_components/Shelves";
 import { resolveMeAccess } from "../_lib/access";
+import { initialPostsTab } from "../_lib/posts-tab";
 
 const shell = css({
   minH: "dvh",
@@ -86,7 +87,7 @@ export default async function MePage({
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
-  const tab = (await searchParams).tab === "reviews" ? "reviews" : "reports";
+  const requestedTab = (await searchParams).tab;
   const access = await resolveMeAccess("/me");
 
   if (access.kind === "other") {
@@ -105,6 +106,7 @@ export default async function MePage({
   const data = result.data;
   if (!details.ok) throw new Error(errorMessageJa[details.error]);
   const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
+  const tab = initialPostsTab(requestedTab, { reports: reportCount, reviews: data.reviewCount });
 
   return (
     <div className={shell}>
