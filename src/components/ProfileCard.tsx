@@ -2,7 +2,6 @@ import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { Avatar } from "@/components/Avatar";
-import { Badge } from "@/components/Badge";
 import { buttonRecipe } from "@/components/Button";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { PREFECTURES } from "@/lib/prefectures";
@@ -19,43 +18,21 @@ function linkLabel(url: string): string {
 
 const card = css(surfaceCardRecipe.raw({ padding: "flush" }), { overflow: "hidden" });
 
-const cover = css({
-  h: "36",
-  bgImage:
-    "[linear-gradient(120deg, {colors.primary.100}, {colors.primary.soft} 55%, {colors.surface.page})]",
+// 上端に色の帯（カバー）を置かない。帯があると背景画像を設定できるように見えるが、その機能は無い。
+const content = css({ px: "4.5", pt: "4.5", pb: "4" });
+
+// 上から アバター → 名前 → 投稿数 を中央に、その下の詳細は左寄せ、最後に編集ボタンを全幅で置く。
+const avatarFrame = css({ display: "flex", justifyContent: "center" });
+
+const name = css({
+  mt: "3",
+  mb: "0",
+  textAlign: "center",
+  textStyle: "title",
+  overflowWrap: "anywhere",
 });
 
-const content = css({ px: "4.5", pb: "4" });
-
-// アバターの行：左にカバーへ重なるアバター、右端に「プロフィールを編集」。
-// 名前や所属の長さで編集ボタンの位置が動かないよう、名前の列はこの行の下に全幅で置く。
-const headRow = css({
-  display: "flex",
-  alignItems: "flex-start",
-  justifyContent: "space-between",
-  gap: "3",
-});
-
-// カバー画像に重なるので、背景色の縁を回して輪郭を切る。
-const avatarFrame = css({
-  flex: "none",
-  alignSelf: "flex-start",
-  mt: "-8",
-  display: "inline-flex",
-  borderWidth: "3px",
-  borderStyle: "solid",
-  borderColor: "surface.card",
-  borderRadius: "pill",
-});
-
-const nameColumn = css({ mt: "3" });
-
-// 立場バッジは名前の文字の流れに入れ、名前が折り返しても最後の文字のすぐ後ろに続ける。
-const name = css({ m: "0", textStyle: "title", overflowWrap: "anywhere" });
-
-const standpointBadge = css({ ml: "2", verticalAlign: "[0.2em]", whiteSpace: "nowrap" });
-
-// 「地域」「所属」「栽培作目」は見出しの幅をそろえ、値（チップ）の始まりを縦一列にする。
+// 「属性」「地域」「所属」「栽培作目」は見出しの幅をそろえ、値（チップ）の始まりを縦一列にする。
 const labeledRow = cva({
   base: { display: "flex", alignItems: "flex-start", gap: "2" },
   variants: { spacing: { tight: { mt: "1.5" }, loose: { mt: "3" } } },
@@ -99,9 +76,8 @@ const affiliation = css({
 });
 
 const editLink = css(buttonRecipe.raw({ variant: "ghost", size: "sm" }), {
-  flex: "none",
-  px: "4",
-  mt: "3",
+  w: "full",
+  mt: "4",
   whiteSpace: "nowrap",
 });
 
@@ -134,14 +110,22 @@ const linkRow = css({
 const statRow = css({
   display: "flex",
   flexWrap: "wrap",
-  gap: "4",
-  mt: "3",
-  pt: "3",
+  justifyContent: "center",
+  columnGap: "3",
+  rowGap: "1",
+  mt: "1.5",
+  color: "text.subtle",
+  fontSize: "sm",
+  "& b": { color: "text.default", fontVariantNumeric: "tabular-nums" },
+});
+
+// 名前・投稿数の下を「詳細」として線で区切る。
+const detailBlock = css({
+  mt: "4",
+  pt: "1",
   borderTopWidth: "1px",
   borderTopStyle: "solid",
   borderTopColor: "border.default",
-  fontSize: "sm",
-  "& b": { fontVariantNumeric: "tabular-nums" },
 });
 
 type ProfileCardProps = {
@@ -162,76 +146,23 @@ export function ProfileCard({
 }: ProfileCardProps) {
   const standpoint = STANDPOINTS.find((item) => item.value === details.standpoint)?.label;
   const prefecture = PREFECTURES.find((item) => item.code === details.prefecture_code)?.name;
+  const hasDetails =
+    Boolean(details.bio) ||
+    standpoint !== undefined ||
+    prefecture !== undefined ||
+    details.affiliations.length > 0 ||
+    details.crops.length > 0 ||
+    details.links.length > 0;
 
   return (
     <section className={card} aria-labelledby="profile-handle">
-      <div className={cover} aria-hidden="true" />
       <div className={content}>
-        <div className={headRow}>
-          <span className={avatarFrame}>
-            <Avatar name={handle} src={avatarUrl} size="xl" />
-          </span>
-          {editable ? (
-            <Link className={editLink} href="/me/edit">
-              プロフィールを編集<span className={srOnly}>（プロフィール公開情報を編集）</span>
-            </Link>
-          ) : null}
-        </div>
-        <div className={nameColumn}>
-          <h1 className={name} id="profile-handle">
-            {handle}
-            {standpoint ? (
-              <Badge variant="type" className={standpointBadge}>
-                {standpoint}
-              </Badge>
-            ) : null}
-          </h1>
-          {prefecture ? (
-            <div className={labeledRow({ spacing: "tight" })}>
-              <span className={label}>地域</span>
-              <div className={values}>
-                <Chip>{prefecture}</Chip>
-              </div>
-            </div>
-          ) : null}
-          {details.affiliations.length > 0 ? (
-            <div className={labeledRow({ spacing: "tight" })}>
-              <span className={label}>所属</span>
-              <div className={values}>
-                {details.affiliations.map((affiliationName) => (
-                  <span key={affiliationName} className={affiliation}>
-                    {affiliationName}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </div>
-
-        {details.bio ? <p className={bio}>{details.bio}</p> : null}
-
-        {details.crops.length > 0 ? (
-          <div className={labeledRow({ spacing: "loose" })}>
-            <span className={label}>栽培作目</span>
-            <div className={values}>
-              {details.crops.map((crop) => (
-                <Chip key={crop.id} wrap>
-                  {crop.name}
-                </Chip>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {details.links.length > 0 ? (
-          <div className={linkRow}>
-            {details.links.map((url) => (
-              <a key={url} href={url} target="_blank" rel="noopener noreferrer">
-                <Icon name="open_in_new" size="2xs" /> {linkLabel(url)}
-              </a>
-            ))}
-          </div>
-        ) : null}
+        <span className={avatarFrame}>
+          <Avatar name={handle} src={avatarUrl} size="2xl" />
+        </span>
+        <h1 className={name} id="profile-handle">
+          {handle}
+        </h1>
 
         <div className={statRow}>
           {stats.map((stat) => (
@@ -240,6 +171,72 @@ export function ProfileCard({
             </span>
           ))}
         </div>
+
+        {hasDetails ? (
+          <div className={detailBlock}>
+            {details.bio ? <p className={bio}>{details.bio}</p> : null}
+
+            {standpoint ? (
+              <div className={labeledRow({ spacing: "loose" })}>
+                <span className={label}>属性</span>
+                <div className={values}>
+                  <Chip wrap>{standpoint}</Chip>
+                </div>
+              </div>
+            ) : null}
+
+            {prefecture ? (
+              <div className={labeledRow({ spacing: standpoint ? "tight" : "loose" })}>
+                <span className={label}>地域</span>
+                <div className={values}>
+                  <Chip>{prefecture}</Chip>
+                </div>
+              </div>
+            ) : null}
+
+            {details.affiliations.length > 0 ? (
+              <div className={labeledRow({ spacing: "tight" })}>
+                <span className={label}>所属</span>
+                <div className={values}>
+                  {details.affiliations.map((affiliationName) => (
+                    <span key={affiliationName} className={affiliation}>
+                      {affiliationName}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {details.crops.length > 0 ? (
+              <div className={labeledRow({ spacing: "loose" })}>
+                <span className={label}>栽培作目</span>
+                <div className={values}>
+                  {details.crops.map((crop) => (
+                    <Chip key={crop.id} wrap>
+                      {crop.name}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {details.links.length > 0 ? (
+              <div className={linkRow}>
+                {details.links.map((url) => (
+                  <a key={url} href={url} target="_blank" rel="noopener noreferrer">
+                    <Icon name="open_in_new" size="2xs" /> {linkLabel(url)}
+                  </a>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {editable ? (
+          <Link className={editLink} href="/me/edit">
+            プロフィールを編集<span className={srOnly}>（プロフィール公開情報を編集）</span>
+          </Link>
+        ) : null}
       </div>
     </section>
   );

@@ -137,7 +137,7 @@ export function SignupForm({
 
       <RadioGroup<string>
         description="投稿やマイページで肩書きとして表示されます。"
-        label="あなたの立場"
+        label="あなたの属性"
         name="standpoint"
         requirement="required"
         visibility="public"

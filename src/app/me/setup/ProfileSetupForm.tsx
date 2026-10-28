@@ -26,7 +26,7 @@ export function ProfileSetupForm() {
         maxLength={HANDLE_MAX_LENGTH}
       />
       <RadioGroup<string>
-        label="あなたの立場"
+        label="あなたの属性"
         name="standpoint"
         requirement="required"
         visibility="public"

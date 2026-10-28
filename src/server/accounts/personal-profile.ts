@@ -18,7 +18,7 @@ export const PersonalProfileSchema = v.object({
   ),
   standpoint: v.picklist(
     STANDPOINTS.map(({ value }) => value),
-    "あなたの立場を選択してください。",
+    "あなたの属性を選択してください。",
   ),
 });
 
