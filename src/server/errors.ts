@@ -6,6 +6,7 @@ export const ERROR_CODES = [
   "not_found",
   "invalid_body",
   "conflict",
+  "active_report_exists",
   "aal2_required",
   "internal",
   // 認証（T-13）
@@ -50,6 +51,8 @@ export const errorMessageJa = {
   not_found: "対象のデータが見つかりません。",
   invalid_body: "入力内容を確認してください。",
   conflict: "すでに同じ内容が登録されています。",
+  active_report_exists:
+    "この資材には下書きまたは確認中のレポートがあります。入力内容は残っています。マイページから既存のレポートを確認してください。",
   aal2_required: "2要素認証を完了してください。",
   internal: "処理中に問題が発生しました。時間をおいて再度お試しください。",
   handle_taken: "このハンドルネームはすでに使われています。",

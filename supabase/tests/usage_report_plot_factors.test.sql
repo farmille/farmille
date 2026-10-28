@@ -8,11 +8,15 @@ values('ca932323-0000-4000-8000-000000000001','区の品種と資材の検証','
 insert into public.materials(id,name,manufacturer_name,publication_status)
 values('ca932323-0000-4000-8000-000000000002','区の品種と資材の検証','検証会社','published');
 
+insert into public.materials(id,name,manufacturer_name,publication_status)
+values('ca932323-0000-4000-8000-000000000004','別区の検証','検証会社','published'),
+('ca932323-0000-4000-8000-000000000007','画像の検証','検証会社','published');
+
 create function pg_temp.report_input(p_report text default 'ca932323-0000-4000-8000-000000000003') returns jsonb language sql as $$
   select jsonb_build_object(
     'reportId',p_report,
     'expectedUpdatedAt',(select updated_at from public.usage_reports where id=p_report::uuid),
-    'materialId','ca932323-0000-4000-8000-000000000002',
+    'materialId',case when p_report in ('ca932323-0000-4000-8000-000000000004','ca932323-0000-4000-8000-000000000007') then p_report else 'ca932323-0000-4000-8000-000000000002' end,
     'cropId',(select id from public.crops limit 1),
     'varietyUnknown',false,
     'varieties','[{"id":"ca932323-0000-4000-8000-000000000011","name":"新藍"}]'::jsonb,
@@ -65,7 +69,7 @@ select throws_ok($$select public.save_usage_report(jsonb_set(jsonb_set(jsonb_set
 select throws_ok($$select public.save_usage_report(pg_temp.report_input()||'{"varieties":[{"id":"ca932323-0000-4000-8000-000000000011","name":"新藍"},{"id":"ca932323-0000-4000-8000-000000000013","name":"初恋"}]}'::jsonb,true)$$,
   '23514',null,'a variety that no plot points to cannot be submitted');
 
-select lives_ok($$select public.save_usage_report(jsonb_build_object('reportId','ca932323-0000-4000-8000-000000000004','expectedUpdatedAt',null)||(pg_temp.report_input()-'reportId'-'expectedUpdatedAt')
+select lives_ok($$select public.save_usage_report(jsonb_build_object('reportId','ca932323-0000-4000-8000-000000000004','expectedUpdatedAt',null)||(pg_temp.report_input('ca932323-0000-4000-8000-000000000004')-'reportId'-'expectedUpdatedAt')
   ||'{"varieties":[{"id":"ca932323-0000-4000-8000-000000000041","name":"別の品種"}],"comparedMaterials":[{"id":"ca932323-0000-4000-8000-000000000042","name":"別の資材"}],"plots":[],"measurements":[]}'::jsonb,false)$$,'another report keeps its own varieties');
 select throws_ok($$select public.save_usage_report(jsonb_set(pg_temp.report_input(),'{plots,0,varietyId}','"ca932323-0000-4000-8000-000000000041"'),false)$$,'23503',null,'plot cannot point to another report variety');
 select throws_ok($$select public.save_usage_report(jsonb_set(pg_temp.report_input(),'{plots,2,treatment,comparedMaterialId}','"ca932323-0000-4000-8000-000000000042"'),false)$$,'23503',null,'plot cannot point to another report compared material');

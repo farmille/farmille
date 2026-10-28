@@ -11,7 +11,8 @@ insert into public.profiles(user_id,handle,standpoint) values
   ('db932323-0000-4000-8000-000000000008','月の境目の検証','farmer'),
   ('db932323-0000-4000-8000-000000000009','別の会員の検証','farmer');
 insert into public.materials(id,name,manufacturer_name,publication_status)
-values('db932323-0000-4000-8000-000000000002','PDF読み取りの検証','検証会社','published');
+values('db932323-0000-4000-8000-000000000002','PDF読み取りの検証','検証会社','published'),
+('db932323-0000-4000-8000-000000000006','別資料の検証','検証会社','published');
 insert into public.usage_reports(id,material_id,author_user_id,observed_change,summary,pesticide_ack,form_version)
 values('db932323-0000-4000-8000-000000000005','db932323-0000-4000-8000-000000000002','db932323-0000-4000-8000-000000000007','','',false,2);
 insert into storage.objects(bucket_id,name)
@@ -29,7 +30,7 @@ create function pg_temp.report_input(p_report text,p_seed text,p_checked boolean
   select jsonb_build_object(
     'reportId',p_report,
     'expectedUpdatedAt',(select updated_at from public.usage_reports where id=p_report::uuid),
-    'materialId','db932323-0000-4000-8000-000000000002',
+    'materialId',case when p_report='db932323-0000-4000-8000-000000000004' then 'db932323-0000-4000-8000-000000000006' else 'db932323-0000-4000-8000-000000000002' end,
     'cropId',(select id from public.crops limit 1),
     'varietyUnknown',false,
     'varieties',jsonb_build_array(jsonb_build_object('id',format('db932323-0000-4000-%s-000000000011',p_seed),'name','新藍')),
@@ -104,7 +105,7 @@ set local role service_role;
 create temp table claimed as
 select 'reading1' as label,reading_id from public.claim_pdf_reading('db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000003','db932323-0000-4000-8000-000000000002',pg_temp.path('000000000001',1,'9001'))
 union all
-select 'reading2',reading_id from public.claim_pdf_reading('db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000004','db932323-0000-4000-8000-000000000002',pg_temp.path('000000000001',2,'9001'))
+select 'reading2',reading_id from public.claim_pdf_reading('db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000004','db932323-0000-4000-8000-000000000006',pg_temp.path('000000000001',2,'9001'))
 union all
 select 'reading3',reading_id from public.claim_pdf_reading('db932323-0000-4000-8000-000000000001','db932323-0000-4000-8000-000000000003','db932323-0000-4000-8000-000000000002',pg_temp.path('000000000001',3,'9001'));
 create function pg_temp.reading(p_label text) returns uuid language sql as $$ select reading_id from claimed where label=p_label $$;
