@@ -220,8 +220,13 @@ export function applySql(plan: CatalogPlan, source: CatalogSource): string {
   statements.push(
     upsert(
       "ingredient_categories",
-      ["id", "name", "sort_order"],
-      plan.masters.ingredient_categories.map((row) => [row.id, row.name, row.sort_order]),
+      ["id", "name", "short_name", "sort_order"],
+      plan.masters.ingredient_categories.map((row) => [
+        row.id,
+        row.name,
+        row.short_name,
+        row.sort_order,
+      ]),
     ),
   );
   statements.push(

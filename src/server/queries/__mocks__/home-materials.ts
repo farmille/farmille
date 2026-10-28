@@ -3,5 +3,8 @@ import { relatedMaterials } from "@/app/materials/[id]/_components/story-fixture
 export const listHomeMaterials = fn<
   typeof import("@/server/queries/home-materials").listHomeMaterials
 >(async () =>
-  relatedMaterials.map((material) => ({ ...material, categories: ["微生物資材"] })),
+  relatedMaterials.map((material) => ({
+    ...material,
+    categories: ["微生物"],
+  })),
 ).mockName("listHomeMaterials");
