@@ -314,15 +314,18 @@ describe("readPdfIntoDraft", () => {
     expect((await readPdfIntoDraft(makeRequest(), userId, deps)).ok).toBe(true);
   });
 
-  it("AI 側の失敗は数え、PDF を消してから記録し、下書きは書き換えない", async () => {
+  it("AI 側の失敗と該当試験なしは数え、PDF を消してから記録し、下書きは書き換えない", async () => {
     const cases = [
-      ["server_error", "pdf_reading_failed"],
-      ["max_tokens", "pdf_reading_incomplete"],
+      [{ ok: false, error: "server_error", usage: null }, "pdf_reading_failed", "server_error"],
+      [{ ok: false, error: "max_tokens", usage: null }, "pdf_reading_incomplete", "max_tokens"],
+      [
+        { ok: true, output: { ...output, outcome: "no_matching_trial" }, usage },
+        "pdf_reading_no_match",
+        "pdf_reading_no_match",
+      ],
     ] as const;
-    for (const [reason, error] of cases) {
-      const { deps, calls, saved, finished } = fakeDeps({
-        extraction: { ok: false, error: reason, usage: null },
-      });
+    for (const [extraction, error, errorCode] of cases) {
+      const { deps, calls, saved, finished } = fakeDeps({ extraction });
       const request = makeRequest();
       const result = await readPdfIntoDraft(request, userId, deps);
       expect(result).toEqual({
@@ -337,7 +340,7 @@ describe("readPdfIntoDraft", () => {
         },
         pdfValuesCheckRequired: false,
       });
-      expect(finished).toEqual([{ status: "failed", errorCode: reason }]);
+      expect(finished).toEqual([{ status: "failed", errorCode }]);
       expect(calls.indexOf("discard")).toBeLessThan(calls.indexOf("finish"));
       expect(saved).toHaveLength(1);
     }
