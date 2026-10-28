@@ -813,7 +813,7 @@ export function ReportPageForm({
               cropName,
               input.varietyUnknown ? [] : input.varieties.map(({ name }) => name),
             )}
-            materialId={material.id}
+            materialId={input.materialId}
             userId={userId}
             siteKey={pdfReading.siteKey}
             remaining={remaining}

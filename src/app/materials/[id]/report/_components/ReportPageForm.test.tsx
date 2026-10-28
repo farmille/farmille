@@ -6,6 +6,10 @@ import {
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import * as reportActions from "@/app/materials/[id]/report/new/actions";
+import * as recaptcha from "@/lib/recaptcha-client";
+import * as reportImages from "./report-page-images";
+
 import { persistKey, writePersisted } from "@/components/form/persisted-input";
 
 import { ReportPageForm } from "./ReportPageForm";
@@ -141,5 +145,56 @@ describe("PDF読み取りの回数取得障害", () => {
       await screen.findByRole("heading", { name: "プレビュー（公開後の見え方）" }),
     ).toBeInTheDocument();
     expect(within(screen.getByRole("dialog")).getByText("手入力で続けた結果")).toBeInTheDocument();
+  });
+});
+
+describe("資材を選び直した後のPDF読み取り", () => {
+  afterEach(() => {
+    window.sessionStorage.clear();
+    vi.restoreAllMocks();
+  });
+
+  it("今選んでいる資材で読み取りを送り、拒否されたPDFを消す", async () => {
+    const uploadPath =
+      "00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-000000000002.pdf";
+    vi.spyOn(recaptcha, "loadRecaptcha").mockResolvedValue();
+    vi.spyOn(recaptcha, "executeRecaptcha").mockResolvedValue("test-token");
+    vi.spyOn(reportImages, "countPdfPages").mockResolvedValue(1);
+    vi.spyOn(reportImages, "uploadPdfForReading").mockResolvedValue(uploadPath);
+    const discard = vi.spyOn(reportImages, "discardPdfForReading").mockResolvedValue();
+    const read = vi.spyOn(reportActions, "readPdfIntoReportAction").mockResolvedValue({
+      ok: false,
+      error: "invalid_body",
+      message: "対象資材を選び直してください。",
+      remaining: null,
+      savedDraft: null,
+      pdfValuesCheckRequired: false,
+    });
+    writePersisted(persistKey("report", `/materials/${pageMaterial.id}/report/new`), {
+      material: chosenMaterial,
+      input: { ...filledReport, materialId: chosenMaterial.id },
+    });
+    renderForm();
+    await screen.findByRole("button", { name: `資材：${chosenMaterial.name}` });
+    fireEvent.click(screen.getByRole("button", { name: "PDF読み取り（今月あと10回）" }));
+    fireEvent.change(screen.getByLabelText("PDF", { exact: false, selector: "input[type=file]" }), {
+      target: { files: [new File(["%PDF-1.4"], "試験.pdf", { type: "application/pdf" })] },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: "読み取る試験" }), {
+      target: { value: "試験1" },
+    });
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("checkbox"));
+    const send = screen.getByRole("button", { name: "置き換えて読み取る" });
+    await waitFor(() => expect(send).toBeEnabled());
+    fireEvent.click(send);
+    await waitFor(() =>
+      expect(read).toHaveBeenCalledWith(
+        chosenMaterial.id,
+        expect.objectContaining({
+          input: expect.objectContaining({ materialId: chosenMaterial.id }),
+        }),
+      ),
+    );
+    expect(discard).toHaveBeenCalledWith(uploadPath);
   });
 });
