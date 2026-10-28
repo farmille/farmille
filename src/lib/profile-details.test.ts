@@ -7,6 +7,7 @@ const profile = {
   bio: "",
   affiliations: [],
   cropIds: [],
+  cropNamesOther: [],
   links: [],
 };
 describe("公開プロフィールの入力境界", () => {
@@ -28,6 +29,16 @@ describe("公開プロフィールの入力境界", () => {
       links: ["https://example.com", "https://example.org"],
     });
     expect(result.affiliations).toEqual(["JA青年部", "生産者の会"]);
+  });
+  it("作物マスタにない作目は「その他」の名前として複数保存できる", () => {
+    const result = v.parse(ProfileDetailsInputSchema, {
+      ...profile,
+      cropNamesOther: [" ステビア ", "パッションフルーツ"],
+    });
+    expect(result.cropNamesOther).toEqual(["ステビア", "パッションフルーツ"]);
+    expect(
+      v.safeParse(ProfileDetailsInputSchema, { ...profile, cropNamesOther: ["  "] }).success,
+    ).toBe(false);
   });
   it("マスタID以外の作目と過大な入力を拒否する", () => {
     expect(

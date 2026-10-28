@@ -17,6 +17,7 @@ const meta = {
       bio: "",
       affiliations: [],
       crops: [],
+      cropNamesOther: [],
       links: [],
     },
     options: {

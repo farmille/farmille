@@ -60,6 +60,7 @@ export async function updateProfileAction(
     bio: formData.get("bio"),
     affiliations: formData.getAll("affiliations"),
     cropIds: formData.getAll("cropIds"),
+    cropNamesOther: formData.getAll("cropNamesOther"),
     links: (formDataString(formData.get("links")) ?? "")
       .split(/\r?\n/)
       .map((line) => line.trim())

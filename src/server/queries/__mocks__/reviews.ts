@@ -46,6 +46,7 @@ export const getReviewForEdit = fn<typeof import("@/server/queries/reviews").get
       pesticide_ack: true,
       status: "published",
       cropIds: ["00000000-0000-4000-8000-000000000304"],
+      cropNameOther: null,
       photos: [],
     },
   }),

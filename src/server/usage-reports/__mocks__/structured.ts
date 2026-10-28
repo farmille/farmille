@@ -37,11 +37,13 @@ export const getStructuredReportFormData = fn<
       },
     ],
     favoriteCropIds: [],
+    favoriteCropNamesOther: [],
     materialCropIds: [],
     draft: {
       ...structuredReport,
       materialId: "00000000-0000-4000-8000-000000000101",
       cropId: "00000000-0000-4000-8000-000000000304",
+      cropNameOther: null,
     },
     pdfValuesCheckRequired: false,
     pdfReadingMarks: [],
