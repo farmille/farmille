@@ -34,20 +34,12 @@ select results_eq(
   $$values ('article'::text, 1::bigint), ('usage_report'::text, 3::bigint)$$,
   '累計ビューは対象ごとに1行で閲覧数を返す'
 );
-select is_empty(
-  $$select target_type, target_id, view_count from public.view_counts_total
-    except
-    select target_type, target_id, sum(view_count)::bigint from public.view_counts_daily
-    group by target_type, target_id$$,
-  '累計ビューの閲覧数は日次ビューの合計と一致する'
+select results_eq(
+  $$select target_type,target_id,view_count from public.view_counts_total order by target_type,target_id$$,
+  $$select target_type,target_id,sum(view_count)::bigint from public.view_counts_daily group by target_type,target_id order by target_type,target_id$$,
+  '累計ビューと日次集計は対象の欠落なく一致する'
 );
-select is_empty(
-  $$select target_type, target_id, sum(view_count)::bigint from public.view_counts_daily
-    group by target_type, target_id
-    except
-    select target_type, target_id, view_count from public.view_counts_total$$,
-  '日次ビューにある対象はすべて累計ビューにある'
-);
+select lives_ok($$insert into public.view_events(target_type,target_id,viewer_user_id) values('review','c4a1d7e2-5b3f-4e8a-9c6d-0f1e2a3b4c53',null)$$,'anonymous card view can be recorded without an account');
 reset role;
 select * from finish();
 rollback;

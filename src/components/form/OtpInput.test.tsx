@@ -24,7 +24,10 @@ describe("OtpInput", () => {
       </Form>,
     );
 
+    await user.click(screen.getByRole("button", { name: "登録を完了する" }));
+    expect(submitted).toHaveLength(0);
     const input = screen.getByLabelText("認証コード");
+    expect(input).toHaveAttribute("aria-invalid", "true");
     expect(input).toHaveAttribute("autocomplete", "one-time-code");
     expect(input).toHaveAttribute("inputmode", "numeric");
     expect(input).toBeRequired();
@@ -34,21 +37,5 @@ describe("OtpInput", () => {
     await user.click(screen.getByRole("button", { name: "登録を完了する" }));
 
     expect(submitted[0]?.get("code")).toBe("123456");
-  });
-
-  it("必須で未入力なら送信を止める", async () => {
-    const user = userEvent.setup();
-    const submitted: FormData[] = [];
-    render(
-      <Form persist={false} onSubmit={captureSubmit(submitted)}>
-        <OtpInput label="認証コード" name="code" requirement="required" />
-        <button type="submit">登録を完了する</button>
-      </Form>,
-    );
-
-    await user.click(screen.getByRole("button", { name: "登録を完了する" }));
-
-    expect(submitted).toHaveLength(0);
-    expect(screen.getByLabelText("認証コード")).toHaveAttribute("aria-invalid", "true");
   });
 });

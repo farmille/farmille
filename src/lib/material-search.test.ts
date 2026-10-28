@@ -22,6 +22,11 @@ describe("キーワードに対応する検索候補", () => {
     for (const query of ["bio support", "ばいお", "ＢＳ５３"]) {
       expect(matchSearchCatalog(names, query).materialNames).toEqual(["活力サポート"]);
     }
+
+    {
+      expect(matchSearchCatalog(catalog, "プチ").filters).toEqual(catalog.filters);
+      expect(matchSearchCatalog(catalog, "green").makerNames).toEqual(["GREEN"]);
+    }
   });
   it("候補の8件制限に関係なく作物・メーカー・資材名を検索対象にする", () => {
     const result = matchSearchCatalog(catalog, " トマト ");
@@ -29,10 +34,7 @@ describe("キーワードに対応する検索候補", () => {
     expect(result.makerNames).toEqual(["トマト農材"]);
     expect(result.materialNames).toHaveLength(12);
   });
-  it("別名と大文字小文字を区別しない検索に対応する", () => {
-    expect(matchSearchCatalog(catalog, "プチ").filters).toEqual(catalog.filters);
-    expect(matchSearchCatalog(catalog, "green").makerNames).toEqual(["GREEN"]);
-  });
+
   it("一致しない文字は全件表示に戻さない", () => {
     expect(matchSearchCatalog(catalog, "一致しない")).toEqual({
       filters: [],

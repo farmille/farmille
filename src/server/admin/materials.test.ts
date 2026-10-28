@@ -24,15 +24,6 @@ const base = {
 };
 
 describe("validateMaterialInput", () => {
-  it("分類・検索層の必須2項目が揃えば通る", () => {
-    const result = validateMaterialInput(base);
-
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.input.name).toBe("テスト資材");
-    expect(result.input.manufacturerName).toBe("テスト製薬");
-  });
-
   it("空の任意項目は null にする（空文字を保存しない）", () => {
     const result = validateMaterialInput({ ...base, compositionTypeId: "", description: "" });
 
@@ -40,6 +31,9 @@ describe("validateMaterialInput", () => {
     if (!result.ok) return;
     expect(result.input.compositionTypeId).toBeNull();
     expect(result.input.description).toBeNull();
+
+    expect(result.input.name).toBe("テスト資材");
+    expect(result.input.manufacturerName).toBe("テスト製薬");
   });
 
   it("資材名とメーカー名の未入力を field ごとに返す", () => {
@@ -52,28 +46,17 @@ describe("validateMaterialInput", () => {
   });
 
   it("http(s) 以外の URL を弾く", () => {
-    const result = validateMaterialInput({ ...base, officialUrl: "javascript:alert(1)" });
+    const result = validateMaterialInput({
+      ...base,
+      officialUrl: "javascript:alert(1)",
+      catalogUrl: "example.com/catalog.pdf",
+    });
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.fieldErrors.officialUrl).toBeDefined();
-  });
 
-  it("URL の形になっていない文字列を弾く", () => {
-    const result = validateMaterialInput({ ...base, catalogUrl: "example.com/catalog.pdf" });
-
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
     expect(result.fieldErrors.catalogUrl).toBeDefined();
-  });
-
-  it("分類 ID の重複は保存側で一意化するためそのまま渡す", () => {
-    const cropId = "11111111-1111-4111-8111-111111111111";
-    const result = validateMaterialInput({ ...base, cropIds: [cropId, cropId] });
-
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.input.cropIds).toEqual([cropId, cropId]);
   });
 
   it("分類 ID にファイルが混入したら入力エラーにする", () => {

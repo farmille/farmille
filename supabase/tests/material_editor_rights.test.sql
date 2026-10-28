@@ -3,8 +3,9 @@ create extension if not exists pgtap with schema extensions;
 select plan(16);
 
 insert into auth.users(id) values('ba8b2af4-a8b5-4b31-9d13-578f15bba739') on conflict (id) do nothing;
+update public.seller_accounts set manufacturer_name='デモ株式会社' where id='33333333-3333-4333-8333-333333333333';
 insert into public.materials(id,name,manufacturer_name) values('ba8b2af4-a8b5-4b31-9d13-578f15bba741','資材オーナー権限テスト専用資材','デモ株式会社');
-select is((select count(*)::integer from public.materials where id='ba8b2af4-a8b5-4b31-9d13-578f15bba741' and seller_id is not null),0,'initial material has no automatic editing rights');
+select is((select count(*)::integer from public.materials where id='ba8b2af4-a8b5-4b31-9d13-578f15bba741' and seller_id is not null),0,'material named after an approved manufacturer has no automatic editing rights');
 select set_config('request.jwt.claims','{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated","app_metadata":{"account_type":"seller","seller_id":"33333333-3333-4333-8333-333333333333"}}',true);
 set local role authenticated;
 select throws_ok($$select public.save_material_page_version('ba8b2af4-a8b5-4b31-9d13-578f15bba741','{"description":"原稿","mainComponents":"","mechanism":"","links":[],"images":[],"usages":[],"timings":[],"certifications":[]}',false)$$,'42501',null,'unverified manufacturer cannot edit');

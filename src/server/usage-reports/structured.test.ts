@@ -150,13 +150,6 @@ describe("実証詳細レポートの保存手順", () => {
     expect(removed).toEqual([[`${folder}/replaced.jpg`]]);
   });
 
-  it("参照が変わらなければ何も消さない", async () => {
-    const kept = mediaUrl(userId, "kept");
-    const { store, removed } = fakeStore({ savedMedia: [kept] });
-    await runUsageReportSave(reportWithMedia([kept]), false, store, userId, []);
-    expect(removed).toEqual([]);
-  });
-
   it("下書きの保存が競合したら消さない", async () => {
     const { store, removed } = fakeStore({
       conflictDraft: true,

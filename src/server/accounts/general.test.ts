@@ -61,18 +61,6 @@ describe("validateGeneralSignup", () => {
     });
   });
 
-  it("メール形式・パスワード長を検証する", () => {
-    expect(validateGeneralSignup({ ...validRaw, email: "farmer.example.com" })).toMatchObject({
-      ok: false,
-    });
-    expect(validateGeneralSignup({ ...validRaw, password: "short12" })).toMatchObject({
-      ok: false,
-    });
-    expect(validateGeneralSignup({ ...validRaw, password: "a".repeat(129) })).toMatchObject({
-      ok: false,
-    });
-  });
-
   it("立場は一般ユーザー向けの4択だけを受け付ける", () => {
     for (const standpoint of ["farmer", "ja", "government", "other"]) {
       expect(validateGeneralSignup({ ...validRaw, standpoint })).toMatchObject({
@@ -96,7 +84,7 @@ describe("validateGeneralSignup", () => {
       ...validRaw,
       handle: "",
       email: "invalid",
-      password: "x",
+      password: "short12",
       standpoint: null,
     });
 
@@ -109,5 +97,8 @@ describe("validateGeneralSignup", () => {
         "standpoint",
       ]);
     }
+    expect(validateGeneralSignup({ ...validRaw, password: "a".repeat(129) })).toMatchObject({
+      ok: false,
+    });
   });
 });

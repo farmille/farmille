@@ -1,10 +1,9 @@
-import { describe, expect, it } from "vitest";
 import * as v from "valibot";
+import { describe, expect, it } from "vitest";
 import {
   createBlankUsageReport,
-  reportMeasurementGroups,
   parseReportNumber,
-  reportErrorStep,
+  reportMeasurementGroups,
   reportVarietyNames,
   UsageReportInputSchema,
   validateUsageReportSubmission,
@@ -47,6 +46,10 @@ describe("実証詳細レポート", () => {
     expect(errors.cropId).toBeDefined();
     expect(errors["measurements.0.values"]).toBeDefined();
     expect(errors.guidelineAck).toBeDefined();
+    expect(input.plots.map(({ varietyId, treatment }) => [varietyId, treatment])).toEqual([
+      [input.varieties[0]?.id, { kind: "untreated" }],
+      [input.varieties[0]?.id, { kind: "posted" }],
+    ]);
   });
   it("負値・ゼロ・誤差・検定記号を原文を変更せず読む", () => {
     expect(parseReportNumber("41.7±0.8 a")).toEqual({ value: 41.7, error: 0.8 });
@@ -56,59 +59,154 @@ describe("実証詳細レポート", () => {
     expect(parseReportNumber("1,250±20 a")).toEqual({ value: 1250, error: 20 });
     expect(parseReportNumber("1,234,567")).toEqual({ value: 1234567, error: null });
   });
-  it("ゼロの数値を有効とし、文章や添付資料の未確認を提出前に検出する", () => {
-    const input = withSingleVariety(createBlankUsageReport(materialId), "", true);
-    input.cropId = "22222222-2222-4222-8222-222222222222";
-    input.prefectureCode = 8;
-    input.observedChange = "変化はありませんでした。";
-    input.purposeTags = ["耐暑性改善"];
-    input.cultivationEnvironment = "露地";
-    input.timingStages = [3];
-    input.timingNote = "9月1日に散布しました。";
-    input.plots = input.plots.map((plot, index) => ({
-      ...plot,
-      name: `区${index + 1}`,
-      scope: "10株",
-      description: "資材なし",
-    }));
-    input.measurements = input.measurements.map((measurement) => ({
+
+  it("品種が不明の状態から外すと、品種を1件作って全区に割り当てる", () => {
+    const unknown = withSingleVariety(createBlankUsageReport(materialId), "", true);
+    const known = withSingleVariety(unknown, "", false);
+    const [variety] = known.varieties;
+    expect(known.varietyUnknown).toBe(false);
+    expect(known.varieties).toEqual([{ id: expect.any(String), name: "" }]);
+    expect(known.plots.map((plot) => plot.varietyId)).toEqual([variety?.id, variety?.id]);
+  });
+
+  it.each([
+    ["入力済み", (input: UsageReportInput) => input, []],
+    [
+      "資材未選択",
+      (input: UsageReportInput) => ({
+        ...input,
+        plots: input.plots.map((plot, index) =>
+          index === 0 ? { ...plot, treatment: null } : plot,
+        ),
+      }),
+      ["plots.0.treatment"],
+    ],
+    [
+      "区の品種未選択",
+      (input: UsageReportInput) => ({
+        ...input,
+        plots: input.plots.map((plot, index) =>
+          index === 1 ? { ...plot, varietyId: null } : plot,
+        ),
+      }),
+      ["plots.1.variety"],
+    ],
+    [
+      "投稿資材の区なし",
+      (input: UsageReportInput) => ({
+        ...input,
+        plots: input.plots.map((plot) => ({ ...plot, treatment: { kind: "untreated" as const } })),
+      }),
+      ["plots.posted"],
+    ],
+    [
+      "比較資材の名前なし",
+      (input: UsageReportInput) => {
+        const compared = { id: crypto.randomUUID(), name: " " };
+        return {
+          ...input,
+          comparedMaterials: [compared],
+          plots: input.plots.map((plot, index) =>
+            index === 0
+              ? {
+                  ...plot,
+                  treatment: { kind: "compared" as const, comparedMaterialId: compared.id },
+                }
+              : plot,
+          ),
+        };
+      },
+      ["comparedMaterials.0.name"],
+    ],
+    [
+      "未使用の品種",
+      (input: UsageReportInput) => ({
+        ...input,
+        varieties: [...input.varieties, { id: crypto.randomUUID(), name: "新藍" }],
+      }),
+      ["varieties.1.plots"],
+    ],
+    [
+      "都道府県なし",
+      (input: UsageReportInput) => ({ ...input, prefectureCode: null }),
+      ["prefectureCode"],
+    ],
+    [
+      "空の品種名",
+      (input: UsageReportInput) => ({
+        ...input,
+        varieties: input.varieties.map((variety) => ({ ...variety, name: " " })),
+      }),
+      ["varieties.0.name"],
+    ],
+    ["品種なし", (input: UsageReportInput) => ({ ...input, varieties: [] }), ["varieties"]],
+    ["品種不明", (input: UsageReportInput) => withSingleVariety(input, "", true), []],
+    [
+      "品種不明なのに品種あり",
+      (input: UsageReportInput) => ({ ...input, varietyUnknown: true }),
+      ["varieties", "plots.0.variety", "plots.1.variety"],
+    ],
+    [
+      "区の説明なし",
+      (input: UsageReportInput) => ({
+        ...input,
+        plots: input.plots.map((plot) => ({ ...plot, description: " " })),
+      }),
+      ["plots.0.description", "plots.1.description"],
+    ],
+    [
+      "全区に共通の説明",
+      (input: UsageReportInput) => ({
+        ...input,
+        commonPlotDescription: "各区10株、3反復",
+        plots: input.plots.map((plot) => ({ ...plot, description: " " })),
+      }),
+      [],
+    ],
+    [
+      "空の文章",
+      (input: UsageReportInput) => ({
+        ...input,
+        measurements: input.measurements.map((item) => ({ ...item, body: "" })),
+      }),
+      ["measurements.0.values"],
+    ],
+    [
+      "資料未確認",
+      (input: UsageReportInput) => ({
+        ...input,
+        documents: [
+          { id: crypto.randomUUID(), path: "owner/report/document.pdf", name: "成績書.pdf" },
+        ],
+      }),
+      ["documentsAck"],
+    ],
+    [
+      "調査項目なし",
+      (input: UsageReportInput) => ({ ...input, measurements: [] }),
+      ["measurements"],
+    ],
+  ])("提出条件：%s", (_name, edit, expected) => {
+    expect(
+      Object.keys(validateUsageReportSubmission(edit(submittableReport()), noPdfReading)).sort(),
+    ).toEqual([...expected].sort());
+  });
+
+  it("ゼロの測定値を受け付け、画像のない項目と未確認の資料を拒否する", () => {
+    const input = submittableReport();
+    input.measurements = createBlankUsageReport(materialId).measurements.map((measurement) => ({
       ...measurement,
       name: "収量",
       graphs: measurement.graphs.map((graph) => ({
         ...graph,
-        rows: graph.rows.map((row) => ({ ...row, value: "0" })),
+        rows: graph.rows.map((row, index) => ({
+          ...row,
+          plotId: input.plots[index]?.id ?? null,
+          value: "0",
+        })),
       })),
     }));
-    input.methodDetailsAck = true;
-    input.guidelineAck = true;
     expect(validateUsageReportSubmission(input, noPdfReading)).toEqual({});
-    input.measurements = input.measurements.map((measurement) => ({
-      ...measurement,
-      kind: "text",
-    }));
-    expect(
-      validateUsageReportSubmission(input, noPdfReading)["measurements.0.values"],
-    ).toBeDefined();
-    expect(validateUsageReportSubmission(input, noPdfReading).measurements).toBeUndefined();
-    input.documents = [
-      { id: crypto.randomUUID(), path: "owner/report/document.pdf", name: "成績書.pdf" },
-    ];
-    expect(validateUsageReportSubmission(input, noPdfReading).documentsAck).toBeDefined();
-  });
-  it("ページ版：区の調査範囲は任意で、資料のグラフ・表の画像だけでも、秘密保持を確認すれば提出できる", () => {
-    const input = withSingleVariety(createBlankUsageReport(materialId), "", true);
-    input.cropId = "22222222-2222-4222-8222-222222222222";
-    input.prefectureCode = 8;
-    input.observedChange = "変化はありませんでした。";
-    input.purposeTags = ["耐暑性改善"];
-    input.cultivationEnvironment = "露地";
-    input.timingStages = [3];
-    input.timingNote = "9月1日に散布しました。";
-    input.plots = input.plots.map((plot, index) => ({
-      ...plot,
-      name: `区${index + 1}`,
-      description: "10株を調査",
-    }));
     const measurement = {
       id: crypto.randomUUID(),
       kind: "image" as const,
@@ -118,11 +216,9 @@ describe("実証詳細レポート", () => {
       graphs: [],
     };
     input.measurements = [measurement];
-    input.methodDetailsAck = true;
-    input.guidelineAck = true;
-    expect(
-      validateUsageReportSubmission(input, noPdfReading)["measurements.0.values"],
-    ).toBeDefined();
+    expect(validateUsageReportSubmission(input, noPdfReading)).toHaveProperty(
+      "measurements.0.values",
+    );
     input.media = [
       {
         id: crypto.randomUUID(),
@@ -133,179 +229,28 @@ describe("実証詳細レポート", () => {
         measurementId: measurement.id,
       },
     ];
-    expect(v.safeParse(UsageReportInputSchema, input).success).toBe(true);
     expect(Object.keys(validateUsageReportSubmission(input, noPdfReading))).toEqual([
       "documentsAck",
     ]);
     input.documentsAck = true;
     expect(validateUsageReportSubmission(input, noPdfReading)).toEqual({});
     input.media = input.media.map((item) => ({ ...item, measurementId: null }));
-    expect(
-      validateUsageReportSubmission(input, noPdfReading)["measurements.0.values"],
-    ).toBeDefined();
-    input.measurements = [];
-    expect(validateUsageReportSubmission(input, noPdfReading).measurements).toBe(
-      "※ 調査項目を1つ以上追加してください",
+    expect(validateUsageReportSubmission(input, noPdfReading)).toHaveProperty(
+      "measurements.0.values",
     );
   });
-  it("どの区からも指されていない品種は、名前を示して提出を断る", () => {
-    const input = withSingleVariety(createBlankUsageReport(materialId), "新藍", false);
-    const aiko = { id: crypto.randomUUID(), name: "アイコ" };
-    input.varieties = [...input.varieties, aiko];
-    expect(validateUsageReportSubmission(input, noPdfReading)["varieties.1.plots"]).toBe(
-      "※ 品種「アイコ」の区がありません。区を足すか、品種を外してください",
-    );
-    expect(validateUsageReportSubmission(input, noPdfReading)["varieties.0.plots"]).toBeUndefined();
-    input.plots = [
-      ...input.plots,
-      { ...input.plots[0]!, id: crypto.randomUUID(), varietyId: aiko.id },
-    ];
-    expect(validateUsageReportSubmission(input, noPdfReading)["varieties.1.plots"]).toBeUndefined();
-  });
-  it("都道府県と品種は提出時に必須で、品種は「不明」のチェックで不要になる", () => {
-    const blank = createBlankUsageReport(materialId);
-    const errors = validateUsageReportSubmission(blank, noPdfReading);
-    expect(errors.prefectureCode).toBe("※ 都道府県を選んでください");
-    expect(errors["varieties.0.name"]).toBe("※ 品種を入力してください");
-    expect(reportErrorStep("prefectureCode")).toBe(3);
-    expect(reportErrorStep("varieties.0.name")).toBe(1);
-    expect(
-      validateUsageReportSubmission({ ...blank, prefectureCode: 8 }, noPdfReading).prefectureCode,
-    ).toBe(undefined);
-    expect(
-      validateUsageReportSubmission(withSingleVariety(blank, "  ", false), noPdfReading)[
-        "varieties.0.name"
-      ],
-    ).toBeDefined();
-    const named = withSingleVariety(blank, "アイコ", false);
-    expect(named.varieties).toEqual([{ id: blank.varieties[0]?.id, name: "アイコ" }]);
-    expect(validateUsageReportSubmission(named, noPdfReading)["varieties.0.name"]).toBeUndefined();
-    const unknown = withSingleVariety(named, "", true);
-    expect(unknown.varieties).toEqual([]);
-    expect(unknown.plots.map((plot) => plot.varietyId)).toEqual([null, null]);
-    const unknownErrors = validateUsageReportSubmission(unknown, noPdfReading);
-    expect(Object.keys(unknownErrors).filter((key) => /variet/.test(key))).toEqual([]);
-    expect(validateUsageReportSubmission({ ...named, varieties: [] }, noPdfReading).varieties).toBe(
-      "※ 品種を入力するか、「品種が不明、または品種がない」にチェックしてください",
-    );
-    expect(
-      validateUsageReportSubmission({ ...unknown, varieties: named.varieties }, noPdfReading)
-        .varieties,
-    ).toBe("※ 「品種が不明、または品種がない」のときは品種を入れないでください");
-  });
-  it("1つの品種の入力欄で名前を変えても、他の品種と区の品種は残る", () => {
-    const blank = createBlankUsageReport(materialId);
-    const aiko = { id: crypto.randomUUID(), name: "アイコ" };
-    const momotaro = { id: crypto.randomUUID(), name: "桃太郎" };
-    const [first, second] = blank.plots;
-    if (first === undefined || second === undefined) throw new Error("区が2つありません。");
-    const input: UsageReportInput = {
-      ...blank,
-      varieties: [aiko, momotaro],
-      plots: [
-        { ...first, varietyId: aiko.id },
-        { ...second, varietyId: momotaro.id },
-        { ...second, id: crypto.randomUUID(), varietyId: null },
-      ],
-    };
-    const renamed = withSingleVariety(input, "アイコ改", false);
-    expect(renamed.varieties).toEqual([{ id: aiko.id, name: "アイコ改" }, momotaro]);
-    expect(renamed.plots.map((plot) => plot.varietyId)).toEqual([aiko.id, momotaro.id, aiko.id]);
-    expect(
-      Object.keys(validateUsageReportSubmission(renamed, noPdfReading)).filter((key) =>
-        /variet/.test(key),
-      ),
-    ).toEqual([]);
-  });
-  it("品種が不明の状態から外すと、品種を1件作って全区に割り当てる", () => {
-    const unknown = withSingleVariety(createBlankUsageReport(materialId), "", true);
-    const known = withSingleVariety(unknown, "", false);
-    const [variety] = known.varieties;
-    expect(known.varietyUnknown).toBe(false);
-    expect(known.varieties).toEqual([{ id: expect.any(String), name: "" }]);
-    expect(known.plots.map((plot) => plot.varietyId)).toEqual([variety?.id, variety?.id]);
-  });
-  it("新しいレポートは品種1つと、無処理・投稿した資材の2区から始まる", () => {
-    const input = createBlankUsageReport(materialId);
-    const [variety] = input.varieties;
-    expect(input.varieties).toEqual([{ id: expect.any(String), name: "" }]);
-    expect(input.comparedMaterials).toEqual([]);
-    expect(input.commonPlotDescription).toBe("");
-    expect(input.plots.map((plot) => [plot.varietyId, plot.treatment])).toEqual([
-      [variety?.id, { kind: "untreated" }],
-      [variety?.id, { kind: "posted" }],
-    ]);
-    expect(v.safeParse(UsageReportInputSchema, input).success).toBe(true);
-  });
-  it("提出できるレポートは、区ごとに品種と使った資材を持つ", () => {
+
+  it.each([false, true])("PDF由来の値の確認要否：%s", (pdfValuesCheckRequired) => {
     const input = submittableReport();
-    expect(validateUsageReportSubmission(input, noPdfReading)).toEqual({});
-    const [untreated, posted] = input.plots;
-    if (!untreated || !posted) throw new Error("区の初期データがありません。");
-    expect(
-      validateUsageReportSubmission(
-        {
-          ...input,
-          plots: [{ ...untreated, treatment: null }, posted],
-        },
-        noPdfReading,
-      ),
-    ).toEqual({ "plots.0.treatment": "※ 区で使った資材を選んでください" });
-    expect(
-      validateUsageReportSubmission(
-        {
-          ...input,
-          plots: [untreated, { ...posted, varietyId: null }],
-        },
-        noPdfReading,
-      ),
-    ).toEqual({ "plots.1.variety": "※ 区の品種を選んでください" });
-    expect(
-      validateUsageReportSubmission(
-        {
-          ...input,
-          plots: [untreated, { ...posted, treatment: { kind: "untreated" } }],
-        },
-        noPdfReading,
-      ),
-    ).toEqual({ "plots.posted": "※ 投稿する資材を使った区を1つ以上入れてください" });
-    const compared = { id: crypto.randomUUID(), name: " " };
-    expect(
-      validateUsageReportSubmission(
-        {
-          ...input,
-          comparedMaterials: [compared],
-          plots: [
-            { ...untreated, treatment: { kind: "compared", comparedMaterialId: compared.id } },
-            posted,
-          ],
-        },
-        noPdfReading,
-      ),
-    ).toEqual({ "comparedMaterials.0.name": "※ 比較した資材の名前を入力してください" });
-    expect(reportErrorStep("comparedMaterials.0.name")).toBe(4);
-    expect(reportErrorStep("plots.posted")).toBe(4);
+    const options = { pdfValuesCheckRequired };
+    expect(Boolean(validateUsageReportSubmission(input, options).pdfValuesChecked)).toBe(
+      pdfValuesCheckRequired,
+    );
+    expect(validateUsageReportSubmission({ ...input, pdfValuesChecked: true }, options)).toEqual(
+      {},
+    );
   });
-  it("区の説明は、区ごとか全区に共通の説明のどちらかがあればよい", () => {
-    const input = submittableReport();
-    const blankDescriptions = input.plots.map((plot) => ({ ...plot, description: " " }));
-    expect(
-      validateUsageReportSubmission({ ...input, plots: blankDescriptions }, noPdfReading),
-    ).toEqual({
-      "plots.0.description": "※ ここを入力してください",
-      "plots.1.description": "※ ここを入力してください",
-    });
-    expect(
-      validateUsageReportSubmission(
-        {
-          ...input,
-          plots: blankDescriptions,
-          commonPlotDescription: "各区10株、3反復",
-        },
-        noPdfReading,
-      ),
-    ).toEqual({});
-  });
+
   it("区・品種・比較した資材は40まで", () => {
     const input = submittableReport();
     const [posted] = input.plots.slice(1);
@@ -375,14 +320,5 @@ describe("実証詳細レポート", () => {
     expect(
       validateUsageReportSubmission(input, noPdfReading)["measurements.0.plots"],
     ).toBeDefined();
-  });
-  it("PDF読み取りの値が入りうるレポートだけ、読み取った値の確認を提出の必須にする", () => {
-    const input = submittableReport();
-    const required = { pdfValuesCheckRequired: true };
-    expect(validateUsageReportSubmission(input, required).pdfValuesChecked).toBeDefined();
-    expect(validateUsageReportSubmission({ ...input, pdfValuesChecked: true }, required)).toEqual(
-      {},
-    );
-    expect(validateUsageReportSubmission(input, noPdfReading)).toEqual({});
   });
 });

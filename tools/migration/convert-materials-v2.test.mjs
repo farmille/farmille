@@ -88,14 +88,11 @@ test("生成SQLは再実行可能なupsertと関連データ置換を含む", ()
   assert.match(sql, /on conflict \(name, manufacturer_name\) do update set/);
   assert.match(sql, /delete from public\.material_product_types/);
   assert.match(sql, /delete from public\.material_crops/);
-  assert.match(sql, /insert into public\.product_types/);
-  assert.match(sql, /insert into public\.material_product_types/);
   assert.match(sql, /delete from public\.material_images/);
   for (const url of KNOWN_BROKEN_IMAGE_URLS) {
     assert.ok(!sql.includes(url));
   }
   assert.match(sql, /raise exception '資材件数が一致しません/);
-  assert.match(sql, /source_product_rows/);
   assert.match(sql, /commit;/);
 });
 

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { CatalogSearch } from "@/server/queries/catalog-search";
+import { describe, expect, it } from "vitest";
 import { cropAncestors, cropEvidence, filterCatalog } from "./catalog-search";
 import { matchSearchCatalog, type SearchCatalog } from "./material-search";
 
@@ -104,6 +104,44 @@ describe("作物階層を使った資材検索", () => {
       "循環",
     );
   });
+});
+
+it("資材ジャンルは同じ分類内をOR、作目との間をANDで絞る", () => {
+  const withGenre = {
+    ...catalog,
+    materials: [
+      {
+        ...base,
+        material_ingredient_categories: [
+          { ingredient_category_id: "seaweed", ingredient_categories: { short_name: "海藻" } },
+        ],
+      },
+      catalog.materials[1],
+    ],
+  };
+  expect(
+    filterCatalog(
+      withGenre,
+      [
+        { category: "genre", id: "missing" },
+        { category: "genre", id: "seaweed" },
+        { category: "crop", id: "onion" },
+      ],
+      [],
+      [],
+    ).map((row) => row.id),
+  ).toEqual(["direct"]);
+  expect(
+    filterCatalog(
+      withGenre,
+      [
+        { category: "genre", id: "seaweed" },
+        { category: "crop", id: "missing" },
+      ],
+      [],
+      [],
+    ),
+  ).toEqual([]);
 });
 
 describe("悩みの同義語と効果分類を使った資材検索", () => {

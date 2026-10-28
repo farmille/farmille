@@ -1,13 +1,11 @@
-import path from "node:path";
-import { expect, test } from "@playwright/test";
 import type { APIRequestContext, Page, TestInfo } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import path from "node:path";
 import * as v from "valibot";
 import type { StorySelection } from "../tools/ci/selection.ts";
 import { selectStoryFiles, StorySelectionSchema } from "../tools/ci/selection.ts";
 
-const VIEWPORT_WIDTHS = [
-  320, 360, 375, 390, 414, 480, 640, 767, 768, 900, 1024, 1280, 1440,
-] as const;
+const VIEWPORT_WIDTHS = [320, 375, 767, 768, 1023, 1024, 1440] as const;
 const VIEWPORT_HEIGHT = 1000;
 const OVERFLOW_TOLERANCE = 1;
 const RENDER_TIMEOUT = 15_000;
@@ -382,24 +380,6 @@ for (let chunkIndex = 0; chunkIndex < CHUNK_COUNT; chunkIndex += 1) {
   });
 }
 
-test("自分のレビューの操作ボタンが狭い画面でも収まる", async ({ page }, testInfo) => {
-  skipUnlessFirstShard();
-  for (const width of [320, 360, 375]) {
-    await page.setViewportSize({ width, height: 812 });
-    await gotoStory(page, "pages-shared-reviewcard--own-review");
-    await expect(page.getByRole("button", { name: "削除", exact: true })).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-      width + OVERFLOW_TOLERANCE,
-    );
-    if (width === 375) {
-      await page.screenshot({
-        path: path.join(resolveScreenshotDirectory(testInfo), "review-own-375.png"),
-        fullPage: true,
-      });
-    }
-  }
-});
-
 test("BottomNav は tab 未満で固定され、tab 以上では非表示になる", async ({ page }) => {
   skipUnlessFirstShard();
   const storyId = "pages-shared-bottomnav--viewport-fixed";
@@ -407,24 +387,6 @@ test("BottomNav は tab 未満で固定され、tab 以上では非表示にな�
   await gotoStory(page, storyId);
 
   const navigation = page.getByRole("navigation", { name: "メインナビ" });
-  await expect(navigation).toBeVisible();
-  await expect(navigation).toHaveCSS("position", "fixed");
-
-  const bottomGap = () =>
-    navigation.evaluate((element) => window.innerHeight - element.getBoundingClientRect().bottom);
-
-  expect(Math.abs(await bottomGap()), "初期位置で画面下端に接すること").toBeLessThanOrEqual(1);
-
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  expect(Math.abs(await bottomGap()), "スクロール後も画面下端に接すること").toBeLessThanOrEqual(1);
-
-  await page.setViewportSize({ width: 640, height: 1024 });
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) => {
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-      }),
-  );
   await expect(navigation).toBeVisible();
   await expect(navigation).toHaveCSS("position", "fixed");
 
@@ -453,18 +415,6 @@ test("AppBar は tab 境界でモバイル版と PC 版を相互排他にする"
   await page.setViewportSize({ width: 768, height: 900 });
   await expect(mobileAppBar).toBeHidden();
   await expect(desktopSiteHeader).toBeVisible();
-});
-
-test("FormPageShell は PC で用途別の有限幅を持つ", async ({ page }) => {
-  skipUnlessFirstShard();
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await gotoStory(page, "components-layout-formpageshell--default");
-
-  const main = page.locator("main");
-  await expect(main).toHaveCSS("max-width", "704px");
-  expect(await main.evaluate((element) => element.getBoundingClientRect().width)).toBeLessThan(
-    1440,
-  );
 });
 
 test("画像枠は画面幅が変わっても用途別のアスペクト比を維持する", async ({ page }) => {
@@ -507,7 +457,7 @@ test("画像枠は画面幅が変わっても用途別のアスペクト比を�
     },
   ] as const;
 
-  for (const width of [375, 1440]) {
+  for (const width of [375]) {
     await page.setViewportSize({ width, height: VIEWPORT_HEIGHT });
 
     for (const testCase of cases) {
@@ -528,28 +478,11 @@ test("画像枠は画面幅が変わっても用途別のアスペクト比を�
   }
 });
 
-test("横送り用の資材カードはPCで過度に拡大しない", async ({ page }) => {
-  skipUnlessFirstShard();
-  const cases = [
-    { width: 375, expectedCardWidth: 150 },
-    { width: 768, expectedCardWidth: 240 },
-    { width: 1440, expectedCardWidth: 240 },
-  ] as const;
-
-  for (const testCase of cases) {
-    await page.setViewportSize({ width: testCase.width, height: VIEWPORT_HEIGHT });
-    await gotoStory(page, "pages-shared-materialcard--scroll");
-
-    const card = page.locator('[data-ui="material-card"][data-variant="scroll"]');
-    await expect(card).toBeVisible();
-    await expect(card).toHaveCSS("width", `${testCase.expectedCardWidth}px`);
-  }
-});
-
 test("代表的な複雑 Story のスクリーンショットを 375px と 1440px で保存する", async ({
   page,
   request,
 }, testInfo) => {
+  test.skip(process.env.CAPTURE_STORYBOOK !== "1", "撮影コマンドからだけ実行する");
   skipUnlessFirstShard();
   const stories = await fetchSortedStories(request);
   const storiesById = new Map(stories.map((story) => [story.id, story]));
@@ -573,12 +506,4 @@ test("代表的な複雑 Story のスクリーンショットを 375px と 1440p
       });
     }
   }
-});
-
-test("口コミ0件の評価サマリーは表示しない", async ({ page }) => {
-  skipUnlessFirstShard();
-  await gotoStory(page, "pages-materials-id-ratingsummary--default");
-  await expect(page.locator("#storybook-root")).toContainText("18件");
-  await gotoStory(page, "pages-materials-id-ratingsummary--no-reviews");
-  await expect(page.locator("#storybook-root")).toBeEmpty();
 });

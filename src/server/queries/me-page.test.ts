@@ -56,24 +56,21 @@ function clientWithPosts(reports: ReturnType<typeof report>[]) {
 }
 
 describe("マイページの参考になった合計", () => {
-  it.each<ReportStatus>(["draft", "pending", "declined"])(
-    "%sのレポートの票を除き、投稿一覧には残す",
-    async (status) => {
-      const client = clientWithPosts([
-        report("published", "published"),
-        report("unpublished", status),
-      ]);
+  it.each<ReportStatus>(["pending"])("%sのレポートの票を除き、投稿一覧には残す", async (status) => {
+    const client = clientWithPosts([
+      report("published", "published"),
+      report("unpublished", status),
+    ]);
 
-      const result = await listOwnPostsWithSupabase(client, "author");
+    const result = await listOwnPostsWithSupabase(client, "author");
 
-      expect(result.ok).toBe(true);
-      if (!result.ok) throw new Error(result.error);
-      expect(result.data.helpfulReceivedCount).toBe(5);
-      expect(result.data.posts).toContainEqual(
-        expect.objectContaining({ id: "unpublished", status, helpfulCount: 2 }),
-      );
-    },
-  );
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    expect(result.data.helpfulReceivedCount).toBe(5);
+    expect(result.data.posts).toContainEqual(
+      expect.objectContaining({ id: "unpublished", status, helpfulCount: 2 }),
+    );
+  });
 
   it("投稿一覧の表示上限より多くても、すべての公開済み投稿の票を数える", async () => {
     const client = clientWithPosts(

@@ -7,7 +7,7 @@ import { Form } from "./Form";
 import { RadioGroup } from "./RadioGroup";
 
 const standpoints = [
-  { value: "farmer", label: "生産者" },
+  { value: "farmer", label: "生産者", description: "農作物を栽培する方" },
   { value: "ja", label: "JAグループ職員（営農指導員など）" },
 ];
 
@@ -37,6 +37,9 @@ describe("RadioGroup", () => {
 
     const group = screen.getByRole("radiogroup", { name: "あなたの立場" });
     expect(group).toHaveAttribute("aria-required", "true");
+    expect(screen.getByRole("radio", { name: "生産者" })).toHaveAccessibleDescription(
+      "農作物を栽培する方",
+    );
 
     await user.click(screen.getByRole("button", { name: "登録する" }));
     expect(submitted).toHaveLength(0);
@@ -46,27 +49,6 @@ describe("RadioGroup", () => {
     expect(screen.getByRole("radio", { name: "生産者" })).toBeChecked();
     await user.click(screen.getByRole("button", { name: "登録する" }));
     expect(submitted[0]?.get("standpoint")).toBe("farmer");
-  });
-
-  it("説明は名前に入れず、選択肢の説明として読ませる", () => {
-    render(
-      <RadioGroup
-        hideLabel
-        label="申請内容"
-        name="target"
-        options={[
-          {
-            value: "new",
-            label: "資材の新規掲載",
-            description: "Farmille にまだ載っていない資材を新しく掲載します。",
-          },
-        ]}
-      />,
-    );
-
-    expect(screen.getByRole("radio", { name: "資材の新規掲載" })).toHaveAccessibleDescription(
-      "Farmille にまだ載っていない資材を新しく掲載します。",
-    );
   });
 
   it("name のある組は見出しで組に名前を付け、組のエラーを選択肢の説明に結ぶ", () => {

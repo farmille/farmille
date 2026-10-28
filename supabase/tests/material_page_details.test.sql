@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(28);
+select plan(27);
 insert into auth.users(id) values('ba8b2af4-a8b5-4b31-9d13-578f15bba750');
 insert into public.materials(id,name,manufacturer_name) values('ba8b2af4-a8b5-4b31-9d13-578f15bba751','資料・登録テスト資材','元の会社');
 insert into storage.objects(bucket_id,name) values
@@ -18,8 +18,7 @@ select is((select content_contract::integer from public.material_page_versions w
 select throws_ok($$select pg_temp.save(pg_temp.content()-'registrations'-'relatedCompanies',false)$$,'40001',null,'old client cannot erase new contract history');
 select throws_ok($$select pg_temp.save(pg_temp.content()-'registrations',false)$$,'23514',null,'partial new contract rejected');
 select throws_ok($$select pg_temp.save(jsonb_set(jsonb_set(pg_temp.content(),'{links,0,group}','null'),'{links,0,trial}','null'),true)$$,'23514',null,'unclassified submission rejected');
-select lives_ok($$select public.withdraw_material_page_version(pg_temp.save(jsonb_set(pg_temp.content(),'{links,0,trial,summary}','""'),true))$$,'trial summary is optional');
-select lives_ok($$select public.withdraw_material_page_version(pg_temp.save(jsonb_set(pg_temp.content(),'{links,0,trial,institution}','""'),true))$$,'trial institution is optional');
+select lives_ok($$select public.withdraw_material_page_version(pg_temp.save(jsonb_set(jsonb_set(pg_temp.content(),'{links,0,trial,summary}','""'),'{links,0,trial,institution}','""'),true))$$,'trial summary and institution are optional');
 select throws_ok($$select pg_temp.save(jsonb_set(pg_temp.content(),'{links,0,trial,year}','1.5'),false)$$,'23514',null,'fractional year rejected');
 select throws_ok($$select pg_temp.save(jsonb_set(pg_temp.content(),'{links,0,trial,pageCount}','0'),false)$$,'23514',null,'zero pages rejected');
 select throws_ok($$select pg_temp.save(jsonb_set(pg_temp.content(),'{links,0,group}','null'),false)$$,'23514',null,'null category cannot carry trial data');

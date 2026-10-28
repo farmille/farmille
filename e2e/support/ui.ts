@@ -147,9 +147,13 @@ export async function fillUsageReportForSubmission(
   page: Page,
   variety: string | null = null,
 ): Promise<void> {
-  if (variety === null)
-    await page.getByRole("checkbox", { name: "不明・なし", exact: true }).check();
-  else await page.getByLabel("品種", { exact: true }).fill(variety);
+  const varietyInput =
+    variety === null
+      ? page.getByRole("checkbox", { name: "不明・なし", exact: true })
+      : page.getByLabel("品種", { exact: true });
+  await waitForReactHydration(varietyInput);
+  if (variety === null) await varietyInput.check();
+  else await varietyInput.fill(variety);
   await page.getByRole("button", { name: /^使用目的：/ }).click();
   await page.getByRole("button", { name: "樹勢改善", exact: true }).click();
   await page.getByRole("button", { name: "完了", exact: true }).click();

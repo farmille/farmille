@@ -110,14 +110,10 @@ describe("applyPdfReading", () => {
     expect(fields.map(({ fieldKey }) => fieldKey)).not.toContain("prefectureCode");
   });
 
-  it("都道府県は、登録住所から入った値や選んだ値があっても PDF の試験地で置き換える", () => {
-    const { input, fields } = applied(base({ prefectureCode: 13 }));
-    expect(input.prefectureCode).toBe(11);
-    expect(fields.map(({ fieldKey }) => fieldKey)).toContain("prefectureCode");
-  });
-
   it("都道府県が変わるときだけ、前の市区町村を外す", () => {
-    const moved = applied(base({ prefectureCode: 13, city: "八王子市", showCity: true })).input;
+    const appliedMove = applied(base({ prefectureCode: 13, city: "八王子市", showCity: true }));
+    const moved = appliedMove.input;
+    expect(appliedMove.fields.map(({ fieldKey }) => fieldKey)).toContain("prefectureCode");
     expect(moved).toMatchObject({ prefectureCode: 11, city: "", showCity: false });
     const same = applied(base({ prefectureCode: 11, city: "熊谷市", showCity: true })).input;
     expect(same).toMatchObject({ prefectureCode: 11, city: "熊谷市", showCity: true });
@@ -312,11 +308,9 @@ describe("applyPdfReading", () => {
   });
 
   it("写すたびに PDF と照らし合わせた確認を外す", () => {
-    expect(applied(base({ pdfValuesChecked: true })).input.pdfValuesChecked).toBe(false);
-  });
-
-  it("区を作り直すので、施用方法などを記入した確認を外す", () => {
-    expect(applied(base({ methodDetailsAck: true })).input.methodDetailsAck).toBe(false);
+    const { input } = applied(base({ pdfValuesChecked: true, methodDetailsAck: true }));
+    expect(input.pdfValuesChecked).toBe(false);
+    expect(input.methodDetailsAck).toBe(false);
   });
 
   it("記録した値は今の値と一致し、値を直した欄の印だけが外れる", () => {

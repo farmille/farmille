@@ -30,6 +30,7 @@ describe("CheckboxGroup", () => {
       </Form>,
     );
 
+    expect(screen.getByRole("group", { name: "使用時期" })).toBeInTheDocument();
     await user.click(screen.getByRole("checkbox", { name: "播種・定植時" }));
     await user.click(screen.getByRole("checkbox", { name: "栽培開始前" }));
     await user.click(screen.getByRole("button", { name: "保存" }));

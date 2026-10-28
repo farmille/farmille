@@ -15,12 +15,8 @@ test("本番切替の既定はロールバック検証で、旧データを削�
   assert.ok(sql.includes("alter schema public rename to legacy_v1_20260908"));
   assert.ok(sql.includes("資材マスタの移行件数が一致しません"));
   assert.ok(sql.includes("施用レシピの移行件数が一致しません"));
+  const commitOutput = join(directory, "commit.sql");
+  execFileSync(process.execPath, ["tools/migration/prepare-production-cutover.mjs", "--output", commitOutput, "--commit"]);
+  assert.ok(readFileSync(commitOutput, "utf8").trimEnd().endsWith("commit;"));
   assert.doesNotMatch(sql, /(?:delete\s+from|truncate|drop\s+table)\s+(?:auth\.users|legacy_v1_20260908\.)/i);
-});
-
-test("適用版には明示的なcommitオプションが必要", () => {
-  const directory = mkdtempSync(join(tmpdir(), "farmille-cutover-test-"));
-  const output = join(directory, "commit.sql");
-  execFileSync(process.execPath, ["tools/migration/prepare-production-cutover.mjs", "--output", output, "--commit"]);
-  assert.ok(readFileSync(output, "utf8").trimEnd().endsWith("commit;"));
 });

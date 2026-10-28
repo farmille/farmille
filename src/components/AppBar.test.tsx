@@ -18,6 +18,7 @@ describe("AppBar のサイトメニュー", () => {
       />,
     );
     expect(screen.getByRole("link", { name: "投稿する" })).toBeTruthy();
+    expect(document.querySelector("[data-can-post]")).toBeNull();
   });
 
   it("投稿できない企業会員には「投稿する」を出さない", () => {
@@ -32,16 +33,5 @@ describe("AppBar のサイトメニュー", () => {
     expect(screen.getByRole("link", { name: "記事" })).toBeTruthy();
     // ルートレイアウトのフッターは、この目印で投稿のリンクを隠す
     expect(document.querySelector('[data-can-post="false"]')).not.toBeNull();
-  });
-
-  it("投稿できる閲覧者には、フッターの投稿のリンクを隠す目印を付けない", () => {
-    render(
-      <AppBar
-        account={{ kind: "member", avatar: null, canPost: true }}
-        chrome="public"
-        variant="home"
-      />,
-    );
-    expect(document.querySelector("[data-can-post]")).toBeNull();
   });
 });

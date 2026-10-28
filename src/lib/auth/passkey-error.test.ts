@@ -1,6 +1,6 @@
+import { errorMessageJa } from "@/server/errors";
 import { describe, expect, it } from "vitest";
 import { passkeyErrorMessage } from "./passkey-error";
-import { errorMessageJa } from "@/server/errors";
 
 describe("パスキーのエラー表示", () => {
   it("無効なAuth設定を案内する", () => {
@@ -12,8 +12,5 @@ describe("パスキーのエラー表示", () => {
     expect(passkeyErrorMessage({ code: "webauthn_verification_failed" })).toBe(
       errorMessageJa.passkey_failed,
     );
-  });
-  it("コード未設定でも内部の情報を表示しない", () => {
-    expect(passkeyErrorMessage({ code: undefined })).toBe(errorMessageJa.passkey_failed);
   });
 });

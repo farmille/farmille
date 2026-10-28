@@ -61,18 +61,4 @@ describe("ToggleGroup", () => {
     expect(screen.getByRole("button", { name: "収量増加" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "樹勢改善" })).toBeEnabled();
   });
-
-  it("multiple を省くと押したものだけが残る", async () => {
-    const user = userEvent.setup();
-    render(<Harness />);
-
-    await user.click(screen.getByRole("button", { name: "樹勢改善" }));
-    await user.click(screen.getByRole("button", { name: "発根促進" }));
-
-    expect(screen.getByRole("status")).toHaveTextContent(/^rooting$/);
-    expect(screen.getByRole("button", { name: "樹勢改善" })).toHaveAttribute(
-      "aria-pressed",
-      "false",
-    );
-  });
 });
