@@ -105,7 +105,7 @@ export default async function MePage({
 
   const data = result.data;
   if (!details.ok) throw new Error(errorMessageJa[details.error]);
-  const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
+  const { reportCount } = data;
   const tab = initialPostsTab(requestedTab, { reports: reportCount, reviews: data.reviewCount });
 
   return (

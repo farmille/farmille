@@ -105,6 +105,7 @@ export type HelpfulItem =
 
 export type MyPageData = {
   profile: OwnProfile;
+  reportCount: number;
   reviewCount: number;
   helpfulReceivedCount: number;
   posts: readonly OwnPostItem[];
@@ -163,7 +164,14 @@ async function getHelpfulCounts(
 export async function listOwnPostsWithSupabase(
   supabase: SupabaseClient<Database>,
   userId: string,
-): Promise<Result<{ posts: OwnPostItem[]; reviewCount: number; helpfulReceivedCount: number }>> {
+): Promise<
+  Result<{
+    posts: OwnPostItem[];
+    reportCount: number;
+    reviewCount: number;
+    helpfulReceivedCount: number;
+  }>
+> {
   const [reviewsResult, reportsResult] = await Promise.all([
     supabase
       .from("reviews")
@@ -304,6 +312,7 @@ export async function listOwnPostsWithSupabase(
 
   return succeed({
     posts: posts.slice(0, SHELF_LIMIT),
+    reportCount: reportRows.length,
     reviewCount: reviewRows.length,
     helpfulReceivedCount,
   });
@@ -473,6 +482,7 @@ export async function getMyPageData(userId: string): Promise<Result<MyPageData>>
 
   return succeed({
     profile: profileResult.data,
+    reportCount: postsResult.data.reportCount,
     reviewCount: postsResult.data.reviewCount,
     helpfulReceivedCount: postsResult.data.helpfulReceivedCount,
     posts: postsResult.data.posts,
