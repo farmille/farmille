@@ -35,6 +35,12 @@ jobs:
           failed=0
           while read -r number sha; do
             [ -n "$number" ] || continue
+            # gh pr list の files は先頭100件だけなので、変更ファイルは REST API で全ページ取る。
+            migrations=$(gh api --paginate "repos/$GH_REPO/pulls/$number/files" --jq '.[]
+              | select((.filename | startswith("supabase/migrations/"))
+                or ((.previous_filename // "") | startswith("supabase/migrations/")))
+              | .filename')
+            [ -n "$migrations" ] || continue
             run=$(gh run list --workflow migrations.yml --event pull_request --commit "$sha" --limit 1 \
               --json databaseId --jq '.[0].databaseId // empty')
             job=""
@@ -50,6 +56,6 @@ jobs:
               echo "::error::PR #$number の Migration order を再実行できませんでした（run $run）。"
               failed=1
             fi
-          done < <(gh pr list --base main --state open --limit 200 --json number,headRefOid,files \
-            --jq '.[] | select(any(.files[]; .path | startswith("supabase/migrations/"))) | "\(.number) \(.headRefOid)"')
+          done < <(gh pr list --base main --state open --limit 1000 --json number,headRefOid \
+            --jq '.[] | "\(.number) \(.headRefOid)"')
           exit "$failed"
