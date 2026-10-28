@@ -67,6 +67,25 @@ describe("BackLink", () => {
     expect(go).toHaveBeenCalledWith(-3);
   });
 
+  it("ログインを挟んで開いた画面からは、ログイン画面を飛ばしてその前の画面へ戻る", () => {
+    stubHistory(["/materials/1", "/login", "/materials/1/review/new"]);
+    const link = renderBackLink();
+
+    fireEvent.click(link);
+
+    expect(go).toHaveBeenCalledWith(-2);
+  });
+
+  it("前に認証の画面しか無いときは、履歴を使わず戻り先のリンクをたどる", () => {
+    stubHistory(["/signup/complete", "/login", "/me"]);
+    const link = renderBackLink();
+
+    const followed = fireEvent.click(link);
+
+    expect(go).not.toHaveBeenCalled();
+    expect(followed).toBe(true);
+  });
+
   it("入力画面からは、親の画面へ1つ戻る", () => {
     stubHistory(["/search", "/materials/1", "/materials/1/review/new"]);
     const link = renderBackLink();

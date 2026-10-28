@@ -4,7 +4,26 @@ import Link from "next/link";
 import type { MouseEvent, ReactNode } from "react";
 import * as v from "valibot";
 
+import { GENERAL_LOGIN_PATH, SELLER_LOGIN_PATH } from "@/lib/auth/protected-paths";
+
 const HistoryEntrySchema = v.object({ url: v.string() });
+
+/**
+ * ログインや会員登録など、認証のために通る画面。ログインの後に戻ると別の画面へ移されるので、戻り先にしない。
+ */
+const AUTH_PATHS = [
+  GENERAL_LOGIN_PATH,
+  SELLER_LOGIN_PATH,
+  "/signup",
+  "/auth",
+  "/logout",
+  "/password-reset",
+  "/sellers/password-reset",
+];
+
+function isAuthPath(path: string): boolean {
+  return AUTH_PATHS.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
 
 /** Navigation API の履歴は、同じオリジンで続いている画面だけを並べる。 */
 const NavigationSchema = v.object({
@@ -14,7 +33,7 @@ const NavigationSchema = v.object({
 
 /**
  * 履歴を今の画面から前へたどり、今の画面のパスと同じか、その配下（入力画面など）を飛ばした最初の画面まで、
- * いくつ戻るか。該当する画面が無い（このサイトの画面から来ていない）ときは null。
+ * いくつ戻るか。認証のために通った画面も飛ばす。該当する画面が無い（このサイトの画面から来ていない）ときは null。
  */
 function stepsBackInThisSite(): number | null {
   const navigation = "navigation" in window ? window.navigation : undefined;
@@ -27,7 +46,7 @@ function stepsBackInThisSite(): number | null {
   const path = new URL(current.url).pathname;
   const target = entries.slice(0, currentIndex).findLastIndex(({ url }) => {
     const entryPath = new URL(url).pathname;
-    return entryPath !== path && !entryPath.startsWith(`${path}/`);
+    return entryPath !== path && !entryPath.startsWith(`${path}/`) && !isAuthPath(entryPath);
   });
   return target === -1 ? null : currentIndex - target;
 }
