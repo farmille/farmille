@@ -1,0 +1,55 @@
+name: Migration order recheck
+
+# main に migration が入ると、先に検査を通した PR の migration が main の最新より古くなることがある。
+# 開いている PR の Migration order を再実行し、main の最新と比べ直す。
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "supabase/migrations/**"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: farmille-migration-recheck
+  cancel-in-progress: true
+
+jobs:
+  recheck:
+    name: Recheck open pull requests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+
+    steps:
+      - name: Rerun Migration order
+        run: |
+          set -euo pipefail
+          failed=0
+          while read -r number sha; do
+            [ -n "$number" ] || continue
+            run=$(gh run list --workflow migrations.yml --event pull_request --commit "$sha" --limit 1 \
+              --json databaseId --jq '.[0].databaseId // empty')
+            job=""
+            if [ -n "$run" ]; then
+              job=$(gh run view "$run" --json jobs --jq '.jobs[] | select(.name == "Migration order") | .databaseId')
+            fi
+            if [ -z "$job" ]; then
+              echo "::error::PR #$number（$sha）の Migration order が見つかりません。PR に push して検査を流し直してください。"
+              failed=1
+            elif gh run rerun "$run" --job "$job"; then
+              echo "PR #$number の Migration order を再実行しました（run $run）。"
+            else
+              echo "::error::PR #$number の Migration order を再実行できませんでした（run $run）。"
+              failed=1
+            fi
+          done < <(gh pr list --base main --state open --limit 200 --json number,headRefOid,files \
+            --jq '.[] | select(any(.files[]; .path | startswith("supabase/migrations/"))) | "\(.number) \(.headRefOid)"')
+          exit "$failed"

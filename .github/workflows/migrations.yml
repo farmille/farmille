@@ -14,6 +14,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  order:
+    name: Migration order
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      # main に migration が入ると migration-recheck.yml がこのジョブを再実行する。再実行でも main の最新と比べる。
+      - name: Fetch latest main
+        run: git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+
+      - name: Check migration order
+        run: bash tools/ci/check-migration-order.sh origin/main
+
   migration:
     name: Reset local Supabase database
     runs-on: ubuntu-latest
