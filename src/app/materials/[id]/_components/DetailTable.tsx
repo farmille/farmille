@@ -14,9 +14,19 @@ import { css, cx } from "../../../../../styled-system/css";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { MaterialBox } from "./MaterialBox";
-import { Chip } from "./CardParts";
 
-const chipsStyle = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "0.5" });
+// 名前の途中ではなく「、」の位置で折り返す
+const joinedNamesStyle = css({ wordBreak: "keep-all" });
+const nameListStyle = css({ listStyle: "none", m: "0", p: "0" });
+// 対象作物は数が多いので2列に並べて拾いやすくする
+const cropListStyle = css({
+  listStyle: "none",
+  m: "0",
+  p: "0",
+  display: "grid",
+  gridTemplateColumns: "[repeat(2, minmax(0, 1fr))]",
+  columnGap: "3",
+});
 const usageMoreStyle = css({ mt: "1.5" });
 const usageBlockStyle = css({
   mt: "1.5",
@@ -57,17 +67,21 @@ function methodLabel(method: string): string {
   return APPLICATION_METHODS.find((item) => item.value === method)?.label ?? method;
 }
 
-function tags(names: readonly string[], tone?: "grey"): ReactNode {
+function joinedNames(names: readonly string[]): ReactNode {
+  const unique = [...new Set(names)];
+  if (unique.length === 0) return "−";
+  return <span className={joinedNamesStyle}>{unique.join("、")}</span>;
+}
+
+function nameList(names: readonly string[], className: string): ReactNode {
   const unique = [...new Set(names)];
   if (unique.length === 0) return "−";
   return (
-    <div className={chipsStyle}>
+    <ul className={className}>
       {unique.map((name) => (
-        <Chip key={name} tone={tone}>
-          {name}
-        </Chip>
+        <li key={name}>{name}</li>
       ))}
-    </div>
+    </ul>
   );
 }
 
@@ -89,24 +103,27 @@ export function MaterialDetailTable({
   );
   const rows: DetailRow[] = [
     { label: "正式名称", value: material.official_name ?? "−" },
-    { label: "期待効果", value: tags(material.effects.map(({ name }) => name)) },
+    { label: "期待効果", value: joinedNames(material.effects.map(({ name }) => name)) },
     {
       label: "資材ジャンル",
-      value: tags(
+      value: nameList(
         material.ingredientCategories.map(({ name }) => name),
-        "grey",
+        nameListStyle,
       ),
     },
     { label: "主な成分", value: material.main_components || "−" },
     {
       label: "対象作物",
-      value: tags([...material.targetCrops, ...material.targetCropGroups].map(({ name }) => name)),
+      value: nameList(
+        [...material.targetCrops, ...material.targetCropGroups].map(({ name }) => name),
+        cropListStyle,
+      ),
     },
     {
       label: "施用方法",
       value: (
         <>
-          {methods.length > 0 ? tags(methods.map(methodLabel)) : "−"}
+          {joinedNames(methods.map(methodLabel))}
           {usageBlocks.length > 0 ? (
             <Collapsible className={usageMoreStyle}>
               <CollapsibleTrigger variant="link">詳細を見る</CollapsibleTrigger>

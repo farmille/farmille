@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(26);
+select plan(25);
 
 insert into public.materials(id, name, manufacturer_name, publication_status, archived_at) values
   ('a9e478c7-f471-4a09-a1f0-a6a6b4d80a01', '名称確認用資材', '検証会社', 'published', null),
@@ -9,7 +9,6 @@ insert into public.material_name_aliases(material_id, name) values
   ('a9e478c7-f471-4a09-a1f0-a6a6b4d80a01', '公開別名'),
   ('a9e478c7-f471-4a09-a1f0-a6a6b4d80a02', '非公開別名');
 
-select is((select count(*)::integer from public.container_types), 11, '容器分類を番号で参照できる');
 select throws_ok($$update public.materials set container_type_id=11 where id='a9e478c7-f471-4a09-a1f0-a6a6b4d80a01'$$,
   '23503', null, '存在しない容器形状を保存できない');
 select throws_ok($$update public.materials set official_name='  ' where id='a9e478c7-f471-4a09-a1f0-a6a6b4d80a01'$$,

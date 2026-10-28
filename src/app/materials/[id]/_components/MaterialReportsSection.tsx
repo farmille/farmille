@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components/Button";
@@ -59,7 +60,7 @@ export function ReportsHeading({ count, moreHref }: { count?: number; moreHref?:
       headingId="usage-reports-heading"
       title="実証詳細レポート"
       count={count}
-      more={moreHref === undefined ? undefined : { href: moreHref, label: "すべて見る →" }}
+      more={moreHref === undefined ? undefined : { href: moreHref, label: "すべて見る" }}
       spacing="section"
     />
   );
@@ -130,13 +131,17 @@ export function MaterialReportsView({
             >
               無料会員登録して読む（1分）
             </Link>
-            <MoreLink href={`/login?next=${next}`}>ログインはこちら →</MoreLink>
+            <MoreLink href={`/login?next=${next}`}>
+              ログインはこちら <Icon name="arrow_forward" size="xs" />
+            </MoreLink>
           </div>
         </div>
       ) : null}
       {articleTotal > 0 ? (
         <div className={articlesLinkStyle}>
-          <MoreLink href={`${materialPath}/articles`}>メーカーの記事 {articleTotal}件 →</MoreLink>
+          <MoreLink href={`${materialPath}/articles`}>
+            メーカーの記事 {articleTotal}件 <Icon name="arrow_forward" size="xs" />
+          </MoreLink>
         </div>
       ) : null}
     </section>

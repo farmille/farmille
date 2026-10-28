@@ -213,37 +213,6 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               ) : (
                 <LegacyReportSections report={report} coverId={cover?.id ?? null} />
               )}
-              <div
-                className={css({
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "2",
-                  mt: "5.5",
-                  px: "3",
-                  py: "3",
-                  borderWidth: "1px",
-                  borderStyle: "solid",
-                  borderColor: "border.default",
-                  borderRadius: "input",
-                  bg: "surface.page",
-                  textStyle: "note",
-                  color: "text.muted",
-                })}
-              >
-                <span
-                  className={css({
-                    display: "flex",
-                    flexShrink: "0",
-                    mt: "0.5",
-                    color: "text.brand",
-                  })}
-                >
-                  <Icon name="check" size="sm" />
-                </span>
-                <span>
-                  この実証詳細レポートには、病害虫の防除、殺菌・殺虫、農薬の代替など、農薬としての効果を断定する表現を含めていません。
-                </span>
-              </div>
             </>
           )}
 
@@ -289,6 +258,31 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
               />
             ) : null}
           </div>
+
+          {session !== null ? (
+            // 資材ページの「掲載情報についてのご案内」と同じ見た目（枠・アイコンなしの小さい字）
+            <section
+              aria-labelledby="report-notice-heading"
+              className={css({
+                mt: "5.5",
+                textStyle: "supporting",
+                color: "text.subtle",
+              })}
+            >
+              <h2
+                id="report-notice-heading"
+                className={css({ m: "0", fontWeight: "bold", color: "text.muted" })}
+              >
+                掲載内容についてのご案内
+              </h2>
+              <p className={css({ m: "0", mt: "1.5" })}>
+                この実証詳細レポートに書かれている効果は、投稿した本人が自身の圃場・条件で観察した、バイオスティミュラントとしての効果です。農薬・肥料・土壌改良資材等としての効果や、法令上認められた効能・効果を示すものではありません。
+              </p>
+              <p className={css({ m: "0", mt: "1.5" })}>
+                実際の効果は、作物・気象・土壌などの条件によって異なります。商品の使用にあたっては、メーカー公式サイトなどの公式情報をご確認のうえ、製品の表示・使用条件・使用上の注意に従ってください。農薬・肥料・土壌改良資材等として法令上の規制がある資材については、法令に基づく表示・使用条件もご確認ください。
+              </p>
+            </section>
+          ) : null}
         </article>
 
         <FabBar

@@ -40,11 +40,10 @@ export const Disabled: Story = {
   args: { disabled: true, defaultValue: "送信済みの内容" },
 };
 
-export const DocumentWithExample: Story = {
+export const WithExample: Story = {
   args: {
     label: "結果・感想",
-    size: "document",
-    example:
+    placeholder:
       "いつ頃から・どこに・どんな変化があったか。良くなかった点も\n例）2回目の使用から数日後、午後の葉の萎れが使用前よりやや軽くなった。",
   },
 };

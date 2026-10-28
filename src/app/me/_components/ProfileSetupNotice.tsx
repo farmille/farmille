@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { buttonRecipe } from "@/components/Button";
@@ -69,9 +70,7 @@ export function ProfileSetupNotice({ missing }: ProfileSetupNoticeProps) {
       <span className={text}>未設定の項目</span>
       {ITEM_ORDER.filter((item) => missing.includes(item)).map((item) => (
         <Link className={itemButton} href="/me/edit" key={item}>
-          <span className={plus} aria-hidden="true">
-            ＋
-          </span>
+          <Icon name="add" size="xs" className={plus} />
           {ITEM_LABELS[item]}
         </Link>
       ))}

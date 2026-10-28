@@ -16,6 +16,7 @@ const meta = {
         manufacturer_name: "グリーンバイオ株式会社",
         avg_rating: 4.2,
         manufacturer_verified_at: "2026-07-01T00:00:00.000Z",
+        container_type_id: 1,
       },
       {
         id: "00000000-0000-4000-8000-000000000302",
@@ -23,6 +24,7 @@ const meta = {
         manufacturer_name: "とても長い名前の農業資材メーカー株式会社",
         avg_rating: null,
         manufacturer_verified_at: null,
+        container_type_id: null,
       },
     ],
   },

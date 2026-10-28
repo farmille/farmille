@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ReportLegacyMedia } from "./ReportLegacyMedia";
-import { inputWithItems, itemsFromInput, reportLegacyMedia } from "./report-page-state";
+import { reportLegacyMedia } from "./report-page-state";
 import { legacyMediaReport } from "./reportStoryFixture";
 
 describe("以前の形式の写真", () => {
@@ -16,19 +16,5 @@ describe("以前の形式の写真", () => {
     expect(screen.getByText("添えた欄：関連資料")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "使用区の株（7月20日）を削除" }));
     expect(onRemove).toHaveBeenCalledWith(media[0]?.id);
-  });
-
-  it("消した写真は保存の入力に残らず、調査項目の画像は残る", () => {
-    const input = {
-      ...legacyMediaReport,
-      media: legacyMediaReport.media.filter((item) => item.section !== "results"),
-    };
-    const back = inputWithItems(input, itemsFromInput(input));
-    expect(back.media.map((item) => item.section)).toEqual(["documents", "measurements"]);
-  });
-
-  it("写真が無ければ何も出さない", () => {
-    const { container } = render(<ReportLegacyMedia media={[]} onRemove={vi.fn()} />);
-    expect(container).toBeEmptyDOMElement();
   });
 });

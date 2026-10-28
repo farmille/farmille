@@ -110,14 +110,10 @@ describe("applyPdfReading", () => {
     expect(fields.map(({ fieldKey }) => fieldKey)).not.toContain("prefectureCode");
   });
 
-  it("都道府県は、登録住所から入った値や選んだ値があっても PDF の試験地で置き換える", () => {
-    const { input, fields } = applied(base({ prefectureCode: 13 }));
-    expect(input.prefectureCode).toBe(11);
-    expect(fields.map(({ fieldKey }) => fieldKey)).toContain("prefectureCode");
-  });
-
   it("都道府県が変わるときだけ、前の市区町村を外す", () => {
-    const moved = applied(base({ prefectureCode: 13, city: "八王子市", showCity: true })).input;
+    const appliedMove = applied(base({ prefectureCode: 13, city: "八王子市", showCity: true }));
+    const moved = appliedMove.input;
+    expect(appliedMove.fields.map(({ fieldKey }) => fieldKey)).toContain("prefectureCode");
     expect(moved).toMatchObject({ prefectureCode: 11, city: "", showCity: false });
     const same = applied(base({ prefectureCode: 11, city: "熊谷市", showCity: true })).input;
     expect(same).toMatchObject({ prefectureCode: 11, city: "熊谷市", showCity: true });
@@ -245,6 +241,7 @@ describe("applyPdfReading", () => {
     if (posted === undefined || untreated === undefined) throw new Error("区が足りない");
     for (const bad of [
       reading({ plots: [{ ...posted, varietyKey: "v9" }, untreated] }),
+      reading({ varieties: [], plots: [{ ...posted, varietyKey: "v1" }, untreated] }),
       reading({
         plots: [posted, { ...untreated, treatment: "compared", comparedMaterialKey: "m9" }],
       }),
@@ -297,12 +294,23 @@ describe("applyPdfReading", () => {
     }
   });
 
-  it("写すたびに PDF と照らし合わせた確認を外す", () => {
-    expect(applied(base({ pdfValuesChecked: true })).input.pdfValuesChecked).toBe(false);
+  it("同じグラフと区に違う値が2つあれば失敗にし、同じ値の重なりは1つの値として写す", () => {
+    const value = { graphKey: "g1", plotKey: "p1", value: "1126±139 B" };
+    const conflicting = reading({ values: [value, { ...value, value: "980±120 A" }] });
+    expect(applyPdfReading(base(), conflicting, catalog, ids())).toEqual({
+      ok: false,
+      error: "pdf_reading_failed",
+    });
+    const { input } = applied(base(), reading({ values: [value, { ...value }] }));
+    const [measurement] = input.measurements;
+    const graph = measurement?.kind === "numeric" ? measurement.graphs[0] : undefined;
+    expect(graph?.rows.map((row) => row.value)).toEqual(["1126±139 B", ""]);
   });
 
-  it("区を作り直すので、施用方法などを記入した確認を外す", () => {
-    expect(applied(base({ methodDetailsAck: true })).input.methodDetailsAck).toBe(false);
+  it("写すたびに PDF と照らし合わせた確認を外す", () => {
+    const { input } = applied(base({ pdfValuesChecked: true, methodDetailsAck: true }));
+    expect(input.pdfValuesChecked).toBe(false);
+    expect(input.methodDetailsAck).toBe(false);
   });
 
   it("記録した値は今の値と一致し、値を直した欄の印だけが外れる", () => {

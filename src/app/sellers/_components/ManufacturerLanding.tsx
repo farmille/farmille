@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -166,9 +167,9 @@ export type ManufacturerLandingProps = { applyHref: "/sellers/apply" | "/sellers
 
 export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
   const stepLinks = {
-    register: { href: applyHref, label: "企業会員登録の申請はこちらから →" },
-    ownerApplication: { href: OWNER_APPLICATION_HREF, label: "申請フォームはこちらから →" },
-    dashboard: { href: "/dashboard", label: "企業会員ダッシュボードはこちらから →" },
+    register: { href: applyHref, label: "企業会員登録の申請はこちらから" },
+    ownerApplication: { href: OWNER_APPLICATION_HREF, label: "申請フォームはこちらから" },
+    dashboard: { href: "/dashboard", label: "企業会員ダッシュボードはこちらから" },
   } as const satisfies Record<ManufacturerOnboardingAction, { href: string; label: string }>;
 
   return (
@@ -403,7 +404,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
               <div className={stepBodyRecipe({ actor: step.actor })}>{step.body}</div>
               {target === null ? null : (
                 <Link className={stepLinkStyle} href={target.href}>
-                  {target.label}
+                  {target.label} <Icon name="arrow_forward" size="xs" />
                 </Link>
               )}
             </article>
@@ -557,7 +558,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
                         href={target.href}
                         key={target.href}
                       >
-                        {target.label}
+                        {target.label} <Icon name="arrow_forward" size="xs" />
                       </a>
                     ))}
                   </div>

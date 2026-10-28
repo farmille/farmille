@@ -289,6 +289,24 @@ export async function deleteAuthUser(userId: string): Promise<void> {
   await checkedFetch(`/auth/v1/admin/users/${userId}`, { method: "DELETE" });
 }
 
+export async function deleteAvatars(userId: string): Promise<void> {
+  const files = await jsonRequest(
+    v.array(v.object({ name: v.string() })),
+    "/storage/v1/object/list/avatars",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prefix: userId }),
+    },
+  );
+  if (files.length === 0) return;
+  await checkedFetch("/storage/v1/object/avatars", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prefixes: files.map((file) => `${userId}/${file.name}`) }),
+  });
+}
+
 async function createAuthUser(
   email: string,
   password: string,

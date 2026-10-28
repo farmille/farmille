@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { css } from "../../../../../styled-system/css";
 
-import { Chip, NoImage, Stars } from "./CardParts";
+import { NoImage, Stars } from "./CardParts";
 
 const row = css({ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "3", mb: "4" });
 const imageBox = css({ w: "24", h: "16" });
@@ -23,16 +23,6 @@ export const StarValues: Story = {
       <Stars value={0} />
       <Stars value={3.4} />
       <Stars value={5} />
-    </div>
-  ),
-};
-
-export const Chips: Story = {
-  render: () => (
-    <div className={row}>
-      <Chip>トマト</Chip>
-      <Chip tone="grey">微生物資材</Chip>
-      <Chip wrap>光合成細菌・バチルス菌・トリコデルマ菌を配合した複合微生物資材</Chip>
     </div>
   ),
 };

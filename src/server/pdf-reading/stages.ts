@@ -1,6 +1,11 @@
 import * as v from "valibot";
 
-import { ReportReadingOutputSchema, type ReadingCatalog, type ReportReadingOutput } from "./apply";
+import {
+  NO_PAGE,
+  ReportReadingOutputSchema,
+  type ReadingCatalog,
+  type ReportReadingOutput,
+} from "./apply";
 import type {
   ExtractionModel,
   PdfExtraction,
@@ -127,6 +132,7 @@ export type ReportReadingRequest = {
   trial: string;
   catalog: Pick<ReadingCatalog, "crops" | "effectNames">;
   deadline: number;
+  pages: number;
 };
 
 /** グラフ×区の値の数から、値を書き写す呼び出しの本数を決め、グラフを途中で切らずにほぼ同じ数ずつ分ける。 */
@@ -150,13 +156,14 @@ export type CopiedValues = {
 /**
  * 段ごとの出力を、applyPdfReading が受ける形にまとめる。
  * 区や調査項目の key の参照切れと、その段で書けない key を指しているもの（区の説明の根拠は品種・資材・区、
- * 値と根拠は渡したグラフ、補足は渡したグラフの調査項目だけ）は失敗にする。
+ * 値と根拠は渡したグラフ、補足は渡したグラフの調査項目だけ）と、根拠のページが PDF に無いものは失敗にする。
  */
 export function mergeStages(
   skeleton: Skeleton,
   single: v.InferOutput<typeof SingleFieldsSchema>,
   plotGroups: v.InferOutput<typeof PlotGroupsSchema>,
   copied: CopiedValues[],
+  pages: number,
 ): Merged {
   const plotKeys = new Set(skeleton.plots.map((plot) => plot.key));
   const measurementKeys = new Set(skeleton.measurements.map((measurement) => measurement.key));
@@ -212,7 +219,11 @@ export function mergeStages(
       ...values.flatMap((chunk) => chunk.evidence),
     ],
   });
-  return merged.success ? { ok: true, output: merged.output } : { ok: false };
+  const cited = (page: number) =>
+    page === NO_PAGE || (Number.isInteger(page) && page >= 1 && page <= pages);
+  return merged.success && merged.output.evidence.every(({ page }) => cited(page))
+    ? { ok: true, output: merged.output }
+    : { ok: false };
 }
 
 const NO_MATCH: ReportReadingOutput = {
@@ -317,9 +328,17 @@ export async function readReportPdf(
   );
   if (!single.ok || !plotGroups.ok || copied.length !== values.length)
     return failed(skeleton.usage, failures[0] ?? "failed");
-  const merged = mergeStages(skeleton.output, single.output, plotGroups.output, copied);
+  const merged = mergeStages(
+    skeleton.output,
+    single.output,
+    plotGroups.output,
+    copied,
+    request.pages,
+  );
   if (!merged.ok) {
-    console.error("[pdf-reading] 段の出力の key や根拠の ref が、骨組みやその段に無い");
+    console.error(
+      "[pdf-reading] 段の出力の key や根拠の ref・ページが、骨組みやその段、PDF に無い",
+    );
     return failed(skeleton.usage, "invalid_output");
   }
   return { ok: true, output: merged.output, usage: total(skeleton.usage) };

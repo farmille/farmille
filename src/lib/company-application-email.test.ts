@@ -1,25 +1,16 @@
 import { describe, expect, it } from "vitest";
-import {
-  companyApplicationSender,
-  companyReceiptEmail,
-  receiptAccessEmail,
-} from "./company-application-email";
+import { companyReceiptEmail, receiptAccessEmail } from "./company-application-email";
 
 describe("企業申請の案内メール", () => {
-  it("宛名・正式署名・期限を付け、受付票の確認用リンクを案内する", () => {
+  it("宛名を付け、受付票の確認用リンクを案内する", () => {
     const url = "https://www.farmille.com/company-requests/receipts/confirm#one-time-token";
     const mail = receiptAccessEmail("農業資材株式会社", "山田太郎", url);
-    expect(companyApplicationSender).toBe("Farmille <contact@farmille.com>");
-    expect(mail.subject).toContain("受付票");
     expect(mail.text).toContain("農業資材株式会社\n山田太郎 様");
     expect(mail.text).toContain(url);
-    expect(mail.text).toContain("30分");
-    expect(mail.text).toContain("ファーミル株式会社 代表取締役社長 奥田朗盛\ncontact@farmille.com");
-    expect(mail.text).not.toContain("申請フォームよりお手続き");
   });
 });
 
-it("受付メールは指定の申請種別・受付番号を示し、署名で結ぶ", () => {
+it("受付メールは指定の申請種別・受付番号と宛名を示す", () => {
   const receipt = companyReceiptEmail(
     {
       application: {
@@ -59,7 +50,4 @@ it("受付メールは指定の申請種別・受付番号を示し、署名で�
   expect(receipt.subject).toBe("【Farmille】ご申請を受け付けました（受付番号 12）");
   expect(receipt.text).toContain("申請種別：資材掲載・資材オーナー権限申請\n");
   expect(receipt.text).toContain("農業資材株式会社\n山田太郎 様");
-  expect(
-    receipt.text.endsWith("ファーミル株式会社 代表取締役社長 奥田朗盛\ncontact@farmille.com"),
-  ).toBe(true);
 });

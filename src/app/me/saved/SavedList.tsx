@@ -113,9 +113,8 @@ export function SavedList({ items }: SavedListProps) {
               variant="list"
               name={item.name}
               maker={item.manufacturerName}
-              rating={item.avgRating ?? 0}
+              rating={item.avgRating}
               reviewCount={item.reviewCount}
-              official={item.official}
               description={item.description ?? undefined}
               href={`/materials/${item.materialId}`}
               imageSrc={item.primaryImageUrl ?? undefined}

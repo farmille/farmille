@@ -112,7 +112,7 @@ export async function tagOperationAction(
         status: "error",
         message: masterErrorMessage(
           result.error,
-          "使用中のタグは削除できません。先に資材からタグを外してください。",
+          "使用中のタグは削除できません。資材・効果分類との関連を確認してください。",
         ),
       };
     }

@@ -204,12 +204,12 @@ export const GUIDE_FAQS: ReadonlyArray<Faq> = [
     question: "Farmilleに登録した覚えがないのに、自社の資材が掲載されています。",
     answer:
       "Farmille運営が公開情報をもとに作成した仮掲載ページです。貴社で情報を管理したい場合は、企業会員登録のうえ、掲載済み資材の資材オーナー権限をお申し込みください。ページに蓄積された感想口コミ・実証詳細レポートはそのまま引き継がれます。",
-    links: [{ href: "#lpGuideNew", label: "資材オーナー権限の申請について →" }],
+    links: [{ href: "#lpGuideNew", label: "資材オーナー権限の申請について" }],
   },
   {
     question: "資材ページを削除してもらえますか？",
     answer: `販売を終了した資材には「終売」の表示を反映し、事情により掲載を控えたい場合は資材ページを「非公開」にします。${REMOVAL_CONTACT_SENTENCE}なお、資材ページそのものの削除は行っておらず、これに伴ってFarmille上の感想口コミ・実証詳細レポートなどのデータを削除することもありません。`,
-    links: [{ href: "#lpGuideDelist", label: "終売・非公開のご依頼について →" }],
+    links: [{ href: "#lpGuideDelist", label: "終売・非公開のご依頼について" }],
   },
   {
     question: "販売代理店や卸売業者でも申請できますか？",
@@ -221,7 +221,7 @@ export const GUIDE_FAQS: ReadonlyArray<Faq> = [
     question: "資材オーナー権限を別の会社に移せますか？",
     answer:
       "資材オーナー権限を移行することは可能です。現在の資材オーナー企業から申請する場合と、事業譲渡・合併などで引き継いだ会社から申請する場合で、手続きが異なります。",
-    links: [{ href: "#lpGuideMore", label: "権限の引き渡し・引き継ぎについて →" }],
+    links: [{ href: "#lpGuideMore", label: "権限の引き渡し・引き継ぎについて" }],
   },
   {
     question: "生産者の感想口コミや実証詳細レポートを削除してもらえますか？",
@@ -239,7 +239,7 @@ export const GUIDE_FAQS: ReadonlyArray<Faq> = [
     question: "非公開にした後、再び掲載できますか？",
     answer:
       "可能です。関係する会社間で掲載についての合意をいただいたうえで、あらためて資材オーナー権限をご申請ください。",
-    links: [{ href: "#lpGuideNew", label: "資材オーナー権限の申請について →" }],
+    links: [{ href: "#lpGuideNew", label: "資材オーナー権限の申請について" }],
   },
 ];
 
@@ -253,13 +253,13 @@ export const PROCEDURE_FAQS: ReadonlyArray<Faq> = [
     question: "Farmilleに登録した覚えがないのに、自社の資材が掲載されています。",
     answer:
       "Farmille運営が公開情報をもとに登録した資材ページです。貴社で情報を管理したい場合は、企業会員登録のうえ、掲載済み資材の資材オーナー権限をお申し込みください。ページに蓄積されたレビューはそのまま引き継がれます。",
-    links: [{ href: "/sellers/procedures/owner", label: "資材オーナー権限の申請 →" }],
+    links: [{ href: "/sellers/procedures/owner", label: "資材オーナー権限の申請" }],
   },
   {
     question: "資材オーナー権限とは何ですか？",
     answer:
       "Farmilleに掲載される資材ごとに1社に設定する権限で、製品情報を編集できます。製造元・販売元・輸入元の企業様に、資材ごとにお渡しします。編集権限だけを代理店等に委託することもできます。",
-    links: [{ href: "/sellers/procedures/owner", label: "申請の流れ・条件 →" }],
+    links: [{ href: "/sellers/procedures/owner", label: "申請の流れ・条件" }],
   },
   {
     question: "販売代理店や卸売業者でも申請できますか？",
@@ -272,8 +272,8 @@ export const PROCEDURE_FAQS: ReadonlyArray<Faq> = [
     answer:
       "資材オーナー権限を移行することは可能です。現在の資材オーナー企業から申請する場合と、事業譲渡・合併などで引き継いだ会社から申請する場合で、手続きが異なります。",
     links: [
-      { href: "/sellers/procedures/transfer-out", label: "引き渡す（現在の資材オーナー企業）→" },
-      { href: "/sellers/procedures/transfer-in", label: "引き継いだ会社から申請する →" },
+      { href: "/sellers/procedures/transfer-out", label: "引き渡す（現在の資材オーナー企業）" },
+      { href: "/sellers/procedures/transfer-in", label: "引き継いだ会社から申請する" },
     ],
   },
   {
@@ -286,6 +286,6 @@ export const PROCEDURE_FAQS: ReadonlyArray<Faq> = [
     question: "非公開にした後、再び掲載できますか？",
     answer:
       "可能です。関係する会社間で掲載についての合意をいただいたうえで、あらためて資材オーナー権限をご申請ください。",
-    links: [{ href: "/sellers/procedures/owner", label: "資材オーナー権限の申請 →" }],
+    links: [{ href: "/sellers/procedures/owner", label: "資材オーナー権限の申請" }],
   },
 ];

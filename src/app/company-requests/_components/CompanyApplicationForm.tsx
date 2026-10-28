@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
@@ -240,7 +241,7 @@ export function CompanyApplicationForm({
             }
             variant="ghost"
           >
-            ＋ 資材を追加
+            <Icon name="add" size="sm" /> 資材を追加
           </Button>
         </section>
 

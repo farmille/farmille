@@ -71,3 +71,15 @@ export const OwnEmpty: Story = {
 };
 
 export const Minimal: Story = { args: { details: emptyDetails } };
+
+export const OtherStandpoint: Story = {
+  args: { editable: true, details: { ...fullDetails, standpoint: "other" } },
+};
+
+export const JaStandpoint: Story = {
+  args: { editable: true, details: { ...fullDetails, standpoint: "ja" } },
+};
+
+export const LongHandle: Story = {
+  args: { editable: true, handle: "はままつ施設トマトといちごの山田農園" },
+};

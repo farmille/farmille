@@ -1,3 +1,4 @@
+import { materialIllustrationUrl } from "@/lib/material-illustration";
 import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
 import {
   getStructuredUsageReport,
@@ -178,7 +179,12 @@ type UsageReportDetailQueryRow = Omit<UsageReportRow, "editor_note" | "pdf_value
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<
     MaterialRow,
-    "id" | "name" | "manufacturer_name" | "manufacturer_verified_at" | "avg_rating"
+    | "id"
+    | "name"
+    | "manufacturer_name"
+    | "manufacturer_verified_at"
+    | "avg_rating"
+    | "container_type_id"
   > | null;
   media: Pick<MediaRow, "id" | "url" | "media_type" | "caption" | "placement" | "sort_order">[];
   applications: Pick<ApplicationRow, "id" | "applied_on" | "method" | "detail" | "sort_order">[];
@@ -221,6 +227,7 @@ export type PublishedUsageReportDetail = {
     manufacturerName: string;
     isOfficial: boolean;
     avgRating: number | null;
+    imageUrl: string | null;
   };
   media: Array<{
     id: string;
@@ -346,7 +353,8 @@ export async function getPublishedUsageReport(
         name,
         manufacturer_name,
         manufacturer_verified_at,
-        avg_rating
+        avg_rating,
+        container_type_id
       ),
       media:usage_report_media (
         id,
@@ -472,6 +480,7 @@ export async function getPublishedUsageReport(
       manufacturerName: row.material.manufacturer_name,
       isOfficial: row.material.manufacturer_verified_at !== null,
       avgRating: row.material.avg_rating,
+      imageUrl: materialIllustrationUrl(row.material.container_type_id),
     },
     media,
     applications: row.applications

@@ -22,7 +22,7 @@ const fetchCatalogMaterials = unstable_cache(
           .from("materials")
           .select(`id,name,official_name,name_reading,container_type_id,material_name_aliases(name),manufacturer_name,manufacturer_verified_at,description,avg_rating,review_count,created_at,
       material_crops(crop_id),material_crop_groups(crop_group_id),
-      material_effects(effect_id),material_ingredient_categories(ingredient_category_id,ingredient_categories(name)),
+      material_effects(effect_id),material_ingredient_categories(ingredient_category_id,ingredient_categories(short_name)),
       material_search_tags(search_tag_id),material_application_methods(method)`)
           .eq("publication_status", "published")
           .order("id")
@@ -55,6 +55,7 @@ async function fetchCatalogSearch() {
     crops: options.data.crops.toSorted((left, right) => left.sort_order - right.sort_order),
     groups: options.data.cropGroups,
     effects: options.data.effects,
+    searchTags: options.data.searchTags,
   };
 }
 export const getCatalogSearch = cache(fetchCatalogSearch);

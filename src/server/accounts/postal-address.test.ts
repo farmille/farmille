@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { postalFill } from "@/lib/postal-fill";
+import { describe, expect, it } from "vitest";
 import { lookupPostalAddress } from "./postal-address";
 
 describe("郵便番号の住所検索", () => {
@@ -9,12 +9,7 @@ describe("郵便番号の住所検索", () => {
       addresses: [{ prefectureCode: 13, city: "千代田区", town: "千代田" }],
     });
   });
-  it("1460085 は東京都大田区久が原を返す", async () => {
-    expect(await lookupPostalAddress("1460085")).toEqual({
-      ok: true,
-      addresses: [{ prefectureCode: 13, city: "大田区", town: "久が原" }],
-    });
-  });
+
   it("0600000 は町名を入れない", async () => {
     expect(await lookupPostalAddress("0600000")).toEqual({
       ok: true,

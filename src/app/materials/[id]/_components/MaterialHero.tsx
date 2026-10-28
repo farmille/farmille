@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import Link from "next/link";
@@ -9,7 +10,8 @@ import { css } from "../../../../../styled-system/css";
 
 import type { SaveControlState } from "../actions";
 import { HeroCount } from "./HeroSavedCount";
-import { Chip, NoImage, Stars } from "./CardParts";
+import { MaterialGenres } from "@/components/MaterialGenres";
+import { NoImage, Stars } from "./CardParts";
 import { SaveControl } from "./SaveControl";
 
 const heroStyle = css(surfaceCardRecipe.raw({ padding: "flush" }), {
@@ -66,7 +68,7 @@ const applyLinkStyle = css({
   fontWeight: "semibold",
   textDecoration: "none",
 });
-const chipsStyle = css({ mt: "2", display: "flex", flexWrap: "wrap", gap: "1" });
+const genresStyle = css({ mb: "1" });
 const countsStyle = css({ mt: "1.5", textStyle: "note", color: "text.subtle" });
 const countLinkStyle = css({ whiteSpace: "nowrap", color: "[inherit]" });
 const countMinorStyle = css({ textStyle: "note", whiteSpace: "nowrap", color: "[inherit]" });
@@ -111,6 +113,10 @@ export function MaterialHero({
         <p className={css({ fontSize: "2xs", color: "text.subtle", mt: "1" })}>容器のイメージ</p>
       </div>
       <div className={infoStyle}>
+        <MaterialGenres
+          names={material.ingredientCategories.map((genre) => genre.short_name)}
+          className={genresStyle}
+        />
         <h1 id="material-name" className={nameStyle}>
           {material.name}
         </h1>
@@ -135,15 +141,6 @@ export function MaterialHero({
             までご連絡ください。
           </div>
         ) : null}
-        {material.ingredientCategories.length > 0 ? (
-          <div className={chipsStyle}>
-            {[...new Set(material.ingredientCategories.map(({ name }) => name))].map((name) => (
-              <Chip key={name} wrap>
-                {name}
-              </Chip>
-            ))}
-          </div>
-        ) : null}
         <div className={countsStyle}>
           <a href="#anchorReports" className={countLinkStyle}>
             実証詳細レポート {reportCount}
@@ -152,7 +149,8 @@ export function MaterialHero({
             ・ 感想口コミ <HeroCount>{material.review_count}件</HeroCount>
           </a>{" "}
           <span className={countMinorStyle}>
-            ・ <span className={savedMarkStyle}>★</span> お気に入り {savedCount}
+            ・ <Icon name="star_filled" size="xs" className={savedMarkStyle} /> お気に入り{" "}
+            {savedCount}
           </span>
         </div>
         <SaveControl

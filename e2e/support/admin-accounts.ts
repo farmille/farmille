@@ -20,10 +20,6 @@ export const E2E_ADMIN_ACCOUNTS = {
     email: "e2e-admin-moderation@farmille.local",
     password: "Farmille-E2E-Admin-Moderation-2026!",
   },
-  publishedPostModeration: {
-    email: "e2e-admin-published-posts@farmille.local",
-    password: "Farmille-E2E-Admin-Published-Posts-2026!",
-  },
   materialGovernance: {
     email: "e2e-admin-materials@farmille.local",
     password: "Farmille-E2E-Admin-Materials-2026!",
@@ -31,10 +27,6 @@ export const E2E_ADMIN_ACCOUNTS = {
   searchCatalog: {
     email: "e2e-admin-search@farmille.local",
     password: "Farmille-E2E-Admin-Search-2026!",
-  },
-  notFoundVisibility: {
-    email: "e2e-admin-not-found@farmille.local",
-    password: "Farmille-E2E-Admin-Not-Found-2026!",
   },
 } as const satisfies Record<string, E2eAdminAccount>;
 

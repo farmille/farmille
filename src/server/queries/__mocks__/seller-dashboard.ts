@@ -27,6 +27,7 @@ export const getSellerDashboardData = fn<
         avg_rating: null,
         manufacturer_verified_at: null,
         publication_status: "published",
+        container_type_id: 1,
       },
     ],
   },
@@ -45,6 +46,7 @@ export const getSellerMaterialsPageData = fn<
         avg_rating: null,
         manufacturer_verified_at: null,
         publication_status: "published",
+        container_type_id: 1,
       },
     ],
     changeRequests: [

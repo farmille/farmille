@@ -11,6 +11,7 @@ import {
   parseSortParam,
   resolveSelectedFilters,
 } from "@/components/search/search-selection";
+import { filterCatalog } from "@/lib/catalog-search";
 import { createPageMetadata } from "@/lib/seo";
 import { matchSearchCatalog } from "@/lib/material-search";
 import { getCatalogSearch, listSearchSuggestions } from "@/server/queries/catalog-search";
@@ -124,6 +125,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     ? matchSearchCatalog(catalogResult.data, initialQuery)
     : undefined;
 
+  const resultCount = filterCatalog(
+    catalog,
+    filters,
+    makerNames,
+    materialNames,
+    keywordMatches,
+  ).length;
+
   return (
     <SearchPageShell>
       <SearchPageHeading />
@@ -150,6 +159,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           selected={selected}
           sort={sort}
           query={initialQuery}
+          resultCount={resultCount}
         />
         <div className={css({ minW: "0" })}>
           <SearchResults

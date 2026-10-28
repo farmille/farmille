@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
 import * as v from "valibot";
+import { describe, expect, it } from "vitest";
 import {
-  MaterialPageContentSchema,
   MaterialExternalUrlSchema,
+  MaterialPageContentSchema,
   SaveMaterialPageSchema,
 } from "./material-page-editor";
 
@@ -119,17 +119,7 @@ describe("製品ページの原稿", () => {
       }),
     ).toBe(false);
   });
-  it("記入途中の資料を下書きに残せる", () => {
-    expect(
-      v.is(SaveMaterialPageSchema, {
-        ...input,
-        content: {
-          ...content,
-          links: [{ trial: null, group: "overview", title: "", url: "入力途中" }],
-        },
-      }),
-    ).toBe(true);
-  });
+
   it("未完成の資料は表現確認へ送れない", () => {
     expect(
       v.is(SaveMaterialPageSchema, {
@@ -141,6 +131,18 @@ describe("製品ページの原稿", () => {
         },
       }),
     ).toBe(false);
+
+    {
+      expect(
+        v.is(SaveMaterialPageSchema, {
+          ...input,
+          content: {
+            ...content,
+            links: [{ trial: null, group: "overview", title: "", url: "入力途中" }],
+          },
+        }),
+      ).toBe(true);
+    }
   });
   it("空の製品説明は表現確認へ送れない", () => {
     expect(

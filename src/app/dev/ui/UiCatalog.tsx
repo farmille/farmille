@@ -118,27 +118,28 @@ export function UiCatalog() {
 
       <section className={section}>
         <h2 className={sectionTitle}>MaterialCard</h2>
-        <p className={sectionLead}>横スクロール用と一覧用。</p>
+        <p className={sectionLead}>横スクロール用、一覧・参照用、検索結果用。</p>
         <p className={label}>scroll</p>
         <div className={row}>
           <MaterialCard
             variant="scroll"
+            href="#"
             name="Skeepon"
             maker="〇〇株式会社"
-            official
             rating={4.2}
             reviewCount={32}
           />
           <MaterialCard
             variant="scroll"
+            href="#"
             name="ボンバルディア"
             maker="△△バイオ"
-            official
             rating={4}
             reviewCount={18}
           />
           <MaterialCard
             variant="scroll"
+            href="#"
             name="グロウエイド"
             maker="□□アグリ"
             rating={4.6}
@@ -148,13 +149,26 @@ export function UiCatalog() {
         <p className={cx(label, css({ mt: "3" }))}>list</p>
         <MaterialCard
           variant="list"
+          href="#"
           name="Skeepon"
           maker="〇〇株式会社"
-          official
           rating={4.2}
           reviewCount={32}
-          articleCount={5}
           description="高温期の草勢維持に定評。施設園芸を中心に導入実績多数。"
+        />
+        <p className={cx(label, css({ mt: "3" }))}>rich</p>
+        <MaterialCard
+          variant="rich"
+          href="#"
+          name="Skeepon"
+          maker="〇〇株式会社"
+          rating={4.2}
+          reviewCount={32}
+          reportCount={5}
+          savedCount={14}
+          description="高温期の草勢維持に定評。施設園芸を中心に導入実績多数。"
+          categories={["微生物", "アミノ酸"]}
+          evidence={{ direct: ["トマト"], groups: [] }}
         />
       </section>
 
@@ -329,9 +343,9 @@ export function UiCatalog() {
             <div className={row}>
               <MaterialCard
                 variant="scroll"
+                href="#"
                 name="Skeepon"
                 maker="〇〇株式会社"
-                official
                 rating={4.2}
                 reviewCount={32}
               />

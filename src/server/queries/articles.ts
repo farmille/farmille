@@ -14,7 +14,12 @@ type ArticleSeller = Pick<PublicSellerRow, "id" | "official_name" | "logo_url">;
 
 type ArticleMaterial = Pick<
   MaterialRow,
-  "id" | "name" | "manufacturer_name" | "avg_rating" | "manufacturer_verified_at"
+  | "id"
+  | "name"
+  | "manufacturer_name"
+  | "avg_rating"
+  | "manufacturer_verified_at"
+  | "container_type_id"
 >;
 
 type ArticleDetailQueryRow = Pick<
@@ -129,7 +134,8 @@ export async function getPublishedArticle(
           name,
           manufacturer_name,
           avg_rating,
-          manufacturer_verified_at
+          manufacturer_verified_at,
+          container_type_id
         )
       )
     `,

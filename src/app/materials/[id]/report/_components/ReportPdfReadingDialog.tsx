@@ -163,6 +163,7 @@ export function ReportPdfReadingDialog({
         message: errorMessageJa.pdf_reading_failed,
         remaining: null,
         savedDraft: null,
+        pdfValuesCheckRequired: false,
       };
     } finally {
       setPhase("idle");

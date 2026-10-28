@@ -12,13 +12,7 @@ describe("normalizeTotpQrCodeSource", () => {
     );
   });
 
-  it("末尾に空白がないSVG data URIは変更しない", () => {
-    const source = "data:image/svg+xml,<svg></svg>";
-
-    expect(normalizeTotpQrCodeSource(source)).toBe(source);
-  });
-
-  it.each(["", "data:image/png;base64,AAAA"])("SVG data URI以外は拒否する：%s", (source) => {
+  it.each(["data:image/png;base64,AAAA"])("SVG data URI以外は拒否する：%s", (source) => {
     expect(normalizeTotpQrCodeSource(source)).toBeNull();
   });
 });

@@ -2,7 +2,6 @@
 
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
-import Link from "next/link";
 import { startTransition, useActionState, useEffect, useMemo, useState } from "react";
 import * as v from "valibot";
 
@@ -13,7 +12,6 @@ import {
 } from "@/app/materials/[id]/review/actions";
 import { Badge } from "@/components/Badge";
 import {
-  Checkbox,
   Field,
   Fieldset,
   Form,
@@ -95,16 +93,38 @@ const coverInputStyle = css({
   cursor: "pointer",
 });
 
-const exampleSpacingStyle = css({ mt: "2" });
+const exampleSpacingStyle = css({ mb: "2" });
+
+const srOnlyStyle = css({ srOnly: true });
+
+const confirmListStyle = css({
+  m: "0",
+  pl: "5",
+  listStyleType: "disc",
+  textStyle: "supporting",
+  color: "text.default",
+});
 
 const photoGridStyle = css({
   display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: "2.5",
-  tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))" },
+  // スマホでは写真・説明・解除を1枚ずつ縦に並べ、タブレット以上で横に並べる
+  gridTemplateColumns: "minmax(0, 1fr)",
+  gap: "4",
+  tab: { gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "2.5" },
+});
+
+// 写真1枚ごとのまとまり（画像・説明・削除）を枠で囲む
+const photoItemStyle = css({
+  p: "2.5",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "border.default",
+  borderRadius: "card",
+  bg: "surface.card",
 });
 
 const photoFrameStyle = css({
+  position: "relative",
   display: "grid",
   placeItems: "center",
   w: "full",
@@ -120,18 +140,37 @@ const photoCaptionStyle = css({ mt: "1.5" });
 
 const photoPlaceholderIconStyle = css({ color: "text.brandOnSoft" });
 
-const photoRemoveCheckStyle = css({ mt: "1" });
-
+// 写真を外す・削除するボタン。写真の右上に重ねる
 const photoRemoveStyle = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "1.5",
-  mt: "1",
+  position: "absolute",
+  top: "1.5",
+  right: "1.5",
+  display: "grid",
+  placeItems: "center",
+  w: "8",
+  h: "8",
   p: "0",
-  bg: "transparent",
-  fontSize: "sm",
-  color: "accent.danger",
+  border: "none",
+  borderRadius: "pill",
+  bg: "surface.card",
+  color: "text.default",
+  boxShadow: "overlay",
   cursor: "pointer",
+  _focusVisible: focusRing,
+});
+
+// 保存時に削除する既存写真の上に重ねる表示
+const photoMarkedStyle = css({
+  position: "absolute",
+  inset: "0",
+  display: "grid",
+  placeItems: "center",
+  p: "3",
+  bg: "scrim/60",
+  color: "text.inverse",
+  fontSize: "sm",
+  fontWeight: "bold",
+  textAlign: "center",
 });
 
 const photoAddStyle = css({
@@ -189,8 +228,9 @@ export function ReviewForm({
   const [rating, setRating] = useState(initialValues.rating);
   // form action の後に React が未制御の入力を初期値へ戻すため、本文は state で保持してエラー時も消さない。
   const [body, setBody] = useState(initialValues.body);
-  const [pesticideAck, setPesticideAck] = useState(initialValues.pesticideAck);
   const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>([]);
+  // 編集時に×で削除を選んだ既存写真。保存するまでは消さず、取り消せる
+  const [removedPhotoIds, setRemovedPhotoIds] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const isPending = uploading || actionPending;
@@ -261,8 +301,6 @@ export function ReviewForm({
     if (restoredRating.success) setRating(restoredRating.output);
     const restoredBody = restored.get("body")?.[0];
     if (restoredBody !== undefined) setBody(restoredBody);
-    const restoredAck = restored.get("pesticideAck");
-    if (restoredAck !== undefined) setPesticideAck(restoredAck.length > 0);
   }
 
   async function submit(formData: FormData) {
@@ -344,6 +382,12 @@ export function ReviewForm({
           </>
         }
       >
+        {/* 記入例は入力欄の上に置き、エラーが入力欄の真下に出るようにする */}
+        <div className={exampleSpacingStyle} id="review-body-example">
+          <Notice tone="neutral" title="記入例">
+            トマト（ハウス栽培）で、定植後から2週間おきに灌水と合わせて使いました。1ヶ月ほどで根張りがしっかりしてきて、高温が続いた時期も葉のしおれが少なかったように感じます。
+          </Notice>
+        </div>
         <Textarea
           label={null}
           size="lg"
@@ -352,11 +396,6 @@ export function ReviewForm({
           placeholder="自由に記入してください"
           aria-describedby="review-body-example"
         />
-        <div className={exampleSpacingStyle} id="review-body-example">
-          <Notice tone="neutral" title="記入例">
-            トマト（ハウス栽培）で、定植後から2週間おきに灌水と合わせて使いました。1ヶ月ほどで根張りがしっかりしてきて、高温が続いた時期も葉のしおれが少なかったように感じます。
-          </Notice>
-        </div>
       </Field>
 
       <Fieldset
@@ -368,41 +407,56 @@ export function ReviewForm({
         description="1枚あたり5MB以下の jpeg・png・webp を選択できます。"
       >
         <div className={photoGridStyle}>
-          {initialValues.photos.map((photo) => (
-            <div key={photo.id}>
-              <input type="hidden" name="existingPhotoId" value={photo.id} />
-              <div className={photoFrameStyle}>
-                <Image
-                  className={photoImageStyle}
-                  src={photo.url}
-                  alt={photo.caption ?? "感想口コミ写真"}
-                  width={240}
-                  height={180}
-                  unoptimized
+          {initialValues.photos.map((photo, index) => {
+            const removed = removedPhotoIds.includes(photo.id);
+            // 読み上げで写真を区別できるよう、何枚目かを名前に入れる
+            const photoName = `${index + 1}枚目の写真`;
+            return (
+              <div key={photo.id} className={photoItemStyle}>
+                <input type="hidden" name="existingPhotoId" value={photo.id} />
+                {removed && <input type="hidden" name="removePhotoId" value={photo.id} />}
+                <div className={photoFrameStyle}>
+                  <Image
+                    className={photoImageStyle}
+                    src={photo.url}
+                    alt={photo.caption ?? photoName}
+                    width={240}
+                    height={180}
+                    unoptimized
+                  />
+                  {removed && <p className={photoMarkedStyle}>保存すると削除されます</p>}
+                  <button
+                    type="button"
+                    className={photoRemoveStyle}
+                    aria-label={`${photoName}を削除する`}
+                    aria-pressed={removed}
+                    onClick={() =>
+                      setRemovedPhotoIds((current) =>
+                        removed ? current.filter((id) => id !== photo.id) : [...current, photo.id],
+                      )
+                    }
+                  >
+                    <Icon name={removed ? "undo" : "close"} />
+                  </button>
+                </div>
+                <Input
+                  size="sm"
+                  className={photoCaptionStyle}
+                  name={`existingPhotoCaption-${photo.id}`}
+                  defaultValue={photo.caption ?? ""}
+                  placeholder="例）散布前の様子"
+                  label={
+                    <>
+                      タイトル<span className={srOnlyStyle}>（{photoName}）</span>
+                    </>
+                  }
+                  requirement="optional"
                 />
               </div>
-              <Input
-                size="sm"
-                className={photoCaptionStyle}
-                name={`existingPhotoCaption-${photo.id}`}
-                defaultValue={photo.caption ?? ""}
-                placeholder="写真の説明"
-                hideLabel
-                label="既存写真の説明"
-              />
-              <Checkbox
-                className={photoRemoveCheckStyle}
-                name="removePhotoId"
-                size="sm"
-                tone="danger"
-                value={photo.id}
-              >
-                この写真を削除する
-              </Checkbox>
-            </div>
-          ))}
-          {pendingPhotos.map((photo) => (
-            <div key={photo.key}>
+            );
+          })}
+          {pendingPhotos.map((photo, index) => (
+            <div key={photo.key} className={photoItemStyle}>
               <div className={photoFrameStyle}>
                 <Image
                   className={photoImageStyle}
@@ -412,6 +466,16 @@ export function ReviewForm({
                   height={180}
                   unoptimized
                 />
+                <button
+                  type="button"
+                  className={photoRemoveStyle}
+                  aria-label={`${initialValues.photos.length + index + 1}枚目の写真を外す`}
+                  onClick={() =>
+                    setPendingPhotos((current) => current.filter((item) => item.key !== photo.key))
+                  }
+                >
+                  <Icon name="close" />
+                </button>
               </div>
               <Input
                 size="sm"
@@ -424,19 +488,17 @@ export function ReviewForm({
                     ),
                   );
                 }}
-                placeholder="散布前の様子"
-                hideLabel
-                label={`${photo.file.name}の説明`}
-              />
-              <button
-                type="button"
-                className={photoRemoveStyle}
-                onClick={() =>
-                  setPendingPhotos((current) => current.filter((item) => item.key !== photo.key))
+                placeholder="例）散布前の様子"
+                label={
+                  <>
+                    タイトル
+                    <span className={srOnlyStyle}>
+                      （{initialValues.photos.length + index + 1}枚目の写真）
+                    </span>
+                  </>
                 }
-              >
-                選択を解除
-              </button>
+                requirement="optional"
+              />
             </div>
           ))}
           <label className={photoAddStyle}>
@@ -458,7 +520,8 @@ export function ReviewForm({
                   <br />
                 </>
               ) : null}
-              ＋<br />
+              <Icon name="add" size="sm" />
+              <br />
               追加
             </span>
           </label>
@@ -470,32 +533,20 @@ export function ReviewForm({
         )}
       </Fieldset>
 
-      <Field
-        name="pesticideAck"
-        requirement="required"
-        description="登録済みのニックネームで投稿されます。"
-      >
-        <Checkbox variant="note" checked={pesticideAck} onCheckedChange={setPesticideAck}>
-          実際に使用した感想を、使用条件や感じた変化が分かるよう具体的にご記入ください。農薬として登録されていない資材については、農薬としての効果を断定せず、実際に感じた変化としてご記載ください。
-          <br />
-          投稿の前に
-          <Link href="/legal/posting" target="_blank" rel="noopener noreferrer">
-            感想口コミガイドライン
-          </Link>
-          ・
-          <Link href="/legal/terms" target="_blank" rel="noopener noreferrer">
-            サイト運営ポリシー
-          </Link>
-          をご確認ください。
-        </Checkbox>
+      {/* 投稿すると下の確認事項に同意したものとして扱う（pesticideAck を送る） */}
+      <input type="hidden" name="pesticideAck" value="on" />
+      <Field label="確認事項" description="登録済みのニックネームで投稿されます。">
+        <ul className={confirmListStyle}>
+          <li>記入内容は、実際に使用して観察した事実と感じた変化にもとづいています。</li>
+          <li>
+            農薬として登録されていない資材について、病害虫や雑草への効果を断定する表現は使っていません。
+          </li>
+          <li>記事・画像・PDFに、他者の権利や秘密保持契約に反するものは含まれていません。</li>
+        </ul>
       </Field>
 
       <FormActions>
-        <SubmitButton
-          pending={isPending}
-          pendingLabel="送信中…"
-          disabled={rating === 0 || !pesticideAck}
-        >
+        <SubmitButton pending={isPending} pendingLabel="送信中…" disabled={rating === 0}>
           {mode === "create" ? "投稿する" : "変更を保存する"}
         </SubmitButton>
         <TextLink variant="subtle" href={`/materials/${material.id}`}>

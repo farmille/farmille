@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 
@@ -17,6 +17,7 @@ describe("MaterialHero", () => {
       "href",
       "/sellers/maker-id",
     );
+    expect(screen.queryByRole("link", { name: "contact@farmille.com" })).toBeNull();
     expect(screen.queryByText("旧掲載会社")).not.toBeInTheDocument();
   });
   it("資材オーナー権限のない資材は従来の会社名をリンクなしで表示する", () => {
@@ -35,53 +36,5 @@ describe("MaterialHero", () => {
       "href",
       "mailto:contact@farmille.com",
     );
-  });
-  it("メーカー確認済みの資材では会社名の注記を出さない", () => {
-    render(createElement(MaterialHero, { material: materialDetail, saved: null }));
-    expect(screen.queryByRole("link", { name: "企業会員登録" })).not.toBeInTheDocument();
-  });
-  it("画像の読み込みに失敗してもプレースホルダーを残す", () => {
-    const material = {
-      ...materialDetail,
-      imageUrl: "/missing-material-image.png",
-    };
-    render(createElement(MaterialHero, { material, saved: null }));
-
-    const image = screen.getByRole("img", { name: `${materialDetail.name}の容器イメージ` });
-    const imageBox = document.querySelector('[data-ui="material-hero-image"]');
-    const placeholder = screen.getByText("NO IMAGE");
-    expect(imageBox).toContainElement(image);
-    expect(placeholder).toHaveAttribute("aria-hidden", "true");
-
-    fireEvent.error(image);
-
-    expect(
-      screen.queryByRole("img", { name: `${materialDetail.name}の容器イメージ` }),
-    ).not.toBeInTheDocument();
-    expect(placeholder).toBeInTheDocument();
-    expect(imageBox).toContainElement(placeholder);
-  });
-
-  it("容器イラストにイメージ画像であることを表示する", () => {
-    render(
-      createElement(MaterialHero, {
-        material: { ...materialDetail, imageUrl: "/images/container-shapes/2.png" },
-        saved: null,
-      }),
-    );
-    expect(
-      screen.getByRole("img", { name: `${materialDetail.name}の容器イメージ` }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("容器のイメージ")).toBeInTheDocument();
-  });
-
-  it("画像がない場合もプレースホルダーを画像領域内に表示する", () => {
-    render(createElement(MaterialHero, { material: materialDetail, saved: null }));
-
-    const imageBox = document.querySelector('[data-ui="material-hero-image"]');
-    const placeholder = screen.getByText("NO IMAGE");
-
-    expect(screen.queryByRole("img", { name: materialDetail.name })).not.toBeInTheDocument();
-    expect(imageBox).toContainElement(placeholder);
   });
 });

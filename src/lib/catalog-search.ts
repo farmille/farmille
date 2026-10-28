@@ -66,6 +66,14 @@ export function matchesCatalogFilter(
     case "method":
       return material.material_application_methods.some((row) => row.method === filter.id);
     case "concern":
+      return (
+        material.material_search_tags.some((row) => row.search_tag_id === filter.id) ||
+        catalog.searchTags.some(
+          (tag) =>
+            tag.id === filter.id &&
+            material.material_effects.some((row) => tag.effectIds.includes(row.effect_id)),
+        )
+      );
     case "condition":
       return material.material_search_tags.some((row) => row.search_tag_id === filter.id);
   }

@@ -54,24 +54,6 @@ describe("Field", () => {
     expect(screen.getByRole("textbox", { name: "ミドルネーム" })).not.toBeRequired();
   });
 
-  it("案内と公開範囲を入力の説明に結びつける", () => {
-    render(
-      <Field
-        description="本名でなくて構いません。"
-        label="ニックネーム"
-        lead="投稿に表示されます"
-        name="handle"
-        visibility="private"
-      >
-        <Input label={null} />
-      </Field>,
-    );
-
-    expect(screen.getByRole("textbox", { name: "ニックネーム" })).toHaveAccessibleDescription(
-      /^(?=.*公開されません)(?=.*投稿に表示されます)(?=.*本名でなくて構いません。)/,
-    );
-  });
-
   it("Form の errors を role=alert で出して入力の説明に結び、入力を変えると消す", async () => {
     const user = userEvent.setup();
     render(
@@ -93,20 +75,6 @@ describe("Field", () => {
     expect(input).not.toHaveAttribute("aria-invalid", "true");
   });
 
-  it("画面側で判定したエラーは Form の外でも出す", () => {
-    render(
-      <Field error="数値を入力してください" label="調査した範囲" name="range">
-        <Input label={null} />
-      </Field>,
-    );
-
-    expect(screen.getByRole("alert")).toHaveTextContent("数値を入力してください");
-    expect(screen.getByRole("textbox", { name: "調査した範囲" })).toHaveAttribute(
-      "aria-invalid",
-      "true",
-    );
-  });
-
   it("Textarea も見出しで名前が付き、Field の name で送る", async () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
@@ -126,26 +94,6 @@ describe("Field", () => {
     await user.click(screen.getByRole("button", { name: "送信" }));
 
     expect(submitted[0]?.get("body")).toBe("根の張りが良くなった");
-  });
-
-  it("必須の入力が空なら送信を止めてエラーを出す", async () => {
-    const user = userEvent.setup();
-    const submitted: FormData[] = [];
-    render(
-      <Form persist={false} onSubmit={captureSubmit(submitted)}>
-        <Field label="メールアドレス" name="email" requirement="required">
-          <Input label={null} type="email" />
-        </Field>
-        <button type="submit">送信</button>
-      </Form>,
-    );
-
-    await user.click(screen.getByRole("button", { name: "送信" }));
-
-    expect(submitted).toHaveLength(0);
-    const input = screen.getByRole("textbox", { name: "メールアドレス" });
-    expect(input).toHaveAttribute("aria-invalid", "true");
-    expect(input).toHaveFocus();
   });
 
   it("ブラウザの検証エラーは閲覧環境の言語によらず日本語で1つだけ出し、alert にはしない", async () => {

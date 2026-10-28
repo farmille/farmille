@@ -21,6 +21,7 @@ export const getPublishedArticle = fn<
         manufacturer_name: "グリーンバイオ株式会社",
         avg_rating: 4.2,
         manufacturer_verified_at: "2026-09-15T09:00:00Z",
+        container_type_id: 1,
       },
     ],
     helpfulCount: 12,

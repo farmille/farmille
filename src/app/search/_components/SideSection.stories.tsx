@@ -11,7 +11,7 @@ const meta = {
     note: "文字検索はすべての作目・別名が対象です。",
     filter: {
       label: "作物名で検索",
-      placeholder: "作物名で検索（例：トマト、柿）",
+      placeholder: "作物名で検索（例：ミニトマト、いちご）",
       empty: "該当する作物がありません",
       items: [
         { key: "tomato", terms: ["トマト", "ミニトマト"], node: <span>トマト</span> },
@@ -33,6 +33,7 @@ export const Open: Story = {
 export const NoFilter: Story = { args: { filter: undefined, note: undefined } };
 export const NoMatch: Story = {
   play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole("button", { name: /作物で探す/ }));
     await userEvent.type(within(canvasElement).getByRole("searchbox"), "該当なし");
   },
 };

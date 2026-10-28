@@ -4,6 +4,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
   agentRules: false,
+  experimental: {
+    // 2MBの画像に、ほかの入力欄とmultipartの分を加える。
+    serverActions: { bodySizeLimit: "3mb" },
+  },
   // jposta は同梱チャンクを相対 import する。バンドルするとその経路が壊れる。
   // pdfjs-dist もサーバーでは worker（pdf.worker.mjs）を相対 import するので、バンドルしない。
   serverExternalPackages: ["jposta", "pdfjs-dist"],

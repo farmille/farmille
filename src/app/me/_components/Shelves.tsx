@@ -167,7 +167,9 @@ export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: Po
             <div className={postStatus}>
               <UsageReportStatus status={post.status} />
               {post.status === "draft" ? (
-                <Link href={`/materials/${post.materialId}/report/new`}>フォームを再開 →</Link>
+                <Link href={`/materials/${post.materialId}/report/new`}>
+                  フォームを再開 <Icon name="arrow_forward" size="xs" />
+                </Link>
               ) : null}
             </div>
             <div className={postTitle}>{post.title}</div>
@@ -202,7 +204,9 @@ export function SavedShelf({ items }: SavedShelfProps) {
         <div className={savedList}>
           {items.map((item) => (
             <LinkRow key={item.savedId} href={`/materials/${item.materialId}`}>
-              <div className={savedName}>★ {item.name}</div>
+              <div className={savedName}>
+                <Icon name="star_filled" size="xs" /> {item.name}
+              </div>
               <div className={savedMaker}>{item.manufacturerName}</div>
             </LinkRow>
           ))}

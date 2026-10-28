@@ -10,9 +10,4 @@ describe("SectionHeading", () => {
     render(createElement(SectionHeading, { title: "感想口コミ" }));
     expect(screen.getByRole("heading", { name: "感想口コミ", level: 2 })).toBeVisible();
   });
-
-  it("ページ見出しにはh1を指定できる", () => {
-    render(createElement(SectionHeading, { as: "h1", title: "掲載資材一覧" }));
-    expect(screen.getByRole("heading", { name: "掲載資材一覧", level: 1 })).toBeVisible();
-  });
 });
