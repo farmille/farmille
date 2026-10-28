@@ -43,6 +43,8 @@ alter table public.usage_reports
 
 comment on column public.usage_reports.crop_name_other is
   '作物マスタにない作目の自由記入。crop_id と同時には持たない。';
+-- usage_reports の閲覧権限は列ごとに付けている（20261011130000）。crop_id と同じく読めるようにする。
+grant select (crop_name_other) on public.usage_reports to anon, authenticated;
 
 -- 口コミの作目は、作物IDを1つか、名前を1つのどちらか。
 create function app.assert_review_crop(p_crop_ids uuid[], p_crop_name_other text)
