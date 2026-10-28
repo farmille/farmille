@@ -98,12 +98,13 @@ export function Field({
       >
         {children}
       </FieldContext.Provider>
+      {/* エラーは入力欄の真下に出す。説明はその下 */}
+      <FieldErrorText error={error} />
       {description === undefined ? null : (
         <BaseField.Description className={guideRecipe({ placement: "below" })}>
           {description}
         </BaseField.Description>
       )}
-      <FieldErrorText error={error} />
     </BaseField.Root>
   );
 }

@@ -23,6 +23,7 @@ const avatarRecipe = cva({
       sm: { w: "8", h: "8" },
       md: { w: "9", h: "9" },
       xl: { w: "20", h: "20" },
+      "2xl": { w: "28", h: "28" },
     },
   },
   defaultVariants: { size: "md" },
@@ -30,7 +31,7 @@ const avatarRecipe = cva({
 
 type AvatarSize = NonNullable<NonNullable<RecipeVariantProps<typeof avatarRecipe>>["size"]>;
 
-const AVATAR_PIXELS = { "2xs": 18, xs: 26, sm: 32, md: 36, xl: 80 } satisfies Record<
+const AVATAR_PIXELS = { "2xs": 18, xs: 26, sm: 32, md: 36, xl: 80, "2xl": 112 } satisfies Record<
   AvatarSize,
   number
 >;

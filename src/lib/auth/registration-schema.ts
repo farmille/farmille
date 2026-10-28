@@ -30,7 +30,7 @@ export const generalRegistrationSchema = v.object({
   phone: v.union([v.literal(""), phone], "電話番号を正しく入力してください。"),
   standpoint: v.picklist(
     ["farmer", "ja", "government", "other"],
-    "あなたの立場を選択してください。",
+    "あなたの属性を選択してください。",
   ),
   postalCode: v.pipe(
     v.string(),

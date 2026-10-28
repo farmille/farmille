@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, type ReactNode } from "react";
+import { startTransition, useActionState, type ReactNode } from "react";
 
 import {
   FileInput,
@@ -21,6 +21,7 @@ import { css } from "../../../../styled-system/css";
 
 import { updateProfileAction } from "./actions";
 import { ProfileTagsEditor } from "./ProfileTagsEditor";
+import { shrinkAvatarIn } from "./shrink-avatar";
 
 const slots = css({
   display: "grid",
@@ -64,7 +65,11 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
 
   return (
     <Form
-      action={formAction}
+      action={async (formData) => {
+        await shrinkAvatarIn(formData);
+        // await のあとは送信の transition から外れるので、結果待ちの表示が続くよう入れ直す
+        startTransition(() => formAction(formData));
+      }}
       errors={fieldErrorsOf(state)}
       persist="profile"
       data-tour="profile-form"
