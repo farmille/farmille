@@ -74,6 +74,8 @@ export function SearchResults({
           <>
             絞り込み条件：<b className={css({ color: "text.brand" })}>{logic}</b>
           </>
+        ) : query ? (
+          `「${query}」の検索結果`
         ) : (
           `全 ${catalog.materials.length} 件を表示中（条件を追加すると絞り込みます）`
         )}

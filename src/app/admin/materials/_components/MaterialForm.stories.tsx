@@ -63,6 +63,8 @@ const classifications: ClassificationOptions = {
       id: "00000000-0000-4000-8000-000000000309",
       name: "根張り改善",
       category: "concern",
+      aliases: [],
+      effectIds: [],
       sort_order: 10,
     },
   ],
