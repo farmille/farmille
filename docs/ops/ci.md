@@ -77,7 +77,7 @@ E2Eには2MBの画像付きプロフィール保存と、2MBを超える画像�
 
 Supabaseが使う`docs/email-templates`は資料扱いにしない。画面の選別では静的import・再export・文字列の動的importをたどり、別ルートの利用先も含める。削除・rename・Nextのlayoutやerrorなどの暗黙の親画面・mock・型宣言の変更、依存を解決できない変更は全件検査する。
 
-選んだStoryは320・375・767・768・1023・1024・1440pxの7幅を検査する。部品の操作テストも行う。代表画面の撮影は、静的ビルド後に`CAPTURE_STORYBOOK=1 pnpm test:storybook:responsive --grep スクリーンショット`で実行する。375px・1440pxの画像を`output/playwright/storybook-responsive`へ保存する。対象Storyがビルド後のindexに存在しなければエラーになる。
+選んだStoryは320・375・767・768・1023・1024・1440pxの7幅を検査し、部品の操作テストも行う。対象Storyがビルド後のindexに存在しなければエラーになる。代表画面の撮影は通常の検査に含めず、`CAPTURE_STORYBOOK=1`を付けたときだけ実行する。
 
 送信するcommitと検査対象を一致させるため、push前に変更をcommitまたはstashする。現在のHEADと異なるcommitを送る場合は、対象ブランチに移動して個別にpushする。検査中にHEADや作業ツリーを変更した場合もpushは止まる。
 
