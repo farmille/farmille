@@ -48,7 +48,7 @@ export const storyCatalog: CatalogSearch = {
       material_ingredient_categories: [
         {
           ingredient_category_id: MICROBE,
-          ingredient_categories: { name: "微生物", short_name: "微生物" },
+          ingredient_categories: { short_name: "微生物" },
         },
       ],
     }),
@@ -66,14 +66,11 @@ export const storyCatalog: CatalogSearch = {
       material_ingredient_categories: [
         {
           ingredient_category_id: MICROBE,
-          ingredient_categories: { name: "微生物", short_name: "微生物" },
+          ingredient_categories: { short_name: "微生物" },
         },
         {
           ingredient_category_id: SEAWEED,
-          ingredient_categories: {
-            name: "海藻、海藻抽出物",
-            short_name: "海藻",
-          },
+          ingredient_categories: { short_name: "海藻" },
         },
       ],
     }),
@@ -86,10 +83,7 @@ export const storyCatalog: CatalogSearch = {
       material_ingredient_categories: [
         {
           ingredient_category_id: SEAWEED,
-          ingredient_categories: {
-            name: "海藻、海藻抽出物",
-            short_name: "海藻",
-          },
+          ingredient_categories: { short_name: "海藻" },
         },
       ],
     }),

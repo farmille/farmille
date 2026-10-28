@@ -27,11 +27,7 @@ const rich = {
   savedCount: 27,
   description:
     "定植前の土壌に混和して使う微生物資材。根の伸長を促し、活着を早める。トマト・きゅうりなど果菜類の育苗期から使える。",
-  categories: [
-    { name: "微生物", short_name: "微生物" },
-    { name: "アミノ酸、ペプチド、タンパク質加水分解物", short_name: "アミノ酸" },
-    { name: "腐植酸、腐植物質、フミン酸、フルボ酸", short_name: "フルボ酸・腐植酸" },
-  ],
+  categories: ["微生物", "アミノ酸", "フルボ酸・腐植酸"],
   evidence: { direct: ["トマト"], groups: [] },
 } as const;
 

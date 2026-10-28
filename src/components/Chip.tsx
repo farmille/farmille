@@ -1,23 +1,76 @@
-"use client";
-
-import { Tooltip } from "@base-ui/react/tooltip";
-import { useRef, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { Icon } from "./Icon";
-import { chipRecipe, chipTooltipStyle } from "./chip-recipe";
-import { popupPositionerStyle } from "./popup";
-import { css, cx } from "../../styled-system/css";
+import { cx, sva } from "../../styled-system/css";
 
-const visuallyHidden = css({ srOnly: true });
+export const chipRecipe = sva({
+  slots: ["root", "category", "remove"],
+  base: {
+    root: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "1.5",
+      maxW: "full",
+      py: "1",
+      pl: "3",
+      pr: "3",
+      bg: "primary.100",
+      color: "text.brandOnSoft",
+      borderWidth: "1px",
+      borderStyle: "solid",
+      borderColor: "primary.700/30",
+      borderRadius: "pill",
+      fontWeight: "semibold",
+      lineHeight: "normal",
+      overflowWrap: "anywhere",
+      outline: "none",
+      // Combobox の中では矢印キーでチップへフォーカスが移る
+      _focusVisible: {
+        outlineWidth: "2px",
+        outlineStyle: "solid",
+        outlineColor: "primary.700",
+        outlineOffset: "[1px]",
+      },
+    },
+    category: { flexShrink: "0", fontSize: "2xs", fontWeight: "bold", opacity: "label" },
+    remove: {
+      position: "relative",
+      display: "grid",
+      placeItems: "center",
+      flexShrink: "0",
+      p: "0",
+      borderWidth: "0",
+      borderRadius: "pill",
+      bg: "primary.700/18",
+      color: "text.brandOnSoft",
+      cursor: "pointer",
+      _focusVisible: {
+        outlineWidth: "2px",
+        outlineStyle: "solid",
+        outlineColor: "primary.700",
+        outlineOffset: "[1px]",
+      },
+      _after: { content: '""', position: "absolute", inset: "-1" },
+    },
+  },
+  variants: {
+    size: {
+      md: { root: { fontSize: "md" }, remove: { w: "4.5", h: "4.5" } },
+      sm: { root: { fontSize: "sm" }, remove: { w: "4", h: "4" } },
+    },
+    removable: {
+      true: { root: { pr: "1.5" } },
+      false: {},
+    },
+  },
+  defaultVariants: { size: "sm", removable: false },
+});
 
 type ChipProps = {
   children: ReactNode;
   /** 名前の前に小さく添える種類（作物・効果など）。 */
   category?: string;
-  /** children が略称のときの正式名称。children と異なるときだけ、ホバーで出し、読み上げにも使う。 */
-  fullLabel?: string;
-  tone?: "brand" | "neutral";
-  size?: "md" | "sm" | "xs";
+  size?: "md" | "sm";
   className?: string;
 } & (
   | {
@@ -28,48 +81,13 @@ type ChipProps = {
   | { onRemove?: undefined; removeLabel?: undefined }
 );
 
-/** 1行に収まる名前のチップ。入りきらない名前は末尾を省略し、ホバーで全文を出す。onRemove を渡すと外すボタンが付く。 */
-export function Chip({
-  children,
-  category,
-  fullLabel,
-  tone,
-  size,
-  className,
-  onRemove,
-  removeLabel,
-}: ChipProps) {
-  const styles = chipRecipe({ tone, size, removable: onRemove !== undefined });
-  const fullName = fullLabel === children ? undefined : fullLabel;
-  const labelRef = useRef<HTMLSpanElement>(null);
-  const [open, setOpen] = useState(false);
-
-  function handleOpenChange(next: boolean): void {
-    const label = labelRef.current;
-    const truncated = label !== null && label.scrollWidth > label.clientWidth;
-    setOpen(next && (fullName !== undefined || truncated));
-  }
-
+/** 選択済みの項目を示すチップ。onRemove を渡すと外すボタンが付く。 */
+export function Chip({ children, category, size, className, onRemove, removeLabel }: ChipProps) {
+  const styles = chipRecipe({ size, removable: onRemove !== undefined });
   return (
     <span className={cx(styles.root, className)}>
       {category === undefined ? null : <span className={styles.category}>{category}</span>}
-      <Tooltip.Root open={open} onOpenChange={handleOpenChange}>
-        <Tooltip.Trigger delay={300} render={<span ref={labelRef} className={styles.label} />}>
-          {fullName === undefined ? (
-            children
-          ) : (
-            <>
-              <span aria-hidden="true">{children}</span>
-              <span className={visuallyHidden}>{fullName}</span>
-            </>
-          )}
-        </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Positioner className={popupPositionerStyle} sideOffset={6}>
-            <Tooltip.Popup className={chipTooltipStyle}>{fullName ?? children}</Tooltip.Popup>
-          </Tooltip.Positioner>
-        </Tooltip.Portal>
-      </Tooltip.Root>
+      {children}
       {onRemove === undefined ? null : (
         <button aria-label={removeLabel} className={styles.remove} onClick={onRemove} type="button">
           <Icon name="close" size="2xs" />

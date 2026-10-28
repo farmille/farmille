@@ -5,6 +5,6 @@ export const listHomeMaterials = fn<
 >(async () =>
   relatedMaterials.map((material) => ({
     ...material,
-    categories: [{ name: "微生物", short_name: "微生物" }],
+    categories: ["微生物"],
   })),
 ).mockName("listHomeMaterials");

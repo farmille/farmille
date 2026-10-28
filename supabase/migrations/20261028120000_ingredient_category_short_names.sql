@@ -1,5 +1,5 @@
--- 資材ジャンル（JBSA材料8分類）の略称。正式名称は分類の構成要素を読点で並べた長い名前なので、
--- チップには略称を出し、詳細と選択肢には正式名称を出す。
+-- 資材ジャンル（JBSA材料8分類）の略称。資材ジャンル名は分類に含まれる材料を読点で並べた長い名前なので、
+-- 資材カードと資材詳細の見出しには略称を出し、製品詳細の表と選択肢には資材ジャンル名を出す。
 -- 略称は、各ジャンルに紐づく資材の主成分に多く現れる語を残して決めた。
 alter table public.ingredient_categories add column short_name text;
 
@@ -21,4 +21,4 @@ alter table public.ingredient_categories
   add constraint ingredient_categories_short_name_length check (char_length(short_name) between 1 and 10);
 
 comment on column public.ingredient_categories.short_name is
-  'チップや検索結果のカードに出す略称。10文字以内。正式名称は name。';
+  '資材カードと資材詳細の見出しに出す略称。10文字以内。資材ジャンル名は name。';

@@ -138,7 +138,7 @@ export function SearchResults({
                     savedCount={counts.saved_count}
                     description={material.description ?? undefined}
                     categories={material.material_ingredient_categories.map(
-                      (row) => row.ingredient_categories,
+                      (row) => row.ingredient_categories.short_name,
                     )}
                     evidence={evidence}
                     imageSrc={material.imageUrl ?? undefined}

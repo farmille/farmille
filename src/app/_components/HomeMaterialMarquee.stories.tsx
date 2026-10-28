@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { MaterialCard, type MaterialGenre } from "@/components/MaterialCard";
+import { MaterialCard } from "@/components/MaterialCard";
 import { css } from "../../../styled-system/css";
 import { HomeMaterialMarquee } from "./HomeMaterialMarquee";
 
@@ -8,22 +8,22 @@ const thumbnail =
   "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20600%20450%22%3E%3Crect%20width%3D%22600%22%20height%3D%22450%22%20fill%3D%22%23dcefd8%22%2F%3E%3Ccircle%20cx%3D%22300%22%20cy%3D%22225%22%20r%3D%22120%22%20fill%3D%22%23618d48%22%2F%3E%3C%2Fsvg%3E";
 
 const genres = [
-  { name: "海藻、海藻抽出物", short_name: "海藻" },
-  { name: "アミノ酸、ペプチド、タンパク質加水分解物", short_name: "アミノ酸" },
-  { name: "腐植酸、腐植物質、フミン酸、フルボ酸", short_name: "フルボ酸・腐植酸" },
-  { name: "微生物", short_name: "微生物" },
-  { name: "微量ミネラル、ビタミン", short_name: "微量ミネラル" },
-  { name: "キチン、キトサン、多糖類", short_name: "キチン・多糖類" },
-  { name: "動植物抽出物、微生物抽出物", short_name: "動植物・微生物抽出物" },
-  { name: "その他", short_name: "その他" },
-] satisfies MaterialGenre[];
+  "海藻",
+  "アミノ酸",
+  "フルボ酸・腐植酸",
+  "微生物",
+  "微量ミネラル",
+  "キチン・多糖類",
+  "動植物・微生物抽出物",
+  "その他",
+];
 
 type MarqueeMaterial = {
   name: string;
   maker: string;
   rating: number;
   reviewCount: number;
-  genre: MaterialGenre;
+  genre: string;
 };
 
 const materials: MarqueeMaterial[] = [

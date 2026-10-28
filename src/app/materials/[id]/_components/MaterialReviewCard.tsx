@@ -14,7 +14,7 @@ import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
 import { css, cx } from "../../../../../styled-system/css";
 
-import { Chip } from "@/components/Chip";
+import { CropLine } from "@/components/CropLine";
 import { Stars } from "./CardParts";
 
 const cardStyle = css({ scrollMarginTop: "16" });
@@ -51,14 +51,7 @@ const scoreStyle = css({
   fontWeight: "extrabold",
   fontVariantNumeric: "tabular-nums",
 });
-const cropsStyle = css({
-  mt: "1",
-  mb: "1.5",
-  display: "flex",
-  alignItems: "center",
-  flexWrap: "wrap",
-  gap: "1.5",
-});
+const cropsStyle = css({ mt: "1", mb: "1.5", textStyle: "note", color: "text.muted" });
 const bodyStyle = css({
   textStyle: "body",
   color: "text.muted",
@@ -136,11 +129,7 @@ export function MaterialReviewCard({
       </div>
       {review.crops.length > 0 ? (
         <div className={cropsStyle}>
-          {review.crops.map((crop) => (
-            <Chip key={crop.id} size="xs">
-              {crop.name}
-            </Chip>
-          ))}
+          <CropLine crops={review.crops.map((crop) => crop.name)} />
         </div>
       ) : null}
       <div className={bodyStyle}>{review.body}</div>

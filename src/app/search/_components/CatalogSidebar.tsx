@@ -9,7 +9,7 @@ import {
 import type { CatalogSearch } from "@/server/queries/catalog-search";
 import type { SearchCatalog, SearchFilterItem } from "@/lib/material-search";
 import { cropAncestors } from "@/lib/catalog-search";
-import { chipRecipe as selectedChipRecipe } from "@/components/chip-recipe";
+import { chipRecipe as selectedChipRecipe } from "@/components/Chip";
 import { Icon } from "@/components/Icon";
 
 import { css, cva, cx } from "../../../../styled-system/css";
@@ -201,7 +201,7 @@ export function CatalogSidebar({
           return (
             <span key={key} className={selectedChip.root}>
               <span className={selectedChip.category}>選択中</span>
-              <span className={selectedChip.label}>{filter.name}</span>
+              {filter.name}
               <Link
                 href={href}
                 rel="nofollow"

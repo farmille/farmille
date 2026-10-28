@@ -167,10 +167,7 @@ export function UiCatalog() {
           reportCount={5}
           savedCount={14}
           description="高温期の草勢維持に定評。施設園芸を中心に導入実績多数。"
-          categories={[
-            { name: "微生物", short_name: "微生物" },
-            { name: "アミノ酸、ペプチド、タンパク質加水分解物", short_name: "アミノ酸" },
-          ]}
+          categories={["微生物", "アミノ酸"]}
           evidence={{ direct: ["トマト"], groups: [] }}
         />
       </section>
