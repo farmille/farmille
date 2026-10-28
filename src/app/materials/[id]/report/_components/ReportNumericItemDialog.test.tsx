@@ -24,11 +24,17 @@ function renderDialog() {
 }
 
 describe("数値を直すポップアップを閉じるとき", () => {
-  it("直していなければ、確かめずに閉じる", () => {
+  it("直していないか元の値へ戻していれば、確かめずに閉じる", () => {
     const onClose = renderDialog();
     const before = new Event("beforeunload", { cancelable: true });
     window.dispatchEvent(before);
     expect(before.defaultPrevented).toBe(false);
+    const unit = screen.getByRole("textbox", { name: "単位" });
+    fireEvent.change(unit, { target: { value: "kg" } });
+    fireEvent.change(unit, { target: { value: "g" } });
+    const restored = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(restored);
+    expect(restored.defaultPrevented).toBe(false);
     fireEvent.click(screen.getByRole("button", { name: "直さずに閉じる" }));
     expect(onClose).toHaveBeenCalled();
   });
