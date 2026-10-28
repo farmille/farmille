@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { fn } from "storybook/test";
+import { fn, mocked } from "storybook/test";
+
+import { FabBar } from "@/components/FabBar";
+import { getSessionUser } from "@/server/auth";
 
 import { TourBar } from "./TourBar";
 
@@ -34,4 +37,21 @@ export const WithSave: Story = {
       "栽培作目を選んで「保存する」を押してください（複数選択可）。所属や自己紹介も入力できます。",
     action: { label: "保存する", onClick: fn() },
   },
+};
+
+// 資材ページの画面の下に固定された「実証詳細レポートを書く」「感想口コミを書く」のバーを隠さず、その上に出る。
+// getSessionUser は preview.ts の sb.mock で差し替わっており、FabBar と同じインスタンスを mocked() 経由で操作する。
+export const AbovePostBar: Story = {
+  beforeEach: () => {
+    mocked(getSessionUser).mockResolvedValue(null);
+  },
+  decorators: [
+    (Story) => (
+      <>
+        <Story />
+        <FabBar placement="viewport" look="site" />
+      </>
+    ),
+  ],
+  args: WithScrollHint.args,
 };

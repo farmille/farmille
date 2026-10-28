@@ -5,6 +5,7 @@ import { Icon } from "../Icon";
 import { TourCardBody } from "./TourCardBody";
 import {
   bottomSpaceStyle,
+  dockStyle,
   riseStyle,
   useBottomSpace,
   useCardHandoff,
@@ -13,13 +14,6 @@ import {
 } from "./tour-motion";
 
 const barStyle = css({
-  position: "fixed",
-  zIndex: "guide",
-  left: "3",
-  right: "3",
-  bottom: "[calc(token(spacing.3) + env(safe-area-inset-bottom, 0px))]",
-  mx: "auto",
-  maxW: "guide",
   display: "flex",
   flexDirection: "column",
   gap: "2",
@@ -106,14 +100,15 @@ export function TourBar({
   scrollHint,
 }: TourBarProps) {
   const entered = useEntered(useHandoff().continuing);
-  const { ref, space } = useBottomSpace<HTMLDivElement>();
+  const { ref, space, clear } = useBottomSpace<HTMLDivElement>();
   useCardHandoff(ref, true, false);
   return (
     <>
       <div aria-hidden="true" className={bottomSpaceStyle} style={{ "--tour-space": space }} />
       <div
         ref={ref}
-        className={cx(barStyle, riseStyle)}
+        className={cx(dockStyle, barStyle, riseStyle)}
+        style={{ "--tour-clear": clear }}
         data-entered={entered ? "" : undefined}
         role="status"
       >

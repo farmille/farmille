@@ -7,6 +7,7 @@ import { TourEndButton } from "./TourEndButton";
 import { TourLabel } from "./TourLabel";
 import {
   bottomSpaceStyle,
+  dockStyle,
   riseStyle,
   sentenceStyle,
   sentences,
@@ -31,13 +32,6 @@ const scrimStyle = css({
 });
 
 const sheetStyle = css({
-  position: "fixed",
-  zIndex: "guide",
-  left: "3",
-  right: "3",
-  bottom: "[calc(token(spacing.3) + env(safe-area-inset-bottom, 0px))]",
-  mx: "auto",
-  maxW: "guide",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -92,6 +86,8 @@ export type TourSheetProps = {
   body: string;
   primaryLabel: string;
   onPrimary: () => void;
+  /** 主ボタンを押した後の処理を待つ間、主ボタンを読み込み中にする */
+  primaryLoading?: boolean;
   /** 段階の何番目か（「1 / 3」と点で示す）。ようこそと終了では省く */
   section?: { current: number; total: number };
   /** 「この手順をスキップ」。段階のシートでだけ出す */
@@ -107,6 +103,7 @@ export function TourSheet({
   body,
   primaryLabel,
   onPrimary,
+  primaryLoading = false,
   section,
   onSkipStep,
   onEnd,
@@ -115,7 +112,7 @@ export function TourSheet({
   const entered = useEntered(handoff.continuing);
   const dimmed = useEntered(handoff.dimmed);
   const state = entered ? "" : undefined;
-  const { ref, space } = useBottomSpace<HTMLElement>();
+  const { ref, space, clear } = useBottomSpace<HTMLElement>();
   useCardHandoff(ref, true, true);
   return (
     <>
@@ -124,7 +121,8 @@ export function TourSheet({
       <section
         ref={ref}
         data-tour-sheet=""
-        className={cx(sheetStyle, riseStyle)}
+        className={cx(dockStyle, sheetStyle, riseStyle)}
+        style={{ "--tour-clear": clear }}
         data-entered={state}
         role="dialog"
         aria-modal="false"
@@ -156,7 +154,9 @@ export function TourSheet({
           </span>
         ) : null}
         <div className={actionsStyle}>
-          <Button onClick={onPrimary}>{primaryLabel}</Button>
+          <Button onClick={onPrimary} loading={primaryLoading}>
+            {primaryLabel}
+          </Button>
           {onSkipStep ? (
             <Button variant="ghost" onClick={onSkipStep}>
               この手順をスキップ

@@ -106,20 +106,48 @@ export const riseStyle = css({
   _motionReduce: { transform: "none" },
 });
 
-/**
- * 画面の下に固定した案内の高さぶん、ページの最後に余白を足す。
- * 案内に隠れたページの下端（「保存する」など）も、スクロールすれば案内の上に出せるようにする。
- */
+// 資材ページの画面の下に固定された、投稿のバー（「実証詳細レポートを書く」「感想口コミを書く」）
+const FIXED_POST_BAR = '[data-ui="responsive-fab-bar"]';
+
+/** 画面の下に固定された投稿のバーが、画面の下から占める高さ（px）。バーが無い・固定でないときは 0。 */
+export function fixedPostBarHeight(): number {
+  const bar = document.querySelector(FIXED_POST_BAR);
+  if (bar === null || getComputedStyle(bar).position !== "fixed") return 0;
+  return Math.max(0, window.innerHeight - bar.getBoundingClientRect().top);
+}
+
 export type BottomSpace<T extends HTMLElement> = {
   ref: RefObject<T | null>;
   /** 余白の高さ。CSS 変数 --tour-space に渡す */
   space: string;
+  /** 投稿のバーが占める高さ。CSS 変数 --tour-clear に渡し、案内をバーの上に出す */
+  clear: string;
 };
 
+/**
+ * 画面の下に固定した案内の高さぶん、ページの最後に余白を足す。
+ * 案内に隠れたページの下端（「保存する」など）も、スクロールすれば案内の上に出せるようにする。
+ * あわせて、画面の下に固定された投稿のバーの高さを測り、案内がバーを隠さないようにする。
+ */
 export function useBottomSpace<T extends HTMLElement>(): BottomSpace<T> {
   const ref = useRef<T>(null);
   const [height, setHeight] = useState(0);
-  useEffect(() => {
+  // 最初の描画から持ち上げておき、案内がバーの下から跳ね上がらないようにする
+  const [barHeight, setBarHeight] = useState(fixedPostBarHeight);
+  // 資材ページはバーを読み込み後に描くので、ページの大きさが変わるたびに測り直す
+  useLayoutEffect(() => {
+    const measure = () => setBarHeight(fixedPostBarHeight());
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(document.body);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+  // 案内を持ち上げると画面の下からの高さが変わるので、持ち上げた後の位置で測る
+  useLayoutEffect(() => {
     const element = ref.current;
     if (element === null) return;
     const measure = () => setHeight(window.innerHeight - element.getBoundingClientRect().top);
@@ -131,12 +159,30 @@ export function useBottomSpace<T extends HTMLElement>(): BottomSpace<T> {
       observer.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, []);
-  return { ref, space: `${Math.max(0, height)}px` };
+  }, [barHeight]);
+  return { ref, space: `${Math.max(0, height)}px`, clear: `${barHeight}px` };
 }
 
 /** ページの最後に置く余白。高さは useBottomSpace で決める */
 export const bottomSpaceStyle = css({ h: "var(--tour-space)", pointerEvents: "none" });
+
+/**
+ * 画面の下に固定する案内の置き場所。タブレット以上で投稿のバーがあるときは、その上（--tour-clear の高さ）に出す。
+ * スマートフォンでは、案内が幅いっぱいの投稿のバーに重なってよい（バーの上に浮かせると、案内と画面の内容の区別が付きにくい）。
+ */
+export const dockStyle = css({
+  position: "fixed",
+  zIndex: "guide",
+  left: "3",
+  right: "3",
+  bottom: "[calc(token(spacing.3) + env(safe-area-inset-bottom, 0px))]",
+  mx: "auto",
+  maxW: "guide",
+  tab: {
+    bottom:
+      "[max(calc(token(spacing.3) + env(safe-area-inset-bottom, 0px)), calc(var(--tour-clear) + token(spacing.3)))]",
+  },
+});
 
 /** 文ごとに行を分ける。短い案内が文の途中で折り返して読みにくくならないようにする。 */
 export function sentences(text: string): string[] {
