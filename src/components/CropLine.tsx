@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+
 import { Icon } from "./Icon";
 import { css, cx } from "../../styled-system/css";
 
@@ -25,7 +27,12 @@ export function CropLine({ crops, className }: CropLineProps) {
       <Icon name="eco" size="xs" className={iconStyle} />
       <span>
         <span className={visuallyHidden}>作物：</span>
-        {crops.join("、")}
+        {crops.map((crop, index) => (
+          <Fragment key={crop}>
+            {index > 0 ? "、" : null}
+            <span>{crop}</span>
+          </Fragment>
+        ))}
       </span>
     </span>
   );
