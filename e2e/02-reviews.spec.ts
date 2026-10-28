@@ -31,9 +31,7 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
     await page.getByRole("option", { name: "ミニトマト なす科果菜類", exact: true }).click();
     await page.getByRole("radio", { name: "4", exact: true }).check();
     await page.getByLabel("感想口コミ本文").fill(body);
-    await page
-      .getByRole("checkbox", { name: /実際に使用した感想を、使用条件や感じた変化/ })
-      .check();
+    await expect(page.getByText("確認事項", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "投稿する" }).click();
 
     await expect(
