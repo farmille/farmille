@@ -72,6 +72,8 @@ export const listClassificationOptions = fn<
       {
         id: "11111111-1111-4111-8111-111111111111",
         name: "高温期の生育維持",
+        aliases: [],
+        effectIds: [],
         sort_order: 3,
         category: "condition",
       },

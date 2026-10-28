@@ -135,6 +135,7 @@ export const storyCatalog: CatalogSearch = {
       categorySortOrder: 2,
     },
   ],
+  searchTags: [],
   counts: [
     { material_id: id(1), report_count: 0, saved_count: 0 },
     { material_id: id(21), report_count: 4, saved_count: 27 },

@@ -3572,6 +3572,59 @@ export type Database = {
           },
         ]
       }
+      search_tag_aliases: {
+        Row: {
+          name: string
+          search_tag_id: string
+        }
+        Insert: {
+          name: string
+          search_tag_id: string
+        }
+        Update: {
+          name?: string
+          search_tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_tag_aliases_search_tag_id_fkey"
+            columns: ["search_tag_id"]
+            isOneToOne: false
+            referencedRelation: "search_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_tag_effects: {
+        Row: {
+          effect_id: string
+          search_tag_id: string
+        }
+        Insert: {
+          effect_id: string
+          search_tag_id: string
+        }
+        Update: {
+          effect_id?: string
+          search_tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_tag_effects_effect_id_fkey"
+            columns: ["effect_id"]
+            isOneToOne: false
+            referencedRelation: "effects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_tag_effects_search_tag_id_fkey"
+            columns: ["search_tag_id"]
+            isOneToOne: false
+            referencedRelation: "search_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       search_tags: {
         Row: {
           category: string
