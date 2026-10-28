@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { companyReceiptEmail, receiptAccessEmail } from "./company-application-email";
 
 describe("企業申請の案内メール", () => {
-  it("宛名・正式署名・期限を付け、受付票の確認用リンクを案内する", () => {
+  it("宛名を付け、受付票の確認用リンクを案内する", () => {
     const url = "https://www.farmille.com/company-requests/receipts/confirm#one-time-token";
     const mail = receiptAccessEmail("農業資材株式会社", "山田太郎", url);
     expect(mail.text).toContain("農業資材株式会社\n山田太郎 様");
@@ -10,7 +10,7 @@ describe("企業申請の案内メール", () => {
   });
 });
 
-it("受付メールは指定の申請種別・受付番号を示し、署名で結ぶ", () => {
+it("受付メールは指定の申請種別・受付番号と宛名を示す", () => {
   const receipt = companyReceiptEmail(
     {
       application: {
