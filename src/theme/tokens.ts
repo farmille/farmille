@@ -187,9 +187,6 @@ export const tokens = {
     },
     // Adobe Fonts のしっぽり明朝 Regular。ホームの応援メッセージに使う。
     shipporiMincho: { value: '"shippori-mincho", serif' },
-    // material-icons パッケージの icon font。ligature で glyph を描く（共通 Icon が使う）
-    materialIcons: { value: '"Material Icons"' },
-    materialIconsOutlined: { value: '"Material Icons Outlined"' },
     sans: {
       value:
         '"Gen Interface JP", -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif',

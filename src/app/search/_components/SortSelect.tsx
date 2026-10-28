@@ -18,7 +18,7 @@ type SortSelectProps = {
 
 const SORT_OPTIONS: readonly Option<MaterialSortParam>[] = [
   { value: "reviews", label: "感想口コミが多い順" },
-  { value: "rating", label: "★が高い順" },
+  { value: "rating", label: "評価が高い順" },
   { value: "newest", label: "新着順" },
 ];
 

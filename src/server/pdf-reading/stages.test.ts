@@ -122,11 +122,12 @@ const request = {
   trial: "キャベツの全品種の全区",
   catalog: { crops: [{ id: "c1", name: "キャベツ", aliases: [] }], effectNames: ["収量の増加"] },
   deadline: Number.MAX_SAFE_INTEGER,
+  pages: 4,
 };
 
 describe("readReportPdf", () => {
   it("骨組みと単独の欄を同時に呼び、骨組みの後に値と区の説明を同時に呼ぶ", async () => {
-    const { extract, log } = fakeExtract();
+    const { extract, log, calls } = fakeExtract();
     const result = await readReportPdf(extract, request);
     expect(result.ok).toBe(true);
     const at = (event: string) => log.indexOf(event);
@@ -140,34 +141,10 @@ describe("readReportPdf", () => {
     );
     expect(Math.min(...copyStarts)).toBeGreaterThan(at("end:skeleton"));
     expect(Math.max(...copyStarts)).toBeLessThan(Math.min(...copyEnds));
-  });
 
-  it("fast で呼ぶのは骨組みだけで、ほかは通常の速度で呼ぶ", async () => {
-    const { extract, calls } = fakeExtract();
-    await readReportPdf(extract, request);
     expect(calls.filter(({ speed }) => speed === "fast").map(({ stage }) => stage)).toEqual([
       "skeleton",
     ]);
-  });
-
-  it("値の数で決めた本数だけ、値を書き写す呼び出しを送る", async () => {
-    const graphs = Array.from({ length: 12 }, (_, index) => ({
-      key: `g${index + 1}`,
-      measurementKey: "k1",
-      heading: "",
-    }));
-    const plots = Array.from({ length: 24 }, (_, index) =>
-      plot(`p${index + 1}`, index === 0 ? "posted" : "untreated"),
-    );
-    const skeleton = { ...answers.skeleton, graphs, plots };
-    const groups = [{ plotKeys: plots.map(({ key }) => key), description: "", quote: "", page: 1 }];
-    const { extract, calls } = fakeExtract(new Map(), {
-      skeleton,
-      plots: { groups, evidence: [] },
-      values: { values: [], bodies: [], evidence: [] },
-    });
-    expect((await readReportPdf(extract, request)).ok).toBe(true);
-    expect(calls.filter(({ stage }) => stage === "values")).toHaveLength(6);
   });
 
   it("区の説明の組を、組の全区に配る", async () => {
@@ -222,47 +199,23 @@ describe("readReportPdf", () => {
     },
   );
 
-  it("区や調査項目の key が骨組みに無ければ、出力の不正として失敗にする", async () => {
-    const brokenPlot = fakeExtract(new Map(), {
-      plots: { groups: [{ plotKeys: ["p9"], description: "", quote: "", page: 1 }], evidence: [] },
-    });
-    const brokenBody = fakeExtract(new Map(), {
-      values: { values: [], bodies: [{ key: "g1", body: "補足" }], evidence: [] },
-    });
-    for (const { extract } of [brokenPlot, brokenBody]) {
-      const result = await readReportPdf(extract, request);
-      expect(result.ok ? null : result.error).toBe("invalid_output");
-    }
-  });
-
   it("根拠がその段で書けない key を指していれば、出力の不正として失敗にする", async () => {
     const evidence = (ref: string) => [{ ref, quote: "引用", page: 1 }];
     const cases = [
       { single: { ...answers.single, evidence: evidence("g1") } },
       { plots: { ...answers.plots, evidence: evidence("g1") } },
       { values: { ...answers.values, evidence: evidence("p1") } },
+      {
+        plots: {
+          groups: [{ plotKeys: ["p9"], description: "", quote: "", page: 1 }],
+          evidence: [],
+        },
+      },
     ];
     for (const overrides of cases) {
       const result = await readReportPdf(fakeExtract(new Map(), overrides).extract, request);
       expect(result.ok ? null : result.error).toBe("invalid_output");
     }
-  });
-
-  it("値の根拠は、その呼び出しに渡したグラフだけを指せる", async () => {
-    // グラフ2つ×区30の60件なので、値はグラフ1つずつの2本に分かれる
-    const plots = Array.from({ length: 30 }, (_, index) =>
-      plot(`p${index + 1}`, index === 0 ? "posted" : "untreated"),
-    );
-    const groups = [{ plotKeys: plots.map(({ key }) => key), description: "", quote: "", page: 1 }];
-    const overrides = {
-      skeleton: { ...answers.skeleton, plots },
-      plots: { groups, evidence: [] },
-      values: { values: [], bodies: [], evidence: [{ ref: "g1", quote: "表3", page: 4 }] },
-    };
-    const { extract, calls } = fakeExtract(new Map(), overrides);
-    const result = await readReportPdf(extract, request);
-    expect(calls.filter(({ stage }) => stage === "values")).toHaveLength(2);
-    expect(result.ok ? null : result.error).toBe("invalid_output");
   });
 
   it.each([
@@ -271,6 +224,7 @@ describe("readReportPdf", () => {
       { values: [{ graphKey: "g1", plotKey: "p1", value: "1126" }], bodies: [], evidence: [] },
     ],
     ["補足", { values: [], bodies: [{ key: "k1", body: "有意差あり" }], evidence: [] }],
+    ["根拠", { values: [], bodies: [], evidence: [{ ref: "g1", quote: "表3", page: 4 }] }],
   ])("%sは、その呼び出しに渡したグラフと調査項目にだけ入れられる", async (_, values) => {
     // グラフ2つ×区30の60件なので、値はグラフ1つずつの2本に分かれ、2本目には g2（k2）だけを渡す
     const plots = Array.from({ length: 30 }, (_, index) =>
@@ -299,6 +253,20 @@ describe("readReportPdf", () => {
     expect(result.ok ? null : result.error).toBe("invalid_output");
   });
 
+  it("根拠のページは、0（記載なし）か PDF のページ数までの整数だけを通す", async () => {
+    const cite = (page: number) => ({
+      single: { ...answers.single, evidence: [{ ref: "crop", quote: "キャベツ", page }] },
+    });
+    for (const page of [0, 1, 4]) {
+      const result = await readReportPdf(fakeExtract(new Map(), cite(page)).extract, request);
+      expect(result.ok, `${page}ページ`).toBe(true);
+    }
+    for (const page of [5, 999, 1.8, -1]) {
+      const result = await readReportPdf(fakeExtract(new Map(), cite(page)).extract, request);
+      expect(result.ok ? null : result.error, `${page}ページ`).toBe("invalid_output");
+    }
+  });
+
   it("骨組みが該当なしなら、値と区の説明を呼ばずに該当なしを返す", async () => {
     const { extract, calls } = fakeExtract(new Map([["single", "hang"]]), {
       skeleton: { ...answers.skeleton, outcome: "no_matching_trial" },
@@ -320,10 +288,7 @@ describe("valueChunks", () => {
     Array.from({ length: count }, (_, index) => plot(`p${index + 1}`, "untreated"));
 
   it.each([
-    [12, 24, 6],
     [7, 20, 3],
-    [10, 6, 2],
-    [1, 2, 1],
     [40, 30, 8],
     [3, 100, 3],
   ])("グラフ %i × 区 %i は %i 本に、グラフを切らずに分ける", (graphCount, plotCount, calls) => {

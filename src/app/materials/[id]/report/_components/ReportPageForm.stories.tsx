@@ -64,3 +64,10 @@ export const Draft: Story = { args: { draft: filledReport } };
 export const Varieties: Story = { args: { draft: varietyReport } };
 
 export const LegacyMedia: Story = { args: { draft: legacyMediaReport } };
+
+export const PdfReadingUnavailable: Story = {
+  args: {
+    draft: filledReport,
+    pdfReading: { siteKey: null, remaining: null, marks: [], checkRequired: false },
+  },
+};

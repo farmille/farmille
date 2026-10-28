@@ -6,9 +6,9 @@ import {
   clearOnboarding,
   isOnboardingPending,
   onboardingShowsOn,
+  onboardingSkipHref,
   onboardingStepAfterNavigation,
   readOnboardingStep,
-  onboardingSkipHref,
   skipOnboardingSection,
   writeOnboardingStep,
 } from "./onboarding";
@@ -67,12 +67,6 @@ describe("初回ログインの案内の進み具合", () => {
     expect(readOnboardingStep(storage, "user-1")).toBeNull();
   });
 
-  it("この手順をスキップは、次の段階の最初へ移る", () => {
-    expect(skipOnboardingSection("profile")).toBe("searchIntro");
-    expect(skipOnboardingSection("materialScroll")).toBe("reviewIntro");
-    expect(skipOnboardingSection("reviewLink")).toBe("finish");
-  });
-
   it("段階ごとの画面でだけ案内を出す", () => {
     expect(onboardingShowsOn("profile", "/me/edit")).toBe(true);
     expect(onboardingShowsOn("profile", "/search")).toBe(false);
@@ -95,6 +89,12 @@ describe("初回ログインの案内の進み具合", () => {
     expect(onboardingSkipHref("finish", "/materials/abc")).toBeNull();
     expect(onboardingShowsOn("reviewIntro", "/post")).toBe(true);
     expect(onboardingShowsOn("finish", "/post")).toBe(true);
+
+    {
+      expect(skipOnboardingSection("profile")).toBe("searchIntro");
+      expect(skipOnboardingSection("materialScroll")).toBe("reviewIntro");
+      expect(skipOnboardingSection("reviewLink")).toBe("finish");
+    }
   });
 
   it("資材ページや投稿画面が開いたら次の段階へ進む", () => {

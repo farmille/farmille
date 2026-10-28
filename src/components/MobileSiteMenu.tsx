@@ -35,65 +35,6 @@ const menuButton = css({
   },
 });
 
-const lines = css({ position: "relative", w: "10", h: "[11px]" });
-
-const line = cva({
-  base: {
-    position: "absolute",
-    left: "0",
-    right: "0",
-    h: "[1.5px]",
-    transitionProperty: "[transform]",
-    transitionDuration: "menu",
-    transitionTimingFunction: "out",
-    // 視覚効果を減らす設定では、線を動かさず × をそのまま見せる
-    _motionReduce: { transitionProperty: "[none]" },
-  },
-  variants: {
-    tone: {
-      paper: { bgColor: "text.default" },
-      forest: { bgColor: "text.inverse" },
-    },
-    place: {
-      top: { top: "0" },
-      middle: { top: "[calc(50% - 0.75px)]" },
-      bottom: { bottom: "0" },
-    },
-    // 開いた面の上の線は、面が広がるあいだに3本線から浅い × へ寄る
-    cross: { true: {}, false: {} },
-  },
-  compoundVariants: [
-    {
-      cross: true,
-      place: "top",
-      css: {
-        transform: "translateY(4.75px) rotate(-15deg)",
-        "[data-starting-style] &": { transform: "none" },
-        "[data-ending-style] &": { transform: "none" },
-      },
-    },
-    {
-      cross: true,
-      place: "middle",
-      css: {
-        transform: "scaleX(0)",
-        "[data-starting-style] &": { transform: "none" },
-        "[data-ending-style] &": { transform: "none" },
-      },
-    },
-    {
-      cross: true,
-      place: "bottom",
-      css: {
-        transform: "translateY(-4.75px) rotate(15deg)",
-        "[data-starting-style] &": { transform: "none" },
-        "[data-ending-style] &": { transform: "none" },
-      },
-    },
-  ],
-  defaultVariants: { cross: false },
-});
-
 const label = cva({
   base: { textStyle: "eyebrow", lineHeight: "none" },
   variants: { tone: { paper: { color: "text.default" }, forest: { color: "text.inverse" } } },
@@ -243,11 +184,7 @@ export function MobileSiteMenu({ links, member }: MobileSiteMenuProps) {
       open={open}
     >
       <BaseDialog.Trigger aria-label="メニュー" className={menuButton}>
-        <span aria-hidden className={lines}>
-          <span className={line({ tone: "paper", place: "top" })} />
-          <span className={line({ tone: "paper", place: "middle" })} />
-          <span className={line({ tone: "paper", place: "bottom" })} />
-        </span>
+        <Icon name="menu" size="lg" className={css({ color: "text.default" })} />
         <span aria-hidden className={label({ tone: "paper" })}>
           MENU
         </span>
@@ -261,11 +198,7 @@ export function MobileSiteMenu({ links, member }: MobileSiteMenuProps) {
               Farmille
             </Link>
             <BaseDialog.Close aria-label="メニューを閉じる" className={menuButton} ref={closeRef}>
-              <span aria-hidden className={lines}>
-                <span className={line({ tone: "forest", place: "top", cross: true })} />
-                <span className={line({ tone: "forest", place: "middle", cross: true })} />
-                <span className={line({ tone: "forest", place: "bottom", cross: true })} />
-              </span>
+              <Icon name="close" size="lg" />
               <span aria-hidden className={label({ tone: "forest" })}>
                 CLOSE
               </span>

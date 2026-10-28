@@ -58,6 +58,7 @@ import {
   type ReportPageNumericItem,
 } from "./report-page-state";
 import { docHeadingRecipe, requirementMark } from "./report-page-styles";
+import { useReportLeaveWarning } from "./use-report-leave-warning";
 
 const bar = css({
   position: "sticky",
@@ -236,8 +237,8 @@ export function ReportPageForm({
    * checkRequired は、読み取りの値を元のPDFと照らし合わせた確認を提出に求めるか。
    */
   pdfReading: {
-    siteKey: string;
-    remaining: number;
+    siteKey: string | null;
+    remaining: number | null;
     marks: PdfReadingField[];
     checkRequired: boolean;
   };
@@ -313,15 +314,7 @@ export function ReportPageForm({
     for (const media of payload.media) shownMedia.current.add(media.url);
   });
 
-  useEffect(() => {
-    if (!dirty || submitted) return;
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty, submitted]);
+  useReportLeaveWarning(dirty && !submitted);
 
   const checks = reportPageChecks(payload, acks, checkRequired);
   const marks = effectivePdfReadingMarks(readMarks, payload);
@@ -415,6 +408,7 @@ export function ReportPageForm({
     if (result.ok || result.savedDraft !== null)
       forgetDropped(droppedMedia(inputWithItems(input, items)));
     if (!result.ok) {
+      if (result.pdfValuesCheckRequired) setCheckRequired(true);
       // 失敗しても、サーバーの下書きを保存した分には揃える（揃えないと次の保存が競合する）
       const draft = result.savedDraft;
       if (draft?.saved === "input" || draft?.saved === "partial") {
@@ -511,13 +505,19 @@ export function ReportPageForm({
             <button
               type="button"
               className={cx(pillButtonRecipe({ tone: "soft", strong: true }), readingButton)}
-              disabled={pending}
+              disabled={pending || remaining === null}
               onClick={() => setReadingOpen(true)}
             >
               <Icon name="picture_as_pdf" size="sm" />
-              PDF読み取り（今月あと{Math.max(remaining, 0)}回）
+              {remaining === null
+                ? "PDF読み取り（いまは使えません）"
+                : `PDF読み取り（今月あと${Math.max(remaining, 0)}回）`}
             </button>
-            <span className={readingNote}>試験成績書のPDFから区・グラフ・栽培条件を入れます</span>
+            <span className={readingNote}>
+              {remaining === null
+                ? "残り回数を取得できませんでした。手入力で続けられます。再読み込みすると再確認します。"
+                : "試験成績書のPDFから区・グラフ・栽培条件を入れます"}
+            </span>
           </div>
 
           <div className={props}>
@@ -549,15 +549,12 @@ export function ReportPageForm({
           </div>
           <div className={divider} />
 
-          <h2 className={heading("observedChange")} id="h-observed-change">
-            結果・感想<span className={requirementMark}>必須</span>
-          </h2>
           <Textarea
             id="report-observed-change"
             label="結果・感想"
-            hideLabel
-            size="document"
-            example={
+            requirement="required"
+            error={missingKeys.has("observedChange") ? "結果・感想を記入してください" : undefined}
+            placeholder={
               "いつ頃から・どこに・どんな変化があったか。良くなかった点も\n例）2回目の使用から数日後、午後の葉の萎れが使用前よりやや軽くなった。収量が増えるような変化は確認できなかったが、暑い時期の萎れを抑える補助としては手応えがあった。薬害（葉焼け・変色）は見られなかった。"
             }
             maxLength={REPORT_BODY_MAX}
@@ -569,15 +566,14 @@ export function ReportPageForm({
           />
           <ReportPdfReadingMark fields={[{ key: "observedChange" }]} />
 
-          <h2 className={heading("cultivationEnvironment")}>
-            栽培環境<span className={requirementMark}>必須</span>
-          </h2>
           <Textarea
             id="report-environment"
             label="栽培環境"
-            hideLabel
-            size="document"
-            example={
+            requirement="required"
+            error={
+              missingKeys.has("cultivationEnvironment") ? "栽培環境を記入してください" : undefined
+            }
+            placeholder={
               "露地か施設か、養液の使用など\n例）パイプハウスで土耕栽培。無加温で、灌水チューブで週2回かん水している。"
             }
             maxLength={REPORT_BODY_MAX}
@@ -589,15 +585,12 @@ export function ReportPageForm({
           />
           <ReportPdfReadingMark fields={[{ key: "cultivationEnvironment" }]} />
 
-          <h2 className={heading("timingNote")}>
-            処理日と生育状況<span className={requirementMark}>必須</span>
-          </h2>
           <Textarea
             id="report-timing-note"
             label="処理日と生育状況"
-            hideLabel
-            size="document"
-            example={
+            requirement="required"
+            error={missingKeys.has("timingNote") ? "処理日と生育状況を記入してください" : undefined}
+            placeholder={
               "資材を使った日（〇月〇日）は必ず。定植日・生育状況も\n例）3月6日に定植。開花してすぐの6月5日に施用。7日おきに3回。"
             }
             maxLength={REPORT_BODY_MAX}
@@ -813,7 +806,7 @@ export function ReportPageForm({
           }}
           onConfirm={() => persist(false, true)}
         />
-        {readingOpen && (
+        {readingOpen && remaining !== null && pdfReading.siteKey !== null && (
           <ReportPdfReadingDialog
             onClose={() => setReadingOpen(false)}
             defaultTrial={pdfReadingTrialDraft(

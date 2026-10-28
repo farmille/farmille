@@ -92,7 +92,12 @@ export const materialDetail: MaterialDetail = {
     },
   ],
   ingredientCategories: [
-    { id: "00000000-0000-4000-8000-000000000306", name: "微生物資材", sort_order: 10 },
+    {
+      id: "00000000-0000-4000-8000-000000000306",
+      name: "微生物",
+      short_name: "微生物",
+      sort_order: 10,
+    },
   ],
   ingredients: [
     {
@@ -100,7 +105,7 @@ export const materialDetail: MaterialDetail = {
       name: "バチルス属菌",
       sort_order: 10,
       categoryId: "00000000-0000-4000-8000-000000000306",
-      categoryName: "微生物資材",
+      categoryName: "微生物",
       categorySortOrder: 10,
     },
   ],

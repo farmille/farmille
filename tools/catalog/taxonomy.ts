@@ -2,6 +2,43 @@ import { APPLICATION_METHODS } from "../../src/lib/material-page-editor.ts";
 import { catalogId, type CatalogSource } from "./source.ts";
 import type { CatalogSnapshot } from "./snapshot.ts";
 
+/**
+ * 元データのタグ名のうち、括弧の中が別名（言い換え・読み・外来名）になっている作目。
+ * チップや一覧に長い名前を出さないよう、括弧の前を名前にし、括弧の中を同義語へ移す。
+ * 切花・球根・品種のように区別に要る括弧と、括弧を外すと既存の作目と同名になるものは含めない。
+ */
+const CROP_NAMES_WITH_ALIAS = new Set([
+  "アマニ（亜麻仁）",
+  "イグサ（い草）",
+  "エンバク（オーツ麦）",
+  "コンニャク（こんにゃくいも）",
+  "サルシファイ（西洋ごぼう）",
+  "ターメリック（ウコン）",
+  "テンサイ（ビート）",
+  "ナタネ（菜種）",
+  "なばな（菜の花）",
+  "ニガウリ（ゴーヤ）",
+  "ハツカダイコン（ラディッシュ）",
+  "ヒヨコマメ（ガルバンゾ）",
+  "フダンソウ（スイスチャード）",
+  "ベニバナ（紅花）",
+  "ホースラディッシュ（西洋わさび）",
+  "モロコシ（ソルガム）",
+  "ライ小麦（トリティケール）",
+  "中玉トマト（ミディトマト）",
+  "白瓜（しろうり）",
+  "胡蝶蘭（ファレノプシス）",
+]);
+
+type CropNameParts = { name: string; aliasInName: string | null };
+
+function splitCropAlias(tagName: string): CropNameParts {
+  if (!CROP_NAMES_WITH_ALIAS.has(tagName)) return { name: tagName, aliasInName: null };
+  const match = /^(.+)（(.+)）$/.exec(tagName);
+  if (match === null) throw new Error(`別名を分けられない作目名です：${tagName}`);
+  return { name: match[1], aliasInName: match[2] };
+}
+
 export function sourceTaxonomy(source: CatalogSource, snapshot: CatalogSnapshot) {
   const ids = new Map<string, string>();
   const groups: CatalogSnapshot["crop_groups"] = [];
@@ -35,22 +72,25 @@ export function sourceTaxonomy(source: CatalogSource, snapshot: CatalogSnapshot)
   )) {
     const parent = tag.親tag_id ? ids.get(tag.親tag_id) : undefined;
     if (!parent) throw new Error(`個別作目の親がありません：${tag.tag_id}`);
+    const { name, aliasInName } = splitCropAlias(tag.タグ名);
     const matches = snapshot.crops.filter(
       (row) =>
-        row.id === catalogId(tag.tag_id) || (row.name === tag.タグ名 && row.group_id === parent),
+        row.id === catalogId(tag.tag_id) ||
+        ((row.name === name || row.name === tag.タグ名) && row.group_id === parent),
     );
     if (matches.length > 1) throw new Error(`個別作目の対応を一意に決定できません：${tag.tag_id}`);
     const id = matches[0]?.id ?? catalogId(tag.tag_id);
     ids.set(tag.tag_id, id);
+    const synonyms =
+      tag.同義語
+        ?.split(/[、;；]/)
+        .map((synonym) => synonym.trim())
+        .filter(Boolean) ?? [];
     crops.push({
       id,
-      name: tag.タグ名,
+      name,
       group_id: parent,
-      aliases:
-        tag.同義語
-          ?.split(/[、;；]/)
-          .map((name) => name.trim())
-          .filter(Boolean) ?? [],
+      aliases: [...new Set([...(aliasInName === null ? [] : [aliasInName]), ...synonyms])],
       sort_order: tag.表示順,
       is_active: true,
     });

@@ -18,10 +18,9 @@ const meta = {
             variant="scroll"
             name={material.name}
             maker={material.manufacturer_name}
-            rating={material.avg_rating ?? 0}
+            rating={material.avg_rating}
             reviewCount={material.review_count}
-            categories={["微生物資材"]}
-            official={material.manufacturer_verified_at !== null}
+            categories={["微生物"]}
             imageSrc={material.imageUrl ?? undefined}
             href={`/materials/${material.id}`}
           />

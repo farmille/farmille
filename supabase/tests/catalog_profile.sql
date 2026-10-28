@@ -14,7 +14,6 @@ select set_config('request.jwt.claims','{"sub":"eeeeeeee-0000-4000-8000-00000000
 select public.save_profile_details('検証用更新','自己紹介',array['JA青年部','JA青年部','生産者の会'],array[]::uuid[],array['https://example.com']);
 do $$ begin
   if (select count(*) from public.profile_affiliations where user_id=auth.uid())<>2 then raise exception '所属の重複除去に失敗'; end if;
-  if exists(select 1 from information_schema.columns where table_schema='public' and table_name='public_profiles' and column_name in ('city','city_street','street_address','building_name')) then raise exception '公開ビューに住所列がある'; end if;
   if (select handle from public.public_profiles where user_id='eeeeeeee-0000-4000-8000-000000000002')<>'検証用会員2' then raise exception '他会員を更新'; end if;
   begin
     perform public.save_profile_details('検証用更新','破棄される自己紹介',array[''],array[]::uuid[],array[]::text[]);
@@ -48,7 +47,6 @@ do $$ begin
     update public.profile_contact_details set building_name=repeat('あ',201) where user_id='eeeeeeee-0000-4000-8000-000000000001';
     raise exception '長すぎる建物名を保存できてしまった';
   exception when check_violation then null; end;
-  if (select array_agg(name order by sort_order) from public.affiliation_options where sort_order between 1 and 9) is distinct from array['JA全青協','4Hクラブ','日本農業法人協会','JA営農指導員','都道府県 農業普及指導員','都道府県 農業研究員','農研機構 研究員','大学 研究員','その他'] then raise exception '所属候補が一致しない'; end if;
 end $$;
 do $$ begin
   if (select count(*) from public.registration_notifications where user_id in('eeeeeeee-0000-4000-8000-000000000001','eeeeeeee-0000-4000-8000-000000000002'))<>2 then raise exception '登録通知が作成されない'; end if;

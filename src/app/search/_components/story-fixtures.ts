@@ -3,9 +3,6 @@ import type { CatalogSearch } from "@/server/queries/catalog-search";
 
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 
-export const storyThumbnail =
-  "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20600%20450%22%3E%3Crect%20width%3D%22600%22%20height%3D%22450%22%20fill%3D%22%23dcefd8%22%2F%3E%3Ccircle%20cx%3D%22300%22%20cy%3D%22225%22%20r%3D%22120%22%20fill%3D%22%23618d48%22%2F%3E%3C%2Fsvg%3E";
-
 const ONION = id(2);
 const TOMATO = id(12);
 const VEGETABLES = id(3);
@@ -49,7 +46,10 @@ export const storyCatalog: CatalogSearch = {
       material_crop_groups: [{ crop_group_id: BULBS }],
       material_effects: [{ effect_id: NUTRIENT }],
       material_ingredient_categories: [
-        { ingredient_category_id: MICROBE, ingredient_categories: { name: "微生物資材" } },
+        {
+          ingredient_category_id: MICROBE,
+          ingredient_categories: { short_name: "微生物" },
+        },
       ],
     }),
     material(21, {
@@ -64,12 +64,13 @@ export const storyCatalog: CatalogSearch = {
       material_crop_groups: [{ crop_group_id: FRUIT_VEGETABLES }],
       material_effects: [{ effect_id: NUTRIENT }, { effect_id: HEAT }],
       material_ingredient_categories: [
-        { ingredient_category_id: MICROBE, ingredient_categories: { name: "微生物資材" } },
+        {
+          ingredient_category_id: MICROBE,
+          ingredient_categories: { short_name: "微生物" },
+        },
         {
           ingredient_category_id: SEAWEED,
-          ingredient_categories: {
-            name: "海藻・海藻抽出物（アルギン酸・ラミナリンなどを含むもの）",
-          },
+          ingredient_categories: { short_name: "海藻" },
         },
       ],
     }),
@@ -82,9 +83,7 @@ export const storyCatalog: CatalogSearch = {
       material_ingredient_categories: [
         {
           ingredient_category_id: SEAWEED,
-          ingredient_categories: {
-            name: "海藻・海藻抽出物（アルギン酸・ラミナリンなどを含むもの）",
-          },
+          ingredient_categories: { short_name: "海藻" },
         },
       ],
     }),
@@ -138,6 +137,7 @@ export const storyCatalog: CatalogSearch = {
       categorySortOrder: 2,
     },
   ],
+  searchTags: [],
   counts: [
     { material_id: id(1), report_count: 0, saved_count: 0 },
     { material_id: id(21), report_count: 4, saved_count: 27 },
@@ -152,11 +152,19 @@ export const storySearchCatalog: SearchCatalog = {
     { category: "crop_group", id: BULBS, name: "鱗茎類", aliases: [], sort_order: 1 },
     { category: "effect", id: NUTRIENT, name: "養分吸収の改善", aliases: [], sort_order: 1 },
     { category: "effect", id: HEAT, name: "耐暑性改善", aliases: ["暑さ対策"], sort_order: 2 },
-    { category: "genre", id: MICROBE, name: "微生物資材", aliases: [], sort_order: 1 },
+    {
+      category: "genre",
+      id: MICROBE,
+      name: "微生物",
+      shortName: "微生物",
+      aliases: [],
+      sort_order: 1,
+    },
     {
       category: "genre",
       id: SEAWEED,
-      name: "海藻・海藻抽出物（アルギン酸・ラミナリンなどを含むもの）",
+      name: "海藻、海藻抽出物",
+      shortName: "海藻",
       aliases: [],
       sort_order: 2,
     },
@@ -170,4 +178,10 @@ export const storySearchCatalog: SearchCatalog = {
   })),
 };
 
-export const storyIds = { onion: ONION, tomato: TOMATO, nutrient: NUTRIENT, microbe: MICROBE };
+export const storyIds = {
+  onion: ONION,
+  tomato: TOMATO,
+  nutrient: NUTRIENT,
+  microbe: MICROBE,
+  seaweed: SEAWEED,
+};

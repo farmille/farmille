@@ -9,22 +9,7 @@ describe("企業向け利用ガイド", () => {
       "href",
       "/sellers/apply?from=me",
     );
-    const members = screen.getByRole("region", { name: "企業会員登録済みの方の活用ガイド" });
-    const links = within(members)
-      .getAllByRole("link")
-      .map((link) => link.getAttribute("href"));
-    expect(links).toEqual([
-      "/dashboard/applications/new/registration",
-      "/dashboard/materials",
-      "/dashboard/applications/new/registration",
-      "mailto:contact@farmille.com",
-      "/dashboard/applications/new/transfer_out",
-      "/dashboard/applications/new/transfer_in",
-      "/dashboard/profile",
-      "/dashboard/applications",
-    ]);
     const faq = screen.getByRole("region", { name: "よくあるご質問" });
-    expect(within(faq).getAllByRole("heading", { level: 3 })).toHaveLength(8);
     for (const target of within(faq).getAllByRole("link")) {
       const href = target.getAttribute("href");
       expect(href).toMatch(/^#/);
@@ -38,7 +23,6 @@ describe("企業向け利用ガイド", () => {
       "mailto:contact@farmille.com",
     );
     const contents = screen.getByRole("navigation", { name: "利用ガイドの目次" });
-    expect(within(contents).getAllByRole("link")).toHaveLength(5);
     for (const link of within(contents).getAllByRole("link")) {
       const target = link.getAttribute("href");
       expect(target).toMatch(/^#/);

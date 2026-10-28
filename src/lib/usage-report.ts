@@ -50,6 +50,8 @@ export const UsageReportInputSchema = v.object({
   expectedUpdatedAt: v.nullable(v.pipe(v.string(), v.isoTimestamp())),
   materialId: uuid,
   cropId: v.nullable(uuid),
+  /** 作物マスタにない作目の自由記入（「その他」）。cropId と同時には持たない。 */
+  cropNameOther: v.nullable(v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(100))),
   varietyUnknown: v.boolean(),
   varieties: v.pipe(v.array(named), v.maxLength(REPORT_PLOT_LIMIT)),
   comparedMaterials: v.pipe(v.array(named), v.maxLength(REPORT_PLOT_LIMIT)),
@@ -183,6 +185,7 @@ export function createBlankUsageReport(materialId: string): UsageReportInput {
     expectedUpdatedAt: null,
     materialId,
     cropId: null,
+    cropNameOther: null,
     varietyUnknown: false,
     varieties: [variety],
     comparedMaterials: [],
@@ -264,7 +267,11 @@ export function validateUsageReportSubmission(
   const required = (key: string, valid: boolean, message = "※ ここを入力してください") => {
     if (!valid) errors[key] = message;
   };
-  required("cropId", input.cropId !== null, "※ 使用対象作目を選んでください");
+  required(
+    "cropId",
+    input.cropId !== null || input.cropNameOther !== null,
+    "※ 使用対象作目を選んでください",
+  );
   required(
     "varieties",
     input.varietyUnknown ? input.varieties.length === 0 : input.varieties.length > 0,

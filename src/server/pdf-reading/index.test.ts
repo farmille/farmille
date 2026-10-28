@@ -239,6 +239,7 @@ describe("readPdfIntoDraft", () => {
         message: errorMessageJa.invalid_body,
         remaining: 8,
         savedDraft: null,
+        pdfValuesCheckRequired: false,
       });
       expect(calls).toEqual(["remaining"]);
     }
@@ -253,58 +254,24 @@ describe("readPdfIntoDraft", () => {
     ] as const;
     for (const [overrides, error] of cases) {
       const { deps, calls, saved } = fakeDeps(overrides);
-      const result = await readPdfIntoDraft(makeRequest(), userId, deps);
+      const request = makeRequest();
+      const result = await readPdfIntoDraft(request, userId, deps);
       expect(result.ok ? null : result.error).toBe(error);
       expect(calls).not.toContain("read");
       expect(calls).not.toContain("finish");
       expect(calls).toContain("discard");
       expect(saved.length).toBeLessThanOrEqual(1);
-    }
-  });
-
-  it("先行保存より前に止めたら、保存した下書きは返さない", async () => {
-    for (const overrides of [{ human: false }, { pdf: null }, { saves: ["conflict" as const] }]) {
-      const { deps } = fakeDeps(overrides);
-      const result = await readPdfIntoDraft(makeRequest(), userId, deps);
-      expect(result.ok ? undefined : result.savedDraft).toBeNull();
-    }
-  });
-
-  it("先行保存の後で止めたら、どの失敗でも先行保存の更新日時を返す", async () => {
-    const long = {
-      ...output,
-      plots: output.plots.map((plot) => ({ ...plot, description: "あ".repeat(20001) })),
-    };
-    const cases = [
-      [{ claim: "pdf_reading_limit" as const }, "pdf_reading_limit"],
-      [
-        { extraction: { ok: false as const, error: "server_error" as const, usage: null } },
-        "pdf_reading_failed",
-      ],
-      [
-        {
-          extraction: {
-            ok: true as const,
-            output: { ...output, outcome: "no_matching_trial" as const },
-            usage,
-          },
-        },
-        "pdf_reading_no_match",
-      ],
-      [{ extraction: { ok: true as const, output: long, usage } }, "pdf_reading_incomplete"],
-      [{ saves: ["ok" as const, "conflict" as const, "conflict" as const] }, "conflict"],
-    ] as const;
-    for (const [overrides, error] of cases) {
-      const { deps } = fakeDeps(overrides);
-      const request = makeRequest();
-      const result = await readPdfIntoDraft(request, userId, deps);
       if (result.ok) throw new Error("失敗するはず");
-      expect(result.error).toBe(error);
-      expect(result.savedDraft).toEqual({
-        saved: "input",
-        reportId: request.input.reportId,
-        updatedAt: "2026-10-25T00:00:01.000Z",
-      });
+      expect(result.pdfValuesCheckRequired).toBe(false);
+      expect(result.savedDraft).toEqual(
+        "claim" in overrides
+          ? {
+              saved: "input",
+              reportId: request.input.reportId,
+              updatedAt: "2026-10-25T00:00:01.000Z",
+            }
+          : null,
+      );
     }
   });
 
@@ -322,9 +289,12 @@ describe("readPdfIntoDraft", () => {
     expect(calls).not.toContain("claim");
   });
 
-  it("読み取った値の保存が一部だけで終わったら、写し直して1回やり直し、だめなら最後に進んだ更新日時を返す", async () => {
+  it("読み取った値の保存が一部だけで終わったら、同じ値を進んだ更新日時で1回保存し直し、だめなら最後に進んだ更新日時を返す", async () => {
     const once = fakeDeps({ saves: ["ok", "partial", "ok"] });
-    expect((await readPdfIntoDraft(makeRequest(), userId, once.deps)).ok).toBe(true);
+    const saved = await readPdfIntoDraft(makeRequest(), userId, once.deps);
+    if (!saved.ok) throw new Error(saved.message);
+    expect(saved.marks.map(({ fieldKey }) => fieldKey)).toContain("cultivationEnvironment");
+    expect(once.saved[2]?.expectedUpdatedAt).toBe("2026-10-25T00:00:02.000Z");
 
     const twice = fakeDeps({ saves: ["ok", "partial", "partial"] });
     const request = makeRequest();
@@ -336,12 +306,7 @@ describe("readPdfIntoDraft", () => {
       updatedAt: "2026-10-25T00:00:03.000Z",
     });
     expect(twice.calls).not.toContain("applied");
-  });
-
-  it("先行保存の失敗は、保存の文言のまま返す", async () => {
-    const { deps } = fakeDeps({ saves: ["conflict"] });
-    const result = await readPdfIntoDraft(makeRequest(), userId, deps);
-    expect(result.ok ? null : result.message).toBe("別の画面で下書きが更新されています。");
+    expect(result.pdfValuesCheckRequired).toBe(true);
   });
 
   it("期限切れの PDF の掃除に失敗しても読み取りは続ける", async () => {
@@ -349,17 +314,18 @@ describe("readPdfIntoDraft", () => {
     expect((await readPdfIntoDraft(makeRequest(), userId, deps)).ok).toBe(true);
   });
 
-  it("AI 側の失敗は数え、PDF を消してから記録し、下書きは書き換えない", async () => {
+  it("AI 側の失敗と該当試験なしは数え、PDF を消してから記録し、下書きは書き換えない", async () => {
     const cases = [
-      ["refusal", "pdf_reading_failed"],
-      ["deadline", "pdf_reading_failed"],
-      ["server_error", "pdf_reading_failed"],
-      ["max_tokens", "pdf_reading_incomplete"],
+      [{ ok: false, error: "server_error", usage: null }, "pdf_reading_failed", "server_error"],
+      [{ ok: false, error: "max_tokens", usage: null }, "pdf_reading_incomplete", "max_tokens"],
+      [
+        { ok: true, output: { ...output, outcome: "no_matching_trial" }, usage },
+        "pdf_reading_no_match",
+        "pdf_reading_no_match",
+      ],
     ] as const;
-    for (const [reason, error] of cases) {
-      const { deps, calls, saved, finished } = fakeDeps({
-        extraction: { ok: false, error: reason, usage: null },
-      });
+    for (const [extraction, error, errorCode] of cases) {
+      const { deps, calls, saved, finished } = fakeDeps({ extraction });
       const request = makeRequest();
       const result = await readPdfIntoDraft(request, userId, deps);
       expect(result).toEqual({
@@ -372,21 +338,12 @@ describe("readPdfIntoDraft", () => {
           reportId: request.input.reportId,
           updatedAt: "2026-10-25T00:00:01.000Z",
         },
+        pdfValuesCheckRequired: false,
       });
-      expect(finished).toEqual([{ status: "failed", errorCode: reason }]);
+      expect(finished).toEqual([{ status: "failed", errorCode }]);
       expect(calls.indexOf("discard")).toBeLessThan(calls.indexOf("finish"));
       expect(saved).toHaveLength(1);
     }
-  });
-
-  it("投稿した資材の試験が無ければ数えたうえで該当なしにし、下書きは書き換えない", async () => {
-    const { deps, saved, finished } = fakeDeps({
-      extraction: { ok: true, output: { ...output, outcome: "no_matching_trial" }, usage },
-    });
-    const result = await readPdfIntoDraft(makeRequest(), userId, deps);
-    expect(result.ok ? null : result.error).toBe("pdf_reading_no_match");
-    expect(finished).toEqual([{ status: "failed", errorCode: "pdf_reading_no_match" }]);
-    expect(saved).toHaveLength(1);
   });
 
   it("読み取りの間に下書きの資材が変わっていたら、数えたうえで写さずに失敗にする", async () => {
@@ -446,9 +403,17 @@ describe("readPdfIntoDraft", () => {
     expect(once.calls.filter((call) => call === "load")).toHaveLength(2);
 
     const twice = fakeDeps({ saves: ["ok", "conflict", "conflict"] });
-    const result = await readPdfIntoDraft(makeRequest(), userId, twice.deps);
+    const request = makeRequest();
+    const result = await readPdfIntoDraft(request, userId, twice.deps);
     expect(result.ok ? null : result.error).toBe("conflict");
     expect(twice.calls.filter((call) => call === "save")).toHaveLength(3);
     expect(twice.calls).not.toContain("applied");
+    if (result.ok) throw new Error("失敗するはず");
+    expect(result.pdfValuesCheckRequired).toBe(true);
+    expect(result.savedDraft).toEqual({
+      saved: "input",
+      reportId: request.input.reportId,
+      updatedAt: "2026-10-25T00:00:01.000Z",
+    });
   });
 });

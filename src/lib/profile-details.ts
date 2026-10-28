@@ -7,6 +7,8 @@ export const ProfileDetailsInputSchema = v.object({
   bio: v.pipe(v.string(), v.trim(), v.maxLength(2000)),
   affiliations: v.pipe(v.array(name), v.maxLength(20)),
   cropIds: v.pipe(v.array(v.pipe(v.string(), v.uuid())), v.maxLength(50)),
+  /** 作物マスタにない作目の自由記入（「その他」）。省略すると保存済みの名前を残す。 */
+  cropNamesOther: v.optional(v.pipe(v.array(name), v.maxLength(50))),
   links: v.pipe(v.array(link), v.maxLength(10)),
 });
 export type ProfileDetailsInput = v.InferOutput<typeof ProfileDetailsInputSchema>;

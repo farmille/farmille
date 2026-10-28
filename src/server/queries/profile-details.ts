@@ -14,7 +14,7 @@ export async function getProfileDetails(userId: string) {
     supabase.from("profile_affiliations").select("name").eq("user_id", userId).order("sort_order"),
     supabase
       .from("profile_crops")
-      .select("crop_id,crops(id,name,aliases)")
+      .select("crop_id,crop_name_other,crops(id,name,aliases)")
       .eq("user_id", userId)
       .order("sort_order"),
     supabase.from("profile_links").select("url").eq("user_id", userId).order("sort_order"),
@@ -33,7 +33,11 @@ export async function getProfileDetails(userId: string) {
   return succeed({
     ...profile.data,
     affiliations: affiliations.data.map((row) => row.name),
-    crops: crops.data.map((row) => row.crops),
+    crops: crops.data.flatMap((row) => (row.crops === null ? [] : [row.crops])),
+    /** 作物マスタにない作目の自由記入（「その他」）。 */
+    cropNamesOther: crops.data.flatMap((row) =>
+      row.crop_name_other === null ? [] : [row.crop_name_other],
+    ),
     links: links.data.map((row) => row.url),
   });
 }
@@ -76,6 +80,7 @@ export async function saveProfileDetails(input: ProfileDetailsInput): Promise<Re
     p_bio: input.bio,
     p_affiliations: input.affiliations,
     p_crop_ids: input.cropIds,
+    p_crop_names_other: input.cropNamesOther,
     p_links: input.links,
   });
   if (error) {

@@ -15,7 +15,7 @@ import {
 } from "./support/test-data";
 import { chooseOption, loginAdminAndEnrollMfa, loginGeneral } from "./support/ui";
 
-test("通報の resolve と対象非公開、編集局の pending 公開", async ({ page }) => {
+test("通報の resolve と対象非公開、編集局の pending 公開", async ({ page, browser }) => {
   const author = await createGeneralUser("reported");
   const reporter = await createGeneralUser("reporter");
   const material = await createMaterial("moderation");
@@ -72,6 +72,20 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
     await expect(page.getByRole("heading", { name: reportTitle })).toBeVisible();
     await expect(page.getByText(material.name, { exact: true })).toBeVisible();
 
+    await page.goto("/admin/published-posts");
+    const card = page
+      .locator("section")
+      .filter({ has: page.getByRole("link", { name: reportTitle, exact: true }) });
+    await card.getByRole("button", { name: "公開から削除する" }).click();
+    await card.getByRole("checkbox").check();
+    await card.getByRole("button", { name: "非公開にする", exact: true }).click();
+    await expect(card).toHaveCount(0);
+    expect((await usageReportByAuthor(reporter.id))?.title).toBe(reportTitle);
+    const anonymous = await browser.newContext();
+    const publicPage = await anonymous.newPage();
+    await publicPage.goto(`/reports/${usageReport.id}`);
+    await expect(publicPage.getByRole("heading", { name: "ページが見つかりません" })).toBeVisible();
+    await anonymous.close();
     await page.goto("/post");
     await expect(page).toHaveURL(/\/me\/setup$/);
     await page.getByRole("textbox", { name: "ハンドルネーム" }).fill("運営の個人利用テスト");

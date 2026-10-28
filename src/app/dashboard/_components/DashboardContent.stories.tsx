@@ -42,6 +42,7 @@ export const WithMaterials: Story = {
         avg_rating: 4.2,
         publication_status: "published",
         manufacturer_verified_at: "2026-09-01T00:00:00Z",
+        container_type_id: 1,
       },
       {
         id: "55555555-5555-4555-8555-555555555552",
@@ -50,6 +51,7 @@ export const WithMaterials: Story = {
         avg_rating: null,
         publication_status: "published",
         manufacturer_verified_at: null,
+        container_type_id: 1,
       },
       {
         id: "55555555-5555-4555-8555-555555555553",
@@ -58,6 +60,7 @@ export const WithMaterials: Story = {
         avg_rating: 3.5,
         publication_status: "archived",
         manufacturer_verified_at: "2025-04-01T00:00:00Z",
+        container_type_id: 1,
       },
     ],
   },

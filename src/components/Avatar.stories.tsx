@@ -29,7 +29,7 @@ export const WithImage: Story = { args: { src: photo } };
 export const Sizes: Story = {
   render: (args) => (
     <div className={row}>
-      {(["2xs", "xs", "sm", "md", "xl"] as const).map((size) => (
+      {(["2xs", "xs", "sm", "md", "xl", "2xl"] as const).map((size) => (
         <Avatar key={size} {...args} size={size} />
       ))}
     </div>

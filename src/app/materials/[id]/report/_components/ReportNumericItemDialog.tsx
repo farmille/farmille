@@ -15,6 +15,8 @@ import { css, cx } from "../../../../../../styled-system/css";
 import { REPORT_SHORT_MAX, type ReportPageNumericItem } from "./report-page-state";
 import { labelStyle } from "./report-page-styles";
 
+import { useReportLeaveWarning } from "./use-report-leave-warning";
+
 const graphBlock = css({
   mt: "5",
   pt: "3",
@@ -51,6 +53,7 @@ export function ReportNumericItemDialog({
   const [draft, setDraft] = useState(initial);
   const [asking, setAsking] = useState(false);
   const changed = JSON.stringify(draft) !== JSON.stringify(initial);
+  useReportLeaveWarning(changed);
   const order = new Map(plots.map((plot, index) => [plot.id, index]));
   const updateGraph = (
     graphId: string,

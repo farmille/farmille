@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { requireGeneralUser } from "@/server/auth";
 import {
   createReviewWithDependencies,
   type ReviewMutationInput,
   validateReviewFormData,
 } from "@/server/mutations/reviews";
-import { requireGeneralUser } from "@/server/auth";
 import { createServerSupabase } from "@/server/supabase";
 
 const materialId = "11111111-1111-4111-8111-111111111111";
@@ -38,6 +38,7 @@ describe("validateReviewFormData", () => {
       ok: true,
       input: {
         cropIds: [cropId],
+        cropNameOther: null,
         rating: 4,
         body: "定植後に使用し、葉の状態を継続して観察しました。",
         pesticideAck: true,
@@ -51,21 +52,30 @@ describe("validateReviewFormData", () => {
     });
   });
 
-  it("退役した購入場所と対照区は送信されても保存入力に含めない", () => {
+  it("作物マスタにない作目は「その他」の名前として受け取る", () => {
     const formData = validFormData();
-    formData.set("purchaseChannel", "ja");
-    formData.set("hasControlPlot", "on");
-    expect(validateReviewFormData(formData)).toEqual(validateReviewFormData(validFormData()));
+    formData.delete("cropIds");
+    formData.set("cropNameOther", " ステビア ");
+    const result = validateReviewFormData(formData);
+    expect(result.ok && result.input).toMatchObject({ cropIds: [], cropNameOther: "ステビア" });
   });
 
-  it("農薬表現同意が無ければ送信を拒否する", () => {
+  it("作目の選択と「その他」の名前を同時には受け付けない", () => {
     const formData = validFormData();
-    formData.delete("pesticideAck");
-    const result = validateReviewFormData(formData);
-
-    expect(result).toMatchObject({
+    formData.set("cropNameOther", "ステビア");
+    expect(validateReviewFormData(formData)).toMatchObject({
       ok: false,
-      fieldErrors: { pesticideAck: "内容を確認し、同意してください。" },
+      fieldErrors: { cropIds: "使用対象作目を1つ選んでください。" },
+    });
+  });
+
+  it("作目の選択も「その他」の名前も無ければ受け付けない", () => {
+    const formData = validFormData();
+    formData.delete("cropIds");
+    formData.set("cropNameOther", "   ");
+    expect(validateReviewFormData(formData)).toMatchObject({
+      ok: false,
+      fieldErrors: { cropIds: "使用対象作目を1つ選んでください。" },
     });
   });
 
@@ -87,6 +97,17 @@ describe("validateReviewFormData", () => {
         photos: expect.any(String),
       },
     });
+
+    {
+      const formData = validFormData();
+      formData.delete("pesticideAck");
+      const result = validateReviewFormData(formData);
+
+      expect(result).toMatchObject({
+        ok: false,
+        fieldErrors: { pesticideAck: "内容を確認し、同意してください。" },
+      });
+    }
   });
 
   it("複数作目の送信を拒否する", () => {
@@ -108,6 +129,7 @@ describe("createReview", () => {
     const input: ReviewMutationInput = {
       materialId,
       cropIds: [cropId],
+      cropNameOther: null,
       rating: 5,
       body: "使用後の状態を記録しました。",
       pesticideAck: true,

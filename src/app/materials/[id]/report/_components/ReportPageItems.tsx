@@ -20,7 +20,7 @@ import {
   type ReportPageItem,
   type ReportPageNumericItem,
 } from "./report-page-state";
-import { addButton, docLead, labelStyle, removeButton } from "./report-page-styles";
+import { addButton, docLead, removeButton } from "./report-page-styles";
 
 const block = css({
   mt: "4",
@@ -276,10 +276,9 @@ export function ReportPageItems({
               <Textarea
                 id={`report-item-text-${item.id}`}
                 fieldClassName={css({ mt: "3" })}
-                label={<span className={labelStyle}>区ごとの結果</span>}
+                label="区ごとの結果"
                 requirement="required"
-                size="document"
-                example={TEXT_EXAMPLE}
+                placeholder={TEXT_EXAMPLE}
                 maxLength={REPORT_BODY_MAX}
                 description={reportLengthNote(item.body, REPORT_BODY_MAX)}
                 value={item.body}
@@ -314,10 +313,9 @@ export function ReportPageItems({
                 </div>
                 <Textarea
                   fieldClassName={css({ mt: "3" })}
-                  label={<span className={labelStyle}>補足説明</span>}
+                  label="補足説明"
                   requirement="optional"
-                  size="document"
-                  example={NOTE_EXAMPLE}
+                  placeholder={NOTE_EXAMPLE}
                   maxLength={REPORT_BODY_MAX}
                   description={reportLengthNote(item.body, REPORT_BODY_MAX)}
                   value={item.body}
@@ -332,10 +330,9 @@ export function ReportPageItems({
                 <ReportNumericGraphs item={item} plots={plots} layout={layout} />
                 <Textarea
                   fieldClassName={css({ mt: "3" })}
-                  label={<span className={labelStyle}>補足説明</span>}
+                  label="補足説明"
                   requirement="optional"
-                  size="document"
-                  example={NOTE_EXAMPLE}
+                  placeholder={NOTE_EXAMPLE}
                   maxLength={REPORT_BODY_MAX}
                   description={reportLengthNote(item.body, REPORT_BODY_MAX)}
                   value={item.body}

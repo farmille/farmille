@@ -33,6 +33,7 @@ export type DashboardMaterial = Pick<
   | "avg_rating"
   | "publication_status"
   | "manufacturer_verified_at"
+  | "container_type_id"
 >;
 
 export type SellerDashboardData = {
@@ -106,7 +107,7 @@ export async function getSellerDashboardData(
     supabase
       .from("materials")
       .select(
-        "id, name, manufacturer_name, avg_rating, publication_status, manufacturer_verified_at",
+        "id, name, manufacturer_name, avg_rating, publication_status, manufacturer_verified_at, container_type_id",
       )
       .eq("seller_id", sellerId)
       .order("name", { ascending: true })

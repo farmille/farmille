@@ -9,6 +9,7 @@ export const structuredReport: UsageReportInput = {
   expectedUpdatedAt: null,
   materialId: id(2),
   cropId: id(3),
+  cropNameOther: null,
   varietyUnknown: false,
   varieties: [{ id: id(4), name: "アイコ" }],
   comparedMaterials: [],
@@ -146,6 +147,7 @@ export const legacyReport: PublishedUsageReportDetail = {
     manufacturerName: "グリーンバイオ株式会社",
     isOfficial: true,
     avgRating: 4.2,
+    imageUrl: "/images/container-shapes/1.png",
   },
   media: [
     {

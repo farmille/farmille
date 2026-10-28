@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { EmptyState, FormPageShell, MaterialRefCard, SurfaceCard, TextLink } from "@/components";
+import { EmptyState, FormPageShell, MaterialCard, SurfaceCard, TextLink } from "@/components";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
+import { materialIllustrationUrl } from "@/lib/material-illustration";
 import { requireSeller } from "@/server/auth";
 import { getSellerMaterialsPageData } from "@/server/queries/seller-dashboard";
 import { SellerAccessDenied } from "../_components/AccessDenied";
@@ -28,15 +29,17 @@ export default async function SellerMaterialsPage() {
           />
         ) : (
           result.data.materials.map((material) => (
-            <MaterialRefCard
+            <MaterialCard
               key={material.id}
+              variant="list"
               name={
                 material.publication_status === "archived"
                   ? `${material.name}（非公開）`
                   : material.name
               }
-              manufacturerName={material.manufacturer_name}
-              avgRating={material.avg_rating}
+              maker={material.manufacturer_name}
+              rating={material.avg_rating}
+              imageSrc={materialIllustrationUrl(material.container_type_id) ?? undefined}
               href={`/dashboard/materials/${material.id}`}
             />
           ))

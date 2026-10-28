@@ -25,6 +25,7 @@ export const Default: Story = {
         <MaterialCard
           key={name}
           variant="scroll"
+          href="#"
           name={name}
           maker={maker}
           rating={4.2}

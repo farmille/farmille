@@ -1,40 +1,23 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { createElement } from "react";
-import { describe, expect, it } from "vitest";
-import { css } from "../../styled-system/css";
+import { expect, it } from "vitest";
+import { MaterialCard } from "./MaterialCard";
 
-import { MaterialCard, type MaterialCardProps } from "./MaterialCard";
-
-const baseProps = {
-  name: "テスト資材",
-  maker: "テストメーカー",
-  rating: 4.2,
-  reviewCount: 12,
-  imageSrc: "/missing-material-image.png",
-} satisfies MaterialCardProps;
-
-describe("MaterialCard", () => {
-  it.each(["scroll", "list"] satisfies NonNullable<MaterialCardProps["variant"]>[])(
-    "%s表示で画像とプレースホルダーを重ね、読み込み失敗後はプレースホルダーを残す",
-    (variant) => {
-      const { container } = render(createElement(MaterialCard, { ...baseProps, variant }));
-
-      const card = container.querySelector(`[data-ui="material-card"][data-variant="${variant}"]`);
-      const imageBox = card?.querySelector('[data-ui="material-card-image"]') ?? null;
-      const placeholder =
-        imageBox?.querySelector<HTMLElement>("[translate='no'][aria-hidden='true']") ?? null;
-      const image = screen.getByRole("img", { name: baseProps.name });
-      const imageLayer = css({ gridArea: "1 / 1" });
-
-      expect(imageBox).toContainElement(image);
-      expect(imageBox).toContainElement(placeholder);
-      expect(image).toHaveClass(imageLayer);
-      expect(placeholder).toHaveClass(imageLayer);
-
-      fireEvent.error(image);
-
-      expect(screen.queryByRole("img", { name: baseProps.name })).not.toBeInTheDocument();
-      expect(imageBox).toContainElement(placeholder);
-    },
+it("資材の画像を読み込めなくてもプレースホルダーが残る", () => {
+  const { container } = render(
+    createElement(MaterialCard, {
+      href: "/materials/1",
+      name: "テスト資材",
+      maker: "テストメーカー",
+      rating: 4.2,
+      reviewCount: 12,
+      imageSrc: "/missing-material-image.png",
+      variant: "list",
+    }),
   );
+  const placeholder = container.querySelector<SVGElement>('svg[data-icon="image"]');
+  expect(placeholder).not.toBeNull();
+  fireEvent.error(screen.getByRole("img", { name: "テスト資材" }));
+  expect(screen.queryByRole("img", { name: "テスト資材" })).not.toBeInTheDocument();
+  expect(container).toContainElement(placeholder);
 });

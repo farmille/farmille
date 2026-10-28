@@ -7,6 +7,8 @@ import { tokens } from "./src/theme/tokens.ts";
 
 const iconLibraryImports = {
   group: [
+    "material-icons",
+    "material-icons/*",
     "react-icons",
     "react-icons/*",
     "lucide",
@@ -16,8 +18,7 @@ const iconLibraryImports = {
     "@mui/icons-material",
     "@mui/icons-material/*",
   ],
-  message:
-    "SVG アイコンライブラリは使わない。src/components/Icon.tsx（Material Icons フォント）に glyph を足して使う。",
+  message: "アイコンは src/components/Icon.tsx（Tabler Icons）に追加して使う。",
 };
 
 // no-restricted-syntax は設定ごとに上書きされるので、ファイルの範囲ごとに必要な組を並べ直す。
@@ -112,9 +113,27 @@ const eslintConfig = defineConfig([
   ]),
   ...oxlint.configs["flat/recommended"],
   {
-    // アイコンは Google Material Icons（material-icons パッケージのフォント）を共通 Icon 経由で使う。
+    // アイコンは共通 Icon 経由で使う。
     rules: {
       "no-restricted-imports": ["error", { patterns: [iconLibraryImports] }],
+    },
+  },
+  {
+    files: ["src/components/**/*.{ts,tsx}"],
+    ignores: ["src/components/Icon.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            iconLibraryImports,
+            {
+              group: ["@tabler/icons-react", "@tabler/icons-react/*"],
+              message: "共通 Icon を使う。",
+            },
+          ],
+        },
+      ],
     },
   },
   {
@@ -126,6 +145,10 @@ const eslintConfig = defineConfig([
         {
           patterns: [
             iconLibraryImports,
+            {
+              group: ["@tabler/icons-react", "@tabler/icons-react/*"],
+              message: "共通 Icon を使う。",
+            },
             {
               group: ["@base-ui/react", "@base-ui/react/*", "sonner"],
               message:

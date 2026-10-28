@@ -254,7 +254,7 @@ export async function getStructuredUsageReport(
 ) {
   const { data, error } = await supabase
     .from("usage_reports")
-    .select(`id, updated_at, material_id, author_user_id, crop_id, variety_unknown,
+    .select(`id, updated_at, material_id, author_user_id, crop_id, crop_name_other, variety_unknown,
     common_plot_description, observed_change, purpose_tags, purpose_note, prefecture_code, publish_city,
     cultivation_environment, timing_note, method_details_ack, documents_ack, pesticide_ack,
     pdf_values_checked,
@@ -280,6 +280,7 @@ export async function getStructuredUsageReport(
     expectedUpdatedAt: data.updated_at,
     materialId: data.material_id,
     cropId: data.crop_id,
+    cropNameOther: data.crop_name_other,
     varietyUnknown: data.variety_unknown,
     varieties: data.varieties.toSorted(byOrder).map(({ id, name }) => ({ id, name })),
     comparedMaterials: data.comparedMaterials
@@ -359,12 +360,12 @@ export async function getStructuredReportFormData(materialId: string, userId: st
     listClassificationOptions(),
     supabase
       .from("usage_reports")
-      .select("id,status,updated_at,crop:crops(name),form_version")
+      .select("id,status,updated_at,crop_name_other,crop:crops(name),form_version")
       .eq("material_id", materialId)
       .eq("author_user_id", userId)
       .in("status", ["draft", "pending"])
       .order("updated_at", { ascending: false }),
-    supabase.from("profile_crops").select("crop_id").eq("user_id", userId),
+    supabase.from("profile_crops").select("crop_id,crop_name_other").eq("user_id", userId),
     supabase.from("material_crops").select("crop_id").eq("material_id", materialId),
   ]);
   if (!options.ok) return options;
@@ -399,7 +400,13 @@ export async function getStructuredReportFormData(materialId: string, userId: st
     documentUrls: documents.data,
     crops: options.data.crops,
     effects: options.data.effects,
-    favoriteCropIds: favorites.data.map((item) => item.crop_id),
+    favoriteCropIds: favorites.data.flatMap((item) =>
+      item.crop_id === null ? [] : [item.crop_id],
+    ),
+    /** プロフィールで「その他」に自由記入した作目。作目の候補に出す。 */
+    favoriteCropNamesOther: favorites.data.flatMap((item) =>
+      item.crop_name_other === null ? [] : [item.crop_name_other],
+    ),
     materialCropIds: materialCrops.data.map((item) => item.crop_id),
     draft: draft.data,
     pdfValuesCheckRequired: pdfCheck.data,
@@ -407,10 +414,11 @@ export async function getStructuredReportFormData(materialId: string, userId: st
     submitted: reports.data
       .filter((row) => row.status === "pending")
       .map((row) => {
-        if (row.crop === null) throw new Error("提出済みレポートの作物が見つかりません。");
+        const cropName = row.crop?.name ?? row.crop_name_other;
+        if (cropName === null) throw new Error("提出済みレポートの作物が見つかりません。");
         return {
           id: row.id,
-          cropName: row.crop.name,
+          cropName,
           status: "pending" as const,
           updatedAt: row.updated_at,
         };

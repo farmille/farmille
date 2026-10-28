@@ -14,6 +14,7 @@ const emptyDetails = {
   bio: "",
   affiliations: [],
   crops: [],
+  cropNamesOther: [],
   links: [],
 };
 
@@ -26,6 +27,7 @@ const fullDetails = {
     { id: "10000000-0000-4000-8000-000000000001", name: "トマト", aliases: [] },
     { id: "10000000-0000-4000-8000-000000000002", name: "いちご", aliases: ["苺"] },
   ],
+  cropNamesOther: [],
   links: ["https://www.ichigo-farm.com/about", "https://example.com/blog"],
 };
 
@@ -71,3 +73,15 @@ export const OwnEmpty: Story = {
 };
 
 export const Minimal: Story = { args: { details: emptyDetails } };
+
+export const OtherStandpoint: Story = {
+  args: { editable: true, details: { ...fullDetails, standpoint: "other" } },
+};
+
+export const JaStandpoint: Story = {
+  args: { editable: true, details: { ...fullDetails, standpoint: "ja" } },
+};
+
+export const LongHandle: Story = {
+  args: { editable: true, handle: "はままつ施設トマトといちごの山田農園" },
+};

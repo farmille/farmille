@@ -132,6 +132,7 @@ export type PdfReadingResult =
       message: string;
       remaining: number | null;
       savedDraft: PdfReadingSavedDraft | null;
+      pdfValuesCheckRequired: boolean;
     };
 
 type FieldPath = (typeof PDF_READING_FIELD_PATHS)[number];

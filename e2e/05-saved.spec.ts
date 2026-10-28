@@ -30,7 +30,6 @@ test("お気に入り保存、マイページ一覧、比較表", async ({ page 
       await materialLink.locator("..").getByRole("checkbox", { name: "比較に含める" }).check();
     }
 
-    await expect(page.locator('img[src*="container-shapes"]')).toBeVisible();
     await page.getByRole("button", { name: "比較する" }).click();
     await expect(page).toHaveURL(/\/me\/saved\/compare\?/);
     await expect(page.getByRole("table")).toBeVisible();

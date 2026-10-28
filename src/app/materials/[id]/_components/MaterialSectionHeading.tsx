@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import type { ReactNode } from "react";
 
 import { css, cva } from "../../../../../styled-system/css";
@@ -61,7 +62,11 @@ export function MaterialSectionHeading({
           </>
         )}
       </h2>
-      {more === undefined ? null : <MoreLink href={more.href}>{more.label}</MoreLink>}
+      {more === undefined ? null : (
+        <MoreLink href={more.href}>
+          {more.label} <Icon name="arrow_forward" size="xs" />
+        </MoreLink>
+      )}
     </div>
   );
 }

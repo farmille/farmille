@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import type { ReviewRatingDistribution } from "@/server/queries/material-content";
 
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
@@ -54,7 +55,10 @@ function BarRow({ rating, count, total }: { rating: number; count: number; total
   const percent = total > 0 ? Math.round((count / total) * 100) : 0;
   return (
     <div className={rowStyle} role="img" aria-label={`星${rating}の感想口コミ ${count}件`}>
-      <span>★{rating}</span>
+      <span>
+        <Icon name="star_filled" size="sm" />
+        {rating}
+      </span>
       <div className={trackStyle}>
         <span className={fillStyle} style={{ "--bar-width": `${percent}%` }} />
       </div>

@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -133,7 +134,7 @@ export function SellerPageContent({ data }: { data: PublicSellerPageData }) {
           {showAllMaterials ? (
             <div className={css({ mt: "2.5" })}>
               <Link className={moreLinkStyle} href={materialsHref}>
-                掲載資材 {data.materialCount}件をすべて見る →
+                掲載資材 {data.materialCount}件をすべて見る <Icon name="arrow_forward" size="xs" />
               </Link>
             </div>
           ) : null}

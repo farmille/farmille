@@ -20,12 +20,8 @@ test("レポートの全文はログイン後に表示し、ログアウト後�
     });
     const path = `/reports/${report.id}`;
     await page.goto(path);
-    await expect(page.getByRole("link", { name: "無料会員登録して続きを読む" })).toHaveAttribute(
-      "href",
-      `/signup/general?next=${encodeURIComponent(path)}`,
-    );
     expect(await page.content()).not.toContain(privateText);
-    await page.getByRole("link", { name: "ログインはこちら →" }).click();
+    await page.getByRole("link", { name: "ログインはこちら" }).click();
     await page.getByLabel("メールアドレス", { exact: false }).fill(user.email);
     await page.getByLabel("パスワード", { exact: false }).fill(user.password);
     await page.getByRole("button", { name: "ログインする", exact: true }).click();

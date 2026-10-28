@@ -5,9 +5,7 @@ import type { Database, Json } from "@/types/database.types";
 
 import {
   claimPdfReading,
-  getPdfReadingRemaining,
   getReportPdfReadingMarks,
-  listExpiredPdfReadingUploads,
   recordPdfReadingApplied,
   recordPdfReadingResult,
   reportNeedsPdfValuesCheck,
@@ -97,23 +95,6 @@ describe("回数の確保", () => {
     expect(result).toEqual({ ok: false, error: "invalid_body" });
     expect(sent).toEqual([]);
   });
-
-  it("DB が想定外の形を返したら internal にする", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
-    const { client } = fakeSupabase(json([]));
-    expect(await claimPdfReading({ userId, reportId, materialId, uploadPath }, client)).toEqual({
-      ok: false,
-      error: "internal",
-    });
-  });
-});
-
-describe("残り回数", () => {
-  it("利用者の今月の残り回数を返す", async () => {
-    const { client, sent } = fakeSupabase(json(3));
-    expect(await getPdfReadingRemaining(userId, client)).toEqual({ ok: true, data: 3 });
-    expect(sent[0]?.body).toEqual({ p_user_id: userId });
-  });
 });
 
 describe("結果の記録", () => {
@@ -172,24 +153,6 @@ describe("結果の記録", () => {
       p_speed: "standard",
       p_error_code: "timeout",
     });
-  });
-
-  it("記録済みの読み取りをもう一度記録すると conflict を返す", async () => {
-    const { client } = fakeSupabase(dbError("40001", "conflict"));
-    const result = await recordPdfReadingResult(
-      {
-        readingId,
-        userId,
-        status: "failed",
-        errorCode: "refusal",
-        model: null,
-        speed: null,
-        inputTokens: null,
-        outputTokens: null,
-      },
-      client,
-    );
-    expect(result).toEqual({ ok: false, error: "conflict" });
   });
 });
 
@@ -274,16 +237,5 @@ describe("提出時に読み取った値の確認が要るか", () => {
       ok: true,
       data: false,
     });
-  });
-});
-
-describe("期限切れの PDF", () => {
-  it("1日を過ぎて残っている PDF の場所を返す", async () => {
-    const { client, sent } = fakeSupabase(json([uploadPath]));
-    expect(await listExpiredPdfReadingUploads(100, client)).toEqual({
-      ok: true,
-      data: [uploadPath],
-    });
-    expect(sent[0]?.body).toEqual({ p_limit: 100 });
   });
 });

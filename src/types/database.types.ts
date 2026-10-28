@@ -1210,6 +1210,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          short_name: string
           sort_order: number
           updated_at: string
         }
@@ -1217,6 +1218,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          short_name: string
           sort_order?: number
           updated_at?: string
         }
@@ -1224,6 +1226,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          short_name?: string
           sort_order?: number
           updated_at?: string
         }
@@ -3128,17 +3131,23 @@ export type Database = {
       }
       profile_crops: {
         Row: {
-          crop_id: string
+          crop_id: string | null
+          crop_name_other: string | null
+          id: string
           sort_order: number
           user_id: string
         }
         Insert: {
-          crop_id: string
+          crop_id?: string | null
+          crop_name_other?: string | null
+          id?: string
           sort_order?: number
           user_id: string
         }
         Update: {
-          crop_id?: string
+          crop_id?: string | null
+          crop_name_other?: string | null
+          id?: string
           sort_order?: number
           user_id?: string
         }
@@ -3329,7 +3338,8 @@ export type Database = {
       review_crops: {
         Row: {
           created_at: string
-          crop_id: string
+          crop_id: string | null
+          crop_name_other: string | null
           id: string
           review_id: string
           sort_order: number
@@ -3337,7 +3347,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          crop_id: string
+          crop_id?: string | null
+          crop_name_other?: string | null
           id?: string
           review_id: string
           sort_order?: number
@@ -3345,7 +3356,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          crop_id?: string
+          crop_id?: string | null
+          crop_name_other?: string | null
           id?: string
           review_id?: string
           sort_order?: number
@@ -3569,6 +3581,59 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      search_tag_aliases: {
+        Row: {
+          name: string
+          search_tag_id: string
+        }
+        Insert: {
+          name: string
+          search_tag_id: string
+        }
+        Update: {
+          name?: string
+          search_tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_tag_aliases_search_tag_id_fkey"
+            columns: ["search_tag_id"]
+            isOneToOne: false
+            referencedRelation: "search_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_tag_effects: {
+        Row: {
+          effect_id: string
+          search_tag_id: string
+        }
+        Insert: {
+          effect_id: string
+          search_tag_id: string
+        }
+        Update: {
+          effect_id?: string
+          search_tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_tag_effects_effect_id_fkey"
+            columns: ["effect_id"]
+            isOneToOne: false
+            referencedRelation: "effects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_tag_effects_search_tag_id_fkey"
+            columns: ["search_tag_id"]
+            isOneToOne: false
+            referencedRelation: "search_tags"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -4257,6 +4322,7 @@ export type Database = {
           common_plot_description: string
           created_at: string
           crop_id: string | null
+          crop_name_other: string | null
           cultivation_environment: string
           cultivation_tags: string[]
           cultivation_type: string | null
@@ -4293,6 +4359,7 @@ export type Database = {
           common_plot_description?: string
           created_at?: string
           crop_id?: string | null
+          crop_name_other?: string | null
           cultivation_environment?: string
           cultivation_tags?: string[]
           cultivation_type?: string | null
@@ -4329,6 +4396,7 @@ export type Database = {
           common_plot_description?: string
           created_at?: string
           crop_id?: string | null
+          crop_name_other?: string | null
           cultivation_environment?: string
           cultivation_tags?: string[]
           cultivation_type?: string | null
@@ -4623,6 +4691,7 @@ export type Database = {
           p_author_user_id: string
           p_body: string
           p_crop_ids: string[]
+          p_crop_name_other?: string
           p_has_control_plot?: boolean
           p_material_id: string
           p_pesticide_ack?: boolean
@@ -4670,6 +4739,7 @@ export type Database = {
           common_plot_description: string
           created_at: string
           crop_id: string | null
+          crop_name_other: string | null
           cultivation_environment: string
           cultivation_tags: string[]
           cultivation_type: string | null
@@ -4833,6 +4903,7 @@ export type Database = {
           p_affiliations: string[]
           p_bio: string
           p_crop_ids: string[]
+          p_crop_names_other?: string[]
           p_handle: string
           p_links: string[]
         }
@@ -4983,6 +5054,7 @@ export type Database = {
           p_author_user_id: string
           p_body: string
           p_crop_ids: string[]
+          p_crop_name_other?: string
           p_has_control_plot?: boolean
           p_material_id: string
           p_pesticide_ack?: boolean

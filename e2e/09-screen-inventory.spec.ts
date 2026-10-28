@@ -56,6 +56,7 @@ test("アカウント別の画面一覧を撮影する", async ({ page }) => {
 
     await loginGeneral(page, user, "/me");
     for (const [path, name] of [
+      [`/users/${user.id}`, "32-general-user-page"],
       ["/me/edit", "41-profile-edit"],
       ["/me/saved", "42-saved"],
       ["/me/saved/compare", "43-compare"],

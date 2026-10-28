@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_PER_PAGE, pageRange, type Paginated } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
+import { reportCrop } from "@/server/usage-reports/crop";
 import { pickReportCover } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
@@ -59,6 +60,7 @@ type ReportFeedRow = Pick<
 > & {
   author: Pick<PublicProfileRow, "handle"> | null;
   crop: Pick<CropRow, "name"> | null;
+  crop_name_other: string | null;
   material: { name: string } | null;
   media: Pick<UsageReportMediaRow, "id" | "url" | "media_type" | "sort_order" | "measurement_id">[];
 };
@@ -192,6 +194,7 @@ async function fetchPublishedReports(
       author:public_profiles!usage_reports_author_user_id_fkey (
         handle
       ),
+      crop_name_other,
       crop:crops!usage_reports_crop_id_fkey (
         name
       ),
@@ -257,7 +260,8 @@ function toReportItem(
     return fail("internal");
   }
 
-  if (row.author?.handle == null || row.crop === null || row.material === null) {
+  const crop = reportCrop(row);
+  if (row.author?.handle == null || crop === null || row.material === null) {
     reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
     return fail("internal");
   }
@@ -278,7 +282,7 @@ function toReportItem(
           ? reportMediaUrl(cover.url, row.author_user_id)
           : cover.url,
     authorHandle: row.author.handle,
-    cropName: row.crop.name,
+    cropName: crop.name,
   });
 }
 

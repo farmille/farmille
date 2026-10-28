@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
@@ -74,8 +75,9 @@ function StarText({ value }: { value: number }) {
   const filled = Math.min(5, Math.max(0, Math.round(value)));
   return (
     <span role="img" aria-label={`5段階中${filled}`}>
-      {"★".repeat(filled)}
-      {"☆".repeat(5 - filled)}
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Icon key={n} name={n <= filled ? "star_filled" : "star"} size="sm" />
+      ))}
     </span>
   );
 }

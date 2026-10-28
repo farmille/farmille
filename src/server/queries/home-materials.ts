@@ -31,19 +31,19 @@ export async function listHomeMaterials() {
       .map(async (material) => {
         const categories = await client
           .from("material_ingredient_categories")
-          .select("category:ingredient_categories(name,sort_order)")
+          .select("category:ingredient_categories(short_name,sort_order)")
           .eq("material_id", material.id);
         if (categories.error) throw new Error("資材の分類情報を取得できませんでした。");
-        const names = categories.data
+        const shortNames = categories.data
           .map((row) => {
             if (row.category === null) throw new Error("資材の分類情報が欠落しています。");
             return row.category;
           })
           .toSorted((a, b) => a.sort_order - b.sort_order)
-          .map((row) => row.name);
+          .map((row) => row.short_name);
         return {
           ...material,
-          categories: names,
+          categories: shortNames,
         };
       }),
   );

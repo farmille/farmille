@@ -49,15 +49,4 @@ describe("MobileSiteMenu", () => {
       document.cookie = "sb-local-auth-token=; max-age=0";
     }
   });
-
-  it("× のボタンで閉じる", async () => {
-    render(<MobileSiteMenu links={links} member={false} />);
-    fireEvent.click(screen.getByRole("button", { name: "メニュー" }));
-    fireEvent.click(await screen.findByRole("button", { name: "メニューを閉じる" }));
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "メニュー" }).getAttribute("aria-expanded")).toBe(
-        "false",
-      ),
-    );
-  });
 });

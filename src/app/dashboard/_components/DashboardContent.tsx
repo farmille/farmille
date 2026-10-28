@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -132,7 +133,7 @@ function CheckItem({
   return (
     <li className={checkItemRecipe({ done })}>
       <span className={checkMarkRecipe({ done })} aria-hidden="true">
-        {done ? "✓" : ""}
+        {done ? <Icon name="check" size="xs" /> : null}
       </span>
       <span>
         {children}
