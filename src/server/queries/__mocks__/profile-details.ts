@@ -6,6 +6,7 @@ export const getProfileDetails = fn<
   data: {
     affiliations: [],
     crops: [],
+    cropNamesOther: [],
     links: [],
     standpoint: "farmer",
     prefecture_code: 8,

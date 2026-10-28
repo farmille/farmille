@@ -20,7 +20,10 @@ export type ExistingReviewPhotoInput = {
 
 export type ReviewMutationInput = {
   materialId: string;
+  /** 作物マスタから選んだ作目。「その他」を自由記入したときは空。 */
   cropIds: string[];
+  /** 作物マスタにない作目の自由記入（「その他」）。cropIds とどちらか一方だけを持つ。 */
+  cropNameOther: string | null;
   rating: number;
   body: string;
   pesticideAck: true;
@@ -36,7 +39,8 @@ export type ReviewValidation =
   | { ok: false; fieldErrors: ReviewFieldErrors };
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const ReviewCropIdsSchema = v.pipe(v.array(v.pipe(v.string(), v.uuid())), v.length(1));
+const ReviewCropIdsSchema = v.pipe(v.array(v.pipe(v.string(), v.uuid())), v.maxLength(1));
+const REVIEW_CROP_NAME_MAX_LENGTH = 100;
 const REVIEW_PHOTO_PATH_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/[0-9a-f-]+\.(?:jpg|png|webp)$/i;
 const REVIEW_PHOTO_PUBLIC_MARKER = "/storage/v1/object/public/review-photos/";
@@ -74,13 +78,19 @@ function parseNewPhotos(value: FormDataEntryValue | null): NewReviewPhoto[] | nu
 export function validateReviewFormData(formData: FormData): ReviewValidation {
   const fieldErrors: ReviewFieldErrors = {};
   const cropIdsResult = v.safeParse(ReviewCropIdsSchema, formData.getAll("cropIds"));
+  const cropNameValue = trimmedFormDataString(formData.get("cropNameOther"));
+  const cropNameOther = cropNameValue.length === 0 ? null : cropNameValue;
+  const hasOneCrop =
+    cropIdsResult.success &&
+    (cropIdsResult.output.length === 1) !== (cropNameOther !== null) &&
+    (cropNameOther === null || cropNameOther.length <= REVIEW_CROP_NAME_MAX_LENGTH);
   const ratingValue = trimmedFormDataString(formData.get("rating"));
   const rating = Number(ratingValue);
   const body = trimmedFormDataString(formData.get("body"));
   const pesticideAck = formData.get("pesticideAck") === "on";
   const newPhotos = parseNewPhotos(formData.get("newPhotos"));
 
-  if (!cropIdsResult.success) {
+  if (!hasOneCrop) {
     fieldErrors.cropIds = "使用対象作目を1つ選んでください。";
   }
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
@@ -104,6 +114,7 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
     ok: true,
     input: {
       cropIds: cropIdsResult.output,
+      cropNameOther,
       rating,
       body,
       pesticideAck: true,
@@ -127,16 +138,13 @@ async function validateReferences(
   materialId: string,
   cropIds: string[],
 ): Promise<Result<null>> {
-  if (cropIds.length !== 1 || !UUID_PATTERN.test(cropIds[0] ?? "")) {
+  if (cropIds.length > 1 || cropIds.some((cropId) => !UUID_PATTERN.test(cropId))) {
     return fail("invalid_body");
   }
 
   const [materialResult, cropResult] = await Promise.all([
     supabase.from("materials").select("id, publication_status").eq("id", materialId).maybeSingle(),
-    supabase
-      .from("crops")
-      .select("id")
-      .eq("id", cropIds[0] ?? ""),
+    supabase.from("crops").select("id").in("id", cropIds),
   ]);
 
   if (materialResult.error !== null || cropResult.error !== null) {
@@ -149,7 +157,7 @@ async function validateReferences(
 
   if (materialResult.data === null) return fail("not_found");
   if (materialResult.data.publication_status !== "published") return fail("conflict");
-  if (cropResult.data.length !== 1) return fail("invalid_body");
+  if (cropResult.data.length !== cropIds.length) return fail("invalid_body");
 
   return succeed(null);
 }
@@ -246,6 +254,7 @@ export async function createReviewWithDependencies(
     p_rating: input.rating,
     p_body: input.body,
     p_crop_ids: input.cropIds,
+    p_crop_name_other: input.cropNameOther ?? undefined,
     p_pesticide_ack: input.pesticideAck,
   };
   const { data: reviewId, error: reviewError } = await supabase.rpc(
@@ -395,6 +404,7 @@ export async function updateReview(
     p_rating: input.rating,
     p_body: input.body,
     p_crop_ids: input.cropIds,
+    p_crop_name_other: input.cropNameOther ?? undefined,
     p_pesticide_ack: input.pesticideAck,
   };
   const { data: updatedReviewId, error: updateError } = await supabase.rpc(

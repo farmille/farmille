@@ -7,6 +7,7 @@ import {
 } from "@/server/usage-reports/structured";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSessionUser } from "@/server/auth";
+import { reportCrop, type ReportCrop } from "@/server/usage-reports/crop";
 import { pickReportCover } from "@/server/usage-reports/model";
 
 import { fail, succeed, type Result } from "@/server/result";
@@ -43,6 +44,7 @@ type RecentReportQueryRow = Pick<
 > & {
   author: Pick<PublicProfileRow, "handle"> | null;
   crop: Pick<CropRow, "name"> | null;
+  crop_name_other: string | null;
   material: Pick<MaterialRow, "name"> | null;
   media: Pick<MediaRow, "id" | "url" | "media_type" | "sort_order" | "measurement_id">[];
 };
@@ -79,6 +81,7 @@ export async function listRecentUsageReports({
       author:public_profiles!usage_reports_author_user_id_fkey (
         handle
       ),
+      crop_name_other,
       crop:crops!usage_reports_crop_id_fkey (
         name
       ),
@@ -142,7 +145,8 @@ export async function listRecentUsageReports({
       return fail("internal");
     }
 
-    if (row.author?.handle == null || row.crop === null || row.material === null) {
+    const crop = reportCrop(row);
+    if (row.author?.handle == null || crop === null || row.material === null) {
       reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
       return fail("internal");
     }
@@ -162,7 +166,7 @@ export async function listRecentUsageReports({
             : cover.url,
       authorHandle: row.author.handle,
       authorUserId: row.author_user_id,
-      cropName: row.crop.name,
+      cropName: crop.name,
       materialName: row.material.name,
       materialId: row.material_id,
       summary: row.summary,
@@ -220,7 +224,7 @@ export type PublishedUsageReportDetail = {
     avatarUrl: string | null;
     standpoint: string | null;
   };
-  crop: { id: string; name: string };
+  crop: ReportCrop;
   material: {
     id: string;
     name: string;
@@ -332,7 +336,7 @@ export async function getPublishedUsageReport(
   const { data, error } = await query
     .select(
       `
-      id, material_id, author_user_id, title, status, crop_id, purpose_tags, purpose_note,
+      id, material_id, author_user_id, title, status, crop_id, crop_name_other, purpose_tags, purpose_note,
       prefecture_code, field_name, variety, planting_date, cultivation_type, cultivation_tags,
       growth_stage, climate_note, observed_change, negative_note, summary, pesticide_ack,
       is_provided_sample, published_at, created_at, updated_at, form_version, variety_unknown,
@@ -395,6 +399,7 @@ export async function getPublishedUsageReport(
   }
 
   const row: UsageReportDetailQueryRow = data;
+  const crop = reportCrop(row);
 
   if (row.published_at === null) {
     reportQueryError("published なのに published_at が無い", { id: row.id });
@@ -404,7 +409,7 @@ export async function getPublishedUsageReport(
   if (
     row.author?.user_id == null ||
     row.author.handle == null ||
-    row.crop === null ||
+    crop === null ||
     row.material === null
   ) {
     reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
@@ -452,7 +457,7 @@ export async function getPublishedUsageReport(
     structured: structured.data,
     documentUrls: documentUrls.data,
     id: row.id,
-    title: row.title ?? `${row.material.name} 実証詳細レポート｜${row.crop.name}`,
+    title: row.title ?? `${row.material.name} 実証詳細レポート｜${crop.name}`,
     publishedAt: row.published_at,
     purposeTags: row.purpose_tags,
     purposeNote: row.purpose_note,
@@ -473,7 +478,7 @@ export async function getPublishedUsageReport(
       avatarUrl: row.author.avatar_url,
       standpoint: row.author.standpoint,
     },
-    crop: row.crop,
+    crop,
     material: {
       id: row.material.id,
       name: row.material.name,

@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { selectAllRows } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
+import { reportCrop, type ReportCrop } from "@/server/usage-reports/crop";
 import { pickReportCover } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
@@ -28,18 +29,18 @@ type UsageReportFields = Pick<
 >;
 
 type UsageReportAuthor = Pick<PublicProfileRow, "user_id" | "handle" | "avatar_url">;
-type UsageReportCrop = Pick<CropRow, "id" | "name">;
 type UsageReportMedia = Pick<UsageReportMediaRow, "id" | "url" | "media_type" | "sort_order">;
 
 type UsageReportQueryRow = UsageReportFields & {
   author: UsageReportAuthor | null;
-  crop: UsageReportCrop | null;
+  crop: Pick<CropRow, "id" | "name"> | null;
+  crop_name_other: string | null;
   media: (UsageReportMedia & Pick<UsageReportMediaRow, "measurement_id">)[];
 };
 
 export type PublishedUsageReport = UsageReportFields & {
   author: UsageReportAuthor | null;
-  crop: UsageReportCrop | null;
+  crop: ReportCrop | null;
   coverImage: UsageReportMedia | null;
   helpfulCount: number;
   viewCount: number;
@@ -185,6 +186,7 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
           handle,
           avatar_url
         ),
+        crop_name_other,
         crop:crops!usage_reports_crop_id_fkey (
           id,
           name
@@ -232,11 +234,12 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
 
   return succeed({
     total: count,
-    items: rows.map(({ media, ...report }) => {
+    items: rows.map(({ media, crop_name_other, ...report }) => {
       const coverImage = pickReportCover(media);
 
       return {
         ...report,
+        crop: reportCrop({ crop: report.crop, crop_name_other }),
         coverImage,
         helpfulCount: counts.data.helpfulById.get(report.id) ?? 0,
         viewCount: counts.data.viewsById.get(report.id) ?? 0,

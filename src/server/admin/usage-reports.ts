@@ -6,6 +6,7 @@ import {
 } from "@/server/usage-reports/structured";
 import { reportAdminError, withAdmin } from "@/server/admin/guard";
 import { fail, succeed, type Result } from "@/server/result";
+import { reportCrop, type ReportCrop } from "@/server/usage-reports/crop";
 import type { Database } from "@/types/database.types";
 
 type ApplicationRow = Database["public"]["Tables"]["usage_report_applications"]["Row"];
@@ -25,7 +26,10 @@ export const EDITORIAL_REPORT_STATUS_LABELS = {
   declined: "差し戻し",
 } satisfies Record<EditorialReportStatus, string>;
 
-type PendingReportQueryRow = Pick<UsageReportRow, "id" | "title" | "status" | "created_at"> & {
+type PendingReportQueryRow = Pick<
+  UsageReportRow,
+  "id" | "title" | "status" | "created_at" | "crop_name_other"
+> & {
   author: Pick<ProfileRow, "user_id" | "handle"> | null;
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
@@ -48,7 +52,7 @@ export type PendingUsageReportItem = {
   title: string;
   createdAt: string;
   author: { userId: string; handle: string };
-  crop: { id: string; name: string };
+  crop: ReportCrop;
   material: { id: string; name: string };
 };
 
@@ -76,7 +80,7 @@ export type UsageReportEditorialDetail = {
   summary: string;
   editorNote: string | null;
   author: { userId: string; handle: string };
-  crop: { id: string; name: string };
+  crop: ReportCrop;
   material: { id: string; name: string };
   applications: Array<{
     id: string;
@@ -147,6 +151,7 @@ export async function listPendingUsageReports(): Promise<Result<PendingUsageRepo
             user_id,
             handle
           ),
+          crop_name_other,
           crop:crops!usage_reports_crop_id_fkey (
             id,
             name
@@ -169,17 +174,18 @@ export async function listPendingUsageReports(): Promise<Result<PendingUsageRepo
     const items: PendingUsageReportItem[] = [];
 
     for (const row of rows) {
-      if (row.author === null || row.crop === null || row.material === null) {
+      const crop = reportCrop(row);
+      if (row.author === null || crop === null || row.material === null) {
         reportError("pending 実証詳細レポートの関連データが欠落", row);
         return fail("internal");
       }
 
       items.push({
         id: row.id,
-        title: row.title ?? `${row.material.name} 実証詳細レポート｜${row.crop.name}`,
+        title: row.title ?? `${row.material.name} 実証詳細レポート｜${crop.name}`,
         createdAt: row.created_at,
         author: { userId: row.author.user_id, handle: row.author.handle },
-        crop: row.crop,
+        crop,
         material: row.material,
       });
     }
@@ -202,6 +208,7 @@ export async function getUsageReportEditorialDetail(
             user_id,
             handle
           ),
+          crop_name_other,
           crop:crops!usage_reports_crop_id_fkey (
             id,
             name
@@ -246,9 +253,10 @@ export async function getUsageReportEditorialDetail(
     if (data === null) return fail("not_found");
 
     const row: EditorialDetailQueryRow = data;
+    const crop = reportCrop(row);
     if (
       row.author === null ||
-      row.crop === null ||
+      crop === null ||
       row.material === null ||
       !isEditorialReportStatus(row.status)
     ) {
@@ -288,7 +296,7 @@ export async function getUsageReportEditorialDetail(
       structured: structured.data,
       documentUrls: documentUrls.data,
       id: row.id,
-      title: row.title ?? `${row.material.name} 実証詳細レポート｜${row.crop.name}`,
+      title: row.title ?? `${row.material.name} 実証詳細レポート｜${crop.name}`,
       status: row.status,
       createdAt: row.created_at,
       publishedAt: row.published_at,
@@ -307,7 +315,7 @@ export async function getUsageReportEditorialDetail(
       summary: row.summary,
       editorNote: row.editor_note,
       author: { userId: row.author.user_id, handle: row.author.handle },
-      crop: row.crop,
+      crop,
       material: row.material,
       applications: row.applications
         .toSorted(
