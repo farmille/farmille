@@ -10,6 +10,7 @@ import {
   buildSearchHref,
   searchFilterItemToSelected,
   selectedFilterCategory,
+  selectedFilterChipName,
   selectedFilterKey,
   type MaterialSortParam,
   type SelectedSearchFilter,
@@ -162,7 +163,7 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
               removeLabel={`${filter.name}を外す`}
               size="sm"
             >
-              {filter.name}
+              {selectedFilterChipName(filter)}
             </Chip>
           ))}
         </div>

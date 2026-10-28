@@ -14,6 +14,8 @@ export type SelectedSearchFilter =
       kind: "filter";
       id: string;
       name: string;
+      /** 資材ジャンルの略称 */
+      shortName?: string;
       category: SearchFilterCategory;
     }
   | { kind: "maker"; name: string }
@@ -144,8 +146,14 @@ export function searchFilterItemToSelected(filter: SearchFilterItem): SelectedSe
     kind: "filter",
     id: filter.id,
     name: filter.name,
+    shortName: filter.shortName,
     category: filter.category,
   };
+}
+
+/** 選んだ条件のチップに出す名前。資材ジャンルは略称にする。 */
+export function selectedFilterChipName(filter: SelectedSearchFilter): string {
+  return filter.kind === "filter" ? (filter.shortName ?? filter.name) : filter.name;
 }
 
 export function resolveSelectedFilters({

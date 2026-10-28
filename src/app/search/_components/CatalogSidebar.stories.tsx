@@ -35,7 +35,13 @@ export const Selected: Story = {
   args: {
     selected: [
       { kind: "filter", category: "effect", id: storyIds.nutrient, name: "養分吸収の改善" },
-      { kind: "filter", category: "genre", id: storyIds.microbe, name: "微生物" },
+      {
+        kind: "filter",
+        category: "genre",
+        id: storyIds.seaweed,
+        name: "海藻、海藻抽出物",
+        shortName: "海藻",
+      },
       { kind: "filter", category: "crop", id: storyIds.onion, name: "たまねぎ" },
     ],
     sort: "rating",

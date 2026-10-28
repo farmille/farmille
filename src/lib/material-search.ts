@@ -18,6 +18,8 @@ export type SearchFilterRef = {
 export type SearchFilterItem = SearchFilterRef & {
   aliases: string[];
   name: string;
+  /** 資材ジャンルの略称。選んだ条件のチップに出す */
+  shortName?: string;
   sort_order: number;
 };
 

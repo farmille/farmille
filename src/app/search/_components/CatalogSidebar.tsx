@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import {
   buildSearchHref,
+  selectedFilterChipName,
   selectedFilterKey,
   type SelectedSearchFilter,
   type MaterialSortParam,
@@ -201,7 +202,7 @@ export function CatalogSidebar({
           return (
             <span key={key} className={selectedChip.root}>
               <span className={selectedChip.category}>選択中</span>
-              {filter.name}
+              {selectedFilterChipName(filter)}
               <Link
                 href={href}
                 rel="nofollow"
