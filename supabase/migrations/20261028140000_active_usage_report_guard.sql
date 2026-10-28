@@ -1,4 +1,4 @@
--- 同じ利用者・資材の下書きと確認中レポートを、保存RPCから重複させない。
+-- 同じ利用者・資材の下書きと確認中レポートを、保存RPCから重複させない。それ以外は 20261028130000 と同じ。
 create or replace function public.save_usage_report(p_input jsonb,p_submit boolean)
 returns table(report_id uuid,status text,updated_at timestamptz)
 language plpgsql security definer set search_path='' as $$
@@ -9,7 +9,8 @@ declare
 begin
   if uid is null or not coalesce(app.can_use_general_features(),false) then raise exception 'forbidden' using errcode='42501'; end if;
   if p_input is null or p_submit is null or octet_length(p_input::text)>1048576 then raise exception 'invalid_report_input' using errcode='23514'; end if;
-  perform app.check_report_object(p_input,'{"reportId":"string","expectedUpdatedAt":"string|null","materialId":"string","cropId":"string|null","varietyUnknown":"boolean","varieties":"array","comparedMaterials":"array","commonPlotDescription":"string","observedChange":"string","purposeTags":"array","prefectureCode":"number|null","city":"string","showCity":"boolean","cultivationEnvironment":"string","timingStages":"array","timingNote":"string","plots":"array","measurements":"array","media":"array","documents":"array","headings":"array","methodDetailsAck":"boolean","documentsAck":"boolean","guidelineAck":"boolean","pdfValuesChecked":"boolean"}');
+  if jsonb_typeof(p_input)='object' and not p_input ? 'cropNameOther' then p_input:=p_input||'{"cropNameOther":null}'; end if;
+  perform app.check_report_object(p_input,'{"reportId":"string","expectedUpdatedAt":"string|null","materialId":"string","cropId":"string|null","cropNameOther":"string|null","varietyUnknown":"boolean","varieties":"array","comparedMaterials":"array","commonPlotDescription":"string","observedChange":"string","purposeTags":"array","prefectureCode":"number|null","city":"string","showCity":"boolean","cultivationEnvironment":"string","timingStages":"array","timingNote":"string","plots":"array","measurements":"array","media":"array","documents":"array","headings":"array","methodDetailsAck":"boolean","documentsAck":"boolean","guidelineAck":"boolean","pdfValuesChecked":"boolean"}');
   rid:=(p_input->>'reportId')::uuid;
   -- 同じ利用者の新規保存と資材変更を直列化し、別タブからの重複も防ぐ。
   perform pg_advisory_xact_lock(hashtextextended('active_report:'||uid::text,0));
@@ -42,6 +43,7 @@ begin
     values(rid,(p_input->>'materialId')::uuid,uid,null,'','',false,2);
   end if;
   update public.usage_reports r set material_id=(p_input->>'materialId')::uuid,crop_id=(p_input->>'cropId')::uuid,
+    crop_name_other=nullif(btrim(p_input->>'cropNameOther'),''),
     variety=null,variety_unknown=(p_input->>'varietyUnknown')::boolean,
     common_plot_description=p_input->>'commonPlotDescription',
     observed_change=p_input->>'observedChange',summary=left(p_input->>'observedChange',120),
