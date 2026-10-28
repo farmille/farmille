@@ -30,6 +30,13 @@ export const Open: Story = {
     await userEvent.click(within(canvasElement).getByRole("button", { name: /作物で探す/ }));
   },
 };
+export const WithHint: Story = {
+  args: {
+    title: "施用方法で探す",
+    hint: "資材の使い方（散布・灌注・浸漬など）",
+    filter: undefined,
+  },
+};
 export const NoFilter: Story = { args: { filter: undefined, note: undefined } };
 export const NoMatch: Story = {
   play: async ({ canvasElement }) => {

@@ -248,11 +248,12 @@ export function CatalogSidebar({
           fontSize: "xs",
         })}
       >
-        作物 × 効果 など、条件を組み合わせて検索できます
+        作物と効果など、条件を組み合わせて探せます。
       </div>
       <SideSection
         sectionKey="effect"
         title="効果分類で探す"
+        hint="期待できる効果（耐暑性改善・糖度増加など）"
         selected={selectedChips(isFilter("effect"))}
         filter={{
           label: "効果名で検索",
@@ -289,6 +290,7 @@ export function CatalogSidebar({
       <SideSection
         sectionKey="genre"
         title="資材ジャンルで探す"
+        hint="原料の種類（微生物・海藻・アミノ酸など）"
         selected={selectedChips(isFilter("genre"))}
       >
         <div>
@@ -402,6 +404,7 @@ export function CatalogSidebar({
       <SideSection
         sectionKey="method"
         title="施用方法で探す"
+        hint="資材の使い方（散布・灌注・浸漬など）"
         selected={selectedChips(isFilter("method"))}
       >
         <div className={chipListStyle}>
