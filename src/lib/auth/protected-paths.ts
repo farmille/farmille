@@ -4,6 +4,9 @@
 /** 要ログイン。一般ユーザーの画面（02 §2「要ログイン」）。 */
 const GENERAL_PROTECTED_PREFIXES = ["/me", "/post", "/account"];
 
+/** 要ログインの配下でも、ログインなしで開ける画面。退会の完了画面は、退会でログアウトした後に開く。 */
+const PUBLIC_PATHS = ["/account/withdrawn"];
+
 /** 要ログイン。メーカーダッシュボード（02 §2「メーカーダッシュボード」）。 */
 const SELLER_PROTECTED_PREFIXES = ["/dashboard"];
 
@@ -21,6 +24,7 @@ function matchesPrefix(pathname: string, prefixes: readonly string[]): boolean {
 }
 
 export function isProtectedPath(pathname: string): boolean {
+  if (PUBLIC_PATHS.includes(pathname)) return false;
   return (
     matchesPrefix(pathname, GENERAL_PROTECTED_PREFIXES) ||
     matchesPrefix(pathname, SELLER_PROTECTED_PREFIXES) ||

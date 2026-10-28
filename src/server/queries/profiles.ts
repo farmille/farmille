@@ -44,11 +44,12 @@ export async function getOwnProfile(userId: string): Promise<Result<OwnProfile>>
     return fail("internal");
   }
 
-  if (profileData === null) {
+  const profile: Pick<ProfileRow, "user_id" | "handle" | "avatar_url"> | null = profileData;
+
+  // 退会済みのプロフィールはニックネームを空けているので、本人の表示情報として扱わない。
+  if (profile === null || profile.handle === null) {
     return fail("not_found");
   }
-
-  const profile: Pick<ProfileRow, "user_id" | "handle" | "avatar_url"> = profileData;
 
   return succeed({
     userId: profile.user_id,

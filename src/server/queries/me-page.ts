@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { postAuthor, type PostAuthor, type PostAuthorRow } from "@/lib/public-profile-label";
 import { getOwnProfile, type OwnProfile } from "@/server/queries/profiles";
 import { listSavedMaterials, type SavedMaterialItem } from "@/server/queries/saved-materials";
 import { fail, succeed, type Result } from "@/server/result";
@@ -13,7 +14,6 @@ type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
-type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
 
 type OwnReviewQueryRow = Pick<
   ReviewRow,
@@ -45,7 +45,7 @@ type HelpfulReviewDetail = {
   body: string;
   cropRelations: ReviewCropRelation | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
-  author: Pick<PublicProfileRow, "user_id" | "handle"> | null;
+  author: PostAuthorRow | null;
 };
 
 type HelpfulReportDetail = {
@@ -54,7 +54,7 @@ type HelpfulReportDetail = {
   crop: Pick<CropRow, "id" | "name"> | null;
   crop_name_other: string | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
-  author: Pick<PublicProfileRow, "user_id" | "handle"> | null;
+  author: PostAuthorRow | null;
 };
 
 export type OwnPostItem =
@@ -89,8 +89,7 @@ export type HelpfulItem =
       cropName: string;
       rating: number;
       body: string;
-      authorHandle: string;
-      authorUserId: string | null;
+      author: PostAuthor;
       helpfulCount: number;
       votedAt: string;
     }
@@ -99,8 +98,7 @@ export type HelpfulItem =
       id: string;
       title: string;
       cropName: string;
-      authorHandle: string;
-      authorUserId: string | null;
+      author: PostAuthor;
       helpfulCount: number;
       votedAt: string;
     };
@@ -360,6 +358,7 @@ async function listHelpfulItems(
               material:materials!reviews_material_id_fkey ( id, name ),
               author:public_profiles!reviews_author_user_id_fkey (
                 user_id,
+                withdrawn,
                 handle
               )
             `,
@@ -379,6 +378,7 @@ async function listHelpfulItems(
               material:materials!usage_reports_material_id_fkey ( id, name ),
               author:public_profiles!usage_reports_author_user_id_fkey (
                 user_id,
+                withdrawn,
                 handle
               )
             `,
@@ -410,7 +410,13 @@ async function listHelpfulItems(
     if (vote.target_type === "review") {
       const review = reviewsById.get(vote.target_id);
       const cropName = review === undefined ? null : reviewCropLabel(review.cropRelations);
-      if (review === undefined || cropName === null || review.material === null) {
+      const author = review === undefined ? null : postAuthor(review.author);
+      if (
+        review === undefined ||
+        cropName === null ||
+        review.material === null ||
+        author === null
+      ) {
         continue;
       }
 
@@ -422,8 +428,7 @@ async function listHelpfulItems(
         cropName,
         rating: review.rating,
         body: review.body,
-        authorHandle: review.author?.handle ?? "不明な投稿者",
-        authorUserId: review.author?.user_id ?? null,
+        author,
         helpfulCount: reviewHelpful.data.get(review.id) ?? 0,
         votedAt: vote.created_at,
       });
@@ -432,7 +437,8 @@ async function listHelpfulItems(
 
     const report = reportsById.get(vote.target_id);
     const crop = report === undefined ? null : reportCrop(report);
-    if (report === undefined || crop === null || report.material === null) {
+    const author = report === undefined ? null : postAuthor(report.author);
+    if (report === undefined || crop === null || report.material === null || author === null) {
       continue;
     }
 
@@ -441,8 +447,7 @@ async function listHelpfulItems(
       id: report.id,
       title: report.title ?? `${report.material.name} 実証詳細レポート`,
       cropName: crop.name,
-      authorHandle: report.author?.handle ?? "不明な投稿者",
-      authorUserId: report.author?.user_id ?? null,
+      author,
       helpfulCount: reportHelpful.data.get(report.id) ?? 0,
       votedAt: vote.created_at,
     });

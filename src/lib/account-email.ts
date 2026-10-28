@@ -1,4 +1,4 @@
-/** 会員登録・パスワード再設定・企業会員の案内で送るメールの件名と本文。送信元アドレスは送信専用。 */
+/** 会員登録・退会・パスワード再設定・企業会員の案内で送るメールの件名と本文。送信元アドレスは送信専用。 */
 export type AccountEmail = { subject: string; text: string };
 
 const CONTACT_EMAIL = "contact@farmille.com";
@@ -72,6 +72,37 @@ export function registrationCompleteEmail(siteUrl: string): AccountEmail {
       strangerNotice(
         "このメールアドレスで登録した覚えがない場合は、下記のお問い合わせ先にご連絡ください。",
       ),
+    ),
+  };
+}
+
+export function withdrawalCompleteEmail(siteUrl: string): AccountEmail {
+  return {
+    subject: subject("退会手続きが完了しました"),
+    text: body(
+      siteUrl,
+      [
+        "Farmille運営事務局です。",
+        "Farmilleの退会手続きが完了しました。これまでご利用いただき、ありがとうございました。",
+      ],
+      [
+        "■削除した情報",
+        "本名・メールアドレス・電話番号・住所・パスワード・パスキーを削除しました。お気に入りと保存した投稿も削除しました。",
+        "これまでのメールアドレスとパスワードでは、ログインできません。",
+      ],
+      [
+        "■掲載を続ける投稿",
+        "投稿した実証詳細レポートと感想口コミは削除していません。投稿者名は「退会済みユーザー」と表示されます。",
+      ],
+      [
+        "■もう一度使う場合",
+        "同じメールアドレスで、新しく会員登録できます。以前の投稿は引き継がれません。",
+        new URL("/signup", siteUrl).toString(),
+      ],
+      [
+        "■この手続きに心当たりがない場合",
+        "ほかの人があなたのパスワードを使って退会した可能性があります。下記のお問い合わせ先にご連絡ください。",
+      ],
     ),
   };
 }

@@ -5,7 +5,6 @@ import { Avatar } from "@/components/Avatar";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { ReportDialog } from "@/components/ReportDialog";
 import { ReviewOwnerActions } from "@/components/ReviewOwnerActions";
-import { publicProfileLabel } from "@/lib/public-profile-label";
 import { createReportAction } from "@/server/actions/reports";
 import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 import type { ReviewListItem } from "@/server/queries/reviews";
@@ -100,12 +99,11 @@ export function MaterialReviewCard({
   currentPath,
   actions,
 }: MaterialReviewCardProps) {
-  const handle = review.author?.handle ?? "退会したユーザー";
-  const details = publicProfileLabel(review.author);
-  const author = (
+  const { author } = review;
+  const authorName = (
     <>
-      <Avatar name={handle} src={review.author?.avatar_url} size="sm" />
-      <span className={nameStyle}>{handle}</span>
+      <Avatar name={author.name} src={author.avatarUrl} size="sm" />
+      <span className={nameStyle}>{author.name}</span>
     </>
   );
   return (
@@ -114,14 +112,14 @@ export function MaterialReviewCard({
       id={`review-${review.id}`}
     >
       <div className={headStyle}>
-        {review.author?.user_id ? (
-          <Link href={`/users/${review.author.user_id}`} className={authorLinkStyle}>
-            {author}
-          </Link>
+        {author.href === null ? (
+          authorName
         ) : (
-          author
+          <Link href={author.href} className={authorLinkStyle}>
+            {authorName}
+          </Link>
         )}
-        {details ? <span className={detailsStyle}>{details}</span> : null}
+        {author.label ? <span className={detailsStyle}>{author.label}</span> : null}
       </div>
       <div className={ratingStyle}>
         <Stars value={review.rating} />

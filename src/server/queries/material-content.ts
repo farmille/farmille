@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { postAuthor, type PostAuthor, type PostAuthorRow } from "@/lib/public-profile-label";
 import { selectAllRows } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
 import { createServerSupabase } from "@/server/supabase";
@@ -10,7 +11,6 @@ import type { Database } from "@/types/database.types";
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
-type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
 type UsageReportMediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
@@ -28,18 +28,17 @@ type UsageReportFields = Pick<
   "id" | "material_id" | "title" | "summary" | "published_at"
 >;
 
-type UsageReportAuthor = Pick<PublicProfileRow, "user_id" | "handle" | "avatar_url">;
 type UsageReportMedia = Pick<UsageReportMediaRow, "id" | "url" | "media_type" | "sort_order">;
 
 type UsageReportQueryRow = UsageReportFields & {
-  author: UsageReportAuthor | null;
+  author: PostAuthorRow | null;
   crop: Pick<CropRow, "id" | "name"> | null;
   crop_name_other: string | null;
   media: (UsageReportMedia & Pick<UsageReportMediaRow, "measurement_id">)[];
 };
 
 export type PublishedUsageReport = UsageReportFields & {
-  author: UsageReportAuthor | null;
+  author: PostAuthor;
   crop: ReportCrop | null;
   coverImage: UsageReportMedia | null;
   helpfulCount: number;
@@ -183,6 +182,7 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
         published_at,
         author:public_profiles!usage_reports_author_user_id_fkey (
           user_id,
+          withdrawn,
           handle,
           avatar_url
         ),
@@ -232,20 +232,24 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
     return counts;
   }
 
-  return succeed({
-    total: count,
-    items: rows.map(({ media, crop_name_other, ...report }) => {
-      const coverImage = pickReportCover(media);
+  const items: PublishedUsageReport[] = [];
+  for (const { media, author: authorRow, crop_name_other, ...report } of rows) {
+    const author = postAuthor(authorRow);
+    if (author === null) {
+      reportQueryError("公開実証詳細レポートの投稿者が欠落", { reportId: report.id });
+      return fail("internal");
+    }
+    items.push({
+      ...report,
+      author,
+      crop: reportCrop({ crop: report.crop, crop_name_other }),
+      coverImage: pickReportCover(media),
+      helpfulCount: counts.data.helpfulById.get(report.id) ?? 0,
+      viewCount: counts.data.viewsById.get(report.id) ?? 0,
+    });
+  }
 
-      return {
-        ...report,
-        crop: reportCrop({ crop: report.crop, crop_name_other }),
-        coverImage,
-        helpfulCount: counts.data.helpfulById.get(report.id) ?? 0,
-        viewCount: counts.data.viewsById.get(report.id) ?? 0,
-      };
-    }),
-  });
+  return succeed({ total: count, items });
 }
 
 export async function listPublishedArticlesByMaterial(

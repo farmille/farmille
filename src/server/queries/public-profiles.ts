@@ -124,13 +124,14 @@ async function getHelpfulCounts(
   return succeed(counts);
 }
 
-/** 一般ユーザーの公開プロフィールと公開済み投稿だけを取得する。 */
+/** 一般ユーザーの公開プロフィールと公開済み投稿だけを取得する。退会済みのプロフィールは見つからない扱いにする。 */
 export async function getPublicProfilePage(id: string): Promise<Result<PublicProfilePageData>> {
   const supabase = await createServerSupabase();
   const { data: profileData, error: profileError } = await supabase
     .from("public_profiles")
     .select("user_id, handle, avatar_url, standpoint, prefecture_code")
     .eq("user_id", id)
+    .eq("withdrawn", false)
     .maybeSingle();
 
   if (profileError !== null) {

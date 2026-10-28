@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AdminMemberName } from "@/app/admin/_components/AdminMemberName";
 import { AdminShell } from "@/app/admin/_components/AdminShell";
 import { Panel } from "@/app/admin/_components/AdminUI";
 import { requireAdminPage } from "@/app/admin/_lib/access";
@@ -44,11 +45,7 @@ const columns: DataTableColumn<PendingUsageReportItem>[] = [
   {
     key: "author",
     header: "投稿者",
-    cell: (row) => (
-      <Link className={linkStyle} href={`/users/${row.author.userId}`}>
-        {row.author.handle}
-      </Link>
-    ),
+    cell: (row) => <AdminMemberName member={row.author} linkClassName={linkStyle} />,
   },
   { key: "created_at", header: "提出日", cell: (row) => formatDateJa(row.createdAt) },
 ];

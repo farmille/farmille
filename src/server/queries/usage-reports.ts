@@ -1,4 +1,5 @@
 import { materialIllustrationUrl } from "@/lib/material-illustration";
+import { postAuthor, type PostAuthor, type PostAuthorRow } from "@/lib/public-profile-label";
 import { reportVarietyNames, type UsageReportInput } from "@/lib/usage-report";
 import {
   getStructuredUsageReport,
@@ -15,7 +16,6 @@ import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
-type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 type MediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
@@ -30,8 +30,7 @@ export type RecentUsageReportItem = {
   publishedAt: string;
   helpfulCount: number;
   coverUrl: string | null;
-  authorHandle: string;
-  authorUserId: string;
+  author: PostAuthor;
   cropName: string;
   materialName: string;
   materialId: string;
@@ -42,7 +41,7 @@ type RecentReportQueryRow = Pick<
   UsageReportRow,
   "id" | "title" | "published_at" | "material_id" | "summary" | "author_user_id" | "form_version"
 > & {
-  author: Pick<PublicProfileRow, "handle"> | null;
+  author: PostAuthorRow | null;
   crop: Pick<CropRow, "name"> | null;
   crop_name_other: string | null;
   material: Pick<MaterialRow, "name"> | null;
@@ -79,6 +78,8 @@ export async function listRecentUsageReports({
       author_user_id,
       form_version,
       author:public_profiles!usage_reports_author_user_id_fkey (
+        user_id,
+        withdrawn,
         handle
       ),
       crop_name_other,
@@ -146,7 +147,8 @@ export async function listRecentUsageReports({
     }
 
     const crop = reportCrop(row);
-    if (row.author?.handle == null || crop === null || row.material === null) {
+    const author = postAuthor(row.author);
+    if (author === null || crop === null || row.material === null) {
       reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
       return fail("internal");
     }
@@ -164,8 +166,7 @@ export async function listRecentUsageReports({
           : row.form_version === 2
             ? reportMediaUrl(cover.url, row.author_user_id)
             : cover.url,
-      authorHandle: row.author.handle,
-      authorUserId: row.author_user_id,
+      author,
       cropName: crop.name,
       materialName: row.material.name,
       materialId: row.material_id,
@@ -179,7 +180,7 @@ export async function listRecentUsageReports({
 }
 
 type UsageReportDetailQueryRow = Omit<UsageReportRow, "editor_note" | "pdf_values_checked"> & {
-  author: Pick<PublicProfileRow, "user_id" | "handle" | "avatar_url" | "standpoint"> | null;
+  author: PostAuthorRow | null;
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<
     MaterialRow,
@@ -218,12 +219,9 @@ export type PublishedUsageReportDetail = {
   observedChange: string;
   negativeNote: string | null;
   summary: string;
-  author: {
-    userId: string;
-    handle: string;
-    avatarUrl: string | null;
-    standpoint: string | null;
-  };
+  authorUserId: string;
+  /** 肩書きは立場だけ。都道府県はレポートの圃場の所在として別に出す。 */
+  author: PostAuthor;
   crop: ReportCrop;
   material: {
     id: string;
@@ -344,6 +342,7 @@ export async function getPublishedUsageReport(
       common_plot_description,
       author:public_profiles!usage_reports_author_user_id_fkey (
         user_id,
+        withdrawn,
         handle,
         avatar_url,
         standpoint
@@ -406,12 +405,8 @@ export async function getPublishedUsageReport(
     return fail("internal");
   }
 
-  if (
-    row.author?.user_id == null ||
-    row.author.handle == null ||
-    crop === null ||
-    row.material === null
-  ) {
+  const author = postAuthor(row.author);
+  if (author === null || crop === null || row.material === null) {
     reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
     return fail("internal");
   }
@@ -472,12 +467,8 @@ export async function getPublishedUsageReport(
     observedChange: row.observed_change,
     negativeNote: row.negative_note,
     summary: row.summary,
-    author: {
-      userId: row.author.user_id,
-      handle: row.author.handle,
-      avatarUrl: row.author.avatar_url,
-      standpoint: row.author.standpoint,
-    },
+    authorUserId: row.author_user_id,
+    author,
     crop,
     material: {
       id: row.material.id,

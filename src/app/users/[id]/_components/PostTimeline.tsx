@@ -39,10 +39,10 @@ export function PostTimeline({
             key={`review-${post.id}`}
             review={post}
             author={{
-              handle: profile.handle,
+              name: profile.handle,
               avatarUrl: profile.avatarUrl,
+              label: authorLabel ?? "",
               href: authorHref,
-              label: authorLabel,
             }}
             actions={
               <PostActionsLoader

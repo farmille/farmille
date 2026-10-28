@@ -12,7 +12,6 @@ const meta = {
   args: {
     report: legacyReport,
     cropLabel: "ミニトマト（アイコ）",
-    standpointLabel: "生産者",
     materialPath: "/materials/73000000-0000-4000-8000-000000000063",
   },
 } satisfies Meta<typeof ReportHeader>;
@@ -23,8 +22,16 @@ export const ManyTags: Story = {
   args: {
     report: {
       ...legacyReport,
+      author: { ...legacyReport.author, label: "" },
       purposeTags: ["耐暑性改善", "しおれ軽減", "根張り改善", "食味向上"],
     },
-    standpointLabel: undefined,
+  },
+};
+export const WithdrawnAuthor: Story = {
+  args: {
+    report: {
+      ...legacyReport,
+      author: { name: "退会済みユーザー", avatarUrl: null, label: "", href: null },
+    },
   },
 };

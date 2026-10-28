@@ -7,6 +7,7 @@ const actions = css({ display: "flex", flexDirection: "column", gap: "2.5", mt: 
 
 const action = buttonRecipe({ variant: "ghost" });
 
+/** 登録情報と退会は一般会員だけの操作なので、運営のアカウントには出さない。 */
 export function AccountActions({ admin = false }: { admin?: boolean }) {
   return (
     <div className={actions}>
@@ -14,7 +15,11 @@ export function AccountActions({ admin = false }: { admin?: boolean }) {
         <Link className={action} href="/admin">
           運営管理へ
         </Link>
-      ) : null}
+      ) : (
+        <Link className={action} href="/account/details">
+          登録情報を確認・変更
+        </Link>
+      )}
       <Link className={action} href="/account/passkeys">
         パスキーを管理
       </Link>
@@ -26,11 +31,16 @@ export function AccountActions({ admin = false }: { admin?: boolean }) {
           ログアウト
         </button>
       </form>
-      {!admin ? (
-        <Link className={action} href="/sellers?from=me">
-          企業会員登録を申請
-        </Link>
-      ) : null}
+      {admin ? null : (
+        <>
+          <Link className={action} href="/sellers?from=me">
+            企業会員登録を申請
+          </Link>
+          <Link className={action} href="/account/withdraw">
+            退会する
+          </Link>
+        </>
+      )}
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { HelpfulButton } from "@/components/HelpfulButton";
 import { helpfulPillRecipe } from "@/components/helpful-pill";
 import { Icon } from "@/components/Icon";
 import { ReportDialog } from "@/components/ReportDialog";
-import { STANDPOINTS } from "@/lib/standpoints";
+import type { PostAuthor } from "@/lib/public-profile-label";
 import { createArticleJsonLd, createPageMetadata, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { toggleHelpfulAction } from "@/server/actions/helpful";
@@ -88,8 +88,11 @@ async function loadViewer(reportId: string) {
   return { session, viewerUserId, helpfulVotedResult };
 }
 
-function reportDescription(authorHandle: string, materialName: string): string {
-  return `${authorHandle}さんの${materialName}に関する実証詳細レポート`;
+// プロフィールの無い退会済みユーザーには「さん」を付けない
+function reportDescription(author: PostAuthor, materialName: string): string {
+  return author.href === null
+    ? `${author.name}の${materialName}に関する実証詳細レポート`
+    : `${author.name}さんの${materialName}に関する実証詳細レポート`;
 }
 
 export async function generateMetadata({ params }: ReportDetailPageProps): Promise<Metadata> {
@@ -98,7 +101,7 @@ export async function generateMetadata({ params }: ReportDetailPageProps): Promi
 
   return createPageMetadata({
     title: report.title,
-    description: reportDescription(report.author.handle, report.material.name),
+    description: reportDescription(report.author, report.material.name),
     path: `/reports/${report.id}`,
     type: "article",
     publishedTime: report.publishedAt,
@@ -119,7 +122,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     loadReport(id),
     loadViewer(id),
   ]);
-  const isOwnPost = viewerUserId !== null && viewerUserId === report.author.userId;
+  const isOwnPost = viewerUserId !== null && viewerUserId === report.authorUserId;
 
   if (!helpfulVotedResult.ok) {
     throw new Error(errorMessageJa[helpfulVotedResult.error]);
@@ -143,22 +146,15 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     report.media.find((m) => m.mediaType === "photo") ??
     null;
   const cropLabel = `${report.crop.name}${report.variety ? `（${report.variety}）` : ""}`;
-  const standpointLabel = report.author.standpoint
-    ? STANDPOINTS.find((item) => item.value === report.author.standpoint)?.label
-    : undefined;
 
   const materialPath = `/materials/${report.material.id}`;
   const reportJsonLd = createArticleJsonLd({
     id: report.id,
     route: "reports",
     headline: report.title,
-    description: reportDescription(report.author.handle, report.material.name),
+    description: reportDescription(report.author, report.material.name),
     datePublished: report.publishedAt,
-    author: {
-      type: "Person",
-      name: report.author.handle,
-      path: `/users/${report.author.userId}`,
-    },
+    author: { type: "Person", name: report.author.name, path: report.author.href },
     imageUrls: report.media
       .filter((media) => media.mediaType === "photo")
       .map((media) => media.url),
@@ -184,12 +180,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
       />
       <main className={main}>
         <article className={readingArticle}>
-          <ReportHeader
-            report={report}
-            cropLabel={cropLabel}
-            standpointLabel={standpointLabel}
-            materialPath={materialPath}
-          />
+          <ReportHeader report={report} cropLabel={cropLabel} materialPath={materialPath} />
 
           {report.structured === null ? (
             <>

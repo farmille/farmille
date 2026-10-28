@@ -15,7 +15,11 @@ export const listContentReports = fn<typeof import("@/server/admin/reports").lis
         createdAt: "2026-09-15T09:00:00Z",
         resolvedAt: null,
         resolvedBy: null,
-        reporter: { userId: "11111111-1111-4111-8111-111111111111", handle: "緑の畑" },
+        reporter: {
+          userId: "11111111-1111-4111-8111-111111111111",
+          handle: "緑の畑",
+          withdrawnAt: null,
+        },
         target: {
           type: "material",
           label: "内容を確認してください。",

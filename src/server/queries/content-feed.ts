@@ -1,3 +1,4 @@
+import { postAuthor, type PostAuthor, type PostAuthorRow } from "@/lib/public-profile-label";
 import { reportMediaUrl } from "@/server/usage-reports/structured";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -11,7 +12,6 @@ import type { Database } from "@/types/database.types";
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
-type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
 type UsageReportMediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
@@ -38,7 +38,7 @@ export type ContentFeedReportItem = {
   helpfulCount: number;
   viewCount: number;
   coverUrl: string | null;
-  authorHandle: string;
+  author: PostAuthor;
   cropName: string;
 };
 
@@ -58,7 +58,7 @@ type ReportFeedRow = Pick<
   UsageReportRow,
   "id" | "title" | "published_at" | "material_id" | "form_version" | "author_user_id"
 > & {
-  author: Pick<PublicProfileRow, "handle"> | null;
+  author: PostAuthorRow | null;
   crop: Pick<CropRow, "name"> | null;
   crop_name_other: string | null;
   material: { name: string } | null;
@@ -192,6 +192,8 @@ async function fetchPublishedReports(
       form_version,
       author_user_id,
       author:public_profiles!usage_reports_author_user_id_fkey (
+        user_id,
+        withdrawn,
         handle
       ),
       crop_name_other,
@@ -261,7 +263,8 @@ function toReportItem(
   }
 
   const crop = reportCrop(row);
-  if (row.author?.handle == null || crop === null || row.material === null) {
+  const author = postAuthor(row.author);
+  if (author === null || crop === null || row.material === null) {
     reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
     return fail("internal");
   }
@@ -281,7 +284,7 @@ function toReportItem(
         : row.form_version === 2
           ? reportMediaUrl(cover.url, row.author_user_id)
           : cover.url,
-    authorHandle: row.author.handle,
+    author,
     cropName: crop.name,
   });
 }

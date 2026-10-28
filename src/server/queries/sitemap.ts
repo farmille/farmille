@@ -59,6 +59,7 @@ export async function listSitemapEntries(): Promise<Result<SitemapEntries>> {
       supabase
         .from("profiles")
         .select("user_id, updated_at")
+        .is("withdrawn_at", null)
         .order("user_id", { ascending: true })
         .range(from, to),
     ),

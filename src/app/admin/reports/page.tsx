@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AdminShell } from "@/app/admin/_components/AdminShell";
+import { AdminMemberName } from "@/app/admin/_components/AdminMemberName";
 import { Panel, adminCodeStyle } from "@/app/admin/_components/AdminUI";
 import { QueryFilter } from "@/app/admin/_components/QueryFilter";
 import { requireAdminPage } from "@/app/admin/_lib/access";
@@ -84,9 +85,7 @@ const columns: DataTableColumn<AdminContentReportItem>[] = [
     header: "通報者（内部）",
     cell: (row) => (
       <div className={stackStyle}>
-        <Link className={linkStyle} href={`/users/${row.reporter.userId}`}>
-          {row.reporter.handle}
-        </Link>
+        <AdminMemberName member={row.reporter} linkClassName={linkStyle} />
         <span className={adminCodeStyle}>{row.reporter.userId}</span>
       </div>
     ),

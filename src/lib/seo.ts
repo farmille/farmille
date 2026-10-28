@@ -50,7 +50,8 @@ type ArticleJsonLdInput = {
   author: {
     type: "Organization" | "Person";
     name: string;
-    path: string;
+    /** 退会済みの投稿者はプロフィールが無いので null。 */
+    path: string | null;
   };
   imageUrls: readonly string[];
   articleSection: string;
@@ -114,7 +115,7 @@ export type ArticleJsonLd = {
   description: string;
   datePublished: string;
   articleSection: string;
-  author: { "@type": "Organization" | "Person"; name: string; url: string };
+  author: { "@type": "Organization" | "Person"; name: string; url?: string };
   publisher: { "@type": "Organization"; name: string; url: string };
   image?: string[];
   about?: { "@type": "Product"; "@id": string; name: string };
@@ -339,11 +340,10 @@ export function createArticleJsonLd({
     description,
     datePublished,
     articleSection,
-    author: {
-      "@type": author.type,
-      name: author.name,
-      url: absoluteUrl(author.path),
-    },
+    author:
+      author.path === null
+        ? { "@type": author.type, name: author.name }
+        : { "@type": author.type, name: author.name, url: absoluteUrl(author.path) },
     publisher: {
       "@type": "Organization",
       name: SITE_NAME,

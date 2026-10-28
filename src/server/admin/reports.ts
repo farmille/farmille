@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { WITHDRAWN_MEMBER_NAME } from "@/lib/public-profile-label";
 import { reportAdminError, withAdmin } from "@/server/admin/guard";
+import { adminMember, type AdminMember } from "@/server/admin/members";
 import { fail, succeed, type Result } from "@/server/result";
 import type { Database } from "@/types/database.types";
 
@@ -49,7 +51,7 @@ type ReportQueryRow = Pick<
   | "resolved_at"
   | "created_at"
 > & {
-  reporter: Pick<ProfileRow, "user_id" | "handle"> | null;
+  reporter: Pick<ProfileRow, "user_id" | "handle" | "withdrawn_at"> | null;
 };
 
 export type AdminContentReportTarget = {
@@ -66,10 +68,7 @@ export type AdminContentReportItem = {
   createdAt: string;
   resolvedAt: string | null;
   resolvedBy: string | null;
-  reporter: {
-    userId: string;
-    handle: string;
-  };
+  reporter: AdminMember;
   target: AdminContentReportTarget;
 };
 
@@ -197,7 +196,7 @@ async function loadProfileTargets(
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("user_id, handle")
+    .select("user_id, handle, withdrawn_at")
     .in("user_id", ids);
 
   if (error !== null) {
@@ -205,14 +204,29 @@ async function loadProfileTargets(
     return fail("internal");
   }
 
-  const rows: Pick<ProfileRow, "user_id" | "handle">[] = data;
+  const rows: Pick<ProfileRow, "user_id" | "handle" | "withdrawn_at">[] = data;
   for (const row of rows) {
-    targets.set(targetKey("profile", row.user_id), {
-      type: "profile",
-      label: row.handle,
-      publicHref: `/users/${row.user_id}`,
-      adminHref: null,
-    });
+    const member = adminMember(row);
+    if (member === null) {
+      reportError("通報対象プロフィールのニックネームが欠落", { userId: row.user_id });
+      return fail("internal");
+    }
+    targets.set(
+      targetKey("profile", row.user_id),
+      member.withdrawnAt === null
+        ? {
+            type: "profile",
+            label: member.handle,
+            publicHref: `/users/${member.userId}`,
+            adminHref: null,
+          }
+        : {
+            type: "profile",
+            label: WITHDRAWN_MEMBER_NAME,
+            publicHref: null,
+            adminHref: null,
+          },
+    );
   }
 
   return succeed(targets);
@@ -265,7 +279,8 @@ export async function listContentReports(
           created_at,
           reporter:profiles!content_reports_reporter_user_id_fkey (
             user_id,
-            handle
+            handle,
+            withdrawn_at
           )
         `,
       )
@@ -294,8 +309,9 @@ export async function listContentReports(
 
     const items: AdminContentReportItem[] = [];
     for (const row of rows) {
+      const reporter = row.reporter === null ? null : adminMember(row.reporter);
       if (
-        row.reporter === null ||
+        reporter === null ||
         !isContentReportStatus(row.status) ||
         !isContentReportTargetType(row.target_type)
       ) {
@@ -310,10 +326,7 @@ export async function listContentReports(
         createdAt: row.created_at,
         resolvedAt: row.resolved_at,
         resolvedBy: row.resolved_by,
-        reporter: {
-          userId: row.reporter_user_id,
-          handle: row.reporter.handle,
-        },
+        reporter,
         target:
           targets.get(targetKey(row.target_type, row.target_id)) ??
           ({

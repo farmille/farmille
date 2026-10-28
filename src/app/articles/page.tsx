@@ -165,7 +165,7 @@ async function ArticleResults({
                   reportId={item.id}
                   key={`report-${item.id}`}
                   title={item.title}
-                  author={item.authorHandle}
+                  author={item.author.name}
                   crop={item.cropName}
                   helpfulCount={item.helpfulCount}
                   viewCount={item.viewCount}

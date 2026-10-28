@@ -97,8 +97,8 @@ export function MaterialReportsView({
               key={report.id}
               href={`/reports/${report.id}`}
               title={report.title ?? `${material.name} 実証詳細レポート`}
-              author={report.author?.handle ?? "退会したユーザー"}
-              avatarSrc={report.author?.avatar_url}
+              author={report.author.name}
+              avatarSrc={report.author.avatarUrl}
               coverSrc={report.coverImage?.url}
               crop={report.crop?.name}
               layout="scroll"

@@ -15,24 +15,28 @@ type ReportHeaderProps = {
     "title" | "author" | "publishedAt" | "purposeTags" | "material"
   >;
   cropLabel: string;
-  standpointLabel: string | undefined;
   materialPath: string;
 };
 
-export function ReportHeader({
-  report,
-  cropLabel,
-  standpointLabel,
-  materialPath,
-}: ReportHeaderProps) {
+export function ReportHeader({ report, cropLabel, materialPath }: ReportHeaderProps) {
+  const { author } = report;
+  const authorName = (
+    <>
+      <Avatar name={author.name} src={author.avatarUrl} size="sm" />
+      <span className={byline.name}>{author.name}</span>
+    </>
+  );
   return (
     <>
       <h1 className={articleTitle}>{report.title}</h1>
       <div className={byline.row}>
-        <Link href={`/users/${report.author.userId}`} className={byline.link}>
-          <Avatar name={report.author.handle} src={report.author.avatarUrl} size="sm" />
-          <span className={byline.name}>{report.author.handle}</span>
-        </Link>
+        {author.href === null ? (
+          <span className={byline.link}>{authorName}</span>
+        ) : (
+          <Link href={author.href} className={byline.link}>
+            {authorName}
+          </Link>
+        )}
         <time className={byline.sub} dateTime={report.publishedAt}>
           {formatDateJa(report.publishedAt)}
         </time>
@@ -40,7 +44,7 @@ export function ReportHeader({
       <ReportFacts
         crop={cropLabel}
         effects={report.purposeTags}
-        standpoint={standpointLabel}
+        standpoint={author.label || undefined}
         className={css({ mt: "3" })}
       />
       <div className={css({ mt: "3.5" })}>
