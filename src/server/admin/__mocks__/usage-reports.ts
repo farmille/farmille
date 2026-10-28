@@ -30,6 +30,7 @@ export const getUsageReportEditorialDetail = fn<
       expectedUpdatedAt: "2026-09-15T09:00:00Z",
       materialId: "11111111-1111-4111-8111-111111111111",
       cropId: "11111111-1111-4111-8111-111111111111",
+      cropNameOther: null,
       varietyUnknown: false,
       varieties: [],
       comparedMaterials: [],

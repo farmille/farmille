@@ -5,6 +5,7 @@ import { listSavedMaterials, type SavedMaterialItem } from "@/server/queries/sav
 import { fail, succeed, type Result } from "@/server/result";
 import { reviewCropLabel, type ReviewCropRelation } from "@/server/reviews/crop-relations";
 import { createServerSupabase } from "@/server/supabase";
+import { reportCrop } from "@/server/usage-reports/crop";
 import type { Database } from "@/types/database.types";
 
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
@@ -27,6 +28,7 @@ type OwnReportQueryRow = Pick<
   "id" | "material_id" | "title" | "status" | "created_at" | "published_at"
 > & {
   crop: Pick<CropRow, "id" | "name"> | null;
+  crop_name_other: string | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
 };
 
@@ -50,6 +52,7 @@ type HelpfulReportDetail = {
   id: string;
   title: string | null;
   crop: Pick<CropRow, "id" | "name"> | null;
+  crop_name_other: string | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
   author: Pick<PublicProfileRow, "user_id" | "handle"> | null;
 };
@@ -175,6 +178,7 @@ export async function listOwnPostsWithSupabase(
           created_at,
           cropRelations:review_crops (
             sort_order,
+            crop_name_other,
             crop:crops!review_crops_crop_id_fkey (
               id,
               name
@@ -200,6 +204,7 @@ export async function listOwnPostsWithSupabase(
           status,
           created_at,
           published_at,
+          crop_name_other,
           crop:crops!usage_reports_crop_id_fkey (
             id,
             name
@@ -268,7 +273,7 @@ export async function listOwnPostsWithSupabase(
 
   for (const report of reportRows) {
     if (
-      (report.crop === null && report.status !== "draft") ||
+      (reportCrop(report) === null && report.status !== "draft") ||
       report.material === null ||
       !isUsageReportStatus(report.status)
     ) {
@@ -282,7 +287,7 @@ export async function listOwnPostsWithSupabase(
       createdAt: report.published_at ?? report.created_at,
       materialId: report.material_id,
       title: report.title ?? `${report.material.name} 実証詳細レポート`,
-      cropName: report.crop?.name ?? "作物未選択",
+      cropName: reportCrop(report)?.name ?? "作物未選択",
       status: report.status,
       helpfulCount: reportHelpful.data.get(report.id) ?? 0,
     });
@@ -349,6 +354,7 @@ async function listHelpfulItems(
               body,
               cropRelations:review_crops (
                 sort_order,
+                crop_name_other,
                 crop:crops!review_crops_crop_id_fkey ( id, name )
               ),
               material:materials!reviews_material_id_fkey ( id, name ),
@@ -368,6 +374,7 @@ async function listHelpfulItems(
             `
               id,
               title,
+              crop_name_other,
               crop:crops!usage_reports_crop_id_fkey ( id, name ),
               material:materials!usage_reports_material_id_fkey ( id, name ),
               author:public_profiles!usage_reports_author_user_id_fkey (
@@ -424,7 +431,8 @@ async function listHelpfulItems(
     }
 
     const report = reportsById.get(vote.target_id);
-    if (report === undefined || report.crop === null || report.material === null) {
+    const crop = report === undefined ? null : reportCrop(report);
+    if (report === undefined || crop === null || report.material === null) {
       continue;
     }
 
@@ -432,7 +440,7 @@ async function listHelpfulItems(
       kind: "usage_report",
       id: report.id,
       title: report.title ?? `${report.material.name} 実証詳細レポート`,
-      cropName: report.crop.name,
+      cropName: crop.name,
       authorHandle: report.author?.handle ?? "不明な投稿者",
       authorUserId: report.author?.user_id ?? null,
       helpfulCount: reportHelpful.data.get(report.id) ?? 0,

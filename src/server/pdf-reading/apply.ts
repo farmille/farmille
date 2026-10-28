@@ -147,7 +147,7 @@ function mapReading(
 
   const cropName = normalized(output.crop);
   const crop =
-    base.cropId === null && cropName !== ""
+    base.cropId === null && base.cropNameOther === null && cropName !== ""
       ? catalog.crops.find(
           (item) =>
             normalized(item.name) === cropName ||

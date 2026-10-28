@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { fail, succeed, type Result } from "@/server/result";
 import { reviewCropLabel, type ReviewCropRelation } from "@/server/reviews/crop-relations";
 import { createServerSupabase } from "@/server/supabase";
+import { reportCrop } from "@/server/usage-reports/crop";
 import { pickReportCover } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
@@ -30,6 +31,7 @@ type ProfileReportQueryRow = Pick<
   "id" | "material_id" | "title" | "published_at" | "form_version"
 > & {
   crop: Pick<CropRow, "id" | "name"> | null;
+  crop_name_other: string | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
   media: Pick<UsageReportMediaRow, "id" | "url" | "media_type" | "sort_order" | "measurement_id">[];
 };
@@ -159,6 +161,7 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
           created_at,
           cropRelations:review_crops (
             sort_order,
+            crop_name_other,
             crop:crops!review_crops_crop_id_fkey (
               id,
               name
@@ -189,6 +192,7 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
           title,
           published_at,
           form_version,
+          crop_name_other,
           crop:crops!usage_reports_crop_id_fkey (
             id,
             name
@@ -274,7 +278,8 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
   }
 
   for (const report of reportRows) {
-    if (report.published_at === null || report.crop === null || report.material === null) {
+    const crop = reportCrop(report);
+    if (report.published_at === null || crop === null || report.material === null) {
       reportQueryError("公開実証詳細レポートの関連データが欠落", { reportId: report.id });
       return fail("internal");
     }
@@ -286,7 +291,7 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
       id: report.id,
       createdAt: report.published_at,
       title: report.title ?? `${report.material.name} 実証詳細レポート`,
-      cropName: report.crop.name,
+      cropName: crop.name,
       helpfulCount: reportHelpful.data.get(report.id) ?? 0,
       coverUrl:
         cover === null

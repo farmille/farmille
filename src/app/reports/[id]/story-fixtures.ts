@@ -9,6 +9,7 @@ export const structuredReport: UsageReportInput = {
   expectedUpdatedAt: null,
   materialId: id(2),
   cropId: id(3),
+  cropNameOther: null,
   varietyUnknown: false,
   varieties: [{ id: id(4), name: "アイコ" }],
   comparedMaterials: [],

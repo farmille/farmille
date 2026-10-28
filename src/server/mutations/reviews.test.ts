@@ -38,6 +38,7 @@ describe("validateReviewFormData", () => {
       ok: true,
       input: {
         cropIds: [cropId],
+        cropNameOther: null,
         rating: 4,
         body: "定植後に使用し、葉の状態を継続して観察しました。",
         pesticideAck: true,
@@ -48,6 +49,33 @@ describe("validateReviewFormData", () => {
           },
         ],
       },
+    });
+  });
+
+  it("作物マスタにない作目は「その他」の名前として受け取る", () => {
+    const formData = validFormData();
+    formData.delete("cropIds");
+    formData.set("cropNameOther", " ステビア ");
+    const result = validateReviewFormData(formData);
+    expect(result.ok && result.input).toMatchObject({ cropIds: [], cropNameOther: "ステビア" });
+  });
+
+  it("作目の選択と「その他」の名前を同時には受け付けない", () => {
+    const formData = validFormData();
+    formData.set("cropNameOther", "ステビア");
+    expect(validateReviewFormData(formData)).toMatchObject({
+      ok: false,
+      fieldErrors: { cropIds: "使用対象作目を1つ選んでください。" },
+    });
+  });
+
+  it("作目の選択も「その他」の名前も無ければ受け付けない", () => {
+    const formData = validFormData();
+    formData.delete("cropIds");
+    formData.set("cropNameOther", "   ");
+    expect(validateReviewFormData(formData)).toMatchObject({
+      ok: false,
+      fieldErrors: { cropIds: "使用対象作目を1つ選んでください。" },
     });
   });
 
@@ -101,6 +129,7 @@ describe("createReview", () => {
     const input: ReviewMutationInput = {
       materialId,
       cropIds: [cropId],
+      cropNameOther: null,
       rating: 5,
       body: "使用後の状態を記録しました。",
       pesticideAck: true,

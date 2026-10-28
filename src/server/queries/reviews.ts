@@ -3,7 +3,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getViewerHelpfulVotes } from "@/server/queries/helpful";
 import { DEFAULT_PER_PAGE, pageRange, selectAllRows, type Paginated } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
-import { orderedReviewCrops, type ReviewCropRelation } from "@/server/reviews/crop-relations";
+import {
+  orderedReviewCrops,
+  type ReviewCropRelation,
+  type ReviewCropSummary,
+} from "@/server/reviews/crop-relations";
 import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
@@ -24,7 +28,7 @@ export type ReviewAuthor = Pick<
   "user_id" | "handle" | "avatar_url" | "standpoint" | "prefecture_code"
 >;
 
-export type ReviewCrop = Pick<CropRow, "id" | "name">;
+export type ReviewCrop = ReviewCropSummary;
 
 export type ReviewPhoto = Pick<ReviewPhotoRow, "id" | "url" | "caption" | "sort_order">;
 
@@ -46,6 +50,8 @@ export type ReviewEditorData = Pick<
   "id" | "material_id" | "author_user_id" | "rating" | "body" | "pesticide_ack" | "status"
 > & {
   cropIds: string[];
+  /** 「その他」に自由記入した作目。作物マスタから選んだときはnull。 */
+  cropNameOther: string | null;
   photos: ReviewPhoto[];
 };
 
@@ -80,6 +86,7 @@ const REVIEW_SELECT = `
   ),
   cropRelations:review_crops (
     sort_order,
+    crop_name_other,
     crop:crops!review_crops_crop_id_fkey (
       id,
       name
@@ -546,6 +553,7 @@ export async function getReviewForEdit(
         status,
         cropRelations:review_crops (
           sort_order,
+          crop_name_other,
           crop:crops!review_crops_crop_id_fkey (
             id,
             name
@@ -590,7 +598,8 @@ export async function getReviewForEdit(
 
   return succeed({
     ...review,
-    cropIds: crops.map(({ id: cropId }) => cropId),
+    cropIds: crops.flatMap(({ id: cropId }) => (cropId === null ? [] : [cropId])),
+    cropNameOther: crops.find(({ id: cropId }) => cropId === null)?.name ?? null,
     photos: review.photos.toSorted(byPhotoOrder),
   });
 }
