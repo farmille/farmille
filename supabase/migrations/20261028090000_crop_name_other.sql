@@ -230,7 +230,7 @@ begin
   insert into public.profile_crops(user_id, crop_id, sort_order)
     select uid, value, min(ord)::int from unnest(p_crop_ids) with ordinality t(value, ord) group by value;
   insert into public.profile_crops(user_id, crop_name_other, sort_order)
-    select uid, btrim(value), cardinality(p_crop_ids) + ord::int
+    select uid, btrim(value), coalesce(cardinality(p_crop_ids), 0) + ord::int
     from unnest(coalesce(p_crop_names_other, '{}')) with ordinality t(value, ord);
   delete from public.profile_links where user_id = uid;
   insert into public.profile_links(user_id, url, sort_order)
