@@ -63,7 +63,9 @@ begin
 end;
 $$;
 
+-- SECURITY INVOKER の口コミRPCから呼ぶので、旧 assert_review_crop_ids と同じく実行を許す。
 revoke all on function app.assert_review_crop(uuid[], text) from public;
+grant execute on function app.assert_review_crop(uuid[], text) to authenticated, service_role;
 
 -- 名前の引数は最後に足し、省略時は今までどおり作物IDだけで保存する。
 drop function public.create_review_with_crops(uuid, uuid, smallint, text, uuid[], boolean, boolean, text);
@@ -200,11 +202,12 @@ grant execute on function public.update_review_with_crops(
 ) to authenticated, service_role;
 
 -- プロフィール：作物IDの後ろに名前を並べて保存する。名前は前後の空白を除き、空は受け付けない。
+-- 名前の引数を省略（null）した呼び出しは、保存済みの名前の行をそのまま残す。
 drop function public.save_profile_details(text, text, text[], uuid[], text[]);
 
 create function public.save_profile_details(
   p_handle text, p_bio text, p_affiliations text[], p_crop_ids uuid[], p_links text[],
-  p_crop_names_other text[] default '{}'
+  p_crop_names_other text[] default null
 ) returns void language plpgsql security definer set search_path = '' as $$
 declare uid uuid := auth.uid();
 begin
@@ -213,7 +216,7 @@ begin
   end if;
   if char_length(btrim(p_handle)) not between 1 and 30 or char_length(p_bio) > 2000
     or cardinality(p_affiliations) > 20 or cardinality(p_crop_ids) > 50 or cardinality(p_links) > 10
-    or p_crop_names_other is null or cardinality(p_crop_names_other) > 50
+    or cardinality(p_crop_names_other) > 50
   then raise exception 'invalid profile' using errcode = '22023'; end if;
   update public.profiles set handle = btrim(p_handle) where user_id = uid;
   if not found then raise exception 'profile not found'; end if;
@@ -222,12 +225,13 @@ begin
   delete from public.profile_affiliations where user_id = uid;
   insert into public.profile_affiliations(user_id, name, sort_order)
     select uid, btrim(value), min(ord)::int from unnest(p_affiliations) with ordinality t(value, ord) group by btrim(value);
-  delete from public.profile_crops where user_id = uid;
+  delete from public.profile_crops
+    where user_id = uid and (p_crop_names_other is not null or crop_id is not null);
   insert into public.profile_crops(user_id, crop_id, sort_order)
     select uid, value, min(ord)::int from unnest(p_crop_ids) with ordinality t(value, ord) group by value;
   insert into public.profile_crops(user_id, crop_name_other, sort_order)
     select uid, btrim(value), cardinality(p_crop_ids) + ord::int
-    from unnest(p_crop_names_other) with ordinality t(value, ord);
+    from unnest(coalesce(p_crop_names_other, '{}')) with ordinality t(value, ord);
   delete from public.profile_links where user_id = uid;
   insert into public.profile_links(user_id, url, sort_order)
     select uid, btrim(value), min(ord)::int from unnest(p_links) with ordinality t(value, ord) group by btrim(value);
@@ -281,7 +285,8 @@ language sql stable security definer set search_path = '' as $$
   where r.status='published' and m.publication_status='published'
 $$;
 
--- 入力の最上位に cropNameOther を足す。前後の空白を除き、空は名前なしとして扱う。それ以外は 20261025130000 と同じ。
+-- 入力の最上位に cropNameOther を足す。前後の空白を除き、空は名前なしとして扱う。
+-- cropNameOther を持たない入力（このmigration前のアプリ）は名前なしとして受け付ける。それ以外は 20261025130000 と同じ。
 create or replace function public.save_usage_report(p_input jsonb,p_submit boolean)
 returns table(report_id uuid,status text,updated_at timestamptz)
 language plpgsql security definer set search_path='' as $$
@@ -292,6 +297,7 @@ declare
 begin
   if uid is null or not coalesce(app.can_use_general_features(),false) then raise exception 'forbidden' using errcode='42501'; end if;
   if p_input is null or p_submit is null or octet_length(p_input::text)>1048576 then raise exception 'invalid_report_input' using errcode='23514'; end if;
+  if jsonb_typeof(p_input)='object' and not p_input ? 'cropNameOther' then p_input:=p_input||'{"cropNameOther":null}'; end if;
   perform app.check_report_object(p_input,'{"reportId":"string","expectedUpdatedAt":"string|null","materialId":"string","cropId":"string|null","cropNameOther":"string|null","varietyUnknown":"boolean","varieties":"array","comparedMaterials":"array","commonPlotDescription":"string","observedChange":"string","purposeTags":"array","prefectureCode":"number|null","city":"string","showCity":"boolean","cultivationEnvironment":"string","timingStages":"array","timingNote":"string","plots":"array","measurements":"array","media":"array","documents":"array","headings":"array","methodDetailsAck":"boolean","documentsAck":"boolean","guidelineAck":"boolean","pdfValuesChecked":"boolean"}');
   rid:=(p_input->>'reportId')::uuid;
   -- 同じ下書きの初回保存同士も直列化し、再送で既存内容を上書きしない。

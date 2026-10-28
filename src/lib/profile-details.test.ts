@@ -7,7 +7,6 @@ const profile = {
   bio: "",
   affiliations: [],
   cropIds: [],
-  cropNamesOther: [],
   links: [],
 };
 describe("公開プロフィールの入力境界", () => {
@@ -36,6 +35,7 @@ describe("公開プロフィールの入力境界", () => {
       cropNamesOther: [" ステビア ", "パッションフルーツ"],
     });
     expect(result.cropNamesOther).toEqual(["ステビア", "パッションフルーツ"]);
+    expect(v.parse(ProfileDetailsInputSchema, profile).cropNamesOther).toBeUndefined();
     expect(
       v.safeParse(ProfileDetailsInputSchema, { ...profile, cropNamesOther: ["  "] }).success,
     ).toBe(false);

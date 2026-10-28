@@ -60,7 +60,10 @@ export async function updateProfileAction(
     bio: formData.get("bio"),
     affiliations: formData.getAll("affiliations"),
     cropIds: formData.getAll("cropIds"),
-    cropNamesOther: formData.getAll("cropNamesOther"),
+    // 「その他」の欄を出したフォームだけが名前を送る。欄の無いフォームの保存では保存済みの名前を残す。
+    cropNamesOther: formData.has("cropNamesOtherField")
+      ? formData.getAll("cropNamesOther")
+      : undefined,
     links: (formDataString(formData.get("links")) ?? "")
       .split(/\r?\n/)
       .map((line) => line.trim())
