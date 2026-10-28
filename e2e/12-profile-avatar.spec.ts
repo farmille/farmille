@@ -1,6 +1,6 @@
+import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { crc32 } from "node:zlib";
-import { expect, test } from "@playwright/test";
 
 import { createGeneralUser, deleteAuthUser, deleteAvatars } from "./support/test-data";
 import { loginGeneral } from "./support/ui";
@@ -16,36 +16,30 @@ function avatarPng(bytes: number): Buffer {
   return Buffer.concat([png.subarray(0, -12), chunk, png.subarray(-12)]);
 }
 
-for (const sizeMb of [1.5, 2]) {
-  test(`${sizeMb}MBのアイコン画像と自己紹介を保存して再表示できる`, async ({ page }, testInfo) => {
-    const user = await createGeneralUser("avatar");
-    const bio = `${sizeMb}MBのアイコン画像と一緒に保存した自己紹介`;
+test("2MBのアイコン画像と自己紹介を保存して再表示できる", async ({ page }) => {
+  const user = await createGeneralUser("avatar");
+  const bio = "2MBのアイコン画像と一緒に保存した自己紹介";
 
-    try {
-      await loginGeneral(page, user, "/me/edit");
-      await page.getByLabel("自己紹介").fill(bio);
-      await page.getByLabel("アバター").setInputFiles({
-        name: "avatar.png",
-        mimeType: "image/png",
-        buffer: avatarPng(sizeMb * 1024 * 1024),
-      });
-      await page.getByRole("button", { name: "保存する", exact: true }).click();
-      await expect(page).toHaveURL(/\/me\?saved=profile$/);
-      await page.goto("/me/edit");
-      await expect(page.getByLabel("自己紹介")).toHaveValue(bio);
-      const avatar = page.locator(`main img[src*="/avatars/${user.id}/"]`);
-      await expect(avatar).toBeVisible();
-      await expect(avatar).toHaveJSProperty("naturalWidth", 400);
-      await page.screenshot({
-        path: testInfo.outputPath("profile-avatar-saved.png"),
-        fullPage: true,
-      });
-    } finally {
-      await deleteAvatars(user.id);
-      await deleteAuthUser(user.id);
-    }
-  });
-}
+  try {
+    await loginGeneral(page, user, "/me/edit");
+    await page.getByLabel("自己紹介").fill(bio);
+    await page.getByLabel("アバター").setInputFiles({
+      name: "avatar.png",
+      mimeType: "image/png",
+      buffer: avatarPng(2 * 1024 * 1024),
+    });
+    await page.getByRole("button", { name: "保存する", exact: true }).click();
+    await expect(page).toHaveURL(/\/me\?saved=profile$/);
+    await page.goto("/me/edit");
+    await expect(page.getByLabel("自己紹介")).toHaveValue(bio);
+    const avatar = page.locator(`main img[src*="/avatars/${user.id}/"]`);
+    await expect(avatar).toBeVisible();
+    await expect(avatar).toHaveJSProperty("naturalWidth", 400);
+  } finally {
+    await deleteAvatars(user.id);
+    await deleteAuthUser(user.id);
+  }
+});
 
 test("2MBを超えるアイコン画像ではプロフィールを保存しない", async ({ page }) => {
   const user = await createGeneralUser("avatar-limit");

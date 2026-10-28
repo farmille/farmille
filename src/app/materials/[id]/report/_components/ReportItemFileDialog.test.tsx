@@ -3,31 +3,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ReportItemFileDialog } from "./ReportItemFileDialog";
 
-describe("資料の差し込みのファイルの選択", () => {
-  it("読み込みが終わるまで、次のファイルを選べない", async () => {
-    render(
-      <ReportItemFileDialog
-        item={{ id: crypto.randomUUID(), mode: "file", name: "可販果収量", body: "", images: [] }}
-        isNew
-        userId={crypto.randomUUID()}
-        reportId={crypto.randomUUID()}
-        imageLimit={30}
-        onCommit={vi.fn()}
-        onDelete={vi.fn()}
-        onClose={vi.fn()}
-      />,
-    );
-    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
-    if (input === null) throw new Error("ファイルの選択欄がありません。");
-    fireEvent.change(input, {
-      target: { files: [new File(["x"], "畑.png", { type: "image/png" })] },
-    });
-    expect(input).toBeDisabled();
-    expect(screen.getByText("読み込みが終わると、次の写真・PDFを選べます")).toBeInTheDocument();
-    await waitFor(() => expect(input).toBeEnabled());
-  });
-});
-
 describe("画像の保存中の操作", () => {
   const getContext = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "getContext");
   afterEach(() => {
@@ -76,9 +51,15 @@ describe("画像の保存中の操作", () => {
   it("ファイルの読み込みが終わるまで、ページに入れられない", async () => {
     // 1枚目はすぐ読み込み、2枚目は読み込みの途中で止めておく
     let calls = 0;
+    let finish: () => void = () => {
+      throw new Error("読み込みが開始されていません。");
+    };
     vi.stubGlobal("createImageBitmap", async () => {
       calls += 1;
-      if (calls > 1) await new Promise(() => {});
+      if (calls > 1)
+        await new Promise<void>((resolve) => {
+          finish = resolve;
+        });
       return { width: 400, height: 300, close: () => {} };
     });
     Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
@@ -114,6 +95,12 @@ describe("画像の保存中の操作", () => {
     });
     await screen.findByRole("img", { name: "1枚目の画像" });
     expect(screen.getByRole("button", { name: "ページに入れる" })).toBeDisabled();
+    expect(input).toBeDisabled();
+    expect(screen.getByText("読み込みが終わると、次の写真・PDFを選べます")).toBeInTheDocument();
+    finish();
+    await screen.findByRole("img", { name: "2枚目の画像" });
+    await waitFor(() => expect(input).toBeEnabled());
+    expect(screen.getByRole("button", { name: "ページに入れる" })).toBeEnabled();
   });
 });
 

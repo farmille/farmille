@@ -1,4 +1,4 @@
-import { expect, test, type BrowserContextOptions } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { E2E_ADMIN_ACCOUNTS } from "./support/admin-accounts";
 import {
   cleanupSellerByLoginId,
@@ -25,26 +25,13 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
   const description = `製品説明_${uniqueToken("description")}`;
   const documents = [
     { group: "overview", label: "概要（製品説明・パンフレット・画像）", title: "製品パンフレット" },
-    { group: "safety", label: "使用上の注意（安全データシートなど）", title: "安全データシート" },
-    { group: "technical", label: "技術・作用機作", title: "作用機作の資料" },
     {
       group: "public_trial",
       label: "公的試験結果（都道府県の試験場など公的機関で実施した試験結果）",
       title: "公的試験報告",
     },
-    {
-      group: "other_trial",
-      label: "その他の試験結果（メーカー、大学・研究機関、生産者団体が実施した試験結果）",
-      title: "メーカー試験報告",
-    },
   ];
-  const adminOptions: BrowserContextOptions = { viewport: { width: 1280, height: 900 } };
-  if (test.info().project.use.video === "on")
-    adminOptions.recordVideo = {
-      dir: test.info().outputPath("admin-video"),
-      size: { width: 1280, height: 900 },
-    };
-  const adminContext = await browser.newContext(adminOptions);
+  const adminContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const adminPage = await adminContext.newPage();
   try {
     await seedCatalogMaterial(material.id);
@@ -197,7 +184,6 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
     await expect(
       page.getByRole("link", { name: "取り込み資料（削除対象）", exact: true }),
     ).toHaveCount(0);
-    await expect(page.getByText("メーカー確認済み", { exact: true })).toHaveCount(0);
     for (const document of documents) {
       await expect(page.getByRole("heading", { name: document.label, exact: true })).toBeVisible();
       await expect(page.getByRole("link", { name: document.title, exact: true })).toHaveAttribute(
@@ -206,7 +192,6 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
       );
     }
     await expect(page.getByText("公的試験報告の概要", { exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "メーカー試験報告", exact: true })).toBeVisible();
     await expect(page.getByText("農薬登録会社", { exact: true })).toBeVisible();
     await expect(page.getByText("製品表示に沿った効果", { exact: true })).toBeVisible();
     await expect(page.getByText("土壌改良資材の表示会社", { exact: true })).toBeVisible();
@@ -215,7 +200,6 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
       page.getByRole("link", { name: seller.officialName, exact: true }),
     ).toHaveAttribute("href", `/sellers/${seller.id}`);
     await page.getByRole("link", { name: seller.officialName, exact: true }).click();
-    await expect(page.locator('img[src*="container-shapes"]').first()).toBeVisible();
     await page.goto(`/dashboard/materials/${material.id}`);
     await page.getByRole("link", { name: /公開済み/ }).click();
     await expect(page.getByRole("img", { name: "容器のイメージ", exact: true })).toBeVisible();

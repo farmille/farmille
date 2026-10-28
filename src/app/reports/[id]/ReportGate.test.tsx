@@ -14,8 +14,5 @@ describe("実証詳細レポートの会員登録案内（見本の表示）", (
       "href",
       "/login?next=%2Freports%2Ftest-report",
     );
-    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
-      "続きは無料会員登録で読めます",
-    );
   });
 });

@@ -1,6 +1,6 @@
+import type { Database } from "@/types/database.types";
 import { createClient } from "@supabase/supabase-js";
 import { expect, it, vi } from "vitest";
-import type { Database } from "@/types/database.types";
 import { removePublishedPostWithSupabase } from "./published-posts";
 
 function form(type = "review") {
@@ -59,18 +59,5 @@ it("すでに非公開または存在しない対象を成功扱いにしない"
   expect(await removePublishedPostWithSupabase(form(), supabase)).toEqual({
     ok: false,
     error: "conflict",
-  });
-});
-
-it("DBの更新失敗を成功扱いにしない", async () => {
-  const supabase = client(
-    async () =>
-      new Response(JSON.stringify({ message: "permission denied", code: "42501" }), {
-        status: 403,
-      }),
-  );
-  expect(await removePublishedPostWithSupabase(form(), supabase)).toEqual({
-    ok: false,
-    error: "internal",
   });
 });

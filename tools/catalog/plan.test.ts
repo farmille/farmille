@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { compareField, planCatalog, valueHash } from "./plan.ts";
+import { planCatalog, valueHash } from "./plan.ts";
+import { FieldNameSchema, type CatalogSnapshot, type LiveMaterial } from "./snapshot.ts";
 import { catalogId, type CatalogSource } from "./source.ts";
-import { type CatalogSnapshot, type LiveMaterial, FieldNameSchema } from "./snapshot.ts";
 import { applySql } from "./sql.ts";
 
 const productId = "PRD-000001";
@@ -135,7 +135,10 @@ describe("カタログ再取り込み", () => {
     const snapshot = importedSnapshot();
     snapshot.baselines = [];
     snapshot.materials[0].fields.name = "運営による変更";
-    const conflict = planCatalog(source(), snapshot, productMap, []).conflicts[0];
+    const plan = planCatalog(source(), snapshot, productMap, []);
+    expect(plan.conflicts).toHaveLength(1);
+    expect(plan.conflicts[0].reason).toContain("初回");
+    const conflict = plan.conflicts[0];
     snapshot.materials[0].fields.name = "再変更";
     expect(() =>
       planCatalog(source(), snapshot, productMap, [{ ...conflict, action: "take_source" }]),
@@ -155,8 +158,5 @@ describe("カタログ再取り込み", () => {
     const plan = planCatalog(incoming, snapshot, productMap, []);
     expect(plan.conflicts).toHaveLength(1);
     expect(plan.conflicts[0].reason).toContain("メーカー確認");
-  });
-  it("初回の既存値との差分には判断を要求する", () => {
-    expect(compareField(undefined, "編集済み", "取り込み値")).toBe("conflict");
   });
 });

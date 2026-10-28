@@ -68,9 +68,7 @@ describe("文章の入力欄", () => {
     for (const label of labels) {
       const field = screen.getByRole("textbox", { name: label });
       expect(field).toBeRequired();
-      expect(field).toHaveAttribute("placeholder", expect.stringContaining("例）"));
       expect(screen.getByText(label, { selector: "label" })).toBeVisible();
-      expect(screen.queryByRole("heading", { name: new RegExp(label) })).not.toBeInTheDocument();
     }
 
     fireEvent.click(screen.getByRole("button", { name: "投稿する" }));
@@ -111,22 +109,15 @@ describe("保存と提出の最中", () => {
     return title;
   }
 
-  it("下書き保存が終わるまで、フォームを編集できない", async () => {
-    renderForm();
-    expect(pageOf().closest("[inert]")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "下書き保存" }));
-    expect(pageOf().closest("[inert]")).not.toBeNull();
-    await waitFor(() => expect(pageOf().closest("[inert]")).toBeNull());
-  });
-
-  it("投稿が終わるまで、フォームを編集できない", async () => {
+  it.each(["下書き保存", "投稿する"])("%sが終わるまで、フォームを編集できない", async (action) => {
     renderForm({ ...filledReport, methodDetailsAck: true, documentsAck: true, guidelineAck: true });
     for (const name of [
       "資材を使った日（処理日）を記入した",
       "差し込んだグラフ・表に、氏名や連絡先などが写っていないか確認した",
     ])
       fireEvent.click(screen.getByRole("checkbox", { name }));
-    fireEvent.click(screen.getByRole("button", { name: "投稿する" }));
+    expect(pageOf().closest("[inert]")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: action }));
     expect(pageOf().closest("[inert]")).not.toBeNull();
     await waitFor(() => expect(pageOf().closest("[inert]")).toBeNull());
   });

@@ -143,6 +143,17 @@ describe("extractFromPdf", () => {
       usage: null,
     });
     expect(sent).toHaveLength(2);
+
+    {
+      const { client, sent } = fakeClient(apiError(429));
+      const sonnet = { ...fastOpus, model: "claude-sonnet-5-5", speed: "standard" } as const;
+      expect(await extractFromPdf(client, { ...request, model: sonnet }, clock(0))).toEqual({
+        ok: false,
+        error: "failed",
+        usage: null,
+      });
+      expect(sent.map(({ speed }) => speed)).toEqual([undefined]);
+    }
   });
 
   it("5xx はやり直さずに server_error を返す", async () => {
@@ -183,17 +194,6 @@ describe("extractFromPdf", () => {
       expect(result.ok ? null : result.error).toBe(error);
       expect(result.usage?.outputTokens).toBe(300);
     }
-  });
-
-  it("通常の速度のモデルは speed を送らず、429 でもやり直さない", async () => {
-    const { client, sent } = fakeClient(apiError(429));
-    const sonnet = { ...fastOpus, model: "claude-sonnet-5-5", speed: "standard" } as const;
-    expect(await extractFromPdf(client, { ...request, model: sonnet }, clock(0))).toEqual({
-      ok: false,
-      error: "failed",
-      usage: null,
-    });
-    expect(sent.map(({ speed }) => speed)).toEqual([undefined]);
   });
 
   it("adaptiveThinking が false なら thinking を送らず、effort と max_tokens は設定のまま送る", async () => {

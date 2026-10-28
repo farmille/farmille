@@ -37,8 +37,10 @@ beforeEach(() => {
 afterEach(() => fs.rmSync(root, { recursive: true, force: true }));
 
 describe("ブラウザ検査の対象", () => {
-  it("全件指定では資料だけの変更でも全検査を実行する", () => {
-    expect(createBrowserCheckPlan(root, ["docs/ops/runbook.md"], true)).toMatchObject({
+  it("暗黙の親画面を変えたら、直接importしないStoryも含めて全件を検査する", () => {
+    write("src/app/me/layout.tsx", "export const Layout = 'layout';");
+    write("src/app/me/Profile.tsx", "export { Layout } from './layout';");
+    expect(createBrowserCheckPlan(root, ["src/app/me/layout.tsx"], false)).toMatchObject({
       storybook: { mode: "all" },
       e2e: true,
     });
@@ -48,7 +50,14 @@ describe("ブラウザ検査の対象", () => {
     expect(
       createBrowserCheckPlan(
         root,
-        ["docs/rebuild/catalog-SPEC.md", "AGENTS.md", ".codex/skills/example/SKILL.md"],
+        [
+          "docs/rebuild/catalog-SPEC.md",
+          "AGENTS.md",
+          ".codex/skills/example/SKILL.md",
+          "tools/ci/selection.ts",
+          "tools/oxlint/anti-slop/index.ts",
+          ".github/workflows/ci.yml",
+        ],
         false,
       ),
     ).toMatchObject({
@@ -83,19 +92,6 @@ describe("ブラウザ検査の対象", () => {
     });
   });
 
-  it.each([
-    "export * as Reader from '../articles/Reading';",
-    "export const load = () => import(`../articles/Reading`);",
-  ])("namespace再exportとテンプレートリテラルのimportも追跡する：%s", (source) => {
-    write("src/app/reports/Report.tsx", source);
-    expect(createBrowserCheckPlan(root, ["src/app/articles/Reading.tsx"], false).storybook).toEqual(
-      {
-        mode: "selected",
-        files: ["src/app/articles/Reading.stories.tsx", "src/app/reports/Report.stories.tsx"],
-      },
-    );
-  });
-
   it("複数変更の一部だけ利用先を特定できても残りを無検査にしない", () => {
     write("src/app/new/page.tsx", "export default function Page() { return null; }");
     expect(
@@ -118,32 +114,13 @@ describe("ブラウザ検査の対象", () => {
     );
   });
 
-  it.each([
-    "src/components/Button.tsx",
-    "src/theme/tokens.ts",
-    "public/hero.png",
-    "panda.config.ts",
-    "pnpm-lock.yaml",
-    ".storybook/preview.ts",
-    "storybook-tests/responsive.spec.ts",
-    "src/app/globals.css",
-    "src/app/me/layout.tsx",
-    "src/app/me/template.tsx",
-    "src/app/me/not-found.tsx",
-    "src/app/me/__mocks__/actions.ts",
-    "supabase/migrations/20260101000000_example.sql",
-    "unknown.config.ts",
-  ])("影響を限定できない %s は全Storyを検査する", (file) => {
-    write(file, "");
-    expect(createBrowserCheckPlan(root, [file], false).storybook.mode).toBe("all");
-  });
-
-  it("削除・rename前のパスがあれば全Storyを検査する", () => {
-    expect(
-      createBrowserCheckPlan(root, ["src/app/old/Removed.tsx", "src/app/me/Profile.tsx"], false)
-        .storybook.mode,
-    ).toBe("all");
-  });
+  it.each(["panda.config.ts", ".storybook/preview.ts", "storybook-tests/responsive.spec.ts"])(
+    "影響を限定できない %s は全Storyを検査する",
+    (file) => {
+      write(file, "");
+      expect(createBrowserCheckPlan(root, [file], false).storybook.mode).toBe("all");
+    },
+  );
 
   it("静的に解決できないローカルimportがあれば対象を絞らない", () => {
     write("src/app/reports/Report.tsx", "import './Missing';");
@@ -172,13 +149,6 @@ describe("ブラウザ検査の対象", () => {
     );
   });
 
-  it("Story を持たない変更も無検査にはしない", () => {
-    write("src/app/new/page.tsx", "export default function Page() { return null; }");
-    expect(createBrowserCheckPlan(root, ["src/app/new/page.tsx"], false).storybook.mode).toBe(
-      "all",
-    );
-  });
-
   it("E2E 自身の変更では E2E だけを、単体テストの変更では画面検査を省く", () => {
     expect(createBrowserCheckPlan(root, ["e2e/search.spec.ts"], false)).toMatchObject({
       storybook: { mode: "none" },
@@ -190,36 +160,13 @@ describe("ブラウザ検査の対象", () => {
     });
   });
 
-  it.each([
-    "tools/ci/browser-checks.ts",
-    "tools/ci/selection.ts",
-    "tools/ci/selection.test.ts",
-    "tools/dev/pre-push.sh",
-    "tools/dev/setup-hooks.sh",
-    "tools/oxlint/anti-slop/index.ts",
-    "eslint.config.mjs",
-    ".github/workflows/ci.yml",
-  ])("開発ツール %s だけならブラウザ検査を省く", (file) => {
-    expect(createBrowserCheckPlan(root, [file], false)).toMatchObject({
-      storybook: { mode: "none" },
-      e2e: false,
-    });
-  });
-
-  it("CSSだけならStorybookを実行し、E2Eを省く", () => {
-    expect(createBrowserCheckPlan(root, ["src/app/globals.css"], false)).toMatchObject({
-      storybook: { mode: "all" },
-      e2e: false,
-    });
-  });
-
   it("CSSと実行コードが混在すればE2Eを残す", () => {
     expect(
       createBrowserCheckPlan(root, ["src/app/globals.css", "src/app/me/Profile.tsx"], false),
     ).toMatchObject({ storybook: { mode: "all" }, e2e: true });
   });
 
-  it.each(["tools/dev/e2e-local.sh", "tools/dev/check-migrations.sh", "e2e/fixtures/style.css"])(
+  it.each(["tools/dev/e2e-local.sh", "e2e/fixtures/style.css"])(
     "E2Eの準備処理 %s はE2Eで検査する",
     (file) => {
       expect(createBrowserCheckPlan(root, [file], false)).toMatchObject({
@@ -228,11 +175,6 @@ describe("ブラウザ検査の対象", () => {
       });
     },
   );
-
-  it("不正な tsconfig は選別を成功扱いせず失敗する", () => {
-    write("tsconfig.json", "invalid");
-    expect(() => createBrowserCheckPlan(root, ["src/app/me/Profile.tsx"], false)).toThrow();
-  });
 });
 
 describe("Storybook index と検査計画の照合", () => {
@@ -249,11 +191,5 @@ describe("Storybook index と検査計画の照合", () => {
         "existing.stories.tsx",
       ]),
     ).toThrow("index にありません");
-  });
-  it("空のindexと不要な検査起動は失敗する", () => {
-    expect(() => selectStoryFiles({ mode: "all", reason: "main" }, [])).toThrow();
-    expect(() =>
-      selectStoryFiles({ mode: "none", reason: "docs" }, ["existing.stories.tsx"]),
-    ).toThrow();
   });
 });

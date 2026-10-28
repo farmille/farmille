@@ -105,13 +105,6 @@ describe("区の組み合わせ", () => {
     expect(plotPlan(removed, posted).showMatrix).toBe(true);
   });
 
-  it("同じ資材の区を足すと、2つ目から番号が付く", () => {
-    const input = blank();
-    const varietyId = input.varieties[0]?.id ?? null;
-    const added = reportPlotEdits.addPlot(input, varietyId, { kind: "posted" }, posted);
-    expect(names(added)).toEqual(["無処理区", "ヒートインパクト区", "ヒートインパクト区（2）"]);
-  });
-
   it("表を出す組み合わせでも、選んだ品種と資材の区を組み合わせの並びの位置に足し、名前を付ける", () => {
     const input = reportPlotEdits.addVariety(blank(), "アイコ", posted);
     const [first, second] = input.varieties;

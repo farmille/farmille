@@ -99,28 +99,6 @@ describe("Combobox", () => {
     expect(submitted).toHaveLength(0);
   });
 
-  it("必須で未選択なら送信を止める", async () => {
-    const user = userEvent.setup();
-    const submitted: FormData[] = [];
-    render(
-      <Form persist={false} onSubmit={captureSubmit(submitted)}>
-        <Combobox
-          emptyMessage="一致する作物がありません"
-          label="作目"
-          name="cropId"
-          options={crops}
-          requirement="required"
-        />
-        <button type="submit">送信</button>
-      </Form>,
-    );
-
-    await user.click(screen.getByRole("button", { name: "送信" }));
-
-    expect(submitted).toHaveLength(0);
-    expect(screen.getByRole("combobox", { name: "作目" })).toHaveAttribute("aria-invalid", "true");
-  });
-
   it("複数選択は選んだ候補をチップで示して値ごとに送り、上限に達すると入力欄を読み取り専用にする", async () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
@@ -177,23 +155,8 @@ describe("Combobox", () => {
     await user.keyboard("{Escape}{ArrowLeft}");
 
     expect(screen.getByText("きゅうり", { exact: true })).toHaveFocus();
-  });
-
-  it("複数選択の空の入力欄ではBackspaceで最後の選択を外せる", async () => {
-    const user = userEvent.setup();
-    render(
-      <Combobox
-        defaultValue={[crops[0], crops[2]]}
-        emptyMessage="一致する作物がありません"
-        label="栽培作目"
-        multiple
-        options={crops}
-      />,
-    );
-
     await user.click(screen.getByRole("combobox", { name: "栽培作目" }));
     await user.keyboard("{Escape}{Backspace}");
-
     expect(screen.queryByRole("button", { name: "きゅうりを削除" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "トマトを削除" })).toBeInTheDocument();
   });

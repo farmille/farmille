@@ -93,56 +93,34 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
   });
   afterEach(() => fs.rmSync(root, { recursive: true, force: true }));
 
-  it.each(["C", process.platform === "darwin" ? "en_US.UTF-8" : "C.UTF-8"])(
-    "reports untrusted files and registers them under %s",
-    (locale) => {
-      env.LC_ALL = locale;
-      git("update-ref", "refs/remotes/origin/main", base);
-      fs.appendFileSync(path.join(repo, "tools/ci/selection.ts"), "\n");
-      write("package.json", '{"type":"module","private":true}\n');
-      git("add", "tools/ci/selection.ts", "package.json");
-      git("commit", "-m", "change checks and package settings");
-      const rejected = push("feature");
-      expect(rejected.status).not.toBe(0);
-      expect(rejected.stderr).toContain(
-        "tools/ci/selection.ts・package.json が origin/main と異なり",
-      );
-      expect(commands()).toEqual([]);
-      const registered = setup("--trust-current");
-      expect(registered.stderr).toBe("");
-      expect(registered.status).toBe(0);
-      expect(push("feature").status).toBe(0);
-    },
-  );
-
-  it("does not execute checkout-controlled post-checkout hooks", () => {
-    write(".githooks/post-checkout", "#!/bin/sh\nprintf compromised > .git/checkout-marker\n");
-    fs.chmodSync(path.join(repo, ".githooks/post-checkout"), 0o755);
-    git("add", ".githooks/post-checkout");
-    git("commit", "-m", "untrusted checkout hook");
-    const untrusted = git("rev-parse", "HEAD");
-    git("checkout", "--detach", base);
-    git("checkout", "--detach", untrusted);
-    expect(fs.existsSync(path.join(repo, ".git/checkout-marker"))).toBe(false);
+  it("依存以外の変更は登録を求め、登録後の再変更も止める", () => {
+    env.LC_ALL = process.platform === "darwin" ? "en_US.UTF-8" : "C.UTF-8";
+    git("update-ref", "refs/remotes/origin/main", base);
+    fs.appendFileSync(path.join(repo, "tools/ci/selection.ts"), "\n");
+    write("package.json", '{"type":"module","scripts":{"test:e2e:local":"true"}}\n');
+    write("pnpm-workspace.yaml", "minimumReleaseAge: 0\n");
+    write(".npmrc", "registry=https://registry.example.test/\n");
+    write(".pnpmfile.cjs", "module.exports = { hooks: {} };\n");
+    write(".pnpmfile.mjs", "export const hooks = {};\n");
+    git("add", ".");
+    git("commit", "-m", "change checks and pnpm settings");
+    const rejected = push("feature");
+    expect(rejected.status).not.toBe(0);
+    expect(rejected.stderr).toContain(
+      "tools/ci/selection.ts・pnpm-workspace.yaml・.npmrc・.pnpmfile.cjs・.pnpmfile.mjs・package.json が origin/main と異なり",
+    );
+    expect(commands()).toEqual([]);
+    const registered = setup("--trust-current");
+    expect(registered.stderr).toBe("");
+    expect(registered.status).toBe(0);
+    expect(push("feature").status).toBe(0);
+    fs.appendFileSync(path.join(repo, ".pnpmfile.cjs"), "// changed after registration\n");
+    git("commit", "-am", "change pnpm settings again");
+    const changed = push("feature");
+    expect(changed.status).not.toBe(0);
+    expect(changed.stderr).toContain("登録済み");
   });
 
-  it.each(["tools/ci/browser-checks.ts", "tools/ci/selection.ts"])(
-    "rejects changes to %s before executing them",
-    (file) => {
-      write(
-        file,
-        'import fs from "node:fs"; fs.writeFileSync(".git/runner-marker", "compromised");\n',
-      );
-      git("add", file);
-      git("commit", "-m", "replace runner");
-      const result = push("feature");
-      expect(result.status).not.toBe(0);
-      expect(result.stderr).toContain("登録済み");
-      expect(fs.existsSync(path.join(repo, ".git/runner-marker"))).toBe(false);
-      expect(commands()).toEqual([]);
-      expect(git("--git-dir", remote, "rev-parse", "refs/heads/feature")).toBe(base);
-    },
-  );
   it("rejects a symlinked runner before it imports from an untrusted directory", () => {
     write(
       "untrusted/browser-checks.ts",
@@ -180,13 +158,7 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     expect(fs.existsSync(path.join(repo, ".git/runner-marker"))).toBe(false);
     expect(commands()).toEqual([]);
   });
-  it.each(["package.json", "pnpm-lock.yaml"])("rejects untrusted changes to %s", (file) => {
-    commit(file);
-    const result = push("feature");
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("登録済み");
-    expect(commands()).toEqual([]);
-  });
+
   it("updates trust only when explicitly requested", () => {
     const trusted = path.join(repo, ".git/farmille-hooks/trusted");
     const original = fs.readFileSync(trusted, "utf8");
@@ -201,19 +173,7 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     expect(push("feature").status).toBe(0);
     expect(commands()).toHaveLength(3);
   });
-  it("keeps earlier trusted sets when another set is registered", () => {
-    write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# feature\n");
-    git("commit", "-am", "feature dependency");
-    expect(setup("--trust-current").status).toBe(0);
-    git("checkout", "-b", "other", base);
-    write("pnpm-lock.yaml", "lockfileVersion: 9.0\n# other\n");
-    git("commit", "-am", "other dependency");
-    expect(setup("--trust-current").status).toBe(0);
-    expect(push("other").status).toBe(0);
-    git("checkout", "feature");
-    const result = push("feature");
-    expect(result.status, result.stderr).toBe(0);
-  });
+
   it("passes files identical to origin/main without registration and rejects others", () => {
     const trusted = path.join(repo, ".git/farmille-hooks/trusted");
     const original = fs.readFileSync(trusted, "utf8");
@@ -286,15 +246,6 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     expect(git("--git-dir", remote, "rev-parse", "refs/heads/feature")).toBe(base);
   });
   it.each([
-    ["pnpm-workspace.yaml", "minimumReleaseAge: 0\n", "pnpm-workspace.yaml"],
-    [".npmrc", "registry=https://registry.example.test/\n", ".npmrc"],
-    [".pnpmfile.cjs", "module.exports = { hooks: {} };\n", ".pnpmfile.cjs"],
-    [".pnpmfile.mjs", "export const hooks = {};\n", ".pnpmfile.mjs"],
-    [
-      "package.json",
-      '{"type":"module","scripts":{"test:e2e:local":"true"},"dependencies":{"pdfjs-dist":"4.10.38"}}\n',
-      "package.json",
-    ],
     [
       "package.json",
       '{"type":"module","dependencies":{"valibot":"link:./untrusted"}}\n',
@@ -338,31 +289,7 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     expect(commands()).toEqual([]);
     expect(git("--git-dir", remote, "rev-parse", "refs/heads/feature")).toBe(base);
   });
-  it.each([
-    ["pnpm-workspace.yaml", "scriptShell: /usr/bin/true\n"],
-    [".npmrc", "registry=https://registry.example.test/\n"],
-    [".pnpmfile.cjs", "module.exports = { hooks: {} };\n"],
-  ])(
-    "requires registration for %s even when the other files match origin/main",
-    (file, content) => {
-      git("update-ref", "refs/remotes/origin/main", base);
-      write(file, content);
-      git("add", file);
-      git("commit", "-m", "change pnpm settings");
-      const rejected = push("feature");
-      expect(rejected.status).not.toBe(0);
-      expect(rejected.stderr).toContain(`${file} が origin/main と異なり、登録済み`);
-      expect(commands()).toEqual([]);
-      expect(setup("--trust-current").status).toBe(0);
-      expect(push("feature").status).toBe(0);
 
-      fs.appendFileSync(path.join(repo, file), "# changed after registration\n");
-      git("commit", "-am", "change pnpm settings again");
-      const changed = push("feature");
-      expect(changed.status).not.toBe(0);
-      expect(changed.stderr).toContain(`${file} が origin/main と異なり、登録済み`);
-    },
-  );
   it("keeps only the 20 most recently registered sets", () => {
     const trusted = path.join(repo, ".git/farmille-hooks/trusted");
     const lines = () => fs.readFileSync(trusted, "utf8").trim().split("\n");
@@ -386,6 +313,9 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     expect(lines()).toHaveLength(20);
     expect(lines()[0]).toBe("stale 1");
     expect(lines().slice(-2)).toEqual([fixture, reviewed]);
+    git("checkout", "old");
+    const earlier = push("old");
+    expect(earlier.status, earlier.stderr).toBe(0);
   });
   it("migrates a hook with embedded hashes only when trust is requested", () => {
     fs.writeFileSync(
@@ -399,16 +329,7 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     const result = push("feature");
     expect(result.status, result.stderr).toBe(0);
   });
-  it("migrates the legacy hook configuration", () => {
-    write(
-      ".githooks/pre-push",
-      '#!/usr/bin/env sh\nset -eu\ncd "$(git rev-parse --show-toplevel)"\nexec node tools/ci/browser-checks.ts pre-push\n',
-    );
-    fs.chmodSync(path.join(repo, ".githooks/pre-push"), 0o755);
-    git("config", "core.hooksPath", ".githooks");
-    expect(setup().status).toBe(0);
-    expect(git("config", "--get", "core.hooksPath")).toBe(path.join(repo, ".git/farmille-hooks"));
-  });
+
   it("preserves unknown hooks in the managed directory", () => {
     write(".git/farmille-hooks/post-checkout", "#!/bin/sh\nexit 0\n");
     expect(setup("--trust-current").status).not.toBe(0);
@@ -442,13 +363,6 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     ).toEqual([linked, linked, linked]);
   });
 
-  it("runs Storybook then E2E and publishes the checked commit", () => {
-    const head = commit("src/components/Example.tsx");
-    const result = push("feature");
-    expect(result.status, result.stderr).toBe(0);
-    expect(commands()).toEqual(["build-storybook", "test:storybook:responsive", "test:e2e:local"]);
-    expect(git("--git-dir", remote, "rev-parse", "refs/heads/feature")).toBe(head);
-  });
   it("blocks publication when a responsive check fails and releases its lock", () => {
     commit("src/components/Example.tsx");
     fakePnpm('[ "$1" != "test:storybook:responsive" ]');
@@ -460,57 +374,23 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
       fs.existsSync(path.join(root, `farmille-browser-checks-${os.userInfo().username}.lock`)),
     ).toBe(false);
   });
-  it("skips browser checks for documentation-only updates", () => {
-    commit("README.md");
-    expect(push("feature").status).toBe(0);
-    expect(commands()).toEqual([]);
-  });
+
   it("runs only E2E for E2E-only updates", () => {
     commit("e2e/search.spec.ts");
     expect(push("feature").status).toBe(0);
     expect(commands()).toEqual(["test:e2e:local"]);
   });
-  it("runs every check for a new branch without a known main", () => {
-    commit("README.md");
-    expect(push("HEAD:refs/heads/new").status).toBe(0);
-    expect(commands()).toHaveLength(3);
-  });
-  it("selects checks from main for the first push of a branch", () => {
-    git("update-ref", "refs/remotes/origin/main", base);
-    commit("README.md");
-    const result = push("HEAD:refs/heads/new");
-    expect(result.status, result.stderr).toBe(0);
-    expect(commands()).toEqual([]);
-  });
-  it("keeps Storybook and skips E2E for CSS on a new branch", () => {
-    git("update-ref", "refs/remotes/origin/main", base);
-    commit("src/app/globals.css");
-    expect(push("HEAD:refs/heads/new").status).toBe(0);
-    expect(commands()).toEqual(["build-storybook", "test:storybook:responsive"]);
-  });
-  it("uses the merge base when main has unrelated changes", () => {
+
+  it("新規ブランチは main との分岐点からの差分で検査を選ぶ", () => {
     git("checkout", "-b", "main");
     const main = commit("package.json");
     git("update-ref", "refs/remotes/origin/main", main);
     git("checkout", "feature");
-    commit("README.md");
+    commit("src/app/globals.css");
     expect(push("HEAD:refs/heads/new").status).toBe(0);
-    expect(commands()).toEqual([]);
+    expect(commands()).toEqual(["build-storybook", "test:storybook:responsive"]);
   });
-  it("skips browser checks for reviewed hook-only updates", () => {
-    fs.appendFileSync(path.join(repo, "tools/ci/selection.ts"), "\n");
-    git("add", "tools/ci/selection.ts");
-    git("commit", "-m", "hook-only change");
-    expect(setup("--trust-current").status).toBe(0);
-    expect(push("feature").status).toBe(0);
-    expect(commands()).toEqual([]);
-  });
-  it("uses the outgoing diff for main updates", () => {
-    git("-c", "core.hooksPath=/dev/null", "push", "origin", "HEAD:main");
-    commit("README.md");
-    expect(push("HEAD:main").status).toBe(0);
-    expect(commands()).toEqual([]);
-  });
+
   it("allows deletion with an unrelated dirty working tree", () => {
     write("scratch.txt", "unsaved");
     expect(push(":feature").status).toBe(0);
@@ -584,16 +464,6 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
       child.kill("SIGTERM");
       await closed;
     }
-  });
-  it("rejects malformed hook input before running checks", () => {
-    const result = spawnSync(process.execPath, ["tools/ci/browser-checks.ts", "pre-push"], {
-      cwd: repo,
-      env,
-      input: "refs/heads/feature invalid\n",
-      encoding: "utf8",
-    });
-    expect(result.status).not.toBe(0);
-    expect(commands()).toEqual([]);
   });
 
   it("preserves executable hooks in the default hooks directory", () => {

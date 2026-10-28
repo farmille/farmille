@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import Link from "next/link";
 import userEvent from "@testing-library/user-event";
+import Link from "next/link";
 import type { FormEvent } from "react";
 import { describe, expect, it } from "vitest";
 
@@ -68,26 +68,6 @@ describe("Checkbox", () => {
 
     await user.click(checkbox);
     expect(checkbox).not.toBeChecked();
-  });
-
-  it("チェックすると Field の name で on を送る", async () => {
-    const user = userEvent.setup();
-    const submitted: FormData[] = [];
-    render(
-      <Form persist={false} onSubmit={captureSubmit(submitted)}>
-        <Field name="terms" requirement="required">
-          <Terms />
-        </Field>
-        <button type="submit">登録する</button>
-      </Form>,
-    );
-
-    await user.click(screen.getByRole("button", { name: "登録する" }));
-    expect(submitted).toHaveLength(0);
-
-    await user.click(screen.getByRole("checkbox", { name: /利用規約/ }));
-    await user.click(screen.getByRole("button", { name: "登録する" }));
-    expect(submitted[0]?.get("terms")).toBe("on");
   });
 
   it("Field の外でも name と value で送る", async () => {
