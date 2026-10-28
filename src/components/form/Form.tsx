@@ -1,6 +1,7 @@
 "use client";
 
 import { Form as BaseForm } from "@base-ui/react/form";
+import { usePathname } from "next/navigation";
 import {
   Fragment,
   useEffect,
@@ -10,9 +11,10 @@ import {
   useState,
   type FormEventHandler,
   type ReactNode,
+  type RefObject,
 } from "react";
 
-import { FormResetContext } from "./field-context";
+import { FormResetContext, FormValidateContext } from "./field-context";
 import {
   readPersistedFields,
   removePersisted,
@@ -37,21 +39,38 @@ type FormProps = {
   action?: (formData: FormData) => void | Promise<void>;
   /** サーバーの項目エラー。値が変わった項目のエラーは消える。送信結果ごとに同じ参照を渡す。 */
   errors?: FieldErrors;
+  /**
+   * 送る前に、送る値（FormData）をサーバーと同じ規則で確かめ、欄ごとのエラー文言を返す。
+   * 送信時に全欄の誤りをまとめて出して最初の誤りの欄へ移り、その後は入力のたびに確かめ直す。
+   */
+  validate?: (formData: FormData) => FieldErrors;
   id?: string;
   className?: string;
   children: ReactNode;
   onSubmit?: FormEventHandler<HTMLFormElement>;
 };
 
-export function Form({ persist, onRestore, errors, children, ...rest }: FormProps) {
+export function Form({ persist, onRestore, errors, validate, children, ...rest }: FormProps) {
   // Base UI は errors の参照が変わるたびに取り込み直すので、描画ごとに作り直さない
   const baseErrors = useMemo(
     () => (errors === undefined ? undefined : presentErrors(errors)),
     [errors],
   );
   const formRef = useRef<HTMLFormElement>(null);
+  const fieldError = useMemo(
+    () =>
+      validate === undefined
+        ? null
+        : (name: string) => {
+            const form = formRef.current;
+            return form === null ? null : (validate(new FormData(form))[name] ?? null);
+          },
+    [validate],
+  );
+  useSubmitClickGuard(formRef);
   const [resetCount, setResetCount] = useState(0);
-  const stored = useStoredOnce(persist, readPersistedFields);
+  // 画面内の遷移で開いた直後は location がまだ前の画面なので、控えの置き場はルーターのパスで決める
+  const stored = useStoredOnce(persist, readPersistedFields, usePathname());
   const saved = stored?.saved ?? null;
   // 送信後の reset からは、サーバーが返した値を初期値にする
   const [discarded, setDiscarded] = useState(false);
@@ -116,19 +135,61 @@ export function Form({ persist, onRestore, errors, children, ...rest }: FormProp
   return (
     <BaseForm errors={baseErrors} ref={formRef} {...rest}>
       <FormResetContext.Provider value={resetCount}>
-        <RestoredFieldsContext.Provider value={restored}>
-          {/* 控えを戻したら中身を作り直し、入力欄と中の部品の state を控えの値から始め直す */}
-          <Fragment key={saved === null ? "blank" : "restored"}>{children}</Fragment>
-        </RestoredFieldsContext.Provider>
+        <FormValidateContext.Provider value={fieldError}>
+          <RestoredFieldsContext.Provider value={restored}>
+            {/* 控えを戻したら中身を作り直し、入力欄と中の部品の state を控えの値から始め直す */}
+            <Fragment key={saved === null ? "blank" : "restored"}>{children}</Fragment>
+          </RestoredFieldsContext.Provider>
+        </FormValidateContext.Provider>
       </FormResetContext.Provider>
     </BaseForm>
   );
 }
+
+/**
+ * 送信のクリックで先頭のエラー欄へフォーカスが移ると、画面がその欄まで動き、ダブルクリックの2回目が
+ * 動いた先の別の欄に当たってフォーカスを奪う。送信した押し操作に続く2回目以降の押し操作（detail が2以上）は、
+ * フォーカスの移動もクリックもどこにも届けない。
+ */
+function useSubmitClickGuard(formRef: RefObject<HTMLFormElement | null>) {
+  useEffect(() => {
+    const form = formRef.current;
+    if (form === null) return;
+    let submitted = false;
+    let swallowing = false;
+    const arm = () => {
+      submitted = true;
+    };
+    const press = (event: MouseEvent) => {
+      swallowing = submitted && event.detail > 1;
+      submitted = false;
+      swallow(event);
+    };
+    const swallow = (event: MouseEvent) => {
+      if (!swallowing) return;
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    const followingEvents = ["mouseup", "click", "dblclick"] as const;
+    form.addEventListener("submit", arm);
+    window.addEventListener("mousedown", press, true);
+    for (const type of followingEvents) window.addEventListener(type, swallow, true);
+    return () => {
+      form.removeEventListener("submit", arm);
+      window.removeEventListener("mousedown", press, true);
+      for (const type of followingEvents) window.removeEventListener(type, swallow, true);
+    };
+  }, [formRef]);
+}
+
+const NO_ERRORS: BaseErrors = {};
 
 function presentErrors(errors: FieldErrors): BaseErrors {
   const present: BaseErrors = {};
   for (const [name, message] of Object.entries(errors)) {
     if (message !== undefined) present[name] = message;
   }
-  return present;
+  // Base UI は送信後に errors が初めて変わったときにだけ最初のエラーの欄へフォーカスを移す。
+  // 送信中の再描画で作り直された空のエラーをそこで使わせず、サーバーの結果まで取っておく
+  return Object.keys(present).length === 0 ? NO_ERRORS : present;
 }

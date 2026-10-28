@@ -7,6 +7,7 @@ import { TextLink } from "@/components/TextLink";
 import { HANDLE_MAX_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
 import { STANDPOINTS } from "@/lib/standpoints";
+import { profileHandleCheckAction } from "../edit/actions";
 import { setupProfileAction } from "./actions";
 
 export function ProfileSetupForm() {
@@ -16,8 +17,9 @@ export function ProfileSetupForm() {
     <Form action={formAction} errors={fieldErrorsOf(state)} persist="profile-setup">
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       <Input
+        check={profileHandleCheckAction}
         description="本名でなくても構いません。"
-        label="ハンドルネーム"
+        label="ニックネーム"
         name="handle"
         requirement="required"
         visibility="public"

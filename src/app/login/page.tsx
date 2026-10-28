@@ -36,7 +36,10 @@ export default async function LoginPage({
         </Notice>
       ) : null}
       <LoginForm next={safeNextPath(next)} />
-      <PasskeyLogin next={safeNextPath(next)} />
+      <PasskeyLogin
+        description="パスキーを登録した方は、パスワードの代わりに、スマートフォンやパソコンの指紋や顔でログインできます。登録は、ログインした後にマイページでできます。"
+        next={safeNextPath(next)}
+      />
     </AuthScreen>
   );
 }

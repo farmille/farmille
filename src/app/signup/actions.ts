@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import type { AuthFormState, AuthFormValues } from "@/lib/auth/form-state";
 import { formDataString } from "@/lib/validation";
+import { emailAddressSchema } from "@/lib/auth/registration-schema";
 import { safeNextPath } from "@/lib/auth/safe-next";
 import {
   getRegistrationIdentity,
@@ -12,6 +13,7 @@ import {
   registerGeneralUser,
   validateGeneralSignup,
 } from "@/server/accounts/general";
+import { isRegistrationHandleTaken } from "@/server/accounts/handle-availability";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 
 function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string> | undefined {
@@ -103,19 +105,22 @@ export async function signupAction(
   redirect(next ? `/signup/done?next=${encodeURIComponent(next)}` : "/signup/done");
 }
 
+/** 欄を離れたときの確認。ニックネームが使われていれば、送信時と同じ文言を返す。 */
+export async function registrationHandleCheckAction(handle: string): Promise<string | null> {
+  const taken = await isRegistrationHandleTaken(handle);
+  return taken.ok && taken.data ? errorMessageJa.handle_taken : null;
+}
+
 export async function registrationEmailAction(
   _state: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const parsed = v.safeParse(
-    v.pipe(v.string(), v.trim(), v.email("メールアドレスの形式が正しくありません。")),
-    formData.get("email"),
-  );
+  const parsed = v.safeParse(emailAddressSchema, formData.get("email"));
   if (!parsed.success)
     return {
       status: "error",
-      message: "メールアドレスの形式が正しくありません。",
-      fieldErrors: { email: "メールアドレスの形式が正しくありません。" },
+      message: errorMessageJa.invalid_body,
+      fieldErrors: { email: parsed.issues[0].message },
     };
   const result = await requestRegistrationEmail(parsed.output, safeNextPath(formData.get("next")));
   if (!result.ok) return { status: "error", message: errorMessageJa[result.error] };

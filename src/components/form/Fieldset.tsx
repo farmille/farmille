@@ -6,7 +6,7 @@ import { useId, type ReactNode } from "react";
 
 import { cx } from "../../../styled-system/css";
 import { FieldErrorText, LabelRow, VisibilityText, type FieldProps } from "./Field";
-import { FieldContext, useFieldContext } from "./field-context";
+import { FieldContext, useFieldContext, useFieldValidate } from "./field-context";
 import {
   fieldErrorStyle,
   fieldRecipe,
@@ -39,6 +39,7 @@ export function Fieldset({
   const parent = useFieldContext();
   const required = requirement === undefined ? parent.required : requirement === "required";
   const rooted = name !== undefined;
+  const validate = useFieldValidate(name);
   const id = useId();
   const describedBy = [
     visibility === undefined ? null : `${id}-visibility`,
@@ -98,6 +99,7 @@ export function Fieldset({
       disabled={disabled}
       invalid={error !== undefined}
       name={name}
+      validate={validate}
     >
       {fieldset}
     </BaseField.Root>

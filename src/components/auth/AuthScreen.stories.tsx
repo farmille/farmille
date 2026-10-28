@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { fn } from "storybook/test";
+import { expect, fn, within } from "storybook/test";
 
 import { Form, FormActions, Input, Notice, RadioGroup, SubmitButton } from "../form";
 import { TextLink } from "../TextLink";
@@ -36,7 +36,7 @@ const signupForm = (
   <Form action={submitAction} persist={false}>
     <Input
       description="感想口コミに表示される名前です。実名を避けることをおすすめします。"
-      label="ハンドルネーム"
+      label="ニックネーム"
       name="handle"
       placeholder="トマト農家12年目"
       requirement="required"
@@ -82,6 +82,7 @@ const signupForm = (
 const meta = {
   title: "Pages/Shared/AuthScreen",
   component: AuthScreen,
+  parameters: { layout: "fullscreen" },
   args: {
     title: "ログイン",
     children: loginForm,
@@ -91,10 +92,37 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** 上にほかの画面と同じ共通ヘッダーと準備中のお知らせを出し、その下に画面名を置く。 */
 export const Login: Story = {
   args: {
     lead: "感想口コミの投稿・参考になった・お気に入りの利用にはログインが必要です。",
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // 共通ヘッダーは閲覧者を確かめてから描かれるので、出るのを待つ
+    const [logo] = await canvas.findAllByRole("link", { name: "Farmille" });
+    await expect(logo).toHaveAttribute("href", "/");
+    const notice = canvas.getByRole("complementary", { name: "公開準備中のお知らせ" });
+    const heading = canvas.getByRole("heading", { level: 1, name: "ログイン" });
+    await expect(
+      notice.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  },
+};
+
+export const LoginMobile: Story = {
+  ...Login,
+  globals: { viewport: { value: "mobile375", isRotated: false } },
+};
+
+export const LoginDesktop: Story = {
+  ...Login,
+  globals: { viewport: { value: "desktop1440", isRotated: false } },
+};
+
+/** 読み込み中の画面。閲覧者を確かめずに共通ヘッダーを出す。 */
+export const Loading: Story = {
+  args: { loading: true },
 };
 
 export const WithoutLead: Story = {};
@@ -102,7 +130,7 @@ export const WithoutLead: Story = {};
 export const SignUp: Story = {
   args: {
     title: "新規登録",
-    lead: "メールアドレスとハンドルネームだけで登録できます。",
+    lead: "メールアドレスとニックネームだけで登録できます。",
     children: signupForm,
   },
 };

@@ -10,6 +10,7 @@ import { fail, succeed, type Result } from "@/server/result";
 import { createAdminSupabase, createIsolatedAuthClient } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
+import { isHandleTakenByOthersWithSupabase } from "./handle-availability";
 import { readRegistrationProof, clearRegistrationProof } from "./registration-proof";
 
 export type GeneralSignupInput = v.InferOutput<typeof generalRegistrationSchema>;
@@ -32,25 +33,6 @@ export function validateGeneralSignup(raw: GeneralSignupFormValues): GeneralSign
     if (message !== undefined) fieldErrors[parsedKey] = message;
   }
   return { ok: false, fieldErrors };
-}
-
-async function isHandleTaken(
-  admin: SupabaseClient<Database>,
-  handle: string,
-): Promise<Result<boolean>> {
-  const { data, error } = await admin
-    .from("profiles")
-    .select("user_id")
-    .eq("handle", handle)
-    .maybeSingle();
-
-  if (error !== null) {
-    console.error(`[auth] handle の重複確認に失敗: ${error.code} ${error.message}`);
-
-    return fail("internal");
-  }
-
-  return succeed(data !== null);
 }
 
 /** メールだけで本人確認を開始する。通常のセッションcookieは作らない。 */
@@ -129,7 +111,7 @@ export async function registerGeneralUserWithSupabase(
   const identity = await registrationIdentity(userId, admin);
   if (!identity.ok) return identity;
   if (input.email !== identity.data.email) return fail("expired_link");
-  const handleTaken = await isHandleTaken(admin, input.handle);
+  const handleTaken = await isHandleTakenByOthersWithSupabase(admin, input.handle, null);
   if (!handleTaken.ok) return handleTaken;
   if (handleTaken.data) return fail("handle_taken");
 

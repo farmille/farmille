@@ -64,11 +64,19 @@ type LabeledProps = {
   kind?: "field" | "group";
   name?: string;
   disabled?: boolean;
+  typeMismatchMessage?: string;
   children: ReactNode;
 };
 
 /** 入力部品の本体を、ラベルと案内を持つ Field（組なら Fieldset）で包む。 */
-export function Labeled({ labeling, kind = "field", name, disabled, children }: LabeledProps) {
+export function Labeled({
+  labeling,
+  kind = "field",
+  name,
+  disabled,
+  typeMismatchMessage,
+  children,
+}: LabeledProps) {
   const { inRoot, inField } = useFieldContext();
   const { label, hideLabel, fieldClassName, ...chrome } = labeling;
 
@@ -101,6 +109,7 @@ export function Labeled({ labeling, kind = "field", name, disabled, children }: 
       hideLabel={hideLabel}
       label={label}
       name={name}
+      typeMismatchMessage={typeMismatchMessage}
     >
       {children}
     </Field>

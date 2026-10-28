@@ -37,7 +37,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           ? await client.auth.verifyOtp({ type, token_hash: tokenHash })
           : null;
     if (!verified || verified.error || !verified.data.user) {
-      return NextResponse.redirect(sameOriginUrl(request, "/signup/general?error=expired_link"));
+      const expired =
+        next === "/"
+          ? "/signup/general?error=expired_link"
+          : `/signup/general?error=expired_link&next=${encodeURIComponent(next)}`;
+      return NextResponse.redirect(sameOriginUrl(request, expired));
     }
     const identity = await registrationIdentity(verified.data.user.id, createAdminSupabase());
     const closed = await client.auth.signOut({ scope: "local" });

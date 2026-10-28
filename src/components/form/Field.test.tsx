@@ -57,7 +57,12 @@ describe("Field", () => {
   it("Form の errors を role=alert で出して入力の説明に結び、入力を変えると消す", async () => {
     const user = userEvent.setup();
     render(
-      <Form persist={false} errors={{ handle: "このハンドルネームはすでに使われています。" }}>
+      <Form
+        persist={false}
+        errors={{
+          handle: "このニックネームはすでに使われています。別のニックネームを入力してください。",
+        }}
+      >
         <Field label="ニックネーム" name="handle">
           <Input defaultValue="山田" label={null} />
         </Field>
@@ -66,7 +71,9 @@ describe("Field", () => {
 
     const input = screen.getByRole("textbox", { name: "ニックネーム" });
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent("このハンドルネームはすでに使われています。");
+    expect(alert).toHaveTextContent(
+      "このニックネームはすでに使われています。別のニックネームを入力してください。",
+    );
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(input.getAttribute("aria-describedby")?.split(" ")).toContain(alert.id);
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { registrationHandleCheckAction } from "../actions";
 import { SignupForm } from "../SignupForm";
 import { RegistrationTerms } from "../RegistrationTerms";
 import { AuthScreen } from "@/components/auth/AuthScreen";
@@ -23,7 +24,12 @@ export default async function CompleteRegistrationPage({
   }
   return (
     <AuthScreen lead="確認済みのメールアドレスで登録します。" title="登録情報の入力">
-      <SignupForm email={identity.data.email} next={next} termsContent={<RegistrationTerms />} />
+      <SignupForm
+        checkHandle={registrationHandleCheckAction}
+        email={identity.data.email}
+        next={next}
+        termsContent={<RegistrationTerms />}
+      />
     </AuthScreen>
   );
 }

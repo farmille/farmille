@@ -32,6 +32,15 @@ export function useFieldRequired(): boolean {
 /** 囲む Form が reset された回数。React は action の送信後にフォームを reset する。 */
 export const FormResetContext = createContext(0);
 
+/** 囲む Form の validate で、名前の欄の最初のエラー文言を求める。Form に validate が無ければ null。 */
+export const FormValidateContext = createContext<((name: string) => string | null) | null>(null);
+
+/** Base UI の Field.Root に渡す validate。送信時と、送信後の入力のたびに呼ばれる。 */
+export function useFieldValidate(name: string | undefined): (() => string | null) | undefined {
+  const fieldError = useContext(FormValidateContext);
+  return fieldError === null || name === undefined ? undefined : () => fieldError(name);
+}
+
 /**
  * Base UI のチェック・ラジオ・セレクトは値を自分の state に持ち、送信用の隠し input だけが reset で初期値へ戻る。
  * reset のたびと初期値が変わったときに作り直し、画面と送信値を今の初期値（再表示した送信値）にそろえる。

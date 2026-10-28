@@ -8,12 +8,12 @@ import { createServerSupabase } from "@/server/supabase";
 
 export const PersonalProfileSchema = v.object({
   handle: v.pipe(
-    v.string("ハンドルネームを入力してください。"),
+    v.string("ニックネームを入力してください。"),
     v.trim(),
-    v.minLength(1, "ハンドルネームを入力してください。"),
+    v.minLength(1, "ニックネームを入力してください。"),
     v.maxLength(
       HANDLE_MAX_LENGTH,
-      `ハンドルネームは${HANDLE_MAX_LENGTH}文字以内で入力してください。`,
+      `ニックネームは${HANDLE_MAX_LENGTH}文字以内で入力してください。`,
     ),
   ),
   standpoint: v.picklist(

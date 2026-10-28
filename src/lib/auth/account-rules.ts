@@ -6,5 +6,8 @@ export const HANDLE_MAX_LENGTH = 30;
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 128;
 
+// RFC 5321 の経路の上限から、メールアドレスとして届けられる最大の長さ。
+export const EMAIL_MAX_LENGTH = 254;
+
 // Supabase 側でも検証されるため、ここでは形の明らかな誤りだけを弾く。
 export const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;

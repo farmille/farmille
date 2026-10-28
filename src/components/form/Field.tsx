@@ -7,7 +7,7 @@ import type { ReactElement, ReactNode } from "react";
 import { Badge } from "@/components/Badge";
 import { Icon } from "@/components/Icon";
 import { cx } from "../../../styled-system/css";
-import { FieldContext, useFieldContext } from "./field-context";
+import { FieldContext, useFieldContext, useFieldValidate } from "./field-context";
 import {
   choiceDescriptionStyle,
   choiceItemStyle,
@@ -36,6 +36,8 @@ export type FieldProps = {
   description?: ReactNode;
   /** Form の外で画面側が判定したエラー。サーバーのエラーは Form の errors で渡す。 */
   error?: string;
+  /** 形式が合わないときの文言を、入力欄の種類に合わせて差し替える（メールアドレスの Input が渡す）。 */
+  typeMismatchMessage?: string;
   disabled?: boolean;
   className?: string;
   children: ReactNode;
@@ -51,12 +53,14 @@ export function Field({
   lead,
   description,
   error,
+  typeMismatchMessage,
   disabled,
   className,
   children,
 }: FieldProps) {
   const parent = useFieldContext();
   const required = requirement === undefined ? parent.required : requirement === "required";
+  const validate = useFieldValidate(name);
 
   return (
     <BaseField.Root
@@ -64,6 +68,7 @@ export function Field({
       disabled={disabled}
       invalid={error !== undefined}
       name={name}
+      validate={validate}
     >
       {label === undefined ? null : hideLabel ? (
         <BaseField.Label className={srOnlyStyle}>{label}</BaseField.Label>
@@ -99,7 +104,7 @@ export function Field({
         {children}
       </FieldContext.Provider>
       {/* エラーは入力欄の真下に出す。説明はその下 */}
-      <FieldErrorText error={error} />
+      <FieldErrorText error={error} typeMismatchMessage={typeMismatchMessage} />
       {description === undefined ? null : (
         <BaseField.Description className={guideRecipe({ placement: "below" })}>
           {description}
@@ -116,10 +121,11 @@ export function EnsureFieldRoot({
   className,
   children,
 }: Pick<FieldProps, "name" | "disabled" | "className" | "children">) {
+  const validate = useFieldValidate(name);
   return useFieldContext().inRoot ? (
     children
   ) : (
-    <BaseField.Root className={className} disabled={disabled} name={name}>
+    <BaseField.Root className={className} disabled={disabled} name={name} validate={validate}>
       {children}
     </BaseField.Root>
   );
@@ -174,7 +180,7 @@ export function VisibilityText({ visibility }: { visibility: Visibility }) {
 
 /**
  * ブラウザの制約検証の結果ごとの文言。ブラウザ任せだと閲覧環境の言語（英語など）で出るので日本語に固定する。
- * 送信時は最初の不備へフォーカスが移り、その説明として読まれるので role="alert" は付けない。
+ * 送信時は最初の不備へフォーカスが移り、その説明として読まれるので role="alert" は付けない（Form の validate の文言も同じ）。
  */
 const VALIDITY_MESSAGES = [
   ["valueMissing", "この項目は必須です。"],
@@ -188,8 +194,17 @@ const VALIDITY_MESSAGES = [
   ["badInput", "入力内容を確認してください。"],
 ] as const;
 
-/** Form の errors とブラウザの検証結果を出す。error を渡すと常にそれを出す。 */
-export function FieldErrorText({ error }: { error?: string }) {
+/**
+ * Form の errors・Form の validate・ブラウザの検証結果を出す。error を渡すと常にそれを出す。
+ * validate の文言は欄ごとに具体的なので、同じ欄のブラウザの判定（必須など）より優先する。
+ */
+export function FieldErrorText({
+  error,
+  typeMismatchMessage,
+}: {
+  error?: string;
+  typeMismatchMessage?: string;
+}) {
   if (error !== undefined) {
     return (
       <BaseField.Error className={fieldErrorStyle} match role="alert">
@@ -198,20 +213,20 @@ export function FieldErrorText({ error }: { error?: string }) {
     );
   }
   return (
-    <>
-      {VALIDITY_MESSAGES.map(([match, message]) => (
-        <BaseField.Error className={fieldErrorStyle} key={match} match={match}>
-          {message}
-        </BaseField.Error>
-      ))}
-      <BaseField.Validity>
-        {({ validity }) =>
-          VALIDITY_MESSAGES.some(([key]) => validity[key]) ? null : (
-            <BaseField.Error className={fieldErrorStyle} role="alert" />
-          )
-        }
-      </BaseField.Validity>
-    </>
+    <BaseField.Validity>
+      {({ validity }) => {
+        if (validity.customError) return <BaseField.Error className={fieldErrorStyle} />;
+        const native = VALIDITY_MESSAGES.find(([key]) => validity[key]);
+        if (native === undefined)
+          return <BaseField.Error className={fieldErrorStyle} role="alert" />;
+        const [match, message] = native;
+        return (
+          <BaseField.Error className={fieldErrorStyle} match={match}>
+            {match === "typeMismatch" ? (typeMismatchMessage ?? message) : message}
+          </BaseField.Error>
+        );
+      }}
+    </BaseField.Validity>
   );
 }
 

@@ -88,7 +88,7 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
     await anonymous.close();
     await page.goto("/post");
     await expect(page).toHaveURL(/\/me\/setup$/);
-    await page.getByRole("textbox", { name: "ハンドルネーム" }).fill("運営の個人利用テスト");
+    await page.getByRole("textbox", { name: "ニックネーム" }).fill("運営の個人利用テスト");
     await page.getByRole("radio", { name: "その他" }).check();
     await page.getByRole("button", { name: "設定してマイページへ" }).click();
     await expect(page).toHaveURL(/\/me$/);

@@ -6,3 +6,5 @@ export const updateProfileAction = fn<Actions["updateProfileAction"]>(async () =
   status: "done",
   message: "Storybook 上でプロフィールを保存しました。",
 }));
+
+export const profileHandleCheckAction = fn<Actions["profileHandleCheckAction"]>(async () => null);

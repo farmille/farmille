@@ -12,3 +12,7 @@ export const registrationEmailAction = fn<Actions["registrationEmailAction"]>(as
   message:
     "farmer@example.testに認証メールを送信しました。メール内のリンクから登録情報を入力してください。",
 }));
+
+export const registrationHandleCheckAction = fn<Actions["registrationHandleCheckAction"]>(
+  async () => null,
+);

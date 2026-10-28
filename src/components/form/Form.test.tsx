@@ -1,5 +1,6 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
 import { useActionState, useState, type ReactNode } from "react";
 import * as v from "valibot";
 
@@ -16,6 +17,7 @@ import { usePersistedInput } from "./persisted-input";
 import { RadioGroup } from "./RadioGroup";
 import { Select } from "./Select";
 import { Textarea } from "./Textarea";
+import type { FieldErrors } from "./types";
 
 type Submitted = { terms: string | null; standpoint: string | null };
 
@@ -183,30 +185,85 @@ test("値を返さないフォームでは、送信後の reset でチェック�
   );
 });
 
+type CheckedState = { status: "idle" } | { status: "error"; fieldErrors: Record<string, string> };
+
+function ServerCheckedForm() {
+  const [state, formAction] = useActionState(
+    async (_previous: CheckedState): Promise<CheckedState> => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      return {
+        status: "error",
+        fieldErrors: {
+          phone: "電話番号を正しく入力してください。",
+          postalCode: "郵便番号を7桁で入力してください。",
+        },
+      };
+    },
+    { status: "idle" },
+  );
+  return (
+    <Form
+      action={formAction}
+      errors={state.status === "error" ? state.fieldErrors : {}}
+      persist={false}
+    >
+      <Input label="ニックネーム" name="handle" />
+      <RadioGroup label="立場" name="standpoint" options={STANDPOINTS} />
+      <Input label="電話番号" name="phone" />
+      <Input label="郵便番号" name="postalCode" />
+      <Field name="terms">
+        <Checkbox>利用規約に同意する</Checkbox>
+      </Field>
+      <button type="submit">送信</button>
+    </Form>
+  );
+}
+
+test("サーバーが欄のエラーを返したら、最初のエラーの欄へフォーカスを移す", async () => {
+  const user = userEvent.setup();
+  render(<ServerCheckedForm />);
+
+  await user.click(screen.getByRole("button", { name: "送信" }));
+
+  await waitFor(() => expect(screen.getByLabelText("電話番号")).toHaveFocus());
+  expect(screen.getByLabelText("電話番号")).toHaveAccessibleDescription(
+    "電話番号を正しく入力してください。",
+  );
+});
+
 const SIZES = [
   { value: "small", label: "小" },
   { value: "large", label: "大" },
 ] as const;
 
-function DraftForm({ onSubmit }: { onSubmit?: (formData: FormData) => void }) {
+/** path はルーターが示す今の画面。省くと location と同じ画面にいるものとする */
+function DraftForm({
+  onSubmit,
+  path = window.location.pathname,
+}: {
+  onSubmit?: (formData: FormData) => void;
+  path?: string;
+}) {
   return (
-    <Form
-      onSubmit={(event) => {
-        event.preventDefault();
-        onSubmit?.(new FormData(event.currentTarget));
-      }}
-      persist="draft"
-    >
-      <Input label="題名" name="title" />
-      <Textarea defaultValue="初期の本文" label="本文" name="body" />
-      <Select defaultValue="small" label="大きさ" name="size" options={SIZES} />
-      <RadioGroup label="立場" name="standpoint" options={STANDPOINTS} />
-      <Field name="terms">
-        <Checkbox defaultChecked>利用規約に同意する</Checkbox>
-      </Field>
-      <Input label="パスワード" name="password" revealable />
-      <button type="submit">送信</button>
-    </Form>
+    <PathnameContext.Provider value={path}>
+      <Form
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit?.(new FormData(event.currentTarget));
+        }}
+        persist="draft"
+      >
+        <Input label="題名" name="title" />
+        <Textarea defaultValue="初期の本文" label="本文" name="body" />
+        <Select defaultValue="small" label="大きさ" name="size" options={SIZES} />
+        <RadioGroup label="立場" name="standpoint" options={STANDPOINTS} />
+        <Field name="terms">
+          <Checkbox defaultChecked>利用規約に同意する</Checkbox>
+        </Field>
+        <Input label="パスワード" name="password" revealable />
+        <button type="submit">送信</button>
+      </Form>
+    </PathnameContext.Provider>
   );
 }
 
@@ -244,6 +301,23 @@ test("ページを離れる前の入力が、開き直したフォームに戻�
     "false",
   );
   expect(screen.getByLabelText("パスワード")).toHaveValue("");
+});
+
+test("画面内の遷移で開いた直後の入力は、location ではなく開いた画面の控えになる", async () => {
+  const user = userEvent.setup();
+  const opened = "/materials/1/review/new";
+  const first = render(<DraftForm path={opened} />);
+  await user.type(screen.getByLabelText("題名"), "遷移直後の入力");
+  fireEvent(window, new Event("pagehide"));
+  first.unmount();
+
+  expect(storedDraft()).toBeNull();
+  expect(window.sessionStorage.getItem(`farmille:input:${opened}#draft`)).toContain(
+    "遷移直後の入力",
+  );
+
+  render(<DraftForm path={opened} />);
+  await waitFor(() => expect(screen.getByLabelText("題名")).toHaveValue("遷移直後の入力"));
 });
 
 test("入力を変えずに離れたフォームは控えを残さない", () => {
@@ -339,4 +413,95 @@ test("形の合わない控えは戻さずに捨てる", async () => {
 
   await waitFor(() => expect(storedNote()).toBeNull());
   expect(screen.getByLabelText("メモ")).toHaveValue("");
+});
+
+function profileErrors(formData: FormData): FieldErrors {
+  const handle = textOf(formData.get("handle")) ?? "";
+  const phone = textOf(formData.get("phone")) ?? "";
+  return {
+    handle: handle.trim() === "" ? "ニックネームを入力してください。" : undefined,
+    phone:
+      phone === "" || /^[0-9]{10,11}$/.test(phone)
+        ? undefined
+        : "電話番号を正しく入力してください。",
+    terms: formData.get("terms") === "on" ? undefined : "利用規約への同意が必要です。",
+  };
+}
+
+function ValidatedForm({ onSubmit }: { onSubmit: () => void }) {
+  return (
+    <Form
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
+      persist={false}
+      validate={profileErrors}
+    >
+      <Input label="ニックネーム" name="handle" requirement="required" />
+      <Input label="電話番号" name="phone" requirement="optional" />
+      <Field name="terms" requirement="required">
+        <Checkbox>利用規約に同意する</Checkbox>
+      </Field>
+      <button type="submit">送信</button>
+    </Form>
+  );
+}
+
+test("送る前の確かめで、全欄の誤りを1回でまとめて出し、最初の誤りの欄へ移る", async () => {
+  const user = userEvent.setup();
+  let submitted = 0;
+  render(<ValidatedForm onSubmit={() => (submitted += 1)} />);
+  await user.type(screen.getByLabelText(/^ニックネーム/), "   ");
+  await user.type(screen.getByLabelText(/^電話番号/), "abc");
+
+  await user.click(screen.getByRole("button", { name: "送信" }));
+
+  expect(screen.getByLabelText(/^ニックネーム/)).toHaveAccessibleDescription(
+    "ニックネームを入力してください。",
+  );
+  expect(screen.getByLabelText(/^電話番号/)).toHaveAccessibleDescription(
+    "電話番号を正しく入力してください。",
+  );
+  expect(screen.getByText("利用規約への同意が必要です。")).toBeInTheDocument();
+  expect(screen.getByLabelText(/^ニックネーム/)).toHaveFocus();
+  expect(submitted).toBe(0);
+});
+
+test("送信の後は入力のたびに確かめ直し、直した欄のエラーだけを消す", async () => {
+  const user = userEvent.setup();
+  render(<ValidatedForm onSubmit={() => undefined} />);
+  await user.type(screen.getByLabelText(/^電話番号/), "abc");
+  await user.click(screen.getByRole("button", { name: "送信" }));
+
+  await user.type(screen.getByLabelText(/^ニックネーム/), "農家の山田");
+
+  expect(screen.queryByText("ニックネームを入力してください。")).not.toBeInTheDocument();
+  expect(screen.getByText("電話番号を正しく入力してください。")).toBeInTheDocument();
+});
+
+test("送信のダブルクリックの2回目が別の欄に当たっても、先頭のエラー欄からフォーカスを動かさない", async () => {
+  const user = userEvent.setup();
+  render(<ValidatedForm onSubmit={() => undefined} />);
+  const submit = screen.getByRole("button", { name: "送信" });
+  const phone = screen.getByLabelText(/^電話番号/);
+  const terms = screen.getByRole("checkbox", { name: "利用規約に同意する" });
+
+  // 1回目の送信で画面が先頭のエラー欄へ動き、2回目の押し操作が動いた先の欄に当たった状態
+  await user.pointer([
+    { keys: "[MouseLeft]", target: submit },
+    { keys: "[MouseLeft]", target: phone },
+  ]);
+  expect(screen.getByLabelText(/^ニックネーム/)).toHaveFocus();
+
+  await user.pointer([
+    { keys: "[MouseLeft]", target: submit },
+    { keys: "[MouseLeft]", target: terms },
+  ]);
+  expect(screen.getByLabelText(/^ニックネーム/)).toHaveFocus();
+  expect(terms).toHaveAttribute("aria-checked", "false");
+
+  // 新しい押し操作は普段どおり届く
+  await user.click(phone);
+  expect(phone).toHaveFocus();
 });

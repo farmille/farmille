@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, type ReactNode } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 
 import { signupAction } from "@/app/signup/actions";
 import {
@@ -17,6 +17,7 @@ import {
 import { TextLink } from "@/components/TextLink";
 import { HANDLE_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
 import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
+import { generalRegistrationFieldErrors } from "@/lib/auth/registration-schema";
 import { STANDPOINTS } from "@/lib/standpoints";
 
 import { css } from "../../../styled-system/css";
@@ -40,17 +41,27 @@ const standpointGroupStyle = css({ mt: "4" });
 export function SignupForm({
   email,
   termsContent,
+  checkHandle,
   next = null,
 }: {
   email: string;
   termsContent: ReactNode;
+  /** ニックネームの欄を離れたときに、使われていないかを確かめる server action。 */
+  checkHandle: (handle: string) => Promise<string | null>;
   next?: string | null;
 }) {
   const [state, formAction] = useActionState(signupAction, initialAuthFormState);
   const values = submittedValuesOf(state);
+  // パスワードはサーバーから返さず控えにも残さないので、送信後のフォームの reset で消えないよう画面で持つ
+  const [password, setPassword] = useState("");
 
   return (
-    <Form action={formAction} errors={fieldErrorsOf(state)} persist="signup">
+    <Form
+      action={formAction}
+      errors={fieldErrorsOf(state)}
+      persist="signup"
+      validate={generalRegistrationFieldErrors}
+    >
       <FormActions layout="links">
         <TextLink
           href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
@@ -62,12 +73,8 @@ export function SignupForm({
       {next ? <input type="hidden" name="next" value={next} /> : null}
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
-      <Notice
-        className={introStyle}
-        title="投稿と実証詳細レポートの閲覧には、会員登録が必要です"
-        tone="info"
-      >
-        メールアドレスの確認ができました。残りの登録情報を入力してください。
+      <Notice className={introStyle} title="メールアドレスを確認しました" tone="info">
+        残りの登録情報を入力すると、会員登録が完了します。
       </Notice>
       <p className={css({ mb: "4.5", textStyle: "supporting", color: "text.subtle" })}>
         ニックネームで参加できます。本名や連絡先が公開されることはありません。
@@ -86,6 +93,7 @@ export function SignupForm({
       />
 
       <Input
+        check={checkHandle}
         description="本名でなくて構いません。"
         label="ニックネーム"
         name="handle"
@@ -130,13 +138,14 @@ export function SignupForm({
         visibility="private"
         autoComplete="tel"
         defaultValue={values.phone}
+        inputMode="tel"
         maxLength={20}
         placeholder="090-1234-5678"
         type="tel"
       />
 
       <RadioGroup<string>
-        description="投稿やマイページで肩書きとして表示されます。"
+        description="選んだ属性は、投稿やマイページでニックネームの横に表示されます（例：生産者）。"
         label="あなたの属性"
         name="standpoint"
         requirement="required"
@@ -155,9 +164,11 @@ export function SignupForm({
         requirement="required"
         autoComplete="new-password"
         minLength={PASSWORD_MIN_LENGTH}
+        onChange={(event) => setPassword(event.target.value)}
         placeholder="••••••••"
         revealable
         type="password"
+        value={password}
       />
 
       <Field name="terms" requirement="required">
