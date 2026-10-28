@@ -22,29 +22,39 @@ const optionalText = (max: number) =>
     v.maxLength(max, `${max}文字以内で入力してください。`),
   );
 
-export const generalRegistrationSchema = v.object({
-  handle: requiredText("ニックネーム", HANDLE_MAX_LENGTH),
+/** 公開する都道府県。 */
+export const prefectureCodeSchema = v.pipe(
+  v.string("都道府県を選択してください。"),
+  v.regex(/^(?:[1-9]|[1-3][0-9]|4[0-7])$/, "都道府県を選択してください。"),
+  v.transform(Number),
+);
+
+/** 本名・電話番号・住所。会員登録と登録情報の変更で同じ検証にする。 */
+const registeredContactEntries = {
   familyName: requiredText("姓", 80),
   givenName: requiredText("名", 80),
-  email: v.pipe(v.string(), v.trim(), v.email("メールアドレスの形式が正しくありません。")),
   phone: v.union([v.literal(""), phone], "電話番号を正しく入力してください。"),
-  standpoint: v.picklist(
-    ["farmer", "ja", "government", "other"],
-    "あなたの立場を選択してください。",
-  ),
   postalCode: v.pipe(
     v.string(),
     v.trim(),
     v.transform((value) => value.replaceAll("-", "")),
     v.regex(/^[0-9]{7}$/, "郵便番号を7桁で入力してください。"),
   ),
-  prefectureCode: v.pipe(
-    v.string("都道府県を選択してください。"),
-    v.regex(/^(?:[1-9]|[1-3][0-9]|4[0-7])$/, "都道府県を選択してください。"),
-    v.transform(Number),
-  ),
+  prefectureCode: prefectureCodeSchema,
   cityStreet: requiredText("市区町村・番地", 300),
   buildingName: optionalText(200),
+};
+
+export const registeredContactSchema = v.object(registeredContactEntries);
+
+export const generalRegistrationSchema = v.object({
+  handle: requiredText("ニックネーム", HANDLE_MAX_LENGTH),
+  email: v.pipe(v.string(), v.trim(), v.email("メールアドレスの形式が正しくありません。")),
+  standpoint: v.picklist(
+    ["farmer", "ja", "government", "other"],
+    "あなたの立場を選択してください。",
+  ),
+  ...registeredContactEntries,
   password: v.pipe(
     v.string(),
     v.minLength(

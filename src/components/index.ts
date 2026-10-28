@@ -67,3 +67,6 @@ export { TextLink } from "./TextLink";
 
 export { Icon } from "./Icon";
 export type { IconName, IconProps } from "./Icon";
+
+export { LinkList } from "./LinkList";
+export type { LinkListItem } from "./LinkList";

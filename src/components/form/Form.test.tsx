@@ -16,6 +16,7 @@ import { usePersistedInput } from "./persisted-input";
 import { RadioGroup } from "./RadioGroup";
 import { Select } from "./Select";
 import { Textarea } from "./Textarea";
+import type { FieldErrors } from "./types";
 
 type Submitted = { terms: string | null; standpoint: string | null };
 
@@ -363,4 +364,87 @@ test("形の合わない控えは戻さずに捨てる", async () => {
 
   await waitFor(() => expect(storedNote()).toBeNull());
   expect(screen.getByLabelText("メモ")).toHaveValue("");
+});
+
+const scrolled: Element[] = [];
+
+beforeEach(() => {
+  scrolled.length = 0;
+  Element.prototype.scrollIntoView = vi.fn(function scrollIntoView(this: Element) {
+    scrolled.push(this);
+  });
+});
+
+function SignupLikeForm({ serverErrors }: { serverErrors: FieldErrors }) {
+  const [errors, formAction] = useActionState(
+    (_previous: FieldErrors | undefined): FieldErrors => serverErrors,
+    undefined,
+  );
+  return (
+    <Form action={formAction} errors={errors} persist={false} revealFirstError>
+      <Input label="ニックネーム" name="handle" defaultValue="しおさい農園" />
+      <Input label="市区町村・番地" name="cityStreet" defaultValue="水戸市" />
+      <Input label="建物名" name="buildingName" requirement="optional" />
+      <button type="submit">登録する</button>
+    </Form>
+  );
+}
+
+test("サーバーから項目エラーが返ると、画面の上から見て最初のエラーの欄へ移動してフォーカスする", async () => {
+  const user = userEvent.setup();
+  render(
+    <SignupLikeForm
+      serverErrors={{
+        cityStreet: "市区町村・番地を入力してください。",
+        handle: "このニックネームはすでに使われています。",
+      }}
+    />,
+  );
+
+  await user.click(screen.getByRole("button", { name: "登録する" }));
+
+  const handle = screen.getByLabelText("ニックネーム");
+  await waitFor(() => expect(handle).toHaveFocus());
+  expect(scrolled).toContain(handle);
+  expect(screen.getByText("このニックネームはすでに使われています。")).toBeVisible();
+});
+
+test("入力チェックで送信が止まると、最初の未入力の欄へ移動してフォーカスする", async () => {
+  const user = userEvent.setup();
+  const submitted = vi.fn();
+  render(
+    <Form action={submitted} persist={false} revealFirstError>
+      <Input
+        label="メールアドレス"
+        name="email"
+        requirement="required"
+        defaultValue="a@example.com"
+      />
+      <Input label="ニックネーム" name="handle" requirement="required" />
+      <Input label="市区町村・番地" name="cityStreet" requirement="required" />
+      <button type="submit">登録する</button>
+    </Form>,
+  );
+
+  await user.click(screen.getByRole("button", { name: "登録する" }));
+
+  const handle = screen.getByLabelText("ニックネーム");
+  await waitFor(() => expect(scrolled).toContain(handle));
+  expect(handle).toHaveFocus();
+  expect(submitted).not.toHaveBeenCalled();
+});
+
+test("revealFirstError を付けないフォームは画面を動かさない", async () => {
+  const user = userEvent.setup();
+  render(
+    <Form action={vi.fn()} persist={false}>
+      <Input label="ニックネーム" name="handle" requirement="required" />
+      <button type="submit">登録する</button>
+    </Form>,
+  );
+
+  await user.click(screen.getByRole("button", { name: "登録する" }));
+
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  expect(scrolled).toEqual([]);
 });

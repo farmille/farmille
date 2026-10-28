@@ -41,7 +41,7 @@ export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
         requirement="required"
         autoComplete="new-password"
         minLength={PASSWORD_MIN_LENGTH}
-        placeholder="••••••••"
+        placeholder={`${PASSWORD_MIN_LENGTH}文字以上`}
         type="password"
       />
 
@@ -51,7 +51,7 @@ export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
         requirement="required"
         autoComplete="new-password"
         minLength={PASSWORD_MIN_LENGTH}
-        placeholder="••••••••"
+        placeholder={`${PASSWORD_MIN_LENGTH}文字以上`}
         type="password"
       />
 

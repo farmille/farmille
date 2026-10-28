@@ -49,23 +49,8 @@ test("@smoke 一般登録、ログイン、ログアウトとハンドル重複�
     await expect(page.getByRole("combobox", { name: /^都道府県/ })).toHaveCount(0);
     await expect(page.getByRole("combobox", { name: "栽培作目" })).toBeVisible();
     await page.goto("/me");
-    const sellerApplyLink = page.getByRole("link", {
-      name: "企業会員登録を申請",
-    });
-    await expect(sellerApplyLink).toHaveAttribute("href", "/sellers?from=me");
-    await sellerApplyLink.click();
-    await expect(page).toHaveURL(/\/sellers\?from=me$/);
-    await expect(
-      page.getByRole("heading", { name: "Farmille 企業様向け利用ガイド" }),
-    ).toBeVisible();
-    const landingApplyLink = page.getByRole("link", { name: "申請フォームへ進む" });
-    await expect(landingApplyLink).toHaveAttribute("href", "/sellers/apply?from=me");
-    await landingApplyLink.click();
-    await expect(page).toHaveURL(/\/sellers\/apply\?from=me$/);
-    const backLink = page.getByRole("link", { name: "戻る" });
-    await expect(backLink).toHaveAttribute("href", "/me");
-    await backLink.click();
-    await expect(page).toHaveURL(/\/me$/);
+    // 企業会員登録の申請へは、問い合わせのあとに運営が送るURLから進むため、マイページに入口を置かない
+    await expect(page.getByRole("link", { name: "企業会員登録を申請" })).toHaveCount(0);
     await page.getByRole("button", { name: "ログアウト" }).click();
     await expect(page).toHaveURL("/");
     await captureAccountScreen(page, "08-home.png");

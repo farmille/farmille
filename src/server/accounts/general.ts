@@ -5,6 +5,7 @@ import * as v from "valibot";
 import { clientEnv } from "@/env";
 import { generalRegistrationSchema } from "@/lib/auth/registration-schema";
 import { ONBOARDING_PENDING } from "@/lib/onboarding";
+import { validateFields, type FieldsValidation, type FormFieldValues } from "@/lib/validation";
 import { toErrorCode } from "@/server/accounts/auth-errors";
 import { fail, succeed, type Result } from "@/server/result";
 import { createAdminSupabase, createIsolatedAuthClient } from "@/server/supabase";
@@ -13,25 +14,14 @@ import type { Database } from "@/types/database.types";
 import { readRegistrationProof, clearRegistrationProof } from "./registration-proof";
 
 export type GeneralSignupInput = v.InferOutput<typeof generalRegistrationSchema>;
-export type GeneralSignupFieldErrors = Partial<Record<keyof GeneralSignupInput, string>>;
-export type GeneralSignupValidation =
-  | { ok: true; input: GeneralSignupInput }
-  | { ok: false; fieldErrors: GeneralSignupFieldErrors };
+export type GeneralSignupValidation = FieldsValidation<typeof generalRegistrationSchema.entries>;
 export type GeneralSignupResult = { userId: string; signedIn: boolean };
 
 /** フォーム境界で必須項目・形式・同意をまとめて検証する。 */
-type GeneralSignupFormValues = { [Key in keyof GeneralSignupInput]: FormDataEntryValue | null };
-export function validateGeneralSignup(raw: GeneralSignupFormValues): GeneralSignupValidation {
-  const result = v.safeParse(generalRegistrationSchema, raw);
-  if (result.success) return { ok: true, input: result.output };
-  const fieldErrors: GeneralSignupFieldErrors = {};
-  const nested = v.flatten(result.issues).nested;
-  for (const key of Object.keys(generalRegistrationSchema.entries)) {
-    const parsedKey = v.parse(v.keyof(generalRegistrationSchema), key);
-    const message = nested?.[parsedKey]?.[0];
-    if (message !== undefined) fieldErrors[parsedKey] = message;
-  }
-  return { ok: false, fieldErrors };
+export function validateGeneralSignup(
+  raw: FormFieldValues<typeof generalRegistrationSchema.entries>,
+): GeneralSignupValidation {
+  return validateFields(generalRegistrationSchema, raw);
 }
 
 async function isHandleTaken(

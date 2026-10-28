@@ -53,7 +53,8 @@ export function PostTimeline({
                 own={isOwnProfile}
               />
             }
-            reportReturnPath={isOwnProfile ? undefined : authorHref}
+            canManage={isOwnProfile}
+            reportReturnPath={authorHref}
           />
         ) : (
           <UsageReportCard

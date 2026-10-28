@@ -4,10 +4,8 @@ import type { ReactNode } from "react";
 import { Avatar } from "@/components/Avatar";
 import { badgeRecipe } from "@/components/Badge";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
-import { ReportDialog } from "@/components/ReportDialog";
+import { ReviewViewerActions } from "@/components/ReviewViewerActions";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
-import { createReportAction } from "@/server/actions/reports";
-import { REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 
 import { css } from "../../styled-system/css";
 
@@ -108,13 +106,17 @@ type ProfileReviewCardProps = {
   };
   author: { handle: string; avatarUrl?: string | null; href?: string; label?: string };
   actions: ReactNode;
-  reportReturnPath?: string;
+  /** 閲覧者が投稿者本人のとき true。本人には編集・削除、それ以外には通報を出す。 */
+  canManage: boolean;
+  /** 通報の後に戻る画面のパス。 */
+  reportReturnPath: string;
 };
 
 export function ProfileReviewCard({
   review,
   author,
   actions,
+  canManage,
   reportReturnPath,
 }: ProfileReviewCardProps) {
   const head = (
@@ -161,13 +163,12 @@ export function ProfileReviewCard({
       ) : null}
       <div className={foot}>
         <div className={css({ flex: "1", minW: "0" })}>{actions}</div>
-        {reportReturnPath === undefined ? null : (
-          <ReportDialog
-            action={createReportAction.bind(null, "review", review.id, reportReturnPath)}
-            reasonOptions={REPORT_REASON_OPTIONS}
-            title="この感想口コミを通報する"
-          />
-        )}
+        <ReviewViewerActions
+          reviewId={review.id}
+          materialId={review.materialId}
+          canManage={canManage}
+          reportReturnPath={reportReturnPath}
+        />
       </div>
     </article>
   );

@@ -49,6 +49,12 @@ export const PREFECTURES = [
   { code: 47, name: "沖縄県" },
 ] as const satisfies readonly { code: number; name: string }[];
 
+/** 都道府県を選ぶ欄の選択肢。値は都道府県コードの文字列。 */
+export const PREFECTURE_OPTIONS = PREFECTURES.map((item) => ({
+  value: String(item.code),
+  label: item.name,
+}));
+
 export function isPrefectureCode(value: number): boolean {
   return Number.isInteger(value) && value >= 1 && value <= PREFECTURES.length;
 }

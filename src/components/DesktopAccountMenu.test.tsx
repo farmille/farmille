@@ -61,4 +61,14 @@ describe("DesktopAccountMenu", () => {
     expect(screen.getByRole("menuitem", { name: "ログアウト" })).toBeDefined();
     expect(screen.queryByRole("menuitem", { name: "ログイン" })).toBeNull();
   });
+
+  it("会員の項目はマイページ・設定・ログアウトの順で、企業会員登録の申請へのリンクを置かない", () => {
+    render(<DesktopAccountMenu myPageCurrent={false} member={{ avatar: <i /> }} />);
+    fireEvent.click(screen.getByRole("button", { name: "アカウント" }));
+    expect(screen.getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
+      "マイページ",
+      "設定",
+      "ログアウト",
+    ]);
+  });
 });

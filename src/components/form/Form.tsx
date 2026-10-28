@@ -22,6 +22,7 @@ import {
   writePersisted,
   type RestoredFields,
 } from "./persisted-input";
+import { revealFirstError } from "./reveal-first-error";
 import type { FieldErrors } from "./types";
 
 type BaseErrors = NonNullable<BaseForm.Props["errors"]>;
@@ -41,9 +42,18 @@ type FormProps = {
   className?: string;
   children: ReactNode;
   onSubmit?: FormEventHandler<HTMLFormElement>;
+  /** 送信の結果エラーがあったら、画面の上から見て最初のエラーの欄へ移動してフォーカスする。 */
+  revealFirstError?: boolean;
 };
 
-export function Form({ persist, onRestore, errors, children, ...rest }: FormProps) {
+export function Form({
+  persist,
+  onRestore,
+  errors,
+  revealFirstError: reveals = false,
+  children,
+  ...rest
+}: FormProps) {
   // Base UI は errors の参照が変わるたびに取り込み直すので、描画ごとに作り直さない
   const baseErrors = useMemo(
     () => (errors === undefined ? undefined : presentErrors(errors)),
@@ -74,6 +84,33 @@ export function Form({ persist, onRestore, errors, children, ...rest }: FormProp
   useEffect(() => {
     if (saved !== null) restoreOutside(saved);
   }, [saved]);
+
+  // 入力チェックで送信が止まったとき。Base UI がエラーの印を付けた後の描画で移動する
+  useEffect(() => {
+    const form = formRef.current;
+    if (!reveals || form === null) return;
+    let frame = 0;
+    const revealWhenBlocked = (event: SubmitEvent) => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        if (event.defaultPrevented) revealFirstError(form);
+      });
+    };
+    form.addEventListener("submit", revealWhenBlocked);
+    return () => {
+      cancelAnimationFrame(frame);
+      form.removeEventListener("submit", revealWhenBlocked);
+    };
+  }, [reveals]);
+
+  // サーバーから項目エラーが返ったとき。送信後の reset と再描画を待ってから移動する
+  useEffect(() => {
+    const form = formRef.current;
+    if (!reveals || form === null || baseErrors === undefined) return;
+    if (Object.keys(baseErrors).length === 0) return;
+    const frame = requestAnimationFrame(() => revealFirstError(form));
+    return () => cancelAnimationFrame(frame);
+  }, [reveals, baseErrors]);
 
   useEffect(() => {
     const form = formRef.current;

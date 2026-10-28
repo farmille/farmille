@@ -15,22 +15,14 @@ export function AccountActions({ admin = false }: { admin?: boolean }) {
           運営管理へ
         </Link>
       ) : null}
-      <Link className={action} href="/account/passkeys">
-        パスキーを管理
-      </Link>
-      <Link className={action} href="/account/password">
-        パスワードを変更
+      <Link className={action} href="/account">
+        設定
       </Link>
       <form action="/logout" method="post">
         <button type="submit" className={action}>
           ログアウト
         </button>
       </form>
-      {!admin ? (
-        <Link className={action} href="/sellers?from=me">
-          企業会員登録を申請
-        </Link>
-      ) : null}
     </div>
   );
 }
