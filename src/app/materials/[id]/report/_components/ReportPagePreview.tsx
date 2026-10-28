@@ -8,6 +8,7 @@ import { ReportPlotList } from "@/components/ReportPlotList";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import {
+  REPORT_COMPARISON_HEADING,
   reportSectionHeading,
   reportVarietyNames,
   type UsageReportInput,
@@ -248,7 +249,7 @@ export function ReportPagePreview({
         <ReportPdfReadingMark fields={conditionMarks} />
         {legacy("conditions")}
 
-        <h2 className={h2}>比較・使用結果</h2>
+        <h2 className={h2}>{REPORT_COMPARISON_HEADING}</h2>
         <h3 className={h3}>{reportSectionHeading(input, "plots")}</h3>
         <ReportPlotList
           layout={layout}

@@ -11,6 +11,8 @@ export const REPORT_SECTIONS = [
   { value: "measurements", title: "使用結果の詳細" },
   { value: "documents", title: "関連資料" },
 ] as const;
+/** 記事で「比較した区」と「使用結果の詳細」をまとめる親の見出し。 */
+export const REPORT_COMPARISON_HEADING = "比較・使用結果";
 const section = v.picklist(REPORT_SECTIONS.map(({ value }) => value));
 export type ReportSection = (typeof REPORT_SECTIONS)[number]["value"];
 /** 記事の節の見出し。保存済みの見出しがあればそれを、無ければ決まった見出しを使う。 */

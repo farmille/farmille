@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import { itemsFromInput } from "@/app/materials/[id]/report/_components/report-page-state";
+import { ReportPagePreview } from "@/app/materials/[id]/report/_components/ReportPagePreview";
 import { createBlankUsageReport } from "@/lib/usage-report";
 
 import { StructuredReportArticle } from "./StructuredReportArticle";
@@ -28,8 +30,14 @@ function sampleReport() {
   return input;
 }
 
+function headingOutline() {
+  return screen
+    .getAllByRole("heading")
+    .map((heading) => `${heading.tagName.toLowerCase()} ${heading.textContent}`);
+}
+
 describe("実証詳細レポート（新形式）の記事", () => {
-  it("見本の節の順に見出しを並べ、比較した区とグラフを出す", () => {
+  it("見本の節の順に見出しを並べ、比較した区と調査項目を「比較・使用結果」の下に置き、グラフを出す", () => {
     render(
       <StructuredReportArticle
         materialName="ハイパーバイオ"
@@ -42,6 +50,9 @@ describe("実証詳細レポート（新形式）の記事", () => {
       "結果・感想",
       "期待した効果",
       "栽培条件・施用時期",
+      "比較・使用結果",
+    ]);
+    expect(screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent)).toEqual([
       "比較した区",
       "使用結果の詳細：可販果率",
     ]);
@@ -93,7 +104,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
     );
     expect(
       screen
-        .getAllByRole("heading", { level: 2 })
+        .getAllByRole("heading", { level: 3 })
         .map((h) => h.textContent)
         .filter((text) => text?.startsWith("使用結果の詳細")),
     ).toEqual(["使用結果の詳細：果実の断面", "使用結果の詳細：可販果率", "使用結果の詳細：食味"]);
@@ -123,7 +134,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
     );
     expect(
       screen
-        .getAllByRole("heading", { level: 2 })
+        .getAllByRole("heading", { level: 3 })
         .filter((h) => h.textContent?.includes("可販果率")),
     ).toHaveLength(1);
     expect(screen.getByText("1回目の調査。")).toBeInTheDocument();
@@ -160,5 +171,35 @@ describe("実証詳細レポート（新形式）の記事", () => {
       />,
     );
     expect(screen.getByText(/地域：茨城県水戸市/)).toBeInTheDocument();
+  });
+  it("本文の見出しを、プレビューと同じ階層で並べる", () => {
+    const input = sampleReport();
+    const { unmount } = render(
+      <StructuredReportArticle
+        materialName="ハイパーバイオ"
+        input={input}
+        cropLabel="ミニトマト"
+        documentUrls={[]}
+      />,
+    );
+    const article = headingOutline();
+    unmount();
+    render(
+      <ReportPagePreview
+        open
+        onOpenChange={vi.fn()}
+        input={input}
+        items={itemsFromInput(input)}
+        title="ハイパーバイオ 実証詳細レポート｜ミニトマト"
+        materialName="ハイパーバイオ"
+        manufacturerName="ファーム技研"
+        cropName="ミニトマト"
+        authorName="しおさい農園"
+        documentUrls={[]}
+        missing={[]}
+      />,
+    );
+    const preview = headingOutline();
+    expect(preview.slice(preview.indexOf("h2 結果・感想"))).toEqual(article);
   });
 });

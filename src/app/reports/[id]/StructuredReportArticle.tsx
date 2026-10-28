@@ -5,6 +5,7 @@ import { ReportPlotList } from "@/components/ReportPlotList";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import {
+  REPORT_COMPARISON_HEADING,
   REPORT_SECTIONS,
   reportMeasurementGroups,
   reportSectionHeading,
@@ -14,7 +15,11 @@ import {
 import { graphSections, reportPlotLayout } from "@/lib/usage-report-plots";
 
 import { css } from "../../../../styled-system/css";
-import { ReadingHeading, ReadingProse } from "../../articles/_components/Reading";
+import {
+  ReadingHeading,
+  ReadingProse,
+  ReadingSubheading,
+} from "../../articles/_components/Reading";
 import { ReportFigures, ReportItemImages } from "./ReportFigures";
 
 const documentList = css({
@@ -91,7 +96,8 @@ export function StructuredReportArticle({
           case "plots":
             return (
               <Fragment key={section}>
-                <ReadingHeading>{h}</ReadingHeading>
+                <ReadingHeading>{REPORT_COMPARISON_HEADING}</ReadingHeading>
+                <ReadingSubheading>{h}</ReadingSubheading>
                 <ReportPlotList layout={layout} commonDescription={input.commonPlotDescription} />
                 <ReportFigures media={media} />
               </Fragment>
@@ -105,9 +111,9 @@ export function StructuredReportArticle({
                     return null;
                   return (
                     <Fragment key={first.id}>
-                      <ReadingHeading>
+                      <ReadingSubheading>
                         {h}：{first.name || "調査項目未入力"}
-                      </ReadingHeading>
+                      </ReadingSubheading>
                       {group.map((measurement) => {
                         const graphs = measurement.graphs
                           .map((graph) => ({
