@@ -41,6 +41,7 @@ function isDevelopmentOnly(file: string): boolean {
     file.startsWith(".github/") ||
     [
       "tools/ci/browser-checks.ts",
+      "tools/ci/check-migration-order.sh",
       "tools/ci/selection.ts",
       "tools/dev/pre-push.sh",
       "tools/dev/setup-hooks.sh",

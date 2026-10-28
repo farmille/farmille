@@ -21,6 +21,7 @@
 
 - 破壊的なALTERより、新テーブルへのデータ移行を経て旧テーブルを削除する方法を選ぶ。スキーマ変更を伴うタスクは単独のPRに分ける。
 - 適用済みmigrationは維持し、修正は`supabase/migrations/`へ新規ファイルで追加する。`supabase/config.toml`も併せてコミットする。
+- migrationの版（ファイル名の先頭14桁）は、mainにある最新の版より後にする。本番の`supabase db push`は、適用済みの最新より古い未適用の版があると止まる。PRの間にmainへ新しいmigrationが入ったら、mainを取り込み、PRで足したmigrationの版を付け直す。dev・本番に当たる前なので、ファイル名を変えてよい。PRで作り直した関数・ビューをmain側のmigrationも作り直していたら、後から当たる側が先の変更を消すので、mainの定義に重ねて作り直す。
 - devへのmigration適用、マスタデータのseed変更、カラムの追加・削除・型変更の直後に`pnpm gen:types`を実行する。migrationを含むPRには`src/types/database.types.ts`の生成差分を含める。型チェックの成功だけではDB実体との一致を確認できない。
 - ローカルDBの起動・適用・E2Eによる再作成と停止の条件は、[ローカル検証手順](docs/ops/local-verification.md)に従う。dev・本番への適用経路は[CIとpush前の検査](docs/ops/ci.md)を参照する。
 

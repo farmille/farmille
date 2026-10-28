@@ -1,0 +1,42 @@
+name: Migration order
+
+# PR の migration の版が main の最新より後かを確かめる。
+# PR が検査を書き換えても素通りしないよう、検査は main の checkout から動かし、PR の checkout はファイル名を読むだけにする。
+# main に migration が入ると migration-recheck.yml がこのジョブを再実行する。再実行でも main の最新を取り直して比べる。
+on:
+  pull_request_target:
+    # edited は、積んだ PR の base が main に変わったときにも検査するため。
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - "main"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: farmille-migration-order-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  order:
+    name: Migration order
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: trusted
+          persist-credentials: false
+
+      - name: Check out pull request
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: source
+          persist-credentials: false
+
+      - name: Check migration order
+        run: bash trusted/tools/ci/check-migration-order.sh trusted source
