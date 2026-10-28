@@ -52,11 +52,17 @@ const valueRecipe = cva({
   },
 });
 
-const inputRowStyle = css({ display: "flex", gap: "2", alignItems: "center" });
+// 星の押せる範囲どうしを隙間なく並べ、1つ目の星の見た目の左端を見出しにそろえる
+const inputRowStyle = css({ display: "flex", alignItems: "center", ml: "-1.5" });
 
 const inputStarRecipe = cva({
   base: {
     display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    // 指で押せるよう、押せる範囲を 44px 四方取る
+    w: "11",
+    h: "11",
     lineHeight: "none",
     borderRadius: "mark",
     cursor: "pointer",

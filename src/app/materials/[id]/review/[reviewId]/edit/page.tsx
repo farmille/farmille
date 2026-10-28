@@ -1,8 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 
 import { FormPageShell } from "@/components";
+import { getViewerAccount } from "@/components/SiteAppBar";
+import { pesticideRegistrationOf } from "@/lib/material-page-editor";
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
+import { getPublishedMaterialPage } from "@/server/material-page-editor";
+import { REVIEW_BODY_MAX_LENGTH } from "@/server/mutations/reviews";
 import { getReviewForEdit, listReviewCropOptions } from "@/server/queries/reviews";
 
 import { loadMaterialOrNotFound } from "../../../material-page-data";
@@ -28,9 +32,11 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
   }
 
   const material = await loadMaterialOrNotFound(id);
-  const [reviewResult, cropsResult] = await Promise.all([
+  const [reviewResult, cropsResult, account, publishedPage] = await Promise.all([
     getReviewForEdit(id, reviewId, session.data.userId),
     listReviewCropOptions(),
+    getViewerAccount(),
+    getPublishedMaterialPage(id),
   ]);
 
   if (!reviewResult.ok) {
@@ -48,6 +54,7 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
     <FormPageShell
       chrome="public"
       active="search"
+      account={account}
       title={`${material.name}の感想口コミ編集`}
       backHref={materialPath}
     >
@@ -60,6 +67,11 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
         }}
         userId={session.data.userId}
         crops={cropsResult.data}
+        targetCropIds={material.targetCrops.map((crop) => crop.id)}
+        pesticideRegistration={pesticideRegistrationOf(
+          publishedPage === null ? null : publishedPage.content.registrations,
+        )}
+        bodyMaxLength={REVIEW_BODY_MAX_LENGTH}
         reviewId={review.id}
         existingReviewNotice={requestedSearchParams.existing === "1"}
         initialValues={{

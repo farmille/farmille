@@ -110,6 +110,25 @@ describe("validateReviewFormData", () => {
     }
   });
 
+  it("本文は2000文字まで受け付け、超えたら欄のエラーを返す", () => {
+    const accepted = validFormData();
+    accepted.set("body", "あ".repeat(2000));
+    expect(validateReviewFormData(accepted)).toMatchObject({ ok: true });
+
+    const rejected = validFormData();
+    rejected.set("body", "あ".repeat(2001));
+    expect(validateReviewFormData(rejected)).toEqual({
+      ok: false,
+      fieldErrors: { body: "感想口コミ本文は2000文字以内で入力してください。" },
+    });
+  });
+
+  it("送信時に CRLF になった改行は1文字と数える", () => {
+    const formData = validFormData();
+    formData.set("body", `${"あ".repeat(999)}\r\n${"い".repeat(1000)}`);
+    expect(validateReviewFormData(formData)).toMatchObject({ ok: true });
+  });
+
   it("複数作目の送信を拒否する", () => {
     const formData = validFormData();
     formData.append("cropIds", secondCropId);

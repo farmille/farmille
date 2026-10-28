@@ -43,7 +43,8 @@ const fillStyle = css({
   bg: "accent.star",
   borderRadius: "pill",
 });
-const percentStyle = css({ w: "6.5", textAlign: "right" });
+// 「100%」まで1行に収まる幅を取り、数字と「%」の間で折り返さない
+const percentStyle = css({ w: "9", flexShrink: "0", textAlign: "right", whiteSpace: "nowrap" });
 
 type RatingSummaryProps = {
   average: number | null;

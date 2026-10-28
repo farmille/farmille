@@ -1,11 +1,11 @@
 import { css, cva } from "../../../../styled-system/css";
 
-export const guidePageStyle = css({ "& [id]": { scrollMarginTop: "32" } });
+export const guidePageStyle = css({ "& [id]": { scrollMarginTop: "12" } });
 
 export const guideNarrowPageStyle = css({
   maxW: "content.reading",
   mx: "auto",
-  "& [id]": { scrollMarginTop: "32" },
+  "& [id]": { scrollMarginTop: "12" },
 });
 
 export const guideTitleStyle = css({ fontSize: "2xl", lineHeight: "snug" });

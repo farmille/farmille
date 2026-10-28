@@ -16,18 +16,24 @@ export function BookmarkButton({ saved, action }: BookmarkButtonProps) {
   const [pending, startTransition] = useTransition();
   return (
     <Toggle
-      aria-label={isSaved ? "保存を解除" : "投稿を保存"}
       pressed={isSaved}
       disabled={pending || action === undefined}
       className={css({
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        p: "1.5",
+        gap: "0.5",
+        flexShrink: "0",
+        // 指で押せるよう、押せる範囲を 44px 四方以上取る
+        minW: "11",
+        h: "11",
+        px: "1",
         borderRadius: "button",
         border: "none",
         bg: "transparent",
         color: "text.brand",
+        fontSize: "md",
+        whiteSpace: "nowrap",
         cursor: "pointer",
         _disabled: { cursor: "default", opacity: "[0.5]" },
       })}
@@ -39,6 +45,7 @@ export function BookmarkButton({ saved, action }: BookmarkButtonProps) {
       }}
     >
       <Icon name={isSaved ? "bookmark_filled" : "bookmark"} size="sm" />
+      {isSaved ? "保存済み" : "保存"}
     </Toggle>
   );
 }

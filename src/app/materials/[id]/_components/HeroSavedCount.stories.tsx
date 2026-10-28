@@ -16,7 +16,3 @@ export const Plain: Story = {};
 export const ReportsHighlighted: Story = {
   args: { tone: "highlight", children: "3件" },
 };
-
-export const ReportsZero: Story = {
-  args: { tone: "zero", children: "0件" },
-};

@@ -1,8 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 
 import { FormPageShell } from "@/components";
+import { getViewerAccount } from "@/components/SiteAppBar";
+import { pesticideRegistrationOf } from "@/lib/material-page-editor";
 import { requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
+import { getPublishedMaterialPage } from "@/server/material-page-editor";
+import { REVIEW_BODY_MAX_LENGTH } from "@/server/mutations/reviews";
 import { findOwnReviewIdByMaterial, listReviewCropOptions } from "@/server/queries/reviews";
 
 import { loadMaterialOrNotFound } from "../../material-page-data";
@@ -27,9 +31,11 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
 
   const material = await loadMaterialOrNotFound(id);
   if (material.publication_status !== "published") notFound();
-  const [cropsResult, existingResult] = await Promise.all([
+  const [cropsResult, existingResult, account, publishedPage] = await Promise.all([
     listReviewCropOptions(),
     findOwnReviewIdByMaterial(id, session.data.userId),
+    getViewerAccount(),
+    getPublishedMaterialPage(id),
   ]);
 
   if (!cropsResult.ok) {
@@ -46,6 +52,7 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
     <FormPageShell
       chrome="public"
       active="search"
+      account={account}
       title={`${material.name}の感想口コミ`}
       backHref={materialPath}
     >
@@ -58,6 +65,11 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
         }}
         userId={session.data.userId}
         crops={cropsResult.data}
+        targetCropIds={material.targetCrops.map((crop) => crop.id)}
+        pesticideRegistration={pesticideRegistrationOf(
+          publishedPage === null ? null : publishedPage.content.registrations,
+        )}
+        bodyMaxLength={REVIEW_BODY_MAX_LENGTH}
         initialValues={{
           cropIds: [],
           rating: 0,

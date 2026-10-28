@@ -30,13 +30,6 @@ const groupTitleStyle = css({
   fontWeight: "bold",
   color: "text.subtle",
 });
-const emptyStyle = css({
-  pt: "1",
-  px: "0.5",
-  pb: "2",
-  textStyle: "supporting",
-  color: "text.subtle",
-});
 const kindStyle = css({
   flex: "none",
   px: "1",
@@ -222,13 +215,11 @@ export function MaterialSourceLinks({ links }: { links: MaterialPageContent["lin
       <div className={cardStyle}>
         {groups.map((group) => {
           const items = links.filter((link) => link.group === group.value);
-          const trial = isTrialGroup(group.value);
+          if (items.length === 0) return null;
           return (
             <div key={group.value ?? "unclassified"}>
               <h3 className={groupTitleStyle}>{group.label}</h3>
-              {items.length === 0 ? (
-                <div className={emptyStyle}>−</div>
-              ) : trial ? (
+              {isTrialGroup(group.value) ? (
                 <div>
                   {items.map((link, index) => (
                     <TestRow key={index} link={link} />

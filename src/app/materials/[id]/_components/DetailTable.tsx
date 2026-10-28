@@ -27,6 +27,7 @@ const cropListStyle = css({
   gridTemplateColumns: "[repeat(2, minmax(0, 1fr))]",
   columnGap: "3",
 });
+const RELATED_COMPANIES_LABEL = "関係会社（販売元、製造元、輸入元など）";
 const usageMoreStyle = css({ mt: "1.5" });
 const usageBlockStyle = css({
   mt: "1.5",
@@ -41,7 +42,6 @@ const usageBlockStyle = css({
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });
-const usageEmptyStyle = css({ mt: "1.5", fontSize: "xs", color: "text.subtle" });
 const rowStyle = css({
   px: "3.5",
   py: "2.5",
@@ -58,7 +58,7 @@ const valueStyle = css({
   overflowWrap: "anywhere",
 });
 
-type DetailRow = {
+export type DetailRow = {
   label: string;
   value: ReactNode;
 };
@@ -68,30 +68,37 @@ function methodLabel(method: string): string {
 }
 
 function joinedNames(names: readonly string[]): ReactNode {
-  const unique = [...new Set(names)];
-  if (unique.length === 0) return "−";
-  return <span className={joinedNamesStyle}>{unique.join("、")}</span>;
+  return <span className={joinedNamesStyle}>{names.join("、")}</span>;
 }
 
 function nameList(names: readonly string[], className: string): ReactNode {
-  const unique = [...new Set(names)];
-  if (unique.length === 0) return "−";
   return (
     <ul className={className}>
-      {unique.map((name) => (
+      {names.map((name) => (
         <li key={name}>{name}</li>
       ))}
     </ul>
   );
 }
 
-export function MaterialDetailTable({
-  material,
-  content,
-}: {
-  material: MaterialDetail;
-  content?: MaterialPageContent;
-}) {
+function namesRow(
+  label: string,
+  names: readonly string[],
+  render: (unique: readonly string[]) => ReactNode,
+): DetailRow[] {
+  const unique = [...new Set(names)];
+  return unique.length === 0 ? [] : [{ label, value: render(unique) }];
+}
+
+function textRow(label: string, value: string | null | undefined): DetailRow[] {
+  return value ? [{ label, value }] : [];
+}
+
+/** 値のある項目だけを、公開ページの順に並べる。 */
+export function materialDetailRows(
+  material: MaterialDetail,
+  content: MaterialPageContent | undefined,
+): DetailRow[] {
   const methods = [
     ...new Set([
       ...material.applicationMethods.map((item) => item.method),
@@ -101,70 +108,88 @@ export function MaterialDetailTable({
   const usageBlocks = (content?.usages ?? []).filter(
     (usage) => usage.method !== "other" && usage.detail.trim().length > 0,
   );
+  const registrations = content?.registrations ?? [];
+  const certifications = content?.certifications ?? [];
   const rows: DetailRow[] = [
-    { label: "正式名称", value: material.official_name ?? "−" },
-    { label: "期待効果", value: joinedNames(material.effects.map(({ name }) => name)) },
-    {
-      label: "資材ジャンル",
-      value: nameList(
-        material.ingredientCategories.map(({ name }) => name),
-        nameListStyle,
-      ),
-    },
-    { label: "主な成分", value: material.main_components || "−" },
-    {
-      label: "対象作物",
-      value: nameList(
-        [...material.targetCrops, ...material.targetCropGroups].map(({ name }) => name),
-        cropListStyle,
-      ),
-    },
-    {
-      label: "施用方法",
-      value: (
-        <>
-          {joinedNames(methods.map(methodLabel))}
-          {usageBlocks.length > 0 ? (
-            <Collapsible className={usageMoreStyle}>
-              <CollapsibleTrigger variant="link">詳細を見る</CollapsibleTrigger>
-              <CollapsiblePanel hiddenUntilFound>
-                {usageBlocks.map((usage, index) => (
-                  <div key={index} className={usageBlockStyle}>
-                    {methodLabel(usage.method)}：{usage.detail}
-                  </div>
-                ))}
-              </CollapsiblePanel>
-            </Collapsible>
-          ) : (
-            <div className={usageEmptyStyle}>詳細：−</div>
-          )}
-        </>
-      ),
-    },
-    { label: "技術・作用機作", value: content?.mechanism || "−" },
-    {
-      label: "登録・認証",
-      value: (
-        <MaterialRegistrationBadges
-          registrations={content?.registrations ?? []}
-          certifications={content?.certifications ?? []}
-        />
-      ),
-    },
-    ...materialRegistrationRows(content?.registrations ?? []),
-    {
-      label: "関係会社（販売元、製造元、輸入元など）",
-      value: content ? content.relatedCompanies.join("、") || "−" : material.manufacturer_name,
-    },
+    ...textRow("正式名称", material.official_name),
+    ...namesRow(
+      "期待効果",
+      material.effects.map(({ name }) => name),
+      joinedNames,
+    ),
+    ...namesRow(
+      "資材ジャンル",
+      material.ingredientCategories.map(({ name }) => name),
+      (names) => nameList(names, nameListStyle),
+    ),
+    ...textRow("主な成分", material.main_components),
+    ...namesRow(
+      "対象作物",
+      [...material.targetCrops, ...material.targetCropGroups].map(({ name }) => name),
+      (names) => nameList(names, cropListStyle),
+    ),
+    ...(methods.length === 0
+      ? []
+      : [
+          {
+            label: "施用方法",
+            value: (
+              <>
+                {joinedNames(methods.map(methodLabel))}
+                {usageBlocks.length > 0 ? (
+                  <Collapsible className={usageMoreStyle}>
+                    <CollapsibleTrigger variant="link">詳細を見る</CollapsibleTrigger>
+                    <CollapsiblePanel hiddenUntilFound>
+                      {usageBlocks.map((usage, index) => (
+                        <div key={index} className={usageBlockStyle}>
+                          {methodLabel(usage.method)}：{usage.detail}
+                        </div>
+                      ))}
+                    </CollapsiblePanel>
+                  </Collapsible>
+                ) : null}
+              </>
+            ),
+          },
+        ]),
+    ...textRow("技術・作用機作", content?.mechanism),
+    ...(registrations.length === 0 && certifications.length === 0
+      ? []
+      : [
+          {
+            label: "登録・認証",
+            value: (
+              <MaterialRegistrationBadges
+                registrations={registrations}
+                certifications={certifications}
+              />
+            ),
+          },
+        ]),
+    ...materialRegistrationRows(registrations),
   ];
 
+  if (content !== undefined) {
+    // 原稿で会社をすべて外したときは「−」を出す（manufacturer-editor-SPEC.md）
+    return [
+      ...rows,
+      { label: RELATED_COMPANIES_LABEL, value: content.relatedCompanies.join("、") || "−" },
+    ];
+  }
+  // 原稿の無い資材の会社名は上部と同じなので、ほかに製品情報があるときだけ添える
+  return rows.length === 0
+    ? []
+    : [...rows, { label: RELATED_COMPANIES_LABEL, value: material.manufacturer_name }];
+}
+
+export function MaterialDetailTable({ rows }: { rows: readonly DetailRow[] }) {
   return (
     <MaterialBox headingId="material-detail-heading" title="製品詳細">
       <dl className={cx(surfaceCardRecipe({ padding: "flush" }), css({ m: "0" }))}>
         {rows.map((row) => (
           <div key={row.label} className={rowStyle}>
             <dt className={termStyle}>{row.label}</dt>
-            <dd className={valueStyle}>{row.value ?? "−"}</dd>
+            <dd className={valueStyle}>{row.value}</dd>
           </div>
         ))}
       </dl>

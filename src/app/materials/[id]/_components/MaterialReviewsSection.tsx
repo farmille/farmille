@@ -47,26 +47,30 @@ export function MaterialReviewsSection({
   return (
     <section aria-labelledby="reviews-heading">
       <ReviewsHeading count={total} />
-      <ScrollToHashOnMount targetId="reviews-heading" trigger={total} />
+      <ScrollToHashOnMount headingId="reviews-heading" cardIdPrefix="review-" trigger={total} />
       {rating}
       {reviews.length > 0 ? (
         <div className={listStyle}>
-          {reviews.map((review) => (
-            <MaterialReviewCard
-              key={review.id}
-              review={review}
-              currentPath={materialPath}
-              canManage={viewerUserId !== null && viewerUserId === review.author_user_id}
-              actions={
-                <PostActionsLoader
-                  target="review"
-                  id={review.id}
-                  currentPath={materialPath}
-                  helpfulCount={review.helpfulCount}
-                />
-              }
-            />
-          ))}
+          {reviews.map((review) => {
+            const own = viewerUserId !== null && viewerUserId === review.author_user_id;
+            return (
+              <MaterialReviewCard
+                key={review.id}
+                review={review}
+                currentPath={materialPath}
+                canManage={own}
+                actions={
+                  <PostActionsLoader
+                    target="review"
+                    id={review.id}
+                    currentPath={materialPath}
+                    helpfulCount={review.helpfulCount}
+                    own={own}
+                  />
+                }
+              />
+            );
+          })}
         </div>
       ) : (
         <EmptyCard

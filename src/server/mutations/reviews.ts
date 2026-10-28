@@ -38,6 +38,8 @@ export type ReviewValidation =
   | { ok: true; input: Omit<ReviewMutationInput, "materialId"> }
   | { ok: false; fieldErrors: ReviewFieldErrors };
 
+export const REVIEW_BODY_MAX_LENGTH = 2000;
+
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ReviewCropIdsSchema = v.pipe(v.array(v.pipe(v.string(), v.uuid())), v.maxLength(1));
 const REVIEW_CROP_NAME_MAX_LENGTH = 100;
@@ -98,6 +100,9 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
   }
   if (body.length === 0) {
     fieldErrors.body = "感想口コミ本文を入力してください。";
+  } else if (body.replaceAll("\r\n", "\n").length > REVIEW_BODY_MAX_LENGTH) {
+    // 送信時の改行は CRLF になるが、入力欄の maxLength は改行を1文字と数える
+    fieldErrors.body = `感想口コミ本文は${REVIEW_BODY_MAX_LENGTH}文字以内で入力してください。`;
   }
   if (!pesticideAck) {
     fieldErrors.pesticideAck = "内容を確認し、同意してください。";

@@ -11,12 +11,12 @@ import type { ReviewListItem } from "@/server/queries/reviews";
 
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 
-import { css, cx } from "../../../../../styled-system/css";
+import { css, cva } from "../../../../../styled-system/css";
 
 import { CropLine } from "@/components/CropLine";
 import { Stars } from "./CardParts";
+import { ReviewBody } from "./ReviewBody";
 
-const cardStyle = css({ scrollMarginTop: "16" });
 const headStyle = css({
   display: "flex",
   alignItems: "center",
@@ -51,12 +51,6 @@ const scoreStyle = css({
   fontVariantNumeric: "tabular-nums",
 });
 const cropsStyle = css({ mt: "1", mb: "1.5", textStyle: "note", color: "text.muted" });
-const bodyStyle = css({
-  textStyle: "body",
-  color: "text.muted",
-  whiteSpace: "pre-wrap",
-  overflowWrap: "anywhere",
-});
 const photosStyle = css({
   mt: "2.5",
   display: "flex",
@@ -76,15 +70,25 @@ const photoStyle = css({
   borderRadius: "input",
 });
 const photoImageStyle = css({ display: "block", w: "full", h: "full", objectFit: "cover" });
-const footStyle = css({
-  mt: "2.5",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  flexWrap: "wrap",
-  gap: "2.5",
+const footRecipe = cva({
+  base: { mt: "2.5", display: "flex", gap: "2.5" },
+  variants: {
+    // 自分の感想口コミは、参考になった・保存・閲覧数の行の下に、編集・削除の行を分けて置く
+    owner: {
+      true: { flexDirection: "column" },
+      // 操作行は縮めずに1行を保ち、入りきらないときは通報を次の行の右端へ回す
+      false: { alignItems: "center", justifyContent: "flex-end", flexWrap: "wrap" },
+    },
+  },
 });
-const actionsStyle = css({ flex: "1", minW: "0" });
+const actionsStyle = css({ flexGrow: "1", flexShrink: "0" });
+const ownerRowStyle = css({
+  display: "flex",
+  justifyContent: "flex-end",
+  pt: "2.5",
+  borderTopWidth: "1px",
+  borderColor: "border.default",
+});
 
 type MaterialReviewCardProps = {
   review: ReviewListItem;
@@ -107,10 +111,7 @@ export function MaterialReviewCard({
     </>
   );
   return (
-    <article
-      className={cx(surfaceCardRecipe({ padding: "cozy" }), cardStyle)}
-      id={`review-${review.id}`}
-    >
+    <article className={surfaceCardRecipe({ padding: "cozy" })} id={`review-${review.id}`}>
       <div className={headStyle}>
         {author.href === null ? (
           authorName
@@ -130,7 +131,7 @@ export function MaterialReviewCard({
           <CropLine crops={review.crops.map((crop) => crop.name)} />
         </div>
       ) : null}
-      <div className={bodyStyle}>{review.body}</div>
+      <ReviewBody>{review.body}</ReviewBody>
       {review.photos.length > 0 ? (
         <div className={photosStyle}>
           {review.photos.map((photo) => (
@@ -147,10 +148,12 @@ export function MaterialReviewCard({
           ))}
         </div>
       ) : null}
-      <div className={footStyle}>
+      <div className={footRecipe({ owner: canManage })}>
         <div className={actionsStyle}>{actions}</div>
         {canManage ? (
-          <ReviewOwnerActions reviewId={review.id} materialId={review.material_id} />
+          <div className={ownerRowStyle}>
+            <ReviewOwnerActions reviewId={review.id} materialId={review.material_id} />
+          </div>
         ) : (
           <ReportDialog
             action={createReportAction.bind(null, "review", review.id, currentPath)}

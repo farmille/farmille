@@ -40,7 +40,6 @@ const row = css({
   gridTemplateColumns: "[6.5em minmax(0, 1fr)]",
   columnGap: "2.5",
   alignItems: "center",
-  scrollMarginTop: "20",
 });
 
 const key = css({

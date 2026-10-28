@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { Combobox, useRestoredField, type Option } from "@/components/form";
+import { Combobox, type Option } from "@/components/form";
 import type { ReviewCropOption } from "@/server/queries/reviews";
 
 const SUGGESTION_LIMIT = 9;
@@ -13,47 +13,60 @@ const optionOf = (crop: ReviewCropOption): Option => ({
   description: crop.groupName,
 });
 
+/** 入力が空の間は、この資材の対象作物だけを候補に出す。ほかの作物は名前で検索して選ぶ。 */
 export function ReviewCropPicker({
   crops,
-  defaultCropIds,
+  targetCropIds,
+  value,
+  onValueChange,
 }: {
   crops: readonly ReviewCropOption[];
-  defaultCropIds: readonly string[];
+  targetCropIds: readonly string[];
+  value: readonly string[];
+  onValueChange: (cropIds: readonly string[]) => void;
 }) {
-  const restoredCropIds = useRestoredField("cropIds");
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState(() =>
-    (restoredCropIds ?? defaultCropIds).flatMap((id) =>
-      crops.filter((crop) => crop.id === id).map(optionOf),
-    ),
+  // Combobox は値の参照が変わるたびに欄のエラーを消すので、選択が変わらない限り同じ配列を渡す
+  const selected = useMemo(
+    () => value.flatMap((id) => crops.filter((crop) => crop.id === id).map(optionOf)),
+    [crops, value],
   );
+  const unselected = crops.filter((crop) => !value.includes(crop.id));
   const normalizedQuery = query.trim().toLocaleLowerCase("ja");
-  const suggestions = crops
-    .filter(
-      (crop) =>
-        !selected.some((option) => option.value === crop.id) &&
-        (normalizedQuery.length === 0 ||
-          crop.name.toLocaleLowerCase("ja").includes(normalizedQuery) ||
-          crop.groupName.toLocaleLowerCase("ja").includes(normalizedQuery) ||
-          crop.aliases.some((alias) => alias.toLocaleLowerCase("ja").includes(normalizedQuery))),
-    )
-    .slice(0, SUGGESTION_LIMIT)
-    .map(optionOf);
+  const suggestions =
+    normalizedQuery.length === 0
+      ? targetCropIds.flatMap((id) => unselected.filter((crop) => crop.id === id))
+      : unselected
+          .filter(
+            (crop) =>
+              crop.name.toLocaleLowerCase("ja").includes(normalizedQuery) ||
+              crop.groupName.toLocaleLowerCase("ja").includes(normalizedQuery) ||
+              crop.aliases.some((alias) => alias.toLocaleLowerCase("ja").includes(normalizedQuery)),
+          )
+          .slice(0, SUGGESTION_LIMIT);
 
   return (
     <Combobox
-      description="使用対象作目を1つ選んでください。"
+      description={
+        targetCropIds.length > 0
+          ? "この資材を使った作物を1つ選びます。最初は、この資材の対象作物を表示しています。ほかの作物は名前を入力すると選べます。"
+          : "この資材を使った作物を1つ選びます。作物の名前を入力すると、候補から選べます。"
+      }
       label="使用対象作目"
       name="cropIds"
       requirement="required"
-      emptyMessage="一致する作物がありません。"
+      emptyMessage={
+        normalizedQuery.length === 0
+          ? "作物の名前を入力すると、候補が出ます。"
+          : "一致する作物がありません。"
+      }
       filterMode="preFiltered"
       inputValue={query}
       multiple
       onInputValueChange={setQuery}
-      onValueChange={(next) => setSelected(next.slice(-1))}
-      options={suggestions}
-      placeholder="作物名を入力（例：みかん、デコポン）"
+      onValueChange={(next) => onValueChange(next.slice(-1).map((option) => option.value))}
+      options={suggestions.map(optionOf)}
+      placeholder="作物名を入力（例：トマト）"
       value={selected}
     />
   );

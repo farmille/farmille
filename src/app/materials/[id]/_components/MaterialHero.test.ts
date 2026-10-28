@@ -37,4 +37,20 @@ describe("MaterialHero", () => {
       "mailto:contact@farmille.com",
     );
   });
+  it("実証詳細レポートと感想口コミの件数を、それぞれの欄へ移るリンクにする", () => {
+    render(
+      createElement(MaterialHero, {
+        material: { ...materialDetail, review_count: 4 },
+        saved: null,
+        reportCount: "2件",
+      }),
+    );
+    expect(screen.getByRole("link", { name: "実証詳細レポート 2件" })).toHaveAttribute(
+      "href",
+      "#anchorReports",
+    );
+    const reviewsLink = screen.getByRole("link", { name: "感想口コミ 4件" });
+    expect(reviewsLink).toHaveAttribute("href", "#anchorReviews");
+    expect(reviewsLink.textContent).not.toContain("・");
+  });
 });

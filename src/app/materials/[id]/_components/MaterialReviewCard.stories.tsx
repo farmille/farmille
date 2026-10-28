@@ -41,3 +41,15 @@ export const WithdrawnAuthor: Story = {
 export const OwnReview: Story = {
   args: { canManage: true },
 };
+
+export const LongBody: Story = {
+  args: {
+    review: {
+      ...review,
+      body: Array.from(
+        { length: 40 },
+        () => "定植後から2週間おきに灌水と合わせて使い、葉の色と根張りを観察しました。",
+      ).join(""),
+    },
+  },
+};

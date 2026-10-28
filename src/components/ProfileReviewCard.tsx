@@ -82,10 +82,11 @@ const photo = css({
   "& img": { display: "block", w: "full", h: "full", objectFit: "cover" },
 });
 
+// 操作行は縮めずに1行を保ち、入りきらないときは通報を次の行の右端へ回す
 const foot = css({
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",
+  justifyContent: "flex-end",
   flexWrap: "wrap",
   gap: "2.5",
   mt: "3",
@@ -155,7 +156,7 @@ export function ProfileReviewCard({
         </div>
       ) : null}
       <div className={foot}>
-        <div className={css({ flex: "1", minW: "0" })}>{actions}</div>
+        <div className={css({ flexGrow: "1", flexShrink: "0" })}>{actions}</div>
         {reportReturnPath === undefined ? null : (
           <ReportDialog
             action={createReportAction.bind(null, "review", review.id, reportReturnPath)}

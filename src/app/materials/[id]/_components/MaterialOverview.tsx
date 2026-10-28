@@ -10,7 +10,6 @@ const descriptionStyle = css({
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });
-const emptyStyle = css({ textStyle: "body", color: "text.subtle" });
 const timelineScrollStyle = css({
   mt: "0.5",
   mx: "-1",
@@ -73,15 +72,11 @@ const labelRecipe = cva({
 const visuallyHiddenStyle = css({ srOnly: true });
 const noteStyle = css({ mt: "2.5", textStyle: "note", color: "text.subtle" });
 
-export function MaterialDescriptionBox({ description }: { description: string | undefined }) {
+export function MaterialDescriptionBox({ description }: { description: string }) {
   return (
     <MaterialBox headingId="material-description-heading" title="製品説明">
       <div className={surfaceCardRecipe()}>
-        {description ? (
-          <p className={descriptionStyle}>{description}</p>
-        ) : (
-          <p className={emptyStyle}>−</p>
-        )}
+        <p className={descriptionStyle}>{description}</p>
       </div>
     </MaterialBox>
   );
@@ -91,29 +86,23 @@ export function MaterialTimingBox({ timings }: { timings: readonly number[] }) {
   return (
     <MaterialBox headingId="material-timing-heading" title="施用タイミング">
       <div className={surfaceCardRecipe()}>
-        {timings.length > 0 ? (
-          <>
-            <div className={timelineScrollStyle}>
-              <ol className={timelineStyle}>
-                {APPLICATION_TIMINGS.map((stage, index) => {
-                  const on = timings.includes(index);
-                  return (
-                    <li key={stage} className={stageStyle}>
-                      <span className={dotRecipe({ on })} />
-                      <span className={labelRecipe({ on })}>
-                        {stage}
-                        {on ? <span className={visuallyHiddenStyle}>（施用時期）</span> : null}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
-            <div className={noteStyle}>作物ごとには分けず、共通の目安として表示します。</div>
-          </>
-        ) : (
-          <p className={emptyStyle}>−</p>
-        )}
+        <div className={timelineScrollStyle}>
+          <ol className={timelineStyle}>
+            {APPLICATION_TIMINGS.map((stage, index) => {
+              const on = timings.includes(index);
+              return (
+                <li key={stage} className={stageStyle}>
+                  <span className={dotRecipe({ on })} />
+                  <span className={labelRecipe({ on })}>
+                    {stage}
+                    {on ? <span className={visuallyHiddenStyle}>（施用時期）</span> : null}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+        <div className={noteStyle}>作物ごとには分けず、共通の目安として表示します。</div>
       </div>
     </MaterialBox>
   );

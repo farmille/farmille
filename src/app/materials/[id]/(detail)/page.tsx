@@ -10,7 +10,6 @@ import { getViewerAccount } from "@/components/SiteAppBar";
 import { SkeletonList } from "@/components/SkeletonList";
 import { RatingSkeleton, SkeletonRegion } from "@/components/Skeleton";
 import { canUseGeneralFeatures } from "@/lib/auth/capabilities";
-import { materialSourceLinks } from "@/lib/material-links";
 import { createProductJsonLd, serializeJsonLd } from "@/lib/seo";
 import { getSessionUser } from "@/server/auth";
 import { getPublishedMaterialPage } from "@/server/material-page-editor";
@@ -23,7 +22,6 @@ import { createServerSupabase } from "@/server/supabase";
 
 import { css } from "../../../../../styled-system/css";
 
-import { MaterialDetailTable } from "../_components/DetailTable";
 import {
   ArchivedNotice,
   MaterialNoticePointer,
@@ -32,14 +30,13 @@ import {
 } from "../_components/MaterialCompliance";
 import { HeroCount, HeroSavedCount } from "../_components/HeroSavedCount";
 import { MaterialHero } from "../_components/MaterialHero";
-import { MaterialDescriptionBox, MaterialTimingBox } from "../_components/MaterialOverview";
+import { MaterialProductInfo } from "../_components/MaterialProductInfo";
 import {
   HeroReportCount,
   MaterialReportsSection,
   ReportsHeading,
 } from "../_components/MaterialReportsSection";
 import { MaterialReviewsSection, ReviewsHeading } from "../_components/MaterialReviewsSection";
-import { MaterialSourceLinks } from "../_components/MaterialSourceLinks";
 import { RelatedHeading, RelatedMaterialsSection } from "../_components/RelatedMaterialsSection";
 import { RatingSummary } from "../_components/RatingSummary";
 import { ReviewAnalytics } from "../_components/ReviewAnalytics";
@@ -201,12 +198,7 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
       {material.publication_status === "archived" ? <ArchivedNotice /> : null}
       <MaterialNoticePointer />
 
-      <MaterialDescriptionBox description={publishedPage?.content.description} />
-      <MaterialTimingBox timings={publishedPage?.content.timings ?? []} />
-      <MaterialSourceLinks
-        links={publishedPage ? publishedPage.content.links : materialSourceLinks(material)}
-      />
-      <MaterialDetailTable material={material} content={publishedPage?.content} />
+      <MaterialProductInfo material={material} content={publishedPage?.content} />
 
       <PostsCompliance />
       <Suspense
