@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Page from "./page";
-import { preparePageSession } from "../../../../.storybook/page-session";
+import { preparePageSession } from "../../../../../.storybook/page-session";
 
 const meta = {
   title: "Pages/materials/[id]",

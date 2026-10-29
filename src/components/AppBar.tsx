@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cva, css, cx } from "../../styled-system/css";
+import { BackLink } from "@/components/BackLink";
 import { DesktopAccountMenu } from "@/components/DesktopAccountMenu";
 import { BrandMark } from "@/components/BrandMark";
 import { Icon } from "@/components/Icon";
@@ -26,9 +27,11 @@ const mobileAppBar = css({
   tab: { display: "none" },
 });
 
+/** 指で押せるよう 44px 四方を取り、負の余白で行の高さと並びは 32px 分に保つ。 */
 const iconButton = css({
-  w: "8",
-  h: "8",
+  w: "11",
+  h: "11",
+  m: "-1.5",
   display: "grid",
   placeItems: "center",
   color: "text.muted",
@@ -149,6 +152,11 @@ function siteMenuFor(account?: AppBarAccount) {
 /** ルートレイアウトのフッターは閲覧者を知らないので、ヘッダーの目印を見て投稿のリンクを隠す。 */
 function postMarker(account?: AppBarAccount) {
   return cannotPost(account) ? "false" : undefined;
+}
+
+/** 同じく、ログイン中はフッターの会員登録のリンクを隠すための目印。 */
+function signedInMarker(account?: AppBarAccount) {
+  return account?.kind === "member" ? "true" : undefined;
 }
 
 const desktopSiteMenuNav = css({ ml: "auto" });
@@ -316,7 +324,7 @@ type AppBarHomeProps = AppBarBaseProps & {
 type AppBarBackProps = AppBarBaseProps & {
   variant?: "back";
   title?: string;
-  /** 戻る先。未指定時はブラウザ履歴に依存させず "/" へ。 */
+  /** このサイトの画面から来ていないときの戻り先。未指定は "/"。 */
   backHref?: string;
   shareHref?: string;
 };
@@ -354,9 +362,9 @@ function MobileAppBar(props: AppBarProps) {
 
   const backRow = (
     <>
-      <Link href={props.backHref ?? "/"} className={iconButton} aria-label="戻る">
+      <BackLink href={props.backHref ?? "/"} className={iconButton} aria-label="戻る">
         <Icon name="chevron_left" size="md" />
-      </Link>
+      </BackLink>
       <div className={mobileTitle}>{props.title ?? ""}</div>
       {props.shareHref ? (
         <Link href={props.shareHref} className={iconButton} aria-label="共有">
@@ -397,6 +405,7 @@ function DesktopSiteHeader({
     <header
       className={desktopHeader}
       data-can-post={postMarker(account)}
+      data-signed-in={signedInMarker(account)}
       data-ui="desktop-site-header"
     >
       <div className={desktopHeaderInner}>
@@ -442,10 +451,10 @@ function DesktopContextBar(props: AppBarBackProps) {
   return (
     <div className={desktopContext} data-ui="desktop-context-bar">
       <div className={desktopContextInner}>
-        <Link href={props.backHref ?? "/"} className={contextBack}>
+        <BackLink href={props.backHref ?? "/"} className={contextBack}>
           <Icon name="chevron_left" size="sm" />
           戻る
-        </Link>
+        </BackLink>
         <div className={contextTitle}>{props.title ?? ""}</div>
         {props.shareHref ? (
           <Link href={props.shareHref} className={iconButton} aria-label="共有">
@@ -464,6 +473,7 @@ function DesktopSellerHeader(props: AppBarProps) {
     <header
       className={desktopHeader}
       data-can-post={postMarker(props.account)}
+      data-signed-in={signedInMarker(props.account)}
       data-ui="desktop-seller-header"
     >
       <div className={desktopHeaderInner}>

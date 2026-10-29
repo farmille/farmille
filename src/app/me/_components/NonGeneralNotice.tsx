@@ -2,8 +2,8 @@ import { PageNotice } from "@/components/PageNotice";
 import { Icon } from "@/components/Icon";
 import Link from "next/link";
 
-import { AppBar } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
+import { SiteAppBar } from "@/components/SiteAppBar";
 import type { AccountType } from "@/server/auth";
 import { css, cx } from "../../../../styled-system/css";
 
@@ -45,7 +45,7 @@ export function NonGeneralNotice({ accountType }: NonGeneralNoticeProps) {
 
   return (
     <div className={shell}>
-      <AppBar chrome="public" active="me" title="マイページ" />
+      <SiteAppBar chrome="public" active="me" title="マイページ" />
       <main className={body}>
         <PageNotice
           title="一般ユーザー向けの画面です"

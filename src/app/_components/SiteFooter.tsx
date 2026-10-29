@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { TextLink } from "@/components/TextLink";
-import { css } from "../../../styled-system/css";
+import { css, cx } from "../../../styled-system/css";
 import { HomeHills } from "./HomeHills";
 
 const groups = [
@@ -9,7 +9,7 @@ const groups = [
   {
     title: "参加する",
     links: [
-      { label: "新規会員登録", href: "/signup/general" },
+      { label: "新規会員登録", href: "/signup/general", guestOnly: true },
       { label: "実証詳細レポートを投稿", href: "/post?type=report", generalOnly: true },
       { label: "マイページ", href: "/me" },
     ],
@@ -67,6 +67,9 @@ const groupTitle = css({ m: "0", mb: "3", textStyle: "body", color: "text.invers
  */
 const generalOnlyItem = css({ "body:has([data-can-post=false]) &": { display: "none" } });
 
+/** 会員登録は、ヘッダーが「ログイン中」の目印を付けた画面では出さない。 */
+const guestOnlyItem = css({ "body:has([data-signed-in=true]) &": { display: "none" } });
+
 /** リンクの色と大きさは一覧に持たせ、TextLink の nav がそれを受け継ぐ。 */
 const linkList = css({
   listStyle: "none",
@@ -120,7 +123,10 @@ export function SiteFooter() {
                 <ul className={linkList}>
                   {group.links.map((item) => (
                     <li
-                      className={"generalOnly" in item ? generalOnlyItem : undefined}
+                      className={cx(
+                        "generalOnly" in item ? generalOnlyItem : undefined,
+                        "guestOnly" in item ? guestOnlyItem : undefined,
+                      )}
                       key={item.href}
                     >
                       <TextLink href={item.href} variant="nav">
