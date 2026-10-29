@@ -102,6 +102,27 @@ describe("保存前の入力の控え", () => {
     ).toBeInTheDocument();
     expect(window.sessionStorage.getItem(key)).toContain("書きかけの感想");
   });
+
+  it("保存せずに閉じると、遷移前に控えを消し、開き直しても捨てた入力が戻らない", async () => {
+    const key = persistKey("report", `/materials/${pageMaterial.id}/report/new`);
+    const otherKey = persistKey("report", "/materials/other/report/new");
+    writePersisted(otherKey, { untouched: true });
+    const form = renderForm();
+    fireEvent.change(screen.getByRole("textbox", { name: "結果・感想" }), {
+      target: { value: "捨てる感想" },
+    });
+    await waitFor(() => expect(window.sessionStorage.getItem(key)).toContain("捨てる感想"));
+    router.push.mockImplementationOnce(() => expect(window.sessionStorage.getItem(key)).toBeNull());
+    fireEvent.click(screen.getByRole("button", { name: "レポートを閉じる" }));
+    fireEvent.click(await screen.findByRole("button", { name: "保存せずに閉じる" }));
+    await waitFor(() => expect(window.sessionStorage.getItem(key)).toBeNull());
+    expect(window.sessionStorage.getItem(otherKey)).toContain("untouched");
+    form.unmount();
+    renderForm();
+    expect(screen.getByRole("textbox", { name: "結果・感想" })).toHaveValue(
+      filledReport.observedChange,
+    );
+  });
 });
 
 describe("保存と提出の最中", () => {

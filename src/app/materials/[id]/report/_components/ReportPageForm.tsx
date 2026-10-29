@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Checkbox, Notice, Textarea, usePersistedInput } from "@/components/form";
+import { persistKey, removePersisted } from "@/components/form/persisted-input";
 import { Icon } from "@/components/Icon";
 import { toast } from "@/components/Toaster";
 import {
@@ -802,7 +803,12 @@ export function ReportPageForm({
           tone="primary"
           alternative={{
             label: "保存せずに閉じる",
-            onSelect: () => router.push(`/materials/${input.materialId}`),
+            onSelect: () => {
+              // 遷移までの再描画でも、破棄した控えを作り直さない
+              setSaved(JSON.stringify(payload));
+              removePersisted(persistKey("report", reportPath));
+              router.push(`/materials/${input.materialId}`);
+            },
           }}
           onConfirm={() => persist(false, true)}
         />
