@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import * as v from "valibot";
 
 import { FormPageShell } from "@/components/FormPageShell";
+import { getViewerAccount } from "@/components/SiteAppBar";
 import { getSessionUser, requireGeneralUser } from "@/server/auth";
 import { errorMessageJa } from "@/server/errors";
 import { searchPostingMaterials, withPostingMaterialImages } from "@/server/queries/materials";
@@ -28,15 +29,15 @@ export default async function PostPage({ searchParams }: PostPageProps) {
     }
 
     if (session.error === "forbidden") {
-      const user = await getSessionUser();
-      return <PostAccessDenied accountType={user?.accountType ?? null} />;
+      const [user, account] = await Promise.all([getSessionUser(), getViewerAccount()]);
+      return <PostAccessDenied accountType={user?.accountType ?? null} account={account} />;
     }
 
     throw new Error(errorMessageJa[session.error]);
   }
 
   const query = Array.isArray(requested.q) ? "" : (requested.q?.trim() ?? "");
-  const result = await searchPostingMaterials(query);
+  const [result, account] = await Promise.all([searchPostingMaterials(query), getViewerAccount()]);
 
   if (!result.ok) {
     throw new Error(errorMessageJa[result.error]);
@@ -47,7 +48,14 @@ export default async function PostPage({ searchParams }: PostPageProps) {
   }
 
   return (
-    <FormPageShell chrome="public" active="post" title="投稿する" backHref="/" hasFixedFooter>
+    <FormPageShell
+      chrome="public"
+      active="post"
+      account={account}
+      title="投稿する"
+      backHref="/"
+      hasFixedFooter
+    >
       <MaterialPicker materials={materials.data} query={query} postType={postType} />
     </FormPageShell>
   );

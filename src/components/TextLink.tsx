@@ -57,11 +57,14 @@ const textLinkRecipe = cva({
         _focusVisible: { _after: { transform: "scaleX(1)", opacity: "1" } },
         "&[aria-current=page]": { _after: { transform: "scaleX(1)", opacity: "1" } },
       },
+      /** 送信ボタンの下に置く「キャンセル」など。指で押せるよう、押せる高さを 44px 取る。 */
       subtle: {
-        display: "block",
-        p: "1",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minH: "11",
         color: "text.subtle",
-        fontSize: "sm",
+        fontSize: "md",
         textAlign: "center",
         textDecoration: "none",
         _focusVisible: {

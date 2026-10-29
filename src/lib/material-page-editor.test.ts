@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   MaterialExternalUrlSchema,
   MaterialPageContentSchema,
+  pesticideRegistrationOf,
   SaveMaterialPageSchema,
 } from "./material-page-editor";
 
@@ -170,5 +171,27 @@ describe("製品ページの原稿", () => {
         ],
       }),
     ).toBe(true);
+  });
+});
+
+describe("pesticideRegistrationOf", () => {
+  it("登録・認証に農薬登録があれば、農薬として登録された資材とする", () => {
+    expect(
+      pesticideRegistrationOf([
+        { kind: "fertilizer", companyName: "肥料登録会社", effects: "" },
+        { kind: "pesticide", companyName: "農薬登録会社", effects: "" },
+      ]),
+    ).toBe("registered");
+  });
+
+  it("ほかの登録区分だけがあれば、農薬として登録されていない資材とする", () => {
+    expect(
+      pesticideRegistrationOf([{ kind: "fertilizer", companyName: "肥料登録会社", effects: "" }]),
+    ).toBe("unregistered");
+  });
+
+  it("製品情報が無いときと、登録区分が1つも無いときは、分からないとする", () => {
+    expect(pesticideRegistrationOf(null)).toBe("unknown");
+    expect(pesticideRegistrationOf([])).toBe("unknown");
   });
 });

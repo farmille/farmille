@@ -41,6 +41,9 @@ const meta = {
         groupName: "なす科果菜類",
       },
     ],
+    targetCropIds: ["crop-tomato"],
+    pesticideRegistration: "unknown",
+    bodyMaxLength: 2000,
     initialValues,
   },
 } satisfies Meta<typeof ReviewForm>;
@@ -49,6 +52,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Create: Story = {};
+
+// 製品情報の「登録・認証」にほかの区分だけがある資材。農薬の確認を条件なしで出す
+export const UnregisteredPesticide: Story = {
+  args: { pesticideRegistration: "unregistered" },
+};
+
+// 農薬として登録された資材。農薬の確認は出さない
+export const RegisteredPesticide: Story = {
+  args: { pesticideRegistration: "registered" },
+};
 
 export const Edit: Story = {
   args: {

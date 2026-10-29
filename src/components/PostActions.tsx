@@ -54,7 +54,7 @@ export function PostActions({
           alignItems: "center",
           gap: "1.5",
           flexWrap: "wrap",
-          fontSize: "2xs",
+          fontSize: "sm",
           color: "text.subtle",
         })}
       >
@@ -80,7 +80,6 @@ export function PostActions({
         />
         <span
           ref={viewRef}
-          aria-label={`${viewCount}回閲覧`}
           className={css({
             ml: "auto",
             display: "inline-flex",
@@ -91,7 +90,7 @@ export function PostActions({
           })}
         >
           <Icon name="visibility" size="xs" />
-          {viewCount.toLocaleString("ja-JP")}
+          閲覧 {viewCount.toLocaleString("ja-JP")}
         </span>
       </div>
       {error ? (

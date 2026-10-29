@@ -19,7 +19,3 @@ export const Unclassified: Story = {
     links: [{ group: null, title: "分類前の資料", url: "https://example.com/a.pdf", trial: null }],
   },
 };
-
-export const Empty: Story = {
-  args: { links: [] },
-};

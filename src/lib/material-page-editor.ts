@@ -126,6 +126,19 @@ export const MaterialPageContentSchema = v.object({
   relatedCompanies: v.array(title()),
 });
 export type MaterialPageContent = v.InferOutput<typeof MaterialPageContentSchema>;
+
+export type PesticideRegistration = "registered" | "unregistered" | "unknown";
+
+/**
+ * 公開中の製品情報の「登録・認証」から、農薬登録の有無を読む。
+ * 製品情報が無い資材と、登録区分を1つも書いていない資材は、書き漏れと区別できないので unknown とする。
+ */
+export function pesticideRegistrationOf(
+  registrations: MaterialPageContent["registrations"] | null,
+): PesticideRegistration {
+  if (registrations === null || registrations.length === 0) return "unknown";
+  return registrations.some((entry) => entry.kind === "pesticide") ? "registered" : "unregistered";
+}
 export const SaveMaterialPageSchema = v.pipe(
   v.object({
     materialId: v.pipe(v.string(), v.uuid()),

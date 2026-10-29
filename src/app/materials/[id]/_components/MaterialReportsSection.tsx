@@ -68,7 +68,7 @@ export function ReportsHeading({ count, moreHref }: { count?: number; moreHref?:
 
 export async function HeroReportCount({ materialId }: { materialId: string }) {
   const reports = unwrapQueryResult(await loadMaterialReports(materialId));
-  return <HeroCount tone={reports.total > 0 ? "highlight" : "zero"}>{reports.total}件</HeroCount>;
+  return <HeroCount tone={reports.total > 0 ? "highlight" : "plain"}>{reports.total}件</HeroCount>;
 }
 
 type MaterialReportsViewProps = {

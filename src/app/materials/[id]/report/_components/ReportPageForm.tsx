@@ -162,7 +162,7 @@ const readingNote = css({ textStyle: "note", color: "text.muted" });
 
 const divider = css({ mt: "4", h: "[1px]", bg: "border.default" });
 
-const ackRow = css({ mt: "3", scrollMarginTop: "20" });
+const ackRow = css({ mt: "3" });
 
 const ackMissing = css({ color: "accent.danger" });
 

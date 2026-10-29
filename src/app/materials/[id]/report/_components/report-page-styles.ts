@@ -2,7 +2,7 @@ import { css, cva } from "../../../../../../styled-system/css";
 
 /** ページ版の文書の見出し（結果・感想など）。未記入のまま投稿しようとしたら赤くする。 */
 export const docHeadingRecipe = cva({
-  base: { m: "0", mt: "8", fontSize: "2xl", lineHeight: "snug", scrollMarginTop: "20" },
+  base: { m: "0", mt: "8", fontSize: "2xl", lineHeight: "snug" },
   variants: {
     level: { 2: {}, 3: { mt: "5", fontSize: "xl" } },
     missing: { true: { color: "accent.danger" }, false: {} },

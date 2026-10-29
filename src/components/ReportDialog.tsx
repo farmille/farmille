@@ -12,15 +12,16 @@ const idleState: ReportActionState = { status: "idle" };
 const trigger = css({
   display: "inline-flex",
   alignItems: "center",
+  // 指で押せるよう、押せる高さを 44px 取る
+  minH: "11",
+  px: "2",
   bg: "transparent",
   color: "text.subtle",
-  fontSize: "xs",
+  fontSize: "sm",
   fontWeight: "bold",
   textDecoration: "underline",
   textUnderlineOffset: "2px",
   cursor: "pointer",
-  px: "1",
-  py: "1",
 });
 
 const formStyle = css({ mt: "3" });

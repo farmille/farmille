@@ -69,9 +69,30 @@ const applyLinkStyle = css({
   textDecoration: "none",
 });
 const genresStyle = css({ mb: "1" });
-const countsStyle = css({ mt: "1.5", textStyle: "note", color: "text.subtle" });
-const countLinkStyle = css({ whiteSpace: "nowrap", color: "[inherit]" });
-const countMinorStyle = css({ textStyle: "note", whiteSpace: "nowrap", color: "[inherit]" });
+// 折り返した行の頭に区切りの記号が残らないよう、記号で区切らず間隔で分ける
+const countsStyle = css({
+  mt: "1.5",
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  columnGap: "3.5",
+  rowGap: "1",
+  textStyle: "supporting",
+  color: "text.muted",
+});
+const countLinkStyle = css({
+  py: "0.5",
+  whiteSpace: "nowrap",
+  color: "text.brand",
+  textDecoration: "underline",
+  textUnderlineOffset: "2px",
+});
+const savedCountStyle = css({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "1",
+  whiteSpace: "nowrap",
+});
 const savedMarkStyle = css({ color: "text.brand" });
 
 type MaterialHeroProps = {
@@ -144,13 +165,13 @@ export function MaterialHero({
         <div className={countsStyle}>
           <a href="#anchorReports" className={countLinkStyle}>
             実証詳細レポート {reportCount}
-          </a>{" "}
-          <a href="#anchorReviews" className={countMinorStyle}>
-            ・ 感想口コミ <HeroCount>{material.review_count}件</HeroCount>
-          </a>{" "}
-          <span className={countMinorStyle}>
-            ・ <Icon name="star_filled" size="xs" className={savedMarkStyle} /> お気に入り{" "}
-            {savedCount}
+          </a>
+          <a href="#anchorReviews" className={countLinkStyle}>
+            感想口コミ <HeroCount>{material.review_count}件</HeroCount>
+          </a>
+          <span className={savedCountStyle}>
+            <Icon name="star_filled" size="xs" className={savedMarkStyle} />
+            お気に入り {savedCount}
           </span>
         </div>
         <SaveControl

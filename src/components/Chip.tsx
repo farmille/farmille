@@ -50,7 +50,16 @@ export const chipRecipe = sva({
         outlineColor: "primary.700",
         outlineOffset: "[1px]",
       },
-      _after: { content: '""', position: "absolute", inset: "-1" },
+      // 見た目は小さいまま、指で押せる範囲を 44px 四方取る
+      _after: {
+        content: '""',
+        position: "absolute",
+        top: "[50%]",
+        left: "[50%]",
+        w: "11",
+        h: "11",
+        transform: "translate(-50%, -50%)",
+      },
     },
   },
   variants: {

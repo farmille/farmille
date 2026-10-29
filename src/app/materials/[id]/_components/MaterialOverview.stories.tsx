@@ -16,14 +16,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Description: Story = {};
 
-export const DescriptionEmpty: Story = {
-  args: { description: undefined },
-};
-
 export const Timing: Story = {
   render: () => <MaterialTimingBox timings={[0, 1, 3]} />,
-};
-
-export const TimingEmpty: Story = {
-  render: () => <MaterialTimingBox timings={[]} />,
 };

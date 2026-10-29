@@ -9,7 +9,6 @@ const countRecipe = cva({
   variants: {
     tone: {
       plain: {},
-      zero: { color: "text.default" },
       highlight: { color: "accent.warn", fontSize: "md" },
     },
   },
@@ -20,7 +19,7 @@ export function HeroCount({
   tone,
   children,
 }: {
-  tone?: "plain" | "zero" | "highlight";
+  tone?: "plain" | "highlight";
   children: ReactNode;
 }) {
   return <b className={countRecipe({ tone })}>{children}</b>;

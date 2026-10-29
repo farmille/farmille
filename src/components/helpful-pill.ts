@@ -26,15 +26,27 @@ export const helpfulPillRecipe = cva({
       card: {
         whiteSpace: "nowrap",
         flexShrink: "0",
-        fontSize: "2xs",
-        px: "2",
-        py: "1.5",
+        px: "3",
+        py: "1",
         gap: "1",
       },
       detail: {},
     },
     interactive: {
-      true: { cursor: "pointer" },
+      true: {
+        position: "relative",
+        cursor: "pointer",
+        // 見た目の高さは低いまま、指で押せる高さを 44px 取る
+        _after: {
+          content: '""',
+          position: "absolute",
+          top: "[50%]",
+          left: "0",
+          right: "0",
+          h: "11",
+          transform: "translateY(-50%)",
+        },
+      },
       false: { cursor: "default" },
     },
     voted: {

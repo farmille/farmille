@@ -25,6 +25,11 @@
     background: color-mix(in srgb, var(--colors-primary-300) 35%, transparent);
   }
 
+  /* ページ内の見出しへ移ったとき、上に固定したヘッダー（スマホ約67px、PC約65px）の裏に隠さない。 */
+  html {
+    scroll-padding-top: var(--spacing-20);
+  }
+
   body {
     font-family: var(--fonts-sans);
     letter-spacing: var(--letter-spacings-body);

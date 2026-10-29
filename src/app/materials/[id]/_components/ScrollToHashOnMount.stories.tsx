@@ -9,12 +9,13 @@ const noteStyle = css({ color: "text.subtle", fontSize: "sm" });
 const meta = {
   title: "Pages/materials/[id]/ScrollToHashOnMount",
   component: ScrollToHashOnMount,
-  args: { targetId: "reviews-heading", trigger: 1 },
+  args: { headingId: "reviews-heading", cardIdPrefix: "review-", trigger: 1 },
   render: (args) => (
     <>
       <ScrollToHashOnMount {...args} />
       <p className={noteStyle}>
-        表示を持たず、URL のハッシュが targetId のときだけ、その要素まで移ります。
+        表示を持たず、URL のハッシュが headingId か cardIdPrefix で始まる ID
+        のときだけ、その要素まで移ります。
       </p>
     </>
   ),

@@ -2,7 +2,7 @@
 
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
-import { startTransition, useActionState, useEffect, useMemo, useState } from "react";
+import { startTransition, useActionState, useEffect, useId, useMemo, useState } from "react";
 import * as v from "valibot";
 
 import {
@@ -28,8 +28,9 @@ import { Icon } from "@/components/Icon";
 import { StarRating } from "@/components/StarRating";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
 import { TextLink } from "@/components/TextLink";
+import type { PesticideRegistration } from "@/lib/material-page-editor";
 
-import { css } from "../../../../../../styled-system/css";
+import { css, cva } from "../../../../../../styled-system/css";
 import { ReviewCropPicker } from "./ReviewCropPicker";
 
 const REVIEW_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -66,6 +67,10 @@ type ReviewFormBaseProps = {
   };
   userId: string;
   crops: ReviewCropOption[];
+  /** 最初に候補として出す、この資材の対象作物。 */
+  targetCropIds: readonly string[];
+  pesticideRegistration: PesticideRegistration;
+  bodyMaxLength: number;
   initialValues: ReviewFormValues;
   existingReviewNotice?: boolean;
 };
@@ -104,6 +109,25 @@ const confirmListStyle = css({
   textStyle: "supporting",
   color: "text.default",
 });
+
+const bodyCountRecipe = cva({
+  base: {
+    mt: "1",
+    textStyle: "supporting",
+    textAlign: "right",
+    fontVariantNumeric: "tabular-nums",
+  },
+  variants: {
+    full: {
+      true: { color: "accent.danger", fontWeight: "bold" },
+      false: { color: "text.muted" },
+    },
+  },
+});
+
+const bodyLimitStyle = css({ textStyle: "supporting", color: "accent.danger" });
+
+const reportLinkLeadStyle = css({ mt: "3", textStyle: "body", color: "text.muted" });
 
 const photoGridStyle = css({
   display: "grid",
@@ -193,6 +217,15 @@ const photoAddStyle = css({
 
 const initialActionState: ReviewActionState = { status: "idle" };
 
+// 農薬として登録された資材は農薬としての効果を書けるので、この確認を出さない
+const PESTICIDE_CHECK = {
+  registered: null,
+  unregistered:
+    "この資材は農薬として登録されていないため、病害虫や雑草に効いたと言い切る書き方はしていません。",
+  unknown:
+    "農薬として登録されていない資材について、病害虫や雑草への効果を断定する表現は使っていません。",
+} satisfies Record<PesticideRegistration, string | null>;
+
 function extensionFor(file: File): "jpg" | "png" | "webp" {
   if (file.type === "image/jpeg") return "jpg";
   if (file.type === "image/png") return "png";
@@ -215,16 +248,21 @@ export function ReviewForm({
   material,
   userId,
   crops,
+  targetCropIds,
+  pesticideRegistration,
+  bodyMaxLength,
   initialValues,
   reviewId,
   existingReviewNotice = false,
 }: ReviewFormProps) {
+  const bodyCountId = useId();
   const supabase = useMemo(() => createAuthBrowserClient(), []);
   const action =
     mode === "create"
       ? createReviewAction.bind(null, material.id)
       : updateReviewAction.bind(null, material.id, reviewId);
   const [state, formAction, actionPending] = useActionState(action, initialActionState);
+  const [cropIds, setCropIds] = useState<readonly string[]>(initialValues.cropIds);
   const [rating, setRating] = useState(initialValues.rating);
   // form action の後に React が未制御の入力を初期値へ戻すため、本文は state で保持してエラー時も消さない。
   const [body, setBody] = useState(initialValues.body);
@@ -235,6 +273,9 @@ export function ReviewForm({
   const [localError, setLocalError] = useState<string | null>(null);
   const isPending = uploading || actionPending;
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
+  const pesticideCheck = PESTICIDE_CHECK[pesticideRegistration];
+  // 上限を超えて貼り付けた分は入力欄が黙って切り捨てるので、上限に達したことを知らせる
+  const bodyFull = body.length >= bodyMaxLength;
 
   useEffect(() => {
     if (state.status === "idle") return;
@@ -297,6 +338,8 @@ export function ReviewForm({
 
   // 写真のファイルはブラウザの仕様で戻せないので、選び直してもらう
   function restore(restored: RestoredFields) {
+    const restoredCropIds = restored.get("cropIds");
+    if (restoredCropIds !== undefined) setCropIds(restoredCropIds);
     const restoredRating = v.safeParse(RestoredRatingSchema, restored.get("rating")?.[0]);
     if (restoredRating.success) setRating(restoredRating.output);
     const restoredBody = restored.get("body")?.[0];
@@ -364,7 +407,12 @@ export function ReviewForm({
         </div>
       </div>
 
-      <ReviewCropPicker crops={crops} defaultCropIds={initialValues.cropIds} />
+      <ReviewCropPicker
+        crops={crops}
+        targetCropIds={targetCropIds}
+        value={cropIds}
+        onValueChange={setCropIds}
+      />
 
       <Fieldset legend="総合評価" name="rating" requirement="required">
         <StarRating mode="input" value={rating} onChange={setRating} />
@@ -374,13 +422,7 @@ export function ReviewForm({
         name="body"
         label="感想口コミ本文"
         requirement="required"
-        description={
-          <>
-            作物・使用時期・使い方・感じた変化が入っていると参考になります。もっと詳しく書きたい場合は「
-            <TextLink href={`/materials/${material.id}/report/new`}>実証詳細レポート入力</TextLink>
-            」から。
-          </>
-        }
+        lead="作物・使用時期・使い方・感じた変化が入っていると参考になります。"
       >
         {/* 記入例は入力欄の上に置き、エラーが入力欄の真下に出るようにする */}
         <div className={exampleSpacingStyle} id="review-body-example">
@@ -392,10 +434,24 @@ export function ReviewForm({
           label={null}
           size="lg"
           value={body}
+          maxLength={bodyMaxLength}
           onChange={(event) => setBody(event.target.value)}
           placeholder="自由に記入してください"
-          aria-describedby="review-body-example"
+          aria-describedby={`${bodyCountId} review-body-example`}
         />
+        <p className={bodyCountRecipe({ full: bodyFull })} id={bodyCountId}>
+          {body.length}／{bodyMaxLength}文字
+        </p>
+        <p className={bodyLimitStyle} role="status">
+          {bodyFull
+            ? `上限の${bodyMaxLength}文字に達しました。${bodyMaxLength}文字を超えた分は入りません。`
+            : null}
+        </p>
+        <p className={reportLinkLeadStyle}>
+          もっとくわしく書きたいときは、
+          <TextLink href={`/materials/${material.id}/report/new`}>実証詳細レポートを書く</TextLink>
+          から投稿できます。
+        </p>
       </Field>
 
       <Fieldset
@@ -538,9 +594,7 @@ export function ReviewForm({
       <Field label="確認事項" description="登録済みのニックネームで投稿されます。">
         <ul className={confirmListStyle}>
           <li>記入内容は、実際に使用して観察した事実と感じた変化にもとづいています。</li>
-          <li>
-            農薬として登録されていない資材について、病害虫や雑草への効果を断定する表現は使っていません。
-          </li>
+          {pesticideCheck === null ? null : <li>{pesticideCheck}</li>}
           <li>記事・画像・PDFに、他者の権利や秘密保持契約に反するものは含まれていません。</li>
         </ul>
       </Field>

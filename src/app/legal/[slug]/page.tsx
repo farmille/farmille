@@ -80,7 +80,7 @@ export default async function LegalDocumentPage({ params }: Props) {
           <section
             key={section.id}
             id={section.id}
-            className={css({ mb: "10", scrollMarginTop: "24" })}
+            className={css({ mb: "10", scrollMarginTop: "4" })}
           >
             {section.heading ? (
               <h2 className={legalHeading({ level: "h2" })}>{section.heading}</h2>
