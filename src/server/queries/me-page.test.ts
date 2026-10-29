@@ -83,5 +83,8 @@ describe("マイページの参考になった合計", () => {
     if (!result.ok) throw new Error(result.error);
     expect(result.data.posts).toHaveLength(8);
     expect(result.data.helpfulReceivedCount).toBe(23);
+    // 投稿の一覧は新しい8件に絞っても、件数は絞る前のすべてを数える
+    expect(result.data.reportCount).toBe(10);
+    expect(result.data.reviewCount).toBe(1);
   });
 });

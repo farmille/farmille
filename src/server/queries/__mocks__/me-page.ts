@@ -10,6 +10,7 @@ export const getMyPageData = fn<typeof import("@/server/queries/me-page").getMyP
     ok: true,
     data: {
       profile: ownProfile,
+      reportCount: 3,
       reviewCount: 12,
       helpfulReceivedCount: 25,
       posts: ownPosts,
