@@ -70,7 +70,7 @@ export const InFieldset: Story = {
 
 export const CardsInFieldset: Story = {
   args: {
-    description: "投稿やマイページで肩書きとして表示されます。",
+    description: "選んだ属性は、投稿やマイページでニックネームの横に表示されます（例：生産者）。",
     label: "あなたの立場",
     name: "standpoint",
     requirement: "required",

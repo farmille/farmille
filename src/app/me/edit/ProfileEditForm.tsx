@@ -19,7 +19,7 @@ import type { OwnProfile } from "@/server/queries/profiles";
 
 import { css } from "../../../../styled-system/css";
 
-import { updateProfileAction } from "./actions";
+import { profileHandleCheckAction, updateProfileAction } from "./actions";
 import { ProfileTagsEditor } from "./ProfileTagsEditor";
 import { shrinkAvatarIn } from "./shrink-avatar";
 
@@ -98,12 +98,9 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
       </div>
 
       <Input
+        check={profileHandleCheckAction}
         description="本名でなくてOKです"
-        label={
-          <>
-            ニックネーム<span className={srOnly}>（ハンドルネーム）</span>
-          </>
-        }
+        label={<>ニックネーム</>}
         name="handle"
         requirement="required"
         autoComplete="nickname"

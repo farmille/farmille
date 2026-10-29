@@ -4,8 +4,10 @@ import * as v from "valibot";
 
 import { clientEnv, serverEnv } from "@/env";
 import {
+  alreadyRegisteredEmail,
   passwordResetEmail,
   registrationVerificationEmail,
+  strangerNotice,
   type AccountEmail,
 } from "@/lib/account-email";
 import { safeNextPath } from "@/lib/auth/safe-next";
@@ -17,6 +19,8 @@ export const AuthEmailSchema = v.object({
     id: v.pipe(v.string(), v.uuid()),
     email: EmailSchema,
     new_email: v.optional(v.string()),
+    // Supabase Auth は auth.users の raw_app_meta_data をそのまま app_metadata として渡す
+    app_metadata: v.object({ account_type: v.optional(v.string()) }),
   }),
   email_data: v.object({
     email_action_type: v.picklist([
@@ -80,6 +84,20 @@ export function confirmationUrl(tokenHash: string, type: string, redirectTo?: st
   return url.toString();
 }
 
+/**
+ * 会員種別が付いた登録済みの本人が会員登録を始めたときは、認証リンクの代わりに登録済みであることを知らせる。
+ * 画面では登録の有無を明かさないので、本人の受信箱にだけ伝える。
+ */
+export function accountEmailFor(input: AuthEmail): AccountEmail {
+  const data = input.email_data;
+  if (data.email_action_type !== "recovery" && input.user.app_metadata.account_type !== undefined)
+    return alreadyRegisteredEmail(clientEnv.siteUrl);
+  const link = confirmationUrl(data.token_hash, data.email_action_type, data.redirect_to);
+  return data.email_action_type === "recovery"
+    ? passwordResetEmail(link, clientEnv.siteUrl)
+    : registrationVerificationEmail(link, clientEnv.siteUrl);
+}
+
 /** トークンはメールだけに載せ、署名済みpayload内の任意URLをリンク先に使わない。 */
 export async function deliverAuthEmail(input: AuthEmail): Promise<void> {
   const to = await recipientFor(input.user);
@@ -90,7 +108,7 @@ export async function deliverAuthEmail(input: AuthEmail): Promise<void> {
       from: serverEnv.mailFrom,
       to: recipient,
       subject: `Farmille：${subject}`,
-      text: `${content}\n\n心当たりがない場合は、このメールを破棄してください。\n`,
+      text: `${content}\n\n${strangerNotice().join("\n")}\n`,
     });
   }
   if (data.email_action_type === "reauthentication") {
@@ -112,10 +130,5 @@ export async function deliverAuthEmail(input: AuthEmail): Promise<void> {
     );
     return;
   }
-  const link = confirmationUrl(data.token_hash, data.email_action_type, data.redirect_to);
-  const mail: AccountEmail =
-    data.email_action_type === "recovery"
-      ? passwordResetEmail(link, clientEnv.siteUrl)
-      : registrationVerificationEmail(link, clientEnv.siteUrl);
-  await transport.sendMail({ from: serverEnv.mailFrom, to, ...mail });
+  await transport.sendMail({ from: serverEnv.mailFrom, to, ...accountEmailFor(input) });
 }

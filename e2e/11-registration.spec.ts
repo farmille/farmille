@@ -17,7 +17,7 @@ test("メール確認、登録完了、ログインと所属の入力", async ({
   try {
     await page.goto("/signup/complete");
     await expect(page).toHaveURL(/\/signup\/general\?error=expired_link/);
-    await expect(page.getByText(/認証リンクの有効期限/)).toBeVisible();
+    await expect(page.getByText(/この認証リンクは、使用済みか/)).toBeVisible();
     await page.goto("/signup");
     await captureAccountScreen(page, "02-general-signup.png");
     await page.getByLabel("メールアドレス").fill(email);
@@ -54,13 +54,17 @@ test("メール確認、登録完了、ログインと所属の入力", async ({
     await expect(otherPage.getByLabel("メールアドレス")).toHaveValue(email);
     await expect(otherPage.getByLabel("メールアドレス")).toHaveAttribute("readonly");
     expect((await other.cookies()).some((cookie) => cookie.name.startsWith("sb-"))).toBe(false);
+    // 登録情報の入力中に同じリンクを開き直しても、使用済みの案内ではなく入力へ戻る
+    await otherPage.goto(withoutFlag.toString());
+    await expect(otherPage).toHaveURL(/\/signup\/complete/);
+    await expect(otherPage.getByLabel("メールアドレス")).toHaveValue(email);
     await otherPage.goto("/me");
     await expect(otherPage).toHaveURL(/\/login\?next=%2Fme/);
     await other.close();
     await signupGeneral(page, { handle: existing.handle, email, password });
-    await expect(
-      page.getByRole("alert").filter({ hasText: "このハンドルネームはすでに使われています。" }),
-    ).toHaveCount(2);
+    await expect(page.getByLabel("ニックネーム")).toHaveAccessibleDescription(
+      /このニックネームはすでに使われています。別のニックネームを入力してください。/,
+    );
     await expect(page.getByLabel("市区町村・番地")).toHaveValue("千代田区千代田1-1");
     await expect(page.getByLabel("建物名・部屋番号")).toHaveValue("試験ビル101号室");
     await page.getByLabel("ニックネーム").fill(handle);

@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import {
+  alreadyRegisteredEmail,
   passwordResetEmail,
   registrationCompleteEmail,
   registrationVerificationEmail,
@@ -12,6 +13,10 @@ it("案内メールに確認リンク・再手続きの入口・企業会員ID�
   const reset = `${site}/password-reset/update?token_hash=abc`;
   const cases = [
     { mail: registrationVerificationEmail(confirm, site), links: [confirm, `${site}/signup`] },
+    {
+      mail: alreadyRegisteredEmail(site),
+      links: [`${site}/login`, `${site}/password-reset`],
+    },
     { mail: registrationCompleteEmail(site), links: [`${site}/login`] },
     { mail: passwordResetEmail(reset, site), links: [reset] },
     {
@@ -29,4 +34,10 @@ it("案内メールに確認リンク・再手続きの入口・企業会員ID�
     expect(mail.text).toContain("contact@farmille.com");
     expect(mail.text).toContain(site);
   }
+});
+
+it("登録済みのアドレスへの案内には、登録を進める認証リンクを載せない", () => {
+  const mail = alreadyRegisteredEmail("https://www.farmille.com");
+  expect(mail.subject).toBe("【Farmille】このメールアドレスは登録済みです");
+  expect(mail.text).not.toContain("/auth/confirm");
 });

@@ -9,3 +9,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
+
+export const WithDescription: Story = {
+  args: {
+    description:
+      "パスキーを登録した方は、パスワードの代わりに、スマートフォンやパソコンの指紋や顔でログインできます。登録は、ログインした後にマイページでできます。",
+  },
+};

@@ -25,10 +25,14 @@ function body(siteUrl: string, ...sections: string[][]): string {
   return `${[...sections.map((lines) => lines.join("\n")), footer(siteUrl)].join("\n\n")}\n`;
 }
 
-const strangerNotice = (closing: string) => [
-  "■本メールにお心当たりのない方へ",
-  `第三者がメールアドレスを誤って入力した可能性があります。恐れ入りますが、${closing}`,
-];
+/** 申し込んでいない人に届いたときの案内。その人に向けた案内が続くときは more に渡す。 */
+export function strangerNotice(...more: string[]): string[] {
+  return [
+    "■このメールに心当たりがない場合",
+    "ほかの方がメールアドレスを間違えて入力した可能性があります。リンクは開かずに、このメールを削除してください。",
+    ...more,
+  ];
+}
 
 export function registrationVerificationEmail(link: string, siteUrl: string): AccountEmail {
   return {
@@ -45,7 +49,7 @@ export function registrationVerificationEmail(link: string, siteUrl: string): Ac
         "有効期限が切れた場合は、お手数ですが下記から再度お手続きください。",
         new URL("/signup", siteUrl).toString(),
       ],
-      strangerNotice("このメールを破棄していただくか、下記までご連絡ください。"),
+      strangerNotice(),
     ),
   };
 }
@@ -65,7 +69,29 @@ export function registrationCompleteEmail(siteUrl: string): AccountEmail {
         "作物や悩みから資材を探せるほか、使った資材の体験を感想口コミや実証詳細レポートとして投稿できます。",
         "ぜひ、ご自身の体験を共有してください。",
       ],
-      strangerNotice("下記までご連絡ください。"),
+      strangerNotice(
+        "このメールアドレスで登録した覚えがない場合は、下記のお問い合わせ先にご連絡ください。",
+      ),
+    ),
+  };
+}
+
+export function alreadyRegisteredEmail(siteUrl: string): AccountEmail {
+  return {
+    subject: subject("このメールアドレスは登録済みです"),
+    text: body(
+      siteUrl,
+      [
+        "Farmille運営事務局です。",
+        "このメールアドレスで、会員登録のお申し込みがありました。",
+        "このメールアドレスは、すでにFarmilleに登録されています。新しく登録する必要はありません。",
+      ],
+      ["▼ログインはこちら", new URL("/login", siteUrl).toString()],
+      [
+        "パスワードを忘れた場合は、下記からパスワードを再設定してください。",
+        new URL("/password-reset", siteUrl).toString(),
+      ],
+      strangerNotice(),
     ),
   };
 }
@@ -81,10 +107,7 @@ export function passwordResetEmail(link: string, siteUrl: string): AccountEmail 
       [
         "有効期限が切れた場合は、お手数ですがログイン画面の「パスワードをお忘れの方」から再度お手続きください。",
       ],
-      [
-        "■本メールにお心当たりのない方へ",
-        "パスワード再設定をお申し込みでない場合は、このメールを破棄してください。リンクを開かない限り、パスワードは変更されません。",
-      ],
+      strangerNotice("リンクを開かなければ、パスワードは変わりません。"),
     ),
   };
 }

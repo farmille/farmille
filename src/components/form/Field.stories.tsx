@@ -53,7 +53,12 @@ export const ClientError: Story = {
 
 export const ServerError: Story = {
   render: (args) => (
-    <Form errors={{ handle: "このハンドルネームはすでに使われています。" }} persist={false}>
+    <Form
+      errors={{
+        handle: "このニックネームはすでに使われています。別のニックネームを入力してください。",
+      }}
+      persist={false}
+    >
       <Field {...args}>
         <Input defaultValue="農家の山田" label={null} />
       </Field>

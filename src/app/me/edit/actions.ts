@@ -12,6 +12,7 @@ import { AVATAR_MAX_BYTES } from "@/lib/avatar-rules";
 import { PROFILE_SAVED_SEARCH } from "@/lib/onboarding";
 import { formDataString } from "@/lib/validation";
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
+import { isProfileHandleTaken } from "@/server/accounts/handle-availability";
 import { requireGeneralUser } from "@/server/auth";
 import { uploadOwnAvatar } from "@/server/queries/profiles";
 
@@ -74,7 +75,7 @@ export async function updateProfileAction(
     return {
       status: "error",
       message:
-        "入力内容を確認してください。ハンドルネームは30文字、自己紹介は2000文字以内、リンクはhttps://またはhttp://で始まるURLを入力してください。",
+        "入力内容を確認してください。ニックネームは30文字、自己紹介は2000文字以内、リンクはhttps://またはhttp://で始まるURLを入力してください。",
       values: submittedValues(formData),
     };
   }
@@ -125,4 +126,10 @@ export async function updateProfileAction(
   revalidatePath("/me/edit");
   revalidatePath(`/users/${session.data.userId}`);
   redirect(`/me${PROFILE_SAVED_SEARCH}`);
+}
+
+/** 欄を離れたときの確認。自分の今のニックネーム以外で使われていれば、保存時と同じ文言を返す。 */
+export async function profileHandleCheckAction(handle: string): Promise<string | null> {
+  const taken = await isProfileHandleTaken(handle);
+  return taken.ok && taken.data ? errorMessageJa.handle_taken : null;
 }

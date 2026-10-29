@@ -27,7 +27,7 @@ describe("validateGeneralSignup", () => {
     });
   });
 
-  it("ハンドルネームは前後の空白を除き、空と31文字以上を弾く", () => {
+  it("ニックネームは前後の空白を除き、空と31文字以上を弾く", () => {
     expect(validateGeneralSignup({ ...validRaw, handle: "  山田  " })).toMatchObject({
       ok: true,
       input: { handle: "山田" },
@@ -61,6 +61,66 @@ describe("validateGeneralSignup", () => {
     });
   });
 
+  it("メールアドレスは254文字まで受け付け、超えたら上限を書いたエラーを返す", () => {
+    const email = `${"a".repeat(64)}@${"b".repeat(63)}.${"c".repeat(63)}.${"d".repeat(58)}.jp`;
+    expect(email).toHaveLength(254);
+    expect(validateGeneralSignup({ ...validRaw, email })).toMatchObject({
+      ok: true,
+      input: { email },
+    });
+    expect(validateGeneralSignup({ ...validRaw, email: `a${email}` })).toMatchObject({
+      ok: false,
+      fieldErrors: { email: "メールアドレスは254文字以内で入力してください。" },
+    });
+  });
+
+  it("電話番号は全角の数字・ハイフン類・空白を半角に直し、数字だけにして受け付ける", () => {
+    for (const phone of [
+      "０９０－１２３４－５６７８",
+      "090‐1234‐5678",
+      "090―1234―5678",
+      "090−1234−5678",
+      "090ー1234ー5678",
+      "090　1234　5678",
+      " 090-1234-5678 ",
+    ]) {
+      expect(validateGeneralSignup({ ...validRaw, phone })).toMatchObject({
+        ok: true,
+        input: { phone: "09012345678" },
+      });
+    }
+    expect(
+      validateGeneralSignup({ ...validRaw, phone: "＋８１ ９０ １２３４ ５６７８" }),
+    ).toMatchObject({ ok: true, input: { phone: "+819012345678" } });
+    for (const phone of ["090-1234", "０９０－ＡＢＣＤ－５６７８"]) {
+      expect(validateGeneralSignup({ ...validRaw, phone })).toMatchObject({
+        ok: false,
+        fieldErrors: { phone: "電話番号を正しく入力してください。" },
+      });
+    }
+  });
+
+  it("文字数の上限を超えた欄は、上限を書いたエラーを返す", () => {
+    expect(
+      validateGeneralSignup({
+        ...validRaw,
+        familyName: "山".repeat(81),
+        givenName: "山".repeat(5000),
+        cityStreet: "あ".repeat(301),
+        buildingName: "あ".repeat(201),
+        password: "a".repeat(129),
+      }),
+    ).toEqual({
+      ok: false,
+      fieldErrors: {
+        familyName: "姓は80文字以内で入力してください。",
+        givenName: "名は80文字以内で入力してください。",
+        cityStreet: "市区町村・番地は300文字以内で入力してください。",
+        buildingName: "200文字以内で入力してください。",
+        password: "パスワードは128文字以内で入力してください。",
+      },
+    });
+  });
   it("立場は一般ユーザー向けの4択だけを受け付ける", () => {
     for (const standpoint of ["farmer", "ja", "government", "other"]) {
       expect(validateGeneralSignup({ ...validRaw, standpoint })).toMatchObject({
