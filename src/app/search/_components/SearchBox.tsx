@@ -133,7 +133,7 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
           label: filter.name,
           description: TAG_CATEGORY_LABELS[selectedFilterCategory(filter)],
         }))}
-        placeholder="作物・悩み・資材名を入力してください"
+        placeholder="作物・悩み・資材名で検索"
         renderOption={(option) => {
           const filter = suggestionOf(option);
           return (

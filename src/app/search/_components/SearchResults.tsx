@@ -72,12 +72,12 @@ export function SearchResults({
       <div className={css({ mt: "2.5", color: "text.muted", textStyle: "note" })}>
         {logic.length > 0 ? (
           <>
-            絞り込み条件：<b className={css({ color: "text.brand" })}>{logic}</b>
+            選択した条件：<b className={css({ color: "text.brand" })}>{logic}</b>
           </>
         ) : query ? (
           `「${query}」の検索結果`
         ) : (
-          `全 ${catalog.materials.length} 件を表示中（条件を追加すると絞り込みます）`
+          `全 ${catalog.materials.length} 件を表示しています。条件を選択すると、該当する資材だけが表示されます。`
         )}
       </div>
       <div

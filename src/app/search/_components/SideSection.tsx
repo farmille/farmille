@@ -24,9 +24,14 @@ const filterInputStyle = css({ mb: "2" });
 // 区分の見出しを詰めて並べ、スマホでも検索結果を最初の画面に近づける
 const triggerStyle = css({ minH: "10", py: "1" });
 
+const titleStyle = css({ display: "flex", flexDirection: "column", minW: "0" });
+
+const hintStyle = css({ textStyle: "supporting", fontWeight: "normal", color: "text.muted" });
+
 export function SideSection({
   sectionKey,
   title,
+  hint,
   note,
   selected,
   filter,
@@ -35,6 +40,8 @@ export function SideSection({
   /** スマホのシートで、区分のチップから開いたときにこの区分を開いた状態で出すための名前。 */
   sectionKey?: string;
   title: string;
+  /** 区分の中身が何かを、実際の項目名を使った例で添える短い説明。 */
+  hint?: string;
   note?: string;
   selected?: ReactNode;
   filter?: {
@@ -66,7 +73,12 @@ export function SideSection({
         },
       })}
     >
-      <CollapsibleTrigger className={triggerStyle}>{title}</CollapsibleTrigger>
+      <CollapsibleTrigger className={triggerStyle}>
+        <span className={titleStyle}>
+          {title}
+          {hint === undefined ? null : <span className={hintStyle}>{hint}</span>}
+        </span>
+      </CollapsibleTrigger>
       {selected}
       <CollapsiblePanel hiddenUntilFound motion="none">
         {filter ? (
