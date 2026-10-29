@@ -85,8 +85,8 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
                 key={report.id}
                 href={`/reports/${report.id}`}
                 title={report.title ?? `${material.name} 実証詳細レポート`}
-                author={report.author?.handle ?? "退会したユーザー"}
-                avatarSrc={report.author?.avatar_url}
+                author={report.author.name}
+                avatarSrc={report.author.avatarUrl}
                 coverSrc={report.coverImage?.url}
                 publishedAt={report.published_at ?? undefined}
                 crop={report.crop?.name}

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { Avatar } from "@/components/Avatar";
 import { badgeRecipe } from "@/components/Badge";
+import type { PostAuthor } from "@/lib/public-profile-label";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { ReportDialog } from "@/components/ReportDialog";
 import { surfaceCardRecipe } from "@/components/SurfaceCard";
@@ -100,7 +101,7 @@ type ProfileReviewCardProps = {
     body: string;
     photos?: ReadonlyArray<{ id: string; url: string; alt: string }>;
   };
-  author: { handle: string; avatarUrl?: string | null; href?: string; label?: string };
+  author: PostAuthor;
   actions: ReactNode;
   reportReturnPath?: string;
 };
@@ -113,8 +114,8 @@ export function ProfileReviewCard({
 }: ProfileReviewCardProps) {
   const head = (
     <>
-      <Avatar name={author.handle} src={author.avatarUrl} size="sm" />
-      <span className={authorName}>{author.handle}</span>
+      <Avatar name={author.name} src={author.avatarUrl} size="sm" />
+      <span className={authorName}>{author.name}</span>
     </>
   );
   return (
@@ -125,12 +126,12 @@ export function ProfileReviewCard({
         </Link>
       </div>
       <div className={headRow}>
-        {author.href ? (
+        {author.href === null ? (
+          head
+        ) : (
           <Link href={author.href} className={authorLink}>
             {head}
           </Link>
-        ) : (
-          head
         )}
         {author.label ? <span className={authorLabel}>{author.label}</span> : null}
       </div>

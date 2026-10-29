@@ -27,7 +27,7 @@ const report: UsageReportEditorialDetail = {
   negativeNote: "散布直後は特有のにおいがありました。",
   summary: "低温期の定植で根張りの改善を確認しました。",
   editorNote: "数値と写真の対応を確認済み。",
-  author: { userId: "user-storybook", handle: "北のトマト農家" },
+  author: { userId: "user-storybook", handle: "北のトマト農家", withdrawnAt: null },
   crop: { id: "crop-tomato", name: "トマト" },
   material: { id: "material-storybook", name: "土づくり微生物資材" },
   applications: [],

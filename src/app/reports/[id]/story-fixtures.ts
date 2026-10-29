@@ -139,7 +139,8 @@ export const legacyReport: PublishedUsageReportDetail = {
   observedChange: "使用区は午後の萎れが軽かった。",
   negativeNote: null,
   summary: "高温期の萎れ対策として来年も使いたい。\n散布の手間は少ない。",
-  author: { userId: id(61), handle: "みどり農園", avatarUrl: null, standpoint: "farmer" },
+  authorUserId: id(61),
+  author: { name: "みどり農園", avatarUrl: null, label: "生産者", href: `/users/${id(61)}` },
   crop: { id: id(62), name: "ミニトマト" },
   material: {
     id: id(63),

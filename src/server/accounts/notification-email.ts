@@ -1,7 +1,11 @@
 import nodemailer from "nodemailer";
 import * as v from "valibot";
 import { clientEnv, serverEnv } from "@/env";
-import { registrationCompleteEmail, sellerWelcomeEmail } from "@/lib/account-email";
+import {
+  registrationCompleteEmail,
+  sellerWelcomeEmail,
+  withdrawalCompleteEmail,
+} from "@/lib/account-email";
 import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
 
 const EmailSchema = v.pipe(v.string(), v.email());
@@ -20,6 +24,21 @@ export async function sendSellerWelcome(
     return true;
   } catch (error) {
     console.error("[notification-email] メーカー案内メールの送信に失敗", error);
+    return false;
+  }
+}
+
+/** 退会後は Auth のユーザーが消えているので、退会前に控えたアドレスへ送る。 */
+export async function sendWithdrawalCompleteEmail(to: string): Promise<boolean> {
+  try {
+    await nodemailer.createTransport(serverEnv.smtpUrl).sendMail({
+      from: serverEnv.mailFrom,
+      to: v.parse(EmailSchema, to),
+      ...withdrawalCompleteEmail(clientEnv.siteUrl),
+    });
+    return true;
+  } catch (error) {
+    console.error("[notification-email] 退会完了メールの送信に失敗", error);
     return false;
   }
 }

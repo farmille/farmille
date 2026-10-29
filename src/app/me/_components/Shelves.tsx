@@ -134,7 +134,12 @@ export function PostsShelf({ profile, posts, kind = "reviews", authorLabel }: Po
           <ProfileReviewCard
             key={`review-${post.id}`}
             review={post}
-            author={{ handle: profile.handle, avatarUrl: profile.avatarUrl, label: authorLabel }}
+            author={{
+              name: profile.handle,
+              avatarUrl: profile.avatarUrl,
+              label: authorLabel ?? "",
+              href: null,
+            }}
             actions={
               <PostActionsLoader
                 target="review"
@@ -236,10 +241,7 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
               <ProfileReviewCard
                 key={`helpful-review-${item.id}`}
                 review={item}
-                author={{
-                  handle: item.authorHandle,
-                  href: item.authorUserId ? `/users/${item.authorUserId}` : undefined,
-                }}
+                author={item.author}
                 actions={
                   <PostActionsLoader
                     target="review"
@@ -255,7 +257,7 @@ export function HelpfulShelf({ items }: HelpfulShelfProps) {
                 key={`helpful-report-${item.id}`}
                 href={`/reports/${item.id}`}
                 title={item.title}
-                author={item.authorHandle}
+                author={item.author.name}
                 crop={item.cropName}
                 actions={
                   <PostActionsLoader

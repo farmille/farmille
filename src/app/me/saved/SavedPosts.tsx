@@ -43,7 +43,7 @@ export async function SavedPosts({ userId }: { userId: string }) {
                 materialId={review.material_id}
                 currentPath="/me/saved"
                 canManage={review.author_user_id === userId}
-                handle={review.author?.handle ?? "退会したユーザー"}
+                handle={review.author.name}
                 crop={review.crops.map((crop) => crop.name).join("・")}
                 rating={review.rating}
                 helpfulCount={review.helpfulCount}
@@ -71,7 +71,7 @@ export async function SavedPosts({ userId }: { userId: string }) {
               reportId={report.id}
               currentPath="/me/saved"
               title={report.title}
-              author={report.authorHandle}
+              author={report.author.name}
               crop={report.cropName}
               helpfulCount={report.helpfulCount}
               summary={report.summary}

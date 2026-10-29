@@ -93,7 +93,7 @@ export default async function MaterialReviewsPage({
             rating: review.rating,
             body: review.body,
             createdAt: review.created_at,
-            authorName: review.author?.handle ?? "退会したユーザー",
+            authorName: review.author.name,
           })),
         })
       : null;

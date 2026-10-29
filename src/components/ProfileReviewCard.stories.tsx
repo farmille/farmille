@@ -20,7 +20,7 @@ const meta = {
       rating: 4,
       body: "定植前に使いました。根張りが安定し、潅水後の立ち上がりも良好でした。",
     },
-    author: { handle: "緑の畑", label: "生産者・静岡県" },
+    author: { name: "緑の畑", avatarUrl: null, label: "生産者 ・ 静岡県", href: null },
     actions: <span>参考になった 12</span>,
     reportReturnPath: "/materials/material-1",
   },
@@ -33,8 +33,17 @@ export const Default: Story = {};
 
 export const LinkedAuthor: Story = {
   args: {
-    author: { handle: "北のきゅうり農家", href: "/users/00000000-0000-4000-8000-000000000302" },
+    author: {
+      name: "北のきゅうり農家",
+      avatarUrl: null,
+      label: "",
+      href: "/users/00000000-0000-4000-8000-000000000302",
+    },
   },
+};
+
+export const WithdrawnAuthor: Story = {
+  args: { author: { name: "退会済みユーザー", avatarUrl: null, label: "", href: null } },
 };
 
 export const WithPhotos: Story = {

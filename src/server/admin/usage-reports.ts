@@ -5,6 +5,7 @@ import {
   reportMediaUrl,
 } from "@/server/usage-reports/structured";
 import { reportAdminError, withAdmin } from "@/server/admin/guard";
+import { adminMember, type AdminMember } from "@/server/admin/members";
 import { fail, succeed, type Result } from "@/server/result";
 import { reportCrop, type ReportCrop } from "@/server/usage-reports/crop";
 import type { Database } from "@/types/database.types";
@@ -30,13 +31,13 @@ type PendingReportQueryRow = Pick<
   UsageReportRow,
   "id" | "title" | "status" | "created_at" | "crop_name_other"
 > & {
-  author: Pick<ProfileRow, "user_id" | "handle"> | null;
+  author: Pick<ProfileRow, "user_id" | "handle" | "withdrawn_at"> | null;
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
 };
 
 type EditorialDetailQueryRow = UsageReportRow & {
-  author: Pick<ProfileRow, "user_id" | "handle"> | null;
+  author: Pick<ProfileRow, "user_id" | "handle" | "withdrawn_at"> | null;
   crop: Pick<CropRow, "id" | "name"> | null;
   material: Pick<MaterialRow, "id" | "name"> | null;
   media: Pick<MediaRow, "id" | "url" | "media_type" | "caption" | "placement" | "sort_order">[];
@@ -51,7 +52,7 @@ export type PendingUsageReportItem = {
   id: string;
   title: string;
   createdAt: string;
-  author: { userId: string; handle: string };
+  author: AdminMember;
   crop: ReportCrop;
   material: { id: string; name: string };
 };
@@ -79,7 +80,7 @@ export type UsageReportEditorialDetail = {
   negativeNote: string | null;
   summary: string;
   editorNote: string | null;
-  author: { userId: string; handle: string };
+  author: AdminMember;
   crop: ReportCrop;
   material: { id: string; name: string };
   applications: Array<{
@@ -149,7 +150,8 @@ export async function listPendingUsageReports(): Promise<Result<PendingUsageRepo
           created_at,
           author:profiles!usage_reports_author_user_id_fkey (
             user_id,
-            handle
+            handle,
+            withdrawn_at
           ),
           crop_name_other,
           crop:crops!usage_reports_crop_id_fkey (
@@ -175,7 +177,8 @@ export async function listPendingUsageReports(): Promise<Result<PendingUsageRepo
 
     for (const row of rows) {
       const crop = reportCrop(row);
-      if (row.author === null || crop === null || row.material === null) {
+      const author = row.author === null ? null : adminMember(row.author);
+      if (author === null || crop === null || row.material === null) {
         reportError("pending 実証詳細レポートの関連データが欠落", row);
         return fail("internal");
       }
@@ -184,7 +187,7 @@ export async function listPendingUsageReports(): Promise<Result<PendingUsageRepo
         id: row.id,
         title: row.title ?? `${row.material.name} 実証詳細レポート｜${crop.name}`,
         createdAt: row.created_at,
-        author: { userId: row.author.user_id, handle: row.author.handle },
+        author,
         crop,
         material: row.material,
       });
@@ -206,7 +209,8 @@ export async function getUsageReportEditorialDetail(
           *,
           author:profiles!usage_reports_author_user_id_fkey (
             user_id,
-            handle
+            handle,
+            withdrawn_at
           ),
           crop_name_other,
           crop:crops!usage_reports_crop_id_fkey (
@@ -254,8 +258,9 @@ export async function getUsageReportEditorialDetail(
 
     const row: EditorialDetailQueryRow = data;
     const crop = reportCrop(row);
+    const author = row.author === null ? null : adminMember(row.author);
     if (
-      row.author === null ||
+      author === null ||
       crop === null ||
       row.material === null ||
       !isEditorialReportStatus(row.status)
@@ -314,7 +319,7 @@ export async function getUsageReportEditorialDetail(
       negativeNote: row.negative_note,
       summary: row.summary,
       editorNote: row.editor_note,
-      author: { userId: row.author.user_id, handle: row.author.handle },
+      author,
       crop,
       material: row.material,
       applications: row.applications

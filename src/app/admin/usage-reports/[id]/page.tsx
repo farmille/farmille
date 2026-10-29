@@ -3,6 +3,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AdminMemberName } from "@/app/admin/_components/AdminMemberName";
 import { AdminShell } from "@/app/admin/_components/AdminShell";
 import {
   DescriptionList,
@@ -180,11 +181,7 @@ export default async function AdminUsageReportDetailPage({
           items={[
             {
               term: "投稿者",
-              value: (
-                <Link className={linkStyle} href={`/users/${data.author.userId}`}>
-                  {data.author.handle}
-                </Link>
-              ),
+              value: <AdminMemberName member={data.author} linkClassName={linkStyle} />,
             },
             {
               term: "資材",

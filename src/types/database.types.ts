@@ -3242,29 +3242,32 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
-          handle: string
+          handle: string | null
           prefecture_code: number | null
           standpoint: string
           updated_at: string
           user_id: string
+          withdrawn_at: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
-          handle: string
+          handle?: string | null
           prefecture_code?: number | null
           standpoint: string
           updated_at?: string
           user_id: string
+          withdrawn_at?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
-          handle?: string
+          handle?: string | null
           prefecture_code?: number | null
           standpoint?: string
           updated_at?: string
           user_id?: string
+          withdrawn_at?: string | null
         }
         Relationships: []
       }
@@ -4538,6 +4541,7 @@ export type Database = {
           prefecture_code: number | null
           standpoint: string | null
           user_id: string | null
+          withdrawn: boolean | null
         }
         Relationships: []
       }
@@ -4909,6 +4913,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      save_registered_details: {
+        Args: {
+          p_building_name: string
+          p_city_street: string
+          p_family_name: string
+          p_given_name: string
+          p_phone: string
+          p_postal_code: string
+          p_prefecture_code: number
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       save_usage_report: {
         Args: { p_input: Json; p_submit: boolean }
         Returns: {
@@ -5063,6 +5080,10 @@ export type Database = {
           p_review_id: string
         }
         Returns: string
+      }
+      withdraw_general_member: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
       withdraw_manufacturer_profile_version: {
         Args: { p_version_id: string }

@@ -11,6 +11,11 @@ describe("isProtectedPath", () => {
     expect(isProtectedPath("/admin/sellers")).toBe(true);
   });
 
+  it("退会の完了画面は、要ログインの配下でもログインなしで開ける", () => {
+    expect(isProtectedPath("/account/withdrawn")).toBe(false);
+    expect(isProtectedPath("/account/withdraw")).toBe(true);
+    expect(isProtectedPath("/account/details")).toBe(true);
+  });
   it("前方一致だけの別 path を保護対象に含めない", () => {
     expect(isProtectedPath("/members")).toBe(false);
     expect(isProtectedPath("/posts")).toBe(false);

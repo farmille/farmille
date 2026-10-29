@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { postAuthor, type PostAuthor, type PostAuthorRow } from "@/lib/public-profile-label";
 import { getViewerHelpfulVotes } from "@/server/queries/helpful";
 import { DEFAULT_PER_PAGE, pageRange, selectAllRows, type Paginated } from "@/server/pagination";
 import { fail, succeed, type Result } from "@/server/result";
@@ -15,7 +16,6 @@ type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
 type ReviewPhotoRow = Database["public"]["Tables"]["review_photos"]["Row"];
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 type CropGroupRow = Database["public"]["Tables"]["crop_groups"]["Row"];
-type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
 type ReviewFields = Pick<
@@ -23,17 +23,12 @@ type ReviewFields = Pick<
   "id" | "material_id" | "author_user_id" | "rating" | "body" | "is_provided_sample" | "created_at"
 >;
 
-export type ReviewAuthor = Pick<
-  PublicProfileRow,
-  "user_id" | "handle" | "avatar_url" | "standpoint" | "prefecture_code"
->;
-
 export type ReviewCrop = ReviewCropSummary;
 
 export type ReviewPhoto = Pick<ReviewPhotoRow, "id" | "url" | "caption" | "sort_order">;
 
 export type ReviewListItem = ReviewFields & {
-  author: ReviewAuthor | null;
+  author: PostAuthor;
   crops: ReviewCrop[];
   photos: ReviewPhoto[];
   helpfulCount: number;
@@ -58,7 +53,7 @@ export type ReviewEditorData = Pick<
 export type ReviewSort = "newest" | "helpful" | "rating";
 
 type ReviewQueryRow = ReviewFields & {
-  author: ReviewAuthor | null;
+  author: PostAuthorRow | null;
   cropRelations: ReviewCropRelation | null;
   photos: ReviewPhoto[];
 };
@@ -79,6 +74,7 @@ const REVIEW_SELECT = `
   created_at,
   author:public_profiles!reviews_author_user_id_fkey (
     user_id,
+    withdrawn,
     handle,
     avatar_url,
     standpoint,
@@ -172,7 +168,7 @@ function toReviewListItem(
   helpfulCounts: Map<string, number>,
   votedIds: ReadonlySet<string>,
 ): ReviewListItem | null {
-  const { cropRelations, photos, ...fields } = review;
+  const { cropRelations, photos, author: authorRow, ...fields } = review;
   const crops = orderedReviewCrops(cropRelations);
 
   if (crops === null) {
@@ -180,8 +176,15 @@ function toReviewListItem(
     return null;
   }
 
+  const author = postAuthor(authorRow);
+  if (author === null) {
+    reportQueryError("感想口コミの投稿者が欠落", { reviewId: review.id });
+    return null;
+  }
+
   return {
     ...fields,
+    author,
     crops,
     photos: photos.toSorted(byPhotoOrder),
     helpfulCount: helpfulCounts.get(review.id) ?? 0,

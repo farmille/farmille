@@ -88,6 +88,7 @@ async function assertReportTarget(
     .from("public_profiles")
     .select("user_id")
     .eq("user_id", targetId)
+    .eq("withdrawn", false)
     .maybeSingle();
 
   if (error !== null) {

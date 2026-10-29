@@ -11,7 +11,15 @@ import { createAdminSupabase, createIsolatedAuthClient } from "@/server/supabase
 import type { Database } from "@/types/database.types";
 
 import { isHandleTakenByOthersWithSupabase } from "./handle-availability";
+import { getMemberAccount } from "./member-account";
+import {
+  adminRegisteredDetailsStore,
+  loadRegisteredDetails,
+  type RegisteredDetails,
+  type RegisteredDetailsInput,
+} from "./registered-details";
 import { readRegistrationProof, clearRegistrationProof } from "./registration-proof";
+import { liveWithdrawalSteps, withdrawMember } from "./withdrawal";
 
 export type GeneralSignupInput = v.InferOutput<typeof generalRegistrationSchema>;
 export type GeneralSignupFieldErrors = Partial<Record<keyof GeneralSignupInput, string>>;
@@ -149,4 +157,28 @@ export async function registerGeneralUserWithSupabase(
     return fail(toErrorCode(updated.error, "completeRegistration"));
   }
   return succeed({ userId, signedIn: false });
+}
+
+/** ログイン中の一般会員の、本名・連絡先・住所とメールアドレス。 */
+export async function getOwnRegisteredDetails(): Promise<Result<RegisteredDetails>> {
+  const account = await getMemberAccount();
+  if (!account.ok) return account;
+  return loadRegisteredDetails(account.data, adminRegisteredDetailsStore());
+}
+
+export async function saveOwnRegisteredDetails(
+  input: RegisteredDetailsInput,
+): Promise<Result<{ userId: string }>> {
+  const account = await getMemberAccount();
+  if (!account.ok) return account;
+  const saved = await adminRegisteredDetailsStore().save(account.data.userId, input);
+  if (!saved.ok) return saved;
+  return succeed({ userId: account.data.userId });
+}
+
+/** 今のパスワードを確かめてから、ログイン中の一般会員を退会させる。 */
+export async function withdrawOwnAccount(password: string): Promise<Result<null>> {
+  const account = await getMemberAccount();
+  if (!account.ok) return account;
+  return withdrawMember(account.data, password, liveWithdrawalSteps());
 }
