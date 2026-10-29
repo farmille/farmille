@@ -66,7 +66,7 @@ export function isMaterialPage(pathname: string): boolean {
 /** 資材ページ以外から感想口コミの段階へ進むときに開く、投稿の入口（資材を選んで書く）。 */
 export const REVIEW_ENTRY_HREF = "/post?type=review";
 const reviewEntryPath = "/post";
-const reviewFormPath = /^\/materials\/[^/]+\/review\/(?:new|[^/]+\/edit)$/;
+const reviewFormPath = /^(\/materials\/[^/]+)\/review\/(?:new|[^/]+\/edit)$/;
 
 /** その段階の案内を、いまの画面で出してよいか。案内中にほかの画面へ移ったときは出さない。 */
 export function onboardingShowsOn(step: OnboardingStep, pathname: string): boolean {
@@ -93,6 +93,14 @@ export function onboardingShowsOn(step: OnboardingStep, pathname: string): boole
 }
 
 /**
+ * 最後のシートを閉じた後に移る、その資材の資材ページ。
+ * 投稿画面以外（資材ページ・投稿の入口）で閉じたときは、いまの画面のまま案内を終えるので null。
+ */
+export function onboardingFinishHref(pathname: string): string | null {
+  return reviewFormPath.exec(pathname)?.[1] ?? null;
+}
+
+/**
  * 「この手順をスキップ」で次の段階へ移るとき、その段階の案内が出る画面へ移る先。いまの画面のままでよければ null。
  */
 export function onboardingSkipHref(next: OnboardingStep, pathname: string): string | null {
@@ -101,14 +109,23 @@ export function onboardingSkipHref(next: OnboardingStep, pathname: string): stri
   return null;
 }
 
+const stepsBeforeReviewForm: readonly OnboardingStep[] = [
+  "searchIntro",
+  "search",
+  "materialScroll",
+  "reviewIntro",
+  "reviewLink",
+];
+
 /** 画面を移ったことで次へ進む段階（資材ページが開いた・投稿画面が開いた）。 */
 export function onboardingStepAfterNavigation(
   step: OnboardingStep,
   pathname: string,
 ): OnboardingStep | null {
   if (step === "search" && materialPath.test(pathname)) return "materialScroll";
-  // 投稿画面が開いたところで案内を終える（その後の入力と投稿は普段どおり）
-  if (step === "reviewLink" && reviewFormPath.test(pathname)) return "finish";
+  // 投稿画面が開いたところで案内を終える（その後の入力と投稿は普段どおり）。
+  // 案内の途中で自分から投稿画面を開いた場合も、投稿した後に資材ページで感想口コミの案内を出し直さない
+  if (stepsBeforeReviewForm.includes(step) && reviewFormPath.test(pathname)) return "finish";
   return null;
 }
 

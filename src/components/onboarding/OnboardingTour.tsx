@@ -9,6 +9,7 @@ import {
   clearOnboarding,
   isMaterialPage,
   isOnboardingPending,
+  onboardingFinishHref,
   onboardingShowsOn,
   onboardingSkipHref,
   onboardingStepAfterNavigation,
@@ -93,6 +94,9 @@ const SECTION_OFFSET = 72;
 const FINISH_FAILED = "チュートリアルを終了できませんでした。時間を置いて再度お試しください。";
 // 最後のお礼を出しておく時間
 const THANKS_SHOWN = 1600;
+// PC のヘッダーとスマートフォンの下部ナビでは入口の名前が違うので、どちらの名前も書く
+const FINISH_BODY =
+  "使用したことのある資材があれば、感想口コミを投稿してください。投稿するときは、画面上部の「投稿する」（スマートフォンでは画面下の「＋」）を押します。";
 
 /**
  * 案内を終えた印をアカウントに残し、セッションを取り直してから、このブラウザの進み具合を消す。
@@ -123,17 +127,31 @@ async function finishOnboarding(userId: string): Promise<boolean> {
  * 登録後に案内を終えていない一般会員でログインしているときだけ、実際の画面の上に案内を重ねる。
  */
 export function OnboardingTour() {
+  return <OnboardingTourWith findPendingUser={pendingUserId} finish={finishOnboarding} />;
+}
+
+type OnboardingTourWithProps = {
+  /** 案内を待っているアカウントなら、その利用者の id を返す。 */
+  findPendingUser: () => Promise<string | null>;
+  /** 案内を終えた印をアカウントとブラウザから消す。消せたら true。 */
+  finish: (userId: string) => Promise<boolean>;
+};
+
+/** 案内を待つ利用者の判定と、終えた印の消し方を受け取って案内を出す。 */
+export function OnboardingTourWith({ findPendingUser, finish }: OnboardingTourWithProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const step = useSyncExternalStore(subscribe, () => readStep(userId), readNothing);
-  const [thanks, setThanks] = useState(false);
+  const [finishing, setFinishing] = useState(false);
+  // お礼を出している間だけ値を持つ。next はお礼の後に移る画面（いまの画面のままなら null）
+  const [thanks, setThanks] = useState<{ next: string | null } | null>(null);
 
   // 案内を待っているアカウントで、このブラウザにまだその人の進み具合が無ければ、ようこそから始める。
   // 終えた直後に古い判定で始め直さないよう、取り直した判定だけで決める
   useEffect(() => {
     let alive = true;
-    void pendingUserId().then((id) => {
+    void findPendingUser().then((id) => {
       if (!alive) return;
       setUserId(id);
       if (id !== null && readStep(id) === null) saveStep(id, "welcome");
@@ -141,7 +159,7 @@ export function OnboardingTour() {
     return () => {
       alive = false;
     };
-  }, [step, pathname]);
+  }, [step, pathname, findPendingUser]);
 
   // 画面を移ったことで進む段階（資材ページが開いた・投稿画面が開いた）
   useEffect(() => {
@@ -150,12 +168,12 @@ export function OnboardingTour() {
     if (after !== null) saveStep(userId, after);
   }, [step, pathname, userId]);
 
-  // お礼を短く出してからホームへ戻る。終えた印は「閉じる」の時点で残してある
+  // お礼を短く出してから、その資材の資材ページへ移る。終えた印は「閉じる」で消し終えている
   useEffect(() => {
-    if (!thanks) return;
+    if (thanks === null) return;
     const leave = window.setTimeout(() => {
-      setThanks(false);
-      router.push("/");
+      setThanks(null);
+      if (thanks.next !== null) router.push(thanks.next);
     }, THANKS_SHOWN);
     return () => window.clearTimeout(leave);
   }, [thanks, router]);
@@ -168,14 +186,20 @@ export function OnboardingTour() {
   );
   const push = useCallback((href: string) => router.push(href), [router]);
   const end = useCallback(async () => {
-    if (userId !== null && (await finishOnboarding(userId)))
-      toast("チュートリアルを終了しました。");
-  }, [userId]);
+    if (userId !== null && (await finish(userId))) toast("チュートリアルを終了しました。");
+  }, [userId, finish]);
+  // 最後の「閉じる」は、印を消し終えるまでボタンを読み込み中にする。
+  // 消せなかったときはエラーを出してシートを残し、もう一度押せるようにする
   const complete = useCallback(async () => {
-    if (userId !== null && (await finishOnboarding(userId))) setThanks(true);
-  }, [userId]);
+    if (userId === null) return;
+    const next = onboardingFinishHref(pathname);
+    setFinishing(true);
+    const finished = await finish(userId);
+    setFinishing(false);
+    if (finished) setThanks({ next });
+  }, [userId, finish, pathname]);
 
-  if (thanks) return <TourSaved title="ありがとうございました" />;
+  if (thanks !== null) return <TourSaved title="ありがとうございました" />;
   if (step === null || !onboardingShowsOn(step, pathname)) return null;
   return (
     <TourStep
@@ -185,6 +209,7 @@ export function OnboardingTour() {
       go={go}
       end={end}
       complete={complete}
+      finishing={finishing}
       push={push}
     />
   );
@@ -196,11 +221,13 @@ type TourStepProps = {
   go: (next: OnboardingStep) => void;
   end: () => void;
   complete: () => void;
+  /** 最後の「閉じる」を押した後、印を消し終えるまでの間 */
+  finishing: boolean;
   push: (href: string) => void;
 };
 
 /** 段階ごとの案内。段階が変わるたびに作り直し、たたんだ状態などを持ち越さない。 */
-function TourStep({ step, pathname, go, end, complete, push }: TourStepProps) {
+function TourStep({ step, pathname, go, end, complete, finishing, push }: TourStepProps) {
   // 次の段階の案内が出る画面へ移り、スキップした画面に取り残さない
   const skip = () => {
     const next = skipOnboardingSection(step);
@@ -224,7 +251,7 @@ function TourStep({ step, pathname, go, end, complete, push }: TourStepProps) {
       return (
         <TourSheet
           title="プロフィールの設定"
-          body="栽培作目を登録すると、作目に合った資材やレポートを見つけやすくなります。"
+          body="栽培作目を登録すると、作目に合った資材や実証詳細レポートを見つけやすくなります。"
           section={{ current: 1, total: 3 }}
           primaryLabel="プロフィール画面へ"
           onPrimary={() => {
@@ -247,8 +274,8 @@ function TourStep({ step, pathname, go, end, complete, push }: TourStepProps) {
         <InputStep
           target={SEARCH_BOX}
           title="資材名・メーカー名を入力"
-          body="候補から選ぶと、検索結果が絞り込まれます（例：鉄力、BIOZ、ICL JAPAN）。"
-          message="候補から検索条件を選び、検索結果から資材を選んでください（条件は追加できます）。"
+          body="資材名やメーカー名を入力すると、候補が表示されます（例：鉄力、BIOZ、ICL JAPAN）。候補を選択すると、該当する資材だけが表示されます。"
+          message="候補を選択すると、該当する資材だけが表示されます。表示された資材を1つ押して、資材ページを開いてください。"
           section={2}
           startCollapsed={hasFocusIn(SEARCH_BOX)}
           skip={skip}
@@ -286,9 +313,10 @@ function TourStep({ step, pathname, go, end, complete, push }: TourStepProps) {
       return (
         <TourSheet
           title="チュートリアルはこれで完了です"
-          body="使用したことのある資材があれば、感想口コミを記入してみてください。プロフィールの変更はマイページから、感想口コミの投稿は画面下の「＋」から、いつでもできます。"
+          body={FINISH_BODY}
           primaryLabel="閉じる"
           onPrimary={complete}
+          primaryLoading={finishing}
         />
       );
   }

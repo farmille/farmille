@@ -45,6 +45,6 @@ export const WithPrimary: Story = {
 export const BodyOnly: Story = {
   args: {
     section: 2,
-    body: "候補から検索条件を選び、検索結果から資材を選んでください（条件は追加できます）。",
+    body: "候補を選択すると、該当する資材だけが表示されます。表示された資材を1つ押して、資材ページを開いてください。",
   },
 };

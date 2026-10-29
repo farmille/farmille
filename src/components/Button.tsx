@@ -1,7 +1,8 @@
 import { Button as BaseButton } from "@base-ui/react/button";
 import type { ComponentPropsWithRef } from "react";
 
-import { cva, cx, type RecipeVariantProps } from "../../styled-system/css";
+import { Icon } from "./Icon";
+import { css, cva, cx, type RecipeVariantProps } from "../../styled-system/css";
 
 const buttonRecipe = cva({
   base: {
@@ -57,14 +58,36 @@ const buttonRecipe = cva({
         fontSize: "sm",
       },
     },
+    /** 読み込み中。回る印を文字の上に重ねる */
+    loading: {
+      true: { position: "relative" },
+      false: {},
+    },
   },
   defaultVariants: {
     variant: "primary",
     size: "md",
+    loading: false,
   },
 });
 
 export type ButtonVariants = RecipeVariantProps<typeof buttonRecipe>;
+
+// 読み込み中は文字を見えなくして幅を保ち、その上に回る印を重ねる
+const loadingLabelStyle = css({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "[inherit]",
+  opacity: "0",
+});
+const spinnerStyle = css({
+  position: "absolute",
+  inset: "0",
+  m: "auto",
+  animation: "[icon-spin 1s linear infinite]",
+  _motionReduce: { animation: "none" },
+});
 
 type ButtonProps = ButtonVariants &
   Omit<ComponentPropsWithRef<"button">, "color" | "className"> & {
@@ -73,10 +96,39 @@ type ButtonProps = ButtonVariants &
     focusableWhenDisabled?: boolean;
   };
 
-/** プライマリ／ゴースト／危険の共通ボタン（モック .btn）。 */
-export function Button({ variant, size, className, type = "button", ...rest }: ButtonProps) {
+/**
+ * プライマリ／ゴースト／危険の共通ボタン（モック .btn）。
+ * loading の間は押せなくし、文字の幅を保ったまま回る印を出す。押したボタンからフォーカスは外さない。
+ */
+export function Button({
+  variant,
+  size,
+  className,
+  type = "button",
+  loading = false,
+  disabled,
+  focusableWhenDisabled,
+  children,
+  ...rest
+}: ButtonProps) {
   return (
-    <BaseButton {...rest} className={cx(buttonRecipe({ variant, size }), className)} type={type} />
+    <BaseButton
+      {...rest}
+      className={cx(buttonRecipe({ variant, size, loading }), className)}
+      type={type}
+      disabled={disabled === true || loading}
+      focusableWhenDisabled={focusableWhenDisabled === true || loading}
+      aria-busy={loading ? true : undefined}
+    >
+      {loading ? (
+        <>
+          <span className={loadingLabelStyle}>{children}</span>
+          <Icon name="loader" size="sm" className={spinnerStyle} />
+        </>
+      ) : (
+        children
+      )}
+    </BaseButton>
   );
 }
 

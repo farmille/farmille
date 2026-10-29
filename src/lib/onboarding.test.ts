@@ -5,6 +5,7 @@ import {
   ONBOARDING_STORAGE_KEY,
   clearOnboarding,
   isOnboardingPending,
+  onboardingFinishHref,
   onboardingShowsOn,
   onboardingSkipHref,
   onboardingStepAfterNavigation,
@@ -104,6 +105,36 @@ describe("初回ログインの案内の進み具合", () => {
     expect(onboardingStepAfterNavigation("reviewLink", "/materials/abc/review/r1/edit")).toBe(
       "finish",
     );
+  });
+
+  it("案内の途中で自分から投稿画面を開いたときも、終了へ進む", () => {
+    for (const step of [
+      "searchIntro",
+      "search",
+      "materialScroll",
+      "reviewIntro",
+      "reviewLink",
+    ] as const) {
+      expect(onboardingStepAfterNavigation(step, "/materials/abc/review/new")).toBe("finish");
+    }
+    expect(onboardingStepAfterNavigation("materialScroll", "/materials/abc")).toBeNull();
+    expect(onboardingStepAfterNavigation("materialScroll", "/search")).toBeNull();
+  });
+
+  it("プロフィールまでの段階と終了は、投稿画面が開いても動かさない", () => {
+    for (const step of ["welcome", "profileIntro", "profile", "profileSaving", "finish"] as const) {
+      expect(onboardingStepAfterNavigation(step, "/materials/abc/review/new")).toBeNull();
+    }
+  });
+
+  it("投稿画面で最後のシートを閉じたら、その資材の資材ページへ移る", () => {
+    expect(onboardingFinishHref("/materials/abc/review/new")).toBe("/materials/abc");
+    expect(onboardingFinishHref("/materials/abc/review/r1/edit")).toBe("/materials/abc");
+  });
+
+  it("資材ページと投稿の入口で最後のシートを閉じたら、いまの画面のまま終える", () => {
+    expect(onboardingFinishHref("/materials/abc")).toBeNull();
+    expect(onboardingFinishHref("/post")).toBeNull();
   });
 
   it("案内を終えていない一般会員だけを案内の対象にする", () => {

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, fn, userEvent, within } from "storybook/test";
 
 import { css } from "../../styled-system/css";
 import { Button } from "./Button";
@@ -57,6 +58,43 @@ export const FocusableWhenDisabled: Story = {
     disabled: true,
     focusableWhenDisabled: true,
     children: "送信中…",
+  },
+};
+
+/** 読み込み中は押せず、文字の幅を保ったまま回る印を出す。読み上げでは名前を変えずに処理中を伝える。 */
+export const Loading: Story = {
+  args: { loading: true, children: "閉じる", onClick: fn() },
+  play: async ({ args, canvasElement }) => {
+    const button = within(canvasElement).getByRole("button", { name: "閉じる" });
+    await expect(button).toHaveAttribute("aria-busy", "true");
+    await expect(button).toHaveAttribute("aria-disabled", "true");
+    await userEvent.click(button);
+    await expect(args.onClick).not.toHaveBeenCalled();
+  },
+};
+
+/** 読み込み中と通常のボタンを並べ、幅が変わらないことを確かめる。 */
+export const LoadingKeepsWidth: Story = {
+  render: () => (
+    <div className={css({ display: "grid", gap: "2", justifyItems: "start" })}>
+      <Button size="sm">チュートリアルを閉じる</Button>
+      <Button size="sm" loading>
+        チュートリアルを閉じる
+      </Button>
+      <Button size="sm" variant="ghost">
+        チュートリアルを閉じる
+      </Button>
+      <Button size="sm" variant="ghost" loading>
+        チュートリアルを閉じる
+      </Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const [idle, loading, idleGhost, loadingGhost] = within(canvasElement).getAllByRole("button");
+    await expect(loading.getBoundingClientRect().width).toBe(idle.getBoundingClientRect().width);
+    await expect(loadingGhost.getBoundingClientRect().width).toBe(
+      idleGhost.getBoundingClientRect().width,
+    );
   },
 };
 
