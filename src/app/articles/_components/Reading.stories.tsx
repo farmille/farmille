@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { ReadingHeading, ReadingMarkdown, ReadingProse } from "./Reading";
+import { ReadingHeading, ReadingMarkdown, ReadingProse, ReadingSubheading } from "./Reading";
 import { readingFrame } from "./story-frame";
 
 const meta = {
@@ -15,6 +15,17 @@ export const Prose: Story = {
   render: (args) => (
     <>
       <ReadingHeading>結果・感想</ReadingHeading>
+      <ReadingProse {...args} />
+    </>
+  ),
+};
+export const Subheading: Story = {
+  render: (args) => (
+    <>
+      <ReadingHeading>比較・使用結果</ReadingHeading>
+      <ReadingSubheading>比較した区</ReadingSubheading>
+      <ReadingProse {...args} />
+      <ReadingSubheading>使用結果の詳細：可販果率</ReadingSubheading>
       <ReadingProse {...args} />
     </>
   ),

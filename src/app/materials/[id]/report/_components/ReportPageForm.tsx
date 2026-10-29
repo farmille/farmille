@@ -21,6 +21,7 @@ import {
 } from "@/lib/pdf-reading";
 import {
   createBlankUsageReport,
+  REPORT_COMPARISON_HEADING,
   reportNeedsMaterialAcks,
   type UsageReportInput,
 } from "@/lib/usage-report";
@@ -612,7 +613,8 @@ export function ReportPageForm({
           </div>
 
           <h2 className={heading("comparison")}>
-            比較・使用結果<span className={requirementMark}>必須</span>
+            {REPORT_COMPARISON_HEADING}
+            <span className={requirementMark}>必須</span>
           </h2>
           <h3 className={heading("plots", 3)} id="report-plots">
             比べた区

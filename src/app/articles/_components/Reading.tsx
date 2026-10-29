@@ -83,6 +83,13 @@ export function ReadingHeading({
   );
 }
 
+const subheadingStyle = css({ textStyle: "body", fontWeight: "bold", mt: "4", mb: "1.5" });
+
+/** ReadingHeading の節の中を分ける見出し。 */
+export function ReadingSubheading({ children }: { children: ReactNode }) {
+  return <h3 className={subheadingStyle}>{children}</h3>;
+}
+
 const proseText = { textStyle: "prose", color: "text.muted" } as const;
 
 export function ReadingProse({ text }: { text: string }) {
