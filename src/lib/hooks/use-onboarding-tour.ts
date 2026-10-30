@@ -4,17 +4,14 @@ import {
   startTransition,
   useActionState,
   useCallback,
-  useEffect,
   useReducer,
   useSyncExternalStore,
 } from "react";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import {
-  PROFILE_SAVED_SEARCH,
   clearOnboarding,
   isOnboardingPending,
   onboardingFinishHref,
-  onboardingStepAfterNavigation,
   readOnboardingStep,
   writeOnboardingStep,
   type OnboardingStep,
@@ -22,6 +19,7 @@ import {
 import { finishOnboardingAction } from "@/server/actions/onboarding";
 import { errorMessageJa } from "@/server/errors";
 import { toast } from "@/components/Toaster";
+import { useMountEffect } from "./use-mount-effect";
 
 // 案内の進み具合は localStorage に置き、同じタブの書き換えはこの購読者へ配る
 const listeners = new Set<() => void>();
@@ -34,7 +32,7 @@ function subscribe(listener: () => void) {
   };
 }
 // localStorage を使えないブラウザ（保存を拒否する設定など）では、進み具合を持てないので案内を出さない
-function readStep(userId: string | null): OnboardingStep | null {
+export function readStep(userId: string | null): OnboardingStep | null {
   if (userId === null) return null;
   try {
     return readOnboardingStep(window.localStorage, userId);
@@ -43,7 +41,7 @@ function readStep(userId: string | null): OnboardingStep | null {
   }
 }
 const readNothing = () => null;
-function saveStep(userId: string, step: OnboardingStep | null) {
+export function saveStep(userId: string, step: OnboardingStep | null) {
   try {
     if (step === null) clearOnboarding(window.localStorage);
     else writeOnboardingStep(window.localStorage, userId, step);
@@ -66,19 +64,15 @@ export async function pendingUserId(): Promise<string | null> {
 }
 
 /** data-tour の目印が画面に出るまで待つ（画面の移動直後や読み込み中は、まだない）。 */
-export function useTourTarget(name: string | null): Element | null {
+export function useTourTarget(name: string): Element | null {
   const [found, setFound] = useReducer(
-    (
-      _current: { name: string; element: Element } | null,
-      next: { name: string; element: Element } | null,
-    ) => next,
+    (_current: Element | null, next: Element | null) => next,
     null,
   );
-  useEffect(() => {
-    if (name === null) return;
+  useMountEffect(() => {
     const look = () => {
       const element = document.querySelector(`[data-tour="${name}"]`);
-      if (element !== null) setFound({ name, element });
+      if (element !== null) setFound(element);
       return element !== null;
     };
     if (look()) return;
@@ -86,15 +80,11 @@ export function useTourTarget(name: string | null): Element | null {
       if (look()) window.clearInterval(timer);
     }, 200);
     return () => window.clearInterval(timer);
-  }, [name]);
-  return name !== null && found?.name === name && found.element.isConnected ? found.element : null;
+  });
+  return found?.isConnected === true ? found : null;
 }
 
-// 実証詳細レポートの見出しが画面の上から半分より上に来たら、見たものとして次へ進む
-const SECTION_SEEN = 0.5;
 const FINISH_FAILED = "チュートリアルを終了できませんでした。時間を置いて再度お試しください。";
-// 最後のお礼を出しておく時間
-const THANKS_SHOWN = 1600;
 
 /**
  * 案内を終えた印をアカウントに残し、セッションを取り直してから、このブラウザの進み具合を消す。
@@ -132,7 +122,7 @@ type FinishRequest =
   | { kind: "end"; userId: string }
   | { kind: "complete"; userId: string; next: string | null };
 
-export function useOnboardingTour({ findPendingUser, finish }: OnboardingTourWithProps) {
+export function useOnboardingTour(finish: OnboardingTourWithProps["finish"]) {
   const pathname = usePathname();
   const router = useRouter();
   const [userId, setUserId] = useReducer(
@@ -158,36 +148,14 @@ export function useOnboardingTour({ findPendingUser, finish }: OnboardingTourWit
   );
   const thanks = completion.status === "thanks" && !thanksHidden ? completion : null;
 
-  // 案内を待っているアカウントで、このブラウザにまだその人の進み具合が無ければ、ようこそから始める。
-  // 終えた直後に古い判定で始め直さないよう、取り直した判定だけで決める
-  useEffect(() => {
-    let alive = true;
-    void findPendingUser().then((id) => {
-      if (!alive) return;
-      setUserId(id);
-      if (id !== null && readStep(id) === null) saveStep(id, "welcome");
-    });
-    return () => {
-      alive = false;
-    };
-  }, [step, pathname, findPendingUser]);
-
-  // 画面を移ったことで進む段階（資材ページが開いた・投稿画面が開いた）
-  useEffect(() => {
-    if (step === null || userId === null) return;
-    const after = onboardingStepAfterNavigation(step, pathname);
-    if (after !== null) saveStep(userId, after);
-  }, [step, pathname, userId]);
-
-  // お礼を短く出してから、その資材の資材ページへ移る。終えた印は「閉じる」で消し終えている
-  useEffect(() => {
-    if (thanks === null) return;
-    const leave = window.setTimeout(() => {
+  // お礼を出し終えたら、その資材の資材ページへ移る。終えた印は「閉じる」で消し終えている
+  const leaveThanks = useCallback(
+    (next: string | null) => {
       setThanksHidden(true);
-      if (thanks.next !== null) router.push(thanks.next);
-    }, THANKS_SHOWN);
-    return () => window.clearTimeout(leave);
-  }, [thanks, router]);
+      if (next !== null) router.push(next);
+    },
+    [router],
+  );
 
   const go = useCallback(
     (next: OnboardingStep) => {
@@ -208,10 +176,21 @@ export function useOnboardingTour({ findPendingUser, finish }: OnboardingTourWit
     startTransition(() => finishTour({ kind: "complete", userId, next }));
   }, [userId, finishing, finishTour, pathname]);
 
-  return { pathname, step, thanks, go, end, complete, finishing, push };
+  return {
+    pathname,
+    userId,
+    setUserId,
+    step,
+    thanks,
+    leaveThanks,
+    go,
+    end,
+    complete,
+    finishing,
+    push,
+  };
 }
 
-const SEARCH_BOX = "search-box";
 const INTERACTIVE =
   "a[href], button, input, select, textarea, label, [role=button], [role=combobox], [tabindex]:not([tabindex='-1'])";
 
@@ -219,7 +198,7 @@ const INTERACTIVE =
  * 入力が目的の場面で、案内の外を押したときの扱い。どこを押しても説明をたたんで次へ進める。
  * リンクやボタンは本来の動きのまま通し、何もないところを押したときだけ入力欄を開く。
  */
-function takeBackgroundTap(event: MouseEvent, target: Element | null): boolean {
+export function takeBackgroundTap(event: MouseEvent, target: Element | null): boolean {
   if (!(event.target instanceof Element)) return false;
   if (event.target.closest("[data-tour-sheet], [data-tour-tip], [role=status]") !== null)
     return false;
@@ -227,103 +206,4 @@ function takeBackgroundTap(event: MouseEvent, target: Element | null): boolean {
     target?.querySelector<HTMLElement>("input:not([type=hidden]), textarea")?.focus();
   }
   return true;
-}
-
-/** 説明を読んだら「入力する」か、欄を直接触った時点で説明をたたみ、画面の下の帯に切り替える。 */
-export function useCollapsed(target: Element | null, initial = false): [boolean, () => void] {
-  const [collapsed, setCollapsed] = useReducer((_current: boolean, next: boolean) => next, initial);
-  const collapse = useCallback(() => {
-    setCollapsed(true);
-    const field = target?.querySelector<HTMLElement>("input:not([type=hidden]), textarea");
-    field?.focus();
-  }, [target]);
-  useEffect(() => {
-    if (target === null || collapsed) return;
-    const fold = () => setCollapsed(true);
-    // この段階の目的は入力なので、吹き出しの外のどこを押しても、説明をたたんで入力欄を開く
-    const onClick = (event: MouseEvent) => {
-      if (takeBackgroundTap(event, target)) setCollapsed(true);
-    };
-    target.addEventListener("focusin", fold);
-    target.addEventListener("pointerdown", fold);
-    document.addEventListener("click", onClick, true);
-    return () => {
-      target.removeEventListener("focusin", fold);
-      target.removeEventListener("pointerdown", fold);
-      document.removeEventListener("click", onClick, true);
-    };
-  }, [target, collapsed, collapse]);
-  return [collapsed, collapse];
-}
-
-export function useOnboardingSearchIntro(onSearch: boolean, go: (step: OnboardingStep) => void) {
-  useEffect(() => {
-    if (!onSearch) return;
-    const onClick = (event: MouseEvent) => {
-      if (takeBackgroundTap(event, document.querySelector(`[data-tour="${SEARCH_BOX}"]`))) {
-        go("search");
-      }
-    };
-    document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
-  }, [onSearch, go]);
-}
-
-export function useOnboardingProfileProgress(
-  step: OnboardingStep,
-  pathname: string,
-  go: (step: OnboardingStep) => void,
-  push: (href: string) => void,
-) {
-  const [saved, setSaved] = useReducer((_current: boolean, next: boolean) => next, false);
-
-  // 案内を読まずに画面の「保存する」を押した場合も含め、プロフィールのフォームを送ったら保存待ちにする
-  useEffect(() => {
-    const onSubmit = (event: SubmitEvent) => {
-      if (event.target instanceof Element && event.target.closest('[data-tour="profile-form"]')) {
-        go("profileSaving");
-      }
-    };
-    document.addEventListener("submit", onSubmit, true);
-    return () => document.removeEventListener("submit", onSubmit, true);
-  }, [go]);
-
-  // 保存できるとマイページへ移る。そこで保存したことを伝えてから、検索画面へ移って次の段階の案内を出す。
-  // 保存できずにキャンセルなどでマイページへ移ったときは、プロフィールの段階へ戻す
-  useEffect(() => {
-    if (step !== "profileSaving" || pathname !== "/me") return;
-    if (window.location.search !== PROFILE_SAVED_SEARCH) {
-      go("profile");
-      return;
-    }
-    const show = window.setTimeout(() => setSaved(true), 0);
-    const leave = window.setTimeout(() => {
-      go("searchIntro");
-      push("/search");
-    }, 1900);
-    return () => {
-      window.clearTimeout(show);
-      window.clearTimeout(leave);
-    };
-  }, [step, pathname, go, push]);
-
-  return saved;
-}
-
-export function useOnboardingReportSection(
-  reports: Element | null,
-  go: (step: OnboardingStep) => void,
-) {
-  useEffect(() => {
-    if (reports === null) return;
-    const onScroll = () => {
-      if (reports.getBoundingClientRect().top < window.innerHeight * SECTION_SEEN)
-        go("reviewIntro");
-    };
-    // スクロール位置が戻されて、目印が出た時点でもう見えていることもある。
-    // 読み込み直後（まだスクロールしていない）は上の要素が描き終わっておらず位置が浅く出るので、判定しない
-    if (window.scrollY > 0) onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [go, reports]);
 }

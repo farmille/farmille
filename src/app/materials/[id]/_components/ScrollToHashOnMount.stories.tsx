@@ -9,7 +9,7 @@ const noteStyle = css({ color: "text.subtle", fontSize: "sm" });
 const meta = {
   title: "Pages/materials/[id]/ScrollToHashOnMount",
   component: ScrollToHashOnMount,
-  args: { headingId: "reviews-heading", cardIdPrefix: "review-", trigger: 1 },
+  args: { headingId: "reviews-heading", cardIdPrefix: "review-" },
   render: (args) => (
     <>
       <ScrollToHashOnMount {...args} />

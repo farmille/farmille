@@ -3,9 +3,10 @@
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm, useStore } from "@tanstack/react-form";
-import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
-import { useArticleCreatedNavigation, useArticleSearchFocus } from "@/lib/hooks/use-article-editor";
+import { PersistedInput } from "@/components/form";
+import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import {
   useActionState,
@@ -14,6 +15,7 @@ import {
   useReducer,
   useTransition,
   type ChangeEvent,
+  type RefObject,
 } from "react";
 import * as v from "valibot";
 
@@ -91,6 +93,14 @@ type ArticleFormBaseProps = {
 type ArticleFormProps = ArticleFormBaseProps &
   ({ mode: "create"; articleId?: never } | { mode: "edit"; articleId: string });
 
+/** 無効にしていた検索欄へ、候補が出たときにフォーカスを戻す。候補が変わるたびに作り直す（key）。 */
+function FocusOnMount({ target }: { target: RefObject<HTMLInputElement | null> }) {
+  useMountEffect(() => {
+    target.current?.focus();
+  });
+  return null;
+}
+
 function isImageFile(file: File): file is File & { type: keyof typeof fileExtensionByType } {
   return file.type in fileExtensionByType;
 }
@@ -159,8 +169,14 @@ export function ArticleForm({
   const boundAction =
     mode === "create" ? createArticleAction : updateArticleAction.bind(null, articleId);
 
+  const router = useRouter();
   const [state, formAction, pending] = useActionState<SellerArticleFormState, FormData>(
-    boundAction,
+    async (previous, formData) => {
+      const next = await boundAction(previous, formData);
+      if (mode === "create" && next.status === "success" && next.articleId !== undefined)
+        router.replace(`/dashboard/articles/${next.articleId}/edit`);
+      return next;
+    },
     initialSellerArticleFormState,
   );
   const fieldErrors = sellerArticleFieldErrors(state);
@@ -183,20 +199,19 @@ export function ArticleForm({
     if (state.status === "success") setSavedInput(JSON.stringify(input));
   }
   // 送信中は控えを消し、公開後のリダイレクトで画面が外れても書きかけを残さない。失敗したら控え直す
-  usePersistedInput({
-    name: "article",
-    schema: ArticleInputSchema,
-    unsaved: pending || JSON.stringify(input) === savedInput ? null : input,
-    restore: (saved) => {
-      form.setFieldValue("title", saved.title);
-      form.setFieldValue("body", saved.body);
-      form.setFieldValue("heroImageUrl", saved.heroImageUrl);
-      form.setFieldValue("materials", saved.materials);
-    },
-  });
-
-  useArticleCreatedNavigation(state, mode);
-  useArticleSearchFocus(materialSearchRef, materialHits, searchPending);
+  const persistedInput = (
+    <PersistedInput
+      name="article"
+      schema={ArticleInputSchema}
+      unsaved={pending || JSON.stringify(input) === savedInput ? null : input}
+      restore={(saved) => {
+        form.setFieldValue("title", saved.title);
+        form.setFieldValue("body", saved.body);
+        form.setFieldValue("heroImageUrl", saved.heroImageUrl);
+        form.setFieldValue("materials", saved.materials);
+      }}
+    />
+  );
 
   async function uploadArticleImage(file: File): Promise<string | null> {
     if (!isImageFile(file)) {
@@ -311,6 +326,7 @@ export function ArticleForm({
 
   return (
     <div className={formLayout}>
+      {persistedInput}
       <Form
         action={formAction}
         className={formLayout}
@@ -467,6 +483,12 @@ export function ArticleForm({
       </Form>
 
       <div className={formLayout}>
+        {!searchPending && materialHits.length > 0 && (
+          <FocusOnMount
+            key={materialHits.map((material) => material.id).join()}
+            target={materialSearchRef}
+          />
+        )}
         <Autocomplete
           label="資材を検索して追加"
           requirement="optional"

@@ -3,7 +3,8 @@ import { controlledFormInput, stateManagement } from "./state-management.mjs";
 
 const tester = new RuleTester({ languageOptions: { ecmaVersion: "latest", sourceType: "module" } });
 const filename = `${process.cwd()}/src/components/Example.js`;
-const hook = `${process.cwd()}/src/lib/hooks/use-example.js`;
+const mountEffect = `${process.cwd()}/src/lib/hooks/use-mount-effect.ts`;
+const hook = `${process.cwd()}/src/lib/hooks/use-example.ts`;
 tester.run("state-management", stateManagement, {
   valid: [
     {
@@ -11,12 +12,8 @@ tester.run("state-management", stateManagement, {
       code: 'import { useReducer } from "react"; function Example() { return useReducer((s, a) => a, false); }',
     },
     {
-      filename: hook,
-      code: 'import { useEffect as effect } from "react"; export function useExample() { effect(() => {}, []); }',
-    },
-    {
-      filename: hook,
-      code: 'import React from "react"; const useExample = () => { React.useLayoutEffect(() => {}, []); };',
+      filename: mountEffect,
+      code: 'import { useEffect } from "react"; export function useMountEffect(effect) { useEffect(effect, []); }',
     },
     { filename, code: "const x = { useState() {} }; x.useState();" },
     { filename, code: 'import React from "react"; function x(React) { React.useState(); }' },
@@ -56,7 +53,27 @@ tester.run("state-management", stateManagement, {
     { filename, code: 'import { useEffect } from "react";', errors: [{ messageId: "effect" }] },
     {
       filename: hook,
-      code: 'import { useEffect } from "react"; function Example() { useEffect(() => {}, []); }',
+      code: 'import { useEffect } from "react"; export function useExample() { useEffect(() => {}, []); }',
+      errors: [{ messageId: "effect" }],
+    },
+    {
+      filename: hook,
+      code: 'import React from "react"; const useExample = () => { React.useLayoutEffect(() => {}, []); };',
+      errors: [{ messageId: "effect" }],
+    },
+    {
+      filename: mountEffect,
+      code: 'import { useEffect } from "react"; export function useMountEffect(effect, deps) { useEffect(effect, deps); }',
+      errors: [{ messageId: "effect" }],
+    },
+    {
+      filename: mountEffect,
+      code: 'import { useEffect } from "react"; export const run = useEffect;',
+      errors: [{ messageId: "effect" }],
+    },
+    {
+      filename,
+      code: 'import { useInsertionEffect } from "react";',
       errors: [{ messageId: "effect" }],
     },
     {

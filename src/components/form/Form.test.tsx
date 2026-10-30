@@ -13,7 +13,7 @@ import { Fieldset } from "./Fieldset";
 import { Form } from "./Form";
 import { Input } from "./Input";
 import { OtpInput } from "./OtpInput";
-import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
+import { PersistedInput } from "./PersistedInput";
 import { RadioGroup } from "./RadioGroup";
 import { Select } from "./Select";
 import { Textarea } from "./Textarea";
@@ -370,13 +370,17 @@ test("Form の外の state で持つ入力欄は、onRestore で戻した値を�
 
 function Note({ savedNote = "" }: { savedNote?: string }) {
   const [note, setNote] = useReducer((_current: string, next: string) => next, savedNote);
-  usePersistedInput({
-    name: "note",
-    schema: v.string(),
-    unsaved: note === savedNote ? null : note,
-    restore: setNote,
-  });
-  return <Textarea label="メモ" onChange={(event) => setNote(event.target.value)} value={note} />;
+  return (
+    <>
+      <PersistedInput
+        name="note"
+        restore={setNote}
+        schema={v.string()}
+        unsaved={note === savedNote ? null : note}
+      />
+      <Textarea label="メモ" onChange={(event) => setNote(event.target.value)} value={note} />
+    </>
+  );
 }
 
 function storedNote(): string | null {

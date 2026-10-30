@@ -117,6 +117,8 @@ const eslintConfig = defineConfig([
     files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
     plugins: { farmille: stateManagement },
     rules: { "farmille/state-management": "error" },
+    // useMountEffect の中から useEffectEvent を呼べるように、Effect として扱わせる
+    settings: { "react-hooks": { additionalEffectHooks: "^useMountEffect$" } },
   },
   {
     files: ["src/**/*.{ts,tsx}"],

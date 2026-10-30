@@ -1,6 +1,6 @@
 import path from "node:path";
 
-const effects = new Set(["useEffect", "useLayoutEffect"]);
+const effects = new Set(["useEffect", "useLayoutEffect", "useInsertionEffect"]);
 const nameOf = (node) => node.name ?? node.value;
 
 export const stateManagement = {
@@ -9,35 +9,35 @@ export const stateManagement = {
     schema: [],
     messages: {
       state: "局所UI状態はuseReducer、フォーム入力はTanStack Formで管理する。useStateは使わない。",
-      effect: "Effectはsrc/lib/hooks/の用途別カスタムフック内でだけ使う。",
+      effect:
+        "Effectを直接使わない。派生値・イベントハンドラ・keyによる再マウントで書き、マウント時の外部同期だけuseMountEffectを使う。",
       form: "フォーム入力はreact-hook-formを使わずTanStack Formで管理する。",
       static: "ReactのAPIは静的importと明示したプロパティ名で参照する。",
     },
   },
   create(context) {
     const source = context.sourceCode;
-    const hooksPath = path.resolve(context.cwd, "src/lib/hooks") + path.sep;
-    const inHooks = path.resolve(context.filename).startsWith(hooksPath);
+    const inMountEffect =
+      path.resolve(context.filename) ===
+      path.resolve(context.cwd, "src/lib/hooks/use-mount-effect.ts");
     const checked = new Set();
 
     function checkApi(node, api) {
       if (api === "useState") context.report({ node, messageId: "state" });
       if (!effects.has(api)) return;
-      if (!inHooks) {
-        context.report({ node, messageId: "effect" });
+      if (!inMountEffect) {
+        // 名前付きimportは宣言で一度だけ報告し、呼び出しごとには重ねない。
+        if (node.type !== "Identifier") context.report({ node, messageId: "effect" });
         return;
       }
-      if (node.type === "ImportSpecifier" || node.type === "ExportSpecifier") return;
-      let fn = node.parent;
-      while (
-        fn &&
-        !/^(FunctionDeclaration|FunctionExpression|ArrowFunctionExpression)$/.test(fn.type)
-      ) {
-        fn = fn.parent;
-      }
-      const name =
-        fn?.id?.name ?? (fn?.parent?.type === "VariableDeclarator" ? fn.parent.id.name : undefined);
-      if (!name || !/^use[A-Z0-9]/.test(name)) context.report({ node, messageId: "effect" });
+      if (node.type === "ImportSpecifier") return;
+      const call = node.parent;
+      const mountOnly =
+        call?.type === "CallExpression" &&
+        call.callee === node &&
+        call.arguments[1]?.type === "ArrayExpression" &&
+        call.arguments[1].elements.length === 0;
+      if (!mountOnly) context.report({ node, messageId: "effect" });
     }
 
     function references(variable, api) {
@@ -48,6 +48,7 @@ export const stateManagement = {
         const id = reference.identifier;
         const parent = id.parent;
         if (parent.type === "VariableDeclarator" && parent.init === id) {
+          if (effects.has(api)) checkApi(id, api);
           if (parent.id.type === "Identifier") {
             references(source.getDeclaredVariables(parent)[0], api);
           } else if (!api && parent.id.type === "ObjectPattern") {

@@ -9,8 +9,7 @@ import { Icon } from "@/components/Icon";
 import { css, cva } from "../../../../../../styled-system/css";
 
 import { cropCanvas, redactCanvas, rotateCanvas, type Rect } from "./report-page-images";
-
-import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
+import { ReportLeaveWarning } from "./ReportLeaveWarning";
 
 const stage = css({
   display: "flex",
@@ -176,9 +175,7 @@ export function ReportImageEditor({
   const view = useRef<HTMLCanvasElement>(null);
   const top = stack.at(-1) ?? null;
 
-  useReportLeaveWarning(
-    open && (top !== current || (mode === "crop" && crop !== null) || drag !== null),
-  );
+  const unsaved = open && (top !== current || (mode === "crop" && crop !== null) || drag !== null);
 
   // ポップアップの中身は後から描かれるので、canvas が置かれた時と画像が変わった時の両方で描く
   const drawTo = useCallback(
@@ -279,6 +276,7 @@ export function ReportImageEditor({
       title="画像の編集"
       closeLabel="キャンセル"
     >
+      {unsaved && <ReportLeaveWarning />}
       <div className={stage}>
         <div className={done}>
           <Button

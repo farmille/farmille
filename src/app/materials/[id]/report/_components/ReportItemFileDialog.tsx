@@ -14,6 +14,7 @@ import { REPORT_PDF_LIMITS } from "@/lib/usage-report";
 import { css } from "../../../../../../styled-system/css";
 
 import { ReportImageEditor } from "./ReportImageEditor";
+import { ReportLeaveWarning } from "./ReportLeaveWarning";
 import { ReportPdfPagePicker } from "./ReportPdfPagePicker";
 import {
   canvasFromImageFile,
@@ -52,8 +53,6 @@ type CanvasEvent =
   | { type: "keep"; id: string; value: ImageCanvases }
   | { type: "remove"; id: string }
   | { type: "saved"; id: string; previousId: string; value: ImageCanvases };
-
-import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
 
 const lead = css({ m: "0", textStyle: "supporting", color: "text.default" });
 
@@ -236,8 +235,6 @@ export function ReportItemFileDialog({
         image.dirty || image.id !== saved[index]?.id || image.caption !== saved[index]?.caption,
     );
 
-  useReportLeaveWarning(open && (changed || reading || saving));
-
   function add(canvas: HTMLCanvasElement) {
     if (!live.current) return;
     count.current += 1;
@@ -416,6 +413,7 @@ export function ReportItemFileDialog({
   const title = `${item.name.trim() || "調査項目"}：資料のグラフ・表を差し込む`;
   return (
     <>
+      {open && (changed || reading || saving) && <ReportLeaveWarning />}
       <Dialog
         open={open}
         onOpenChange={(open) => {

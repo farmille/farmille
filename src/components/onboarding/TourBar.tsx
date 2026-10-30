@@ -4,12 +4,7 @@ import { css, cx } from "../../../styled-system/css";
 import { Icon } from "../Icon";
 import { TourCardBody } from "./TourCardBody";
 import { bottomSpaceStyle, dockStyle, riseStyle } from "./tour-motion";
-import {
-  useBottomSpace,
-  useCardHandoff,
-  useEntered,
-  useHandoff,
-} from "@/lib/hooks/use-onboarding-motion";
+import { useDock, useEntered, useHandoff } from "@/lib/hooks/use-onboarding-motion";
 
 const barStyle = css({
   display: "flex",
@@ -98,8 +93,7 @@ export function TourBar({
   scrollHint,
 }: TourBarProps) {
   const entered = useEntered(useHandoff().continuing);
-  const { ref, space, clear } = useBottomSpace<HTMLDivElement>();
-  useCardHandoff(ref, true, false);
+  const { ref, space, clear } = useDock<HTMLDivElement>(false);
   return (
     <>
       <div aria-hidden="true" className={bottomSpaceStyle} style={{ "--tour-space": space }} />

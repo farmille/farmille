@@ -1,7 +1,7 @@
 "use client";
 import { startTransition, useActionState, useReducer } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
-import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
+import { PersistedInput } from "@/components/form";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
 import { SellerHeader } from "@/app/sellers/[id]/_components/SellerHeader";
@@ -124,21 +124,24 @@ export function ManufacturerProfileEditor({
     { versionId: expectedVersion, savedContent: JSON.stringify(initialContent), message: null },
   );
   const message = previewError ? { tone: "error" as const, text: previewError } : state.message;
-  usePersistedInput({
-    name: "manufacturer-profile",
-    schema: ProfileInputSchema,
-    unsaved: pendingVersion || JSON.stringify(content) === state.savedContent ? null : content,
-    // 表現確認中は編集できないので、保存前の入力を戻さない
-    restore: (restored) => {
-      if (!pendingVersion) form.setFieldValue("content", restored);
-    },
-  });
+  const persistedInput = (
+    <PersistedInput
+      name="manufacturer-profile"
+      schema={ProfileInputSchema}
+      unsaved={pendingVersion || JSON.stringify(content) === state.savedContent ? null : content}
+      // 表現確認中は編集できないので、保存前の入力を戻さない
+      restore={(restored) => {
+        if (!pendingVersion) form.setFieldValue("content", restored);
+      }}
+    />
+  );
   function save(submit: boolean) {
     setPreviewError(null);
     startTransition(() => submitAction({ type: "save", content, submit }));
   }
   return (
     <div className={materialPageStack}>
+      {persistedInput}
       {message ? <Notice tone={message.tone}>{message.text}</Notice> : null}
       {pendingVersion ? <Notice tone="info">プロフィールの表現確認中です。</Notice> : null}
       {state.versionId && !pendingVersion ? (

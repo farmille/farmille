@@ -1,7 +1,8 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { createElement } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { fixedPostBarHeight, useBottomSpace } from "@/lib/hooks/use-onboarding-motion";
+import { fixedPostBarHeight, useDock } from "@/lib/hooks/use-onboarding-motion";
 
 afterEach(() => {
   document.body.replaceChildren();
@@ -31,13 +32,18 @@ describe("案内が避ける、画面の下の投稿のバー", () => {
   });
 });
 
+function Dock() {
+  const { ref, clear } = useDock<HTMLDivElement>(false);
+  return createElement("div", { ref, "data-testid": "dock" }, clear);
+}
+
 describe("案内の置き場所", () => {
   it("案内を出した後に投稿のバーが描かれても、バーの上へ持ち上げる", async () => {
-    const { result } = renderHook(() => useBottomSpace<HTMLDivElement>());
-    expect(result.current.clear).toBe("0px");
+    render(createElement(Dock));
+    expect(screen.getByTestId("dock")).toHaveTextContent("0px");
 
     act(() => addPostBar("fixed", window.innerHeight - 76));
 
-    await waitFor(() => expect(result.current.clear).toBe("76px"));
+    await waitFor(() => expect(screen.getByTestId("dock")).toHaveTextContent("76px"));
   });
 });

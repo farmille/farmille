@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useReducer, useRef } from "react";
+import { useReducer, useRef } from "react";
+import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 
 /** 1セット分を流し切る周期。 */
 const LOOP_MS = 55_000;
@@ -36,8 +37,7 @@ export function useHomeMaterialMarquee() {
   const setRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useReducer((_state: MarqueeMode, next: MarqueeMode) => next, "marquee");
 
-  useEffect(() => {
-    if (mode !== "marquee") return;
+  useMountEffect(() => {
     const frameElement = frameRef.current;
     const trackElement = trackRef.current;
     const setElement = setRef.current;
@@ -188,6 +188,6 @@ export function useHomeMaterialMarquee() {
       cancelAnimationFrame(rateFrame);
       animation.cancel();
     };
-  }, [mode]);
+  });
   return { frameRef, trackRef, setRef, mode };
 }

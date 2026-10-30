@@ -5,7 +5,7 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import { startTransition, useActionState, useId, useMemo, useReducer } from "react";
 import * as v from "valibot";
 import { useForm, useStore } from "@tanstack/react-form";
-import { useReviewPhotoCleanup, useReviewPhotoPreviews } from "@/lib/hooks/use-review-photos";
+import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 
 import {
   createReviewAction,
@@ -270,7 +270,6 @@ export function ReviewForm({
     mode === "create"
       ? createReviewAction.bind(null, material.id)
       : updateReviewAction.bind(null, material.id, reviewId);
-  const [state, formAction, actionPending] = useActionState(action, initialActionState);
   const initialInput: ReviewInput = {
     cropIds: initialValues.cropIds,
     rating: initialValues.rating,
@@ -292,15 +291,35 @@ export function ReviewForm({
     (_: string | null, next: string | null) => next,
     null,
   );
+  const [state, formAction, actionPending] = useActionState(
+    async (previous: ReviewActionState, formData: FormData) => {
+      const next = await action(previous, formData);
+      if (next.status === "error" && (next.cleanupPaths?.length ?? 0) > 0) {
+        void supabase.storage
+          .from("review-photos")
+          .remove(next.cleanupPaths ?? [])
+          .then(({ error }) => {
+            if (error !== null) {
+              setLocalError(
+                "一時アップロードした写真を削除できませんでした。再送信せずお待ちください。",
+              );
+            }
+          });
+      }
+      return next;
+    },
+    initialActionState,
+  );
   const isPending = uploading || actionPending;
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const pesticideCheck = PESTICIDE_CHECK[pesticideRegistration];
   // 上限を超えて貼り付けた分は入力欄が黙って切り捨てるので、上限に達したことを知らせる
   const bodyFull = body.length >= bodyMaxLength;
 
-  useReviewPhotoCleanup(state, supabase, setLocalError);
-  const pendingPreviewUrls = pendingPhotos.map((photo) => photo.previewUrl).join("\n");
-  useReviewPhotoPreviews(pendingPreviewUrls);
+  // 外した写真のURLは外した時点で解放し、残りは画面を離れるときに解放する。
+  useMountEffect(() => () => {
+    for (const photo of form.getFieldValue("pendingPhotos")) URL.revokeObjectURL(photo.previewUrl);
+  });
 
   function addPhotos(files: FileList | null) {
     if (files === null) return;
@@ -528,11 +547,12 @@ export function ReviewForm({
                   type="button"
                   className={photoRemoveStyle}
                   aria-label={`${initialValues.photos.length + index + 1}枚目の写真を外す`}
-                  onClick={() =>
+                  onClick={() => {
+                    URL.revokeObjectURL(photo.previewUrl);
                     form.setFieldValue("pendingPhotos", (current) =>
                       current.filter((item) => item.key !== photo.key),
-                    )
-                  }
+                    );
+                  }}
                 >
                   <Icon name="close" />
                 </button>

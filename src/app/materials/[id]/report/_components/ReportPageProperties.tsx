@@ -1,8 +1,7 @@
 "use client";
 
-import { useReducer, type ReactNode } from "react";
+import { useReducer, useRef, type ReactNode } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
-import { useReportMaterialSearch } from "@/lib/hooks/use-report-material-search";
 
 import { Checkbox, Input, Notice, SearchInput, Select } from "@/components/form";
 import { DialogClose, Dialog } from "@/components/Dialog";
@@ -12,7 +11,9 @@ import { ToggleGroup } from "@/components/ToggleGroup";
 import {
   findOtherReportForMaterialAction,
   getReportMaterialClassificationsAction,
+  searchReportMaterialsAction,
 } from "@/app/materials/[id]/report/new/actions";
+import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
 import { withSingleVariety, type UsageReportInput } from "@/lib/usage-report";
@@ -243,11 +244,42 @@ export function ReportPageProperties({
   const searchForm = useForm({ defaultValues: { query: "" } });
   const query = useStore(searchForm.store, (state) => state.values.query);
   const setQuery = (value: string) => searchForm.setFieldValue("query", value);
-  const { materials, clearMaterials } = useReportMaterialSearch(
-    picker === "material",
-    query,
-    onMessage,
+  const [materials, setMaterials] = useReducer(
+    (_current: PostingMaterial[], next: PostingMaterial[]) => next,
+    [],
   );
+  const [materialSearches] = useReducer(
+    (current: ReturnType<typeof latestRequests>) => current,
+    null,
+    latestRequests,
+  );
+  const searchTimer = useRef<number | undefined>(undefined);
+  const cancelMaterialSearch = () => {
+    window.clearTimeout(searchTimer.current);
+    materialSearches.cancel();
+  };
+  useMountEffect(() => () => cancelMaterialSearch());
+  // 打ち終えてから250ms後に、最後に打った文字列だけを検索する
+  const searchMaterials = (value: string) => {
+    setQuery(value);
+    cancelMaterialSearch();
+    const text = value.trim();
+    if (!text) return;
+    const request = materialSearches.start();
+    searchTimer.current = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const result = await searchReportMaterialsAction(text);
+          if (!materialSearches.isLatest(request)) return;
+          if (result.ok) setMaterials(result.data.slice(0, 20));
+          else onMessage("資材を検索できませんでした。");
+        } catch {
+          if (materialSearches.isLatest(request))
+            onMessage("資材を検索できませんでした。通信状態を確認してください。");
+        }
+      })();
+    }, 250);
+  };
   const [materialChecks] = useReducer(
     (current: ReturnType<typeof latestRequests>) => current,
     null,
@@ -255,6 +287,7 @@ export function ReportPageProperties({
   );
   const closeMaterialPicker = () => {
     materialChecks.cancel();
+    cancelMaterialSearch();
     setPicker("");
   };
   // 選んだ資材に同じ利用者の下書きか確認中のレポートがあって、切り替えなかった資材
@@ -307,6 +340,7 @@ export function ReportPageProperties({
       return;
     }
     onMaterialChange({ id: item.id, name: item.name, manufacturerName: item.manufacturer_name });
+    cancelMaterialSearch();
     setPicker("");
     void loadClasses(item.id);
   }
@@ -315,8 +349,9 @@ export function ReportPageProperties({
     // 控えから戻した資材は、まだ登録作物と効果を読んでいないので、候補を開くときに読む
     if (next === "crop" || next === "purpose") void loadClasses(input.materialId);
     setBlocked(null);
+    cancelMaterialSearch();
     setQuery("");
-    clearMaterials();
+    setMaterials([]);
     setPicker(next);
   }
 
@@ -534,7 +569,7 @@ export function ReportPageProperties({
             aria-label="資材を検索"
             placeholder="資材名・メーカー名で検索"
             value={query}
-            onValueChange={setQuery}
+            onValueChange={searchMaterials}
           />
           <p className={note}>
             資材ページの「実証詳細レポートを書く」から来た場合は、その資材が入っています。

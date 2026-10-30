@@ -6,12 +6,7 @@ import { css, cx } from "../../../styled-system/css";
 import { TourEndButton } from "./TourEndButton";
 import { TourLabel } from "./TourLabel";
 import { bottomSpaceStyle, dockStyle, riseStyle, sentenceStyle, sentences } from "./tour-motion";
-import {
-  useBottomSpace,
-  useCardHandoff,
-  useEntered,
-  useHandoff,
-} from "@/lib/hooks/use-onboarding-motion";
+import { useDock, useEntered, useHandoff } from "@/lib/hooks/use-onboarding-motion";
 
 const scrimStyle = css({
   position: "fixed",
@@ -108,8 +103,7 @@ export function TourSheet({
   const entered = useEntered(handoff.continuing);
   const dimmed = useEntered(handoff.dimmed);
   const state = entered ? "" : undefined;
-  const { ref, space, clear } = useBottomSpace<HTMLElement>();
-  useCardHandoff(ref, true, true);
+  const { ref, space, clear } = useDock<HTMLElement>(true);
   return (
     <>
       <div aria-hidden="true" className={bottomSpaceStyle} style={{ "--tour-space": space }} />

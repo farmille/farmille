@@ -31,7 +31,7 @@
 
 ### 状態管理
 
-[状態管理規約](docs/state-management.md)に従い、状態の所有者と破棄するタイミングを決める。フォーム入力はTanStack Form、局所的なUI状態は`useReducer`で扱う。`useState`は使わない。`useEffect`・`useLayoutEffect`は`src/lib/hooks/`の用途別カスタムフック内でだけ使う。Story・テストにも同じ規則を適用する。
+[状態管理規約](docs/state-management.md)に従い、状態の所有者と破棄するタイミングを決める。フォーム入力はTanStack Form、局所的なUI状態は`useReducer`で扱う。`useState`は使わない。`useEffect`系のフックは直接呼ばず、マウント時の外部同期だけ`useMountEffect`を使う。Story・テストにも同じ規則を適用する。
 
 ### 共通部品
 

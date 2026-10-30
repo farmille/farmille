@@ -1,8 +1,10 @@
 "use client";
 
-import { type RefObject, useEffect, useLayoutEffect, useRef, useReducer } from "react";
+import { useCallback, useReducer } from "react";
+import { flushSync } from "react-dom";
 
 import { token } from "../../../styled-system/tokens";
+import { useMountEffect } from "./use-mount-effect";
 
 /**
  * 表示した次の描画で true になる。案内の部品を下から・中央から出すときの合図に使う。
@@ -13,11 +15,11 @@ export function useEntered(initiallyEntered = false): boolean {
     (_current: boolean, next: boolean) => next,
     initiallyEntered,
   );
-  useEffect(() => {
-    if (entered) return;
+  useMountEffect(() => {
+    if (initiallyEntered) return;
     const frame = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(frame);
-  }, [entered]);
+  });
   return entered;
 }
 
@@ -82,25 +84,17 @@ function moveFrom(card: HTMLElement, from: DOMRect) {
 }
 
 /**
- * カードが画面に出ている間を記録し、消えるときに位置を残す。
- * 前の段階のカードから引き継いだときは、その位置から動かす。ready は位置が決まったか（吹き出しは対象を測るまで待つ）。
+ * カードが画面に出ている間を記録し、消えるときに位置を残す。返す関数で後片付けする。
+ * 前の段階のカードから引き継いだときは、その位置から動かす。カードの位置が決まった描画の直後（描く前）に呼ぶ。
  */
-export function useCardHandoff(
-  ref: RefObject<HTMLElement | null>,
-  ready: boolean,
-  dimmed: boolean,
-): void {
-  useLayoutEffect(() => {
-    const card = ref.current;
-    if (!ready || card === null) return;
-    const previous = recentTrace(card);
-    shown = { dimmed };
-    if (previous !== null) moveFrom(card, previous.rect);
-    return () => {
-      shown = null;
-      left = { card, rect: card.getBoundingClientRect(), dimmed, at: performance.now() };
-    };
-  }, [ref, ready, dimmed]);
+export function handOff(card: HTMLElement, dimmed: boolean): () => void {
+  const previous = recentTrace(card);
+  shown = { dimmed };
+  if (previous !== null) moveFrom(card, previous.rect);
+  return () => {
+    shown = null;
+    left = { card, rect: card.getBoundingClientRect(), dimmed, at: performance.now() };
+  };
 }
 
 // 資材ページの画面の下に固定された、投稿のバー（「実証詳細レポートを書く」「感想口コミを書く」）
@@ -113,8 +107,9 @@ export function fixedPostBarHeight(): number {
   return Math.max(0, window.innerHeight - bar.getBoundingClientRect().top);
 }
 
-export type BottomSpace<T extends HTMLElement> = {
-  ref: RefObject<T | null>;
+export type Dock<T extends HTMLElement> = {
+  /** 画面の下に固定する案内に付ける ref */
+  ref: (element: T) => () => void;
   /** 余白の高さ。CSS 変数 --tour-space に渡す */
   space: string;
   /** 投稿のバーが占める高さ。CSS 変数 --tour-clear に渡し、案内をバーの上に出す */
@@ -125,9 +120,9 @@ export type BottomSpace<T extends HTMLElement> = {
  * 画面の下に固定した案内の高さぶん、ページの最後に余白を足す。
  * 案内に隠れたページの下端（「保存する」など）も、スクロールすれば案内の上に出せるようにする。
  * あわせて、画面の下に固定された投稿のバーの高さを測り、案内がバーを隠さないようにする。
+ * 前の段階のカードからの引き継ぎ（handOff）も、同じ ref で行う。dimmed は画面を暗くする案内か。
  */
-export function useBottomSpace<T extends HTMLElement>(): BottomSpace<T> {
-  const ref = useRef<T>(null);
+export function useDock<T extends HTMLElement>(dimmed: boolean): Dock<T> {
   const [height, setHeight] = useReducer((_current: number, next: number) => next, 0);
   // 最初の描画から持ち上げておき、案内がバーの下から跳ね上がらないようにする
   const [barHeight, setBarHeight] = useReducer(
@@ -135,35 +130,39 @@ export function useBottomSpace<T extends HTMLElement>(): BottomSpace<T> {
     undefined,
     fixedPostBarHeight,
   );
-  // 資材ページはバーを読み込み後に描く。固定したバーが加わってもページの大きさは変わらないので、
-  // ページの大きさの変化に加えて、要素の追加と削除でも測り直す
-  useLayoutEffect(() => {
-    const measure = () => setBarHeight(fixedPostBarHeight());
-    measure();
-    const resizes = new ResizeObserver(measure);
-    resizes.observe(document.body);
-    const mutations = new MutationObserver(measure);
-    mutations.observe(document.body, { childList: true, subtree: true });
-    window.addEventListener("resize", measure);
-    return () => {
-      resizes.disconnect();
-      mutations.disconnect();
-      window.removeEventListener("resize", measure);
-    };
-  }, []);
-  // 案内を持ち上げると画面の下からの高さが変わるので、持ち上げた後の位置で測る
-  useLayoutEffect(() => {
-    const element = ref.current;
-    if (element === null) return;
-    const measure = () => setHeight(window.innerHeight - element.getBoundingClientRect().top);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(element);
-    window.addEventListener("resize", measure);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", measure);
-    };
-  }, [barHeight]);
+  const ref = useCallback(
+    (element: T) => {
+      const measureSpace = () =>
+        setHeight(window.innerHeight - element.getBoundingClientRect().top);
+      let bar = fixedPostBarHeight();
+      setBarHeight(bar);
+      measureSpace();
+      // 資材ページはバーを読み込み後に描く。固定したバーが加わってもページの大きさは変わらないので、
+      // ページの大きさの変化に加えて、要素の追加と削除でも測り直す。
+      // 案内を持ち上げると画面の下からの高さが変わるので、持ち上げを先に反映し、持ち上げた後の位置で測る
+      const measure = () => {
+        const next = fixedPostBarHeight();
+        if (next !== bar) {
+          bar = next;
+          flushSync(() => setBarHeight(next));
+        }
+        measureSpace();
+      };
+      const resizes = new ResizeObserver(measure);
+      resizes.observe(document.body);
+      resizes.observe(element);
+      const mutations = new MutationObserver(measure);
+      mutations.observe(document.body, { childList: true, subtree: true });
+      window.addEventListener("resize", measure);
+      const leave = handOff(element, dimmed);
+      return () => {
+        leave();
+        resizes.disconnect();
+        mutations.disconnect();
+        window.removeEventListener("resize", measure);
+      };
+    },
+    [dimmed],
+  );
   return { ref, space: `${Math.max(0, height)}px`, clear: `${barHeight}px` };
 }

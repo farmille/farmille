@@ -15,8 +15,7 @@ import { css, cx } from "../../../../../../styled-system/css";
 
 import { REPORT_SHORT_MAX, type ReportPageNumericItem } from "./report-page-state";
 import { labelStyle } from "./report-page-styles";
-
-import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
+import { ReportLeaveWarning } from "./ReportLeaveWarning";
 
 const graphBlock = css({
   mt: "5",
@@ -61,7 +60,6 @@ export function ReportNumericItemDialog({
     form.setFieldValue("draft", next);
   const [asking, setAsking] = useReducer((_current: boolean, next: boolean) => next, false);
   const changed = JSON.stringify(draft) !== JSON.stringify(initial);
-  useReportLeaveWarning(changed);
   const order = new Map(plots.map((plot, index) => [plot.id, index]));
   const updateGraph = (
     graphId: string,
@@ -76,6 +74,7 @@ export function ReportNumericItemDialog({
 
   return (
     <>
+      {changed && <ReportLeaveWarning />}
       <Dialog
         open
         onOpenChange={(open) => {

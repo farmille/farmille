@@ -2,7 +2,7 @@
 
 import { startTransition, useActionState, useReducer } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
-import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
+import { PersistedInput } from "@/components/form";
 import { MaterialIllustration } from "@/components/materials/MaterialIllustration";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
@@ -115,15 +115,17 @@ export function MaterialPageEditor({
     { version: expectedVersion, savedContent: JSON.stringify(initialContent), message: null },
   );
   const message = previewError ? { tone: "error" as const, text: previewError } : state.message;
-  usePersistedInput({
-    name: "material-page",
-    schema: MaterialPageContentSchema,
-    unsaved: pendingVersion || JSON.stringify(content) === state.savedContent ? null : content,
-    // 表現確認中は編集できないので、保存前の入力を戻さない
-    restore: (restored) => {
-      if (!pendingVersion) form.setFieldValue("content", restored);
-    },
-  });
+  const persistedInput = (
+    <PersistedInput
+      name="material-page"
+      schema={MaterialPageContentSchema}
+      unsaved={pendingVersion || JSON.stringify(content) === state.savedContent ? null : content}
+      // 表現確認中は編集できないので、保存前の入力を戻さない
+      restore={(restored) => {
+        if (!pendingVersion) form.setFieldValue("content", restored);
+      }}
+    />
+  );
 
   function save(submit: boolean) {
     setPreviewError(null);
@@ -133,6 +135,7 @@ export function MaterialPageEditor({
   if (pendingVersion)
     return (
       <div className={materialPageStack}>
+        {persistedInput}
         <Notice tone="info">表現確認中です。公開内容は確認完了後に変わります。</Notice>
         <MaterialPageContent content={content} imageUrl={imageUrl} />
         {message ? <Notice tone={message.tone}>{message.text}</Notice> : null}
@@ -149,6 +152,7 @@ export function MaterialPageEditor({
 
   return (
     <div className={materialPageStack}>
+      {persistedInput}
       <p>枠の中を編集すると、同じ項目が資材ページに表示されます。下書きは公開されません。</p>
       {message ? <Notice tone={message.tone}>{message.text}</Notice> : null}
       {preview ? (

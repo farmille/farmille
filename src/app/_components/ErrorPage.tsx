@@ -1,8 +1,9 @@
 "use client";
 
-import { PageNotice } from "@/components/PageNotice";
+import * as Sentry from "@sentry/nextjs";
 
-import { useErrorReporting } from "@/lib/hooks/use-error-reporting";
+import { PageNotice } from "@/components/PageNotice";
+import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 
 import { Button, FormPageShell } from "@/components";
 import type { AppChrome } from "@/components/AppBar";
@@ -26,7 +27,11 @@ export function ErrorPage({
   backHref = "/",
   chrome = "public",
 }: ErrorPageProps) {
-  useErrorReporting(error);
+  // エラー境界は捕まえたエラーごとにこの画面をマウントし直す。
+  useMountEffect(() => {
+    if (!process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()) return;
+    Sentry.captureException(error);
+  });
 
   return (
     <FormPageShell chrome={chrome} backHref={backHref} title={pageTitle}>

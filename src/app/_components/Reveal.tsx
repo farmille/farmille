@@ -1,9 +1,10 @@
 "use client";
 
-import { type ReactNode } from "react";
-import { useHomeReveal } from "@/lib/hooks/use-home-reveal";
+import { useReducer, type ReactNode } from "react";
 
 import { cva, cx, type RecipeVariantProps } from "../../../styled-system/css";
+
+const ROOT_MARGIN = "0px 0px -12% 0px";
 
 /**
  * 隠すのは JS が動く環境だけにし、data-revealed が付いたら元の位置へ戻す。
@@ -47,11 +48,24 @@ type RevealProps = NonNullable<RecipeVariantProps<typeof revealRecipe>> & {
  * 子孫は `_revealedWithin` の条件で同じ合図を受け取り、下線や文字の動きを続けられる。
  */
 export function Reveal({ effect, delay, className, children }: RevealProps) {
-  const { ref, revealed } = useHomeReveal();
+  const [revealed, reveal] = useReducer(() => true, false);
 
   return (
     <div
-      ref={ref}
+      ref={
+        revealed
+          ? undefined
+          : (element: HTMLDivElement) => {
+              const observer = new IntersectionObserver(
+                (entries) => {
+                  if (entries.some((entry) => entry.isIntersecting)) reveal();
+                },
+                { rootMargin: ROOT_MARGIN },
+              );
+              observer.observe(element);
+              return () => observer.disconnect();
+            }
+      }
       className={cx(revealRecipe({ effect, delay }), className)}
       data-revealed={revealed ? "" : undefined}
     >

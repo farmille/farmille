@@ -1,8 +1,8 @@
 "use client";
 
-import { usePostCardView } from "@/lib/hooks/use-post-card-view";
+import { useReducer, useRef } from "react";
 import type { PostTarget } from "@/server/queries/post-actions";
-import { setPostSavedAction } from "@/server/actions/post-actions";
+import { recordReviewCardView, setPostSavedAction } from "@/server/actions/post-actions";
 import { toggleHelpfulAction } from "@/server/actions/helpful";
 import { BookmarkButton } from "./BookmarkButton";
 import { HelpfulButton } from "./HelpfulButton";
@@ -32,7 +32,24 @@ export function PostActions({
   viewCount,
   own = false,
 }: PostActionsProps) {
-  const { error, viewRef } = usePostCardView(target, id);
+  const [error, setError] = useReducer(
+    (_current: string | null, next: string | null) => next,
+    null,
+  );
+  const recorded = useRef(false);
+  const observeView =
+    target === "review" && id !== undefined
+      ? (element: HTMLSpanElement) => {
+          const observer = new IntersectionObserver((entries) => {
+            if (recorded.current || !entries.some((entry) => entry.isIntersecting)) return;
+            recorded.current = true;
+            observer.disconnect();
+            void recordReviewCardView(id).catch(() => setError("閲覧数を記録できませんでした。"));
+          });
+          observer.observe(element);
+          return () => observer.disconnect();
+        }
+      : undefined;
   return (
     <div className={css({ mt: "2.5" })}>
       <div
@@ -66,7 +83,7 @@ export function PostActions({
           }
         />
         <span
-          ref={viewRef}
+          ref={observeView}
           className={css({
             ml: "auto",
             display: "inline-flex",

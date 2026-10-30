@@ -5,7 +5,7 @@ import { startTransition, useActionState } from "react";
 import * as v from "valibot";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
-import { Notice, Select, Textarea, usePersistedInput, type Option } from "@/components/form";
+import { Notice, Select, Textarea, PersistedInput, type Option } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { recordMaterialAuditAction } from "./audit-actions";
 
@@ -36,14 +36,17 @@ export function MaterialAuditForm({ materialId }: { materialId: string }) {
     },
     { result: null, recordedNote: "" },
   );
-  usePersistedInput({
-    name: "material-audit",
-    schema: v.string(),
-    unsaved: note === recordedNote ? null : note,
-    restore: (value) => form.setFieldValue("note", value),
-  });
+  const persistedInput = (
+    <PersistedInput
+      name="material-audit"
+      schema={v.string()}
+      unsaved={note === recordedNote ? null : note}
+      restore={(value) => form.setFieldValue("note", value)}
+    />
+  );
   return (
     <div className={materialPageStack}>
+      {persistedInput}
       <Select
         label="掲載後の確認結果"
         onValueChange={(value) => {

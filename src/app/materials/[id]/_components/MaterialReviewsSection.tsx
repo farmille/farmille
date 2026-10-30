@@ -47,7 +47,7 @@ export function MaterialReviewsSection({
   return (
     <section aria-labelledby="reviews-heading">
       <ReviewsHeading count={total} />
-      <ScrollToHashOnMount headingId="reviews-heading" cardIdPrefix="review-" trigger={total} />
+      <ScrollToHashOnMount key={total} headingId="reviews-heading" cardIdPrefix="review-" />
       {rating}
       {reviews.length > 0 ? (
         <div className={listStyle}>

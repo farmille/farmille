@@ -1,8 +1,8 @@
 "use client";
 
 import { Input as BaseInput } from "@base-ui/react/input";
-import type { ChangeEvent, InputHTMLAttributes } from "react";
-import { useInputFileSelection } from "@/lib/hooks/use-input-file-selection";
+import { useReducer, useRef, type ChangeEvent, type InputHTMLAttributes } from "react";
+import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 
 import { buttonRecipe } from "@/components/Button";
 import { css, cx } from "../../../styled-system/css";
@@ -65,7 +65,17 @@ export function FileInput(props: FileInputProps) {
 
 function FileInputBody({ onChange, disabled, className, ...inputProps }: FileInputBodyProps) {
   const required = useFieldRequired();
-  const { inputRef, fileNames, setFileNames } = useInputFileSelection();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [fileNames, setFileNames] = useReducer((_current: string[], next: string[]) => next, []);
+
+  // フォームの reset はファイル入力を空にするが change を出さないので、表示中の選択も空にする
+  useMountEffect(() => {
+    const form = inputRef.current?.form;
+    if (form === null || form === undefined) return;
+    const clear = () => setFileNames([]);
+    form.addEventListener("reset", clear);
+    return () => form.removeEventListener("reset", clear);
+  });
 
   function handleChange(event: ChangeEvent<HTMLInputElement>): void {
     onChange?.(event);

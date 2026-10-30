@@ -11,7 +11,7 @@ export const riseStyle = css({
   _motionReduce: { transform: "none" },
 });
 
-/** ページの最後に置く余白。高さは useBottomSpace で決める */
+/** ページの最後に置く余白。高さは useDock で決める */
 export const bottomSpaceStyle = css({ h: "var(--tour-space)", pointerEvents: "none" });
 
 /**

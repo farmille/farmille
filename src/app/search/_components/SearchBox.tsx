@@ -55,11 +55,8 @@ const categoryLabelRecipe = cva({
 });
 
 export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxProps) {
-  const { query, isPending, setQuery, setComposing, navigate } = useMaterialSearch(
-    initialQuery,
-    selected,
-    sort,
-  );
+  const { query, isPending, setQuery, onCompositionStart, onCompositionEndCapture, navigate } =
+    useMaterialSearch(initialQuery, selected, sort);
 
   const selectedKeys = useMemo(() => new Set(selected.map(selectedFilterKey)), [selected]);
 
@@ -84,8 +81,8 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
     <div
       aria-busy={isPending || undefined}
       data-tour="search-box"
-      onCompositionEnd={() => setComposing(false)}
-      onCompositionStart={() => setComposing(true)}
+      onCompositionEndCapture={onCompositionEndCapture}
+      onCompositionStart={onCompositionStart}
     >
       <Autocomplete
         hideLabel

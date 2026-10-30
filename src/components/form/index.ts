@@ -20,4 +20,4 @@ export { SubmitButton } from "./SubmitButton";
 export { Textarea } from "./Textarea";
 export type { FieldErrors, Option, Requirement, Visibility } from "./types";
 
-export { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
+export { PersistedInput } from "./PersistedInput";
