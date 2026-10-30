@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useReducer, useTransition } from "react";
+import { startTransition, useActionState } from "react";
 
 import { Badge, Button, ConfirmDialog, SurfaceCard, buttonRecipe } from "@/components";
 import { Notice } from "@/components/form";
@@ -10,7 +10,7 @@ import { formatDateJa } from "@/components/format-date";
 import type { SellerArticleListItem } from "@/server/queries/seller-articles";
 import { css } from "../../../../../styled-system/css";
 import { deleteArticleAction, setArticleStatusAction } from "../actions";
-import type { SellerArticleFormState } from "./form-state";
+import { initialSellerArticleFormState } from "./form-state";
 
 const rowActions = css({
   display: "flex",
@@ -35,22 +35,12 @@ type ArticleListItemProps = {
 
 export function ArticleListItem({ article }: ArticleListItemProps) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const [state, setState] = useReducer(
-    (_: SellerArticleFormState, next: SellerArticleFormState) => next,
-    { status: "idle" },
-  );
   const isPublished = article.status === "published";
-
-  function toggleStatus(): void {
-    startTransition(async () => {
-      const result = await setArticleStatusAction(article.id, isPublished ? "draft" : "published");
-      setState(result);
-      if (result.status === "success") {
-        router.refresh();
-      }
-    });
-  }
+  const [state, toggleStatus, pending] = useActionState(async () => {
+    const result = await setArticleStatusAction(article.id, isPublished ? "draft" : "published");
+    if (result.status === "success") router.refresh();
+    return result;
+  }, initialSellerArticleFormState);
 
   return (
     <SurfaceCard title={article.title}>
@@ -77,7 +67,13 @@ export function ArticleListItem({ article }: ArticleListItemProps) {
         >
           編集
         </Link>
-        <Button disabled={pending} onClick={toggleStatus} size="sm" type="button" variant="ghost">
+        <Button
+          disabled={pending}
+          onClick={() => startTransition(toggleStatus)}
+          size="sm"
+          type="button"
+          variant="ghost"
+        >
           {isPublished ? "非公開にする" : "公開する"}
         </Button>
         {isPublished ? (

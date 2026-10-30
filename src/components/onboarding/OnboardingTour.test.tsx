@@ -89,6 +89,8 @@ describe("チュートリアルの最後のシート", () => {
     expect(screen.queryByText("ありがとうございました")).toBeNull();
     await user.click(close);
     expect(account.finish).toHaveBeenCalledTimes(1);
+    await act(async () => account.settle(false));
+    await waitFor(() => expect(close).not.toHaveAttribute("aria-busy"));
   });
 
   it("印を消し終えたら、お礼を出してから、その資材の資材ページへ移る", async () => {
@@ -99,7 +101,7 @@ describe("チュートリアルの最後のシート", () => {
     await user.click(await screen.findByRole("button", { name: "閉じる" }));
     await act(async () => account.settle(true));
 
-    expect(screen.getByText("ありがとうございました")).toBeInTheDocument();
+    expect(await screen.findByText("ありがとうございました")).toBeInTheDocument();
     expect(screen.queryByText("チュートリアルはこれで完了です")).toBeNull();
     expect(router.push).not.toHaveBeenCalled();
     await waitFor(() => expect(router.push).toHaveBeenCalledWith(MATERIAL_PAGE), {
@@ -118,11 +120,13 @@ describe("チュートリアルの最後のシート", () => {
     await act(async () => account.settle(false));
 
     const close = screen.getByRole("button", { name: "閉じる" });
-    expect(close).not.toHaveAttribute("aria-busy");
+    await waitFor(() => expect(close).not.toHaveAttribute("aria-busy"));
     expect(close).not.toHaveAttribute("aria-disabled");
     expect(screen.queryByText("ありがとうございました")).toBeNull();
     expect(readOnboardingStep(window.localStorage, USER_ID)).toBe("finish");
     await user.click(close);
     expect(account.finish).toHaveBeenCalledTimes(2);
+    await act(async () => account.settle(false));
+    await waitFor(() => expect(close).not.toHaveAttribute("aria-busy"));
   });
 });

@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { Form } from "@/components/form";
 
 import { PostalAddressFields } from "./PostalAddressFields";
 
@@ -14,6 +15,28 @@ async function lookup(postalCode: string) {
 }
 
 describe("PostalAddressFields", () => {
+  it("親フォームをリセットすると、建物名を含む住所を初期値へ戻す", async () => {
+    const user = userEvent.setup();
+    render(
+      <Form persist={false}>
+        <PostalAddressFields
+          values={{ cityStreet: "千代田区千代田1", buildingName: "農業会館101" }}
+        />
+        <button type="reset">元に戻す</button>
+      </Form>,
+    );
+    const building = screen.getByLabelText(/^建物名・部屋番号/);
+    const cityStreet = screen.getByLabelText(/^市区町村・番地/);
+    await user.clear(building);
+    await user.type(building, "農業会館202");
+    await user.clear(cityStreet);
+    await user.type(cityStreet, "千代田区大手町2");
+    await user.click(screen.getByRole("button", { name: "元に戻す" }));
+
+    expect(screen.getByLabelText(/^建物名・部屋番号/)).toHaveValue("農業会館101");
+    expect(screen.getByLabelText(/^市区町村・番地/)).toHaveValue("千代田区千代田1");
+  });
+
   it("直前の自動入力のままなら次の検索で上書きし、手入力のあとは上書きしない", async () => {
     render(<PostalAddressFields values={{}} />);
     const user = await lookup("1000001");

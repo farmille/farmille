@@ -15,6 +15,7 @@ export function useFormPersistence(
   persist: string | false,
   pathname: string,
   onRestore: ((restored: RestoredFields) => void) | undefined,
+  onReset: (() => void) | undefined,
 ) {
   useSubmitClickGuard(formRef);
   const [{ resetCount, discarded }, resetForm] = useReducer(
@@ -30,6 +31,7 @@ export function useFormPersistence(
   // 送信後のresetでは控えを外し、サーバーが返した値を入力部品の初期値にする。
   const restored = discarded ? null : saved;
   const restoreOutside = useEffectEvent((fields: RestoredFields) => onRestore?.(fields));
+  const resetOutside = useEffectEvent(() => onReset?.());
   const keepsRestored = useEffectEvent(() => restored !== null);
 
   // action の後の reset を React は commit 中に呼び、その間は onReset を配らないので、DOM の reset を直接聞く
@@ -37,6 +39,7 @@ export function useFormPersistence(
     const form = formRef.current;
     if (form === null) return;
     const reset = () => {
+      resetOutside();
       resetForm();
     };
     form.addEventListener("reset", reset);

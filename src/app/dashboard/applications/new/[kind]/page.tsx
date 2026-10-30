@@ -2,12 +2,10 @@ import { notFound } from "next/navigation";
 import * as v from "valibot";
 
 import { FormPageShell } from "@/components/FormPageShell";
-import { CompanyApplicationForm } from "@/app/company-requests/_components/CompanyApplicationForm";
 import { emptyContact } from "@/app/company-requests/_components/ContactFields";
 import { submittableKindSchema } from "@/lib/company-application";
 import { applicationCopy } from "@/lib/company-application-copy";
-import { cleanupExpiredApplicationUploads } from "@/server/company-application-evidence";
-import { beginCompanyApplication } from "@/server/company-applications";
+import { NewApplicationForm } from "./NewApplicationForm";
 
 import { css } from "../../../../../../styled-system/css";
 import { SellerAccessDenied } from "../../../_components/AccessDenied";
@@ -24,8 +22,6 @@ export default async function NewApplicationPage({
   const session = await applicationSellerPage(`/dashboard/applications/new/${kind}`);
   if (!session) return <SellerAccessDenied />;
   const { seller } = session;
-  await cleanupExpiredApplicationUploads();
-  const intent = await beginCompanyApplication(kind);
   return (
     <FormPageShell
       chrome="seller"
@@ -34,8 +30,8 @@ export default async function NewApplicationPage({
     >
       <div className={css({ maxW: "content.medium", mx: "auto", pt: "6.5" })}>
         <h1 className={css({ fontSize: "xl" })}>{applicationCopy[kind].title}</h1>
-        <CompanyApplicationForm
-          intentId={intent.id}
+        <NewApplicationForm
+          key={kind}
           kind={kind}
           defaults={{
             ...emptyContact,

@@ -1,10 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useReducer, type RefObject } from "react";
+import { useEffect, type RefObject } from "react";
 
 import type { SellerArticleFormState } from "@/app/dashboard/articles/_components/form-state";
-import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import type { SellerArticleMaterial } from "@/server/queries/seller-articles";
 
 export function useArticleCreatedNavigation(
@@ -17,21 +16,6 @@ export function useArticleCreatedNavigation(
       router.replace(`/dashboard/articles/${state.articleId}/edit`);
     }
   }, [mode, router, state]);
-}
-
-export function useArticleMarkdownPreview(body: string, tab: "write" | "preview") {
-  const [html, setHtml] = useReducer((_: string, next: string) => next, "");
-  useEffect(() => {
-    if (tab !== "preview") return;
-    let cancelled = false;
-    void renderMarkdownToHtml(body).then((rendered) => {
-      if (!cancelled) setHtml(rendered);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [body, tab]);
-  return html;
 }
 
 export function useArticleSearchFocus(

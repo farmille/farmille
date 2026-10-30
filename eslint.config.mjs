@@ -119,6 +119,11 @@ const eslintConfig = defineConfig([
     rules: { "farmille/state-management": "error" },
   },
   {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.*", "**/*.stories.*", "src/components/form/**"],
+    rules: { "farmille/controlled-form-input": "error" },
+  },
+  {
     // アイコンは共通 Icon 経由で使う。
     rules: {
       "no-restricted-imports": ["error", { patterns: [iconLibraryImports] }],

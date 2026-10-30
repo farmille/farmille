@@ -39,7 +39,11 @@ const credentialLabelStyle = css({
   color: "text.brand",
 });
 
-type SellerApprovalInput = { selectedManufacturer: string | null; newManufacturerName: string };
+type SellerApprovalInput = {
+  selectedManufacturer: string | null;
+  newManufacturerName: string;
+  rejectedReason: string;
+};
 
 type Operation = "approve" | "reject" | "suspend" | "reinstate" | "invite";
 
@@ -66,9 +70,10 @@ export function SellerReviewActions({
   const initialValues: SellerApprovalInput = {
     selectedManufacturer: null,
     newManufacturerName: "",
+    rejectedReason: "",
   };
   const form = useForm({ defaultValues: initialValues });
-  const { selectedManufacturer, newManufacturerName } = useStore(
+  const { selectedManufacturer, newManufacturerName, rejectedReason } = useStore(
     form.store,
     (state) => state.values,
   );
@@ -183,6 +188,8 @@ export function SellerReviewActions({
                 <Textarea
                   label="却下理由"
                   name="rejectedReason"
+                  value={rejectedReason}
+                  onChange={(event) => form.setFieldValue("rejectedReason", event.target.value)}
                   requirement="required"
                   placeholder="申請者へ伝える判断理由を入力"
                 />

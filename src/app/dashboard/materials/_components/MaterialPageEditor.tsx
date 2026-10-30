@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useTransition } from "react";
+import { startTransition, useActionState, useReducer } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
 import { MaterialIllustration } from "@/components/materials/MaterialIllustration";
@@ -47,6 +47,16 @@ const LINK_GROUP_OPTIONS = [
   ...MATERIAL_LINK_GROUPS,
 ] as const;
 
+type EditorAction =
+  | { type: "save"; content: Content; submit: boolean }
+  | { type: "withdraw"; versionId: string };
+
+type EditorState = {
+  version: string | null;
+  savedContent: string;
+  message: { tone: "success" | "error"; text: string } | null;
+};
+
 export function MaterialPageEditor({
   materialId,
   initialContent,
@@ -62,29 +72,53 @@ export function MaterialPageEditor({
 }) {
   const form = useForm({ defaultValues: { content: initialContent } });
   const content = useStore(form.store, (state) => state.values.content);
-  const [savedContent, setSavedContent] = useReducer(
-    (_: string, next: string) => next,
-    initialContent,
-    JSON.stringify,
-  );
-  const [version, setVersion] = useReducer(
-    (_: string | null, next: string | null) => next,
-    expectedVersion,
-  );
   const [preview, setPreview] = useReducer((_: boolean, next: boolean) => next, false);
-  const [message, setMessage] = useReducer(
-    (
-      _: { tone: "success" | "error"; text: string } | null,
-      next: { tone: "success" | "error"; text: string } | null,
-    ) => next,
+  const [previewError, setPreviewError] = useReducer(
+    (_: string | null, next: string | null) => next,
     null,
   );
-  const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const [state, submitAction, pending] = useActionState<EditorState, EditorAction>(
+    async (current, action) => {
+      if (action.type === "withdraw") {
+        if (await withdrawMaterialPage(action.versionId)) {
+          router.refresh();
+          return { ...current, message: null };
+        }
+        return {
+          ...current,
+          message: {
+            tone: "error",
+            text: "取り下げできませんでした。再読み込みして状態を確認してください。",
+          },
+        };
+      }
+      const result = await saveMaterialPage({
+        materialId,
+        expectedVersion: current.version,
+        content: action.content,
+        submit: action.submit,
+      });
+      if (!result.ok) return { ...current, message: { tone: "error", text: result.message } };
+      router.refresh();
+      return {
+        version: action.submit ? null : result.versionId,
+        savedContent: JSON.stringify(action.content),
+        message: {
+          tone: "success",
+          text: action.submit
+            ? "表現確認へ送りました。公開中の内容はまだ変わりません。"
+            : "下書きを保存しました。",
+        },
+      };
+    },
+    { version: expectedVersion, savedContent: JSON.stringify(initialContent), message: null },
+  );
+  const message = previewError ? { tone: "error" as const, text: previewError } : state.message;
   usePersistedInput({
     name: "material-page",
     schema: MaterialPageContentSchema,
-    unsaved: pendingVersion || JSON.stringify(content) === savedContent ? null : content,
+    unsaved: pendingVersion || JSON.stringify(content) === state.savedContent ? null : content,
     // 表現確認中は編集できないので、保存前の入力を戻さない
     restore: (restored) => {
       if (!pendingVersion) form.setFieldValue("content", restored);
@@ -92,27 +126,8 @@ export function MaterialPageEditor({
   });
 
   function save(submit: boolean) {
-    startTransition(async () => {
-      const result = await saveMaterialPage({
-        materialId,
-        expectedVersion: version,
-        content,
-        submit,
-      });
-      if (!result.ok) {
-        setMessage({ tone: "error", text: result.message });
-        return;
-      }
-      setVersion(submit ? null : result.versionId);
-      setSavedContent(JSON.stringify(content));
-      setMessage({
-        tone: "success",
-        text: submit
-          ? "表現確認へ送りました。公開中の内容はまだ変わりません。"
-          : "下書きを保存しました。",
-      });
-      router.refresh();
-    });
+    setPreviewError(null);
+    startTransition(() => submitAction({ type: "save", content, submit }));
   }
 
   if (pendingVersion)
@@ -124,14 +139,7 @@ export function MaterialPageEditor({
         <Button
           disabled={pending}
           onClick={() =>
-            startTransition(async () => {
-              if (await withdrawMaterialPage(pendingVersion)) router.refresh();
-              else
-                setMessage({
-                  tone: "error",
-                  text: "取り下げできませんでした。再読み込みして状態を確認してください。",
-                });
-            })
+            startTransition(() => submitAction({ type: "withdraw", versionId: pendingVersion }))
           }
         >
           取り下げて編集を再開
@@ -613,10 +621,9 @@ export function MaterialPageEditor({
           disabled={pending}
           onClick={() => {
             if (!preview && !v.is(MaterialPageContentSchema, content)) {
-              setMessage({
-                tone: "error",
-                text: "プレビューの前に、資料のタイトル・URLと登録・認証の空欄を確認してください。",
-              });
+              setPreviewError(
+                "プレビューの前に、資料のタイトル・URLと登録・認証の空欄を確認してください。",
+              );
               return;
             }
             setPreview(!preview);

@@ -18,3 +18,5 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
+export const TransferOut: Story = { args: { kind: "transfer_out" } };
+export const TransferIn: Story = { args: { kind: "transfer_in" } };

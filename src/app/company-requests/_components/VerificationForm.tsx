@@ -1,6 +1,7 @@
 "use client";
 import * as v from "valibot";
-import { useReducer, type FormEvent } from "react";
+import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { receiptAccessSchema } from "@/lib/company-application";
 import { errorMessageJa } from "@/server/errors";
@@ -10,42 +11,44 @@ import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/for
 import { requestReceiptVerification } from "../actions";
 
 export function VerificationForm() {
-  const [busy, setBusy] = useReducer((_state: boolean, next: boolean) => next, false);
-  const [message, setMessage] = useReducer((_state: string, next: string) => next, "");
-  const [failed, setFailed] = useReducer((_state: boolean, next: boolean) => next, false);
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setMessage("");
-    setFailed(false);
-    const data = new FormData(event.currentTarget);
-    try {
-      const result = await requestReceiptVerification(
-        v.parse(receiptAccessSchema, {
-          receiptNumber: data.get("receiptNumber"),
-          email: data.get("email"),
-        }),
-      );
-      setFailed(!result.ok);
-      setMessage(
-        result.ok
-          ? "受付番号とメールアドレスが一致する場合は、確認メールをお送りしました。"
-          : errorMessageJa[result.error],
-      );
-    } catch {
-      setFailed(true);
-      setMessage(
-        "確認メールを送信できませんでした。入力内容をご確認のうえ、もう一度お試しください。",
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
+  const form = useForm({ defaultValues: { receiptNumber: "", email: "" } });
+  const values = useStore(form.store, (state) => state.values);
+  const [result, submit, busy] = useActionState(
+    async (_previous: { failed: boolean; message: string }, _data: FormData) => {
+      try {
+        const result = await requestReceiptVerification(
+          v.parse(receiptAccessSchema, form.state.values),
+        );
+        return {
+          failed: !result.ok,
+          message: result.ok
+            ? "受付番号とメールアドレスが一致する場合は、確認メールをお送りしました。"
+            : errorMessageJa[result.error],
+        };
+      } catch {
+        return {
+          failed: true,
+          message:
+            "確認メールを送信できませんでした。入力内容をご確認のうえ、もう一度お試しください。",
+        };
+      }
+    },
+    { failed: false, message: "" },
+  );
   return (
-    <Form onSubmit={submit} persist="receipt-verification">
+    <Form
+      action={submit}
+      onRestore={(restored) => {
+        form.setFieldValue("receiptNumber", restored.get("receiptNumber")?.[0] ?? "");
+        form.setFieldValue("email", restored.get("email")?.[0] ?? "");
+      }}
+      persist="receipt-verification"
+    >
       <Input
         label="受付番号"
         name="receiptNumber"
+        value={values.receiptNumber}
+        onChange={(event) => form.setFieldValue("receiptNumber", event.target.value)}
         requirement="required"
         inputMode="numeric"
         pattern="[0-9]+"
@@ -53,12 +56,16 @@ export function VerificationForm() {
       <Input
         label="担当者メールアドレス"
         name="email"
+        value={values.email}
+        onChange={(event) => form.setFieldValue("email", event.target.value)}
         requirement="required"
         maxLength={254}
         placeholder="tanto@example.co.jp"
         type="email"
       />
-      {message ? <Notice tone={failed ? "error" : "success"}>{message}</Notice> : null}
+      {!busy && result.message ? (
+        <Notice tone={result.failed ? "error" : "success"}>{result.message}</Notice>
+      ) : null}
       <FormActions>
         <SubmitButton pending={busy} pendingLabel="送信しています…">
           確認メールを送信

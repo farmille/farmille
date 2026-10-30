@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
-import { useReducer, type FormEvent } from "react";
+import { useActionState, useReducer } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
@@ -10,6 +10,7 @@ import { applicationCopy } from "@/lib/company-application-copy";
 import {
   companyApplicationSchema,
   relationLabels,
+  relationSchema,
   relationExplanation,
   evidenceExplanation,
   successionExplanation,
@@ -55,7 +56,10 @@ const introListStyle = css({
   listStyle: "disc",
 });
 
-const RELATION_OPTIONS = Object.entries(relationLabels).map(([value, label]) => ({ value, label }));
+const RELATION_OPTIONS = relationSchema.options.map((value) => ({
+  value,
+  label: relationLabels[value],
+}));
 
 const TARGET_OPTIONS = [
   { value: "new", label: "資材の新規掲載" },
@@ -68,7 +72,57 @@ const noteStyle = css({ mt: "2" });
 
 const orStyle = css({ my: "2", textAlign: "center", fontSize: "xs", color: "text.subtle" });
 
-type ItemRow = { id: string; target: "new" | "existing" };
+type ItemRow = {
+  id: string;
+  target: "new" | "existing";
+  materialName: string;
+  materialUrl: string;
+  officialUrl: string;
+  evidenceUrl: string;
+  relations: v.InferOutput<typeof relationSchema>[];
+  ownerName: string;
+  ownerInformation: string;
+};
+
+type ApplicationValues = {
+  contact: ContactDefaults;
+  destination: ContactDefaults;
+  rows: ItemRow[];
+  background: string;
+  applicationDate: string;
+  signerName: string;
+  consents: boolean[];
+};
+
+function emptyItem(id: string, target: ItemRow["target"]): ItemRow {
+  return {
+    id,
+    target,
+    materialName: "",
+    materialUrl: "",
+    officialUrl: "",
+    evidenceUrl: "",
+    relations: [],
+    ownerName: "",
+    ownerInformation: "",
+  };
+}
+
+function restoredContact(
+  restored: RestoredFields,
+  prefix: string,
+  defaults: ContactDefaults,
+): ContactDefaults {
+  return {
+    companyName: restored.get(`${prefix}companyName`)?.[0] ?? defaults.companyName,
+    corporateNumber: restored.get(`${prefix}corporateNumber`)?.[0] ?? defaults.corporateNumber,
+    accountId: restored.get(`${prefix}accountId`)?.[0] ?? defaults.accountId,
+    contactName: restored.get(`${prefix}contactName`)?.[0] ?? defaults.contactName,
+    department: restored.get(`${prefix}department`)?.[0] ?? defaults.department,
+    email: restored.get(`${prefix}email`)?.[0] ?? defaults.email,
+    phone: restored.get(`${prefix}phone`)?.[0] ?? defaults.phone,
+  };
+}
 
 function IntroCard({ text }: { text: string }) {
   const [lead, list = ""] = text.split("\n\n");
@@ -115,9 +169,22 @@ export function CompanyApplicationForm({
 }) {
   const router = useRouter();
   const defaultTarget = kind === "registration" ? "new" : "existing";
-  const initialRows: ItemRow[] = [{ id: intentId, target: defaultTarget }];
-  const form = useForm({ defaultValues: { rows: initialRows } });
-  const rows = useStore(form.store, (state) => state.values.rows);
+  const [initialValues] = useReducer(
+    (values: ApplicationValues) => values,
+    null,
+    () => ({
+      contact: defaults,
+      destination: emptyContact,
+      rows: [emptyItem(intentId, defaultTarget)],
+      background: "",
+      applicationDate: new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" }),
+      signerName: "",
+      consents: applicationCopy[kind].consents.map(() => false),
+    }),
+  );
+  const form = useForm({ defaultValues: initialValues });
+  const values = useStore(form.store, (state) => state.values);
+  const { rows } = values;
   const [counts, countEvidence] = useReducer(
     (previous: Map<string, number>, entry: { key: string; count: number }) =>
       new Map(previous).set(entry.key, entry.count),
@@ -127,81 +194,80 @@ export function CompanyApplicationForm({
     (count: number, busy: boolean) => count + (busy ? 1 : -1),
     0,
   );
-  const [submitting, setSubmitting] = useReducer((_state: boolean, next: boolean) => next, false);
-  const [error, setError] = useReducer((_state: string, next: string) => next, "");
   const copy = applicationCopy[kind];
   const titles = SECTION_TITLES[kind];
   function countFiles(key: string, count: number) {
     countEvidence({ key, count });
   }
-  // 資材の欄の名前は行 ID を含むので、控えの行 ID で行を作り直してから欄に値を戻す。添付資料は付け直してもらう
-  function restoreRows(restored: RestoredFields) {
+  // 資材の欄の名前は行 ID を含むので、控えの行と入力をまとめて戻す。添付資料は付け直してもらう。
+  function restore(restored: RestoredFields) {
     const restoredRows = [...restored.keys()].flatMap((name) => {
       const id = /^(.+)\.materialName$/.exec(name)?.[1];
       if (!v.is(uuidSchema, id)) return [];
       const target = v.safeParse(TargetSchema, restored.get(`${id}.target`)?.[0]);
-      return [{ id, target: target.success ? target.output : defaultTarget }];
+      const relations = v.safeParse(v.array(relationSchema), restored.get(`${id}.relations`) ?? []);
+      return [
+        {
+          id,
+          target: target.success ? target.output : defaultTarget,
+          materialName: restored.get(`${id}.materialName`)?.[0] ?? "",
+          materialUrl: restored.get(`${id}.materialUrl`)?.[0] ?? "",
+          officialUrl: restored.get(`${id}.officialUrl`)?.[0] ?? "",
+          evidenceUrl: restored.get(`${id}.evidenceUrl`)?.[0] ?? "",
+          relations: relations.success ? relations.output : [],
+          ownerName: restored.get(`${id}.ownerName`)?.[0] ?? "",
+          ownerInformation: restored.get(`${id}.ownerInformation`)?.[0] ?? "",
+        },
+      ];
     });
-    if (restoredRows.length > 0) form.setFieldValue("rows", restoredRows);
+    form.setFieldValue("contact", restoredContact(restored, "", initialValues.contact));
+    form.setFieldValue(
+      "destination",
+      restoredContact(restored, "destination.", initialValues.destination),
+    );
+    form.setFieldValue("rows", restoredRows.length > 0 ? restoredRows : initialValues.rows);
+    form.setFieldValue("background", restored.get("background")?.[0] ?? initialValues.background);
+    form.setFieldValue(
+      "applicationDate",
+      restored.get("applicationDate")?.[0] ?? initialValues.applicationDate,
+    );
+    form.setFieldValue("signerName", restored.get("signerName")?.[0] ?? initialValues.signerName);
+    form.setFieldValue(
+      "consents",
+      copy.consents.map((_, index) => restored.get(`consent.${index}`)?.includes("on") ?? false),
+    );
   }
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    setSubmitting(true);
-    const data = new FormData(event.currentTarget);
-    const text = (name: string) => v.parse(v.string(), data.get(name) ?? "");
-    const contact = (prefix = "") => ({
-      companyName: text(`${prefix}companyName`),
-      corporateNumber: text(`${prefix}corporateNumber`),
-      accountId: text(`${prefix}accountId`),
-      contactName: text(`${prefix}contactName`),
-      department: text(`${prefix}department`),
-      email: text(`${prefix}email`),
-      phone: text(`${prefix}phone`),
-    });
-    const items = rows.map((row) => ({
-      id: row.id,
-      target: row.target,
-      materialName: text(`${row.id}.materialName`),
-      materialUrl: row.target === "new" ? "" : text(`${row.id}.materialUrl`),
-      officialUrl: text(`${row.id}.officialUrl`),
-      evidenceUrl: text(`${row.id}.evidenceUrl`),
-      relations: data.getAll(`${row.id}.relations`),
-      ownerName: text(`${row.id}.ownerName`),
-      ownerInformation: text(`${row.id}.ownerInformation`),
-    }));
-    const input = v.safeParse(companyApplicationSchema, {
-      ...contact(),
-      kind,
-      items,
-      destination: contact("destination."),
-      background: text("background"),
-      signerName: text("signerName"),
-      applicationDate: text("applicationDate"),
-      consents: copy.consents.map((_, index) => data.get(`consent.${index}`) === "on"),
-    });
-    if (!input.success) {
-      setError(`入力内容を確認してください。${v.summarize(input.issues)}`);
-      setSubmitting(false);
-      return;
-    }
-    try {
-      const result = await submitApplication({ intentId, input: input.output });
-      if (!result.ok) {
-        setError(`${errorMessageJa[result.error]} 資材URL・移行先ID・必須資料もご確認ください。`);
-        return;
+  const [error, submit, submitting] = useActionState(
+    async (_previous: string, _data: FormData): Promise<string> => {
+      const current = form.state.values;
+      const input = v.safeParse(companyApplicationSchema, {
+        ...current.contact,
+        kind,
+        items: current.rows.map((row) => ({
+          ...row,
+          materialUrl: row.target === "new" ? "" : row.materialUrl,
+        })),
+        destination: current.destination,
+        background: current.background,
+        signerName: current.signerName,
+        applicationDate: current.applicationDate,
+        consents: current.consents,
+      });
+      if (!input.success) return `入力内容を確認してください。${v.summarize(input.issues)}`;
+      try {
+        const result = await submitApplication({ intentId, input: input.output });
+        if (!result.ok)
+          return `${errorMessageJa[result.error]} 資材URL・移行先ID・必須資料もご確認ください。`;
+        router.push(`/dashboard/applications/${result.data}`);
+        return "";
+      } catch {
+        return "申請結果を確認できませんでした。入力内容はこの画面に残っています。同じ内容で再送しても、申請は重複しません。";
       }
-      router.push(`/dashboard/applications/${result.data}`);
-    } catch {
-      setError(
-        "申請結果を確認できませんでした。入力内容はこの画面に残っています。同じ内容で再送しても、申請は重複しません。",
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  }
+    },
+    "",
+  );
   return (
-    <Form onRestore={restoreRows} onSubmit={submit} persist="application">
+    <Form action={submit} onRestore={restore} persist="application">
       <fieldset className={cx(fieldsetStyle, stackStyle)} disabled={submitting}>
         <IntroCard text={copy.introduction} />
         <Notice tone="neutral">
@@ -209,7 +275,11 @@ export function CompanyApplicationForm({
         </Notice>
 
         <SurfaceCard title={titles.company}>
-          <ContactFields defaults={defaults} fixedAccount />
+          <ContactFields
+            values={values.contact}
+            onChange={(name, value) => form.setFieldValue(`contact.${name}`, value)}
+            fixedAccount
+          />
         </SurfaceCard>
 
         <section className={stackStyle}>
@@ -230,9 +300,9 @@ export function CompanyApplicationForm({
                   previous.filter((item) => item.id !== row.id),
                 )
               }
-              onTarget={(target) =>
+              onChange={(next) =>
                 form.setFieldValue("rows", (previous) =>
-                  previous.map((item) => (item.id === row.id ? { ...item, target } : item)),
+                  previous.map((item) => (item.id === row.id ? next : item)),
                 )
               }
               removable={rows.length > 1}
@@ -249,7 +319,7 @@ export function CompanyApplicationForm({
             onClick={() =>
               form.setFieldValue("rows", (previous) => [
                 ...previous,
-                { id: crypto.randomUUID(), target: defaultTarget },
+                emptyItem(crypto.randomUUID(), defaultTarget),
               ])
             }
             variant="ghost"
@@ -260,7 +330,11 @@ export function CompanyApplicationForm({
 
         {kind === "transfer_out" ? (
           <SurfaceCard title="移行先企業情報">
-            <ContactFields prefix="destination." defaults={emptyContact} />
+            <ContactFields
+              prefix="destination."
+              values={values.destination}
+              onChange={(name, value) => form.setFieldValue(`destination.${name}`, value)}
+            />
           </SurfaceCard>
         ) : null}
         {kind === "transfer_in" ? (
@@ -269,6 +343,8 @@ export function CompanyApplicationForm({
               <Textarea
                 label="申請の経緯"
                 name="background"
+                value={values.background}
+                onChange={(event) => form.setFieldValue("background", event.target.value)}
                 requirement="required"
                 maxLength={10000}
                 placeholder="例：事業譲渡により当該資材に関する事業を承継した"
@@ -304,19 +380,30 @@ export function CompanyApplicationForm({
           </>
         ) : null}
 
-        <ConsentFields kind={kind} />
+        <ConsentFields
+          kind={kind}
+          values={values.consents}
+          onChange={(index, checked) =>
+            form.setFieldValue("consents", (previous) =>
+              previous.map((value, i) => (i === index ? checked : value)),
+            )
+          }
+        />
 
         <SurfaceCard title="署名">
           <Input
             label="申請日"
             name="applicationDate"
             requirement="required"
-            defaultValue={new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" })}
+            value={values.applicationDate}
+            onChange={(event) => form.setFieldValue("applicationDate", event.target.value)}
             type="date"
           />
           <Input
             label={SIGNER_LABELS[kind]}
             name="signerName"
+            value={values.signerName}
+            onChange={(event) => form.setFieldValue("signerName", event.target.value)}
             requirement="required"
             maxLength={200}
             placeholder="金子 太郎"
@@ -327,7 +414,7 @@ export function CompanyApplicationForm({
           受付番号と回答の控えを企業会員の登録連絡先「{recipient}
           」へ送信します。審査後の連絡先は、入力した担当者メールアドレスです。
         </Notice>
-        {error ? <Notice tone="error">{error}</Notice> : null}
+        {!submitting && error ? <Notice tone="error">{error}</Notice> : null}
         <FormActions>
           <SubmitButton
             disabled={uploads > 0}
@@ -351,7 +438,7 @@ function MaterialItem({
   removable,
   removeDisabled,
   onRemove,
-  onTarget,
+  onChange,
   onBusy,
   onCount,
 }: {
@@ -362,7 +449,7 @@ function MaterialItem({
   removable: boolean;
   removeDisabled: boolean;
   onRemove: () => void;
-  onTarget: (target: ItemRow["target"]) => void;
+  onChange: (row: ItemRow) => void;
   onBusy: (busy: boolean) => void;
   onCount: (key: string, count: number) => void;
 }) {
@@ -372,6 +459,8 @@ function MaterialItem({
       description="※パッケージ記載の正式名称"
       label="資材名"
       name={field("materialName")}
+      value={row.materialName}
+      onChange={(event) => onChange({ ...row, materialName: event.target.value })}
       requirement="required"
       maxLength={300}
       placeholder="パッケージ記載の正式名称"
@@ -383,6 +472,8 @@ function MaterialItem({
         description={kind === "registration" ? "掲載済み資材の場合は必須です。" : undefined}
         label="FarmilleページURL"
         name={field("materialUrl")}
+        value={row.materialUrl}
+        onChange={(event) => onChange({ ...row, materialUrl: event.target.value })}
         requirement="required"
         maxLength={2000}
         placeholder="https://www.farmille.com/materials/…"
@@ -394,6 +485,8 @@ function MaterialItem({
       description={relationExplanation}
       label="当該資材との関係（複数選択可）"
       name={field("relations")}
+      value={row.relations}
+      onValueChange={(relations) => onChange({ ...row, relations })}
       requirement="required"
       options={RELATION_OPTIONS}
       variant="chips"
@@ -429,6 +522,8 @@ function MaterialItem({
         hideLabel
         label="パッケージが確認できる製品ページURL"
         name={field("evidenceUrl")}
+        value={row.evidenceUrl}
+        onChange={(event) => onChange({ ...row, evidenceUrl: event.target.value })}
         requirement="optional"
         maxLength={2000}
         placeholder="パッケージ画像が掲載されている公式サイト・ECサイトの製品ページURL（https://）"
@@ -446,7 +541,7 @@ function MaterialItem({
             label="申請内容"
             name={field("target")}
             requirement="required"
-            onValueChange={onTarget}
+            onValueChange={(target) => onChange({ ...row, target })}
             options={TARGET_OPTIONS}
             value={row.target}
           />
@@ -456,6 +551,8 @@ function MaterialItem({
           <Input
             label="製品公式ページURL"
             name={field("officialUrl")}
+            value={row.officialUrl}
+            onChange={(event) => onChange({ ...row, officialUrl: event.target.value })}
             requirement="optional"
             maxLength={2000}
             placeholder="https://"
@@ -479,12 +576,16 @@ function MaterialItem({
               <Input
                 label="法人名"
                 name={field("ownerName")}
+                value={row.ownerName}
+                onChange={(event) => onChange({ ...row, ownerName: event.target.value })}
                 requirement="required"
                 maxLength={200}
               />
               <Textarea
                 label="その他、分かる情報"
                 name={field("ownerInformation")}
+                value={row.ownerInformation}
+                onChange={(event) => onChange({ ...row, ownerInformation: event.target.value })}
                 requirement="optional"
                 maxLength={10000}
                 placeholder="担当部署・担当者名・連絡先など、分かる範囲で"

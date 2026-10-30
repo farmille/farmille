@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import * as reportActions from "@/app/materials/[id]/report/new/actions";
 import * as recaptcha from "@/lib/recaptcha-client";
 import * as reportImages from "./report-page-images";
+import type { UsageReportInput } from "@/lib/usage-report";
 
 import { persistKey, writePersisted } from "@/components/form/persisted-input";
 
@@ -36,7 +37,7 @@ const chosenMaterial = {
   manufacturerName: "ファーム技研",
 };
 
-function renderForm(draft = filledReport, readingAvailable = true) {
+function renderForm(draft: UsageReportInput | null = filledReport, readingAvailable = true) {
   return render(
     <ReportPageForm
       material={pageMaterial}
@@ -66,6 +67,14 @@ function renderForm(draft = filledReport, readingAvailable = true) {
 }
 
 describe("文章の入力欄", () => {
+  it("新規レポートを開き、未入力のままプレビューできる", async () => {
+    renderForm(null);
+    fireEvent.click(screen.getByRole("button", { name: "プレビュー" }));
+    expect(
+      await screen.findByRole("heading", { name: "プレビュー（公開後の見え方）" }),
+    ).toBeVisible();
+  });
+
   it("標準ラベルとplaceholderを使い、未入力なら欄にエラーを表示する", () => {
     renderForm({ ...filledReport, observedChange: "", cultivationEnvironment: "", timingNote: "" });
     const labels = ["結果・感想", "栽培環境", "処理日と生育状況"];

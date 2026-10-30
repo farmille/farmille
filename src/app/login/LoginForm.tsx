@@ -1,15 +1,22 @@
 "use client";
 
 import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { loginAction } from "@/app/login/actions";
 import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
-import { initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
+import { initialAuthFormState, submittedValuesOf, type AuthFormState } from "@/lib/auth/form-state";
 
 export function LoginForm({ next }: { next: string | null }) {
-  const [state, formAction] = useActionState(loginAction, initialAuthFormState);
-  const values = submittedValuesOf(state);
+  const form = useForm({ defaultValues: { email: "", password: "" } });
+  const values = useStore(form.store, (state) => state.values);
+  const [state, formAction] = useActionState(async (previous: AuthFormState, data: FormData) => {
+    const result = await loginAction(previous, data);
+    form.setFieldValue("email", submittedValuesOf(result).email ?? "");
+    form.setFieldValue("password", "");
+    return result;
+  }, initialAuthFormState);
 
   return (
     <Form action={formAction} persist={false}>
@@ -21,7 +28,8 @@ export function LoginForm({ next }: { next: string | null }) {
         name="email"
         requirement="required"
         autoComplete="email"
-        defaultValue={values.email}
+        value={values.email}
+        onChange={(event) => form.setFieldValue("email", event.target.value)}
         placeholder="you@example.com"
         type="email"
       />
@@ -29,6 +37,8 @@ export function LoginForm({ next }: { next: string | null }) {
       <Input
         label="パスワード"
         name="password"
+        value={values.password}
+        onChange={(event) => form.setFieldValue("password", event.target.value)}
         requirement="required"
         autoComplete="current-password"
         placeholder="••••••••"

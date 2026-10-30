@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer } from "react";
+import { startTransition, useActionState, useReducer } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useReportReadingProgress } from "@/lib/hooks/use-report-reading-progress";
 import { useRecaptcha } from "@/lib/hooks/use-recaptcha";
@@ -107,9 +107,8 @@ export function ReportPdfReadingDialog({
     null,
   );
   const [startedAt, setStartedAt] = useReducer((_current: number, next: number) => next, 0);
-  const busy = phase !== "idle" && phase !== "checking";
   useRecaptcha(siteKey);
-  const { now, setNow } = useReportReadingProgress(busy);
+  const { now, setNow } = useReportReadingProgress(phase !== "idle" && phase !== "checking");
 
   async function choose(next: File | undefined) {
     setFile(null);
@@ -131,10 +130,7 @@ export function ReportPdfReadingDialog({
     }
   }
 
-  async function read() {
-    setTried(true);
-    if (file === null || !consent || busy || pdfReadingTrialError(trial) !== undefined) return;
-    setProblem(null);
+  async function performRead(file: File, trial: string): Promise<PdfReadingResult> {
     setStartedAt(Date.now());
     setNow(Date.now());
     let result: PdfReadingResult;
@@ -173,11 +169,29 @@ export function ReportPdfReadingDialog({
     } finally {
       setPhase("idle");
     }
-    if (!result.ok) setProblem(result.message);
     onRead(result);
+    return result;
+  }
+
+  const [reading, dispatchRead, busy] = useActionState<
+    { file: File; result: PdfReadingResult } | null,
+    { file: File; trial: string }
+  >(async (_previous, request) => {
+    const result = await performRead(request.file, request.trial);
+    return { file: request.file, result };
+  }, null);
+
+  function read() {
+    setTried(true);
+    if (file === null || !consent || busy || pdfReadingTrialError(trial) !== undefined) return;
+    setProblem(null);
+    startTransition(() => dispatchRead({ file, trial }));
   }
 
   const used = remaining <= 0;
+  const error =
+    problem ??
+    (!busy && reading?.file === file && !reading.result.ok ? reading.result.message : null);
   const step = STEPS.findIndex((item) => item.phase === phase);
   return (
     <Dialog
@@ -194,7 +208,7 @@ export function ReportPdfReadingDialog({
           variant="primary"
           size="sm"
           disabled={file === null || !consent || busy || used}
-          onClick={() => void read()}
+          onClick={read}
         >
           {busy ? "読み取っています…" : replaces ? "置き換えて読み取る" : "読み取る"}
         </Button>
@@ -247,7 +261,7 @@ export function ReportPdfReadingDialog({
             <p className={elapsed}>{Math.max(0, Math.round((now - startedAt) / 1000))}秒経過</p>
           </div>
         )}
-        {problem !== null && <Notice tone="error">{problem}</Notice>}
+        {error !== null && <Notice tone="error">{error}</Notice>}
       </div>
     </Dialog>
   );

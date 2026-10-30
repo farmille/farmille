@@ -1,7 +1,8 @@
 "use client";
 
 import { useQueryStates } from "nuqs";
-import { useEffect, useReducer, useTransition } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useEffect, useReducer, useRef, useTransition } from "react";
 
 import {
   encodeFiltersQuery,
@@ -10,63 +11,34 @@ import {
 } from "@/components/search/search-selection";
 import { materialSearchParsers } from "@/lib/search-query-state";
 
-type SearchInput = {
-  value: string;
-  urlQuery: string;
-  requested: string | null;
-  composing: boolean;
-};
-type SearchEvent =
-  | { type: "input"; value: string }
-  | { type: "url"; query: string }
-  | { type: "request"; query: string }
-  | { type: "navigate"; query: string }
-  | { type: "compose"; composing: boolean };
-
-function searchInputReducer(state: SearchInput, event: SearchEvent): SearchInput {
-  switch (event.type) {
-    case "input":
-      return { ...state, value: event.value };
-    case "url":
-      return {
-        ...state,
-        value: state.requested === event.query ? state.value : event.query,
-        urlQuery: event.query,
-        requested: null,
-      };
-    case "request":
-      return { ...state, requested: event.query };
-    case "navigate":
-      return { ...state, value: event.query, requested: event.query.trim() };
-    case "compose":
-      return { ...state, composing: event.composing };
-  }
-}
-
 export function useMaterialSearch(
   initialQuery: string,
   selected: SelectedSearchFilter[],
   sort: MaterialSortParam,
 ) {
-  const [input, dispatch] = useReducer(searchInputReducer, {
-    value: initialQuery,
-    urlQuery: initialQuery,
-    requested: null,
-    composing: false,
-  });
+  const form = useForm({ defaultValues: { query: initialQuery } });
+  const query = useStore(form.store, (state) => state.values.query);
+  const [composing, setComposing] = useReducer((_current: boolean, next: boolean) => next, false);
+  const requestedQuery = useRef<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [, setSearch] = useQueryStates(materialSearchParsers, {
     shallow: false,
     scroll: false,
     startTransition,
   });
-  if (input.urlQuery !== initialQuery) dispatch({ type: "url", query: initialQuery });
-  const { value: query, composing } = input;
+
+  useEffect(() => {
+    // 自分で送った検索の応答では、待っている間に入力した続きやフォーカスを戻さない。
+    if (requestedQuery.current !== initialQuery && form.getFieldValue("query") !== initialQuery) {
+      form.setFieldValue("query", initialQuery);
+    }
+    requestedQuery.current = null;
+  }, [form, initialQuery]);
 
   useEffect(() => {
     if (composing || isPending || query.trim() === initialQuery) return;
     const timer = setTimeout(() => {
-      dispatch({ type: "request", query: query.trim() });
+      requestedQuery.current = query.trim();
       void setSearch(
         { filters: encodeFiltersQuery(selected), sort, q: query.trim() },
         { history: "replace" },
@@ -78,10 +50,11 @@ export function useMaterialSearch(
   return {
     query,
     isPending,
-    setQuery: (value: string) => dispatch({ type: "input", value }),
-    setComposing: (value: boolean) => dispatch({ type: "compose", composing: value }),
+    setQuery: (value: string) => form.setFieldValue("query", value),
+    setComposing,
     navigate: (filters: SelectedSearchFilter[], nextQuery = query) => {
-      dispatch({ type: "navigate", query: nextQuery });
+      form.setFieldValue("query", nextQuery);
+      requestedQuery.current = nextQuery.trim();
       void setSearch(
         { filters: encodeFiltersQuery(filters), sort, q: nextQuery.trim() },
         { history: "push" },

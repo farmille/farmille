@@ -1,9 +1,10 @@
 "use client";
 
 import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { adminBodyStyle } from "@/app/admin/_components/AdminUI";
-import { initialAdminActionState } from "@/app/admin/_lib/action-state";
+import { initialAdminActionState, type AdminActionState } from "@/app/admin/_lib/action-state";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
 import { Checkbox, Field, Form, Notice, SubmitButton } from "@/components/form";
 import { removePublishedPostAction } from "./actions";
@@ -12,7 +13,13 @@ import { css } from "../../../../styled-system/css";
 const formStyle = css({ display: "grid", gap: "3", mt: "3" });
 
 export function RemovalForm({ id, type }: { id: string; type: "review" | "usage_report" }) {
-  const [state, action] = useActionState(removePublishedPostAction, initialAdminActionState);
+  const form = useForm({ defaultValues: { confirmed: false } });
+  const confirmed = useStore(form.store, (state) => state.values.confirmed);
+  const [state, action] = useActionState(async (previous: AdminActionState, data: FormData) => {
+    const result = await removePublishedPostAction(previous, data);
+    if (result.status === "done") form.reset();
+    return result;
+  }, initialAdminActionState);
   return (
     <Collapsible>
       <CollapsibleTrigger>公開から削除する</CollapsibleTrigger>
@@ -24,7 +31,12 @@ export function RemovalForm({ id, type }: { id: string; type: "review" | "usage_
             この投稿を非公開にします。公開ページと一覧から表示されなくなります。本文や添付データは保持されます。
           </p>
           <Field name="confirmed" requirement="required">
-            <Checkbox>この投稿を非公開にすることを確認しました</Checkbox>
+            <Checkbox
+              checked={confirmed}
+              onCheckedChange={(checked) => form.setFieldValue("confirmed", checked)}
+            >
+              この投稿を非公開にすることを確認しました
+            </Checkbox>
           </Field>
           {state.status === "idle" ? null : (
             <Notice tone={state.status === "error" ? "error" : "success"}>{state.message}</Notice>

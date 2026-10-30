@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useReducer } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { parseAsString, useQueryState } from "nuqs";
 
 import { NoImage, Stars } from "@/app/materials/[id]/_components/CardParts";
 import { buttonRecipe } from "@/components/Button";
@@ -14,7 +16,6 @@ import { css, cx } from "../../../styled-system/css";
 
 type MaterialPickerProps = {
   materials: PostingMaterialWithImage[];
-  query: string;
   postType?: "report" | "review";
 };
 
@@ -129,7 +130,33 @@ function MaterialThumb({ src, size }: { src: string | null; size: number }) {
   );
 }
 
-export function MaterialPicker({ materials, query, postType }: MaterialPickerProps) {
+export function MaterialPicker({ materials, postType }: MaterialPickerProps) {
+  const [query, setQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("").withOptions({ shallow: false, history: "push", scroll: false }),
+  );
+  return (
+    <MaterialPickerBody
+      key={query}
+      materials={materials}
+      onSearch={(query) => void setQuery(query || null)}
+      postType={postType}
+      query={query}
+    />
+  );
+}
+
+function MaterialPickerBody({
+  materials,
+  query,
+  postType,
+  onSearch,
+}: MaterialPickerProps & { query: string; onSearch: (query: string) => void }) {
+  const form = useForm({
+    defaultValues: { query },
+    onSubmit: ({ value }) => onSearch(value.query.trim()),
+  });
+  const input = useStore(form.store, (state) => state.values.query);
   const [selectedId, setSelectedId] = useReducer(
     (_state: string | null, next: string | null) => next,
     null,
@@ -142,15 +169,24 @@ export function MaterialPicker({ materials, query, postType }: MaterialPickerPro
         どの資材について書きますか？
       </p>
 
-      <form method="get" role="search">
+      <form
+        method="get"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setSelectedId(null);
+          void form.handleSubmit();
+        }}
+        role="search"
+      >
         {postType !== undefined ? <input type="hidden" name="type" value={postType} /> : null}
         <SearchInput
           aria-label="資材名・メーカー名で検索"
-          defaultValue={query}
           maxLength={100}
           name="q"
+          onValueChange={(value) => form.setFieldValue("query", value)}
           placeholder="資材名・メーカー名で検索"
           submitLabel="検索"
+          value={input}
         />
       </form>
 

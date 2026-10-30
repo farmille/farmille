@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { initialAdminActionState } from "@/app/admin/_lib/action-state";
 import { updateUsageReportEditorialAction } from "@/app/admin/usage-reports/[id]/actions";
@@ -9,6 +10,16 @@ import { Form, FormActions, Input, Notice, Textarea } from "@/components/form";
 import type { UsageReportEditorialDetail } from "@/server/admin/usage-reports";
 
 export function UsageReportEditorialForm({ report }: { report: UsageReportEditorialDetail }) {
+  const form = useForm({
+    defaultValues: {
+      title: report.title,
+      observedChange: report.observedChange,
+      negativeNote: report.negativeNote ?? "",
+      summary: report.summary,
+      editorNote: report.editorNote ?? "",
+    },
+  });
+  const values = useStore(form.store, (state) => state.values);
   const [state, formAction, pending] = useActionState(
     updateUsageReportEditorialAction,
     initialAdminActionState,
@@ -16,7 +27,22 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
   const editable = report.status === "pending";
 
   return (
-    <Form action={formAction} persist="editorial">
+    <Form
+      action={formAction}
+      persist="editorial"
+      onRestore={(restored) => {
+        for (const name of [
+          "title",
+          "observedChange",
+          "negativeNote",
+          "summary",
+          "editorNote",
+        ] as const) {
+          const value = restored.get(name)?.[0];
+          if (value !== undefined) form.setFieldValue(name, value);
+        }
+      }}
+    >
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
 
@@ -25,7 +51,8 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
         labelSize="sm"
         name="title"
         requirement="required"
-        defaultValue={report.title}
+        value={values.title}
+        onChange={(event) => form.setFieldValue("title", event.target.value)}
         disabled={!editable}
       />
       <Textarea
@@ -33,7 +60,8 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
         labelSize="sm"
         name="observedChange"
         requirement="required"
-        defaultValue={report.observedChange}
+        value={values.observedChange}
+        onChange={(event) => form.setFieldValue("observedChange", event.target.value)}
         disabled={!editable}
         size="lg"
       />
@@ -48,7 +76,8 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
             label="悪影響・気になった点"
             labelSize="sm"
             name="negativeNote"
-            defaultValue={report.negativeNote ?? ""}
+            value={values.negativeNote}
+            onChange={(event) => form.setFieldValue("negativeNote", event.target.value)}
             disabled={!editable}
           />
           <Textarea
@@ -56,7 +85,8 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
             labelSize="sm"
             name="summary"
             requirement="required"
-            defaultValue={report.summary}
+            value={values.summary}
+            onChange={(event) => form.setFieldValue("summary", event.target.value)}
             disabled={!editable}
             size="lg"
           />
@@ -71,7 +101,8 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
         label="編集局メモ（内部）"
         labelSize="sm"
         name="editorNote"
-        defaultValue={report.editorNote ?? ""}
+        value={values.editorNote}
+        onChange={(event) => form.setFieldValue("editorNote", event.target.value)}
         disabled={!editable}
       />
 

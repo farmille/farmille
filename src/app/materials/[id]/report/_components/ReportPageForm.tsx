@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useReducer, useRef, useTransition } from "react";
+import { startTransition, useActionState, useCallback, useReducer, useRef } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
 import { useReportMediaHistory } from "@/lib/hooks/use-report-media-history";
@@ -70,6 +70,18 @@ type PdfReadingStatus = {
   marks: PdfReadingField[];
   checkRequired: boolean;
 };
+
+type ReportPageFormValues = {
+  input: UsageReportInput;
+  items: ReportPageItem[];
+  acks: ReportPageAcks;
+};
+
+type ReportSaveState =
+  | { status: "idle" | "saved" | "submitted" }
+  | { status: "error"; message: string };
+
+type ReportSaveCommand = { type: "save"; submit: boolean; close: boolean } | { type: "clear" };
 
 const bar = css({
   position: "sticky",
@@ -252,22 +264,23 @@ export function ReportPageForm({
   };
 }) {
   const router = useRouter();
-  const [initialInput] = useReducer(
-    (value: UsageReportInput) => value,
+  const [initialValues] = useReducer(
+    (value: ReportPageFormValues) => value,
     null,
     () => {
       // ページ版では数値のグラフを手で作らないので、新しいレポートは入れ方を選ぶ前の調査項目から始める
       const base = draft ?? { ...createBlankUsageReport(material.id), measurements: [] };
       const named = withAutoPlotNames(base, base, material.name);
-      return { ...named, prefectureCode: named.prefectureCode ?? registeredAddress.prefectureCode };
+      const input = {
+        ...named,
+        prefectureCode: named.prefectureCode ?? registeredAddress.prefectureCode,
+      };
+      // 空の調査項目のIDも初回に確定し、再描画でフォームの初期値を変えない。
+      return { input, items: itemsFromInput(input), acks: { timing: false, privacy: false } };
     },
   );
   const form = useForm({
-    defaultValues: {
-      input: initialInput,
-      items: itemsFromInput(initialInput),
-      acks: { timing: false, privacy: false },
-    },
+    defaultValues: initialValues,
   });
   const { input, items, acks } = useStore(form.store, (state) => state.values);
   const setInput = useCallback(
@@ -299,7 +312,6 @@ export function ReportPageForm({
   );
   const [preview, setPreview] = useReducer((_current: boolean, next: boolean) => next, false);
   const [leaving, setLeaving] = useReducer((_current: boolean, next: boolean) => next, false);
-  const [submitted, setSubmitted] = useReducer((_current: boolean, next: boolean) => next, false);
   const [fileItem, setFileItem] = useReducer(
     (
       _current: { item: ReportPageItem; isNew: boolean } | null,
@@ -332,7 +344,6 @@ export function ReportPageForm({
       remaining: pdfReading.remaining,
     },
   );
-  const [pending, startTransition] = useTransition();
   // 連打で保存・提出が二重に送られないよう、送信中は ref で止める（state の disabled は次の描画まで効かない）
   const sending = useRef(false);
   // この画面の入力に入った画像。保存の前に外れた分は、保存のあとにサーバーが置き場から消す
@@ -358,6 +369,91 @@ export function ReportPageForm({
     toast.error(message.split("\n")[0], { toasterId: reportToasterId });
   }, []);
 
+  const checks = reportPageChecks(payload, acks, checkRequired);
+  const marks = effectivePdfReadingMarks(readMarks, payload);
+  const missing = checks.filter((check) => !check.ok);
+  const missingKeys = new Set(tried ? missing.map((check) => check.key) : []);
+  const cropName = crops.find((crop) => crop.id === input.cropId)?.name ?? null;
+  const title = reportPageTitle(currentMaterial.name, cropName);
+  const materialAcks = reportNeedsMaterialAcks(payload);
+  const done = checks.length - missing.length;
+  const layout = reportPlotLayout(input, currentMaterial.name);
+
+  /** この画面の入力に入っていて、current から外れた画像。保存で渡すと、サーバーが置き場から消す。 */
+  function droppedMedia(current: UsageReportInput): string[] {
+    const kept = new Set(current.media.map((media) => media.url));
+    return [...shownMedia.current].filter((url) => !kept.has(url));
+  }
+
+  /** 下書きの保存が済んだら、渡した画像はサーバーが消している。 */
+  function forgetDropped(urls: string[]) {
+    for (const url of urls) shownMedia.current.delete(url);
+  }
+
+  function saveFailure(message: string): ReportSaveState {
+    toast.error(message.split("\n")[0], { toasterId: reportToasterId });
+    return { status: "error", message };
+  }
+
+  async function performSave(submit: boolean, close: boolean): Promise<ReportSaveState> {
+    try {
+      const body = inputWithItems(input, items);
+      const over = reportOverLimit(body, items);
+      if (over.length > 0) {
+        return saveFailure(`文字数の上限を超えている欄があります：${over.join("、")}`);
+      }
+      const dropped = droppedMedia(body);
+      const result = submit
+        ? await submitUsageReportAction(body.materialId, body, dropped)
+        : await saveUsageReportDraftAction(body.materialId, body, dropped);
+      if (result.ok || result.savedDraft !== undefined) forgetDropped(dropped);
+      if (!result.ok) {
+        if (result.savedDraft !== undefined) {
+          const savedUpdatedAt = result.savedDraft.updatedAt;
+          setInput((current) => ({ ...current, expectedUpdatedAt: savedUpdatedAt }));
+          if (result.savedDraft.status === "complete")
+            setSaved(JSON.stringify({ ...body, expectedUpdatedAt: savedUpdatedAt }));
+        }
+        const details = Object.values(result.fieldErrors).map((text) => text.replace(/^※\s*/, ""));
+        return saveFailure([result.message, ...new Set(details)].join("\n"));
+      }
+      setFailure(null);
+      setInput((current) => ({ ...current, expectedUpdatedAt: result.updatedAt }));
+      setSaved(JSON.stringify({ ...body, expectedUpdatedAt: result.updatedAt }));
+      if (result.status === "pending") {
+        // 提出後の画面はサーバーの「提出済み」に揃える
+        router.refresh();
+      } else {
+        const now = new Date();
+        toast(
+          `下書きを保存しました（${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}）`,
+          {
+            toasterId: reportToasterId,
+          },
+        );
+      }
+      if (close) router.push(`/materials/${body.materialId}`);
+      else if (body.materialId !== material.id)
+        router.replace(`/materials/${body.materialId}/report/new`);
+      return { status: result.status === "pending" ? "submitted" : "saved" };
+    } catch {
+      // 通信の失敗などはブラウザの英語の文言になるので、そのまま出さない
+      return saveFailure(
+        "保存できませんでした。入力内容はそのまま残っています。通信状態を確認して再度お試しください。",
+      );
+    } finally {
+      sending.current = false;
+    }
+  }
+
+  const [saveState, dispatchSave, pending] = useActionState<ReportSaveState, ReportSaveCommand>(
+    async (_previous, command) =>
+      command.type === "clear" ? { status: "idle" } : performSave(command.submit, command.close),
+    { status: "idle" },
+  );
+  const submitted = saveState.status === "submitted";
+  const visibleFailure = failure ?? (saveState.status === "error" ? saveState.message : null);
+
   // 下書き保存の前に閉じても、同じタブで開き直せば保存前の入力に戻る
   // 資材ページから画面内の遷移で開くと、最初の描画ではまだ URL が遷移前なので、控えの置き場は URL を固定する
   usePersistedInput({
@@ -381,80 +477,11 @@ export function ReportPageForm({
 
   useReportLeaveWarning(dirty && !submitted);
 
-  const checks = reportPageChecks(payload, acks, checkRequired);
-  const marks = effectivePdfReadingMarks(readMarks, payload);
-  const missing = checks.filter((check) => !check.ok);
-  const missingKeys = new Set(tried ? missing.map((check) => check.key) : []);
-  const cropName = crops.find((crop) => crop.id === input.cropId)?.name ?? null;
-  const title = reportPageTitle(currentMaterial.name, cropName);
-  const materialAcks = reportNeedsMaterialAcks(payload);
-  const done = checks.length - missing.length;
-  const layout = reportPlotLayout(input, currentMaterial.name);
-
-  /** この画面の入力に入っていて、current から外れた画像。保存で渡すと、サーバーが置き場から消す。 */
-  function droppedMedia(current: UsageReportInput): string[] {
-    const kept = new Set(current.media.map((media) => media.url));
-    return [...shownMedia.current].filter((url) => !kept.has(url));
-  }
-
-  /** 下書きの保存が済んだら、渡した画像はサーバーが消している。 */
-  function forgetDropped(urls: string[]) {
-    for (const url of urls) shownMedia.current.delete(url);
-  }
-
-  async function persist(submit: boolean, close = false) {
+  function persist(submit: boolean, close = false) {
     if (sending.current) return;
     sending.current = true;
-    try {
-      const body = inputWithItems(input, items);
-      const over = reportOverLimit(body, items);
-      if (over.length > 0) {
-        showError(`文字数の上限を超えている欄があります：${over.join("、")}`);
-        return;
-      }
-      const dropped = droppedMedia(body);
-      const result = submit
-        ? await submitUsageReportAction(body.materialId, body, dropped)
-        : await saveUsageReportDraftAction(body.materialId, body, dropped);
-      if (result.ok || result.savedDraft !== undefined) forgetDropped(dropped);
-      if (!result.ok) {
-        if (result.savedDraft !== undefined) {
-          const savedUpdatedAt = result.savedDraft.updatedAt;
-          setInput((current) => ({ ...current, expectedUpdatedAt: savedUpdatedAt }));
-          if (result.savedDraft.status === "complete")
-            setSaved(JSON.stringify({ ...body, expectedUpdatedAt: savedUpdatedAt }));
-        }
-        const details = Object.values(result.fieldErrors).map((text) => text.replace(/^※\s*/, ""));
-        showError([result.message, ...new Set(details)].join("\n"));
-        return;
-      }
-      setFailure(null);
-      setInput((current) => ({ ...current, expectedUpdatedAt: result.updatedAt }));
-      setSaved(JSON.stringify({ ...body, expectedUpdatedAt: result.updatedAt }));
-      if (result.status === "pending") {
-        // 提出後の画面はサーバーの「提出済み」に揃える
-        setSubmitted(true);
-        router.refresh();
-      } else {
-        const now = new Date();
-        toast(
-          `下書きを保存しました（${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}）`,
-          {
-            toasterId: reportToasterId,
-          },
-        );
-      }
-      if (close) router.push(`/materials/${body.materialId}`);
-      else if (body.materialId !== material.id)
-        router.replace(`/materials/${body.materialId}/report/new`);
-    } catch {
-      // 通信の失敗などはブラウザの英語の文言になるので、そのまま出さない
-      showError(
-        "保存できませんでした。入力内容はそのまま残っています。通信状態を確認して再度お試しください。",
-      );
-    } finally {
-      sending.current = false;
-    }
+    setFailure(null);
+    startTransition(() => dispatchSave({ type: "save", submit, close }));
   }
 
   // 読み取った値はサーバーの下書きに保存済みなので、画面の入力と保存済みの控えをまとめて置き換える
@@ -486,6 +513,7 @@ export function ReportPageForm({
     }
     adoptRead(result.input);
     setFailure(null);
+    startTransition(() => dispatchSave({ type: "clear" }));
     setReadingOpen(false);
     toast("PDF読み取りの内容を下書きに保存しました。元のPDFと照らし合わせて確かめてください。", {
       toasterId: reportToasterId,
@@ -495,7 +523,7 @@ export function ReportPageForm({
   function submit() {
     setTried(true);
     if (missing.length > 0) return;
-    startTransition(() => persist(true));
+    persist(true);
   }
 
   if (submitted)
@@ -524,7 +552,7 @@ export function ReportPageForm({
               type="button"
               className={pillButtonRecipe({ strong: true })}
               disabled={pending}
-              onClick={() => startTransition(() => persist(false))}
+              onClick={() => persist(false)}
             >
               {pending ? "保存中…" : "下書き保存"}
             </button>
@@ -798,9 +826,9 @@ export function ReportPageForm({
                 </button>
               </Notice>
             )}
-            {failure !== null && (
+            {visibleFailure !== null && (
               <Notice tone="error" className={missingBox}>
-                <span className={css({ whiteSpace: "pre-line" })}>{failure}</span>
+                <span className={css({ whiteSpace: "pre-line" })}>{visibleFailure}</span>
               </Notice>
             )}
           </div>
@@ -872,7 +900,8 @@ export function ReportPageForm({
               router.push(`/materials/${input.materialId}`);
             },
           }}
-          onConfirm={() => persist(false, true)}
+          pending={pending}
+          action={() => persist(false, true)}
         />
         {readingOpen && remaining !== null && pdfReading.siteKey !== null && (
           <ReportPdfReadingDialog

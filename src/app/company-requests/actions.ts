@@ -3,16 +3,25 @@ import type {
   ApplicationSubmission,
   ReceiptAccess,
   EvidenceReservation,
+  SubmittableKind,
 } from "@/lib/company-application";
 import { applicationResult } from "@/server/company-application-auth";
-import { saveCompanyApplication } from "@/server/company-applications";
+import { beginCompanyApplication, saveCompanyApplication } from "@/server/company-applications";
 import { requestReceiptAccess } from "@/server/company-application-access";
 import {
   reserveApplicationEvidence,
   finalizeApplicationEvidence,
   removeApplicationEvidence,
+  cleanupExpiredApplicationUploads,
 } from "@/server/company-application-evidence";
 import { sendApplicationReceipt } from "@/server/accounts/application-email";
+
+export async function beginApplication(kind: SubmittableKind) {
+  return applicationResult(async () => {
+    await cleanupExpiredApplicationUploads();
+    return (await beginCompanyApplication(kind)).id;
+  });
+}
 
 export async function submitApplication(input: ApplicationSubmission) {
   return applicationResult(async () => {

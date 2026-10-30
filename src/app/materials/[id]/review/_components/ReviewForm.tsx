@@ -65,6 +65,7 @@ type ReviewInput = Pick<ReviewFormValues, "rating" | "body"> & {
   cropIds: readonly string[];
   pendingPhotos: PendingPhoto[];
   removedPhotoIds: string[];
+  existingPhotoCaptions: Record<string, string>;
 };
 
 type ReviewFormBaseProps = {
@@ -276,10 +277,13 @@ export function ReviewForm({
     body: initialValues.body,
     pendingPhotos: [],
     removedPhotoIds: [],
+    existingPhotoCaptions: Object.fromEntries(
+      initialValues.photos.map((photo) => [photo.id, photo.caption ?? ""]),
+    ),
   };
   // Reactはaction後に未制御入力をresetするため、エラー時も本文が残るよう入力値を保持する。
   const form = useForm({ defaultValues: initialInput });
-  const { cropIds, rating, body, pendingPhotos, removedPhotoIds } = useStore(
+  const { cropIds, rating, body, pendingPhotos, removedPhotoIds, existingPhotoCaptions } = useStore(
     form.store,
     (state) => state.values,
   );
@@ -331,6 +335,10 @@ export function ReviewForm({
     if (restoredRating.success) form.setFieldValue("rating", restoredRating.output);
     const restoredBody = restored.get("body")?.[0];
     if (restoredBody !== undefined) form.setFieldValue("body", restoredBody);
+    for (const photo of initialValues.photos) {
+      const caption = restored.get(`existingPhotoCaption-${photo.id}`)?.[0];
+      if (caption !== undefined) form.setFieldValue(`existingPhotoCaptions.${photo.id}`, caption);
+    }
   }
 
   async function submit(formData: FormData) {
@@ -490,7 +498,10 @@ export function ReviewForm({
                   size="sm"
                   className={photoCaptionStyle}
                   name={`existingPhotoCaption-${photo.id}`}
-                  defaultValue={photo.caption ?? ""}
+                  value={existingPhotoCaptions[photo.id] ?? ""}
+                  onChange={(event) =>
+                    form.setFieldValue(`existingPhotoCaptions.${photo.id}`, event.target.value)
+                  }
                   placeholder="例）散布前の様子"
                   label={
                     <>

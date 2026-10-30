@@ -1,6 +1,13 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useReducer, useSyncExternalStore } from "react";
+import {
+  startTransition,
+  useActionState,
+  useCallback,
+  useEffect,
+  useReducer,
+  useSyncExternalStore,
+} from "react";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import {
   PROFILE_SAVED_SEARCH,
@@ -120,6 +127,11 @@ export type OnboardingTourWithProps = {
   finish: (userId: string) => Promise<boolean>;
 };
 
+type OnboardingCompletion = { status: "idle" } | { status: "thanks"; next: string | null };
+type FinishRequest =
+  | { kind: "end"; userId: string }
+  | { kind: "complete"; userId: string; next: string | null };
+
 export function useOnboardingTour({ findPendingUser, finish }: OnboardingTourWithProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -128,32 +140,23 @@ export function useOnboardingTour({ findPendingUser, finish }: OnboardingTourWit
     null,
   );
   const step = useSyncExternalStore(subscribe, () => readStep(userId), readNothing);
-  const [completion, dispatchCompletion] = useReducer(
-    (
-      state:
-        | { status: "idle" }
-        | { status: "finishing" }
-        | { status: "thanks"; next: string | null },
-      event:
-        | { type: "finish" }
-        | { type: "failed" }
-        | { type: "dismiss" }
-        | { type: "finished"; next: string | null },
-    ): typeof state => {
-      switch (event.type) {
-        case "finish":
-          return { status: "finishing" };
-        case "finished":
-          return { status: "thanks", next: event.next };
-        case "failed":
-        case "dismiss":
-          return { status: "idle" };
+  const [thanksHidden, setThanksHidden] = useReducer(
+    (_current: boolean, next: boolean) => next,
+    false,
+  );
+  const [completion, finishTour, finishing] = useActionState<OnboardingCompletion, FinishRequest>(
+    async (_previous, request) => {
+      if (!(await finish(request.userId))) return { status: "idle" };
+      if (request.kind === "end") {
+        toast("チュートリアルを終了しました。");
+        return { status: "idle" };
       }
+      setThanksHidden(false);
+      return { status: "thanks", next: request.next };
     },
     { status: "idle" },
   );
-  const finishing = completion.status === "finishing";
-  const thanks = completion.status === "thanks" ? completion : null;
+  const thanks = completion.status === "thanks" && !thanksHidden ? completion : null;
 
   // 案内を待っているアカウントで、このブラウザにまだその人の進み具合が無ければ、ようこそから始める。
   // 終えた直後に古い判定で始め直さないよう、取り直した判定だけで決める
@@ -180,7 +183,7 @@ export function useOnboardingTour({ findPendingUser, finish }: OnboardingTourWit
   useEffect(() => {
     if (thanks === null) return;
     const leave = window.setTimeout(() => {
-      dispatchCompletion({ type: "dismiss" });
+      setThanksHidden(true);
       if (thanks.next !== null) router.push(thanks.next);
     }, THANKS_SHOWN);
     return () => window.clearTimeout(leave);
@@ -193,18 +196,17 @@ export function useOnboardingTour({ findPendingUser, finish }: OnboardingTourWit
     [userId],
   );
   const push = useCallback((href: string) => router.push(href), [router]);
-  const end = useCallback(async () => {
-    if (userId !== null && (await finish(userId))) toast("チュートリアルを終了しました。");
-  }, [userId, finish]);
+  const end = useCallback(() => {
+    if (userId === null || finishing) return;
+    startTransition(() => finishTour({ kind: "end", userId }));
+  }, [userId, finishing, finishTour]);
   // 最後の「閉じる」は、印を消し終えるまでボタンを読み込み中にする。
   // 消せなかったときはエラーを出してシートを残し、もう一度押せるようにする
-  const complete = useCallback(async () => {
-    if (userId === null) return;
+  const complete = useCallback(() => {
+    if (userId === null || finishing) return;
     const next = onboardingFinishHref(pathname);
-    dispatchCompletion({ type: "finish" });
-    const finished = await finish(userId);
-    dispatchCompletion(finished ? { type: "finished", next } : { type: "failed" });
-  }, [userId, finish, pathname]);
+    startTransition(() => finishTour({ kind: "complete", userId, next }));
+  }, [userId, finishing, finishTour, pathname]);
 
   return { pathname, step, thanks, go, end, complete, finishing, push };
 }

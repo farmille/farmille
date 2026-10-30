@@ -34,7 +34,11 @@ export function CheckboxGroup<V extends string>(props: CheckboxGroupProps<V>) {
   const [labeling] = splitLabeling(props);
   return (
     <Labeled disabled={props.disabled} kind="group" labeling={labeling} name={props.name}>
-      <CheckboxGroupWithReset<V> {...props} />
+      {props.value === undefined ? (
+        <CheckboxGroupWithReset<V> {...props} />
+      ) : (
+        <CheckboxGroupBody<V> {...props} value={props.value} />
+      )}
     </Labeled>
   );
 }
@@ -43,46 +47,57 @@ function CheckboxGroupWithReset<V extends string>(props: CheckboxGroupBodyProps<
   const field = useFieldContext();
   const restored = useRestoredField(props.name ?? field.name);
   const initial =
-    props.value === undefined && restored !== undefined
-      ? restoredChoices(props.options, restored)
-      : props.defaultValue;
+    restored === undefined ? props.defaultValue : restoredChoices(props.options, restored);
   const resetKey = useResetKey((initial ?? []).join("\u001f"));
-  return <CheckboxGroupBody<V> key={resetKey} {...props} defaultValue={initial} />;
+  return <UncontrolledCheckboxGroup<V> key={resetKey} {...props} defaultValue={initial} />;
+}
+
+function UncontrolledCheckboxGroup<V extends string>({
+  defaultValue,
+  onValueChange,
+  ...props
+}: CheckboxGroupBodyProps<V>) {
+  const initial: string[] = [...(defaultValue ?? [])];
+  const form = useForm({ defaultValues: { selection: initial } });
+  const selection = useStore(form.store, (state) => state.values.selection);
+  const picked = useMemo(
+    () =>
+      props.options
+        .filter((option) => selection.includes(option.value))
+        .map((option) => option.value),
+    [props.options, selection],
+  );
+  return (
+    <CheckboxGroupBody
+      {...props}
+      onValueChange={(next) => {
+        form.setFieldValue("selection", next);
+        onValueChange?.(next);
+      }}
+      value={picked}
+    />
+  );
 }
 
 function CheckboxGroupBody<V extends string>({
   options,
   variant = "list",
   value,
-  defaultValue,
   onValueChange,
   limit,
   name,
   disabled,
   className,
-}: CheckboxGroupBodyProps<V>) {
+}: CheckboxGroupBodyProps<V> & { value: readonly V[] }) {
   const { inRoot } = useFieldContext();
-  const initial = (defaultValue ?? []).map((value) => String(value));
-  const form = useForm({ defaultValues: { selection: initial } });
-  const uncontrolled = useStore(form.store, (state) => state.values.selection);
-  const picked = useMemo(
-    () =>
-      options.filter((option) => uncontrolled.includes(option.value)).map((option) => option.value),
-    [options, uncontrolled],
-  );
-  const current = value ?? picked;
   // Base UI は value の参照が変わるたびに Form のエラーを消す
-  const groupValue = useMemo(() => [...current], [current]);
-  const full = limit !== undefined && current.length >= limit;
+  const groupValue = useMemo(() => [...value], [value]);
+  const full = limit !== undefined && value.length >= limit;
 
   function handleValueChange(next: readonly string[]): void {
     const picked = options
       .filter((option) => next.includes(option.value))
       .map((option) => option.value);
-    form.setFieldValue(
-      "selection",
-      picked.map((value) => String(value)),
-    );
     onValueChange?.(picked);
   }
 
@@ -96,7 +111,7 @@ function CheckboxGroupBody<V extends string>({
       {options.map((option) => (
         <Choice
           description={option.description}
-          disabled={option.disabled === true || (full && !current.includes(option.value))}
+          disabled={option.disabled === true || (full && !value.includes(option.value))}
           key={option.value}
           label={option.label}
           look={variant === "chips" ? "chip" : "inline"}

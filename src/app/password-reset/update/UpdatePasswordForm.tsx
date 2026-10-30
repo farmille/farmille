@@ -2,16 +2,23 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { updatePasswordAction } from "@/app/password-reset/update/actions";
 import { buttonRecipe } from "@/components/Button";
 import { Form, FormActions, Input, Notice, OtpInput, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth/account-rules";
-import { fieldErrorsOf, initialAuthFormState } from "@/lib/auth/form-state";
+import { fieldErrorsOf, initialAuthFormState, type AuthFormState } from "@/lib/auth/form-state";
 
 export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
-  const [state, formAction] = useActionState(updatePasswordAction, initialAuthFormState);
+  const form = useForm({ defaultValues: { password: "", passwordConfirmation: "" } });
+  const values = useStore(form.store, (state) => state.values);
+  const [state, formAction] = useActionState(async (previous: AuthFormState, data: FormData) => {
+    const result = await updatePasswordAction(previous, data);
+    form.reset();
+    return result;
+  }, initialAuthFormState);
 
   if (state.status === "done") {
     return (
@@ -38,6 +45,8 @@ export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
         description={`${PASSWORD_MIN_LENGTH}文字以上で設定してください。`}
         label="新しいパスワード"
         name="password"
+        value={values.password}
+        onChange={(event) => form.setFieldValue("password", event.target.value)}
         requirement="required"
         autoComplete="new-password"
         minLength={PASSWORD_MIN_LENGTH}
@@ -48,6 +57,8 @@ export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
       <Input
         label="新しいパスワード（確認）"
         name="passwordConfirmation"
+        value={values.passwordConfirmation}
+        onChange={(event) => form.setFieldValue("passwordConfirmation", event.target.value)}
         requirement="required"
         autoComplete="new-password"
         minLength={PASSWORD_MIN_LENGTH}

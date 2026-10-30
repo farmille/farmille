@@ -1,6 +1,7 @@
 "use client";
 
-import { startTransition, useActionState, type ReactNode } from "react";
+import { useActionState, type ReactNode } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import {
   FileInput,
@@ -13,7 +14,7 @@ import {
 } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { HANDLE_MAX_LENGTH } from "@/lib/auth/account-rules";
-import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
+import { fieldErrorsOf, initialAuthFormState, type AuthFormState } from "@/lib/auth/form-state";
 import type { ProfileDetails, ProfileOptions } from "@/server/queries/profile-details";
 import type { OwnProfile } from "@/server/queries/profiles";
 
@@ -59,19 +60,48 @@ type ProfileEditFormProps = {
   options: ProfileOptions;
 };
 
+type ProfileInputs = {
+  avatar: File | null;
+  handle: string;
+  bio: string;
+  links: string;
+};
+
 export function ProfileEditForm({ avatar, profile, details, options }: ProfileEditFormProps) {
-  const [state, formAction] = useActionState(updateProfileAction, initialAuthFormState);
-  const values = submittedValuesOf(state);
+  const defaults: ProfileInputs = {
+    avatar: null,
+    handle: profile.handle,
+    bio: details.bio ?? "",
+    links: details.links.join("\n"),
+  };
+  const form = useForm({ defaultValues: defaults });
+  const values = useStore(form.store, (state) => state.values);
+  const [state, formAction] = useActionState(
+    async (previous: AuthFormState, formData: FormData) => {
+      const avatar = form.state.values.avatar;
+      if (avatar === null) formData.delete("avatar");
+      else formData.set("avatar", avatar);
+      await shrinkAvatarIn(formData);
+      return updateProfileAction(previous, formData);
+    },
+    initialAuthFormState,
+  );
 
   return (
     <Form
-      action={async (formData) => {
-        await shrinkAvatarIn(formData);
-        // await のあとは送信の transition から外れるので、結果待ちの表示が続くよう入れ直す
-        startTransition(() => formAction(formData));
-      }}
+      action={formAction}
       errors={fieldErrorsOf(state)}
       persist="profile"
+      onReset={() => {
+        if (state.status === "error") form.setFieldValue("avatar", null);
+        else form.reset(defaults);
+      }}
+      onRestore={(restored) => {
+        for (const name of ["handle", "bio", "links"] as const) {
+          const value = restored.get(name)?.[0];
+          if (value !== undefined) form.setFieldValue(name, value);
+        }
+      }}
       data-tour="profile-form"
     >
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
@@ -87,6 +117,7 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
             }
             name="avatar"
             accept="image/jpeg,image/png,image/webp"
+            onChange={(event) => form.setFieldValue("avatar", event.target.files?.[0] ?? null)}
           />
           <div className={avatarCurrent}>
             {avatar}
@@ -104,7 +135,8 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
         name="handle"
         requirement="required"
         autoComplete="nickname"
-        defaultValue={values.handle ?? profile.handle}
+        value={values.handle}
+        onChange={(event) => form.setFieldValue("handle", event.target.value)}
         maxLength={HANDLE_MAX_LENGTH}
       />
 
@@ -113,7 +145,8 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
         label="自己紹介"
         name="bio"
         requirement="optional"
-        defaultValue={values.bio ?? details.bio ?? ""}
+        value={values.bio}
+        onChange={(event) => form.setFieldValue("bio", event.target.value)}
         maxLength={2000}
         rows={5}
       />
@@ -125,7 +158,8 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
         lead="自己紹介に表示するリンクを、1行に1件入力してください（10件まで）。公開されます。"
         name="links"
         requirement="optional"
-        defaultValue={values.links ?? details.links.join("\n")}
+        value={values.links}
+        onChange={(event) => form.setFieldValue("links", event.target.value)}
         placeholder="https://"
         rows={3}
       />

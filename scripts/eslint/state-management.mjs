@@ -135,5 +135,63 @@ export const stateManagement = {
   },
 };
 
-const plugin = { rules: { "state-management": stateManagement } };
+export const controlledFormInput = {
+  meta: {
+    type: "problem",
+    schema: [],
+    messages: {
+      controlled: "名前付きの入力には、TanStack Formが所有する値をvalueまたはcheckedで渡す。",
+    },
+  },
+  create(context) {
+    const controls = new Map();
+    const source = context.sourceCode;
+    return {
+      ImportDeclaration(node) {
+        if (!/^@\/components\/form(?:\/|$)/.test(node.source.value)) return;
+        for (const specifier of node.specifiers) {
+          if (specifier.type !== "ImportSpecifier") continue;
+          const name = nameOf(specifier.imported);
+          if (
+            !["Input", "SearchInput", "Textarea", "Select", "RadioGroup", "Checkbox"].includes(name)
+          )
+            continue;
+          controls.set(specifier.local.name, {
+            name,
+            variable: source.getDeclaredVariables(specifier)[0],
+          });
+        }
+      },
+      JSXOpeningElement(node) {
+        if (node.name.type !== "JSXIdentifier") return;
+        const tag = node.name.name;
+        const control = controls.get(tag);
+        if (control) {
+          let scope = source.getScope(node);
+          while (scope && !scope.set.has(tag)) scope = scope.upper;
+          if (scope?.set.get(tag) !== control.variable) return;
+        } else if (!["input", "textarea", "select"].includes(tag)) return;
+
+        if (node.attributes.some((attribute) => attribute.type === "JSXSpreadAttribute")) return;
+        const attributes = new Map(
+          node.attributes
+            .filter((attribute) => attribute.type === "JSXAttribute")
+            .map((attribute) => [attribute.name.name, attribute.value]),
+        );
+        if (!attributes.has("name")) return;
+        const type = attributes.get("type");
+        const inputType = type?.type === "Literal" ? type.value : type?.expression?.value;
+        if (tag === "input" && ["hidden", "file"].includes(inputType)) return;
+        const checked = control?.name === "Checkbox" || ["checkbox", "radio"].includes(inputType);
+        if (!attributes.has(checked ? "checked" : "value")) {
+          context.report({ node, messageId: "controlled" });
+        }
+      },
+    };
+  },
+};
+
+const plugin = {
+  rules: { "state-management": stateManagement, "controlled-form-input": controlledFormInput },
+};
 export default plugin;

@@ -49,6 +49,9 @@ export const RestoredAfterError: Story = {
     sessionStorage.setItem(
       key,
       JSON.stringify({
+        handle: ["復元した農家"],
+        bio: ["控えに残した自己紹介"],
+        links: ["https://example.test/farm"],
         cropIds: ["10000000-0000-4000-8000-000000000001"],
         affiliations: ["復元した部会"],
       }),
@@ -67,6 +70,9 @@ export const RestoredAfterError: Story = {
     await expect(await canvas.findByRole("button", { name: "復元した部会を削除" })).toBeVisible();
     await userEvent.click(canvas.getByRole("button", { name: "保存する" }));
     await expect(await canvas.findByText("ニックネームが重複しています。")).toBeVisible();
+    await expect(canvas.getByLabelText(/^ニックネーム/)).toHaveValue("復元した農家");
+    await expect(canvas.getByLabelText(/^自己紹介/)).toHaveValue("控えに残した自己紹介");
+    await expect(canvas.getByLabelText(/^リンク/)).toHaveValue("https://example.test/farm");
     await expect(canvas.getByRole("button", { name: "復元した部会を削除" })).toBeVisible();
     await expect(canvas.getByRole("button", { name: "いちごを削除" })).toBeVisible();
   },

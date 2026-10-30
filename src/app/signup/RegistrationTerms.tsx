@@ -3,20 +3,16 @@ import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { css } from "../../../styled-system/css";
 import { legalProse, legalHeading } from "@/app/legal/styles";
 
-export async function RegistrationTerms() {
-  const documents = await Promise.all(
-    legalDocuments
-      .filter(({ slug }) => slug === "terms" || slug === "privacy")
-      .map(async (document) => ({
-        title: document.title,
-        sections: await Promise.all(
-          document.sections.map(async (section) => ({
-            heading: section.heading,
-            html: await renderMarkdownToHtml(section.markdown),
-          })),
-        ),
+export function RegistrationTerms() {
+  const documents = legalDocuments
+    .filter(({ slug }) => slug === "terms" || slug === "privacy")
+    .map((document) => ({
+      title: document.title,
+      sections: document.sections.map((section) => ({
+        heading: section.heading,
+        html: renderMarkdownToHtml(section.markdown),
       })),
-  );
+    }));
   return (
     <div
       role="region"

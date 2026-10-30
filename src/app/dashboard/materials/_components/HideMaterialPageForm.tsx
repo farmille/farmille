@@ -1,5 +1,5 @@
 "use client";
-import { useReducer, useTransition } from "react";
+import { startTransition, useActionState } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
@@ -12,9 +12,14 @@ const descriptionStyle = css({ textStyle: "supporting", color: "text.muted" });
 export function HideMaterialPageForm({ materialId }: { materialId: string }) {
   const form = useForm({ defaultValues: { note: "" } });
   const note = useStore(form.store, (state) => state.values.note);
-  const [message, setMessage] = useReducer((_: string, next: string) => next, "");
-  const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const [message, hide, pending] = useActionState(async () => {
+    if (await hideMaterialPage({ materialId, note })) {
+      router.refresh();
+      return "";
+    }
+    return "非公開にできませんでした。資材オーナー権限と通信状態を確認してください。";
+  }, "");
   return (
     <div>
       <p className={descriptionStyle}>
@@ -29,15 +34,7 @@ export function HideMaterialPageForm({ materialId }: { materialId: string }) {
       <Button
         variant="danger"
         disabled={pending || note.trim().length === 0}
-        onClick={() =>
-          startTransition(async () => {
-            if (await hideMaterialPage({ materialId, note })) router.refresh();
-            else
-              setMessage(
-                "非公開にできませんでした。資材オーナー権限と通信状態を確認してください。",
-              );
-          })
-        }
+        onClick={() => startTransition(hide)}
       >
         理由を記録して非公開にする
       </Button>

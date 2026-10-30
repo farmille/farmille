@@ -5,11 +5,8 @@ import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
 import { useForm, useStore } from "@tanstack/react-form";
 import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
-import {
-  useArticleCreatedNavigation,
-  useArticleMarkdownPreview,
-  useArticleSearchFocus,
-} from "@/lib/hooks/use-article-editor";
+import { useArticleCreatedNavigation, useArticleSearchFocus } from "@/lib/hooks/use-article-editor";
+import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import {
   useActionState,
   useMemo,
@@ -136,7 +133,10 @@ export function ArticleForm({
     (_: "write" | "preview", next: "write" | "preview") => next,
     "write",
   );
-  const previewHtml = useArticleMarkdownPreview(body, editorTab);
+  const previewHtml = useMemo(
+    () => (editorTab === "preview" ? renderMarkdownToHtml(body) : ""),
+    [body, editorTab],
+  );
   const [materialHits, updateMaterialHits] = useReducer(
     (
       current: SellerArticleMaterial[],

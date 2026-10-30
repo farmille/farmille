@@ -5,6 +5,7 @@ import { useRef, useReducer, useTransition } from "react";
 
 import { buttonRecipe } from "@/components/Button";
 import { Field, Fieldset, Input, Select, useRestoredText } from "@/components/form";
+import { useResetKey } from "@/components/form/field-context";
 import { postalFill } from "@/lib/postal-fill";
 import { PREFECTURES } from "@/lib/prefectures";
 
@@ -34,17 +35,27 @@ function completePostalCode(value: string): string | null {
 }
 
 export function PostalAddressFields({ values }: { values: Record<string, string> }) {
+  const resetKey = useResetKey("");
+  return <PostalAddressInputs key={resetKey} values={values} />;
+}
+
+function PostalAddressInputs({ values }: { values: Record<string, string> }) {
   const restoredPostal = useRestoredText("postalCode");
   const restoredPrefecture = useRestoredText("prefectureCode");
   const restoredCityStreet = useRestoredText("cityStreet");
+  const restoredBuildingName = useRestoredText("buildingName");
   const form = useForm({
     defaultValues: {
       postal: restoredPostal ?? values.postalCode ?? "",
       prefecture: restoredPrefecture ?? values.prefectureCode ?? "",
       cityStreet: restoredCityStreet ?? values.cityStreet ?? "",
+      buildingName: restoredBuildingName ?? values.buildingName ?? "",
     },
   });
-  const { postal, prefecture, cityStreet } = useStore(form.store, (state) => state.values);
+  const { postal, prefecture, cityStreet, buildingName } = useStore(
+    form.store,
+    (state) => state.values,
+  );
   const [message, setMessage] = useReducer((_state: string, next: string) => next, "");
   const [pending, startTransition] = useTransition();
   const requestVersion = useRef(0);
@@ -169,7 +180,8 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
         requirement="optional"
         visibility="private"
         autoComplete="address-line2"
-        defaultValue={values.buildingName}
+        value={buildingName}
+        onChange={(event) => form.setFieldValue("buildingName", event.target.value)}
         maxLength={200}
         placeholder="〇〇マンション101"
       />

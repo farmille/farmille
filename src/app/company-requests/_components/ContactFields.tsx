@@ -21,11 +21,13 @@ export const emptyContact: ContactDefaults = {
 
 export function ContactFields({
   prefix = "",
-  defaults,
+  values,
+  onChange,
   fixedAccount = false,
 }: {
   prefix?: string;
-  defaults: ContactDefaults;
+  values: ContactDefaults;
+  onChange: (name: keyof ContactDefaults, value: string) => void;
   fixedAccount?: boolean;
 }) {
   return (
@@ -34,7 +36,8 @@ export function ContactFields({
         label="法人名"
         name={`${prefix}companyName`}
         requirement="required"
-        defaultValue={defaults.companyName}
+        value={values.companyName}
+        onChange={(event) => onChange("companyName", event.target.value)}
         maxLength={200}
         placeholder="〇〇バイオ株式会社"
       />
@@ -43,7 +46,8 @@ export function ContactFields({
         label="法人番号"
         name={`${prefix}corporateNumber`}
         requirement="required"
-        defaultValue={defaults.corporateNumber}
+        value={values.corporateNumber}
+        onChange={(event) => onChange("corporateNumber", event.target.value)}
         inputMode="numeric"
         maxLength={13}
         pattern="[0-9]{13}"
@@ -54,7 +58,8 @@ export function ContactFields({
         label="Farmille企業会員ID"
         name={`${prefix}accountId`}
         requirement="required"
-        defaultValue={defaults.accountId}
+        value={values.accountId}
+        onChange={(event) => onChange("accountId", event.target.value)}
         maxLength={100}
         placeholder="Farmilleが発行したID"
         readOnly={fixedAccount}
@@ -64,7 +69,8 @@ export function ContactFields({
         name={`${prefix}contactName`}
         requirement="required"
         visibility="private"
-        defaultValue={defaults.contactName}
+        value={values.contactName}
+        onChange={(event) => onChange("contactName", event.target.value)}
         maxLength={200}
         placeholder="金子 太郎"
       />
@@ -73,7 +79,8 @@ export function ContactFields({
         name={`${prefix}department`}
         requirement="required"
         visibility="private"
-        defaultValue={defaults.department}
+        value={values.department}
+        onChange={(event) => onChange("department", event.target.value)}
         maxLength={200}
         placeholder="営業部"
       />
@@ -82,7 +89,8 @@ export function ContactFields({
         name={`${prefix}email`}
         requirement="required"
         visibility="private"
-        defaultValue={defaults.email}
+        value={values.email}
+        onChange={(event) => onChange("email", event.target.value)}
         maxLength={254}
         placeholder="tanto@example.co.jp"
         type="email"
@@ -92,7 +100,8 @@ export function ContactFields({
         name={`${prefix}phone`}
         requirement="required"
         visibility="private"
-        defaultValue={defaults.phone}
+        value={values.phone}
+        onChange={(event) => onChange("phone", event.target.value)}
         maxLength={50}
         placeholder="03-1234-5678"
         type="tel"

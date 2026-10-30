@@ -1,6 +1,8 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
 import { afterEach, describe, expect, it } from "vitest";
+import { persistKey, writePersisted } from "@/components/form/persisted-input";
 
 import { SignupForm } from "./SignupForm";
 
@@ -33,10 +35,44 @@ describe("SignupForm", () => {
     // サーバーの検証で戻ったあと、React は送信したフォームをこの操作で初期値へ戻す
     const form = password.closest("form");
     if (form === null) throw new Error("パスワード欄がフォームの中にありません。");
-    form.reset();
+    act(() => form.reset());
 
     expect(handle).toHaveValue("");
     expect(password).toHaveValue("farmille-pass");
+  });
+
+  it("控えから名前・電話・属性・同意と住所を復元する", async () => {
+    writePersisted(persistKey("signup", "/signup/complete"), {
+      handle: ["復元した農家"],
+      familyName: ["山田"],
+      givenName: ["花子"],
+      phone: ["090-1234-5678"],
+      standpoint: ["farmer"],
+      terms: ["on"],
+      postalCode: ["100-0001"],
+      prefectureCode: ["13"],
+      cityStreet: ["千代田区千代田1"],
+      buildingName: ["農業会館101"],
+    });
+    render(
+      <PathnameContext.Provider value="/signup/complete">
+        <SignupForm
+          checkHandle={handleIsFree}
+          email="farmer@example.test"
+          termsContent={<p>利用規約</p>}
+        />
+      </PathnameContext.Provider>,
+    );
+
+    await waitFor(() => expect(screen.getByLabelText(/^ニックネーム/)).toHaveValue("復元した農家"));
+    expect(screen.getByLabelText("本名（姓）")).toHaveValue("山田");
+    expect(screen.getByLabelText("本名（名）")).toHaveValue("花子");
+    expect(screen.getByLabelText(/^電話番号/)).toHaveValue("090-1234-5678");
+    expect(screen.getByRole("radio", { name: "生産者" })).toBeChecked();
+    expect(
+      screen.getByRole("checkbox", { name: /利用規約・プライバシーポリシーに同意/ }),
+    ).toBeChecked();
+    expect(screen.getByLabelText(/^建物名・部屋番号/)).toHaveValue("農業会館101");
   });
 
   it("ニックネームの欄を離れた時点で使われていれば欄の下に出し、入力し直すと消す", async () => {

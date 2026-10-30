@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, useStore } from "@tanstack/react-form";
-import { useReducer, useTransition } from "react";
+import { startTransition, useActionState } from "react";
 import * as v from "valibot";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
@@ -12,6 +12,10 @@ import { recordMaterialAuditAction } from "./audit-actions";
 type AuditOutcome = "checked" | "correction_requested" | "hidden";
 
 type MaterialAuditInput = { outcome: AuditOutcome; note: string };
+type AuditState = {
+  result: Awaited<ReturnType<typeof recordMaterialAuditAction>> | null;
+  recordedNote: string;
+};
 
 const AUDIT_OUTCOMES: readonly Option<AuditOutcome>[] = [
   { value: "checked", label: "確認済み" },
@@ -23,16 +27,15 @@ export function MaterialAuditForm({ materialId }: { materialId: string }) {
   const initialValues: MaterialAuditInput = { outcome: "checked", note: "" };
   const form = useForm({ defaultValues: initialValues });
   const { outcome, note } = useStore(form.store, (state) => state.values);
-  const [recordedNote, setRecordedNote] = useReducer((_state: string, next: string) => next, "");
-  const [result, setResult] = useReducer(
-    (
-      _state: { ok: boolean; message: string } | null,
-      next: { ok: boolean; message: string } | null,
-    ) => next,
-    null,
-  );
-  const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const [{ result, recordedNote }, record, pending] = useActionState(
+    async (previous: AuditState, input: MaterialAuditInput): Promise<AuditState> => {
+      const result = await recordMaterialAuditAction({ materialId, ...input });
+      if (result.ok) router.refresh();
+      return { result, recordedNote: result.ok ? input.note : previous.recordedNote };
+    },
+    { result: null, recordedNote: "" },
+  );
   usePersistedInput({
     name: "material-audit",
     schema: v.string(),
@@ -62,19 +65,7 @@ export function MaterialAuditForm({ materialId }: { materialId: string }) {
       {result === null ? null : (
         <Notice tone={result.ok ? "success" : "error"}>{result.message}</Notice>
       )}
-      <Button
-        disabled={pending}
-        onClick={() =>
-          startTransition(async () => {
-            const next = await recordMaterialAuditAction({ materialId, outcome, note });
-            setResult(next);
-            if (next.ok) {
-              setRecordedNote(note);
-              router.refresh();
-            }
-          })
-        }
-      >
+      <Button disabled={pending} onClick={() => startTransition(() => record({ outcome, note }))}>
         {outcome === "hidden" ? "記録を保存して非公開にする" : "確認記録を保存"}
       </Button>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { saveRegisteredDetailsAction } from "@/app/account/details/actions";
 import { PostalAddressFields } from "@/app/signup/PostalAddressFields";
@@ -40,9 +41,21 @@ export function RegisteredDetailsForm({ details }: { details: RegisteredDetails 
   // 送信後の reset で欄が戻る先。エラーのときは送った値、保存できたときは保存した値（再取得した props）。
   const values =
     state.status === "error" && state.values !== undefined ? state.values : formValues(details);
+  const defaults = {
+    familyName: values.familyName ?? "",
+    givenName: values.givenName ?? "",
+    phone: values.phone ?? "",
+  };
+  const form = useForm({ defaultValues: defaults });
+  const input = useStore(form.store, (state) => state.values);
 
   return (
-    <Form action={action} errors={fieldErrorsOf(state)} persist={false}>
+    <Form
+      action={action}
+      errors={fieldErrorsOf(state)}
+      persist={false}
+      onReset={() => form.reset(defaults)}
+    >
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
       <Input
@@ -69,7 +82,8 @@ export function RegisteredDetailsForm({ details }: { details: RegisteredDetails 
             label="本名（姓）"
             name="familyName"
             autoComplete="family-name"
-            defaultValue={values.familyName}
+            value={input.familyName}
+            onChange={(event) => form.setFieldValue("familyName", event.target.value)}
             maxLength={80}
             placeholder="姓"
           />
@@ -79,7 +93,8 @@ export function RegisteredDetailsForm({ details }: { details: RegisteredDetails 
             label="本名（名）"
             name="givenName"
             autoComplete="given-name"
-            defaultValue={values.givenName}
+            value={input.givenName}
+            onChange={(event) => form.setFieldValue("givenName", event.target.value)}
             maxLength={80}
             placeholder="名"
           />
@@ -93,7 +108,8 @@ export function RegisteredDetailsForm({ details }: { details: RegisteredDetails 
         requirement="optional"
         visibility="private"
         autoComplete="tel"
-        defaultValue={values.phone}
+        value={input.phone}
+        onChange={(event) => form.setFieldValue("phone", event.target.value)}
         inputMode="tel"
         maxLength={20}
         placeholder="090-1234-5678"

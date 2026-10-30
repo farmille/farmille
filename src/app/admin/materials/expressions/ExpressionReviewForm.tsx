@@ -1,13 +1,18 @@
 "use client";
 
 import { useForm, useStore } from "@tanstack/react-form";
-import { useReducer, useTransition } from "react";
+import { startTransition, useActionState } from "react";
 import * as v from "valibot";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
 import { Notice, Textarea, usePersistedInput } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { reviewMaterialPageAction, reviewManufacturerProfileAction } from "./actions";
+
+type ReviewState = {
+  result: Awaited<ReturnType<typeof reviewMaterialPageAction>> | null;
+  recordedNote: string;
+};
 
 export function ExpressionReviewForm({
   versionId,
@@ -18,16 +23,20 @@ export function ExpressionReviewForm({
 }) {
   const form = useForm({ defaultValues: { note: "" } });
   const note = useStore(form.store, (state) => state.values.note);
-  const [recordedNote, setRecordedNote] = useReducer((_state: string, next: string) => next, "");
-  const [result, setResult] = useReducer(
-    (
-      _state: { ok: boolean; message: string } | null,
-      next: { ok: boolean; message: string } | null,
-    ) => next,
-    null,
-  );
-  const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const [{ result, recordedNote }, review, pending] = useActionState(
+    async (
+      previous: ReviewState,
+      input: { publish: boolean; note: string },
+    ): Promise<ReviewState> => {
+      const result = await (
+        kind === "material" ? reviewMaterialPageAction : reviewManufacturerProfileAction
+      )({ versionId, ...input });
+      if (result.ok) router.refresh();
+      return { result, recordedNote: result.ok ? input.note : previous.recordedNote };
+    },
+    { result: null, recordedNote: "" },
+  );
   usePersistedInput({
     name: "expression-review",
     schema: v.string(),
@@ -35,16 +44,7 @@ export function ExpressionReviewForm({
     restore: (value) => form.setFieldValue("note", value),
   });
   function submit(publish: boolean) {
-    startTransition(async () => {
-      const next = await (
-        kind === "material" ? reviewMaterialPageAction : reviewManufacturerProfileAction
-      )({ versionId, publish, note });
-      setResult(next);
-      if (next.ok) {
-        setRecordedNote(note);
-        router.refresh();
-      }
-    });
+    startTransition(() => review({ publish, note }));
   }
   return (
     <div className={materialPageStack}>

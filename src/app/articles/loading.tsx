@@ -2,6 +2,7 @@ import { AppBar, ArticlesToolbar } from "@/components";
 import { BottomNav } from "@/components/BottomNav";
 import { SkeletonList } from "@/components/SkeletonList";
 import { css } from "../../../styled-system/css";
+import { Suspense } from "react";
 
 export default function ArticlesLoading() {
   return (
@@ -16,7 +17,9 @@ export default function ArticlesLoading() {
           tab: { px: "5", py: "6" },
         })}
       >
-        <ArticlesToolbar filter="all" q="" />
+        <Suspense fallback={null}>
+          <ArticlesToolbar />
+        </Suspense>
         <SkeletonList variant="articles" label="記事を読み込んでいます" />
       </main>
       <BottomNav active="articles" />

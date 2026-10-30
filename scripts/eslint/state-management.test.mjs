@@ -1,5 +1,5 @@
 import { RuleTester } from "eslint";
-import { stateManagement } from "./state-management.mjs";
+import { controlledFormInput, stateManagement } from "./state-management.mjs";
 
 const tester = new RuleTester({ languageOptions: { ecmaVersion: "latest", sourceType: "module" } });
 const filename = `${process.cwd()}/src/components/Example.js`;
@@ -71,5 +71,38 @@ tester.run("state-management", stateManagement, {
     },
     { filename, code: 'const React = await import("react");', errors: [{ messageId: "static" }] },
     { filename, code: 'const React = require("react");', errors: [{ messageId: "static" }] },
+  ],
+});
+
+new RuleTester({
+  languageOptions: {
+    ecmaVersion: "latest",
+    sourceType: "module",
+    parserOptions: { ecmaFeatures: { jsx: true } },
+  },
+}).run("controlled-form-input", controlledFormInput, {
+  valid: [
+    'import { Input } from "@/components/form"; const x = <Input name="email" value={value} />;',
+    'import { Checkbox } from "@/components/form"; const x = <Checkbox name="terms" checked={value} />;',
+    'import { Input } from "@/components/form"; function x(Input) { return <Input name="other" />; }',
+    'const x = <input name="id" type="hidden" value="id" />;',
+    'const x = <input name="photo" type="file" />;',
+    'const x = <input name="field" {...props} />;',
+    'const x = <input placeholder="検索" />;',
+  ],
+  invalid: [
+    {
+      code: 'import { Input as Field } from "@/components/form"; const x = <Field name="email" defaultValue="" />;',
+      errors: [{ messageId: "controlled" }],
+    },
+    {
+      code: 'import { Checkbox } from "@/components/form/Checkbox"; const x = <Checkbox name="terms" value="yes" />;',
+      errors: [{ messageId: "controlled" }],
+    },
+    { code: 'const x = <textarea name="body" />;', errors: [{ messageId: "controlled" }] },
+    {
+      code: 'const x = <input name="terms" type="checkbox" />;',
+      errors: [{ messageId: "controlled" }],
+    },
   ],
 });

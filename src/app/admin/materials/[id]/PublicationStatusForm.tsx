@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 import * as v from "valibot";
 
 import { initialMaterialFormState } from "@/app/admin/_lib/action-state";
@@ -17,6 +18,8 @@ export function PublicationStatusForm({
   status: string;
 }) {
   const current = v.parse(publicationStatusSchema, status);
+  const form = useForm({ defaultValues: { publicationStatus: current } });
+  const publicationStatus = useStore(form.store, (state) => state.values.publicationStatus);
   const [state, formAction] = useActionState(
     setMaterialPublicationStatusAction,
     initialMaterialFormState,
@@ -31,7 +34,8 @@ export function PublicationStatusForm({
         label="公開状態"
         name="publicationStatus"
         requirement="required"
-        defaultValue={current}
+        value={publicationStatus}
+        onValueChange={(value) => form.setFieldValue("publicationStatus", value)}
         options={[
           { value: "published", label: "公開中" },
           { value: "archived", label: "非公開" },

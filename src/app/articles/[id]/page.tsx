@@ -91,10 +91,8 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
   const [article, session] = await Promise.all([loadArticle(id), getSessionUser()]);
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
-  const [bodyHtml, helpfulVotedResult] = await Promise.all([
-    renderMarkdownToHtml(article.body),
-    isHelpfulVotedByViewer(viewerUserId, "article", article.id),
-  ]);
+  const bodyHtml = renderMarkdownToHtml(article.body);
+  const helpfulVotedResult = await isHelpfulVotedByViewer(viewerUserId, "article", article.id);
 
   if (!helpfulVotedResult.ok) {
     throw new Error(errorMessageJa[helpfulVotedResult.error]);

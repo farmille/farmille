@@ -13,7 +13,7 @@
 ## サーバー処理を変更する
 
 - ドメインロジック・Supabaseのテーブル/RPCアクセス・`SUPABASE_SECRET_KEY`の参照は`src/server/`に置く。画面・クライアント部品・Server Actionsから`.from()`・`.rpc()`を直接呼ばない。クライアントからの`auth.*`・`storage.*`利用は可。
-- 画面の読み取りはServer Componentsから`src/server/`を呼ぶ。変更はServer ActionsかRoute Handlersで行う。クライアントの状態は[状態管理規約](docs/state-management.md)に沿って局所化する。
+- 画面の読み取りはServer Componentsから`src/server/`を呼ぶ。画面からの書き込みはServer Actionsで行い、送信結果は`useActionState`で扱う。Webhookなど外部からのHTTP要求はRoute Handlersで受ける。クライアントの状態は[状態管理規約](docs/state-management.md)に沿って局所化する。
 - `src/app/api/`のRoute HandlersはフォームPOST・Webhook・外部からの呼び出しに使う。
 - エラーレスポンスは`{ok: false, error: "<code>"}`に揃え、日本語文言は`src/server/errors.ts`で管理する。例外は握り潰さず、画面では404・403・500を出し分ける。`error.tsx`・`not-found.tsx`を置く。
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useReducer } from "react";
+import { useActionState, useMemo, useReducer } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button, EmptyState, MaterialCard } from "@/components";
@@ -44,6 +44,44 @@ const footer = css({
 type SavedListProps = {
   items: readonly SavedMaterialItem[];
 };
+
+function SavedRow({
+  item,
+  selected,
+  onToggle,
+}: {
+  item: SavedMaterialItem;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  const [, unsave, pending] = useActionState(async (_previous: null, formData: FormData) => {
+    await unsaveMaterialAction(item.materialId, formData);
+    return null;
+  }, null);
+
+  return (
+    <div className={row}>
+      <Checkbox checked={selected} onCheckedChange={onToggle}>
+        比較に含める
+      </Checkbox>
+      <MaterialCard
+        variant="list"
+        name={item.name}
+        maker={item.manufacturerName}
+        rating={item.avgRating}
+        reviewCount={item.reviewCount}
+        description={item.description ?? undefined}
+        href={`/materials/${item.materialId}`}
+        imageSrc={item.primaryImageUrl ?? undefined}
+      />
+      <form action={unsave}>
+        <Button type="submit" variant="danger" size="sm" disabled={pending}>
+          リストから外す
+        </Button>
+      </form>
+    </div>
+  );
+}
 
 export function SavedList({ items }: SavedListProps) {
   const router = useRouter();
@@ -98,29 +136,12 @@ export function SavedList({ items }: SavedListProps) {
     <div>
       <div className={stack}>
         {items.map((item) => (
-          <div key={item.savedId} className={row}>
-            <Checkbox
-              checked={selected.includes(item.materialId)}
-              onCheckedChange={() => toggle(item.materialId)}
-            >
-              比較に含める
-            </Checkbox>
-            <MaterialCard
-              variant="list"
-              name={item.name}
-              maker={item.manufacturerName}
-              rating={item.avgRating}
-              reviewCount={item.reviewCount}
-              description={item.description ?? undefined}
-              href={`/materials/${item.materialId}`}
-              imageSrc={item.primaryImageUrl ?? undefined}
-            />
-            <form action={unsaveMaterialAction.bind(null, item.materialId)}>
-              <Button type="submit" variant="danger" size="sm">
-                リストから外す
-              </Button>
-            </form>
-          </div>
+          <SavedRow
+            key={item.savedId}
+            item={item}
+            selected={selected.includes(item.materialId)}
+            onToggle={() => toggle(item.materialId)}
+          />
         ))}
       </div>
 

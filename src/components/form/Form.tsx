@@ -19,6 +19,8 @@ type FormProps = {
   persist: string | false;
   /** 控えから戻した入力値。Form の外の state で持つ入力欄は、ここで state に入れる。 */
   onRestore?: (restored: RestoredFields) => void;
+  /** DOMのresetに合わせて、所有するTanStack Formの入力を戻す。 */
+  onReset?: () => void;
   action?: (formData: FormData) => void | Promise<void>;
   /** サーバーの項目エラー。値が変わった項目のエラーは消える。送信結果ごとに同じ参照を渡す。 */
   errors?: FieldErrors;
@@ -33,7 +35,15 @@ type FormProps = {
   onSubmit?: FormEventHandler<HTMLFormElement>;
 };
 
-export function Form({ persist, onRestore, errors, validate, children, ...rest }: FormProps) {
+export function Form({
+  persist,
+  onRestore,
+  onReset,
+  errors,
+  validate,
+  children,
+  ...rest
+}: FormProps) {
   // Base UI は errors の参照が変わるたびに取り込み直すので、描画ごとに作り直さない
   const baseErrors = useMemo(
     () => (errors === undefined ? undefined : presentErrors(errors)),
@@ -55,6 +65,7 @@ export function Form({ persist, onRestore, errors, validate, children, ...rest }
     persist,
     usePathname(),
     onRestore,
+    onReset,
   );
 
   return (
