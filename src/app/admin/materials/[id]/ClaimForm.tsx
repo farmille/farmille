@@ -1,8 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
-import { initialMaterialFormState } from "@/app/admin/_lib/action-state";
+import { initialMaterialFormState, type MaterialFormState } from "@/app/admin/_lib/action-state";
 import { setMaterialSellerAction } from "@/app/admin/materials/actions";
 import { Field, Form, FormActions, Input, Notice, Select, SubmitButton } from "@/components/form";
 
@@ -22,7 +23,18 @@ export function ClaimForm({
   materialId: string;
   sellers: ClaimSellerOption[];
 }) {
-  const [state, formAction] = useActionState(setMaterialSellerAction, initialMaterialFormState);
+  const form = useForm({
+    defaultValues: { sellerId: currentSellerId ?? "", documentReference: "" },
+  });
+  const values = useStore(form.store, (state) => state.values);
+  const [state, formAction] = useActionState(
+    async (previous: MaterialFormState, data: FormData) => {
+      const result = await setMaterialSellerAction(previous, data);
+      if (result.status === "done") form.setFieldValue("documentReference", "");
+      return result;
+    },
+    initialMaterialFormState,
+  );
 
   return (
     <Form action={formAction} persist={false}>
@@ -34,11 +46,10 @@ export function ClaimForm({
         name="sellerId"
         requirement="optional"
       >
-        {/* 更新後に再検証された claim 先を確実に反映させるため、値が変わったら作り直す。 */}
         <Select
           label={null}
-          defaultValue={currentSellerId ?? ""}
-          key={currentSellerId ?? "unclaimed"}
+          value={values.sellerId}
+          onValueChange={(value) => form.setFieldValue("sellerId", value ?? "")}
           options={[
             { value: "", label: "資材オーナー権限なし（取り消す）" },
             ...sellers.map((seller) => ({
@@ -52,6 +63,8 @@ export function ClaimForm({
         description="付与時は必須です。確認資料の保管先または受付番号を記入してください。公開されません。"
         label="確認資料の保管先または受付番号"
         name="documentReference"
+        value={values.documentReference}
+        onChange={(event) => form.setFieldValue("documentReference", event.target.value)}
         maxLength={2000}
       />
       <input name="materialId" type="hidden" value={materialId} />

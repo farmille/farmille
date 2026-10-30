@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
+import { useReducer } from "react";
 import { fn } from "storybook/test";
 
 import { css } from "../../../styled-system/css";
@@ -19,7 +19,10 @@ const fieldStyle = css({
 
 /** 光らせる対象の要素を置き、描画後にその要素を渡す。 */
 function WithTarget(props: Omit<TourTipProps, "target">) {
-  const [target, setTarget] = useState<Element | null>(null);
+  const [target, setTarget] = useReducer(
+    (_current: Element | null, next: Element | null) => next,
+    null,
+  );
   return (
     <>
       <div ref={setTarget} className={fieldStyle}>

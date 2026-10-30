@@ -1,14 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useQueryStates } from "nuqs";
 import { useTransition } from "react";
 
 import {
-  buildSearchHref,
+  encodeFiltersQuery,
   type MaterialSortParam,
   type SelectedSearchFilter,
 } from "@/components/search/search-selection";
-import { Select, type Option } from "@/components/form";
+import { Select } from "@/components/form";
+import { MATERIAL_SORT_OPTIONS, materialSearchParsers } from "@/lib/search-query-state";
 
 type SortSelectProps = {
   selected: SelectedSearchFilter[];
@@ -16,29 +17,26 @@ type SortSelectProps = {
   query?: string;
 };
 
-const SORT_OPTIONS: readonly Option<MaterialSortParam>[] = [
-  { value: "reviews", label: "感想口コミが多い順" },
-  { value: "rating", label: "評価が高い順" },
-  { value: "newest", label: "新着順" },
-];
-
 export function SortSelect({ selected, sort, query }: SortSelectProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [, setSearch] = useQueryStates(materialSearchParsers, {
+    shallow: false,
+    scroll: false,
+    startTransition,
+    history: "push",
+  });
 
   return (
     <Select
       size="sm"
-      options={SORT_OPTIONS}
+      options={MATERIAL_SORT_OPTIONS}
       value={sort}
       hideLabel
       label="並び替え"
       disabled={isPending}
       onValueChange={(next) => {
         if (next === null) return;
-        startTransition(() => {
-          router.push(buildSearchHref({ filters: selected, sort: next, query }), { scroll: false });
-        });
+        void setSearch({ filters: encodeFiltersQuery(selected), sort: next, q: query ?? "" });
       }}
     />
   );

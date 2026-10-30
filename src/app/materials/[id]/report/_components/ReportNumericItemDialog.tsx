@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useReducer } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -15,7 +16,7 @@ import { css, cx } from "../../../../../../styled-system/css";
 import { REPORT_SHORT_MAX, type ReportPageNumericItem } from "./report-page-state";
 import { labelStyle } from "./report-page-styles";
 
-import { useReportLeaveWarning } from "./use-report-leave-warning";
+import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
 
 const graphBlock = css({
   mt: "5",
@@ -46,12 +47,19 @@ export function ReportNumericItemDialog({
   onClose: () => void;
 }) {
   // 開くたびに呼び出し側が作り直す（key）ので、最初の状態は区にそろえた調査項目
-  const [initial] = useState<ReportPageNumericItem>(() => ({
-    ...item,
-    graphs: item.graphs.map((graph) => graphWithPlots(graph, plots)),
-  }));
-  const [draft, setDraft] = useState(initial);
-  const [asking, setAsking] = useState(false);
+  const [initial] = useReducer(
+    (value: ReportPageNumericItem) => value,
+    null,
+    () => ({
+      ...item,
+      graphs: item.graphs.map((graph) => graphWithPlots(graph, plots)),
+    }),
+  );
+  const form = useForm({ defaultValues: { draft: initial } });
+  const draft = useStore(form.store, (state) => state.values.draft);
+  const setDraft = (next: (current: ReportPageNumericItem) => ReportPageNumericItem) =>
+    form.setFieldValue("draft", next);
+  const [asking, setAsking] = useReducer((_current: boolean, next: boolean) => next, false);
   const changed = JSON.stringify(draft) !== JSON.stringify(initial);
   useReportLeaveWarning(changed);
   const order = new Map(plots.map((plot, index) => [plot.id, index]));

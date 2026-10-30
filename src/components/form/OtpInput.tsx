@@ -1,8 +1,10 @@
 "use client";
 
+import { useForm, useStore } from "@tanstack/react-form";
+
 import { Field as BaseField } from "@base-ui/react/field";
 import { OTPInput, OTPInputContext, REGEXP_ONLY_DIGITS, type SlotProps } from "input-otp";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 
 import { css, cva } from "../../../styled-system/css";
 import { useFieldRequired } from "./field-context";
@@ -60,6 +62,8 @@ type OtpInputBodyProps = {
   /** 送信名。囲む Field に name があればそちらが優先される。 */
   name?: string;
   disabled?: boolean;
+  value?: string;
+  onValueChange?: (value: string) => void;
 };
 
 type OtpInputProps = OtpInputBodyProps & Labeling;
@@ -72,14 +76,37 @@ export function OtpInput(props: OtpInputProps) {
   const [labeling] = splitLabeling(props);
   return (
     <Labeled disabled={props.disabled} labeling={labeling} name={props.name}>
-      <OtpInputBody {...props} />
+      {props.value === undefined ? (
+        <UncontrolledOtpInput {...props} />
+      ) : (
+        <OtpInputBody {...props} value={props.value} />
+      )}
     </Labeled>
   );
 }
 
-function OtpInputBody({ name, disabled }: OtpInputBodyProps) {
+function UncontrolledOtpInput({ onValueChange, ...props }: OtpInputBodyProps) {
+  const form = useForm({ defaultValues: { code: "" } });
+  const code = useStore(form.store, (state) => state.values.code);
+  return (
+    <OtpInputBody
+      {...props}
+      onValueChange={(next) => {
+        form.setFieldValue("code", next);
+        onValueChange?.(next);
+      }}
+      value={code}
+    />
+  );
+}
+
+function OtpInputBody({
+  name,
+  disabled,
+  value,
+  onValueChange,
+}: OtpInputBodyProps & { value: string }) {
   const required = useFieldRequired();
-  const [code, setCode] = useState("");
 
   return (
     <BaseField.Control
@@ -94,15 +121,15 @@ function OtpInputBody({ name, disabled }: OtpInputBodyProps) {
           containerClassName={containerStyle}
           inputMode="numeric"
           maxLength={CODE_LENGTH}
-          onChange={setCode}
+          onChange={(next) => onValueChange?.(next)}
           pattern={REGEXP_ONLY_DIGITS}
-          value={code}
+          value={value}
         >
           <Slots disabled={state.disabled} invalid={state.valid === false} />
         </OTPInput>
       )}
       required={required}
-      value={code}
+      value={value}
     />
   );
 }

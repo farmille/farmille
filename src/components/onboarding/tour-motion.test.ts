@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { fixedPostBarHeight, useBottomSpace } from "./tour-motion";
+import { fixedPostBarHeight, useBottomSpace } from "@/lib/hooks/use-onboarding-motion";
 
 afterEach(() => {
   document.body.replaceChildren();

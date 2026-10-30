@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
+import { useReducer } from "react";
 import { fn } from "storybook/test";
 
 import type { UsageReportInput } from "@/lib/usage-report";
@@ -8,7 +8,10 @@ import { ReportPagePlots } from "./ReportPagePlots";
 import { filledReport, storyMaterialName, varietyReport } from "./reportStoryFixture";
 
 function Stateful({ initial, missing }: { initial: UsageReportInput; missing: boolean }) {
-  const [input, setInput] = useState(initial);
+  const [input, setInput] = useReducer(
+    (_current: UsageReportInput, next: UsageReportInput) => next,
+    initial,
+  );
   return (
     <ReportPagePlots
       input={input}

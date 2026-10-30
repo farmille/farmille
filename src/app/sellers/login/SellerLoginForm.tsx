@@ -1,15 +1,22 @@
 "use client";
 
 import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { sellerLoginAction } from "@/app/sellers/login/actions";
 import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
-import { initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
+import { initialAuthFormState, submittedValuesOf, type AuthFormState } from "@/lib/auth/form-state";
 
 export function SellerLoginForm({ next }: { next: string | null }) {
-  const [state, formAction] = useActionState(sellerLoginAction, initialAuthFormState);
-  const values = submittedValuesOf(state);
+  const form = useForm({ defaultValues: { loginId: "", password: "" } });
+  const values = useStore(form.store, (state) => state.values);
+  const [state, formAction] = useActionState(async (previous: AuthFormState, data: FormData) => {
+    const result = await sellerLoginAction(previous, data);
+    form.setFieldValue("loginId", submittedValuesOf(result).loginId ?? "");
+    form.setFieldValue("password", "");
+    return result;
+  }, initialAuthFormState);
 
   return (
     <Form action={formAction} persist={false}>
@@ -23,7 +30,8 @@ export function SellerLoginForm({ next }: { next: string | null }) {
         requirement="required"
         autoCapitalize="none"
         autoComplete="username"
-        defaultValue={values.loginId}
+        value={values.loginId}
+        onChange={(event) => form.setFieldValue("loginId", event.target.value)}
         placeholder="example-agri"
         spellCheck={false}
         type="text"
@@ -32,6 +40,8 @@ export function SellerLoginForm({ next }: { next: string | null }) {
       <Input
         label="パスワード"
         name="password"
+        value={values.password}
+        onChange={(event) => form.setFieldValue("password", event.target.value)}
         requirement="required"
         autoComplete="current-password"
         placeholder="••••••••"

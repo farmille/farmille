@@ -42,6 +42,15 @@ export const Create: Story = {
   },
 };
 
+export const MarkdownPreview: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("tab", { name: "プレビュー" }));
+    await expect(canvas.getByRole("heading", { name: "使用した時期" })).toBeVisible();
+    await expect(canvas.getByText("初期の根張りがそろいました。", { exact: true })).toBeVisible();
+  },
+};
+
 export const MaterialSearch: Story = {
   args: Create.args,
   play: async ({ canvasElement }) => {

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, userEvent, within } from "storybook/test";
 
 import { ReportPageForm } from "./ReportPageForm";
 import { filledReport, legacyMediaReport, varietyReport } from "./reportStoryFixture";
@@ -57,7 +58,15 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Blank: Story = {};
+export const Blank: Story = {
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    await userEvent.click(page.getByRole("button", { name: "プレビュー" }));
+    await expect(
+      await page.findByRole("heading", { name: "プレビュー（公開後の見え方）" }),
+    ).toBeVisible();
+  },
+};
 
 export const Draft: Story = { args: { draft: filledReport } };
 

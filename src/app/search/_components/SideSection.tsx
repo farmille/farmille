@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useContext, useState, type ReactNode } from "react";
+import { Fragment, useContext, type ReactNode } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
 import { Input } from "@/components/form";
@@ -13,6 +14,13 @@ export type SideFilterItem = {
   key: string;
   terms: string[];
   node: ReactNode;
+};
+
+type SideSectionFilter = {
+  label: string;
+  placeholder: string;
+  empty: string;
+  items: SideFilterItem[];
 };
 
 function normalize(value: string) {
@@ -44,21 +52,23 @@ export function SideSection({
   hint?: string;
   note?: string;
   selected?: ReactNode;
-  filter?: {
-    label: string;
-    placeholder: string;
-    empty: string;
-    items: SideFilterItem[];
-  };
+  filter?: SideSectionFilter;
   children: ReactNode;
 }) {
   const focus = useContext(FilterFocusContext);
-  const [query, setQuery] = useState("");
-  const keyword = normalize(query.trim());
-  const hits =
-    filter && keyword
-      ? filter.items.filter((item) => item.terms.some((term) => normalize(term).includes(keyword)))
-      : null;
+  const noteContent = note ? (
+    <div
+      className={css({
+        mt: "0.5",
+        mb: "1.5",
+        color: "text.muted",
+        fontSize: "sm",
+        lineHeight: "normal",
+      })}
+    >
+      {note}
+    </div>
+  ) : null;
 
   return (
     <Collapsible
@@ -82,59 +92,76 @@ export function SideSection({
       {selected}
       <CollapsiblePanel hiddenUntilFound motion="none">
         {filter ? (
-          <Input
-            type="search"
-            size="sm"
-            className={filterInputStyle}
-            hideLabel
-            label={filter.label}
-            placeholder={filter.placeholder}
-            autoComplete="off"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        ) : null}
-        {note ? (
-          <div
-            className={css({
-              mt: "0.5",
-              mb: "1.5",
-              color: "text.muted",
-              fontSize: "sm",
-              lineHeight: "normal",
-            })}
-          >
-            {note}
-          </div>
-        ) : null}
-        {hits ? (
-          <div className={chipListStyle}>
-            {hits.length > 0 ? (
-              hits.map((item) => <Fragment key={item.key}>{item.node}</Fragment>)
-            ) : (
-              <span
-                className={css({
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "1.5",
-                  py: "0.5",
-                  px: "2.5",
-                  bg: "surface.page",
-                  borderWidth: "1px",
-                  borderStyle: "solid",
-                  borderColor: "border.default",
-                  borderRadius: "pill",
-                  color: "text.subtle",
-                  textStyle: "note",
-                })}
-              >
-                {filter?.empty}
-              </span>
-            )}
-          </div>
-        ) : null}
-        <div hidden={hits !== null}>{children}</div>
+          <FilteredSection filter={filter} note={noteContent}>
+            {children}
+          </FilteredSection>
+        ) : (
+          <>
+            {noteContent}
+            {children}
+          </>
+        )}
       </CollapsiblePanel>
     </Collapsible>
+  );
+}
+
+function FilteredSection({
+  filter,
+  note,
+  children,
+}: {
+  filter: SideSectionFilter;
+  note: ReactNode;
+  children: ReactNode;
+}) {
+  const form = useForm({ defaultValues: { query: "" } });
+  const query = useStore(form.store, (state) => state.values.query);
+  const keyword = normalize(query.trim());
+  const hits = keyword
+    ? filter.items.filter((item) => item.terms.some((term) => normalize(term).includes(keyword)))
+    : null;
+  return (
+    <>
+      <Input
+        type="search"
+        size="sm"
+        className={filterInputStyle}
+        hideLabel
+        label={filter.label}
+        placeholder={filter.placeholder}
+        autoComplete="off"
+        value={query}
+        onChange={(event) => form.setFieldValue("query", event.target.value)}
+      />
+      {note}
+      {hits ? (
+        <div className={chipListStyle}>
+          {hits.length > 0 ? (
+            hits.map((item) => <Fragment key={item.key}>{item.node}</Fragment>)
+          ) : (
+            <span
+              className={css({
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "1.5",
+                py: "0.5",
+                px: "2.5",
+                bg: "surface.page",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "border.default",
+                borderRadius: "pill",
+                color: "text.subtle",
+                textStyle: "note",
+              })}
+            >
+              {filter.empty}
+            </span>
+          )}
+        </div>
+      ) : null}
+      <div hidden={hits !== null}>{children}</div>
+    </>
   );
 }

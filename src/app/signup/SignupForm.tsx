@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState, useState, type ReactNode } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+
+import { useActionState, type ReactNode } from "react";
 
 import { signupAction } from "@/app/signup/actions";
 import {
@@ -51,15 +53,39 @@ export function SignupForm({
   next?: string | null;
 }) {
   const [state, formAction] = useActionState(signupAction, initialAuthFormState);
-  const values = submittedValuesOf(state);
+  const submitted = submittedValuesOf(state);
+  const defaults = {
+    handle: submitted.handle ?? "",
+    familyName: submitted.familyName ?? "",
+    givenName: submitted.givenName ?? "",
+    phone: submitted.phone ?? "",
+    standpoint: submitted.standpoint ?? "",
+    terms: submitted.terms === "on",
+    password: "",
+  };
   // パスワードはサーバーから返さず控えにも残さないので、送信後のフォームの reset で消えないよう画面で持つ
-  const [password, setPassword] = useState("");
+  const form = useForm({ defaultValues: defaults });
+  const values = useStore(form.store, (state) => state.values);
 
   return (
     <Form
       action={formAction}
       errors={fieldErrorsOf(state)}
       persist="signup"
+      onReset={() => {
+        const password = form.state.values.password;
+        form.reset(defaults);
+        form.setFieldValue("password", password);
+      }}
+      onRestore={(restored) => {
+        for (const name of ["handle", "familyName", "givenName", "phone", "standpoint"] as const) {
+          const value = restored.get(name)?.[0];
+          if (value !== undefined) form.setFieldValue(name, value);
+        }
+        if (restored.has("terms")) {
+          form.setFieldValue("terms", restored.get("terms")?.includes("on") ?? false);
+        }
+      }}
       validate={generalRegistrationFieldErrors}
     >
       <FormActions layout="links">
@@ -100,7 +126,8 @@ export function SignupForm({
         requirement="required"
         visibility="public"
         autoComplete="nickname"
-        defaultValue={values.handle}
+        value={values.handle}
+        onChange={(event) => form.setFieldValue("handle", event.target.value)}
         maxLength={HANDLE_MAX_LENGTH}
         placeholder="農家の山田"
       />
@@ -113,7 +140,8 @@ export function SignupForm({
             label="本名（姓）"
             name="familyName"
             autoComplete="family-name"
-            defaultValue={values.familyName}
+            value={values.familyName}
+            onChange={(event) => form.setFieldValue("familyName", event.target.value)}
             maxLength={80}
             placeholder="姓"
           />
@@ -123,7 +151,8 @@ export function SignupForm({
             label="本名（名）"
             name="givenName"
             autoComplete="given-name"
-            defaultValue={values.givenName}
+            value={values.givenName}
+            onChange={(event) => form.setFieldValue("givenName", event.target.value)}
             maxLength={80}
             placeholder="名"
           />
@@ -137,7 +166,8 @@ export function SignupForm({
         requirement="optional"
         visibility="private"
         autoComplete="tel"
-        defaultValue={values.phone}
+        value={values.phone}
+        onChange={(event) => form.setFieldValue("phone", event.target.value)}
         inputMode="tel"
         maxLength={20}
         placeholder="090-1234-5678"
@@ -151,11 +181,12 @@ export function SignupForm({
         requirement="required"
         visibility="public"
         className={standpointGroupStyle}
-        defaultValue={values.standpoint}
+        value={values.standpoint}
+        onValueChange={(value) => form.setFieldValue("standpoint", value)}
         options={STANDPOINTS}
       />
 
-      <PostalAddressFields values={values} />
+      <PostalAddressFields values={submitted} />
 
       <Input
         description={`${PASSWORD_MIN_LENGTH}文字以上で設定してください。`}
@@ -164,15 +195,19 @@ export function SignupForm({
         requirement="required"
         autoComplete="new-password"
         minLength={PASSWORD_MIN_LENGTH}
-        onChange={(event) => setPassword(event.target.value)}
+        onChange={(event) => form.setFieldValue("password", event.target.value)}
         placeholder="••••••••"
         revealable
         type="password"
-        value={password}
+        value={values.password}
       />
 
       <Field name="terms" requirement="required">
-        <Checkbox defaultChecked={values.terms === "on"} variant="row">
+        <Checkbox
+          checked={values.terms}
+          onCheckedChange={(checked) => form.setFieldValue("terms", checked)}
+          variant="row"
+        >
           利用規約・プライバシーポリシーに同意する
         </Checkbox>
       </Field>

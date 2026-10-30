@@ -38,6 +38,7 @@ function isUnitTest(file: string): boolean {
 function isDevelopmentOnly(file: string): boolean {
   return (
     file.startsWith("tools/oxlint/") ||
+    file.startsWith("scripts/eslint/") ||
     file.startsWith(".github/") ||
     [
       "tools/ci/browser-checks.ts",

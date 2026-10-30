@@ -8,10 +8,22 @@ import { css } from "../../../../styled-system/css";
 
 const noteStyle = css({ mt: "2" });
 
-function ConsentRow({ name, text }: { name: string; text: string }) {
+function ConsentRow({
+  name,
+  text,
+  checked,
+  onChange,
+}: {
+  name: string;
+  text: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
   return (
     <Field name={name}>
-      <Checkbox>{text}</Checkbox>
+      <Checkbox checked={checked} onCheckedChange={onChange}>
+        {text}
+      </Checkbox>
     </Field>
   );
 }
@@ -31,7 +43,15 @@ function PrivacyText({ text }: { text: string }) {
   );
 }
 
-export function ConsentFields({ kind }: { kind: SubmittableKind }) {
+export function ConsentFields({
+  kind,
+  values,
+  onChange,
+}: {
+  kind: SubmittableKind;
+  values: boolean[];
+  onChange: (index: number, checked: boolean) => void;
+}) {
   const copy = applicationCopy[kind];
   const last = copy.consents.length - 1;
   const conditionCount = kind === "registration" ? 2 : 0;
@@ -49,7 +69,13 @@ export function ConsentFields({ kind }: { kind: SubmittableKind }) {
           {checkAll}
           <Fieldset hideLegend legend="該当条件のご確認" requirement="required">
             {conditions.map((text, index) => (
-              <ConsentRow key={text} name={`consent.${index}`} text={text} />
+              <ConsentRow
+                key={text}
+                name={`consent.${index}`}
+                text={text}
+                checked={values[index]}
+                onChange={(checked) => onChange(index, checked)}
+              />
             ))}
           </Fieldset>
         </SurfaceCard>
@@ -58,14 +84,25 @@ export function ConsentFields({ kind }: { kind: SubmittableKind }) {
         {checkAll}
         <Fieldset hideLegend legend="ご申請にあたっての確認事項" requirement="required">
           {confirmations.map((text, index) => (
-            <ConsentRow key={text} name={`consent.${conditionCount + index}`} text={text} />
+            <ConsentRow
+              key={text}
+              name={`consent.${conditionCount + index}`}
+              text={text}
+              checked={values[conditionCount + index]}
+              onChange={(checked) => onChange(conditionCount + index, checked)}
+            />
           ))}
         </Fieldset>
       </SurfaceCard>
       <SurfaceCard title="ご入力いただいた情報の取扱いについて">
         <PrivacyText text={copy.privacy} />
         <Fieldset hideLegend legend="ご入力いただいた情報の取扱いについて" requirement="required">
-          <ConsentRow name={`consent.${last}`} text={copy.consents[last]} />
+          <ConsentRow
+            name={`consent.${last}`}
+            text={copy.consents[last]}
+            checked={values[last]}
+            onChange={(checked) => onChange(last, checked)}
+          />
         </Fieldset>
       </SurfaceCard>
     </>

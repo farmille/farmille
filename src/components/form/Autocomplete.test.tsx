@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState, type FormEvent } from "react";
+import { useReducer, type FormEvent } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Autocomplete } from "./Autocomplete";
@@ -18,7 +18,7 @@ function Harness({
   onPick: (option: Option) => void;
   onSubmitText?: (text: string) => void;
 }) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useReducer((_current: string, next: string) => next, "");
   return (
     <>
       <Autocomplete
@@ -39,7 +39,7 @@ describe("Autocomplete", () => {
   it("一致する候補が無いあいだは一覧を開かず、周りの部品を読み上げから隠さない", async () => {
     const user = userEvent.setup();
     function Host() {
-      const [text, setText] = useState("");
+      const [text, setText] = useReducer((_current: string, next: string) => next, "");
       return (
         <>
           <Autocomplete
@@ -133,7 +133,7 @@ describe("Autocomplete", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     function Search() {
-      const [value, setValue] = useState("");
+      const [value, setValue] = useReducer((_current: string, next: string) => next, "");
       return (
         <form
           onSubmit={(event) => {

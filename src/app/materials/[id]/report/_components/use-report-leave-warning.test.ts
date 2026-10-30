@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { expect, it } from "vitest";
-import { useReportLeaveWarning } from "./use-report-leave-warning";
+import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
 
 it("閉じたダイアログの警告を外し、ほかの未保存編集の警告を残す", () => {
   const first = renderHook(() => useReportLeaveWarning(true));

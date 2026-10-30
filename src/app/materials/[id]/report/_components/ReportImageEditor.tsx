@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, type PointerEvent } from "react";
+import { useCallback, useRef, useReducer, type PointerEvent } from "react";
 
 import { Button } from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
@@ -10,7 +10,7 @@ import { css, cva } from "../../../../../../styled-system/css";
 
 import { cropCanvas, redactCanvas, rotateCanvas, type Rect } from "./report-page-images";
 
-import { useReportLeaveWarning } from "./use-report-leave-warning";
+import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
 
 const stage = css({
   display: "flex",
@@ -162,12 +162,17 @@ export function ReportImageEditor({
   onCancel: () => void;
 }) {
   // 開くたびに呼び出し側が作り直す（key）ので、最初の状態は開いたときの画像
-  const [stack, setStack] = useState<HTMLCanvasElement[]>(() =>
-    current === null ? [] : [current],
+  const [stack, changeStack] = useReducer(
+    (
+      history: HTMLCanvasElement[],
+      action: { type: "push"; canvas: HTMLCanvasElement } | { type: "undo" },
+    ) => (action.type === "push" ? [...history, action.canvas] : history.slice(0, -1)),
+    current,
+    (canvas) => (canvas === null ? [] : [canvas]),
   );
-  const [mode, setMode] = useState<Mode>("");
-  const [crop, setCrop] = useState<Rect | null>(null);
-  const [drag, setDrag] = useState<Drag | null>(null);
+  const [mode, setMode] = useReducer((_current: Mode, next: Mode) => next, "");
+  const [crop, setCrop] = useReducer((_current: Rect | null, next: Rect | null) => next, null);
+  const [drag, setDrag] = useReducer((_current: Drag | null, next: Drag | null) => next, null);
   const view = useRef<HTMLCanvasElement>(null);
   const top = stack.at(-1) ?? null;
 
@@ -188,7 +193,7 @@ export function ReportImageEditor({
   );
 
   function push(next: HTMLCanvasElement) {
-    setStack((previous) => [...previous, next]);
+    changeStack({ type: "push", canvas: next });
   }
   function pointOf(event: PointerEvent<HTMLDivElement>): Point {
     const canvas = view.current;
@@ -394,7 +399,7 @@ export function ReportImageEditor({
               type="button"
               className={toolRecipe()}
               disabled={stack.length < 2}
-              onClick={() => setStack((previous) => previous.slice(0, -1))}
+              onClick={() => changeStack({ type: "undo" })}
             >
               <Icon name="undo" size="sm" />
               元に戻す

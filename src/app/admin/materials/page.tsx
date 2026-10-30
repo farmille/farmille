@@ -5,10 +5,10 @@ import { AdminShell } from "@/app/admin/_components/AdminShell";
 import { Panel, adminInlineNoteStyle } from "@/app/admin/_components/AdminUI";
 import { requireAdminPage } from "@/app/admin/_lib/access";
 import { Button, DataTable, type DataTableColumn } from "@/components";
-import { Input } from "@/components/form";
 import { listAdminMaterials, type AdminMaterialListItem } from "@/server/admin/materials";
 import { errorMessageJa } from "@/server/errors";
 import { css } from "../../../../styled-system/css";
+import { MaterialSearchForm } from "./MaterialSearchForm";
 
 export const metadata: Metadata = {
   title: "資材の管理",
@@ -20,16 +20,6 @@ const linkStyle = css({
   textDecoration: "none",
   _hover: { textDecoration: "underline" },
 });
-
-const searchFormStyle = css({
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "2",
-  alignItems: "center",
-  mb: "3",
-});
-
-const searchInputStyle = css({ w: "full", maxW: "[320px]" });
 
 const headerActionsStyle = css({
   display: "flex",
@@ -96,20 +86,7 @@ export default async function AdminMaterialsPage({
             </Button>
           </Link>
         </div>
-        <form action="/admin/materials" className={searchFormStyle} method="get">
-          <Input
-            hideLabel
-            label="資材名・メーカー名で検索"
-            fieldClassName={searchInputStyle}
-            defaultValue={keyword}
-            name="q"
-            placeholder="資材名・メーカー名で検索"
-            type="search"
-          />
-          <Button size="sm" type="submit" variant="ghost">
-            検索
-          </Button>
-        </form>
+        <MaterialSearchForm />
         <DataTable
           columns={columns}
           emptyMessage={

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId } from "react";
+import { useReviewBody } from "@/lib/hooks/use-review-body";
 
 import { Icon } from "@/components/Icon";
 
@@ -44,20 +45,7 @@ const toggleIconStyle = css({ transform: "rotate(180deg)" });
 /** 感想口コミの本文。長い本文は8行で切り、あふれたときだけ「続きを読む」で全文を開けるようにする。 */
 export function ReviewBody({ children }: { children: string }) {
   const bodyId = useId();
-  const bodyRef = useRef<HTMLDivElement>(null);
-  const [expanded, setExpanded] = useState(false);
-  const [overflowing, setOverflowing] = useState(false);
-
-  useEffect(() => {
-    const body = bodyRef.current;
-    if (body === null || expanded) return;
-    const measure = () => setOverflowing(body.scrollHeight > body.clientHeight);
-    measure();
-    // 画面幅が変わると折り返しが変わり、あふれるかどうかも変わる
-    const observer = new ResizeObserver(measure);
-    observer.observe(body);
-    return () => observer.disconnect();
-  }, [children, expanded]);
+  const { bodyRef, expanded, toggleExpanded, overflowing } = useReviewBody(children);
 
   return (
     <>
@@ -70,7 +58,7 @@ export function ReviewBody({ children }: { children: string }) {
           aria-controls={bodyId}
           aria-expanded={expanded}
           className={toggleStyle}
-          onClick={() => setExpanded((current) => !current)}
+          onClick={toggleExpanded}
         >
           {expanded ? "閉じる" : "続きを読む"}
           <Icon name="expand_more" size="xs" className={expanded ? toggleIconStyle : undefined} />

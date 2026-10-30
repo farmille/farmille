@@ -1,34 +1,33 @@
 "use client";
-import { useState } from "react";
+import { startTransition, useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { css } from "../../../../styled-system/css";
 import { Button } from "@/components";
 import { Notice } from "@/components/form";
 import { retryApplicationMail } from "../actions";
 import { errorMessageJa } from "@/server/errors";
+
+type ReceiptMessage = { tone: "success" | "error"; text: string } | null;
+
 export function ReceiptButtons({ id, sent }: { id: string; sent: boolean }) {
   const router = useRouter();
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
-  async function retry() {
-    setBusy(true);
-    try {
-      const result = await retryApplicationMail(id);
-      setMessage(
-        result.ok
+  const [message, retry, busy] = useActionState(
+    async (_previous: ReceiptMessage): Promise<ReceiptMessage> => {
+      try {
+        const result = await retryApplicationMail(id);
+        router.refresh();
+        return result.ok
           ? { tone: "success", text: "メールの送信状況を確認しました。" }
-          : { tone: "error", text: errorMessageJa[result.error] },
-      );
-      router.refresh();
-    } catch {
-      setMessage({
-        tone: "error",
-        text: "送信状況を確認できませんでした。時間をおいて再度お試しください。",
-      });
-    } finally {
-      setBusy(false);
-    }
-  }
+          : { tone: "error", text: errorMessageJa[result.error] };
+      } catch {
+        return {
+          tone: "error",
+          text: "送信状況を確認できませんでした。時間をおいて再度お試しください。",
+        };
+      }
+    },
+    null,
+  );
   return (
     <div
       className={css({
@@ -43,7 +42,12 @@ export function ReceiptButtons({ id, sent }: { id: string; sent: boolean }) {
         受付票を印刷・PDF保存
       </Button>
       {!sent && (
-        <Button type="button" variant="ghost" disabled={busy} onClick={() => void retry()}>
+        <Button
+          type="button"
+          variant="ghost"
+          disabled={busy}
+          onClick={() => startTransition(retry)}
+        >
           控えメールを再送
         </Button>
       )}

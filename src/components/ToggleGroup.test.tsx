@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { useReducer } from "react";
 import { describe, expect, it } from "vitest";
 
 import { ToggleGroup } from "./ToggleGroup";
@@ -12,7 +12,7 @@ const effects = [
 ];
 
 function Harness({ multiple, limit }: { multiple?: boolean; limit?: number }) {
-  const [value, setValue] = useState<string[]>([]);
+  const [value, setValue] = useReducer((_current: string[], next: string[]) => next, []);
   return (
     <>
       <ToggleGroup

@@ -1,18 +1,12 @@
 "use client";
-import { useState, useTransition } from "react";
+import { startTransition, useActionState, useReducer } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
 import { SellerHeader } from "@/app/sellers/[id]/_components/SellerHeader";
 import { Button } from "@/components";
-import {
-  Field,
-  FileInput,
-  FormActions,
-  Input,
-  Notice,
-  Textarea,
-  usePersistedInput,
-} from "@/components/form";
+import { Field, FileInput, FormActions, Input, Notice, Textarea } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import {
@@ -46,6 +40,17 @@ const logoThumbStyle = css({
   bg: "surface.page",
 });
 
+type ProfileAction =
+  | { type: "save"; content: ManufacturerProfileContent; submit: boolean }
+  | { type: "upload"; file: File }
+  | { type: "withdraw"; versionId: string };
+
+type ProfileState = {
+  versionId: string | null;
+  savedContent: string;
+  message: { tone: "success" | "error"; text: string } | null;
+};
+
 export function ManufacturerProfileEditor({
   sellerId,
   name,
@@ -61,45 +66,82 @@ export function ManufacturerProfileEditor({
   expectedVersion: string | null;
   pendingVersion: string | null;
 }) {
-  const [content, setContent] = useState(initialContent);
-  const [savedContent, setSavedContent] = useState(() => JSON.stringify(initialContent));
-  const [versionId, setVersionId] = useState(expectedVersion);
-  const [preview, setPreview] = useState(false);
-  const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const form = useForm({ defaultValues: { content: initialContent } });
+  const content = useStore(form.store, (state) => state.values.content);
+  const [preview, setPreview] = useReducer((_: boolean, next: boolean) => next, false);
+  const [previewError, setPreviewError] = useReducer(
+    (_: string | null, next: string | null) => next,
+    null,
+  );
   const router = useRouter();
+  const [state, submitAction, pending] = useActionState<ProfileState, ProfileAction>(
+    async (current, action) => {
+      if (action.type === "withdraw") {
+        if (await withdrawManufacturerProfile(action.versionId)) {
+          router.refresh();
+          return { ...current, message: null };
+        }
+        return {
+          ...current,
+          message: {
+            tone: "error",
+            text: "取り下げできませんでした。再読み込みして確認してください。",
+          },
+        };
+      }
+      if (action.type === "upload") {
+        const logoData = new FormData();
+        logoData.set("logo", action.file);
+        const result = await uploadLogo(logoData);
+        if (!result.ok) return { ...current, message: { tone: "error", text: result.message } };
+        form.setFieldValue("content", (content) => ({ ...content, logoUrl: result.url }));
+        return {
+          ...current,
+          message: {
+            tone: "success",
+            text: "ロゴをアップロードしました。下書き保存または表現確認への送信をしてください。",
+          },
+        };
+      }
+      const result = await saveManufacturerProfile({
+        content: action.content,
+        expectedVersion: current.versionId,
+        submit: action.submit,
+      });
+      if (!result.ok) return { ...current, message: { tone: "error", text: result.message } };
+      router.refresh();
+      return {
+        versionId: action.submit ? null : result.versionId,
+        savedContent: JSON.stringify(action.content),
+        message: {
+          tone: "success",
+          text: action.submit
+            ? "表現確認へ送りました。公開中のプロフィールはまだ変わりません。"
+            : "下書きを保存しました。",
+        },
+      };
+    },
+    { versionId: expectedVersion, savedContent: JSON.stringify(initialContent), message: null },
+  );
+  const message = previewError ? { tone: "error" as const, text: previewError } : state.message;
   usePersistedInput({
     name: "manufacturer-profile",
     schema: ProfileInputSchema,
-    unsaved: pendingVersion || JSON.stringify(content) === savedContent ? null : content,
+    unsaved: pendingVersion || JSON.stringify(content) === state.savedContent ? null : content,
     // 表現確認中は編集できないので、保存前の入力を戻さない
     restore: (restored) => {
-      if (!pendingVersion) setContent(restored);
+      if (!pendingVersion) form.setFieldValue("content", restored);
     },
   });
   function save(submit: boolean) {
-    startTransition(async () => {
-      const result = await saveManufacturerProfile({ content, expectedVersion: versionId, submit });
-      if (!result.ok) {
-        setMessage({ tone: "error", text: result.message });
-        return;
-      }
-      setVersionId(submit ? null : result.versionId);
-      setSavedContent(JSON.stringify(content));
-      setMessage({
-        tone: "success",
-        text: submit
-          ? "表現確認へ送りました。公開中のプロフィールはまだ変わりません。"
-          : "下書きを保存しました。",
-      });
-      router.refresh();
-    });
+    setPreviewError(null);
+    startTransition(() => submitAction({ type: "save", content, submit }));
   }
   return (
     <div className={materialPageStack}>
       {message ? <Notice tone={message.tone}>{message.text}</Notice> : null}
       {pendingVersion ? <Notice tone="info">プロフィールの表現確認中です。</Notice> : null}
-      {versionId && !pendingVersion ? (
+      {state.versionId && !pendingVersion ? (
         <Notice tone="neutral">
           未公開の下書きを編集中です。表現確認を経るまで、メーカーページには反映されません。
         </Notice>
@@ -128,20 +170,8 @@ export function ManufacturerProfileEditor({
               onChange={(event) => {
                 const file = event.target.files?.[0];
                 if (!file) return;
-                startTransition(async () => {
-                  const form = new FormData();
-                  form.set("logo", file);
-                  const result = await uploadLogo(form);
-                  if (!result.ok) {
-                    setMessage({ tone: "error", text: result.message });
-                    return;
-                  }
-                  setContent((current) => ({ ...current, logoUrl: result.url }));
-                  setMessage({
-                    tone: "success",
-                    text: "ロゴをアップロードしました。下書き保存または表現確認への送信をしてください。",
-                  });
-                });
+                setPreviewError(null);
+                startTransition(() => submitAction({ type: "upload", file }));
               }}
               disabled={pending}
             />
@@ -161,7 +191,7 @@ export function ManufacturerProfileEditor({
                     size="sm"
                     variant="ghost"
                     disabled={pending}
-                    onClick={() => setContent({ ...content, logoUrl: "" })}
+                    onClick={() => form.setFieldValue("content", { ...content, logoUrl: "" })}
                   >
                     ロゴを外す
                   </Button>
@@ -175,14 +205,18 @@ export function ManufacturerProfileEditor({
             label="会社紹介"
             rows={7}
             value={content.profileText}
-            onChange={(event) => setContent({ ...content, profileText: event.target.value })}
+            onChange={(event) =>
+              form.setFieldValue("content", { ...content, profileText: event.target.value })
+            }
             disabled={pending}
           />
           <Input
             label="公式サイトURL"
             type="url"
             value={content.websiteUrl}
-            onChange={(event) => setContent({ ...content, websiteUrl: event.target.value })}
+            onChange={(event) =>
+              form.setFieldValue("content", { ...content, websiteUrl: event.target.value })
+            }
             disabled={pending}
           />
         </>
@@ -192,14 +226,7 @@ export function ManufacturerProfileEditor({
           <Button
             disabled={pending}
             onClick={() =>
-              startTransition(async () => {
-                if (await withdrawManufacturerProfile(pendingVersion)) router.refresh();
-                else
-                  setMessage({
-                    tone: "error",
-                    text: "取り下げできませんでした。再読み込みして確認してください。",
-                  });
-              })
+              startTransition(() => submitAction({ type: "withdraw", versionId: pendingVersion }))
             }
           >
             取り下げて編集を再開
@@ -217,7 +244,7 @@ export function ManufacturerProfileEditor({
               variant="ghost"
               onClick={() => {
                 if (!v.is(ManufacturerProfileSchema, content)) {
-                  setMessage({ tone: "error", text: "URLの入力を確認してください。" });
+                  setPreviewError("URLの入力を確認してください。");
                   return;
                 }
                 setPreview(!preview);

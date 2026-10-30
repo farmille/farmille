@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useReducer, type ReactNode } from "react";
 
 import { Dialog, DialogClose } from "@/components/Dialog";
 import { TextLink } from "@/components/TextLink";
@@ -34,12 +34,17 @@ export function SearchFilterSheet({
   searchBox: ReactNode;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
-  const [focus, setFocus] = useState<string | null>(null);
+  const [{ open, focus }, dispatch] = useReducer(
+    (
+      state: { open: boolean; focus: string | null },
+      event: { type: "open"; focus: string | null } | { type: "toggle"; open: boolean },
+    ) =>
+      event.type === "open" ? { open: true, focus: event.focus } : { ...state, open: event.open },
+    { open: false, focus: null },
+  );
   const conditionCount = categories.reduce((sum, category) => sum + category.count, 0);
   function show(key: string | null) {
-    setFocus(key);
-    setOpen(true);
+    dispatch({ type: "open", focus: key });
   }
 
   return (
@@ -75,7 +80,7 @@ export function SearchFilterSheet({
         size="sheet"
         title="絞り込み"
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={(open) => dispatch({ type: "toggle", open })}
         footer={
           <>
             <TextLink href="/search" variant="plain">

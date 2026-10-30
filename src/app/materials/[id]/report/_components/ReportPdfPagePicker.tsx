@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useReducer } from "react";
+import { useReportPdfThumbnails } from "@/lib/hooks/use-report-pdf-thumbnails";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 
 import { Button } from "@/components/Button";
 import { Dialog } from "@/components/Dialog";
 
 import { css, cva } from "../../../../../../styled-system/css";
-
-import { renderPdfThumb } from "./report-page-images";
 
 const grid = css({
   display: "grid",
@@ -78,37 +77,15 @@ export function ReportPdfPagePicker({
   onPick: (pages: number[]) => void;
   onCancel: () => void;
 }) {
-  const [thumbs, setThumbs] = useState<Record<number, string>>({});
-  const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
+  const thumbs = useReportPdfThumbnails(doc);
+  const [selected, togglePage] = useReducer((previous: ReadonlySet<number>, page: number) => {
+    const next = new Set(previous);
+    if (next.has(page)) next.delete(page);
+    else next.add(page);
+    return next;
+  }, new Set<number>());
   const count = doc === null ? 0 : doc.numPages;
   const full = selected.size >= max;
-
-  // 縮小画像は1本の順番待ちで描く。同じページを同時に2回描くと pdf.js が止まるため、
-  // 効果が作り直されても（開発時の二重実行など）描画は続きから1本だけにする
-  const queue = useRef<{ doc: PDFDocumentProxy; stopped: boolean } | null>(null);
-  useEffect(() => {
-    if (doc === null) return;
-    const running = queue.current;
-    if (running !== null && running.doc === doc) {
-      running.stopped = false;
-      return () => {
-        running.stopped = true;
-      };
-    }
-    const state = { doc, stopped: false };
-    queue.current = state;
-    void (async () => {
-      for (let page = 1; page <= doc.numPages; page++) {
-        const canvas = await renderPdfThumb(doc, page);
-        if (state.stopped) return;
-        const url = canvas.toDataURL("image/jpeg", 0.7);
-        setThumbs((previous) => ({ ...previous, [page]: url }));
-      }
-    })();
-    return () => {
-      state.stopped = true;
-    };
-  }, [doc]);
 
   return (
     <Dialog
@@ -129,14 +106,7 @@ export function ReportPdfPagePicker({
             aria-pressed={selected.has(page)}
             disabled={full && !selected.has(page)}
             className={pageRecipe({ on: selected.has(page) })}
-            onClick={() =>
-              setSelected((previous) => {
-                const next = new Set(previous);
-                if (next.has(page)) next.delete(page);
-                else next.add(page);
-                return next;
-              })
-            }
+            onClick={() => togglePage(page)}
           >
             {thumbs[page] === undefined ? (
               <span className={placeholder}>読み込み中…</span>

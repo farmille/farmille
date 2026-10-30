@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { startTransition, useActionState, useReducer } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
 import { MaterialIllustration } from "@/components/materials/MaterialIllustration";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
@@ -13,7 +15,6 @@ import {
   Notice,
   Select,
   Textarea,
-  usePersistedInput,
 } from "@/components/form";
 import { MaterialPageContent, materialPageStack } from "@/components/materials/MaterialPageContent";
 import {
@@ -46,6 +47,16 @@ const LINK_GROUP_OPTIONS = [
   ...MATERIAL_LINK_GROUPS,
 ] as const;
 
+type EditorAction =
+  | { type: "save"; content: Content; submit: boolean }
+  | { type: "withdraw"; versionId: string };
+
+type EditorState = {
+  version: string | null;
+  savedContent: string;
+  message: { tone: "success" | "error"; text: string } | null;
+};
+
 export function MaterialPageEditor({
   materialId,
   initialContent,
@@ -59,45 +70,64 @@ export function MaterialPageEditor({
   pendingVersion: string | null;
   imageUrl: string | null;
 }) {
-  const [content, setContent] = useState(initialContent);
-  const [savedContent, setSavedContent] = useState(() => JSON.stringify(initialContent));
-  const [version, setVersion] = useState(expectedVersion);
-  const [preview, setPreview] = useState(false);
-  const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const form = useForm({ defaultValues: { content: initialContent } });
+  const content = useStore(form.store, (state) => state.values.content);
+  const [preview, setPreview] = useReducer((_: boolean, next: boolean) => next, false);
+  const [previewError, setPreviewError] = useReducer(
+    (_: string | null, next: string | null) => next,
+    null,
+  );
   const router = useRouter();
+  const [state, submitAction, pending] = useActionState<EditorState, EditorAction>(
+    async (current, action) => {
+      if (action.type === "withdraw") {
+        if (await withdrawMaterialPage(action.versionId)) {
+          router.refresh();
+          return { ...current, message: null };
+        }
+        return {
+          ...current,
+          message: {
+            tone: "error",
+            text: "取り下げできませんでした。再読み込みして状態を確認してください。",
+          },
+        };
+      }
+      const result = await saveMaterialPage({
+        materialId,
+        expectedVersion: current.version,
+        content: action.content,
+        submit: action.submit,
+      });
+      if (!result.ok) return { ...current, message: { tone: "error", text: result.message } };
+      router.refresh();
+      return {
+        version: action.submit ? null : result.versionId,
+        savedContent: JSON.stringify(action.content),
+        message: {
+          tone: "success",
+          text: action.submit
+            ? "表現確認へ送りました。公開中の内容はまだ変わりません。"
+            : "下書きを保存しました。",
+        },
+      };
+    },
+    { version: expectedVersion, savedContent: JSON.stringify(initialContent), message: null },
+  );
+  const message = previewError ? { tone: "error" as const, text: previewError } : state.message;
   usePersistedInput({
     name: "material-page",
     schema: MaterialPageContentSchema,
-    unsaved: pendingVersion || JSON.stringify(content) === savedContent ? null : content,
+    unsaved: pendingVersion || JSON.stringify(content) === state.savedContent ? null : content,
     // 表現確認中は編集できないので、保存前の入力を戻さない
     restore: (restored) => {
-      if (!pendingVersion) setContent(restored);
+      if (!pendingVersion) form.setFieldValue("content", restored);
     },
   });
 
   function save(submit: boolean) {
-    startTransition(async () => {
-      const result = await saveMaterialPage({
-        materialId,
-        expectedVersion: version,
-        content,
-        submit,
-      });
-      if (!result.ok) {
-        setMessage({ tone: "error", text: result.message });
-        return;
-      }
-      setVersion(submit ? null : result.versionId);
-      setSavedContent(JSON.stringify(content));
-      setMessage({
-        tone: "success",
-        text: submit
-          ? "表現確認へ送りました。公開中の内容はまだ変わりません。"
-          : "下書きを保存しました。",
-      });
-      router.refresh();
-    });
+    setPreviewError(null);
+    startTransition(() => submitAction({ type: "save", content, submit }));
   }
 
   if (pendingVersion)
@@ -109,14 +139,7 @@ export function MaterialPageEditor({
         <Button
           disabled={pending}
           onClick={() =>
-            startTransition(async () => {
-              if (await withdrawMaterialPage(pendingVersion)) router.refresh();
-              else
-                setMessage({
-                  tone: "error",
-                  text: "取り下げできませんでした。再読み込みして状態を確認してください。",
-                });
-            })
+            startTransition(() => submitAction({ type: "withdraw", versionId: pendingVersion }))
           }
         >
           取り下げて編集を再開
@@ -152,7 +175,9 @@ export function MaterialPageEditor({
                 }
                 rows={7}
                 value={content.description}
-                onChange={(event) => setContent({ ...content, description: event.target.value })}
+                onChange={(event) =>
+                  form.setFieldValue("content", { ...content, description: event.target.value })
+                }
               />
             </section>
             <section>
@@ -164,7 +189,7 @@ export function MaterialPageEditor({
                   label="施用タイミング"
                   disabled={pending}
                   onValueChange={(values) =>
-                    setContent({ ...content, timings: values.map(Number) })
+                    form.setFieldValue("content", { ...content, timings: values.map(Number) })
                   }
                   options={TIMING_OPTIONS}
                   value={content.timings.map(String)}
@@ -187,7 +212,7 @@ export function MaterialPageEditor({
                           options={LINK_GROUP_OPTIONS}
                           value={link.group ?? ""}
                           onValueChange={(value) => {
-                            setContent({
+                            form.setFieldValue("content", {
                               ...content,
                               links: content.links.map((entry, i) =>
                                 i === index
@@ -215,7 +240,7 @@ export function MaterialPageEditor({
                           labelSize="sm"
                           value={link.title}
                           onChange={(event) =>
-                            setContent({
+                            form.setFieldValue("content", {
                               ...content,
                               links: content.links.map((entry, i) =>
                                 i === index ? { ...entry, title: event.target.value } : entry,
@@ -229,7 +254,7 @@ export function MaterialPageEditor({
                           type="url"
                           value={link.url}
                           onChange={(event) =>
-                            setContent({
+                            form.setFieldValue("content", {
                               ...content,
                               links: content.links.map((entry, i) =>
                                 i === index ? { ...entry, url: event.target.value } : entry,
@@ -253,7 +278,7 @@ export function MaterialPageEditor({
                                 rows={field.key === "summary" ? 3 : 1}
                                 value={link.trial?.[field.key] ?? ""}
                                 onChange={(event) =>
-                                  setContent({
+                                  form.setFieldValue("content", {
                                     ...content,
                                     links: content.links.map((entry, i) =>
                                       i === index && entry.trial
@@ -290,7 +315,7 @@ export function MaterialPageEditor({
                                 step={1}
                                 value={link.trial?.[field.key] ?? ""}
                                 onChange={(event) =>
-                                  setContent({
+                                  form.setFieldValue("content", {
                                     ...content,
                                     links: content.links.map((entry, i) =>
                                       i === index && entry.trial
@@ -315,7 +340,7 @@ export function MaterialPageEditor({
                         <Button
                           variant="ghost"
                           onClick={() =>
-                            setContent({
+                            form.setFieldValue("content", {
                               ...content,
                               links: content.links.filter((_, i) => i !== index),
                             })
@@ -329,7 +354,7 @@ export function MaterialPageEditor({
                   <Button
                     variant="ghost"
                     onClick={() =>
-                      setContent({
+                      form.setFieldValue("content", {
                         ...content,
                         links: [
                           ...content.links,
@@ -369,7 +394,7 @@ export function MaterialPageEditor({
                     value={usage.method}
                     onValueChange={(method) => {
                       if (method === null) return;
-                      setContent({
+                      form.setFieldValue("content", {
                         ...content,
                         usages: content.usages.map((entry, i) =>
                           i === index ? { ...entry, method } : entry,
@@ -383,7 +408,7 @@ export function MaterialPageEditor({
                     rows={3}
                     value={usage.detail}
                     onChange={(event) =>
-                      setContent({
+                      form.setFieldValue("content", {
                         ...content,
                         usages: content.usages.map((entry, i) =>
                           i === index ? { ...entry, detail: event.target.value } : entry,
@@ -394,7 +419,7 @@ export function MaterialPageEditor({
                   <Button
                     variant="ghost"
                     onClick={() =>
-                      setContent({
+                      form.setFieldValue("content", {
                         ...content,
                         usages: content.usages.filter((_, i) => i !== index),
                       })
@@ -407,7 +432,7 @@ export function MaterialPageEditor({
               <Button
                 variant="ghost"
                 onClick={() =>
-                  setContent({
+                  form.setFieldValue("content", {
                     ...content,
                     usages: [...content.usages, { method: "other", detail: "" }],
                   })
@@ -421,13 +446,17 @@ export function MaterialPageEditor({
               <Textarea
                 label="主な成分"
                 value={content.mainComponents}
-                onChange={(event) => setContent({ ...content, mainComponents: event.target.value })}
+                onChange={(event) =>
+                  form.setFieldValue("content", { ...content, mainComponents: event.target.value })
+                }
               />
               <Textarea
                 label="作用機作"
                 rows={4}
                 value={content.mechanism}
-                onChange={(event) => setContent({ ...content, mechanism: event.target.value })}
+                onChange={(event) =>
+                  form.setFieldValue("content", { ...content, mechanism: event.target.value })
+                }
               />
             </section>
             <section>
@@ -443,7 +472,7 @@ export function MaterialPageEditor({
                       checked={Boolean(registration)}
                       disabled={pending}
                       onCheckedChange={(checked) =>
-                        setContent({
+                        form.setFieldValue("content", {
                           ...content,
                           registrations: checked
                             ? [
@@ -462,7 +491,7 @@ export function MaterialPageEditor({
                           label={kind.companyLabel}
                           value={registration.companyName}
                           onChange={(event) =>
-                            setContent({
+                            form.setFieldValue("content", {
                               ...content,
                               registrations: content.registrations.map((entry) =>
                                 entry.kind === kind.value
@@ -477,7 +506,7 @@ export function MaterialPageEditor({
                           rows={3}
                           value={registration.effects}
                           onChange={(event) =>
-                            setContent({
+                            form.setFieldValue("content", {
                               ...content,
                               registrations: content.registrations.map((entry) =>
                                 entry.kind === kind.value
@@ -501,7 +530,7 @@ export function MaterialPageEditor({
                     label={`登録・認証${index + 1}`}
                     value={title}
                     onChange={(event) =>
-                      setContent({
+                      form.setFieldValue("content", {
                         ...content,
                         certifications: content.certifications.map((entry, i) =>
                           i === index ? event.target.value : entry,
@@ -512,7 +541,7 @@ export function MaterialPageEditor({
                   <Button
                     variant="ghost"
                     onClick={() =>
-                      setContent({
+                      form.setFieldValue("content", {
                         ...content,
                         certifications: content.certifications.filter((_, i) => i !== index),
                       })
@@ -525,7 +554,10 @@ export function MaterialPageEditor({
               <Button
                 variant="ghost"
                 onClick={() =>
-                  setContent({ ...content, certifications: [...content.certifications, ""] })
+                  form.setFieldValue("content", {
+                    ...content,
+                    certifications: [...content.certifications, ""],
+                  })
                 }
               >
                 登録・認証を追加
@@ -541,7 +573,7 @@ export function MaterialPageEditor({
                     labelSize="sm"
                     value={company}
                     onChange={(event) =>
-                      setContent({
+                      form.setFieldValue("content", {
                         ...content,
                         relatedCompanies: content.relatedCompanies.map((name, i) =>
                           i === index ? event.target.value : name,
@@ -552,7 +584,7 @@ export function MaterialPageEditor({
                   <Button
                     variant="ghost"
                     onClick={() =>
-                      setContent({
+                      form.setFieldValue("content", {
                         ...content,
                         relatedCompanies: content.relatedCompanies.filter((_, i) => i !== index),
                       })
@@ -565,7 +597,10 @@ export function MaterialPageEditor({
               <Button
                 variant="ghost"
                 onClick={() =>
-                  setContent({ ...content, relatedCompanies: [...content.relatedCompanies, ""] })
+                  form.setFieldValue("content", {
+                    ...content,
+                    relatedCompanies: [...content.relatedCompanies, ""],
+                  })
                 }
               >
                 関係会社を追加
@@ -586,10 +621,9 @@ export function MaterialPageEditor({
           disabled={pending}
           onClick={() => {
             if (!preview && !v.is(MaterialPageContentSchema, content)) {
-              setMessage({
-                tone: "error",
-                text: "プレビューの前に、資料のタイトル・URLと登録・認証の空欄を確認してください。",
-              });
+              setPreviewError(
+                "プレビューの前に、資料のタイトル・URLと登録・認証の空欄を確認してください。",
+              );
               return;
             }
             setPreview(!preview);

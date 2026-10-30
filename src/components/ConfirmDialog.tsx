@@ -1,7 +1,14 @@
 "use client";
 
 import { AlertDialog } from "@base-ui/react/alert-dialog";
-import { useRef, useState, useTransition, type ReactElement, type ReactNode } from "react";
+import {
+  startTransition,
+  useActionState,
+  useRef,
+  useReducer,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 
 import { Button, buttonRecipe } from "./Button";
 import { dialogRecipe } from "./Dialog";
@@ -61,21 +68,28 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
     tone = "danger",
     alternative,
   } = props;
-  const [ownOpen, setOwnOpen] = useState(false);
-  const [confirming, startConfirming] = useTransition();
+  const [ownOpen, setOwnOpen] = useReducer((_current: boolean, next: boolean) => next, false);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
   const styles = dialogRecipe({ size: "panel" });
   const open = props.trigger === undefined ? props.open : ownOpen;
   const setOpen = props.trigger === undefined ? props.onOpenChange : setOwnOpen;
+  const [, runConfirmation, confirming] = useActionState(
+    async (
+      _state: null,
+      confirmation: { work: () => void | Promise<void>; closeWhenDone: boolean },
+    ) => {
+      await confirmation.work();
+      if (confirmation.closeWhenDone) setOpen(false);
+      return null;
+    },
+    null,
+  );
   const busy = confirming || props.pending === true;
 
   // 失敗は transition から一番近いエラー境界へ届く（Next の redirect もそこで処理される）
   function confirm(work: () => void | Promise<void>, closeWhenDone: boolean): void {
-    startConfirming(async () => {
-      await work();
-      if (closeWhenDone) setOpen(false);
-    });
+    startTransition(() => runConfirmation({ work, closeWhenDone }));
   }
 
   const actions = (

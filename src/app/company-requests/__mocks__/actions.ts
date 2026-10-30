@@ -1,5 +1,9 @@
 import { fn } from "storybook/test";
 type Actions = typeof import("../actions");
+export const beginApplication = fn<Actions["beginApplication"]>(async () => ({
+  ok: true,
+  data: "11111111-1111-4111-8111-111111111111",
+}));
 export const submitApplication = fn<Actions["submitApplication"]>(async () => ({
   ok: true,
   data: "11111111-1111-4111-8111-111111111111",

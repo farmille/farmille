@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useReducer } from "react";
 import { css } from "../../../../styled-system/css";
 import { FilterPills } from "@/components/FilterPills";
 import { StarRating } from "@/components/StarRating";
@@ -20,8 +20,11 @@ const SELECTED_TAGS: Array<{ cat: TagCategory; v: string }> = [
 
 /** /dev/ui 用のインタラクティブ見本。 */
 export function UiKitInteractiveDemos() {
-  const [stars, setStars] = useState(4);
-  const [tags, setTags] = useState(SELECTED_TAGS);
+  const [stars, setStars] = useReducer((_state: number, next: number) => next, 4);
+  const [tags, removeTag] = useReducer(
+    (current: typeof SELECTED_TAGS, index: number) => current.filter((_, idx) => idx !== index),
+    SELECTED_TAGS,
+  );
 
   return (
     <div className={css({ display: "flex", flexDirection: "column", gap: "4" })}>
@@ -43,7 +46,7 @@ export function UiKitInteractiveDemos() {
               key={`${t.cat}-${t.v}`}
               category={t.cat}
               label={t.v}
-              onRemove={() => setTags((prev) => prev.filter((_, idx) => idx !== i))}
+              onRemove={() => removeTag(i)}
             />
           ))}
         </div>

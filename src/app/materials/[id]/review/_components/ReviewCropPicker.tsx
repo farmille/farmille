@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { Combobox, type Option } from "@/components/form";
 import type { ReviewCropOption } from "@/server/queries/reviews";
@@ -25,7 +26,8 @@ export function ReviewCropPicker({
   value: readonly string[];
   onValueChange: (cropIds: readonly string[]) => void;
 }) {
-  const [query, setQuery] = useState("");
+  const form = useForm({ defaultValues: { query: "" } });
+  const query = useStore(form.store, (state) => state.values.query);
   // Combobox は値の参照が変わるたびに欄のエラーを消すので、選択が変わらない限り同じ配列を渡す
   const selected = useMemo(
     () => value.flatMap((id) => crops.filter((crop) => crop.id === id).map(optionOf)),
@@ -63,7 +65,7 @@ export function ReviewCropPicker({
       filterMode="preFiltered"
       inputValue={query}
       multiple
-      onInputValueChange={setQuery}
+      onInputValueChange={(query) => form.setFieldValue("query", query)}
       onValueChange={(next) => onValueChange(next.slice(-1).map((option) => option.value))}
       options={suggestions.map(optionOf)}
       placeholder="作物名を入力（例：トマト）"

@@ -1,11 +1,16 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PesticideRegistration } from "@/lib/material-page-editor";
+import type { ReviewPhoto } from "@/server/queries/reviews";
 
 import { ReviewForm } from "./ReviewForm";
 
-function renderForm(body = "", pesticideRegistration: PesticideRegistration = "unknown") {
+function renderForm(
+  body = "",
+  pesticideRegistration: PesticideRegistration = "unknown",
+  photos: ReviewPhoto[] = [],
+) {
   render(
     <ReviewForm
       mode="create"
@@ -19,7 +24,7 @@ function renderForm(body = "", pesticideRegistration: PesticideRegistration = "u
       targetCropIds={[]}
       pesticideRegistration={pesticideRegistration}
       bodyMaxLength={10}
-      initialValues={{ cropIds: [], rating: 0, body, pesticideAck: false, photos: [] }}
+      initialValues={{ cropIds: [], rating: 0, body, pesticideAck: false, photos }}
     />,
   );
   return screen.getByRole("textbox", { name: "感想口コミ本文" });
@@ -36,6 +41,18 @@ afterEach(() => {
 });
 
 describe("感想口コミ本文", () => {
+  it("送信後のDOM resetでも既存写真の編集中タイトルを保持する", () => {
+    renderForm("", "unknown", [
+      { id: "photo-1", url: "https://example.com/photo.jpg", caption: "変更前", sort_order: 0 },
+    ]);
+    const caption = screen.getByRole("textbox", { name: /タイトル.*1枚目の写真/ });
+    fireEvent.change(caption, { target: { value: "変更したタイトル" } });
+    const form = caption.closest("form");
+    if (form === null) throw new Error("口コミフォームがありません。");
+    act(() => form.reset());
+    expect(caption).toHaveValue("変更したタイトル");
+  });
+
   it("いまの文字数と上限を出す", () => {
     const body = renderForm();
 

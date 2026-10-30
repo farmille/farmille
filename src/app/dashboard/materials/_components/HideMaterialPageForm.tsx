@@ -1,5 +1,6 @@
 "use client";
-import { useState, useTransition } from "react";
+import { startTransition, useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
 import { Notice, Textarea } from "@/components/form";
@@ -9,10 +10,16 @@ import { hideMaterialPage } from "../editor-actions";
 const descriptionStyle = css({ textStyle: "supporting", color: "text.muted" });
 
 export function HideMaterialPageForm({ materialId }: { materialId: string }) {
-  const [note, setNote] = useState("");
-  const [message, setMessage] = useState("");
-  const [pending, startTransition] = useTransition();
+  const form = useForm({ defaultValues: { note: "" } });
+  const note = useStore(form.store, (state) => state.values.note);
   const router = useRouter();
+  const [message, hide, pending] = useActionState(async () => {
+    if (await hideMaterialPage({ materialId, note })) {
+      router.refresh();
+      return "";
+    }
+    return "非公開にできませんでした。資材オーナー権限と通信状態を確認してください。";
+  }, "");
   return (
     <div>
       <p className={descriptionStyle}>
@@ -21,21 +28,13 @@ export function HideMaterialPageForm({ materialId }: { materialId: string }) {
       <Textarea
         label="非公開にする理由"
         value={note}
-        onChange={(event) => setNote(event.target.value)}
+        onChange={(event) => form.setFieldValue("note", event.target.value)}
       />
       {message ? <Notice tone="error">{message}</Notice> : null}
       <Button
         variant="danger"
         disabled={pending || note.trim().length === 0}
-        onClick={() =>
-          startTransition(async () => {
-            if (await hideMaterialPage({ materialId, note })) router.refresh();
-            else
-              setMessage(
-                "非公開にできませんでした。資材オーナー権限と通信状態を確認してください。",
-              );
-          })
-        }
+        onClick={() => startTransition(hide)}
       >
         理由を記録して非公開にする
       </Button>

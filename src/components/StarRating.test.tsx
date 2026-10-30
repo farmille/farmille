@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState, type FormEvent } from "react";
+import { useReducer, type FormEvent } from "react";
 import { describe, expect, it } from "vitest";
 
 import { Fieldset } from "./form/Fieldset";
@@ -8,7 +8,7 @@ import { Form } from "./form/Form";
 import { StarRating } from "./StarRating";
 
 function Rating({ initial = 0 }: { initial?: number }) {
-  const [value, setValue] = useState(initial);
+  const [value, setValue] = useReducer((_current: number, next: number) => next, initial);
   return <StarRating mode="input" onChange={setValue} value={value} />;
 }
 
@@ -33,7 +33,7 @@ describe("StarRating（入力）", () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
     function ReviewRating() {
-      const [value, setValue] = useState(0);
+      const [value, setValue] = useReducer((_current: number, next: number) => next, 0);
       return (
         <Form
           persist={false}

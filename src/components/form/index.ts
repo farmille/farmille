@@ -11,12 +11,7 @@ export { FormActions } from "./FormActions";
 export { Input } from "./Input";
 export { Notice } from "./Notice";
 export { OtpInput } from "./OtpInput";
-export {
-  usePersistedInput,
-  useRestoredField,
-  useRestoredText,
-  type RestoredFields,
-} from "./persisted-input";
+export { useRestoredField, useRestoredText, type RestoredFields } from "./persisted-input";
 export { RadioGroup } from "./RadioGroup";
 export { controlRecipe } from "./recipes";
 export { SearchInput } from "./SearchInput";
@@ -24,3 +19,5 @@ export { Select } from "./Select";
 export { SubmitButton } from "./SubmitButton";
 export { Textarea } from "./Textarea";
 export type { FieldErrors, Option, Requirement, Visibility } from "./types";
+
+export { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";

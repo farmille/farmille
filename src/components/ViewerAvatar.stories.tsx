@@ -20,7 +20,7 @@ const general: SessionUser = {
   aal: "aal1",
 };
 
-// getOwnProfile は preview.ts の sb.mock で __mocks__ 実装に差し替わっている。
+// getOwnProfile は preview.tsx の sb.mock で __mocks__ 実装に差し替わっている。
 const meta = {
   title: "Pages/Shared/ViewerAvatar",
   component: ViewerAvatar,

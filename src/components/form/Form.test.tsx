@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
-import { useActionState, useState, type ReactNode } from "react";
+import { useActionState, useReducer, type ReactNode } from "react";
 import * as v from "valibot";
 
 import { StarRating } from "@/components/StarRating";
@@ -13,7 +13,7 @@ import { Fieldset } from "./Fieldset";
 import { Form } from "./Form";
 import { Input } from "./Input";
 import { OtpInput } from "./OtpInput";
-import { usePersistedInput } from "./persisted-input";
+import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
 import { RadioGroup } from "./RadioGroup";
 import { Select } from "./Select";
 import { Textarea } from "./Textarea";
@@ -116,7 +116,7 @@ async function submitTwice(submissions: FormData[]): Promise<void> {
 
 test("送信後の reset を越えて、候補・認証コード・星が画面と送信で食い違わない", async () => {
   function Stars() {
-    const [rating, setRating] = useState(0);
+    const [rating, setRating] = useReducer((_current: number, next: number) => next, 0);
     return (
       <Fieldset legend="評価" name="rating">
         <StarRating mode="input" onChange={setRating} value={rating} />
@@ -348,7 +348,7 @@ test("送信して画面が外れたフォームは控えを消し、送信が�
 test("Form の外の state で持つ入力欄は、onRestore で戻した値を受け取る", async () => {
   const user = userEvent.setup();
   function OutsideState() {
-    const [body, setBody] = useState("");
+    const [body, setBody] = useReducer((_current: string, next: string) => next, "");
     return (
       <Form onRestore={(restored) => setBody(restored.get("body")?.[0] ?? "")} persist="outside">
         <Textarea
@@ -369,7 +369,7 @@ test("Form の外の state で持つ入力欄は、onRestore で戻した値を�
 });
 
 function Note({ savedNote = "" }: { savedNote?: string }) {
-  const [note, setNote] = useState(savedNote);
+  const [note, setNote] = useReducer((_current: string, next: string) => next, savedNote);
   usePersistedInput({
     name: "note",
     schema: v.string(),

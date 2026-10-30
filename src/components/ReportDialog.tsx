@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { Dialog, DialogActions, DialogClose } from "@/components/Dialog";
 import { Form, Notice, Select, SubmitButton, Textarea } from "@/components/form";
@@ -8,6 +9,8 @@ import type { ReportActionState } from "@/server/actions/reports";
 import { css, cx } from "../../styled-system/css";
 
 const idleState: ReportActionState = { status: "idle" };
+
+type ReportFormInput = { reasonCode: string | null; detail: string };
 
 const trigger = css({
   display: "inline-flex",
@@ -45,6 +48,12 @@ export function ReportDialog({
   triggerLabel = "通報する",
   className,
 }: ReportDialogProps) {
+  const initialValues: ReportFormInput = {
+    reasonCode: null,
+    detail: "",
+  };
+  const form = useForm({ defaultValues: initialValues });
+  const values = useStore(form.store, (state) => state.values);
   const [state, formAction] = useActionState(action, idleState);
   const done = state.status === "success";
 
@@ -70,6 +79,8 @@ export function ReportDialog({
             label="通報理由"
             labelSize="sm"
             name="reasonCode"
+            value={values.reasonCode}
+            onValueChange={(value) => form.setFieldValue("reasonCode", value)}
             requirement="required"
             options={reasonOptions}
             placeholder="選択してください"
@@ -78,6 +89,8 @@ export function ReportDialog({
             label="詳細（任意）"
             labelSize="sm"
             name="detail"
+            value={values.detail}
+            onChange={(event) => form.setFieldValue("detail", event.target.value)}
             placeholder="具体的な内容があればご記入ください"
           />
           {state.status === "error" ? (

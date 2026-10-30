@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { adminFieldGridStyle } from "@/app/admin/_components/AdminUI";
 import { initialMaterialFormState } from "@/app/admin/_lib/action-state";
@@ -51,17 +52,25 @@ function ClassificationGroup({
   name,
   items,
   selectedIds,
+  onValueChange,
 }: {
   legend: string;
   name: string;
   items: readonly ChoiceItem[];
   selectedIds: readonly string[];
+  onValueChange: (ids: string[]) => void;
 }) {
   return (
     <CheckboxGroup
       labelSize="sm"
       label={legend}
-      defaultValue={selectedIds}
+      value={selectedIds}
+      onValueChange={(next) =>
+        onValueChange([
+          ...selectedIds.filter((id) => !items.some((item) => item.id === id)),
+          ...next,
+        ])
+      }
       name={name}
       options={items.map((item) => ({ value: item.id, label: item.name }))}
       variant="chips"
@@ -83,24 +92,70 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
     const { classifications, ...fieldErrors } = state.fieldErrors;
     return { errors: fieldErrors, classificationError: classifications };
   }, [state]);
-  // エラー時は送信値を優先し、無ければ保存済みの値（新規登録は空）に戻す。
-  const submitted = state.status === "error" ? state.values : undefined;
-  const valueOf = (field: string, stored: string | null | undefined): string =>
-    submitted?.fields[field] ?? stored ?? "";
-  const selectedCropIds = submitted?.cropIds ?? material?.cropIds ?? [];
-  const selectedEffectIds = submitted?.effectIds ?? material?.effectIds ?? [];
-  const selectedIngredientCategoryIds =
-    submitted?.ingredientCategoryIds ?? material?.ingredientCategoryIds ?? [];
-  const selectedIngredientIds = submitted?.ingredientIds ?? material?.ingredientIds ?? [];
-  const selectedSearchTagIds = submitted?.searchTagIds ?? material?.searchTagIds ?? [];
+  const form = useForm({
+    defaultValues: {
+      name: material?.name ?? "",
+      manufacturerName: material?.manufacturer_name ?? "",
+      compositionTypeId: material?.composition_type_id ?? "",
+      salesStatus: material?.sales_status ?? "",
+      description: material?.description ?? "",
+      generalUse: material?.general_use ?? "",
+      mainComponents: material?.main_components ?? "",
+      mechanism: material?.mechanism ?? "",
+      priceRange: material?.price_range ?? "",
+      usageText: material?.usage_text ?? "",
+      officialUrl: material?.official_url ?? "",
+      catalogUrl: material?.catalog_url ?? "",
+      cropIds: material?.cropIds ?? [],
+      effectIds: material?.effectIds ?? [],
+      ingredientCategoryIds: material?.ingredientCategoryIds ?? [],
+      ingredientIds: material?.ingredientIds ?? [],
+      searchTagIds: material?.searchTagIds ?? [],
+    },
+  });
+  const values = useStore(form.store, (state) => state.values);
 
   return (
-    <Form action={formAction} className={formStyle} errors={errors} persist="material">
+    <Form
+      action={formAction}
+      className={formStyle}
+      errors={errors}
+      persist="material"
+      onRestore={(restored) => {
+        for (const name of [
+          "name",
+          "manufacturerName",
+          "compositionTypeId",
+          "salesStatus",
+          "description",
+          "generalUse",
+          "mainComponents",
+          "mechanism",
+          "priceRange",
+          "usageText",
+          "officialUrl",
+          "catalogUrl",
+        ] as const) {
+          const value = restored.get(name)?.[0];
+          if (value !== undefined) form.setFieldValue(name, value);
+        }
+        for (const name of [
+          "cropIds",
+          "effectIds",
+          "ingredientCategoryIds",
+          "ingredientIds",
+          "searchTagIds",
+        ] as const) {
+          const value = restored.get(name);
+          if (value !== undefined) form.setFieldValue(name, [...value]);
+        }
+      }}
+    >
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
       {state.status === "done" ? <Notice tone="success">{state.message}</Notice> : null}
       {isEdit ? <input name="materialId" type="hidden" value={material.id} /> : null}
       {/* 表示対象外の既存分類は、別の情報を保存しても失わない。 */}
-      {(submitted?.productTypeIds ?? material?.productTypeIds ?? []).map((id) => (
+      {(material?.productTypeIds ?? []).map((id) => (
         <input key={id} name="productTypeIds" type="hidden" value={id} />
       ))}
 
@@ -110,20 +165,23 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
           label="資材名"
           name="name"
           requirement="required"
-          defaultValue={valueOf("name", material?.name)}
+          value={values.name}
+          onChange={(event) => form.setFieldValue("name", event.target.value)}
         />
         <Input
           description="未 claim でも表示するマスタ由来の表示名。"
           label="メーカー名"
           name="manufacturerName"
           requirement="required"
-          defaultValue={valueOf("manufacturerName", material?.manufacturer_name)}
+          value={values.manufacturerName}
+          onChange={(event) => form.setFieldValue("manufacturerName", event.target.value)}
         />
         <Select
           label="組成タイプ"
           name="compositionTypeId"
           requirement="optional"
-          defaultValue={valueOf("compositionTypeId", material?.composition_type_id)}
+          value={values.compositionTypeId}
+          onValueChange={(value) => form.setFieldValue("compositionTypeId", value ?? "")}
           options={[
             { value: "", label: "未設定" },
             ...classifications.compositionTypes.map((option) => ({
@@ -136,7 +194,8 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
           label="販売状況"
           name="salesStatus"
           requirement="optional"
-          defaultValue={valueOf("salesStatus", material?.sales_status)}
+          value={values.salesStatus}
+          onChange={(event) => form.setFieldValue("salesStatus", event.target.value)}
         />
       </div>
 
@@ -147,7 +206,8 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
             key={category.id}
             legend={category.name}
             name="effectIds"
-            selectedIds={selectedEffectIds}
+            selectedIds={values.effectIds}
+            onValueChange={(ids) => form.setFieldValue("effectIds", ids)}
           />
         ))}
       </Fieldset>
@@ -163,7 +223,8 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
               key={groupId}
               legend={first.groupName}
               name="cropIds"
-              selectedIds={selectedCropIds}
+              selectedIds={values.cropIds}
+              onValueChange={(ids) => form.setFieldValue("cropIds", ids)}
             />
           );
         })}
@@ -173,7 +234,8 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
         label="資材ジャンル（JBSA材料8分類）"
         name="ingredientCategoryIds"
         requirement="optional"
-        defaultValue={selectedIngredientCategoryIds}
+        value={values.ingredientCategoryIds}
+        onValueChange={(ids) => form.setFieldValue("ingredientCategoryIds", ids)}
         options={classifications.ingredientCategories.map((category) => ({
           value: category.id,
           label: category.name,
@@ -190,7 +252,8 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
             key={category.id}
             legend={category.name}
             name="ingredientIds"
-            selectedIds={selectedIngredientIds}
+            selectedIds={values.ingredientIds}
+            onValueChange={(ids) => form.setFieldValue("ingredientIds", ids)}
           />
         ))}
       </Fieldset>
@@ -208,7 +271,8 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
             key={category}
             legend={category === "concern" ? "悩み" : "条件・使い方"}
             name="searchTagIds"
-            selectedIds={selectedSearchTagIds}
+            selectedIds={values.searchTagIds}
+            onValueChange={(ids) => form.setFieldValue("searchTagIds", ids)}
           />
         ))}
       </Fieldset>
@@ -220,14 +284,16 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
         label="紹介文"
         name="description"
         requirement="optional"
-        defaultValue={valueOf("description", material?.description)}
+        value={values.description}
+        onChange={(event) => form.setFieldValue("description", event.target.value)}
         rows={4}
       />
       <Textarea
         label="一般用途"
         name="generalUse"
         requirement="optional"
-        defaultValue={valueOf("generalUse", material?.general_use)}
+        value={values.generalUse}
+        onChange={(event) => form.setFieldValue("generalUse", event.target.value)}
         rows={4}
       />
       <div className={adminFieldGridStyle}>
@@ -235,26 +301,30 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
           label="主成分"
           name="mainComponents"
           requirement="optional"
-          defaultValue={valueOf("mainComponents", material?.main_components)}
+          value={values.mainComponents}
+          onChange={(event) => form.setFieldValue("mainComponents", event.target.value)}
         />
         <Input
           label="作用機作"
           name="mechanism"
           requirement="optional"
-          defaultValue={valueOf("mechanism", material?.mechanism)}
+          value={values.mechanism}
+          onChange={(event) => form.setFieldValue("mechanism", event.target.value)}
         />
         <Input
           label="価格帯"
           name="priceRange"
           requirement="optional"
-          defaultValue={valueOf("priceRange", material?.price_range)}
+          value={values.priceRange}
+          onChange={(event) => form.setFieldValue("priceRange", event.target.value)}
         />
       </div>
       <Textarea
         label="使い方"
         name="usageText"
         requirement="optional"
-        defaultValue={valueOf("usageText", material?.usage_text)}
+        value={values.usageText}
+        onChange={(event) => form.setFieldValue("usageText", event.target.value)}
         rows={4}
       />
       <div className={adminFieldGridStyle}>
@@ -262,13 +332,15 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
           label="公式 URL"
           name="officialUrl"
           requirement="optional"
-          defaultValue={valueOf("officialUrl", material?.official_url)}
+          value={values.officialUrl}
+          onChange={(event) => form.setFieldValue("officialUrl", event.target.value)}
         />
         <Input
           label="カタログ URL"
           name="catalogUrl"
           requirement="optional"
-          defaultValue={valueOf("catalogUrl", material?.catalog_url)}
+          value={values.catalogUrl}
+          onChange={(event) => form.setFieldValue("catalogUrl", event.target.value)}
         />
       </div>
 

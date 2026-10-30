@@ -1,8 +1,10 @@
 "use client";
 
+import { useForm, useStore } from "@tanstack/react-form";
+
 import { Combobox as BaseCombobox } from "@base-ui/react/combobox";
 import type { BaseUIEvent } from "@base-ui/react/types";
-import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useMemo, useRef, type KeyboardEvent } from "react";
 
 import { chipRecipe } from "@/components/Chip";
 import { Icon } from "@/components/Icon";
@@ -159,7 +161,35 @@ export function Combobox(props: ComboboxProps) {
   );
 }
 
-function SingleCombobox({
+function SingleCombobox(props: ComboboxCommonProps & SingleProps) {
+  return props.value === undefined ? (
+    <UncontrolledSingleCombobox {...props} />
+  ) : (
+    <SingleComboboxBody {...props} value={props.value} />
+  );
+}
+
+function UncontrolledSingleCombobox({
+  defaultValue,
+  onValueChange,
+  ...props
+}: ComboboxCommonProps & SingleProps) {
+  const initial: Option | null = defaultValue ?? null;
+  const form = useForm({ defaultValues: { selection: initial } });
+  const selection = useStore(form.store, (state) => state.values.selection);
+  return (
+    <SingleComboboxBody
+      {...props}
+      onValueChange={(next) => {
+        form.setFieldValue("selection", next);
+        onValueChange?.(next);
+      }}
+      value={selection}
+    />
+  );
+}
+
+function SingleComboboxBody({
   options,
   filterMode = "contains",
   inputValue,
@@ -170,15 +200,13 @@ function SingleCombobox({
   disabled,
   className,
   value,
-  defaultValue,
   onValueChange,
-}: ComboboxCommonProps & SingleProps) {
+}: ComboboxCommonProps & SingleProps & { value: Option | null }) {
   const required = useFieldRequired();
   const enterGuard = useEnterGuard();
 
   return (
     <BaseCombobox.Root<Option>
-      defaultValue={defaultValue}
       disabled={disabled}
       filter={filterMode === "preFiltered" ? null : undefined}
       inputValue={inputValue}
@@ -208,7 +236,35 @@ function SingleCombobox({
   );
 }
 
-function MultipleCombobox({
+function MultipleCombobox(props: ComboboxCommonProps & MultipleProps) {
+  return props.value === undefined ? (
+    <UncontrolledMultipleCombobox {...props} />
+  ) : (
+    <MultipleComboboxBody {...props} value={props.value} />
+  );
+}
+
+function UncontrolledMultipleCombobox({
+  defaultValue,
+  onValueChange,
+  ...props
+}: ComboboxCommonProps & MultipleProps) {
+  const initial: readonly Option[] = defaultValue ?? [];
+  const form = useForm({ defaultValues: { selection: initial } });
+  const selection = useStore(form.store, (state) => state.values.selection);
+  return (
+    <MultipleComboboxBody
+      {...props}
+      onValueChange={(next) => {
+        form.setFieldValue("selection", next);
+        onValueChange?.(next);
+      }}
+      value={selection}
+    />
+  );
+}
+
+function MultipleComboboxBody({
   options,
   filterMode = "contains",
   inputValue,
@@ -219,16 +275,13 @@ function MultipleCombobox({
   disabled,
   className,
   value,
-  defaultValue,
   onValueChange,
   max,
-}: ComboboxCommonProps & MultipleProps) {
+}: ComboboxCommonProps & MultipleProps & { value: readonly Option[] }) {
   const required = useFieldRequired();
   const enterGuard = useEnterGuard();
-  const [uncontrolled, setUncontrolled] = useState<readonly Option[]>(defaultValue ?? []);
-  const current = value ?? uncontrolled;
   // Base UI は値の参照が変わるたびに Form のエラーを消す
-  const selected = useMemo(() => [...current], [current]);
+  const selected = useMemo(() => [...value], [value]);
   const full = max !== undefined && selected.length >= max;
   const chips = chipRecipe({ size: "sm", removable: true });
 
@@ -245,10 +298,7 @@ function MultipleCombobox({
       name={name}
       onInputValueChange={onInputValueChange}
       onItemHighlighted={enterGuard.onItemHighlighted}
-      onValueChange={(next) => {
-        setUncontrolled(next);
-        onValueChange?.(next);
-      }}
+      onValueChange={(next) => onValueChange?.(next)}
       required={required}
       value={selected}
     >

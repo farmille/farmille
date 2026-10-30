@@ -109,7 +109,9 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
       <SiteAppBar chrome="public" active="articles" title="記事を読む" backHref="/" />
       <main className={main}>
         <h1 className={pageTitle}>記事を読む</h1>
-        <ArticlesToolbar filter={filter} q={q} />
+        <Suspense fallback={null}>
+          <ArticlesToolbar />
+        </Suspense>
 
         <Suspense
           key={`${filter}:${q}:${page}`}

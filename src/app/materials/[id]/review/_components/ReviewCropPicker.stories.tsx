@@ -1,5 +1,5 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState, type ComponentProps } from "react";
+import { useReducer, type ComponentProps } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 import { Form } from "@/components/form";
@@ -38,7 +38,10 @@ const cropError = { cropIds: "作物を1つ以上選んでください。" };
 const fmDecorator: Decorator = (Story) => <div className={css({ p: "4" })}>{Story()}</div>;
 
 function StatefulPicker(props: ComponentProps<typeof ReviewCropPicker>) {
-  const [value, setValue] = useState(props.value);
+  const [value, setValue] = useReducer(
+    (_: readonly string[], next: readonly string[]) => next,
+    props.value,
+  );
   return (
     <ReviewCropPicker
       {...props}

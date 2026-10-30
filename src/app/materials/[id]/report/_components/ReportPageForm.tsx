@@ -1,6 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { startTransition, useActionState, useCallback, useReducer, useRef } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
+import { useReportMediaHistory } from "@/lib/hooks/use-report-media-history";
 import { useRouter } from "next/navigation";
 
 import {
@@ -9,7 +12,7 @@ import {
 } from "@/app/materials/[id]/report/new/actions";
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { Checkbox, Notice, Textarea, usePersistedInput } from "@/components/form";
+import { Checkbox, Notice, Textarea } from "@/components/form";
 import { persistKey, removePersisted } from "@/components/form/persisted-input";
 import { Icon } from "@/components/Icon";
 import { toast } from "@/components/Toaster";
@@ -60,7 +63,25 @@ import {
   type ReportPageNumericItem,
 } from "./report-page-state";
 import { docHeadingRecipe, requirementMark } from "./report-page-styles";
-import { useReportLeaveWarning } from "./use-report-leave-warning";
+import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
+
+type PdfReadingStatus = {
+  remaining: PdfReadingResult["remaining"];
+  marks: PdfReadingField[];
+  checkRequired: boolean;
+};
+
+type ReportPageFormValues = {
+  input: UsageReportInput;
+  items: ReportPageItem[];
+  acks: ReportPageAcks;
+};
+
+type ReportSaveState =
+  | { status: "idle" | "saved" | "submitted" }
+  | { status: "error"; message: string };
+
+type ReportSaveCommand = { type: "save"; submit: boolean; close: boolean } | { type: "clear" };
 
 const bar = css({
   position: "sticky",
@@ -238,85 +259,115 @@ export function ReportPageForm({
    * PDF読み取りの入口に出す残り回数・reCAPTCHA のサイトキーと、この下書きの最新の読み取りで入った欄。
    * checkRequired は、読み取りの値を元のPDFと照らし合わせた確認を提出に求めるか。
    */
-  pdfReading: {
+  pdfReading: PdfReadingStatus & {
     siteKey: string | null;
-    remaining: number | null;
-    marks: PdfReadingField[];
-    checkRequired: boolean;
   };
 }) {
   const router = useRouter();
-  const [input, setInput] = useState(() => {
-    // ページ版では数値のグラフを手で作らないので、新しいレポートは入れ方を選ぶ前の調査項目から始める
-    const base = draft ?? { ...createBlankUsageReport(material.id), measurements: [] };
-    const named = withAutoPlotNames(base, base, material.name);
-    return { ...named, prefectureCode: named.prefectureCode ?? registeredAddress.prefectureCode };
+  const [initialValues] = useReducer(
+    (value: ReportPageFormValues) => value,
+    null,
+    () => {
+      // ページ版では数値のグラフを手で作らないので、新しいレポートは入れ方を選ぶ前の調査項目から始める
+      const base = draft ?? { ...createBlankUsageReport(material.id), measurements: [] };
+      const named = withAutoPlotNames(base, base, material.name);
+      const input = {
+        ...named,
+        prefectureCode: named.prefectureCode ?? registeredAddress.prefectureCode,
+      };
+      // 空の調査項目のIDも初回に確定し、再描画でフォームの初期値を変えない。
+      return { input, items: itemsFromInput(input), acks: { timing: false, privacy: false } };
+    },
+  );
+  const form = useForm({
+    defaultValues: initialValues,
   });
-  const [items, setItems] = useState<ReportPageItem[]>(() => itemsFromInput(input));
-  const [acks, setAcks] = useState<ReportPageAcks>({ timing: false, privacy: false });
+  const { input, items, acks } = useStore(form.store, (state) => state.values);
+  const setInput = useCallback(
+    (next: UsageReportInput | ((current: UsageReportInput) => UsageReportInput)) =>
+      form.setFieldValue("input", next),
+    [form],
+  );
+  const setItems = useCallback(
+    (next: ReportPageItem[] | ((current: ReportPageItem[]) => ReportPageItem[])) =>
+      form.setFieldValue("items", next),
+    [form],
+  );
+  const setAcks = (next: (current: ReportPageAcks) => ReportPageAcks) =>
+    form.setFieldValue("acks", next);
   const payload = inputWithItems(input, items);
-  const [saved, setSaved] = useState(() => JSON.stringify(payload));
-  const [currentMaterial, setCurrentMaterial] = useState(material);
-  const [tried, setTried] = useState(false);
-  const [failure, setFailure] = useState<string | null>(null);
-  const [preview, setPreview] = useState(false);
-  const [leaving, setLeaving] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [fileItem, setFileItem] = useState<{ item: ReportPageItem; isNew: boolean } | null>(null);
-  const [numericItem, setNumericItem] = useState<ReportPageNumericItem | null>(null);
-  const [readingOpen, setReadingOpen] = useState(false);
-  const [readMarks, setReadMarks] = useState(pdfReading.marks);
-  const [checkRequired, setCheckRequired] = useState(pdfReading.checkRequired);
-  const [remaining, setRemaining] = useState(pdfReading.remaining);
-  const [pending, startTransition] = useTransition();
+  const [saved, setSaved] = useReducer(
+    (_current: string, next: string) => next,
+    payload,
+    JSON.stringify,
+  );
+  const [currentMaterial, setCurrentMaterial] = useReducer(
+    (_current: ReportMaterialSummary, next: ReportMaterialSummary) => next,
+    material,
+  );
+  const [tried, setTried] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [failure, setFailure] = useReducer(
+    (_current: string | null, next: string | null) => next,
+    null,
+  );
+  const [preview, setPreview] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [leaving, setLeaving] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [fileItem, setFileItem] = useReducer(
+    (
+      _current: { item: ReportPageItem; isNew: boolean } | null,
+      next: { item: ReportPageItem; isNew: boolean } | null,
+    ) => next,
+    null,
+  );
+  const [numericItem, setNumericItem] = useReducer(
+    (_current: ReportPageNumericItem | null, next: ReportPageNumericItem | null) => next,
+    null,
+  );
+  const [readingOpen, setReadingOpen] = useReducer(
+    (_current: boolean, next: boolean) => next,
+    false,
+  );
+  const [{ marks: readMarks, checkRequired, remaining }, recordReading] = useReducer(
+    (current: PdfReadingStatus, result: PdfReadingResult): PdfReadingStatus => {
+      const remaining = result.remaining ?? current.remaining;
+      if (result.ok) return { remaining, marks: result.marks, checkRequired: true };
+      const adopted = result.savedDraft?.saved === "read";
+      return {
+        remaining,
+        marks: adopted ? [] : current.marks,
+        checkRequired: current.checkRequired || result.pdfValuesCheckRequired || adopted,
+      };
+    },
+    {
+      marks: pdfReading.marks,
+      checkRequired: pdfReading.checkRequired,
+      remaining: pdfReading.remaining,
+    },
+  );
   // 連打で保存・提出が二重に送られないよう、送信中は ref で止める（state の disabled は次の描画まで効かない）
   const sending = useRef(false);
   // この画面の入力に入った画像。保存の前に外れた分は、保存のあとにサーバーが置き場から消す
-  const shownMedia = useRef(new Set<string>());
+  const shownMedia = useReportMediaHistory(payload.media);
   const dirty = JSON.stringify(payload) !== saved;
   const reportPath = `/materials/${material.id}/report/new`;
 
   const update = useCallback(
-    (next: (current: UsageReportInput) => UsageReportInput) => setInput((current) => next(current)),
-    [],
+    (next: (current: UsageReportInput) => UsageReportInput) => setInput(next),
+    [setInput],
   );
   // 区を変えたら、数値の調査項目のグラフの行も区にそろえる
-  const changePlots = useCallback((next: UsageReportInput) => {
-    setInput(next);
-    setItems((current) => itemsWithPlots(current, next.plots));
-  }, []);
+  const changePlots = useCallback(
+    (next: UsageReportInput) => {
+      setInput(next);
+      setItems((current) => itemsWithPlots(current, next.plots));
+    },
+    [setInput, setItems],
+  );
   // 失敗は画面の下の欄に残し、スマホでも気づけるよう通知でも出す
   const showError = useCallback((message: string) => {
     setFailure(message);
     toast.error(message.split("\n")[0], { toasterId: reportToasterId });
   }, []);
-
-  // 下書き保存の前に閉じても、同じタブで開き直せば保存前の入力に戻る
-  // 資材ページから画面内の遷移で開くと、最初の描画ではまだ URL が遷移前なので、控えの置き場は URL を固定する
-  usePersistedInput({
-    name: "report",
-    path: reportPath,
-    schema: ReportPageBackupSchema,
-    unsaved: dirty && !submitted ? { material: currentMaterial, input: payload } : null,
-    restore: (backup) => {
-      // 控えのあとに別の画面で下書きが更新されていたら、控えは戻さない（戻すと保存のたびに競合する）
-      if (backup.input.expectedUpdatedAt !== input.expectedUpdatedAt) {
-        setFailure(
-          "別の画面で更新された下書きを開きました。この画面で保存していなかった入力は戻していません。",
-        );
-        return;
-      }
-      setCurrentMaterial(backup.material);
-      setInput(backup.input);
-      setItems(itemsFromInput(backup.input));
-    },
-  });
-
-  useEffect(() => {
-    for (const media of payload.media) shownMedia.current.add(media.url);
-  });
-
-  useReportLeaveWarning(dirty && !submitted);
 
   const checks = reportPageChecks(payload, acks, checkRequired);
   const marks = effectivePdfReadingMarks(readMarks, payload);
@@ -339,15 +390,17 @@ export function ReportPageForm({
     for (const url of urls) shownMedia.current.delete(url);
   }
 
-  async function persist(submit: boolean, close = false) {
-    if (sending.current) return;
-    sending.current = true;
+  function saveFailure(message: string): ReportSaveState {
+    toast.error(message.split("\n")[0], { toasterId: reportToasterId });
+    return { status: "error", message };
+  }
+
+  async function performSave(submit: boolean, close: boolean): Promise<ReportSaveState> {
     try {
       const body = inputWithItems(input, items);
       const over = reportOverLimit(body, items);
       if (over.length > 0) {
-        showError(`文字数の上限を超えている欄があります：${over.join("、")}`);
-        return;
+        return saveFailure(`文字数の上限を超えている欄があります：${over.join("、")}`);
       }
       const dropped = droppedMedia(body);
       const result = submit
@@ -362,15 +415,13 @@ export function ReportPageForm({
             setSaved(JSON.stringify({ ...body, expectedUpdatedAt: savedUpdatedAt }));
         }
         const details = Object.values(result.fieldErrors).map((text) => text.replace(/^※\s*/, ""));
-        showError([result.message, ...new Set(details)].join("\n"));
-        return;
+        return saveFailure([result.message, ...new Set(details)].join("\n"));
       }
       setFailure(null);
       setInput((current) => ({ ...current, expectedUpdatedAt: result.updatedAt }));
       setSaved(JSON.stringify({ ...body, expectedUpdatedAt: result.updatedAt }));
       if (result.status === "pending") {
         // 提出後の画面はサーバーの「提出済み」に揃える
-        setSubmitted(true);
         router.refresh();
       } else {
         const now = new Date();
@@ -384,9 +435,10 @@ export function ReportPageForm({
       if (close) router.push(`/materials/${body.materialId}`);
       else if (body.materialId !== material.id)
         router.replace(`/materials/${body.materialId}/report/new`);
+      return { status: result.status === "pending" ? "submitted" : "saved" };
     } catch {
       // 通信の失敗などはブラウザの英語の文言になるので、そのまま出さない
-      showError(
+      return saveFailure(
         "保存できませんでした。入力内容はそのまま残っています。通信状態を確認して再度お試しください。",
       );
     } finally {
@@ -394,23 +446,58 @@ export function ReportPageForm({
     }
   }
 
+  const [saveState, dispatchSave, pending] = useActionState<ReportSaveState, ReportSaveCommand>(
+    async (_previous, command) =>
+      command.type === "clear" ? { status: "idle" } : performSave(command.submit, command.close),
+    { status: "idle" },
+  );
+  const submitted = saveState.status === "submitted";
+  const visibleFailure = failure ?? (saveState.status === "error" ? saveState.message : null);
+
+  // 下書き保存の前に閉じても、同じタブで開き直せば保存前の入力に戻る
+  // 資材ページから画面内の遷移で開くと、最初の描画ではまだ URL が遷移前なので、控えの置き場は URL を固定する
+  usePersistedInput({
+    name: "report",
+    path: reportPath,
+    schema: ReportPageBackupSchema,
+    unsaved: dirty && !submitted ? { material: currentMaterial, input: payload } : null,
+    restore: (backup) => {
+      // 控えのあとに別の画面で下書きが更新されていたら、控えは戻さない（戻すと保存のたびに競合する）
+      if (backup.input.expectedUpdatedAt !== input.expectedUpdatedAt) {
+        setFailure(
+          "別の画面で更新された下書きを開きました。この画面で保存していなかった入力は戻していません。",
+        );
+        return;
+      }
+      setCurrentMaterial(backup.material);
+      setInput(backup.input);
+      setItems(itemsFromInput(backup.input));
+    },
+  });
+
+  useReportLeaveWarning(dirty && !submitted);
+
+  function persist(submit: boolean, close = false) {
+    if (sending.current) return;
+    sending.current = true;
+    setFailure(null);
+    startTransition(() => dispatchSave({ type: "save", submit, close }));
+  }
+
   // 読み取った値はサーバーの下書きに保存済みなので、画面の入力と保存済みの控えをまとめて置き換える
-  function adoptRead(next: UsageReportInput, marks: PdfReadingField[]) {
+  function adoptRead(next: UsageReportInput) {
     const nextItems = itemsFromInput(next);
     setInput(next);
     setItems(nextItems);
     setSaved(JSON.stringify(inputWithItems(next, nextItems)));
-    setReadMarks(marks);
-    setCheckRequired(true);
   }
 
   function applyReading(result: PdfReadingResult) {
-    if (result.remaining !== null) setRemaining(result.remaining);
+    recordReading(result);
     // 読み取りの間は編集できないので、外した画像は読み取りに渡したときのまま
     if (result.ok || result.savedDraft !== null)
       forgetDropped(droppedMedia(inputWithItems(input, items)));
     if (!result.ok) {
-      if (result.pdfValuesCheckRequired) setCheckRequired(true);
       // 失敗しても、サーバーの下書きを保存した分には揃える（揃えないと次の保存が競合する）
       const draft = result.savedDraft;
       if (draft?.saved === "input" || draft?.saved === "partial") {
@@ -421,11 +508,12 @@ export function ReportPageForm({
           setSaved(JSON.stringify({ ...inputWithItems(input, items), ...stamp }));
       }
       // 値は入ったが根拠の記録に失敗したので、印は出さない（文言はダイアログに出したまま）
-      if (draft?.saved === "read") adoptRead(draft.input, []);
+      if (draft?.saved === "read") adoptRead(draft.input);
       return;
     }
-    adoptRead(result.input, result.marks);
+    adoptRead(result.input);
     setFailure(null);
+    startTransition(() => dispatchSave({ type: "clear" }));
     setReadingOpen(false);
     toast("PDF読み取りの内容を下書きに保存しました。元のPDFと照らし合わせて確かめてください。", {
       toasterId: reportToasterId,
@@ -435,7 +523,7 @@ export function ReportPageForm({
   function submit() {
     setTried(true);
     if (missing.length > 0) return;
-    startTransition(() => persist(true));
+    persist(true);
   }
 
   if (submitted)
@@ -464,7 +552,7 @@ export function ReportPageForm({
               type="button"
               className={pillButtonRecipe({ strong: true })}
               disabled={pending}
-              onClick={() => startTransition(() => persist(false))}
+              onClick={() => persist(false)}
             >
               {pending ? "保存中…" : "下書き保存"}
             </button>
@@ -738,9 +826,9 @@ export function ReportPageForm({
                 </button>
               </Notice>
             )}
-            {failure !== null && (
+            {visibleFailure !== null && (
               <Notice tone="error" className={missingBox}>
-                <span className={css({ whiteSpace: "pre-line" })}>{failure}</span>
+                <span className={css({ whiteSpace: "pre-line" })}>{visibleFailure}</span>
               </Notice>
             )}
           </div>
@@ -812,7 +900,8 @@ export function ReportPageForm({
               router.push(`/materials/${input.materialId}`);
             },
           }}
-          onConfirm={() => persist(false, true)}
+          pending={pending}
+          action={() => persist(false, true)}
         />
         {readingOpen && remaining !== null && pdfReading.siteKey !== null && (
           <ReportPdfReadingDialog

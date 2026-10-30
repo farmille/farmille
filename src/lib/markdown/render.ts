@@ -7,8 +7,7 @@ import type { Root, Element, RootContent, ElementContent } from "hast";
 import * as v from "valibot";
 
 /**
- * 記事本文の markdown を Server Component から呼び出して
- * sanitize 済 HTML 文字列に変換する。
+ * 記事本文の Markdown を sanitize 済みの HTML 文字列に変換する。
  *
  * spec §6.2 / §10.1:
  * - rehype-sanitize の defaultSchema をベースにする（<script>, <iframe>, on* 属性除去）
@@ -79,7 +78,7 @@ const processor = unified()
   .use(rehypeRestrictImageHosts)
   .use(rehypeStringify);
 
-export async function renderMarkdownToHtml(markdown: string): Promise<string> {
-  const file = await processor.process(markdown);
+export function renderMarkdownToHtml(markdown: string): string {
+  const file = processor.processSync(markdown);
   return String(file);
 }

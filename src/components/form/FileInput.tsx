@@ -1,7 +1,8 @@
 "use client";
 
 import { Input as BaseInput } from "@base-ui/react/input";
-import { useEffect, useRef, useState, type ChangeEvent, type InputHTMLAttributes } from "react";
+import type { ChangeEvent, InputHTMLAttributes } from "react";
+import { useInputFileSelection } from "@/lib/hooks/use-input-file-selection";
 
 import { buttonRecipe } from "@/components/Button";
 import { css, cx } from "../../../styled-system/css";
@@ -64,20 +65,7 @@ export function FileInput(props: FileInputProps) {
 
 function FileInputBody({ onChange, disabled, className, ...inputProps }: FileInputBodyProps) {
   const required = useFieldRequired();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [fileNames, setFileNames] = useState<string[]>([]);
-
-  useEffect(() => {
-    const form = inputRef.current?.form;
-    if (form === null || form === undefined) return;
-
-    function handleReset(): void {
-      setFileNames([]);
-    }
-
-    form.addEventListener("reset", handleReset);
-    return () => form.removeEventListener("reset", handleReset);
-  }, []);
+  const { inputRef, fileNames, setFileNames } = useInputFileSelection();
 
   function handleChange(event: ChangeEvent<HTMLInputElement>): void {
     onChange?.(event);

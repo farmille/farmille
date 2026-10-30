@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useActionState, useMemo, useReducer } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button, EmptyState, MaterialCard } from "@/components";
@@ -45,10 +45,58 @@ type SavedListProps = {
   items: readonly SavedMaterialItem[];
 };
 
+function SavedRow({
+  item,
+  selected,
+  onToggle,
+}: {
+  item: SavedMaterialItem;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  const [, unsave, pending] = useActionState(async (_previous: null, formData: FormData) => {
+    await unsaveMaterialAction(item.materialId, formData);
+    return null;
+  }, null);
+
+  return (
+    <div className={row}>
+      <Checkbox checked={selected} onCheckedChange={onToggle}>
+        比較に含める
+      </Checkbox>
+      <MaterialCard
+        variant="list"
+        name={item.name}
+        maker={item.manufacturerName}
+        rating={item.avgRating}
+        reviewCount={item.reviewCount}
+        description={item.description ?? undefined}
+        href={`/materials/${item.materialId}`}
+        imageSrc={item.primaryImageUrl ?? undefined}
+      />
+      <form action={unsave}>
+        <Button type="submit" variant="danger" size="sm" disabled={pending}>
+          リストから外す
+        </Button>
+      </form>
+    </div>
+  );
+}
+
 export function SavedList({ items }: SavedListProps) {
   const router = useRouter();
-  const [selected, setSelected] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [{ selected, error }, toggle] = useReducer(
+    (state: { selected: string[]; error: string | null }, materialId: string) => {
+      if (state.selected.includes(materialId)) {
+        return { selected: state.selected.filter((id) => id !== materialId), error: null };
+      }
+      if (state.selected.length >= COMPARE_MATERIAL_LIMITS.max) {
+        return { ...state, error: `比較は最大${COMPARE_MATERIAL_LIMITS.max}件までです。` };
+      }
+      return { selected: [...state.selected, materialId], error: null };
+    },
+    { selected: [], error: null },
+  );
 
   const selectedCount = selected.length;
   const canCompare =
@@ -67,20 +115,6 @@ export function SavedList({ items }: SavedListProps) {
     }
     return `${selectedCount}件を比較できます。`;
   }, [items.length, selectedCount]);
-
-  function toggle(materialId: string): void {
-    setError(null);
-    setSelected((current) => {
-      if (current.includes(materialId)) {
-        return current.filter((id) => id !== materialId);
-      }
-      if (current.length >= COMPARE_MATERIAL_LIMITS.max) {
-        setError(`比較は最大${COMPARE_MATERIAL_LIMITS.max}件までです。`);
-        return current;
-      }
-      return [...current, materialId];
-    });
-  }
 
   function goCompare(): void {
     if (!canCompare) return;
@@ -102,29 +136,12 @@ export function SavedList({ items }: SavedListProps) {
     <div>
       <div className={stack}>
         {items.map((item) => (
-          <div key={item.savedId} className={row}>
-            <Checkbox
-              checked={selected.includes(item.materialId)}
-              onCheckedChange={() => toggle(item.materialId)}
-            >
-              比較に含める
-            </Checkbox>
-            <MaterialCard
-              variant="list"
-              name={item.name}
-              maker={item.manufacturerName}
-              rating={item.avgRating}
-              reviewCount={item.reviewCount}
-              description={item.description ?? undefined}
-              href={`/materials/${item.materialId}`}
-              imageSrc={item.primaryImageUrl ?? undefined}
-            />
-            <form action={unsaveMaterialAction.bind(null, item.materialId)}>
-              <Button type="submit" variant="danger" size="sm">
-                リストから外す
-              </Button>
-            </form>
-          </div>
+          <SavedRow
+            key={item.savedId}
+            item={item}
+            selected={selected.includes(item.materialId)}
+            onToggle={() => toggle(item.materialId)}
+          />
         ))}
       </div>
 

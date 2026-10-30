@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useReducer } from "react";
 
 import { Button } from "@/components/Button";
 import { FormActions, Notice } from "@/components/form";
@@ -25,8 +25,11 @@ export function PasskeyLogin({
   /** ボタンの下に添える、パスキーとは何かと登録の場所の説明。 */
   description?: string;
 }) {
-  const [pending, setPending] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [pending, setPending] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [message, setMessage] = useReducer(
+    (_current: string | null, next: string | null) => next,
+    null,
+  );
   const descriptionId = useId();
 
   async function signIn() {

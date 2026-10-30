@@ -1,10 +1,56 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
+import { useActionState } from "react";
+import { afterEach, describe, expect, it } from "vitest";
+import { Form } from "@/components/form/Form";
+import { persistKey } from "@/components/form/persisted-input";
 import { ProfileTagsEditor } from "./ProfileTagsEditor";
 import meta from "./ProfileTagsEditor.stories";
 
+afterEach(() => sessionStorage.clear());
+
+function RejectedProfileForm() {
+  const [message, action] = useActionState(
+    async (_state: string, _formData: FormData) => "ニックネームが重複しています。",
+    "",
+  );
+  return (
+    <Form persist="profile" action={action}>
+      <input name="handle" aria-label="ニックネーム" defaultValue="重複する名前" />
+      <ProfileTagsEditor {...meta.args} />
+      <button type="submit">送信</button>
+      <p role="status">{message}</p>
+    </Form>
+  );
+}
+
 describe("プロフィールのタグ編集", () => {
+  it("復元した作目・所属を未編集のまま送信しても、エラー後と再送信で保持する", async () => {
+    const cropId = meta.args.options.crops[1].id;
+    sessionStorage.setItem(
+      persistKey("profile", "/me/edit"),
+      JSON.stringify({ cropIds: [cropId], affiliations: ["復元した部会"] }),
+    );
+    const { container } = render(
+      <PathnameContext.Provider value="/me/edit">
+        <RejectedProfileForm />
+      </PathnameContext.Provider>,
+    );
+    const form = container.querySelector("form");
+    if (form === null) throw new Error("プロフィールのフォームがありません。");
+    const values = (name: string) => new FormData(form).getAll(name);
+    await waitFor(() => expect(values("affiliations")).toEqual(["復元した部会"]));
+    expect(values("cropIds")).toEqual([cropId]);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "送信" }));
+      });
+      await screen.findByText("ニックネームが重複しています。");
+      expect(values("affiliations")).toEqual(["復元した部会"]);
+      expect(values("cropIds")).toEqual([cropId]);
+    }
+  });
   it("別名検索と選択・削除をhidden送信値へ反映する", async () => {
     const user = userEvent.setup();
     const { container } = render(

@@ -9,10 +9,10 @@ describe("規約集", () => {
     );
   });
 
-  it("本文にh1・h2や引用文を混在させず全項目を表示する", async () => {
+  it("本文にh1・h2や引用文を混在させず全項目を表示する", () => {
     for (const document of legalDocuments) {
       for (const section of document.sections) {
-        const html = await renderMarkdownToHtml(section.markdown);
+        const html = renderMarkdownToHtml(section.markdown);
         expect(html).not.toMatch(/<(?:h1|h2|blockquote|pre)[ >]/);
       }
     }

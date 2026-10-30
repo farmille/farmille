@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { useState } from "react";
+import { useReducer } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { Tabs } from "./Tabs";
@@ -7,7 +7,10 @@ import { Tabs } from "./Tabs";
 afterEach(cleanup);
 
 function EditorTabs() {
-  const [tab, setTab] = useState<"write" | "preview">("write");
+  const [tab, setTab] = useReducer(
+    (_current: "write" | "preview", next: "write" | "preview") => next,
+    "write",
+  );
   return (
     <Tabs
       aria-label="本文エディタ"

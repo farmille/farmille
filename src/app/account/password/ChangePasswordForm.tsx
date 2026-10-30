@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { changePasswordAction } from "@/app/account/password/actions";
 import { buttonRecipe } from "@/components/Button";
 import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
-import { initialAuthFormState } from "@/lib/auth/form-state";
+import { initialAuthFormState, type AuthFormState } from "@/lib/auth/form-state";
 
 import { css } from "../../../../styled-system/css";
 
@@ -20,7 +21,15 @@ export function ChangePasswordForm({
   loginHref: string;
   resetHref: string;
 }) {
-  const [state, action] = useActionState(changePasswordAction, initialAuthFormState);
+  const form = useForm({
+    defaultValues: { currentPassword: "", password: "", passwordConfirmation: "" },
+  });
+  const values = useStore(form.store, (state) => state.values);
+  const [state, action] = useActionState(async (previous: AuthFormState, data: FormData) => {
+    const result = await changePasswordAction(previous, data);
+    form.reset();
+    return result;
+  }, initialAuthFormState);
   if (state.status === "done")
     return (
       <>
@@ -36,6 +45,8 @@ export function ChangePasswordForm({
       <Input
         label="現在のパスワード"
         name="currentPassword"
+        value={values.currentPassword}
+        onChange={(event) => form.setFieldValue("currentPassword", event.target.value)}
         requirement="required"
         autoComplete="current-password"
         type="password"
@@ -44,6 +55,8 @@ export function ChangePasswordForm({
         description="8〜128文字で、現在と異なるパスワードを設定してください。"
         label="新しいパスワード"
         name="password"
+        value={values.password}
+        onChange={(event) => form.setFieldValue("password", event.target.value)}
         requirement="required"
         autoComplete="new-password"
         maxLength={128}
@@ -53,6 +66,8 @@ export function ChangePasswordForm({
       <Input
         label="新しいパスワード（確認）"
         name="passwordConfirmation"
+        value={values.passwordConfirmation}
+        onChange={(event) => form.setFieldValue("passwordConfirmation", event.target.value)}
         requirement="required"
         autoComplete="new-password"
         type="password"

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState, type FormEvent } from "react";
+import { useReducer, type FormEvent } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Combobox } from "./Combobox";
@@ -164,8 +164,8 @@ describe("Combobox", () => {
   it("サーバー検索で候補が入れ替わっても、選んだ候補のラベルを保つ", async () => {
     const user = userEvent.setup();
     function ServerSearch() {
-      const [query, setQuery] = useState("");
-      const [picked, setPicked] = useState<Option[]>([]);
+      const [query, setQuery] = useReducer((_current: string, next: string) => next, "");
+      const [picked, setPicked] = useReducer((_current: Option[], next: Option[]) => next, []);
       return (
         <Combobox
           emptyMessage="一致する作物がありません"

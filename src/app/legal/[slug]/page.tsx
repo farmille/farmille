@@ -29,13 +29,11 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function LegalDocumentPage({ params }: Props) {
   const document = getDocument((await params).slug);
-  const sections = await Promise.all(
-    document.sections.map(async (section, index) => ({
-      ...section,
-      id: `section-${index + 1}`,
-      html: await renderMarkdownToHtml(section.markdown),
-    })),
-  );
+  const sections = document.sections.map((section, index) => ({
+    ...section,
+    id: `section-${index + 1}`,
+    html: renderMarkdownToHtml(section.markdown),
+  }));
   return (
     <>
       <Link href="/legal" className={legalLink}>

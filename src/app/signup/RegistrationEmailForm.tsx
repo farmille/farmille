@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+
+import { useActionState, useReducer } from "react";
 import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
 import { initialAuthFormState, fieldErrorsOf, type AuthFormState } from "@/lib/auth/form-state";
@@ -21,9 +23,13 @@ export function RegistrationEmailForm({
   error?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initialAuthFormState);
-  const [email, setEmail] = useState("");
+  const form = useForm({ defaultValues: { email: "" } });
+  const email = useStore(form.store, (state) => state.values.email);
   // 欄を直したら、直す前の送信の結果（エラーも送信済みの案内も）は今の入力に当てはまらないので出さない
-  const [editedState, setEditedState] = useState<AuthFormState | null>(null);
+  const [editedState, setEditedState] = useReducer(
+    (_state: AuthFormState | null, next: AuthFormState | null) => next,
+    null,
+  );
   const loginHref = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
   const linkError = state.status === "idle" && !pending ? error : undefined;
   const current = state !== editedState && !pending;
@@ -38,7 +44,7 @@ export function RegistrationEmailForm({
     <Form
       action={formAction}
       errors={fieldErrors}
-      onRestore={(restored) => setEmail(restored.get("email")?.[0] ?? "")}
+      onRestore={(restored) => form.setFieldValue("email", restored.get("email")?.[0] ?? "")}
       persist="registration-email"
     >
       <FormActions layout="links">
@@ -71,7 +77,7 @@ export function RegistrationEmailForm({
         placeholder="you@example.com"
         value={email}
         onChange={(event) => {
-          setEmail(event.target.value);
+          form.setFieldValue("email", event.target.value);
           setEditedState(state);
         }}
       />

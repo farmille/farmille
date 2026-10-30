@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { startTransition, useActionState } from "react";
 import * as v from "valibot";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { evidenceMimeSchema, evidencePurposeSchema } from "@/lib/company-application";
@@ -27,6 +27,8 @@ const fileListStyle = css({
 });
 
 type EvidenceFile = { id: string; name: string; verified: boolean };
+type EvidenceState = { files: EvidenceFile[]; error: string };
+type EvidenceAction = { type: "upload"; files: File[] } | { type: "remove"; id: string };
 export function EvidenceFields({
   intentId,
   itemKey,
@@ -40,81 +42,73 @@ export function EvidenceFields({
   onBusy: (busy: boolean) => void;
   onCount?: (count: number) => void;
 }) {
-  const [files, setFiles] = useState<EvidenceFile[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  function update(next: EvidenceFile[]) {
-    setFiles(next);
-    onCount?.(next.length);
-  }
-  async function upload(selected: FileList | null) {
-    if (!selected?.length) return;
-    setError("");
-    if (files.length + selected.length > 5) {
-      setError("この添付欄に登録できる資料は5件までです。");
-      return;
-    }
-    setBusy(true);
-    onBusy(true);
-    let current = files;
-    try {
-      for (const file of Array.from(selected)) {
-        const mime = v.safeParse(evidenceMimeSchema, file.type);
-        if (!mime.success || file.size < 1 || file.size > 10 * 1024 * 1024)
-          throw new Error("JPG・PNG・PDFを、1ファイル10MB以内で選択してください。");
-        const reserved = await reserveEvidence({
-          intentId,
-          itemKey,
-          purpose,
-          fileName: file.name,
-          mime: mime.output,
-          size: file.size,
-        });
-        if (!reserved.ok) throw new Error(errorMessageJa[reserved.error]);
-        current = [...current, { id: reserved.data.id, name: file.name, verified: false }];
-        update(current);
-        const result = await createAuthBrowserClient()
-          .storage.from("company-application-evidence")
-          .uploadToSignedUrl(reserved.data.path, reserved.data.token, file, {
-            contentType: mime.output,
+  const [{ files, error }, send, busy] = useActionState(
+    async (state: EvidenceState, action: EvidenceAction): Promise<EvidenceState> => {
+      let files = state.files;
+      if (action.type === "upload" && files.length + action.files.length > 5) {
+        return { files, error: "この添付欄に登録できる資料は5件までです。" };
+      }
+      onBusy(true);
+      try {
+        if (action.type === "remove") {
+          const result = await removeEvidence(action.id);
+          if (!result.ok) return { files, error: errorMessageJa[result.error] };
+          files = files.filter((file) => file.id !== action.id);
+          onCount?.(files.length);
+          return { files, error: "" };
+        }
+        for (const file of action.files) {
+          const mime = v.safeParse(evidenceMimeSchema, file.type);
+          if (!mime.success || file.size < 1 || file.size > 10 * 1024 * 1024) {
+            return { files, error: "JPG・PNG・PDFを、1ファイル10MB以内で選択してください。" };
+          }
+          const reserved = await reserveEvidence({
+            intentId,
+            itemKey,
+            purpose,
+            fileName: file.name,
+            mime: mime.output,
+            size: file.size,
           });
-        if (result.error)
-          throw new Error(
-            "資料をアップロードできませんでした。失敗した資料を削除し、もう一度選択してください。",
+          if (!reserved.ok) return { files, error: errorMessageJa[reserved.error] };
+          files = [...files, { id: reserved.data.id, name: file.name, verified: false }];
+          onCount?.(files.length);
+          const result = await createAuthBrowserClient()
+            .storage.from("company-application-evidence")
+            .uploadToSignedUrl(reserved.data.path, reserved.data.token, file, {
+              contentType: mime.output,
+            });
+          if (result.error) {
+            return {
+              files,
+              error:
+                "資料をアップロードできませんでした。失敗した資料を削除し、もう一度選択してください。",
+            };
+          }
+          const verified = await finalizeEvidence(reserved.data.id);
+          if (!verified.ok) {
+            return {
+              files,
+              error:
+                "資料の形式を確認できませんでした。失敗した資料を削除し、JPG・PNG・PDFの元ファイルを選択してください。",
+            };
+          }
+          files = files.map((item) =>
+            item.id === reserved.data.id ? { ...item, verified: true } : item,
           );
-        const verified = await finalizeEvidence(reserved.data.id);
-        if (!verified.ok)
-          throw new Error(
-            "資料の形式を確認できませんでした。失敗した資料を削除し、JPG・PNG・PDFの元ファイルを選択してください。",
-          );
-        current = current.map((item) =>
-          item.id === reserved.data.id ? { ...item, verified: true } : item,
-        );
-        update(current);
+        }
+        return { files, error: "" };
+      } catch (error) {
+        return {
+          files,
+          error: error instanceof Error ? error.message : "資料の登録に失敗しました。",
+        };
+      } finally {
+        onBusy(false);
       }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "資料の登録に失敗しました。");
-    } finally {
-      setBusy(false);
-      onBusy(false);
-    }
-  }
-  async function remove(id: string) {
-    setBusy(true);
-    onBusy(true);
-    setError("");
-    try {
-      const result = await removeEvidence(id);
-      if (!result.ok) {
-        setError(errorMessageJa[result.error]);
-        return;
-      }
-      update(files.filter((file) => file.id !== id));
-    } finally {
-      setBusy(false);
-      onBusy(false);
-    }
-  }
+    },
+    { files: [], error: "" },
+  );
   return (
     <div className={stackStyle}>
       <FileInput
@@ -123,8 +117,9 @@ export function EvidenceFields({
         label={null}
         multiple
         onChange={(event) => {
-          void upload(event.currentTarget.files);
+          const files = Array.from(event.currentTarget.files ?? []);
           event.currentTarget.value = "";
+          if (files.length > 0) startTransition(() => send({ type: "upload", files }));
         }}
       />
       <Notice tone="neutral">jpg / png / pdf、1ファイル10MBまで、最大5ファイル</Notice>
@@ -138,7 +133,7 @@ export function EvidenceFields({
               <Button
                 aria-label={`${file.name}を削除`}
                 disabled={busy}
-                onClick={() => void remove(file.id)}
+                onClick={() => startTransition(() => send({ type: "remove", id: file.id }))}
                 size="sm"
                 variant="danger"
               >
@@ -149,7 +144,7 @@ export function EvidenceFields({
         </ul>
       ) : null}
       {busy ? <Notice tone="info">資料を処理しています…</Notice> : null}
-      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!busy && error ? <Notice tone="error">{error}</Notice> : null}
     </div>
   );
 }

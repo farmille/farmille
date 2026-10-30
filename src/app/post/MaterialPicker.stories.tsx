@@ -1,6 +1,7 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { userEvent, within } from "storybook/test";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 
 import type { PostingMaterialWithImage } from "@/server/queries/materials";
 import { css } from "../../../styled-system/css";
@@ -33,7 +34,7 @@ const meta = {
   title: "Pages/post/MaterialPicker",
   component: MaterialPicker,
   decorators: [fmDecorator],
-  args: { materials, query: "" },
+  args: { materials },
 } satisfies Meta<typeof MaterialPicker>;
 
 export default meta;
@@ -50,5 +51,12 @@ export const Selected: Story = {
 };
 
 export const NoResults: Story = {
-  args: { materials: [], query: "見つからない資材" },
+  args: { materials: [] },
+  decorators: [
+    (Story) => (
+      <NuqsTestingAdapter searchParams="?q=見つからない資材" hasMemory>
+        <Story />
+      </NuqsTestingAdapter>
+    ),
+  ],
 };

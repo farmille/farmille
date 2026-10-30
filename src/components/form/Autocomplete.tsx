@@ -1,7 +1,7 @@
 "use client";
 
 import { Autocomplete as BaseAutocomplete } from "@base-ui/react/autocomplete";
-import { useRef, useState, type ReactNode, type Ref } from "react";
+import { useRef, useReducer, type ReactNode, type Ref } from "react";
 
 import { Icon } from "@/components/Icon";
 import { optionRecipe, popupPositionerStyle, popupRecipe } from "@/components/popup";
@@ -46,8 +46,26 @@ export function Autocomplete(props: AutocompleteProps) {
   const [labeling] = splitLabeling(props);
   return (
     <Labeled disabled={props.disabled} labeling={labeling} name={props.name}>
-      <AutocompleteBody {...props} />
+      {props.open === undefined ? (
+        <UncontrolledAutocomplete {...props} />
+      ) : (
+        <AutocompleteBody {...props} open={props.open} />
+      )}
     </Labeled>
+  );
+}
+
+function UncontrolledAutocomplete(props: AutocompleteBodyProps) {
+  const [open, setOpen] = useReducer((_current: boolean, next: boolean) => next, false);
+  return (
+    <AutocompleteBody
+      {...props}
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        props.onOpenChange?.(next);
+      }}
+    />
   );
 }
 
@@ -69,18 +87,17 @@ function AutocompleteBody({
   onOpenChange,
   inputRef,
   className,
-}: AutocompleteBodyProps) {
+}: AutocompleteBodyProps & { open: boolean }) {
   const required = useFieldRequired();
   const highlighted = useRef(false);
   const filter = BaseAutocomplete.useFilter();
-  const [requestedOpen, setRequestedOpen] = useState(false);
   const query = value.trim();
   const visible =
     filterMode === "preFiltered" || query === ""
       ? options
       : options.filter((option) => filter.contains(option, query, labelOf));
   // 候補も案内も無い一覧は開かない。開いたままだと Base UI が周りを読み上げから隠し、aria-expanded も true のまま残る
-  const shown = (open ?? requestedOpen) && (visible.length > 0 || emptyMessage !== undefined);
+  const shown = open && (visible.length > 0 || emptyMessage !== undefined);
 
   const input = (
     <BaseAutocomplete.Input
@@ -88,14 +105,12 @@ function AutocompleteBody({
       maxLength={maxLength}
       onBlur={() => {
         if (shown) return;
-        setRequestedOpen(false);
         onOpenChange?.(false);
       }}
       onKeyDown={(event) => {
         if (event.key !== "Enter" || isComposingEnter(event)) return;
         if (highlighted.current || onSubmitText === undefined) return;
         event.preventDefault();
-        setRequestedOpen(false);
         onOpenChange?.(false);
         onSubmitText(value);
       }}
@@ -118,10 +133,7 @@ function AutocompleteBody({
       onValueChange={(next, details) => {
         if (details.reason !== "item-press") onValueChange(next);
       }}
-      onOpenChange={(next) => {
-        setRequestedOpen(next);
-        onOpenChange?.(next);
-      }}
+      onOpenChange={onOpenChange}
       open={shown}
       required={required}
       value={value}

@@ -1,13 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo } from "react";
 
 import { Chip } from "@/components/Chip";
 import { Autocomplete, type Option } from "@/components/form";
 import { TAG_CATEGORY_LABELS } from "@/components/TagChip";
 import {
-  buildSearchHref,
   searchFilterItemToSelected,
   selectedFilterCategory,
   selectedFilterChipName,
@@ -16,6 +14,7 @@ import {
   type SelectedSearchFilter,
 } from "@/components/search/search-selection";
 import { matchSearchCatalog, type SearchCatalog } from "@/lib/material-search";
+import { useMaterialSearch } from "@/lib/hooks/use-material-search";
 import { css, cva } from "../../../../styled-system/css";
 
 type SearchBoxProps = {
@@ -56,40 +55,13 @@ const categoryLabelRecipe = cva({
 });
 
 export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxProps) {
-  const router = useRouter();
-  const [input, setInput] = useState<{ value: string; urlQuery: string; requested: string | null }>(
-    { value: initialQuery, urlQuery: initialQuery, requested: null },
+  const { query, isPending, setQuery, setComposing, navigate } = useMaterialSearch(
+    initialQuery,
+    selected,
+    sort,
   );
-  const [composing, setComposing] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const query = input.value;
-
-  if (input.urlQuery !== initialQuery) {
-    setInput({
-      value: input.requested === initialQuery ? input.value : initialQuery,
-      urlQuery: initialQuery,
-      requested: null,
-    });
-  }
-
-  useEffect(() => {
-    if (composing || isPending || query.trim() === initialQuery) return;
-    const timer = setTimeout(() => {
-      setInput((current) => ({ ...current, requested: query.trim() }));
-      startTransition(() => {
-        router.replace(buildSearchHref({ filters: selected, sort, query }), { scroll: false });
-      });
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [composing, initialQuery, isPending, query, router, selected, sort]);
 
   const selectedKeys = useMemo(() => new Set(selected.map(selectedFilterKey)), [selected]);
-
-  const navigate = (nextFilters: SelectedSearchFilter[], nextQuery = query) => {
-    setInput((current) => ({ ...current, value: nextQuery, requested: nextQuery.trim() }));
-    const href = buildSearchHref({ filters: nextFilters, sort, query: nextQuery });
-    startTransition(() => router.push(href, { scroll: false }));
-  };
 
   const keyword = query.trim();
   const suggestions = useMemo((): SelectedSearchFilter[] => {
@@ -127,7 +99,7 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
         onSubmitText={(text) => {
           if (text.trim() !== initialQuery) navigate(selected, text);
         }}
-        onValueChange={(value) => setInput({ ...input, value })}
+        onValueChange={setQuery}
         options={suggestions.map((filter) => ({
           value: selectedFilterKey(filter),
           label: filter.name,

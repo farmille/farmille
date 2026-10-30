@@ -2,7 +2,7 @@
 
 import type { PasskeyMetadata } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useReducer } from "react";
 
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -27,9 +27,12 @@ export function PasskeyManager({
   admin: boolean;
 }) {
   const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [pending, setPending] = useReducer((_state: boolean, next: boolean) => next, false);
+  const [message, setMessage] = useReducer(
+    (_state: string | null, next: string | null) => next,
+    null,
+  );
+  const [failed, setFailed] = useReducer((_state: boolean, next: boolean) => next, false);
 
   async function change(passkeyId: string | null) {
     setPending(true);

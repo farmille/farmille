@@ -56,7 +56,7 @@ export default async function PostPage({ searchParams }: PostPageProps) {
       backHref="/"
       hasFixedFooter
     >
-      <MaterialPicker materials={materials.data} query={query} postType={postType} />
+      <MaterialPicker materials={materials.data} postType={postType} />
     </FormPageShell>
   );
 }

@@ -129,7 +129,7 @@ export default async function MaterialReviewsPage({
 
       <div className={toolsStyle}>
         <span className={countStyle}>{reviews.total}件</span>
-        <ReviewSortSelect sort={sort} />
+        <ReviewSortSelect />
       </div>
 
       {reviews.items.length > 0 ? (

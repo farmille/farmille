@@ -2,7 +2,7 @@
 
 import { Menu } from "@base-ui/react/menu";
 import Link from "next/link";
-import { Suspense, useId, useState, type ReactNode } from "react";
+import { Suspense, useId, useReducer, type ReactNode } from "react";
 
 import { Icon } from "@/components/Icon";
 import { css } from "../../styled-system/css";
@@ -111,7 +111,7 @@ type DesktopAccountMenuProps = {
 };
 
 export function DesktopAccountMenu({ myPageCurrent, member }: DesktopAccountMenuProps) {
-  const [signedIn, setSignedIn] = useState(false);
+  const [signedIn, setSignedIn] = useReducer((_current: boolean, next: boolean) => next, false);
   const logoutFormId = useId();
   const entries = member !== undefined || signedIn ? MEMBER_ENTRIES : GUEST_ENTRIES;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Image, { type ImageProps } from "next/image";
-import { useState } from "react";
+import { useReducer } from "react";
 import * as v from "valibot";
 import { cva, cx } from "../../styled-system/css";
 
@@ -59,8 +59,14 @@ export function OptimizedImage({
   ...props
 }: ImageProps) {
   const key = sourceKey(src);
-  const [failedSource, setFailedSource] = useState<string | null>(null);
-  const [loadedSource, setLoadedSource] = useState<string | null>(null);
+  const [failedSource, setFailedSource] = useReducer(
+    (_current: string | null, next: string | null) => next,
+    null,
+  );
+  const [loadedSource, setLoadedSource] = useReducer(
+    (_current: string | null, next: string | null) => next,
+    null,
+  );
 
   if (failedSource === key) return null;
 

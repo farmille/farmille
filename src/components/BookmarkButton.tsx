@@ -1,7 +1,7 @@
 "use client";
 
 import { Toggle } from "@base-ui/react/toggle";
-import { useState, useTransition } from "react";
+import { startTransition, useActionState } from "react";
 import { Icon } from "./Icon";
 import { css } from "../../styled-system/css";
 
@@ -12,8 +12,9 @@ type BookmarkButtonProps = {
 
 /** 保存処理が成功した状態だけを表示する。送信中の連打を防ぐ。 */
 export function BookmarkButton({ saved, action }: BookmarkButtonProps) {
-  const [isSaved, setSaved] = useState(saved);
-  const [pending, startTransition] = useTransition();
+  const [isSaved, save, pending] = useActionState(async (current: boolean, next: boolean) => {
+    return action === undefined ? current : action(next);
+  }, saved);
   return (
     <Toggle
       pressed={isSaved}
@@ -39,9 +40,7 @@ export function BookmarkButton({ saved, action }: BookmarkButtonProps) {
       })}
       onPressedChange={(next) => {
         if (action === undefined) return;
-        startTransition(async () => {
-          setSaved(await action(next));
-        });
+        startTransition(() => save(next));
       }}
     >
       <Icon name={isSaved ? "bookmark_filled" : "bookmark"} size="sm" />

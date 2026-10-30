@@ -1,12 +1,18 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useReducer } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { sellerApplyAction } from "@/app/sellers/apply/actions";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
 import { Form, FormActions, Input, Notice, SubmitButton, Textarea } from "@/components/form";
 import { TextLink } from "@/components/TextLink";
-import { fieldErrorsOf, initialAuthFormState, submittedValuesOf } from "@/lib/auth/form-state";
+import {
+  fieldErrorsOf,
+  initialAuthFormState,
+  submittedValuesOf,
+  type AuthFormState,
+} from "@/lib/auth/form-state";
 
 import { css } from "../../../../styled-system/css";
 
@@ -16,15 +22,52 @@ const inviteStyle = css({ mt: "5" });
 
 const invitePanelBodyStyle = css({ pt: "3" });
 
+const applicationFields = [
+  "officialName",
+  "corporateNumber",
+  "contactEmail",
+  "contactName",
+  "location",
+  "contactPhone",
+  "materialRequestNotes",
+  "websiteUrl",
+  "inviteCode",
+] as const;
+
 export function SellerApplyForm() {
-  const [state, formAction] = useActionState(sellerApplyAction, initialAuthFormState);
-  const values = submittedValuesOf(state);
-  const hadInvite =
-    state.status === "error" && values.inviteCode !== undefined && values.inviteCode.length > 0;
-  const [inviteOpen, setInviteOpen] = useState(hadInvite);
+  const form = useForm({
+    defaultValues: {
+      officialName: "",
+      corporateNumber: "",
+      contactEmail: "",
+      contactName: "",
+      location: "",
+      contactPhone: "",
+      materialRequestNotes: "",
+      websiteUrl: "",
+      inviteCode: "",
+    },
+  });
+  const values = useStore(form.store, (state) => state.values);
+  const [state, formAction] = useActionState(async (previous: AuthFormState, data: FormData) => {
+    const result = await sellerApplyAction(previous, data);
+    const submitted = submittedValuesOf(result);
+    for (const name of applicationFields) form.setFieldValue(name, submitted[name] ?? "");
+    return result;
+  }, initialAuthFormState);
+  const [inviteOpen, setInviteOpen] = useReducer((_state: boolean, next: boolean) => next, false);
 
   return (
-    <Form action={formAction} errors={fieldErrorsOf(state)} persist="seller-apply">
+    <Form
+      action={formAction}
+      errors={fieldErrorsOf(state)}
+      persist="seller-apply"
+      onRestore={(restored) => {
+        for (const name of applicationFields)
+          form.setFieldValue(name, restored.get(name)?.[0] ?? "");
+        if (restored.get("inviteCode")?.[0]) setInviteOpen(true);
+      }}
+    >
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}
 
       <Input
@@ -32,7 +75,8 @@ export function SellerApplyForm() {
         name="officialName"
         requirement="required"
         autoComplete="organization"
-        defaultValue={values.officialName}
+        value={values.officialName}
+        onChange={(event) => form.setFieldValue("officialName", event.target.value)}
         placeholder="〇〇株式会社"
       />
 
@@ -41,7 +85,8 @@ export function SellerApplyForm() {
         label="法人番号"
         name="corporateNumber"
         requirement="required"
-        defaultValue={values.corporateNumber}
+        value={values.corporateNumber}
+        onChange={(event) => form.setFieldValue("corporateNumber", event.target.value)}
         inputMode="numeric"
         maxLength={13}
       />
@@ -56,7 +101,8 @@ export function SellerApplyForm() {
         name="contactEmail"
         requirement="required"
         autoComplete="email"
-        defaultValue={values.contactEmail}
+        value={values.contactEmail}
+        onChange={(event) => form.setFieldValue("contactEmail", event.target.value)}
         placeholder="contact@example.com"
         type="email"
       />
@@ -67,7 +113,8 @@ export function SellerApplyForm() {
         name="contactName"
         requirement="required"
         autoComplete="name"
-        defaultValue={values.contactName}
+        value={values.contactName}
+        onChange={(event) => form.setFieldValue("contactName", event.target.value)}
         placeholder="担当 太郎"
       />
 
@@ -76,7 +123,8 @@ export function SellerApplyForm() {
         name="location"
         requirement="optional"
         autoComplete="street-address"
-        defaultValue={values.location}
+        value={values.location}
+        onChange={(event) => form.setFieldValue("location", event.target.value)}
         placeholder="東京都〇〇区…"
       />
 
@@ -86,7 +134,8 @@ export function SellerApplyForm() {
         name="contactPhone"
         requirement="required"
         autoComplete="tel"
-        defaultValue={values.contactPhone}
+        value={values.contactPhone}
+        onChange={(event) => form.setFieldValue("contactPhone", event.target.value)}
         maxLength={20}
         type="tel"
       />
@@ -96,7 +145,8 @@ export function SellerApplyForm() {
         label="備考：掲載・編集を希望する資材"
         name="materialRequestNotes"
         requirement="optional"
-        defaultValue={values.materialRequestNotes}
+        value={values.materialRequestNotes}
+        onChange={(event) => form.setFieldValue("materialRequestNotes", event.target.value)}
         maxLength={2000}
         rows={4}
       />
@@ -106,7 +156,8 @@ export function SellerApplyForm() {
         name="websiteUrl"
         requirement="optional"
         autoComplete="url"
-        defaultValue={values.websiteUrl}
+        value={values.websiteUrl}
+        onChange={(event) => form.setFieldValue("websiteUrl", event.target.value)}
         placeholder="https://…"
         type="url"
       />
@@ -125,7 +176,8 @@ export function SellerApplyForm() {
               requirement="optional"
               autoCapitalize="none"
               autoComplete="off"
-              defaultValue={values.inviteCode}
+              value={values.inviteCode}
+              onChange={(event) => form.setFieldValue("inviteCode", event.target.value)}
               placeholder="案内に記載のコード"
               spellCheck={false}
             />

@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { startTransition, useActionState, useEffect, useState } from "react";
+import { useSellerApprovalRefresh } from "@/lib/hooks/use-seller-approval-refresh";
+import { startTransition, useActionState, useReducer } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import {
   adminActionsStyle,
@@ -38,6 +39,12 @@ const credentialLabelStyle = css({
   color: "text.brand",
 });
 
+type SellerApprovalInput = {
+  selectedManufacturer: string | null;
+  newManufacturerName: string;
+  rejectedReason: string;
+};
+
 type Operation = "approve" | "reject" | "suspend" | "reinstate" | "invite";
 
 export function SellerReviewActions({
@@ -51,21 +58,25 @@ export function SellerReviewActions({
   inviteCode: string | null;
   manufacturerNames: string[];
 }) {
-  const router = useRouter();
   const [state, formAction, pending] = useActionState(
     sellerOperationAction,
     initialSellerActionState,
   );
-  const [submitting, setSubmitting] = useState<Operation | null>(null);
-  const [selectedManufacturer, setSelectedManufacturer] = useState<string | null>(null);
-  const [newManufacturerName, setNewManufacturerName] = useState("");
-
-  useEffect(() => {
-    if (state.status === "approved") {
-      // RSCだけを更新するため、初期パスワードを持つClient stateは保持される。
-      router.refresh();
-    }
-  }, [router, state.status]);
+  useSellerApprovalRefresh(state.status);
+  const [submitting, setSubmitting] = useReducer(
+    (_state: Operation | null, next: Operation | null) => next,
+    null,
+  );
+  const initialValues: SellerApprovalInput = {
+    selectedManufacturer: null,
+    newManufacturerName: "",
+    rejectedReason: "",
+  };
+  const form = useForm({ defaultValues: initialValues });
+  const { selectedManufacturer, newManufacturerName, rejectedReason } = useStore(
+    form.store,
+    (state) => state.values,
+  );
 
   const submit = (operation: Operation, formData = new FormData()): void => {
     formData.set("sellerId", sellerId);
@@ -91,7 +102,7 @@ export function SellerReviewActions({
             label="紐づける資材メーカー"
             labelSize="sm"
             disabled={pending}
-            onValueChange={setSelectedManufacturer}
+            onValueChange={(value) => form.setFieldValue("selectedManufacturer", value)}
             options={[
               ...manufacturerNames.map((name) => ({ value: name, label: name })),
               { value: "__new__", label: "該当なし：メーカーを追加" },
@@ -105,7 +116,7 @@ export function SellerReviewActions({
               labelSize="sm"
               disabled={pending}
               maxLength={300}
-              onChange={(event) => setNewManufacturerName(event.target.value)}
+              onChange={(event) => form.setFieldValue("newManufacturerName", event.target.value)}
               value={newManufacturerName}
             />
           ) : null}
@@ -177,6 +188,8 @@ export function SellerReviewActions({
                 <Textarea
                   label="却下理由"
                   name="rejectedReason"
+                  value={rejectedReason}
+                  onChange={(event) => form.setFieldValue("rejectedReason", event.target.value)}
                   requirement="required"
                   placeholder="申請者へ伝える判断理由を入力"
                 />

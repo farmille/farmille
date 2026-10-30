@@ -49,7 +49,7 @@ export const FinishClosing: Story = {
 };
 
 // 資材ページの画面の下に固定された「実証詳細レポートを書く」「感想口コミを書く」のバーを隠さず、その上に出る。
-// getSessionUser は preview.ts の sb.mock で差し替わっており、FabBar と同じインスタンスを mocked() 経由で操作する。
+// getSessionUser は preview.tsx の sb.mock で差し替わっており、FabBar と同じインスタンスを mocked() 経由で操作する。
 export const AbovePostBar: Story = {
   beforeEach: () => {
     mocked(getSessionUser).mockResolvedValue(null);

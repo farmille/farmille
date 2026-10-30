@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
+import { useReducer } from "react";
 
 import { css } from "../../styled-system/css";
 import { Tabs } from "./Tabs";
@@ -7,7 +7,10 @@ import { Tabs } from "./Tabs";
 const panelStyle = css({ mt: "3", fontSize: "sm", lineHeight: "relaxed" });
 
 function EditorTabs({ initial }: { initial: "write" | "preview" }) {
-  const [tab, setTab] = useState(initial);
+  const [tab, setTab] = useReducer(
+    (_current: "write" | "preview", next: "write" | "preview") => next,
+    initial,
+  );
   return (
     <Tabs
       aria-label="本文エディタ"

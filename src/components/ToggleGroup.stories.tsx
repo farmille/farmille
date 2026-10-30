@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState, type ComponentProps } from "react";
+import { useReducer, type ComponentProps } from "react";
 import { fn } from "storybook/test";
 
 import { ToggleGroup } from "./ToggleGroup";
@@ -14,7 +14,10 @@ const purposes = [
 ];
 
 function StatefulToggleGroup(args: ComponentProps<typeof ToggleGroup>) {
-  const [value, setValue] = useState<readonly string[]>(args.value);
+  const [value, setValue] = useReducer(
+    (_current: readonly string[], next: readonly string[]) => next,
+    args.value,
+  );
   return (
     <ToggleGroup
       {...args}

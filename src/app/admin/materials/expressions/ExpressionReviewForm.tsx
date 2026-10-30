@@ -1,11 +1,18 @@
 "use client";
-import { useState, useTransition } from "react";
+
+import { useForm, useStore } from "@tanstack/react-form";
+import { startTransition, useActionState } from "react";
 import * as v from "valibot";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
 import { Notice, Textarea, usePersistedInput } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { reviewMaterialPageAction, reviewManufacturerProfileAction } from "./actions";
+
+type ReviewState = {
+  result: Awaited<ReturnType<typeof reviewMaterialPageAction>> | null;
+  recordedNote: string;
+};
 
 export function ExpressionReviewForm({
   versionId,
@@ -14,35 +21,37 @@ export function ExpressionReviewForm({
   versionId: string;
   kind?: "material" | "profile";
 }) {
-  const [note, setNote] = useState("");
-  const [recordedNote, setRecordedNote] = useState("");
-  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const form = useForm({ defaultValues: { note: "" } });
+  const note = useStore(form.store, (state) => state.values.note);
   const router = useRouter();
+  const [{ result, recordedNote }, review, pending] = useActionState(
+    async (
+      previous: ReviewState,
+      input: { publish: boolean; note: string },
+    ): Promise<ReviewState> => {
+      const result = await (
+        kind === "material" ? reviewMaterialPageAction : reviewManufacturerProfileAction
+      )({ versionId, ...input });
+      if (result.ok) router.refresh();
+      return { result, recordedNote: result.ok ? input.note : previous.recordedNote };
+    },
+    { result: null, recordedNote: "" },
+  );
   usePersistedInput({
     name: "expression-review",
     schema: v.string(),
     unsaved: note === recordedNote ? null : note,
-    restore: setNote,
+    restore: (value) => form.setFieldValue("note", value),
   });
   function submit(publish: boolean) {
-    startTransition(async () => {
-      const next = await (
-        kind === "material" ? reviewMaterialPageAction : reviewManufacturerProfileAction
-      )({ versionId, publish, note });
-      setResult(next);
-      if (next.ok) {
-        setRecordedNote(note);
-        router.refresh();
-      }
-    });
+    startTransition(() => review({ publish, note }));
   }
   return (
     <div className={materialPageStack}>
       <Textarea
         description="メーカーにも表示されます。修正を求める場合は、該当箇所と理由を記入してください。"
         label="確認メモ・修正が必要な箇所"
-        onChange={(event) => setNote(event.target.value)}
+        onChange={(event) => form.setFieldValue("note", event.target.value)}
         rows={4}
         value={note}
       />

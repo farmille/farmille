@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useReducer } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 
 import { Button } from "@/components/Button";
 import { Chip } from "@/components/Chip";
@@ -80,6 +81,8 @@ const plotAdder = css({
 
 const plotAdderSelect = css({ flex: "[1 1 9em]", minW: "0" });
 
+type PlotSelection = { variety: string | null; material: string | null };
+
 const NO_VARIETY = "none";
 
 const limitError = css({ m: "0", mt: "1.5", textStyle: "supporting", color: "accent.danger" });
@@ -110,7 +113,9 @@ function Adder({
   /** 足せたら true。断られたら書いた名前を残す。 */
   onAdd: (name: string) => boolean;
 }) {
-  const [value, setValue] = useState("");
+  const form = useForm({ defaultValues: { value: "" } });
+  const value = useStore(form.store, (state) => state.values.value);
+  const setValue = (next: string) => form.setFieldValue("value", next);
   const add = () => {
     const name = value.trim();
     if (name === "" || disabled) return;
@@ -153,8 +158,14 @@ function PlotAdder({
     value: variety?.id ?? NO_VARIETY,
     label: variety === null ? "品種なし" : variety.name.trim() || "（品種名未入力）",
   }));
-  const [variety, setVariety] = useState<string | null>(null);
-  const [material, setMaterial] = useState<string | null>(null);
+  const defaults: PlotSelection = {
+    variety: null,
+    material: null,
+  };
+  const form = useForm({ defaultValues: defaults });
+  const { variety, material } = useStore(form.store, (state) => state.values);
+  const setVariety = (next: string | null) => form.setFieldValue("variety", next);
+  const setMaterial = (next: string | null) => form.setFieldValue("material", next);
   // 選んでいた品種や資材を外したら、先頭の品種と投稿した資材に戻す
   const varietyValue =
     varieties.find((option) => option.value === variety)?.value ?? varieties[0]?.value;
@@ -221,7 +232,10 @@ export function ReportPagePlots({
   onChange: (next: UsageReportInput) => void;
   missing: boolean;
 }) {
-  const [refused, setRefused] = useState<Refusal | null>(null);
+  const [refused, setRefused] = useReducer(
+    (_current: Refusal | null, next: Refusal | null) => next,
+    null,
+  );
   const change = (next: UsageReportInput) => {
     setRefused(null);
     onChange(next);

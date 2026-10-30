@@ -1,14 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 
 import { ArticlesToolbar } from "./ArticlesToolbar";
 
 const meta = {
   title: "Pages/Shared/ArticlesToolbar",
   component: ArticlesToolbar,
-  args: {
-    filter: "all",
-    q: "",
-  },
   parameters: {
     nextjs: {
       navigation: {
@@ -25,9 +22,13 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const ReportFilter: Story = {
-  args: {
-    filter: "report",
-  },
+  decorators: [
+    (Story) => (
+      <NuqsTestingAdapter searchParams="?type=report" hasMemory>
+        <Story />
+      </NuqsTestingAdapter>
+    ),
+  ],
   parameters: {
     nextjs: {
       navigation: {
@@ -39,10 +40,13 @@ export const ReportFilter: Story = {
 };
 
 export const ArticleFilterWithQuery: Story = {
-  args: {
-    filter: "article",
-    q: "トマト",
-  },
+  decorators: [
+    (Story) => (
+      <NuqsTestingAdapter searchParams="?type=article&q=トマト" hasMemory>
+        <Story />
+      </NuqsTestingAdapter>
+    ),
+  ],
   parameters: {
     nextjs: {
       navigation: {
@@ -54,10 +58,13 @@ export const ArticleFilterWithQuery: Story = {
 };
 
 export const SearchQuery: Story = {
-  args: {
-    filter: "all",
-    q: "うどんこ病",
-  },
+  decorators: [
+    (Story) => (
+      <NuqsTestingAdapter searchParams="?q=うどんこ病" hasMemory>
+        <Story />
+      </NuqsTestingAdapter>
+    ),
+  ],
   parameters: {
     nextjs: {
       navigation: {

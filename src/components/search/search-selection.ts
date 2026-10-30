@@ -1,4 +1,5 @@
 import { APPLICATION_METHODS } from "@/lib/material-page-editor";
+import { materialSearchParsers } from "@/lib/search-query-state";
 import * as v from "valibot";
 
 import type { TagCategory } from "@/components/TagChip";
@@ -21,7 +22,7 @@ export type SelectedSearchFilter =
   | { kind: "maker"; name: string }
   | { kind: "name"; name: string };
 
-export type MaterialSortParam = "reviews" | "rating" | "newest";
+export type MaterialSortParam = ReturnType<typeof materialSearchParsers.sort.parseServerSide>;
 
 export type ParsedSearchQuery = {
   filters: SearchFilterRef[];
@@ -103,8 +104,7 @@ export function parseQueryParam(raw: string | string[] | undefined): string {
 }
 
 export function parseSortParam(raw: string | undefined): MaterialSortParam {
-  if (raw === "rating" || raw === "newest" || raw === "reviews") return raw;
-  return "reviews";
+  return materialSearchParsers.sort.parseServerSide(raw);
 }
 
 export function buildSearchHref({
