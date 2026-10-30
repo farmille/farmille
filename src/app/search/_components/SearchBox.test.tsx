@@ -25,13 +25,18 @@ const props = {
   catalog: { filters: [], makers: [], materials: [{ name: "トマト資材", aliases: [] }] },
 };
 
-function SortToNewest() {
+function OtherUrlChanges() {
   const [, setSearch] = useQueryStates(materialSearchParsers);
 
   return (
-    <button type="button" onClick={() => void setSearch({ sort: "newest" })}>
-      新着順
-    </button>
+    <>
+      <button type="button" onClick={() => void setSearch({ sort: "newest" })}>
+        新着順
+      </button>
+      <button type="button" onClick={() => void setSearch({ q: "いちご" })}>
+        戻る
+      </button>
+    </>
   );
 }
 
@@ -73,13 +78,25 @@ describe("資材の入力検索", () => {
     renderSearch(
       <>
         <SearchBox {...props} />
-        <SortToNewest />
+        <OtherUrlChanges />
       </>,
     );
     fireEvent.change(searchInput(), { target: { value: "トマト" } });
     fireEvent.click(screen.getByRole("button", { name: "新着順" }));
     await advanceSearch();
     expect(onUrlUpdate.mock.lastCall?.[0].queryString).toBe("?sort=newest&q=トマト");
+  });
+  it("入力を待つ間に別の検索語へ移ったら、古い入力を送らない", async () => {
+    renderSearch(
+      <>
+        <SearchBox {...props} />
+        <OtherUrlChanges />
+      </>,
+    );
+    fireEvent.change(searchInput(), { target: { value: "トマト" } });
+    fireEvent.click(screen.getByRole("button", { name: "戻る" }));
+    await advanceSearch();
+    expect(onUrlUpdate.mock.lastCall?.[0].queryString).toBe("?q=いちご");
   });
   it("日本語変換の途中では検索しない", async () => {
     renderSearch(<SearchBox {...props} />);

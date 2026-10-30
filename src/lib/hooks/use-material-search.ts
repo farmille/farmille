@@ -66,7 +66,7 @@ export function useMaterialSearch(initialQuery: string, sort: MaterialSortParam)
 
   const [isPending, startTransition] = useTransition();
 
-  const [, setSearch] = useQueryStates(materialSearchParsers, {
+  const [search, setSearch] = useQueryStates(materialSearchParsers, {
     shallow: false,
     scroll: false,
     startTransition,
@@ -76,10 +76,21 @@ export function useMaterialSearch(initialQuery: string, sort: MaterialSortParam)
     clearTimeout(timer.current);
 
     if (composing.current || value.trim() === initialQuery) return;
+    const scheduledQuery = search.q;
     timer.current = setTimeout(() => {
-      dispatch({ type: "request", text: value });
-      // 待っている間に変わった絞り込みと並び順を戻さないよう、検索語だけを書き換える。
-      void setSearch({ q: value.trim() }, { history: "replace" });
+      let sent = false;
+      // 待つ間に「戻る」などで検索語が変わっていたら送らない。絞り込みと並び順は書き換えない。
+      void setSearch(
+        (current) => {
+          if (current.q !== scheduledQuery) return {};
+          sent = true;
+
+          return { q: value.trim() };
+        },
+        { history: "replace" },
+      );
+
+      if (sent) dispatch({ type: "request", text: value });
     }, DEBOUNCE_MS);
   };
 
