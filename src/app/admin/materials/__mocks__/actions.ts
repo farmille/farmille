@@ -7,6 +7,7 @@ const done = { status: "done", message: "Storybook 上で操作を受け付け�
 export const createMaterialAction = fn<Actions["createMaterialAction"]>(async () => done);
 export const updateMaterialAction = fn<Actions["updateMaterialAction"]>(async () => done);
 export const setMaterialSellerAction = fn<Actions["setMaterialSellerAction"]>(async () => done);
+
 export const setMaterialPublicationStatusAction = fn<Actions["setMaterialPublicationStatusAction"]>(
   async () => done,
 );

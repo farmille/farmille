@@ -1,14 +1,23 @@
 {
-  "plugins": ["eslint", "react", "unicorn", "typescript", "nextjs", "oxc"],
+  "plugins": ["eslint", "react", "unicorn", "typescript", "nextjs", "oxc", "import", "jsx-a11y"],
   "jsPlugins": [
     {
       "name": "anti-slop",
       "specifier": "./tools/oxlint/anti-slop/index.ts"
+    },
+    {
+      "name": "farmille",
+      "specifier": "./tools/oxlint/farmille/index.mjs"
     }
   ],
   "options": {
     "typeAware": true,
     "typeCheck": true
+  },
+  "settings": {
+    "react-hooks": {
+      "additionalEffectHooks": "^useMountEffect$"
+    }
   },
   "ignorePatterns": [
     ".claude/",
@@ -28,14 +37,17 @@
     "storybook-static/",
     "tools/migration/",
     "tools/oxlint/anti-slop/",
+    "tools/oxlint/farmille/",
     "src/types/database.types.ts"
   ],
   "rules": {
+    "anti-slop/no-array-filter-map": "error",
     "anti-slop/no-chained-type-assertions": "error",
     "anti-slop/no-conditional-empty-object-spread": "error",
     "anti-slop/no-known-value-widening": "error",
     "anti-slop/no-module-mocking": "error",
     "anti-slop/no-object-parameters": "error",
+    "anti-slop/no-reduce-accumulator-copy": "error",
     "anti-slop/no-reflect-apply": "error",
     "anti-slop/no-reflect-get": "error",
     "anti-slop/no-runtime-typeof": "error",
@@ -45,6 +57,219 @@
     "anti-slop/no-unknown-type-aliases": "error",
     "anti-slop/no-unsafe-dictionary-type": "error",
     "anti-slop/no-widen-then-assert": "error",
-    "anti-slop/require-safety-comment-for-type-assertion": "error"
-  }
+    "anti-slop/require-readable-spacing": "error",
+    "anti-slop/require-safety-comment-for-type-assertion": "error",
+    "eslint/no-array-constructor": "error",
+    "eslint/no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": [
+              "material-icons",
+              "material-icons/*",
+              "react-icons",
+              "react-icons/*",
+              "lucide",
+              "lucide/*",
+              "lucide-react",
+              "lucide-react/*",
+              "@mui/icons-material",
+              "@mui/icons-material/*"
+            ],
+            "message": "アイコンは src/components/Icon.tsx（Tabler Icons）に追加して使う。"
+          }
+        ]
+      }
+    ],
+    "eslint/no-var": "error",
+    "eslint/prefer-const": [
+      "error",
+      {
+        "destructuring": "any",
+        "ignoreReadBeforeAssign": false
+      }
+    ],
+    "eslint/prefer-rest-params": "error",
+    "eslint/prefer-spread": "error",
+    "farmille/state-management": "error",
+    "import/namespace": "off",
+    "import/no-anonymous-default-export": "warn",
+    "jsx-a11y/alt-text": "warn",
+    "jsx-a11y/aria-props": "warn",
+    "jsx-a11y/aria-proptypes": "warn",
+    "jsx-a11y/aria-unsupported-elements": "warn",
+    "jsx-a11y/control-has-associated-label": "off",
+    "jsx-a11y/label-has-associated-control": "off",
+    "jsx-a11y/media-has-caption": "off",
+    "jsx-a11y/no-noninteractive-tabindex": "off",
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "jsx-a11y/role-has-required-aria-props": "warn",
+    "jsx-a11y/role-supports-aria-props": "warn",
+    "oxc/no-accumulating-spread": "error",
+    "react/display-name": "error",
+    "react/jsx-no-comment-textnodes": "error",
+    "react/no-unescaped-entities": "error",
+    "react/require-render-return": "error",
+    "react/rules-of-hooks": "error",
+    "typescript/ban-ts-comment": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-require-imports": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-function-type": "error"
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.{ts,tsx}"],
+      "rules": {
+        "farmille/controlled-form-input": "error",
+        "eslint/no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "material-icons",
+                  "material-icons/*",
+                  "react-icons",
+                  "react-icons/*",
+                  "lucide",
+                  "lucide/*",
+                  "lucide-react",
+                  "lucide-react/*",
+                  "@mui/icons-material",
+                  "@mui/icons-material/*"
+                ],
+                "message": "アイコンは src/components/Icon.tsx（Tabler Icons）に追加して使う。"
+              },
+              {
+                "group": ["@tabler/icons-react", "@tabler/icons-react/*"],
+                "message": "共通 Icon を使う。"
+              },
+              {
+                "group": ["@base-ui/react", "@base-ui/react/*", "sonner"],
+                "message": "Base UI と Sonner は src/components の共通部品の中だけで使う。画面からは @/components/form などの部品を使う。"
+              }
+            ]
+          }
+        ],
+        "farmille/restricted-syntax": [
+          "error",
+          {
+            "groups": ["textColor", "colorValue", "styleAttribute", "supabaseQuery", "secretKey"]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["**/*.test.*", "**/*.stories.*", "src/components/form/**"],
+      "rules": {
+        "farmille/controlled-form-input": "off"
+      }
+    },
+    {
+      "files": ["src/components/**/*.{ts,tsx}"],
+      "rules": {
+        "eslint/no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "material-icons",
+                  "material-icons/*",
+                  "react-icons",
+                  "react-icons/*",
+                  "lucide",
+                  "lucide/*",
+                  "lucide-react",
+                  "lucide-react/*",
+                  "@mui/icons-material",
+                  "@mui/icons-material/*"
+                ],
+                "message": "アイコンは src/components/Icon.tsx（Tabler Icons）に追加して使う。"
+              },
+              {
+                "group": ["@tabler/icons-react", "@tabler/icons-react/*"],
+                "message": "共通 Icon を使う。"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/components/Icon.tsx"],
+      "rules": {
+        "eslint/no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "material-icons",
+                  "material-icons/*",
+                  "react-icons",
+                  "react-icons/*",
+                  "lucide",
+                  "lucide/*",
+                  "lucide-react",
+                  "lucide-react/*",
+                  "@mui/icons-material",
+                  "@mui/icons-material/*"
+                ],
+                "message": "アイコンは src/components/Icon.tsx（Tabler Icons）に追加して使う。"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/server/**"],
+      "rules": {
+        "farmille/restricted-syntax": [
+          "error",
+          {
+            "groups": ["textColor", "colorValue", "styleAttribute"]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/env.ts"],
+      "rules": {
+        "farmille/restricted-syntax": [
+          "error",
+          {
+            "groups": ["textColor", "colorValue", "styleAttribute", "supabaseQuery"]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/theme/**"],
+      "rules": {
+        "farmille/restricted-syntax": [
+          "error",
+          {
+            "groups": ["textColor", "styleAttribute", "supabaseQuery", "secretKey"]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/app/**/opengraph-image.tsx"],
+      "rules": {
+        "farmille/restricted-syntax": [
+          "error",
+          {
+            "groups": ["textColor", "supabaseQuery", "secretKey"]
+          }
+        ]
+      }
+    }
+  ]
 }

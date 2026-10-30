@@ -41,8 +41,10 @@ const scrollStyle = css({
     overflowX: "visible",
   },
 });
+
 const signupStyle = css({ mt: "2.5", textAlign: "center" });
 const signupTitleStyle = css({ textStyle: "body", fontWeight: "bold" });
+
 const signupActionsStyle = css({
   mt: "2",
   display: "flex",
@@ -51,6 +53,7 @@ const signupActionsStyle = css({
   justifyContent: "center",
   gap: "2.5",
 });
+
 const articlesLinkStyle = css({ mt: "3" });
 
 export function ReportsHeading({ count, moreHref }: { count?: number; moreHref?: string }) {
@@ -68,6 +71,7 @@ export function ReportsHeading({ count, moreHref }: { count?: number; moreHref?:
 
 export async function HeroReportCount({ materialId }: { materialId: string }) {
   const reports = unwrapQueryResult(await loadMaterialReports(materialId));
+
   return <HeroCount tone={reports.total > 0 ? "highlight" : "plain"}>{reports.total}件</HeroCount>;
 }
 
@@ -159,6 +163,7 @@ export async function MaterialReportsSection({
     loadMaterialReports(material.id),
     listPublishedArticlesByMaterial(material.id),
   ]);
+
   return (
     <MaterialReportsView
       material={material}

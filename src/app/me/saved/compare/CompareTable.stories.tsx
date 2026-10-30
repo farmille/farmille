@@ -10,6 +10,7 @@ const meta = {
 } satisfies Meta<typeof CompareTable>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const ThreeMaterials: Story = {};

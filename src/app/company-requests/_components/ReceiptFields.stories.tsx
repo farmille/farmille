@@ -2,19 +2,25 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { applicationReceiptDocument } from "@/lib/company-application-receipt";
 import { ReceiptFields } from "./ReceiptFields";
 import { registrationReceipt, removalReceipt } from "./story-fixtures";
+
 const meta = {
   title: "Pages/company-requests/ReceiptFields",
   component: ReceiptFields,
 } satisfies Meta<typeof ReceiptFields>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {
   args: { fields: applicationReceiptDocument(registrationReceipt).applicant.details },
 };
+
 /** 長い URL は折り返し、回答の改行はそのまま見せる。 */
 export const MultilineValue: Story = {
   args: { fields: applicationReceiptDocument(removalReceipt).items.flatMap((item) => item.fields) },
 };
+
 /** 受付日時などの要点は、項目名の列を狭くする。 */
 export const Narrow: Story = {
   args: {
@@ -26,6 +32,7 @@ export const Narrow: Story = {
     ],
   },
 };
+
 /** 結びの欄では、項目名を値の上に置く。 */
 export const FullWidthLabel: Story = {
   args: {

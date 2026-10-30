@@ -14,6 +14,7 @@ export const TAG_CATEGORY_LABELS = {
 /** DB と画面モックの分類文字列を共通の UI 分類へ正規化する。 */
 export function toTagChipCategory(category: string): TagCategory {
   if (category === "condition") return "cond";
+
   if (
     category === "crop" ||
     category === "concern" ||

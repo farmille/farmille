@@ -7,7 +7,9 @@ const meta = {
   component: SortSelect,
   args: { selected: [], sort: "reviews" },
 } satisfies Meta<typeof SortSelect>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};

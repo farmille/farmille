@@ -6,7 +6,9 @@ export async function applicationSellerPage(next: string) {
     return await approvedApplicationSeller();
   } catch (error) {
     if (!(error instanceof ApplicationError)) throw error;
+
     if (error.code === "unauthorized") redirect(`/sellers/login?next=${encodeURIComponent(next)}`);
+
     if (error.code === "forbidden") return null;
     throw error;
   }

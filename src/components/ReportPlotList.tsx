@@ -59,6 +59,7 @@ export function ReportPlotList({
 }) {
   // 全区に共通の説明があれば、区ごとの説明が空でも未記入として出さない
   const common = commonDescription.trim();
+
   return (
     <>
       {common ? <p className={styles.common}>{common}</p> : null}

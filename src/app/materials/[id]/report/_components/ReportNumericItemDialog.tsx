@@ -15,8 +15,7 @@ import { css, cx } from "../../../../../../styled-system/css";
 
 import { REPORT_SHORT_MAX, type ReportPageNumericItem } from "./report-page-state";
 import { labelStyle } from "./report-page-styles";
-
-import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
+import { ReportLeaveWarning } from "./ReportLeaveWarning";
 
 const graphBlock = css({
   mt: "5",
@@ -55,14 +54,17 @@ export function ReportNumericItemDialog({
       graphs: item.graphs.map((graph) => graphWithPlots(graph, plots)),
     }),
   );
+
   const form = useForm({ defaultValues: { draft: initial } });
   const draft = useStore(form.store, (state) => state.values.draft);
+
   const setDraft = (next: (current: ReportPageNumericItem) => ReportPageNumericItem) =>
     form.setFieldValue("draft", next);
+
   const [asking, setAsking] = useReducer((_current: boolean, next: boolean) => next, false);
   const changed = JSON.stringify(draft) !== JSON.stringify(initial);
-  useReportLeaveWarning(changed);
   const order = new Map(plots.map((plot, index) => [plot.id, index]));
+
   const updateGraph = (
     graphId: string,
     next: (
@@ -76,10 +78,12 @@ export function ReportNumericItemDialog({
 
   return (
     <>
+      {changed && <ReportLeaveWarning />}
       <Dialog
         open
         onOpenChange={(open) => {
           if (open) return;
+
           // 直した値を確かめずに捨てないよう、変えたときだけ確かめる
           if (changed) setAsking(true);
           else onClose();
@@ -131,6 +135,7 @@ export function ReportNumericItemDialog({
               const index = order.get(row.plotId ?? "") ?? -1;
               const plot = plots[index];
               const name = plot?.name.trim() || `区${index + 1}`;
+
               return (
                 <Input
                   key={row.id}

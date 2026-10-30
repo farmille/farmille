@@ -81,8 +81,10 @@ async function loadReport(id: string) {
 
 async function loadViewer(reportId: string) {
   const session = await getSessionUser();
+
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
+
   const helpfulVotedResult = await isHelpfulVotedByViewer(viewerUserId, "usage_report", reportId);
 
   return { session, viewerUserId, helpfulVotedResult };
@@ -122,6 +124,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     loadReport(id),
     loadViewer(id),
   ]);
+
   const isOwnPost = viewerUserId !== null && viewerUserId === report.authorUserId;
 
   if (!helpfulVotedResult.ok) {
@@ -145,9 +148,11 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     report.media.find((m) => m.placement === "cover") ??
     report.media.find((m) => m.mediaType === "photo") ??
     null;
+
   const cropLabel = `${report.crop.name}${report.variety ? `（${report.variety}）` : ""}`;
 
   const materialPath = `/materials/${report.material.id}`;
+
   const reportJsonLd = createArticleJsonLd({
     id: report.id,
     route: "reports",

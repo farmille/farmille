@@ -24,6 +24,7 @@ const headStyle = css({
   gap: "2",
   rowGap: "1",
 });
+
 const authorLinkStyle = css({
   display: "inline-flex",
   alignItems: "center",
@@ -31,7 +32,9 @@ const authorLinkStyle = css({
   color: "[inherit]",
   textDecoration: "none",
 });
+
 const nameStyle = css({ textStyle: "body", fontWeight: "bold", overflowWrap: "anywhere" });
+
 const detailsStyle = css({
   maxW: "full",
   px: "2",
@@ -43,14 +46,18 @@ const detailsStyle = css({
   borderRadius: "pill",
   overflowWrap: "anywhere",
 });
+
 const ratingStyle = css({ mt: "2", display: "flex", alignItems: "center", gap: "1.5" });
+
 const scoreStyle = css({
   color: "accent.warn",
   fontSize: "md",
   fontWeight: "extrabold",
   fontVariantNumeric: "tabular-nums",
 });
+
 const cropsStyle = css({ mt: "1", mb: "1.5", textStyle: "note", color: "text.muted" });
+
 const photosStyle = css({
   mt: "2.5",
   display: "flex",
@@ -59,6 +66,7 @@ const photosStyle = css({
   scrollbarWidth: "none",
   "&::-webkit-scrollbar": { display: "none" },
 });
+
 const photoStyle = css({
   w: "16",
   h: "16",
@@ -69,7 +77,9 @@ const photoStyle = css({
   bg: "primary.soft",
   borderRadius: "input",
 });
+
 const photoImageStyle = css({ display: "block", w: "full", h: "full", objectFit: "cover" });
+
 const footRecipe = cva({
   base: { mt: "2.5", display: "flex", gap: "2.5" },
   variants: {
@@ -81,7 +91,9 @@ const footRecipe = cva({
     },
   },
 });
+
 const actionsStyle = css({ flexGrow: "1", flexShrink: "0" });
+
 const ownerRowStyle = css({
   display: "flex",
   justifyContent: "flex-end",
@@ -104,12 +116,14 @@ export function MaterialReviewCard({
   actions,
 }: MaterialReviewCardProps) {
   const { author } = review;
+
   const authorName = (
     <>
       <Avatar name={author.name} src={author.avatarUrl} size="sm" />
       <span className={nameStyle}>{author.name}</span>
     </>
   );
+
   return (
     <article className={surfaceCardRecipe({ padding: "cozy" })} id={`review-${review.id}`}>
       <div className={headStyle}>

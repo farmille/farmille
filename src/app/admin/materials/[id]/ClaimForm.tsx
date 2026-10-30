@@ -26,11 +26,15 @@ export function ClaimForm({
   const form = useForm({
     defaultValues: { sellerId: currentSellerId ?? "", documentReference: "" },
   });
+
   const values = useStore(form.store, (state) => state.values);
+
   const [state, formAction] = useActionState(
     async (previous: MaterialFormState, data: FormData) => {
       const result = await setMaterialSellerAction(previous, data);
+
       if (result.status === "done") form.setFieldValue("documentReference", "");
+
       return result;
     },
     initialMaterialFormState,

@@ -296,6 +296,7 @@ const workspaceTitle = css({
 });
 
 export type AppChrome = "public" | "seller";
+
 export type AppBarActive = "home" | "search" | "post" | "articles" | "me";
 
 /** PCヘッダー右端に出す、閲覧者に応じたアカウント欄。会員の画像はサーバー側で描いたものを受け取る（SiteAppBar が渡す）。 */

@@ -5,13 +5,14 @@ import { startTransition, useActionState } from "react";
 import * as v from "valibot";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
-import { Notice, Select, Textarea, usePersistedInput, type Option } from "@/components/form";
+import { Notice, Select, Textarea, PersistedInput, type Option } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { recordMaterialAuditAction } from "./audit-actions";
 
 type AuditOutcome = "checked" | "correction_requested" | "hidden";
 
 type MaterialAuditInput = { outcome: AuditOutcome; note: string };
+
 type AuditState = {
   result: Awaited<ReturnType<typeof recordMaterialAuditAction>> | null;
   recordedNote: string;
@@ -28,22 +29,30 @@ export function MaterialAuditForm({ materialId }: { materialId: string }) {
   const form = useForm({ defaultValues: initialValues });
   const { outcome, note } = useStore(form.store, (state) => state.values);
   const router = useRouter();
+
   const [{ result, recordedNote }, record, pending] = useActionState(
     async (previous: AuditState, input: MaterialAuditInput): Promise<AuditState> => {
       const result = await recordMaterialAuditAction({ materialId, ...input });
+
       if (result.ok) router.refresh();
+
       return { result, recordedNote: result.ok ? input.note : previous.recordedNote };
     },
     { result: null, recordedNote: "" },
   );
-  usePersistedInput({
-    name: "material-audit",
-    schema: v.string(),
-    unsaved: note === recordedNote ? null : note,
-    restore: (value) => form.setFieldValue("note", value),
-  });
+
+  const persistedInput = (
+    <PersistedInput
+      name="material-audit"
+      schema={v.string()}
+      unsaved={note === recordedNote ? null : note}
+      restore={(value) => form.setFieldValue("note", value)}
+    />
+  );
+
   return (
     <div className={materialPageStack}>
+      {persistedInput}
       <Select
         label="掲載後の確認結果"
         onValueChange={(value) => {

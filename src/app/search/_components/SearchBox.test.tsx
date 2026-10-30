@@ -1,28 +1,52 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { useQueryStates } from "nuqs";
 import { NuqsTestingAdapter, type UrlUpdateEvent } from "nuqs/adapters/testing";
 import type { ReactElement, ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { materialSearchParsers } from "@/lib/search-query-state";
 import { SearchBox } from "./SearchBox";
 
 const onUrlUpdate = vi.fn<(event: UrlUpdateEvent) => void>();
+
 function renderSearch(element: ReactElement) {
   return render(element, {
     wrapper: ({ children }: { children: ReactNode }) => (
-      <NuqsTestingAdapter onUrlUpdate={onUrlUpdate}>{children}</NuqsTestingAdapter>
+      <NuqsTestingAdapter hasMemory onUrlUpdate={onUrlUpdate}>
+        {children}
+      </NuqsTestingAdapter>
     ),
   });
 }
+
 const props = {
   initialQuery: "",
   selected: [],
   sort: "reviews" as const,
   catalog: { filters: [], makers: [], materials: [{ name: "トマト資材", aliases: [] }] },
 };
+
+function OtherUrlChanges() {
+  const [, setSearch] = useQueryStates(materialSearchParsers);
+
+  return (
+    <>
+      <button type="button" onClick={() => void setSearch({ sort: "newest" })}>
+        新着順
+      </button>
+      <button type="button" onClick={() => void setSearch({ q: "いちご" })}>
+        戻る
+      </button>
+    </>
+  );
+}
+
 const advanceSearch = () =>
   act(async () => {
     await vi.advanceTimersByTimeAsync(301);
   });
+
 const searchInput = () => screen.getByRole("combobox", { name: "資材の検索条件" });
+
 function pickOption(name: string) {
   fireEvent.keyDown(searchInput(), { key: "ArrowDown" });
   fireEvent.click(screen.getByRole("option", { name }));
@@ -49,6 +73,38 @@ describe("資材の入力検索", () => {
         options: expect.objectContaining({ history: "replace", shallow: false, scroll: false }),
       }),
     );
+  });
+  it("入力を待つ間に変えた並び順を戻さない", async () => {
+    renderSearch(
+      <>
+        <SearchBox {...props} />
+        <OtherUrlChanges />
+      </>,
+    );
+    fireEvent.change(searchInput(), { target: { value: "トマト" } });
+    fireEvent.click(screen.getByRole("button", { name: "新着順" }));
+    await advanceSearch();
+    expect(onUrlUpdate.mock.lastCall?.[0].queryString).toBe("?sort=newest&q=トマト");
+  });
+  it("入力を待つ間に別の検索語へ移ったら、古い入力を送らない", async () => {
+    renderSearch(
+      <>
+        <SearchBox {...props} />
+        <OtherUrlChanges />
+      </>,
+    );
+    fireEvent.change(searchInput(), { target: { value: "トマト" } });
+    fireEvent.click(screen.getByRole("button", { name: "戻る" }));
+    await advanceSearch();
+    expect(onUrlUpdate.mock.lastCall?.[0].queryString).toBe("?q=いちご");
+  });
+  it("応答を待つ間に元の検索語へ戻した入力も送る", async () => {
+    renderSearch(<SearchBox {...props} initialQuery="トマト" />);
+    fireEvent.change(searchInput(), { target: { value: "いちご" } });
+    await advanceSearch();
+    fireEvent.change(searchInput(), { target: { value: "トマト" } });
+    await advanceSearch();
+    expect(onUrlUpdate.mock.lastCall?.[0].queryString).toBe("?q=トマト");
   });
   it("日本語変換の途中では検索しない", async () => {
     renderSearch(<SearchBox {...props} />);

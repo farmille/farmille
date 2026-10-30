@@ -13,6 +13,7 @@ import { requireAdmin } from "@/server/auth";
  */
 export async function generateMetadata(): Promise<Metadata> {
   const session = await requireAdmin();
+
   if (!session.ok && session.error !== "unauthorized" && session.error !== "aal2_required") {
     notFound();
   }

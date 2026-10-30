@@ -9,11 +9,17 @@ import { pickReportCover } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
+
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
+
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
+
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
+
 type UsageReportMediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
+
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
+
 type ViewCountRow = Database["public"]["Views"]["view_counts_total"]["Row"];
 
 type ContentType = "article" | "usage_report";
@@ -102,6 +108,7 @@ async function getContentCounts(
 
   for (let start = 0; start < targetIds.length; start += IN_FILTER_CHUNK_SIZE) {
     const ids = targetIds.slice(start, start + IN_FILTER_CHUNK_SIZE);
+
     const [helpfulResult, viewResult] = await Promise.all([
       supabase
         .from("helpful_counts")
@@ -117,11 +124,13 @@ async function getContentCounts(
 
     if (helpfulResult.error !== null) {
       reportQueryError("参考になった件数の取得に失敗", helpfulResult.error);
+
       return fail("internal");
     }
 
     if (viewResult.error !== null) {
       reportQueryError("閲覧数の取得に失敗", viewResult.error);
+
       return fail("internal");
     }
 
@@ -131,6 +140,7 @@ async function getContentCounts(
     for (const row of helpfulRows) {
       if (row.target_id === null || row.helpful_count === null) {
         reportQueryError("参考になった件数にNULLが含まれる", row);
+
         return fail("internal");
       }
 
@@ -140,6 +150,7 @@ async function getContentCounts(
     for (const row of viewRows) {
       if (row.target_id === null || row.view_count === null) {
         reportQueryError("閲覧数にNULLが含まれる", row);
+
         return fail("internal");
       }
 
@@ -157,6 +168,7 @@ export async function listPublishedUsageReportsByMaterial(
   options: PublishedUsageReportOptions = {},
 ): Promise<Result<MaterialContentList<PublishedUsageReport>>> {
   const supabase = await createServerSupabase();
+
   return listPublishedUsageReportsByMaterialWithSupabase(supabase, materialId, options);
 }
 
@@ -213,15 +225,18 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
 
   if (error !== null) {
     reportQueryError("公開実証詳細レポートの取得に失敗", error);
+
     return fail("internal");
   }
 
   if (count === null) {
     reportQueryError("公開実証詳細レポートの総件数が返されなかった", { materialId });
+
     return fail("internal");
   }
 
   const rows: UsageReportQueryRow[] = data;
+
   const counts = await getContentCounts(
     supabase,
     "usage_report",
@@ -233,12 +248,16 @@ export async function listPublishedUsageReportsByMaterialWithSupabase(
   }
 
   const items: PublishedUsageReport[] = [];
+
   for (const { media, author: authorRow, crop_name_other, ...report } of rows) {
     const author = postAuthor(authorRow);
+
     if (author === null) {
       reportQueryError("公開実証詳細レポートの投稿者が欠落", { reportId: report.id });
+
       return fail("internal");
     }
+
     items.push({
       ...report,
       author,
@@ -256,6 +275,7 @@ export async function listPublishedArticlesByMaterial(
   materialId: string,
 ): Promise<Result<MaterialContentList<PublishedMaterialArticle>>> {
   const supabase = await createServerSupabase();
+
   return listPublishedArticlesByMaterialWithSupabase(supabase, materialId);
 }
 
@@ -287,11 +307,13 @@ export async function listPublishedArticlesByMaterialWithSupabase(
 
   if (error !== null) {
     reportQueryError("公開記事の取得に失敗", error);
+
     return fail("internal");
   }
 
   if (count === null) {
     reportQueryError("公開記事の総件数が返されなかった", { materialId });
+
     return fail("internal");
   }
 
@@ -301,6 +323,7 @@ export async function listPublishedArticlesByMaterialWithSupabase(
   for (const relation of relationRows) {
     if (relation.articles === null) {
       reportQueryError("公開記事の内部結合結果がNULL", relation);
+
       return fail("internal");
     }
 
@@ -333,6 +356,7 @@ export async function getReviewRatingDistribution(
   materialId: string,
 ): Promise<Result<ReviewRatingDistribution>> {
   const supabase = await createServerSupabase();
+
   return getReviewRatingDistributionWithSupabase(supabase, materialId);
 }
 
@@ -352,6 +376,7 @@ export async function getReviewRatingDistributionWithSupabase(
 
   if (error !== null) {
     reportQueryError("星分布用感想口コミの取得に失敗", error);
+
     return fail("internal");
   }
 

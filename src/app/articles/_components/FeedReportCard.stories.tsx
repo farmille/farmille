@@ -32,9 +32,13 @@ const meta = {
     ),
   },
 } satisfies Meta<typeof FeedReportCard>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
+
 export const LongTitleAndAuthor: Story = {
   args: {
     title: "定植直後から3回散布し、梅雨明けの高温でも株の勢いが落ちにくかった実証の記録",
@@ -42,5 +46,6 @@ export const LongTitleAndAuthor: Story = {
     crop: "中玉トマト（フルティカ）",
   },
 };
+
 export const WithoutCropAndDate: Story = { args: { crop: null, publishedAt: undefined } };
 export const WithCover: Story = { args: { coverSrc: "/missing-material-image.png" } };

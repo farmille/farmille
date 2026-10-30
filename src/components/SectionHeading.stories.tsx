@@ -11,6 +11,7 @@ const meta = {
 } satisfies Meta<typeof SectionHeading>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Standard: Story = {

@@ -14,6 +14,7 @@ test("@smoke 公開状態、作目検索、並び替え操作と詳細への遷�
   const crops = await cropsByNames(["いちご", "水稲"]);
   const strawberry = crops.find((crop) => crop.name === "いちご");
   const rice = crops.find((crop) => crop.name === "水稲");
+
   if (strawberry === undefined || rice === undefined)
     throw new Error("検索テスト用の作目が見つかりません。");
 
@@ -31,6 +32,7 @@ test("@smoke 公開状態、作目検索、並び替え操作と詳細への遷�
     ]);
     await archiveMaterial(matchingMaterial.id);
     const adminContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+
     try {
       const adminPage = await adminContext.newPage();
       await loginAdminAndEnrollMfa(

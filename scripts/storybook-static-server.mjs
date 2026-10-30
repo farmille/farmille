@@ -7,12 +7,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const port = Number(process.argv[2]);
+
 if (!Number.isInteger(port) || port <= 0 || port > 65_535) {
   console.error("使い方：node scripts/storybook-static-server.mjs <port>");
   process.exit(1);
 }
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../storybook-static");
+
 if (!existsSync(path.join(root, "index.json"))) {
   console.error(
     `${root} に Storybook の静的ビルドがありません。先に pnpm build-storybook を実行してください。`,
@@ -51,13 +53,16 @@ const server = http.createServer(async (request, response) => {
     if (!filePath.startsWith(root + path.sep)) {
       response.writeHead(403);
       response.end("forbidden");
+
       return;
     }
 
     const fileStat = await stat(filePath).catch(() => null);
+
     if (fileStat === null || !fileStat.isFile()) {
       response.writeHead(404);
       response.end("not found");
+
       return;
     }
 

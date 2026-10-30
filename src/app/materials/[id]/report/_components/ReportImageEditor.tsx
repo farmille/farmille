@@ -9,8 +9,7 @@ import { Icon } from "@/components/Icon";
 import { css, cva } from "../../../../../../styled-system/css";
 
 import { cropCanvas, redactCanvas, rotateCanvas, type Rect } from "./report-page-images";
-
-import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
+import { ReportLeaveWarning } from "./ReportLeaveWarning";
 
 const stage = css({
   display: "flex",
@@ -123,11 +122,13 @@ const toolRecipe = cva({
 const done = css({ px: "4", pt: "2", display: "flex", justifyContent: "flex-end" });
 
 type Mode = "" | "crop" | "redact";
+
 type Drag =
   | { kind: "new"; from: Point }
   | { kind: "move"; dx: number; dy: number }
   | { kind: "corner"; fixed: Point }
   | { kind: "redact"; from: Point; rect: Rect | null };
+
 type Point = { x: number; y: number };
 
 function rectBetween(a: Point, b: Point): Rect {
@@ -170,20 +171,20 @@ export function ReportImageEditor({
     current,
     (canvas) => (canvas === null ? [] : [canvas]),
   );
+
   const [mode, setMode] = useReducer((_current: Mode, next: Mode) => next, "");
   const [crop, setCrop] = useReducer((_current: Rect | null, next: Rect | null) => next, null);
   const [drag, setDrag] = useReducer((_current: Drag | null, next: Drag | null) => next, null);
   const view = useRef<HTMLCanvasElement>(null);
   const top = stack.at(-1) ?? null;
 
-  useReportLeaveWarning(
-    open && (top !== current || (mode === "crop" && crop !== null) || drag !== null),
-  );
+  const unsaved = open && (top !== current || (mode === "crop" && crop !== null) || drag !== null);
 
   // ポップアップの中身は後から描かれるので、canvas が置かれた時と画像が変わった時の両方で描く
   const drawTo = useCallback(
     (canvas: HTMLCanvasElement | null) => {
       view.current = canvas;
+
       if (canvas === null || top === null) return;
       canvas.width = top.width;
       canvas.height = top.height;
@@ -195,31 +196,40 @@ export function ReportImageEditor({
   function push(next: HTMLCanvasElement) {
     changeStack({ type: "push", canvas: next });
   }
+
   function pointOf(event: PointerEvent<HTMLDivElement>): Point {
     const canvas = view.current;
+
     if (canvas === null || top === null) return { x: 0, y: 0 };
     const box = canvas.getBoundingClientRect();
+
     return {
       x: Math.min(top.width, Math.max(0, ((event.clientX - box.left) * top.width) / box.width)),
       y: Math.min(top.height, Math.max(0, ((event.clientY - box.top) * top.height) / box.height)),
     };
   }
+
   function startCrop() {
     if (top === null) return;
     setMode("crop");
     setCrop({ x: top.width * 0.05, y: top.height * 0.05, w: top.width * 0.9, h: top.height * 0.9 });
   }
+
   function onDown(event: PointerEvent<HTMLDivElement>) {
     if (mode === "") return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     const point = pointOf(event);
+
     if (mode === "redact") {
       setDrag({ kind: "redact", from: point, rect: null });
+
       return;
     }
+
     if (crop === null) return;
     const corner = event.target instanceof HTMLElement ? event.target.dataset.corner : undefined;
+
     if (corner !== undefined)
       setDrag({
         kind: "corner",
@@ -232,9 +242,11 @@ export function ReportImageEditor({
       setDrag({ kind: "move", dx: point.x - crop.x, dy: point.y - crop.y });
     else setDrag({ kind: "new", from: point });
   }
+
   function onMove(event: PointerEvent<HTMLDivElement>) {
     if (drag === null || top === null) return;
     const point = pointOf(event);
+
     if (drag.kind === "redact") setDrag({ ...drag, rect: rectBetween(drag.from, point) });
     else if (drag.kind === "move" && crop !== null)
       setCrop({
@@ -245,14 +257,18 @@ export function ReportImageEditor({
     else if (drag.kind === "corner") setCrop(rectBetween(drag.fixed, point));
     else if (drag.kind === "new") setCrop(rectBetween(drag.from, point));
   }
+
   function onUp() {
     if (drag === null || top === null) return;
     setDrag(null);
+
     if (drag.kind === "redact") {
       if (drag.rect !== null && drag.rect.w > 6 && drag.rect.h > 6)
         push(redactCanvas(top, drag.rect));
+
       return;
     }
+
     if (crop !== null && (crop.w < 20 || crop.h < 20))
       setCrop({
         x: top.width * 0.05,
@@ -279,6 +295,7 @@ export function ReportImageEditor({
       title="画像の編集"
       closeLabel="キャンセル"
     >
+      {unsaved && <ReportLeaveWarning />}
       <div className={stage}>
         <div className={done}>
           <Button

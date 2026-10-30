@@ -54,6 +54,7 @@ const cardRecipe = sva({
 });
 
 const coverImageStyle = css({ display: "block", w: "full", h: "full", objectFit: "cover" });
+
 const bylineStyle = css({
   mt: "auto",
   pt: "2",
@@ -63,6 +64,7 @@ const bylineStyle = css({
   fontSize: "sm",
   color: "text.subtle",
 });
+
 const authorStyle = css({
   minW: "0",
   overflow: "hidden",
@@ -71,6 +73,7 @@ const authorStyle = css({
   fontWeight: "normal",
   color: "text.muted",
 });
+
 type UsageReportCardProps = {
   href: string;
   title: string;
@@ -93,6 +96,7 @@ export function UsageReportCard({
   layout,
 }: UsageReportCardProps) {
   const classes = cardRecipe({ layout });
+
   return (
     <article className={classes.root}>
       <Link href={href} className={classes.cover} aria-label={title}>

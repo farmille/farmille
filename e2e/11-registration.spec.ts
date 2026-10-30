@@ -14,6 +14,7 @@ test("メール確認、登録完了、ログインと所属の入力", async ({
   const handle = `E2E_${token}`.slice(0, 30);
   const password = "Farmille-E2E-Signup-2026!";
   const existing = await createGeneralUser("duplicate-handle");
+
   try {
     await page.goto("/signup/complete");
     await expect(page).toHaveURL(/\/signup\/general\?error=expired_link/);
@@ -23,29 +24,35 @@ test("メール確認、登録完了、ログインと所属の入力", async ({
     await page.getByLabel("メールアドレス").fill(email);
     await page.getByRole("button", { name: "認証メールを送信" }).click();
     await expect(page.getByText("メールをご確認ください", { exact: true })).toBeVisible();
+
     const first = await registrationMail(
       email,
       "【Farmille】メールアドレスの確認（会員登録はまだ完了していません）",
     );
+
     await expect(page.getByLabel("メールアドレス")).toHaveValue(email);
     // ローカルAuthの再送間隔（1秒）を超えてから、別のリンクを発行する。
     await page.waitForTimeout(1100);
     await page.getByRole("button", { name: "認証メールを再送" }).click();
+
     const second = await registrationMail(
       email,
       "【Farmille】メールアドレスの確認（会員登録はまだ完了していません）",
       first.id,
     );
+
     const link = registrationLink(second.Text);
     const expired = new URL(link);
     expired.searchParams.set("token_hash", "invalid-registration-token");
     await page.goto(expired.toString());
     await expect(page).toHaveURL(/error=expired_link/);
     await expect(page.getByLabel("ニックネーム")).toHaveCount(0);
+
     // 別のブラウザでも、メール内リンクだけで登録を継続できる。
     const other = await browser.newContext({
       viewport: page.viewportSize() ?? { width: 375, height: 812 },
     });
+
     const otherPage = await other.newPage();
     const withoutFlag = new URL(link);
     withoutFlag.searchParams.delete("registration");

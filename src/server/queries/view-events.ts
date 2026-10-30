@@ -36,6 +36,7 @@ export async function recordViewEvent({
   }
 
   const client = supabase ?? (await createServerSupabase());
+
   const { error } = await client.from("view_events").insert({
     target_type: targetType,
     target_id: targetId,
@@ -44,6 +45,7 @@ export async function recordViewEvent({
 
   if (error !== null) {
     reportViewError("閲覧イベントの記録に失敗", error);
+
     return fail("internal");
   }
 

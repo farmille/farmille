@@ -9,18 +9,22 @@ import { Stars } from "./CardParts";
 
 const summaryStyle = css({ display: "flex", alignItems: "center", gap: "4" });
 const averageColumnStyle = css({ textAlign: "center" });
+
 const averageStyle = css({
   fontSize: "display",
   fontWeight: "extrabold",
   lineHeight: "none",
   fontVariantNumeric: "tabular-nums",
 });
+
 const countStyle = css({
   textStyle: "note",
   color: "text.subtle",
   fontVariantNumeric: "tabular-nums",
 });
+
 const barsStyle = css({ flex: "1", minW: "0", display: "flex", flexDirection: "column", gap: "1" });
+
 const rowStyle = css({
   display: "flex",
   alignItems: "center",
@@ -29,6 +33,7 @@ const rowStyle = css({
   color: "text.subtle",
   fontVariantNumeric: "tabular-nums",
 });
+
 const trackStyle = css({
   flex: "1",
   h: "1.5",
@@ -36,6 +41,7 @@ const trackStyle = css({
   borderRadius: "pill",
   overflow: "hidden",
 });
+
 const fillStyle = css({
   display: "block",
   w: "var(--bar-width)",
@@ -43,6 +49,7 @@ const fillStyle = css({
   bg: "accent.star",
   borderRadius: "pill",
 });
+
 // 「100%」まで1行に収まる幅を取り、数字と「%」の間で折り返さない
 const percentStyle = css({ w: "9", flexShrink: "0", textAlign: "right", whiteSpace: "nowrap" });
 
@@ -54,6 +61,7 @@ type RatingSummaryProps = {
 
 function BarRow({ rating, count, total }: { rating: number; count: number; total: number }) {
   const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+
   return (
     <div className={rowStyle} role="img" aria-label={`星${rating}の感想口コミ ${count}件`}>
       <span>

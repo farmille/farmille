@@ -89,8 +89,10 @@ export async function generateMetadata({ params }: ArticleDetailPageProps): Prom
 export default async function ArticleDetailPage({ params }: ArticleDetailPageProps) {
   const { id } = await params;
   const [article, session] = await Promise.all([loadArticle(id), getSessionUser()]);
+
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
+
   const bodyHtml = renderMarkdownToHtml(article.body);
   const helpfulVotedResult = await isHelpfulVotedByViewer(viewerUserId, "article", article.id);
 
@@ -114,6 +116,7 @@ export default async function ArticleDetailPage({ params }: ArticleDetailPagePro
 
   const sellerName = article.seller.official_name ?? "メーカー";
   const sellerPath = `/sellers/${article.seller.id}`;
+
   const articleJsonLd = createArticleJsonLd({
     id: article.id,
     route: "articles",

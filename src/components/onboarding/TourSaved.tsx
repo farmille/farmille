@@ -41,11 +41,13 @@ const checkStyle = css({
   bg: "primary.700",
   color: "text.inverse",
 });
+
 const titleStyle = css({ textStyle: "body", fontWeight: "bold" });
 
 /** 保存できたことを、チェックの印と一緒に短く伝える。 */
 export function TourSaved({ title }: { title: string }) {
   const entered = useEntered();
+
   return (
     <div className={boxStyle} data-entered={entered ? "" : undefined} role="status">
       <span className={checkStyle}>

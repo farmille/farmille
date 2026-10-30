@@ -60,6 +60,7 @@ type SellerPageProps = {
 export async function generateMetadata({ params }: SellerPageProps): Promise<Metadata> {
   const { id } = await params;
   const { seller } = await loadSellerOrNotFound(id);
+
   const description =
     seller.profileText ?? `${seller.officialName}の掲載資材と投稿記事を確認できます。`;
 

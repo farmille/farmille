@@ -9,6 +9,7 @@ const meta = {
 } satisfies Meta<typeof MaterialSearchForm>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Empty: Story = {};

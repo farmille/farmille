@@ -13,9 +13,13 @@ import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
+
 type ReviewPhotoRow = Database["public"]["Tables"]["review_photos"]["Row"];
+
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
+
 type CropGroupRow = Database["public"]["Tables"]["crop_groups"]["Row"];
+
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
 type ReviewFields = Pick<
@@ -123,6 +127,7 @@ async function listPublishedReviewOrder(
 
   if (error !== null) {
     reportQueryError("参考順用の感想口コミ取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -137,6 +142,7 @@ async function getHelpfulCounts(
 
   for (let start = 0; start < reviewIds.length; start += IN_FILTER_CHUNK_SIZE) {
     const ids = reviewIds.slice(start, start + IN_FILTER_CHUNK_SIZE);
+
     const { data, error } = await supabase
       .from("helpful_counts")
       .select("target_id, helpful_count")
@@ -145,6 +151,7 @@ async function getHelpfulCounts(
 
     if (error !== null) {
       reportQueryError("参考になった件数の取得に失敗", error);
+
       return fail("internal");
     }
 
@@ -153,6 +160,7 @@ async function getHelpfulCounts(
     for (const row of helpfulRows) {
       if (row.target_id === null || row.helpful_count === null) {
         reportQueryError("参考になった件数にNULLが含まれる", row);
+
         return fail("internal");
       }
 
@@ -173,12 +181,15 @@ function toReviewListItem(
 
   if (crops === null) {
     reportQueryError("感想口コミの作目関連が欠落", { reviewId: review.id });
+
     return null;
   }
 
   const author = postAuthor(authorRow);
+
   if (author === null) {
     reportQueryError("感想口コミの投稿者が欠落", { reviewId: review.id });
+
     return null;
   }
 
@@ -222,6 +233,7 @@ async function listByHelpfulCount(
         left.id.localeCompare(right.id),
     )
     .map(({ id }) => id);
+
   const pageReviewIds = sortedReviewIds.slice(range.from, range.to + 1);
   const total = sortedReviewIds.length;
 
@@ -244,6 +256,7 @@ async function listByHelpfulCount(
 
   if (error !== null) {
     reportQueryError("参考順感想口コミ詳細の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -262,10 +275,12 @@ async function listByHelpfulCount(
 
     if (review === undefined) {
       reportQueryError("参考順感想口コミの詳細が取得結果にない", { reviewId });
+
       return fail("internal");
     }
 
     const item = toReviewListItem(review, helpfulCounts.data, votedIds.data);
+
     if (item === null) return fail("internal");
     items.push(item);
   }
@@ -298,7 +313,9 @@ export async function listRecentReviews({
   }
 
   const supabase = await createServerSupabase();
+
   if (ids?.length === 0) return succeed([]);
+
   let query = supabase
     .from("reviews")
     .select(
@@ -319,11 +336,14 @@ export async function listRecentReviews({
 
   if (error !== null) {
     reportQueryError("新着感想口コミの取得に失敗", error);
+
     return fail("internal");
   }
 
   type RecentRow = ReviewQueryRow & { material: { name: string } | null };
+
   const rows: RecentRow[] = data;
+
   const helpfulCounts = await getHelpfulCounts(
     supabase,
     rows.map(({ id }) => id),
@@ -334,21 +354,25 @@ export async function listRecentReviews({
   }
 
   const items: RecentReviewItem[] = [];
+
   const votedIds = await getViewerHelpfulVotes(
     viewerUserId,
     "review",
     rows.map((row) => row.id),
   );
+
   if (!votedIds.ok) return votedIds;
 
   for (const row of rows) {
     if (row.material === null) {
       reportQueryError("新着感想口コミに資材名が無い", { reviewId: row.id });
+
       return fail("internal");
     }
 
     const { material, ...review } = row;
     const item = toReviewListItem(review, helpfulCounts.data, votedIds.data);
+
     if (item === null) return fail("internal");
 
     items.push({
@@ -397,6 +421,7 @@ export async function listReviewsByMaterial(
 
   if (error !== null) {
     reportQueryError("感想口コミ一覧の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -406,10 +431,12 @@ export async function listReviewsByMaterial(
       page,
       sort,
     });
+
     return fail("internal");
   }
 
   const reviews: ReviewQueryRow[] = data;
+
   const helpfulCounts = await getHelpfulCounts(
     supabase,
     reviews.map(({ id }) => id),
@@ -430,8 +457,10 @@ export async function listReviewsByMaterial(
   }
 
   const items: ReviewListItem[] = [];
+
   for (const review of reviews) {
     const item = toReviewListItem(review, helpfulCounts.data, votedIds.data);
+
     if (item === null) return fail("internal");
     items.push(item);
   }
@@ -448,6 +477,7 @@ export async function listReviewsByMaterial(
 /** 感想口コミ作目候補を作物群・作物の表示順で返す。 */
 export async function listReviewCropOptions(): Promise<Result<ReviewCropOption[]>> {
   const supabase = await createServerSupabase();
+
   const { data, error } = await selectAllRows((from, to) =>
     supabase
       .from("crops")
@@ -471,6 +501,7 @@ export async function listReviewCropOptions(): Promise<Result<ReviewCropOption[]
 
   if (error !== null) {
     reportQueryError("感想口コミ作目候補の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -478,6 +509,7 @@ export async function listReviewCropOptions(): Promise<Result<ReviewCropOption[]
 
   if (rows.some(({ group }) => group === null)) {
     reportQueryError("感想口コミ作目候補の作物群が欠落", rows);
+
     return fail("internal");
   }
 
@@ -519,6 +551,7 @@ export async function findOwnReviewIdByMaterial(
   userId: string,
 ): Promise<Result<string | null>> {
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("reviews")
     .select("id")
@@ -530,6 +563,7 @@ export async function findOwnReviewIdByMaterial(
 
   if (error !== null) {
     reportQueryError("投稿済み感想口コミの確認に失敗", error);
+
     return fail("internal");
   }
 
@@ -543,6 +577,7 @@ export async function getReviewForEdit(
   userId: string,
 ): Promise<Result<ReviewEditorData>> {
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("reviews")
     .select(
@@ -575,6 +610,7 @@ export async function getReviewForEdit(
 
   if (error !== null) {
     reportQueryError("編集対象感想口コミの取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -588,6 +624,7 @@ export async function getReviewForEdit(
 
   if (crops === null) {
     reportQueryError("編集対象感想口コミの作目関連が欠落", { reviewId });
+
     return fail("internal");
   }
 

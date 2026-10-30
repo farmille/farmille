@@ -120,13 +120,17 @@ describe("RegistrationEmailForm", () => {
     const user = userEvent.setup();
     let finishResend: (state: AuthFormState) => void = () => {};
     let sends = 0;
+
     async function sendThenWait(): Promise<AuthFormState> {
       sends += 1;
+
       if (sends === 1) return sent;
+
       return new Promise((resolve) => {
         finishResend = resolve;
       });
     }
+
     render(<RegistrationEmailForm action={sendThenWait} />);
     await user.type(screen.getByLabelText(/^メールアドレス/), "farmer@example.test");
     await user.click(screen.getByRole("button", { name: "認証メールを送信" }));

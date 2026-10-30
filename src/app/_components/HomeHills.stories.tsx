@@ -10,6 +10,7 @@ const meta = {
 } satisfies Meta<typeof HomeHills>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const IntoPaper: Story = {

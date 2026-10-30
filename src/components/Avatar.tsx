@@ -49,6 +49,7 @@ export type AvatarProps = {
 /** 横に表示名を添える前提の装飾なので、支援技術には読み上げさせない。 */
 export function Avatar({ name, src, size = "md" }: AvatarProps) {
   const pixels = AVATAR_PIXELS[size];
+
   return (
     <span className={avatarRecipe({ size })} aria-hidden="true">
       {src ? (

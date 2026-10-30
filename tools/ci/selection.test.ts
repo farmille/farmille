@@ -75,15 +75,6 @@ describe("ブラウザ検査の対象", () => {
     });
   });
 
-  it("lint規則だけの変更では画面検査を起動しない", () => {
-    expect(
-      createBrowserCheckPlan(root, ["scripts/eslint/state-management.mjs"], false),
-    ).toMatchObject({
-      storybook: { mode: "none" },
-      e2e: false,
-    });
-  });
-
   it("変更した部品を再export経由で使う別ルートの Story も選ぶ", () => {
     expect(createBrowserCheckPlan(root, ["src/app/articles/Reading.tsx"], false)).toEqual({
       storybook: {

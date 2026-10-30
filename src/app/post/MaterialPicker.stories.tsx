@@ -38,6 +38,7 @@ const meta = {
 } satisfies Meta<typeof MaterialPicker>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Results: Story = {};

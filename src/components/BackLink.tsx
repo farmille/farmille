@@ -37,17 +37,23 @@ const NavigationSchema = v.object({
  */
 function stepsBackInThisSite(): number | null {
   const navigation = "navigation" in window ? window.navigation : undefined;
+
   if (!v.is(NavigationSchema, navigation)) return null;
   const entries: unknown = navigation.entries();
+
   if (!v.is(v.array(HistoryEntrySchema), entries)) return null;
   const currentIndex = navigation.currentEntry.index;
   const current = entries[currentIndex];
+
   if (current === undefined) return null;
   const path = new URL(current.url).pathname;
+
   const target = entries.slice(0, currentIndex).findLastIndex(({ url }) => {
     const entryPath = new URL(url).pathname;
+
     return entryPath !== path && !entryPath.startsWith(`${path}/`) && !isAuthPath(entryPath);
   });
+
   return target === -1 ? null : currentIndex - target;
 }
 
@@ -76,6 +82,7 @@ export function BackLink({ href, className, "aria-label": ariaLabel, children }:
       onClick={(event) => {
         if (!isPlainClick(event)) return;
         const steps = stepsBackInThisSite();
+
         if (steps === null) return;
         event.preventDefault();
         window.history.go(-steps);

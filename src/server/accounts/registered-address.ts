@@ -16,11 +16,15 @@ export function adminRegisteredAddressStore(): RegisteredAddressStore {
         .select("prefecture_code")
         .eq("user_id", userId)
         .maybeSingle();
+
       if (error !== null) {
         console.error("[accounts] 登録住所の取得に失敗", error.code);
+
         return fail("internal");
       }
+
       if (data === null) return succeed(null);
+
       return succeed({ prefectureCode: data.prefecture_code });
     },
   };
@@ -32,8 +36,11 @@ export async function loadRegisteredAddress(
 ): Promise<Result<RegisteredAddress>> {
   if (!session.ok) return session;
   const found = await store.findByUserId(session.data.userId);
+
   if (!found.ok) return found;
+
   if (found.data === null) return fail("not_found");
+
   return succeed(found.data);
 }
 

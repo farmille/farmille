@@ -7,6 +7,7 @@ afterEach(() => vi.unstubAllEnvs());
 
 it("異なる送信元を拒否し、no-referrerでも同一オリジンのフォームだけ受け付ける", async () => {
   vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://www.farmille.com");
+
   for (const [origin, site, status] of [
     ["https://unrelated.example", "cross-site", 403],
     ["null", "cross-site", 403],
@@ -20,6 +21,7 @@ it("異なる送信元を拒否し、no-referrerでも同一オリジンのフ�
       headers: { origin, "sec-fetch-site": site },
       body: new URLSearchParams({ token: "invalid" }),
     });
+
     expect((await POST(request)).status).toBe(status);
   }
 });

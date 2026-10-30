@@ -397,6 +397,7 @@ export function ManufacturerLanding({ applyHref }: ManufacturerLandingProps) {
 
         {MANUFACTURER_ONBOARDING_STEPS.map((step, index) => {
           const target = step.action === null ? null : stepLinks[step.action];
+
           return (
             <article className={stepCardRecipe({ actor: step.actor })} key={step.title}>
               <span className={stepLabelRecipe({ actor: step.actor })}>STEP{index + 1}</span>
@@ -801,6 +802,7 @@ export function ProcedureRequirements({
   spacing?: "tight" | "standard" | "open";
 }) {
   const procedure = PROCEDURES[slug];
+
   return (
     <div className={requirementsRecipe({ spacing })}>
       <div className={requirementBoxStyle}>

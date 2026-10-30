@@ -142,20 +142,27 @@ export function ReportPagePreview({
 }) {
   const today = new Date();
   const variety = input.varietyUnknown ? "" : reportVarietyNames(input);
+
   const prefecture =
     PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name ?? "（未選択）";
+
   const city = input.showCity && input.city.trim() ? ` ${input.city.trim()}` : "";
+
   const stages = input.timingStages
     .toSorted((a, b) => a - b)
     .map((stage) => APPLICATION_TIMINGS[stage])
     .join("、");
+
   const shown = items.filter((item) => item.mode !== "");
   const layout = reportPlotLayout(input, materialName);
+
   // 以前の入力画面で節ごとに添えた写真は、公開記事と同じく節の最後に出す
   const legacy = (section: UsageReportInput["media"][number]["section"]) => (
     <ReportFigures media={reportLegacyMedia(input).filter((media) => media.section === section)} />
   );
+
   const documentMedia = reportLegacyMedia(input).filter((media) => media.section === "documents");
+
   // 印は投稿者のプレビューにだけ出す（公開記事の部品には渡さない）
   const conditionMarks: ReportMarkField[] = [
     { key: "prefectureCode", label: "地域" },
@@ -167,6 +174,7 @@ export function ReportPagePreview({
     { key: "timingStages", label: "施用時期" },
     { key: "timingNote", label: "処理日と生育状況" },
   ];
+
   const plotMarks: ReportMarkField[] = [
     { key: "commonPlotDescription", label: "全区に共通の説明" },
     ...input.comparedMaterials.map(
@@ -182,6 +190,7 @@ export function ReportPagePreview({
       })),
     ),
   ];
+
   return (
     <Dialog
       open={open}
@@ -293,6 +302,7 @@ export function ReportPagePreview({
               <ul className={documentList}>
                 {input.documents.map((document) => {
                   const url = documentUrls.find((item) => item.id === document.id)?.url;
+
                   return (
                     <li key={document.id}>
                       {url ? (

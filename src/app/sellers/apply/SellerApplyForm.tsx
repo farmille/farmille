@@ -48,13 +48,18 @@ export function SellerApplyForm() {
       inviteCode: "",
     },
   });
+
   const values = useStore(form.store, (state) => state.values);
+
   const [state, formAction] = useActionState(async (previous: AuthFormState, data: FormData) => {
     const result = await sellerApplyAction(previous, data);
     const submitted = submittedValuesOf(result);
+
     for (const name of applicationFields) form.setFieldValue(name, submitted[name] ?? "");
+
     return result;
   }, initialAuthFormState);
+
   const [inviteOpen, setInviteOpen] = useReducer((_state: boolean, next: boolean) => next, false);
 
   return (
@@ -65,6 +70,7 @@ export function SellerApplyForm() {
       onRestore={(restored) => {
         for (const name of applicationFields)
           form.setFieldValue(name, restored.get(name)?.[0] ?? "");
+
         if (restored.get("inviteCode")?.[0]) setInviteOpen(true);
       }}
     >

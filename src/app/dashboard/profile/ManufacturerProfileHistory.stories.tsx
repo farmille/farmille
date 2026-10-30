@@ -27,7 +27,10 @@ const meta = {
     ],
   },
 } satisfies Meta<typeof ManufacturerProfileHistory>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
 export const Empty: Story = { args: { versions: [] } };

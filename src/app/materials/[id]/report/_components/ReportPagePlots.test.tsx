@@ -31,6 +31,7 @@ describe("組み合わせの表を出している間の区の追加", () => {
 
   it("区が上限を超える追加は断って案内し、書いた名前を残す", () => {
     let input = varietyReport;
+
     for (
       let i = 0;
       input.plots.length + varietyReport.varieties.length <= REPORT_PLOT_LIMIT;

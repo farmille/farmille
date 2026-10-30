@@ -31,9 +31,11 @@ const router = {
  */
 function pendingAccount() {
   let pending = true;
+
   let settle: (finished: boolean) => void = () => {
     throw new Error("終了の処理が始まっていません。");
   };
+
   const finish = vi.fn(
     (userId: string) =>
       new Promise<boolean>((resolve) => {
@@ -43,10 +45,12 @@ function pendingAccount() {
             pending = false;
             clearOnboarding(window.localStorage);
           }
+
           resolve(finished);
         };
       }),
   );
+
   return {
     findPendingUser: async () => (pending ? USER_ID : null),
     finish,

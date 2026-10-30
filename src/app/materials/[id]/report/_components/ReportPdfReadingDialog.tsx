@@ -2,8 +2,7 @@
 
 import { startTransition, useActionState, useReducer } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
-import { useReportReadingProgress } from "@/lib/hooks/use-report-reading-progress";
-import { useRecaptcha } from "@/lib/hooks/use-recaptcha";
+import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 
 import { readPdfIntoReportAction } from "@/app/materials/[id]/report/new/actions";
 import { Button } from "@/components/Button";
@@ -16,7 +15,7 @@ import {
   pdfReadingTrialError,
   type PdfReadingResult,
 } from "@/lib/pdf-reading";
-import { executeRecaptcha } from "@/lib/recaptcha-client";
+import { executeRecaptcha, loadRecaptcha } from "@/lib/recaptcha-client";
 import { REPORT_PDF_LIMITS, type UsageReportInput } from "@/lib/usage-report";
 import { errorMessageJa } from "@/server/errors";
 
@@ -59,6 +58,18 @@ const steps = css({
 
 const elapsed = css({ m: "0", textStyle: "note", color: "text.muted" });
 
+/** 読み取りの間だけ置き、経過秒数を1秒ごとに描き直す。 */
+function ElapsedSeconds({ startedAt }: { startedAt: number }) {
+  const [now, setNow] = useReducer((_current: number, next: number) => next, startedAt);
+  useMountEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+
+    return () => window.clearInterval(timer);
+  });
+
+  return <p className={elapsed}>{Math.max(0, Math.round((now - startedAt) / 1000))}秒経過</p>;
+}
+
 const TRIAL_GUIDE =
   "PDFの中での資材の呼び名とこの資材の関係（例：高活性腐植資材区がこの資材）、作物と品種（例：キャベツの新藍）、試験の番号（例：試験2）を書きます。";
 
@@ -95,6 +106,7 @@ export function ReportPdfReadingDialog({
     trial: defaultTrial,
     consent: false,
   };
+
   const form = useForm({ defaultValues });
   const { file, trial, consent } = useStore(form.store, (state) => state.values);
   const setFile = (value: File | null) => form.setFieldValue("file", value);
@@ -102,25 +114,35 @@ export function ReportPdfReadingDialog({
   const setConsent = (value: boolean) => form.setFieldValue("consent", value);
   const [tried, setTried] = useReducer((_current: boolean, next: boolean) => next, false);
   const [phase, setPhase] = useReducer((_current: Phase, next: Phase) => next, "idle");
+
   const [problem, setProblem] = useReducer(
     (_current: string | null, next: string | null) => next,
     null,
   );
+
   const [startedAt, setStartedAt] = useReducer((_current: number, next: number) => next, 0);
-  useRecaptcha(siteKey);
-  const { now, setNow } = useReportReadingProgress(phase !== "idle" && phase !== "checking");
+  useMountEffect(() => {
+    // 先読みの失敗は操作を妨げず、送信時のexecuteRecaptchaで再試行して利用者に知らせる。
+    void loadRecaptcha(siteKey).catch(() => undefined);
+  });
 
   async function choose(next: File | undefined) {
     setFile(null);
     setProblem(null);
+
     if (next === undefined) return;
+
     if (!isPdf(next) || next.size > REPORT_PDF_LIMITS.bytes) {
       setProblem(isPdf(next) ? LIMIT_MESSAGE : "PDFファイルを選んでください。");
+
       return;
     }
+
     setPhase("checking");
+
     try {
       const pages = await countPdfPages(next);
+
       if (pages > REPORT_PDF_LIMITS.pages) setProblem(LIMIT_MESSAGE);
       else setFile(next);
     } catch {
@@ -132,10 +154,10 @@ export function ReportPdfReadingDialog({
 
   async function performRead(file: File, trial: string): Promise<PdfReadingResult> {
     setStartedAt(Date.now());
-    setNow(Date.now());
     let result: PdfReadingResult;
     // Server Action を呼ぶ前に止めたら、上げた PDF はサーバーが消さないので、ここで消す
     let unsent: string | null = null;
+
     try {
       setPhase("uploading");
       const uploadPath = await uploadPdfForReading(file, userId);
@@ -153,6 +175,7 @@ export function ReportPdfReadingDialog({
         trial: trial.trim(),
         consent: true,
       });
+
       // 読み取りの前に断られると、サーバーは PDF を消さない（消してあれば何もしない）
       if (!result.ok) await discardPdfForReading(uploadPath);
     } catch {
@@ -169,7 +192,9 @@ export function ReportPdfReadingDialog({
     } finally {
       setPhase("idle");
     }
+
     onRead(result);
+
     return result;
   }
 
@@ -178,21 +203,26 @@ export function ReportPdfReadingDialog({
     { file: File; trial: string }
   >(async (_previous, request) => {
     const result = await performRead(request.file, request.trial);
+
     return { file: request.file, result };
   }, null);
 
   function read() {
     setTried(true);
+
     if (file === null || !consent || busy || pdfReadingTrialError(trial) !== undefined) return;
     setProblem(null);
     startTransition(() => dispatchRead({ file, trial }));
   }
 
   const used = remaining <= 0;
+
   const error =
     problem ??
     (!busy && reading?.file === file && !reading.result.ok ? reading.result.message : null);
+
   const step = STEPS.findIndex((item) => item.phase === phase);
+
   return (
     <Dialog
       open
@@ -258,7 +288,7 @@ export function ReportPdfReadingDialog({
                 </li>
               ))}
             </ol>
-            <p className={elapsed}>{Math.max(0, Math.round((now - startedAt) / 1000))}秒経過</p>
+            <ElapsedSeconds key={startedAt} startedAt={startedAt} />
           </div>
         )}
         {error !== null && <Notice tone="error">{error}</Notice>}

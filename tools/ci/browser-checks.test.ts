@@ -20,23 +20,29 @@ function git(...args: string[]): string {
     stdio: ["ignore", "pipe", "pipe"],
   }).trim();
 }
+
 function write(file: string, content: string): void {
   fs.mkdirSync(path.dirname(path.join(repo, file)), { recursive: true });
   fs.writeFileSync(path.join(repo, file), content);
 }
+
 function commit(file: string): string {
   write(file, "changed\n");
   git("add", file);
   git("commit", "-m", "test change");
+
   return git("rev-parse", "HEAD");
 }
+
 function fakePnpm(script = ""): void {
   write(".git/bin/pnpm", `#!/bin/sh\nprintf '%s\\n' "$*" >> .git/commands\n${script}\n`);
   fs.chmodSync(path.join(repo, ".git/bin/pnpm"), 0o755);
 }
+
 function push(...refs: string[]) {
   return spawnSync("git", ["push", "origin", ...refs], { cwd: repo, env, encoding: "utf8" });
 }
+
 function setup(...args: string[]) {
   return spawnSync("bash", ["tools/dev/setup-hooks.sh", ...args], {
     cwd: repo,
@@ -44,8 +50,10 @@ function setup(...args: string[]) {
     encoding: "utf8",
   });
 }
+
 function commands(): string[] {
   const log = path.join(repo, ".git/commands");
+
   return fs.existsSync(log) ? fs.readFileSync(log, "utf8").trim().split("\n") : [];
 }
 
@@ -72,6 +80,7 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     git("config", "commit.gpgSign", "false");
     git("init", "--bare", remote);
     git("remote", "add", "origin", remote);
+
     for (const file of [
       "tools/dev/pre-push.sh",
       "tools/ci/browser-checks.ts",
@@ -80,6 +89,7 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     ]) {
       write(file, fs.readFileSync(path.join(source, file), "utf8"));
     }
+
     fs.symlinkSync(path.join(source, "node_modules"), path.join(repo, "node_modules"), "dir");
     write(".gitignore", "node_modules\n");
     write("package.json", '{"type":"module"}\n');
@@ -369,11 +379,13 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
         .readFileSync(binary, "utf8")
         .replace(">> .git/commands", `>> '${path.join(repo, ".git/commands")}'`),
     );
+
     const result = spawnSync("git", ["push", "origin", "linked"], {
       cwd: linked,
       env,
       encoding: "utf8",
     });
+
     expect(result.status, result.stderr).toBe(0);
     expect(commands()).toHaveLength(3);
     expect(
@@ -456,6 +468,7 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     for (let attempt = 0; attempt < 2; attempt++) {
       expect(spawnSync("bash", ["tools/dev/setup-hooks.sh"], { cwd: repo, env }).status).toBe(0);
     }
+
     expect(git("config", "--get", "core.hooksPath")).toBe(path.join(repo, ".git/farmille-hooks"));
     git("config", "core.hooksPath", ".custom-hooks");
     expect(spawnSync("bash", ["tools/dev/setup-hooks.sh"], { cwd: repo, env }).status).not.toBe(0);
@@ -464,12 +477,15 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
 
   it("stops an interrupted check and releases its lock", async () => {
     fakePnpm("sleep 30 & wait");
+
     const child = spawn(process.execPath, ["tools/ci/browser-checks.ts", "all"], {
       cwd: repo,
       env,
       stdio: "ignore",
     });
+
     const closed = new Promise<number | null>((resolve) => child.once("close", resolve));
+
     try {
       await vi.waitFor(() => expect(commands()).toEqual(["build-storybook"]), { timeout: 10_000 });
       child.kill("SIGTERM");
@@ -488,11 +504,13 @@ describe("Git pre-push integration", { timeout: 20_000 }, () => {
     git("config", "--unset", "core.hooksPath");
     write(".git/hooks/pre-commit", "#!/bin/sh\nexit 0\n");
     fs.chmodSync(path.join(repo, ".git/hooks/pre-commit"), 0o755);
+
     const result = spawnSync("bash", ["tools/dev/setup-hooks.sh"], {
       cwd: repo,
       env,
       encoding: "utf8",
     });
+
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("既存 hook");
     expect(spawnSync("git", ["config", "--get", "core.hooksPath"], { cwd: repo, env }).status).toBe(

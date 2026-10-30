@@ -49,6 +49,7 @@ describe("MaterialForm", () => {
       status: "error",
       message: "保存できませんでした。",
     });
+
     render(
       <PathnameContext.Provider value="/admin/materials/new">
         <MaterialForm classifications={classifications} material={null} />

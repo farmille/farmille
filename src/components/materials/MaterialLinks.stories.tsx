@@ -39,9 +39,13 @@ const meta = {
     ],
   },
 } satisfies Meta<typeof MaterialLinks>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
+
 export const Unclassified: Story = {
   args: {
     links: [{ group: null, title: "公開資料", url: "https://example.com/report.pdf", trial: null }],

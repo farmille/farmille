@@ -18,6 +18,7 @@ import { MaterialBox } from "./MaterialBox";
 // 名前の途中ではなく「、」の位置で折り返す
 const joinedNamesStyle = css({ wordBreak: "keep-all" });
 const nameListStyle = css({ listStyle: "none", m: "0", p: "0" });
+
 // 対象作物は数が多いので2列に並べて拾いやすくする
 const cropListStyle = css({
   listStyle: "none",
@@ -27,8 +28,10 @@ const cropListStyle = css({
   gridTemplateColumns: "[repeat(2, minmax(0, 1fr))]",
   columnGap: "3",
 });
+
 const RELATED_COMPANIES_LABEL = "関係会社（販売元、製造元、輸入元など）";
 const usageMoreStyle = css({ mt: "1.5" });
+
 const usageBlockStyle = css({
   mt: "1.5",
   px: "3",
@@ -42,6 +45,7 @@ const usageBlockStyle = css({
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });
+
 const rowStyle = css({
   px: "3.5",
   py: "2.5",
@@ -49,7 +53,9 @@ const rowStyle = css({
   borderColor: "border.default",
   _last: { borderBottomWidth: "0" },
 });
+
 const termStyle = css({ textStyle: "note", color: "text.subtle" });
+
 const valueStyle = css({
   m: "0",
   mt: "0.5",
@@ -87,6 +93,7 @@ function namesRow(
   render: (unique: readonly string[]) => ReactNode,
 ): DetailRow[] {
   const unique = [...new Set(names)];
+
   return unique.length === 0 ? [] : [{ label, value: render(unique) }];
 }
 
@@ -105,11 +112,14 @@ export function materialDetailRows(
       ...(content?.usages.map((item) => item.method) ?? []),
     ]),
   ];
+
   const usageBlocks = (content?.usages ?? []).filter(
     (usage) => usage.method !== "other" && usage.detail.trim().length > 0,
   );
+
   const registrations = content?.registrations ?? [];
   const certifications = content?.certifications ?? [];
+
   const rows: DetailRow[] = [
     ...textRow("正式名称", material.official_name),
     ...namesRow(
@@ -176,6 +186,7 @@ export function materialDetailRows(
       { label: RELATED_COMPANIES_LABEL, value: content.relatedCompanies.join("、") || "−" },
     ];
   }
+
   // 原稿の無い資材の会社名は上部と同じなので、ほかに製品情報があるときだけ添える
   return rows.length === 0
     ? []

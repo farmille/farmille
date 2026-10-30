@@ -20,6 +20,7 @@ const catalog: ReadingCatalog = {
 
 function ids() {
   let n = 0;
+
   return () => `00000000-0000-4000-8000-${String((n += 1)).padStart(12, "0")}`;
 }
 
@@ -75,7 +76,9 @@ function base(patch: Partial<UsageReportInput> = {}): UsageReportInput {
 
 function applied(input: UsageReportInput, output: ReportReadingOutput = reading()) {
   const result = applyPdfReading(input, output, catalog, ids());
+
   if (!result.ok) throw new Error(`写せなかった：${result.error}`);
+
   return result;
 }
 
@@ -84,6 +87,7 @@ describe("applyPdfReading", () => {
     const { input, fields } = applied(
       base({ cropId: otherCropId, observedChange: "自分で書いた感想", purposeTags: [] }),
     );
+
     expect(input.cropId).toBe(otherCropId);
     expect(input.observedChange).toBe("自分で書いた感想");
     expect(input.timingNote).toBe("7月25日定植");
@@ -104,6 +108,7 @@ describe("applyPdfReading", () => {
       base({ prefectureCode: 13 }),
       reading({ crop: "チリメンキャベツ", prefecture: "埼玉", purposes: ["収量の改善"] }),
     );
+
     expect(input.cropId).toBe(cropId);
     expect(input.prefectureCode).toBe(13);
     expect(input.purposeTags).toEqual([]);
@@ -117,10 +122,12 @@ describe("applyPdfReading", () => {
     expect(moved).toMatchObject({ prefectureCode: 11, city: "", showCity: false });
     const same = applied(base({ prefectureCode: 11, city: "熊谷市", showCity: true })).input;
     expect(same).toMatchObject({ prefectureCode: 11, city: "熊谷市", showCity: true });
+
     const unread = applied(
       base({ prefectureCode: 13, city: "八王子市", showCity: true }),
       reading({ prefecture: "" }),
     ).input;
+
     expect(unread).toMatchObject({ prefectureCode: 13, city: "八王子市", showCity: true });
   });
 
@@ -142,6 +149,7 @@ describe("applyPdfReading", () => {
       graphs: [],
       values: [],
     });
+
     const { input } = applied(base(), output);
     expect(input.varieties.map(({ name }) => name)).toEqual(["新藍", "初恋"]);
     expect(input.varietyUnknown).toBe(false);
@@ -166,6 +174,7 @@ describe("applyPdfReading", () => {
 
   it("数値の調査項目と空の項目は置き換え、画像と文章の調査項目と写真は残す", () => {
     const blank = base();
+
     const textItem = {
       id: crypto.randomUUID(),
       kind: "text" as const,
@@ -174,12 +183,14 @@ describe("applyPdfReading", () => {
       body: "葉色が濃い",
       graphs: [],
     };
+
     const imageItem = {
       ...textItem,
       id: crypto.randomUUID(),
       kind: "image" as const,
       name: "写真",
     };
+
     const photo = {
       id: crypto.randomUUID(),
       url: "https://example.supabase.co/storage/v1/object/public/report-media/u/r/p.jpg",
@@ -188,6 +199,7 @@ describe("applyPdfReading", () => {
       caption: "",
       measurementId: imageItem.id,
     };
+
     const { input } = applied({
       ...blank,
       measurements: [
@@ -198,6 +210,7 @@ describe("applyPdfReading", () => {
       ],
       media: [photo],
     });
+
     expect(input.measurements.map(({ kind, name }) => [kind, name])).toEqual([
       ["text", "観察"],
       ["image", "写真"],
@@ -215,6 +228,7 @@ describe("applyPdfReading", () => {
         values: [{ graphKey: "g1", plotKey: "p3", value: "33.6a" }],
       }),
     );
+
     const graph = input.measurements.at(-1)?.graphs[0];
     expect(graph?.heading).toBe("収穫時");
     expect(graph?.rows.map(({ plotId }) => plotId)).toEqual(input.plots.map(({ id }) => id));
@@ -224,6 +238,7 @@ describe("applyPdfReading", () => {
 
   it("投稿した資材の試験が見つからなければ該当なしにする", () => {
     const untreated = reading().plots.map((item) => ({ ...item, treatment: "untreated" as const }));
+
     for (const bad of [
       reading({ outcome: "no_matching_trial" }),
       reading({ plots: reading().plots.slice(0, 1) }),
@@ -238,7 +253,9 @@ describe("applyPdfReading", () => {
 
   it("区・品種・比較した資材・調査項目・グラフの鍵が見つからなければ失敗にする", () => {
     const [posted, untreated] = reading().plots;
+
     if (posted === undefined || untreated === undefined) throw new Error("区が足りない");
+
     for (const bad of [
       reading({ plots: [{ ...posted, varietyKey: "v9" }, untreated] }),
       reading({ varieties: [], plots: [{ ...posted, varietyKey: "v1" }, untreated] }),
@@ -258,7 +275,9 @@ describe("applyPdfReading", () => {
 
   it("品種・比較した資材・区・調査項目・グラフの鍵が重なっていれば失敗にする", () => {
     const [posted, untreated] = reading().plots;
+
     if (posted === undefined || untreated === undefined) throw new Error("区が足りない");
+
     for (const bad of [
       reading({ plots: [posted, { ...untreated, key: "p1" }] }),
       reading({
@@ -315,23 +334,27 @@ describe("applyPdfReading", () => {
 
   it("記録した値は今の値と一致し、値を直した欄の印だけが外れる", () => {
     const { input, fields } = applied(base());
+
     const marks = fields.map(({ fieldKey, quote }) => ({
       fieldKey,
       quote,
       value: pdfReadingFieldValue(input, fieldKey) ?? "",
     }));
+
     expect(
       fields.every(({ fieldKey }) => pdfReadingFieldValue(input, fieldKey) !== undefined),
     ).toBe(true);
     expect(effectivePdfReadingMarks(marks, input)).toEqual(marks);
     const [first] = input.plots;
     const nameKey = `plots.${first?.id}.name`;
+
     const edited = {
       ...input,
       plots: input.plots.map((item) =>
         item.id === first?.id ? { ...item, name: "直した名前" } : item,
       ),
     };
+
     expect(effectivePdfReadingMarks(marks, edited).map(({ fieldKey }) => fieldKey)).toEqual(
       marks.map(({ fieldKey }) => fieldKey).filter((fieldKey) => fieldKey !== nameKey),
     );

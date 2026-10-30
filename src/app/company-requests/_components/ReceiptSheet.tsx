@@ -116,11 +116,13 @@ const sprig = css({
 export function ReceiptSheet({ receiptDocument }: { receiptDocument: ApplicationReceiptDocument }) {
   const { applicant } = receiptDocument;
   const applicationDate = formatDateJa(receiptDocument.applicationDate);
+
   const facts: ReceiptField[] = [
     { label: "受付日時", value: receiptDocument.submittedAt },
     { label: "申請日", value: applicationDate },
     { label: "申請の種類", value: receiptDocument.title },
   ];
+
   return (
     // auto-phrase は日本語と明示された文書でだけ効くので、用紙そのものに lang を持たせる。
     <article className={cx("application-receipt", sheet)} lang="ja">

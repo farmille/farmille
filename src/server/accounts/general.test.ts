@@ -53,9 +53,11 @@ describe("validateGeneralSignup", () => {
       ok: true,
       input: { cityStreet: "あ".repeat(300) },
     });
+
     for (const cityStreet of [null, "", "　 ", "あ".repeat(301)]) {
       expect(validateGeneralSignup({ ...validRaw, cityStreet })).toMatchObject({ ok: false });
     }
+
     expect(validateGeneralSignup({ ...validRaw, buildingName: "あ".repeat(201) })).toMatchObject({
       ok: false,
     });
@@ -89,9 +91,11 @@ describe("validateGeneralSignup", () => {
         input: { phone: "09012345678" },
       });
     }
+
     expect(
       validateGeneralSignup({ ...validRaw, phone: "＋８１ ９０ １２３４ ５６７８" }),
     ).toMatchObject({ ok: true, input: { phone: "+819012345678" } });
+
     for (const phone of ["090-1234", "０９０－ＡＢＣＤ－５６７８"]) {
       expect(validateGeneralSignup({ ...validRaw, phone })).toMatchObject({
         ok: false,
@@ -149,6 +153,7 @@ describe("validateGeneralSignup", () => {
     });
 
     expect(result.ok).toBe(false);
+
     if (!result.ok) {
       expect(Object.keys(result.fieldErrors).sort()).toEqual([
         "email",
@@ -157,6 +162,7 @@ describe("validateGeneralSignup", () => {
         "standpoint",
       ]);
     }
+
     expect(validateGeneralSignup({ ...validRaw, password: "a".repeat(129) })).toMatchObject({
       ok: false,
     });

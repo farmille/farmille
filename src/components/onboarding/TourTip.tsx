@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef } from "react";
-import { useBringIntoView, useSpot } from "@/lib/hooks/use-onboarding-spot";
+import { useCallback, useReducer } from "react";
+import { bringIntoView, watchSpot, type Box } from "@/lib/hooks/use-onboarding-spot";
+import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 
 import { css, cva, cx } from "../../../styled-system/css";
 import { TourCardBody } from "./TourCardBody";
 import { riseStyle } from "./tour-motion";
-import { useCardHandoff, useEntered, useHandoff } from "@/lib/hooks/use-onboarding-motion";
+import { handOff, useEntered, useHandoff } from "@/lib/hooks/use-onboarding-motion";
 
 // 画面に固定・貼り付く対象には画面へ、ページの中の対象にはページへ留め、ページの中の対象はスクロールで遅れずに一緒に動くようにする
 const anchorRecipe = cva({
@@ -89,17 +90,64 @@ export function TourTip({
   onSkipStep,
   onEnd,
 }: TourTipProps) {
-  const card = useRef<HTMLElement>(null);
-  useBringIntoView(target);
-  const box = useSpot(target, card);
   const handoff = useHandoff();
   const entered = useEntered(handoff.continuing);
   const lit = useEntered(handoff.dimmed);
-  useCardHandoff(card, box !== null, true);
+
   if (target === null) return null;
-  const state = entered && box !== null ? "" : undefined;
-  const spotState = lit && box !== null ? "" : undefined;
+
+  return (
+    <TourTipSpot
+      target={target}
+      entered={entered}
+      lit={lit}
+      title={title}
+      body={body}
+      section={section}
+      primary={primary}
+      pulse={pulse}
+      onSkipStep={onSkipStep}
+      onEnd={onEnd}
+    />
+  );
+}
+
+/** 対象が見つかってから出す光と吹き出し。対象は出している間は変わらない。 */
+function TourTipSpot({
+  target,
+  entered,
+  lit,
+  title,
+  body,
+  section,
+  primary,
+  pulse = false,
+  onSkipStep,
+  onEnd,
+}: TourTipProps & { target: Element; entered: boolean; lit: boolean }) {
+  const [box, setBox] = useReducer((_current: Box | null, next: Box) => next, null);
+  useMountEffect(() => bringIntoView(target));
+  const ready = box !== null;
+
+  // 位置を測ってから描くまでの間に、吹き出しの高さで置き場所を決め、前の段階のカードから動かす。
+  // 引き継ぎは位置が決まってから行う（測る前の吹き出しは仮の位置にある）
+  const card = useCallback(
+    (element: HTMLElement) => {
+      const stopSpot = watchSpot(target, element, setBox);
+      const leave = ready ? handOff(element, true) : null;
+
+      return () => {
+        leave?.();
+        stopSpot();
+      };
+    },
+    [target, ready],
+  );
+
+  const state = entered && ready ? "" : undefined;
+  const spotState = lit && ready ? "" : undefined;
   const anchor = anchorRecipe({ anchor: box?.anchor ?? "viewport" });
+
   // 実行時に決まる位置は CSS 変数で渡し、スタイル側は var() で受ける
   return (
     <>

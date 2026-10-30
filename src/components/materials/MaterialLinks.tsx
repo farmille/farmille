@@ -17,6 +17,7 @@ export function MaterialLinks({ links }: { links: MaterialPageContent["links"] }
           : []),
       ].map((group) => {
         const items = links.filter((link) => link.group === group.value);
+
         return (
           <div key={group.value ?? "unclassified"} className={css({ mt: "3" })}>
             <h3 className={css({ textStyle: "body", fontWeight: "bold", mb: "2" })}>

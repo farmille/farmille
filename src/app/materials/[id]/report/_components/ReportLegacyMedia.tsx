@@ -45,6 +45,7 @@ export function ReportLegacyMedia({
   onRemove: (id: string) => void;
 }) {
   if (media.length === 0) return null;
+
   return (
     <>
       <h2 className={docHeadingRecipe()} id="report-legacy-media">
@@ -56,8 +57,10 @@ export function ReportLegacyMedia({
       <ul className={list}>
         {media.map((item, index) => {
           const section = REPORT_SECTIONS.find(({ value }) => value === item.section)?.title;
+
           const label =
             item.caption || `${index + 1}件目の${item.mediaType === "photo" ? "写真" : "動画"}`;
+
           return (
             <li key={item.id} className={card}>
               {item.mediaType === "photo" ? (

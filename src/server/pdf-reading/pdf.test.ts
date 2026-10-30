@@ -5,6 +5,7 @@ import { inspectPdf } from "./pdf";
 
 function pdfWithPages(count: number, trailer = ""): Uint8Array {
   const pages = Array.from({ length: count }, (_, i) => i + 3);
+
   const objects = [
     "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj",
     `2 0 obj << /Type /Pages /Kids [${pages.map((id) => `${id} 0 R`).join(" ")}] /Count ${count} >> endobj`,
@@ -12,6 +13,7 @@ function pdfWithPages(count: number, trailer = ""): Uint8Array {
       (id) => `${id} 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 10 10] >> endobj`,
     ),
   ];
+
   return new TextEncoder().encode(
     `%PDF-1.4\n${objects.join("\n")}\ntrailer << /Root 1 0 R ${trailer}>>\n%%EOF\n`,
   );
@@ -43,6 +45,7 @@ describe("inspectPdf", () => {
 
   it("PDF でないもの・暗号化されたもの・壊れたものは止める", async () => {
     const encrypted = pdfWithPages(1, "/Encrypt 9 0 R ");
+
     for (const bytes of [
       new TextEncoder().encode("<html>not a pdf</html>"),
       encrypted,

@@ -25,6 +25,7 @@ const PdfReadingClaimSchema = v.object({
   materialId: uuid,
   uploadPath: PdfReadingUploadPathSchema,
 });
+
 export type PdfReadingClaim = v.InferInput<typeof PdfReadingClaimSchema>;
 
 const PdfReadingOutcomeSchema = v.variant("status", [
@@ -46,27 +47,33 @@ const PdfReadingOutcomeSchema = v.variant("status", [
     outputTokens: v.nullable(count),
   }),
 ]);
+
 /** AI の応答を受けた結果。失敗では、応答が無ければトークン数を null にする。 */
 export type PdfReadingOutcome = v.InferInput<typeof PdfReadingOutcomeSchema>;
 
 const PdfReadingApplicationSchema = v.object({ ...reading, fields: PdfReadingFieldsSchema });
+
 export type PdfReadingApplication = v.InferInput<typeof PdfReadingApplicationSchema>;
 
 function dbFailure(error: PostgrestError, action: string) {
   if (error.code === "23505") return fail("conflict");
   const code = v.safeParse(ErrorCodeSchema, error.message);
+
   if (code.success) return fail(code.output);
   console.error(`[pdf-reading] ${action}に失敗`, error);
+
   return fail("internal");
 }
 
 function invalidInput(action: string, issues: Parameters<typeof v.summarize>[0]) {
   console.error(`[pdf-reading] ${action}の入力が不正`, v.summarize(issues));
+
   return fail("invalid_body");
 }
 
 function malformedOutput(action: string, issues: Parameters<typeof v.summarize>[0]) {
   console.error(`[pdf-reading] ${action}の結果の形式が不正`, v.summarize(issues));
+
   return fail("internal");
 }
 
@@ -76,27 +83,36 @@ export async function claimPdfReading(
   admin: Db,
 ): Promise<Result<{ readingId: string; remaining: number }>> {
   const input = v.safeParse(PdfReadingClaimSchema, claim);
+
   if (!input.success) return invalidInput("回数の確保", input.issues);
+
   const { data, error } = await admin.rpc("claim_pdf_reading", {
     p_user_id: input.output.userId,
     p_report_id: input.output.reportId,
     p_material_id: input.output.materialId,
     p_upload_path: input.output.uploadPath,
   });
+
   if (error !== null) return dbFailure(error, "回数の確保");
   const rows = v.safeParse(v.tuple([v.object({ reading_id: uuid, remaining: count })]), data);
+
   if (!rows.success) return malformedOutput("回数の確保", rows.issues);
+
   return succeed({ readingId: rows.output[0].reading_id, remaining: rows.output[0].remaining });
 }
 
 /** 今月の残り回数。admin は service_role の接続。 */
 export async function getPdfReadingRemaining(userId: string, admin: Db): Promise<Result<number>> {
   const input = v.safeParse(uuid, userId);
+
   if (!input.success) return invalidInput("残り回数の取得", input.issues);
   const { data, error } = await admin.rpc("pdf_reading_remaining", { p_user_id: input.output });
+
   if (error !== null) return dbFailure(error, "残り回数の取得");
   const remaining = v.safeParse(count, data);
+
   if (!remaining.success) return malformedOutput("残り回数の取得", remaining.issues);
+
   return succeed(remaining.output);
 }
 
@@ -106,8 +122,10 @@ export async function recordPdfReadingResult(
   admin: Db,
 ): Promise<Result<null>> {
   const input = v.safeParse(PdfReadingOutcomeSchema, outcome);
+
   if (!input.success) return invalidInput("結果の記録", input.issues);
   const result = input.output;
+
   const { error } = await admin.rpc("finish_pdf_reading", {
     p_reading_id: result.readingId,
     p_user_id: result.userId,
@@ -118,7 +136,9 @@ export async function recordPdfReadingResult(
     p_output_tokens: result.outputTokens ?? undefined,
     p_error_code: result.status === "failed" ? result.errorCode : undefined,
   });
+
   if (error !== null) return dbFailure(error, "結果の記録");
+
   return succeed(null);
 }
 
@@ -128,13 +148,17 @@ export async function recordPdfReadingApplied(
   admin: Db,
 ): Promise<Result<null>> {
   const input = v.safeParse(PdfReadingApplicationSchema, application);
+
   if (!input.success) return invalidInput("適用の記録", input.issues);
+
   const { error } = await admin.rpc("apply_pdf_reading", {
     p_reading_id: input.output.readingId,
     p_user_id: input.output.userId,
     p_fields: input.output.fields,
   });
+
   if (error !== null) return dbFailure(error, "適用の記録");
+
   return succeed(null);
 }
 
@@ -150,7 +174,9 @@ export async function getReportPdfReadingMarks(
     .eq("status", "applied")
     .order("applied_at", { ascending: false })
     .limit(1);
+
   if (error !== null) return dbFailure(error, "印の取得");
+
   const rows = v.safeParse(
     v.array(
       v.object({
@@ -161,7 +187,9 @@ export async function getReportPdfReadingMarks(
     ),
     data,
   );
+
   if (!rows.success) return malformedOutput("印の取得", rows.issues);
+
   return succeed(
     (rows.output[0]?.fields ?? []).map((field) => ({
       fieldKey: field.field_key,
@@ -185,7 +213,9 @@ export async function reportNeedsPdfValuesCheck(
     .eq("report_id", reportId)
     .in("status", ["succeeded", "applied"])
     .limit(1);
+
   if (error !== null) return dbFailure(error, "読み取りの有無の取得");
+
   return succeed(data.length > 0);
 }
 
@@ -195,8 +225,11 @@ export async function listExpiredPdfReadingUploads(
   admin: Db,
 ): Promise<Result<string[]>> {
   const { data, error } = await admin.rpc("list_expired_pdf_reading_uploads", { p_limit: limit });
+
   if (error !== null) return dbFailure(error, "期限切れの PDF の取得");
   const paths = v.safeParse(v.array(PdfReadingUploadPathSchema), data);
+
   if (!paths.success) return malformedOutput("期限切れの PDF の取得", paths.issues);
+
   return succeed(paths.output);
 }

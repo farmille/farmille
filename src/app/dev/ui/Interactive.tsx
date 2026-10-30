@@ -21,6 +21,7 @@ const SELECTED_TAGS: Array<{ cat: TagCategory; v: string }> = [
 /** /dev/ui 用のインタラクティブ見本。 */
 export function UiKitInteractiveDemos() {
   const [stars, setStars] = useReducer((_state: number, next: number) => next, 4);
+
   const [tags, removeTag] = useReducer(
     (current: typeof SELECTED_TAGS, index: number) => current.filter((_, idx) => idx !== index),
     SELECTED_TAGS,

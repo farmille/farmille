@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { css } from "../../../../../styled-system/css";
 
 const sectionStyle = css({ pt: "6" });
+
 const headingStyle = css({
   pb: "2",
   textStyle: "title",

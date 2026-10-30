@@ -11,14 +11,17 @@ import { ManufacturerProfileHistory } from "./ManufacturerProfileHistory";
 
 export default async function ManufacturerProfilePage() {
   const session = await requireSeller();
+
   if (!session.ok) redirect("/sellers/login?next=%2Fdashboard%2Fprofile");
   const { seller, versions } = await getManufacturerProfileEditor(session.data.sellerId);
   const latest = versions[0];
+
   const content = v.parse(ManufacturerProfileSchema, {
     profileText: latest?.profile_text ?? seller.profile_text ?? "",
     logoUrl: latest?.logo_url ?? seller.logo_url ?? "",
     websiteUrl: latest?.website_url ?? seller.website_url ?? "",
   });
+
   return (
     <FormPageShell chrome="seller" title="メーカープロフィールの編集" backHref="/dashboard">
       <div className={readingColumn}>

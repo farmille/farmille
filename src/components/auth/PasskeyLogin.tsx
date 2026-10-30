@@ -26,21 +26,27 @@ export function PasskeyLogin({
   description?: string;
 }) {
   const [pending, setPending] = useReducer((_current: boolean, next: boolean) => next, false);
+
   const [message, setMessage] = useReducer(
     (_current: string | null, next: string | null) => next,
     null,
   );
+
   const descriptionId = useId();
 
   async function signIn() {
     setPending(true);
     setMessage(null);
+
     try {
       const { error } = await createAuthBrowserClient().auth.signInWithPasskey();
+
       if (error) {
         setMessage(passkeyErrorMessage(error));
+
         return;
       }
+
       // Cookie の更新後にサーバー側でアカウントと遷移先の権限を判定する。
       window.location.assign(safeNextPath(next) ?? "/");
     } catch {

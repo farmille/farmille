@@ -13,22 +13,30 @@ const meta = {
   component: Skeleton,
   parameters: { layout: "padded" },
 } satisfies Meta<typeof Skeleton>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
 export const MaterialSearch: Story = { render: () => <SearchResultsSkeleton /> };
+
 export const HomeMaterials: Story = {
   render: () => <SkeletonList variant="materialScroll" label="掲載資材を読み込んでいます" />,
 };
+
 export const Articles: Story = {
   render: () => <SkeletonList variant="articles" label="記事を読み込んでいます" />,
 };
+
 export const Reports: Story = {
   render: () => <SkeletonList variant="reportScroll" label="実証詳細レポートを読み込んでいます" />,
 };
+
 export const Reviews: Story = {
   render: () => <SkeletonList variant="reviewScroll" label="感想口コミを読み込んでいます" />,
 };
+
 export const MaterialHero: Story = {
   render: () => (
     <SkeletonRegion label="製品情報を読み込んでいます">
@@ -36,6 +44,7 @@ export const MaterialHero: Story = {
     </SkeletonRegion>
   ),
 };
+
 export const Rating: Story = {
   render: () => (
     <SkeletonRegion label="評価を読み込んでいます">
@@ -43,6 +52,7 @@ export const Rating: Story = {
     </SkeletonRegion>
   ),
 };
+
 export const Reading: Story = { render: () => <ReadingSkeleton /> };
 
 export const ReadingReport: Story = { render: () => <ReadingSkeleton variant="report" /> };

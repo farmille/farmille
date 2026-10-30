@@ -29,6 +29,7 @@ const meta = {
 } satisfies Meta<typeof Select>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 async function openSelect({ canvasElement }: { canvasElement: HTMLElement }) {

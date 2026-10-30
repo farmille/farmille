@@ -12,6 +12,7 @@ function Stateful({ initial, missing }: { initial: UsageReportInput; missing: bo
     (_current: UsageReportInput, next: UsageReportInput) => next,
     initial,
   );
+
   return (
     <ReportPagePlots
       input={input}
@@ -30,6 +31,7 @@ const meta = {
 } satisfies Meta<typeof ReportPagePlots>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};

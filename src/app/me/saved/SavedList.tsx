@@ -56,6 +56,7 @@ function SavedRow({
 }) {
   const [, unsave, pending] = useActionState(async (_previous: null, formData: FormData) => {
     await unsaveMaterialAction(item.materialId, formData);
+
     return null;
   }, null);
 
@@ -85,34 +86,42 @@ function SavedRow({
 
 export function SavedList({ items }: SavedListProps) {
   const router = useRouter();
+
   const [{ selected, error }, toggle] = useReducer(
     (state: { selected: string[]; error: string | null }, materialId: string) => {
       if (state.selected.includes(materialId)) {
         return { selected: state.selected.filter((id) => id !== materialId), error: null };
       }
+
       if (state.selected.length >= COMPARE_MATERIAL_LIMITS.max) {
         return { ...state, error: `比較は最大${COMPARE_MATERIAL_LIMITS.max}件までです。` };
       }
+
       return { selected: [...state.selected, materialId], error: null };
     },
     { selected: [], error: null },
   );
 
   const selectedCount = selected.length;
+
   const canCompare =
     selectedCount >= COMPARE_MATERIAL_LIMITS.min && selectedCount <= COMPARE_MATERIAL_LIMITS.max;
 
   const hint = useMemo(() => {
     if (items.length === 0) return null;
+
     if (selectedCount === 0) {
       return `比較する資材を${COMPARE_MATERIAL_LIMITS.min}〜${COMPARE_MATERIAL_LIMITS.max}件選んでください。`;
     }
+
     if (selectedCount < COMPARE_MATERIAL_LIMITS.min) {
       return `あと${COMPARE_MATERIAL_LIMITS.min - selectedCount}件選ぶと比較できます。`;
     }
+
     if (selectedCount > COMPARE_MATERIAL_LIMITS.max) {
       return `比較は最大${COMPARE_MATERIAL_LIMITS.max}件までです。`;
     }
+
     return `${selectedCount}件を比較できます。`;
   }, [items.length, selectedCount]);
 

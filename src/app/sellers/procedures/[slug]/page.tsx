@@ -22,12 +22,15 @@ type ProcedurePageProps = { params: Promise<{ slug: string }> };
 
 async function procedureOf(params: ProcedurePageProps["params"]): Promise<Procedure> {
   const { slug } = await params;
+
   if (!isProcedureSlug(slug)) notFound();
+
   return PROCEDURES[slug];
 }
 
 export async function generateMetadata({ params }: ProcedurePageProps): Promise<Metadata> {
   const procedure = await procedureOf(params);
+
   return createPageMetadata({
     title: procedure.title,
     description: procedure.lead,

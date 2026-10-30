@@ -47,6 +47,7 @@ describe("validateSellerApply", () => {
   it("必須項目が揃えば通る", () => {
     const result = validateSellerApply(valid);
     expect(result.ok).toBe(true);
+
     if (!result.ok) return;
     expect(result.input.corporateNumber).toBe("1234567890123");
     expect(result.input.websiteUrl).toBe("https://example.com");
@@ -56,6 +57,7 @@ describe("validateSellerApply", () => {
   it("法人番号の形式エラーをフィールドに返す", () => {
     const result = validateSellerApply({ ...valid, corporateNumber: "AB", contactPhone: "" });
     expect(result.ok).toBe(false);
+
     if (result.ok) return;
     expect(result.fieldErrors.corporateNumber).toBeDefined();
 
@@ -65,10 +67,12 @@ describe("validateSellerApply", () => {
   it("公式サイト URL は空を許可し、不正なスキームを弾く", () => {
     const empty = validateSellerApply({ ...valid, websiteUrl: "" });
     expect(empty.ok).toBe(true);
+
     if (empty.ok) expect(empty.input.websiteUrl).toBe("");
 
     const bad = validateSellerApply({ ...valid, websiteUrl: "ftp://example.com" });
     expect(bad.ok).toBe(false);
+
     if (bad.ok) return;
     expect(bad.fieldErrors.websiteUrl).toBeDefined();
   });

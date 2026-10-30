@@ -23,9 +23,13 @@ const meta = {
     materials: [],
   },
 } satisfies Meta<typeof DashboardContent>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
+
 export const WithMaterials: Story = {
   args: {
     seller: {

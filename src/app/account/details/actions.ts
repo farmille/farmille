@@ -20,10 +20,13 @@ const FIELDS = [
 
 function submittedValues(formData: FormData): AuthFormValues {
   const values: AuthFormValues = {};
+
   for (const name of FIELDS) {
     const value = formDataString(formData.get(name));
+
     if (value !== null) values[name] = value;
   }
+
   return values;
 }
 
@@ -40,6 +43,7 @@ export async function saveRegisteredDetailsAction(
     cityStreet: formData.get("cityStreet"),
     buildingName: formData.get("buildingName"),
   });
+
   if (!validation.ok)
     return {
       status: "error",
@@ -48,6 +52,7 @@ export async function saveRegisteredDetailsAction(
       values: submittedValues(formData),
     };
   const saved = await saveOwnRegisteredDetails(validation.input);
+
   if (!saved.ok)
     return {
       status: "error",
@@ -58,5 +63,6 @@ export async function saveRegisteredDetailsAction(
   // 都道府県は公開プロフィールと投稿者の肩書きに出る。
   revalidatePath("/me");
   revalidatePath(`/users/${saved.data.userId}`);
+
   return { status: "done", message: "登録情報を保存しました" };
 }

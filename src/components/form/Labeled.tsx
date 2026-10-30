@@ -42,6 +42,7 @@ export function splitLabeling<P extends LabelingFields>(
     fieldClassName,
     ...rest
   } = props;
+
   return [
     {
       label,
@@ -84,8 +85,10 @@ export function Labeled({
     if (!inRoot) {
       throw new Error("label={null} は、囲む Field か name 付きの Fieldset の中でだけ使えます。");
     }
+
     return children;
   }
+
   if (inField) {
     throw new Error("Field の中の部品に label は付けられません。Field の label を使ってください。");
   }

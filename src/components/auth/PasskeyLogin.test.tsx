@@ -9,6 +9,7 @@ describe("PasskeyLogin", () => {
   it("パスキーの説明をボタンの下に出し、ボタンの説明として読ませる", () => {
     const description =
       "パスキーを登録した方は、パスワードの代わりに、スマートフォンやパソコンの指紋や顔でログインできます。登録は、ログインした後にマイページでできます。";
+
     render(<PasskeyLogin description={description} next={null} />);
 
     expect(screen.getByText(description)).toBeVisible();

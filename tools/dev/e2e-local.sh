@@ -30,6 +30,8 @@ eval "$status_env"
 export NEXT_PUBLIC_SUPABASE_URL="$API_URL" NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" SUPABASE_SECRET_KEY="$SERVICE_ROLE_KEY"
 export SMTP_URL="smtp://127.0.0.1:54325" MAIL_FROM="Farmille <noreply@example.test>" \
   AUTH_EMAIL_HOOK_SECRET="v1,whsec_bG9jYWwtZmFybWlsbGUtZW1haWwtaG9vay10ZXN0LWtleQ=="
+# CI（browser-checks.yml）と同じ公開のダミー値。E2E は PDF読み取りを送らない
+export RECAPTCHA_SITE_KEY="ci-dummy-recaptcha-site-key"
 log "接続先：${API_URL}"
 
 # 54321 の DB は worktree 間で共有しているので、別のブランチの migration が当たっていることがある。

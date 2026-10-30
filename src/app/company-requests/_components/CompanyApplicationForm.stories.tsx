@@ -3,6 +3,7 @@ import { css } from "../../../../styled-system/css";
 
 import { CompanyApplicationForm } from "./CompanyApplicationForm";
 import { emptyContact } from "./ContactFields";
+
 const meta = {
   title: "Pages/company-requests/CompanyApplicationForm",
   component: CompanyApplicationForm,
@@ -15,8 +16,11 @@ const meta = {
   },
   decorators: [(Story) => <div className={css({ p: "4" })}>{Story()}</div>],
 } satisfies Meta<typeof CompanyApplicationForm>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
 export const TransferOut: Story = { args: { kind: "transfer_out" } };
 export const TransferIn: Story = { args: { kind: "transfer_in" } };

@@ -11,6 +11,7 @@ const meta = {
 } satisfies Meta<typeof RequestDecisionForm>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const PendingRequest: Story = {};

@@ -16,10 +16,12 @@ it("法人番号の無い申請（フォームD）は、申請者向けの受付
       line.startsWith("法人番号："),
     ),
   ).toBe(false);
+
   const withNumber = {
     ...removalReceipt,
     application: { ...removalReceipt.application, corporate_number: "1234567890123" },
   };
+
   expect(applicationReceiptLines(withNumber, { omitMissingCorporateNumber: true })).toContain(
     "法人番号：1234567890123",
   );
@@ -47,6 +49,7 @@ it("申請内容は掲載・権限申請の資材だけが持ち、ほかの項�
   expect(applicationReceiptDocument(registrationReceipt).items.map((item) => item.request)).toEqual(
     ["資材の新規掲載", "掲載済み資材の資材オーナー権限"],
   );
+
   for (const receipt of [transferOutReceipt, transferInReceipt, removalReceipt]) {
     expect(applicationReceiptDocument(receipt).items.map((item) => item.request)).toEqual([null]);
   }
@@ -89,6 +92,7 @@ it("申請に無い資材を指す添付資料は、壊れたデータとして�
       },
     ],
   };
+
   expect(() => applicationReceiptDocument(receipt)).toThrow("添付資料の対象資材が見つかりません");
 });
 
@@ -107,6 +111,7 @@ it("同意日時が変わるたびにまとまりを分け、前のまとまり�
     .map((consent, index) =>
       index === 2 ? { ...consent, accepted_at: "2026-10-15T01:30:00+00:00" } : consent,
     );
+
   const texts = consents.map((consent) => consent.text_snapshot);
   expect(applicationReceiptDocument({ ...registrationReceipt, consents }).consents).toEqual([
     {
@@ -125,6 +130,7 @@ it("控えメールの受付票は、申請者・資材・移行先・添付資�
     evidence: transferOutReceipt.evidence.slice(0, 1),
     consents: transferOutReceipt.consents.slice(0, 1),
   };
+
   expect(applicationReceiptLines(receipt)).toEqual([
     "資材オーナー権限の移行申請フォーム（現資材オーナー企業様用）",
     "受付番号：117",

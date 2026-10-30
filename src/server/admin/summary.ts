@@ -12,6 +12,7 @@ export type AdminSummary = {
 export async function getAdminSummary(): Promise<Result<AdminSummary>> {
   return withAdmin(async ({ supabase }) => {
     const countOf = { count: "exact" as const, head: true };
+
     const [sellers, reports, usageReports, editRequests] = await Promise.all([
       supabase.from("seller_accounts").select("id", countOf).eq("status", "applied"),
       supabase.from("content_reports").select("id", countOf).eq("status", "open"),
@@ -23,6 +24,7 @@ export async function getAdminSummary(): Promise<Result<AdminSummary>> {
 
     if (failed !== null) {
       reportAdminError("summary", "サマリーの集計に失敗", failed);
+
       return fail("internal");
     }
 

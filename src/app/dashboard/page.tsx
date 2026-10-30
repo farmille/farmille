@@ -16,6 +16,7 @@ export default async function DashboardPage() {
   }
 
   const result = await getSellerDashboardData(session.data.sellerId);
+
   if (!result.ok) {
     if (result.error === "forbidden") return <SellerAccessDenied />;
     throw new Error("企業会員ダッシュボードの取得に失敗しました。");

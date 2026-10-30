@@ -4,16 +4,20 @@ import { guardQuery, lockedTables, FieldNameSchema } from "./snapshot.ts";
 import { valueHash, type CatalogPlan } from "./plan.ts";
 
 type SqlValue = string | number | boolean | null;
+
 const literal = (value: SqlValue): string =>
   value === null
     ? "null"
     : v.is(v.string(), value)
       ? `'${value.replaceAll("'", "''")}'`
       : String(value);
+
 function insert(table: string, columns: string[], rows: SqlValue[][], conflict = ""): string {
   if (!rows.length) return "";
+
   return `insert into public.${table}(${columns.join(",")}) values\n${rows.map((row) => `(${row.map(literal).join(",")})`).join(",\n")} ${conflict};`;
 }
+
 function upsert(table: string, columns: string[], rows: SqlValue[][]) {
   return insert(
     table,
@@ -29,6 +33,7 @@ function upsert(table: string, columns: string[], rows: SqlValue[][]) {
 function materialSql(material: CatalogPlan["materials"][number], runId: string): string[] {
   const { id, fields, changed, existing } = material;
   const statements: string[] = [];
+
   if (!existing)
     statements.push(
       insert(
@@ -37,6 +42,7 @@ function materialSql(material: CatalogPlan["materials"][number], runId: string):
         [[id, fields.name, fields.manufacturer_name, "published", null]],
       ),
     );
+
   const scalarFields = [
     "name",
     "official_name",
@@ -46,19 +52,25 @@ function materialSql(material: CatalogPlan["materials"][number], runId: string):
     "publication_status",
     "main_components",
   ];
+
   const assignments = changed
     .filter((field) => scalarFields.includes(field))
     .map((field) => {
       const value = fields[field];
+
       if (Array.isArray(value)) throw new Error(`単一値の項目ではありません：${field}`);
+
       return `${field}=${literal(value)}`;
     });
+
   if (changed.includes("publication_status"))
     assignments.push(`archived_at=${fields.publication_status === "archived" ? "now()" : "null"}`);
+
   if (assignments.length)
     statements.push(
       `update public.materials set ${assignments.join(",")} where id=${literal(id)};`,
     );
+
   const replace = (
     field: (typeof changed)[number],
     table: string,
@@ -75,6 +87,7 @@ function materialSql(material: CatalogPlan["materials"][number], runId: string):
       ),
     );
   };
+
   replace(
     "aliases",
     "material_name_aliases",
@@ -112,11 +125,13 @@ function materialSql(material: CatalogPlan["materials"][number], runId: string):
     fields.application_methods.map((row) => [row.method, row.source_text, row.sort_order]),
   );
   const needsVersion = changed.includes("links") || changed.includes("main_components");
+
   if (needsVersion) {
     const versionId = catalogId(`${runId}/${id}`);
     statements.push(`insert into public.material_page_versions(id,material_id,base_revision,status,description,main_components,mechanism,content_contract,origin,catalog_import_run_id)
       select ${literal(versionId)},m.id,m.content_revision,'published',coalesce(v.description,m.description,''),${literal(fields.main_components ?? "")},coalesce(v.mechanism,m.mechanism,''),coalesce(v.content_contract,2),'catalog',${literal(runId)}
       from public.materials m left join public.material_page_versions v on v.id=m.published_page_version_id where m.id=${literal(id)};`);
+
     for (const [table, columns] of [
       ["material_page_usages", "method,detail,sort_order"],
       ["material_page_timings", "timing"],
@@ -129,6 +144,7 @@ function materialSql(material: CatalogPlan["materials"][number], runId: string):
           `insert into public.${table}(version_id,${columns}) select ${literal(versionId)},${columns} from public.${table} where version_id=${literal(existing.published_page_version_id)};`,
         );
     }
+
     if (!existing?.published_page_version_id) {
       statements.push(
         insert(
@@ -141,6 +157,7 @@ function materialSql(material: CatalogPlan["materials"][number], runId: string):
         `insert into public.material_page_usages(version_id,method,detail,sort_order) select ${literal(versionId)},'other',usage_text,0 from public.materials where id=${literal(id)} and nullif(btrim(usage_text),'') is not null;`,
       );
     }
+
     statements.push(
       insert(
         "material_page_links",
@@ -158,6 +175,7 @@ function materialSql(material: CatalogPlan["materials"][number], runId: string):
         ],
         fields.links.map((link, index) => {
           const trial = link.group_name === "public_trial" || link.group_name === "other_trial";
+
           return [
             versionId,
             index,
@@ -180,11 +198,13 @@ function materialSql(material: CatalogPlan["materials"][number], runId: string):
     statements.push(
       `update public.materials set content_revision=content_revision+1 where id=${literal(id)};`,
     );
+
   return statements;
 }
 
 export function applySql(plan: CatalogPlan, source: CatalogSource): string {
   if (plan.conflicts.length) throw new Error("未解決の差分があるため適用SQLを生成できません。");
+
   const statements = [
     `if exists(select 1 from public.catalog_import_runs where id=${literal(plan.runId)} and plan_sha256=${literal(plan.planHash)}) then return; end if;`,
     `if (${guardQuery})<>${literal(plan.guard)} then raise exception '計画後にデータが更新されています。スナップショットと計画を作り直してください。'; end if;`,
@@ -206,6 +226,7 @@ export function applySql(plan: CatalogPlan, source: CatalogSource): string {
       ]),
     ),
   ];
+
   for (const row of plan.masters.crops)
     statements.push(
       `insert into public.crops(id,name,group_id,aliases,sort_order,is_active) values(${literal(row.id)},${literal(row.name)},${literal(row.group_id)},array[${row.aliases.map(literal).join(",")}]::text[],${row.sort_order},${row.is_active}) on conflict(id) do update set name=excluded.name,group_id=excluded.group_id,aliases=excluded.aliases,sort_order=excluded.sort_order,is_active=excluded.is_active;`,
@@ -237,12 +258,14 @@ export function applySql(plan: CatalogPlan, source: CatalogSource): string {
       "on conflict(name) do nothing",
     ),
   );
+
   for (const material of plan.retired) {
     if (material.fields.publication_status !== "archived")
       statements.push(
         `update public.materials set publication_status='archived',archived_at=now(),content_revision=content_revision+1 where id=${literal(material.id)};`,
       );
   }
+
   for (const material of plan.materials) statements.push(...materialSql(material, plan.runId));
   statements.push(
     upsert(
@@ -250,7 +273,9 @@ export function applySql(plan: CatalogPlan, source: CatalogSource): string {
       ["source_product_id", "material_id", "source_name", "publication_decision"],
       source.製品.map((product) => {
         const id = plan.productMap.get(product.product_id);
+
         if (!id) throw new Error(`製品の対応がありません：${product.product_id}`);
+
         return [product.product_id, id, product.表示製品名, product.掲載判定];
       }),
     ),
@@ -269,6 +294,7 @@ export function applySql(plan: CatalogPlan, source: CatalogSource): string {
       ],
       source.根拠原文.map((row) => {
         const citation = row.source_id ? sources.get(row.source_id) : undefined;
+
         return [
           row.evidence_id,
           row.product_id,
@@ -297,6 +323,8 @@ export function applySql(plan: CatalogPlan, source: CatalogSource): string {
   );
   const body = statements.filter(Boolean).join("\n");
   const delimiter = `$catalog_${plan.planHash}$`;
+
   if (body.includes(delimiter)) throw new Error("SQL区切り文字が資料内に含まれています。");
+
   return `begin;\nset local standard_conforming_strings=on;\nset local lock_timeout='5s';\nlock table ${lockedTables.map((table) => `public.${table}`).join(",")} in share row exclusive mode;\ndo ${delimiter} begin\n${body}\nend ${delimiter};\ncommit;\n`;
 }

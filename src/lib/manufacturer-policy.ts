@@ -36,11 +36,13 @@ export const MANUFACTURER_ONBOARDING_STEPS = [
 ] as const;
 
 export type ManufacturerOnboardingActor = (typeof MANUFACTURER_ONBOARDING_STEPS)[number]["actor"];
+
 export type ManufacturerOnboardingAction = Exclude<
   (typeof MANUFACTURER_ONBOARDING_STEPS)[number]["action"],
   null
 >;
 
 export const BS_GUIDELINE_URL = "https://www.maff.go.jp/j/press/syouan/nouan/250530.html";
+
 export const BS_GUIDELINE_TITLE =
   "農林水産省「バイオスティミュラントの表示等に係るガイドライン」（令和7年5月30日策定）";

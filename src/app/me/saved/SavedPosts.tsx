@@ -9,9 +9,11 @@ import { css } from "../../../../styled-system/css";
 /** 保存した投稿にも、公開一覧と同じカードと操作を使う。 */
 export async function SavedPosts({ userId }: { userId: string }) {
   const saved = await listSavedPosts(userId);
+
   const visible = saved.filter(
     (post) => post.review?.status === "published" || post.report?.status === "published",
   );
+
   const [reviews, reports] = await Promise.all([
     listRecentReviews({
       ids: visible.flatMap((post) => (post.review_id === null ? [] : [post.review_id])),
@@ -23,9 +25,11 @@ export async function SavedPosts({ userId }: { userId: string }) {
       limit: Math.max(1, visible.length),
     }),
   ]);
+
   if (!reviews.ok || !reports.ok) throw new Error("保存した投稿の内容を取得できませんでした。");
   const reviewById = new Map(reviews.data.map((review) => [review.id, review]));
   const reportById = new Map(reports.data.map((report) => [report.id, report]));
+
   return (
     <section className={css({ mt: "6" })} aria-labelledby="saved-posts-heading">
       <h2 id="saved-posts-heading" className={css({ textStyle: "title", mb: "3" })}>
@@ -35,7 +39,9 @@ export async function SavedPosts({ userId }: { userId: string }) {
         {visible.map((post) => {
           if (post.review_id !== null) {
             const review = reviewById.get(post.review_id);
+
             if (review === undefined) throw new Error("保存した感想口コミの内容が欠落しています。");
+
             return (
               <ReviewCard
                 key={post.id}
@@ -60,11 +66,14 @@ export async function SavedPosts({ userId }: { userId: string }) {
               />
             );
           }
+
           if (post.usage_report_id === null)
             throw new Error("保存した投稿の参照先が欠落しています。");
           const report = reportById.get(post.usage_report_id);
+
           if (report === undefined)
             throw new Error("保存した実証詳細レポートの内容が欠落しています。");
+
           return (
             <ReportCard
               key={post.id}

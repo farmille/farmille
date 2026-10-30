@@ -30,10 +30,12 @@ export type ReviewActionState =
 
 function uploadedPhotoPaths(formData: FormData): string[] {
   const value = formDataString(formData.get("newPhotos"));
+
   if (value === null || value.length === 0) return [];
 
   try {
     const result = v.safeParse(v.array(NewReviewPhotoSchema), JSON.parse(value));
+
     return result.success ? result.output.map((photo) => photo.path) : [];
   } catch {
     return [];
@@ -43,6 +45,7 @@ function uploadedPhotoPaths(formData: FormData): string[] {
 function existingPhotoInputs(formData: FormData): ExistingReviewPhotoInput[] | null {
   const idsResult = v.safeParse(v.array(v.string()), formData.getAll("existingPhotoId"));
   const removedIdsResult = v.safeParse(v.array(v.string()), formData.getAll("removePhotoId"));
+
   if (!idsResult.success || !removedIdsResult.success) return null;
 
   const removedIds = new Set(removedIdsResult.output);
@@ -50,6 +53,7 @@ function existingPhotoInputs(formData: FormData): ExistingReviewPhotoInput[] | n
 
   for (const value of idsResult.output) {
     const caption = formDataString(formData.get(`existingPhotoCaption-${value}`));
+
     if (caption === null) return null;
 
     const trimmedCaption = caption.trim();
@@ -72,8 +76,11 @@ function errorState(
     status: "error",
     message,
   };
+
   if (fieldErrors !== undefined) state.fieldErrors = fieldErrors;
+
   if (cleanupPaths.length > 0) state.cleanupPaths = cleanupPaths;
+
   return state;
 }
 

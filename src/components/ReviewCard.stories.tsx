@@ -30,6 +30,7 @@ const meta = {
 } satisfies Meta<typeof ReviewCard>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 /** 閲覧者視点（reviewId あり・canManage false）：押せる「参考になった」と通報ボタンが出る。 */

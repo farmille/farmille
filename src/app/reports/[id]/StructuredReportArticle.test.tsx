@@ -10,6 +10,7 @@ import { StructuredReportArticle } from "./StructuredReportArticle";
 function sampleReport() {
   const input = createBlankUsageReport(crypto.randomUUID());
   const [control, treated] = input.plots;
+
   if (control === undefined || treated === undefined) throw new Error("区が2つ必要です");
   control.name = "対照区";
   control.scope = "10株";
@@ -22,11 +23,13 @@ function sampleReport() {
   input.purposeTags = ["耐暑性改善", "しおれ軽減"];
   const measurement = input.measurements[0];
   const graph = measurement?.graphs[0];
+
   if (measurement === undefined || graph === undefined) throw new Error("グラフが必要です");
   measurement.name = "可販果率";
   measurement.unit = "%";
   graph.rows[0] = { ...graph.rows[0]!, value: "74" };
   graph.rows[1] = { ...graph.rows[1]!, value: "82±3 a" };
+
   return input;
 }
 
@@ -68,6 +71,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
   });
   it("画像の調査項目は、項目名・画像・補足説明を調査項目の並びで出し、節の最後に画像を重ねて出さない", () => {
     const input = sampleReport();
+
     const image = {
       id: crypto.randomUUID(),
       kind: "image" as const,
@@ -76,6 +80,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
       body: "使用区は果肉が厚かった。",
       graphs: [],
     };
+
     const text = {
       ...image,
       id: crypto.randomUUID(),
@@ -83,6 +88,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
       name: "食味",
       body: "皮が薄く感じた。",
     };
+
     input.measurements = [image, ...input.measurements, text];
     input.media = [
       {
@@ -115,14 +121,17 @@ describe("実証詳細レポート（新形式）の記事", () => {
   it("同じ名前と単位の数値の項目は1つの見出しにまとめ、項目ごとの補足説明を残す", () => {
     const input = sampleReport();
     const [first] = input.measurements;
+
     if (first === undefined) throw new Error("調査項目が必要です");
     first.body = "1回目の調査。";
+
     const second = {
       ...first,
       id: crypto.randomUUID(),
       body: "2回目の調査。",
       graphs: first.graphs.map((graph) => ({ ...graph, id: crypto.randomUUID() })),
     };
+
     input.measurements = [first, second];
     render(
       <StructuredReportArticle
@@ -145,6 +154,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
     input.purposeNote = "高温期の萎れを軽くしたかった";
     input.prefectureCode = 8;
     input.city = "水戸市";
+
     const { rerender } = render(
       <StructuredReportArticle
         input={input}
@@ -153,6 +163,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
         documentUrls={[]}
       />,
     );
+
     expect(
       screen.getByText((_, element) =>
         element?.tagName === "P"
@@ -174,6 +185,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
   });
   it("本文の見出しを、プレビューと同じ階層で並べる", () => {
     const input = sampleReport();
+
     const { unmount } = render(
       <StructuredReportArticle
         materialName="ハイパーバイオ"
@@ -182,6 +194,7 @@ describe("実証詳細レポート（新形式）の記事", () => {
         documentUrls={[]}
       />,
     );
+
     const article = headingOutline();
     unmount();
     render(

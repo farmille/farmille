@@ -3,8 +3,11 @@ import { createAdminSupabase, createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type SellerAccountRow = Database["public"]["Tables"]["seller_accounts"]["Row"];
+
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+
 type MaterialChangeRequestRow = Database["public"]["Tables"]["material_change_requests"]["Row"];
+
 type MaterialChangeRequestDetailRow =
   Database["public"]["Tables"]["material_change_request_details"]["Row"];
 
@@ -81,6 +84,7 @@ export async function getSellerDashboardData(
 ): Promise<Result<SellerDashboardData>> {
   const admin = createAdminSupabase();
   const supabase = await createServerSupabase();
+
   const [sellerResult, materialsResult] = await Promise.all([
     admin
       .from("seller_accounts")
@@ -116,16 +120,19 @@ export async function getSellerDashboardData(
 
   if (sellerResult.error !== null) {
     reportQueryError("メーカー情報の取得に失敗", sellerResult.error);
+
     return fail("internal");
   }
 
   if (sellerResult.data === null) {
     reportQueryError("承認済みのメーカー情報が見つからない", { sellerId });
+
     return fail("forbidden");
   }
 
   if (materialsResult.error !== null) {
     reportQueryError("自社資材一覧の取得に失敗", materialsResult.error);
+
     return fail("internal");
   }
 
@@ -140,9 +147,11 @@ export async function getSellerMaterialsPageData(
   sellerId: string,
 ): Promise<Result<SellerMaterialsPageData>> {
   const dashboard = await getSellerDashboardData(sellerId);
+
   if (!dashboard.ok) return dashboard;
 
   const supabase = await createServerSupabase();
+
   const { data: requests, error } = await supabase
     .from("material_change_requests")
     .select(
@@ -153,10 +162,12 @@ export async function getSellerMaterialsPageData(
 
   if (error !== null) {
     reportQueryError("自社資材の申請一覧取得に失敗", error);
+
     return fail("internal");
   }
 
   const requestIds = requests.map(({ id }) => id);
+
   const detailsResult =
     requestIds.length === 0
       ? { data: [], error: null }
@@ -164,18 +175,25 @@ export async function getSellerMaterialsPageData(
           .from("material_change_request_details")
           .select("request_id, name")
           .in("request_id", requestIds);
+
   if (detailsResult.error !== null || detailsResult.data === null) {
     reportQueryError("申請資材名の取得に失敗", detailsResult.error);
+
     return fail("internal");
   }
+
   const names = new Map(detailsResult.data.map((detail) => [detail.request_id, detail.name]));
   const changeRequests: SellerMaterialChangeRequest[] = [];
+
   for (const request of requests) {
     const materialName = names.get(request.id);
+
     if (materialName === undefined) {
       reportQueryError("申請の資材名が見つからない", request);
+
       return fail("internal");
     }
+
     changeRequests.push({ ...request, materialName });
   }
 
@@ -192,6 +210,7 @@ export async function getSellerMaterialChangeRequest(
   requestId: string,
 ): Promise<Result<SellerMaterialChangeRequestDetail>> {
   const supabase = await createServerSupabase();
+
   const [requestResult, detailResult] = await Promise.all([
     supabase
       .from("material_change_requests")
@@ -210,8 +229,10 @@ export async function getSellerMaterialChangeRequest(
 
   if (requestResult.error !== null || detailResult.error !== null) {
     reportQueryError("資材変更申請詳細の取得に失敗", requestResult.error ?? detailResult.error);
+
     return fail("internal");
   }
+
   if (requestResult.data === null || detailResult.data === null) return fail("not_found");
 
   return succeed({

@@ -15,6 +15,7 @@ function RejectedProfileForm() {
     async (_state: string, _formData: FormData) => "ニックネームが重複しています。",
     "",
   );
+
   return (
     <Form persist="profile" action={action}>
       <input name="handle" aria-label="ニックネーム" defaultValue="重複する名前" />
@@ -32,16 +33,20 @@ describe("プロフィールのタグ編集", () => {
       persistKey("profile", "/me/edit"),
       JSON.stringify({ cropIds: [cropId], affiliations: ["復元した部会"] }),
     );
+
     const { container } = render(
       <PathnameContext.Provider value="/me/edit">
         <RejectedProfileForm />
       </PathnameContext.Provider>,
     );
+
     const form = container.querySelector("form");
+
     if (form === null) throw new Error("プロフィールのフォームがありません。");
     const values = (name: string) => new FormData(form).getAll(name);
     await waitFor(() => expect(values("affiliations")).toEqual(["復元した部会"]));
     expect(values("cropIds")).toEqual([cropId]);
+
     for (let attempt = 0; attempt < 2; attempt++) {
       await act(async () => {
         fireEvent.click(screen.getByRole("button", { name: "送信" }));
@@ -53,11 +58,13 @@ describe("プロフィールのタグ編集", () => {
   });
   it("別名検索と選択・削除をhidden送信値へ反映する", async () => {
     const user = userEvent.setup();
+
     const { container } = render(
       <form>
         <ProfileTagsEditor {...meta.args} />
       </form>,
     );
+
     await user.click(screen.getByRole("button", { name: "いちごを削除" }));
     await user.type(screen.getByRole("combobox", { name: "栽培作目" }), "苺");
     await user.keyboard("{ArrowDown}{Enter}");
@@ -68,11 +75,13 @@ describe("プロフィールのタグ編集", () => {
   });
   it("所属の自由入力を確定し、重複を増やさない", async () => {
     const user = userEvent.setup();
+
     const { container } = render(
       <form>
         <ProfileTagsEditor {...meta.args} />
       </form>,
     );
+
     const input = screen.getByRole("combobox", { name: "所属" });
     await user.type(input, "地域農業研究会");
     await user.keyboard("{Enter}");
@@ -117,6 +126,7 @@ describe("プロフィールのタグ編集", () => {
       name: `作目${i}`,
       aliases: [],
     }));
+
     render(
       <ProfileTagsEditor
         {...meta.args}

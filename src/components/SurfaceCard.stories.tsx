@@ -13,6 +13,7 @@ const meta = {
 } satisfies Meta<typeof SurfaceCard>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Standard: Story = {

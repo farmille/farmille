@@ -1,9 +1,12 @@
-import { RuleTester } from "eslint";
-import { controlledFormInput, stateManagement } from "./state-management.mjs";
+import { RuleTester } from "oxlint/plugins-dev";
+
+import { controlledFormInput, stateManagement } from "./index.mjs";
+import { restrictedSyntax } from "./restricted-syntax.mjs";
 
 const tester = new RuleTester({ languageOptions: { ecmaVersion: "latest", sourceType: "module" } });
 const filename = `${process.cwd()}/src/components/Example.js`;
-const hook = `${process.cwd()}/src/lib/hooks/use-example.js`;
+const mountEffect = `${process.cwd()}/src/lib/hooks/use-mount-effect.ts`;
+const hook = `${process.cwd()}/src/lib/hooks/use-example.ts`;
 tester.run("state-management", stateManagement, {
   valid: [
     {
@@ -11,12 +14,8 @@ tester.run("state-management", stateManagement, {
       code: 'import { useReducer } from "react"; function Example() { return useReducer((s, a) => a, false); }',
     },
     {
-      filename: hook,
-      code: 'import { useEffect as effect } from "react"; export function useExample() { effect(() => {}, []); }',
-    },
-    {
-      filename: hook,
-      code: 'import React from "react"; const useExample = () => { React.useLayoutEffect(() => {}, []); };',
+      filename: mountEffect,
+      code: 'import { useEffect } from "react"; export function useMountEffect(effect) { useEffect(effect, []); }',
     },
     { filename, code: "const x = { useState() {} }; x.useState();" },
     { filename, code: 'import React from "react"; function x(React) { React.useState(); }' },
@@ -56,7 +55,27 @@ tester.run("state-management", stateManagement, {
     { filename, code: 'import { useEffect } from "react";', errors: [{ messageId: "effect" }] },
     {
       filename: hook,
-      code: 'import { useEffect } from "react"; function Example() { useEffect(() => {}, []); }',
+      code: 'import { useEffect } from "react"; export function useExample() { useEffect(() => {}, []); }',
+      errors: [{ messageId: "effect" }],
+    },
+    {
+      filename: hook,
+      code: 'import React from "react"; const useExample = () => { React.useLayoutEffect(() => {}, []); };',
+      errors: [{ messageId: "effect" }],
+    },
+    {
+      filename: mountEffect,
+      code: 'import { useEffect } from "react"; export function useMountEffect(effect, deps) { useEffect(effect, deps); }',
+      errors: [{ messageId: "effect" }],
+    },
+    {
+      filename: mountEffect,
+      code: 'import { useEffect } from "react"; export const run = useEffect;',
+      errors: [{ messageId: "effect" }],
+    },
+    {
+      filename,
+      code: 'import { useInsertionEffect } from "react";',
       errors: [{ messageId: "effect" }],
     },
     {
@@ -104,5 +123,29 @@ new RuleTester({
       code: 'const x = <input name="terms" type="checkbox" />;',
       errors: [{ messageId: "controlled" }],
     },
+  ],
+});
+
+const syntax = (groups) => [{ groups }];
+new RuleTester({
+  languageOptions: {
+    ecmaVersion: "latest",
+    sourceType: "module",
+    parserOptions: { ecmaFeatures: { jsx: true } },
+  },
+}).run("restricted-syntax", restrictedSyntax, {
+  valid: [
+    { code: 'css({ color: "text.brand", bg: "surface" });', options: syntax(["textColor", "colorValue"]) },
+    { code: 'const x = <div style={{ "--bar-width": width }} />;', options: syntax(["styleAttribute"]) },
+    { code: 'supabase.storage.from("photos");', options: syntax(["supabaseQuery"]) },
+    { code: 'supabase.from("materials");', options: syntax(["textColor"]) },
+  ],
+  invalid: [
+    { code: 'css({ color: "primary.700" });', options: syntax(["textColor"]), errors: 1 },
+    { code: 'css({ bg: "#fff" });', options: syntax(["colorValue"]), errors: 1 },
+    { code: 'css({ bg: "[red]" });', options: syntax(["colorValue"]), errors: 1 },
+    { code: "const x = <div style={{ color: 'red' }} />;", options: syntax(["styleAttribute"]), errors: 1 },
+    { code: 'supabase.rpc("withdraw");', options: syntax(["supabaseQuery"]), errors: 1 },
+    { code: "process.env.SUPABASE_SECRET_KEY;", options: syntax(["secretKey"]), errors: 1 },
   ],
 });

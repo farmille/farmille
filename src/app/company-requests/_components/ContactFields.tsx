@@ -9,6 +9,7 @@ export type ContactDefaults = {
   email: string;
   phone: string;
 };
+
 export const emptyContact: ContactDefaults = {
   companyName: "",
   corporateNumber: "",

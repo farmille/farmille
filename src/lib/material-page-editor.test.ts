@@ -19,6 +19,7 @@ const content = {
   relatedCompanies: [],
   certifications: [],
 };
+
 const input = {
   materialId: "11111111-1111-4111-8111-111111111111",
   expectedVersion: null,
@@ -32,6 +33,7 @@ describe("製品ページの原稿", () => {
       ...input,
       content: { ...content, registrations: [{ kind: "pesticide", companyName: "", effects: "" }] },
     };
+
     expect(v.is(SaveMaterialPageSchema, draft)).toBe(true);
     expect(v.is(SaveMaterialPageSchema, { ...draft, submit: true })).toBe(false);
     expect(
@@ -73,6 +75,7 @@ describe("製品ページの原稿", () => {
       year: null,
       pageCount: null,
     };
+
     const link = { group: "public_trial", title: "試験", url: "https://example.com/trial", trial };
     expect(
       v.is(SaveMaterialPageSchema, {
@@ -81,6 +84,7 @@ describe("製品ページの原稿", () => {
         content: { ...content, links: [link] },
       }),
     ).toBe(true);
+
     for (const incomplete of [{ ...link, group: null, trial: null }]) {
       expect(
         v.is(SaveMaterialPageSchema, { ...input, content: { ...content, links: [incomplete] } }),
@@ -93,6 +97,7 @@ describe("製品ページの原稿", () => {
         }),
       ).toBe(false);
     }
+
     expect(
       v.is(SaveMaterialPageSchema, {
         ...input,

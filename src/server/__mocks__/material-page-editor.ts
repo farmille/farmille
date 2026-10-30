@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const getPublishedMaterialPage = fn<
   typeof import("@/server/material-page-editor").getPublishedMaterialPage
 >(async () => ({
@@ -17,6 +18,7 @@ export const getPublishedMaterialPage = fn<
   imageUrl: null,
   origin: "manufacturer",
 })).mockName("getPublishedMaterialPage");
+
 export const getMaterialPageVersion = fn<
   typeof import("@/server/material-page-editor").getMaterialPageVersion
 >(async () => ({
@@ -52,6 +54,7 @@ export const getMaterialPageVersion = fn<
     status: "pending",
   },
 })).mockName("getMaterialPageVersion");
+
 export const getMaterialEditor = fn<
   typeof import("@/server/material-page-editor").getMaterialEditor
 >(async () => ({
@@ -87,6 +90,7 @@ export const getMaterialEditor = fn<
   expectedVersion: "",
   pendingVersion: "",
 })).mockName("getMaterialEditor");
+
 export const saveMaterialPageVersion = fn<
   typeof import("@/server/material-page-editor").saveMaterialPageVersion
 >(async () => ({
@@ -97,6 +101,7 @@ export const saveMaterialPageVersion = fn<
   statusText: "OK",
   success: true,
 })).mockName("saveMaterialPageVersion");
+
 export const withdrawMaterialPageVersion = fn<
   typeof import("@/server/material-page-editor").withdrawMaterialPageVersion
 >(async () => ({
@@ -107,6 +112,7 @@ export const withdrawMaterialPageVersion = fn<
   statusText: "No Content",
   success: true,
 })).mockName("withdrawMaterialPageVersion");
+
 export const hideOwnedMaterialPage = fn<
   typeof import("@/server/material-page-editor").hideOwnedMaterialPage
 >(async () => ({

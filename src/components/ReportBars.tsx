@@ -24,32 +24,32 @@ export type ReportBarGroup = { key: string; heading: string | null; rows: Report
 
 /** グラフの節を棒の並びにする。数値として読めない値の行は棒にしない。 */
 export function reportBarGroups(sections: ReportGraphSection[]): ReportBarGroup[] {
-  return sections
-    .map(({ key, heading, rows }) => ({
-      key,
-      heading,
-      rows: rows.flatMap(({ id, label, value, series }) => {
-        const parsed = parseReportNumber(value);
-        return parsed === null
-          ? []
-          : [
-              {
-                id,
-                label,
-                valueText: value.trim(),
-                value: parsed.value,
-                error: parsed.error,
-                series,
-              },
-            ];
-      }),
-    }))
-    .filter(({ rows }) => rows.length > 0);
+  return sections.flatMap(({ key, heading, rows }) => {
+    const bars = rows.flatMap(({ id, label, value, series }) => {
+      const parsed = parseReportNumber(value);
+
+      return parsed === null
+        ? []
+        : [
+            {
+              id,
+              label,
+              valueText: value.trim(),
+              value: parsed.value,
+              error: parsed.error,
+              series,
+            },
+          ];
+    });
+
+    return bars.length === 0 ? [] : [{ key, heading, rows: bars }];
+  });
 }
 
 function domain(rows: ReportBarRow[], unit: string) {
   const min = Math.min(0, ...rows.map((row) => row.value - (row.error ?? 0)));
   const max = Math.max(unit === "%" ? 100 : 0, ...rows.map((row) => row.value + (row.error ?? 0)));
+
   return { min, max: max === min ? min + 1 : max };
 }
 
@@ -93,7 +93,9 @@ export function ReportBars({
     groups.flatMap(({ rows }) => rows),
     unit,
   );
+
   const position = (value: number) => ((value - min) / (max - min)) * 100;
+
   return (
     <figure
       className={css({
@@ -160,6 +162,7 @@ export function ReportBars({
             {group.rows.map((row) => {
               const zero = position(0);
               const end = position(row.value);
+
               return (
                 <div
                   key={row.id}

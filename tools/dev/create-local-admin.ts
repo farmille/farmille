@@ -22,8 +22,11 @@ const AuthUserSchema = v.object({
   id: v.string(),
   email: v.optional(v.string()),
 });
+
 const AuthUserListSchema = v.object({ users: v.array(AuthUserSchema) });
+
 type AuthUser = v.InferOutput<typeof AuthUserSchema>;
+
 type AuthAdminRequestBody =
   | Readonly<{
       email: string;
@@ -69,6 +72,7 @@ function generatePassword(): string {
     for (const byte of randomBytes(length)) {
       if (byte >= limit) continue;
       chars.push(alphabet[byte % alphabet.length]);
+
       if (chars.length === length) break;
     }
   }
@@ -92,6 +96,7 @@ async function callAuthAdmin<TSchema extends v.GenericSchema>(
       "Content-Type": "application/json",
     },
   };
+
   if (body !== undefined) requestInit.body = JSON.stringify(body);
 
   const response = await fetch(new URL(`/auth/v1/admin${path}`, baseUrl), requestInit);
@@ -102,11 +107,13 @@ async function callAuthAdmin<TSchema extends v.GenericSchema>(
   }
 
   const result = v.safeParse(schema, JSON.parse(responseText));
+
   if (!result.success) {
     throw new Error(
       `Auth Admin API ${method} ${path} のレスポンス形式が不正です：${v.summarize(result.issues)}`,
     );
   }
+
   return result.output;
 }
 
@@ -122,6 +129,7 @@ async function findUserByEmail(
     `/users?page=1&per_page=1000`,
     "GET",
   );
+
   return payload.users.find((user) => user.email === email) ?? null;
 }
 

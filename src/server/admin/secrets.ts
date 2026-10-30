@@ -18,6 +18,7 @@ function randomString(alphabet: string, length: number): string {
     for (const byte of randomBytes(length)) {
       if (byte >= limit) continue;
       chars.push(alphabet[byte % alphabet.length]);
+
       if (chars.length === length) break;
     }
   }

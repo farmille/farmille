@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const listSearchFiltersByRefs = fn<
   typeof import("@/server/queries/classifications").listSearchFiltersByRefs
 >(async () => ({
@@ -13,6 +14,7 @@ export const listSearchFiltersByRefs = fn<
     },
   ],
 })).mockName("listSearchFiltersByRefs");
+
 export const listClassificationOptions = fn<
   typeof import("@/server/queries/classifications").listClassificationOptions
 >(async () => ({

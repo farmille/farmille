@@ -45,6 +45,7 @@ export function ManufacturerProfileHistory({
         ) : (
           versions.map((version) => {
             const status = v.parse(versionStatusSchema, version.status);
+
             return (
               <li className={logRow} key={version.id}>
                 <span className={logDate}>{formatDateJa(version.created_at)}</span>

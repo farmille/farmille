@@ -11,6 +11,7 @@ async function lookup(postalCode: string) {
   await user.clear(postal);
   await user.type(postal, postalCode);
   await user.click(screen.getByRole("button", { name: "住所を自動入力" }));
+
   return user;
 }
 

@@ -44,11 +44,14 @@ export function StructuredReportArticle({
   documentUrls: { id: string; url: string }[];
 }) {
   const layout = reportPlotLayout(input, materialName);
+
   // 調査項目に差し込んだ画像は項目ごとに出し、節の最後には調査項目に属さない旧形式の写真だけを出す
   const mediaOf = (section: ReportSection) =>
     input.media.filter((media) => media.section === section && !media.measurementId);
+
   const prefecture = PREFECTURES.find(({ code }) => code === input.prefectureCode)?.name;
   const stages = input.timingStages.map((stage) => APPLICATION_TIMINGS[stage]).join("、");
+
   const conditionLines = [
     prefecture
       ? `地域：${prefecture}${input.showCity && input.city.trim() ? input.city.trim() : ""}`
@@ -64,6 +67,7 @@ export function StructuredReportArticle({
       {REPORT_SECTIONS.map(({ value: section }) => {
         const media = mediaOf(section);
         const h = reportSectionHeading(input, section);
+
         switch (section) {
           case "results":
             return (
@@ -107,8 +111,10 @@ export function StructuredReportArticle({
               <Fragment key={section}>
                 {reportMeasurementGroups(input.measurements).map((group) => {
                   const [first] = group;
+
                   if (first === undefined || (first.kind === "text" && !first.body.trim()))
                     return null;
+
                   return (
                     <Fragment key={first.id}>
                       <ReadingSubheading>
@@ -121,6 +127,7 @@ export function StructuredReportArticle({
                             groups: reportBarGroups(graphSections(graph, input.plots, layout)),
                           }))
                           .filter(({ groups }) => groups.length > 0);
+
                         return (
                           <Fragment key={measurement.id}>
                             <ReportItemImages
@@ -157,6 +164,7 @@ export function StructuredReportArticle({
             );
           case "documents":
             if (input.documents.length === 0 && media.length === 0) return null;
+
             return (
               <Fragment key={section}>
                 <ReadingHeading>{h}</ReadingHeading>
@@ -164,6 +172,7 @@ export function StructuredReportArticle({
                   <ul className={documentList}>
                     {input.documents.map((document) => {
                       const url = documentUrls.find((item) => item.id === document.id)?.url;
+
                       return (
                         <li key={document.id}>
                           {url ? (
@@ -182,6 +191,7 @@ export function StructuredReportArticle({
               </Fragment>
             );
         }
+
         return null;
       })}
     </>

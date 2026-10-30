@@ -9,6 +9,7 @@ const profile = {
   cropIds: [],
   links: [],
 };
+
 describe("公開プロフィールの入力境界", () => {
   it("自己紹介やタグは任意で保存できる", () => {
     expect(v.safeParse(ProfileDetailsInputSchema, profile).success).toBe(true);
@@ -19,6 +20,7 @@ describe("公開プロフィールの入力境界", () => {
         affiliations: [" JA青年部 ", "生産者の会"],
         links: ["https://example.com", "https://example.org"],
       });
+
       expect(result.affiliations).toEqual(["JA青年部", "生産者の会"]);
     }
   });
@@ -36,6 +38,7 @@ describe("公開プロフィールの入力境界", () => {
       ...profile,
       cropNamesOther: [" ステビア ", "パッションフルーツ"],
     });
+
     expect(result.cropNamesOther).toEqual(["ステビア", "パッションフルーツ"]);
     expect(v.parse(ProfileDetailsInputSchema, profile).cropNamesOther).toBeUndefined();
     expect(

@@ -9,9 +9,13 @@ const meta = {
   args: { passkeys: [], admin: false },
   parameters: { nextjs: { appDirectory: true } },
 } satisfies Meta<typeof PasskeyManager>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Empty: Story = {};
+
 export const Registered: Story = {
   args: {
     passkeys: [
@@ -23,6 +27,7 @@ export const Registered: Story = {
     ],
   },
 };
+
 export const Admin: Story = { args: { admin: true } };
 
 export const DeleteConfirm: Story = {

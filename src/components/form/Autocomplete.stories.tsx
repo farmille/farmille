@@ -20,6 +20,7 @@ const searchSuggestions: Option[] = [
 
 function StatefulAutocomplete(args: ComponentProps<typeof Autocomplete>) {
   const [value, setValue] = useReducer((_current: string, next: string) => next, args.value);
+
   return (
     <Autocomplete
       {...args}
@@ -52,6 +53,7 @@ const meta = {
 } satisfies Meta<typeof Autocomplete>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);

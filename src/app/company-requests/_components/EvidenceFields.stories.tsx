@@ -3,6 +3,7 @@ import { Field } from "@/components/form";
 import { css } from "../../../../styled-system/css";
 
 import { EvidenceFields } from "./EvidenceFields";
+
 const meta = {
   title: "Pages/company-requests/EvidenceFields",
   component: EvidenceFields,
@@ -23,6 +24,9 @@ const meta = {
     ),
   ],
 } satisfies Meta<typeof EvidenceFields>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

@@ -13,6 +13,7 @@ const effects = [
 
 function Harness({ multiple, limit }: { multiple?: boolean; limit?: number }) {
   const [value, setValue] = useReducer((_current: string[], next: string[]) => next, []);
+
   return (
     <>
       <ToggleGroup

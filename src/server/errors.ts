@@ -38,6 +38,7 @@ export const ERROR_CODES = [
 ] as const;
 
 export const ErrorCodeSchema = v.picklist(ERROR_CODES);
+
 export type ErrorCode = v.InferOutput<typeof ErrorCodeSchema>;
 
 // 機能固有のエラーコードは、利用箇所と表示文言を同時に追加する。

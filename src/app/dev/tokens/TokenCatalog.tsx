@@ -69,17 +69,21 @@ const primitiveColors = primitiveColorTokens.map((token) => ({
   ...token,
   color: token.value,
 }));
+
 const semanticColors = flattenTokenBranch(semanticTokens.colors).map(resolveSemanticColor);
 const fontSizes = flattenTokenBranch(tokens.fontSizes);
 const fontWeights = flattenTokenBranch(tokens.fontWeights);
 const lineHeights = flattenTokenBranch(tokens.lineHeights);
+
 const spacing = flattenTokenBranch(tokens.spacing).toSorted(
   (left, right) => Number.parseFloat(left.value) - Number.parseFloat(right.value),
 );
+
 const radii = flattenTokenBranch(tokens.radii);
 const shadows = flattenTokenBranch(tokens.shadows);
 const sizes = flattenTokenBranch(tokens.sizes);
 const aspectRatios = flattenTokenBranch(tokens.aspectRatios);
+
 function isTextStyleName(name: string): name is keyof typeof textStyles {
   return Object.hasOwn(textStyles, name);
 }

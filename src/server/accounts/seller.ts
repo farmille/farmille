@@ -15,30 +15,40 @@ export const SELLER_EMAIL_DOMAIN = "sellers.farmille.internal";
 export const LOGIN_ID_PATTERN = /^[a-z0-9][a-z0-9._-]{2,30}$/;
 
 export type SellerSignInResult = { sellerId: string };
+
 export type SellerApplyInput = v.InferOutput<typeof manufacturerRegistrationSchema>;
+
 export type SellerApplyFieldErrors = Partial<Record<keyof SellerApplyInput, string>>;
+
 export type SellerApplyValidation =
   | { ok: true; input: SellerApplyInput }
   | { ok: false; fieldErrors: SellerApplyFieldErrors };
+
 export type SellerApplyResult = { applied: true };
 
 export function syntheticSellerEmail(loginId: string): string | null {
   const normalized = loginId.trim().toLowerCase();
+
   return LOGIN_ID_PATTERN.test(normalized) ? `${normalized}@${SELLER_EMAIL_DOMAIN}` : null;
 }
 
 /** 申請者が入力する連絡先を検証し、Farmille企業会員IDはサーバー側で発行する。 */
 type SellerApplyFormValues = { [Key in keyof SellerApplyInput]: FormDataEntryValue | null };
+
 export function validateSellerApply(raw: SellerApplyFormValues): SellerApplyValidation {
   const result = v.safeParse(manufacturerRegistrationSchema, raw);
+
   if (result.success) return { ok: true, input: result.output };
   const fieldErrors: SellerApplyFieldErrors = {};
   const nested = v.flatten(result.issues).nested;
+
   for (const key of Object.keys(manufacturerRegistrationSchema.entries)) {
     const parsedKey = v.parse(v.keyof(manufacturerRegistrationSchema), key);
     const message = nested?.[parsedKey]?.[0];
+
     if (message !== undefined) fieldErrors[parsedKey] = message;
   }
+
   return { ok: false, fieldErrors };
 }
 
@@ -101,12 +111,16 @@ export async function applySellerAccount(
 
   const loginId = `m-${randomUUID().replaceAll("-", "").slice(0, 28)}`;
   const taken = await isLoginIdTaken(admin, loginId);
+
   if (!taken.ok) return taken;
+
   if (taken.data) return fail("login_id_taken");
 
   let inviteCode: string | null = null;
+
   if (input.inviteCode.length > 0) {
     const resolved = await resolveInviteCode(admin, input.inviteCode);
+
     if (!resolved.ok) return resolved;
     inviteCode = resolved.data;
   }
@@ -114,6 +128,7 @@ export async function applySellerAccount(
   // anon INSERT の RLS（status=applied・auth_user_id/approved_at NULL）を実効経路として使う。
   // applied 行は SELECT できないため RETURNING（.select）は付けない。
   const supabase = await createServerSupabase();
+
   const { error } = await supabase.from("seller_accounts").insert({
     official_name: input.officialName,
     login_id: loginId,
@@ -153,9 +168,11 @@ export async function signInSellerWithLoginId(
   password: string,
 ): Promise<Result<SellerSignInResult>> {
   const email = syntheticSellerEmail(loginId);
+
   if (email === null || password.length === 0) return fail("seller_invalid_credentials");
 
   const admin = createAdminSupabase();
+
   const { data: seller, error: sellerError } = await admin
     .from("seller_accounts")
     .select("id, status, auth_user_id")

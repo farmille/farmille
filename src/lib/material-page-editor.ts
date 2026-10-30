@@ -8,6 +8,7 @@ export const APPLICATION_METHODS = [
   { value: "coat", label: "粉衣・塗布" },
   { value: "other", label: "その他" },
 ] as const;
+
 export const APPLICATION_TIMINGS = [
   "栽培開始前",
   "播種・定植時",
@@ -18,6 +19,7 @@ export const APPLICATION_TIMINGS = [
   "生育後期〜収穫前",
   "収穫後",
 ] as const;
+
 export const MATERIAL_LINK_GROUPS = [
   { value: "overview", label: "概要（製品説明・パンフレット・画像）" },
   { value: "safety", label: "使用上の注意（安全データシートなど）" },
@@ -31,6 +33,7 @@ export const MATERIAL_LINK_GROUPS = [
     label: "その他の試験結果（メーカー、大学・研究機関、生産者団体が実施した試験結果）",
   },
 ] as const;
+
 export const MATERIAL_REGISTRATION_KINDS = [
   {
     value: "pesticide",
@@ -51,8 +54,10 @@ export const MATERIAL_REGISTRATION_KINDS = [
     effectsLabel: "土壌改良資材としての効果・特徴",
   },
 ] as const;
+
 const text = () => v.pipe(v.string(), v.maxLength(20000));
 const title = () => v.pipe(v.string(), v.maxLength(500));
+
 export const MaterialExternalUrlSchema = v.pipe(
   v.string(),
   v.trim(),
@@ -60,6 +65,7 @@ export const MaterialExternalUrlSchema = v.pipe(
   v.regex(/^https?:\/\//),
   v.maxLength(4000),
 );
+
 export const MaterialPageContentSchema = v.object({
   description: text(),
   mainComponents: text(),
@@ -125,6 +131,7 @@ export const MaterialPageContentSchema = v.object({
   ),
   relatedCompanies: v.array(title()),
 });
+
 export type MaterialPageContent = v.InferOutput<typeof MaterialPageContentSchema>;
 
 export type PesticideRegistration = "registered" | "unregistered" | "unknown";
@@ -137,8 +144,10 @@ export function pesticideRegistrationOf(
   registrations: MaterialPageContent["registrations"] | null,
 ): PesticideRegistration {
   if (registrations === null || registrations.length === 0) return "unknown";
+
   return registrations.some((entry) => entry.kind === "pesticide") ? "registered" : "unregistered";
 }
+
 export const SaveMaterialPageSchema = v.pipe(
   v.object({
     materialId: v.pipe(v.string(), v.uuid()),
@@ -166,6 +175,7 @@ export const SaveMaterialPageSchema = v.pipe(
     "公開前に製品説明と資料・登録認証の入力を確認してください。",
   ),
 );
+
 export const MATERIAL_PAGE_STATUS_LABELS = {
   draft: "下書き",
   pending: "表現確認中",
@@ -178,6 +188,7 @@ export const MATERIAL_PAGE_STATUS_LABELS = {
 export function materialRegistrationRows(registrations: MaterialPageContent["registrations"]) {
   return MATERIAL_REGISTRATION_KINDS.flatMap((kind) => {
     const registration = registrations.find((entry) => entry.kind === kind.value);
+
     return registration
       ? [
           {

@@ -74,14 +74,18 @@ export default async function AdminTagsPage() {
   ]);
 
   if (!tags.ok) throw new Error(errorMessageJa[tags.error]);
+
   if (!crops.ok) throw new Error(errorMessageJa[crops.error]);
+
   if (!groups.ok) throw new Error(errorMessageJa[groups.error]);
 
   const tagGroups = TAG_CATEGORIES.map((category) => ({
     category,
     items: tags.data.filter((tag) => tag.category === category),
   }));
+
   const groupedTagCount = tagGroups.reduce((count, group) => count + group.items.length, 0);
+
   if (groupedTagCount !== tags.data.length) {
     throw new Error("未対応の検索補助タグ分類があります。");
   }
@@ -90,7 +94,9 @@ export default async function AdminTagsPage() {
     group,
     items: crops.data.filter((crop) => crop.group_id === group.id),
   }));
+
   const groupedCropCount = cropGroups.reduce((count, group) => count + group.items.length, 0);
+
   if (groupedCropCount !== crops.data.length) {
     throw new Error("作物群に紐づかない作物があります。");
   }

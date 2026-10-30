@@ -31,6 +31,7 @@ const pageMaterial = {
   name: "スキーポン",
   manufacturerName: "ファーム技研",
 };
+
 const chosenMaterial = {
   id: "00000000-0000-4000-8000-000000000102",
   name: "根圏サポートA",
@@ -78,6 +79,7 @@ describe("文章の入力欄", () => {
   it("標準ラベルとplaceholderを使い、未入力なら欄にエラーを表示する", () => {
     renderForm({ ...filledReport, observedChange: "", cultivationEnvironment: "", timingNote: "" });
     const labels = ["結果・感想", "栽培環境", "処理日と生育状況"];
+
     for (const label of labels) {
       const field = screen.getByRole("textbox", { name: label });
       expect(field).toBeRequired();
@@ -139,12 +141,15 @@ describe("保存と提出の最中", () => {
 
   function pageOf() {
     const title = document.querySelector("h1");
+
     if (title === null) throw new Error("タイトルがありません。");
+
     return title;
   }
 
   it.each(["下書き保存", "投稿する"])("%sが終わるまで、フォームを編集できない", async (action) => {
     renderForm({ ...filledReport, methodDetailsAck: true, documentsAck: true, guidelineAck: true });
+
     for (const name of [
       "資材を使った日（処理日）を記入した",
       "差し込んだグラフ・表に、氏名や連絡先などが写っていないか確認した",
@@ -187,11 +192,13 @@ describe("資材を選び直した後のPDF読み取り", () => {
   it("今選んでいる資材で読み取りを送り、拒否されたPDFを消す", async () => {
     const uploadPath =
       "00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-000000000002.pdf";
+
     vi.spyOn(recaptcha, "loadRecaptcha").mockResolvedValue();
     vi.spyOn(recaptcha, "executeRecaptcha").mockResolvedValue("test-token");
     vi.spyOn(reportImages, "countPdfPages").mockResolvedValue(1);
     vi.spyOn(reportImages, "uploadPdfForReading").mockResolvedValue(uploadPath);
     const discard = vi.spyOn(reportImages, "discardPdfForReading").mockResolvedValue();
+
     const read = vi.spyOn(reportActions, "readPdfIntoReportAction").mockResolvedValue({
       ok: false,
       error: "invalid_body",
@@ -200,6 +207,7 @@ describe("資材を選び直した後のPDF読み取り", () => {
       savedDraft: null,
       pdfValuesCheckRequired: false,
     });
+
     writePersisted(persistKey("report", `/materials/${pageMaterial.id}/report/new`), {
       material: chosenMaterial,
       input: { ...filledReport, materialId: chosenMaterial.id },

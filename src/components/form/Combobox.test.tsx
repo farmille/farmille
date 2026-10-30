@@ -163,9 +163,11 @@ describe("Combobox", () => {
 
   it("サーバー検索で候補が入れ替わっても、選んだ候補のラベルを保つ", async () => {
     const user = userEvent.setup();
+
     function ServerSearch() {
       const [query, setQuery] = useReducer((_current: string, next: string) => next, "");
       const [picked, setPicked] = useReducer((_current: Option[], next: Option[]) => next, []);
+
       return (
         <Combobox
           emptyMessage="一致する作物がありません"
@@ -181,6 +183,7 @@ describe("Combobox", () => {
         />
       );
     }
+
     render(<ServerSearch />);
 
     await user.type(screen.getByRole("combobox", { name: "資材" }), "きゅ");

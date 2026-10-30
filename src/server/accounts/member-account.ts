@@ -11,10 +11,14 @@ export type MemberAccount = { userId: string; email: string };
  */
 export async function getMemberAccount(): Promise<Result<MemberAccount>> {
   const session = await getSessionUser();
+
   if (session === null) return fail("unauthorized");
+
   if (session.accountType !== "general") return fail("forbidden");
   const { data, error } = await (await createServerSupabase()).auth.getUser();
+
   if (error !== null || data.user.id !== session.userId || data.user.email === undefined)
     return fail("unauthorized");
+
   return succeed({ userId: data.user.id, email: data.user.email });
 }

@@ -7,6 +7,7 @@ export function MaterialRegistrationBadges({
   certifications,
 }: Pick<MaterialPageContent, "registrations" | "certifications">) {
   if (registrations.length === 0 && certifications.length === 0) return <>−</>;
+
   return (
     <div className={css({ display: "flex", flexWrap: "wrap", gap: "2" })}>
       {MATERIAL_REGISTRATION_KINDS.filter((kind) =>

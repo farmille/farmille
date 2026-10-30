@@ -25,6 +25,7 @@ function clientWithPosts(reports: ReturnType<typeof report>[]) {
     global: {
       fetch: async (input, init) => {
         const url = new URL(new Request(input, init).url);
+
         switch (url.pathname) {
           case "/rest/v1/reviews":
             return Response.json([
@@ -52,6 +53,7 @@ function clientWithPosts(reports: ReturnType<typeof report>[]) {
       },
     },
   });
+
   return client;
 }
 
@@ -65,6 +67,7 @@ describe("マイページの参考になった合計", () => {
     const result = await listOwnPostsWithSupabase(client, "author");
 
     expect(result.ok).toBe(true);
+
     if (!result.ok) throw new Error(result.error);
     expect(result.data.helpfulReceivedCount).toBe(5);
     expect(result.data.posts).toContainEqual(
@@ -80,6 +83,7 @@ describe("マイページの参考になった合計", () => {
     const result = await listOwnPostsWithSupabase(client, "author");
 
     expect(result.ok).toBe(true);
+
     if (!result.ok) throw new Error(result.error);
     expect(result.data.posts).toHaveLength(8);
     expect(result.data.helpfulReceivedCount).toBe(23);

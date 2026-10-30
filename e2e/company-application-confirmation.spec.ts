@@ -11,7 +11,9 @@ test("申請用メール確認は解析を読み込まず、明示POSTだけを�
   expect(response.headers()["cache-control"]).toBe("no-store");
   expect(response.headers()["x-content-type-options"]).toBe("nosniff");
   const csp = response.headers()["content-security-policy"];
+
   if (!csp) throw new Error("確認ページのCSPがありません。");
+
   for (const directive of [
     "default-src 'none'",
     "form-action 'self'",
@@ -25,14 +27,18 @@ test("申請用メール確認は解析を読み込まず、明示POSTだけを�
   expect(html).toContain(`<script nonce="${nonce}">`);
   expect(html).not.toMatch(/<script[^>]+src=/);
   expect(html).toContain("history.replaceState");
+
   const forged = await request.post("/company-requests/receipts/confirm", {
     headers: { origin: "https://unrelated.example" },
     form: { token: "a".repeat(64) },
   });
+
   expect(forged.status()).toBe(403);
+
   const invalid = await request.post("/company-requests/receipts/confirm", {
     headers: { origin: baseURL },
     form: { token: "invalid" },
   });
+
   expect(invalid.status()).toBe(400);
 });

@@ -15,6 +15,7 @@ import { css, cx } from "../../../../../styled-system/css";
 import { MaterialBox } from "./MaterialBox";
 
 type MaterialLink = MaterialPageContent["links"][number];
+
 type LinkGroup = MaterialLink["group"];
 
 const cardStyle = css(surfaceCardRecipe.raw({ padding: "flush" }), {
@@ -22,6 +23,7 @@ const cardStyle = css(surfaceCardRecipe.raw({ padding: "flush" }), {
   px: "3.5",
   pb: "2.5",
 });
+
 const groupTitleStyle = css({
   pt: "2",
   px: "0.5",
@@ -30,6 +32,7 @@ const groupTitleStyle = css({
   fontWeight: "bold",
   color: "text.subtle",
 });
+
 const kindStyle = css({
   flex: "none",
   px: "1",
@@ -40,6 +43,7 @@ const kindStyle = css({
   bg: "accent.danger/14",
   borderRadius: "mark",
 });
+
 const fileRowStyle = css({
   display: "flex",
   alignItems: "center",
@@ -50,8 +54,10 @@ const fileRowStyle = css({
   borderColor: "border.default",
   _last: { borderBottomWidth: "0" },
 });
+
 const fileTitleBoxStyle = css({ flex: "1", minW: "0", overflowWrap: "anywhere" });
 const fileTitleStyle = css({ fontSize: "sm", fontWeight: "semibold", lineHeight: "snug" });
+
 const openLinkStyle = css({
   flex: "none",
   display: "inline-flex",
@@ -64,6 +70,7 @@ const openLinkStyle = css({
   textDecoration: "none",
   whiteSpace: "nowrap",
 });
+
 const testRowStyle = css({
   display: "flex",
   alignItems: "flex-start",
@@ -76,8 +83,10 @@ const testRowStyle = css({
   borderColor: "border.default",
   _first: { borderTopWidth: "0" },
 });
+
 const testKindStyle = css({ mt: "0.5" });
 const testBodyStyle = css({ flex: "1", minW: "0" });
+
 const testTitleStyle = css({
   fontSize: "md",
   fontWeight: "bold",
@@ -89,13 +98,16 @@ const testTitleStyle = css({
     textUnderlineOffset: "2px",
   },
 });
+
 const testSummaryStyle = css({
   mt: "0.5",
   textStyle: "supporting",
   color: "text.muted",
   lineClamp: "2",
 });
+
 const testMetaStyle = css({ mt: "1", textStyle: "note", color: "text.subtle" });
+
 const testOpenStyle = css({
   flex: "none",
   alignSelf: "center",
@@ -122,6 +134,7 @@ function FileRow({ link }: { link: MaterialLink }) {
   const titleId = useId();
   const title = link.title || "資料名は未入力です";
   const valid = v.is(MaterialExternalUrlSchema, link.url);
+
   return (
     <div className={fileRowStyle}>
       <span className={kindStyle}>{linkKind(link.url)}</span>
@@ -150,11 +163,13 @@ function TestRow({ link }: { link: MaterialLink }) {
   const titleId = useId();
   const title = link.title || "資料名は未入力です";
   const trial = link.trial;
+
   const meta = [
     trial?.institution,
     trial?.year === null || trial?.year === undefined ? "" : `${trial.year}年`,
     trial?.pageCount === null || trial?.pageCount === undefined ? "" : `${trial.pageCount}ページ`,
   ].filter(Boolean);
+
   const body = (
     <>
       <span className={cx(kindStyle, testKindStyle)}>{linkKind(link.url)}</span>
@@ -177,6 +192,7 @@ function TestRow({ link }: { link: MaterialLink }) {
       </div>
     </>
   );
+
   if (!v.is(MaterialExternalUrlSchema, link.url)) {
     return (
       <div className={testRowStyle}>
@@ -185,6 +201,7 @@ function TestRow({ link }: { link: MaterialLink }) {
       </div>
     );
   }
+
   return (
     <a
       className={cx("group", testRowStyle)}
@@ -210,12 +227,15 @@ export function MaterialSourceLinks({ links }: { links: MaterialPageContent["lin
     ...MATERIAL_LINK_GROUPS,
     ...(links.some((link) => link.group === null) ? [{ value: null, label: "分類未選択" }] : []),
   ];
+
   return (
     <MaterialBox headingId="material-links-heading" title="リンク・資料">
       <div className={cardStyle}>
         {groups.map((group) => {
           const items = links.filter((link) => link.group === group.value);
+
           if (items.length === 0) return null;
+
           return (
             <div key={group.value ?? "unclassified"}>
               <h3 className={groupTitleStyle}>{group.label}</h3>

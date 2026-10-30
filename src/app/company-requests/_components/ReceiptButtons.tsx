@@ -1,4 +1,5 @@
 "use client";
+
 import { startTransition, useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { css } from "../../../../styled-system/css";
@@ -11,11 +12,13 @@ type ReceiptMessage = { tone: "success" | "error"; text: string } | null;
 
 export function ReceiptButtons({ id, sent }: { id: string; sent: boolean }) {
   const router = useRouter();
+
   const [message, retry, busy] = useActionState(
     async (_previous: ReceiptMessage): Promise<ReceiptMessage> => {
       try {
         const result = await retryApplicationMail(id);
         router.refresh();
+
         return result.ok
           ? { tone: "success", text: "メールの送信状況を確認しました。" }
           : { tone: "error", text: errorMessageJa[result.error] };
@@ -28,6 +31,7 @@ export function ReceiptButtons({ id, sent }: { id: string; sent: boolean }) {
     },
     null,
   );
+
   return (
     <div
       className={css({

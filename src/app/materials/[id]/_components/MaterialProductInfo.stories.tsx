@@ -41,6 +41,7 @@ const meta = {
 } satisfies Meta<typeof MaterialProductInfo>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Published: Story = {};

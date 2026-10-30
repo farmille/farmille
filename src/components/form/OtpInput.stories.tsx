@@ -10,6 +10,7 @@ const meta = {
 } satisfies Meta<typeof OtpInput>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Empty: Story = {};

@@ -49,6 +49,7 @@ const meta = {
 } satisfies Meta<typeof ReviewForm>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Create: Story = {};
@@ -128,6 +129,7 @@ export const SubmitsCropAndRating: Story = {
 
     await waitFor(() => expect(createReviewAction).toHaveBeenCalledTimes(1));
     const formData = mocked(createReviewAction).mock.calls[0]?.[2];
+
     if (!(formData instanceof FormData)) throw new TypeError("送信値が FormData ではありません。");
     await expect(formData.getAll("cropIds")).toEqual(["crop-pepper"]);
     await expect(formData.getAll("rating")).toEqual(["4"]);

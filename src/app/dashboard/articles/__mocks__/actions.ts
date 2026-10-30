@@ -13,6 +13,7 @@ export const createArticleAction = fn<Actions["createArticleAction"]>(async () =
 export const updateArticleAction = fn<Actions["updateArticleAction"]>(async () => saved);
 export const setArticleStatusAction = fn<Actions["setArticleStatusAction"]>(async () => saved);
 export const deleteArticleAction = fn<Actions["deleteArticleAction"]>(async () => undefined);
+
 export const searchMaterialsAction = fn<Actions["searchMaterialsAction"]>(async () => ({
   ok: true,
   items: [

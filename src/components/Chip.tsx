@@ -93,6 +93,7 @@ type ChipProps = {
 /** 選択済みの項目を示すチップ。onRemove を渡すと外すボタンが付く。 */
 export function Chip({ children, category, size, className, onRemove, removeLabel }: ChipProps) {
   const styles = chipRecipe({ size, removable: onRemove !== undefined });
+
   return (
     <span className={cx(styles.root, className)}>
       {category === undefined ? null : <span className={styles.category}>{category}</span>}

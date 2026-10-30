@@ -4,12 +4,7 @@ import { css, cx } from "../../../styled-system/css";
 import { Icon } from "../Icon";
 import { TourCardBody } from "./TourCardBody";
 import { bottomSpaceStyle, dockStyle, riseStyle } from "./tour-motion";
-import {
-  useBottomSpace,
-  useCardHandoff,
-  useEntered,
-  useHandoff,
-} from "@/lib/hooks/use-onboarding-motion";
+import { useDock, useEntered, useHandoff } from "@/lib/hooks/use-onboarding-motion";
 
 const barStyle = css({
   display: "flex",
@@ -37,6 +32,7 @@ const hintStyle = css({
   justifyContent: "center",
   pointerEvents: "none",
 });
+
 const hintButtonStyle = css({
   pointerEvents: "auto",
   display: "inline-flex",
@@ -73,7 +69,9 @@ const hintButtonStyle = css({
     outlineOffset: "0.5",
   },
 });
+
 const nudgeStyle = css({ animation: "tourNudge", _motionReduce: { animation: "none" } });
+
 export type TourBarProps = {
   /** 3段階のどこにいるか。帯の上に「チュートリアル中　1 / 3」と出す */
   section?: number;
@@ -98,8 +96,8 @@ export function TourBar({
   scrollHint,
 }: TourBarProps) {
   const entered = useEntered(useHandoff().continuing);
-  const { ref, space, clear } = useBottomSpace<HTMLDivElement>();
-  useCardHandoff(ref, true, false);
+  const { ref, space, clear } = useDock<HTMLDivElement>(false);
+
   return (
     <>
       <div aria-hidden="true" className={bottomSpaceStyle} style={{ "--tour-space": space }} />

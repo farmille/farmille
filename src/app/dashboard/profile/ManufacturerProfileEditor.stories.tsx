@@ -24,9 +24,13 @@ const meta = {
     pendingVersion: null,
   },
 } satisfies Meta<typeof ManufacturerProfileEditor>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
+
 export const DraftWithLogo: Story = {
   args: {
     initialContent: {
@@ -38,6 +42,7 @@ export const DraftWithLogo: Story = {
     expectedVersion: "44444444-4444-4444-8444-444444444441",
   },
 };
+
 export const Pending: Story = {
   args: { pendingVersion: "44444444-4444-4444-8444-444444444442" },
 };

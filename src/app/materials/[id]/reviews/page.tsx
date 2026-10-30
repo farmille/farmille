@@ -23,6 +23,7 @@ import { parseReviewSearchParams } from "./search-params";
 
 const visuallyHiddenStyle = css({ srOnly: true });
 const summaryStyle = css({ mb: "3" });
+
 const toolsStyle = css({
   mb: "2.5",
   display: "flex",
@@ -30,11 +31,13 @@ const toolsStyle = css({
   alignItems: "center",
   gap: "2",
 });
+
 const countStyle = css({
   fontSize: "sm",
   color: "text.subtle",
   fontVariantNumeric: "tabular-nums",
 });
+
 const listStyle = css({ display: "flex", flexDirection: "column", gap: "2.5" });
 
 type MaterialReviewsPageProps = {
@@ -71,18 +74,22 @@ export default async function MaterialReviewsPage({
   }
 
   const { sort, page } = parseReviewSearchParams(requestedSearchParams);
+
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
+
   const [material, reviewsResult, distributionResult, account] = await Promise.all([
     loadMaterialOrNotFound(id),
     listReviewsByMaterial(id, { sort, page, viewerUserId }),
     getReviewRatingDistribution(id),
     getViewerAccount(),
   ]);
+
   const reviews = unwrapQueryResult(reviewsResult);
   const distribution = unwrapQueryResult(distributionResult);
   const materialPath = `/materials/${material.id}`;
   const reviewsPath = `${materialPath}/reviews`;
+
   const reviewListJsonLd =
     page === 1
       ? createReviewListJsonLd({
@@ -97,6 +104,7 @@ export default async function MaterialReviewsPage({
           })),
         })
       : null;
+
   const hrefForPage = (targetPage: number): string => {
     const query = new URLSearchParams({
       sort,

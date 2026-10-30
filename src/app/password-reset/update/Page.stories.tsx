@@ -14,8 +14,11 @@ const meta = {
     searchParams: Promise.resolve({ token_hash: "storybook-valid-password-reset-token-2026" }),
   },
 } satisfies Meta<typeof Page>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
 
 export const InvalidLink: Story = { args: { searchParams: Promise.resolve({}) } };

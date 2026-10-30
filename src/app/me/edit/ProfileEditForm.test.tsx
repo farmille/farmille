@@ -14,6 +14,7 @@ afterEach(() => {
 describe("プロフィール編集", () => {
   it("保存に失敗しても名前・自己紹介・リンクを保持し、次の保存へ渡す", async () => {
     vi.spyOn(actions, "profileHandleCheckAction").mockResolvedValue(null);
+
     const save = vi.spyOn(actions, "updateProfileAction").mockResolvedValue({
       status: "error",
       message: "保存できませんでした。",
@@ -23,6 +24,7 @@ describe("プロフィール編集", () => {
         links: "https://example.test/farm",
       },
     });
+
     const user = userEvent.setup();
     render(<ProfileEditForm {...meta.args} />);
     const handle = screen.getByLabelText(/^ニックネーム/);

@@ -68,23 +68,28 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
     tone = "danger",
     alternative,
   } = props;
+
   const [ownOpen, setOwnOpen] = useReducer((_current: boolean, next: boolean) => next, false);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
   const styles = dialogRecipe({ size: "panel" });
   const open = props.trigger === undefined ? props.open : ownOpen;
   const setOpen = props.trigger === undefined ? props.onOpenChange : setOwnOpen;
+
   const [, runConfirmation, confirming] = useActionState(
     async (
       _state: null,
       confirmation: { work: () => void | Promise<void>; closeWhenDone: boolean },
     ) => {
       await confirmation.work();
+
       if (confirmation.closeWhenDone) setOpen(false);
+
       return null;
     },
     null,
   );
+
   const busy = confirming || props.pending === true;
 
   // 失敗は transition から一番近いエラー境界へ届く（Next の redirect もそこで処理される）

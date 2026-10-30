@@ -179,6 +179,7 @@ function MaterialImage({
   preload: boolean;
 }) {
   const size = IMAGE_SIZES[variant];
+
   return (
     <div className={imageBoxRecipe({ variant })} data-ui="material-card-image">
       <Icon name="image" size="lg" className={imageLayer} />
@@ -362,6 +363,7 @@ function EvidenceBand({
       </div>
     );
   }
+
   if (evidence.groups.length > 0) {
     return (
       <div className={evidenceBandRecipe({ match: "group" })}>
@@ -369,5 +371,6 @@ function EvidenceBand({
       </div>
     );
   }
+
   return null;
 }

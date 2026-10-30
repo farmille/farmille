@@ -52,6 +52,7 @@ export function ProfileTagsEditor({
 }) {
   const restoredCropIds = useRestoredField("cropIds");
   const restoredAffiliations = useRestoredField("affiliations");
+
   // TanStack Formは未編集のdefaultValues変更を取り込むため、復元した初期値を固定する。
   const [initialValues] = useReducer(
     (current: ProfileTagSelection) => current,
@@ -70,27 +71,36 @@ export function ProfileTagsEditor({
       affiliations: restoredAffiliations ?? details.affiliations,
     }),
   );
+
   const form = useForm({ defaultValues: initialValues });
+
   const { cropQuery, crops, affiliation, affiliations } = useStore(
     form.store,
     (state) => state.values,
   );
+
   const [message, setMessage] = useReducer((_state: string, next: string) => next, "");
   const query = normalize(cropQuery);
+
   const available = options.crops.filter(
     (crop) =>
       !crops.some((option) => option.value === crop.id) &&
       [crop.name, ...crop.aliases].some((name) => normalize(name).includes(query)),
   );
+
   const affiliationFull = affiliations.length >= AFFILIATION_LIMIT;
 
   function addAffiliation(name: string) {
     const value = name.trim();
+
     if (!value) return;
+
     if (affiliationFull) {
       setMessage(`所属は${AFFILIATION_LIMIT}件まで登録できます。`);
+
       return;
     }
+
     if (!affiliations.includes(value)) form.setFieldValue("affiliations", [...affiliations, value]);
     form.setFieldValue("affiliation", "");
     setMessage("");

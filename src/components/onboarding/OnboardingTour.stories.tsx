@@ -19,6 +19,7 @@ const meta = {
 } satisfies Meta<typeof OnboardingTour>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const WithoutMark: Story = {};
@@ -31,6 +32,7 @@ export const FinishOnSlowNetwork: Story = {
   parameters: { nextjs: { navigation: { pathname: REVIEW_FORM } } },
   beforeEach: () => {
     writeOnboardingStep(window.localStorage, USER_ID, "finish");
+
     return () => clearOnboarding(window.localStorage);
   },
   render: () => (

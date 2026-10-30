@@ -81,17 +81,22 @@ function ClassificationGroup({
 /** 資材の登録・編集フォーム。admin は分類・検索層と一次情報層の両方を編集できる（01 §3）。 */
 export function MaterialForm({ classifications, material }: MaterialFormProps) {
   const isEdit = material !== null;
+
   const [state, formAction] = useActionState(
     isEdit ? updateMaterialAction : createMaterialAction,
     initialMaterialFormState,
   );
+
   const { errors, classificationError } = useMemo((): FormErrorState => {
     if (state.status !== "error" || state.fieldErrors === undefined) {
       return { errors: undefined, classificationError: undefined };
     }
+
     const { classifications, ...fieldErrors } = state.fieldErrors;
+
     return { errors: fieldErrors, classificationError: classifications };
   }, [state]);
+
   const form = useForm({
     defaultValues: {
       name: material?.name ?? "",
@@ -113,6 +118,7 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
       searchTagIds: material?.searchTagIds ?? [],
     },
   });
+
   const values = useStore(form.store, (state) => state.values);
 
   return (
@@ -137,8 +143,10 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
           "catalogUrl",
         ] as const) {
           const value = restored.get(name)?.[0];
+
           if (value !== undefined) form.setFieldValue(name, value);
         }
+
         for (const name of [
           "cropIds",
           "effectIds",
@@ -147,6 +155,7 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
           "searchTagIds",
         ] as const) {
           const value = restored.get(name);
+
           if (value !== undefined) form.setFieldValue(name, [...value]);
         }
       }}
@@ -216,7 +225,9 @@ export function MaterialForm({ classifications, material }: MaterialFormProps) {
         {[...new Set(classifications.crops.map((crop) => crop.groupId))].map((groupId) => {
           const crops = classifications.crops.filter((crop) => crop.groupId === groupId);
           const [first] = crops;
+
           if (first === undefined) return null;
+
           return (
             <ClassificationGroup
               items={crops}

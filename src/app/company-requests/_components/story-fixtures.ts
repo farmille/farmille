@@ -12,6 +12,7 @@ const consents = (
   acceptedAt: string,
 ): ApplicationReceipt["consents"] => {
   const { consents: texts, privacy } = applicationCopy[kind];
+
   return texts.map((text, index) => ({
     application_id: applicationId,
     position: index + 1,
@@ -23,6 +24,7 @@ const consents = (
 
 const registrationId = id(100);
 const registrationSubmittedAt = "2026-10-15T01:23:45+00:00";
+
 export const registrationReceipt: ApplicationReceipt = {
   application: {
     id: registrationId,
@@ -107,6 +109,7 @@ export const registrationReceipt: ApplicationReceipt = {
 
 const transferOutId = id(200);
 const transferOutSubmittedAt = "2026-10-08T05:12:30+00:00";
+
 export const transferOutReceipt: ApplicationReceipt = {
   application: {
     id: transferOutId,
@@ -183,6 +186,7 @@ export const transferOutReceipt: ApplicationReceipt = {
 
 const transferInId = id(300);
 const transferInSubmittedAt = "2026-10-12T02:40:00+00:00";
+
 export const transferInReceipt: ApplicationReceipt = {
   application: {
     id: transferInId,
@@ -263,6 +267,7 @@ export const transferInReceipt: ApplicationReceipt = {
 };
 
 const removalId = id(400);
+
 export const removalReceipt: ApplicationReceipt = {
   application: {
     id: removalId,

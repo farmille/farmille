@@ -37,6 +37,7 @@ const meta = {
 } satisfies Meta<typeof MaterialCard>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const List: Story = {

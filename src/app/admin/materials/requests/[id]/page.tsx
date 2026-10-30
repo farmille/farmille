@@ -44,6 +44,7 @@ function display(value: string | null | undefined): string {
 
 function names(ids: string[], options: { id: string; name: string }[]): string {
   const byId = new Map(options.map((option) => [option.id, option.name]));
+
   return ids.map((id) => byId.get(id) ?? `不明：${id}`).join("、") || "—";
 }
 
@@ -61,13 +62,16 @@ export default async function AdminMaterialChangeRequestPage({
     getMaterialChangeRequest(id),
     listClassificationOptions(),
   ]);
+
   if (!result.ok) {
     if (result.error === "not_found") notFound();
     throw new Error("資材変更申請の取得に失敗しました。");
   }
+
   if (!classifications.ok) throw new Error("資材分類の取得に失敗しました。");
 
   const { request, proposal, current, sellerName } = result.data;
+
   const currentValues = {
     name: current?.name,
     manufacturer: current?.manufacturer_name,
@@ -89,6 +93,7 @@ export default async function AdminMaterialChangeRequestPage({
     productTypes:
       current === null ? "—" : names(current.productTypeIds, classifications.data.productTypes),
   };
+
   const rows = [
     ["資材名", currentValues.name, proposal.name],
     ["メーカー名", currentValues.manufacturer, proposal.manufacturerName],

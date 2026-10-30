@@ -34,6 +34,7 @@ describe("実証詳細レポートの一覧の表紙", () => {
       photo("field-b", 3),
       photo("field-a", 2),
     ]);
+
     expect(cover?.id).toBe("field-a");
   });
 

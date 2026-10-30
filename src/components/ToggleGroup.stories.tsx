@@ -18,6 +18,7 @@ function StatefulToggleGroup(args: ComponentProps<typeof ToggleGroup>) {
     (_current: readonly string[], next: readonly string[]) => next,
     args.value,
   );
+
   return (
     <ToggleGroup
       {...args}
@@ -44,6 +45,7 @@ const meta = {
 } satisfies Meta<typeof ToggleGroup>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Multiple: Story = {};

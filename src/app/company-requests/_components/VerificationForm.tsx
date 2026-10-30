@@ -1,4 +1,5 @@
 "use client";
+
 import * as v from "valibot";
 import { useActionState } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
@@ -13,12 +14,14 @@ import { requestReceiptVerification } from "../actions";
 export function VerificationForm() {
   const form = useForm({ defaultValues: { receiptNumber: "", email: "" } });
   const values = useStore(form.store, (state) => state.values);
+
   const [result, submit, busy] = useActionState(
     async (_previous: { failed: boolean; message: string }, _data: FormData) => {
       try {
         const result = await requestReceiptVerification(
           v.parse(receiptAccessSchema, form.state.values),
         );
+
         return {
           failed: !result.ok,
           message: result.ok
@@ -35,6 +38,7 @@ export function VerificationForm() {
     },
     { failed: false, message: "" },
   );
+
   return (
     <Form
       action={submit}

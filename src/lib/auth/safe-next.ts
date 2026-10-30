@@ -19,24 +19,33 @@ const SafePathSchema = v.string();
 function hasUnsafeChar(s: string): boolean {
   for (let i = 0; i < s.length; i++) {
     const c = s.charCodeAt(i);
+
     // control chars + space (<= 0x20), DEL (0x7F), backslash (0x5C):
     // the URL parser strips/normalizes these into "//" and escapes to an external origin.
     if (c <= 0x20 || c === 0x7f || c === 0x5c) return true;
   }
+
   return false;
 }
 
 export function safeNextPath(input: FormDataEntryValue | number | null | undefined): string | null {
   const result = v.safeParse(SafePathSchema, input);
+
   if (!result.success || result.output.length === 0) return null;
   const raw = result.output;
+
   if (hasUnsafeChar(raw)) return null;
+
   if (!raw.startsWith("/") || raw.startsWith("//")) return null;
+
   // Reject the auth pages themselves to avoid redirect loops.
   if (raw.startsWith("/login") || raw.startsWith("/signup")) return null;
+
   try {
     const u = new URL(raw, "http://localhost");
+
     if (u.origin !== "http://localhost") return null;
+
     return u.pathname + u.search + u.hash;
   } catch {
     return null;

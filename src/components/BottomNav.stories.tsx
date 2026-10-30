@@ -23,6 +23,7 @@ const meta = {
 } satisfies Meta<typeof BottomNav>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 // 非ログイン（中央の投稿ボタンあり）で active 各値を網羅する。

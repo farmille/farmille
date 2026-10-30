@@ -17,6 +17,7 @@ type PostPageProps = {
 export default async function PostPage({ searchParams }: PostPageProps) {
   const requested = await searchParams;
   const typeResult = v.safeParse(v.optional(v.picklist(["report", "review"])), requested.type);
+
   if (!typeResult.success) notFound();
   const postType = typeResult.output;
   const session = await requireGeneralUser();
@@ -30,6 +31,7 @@ export default async function PostPage({ searchParams }: PostPageProps) {
 
     if (session.error === "forbidden") {
       const [user, account] = await Promise.all([getSessionUser(), getViewerAccount()]);
+
       return <PostAccessDenied accountType={user?.accountType ?? null} account={account} />;
     }
 
@@ -42,7 +44,9 @@ export default async function PostPage({ searchParams }: PostPageProps) {
   if (!result.ok) {
     throw new Error(errorMessageJa[result.error]);
   }
+
   const materials = await withPostingMaterialImages(result.data);
+
   if (!materials.ok) {
     throw new Error(errorMessageJa[materials.error]);
   }

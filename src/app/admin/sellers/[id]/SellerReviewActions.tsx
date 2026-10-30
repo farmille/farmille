@@ -1,6 +1,6 @@
 "use client";
 
-import { useSellerApprovalRefresh } from "@/lib/hooks/use-seller-approval-refresh";
+import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useReducer } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 
@@ -9,7 +9,7 @@ import {
   adminCodeStyle,
   adminInlineNoteStyle,
 } from "@/app/admin/_components/AdminUI";
-import { initialSellerActionState } from "@/app/admin/_lib/action-state";
+import { initialSellerActionState, type SellerActionState } from "@/app/admin/_lib/action-state";
 import { sellerOperationAction } from "@/app/admin/sellers/[id]/actions";
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -58,21 +58,33 @@ export function SellerReviewActions({
   inviteCode: string | null;
   manufacturerNames: string[];
 }) {
+  const router = useRouter();
+
   const [state, formAction, pending] = useActionState(
-    sellerOperationAction,
+    async (previous: SellerActionState, formData: FormData) => {
+      const next = await sellerOperationAction(previous, formData);
+
+      // RSCだけを更新し、初期パスワードを持つクライアント状態を保持する。
+      if (next.status === "approved") router.refresh();
+
+      return next;
+    },
     initialSellerActionState,
   );
-  useSellerApprovalRefresh(state.status);
+
   const [submitting, setSubmitting] = useReducer(
     (_state: Operation | null, next: Operation | null) => next,
     null,
   );
+
   const initialValues: SellerApprovalInput = {
     selectedManufacturer: null,
     newManufacturerName: "",
     rejectedReason: "",
   };
+
   const form = useForm({ defaultValues: initialValues });
+
   const { selectedManufacturer, newManufacturerName, rejectedReason } = useStore(
     form.store,
     (state) => state.values,
@@ -81,6 +93,7 @@ export function SellerReviewActions({
   const submit = (operation: Operation, formData = new FormData()): void => {
     formData.set("sellerId", sellerId);
     formData.set("operation", operation);
+
     if (operation === "approve") {
       formData.set(
         "manufacturerName",
@@ -88,6 +101,7 @@ export function SellerReviewActions({
       );
       formData.set("createManufacturer", String(selectedManufacturer === "__new__"));
     }
+
     setSubmitting(operation);
     startTransition(() => {
       formAction(formData);

@@ -37,6 +37,7 @@ function toSortOrder(formData: FormData): number {
 /** 表記ゆれ辞書はカンマ・読点・改行のいずれでも区切れるようにする。 */
 function toAliases(formData: FormData): string[] {
   const raw = formDataString(formData.get("aliases"));
+
   if (raw === null) return [];
 
   return [
@@ -65,7 +66,9 @@ export async function tagOperationAction(
     if (!isTagCategory(category)) {
       return { status: "error", message: "分類を選んでください。" };
     }
+
     const name = toName(formData);
+
     if (name.length === 0) return { status: "error", message: "タグ名を入力してください。" };
 
     const result = await createTag({ name, category, sortOrder: toSortOrder(formData) });
@@ -88,6 +91,7 @@ export async function tagOperationAction(
 
   if (operation === "rename") {
     const name = toName(formData);
+
     if (name.length === 0) return { status: "error", message: "タグ名を入力してください。" };
 
     const result = await renameTag(tagId, { name, sortOrder: toSortOrder(formData) });
@@ -134,10 +138,13 @@ export async function cropOperationAction(
 
   if (operation === "create") {
     const groupId = formDataString(formData.get("groupId"));
+
     if (groupId === null || groupId.length === 0) {
       return { status: "error", message: "作物群を選んでください。" };
     }
+
     const name = toName(formData);
+
     if (name.length === 0) return { status: "error", message: "作物名を入力してください。" };
 
     const result = await createCrop({
@@ -165,6 +172,7 @@ export async function cropOperationAction(
 
   if (operation === "rename") {
     const name = toName(formData);
+
     if (name.length === 0) return { status: "error", message: "作物名を入力してください。" };
 
     const result = await renameCrop(cropId, {

@@ -84,6 +84,7 @@ export default async function AdminMaterialChangeRequestsPage({
   const { status } = await searchParams;
   const selected = isMaterialChangeRequestStatus(status) || status === "all" ? status : "pending";
   const requests = await listMaterialChangeRequests(selected);
+
   if (!requests.ok) throw new Error(errorMessageJa[requests.error]);
 
   return (

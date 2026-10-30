@@ -11,9 +11,12 @@ export const metadata: Metadata = { title: "退会", robots: NO_INDEX_ROBOTS };
 
 export default async function WithdrawPage() {
   const user = await getSessionUser();
+
   if (!user) redirect("/login?next=%2Faccount%2Fwithdraw");
+
   // 企業会員と運営は、この画面から退会できない。
   if (user.accountType !== "general") notFound();
+
   return (
     <AuthScreen
       title="退会"

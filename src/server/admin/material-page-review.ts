@@ -11,10 +11,13 @@ export async function listMaterialPageReviews() {
       )
       .eq("status", "pending")
       .order("created_at");
+
     if (error) {
       reportAdminError("material-page-review", "確認待ち原稿の取得に失敗", error);
+
       return fail("internal");
     }
+
     return succeed(data);
   });
 }
@@ -28,10 +31,13 @@ export async function listManufacturerProfileReviews() {
       )
       .eq("status", "pending")
       .order("created_at");
+
     if (error) {
       reportAdminError("profile-review", "確認待ちの取得に失敗", error);
+
       return fail("internal");
     }
+
     return succeed(data);
   });
 }
@@ -49,8 +55,10 @@ export async function reviewManufacturerProfile(input: {
     }),
     input,
   );
+
   if (!parsed.success || (!parsed.output.publish && parsed.output.note.length === 0))
     return fail("invalid_body");
+
   return withAdmin(async ({ supabase, session }) => {
     const { data, error } = await supabase.rpc("review_manufacturer_profile_version", {
       p_version_id: parsed.output.versionId,
@@ -58,10 +66,13 @@ export async function reviewManufacturerProfile(input: {
       p_publish: parsed.output.publish,
       p_note: parsed.output.note,
     });
+
     if (error) {
       reportAdminError("profile-review", "確認結果の保存に失敗", error);
+
       return fail(error.code === "40001" || error.code === "23505" ? "conflict" : "internal");
     }
+
     return succeed(data);
   });
 }
@@ -79,8 +90,10 @@ export async function reviewMaterialPage(input: {
     }),
     input,
   );
+
   if (!parsed.success || (!parsed.output.publish && parsed.output.note.length === 0))
     return fail("invalid_body");
+
   return withAdmin(async ({ supabase, session }) => {
     const { data, error } = await supabase.rpc("review_material_page_version", {
       p_version_id: parsed.output.versionId,
@@ -88,8 +101,10 @@ export async function reviewMaterialPage(input: {
       p_publish: parsed.output.publish,
       p_note: parsed.output.note,
     });
+
     if (error) {
       reportAdminError("material-page-review", "表現確認結果の保存に失敗", error);
+
       return fail(
         error.code === "40001" || error.code === "23505"
           ? "conflict"
@@ -98,6 +113,7 @@ export async function reviewMaterialPage(input: {
             : "internal",
       );
     }
+
     return succeed(data);
   });
 }

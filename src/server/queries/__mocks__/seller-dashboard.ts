@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const getSellerDashboardData = fn<
   typeof import("@/server/queries/seller-dashboard").getSellerDashboardData
 >(async () => ({
@@ -32,6 +33,7 @@ export const getSellerDashboardData = fn<
     ],
   },
 })).mockName("getSellerDashboardData");
+
 export const getSellerMaterialsPageData = fn<
   typeof import("@/server/queries/seller-dashboard").getSellerMaterialsPageData
 >(async () => ({
@@ -67,6 +69,7 @@ export const getSellerMaterialsPageData = fn<
     ],
   },
 })).mockName("getSellerMaterialsPageData");
+
 export const getSellerMaterialChangeRequest = fn<
   typeof import("@/server/queries/seller-dashboard").getSellerMaterialChangeRequest
 >(async () => ({

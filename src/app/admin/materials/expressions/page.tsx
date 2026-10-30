@@ -9,12 +9,16 @@ import {
 
 export default async function ExpressionReviewsPage() {
   await requireAdminPage("/admin/materials/expressions");
+
   const [result, profiles] = await Promise.all([
     listMaterialPageReviews(),
     listManufacturerProfileReviews(),
   ]);
+
   if (!profiles.ok) throw new Error("確認待ちのメーカープロフィールを取得できませんでした。");
+
   if (!result.ok) throw new Error("表現確認待ちの原稿を取得できませんでした。");
+
   return (
     <AdminShell
       title="製品情報の表現確認"

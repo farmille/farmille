@@ -11,10 +11,12 @@ import { initialAuthFormState, submittedValuesOf, type AuthFormState } from "@/l
 export function LoginForm({ next }: { next: string | null }) {
   const form = useForm({ defaultValues: { email: "", password: "" } });
   const values = useStore(form.store, (state) => state.values);
+
   const [state, formAction] = useActionState(async (previous: AuthFormState, data: FormData) => {
     const result = await loginAction(previous, data);
     form.setFieldValue("email", submittedValuesOf(result).email ?? "");
     form.setFieldValue("password", "");
+
     return result;
   }, initialAuthFormState);
 

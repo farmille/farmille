@@ -75,6 +75,7 @@ describe("登録情報の入力の検証", () => {
 
 describe("登録情報の読み取り", () => {
   const account = { userId: "self", email: "farmer@example.test" };
+
   const stored = {
     familyName: "山田",
     givenName: "花子",
@@ -87,15 +88,18 @@ describe("登録情報の読み取り", () => {
 
   function store(found: Awaited<ReturnType<RegisteredDetailsStore["find"]>>) {
     const reads: string[] = [];
+
     const value: RegisteredDetailsStore = {
       async find(userId) {
         reads.push(userId);
+
         return found;
       },
       async save() {
         return succeed(null);
       },
     };
+
     return { value, reads };
   }
 

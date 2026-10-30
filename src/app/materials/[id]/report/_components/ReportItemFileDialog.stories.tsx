@@ -6,6 +6,7 @@ import { createReportPageItem, itemsFromInput } from "./report-page-state";
 import { filledReport } from "./reportStoryFixture";
 
 const [withImage] = itemsFromInput(filledReport);
+
 if (withImage === undefined) throw new Error("記入例の調査項目がありません。");
 
 const meta = {
@@ -24,6 +25,7 @@ const meta = {
 } satisfies Meta<typeof ReportItemFileDialog>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const New: Story = {};

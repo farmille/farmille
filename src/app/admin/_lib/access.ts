@@ -17,6 +17,7 @@ export async function requireAdminPage(nextPath: string): Promise<AdminSession> 
   if (session.error === "unauthorized") {
     redirect(`/login?next=${encodeURIComponent(nextPath)}`);
   }
+
   if (session.error === "aal2_required") {
     redirect(`/admin/mfa?next=${encodeURIComponent(nextPath)}`);
   }

@@ -22,6 +22,7 @@ type Sent = { path: string; query: URLSearchParams; body: Json };
 
 function fakeSupabase(...responses: Response[]) {
   const sent: Sent[] = [];
+
   const client = createClient<Database>("http://supabase.test", "test-key", {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {
@@ -34,16 +35,20 @@ function fakeSupabase(...responses: Response[]) {
           body: text.length > 0 ? JSON.parse(text) : null,
         });
         const response = responses.shift();
+
         if (response === undefined) throw new Error(`想定外の要求：${url.pathname}`);
+
         return response;
       },
     },
   });
+
   return { client, sent };
 }
 
 const json = (body: Json, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+
 const dbError = (code: string, message: string, status = 400) =>
   json({ code, message, details: null, hint: null }, status);
 
@@ -73,6 +78,7 @@ describe("回数の確保", () => {
     expect(
       await claimPdfReading({ userId, reportId, materialId, uploadPath }, limited.client),
     ).toEqual({ ok: false, error: "pdf_reading_limit" });
+
     const repeated = fakeSupabase(
       dbError(
         "23505",
@@ -80,6 +86,7 @@ describe("回数の確保", () => {
         409,
       ),
     );
+
     expect(
       await claimPdfReading({ userId, reportId, materialId, uploadPath }, repeated.client),
     ).toEqual({ ok: false, error: "conflict" });
@@ -88,10 +95,12 @@ describe("回数の確保", () => {
   it("PDF の場所の形が違えば、DB に送らず invalid_body を返す", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     const { client, sent } = fakeSupabase();
+
     const result = await claimPdfReading(
       { userId, reportId, materialId, uploadPath: `${userId}/成績書.pdf` },
       client,
     );
+
     expect(result).toEqual({ ok: false, error: "invalid_body" });
     expect(sent).toEqual([]);
   });
@@ -100,6 +109,7 @@ describe("回数の確保", () => {
 describe("結果の記録", () => {
   it("成功はモデル・速度・トークン数を記録する", async () => {
     const { client, sent } = fakeSupabase(new Response(null, { status: 204 }));
+
     const result = await recordPdfReadingResult(
       {
         readingId,
@@ -112,6 +122,7 @@ describe("結果の記録", () => {
       },
       client,
     );
+
     expect(result).toEqual({ ok: true, data: null });
     expect(sent).toEqual([
       {
@@ -159,10 +170,12 @@ describe("結果の記録", () => {
 describe("適用の記録", () => {
   it("入れた値と引用を、欄の経路と一緒に送る", async () => {
     const { client, sent } = fakeSupabase(new Response(null, { status: 204 }));
+
     const fields = [
       { fieldKey: "observedChange" as const, value: "葉色が濃い", quote: "処理区で葉色が濃い" },
       { fieldKey: `plots.${plotId}.name` as const, value: "処理区", quote: "処理区（1000倍）" },
     ];
+
     expect(await recordPdfReadingApplied({ readingId, userId, fields }, client)).toEqual({
       ok: true,
       data: null,
@@ -196,6 +209,7 @@ describe("印の読み出し", () => {
         },
       ]),
     );
+
     expect(await getReportPdfReadingMarks(reportId, client)).toEqual({
       ok: true,
       data: [{ fieldKey: `plots.${plotId}.name`, value: "処理区", quote: "処理区（1000倍）" }],
@@ -214,9 +228,11 @@ describe("印の読み出し", () => {
 
   it("記録の欄の経路が今の一覧に無ければ internal にする", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
+
     const { client } = fakeSupabase(
       json([{ fields: [{ field_key: "purposeNote", value: "", quote: "" }] }]),
     );
+
     expect(await getReportPdfReadingMarks(reportId, client)).toEqual({
       ok: false,
       error: "internal",

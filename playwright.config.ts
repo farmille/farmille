@@ -15,7 +15,9 @@ function requireEnv(name: string): string {
 }
 
 const supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
+
 requireEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+
 requireEnv("SUPABASE_SECRET_KEY");
 
 if (new URL(supabaseUrl).origin !== LOCAL_SUPABASE_ORIGIN) {

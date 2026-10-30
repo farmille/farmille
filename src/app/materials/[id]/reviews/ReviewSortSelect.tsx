@@ -13,6 +13,7 @@ const formStyle = css({ ml: "auto" });
 
 export function ReviewSortSelect() {
   const [pending, startTransition] = useTransition();
+
   const [{ sort }, setQuery] = useQueryStates(
     {
       sort: reviewSortParser,

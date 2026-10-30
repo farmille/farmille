@@ -24,12 +24,16 @@ export function applicationData<T>(result: {
   error: { message: string } | null;
 }): NonNullable<T> {
   checkApplicationDb(result.error);
+
   if (result.data === null || result.data === undefined) throw new ApplicationError("not_found");
+
   return result.data;
 }
+
 export async function beginCompanyApplication(kind: SubmittableKind) {
   v.parse(submittableKindSchema, kind);
   const { seller } = await approvedApplicationSeller();
+
   return applicationData(
     await createAdminSupabase()
       .from("company_application_intents")
@@ -38,20 +42,26 @@ export async function beginCompanyApplication(kind: SubmittableKind) {
       .single(),
   );
 }
+
 function materialId(url: string) {
   const parsed = new URL(url);
   const path = /^\/materials\/([a-f\d-]+)\/?$/.exec(parsed.pathname);
+
   if (parsed.origin !== new URL(clientEnv.siteUrl).origin || !path?.[1])
     throw new ApplicationError("invalid_body");
+
   return v.parse(uuidSchema, path[1]);
 }
+
 export async function saveCompanyApplication(raw: ApplicationSubmission) {
   const { intentId, input } = v.parse(submissionSchema, raw);
   const actor = await applicationIntentActor(intentId);
+
   const resolvedItems = input.items.map((item) => ({
     ...item,
     materialId: item.materialUrl ? materialId(item.materialUrl) : "",
   }));
+
   const result = await createAdminSupabase().rpc("submit_company_application", {
     p_intent_id: intentId,
     ...applicationActorArgs(actor),
@@ -62,12 +72,15 @@ export async function saveCompanyApplication(raw: ApplicationSubmission) {
         : text,
     ),
   });
+
   return applicationData(result);
 }
+
 export async function readCompanyApplication(id: string) {
   v.parse(uuidSchema, id);
   await authorizeApplicationReceipt(id);
   const db = createAdminSupabase();
+
   const [application, items, consents, evidence, delivery, transferOut, transferIn, removal] =
     await Promise.all([
       db.from("company_applications").select("*").eq("id", id).single(),
@@ -97,9 +110,11 @@ export async function readCompanyApplication(id: string) {
       db.from("company_application_transfer_in").select("*").eq("application_id", id).maybeSingle(),
       db.from("company_application_removals").select("*").eq("application_id", id).maybeSingle(),
     ]);
+
   checkApplicationDb(transferOut.error);
   checkApplicationDb(transferIn.error);
   checkApplicationDb(removal.error);
+
   return {
     application: applicationData(application),
     items: applicationData(items),
@@ -111,7 +126,9 @@ export async function readCompanyApplication(id: string) {
     removal: removal.data,
   };
 }
+
 export type ApplicationReceipt = Awaited<ReturnType<typeof readCompanyApplication>>;
+
 export async function listCompanyApplications(admin = false) {
   let query = createAdminSupabase()
     .from("company_applications")
@@ -119,12 +136,15 @@ export async function listCompanyApplications(admin = false) {
       "id,kind,receipt_number,company_name,submitted_at,company_application_mail_deliveries(sent_at,last_error_code)",
     )
     .order("submitted_at", { ascending: false });
+
   if (admin) {
     const session = await requireAdmin();
+
     if (!session.ok) throw new ApplicationError(session.error);
   } else {
     const { seller } = await approvedApplicationSeller();
     query = query.eq("seller_id", seller.id);
   }
+
   return applicationData(await query.limit(100));
 }

@@ -43,12 +43,15 @@ export function Checkbox({
   const field = useFieldContext();
   const { required, inRoot, requirement } = field;
   const restored = useRestoredField(name ?? field.name);
+
   // 送信値を決めていないチェックは、ブラウザの既定どおり "on" で送られる
   const initialChecked =
     checked === undefined && restored !== undefined
       ? restored.includes(value ?? "on")
       : defaultChecked;
+
   const resetKey = useResetKey(String(initialChecked === true));
+
   const choice = (
     <Choice
       className={inRoot ? className : undefined}

@@ -35,27 +35,35 @@ export function SearchResults({
     (a, b) => {
       if (sort === "rating")
         return (b.avg_rating ?? 0) - (a.avg_rating ?? 0) || a.name.localeCompare(b.name, "ja");
+
       if (sort === "newest")
         return b.created_at.localeCompare(a.created_at) || a.name.localeCompare(b.name, "ja");
+
       return b.review_count - a.review_count || a.name.localeCompare(b.name, "ja");
     },
   );
+
   const cropFilters = [...filters, ...(keywordMatches?.filters ?? [])].filter(
     (filter) => filter.category === "crop",
   );
+
   const namedCrops = catalog.crops.filter((crop) =>
     cropFilters.some((filter) => filter.id === crop.id),
   );
+
   const results = items.map((material) => ({
     material,
     evidence: cropEvidence(material, cropFilters, catalog),
   }));
+
   const direct = results.filter(
     (result) => result.evidence.direct.length > 0 || result.evidence.groups.length === 0,
   );
+
   const broader = results.filter(
     (result) => result.evidence.direct.length === 0 && result.evidence.groups.length > 0,
   );
+
   const groups =
     namedCrops.length > 0
       ? [
@@ -66,6 +74,7 @@ export function SearchResults({
           { title: "作物分類として記載のある資材", items: broader },
         ]
       : [{ title: null, items: results }];
+
   return (
     <>
       <SearchAnalytics filterCount={selected.length} resultCount={items.length} sort={sort} />
@@ -126,7 +135,9 @@ export function SearchResults({
             <div className={css({ display: "flex", flexDirection: "column", gap: "3" })}>
               {group.items.map(({ material, evidence }, index) => {
                 const counts = catalog.counts.find((row) => row.material_id === material.id);
+
                 if (!counts) throw new Error("資材の集計が見つかりませんでした。");
+
                 return (
                   <MaterialCard
                     key={material.id}

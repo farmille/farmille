@@ -16,6 +16,7 @@ const noPdfReading = { pdfValuesCheckRequired: false };
 
 function submittableReport(): UsageReportInput {
   const input = withSingleVariety(createBlankUsageReport(materialId), "アイコ", false);
+
   return {
     ...input,
     cropId: "22222222-2222-4222-8222-222222222222",
@@ -103,6 +104,7 @@ describe("実証詳細レポート", () => {
       "比較資材の名前なし",
       (input: UsageReportInput) => {
         const compared = { id: crypto.randomUUID(), name: " " };
+
         return {
           ...input,
           comparedMaterials: [compared],
@@ -207,6 +209,7 @@ describe("実証詳細レポート", () => {
       })),
     }));
     expect(validateUsageReportSubmission(input, noPdfReading)).toEqual({});
+
     const measurement = {
       id: crypto.randomUUID(),
       kind: "image" as const,
@@ -215,6 +218,7 @@ describe("実証詳細レポート", () => {
       body: "",
       graphs: [],
     };
+
     input.measurements = [measurement];
     expect(validateUsageReportSubmission(input, noPdfReading)).toHaveProperty(
       "measurements.0.values",
@@ -254,13 +258,18 @@ describe("実証詳細レポート", () => {
   it("区・品種・比較した資材は40まで", () => {
     const input = submittableReport();
     const [posted] = input.plots.slice(1);
+
     if (!posted) throw new Error("区の初期データがありません。");
+
     const plots = (count: number) =>
       Array.from({ length: count }, () => ({ ...posted, id: crypto.randomUUID() }));
+
     expect(v.safeParse(UsageReportInputSchema, { ...input, plots: plots(40) }).success).toBe(true);
     expect(v.safeParse(UsageReportInputSchema, { ...input, plots: plots(41) }).success).toBe(false);
+
     const names = (count: number) =>
       Array.from({ length: count }, () => ({ id: crypto.randomUUID(), name: "品種" }));
+
     expect(v.safeParse(UsageReportInputSchema, { ...input, varieties: names(41) }).success).toBe(
       false,
     );
@@ -271,6 +280,7 @@ describe("実証詳細レポート", () => {
   it("比較した資材の区は、比較した資材を指す", () => {
     const input = submittableReport();
     const [untreated, posted] = input.plots;
+
     if (!untreated || !posted) throw new Error("区の初期データがありません。");
     const plots = [{ ...untreated, treatment: { kind: "compared" } }, posted];
     expect(v.safeParse(UsageReportInputSchema, { ...input, plots }).success).toBe(false);
@@ -298,6 +308,7 @@ describe("実証詳細レポート", () => {
   it("同じ調査項目と単位の数値の項目を、最初の項目の位置に入力を変えずにまとめる", () => {
     const input = createBlankUsageReport(materialId);
     const first = input.measurements[0]!;
+
     const second = {
       ...first,
       id: crypto.randomUUID(),
@@ -305,6 +316,7 @@ describe("実証詳細レポート", () => {
       unit: "kg",
       graphs: [{ ...first.graphs[0]!, id: crypto.randomUUID() }],
     };
+
     first.name = "収量";
     first.unit = "kg";
     const differentUnit = { ...second, id: crypto.randomUUID(), unit: "g" };

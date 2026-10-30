@@ -5,6 +5,7 @@ import { css } from "../../../../styled-system/css";
 
 import { ContactFields } from "./ContactFields";
 import { emptyContact } from "./ContactFields";
+
 const meta = {
   title: "Pages/company-requests/ContactFields",
   component: ContactFields,
@@ -13,6 +14,7 @@ const meta = {
   render: function ControlledContactFields(args) {
     const form = useForm({ defaultValues: args.values });
     const values = useStore(form.store, (state) => state.values);
+
     return (
       <ContactFields
         {...args}
@@ -23,6 +25,9 @@ const meta = {
   },
   decorators: [(Story) => <div className={css({ p: "4" })}>{Story()}</div>],
 } satisfies Meta<typeof ContactFields>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

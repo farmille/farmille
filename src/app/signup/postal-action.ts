@@ -1,4 +1,5 @@
 "use server";
+
 import { lookupPostalAddress } from "@/server/accounts/postal-address";
 
 export async function findPostalAddress(postalCode: string) {
@@ -6,6 +7,7 @@ export async function findPostalAddress(postalCode: string) {
     return await lookupPostalAddress(postalCode);
   } catch (error) {
     console.error("[postal-address] 住所検索に失敗", error);
+
     return {
       ok: false,
       message:

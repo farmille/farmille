@@ -11,6 +11,7 @@ function renderDialog(result: ReportActionState, submitted: FormData[]) {
     <ReportDialog
       action={async (_previousState, formData) => {
         submitted.push(formData);
+
         return result;
       }}
       reasonOptions={REPORT_REASON_OPTIONS}

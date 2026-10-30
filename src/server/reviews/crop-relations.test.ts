@@ -9,6 +9,7 @@ describe("感想口コミの作目", () => {
       crop_name_other: null,
       crop: { id: "crop-1", name: "トマト" },
     };
+
     expect(orderedReviewCrops(relation)).toEqual([{ id: "crop-1", name: "トマト" }]);
     expect(reviewCropLabel(relation)).toBe("トマト");
   });

@@ -4,6 +4,7 @@ import { fail, succeed, type Result } from "@/server/result";
 import type { Database } from "@/types/database.types";
 
 type TagRow = Database["public"]["Tables"]["search_tags"]["Row"];
+
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
 
 /**
@@ -11,6 +12,7 @@ type CropRow = Database["public"]["Tables"]["crops"]["Row"];
  * 表示ラベルは共通の TAG_CATEGORY_LABELS（toTagChipCategory で正規化）を使う。
  */
 export const TAG_CATEGORIES = ["concern", "condition"] as const;
+
 export type TagCategoryValue = (typeof TAG_CATEGORIES)[number];
 
 export function isTagCategory(value: string | null): value is TagCategoryValue {
@@ -72,14 +74,19 @@ export async function listAdminTags(): Promise<Result<AdminTagItem[]>> {
 
     if (tagsResult.error !== null) {
       reportError("タグ一覧の取得に失敗", tagsResult.error);
+
       return fail("internal");
     }
+
     if (usageResult.error !== null) {
       reportError("タグ参照数の取得に失敗", usageResult.error);
+
       return fail("internal");
     }
+
     if (effectsResult.error !== null) {
       reportError("タグの効果分類の取得に失敗", effectsResult.error);
+
       return fail("internal");
     }
 
@@ -106,6 +113,7 @@ export async function createTag(input: {
     if (error !== null) {
       if (isUniqueViolation(error)) return fail("conflict");
       reportError("タグの追加に失敗", error);
+
       return fail("internal");
     }
 
@@ -128,8 +136,10 @@ export async function renameTag(
     if (error !== null) {
       if (isUniqueViolation(error)) return fail("conflict");
       reportError("タグの改名に失敗", error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return fail("not_found");
 
     return succeed(null);
@@ -148,18 +158,23 @@ export async function deleteTag(tagId: string): Promise<Result<null>> {
 
     if (countError !== null) {
       reportError("タグ参照数の確認に失敗", countError);
+
       return fail("internal");
     }
+
     if ((count ?? 0) > 0) return fail("conflict");
 
     const effects = await supabase
       .from("search_tag_effects")
       .select("effect_id", { count: "exact", head: true })
       .eq("search_tag_id", tagId);
+
     if (effects.error !== null) {
       reportError("タグの効果分類の確認に失敗", effects.error);
+
       return fail("internal");
     }
+
     if ((effects.count ?? 0) > 0) return fail("conflict");
 
     const { data, error } = await supabase
@@ -170,8 +185,10 @@ export async function deleteTag(tagId: string): Promise<Result<null>> {
 
     if (error !== null) {
       reportError("タグの削除に失敗", error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return fail("not_found");
 
     return succeed(null);
@@ -188,6 +205,7 @@ export async function listCropGroups(): Promise<Result<CropGroupOption[]>> {
 
     if (error !== null) {
       reportError("作物群の取得に失敗", error);
+
       return fail("internal");
     }
 
@@ -240,6 +258,7 @@ export async function listAdminCrops(): Promise<Result<AdminCropItem[]>> {
     }
 
     const groupNames = new Map(groupsResult.data.map((row) => [row.id, row.name]));
+
     const usage = countBy([
       ...reviewsResult.data.map((row) => row.crop_id),
       ...reportsResult.data.map((row) => row.crop_id),
@@ -277,6 +296,7 @@ export async function createCrop(input: {
     if (error !== null) {
       if (isUniqueViolation(error)) return fail("conflict");
       reportError("作物の追加に失敗", error);
+
       return fail("internal");
     }
 
@@ -299,8 +319,10 @@ export async function renameCrop(
     if (error !== null) {
       if (isUniqueViolation(error)) return fail("conflict");
       reportError("作物の改名に失敗", error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return fail("not_found");
 
     return succeed(null);
@@ -333,18 +355,22 @@ export async function deleteCrop(cropId: string): Promise<Result<null>> {
 
     if (failed !== null) {
       reportError("作物の参照数の確認に失敗", failed);
+
       return fail("internal");
     }
 
     const usageCount = (reviews.count ?? 0) + (reports.count ?? 0) + (materialCrops.count ?? 0);
+
     if (usageCount > 0) return fail("conflict");
 
     const { data, error } = await supabase.from("crops").delete().eq("id", cropId).select("id");
 
     if (error !== null) {
       reportError("作物の削除に失敗", error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return fail("not_found");
 
     return succeed(null);

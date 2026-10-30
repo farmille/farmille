@@ -8,6 +8,7 @@ const meta = {
 } satisfies Meta<typeof TourSaved>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Profile: Story = { args: { title: "プロフィールを保存しました" } };

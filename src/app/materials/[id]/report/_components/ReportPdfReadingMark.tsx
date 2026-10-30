@@ -56,11 +56,15 @@ export function ReportPdfReadingMarks({
 /** PDF読み取りで入った欄の印。開くと根拠の引用が見える。印のある欄が無ければ何も出さない。 */
 export function ReportPdfReadingMark({ fields }: { fields: ReportMarkField[] }) {
   const marks = useContext(MarksContext);
+
   const found = fields.flatMap(({ key, label }) => {
     const quote = marks.get(key);
+
     return quote === undefined ? [] : [{ key, label, quote }];
   });
+
   if (found.length === 0) return null;
+
   return (
     <Collapsible className={root}>
       <CollapsibleTrigger variant="link" className={trigger}>

@@ -119,6 +119,7 @@ export function ProfileReviewCard({
       <span className={authorName}>{author.name}</span>
     </>
   );
+
   return (
     <article className={card}>
       <div className={materialLine}>

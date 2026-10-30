@@ -13,6 +13,7 @@ export function RegistrationTerms() {
         html: renderMarkdownToHtml(section.markdown),
       })),
     }));
+
   return (
     <div
       role="region"

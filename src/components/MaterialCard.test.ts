@@ -15,6 +15,7 @@ it("資材の画像を読み込めなくてもプレースホルダーが残る"
       variant: "list",
     }),
   );
+
   const placeholder = container.querySelector<SVGElement>('svg[data-icon="image"]');
   expect(placeholder).not.toBeNull();
   fireEvent.error(screen.getByRole("img", { name: "テスト資材" }));

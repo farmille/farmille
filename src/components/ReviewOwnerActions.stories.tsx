@@ -13,6 +13,7 @@ const meta = {
 } satisfies Meta<typeof ReviewOwnerActions>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 // 編集リンク＋削除ボタン（ダイアログは閉じた状態）

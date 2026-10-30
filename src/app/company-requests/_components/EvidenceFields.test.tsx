@@ -14,6 +14,7 @@ const evidenceId = "22222222-2222-4222-8222-222222222222";
 function renderEvidence() {
   const onCount = vi.fn();
   const onBusy = vi.fn();
+
   const view = render(
     <Field label="パッケージ資料">
       <EvidenceFields
@@ -25,8 +26,11 @@ function renderEvidence() {
       />
     </Field>,
   );
+
   const input = view.container.querySelector("input[type=file]");
+
   if (input === null) throw new Error("ファイル選択がありません。");
+
   return { input, onCount, onBusy };
 }
 
@@ -41,16 +45,19 @@ describe("申請の添付資料", () => {
       ok: true,
       data: { id: evidenceId, path: "test.png", token: "test-token" },
     });
+
     const upload = vi.fn<typeof fetch>().mockResolvedValue(
       new Response(JSON.stringify({ message: "offline" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       }),
     );
+
     const client = createClient<Database>("http://supabase.test", "test-key", {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
       global: { fetch: upload },
     });
+
     vi.spyOn(auth, "createAuthBrowserClient").mockReturnValue(client);
     vi.spyOn(actions, "finalizeEvidence").mockResolvedValue({ ok: true, data: true });
     vi.spyOn(actions, "removeEvidence").mockResolvedValue({ ok: true, data: true });

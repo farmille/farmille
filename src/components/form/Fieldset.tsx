@@ -41,6 +41,7 @@ export function Fieldset({
   const rooted = name !== undefined;
   const validate = useFieldValidate(name);
   const id = useId();
+
   const describedBy = [
     visibility === undefined ? null : `${id}-visibility`,
     lead === undefined ? null : `${id}-lead`,

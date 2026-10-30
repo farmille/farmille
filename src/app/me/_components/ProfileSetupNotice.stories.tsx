@@ -10,6 +10,7 @@ const meta = {
 } satisfies Meta<typeof ProfileSetupNotice>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};

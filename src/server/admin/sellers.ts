@@ -12,6 +12,7 @@ type SellerRow = Database["public"]["Tables"]["seller_accounts"]["Row"];
 
 /** seller_accounts.status（01 §3・§6）。 */
 export const SELLER_STATUSES = ["applied", "approved", "rejected", "suspended"] as const;
+
 export type SellerStatus = (typeof SELLER_STATUSES)[number];
 
 export const SELLER_STATUS_LABELS = {
@@ -51,6 +52,7 @@ const LIST_COLUMNS = "id, official_name, login_id, status, created_at, approved_
 export async function listSellers(status: SellerStatus | "all"): Promise<Result<SellerListItem[]>> {
   return withAdmin(async ({ supabase }) => {
     const query = supabase.from("seller_accounts").select(LIST_COLUMNS);
+
     const { data, error } = await (status === "all" ? query : query.eq("status", status)).order(
       "created_at",
       { ascending: false },
@@ -58,6 +60,7 @@ export async function listSellers(status: SellerStatus | "all"): Promise<Result<
 
     if (error !== null) {
       reportError("メーカー一覧の取得に失敗", error);
+
       return fail("internal");
     }
 
@@ -77,12 +80,15 @@ export async function getSellerDetail(sellerId: string): Promise<Result<SellerDe
 
     if (sellerResult.error !== null) {
       reportError("メーカー詳細の取得に失敗", sellerResult.error);
+
       return fail("internal");
     }
+
     if (sellerResult.data === null) return fail("not_found");
 
     if (materialResult.error !== null) {
       reportError("claim 済み資材数の取得に失敗", materialResult.error);
+
       return fail("internal");
     }
 
@@ -106,7 +112,9 @@ export async function approveSellerApplication(
     v.pipe(v.string(), v.minLength(1), v.maxLength(300)),
     createManufacturer ? manufacturerName.trim() : manufacturerName,
   );
+
   if (!name.success) return fail("invalid_body");
+
   return withAdmin(async ({ supabase }) => {
     const { data: seller, error } = await supabase
       .from("seller_accounts")
@@ -116,19 +124,25 @@ export async function approveSellerApplication(
 
     if (error !== null) {
       reportError("承認対象の取得に失敗", error);
+
       return fail("internal");
     }
+
     if (seller === null) return fail("not_found");
+
     // 二重承認・共有ログインの二重発行を防ぐ。
     if (seller.status !== "applied" || seller.auth_user_id !== null) return fail("conflict");
 
     const email = syntheticSellerEmail(seller.login_id);
+
     if (email === null) {
       reportError("login_id から合成メールを作れません", seller.login_id);
+
       return fail("invalid_body");
     }
 
     const password = generateInitialPassword();
+
     const { data: created, error: createError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -138,18 +152,24 @@ export async function approveSellerApplication(
 
     if (createError !== null) {
       reportError("共有ログインの作成に失敗", createError);
+
       return fail(createError.code === "email_exists" ? "conflict" : "internal");
     }
 
     const invitation = await supabase.auth.admin.generateLink({ type: "recovery", email });
+
     if (invitation.error) {
       const rollback = await supabase.auth.admin.deleteUser(created.user.id);
+
       if (rollback.error) reportError("案内発行失敗後のログイン削除に失敗", rollback.error);
       reportError("パスワード設定案内の発行に失敗", invitation.error);
+
       return fail("internal");
     }
+
     const passwordSetupUrl = new URL("/password-reset/update", clientEnv.siteUrl);
     passwordSetupUrl.searchParams.set("token_hash", invitation.data.properties.hashed_token);
+
     const { error: updateError } = await supabase.rpc("approve_seller_with_manufacturer", {
       p_seller_id: seller.id,
       p_auth_user_id: created.user.id,
@@ -163,6 +183,7 @@ export async function approveSellerApplication(
       if (rollbackError !== null) {
         reportError("承認の巻き戻し（Auth ユーザー削除）に失敗", rollbackError);
       }
+
       reportError("承認の反映に失敗", updateError);
 
       return fail(isUniqueViolation(updateError) ? "conflict" : "internal");
@@ -173,6 +194,7 @@ export async function approveSellerApplication(
       seller.login_id,
       passwordSetupUrl.toString(),
     );
+
     return succeed({
       loginId: seller.login_id,
       passwordSetupUrl: passwordSetupUrl.toString(),
@@ -185,10 +207,13 @@ export async function approveSellerApplication(
 export async function listManufacturerNames(): Promise<Result<string[]>> {
   return withAdmin(async ({ supabase }) => {
     const { data, error } = await supabase.from("manufacturers").select("name").order("name");
+
     if (error !== null) {
       reportError("メーカー候補の取得に失敗", error);
+
       return fail("internal");
     }
+
     return succeed(data.map(({ name }) => name));
   });
 }
@@ -196,15 +221,19 @@ export async function listManufacturerNames(): Promise<Result<string[]>> {
 export async function listSellerMaterialCandidates(manufacturerName: string | null) {
   return withAdmin(async ({ supabase }) => {
     if (manufacturerName === null) return succeed([]);
+
     const { data, error } = await supabase
       .from("materials")
       .select("id,name,manufacturer_name,seller_id,publication_status")
       .eq("manufacturer_name", manufacturerName)
       .order("name");
+
     if (error) {
       reportError("候補資材の取得に失敗", error);
+
       return fail("internal");
     }
+
     return succeed(data);
   });
 }
@@ -215,6 +244,7 @@ export async function rejectSellerApplication(
   rejectedReason: string,
 ): Promise<Result<null>> {
   const normalizedReason = rejectedReason.trim();
+
   if (normalizedReason.length === 0) return fail("invalid_body");
 
   return updateSellerStatus(sellerId, "rejected", ["applied"], "却下", normalizedReason);
@@ -247,9 +277,12 @@ async function updateSellerStatus(
 
     if (loadError !== null) {
       reportError(`${operationLabel}対象の取得に失敗`, loadError);
+
       return fail("internal");
     }
+
     if (seller === null) return fail("not_found");
+
     if (!isSellerStatus(seller.status) || !allowedCurrentStatuses.includes(seller.status)) {
       return fail("conflict");
     }
@@ -261,6 +294,7 @@ async function updateSellerStatus(
           ? (seller.approved_at ?? new Date().toISOString())
           : seller.approved_at,
     };
+
     if (nextStatus === "rejected") update.rejected_reason = rejectedReason;
 
     const { data, error } = await supabase
@@ -272,8 +306,10 @@ async function updateSellerStatus(
 
     if (error !== null) {
       reportError(`${operationLabel}に失敗`, error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return fail("conflict");
 
     return succeed(null);
@@ -286,6 +322,7 @@ export async function issueSellerInviteCode(
 ): Promise<Result<{ inviteCode: string }>> {
   return withAdmin(async ({ supabase }) => {
     const inviteCode = generateInviteCode();
+
     const { data, error } = await supabase
       .from("seller_accounts")
       .update({ invite_code: inviteCode })
@@ -295,8 +332,10 @@ export async function issueSellerInviteCode(
     if (error !== null) {
       if (isUniqueViolation(error)) return fail("conflict");
       reportError("招待コードの発行に失敗", error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return fail("not_found");
 
     return succeed({ inviteCode });
@@ -316,6 +355,7 @@ export async function listClaimableSellers(): Promise<
 
     if (error !== null) {
       reportError("claim 候補の取得に失敗", error);
+
       return fail("internal");
     }
 

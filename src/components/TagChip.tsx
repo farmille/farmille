@@ -1,10 +1,12 @@
 "use client";
+
 import { Icon } from "@/components/Icon";
 
 import { TAG_CATEGORY_LABELS, type TagCategory } from "@/lib/tag-categories";
 import { cva, css, cx, type RecipeVariantProps } from "../../styled-system/css";
 
 export { TAG_CATEGORY_LABELS, toTagChipCategory } from "@/lib/tag-categories";
+
 export type { TagCategory } from "@/lib/tag-categories";
 
 const chipRecipe = cva({

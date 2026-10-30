@@ -28,6 +28,7 @@ describe("validateMaterialInput", () => {
     const result = validateMaterialInput({ ...base, compositionTypeId: "", description: "" });
 
     expect(result.ok).toBe(true);
+
     if (!result.ok) return;
     expect(result.input.compositionTypeId).toBeNull();
     expect(result.input.description).toBeNull();
@@ -40,6 +41,7 @@ describe("validateMaterialInput", () => {
     const result = validateMaterialInput({ ...base, name: "  ", manufacturerName: "" });
 
     expect(result.ok).toBe(false);
+
     if (result.ok) return;
     expect(result.fieldErrors.name).toBeDefined();
     expect(result.fieldErrors.manufacturerName).toBeDefined();
@@ -53,6 +55,7 @@ describe("validateMaterialInput", () => {
     });
 
     expect(result.ok).toBe(false);
+
     if (result.ok) return;
     expect(result.fieldErrors.officialUrl).toBeDefined();
 

@@ -18,6 +18,7 @@ function errorState(code: ErrorCode): SellerFormState {
 
 async function authorize(): Promise<SellerFormState | null> {
   const session = await requireSeller();
+
   return session.ok ? null : errorState(session.error);
 }
 
@@ -33,11 +34,14 @@ export async function cancelMaterialChangeRequestAction(
   _previousState: SellerFormState,
 ): Promise<SellerFormState> {
   const denied = await authorize();
+
   if (denied !== null) return denied;
 
   const result = await cancelSellerMaterialChangeRequest(requestId);
+
   if (!result.ok) return errorState(result.error);
 
   revalidateMaterialRoutes();
+
   return { status: "success", message: "申請を取り消しました。" };
 }

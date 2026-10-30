@@ -15,6 +15,7 @@ const ReportMaterialSummarySchema = v.object({
   name: v.string(),
   manufacturerName: v.string(),
 });
+
 export type ReportMaterialSummary = v.InferOutput<typeof ReportMaterialSummarySchema>;
 
 /**
@@ -30,6 +31,7 @@ export const ReportPageBackupSchema = v.pipe(
 export type ReportPageImage = { id: string; url: string; caption: string };
 
 type ReportGraph = UsageReportInput["measurements"][number]["graphs"][number];
+
 type ReportPageItemBase = { id: string; name: string; body: string };
 
 /**
@@ -72,15 +74,18 @@ export function reportImageRoom(
   itemId: string,
 ): number {
   const sectionPhotos = reportLegacyMedia(input).length;
+
   const others = items
     .filter((item) => item.id !== itemId)
     .reduce((sum, item) => sum + reportPageItemImages(item).length, 0);
+
   return Math.max(0, REPORT_IMAGE_LIMIT - sectionPhotos - others);
 }
 
 /** 文字数の上限を超えている欄の名前（保存すると入力の検証で落ちるので、先に欄を示す）。 */
 export function reportOverLimit(input: UsageReportInput, items: ReportPageItem[]): string[] {
   const over = (label: string, value: string, max: number) => (value.length > max ? [label] : []);
+
   return [
     ...input.varieties.flatMap((variety) => over("品種", variety.name, REPORT_SHORT_MAX)),
     ...input.comparedMaterials.flatMap((material) =>
@@ -128,6 +133,7 @@ export function reportOverLimit(input: UsageReportInput, items: ReportPageItem[]
 /** 上限に近づいた欄に出す一言。余裕があるあいだは出さない。 */
 export function reportLengthNote(value: string, max: number): string | undefined {
   if (value.length < max * 0.9) return undefined;
+
   return value.length >= max
     ? `上限の${max.toLocaleString("ja-JP")}字に達しました。`
     : `あと${(max - value.length).toLocaleString("ja-JP")}字まで書けます。`;
@@ -144,6 +150,7 @@ export function createReportPageItem(): ReportPageItem {
 export function itemsFromInput(input: UsageReportInput): ReportPageItem[] {
   const items = input.measurements.map((measurement): ReportPageItem => {
     const { id, name, body } = measurement;
+
     switch (measurement.kind) {
       case "image":
         return {
@@ -169,6 +176,7 @@ export function itemsFromInput(input: UsageReportInput): ReportPageItem[] {
         };
     }
   });
+
   return items.length > 0 ? items : [createReportPageItem()];
 }
 
@@ -178,6 +186,7 @@ export function inputWithItems(input: UsageReportInput, items: ReportPageItem[])
     ...input,
     measurements: items.map((item) => {
       const { id, name, body } = item;
+
       switch (item.mode) {
         case "numeric":
           return { id, kind: "numeric", name, unit: item.unit, body, graphs: item.graphs };
@@ -210,18 +219,23 @@ export function itemsWithPlots(
   plots: UsageReportInput["plots"],
 ): ReportPageItem[] {
   let changed = false;
+
   const next = items.map((item) => {
     if (item.mode !== "numeric") return item;
     const graphs = item.graphs.map((graph) => graphWithPlots(graph, plots));
+
     if (graphs.every((graph, index) => graph === item.graphs[index])) return item;
     changed = true;
+
     return { ...item, graphs };
   });
+
   return changed ? next : items;
 }
 
 export function reportPageItemDone(item: ReportPageItem): boolean {
   if (item.name.trim() === "") return false;
+
   switch (item.mode) {
     case "text":
       return item.body.trim() !== "";
@@ -358,10 +372,13 @@ export function reportPageChecks(
 ): ReportPageCheck[] {
   const errors = Object.keys(validateUsageReportSubmission(input, { pdfValuesCheckRequired }));
   const materialAcks = reportNeedsMaterialAcks(input);
+
   return SUBMISSION_CHECKS.flatMap(({ key, label, target, errors: pattern }) => {
     if ((key === "privacyAck" || key === "documentsAck") && !materialAcks) return [];
+
     if (key === "pdfValuesChecked" && !pdfValuesCheckRequired) return [];
     const valid = pattern === null || !errors.some((error) => pattern.test(error));
+
     return [
       {
         key,
@@ -378,8 +395,10 @@ function varietiesWithoutPlots(input: UsageReportInput, errors: string[]): strin
   const names = errors.flatMap((error) => {
     const index = /^varieties\.(\d+)\.plots$/.exec(error)?.[1];
     const variety = index === undefined ? undefined : input.varieties[Number(index)];
+
     return variety === undefined ? [] : [`「${variety.name.trim() || "品種名未入力"}」`];
   });
+
   return names.length > 0 ? `（品種${names.join("")}の区が無い）` : "";
 }
 
@@ -389,6 +408,7 @@ function varietiesWithoutPlots(input: UsageReportInput, errors: string[]): strin
  */
 export function latestRequests() {
   let latest = 0;
+
   return {
     start: () => ++latest,
     isLatest: (request: number) => request === latest,
@@ -407,6 +427,7 @@ export function otherOpenReport(
   reportId: string,
 ): "draft" | "pending" | null {
   if (existing.submitted.length > 0) return "pending";
+
   return existing.draft !== null && existing.draft.reportId !== reportId ? "draft" : null;
 }
 
@@ -455,17 +476,21 @@ export function itemMarkFields(
     { key: `measurements.${item.id}.name`, label: "調査項目名" },
     { key: `measurements.${item.id}.body`, label: "補足説明" },
   ];
+
   if (item.mode !== "numeric") return base;
+
   return [
     ...base,
     { key: `measurements.${item.id}.unit`, label: "単位" },
     ...item.graphs.flatMap((graph, index): ReportMarkField[] => {
       const title = item.graphs.length > 1 ? `グラフ${index + 1}` : "グラフ";
+
       return [
         { key: `measurements.${item.id}.graphs.${graph.id}.heading`, label: `${title}の題` },
         ...graph.rows.map((row): ReportMarkField => {
           const at = plots.findIndex(({ id }) => id === row.plotId);
           const name = plots[at]?.name.trim() || `区${at + 1}`;
+
           return {
             key: `measurements.${item.id}.graphs.${graph.id}.rows.${row.id}.value`,
             label: `${title}・${name}`,

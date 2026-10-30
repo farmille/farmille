@@ -6,43 +6,55 @@ type MaterialSelection = Pick<
   Database["public"]["Tables"]["materials"]["Row"],
   "avg_rating" | "id" | "manufacturer_name" | "name" | "review_count" | "seller_id"
 >;
+
 type ReviewSelection = Pick<
   Database["public"]["Tables"]["reviews"]["Row"],
   "author_user_id" | "body" | "id" | "material_id" | "rating" | "status"
 >;
+
 type UsageReportSelection = Pick<
   Database["public"]["Tables"]["usage_reports"]["Row"],
   "author_user_id" | "id" | "material_id" | "status" | "title"
 >;
+
 type UsageReportPlotSelection = Pick<
   Database["public"]["Tables"]["usage_report_plots"]["Row"],
   "name" | "treatment" | "variety_id"
 >;
+
 type ProfileReference = Pick<Database["public"]["Tables"]["profiles"]["Row"], "user_id">;
+
 type CropSelection = Pick<Database["public"]["Tables"]["crops"]["Row"], "id" | "name">;
+
 type ProductTypeSelection = Pick<
   Database["public"]["Tables"]["product_types"]["Row"],
   "id" | "name"
 >;
+
 type SellerAccountReference = Pick<
   Database["public"]["Tables"]["seller_accounts"]["Row"],
   "auth_user_id" | "id"
 >;
+
 type SellerApprovalState = Pick<
   Database["public"]["Tables"]["seller_accounts"]["Row"],
   "auth_user_id" | "status"
 >;
+
 type ContentReportState = Pick<
   Database["public"]["Tables"]["content_reports"]["Row"],
   "reporter_user_id" | "status" | "target_id" | "target_type"
 >;
 
 const UuidSchema = v.pipe(v.string(), v.uuid());
+
 const AuthUserSchema = v.object({
   id: UuidSchema,
   email: v.optional(v.string()),
 });
+
 const AuthUserListSchema = v.object({ users: v.array(AuthUserSchema) });
+
 type AuthUser = v.InferOutput<typeof AuthUserSchema>;
 
 export type GeneralUser = {
@@ -68,6 +80,7 @@ const MaterialSchema = v.object({
   avg_rating: v.nullable(v.number()),
   seller_id: v.nullable(UuidSchema),
 }) satisfies v.GenericSchema<MaterialSelection>;
+
 const ReviewSchema = v.object({
   id: UuidSchema,
   material_id: UuidSchema,
@@ -76,6 +89,7 @@ const ReviewSchema = v.object({
   body: v.string(),
   status: v.string(),
 }) satisfies v.GenericSchema<ReviewSelection>;
+
 const UsageReportSchema = v.object({
   id: UuidSchema,
   material_id: UuidSchema,
@@ -83,36 +97,45 @@ const UsageReportSchema = v.object({
   title: v.nullable(v.string()),
   status: v.string(),
 }) satisfies v.GenericSchema<UsageReportSelection>;
+
 const UsageReportPlotSchema = v.object({
   name: v.string(),
   treatment: v.nullable(v.string()),
   variety_id: v.nullable(UuidSchema),
 }) satisfies v.GenericSchema<UsageReportPlotSelection>;
+
 const NamedSchema = v.object({ id: UuidSchema, name: v.string() });
 const IdSchema = v.object({ id: UuidSchema });
+
 const ProfileReferenceSchema = v.object({
   user_id: UuidSchema,
 }) satisfies v.GenericSchema<ProfileReference>;
+
 const CropSchema = v.object({
   id: UuidSchema,
   name: v.string(),
 }) satisfies v.GenericSchema<CropSelection>;
+
 const ReviewCropNameRelationSchema = v.object({
   sort_order: v.number(),
   crop: v.object({ name: v.string() }),
 });
+
 const ProductTypeSchema = v.object({
   id: UuidSchema,
   name: v.string(),
 }) satisfies v.GenericSchema<ProductTypeSelection>;
+
 const SellerAccountReferenceSchema = v.object({
   id: UuidSchema,
   auth_user_id: v.nullable(UuidSchema),
 }) satisfies v.GenericSchema<SellerAccountReference>;
+
 const SellerApprovalStateSchema = v.object({
   auth_user_id: v.nullable(UuidSchema),
   status: v.string(),
 }) satisfies v.GenericSchema<SellerApprovalState>;
+
 const ContentReportStateSchema = v.object({
   reporter_user_id: UuidSchema,
   status: v.string(),
@@ -121,9 +144,13 @@ const ContentReportStateSchema = v.object({
 }) satisfies v.GenericSchema<ContentReportState>;
 
 export type Material = v.InferOutput<typeof MaterialSchema>;
+
 export type Review = v.InferOutput<typeof ReviewSchema>;
+
 export type UsageReport = v.InferOutput<typeof UsageReportSchema>;
+
 export type SellerApproval = v.InferOutput<typeof SellerApprovalStateSchema>;
+
 export type ContentReport = v.InferOutput<typeof ContentReportStateSchema>;
 
 type RestInsertTable =
@@ -138,6 +165,7 @@ type RestInsertTable =
   | "reviews"
   | "seller_accounts"
   | "usage_reports";
+
 type RestInsertBody<Table extends RestInsertTable> = Database["public"]["Tables"][Table]["Insert"];
 
 const GENERAL_PASSWORD = "Farmille-E2E-General-2026!";
@@ -165,6 +193,7 @@ function adminHeaders(extra?: HeadersInit): Headers {
   const headers = new Headers(extra);
   headers.set("apikey", secretKey);
   headers.set("Authorization", `Bearer ${secretKey}`);
+
   return headers;
 }
 
@@ -191,14 +220,17 @@ async function jsonRequest<TSchema extends v.GenericSchema>(
 ): Promise<v.InferOutput<TSchema>> {
   const response = await checkedFetch(path, init);
   const result = v.safeParse(schema, await response.json());
+
   if (!result.success) {
     throw new Error(`${path} のレスポンス形式が不正です：${v.summarize(result.issues)}`);
   }
+
   return result.output;
 }
 
 function restPath(table: string, params?: URLSearchParams): string {
   const query = params?.toString();
+
   return `/rest/v1/${table}${query === undefined || query.length === 0 ? "" : `?${query}`}`;
 }
 
@@ -223,6 +255,7 @@ async function restInsert<TSchema extends v.GenericSchema, Table extends RestIns
     },
     body: JSON.stringify(body),
   });
+
   const row = rows[0];
 
   if (row === undefined) {
@@ -237,6 +270,7 @@ async function authUsersByEmail(email: string): Promise<AuthUser[]> {
     AuthUserListSchema,
     "/auth/v1/admin/users?page=1&per_page=1000",
   );
+
   return payload.users.filter((user) => user.email === email);
 }
 
@@ -245,11 +279,13 @@ export async function cleanupOwnedE2eData(): Promise<void> {
     select: "id,auth_user_id",
     login_id: `like.${E2E_TOKEN_PREFIX}*`,
   });
+
   const sellers = await restSelect(
     SellerAccountReferenceSchema,
     "seller_accounts",
     sellerLookupParams,
   );
+
   for (const seller of sellers) {
     const requestParams = new URLSearchParams({ seller_id: `eq.${seller.id}` });
     await checkedFetch(restPath("material_change_requests", requestParams), { method: "DELETE" });
@@ -259,6 +295,7 @@ export async function cleanupOwnedE2eData(): Promise<void> {
     select: "id",
     name: `like.E2E資材_${E2E_TOKEN_PREFIX}*`,
   });
+
   for (const material of await restSelect(IdSchema, "materials", materialParams)) {
     await deleteMaterial(material.id);
   }
@@ -270,6 +307,7 @@ export async function cleanupOwnedE2eData(): Promise<void> {
     AuthUserListSchema,
     "/auth/v1/admin/users?page=1&per_page=1000",
   );
+
   const ownedUsers = payload.users.filter((user) => user.email?.startsWith(E2E_TOKEN_PREFIX));
 
   for (const user of ownedUsers) {
@@ -299,6 +337,7 @@ export async function deleteAvatars(userId: string): Promise<void> {
       body: JSON.stringify({ prefix: userId }),
     },
   );
+
   if (files.length === 0) return;
   await checkedFetch("/storage/v1/object/avatars", {
     method: "DELETE",
@@ -328,6 +367,7 @@ async function createAuthUser(
 
 export function uniqueToken(prefix: string): string {
   const suffix = `${Date.now().toString(36)}${crypto.randomUUID().slice(0, 8)}`.toLowerCase();
+
   return `${E2E_TOKEN_PREFIX}${prefix}-${suffix}`;
 }
 
@@ -356,6 +396,7 @@ export async function createApprovedSeller(prefix: string): Promise<SellerAccoun
   const email = `${loginId}@sellers.farmille.internal`;
   const officialName = `E2E ${loginId}株式会社`;
   const authUser = await createAuthUser(email, SELLER_PASSWORD, "seller");
+
   const seller = await restInsert(IdSchema, "seller_accounts", {
     auth_user_id: authUser.id,
     official_name: officialName,
@@ -390,6 +431,7 @@ export async function cleanupSellerByLoginId(loginId: string): Promise<void> {
     select: "id,auth_user_id",
     login_id: `eq.${loginId}`,
   });
+
   const sellers = await restSelect(SellerAccountReferenceSchema, "seller_accounts", params);
 
   for (const seller of sellers) {
@@ -397,6 +439,7 @@ export async function cleanupSellerByLoginId(loginId: string): Promise<void> {
     await checkedFetch(restPath("material_change_requests", requestParams), { method: "DELETE" });
     const deleteParams = new URLSearchParams({ id: `eq.${seller.id}` });
     await checkedFetch(restPath("seller_accounts", deleteParams), { method: "DELETE" });
+
     if (seller.auth_user_id !== null) {
       await deleteAuthUser(seller.auth_user_id);
     }
@@ -409,7 +452,9 @@ export async function sellerApprovalByLoginId(loginId: string): Promise<SellerAp
     login_id: `eq.${loginId}`,
     limit: "1",
   });
+
   const sellers = await restSelect(SellerApprovalStateSchema, "seller_accounts", params);
+
   return sellers[0] ?? null;
 }
 
@@ -419,8 +464,11 @@ export async function sellerLoginIdByOfficialName(officialName: string): Promise
     official_name: `eq.${officialName}`,
     limit: "1",
   });
+
   const sellers = await restSelect(v.object({ login_id: v.string() }), "seller_accounts", params);
+
   if (sellers[0] === undefined) throw new Error("申請済みメーカーが見つかりません。");
+
   return sellers[0].login_id;
 }
 
@@ -441,6 +489,7 @@ export async function createMaterial(
 
 export async function seedCatalogMaterial(materialId: string): Promise<void> {
   const material = await getMaterial(materialId);
+
   if (!material.name.startsWith(`E2E資材_${E2E_TOKEN_PREFIX}`))
     throw new Error("E2E以外の資材は変更できません。");
   const hash = materialId.replaceAll("-", "").repeat(2);
@@ -449,6 +498,7 @@ export async function seedCatalogMaterial(materialId: string): Promise<void> {
     source_sha256: hash,
     plan_sha256: hash,
   });
+
   const version = await restInsert(IdSchema, "material_page_versions", {
     material_id: materialId,
     base_revision: 0,
@@ -458,6 +508,7 @@ export async function seedCatalogMaterial(materialId: string): Promise<void> {
     description: "取り込み済みの製品説明",
     content_contract: 2,
   });
+
   await checkedFetch(restPath("material_page_related_companies"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -467,6 +518,7 @@ export async function seedCatalogMaterial(materialId: string): Promise<void> {
       company_name: material.manufacturer_name,
     } satisfies Database["public"]["Tables"]["material_page_related_companies"]["Insert"]),
   });
+
   for (const [sortOrder, group, title] of [
     [0, "overview", "取り込み資料（削除対象）"],
     [1, "public_trial", "取り込み試験資料"],
@@ -479,6 +531,7 @@ export async function seedCatalogMaterial(materialId: string): Promise<void> {
       url: `https://example.com/imported-${group}.pdf`,
     });
   }
+
   await checkedFetch(restPath("materials", new URLSearchParams({ id: `eq.${materialId}` })), {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -493,9 +546,11 @@ export async function seedCatalogMaterial(materialId: string): Promise<void> {
 
 export async function archiveMaterial(materialId: string): Promise<void> {
   const material = await getMaterial(materialId);
+
   if (!material.name.startsWith(`E2E資材_${E2E_TOKEN_PREFIX}`)) {
     throw new Error("E2E以外の資材は変更できません。");
   }
+
   await checkedFetch(restPath("materials", new URLSearchParams({ id: `eq.${materialId}` })), {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -506,16 +561,20 @@ export async function archiveMaterial(materialId: string): Promise<void> {
 export async function deleteMaterial(materialId: string): Promise<void> {
   // 書類・原稿の証跡は本番では保持する。使い捨てE2E資材だけを参照順に片付ける。
   const material = await getMaterial(materialId);
+
   if (!material.name.startsWith(`E2E資材_${E2E_TOKEN_PREFIX}`)) {
     throw new Error("E2E以外の資材は削除できません。");
   }
+
   const materialFilter = new URLSearchParams({ material_id: `eq.${materialId}` });
   await checkedFetch(restPath("material_page_audits", materialFilter), { method: "DELETE" });
+
   const versions = await restSelect(
     IdSchema,
     "material_page_versions",
     new URLSearchParams({ select: "id", material_id: `eq.${materialId}` }),
   );
+
   for (const version of versions) {
     await checkedFetch(
       restPath(
@@ -525,11 +584,13 @@ export async function deleteMaterial(materialId: string): Promise<void> {
       { method: "DELETE" },
     );
   }
+
   await checkedFetch(restPath("materials", new URLSearchParams({ id: `eq.${materialId}` })), {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ published_page_version_id: null }),
   });
+
   for (const table of [
     "material_page_versions",
     "material_editor_grants",
@@ -537,6 +598,7 @@ export async function deleteMaterial(materialId: string): Promise<void> {
   ]) {
     await checkedFetch(restPath(table, materialFilter), { method: "DELETE" });
   }
+
   await checkedFetch(
     restPath("catalog_import_runs", new URLSearchParams({ id: `eq.${materialId}` })),
     { method: "DELETE" },
@@ -590,6 +652,7 @@ export async function getMaterial(materialId: string): Promise<Material> {
     select: "id,name,manufacturer_name,review_count,avg_rating,seller_id",
     id: `eq.${materialId}`,
   });
+
   const rows = await restSelect(MaterialSchema, "materials", params);
   const material = rows[0];
 
@@ -606,6 +669,7 @@ export async function firstCrop(): Promise<v.InferOutput<typeof CropSchema>> {
     name: "eq.トマト",
     limit: "1",
   });
+
   const rows = await restSelect(CropSchema, "crops", params);
   const crop = rows[0];
 
@@ -623,6 +687,7 @@ export async function createReview(input: {
   body: string;
 }): Promise<Review> {
   const crop = await firstCrop();
+
   const reviewId = await jsonRequest(UuidSchema, "/rest/v1/rpc/create_review_with_crops", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -637,10 +702,12 @@ export async function createReview(input: {
       p_pesticide_ack: true,
     }),
   });
+
   const params = new URLSearchParams({
     select: "id,material_id,author_user_id,rating,body,status",
     id: `eq.${reviewId}`,
   });
+
   const rows = await restSelect(ReviewSchema, "reviews", params);
   const review = rows[0];
 
@@ -657,7 +724,9 @@ export async function reviewByAuthor(authorUserId: string): Promise<Review | nul
     author_user_id: `eq.${authorUserId}`,
     limit: "1",
   });
+
   const rows = await restSelect(ReviewSchema, "reviews", params);
+
   return rows[0] ?? null;
 }
 
@@ -674,7 +743,9 @@ export async function contentReportByTarget(
     order: "created_at.desc",
     limit: "1",
   });
+
   const reports = await restSelect(ContentReportStateSchema, "content_reports", params);
+
   return reports[0] ?? null;
 }
 
@@ -684,7 +755,9 @@ export async function reviewCropNames(reviewId: string): Promise<string[]> {
     review_id: `eq.${reviewId}`,
     order: "sort_order.asc",
   });
+
   const rows = await restSelect(ReviewCropNameRelationSchema, "review_crops", params);
+
   return rows.map(({ crop }) => crop.name);
 }
 
@@ -694,7 +767,9 @@ export async function helpfulVoteCount(userId: string): Promise<number> {
     select: "id",
     user_id: `eq.${userId}`,
   });
+
   const rows = await restSelect(IdSchema, "helpful_votes", params);
+
   return rows.length;
 }
 
@@ -705,7 +780,9 @@ export async function reviewViewEventCount(reviewId: string): Promise<number> {
     target_type: "eq.review",
     target_id: `eq.${reviewId}`,
   });
+
   const rows = await restSelect(IdSchema, "view_events", params);
+
   return rows.length;
 }
 
@@ -740,6 +817,7 @@ export async function createPublishedUsageReport(input: {
   observedChange: string;
 }) {
   const crop = await firstCrop();
+
   return restInsert(UsageReportSchema, "usage_reports", {
     material_id: input.materialId,
     author_user_id: input.authorUserId,
@@ -760,7 +838,9 @@ export async function usageReportByAuthor(authorUserId: string): Promise<UsageRe
     order: "created_at.desc",
     limit: "1",
   });
+
   const rows = await restSelect(UsageReportSchema, "usage_reports", params);
+
   return rows[0] ?? null;
 }
 
@@ -782,6 +862,7 @@ export async function usageReportPlots(reportId: string): Promise<string[]> {
       new URLSearchParams({ select: "id,name", report_id: `eq.${reportId}` }),
     ),
   ]);
+
   return plots.map(
     (plot) =>
       `${varieties.find(({ id }) => id === plot.variety_id)?.name ?? "-"}／${plot.treatment ?? "-"}`,
@@ -793,6 +874,7 @@ export async function cropsByNames(names: string[]): Promise<v.InferOutput<typeo
     select: "id,name",
     name: `in.(${names.join(",")})`,
   });
+
   return restSelect(CropSchema, "crops", params);
 }
 
@@ -803,6 +885,7 @@ export async function productTypesByNames(
     select: "id,name",
     name: `in.(${names.join(",")})`,
   });
+
   return restSelect(ProductTypeSchema, "product_types", params);
 }
 

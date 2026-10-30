@@ -1,5 +1,6 @@
 import { fn } from "storybook/test";
 import { structuredReport } from "@/app/reports/[id]/story-fixtures";
+
 export const saveStructuredUsageReport = fn<
   typeof import("@/server/usage-reports/structured").saveStructuredUsageReport
 >(async () => ({
@@ -9,6 +10,7 @@ export const saveStructuredUsageReport = fn<
   updatedAt: "2026-09-15T09:00:00Z",
   message: "",
 })).mockName("saveStructuredUsageReport");
+
 export const getStructuredReportFormData = fn<
   typeof import("@/server/usage-reports/structured").getStructuredReportFormData
 >(async () => ({

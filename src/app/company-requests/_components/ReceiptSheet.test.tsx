@@ -29,6 +29,7 @@ describe("申請受付票の用紙", () => {
     const receiptDocument = applicationReceiptDocument(registrationReceipt);
     render(<ReceiptSheet receiptDocument={receiptDocument} />);
     const [file] = receiptDocument.attachments;
+
     if (file === undefined) throw new Error("添付資料が必要です");
     expect(screen.getByRole("link", { name: file.fileName })).toHaveAttribute(
       "href",

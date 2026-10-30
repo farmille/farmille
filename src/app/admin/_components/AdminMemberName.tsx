@@ -23,6 +23,7 @@ export function AdminMemberName({
       </span>
     );
   }
+
   return (
     <Link className={linkClassName} href={`/users/${member.userId}`}>
       {member.handle}

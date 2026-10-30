@@ -16,9 +16,12 @@ export default async function ExpressionReviewPage({
 }) {
   const { id } = await params;
   await requireAdminPage(`/admin/materials/expressions/${id}`);
+
   if (!v.is(v.pipe(v.string(), v.uuid()), id)) notFound();
   const saved = await getMaterialPageVersion(id);
+
   if (!saved) notFound();
+
   return (
     <AdminShell title="製品情報の表現確認" backHref="/admin/materials/expressions">
       <p className={adminBodyStyle}>

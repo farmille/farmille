@@ -23,6 +23,7 @@ const meta = {
 } satisfies Meta<typeof CheckboxGroup>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const List: Story = {};

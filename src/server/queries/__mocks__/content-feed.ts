@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const listContentFeed = fn<typeof import("@/server/queries/content-feed").listContentFeed>(
   async () => ({
     ok: true,

@@ -4,6 +4,7 @@ import { AuthScreen } from "@/components/auth/AuthScreen";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 export const metadata: Metadata = { title: "メーカーのパスワード再設定", robots: NO_INDEX_ROBOTS };
+
 export default function SellerPasswordResetPage() {
   return (
     <AuthScreen

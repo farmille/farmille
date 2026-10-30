@@ -58,12 +58,14 @@ describe("PDF読み取りの欄の経路", () => {
     const field = { fieldKey: "observedChange", value: "", quote: "あ".repeat(1000) };
     expect(v.is(PdfReadingFieldsSchema, [field])).toBe(true);
     expect(v.is(PdfReadingFieldsSchema, [{ ...field, quote: "あ".repeat(1001) }])).toBe(false);
+
     const many = (count: number) =>
       Array.from({ length: count }, (_, i) => ({
         fieldKey: `plots.${crypto.randomUUID()}.name`,
         value: `区${i}`,
         quote: "",
       }));
+
     expect(v.is(PdfReadingFieldsSchema, many(2000))).toBe(true);
     expect(v.is(PdfReadingFieldsSchema, many(2001))).toBe(false);
   });
@@ -121,6 +123,7 @@ describe("pdfReadingFieldValue", () => {
     timingStages: [4, 1],
     purposeTags: ["収量改善", "耐暑性改善"],
   };
+
   const [first] = input.plots;
 
   it("欄の今の値を比較用の文字列で返す", () => {
@@ -135,6 +138,7 @@ describe("pdfReadingFieldValue", () => {
       { fieldKey: "timingStages" as const, value: "1,4", quote: "" },
       { fieldKey: "cropId" as const, value: graphId, quote: "" },
     ];
+
     expect(effectivePdfReadingMarks(marks, input)).toEqual([marks[0]]);
 
     {

@@ -28,6 +28,7 @@ export function QueryFilter({
       items={options.map((option) => {
         const params = new URLSearchParams(searchParams);
         params.set(param, option.value);
+
         return {
           href: `${pathname}?${params.toString()}`,
           label: option.label,

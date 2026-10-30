@@ -95,6 +95,7 @@ export const MEMBER_ENTRIES = [
 export function hasAuthSession(): boolean {
   return document.cookie.split("; ").some((part) => {
     const name = part.split("=")[0] ?? "";
+
     return /^sb-.+-auth-token(?:\.\d+)?$/.test(name);
   });
 }

@@ -12,6 +12,7 @@ const meta = {
 } satisfies Meta<typeof ReportActions>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Content: Story = {};

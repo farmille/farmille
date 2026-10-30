@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { clientEnv } from "@/env";
 
 export const SITE_NAME = "Farmille";
+
 export const DEFAULT_DESCRIPTION =
   "農業資材の製品情報、農家の感想口コミ、実証詳細レポートを共有するプラットフォームです。";
 
@@ -147,6 +148,7 @@ function titleWithSiteName(title: string): string {
 function metadataImages(imageUrls: readonly string[] | undefined) {
   const urls =
     imageUrls === undefined || imageUrls.length === 0 ? [DEFAULT_OG_IMAGE_PATH] : imageUrls;
+
   return urls.map((url) => ({ url: absoluteUrl(url) }));
 }
 
@@ -200,6 +202,7 @@ export function createPageMetadata({
   const canonicalUrl = absoluteUrl(path);
   const fullTitle = titleWithSiteName(title);
   const images = metadataImages(imageUrls);
+
   const commonOpenGraph = {
     locale: "ja_JP",
     url: canonicalUrl,
@@ -208,6 +211,7 @@ export function createPageMetadata({
     description,
     images,
   };
+
   const openGraph =
     type === "article"
       ? {
@@ -246,6 +250,7 @@ export function createProductJsonLd({
   reviewCount,
 }: ProductJsonLdInput): ProductJsonLd {
   const productUrl = absoluteUrl(`/materials/${id}`);
+
   const aggregateRating: AggregateRatingJsonLd | undefined =
     reviewCount > 0 && averageRating !== null
       ? {
@@ -269,12 +274,15 @@ export function createProductJsonLd({
       name: manufacturerName,
     },
   };
+
   if (imageUrls.length > 0) {
     document.image = imageUrls.map((url) => absoluteUrl(url));
   }
+
   if (aggregateRating !== undefined) {
     document.aggregateRating = aggregateRating;
   }
+
   return document;
 }
 
@@ -350,9 +358,11 @@ export function createArticleJsonLd({
       url: absoluteUrl("/"),
     },
   };
+
   if (imageUrls.length > 0) {
     document.image = imageUrls.map((url) => absoluteUrl(url));
   }
+
   if (about !== undefined) {
     document.about = {
       "@type": "Product",
@@ -360,6 +370,7 @@ export function createArticleJsonLd({
       name: about.name,
     };
   }
+
   return document;
 }
 

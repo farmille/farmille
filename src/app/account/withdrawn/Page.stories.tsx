@@ -8,6 +8,9 @@ const meta = {
   parameters: { layout: "fullscreen", nextjs: { navigation: { pathname: "/account/withdrawn" } } },
   args: {},
 } satisfies Meta<typeof Page>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

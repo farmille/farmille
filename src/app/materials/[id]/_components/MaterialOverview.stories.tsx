@@ -12,6 +12,7 @@ const meta = {
 } satisfies Meta<typeof MaterialDescriptionBox>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Description: Story = {};

@@ -15,6 +15,7 @@ export function BookmarkButton({ saved, action }: BookmarkButtonProps) {
   const [isSaved, save, pending] = useActionState(async (current: boolean, next: boolean) => {
     return action === undefined ? current : action(next);
   }, saved);
+
   return (
     <Toggle
       pressed={isSaved}

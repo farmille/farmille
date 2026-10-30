@@ -11,7 +11,10 @@ const meta = {
     helpfulCount: 12,
   },
 } satisfies Meta<typeof PostActionsLoader>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Review: Story = {};
 export const Report: Story = { args: { target: "usage_report" } };

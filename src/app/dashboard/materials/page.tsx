@@ -8,12 +8,17 @@ import { SellerAccessDenied } from "../_components/AccessDenied";
 
 export default async function SellerMaterialsPage() {
   const session = await requireSeller();
+
   if (!session.ok) {
     if (session.error === "unauthorized") redirect("/sellers/login?next=%2Fdashboard%2Fmaterials");
+
     return <SellerAccessDenied backHref="/dashboard" />;
   }
+
   const result = await getSellerMaterialsPageData(session.data.sellerId);
+
   if (!result.ok) throw new Error("資材一覧を取得できませんでした。");
+
   return (
     <FormPageShell chrome="seller" backHref="/dashboard" title="製品情報の管理">
       <div className={materialPageStack}>

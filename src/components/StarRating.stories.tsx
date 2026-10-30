@@ -11,6 +11,7 @@ const meta = {
 } satisfies Meta<typeof StarRating>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Zero: Story = {
@@ -100,8 +101,10 @@ export const InputFull: Story = {
 
 function RatingInput() {
   const [value, setValue] = useReducer((_current: number, next: number) => next, 3);
+
   return <StarRating mode="input" value={value} onChange={setValue} />;
 }
+
 export const Interactive: Story = {
   args: { mode: "input", value: 3, onChange: fn() },
   render: () => <RatingInput />,
@@ -109,6 +112,7 @@ export const Interactive: Story = {
 
 function ReviewRating({ error }: { error?: string }) {
   const [value, setValue] = useReducer((_current: number, next: number) => next, 0);
+
   return (
     <Fieldset error={error} legend="総合評価" name="rating" requirement="required">
       <StarRating mode="input" value={value} onChange={setValue} />

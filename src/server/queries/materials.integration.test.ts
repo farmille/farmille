@@ -25,7 +25,9 @@ function createLocalClient() {
 describe.skipIf(localSupabaseUrl === undefined)("分類マスタ 統合", () => {
   it("悩みタグの同義語と対応する効果を公開クライアントから取得できる", async () => {
     const result = await listClassificationOptionsWithSupabase(createLocalClient());
+
     if (!result.ok) throw new Error("分類マスタを取得できませんでした。");
+
     const search: SearchCatalog = {
       filters: result.data.searchTags
         .filter((tag) => tag.category === "concern")
@@ -33,6 +35,7 @@ describe.skipIf(localSupabaseUrl === undefined)("分類マスタ 統合", () => 
       makers: [],
       materials: [],
     };
+
     for (const { query, effects } of [
       { query: "水分不足", effects: ["耐乾燥性改善"] },
       { query: "暑さ対策", effects: ["耐暑性改善"] },
@@ -49,11 +52,13 @@ describe.skipIf(localSupabaseUrl === undefined)("分類マスタ 統合", () => 
       { query: "病害虫", effects: [] },
     ]) {
       const matches = matchSearchCatalog(search, query);
+
       const effectIds = new Set(
         result.data.searchTags
           .filter((tag) => matches.filters.some((filter) => filter.id === tag.id))
           .flatMap((tag) => tag.effectIds),
       );
+
       expect(
         result.data.effects
           .filter((effect) => effectIds.has(effect.id))
@@ -62,10 +67,13 @@ describe.skipIf(localSupabaseUrl === undefined)("分類マスタ 統合", () => 
       ).toEqual(expect.arrayContaining(effects));
       expect(effectIds.size, query).toBe(effects.length);
     }
+
     const climate = result.data.searchTags.find((tag) => tag.aliases.includes("気象変動"));
+
     const environment = result.data.effects.find(
       (effect) => effect.name === "環境ストレス耐性を高める",
     );
+
     expect(environment).toBeDefined();
     expect(climate?.effectIds).toContain(environment?.id);
   });

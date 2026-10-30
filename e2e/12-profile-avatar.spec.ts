@@ -13,6 +13,7 @@ function avatarPng(bytes: number): Buffer {
   chunk.write("tEXt", 4);
   chunk.write("size\0", 8);
   chunk.writeUInt32BE(crc32(chunk.subarray(4, -4)), chunk.length - 4);
+
   return Buffer.concat([png.subarray(0, -12), chunk, png.subarray(-12)]);
 }
 

@@ -10,6 +10,7 @@ const meta = {
 } satisfies Meta<typeof MaterialSourceLinks>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};

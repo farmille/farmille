@@ -20,6 +20,7 @@ const meta = {
 } satisfies Meta<typeof OptimizedImage>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const WithPreload: Story = {

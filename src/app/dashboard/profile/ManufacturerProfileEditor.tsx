@@ -1,7 +1,8 @@
 "use client";
+
 import { startTransition, useActionState, useReducer } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
-import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
+import { PersistedInput } from "@/components/form";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
 import { SellerHeader } from "@/app/sellers/[id]/_components/SellerHeader";
@@ -22,6 +23,7 @@ const ProfileInputSchema = v.object({
   logoUrl: v.string(),
   websiteUrl: v.string(),
 });
+
 const currentLogoStyle = css({
   display: "flex",
   alignItems: "center",
@@ -69,18 +71,23 @@ export function ManufacturerProfileEditor({
   const form = useForm({ defaultValues: { content: initialContent } });
   const content = useStore(form.store, (state) => state.values.content);
   const [preview, setPreview] = useReducer((_: boolean, next: boolean) => next, false);
+
   const [previewError, setPreviewError] = useReducer(
     (_: string | null, next: string | null) => next,
     null,
   );
+
   const router = useRouter();
+
   const [state, submitAction, pending] = useActionState<ProfileState, ProfileAction>(
     async (current, action) => {
       if (action.type === "withdraw") {
         if (await withdrawManufacturerProfile(action.versionId)) {
           router.refresh();
+
           return { ...current, message: null };
         }
+
         return {
           ...current,
           message: {
@@ -89,12 +96,15 @@ export function ManufacturerProfileEditor({
           },
         };
       }
+
       if (action.type === "upload") {
         const logoData = new FormData();
         logoData.set("logo", action.file);
         const result = await uploadLogo(logoData);
+
         if (!result.ok) return { ...current, message: { tone: "error", text: result.message } };
         form.setFieldValue("content", (content) => ({ ...content, logoUrl: result.url }));
+
         return {
           ...current,
           message: {
@@ -103,13 +113,16 @@ export function ManufacturerProfileEditor({
           },
         };
       }
+
       const result = await saveManufacturerProfile({
         content: action.content,
         expectedVersion: current.versionId,
         submit: action.submit,
       });
+
       if (!result.ok) return { ...current, message: { tone: "error", text: result.message } };
       router.refresh();
+
       return {
         versionId: action.submit ? null : result.versionId,
         savedContent: JSON.stringify(action.content),
@@ -123,22 +136,29 @@ export function ManufacturerProfileEditor({
     },
     { versionId: expectedVersion, savedContent: JSON.stringify(initialContent), message: null },
   );
+
   const message = previewError ? { tone: "error" as const, text: previewError } : state.message;
-  usePersistedInput({
-    name: "manufacturer-profile",
-    schema: ProfileInputSchema,
-    unsaved: pendingVersion || JSON.stringify(content) === state.savedContent ? null : content,
-    // 表現確認中は編集できないので、保存前の入力を戻さない
-    restore: (restored) => {
-      if (!pendingVersion) form.setFieldValue("content", restored);
-    },
-  });
+
+  const persistedInput = (
+    <PersistedInput
+      name="manufacturer-profile"
+      schema={ProfileInputSchema}
+      unsaved={pendingVersion || JSON.stringify(content) === state.savedContent ? null : content}
+      // 表現確認中は編集できないので、保存前の入力を戻さない
+      restore={(restored) => {
+        if (!pendingVersion) form.setFieldValue("content", restored);
+      }}
+    />
+  );
+
   function save(submit: boolean) {
     setPreviewError(null);
     startTransition(() => submitAction({ type: "save", content, submit }));
   }
+
   return (
     <div className={materialPageStack}>
+      {persistedInput}
       {message ? <Notice tone={message.tone}>{message.text}</Notice> : null}
       {pendingVersion ? <Notice tone="info">プロフィールの表現確認中です。</Notice> : null}
       {state.versionId && !pendingVersion ? (
@@ -169,6 +189,7 @@ export function ManufacturerProfileEditor({
               accept="image/jpeg,image/png,image/webp"
               onChange={(event) => {
                 const file = event.target.files?.[0];
+
                 if (!file) return;
                 setPreviewError(null);
                 startTransition(() => submitAction({ type: "upload", file }));
@@ -245,8 +266,10 @@ export function ManufacturerProfileEditor({
               onClick={() => {
                 if (!v.is(ManufacturerProfileSchema, content)) {
                   setPreviewError("URLの入力を確認してください。");
+
                   return;
                 }
+
                 setPreview(!preview);
               }}
             >

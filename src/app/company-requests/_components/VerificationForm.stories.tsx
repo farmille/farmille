@@ -3,6 +3,7 @@ import { css } from "../../../../styled-system/css";
 
 import { expect, userEvent, within } from "storybook/test";
 import { VerificationForm } from "./VerificationForm";
+
 const meta = {
   title: "Pages/company-requests/VerificationForm",
   component: VerificationForm,
@@ -10,8 +11,11 @@ const meta = {
   args: {},
   decorators: [(Story) => <div className={css({ p: "4" })}>{Story()}</div>],
 } satisfies Meta<typeof VerificationForm>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
 
 export const Submitted: Story = {

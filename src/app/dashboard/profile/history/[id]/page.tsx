@@ -7,12 +7,16 @@ import { getManufacturerProfileVersion } from "@/server/manufacturer-profile";
 
 export default async function ProfileHistoryPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireSeller();
+
   if (!session.ok) redirect("/sellers/login");
   const { id } = await params;
+
   if (!v.is(v.pipe(v.string(), v.uuid()), id)) notFound();
   const version = await getManufacturerProfileVersion(id);
+
   if (!version || version.seller_id !== session.data.sellerId || !version.seller_accounts)
     notFound();
+
   return (
     <FormPageShell chrome="seller" title="保存したプロフィール" backHref="/dashboard/profile">
       <SellerHeader

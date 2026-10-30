@@ -34,9 +34,11 @@ export const PDF_READING_FIELD_PATHS = [
 type WithIds<TPath extends string> = TPath extends `${infer Head}{id}${infer Tail}`
   ? `${Head}${string}${WithIds<Tail>}`
   : TPath;
+
 export type PdfReadingFieldKey = WithIds<(typeof PDF_READING_FIELD_PATHS)[number]>;
 
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+
 const fieldKeyString = v.pipe(
   v.string(),
   v.maxLength(200),
@@ -47,6 +49,7 @@ const fieldKeyString = v.pipe(
     ),
   ),
 );
+
 // 正規表現と型は同じ経路の一覧から作るので、検査に通った文字列は PdfReadingFieldKey に入る。
 export const PdfReadingFieldKeySchema = v.custom<PdfReadingFieldKey>((input) =>
   v.is(fieldKeyString, input),
@@ -57,7 +60,9 @@ export const PdfReadingFieldSchema = v.object({
   value: v.pipe(v.string(), v.maxLength(20000)),
   quote: v.pipe(v.string(), v.maxLength(1000)),
 });
+
 export type PdfReadingField = v.InferOutput<typeof PdfReadingFieldSchema>;
+
 export const PdfReadingFieldsSchema = v.pipe(
   v.array(PdfReadingFieldSchema),
   v.maxLength(2000),
@@ -92,7 +97,10 @@ export function pdfReadingTrialError(trial: string): string | undefined {
 
 /** 読み取る試験の書き始め。作物と品種が入っていれば「作物・品種の」の形で入れておく。 */
 export function pdfReadingTrialDraft(cropName: string | null, varietyNames: string[]): string {
-  const names = [cropName ?? "", ...varietyNames].map((name) => name.trim()).filter(Boolean);
+  const names = [cropName ?? "", ...varietyNames].flatMap((name) =>
+    name.trim() === "" ? [] : [name.trim()],
+  );
+
   return names.length === 0 ? "" : `${names.join("・")}の`;
 }
 
@@ -110,6 +118,7 @@ export const PdfReadingRequestSchema = v.object({
   ),
   consent: v.literal(true),
 });
+
 export type PdfReadingRequest = v.InferOutput<typeof PdfReadingRequestSchema>;
 
 /**
@@ -136,6 +145,7 @@ export type PdfReadingResult =
     };
 
 type FieldPath = (typeof PDF_READING_FIELD_PATHS)[number];
+
 type FieldValue = (input: UsageReportInput, ids: string[]) => string | undefined;
 
 function measurementGraph(input: UsageReportInput, [measurementId, graphId]: string[]) {
@@ -162,6 +172,7 @@ const FIELD_VALUES = {
   "plots.{id}.description": (input, [id]) => byId(input.plots, id)?.description,
   "plots.{id}.treatment": (input, [id]) => {
     const plot = byId(input.plots, id);
+
     return plot === undefined
       ? undefined
       : plot.treatment === null
@@ -191,8 +202,10 @@ export function pdfReadingFieldValue(
 ): string | undefined {
   for (const { pattern, value } of FIELD_MATCHERS) {
     const match = pattern.exec(fieldKey);
+
     if (match !== null) return value(input, match.slice(1));
   }
+
   return undefined;
 }
 

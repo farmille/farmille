@@ -7,13 +7,19 @@ import { fail, succeed, type Result } from "@/server/result";
 import type { Database } from "@/types/database.types";
 
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
+
 type ContentReportRow = Database["public"]["Tables"]["content_reports"]["Row"];
+
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
+
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
 
 export const CONTENT_REPORT_STATUSES = ["open", "resolved", "dismissed"] as const;
+
 export type ContentReportStatus = (typeof CONTENT_REPORT_STATUSES)[number];
 
 export const CONTENT_REPORT_STATUS_LABELS = {
@@ -29,6 +35,7 @@ export const CONTENT_REPORT_TARGET_TYPES = [
   "profile",
   "material",
 ] as const;
+
 export type ContentReportTargetType = (typeof CONTENT_REPORT_TARGET_TYPES)[number];
 
 export const CONTENT_REPORT_TARGET_LABELS = {
@@ -99,7 +106,7 @@ function targetKey(type: ContentReportTargetType, id: string): string {
 }
 
 function targetIds(rows: ReportQueryRow[], type: ContentReportTargetType): string[] {
-  return [...new Set(rows.filter((row) => row.target_type === type).map((row) => row.target_id))];
+  return [...new Set(rows.flatMap((row) => (row.target_type === type ? [row.target_id] : [])))];
 }
 
 async function loadReviewTargets(
@@ -107,6 +114,7 @@ async function loadReviewTargets(
   ids: string[],
 ): Promise<Result<Map<string, AdminContentReportTarget>>> {
   const targets = new Map<string, AdminContentReportTarget>();
+
   if (ids.length === 0) return succeed(targets);
 
   const { data, error } = await supabase
@@ -116,10 +124,12 @@ async function loadReviewTargets(
 
   if (error !== null) {
     reportError("通報対象感想口コミの取得に失敗", error);
+
     return fail("internal");
   }
 
   const rows: Pick<ReviewRow, "id" | "material_id" | "body">[] = data;
+
   for (const row of rows) {
     const excerpt = row.body.length > 32 ? `${row.body.slice(0, 32)}…` : row.body;
     targets.set(targetKey("review", row.id), {
@@ -138,16 +148,19 @@ async function loadUsageReportTargets(
   ids: string[],
 ): Promise<Result<Map<string, AdminContentReportTarget>>> {
   const targets = new Map<string, AdminContentReportTarget>();
+
   if (ids.length === 0) return succeed(targets);
 
   const { data, error } = await supabase.from("usage_reports").select("id, title").in("id", ids);
 
   if (error !== null) {
     reportError("通報対象実証詳細レポートの取得に失敗", error);
+
     return fail("internal");
   }
 
   const rows: Pick<UsageReportRow, "id" | "title">[] = data;
+
   for (const row of rows) {
     targets.set(targetKey("usage_report", row.id), {
       type: "usage_report",
@@ -165,16 +178,19 @@ async function loadArticleTargets(
   ids: string[],
 ): Promise<Result<Map<string, AdminContentReportTarget>>> {
   const targets = new Map<string, AdminContentReportTarget>();
+
   if (ids.length === 0) return succeed(targets);
 
   const { data, error } = await supabase.from("articles").select("id, title").in("id", ids);
 
   if (error !== null) {
     reportError("通報対象記事の取得に失敗", error);
+
     return fail("internal");
   }
 
   const rows: Pick<ArticleRow, "id" | "title">[] = data;
+
   for (const row of rows) {
     targets.set(targetKey("article", row.id), {
       type: "article",
@@ -192,6 +208,7 @@ async function loadProfileTargets(
   ids: string[],
 ): Promise<Result<Map<string, AdminContentReportTarget>>> {
   const targets = new Map<string, AdminContentReportTarget>();
+
   if (ids.length === 0) return succeed(targets);
 
   const { data, error } = await supabase
@@ -201,16 +218,21 @@ async function loadProfileTargets(
 
   if (error !== null) {
     reportError("通報対象プロフィールの取得に失敗", error);
+
     return fail("internal");
   }
 
   const rows: Pick<ProfileRow, "user_id" | "handle" | "withdrawn_at">[] = data;
+
   for (const row of rows) {
     const member = adminMember(row);
+
     if (member === null) {
       reportError("通報対象プロフィールのニックネームが欠落", { userId: row.user_id });
+
       return fail("internal");
     }
+
     targets.set(
       targetKey("profile", row.user_id),
       member.withdrawnAt === null
@@ -237,16 +259,19 @@ async function loadMaterialTargets(
   ids: string[],
 ): Promise<Result<Map<string, AdminContentReportTarget>>> {
   const targets = new Map<string, AdminContentReportTarget>();
+
   if (ids.length === 0) return succeed(targets);
 
   const { data, error } = await supabase.from("materials").select("id, name").in("id", ids);
 
   if (error !== null) {
     reportError("通報対象資材の取得に失敗", error);
+
     return fail("internal");
   }
 
   const rows: Pick<MaterialRow, "id" | "name">[] = data;
+
   for (const row of rows) {
     targets.set(targetKey("material", row.id), {
       type: "material",
@@ -285,14 +310,17 @@ export async function listContentReports(
         `,
       )
       .order("created_at", { ascending: false });
+
     const { data, error } = await (status === "all" ? query : query.eq("status", status));
 
     if (error !== null) {
       reportError("通報一覧の取得に失敗", error);
+
       return fail("internal");
     }
 
     const rows: ReportQueryRow[] = data;
+
     const targetResults = await Promise.all([
       loadReviewTargets(supabase, targetIds(rows, "review")),
       loadUsageReportTargets(supabase, targetIds(rows, "usage_report")),
@@ -302,20 +330,25 @@ export async function listContentReports(
     ]);
 
     const targets = new Map<string, AdminContentReportTarget>();
+
     for (const result of targetResults) {
       if (!result.ok) return result;
+
       for (const [key, target] of result.data) targets.set(key, target);
     }
 
     const items: AdminContentReportItem[] = [];
+
     for (const row of rows) {
       const reporter = row.reporter === null ? null : adminMember(row.reporter);
+
       if (
         reporter === null ||
         !isContentReportStatus(row.status) ||
         !isContentReportTargetType(row.target_type)
       ) {
         reportError("通報一覧に不正な関連データまたは状態が含まれる", row);
+
         return fail("internal");
       }
 
@@ -361,9 +394,12 @@ async function hideReportedTarget(
 
     if (loadError !== null) {
       reportError("通報対象感想口コミの状態取得に失敗", loadError);
+
       return fail("internal");
     }
+
     if (review === null || review.status === "hidden") return succeed(null);
+
     if (review.status !== "published") return fail("conflict");
 
     const { data, error } = await supabase
@@ -375,8 +411,10 @@ async function hideReportedTarget(
 
     if (error !== null) {
       reportError("通報対象感想口コミの非公開化に失敗", error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return fail("conflict");
 
     return succeed({
@@ -396,9 +434,12 @@ async function hideReportedTarget(
 
     if (loadError !== null) {
       reportError("通報対象実証詳細レポートの状態取得に失敗", loadError);
+
       return fail("internal");
     }
+
     if (report === null || report.status === "declined") return succeed(null);
+
     if (!["draft", "pending", "published"].includes(report.status)) return fail("conflict");
 
     const { data, error } = await supabase
@@ -410,8 +451,10 @@ async function hideReportedTarget(
 
     if (error !== null) {
       reportError("通報対象実証詳細レポートの非公開化に失敗", error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return fail("conflict");
 
     return succeed({
@@ -430,9 +473,12 @@ async function hideReportedTarget(
 
   if (loadError !== null) {
     reportError("通報対象記事の状態取得に失敗", loadError);
+
     return fail("internal");
   }
+
   if (article === null || article.status === "draft") return succeed(null);
+
   if (article.status !== "published") return fail("conflict");
 
   const { data, error } = await supabase
@@ -444,8 +490,10 @@ async function hideReportedTarget(
 
   if (error !== null) {
     reportError("通報対象記事の非公開化に失敗", error);
+
     return fail("internal");
   }
+
   if (data.length === 0) return fail("conflict");
 
   return succeed({
@@ -497,12 +545,17 @@ export async function processContentReport(
 
     if (loadError !== null) {
       reportError("処理対象の通報取得に失敗", loadError);
+
       return fail("internal");
     }
+
     if (report === null) return fail("not_found");
+
     if (report.status !== "open") return fail("conflict");
+
     if (!isContentReportTargetType(report.target_type)) {
       reportError("未知の通報対象種別", report.target_type);
+
       return fail("internal");
     }
 
@@ -510,6 +563,7 @@ export async function processContentReport(
       nextStatus === "resolved"
         ? await hideReportedTarget(supabase, report.target_type, report.target_id)
         : succeed(null);
+
     if (!targetChange.ok) return targetChange;
 
     const { data, error } = await supabase
@@ -525,10 +579,13 @@ export async function processContentReport(
 
     if (error !== null || data.length === 0) {
       if (targetChange.data !== null) await rollbackTarget(supabase, targetChange.data);
+
       if (error !== null) {
         reportError("通報の処理記録に失敗", error);
+
         return fail("internal");
       }
+
       return fail("conflict");
     }
 

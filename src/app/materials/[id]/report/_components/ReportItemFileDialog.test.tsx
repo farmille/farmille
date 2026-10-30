@@ -7,6 +7,7 @@ describe("画像の保存中の操作", () => {
   const getContext = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "getContext");
   afterEach(() => {
     vi.unstubAllGlobals();
+
     if (getContext !== undefined)
       Object.defineProperty(HTMLCanvasElement.prototype, "getContext", getContext);
   });
@@ -36,6 +37,7 @@ describe("画像の保存中の操作", () => {
       />,
     );
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+
     if (input === null) throw new Error("ファイルの選択欄がありません。");
     fireEvent.change(input, {
       target: { files: [new File(["x"], "畑.png", { type: "image/png" })] },
@@ -51,15 +53,19 @@ describe("画像の保存中の操作", () => {
   it("ファイルの読み込みが終わるまで、ページに入れられない", async () => {
     // 1枚目はすぐ読み込み、2枚目は読み込みの途中で止めておく
     let calls = 0;
+
     let finish: () => void = () => {
       throw new Error("読み込みが開始されていません。");
     };
+
     vi.stubGlobal("createImageBitmap", async () => {
       calls += 1;
+
       if (calls > 1)
         await new Promise<void>((resolve) => {
           finish = resolve;
         });
+
       return { width: 400, height: 300, close: () => {} };
     });
     Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
@@ -84,6 +90,7 @@ describe("画像の保存中の操作", () => {
       />,
     );
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+
     if (input === null) throw new Error("ファイルの選択欄がありません。");
     fireEvent.change(input, {
       target: {
@@ -109,9 +116,11 @@ describe("上げたがページに入れなかった画像", () => {
     getContext: Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "getContext"),
     toBlob: Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "toBlob"),
   };
+
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.unstubAllEnvs();
+
     for (const [name, descriptor] of Object.entries(descriptors))
       if (descriptor !== undefined)
         Object.defineProperty(HTMLCanvasElement.prototype, name, descriptor);
@@ -143,8 +152,11 @@ describe("上げたがページに入れなかった画像", () => {
     vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
       const request = new Request(input, init);
       requests.push({ method: request.method, url: request.url, body: await request.text() });
+
       if (request.method === "DELETE") return Response.json([]);
+
       if (new URL(request.url).pathname.startsWith(folder)) uploads += 1;
+
       // 2枚目の保存は失敗させ、途中まで上げた状態を作る
       return uploads === 1
         ? Response.json({ Key: "report-media/uploaded.jpg" })
@@ -163,6 +175,7 @@ describe("上げたがページに入れなかった画像", () => {
       />,
     );
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+
     if (input === null) throw new Error("ファイルの選択欄がありません。");
     fireEvent.change(input, {
       target: {
@@ -175,14 +188,18 @@ describe("上げたがページに入れなかった画像", () => {
     await screen.findByRole("img", { name: "2枚目の画像" });
     fireEvent.click(screen.getByRole("button", { name: "変更を反映する" }));
     await screen.findByText(/保存できた画像はそのまま残っています/);
+
     const uploaded = requests.find(
       (request) => request.method === "POST" && new URL(request.url).pathname.startsWith(folder),
     );
+
     if (uploaded === undefined) throw new Error("1枚目の画像を上げていません。");
+
     const uploadedPath = new URL(uploaded.url).pathname.replace(
       "/storage/v1/object/report-media/",
       "",
     );
+
     fireEvent.click(screen.getByRole("button", { name: "閉じる" }));
     fireEvent.click(await screen.findByRole("button", { name: "記入をやめる" }));
     await waitFor(() =>

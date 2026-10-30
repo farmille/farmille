@@ -13,7 +13,9 @@ export const metadata = { title: "公開済みの投稿" };
 export default async function PublishedPostsPage() {
   await requireAdminPage("/admin/published-posts");
   const result = await listPublishedPosts();
+
   if (!result.ok) throw new Error(errorMessageJa[result.error]);
+
   return (
     <AdminShell
       title="公開済みの投稿"

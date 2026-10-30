@@ -12,6 +12,7 @@ const meta = {
 } satisfies Meta<typeof EmptyCard>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Start: Story = {};

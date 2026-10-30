@@ -18,6 +18,7 @@ const meta = {
 } satisfies Meta<typeof FabBar>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 // getSessionUser は preview.tsx の sb.mock で __mocks__ 実装に差し替わっており、

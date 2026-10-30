@@ -6,8 +6,11 @@ import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
+
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
+
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
 type SellerMaterialQueryRow = Pick<
@@ -66,6 +69,7 @@ async function getArticleHelpfulCount(
 
   for (let start = 0; start < articleIds.length; start += IN_FILTER_CHUNK_SIZE) {
     const ids = articleIds.slice(start, start + IN_FILTER_CHUNK_SIZE);
+
     const { data, error } = await supabase
       .from("helpful_counts")
       .select("helpful_count")
@@ -74,6 +78,7 @@ async function getArticleHelpfulCount(
 
     if (error !== null) {
       reportQueryError("記事の参考になった件数の取得に失敗", error);
+
       return fail("internal");
     }
 
@@ -82,6 +87,7 @@ async function getArticleHelpfulCount(
     for (const row of rows) {
       if (row.helpful_count === null) {
         reportQueryError("記事の参考になった件数にNULLが含まれる", row);
+
         return fail("internal");
       }
 
@@ -95,6 +101,7 @@ async function getArticleHelpfulCount(
 /** 承認済みメーカーの公開ページに必要な情報だけを取得する。 */
 export async function getPublicSellerPage(id: string): Promise<Result<PublicSellerPageData>> {
   const supabase = await createServerSupabase();
+
   const { data: sellerData, error: sellerError } = await supabase
     .from("public_sellers")
     .select("id, official_name, region_scope, website_url, logo_url, profile_text")
@@ -103,6 +110,7 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
 
   if (sellerError !== null) {
     reportQueryError("公開メーカーの取得に失敗", sellerError);
+
     return fail("internal");
   }
 
@@ -117,6 +125,7 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
 
   if (seller.id === null || seller.official_name === null) {
     reportQueryError("公開メーカーの必須項目が欠落", { id });
+
     return fail("internal");
   }
 
@@ -151,21 +160,25 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
 
   if (materialsResult.error !== null) {
     reportQueryError("掲載資材の取得に失敗", materialsResult.error);
+
     return fail("internal");
   }
 
   if (materialsResult.count === null) {
     reportQueryError("掲載資材の総件数が返されなかった", { id });
+
     return fail("internal");
   }
 
   if (articlesResult.error !== null) {
     reportQueryError("公開記事の取得に失敗", articlesResult.error);
+
     return fail("internal");
   }
 
   const materialRows: SellerMaterialQueryRow[] = materialsResult.data;
   const articleRows: SellerArticleQueryRow[] = articlesResult.data;
+
   const helpfulCount = await getArticleHelpfulCount(
     supabase,
     articleRows.map(({ id: articleId }) => articleId),
@@ -180,6 +193,7 @@ export async function getPublicSellerPage(id: string): Promise<Result<PublicSell
   for (const article of articleRows) {
     if (article.published_at === null) {
       reportQueryError("公開記事の公開日時が欠落", { articleId: article.id });
+
       return fail("internal");
     }
 

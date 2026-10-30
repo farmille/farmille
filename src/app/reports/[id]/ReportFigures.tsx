@@ -63,6 +63,7 @@ export function ReportFigures({
   grid?: boolean;
 }) {
   if (media.length === 0) return null;
+
   if (grid || media.length === 2) {
     return (
       <div
@@ -84,6 +85,7 @@ export function ReportFigures({
       </div>
     );
   }
+
   return (
     <>
       {media.map((item) => (

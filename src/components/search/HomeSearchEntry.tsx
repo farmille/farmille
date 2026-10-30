@@ -11,6 +11,7 @@ const entry = css({ display: "block", w: "full", m: "0" });
 export function HomeSearchEntry() {
   const form = useForm({ defaultValues: { query: "" } });
   const query = useStore(form.store, (state) => state.values.query);
+
   return (
     <Form action="/search" aria-label="資材検索" className={entry} role="search">
       <SearchInput

@@ -30,31 +30,40 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     type === "email"
   ) {
     const client = createIsolatedAuthClient();
+
     const verified =
       code !== null
         ? await client.auth.exchangeCodeForSession(code)
         : tokenHash !== null && (type === "signup" || type === "magiclink" || type === "email")
           ? await client.auth.verifyOtp({ type, token_hash: tokenHash })
           : null;
+
     if (!verified || verified.error || !verified.data.user) {
       const expired =
         next === "/"
           ? "/signup/general?error=expired_link"
           : `/signup/general?error=expired_link&next=${encodeURIComponent(next)}`;
+
       return NextResponse.redirect(sameOriginUrl(request, expired));
     }
+
     const identity = await registrationIdentity(verified.data.user.id, createAdminSupabase());
     const closed = await client.auth.signOut({ scope: "local" });
+
     if (closed.error) throw new Error("メール確認用セッションを終了できませんでした。");
+
     if (!identity.ok)
       return NextResponse.redirect(
         sameOriginUrl(request, `/signup/general?error=${identity.error}`),
       );
     await saveRegistrationProof(identity.data.userId, identity.data.email);
+
     const destination =
       next === "/" ? "/signup/complete" : `/signup/complete?next=${encodeURIComponent(next)}`;
+
     return NextResponse.redirect(sameOriginUrl(request, destination));
   }
+
   const result = await verifyLink({ code, tokenHash, type });
 
   if (!result.ok) {
@@ -62,6 +71,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   await sendPendingRegistrationEmail();
+
   return NextResponse.redirect(sameOriginUrl(request, next));
 }
 
@@ -75,6 +85,7 @@ async function verifyLink({
   type: string | null;
 }): Promise<Result<null>> {
   if (code !== null) return exchangeAuthCode(code);
+
   if (tokenHash !== null && isEmailOtpType(type)) return verifyEmailOtp(type, tokenHash);
 
   return fail("expired_link");

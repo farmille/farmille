@@ -21,6 +21,7 @@ const meta = {
 } satisfies Meta<typeof ArticleListItem>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Draft: Story = {};

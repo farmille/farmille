@@ -22,6 +22,7 @@ const meta = {
 } satisfies Meta<typeof HelpfulButton>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const CardNotVoted: Story = {

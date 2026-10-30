@@ -10,6 +10,7 @@ const meta = {
 } satisfies Meta<typeof Collapsible>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 const usage = (

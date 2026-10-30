@@ -15,6 +15,7 @@ import { MaterialSectionHeading } from "./MaterialSectionHeading";
 import { NoImage } from "./CardParts";
 
 const captionStyle = css({ mb: "1.5", fontSize: "xs", color: "text.subtle" });
+
 const scrollStyle = css({
   display: "flex",
   gap: "2.5",
@@ -31,6 +32,7 @@ const scrollStyle = css({
     overflowX: "visible",
   },
 });
+
 const cardStyle = css({
   display: "block",
   flex: "[0 0 token(sizes.card.materialMobile)]",
@@ -44,12 +46,14 @@ const cardStyle = css({
   boxShadow: "shadow",
   pc: { flex: "none" },
 });
+
 const imageBoxStyle = css({
   display: "grid",
   placeItems: "center",
   aspectRatio: "image.landscape",
   bg: "primary.soft",
 });
+
 const imageStyle = css({
   display: "block",
   w: "full",
@@ -57,8 +61,10 @@ const imageStyle = css({
   objectFit: "contain",
   bg: "surface.card",
 });
+
 const infoStyle = css({ p: "2.5" });
 const nameStyle = css({ textStyle: "body", fontWeight: "bold" });
+
 const makerStyle = css({
   mt: "0.5",
   textStyle: "note",
@@ -67,12 +73,14 @@ const makerStyle = css({
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
 });
+
 const ratingStyle = css({ mt: "0.5", fontSize: "xs", color: "accent.star" });
 const reviewCountStyle = css({ color: "text.subtle", fontVariantNumeric: "tabular-nums" });
 const emptyStyle = css({ textStyle: "supporting", color: "text.subtle" });
 
 function StarText({ value }: { value: number }) {
   const filled = Math.min(5, Math.max(0, Math.round(value)));
+
   return (
     <span role="img" aria-label={`5段階中${filled}`}>
       {[1, 2, 3, 4, 5].map((n) => (
@@ -144,5 +152,6 @@ export async function RelatedMaterialsSection({ material }: { material: Material
       material.ingredientCategories.map(({ id }) => id),
     ),
   );
+
   return <RelatedMaterialsView related={related} />;
 }

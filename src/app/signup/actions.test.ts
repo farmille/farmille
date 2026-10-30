@@ -7,6 +7,7 @@ import { registrationEmailAction } from "./actions";
 function emailForm(email: string): FormData {
   const formData = new FormData();
   formData.set("email", email);
+
   return formData;
 }
 

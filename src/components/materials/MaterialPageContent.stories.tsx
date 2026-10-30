@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialPageContent } from "./MaterialPageContent";
+
 const meta = {
   title: "Pages/Shared/MaterialPageContent",
   component: MaterialPageContent,
@@ -22,6 +23,9 @@ const meta = {
     imageUrl: "/images/container-shapes/5.png",
   },
 } satisfies Meta<typeof MaterialPageContent>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

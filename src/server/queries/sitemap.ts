@@ -22,6 +22,7 @@ function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): voi
 /** 公開 URL の生成に必要な識別子と更新日時だけを取得する。 */
 export async function listSitemapEntries(): Promise<Result<SitemapEntries>> {
   const supabase = createAdminSupabase();
+
   const [materials, articles, reports, sellers, users] = await Promise.all([
     selectAllRows((from, to) =>
       supabase
@@ -67,22 +68,31 @@ export async function listSitemapEntries(): Promise<Result<SitemapEntries>> {
 
   if (materials.error !== null) {
     reportQueryError("資材一覧の取得に失敗", materials.error);
+
     return fail("internal");
   }
+
   if (articles.error !== null) {
     reportQueryError("記事一覧の取得に失敗", articles.error);
+
     return fail("internal");
   }
+
   if (reports.error !== null) {
     reportQueryError("実証詳細レポート一覧の取得に失敗", reports.error);
+
     return fail("internal");
   }
+
   if (sellers.error !== null) {
     reportQueryError("メーカー一覧の取得に失敗", sellers.error);
+
     return fail("internal");
   }
+
   if (users.error !== null) {
     reportQueryError("ユーザー一覧の取得に失敗", users.error);
+
     return fail("internal");
   }
 

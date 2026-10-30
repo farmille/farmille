@@ -9,6 +9,7 @@ import type { Database } from "@/types/database.types";
  * 01 §3 の CHECK は 'answer' も許可するが、Q&A は Phase 2 まで非表示のため対象外。
  */
 export const HELPFUL_TARGET_TYPES = ["review", "usage_report", "article"] as const;
+
 export type HelpfulTargetType = (typeof HELPFUL_TARGET_TYPES)[number];
 
 export function isHelpfulTargetType(value: string): value is HelpfulTargetType {
@@ -43,10 +44,14 @@ async function assertHelpfulTarget(
 
     if (error !== null) {
       reportMutationError("対象感想口コミの確認に失敗", error);
+
       return fail("internal");
     }
+
     if (data === null || data.status !== "published") return fail("not_found");
+
     if (data.author_user_id === userId) return fail("forbidden");
+
     return succeed(null);
   }
 
@@ -59,10 +64,14 @@ async function assertHelpfulTarget(
 
     if (error !== null) {
       reportMutationError("対象実証詳細レポートの確認に失敗", error);
+
       return fail("internal");
     }
+
     if (data === null || data.status !== "published") return fail("not_found");
+
     if (data.author_user_id === userId) return fail("forbidden");
+
     return succeed(null);
   }
 
@@ -74,9 +83,12 @@ async function assertHelpfulTarget(
 
   if (error !== null) {
     reportMutationError("対象記事の確認に失敗", error);
+
     return fail("internal");
   }
+
   if (data === null || data.status !== "published") return fail("not_found");
+
   return succeed(null);
 }
 
@@ -102,6 +114,7 @@ export async function toggleHelpfulVoteWithSupabase(
 
   const supabase = await createSupabase();
   const target = await assertHelpfulTarget(supabase, targetType, targetId, userId);
+
   if (!target.ok) return target;
 
   const { data: existing, error: existingError } = await supabase
@@ -114,6 +127,7 @@ export async function toggleHelpfulVoteWithSupabase(
 
   if (existingError !== null) {
     reportMutationError("参考になった状態の確認に失敗", existingError);
+
     return fail("internal");
   }
 
@@ -126,6 +140,7 @@ export async function toggleHelpfulVoteWithSupabase(
 
     if (error !== null) {
       reportMutationError("参考になったの取り消しに失敗", error);
+
       return fail("internal");
     }
 
@@ -143,7 +158,9 @@ export async function toggleHelpfulVoteWithSupabase(
       // 二重送信などの競合。既に登録済みとして扱う。
       return succeed({ voted: true });
     }
+
     reportMutationError("参考になったの登録に失敗", error);
+
     return fail("internal");
   }
 

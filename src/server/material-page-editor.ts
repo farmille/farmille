@@ -17,14 +17,19 @@ type MaterialPageBody = Pick<
 
 export async function getPublishedMaterialPage(materialId: string) {
   const db = await createServerSupabase();
+
   const { data, error } = await db
     .from("public_material_page_versions")
     .select("id,material_id,description,main_components,mechanism,origin")
     .eq("material_id", materialId)
     .maybeSingle();
+
   if (error) throw new Error("公開中の製品情報を取得できませんでした。");
+
   if (!data) return null;
+
   if (!data.id) throw new Error("公開原稿の識別子がありません。");
+
   return {
     origin: v.parse(v.picklist(["manufacturer", "catalog"]), data.origin),
     ...(await getMaterialPageBody(data.id, data)),
@@ -34,19 +39,25 @@ export async function getPublishedMaterialPage(materialId: string) {
 /** 読み取りもRLSを通し、公開版または有効な資材オーナー権限のある版だけを返す。 */
 export async function getMaterialPageVersion(versionId: string) {
   const db = await createServerSupabase();
+
   const { data, error } = await db
     .from("material_page_versions")
     .select("*")
     .eq("id", versionId)
     .maybeSingle();
+
   if (error) throw new Error("原稿履歴を取得できませんでした。");
+
   if (!data) return null;
+
   return { version: data, ...(await getMaterialPageBody(versionId, data)) };
 }
 
 async function getMaterialPageBody(versionId: string, version: MaterialPageBody) {
   const db = await createServerSupabase();
+
   if (!version.material_id) throw new Error("原稿の資材識別子がありません。");
+
   const [links, material, usages, timings, certifications, registrations, relatedCompanies] =
     await Promise.all([
       db.from("material_page_links").select("*").eq("version_id", versionId).order("sort_order"),
@@ -65,6 +76,7 @@ async function getMaterialPageBody(versionId: string, version: MaterialPageBody)
         .eq("version_id", versionId)
         .order("sort_order"),
     ]);
+
   if (
     links.error ||
     material.error ||
@@ -76,6 +88,7 @@ async function getMaterialPageBody(versionId: string, version: MaterialPageBody)
   ) {
     throw new Error("資材の原稿を取得できませんでした。再読み込みしてください。");
   }
+
   const content = v.parse(MaterialPageContentSchema, {
     description: version.description,
     mainComponents: version.main_components,
@@ -106,11 +119,13 @@ async function getMaterialPageBody(versionId: string, version: MaterialPageBody)
     })),
     relatedCompanies: relatedCompanies.data.map((row) => row.company_name),
   });
+
   return { content, imageUrl: materialIllustrationUrl(material.data.container_type_id) };
 }
 
 export async function getMaterialEditor(materialId: string, sellerId: string) {
   const db = await createServerSupabase();
+
   const [material, grant, history] = await Promise.all([
     db
       .from("materials")
@@ -133,23 +148,30 @@ export async function getMaterialEditor(materialId: string, sellerId: string) {
       .eq("seller_id", sellerId)
       .order("created_at", { ascending: false }),
   ]);
+
   if (material.error || grant.error || history.error)
     throw new Error("資材の編集情報を取得できませんでした。");
+
   if (!material.data || !grant.data) return null;
+
   const existingEvidence = await db
     .from("material_evidences")
     .select("evidence_type,title,file_url,external_url")
     .eq("material_id", materialId)
     .order("sort_order");
+
   if (existingEvidence.error) throw new Error("公開中のリンク・資料を取得できませんでした。");
   const latest = history.data[0];
+
   const editing =
     latest &&
     (["draft", "pending"].includes(latest.status) ||
       (["returned", "withdrawn"].includes(latest.status) &&
         latest.base_revision === material.data.content_revision));
+
   const sourceVersion = editing ? latest.id : material.data.published_page_version_id;
   const saved = sourceVersion ? await getMaterialPageVersion(sourceVersion) : null;
+
   const content: MaterialPageContent = saved?.content ?? {
     description: material.data.description ?? "",
     mainComponents: material.data.main_components ?? "",
@@ -164,6 +186,7 @@ export async function getMaterialEditor(materialId: string, sellerId: string) {
     relatedCompanies: [material.data.manufacturer_name],
     usages: material.data.usage_text ? [{ method: "other", detail: material.data.usage_text }] : [],
   };
+
   return {
     material: material.data,
     content,
@@ -176,6 +199,7 @@ export async function getMaterialEditor(materialId: string, sellerId: string) {
 
 export async function saveMaterialPageVersion(input: v.InferOutput<typeof SaveMaterialPageSchema>) {
   const db = await createServerSupabase();
+
   return db.rpc("save_material_page_version", {
     p_material_id: input.materialId,
     p_expected_version: input.expectedVersion ?? undefined,
@@ -186,10 +210,12 @@ export async function saveMaterialPageVersion(input: v.InferOutput<typeof SaveMa
 
 export async function withdrawMaterialPageVersion(versionId: string) {
   const db = await createServerSupabase();
+
   return db.rpc("withdraw_material_page_version", { p_version_id: versionId });
 }
 
 export async function hideOwnedMaterialPage(materialId: string, note: string) {
   const db = await createServerSupabase();
+
   return db.rpc("hide_owned_material_page", { p_material_id: materialId, p_note: note });
 }

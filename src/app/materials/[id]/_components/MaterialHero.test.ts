@@ -12,6 +12,7 @@ describe("MaterialHero", () => {
       manufacturer_name: "旧掲載会社",
       representativeSeller: { id: "maker-id", official_name: "資材オーナー権限を持つメーカー" },
     };
+
     render(createElement(MaterialHero, { material, saved: null }));
     expect(screen.getByRole("link", { name: "資材オーナー権限を持つメーカー" })).toHaveAttribute(
       "href",
@@ -27,6 +28,7 @@ describe("MaterialHero", () => {
       representativeSeller: null,
       manufacturer_verified_at: null,
     };
+
     render(createElement(MaterialHero, { material, saved: null }));
     expect(screen.getByText(material.manufacturer_name)).toBeInTheDocument();
     expect(

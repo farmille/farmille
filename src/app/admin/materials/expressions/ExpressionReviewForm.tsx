@@ -5,7 +5,7 @@ import { startTransition, useActionState } from "react";
 import * as v from "valibot";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
-import { Notice, Textarea, usePersistedInput } from "@/components/form";
+import { Notice, Textarea, PersistedInput } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { reviewMaterialPageAction, reviewManufacturerProfileAction } from "./actions";
 
@@ -24,6 +24,7 @@ export function ExpressionReviewForm({
   const form = useForm({ defaultValues: { note: "" } });
   const note = useStore(form.store, (state) => state.values.note);
   const router = useRouter();
+
   const [{ result, recordedNote }, review, pending] = useActionState(
     async (
       previous: ReviewState,
@@ -32,22 +33,30 @@ export function ExpressionReviewForm({
       const result = await (
         kind === "material" ? reviewMaterialPageAction : reviewManufacturerProfileAction
       )({ versionId, ...input });
+
       if (result.ok) router.refresh();
+
       return { result, recordedNote: result.ok ? input.note : previous.recordedNote };
     },
     { result: null, recordedNote: "" },
   );
-  usePersistedInput({
-    name: "expression-review",
-    schema: v.string(),
-    unsaved: note === recordedNote ? null : note,
-    restore: (value) => form.setFieldValue("note", value),
-  });
+
+  const persistedInput = (
+    <PersistedInput
+      name="expression-review"
+      schema={v.string()}
+      unsaved={note === recordedNote ? null : note}
+      restore={(value) => form.setFieldValue("note", value)}
+    />
+  );
+
   function submit(publish: boolean) {
     startTransition(() => review({ publish, note }));
   }
+
   return (
     <div className={materialPageStack}>
+      {persistedInput}
       <Textarea
         description="メーカーにも表示されます。修正を求める場合は、該当箇所と理由を記入してください。"
         label="確認メモ・修正が必要な箇所"

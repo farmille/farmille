@@ -26,10 +26,12 @@ afterEach(() => {
 it("ロゴのアップロード結果を次の保存へ渡す", async () => {
   const logoUrl = "https://example.com/logo.png";
   vi.spyOn(actions, "uploadLogo").mockResolvedValue({ ok: true, url: logoUrl });
+
   const save = vi.spyOn(actions, "saveManufacturerProfile").mockResolvedValue({
     ok: true,
     versionId: "22222222-2222-4222-8222-222222222222",
   });
+
   render(
     <AppRouterContext.Provider value={router}>
       <ManufacturerProfileEditor

@@ -112,8 +112,10 @@ const iconRecipe = cva({
 });
 
 export type IconName = keyof typeof glyphs;
+
 /** 利用できるアイコン名の一覧（Storybook の全件表示用）。 */
 export const iconNames = Object.keys(glyphs).filter((name): name is IconName => name in glyphs);
+
 export type IconProps = Pick<NonNullable<RecipeVariantProps<typeof iconRecipe>>, "size"> & {
   name: IconName;
   className?: string;
@@ -124,6 +126,7 @@ export type IconProps = Pick<NonNullable<RecipeVariantProps<typeof iconRecipe>>,
 /** サイズをトークンで指定するアイコン。色は親要素から継承する。 */
 export function Icon({ name, size, className, label }: IconProps) {
   const Glyph = glyphs[name];
+
   return (
     <Glyph
       className={cx(iconRecipe({ size }), className)}

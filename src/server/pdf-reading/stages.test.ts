@@ -25,7 +25,9 @@ const STAGES: ReadonlyArray<[v.GenericSchema, Stage]> = [
 
 function stageOf(schema: v.GenericSchema): Stage {
   const found = STAGES.find(([candidate]) => candidate === schema);
+
   if (found === undefined) throw new Error("想定外のスキーマ");
+
   return found[1];
 }
 
@@ -75,6 +77,7 @@ const answers = {
 };
 
 type Behavior = "answer" | "hang" | PdfExtractionError;
+
 type Answers = typeof answers;
 
 /** 段ごとにふるまいを決めた偽の呼び出し。hang は外から打ち切られるまで返さない。 */
@@ -84,35 +87,46 @@ function fakeExtract(
 ) {
   const log: string[] = [];
   const calls: Array<{ stage: Stage; speed: string; aborted: () => boolean }> = [];
+
   const extract: ExtractPdf = async (request) => {
     const stage = stageOf(request.schema);
+
     const usage = {
       model: request.model.model,
       speed: request.model.speed,
       inputTokens: 1000,
       outputTokens: 100,
     };
+
     log.push(`start:${stage}`);
     calls.push({
       stage,
       speed: request.model.speed,
       aborted: () => request.signal?.aborted === true,
     });
+
     if (request.signal?.aborted === true) return { ok: false, error: "deadline", usage: null };
     const behavior = behaviors.get(stage) ?? "answer";
+
     if (behavior === "hang") {
       await new Promise((resolve) => request.signal?.addEventListener("abort", resolve));
       log.push(`end:${stage}`);
+
       return { ok: false, error: "deadline", usage: null };
     }
+
     await new Promise((resolve) => setTimeout(resolve, 0));
     log.push(`end:${stage}`);
+
     if (behavior !== "answer") return { ok: false, error: behavior, usage };
     // extractFromPdf と同じく、スキーマに合わない出力は invalid_output にする
     const parsed = v.safeParse(request.schema, overrides[stage] ?? answers[stage]);
+
     if (!parsed.success) return { ok: false, error: "invalid_output", usage };
+
     return { ok: true, output: parsed.output, usage };
   };
+
   return { extract, log, calls };
 }
 
@@ -133,12 +147,15 @@ describe("readReportPdf", () => {
     const at = (event: string) => log.indexOf(event);
     expect(at("start:single")).toBeLessThan(at("end:skeleton"));
     expect(at("start:skeleton")).toBeLessThan(at("end:single"));
+
     const copyStarts = log.flatMap((event, index) =>
       event === "start:values" || event === "start:plots" ? [index] : [],
     );
+
     const copyEnds = log.flatMap((event, index) =>
       event === "end:values" || event === "end:plots" ? [index] : [],
     );
+
     expect(Math.min(...copyStarts)).toBeGreaterThan(at("end:skeleton"));
     expect(Math.max(...copyStarts)).toBeLessThan(Math.min(...copyEnds));
 
@@ -150,6 +167,7 @@ describe("readReportPdf", () => {
   it("区の説明の組を、組の全区に配る", async () => {
     const { extract } = fakeExtract();
     const result = await readReportPdf(extract, request);
+
     if (!result.ok) throw new Error(result.error);
     expect(result.output.plots.map(({ key, description }) => [key, description])).toEqual([
       ["p1", "定植時に500倍で灌注"],
@@ -162,6 +180,7 @@ describe("readReportPdf", () => {
   it("まとめた結果は読み取りの出力の形を満たし、トークン数は全部の呼び出しの合計になる", async () => {
     const { extract, calls } = fakeExtract();
     const result = await readReportPdf(extract, request);
+
     if (!result.ok) throw new Error(result.error);
     expect(v.is(ReportReadingOutputSchema, result.output)).toBe(true);
     expect(result.output.measurements[0]?.body).toBe("異なる英字間に有意差あり");
@@ -183,6 +202,7 @@ describe("readReportPdf", () => {
     "%s の失敗（%s）で全体を失敗にし、待っているほかの呼び出しを打ち切る",
     async (stage, error) => {
       const copying = stage === "values" || stage === "plots";
+
       const behaviors = new Map<Stage, Behavior>([
         ["skeleton", copying ? "answer" : "hang"],
         ["single", "hang"],
@@ -190,6 +210,7 @@ describe("readReportPdf", () => {
         ["plots", "hang"],
         [stage, error],
       ]);
+
       const { extract, calls } = fakeExtract(behaviors);
       const result = await readReportPdf(extract, request);
       expect(result.ok ? null : result.error).toBe(error);
@@ -201,6 +222,7 @@ describe("readReportPdf", () => {
 
   it("根拠がその段で書けない key を指していれば、出力の不正として失敗にする", async () => {
     const evidence = (ref: string) => [{ ref, quote: "引用", page: 1 }];
+
     const cases = [
       { single: { ...answers.single, evidence: evidence("g1") } },
       { plots: { ...answers.plots, evidence: evidence("g1") } },
@@ -212,6 +234,7 @@ describe("readReportPdf", () => {
         },
       },
     ];
+
     for (const overrides of cases) {
       const result = await readReportPdf(fakeExtract(new Map(), overrides).extract, request);
       expect(result.ok ? null : result.error).toBe("invalid_output");
@@ -230,7 +253,9 @@ describe("readReportPdf", () => {
     const plots = Array.from({ length: 30 }, (_, index) =>
       plot(`p${index + 1}`, index === 0 ? "posted" : "untreated"),
     );
+
     const groups = [{ plotKeys: plots.map(({ key }) => key), description: "", quote: "", page: 1 }];
+
     const overrides = {
       skeleton: {
         ...answers.skeleton,
@@ -247,6 +272,7 @@ describe("readReportPdf", () => {
       plots: { groups, evidence: [] },
       values,
     };
+
     const { extract, calls } = fakeExtract(new Map(), overrides);
     const result = await readReportPdf(extract, request);
     expect(calls.filter(({ stage }) => stage === "values")).toHaveLength(2);
@@ -257,10 +283,12 @@ describe("readReportPdf", () => {
     const cite = (page: number) => ({
       single: { ...answers.single, evidence: [{ ref: "crop", quote: "キャベツ", page }] },
     });
+
     for (const page of [0, 1, 4]) {
       const result = await readReportPdf(fakeExtract(new Map(), cite(page)).extract, request);
       expect(result.ok, `${page}ページ`).toBe(true);
     }
+
     for (const page of [5, 999, 1.8, -1]) {
       const result = await readReportPdf(fakeExtract(new Map(), cite(page)).extract, request);
       expect(result.ok ? null : result.error, `${page}ページ`).toBe("invalid_output");
@@ -271,6 +299,7 @@ describe("readReportPdf", () => {
     const { extract, calls } = fakeExtract(new Map([["single", "hang"]]), {
       skeleton: { ...answers.skeleton, outcome: "no_matching_trial" },
     });
+
     const result = await readReportPdf(extract, request);
     expect(result.ok && result.output.outcome).toBe("no_matching_trial");
     expect(calls.map(({ stage }) => stage).toSorted()).toEqual(["single", "skeleton"]);
@@ -284,6 +313,7 @@ describe("valueChunks", () => {
       measurementKey: "k1",
       heading: "",
     }));
+
   const plots = (count: number) =>
     Array.from({ length: count }, (_, index) => plot(`p${index + 1}`, "untreated"));
 

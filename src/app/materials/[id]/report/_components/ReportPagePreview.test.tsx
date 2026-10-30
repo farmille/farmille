@@ -8,6 +8,7 @@ import { legacyMediaReport } from "./reportStoryFixture";
 describe("プレビューの関連資料", () => {
   it("署名付き URL がある資料は、名前のリンクで開ける", () => {
     const [document] = legacyMediaReport.documents;
+
     if (document === undefined) throw new Error("記入例に関連資料がありません。");
     render(
       <ReportPagePreview

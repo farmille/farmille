@@ -14,12 +14,15 @@ export function generateStaticParams() {
 
 function getDocument(slug: string) {
   const document = legalDocuments.find((entry) => entry.slug === slug);
+
   if (!document) notFound();
+
   return document;
 }
 
 export async function generateMetadata({ params }: Props) {
   const document = getDocument((await params).slug);
+
   return createPageMetadata({
     title: document.title,
     description: document.title,
@@ -29,11 +32,13 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function LegalDocumentPage({ params }: Props) {
   const document = getDocument((await params).slug);
+
   const sections = document.sections.map((section, index) => ({
     ...section,
     id: `section-${index + 1}`,
     html: renderMarkdownToHtml(section.markdown),
   }));
+
   return (
     <>
       <Link href="/legal" className={legalLink}>

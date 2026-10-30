@@ -74,6 +74,7 @@ describe("作目の別名", () => {
 
   it("名前を分けた後のDBの作目にも対応し、新しい作目を作らない", () => {
     const existingId = "00000000-0000-4000-8000-000000000999";
+
     const { crops } = sourceTaxonomy(
       source([tag({ tag_id: "TAG-HORSERADISH", タグ名: "ホースラディッシュ（西洋わさび）" })]),
       snapshot([

@@ -6,8 +6,11 @@ const meta = {
   component: PasskeyLogin,
   args: { next: null },
 } satisfies Meta<typeof PasskeyLogin>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
 
 export const WithDescription: Story = {

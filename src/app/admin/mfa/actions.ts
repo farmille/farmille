@@ -17,6 +17,7 @@ function mfaErrorMessage(code: ErrorCode): string {
   if (code === "invalid_body") {
     return "認証コードが正しくありません。認証アプリに表示された6桁を入れ直してください。";
   }
+
   if (code === "forbidden") {
     return "Supabase 側で TOTP が有効になっていません。プロジェクトの MFA 設定を確認してください。";
   }

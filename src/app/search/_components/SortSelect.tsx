@@ -19,6 +19,7 @@ type SortSelectProps = {
 
 export function SortSelect({ selected, sort, query }: SortSelectProps) {
   const [isPending, startTransition] = useTransition();
+
   const [, setSearch] = useQueryStates(materialSearchParsers, {
     shallow: false,
     scroll: false,

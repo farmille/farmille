@@ -32,6 +32,7 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
   }
 
   const material = await loadMaterialOrNotFound(id);
+
   const [reviewResult, cropsResult, account, publishedPage] = await Promise.all([
     getReviewForEdit(id, reviewId, session.data.userId),
     listReviewCropOptions(),
@@ -41,9 +42,11 @@ export default async function EditReviewPage({ params, searchParams }: EditRevie
 
   if (!reviewResult.ok) {
     if (reviewResult.error === "not_found") notFound();
+
     if (reviewResult.error === "forbidden") redirect(materialPath);
     throw new Error(errorMessageJa[reviewResult.error]);
   }
+
   if (!cropsResult.ok) {
     throw new Error(errorMessageJa[cropsResult.error]);
   }

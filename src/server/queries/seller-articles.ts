@@ -3,6 +3,7 @@ import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
+
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
 
 export type SellerArticleListItem = Pick<
@@ -37,6 +38,7 @@ export async function listSellerArticles(
   sellerId: string,
 ): Promise<Result<SellerArticleListItem[]>> {
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("articles")
     .select("id, title, status, published_at, updated_at, hero_image_url")
@@ -46,10 +48,12 @@ export async function listSellerArticles(
 
   if (error !== null) {
     reportQueryError("自組織記事一覧の取得に失敗", error);
+
     return fail("internal");
   }
 
   const articles: SellerArticleListItem[] = data;
+
   return succeed(articles);
 }
 
@@ -59,6 +63,7 @@ export async function getSellerArticle(
   articleId: string,
 ): Promise<Result<SellerArticleDetail>> {
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("articles")
     .select(
@@ -85,6 +90,7 @@ export async function getSellerArticle(
 
   if (error !== null) {
     reportQueryError("自組織記事の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -98,8 +104,10 @@ export async function getSellerArticle(
   for (const relation of row.article_materials) {
     if (relation.material === null) {
       reportQueryError("記事紐づけ資材が欠落", { articleId: row.id });
+
       return fail("internal");
     }
+
     materials.push(relation.material);
   }
 
@@ -120,6 +128,7 @@ export async function searchMaterialsForArticleLink(
   query: string,
 ): Promise<Result<SellerArticleMaterial[]>> {
   const normalized = query.trim();
+
   if (normalized.length === 0) {
     return succeed([]);
   }
@@ -129,11 +138,13 @@ export async function searchMaterialsForArticleLink(
     .replace(/[%_,.()]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+
   if (safe.length === 0) {
     return succeed([]);
   }
 
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("materials")
     .select("id, name, manufacturer_name")
@@ -145,16 +156,19 @@ export async function searchMaterialsForArticleLink(
 
   if (error !== null) {
     reportQueryError("紐づけ資材の検索に失敗", error);
+
     return fail("internal");
   }
 
   const materials: SellerArticleMaterial[] = data;
+
   return succeed(materials);
 }
 
 /** 記事に紐づく資材の ID。資材ページの再検証に使うので、取得に失敗したら空にする。 */
 export async function listArticleMaterialIds(articleId: string): Promise<string[]> {
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("article_materials")
     .select("material_id")
@@ -162,6 +176,7 @@ export async function listArticleMaterialIds(articleId: string): Promise<string[
 
   if (error !== null || data === null) {
     console.error("[dashboard/articles] 紐づけ資材の再検証用取得に失敗", error);
+
     return [];
   }
 

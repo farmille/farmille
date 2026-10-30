@@ -19,6 +19,7 @@ const meta = {
 } satisfies Meta<typeof Avatar>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 /** 画像が無いとき、表示名から決まるイラストを出す。同じ名前なら必ず同じ絵になる。 */

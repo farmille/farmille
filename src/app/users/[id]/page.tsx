@@ -94,9 +94,12 @@ export default async function UserPage({ params }: UserPageProps) {
     getSessionUser(),
     getProfileDetails(id),
   ]);
+
   if (!details.ok) throw new Error(errorMessageJa[details.error]);
+
   const viewerUserId =
     session !== null && canUseGeneralFeatures(session.accountType) ? session.userId : null;
+
   const isOwnProfile = viewerUserId !== null && viewerUserId === data.profile.userId;
   const reportCount = data.posts.filter((post) => post.kind === "usage_report").length;
 

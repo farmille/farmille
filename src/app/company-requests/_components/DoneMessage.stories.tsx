@@ -11,6 +11,7 @@ const meta = {
 } satisfies Meta<typeof DoneMessage>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Compact: Story = { args: { as: "h1", spacing: "compact" } };

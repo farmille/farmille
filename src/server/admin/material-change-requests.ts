@@ -6,6 +6,7 @@ import { fail, succeed, type Result } from "@/server/result";
 import type { Database } from "@/types/database.types";
 
 type RequestRow = Database["public"]["Tables"]["material_change_requests"]["Row"];
+
 type EvidenceRow = Database["public"]["Tables"]["material_change_request_evidences"]["Row"];
 
 export {
@@ -51,11 +52,15 @@ function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
 
 function mutationError(error: { code?: string | null }): Result<never> {
   if (error.code === "P0002") return fail("not_found");
+
   if (error.code === "23505" || error.code === "40001") return fail("conflict");
+
   if (error.code === "23514" || error.code === "22023" || error.code === "22P02") {
     return fail("invalid_body");
   }
+
   if (error.code === "42501") return fail("forbidden");
+
   return fail("internal");
 }
 
@@ -69,16 +74,20 @@ export async function listMaterialChangeRequests(
         "id, material_id, result_material_id, seller_id, status, change_type, reason, submitted_at",
       )
       .order("submitted_at", { ascending: false });
+
     const { data, error } = await (status === "all" ? base : base.eq("status", status));
 
     if (error !== null) {
       reportError("申請一覧の取得に失敗", error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return succeed([]);
 
     const requestIds = data.map(({ id }) => id);
     const sellerIds = [...new Set(data.map(({ seller_id }) => seller_id))];
+
     const [detailsResult, sellersResult] = await Promise.all([
       supabase
         .from("material_change_request_details")
@@ -89,6 +98,7 @@ export async function listMaterialChangeRequests(
 
     if (detailsResult.error !== null || sellersResult.error !== null) {
       reportError("申請の関連情報取得に失敗", detailsResult.error ?? sellersResult.error);
+
       return fail("internal");
     }
 
@@ -96,13 +106,17 @@ export async function listMaterialChangeRequests(
     const sellerNames = new Map(sellersResult.data.map((row) => [row.id, row.official_name]));
 
     const items: MaterialChangeRequestListItem[] = [];
+
     for (const row of data) {
       const materialName = materialNames.get(row.id);
       const sellerName = sellerNames.get(row.seller_id);
+
       if (materialName === undefined || sellerName === undefined) {
         reportError("申請の参照先が不足", row);
+
         return fail("internal");
       }
+
       items.push({ ...row, materialName, sellerName });
     }
 
@@ -169,11 +183,15 @@ export async function getMaterialChangeRequest(
       productTypes.error ??
       tags.error ??
       evidences.error;
+
     if (error !== null) {
       reportError("申請詳細の取得に失敗", error);
+
       return fail("internal");
     }
+
     if (request.data === null || detail.data === null) return fail("not_found");
+
     if (
       crops.data === null ||
       effects.data === null ||
@@ -184,6 +202,7 @@ export async function getMaterialChangeRequest(
       evidences.data === null
     ) {
       reportError("申請詳細の関連データが空", { requestId });
+
       return fail("internal");
     }
 
@@ -192,10 +211,13 @@ export async function getMaterialChangeRequest(
       .select("official_name")
       .eq("id", request.data.seller_id)
       .maybeSingle();
+
     if (sellerError !== null) {
       reportError("申請元メーカーの取得に失敗", sellerError);
+
       return fail("internal");
     }
+
     if (seller === null) return fail("not_found");
 
     return succeed({
@@ -230,10 +252,13 @@ export async function getMaterialChangeRequest(
 
   if (!requestResult.ok) return requestResult;
   const { materialId, ...data } = requestResult.data;
+
   if (materialId === null) return succeed({ ...data, current: null });
 
   const current = await getAdminMaterial(materialId);
+
   if (!current.ok) return current;
+
   return succeed({ ...data, current: current.data });
 }
 
@@ -250,8 +275,10 @@ export async function approveMaterialChangeRequest(
 
     if (error !== null) {
       reportError("申請の承認に失敗", error);
+
       return mutationError(error);
     }
+
     return succeed({ materialId: data });
   });
 }
@@ -269,8 +296,10 @@ export async function rejectMaterialChangeRequest(
 
     if (error !== null) {
       reportError("申請の却下に失敗", error);
+
       return mutationError(error);
     }
+
     return succeed(null);
   });
 }

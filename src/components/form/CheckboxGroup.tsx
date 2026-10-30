@@ -32,6 +32,7 @@ type CheckboxGroupProps<V extends string> = CheckboxGroupBodyProps<V> & Labeling
 
 export function CheckboxGroup<V extends string>(props: CheckboxGroupProps<V>) {
   const [labeling] = splitLabeling(props);
+
   return (
     <Labeled disabled={props.disabled} kind="group" labeling={labeling} name={props.name}>
       {props.value === undefined ? (
@@ -46,9 +47,12 @@ export function CheckboxGroup<V extends string>(props: CheckboxGroupProps<V>) {
 function CheckboxGroupWithReset<V extends string>(props: CheckboxGroupBodyProps<V>) {
   const field = useFieldContext();
   const restored = useRestoredField(props.name ?? field.name);
+
   const initial =
     restored === undefined ? props.defaultValue : restoredChoices(props.options, restored);
+
   const resetKey = useResetKey((initial ?? []).join("\u001f"));
+
   return <UncontrolledCheckboxGroup<V> key={resetKey} {...props} defaultValue={initial} />;
 }
 
@@ -60,6 +64,7 @@ function UncontrolledCheckboxGroup<V extends string>({
   const initial: string[] = [...(defaultValue ?? [])];
   const form = useForm({ defaultValues: { selection: initial } });
   const selection = useStore(form.store, (state) => state.values.selection);
+
   const picked = useMemo(
     () =>
       props.options
@@ -67,6 +72,7 @@ function UncontrolledCheckboxGroup<V extends string>({
         .map((option) => option.value),
     [props.options, selection],
   );
+
   return (
     <CheckboxGroupBody
       {...props}
@@ -98,6 +104,7 @@ function CheckboxGroupBody<V extends string>({
     const picked = options
       .filter((option) => next.includes(option.value))
       .map((option) => option.value);
+
     onValueChange?.(picked);
   }
 

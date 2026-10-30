@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const listSellerArticles = fn<
   typeof import("@/server/queries/seller-articles").listSellerArticles
 >(async () => ({
@@ -14,6 +15,7 @@ export const listSellerArticles = fn<
     },
   ],
 })).mockName("listSellerArticles");
+
 export const getSellerArticle = fn<
   typeof import("@/server/queries/seller-articles").getSellerArticle
 >(async () => ({
@@ -35,6 +37,7 @@ export const getSellerArticle = fn<
     ],
   },
 })).mockName("getSellerArticle");
+
 export const searchMaterialsForArticleLink = fn<
   typeof import("@/server/queries/seller-articles").searchMaterialsForArticleLink
 >(async () => ({ ok: true, data: [] })).mockName("searchMaterialsForArticleLink");

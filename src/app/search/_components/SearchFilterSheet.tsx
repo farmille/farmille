@@ -42,7 +42,9 @@ export function SearchFilterSheet({
       event.type === "open" ? { open: true, focus: event.focus } : { ...state, open: event.open },
     { open: false, focus: null },
   );
+
   const conditionCount = categories.reduce((sum, category) => sum + category.count, 0);
+
   function show(key: string | null) {
     dispatch({ type: "open", focus: key });
   }

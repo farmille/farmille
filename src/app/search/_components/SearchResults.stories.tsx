@@ -18,10 +18,13 @@ const meta = {
     logic: "",
   },
 } satisfies Meta<typeof SearchResults>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const All: Story = {};
+
 export const ByCrop: Story = {
   args: {
     filters: [{ category: "crop", id: storyIds.tomato }],
@@ -29,6 +32,7 @@ export const ByCrop: Story = {
     logic: "トマト",
   },
 };
+
 export const NoResult: Story = {
   args: {
     makerNames: ["存在しないメーカー"],

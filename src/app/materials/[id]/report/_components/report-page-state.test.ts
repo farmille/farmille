@@ -52,6 +52,7 @@ describe("ページ版の調査項目", () => {
       "ノビテク",
       "ヒートインパクト",
     );
+
     for (const base of [
       expanded,
       {
@@ -65,9 +66,12 @@ describe("ページ版の調査項目", () => {
         plots: base.plots.map((plot, index) => ({ ...plot, scope: String(index + 1) + "0株" })),
         measurements: [...base.measurements, numericMeasurement(base.plots)],
       };
+
       const back = inputWithItems(input, itemsFromInput(input));
+
       const order = (a: UsageReportInput["media"][number], b: UsageReportInput["media"][number]) =>
         a.id.localeCompare(b.id);
+
       expect({ ...back, media: back.media.toSorted(order) }).toEqual({
         ...input,
         media: input.media.toSorted(order),
@@ -80,6 +84,7 @@ describe("ページ版の調査項目", () => {
     const input = { ...filledReport, measurements: [numericMeasurement(filledReport.plots)] };
     const items = itemsFromInput(input);
     const [, second, third] = input.plots;
+
     if (second === undefined || third === undefined) throw new Error("記入例の区が足りません。");
     const plots = [second, third, { ...third, id: crypto.randomUUID() }];
     const next = itemsWithPlots(items, plots);
@@ -95,7 +100,9 @@ describe("ページ版の調査項目", () => {
   it("数値の項目は、どのグラフにも数として読める値が入るまで書きかけ", () => {
     const measurement = numericMeasurement(filledReport.plots);
     const [first] = measurement.graphs;
+
     if (first === undefined) throw new Error("記入例のグラフがありません。");
+
     const withSecond = (value: string) =>
       itemsFromInput({
         ...filledReport,
@@ -113,11 +120,15 @@ describe("ページ版の調査項目", () => {
           },
         ],
       })[0];
+
     const done = (value: string) => {
       const item = withSecond(value);
+
       if (item === undefined) throw new Error("調査項目がありません。");
+
       return reportPageItemDone(item);
     };
+
     expect(done("")).toBe(false);
     expect(done("abc")).toBe(false);
     expect(done("12.5")).toBe(true);
@@ -128,6 +139,7 @@ describe("記入状況", () => {
   it("空のレポートは確認のチェックを含めて未記入", () => {
     const blank = createBlankUsageReport(crypto.randomUUID());
     const items = itemsFromInput(blank);
+
     const missing = reportPageChecks(
       inputWithItems(blank, items),
       { timing: false, privacy: false },
@@ -135,6 +147,7 @@ describe("記入状況", () => {
     )
       .filter((check) => !check.ok)
       .map((check) => check.key);
+
     expect(missing).toContain("timingAck");
     expect(missing).toContain("measurements");
     expect(missing).not.toContain("privacyAck");
@@ -151,19 +164,23 @@ describe("記入状況", () => {
         { id: crypto.randomUUID(), path: "user/report/document.pdf", name: "成績書.pdf" },
       ],
     };
+
     const items = itemsFromInput(input);
     const payload = inputWithItems(input, items);
     expect(reportNeedsMaterialAcks(payload)).toBe(true);
+
     const missing = (checked: UsageReportInput, privacy: boolean) =>
       reportPageChecks(checked, { timing: true, privacy }, false)
         .filter((check) => !check.ok)
         .map((check) => check.key);
+
     expect(missing(payload, false)).toEqual(["privacyAck", "documentsAck"]);
     expect(missing({ ...payload, documentsAck: true }, true)).toEqual([]);
 
     {
       const input = { ...filledReport, methodDetailsAck: true, guidelineAck: true };
       const items = itemsFromInput(input);
+
       const keys = reportPageChecks(
         inputWithItems(input, items),
         { timing: true, privacy: false },
@@ -171,6 +188,7 @@ describe("記入状況", () => {
       )
         .filter((check) => !check.ok)
         .map((check) => check.key);
+
       expect(keys).toEqual(["privacyAck", "documentsAck"]);
     }
   });
@@ -180,6 +198,7 @@ describe("記入状況", () => {
       ...filledReport,
       varieties: [...filledReport.varieties, { id: crypto.randomUUID(), name: "アイコ" }],
     };
+
     const items = itemsFromInput(input);
     const checks = reportPageChecks(inputWithItems(input, items), acks, false);
     expect(checks.find((check) => check.key === "plots")).toMatchObject({
@@ -197,6 +216,7 @@ describe("記入状況", () => {
       documentsAck: true,
       guidelineAck: true,
     };
+
     const items = itemsFromInput(input);
     const payload = inputWithItems(input, items);
     expect(reportPageChecks(payload, acks, false).every((check) => check.ok)).toBe(true);
@@ -210,12 +230,15 @@ describe("記入状況", () => {
       documentsAck: true,
       guidelineAck: true,
     };
+
     const items = itemsFromInput(input);
     const payload = inputWithItems(input, items);
+
     const keys = (required: boolean, checked: boolean) =>
       reportPageChecks({ ...payload, pdfValuesChecked: checked }, acks, required)
         .filter((check) => !check.ok)
         .map((check) => check.key);
+
     expect(keys(false, false)).toEqual([]);
     expect(keys(true, false)).toEqual(["pdfValuesChecked"]);
     expect(keys(true, true)).toEqual([]);
@@ -228,10 +251,12 @@ describe("PDF読み取りで置き換わる入力", () => {
     const blank = { ...createBlankUsageReport(crypto.randomUUID()), measurements: [] };
     const named = withAutoPlotNames(blank, blank, "資材A");
     expect(reportPdfReadingReplaces(named, itemsFromInput(named), "資材A")).toBe(false);
+
     const described = {
       ...named,
       plots: named.plots.map((plot) => ({ ...plot, description: "1,000倍" })),
     };
+
     expect(reportPdfReadingReplaces(described, itemsFromInput(described), "資材A")).toBe(true);
     const numeric = { ...named, measurements: [createReportMeasurement(named.plots)] };
     expect(reportPdfReadingReplaces(numeric, itemsFromInput(numeric), "資材A")).toBe(true);
@@ -259,8 +284,10 @@ describe("続けて選んだ資材の確かめ", () => {
     const chosen: string[] = [];
     const a = requests.start();
     const b = requests.start();
+
     // B の応答が先に返り、A の応答が後から返る
     if (requests.isLatest(b)) chosen.push("B");
+
     if (requests.isLatest(a)) chosen.push("A");
     expect(chosen).toEqual(["B"]);
     const c = requests.start();

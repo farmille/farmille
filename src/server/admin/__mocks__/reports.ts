@@ -1,9 +1,11 @@
 import { fn } from "storybook/test";
+
 export function isContentReportStatus(
   value: string | null | undefined,
 ): value is import("@/server/admin/reports").ContentReportStatus {
   return value === "open" || value === "resolved" || value === "dismissed";
 }
+
 export const listContentReports = fn<typeof import("@/server/admin/reports").listContentReports>(
   async () => ({
     ok: true,
@@ -30,15 +32,18 @@ export const listContentReports = fn<typeof import("@/server/admin/reports").lis
     ],
   }),
 ).mockName("listContentReports");
+
 export const processContentReport = fn<
   typeof import("@/server/admin/reports").processContentReport
 >(async () => ({ ok: true, data: null })).mockName("processContentReport");
+
 export const CONTENT_REPORT_STATUS_LABELS: typeof import("@/server/admin/reports").CONTENT_REPORT_STATUS_LABELS =
   {
     open: "未処理",
     resolved: "解決済み",
     dismissed: "却下",
   };
+
 export const CONTENT_REPORT_TARGET_LABELS: typeof import("@/server/admin/reports").CONTENT_REPORT_TARGET_LABELS =
   {
     review: "感想口コミ",

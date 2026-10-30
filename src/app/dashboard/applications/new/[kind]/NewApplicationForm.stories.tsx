@@ -17,15 +17,19 @@ const meta = {
     recipient: "contact@example.test",
   },
 } satisfies Meta<typeof NewApplicationForm>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
 export const Failed: Story = {
   beforeEach: () => {
     mocked(beginApplication).mockResolvedValue({ ok: false, error: "internal" });
   },
 };
+
 export const Retried: Story = {
   beforeEach: () => {
     mocked(beginApplication)

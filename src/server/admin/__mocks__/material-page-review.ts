@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const listMaterialPageReviews = fn<
   typeof import("@/server/admin/material-page-review").listMaterialPageReviews
 >(async () => ({
@@ -13,6 +14,7 @@ export const listMaterialPageReviews = fn<
     },
   ],
 })).mockName("listMaterialPageReviews");
+
 export const listManufacturerProfileReviews = fn<
   typeof import("@/server/admin/material-page-review").listManufacturerProfileReviews
 >(async () => ({
@@ -25,9 +27,11 @@ export const listManufacturerProfileReviews = fn<
     },
   ],
 })).mockName("listManufacturerProfileReviews");
+
 export const reviewManufacturerProfile = fn<
   typeof import("@/server/admin/material-page-review").reviewManufacturerProfile
 >(async () => ({ ok: true, data: "" })).mockName("reviewManufacturerProfile");
+
 export const reviewMaterialPage = fn<
   typeof import("@/server/admin/material-page-review").reviewMaterialPage
 >(async () => ({ ok: true, data: "" })).mockName("reviewMaterialPage");

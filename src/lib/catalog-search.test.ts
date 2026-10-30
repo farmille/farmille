@@ -24,6 +24,7 @@ const base: CatalogSearch["materials"][number] = {
   material_search_tags: [],
   material_application_methods: [{ method: "葉面散布" }],
 };
+
 const catalog: CatalogSearch = {
   materials: [
     base,
@@ -59,6 +60,7 @@ describe("作物階層を使った資材検索", () => {
     const filters = [{ category: "crop", id: "onion" }] satisfies Parameters<
       typeof cropEvidence
     >[1];
+
     expect(cropEvidence(base, filters, catalog)).toEqual({ direct: ["たまねぎ"], groups: [] });
     expect(cropEvidence(catalog.materials[1], filters, catalog)).toEqual({
       direct: [],
@@ -119,6 +121,7 @@ it("資材ジャンルは同じ分類内をOR、作目との間をANDで絞る",
       catalog.materials[1],
     ],
   };
+
   expect(
     filterCatalog(
       withGenre,
@@ -153,11 +156,13 @@ describe("悩みの同義語と効果分類を使った資材検索", () => {
     aliases: ["暑さ対策", "高温障害"],
     effectIds: ["heat-effect"],
   };
+
   const search: SearchCatalog = {
     filters: [{ ...concern, category: "concern" }],
     makers: [],
     materials: [],
   };
+
   const data: CatalogSearch = {
     ...catalog,
     searchTags: [concern],
@@ -176,6 +181,7 @@ describe("悩みの同義語と効果分類を使った資材検索", () => {
 
   it("同義語の入力と悩みタグの選択から同じ資材を重複なく返す", () => {
     const expected = ["effect", "direct", "both"];
+
     for (const query of ["高温対策", "暑さ対策", "高温障害"]) {
       expect(
         filterCatalog(data, [], [], [], matchSearchCatalog(search, query)).map(
@@ -183,6 +189,7 @@ describe("悩みの同義語と効果分類を使った資材検索", () => {
         ),
       ).toEqual(expected);
     }
+
     expect(
       filterCatalog(data, [{ category: "concern", id: "heat" }], [], []).map(
         (material) => material.id,

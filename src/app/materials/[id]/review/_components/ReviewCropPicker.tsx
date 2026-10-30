@@ -28,13 +28,16 @@ export function ReviewCropPicker({
 }) {
   const form = useForm({ defaultValues: { query: "" } });
   const query = useStore(form.store, (state) => state.values.query);
+
   // Combobox は値の参照が変わるたびに欄のエラーを消すので、選択が変わらない限り同じ配列を渡す
   const selected = useMemo(
     () => value.flatMap((id) => crops.filter((crop) => crop.id === id).map(optionOf)),
     [crops, value],
   );
+
   const unselected = crops.filter((crop) => !value.includes(crop.id));
   const normalizedQuery = query.trim().toLocaleLowerCase("ja");
+
   const suggestions =
     normalizedQuery.length === 0
       ? targetCropIds.flatMap((id) => unselected.filter((crop) => crop.id === id))

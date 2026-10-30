@@ -48,6 +48,7 @@ describe("Fieldset", () => {
         <Input defaultValue="トマト" hideLabel label="作物名" />
       </Fieldset>,
     );
+
     const input = screen.getByRole("textbox", { name: "作物名" });
 
     rerender(

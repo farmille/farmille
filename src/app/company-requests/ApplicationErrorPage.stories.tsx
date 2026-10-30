@@ -7,6 +7,9 @@ const meta = {
   component: ApplicationErrorPage,
   args: { unstable_retry: fn() },
 } satisfies Meta<typeof ApplicationErrorPage>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

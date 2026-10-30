@@ -5,6 +5,7 @@ import { sourceLinks, validateSource, type CatalogSource } from "./source.ts";
 function source(): CatalogSource {
   return { 製品: [], タグマスター: [], 表示値: [], 出典: [], 根拠原文: [], 資材ページのリンク: [] };
 }
+
 const link = {
   product_id: "PRD-000001",
   区分: MATERIAL_LINK_GROUPS[0].label,
@@ -13,6 +14,7 @@ const link = {
   資料種別: "資料",
   source_id: "SRC-1",
 };
+
 it("拡張子のない画像資料とクエリ付き画像を除く", () => {
   const input = source();
   input.資材ページのリンク = [
@@ -26,6 +28,7 @@ it("拡張子のない画像資料とクエリ付き画像を除く", () => {
     "https://example.com/manual.pdf",
   ]);
 });
+
 it("URLの空白表記を統一し、重複資料の具体的な題名を残す", () => {
   const input = source();
   input.資材ページのリンク = [
@@ -35,11 +38,13 @@ it("URLの空白表記を統一し、重複資料の具体的な題名を残す"
   expect(sourceLinks(input).links.get(link.product_id)).toHaveLength(1);
   expect(sourceLinks(input).links.get(link.product_id)?.[0].title).toBe("製品資料");
 });
+
 it("同じURLで分類が競合する場合は判断を要求する", () => {
   const input = source();
   input.資材ページのリンク = [link, { ...link, 区分: MATERIAL_LINK_GROUPS[1].label }];
   expect(() => sourceLinks(input)).toThrow("分類が異なります");
 });
+
 it("参照する製品のない資料を受け付けない", () => {
   const input = source();
   input.資材ページのリンク = [link];

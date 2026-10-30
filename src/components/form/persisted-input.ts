@@ -24,17 +24,22 @@ export function persistKey(name: string, path = window.location.pathname): strin
 
 export function readPersisted<T>(key: string, schema: v.GenericSchema<unknown, T>): T | null {
   let raw: string | null;
+
   try {
     raw = window.sessionStorage.getItem(key);
   } catch (error) {
     Sentry.captureException(error);
+
     return null;
   }
+
   if (raw === null) return null;
   const parsed = v.safeParse(v.pipe(v.string(), v.parseJson(), schema), raw);
+
   if (parsed.success) return parsed.output;
   // 画面の改修で形が変わった古い控えは戻せないので捨てる
   removePersisted(key);
+
   return null;
 }
 
@@ -71,7 +76,9 @@ function persistable(
   ) {
     return false;
   }
+
   if (element.name === "" || element.disabled || element.dataset.persist === "never") return false;
+
   return !(
     element instanceof HTMLInputElement &&
     (element.type === "file" || element.type === "password")
@@ -81,10 +88,12 @@ function persistable(
 /** フォームの今の入力を名前ごとに読む。チェックを外した欄も空配列で残し、戻したときに初期値のチェックを打ち消す。 */
 export function snapshotFields(form: HTMLFormElement): Map<string, string[]> {
   const fields = new Map<string, string[]>();
+
   for (const element of Array.from(form.elements)) {
     if (!persistable(element)) continue;
     const values = fields.get(element.name) ?? [];
     fields.set(element.name, values);
+
     if (
       element instanceof HTMLInputElement &&
       (element.type === "checkbox" || element.type === "radio")
@@ -96,6 +105,7 @@ export function snapshotFields(form: HTMLFormElement): Map<string, string[]> {
       values.push(element.value);
     }
   }
+
   return fields;
 }
 
@@ -104,12 +114,14 @@ export const RestoredFieldsContext = createContext<RestoredFields | null>(null);
 
 export function useRestoredField(name: string | undefined): readonly string[] | undefined {
   const restored = useContext(RestoredFieldsContext);
+
   return name === undefined ? undefined : restored?.get(name);
 }
 
 /** 1つの入力欄に戻す文字列。同じ名前が複数ある欄はどれに戻すか決まらないので戻さない。 */
 export function useRestoredText(name: string | undefined): string | undefined {
   const values = useRestoredField(name);
+
   return values?.length === 1 ? values[0] : undefined;
 }
 
@@ -118,7 +130,7 @@ export function restoredChoices<V extends string>(
   options: readonly Option<V>[],
   restored: readonly string[],
 ): V[] {
-  return options.filter((option) => restored.includes(option.value)).map((option) => option.value);
+  return options.flatMap((option) => (restored.includes(option.value) ? [option.value] : []));
 }
 
 type Stored<T> = { key: string; saved: T | null };
@@ -140,15 +152,19 @@ export function useStoredOnce<T>(
     undefined,
     () => {
       let stored: Stored<T> | undefined;
+
       return () => {
         if (name === false) return undefined;
+
         if (stored === undefined) {
           const key = persistKey(name, path);
           stored = { key, saved: read(key) };
         }
+
         return stored;
       };
     },
   );
+
   return useSyncExternalStore(subscribeNothing, snapshot, notReadOnServer);
 }

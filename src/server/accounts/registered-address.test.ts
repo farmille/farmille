@@ -9,10 +9,13 @@ it("セッションの本人の都道府県だけを返す", async () => {
     ["self", { prefectureCode: 8 }],
     ["other", { prefectureCode: 13 }],
   ]);
+
   const reads: string[] = [];
+
   const store: RegisteredAddressStore = {
     async findByUserId(userId) {
       reads.push(userId);
+
       return succeed(rows.get(userId) ?? null);
     },
   };

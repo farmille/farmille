@@ -16,6 +16,7 @@ const meta = {
 } satisfies Meta<typeof SellerReviewActions>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Applied: Story = {};
@@ -100,7 +101,9 @@ async function openConfirm(canvasElement: HTMLElement, triggerName: string) {
 
 function lastSubmitted(): Record<string, FormDataEntryValue> {
   const call = mocked(sellerOperationAction).mock.lastCall;
+
   if (call === undefined) throw new Error("sellerOperationAction が呼ばれていません");
+
   return Object.fromEntries(call[1]);
 }
 

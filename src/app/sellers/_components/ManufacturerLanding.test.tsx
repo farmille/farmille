@@ -10,22 +10,27 @@ describe("企業向け利用ガイド", () => {
       "/sellers/apply?from=me",
     );
     const faq = screen.getByRole("region", { name: "よくあるご質問" });
+
     for (const target of within(faq).getAllByRole("link")) {
       const href = target.getAttribute("href");
       expect(href).toMatch(/^#/);
       expect(document.querySelector(href ?? "")).not.toBeNull();
     }
+
     expect(document.querySelector('a[href^="/company-requests/removal"]')).toBeNull();
     const delist = document.getElementById("lpGuideDelist");
+
     if (!delist) throw new Error("終売・非公開の案内がありません");
     expect(within(delist).getByRole("link", { name: "contact@farmille.com" })).toHaveAttribute(
       "href",
       "mailto:contact@farmille.com",
     );
     const contents = screen.getByRole("navigation", { name: "利用ガイドの目次" });
+
     for (const link of within(contents).getAllByRole("link")) {
       const target = link.getAttribute("href");
       expect(target).toMatch(/^#/);
+
       if (!target) throw new Error("目次にリンク先がありません");
       expect(document.getElementById(target.slice(1))).not.toBeNull();
     }

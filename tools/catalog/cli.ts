@@ -17,25 +17,32 @@ const { values, positionals } = parseArgs({
     out: { type: "string" },
   },
 });
+
 if (positionals[0] === "snapshot") process.stdout.write(snapshotQuery + ";\n");
 else if (positionals[0] === "plan") {
   if (!values.source || !values.snapshot || !values.out)
     throw new Error("--source、--snapshot、--out を指定してください。");
+
   const source = validateSource(
     v.parse(SourceSchema, JSON.parse(await readFile(values.source, "utf8"))),
   );
+
   const snapshot = v.parse(SnapshotSchema, JSON.parse(await readFile(values.snapshot, "utf8")));
+
   const productMap = v.parse(
     ProductMapSchema,
     JSON.parse(
       await readFile(values.map ?? new URL("./product-map.json", import.meta.url), "utf8"),
     ),
   );
+
   const resolutions = values.resolutions
     ? v.parse(ResolutionsSchema, JSON.parse(await readFile(values.resolutions, "utf8")))
     : [];
+
   const plan = planCatalog(source, snapshot, new Map(Object.entries(productMap)), resolutions);
   await mkdir(values.out, { recursive: true });
+
   const report = {
     runId: plan.runId,
     sourceHash: plan.sourceHash,
@@ -57,8 +64,10 @@ else if (positionals[0] === "plan") {
     retired: plan.retired.map((row) => ({ id: row.id, name: row.fields.name })),
     conflicts: plan.conflicts,
   };
+
   await writeFile(resolve(values.out, "report.json"), JSON.stringify(report, null, 2) + "\n");
   const output = resolve(values.out, "apply.sql");
+
   if (plan.conflicts.length) {
     await rm(output, { force: true });
     process.exitCode = 2;

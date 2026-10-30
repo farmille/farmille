@@ -7,7 +7,9 @@ import { ViewerAvatar } from "./ViewerAvatar";
 /** 閲覧者のセッションから、PCヘッダーのアカウント欄を決める。 */
 export async function getViewerAccount(): Promise<AppBarAccount> {
   const session = await getSessionUser();
+
   if (session === null) return { kind: "guest" };
+
   return {
     kind: "member",
     avatar: <ViewerAvatar session={session} />,

@@ -1,7 +1,12 @@
 "use client";
 
+import { useReducer } from "react";
+
+import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 import {
+  PROFILE_SAVED_SEARCH,
   onboardingShowsOn,
+  onboardingStepAfterNavigation,
   onboardingSkipHref,
   skipOnboardingSection,
   isMaterialPage,
@@ -10,17 +15,23 @@ import {
 import {
   useOnboardingTour,
   useTourTarget,
-  useCollapsed,
-  useOnboardingSearchIntro,
-  useOnboardingProfileProgress,
-  useOnboardingReportSection,
   pendingUserId,
+  readStep,
+  saveStep,
+  takeBackgroundTap,
   finishOnboarding,
   type OnboardingTourWithProps,
 } from "@/lib/hooks/use-onboarding-tour";
 
 const SECTION_OFFSET = 72;
+
+// 実証詳細レポートの見出しが画面の上から半分より上に来たら、見たものとして次へ進む
+const SECTION_SEEN = 0.5;
+
+// 最後のお礼を出しておく時間
+const THANKS_SHOWN = 1600;
 const SEARCH_BOX = "search-box";
+
 const FINISH_BODY =
   "使用したことのある資材があれば、感想口コミを投稿してください。投稿するときは、画面上部の「投稿する」（スマートフォンでは画面下の「＋」）を押します。";
 
@@ -39,24 +50,95 @@ export function OnboardingTour() {
 
 /** 案内を待つ利用者の判定と、終えた印の消し方を受け取って案内を出す。 */
 export function OnboardingTourWith({ findPendingUser, finish }: OnboardingTourWithProps) {
-  const { pathname, step, thanks, go, end, complete, finishing, push } = useOnboardingTour({
-    findPendingUser,
-    finish,
-  });
-  if (thanks !== null) return <TourSaved title="ありがとうございました" />;
-  if (step === null || !onboardingShowsOn(step, pathname)) return null;
+  const tour = useOnboardingTour(finish);
+  const { pathname, userId, step, thanks, go, end, complete, finishing, push } = tour;
+
   return (
-    <TourStep
-      key={step}
-      step={step}
-      pathname={pathname}
-      go={go}
-      end={end}
-      complete={complete}
-      finishing={finishing}
-      push={push}
-    />
+    <>
+      <TourSync
+        key={`${userId}:${step}:${pathname}`}
+        userId={userId}
+        step={step}
+        pathname={pathname}
+        findPendingUser={findPendingUser}
+        setUserId={tour.setUserId}
+      />
+      {thanks !== null ? (
+        <TourThanks next={thanks.next} leave={tour.leaveThanks} />
+      ) : step !== null && onboardingShowsOn(step, pathname) ? (
+        <TourStep
+          key={`${userId}:${step}`}
+          step={step}
+          pathname={pathname}
+          go={go}
+          end={end}
+          complete={complete}
+          finishing={finishing}
+          push={push}
+        />
+      ) : null}
+    </>
   );
+}
+
+/**
+ * 利用者・段階・画面が変わるたびに作り直し、案内の進み具合をアカウントと画面に合わせる。
+ * 画面には何も出さない。
+ */
+function TourSync({
+  userId,
+  step,
+  pathname,
+  findPendingUser,
+  setUserId,
+}: {
+  userId: string | null;
+  step: OnboardingStep | null;
+  pathname: string;
+  findPendingUser: () => Promise<string | null>;
+  setUserId: (id: string | null) => void;
+}) {
+  useMountEffect(() => {
+    // 画面を移ったことで進む段階（資材ページが開いた・投稿画面が開いた）
+    if (step !== null && userId !== null) {
+      const after = onboardingStepAfterNavigation(step, pathname);
+
+      if (after !== null) saveStep(userId, after);
+    }
+
+    // 案内を待っているアカウントで、このブラウザにまだその人の進み具合が無ければ、ようこそから始める。
+    // 終えた直後に古い判定で始め直さないよう、取り直した判定だけで決める
+    let alive = true;
+    void findPendingUser().then((id) => {
+      if (!alive) return;
+      setUserId(id);
+
+      if (id !== null && readStep(id) === null) saveStep(id, "welcome");
+    });
+
+    return () => {
+      alive = false;
+    };
+  });
+
+  return null;
+}
+
+/** お礼を短く出してから、その資材の資材ページへ移る。 */
+function TourThanks({
+  next,
+  leave,
+}: {
+  next: string | null;
+  leave: (next: string | null) => void;
+}) {
+  useMountEffect(() => {
+    const timer = window.setTimeout(() => leave(next), THANKS_SHOWN);
+
+    return () => window.clearTimeout(timer);
+  });
+
+  return <TourSaved title="ありがとうございました" />;
 }
 
 type TourStepProps = {
@@ -70,15 +152,17 @@ type TourStepProps = {
   push: (href: string) => void;
 };
 
-/** 段階ごとの案内。段階が変わるたびに作り直し、たたんだ状態などを持ち越さない。 */
+/** 段階ごとの案内。段階か利用者が変わるたびに作り直し、たたんだ状態や go の宛先を持ち越さない。 */
 function TourStep({ step, pathname, go, end, complete, finishing, push }: TourStepProps) {
   // 次の段階の案内が出る画面へ移り、スキップした画面に取り残さない
   const skip = () => {
     const next = skipOnboardingSection(step);
     go(next);
     const href = onboardingSkipHref(next, pathname);
+
     if (href !== null) push(href);
   };
+
   switch (step) {
     case "welcome":
       return (
@@ -184,21 +268,42 @@ function SearchIntroStep({
   end,
 }: StepControls & Pick<TourStepProps, "pathname" | "go" | "push">) {
   const onSearch = pathname === "/search";
-  useOnboardingSearchIntro(onSearch, go);
+
   return (
-    <TourSheet
-      title="資材の検索"
-      body="資材名やメーカー名、作物、悩みなどのキーワードで資材を探せます。"
-      section={{ current: 2, total: 3 }}
-      primaryLabel={onSearch ? "次へ" : "検索画面へ"}
-      onPrimary={() => {
-        go("search");
-        if (!onSearch) push("/search");
-      }}
-      onSkipStep={skip}
-      onEnd={end}
-    />
+    <>
+      {onSearch ? <SearchBackgroundTap go={go} /> : null}
+      <TourSheet
+        title="資材の検索"
+        body="資材名やメーカー名、作物、悩みなどのキーワードで資材を探せます。"
+        section={{ current: 2, total: 3 }}
+        primaryLabel={onSearch ? "次へ" : "検索画面へ"}
+        onPrimary={() => {
+          go("search");
+
+          if (!onSearch) push("/search");
+        }}
+        onSkipStep={skip}
+        onEnd={end}
+      />
+    </>
   );
+}
+
+/** 検索画面で、シートの外のどこかを押したら検索の段階へ進める。 */
+function SearchBackgroundTap({ go }: { go: (next: OnboardingStep) => void }) {
+  useMountEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      if (takeBackgroundTap(event, document.querySelector(`[data-tour="${SEARCH_BOX}"]`))) {
+        go("search");
+      }
+    };
+
+    document.addEventListener("click", onClick, true);
+
+    return () => document.removeEventListener("click", onClick, true);
+  });
+
+  return null;
 }
 
 function TargetTip({
@@ -219,6 +324,7 @@ function TargetTip({
   pulse?: boolean;
 }) {
   const element = useTourTarget(target);
+
   return (
     <TourTip
       target={element}
@@ -254,23 +360,56 @@ function InputStep({
   section: number;
 }) {
   const element = useTourTarget(target);
-  const [collapsed, collapse] = useCollapsed(element, startCollapsed);
+  // 説明を読んだら「入力する」か、欄を直接触った時点で説明をたたみ、画面の下の帯に切り替える
+  const [collapsed, fold] = useReducer(() => true, startCollapsed);
+
+  const collapse = () => {
+    fold();
+    element?.querySelector<HTMLElement>("input:not([type=hidden]), textarea")?.focus();
+  };
+
   if (collapsed) {
     return (
       <TourBar section={section} message={message} action={action} onSkipStep={skip} onEnd={end} />
     );
   }
+
   return (
-    <TourTip
-      target={element}
-      title={title}
-      body={body}
-      section={section}
-      primary={{ label: "入力する", onClick: collapse }}
-      onSkipStep={skip}
-      onEnd={end}
-    />
+    <>
+      {element !== null ? <FoldOnTouch target={element} fold={fold} /> : null}
+      <TourTip
+        target={element}
+        title={title}
+        body={body}
+        section={section}
+        primary={{ label: "入力する", onClick: collapse }}
+        onSkipStep={skip}
+        onEnd={end}
+      />
+    </>
   );
+}
+
+/** 説明を出している間、欄を触るか吹き出しの外を押したら説明をたたむ。 */
+function FoldOnTouch({ target, fold }: { target: Element; fold: () => void }) {
+  useMountEffect(() => {
+    // この段階の目的は入力なので、吹き出しの外のどこを押しても、説明をたたんで入力欄を開く
+    const onClick = (event: MouseEvent) => {
+      if (takeBackgroundTap(event, target)) fold();
+    };
+
+    target.addEventListener("focusin", fold);
+    target.addEventListener("pointerdown", fold);
+    document.addEventListener("click", onClick, true);
+
+    return () => {
+      target.removeEventListener("focusin", fold);
+      target.removeEventListener("pointerdown", fold);
+      document.removeEventListener("click", onClick, true);
+    };
+  });
+
+  return null;
 }
 
 /** プロフィール：栽培作目を示し、帯か画面の「保存する」で保存できたら、保存したことを伝えて次の段階へ。 */
@@ -287,8 +426,23 @@ function ProfileStep({
   go: (next: OnboardingStep) => void;
   push: (href: string) => void;
 }) {
-  const saved = useOnboardingProfileProgress(step, pathname, go, push);
-  if (pathname === "/me") return saved ? <TourSaved title="プロフィールを保存しました" /> : null;
+  // 案内を読まずに画面の「保存する」を押した場合も含め、プロフィールのフォームを送ったら保存待ちにする
+  useMountEffect(() => {
+    const onSubmit = (event: SubmitEvent) => {
+      if (event.target instanceof Element && event.target.closest('[data-tour="profile-form"]')) {
+        go("profileSaving");
+      }
+    };
+
+    document.addEventListener("submit", onSubmit, true);
+
+    return () => document.removeEventListener("submit", onSubmit, true);
+  });
+
+  if (pathname === "/me") {
+    return step === "profileSaving" ? <ProfileSaved go={go} push={push} /> : null;
+  }
+
   return (
     <InputStep
       target="profile-crops"
@@ -310,6 +464,41 @@ function ProfileStep({
   );
 }
 
+/**
+ * 保存できるとマイページへ移る。そこで保存したことを伝えてから、検索画面へ移って次の段階の案内を出す。
+ * 保存できずにキャンセルなどでマイページへ移ったときは、プロフィールの段階へ戻す
+ */
+function ProfileSaved({
+  go,
+  push,
+}: {
+  go: (next: OnboardingStep) => void;
+  push: (href: string) => void;
+}) {
+  const [saved, show] = useReducer(() => true, false);
+  useMountEffect(() => {
+    if (window.location.search !== PROFILE_SAVED_SEARCH) {
+      go("profile");
+
+      return;
+    }
+
+    const showing = window.setTimeout(show, 0);
+
+    const leave = window.setTimeout(() => {
+      go("searchIntro");
+      push("/search");
+    }, 1900);
+
+    return () => {
+      window.clearTimeout(showing);
+      window.clearTimeout(leave);
+    };
+  });
+
+  return saved ? <TourSaved title="プロフィールを保存しました" /> : null;
+}
+
 /** 実証詳細レポートの見出しを、画面の上のほう（固定の見出しの下）まで送る。 */
 function scrollToSection(section: Element) {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -320,19 +509,47 @@ function scrollToSection(section: Element) {
 /** 資材ページ：実証詳細レポートの見出しが見えるところまで下へスクロールしたら、感想口コミの段階へ。 */
 function ScrollStep({ go, skip, end }: StepControls & { go: (next: OnboardingStep) => void }) {
   const reports = useTourTarget("material-reports");
-  useOnboardingReportSection(reports, go);
+
   return (
-    <TourBar
-      section={2}
-      title="画面の下に、実証詳細レポートと感想口コミがあります。"
-      message="下へスクロールして、製品情報と合わせて確認してください。"
-      scrollHint={
-        reports === null
-          ? undefined
-          : { label: "下へスクロール", onClick: () => scrollToSection(reports) }
-      }
-      onSkipStep={skip}
-      onEnd={end}
-    />
+    <>
+      {reports !== null ? <ReportSectionSeen reports={reports} go={go} /> : null}
+      <TourBar
+        section={2}
+        title="画面の下に、実証詳細レポートと感想口コミがあります。"
+        message="下へスクロールして、製品情報と合わせて確認してください。"
+        scrollHint={
+          reports === null
+            ? undefined
+            : { label: "下へスクロール", onClick: () => scrollToSection(reports) }
+        }
+        onSkipStep={skip}
+        onEnd={end}
+      />
+    </>
   );
+}
+
+/** 実証詳細レポートの見出しが画面の上半分に来たら、感想口コミの段階へ進める。 */
+function ReportSectionSeen({
+  reports,
+  go,
+}: {
+  reports: Element;
+  go: (next: OnboardingStep) => void;
+}) {
+  useMountEffect(() => {
+    const onScroll = () => {
+      if (reports.getBoundingClientRect().top < window.innerHeight * SECTION_SEEN)
+        go("reviewIntro");
+    };
+
+    // スクロール位置が戻されて、目印が出た時点でもう見えていることもある。
+    // 読み込み直後（まだスクロールしていない）は上の要素が描き終わっておらず位置が浅く出るので、判定しない
+    if (window.scrollY > 0) onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  });
+
+  return null;
 }

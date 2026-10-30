@@ -45,6 +45,7 @@ export default async function MeSavedComparePage({ searchParams }: ComparePagePr
   }
 
   const params = await searchParams;
+
   const ids = (params.ids ?? "")
     .split(",")
     .map((id) => id.trim())

@@ -30,7 +30,9 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
   }
 
   const material = await loadMaterialOrNotFound(id);
+
   if (material.publication_status !== "published") notFound();
+
   const [cropsResult, existingResult, account, publishedPage] = await Promise.all([
     listReviewCropOptions(),
     findOwnReviewIdByMaterial(id, session.data.userId),
@@ -41,9 +43,11 @@ export default async function NewReviewPage({ params }: NewReviewPageProps) {
   if (!cropsResult.ok) {
     throw new Error(errorMessageJa[cropsResult.error]);
   }
+
   if (!existingResult.ok) {
     throw new Error(errorMessageJa[existingResult.error]);
   }
+
   if (existingResult.data !== null) {
     redirect(`${materialPath}/review/${existingResult.data}/edit?existing=1`);
   }

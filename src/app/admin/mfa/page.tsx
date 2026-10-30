@@ -30,6 +30,7 @@ export default async function AdminMfaPage({
   if (!state.ok) {
     throw new Error(errorMessageJa[state.error]);
   }
+
   if (state.data.currentLevel === "aal2") {
     redirect(target);
   }

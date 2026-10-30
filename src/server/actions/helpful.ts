@@ -37,6 +37,7 @@ export async function toggleHelpfulAction(
     if (session.error === "unauthorized") {
       redirect(`/login?next=${encodeURIComponent(currentPath)}`);
     }
+
     throw new Error(errorMessageJa[session.error]);
   }
 

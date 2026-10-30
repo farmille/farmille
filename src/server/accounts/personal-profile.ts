@@ -27,17 +27,22 @@ export async function createPersonalProfile(
   input: v.InferOutput<typeof PersonalProfileSchema>,
 ): Promise<Result<null>> {
   const session = authorizeGeneralUser(await getSessionUser());
+
   if (!session.ok) return session;
   const supabase = await createServerSupabase();
+
   const existing = await supabase
     .from("profiles")
     .select("user_id")
     .eq("user_id", session.data.userId)
     .maybeSingle();
+
   if (existing.error !== null) {
     console.error("プロフィールの確認に失敗しました", existing.error);
+
     return fail("internal");
   }
+
   if (existing.data !== null) return succeed(null);
 
   const { error } = await supabase.from("profiles").insert({
@@ -45,10 +50,13 @@ export async function createPersonalProfile(
     handle: input.handle,
     standpoint: input.standpoint,
   });
+
   if (error !== null) {
     if (error.code === "23505") return fail("handle_taken");
     console.error("プロフィールの作成に失敗しました", error);
+
     return fail("internal");
   }
+
   return succeed(null);
 }

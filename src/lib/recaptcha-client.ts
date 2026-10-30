@@ -12,7 +12,9 @@ const scripts = new Map<string, Promise<void>>();
 /** reCAPTCHA v3 の script を読み込む。使う画面を開いたときだけ呼ぶ。 */
 export function loadRecaptcha(siteKey: string): Promise<void> {
   const loaded = scripts.get(siteKey);
+
   if (loaded !== undefined) return loaded;
+
   const loading = new Promise<void>((resolve, reject) => {
     const script = document.createElement("script");
     script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(siteKey)}`;
@@ -25,7 +27,9 @@ export function loadRecaptcha(siteKey: string): Promise<void> {
     });
     document.head.append(script);
   });
+
   scripts.set(siteKey, loading);
+
   return loading;
 }
 
@@ -33,7 +37,9 @@ export function loadRecaptcha(siteKey: string): Promise<void> {
 export async function executeRecaptcha(siteKey: string, action: string): Promise<string> {
   await loadRecaptcha(siteKey);
   const { grecaptcha } = window;
+
   if (grecaptcha === undefined) throw new Error("reCAPTCHA を読み込めませんでした。");
   await new Promise<void>((resolve) => grecaptcha.ready(resolve));
+
   return grecaptcha.execute(siteKey, { action });
 }

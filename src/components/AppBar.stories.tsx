@@ -8,6 +8,7 @@ const meta = {
 } satisfies Meta<typeof AppBar>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Home: Story = {

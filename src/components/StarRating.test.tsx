@@ -9,6 +9,7 @@ import { StarRating } from "./StarRating";
 
 function Rating({ initial = 0 }: { initial?: number }) {
   const [value, setValue] = useReducer((_current: number, next: number) => next, initial);
+
   return <StarRating mode="input" onChange={setValue} value={value} />;
 }
 
@@ -32,8 +33,10 @@ describe("StarRating（入力）", () => {
   it("Fieldset の name で値を送り、必須なら未選択の送信を止める", async () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
+
     function ReviewRating() {
       const [value, setValue] = useReducer((_current: number, next: number) => next, 0);
+
       return (
         <Form
           persist={false}
@@ -49,6 +52,7 @@ describe("StarRating（入力）", () => {
         </Form>
       );
     }
+
     render(<ReviewRating />);
 
     expect(screen.getByRole("radiogroup", { name: "総合評価" })).toHaveAttribute(

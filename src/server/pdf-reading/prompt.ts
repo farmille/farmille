@@ -18,6 +18,7 @@ function list(values: readonly string[]): string {
 
 function materialSection(material: ReadingMaterial): string {
   const names = [material.name, ...material.aliases].filter((name) => name.trim() !== "");
+
   return `# 投稿した資材
 - 名前：${names.join("、")}
 - メーカー：${material.manufacturerName}`;
@@ -89,12 +90,14 @@ ${APPLICATION_TIMINGS.map((name, index) => `- ${index}：${name}`).join("\n")}
 function plotList(skeleton: Skeleton): string {
   const variety = new Map(skeleton.varieties.map(({ key, name }) => [key, name]));
   const compared = new Map(skeleton.comparedMaterials.map(({ key, name }) => [key, name]));
+
   const used = (plot: Skeleton["plots"][number]) =>
     plot.treatment === "posted"
       ? "投稿した資材"
       : plot.treatment === "untreated"
         ? "資材なし（無処理・対照）"
         : `比較した資材「${compared.get(plot.comparedMaterialKey) ?? ""}」`;
+
   return skeleton.plots
     .map(
       (plot) =>
@@ -109,16 +112,20 @@ function plotList(skeleton: Skeleton): string {
  */
 export function valueInstructions(skeleton: Skeleton, graphs: Skeleton["graphs"]): string {
   const measurement = new Map(skeleton.measurements.map((item) => [item.key, item]));
+
   const graphList = graphs
     .map((graph) => {
       const owner = measurement.get(graph.measurementKey);
       const unit = owner?.unit ? `（単位：${owner.unit}）` : "";
+
       return `- ${graph.key}：「${owner?.name ?? ""}」${unit}${graph.heading ? `・${graph.heading}` : ""}`;
     })
     .join("\n");
+
   const owners = [...new Set(graphs.map(({ measurementKey }) => measurementKey))]
     .map((key) => `- ${key}：${measurement.get(key)?.name ?? ""}`)
     .join("\n");
+
   return `${INTRO}次の区とグラフについて、区ごとの値をPDFから書き写す。
 
 # 区
@@ -146,6 +153,7 @@ export function plotInstructions(skeleton: Skeleton): string {
     ...skeleton.varieties.map(({ key, name }) => `- ${key}：品種「${name}」`),
     ...skeleton.comparedMaterials.map(({ key, name }) => `- ${key}：比較した資材「${name}」`),
   ];
+
   return `${INTRO}次の区について説明を書き、区・品種・比較した資材の根拠を写す。
 
 # 区

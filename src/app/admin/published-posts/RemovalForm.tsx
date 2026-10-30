@@ -15,11 +15,15 @@ const formStyle = css({ display: "grid", gap: "3", mt: "3" });
 export function RemovalForm({ id, type }: { id: string; type: "review" | "usage_report" }) {
   const form = useForm({ defaultValues: { confirmed: false } });
   const confirmed = useStore(form.store, (state) => state.values.confirmed);
+
   const [state, action] = useActionState(async (previous: AdminActionState, data: FormData) => {
     const result = await removePublishedPostAction(previous, data);
+
     if (result.status === "done") form.reset();
+
     return result;
   }, initialAdminActionState);
+
   return (
     <Collapsible>
       <CollapsibleTrigger>公開から削除する</CollapsibleTrigger>

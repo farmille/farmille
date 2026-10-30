@@ -27,6 +27,7 @@ const meta = {
 } satisfies Meta<typeof ReportCard>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 /** 一覧フル幅（既定 layout）。カバー未設定時はプレースホルダーアイコンが出る。 */

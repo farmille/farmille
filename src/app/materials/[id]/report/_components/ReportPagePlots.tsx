@@ -116,11 +116,15 @@ function Adder({
   const form = useForm({ defaultValues: { value: "" } });
   const value = useStore(form.store, (state) => state.values.value);
   const setValue = (next: string) => form.setFieldValue("value", next);
+
   const add = () => {
     const name = value.trim();
+
     if (name === "" || disabled) return;
+
     if (onAdd(name)) setValue("");
   };
+
   return (
     <div className={adder}>
       <Input
@@ -158,20 +162,25 @@ function PlotAdder({
     value: variety?.id ?? NO_VARIETY,
     label: variety === null ? "品種なし" : variety.name.trim() || "（品種名未入力）",
   }));
+
   const defaults: PlotSelection = {
     variety: null,
     material: null,
   };
+
   const form = useForm({ defaultValues: defaults });
   const { variety, material } = useStore(form.store, (state) => state.values);
   const setVariety = (next: string | null) => form.setFieldValue("variety", next);
   const setMaterial = (next: string | null) => form.setFieldValue("material", next);
+
   // 選んでいた品種や資材を外したら、先頭の品種と投稿した資材に戻す
   const varietyValue =
     varieties.find((option) => option.value === variety)?.value ?? varieties[0]?.value;
+
   const chosen =
     plan.materials.find((item) => item.key === material) ??
     plan.materials.find((item) => item.treatment.kind === "posted");
+
   return (
     <>
       <p className={fieldLabel}>区を1つ足す</p>
@@ -236,19 +245,25 @@ export function ReportPagePlots({
     (_current: Refusal | null, next: Refusal | null) => next,
     null,
   );
+
   const change = (next: UsageReportInput) => {
     setRefused(null);
     onChange(next);
   };
+
   // 区を足す操作は、要る区が上限に収まらないと、渡した input をそのまま返す
   const add = (next: UsageReportInput, what: Refusal) => {
     if (next === input) {
       setRefused(what);
+
       return false;
     }
+
     change(next);
+
     return true;
   };
+
   const refusal = (what: Refusal) =>
     refused === what && (
       <p className={limitError} role="alert">
@@ -256,10 +271,12 @@ export function ReportPagePlots({
         を超えるため、足せません。区を減らしてから足してください。
       </p>
     );
+
   const plan = plotPlan(input, postedName);
   const layout = reportPlotLayout(input, postedName);
   const common = plan.showMatrix || input.commonPlotDescription.trim() !== "";
   const numbered = new Map(input.plots.map((plot, index) => [plot.id, index + 1]));
+
   const update = (id: string, patch: Partial<Pick<Plot, "name" | "description">>) =>
     change({
       ...input,
@@ -268,12 +285,15 @@ export function ReportPagePlots({
 
   const plotCard = (plot: Plot, series: ReportPlotSeries) => {
     const number = numbered.get(plot.id) ?? 0;
+
     const example = common
       ? EXAMPLES.difference
       : plot.treatment?.kind === "untreated"
         ? EXAMPLES.untreated
         : EXAMPLES.used;
+
     const described = plot.description.trim() !== "" || input.commonPlotDescription.trim() !== "";
+
     return (
       <div key={plot.id} className={plotStyle}>
         <div className={plotHead}>
@@ -302,6 +322,7 @@ export function ReportPagePlots({
               error={missing ? "区で使った資材を選んでください" : undefined}
               onValueChange={(key) => {
                 const material = plan.materials.find((item) => item.key === key);
+
                 if (material !== undefined)
                   change(
                     reportPlotEdits.setTreatment(input, plot.id, material.treatment, postedName),
@@ -353,6 +374,7 @@ export function ReportPagePlots({
           <div className={chips}>
             {input.varieties.map((variety) => {
               const name = variety.name.trim() || "（品種名未入力）";
+
               return input.varieties.length > 1 ? (
                 <Chip
                   key={variety.id}
@@ -389,6 +411,7 @@ export function ReportPagePlots({
               {role !== name && <span className={chipRole}>（{role}）</span>}
             </>
           );
+
           return treatment.kind === "compared" ? (
             <Chip
               key={key}
@@ -446,11 +469,13 @@ export function ReportPagePlots({
               <tbody>
                 {plan.rows.map((variety) => {
                   const varietyName = variety === null ? "品種なし" : variety.name.trim() || "品種";
+
                   return (
                     <tr key={variety?.id ?? "none"}>
                       <th scope="row">{varietyName}</th>
                       {plan.materials.map((material) => {
                         const checked = plan.checked(variety?.id ?? null, material.treatment);
+
                         return (
                           <td key={material.key}>
                             <Checkbox

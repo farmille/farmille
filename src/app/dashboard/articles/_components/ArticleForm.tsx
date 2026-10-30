@@ -3,9 +3,10 @@
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm, useStore } from "@tanstack/react-form";
-import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
-import { useArticleCreatedNavigation, useArticleSearchFocus } from "@/lib/hooks/use-article-editor";
+import { PersistedInput } from "@/components/form";
+import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import {
   useActionState,
@@ -14,6 +15,7 @@ import {
   useReducer,
   useTransition,
   type ChangeEvent,
+  type RefObject,
 } from "react";
 import * as v from "valibot";
 
@@ -88,8 +90,18 @@ type ArticleFormBaseProps = {
   initialStatus?: "draft" | "published";
   initialMaterials?: SellerArticleMaterial[];
 };
+
 type ArticleFormProps = ArticleFormBaseProps &
   ({ mode: "create"; articleId?: never } | { mode: "edit"; articleId: string });
+
+/** 無効にしていた検索欄へ、候補が出たときにフォーカスを戻す。候補が変わるたびに作り直す（key）。 */
+function FocusOnMount({ target }: { target: RefObject<HTMLInputElement | null> }) {
+  useMountEffect(() => {
+    target.current?.focus();
+  });
+
+  return null;
+}
 
 function isImageFile(file: File): file is File & { type: keyof typeof fileExtensionByType } {
   return file.type in fileExtensionByType;
@@ -116,6 +128,7 @@ export function ArticleForm({
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const bodyImageInputRef = useRef<HTMLInputElement>(null);
   const statusInputRef = useRef<HTMLInputElement>(null);
+
   const form = useForm({
     defaultValues: {
       title: initialTitle,
@@ -125,18 +138,22 @@ export function ArticleForm({
       materialQuery: "",
     },
   });
+
   const { title, body, heroImageUrl, materials, materialQuery } = useStore(
     form.store,
     (state) => state.values,
   );
+
   const [editorTab, setEditorTab] = useReducer(
     (_: "write" | "preview", next: "write" | "preview") => next,
     "write",
   );
+
   const previewHtml = useMemo(
     () => (editorTab === "preview" ? renderMarkdownToHtml(body) : ""),
     [body, editorTab],
   );
+
   const [materialHits, updateMaterialHits] = useReducer(
     (
       current: SellerArticleMaterial[],
@@ -145,12 +162,15 @@ export function ArticleForm({
       action.type === "replace" ? action.items : current.filter((item) => item.id !== action.id),
     [],
   );
+
   const [uploadError, setUploadError] = useReducer(
     (_: string | null, next: string | null) => next,
     null,
   );
+
   const [uploading, setUploading] = useReducer((_: boolean, next: boolean) => next, false);
   const [searchPending, startSearch] = useTransition();
+
   const [materialListOpen, setMaterialListOpen] = useReducer(
     (_: boolean, next: boolean) => next,
     false,
@@ -159,52 +179,69 @@ export function ArticleForm({
   const boundAction =
     mode === "create" ? createArticleAction : updateArticleAction.bind(null, articleId);
 
+  const router = useRouter();
+
   const [state, formAction, pending] = useActionState<SellerArticleFormState, FormData>(
-    boundAction,
+    async (previous, formData) => {
+      const next = await boundAction(previous, formData);
+
+      if (mode === "create" && next.status === "success" && next.articleId !== undefined)
+        router.replace(`/dashboard/articles/${next.articleId}/edit`);
+
+      return next;
+    },
     initialSellerArticleFormState,
   );
+
   const fieldErrors = sellerArticleFieldErrors(state);
 
   const input = useMemo(
     () => ({ title, body, heroImageUrl, materials }),
     [title, body, heroImageUrl, materials],
   );
+
   const [savedInput, setSavedInput] = useReducer(
     (_: string, next: string) => next,
     input,
     JSON.stringify,
   );
+
   const [settledState, setSettledState] = useReducer(
     (_: SellerArticleFormState, next: SellerArticleFormState) => next,
     state,
   );
+
   if (state !== settledState) {
     setSettledState(state);
+
     if (state.status === "success") setSavedInput(JSON.stringify(input));
   }
-  // 送信中は控えを消し、公開後のリダイレクトで画面が外れても書きかけを残さない。失敗したら控え直す
-  usePersistedInput({
-    name: "article",
-    schema: ArticleInputSchema,
-    unsaved: pending || JSON.stringify(input) === savedInput ? null : input,
-    restore: (saved) => {
-      form.setFieldValue("title", saved.title);
-      form.setFieldValue("body", saved.body);
-      form.setFieldValue("heroImageUrl", saved.heroImageUrl);
-      form.setFieldValue("materials", saved.materials);
-    },
-  });
 
-  useArticleCreatedNavigation(state, mode);
-  useArticleSearchFocus(materialSearchRef, materialHits, searchPending);
+  // 送信中は控えを消し、公開後のリダイレクトで画面が外れても書きかけを残さない。失敗したら控え直す
+  const persistedInput = (
+    <PersistedInput
+      name="article"
+      schema={ArticleInputSchema}
+      unsaved={pending || JSON.stringify(input) === savedInput ? null : input}
+      restore={(saved) => {
+        form.setFieldValue("title", saved.title);
+        form.setFieldValue("body", saved.body);
+        form.setFieldValue("heroImageUrl", saved.heroImageUrl);
+        form.setFieldValue("materials", saved.materials);
+      }}
+    />
+  );
 
   async function uploadArticleImage(file: File): Promise<string | null> {
     if (!isImageFile(file)) {
       setUploadError("JPEG、PNG、WebPのいずれかを選択してください。");
+
       return null;
     }
+
     if (file.size > MAX_FILE_BYTES) {
       setUploadError("ファイルは5MB以下にしてください。");
+
       return null;
     }
 
@@ -212,6 +249,7 @@ export function ArticleForm({
     const extension = fileExtensionByType[file.type];
     const storagePath = `${sellerId}/${crypto.randomUUID()}.${extension}`;
     const supabase = createAuthBrowserClient();
+
     const { error } = await supabase.storage.from("article-images").upload(storagePath, file, {
       contentType: file.type,
       upsert: false,
@@ -220,39 +258,47 @@ export function ArticleForm({
     if (error !== null) {
       console.error("[dashboard/articles] 画像アップロードに失敗", error);
       setUploadError(errorMessageJa.internal);
+
       return null;
     }
 
     const { data } = supabase.storage.from("article-images").getPublicUrl(storagePath);
     setUploadError(null);
+
     return data.publicUrl;
   }
 
   async function handleHeroChange(event: ChangeEvent<HTMLInputElement>): Promise<void> {
     const file = event.target.files?.[0];
     event.target.value = "";
+
     if (file === undefined) return;
 
     setUploading(true);
     const url = await uploadArticleImage(file);
     setUploading(false);
+
     if (url !== null) form.setFieldValue("heroImageUrl", url);
   }
 
   async function handleBodyImageChange(event: ChangeEvent<HTMLInputElement>): Promise<void> {
     const file = event.target.files?.[0];
     event.target.value = "";
+
     if (file === undefined) return;
 
     setUploading(true);
     const url = await uploadArticleImage(file);
     setUploading(false);
+
     if (url === null) return;
 
     const textarea = bodyRef.current;
     const markdown = `\n\n![画像](${url})\n\n`;
+
     if (textarea === null) {
       form.setFieldValue("body", (current) => `${current}${markdown}`);
+
       return;
     }
 
@@ -269,18 +315,23 @@ export function ArticleForm({
 
   function handleMaterialSearch(): void {
     const q = materialQuery.trim();
+
     if (q.length === 0) {
       updateMaterialHits({ type: "replace", items: [] });
+
       return;
     }
 
     startSearch(async () => {
       const result = await searchMaterialsAction(q);
+
       if (!result.ok) {
         setUploadError(result.message);
         updateMaterialHits({ type: "replace", items: [] });
+
         return;
       }
+
       setUploadError(null);
       const hits = result.items.filter((item) => !materials.some((m) => m.id === item.id));
       updateMaterialHits({ type: "replace", items: hits });
@@ -303,6 +354,7 @@ export function ArticleForm({
     if (statusInputRef.current !== null) {
       statusInputRef.current.value = status;
     }
+
     const form = document.querySelector<HTMLFormElement>("#article-editor-form");
     form?.requestSubmit();
   }
@@ -311,6 +363,7 @@ export function ArticleForm({
 
   return (
     <div className={formLayout}>
+      {persistedInput}
       <Form
         action={formAction}
         className={formLayout}
@@ -467,6 +520,12 @@ export function ArticleForm({
       </Form>
 
       <div className={formLayout}>
+        {!searchPending && materialHits.length > 0 && (
+          <FocusOnMount
+            key={materialHits.map((material) => material.id).join()}
+            target={materialSearchRef}
+          />
+        )}
         <Autocomplete
           label="資材を検索して追加"
           requirement="optional"
@@ -476,6 +535,7 @@ export function ArticleForm({
           onOpenChange={setMaterialListOpen}
           onPick={(option) => {
             const material = materialHits.find((item) => item.id === option.value);
+
             if (material) addMaterial(material);
           }}
           onSubmitText={handleMaterialSearch}

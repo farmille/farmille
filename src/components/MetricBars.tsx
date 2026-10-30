@@ -16,11 +16,13 @@ type MetricBarsProps = {
 
 function formatValue(value: number, unit: string | null): string {
   const text = Number.isInteger(value) ? String(value) : value.toFixed(1);
+
   return unit === null || unit.length === 0 ? text : `${text}${unit}`;
 }
 
 function barWidthPercent(value: number, max: number): number {
   if (max <= 0) return 0;
+
   return Math.max(4, Math.round((value / max) * 100));
 }
 

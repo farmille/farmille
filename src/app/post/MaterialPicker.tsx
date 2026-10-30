@@ -135,6 +135,7 @@ export function MaterialPicker({ materials, postType }: MaterialPickerProps) {
     "q",
     parseAsString.withDefault("").withOptions({ shallow: false, history: "push", scroll: false }),
   );
+
   return (
     <MaterialPickerBody
       key={query}
@@ -156,11 +157,14 @@ function MaterialPickerBody({
     defaultValues: { query },
     onSubmit: ({ value }) => onSearch(value.query.trim()),
   });
+
   const input = useStore(form.store, (state) => state.values.query);
+
   const [selectedId, setSelectedId] = useReducer(
     (_state: string | null, next: string | null) => next,
     null,
   );
+
   const selected = materials.find(({ id }) => id === selectedId) ?? null;
 
   return (

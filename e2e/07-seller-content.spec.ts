@@ -23,6 +23,7 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
   const material = await createMaterial("editor", null, seller.officialName);
   const otherMaterial = await createMaterial("no-right", null, seller.officialName);
   const description = `製品説明_${uniqueToken("description")}`;
+
   const documents = [
     { group: "overview", label: "概要（製品説明・パンフレット・画像）", title: "製品パンフレット" },
     {
@@ -31,8 +32,10 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
       title: "公的試験報告",
     },
   ];
+
   const adminContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const adminPage = await adminContext.newPage();
+
   try {
     await seedCatalogMaterial(material.id);
     await page.goto(`/materials/${material.id}`);
@@ -73,21 +76,26 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
     await page.goto(`/dashboard/materials/${material.id}`);
     await expect(page.getByRole("img", { name: "容器のイメージ", exact: true })).toBeVisible();
     await expect(page.locator('input[type="file"]')).toHaveCount(0);
+
     const importedOverview = page
       .getByRole("heading", { name: documents[0].label, exact: true })
       .locator("..");
+
     await importedOverview.getByRole("button", { name: "資料を外す", exact: true }).click();
     await page.getByRole("textbox", { name: "製品説明", exact: true }).fill(description);
     await page.getByLabel("主な成分", { exact: true }).fill("海藻抽出物");
     await page.getByRole("checkbox", { name: "播種・定植時", exact: true }).check();
+
     for (const document of documents) {
       const group = page.getByRole("heading", { name: document.label, exact: true }).locator("..");
+
       if (document.group !== "public_trial")
         await group.getByRole("button", { name: "資料を追加", exact: true }).click();
       await group.getByRole("textbox", { name: "資料名", exact: true }).fill(document.title);
       await group
         .getByRole("textbox", { name: "資料URL", exact: true })
         .fill(`https://example.com/${document.group}.pdf`);
+
       if (document.group === "public_trial") {
         await group
           .getByRole("textbox", { name: "試験の作目（任意）", exact: true })
@@ -106,6 +114,7 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
           .fill("12");
       }
     }
+
     await page.getByRole("checkbox", { name: "農薬登録", exact: true }).check();
     await page.getByRole("textbox", { name: "農薬登録者", exact: true }).fill("農薬登録会社");
     await page
@@ -124,6 +133,7 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
     await expect(page.getByRole("textbox", { name: "製品説明", exact: true })).toHaveValue(
       description,
     );
+
     for (const document of documents) {
       const group = page.getByRole("heading", { name: document.label, exact: true }).locator("..");
       await expect(group.getByRole("combobox", { name: "資料の分類", exact: true })).toContainText(
@@ -132,6 +142,7 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
       await expect(group.getByRole("textbox", { name: "資料名", exact: true })).toHaveValue(
         document.title,
       );
+
       if (document.group === "public_trial") {
         await expect(
           group.getByRole("textbox", { name: "試験の概要（任意）", exact: true }),
@@ -144,6 +155,7 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
         ).toHaveValue("12");
       }
     }
+
     await expect(page.getByRole("textbox", { name: "農薬登録者", exact: true })).toHaveValue(
       "農薬登録会社",
     );
@@ -165,11 +177,13 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
       page.getByRole("link", { name: "取り込み資料（削除対象）", exact: true }),
     ).toBeVisible();
     await adminPage.goto("/admin/materials/expressions");
+
     const card = adminPage
       .locator("section, article, div")
       .filter({ has: adminPage.getByRole("heading", { name: material.name, exact: true }) })
       .filter({ has: adminPage.getByRole("link", { name: "原稿を確認", exact: true }) })
       .last();
+
     await card.getByRole("link", { name: "原稿を確認", exact: true }).click();
     await expect(adminPage.getByText(description, { exact: true }).first()).toBeVisible();
     await expect(adminPage.getByText("公的試験報告の概要", { exact: true })).toBeVisible();
@@ -184,6 +198,7 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
     await expect(
       page.getByRole("link", { name: "取り込み資料（削除対象）", exact: true }),
     ).toHaveCount(0);
+
     for (const document of documents) {
       await expect(page.getByRole("heading", { name: document.label, exact: true })).toBeVisible();
       await expect(page.getByRole("link", { name: document.title, exact: true })).toHaveAttribute(
@@ -191,6 +206,7 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
         `https://example.com/${document.group}.pdf`,
       );
     }
+
     await expect(page.getByText("公的試験報告の概要", { exact: true })).toBeVisible();
     await expect(page.getByText("農薬登録会社", { exact: true })).toBeVisible();
     await expect(page.getByText("製品表示に沿った効果", { exact: true })).toBeVisible();
@@ -216,6 +232,7 @@ test("書類確認で資材単位の資材オーナー権限を付与し、原�
     await page.getByRole("button", { name: "理由を記録して非公開にする" }).click();
     await expect(page.getByText("非公開", { exact: true })).toBeVisible();
     const anonymous = await browser.newPage();
+
     try {
       await anonymous.goto(`/materials/${material.id}`);
       await expect(

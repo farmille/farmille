@@ -10,6 +10,7 @@ const meta = {
 } satisfies Meta<typeof HomeConcept>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Guest: Story = {};

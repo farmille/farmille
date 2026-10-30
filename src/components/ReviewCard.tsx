@@ -82,6 +82,7 @@ export function ReviewCard({
 }: ReviewCardProps) {
   const interactive = reviewId !== undefined && !canManage;
   const resolvedPath = currentPath ?? (materialId !== undefined ? `/materials/${materialId}` : "/");
+
   const author = (
     <>
       <Avatar name={handle} src={avatarSrc} size="sm" />
@@ -91,6 +92,7 @@ export function ReviewCard({
       ) : null}
     </>
   );
+
   const displayedPhotoCount = photos.length > 0 ? photos.length : photoCount;
 
   return (

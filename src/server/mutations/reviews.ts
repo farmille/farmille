@@ -8,8 +8,11 @@ import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type ReviewPhotoRow = Database["public"]["Tables"]["review_photos"]["Row"];
+
 type ReviewPhotoInsert = Database["public"]["Tables"]["review_photos"]["Insert"];
+
 type CreateReviewRpcArgs = Database["public"]["Functions"]["create_review_with_crops"]["Args"];
+
 type UpdateReviewRpcArgs = Database["public"]["Functions"]["update_review_with_crops"]["Args"];
 
 export type ExistingReviewPhotoInput = {
@@ -43,8 +46,10 @@ export const REVIEW_BODY_MAX_LENGTH = 2000;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ReviewCropIdsSchema = v.pipe(v.array(v.pipe(v.string(), v.uuid())), v.maxLength(1));
 const REVIEW_CROP_NAME_MAX_LENGTH = 100;
+
 const REVIEW_PHOTO_PATH_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/[0-9a-f-]+\.(?:jpg|png|webp)$/i;
+
 const REVIEW_PHOTO_PUBLIC_MARKER = "/storage/v1/object/public/review-photos/";
 
 export const NewReviewPhotoSchema = v.strictObject({
@@ -54,10 +59,12 @@ export const NewReviewPhotoSchema = v.strictObject({
     v.transform((caption) => {
       if (caption === null) return null;
       const trimmed = caption.trim();
+
       return trimmed.length === 0 ? null : trimmed;
     }),
   ),
 });
+
 export type NewReviewPhoto = v.InferOutput<typeof NewReviewPhotoSchema>;
 
 function reportMutationError<ErrorValue>(operation: string, error: ErrorValue): void {
@@ -66,10 +73,12 @@ function reportMutationError<ErrorValue>(operation: string, error: ErrorValue): 
 
 function parseNewPhotos(value: FormDataEntryValue | null): NewReviewPhoto[] | null {
   const serialized = formDataString(value);
+
   if (serialized === null || serialized.length === 0) return [];
 
   try {
     const result = v.safeParse(v.array(NewReviewPhotoSchema), JSON.parse(serialized));
+
     return result.success ? result.output : null;
   } catch {
     return null;
@@ -82,10 +91,12 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
   const cropIdsResult = v.safeParse(ReviewCropIdsSchema, formData.getAll("cropIds"));
   const cropNameValue = trimmedFormDataString(formData.get("cropNameOther"));
   const cropNameOther = cropNameValue.length === 0 ? null : cropNameValue;
+
   const hasOneCrop =
     cropIdsResult.success &&
     (cropIdsResult.output.length === 1) !== (cropNameOther !== null) &&
     (cropNameOther === null || cropNameOther.length <= REVIEW_CROP_NAME_MAX_LENGTH);
+
   const ratingValue = trimmedFormDataString(formData.get("rating"));
   const rating = Number(ratingValue);
   const body = trimmedFormDataString(formData.get("body"));
@@ -95,18 +106,22 @@ export function validateReviewFormData(formData: FormData): ReviewValidation {
   if (!hasOneCrop) {
     fieldErrors.cropIds = "使用対象作目を1つ選んでください。";
   }
+
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     fieldErrors.rating = "星を1〜5から選択してください。";
   }
+
   if (body.length === 0) {
     fieldErrors.body = "感想口コミ本文を入力してください。";
   } else if (body.replaceAll("\r\n", "\n").length > REVIEW_BODY_MAX_LENGTH) {
     // 送信時の改行は CRLF になるが、入力欄の maxLength は改行を1文字と数える
     fieldErrors.body = `感想口コミ本文は${REVIEW_BODY_MAX_LENGTH}文字以内で入力してください。`;
   }
+
   if (!pesticideAck) {
     fieldErrors.pesticideAck = "内容を確認し、同意してください。";
   }
+
   if (newPhotos === null) {
     fieldErrors.photos = "写真情報が正しくありません。もう一度選択してください。";
   }
@@ -157,11 +172,14 @@ async function validateReferences(
       materialError: materialResult.error,
       cropError: cropResult.error,
     });
+
     return fail("internal");
   }
 
   if (materialResult.data === null) return fail("not_found");
+
   if (materialResult.data.publication_status !== "published") return fail("conflict");
+
   if (cropResult.data.length !== cropIds.length) return fail("invalid_body");
 
   return succeed(null);
@@ -178,6 +196,7 @@ function buildPhotoRows(
 
   for (const [index, photo] of photos.entries()) {
     const url = publicPhotoUrl(supabase, userId, photo);
+
     if (url === null) return fail("invalid_body");
 
     rows.push({
@@ -197,8 +216,10 @@ export async function removeReviewPhotoUploads(paths: string[]): Promise<void> {
   if (paths.length === 0) return;
 
   const session = await requireGeneralUser();
+
   if (!session.ok) {
     reportMutationError("未確定の感想口コミ写真を削除できません", session.error);
+
     return;
   }
 
@@ -209,6 +230,7 @@ export async function removeReviewPhotoUploads(paths: string[]): Promise<void> {
     )
   ) {
     reportMutationError("未確定の感想口コミ写真パスが不正です", paths);
+
     return;
   }
 
@@ -232,11 +254,14 @@ export async function createReviewWithDependencies(
   createSupabase: typeof createServerSupabase,
 ): Promise<Result<{ reviewId: string }>> {
   const session = await authenticate();
+
   if (!session.ok) return session;
+
   if (!UUID_PATTERN.test(input.materialId)) return fail("not_found");
 
   const supabase = await createSupabase();
   const references = await validateReferences(supabase, input.materialId, input.cropIds);
+
   if (!references.ok) return references;
 
   const { data: existing, error: existingError } = await supabase
@@ -249,8 +274,10 @@ export async function createReviewWithDependencies(
 
   if (existingError !== null) {
     reportMutationError("重複感想口コミの確認に失敗", existingError);
+
     return fail("internal");
   }
+
   if (existing !== null) return fail("conflict");
 
   const rpcInput: CreateReviewRpcArgs = {
@@ -262,6 +289,7 @@ export async function createReviewWithDependencies(
     p_crop_name_other: input.cropNameOther ?? undefined,
     p_pesticide_ack: input.pesticideAck,
   };
+
   const { data: reviewId, error: reviewError } = await supabase.rpc(
     "create_review_with_crops",
     rpcInput,
@@ -269,6 +297,7 @@ export async function createReviewWithDependencies(
 
   if (reviewError !== null || reviewId === null) {
     reportMutationError("感想口コミの作成に失敗", reviewError);
+
     return fail("internal");
   }
 
@@ -276,6 +305,7 @@ export async function createReviewWithDependencies(
 
   if (!photoRows.ok) {
     await supabase.from("reviews").delete().eq("id", reviewId);
+
     return photoRows;
   }
 
@@ -285,9 +315,11 @@ export async function createReviewWithDependencies(
     if (photoError !== null) {
       reportMutationError("感想口コミ写真行の作成に失敗", photoError);
       const { error: rollbackError } = await supabase.from("reviews").delete().eq("id", reviewId);
+
       if (rollbackError !== null) {
         reportMutationError("感想口コミ作成のロールバックに失敗", rollbackError);
       }
+
       return fail("internal");
     }
   }
@@ -299,11 +331,13 @@ function storagePathFromPublicUrl(url: string, userId: string): string | null {
   try {
     const pathname = new URL(url).pathname;
     const markerIndex = pathname.indexOf(REVIEW_PHOTO_PUBLIC_MARKER);
+
     if (markerIndex < 0) return null;
 
     const path = decodeURIComponent(
       pathname.slice(markerIndex + REVIEW_PHOTO_PUBLIC_MARKER.length),
     );
+
     return path.startsWith(`${userId}/`) ? path : null;
   } catch {
     return null;
@@ -317,12 +351,14 @@ async function removeStoragePhotos(
 ): Promise<void> {
   const paths = photos.flatMap(({ url }) => {
     const path = storagePathFromPublicUrl(url, userId);
+
     return path === null ? [] : [path];
   });
 
   if (paths.length === 0) return;
 
   const { error } = await supabase.storage.from("review-photos").remove(paths);
+
   if (error !== null) {
     // DB 上の削除は完了済み。ユーザー操作を失敗扱いに戻さず、運用ログへ残す。
     reportMutationError("削除済み感想口コミ写真の Storage 清掃に失敗", error);
@@ -335,13 +371,16 @@ export async function updateReview(
   existingPhotoInputs: ExistingReviewPhotoInput[],
 ): Promise<Result<{ reviewId: string }>> {
   const session = await requireGeneralUser();
+
   if (!session.ok) return session;
+
   if (!UUID_PATTERN.test(input.materialId) || !UUID_PATTERN.test(reviewId)) {
     return fail("not_found");
   }
 
   const supabase = await createServerSupabase();
   const references = await validateReferences(supabase, input.materialId, input.cropIds);
+
   if (!references.ok) return references;
 
   const { data: review, error: reviewError } = await supabase
@@ -368,12 +407,16 @@ export async function updateReview(
 
   if (reviewError !== null) {
     reportMutationError("編集対象感想口コミの確認に失敗", reviewError);
+
     return fail("internal");
   }
+
   if (review === null) return fail("not_found");
+
   if (review.author_user_id !== session.data.userId || review.material_id !== input.materialId) {
     return fail("forbidden");
   }
+
   if (review.status !== "published") return fail("forbidden");
 
   const currentPhotos: ReviewPhotoRow[] = review.photos;
@@ -388,11 +431,14 @@ export async function updateReview(
   }
 
   const inputByPhotoId = new Map(existingPhotoInputs.map((photo) => [photo.id, photo]));
+
   const removedPhotos = currentPhotos.filter(
     (photo) => inputByPhotoId.get(photo.id)?.remove === true,
   );
+
   const removedPhotoIds = new Set(removedPhotos.map(({ id }) => id));
   const keptPhotos = currentPhotos.filter((photo) => !removedPhotoIds.has(photo.id));
+
   const newPhotoRows = buildPhotoRows(
     supabase,
     reviewId,
@@ -400,6 +446,7 @@ export async function updateReview(
     input.newPhotos,
     keptPhotos.length,
   );
+
   if (!newPhotoRows.ok) return newPhotoRows;
 
   const rpcInput: UpdateReviewRpcArgs = {
@@ -412,6 +459,7 @@ export async function updateReview(
     p_crop_name_other: input.cropNameOther ?? undefined,
     p_pesticide_ack: input.pesticideAck,
   };
+
   const { data: updatedReviewId, error: updateError } = await supabase.rpc(
     "update_review_with_crops",
     rpcInput,
@@ -419,6 +467,7 @@ export async function updateReview(
 
   if (updateError !== null || updatedReviewId !== reviewId) {
     reportMutationError("感想口コミの更新に失敗", updateError);
+
     return fail("internal");
   }
 
@@ -442,6 +491,7 @@ export async function updateReview(
 
     if (upsertError !== null) {
       reportMutationError("感想口コミ写真行の更新に失敗", upsertError);
+
       return fail("internal");
     }
   }
@@ -458,6 +508,7 @@ export async function updateReview(
 
     if (deleteError !== null) {
       reportMutationError("感想口コミ写真行の削除に失敗", deleteError);
+
       return fail("internal");
     }
 
@@ -469,10 +520,13 @@ export async function updateReview(
 
 export async function deleteReview(materialId: string, reviewId: string): Promise<Result<null>> {
   const session = await requireGeneralUser();
+
   if (!session.ok) return session;
+
   if (!UUID_PATTERN.test(materialId) || !UUID_PATTERN.test(reviewId)) return fail("not_found");
 
   const supabase = await createServerSupabase();
+
   const { data: review, error: reviewError } = await supabase
     .from("reviews")
     .select(
@@ -490,9 +544,12 @@ export async function deleteReview(materialId: string, reviewId: string): Promis
 
   if (reviewError !== null) {
     reportMutationError("削除対象感想口コミの確認に失敗", reviewError);
+
     return fail("internal");
   }
+
   if (review === null) return fail("not_found");
+
   if (review.author_user_id !== session.data.userId || review.material_id !== materialId) {
     return fail("forbidden");
   }
@@ -505,9 +562,11 @@ export async function deleteReview(materialId: string, reviewId: string): Promis
 
   if (deleteError !== null) {
     reportMutationError("感想口コミの削除に失敗", deleteError);
+
     return fail("internal");
   }
 
   await removeStoragePhotos(supabase, session.data.userId, review.photos);
+
   return succeed(null);
 }

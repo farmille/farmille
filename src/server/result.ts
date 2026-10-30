@@ -10,6 +10,7 @@ export const FailureSchema = v.strictObject({
   ok: v.literal(false),
   error: ErrorCodeSchema,
 });
+
 type Failure = v.InferOutput<typeof FailureSchema>;
 
 export function resultSchema<TSchema extends v.GenericSchema>(dataSchema: TSchema) {
@@ -17,6 +18,7 @@ export function resultSchema<TSchema extends v.GenericSchema>(dataSchema: TSchem
 }
 
 type Success<T> = v.InferOutput<ReturnType<typeof successSchema<v.GenericSchema<T>>>>;
+
 export type Result<T> = v.InferOutput<ReturnType<typeof resultSchema<v.GenericSchema<T>>>>;
 
 const errorStatus = {
@@ -66,9 +68,11 @@ export function toResponse<TSchema extends v.GenericSchema>(
   status?: number,
 ): Response {
   const parsed = v.safeParse(resultSchema(dataSchema), result);
+
   if (!parsed.success) {
     throw new Error(`HTTPレスポンスが Result 契約に一致しません：${v.summarize(parsed.issues)}`);
   }
+
   const responseStatus = status ?? (result.ok ? 200 : errorStatus[result.error]);
 
   return Response.json(parsed.output, { status: responseStatus });

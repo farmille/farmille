@@ -19,6 +19,7 @@ import { ProcedureRow } from "./ProcedureRow";
 
 function checkedExternalUrl(value: string): string {
   const url = new URL(value);
+
   if (url.protocol !== "https:" && url.protocol !== "http:") {
     throw new Error("メーカーの公式サイトURLはHTTPまたはHTTPSで指定してください。");
   }
@@ -70,6 +71,7 @@ const infoAction = css({ flex: "none", display: "flex", gap: "1.5", alignItems: 
 
 function InfoRow({ label, value }: { label: string; value: ReactNode }) {
   const empty = value === null || value === undefined || value === "";
+
   return (
     <div className={infoRow}>
       <div className={infoLabel}>{label}</div>
@@ -265,6 +267,7 @@ export function DashboardContent({ seller, materials }: SellerDashboardData) {
   const verifiedCount = materials.filter(
     (material) => material.manufacturer_verified_at !== null,
   ).length;
+
   const firstUnentered = materials.find((material) => material.manufacturer_verified_at === null);
   const hasProfileText = (seller.profile_text ?? "").trim().length > 0;
 

@@ -14,6 +14,7 @@ const meta = {
 } satisfies Meta<typeof ProcedureDetail>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const NeedsMembership: Story = {};

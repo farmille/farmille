@@ -24,14 +24,17 @@ export async function listPublishedPosts() {
         .eq("status", "published")
         .order("created_at", { ascending: false }),
     ]);
+
     if (reviews.error || reports.error) {
       reportAdminError(
         "published-posts",
         "公開済み投稿の取得に失敗",
         reviews.error ?? reports.error,
       );
+
       return fail("internal");
     }
+
     return succeed(
       [
         ...reviews.data.map((row) => ({
@@ -66,22 +69,29 @@ export async function removePublishedPostWithSupabase(
     type: formData.get("type"),
     confirmed: formData.get("confirmed"),
   });
+
   if (!input.success) return fail("invalid_body");
   const { id, type } = input.output;
+
   const query =
     type === "review"
       ? supabase.from("reviews").update({ status: "hidden" })
       : supabase.from("usage_reports").update({ status: "declined", published_at: null });
+
   const result = await query
     .eq("id", id)
     .eq("status", "published")
     .select("material_id, author_user_id")
     .maybeSingle();
+
   if (result.error) {
     reportAdminError("published-posts", "投稿の非公開化に失敗", result.error);
+
     return fail("internal");
   }
+
   if (result.data === null) return fail("conflict");
+
   return succeed({
     id,
     type,

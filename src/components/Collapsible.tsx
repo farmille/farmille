@@ -114,6 +114,7 @@ export function CollapsibleTrigger({
   className?: string;
 }) {
   const styles = triggerRecipe({ variant });
+
   return (
     <BaseCollapsible.Trigger className={cx(styles.trigger, className)}>
       {children}

@@ -68,6 +68,7 @@ const tagList = css({
 
 function formatRating(rating: number | null): string {
   if (rating === null) return "—";
+
   return rating.toFixed(1);
 }
 

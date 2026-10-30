@@ -44,6 +44,7 @@ function revalidateArticlePaths(articleId: string, materialIds: string[]): void 
   revalidatePath(`/dashboard/articles/${articleId}/edit`);
   revalidatePath("/articles");
   revalidatePath(`/articles/${articleId}`);
+
   for (const materialId of materialIds) {
     revalidatePath(`/materials/${materialId}`);
     revalidatePath(`/materials/${materialId}/articles`);
@@ -55,6 +56,7 @@ export async function createArticleAction(
   formData: FormData,
 ): Promise<SellerArticleFormState> {
   const authorization = await sellerIdForAction();
+
   if (!authorization.ok) return authorization.state;
 
   const validation = validateArticleInput({
@@ -70,6 +72,7 @@ export async function createArticleAction(
   }
 
   const result = await createSellerArticle(authorization.sellerId, validation.input);
+
   if (!result.ok) return errorState(result.error);
 
   revalidateArticlePaths(result.data.id, validation.input.materialIds);
@@ -92,6 +95,7 @@ export async function updateArticleAction(
   formData: FormData,
 ): Promise<SellerArticleFormState> {
   const authorization = await sellerIdForAction();
+
   if (!authorization.ok) return authorization.state;
 
   const validation = validateArticleInput({
@@ -107,6 +111,7 @@ export async function updateArticleAction(
   }
 
   const result = await updateSellerArticle(authorization.sellerId, articleId, validation.input);
+
   if (!result.ok) return errorState(result.error);
 
   revalidateArticlePaths(articleId, validation.input.materialIds);
@@ -133,9 +138,11 @@ export async function setArticleStatusAction(
   status: "draft" | "published",
 ): Promise<SellerArticleFormState> {
   const authorization = await sellerIdForAction();
+
   if (!authorization.ok) return authorization.state;
 
   const result = await setSellerArticleStatus(authorization.sellerId, articleId, status);
+
   if (!result.ok) return errorState(result.error);
 
   const materialIds = await listArticleMaterialIds(articleId);
@@ -154,12 +161,14 @@ export async function setArticleStatusAction(
 
 export async function deleteArticleAction(articleId: string): Promise<void> {
   const session = await requireSeller();
+
   if (!session.ok) {
     redirect(`/sellers/login?next=${encodeURIComponent("/dashboard/articles")}`);
   }
 
   const materialIds = await listArticleMaterialIds(articleId);
   const result = await deleteSellerArticle(session.data.sellerId, articleId);
+
   if (!result.ok) {
     throw new Error(errorMessageJa[result.error]);
   }
@@ -175,11 +184,13 @@ export async function searchMaterialsAction(
   | { ok: false; message: string }
 > {
   const session = await requireSeller();
+
   if (!session.ok) {
     return { ok: false, message: errorMessageJa[session.error] };
   }
 
   const result = await searchMaterialsForArticleLink(query);
+
   if (!result.ok) {
     return { ok: false, message: errorMessageJa[result.error] };
   }
