@@ -75,7 +75,8 @@ export function useMaterialSearch(initialQuery: string, sort: MaterialSortParam)
   const scheduleSearch = (value: string) => {
     clearTimeout(timer.current);
 
-    if (composing.current || value.trim() === initialQuery) return;
+    // 応答待ちの間は initialQuery が古いので、送った直後の検索語と比べる。
+    if (composing.current || value.trim() === search.q) return;
     const scheduledQuery = search.q;
     timer.current = setTimeout(() => {
       let sent = false;
@@ -113,7 +114,7 @@ export function useMaterialSearch(initialQuery: string, sort: MaterialSortParam)
       clearTimeout(timer.current);
       // URLの検索語が変わらないときは応答を待たない。
       dispatch({
-        type: nextQuery.trim() === initialQuery ? "input" : "request",
+        type: nextQuery.trim() === search.q ? "input" : "request",
         text: nextQuery,
       });
       void setSearch(

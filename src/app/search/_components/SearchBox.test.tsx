@@ -98,6 +98,14 @@ describe("資材の入力検索", () => {
     await advanceSearch();
     expect(onUrlUpdate.mock.lastCall?.[0].queryString).toBe("?q=いちご");
   });
+  it("応答を待つ間に元の検索語へ戻した入力も送る", async () => {
+    renderSearch(<SearchBox {...props} initialQuery="トマト" />);
+    fireEvent.change(searchInput(), { target: { value: "いちご" } });
+    await advanceSearch();
+    fireEvent.change(searchInput(), { target: { value: "トマト" } });
+    await advanceSearch();
+    expect(onUrlUpdate.mock.lastCall?.[0].queryString).toBe("?q=トマト");
+  });
   it("日本語変換の途中では検索しない", async () => {
     renderSearch(<SearchBox {...props} />);
     const input = searchInput();
