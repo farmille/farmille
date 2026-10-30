@@ -9,6 +9,7 @@ const meta = {
 } satisfies Meta<typeof SuccessMark>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Soft: Story = {};

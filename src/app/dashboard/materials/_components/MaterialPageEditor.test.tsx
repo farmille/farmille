@@ -39,10 +39,12 @@ afterEach(() => {
 
 it("保存した版番号で再送信し、失敗した入力を残す", async () => {
   const versionId = "22222222-2222-4222-8222-222222222222";
+
   const save = vi
     .spyOn(actions, "saveMaterialPage")
     .mockResolvedValueOnce({ ok: true, versionId })
     .mockResolvedValueOnce({ ok: false, message: "保存できませんでした" });
+
   render(
     <AppRouterContext.Provider value={router}>
       <MaterialPageEditor

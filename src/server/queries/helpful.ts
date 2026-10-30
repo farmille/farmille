@@ -26,6 +26,7 @@ export async function getViewerHelpfulVotes(
 
   for (let start = 0; start < targetIds.length; start += IN_FILTER_CHUNK_SIZE) {
     const chunk = targetIds.slice(start, start + IN_FILTER_CHUNK_SIZE);
+
     const { data, error } = await supabase
       .from("helpful_votes")
       .select("target_id")
@@ -35,6 +36,7 @@ export async function getViewerHelpfulVotes(
 
     if (error !== null) {
       reportQueryError("参考になった投票状況の取得に失敗", { targetType, error });
+
       return fail("internal");
     }
 
@@ -52,6 +54,7 @@ export async function getHelpfulCount(
   targetId: string,
 ): Promise<Result<number>> {
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("helpful_counts")
     .select("helpful_count")
@@ -61,6 +64,7 @@ export async function getHelpfulCount(
 
   if (error !== null) {
     reportQueryError("参考になった件数の取得に失敗", { targetType, error });
+
     return fail("internal");
   }
 
@@ -70,6 +74,7 @@ export async function getHelpfulCount(
 
   if (data.helpful_count === null) {
     reportQueryError("参考になった件数にNULLが含まれる", { targetType, targetId });
+
     return fail("internal");
   }
 
@@ -87,6 +92,7 @@ export async function isHelpfulVotedByViewer(
   }
 
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("helpful_votes")
     .select("id")
@@ -97,6 +103,7 @@ export async function isHelpfulVotedByViewer(
 
   if (error !== null) {
     reportQueryError("参考になった投票状況の取得に失敗", { targetType, error });
+
     return fail("internal");
   }
 

@@ -14,13 +14,16 @@ const requiredText = (label: string, max: number) =>
     v.minLength(1, `${label}を入力してください。`),
     v.maxLength(max, `${label}は${max}文字以内で入力してください。`),
   );
+
 // NFKC で全角の数字・＋・－を半角にし、NFKC で変わらないハイフン類・長音・空白は区切りとして除く
 const PHONE_SEPARATORS = /[\s\-‐‑‒–—―−ー]/g;
+
 const phone = v.pipe(
   v.string("電話番号を入力してください。"),
   v.transform((value) => value.normalize("NFKC").replaceAll(PHONE_SEPARATORS, "")),
   v.regex(/^\+?[0-9]{10,15}$/, "電話番号を正しく入力してください。"),
 );
+
 /** Supabase に渡す前に、長さと形式を確かめる。 */
 export const emailAddressSchema = v.pipe(
   v.string("メールアドレスを入力してください。"),
@@ -28,6 +31,7 @@ export const emailAddressSchema = v.pipe(
   v.maxLength(EMAIL_MAX_LENGTH, `メールアドレスは${EMAIL_MAX_LENGTH}文字以内で入力してください。`),
   v.email("メールアドレスの形式が正しくありません。"),
 );
+
 const optionalText = (max: number) =>
   v.pipe(
     v.string("文字列を入力してください。"),
@@ -87,10 +91,13 @@ export function generalRegistrationFieldErrors(formData: FormData): GeneralRegis
     generalRegistrationSchema,
     Object.fromEntries(generalRegistrationFields.map((name) => [name, formData.get(name)])),
   );
+
   if (result.success) return {};
   const nested = v.flatten<typeof generalRegistrationSchema>(result.issues).nested ?? {};
   const errors: GeneralRegistrationFieldErrors = {};
+
   for (const name of generalRegistrationFields) errors[name] = nested[name]?.[0];
+
   return errors;
 }
 

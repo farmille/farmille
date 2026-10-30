@@ -121,6 +121,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   });
 
   const logic = formatLogicHint(selected);
+
   const keywordMatches = initialQuery
     ? matchSearchCatalog(catalogResult.data, initialQuery)
     : undefined;

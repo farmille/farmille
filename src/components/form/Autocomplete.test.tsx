@@ -19,6 +19,7 @@ function Harness({
   onSubmitText?: (text: string) => void;
 }) {
   const [value, setValue] = useReducer((_current: string, next: string) => next, "");
+
   return (
     <>
       <Autocomplete
@@ -38,8 +39,10 @@ function Harness({
 describe("Autocomplete", () => {
   it("一致する候補が無いあいだは一覧を開かず、周りの部品を読み上げから隠さない", async () => {
     const user = userEvent.setup();
+
     function Host() {
       const [text, setText] = useReducer((_current: string, next: string) => next, "");
+
       return (
         <>
           <Autocomplete
@@ -53,6 +56,7 @@ describe("Autocomplete", () => {
         </>
       );
     }
+
     render(<Host />);
 
     const input = screen.getByRole("combobox", { name: "所属" });
@@ -132,8 +136,10 @@ describe("Autocomplete", () => {
   it("説明付きの候補は「ラベル 説明」で読み上げ、onSubmitText が無ければ Enter で囲むフォームを送る", async () => {
     const user = userEvent.setup();
     const submitted: FormData[] = [];
+
     function Search() {
       const [value, setValue] = useReducer((_current: string, next: string) => next, "");
+
       return (
         <form
           onSubmit={(event) => {
@@ -154,6 +160,7 @@ describe("Autocomplete", () => {
         </form>
       );
     }
+
     render(<Search />);
     const input = screen.getByRole("combobox", { name: "資材の検索条件" });
 

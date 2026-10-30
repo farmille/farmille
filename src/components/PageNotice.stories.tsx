@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PageNotice } from "./PageNotice";
 import { Button } from "./Button";
+
 const meta = {
   title: "Components/Feedback/PageNotice",
   component: PageNotice,
@@ -10,6 +11,9 @@ const meta = {
     children: <Button variant="ghost">ホームへ戻る</Button>,
   },
 } satisfies Meta<typeof PageNotice>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

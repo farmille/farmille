@@ -10,6 +10,7 @@ const meta = {
   beforeEach: () => {
     const cleanup = preparePageSession("general");
     mocked(getOwnProfile).mockResolvedValue({ ok: false, error: "not_found" });
+
     return () => {
       mocked(getOwnProfile).mockReset();
       cleanup();
@@ -18,6 +19,9 @@ const meta = {
   parameters: { layout: "fullscreen", nextjs: { navigation: { pathname: "/me/setup" } } },
   args: {},
 } satisfies Meta<typeof Page>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

@@ -101,13 +101,16 @@ export default async function AdminSellerDetailPage({
   await requireAdminPage(`/admin/sellers/${id}`);
 
   const [seller, manufacturers] = await Promise.all([getSellerDetail(id), listManufacturerNames()]);
+
   if (!manufacturers.ok) throw new Error(errorMessageJa[manufacturers.error]);
 
   if (!seller.ok) {
     if (seller.error === "not_found") notFound();
     throw new Error(errorMessageJa[seller.error]);
   }
+
   const candidates = await listSellerMaterialCandidates(seller.data.manufacturer_name);
+
   if (!candidates.ok) throw new Error("掲載ページの候補を取得できませんでした。");
 
   return (

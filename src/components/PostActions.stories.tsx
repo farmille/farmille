@@ -16,8 +16,11 @@ const meta = {
     voted: false,
   },
 } satisfies Meta<typeof PostActions>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Review: Story = {};
 export const Report: Story = { args: { target: "usage_report" } };
 
@@ -33,20 +36,25 @@ export const Saved: Story = {
     const helpful = canvas.getByRole("button", { name: /参考になった/ });
     const save = canvas.getByRole("button", { name: "保存済み" });
     const view = canvas.getByText("閲覧 125");
+
     const middles = [helpful, save, view].map((element) => {
       const rect = element.getBoundingClientRect();
+
       return rect.top + rect.height / 2;
     });
+
     await expect(Math.max(...middles) - Math.min(...middles)).toBeLessThanOrEqual(2);
     await expect(save.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
     const helpfulRect = helpful.getBoundingClientRect();
     await expect(helpfulRect.height).toBeLessThan(44);
     const helpfulMiddle = helpfulRect.top + helpfulRect.height / 2;
+
     for (const y of [helpfulMiddle - 21, helpfulMiddle + 21]) {
       const hit = canvasElement.ownerDocument.elementFromPoint(
         helpfulRect.left + helpfulRect.width / 2,
         y,
       );
+
       await expect(hit?.closest("button")).toBe(helpful);
     }
   },

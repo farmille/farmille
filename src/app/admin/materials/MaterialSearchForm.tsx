@@ -33,6 +33,7 @@ function SearchForm({ query, onSearch }: { query: string; onSearch: (query: stri
     defaultValues: { query },
     onSubmit: ({ value }) => onSearch(value.query.trim()),
   });
+
   const value = useStore(form.store, (state) => state.values.query);
 
   return (

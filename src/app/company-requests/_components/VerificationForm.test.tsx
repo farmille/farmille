@@ -15,16 +15,19 @@ it("確認メールの送信が失敗しても入力を保ち、その値で再�
   vi.spyOn(actions, "requestReceiptVerification")
     .mockResolvedValueOnce({ ok: false, error: "internal" })
     .mockResolvedValueOnce({ ok: true, data: true });
+
   const { container } = render(
     <PathnameContext.Provider value="/company-requests/receipts">
       <VerificationForm />
     </PathnameContext.Provider>,
   );
+
   const number = screen.getByRole("textbox", { name: /^受付番号/ });
   const email = screen.getByRole("textbox", { name: /^担当者メールアドレス/ });
   fireEvent.change(number, { target: { value: "12" } });
   fireEvent.change(email, { target: { value: "contact@example.test" } });
   const form = container.querySelector("form");
+
   if (form === null) throw new Error("確認フォームがありません。");
 
   fireEvent.submit(form);

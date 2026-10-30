@@ -122,6 +122,7 @@ export function EnsureFieldRoot({
   children,
 }: Pick<FieldProps, "name" | "disabled" | "className" | "children">) {
   const validate = useFieldValidate(name);
+
   return useFieldContext().inRoot ? (
     children
   ) : (
@@ -212,14 +213,17 @@ export function FieldErrorText({
       </BaseField.Error>
     );
   }
+
   return (
     <BaseField.Validity>
       {({ validity }) => {
         if (validity.customError) return <BaseField.Error className={fieldErrorStyle} />;
         const native = VALIDITY_MESSAGES.find(([key]) => validity[key]);
+
         if (native === undefined)
           return <BaseField.Error className={fieldErrorStyle} role="alert" />;
         const [match, message] = native;
+
         return (
           <BaseField.Error className={fieldErrorStyle} match={match}>
             {match === "typeMismatch" ? (typeMismatchMessage ?? message) : message}

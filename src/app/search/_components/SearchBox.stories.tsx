@@ -9,16 +9,20 @@ const meta = {
   component: SearchBox,
   args: { initialQuery: "", selected: [], sort: "reviews", catalog: storySearchCatalog },
 } satisfies Meta<typeof SearchBox>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 async function openSuggestions(canvasElement: HTMLElement) {
   await userEvent.click(within(canvasElement).getByRole("combobox", { name: "資材の検索条件" }));
   await userEvent.keyboard("{ArrowDown}");
+
   return within(canvasElement.ownerDocument.body);
 }
 
 export const Empty: Story = {};
+
 export const WithSelection: Story = {
   args: {
     selected: [
@@ -35,6 +39,7 @@ export const WithSelection: Story = {
     ],
   },
 };
+
 export const Suggestions: Story = {
   args: { initialQuery: "ト" },
   play: async ({ canvasElement }) => {
@@ -42,6 +47,7 @@ export const Suggestions: Story = {
     await waitFor(() => expect(page.getAllByRole("option").length).toBeGreaterThan(0));
   },
 };
+
 export const NoSuggestion: Story = {
   args: { initialQuery: "該当なし" },
   play: async ({ canvasElement }) => {

@@ -14,15 +14,19 @@ export async function requestSellerPasswordReset(
   input: v.InferOutput<typeof SellerRecoverySchema>,
 ): Promise<Result<null>> {
   const parsed = v.safeParse(SellerRecoverySchema, input);
+
   if (!parsed.success) return fail("invalid_body");
   const db = createAdminSupabase();
+
   const result = await db
     .from("seller_accounts")
     .select("contact_email,auth_user_id,status")
     .eq("login_id", parsed.output.loginId)
     .maybeSingle();
+
   if (result.error) return fail("internal");
   const seller = result.data;
+
   if (
     !seller ||
     seller.status !== "approved" ||
@@ -31,6 +35,8 @@ export async function requestSellerPasswordReset(
   )
     return succeed(null);
   const email = syntheticSellerEmail(parsed.output.loginId);
+
   if (!email) return fail("invalid_body");
+
   return requestPasswordReset(email);
 }

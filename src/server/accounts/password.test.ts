@@ -9,6 +9,7 @@ describe("PasswordChangeSchema", () => {
     password: "new-password",
     passwordConfirmation: "new-password",
   };
+
   it("現在のパスワードと一致する確認欄を要求する", () => {
     expect(v.safeParse(PasswordChangeSchema, input).success).toBe(true);
     expect(v.safeParse(PasswordChangeSchema, { ...input, currentPassword: "" }).success).toBe(

@@ -1,9 +1,11 @@
 import { fn } from "storybook/test";
+
 export function isUsageReportEditorialOperation(
   value: string | null | undefined,
 ): value is import("@/server/admin/usage-reports").UsageReportEditorialOperation {
   return value === "save" || value === "publish" || value === "decline";
 }
+
 export const listPendingUsageReports = fn<
   typeof import("@/server/admin/usage-reports").listPendingUsageReports
 >(async () => ({
@@ -23,6 +25,7 @@ export const listPendingUsageReports = fn<
     },
   ],
 })).mockName("listPendingUsageReports");
+
 export const getUsageReportEditorialDetail = fn<
   typeof import("@/server/admin/usage-reports").getUsageReportEditorialDetail
 >(async () => ({
@@ -86,9 +89,11 @@ export const getUsageReportEditorialDetail = fn<
     metrics: [],
   },
 })).mockName("getUsageReportEditorialDetail");
+
 export const updateUsageReportEditorial = fn<
   typeof import("@/server/admin/usage-reports").updateUsageReportEditorial
 >(async () => ({ ok: true, data: null })).mockName("updateUsageReportEditorial");
+
 export const EDITORIAL_REPORT_STATUS_LABELS: typeof import("@/server/admin/usage-reports").EDITORIAL_REPORT_STATUS_LABELS =
   {
     pending: "確認待ち",

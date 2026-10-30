@@ -54,6 +54,7 @@ export function SignupForm({
 }) {
   const [state, formAction] = useActionState(signupAction, initialAuthFormState);
   const submitted = submittedValuesOf(state);
+
   const defaults = {
     handle: submitted.handle ?? "",
     familyName: submitted.familyName ?? "",
@@ -63,6 +64,7 @@ export function SignupForm({
     terms: submitted.terms === "on",
     password: "",
   };
+
   // パスワードはサーバーから返さず控えにも残さないので、送信後のフォームの reset で消えないよう画面で持つ
   const form = useForm({ defaultValues: defaults });
   const values = useStore(form.store, (state) => state.values);
@@ -80,8 +82,10 @@ export function SignupForm({
       onRestore={(restored) => {
         for (const name of ["handle", "familyName", "givenName", "phone", "standpoint"] as const) {
           const value = restored.get(name)?.[0];
+
           if (value !== undefined) form.setFieldValue(name, value);
         }
+
         if (restored.has("terms")) {
           form.setFieldValue("terms", restored.get("terms")?.includes("on") ?? false);
         }

@@ -24,12 +24,16 @@ export function ChangePasswordForm({
   const form = useForm({
     defaultValues: { currentPassword: "", password: "", passwordConfirmation: "" },
   });
+
   const values = useStore(form.store, (state) => state.values);
+
   const [state, action] = useActionState(async (previous: AuthFormState, data: FormData) => {
     const result = await changePasswordAction(previous, data);
     form.reset();
+
     return result;
   }, initialAuthFormState);
+
   if (state.status === "done")
     return (
       <>
@@ -39,6 +43,7 @@ export function ChangePasswordForm({
         </Link>
       </>
     );
+
   return (
     <Form action={action} persist={false}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}

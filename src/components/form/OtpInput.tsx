@@ -74,6 +74,7 @@ type OtpInputProps = OtpInputBodyProps & Labeling;
  */
 export function OtpInput(props: OtpInputProps) {
   const [labeling] = splitLabeling(props);
+
   return (
     <Labeled disabled={props.disabled} labeling={labeling} name={props.name}>
       {props.value === undefined ? (
@@ -88,6 +89,7 @@ export function OtpInput(props: OtpInputProps) {
 function UncontrolledOtpInput({ onValueChange, ...props }: OtpInputBodyProps) {
   const form = useForm({ defaultValues: { code: "" } });
   const code = useStore(form.store, (state) => state.values.code);
+
   return (
     <OtpInputBody
       {...props}
@@ -136,6 +138,7 @@ function OtpInputBody({
 
 function Slots({ invalid, disabled }: { invalid: boolean; disabled: boolean }) {
   const { slots } = useContext(OTPInputContext);
+
   return (
     <div className={slotsStyle}>
       {slots.map((slot, index) => (

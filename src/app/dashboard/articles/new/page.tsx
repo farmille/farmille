@@ -12,6 +12,7 @@ export default async function NewArticlePage() {
     if (session.error === "unauthorized") {
       redirect(`/sellers/login?next=${encodeURIComponent("/dashboard/articles/new")}`);
     }
+
     return <SellerAccessDenied backHref="/dashboard" />;
   }
 

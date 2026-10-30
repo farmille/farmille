@@ -19,10 +19,13 @@ const meta = {
     children: <p>絞り込みの項目</p>,
   },
 } satisfies Meta<typeof SearchFilterSheet>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
 export const Selected: Story = {
   args: {
     resultCount: 3,
@@ -35,6 +38,7 @@ export const Selected: Story = {
     ],
   },
 };
+
 export const Open: Story = {
   args: Selected.args,
   play: async ({ canvasElement }) => {

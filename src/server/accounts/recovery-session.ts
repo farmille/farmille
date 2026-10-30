@@ -9,6 +9,7 @@ import { toErrorCode } from "./auth-errors";
 
 const COOKIE_NAME = "farmille-password-recovery";
 const MAX_AGE = 600;
+
 const RecoverySessionSchema = v.object({
   access_token: v.string(),
   refresh_token: v.string(),
@@ -25,20 +26,26 @@ export function encodeRecoveryProof(
   secret: string,
 ): string {
   const body = Buffer.from(JSON.stringify(session)).toString("base64url");
+
   return `${body}.${signature(body, secret).toString("base64url")}`;
 }
 
 export function decodeRecoveryProof(stored: string, link: string, secret: string, now: number) {
   const [body, mac, extra] = stored.split(".");
+
   if (!body || !mac || extra !== undefined) return null;
   const expected = signature(body, secret);
   const actual = Buffer.from(mac, "base64url");
+
   if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return null;
+
   const parsed = v.safeParse(
     v.pipe(v.string(), v.parseJson(), RecoverySessionSchema),
     Buffer.from(body, "base64url").toString("utf8"),
   );
+
   if (!parsed.success || parsed.output.link !== link || parsed.output.expires <= now) return null;
+
   return parsed.output;
 }
 
@@ -48,18 +55,25 @@ export async function openRecoverySession(tokenHash: string) {
   const jar = await cookies();
   const link = createHash("sha256").update(tokenHash).digest("hex");
   const stored = jar.get(COOKIE_NAME)?.value;
+
   if (stored) {
     const session = decodeRecoveryProof(stored, link, serverEnv.authEmailHookSecret, Date.now());
+
     if (session) {
       const restored = await client.auth.setSession(session);
+
       if (restored.error) return fail(toErrorCode(restored.error, "restoreRecovery"));
+
       return succeed(client);
     }
   }
 
   const verified = await client.auth.verifyOtp({ type: "recovery", token_hash: tokenHash });
+
   if (verified.error) return fail(toErrorCode(verified.error, "verifyPasswordRecovery"));
+
   if (!verified.data.session) return fail("expired_link");
+
   const proof = encodeRecoveryProof(
     {
       access_token: verified.data.session.access_token,
@@ -69,6 +83,7 @@ export async function openRecoverySession(tokenHash: string) {
     },
     serverEnv.authEmailHookSecret,
   );
+
   jar.set(COOKIE_NAME, proof, {
     httpOnly: true,
     secure: new URL(clientEnv.siteUrl).protocol === "https:",
@@ -76,6 +91,7 @@ export async function openRecoverySession(tokenHash: string) {
     path: "/password-reset/update",
     maxAge: MAX_AGE,
   });
+
   return succeed(client);
 }
 

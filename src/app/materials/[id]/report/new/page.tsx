@@ -31,6 +31,7 @@ const shell = css({
 export async function generateMetadata({ params }: ReportFormPageProps): Promise<Metadata> {
   const { id } = await params;
   const material = await loadMaterialOrNotFound(id);
+
   return materialMetadata(material, {
     titleSuffix: "の実証詳細レポートを投稿",
     description: `${material.name}を使った条件と観察結果を実証詳細レポートとして投稿します。`,
@@ -47,6 +48,7 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
     if (session.error === "unauthorized") {
       redirect(`/login?next=${encodeURIComponent(reportPath)}`);
     }
+
     throw new Error(errorMessageJa[session.error]);
   }
 
@@ -63,15 +65,19 @@ export default async function ReportFormPage({ params }: ReportFormPageProps) {
   if (!formDataResult.ok) {
     throw new Error(errorMessageJa[formDataResult.error]);
   }
+
   if (!addressResult.ok) {
     throw new Error(errorMessageJa[addressResult.error]);
   }
+
   if (!profileResult.ok) {
     throw new Error(errorMessageJa[profileResult.error]);
   }
+
   if (material.publication_status !== "published") notFound();
 
   const formData = formDataResult.data;
+
   if (formData.submitted.length > 0) {
     return (
       <div className={shell}>

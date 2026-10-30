@@ -6,6 +6,7 @@ export const listRecentReviews = fn<typeof ListRecentReviews>(async () => ({
   ok: true,
   data: [],
 })).mockName("listRecentReviews");
+
 export const listReviewsByMaterial = fn<
   typeof import("@/server/queries/reviews").listReviewsByMaterial
 >(async () => ({
@@ -18,6 +19,7 @@ export const listReviewsByMaterial = fn<
     totalPages: 1,
   },
 })).mockName("listReviewsByMaterial");
+
 export const listReviewCropOptions = fn<
   typeof import("@/server/queries/reviews").listReviewCropOptions
 >(async () => ({
@@ -31,9 +33,11 @@ export const listReviewCropOptions = fn<
     },
   ],
 })).mockName("listReviewCropOptions");
+
 export const findOwnReviewIdByMaterial = fn<
   typeof import("@/server/queries/reviews").findOwnReviewIdByMaterial
 >(async () => ({ ok: true, data: null })).mockName("findOwnReviewIdByMaterial");
+
 export const getReviewForEdit = fn<typeof import("@/server/queries/reviews").getReviewForEdit>(
   async () => ({
     ok: true,

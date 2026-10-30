@@ -19,6 +19,7 @@ describe("キーワードに対応する検索候補", () => {
       makers: [],
       materials: [{ name: "活力サポート", aliases: ["Bio Support 53", "バイオサポート", "BS53"] }],
     };
+
     for (const query of ["bio support", "ばいお", "ＢＳ５３"]) {
       expect(matchSearchCatalog(names, query).materialNames).toEqual(["活力サポート"]);
     }

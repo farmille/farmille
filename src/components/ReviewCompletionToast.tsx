@@ -6,12 +6,15 @@ import { toast } from "@/components/Toaster";
 import { useMountEffect } from "@/lib/hooks/use-mount-effect";
 
 const completions = ["posted", "updated", "deleted"] as const;
+
 type Completion = (typeof completions)[number];
+
 const messages = {
   posted: "感想口コミを投稿しました。",
   updated: "感想口コミを更新しました。",
   deleted: "感想口コミを削除しました。",
 } satisfies Record<Completion, string>;
+
 const completionParser = parseAsStringLiteral(completions).withOptions({
   shallow: true,
   history: "replace",
@@ -19,7 +22,9 @@ const completionParser = parseAsStringLiteral(completions).withOptions({
 
 export function ReviewCompletionToast() {
   const [completion, setCompletion] = useQueryState("review", completionParser);
+
   if (completion === null) return null;
+
   return (
     <CompletionNotice
       key={completion}
@@ -40,5 +45,6 @@ function CompletionNotice({
     toast(messages[completion], { id: "review-completion" });
     onShown();
   });
+
   return null;
 }

@@ -12,6 +12,7 @@ import { recordMaterialAuditAction } from "./audit-actions";
 type AuditOutcome = "checked" | "correction_requested" | "hidden";
 
 type MaterialAuditInput = { outcome: AuditOutcome; note: string };
+
 type AuditState = {
   result: Awaited<ReturnType<typeof recordMaterialAuditAction>> | null;
   recordedNote: string;
@@ -28,14 +29,18 @@ export function MaterialAuditForm({ materialId }: { materialId: string }) {
   const form = useForm({ defaultValues: initialValues });
   const { outcome, note } = useStore(form.store, (state) => state.values);
   const router = useRouter();
+
   const [{ result, recordedNote }, record, pending] = useActionState(
     async (previous: AuditState, input: MaterialAuditInput): Promise<AuditState> => {
       const result = await recordMaterialAuditAction({ materialId, ...input });
+
       if (result.ok) router.refresh();
+
       return { result, recordedNote: result.ok ? input.note : previous.recordedNote };
     },
     { result: null, recordedNote: "" },
   );
+
   const persistedInput = (
     <PersistedInput
       name="material-audit"
@@ -44,6 +49,7 @@ export function MaterialAuditForm({ materialId }: { materialId: string }) {
       restore={(value) => form.setFieldValue("note", value)}
     />
   );
+
   return (
     <div className={materialPageStack}>
       {persistedInput}

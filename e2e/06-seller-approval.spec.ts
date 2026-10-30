@@ -58,6 +58,7 @@ for (const mode of ["existing", "new"]) {
       await expect(
         page.getByRole("button", { name: "確認を完了してログインを発行" }),
       ).toBeDisabled();
+
       if (mode === "new") {
         await chooseOption(
           page,
@@ -72,6 +73,7 @@ for (const mode of ["existing", "new"]) {
           material.manufacturer_name,
         );
       }
+
       await captureAccountScreen(
         page,
         mode === "new" ? "61-admin-new-manufacturer.png" : "12-admin-seller-detail.png",
@@ -86,6 +88,7 @@ for (const mode of ["existing", "new"]) {
         .poll(
           async () => {
             const approval = await sellerApprovalByLoginId(loginId);
+
             return approval?.status === "approved" && approval.auth_user_id !== null;
           },
           { timeout: 30_000 },

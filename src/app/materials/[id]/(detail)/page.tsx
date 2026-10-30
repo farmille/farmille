@@ -77,6 +77,7 @@ async function loadViewer(materialId: string) {
 
 async function MaterialRating({ material }: { material: MaterialDetail }) {
   const distribution = unwrapQueryResult(await getReviewRatingDistribution(material.id));
+
   return (
     <RatingSummary
       average={material.avg_rating}
@@ -96,6 +97,7 @@ async function MaterialReviews({
   const reviews = unwrapQueryResult(
     await listReviewsByMaterial(material.id, { sort: "newest", page: 1, viewerUserId }),
   );
+
   const displayedReviews = reviews.items.slice(0, 3);
 
   return (
@@ -133,6 +135,7 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
       getPublishedMaterialPage(id),
       getViewerAccount(),
     ]);
+
   const isGeneralUser = viewerUserId !== null;
   // after() の中では cookies() が使えないため、Supabase クライアントは先に作る。
   const viewEventSupabase = await createServerSupabase();
@@ -148,9 +151,11 @@ export default async function MaterialPage({ params, searchParams }: MaterialPag
 
   const materialPath = `/materials/${material.id}`;
   const saved = savedResult === null ? null : unwrapQueryResult(savedResult);
+
   const toggleAction = isGeneralUser
     ? toggleSavedMaterialAction.bind(null, material.id)
     : undefined;
+
   const productJsonLd = createProductJsonLd({
     id: material.id,
     name: material.name,

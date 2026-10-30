@@ -24,17 +24,20 @@ it("控えの入力を復元し、エラー後の再送信にも同じ値を渡�
     websiteUrl: "https://example.test/",
     inviteCode: "TEST-INVITE",
   };
+
   sessionStorage.setItem(
     persistKey("seller-apply", "/sellers/apply"),
     JSON.stringify(
       Object.fromEntries(Object.entries(values).map(([name, value]) => [name, [value]])),
     ),
   );
+
   const action = vi.spyOn(sellerApplyActions, "sellerApplyAction").mockResolvedValue({
     status: "error",
     message: "申請内容を確認してください。",
     values,
   });
+
   render(
     <PathnameContext.Provider value="/sellers/apply">
       <SellerApplyForm />
@@ -49,6 +52,7 @@ it("控えの入力を復元し、エラー後の再送信にも同じ値を渡�
     });
     expect(await screen.findByText("申請内容を確認してください。")).toBeVisible();
     const call = action.mock.lastCall;
+
     if (call === undefined) throw new Error("申請処理が呼ばれていません。");
     expect(Object.fromEntries(call[1])).toEqual(values);
     expect(screen.getByLabelText("法人名")).toHaveValue(values.officialName);

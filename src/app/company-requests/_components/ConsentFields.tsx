@@ -30,6 +30,7 @@ function ConsentRow({
 
 function PrivacyText({ text }: { text: string }) {
   const [before, ...rest] = text.split("プライバシーポリシー");
+
   return (
     <Notice className={noteStyle} tone="neutral">
       {before}
@@ -57,11 +58,13 @@ export function ConsentFields({
   const conditionCount = kind === "registration" ? 2 : 0;
   const conditions = copy.consents.slice(0, conditionCount);
   const confirmations = copy.consents.slice(conditionCount, last);
+
   const checkAll = (
     <Notice className={noteStyle} tone="warn">
       以下すべてをご確認のうえ、チェックしてください。
     </Notice>
   );
+
   return (
     <>
       {conditionCount > 0 ? (

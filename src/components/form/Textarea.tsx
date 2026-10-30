@@ -17,6 +17,7 @@ type TextareaProps = TextareaBodyProps & Labeling;
 
 export function Textarea(props: TextareaProps) {
   const [labeling, textareaProps] = splitLabeling(props);
+
   return (
     <Labeled disabled={textareaProps.disabled} labeling={labeling} name={textareaProps.name}>
       <TextareaBody {...textareaProps} />
@@ -38,6 +39,7 @@ function TextareaBody({
 }: TextareaBodyProps) {
   const field = useFieldContext();
   const restored = useRestoredText(name ?? field.name);
+
   return (
     <BaseField.Control
       aria-describedby={describedBy}

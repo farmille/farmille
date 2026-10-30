@@ -1,4 +1,5 @@
 "use client";
+
 import { startTransition, useActionState } from "react";
 import * as v from "valibot";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
@@ -27,8 +28,11 @@ const fileListStyle = css({
 });
 
 type EvidenceFile = { id: string; name: string; verified: boolean };
+
 type EvidenceState = { files: EvidenceFile[]; error: string };
+
 type EvidenceAction = { type: "upload"; files: File[] } | { type: "remove"; id: string };
+
 export function EvidenceFields({
   intentId,
   itemKey,
@@ -45,23 +49,31 @@ export function EvidenceFields({
   const [{ files, error }, send, busy] = useActionState(
     async (state: EvidenceState, action: EvidenceAction): Promise<EvidenceState> => {
       let files = state.files;
+
       if (action.type === "upload" && files.length + action.files.length > 5) {
         return { files, error: "この添付欄に登録できる資料は5件までです。" };
       }
+
       onBusy(true);
+
       try {
         if (action.type === "remove") {
           const result = await removeEvidence(action.id);
+
           if (!result.ok) return { files, error: errorMessageJa[result.error] };
           files = files.filter((file) => file.id !== action.id);
           onCount?.(files.length);
+
           return { files, error: "" };
         }
+
         for (const file of action.files) {
           const mime = v.safeParse(evidenceMimeSchema, file.type);
+
           if (!mime.success || file.size < 1 || file.size > 10 * 1024 * 1024) {
             return { files, error: "JPG・PNG・PDFを、1ファイル10MB以内で選択してください。" };
           }
+
           const reserved = await reserveEvidence({
             intentId,
             itemKey,
@@ -70,14 +82,17 @@ export function EvidenceFields({
             mime: mime.output,
             size: file.size,
           });
+
           if (!reserved.ok) return { files, error: errorMessageJa[reserved.error] };
           files = [...files, { id: reserved.data.id, name: file.name, verified: false }];
           onCount?.(files.length);
+
           const result = await createAuthBrowserClient()
             .storage.from("company-application-evidence")
             .uploadToSignedUrl(reserved.data.path, reserved.data.token, file, {
               contentType: mime.output,
             });
+
           if (result.error) {
             return {
               files,
@@ -85,7 +100,9 @@ export function EvidenceFields({
                 "資料をアップロードできませんでした。失敗した資料を削除し、もう一度選択してください。",
             };
           }
+
           const verified = await finalizeEvidence(reserved.data.id);
+
           if (!verified.ok) {
             return {
               files,
@@ -93,10 +110,12 @@ export function EvidenceFields({
                 "資料の形式を確認できませんでした。失敗した資料を削除し、JPG・PNG・PDFの元ファイルを選択してください。",
             };
           }
+
           files = files.map((item) =>
             item.id === reserved.data.id ? { ...item, verified: true } : item,
           );
         }
+
         return { files, error: "" };
       } catch (error) {
         return {
@@ -109,6 +128,7 @@ export function EvidenceFields({
     },
     { files: [], error: "" },
   );
+
   return (
     <div className={stackStyle}>
       <FileInput
@@ -119,6 +139,7 @@ export function EvidenceFields({
         onChange={(event) => {
           const files = Array.from(event.currentTarget.files ?? []);
           event.currentTarget.value = "";
+
           if (files.length > 0) startTransition(() => send({ type: "upload", files }));
         }}
       />

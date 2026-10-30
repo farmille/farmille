@@ -21,6 +21,7 @@ function fieldErrorsFor(code: ErrorCode, message: string): Record<string, string
 /** 再入力用。パスワード欄は無いので全項目を返す。 */
 function submittedValues(formData: FormData): AuthFormValues {
   const values: AuthFormValues = {};
+
   const names = [
     "officialName",
     "corporateNumber",
@@ -35,6 +36,7 @@ function submittedValues(formData: FormData): AuthFormValues {
 
   for (const name of names) {
     const value = formDataString(formData.get(name));
+
     if (value !== null) values[name] = value;
   }
 

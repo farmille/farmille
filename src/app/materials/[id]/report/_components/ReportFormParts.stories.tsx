@@ -45,7 +45,9 @@ const meta = {
   args: { title: "栽培条件", note: "どこで・どんな環境で育てているか" },
   render: () => <PartsPreview />,
 } satisfies Meta<typeof GroupHeading>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};

@@ -6,7 +6,9 @@ export async function captureScreenFlow(
   fullPage = true,
 ): Promise<void> {
   const originalViewport = page.viewportSize();
+
   if (originalViewport === null) throw new Error("撮影用の画面サイズが設定されていません");
+
   try {
     for (const device of [
       { directory: "", width: 375, height: 812 },

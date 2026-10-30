@@ -34,12 +34,15 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 function toUiCategory(category: SearchFilterCategory): TagCategory {
   if (category === "crop_group") return "crop";
+
   return category === "condition" || category === "method" ? "cond" : category;
 }
 
 export function selectedFilterKey(filter: SelectedSearchFilter): string {
   if (filter.kind === "filter") return `${filter.category}:${filter.id}`;
+
   if (filter.kind === "maker") return `maker:${filter.name}`;
+
   return `name:${filter.name}`;
 }
 
@@ -47,7 +50,9 @@ export function encodeFiltersQuery(filters: SelectedSearchFilter[]): string {
   return filters
     .map((filter) => {
       if (filter.kind === "filter") return `${filter.category}:${filter.id}`;
+
       if (filter.kind === "maker") return `maker:${encodeURIComponent(filter.name)}`;
+
       return `name:${encodeURIComponent(filter.name)}`;
     })
     .join(",");
@@ -64,6 +69,7 @@ export function parseFiltersQuery(raw: string | undefined): ParsedSearchQuery {
 
   for (const part of raw.split(",")) {
     const token = part.trim();
+
     if (token.length === 0) continue;
 
     if (token.startsWith("maker:")) {
@@ -118,10 +124,14 @@ export function buildSearchHref({
 }): string {
   const params = new URLSearchParams();
   const encoded = encodeFiltersQuery(filters);
+
   if (encoded.length > 0) params.set("filters", encoded);
+
   if (sort !== "reviews") params.set("sort", sort);
+
   if (query.trim().length > 0) params.set("q", query.trim());
   const encodedQuery = params.toString();
+
   return encodedQuery.length > 0 ? `/search?${encodedQuery}` : "/search";
 }
 
@@ -133,6 +143,7 @@ export function formatLogicHint(filters: SelectedSearchFilter[]): string {
   for (const filter of filters) {
     const category =
       filter.kind === "filter" ? filter.category : filter.kind === "maker" ? "maker" : "name";
+
     const names = byCategory.get(category) ?? [];
     names.push(filter.name);
     byCategory.set(category, names);
@@ -174,5 +185,6 @@ export function resolveSelectedFilters({
 
 export function selectedFilterCategory(filter: SelectedSearchFilter): TagCategory {
   if (filter.kind === "filter") return toUiCategory(filter.category);
+
   return filter.kind;
 }

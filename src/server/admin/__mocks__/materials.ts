@@ -59,21 +59,26 @@ export const listAdminMaterials = fn<typeof import("@/server/admin/materials").l
     ],
   }),
 ).mockName("listAdminMaterials");
+
 export const getAdminMaterial = fn<typeof import("@/server/admin/materials").getAdminMaterial>(
   async () => ({
     ok: true,
     data: adminMaterialFixture,
   }),
 ).mockName("getAdminMaterial");
+
 export const createMaterial = fn<typeof import("@/server/admin/materials").createMaterial>(
   async () => ({ ok: true, data: { id: "11111111-1111-4111-8111-111111111111" } }),
 ).mockName("createMaterial");
+
 export const updateMaterial = fn<typeof import("@/server/admin/materials").updateMaterial>(
   async () => ({ ok: true, data: null }),
 ).mockName("updateMaterial");
+
 export const setMaterialSeller = fn<typeof import("@/server/admin/materials").setMaterialSeller>(
   async () => ({ ok: true, data: null }),
 ).mockName("setMaterialSeller");
+
 export const setMaterialPublicationStatus = fn<
   typeof import("@/server/admin/materials").setMaterialPublicationStatus
 >(async () => ({ ok: true, data: null })).mockName("setMaterialPublicationStatus");

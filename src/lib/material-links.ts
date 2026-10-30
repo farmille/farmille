@@ -2,6 +2,7 @@ import type { MaterialDetail } from "@/server/queries/materials";
 import type { MaterialPageContent } from "@/lib/material-page-editor";
 
 type MaterialLink = MaterialPageContent["links"][number];
+
 const priority = new Map([
   ["overview", 0],
   ["safety", 1],
@@ -12,23 +13,29 @@ const priority = new Map([
 export function uniqueMaterialLinks(links: MaterialLink[]): MaterialLink[] {
   const unique = new Map<string, MaterialLink>();
   const result: MaterialLink[] = [];
+
   for (const link of links) {
     const url = link.url.trim();
+
     // 編集中の未入力行はそれぞれ残す。
     if (!url) {
       result.push(link);
       continue;
     }
+
     const previous = unique.get(url);
+
     if (previous) {
       if ((priority.get(link.group ?? "") ?? -1) > (priority.get(previous.group ?? "") ?? -1))
         previous.group = link.group;
       continue;
     }
+
     const item = { ...link, url };
     unique.set(url, item);
     result.push(item);
   }
+
   return result;
 }
 
@@ -41,6 +48,7 @@ export function materialSourceLinks(
   },
 ): MaterialLink[] {
   const links: MaterialLink[] = [];
+
   if (material.official_url)
     links.push({
       group: "overview",
@@ -48,6 +56,7 @@ export function materialSourceLinks(
       url: material.official_url,
       trial: null,
     });
+
   if (material.catalog_url)
     links.push({
       group: "overview",
@@ -55,8 +64,10 @@ export function materialSourceLinks(
       url: material.catalog_url,
       trial: null,
     });
+
   for (const evidence of material.evidences) {
     const url = evidence.file_url || evidence.external_url;
+
     if (url)
       links.push({
         group:
@@ -70,5 +81,6 @@ export function materialSourceLinks(
         trial: null,
       });
   }
+
   return uniqueMaterialLinks(links);
 }

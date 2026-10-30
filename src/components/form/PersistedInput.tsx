@@ -34,12 +34,14 @@ export function PersistedInput<T>({
   useMountEffect(() => {
     const opened = persistKey(name, path);
     const saved = readPersisted(opened, schema);
+
     if (saved !== null) restoreSaved(saved);
     settle(opened);
   });
 
   // 控えを読んで戻すまでは書かない（戻す前の空の入力で控えを消さない）
   if (storageKey === null) return null;
+
   // 入力が変わるたびに作り直して書き直す
   return (
     <PersistedCopy
@@ -55,5 +57,6 @@ function PersistedCopy<T>({ storageKey, unsaved }: { storageKey: string; unsaved
     if (unsaved === null) removePersisted(storageKey);
     else writePersisted(storageKey, unsaved);
   });
+
   return null;
 }

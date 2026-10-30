@@ -25,6 +25,7 @@ it("検索の確定時にURLを更新し、種別を保ってページ番号を�
   await user.type(input, "  いちご  ");
   expect(onUrlUpdate).not.toHaveBeenCalled();
   const search = input.closest("form");
+
   if (search === null) throw new Error("検索フォームがありません。");
   fireEvent.submit(search);
 

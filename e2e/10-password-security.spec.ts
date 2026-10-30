@@ -19,6 +19,7 @@ test.use({ trace: "off", video: "off", screenshot: "off" });
 const MailListSchema = v.object({
   messages: v.array(v.object({ ID: v.string(), To: v.array(v.object({ Address: v.string() })) })),
 });
+
 const MailSchema = v.object({ Text: v.string() });
 
 async function recoveryLink(email: string): Promise<string> {
@@ -29,6 +30,7 @@ async function recoveryLink(email: string): Promise<string> {
         const response = await fetch("http://127.0.0.1:54324/api/v1/messages");
         const data = v.parse(MailListSchema, await response.json());
         id = data.messages.find((mail) => mail.To.some((to) => to.Address === email))?.ID ?? "";
+
         return id;
       },
       { timeout: 20_000 },
@@ -36,10 +38,13 @@ async function recoveryLink(email: string): Promise<string> {
     .not.toBe("");
   const response = await fetch(`http://127.0.0.1:54324/api/v1/message/${id}`);
   const data = v.parse(MailSchema, await response.json());
+
   const link = data.Text.match(
     /http:\/\/localhost:3007\/password-reset\/update\?token_hash=[a-zA-Z0-9_-]+/,
   )?.[0];
+
   if (!link) throw new Error("再設定メールにアプリの再設定リンクがありません。");
+
   return link;
 }
 
@@ -47,11 +52,14 @@ for (const role of ["seller", "admin"] as const) {
   test(`${role}の現在パスワード変更とメールによる再設定`, async ({ page, browser }) => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const secret = process.env.SUPABASE_SECRET_KEY;
+
     if (url !== "http://127.0.0.1:54321" || !secret)
       throw new Error("ローカル検証環境だけで実行できます。");
+
     const db = createClient<Database>(url, secret, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
+
     const general = await createGeneralUser(`password-${role}`);
     const seller = role === "seller" ? await createApprovedSeller("password") : null;
     const authId = seller?.authUserId ?? general.id;
@@ -60,15 +68,18 @@ for (const role of ["seller", "admin"] as const) {
     const changed = `Changed-${randomUUID()}aA!1`;
     const recovered = `Recovered-${randomUUID()}aA!1`;
     let totpSecret = "";
+
     try {
       if (role === "admin") {
         const result = await db.auth.admin.updateUserById(authId, {
           app_metadata: { account_type: "admin" },
         });
+
         if (result.error) throw result.error;
         totpSecret = await loginAdminAndEnrollMfa(page, general, "/admin");
       } else if (seller) await loginSeller(page, seller);
       else await loginGeneral(page, general, "/me");
+
       if (process.env.CAPTURE_SCREEN_FLOW === "1")
         await captureScreenFlow(
           page,
@@ -78,8 +89,10 @@ for (const role of ["seller", "admin"] as const) {
       await expect(
         page.getByRole("heading", { name: "パスワードの変更", exact: true }),
       ).toBeVisible();
+
       if (process.env.CAPTURE_SCREEN_FLOW === "1")
         await captureScreenFlow(page, `62-password-change-${role}.png`);
+
       if (role === "seller") {
         await page.getByLabel(/^現在のパスワード/).fill("Wrong-password!");
         await page.getByLabel(/^新しいパスワード[^（]*$/).fill(changed);
@@ -89,6 +102,7 @@ for (const role of ["seller", "admin"] as const) {
           page.getByText("現在のパスワードが正しくありません。", { exact: true }),
         ).toBeVisible();
       }
+
       await page.getByLabel(/^現在のパスワード/).fill(original);
       await page.getByLabel(/^新しいパスワード[^（]*$/).fill(changed);
       await page.getByLabel(/^新しいパスワード（確認）/).fill(changed);
@@ -99,9 +113,11 @@ for (const role of ["seller", "admin"] as const) {
         }),
       ).toBeVisible();
       const loginEmail = seller ? `${seller.loginId}@sellers.farmille.internal` : email;
+
       const auth = createClient(url, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "", {
         auth: { persistSession: false, autoRefreshToken: false },
       });
+
       expect(
         (await auth.auth.signInWithPassword({ email: loginEmail, password: original })).error,
       ).not.toBeNull();
@@ -111,6 +127,7 @@ for (const role of ["seller", "admin"] as const) {
       await auth.auth.signOut({ scope: "local" });
 
       await page.goto(seller ? "/sellers/password-reset" : "/password-reset");
+
       if (seller) {
         if (process.env.CAPTURE_SCREEN_FLOW === "1")
           await captureScreenFlow(page, "63-seller-password-reset.png");
@@ -121,19 +138,23 @@ for (const role of ["seller", "admin"] as const) {
         await page.getByLabel(/^メールアドレス/).fill(email);
         await page.getByRole("button", { name: "再設定メールを送る", exact: true }).click();
       }
+
       await expect(page.getByText(/登録情報が一致する場合/)).toBeVisible();
       const link = await recoveryLink(email);
       // メールを別のブラウザで開いても、元ブラウザのPKCE cookieに依存しない。
       const context = await browser.newContext({ viewport: { width: 375, height: 812 } });
       const recovery = await context.newPage();
+
       try {
         await recovery.goto(link);
         await expect(recovery.getByLabel(/^新しいパスワード[^（]*$/)).toBeVisible();
+
         if (process.env.CAPTURE_SCREEN_FLOW === "1" && role === "seller")
           await captureScreenFlow(recovery, "45-password-update.png");
         await recovery.getByLabel(/^新しいパスワード[^（]*$/).fill(recovered);
         await recovery.getByLabel(/^新しいパスワード（確認）/).fill(recovered);
         await recovery.getByRole("button", { name: "パスワードを変更する" }).click();
+
         if (role === "admin") {
           await expect(
             recovery.getByText(
@@ -149,6 +170,7 @@ for (const role of ["seller", "admin"] as const) {
           await recovery.getByLabel("2要素認証コード").fill(totp.generate());
           await recovery.getByRole("button", { name: "パスワードを変更する" }).click();
         }
+
         await expect(
           recovery.getByText("パスワードを変更しました。", { exact: true }),
         ).toBeVisible();
@@ -158,10 +180,12 @@ for (const role of ["seller", "admin"] as const) {
         expect(
           (await auth.auth.signInWithPassword({ email: loginEmail, password: recovered })).error,
         ).toBeNull();
+
         if (role === "admin") {
           const factors = await db.auth.admin.mfa.listFactors({ userId: authId });
           expect(factors.data?.factors.some((factor) => factor.status === "verified")).toBe(true);
         }
+
         if (role === "seller") {
           await recovery.goto(link);
           await recovery.getByLabel(/^新しいパスワード[^（]*$/).fill(changed);

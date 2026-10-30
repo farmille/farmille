@@ -13,9 +13,11 @@ const meta = {
 } satisfies Meta<typeof HomeVerticalCopy>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const OnLoad: Story = {};
+
 export const Mission: Story = {
   args: { lines: ["「豊かな実りを、", "微力ながら", "支えさせてください。」"] },
 };

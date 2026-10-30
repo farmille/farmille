@@ -31,6 +31,7 @@ export function Tabs<V extends string>({
       value={value}
       onValueChange={(next) => {
         const tab = tabs.find((item) => item.value === next);
+
         if (tab !== undefined) onValueChange(tab.value);
       }}
       className={className}

@@ -107,6 +107,7 @@ const sizeFormat = new Intl.NumberFormat("ja-JP");
 
 function Attachments({ attachments }: { attachments: ReceiptAttachment[] }) {
   if (attachments.length === 0) return <p className={detailText}>なし</p>;
+
   return (
     <ul className={plainList}>
       {attachments.map((file) => (
@@ -175,6 +176,7 @@ export function ReceiptDetails({
   receiptDocument: ApplicationReceiptDocument;
 }) {
   const { applicant, destination, background, attachments, consents } = receiptDocument;
+
   return (
     <div className={css({ display: "flex", flexDirection: "column", gap: "6" })}>
       <DetailSection title="申請者">

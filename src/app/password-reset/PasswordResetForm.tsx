@@ -11,9 +11,11 @@ import { initialAuthFormState, type AuthFormState } from "@/lib/auth/form-state"
 export function PasswordResetForm() {
   const form = useForm({ defaultValues: { email: "" } });
   const email = useStore(form.store, (state) => state.values.email);
+
   const [state, formAction] = useActionState(async (previous: AuthFormState, data: FormData) => {
     const result = await requestPasswordResetAction(previous, data);
     form.reset();
+
     return result;
   }, initialAuthFormState);
 

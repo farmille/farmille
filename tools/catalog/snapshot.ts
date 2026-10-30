@@ -4,6 +4,7 @@ import { LinkSchema } from "./source.ts";
 const id = v.pipe(v.string(), v.uuid());
 const text = v.nullable(v.string());
 const crop = v.object({ id, source_name: v.string(), sort_order: v.number() });
+
 export const MaterialFieldsSchema = v.object({
   name: v.string(),
   official_name: text,
@@ -26,9 +27,13 @@ export const MaterialFieldsSchema = v.object({
     }),
   ),
 });
+
 export type MaterialFields = v.InferOutput<typeof MaterialFieldsSchema>;
+
 export const FieldNameSchema = v.keyof(MaterialFieldsSchema);
+
 export type FieldName = v.InferOutput<typeof FieldNameSchema>;
+
 export const SnapshotSchema = v.object({
   guard: v.pipe(v.string(), v.regex(/^[0-9a-f]{64}$/)),
   materials: v.array(
@@ -72,7 +77,9 @@ export const SnapshotSchema = v.object({
     v.object({ id, name: v.string(), short_name: v.string(), sort_order: v.number() }),
   ),
 });
+
 export type CatalogSnapshot = v.InferOutput<typeof SnapshotSchema>;
+
 export type LiveMaterial = CatalogSnapshot["materials"][number];
 
 export const lockedTables = [
@@ -121,8 +128,10 @@ ${lockedTables.map((table) => `(select coalesce(jsonb_agg(to_jsonb(t) order by t
 
 const trialColumns =
   "'trial_crops',coalesce(l.trial_crops,''),'trial_summary',coalesce(l.trial_summary,''),'trial_institution',coalesce(l.trial_institution,''),'trial_year',l.trial_year,'trial_page_count',l.trial_page_count";
+
 const aggregate = (query: string) =>
   `(select coalesce(jsonb_agg(to_jsonb(items)),'[]'::jsonb) from (${query}) items)`;
+
 const protectedReferences = [
   ["reviews", "material_id"],
   ["usage_reports", "material_id"],
@@ -137,6 +146,7 @@ const protectedReferences = [
   ["material_page_versions", "material_id"],
   ["material_page_audits", "material_id"],
 ];
+
 export const snapshotQuery = `select jsonb_build_object(
 'guard',(${guardQuery}),
 'materials',(select coalesce(jsonb_agg(jsonb_build_object(

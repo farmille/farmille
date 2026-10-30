@@ -19,13 +19,16 @@ import { setupProfileAction } from "./actions";
 export function ProfileSetupForm() {
   const form = useForm({ defaultValues: { handle: "", standpoint: "" } });
   const values = useStore(form.store, (state) => state.values);
+
   const [state, formAction] = useActionState(async (previous: AuthFormState, data: FormData) => {
     const result = await setupProfileAction(previous, data);
     const submitted = submittedValuesOf(result);
     form.setFieldValue("handle", submitted.handle ?? "");
     form.setFieldValue("standpoint", submitted.standpoint ?? "");
+
     return result;
   }, initialAuthFormState);
+
   return (
     <Form
       action={formAction}

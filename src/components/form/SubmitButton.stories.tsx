@@ -18,6 +18,7 @@ const meta = {
 } satisfies Meta<typeof SubmitButton>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {};

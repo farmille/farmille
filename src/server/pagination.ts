@@ -40,9 +40,12 @@ export async function selectAllRows<Row>(
   selectPage: (from: number, to: number) => PromiseLike<PostgrestResponse<Row>>,
 ): Promise<{ data: Row[]; error: null } | { data: null; error: PostgrestError }> {
   const rows: Row[] = [];
+
   for (;;) {
     const page = await selectPage(rows.length, rows.length + SELECT_ALL_PAGE_SIZE - 1);
+
     if (page.error !== null) return { data: null, error: page.error };
+
     if (page.data.length === 0) return { data: rows, error: null };
     rows.push(...page.data);
   }

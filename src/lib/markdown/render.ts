@@ -28,17 +28,23 @@ const ALLOWED_IMG_HOST_SUFFIX = ".supabase.co";
 
 function isAllowedImageSrc(src: string): boolean {
   let url: URL;
+
   try {
     url = new URL(src);
   } catch {
     return false;
   }
+
   if (url.protocol !== "https:" && url.protocol !== "http:") {
     return false;
   }
+
   const host = url.hostname;
+
   if (ALLOWED_IMG_HOSTS.has(host)) return true;
+
   if (host.endsWith(ALLOWED_IMG_HOST_SUFFIX)) return true;
+
   return false;
 }
 
@@ -46,11 +52,14 @@ function stripDisallowedImgSrc(node: Root | Element): void {
   if (node.type === "element" && node.tagName === "img") {
     const src = node.properties?.src;
     const srcResult = v.safeParse(v.string(), src);
+
     if (srcResult.success && !isAllowedImageSrc(srcResult.output)) {
       delete node.properties.src;
     }
   }
+
   const children: ReadonlyArray<RootContent | ElementContent> = node.children;
+
   for (const child of children) {
     if (child.type === "element") {
       stripDisallowedImgSrc(child);
@@ -67,6 +76,7 @@ function stripDisallowedImgSrc(node: Root | Element): void {
 function rehypeRestrictImageHosts() {
   return (tree: Root): Root => {
     stripDisallowedImgSrc(tree);
+
     return tree;
   };
 }
@@ -80,5 +90,6 @@ const processor = unified()
 
 export function renderMarkdownToHtml(markdown: string): string {
   const file = processor.processSync(markdown);
+
   return String(file);
 }

@@ -11,6 +11,7 @@ function EditorTabs({ initial }: { initial: "write" | "preview" }) {
     (_current: "write" | "preview", next: "write" | "preview") => next,
     initial,
   );
+
   return (
     <Tabs
       aria-label="本文エディタ"
@@ -44,6 +45,7 @@ const meta = {
 } satisfies Meta<typeof EditorTabs>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Write: Story = {};

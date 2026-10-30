@@ -9,7 +9,9 @@ describe("errorMessageJa", () => {
       (code) =>
         (code.startsWith("pdf_") && code !== "pdf_reading_unrecorded") || code === "captcha_failed",
     );
+
     expect(pdfCodes.length).toBeGreaterThan(0);
+
     for (const code of pdfCodes) {
       expect(errorMessageJa[code], code).toContain("入力した内容はそのまま残っています。");
     }

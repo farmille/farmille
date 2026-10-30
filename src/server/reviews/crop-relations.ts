@@ -12,7 +12,9 @@ export type ReviewCropRelation = {
 
 function cropSummary(relation: ReviewCropRelation | null): ReviewCropSummary | null {
   if (relation === null) return null;
+
   if (relation.crop !== null) return relation.crop;
+
   return relation.crop_name_other === null ? null : { id: null, name: relation.crop_name_other };
 }
 
@@ -21,6 +23,7 @@ export function orderedReviewCrops(
   relation: ReviewCropRelation | null,
 ): ReviewCropSummary[] | null {
   const crop = cropSummary(relation);
+
   return crop === null ? null : [crop];
 }
 

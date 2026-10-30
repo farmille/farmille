@@ -36,6 +36,7 @@ const empty = css({
 export default async function HomePage() {
   // SiteAppBar と同じリクエスト内のキャッシュを使うので、問い合わせは増えない。
   const session = await getSessionUser();
+
   return (
     <div className={shell} data-ui="home">
       <SiteAppBar chrome="public" active="home" variant="home" preparationNotice={false} />
@@ -61,9 +62,11 @@ export default async function HomePage() {
 
 async function HomeMaterials() {
   const materialsResult = await listHomeMaterials();
+
   if (materialsResult.length === 0) {
     return <p className={empty}>表示できる資材がまだありません。</p>;
   }
+
   return (
     <HomeMaterialMarquee>
       {materialsResult.map((material) => (

@@ -44,6 +44,7 @@ function toMfaErrorCode(error: AuthError, operation: string) {
     case "mfa_totp_verify_not_enabled":
       // Supabase プロジェクト側で TOTP が無効。設定不足を握り潰さず forbidden で表に出す。
       reportError(`${operation}: TOTP が Supabase 側で無効になっています`, error.code);
+
       return "forbidden" as const;
     default:
       break;
@@ -59,9 +60,11 @@ function toMfaErrorCode(error: AuthError, operation: string) {
 /** 現在の admin の MFA 状態。AAL の判定は JWT 由来。 */
 export async function getAdminMfaState(): Promise<Result<AdminMfaState>> {
   const account = await requireAdminAccount();
+
   if (!account.ok) return account;
 
   const user = await getSessionUser();
+
   if (user === null) return fail("unauthorized");
 
   const supabase = await createServerSupabase();
@@ -85,6 +88,7 @@ export async function getAdminMfaState(): Promise<Result<AdminMfaState>> {
  */
 export async function startAdminTotpEnrollment(): Promise<Result<TotpEnrollment>> {
   const account = await requireAdminAccount();
+
   if (!account.ok) return account;
 
   const supabase = await createServerSupabase();
@@ -95,6 +99,7 @@ export async function startAdminTotpEnrollment(): Promise<Result<TotpEnrollment>
   const verified = factors.data.all.find(
     (factor) => factor.factor_type === "totp" && factor.status === "verified",
   );
+
   // 登録済みの factor がある状態での再登録は求めない（AAL2 への昇格は challenge で行う）。
   if (verified !== undefined) return fail("conflict");
 
@@ -102,6 +107,7 @@ export async function startAdminTotpEnrollment(): Promise<Result<TotpEnrollment>
     if (factor.factor_type !== "totp" || factor.status !== "unverified") continue;
 
     const { error } = await supabase.auth.mfa.unenroll({ factorId: factor.id });
+
     if (error !== null) return fail(toMfaErrorCode(error, "未検証 factor の破棄"));
   }
 
@@ -113,8 +119,10 @@ export async function startAdminTotpEnrollment(): Promise<Result<TotpEnrollment>
   if (error !== null) return fail(toMfaErrorCode(error, "TOTP の登録開始"));
 
   const qrCode = normalizeTotpQrCodeSource(data.totp.qr_code);
+
   if (qrCode === null) {
     reportError("TOTP の登録開始", "Supabase Auth が不正な QR コード形式を返しました");
+
     return fail("internal");
   }
 
@@ -133,9 +141,11 @@ export async function startAdminTotpEnrollment(): Promise<Result<TotpEnrollment>
  */
 export async function verifyAdminTotpCode(factorId: string, code: string): Promise<Result<null>> {
   const account = await requireAdminAccount();
+
   if (!account.ok) return account;
 
   const normalized = code.replaceAll(/\s/gu, "");
+
   if (!/^\d{6}$/u.test(normalized)) return fail("invalid_body");
 
   const supabase = await createServerSupabase();

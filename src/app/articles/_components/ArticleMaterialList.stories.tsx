@@ -29,6 +29,9 @@ const meta = {
     ],
   },
 } satisfies Meta<typeof ArticleMaterialList>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

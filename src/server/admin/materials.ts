@@ -65,6 +65,7 @@ function reportError<ErrorValue>(operation: string, error: ErrorValue): void {
 export async function listAdminMaterials(query: string): Promise<Result<AdminMaterialListItem[]>> {
   return withAdmin(async ({ supabase }) => {
     const keyword = query.trim();
+
     const base = supabase
       .from("materials")
       .select(
@@ -72,6 +73,7 @@ export async function listAdminMaterials(query: string): Promise<Result<AdminMat
       )
       .order("created_at", { ascending: false })
       .limit(200);
+
     const { data, error } =
       keyword.length === 0
         ? await base
@@ -79,10 +81,12 @@ export async function listAdminMaterials(query: string): Promise<Result<AdminMat
 
     if (error !== null) {
       reportError("資材一覧の取得に失敗", error);
+
       return fail("internal");
     }
 
     const materialIds = data.map(({ id }) => id);
+
     const [sellerNames, productTypeResult] = await Promise.all([
       loadSellerNames(data.map((row) => row.seller_id).filter((id): id is string => id !== null)),
       materialIds.length === 0
@@ -96,17 +100,22 @@ export async function listAdminMaterials(query: string): Promise<Result<AdminMat
     ]);
 
     if (!sellerNames.ok) return sellerNames;
+
     if (productTypeResult.error !== null || productTypeResult.data === null) {
       reportError("資材の製品タイプ取得に失敗", productTypeResult.error);
+
       return fail("internal");
     }
 
     const productTypeNamesByMaterial = new Map<string, string[]>();
+
     for (const relation of productTypeResult.data) {
       if (relation.product_type === null) {
         reportError("製品タイプの参照先が無い", relation);
+
         return fail("internal");
       }
+
       const names = productTypeNamesByMaterial.get(relation.material_id) ?? [];
       names.push(relation.product_type.name);
       productTypeNamesByMaterial.set(relation.material_id, names);
@@ -135,6 +144,7 @@ async function loadSellerNames(sellerIds: string[]): Promise<Result<Map<string, 
 
     if (error !== null) {
       reportError("claim 元のメーカー名の取得に失敗", error);
+
       return fail("internal");
     }
 
@@ -170,9 +180,12 @@ export async function getAdminMaterial(materialId: string): Promise<Result<Admin
 
     if (materialResult.error !== null) {
       reportError("資材詳細の取得に失敗", materialResult.error);
+
       return fail("internal");
     }
+
     if (materialResult.data === null) return fail("not_found");
+
     const relationError =
       cropResult.error ??
       effectResult.error ??
@@ -180,16 +193,20 @@ export async function getAdminMaterial(materialId: string): Promise<Result<Admin
       ingredientResult.error ??
       productTypeResult.error ??
       searchTagResult.error;
+
     if (relationError !== null) {
       reportError("資材の分類取得に失敗", relationError);
+
       return fail("internal");
     }
+
     const cropRelations = cropResult.data;
     const effectRelations = effectResult.data;
     const ingredientCategoryRelations = ingredientCategoryResult.data;
     const ingredientRelations = ingredientResult.data;
     const productTypeRelations = productTypeResult.data;
     const searchTagRelations = searchTagResult.data;
+
     if (
       cropRelations === null ||
       effectRelations === null ||
@@ -199,6 +216,7 @@ export async function getAdminMaterial(materialId: string): Promise<Result<Admin
       searchTagRelations === null
     ) {
       reportError("資材分類の応答にデータが無い", { materialId });
+
       return fail("internal");
     }
 
@@ -232,10 +250,12 @@ export async function createMaterial(input: MaterialInput): Promise<Result<{ id:
     if (error !== null) {
       if (isUniqueViolation(error)) return fail("conflict");
       reportError("資材の登録に失敗", error);
+
       return fail("internal");
     }
 
     const classifications = await replaceMaterialClassifications(data.id, input);
+
     if (!classifications.ok) return classifications;
 
     return succeed({ id: data.id });
@@ -256,9 +276,12 @@ export async function updateMaterial(
 
     if (currentError !== null) {
       reportError("資材のリビジョン取得に失敗", currentError);
+
       return fail("internal");
     }
+
     if (current === null) return fail("not_found");
+
     if (current.seller_id !== null || current.published_page_version_id !== null) {
       return fail("forbidden");
     }
@@ -275,8 +298,10 @@ export async function updateMaterial(
     if (error !== null) {
       if (isUniqueViolation(error)) return fail("conflict");
       reportError("資材の更新に失敗", error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return fail("not_found");
 
     return replaceMaterialClassifications(materialId, input);
@@ -289,19 +314,25 @@ async function replaceMaterialClassifications(
 ): Promise<Result<null>> {
   return withAdmin(async ({ supabase }) => {
     const cropIds = [...new Set(input.cropIds)];
+
     const cropResult =
       cropIds.length === 0
         ? { data: [], error: null }
         : await supabase.from("crops").select("id, name").in("id", cropIds);
+
     if (cropResult.error !== null || cropResult.data === null) {
       reportError("対象作物名の取得に失敗", cropResult.error);
+
       return fail("internal");
     }
+
     if (cropResult.data.length !== cropIds.length) return fail("invalid_body");
     const cropNameById = new Map(cropResult.data.map((crop) => [crop.id, crop.name]));
     const cropRelations: Database["public"]["Tables"]["material_crops"]["Insert"][] = [];
+
     for (const [index, cropId] of cropIds.entries()) {
       const sourceName = cropNameById.get(cropId);
+
       if (sourceName === undefined) return fail("invalid_body");
       cropRelations.push({
         material_id: materialId,
@@ -319,9 +350,12 @@ async function replaceMaterialClassifications(
       supabase.from("material_product_types").delete().eq("material_id", materialId),
       supabase.from("material_search_tags").delete().eq("material_id", materialId),
     ]);
+
     const deleteError = deleteResults.find(({ error }) => error !== null)?.error ?? null;
+
     if (deleteError !== null) {
       reportError("既存分類の削除に失敗", deleteError);
+
       return fail("internal");
     }
 
@@ -330,6 +364,7 @@ async function replaceMaterialClassifications(
     const ingredientIds = [...new Set(input.ingredientIds)];
     const productTypeIds = [...new Set(input.productTypeIds)];
     const searchTagIds = [...new Set(input.searchTagIds)];
+
     const insertResults = await Promise.all([
       cropIds.length === 0
         ? Promise.resolve({ error: null })
@@ -374,9 +409,12 @@ async function replaceMaterialClassifications(
             })),
           ),
     ]);
+
     const insertError = insertResults.find(({ error }) => error !== null)?.error ?? null;
+
     if (insertError !== null) {
       reportError("分類の付け替えに失敗", insertError);
+
       return fail("internal");
     }
 
@@ -401,8 +439,10 @@ export async function setMaterialSeller(
     }),
     { materialId, sellerId, documentReference },
   );
+
   if (!validated.success || (sellerId !== null && validated.output.documentReference.length === 0))
     return fail("invalid_body");
+
   return withAdmin(async ({ supabase, session }) => {
     if (sellerId !== null) {
       const { data: seller, error } = await supabase
@@ -413,9 +453,12 @@ export async function setMaterialSeller(
 
       if (error !== null) {
         reportError("claim 先メーカーの確認に失敗", error);
+
         return fail("internal");
       }
+
       if (seller === null) return fail("not_found");
+
       // 確認中・却下・凍結中の組織に一次情報の資材オーナー権限を渡さない。
       if (seller.status !== "approved") return fail("conflict");
     }
@@ -435,8 +478,10 @@ export async function setMaterialSeller(
 
     if (error !== null) {
       reportError("claim 紐づけの更新に失敗", error);
+
       return fail("internal");
     }
+
     return succeed(null);
   });
 }
@@ -452,10 +497,13 @@ export async function setMaterialPublicationStatus(
       .select("content_revision")
       .eq("id", materialId)
       .maybeSingle();
+
     if (loadError !== null) {
       reportError("資材公開状態の取得に失敗", loadError);
+
       return fail("internal");
     }
+
     if (material === null) return fail("not_found");
 
     const { error } = await supabase
@@ -466,10 +514,13 @@ export async function setMaterialPublicationStatus(
         content_revision: material.content_revision + 1,
       })
       .eq("id", materialId);
+
     if (error !== null) {
       reportError("資材公開状態の更新に失敗", error);
+
       return fail("internal");
     }
+
     return succeed(null);
   });
 }

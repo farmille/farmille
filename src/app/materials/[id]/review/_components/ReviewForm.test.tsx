@@ -27,6 +27,7 @@ function renderForm(
       initialValues={{ cropIds: [], rating: 0, body, pesticideAck: false, photos }}
     />,
   );
+
   return screen.getByRole("textbox", { name: "感想口コミ本文" });
 }
 
@@ -35,6 +36,7 @@ beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://supabase.example.test");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "test-publishable-key");
 });
+
 afterEach(() => {
   cleanup();
   vi.unstubAllEnvs();
@@ -48,6 +50,7 @@ describe("感想口コミ本文", () => {
     const caption = screen.getByRole("textbox", { name: /タイトル.*1枚目の写真/ });
     fireEvent.change(caption, { target: { value: "変更したタイトル" } });
     const form = caption.closest("form");
+
     if (form === null) throw new Error("口コミフォームがありません。");
     act(() => form.reset());
     expect(caption).toHaveValue("変更したタイトル");

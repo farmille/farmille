@@ -9,8 +9,11 @@ export function ReportLeaveWarning() {
       event.preventDefault();
       event.returnValue = "";
     };
+
     window.addEventListener("beforeunload", warn);
+
     return () => window.removeEventListener("beforeunload", warn);
   });
+
   return null;
 }

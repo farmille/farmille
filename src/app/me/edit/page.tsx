@@ -48,6 +48,7 @@ export default async function MeEditPage() {
     getProfileDetails(access.session.userId),
     getProfileOptions(),
   ]);
+
   if (!details.ok || !options.ok) throw new Error("プロフィール設定の取得に失敗しました。");
 
   return (

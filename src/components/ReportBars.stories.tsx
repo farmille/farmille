@@ -39,9 +39,13 @@ const meta = {
     ],
   },
 } satisfies Meta<typeof ReportBars>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Percent: Story = {};
+
 export const NegativeAndLongLabels: Story = {
   args: {
     title: "前年比の収量の増減",
@@ -65,6 +69,7 @@ export const NegativeAndLongLabels: Story = {
     ],
   },
 };
+
 export const WithoutUnit: Story = {
   args: {
     title: "株数",
@@ -78,6 +83,7 @@ export const WithoutUnit: Story = {
     ],
   },
 };
+
 export const ByVariety: Story = {
   args: {
     title: "可販重量",
@@ -105,6 +111,7 @@ export const ByVariety: Story = {
     })),
   },
 };
+
 export const WithNote: Story = {
   render: (args) => (
     <>

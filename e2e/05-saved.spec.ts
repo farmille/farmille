@@ -24,6 +24,7 @@ test("お気に入り保存、マイページ一覧、比較表", async ({ page 
     }
 
     await page.goto("/me/saved");
+
     for (const material of materials) {
       const materialLink = page.getByRole("link", { name: new RegExp(material.name) });
       await expect(materialLink).toBeVisible();
@@ -33,11 +34,13 @@ test("お気に入り保存、マイページ一覧、比較表", async ({ page 
     await page.getByRole("button", { name: "比較する" }).click();
     await expect(page).toHaveURL(/\/me\/saved\/compare\?/);
     await expect(page.getByRole("table")).toBeVisible();
+
     for (const material of materials) {
       await expect(page.getByText(material.name, { exact: true })).toBeVisible();
     }
   } finally {
     await deleteAuthUsersByEmail(user.email);
+
     for (const material of materials) {
       await deleteMaterial(material.id);
     }

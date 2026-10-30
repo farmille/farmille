@@ -38,10 +38,12 @@ export async function signupGeneral(
   await page.getByLabel("メールアドレス").fill(input.email);
   await page.getByRole("button", { name: "認証メールを送信" }).click();
   await expect(page.getByText("メールをご確認ください", { exact: true })).toBeVisible();
+
   const mail = await registrationMail(
     input.email,
     "【Farmille】メールアドレスの確認（会員登録はまだ完了していません）",
   );
+
   await page.goto(registrationLink(mail.Text));
   await expect(page).toHaveURL(/\/signup\/complete/);
   await expect(page.getByLabel("メールアドレス")).toHaveValue(input.email);
@@ -109,15 +111,19 @@ export async function loginAdminAndEnrollMfa(
   await loginAdminWithPassword(page, admin, next);
 
   const enrollmentButton = page.getByRole("button", { name: "登録を始める" });
+
   if (process.env.CAPTURE_SCREEN_FLOW === "1") {
     await captureScreenFlow(page, "60-admin-mfa.png");
   }
+
   await waitForReactHydration(enrollmentButton);
   await enrollmentButton.click();
+
   const secretLocator = page
     .locator("span")
     .filter({ hasText: /^[A-Z2-7]+$/ })
     .first();
+
   const secret = (await secretLocator.textContent())?.trim();
 
   if (secret === undefined || secret.length === 0) {
@@ -139,6 +145,7 @@ export async function loginAdminAndEnrollMfa(
   await expect(page).toHaveURL((url) => url.pathname === expectedPathname, {
     timeout: COLD_NAVIGATION_TIMEOUT_MS,
   });
+
   return secret;
 }
 
@@ -151,7 +158,9 @@ export async function fillUsageReportForSubmission(
     variety === null
       ? page.getByRole("checkbox", { name: "不明・なし", exact: true })
       : page.getByLabel("品種", { exact: true });
+
   await waitForReactHydration(varietyInput);
+
   if (variety === null) await varietyInput.check();
   else await varietyInput.fill(variety);
   await page.getByRole("button", { name: /^使用目的：/ }).click();
@@ -170,12 +179,14 @@ export async function fillUsageReportForSubmission(
     .fill("9月1日に定植、9月10日に施用しました。");
   await page.getByRole("checkbox", { name: "資材を使った日（処理日）を記入した" }).check();
   await expect(page.getByLabel("区の名前").nth(0)).toHaveValue("無処理区");
+
   for (const [index, description] of [
     "10株。資材なし。ほかは同じ条件です。",
     "10株。1000倍、200L/10aを1回葉面散布しました。",
   ].entries()) {
     await page.getByLabel("区の説明").nth(index).fill(description);
   }
+
   await page.getByLabel("調査項目1の名前", { exact: true }).fill("活着率");
   await page.getByRole("button", { name: /^文章で書く/ }).click();
   await page

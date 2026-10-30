@@ -55,21 +55,26 @@ export type ApplicationReceiptDocument = {
 };
 
 type ReceiptEntry = [label: string, value: string | null | undefined];
+
 type ReceiptCompany = Pick<
   ApplicationReceipt["application"],
   "company_name" | "department" | "contact_name" | "account_id" | "email" | "phone"
 >;
 
 const targetSchema = v.picklist(["new", "existing"]);
+
 const targetLabels = {
   new: "資材の新規掲載",
   existing: "掲載済み資材の資材オーナー権限",
 } as const;
+
 const requestTypeSchema = v.picklist(["hidden", "discontinued"]);
+
 const requestTypeLabels = {
   hidden: "資材ページの非公開",
   discontinued: "終売の表示",
 } as const;
+
 const purposeLabels = {
   package: "パッケージ資料",
   involvement: "関与を確認できる資料",
@@ -104,6 +109,7 @@ const receiptItem = (item: ApplicationReceipt["items"][number]): ReceiptItem => 
   const registration = item.company_application_registration_items;
   const owner = item.company_application_transfer_in_items;
   const removal = item.company_application_removal_items;
+
   return {
     name: item.material_name,
     request: registration && targetLabels[v.parse(targetSchema, registration.target)],
@@ -131,21 +137,26 @@ const receiptItem = (item: ApplicationReceipt["items"][number]): ReceiptItem => 
 const attachmentOwner = (items: ApplicationReceipt["items"], itemKey: string | null) => {
   if (itemKey === null) return "申請全体";
   const item = items.find(({ id }) => id === itemKey);
+
   // 申請に無い資材への資料は受付時に拒んでいるので、見つからなければデータが壊れている。
   if (!item) throw new Error(`添付資料の対象資材が見つかりません：${itemKey}`);
+
   return item.material_name;
 };
 
 const consentGroups = (consents: ApplicationReceipt["consents"]) => {
   const groups: ReceiptConsentGroup[] = [];
+
   for (const consent of consents) {
     const acceptedAt = receiptDateTime(consent.accepted_at);
     const last = groups.at(-1);
+
     // 受付票に出す秒の単位で同じなら1つにまとめ、同じ見出しのまとまりを並べない。
     if (last?.version === consent.version && last.acceptedAt === acceptedAt)
       last.texts.push(consent.text_snapshot);
     else groups.push({ version: consent.version, acceptedAt, texts: [consent.text_snapshot] });
   }
+
   return groups;
 };
 
@@ -155,6 +166,7 @@ export function applicationReceiptDocument(
 ): ApplicationReceiptDocument {
   const a = receipt.application;
   const destination = receipt.transferOut;
+
   return {
     title: applicationTitle(v.parse(applicationKindSchema, a.kind)),
     receiptNumber: a.receipt_number,
@@ -182,6 +194,7 @@ export function applicationReceiptDocument(
 }
 
 const fieldLine = ({ label, value }: ReceiptField) => `${label}：${value}`;
+
 const partyLines = (party: ReceiptParty) => [
   `法人名：${party.companyName}`,
   `部署名：${party.department}`,
@@ -195,6 +208,7 @@ export function applicationReceiptLines(
   options?: { omitMissingCorporateNumber?: boolean },
 ): string[] {
   const receiptDocument = applicationReceiptDocument(receipt, options);
+
   return [
     receiptDocument.title,
     `受付番号：${receiptDocument.receiptNumber}`,

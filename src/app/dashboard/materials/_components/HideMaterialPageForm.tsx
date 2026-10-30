@@ -1,4 +1,5 @@
 "use client";
+
 import { startTransition, useActionState } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
@@ -13,13 +14,17 @@ export function HideMaterialPageForm({ materialId }: { materialId: string }) {
   const form = useForm({ defaultValues: { note: "" } });
   const note = useStore(form.store, (state) => state.values.note);
   const router = useRouter();
+
   const [message, hide, pending] = useActionState(async () => {
     if (await hideMaterialPage({ materialId, note })) {
       router.refresh();
+
       return "";
     }
+
     return "非公開にできませんでした。資材オーナー権限と通信状態を確認してください。";
   }, "");
+
   return (
     <div>
       <p className={descriptionStyle}>

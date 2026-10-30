@@ -59,25 +59,32 @@ export function SellerReviewActions({
   manufacturerNames: string[];
 }) {
   const router = useRouter();
+
   const [state, formAction, pending] = useActionState(
     async (previous: SellerActionState, formData: FormData) => {
       const next = await sellerOperationAction(previous, formData);
+
       // RSCだけを更新し、初期パスワードを持つクライアント状態を保持する。
       if (next.status === "approved") router.refresh();
+
       return next;
     },
     initialSellerActionState,
   );
+
   const [submitting, setSubmitting] = useReducer(
     (_state: Operation | null, next: Operation | null) => next,
     null,
   );
+
   const initialValues: SellerApprovalInput = {
     selectedManufacturer: null,
     newManufacturerName: "",
     rejectedReason: "",
   };
+
   const form = useForm({ defaultValues: initialValues });
+
   const { selectedManufacturer, newManufacturerName, rejectedReason } = useStore(
     form.store,
     (state) => state.values,
@@ -86,6 +93,7 @@ export function SellerReviewActions({
   const submit = (operation: Operation, formData = new FormData()): void => {
     formData.set("sellerId", sellerId);
     formData.set("operation", operation);
+
     if (operation === "approve") {
       formData.set(
         "manufacturerName",
@@ -93,6 +101,7 @@ export function SellerReviewActions({
       );
       formData.set("createManufacturer", String(selectedManufacturer === "__new__"));
     }
+
     setSubmitting(operation);
     startTransition(() => {
       formAction(formData);

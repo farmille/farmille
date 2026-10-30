@@ -200,6 +200,7 @@ export function Dialog({
 }: DialogProps) {
   const styles = dialogRecipe({ size, wide, fit });
   const titleNode = <BaseDialog.Title className={styles.title}>{title}</BaseDialog.Title>;
+
   return (
     <BaseDialog.Root open={open} onOpenChange={onOpenChange}>
       {trigger === undefined ? null : <BaseDialog.Trigger render={trigger} />}

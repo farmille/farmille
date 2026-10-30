@@ -10,11 +10,17 @@ import { pickReportCover } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
+
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
+
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
+
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
+
 type UsageReportMediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
+
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
+
 type ViewCountRow = Database["public"]["Views"]["view_counts_total"]["Row"];
 
 export type ContentFeedFilter = "all" | "report" | "article";
@@ -73,9 +79,12 @@ function reportQueryError<ErrorValue>(operation: string, error: ErrorValue): voi
 
 function byPublishedAtDesc(left: FeedKey, right: FeedKey): number {
   const dateOrder = right.publishedAt.localeCompare(left.publishedAt);
+
   if (dateOrder !== 0) return dateOrder;
   const kindOrder = left.kind.localeCompare(right.kind);
+
   if (kindOrder !== 0) return kindOrder;
+
   return left.id.localeCompare(right.id);
 }
 
@@ -110,11 +119,13 @@ async function loadCounts(
 
   if (helpfulResult.error !== null) {
     reportQueryError("参考になった件数の取得に失敗", helpfulResult.error);
+
     return fail("internal");
   }
 
   if (viewResult.error !== null) {
     reportQueryError("閲覧数の取得に失敗", viewResult.error);
+
     return fail("internal");
   }
 
@@ -124,16 +135,20 @@ async function loadCounts(
   for (const row of helpfulRows) {
     if (row.target_id === null || row.helpful_count === null) {
       reportQueryError("参考になった件数にNULLが含まれる", row);
+
       return fail("internal");
     }
+
     helpfulById.set(row.target_id, row.helpful_count);
   }
 
   for (const row of viewRows) {
     if (row.target_id === null || row.view_count === null) {
       reportQueryError("閲覧数にNULLが含まれる", row);
+
       return fail("internal");
     }
+
     viewsById.set(row.target_id, row.view_count);
   }
 
@@ -171,6 +186,7 @@ async function fetchPublishedArticles(
 
   if (error !== null) {
     reportQueryError("公開記事一覧の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -219,6 +235,7 @@ async function fetchPublishedReports(
 
   if (error !== null) {
     reportQueryError("公開実証詳細レポート一覧の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -232,11 +249,13 @@ function toArticleItem(
 ): Result<ContentFeedArticleItem> {
   if (row.published_at === null) {
     reportQueryError("published なのに published_at が無い", { id: row.id });
+
     return fail("internal");
   }
 
   if (row.seller?.official_name == null) {
     reportQueryError("記事のメーカー情報が欠落", { id: row.id });
+
     return fail("internal");
   }
 
@@ -259,13 +278,16 @@ function toReportItem(
 ): Result<ContentFeedReportItem> {
   if (row.published_at === null) {
     reportQueryError("published なのに published_at が無い", { id: row.id });
+
     return fail("internal");
   }
 
   const crop = reportCrop(row);
   const author = postAuthor(row.author);
+
   if (author === null || crop === null || row.material === null) {
     reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
+
     return fail("internal");
   }
 
@@ -315,6 +337,7 @@ export async function listContentFeed({
   ]);
 
   if (!articlesResult.ok) return articlesResult;
+
   if (!reportsResult.ok) return reportsResult;
 
   const keys: FeedKey[] = [];
@@ -322,19 +345,23 @@ export async function listContentFeed({
   for (const row of articlesResult.data) {
     if (row.published_at === null) {
       reportQueryError("published なのに published_at が無い", { id: row.id });
+
       return fail("internal");
     }
+
     keys.push({ kind: "article", id: row.id, publishedAt: row.published_at });
   }
 
   for (const row of reportsResult.data) {
     if (row.published_at === null) {
       reportQueryError("published なのに published_at が無い", { id: row.id });
+
       return fail("internal");
     }
 
     if (row.material === null) {
       reportQueryError("実証詳細レポートの資材が欠落", { id: row.id });
+
       return fail("internal");
     }
 
@@ -353,8 +380,8 @@ export async function listContentFeed({
   const totalPages = total === 0 ? 0 : Math.ceil(total / perPage);
   const pageKeys = keys.slice(from, to + 1);
 
-  const articleIds = pageKeys.filter((k) => k.kind === "article").map((k) => k.id);
-  const reportIds = pageKeys.filter((k) => k.kind === "report").map((k) => k.id);
+  const articleIds = pageKeys.flatMap((k) => (k.kind === "article" ? [k.id] : []));
+  const reportIds = pageKeys.flatMap((k) => (k.kind === "report" ? [k.id] : []));
 
   const articleById = new Map(articlesResult.data.map((row) => [row.id, row]));
   const reportById = new Map(reportsResult.data.map((row) => [row.id, row]));
@@ -365,6 +392,7 @@ export async function listContentFeed({
   ]);
 
   if (!articleCounts.ok) return articleCounts;
+
   if (!reportCounts.ok) return reportCounts;
 
   const items: ContentFeedItem[] = [];
@@ -372,30 +400,38 @@ export async function listContentFeed({
   for (const key of pageKeys) {
     if (key.kind === "article") {
       const row = articleById.get(key.id);
+
       if (row === undefined) {
         reportQueryError("ページ内の記事が見つからない", key);
+
         return fail("internal");
       }
+
       const item = toArticleItem(
         row,
         articleCounts.data.helpfulById.get(key.id) ?? 0,
         articleCounts.data.viewsById.get(key.id) ?? 0,
       );
+
       if (!item.ok) return item;
       items.push(item.data);
       continue;
     }
 
     const row = reportById.get(key.id);
+
     if (row === undefined) {
       reportQueryError("ページ内の実証詳細レポートが見つからない", key);
+
       return fail("internal");
     }
+
     const item = toReportItem(
       row,
       reportCounts.data.helpfulById.get(key.id) ?? 0,
       reportCounts.data.viewsById.get(key.id) ?? 0,
     );
+
     if (!item.ok) return item;
     items.push(item.data);
   }

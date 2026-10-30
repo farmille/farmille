@@ -22,11 +22,13 @@ export const materialPageStack = css({
   // 色は原稿の素の要素にだけ付け、カードやリンク部品が自分で決めた色を上書きしない
   "& h2:not([class]), & a:not([class])": { color: "text.brand" },
 });
+
 export const materialPageText = css({
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
   textStyle: "prose",
 });
+
 /** メーカー原稿の本文と資料をプレビューする。 */
 export function MaterialPageContent({
   content,

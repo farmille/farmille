@@ -42,6 +42,7 @@ function StatefulPicker(props: ComponentProps<typeof ReviewCropPicker>) {
     (_: readonly string[], next: readonly string[]) => next,
     props.value,
   );
+
   return (
     <ReviewCropPicker
       {...props}
@@ -68,6 +69,7 @@ const meta = {
 } satisfies Meta<typeof ReviewCropPicker>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);

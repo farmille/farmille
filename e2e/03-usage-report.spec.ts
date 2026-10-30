@@ -69,9 +69,11 @@ test("実証詳細レポートの下書き保存、提出、pending の公開側
     await expect(page.getByRole("heading", { name: "レポートは提出済みです" })).toBeVisible();
 
     const pending = await usageReportByAuthor(user.id);
+
     if (pending === null) {
       throw new Error("提出した実証詳細レポートを取得できませんでした。");
     }
+
     expect(pending.status).toBe("pending");
     expect(await usageReportPlots(pending.id)).toEqual([
       "桃太郎／untreated",
@@ -94,6 +96,7 @@ test("2つのタブの新規下書きは1件だけ保存し、競合したタブ
   const user = await createGeneralUser("usageconflict");
   const material = await createMaterial("usageconflict");
   const reportPath = `/materials/${material.id}/report/new`;
+
   try {
     await loginGeneral(page, user, reportPath);
     const second = await page.context().newPage();
@@ -104,6 +107,7 @@ test("2つのタブの新規下書きは1件だけ保存し、競合したタブ
       "下書きを保存しました",
     );
     const saved = await usageReportByAuthor(user.id);
+
     if (saved === null) throw new Error("先に保存した下書きがありません。");
     await second
       .getByRole("textbox", { name: "結果・感想", exact: true })

@@ -36,9 +36,12 @@ type ArticleListItemProps = {
 export function ArticleListItem({ article }: ArticleListItemProps) {
   const router = useRouter();
   const isPublished = article.status === "published";
+
   const [state, toggleStatus, pending] = useActionState(async () => {
     const result = await setArticleStatusAction(article.id, isPublished ? "draft" : "published");
+
     if (result.status === "success") router.refresh();
+
     return result;
   }, initialSellerArticleFormState);
 

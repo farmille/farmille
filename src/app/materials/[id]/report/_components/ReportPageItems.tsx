@@ -143,7 +143,9 @@ function ReportNumericGraphs({
   const charts = item.graphs
     .map((graph) => ({ graph, groups: reportBarGroups(graphSections(graph, plots, layout)) }))
     .filter(({ groups }) => groups.length > 0);
+
   if (charts.length === 0) return <p className={errorText}>グラフにできる数値が入っていません</p>;
+
   return charts.map(({ graph, groups }) => (
     <ReportBars
       key={graph.id}
@@ -175,11 +177,14 @@ export function ReportPageItems({
 }) {
   const update = (id: string, next: (item: ReportPageItem) => ReportPageItem) =>
     onChange((current) => current.map((item) => (item.id === id ? next(item) : item)));
+
   const remove = (id: string) =>
     onChange((current) => {
       const rest = current.filter((item) => item.id !== id);
+
       return rest.length > 0 ? rest : [createReportPageItem()];
     });
+
   return (
     <>
       <p className={docLead}>
@@ -189,6 +194,7 @@ export function ReportPageItems({
       </p>
       {items.map((item, index) => {
         const done = reportPageItemDone(item);
+
         return (
           <div key={item.id} className={block}>
             <div className={head}>

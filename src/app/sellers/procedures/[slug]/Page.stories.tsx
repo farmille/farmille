@@ -12,6 +12,9 @@ const meta = {
   },
   args: { params: Promise.resolve({ slug: "owner" }) },
 } satisfies Meta<typeof Page>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

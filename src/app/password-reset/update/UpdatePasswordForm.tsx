@@ -14,9 +14,11 @@ import { fieldErrorsOf, initialAuthFormState, type AuthFormState } from "@/lib/a
 export function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
   const form = useForm({ defaultValues: { password: "", passwordConfirmation: "" } });
   const values = useStore(form.store, (state) => state.values);
+
   const [state, formAction] = useActionState(async (previous: AuthFormState, data: FormData) => {
     const result = await updatePasswordAction(previous, data);
     form.reset();
+
     return result;
   }, initialAuthFormState);
 

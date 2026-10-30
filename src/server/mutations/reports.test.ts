@@ -16,6 +16,7 @@ describe("isReportTargetType", () => {
     for (const targetType of REPORT_TARGET_TYPES) {
       expect(isReportTargetType(targetType)).toBe(true);
     }
+
     expect(isReportTargetType("material")).toBe(false);
     expect(isReportTargetType("answer")).toBe(false);
   });
@@ -26,6 +27,7 @@ describe("isReportReasonCode", () => {
     for (const option of REPORT_REASON_OPTIONS) {
       expect(isReportReasonCode(option.value)).toBe(true);
     }
+
     expect(isReportReasonCode("unknown-reason")).toBe(false);
   });
 });
@@ -33,6 +35,7 @@ describe("isReportReasonCode", () => {
 describe("createContentReport", () => {
   it("UUID形式でないtargetIdはDBに触れずnot_foundを返す", async () => {
     const createSupabase = vi.fn<typeof createServerSupabase>();
+
     const result = await createContentReportWithSupabase(
       {
         reporterUserId,

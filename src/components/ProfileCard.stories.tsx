@@ -47,6 +47,7 @@ const meta = {
 } satisfies Meta<typeof ProfileCard>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Public: Story = {};

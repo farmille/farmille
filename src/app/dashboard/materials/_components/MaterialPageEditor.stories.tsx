@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MaterialPageEditor } from "./MaterialPageEditor";
+
 const meta = {
   title: "Pages/dashboard/materials/MaterialPageEditor",
   component: MaterialPageEditor,
@@ -25,9 +26,13 @@ const meta = {
     imageUrl: "/images/container-shapes/5.png",
   },
 } satisfies Meta<typeof MaterialPageEditor>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
+
 export const TrialAndRegistration: Story = {
   args: {
     initialContent: {
@@ -51,6 +56,7 @@ export const TrialAndRegistration: Story = {
     },
   },
 };
+
 export const Pending: Story = {
   args: { pendingVersion: "22222222-2222-4222-8222-222222222222" },
 };

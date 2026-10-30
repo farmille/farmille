@@ -12,6 +12,7 @@ it("案内メールに確認リンク・再手続きの入口・企業会員ID�
   const site = "https://www.farmille.com";
   const confirm = `${site}/auth/confirm?token_hash=abc&type=magiclink&registration=1`;
   const reset = `${site}/password-reset/update?token_hash=abc`;
+
   const cases = [
     { mail: registrationVerificationEmail(confirm, site), links: [confirm, `${site}/signup`] },
     {
@@ -31,6 +32,7 @@ it("案内メールに確認リンク・再手続きの入口・企業会員ID�
       ],
     },
   ];
+
   for (const { mail, links } of cases) {
     for (const link of links) expect(mail.text).toContain(link);
     expect(mail.text).toContain("contact@farmille.com");

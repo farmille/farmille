@@ -32,6 +32,7 @@ function submittedValues(formData: FormData): AuthFormValues {
 
   for (const name of ["handle", "bio", "links"]) {
     const value = formDataString(formData.get(name));
+
     if (value !== null) values[name] = value;
   }
 
@@ -81,6 +82,7 @@ export async function updateProfileAction(
   }
 
   const avatar = formData.get("avatar");
+
   if (avatar instanceof File && avatar.size > 0) {
     if (avatar.size > AVATAR_MAX_BYTES) {
       return {
@@ -94,6 +96,7 @@ export async function updateProfileAction(
     }
 
     const uploadResult = await uploadOwnAvatar(session.data.userId, avatar);
+
     if (!uploadResult.ok) {
       return {
         status: "error",
@@ -131,5 +134,6 @@ export async function updateProfileAction(
 /** 欄を離れたときの確認。自分の今のニックネーム以外で使われていれば、保存時と同じ文言を返す。 */
 export async function profileHandleCheckAction(handle: string): Promise<string | null> {
   const taken = await isProfileHandleTaken(handle);
+
   return taken.ok && taken.data ? errorMessageJa.handle_taken : null;
 }

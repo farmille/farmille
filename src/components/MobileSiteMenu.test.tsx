@@ -37,6 +37,7 @@ describe("MobileSiteMenu", () => {
     expect(await screen.findByRole("link", { name: "ログイン" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "メニューを閉じる" }));
     document.cookie = "sb-local-auth-token=1";
+
     try {
       await waitFor(() =>
         expect(screen.getByRole("button", { name: "メニュー" }).getAttribute("aria-expanded")).toBe(

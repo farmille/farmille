@@ -15,6 +15,7 @@ export function generateMetadata() {
 
 export default function LegalIndexPage() {
   const groups = [...new Set(legalDocuments.map((document) => document.group))];
+
   return (
     <>
       <Link href="/" className={legalLink}>

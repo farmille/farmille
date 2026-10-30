@@ -23,6 +23,7 @@ function blank(): UsageReportInput {
     "新藍",
     false,
   );
+
   return withAutoPlotNames(input, input, posted);
 }
 
@@ -48,14 +49,17 @@ describe("区の組み合わせ", () => {
 
   it("書き換えた区の名前は、組み合わせや品種名を変えても上書きしない", () => {
     const start = blank();
+
     const renamed = {
       ...start,
       plots: start.plots.map((plot, index) =>
         index === 1 ? { ...plot, name: "1,000倍区" } : plot,
       ),
     };
+
     const added = reportPlotEdits.addVariety(renamed, "味珠", posted);
     const variety = added.varieties[1];
+
     if (variety === undefined) throw new Error("足した品種がありません。");
     const next = reportPlotEdits.renameVariety(added, variety.id, "味珠2", posted);
     expect(names(next)).toEqual([
@@ -78,6 +82,7 @@ describe("区の組み合わせ", () => {
       "味珠・ノビテク",
     ]);
     const [first, second] = added.varieties;
+
     if (first === undefined || second === undefined) throw new Error("品種が足りません。");
     const removed = reportPlotEdits.toggle(added, second.id, { kind: "untreated" }, false, posted);
     expect(names(removed)).not.toContain("味珠・無処理");
@@ -91,6 +96,7 @@ describe("区の組み合わせ", () => {
   it("比較した資材を外すと、その資材の区も消える", () => {
     const added = reportPlotEdits.addComparedMaterial(blank(), "ノビテク", posted);
     const material = added.comparedMaterials[0];
+
     if (material === undefined) throw new Error("比較した資材がありません。");
     expect(names(added)).toEqual(["無処理区", "ヒートインパクト区", "ノビテク区"]);
     const removed = reportPlotEdits.removeComparedMaterial(added, material.id, posted);
@@ -108,6 +114,7 @@ describe("区の組み合わせ", () => {
   it("表を出す組み合わせでも、選んだ品種と資材の区を組み合わせの並びの位置に足し、名前を付ける", () => {
     const input = reportPlotEdits.addVariety(blank(), "アイコ", posted);
     const [first, second] = input.varieties;
+
     if (first === undefined || second === undefined) throw new Error("品種が2つ要ります");
     const added = reportPlotEdits.addPlot(input, first.id, { kind: "posted" }, posted);
     expect(names(added)).toEqual([
@@ -131,6 +138,7 @@ describe("区の組み合わせ", () => {
 
   it("要る区が上限に収まらない追加は断り、品種も資材も区も足さない", () => {
     let input = reportPlotEdits.addVariety(blank(), "アイコ", posted);
+
     for (let i = 0; i < 17; i += 1)
       input = reportPlotEdits.addComparedMaterial(input, `資材${i}`, posted);
     const [first] = input.varieties;
@@ -149,12 +157,14 @@ describe("区の組み合わせ", () => {
 describe("区の並びと色", () => {
   it("区に資材が無い既存のレポートは、区の順に1列で、区の順に塗る", () => {
     const input = blank();
+
     const legacy = {
       ...input,
       plots: [...input.plots, input.plots[1]].flatMap((plot) =>
         plot === undefined ? [] : [{ ...plot, id: crypto.randomUUID(), treatment: null }],
       ),
     };
+
     const layout = reportPlotLayout(legacy, posted);
     expect(layout.groups).toHaveLength(1);
     expect(layout.groups[0]?.plots.map(({ series }) => series)).toEqual(["1", "2", "3"]);
@@ -167,6 +177,7 @@ describe("区の並びと色", () => {
       "ノビテク",
       posted,
     );
+
     const layout = reportPlotLayout(input, posted);
     expect(layout.groups.map(({ variety }) => variety)).toEqual(["新藍", "味珠"]);
     expect(layout.groups[1]?.plots.map(({ series }) => series)).toEqual(["1", "2", "3"]);
@@ -180,10 +191,12 @@ describe("区の並びと色", () => {
   it("グラフの行は品種ごとの節に分かれ、値の原文を保つ", () => {
     const input = reportPlotEdits.addVariety(blank(), "味珠", posted);
     const graph = graphWithPlots({ id: crypto.randomUUID(), heading: "", rows: [] }, input.plots);
+
     const valued = {
       ...graph,
       rows: graph.rows.map((row, index) => ({ ...row, value: `${index + 1}±1 a` })),
     };
+
     const sections = graphSections(valued, input.plots, reportPlotLayout(input, posted));
     expect(sections.map(({ heading, rows }) => [heading, rows.map(({ value }) => value)])).toEqual([
       ["新藍", ["1±1 a", "2±1 a"]],

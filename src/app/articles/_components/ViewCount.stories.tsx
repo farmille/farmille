@@ -7,6 +7,9 @@ const meta = {
   component: ViewCount,
   args: { count: 12345 },
 } satisfies Meta<typeof ViewCount>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

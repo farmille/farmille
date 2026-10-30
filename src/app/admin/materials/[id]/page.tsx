@@ -50,8 +50,11 @@ export default async function AdminMaterialDetailPage({
     if (material.error === "not_found") notFound();
     throw new Error(errorMessageJa[material.error]);
   }
+
   if (!classifications.ok) throw new Error(errorMessageJa[classifications.error]);
+
   if (!sellers.ok) throw new Error(errorMessageJa[sellers.error]);
+
   const [grants, audits] = await Promise.all([
     listMaterialEditorGrants(id),
     listMaterialPageAudits(id),

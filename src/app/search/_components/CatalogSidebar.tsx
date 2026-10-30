@@ -85,16 +85,21 @@ export function CatalogSidebar({
   resultCount: number;
 }) {
   const selectedKeys = new Set(selected.map(selectedFilterKey));
+
   function hrefFor(filter: SelectedSearchFilter) {
     const key = selectedFilterKey(filter);
     const active = selectedKeys.has(key);
+
     const next = active
       ? selected.filter((item) => selectedFilterKey(item) !== key)
       : [...selected, filter];
+
     return { href: buildSearchHref({ filters: next, sort, query }), active, key };
   }
+
   function chip(filter: SelectedSearchFilter, label = filter.name) {
     const { href, active, key } = hrefFor(filter);
+
     return (
       <Link
         key={key}
@@ -109,8 +114,10 @@ export function CatalogSidebar({
       </Link>
     );
   }
+
   function row(filter: SelectedSearchFilter, count: number) {
     const { href, active, key } = hrefFor(filter);
+
     return (
       <Link
         key={key}
@@ -150,23 +157,29 @@ export function CatalogSidebar({
       </Link>
     );
   }
+
   const tag = (filter: SearchFilterItem) => chip({ ...filter, kind: "filter" });
   const cropCounts = new Map<string, number>();
   const groupCounts = new Map<string, number>();
   const genreCounts = new Map<string, number>();
+
   for (const material of catalog.materials) {
     for (const item of material.material_crops)
       cropCounts.set(item.crop_id, (cropCounts.get(item.crop_id) ?? 0) + 1);
+
     for (const item of material.material_crop_groups)
       groupCounts.set(item.crop_group_id, (groupCounts.get(item.crop_group_id) ?? 0) + 1);
+
     for (const item of material.material_ingredient_categories)
       genreCounts.set(
         item.ingredient_category_id,
         (genreCounts.get(item.ingredient_category_id) ?? 0) + 1,
       );
   }
+
   function groupChip(group: CatalogSearch["groups"][number]) {
     const count = groupCounts.get(group.id) ?? 0;
+
     return count
       ? chip(
           { kind: "filter", category: "crop_group", id: group.id, name: group.name },
@@ -174,15 +187,20 @@ export function CatalogSidebar({
         )
       : null;
   }
+
   function cropChip(crop: CatalogSearch["crops"][number]) {
     return chip({ kind: "filter", category: "crop", id: crop.id, name: crop.name });
   }
+
   const effectGroups: Array<{ id: string; name: string; effects: CatalogSearch["effects"] }> = [];
+
   for (const effect of catalog.effects) {
     const group = effectGroups.at(-1);
+
     if (group?.id === effect.categoryId) group.effects.push(effect);
     else effectGroups.push({ id: effect.categoryId, name: effect.categoryName, effects: [effect] });
   }
+
   const genres = search.filters
     .filter(
       (filter) =>
@@ -194,11 +212,14 @@ export function CatalogSidebar({
 
   function selectedChips(match: (filter: SelectedSearchFilter) => boolean) {
     const items = selected.filter(match);
+
     if (!items.length) return null;
+
     return (
       <div className={css(chipList, { pt: "0", pb: "2" })}>
         {items.map((filter) => {
           const { href, key } = hrefFor(filter);
+
           return (
             <span key={key} className={selectedChip.root}>
               <span className={selectedChip.category}>選択中</span>
@@ -218,10 +239,12 @@ export function CatalogSidebar({
       </div>
     );
   }
+
   const isFilter = (...categories: SearchFilterItem["category"][]) =>
     function (filter: SelectedSearchFilter) {
       return filter.kind === "filter" && categories.includes(filter.category);
     };
+
   function filterItems(filters: SearchFilterItem[]): SideFilterItem[] {
     return filters.map((filter) => ({
       key: `${filter.category}:${filter.id}`,
@@ -229,6 +252,7 @@ export function CatalogSidebar({
       node: tag(filter),
     }));
   }
+
   const conditionCount = selected.length + (query ? 1 : 0);
 
   const makerItems: SideFilterItem[] = search.makers.map((name) => ({
@@ -236,6 +260,7 @@ export function CatalogSidebar({
     terms: [name],
     node: chip({ kind: "maker", name }),
   }));
+
   const sections = (
     <>
       <div
@@ -317,17 +342,20 @@ export function CatalogSidebar({
           .filter((group) => group.hierarchy_level === "major")
           .map((major) => {
             const groups = catalog.groups.filter((group) => group.parent_id === major.id);
+
             const visible = catalog.crops.filter(
               (crop) =>
                 cropCounts.has(crop.id) &&
                 cropAncestors(crop.groupId, catalog.groups).includes(major.id),
             );
+
             if (
               !visible.length &&
               !groupCounts.has(major.id) &&
               !groups.some((group) => groupCounts.has(group.id))
             )
               return null;
+
             return (
               <details
                 key={major.id}
@@ -360,8 +388,10 @@ export function CatalogSidebar({
                 </div>
                 {groups.map((group) => {
                   const crops = visible.filter((crop) => crop.groupId === group.id);
+
                   if ((!crops.length || visible.length <= 8) && !groupCounts.has(group.id))
                     return null;
+
                   return (
                     <div key={group.id}>
                       <p

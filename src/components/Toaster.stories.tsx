@@ -10,6 +10,7 @@ const meta = {
 } satisfies Meta<typeof Toaster>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 async function openToast({ canvasElement }: { canvasElement: HTMLElement }) {

@@ -16,12 +16,19 @@ import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
+
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
+
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+
 type MediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
+
 type ApplicationRow = Database["public"]["Tables"]["usage_report_applications"]["Row"];
+
 type MetricRow = Database["public"]["Tables"]["usage_report_metrics"]["Row"];
+
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
+
 type ViewCountRow = Database["public"]["Views"]["view_counts_total"]["Row"];
 
 export type RecentUsageReportItem = {
@@ -65,7 +72,9 @@ export async function listRecentUsageReports({
   }
 
   const supabase = await createServerSupabase();
+
   if (ids?.length === 0) return succeed([]);
+
   let query = supabase
     .rpc("list_usage_report_previews")
     .select(
@@ -108,6 +117,7 @@ export async function listRecentUsageReports({
 
   if (error !== null) {
     reportQueryError("新着実証詳細レポートの取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -124,6 +134,7 @@ export async function listRecentUsageReports({
 
     if (helpfulError !== null) {
       reportQueryError("実証詳細レポートの参考になった件数の取得に失敗", helpfulError);
+
       return fail("internal");
     }
 
@@ -132,8 +143,10 @@ export async function listRecentUsageReports({
     for (const row of counts) {
       if (row.target_id === null || row.helpful_count === null) {
         reportQueryError("参考になった件数にNULLが含まれる", row);
+
         return fail("internal");
       }
+
       helpfulById.set(row.target_id, row.helpful_count);
     }
   }
@@ -143,13 +156,16 @@ export async function listRecentUsageReports({
   for (const row of rows) {
     if (row.published_at === null) {
       reportQueryError("published なのに published_at が無い", { id: row.id });
+
       return fail("internal");
     }
 
     const crop = reportCrop(row);
     const author = postAuthor(row.author);
+
     if (author === null || crop === null || row.material === null) {
       reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
+
       return fail("internal");
     }
 
@@ -279,23 +295,28 @@ async function getReportCounts(
 
   if (helpfulResult.error !== null) {
     reportQueryError("実証詳細レポートの参考になった件数の取得に失敗", helpfulResult.error);
+
     return fail("internal");
   }
 
   if (viewResult.error !== null) {
     reportQueryError("実証詳細レポートの閲覧数の取得に失敗", viewResult.error);
+
     return fail("internal");
   }
 
   const helpfulRow: Pick<HelpfulCountRow, "target_id" | "helpful_count"> | null =
     helpfulResult.data;
+
   let helpfulCount = 0;
 
   if (helpfulRow !== null) {
     if (helpfulRow.helpful_count === null) {
       reportQueryError("参考になった件数にNULLが含まれる", helpfulRow);
+
       return fail("internal");
     }
+
     helpfulCount = helpfulRow.helpful_count;
   }
 
@@ -305,8 +326,10 @@ async function getReportCounts(
   if (viewRow !== null) {
     if (viewRow.view_count === null) {
       reportQueryError("閲覧数にNULLが含まれる", viewRow);
+
       return fail("internal");
     }
+
     viewCount = viewRow.view_count;
   }
 
@@ -315,6 +338,7 @@ async function getReportCounts(
 
 function toMediaType(value: string): "photo" | "video" | null {
   if (value === "photo" || value === "video") return value;
+
   return null;
 }
 
@@ -328,9 +352,11 @@ export async function getPublishedUsageReport(
 
   const supabase = await createServerSupabase();
   const session = await getSessionUser();
+
   // 未ログインではDB側で本文を切り落とした公開用データだけを取得する。
   const query =
     session === null ? supabase.rpc("list_usage_report_previews") : supabase.from("usage_reports");
+
   const { data, error } = await query
     .select(
       `
@@ -390,6 +416,7 @@ export async function getPublishedUsageReport(
 
   if (error !== null) {
     reportQueryError("公開実証詳細レポートの取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -402,12 +429,15 @@ export async function getPublishedUsageReport(
 
   if (row.published_at === null) {
     reportQueryError("published なのに published_at が無い", { id: row.id });
+
     return fail("internal");
   }
 
   const author = postAuthor(row.author);
+
   if (author === null || crop === null || row.material === null) {
     reportQueryError("実証詳細レポートの関連データが欠落", { id: row.id });
+
     return fail("internal");
   }
 
@@ -417,10 +447,13 @@ export async function getPublishedUsageReport(
     (a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id),
   )) {
     const mediaType = toMediaType(item.media_type);
+
     if (mediaType === null) {
       reportQueryError("未知の media_type", item);
+
       return fail("internal");
     }
+
     media.push({
       id: item.id,
       url: row.form_version === 2 ? reportMediaUrl(item.url, row.author_user_id) : item.url,
@@ -441,10 +474,14 @@ export async function getPublishedUsageReport(
     row.form_version === 2 && session !== null
       ? await getStructuredUsageReport(row.id, supabase)
       : succeed(null);
+
   if (!structured.ok) return structured;
+
   if (structured.data !== null && !structured.data.showCity) structured.data.city = "";
+
   const documentUrls =
     structured.data === null ? succeed([]) : await getReportDocumentUrls(structured.data, supabase);
+
   if (!documentUrls.ok) return documentUrls;
 
   return succeed({

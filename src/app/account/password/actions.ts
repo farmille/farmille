@@ -17,6 +17,7 @@ export async function changePasswordAction(
     password: formData.get("password"),
     passwordConfirmation: formData.get("passwordConfirmation"),
   });
+
   if (!input.success)
     return {
       status: "error",
@@ -25,6 +26,7 @@ export async function changePasswordAction(
     };
   const user = await getSessionUser();
   const result = await changePassword(input.output);
+
   if (!result.ok)
     return {
       status: "error",

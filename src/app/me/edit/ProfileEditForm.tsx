@@ -74,14 +74,18 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
     bio: details.bio ?? "",
     links: details.links.join("\n"),
   };
+
   const form = useForm({ defaultValues: defaults });
   const values = useStore(form.store, (state) => state.values);
+
   const [state, formAction] = useActionState(
     async (previous: AuthFormState, formData: FormData) => {
       const avatar = form.state.values.avatar;
+
       if (avatar === null) formData.delete("avatar");
       else formData.set("avatar", avatar);
       await shrinkAvatarIn(formData);
+
       return updateProfileAction(previous, formData);
     },
     initialAuthFormState,
@@ -99,6 +103,7 @@ export function ProfileEditForm({ avatar, profile, details, options }: ProfileEd
       onRestore={(restored) => {
         for (const name of ["handle", "bio", "links"] as const) {
           const value = restored.get(name)?.[0];
+
           if (value !== undefined) form.setFieldValue(name, value);
         }
       }}

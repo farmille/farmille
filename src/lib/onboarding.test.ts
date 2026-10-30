@@ -26,6 +26,7 @@ function userOf(appMetadata: Record<string, string>): User {
 
 function memoryStorage(): Storage {
   const values = new Map<string, string>();
+
   return {
     get length() {
       return values.size;
@@ -117,6 +118,7 @@ describe("初回ログインの案内の進み具合", () => {
     ] as const) {
       expect(onboardingStepAfterNavigation(step, "/materials/abc/review/new")).toBe("finish");
     }
+
     expect(onboardingStepAfterNavigation("materialScroll", "/materials/abc")).toBeNull();
     expect(onboardingStepAfterNavigation("materialScroll", "/search")).toBeNull();
   });

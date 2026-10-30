@@ -47,6 +47,7 @@ it("受付メールは指定の申請種別・受付番号と宛名を示す", (
     },
     "https://www.farmille.com/dashboard/applications/example",
   );
+
   expect(receipt.subject).toBe("【Farmille】ご申請を受け付けました（受付番号 12）");
   expect(receipt.text).toContain("申請種別：資材掲載・資材オーナー権限申請\n");
   expect(receipt.text).toContain("農業資材株式会社\n山田太郎 様");

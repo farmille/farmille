@@ -22,6 +22,7 @@ export function NewApplicationForm({
   const [state, begin, pending] = useActionState<Awaited<
     ReturnType<typeof beginApplication>
   > | null>(() => beginApplication(kind), null);
+
   // 呼び出し側が種類を key に渡すので、種類ごとに1回だけ作る。StrictModeの再実行では作らない。
   const started = useRef(false);
   useMountEffect(() => {
@@ -29,6 +30,7 @@ export function NewApplicationForm({
     started.current = true;
     startTransition(begin);
   });
+
   if (state?.ok)
     return (
       <CompanyApplicationForm
@@ -38,7 +40,9 @@ export function NewApplicationForm({
         recipient={recipient}
       />
     );
+
   if (state === null || pending) return <p role="status">申請フォームを準備しています…</p>;
+
   return (
     <div>
       <Notice tone="error">{errorMessageJa[state.error]}</Notice>

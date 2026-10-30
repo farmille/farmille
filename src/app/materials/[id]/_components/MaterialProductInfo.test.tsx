@@ -44,9 +44,11 @@ describe("MaterialProductInfo", () => {
     expect(screen.getByRole("heading", { name: "製品詳細" })).toBeInTheDocument();
     expect(screen.getByText("主な成分")).toBeInTheDocument();
     expect(screen.queryByText("正式名称")).not.toBeInTheDocument();
+
     for (const name of ["製品説明", "施用タイミング", "リンク・資料"]) {
       expect(screen.queryByRole("heading", { name })).not.toBeInTheDocument();
     }
+
     expect(screen.queryByText("−")).not.toBeInTheDocument();
   });
 

@@ -60,6 +60,7 @@ const screens = [
   ["/reports/[id]", "公開使用レポート", "59-public-report"],
   ["/admin/mfa", "運営の2要素認証", "60-admin-mfa"],
 ];
+
 /** @type {Array<[string, string, string, Array<[string, string[]]>]>} */
 const groups = [
   [
@@ -182,8 +183,10 @@ const groups = [
     ],
   ],
 ];
+
 const root = "docs/rebuild/assets/account-flow";
 const screenMap = new Map(screens.map((entry) => [entry[0], entry]));
+
 function pages(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) =>
     entry.isDirectory()
@@ -197,32 +200,44 @@ function pages(directory) {
         : [],
   );
 }
+
 const missing = pages("src/app").filter(
   (path) => !path.startsWith("/dev/") && !screenMap.has(path),
 );
+
 if (missing.length) throw new Error(`資料にない画面：${missing.join(", ")}`);
+
 const escape = (value) =>
   value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
+
 function card(path, account) {
   const screen = screenMap.get(path);
+
   if (!screen) throw new Error(`画面が未定義：${path}`);
   const [, label, defaultFile] = screen;
+
   const file =
     path === "/account/password"
       ? `62-password-change-${account === "manufacturer" ? "seller" : account}`
       : defaultFile;
+
   if (!existsSync(`${root}/screens/${file}.png`)) throw new Error(`未撮影：${file}`);
+
   if (!existsSync(`${root}/screens/pc/${file}.png`)) throw new Error(`PC未撮影：${file}`);
+
   return `<figure><div class="captures"><a href="screens/${file}.png" target="_blank" rel="noopener"><span>SP・375px</span><img src="screens/${file}.png" alt="${escape(label)}のSP実画面" loading="lazy"></a><a href="screens/pc/${file}.png" target="_blank" rel="noopener"><span>PC・1280px</span><img src="screens/pc/${file}.png" alt="${escape(label)}のPC実画面" loading="lazy"></a></div><figcaption><strong>${label}</strong><small>${escape(path)}</small></figcaption></figure>`;
 }
+
 const arrow =
   '<svg class="arrow" viewBox="0 0 40 30" aria-label="遷移"><path d="M2 15H34M25 6L34 15L25 24" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+
 const body = groups
   .map(
     ([id, title, note, flows]) =>
       `<section id="${id}"><h2>${title}</h2><p>${note}</p>${flows.map(([label, paths]) => `<article><h3>${label}</h3><div class="flow">${paths.map((path) => card(path, id)).join(arrow)}</div></article>`).join("")}</section>`,
   )
   .join("");
+
 writeFileSync(
   `${root}/20260908-account-screen-flow.html`,
   `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Farmille アカウント別画面遷移図</title><style>
@@ -230,4 +245,5 @@ writeFileSync(
 .captures{display:grid;gap:12px;padding:10px}.captures a{display:block;text-decoration:none;min-width:0}.captures span{display:block;font-size:12px;padding:4px}.captures img{height:260px;object-fit:cover;background:#f4f6f4;border:1px solid var(--line)}.captures a:nth-child(2) img{height:180px}@media(max-width:700px){.captures img{height:380px}.captures a:nth-child(2) img{height:230px}}
 </style></head><body><main><h1>Farmille アカウント別画面遷移図</h1><p>一般・メーカー・運営の${screens.length}画面を、2026年9月8日のローカル本番ビルドでSP（375px）・PC（1280px）の両方で撮影。各カードの上にSP、下にPCを掲載している。画像を押すと画面全体を拡大できる。矢印は各見出しに記した操作・審査を経た遷移を示す。</p><nav aria-label="アカウント別目次"><a href="#general">一般ユーザー</a><a href="#manufacturer">メーカー</a><a href="#admin">運営</a></nav><p class="note">メーカーの資材追加・変更・非公開化は運営の承認後に反映。非公開資材は一般ユーザーに表示せず、担当メーカーと運営は管理画面で参照できる。メーカー確認済みマークはアカウント承認だけでは付かない。</p>${body}<footer><p>開発専用の /dev/tokens と /dev/ui は利用者向け遷移の対象外。認証確認・ログアウト・画像・サイトマップは画面を持たない処理ルート。未ログインで投稿・保存へ進むとログインへ、メーカー・一般アカウントで運営画面へ進むとアクセス拒否になる。</p><p>この図の画像はローカル本番ビルドで撮影した。2026年9月8日に本番DB移行とデプロイを実施し、本番URLで一般・メーカー・運営のログイン、メーカー紐づけ、資材変更・掲載終了の承認、SP・PC表示を検証済み。</p></footer></main></body></html>`,
 );
+
 console.log(`${screens.length}画面の遷移図を作成しました。`);

@@ -26,6 +26,7 @@ const meta = {
 } satisfies Meta<typeof ClaimForm>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Claimed: Story = {};

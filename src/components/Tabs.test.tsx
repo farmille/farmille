@@ -11,6 +11,7 @@ function EditorTabs() {
     (_current: "write" | "preview", next: "write" | "preview") => next,
     "write",
   );
+
   return (
     <Tabs
       aria-label="本文エディタ"

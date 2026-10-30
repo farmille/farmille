@@ -8,13 +8,16 @@ import { applySql } from "./sql.ts";
 import { SnapshotSchema, snapshotQuery } from "./snapshot.ts";
 
 const databaseUrl = process.env.CATALOG_TEST_DATABASE_URL;
+
 it.skipIf(!databaseUrl)(
   "実DBで本文と保存を保持し、再実行・削除維持・競合時のロールバック・修正待ちの原稿の保護を確認する",
   () => {
     if (!databaseUrl) throw new Error("CATALOG_TEST_DATABASE_URL が必要です。");
     const address = new URL(databaseUrl);
+
     if (address.hostname !== "127.0.0.1" || address.port !== "54322")
       throw new Error("専用のローカルDBだけで実行できます。");
+
     const execute = (sql: string) =>
       execFileSync("psql", [databaseUrl, "-XAt", "-v", "ON_ERROR_STOP=1"], {
         input: sql,
@@ -22,22 +25,27 @@ it.skipIf(!databaseUrl)(
         stdio: ["pipe", "pipe", "pipe"],
         maxBuffer: 20_000_000,
       });
+
     const snapshot = () => v.parse(SnapshotSchema, JSON.parse(execute(snapshotQuery)));
     const id = randomUUID();
     const productId = "PRD-999999";
     const originalVersion = randomUUID();
     const mapping = new Map([[productId, id]]);
     const createdRuns = new Set<string>();
+
     const apply = (plan: ReturnType<typeof planCatalog>) => {
       createdRuns.add(plan.runId);
+
       return execute(applySql(plan, source));
     };
+
     if (
       execute(
         `select count(*) from public.catalog_source_products where source_product_id='${productId}'`,
       ).trim() !== "0"
     )
       throw new Error("検証用の出典IDが使用中です。");
+
     const source: CatalogSource = {
       製品: [
         {
@@ -78,9 +86,11 @@ it.skipIf(!databaseUrl)(
         },
       ],
     };
+
     const makePlan = () => {
       const state = snapshot();
       const unresolved = planCatalog(source, state, mapping, []);
+
       return planCatalog(
         source,
         state,
@@ -90,6 +100,7 @@ it.skipIf(!databaseUrl)(
           .map((row) => ({ ...row, action: "keep_current" })),
       );
     };
+
     try {
       execute(`insert into public.materials(id,name,manufacturer_name,description,main_components,mechanism,usage_text) values('${id}','取り込み検証 ${id}','検証会社 ${id}','メーカーの説明','既存の成分','メーカーの作用機作','既存の施用方法');
       insert into public.saved_materials(user_id,material_id) select user_id,'${id}' from public.profiles limit 1;
@@ -106,6 +117,7 @@ it.skipIf(!databaseUrl)(
         update public.materials set published_page_version_id='${originalVersion}',content_revision=1,manufacturer_verified_at=now(),manufacturer_verified_by_seller_id='33333333-3333-4333-8333-333333333333',manufacturer_verification_method='submitted_update' where id='${id}';`);
       const initialState = snapshot();
       const initial = planCatalog(source, initialState, mapping, []);
+
       const ready = planCatalog(
         source,
         initialState,
@@ -115,6 +127,7 @@ it.skipIf(!databaseUrl)(
           action: row.key.startsWith("material/") ? "take_source" : "keep_current",
         })),
       );
+
       apply(ready);
       apply(ready);
       expect(
@@ -169,12 +182,14 @@ it.skipIf(!databaseUrl)(
       expect(conflict.conflicts).toHaveLength(1);
       const live = snapshot();
       const allConflicts = planCatalog(source, live, mapping, []).conflicts;
+
       const resolved = planCatalog(
         source,
         live,
         mapping,
         allConflicts.map((row) => ({ ...row, action: "keep_current" })),
       );
+
       apply(resolved);
       expect(makePlan().conflicts).toEqual([]);
       expect(makePlan().materials[0].fields.links).toEqual([]);

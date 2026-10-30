@@ -20,7 +20,9 @@ const heroStyle = css(surfaceCardRecipe.raw({ padding: "flush" }), {
   p: "3.5",
   pc: { p: "5.5", gap: "5.5" },
 });
+
 const mediaColumnStyle = css({ flex: "none" });
+
 const imageFrameStyle = css({
   w: "skeleton.materialHero",
   h: "skeleton.materialHero",
@@ -34,9 +36,11 @@ const imageFrameStyle = css({
   "& > *": { gridArea: "1 / 1" },
   pc: { w: "44", h: "44" },
 });
+
 const photoStyle = css({ objectFit: "contain", bg: "surface.card" });
 const infoStyle = css({ flex: "1", minW: "0" });
 const nameStyle = css({ textStyle: "title" });
+
 const ratingStyle = css({
   mt: "1",
   color: "accent.warn",
@@ -44,6 +48,7 @@ const ratingStyle = css({
   fontSize: "md",
   fontVariantNumeric: "tabular-nums",
 });
+
 const makerBase = {
   mt: "1",
   display: "inline-flex",
@@ -51,24 +56,30 @@ const makerBase = {
   gap: "1",
   fontSize: "sm",
 } as const;
+
 const makerLinkStyle = css(makerBase, {
   color: "text.brand",
   textDecoration: "underline",
   textDecorationColor: "text.brand/40",
 });
+
 const makerTextStyle = css(makerBase, { color: "text.muted" });
+
 const unverifiedStyle = css({
   mt: "0.5",
   fontSize: "xs",
   lineHeight: "relaxed",
   color: "text.subtle",
 });
+
 const applyLinkStyle = css({
   color: "text.brand",
   fontWeight: "semibold",
   textDecoration: "none",
 });
+
 const genresStyle = css({ mb: "1" });
+
 // 折り返した行の頭に区切りの記号が残らないよう、記号で区切らず間隔で分ける
 const countsStyle = css({
   mt: "1.5",
@@ -80,6 +91,7 @@ const countsStyle = css({
   textStyle: "supporting",
   color: "text.muted",
 });
+
 const countLinkStyle = css({
   py: "0.5",
   whiteSpace: "nowrap",
@@ -87,12 +99,14 @@ const countLinkStyle = css({
   textDecoration: "underline",
   textUnderlineOffset: "2px",
 });
+
 const savedCountStyle = css({
   display: "inline-flex",
   alignItems: "center",
   gap: "1",
   whiteSpace: "nowrap",
 });
+
 const savedMarkStyle = css({ color: "text.brand" });
 
 type MaterialHeroProps = {

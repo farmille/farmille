@@ -14,6 +14,8 @@ export function adminMember(
   if (row.withdrawn_at !== null) {
     return { userId: row.user_id, handle: null, withdrawnAt: row.withdrawn_at };
   }
+
   if (row.handle === null) return null;
+
   return { userId: row.user_id, handle: row.handle, withdrawnAt: null };
 }

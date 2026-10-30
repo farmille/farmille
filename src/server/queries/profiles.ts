@@ -33,6 +33,7 @@ function avatarExtension(mimeType: string): string | null {
 /** マイページと表示情報編集で使う、本人の公開表示情報を取得する。 */
 export async function getOwnProfile(userId: string): Promise<Result<OwnProfile>> {
   const supabase = await createServerSupabase();
+
   const { data: profileData, error: profileError } = await supabase
     .from("profiles")
     .select("user_id, handle, avatar_url")
@@ -41,6 +42,7 @@ export async function getOwnProfile(userId: string): Promise<Result<OwnProfile>>
 
   if (profileError !== null) {
     reportQueryError("本人の表示情報取得に失敗", profileError);
+
     return fail("internal");
   }
 
@@ -69,6 +71,7 @@ export async function uploadOwnAvatar(userId: string, file: File): Promise<Resul
   }
 
   const extension = avatarExtension(file.type);
+
   if (extension === null) {
     return fail("invalid_body");
   }
@@ -84,6 +87,7 @@ export async function uploadOwnAvatar(userId: string, file: File): Promise<Resul
 
   if (uploadError !== null) {
     reportQueryError("アバターのアップロードに失敗", uploadError);
+
     return fail("internal");
   }
 
@@ -98,6 +102,7 @@ export async function uploadOwnAvatar(userId: string, file: File): Promise<Resul
 
   if (updateError !== null) {
     reportQueryError("アバターURLの保存に失敗", updateError);
+
     return fail("internal");
   }
 

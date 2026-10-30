@@ -53,6 +53,7 @@ export function MaterialReviewsSection({
         <div className={listStyle}>
           {reviews.map((review) => {
             const own = viewerUserId !== null && viewerUserId === review.author_user_id;
+
             return (
               <MaterialReviewCard
                 key={review.id}

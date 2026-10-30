@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const getManufacturerProfileEditor = fn<
   typeof import("@/server/manufacturer-profile").getManufacturerProfileEditor
 >(async () => ({
@@ -12,6 +13,7 @@ export const getManufacturerProfileEditor = fn<
   },
   versions: [],
 })).mockName("getManufacturerProfileEditor");
+
 export const getManufacturerProfileVersion = fn<
   typeof import("@/server/manufacturer-profile").getManufacturerProfileVersion
 >(async () => ({
@@ -30,6 +32,7 @@ export const getManufacturerProfileVersion = fn<
   website_url: "https://example.com",
   seller_accounts: { official_name: "グリーンバイオ株式会社", region_scope: "関東" },
 })).mockName("getManufacturerProfileVersion");
+
 export const saveManufacturerProfileVersion = fn<
   typeof import("@/server/manufacturer-profile").saveManufacturerProfileVersion
 >(async () => ({
@@ -40,6 +43,7 @@ export const saveManufacturerProfileVersion = fn<
   statusText: "OK",
   success: true,
 })).mockName("saveManufacturerProfileVersion");
+
 export const withdrawManufacturerProfileVersion = fn<
   typeof import("@/server/manufacturer-profile").withdrawManufacturerProfileVersion
 >(async () => ({

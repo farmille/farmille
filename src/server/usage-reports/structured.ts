@@ -17,11 +17,14 @@ import type { Database } from "@/types/database.types";
 
 export function reportMediaUrl(value: string, authorId: string): string {
   const path = new URL(value).pathname;
+
   if (!path.startsWith(`/storage/v1/object/public/report-media/${authorId}/`)) {
     throw new Error("実証詳細レポートの写真の保存先が不正です。");
   }
+
   const url = new URL(clientEnv.supabaseUrl);
   url.pathname = path;
+
   return url.href;
 }
 
@@ -30,12 +33,15 @@ const REPORT_MEDIA_PREFIX = "/storage/v1/object/public/report-media/";
 /** report-media の中の、userId のフォルダのオブジェクト名。保存の RPC と同じく、URL のパスをそのまま使う。 */
 function ownMediaPath(value: string, userId: string): string | null {
   const url = URL.parse(value);
+
   if (url === null || !url.pathname.startsWith(`${REPORT_MEDIA_PREFIX}${userId}/`)) return null;
+
   return url.pathname.slice(REPORT_MEDIA_PREFIX.length);
 }
 
 function ownedMediaUrl(value: string, userId: string): boolean {
   const url = URL.parse(value);
+
   return (
     url !== null &&
     url.origin === new URL(clientEnv.supabaseUrl).origin &&
@@ -44,6 +50,7 @@ function ownedMediaUrl(value: string, userId: string): boolean {
 }
 
 type SaveRpcInput = Omit<UsageReportInput, "purposeNote">;
+
 type SaveStepResult<T> = ({ ok: true } & T) | { ok: false; message: string };
 
 export type UsageReportSaveStore = {
@@ -63,6 +70,7 @@ export type UsageReportSaveStore = {
 
 const SAVE_FAILED =
   "保存できませんでした。入力内容はそのまま残っています。内容を確認して、もう一度保存してください。";
+
 const SAVE_CONFLICT =
   "別の画面で下書きが更新されています。入力内容を控えてから再読み込みしてください。";
 
@@ -73,8 +81,10 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
         p_input: input,
         p_submit: submit,
       });
+
       if (error !== null) {
         console.error("[usage-reports] 保存に失敗", error);
+
         return {
           ok: false,
           message:
@@ -85,10 +95,13 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
                 : SAVE_FAILED,
         };
       }
+
       const saved = data[0];
+
       if (saved === undefined || (saved.status !== "draft" && saved.status !== "pending")) {
         throw new Error("実証詳細レポートの保存結果を確認できませんでした。");
       }
+
       return { ok: true, status: saved.status, updatedAt: saved.updated_at };
     },
     async savePurposeNote(reportId, purposeNote, expectedUpdatedAt) {
@@ -100,11 +113,15 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
         .eq("updated_at", expectedUpdatedAt)
         .select("updated_at")
         .maybeSingle();
+
       if (error !== null) {
         console.error("[usage-reports] 使用目的の補足の保存に失敗", error);
+
         return { ok: false, message: SAVE_FAILED };
       }
+
       if (data === null) return { ok: false, message: SAVE_CONFLICT };
+
       return { ok: true, updatedAt: data.updated_at };
     },
     async savedMediaUrls(reportId) {
@@ -112,14 +129,18 @@ function supabaseSaveStore(supabase: SupabaseClient<Database>): UsageReportSaveS
         .from("usage_report_media")
         .select("url")
         .eq("usage_report_id", reportId);
+
       if (error !== null) {
         console.error("[usage-reports] 保存前の写真の参照を読めませんでした", error);
+
         return null;
       }
+
       return data.map((row) => row.url);
     },
     async removeMedia(paths) {
       const { data, error } = await supabase.storage.from("report-media").remove(paths);
+
       if (error !== null || data.length !== paths.length) {
         console.error("[usage-reports] 参照しなくなった写真を消せませんでした", error ?? paths);
       }
@@ -141,15 +162,19 @@ async function removeUnreferencedMedia(
   store: UsageReportSaveStore,
 ) {
   const kept = new Set(input.media.map((media) => ownMediaPath(media.url, userId)));
+
   // 外れた画像は画面から届くので、このレポートの置き場のものに限る
   const dropped = before.droppedUrls.flatMap((url) => {
     const path = ownMediaPath(url, userId);
+
     return path?.startsWith(`${userId}/${input.reportId}/`) ? [path] : [];
   });
+
   const candidates = [
     ...(before.savedUrls ?? []).map((url) => ownMediaPath(url, userId)),
     ...dropped,
   ];
+
   const stale = [
     ...new Set(
       candidates.flatMap((path) =>
@@ -157,7 +182,9 @@ async function removeUnreferencedMedia(
       ),
     ),
   ];
+
   if (stale.length === 0) return;
+
   try {
     await store.removeMedia(stale);
   } catch (error) {
@@ -173,15 +200,19 @@ export async function runUsageReportSave(
   droppedMediaUrls: string[],
 ): Promise<UsageReportActionResult> {
   const { purposeNote, ...rpcInput } = input;
+
   const before = {
     savedUrls: await store.savedMediaUrls(input.reportId),
     droppedUrls: droppedMediaUrls,
   };
+
   const draft = await store.saveReport(rpcInput, false);
+
   if (!draft.ok) return { ok: false, message: draft.message, fieldErrors: {} };
   // 下書きの保存で写真の参照は入れ替わっている。補足の書き込みや提出が失敗しても、前の参照には戻らない
   await removeUnreferencedMedia(before, input, userId, store);
   const note = await store.savePurposeNote(input.reportId, purposeNote.trim(), draft.updatedAt);
+
   if (!note.ok)
     return {
       ok: false,
@@ -189,6 +220,7 @@ export async function runUsageReportSave(
       fieldErrors: {},
       savedDraft: { updatedAt: draft.updatedAt, status: "partial" },
     };
+
   if (!submit)
     return {
       ok: true,
@@ -197,10 +229,12 @@ export async function runUsageReportSave(
       updatedAt: note.updatedAt,
       message: "下書きを保存しました。",
     };
+
   const submitted = await store.saveReport(
     { ...rpcInput, expectedUpdatedAt: note.updatedAt },
     true,
   );
+
   if (!submitted.ok)
     return {
       ok: false,
@@ -208,6 +242,7 @@ export async function runUsageReportSave(
       fieldErrors: {},
       savedDraft: { updatedAt: note.updatedAt, status: "complete" },
     };
+
   return {
     ok: true,
     status: submitted.status,
@@ -225,19 +260,25 @@ export async function saveStructuredUsageReport(
 ): Promise<UsageReportActionResult> {
   const parsed = v.safeParse(UsageReportInputSchema, raw);
   const dropped = v.safeParse(DroppedMediaUrlsSchema, rawDroppedMediaUrls);
+
   if (!parsed.success || !dropped.success)
     return { ok: false, message: "入力内容を確認してください。", fieldErrors: {} };
   const input = parsed.output;
   const supabase = await createServerSupabase();
+
   const pdfCheck = submit
     ? await reportNeedsPdfValuesCheck(input.reportId, supabase)
     : succeed(false);
+
   if (!pdfCheck.ok) return { ok: false, message: SAVE_FAILED, fieldErrors: {} };
+
   const fieldErrors = submit
     ? validateUsageReportSubmission(input, { pdfValuesCheckRequired: pdfCheck.data })
     : {};
+
   if (Object.keys(fieldErrors).length > 0)
     return { ok: false, message: "未入力の必須項目があります。", fieldErrors };
+
   if (input.media.some((item) => !ownedMediaUrl(item.url, userId))) {
     return {
       ok: false,
@@ -245,6 +286,7 @@ export async function saveStructuredUsageReport(
       fieldErrors: {},
     };
   }
+
   return runUsageReportSave(input, submit, supabaseSaveStore(supabase), userId, dropped.output);
 }
 
@@ -268,13 +310,18 @@ export async function getStructuredUsageReport(
     .eq("id", reportId)
     .eq("form_version", 2)
     .maybeSingle();
+
   if (error !== null) {
     console.error("[usage-reports] 保存内容の取得に失敗", error);
+
     return fail("internal");
   }
+
   if (data === null) return succeed(null);
+
   const byOrder = (left: { sort_order: number }, right: { sort_order: number }) =>
     left.sort_order - right.sort_order;
+
   const parsed = v.safeParse(UsageReportInputSchema, {
     reportId: data.id,
     expectedUpdatedAt: data.updated_at,
@@ -347,15 +394,19 @@ export async function getStructuredUsageReport(
     guidelineAck: data.pesticide_ack,
     pdfValuesChecked: data.pdf_values_checked,
   });
+
   if (!parsed.success) {
     console.error("[usage-reports] 保存内容の形式が不正", v.summarize(parsed.issues));
+
     return fail("internal");
   }
+
   return succeed(parsed.output);
 }
 
 export async function getStructuredReportFormData(materialId: string, userId: string) {
   const supabase = await createServerSupabase();
+
   const [options, reports, favorites, materialCrops] = await Promise.all([
     listClassificationOptions(),
     supabase
@@ -368,8 +419,10 @@ export async function getStructuredReportFormData(materialId: string, userId: st
     supabase.from("profile_crops").select("crop_id,crop_name_other").eq("user_id", userId),
     supabase.from("material_crops").select("crop_id").eq("material_id", materialId),
   ]);
+
   if (!options.ok) return options;
   const error = reports.error ?? favorites.error ?? materialCrops.error;
+
   if (
     error !== null ||
     reports.data === null ||
@@ -377,25 +430,36 @@ export async function getStructuredReportFormData(materialId: string, userId: st
     materialCrops.data === null
   ) {
     console.error("[usage-reports] 入力候補の取得に失敗", error);
+
     return fail("internal");
   }
+
   const draftRow = reports.data.find((row) => row.status === "draft" && row.form_version === 2);
+
   const draft =
     draftRow === undefined ? succeed(null) : await getStructuredUsageReport(draftRow.id, supabase);
+
   if (!draft.ok) return draft;
+
   const pdfCheck =
     draft.data === null
       ? succeed(false)
       : await reportNeedsPdfValuesCheck(draft.data.reportId, supabase);
+
   if (!pdfCheck.ok) return pdfCheck;
+
   const pdfReadingMarks =
     draft.data === null
       ? succeed([])
       : await getReportPdfReadingMarks(draft.data.reportId, supabase);
+
   if (!pdfReadingMarks.ok) return pdfReadingMarks;
+
   const documents =
     draft.data === null ? succeed([]) : await getReportDocumentUrls(draft.data, supabase);
+
   if (!documents.ok) return documents;
+
   return succeed({
     documentUrls: documents.data,
     crops: options.data.crops,
@@ -415,7 +479,9 @@ export async function getStructuredReportFormData(materialId: string, userId: st
       .filter((row) => row.status === "pending")
       .map((row) => {
         const cropName = row.crop?.name ?? row.crop_name_other;
+
         if (cropName === null) throw new Error("提出済みレポートの作物が見つかりません。");
+
         return {
           id: row.id,
           cropName,
@@ -431,17 +497,23 @@ export async function getReportDocumentUrls(
   supabase: SupabaseClient<Database>,
 ) {
   if (input.documents.length === 0) return succeed([]);
+
   const { data, error } = await supabase.storage.from("report-documents").createSignedUrls(
     input.documents.map((item) => item.path),
     600,
   );
+
   if (error !== null) {
     console.error("[usage-reports] 資料リンクの作成に失敗", error);
+
     return fail("internal");
   }
+
   const urls: Array<{ id: string; url: string }> = [];
+
   for (const document of input.documents) {
     const signed = data.find((item) => item.path === document.path);
+
     if (
       signed === undefined ||
       signed.error !== null ||
@@ -449,9 +521,12 @@ export async function getReportDocumentUrls(
       signed.signedUrl.length === 0
     ) {
       console.error("[usage-reports] 資料ファイルを取得できません", document.id);
+
       return fail("internal");
     }
+
     urls.push({ id: document.id, url: signed.signedUrl });
   }
+
   return succeed(urls);
 }

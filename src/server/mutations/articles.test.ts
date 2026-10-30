@@ -15,6 +15,7 @@ describe("validateArticleInput", () => {
     });
 
     expect(result.ok).toBe(true);
+
     if (!result.ok) return;
     expect(result.input).toEqual({
       title: "高温対策ガイド",
@@ -35,6 +36,7 @@ describe("validateArticleInput", () => {
     });
 
     expect(result.ok).toBe(false);
+
     if (result.ok) return;
     expect(result.fieldErrors.title).toBe("タイトルを入力してください。");
     expect(result.fieldErrors.body).toBe("本文を入力してください。");
@@ -50,6 +52,7 @@ describe("validateArticleInput", () => {
     });
 
     expect(result.ok).toBe(false);
+
     if (result.ok) return;
     expect(result.fieldErrors.heroImageUrl).toBeDefined();
     expect(result.fieldErrors.materialIds).toBeDefined();

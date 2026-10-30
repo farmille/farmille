@@ -11,11 +11,14 @@ import { fieldErrorsOf, initialAuthFormState, type AuthFormState } from "@/lib/a
 export function WithdrawForm() {
   const form = useForm({ defaultValues: { password: "" } });
   const password = useStore(form.store, (state) => state.values.password);
+
   const [state, action] = useActionState(async (previous: AuthFormState, data: FormData) => {
     const result = await withdrawAction(previous, data);
     form.reset();
+
     return result;
   }, initialAuthFormState);
+
   return (
     <Form action={action} errors={fieldErrorsOf(state)} persist={false}>
       {state.status === "error" ? <Notice tone="error">{state.message}</Notice> : null}

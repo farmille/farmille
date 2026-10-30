@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const listPublishedPosts = fn<
   typeof import("@/server/admin/published-posts").listPublishedPosts
 >(async () => ({
@@ -13,6 +14,7 @@ export const listPublishedPosts = fn<
     },
   ],
 })).mockName("listPublishedPosts");
+
 export const removePublishedPost = fn<
   typeof import("@/server/admin/published-posts").removePublishedPost
 >(async () => ({

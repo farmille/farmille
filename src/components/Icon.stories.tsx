@@ -7,12 +7,15 @@ const meta = {
   component: Icon,
   args: { name: "star_filled" },
 } satisfies Meta<typeof Icon>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
 const sizes: IconProps["size"][] = ["2xs", "xs", "sm", "md", "lg", "xl", "2xl"];
+
 export const Sizes: Story = {
   render: (args) => (
     <div className={css({ display: "flex", flexWrap: "wrap", gap: "4", alignItems: "center" })}>

@@ -20,12 +20,14 @@ export function LegacyReportSections({
   const methodMedia: ReportFigureMedia[] = report.media.filter(
     (m) => m.placement === "method" || (m.mediaType === "video" && m.id !== coverId),
   );
+
   const observationPhotos = report.media.filter(
     (m) =>
       m.mediaType === "photo" &&
       m.id !== coverId &&
       (m.placement === "observation" || m.placement === "treated" || m.placement === "untreated"),
   );
+
   const summaryMedia = report.media.filter((m) => m.placement === "summary");
 
   const envLines = [
@@ -46,15 +48,19 @@ export function LegacyReportSections({
 
   const applicationLines = report.applications.flatMap((app) => {
     const lines: string[] = [];
+
     if (app.method !== null && app.method.length > 0) {
       lines.push(`使用方法：${app.method}`);
     }
+
     if (app.detail !== null && app.detail.length > 0) {
       lines.push(app.detail);
     }
+
     if (app.appliedOn !== null) {
       lines.push(`処理日：${formatDateJa(app.appliedOn)}`);
     }
+
     return lines;
   });
 

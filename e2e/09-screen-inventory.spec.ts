@@ -31,17 +31,20 @@ test("アカウント別の画面一覧を撮影する", async ({ page }) => {
   const seller = await createApprovedSeller("screen");
   const material = await createMaterial("screen", null, seller.officialName);
   const unreviewedMaterial = await createMaterial("screen-unreviewed", null, seller.officialName);
+
   const review = await createReview({
     materialId: material.id,
     authorUserId: user.id,
     rating: 4,
     body: "葉色と根の張りを観察しました。継続して比較します。",
   });
+
   const report = await createPendingUsageReport({
     materialId: material.id,
     authorUserId: user.id,
     title: "トマト栽培での使用記録",
   });
+
   try {
     for (const [path, name] of [
       ["/search", "34-search"],
@@ -55,6 +58,7 @@ test("アカウント別の画面一覧を撮影する", async ({ page }) => {
       await capture(page, path, name);
 
     await loginGeneral(page, user, "/me");
+
     for (const [path, name] of [
       [`/users/${user.id}`, "32-general-user-page"],
       ["/me/edit", "41-profile-edit"],
@@ -78,6 +82,7 @@ test("アカウント別の画面一覧を撮影する", async ({ page }) => {
     await page.getByRole("button", { name: "公開する", exact: true }).click();
     await expect(page).toHaveURL(/\/articles\/[0-9a-f-]+$/);
     const articleId = /\/articles\/([0-9a-f-]+)$/.exec(page.url())?.[1];
+
     if (articleId === undefined) throw new Error("記事の公開URLがありません。");
     const articlePath = `/articles/${articleId}`;
     await capture(page, `/dashboard${articlePath}/edit`, "51-article-edit");
@@ -85,6 +90,7 @@ test("アカウント別の画面一覧を撮影する", async ({ page }) => {
 
     await page.context().clearCookies();
     await loginAdminAndEnrollMfa(page, E2E_ADMIN_ACCOUNTS.screenInventory, "/admin");
+
     for (const [path, name] of [
       ["/admin", "53-admin-home"],
       ["/admin/tags", "54-admin-tags"],

@@ -13,6 +13,7 @@ const meta = {
 } satisfies Meta<typeof TourSheet>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Welcome: Story = {

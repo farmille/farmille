@@ -27,6 +27,7 @@ const meta = {
 } satisfies Meta<typeof ReportSubmitted>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};

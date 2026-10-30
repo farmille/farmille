@@ -15,6 +15,7 @@ const meta = {
 } satisfies Meta<typeof MaterialReportsView>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const SignedIn: Story = {};

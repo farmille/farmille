@@ -58,23 +58,28 @@ export function Form({
     () => (errors === undefined ? undefined : presentErrors(errors)),
     [errors],
   );
+
   const formRef = useRef<HTMLFormElement>(null);
+
   const fieldError = useMemo(
     () =>
       validate === undefined
         ? null
         : (name: string) => {
             const form = formRef.current;
+
             return form === null ? null : (validate(new FormData(form))[name] ?? null);
           },
     [validate],
   );
+
   const { resetCount, stored, restored } = useFormPersistence(
     formRef,
     persist,
     usePathname(),
     onReset,
   );
+
   const saved = stored?.saved ?? null;
 
   return (
@@ -120,9 +125,12 @@ function KeepInput({
   useMountEffect(() => {
     if (saved !== null) restoreOutside(saved);
     const form = formRef.current;
+
     if (form === null) return;
+
     return keepFields(form, storeKey, readKeepsRestored);
   });
+
   return null;
 }
 
@@ -130,9 +138,11 @@ const NO_ERRORS: BaseErrors = {};
 
 function presentErrors(errors: FieldErrors): BaseErrors {
   const present: BaseErrors = {};
+
   for (const [name, message] of Object.entries(errors)) {
     if (message !== undefined) present[name] = message;
   }
+
   // Base UI は送信後に errors が初めて変わったときにだけ最初のエラーの欄へフォーカスを移す。
   // 送信中の再描画で作り直された空のエラーをそこで使わせず、サーバーの結果まで取っておく
   return Object.keys(present).length === 0 ? NO_ERRORS : present;

@@ -29,17 +29,20 @@ export async function setMaterialPublicationStatusAction(
 ): Promise<MaterialFormState> {
   const materialId = formDataString(formData.get("materialId"))?.trim() ?? "";
   const status = formDataString(formData.get("publicationStatus"));
+
   if (materialId.length === 0 || (status !== "published" && status !== "archived")) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
 
   const result = await setMaterialPublicationStatus(materialId, status);
+
   if (!result.ok) return { status: "error", message: errorMessageJa[result.error] };
 
   updateTag(CACHE_TAGS.catalog);
   revalidatePath(`/admin/materials/${materialId}`);
   revalidatePath("/admin/materials");
   revalidatePath(`/materials/${materialId}`);
+
   return {
     status: "done",
     message: status === "published" ? "資材を公開状態へ戻しました。" : "資材を非公開にしました。",
@@ -67,6 +70,7 @@ function submittedValues(formData: FormData): MaterialFormValues {
 
   for (const field of TEXT_FIELDS) {
     const value = formDataString(formData.get(field));
+
     if (value !== null) fields[field] = value;
   }
 
@@ -188,9 +192,11 @@ export async function setMaterialSellerAction(
 
   const nextSellerId = sellerId !== null && sellerId.length > 0 ? sellerId : null;
   const documentReference = formDataString(formData.get("documentReference"))?.trim() ?? "";
+
   if (nextSellerId !== null && documentReference.length === 0) {
     return { status: "error", message: "確認資料の保管先または受付番号を入力してください。" };
   }
+
   const result = await setMaterialSeller(materialId, nextSellerId, documentReference);
 
   if (!result.ok) {

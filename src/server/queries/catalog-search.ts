@@ -15,6 +15,7 @@ import { createPublicSupabase } from "@/server/supabase";
 const fetchCatalogMaterials = unstable_cache(
   async (supabaseUrl: string) => {
     const db = createPublicSupabase(supabaseUrl);
+
     const [counts, materials] = await Promise.all([
       db.rpc("catalog_material_counts"),
       selectAllRows((from, to) =>
@@ -29,8 +30,11 @@ const fetchCatalogMaterials = unstable_cache(
           .range(from, to),
       ),
     ]);
+
     if (counts.error) throw new Error("検索用の件数を取得できませんでした。");
+
     if (materials.error) throw new Error("資材の検索情報を取得できませんでした。");
+
     return {
       materials: materials.data.map((material) => ({
         ...material,
@@ -48,7 +52,9 @@ async function fetchCatalogSearch() {
     fetchCatalogMaterials(clientEnv.supabaseUrl),
     listClassificationOptions(),
   ]);
+
   if (!options.ok) throw new Error("検索用の作物分類を取得できませんでした。");
+
   return {
     ...snapshot,
     // 分類マスタは作物群ごとに並ぶが、検索のタグ一覧は作物の表示順で並べる。
@@ -58,20 +64,25 @@ async function fetchCatalogSearch() {
     searchTags: options.data.searchTags,
   };
 }
+
 export const getCatalogSearch = cache(fetchCatalogSearch);
+
 export type CatalogSearch = Awaited<ReturnType<typeof getCatalogSearch>>;
 
 export async function getMaterialSavedCount(materialId: string): Promise<number | null> {
   const { counts } = await fetchCatalogMaterials(clientEnv.supabaseUrl);
+
   return counts.find((row) => row.material_id === materialId)?.saved_count ?? null;
 }
 
 /** 検索欄の候補。分類は分類マスタから、資材名とメーカー名は公開中の資材から作る。 */
 export async function listSearchSuggestions(): Promise<Result<SearchCatalog>> {
   const [filters, catalog] = await Promise.all([listSearchFilters(), getCatalogSearch()]);
+
   if (!filters.ok) return filters;
 
   const byJapanese = (left: string, right: string) => left.localeCompare(right, "ja");
+
   return succeed({
     filters: filters.data,
     makers: [...new Set(catalog.materials.map((material) => material.manufacturer_name))].toSorted(

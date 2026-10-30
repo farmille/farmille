@@ -17,8 +17,11 @@ const meta = {
   },
   args: { params: Promise.resolve({ id: "11111111-1111-4111-8111-111111111111" }) },
 } satisfies Meta<typeof Page>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 /** この画面で開くのは、旧フォームD（終売・非公開）の受付票だけ。 */
 export const Default: Story = {
   beforeEach: () => {

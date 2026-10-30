@@ -27,6 +27,7 @@ function validFormData(): FormData {
       },
     ]),
   );
+
   return formData;
 }
 
@@ -145,6 +146,7 @@ describe("createReview", () => {
     const authenticate = vi.fn<typeof requireGeneralUser>();
     const createSupabase = vi.fn<typeof createServerSupabase>();
     authenticate.mockResolvedValue({ ok: false, error: "forbidden" });
+
     const input: ReviewMutationInput = {
       materialId,
       cropIds: [cropId],

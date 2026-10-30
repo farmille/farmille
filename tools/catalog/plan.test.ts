@@ -7,6 +7,7 @@ import { applySql } from "./sql.ts";
 const productId = "PRD-000001";
 const id = catalogId(productId);
 const productMap = new Map([[productId, id]]);
+
 function source(): CatalogSource {
   return {
     製品: [
@@ -38,6 +39,7 @@ function source(): CatalogSource {
     ],
   };
 }
+
 function emptySnapshot(): CatalogSnapshot {
   return {
     guard: "0".repeat(64),
@@ -50,10 +52,12 @@ function emptySnapshot(): CatalogSnapshot {
     ingredient_categories: [],
   };
 }
+
 function importedSnapshot(): CatalogSnapshot {
   const snapshot = emptySnapshot();
   const plan = planCatalog(source(), snapshot, productMap, []);
   const material = plan.materials[0];
+
   const live: LiveMaterial = {
     id,
     fields: structuredClone(material.fields),
@@ -64,6 +68,7 @@ function importedSnapshot(): CatalogSnapshot {
     protected_references: 1,
     working_version: null,
   };
+
   snapshot.materials.push(live);
   snapshot.product_map.push({ source_product_id: productId, material_id: id });
   snapshot.baselines = FieldNameSchema.options.map((field) => ({
@@ -71,6 +76,7 @@ function importedSnapshot(): CatalogSnapshot {
     field_name: field,
     source_sha256: valueHash(material.fields[field]),
   }));
+
   return snapshot;
 }
 
@@ -98,9 +104,11 @@ describe("カタログ再取り込み", () => {
     expect(plan.conflicts).toHaveLength(1);
     expect(() => applySql(plan, incoming)).toThrow("未解決");
     const conflict = plan.conflicts[0];
+
     const kept = planCatalog(incoming, snapshot, productMap, [
       { ...conflict, action: "keep_current" },
     ]);
+
     expect(kept.conflicts).toEqual([]);
     expect(kept.materials[0].fields.links).toEqual([]);
     expect(kept.materials[0].sourceFields.links[0].title).toBe("改訂資料");

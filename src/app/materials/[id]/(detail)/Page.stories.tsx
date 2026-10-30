@@ -15,6 +15,9 @@ const meta = {
     params: Promise.resolve({ id: "00000000-0000-4000-8000-000000000101" }),
   },
 } satisfies Meta<typeof Page>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

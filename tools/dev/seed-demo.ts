@@ -18,7 +18,9 @@ const AuthUserSchema = v.object({
   email: v.optional(v.string()),
   app_metadata: v.optional(v.object({ account_type: v.optional(v.string()) })),
 });
+
 const AuthUserListSchema = v.object({ users: v.array(AuthUserSchema) });
+
 type AuthUser = v.InferOutput<typeof AuthUserSchema>;
 
 function requireEnv(name: string): string {
@@ -48,6 +50,7 @@ function assertLocalSupabase(rawUrl: string): URL {
 const supabaseUrl = assertLocalSupabase(
   requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
 ).origin;
+
 const secretKey = requireEnv("SUPABASE_SECRET_KEY");
 
 const authHeaders = {
@@ -66,9 +69,11 @@ async function listUsers(): Promise<AuthUser[]> {
   }
 
   const result = v.safeParse(AuthUserListSchema, await res.json());
+
   if (!result.success) {
     throw new Error(`ユーザー一覧の形式が不正です：${v.summarize(result.issues)}`);
   }
+
   return result.output.users;
 }
 

@@ -33,10 +33,13 @@ function componentStem(fileName) {
 const tsxFiles = (await readdir(sourceRoot, { recursive: true, withFileTypes: true }))
   .filter((entry) => entry.isFile() && entry.name.endsWith(".tsx"))
   .map((entry) => path.join(entry.parentPath, entry.name));
+
 const invalidFiles = tsxFiles.filter((file) => {
   const relativePath = path.relative(repositoryRoot, file);
   const isAppFile = relativePath.startsWith(`src${path.sep}app${path.sep}`);
+
   if (isAppFile && nextReservedFiles.has(path.basename(file))) return false;
+
   if (relativePath === path.join("src", "mdx-components.tsx")) return false;
 
   return !/^[A-Z][A-Za-z0-9]*$/.test(componentStem(path.basename(file)));
@@ -44,6 +47,7 @@ const invalidFiles = tsxFiles.filter((file) => {
 
 if (invalidFiles.length > 0) {
   console.error("PascalCase ではないコンポーネントファイルがあります：");
+
   for (const file of invalidFiles) console.error(`- ${path.relative(repositoryRoot, file)}`);
   process.exitCode = 1;
 } else {

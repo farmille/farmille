@@ -7,6 +7,7 @@ const meta = {
 } satisfies Meta<typeof PreparationNotice>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};

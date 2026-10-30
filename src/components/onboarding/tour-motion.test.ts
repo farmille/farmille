@@ -34,6 +34,7 @@ describe("案内が避ける、画面の下の投稿のバー", () => {
 
 function Dock() {
   const { ref, clear } = useDock<HTMLDivElement>(false);
+
   return createElement("div", { ref, "data-testid": "dock" }, clear);
 }
 

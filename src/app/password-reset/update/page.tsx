@@ -18,6 +18,7 @@ export default async function UpdatePasswordPage({
   searchParams: Promise<{ token_hash?: string }>;
 }) {
   const { token_hash: tokenHash } = await searchParams;
+
   if (!tokenHash || !/^[a-zA-Z0-9_-]{32,256}$/.test(tokenHash)) {
     return (
       <AuthScreen title="新しいパスワードの設定">

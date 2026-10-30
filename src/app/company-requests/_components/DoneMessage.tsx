@@ -47,6 +47,7 @@ export function DoneMessage({
   actions?: ReactNode;
 }) {
   const step = (n: 1 | 2 | 3) => (check ? completionStepRecipe({ step: n }) : undefined);
+
   return (
     <section role={role} className={cx(doneRecipe({ spacing }), className)}>
       {check ? <SuccessMark entrance className={css({ mb: "4.5" })} /> : null}

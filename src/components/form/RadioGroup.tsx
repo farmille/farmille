@@ -26,6 +26,7 @@ type RadioGroupProps<V extends string> = RadioGroupBodyProps<V> & Labeling;
 
 export function RadioGroup<V extends string>(props: RadioGroupProps<V>) {
   const [labeling] = splitLabeling(props);
+
   return (
     <Labeled disabled={props.disabled} kind="group" labeling={labeling} name={props.name}>
       <RadioGroupBody<V> {...props} />
@@ -45,11 +46,14 @@ function RadioGroupBody<V extends string>({
 }: RadioGroupBodyProps<V>) {
   const field = useFieldContext();
   const restored = useRestoredField(name ?? field.name);
+
   const initial =
     value === undefined && restored !== undefined
       ? (restoredChoices(options, restored)[0] ?? defaultValue)
       : defaultValue;
+
   const resetKey = useResetKey(initial ?? "");
+
   const group = (
     <BaseRadioGroup<V>
       key={resetKey}

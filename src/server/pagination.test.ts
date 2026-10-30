@@ -23,6 +23,7 @@ type Row = { id: number };
 /** max_rows を超えた分を黙って切り捨てる PostgREST の range 取得を再現する。 */
 function truncatingTable(size: number, maxRows: number) {
   const rows: Row[] = Array.from({ length: size }, (_, id) => ({ id }));
+
   function selectPage(from: number, to: number): Promise<PostgrestResponse<Row>> {
     return Promise.resolve({
       success: true,
@@ -33,6 +34,7 @@ function truncatingTable(size: number, maxRows: number) {
       statusText: "OK",
     });
   }
+
   return { rows, selectPage };
 }
 
@@ -60,6 +62,7 @@ describe("selectAllRows", () => {
 
   it("途中のページが失敗したら、取得済みの行を返さずにエラーを返す", async () => {
     const table = truncatingTable(1_500, 1_000);
+
     const error = new PostgrestError({
       message: "canceling statement due to statement timeout",
       details: "",

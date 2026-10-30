@@ -3,9 +3,11 @@ import { AdminShell } from "@/app/admin/_components/AdminShell";
 import { adminBodyStyle, adminInlineNoteStyle } from "@/app/admin/_components/AdminUI";
 import { requireAdminPage } from "@/app/admin/_lib/access";
 import { listCompanyApplications } from "@/server/company-applications";
+
 export default async function AdminApplicationsPage() {
   await requireAdminPage("/admin/company-applications");
   const receipts = await listCompanyApplications(true);
+
   return (
     <AdminShell
       title="企業からの申請"

@@ -1,9 +1,12 @@
 import { fn } from "storybook/test";
+
 type Accounts = typeof import("../general");
+
 export const getRegistrationIdentity = fn<Accounts["getRegistrationIdentity"]>(async () => ({
   ok: true,
   data: { userId: "00000000-0000-4000-8000-000000000701", email: "farmer@example.test" },
 }));
+
 export const getOwnRegisteredDetails = fn<Accounts["getOwnRegisteredDetails"]>(async () => ({
   ok: true,
   data: {
@@ -17,10 +20,12 @@ export const getOwnRegisteredDetails = fn<Accounts["getOwnRegisteredDetails"]>(a
     buildingName: "",
   },
 }));
+
 export const saveOwnRegisteredDetails = fn<Accounts["saveOwnRegisteredDetails"]>(async () => ({
   ok: true,
   data: { userId: "00000000-0000-4000-8000-000000000701" },
 }));
+
 export const withdrawOwnAccount = fn<Accounts["withdrawOwnAccount"]>(async () => ({
   ok: true,
   data: null,

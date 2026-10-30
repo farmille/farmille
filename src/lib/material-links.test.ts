@@ -10,6 +10,7 @@ describe("uniqueMaterialLinks", () => {
       { trial: null, group: "technical", title: "技術資料", url: "https://example.com/a.pdf" },
       { trial: null, group: "overview", title: "別の資料", url: "https://example.com/b.pdf" },
     ];
+
     expect(uniqueMaterialLinks(links)).toEqual([
       { trial: null, group: "technical", title: "最初の資料名", url: "https://example.com/a.pdf" },
       { trial: null, group: "overview", title: "別の資料", url: "https://example.com/b.pdf" },
@@ -21,6 +22,7 @@ describe("uniqueMaterialLinks", () => {
       { trial: null, group: "overview", title: "入力中1", url: "" },
       { trial: null, group: "safety", title: "入力中2", url: "" },
     ];
+
     expect(uniqueMaterialLinks(links)).toEqual(links);
   });
 });

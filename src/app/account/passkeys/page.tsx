@@ -11,6 +11,7 @@ export const metadata: Metadata = { title: "パスキーの管理", robots: NO_I
 export default async function PasskeysPage() {
   const { passkeys, accountType } = await getAccountPasskeys();
   const back = accountType === "admin" ? "/admin" : accountType === "seller" ? "/dashboard" : "/me";
+
   return (
     <AuthScreen
       title="パスキーの管理"

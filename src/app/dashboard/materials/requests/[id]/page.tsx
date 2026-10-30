@@ -22,23 +22,28 @@ export default async function SellerMaterialRequestPage({
 }) {
   const { id } = await params;
   const session = await requireSeller();
+
   if (!session.ok) {
     if (session.error === "unauthorized") {
       redirect(`/sellers/login?next=${encodeURIComponent(`/dashboard/materials/requests/${id}`)}`);
     }
+
     return <SellerAccessDenied backHref="/dashboard/materials" />;
   }
 
   const result = await getSellerMaterialChangeRequest(session.data.sellerId, id);
+
   if (!result.ok) {
     if (result.error === "not_found") notFound();
     throw new Error("資材変更申請の取得に失敗しました。");
   }
 
   const { request, proposal } = result.data;
+
   const statusLabel = isMaterialChangeRequestStatus(request.status)
     ? MATERIAL_CHANGE_REQUEST_STATUS_LABELS[request.status]
     : request.status;
+
   const typeLabel = isMaterialChangeType(request.change_type)
     ? MATERIAL_CHANGE_TYPE_LABELS[request.change_type]
     : request.change_type;

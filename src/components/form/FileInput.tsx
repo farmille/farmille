@@ -49,13 +49,16 @@ type FileInputProps = FileInputBodyProps & Labeling;
 
 function selectionText(fileNames: readonly string[]): string {
   if (fileNames.length === 0) return "ファイルが選択されていません";
+
   if (fileNames.length === 1) return `選択中：${fileNames[0]}`;
+
   return `${fileNames.length}件選択中：${fileNames.join("、")}`;
 }
 
 /** ブラウザ固有の英語表示を出さず、選択状態を日本語で伝えるファイル入力。 */
 export function FileInput(props: FileInputProps) {
   const [labeling, inputProps] = splitLabeling(props);
+
   return (
     <Labeled disabled={inputProps.disabled} labeling={labeling} name={inputProps.name}>
       <FileInputBody {...inputProps} />
@@ -71,9 +74,11 @@ function FileInputBody({ onChange, disabled, className, ...inputProps }: FileInp
   // フォームの reset はファイル入力を空にするが change を出さないので、表示中の選択も空にする
   useMountEffect(() => {
     const form = inputRef.current?.form;
+
     if (form === null || form === undefined) return;
     const clear = () => setFileNames([]);
     form.addEventListener("reset", clear);
+
     return () => form.removeEventListener("reset", clear);
   });
 

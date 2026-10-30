@@ -18,6 +18,9 @@ const meta = {
     ],
   },
 } satisfies Meta<typeof StructuredReportArticle>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

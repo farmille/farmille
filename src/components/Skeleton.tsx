@@ -55,6 +55,7 @@ export function Skeleton({
 }
 
 const lines = css({ display: "grid", gap: "2.5", minW: "0", flex: "1" });
+
 const card = css({
   bg: "surface.card",
   borderWidth: "1px",

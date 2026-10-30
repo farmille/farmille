@@ -12,9 +12,11 @@ function storybookClient() {
     },
   });
 }
+
 export const createServerSupabase = fn<typeof import("@/server/supabase").createServerSupabase>(
   async () => storybookClient(),
 );
+
 export const createAdminSupabase = fn<typeof import("@/server/supabase").createAdminSupabase>(() =>
   storybookClient(),
 );

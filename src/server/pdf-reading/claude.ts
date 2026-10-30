@@ -58,6 +58,7 @@ export function outputJsonSchema(schema: v.GenericSchema): Anthropic.JSONOutputF
 
 function usageOf(message: Anthropic.Message, requested: Speed): PdfExtractionUsage {
   const { usage } = message;
+
   return {
     model: message.model,
     speed: usage.speed ?? requested,
@@ -75,7 +76,9 @@ function parseOutput<TSchema extends v.GenericSchema>(
   speed: Speed,
 ): PdfExtraction<v.InferOutput<TSchema>> {
   const usage = usageOf(message, speed);
+
   if (message.stop_reason === "refusal") return { ok: false, error: "refusal", usage };
+
   if (
     message.stop_reason === "max_tokens" ||
     message.stop_reason === "model_context_window_exceeded"
@@ -83,17 +86,23 @@ function parseOutput<TSchema extends v.GenericSchema>(
     return { ok: false, error: "max_tokens", usage };
   const text = message.content.flatMap((block) => (block.type === "text" ? [block.text] : []));
   let json: unknown;
+
   try {
     json = JSON.parse(text.join(""));
   } catch {
     console.error("[pdf-reading] 出力が JSON ではない", message.stop_reason);
+
     return { ok: false, error: "invalid_output", usage };
   }
+
   const output = v.safeParse(schema, json);
+
   if (!output.success) {
     console.error("[pdf-reading] 出力の形式が不正", v.summarize(output.issues));
+
     return { ok: false, error: "invalid_output", usage };
   }
+
   return { ok: true, output: output.output, usage };
 }
 
@@ -113,6 +122,7 @@ export async function extractFromPdf<TSchema extends v.GenericSchema>(
   now: () => number = Date.now,
 ): Promise<PdfExtraction<v.InferOutput<TSchema>>> {
   const { model } = request;
+
   const params: Anthropic.MessageStreamParams = {
     model: model.model,
     max_tokens: model.maxTokens,
@@ -138,17 +148,22 @@ export async function extractFromPdf<TSchema extends v.GenericSchema>(
       },
     ],
   };
+
   if (model.adaptiveThinking) params.thinking = { type: "adaptive" };
 
   const speeds: Speed[] = model.speed === "fast" ? ["fast", "standard"] : ["standard"];
+
   for (const speed of speeds) {
     const remaining = request.deadline - now();
+
     if (remaining <= 0 || request.signal?.aborted)
       return { ok: false, error: "deadline", usage: null };
     // timeout は応答の始まりまでしか効かないので、本文の受信も含めて signal で期限を守る
     const timeout = AbortSignal.timeout(remaining);
+
     const signal =
       request.signal === undefined ? timeout : AbortSignal.any([timeout, request.signal]);
+
     try {
       const message = await client.messages
         .stream(speed === "fast" ? { ...params, speed } : params, {
@@ -157,16 +172,20 @@ export async function extractFromPdf<TSchema extends v.GenericSchema>(
           signal,
         })
         .finalMessage();
+
       return parseOutput(message, request.schema, speed);
     } catch (error) {
       const fastUnavailable =
         error instanceof Anthropic.RateLimitError ||
         (error instanceof Anthropic.APIError && error.status === 529);
+
       if (speed === "fast" && fastUnavailable) continue;
       console.error("[pdf-reading] AI の呼び出しに失敗", error);
       const reason = FAILURES.find(([type]) => error instanceof type)?.[1] ?? "failed";
+
       return { ok: false, error: reason, usage: null };
     }
   }
+
   return { ok: false, error: "failed", usage: null };
 }

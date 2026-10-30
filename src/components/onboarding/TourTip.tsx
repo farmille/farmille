@@ -93,7 +93,9 @@ export function TourTip({
   const handoff = useHandoff();
   const entered = useEntered(handoff.continuing);
   const lit = useEntered(handoff.dimmed);
+
   if (target === null) return null;
+
   return (
     <TourTipSpot
       target={target}
@@ -126,12 +128,14 @@ function TourTipSpot({
   const [box, setBox] = useReducer((_current: Box | null, next: Box) => next, null);
   useMountEffect(() => bringIntoView(target));
   const ready = box !== null;
+
   // 位置を測ってから描くまでの間に、吹き出しの高さで置き場所を決め、前の段階のカードから動かす。
   // 引き継ぎは位置が決まってから行う（測る前の吹き出しは仮の位置にある）
   const card = useCallback(
     (element: HTMLElement) => {
       const stopSpot = watchSpot(target, element, setBox);
       const leave = ready ? handOff(element, true) : null;
+
       return () => {
         leave?.();
         stopSpot();
@@ -139,9 +143,11 @@ function TourTipSpot({
     },
     [target, ready],
   );
+
   const state = entered && ready ? "" : undefined;
   const spotState = lit && ready ? "" : undefined;
   const anchor = anchorRecipe({ anchor: box?.anchor ?? "viewport" });
+
   // 実行時に決まる位置は CSS 変数で渡し、スタイル側は var() で受ける
   return (
     <>

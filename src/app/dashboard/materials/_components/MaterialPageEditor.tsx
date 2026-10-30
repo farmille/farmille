@@ -30,6 +30,7 @@ import { saveMaterialPage, withdrawMaterialPage } from "../editor-actions";
 import { css } from "../../../../../styled-system/css";
 
 const timingOptions = css({ mt: "3" });
+
 const row = css({
   display: "flex",
   flexDirection: "column",
@@ -40,8 +41,10 @@ const row = css({
   borderColor: "border.default",
   borderRadius: "card",
 });
+
 const fieldset = css({ border: "0", p: "0", m: "0", minW: "0" });
 const TIMING_OPTIONS = APPLICATION_TIMINGS.map((label, index) => ({ value: String(index), label }));
+
 const LINK_GROUP_OPTIONS = [
   { value: "", label: "分類を選択してください" },
   ...MATERIAL_LINK_GROUPS,
@@ -73,18 +76,23 @@ export function MaterialPageEditor({
   const form = useForm({ defaultValues: { content: initialContent } });
   const content = useStore(form.store, (state) => state.values.content);
   const [preview, setPreview] = useReducer((_: boolean, next: boolean) => next, false);
+
   const [previewError, setPreviewError] = useReducer(
     (_: string | null, next: string | null) => next,
     null,
   );
+
   const router = useRouter();
+
   const [state, submitAction, pending] = useActionState<EditorState, EditorAction>(
     async (current, action) => {
       if (action.type === "withdraw") {
         if (await withdrawMaterialPage(action.versionId)) {
           router.refresh();
+
           return { ...current, message: null };
         }
+
         return {
           ...current,
           message: {
@@ -93,14 +101,17 @@ export function MaterialPageEditor({
           },
         };
       }
+
       const result = await saveMaterialPage({
         materialId,
         expectedVersion: current.version,
         content: action.content,
         submit: action.submit,
       });
+
       if (!result.ok) return { ...current, message: { tone: "error", text: result.message } };
       router.refresh();
+
       return {
         version: action.submit ? null : result.versionId,
         savedContent: JSON.stringify(action.content),
@@ -114,7 +125,9 @@ export function MaterialPageEditor({
     },
     { version: expectedVersion, savedContent: JSON.stringify(initialContent), message: null },
   );
+
   const message = previewError ? { tone: "error" as const, text: previewError } : state.message;
+
   const persistedInput = (
     <PersistedInput
       name="material-page"
@@ -470,6 +483,7 @@ export function MaterialPageEditor({
                 const registration = content.registrations.find(
                   (entry) => entry.kind === kind.value,
                 );
+
                 return (
                   <div className={row} key={kind.value}>
                     <Checkbox
@@ -628,8 +642,10 @@ export function MaterialPageEditor({
               setPreviewError(
                 "プレビューの前に、資料のタイトル・URLと登録・認証の空欄を確認してください。",
               );
+
               return;
             }
+
             setPreview(!preview);
           }}
         >

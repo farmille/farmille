@@ -10,6 +10,7 @@ export async function removePublishedPostAction(
   formData: FormData,
 ): Promise<AdminActionState> {
   const result = await removePublishedPost(formData);
+
   if (!result.ok)
     return {
       status: "error",
@@ -18,6 +19,7 @@ export async function removePublishedPostAction(
           ? "この投稿はすでに非公開になっているか、存在しません。再読み込みしてください。"
           : errorMessageJa[result.error],
     };
+
   for (const path of [
     "/",
     "/admin",
@@ -30,10 +32,12 @@ export async function removePublishedPostAction(
     `/users/${result.data.authorUserId}`,
   ])
     revalidatePath(path);
+
   if (result.data.type === "usage_report") {
     revalidatePath(`/reports/${result.data.id}`);
     revalidatePath(`/admin/usage-reports/${result.data.id}`);
   }
+
   return {
     status: "done",
     message: "公開から削除しました。投稿内容は運営の記録として保持されています。",

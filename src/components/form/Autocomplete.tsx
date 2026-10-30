@@ -44,6 +44,7 @@ const labelOf = (option: Option) => option.label;
 
 export function Autocomplete(props: AutocompleteProps) {
   const [labeling] = splitLabeling(props);
+
   return (
     <Labeled disabled={props.disabled} labeling={labeling} name={props.name}>
       {props.open === undefined ? (
@@ -57,6 +58,7 @@ export function Autocomplete(props: AutocompleteProps) {
 
 function UncontrolledAutocomplete(props: AutocompleteBodyProps) {
   const [open, setOpen] = useReducer((_current: boolean, next: boolean) => next, false);
+
   return (
     <AutocompleteBody
       {...props}
@@ -92,10 +94,12 @@ function AutocompleteBody({
   const highlighted = useRef(false);
   const filter = BaseAutocomplete.useFilter();
   const query = value.trim();
+
   const visible =
     filterMode === "preFiltered" || query === ""
       ? options
       : options.filter((option) => filter.contains(option, query, labelOf));
+
   // 候補も案内も無い一覧は開かない。開いたままだと Base UI が周りを読み上げから隠し、aria-expanded も true のまま残る
   const shown = open && (visible.length > 0 || emptyMessage !== undefined);
 
@@ -109,6 +113,7 @@ function AutocompleteBody({
       }}
       onKeyDown={(event) => {
         if (event.key !== "Enter" || isComposingEnter(event)) return;
+
         if (highlighted.current || onSubmitText === undefined) return;
         event.preventDefault();
         onOpenChange?.(false);

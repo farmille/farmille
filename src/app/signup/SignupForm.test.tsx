@@ -34,6 +34,7 @@ describe("SignupForm", () => {
 
     // サーバーの検証で戻ったあと、React は送信したフォームをこの操作で初期値へ戻す
     const form = password.closest("form");
+
     if (form === null) throw new Error("パスワード欄がフォームの中にありません。");
     act(() => form.reset());
 
@@ -82,6 +83,7 @@ describe("SignupForm", () => {
       <SignupForm
         checkHandle={async (value) => {
           checked.push(value);
+
           return value === "せっかち農家" ? HANDLE_TAKEN : null;
         }}
         email="farmer@example.test"

@@ -49,6 +49,7 @@ type DraftImage = {
 };
 
 type ImageCanvases = { canvas: HTMLCanvasElement; original: HTMLCanvasElement };
+
 type CanvasEvent =
   | { type: "keep"; id: string; value: ImageCanvases }
   | { type: "remove"; id: string }
@@ -170,36 +171,45 @@ export function ReportItemFileDialog({
   const saved = reportPageItemImages(item);
   const form = useForm({ defaultValues: { images: saved.map(fromSaved) } });
   const images = useStore(form.store, (state) => state.values.images);
+
   const [canvases, changeCanvas] = useReducer(
     (current: Map<string, ImageCanvases>, event: CanvasEvent) => {
       const next = new Map(current);
+
       if (event.type === "remove") {
         next.delete(event.id);
       } else {
         if (event.type === "saved") next.delete(event.previousId);
         next.set(event.id, event.value);
       }
+
       return next;
     },
     new Map<string, ImageCanvases>(),
   );
+
   const setImages = (next: DraftImage[] | ((previous: DraftImage[]) => DraftImage[])) =>
     form.setFieldValue("images", next);
+
   const [open, setOpen] = useReducer((_current: boolean, next: boolean) => next, true);
   // 進み具合（読み込み中など）と、追加できなかった理由は分けて持つ。理由は次のファイルの読み込みで消さない
   const [message, setMessage] = useReducer((_current: string, next: string) => next, "");
+
   const [rejected, changeRejected] = useReducer(
     (current: string[], action: { type: "clear" } | { type: "reject"; message: string }) =>
       action.type === "clear" ? [] : [...current, action.message],
     [],
   );
+
   // 保存中に消す・題を変える・編集すると、保存を始めたときの画像で閉じて黙って失われるので、保存中は操作を止める
   const [saving, setSaving] = useReducer((_current: boolean, next: boolean) => next, false);
   const [asking, setAsking] = useReducer((_current: boolean, next: boolean) => next, false);
+
   const [editing, setEditing] = useReducer(
     (_current: DraftImage | null, next: DraftImage | null) => next,
     null,
   );
+
   const [pdf, setPdf] = useReducer(
     (
       _current: {
@@ -217,6 +227,7 @@ export function ReportItemFileDialog({
     ) => next,
     null,
   );
+
   const live = useRef(true);
   const committing = useRef(false);
   // このポップアップで上げた画像。ページに入れずに捨てたら、公開の置き場からその場で消す
@@ -256,6 +267,7 @@ export function ReportItemFileDialog({
     if (readingNow.current) return;
     readingNow.current = true;
     setReading(true);
+
     try {
       await readFiles(files);
     } finally {
@@ -268,40 +280,51 @@ export function ReportItemFileDialog({
     count.current = images.length;
     changeRejected({ type: "clear" });
     const reject = (text: string) => changeRejected({ type: "reject", message: text });
+
     for (const file of files) {
       if (!live.current) return;
+
       if (count.current >= imageLimit) {
         reject(
           `画像はレポート全体で${REPORT_IMAGE_LIMIT}枚までのため、「${file.name}」は追加できませんでした。`,
         );
         continue;
       }
+
       if (isPdf(file)) {
         const tooLarge = fileTooLarge(file);
+
         if (tooLarge !== null) {
           reject(tooLarge);
           continue;
         }
+
         setMessage(`「${file.name}」を開いています…`);
+
         try {
           const doc = await openPdf(file);
+
           // 上限超え・途中で閉じた・描画の失敗のどれで抜けても、pdf.js の文書と worker を残さない
           try {
             if (!live.current) return;
             const tooLong = pdfTooLong(file.name, doc.numPages);
+
             if (tooLong !== null) {
               setMessage("");
               reject(tooLong);
               continue;
             }
+
             if (doc.numPages === 1) {
               setMessage("ページを画像にしています…");
               add(await renderPdfPage(doc, 1));
             } else {
               setMessage("");
+
               const pages = await new Promise<number[]>((resolve) =>
                 setPdf({ doc, name: file.name, resolve, max: imageLimit - count.current }),
               );
+
               for (const [index, page] of pages.entries()) {
                 if (!live.current) return;
                 setMessage(`ページを画像にしています（${index + 1}/${pages.length}）…`);
@@ -311,23 +334,30 @@ export function ReportItemFileDialog({
           } finally {
             void doc.destroy();
           }
+
           setMessage("");
         } catch {
           setMessage("");
           reject(`「${file.name}」を開けませんでした。`);
         }
+
         continue;
       }
+
       if (!isImage(file)) {
         reject(`「${file.name}」は写真（JPEG・PNG・WebP）でもPDFでもないため、追加できません。`);
         continue;
       }
+
       const tooLarge = fileTooLarge(file);
+
       if (tooLarge !== null) {
         reject(tooLarge);
         continue;
       }
+
       setMessage(`「${file.name}」を読み込んでいます…`);
+
       try {
         add(await canvasFromImageFile(file));
         setMessage("");
@@ -341,10 +371,13 @@ export function ReportItemFileDialog({
   async function startEdit(image: DraftImage) {
     if (canvases.has(image.id)) {
       setEditing(image);
+
       return;
     }
+
     if (image.url === null) return;
     setMessage("画像を読み込んでいます…");
+
     try {
       const canvas = await canvasFromUrl(image.url);
       changeCanvas({ type: "keep", id: image.id, value: { canvas, original: canvas } });
@@ -361,9 +394,11 @@ export function ReportItemFileDialog({
     committing.current = true;
     setSaving(true);
     let current = images;
+
     try {
       for (const [index, image] of current.entries()) {
         const resource = canvases.get(image.id);
+
         if (!image.dirty || resource === undefined) continue;
         setMessage(`画像を保存しています（${index + 1}/${current.length}）…`);
         // 保存はいつも新しい名前で行う（途中で失敗した画像を送り直しても、同じ名前とぶつからない）
@@ -377,11 +412,14 @@ export function ReportItemFileDialog({
         );
         setImages(current);
       }
+
       setMessage("");
       live.current = false;
+
       const committed = current.flatMap((image) =>
         image.url === null ? [] : [{ id: image.id, url: image.url, caption: image.caption }],
       );
+
       // 前の保存で上げたあと、ページに入れる前に消した画像
       void discardUploads(new Set(committed.map((image) => image.url)));
       onCommit({ ...item, mode: "file", images: committed });
@@ -398,6 +436,7 @@ export function ReportItemFileDialog({
   function discardUploads(kept: ReadonlySet<string> = new Set()) {
     const paths = uploaded.current.filter(({ url }) => !kept.has(url)).map(({ path }) => path);
     uploaded.current = [];
+
     return removeReportImages(paths);
   }
 
@@ -411,6 +450,7 @@ export function ReportItemFileDialog({
   }
 
   const title = `${item.name.trim() || "調査項目"}：資料のグラフ・表を差し込む`;
+
   return (
     <>
       {open && (changed || reading || saving) && <ReportLeaveWarning />}
@@ -418,6 +458,7 @@ export function ReportItemFileDialog({
         open={open}
         onOpenChange={(open) => {
           if (open || saving) return;
+
           if (changed) setAsking(true);
           else close();
         }}
@@ -554,6 +595,7 @@ export function ReportItemFileDialog({
         tone="primary"
         onConfirm={async () => {
           setAsking(false);
+
           if (isNew && images.length > 0) await commit();
           else close();
         }}
@@ -581,8 +623,10 @@ export function ReportItemFileDialog({
         onDone={(canvas) => {
           const target = editing;
           setEditing(null);
+
           if (target === null) return;
           const resource = canvases.get(target.id);
+
           if (canvas === resource?.canvas) return;
           changeCanvas({
             type: "keep",

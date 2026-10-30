@@ -10,6 +10,7 @@ const descriptionStyle = css({
   whiteSpace: "pre-wrap",
   overflowWrap: "anywhere",
 });
+
 const timelineScrollStyle = css({
   mt: "0.5",
   mx: "-1",
@@ -17,6 +18,7 @@ const timelineScrollStyle = css({
   scrollbarWidth: "none",
   "&::-webkit-scrollbar": { display: "none" },
 });
+
 const timelineStyle = css({
   position: "relative",
   display: "flex",
@@ -36,7 +38,9 @@ const timelineStyle = css({
     bg: "text.default",
   },
 });
+
 const stageStyle = css({ position: "relative", flex: "1", minW: "20", textAlign: "center" });
+
 const dotRecipe = cva({
   base: {
     position: "relative",
@@ -55,6 +59,7 @@ const dotRecipe = cva({
     },
   },
 });
+
 const labelRecipe = cva({
   base: {
     display: "block",
@@ -69,6 +74,7 @@ const labelRecipe = cva({
     },
   },
 });
+
 const visuallyHiddenStyle = css({ srOnly: true });
 const noteStyle = css({ mt: "2.5", textStyle: "note", color: "text.subtle" });
 
@@ -90,6 +96,7 @@ export function MaterialTimingBox({ timings }: { timings: readonly number[] }) {
           <ol className={timelineStyle}>
             {APPLICATION_TIMINGS.map((stage, index) => {
               const on = timings.includes(index);
+
               return (
                 <li key={stage} className={stageStyle}>
                   <span className={dotRecipe({ on })} />

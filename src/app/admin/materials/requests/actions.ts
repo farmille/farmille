@@ -23,6 +23,7 @@ export async function resolveMaterialChangeRequestAction(
   if (requestId.length === 0 || (decision !== "approve" && decision !== "reject")) {
     return { status: "error", message: errorMessageJa.invalid_body };
   }
+
   if (decision === "reject" && reviewNote.length === 0) {
     return { status: "error", message: "却下理由を入力してください。" };
   }

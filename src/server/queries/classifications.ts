@@ -20,13 +20,21 @@ import { createPublicSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type CompositionTypeRow = Database["public"]["Tables"]["composition_types"]["Row"];
+
 type CropGroupRow = Database["public"]["Tables"]["crop_groups"]["Row"];
+
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
+
 type EffectCategoryRow = Database["public"]["Tables"]["effect_categories"]["Row"];
+
 type EffectRow = Database["public"]["Tables"]["effects"]["Row"];
+
 type IngredientCategoryRow = Database["public"]["Tables"]["ingredient_categories"]["Row"];
+
 type IngredientRow = Database["public"]["Tables"]["ingredients"]["Row"];
+
 type ProductTypeRow = Database["public"]["Tables"]["product_types"]["Row"];
+
 type SearchTagRow = Database["public"]["Tables"]["search_tags"]["Row"];
 
 export type EffectOption = Pick<EffectRow, "id" | "name" | "sort_order"> & {
@@ -138,6 +146,7 @@ export async function listClassificationOptionsWithSupabase(
 
   if (error !== null) {
     reportQueryError("分類マスタの取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -163,24 +172,30 @@ export async function listClassificationOptionsWithSupabase(
     searchTagRows === null
   ) {
     reportQueryError("分類マスタの応答にデータが無い", null);
+
     return fail("internal");
   }
 
   const cropGroups = new Map(cropGroupRows.map((group) => [group.id, group]));
   const effectCategories = new Map(effectCategoryRows.map((category) => [category.id, category]));
+
   const ingredientCategories = new Map(
     ingredientCategoryRows.map((category) => [category.id, category]),
   );
+
   const crops: CropOption[] = [];
   const effects: EffectOption[] = [];
   const ingredients: IngredientOption[] = [];
 
   for (const crop of cropRows) {
     const group = cropGroups.get(crop.group_id);
+
     if (group === undefined) {
       reportQueryError("作物に対応する作物群が無い", crop);
+
       return fail("internal");
     }
+
     crops.push({
       id: crop.id,
       name: crop.name,
@@ -194,10 +209,13 @@ export async function listClassificationOptionsWithSupabase(
 
   for (const effect of effectRows) {
     const category = effectCategories.get(effect.category_id);
+
     if (category === undefined) {
       reportQueryError("個別効果に対応する効果大分類が無い", effect);
+
       return fail("internal");
     }
+
     effects.push({
       id: effect.id,
       name: effect.name,
@@ -210,10 +228,13 @@ export async function listClassificationOptionsWithSupabase(
 
   for (const ingredient of ingredientRows) {
     const category = ingredientCategories.get(ingredient.category_id);
+
     if (category === undefined) {
       reportQueryError("個別材料に対応する材料分類が無い", ingredient);
+
       return fail("internal");
     }
+
     ingredients.push({
       id: ingredient.id,
       name: ingredient.name,
@@ -265,8 +286,10 @@ export async function listClassificationOptionsWithSupabase(
 const fetchCachedClassificationOptions = unstable_cache(
   async (supabaseUrl: string): Promise<ClassificationOptions> => {
     const result = await listClassificationOptionsWithSupabase(createPublicSupabase(supabaseUrl));
+
     // 失敗を値で返すとキャッシュに残るので、例外にして保存させない。
     if (!result.ok) throw new Error("分類マスタを取得できませんでした。");
+
     return result.data;
   },
   ["classification-options-with-search-vocabulary"],
@@ -279,6 +302,7 @@ async function fetchClassificationOptions(): Promise<Result<ClassificationOption
   } catch (error) {
     unstable_rethrow(error);
     reportQueryError("分類マスタの取得に失敗", error);
+
     return fail("internal");
   }
 }
@@ -287,6 +311,7 @@ export const listClassificationOptions = cache(fetchClassificationOptions);
 
 async function fetchSearchFilters(): Promise<Result<SearchFilterItem[]>> {
   const options = await listClassificationOptions();
+
   if (!options.ok) return options;
 
   const filters: SearchFilterItem[] = [
@@ -319,6 +344,7 @@ async function fetchSearchFilters(): Promise<Result<SearchFilterItem[]>> {
       if (!isSearchFilterCategory(tag.category)) {
         throw new Error(`未対応の検索タグ分類です: ${tag.category}`);
       }
+
       return {
         id: tag.id,
         name: tag.name,
@@ -348,6 +374,7 @@ async function fetchSearchFilters(): Promise<Result<SearchFilterItem[]>> {
     filters.toSorted((left, right) => {
       const categoryOrder =
         (CATEGORY_ORDER.get(left.category) ?? 0) - (CATEGORY_ORDER.get(right.category) ?? 0);
+
       return categoryOrder || bySortOrder(left, right);
     }),
   );
@@ -361,6 +388,7 @@ export async function listSearchFiltersByRefs(
   if (refs.length === 0) return succeed([]);
 
   const filters = await listSearchFilters();
+
   if (!filters.ok) return filters;
 
   const byKey = new Map(filters.data.map((filter) => [`${filter.category}:${filter.id}`, filter]));
@@ -368,6 +396,7 @@ export async function listSearchFiltersByRefs(
 
   for (const ref of refs) {
     const filter = byKey.get(`${ref.category}:${ref.id}`);
+
     if (filter === undefined) return fail("invalid_body");
     resolved.push(filter);
   }

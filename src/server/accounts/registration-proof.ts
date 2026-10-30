@@ -6,11 +6,13 @@ import { clientEnv, serverEnv } from "@/env";
 
 const COOKIE_NAME = "farmille-registration";
 const MAX_AGE = 3600;
+
 const ProofSchema = v.object({
   userId: v.pipe(v.string(), v.uuid()),
   email: v.pipe(v.string(), v.email()),
   expires: v.number(),
 });
+
 export type RegistrationProof = v.InferOutput<typeof ProofSchema>;
 
 function signature(body: string, secret: string) {
@@ -19,20 +21,26 @@ function signature(body: string, secret: string) {
 
 export function encodeRegistrationProof(proof: RegistrationProof, secret: string): string {
   const body = Buffer.from(JSON.stringify(proof)).toString("base64url");
+
   return `${body}.${signature(body, secret).toString("base64url")}`;
 }
 
 export function decodeRegistrationProof(stored: string, secret: string, now: number) {
   const [body, mac, extra] = stored.split(".");
+
   if (!body || !mac || extra !== undefined) return null;
   const expected = signature(body, secret);
   const actual = Buffer.from(mac, "base64url");
+
   if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return null;
+
   const parsed = v.safeParse(
     v.pipe(v.string(), v.parseJson(), ProofSchema),
     Buffer.from(body, "base64url").toString("utf8"),
   );
+
   if (!parsed.success || parsed.output.expires <= now) return null;
+
   return parsed.output;
 }
 
@@ -57,6 +65,7 @@ export async function saveRegistrationProof(userId: string, email: string) {
 
 export async function readRegistrationProof() {
   const stored = (await cookies()).get(COOKIE_NAME)?.value;
+
   return stored ? decodeRegistrationProof(stored, serverEnv.authEmailHookSecret, Date.now()) : null;
 }
 

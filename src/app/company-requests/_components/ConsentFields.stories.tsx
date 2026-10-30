@@ -5,6 +5,7 @@ import { css } from "../../../../styled-system/css";
 import { applicationCopy } from "@/lib/company-application-copy";
 
 import { ConsentFields } from "./ConsentFields";
+
 const meta = {
   title: "Pages/company-requests/ConsentFields",
   component: ConsentFields,
@@ -14,7 +15,9 @@ const meta = {
     const form = useForm({
       defaultValues: { consents: applicationCopy[args.kind].consents.map(() => false) },
     });
+
     const values = useStore(form.store, (state) => state.values.consents);
+
     return (
       <ConsentFields
         {...args}
@@ -29,6 +32,9 @@ const meta = {
   },
   decorators: [(Story) => <div className={css({ p: "4" })}>{Story()}</div>],
 } satisfies Meta<typeof ConsentFields>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

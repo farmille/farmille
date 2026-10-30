@@ -52,6 +52,7 @@ export function OptionText({ option }: { option: Option }) {
 export function isComposingEnter(event: BaseUIEvent<KeyboardEvent<HTMLInputElement>>): boolean {
   if (!event.nativeEvent.isComposing && event.keyCode !== 229) return false;
   event.preventBaseUIHandler();
+
   return true;
 }
 
@@ -154,6 +155,7 @@ const valueOf = (option: Option) => option.value;
  */
 export function Combobox(props: ComboboxProps) {
   const [labeling] = splitLabeling(props);
+
   return (
     <Labeled disabled={props.disabled} labeling={labeling} name={props.name}>
       {props.multiple === true ? <MultipleCombobox {...props} /> : <SingleCombobox {...props} />}
@@ -177,6 +179,7 @@ function UncontrolledSingleCombobox({
   const initial: Option | null = defaultValue ?? null;
   const form = useForm({ defaultValues: { selection: initial } });
   const selection = useStore(form.store, (state) => state.values.selection);
+
   return (
     <SingleComboboxBody
       {...props}
@@ -252,6 +255,7 @@ function UncontrolledMultipleCombobox({
   const initial: readonly Option[] = defaultValue ?? [];
   const form = useForm({ defaultValues: { selection: initial } });
   const selection = useStore(form.store, (state) => state.values.selection);
+
   return (
     <MultipleComboboxBody
       {...props}
@@ -346,12 +350,14 @@ function MultipleComboboxBody({
 
 function useEnterGuard() {
   const highlighted = useRef(false);
+
   return {
     onItemHighlighted: (item: Option | undefined) => {
       highlighted.current = item !== undefined;
     },
     onKeyDown: (event: BaseUIEvent<KeyboardEvent<HTMLInputElement>>) => {
       if (event.key !== "Enter" || isComposingEnter(event)) return;
+
       if (!highlighted.current) event.preventDefault();
     },
   };

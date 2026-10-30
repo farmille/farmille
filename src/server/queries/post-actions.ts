@@ -5,7 +5,9 @@ import { getSessionUser } from "@/server/auth";
 import { createServerSupabase } from "@/server/supabase";
 
 export const PostTargetSchema = v.picklist(["review", "usage_report"]);
+
 export type PostTarget = v.InferOutput<typeof PostTargetSchema>;
+
 export const PostIdSchema = v.pipe(v.string(), v.uuid());
 
 /** カードが共通で使う、本人の保存状態と公開集計。 */
@@ -13,6 +15,7 @@ export const getPostActions = cache(async (target: PostTarget, id: string) => {
   const supabase = await createServerSupabase();
   const session = await getSessionUser();
   const column = target === "review" ? "review_id" : "usage_report_id";
+
   const [views, saved, helpful, post] = await Promise.all([
     supabase
       .from("view_counts_total")
@@ -43,13 +46,16 @@ export const getPostActions = cache(async (target: PostTarget, id: string) => {
       .eq("id", id)
       .maybeSingle(),
   ]);
+
   if (views.error || saved?.error || helpful?.error || post.error)
     throw new Error("投稿の保存状態・閲覧数を取得できませんでした。");
   let viewCount = 0;
+
   if (views.data !== null) {
     if (views.data.view_count === null) throw new Error("投稿の閲覧数が欠落しています。");
     viewCount = views.data.view_count;
   }
+
   return {
     saved: saved?.data != null,
     voted: helpful?.data != null,
@@ -61,6 +67,7 @@ export const getPostActions = cache(async (target: PostTarget, id: string) => {
 /** 保存一覧は投稿側の公開権限も通して取得する。非公開化された投稿は表示しない。 */
 export async function listSavedPosts(userId: string) {
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("saved_posts")
     .select(`
@@ -70,6 +77,8 @@ export async function listSavedPosts(userId: string) {
   `)
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
+
   if (error) throw new Error("保存した投稿を取得できませんでした。");
+
   return data;
 }

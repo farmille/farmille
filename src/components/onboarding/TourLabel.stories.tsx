@@ -8,6 +8,7 @@ const meta = {
 } satisfies Meta<typeof TourLabel>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Profile: Story = { args: { section: 1 } };

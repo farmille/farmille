@@ -11,10 +11,12 @@ import { initialAuthFormState, submittedValuesOf, type AuthFormState } from "@/l
 export function SellerLoginForm({ next }: { next: string | null }) {
   const form = useForm({ defaultValues: { loginId: "", password: "" } });
   const values = useStore(form.store, (state) => state.values);
+
   const [state, formAction] = useActionState(async (previous: AuthFormState, data: FormData) => {
     const result = await sellerLoginAction(previous, data);
     form.setFieldValue("loginId", submittedValuesOf(result).loginId ?? "");
     form.setFieldValue("password", "");
+
     return result;
   }, initialAuthFormState);
 

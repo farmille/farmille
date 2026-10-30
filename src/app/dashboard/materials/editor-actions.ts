@@ -12,8 +12,10 @@ import {
 
 export async function saveMaterialPage(input: v.InferOutput<typeof SaveMaterialPageSchema>) {
   const session = await requireSeller();
+
   if (!session.ok) return { ok: false as const, message: "企業会員でログインしてください。" };
   const parsed = v.safeParse(SaveMaterialPageSchema, input);
+
   if (!parsed.success)
     return {
       ok: false as const,
@@ -21,8 +23,10 @@ export async function saveMaterialPage(input: v.InferOutput<typeof SaveMaterialP
         "資料の分類・タイトル・URL、試験の概要・実施機関、登録事業者と関係会社を確認してください。同じURLや会社名は重複して送信できません。",
     };
   const { data, error } = await saveMaterialPageVersion(parsed.output);
+
   if (error) {
     console.error("[material-page] 原稿保存に失敗", error);
+
     return {
       ok: false as const,
       message:
@@ -33,25 +37,33 @@ export async function saveMaterialPage(input: v.InferOutput<typeof SaveMaterialP
             : "原稿を保存できませんでした。入力を残していますので、内容を確認して再度お試しください。",
     };
   }
+
   revalidatePath(`/dashboard/materials/${parsed.output.materialId}`);
   revalidatePath("/dashboard/materials");
+
   return { ok: true as const, versionId: data };
 }
 
 export async function withdrawMaterialPage(versionId: string) {
   const session = await requireSeller();
+
   if (!session.ok || !v.is(v.pipe(v.string(), v.uuid()), versionId)) return false;
   const { error } = await withdrawMaterialPageVersion(versionId);
+
   if (error) {
     console.error("[material-page] 取り下げに失敗", error);
+
     return false;
   }
+
   revalidatePath("/dashboard/materials", "layout");
+
   return true;
 }
 
 export async function hideMaterialPage(input: { materialId: string; note: string }) {
   if (!(await requireSeller()).ok) return false;
+
   const parsed = v.safeParse(
     v.object({
       materialId: v.pipe(v.string(), v.uuid()),
@@ -59,14 +71,19 @@ export async function hideMaterialPage(input: { materialId: string; note: string
     }),
     input,
   );
+
   if (!parsed.success) return false;
   const { error } = await hideOwnedMaterialPage(parsed.output.materialId, parsed.output.note);
+
   if (error) {
     console.error("[material-page] 非公開への変更に失敗", error);
+
     return false;
   }
+
   revalidatePath(`/materials/${input.materialId}`);
   revalidatePath(`/dashboard/materials/${input.materialId}`);
   revalidatePath("/dashboard/materials");
+
   return true;
 }

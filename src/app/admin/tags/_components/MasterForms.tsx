@@ -11,6 +11,7 @@ import type { AdminCropItem, AdminTagItem, CropGroupOption } from "@/server/admi
 import { css } from "../../../../../styled-system/css";
 
 type TagCreateInput = { category: string | null; name: string; sortOrder: string };
+
 type CropCreateInput = {
   groupId: string | null;
   name: string;
@@ -52,6 +53,7 @@ const usageStyle = css({
 
 function StateMessage({ state }: { state: AdminActionState }) {
   if (state.status === "error") return <Notice tone="error">{state.message}</Notice>;
+
   if (state.status === "done") return <Notice tone="success">{state.message}</Notice>;
 
   return null;
@@ -64,11 +66,15 @@ export function TagCreateForm({ categories }: { categories: string[] }) {
     name: "",
     sortOrder: "0",
   };
+
   const form = useForm({ defaultValues: initialValues });
   const values = useStore(form.store, (state) => state.values);
+
   const [state, formAction] = useActionState(async (previous: AdminActionState, data: FormData) => {
     const result = await tagOperationAction(previous, data);
+
     if (result.status === "done") form.reset();
+
     return result;
   }, initialAdminActionState);
 
@@ -185,11 +191,15 @@ export function CropCreateForm({ groups }: { groups: CropGroupOption[] }) {
     aliases: "",
     sortOrder: "0",
   };
+
   const form = useForm({ defaultValues: initialValues });
   const values = useStore(form.store, (state) => state.values);
+
   const [state, formAction] = useActionState(async (previous: AdminActionState, data: FormData) => {
     const result = await cropOperationAction(previous, data);
+
     if (result.status === "done") form.reset();
+
     return result;
   }, initialAdminActionState);
 
@@ -264,6 +274,7 @@ export function CropRow({ crop }: { crop: AdminCropItem }) {
       sortOrder: String(crop.sort_order),
     },
   });
+
   const values = useStore(form.store, (state) => state.values);
   const [state, formAction] = useActionState(cropOperationAction, initialAdminActionState);
   const inUse = crop.usageCount > 0;

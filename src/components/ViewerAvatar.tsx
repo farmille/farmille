@@ -16,11 +16,13 @@ export async function ViewerAvatar({ session }: { session: SessionUser }) {
   }
 
   const profile = await getOwnProfile(session.userId);
+
   if (!profile.ok) {
     if (profile.error === "not_found") return <Icon name="person" size="md" />;
     throw new Error(errorMessageJa[profile.error]);
   }
 
   const { handle, avatarUrl } = profile.data;
+
   return <Avatar name={handle} src={avatarUrl} size="md" />;
 }

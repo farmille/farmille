@@ -42,6 +42,7 @@ export type MaterialValidation =
 
 function toOptionalText(value: FormDataEntryValue | null): string | null {
   const text = trimmedFormDataString(value);
+
   return text.length === 0 ? null : text;
 }
 
@@ -49,11 +50,14 @@ type UrlParse = { ok: true; value: string | null } | { ok: false };
 
 function toOptionalHttpUrl(value: FormDataEntryValue | null): UrlParse {
   const text = trimmedFormDataString(value);
+
   if (text.length === 0) return { ok: true, value: null };
 
   try {
     const url = new URL(text);
+
     if (url.protocol !== "http:" && url.protocol !== "https:") return { ok: false };
+
     return { ok: true, value: url.toString() };
   } catch {
     return { ok: false };
@@ -86,20 +90,25 @@ export function validateMaterialInput(raw: {
   const manufacturerName = trimmedFormDataString(raw.manufacturerName);
 
   if (name.length === 0) fieldErrors.name = "資材名を入力してください。";
+
   if (manufacturerName.length === 0) {
     fieldErrors.manufacturerName = "メーカー名を入力してください。";
   }
 
   const officialUrl = toOptionalHttpUrl(raw.officialUrl);
   const catalogUrl = toOptionalHttpUrl(raw.catalogUrl);
+
   if (!officialUrl.ok) fieldErrors.officialUrl = "http(s) の URL で入力してください。";
+
   if (!catalogUrl.ok) fieldErrors.catalogUrl = "http(s) の URL で入力してください。";
 
   const compositionTypeIdText = trimmedFormDataString(raw.compositionTypeId);
+
   const compositionTypeIdResult = v.safeParse(
     v.union([v.literal(""), v.pipe(v.string(), v.uuid())]),
     compositionTypeIdText,
   );
+
   if (!compositionTypeIdResult.success) {
     fieldErrors.compositionTypeId = "組成タイプの選択内容が正しくありません。";
   }
@@ -111,6 +120,7 @@ export function validateMaterialInput(raw: {
   const ingredientIdsResult = v.safeParse(idListSchema, raw.ingredientIds);
   const productTypeIdsResult = v.safeParse(idListSchema, raw.productTypeIds);
   const searchTagIdsResult = v.safeParse(idListSchema, raw.searchTagIds);
+
   const classificationResults = [
     cropIdsResult,
     effectIdsResult,
@@ -119,6 +129,7 @@ export function validateMaterialInput(raw: {
     productTypeIdsResult,
     searchTagIdsResult,
   ];
+
   if (classificationResults.some((result) => !result.success)) {
     fieldErrors.classifications = "分類の選択内容が正しくありません。";
   }

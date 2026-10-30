@@ -11,6 +11,9 @@ const meta = {
   decorators: [(Story) => readingFrame(Story())],
   args: { report: legacyReport, coverId: null },
 } satisfies Meta<typeof LegacyReportSections>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};

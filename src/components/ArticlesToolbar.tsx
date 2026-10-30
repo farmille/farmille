@@ -18,6 +18,7 @@ const queryParsers = {
   q: parseAsString.withDefault(""),
   page: parseAsString,
 };
+
 const serializeQuery = createSerializer(queryParsers);
 
 /** 記事一覧の検索ボックス＋フィルタピル。URL の q / type / page を更新する。 */
@@ -64,7 +65,9 @@ function ArticleSearch({
     defaultValues: { query },
     onSubmit: ({ value }) => onSubmit(value.query.trim()),
   });
+
   const input = useStore(form.store, (state) => state.values.query);
+
   return (
     <form
       action="/articles"

@@ -3,6 +3,7 @@ import { decodeRecoveryProof, encodeRecoveryProof } from "./recovery-session";
 
 const secret = "test-recovery-cookie-signing-secret";
 const now = 1_000_000;
+
 const session = {
   access_token: "test-access",
   refresh_token: "test-refresh",
@@ -17,6 +18,7 @@ describe("再設定専用セッションの署名", () => {
   });
   it("本文・署名の改ざんと不正形式を拒否する", () => {
     const proof = encodeRecoveryProof(session, secret);
+
     for (const changed of ["x" + proof, "invalid"]) {
       expect(decodeRecoveryProof(changed, session.link, secret, now)).toBeNull();
     }

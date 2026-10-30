@@ -17,6 +17,7 @@ const decoyLine = cva({
 
 export function ReportGate({ reportPath }: { reportPath: string }) {
   const next = encodeURIComponent(reportPath);
+
   return (
     <section
       className={css({ position: "relative", mt: "2", pb: "20" })}

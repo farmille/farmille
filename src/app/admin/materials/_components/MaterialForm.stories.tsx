@@ -121,6 +121,7 @@ const meta = {
 } satisfies Meta<typeof MaterialForm>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Edit: Story = { args: { classifications, material } };

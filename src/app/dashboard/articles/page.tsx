@@ -22,10 +22,12 @@ export default async function DashboardArticlesPage() {
     if (session.error === "unauthorized") {
       redirect(`/sellers/login?next=${encodeURIComponent("/dashboard/articles")}`);
     }
+
     return <SellerAccessDenied backHref="/dashboard" />;
   }
 
   const result = await listSellerArticles(session.data.sellerId);
+
   if (!result.ok) {
     throw new Error(errorMessageJa[result.error]);
   }

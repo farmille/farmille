@@ -21,17 +21,20 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
   const material = await createMaterial("moderation");
   const reviewBody = `E2E通報対象_${uniqueToken("review")}`;
   const reportTitle = `E2E編集局_${uniqueToken("report")}`;
+
   const review = await createReview({
     materialId: material.id,
     authorUserId: author.id,
     rating: 2,
     body: reviewBody,
   });
+
   const usageReport = await createPendingUsageReport({
     materialId: material.id,
     authorUserId: reporter.id,
     title: reportTitle,
   });
+
   const materialPath = `/materials/${material.id}`;
 
   try {
@@ -73,9 +76,11 @@ test("通報の resolve と対象非公開、編集局の pending 公開", async
     await expect(page.getByText(material.name, { exact: true })).toBeVisible();
 
     await page.goto("/admin/published-posts");
+
     const card = page
       .locator("section")
       .filter({ has: page.getByRole("link", { name: reportTitle, exact: true }) });
+
     await card.getByRole("button", { name: "公開から削除する" }).click();
     await card.getByRole("checkbox").check();
     await card.getByRole("button", { name: "非公開にする", exact: true }).click();

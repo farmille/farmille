@@ -65,15 +65,20 @@ export function missingProfileItems(details: {
 
 export function ProfileSetupNotice({ missing }: ProfileSetupNoticeProps) {
   if (missing.length === 0) return null;
+
   return (
     <Notice tone="info" className={row}>
       <span className={text}>未設定の項目</span>
-      {ITEM_ORDER.filter((item) => missing.includes(item)).map((item) => (
-        <Link className={itemButton} href="/me/edit" key={item}>
-          <Icon name="add" size="xs" className={plus} />
-          {ITEM_LABELS[item]}
-        </Link>
-      ))}
+      {ITEM_ORDER.flatMap((item) =>
+        missing.includes(item)
+          ? [
+              <Link className={itemButton} href="/me/edit" key={item}>
+                <Icon name="add" size="xs" className={plus} />
+                {ITEM_LABELS[item]}
+              </Link>,
+            ]
+          : [],
+      )}
     </Notice>
   );
 }

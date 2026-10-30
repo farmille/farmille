@@ -16,9 +16,13 @@ export const RegisteredDetailsSchema = v.pick(generalRegistrationSchema, [
   "cityStreet",
   "buildingName",
 ]);
+
 export type RegisteredDetailsInput = v.InferOutput<typeof RegisteredDetailsSchema>;
+
 type RegisteredDetailsField = keyof RegisteredDetailsInput;
+
 export type RegisteredDetailsFieldErrors = Partial<Record<RegisteredDetailsField, string>>;
+
 type RegisteredDetailsFormValues = { [Key in RegisteredDetailsField]: FormDataEntryValue | null };
 
 export function validateRegisteredDetails(
@@ -27,14 +31,18 @@ export function validateRegisteredDetails(
   | { ok: true; input: RegisteredDetailsInput }
   | { ok: false; fieldErrors: RegisteredDetailsFieldErrors } {
   const result = v.safeParse(RegisteredDetailsSchema, raw);
+
   if (result.success) return { ok: true, input: result.output };
   const fieldErrors: RegisteredDetailsFieldErrors = {};
   const nested = v.flatten(result.issues).nested;
+
   for (const key of Object.keys(RegisteredDetailsSchema.entries)) {
     const field = v.parse(v.keyof(RegisteredDetailsSchema), key);
     const message = nested?.[field]?.[0];
+
     if (message !== undefined) fieldErrors[field] = message;
   }
+
   return { ok: false, fieldErrors };
 }
 
@@ -63,6 +71,7 @@ export function adminRegisteredDetailsStore(): RegisteredDetailsStore {
   return {
     async find(userId) {
       const db = createAdminSupabase();
+
       const [profile, contact] = await Promise.all([
         db
           .from("profiles")
@@ -76,11 +85,15 @@ export function adminRegisteredDetailsStore(): RegisteredDetailsStore {
           .eq("user_id", userId)
           .maybeSingle(),
       ]);
+
       if (profile.error !== null || contact.error !== null) {
         console.error("[accounts] 登録情報の取得に失敗", profile.error?.code, contact.error?.code);
+
         return fail("internal");
       }
+
       if (profile.data === null) return succeed(null);
+
       return succeed({
         familyName: contact.data?.family_name ?? "",
         givenName: contact.data?.given_name ?? "",
@@ -102,9 +115,12 @@ export function adminRegisteredDetailsStore(): RegisteredDetailsStore {
         p_city_street: input.cityStreet,
         p_building_name: input.buildingName,
       });
+
       if (error === null) return succeed(null);
+
       if (error.code === "P0002") return fail("not_found");
       console.error("[accounts] 登録情報の保存に失敗", error.code);
+
       return fail("internal");
     },
   };
@@ -115,7 +131,10 @@ export async function loadRegisteredDetails(
   store: RegisteredDetailsStore,
 ): Promise<Result<RegisteredDetails>> {
   const found = await store.find(account.userId);
+
   if (!found.ok) return found;
+
   if (found.data === null) return fail("not_found");
+
   return succeed({ email: account.email, ...found.data });
 }

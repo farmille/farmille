@@ -15,9 +15,13 @@ const meta = {
     materialPath: "/materials/73000000-0000-4000-8000-000000000063",
   },
 } satisfies Meta<typeof ReportHeader>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
+
 export const ManyTags: Story = {
   args: {
     report: {
@@ -27,6 +31,7 @@ export const ManyTags: Story = {
     },
   },
 };
+
 export const WithdrawnAuthor: Story = {
   args: {
     report: {

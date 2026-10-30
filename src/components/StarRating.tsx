@@ -105,6 +105,7 @@ export type StarRatingProps = StarDisplayProps | StarInputProps;
 
 function clampInt(n: number): number {
   if (!Number.isFinite(n)) return 0;
+
   return Math.max(0, Math.min(5, Math.round(n)));
 }
 
@@ -115,6 +116,7 @@ export function StarRating(props: StarRatingProps) {
   const value = clampInt(props.value);
   const showValue = props.showValue === true;
   const formatted = Number.isFinite(props.value) ? props.value.toFixed(1) : "0.0";
+
   return (
     <span
       className={cx(displayRowRecipe({ withValue: showValue }), props.className)}
@@ -139,6 +141,7 @@ function StarInput({ value, onChange, className, name }: StarInputProps) {
   const required = useFieldRequired();
   const resetKey = useResetKey("");
   const rating = clampInt(value);
+
   const group = (
     <BaseRadioGroup<number | null>
       aria-label="評価"

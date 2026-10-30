@@ -4,6 +4,7 @@ import { registerGeneralUserWithSupabase, type GeneralSignupInput } from "./gene
 import type { Database } from "@/types/database.types";
 
 const userId = "00000000-0000-4000-8000-000000000701";
+
 const input: GeneralSignupInput = {
   handle: "登録テスト",
   email: "signup@example.test",
@@ -18,6 +19,7 @@ const input: GeneralSignupInput = {
   buildingName: "",
   terms: "on",
 };
+
 function authUser(): User {
   return {
     id: userId,
@@ -29,8 +31,10 @@ function authUser(): User {
     created_at: "2026-10-11T00:00:00Z",
   };
 }
+
 function client(responses: Response[]) {
   const requests: Request[] = [];
+
   const admin = createClient<Database>("https://example.supabase.co", "test-key", {
     auth: { persistSession: false, autoRefreshToken: false, storageKey: crypto.randomUUID() },
     global: {
@@ -38,13 +42,17 @@ function client(responses: Response[]) {
         const request = new Request(resource, init);
         requests.push(request);
         const response = responses.shift();
+
         if (!response) throw new Error(`想定外のリクエスト：${request.url}`);
+
         return response;
       },
     },
   });
+
   return { admin, requests };
 }
+
 const saved = () => new Response(null, { status: 201 });
 const deleted = () => new Response(null, { status: 204 });
 const dbError = (code: string) => Response.json({ code, message: "保存失敗" }, { status: 409 });
@@ -80,6 +88,7 @@ describe("メール確認後の一般登録", () => {
       saved(),
       Response.json(authUser()),
     ]);
+
     expect(await registerGeneralUserWithSupabase(input, admin, userId)).toEqual({
       ok: true,
       data: { userId, signedIn: false },
@@ -108,6 +117,7 @@ describe("メール確認後の一般登録", () => {
       Response.json([]),
       dbError("23505"),
     ]);
+
     expect(await registerGeneralUserWithSupabase(input, admin, userId)).toEqual({
       ok: false,
       error: "handle_taken",
@@ -123,6 +133,7 @@ describe("メール確認後の一般登録", () => {
       deleted(),
       deleted(),
     ]);
+
     expect(await registerGeneralUserWithSupabase(input, admin, userId)).toEqual({
       ok: false,
       error: "internal",
@@ -139,6 +150,7 @@ describe("メール確認後の一般登録", () => {
       { code: "weak_password", msg: "弱いパスワード" },
       { status: 422, headers: { "x-supabase-api-version": "2024-01-01" } },
     );
+
     const { admin, requests } = client([
       Response.json(authUser()),
       Response.json([]),
@@ -148,6 +160,7 @@ describe("メール確認後の一般登録", () => {
       deleted(),
       deleted(),
     ]);
+
     expect(await registerGeneralUserWithSupabase(input, admin, userId)).toEqual({
       ok: false,
       error: "weak_password",

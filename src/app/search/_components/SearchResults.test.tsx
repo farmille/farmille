@@ -17,6 +17,7 @@ it.each([
       created_at: ["2026-10-28", "2026-10-26", "2026-10-27"][index] ?? material.created_at,
     })),
   };
+
   render(
     <NuqsTestingAdapter>
       <SearchResults

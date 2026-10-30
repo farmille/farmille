@@ -79,22 +79,29 @@ function parseFilter(value: string | undefined): ContentFeedFilter {
   if (value === "report" || value === "article" || value === "all") {
     return value;
   }
+
   return "all";
 }
 
 function parsePage(value: string | undefined): number {
   if (value === undefined || value.length === 0) return 1;
   const page = Number(value);
+
   if (!Number.isInteger(page) || page < 1) return 1;
+
   return page;
 }
 
 function hrefForPage(page: number, filter: ContentFeedFilter, q: string): string {
   const params = new URLSearchParams();
+
   if (filter !== "all") params.set("type", filter);
+
   if (q.trim().length > 0) params.set("q", q.trim());
+
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
+
   return query.length > 0 ? `/articles?${query}` : "/articles";
 }
 

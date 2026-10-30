@@ -13,7 +13,10 @@ const meta = {
     certifications: ["有機JAS適合資材"],
   },
 } satisfies Meta<typeof MaterialRegistrationBadges>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
 export const Empty: Story = { args: { registrations: [], certifications: [] } };

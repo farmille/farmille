@@ -25,5 +25,6 @@ function SearchTracker({ filterCount, resultCount, sort }: SearchAnalyticsProps)
     tracked.current = true;
     trackSearchPerformed({ filter_count: filterCount, result_count: resultCount, sort });
   });
+
   return null;
 }

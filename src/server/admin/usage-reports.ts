@@ -11,14 +11,21 @@ import { reportCrop, type ReportCrop } from "@/server/usage-reports/crop";
 import type { Database } from "@/types/database.types";
 
 type ApplicationRow = Database["public"]["Tables"]["usage_report_applications"]["Row"];
+
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
+
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+
 type MediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
+
 type MetricRow = Database["public"]["Tables"]["usage_report_metrics"]["Row"];
+
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
 
 export const EDITORIAL_REPORT_STATUSES = ["pending", "published", "declined"] as const;
+
 export type EditorialReportStatus = (typeof EDITORIAL_REPORT_STATUSES)[number];
 
 export const EDITORIAL_REPORT_STATUS_LABELS = {
@@ -134,6 +141,7 @@ function isEditorialReportStatus(value: string): value is EditorialReportStatus 
 
 function optionalText(value: string): string | null {
   const normalized = value.trim();
+
   return normalized.length === 0 ? null : normalized;
 }
 
@@ -169,6 +177,7 @@ export async function listPendingUsageReports(): Promise<Result<PendingUsageRepo
 
     if (error !== null) {
       reportError("pending 一覧の取得に失敗", error);
+
       return fail("internal");
     }
 
@@ -178,8 +187,10 @@ export async function listPendingUsageReports(): Promise<Result<PendingUsageRepo
     for (const row of rows) {
       const crop = reportCrop(row);
       const author = row.author === null ? null : adminMember(row.author);
+
       if (author === null || crop === null || row.material === null) {
         reportError("pending 実証詳細レポートの関連データが欠落", row);
+
         return fail("internal");
       }
 
@@ -252,13 +263,16 @@ export async function getUsageReportEditorialDetail(
 
     if (error !== null) {
       reportError("編集局詳細の取得に失敗", error);
+
       return fail("internal");
     }
+
     if (data === null) return fail("not_found");
 
     const row: EditorialDetailQueryRow = data;
     const crop = reportCrop(row);
     const author = row.author === null ? null : adminMember(row.author);
+
     if (
       author === null ||
       crop === null ||
@@ -266,17 +280,21 @@ export async function getUsageReportEditorialDetail(
       !isEditorialReportStatus(row.status)
     ) {
       reportError("編集局詳細の関連データまたは状態が不正", row);
+
       return fail("internal");
     }
 
     const media: UsageReportEditorialDetail["media"] = [];
+
     for (const item of row.media.toSorted(
       (left, right) => left.sort_order - right.sort_order || left.id.localeCompare(right.id),
     )) {
       if (item.media_type !== "photo" && item.media_type !== "video") {
         reportError("未知の実証詳細レポート media_type", item);
+
         return fail("internal");
       }
+
       media.push({
         id: item.id,
         url: row.form_version === 2 ? reportMediaUrl(item.url, row.author_user_id) : item.url,
@@ -289,11 +307,14 @@ export async function getUsageReportEditorialDetail(
 
     const structured =
       row.form_version === 2 ? await getStructuredUsageReport(row.id, supabase) : succeed(null);
+
     if (!structured.ok) return structured;
+
     const documentUrls =
       structured.data === null
         ? succeed([])
         : await getReportDocumentUrls(structured.data, supabase);
+
     if (!documentUrls.ok) return documentUrls;
 
     return succeed({
@@ -367,6 +388,7 @@ export async function updateUsageReportEditorial(
   if (title.length === 0 || observedChange.length === 0) {
     return fail("invalid_body");
   }
+
   if (operation === "decline" && editorNote === null) return fail("invalid_body");
 
   return withAdmin(async ({ supabase }) => {
@@ -376,9 +398,13 @@ export async function updateUsageReportEditorial(
       .eq("id", reportId)
       .eq("status", "pending")
       .maybeSingle();
+
     if (current.error !== null) return fail("internal");
+
     if (current.data === null) return fail("conflict");
+
     if (current.data.form_version !== 2 && summary.length === 0) return fail("invalid_body");
+
     const update: Database["public"]["Tables"]["usage_reports"]["Update"] = {
       title,
       observed_change: observedChange,
@@ -389,10 +415,12 @@ export async function updateUsageReportEditorial(
           : summary,
       editor_note: editorNote,
     };
+
     if (operation === "publish") {
       update.status = "published";
       update.published_at = new Date().toISOString();
     }
+
     if (operation === "decline") {
       update.status = "declined";
       update.published_at = null;
@@ -407,8 +435,10 @@ export async function updateUsageReportEditorial(
 
     if (error !== null) {
       reportError("編集局の調整内容の保存に失敗", error);
+
       return fail("internal");
     }
+
     if (data.length === 0) return fail("conflict");
 
     return succeed(null);

@@ -62,7 +62,9 @@ export function Reveal({ effect, delay, className, children }: RevealProps) {
                 },
                 { rootMargin: ROOT_MARGIN },
               );
+
               observer.observe(element);
+
               return () => observer.disconnect();
             }
       }

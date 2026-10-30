@@ -12,7 +12,9 @@ export const storyPhoto = (fill: string) =>
 
 const blank = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
 const [control, treated] = blank.plots;
+
 if (!control || !treated) throw new Error("区の初期データがありません。");
+
 const extra = { ...treated, id: "33333333-3333-4333-8333-333333333333" };
 
 const plots: UsageReportInput["plots"] = [
@@ -128,6 +130,7 @@ const twoVarieties = reportPlotEdits.addComparedMaterial(
   "ノビテク",
   storyMaterialName,
 );
+
 const yields = ["856±105 A", "1126±139 B", "852±39 A", "808±71 B", "1062±123 A", "968±134 A"];
 
 /** 品種2つ・比較した資材1つの6区と、PDF読み取りで入るような数値のグラフを持つレポート。 */

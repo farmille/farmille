@@ -10,10 +10,13 @@ export const metadata: Metadata = { title: "パスワードの変更", robots: N
 
 export default async function ChangePasswordPage() {
   const user = await getSessionUser();
+
   if (!user) redirect("/login?next=%2Faccount%2Fpassword");
+
   if (user.accountType === "admin" && user.aal !== "aal2")
     redirect("/admin/mfa?next=%2Faccount%2Fpassword");
   const seller = user.accountType === "seller";
+
   return (
     <AuthScreen
       title="パスワードの変更"

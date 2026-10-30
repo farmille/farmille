@@ -1,5 +1,6 @@
 import { fn } from "storybook/test";
 import { adminMaterialFixture } from "./materials";
+
 export const listMaterialChangeRequests = fn<
   typeof import("@/server/admin/material-change-requests").listMaterialChangeRequests
 >(async () => ({
@@ -19,6 +20,7 @@ export const listMaterialChangeRequests = fn<
     },
   ],
 })).mockName("listMaterialChangeRequests");
+
 export const getMaterialChangeRequest = fn<
   typeof import("@/server/admin/material-change-requests").getMaterialChangeRequest
 >(async () => ({
@@ -65,12 +67,14 @@ export const getMaterialChangeRequest = fn<
     current: adminMaterialFixture,
   },
 })).mockName("getMaterialChangeRequest");
+
 export const approveMaterialChangeRequest = fn<
   typeof import("@/server/admin/material-change-requests").approveMaterialChangeRequest
 >(async () => ({
   ok: true,
   data: { materialId: "11111111-1111-4111-8111-111111111111" },
 })).mockName("approveMaterialChangeRequest");
+
 export const rejectMaterialChangeRequest = fn<
   typeof import("@/server/admin/material-change-requests").rejectMaterialChangeRequest
 >(async () => ({ ok: true, data: null })).mockName("rejectMaterialChangeRequest");

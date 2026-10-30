@@ -7,10 +7,13 @@ type SiteverifyBody = { [key: string]: boolean | number | string | string[] };
 
 function siteverify(body: SiteverifyBody, status = 200) {
   const sent: URLSearchParams[] = [];
+
   const fetcher: typeof fetch = async (_url, init) => {
     sent.push(new URLSearchParams(init?.body instanceof URLSearchParams ? init.body : undefined));
+
     return Response.json(body, { status });
   };
+
   return { fetcher, sent };
 }
 
@@ -29,6 +32,7 @@ describe("verifyRecaptcha", () => {
       { success: true, action: "pdf_reading" },
       { success: false, "error-codes": ["timeout-or-duplicate"] },
     ];
+
     for (const body of bodies) {
       expect(
         await verifyRecaptcha("token", "secret", siteverify(body).fetcher),
@@ -40,9 +44,11 @@ describe("verifyRecaptcha", () => {
   it("応答の形が違う・検証先がエラーのときは断る", async () => {
     expect(await verifyRecaptcha("t", "s", siteverify({ ok: true }).fetcher)).toBe(false);
     expect(await verifyRecaptcha("t", "s", siteverify({ success: true }, 500).fetcher)).toBe(false);
+
     const offline: typeof fetch = async () => {
       throw new TypeError("fetch failed");
     };
+
     expect(await verifyRecaptcha("t", "s", offline)).toBe(false);
   });
 });

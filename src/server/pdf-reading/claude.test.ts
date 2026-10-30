@@ -36,9 +36,11 @@ function sse(text: string, stopReason: string, speed: "fast" | "standard"): Resp
     },
     { type: "message_stop" },
   ];
+
   const body = events
     .map((event) => `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`)
     .join("");
+
   return new Response(body, { headers: { "content-type": "text/event-stream" } });
 }
 
@@ -54,6 +56,7 @@ function apiError(status: number): Response {
 
 function fakeClient(...responses: Array<Response | "hang">) {
   const sent: Sent[] = [];
+
   const client = new Anthropic({
     apiKey: "test-key",
     fetch: async (_url, init) => {
@@ -61,8 +64,11 @@ function fakeClient(...responses: Array<Response | "hang">) {
       const parsed = v.parse(v.object({ speed: v.optional(v.string()) }), JSON.parse(body));
       sent.push({ speed: parsed.speed, body });
       const next = responses.shift();
+
       if (next === undefined) throw new Error("想定外の要求");
+
       if (next !== "hang") return next;
+
       return new Promise<Response>((_resolve, reject) => {
         init?.signal?.addEventListener("abort", () =>
           reject(new DOMException("aborted", "AbortError")),
@@ -70,6 +76,7 @@ function fakeClient(...responses: Array<Response | "hang">) {
       });
     },
   });
+
   return { client, sent };
 }
 
@@ -84,6 +91,7 @@ const fastOpus = {
   adaptiveThinking: true,
   maxTokens: 64000,
 } as const;
+
 const request = {
   model: fastOpus,
   pdf,
@@ -103,6 +111,7 @@ describe("extractFromPdf", () => {
       usage: { model: "claude-opus-5-5", speed: "fast", inputTokens: 1200, outputTokens: 300 },
     });
     expect(sent).toHaveLength(1);
+
     const body = v.parse(
       v.object({
         speed: v.literal("fast"),
@@ -122,6 +131,7 @@ describe("extractFromPdf", () => {
       }),
       JSON.parse(sent[0]?.body ?? "{}"),
     );
+
     expect(body.speed).toBe("fast");
   });
 
@@ -130,6 +140,7 @@ describe("extractFromPdf", () => {
       apiError(429),
       sse('{"answer":"a"}', "end_turn", "standard"),
     );
+
     const result = await extractFromPdf(client, request, clock(0, 5_000));
     expect(result.ok && result.usage.speed).toBe("standard");
     expect(sent.map(({ speed }) => speed)).toEqual(["fast", undefined]);
@@ -188,6 +199,7 @@ describe("extractFromPdf", () => {
       [sse('{"answer":', "max_tokens", "fast"), "max_tokens"],
       [sse('{"other":1}', "end_turn", "fast"), "invalid_output"],
     ] as const;
+
     for (const [response, error] of cases) {
       const { client } = fakeClient(response);
       const result = await extractFromPdf(client, request, clock(0));
@@ -198,6 +210,7 @@ describe("extractFromPdf", () => {
 
   it("adaptiveThinking が false なら thinking を送らず、effort と max_tokens は設定のまま送る", async () => {
     const { client, sent } = fakeClient(sse('{"answer":"a"}', "end_turn", "standard"));
+
     const model = {
       ...fastOpus,
       speed: "standard",
@@ -205,7 +218,9 @@ describe("extractFromPdf", () => {
       adaptiveThinking: false,
       maxTokens: 32000,
     } as const;
+
     await extractFromPdf(client, { ...request, model }, clock(0));
+
     const body = v.parse(
       v.object({
         thinking: v.optional(v.unknown()),
@@ -214,6 +229,7 @@ describe("extractFromPdf", () => {
       }),
       JSON.parse(sent[0]?.body ?? "{}"),
     );
+
     expect(body.thinking).toBeUndefined();
     expect(body.max_tokens).toBe(32000);
     expect(body.output_config.effort).toBe("low");
@@ -229,7 +245,9 @@ describe("extractFromPdf", () => {
 });
 
 type JsonNode = { [key: string]: JsonValue };
+
 type JsonValue = string | number | boolean | null | JsonValue[] | JsonNode;
+
 const JsonValueSchema: v.GenericSchema<JsonValue> = v.union([
   v.string(),
   v.number(),
@@ -249,7 +267,9 @@ const JsonNodeSchema = v.record(
 
 function nodes(value: JsonValue): JsonNode[] {
   if (Array.isArray(value)) return value.flatMap(nodes);
+
   if (!v.is(JsonNodeSchema, value)) return [];
+
   return [value, ...Object.values(value).flatMap(nodes)];
 }
 
@@ -266,10 +286,12 @@ describe("レポートの読み取りの段ごとの出力スキーマ", () => {
       const all = nodes(json);
       const objects = all.filter((node) => node.type === "object");
       expect(objects.length).toBeGreaterThan(1);
+
       for (const node of objects) {
         expect(node.additionalProperties).toBe(false);
         expect(node.required).toEqual(Object.keys(v.parse(JsonNodeSchema, node.properties)));
       }
+
       const banned = [
         "anyOf",
         "oneOf",
@@ -281,6 +303,7 @@ describe("レポートの読み取りの段ごとの出力スキーマ", () => {
         "maxItems",
         "$schema",
       ];
+
       for (const node of all) {
         for (const key of banned) expect(node, key).not.toHaveProperty(key);
         expect(Array.isArray(node.type), "型の配列（null 許容）").toBe(false);

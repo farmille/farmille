@@ -6,6 +6,9 @@ const meta = {
   component: SavedPosts,
   args: { userId: "71000000-0000-4000-8000-000000000001" },
 } satisfies Meta<typeof SavedPosts>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Empty: Story = {};

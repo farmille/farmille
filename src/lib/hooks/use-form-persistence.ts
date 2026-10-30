@@ -23,6 +23,7 @@ export function useFormPersistence(
     }),
     { resetCount: 0, discarded: false },
   );
+
   // 画面内の遷移で開いた直後は location がまだ前の画面なので、控えの置き場はルーターのパスで決める
   const stored = useStoredOnce(persist, readPersistedFields, pathname);
   const saved = stored?.saved ?? null;
@@ -32,14 +33,18 @@ export function useFormPersistence(
 
   useMountEffect(() => {
     const form = formRef.current;
+
     if (form === null) return;
+
     // action の後の reset を React は commit 中に呼び、その間は onReset を配らないので、DOM の reset を直接聞く
     const reset = () => {
       resetOutside();
       resetForm();
     };
+
     form.addEventListener("reset", reset);
     const releaseClicks = guardSubmitClicks(form);
+
     return () => {
       form.removeEventListener("reset", reset);
       releaseClicks();
@@ -60,31 +65,39 @@ export function keepFields(
 ): () => void {
   const initial = JSON.stringify(Object.fromEntries(snapshotFields(form)));
   let submitted = false;
+
   const keep = () => {
     const fields = Object.fromEntries(snapshotFields(form));
+
     if (!keepsRestored() && JSON.stringify(fields) === initial) removePersisted(key);
     else writePersisted(key, fields);
   };
+
   const markSubmitted = () => {
     submitted = true;
   };
+
   const markEdited = () => {
     submitted = false;
   };
+
   const keepWhenHidden = () => {
     if (document.visibilityState === "hidden") keep();
   };
+
   form.addEventListener("submit", markSubmitted);
   form.addEventListener("input", markEdited);
   form.addEventListener("change", markEdited);
   window.addEventListener("pagehide", keep);
   document.addEventListener("visibilitychange", keepWhenHidden);
+
   return () => {
     form.removeEventListener("submit", markSubmitted);
     form.removeEventListener("input", markEdited);
     form.removeEventListener("change", markEdited);
     window.removeEventListener("pagehide", keep);
     document.removeEventListener("visibilitychange", keepWhenHidden);
+
     if (submitted) removePersisted(key);
     else keep();
   };
@@ -98,26 +111,33 @@ export function keepFields(
 function guardSubmitClicks(form: HTMLFormElement): () => void {
   let submitted = false;
   let swallowing = false;
+
   const arm = () => {
     submitted = true;
   };
+
   const press = (event: MouseEvent) => {
     swallowing = submitted && event.detail > 1;
     submitted = false;
     swallow(event);
   };
+
   const swallow = (event: MouseEvent) => {
     if (!swallowing) return;
     event.preventDefault();
     event.stopPropagation();
   };
+
   const followingEvents = ["mouseup", "click", "dblclick"] as const;
   form.addEventListener("submit", arm);
   window.addEventListener("mousedown", press, true);
+
   for (const type of followingEvents) window.addEventListener(type, swallow, true);
+
   return () => {
     form.removeEventListener("submit", arm);
     window.removeEventListener("mousedown", press, true);
+
     for (const type of followingEvents) window.removeEventListener(type, swallow, true);
   };
 }

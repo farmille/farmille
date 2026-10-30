@@ -8,17 +8,21 @@ import { css } from "../../styled-system/css";
 import { ReportPlotList } from "./ReportPlotList";
 
 const posted = "ヒートインパクト";
+
 const base = withSingleVariety(
   createBlankUsageReport("11111111-1111-4111-8111-111111111111"),
   "新藍",
   false,
 );
+
 const single = withAutoPlotNames(base, base, posted);
+
 const varieties = reportPlotEdits.addComparedMaterial(
   reportPlotEdits.addVariety(single, "味珠", posted),
   "ノビテク",
   posted,
 );
+
 const described = (input: typeof single) => ({
   ...input,
   plots: input.plots.map((plot) => ({
@@ -42,7 +46,9 @@ const meta = {
     commonDescription: "",
   },
 } satisfies Meta<typeof ReportPlotList>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const TwoPlots: Story = {};

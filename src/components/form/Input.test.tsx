@@ -8,6 +8,7 @@ import { Input } from "./Input";
 
 function ControlledEmail() {
   const [email, setEmail] = useReducer((_current: string, next: string) => next, "");
+
   return (
     <>
       <Input
@@ -130,13 +131,16 @@ describe("Input", () => {
   it("欄を離れたときの確認は、空欄では行わず、確かめている間に入力し直したら古い値の結果を出さない", async () => {
     const user = userEvent.setup();
     const checked: string[] = [];
+
     let answer: (message: string | null) => void = () => {
       throw new Error("確認が始まっていません。");
     };
+
     render(
       <Input
         check={(value) => {
           checked.push(value);
+
           return new Promise((resolve) => {
             answer = resolve;
           });

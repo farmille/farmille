@@ -20,12 +20,14 @@ type ReportHeaderProps = {
 
 export function ReportHeader({ report, cropLabel, materialPath }: ReportHeaderProps) {
   const { author } = report;
+
   const authorName = (
     <>
       <Avatar name={author.name} src={author.avatarUrl} size="sm" />
       <span className={byline.name}>{author.name}</span>
     </>
   );
+
   return (
     <>
       <h1 className={articleTitle}>{report.title}</h1>

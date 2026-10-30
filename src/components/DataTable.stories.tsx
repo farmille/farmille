@@ -61,6 +61,7 @@ const meta = {
 } satisfies Meta<typeof DataTable<MaterialRow>>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};

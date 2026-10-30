@@ -27,6 +27,7 @@ export function mediaPlacementLabel(placement: string | null): string | null {
   if (placement === null) return null;
 
   const option = STORED_MEDIA_PLACEMENTS.find(({ value }) => value === placement);
+
   if (option === undefined) {
     throw new Error(`未対応のメディア配置です：${placement}`);
   }

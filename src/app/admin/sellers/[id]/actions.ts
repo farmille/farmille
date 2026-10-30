@@ -14,6 +14,7 @@ import {
 import { errorMessageJa, type ErrorCode } from "@/server/errors";
 
 const SELLER_OPERATIONS = ["approve", "reject", "suspend", "reinstate", "invite"] as const;
+
 type SellerOperation = (typeof SELLER_OPERATIONS)[number];
 
 function isSellerOperation(value: string | null): value is SellerOperation {
@@ -53,6 +54,7 @@ export async function sellerOperationAction(
   if (operation !== "approve") {
     revalidatePath(`/admin/sellers/${sellerId}`);
   }
+
   revalidatePath("/admin/sellers");
   revalidatePath("/admin");
 
@@ -67,7 +69,9 @@ async function runSellerOperation(
 ): Promise<{ ok: true; state: SellerActionState } | { ok: false; error: ErrorCode }> {
   if (operation === "approve") {
     const manufacturerName = formDataString(formData.get("manufacturerName"));
+
     if (manufacturerName === null) return { ok: false, error: "invalid_body" };
+
     const result = await approveSellerApplication(
       sellerId,
       manufacturerName,
@@ -89,6 +93,7 @@ async function runSellerOperation(
 
   if (operation === "reject") {
     const reason = formDataString(rejectedReason);
+
     if (reason === null) {
       return { ok: false, error: "invalid_body" };
     }

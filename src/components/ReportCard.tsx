@@ -111,6 +111,7 @@ export function ReportCard({
   className,
 }: ReportCardProps) {
   const compact = layout === "scroll" || layout === "grid";
+
   const authorContent = (
     <>
       <Avatar name={author} src={avatarSrc} size={compact ? "2xs" : "xs"} />

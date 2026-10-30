@@ -52,6 +52,7 @@ export function ReportDialog({
     reasonCode: null,
     detail: "",
   };
+
   const form = useForm({ defaultValues: initialValues });
   const values = useStore(form.store, (state) => state.values);
   const [state, formAction] = useActionState(action, idleState);

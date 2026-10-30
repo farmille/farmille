@@ -16,8 +16,10 @@ const headStyle = css({
   mx: "-2",
   "& > :last-child": { ml: "auto" },
 });
+
 const titleStyle = css({ textStyle: "body", fontWeight: "bold", wordBreak: "auto-phrase" });
 const bodyStyle = css({ textStyle: "supporting", color: "text.muted" });
+
 // 狭い画面で主ボタンが入りきらないときは、次の行へ送る
 const rowStyle = css({
   display: "flex",

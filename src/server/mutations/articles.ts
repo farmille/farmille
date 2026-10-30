@@ -55,12 +55,15 @@ function optionalText(
   fieldErrors: Record<string, string>,
 ): string | null {
   const parsed = formDataString(value);
+
   if (parsed === null) {
     fieldErrors[field] = "入力内容を確認してください。";
+
     return null;
   }
 
   const normalized = parsed.trim();
+
   return normalized.length === 0 ? null : normalized;
 }
 
@@ -71,15 +74,18 @@ function requiredText(
   fieldErrors: Record<string, string>,
 ): string | null {
   const normalized = optionalText(value, field, fieldErrors);
+
   if (normalized === null && fieldErrors[field] === undefined) {
     fieldErrors[field] = emptyMessage;
   }
+
   return normalized;
 }
 
 function validHttpUrl(value: string): boolean {
   try {
     const url = new URL(value);
+
     return url.protocol === "https:" || url.protocol === "http:";
   } catch {
     return false;
@@ -97,17 +103,21 @@ function parseMaterialIds(
   fieldErrors: Record<string, string>,
 ): string[] {
   const serialized = formDataString(value);
+
   if (serialized === null || serialized.length === 0) {
     return [];
   }
 
   try {
     const result = v.safeParse(MaterialIdsSchema, JSON.parse(serialized));
+
     if (result.success) return [...new Set(result.output)];
     fieldErrors.materialIds = "紐づけ資材の形式が正しくありません。";
+
     return [];
   } catch {
     fieldErrors.materialIds = "紐づけ資材の形式が正しくありません。";
+
     return [];
   }
 }
@@ -128,6 +138,7 @@ export function validateArticleInput(input: {
 
   const statusRaw = formDataString(input.status) ?? "";
   const status = isArticleStatus(statusRaw) ? statusRaw : null;
+
   if (status === null) {
     fieldErrors.status = "公開状態を選択してください。";
   }
@@ -166,6 +177,7 @@ async function ensureOwnedArticle(
 
   if (error !== null) {
     reportMutationError("記事所有権の確認に失敗", error);
+
     return fail("internal");
   }
 
@@ -186,6 +198,7 @@ async function ensureMaterialsExist(
 
   if (error !== null) {
     reportMutationError("紐づけ資材の存在確認に失敗", error);
+
     return fail("internal");
   }
 
@@ -208,6 +221,7 @@ async function replaceArticleMaterials(
 
   if (deleteError !== null) {
     reportMutationError("記事紐づけ資材の削除に失敗", deleteError);
+
     return fail(errorCodeForMutation(deleteError));
   }
 
@@ -222,6 +236,7 @@ async function replaceArticleMaterials(
 
   if (insertError !== null) {
     reportMutationError("記事紐づけ資材の追加に失敗", insertError);
+
     return fail(errorCodeForMutation(insertError));
   }
 
@@ -235,9 +250,11 @@ export async function createSellerArticle(
 ): Promise<Result<{ id: string }>> {
   const supabase = await createServerSupabase();
   const materials = await ensureMaterialsExist(supabase, input.materialIds);
+
   if (!materials.ok) return materials;
 
   const publishedAt = input.status === "published" ? new Date().toISOString() : null;
+
   const { data, error } = await supabase
     .from("articles")
     .insert({
@@ -253,15 +270,19 @@ export async function createSellerArticle(
 
   if (error !== null || data === null) {
     reportMutationError("記事の作成に失敗", error);
+
     return fail(error === null ? "internal" : errorCodeForMutation(error));
   }
 
   const linked = await replaceArticleMaterials(supabase, data.id, input.materialIds);
+
   if (!linked.ok) {
     const { error: cleanupError } = await supabase.from("articles").delete().eq("id", data.id);
+
     if (cleanupError !== null) {
       reportMutationError("紐づけ失敗後の記事回収に失敗", cleanupError);
     }
+
     return linked;
   }
 
@@ -276,9 +297,11 @@ export async function updateSellerArticle(
 ): Promise<Result<null>> {
   const supabase = await createServerSupabase();
   const ownership = await ensureOwnedArticle(supabase, sellerId, articleId);
+
   if (!ownership.ok) return ownership;
 
   const materials = await ensureMaterialsExist(supabase, input.materialIds);
+
   if (!materials.ok) return materials;
 
   const { data: current, error: currentError } = await supabase
@@ -290,8 +313,10 @@ export async function updateSellerArticle(
 
   if (currentError !== null) {
     reportMutationError("更新対象記事の取得に失敗", currentError);
+
     return fail("internal");
   }
+
   if (current === null) return fail("not_found");
 
   const publishedAt =
@@ -315,8 +340,10 @@ export async function updateSellerArticle(
 
   if (error !== null) {
     reportMutationError("記事の更新に失敗", error);
+
     return fail(errorCodeForMutation(error));
   }
+
   if (data === null) return fail("not_found");
 
   return replaceArticleMaterials(supabase, articleId, input.materialIds);
@@ -330,6 +357,7 @@ export async function setSellerArticleStatus(
 ): Promise<Result<null>> {
   const supabase = await createServerSupabase();
   const ownership = await ensureOwnedArticle(supabase, sellerId, articleId);
+
   if (!ownership.ok) return ownership;
 
   const { data: current, error: currentError } = await supabase
@@ -341,8 +369,10 @@ export async function setSellerArticleStatus(
 
   if (currentError !== null) {
     reportMutationError("公開状態切替対象の取得に失敗", currentError);
+
     return fail("internal");
   }
+
   if (current === null) return fail("not_found");
 
   const publishedAt =
@@ -360,6 +390,7 @@ export async function setSellerArticleStatus(
 
   if (error !== null) {
     reportMutationError("記事の公開状態切替に失敗", error);
+
     return fail(errorCodeForMutation(error));
   }
 
@@ -372,6 +403,7 @@ export async function deleteSellerArticle(
   articleId: string,
 ): Promise<Result<null>> {
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("articles")
     .delete()
@@ -382,6 +414,7 @@ export async function deleteSellerArticle(
 
   if (error !== null) {
     reportMutationError("記事の削除に失敗", error);
+
     return fail(errorCodeForMutation(error));
   }
 

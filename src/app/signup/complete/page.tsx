@@ -17,11 +17,13 @@ export default async function CompleteRegistrationPage({
 }) {
   const next = safeNextPath((await searchParams).next);
   const identity = await getRegistrationIdentity();
+
   if (!identity.ok) {
     if (identity.error === "internal")
       throw new Error("メールアドレスの確認状態を取得できませんでした。");
     redirect(`/signup/general?error=${identity.error}`);
   }
+
   return (
     <AuthScreen lead="確認済みのメールアドレスで登録します。" title="登録情報の入力">
       <SignupForm

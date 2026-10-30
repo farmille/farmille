@@ -21,6 +21,7 @@ export default async function EditArticlePage({ params }: EditArticlePageProps) 
     if (session.error === "unauthorized") {
       redirect(`/sellers/login?next=${encodeURIComponent(`/dashboard/articles/${id}/edit`)}`);
     }
+
     return <SellerAccessDenied backHref="/dashboard" />;
   }
 
@@ -29,6 +30,7 @@ export default async function EditArticlePage({ params }: EditArticlePageProps) 
   }
 
   const result = await getSellerArticle(session.data.sellerId, id);
+
   if (!result.ok) {
     if (result.error === "not_found") notFound();
     throw new Error(errorMessageJa[result.error]);

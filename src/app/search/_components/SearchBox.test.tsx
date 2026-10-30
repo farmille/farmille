@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SearchBox } from "./SearchBox";
 
 const onUrlUpdate = vi.fn<(event: UrlUpdateEvent) => void>();
+
 function renderSearch(element: ReactElement) {
   return render(element, {
     wrapper: ({ children }: { children: ReactNode }) => (
@@ -12,17 +13,21 @@ function renderSearch(element: ReactElement) {
     ),
   });
 }
+
 const props = {
   initialQuery: "",
   selected: [],
   sort: "reviews" as const,
   catalog: { filters: [], makers: [], materials: [{ name: "トマト資材", aliases: [] }] },
 };
+
 const advanceSearch = () =>
   act(async () => {
     await vi.advanceTimersByTimeAsync(301);
   });
+
 const searchInput = () => screen.getByRole("combobox", { name: "資材の検索条件" });
+
 function pickOption(name: string) {
   fireEvent.keyDown(searchInput(), { key: "ArrowDown" });
   fireEvent.click(screen.getByRole("option", { name }));

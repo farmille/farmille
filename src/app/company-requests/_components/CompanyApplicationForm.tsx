@@ -126,10 +126,12 @@ function restoredContact(
 
 function IntroCard({ text }: { text: string }) {
   const [lead, list = ""] = text.split("\n\n");
+
   const bullets = list
     .split(/(?:^|\s)・/u)
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
+
   return (
     <SurfaceCard padding="cozy" tone="soft">
       <p className={introTextStyle}>{lead}</p>
@@ -169,6 +171,7 @@ export function CompanyApplicationForm({
 }) {
   const router = useRouter();
   const defaultTarget = kind === "registration" ? "new" : "existing";
+
   const [initialValues] = useReducer(
     (values: ApplicationValues) => values,
     null,
@@ -182,30 +185,38 @@ export function CompanyApplicationForm({
       consents: applicationCopy[kind].consents.map(() => false),
     }),
   );
+
   const form = useForm({ defaultValues: initialValues });
   const values = useStore(form.store, (state) => state.values);
   const { rows } = values;
+
   const [counts, countEvidence] = useReducer(
     (previous: Map<string, number>, entry: { key: string; count: number }) =>
       new Map(previous).set(entry.key, entry.count),
     new Map<string, number>(),
   );
+
   const [uploads, onBusy] = useReducer(
     (count: number, busy: boolean) => count + (busy ? 1 : -1),
     0,
   );
+
   const copy = applicationCopy[kind];
   const titles = SECTION_TITLES[kind];
+
   function countFiles(key: string, count: number) {
     countEvidence({ key, count });
   }
+
   // 資材の欄の名前は行 ID を含むので、控えの行と入力をまとめて戻す。添付資料は付け直してもらう。
   function restore(restored: RestoredFields) {
     const restoredRows = [...restored.keys()].flatMap((name) => {
       const id = /^(.+)\.materialName$/.exec(name)?.[1];
+
       if (!v.is(uuidSchema, id)) return [];
       const target = v.safeParse(TargetSchema, restored.get(`${id}.target`)?.[0]);
       const relations = v.safeParse(v.array(relationSchema), restored.get(`${id}.relations`) ?? []);
+
       return [
         {
           id,
@@ -220,6 +231,7 @@ export function CompanyApplicationForm({
         },
       ];
     });
+
     form.setFieldValue("contact", restoredContact(restored, "", initialValues.contact));
     form.setFieldValue(
       "destination",
@@ -237,9 +249,11 @@ export function CompanyApplicationForm({
       copy.consents.map((_, index) => restored.get(`consent.${index}`)?.includes("on") ?? false),
     );
   }
+
   const [error, submit, submitting] = useActionState(
     async (_previous: string, _data: FormData): Promise<string> => {
       const current = form.state.values;
+
       const input = v.safeParse(companyApplicationSchema, {
         ...current.contact,
         kind,
@@ -253,12 +267,16 @@ export function CompanyApplicationForm({
         applicationDate: current.applicationDate,
         consents: current.consents,
       });
+
       if (!input.success) return `入力内容を確認してください。${v.summarize(input.issues)}`;
+
       try {
         const result = await submitApplication({ intentId, input: input.output });
+
         if (!result.ok)
           return `${errorMessageJa[result.error]} 資材URL・移行先ID・必須資料もご確認ください。`;
         router.push(`/dashboard/applications/${result.data}`);
+
         return "";
       } catch {
         return "申請結果を確認できませんでした。入力内容はこの画面に残っています。同じ内容で再送しても、申請は重複しません。";
@@ -266,6 +284,7 @@ export function CompanyApplicationForm({
     },
     "",
   );
+
   return (
     <Form action={submit} onRestore={restore} persist="application">
       <fieldset className={cx(fieldsetStyle, stackStyle)} disabled={submitting}>
@@ -454,6 +473,7 @@ function MaterialItem({
   onCount: (key: string, count: number) => void;
 }) {
   const field = (name: string) => `${row.id}.${name}`;
+
   const materialName = (
     <Input
       description="※パッケージ記載の正式名称"
@@ -466,6 +486,7 @@ function MaterialItem({
       placeholder="パッケージ記載の正式名称"
     />
   );
+
   const materialUrl =
     row.target === "existing" ? (
       <Input
@@ -480,6 +501,7 @@ function MaterialItem({
         type="url"
       />
     ) : null;
+
   const relations = (
     <CheckboxGroup
       description={relationExplanation}
@@ -492,6 +514,7 @@ function MaterialItem({
       variant="chips"
     />
   );
+
   const evidence = (
     <Fieldset
       description={`${

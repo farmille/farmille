@@ -17,6 +17,7 @@ const meta = {
 } satisfies Meta<typeof MobileSiteMenu>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Closed: Story = {};

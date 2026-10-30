@@ -5,9 +5,13 @@ import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type ArticleRow = Database["public"]["Tables"]["articles"]["Row"];
+
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
+
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+
 type PublicSellerRow = Database["public"]["Views"]["public_sellers"]["Row"];
+
 type ViewCountRow = Database["public"]["Views"]["view_counts_total"]["Row"];
 
 type ArticleSeller = Pick<PublicSellerRow, "id" | "official_name" | "logo_url">;
@@ -69,23 +73,28 @@ async function getArticleCounts(
 
   if (helpfulResult.error !== null) {
     reportQueryError("記事の参考になった件数の取得に失敗", helpfulResult.error);
+
     return fail("internal");
   }
 
   if (viewResult.error !== null) {
     reportQueryError("記事の閲覧数の取得に失敗", viewResult.error);
+
     return fail("internal");
   }
 
   const helpfulRow: Pick<HelpfulCountRow, "target_id" | "helpful_count"> | null =
     helpfulResult.data;
+
   let helpfulCount = 0;
 
   if (helpfulRow !== null) {
     if (helpfulRow.helpful_count === null) {
       reportQueryError("参考になった件数にNULLが含まれる", helpfulRow);
+
       return fail("internal");
     }
+
     helpfulCount = helpfulRow.helpful_count;
   }
 
@@ -95,8 +104,10 @@ async function getArticleCounts(
   if (viewRow !== null) {
     if (viewRow.view_count === null) {
       reportQueryError("閲覧数にNULLが含まれる", viewRow);
+
       return fail("internal");
     }
+
     viewCount = viewRow.view_count;
   }
 
@@ -112,6 +123,7 @@ export async function getPublishedArticle(
   }
 
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("articles")
     .select(
@@ -146,6 +158,7 @@ export async function getPublishedArticle(
 
   if (error !== null) {
     reportQueryError("公開記事の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -157,11 +170,13 @@ export async function getPublishedArticle(
 
   if (row.published_at === null) {
     reportQueryError("published なのに published_at が無い", { id: row.id });
+
     return fail("internal");
   }
 
   if (row.seller === null) {
     reportQueryError("記事のメーカー情報が欠落", { id: row.id });
+
     return fail("internal");
   }
 
@@ -170,8 +185,10 @@ export async function getPublishedArticle(
   for (const relation of row.article_materials) {
     if (relation.material === null) {
       reportQueryError("記事紐づけ資材が欠落", { articleId: row.id });
+
       return fail("internal");
     }
+
     materials.push(relation.material);
   }
 

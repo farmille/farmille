@@ -29,6 +29,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
           request.cookies.set(name, value);
           pendingCookies.push({ name, value, options });
         }
+
         Object.assign(pendingHeaders, headers);
       },
     },
@@ -49,6 +50,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   for (const { name, value, options } of pendingCookies) {
     response.cookies.set(name, value, options);
   }
+
   // 認証 cookie を載せた応答は CDN にキャッシュさせない（@supabase/ssr が指定するヘッダ）。
   for (const [name, value] of Object.entries(pendingHeaders)) {
     response.headers.set(name, value);

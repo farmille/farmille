@@ -47,6 +47,7 @@ const headStyle = css({
   mx: "-3",
   "& > :last-child": { ml: "auto" },
 });
+
 const titleStyle = css({
   textStyle: "title",
   textWrap: "balance",
@@ -54,8 +55,10 @@ const titleStyle = css({
   // 案内の最初のシートだけ、見出しを大きくする
   "&[data-welcome]": { textStyle: "welcome" },
 });
+
 const bodyStyle = css({ textStyle: "body", color: "text.muted" });
 const dotsStyle = css({ display: "flex", gap: "1.5" });
+
 const dotStyle = css({
   w: "2",
   h: "2",
@@ -63,6 +66,7 @@ const dotStyle = css({
   bg: "border.default",
   "&[data-current]": { w: "4.5", bg: "primary.700" },
 });
+
 const actionsStyle = css({
   alignSelf: "stretch",
   display: "flex",
@@ -104,6 +108,7 @@ export function TourSheet({
   const dimmed = useEntered(handoff.dimmed);
   const state = entered ? "" : undefined;
   const { ref, space, clear } = useDock<HTMLElement>(true);
+
   return (
     <>
       <div aria-hidden="true" className={bottomSpaceStyle} style={{ "--tour-space": space }} />

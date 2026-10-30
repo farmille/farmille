@@ -27,6 +27,7 @@ const meta = {
 } satisfies Meta<typeof ReviewCompletionToast>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 // 感想口コミ投稿完了（?review=posted）

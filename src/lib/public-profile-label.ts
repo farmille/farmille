@@ -9,6 +9,7 @@ export function publicProfileLabel(
   profile: Pick<PublicProfileRow, "standpoint" | "prefecture_code"> | null,
 ): string {
   if (profile === null) return "";
+
   return [
     STANDPOINTS.find((item) => item.value === profile.standpoint)?.label,
     PREFECTURES.find((item) => item.code === profile.prefecture_code)?.name,
@@ -41,10 +42,13 @@ export type PostAuthorRow = Pick<PublicProfileRow, "user_id" | "withdrawn" | "ha
  */
 export function postAuthor(row: PostAuthorRow | null): PostAuthor | null {
   if (row === null || row.user_id === null) return null;
+
   if (row.withdrawn === true) {
     return { name: WITHDRAWN_MEMBER_NAME, avatarUrl: null, label: "", href: null };
   }
+
   if (row.withdrawn !== false || row.handle === null) return null;
+
   return {
     name: row.handle,
     avatarUrl: row.avatar_url ?? null,

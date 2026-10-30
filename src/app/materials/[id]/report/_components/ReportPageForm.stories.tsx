@@ -56,6 +56,7 @@ const meta = {
 } satisfies Meta<typeof ReportPageForm>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Blank: Story = {

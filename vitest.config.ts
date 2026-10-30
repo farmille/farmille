@@ -9,12 +9,14 @@ const staticImageImport: Plugin = {
   enforce: "pre",
   load(id) {
     if (!/\.(png|jpe?g|webp|avif)$/.test(id)) return null;
+
     const image = {
       src: id,
       width: 1200,
       height: 900,
       blurDataURL: "data:image/webp;base64,UklGRg==",
     };
+
     return `export default ${JSON.stringify(image)};`;
   },
 };

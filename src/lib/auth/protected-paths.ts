@@ -25,6 +25,7 @@ function matchesPrefix(pathname: string, prefixes: readonly string[]): boolean {
 
 export function isProtectedPath(pathname: string): boolean {
   if (PUBLIC_PATHS.includes(pathname)) return false;
+
   return (
     matchesPrefix(pathname, GENERAL_PROTECTED_PREFIXES) ||
     matchesPrefix(pathname, SELLER_PROTECTED_PREFIXES) ||

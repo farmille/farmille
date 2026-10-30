@@ -51,6 +51,7 @@ export default async function MaterialArticlesPage({ params }: MaterialArticlesP
     listPublishedArticlesByMaterial(id),
     getViewerAccount(),
   ]);
+
   const reports = unwrapQueryResult(reportsResult);
   const articles = unwrapQueryResult(articlesResult);
   const materialPath = `/materials/${material.id}`;

@@ -8,6 +8,7 @@ import { css } from "../../../../../styled-system/css";
 
 export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
   const receipt = await readCompanyApplication((await params).id);
+
   return (
     <FormPageShell chrome="public" title="申請受付票" backHref="/company-requests/receipts">
       <div className={css({ maxW: "content.reading", mx: "auto" })}>

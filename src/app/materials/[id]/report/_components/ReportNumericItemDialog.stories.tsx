@@ -8,6 +8,7 @@ import { itemsFromInput } from "./report-page-state";
 import { storyMaterialName, varietyReport } from "./reportStoryFixture";
 
 const numeric = itemsFromInput(varietyReport).find((item) => item.mode === "numeric");
+
 if (numeric?.mode !== "numeric") throw new Error("記入例に数値の調査項目がありません。");
 
 const meta = {
@@ -23,6 +24,7 @@ const meta = {
 } satisfies Meta<typeof ReportNumericItemDialog>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};

@@ -24,11 +24,14 @@ import {
 } from "@/lib/hooks/use-onboarding-tour";
 
 const SECTION_OFFSET = 72;
+
 // 実証詳細レポートの見出しが画面の上から半分より上に来たら、見たものとして次へ進む
 const SECTION_SEEN = 0.5;
+
 // 最後のお礼を出しておく時間
 const THANKS_SHOWN = 1600;
 const SEARCH_BOX = "search-box";
+
 const FINISH_BODY =
   "使用したことのある資材があれば、感想口コミを投稿してください。投稿するときは、画面上部の「投稿する」（スマートフォンでは画面下の「＋」）を押します。";
 
@@ -49,6 +52,7 @@ export function OnboardingTour() {
 export function OnboardingTourWith({ findPendingUser, finish }: OnboardingTourWithProps) {
   const tour = useOnboardingTour(finish);
   const { pathname, userId, step, thanks, go, end, complete, finishing, push } = tour;
+
   return (
     <>
       <TourSync
@@ -98,20 +102,25 @@ function TourSync({
     // 画面を移ったことで進む段階（資材ページが開いた・投稿画面が開いた）
     if (step !== null && userId !== null) {
       const after = onboardingStepAfterNavigation(step, pathname);
+
       if (after !== null) saveStep(userId, after);
     }
+
     // 案内を待っているアカウントで、このブラウザにまだその人の進み具合が無ければ、ようこそから始める。
     // 終えた直後に古い判定で始め直さないよう、取り直した判定だけで決める
     let alive = true;
     void findPendingUser().then((id) => {
       if (!alive) return;
       setUserId(id);
+
       if (id !== null && readStep(id) === null) saveStep(id, "welcome");
     });
+
     return () => {
       alive = false;
     };
   });
+
   return null;
 }
 
@@ -125,8 +134,10 @@ function TourThanks({
 }) {
   useMountEffect(() => {
     const timer = window.setTimeout(() => leave(next), THANKS_SHOWN);
+
     return () => window.clearTimeout(timer);
   });
+
   return <TourSaved title="ありがとうございました" />;
 }
 
@@ -148,8 +159,10 @@ function TourStep({ step, pathname, go, end, complete, finishing, push }: TourSt
     const next = skipOnboardingSection(step);
     go(next);
     const href = onboardingSkipHref(next, pathname);
+
     if (href !== null) push(href);
   };
+
   switch (step) {
     case "welcome":
       return (
@@ -255,6 +268,7 @@ function SearchIntroStep({
   end,
 }: StepControls & Pick<TourStepProps, "pathname" | "go" | "push">) {
   const onSearch = pathname === "/search";
+
   return (
     <>
       {onSearch ? <SearchBackgroundTap go={go} /> : null}
@@ -265,6 +279,7 @@ function SearchIntroStep({
         primaryLabel={onSearch ? "次へ" : "検索画面へ"}
         onPrimary={() => {
           go("search");
+
           if (!onSearch) push("/search");
         }}
         onSkipStep={skip}
@@ -282,9 +297,12 @@ function SearchBackgroundTap({ go }: { go: (next: OnboardingStep) => void }) {
         go("search");
       }
     };
+
     document.addEventListener("click", onClick, true);
+
     return () => document.removeEventListener("click", onClick, true);
   });
+
   return null;
 }
 
@@ -306,6 +324,7 @@ function TargetTip({
   pulse?: boolean;
 }) {
   const element = useTourTarget(target);
+
   return (
     <TourTip
       target={element}
@@ -343,15 +362,18 @@ function InputStep({
   const element = useTourTarget(target);
   // 説明を読んだら「入力する」か、欄を直接触った時点で説明をたたみ、画面の下の帯に切り替える
   const [collapsed, fold] = useReducer(() => true, startCollapsed);
+
   const collapse = () => {
     fold();
     element?.querySelector<HTMLElement>("input:not([type=hidden]), textarea")?.focus();
   };
+
   if (collapsed) {
     return (
       <TourBar section={section} message={message} action={action} onSkipStep={skip} onEnd={end} />
     );
   }
+
   return (
     <>
       {element !== null ? <FoldOnTouch target={element} fold={fold} /> : null}
@@ -375,15 +397,18 @@ function FoldOnTouch({ target, fold }: { target: Element; fold: () => void }) {
     const onClick = (event: MouseEvent) => {
       if (takeBackgroundTap(event, target)) fold();
     };
+
     target.addEventListener("focusin", fold);
     target.addEventListener("pointerdown", fold);
     document.addEventListener("click", onClick, true);
+
     return () => {
       target.removeEventListener("focusin", fold);
       target.removeEventListener("pointerdown", fold);
       document.removeEventListener("click", onClick, true);
     };
   });
+
   return null;
 }
 
@@ -408,12 +433,16 @@ function ProfileStep({
         go("profileSaving");
       }
     };
+
     document.addEventListener("submit", onSubmit, true);
+
     return () => document.removeEventListener("submit", onSubmit, true);
   });
+
   if (pathname === "/me") {
     return step === "profileSaving" ? <ProfileSaved go={go} push={push} /> : null;
   }
+
   return (
     <InputStep
       target="profile-crops"
@@ -450,18 +479,23 @@ function ProfileSaved({
   useMountEffect(() => {
     if (window.location.search !== PROFILE_SAVED_SEARCH) {
       go("profile");
+
       return;
     }
+
     const showing = window.setTimeout(show, 0);
+
     const leave = window.setTimeout(() => {
       go("searchIntro");
       push("/search");
     }, 1900);
+
     return () => {
       window.clearTimeout(showing);
       window.clearTimeout(leave);
     };
   });
+
   return saved ? <TourSaved title="プロフィールを保存しました" /> : null;
 }
 
@@ -475,6 +509,7 @@ function scrollToSection(section: Element) {
 /** 資材ページ：実証詳細レポートの見出しが見えるところまで下へスクロールしたら、感想口コミの段階へ。 */
 function ScrollStep({ go, skip, end }: StepControls & { go: (next: OnboardingStep) => void }) {
   const reports = useTourTarget("material-reports");
+
   return (
     <>
       {reports !== null ? <ReportSectionSeen reports={reports} go={go} /> : null}
@@ -507,11 +542,14 @@ function ReportSectionSeen({
       if (reports.getBoundingClientRect().top < window.innerHeight * SECTION_SEEN)
         go("reviewIntro");
     };
+
     // スクロール位置が戻されて、目印が出た時点でもう見えていることもある。
     // 読み込み直後（まだスクロールしていない）は上の要素が描き終わっておらず位置が浅く出るので、判定しない
     if (window.scrollY > 0) onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", onScroll);
   });
+
   return null;
 }

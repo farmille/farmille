@@ -31,11 +31,13 @@ const lookupStatusStyle = css({ color: "text.brand" });
 
 function completePostalCode(value: string): string | null {
   const digits = value.normalize("NFKC").replace(/-/g, "");
+
   return /^\d{7}$/.test(digits) ? digits : null;
 }
 
 export function PostalAddressFields({ values }: { values: Record<string, string> }) {
   const resetKey = useResetKey("");
+
   return <PostalAddressInputs key={resetKey} values={values} />;
 }
 
@@ -44,6 +46,7 @@ function PostalAddressInputs({ values }: { values: Record<string, string> }) {
   const restoredPrefecture = useRestoredText("prefectureCode");
   const restoredCityStreet = useRestoredText("cityStreet");
   const restoredBuildingName = useRestoredText("buildingName");
+
   const form = useForm({
     defaultValues: {
       postal: restoredPostal ?? values.postalCode ?? "",
@@ -52,42 +55,57 @@ function PostalAddressInputs({ values }: { values: Record<string, string> }) {
       buildingName: restoredBuildingName ?? values.buildingName ?? "",
     },
   });
+
   const { postal, prefecture, cityStreet, buildingName } = useStore(
     form.store,
     (state) => state.values,
   );
+
   const [message, setMessage] = useReducer((_state: string, next: string) => next, "");
   const [pending, startTransition] = useTransition();
   const requestVersion = useRef(0);
   const lastAutofill = useRef("");
   const postalCode = completePostalCode(postal);
+
   function lookup() {
     if (postalCode === null) return;
     const version = ++requestVersion.current;
     startTransition(async () => {
       const result = await findPostalAddress(postalCode);
+
       if (version !== requestVersion.current) return;
+
       if (!result.ok || !("addresses" in result) || result.addresses === undefined) {
         setMessage(result.message ?? "住所を検索できませんでした。");
+
         return;
       }
+
       const fill = postalFill(result.addresses);
+
       if (fill.status === "many-cities") {
         setMessage("複数の市区町村が該当します。都道府県と市区町村・番地を入力してください。");
+
         return;
       }
+
       form.setFieldValue("prefecture", String(fill.prefectureCode));
+
       if (fill.status === "many-towns") {
         setMessage(
           "複数の町名が該当します。都道府県を入力しました。市区町村・番地を入力してください。",
         );
+
         return;
       }
+
       const next = fill.status === "town" ? fill.city + fill.town : fill.city;
+
       if (cityStreet === "" || cityStreet === lastAutofill.current) {
         lastAutofill.current = next;
         form.setFieldValue("cityStreet", next);
       }
+
       setMessage("");
     });
   }

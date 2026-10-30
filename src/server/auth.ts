@@ -45,6 +45,7 @@ const SessionClaimsSchema = v.object({
     }),
   ),
 });
+
 const AccountTypeSchema = v.picklist(ACCOUNT_TYPES);
 const AssuranceLevelSchema = v.picklist(["aal1", "aal2"]);
 
@@ -54,12 +55,14 @@ const AssuranceLevelSchema = v.picklist(["aal1", "aal2"]);
  */
 export function toSessionUser(claims: JwtPayload): SessionUser | null {
   const claimsResult = v.safeParse(SessionClaimsSchema, claims);
+
   if (!claimsResult.success) return null;
 
   const accountTypeResult = v.safeParse(
     AccountTypeSchema,
     claimsResult.output.app_metadata?.account_type,
   );
+
   const assuranceLevelResult = v.safeParse(AssuranceLevelSchema, claimsResult.output.aal);
   const sellerId = claimsResult.output.app_metadata?.seller_id?.trim() ?? "";
 
@@ -73,6 +76,7 @@ export function toSessionUser(claims: JwtPayload): SessionUser | null {
 
 export function authorizeGeneralUser(user: SessionUser | null): Result<GeneralSession> {
   if (user === null) return fail("unauthorized");
+
   if (!canUseGeneralFeatures(user.accountType)) return fail("forbidden");
 
   return succeed({ userId: user.userId });
@@ -80,7 +84,9 @@ export function authorizeGeneralUser(user: SessionUser | null): Result<GeneralSe
 
 export function authorizeSeller(user: SessionUser | null): Result<SellerSession> {
   if (user === null) return fail("unauthorized");
+
   if (user.accountType !== "seller") return fail("forbidden");
+
   // seller_id が無い JWT はメーカーとして扱わない（承認処理の取りこぼし検知）。
   if (user.sellerId === null) return fail("forbidden");
 
@@ -90,7 +96,9 @@ export function authorizeSeller(user: SessionUser | null): Result<SellerSession>
 /** admin は account_type='admin' かつ AAL2（MFA 済み）を要求する（01 §4）。 */
 export function authorizeAdmin(user: SessionUser | null): Result<AdminSession> {
   if (user === null) return fail("unauthorized");
+
   if (user.accountType !== "admin") return fail("forbidden");
+
   if (user.aal !== "aal2") return fail("aal2_required");
 
   return succeed({ userId: user.userId });
@@ -120,38 +128,49 @@ export async function getAccountType(): Promise<AccountType | null> {
 export async function requireGeneralUser(): Promise<Result<GeneralSession>> {
   const user = await getSessionUser();
   const result = authorizeGeneralUser(user);
+
   if (!result.ok || user?.accountType !== "admin") return result;
 
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("profiles")
     .select("user_id")
     .eq("user_id", result.data.userId)
     .maybeSingle();
+
   if (error !== null) {
     console.error("個人プロフィールの確認に失敗しました", error);
+
     return fail("internal");
   }
+
   if (data === null) redirect("/me/setup");
+
   return result;
 }
 
 export async function requireSeller(): Promise<Result<SellerSession>> {
   const session = authorizeSeller(await getSessionUser());
+
   if (!session.ok) return session;
 
   // 非公開のauth_user_idも照合し、発行済みJWTからの凍結・紐づけ変更の迂回を防ぐ。
   const supabase = createAdminSupabase();
+
   const { data, error } = await supabase
     .from("seller_accounts")
     .select("status")
     .eq("id", session.data.sellerId)
     .eq("auth_user_id", session.data.userId)
     .maybeSingle();
+
   if (error !== null) {
     console.error("メーカーアカウントの確認に失敗しました", error);
+
     return fail("internal");
   }
+
   if (data?.status !== "approved") return fail("forbidden");
 
   return session;

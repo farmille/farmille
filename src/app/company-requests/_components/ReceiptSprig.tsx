@@ -2,6 +2,7 @@ import { css, cx } from "../../../../styled-system/css";
 
 // 茎は3次ベジェ曲線。葉は [付け根の x, y, 向き（真上を0度、時計回り）, 長さ, 幅, ふくらむ側]。
 const stems = ["M0 250C22 190 60 118 156 34", "M34 186C62 178 96 176 136 162"];
+
 const leaves = [
   [8.7, 227.9, 76.8, 54, 23, 1],
   [17.3, 208.7, -26.5, 50, 22, -1],
@@ -26,6 +27,7 @@ const leafOutline = (length: number, width: number, side: number) => {
   const far = width * (0.52 + 0.1 * side);
   const nearBack = width * (0.62 - 0.1 * side);
   const farBack = width * (0.52 - 0.1 * side);
+
   return `M0 0C${round(near)} ${round(-length * 0.16)} ${round(far)} ${round(-length * 0.7)} 0 ${-length}C${round(-farBack)} ${round(-length * 0.72)} ${round(-nearBack)} ${round(-length * 0.18)} 0 0Z`;
 };
 
@@ -33,6 +35,7 @@ const leafVein = (length: number, width: number, side: number) =>
   `M0 ${round(-length * 0.08)}Q${round(width * side * 0.05)} ${round(-length * 0.5)} 0 ${round(-length * 0.88)}`;
 
 const line = css({ fill: "[none]", stroke: "primary.600", _print: { stroke: "primary.700" } });
+
 const leafFill = css({
   fill: "primary.soft",
   stroke: "primary.600",

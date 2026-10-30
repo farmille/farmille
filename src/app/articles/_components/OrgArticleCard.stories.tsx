@@ -18,13 +18,18 @@ const meta = {
     viewCount: 1520,
   },
 } satisfies Meta<typeof OrgArticleCard>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
+
 export const LongTitle: Story = {
   args: {
     title: "夏場の高温ストレス対策として、葉面散布と灌注を組み合わせた場合の使い分けと注意点",
     organization: "とても長い名前の農業資材メーカー株式会社",
   },
 };
+
 export const WithCover: Story = { args: { coverSrc: "/missing-material-image.png" } };

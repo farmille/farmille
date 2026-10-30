@@ -31,6 +31,7 @@ const meta = {
 } satisfies Meta<typeof MetricBars>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Few: Story = {};

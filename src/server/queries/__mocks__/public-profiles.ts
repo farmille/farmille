@@ -1,5 +1,6 @@
 import { fn } from "storybook/test";
 import { publicProfile, publicPosts } from "@/app/users/[id]/_components/story-fixtures";
+
 export const getPublicProfilePage = fn<
   typeof import("@/server/queries/public-profiles").getPublicProfilePage
 >(async () => ({

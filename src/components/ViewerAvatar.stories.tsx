@@ -29,6 +29,7 @@ const meta = {
 } satisfies Meta<typeof ViewerAvatar>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 /** 画像を設定した人には、その画像を出す。 */

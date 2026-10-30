@@ -28,6 +28,7 @@ export async function signInWithEmail(
   if (error !== null) return fail(toErrorCode(error, "signIn"));
 
   await sendPendingRegistrationEmail();
+
   return succeed({ userId: data.user.id });
 }
 
@@ -49,10 +50,12 @@ export async function requestPasswordReset(email: string): Promise<Result<null>>
   if (email.length === 0) return fail("invalid_body");
 
   const supabase = await createServerSupabase();
+
   const redirectTo = new URL(
     "/auth/confirm?next=%2Fpassword-reset%2Fupdate",
     clientEnv.siteUrl,
   ).toString();
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
 
   if (error !== null) return fail(toErrorCode(error, "resetPasswordForEmail"));
@@ -73,29 +76,37 @@ export async function updatePassword(
   if (!/^[a-zA-Z0-9_-]{32,256}$/.test(tokenHash)) return fail("expired_link");
   // 通常ログインからの呼び出しでは変更させず、送信時に使い捨てトークンを消費する。
   const recovery = await openRecoverySession(tokenHash);
+
   if (!recovery.ok) return recovery;
   const supabase = recovery.data;
   const factors = await supabase.auth.mfa.listFactors();
+
   if (factors.error) return fail(toErrorCode(factors.error, "recoveryFactors"));
   const factor = factors.data.totp.find((item) => item.status === "verified");
+
   if (factor) {
     if (!/^\d{6}$/.test(code)) return fail("aal2_required");
     const verified = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
+
     if (verified.error) {
       if (["mfa_verification_failed", "mfa_challenge_expired"].includes(verified.error.code ?? ""))
         return fail("aal2_required");
+
       return fail(toErrorCode(verified.error, "recoveryMfa"));
     }
   }
+
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error !== null) return fail(toErrorCode(error, "updatePassword"));
 
   const signedOut = await supabase.auth.signOut({ scope: "global" });
+
   if (signedOut.error) return fail(toErrorCode(signedOut.error, "signOutAfterRecovery"));
   await clearRecoverySession();
   const browserSession = await createServerSupabase();
   const closed = await browserSession.auth.signOut({ scope: "local" });
+
   if (closed.error) return fail(toErrorCode(closed.error, "closeRecoveryBrowserSession"));
 
   return succeed(null);
@@ -111,6 +122,7 @@ export async function exchangeAuthCode(code: string): Promise<Result<null>> {
 
   if (error !== null) {
     const code = toErrorCode(error, "exchangeCodeForSession");
+
     if (code !== "internal") return fail(code);
 
     return fail(error.status !== undefined && error.status < 500 ? "expired_link" : "internal");
@@ -129,6 +141,7 @@ export async function verifyEmailOtp(type: EmailOtpType, tokenHash: string): Pro
 
   if (error !== null) {
     const code = toErrorCode(error, "verifyOtp");
+
     if (code !== "internal") return fail(code);
 
     // 使用済み・改竄されたリンクは 4xx で返る。リンク側の問題として扱う。

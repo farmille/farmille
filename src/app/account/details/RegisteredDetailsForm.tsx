@@ -38,14 +38,17 @@ function formValues(details: RegisteredDetails) {
 
 export function RegisteredDetailsForm({ details }: { details: RegisteredDetails }) {
   const [state, action] = useActionState(saveRegisteredDetailsAction, initialAuthFormState);
+
   // 送信後の reset で欄が戻る先。エラーのときは送った値、保存できたときは保存した値（再取得した props）。
   const values =
     state.status === "error" && state.values !== undefined ? state.values : formValues(details);
+
   const defaults = {
     familyName: values.familyName ?? "",
     givenName: values.givenName ?? "",
     phone: values.phone ?? "",
   };
+
   const form = useForm({ defaultValues: defaults });
   const input = useStore(form.store, (state) => state.values);
 

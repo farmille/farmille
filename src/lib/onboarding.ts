@@ -53,12 +53,16 @@ export function onboardingSection(step: OnboardingStep): OnboardingSection | nul
 /** 「この手順をスキップ」で移る先。いまの段階を飛ばして、次の段階の最初へ。 */
 export function skipOnboardingSection(step: OnboardingStep): OnboardingStep {
   const section = sectionOf[step];
+
   if (section === 0) return "searchIntro";
+
   if (section === 1) return "reviewIntro";
+
   return "finish";
 }
 
 const materialPath = /^\/materials\/[^/]+$/;
+
 export function isMaterialPage(pathname: string): boolean {
   return materialPath.test(pathname);
 }
@@ -105,7 +109,9 @@ export function onboardingFinishHref(pathname: string): string | null {
  */
 export function onboardingSkipHref(next: OnboardingStep, pathname: string): string | null {
   if (next === "searchIntro") return pathname === "/search" ? null : "/search";
+
   if (next === "reviewIntro") return onboardingShowsOn(next, pathname) ? null : REVIEW_ENTRY_HREF;
+
   return null;
 }
 
@@ -123,28 +129,37 @@ export function onboardingStepAfterNavigation(
   pathname: string,
 ): OnboardingStep | null {
   if (step === "search" && materialPath.test(pathname)) return "materialScroll";
+
   // 投稿画面が開いたところで案内を終える（その後の入力と投稿は普段どおり）。
   // 案内の途中で自分から投稿画面を開いた場合も、投稿した後に資材ページで感想口コミの案内を出し直さない
   if (stepsBeforeReviewForm.includes(step) && reviewFormPath.test(pathname)) return "finish";
+
   return null;
 }
 
 /** そのアカウントの進み具合だけを読む。共用のブラウザで、別のアカウントの進み具合を引き継がない。 */
 export function readOnboardingStep(storage: Storage, userId: string): OnboardingStep | null {
   const raw = storage.getItem(ONBOARDING_STORAGE_KEY);
+
   if (raw === null) return null;
   let json: unknown;
+
   try {
     json = JSON.parse(raw);
   } catch {
     storage.removeItem(ONBOARDING_STORAGE_KEY);
+
     return null;
   }
+
   const parsed = v.safeParse(storedSchema, json);
+
   if (!parsed.success) {
     storage.removeItem(ONBOARDING_STORAGE_KEY);
+
     return null;
   }
+
   return parsed.output.userId === userId ? parsed.output.step : null;
 }
 
@@ -160,6 +175,7 @@ export function clearOnboarding(storage: Storage): void {
 export function isOnboardingPending(user: User | null): boolean {
   if (user === null) return false;
   const metadata = user.app_metadata;
+
   return (
     v.is(v.literal("general"), metadata.account_type) &&
     v.is(v.literal(ONBOARDING_PENDING), metadata.onboarding)

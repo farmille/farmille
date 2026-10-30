@@ -9,6 +9,7 @@ import { storyMaterialName, varietyReport } from "./reportStoryFixture";
 
 function renderDialog() {
   const numeric = itemsFromInput(varietyReport).find((item) => item.mode === "numeric");
+
   if (numeric?.mode !== "numeric") throw new Error("記入例に数値の調査項目がありません。");
   const onClose = vi.fn();
   render(
@@ -20,6 +21,7 @@ function renderDialog() {
       onClose={onClose}
     />,
   );
+
   return onClose;
 }
 

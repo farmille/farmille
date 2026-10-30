@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export function isSellerStatus(
   value: string | null | undefined,
 ): value is import("@/server/admin/sellers").SellerStatus {
@@ -6,6 +7,7 @@ export function isSellerStatus(
     value === "applied" || value === "approved" || value === "rejected" || value === "suspended"
   );
 }
+
 export const listSellers = fn<typeof import("@/server/admin/sellers").listSellers>(async () => ({
   ok: true,
   data: [
@@ -19,6 +21,7 @@ export const listSellers = fn<typeof import("@/server/admin/sellers").listSeller
     },
   ],
 })).mockName("listSellers");
+
 export const getSellerDetail = fn<typeof import("@/server/admin/sellers").getSellerDetail>(
   async () => ({
     ok: true,
@@ -48,6 +51,7 @@ export const getSellerDetail = fn<typeof import("@/server/admin/sellers").getSel
     },
   }),
 ).mockName("getSellerDetail");
+
 export const approveSellerApplication = fn<
   typeof import("@/server/admin/sellers").approveSellerApplication
 >(async () => ({
@@ -58,9 +62,11 @@ export const approveSellerApplication = fn<
     emailSent: false,
   },
 })).mockName("approveSellerApplication");
+
 export const listManufacturerNames = fn<
   typeof import("@/server/admin/sellers").listManufacturerNames
 >(async () => ({ ok: true, data: ["内容を確認してください。"] })).mockName("listManufacturerNames");
+
 export const listSellerMaterialCandidates = fn<
   typeof import("@/server/admin/sellers").listSellerMaterialCandidates
 >(async () => ({
@@ -75,18 +81,23 @@ export const listSellerMaterialCandidates = fn<
     },
   ],
 })).mockName("listSellerMaterialCandidates");
+
 export const rejectSellerApplication = fn<
   typeof import("@/server/admin/sellers").rejectSellerApplication
 >(async () => ({ ok: true, data: null })).mockName("rejectSellerApplication");
+
 export const suspendSellerAccount = fn<
   typeof import("@/server/admin/sellers").suspendSellerAccount
 >(async () => ({ ok: true, data: null })).mockName("suspendSellerAccount");
+
 export const reinstateSellerAccount = fn<
   typeof import("@/server/admin/sellers").reinstateSellerAccount
 >(async () => ({ ok: true, data: null })).mockName("reinstateSellerAccount");
+
 export const issueSellerInviteCode = fn<
   typeof import("@/server/admin/sellers").issueSellerInviteCode
 >(async () => ({ ok: true, data: { inviteCode: "" } })).mockName("issueSellerInviteCode");
+
 export const listClaimableSellers = fn<
   typeof import("@/server/admin/sellers").listClaimableSellers
 >(async () => ({
@@ -99,12 +110,14 @@ export const listClaimableSellers = fn<
     },
   ],
 })).mockName("listClaimableSellers");
+
 export const SELLER_STATUSES: typeof import("@/server/admin/sellers").SELLER_STATUSES = [
   "applied",
   "approved",
   "rejected",
   "suspended",
 ];
+
 export const SELLER_STATUS_LABELS: typeof import("@/server/admin/sellers").SELLER_STATUS_LABELS = {
   applied: "確認中",
   approved: "確認済み",

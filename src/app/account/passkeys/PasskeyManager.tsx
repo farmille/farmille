@@ -28,27 +28,34 @@ export function PasskeyManager({
 }) {
   const router = useRouter();
   const [pending, setPending] = useReducer((_state: boolean, next: boolean) => next, false);
+
   const [message, setMessage] = useReducer(
     (_state: string | null, next: string | null) => next,
     null,
   );
+
   const [failed, setFailed] = useReducer((_state: boolean, next: boolean) => next, false);
 
   async function change(passkeyId: string | null) {
     setPending(true);
     setMessage(null);
     setFailed(false);
+
     try {
       const auth = createAuthBrowserClient().auth;
+
       const { error } =
         passkeyId === null
           ? await auth.registerPasskey()
           : await auth.passkey.delete({ passkeyId });
+
       if (error) {
         setFailed(true);
         setMessage(passkeyErrorMessage(error));
+
         return;
       }
+
       setMessage(passkeyId === null ? "パスキーを登録しました。" : "パスキーを削除しました。");
       router.refresh();
     } catch {

@@ -56,6 +56,7 @@ export function SideSection({
   children: ReactNode;
 }) {
   const focus = useContext(FilterFocusContext);
+
   const noteContent = note ? (
     <div
       className={css({
@@ -118,9 +119,11 @@ function FilteredSection({
   const form = useForm({ defaultValues: { query: "" } });
   const query = useStore(form.store, (state) => state.values.query);
   const keyword = normalize(query.trim());
+
   const hits = keyword
     ? filter.items.filter((item) => item.terms.some((term) => normalize(term).includes(keyword)))
     : null;
+
   return (
     <>
       <Input

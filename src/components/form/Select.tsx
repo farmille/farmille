@@ -51,6 +51,7 @@ type SelectProps<V extends string> = SelectBodyProps<V> & Labeling;
 
 export function Select<V extends string>(props: SelectProps<V>) {
   const [labeling, selectProps] = splitLabeling(props);
+
   return (
     <Labeled disabled={selectProps.disabled} labeling={labeling} name={selectProps.name}>
       <SelectBody<V> {...selectProps} />
@@ -72,10 +73,12 @@ function SelectBody<V extends string>({
 }: SelectBodyProps<V>) {
   const field = useFieldContext();
   const restored = useRestoredField(name ?? field.name);
+
   const initial =
     value === undefined && restored !== undefined
       ? (restoredChoices(options, restored)[0] ?? defaultValue)
       : defaultValue;
+
   const resetKey = useResetKey(initial ?? "");
 
   return (
@@ -113,14 +116,18 @@ function SelectBody<V extends string>({
 
 function renderOptions<V extends string>(options: readonly Option<V>[]): ReactNode {
   const runs: { group?: string; options: Option<V>[] }[] = [];
+
   for (const option of options) {
     const last = runs.at(-1);
+
     if (last !== undefined && last.group === option.group) last.options.push(option);
     else runs.push({ group: option.group, options: [option] });
   }
+
   return runs.map((run) => {
     const items = run.options.map((option) => <SelectOption key={option.value} option={option} />);
     const key = run.options[0]?.value;
+
     return run.group === undefined ? (
       <Fragment key={key}>{items}</Fragment>
     ) : (

@@ -25,13 +25,16 @@ function reportMutationError<ErrorValue>(operation: string, error: ErrorValue): 
 
 export async function cancelSellerMaterialChangeRequest(requestId: string): Promise<Result<null>> {
   const supabase = await createServerSupabase();
+
   const { error } = await supabase.rpc("cancel_material_change_request", {
     p_request_id: requestId,
   });
 
   if (error !== null) {
     reportMutationError("資材変更申請の取消に失敗", error);
+
     return fail(errorCodeForMutation(error));
   }
+
   return succeed(null);
 }

@@ -37,7 +37,9 @@ function reduceSearchText(state: SearchText, action: SearchTextAction): SearchTe
     case "url": {
       // 自分で送った検索の応答では、待っている間に入力した続きを戻さない。
       const index = state.requested.indexOf(action.query);
+
       if (index === -1) return { text: action.query, synced: action.query, requested: [] };
+
       return {
         ...state,
         synced: action.query,
@@ -59,6 +61,7 @@ export function useMaterialSearch(
     synced: initialQuery,
     requested: [],
   });
+
   if (synced !== initialQuery) dispatch({ type: "url", query: initialQuery });
 
   const composing = useRef(false);
@@ -66,6 +69,7 @@ export function useMaterialSearch(
   useMountEffect(() => () => clearTimeout(timer.current));
 
   const [isPending, startTransition] = useTransition();
+
   const [, setSearch] = useQueryStates(materialSearchParsers, {
     shallow: false,
     scroll: false,
@@ -74,6 +78,7 @@ export function useMaterialSearch(
 
   const scheduleSearch = (value: string) => {
     clearTimeout(timer.current);
+
     if (composing.current || value.trim() === initialQuery) return;
     timer.current = setTimeout(() => {
       dispatch({ type: "request", text: value });

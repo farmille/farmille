@@ -13,6 +13,7 @@ export async function sellerLoginAction(
   formData: FormData,
 ): Promise<AuthFormState> {
   const submittedLoginId = formDataString(formData.get("loginId")) ?? "";
+
   const result = await signInSellerWithLoginId(
     submittedLoginId,
     formDataString(formData.get("password")) ?? "",

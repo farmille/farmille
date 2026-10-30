@@ -68,6 +68,7 @@ type ToasterProps = {
  */
 export function Toaster({ id, placement = "top", label = "通知" }: ToasterProps) {
   const { position, offset } = placements[placement];
+
   return (
     <Sonner
       id={id}

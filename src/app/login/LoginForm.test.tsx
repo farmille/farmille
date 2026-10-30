@@ -36,6 +36,7 @@ describe.each([
       message: "ログインできませんでした。",
       values: { [fieldName]: identity },
     });
+
     render(
       <PathnameContext.Provider value="/login">
         <Component next="/me" />
@@ -53,6 +54,7 @@ describe.each([
 
     expect(await screen.findByText("ログインできませんでした。")).toBeVisible();
     const call = action.mock.lastCall;
+
     if (call === undefined) throw new Error("ログイン処理が呼ばれていません。");
     expect(call[1].get(fieldName)).toBe(identity);
     expect(call[1].get("password")).toBe("test-password");

@@ -36,7 +36,9 @@ export function PostActions({
     (_current: string | null, next: string | null) => next,
     null,
   );
+
   const recorded = useRef(false);
+
   const observeView =
     target === "review" && id !== undefined
       ? (element: HTMLSpanElement) => {
@@ -46,10 +48,13 @@ export function PostActions({
             observer.disconnect();
             void recordReviewCardView(id).catch(() => setError("閲覧数を記録できませんでした。"));
           });
+
           observer.observe(element);
+
           return () => observer.disconnect();
         }
       : undefined;
+
   return (
     <div className={css({ mt: "2.5" })}>
       <div

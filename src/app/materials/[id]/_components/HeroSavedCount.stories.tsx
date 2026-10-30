@@ -9,6 +9,7 @@ const meta = {
 } satisfies Meta<typeof HeroCount>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Plain: Story = {};

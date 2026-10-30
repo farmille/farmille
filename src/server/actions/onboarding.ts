@@ -11,9 +11,12 @@ import { createAdminSupabase } from "@/server/supabase";
  */
 export async function finishOnboardingAction(): Promise<Result<null>> {
   const session = await requireGeneralUser();
+
   if (!session.ok) return session;
+
   const { error } = await createAdminSupabase().auth.admin.updateUserById(session.data.userId, {
     app_metadata: { onboarding: null },
   });
+
   return error ? fail(toErrorCode(error, "finishOnboarding")) : succeed(null);
 }

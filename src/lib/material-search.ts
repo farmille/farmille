@@ -39,6 +39,7 @@ function normalizeSearchText(value: string) {
 /** キーワードに合う候補を全件返す。一覧の絞り込みには候補表示の件数上限を適用しない。 */
 export function matchSearchCatalog(catalog: SearchCatalog, query: string) {
   const keyword = normalizeSearchText(query.trim());
+
   return {
     filters: catalog.filters.filter((filter) =>
       [filter.name, ...filter.aliases].some((name) => normalizeSearchText(name).includes(keyword)),

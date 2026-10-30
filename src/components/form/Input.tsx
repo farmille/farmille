@@ -66,7 +66,9 @@ function normalizePhone(value: string): string {
 /** 欄を離れたときに値を整える入力の種類と、その整え方。 */
 function blurNormalizer(type: InputBodyProps["type"]): ((value: string) => string) | null {
   if (type === "email") return normalizeEmail;
+
   if (type === "tel") return normalizePhone;
+
   return null;
 }
 
@@ -80,11 +82,14 @@ function normalizeOnBlur(
 ) {
   const input = event.currentTarget;
   const normalized = normalize(input.value);
+
   if (normalized === input.value) return;
+
   // React が要素に被せた value を通さず、ブラウザ本来の value を書き換える（input イベントで React に変化を伝えるため）
   if (!Reflect.set(HTMLInputElement.prototype, "value", normalized, input)) {
     throw new Error("入力欄の値を書き換えられませんでした。");
   }
+
   input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
@@ -105,9 +110,11 @@ type InputProps = InputBodyProps &
 export function Input({ check, ...props }: InputProps) {
   const [labeling, inputProps] = splitLabeling(props);
   const checked = useBlurCheck(check);
+
   if (check !== undefined && labeling.label === null) {
     throw new Error("check は、自分のラベルを持つ Input でだけ使えます。");
   }
+
   return (
     <Labeled
       disabled={inputProps.disabled}
@@ -136,15 +143,19 @@ function useBlurCheck(check: InputProps["check"]) {
     (_current: string | undefined, next: string | undefined) => next,
     undefined,
   );
+
   const current = useRef("");
+
   return {
     error,
     onBlur: async (event: FocusEvent<HTMLInputElement>) => {
       if (check === undefined) return;
       const value = event.currentTarget.value;
       current.current = value;
+
       if (value.trim() === "") return;
       const message = await check(value);
+
       if (current.current === value) setError(message ?? undefined);
     },
     onChange: (event: ChangeEvent<HTMLInputElement>) => {
@@ -171,6 +182,7 @@ function InputBody({
   const restored = useRestoredText(rest.name ?? name);
   const [shown, toggleShown] = useReducer((current: boolean) => !current, false);
   const state = revealState[shown ? "visible" : "hidden"];
+
   const input = (
     <BaseInput
       {...rest}

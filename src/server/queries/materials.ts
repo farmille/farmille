@@ -14,6 +14,7 @@ import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+
 type MaterialEvidenceRow = Database["public"]["Tables"]["material_evidences"]["Row"];
 
 type MaterialListFields = Pick<
@@ -173,6 +174,7 @@ export async function listMaterials(
   options: ListMaterialsOptions,
 ): Promise<Result<Paginated<MaterialListItem>>> {
   const supabase = await createServerSupabase();
+
   return listMaterialsWithSupabase(supabase, options);
 }
 
@@ -181,6 +183,7 @@ export async function listMaterialsWithSupabase(
   { ids, page }: ListMaterialsOptions,
 ): Promise<Result<Paginated<MaterialListItem>>> {
   const { from, to } = pageRange(page);
+
   let query = supabase
     .from("materials")
     .select(MATERIAL_LIST_COLUMNS, { count: "exact" })
@@ -195,15 +198,18 @@ export async function listMaterialsWithSupabase(
 
   if (error !== null) {
     reportQueryError("資材一覧の取得に失敗", error);
+
     return fail("internal");
   }
 
   if (count === null) {
     reportQueryError("資材一覧の総件数が返されなかった", { page });
+
     return fail("internal");
   }
 
   const items = withIllustrations(data);
+
   if (!items.ok) return items;
 
   return succeed({
@@ -220,6 +226,7 @@ export async function listRelatedMaterials(
   genreIds: readonly string[],
 ): Promise<Result<MaterialListItem[]>> {
   const supabase = await createServerSupabase();
+
   return listRelatedMaterialsWithSupabase(supabase, materialId, genreIds);
 }
 
@@ -246,6 +253,7 @@ export async function listRelatedMaterialsWithSupabase(
 
   if (error !== null) {
     reportQueryError("関連資材の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -257,7 +265,9 @@ export async function getMaterial(id: string): Promise<Result<MaterialDetail>> {
     createServerSupabase(),
     listClassificationOptions(),
   ]);
+
   if (!options.ok) return options;
+
   return getMaterialWithSupabase(supabase, id, options.data);
 }
 
@@ -303,6 +313,7 @@ export async function getMaterialWithSupabase(
 
   if (error !== null) {
     reportQueryError("資材詳細の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -367,8 +378,10 @@ export async function getMaterialWithSupabase(
     productTypesResult.error ??
     searchTagsResult.error ??
     representativeSellerResult.error;
+
   if (relationError !== null) {
     reportQueryError("資材分類の取得に失敗", relationError);
+
     return fail("internal");
   }
 
@@ -379,6 +392,7 @@ export async function getMaterialWithSupabase(
   const ingredientRelations = ingredientsResult.data;
   const productTypeRelations = productTypesResult.data;
   const searchTagRelations = searchTagsResult.data;
+
   if (
     cropGroupsResult.data === null ||
     methodsResult.data === null ||
@@ -391,6 +405,7 @@ export async function getMaterialWithSupabase(
     searchTagRelations === null
   ) {
     reportQueryError("資材分類の応答にデータが無い", { materialId: id });
+
     return fail("internal");
   }
 
@@ -400,22 +415,28 @@ export async function getMaterialWithSupabase(
       : (options.compositionTypes.find(
           ({ id: compositionTypeId }) => compositionTypeId === data.composition_type_id,
         ) ?? null);
+
   if (data.composition_type_id !== null && compositionType === null) {
     reportQueryError("資材に対応する組成タイプが無い", data);
+
     return fail("internal");
   }
 
   const effectById = new Map(options.effects.map((effect) => [effect.id, effect]));
   const cropById = new Map(options.crops.map((crop) => [crop.id, crop]));
+
   const ingredientCategoryById = new Map(
     options.ingredientCategories.map((category) => [category.id, category]),
   );
+
   const ingredientById = new Map(
     options.ingredients.map((ingredient) => [ingredient.id, ingredient]),
   );
+
   const productTypeById = new Map(
     options.productTypes.map((productType) => [productType.id, productType]),
   );
+
   const searchTagById = new Map(options.searchTags.map((searchTag) => [searchTag.id, searchTag]));
   const effects: MaterialEffect[] = [];
   const targetCrops: MaterialTargetCrop[] = [];
@@ -426,54 +447,77 @@ export async function getMaterialWithSupabase(
 
   for (const relation of effectRelations) {
     const effect = effectById.get(relation.effect_id);
+
     if (effect === undefined) {
       reportQueryError("資材に対応する効果が無い", relation);
+
       return fail("internal");
     }
+
     effects.push(effect);
   }
+
   for (const relation of cropRelations) {
     const crop = cropById.get(relation.crop_id);
+
     if (crop === undefined) {
       reportQueryError("資材に対応する対象作物が無い", relation);
+
       return fail("internal");
     }
+
     targetCrops.push({
       ...crop,
       sort_order: relation.sort_order,
       sourceName: relation.source_name,
     });
   }
+
   for (const relation of ingredientCategoryRelations) {
     const ingredientCategory = ingredientCategoryById.get(relation.ingredient_category_id);
+
     if (ingredientCategory === undefined) {
       reportQueryError("資材に対応する材料分類が無い", relation);
+
       return fail("internal");
     }
+
     ingredientCategories.push(ingredientCategory);
   }
+
   for (const relation of ingredientRelations) {
     const ingredient = ingredientById.get(relation.ingredient_id);
+
     if (ingredient === undefined) {
       reportQueryError("資材に対応する個別材料が無い", relation);
+
       return fail("internal");
     }
+
     ingredients.push(ingredient);
   }
+
   for (const relation of productTypeRelations) {
     const productType = productTypeById.get(relation.product_type_id);
+
     if (productType === undefined) {
       reportQueryError("資材に対応する製品タイプが無い", relation);
+
       return fail("internal");
     }
+
     productTypes.push(productType);
   }
+
   for (const relation of searchTagRelations) {
     const searchTag = searchTagById.get(relation.search_tag_id);
+
     if (searchTag === undefined) {
       reportQueryError("資材に対応する検索タグが無い", relation);
+
       return fail("internal");
     }
+
     searchTags.push(searchTag);
   }
 
@@ -518,10 +562,13 @@ function byPostingPriority(left: PostingMaterial, right: PostingMaterial): numbe
 
 export async function searchPostingMaterials(query: string): Promise<Result<PostingMaterial[]>> {
   const normalizedQuery = query.trim();
+
   if (normalizedQuery.length > POSTING_QUERY_MAX_LENGTH) return fail("invalid_body");
   const [catalog, suggestions] = await Promise.all([getCatalogSearch(), listSearchSuggestions()]);
+
   if (!suggestions.ok) return suggestions;
   const matches = matchSearchCatalog(suggestions.data, normalizedQuery);
+
   return succeed(
     catalog.materials
       .filter(
@@ -548,6 +595,7 @@ export async function withPostingMaterialImages(
   materials: readonly PostingMaterial[],
 ): Promise<Result<PostingMaterialWithImage[]>> {
   const supabase = await createServerSupabase();
+
   return withPostingMaterialImagesWithSupabase(supabase, materials);
 }
 
@@ -562,13 +610,16 @@ export async function withPostingMaterialImagesWithSupabase(
       "id",
       materials.map(({ id }) => id),
     );
+
   if (result.error) return fail("internal");
+
   const illustrations = new Map(
     result.data.map((material) => [
       material.id,
       materialIllustrationUrl(material.container_type_id),
     ]),
   );
+
   return succeed(
     materials.map((material) => ({
       ...material,

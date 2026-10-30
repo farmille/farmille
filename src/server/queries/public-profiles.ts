@@ -9,12 +9,19 @@ import { pickReportCover } from "@/server/usage-reports/model";
 import type { Database } from "@/types/database.types";
 
 type PublicProfileRow = Database["public"]["Views"]["public_profiles"]["Row"];
+
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
+
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
+
 type ReviewPhotoRow = Database["public"]["Tables"]["review_photos"]["Row"];
+
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
+
 type UsageReportMediaRow = Database["public"]["Tables"]["usage_report_media"]["Row"];
+
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
 type ProfileReviewQueryRow = Pick<
@@ -98,6 +105,7 @@ async function getHelpfulCounts(
 
   for (let start = 0; start < ids.length; start += IN_FILTER_CHUNK_SIZE) {
     const chunk = ids.slice(start, start + IN_FILTER_CHUNK_SIZE);
+
     const { data, error } = await supabase
       .from("helpful_counts")
       .select("target_id, helpful_count")
@@ -106,6 +114,7 @@ async function getHelpfulCounts(
 
     if (error !== null) {
       reportQueryError("参考になった件数の取得に失敗", { targetType, error });
+
       return fail("internal");
     }
 
@@ -114,6 +123,7 @@ async function getHelpfulCounts(
     for (const row of rows) {
       if (row.target_id === null || row.helpful_count === null) {
         reportQueryError("参考になった件数にNULLが含まれる", { targetType, row });
+
         return fail("internal");
       }
 
@@ -127,6 +137,7 @@ async function getHelpfulCounts(
 /** 一般ユーザーの公開プロフィールと公開済み投稿だけを取得する。退会済みのプロフィールは見つからない扱いにする。 */
 export async function getPublicProfilePage(id: string): Promise<Result<PublicProfilePageData>> {
   const supabase = await createServerSupabase();
+
   const { data: profileData, error: profileError } = await supabase
     .from("public_profiles")
     .select("user_id, handle, avatar_url, standpoint, prefecture_code")
@@ -136,6 +147,7 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
 
   if (profileError !== null) {
     reportQueryError("公開プロフィールの取得に失敗", profileError);
+
     return fail("internal");
   }
 
@@ -147,6 +159,7 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
 
   if (profile.user_id === null || profile.handle === null) {
     reportQueryError("公開プロフィールの必須項目が欠落", { id });
+
     return fail("internal");
   }
 
@@ -219,16 +232,19 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
 
   if (reviewsResult.error !== null) {
     reportQueryError("公開感想口コミの取得に失敗", reviewsResult.error);
+
     return fail("internal");
   }
 
   if (reportsResult.error !== null) {
     reportQueryError("公開実証詳細レポートの取得に失敗", reportsResult.error);
+
     return fail("internal");
   }
 
   const reviewRows: ProfileReviewQueryRow[] = reviewsResult.data;
   const reportRows: ProfileReportQueryRow[] = reportsResult.data;
+
   const [reviewHelpful, reportHelpful] = await Promise.all([
     getHelpfulCounts(
       supabase,
@@ -257,6 +273,7 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
 
     if (cropName === null || review.material === null) {
       reportQueryError("公開感想口コミの関連データが欠落", { reviewId: review.id });
+
       return fail("internal");
     }
 
@@ -280,8 +297,10 @@ export async function getPublicProfilePage(id: string): Promise<Result<PublicPro
 
   for (const report of reportRows) {
     const crop = reportCrop(report);
+
     if (report.published_at === null || crop === null || report.material === null) {
       reportQueryError("公開実証詳細レポートの関連データが欠落", { reportId: report.id });
+
       return fail("internal");
     }
 

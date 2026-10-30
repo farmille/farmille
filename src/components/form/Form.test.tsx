@@ -37,11 +37,14 @@ function EchoForm({ onSubmit }: { onSubmit: (submitted: Submitted) => void }) {
         terms: textOf(formData.get("terms")),
         standpoint: textOf(formData.get("standpoint")),
       };
+
       onSubmit(submitted);
+
       return submitted;
     },
     { terms: null, standpoint: null },
   );
+
   return (
     <Form action={formAction} persist={false}>
       <RadioGroup
@@ -95,8 +98,10 @@ function RejectingForm({
 }) {
   const [, formAction] = useActionState((_previous: null, formData: FormData) => {
     onSubmit(formData);
+
     return null;
   }, null);
+
   return (
     <Form action={formAction} persist={false}>
       {children}
@@ -117,12 +122,14 @@ async function submitTwice(submissions: FormData[]): Promise<void> {
 test("送信後の reset を越えて、候補・認証コード・星が画面と送信で食い違わない", async () => {
   function Stars() {
     const [rating, setRating] = useReducer((_current: number, next: number) => next, 0);
+
     return (
       <Fieldset legend="評価" name="rating">
         <StarRating mode="input" onChange={setRating} value={rating} />
       </Fieldset>
     );
   }
+
   const user = userEvent.setup();
   const submissions: FormData[] = [];
   render(
@@ -191,6 +198,7 @@ function ServerCheckedForm() {
   const [state, formAction] = useActionState(
     async (_previous: CheckedState): Promise<CheckedState> => {
       await new Promise((resolve) => setTimeout(resolve, 10));
+
       return {
         status: "error",
         fieldErrors: {
@@ -201,6 +209,7 @@ function ServerCheckedForm() {
     },
     { status: "idle" },
   );
+
   return (
     <Form
       action={formAction}
@@ -347,8 +356,10 @@ test("送信して画面が外れたフォームは控えを消し、送信が�
 
 test("Form の外の state で持つ入力欄は、onRestore で戻した値を受け取る", async () => {
   const user = userEvent.setup();
+
   function OutsideState() {
     const [body, setBody] = useReducer((_current: string, next: string) => next, "");
+
     return (
       <Form onRestore={(restored) => setBody(restored.get("body")?.[0] ?? "")} persist="outside">
         <Textarea
@@ -360,6 +371,7 @@ test("Form の外の state で持つ入力欄は、onRestore で戻した値を�
       </Form>
     );
   }
+
   const first = render(<OutsideState />);
   await user.type(screen.getByLabelText("本文"), "外の state");
   first.unmount();
@@ -370,6 +382,7 @@ test("Form の外の state で持つ入力欄は、onRestore で戻した値を�
 
 function Note({ savedNote = "" }: { savedNote?: string }) {
   const [note, setNote] = useReducer((_current: string, next: string) => next, savedNote);
+
   return (
     <>
       <PersistedInput
@@ -422,6 +435,7 @@ test("形の合わない控えは戻さずに捨てる", async () => {
 function profileErrors(formData: FormData): FieldErrors {
   const handle = textOf(formData.get("handle")) ?? "";
   const phone = textOf(formData.get("phone")) ?? "";
+
   return {
     handle: handle.trim() === "" ? "ニックネームを入力してください。" : undefined,
     phone:

@@ -9,8 +9,11 @@ const meta = {
   decorators: [(Story) => readingFrame(Story())],
   args: { text: "使用区は午後の萎れが軽かった。\n収穫終盤まで葉色が保たれた。" },
 } satisfies Meta<typeof ReadingProse>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Prose: Story = {
   render: (args) => (
     <>
@@ -19,6 +22,7 @@ export const Prose: Story = {
     </>
   ),
 };
+
 export const Subheading: Story = {
   render: (args) => (
     <>
@@ -30,6 +34,7 @@ export const Subheading: Story = {
     </>
   ),
 };
+
 export const Markdown: Story = {
   render: () => (
     <ReadingMarkdown

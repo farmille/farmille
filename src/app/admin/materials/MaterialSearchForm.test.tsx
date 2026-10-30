@@ -19,6 +19,7 @@ it("入力中はURLを変えず、検索と解除を確定したときに反映�
   await user.type(input, "  いちご  ");
   expect(onUrlUpdate).not.toHaveBeenCalled();
   const form = input.closest("form");
+
   if (form === null) throw new Error("検索フォームがありません。");
   fireEvent.submit(form);
 
@@ -29,6 +30,7 @@ it("入力中はURLを変えず、検索と解除を確定したときに反映�
   expect(updated).toHaveValue("いちご");
   await user.clear(updated);
   const updatedForm = updated.closest("form");
+
   if (updatedForm === null) throw new Error("検索フォームがありません。");
   fireEvent.submit(updatedForm);
 

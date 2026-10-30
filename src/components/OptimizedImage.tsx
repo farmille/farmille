@@ -23,12 +23,15 @@ const imageVisibility = cva({
 
 function sourceKey(src: ImageProps["src"]): string {
   const textResult = v.safeParse(v.string(), src);
+
   if (textResult.success) return textResult.output;
 
   const directResult = v.safeParse(v.object({ src: v.string() }), src);
+
   if (directResult.success) return directResult.output.src;
 
   const requiredResult = v.safeParse(v.object({ default: v.object({ src: v.string() }) }), src);
+
   if (requiredResult.success) return requiredResult.output.default.src;
 
   throw new Error("画像ソースの形式が不正です。");
@@ -36,9 +39,12 @@ function sourceKey(src: ImageProps["src"]): string {
 
 function mustSkipOptimization(src: ImageProps["src"]): boolean {
   const result = v.safeParse(v.string(), src);
+
   if (!result.success) return false;
   const url = URL.parse(result.output);
+
   if (url === null) return false;
+
   return (
     url.hostname === "127.0.0.1" ||
     url.hostname === "localhost" ||
@@ -59,10 +65,12 @@ export function OptimizedImage({
   ...props
 }: ImageProps) {
   const key = sourceKey(src);
+
   const [failedSource, setFailedSource] = useReducer(
     (_current: string | null, next: string | null) => next,
     null,
   );
+
   const [loadedSource, setLoadedSource] = useReducer(
     (_current: string | null, next: string | null) => next,
     null,

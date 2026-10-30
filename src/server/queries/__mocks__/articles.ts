@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const getPublishedArticle = fn<
   typeof import("@/server/queries/articles").getPublishedArticle
 >(async () => ({

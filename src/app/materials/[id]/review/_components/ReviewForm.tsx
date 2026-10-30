@@ -83,6 +83,7 @@ type ReviewFormBaseProps = {
   initialValues: ReviewFormValues;
   existingReviewNotice?: boolean;
 };
+
 type ReviewFormProps = ReviewFormBaseProps &
   ({ mode: "create"; reviewId?: never } | { mode: "edit"; reviewId: string });
 
@@ -237,7 +238,9 @@ const PESTICIDE_CHECK = {
 
 function extensionFor(file: File): "jpg" | "png" | "webp" {
   if (file.type === "image/jpeg") return "jpg";
+
   if (file.type === "image/png") return "png";
+
   if (file.type === "image/webp") return "webp";
   throw new TypeError("対応していない画像形式です。");
 }
@@ -246,9 +249,11 @@ function photoValidationMessage(file: File): string | null {
   if (!REVIEW_PHOTO_TYPES.some((type) => type === file.type)) {
     return `${file.name} は jpeg・png・webp のいずれかを選択してください。`;
   }
+
   if (file.size > REVIEW_PHOTO_MAX_BYTES) {
     return `${file.name} は5MB以下の画像を選択してください。`;
   }
+
   return null;
 }
 
@@ -266,10 +271,12 @@ export function ReviewForm({
 }: ReviewFormProps) {
   const bodyCountId = useId();
   const supabase = useMemo(() => createAuthBrowserClient(), []);
+
   const action =
     mode === "create"
       ? createReviewAction.bind(null, material.id)
       : updateReviewAction.bind(null, material.id, reviewId);
+
   const initialInput: ReviewInput = {
     cropIds: initialValues.cropIds,
     rating: initialValues.rating,
@@ -280,20 +287,26 @@ export function ReviewForm({
       initialValues.photos.map((photo) => [photo.id, photo.caption ?? ""]),
     ),
   };
+
   // Reactはaction後に未制御入力をresetするため、エラー時も本文が残るよう入力値を保持する。
   const form = useForm({ defaultValues: initialInput });
+
   const { cropIds, rating, body, pendingPhotos, removedPhotoIds, existingPhotoCaptions } = useStore(
     form.store,
     (state) => state.values,
   );
+
   const [uploading, setUploading] = useReducer((_: boolean, next: boolean) => next, false);
+
   const [localError, setLocalError] = useReducer(
     (_: string | null, next: string | null) => next,
     null,
   );
+
   const [state, formAction, actionPending] = useActionState(
     async (previous: ReviewActionState, formData: FormData) => {
       const next = await action(previous, formData);
+
       if (next.status === "error" && (next.cleanupPaths?.length ?? 0) > 0) {
         void supabase.storage
           .from("review-photos")
@@ -306,10 +319,12 @@ export function ReviewForm({
             }
           });
       }
+
       return next;
     },
     initialActionState,
   );
+
   const isPending = uploading || actionPending;
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const pesticideCheck = PESTICIDE_CHECK[pesticideRegistration];
@@ -327,8 +342,10 @@ export function ReviewForm({
 
     for (const file of Array.from(files)) {
       const validationMessage = photoValidationMessage(file);
+
       if (validationMessage !== null) {
         setLocalError(validationMessage);
+
         return;
       }
     }
@@ -349,13 +366,18 @@ export function ReviewForm({
   // 写真のファイルはブラウザの仕様で戻せないので、選び直してもらう
   function restore(restored: RestoredFields) {
     const restoredCropIds = restored.get("cropIds");
+
     if (restoredCropIds !== undefined) form.setFieldValue("cropIds", restoredCropIds);
     const restoredRating = v.safeParse(RestoredRatingSchema, restored.get("rating")?.[0]);
+
     if (restoredRating.success) form.setFieldValue("rating", restoredRating.output);
     const restoredBody = restored.get("body")?.[0];
+
     if (restoredBody !== undefined) form.setFieldValue("body", restoredBody);
+
     for (const photo of initialValues.photos) {
       const caption = restored.get(`existingPhotoCaption-${photo.id}`)?.[0];
+
       if (caption !== undefined) form.setFieldValue(`existingPhotoCaptions.${photo.id}`, caption);
     }
   }
@@ -368,6 +390,7 @@ export function ReviewForm({
     try {
       for (const photo of pendingPhotos) {
         const path = `${userId}/${crypto.randomUUID()}.${extensionFor(photo.file)}`;
+
         const { error } = await supabase.storage.from("review-photos").upload(path, photo.file, {
           cacheControl: "3600",
           contentType: photo.file.type,
@@ -378,7 +401,9 @@ export function ReviewForm({
           if (uploaded.length > 0) {
             await supabase.storage.from("review-photos").remove(uploaded.map(({ path }) => path));
           }
+
           setLocalError(`写真をアップロードできませんでした。${error.message}`);
+
           return;
         }
 
@@ -485,6 +510,7 @@ export function ReviewForm({
             const removed = removedPhotoIds.includes(photo.id);
             // 読み上げで写真を区別できるよう、何枚目かを名前に入れる
             const photoName = `${index + 1}枚目の写真`;
+
             return (
               <div key={photo.id} className={photoItemStyle}>
                 <input type="hidden" name="existingPhotoId" value={photo.id} />

@@ -32,6 +32,7 @@ const hintStyle = css({
   justifyContent: "center",
   pointerEvents: "none",
 });
+
 const hintButtonStyle = css({
   pointerEvents: "auto",
   display: "inline-flex",
@@ -68,7 +69,9 @@ const hintButtonStyle = css({
     outlineOffset: "0.5",
   },
 });
+
 const nudgeStyle = css({ animation: "tourNudge", _motionReduce: { animation: "none" } });
+
 export type TourBarProps = {
   /** 3段階のどこにいるか。帯の上に「チュートリアル中　1 / 3」と出す */
   section?: number;
@@ -94,6 +97,7 @@ export function TourBar({
 }: TourBarProps) {
   const entered = useEntered(useHandoff().continuing);
   const { ref, space, clear } = useDock<HTMLDivElement>(false);
+
   return (
     <>
       <div aria-hidden="true" className={bottomSpaceStyle} style={{ "--tour-space": space }} />

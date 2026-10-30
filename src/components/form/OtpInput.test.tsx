@@ -17,9 +17,11 @@ function captureSubmit(sink: FormData[]) {
 describe("OtpInput", () => {
   it("親のフォームが認証コードを保持し、入力とクリアを反映する", async () => {
     const user = userEvent.setup();
+
     function ControlledCode() {
       const form = useForm({ defaultValues: { code: "12" } });
       const code = useStore(form.store, (state) => state.values.code);
+
       return (
         <>
           <OtpInput
@@ -33,6 +35,7 @@ describe("OtpInput", () => {
         </>
       );
     }
+
     render(<ControlledCode />);
     const input = screen.getByLabelText("認証コード");
     expect(input).toHaveValue("12");

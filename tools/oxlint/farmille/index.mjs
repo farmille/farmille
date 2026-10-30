@@ -1,5 +1,9 @@
 import path from "node:path";
 
+import { eslintCompatPlugin } from "@oxlint/plugins";
+
+import { restrictedSyntax } from "./restricted-syntax.mjs";
+
 const effects = new Set(["useEffect", "useLayoutEffect", "useInsertionEffect"]);
 const nameOf = (node) => node.name ?? node.value;
 
@@ -17,9 +21,10 @@ export const stateManagement = {
   },
   create(context) {
     const source = context.sourceCode;
-    const inMountEffect =
-      path.resolve(context.filename) ===
-      path.resolve(context.cwd, "src/lib/hooks/use-mount-effect.ts");
+    // oxlintのcwdは実行のしかたで変わるので、リポジトリ内のパスの末尾で判定する
+    const inMountEffect = path
+      .resolve(context.filename)
+      .endsWith(path.join(path.sep, "src", "lib", "hooks", "use-mount-effect.ts"));
     const checked = new Set();
 
     function checkApi(node, api) {
@@ -192,7 +197,11 @@ export const controlledFormInput = {
   },
 };
 
-const plugin = {
-  rules: { "state-management": stateManagement, "controlled-form-input": controlledFormInput },
-};
-export default plugin;
+export default eslintCompatPlugin({
+  meta: { name: "farmille" },
+  rules: {
+    "state-management": stateManagement,
+    "controlled-form-input": controlledFormInput,
+    "restricted-syntax": restrictedSyntax,
+  },
+});

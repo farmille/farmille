@@ -69,10 +69,11 @@
 
 Pandaの設定を変更する場合は、[スタイルと文字](#スタイルと文字)も読む。
 
-- `tools/oxlint/`は取り込んだlint実装として扱い、診断を通すために編集しない。anti-slopは[dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop)のcommit `6d538555cb151d4121ed51a27db81890eacf8ae9`を基準とし、更新はupstreamの差分をそのまま取り込む。ルール変更が必要な場合は、アプリ側で修正できない根拠を先に示す。
+- `tools/oxlint/anti-slop/`は取り込んだlint実装として扱い、診断を通すために編集しない。基準にしたupstreamのcommitは`tools/oxlint/anti-slop/UPSTREAM.md`に記録し、更新はupstreamの差分をそのまま取り込む。ルール変更が必要な場合は、アプリ側で修正できない根拠を先に示す。
+- 自前のlintルールは`tools/oxlint/farmille/`のoxlintプラグインに書き、`pnpm test:lint-rules`で検証する。
 - 依存の監査はpnpmを使う。`critical`・`high`はhotfixで先に塞ぐか別PRで固定し、`moderate`以下は起票する。
 
-lintの診断が重複するときは`eslint.config.mjs`でoxlintとESLintの役割分担を確認する。
+lintのルールは`.oxlintrc.json`に置く。ESLintには、React Compiler系の`react-hooks`ルールなどoxlintに無いものだけを残す。`eslint.config.mjs`は`.oxlintrc.json`で有効にしたルールをESLint側で無効にする。
 
 ## PRを作成・更新する
 

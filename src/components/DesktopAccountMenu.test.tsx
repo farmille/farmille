@@ -35,6 +35,7 @@ describe("DesktopAccountMenu", () => {
     render(<DesktopAccountMenu myPageCurrent={false} />);
     fireEvent.click(screen.getByRole("button", { name: "アカウント" }));
     const logout = screen.getByRole("menuitem", { name: "ログアウト" });
+
     if (!(logout instanceof HTMLButtonElement))
       throw new Error("ログアウトが送信ボタンではありません。");
     expect(logout.type).toBe("submit");

@@ -30,11 +30,15 @@ describe("実証詳細レポートの保存手順", () => {
   function completeReport() {
     const input = createBlankUsageReport("11111111-1111-4111-8111-111111111111");
     input.purposeNote = "  高温期の萎れを軽くしたかった ";
+
     return input;
   }
+
   const userId = "22222222-2222-4222-8222-222222222222";
+
   const mediaUrl = (owner: string, name: string) =>
     `https://storage.example.test/storage/v1/object/public/report-media/${owner}/report/${name}.jpg`;
+
   function fakeStore(
     options: {
       failSubmit?: boolean;
@@ -47,12 +51,16 @@ describe("実証詳細レポートの保存手順", () => {
     const calls: string[] = [];
     const removed: string[][] = [];
     const rpcInputs: Array<{ keys: string[]; expectedUpdatedAt: string | null }> = [];
+
     const store: UsageReportSaveStore = {
       async saveReport(input, submit) {
         calls.push(submit ? "submit" : "draft");
         rpcInputs.push({ keys: Object.keys(input), expectedUpdatedAt: input.expectedUpdatedAt });
+
         if (!submit && options.conflictDraft) return { ok: false, message: "競合。" };
+
         if (submit && options.failSubmit) return { ok: false, message: "提出エラー。" };
+
         return {
           ok: true,
           status: submit ? "pending" : "draft",
@@ -61,7 +69,9 @@ describe("実証詳細レポートの保存手順", () => {
       },
       async savePurposeNote(reportId, purposeNote, expectedUpdatedAt) {
         calls.push(`note:${purposeNote}@${expectedUpdatedAt}`);
+
         if (options.conflictNote) return { ok: false, message: "競合。" };
+
         return { ok: true, updatedAt: "t2" };
       },
       async savedMediaUrls() {
@@ -69,9 +79,11 @@ describe("実証詳細レポートの保存手順", () => {
       },
       async removeMedia(paths) {
         removed.push(paths);
+
         if (options.failRemove) throw new Error("storage down");
       },
     };
+
     return { store, calls, rpcInputs, removed };
   }
 
@@ -116,6 +128,7 @@ describe("実証詳細レポートの保存手順", () => {
       section: "results" as const,
       caption: "",
     }));
+
     return input;
   }
 
@@ -124,6 +137,7 @@ describe("実証詳細レポートの保存手順", () => {
     const replaced = mediaUrl(userId, "before-redaction");
     const others = mediaUrl("33333333-3333-4333-8333-333333333333", "others");
     const { store, removed } = fakeStore({ savedMedia: [kept, replaced, replaced, others] });
+
     const result = await runUsageReportSave(
       reportWithMedia([kept, mediaUrl(userId, "after-redaction")]),
       false,
@@ -131,6 +145,7 @@ describe("実証詳細レポートの保存手順", () => {
       userId,
       [],
     );
+
     expect(result).toMatchObject({ ok: true });
     expect(removed).toEqual([[`${userId}/report/before-redaction.jpg`]]);
   });
@@ -138,8 +153,10 @@ describe("実証詳細レポートの保存手順", () => {
   it("保存した画面で保存の前に外した画像も消す。別のレポートの置き場の画像は消さない", async () => {
     const input = completeReport();
     const folder = `${userId}/${input.reportId}`;
+
     const url = (name: string) =>
       `https://storage.example.test/storage/v1/object/public/report-media/${folder}/${name}.jpg`;
+
     input.media = reportWithMedia([url("kept")]).media;
     const { store, removed } = fakeStore();
     await runUsageReportSave(input, false, store, userId, [
@@ -155,6 +172,7 @@ describe("実証詳細レポートの保存手順", () => {
       conflictDraft: true,
       savedMedia: [mediaUrl(userId, "old")],
     });
+
     const result = await runUsageReportSave(reportWithMedia([]), false, store, userId, []);
     expect(result).toMatchObject({ ok: false });
     expect(removed).toEqual([]);
@@ -165,6 +183,7 @@ describe("実証詳細レポートの保存手順", () => {
       savedMedia: [mediaUrl(userId, "old")],
       failRemove: true,
     });
+
     const result = await runUsageReportSave(reportWithMedia([]), true, store, userId, []);
     expect(removed).toHaveLength(1);
     expect(result).toMatchObject({ ok: true, status: "pending" });

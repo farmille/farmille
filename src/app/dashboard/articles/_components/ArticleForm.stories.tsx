@@ -28,6 +28,7 @@ const meta = {
 } satisfies Meta<typeof ArticleForm>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const EditDraft: Story = {};

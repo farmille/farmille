@@ -6,7 +6,9 @@ import {
 } from "./usage-report";
 
 type Plot = UsageReportInput["plots"][number];
+
 type Graph = UsageReportInput["measurements"][number]["graphs"][number];
+
 type Named = UsageReportInput["varieties"][number];
 
 /** グラフと区の印の系列色。`reportPlotColor` の variant と同じ名前。 */
@@ -89,11 +91,15 @@ export type ReportPlotPlan = {
 export function plotPlan(input: UsageReportInput, postedName: string): ReportPlotPlan {
   const rows = plotRows(input);
   const combos = new Set(input.plots.map(plotComboKey));
+
   const checked = (varietyId: string | null, treatment: ReportPlotTreatment) =>
     combos.has(comboKey(varietyId, treatment));
+
   const only = rows[0]?.id ?? null;
+
   const defaults =
     rows.length === 1 && checked(only, { kind: "untreated" }) && checked(only, { kind: "posted" });
+
   return {
     rows,
     materials: reportPlotMaterials(input, postedName),
@@ -108,15 +114,19 @@ export function defaultPlotName(plot: Plot, input: UsageReportInput, postedName:
   if (plot.treatment === null) return "";
   const key = treatmentKey(plot.treatment);
   const material = reportPlotMaterials(input, postedName).find((item) => item.key === key);
+
   if (material === undefined) return "";
   const variety = input.varieties.find(({ id }) => id === plot.varietyId);
+
   const base =
     plotRows(input).length > 1 && variety !== undefined
       ? `${variety.name.trim()}・${material.name}`
       : `${material.name}区`;
+
   const order = input.plots
     .filter((item) => plotComboKey(item) === plotComboKey(plot))
     .findIndex((item) => item.id === plot.id);
+
   return order > 0 ? `${base}（${order + 1}）` : base;
 }
 
@@ -131,14 +141,17 @@ export function withAutoPlotNames(
   postedAfter: string = postedBefore,
 ): UsageReportInput {
   const previous = new Map(before.plots.map((plot) => [plot.id, plot]));
+
   return {
     ...after,
     plots: after.plots.map((plot) => {
       const old = previous.get(plot.id);
+
       const auto =
         old === undefined ||
         old.name.trim() === "" ||
         old.name === defaultPlotName(old, before, postedBefore);
+
       return auto ? { ...plot, name: defaultPlotName(plot, after, postedAfter) } : plot;
     }),
   };
@@ -148,9 +161,11 @@ export function withAutoPlotNames(
 function plotOrder(input: UsageReportInput, postedName: string) {
   const rows = plotRows(input).map((variety) => variety?.id ?? null);
   const columns = reportPlotMaterials(input, postedName).map(({ key }) => key);
+
   return (plot: Plot) => {
     if (plot.treatment === null) return Number.MAX_SAFE_INTEGER;
     const row = rows.indexOf(plot.varietyId);
+
     return (
       (row < 0 ? rows.length : row) * columns.length + columns.indexOf(treatmentKey(plot.treatment))
     );
@@ -166,11 +181,13 @@ function insertPlots(
   if (input.plots.length + combos.length > REPORT_PLOT_LIMIT) return null;
   const order = plotOrder(input, postedName);
   let plots = input.plots;
+
   for (const { varietyId, treatment } of combos) {
     const plot = createReportPlot(varietyId, treatment);
     const at = plots.findIndex((item) => order(item) > order(plot));
     plots = at < 0 ? [...plots, plot] : plots.toSpliced(at, 0, plot);
   }
+
   return { ...input, plots };
 }
 
@@ -187,9 +204,11 @@ export const reportPlotEdits = {
     postedName: string,
   ): UsageReportInput {
     const key = comboKey(varietyId, treatment);
+
     const next = checked
       ? insertPlots(input, [{ varietyId, treatment }], postedName)
       : { ...input, plots: input.plots.filter((plot) => plotComboKey(plot) !== key) };
+
     return next === null ? input : withAutoPlotNames(input, next, postedName);
   },
 
@@ -198,6 +217,7 @@ export const reportPlotEdits = {
     if (input.varietyUnknown || input.varieties.length >= REPORT_PLOT_LIMIT) return input;
     const variety = { id: crypto.randomUUID(), name };
     const added = { ...input, varieties: [...input.varieties, variety] };
+
     const next = insertPlots(
       added,
       reportPlotMaterials(added, postedName).map(({ treatment }) => ({
@@ -206,17 +226,20 @@ export const reportPlotEdits = {
       })),
       postedName,
     );
+
     return next === null ? input : withAutoPlotNames(input, next, postedName);
   },
 
   /** 品種とその品種の区を外す。品種は1つ以上残す。 */
   removeVariety(input: UsageReportInput, varietyId: string, postedName: string): UsageReportInput {
     if (input.varieties.length <= 1) return input;
+
     const next = {
       ...input,
       varieties: input.varieties.filter(({ id }) => id !== varietyId),
       plots: input.plots.filter((plot) => plot.varietyId !== varietyId),
     };
+
     return withAutoPlotNames(input, next, postedName);
   },
 
@@ -232,6 +255,7 @@ export const reportPlotEdits = {
         variety.id === varietyId ? { ...variety, name } : variety,
       ),
     };
+
     return withAutoPlotNames(input, next, postedName);
   },
 
@@ -242,12 +266,14 @@ export const reportPlotEdits = {
     postedName: string,
   ): UsageReportInput {
     const variety = { id: crypto.randomUUID(), name: "" };
+
     const next = {
       ...input,
       varietyUnknown: unknown,
       varieties: unknown ? [] : [variety],
       plots: input.plots.map((plot) => ({ ...plot, varietyId: unknown ? null : variety.id })),
     };
+
     return withAutoPlotNames(input, next, postedName);
   },
 
@@ -257,11 +283,13 @@ export const reportPlotEdits = {
     const material = { id: crypto.randomUUID(), name };
     const added = { ...input, comparedMaterials: [...input.comparedMaterials, material] };
     const treatment: ReportPlotTreatment = { kind: "compared", comparedMaterialId: material.id };
+
     const next = insertPlots(
       added,
       plotRows(added).map((variety) => ({ varietyId: variety?.id ?? null, treatment })),
       postedName,
     );
+
     return next === null ? input : withAutoPlotNames(input, next, postedName);
   },
 
@@ -278,6 +306,7 @@ export const reportPlotEdits = {
           plot.treatment?.kind !== "compared" || plot.treatment.comparedMaterialId !== materialId,
       ),
     };
+
     return withAutoPlotNames(input, next, postedName);
   },
 
@@ -289,11 +318,13 @@ export const reportPlotEdits = {
     postedName: string,
   ): UsageReportInput {
     const next = insertPlots(input, [{ varietyId, treatment }], postedName);
+
     return next === null ? input : withAutoPlotNames(input, next, postedName);
   },
 
   removePlot(input: UsageReportInput, plotId: string, postedName: string): UsageReportInput {
     const next = { ...input, plots: input.plots.filter((plot) => plot.id !== plotId) };
+
     return withAutoPlotNames(input, next, postedName);
   },
 
@@ -308,6 +339,7 @@ export const reportPlotEdits = {
       ...input,
       plots: input.plots.map((plot) => (plot.id === plotId ? { ...plot, treatment } : plot)),
     };
+
     return withAutoPlotNames(input, next, postedName);
   },
 };
@@ -317,7 +349,9 @@ export function graphWithPlots(graph: Graph, plots: Plot[]): Graph {
   const aligned =
     graph.rows.length === plots.length &&
     plots.every((plot, index) => graph.rows[index]?.plotId === plot.id);
+
   if (aligned) return graph;
+
   return {
     ...graph,
     rows: plots.map(
@@ -349,7 +383,9 @@ export type ReportPlotLayout = {
 
 function orderSeries(index: number): ReportPlotSeries {
   if (index === 0) return "1";
+
   if (index === 1) return "2";
+
   return comparedSeries(index - 2);
 }
 
@@ -359,9 +395,11 @@ function orderSeries(index: number): ReportPlotSeries {
  */
 export function reportPlotLayout(input: UsageReportInput, postedName: string): ReportPlotLayout {
   const byMaterial = input.plots.length > 0 && input.plots.every((plot) => plot.treatment !== null);
+
   const materials = new Map(
     reportPlotMaterials(input, postedName).map((material) => [material.key, material]),
   );
+
   const seriesOf = new Map(
     input.plots.map((plot, index) => [
       plot.id,
@@ -370,34 +408,40 @@ export function reportPlotLayout(input: UsageReportInput, postedName: string): R
         : undefined) ?? orderSeries(index),
     ]),
   );
+
   const series = (plotId: string | null, index: number) =>
     (plotId === null ? undefined : seriesOf.get(plotId)) ?? orderSeries(index);
+
   const entry = (plot: Plot, index: number) => ({ plot, series: series(plot.id, index) });
+
   const grouped =
     byMaterial &&
     input.varieties.length > 1 &&
     input.plots.every((plot) => input.varieties.some(({ id }) => id === plot.varietyId));
+
   const groups: ReportPlotGroup[] = grouped
     ? input.varieties.flatMap((variety) => {
         const plots = input.plots.flatMap((plot, index) =>
           plot.varietyId === variety.id ? [entry(plot, index)] : [],
         );
+
         return plots.length > 0 ? [{ key: variety.id, variety: variety.name.trim(), plots }] : [];
       })
     : [{ key: "all", variety: null, plots: input.plots.map(entry) }];
+
   const used = new Set(
     input.plots.flatMap((plot) => (plot.treatment === null ? [] : [treatmentKey(plot.treatment)])),
   );
+
   const legend =
     byMaterial && (grouped || input.comparedMaterials.length > 0)
-      ? [...materials.values()]
-          .filter(({ key }) => used.has(key))
-          .map(({ key, name, role, series: tone }) => ({
-            key,
-            label: role === name ? name : `${name}（${role}）`,
-            series: tone,
-          }))
+      ? [...materials.values()].flatMap(({ key, name, role, series: tone }) =>
+          used.has(key)
+            ? [{ key, label: role === name ? name : `${name}（${role}）`, series: tone }]
+            : [],
+        )
       : null;
+
   return { groups, legend, series };
 }
 
@@ -420,6 +464,7 @@ export function graphSections(
         heading: null,
         rows: graph.rows.map((row, index) => {
           const plotIndex = plots.findIndex((plot) => plot.id === row.plotId);
+
           return {
             id: row.id,
             label: plots[plotIndex]?.name.trim() || row.label.trim() || `区 ${index + 1}`,
@@ -429,11 +474,13 @@ export function graphSections(
         }),
       },
     ];
+
   return layout.groups.map((group) => ({
     key: group.key,
     heading: group.variety,
     rows: group.plots.flatMap(({ plot, series }) => {
       const row = graph.rows.find((item) => item.plotId === plot.id);
+
       return row === undefined
         ? []
         : [{ id: row.id, label: plot.name.trim() || row.label.trim(), value: row.value, series }];

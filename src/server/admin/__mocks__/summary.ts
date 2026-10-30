@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const getAdminSummary = fn<typeof import("@/server/admin/summary").getAdminSummary>(
   async () => ({
     ok: true,

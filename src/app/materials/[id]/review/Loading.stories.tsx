@@ -14,7 +14,9 @@ const meta = {
   },
   args: {},
 } satisfies Meta<typeof Page>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 /** 読み込み中も、戻り先は開いている感想口コミの資材ページにする。 */

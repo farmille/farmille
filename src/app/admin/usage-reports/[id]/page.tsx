@@ -81,12 +81,15 @@ const metricColumns: DataTableColumn<Metric>[] = [
 
 function valueWithUnit(value: number | null, unit: string | null): string {
   if (value === null) return "未設定";
+
   return unit === null ? String(value) : `${value} ${unit}`;
 }
 
 function prefectureName(code: number | null): string | null {
   if (code === null) return null;
+
   if (!isPrefectureCode(code)) throw new Error(`未対応の都道府県コードです：${code}`);
+
   return PREFECTURES[code - 1].name;
 }
 

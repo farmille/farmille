@@ -31,6 +31,7 @@ const meta = {
 } satisfies Meta<typeof ReportDialog>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 const page = (canvasElement: HTMLElement) => within(canvasElement.ownerDocument.body);

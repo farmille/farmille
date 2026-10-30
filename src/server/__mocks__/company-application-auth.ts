@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const approvedApplicationSeller = fn<
   typeof import("@/server/company-application-auth").approvedApplicationSeller
 >(async () => ({
@@ -27,6 +28,7 @@ export const approvedApplicationSeller = fn<
   },
   userId: "11111111-1111-4111-8111-111111111111",
 })).mockName("approvedApplicationSeller");
+
 export class ApplicationError extends Error {
   constructor(public code: import("@/server/errors").ErrorCode) {
     super(code);

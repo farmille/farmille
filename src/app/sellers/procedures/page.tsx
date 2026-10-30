@@ -107,6 +107,7 @@ export default function SellerProceduresPage() {
         >
           {PROCEDURE_ORDER.map((slug) => {
             const procedure = PROCEDURES[slug];
+
             return (
               <Link
                 className={cx(

@@ -29,9 +29,11 @@ it("解除中は対象だけ再送を止め、比較の選択を保持する", a
   let complete: () => void = () => {
     throw new Error("解除が始まっていません。");
   };
+
   const unsave = vi
     .spyOn(savedActions, "unsaveMaterialAction")
     .mockImplementation(() => new Promise<void>((resolve) => (complete = resolve)));
+
   render(
     <AppRouterContext.Provider value={router}>
       <SavedList items={savedMaterials.slice(0, 2)} />

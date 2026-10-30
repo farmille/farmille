@@ -1,13 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { registrationEmailAction } from "./actions";
 import { RegistrationEmailForm } from "./RegistrationEmailForm";
+
 const meta = {
   title: "Pages/signup/RegistrationEmailForm",
   component: RegistrationEmailForm,
   args: { action: registrationEmailAction },
 } satisfies Meta<typeof RegistrationEmailForm>;
+
 export default meta;
+
 type Story = StoryObj<typeof meta>;
+
 export const Default: Story = {};
 
 export const UsedLink: Story = {

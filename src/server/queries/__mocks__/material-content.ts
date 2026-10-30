@@ -1,11 +1,13 @@
 import { fn } from "storybook/test";
 import { materialReports } from "@/app/materials/[id]/_components/story-fixtures";
+
 export const listPublishedUsageReportsByMaterial = fn<
   typeof import("@/server/queries/material-content").listPublishedUsageReportsByMaterial
 >(async () => ({
   ok: true,
   data: { items: materialReports, total: materialReports.length },
 })).mockName("listPublishedUsageReportsByMaterial");
+
 export const listPublishedArticlesByMaterial = fn<
   typeof import("@/server/queries/material-content").listPublishedArticlesByMaterial
 >(async () => ({
@@ -26,6 +28,7 @@ export const listPublishedArticlesByMaterial = fn<
     total: 3,
   },
 })).mockName("listPublishedArticlesByMaterial");
+
 export const getReviewRatingDistribution = fn<
   typeof import("@/server/queries/material-content").getReviewRatingDistribution
 >(async () => ({ ok: true, data: { total: 0, stars: [] } })).mockName(

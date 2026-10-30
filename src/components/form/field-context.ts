@@ -38,6 +38,7 @@ export const FormValidateContext = createContext<((name: string) => string | nul
 /** Base UI の Field.Root に渡す validate。送信時と、送信後の入力のたびに呼ばれる。 */
 export function useFieldValidate(name: string | undefined): (() => string | null) | undefined {
   const fieldError = useContext(FormValidateContext);
+
   return fieldError === null || name === undefined ? undefined : () => fieldError(name);
 }
 

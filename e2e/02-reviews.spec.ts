@@ -49,11 +49,13 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
     await expect.poll(async () => (await getMaterial(material.id)).avg_rating).toBe(4);
 
     const createdReview = await reviewByAuthor(user.id);
+
     if (createdReview === null) throw new Error("投稿した感想口コミが見つかりません。");
     await expect.poll(async () => await reviewCropNames(createdReview.id)).toEqual(["ミニトマト"]);
 
     for (const path of ["/me", `/users/${user.id}`]) {
       await page.goto(path);
+
       if (path === "/me") {
         await page
           .getByRole("navigation", { name: "投稿の種類" })
@@ -61,6 +63,7 @@ test("@smoke 感想口コミ投稿、集計反映、編集、削除", async ({ p
           .click();
         await expect(page).toHaveURL(/tab=reviews$/);
       }
+
       const reviewCard = page.getByRole("article").filter({ hasText: body });
       await expect(reviewCard.getByText(body, { exact: true })).toBeVisible();
       await expect(reviewCard.getByText("ミニトマト", { exact: true })).toBeVisible();

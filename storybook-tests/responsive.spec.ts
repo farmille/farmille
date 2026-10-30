@@ -9,6 +9,7 @@ const VIEWPORT_WIDTHS = [320, 375, 767, 768, 1023, 1024, 1440] as const;
 const VIEWPORT_HEIGHT = 1000;
 const OVERFLOW_TOLERANCE = 1;
 const RENDER_TIMEOUT = 15_000;
+
 // 全 Story をこの数のテストに分ける。1 テストを timeout（600 秒）に収め、CI の各 shard は自分の分のテストだけを流す。
 const CHUNK_COUNT = 12;
 const MAX_REPORTED_FAILURES = 50;
@@ -22,6 +23,7 @@ const CiShardSchema = v.pipe(
   ),
   v.transform((value) => {
     const [current, total] = value.split("/");
+
     return { current: Number(current), total: Number(total) };
   }),
   v.check(
@@ -33,15 +35,18 @@ const CiShardSchema = v.pipe(
     `STORYBOOK_RESPONSIVE_SHARD の total は ${CHUNK_COUNT} 以下にする`,
   ),
 );
+
 type CiShard = v.InferOutput<typeof CiShardSchema>;
 
 function resolveCiShard(): CiShard {
   const raw = process.env.STORYBOOK_RESPONSIVE_SHARD;
+
   return raw === undefined ? { current: 1, total: 1 } : v.parse(CiShardSchema, raw);
 }
 
 const CI_SHARD = resolveCiShard();
 const selectionInput = process.env.STORYBOOK_RESPONSIVE_SELECTION;
+
 const STORY_SELECTION: StorySelection =
   selectionInput === undefined
     ? { mode: "all", reason: "ローカル実行は全件検査" }
@@ -53,6 +58,7 @@ function skipUnlessFirstShard(): void {
 }
 
 const SCREENSHOT_WIDTHS = [375, 1440] as const;
+
 const REPRESENTATIVE_STORY_IDS = [
   "pages-admin-adminshell--default",
   "pages-admin-materials-materialform--edit",
@@ -72,9 +78,11 @@ const StoryIndexEntrySchema = v.object({
   importPath: v.string(),
   type: v.picklist(["story", "docs"]),
 });
+
 const StoryIndexSchema = v.object({
   entries: v.record(v.string(), StoryIndexEntrySchema),
 });
+
 type StoryIndexEntry = v.InferOutput<typeof StoryIndexEntrySchema>;
 
 type OverflowDetails = {
@@ -104,6 +112,7 @@ async function fetchSortedStories(request: APIRequestContext): Promise<StoryInde
   expect(indexResponse.ok(), "Storybook の index.json を取得できること").toBe(true);
 
   const result = v.safeParse(StoryIndexSchema, await indexResponse.json());
+
   if (!result.success) {
     throw new Error(`Storybook の index.json が不正です：${v.summarize(result.issues)}`);
   }
@@ -154,7 +163,9 @@ async function gotoStory(
       () => {
         if (document.body.classList.contains("sb-show-errordisplay")) return true;
         const root = document.querySelector("#storybook-root");
+
         if (root !== null && root.childNodes.length > 0) return true;
+
         // ダイアログは body 直下へ portal されるので、開いたダイアログだけを描く Story は root が空のまま
         return document.querySelector('[role="dialog"], [role="alertdialog"]') !== null;
       },
@@ -180,20 +191,24 @@ async function gotoStory(
 
 function resolveScreenshotDirectory(testInfo: TestInfo): string {
   const configFile = testInfo.config.configFile;
+
   if (configFile === undefined) {
     throw new Error(
       "Playwright 設定ファイルのパスを解決できず、スクリーンショットの保存先を決められません。",
     );
   }
+
   return path.join(path.dirname(configFile), "output", "playwright", "storybook-responsive");
 }
 
 function readStoryError(page: Page): Promise<string | null> {
   return page.evaluate(() => {
     const error = document.querySelector("#error-message, .sb-errordisplay");
+
     if (error === null) return null;
 
     const style = getComputedStyle(error);
+
     if (
       style.display === "none" ||
       style.visibility === "hidden" ||
@@ -201,6 +216,7 @@ function readStoryError(page: Page): Promise<string | null> {
     ) {
       return null;
     }
+
     return error.textContent;
   });
 }
@@ -243,6 +259,7 @@ async function collectResponsiveFailures(
     }
 
     const storyError = await readStoryError(page);
+
     if (storyError !== null) {
       failures.push({
         storyId: story.id,
@@ -266,6 +283,7 @@ async function collectResponsiveFailures(
 
       const overflow = await page.evaluate((tolerance) => {
         const viewportWidth = document.documentElement.clientWidth;
+
         const documentWidth = Math.max(
           document.documentElement.scrollWidth,
           document.body.scrollWidth,
@@ -275,9 +293,11 @@ async function collectResponsiveFailures(
 
         const root = document.querySelector("#storybook-root");
         const elements = root === null ? [] : Array.from(root.querySelectorAll<HTMLElement>("*"));
+
         const offenders = elements
           .map((element) => {
             const rect = element.getBoundingClientRect();
+
             return {
               element,
               left: Math.round(rect.left),
@@ -291,6 +311,7 @@ async function collectResponsiveFailures(
             }
 
             const style = getComputedStyle(element);
+
             return (
               style.display !== "none" && style.visibility !== "hidden" && style.clipPath === "none"
             );
@@ -327,6 +348,7 @@ async function collectResponsiveFailures(
   }
 
   currentStory = null;
+
   return failures;
 }
 
@@ -338,13 +360,16 @@ for (let chunkIndex = 0; chunkIndex < CHUNK_COUNT; chunkIndex += 1) {
     request,
   }, testInfo) => {
     const allStories = await fetchSortedStories(request);
+
     const selectedFiles = selectStoryFiles(
       STORY_SELECTION,
       allStories.map((story) => story.importPath),
     );
+
     const selectedStories = allStories.filter((story) =>
       selectedFiles.has(story.importPath.replace(/^\.\//, "")),
     );
+
     const stories = selectedStories.filter((_, index) => index % CHUNK_COUNT === chunkIndex);
     // 少数の Story を選んだ PR では空の chunk がある。manifest の照合後にだけ省く。
     test.skip(
@@ -419,6 +444,7 @@ test("AppBar は tab 境界でモバイル版と PC 版を相互排他にする"
 
 test("画像枠は画面幅が変わっても用途別のアスペクト比を維持する", async ({ page }) => {
   skipUnlessFirstShard();
+
   const cases = [
     {
       storyId: "pages-shared-materialcard--scroll",
@@ -467,6 +493,7 @@ test("画像枠は画面幅が変わっても用途別のアスペクト比を�
 
       const measuredRatio = await frame.evaluate((element) => {
         const rect = element.getBoundingClientRect();
+
         return rect.width / rect.height;
       });
 

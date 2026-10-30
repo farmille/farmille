@@ -14,6 +14,7 @@ describe("isHelpfulTargetType", () => {
     for (const targetType of HELPFUL_TARGET_TYPES) {
       expect(isHelpfulTargetType(targetType)).toBe(true);
     }
+
     expect(isHelpfulTargetType("answer")).toBe(false);
     expect(isHelpfulTargetType("profile")).toBe(false);
     expect(isHelpfulTargetType("")).toBe(false);
@@ -23,6 +24,7 @@ describe("isHelpfulTargetType", () => {
 describe("toggleHelpfulVote", () => {
   it("UUID形式でないtargetIdはDBに触れずnot_foundを返す", async () => {
     const createSupabase = vi.fn<typeof createServerSupabase>();
+
     const result = await toggleHelpfulVoteWithSupabase(
       "review",
       "not-a-uuid",

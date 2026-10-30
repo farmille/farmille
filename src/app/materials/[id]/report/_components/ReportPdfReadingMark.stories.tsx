@@ -4,6 +4,7 @@ import { ReportPdfReadingMark, ReportPdfReadingMarks } from "./ReportPdfReadingM
 import { filledReport } from "./reportStoryFixture";
 
 const [plot] = filledReport.plots;
+
 if (plot === undefined) throw new Error("記入例に区がありません。");
 
 const meta = {
@@ -36,6 +37,7 @@ const meta = {
 } satisfies Meta<typeof ReportPdfReadingMark>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};

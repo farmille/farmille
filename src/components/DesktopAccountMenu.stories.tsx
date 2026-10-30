@@ -24,6 +24,7 @@ const meta = {
 } satisfies Meta<typeof DesktopAccountMenu>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
@@ -34,6 +35,7 @@ export const MyPage: Story = {
   args: { myPageCurrent: true },
   beforeEach: () => {
     document.cookie = `${SESSION_COOKIE}=session; path=/`;
+
     return () => {
       document.cookie = `${SESSION_COOKIE}=; Max-Age=0; path=/`;
     };

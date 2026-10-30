@@ -9,6 +9,7 @@ function storageTest(
   removal: { body: string; status: number },
 ) {
   const requests: { url: string; body: BodyInit | null | undefined }[] = [];
+
   const db = createClient<Database>("https://storage.example.test", "test-key", {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {
@@ -16,6 +17,7 @@ function storageTest(
         const url = input instanceof Request ? input.url : String(input);
         requests.push({ url, body: init?.body });
         const response = url.includes("/rpc/") ? claim : removal;
+
         return new Response(response.body, {
           status: response.status,
           headers: { "Content-Type": "application/json" },
@@ -23,6 +25,7 @@ function storageTest(
       },
     },
   });
+
   return { db, requests };
 }
 
@@ -32,6 +35,7 @@ describe("cleanupExpiredReportMedia", () => {
       { body: '[{"path":"user/report/old.jpg"}]', status: 200 },
       { body: '[{"name":"user/report/old.jpg"}]', status: 200 },
     );
+
     expect(await cleanupExpiredReportMedia(db)).toBe(1);
     expect(requests).toEqual([
       {
@@ -54,6 +58,7 @@ describe("cleanupExpiredReportMedia", () => {
       { body: '{"message":"database unavailable"}', status: 503 },
       { body: "[]", status: 200 },
     );
+
     await expect(cleanupExpiredReportMedia(db)).rejects.toThrow("確保できませんでした");
     expect(requests).toHaveLength(1);
   });
@@ -66,6 +71,7 @@ describe("cleanupExpiredReportMedia", () => {
         { body: '[{"path":"user/report/old.jpg"}]', status: 200 },
         removal,
       );
+
       await expect(cleanupExpiredReportMedia(db)).rejects.toThrow("削除できませんでした");
     }
   });
@@ -74,6 +80,7 @@ describe("cleanupExpiredReportMedia", () => {
       { body: '[{"path":null}]', status: 200 },
       { body: "[]", status: 200 },
     );
+
     await expect(cleanupExpiredReportMedia(db)).rejects.toThrow();
     expect(requests).toHaveLength(1);
   });

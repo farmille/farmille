@@ -14,6 +14,7 @@ it("StrictModeでも入力開始のintentは1回だけ作る", async () => {
   const begin = vi
     .spyOn(actions, "beginApplication")
     .mockResolvedValue({ ok: false, error: "internal" });
+
   render(
     <StrictMode>
       <NewApplicationForm kind="registration" {...props} />
@@ -27,6 +28,7 @@ it("作成に失敗したら再試行できる", async () => {
   const begin = vi
     .spyOn(actions, "beginApplication")
     .mockResolvedValue({ ok: false, error: "internal" });
+
   render(<NewApplicationForm kind="transfer_out" {...props} />);
   fireEvent.click(await retryButton());
   await waitFor(() => expect(begin).toHaveBeenCalledTimes(2));

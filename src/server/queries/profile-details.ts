@@ -5,6 +5,7 @@ import { fail, succeed, type Result } from "@/server/result";
 
 export async function getProfileDetails(userId: string) {
   const supabase = await createServerSupabase();
+
   const [profile, affiliations, crops, links] = await Promise.all([
     supabase
       .from("public_profiles")
@@ -19,7 +20,9 @@ export async function getProfileDetails(userId: string) {
       .order("sort_order"),
     supabase.from("profile_links").select("url").eq("user_id", userId).order("sort_order"),
   ]);
+
   const errors = [profile.error, affiliations.error, crops.error, links.error].filter(Boolean);
+
   if (
     errors.length > 0 ||
     profile.data === null ||
@@ -28,8 +31,10 @@ export async function getProfileDetails(userId: string) {
     links.data === null
   ) {
     console.error("[profile-details] プロフィールの取得に失敗", errors);
+
     return fail("internal");
   }
+
   return succeed({
     ...profile.data,
     affiliations: affiliations.data.map((row) => row.name),
@@ -41,6 +46,7 @@ export async function getProfileDetails(userId: string) {
     links: links.data.map((row) => row.url),
   });
 }
+
 export type ProfileDetails = Extract<
   Awaited<ReturnType<typeof getProfileDetails>>,
   { ok: true }
@@ -48,6 +54,7 @@ export type ProfileDetails = Extract<
 
 export async function getProfileOptions() {
   const supabase = await createServerSupabase();
+
   const [crops, affiliations] = await Promise.all([
     selectAllRows((from, to) =>
       supabase
@@ -61,12 +68,16 @@ export async function getProfileOptions() {
     ),
     supabase.from("affiliation_options").select("name").order("sort_order").order("name"),
   ]);
+
   if (crops.error || affiliations.error) {
     console.error("[profile-details] 選択肢の取得に失敗", crops.error, affiliations.error);
+
     return fail("internal");
   }
+
   return succeed({ crops: crops.data, affiliations: affiliations.data.map((row) => row.name) });
 }
+
 export type ProfileOptions = Extract<
   Awaited<ReturnType<typeof getProfileOptions>>,
   { ok: true }
@@ -75,6 +86,7 @@ export type ProfileOptions = Extract<
 /** 本人の情報と複数のタグを同一トランザクションで保存する。 */
 export async function saveProfileDetails(input: ProfileDetailsInput): Promise<Result<null>> {
   const supabase = await createServerSupabase();
+
   const { error } = await supabase.rpc("save_profile_details", {
     p_handle: input.handle,
     p_bio: input.bio,
@@ -83,10 +95,13 @@ export async function saveProfileDetails(input: ProfileDetailsInput): Promise<Re
     p_crop_names_other: input.cropNamesOther,
     p_links: input.links,
   });
+
   if (error) {
     if (error.code === "23505") return fail("handle_taken");
     console.error("[profile-details] 保存に失敗", error);
+
     return fail("internal");
   }
+
   return succeed(null);
 }

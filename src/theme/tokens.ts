@@ -1,6 +1,7 @@
 import type { SemanticTokens, Tokens } from "@pandacss/dev";
 
 type DescribedToken = { value: string; description: string };
+
 type DescribedTokens = { [name: string]: DescribedToken | DescribedTokens };
 
 /** sp（767px 以下）は base。tab 以上は PC 寄りの UI にし、pc は 768px 幅で成立しない密度だけを持つ。 */

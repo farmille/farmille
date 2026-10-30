@@ -39,6 +39,7 @@ export function preparePageSession(accountType: AccountType) {
   mocked(authorizeAdmin).mockReturnValue(
     accountType === "admin" ? { ok: true, data: { userId } } : { ok: false, error: "forbidden" },
   );
+
   return () => {
     mocked(getSessionUser).mockReset();
     mocked(getAccountType).mockReset();

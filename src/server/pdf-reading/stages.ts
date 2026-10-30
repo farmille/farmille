@@ -61,6 +61,7 @@ const MAX_VALUE_CALLS = 8;
 const key = v.string();
 const cited = { quote: v.string(), page: v.number() };
 const evidence = v.array(v.strictObject({ ref: v.string(), ...cited }));
+
 /** 単独の欄の根拠が指せる欄。ほかの ref はほかの段の根拠より先にまとめられ、別の欄の引用になるので断る。 */
 const SINGLE_FIELD_REFS = [
   "crop",
@@ -89,6 +90,7 @@ export const SkeletonSchema = v.strictObject({
   measurements: v.array(v.strictObject({ key, name: v.string(), unit: v.string() })),
   graphs: v.array(v.strictObject({ key, measurementKey: v.string(), heading: v.string() })),
 });
+
 export type Skeleton = v.InferOutput<typeof SkeletonSchema>;
 
 export const SingleFieldsSchema = v.strictObject({
@@ -138,10 +140,12 @@ export type ReportReadingRequest = {
 /** グラフ×区の値の数から、値を書き写す呼び出しの本数を決め、グラフを途中で切らずにほぼ同じ数ずつ分ける。 */
 export function valueChunks(skeleton: Pick<Skeleton, "graphs" | "plots">): Skeleton["graphs"][] {
   const { graphs, plots } = skeleton;
+
   if (graphs.length === 0) return [];
   const wanted = Math.ceil((graphs.length * plots.length) / VALUES_PER_CALL);
   const calls = Math.max(1, Math.min(MAX_VALUE_CALLS, graphs.length, wanted));
   const edge = (index: number) => Math.floor((index * graphs.length) / calls);
+
   return Array.from({ length: calls }, (_, index) => graphs.slice(edge(index), edge(index + 1)));
 }
 
@@ -167,13 +171,17 @@ export function mergeStages(
 ): Merged {
   const plotKeys = new Set(skeleton.plots.map((plot) => plot.key));
   const measurementKeys = new Set(skeleton.measurements.map((measurement) => measurement.key));
+
   const namedKeys = new Set(
     [...skeleton.varieties, ...skeleton.comparedMaterials, ...skeleton.plots].map(({ key }) => key),
   );
+
   if (plotGroups.evidence.some(({ ref }) => !namedKeys.has(ref))) return { ok: false };
+
   for (const { graphs, output } of copied) {
     const graphKeys = new Set(graphs.map((graph) => graph.key));
     const ownerKeys = new Set(graphs.map((graph) => graph.measurementKey));
+
     if (
       output.values.some(({ graphKey }) => !graphKeys.has(graphKey)) ||
       output.bodies.some(({ key }) => !ownerKeys.has(key)) ||
@@ -181,22 +189,30 @@ export function mergeStages(
     )
       return { ok: false };
   }
+
   const values = copied.map(({ output }) => output);
   const descriptions = new Map<string, string>();
   const plotEvidence: ReportReadingOutput["evidence"] = [];
+
   for (const group of plotGroups.groups) {
     for (const plotKey of group.plotKeys) {
       if (!plotKeys.has(plotKey)) return { ok: false };
+
       if (!descriptions.has(plotKey)) descriptions.set(plotKey, group.description);
       plotEvidence.push({ ref: plotKey, quote: group.quote, page: group.page });
     }
   }
+
   const bodies = new Map<string, string>();
+
   for (const { key: measurementKey, body } of values.flatMap((chunk) => chunk.bodies)) {
     if (!measurementKeys.has(measurementKey)) return { ok: false };
+
     if (body.trim() !== "" && !bodies.has(measurementKey)) bodies.set(measurementKey, body);
   }
+
   const { evidence: singleEvidence, ...fields } = single;
+
   const merged = v.safeParse(ReportReadingOutputSchema, {
     ...fields,
     outcome: skeleton.outcome,
@@ -219,8 +235,10 @@ export function mergeStages(
       ...values.flatMap((chunk) => chunk.evidence),
     ],
   });
+
   const cited = (page: number) =>
     page === NO_PAGE || (Number.isInteger(page) && page >= 1 && page <= pages);
+
   return merged.success && merged.output.evidence.every(({ page }) => cited(page))
     ? { ok: true, output: merged.output }
     : { ok: false };
@@ -257,6 +275,7 @@ export async function readReportPdf(
   const controller = new AbortController();
   const usages: PdfExtractionUsage[] = [];
   const failures: PdfExtractionError[] = [];
+
   const call = async <TSchema extends v.GenericSchema>(
     model: ExtractionModel,
     schema: TSchema,
@@ -271,19 +290,24 @@ export async function readReportPdf(
       deadline: request.deadline,
       signal: controller.signal,
     });
+
     if (result.usage !== null) usages.push(result.usage);
+
     if (!result.ok) {
       failures.push(result.error);
       controller.abort();
     }
+
     return result;
   };
+
   const total = (skeletonUsage: PdfExtractionUsage | null): PdfExtractionUsage => ({
     model: skeletonUsage?.model ?? STAGE_MODELS.skeleton.model,
     speed: skeletonUsage?.speed ?? STAGE_MODELS.skeleton.speed,
     inputTokens: usages.reduce((sum, usage) => sum + usage.inputTokens, 0),
     outputTokens: usages.reduce((sum, usage) => sum + usage.outputTokens, 0),
   });
+
   const failed = (skeletonUsage: PdfExtractionUsage | null, error: PdfExtractionError) => ({
     ok: false as const,
     error,
@@ -295,20 +319,26 @@ export async function readReportPdf(
     SingleFieldsSchema,
     singleFieldsInstructions(request.material, request.trial, request.catalog),
   );
+
   const skeleton = await call(
     STAGE_MODELS.skeleton,
     SkeletonSchema,
     skeletonInstructions(request.material, request.trial),
   );
+
   if (!skeleton.ok || failures.length > 0) {
     await singlePending;
+
     return failed(skeleton.usage, failures[0] ?? "failed");
   }
+
   if (skeleton.output.outcome === "no_matching_trial") {
     controller.abort();
     await singlePending;
+
     return { ok: true, output: NO_MATCH, usage: total(skeleton.usage) };
   }
+
   const [plotGroups, values, single] = await Promise.all([
     call(STAGE_MODELS.copy, PlotGroupsSchema, plotInstructions(skeleton.output)),
     Promise.all(
@@ -323,11 +353,14 @@ export async function readReportPdf(
     ),
     singlePending,
   ]);
+
   const copied = values.flatMap(({ graphs, result }) =>
     result.ok ? [{ graphs, output: result.output }] : [],
   );
+
   if (!single.ok || !plotGroups.ok || copied.length !== values.length)
     return failed(skeleton.usage, failures[0] ?? "failed");
+
   const merged = mergeStages(
     skeleton.output,
     single.output,
@@ -335,11 +368,14 @@ export async function readReportPdf(
     copied,
     request.pages,
   );
+
   if (!merged.ok) {
     console.error(
       "[pdf-reading] 段の出力の key や根拠の ref・ページが、骨組みやその段、PDF に無い",
     );
+
     return failed(skeleton.usage, "invalid_output");
   }
+
   return { ok: true, output: merged.output, usage: total(skeleton.usage) };
 }

@@ -17,11 +17,14 @@ export default async function NewApplicationPage({
   params: Promise<{ kind: string }>;
 }) {
   const parsed = v.safeParse(submittableKindSchema, (await params).kind);
+
   if (!parsed.success) notFound();
   const kind = parsed.output;
   const session = await applicationSellerPage(`/dashboard/applications/new/${kind}`);
+
   if (!session) return <SellerAccessDenied />;
   const { seller } = session;
+
   return (
     <FormPageShell
       chrome="seller"

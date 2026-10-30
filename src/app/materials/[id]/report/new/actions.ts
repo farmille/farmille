@@ -25,15 +25,18 @@ async function runMutation(
   droppedMediaUrls: string[],
 ): Promise<UsageReportActionResult> {
   const reportPath = `/materials/${materialId}/report/new`;
+
   if (!isMaterialId(materialId)) {
     return { ok: false, message: errorMessageJa.not_found, fieldErrors: {} };
   }
 
   const session = await requireGeneralUser();
+
   if (!session.ok) {
     if (session.error === "unauthorized") {
       redirect(`/login?next=${encodeURIComponent(reportPath)}`);
     }
+
     return {
       ok: false,
       message: errorMessageJa[session.error],
@@ -44,6 +47,7 @@ async function runMutation(
   if (payload.materialId !== materialId) {
     return { ok: false, message: "対象資材を選び直してください。", fieldErrors: {} };
   }
+
   const result = await saveStructuredUsageReport(
     payload,
     session.data.userId,
@@ -54,6 +58,7 @@ async function runMutation(
   if (result.ok) {
     revalidatePath(reportPath);
   }
+
   return result;
 }
 
@@ -91,35 +96,47 @@ export async function readPdfIntoReportAction(
   request: PdfReadingRequest,
 ): Promise<PdfReadingResult> {
   const reportPath = `/materials/${materialId}/report/new`;
+
   if (!isMaterialId(materialId)) return pdfReadingRefused("not_found");
   const session = await requireGeneralUser();
+
   if (!session.ok) {
     if (session.error === "unauthorized") {
       redirect(`/login?next=${encodeURIComponent(reportPath)}`);
     }
+
     return pdfReadingRefused(session.error);
   }
+
   if (!v.is(v.object({ input: v.object({ materialId: v.literal(materialId) }) }), request)) {
     return pdfReadingRefused("invalid_body", "対象資材を選び直してください。");
   }
+
   const userId = session.data.userId;
   const result = await readPdfIntoDraft(request, userId, await createPdfReadingDeps(userId));
+
   if (result.ok) revalidatePath(reportPath);
+
   return result;
 }
 
 export async function searchReportMaterialsAction(query: string) {
   const parsed = v.safeParse(v.string(), query);
+
   if (!parsed.success) return fail("invalid_body");
+
   return searchPostingMaterials(parsed.output);
 }
 
 /** 資材を選び直したときに、作物と使用目的の候補に出す、その資材の登録作物と効果。 */
 export async function getReportMaterialClassificationsAction(materialId: string) {
   const parsed = v.safeParse(v.string(), materialId);
+
   if (!parsed.success || !isMaterialId(parsed.output)) return fail("invalid_body");
   const material = await getMaterial(parsed.output);
+
   if (!material.ok) return material;
+
   return succeed({
     cropIds: material.data.targetCrops.map((crop) => crop.id),
     effectNames: material.data.effects.map((effect) => effect.name),
@@ -135,10 +152,14 @@ export async function findOtherReportForMaterialAction(materialId: string, repor
     v.object({ materialId: v.pipe(v.string(), v.uuid()), reportId: v.pipe(v.string(), v.uuid()) }),
     { materialId, reportId },
   );
+
   if (!parsed.success || !isMaterialId(parsed.output.materialId)) return fail("invalid_body");
   const session = await requireGeneralUser();
+
   if (!session.ok) return fail(session.error);
   const formData = await getStructuredReportFormData(parsed.output.materialId, session.data.userId);
+
   if (!formData.ok) return formData;
+
   return succeed(otherOpenReport(formData.data, parsed.output.reportId));
 }

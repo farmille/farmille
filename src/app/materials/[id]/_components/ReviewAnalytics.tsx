@@ -22,5 +22,6 @@ function SubmittedTracker({ materialId }: { materialId: string }) {
     tracked.current = true;
     trackReviewSubmitted(materialId);
   });
+
   return null;
 }

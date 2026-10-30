@@ -12,5 +12,6 @@ type PostActionsLoaderProps = {
 /** 公開カードの保存状態と閲覧数をサーバーで取得する。 */
 export async function PostActionsLoader(props: PostActionsLoaderProps) {
   const state = await getPostActions(props.target, props.id);
+
   return <PostActions {...props} {...state} />;
 }

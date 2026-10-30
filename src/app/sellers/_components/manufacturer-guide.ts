@@ -191,6 +191,7 @@ export const MEMBER_ACTIONS: ReadonlyArray<MemberAction> = [
 ];
 
 type FaqLink = { href: string; label: string };
+
 type Faq = { question: string; answer: string; links: ReadonlyArray<FaqLink> };
 
 export const GUIDE_FAQS: ReadonlyArray<Faq> = [

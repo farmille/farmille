@@ -1,5 +1,7 @@
-import { RuleTester } from "eslint";
-import { controlledFormInput, stateManagement } from "./state-management.mjs";
+import { RuleTester } from "oxlint/plugins-dev";
+
+import { controlledFormInput, stateManagement } from "./index.mjs";
+import { restrictedSyntax } from "./restricted-syntax.mjs";
 
 const tester = new RuleTester({ languageOptions: { ecmaVersion: "latest", sourceType: "module" } });
 const filename = `${process.cwd()}/src/components/Example.js`;
@@ -121,5 +123,29 @@ new RuleTester({
       code: 'const x = <input name="terms" type="checkbox" />;',
       errors: [{ messageId: "controlled" }],
     },
+  ],
+});
+
+const syntax = (groups) => [{ groups }];
+new RuleTester({
+  languageOptions: {
+    ecmaVersion: "latest",
+    sourceType: "module",
+    parserOptions: { ecmaFeatures: { jsx: true } },
+  },
+}).run("restricted-syntax", restrictedSyntax, {
+  valid: [
+    { code: 'css({ color: "text.brand", bg: "surface" });', options: syntax(["textColor", "colorValue"]) },
+    { code: 'const x = <div style={{ "--bar-width": width }} />;', options: syntax(["styleAttribute"]) },
+    { code: 'supabase.storage.from("photos");', options: syntax(["supabaseQuery"]) },
+    { code: 'supabase.from("materials");', options: syntax(["textColor"]) },
+  ],
+  invalid: [
+    { code: 'css({ color: "primary.700" });', options: syntax(["textColor"]), errors: 1 },
+    { code: 'css({ bg: "#fff" });', options: syntax(["colorValue"]), errors: 1 },
+    { code: 'css({ bg: "[red]" });', options: syntax(["colorValue"]), errors: 1 },
+    { code: "const x = <div style={{ color: 'red' }} />;", options: syntax(["styleAttribute"]), errors: 1 },
+    { code: 'supabase.rpc("withdraw");', options: syntax(["supabaseQuery"]), errors: 1 },
+    { code: "process.env.SUPABASE_SECRET_KEY;", options: syntax(["secretKey"]), errors: 1 },
   ],
 });

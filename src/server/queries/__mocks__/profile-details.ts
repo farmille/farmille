@@ -1,4 +1,5 @@
 import { fn } from "storybook/test";
+
 export const getProfileDetails = fn<
   typeof import("@/server/queries/profile-details").getProfileDetails
 >(async () => ({
@@ -13,6 +14,7 @@ export const getProfileDetails = fn<
     bio: "茨城県でトマトと葉物を栽培しています。",
   },
 })).mockName("getProfileDetails");
+
 export const getProfileOptions = fn<
   typeof import("@/server/queries/profile-details").getProfileOptions
 >(async () => ({
@@ -29,6 +31,7 @@ export const getProfileOptions = fn<
     affiliations: ["農業法人"],
   },
 })).mockName("getProfileOptions");
+
 export const saveProfileDetails = fn<
   typeof import("@/server/queries/profile-details").saveProfileDetails
 >(async () => ({ ok: true, data: null })).mockName("saveProfileDetails");

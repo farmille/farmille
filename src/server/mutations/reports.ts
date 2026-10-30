@@ -6,10 +6,12 @@ import { createServerSupabase } from "@/server/supabase";
 import type { Database } from "@/types/database.types";
 
 export type { ReportReasonCode } from "@/server/mutations/report-reasons";
+
 export { isReportReasonCode, REPORT_REASON_OPTIONS } from "@/server/mutations/report-reasons";
 
 /** content_reports.target_type のうち UI から通報できる種別（01 §3）。 */
 export const REPORT_TARGET_TYPES = ["review", "usage_report", "article", "profile"] as const;
+
 export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number];
 
 export function isReportTargetType(value: string): value is ReportTargetType {
@@ -18,9 +20,11 @@ export function isReportTargetType(value: string): value is ReportTargetType {
 
 function reasonLabel(code: ReportReasonCode): string {
   const option = REPORT_REASON_OPTIONS.find((candidate) => candidate.value === code);
+
   if (option === undefined) {
     throw new Error(`未知の通報理由です：${code}`);
   }
+
   return option.label;
 }
 
@@ -48,9 +52,12 @@ async function assertReportTarget(
 
     if (error !== null) {
       reportMutationError("通報対象感想口コミの確認に失敗", error);
+
       return fail("internal");
     }
+
     if (data === null || data.status !== "published") return fail("not_found");
+
     return succeed({ authorUserId: data.author_user_id });
   }
 
@@ -63,9 +70,12 @@ async function assertReportTarget(
 
     if (error !== null) {
       reportMutationError("通報対象実証詳細レポートの確認に失敗", error);
+
       return fail("internal");
     }
+
     if (data === null || data.status !== "published") return fail("not_found");
+
     return succeed({ authorUserId: data.author_user_id });
   }
 
@@ -78,9 +88,12 @@ async function assertReportTarget(
 
     if (error !== null) {
       reportMutationError("通報対象記事の確認に失敗", error);
+
       return fail("internal");
     }
+
     if (data === null || data.status !== "published") return fail("not_found");
+
     return succeed({ authorUserId: null });
   }
 
@@ -93,9 +106,12 @@ async function assertReportTarget(
 
   if (error !== null) {
     reportMutationError("通報対象プロフィールの確認に失敗", error);
+
     return fail("internal");
   }
+
   if (data === null || data.user_id === null) return fail("not_found");
+
   return succeed({ authorUserId: data.user_id });
 }
 
@@ -127,6 +143,7 @@ export async function createContentReportWithSupabase(
 
   const supabase = await createSupabase();
   const target = await assertReportTarget(supabase, targetType, targetId);
+
   if (!target.ok) return target;
 
   // 自分の投稿・自分自身のプロフィールは通報できない。
@@ -145,11 +162,14 @@ export async function createContentReportWithSupabase(
 
   if (existingError !== null) {
     reportMutationError("既存の通報確認に失敗", existingError);
+
     return fail("internal");
   }
+
   if (existing !== null) return fail("already_reported");
 
   const trimmedDetail = detail?.trim() ?? "";
+
   const reason =
     trimmedDetail.length === 0
       ? reasonLabel(reasonCode)
@@ -168,6 +188,7 @@ export async function createContentReportWithSupabase(
 
   if (error !== null) {
     reportMutationError("通報の登録に失敗", error);
+
     return fail("internal");
   }
 

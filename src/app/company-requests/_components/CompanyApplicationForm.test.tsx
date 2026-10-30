@@ -21,9 +21,11 @@ const router = {
   prefetch: vi.fn(),
   bfcacheId: "test",
 } satisfies AppRouterInstance;
+
 const pathname = "/dashboard/applications/new/transfer_out";
 
 const intentId = "11111111-1111-4111-8111-111111111111";
+
 const contact: ContactDefaults = {
   companyName: "しおさい資材株式会社",
   corporateNumber: "1234567890123",
@@ -52,7 +54,9 @@ function renderRestoredForm() {
       (_, index) => [`consent.${index}`, ["on"]] satisfies [string, string[]],
     ),
   ]);
+
   writePersisted(persistKey("application", pathname), restored);
+
   return render(
     <PathnameContext.Provider value={pathname}>
       <AppRouterContext.Provider value={router}>
@@ -84,6 +88,7 @@ describe("企業申請の入力", () => {
       expect(screen.getByRole("textbox", { name: "資材名" })).toHaveValue("土づくり資材"),
     );
     const form = container.querySelector("form");
+
     if (form === null) throw new Error("申請フォームがありません。");
 
     fireEvent.submit(form);

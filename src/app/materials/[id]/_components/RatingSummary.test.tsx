@@ -7,6 +7,7 @@ it("口コミ0件のときは評価を出さず、口コミがあれば平均と
   const { container, rerender } = render(
     <RatingSummary {...meta.args} reviewCount={0} average={null} />,
   );
+
   expect(container).toBeEmptyDOMElement();
   rerender(<RatingSummary {...meta.args} />);
   expect(screen.getByText("4.2")).toBeInTheDocument();

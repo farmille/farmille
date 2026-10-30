@@ -21,6 +21,7 @@ describe("search-selection", () => {
       }),
       "https://example.com",
     );
+
     expect(url.searchParams.get("q")).toBe("トマト");
     expect(url.searchParams.get("sort")).toBe("rating");
     expect(parseFiltersQuery(url.searchParams.get("filters") ?? undefined).makerNames).toEqual([
@@ -52,6 +53,7 @@ describe("search-selection", () => {
       shortName: "アミノ酸",
       category: "genre",
     };
+
     const crop: SelectedSearchFilter = {
       kind: "filter",
       id: "2",
@@ -69,6 +71,7 @@ describe("search-selection", () => {
 
   it("filters クエリを分類・メーカー・資材名に分解する", () => {
     const id = "11111111-1111-1111-1111-111111111111";
+
     const encoded = encodeFiltersQuery([
       { kind: "filter", id, name: "いちご", category: "crop" },
       { kind: "maker", name: "ICL JAPAN" },

@@ -20,15 +20,20 @@ import { SellerAccessDenied } from "../../_components/AccessDenied";
 
 export default async function SellerMaterialPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
   if (!v.is(v.pipe(v.string(), v.uuid()), id)) notFound();
   const session = await requireSeller();
+
   if (!session.ok) {
     if (session.error === "unauthorized")
       redirect(`/sellers/login?next=${encodeURIComponent(`/dashboard/materials/${id}`)}`);
+
     return <SellerAccessDenied backHref="/dashboard/materials" />;
   }
+
   const editor = await getMaterialEditor(id, session.data.sellerId);
   const audits = editor ? await listMaterialPageAudits(id) : [];
+
   if (!editor)
     return (
       <FormPageShell chrome="seller" backHref="/dashboard/materials" title="製品情報の管理">
@@ -38,6 +43,7 @@ export default async function SellerMaterialPage({ params }: { params: Promise<{
         />
       </FormPageShell>
     );
+
   return (
     <FormPageShell chrome="seller" backHref="/dashboard/materials" title="製品情報の管理">
       <div className={materialPageStack}>
@@ -96,6 +102,7 @@ export default async function SellerMaterialPage({ params }: { params: Promise<{
                 ]),
                 version.status,
               );
+
               return (
                 <div key={version.id}>
                   <TextLink href={`/dashboard/materials/${id}/history/${version.id}`}>

@@ -27,5 +27,6 @@ export function HeroCount({
 
 export async function HeroSavedCount({ materialId }: { materialId: string }) {
   const count = await getMaterialSavedCount(materialId);
+
   return <HeroCount>{count ?? "−"}</HeroCount>;
 }

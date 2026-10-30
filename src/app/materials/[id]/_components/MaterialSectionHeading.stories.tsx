@@ -9,6 +9,7 @@ const meta = {
 } satisfies Meta<typeof MaterialSectionHeading>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Plain: Story = {};

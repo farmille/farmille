@@ -10,9 +10,13 @@ import { reportCrop } from "@/server/usage-reports/crop";
 import type { Database } from "@/types/database.types";
 
 type ReviewRow = Database["public"]["Tables"]["reviews"]["Row"];
+
 type UsageReportRow = Database["public"]["Tables"]["usage_reports"]["Row"];
+
 type CropRow = Database["public"]["Tables"]["crops"]["Row"];
+
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+
 type HelpfulCountRow = Database["public"]["Views"]["helpful_counts"]["Row"];
 
 type OwnReviewQueryRow = Pick<
@@ -135,6 +139,7 @@ async function getHelpfulCounts(
 
   for (let start = 0; start < ids.length; start += IN_FILTER_CHUNK_SIZE) {
     const chunk = ids.slice(start, start + IN_FILTER_CHUNK_SIZE);
+
     const { data, error } = await supabase
       .from("helpful_counts")
       .select("target_id, helpful_count")
@@ -143,6 +148,7 @@ async function getHelpfulCounts(
 
     if (error !== null) {
       reportQueryError("参考になった件数の取得に失敗", { targetType, error });
+
       return fail("internal");
     }
 
@@ -151,6 +157,7 @@ async function getHelpfulCounts(
     for (const row of rows) {
       if (row.target_id === null || row.helpful_count === null) {
         reportQueryError("参考になった件数にNULLが含まれる", { targetType, row });
+
         return fail("internal");
       }
 
@@ -228,16 +235,19 @@ export async function listOwnPostsWithSupabase(
 
   if (reviewsResult.error !== null) {
     reportQueryError("自分の感想口コミ取得に失敗", reviewsResult.error);
+
     return fail("internal");
   }
 
   if (reportsResult.error !== null) {
     reportQueryError("自分の実証詳細レポート取得に失敗", reportsResult.error);
+
     return fail("internal");
   }
 
   const reviewRows: OwnReviewQueryRow[] = reviewsResult.data;
   const reportRows: OwnReportQueryRow[] = reportsResult.data;
+
   const [reviewHelpful, reportHelpful] = await Promise.all([
     getHelpfulCounts(
       supabase,
@@ -252,6 +262,7 @@ export async function listOwnPostsWithSupabase(
   ]);
 
   if (!reviewHelpful.ok) return reviewHelpful;
+
   if (!reportHelpful.ok) return reportHelpful;
 
   const posts: OwnPostItem[] = [];
@@ -261,6 +272,7 @@ export async function listOwnPostsWithSupabase(
 
     if (cropName === null || review.material === null) {
       reportQueryError("自分の感想口コミの関連データが欠落", { reviewId: review.id });
+
       return fail("internal");
     }
 
@@ -284,6 +296,7 @@ export async function listOwnPostsWithSupabase(
       !isUsageReportStatus(report.status)
     ) {
       reportQueryError("自分の実証詳細レポートの関連データが欠落", { reportId: report.id });
+
       return fail("internal");
     }
 
@@ -333,18 +346,24 @@ async function listHelpfulItems(
 
   if (votesError !== null) {
     reportQueryError("参考になった一覧の取得に失敗", votesError);
+
     return fail("internal");
   }
 
   const votes: HelpfulVoteRow[] = votesData;
+
   if (votes.length === 0) {
     return succeed([]);
   }
 
-  const reviewIds = votes.filter((vote) => vote.target_type === "review").map((v) => v.target_id);
-  const reportIds = votes
-    .filter((vote) => vote.target_type === "usage_report")
-    .map((v) => v.target_id);
+  const reviewIds = votes.flatMap((vote) =>
+    vote.target_type === "review" ? [vote.target_id] : [],
+  );
+
+  const reportIds = votes.flatMap((vote) =>
+    vote.target_type === "usage_report" ? [vote.target_id] : [],
+  );
+
   const emptyReviews: HelpfulReviewDetail[] = [];
   const emptyReports: HelpfulReportDetail[] = [];
 
@@ -400,15 +419,18 @@ async function listHelpfulItems(
 
   if (reviewsResult.error !== null) {
     reportQueryError("参考になった感想口コミ詳細の取得に失敗", reviewsResult.error);
+
     return fail("internal");
   }
 
   if (reportsResult.error !== null) {
     reportQueryError("参考になった実証詳細レポート詳細の取得に失敗", reportsResult.error);
+
     return fail("internal");
   }
 
   if (!reviewHelpful.ok) return reviewHelpful;
+
   if (!reportHelpful.ok) return reportHelpful;
 
   const reviewsById = new Map(reviewsResult.data.map((row) => [row.id, row]));
@@ -420,6 +442,7 @@ async function listHelpfulItems(
       const review = reviewsById.get(vote.target_id);
       const cropName = review === undefined ? null : reviewCropLabel(review.cropRelations);
       const author = review === undefined ? null : postAuthor(review.author);
+
       if (
         review === undefined ||
         cropName === null ||
@@ -447,6 +470,7 @@ async function listHelpfulItems(
     const report = reportsById.get(vote.target_id);
     const crop = report === undefined ? null : reportCrop(report);
     const author = report === undefined ? null : postAuthor(report.author);
+
     if (report === undefined || crop === null || report.material === null || author === null) {
       continue;
     }
@@ -468,6 +492,7 @@ async function listHelpfulItems(
 /** マイページ `/me` 用の集約データ。 */
 export async function getMyPageData(userId: string): Promise<Result<MyPageData>> {
   const supabase = await createServerSupabase();
+
   const [profileResult, postsResult, savedResult, helpfulResult] = await Promise.all([
     getOwnProfile(userId),
     listOwnPostsWithSupabase(supabase, userId),
@@ -476,8 +501,11 @@ export async function getMyPageData(userId: string): Promise<Result<MyPageData>>
   ]);
 
   if (!profileResult.ok) return profileResult;
+
   if (!postsResult.ok) return postsResult;
+
   if (!savedResult.ok) return savedResult;
+
   if (!helpfulResult.ok) return helpfulResult;
 
   return succeed({

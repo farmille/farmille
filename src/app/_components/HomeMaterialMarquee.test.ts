@@ -33,13 +33,16 @@ describe("再生速度の補間", () => {
     const frame = 16;
     expect(easeRate(1, 0.25, frame)).toBeGreaterThan(0.25);
     let rate = 1;
+
     for (let tick = 0; tick < 200; tick += 1) {
       const next = easeRate(rate, 0.25, frame);
       expect(next).toBeLessThan(rate);
       expect(next).toBeGreaterThanOrEqual(0.25);
       rate = next;
+
       if (rate === 0.25) break;
     }
+
     expect(rate).toBe(0.25);
 
     {

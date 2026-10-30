@@ -61,6 +61,7 @@ export function ReviewBody({ children }: { children: string }) {
                 // 画面幅が変わると折り返しが変わり、あふれるかどうかも変わる
                 const observer = new ResizeObserver(measure);
                 observer.observe(body);
+
                 return () => observer.disconnect();
               }
         }

@@ -11,6 +11,7 @@ test("レポートの全文はログイン後に表示し、ログアウト後�
   const user = await createGeneralUser("reading");
   const material = await createMaterial("reading");
   const privateText = "会員限定の観察結果末尾です";
+
   try {
     const report = await createPublishedUsageReport({
       materialId: material.id,
@@ -18,6 +19,7 @@ test("レポートの全文はログイン後に表示し、ログアウト後�
       title: "会員向けレポートの閲覧",
       observedChange: "公開する冒頭の観察記録です。".repeat(20) + privateText,
     });
+
     const path = `/reports/${report.id}`;
     await page.goto(path);
     expect(await page.content()).not.toContain(privateText);

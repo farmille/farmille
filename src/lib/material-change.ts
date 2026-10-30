@@ -4,6 +4,7 @@ export const MATERIAL_CHANGE_REQUEST_STATUSES = [
   "rejected",
   "cancelled",
 ] as const;
+
 export type MaterialChangeRequestStatus = (typeof MATERIAL_CHANGE_REQUEST_STATUSES)[number];
 
 export const MATERIAL_CHANGE_REQUEST_STATUS_LABELS = {
@@ -14,6 +15,7 @@ export const MATERIAL_CHANGE_REQUEST_STATUS_LABELS = {
 } satisfies Record<MaterialChangeRequestStatus, string>;
 
 export const MATERIAL_CHANGE_TYPES = ["create", "update", "archive"] as const;
+
 export type MaterialChangeType = (typeof MATERIAL_CHANGE_TYPES)[number];
 
 export const MATERIAL_CHANGE_TYPE_LABELS = {

@@ -20,6 +20,7 @@ export function PublicationStatusForm({
   const current = v.parse(publicationStatusSchema, status);
   const form = useForm({ defaultValues: { publicationStatus: current } });
   const publicationStatus = useStore(form.store, (state) => state.values.publicationStatus);
+
   const [state, formAction] = useActionState(
     setMaterialPublicationStatusAction,
     initialMaterialFormState,

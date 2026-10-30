@@ -45,6 +45,7 @@ export async function createReportAction(
     if (session.error === "unauthorized") {
       redirect(`/login?next=${encodeURIComponent(currentPath)}`);
     }
+
     return { status: "error", message: errorMessageJa[session.error] };
   }
 

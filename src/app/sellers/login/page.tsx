@@ -12,16 +12,24 @@ export const metadata: Metadata = {
 
 function destinationLabelOf(destination: string | null): string | null {
   if (destination === null) return null;
+
   if (destination.startsWith("/dashboard/applications/new/registration"))
     return "資材掲載・資材オーナー権限申請";
+
   if (destination.startsWith("/dashboard/applications/new/transfer_out"))
     return "資材オーナー権限の移行申請（現資材オーナー企業）";
+
   if (destination.startsWith("/dashboard/applications/new/transfer_in"))
     return "資材オーナー権限の移行申請（引き継ぎ先企業）";
+
   if (destination.startsWith("/dashboard/applications")) return "各種お手続き";
+
   if (destination.startsWith("/dashboard/materials")) return "製品情報の管理";
+
   if (destination.startsWith("/dashboard/profile")) return "メーカープロフィールの編集";
+
   if (destination.startsWith("/dashboard")) return "企業会員ダッシュボード";
+
   return null;
 }
 

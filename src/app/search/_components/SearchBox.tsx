@@ -61,14 +61,17 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
   const selectedKeys = useMemo(() => new Set(selected.map(selectedFilterKey)), [selected]);
 
   const keyword = query.trim();
+
   const suggestions = useMemo((): SelectedSearchFilter[] => {
     if (keyword.length === 0) return [];
     const matches = matchSearchCatalog(catalog, keyword);
+
     const candidates: SelectedSearchFilter[] = [
       ...matches.filters.map(searchFilterItemToSelected),
       ...matches.materialNames.map((name): SelectedSearchFilter => ({ kind: "name", name })),
       ...matches.makerNames.map((name): SelectedSearchFilter => ({ kind: "maker", name })),
     ];
+
     return candidates
       .filter((filter) => !selectedKeys.has(selectedFilterKey(filter)))
       .slice(0, SUGGESTION_LIMIT);
@@ -91,6 +94,7 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
         filterMode="preFiltered"
         onPick={(option) => {
           const next = suggestionOf(option);
+
           if (next !== undefined) navigate([...selected, next], "");
         }}
         onSubmitText={(text) => {
@@ -105,6 +109,7 @@ export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxPr
         placeholder="作物・悩み・資材名で検索"
         renderOption={(option) => {
           const filter = suggestionOf(option);
+
           return (
             <>
               <span

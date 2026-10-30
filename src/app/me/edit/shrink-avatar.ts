@@ -11,6 +11,7 @@ const ACCEPTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 /** 長辺を AVATAR_MAX_EDGE に収めた幅と高さ。小さい画像は拡大しない。 */
 export function shrunkAvatarSize(width: number, height: number) {
   const scale = Math.min(1, AVATAR_MAX_EDGE / Math.max(width, height));
+
   return { width: Math.round(width * scale), height: Math.round(height * scale) };
 }
 
@@ -21,6 +22,7 @@ export function shrunkAvatarSize(width: number, height: number) {
  */
 export async function shrinkAvatar(file: File): Promise<File> {
   let bitmap: ImageBitmap;
+
   try {
     bitmap = await createImageBitmap(file);
   } catch {
@@ -30,12 +32,14 @@ export async function shrinkAvatar(file: File): Promise<File> {
   try {
     const size = shrunkAvatarSize(bitmap.width, bitmap.height);
     const fits = size.width === bitmap.width && file.size <= AVATAR_MAX_BYTES;
+
     if (fits && ACCEPTED_TYPES.has(file.type)) return file;
 
     const canvas = document.createElement("canvas");
     canvas.width = size.width;
     canvas.height = size.height;
     const context = canvas.getContext("2d");
+
     if (context === null) return file;
     // JPEG は透過を持てないので、透過部分は白にする
     context.fillStyle = "#fff";
@@ -46,13 +50,16 @@ export async function shrinkAvatar(file: File): Promise<File> {
       const blob = await new Promise<Blob | null>((resolve) =>
         canvas.toBlob(resolve, "image/jpeg", quality),
       );
+
       if (blob === null) return file;
+
       if (blob.size <= AVATAR_MAX_BYTES) {
         return new File([blob], `${file.name.replace(/\.[^.]*$/, "")}.jpg`, {
           type: "image/jpeg",
         });
       }
     }
+
     return file;
   } finally {
     bitmap.close();
@@ -62,6 +69,7 @@ export async function shrinkAvatar(file: File): Promise<File> {
 /** フォームの avatar を縮めた画像に差し替える。 */
 export async function shrinkAvatarIn(formData: FormData): Promise<void> {
   const avatar = formData.get("avatar");
+
   if (!(avatar instanceof File) || avatar.size === 0) return;
   formData.set("avatar", await shrinkAvatar(avatar));
 }

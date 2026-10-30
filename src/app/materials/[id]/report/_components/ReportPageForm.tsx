@@ -220,11 +220,14 @@ const doneWrap = css({
 
 function focusTarget(id: string) {
   const element = document.getElementById(id);
+
   if (element === null) return;
   element.scrollIntoView({ behavior: "smooth", block: "center" });
+
   const control = element.matches("input, textarea, button")
     ? element
     : element.querySelector<HTMLElement>("input, textarea, button");
+
   control?.focus({ preventScroll: true });
 }
 
@@ -263,6 +266,7 @@ export function ReportPageForm({
   };
 }) {
   const router = useRouter();
+
   const [initialValues] = useReducer(
     (value: ReportPageFormValues) => value,
     null,
@@ -270,47 +274,61 @@ export function ReportPageForm({
       // ページ版では数値のグラフを手で作らないので、新しいレポートは入れ方を選ぶ前の調査項目から始める
       const base = draft ?? { ...createBlankUsageReport(material.id), measurements: [] };
       const named = withAutoPlotNames(base, base, material.name);
+
       const input = {
         ...named,
         prefectureCode: named.prefectureCode ?? registeredAddress.prefectureCode,
       };
+
       // 空の調査項目のIDも初回に確定し、再描画でフォームの初期値を変えない。
       return { input, items: itemsFromInput(input), acks: { timing: false, privacy: false } };
     },
   );
+
   const form = useForm({
     defaultValues: initialValues,
   });
+
   const { input, items, acks } = useStore(form.store, (state) => state.values);
+
   const setInput = useCallback(
     (next: UsageReportInput | ((current: UsageReportInput) => UsageReportInput)) =>
       form.setFieldValue("input", next),
     [form],
   );
+
   const setItems = useCallback(
     (next: ReportPageItem[] | ((current: ReportPageItem[]) => ReportPageItem[])) =>
       form.setFieldValue("items", next),
     [form],
   );
+
   const setAcks = (next: (current: ReportPageAcks) => ReportPageAcks) =>
     form.setFieldValue("acks", next);
+
   const payload = inputWithItems(input, items);
+
   const [saved, setSaved] = useReducer(
     (_current: string, next: string) => next,
     payload,
     JSON.stringify,
   );
+
   const [currentMaterial, setCurrentMaterial] = useReducer(
     (_current: ReportMaterialSummary, next: ReportMaterialSummary) => next,
     material,
   );
+
   const [tried, setTried] = useReducer((_current: boolean, next: boolean) => next, false);
+
   const [failure, setFailure] = useReducer(
     (_current: string | null, next: string | null) => next,
     null,
   );
+
   const [preview, setPreview] = useReducer((_current: boolean, next: boolean) => next, false);
   const [leaving, setLeaving] = useReducer((_current: boolean, next: boolean) => next, false);
+
   const [fileItem, setFileItem] = useReducer(
     (
       _current: { item: ReportPageItem; isNew: boolean } | null,
@@ -318,19 +336,24 @@ export function ReportPageForm({
     ) => next,
     null,
   );
+
   const [numericItem, setNumericItem] = useReducer(
     (_current: ReportPageNumericItem | null, next: ReportPageNumericItem | null) => next,
     null,
   );
+
   const [readingOpen, setReadingOpen] = useReducer(
     (_current: boolean, next: boolean) => next,
     false,
   );
+
   const [{ marks: readMarks, checkRequired, remaining }, recordReading] = useReducer(
     (current: PdfReadingStatus, result: PdfReadingResult): PdfReadingStatus => {
       const remaining = result.remaining ?? current.remaining;
+
       if (result.ok) return { remaining, marks: result.marks, checkRequired: true };
       const adopted = result.savedDraft?.saved === "read";
+
       return {
         remaining,
         marks: adopted ? [] : current.marks,
@@ -343,21 +366,26 @@ export function ReportPageForm({
       remaining: pdfReading.remaining,
     },
   );
+
   // 連打で保存・提出が二重に送られないよう、送信中は ref で止める（state の disabled は次の描画まで効かない）
   const sending = useRef(false);
+
   // この画面の入力に入った画像。保存の前に外れた分は、保存のあとにサーバーが置き場から消す
   const [shownMedia, updateShownMedia] = useReducer(
     (current: ReadonlySet<string>, action: { type: "show" | "forget"; urls: string[] }) => {
       const next = new Set(current);
+
       for (const url of action.urls) {
         if (action.type === "show") next.add(url);
         else next.delete(url);
       }
+
       return next;
     },
     payload.media,
     (media) => new Set(media.map((item) => item.url)),
   );
+
   if (payload.media.some((item) => !shownMedia.has(item.url)))
     updateShownMedia({ type: "show", urls: payload.media.map((item) => item.url) });
   const dirty = JSON.stringify(payload) !== saved;
@@ -367,6 +395,7 @@ export function ReportPageForm({
     (next: (current: UsageReportInput) => UsageReportInput) => setInput(next),
     [setInput],
   );
+
   // 区を変えたら、数値の調査項目のグラフの行も区にそろえる
   const changePlots = useCallback(
     (next: UsageReportInput) => {
@@ -375,6 +404,7 @@ export function ReportPageForm({
     },
     [setInput, setItems],
   );
+
   // 失敗は画面の下の欄に残し、スマホでも気づけるよう通知でも出す
   const showError = useCallback((message: string) => {
     setFailure(message);
@@ -394,6 +424,7 @@ export function ReportPageForm({
   /** この画面の入力に入っていて、current から外れた画像。保存で渡すと、サーバーが置き場から消す。 */
   function droppedMedia(current: UsageReportInput): string[] {
     const kept = new Set(current.media.map((media) => media.url));
+
     return [...shownMedia].filter((url) => !kept.has(url));
   }
 
@@ -404,6 +435,7 @@ export function ReportPageForm({
 
   function saveFailure(message: string): ReportSaveState {
     toast.error(message.split("\n")[0], { toasterId: reportToasterId });
+
     return { status: "error", message };
   }
 
@@ -411,27 +443,37 @@ export function ReportPageForm({
     try {
       const body = inputWithItems(input, items);
       const over = reportOverLimit(body, items);
+
       if (over.length > 0) {
         return saveFailure(`文字数の上限を超えている欄があります：${over.join("、")}`);
       }
+
       const dropped = droppedMedia(body);
+
       const result = submit
         ? await submitUsageReportAction(body.materialId, body, dropped)
         : await saveUsageReportDraftAction(body.materialId, body, dropped);
+
       if (result.ok || result.savedDraft !== undefined) forgetDropped(dropped);
+
       if (!result.ok) {
         if (result.savedDraft !== undefined) {
           const savedUpdatedAt = result.savedDraft.updatedAt;
           setInput((current) => ({ ...current, expectedUpdatedAt: savedUpdatedAt }));
+
           if (result.savedDraft.status === "complete")
             setSaved(JSON.stringify({ ...body, expectedUpdatedAt: savedUpdatedAt }));
         }
+
         const details = Object.values(result.fieldErrors).map((text) => text.replace(/^※\s*/, ""));
+
         return saveFailure([result.message, ...new Set(details)].join("\n"));
       }
+
       setFailure(null);
       setInput((current) => ({ ...current, expectedUpdatedAt: result.updatedAt }));
       setSaved(JSON.stringify({ ...body, expectedUpdatedAt: result.updatedAt }));
+
       if (result.status === "pending") {
         // 提出後の画面はサーバーの「提出済み」に揃える
         router.refresh();
@@ -444,9 +486,11 @@ export function ReportPageForm({
           },
         );
       }
+
       if (close) router.push(`/materials/${body.materialId}`);
       else if (body.materialId !== material.id)
         router.replace(`/materials/${body.materialId}/report/new`);
+
       return { status: result.status === "pending" ? "submitted" : "saved" };
     } catch {
       // 通信の失敗などはブラウザの英語の文言になるので、そのまま出さない
@@ -463,6 +507,7 @@ export function ReportPageForm({
       command.type === "clear" ? { status: "idle" } : performSave(command.submit, command.close),
     { status: "idle" },
   );
+
   const submitted = saveState.status === "submitted";
   const visibleFailure = failure ?? (saveState.status === "error" ? saveState.message : null);
 
@@ -480,8 +525,10 @@ export function ReportPageForm({
           setFailure(
             "別の画面で更新された下書きを開きました。この画面で保存していなかった入力は戻していません。",
           );
+
           return;
         }
+
         setCurrentMaterial(backup.material);
         setInput(backup.input);
         setItems(itemsFromInput(backup.input));
@@ -506,23 +553,30 @@ export function ReportPageForm({
 
   function applyReading(result: PdfReadingResult) {
     recordReading(result);
+
     // 読み取りの間は編集できないので、外した画像は読み取りに渡したときのまま
     if (result.ok || result.savedDraft !== null)
       forgetDropped(droppedMedia(inputWithItems(input, items)));
+
     if (!result.ok) {
       // 失敗しても、サーバーの下書きを保存した分には揃える（揃えないと次の保存が競合する）
       const draft = result.savedDraft;
+
       if (draft?.saved === "input" || draft?.saved === "partial") {
         const stamp = { reportId: draft.reportId, expectedUpdatedAt: draft.updatedAt };
         setInput((current) => ({ ...current, ...stamp }));
+
         // 一部だけ保存したときは、入力を未保存のまま残す（保存し直してもらう）
         if (draft.saved === "input")
           setSaved(JSON.stringify({ ...inputWithItems(input, items), ...stamp }));
       }
+
       // 値は入ったが根拠の記録に失敗したので、印は出さない（文言はダイアログに出したまま）
       if (draft?.saved === "read") adoptRead(draft.input);
+
       return;
     }
+
     adoptRead(result.input);
     setFailure(null);
     startTransition(() => dispatchSave({ type: "clear" }));
@@ -534,6 +588,7 @@ export function ReportPageForm({
 
   function submit() {
     setTried(true);
+
     if (missing.length > 0) return;
     persist(true);
   }
@@ -553,6 +608,7 @@ export function ReportPageForm({
 
   const heading = (key: string, level: 2 | 3 = 2) =>
     docHeadingRecipe({ level, missing: missingKeys.has(key) });
+
   const ackClass = (key: string) => cx(ackRow, missingKeys.has(key) ? ackMissing : undefined);
 
   return (
@@ -840,6 +896,7 @@ export function ReportPageForm({
                     className={missingLink}
                     onClick={() => {
                       const first = missing[0];
+
                       if (first !== undefined) focusTarget(first.target);
                     }}
                   >
@@ -867,6 +924,7 @@ export function ReportPageForm({
               onDelete={(id) => {
                 setItems((current) => {
                   const rest = current.filter((item) => item.id !== id);
+
                   return rest.length > 0 ? rest : itemsFromInput({ ...input, measurements: [] });
                 });
                 setFileItem(null);

@@ -19,11 +19,14 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
       editorNote: report.editorNote ?? "",
     },
   });
+
   const values = useStore(form.store, (state) => state.values);
+
   const [state, formAction, pending] = useActionState(
     updateUsageReportEditorialAction,
     initialAdminActionState,
   );
+
   const editable = report.status === "pending";
 
   return (
@@ -39,6 +42,7 @@ export function UsageReportEditorialForm({ report }: { report: UsageReportEditor
           "editorNote",
         ] as const) {
           const value = restored.get(name)?.[0];
+
           if (value !== undefined) form.setFieldValue(name, value);
         }
       }}

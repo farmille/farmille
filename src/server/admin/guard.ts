@@ -34,6 +34,7 @@ export async function requireAdminAccount(): Promise<Result<{ userId: string }>>
   const user = await getSessionUser();
 
   if (user === null) return fail("unauthorized");
+
   if (user.accountType !== "admin") return fail("forbidden");
 
   return succeed({ userId: user.userId });

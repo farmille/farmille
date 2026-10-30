@@ -74,17 +74,22 @@ async function loadGenreNames(
       "material_id, ingredient_category:ingredient_categories!material_ingredient_categories_ingredient_category_id_fkey(name, sort_order)",
     )
     .in("material_id", materialIds);
+
   if (error !== null || data === null) {
     reportQueryError("資材ジャンルの取得に失敗", error);
+
     return fail("internal");
   }
 
   const itemsByMaterial = new Map<string, Array<{ name: string; sort_order: number }>>();
+
   for (const relation of data) {
     if (relation.ingredient_category === null) {
       reportQueryError("資材ジャンルの参照先が無い", relation);
+
       return fail("internal");
     }
+
     const items = itemsByMaterial.get(relation.material_id) ?? [];
     items.push(relation.ingredient_category);
     itemsByMaterial.set(relation.material_id, items);
@@ -108,6 +113,7 @@ export async function isMaterialSaved(
   userId: string,
 ): Promise<Result<boolean>> {
   const supabase = await createServerSupabase();
+
   const { data, error } = await supabase
     .from("saved_materials")
     .select("id")
@@ -117,6 +123,7 @@ export async function isMaterialSaved(
 
   if (error !== null) {
     reportQueryError("保存状態の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -128,6 +135,7 @@ export async function toggleSavedMaterial(
   userId: string,
 ): Promise<Result<boolean>> {
   const supabase = await createServerSupabase();
+
   const { data: material, error: materialError } = await supabase
     .from("materials")
     .select("id")
@@ -136,6 +144,7 @@ export async function toggleSavedMaterial(
 
   if (materialError !== null) {
     reportQueryError("保存対象資材の確認に失敗", materialError);
+
     return fail("internal");
   }
 
@@ -152,6 +161,7 @@ export async function toggleSavedMaterial(
 
   if (savedError !== null) {
     reportQueryError("保存状態の取得に失敗", savedError);
+
     return fail("internal");
   }
 
@@ -164,6 +174,7 @@ export async function toggleSavedMaterial(
 
     if (error !== null) {
       reportQueryError("資材の保存解除に失敗", error);
+
       return fail("internal");
     }
 
@@ -177,6 +188,7 @@ export async function toggleSavedMaterial(
 
   if (error !== null) {
     reportQueryError("資材の保存に失敗", error);
+
     return fail("internal");
   }
 
@@ -189,6 +201,7 @@ export async function listSavedMaterials(
   options?: { limit?: number },
 ): Promise<Result<readonly SavedMaterialItem[]>> {
   const supabase = await createServerSupabase();
+
   let query = supabase
     .from("saved_materials")
     .select(
@@ -221,20 +234,24 @@ export async function listSavedMaterials(
 
   if (error !== null) {
     reportQueryError("お気に入りの取得に失敗", error);
+
     return fail("internal");
   }
 
   const rows: SavedMaterialQueryRow[] = data;
+
   const genres = await loadGenreNames(
     supabase,
     rows.flatMap(({ material }) => (material === null ? [] : [material.id])),
   );
+
   if (!genres.ok) return genres;
   const items: SavedMaterialItem[] = [];
 
   for (const row of rows) {
     if (row.material === null) {
       reportQueryError("お気に入りの資材関連が欠落", { savedId: row.id });
+
       return fail("internal");
     }
 
@@ -261,6 +278,7 @@ export async function listSavedMaterials(
 /** お気に入りから1件解除する。 */
 export async function unsaveMaterial(materialId: string, userId: string): Promise<Result<null>> {
   const supabase = await createServerSupabase();
+
   const { error } = await supabase
     .from("saved_materials")
     .delete()
@@ -269,6 +287,7 @@ export async function unsaveMaterial(materialId: string, userId: string): Promis
 
   if (error !== null) {
     reportQueryError("お気に入りの解除に失敗", error);
+
     return fail("internal");
   }
 
@@ -293,6 +312,7 @@ export async function listMaterialsForCompare(
   }
 
   const supabase = await createServerSupabase();
+
   const { data: savedRows, error: savedError } = await supabase
     .from("saved_materials")
     .select("material_id")
@@ -301,6 +321,7 @@ export async function listMaterialsForCompare(
 
   if (savedError !== null) {
     reportQueryError("比較対象の保存確認に失敗", savedError);
+
     return fail("internal");
   }
 
@@ -325,6 +346,7 @@ export async function listMaterialsForCompare(
 
   if (error !== null) {
     reportQueryError("比較資材の取得に失敗", error);
+
     return fail("internal");
   }
 
@@ -342,23 +364,31 @@ export async function listMaterialsForCompare(
   const rows: CompareQueryRow[] = data;
   const byId = new Map(rows.map((row) => [row.id, row]));
   const options = await listClassificationOptions();
+
   if (!options.ok) return options;
+
   const detailResults = await Promise.all(
     uniqueIds.map((materialId) => getMaterialWithSupabase(supabase, materialId, options.data)),
   );
+
   const detailById = new Map(
     detailResults.flatMap((result) => (result.ok ? [[result.data.id, result.data] as const] : [])),
   );
+
   if (detailResults.some((result) => !result.ok)) return fail("internal");
   const items: CompareMaterialItem[] = [];
 
   for (const id of uniqueIds) {
     const row = byId.get(id);
+
     if (row === undefined) {
       return fail("not_found");
     }
+
     const detail = detailById.get(id);
+
     if (detail === undefined) return fail("not_found");
+
     const tags = [
       ...detail.effects.map(({ id, name }) => ({ id, name, category: "effect" })),
       ...detail.targetCrops.map(({ id, name }) => ({ id, name, category: "crop" })),

@@ -19,8 +19,10 @@ const GAP = 12;
 function isFixed(element: Element): boolean {
   for (let node: Element | null = element; node !== null; node = node.parentElement) {
     const position = getComputedStyle(node).position;
+
     if (position === "fixed" || position === "sticky") return true;
   }
+
   return false;
 }
 
@@ -30,16 +32,21 @@ function isFixed(element: Element): boolean {
  */
 export function bringIntoView(target: Element): () => void {
   if (isFixed(target)) return () => {};
+
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   const bring = () => {
     const r = target.getBoundingClientRect();
+
     if (r.top >= 0 && r.bottom <= window.innerHeight * 0.6) return;
     window.scrollBy({
       top: r.top - window.innerHeight * 0.22,
       behavior: reduce ? "auto" : "smooth",
     });
   };
+
   const timers = [0, 400, 1000].map((delay) => window.setTimeout(bring, delay));
+
   return () => timers.forEach((timer) => window.clearTimeout(timer));
 }
 
@@ -55,17 +62,21 @@ export function watchSpot(
 ): () => void {
   const anchor: Anchor = isFixed(target) ? "viewport" : "page";
   let frame = 0;
+
   const measure = () => {
     frame = 0;
     const r = target.getBoundingClientRect();
     const cardHeight = card.offsetHeight;
+
     if (anchor === "viewport") {
       const viewport = window.innerHeight;
       const top = Math.max(6, r.top - PAD);
       const bottom = Math.min(viewport - 6, r.bottom + PAD);
       const below = bottom + GAP;
+
       const cardTop =
         below + cardHeight < viewport - GAP ? below : Math.max(GAP, top - GAP - cardHeight);
+
       setBox({
         anchor,
         top,
@@ -74,8 +85,10 @@ export function watchSpot(
         height: bottom - top,
         cardTop,
       });
+
       return;
     }
+
     const top = r.top + window.scrollY - PAD;
     const bottom = r.bottom + window.scrollY + PAD;
     // ページに置いた枠は横スクロールを生むので、左右は画面の幅に収める
@@ -93,18 +106,23 @@ export function watchSpot(
       cardTop,
     });
   };
+
   const schedule = () => {
     if (frame === 0) frame = requestAnimationFrame(measure);
   };
+
   measure();
+
   if (anchor === "viewport") {
     window.addEventListener("scroll", schedule, { capture: true, passive: true });
   }
+
   window.addEventListener("resize", schedule);
   // ページの中の対象は、上の要素が読み込まれて位置がずれたときにも測り直す
   const observer = new ResizeObserver(schedule);
   observer.observe(target);
   observer.observe(document.body);
+
   return () => {
     cancelAnimationFrame(frame);
     window.removeEventListener("scroll", schedule, { capture: true });

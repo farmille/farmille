@@ -11,13 +11,18 @@ export const metadata: Metadata = { title: "個人プロフィールの設定", 
 
 export default async function ProfileSetupPage() {
   const session = authorizeGeneralUser(await getSessionUser());
+
   if (!session.ok) {
     if (session.error === "unauthorized") redirect("/login?next=%2Fme%2Fsetup");
     redirect("/me");
   }
+
   const profile = await getOwnProfile(session.data.userId);
+
   if (profile.ok) redirect("/me");
+
   if (profile.error !== "not_found") throw new Error(errorMessageJa[profile.error]);
+
   return (
     <AuthScreen
       title="個人プロフィールの設定"

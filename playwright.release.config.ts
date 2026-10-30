@@ -4,6 +4,7 @@ import { defineConfig } from "@playwright/test";
 // FARMILLE_RELEASE_TEST_URL=https://www.farmille.com FARMILLE_RELEASE_SECRET_FILE=<接続キーのファイル> pnpm exec playwright test --config playwright.release.config.ts
 // 認証情報を残さないよう、trace・動画・自動スクリーンショットは保存しない。
 const baseURL = process.env.FARMILLE_RELEASE_TEST_URL;
+
 if (
   baseURL !== "https://www.farmille.com" &&
   baseURL !== "https://farmille-git-rebuild-m0-farmille.vercel.app"

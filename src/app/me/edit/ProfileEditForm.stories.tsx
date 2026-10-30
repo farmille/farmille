@@ -38,6 +38,7 @@ const meta = {
 } satisfies Meta<typeof ProfileEditForm>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
@@ -60,6 +61,7 @@ export const RestoredAfterError: Story = {
       status: "error",
       message: "ニックネームが重複しています。",
     });
+
     return () => {
       sessionStorage.removeItem(key);
       mocked(updateProfileAction).mockReset();

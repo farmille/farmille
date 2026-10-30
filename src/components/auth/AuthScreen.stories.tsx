@@ -90,6 +90,7 @@ const meta = {
 } satisfies Meta<typeof AuthScreen>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 /** 上にほかの画面と同じ共通ヘッダーと準備中のお知らせを出し、その下に画面名を置く。 */

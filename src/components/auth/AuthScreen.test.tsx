@@ -15,6 +15,7 @@ describe("AuthScreen", () => {
 
     const logos = screen.getAllByRole("link", { name: "Farmille" });
     expect(logos.length).toBeGreaterThan(0);
+
     for (const logo of logos) expect(logo).toHaveAttribute("href", "/");
     expect(screen.getByRole("button", { name: "メニュー" })).toBeInTheDocument();
     const notice = screen.getByRole("complementary", { name: "公開準備中のお知らせ" });

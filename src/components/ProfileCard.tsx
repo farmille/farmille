@@ -11,6 +11,7 @@ import { css, cva, cx } from "../../styled-system/css";
 
 function linkLabel(url: string): string {
   const parsed = URL.parse(url);
+
   return parsed === null ? url : parsed.hostname.replace(/^www\./, "");
 }
 
@@ -152,6 +153,7 @@ export function ProfileCard({
 }: ProfileCardProps) {
   const standpoint = STANDPOINTS.find((item) => item.value === details.standpoint)?.label;
   const prefecture = PREFECTURES.find((item) => item.code === details.prefecture_code)?.name;
+
   const hasDetails =
     Boolean(details.bio) ||
     standpoint !== undefined ||

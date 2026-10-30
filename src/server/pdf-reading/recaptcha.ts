@@ -19,27 +19,38 @@ export async function verifyRecaptcha(
   fetcher: typeof fetch = fetch,
 ): Promise<boolean> {
   let body: unknown;
+
   try {
     const response = await fetcher(VERIFY_URL, {
       method: "POST",
       body: new URLSearchParams({ secret, response: token }),
     });
+
     if (!response.ok) {
       console.error("[pdf-reading] reCAPTCHA の検証に失敗", response.status);
+
       return false;
     }
+
     body = await response.json();
   } catch (error) {
     console.error("[pdf-reading] reCAPTCHA の検証に失敗", error);
+
     return false;
   }
+
   const result = v.safeParse(SiteverifySchema, body);
+
   if (!result.success) {
     console.error("[pdf-reading] reCAPTCHA の応答の形式が不正", v.summarize(result.issues));
+
     return false;
   }
+
   const { success, score, action } = result.output;
+
   if (!success) console.error("[pdf-reading] reCAPTCHA が拒否", result.output["error-codes"]);
+
   return (
     success && action === PDF_READING_RECAPTCHA_ACTION && score !== undefined && score >= MIN_SCORE
   );

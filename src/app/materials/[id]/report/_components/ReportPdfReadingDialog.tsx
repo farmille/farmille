@@ -63,8 +63,10 @@ function ElapsedSeconds({ startedAt }: { startedAt: number }) {
   const [now, setNow] = useReducer((_current: number, next: number) => next, startedAt);
   useMountEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
+
     return () => window.clearInterval(timer);
   });
+
   return <p className={elapsed}>{Math.max(0, Math.round((now - startedAt) / 1000))}秒経過</p>;
 }
 
@@ -104,6 +106,7 @@ export function ReportPdfReadingDialog({
     trial: defaultTrial,
     consent: false,
   };
+
   const form = useForm({ defaultValues });
   const { file, trial, consent } = useStore(form.store, (state) => state.values);
   const setFile = (value: File | null) => form.setFieldValue("file", value);
@@ -111,10 +114,12 @@ export function ReportPdfReadingDialog({
   const setConsent = (value: boolean) => form.setFieldValue("consent", value);
   const [tried, setTried] = useReducer((_current: boolean, next: boolean) => next, false);
   const [phase, setPhase] = useReducer((_current: Phase, next: Phase) => next, "idle");
+
   const [problem, setProblem] = useReducer(
     (_current: string | null, next: string | null) => next,
     null,
   );
+
   const [startedAt, setStartedAt] = useReducer((_current: number, next: number) => next, 0);
   useMountEffect(() => {
     // 先読みの失敗は操作を妨げず、送信時のexecuteRecaptchaで再試行して利用者に知らせる。
@@ -124,14 +129,20 @@ export function ReportPdfReadingDialog({
   async function choose(next: File | undefined) {
     setFile(null);
     setProblem(null);
+
     if (next === undefined) return;
+
     if (!isPdf(next) || next.size > REPORT_PDF_LIMITS.bytes) {
       setProblem(isPdf(next) ? LIMIT_MESSAGE : "PDFファイルを選んでください。");
+
       return;
     }
+
     setPhase("checking");
+
     try {
       const pages = await countPdfPages(next);
+
       if (pages > REPORT_PDF_LIMITS.pages) setProblem(LIMIT_MESSAGE);
       else setFile(next);
     } catch {
@@ -146,6 +157,7 @@ export function ReportPdfReadingDialog({
     let result: PdfReadingResult;
     // Server Action を呼ぶ前に止めたら、上げた PDF はサーバーが消さないので、ここで消す
     let unsent: string | null = null;
+
     try {
       setPhase("uploading");
       const uploadPath = await uploadPdfForReading(file, userId);
@@ -163,6 +175,7 @@ export function ReportPdfReadingDialog({
         trial: trial.trim(),
         consent: true,
       });
+
       // 読み取りの前に断られると、サーバーは PDF を消さない（消してあれば何もしない）
       if (!result.ok) await discardPdfForReading(uploadPath);
     } catch {
@@ -179,7 +192,9 @@ export function ReportPdfReadingDialog({
     } finally {
       setPhase("idle");
     }
+
     onRead(result);
+
     return result;
   }
 
@@ -188,21 +203,26 @@ export function ReportPdfReadingDialog({
     { file: File; trial: string }
   >(async (_previous, request) => {
     const result = await performRead(request.file, request.trial);
+
     return { file: request.file, result };
   }, null);
 
   function read() {
     setTried(true);
+
     if (file === null || !consent || busy || pdfReadingTrialError(trial) !== undefined) return;
     setProblem(null);
     startTransition(() => dispatchRead({ file, trial }));
   }
 
   const used = remaining <= 0;
+
   const error =
     problem ??
     (!busy && reading?.file === file && !reading.result.ok ? reading.result.message : null);
+
   const step = STEPS.findIndex((item) => item.phase === phase);
+
   return (
     <Dialog
       open

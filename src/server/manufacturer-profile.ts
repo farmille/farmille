@@ -5,6 +5,7 @@ import { createServerSupabase } from "@/server/supabase";
 
 export async function getManufacturerProfileEditor(sellerId: string) {
   const db = await createServerSupabase();
+
   const [seller, versions] = await Promise.all([
     db
       .from("seller_accounts")
@@ -17,13 +18,16 @@ export async function getManufacturerProfileEditor(sellerId: string) {
       .eq("seller_id", sellerId)
       .order("created_at", { ascending: false }),
   ]);
+
   if (seller.error || versions.error)
     throw new Error("メーカープロフィールを取得できませんでした。");
+
   return { seller: seller.data, versions: versions.data };
 }
 
 export async function getManufacturerProfileVersion(id: string) {
   const db = await createServerSupabase();
+
   const { data, error } = await db
     .from("manufacturer_profile_versions")
     .select(
@@ -31,7 +35,9 @@ export async function getManufacturerProfileVersion(id: string) {
     )
     .eq("id", id)
     .maybeSingle();
+
   if (error) throw new Error("保存したメーカープロフィールを取得できませんでした。");
+
   return data;
 }
 
@@ -39,6 +45,7 @@ export async function saveManufacturerProfileVersion(
   input: v.InferOutput<typeof SaveManufacturerProfileSchema>,
 ) {
   const db = await createServerSupabase();
+
   return db.rpc("save_manufacturer_profile_version", {
     p_profile_text: input.content.profileText,
     p_logo_url: input.content.logoUrl,
@@ -50,5 +57,6 @@ export async function saveManufacturerProfileVersion(
 
 export async function withdrawManufacturerProfileVersion(versionId: string) {
   const db = await createServerSupabase();
+
   return db.rpc("withdraw_manufacturer_profile_version", { p_version_id: versionId });
 }

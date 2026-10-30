@@ -4,6 +4,7 @@ export function cultivationTypeFromLabel(label: string | null): CultivationType 
   if (label === null) return "";
 
   const option = CULTIVATION_TYPES.find((type) => type.label === label || type.value === label);
+
   if (option === undefined) {
     throw new Error(`未対応の栽培形態です：${label}`);
   }
@@ -21,6 +22,7 @@ export function cultivationTypeDisplayLabel(value: string | null): string | null
 
   const type = cultivationTypeFromLabel(value);
   const label = cultivationTypeLabel(type);
+
   if (label === null) {
     throw new Error(`未対応の栽培形態です：${value}`);
   }

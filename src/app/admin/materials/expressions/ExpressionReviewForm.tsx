@@ -24,6 +24,7 @@ export function ExpressionReviewForm({
   const form = useForm({ defaultValues: { note: "" } });
   const note = useStore(form.store, (state) => state.values.note);
   const router = useRouter();
+
   const [{ result, recordedNote }, review, pending] = useActionState(
     async (
       previous: ReviewState,
@@ -32,11 +33,14 @@ export function ExpressionReviewForm({
       const result = await (
         kind === "material" ? reviewMaterialPageAction : reviewManufacturerProfileAction
       )({ versionId, ...input });
+
       if (result.ok) router.refresh();
+
       return { result, recordedNote: result.ok ? input.note : previous.recordedNote };
     },
     { result: null, recordedNote: "" },
   );
+
   const persistedInput = (
     <PersistedInput
       name="expression-review"
@@ -45,9 +49,11 @@ export function ExpressionReviewForm({
       restore={(value) => form.setFieldValue("note", value)}
     />
   );
+
   function submit(publish: boolean) {
     startTransition(() => review({ publish, note }));
   }
+
   return (
     <div className={materialPageStack}>
       {persistedInput}

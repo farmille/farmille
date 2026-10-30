@@ -9,5 +9,6 @@ export function initialPostsTab(
   counts: { reports: number; reviews: number },
 ): PostsTab {
   if (requested === "reports" || requested === "reviews") return requested;
+
   return counts.reports === 0 && counts.reviews > 0 ? "reviews" : "reports";
 }

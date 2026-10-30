@@ -23,6 +23,7 @@ function WithTarget(props: Omit<TourTipProps, "target">) {
     (_current: Element | null, next: Element | null) => next,
     null,
   );
+
   return (
     <>
       <div ref={setTarget} className={fieldStyle}>
@@ -41,6 +42,7 @@ const meta = {
 } satisfies Meta<typeof TourTip>;
 
 export default meta;
+
 type Story = StoryObj<typeof meta>;
 
 export const WithPrimary: Story = {

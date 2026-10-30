@@ -11,10 +11,12 @@ import { readingColumn } from "../../_components/dashboard-styles";
 
 export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
   if (!(await applicationSellerPage(`/dashboard/applications/${id}`)))
     return <SellerAccessDenied />;
   const receipt = await readCompanyApplication(id);
   const kind = v.safeParse(applicationKindSchema, receipt.application.kind);
+
   return (
     <FormPageShell chrome="seller" title="申請受付票" backHref="/dashboard/applications">
       <div className={readingColumn}>

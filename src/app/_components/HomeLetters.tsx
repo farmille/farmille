@@ -131,6 +131,7 @@ export function HomeLetters() {
         <ul className={list}>
           {supportLetters.map((letter, index) => {
             const placement = placements[index % placements.length];
+
             return (
               <li className={item} key={letter.role}>
                 <Reveal delay={placement.delay} effect="settle">

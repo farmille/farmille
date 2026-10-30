@@ -16,32 +16,40 @@ function recordingSteps(
 ) {
   const calls: string[] = [];
   const result = (name: ResultStep): Result<null> => failures[name] ?? succeed(null);
+
   const steps: WithdrawalSteps = {
     async verifyPassword(target, password) {
       calls.push(`verifyPassword:${target.email}:${password}`);
+
       return result("verifyPassword");
     },
     async withdrawProfile(userId) {
       calls.push(`withdrawProfile:${userId}`);
+
       return result("withdrawProfile");
     },
     async removeAvatars(userId) {
       calls.push(`removeAvatars:${userId}`);
+
       return result("removeAvatars");
     },
     async deleteAuthUser(userId) {
       calls.push(`deleteAuthUser:${userId}`);
+
       return result("deleteAuthUser");
     },
     async sendCompletionEmail(email) {
       calls.push(`sendCompletionEmail:${email}`);
+
       return failures.sendCompletionEmail !== false;
     },
     async signOut() {
       calls.push("signOut");
+
       return result("signOut");
     },
   };
+
   return { steps, calls };
 }
 
@@ -92,6 +100,7 @@ describe("退会の手順", () => {
       sendCompletionEmail: false,
       signOut: fail("internal"),
     });
+
     expect(await withdrawMember(account, "current-password", steps)).toEqual(succeed(null));
     expect(calls).toEqual(FULL_ORDER);
   });

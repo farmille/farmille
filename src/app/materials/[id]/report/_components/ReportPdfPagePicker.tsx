@@ -78,25 +78,31 @@ function PdfThumbnailQueue({
   const queue = useRef<{ stopped: boolean } | null>(null);
   useMountEffect(() => {
     const running = queue.current;
+
     if (running !== null) {
       running.stopped = false;
+
       return () => {
         running.stopped = true;
       };
     }
+
     const state = { stopped: false };
     queue.current = state;
     void (async () => {
       for (let page = 1; page <= doc.numPages; page++) {
         const canvas = await renderPdfThumb(doc, page);
+
         if (state.stopped) return;
         onThumbnail({ page, url: canvas.toDataURL("image/jpeg", 0.7) });
       }
     })();
+
     return () => {
       state.stopped = true;
     };
   });
+
   return null;
 }
 
@@ -119,12 +125,16 @@ export function ReportPdfPagePicker({
     (current: Record<number, string>, next: Thumbnail) => ({ ...current, [next.page]: next.url }),
     {},
   );
+
   const [selected, togglePage] = useReducer((previous: ReadonlySet<number>, page: number) => {
     const next = new Set(previous);
+
     if (next.has(page)) next.delete(page);
     else next.add(page);
+
     return next;
   }, new Set<number>());
+
   const count = doc === null ? 0 : doc.numPages;
   const full = selected.size >= max;
 
