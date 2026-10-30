@@ -3,15 +3,13 @@
 import { css, cx } from "../../../styled-system/css";
 import { Icon } from "../Icon";
 import { TourCardBody } from "./TourCardBody";
+import { bottomSpaceStyle, dockStyle, riseStyle } from "./tour-motion";
 import {
-  bottomSpaceStyle,
-  dockStyle,
-  riseStyle,
   useBottomSpace,
   useCardHandoff,
   useEntered,
   useHandoff,
-} from "./tour-motion";
+} from "@/lib/hooks/use-onboarding-motion";
 
 const barStyle = css({
   display: "flex",

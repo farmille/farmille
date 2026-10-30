@@ -1,3 +1,4 @@
+import { parseAsStringLiteral } from "nuqs/server";
 import type { ReviewSort } from "@/server/queries/reviews";
 
 export const REVIEW_SORT_OPTIONS: ReadonlyArray<{
@@ -8,6 +9,10 @@ export const REVIEW_SORT_OPTIONS: ReadonlyArray<{
   { value: "helpful", label: "参考になった順" },
   { value: "rating", label: "星の高い順" },
 ];
+
+export const reviewSortParser = parseAsStringLiteral(
+  REVIEW_SORT_OPTIONS.map((option) => option.value),
+).withDefault("newest");
 
 type ReviewSearchParams = {
   sort?: string | string[];
@@ -27,7 +32,7 @@ export function parseReviewSearchParams(
   searchParams: ReviewSearchParams,
 ): ParsedReviewSearchParams {
   const requestedSort = firstValue(searchParams.sort);
-  const sort = REVIEW_SORT_OPTIONS.find(({ value }) => value === requestedSort)?.value ?? "newest";
+  const sort = reviewSortParser.parseServerSide(requestedSort);
   const requestedPage = Number(firstValue(searchParams.page));
   const page = Number.isInteger(requestedPage) && requestedPage >= 1 ? requestedPage : 1;
 

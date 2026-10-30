@@ -1,6 +1,7 @@
 import type { Preview } from "@storybook/nextjs-vite";
 import { sb } from "storybook/test";
 import { createElement, Fragment } from "react";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { Toaster } from "../src/components/Toaster";
 
 import "gen-interface-jp/400.css";
@@ -167,6 +168,11 @@ const ROUTE_STORY_FILE = /\/(Page|Error|NotFound|Loading)\.stories\.tsx$/;
 const preview: Preview = {
   tags: ["autodocs"],
   decorators: [
+    (Story) => (
+      <NuqsTestingAdapter hasMemory>
+        <Story />
+      </NuqsTestingAdapter>
+    ),
     (Story, context) =>
       ROUTE_STORY_FILE.test(context.parameters.fileName)
         ? createElement(Fragment, null, createElement(Story), createElement(Toaster))

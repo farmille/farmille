@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertDialog } from "@base-ui/react/alert-dialog";
-import { useRef, useState, useTransition, type ReactElement, type ReactNode } from "react";
+import { useRef, useReducer, useTransition, type ReactElement, type ReactNode } from "react";
 
 import { Button, buttonRecipe } from "./Button";
 import { dialogRecipe } from "./Dialog";
@@ -61,7 +61,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
     tone = "danger",
     alternative,
   } = props;
-  const [ownOpen, setOwnOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useReducer((_current: boolean, next: boolean) => next, false);
   const [confirming, startConfirming] = useTransition();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);

@@ -1,6 +1,6 @@
 "use client";
 import * as v from "valibot";
-import { useState, type FormEvent } from "react";
+import { useReducer, type FormEvent } from "react";
 
 import { receiptAccessSchema } from "@/lib/company-application";
 import { errorMessageJa } from "@/server/errors";
@@ -10,9 +10,9 @@ import { Form, FormActions, Input, Notice, SubmitButton } from "@/components/for
 import { requestReceiptVerification } from "../actions";
 
 export function VerificationForm() {
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-  const [failed, setFailed] = useState(false);
+  const [busy, setBusy] = useReducer((_state: boolean, next: boolean) => next, false);
+  const [message, setMessage] = useReducer((_state: string, next: string) => next, "");
+  const [failed, setFailed] = useReducer((_state: boolean, next: boolean) => next, false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);

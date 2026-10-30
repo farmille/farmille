@@ -1,8 +1,10 @@
 "use client";
 
+import { useForm, useStore } from "@tanstack/react-form";
+
 import { Field as BaseField } from "@base-ui/react/field";
 import { OTPInput, OTPInputContext, REGEXP_ONLY_DIGITS, type SlotProps } from "input-otp";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 
 import { css, cva } from "../../../styled-system/css";
 import { useFieldRequired } from "./field-context";
@@ -79,7 +81,8 @@ export function OtpInput(props: OtpInputProps) {
 
 function OtpInputBody({ name, disabled }: OtpInputBodyProps) {
   const required = useFieldRequired();
-  const [code, setCode] = useState("");
+  const form = useForm({ defaultValues: { code: "" } });
+  const code = useStore(form.store, (state) => state.values.code);
 
   return (
     <BaseField.Control
@@ -94,7 +97,7 @@ function OtpInputBody({ name, disabled }: OtpInputBodyProps) {
           containerClassName={containerStyle}
           inputMode="numeric"
           maxLength={CODE_LENGTH}
-          onChange={setCode}
+          onChange={(next) => form.setFieldValue("code", next)}
           pattern={REGEXP_ONLY_DIGITS}
           value={code}
         >

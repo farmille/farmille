@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useReducer } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useReportReadingProgress } from "@/lib/hooks/use-report-reading-progress";
+import { useRecaptcha } from "@/lib/hooks/use-recaptcha";
 
 import { readPdfIntoReportAction } from "@/app/materials/[id]/report/new/actions";
 import { Button } from "@/components/Button";
@@ -13,7 +16,7 @@ import {
   pdfReadingTrialError,
   type PdfReadingResult,
 } from "@/lib/pdf-reading";
-import { executeRecaptcha, loadRecaptcha } from "@/lib/recaptcha-client";
+import { executeRecaptcha } from "@/lib/recaptcha-client";
 import { REPORT_PDF_LIMITS, type UsageReportInput } from "@/lib/usage-report";
 import { errorMessageJa } from "@/server/errors";
 
@@ -25,6 +28,8 @@ import {
   isPdf,
   uploadPdfForReading,
 } from "./report-page-images";
+
+type PdfReadingInput = { file: File | null; trial: string; consent: boolean };
 
 type Phase = "idle" | "checking" | "uploading" | "verifying" | "reading";
 
@@ -85,26 +90,26 @@ export function ReportPdfReadingDialog({
   replaces: boolean;
   onRead: (result: PdfReadingResult) => void;
 }) {
-  const [file, setFile] = useState<File | null>(null);
-  const [trial, setTrial] = useState(defaultTrial);
-  const [tried, setTried] = useState(false);
-  const [consent, setConsent] = useState(false);
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [problem, setProblem] = useState<string | null>(null);
-  const [startedAt, setStartedAt] = useState(0);
-  const [now, setNow] = useState(0);
+  const defaultValues: PdfReadingInput = {
+    file: null,
+    trial: defaultTrial,
+    consent: false,
+  };
+  const form = useForm({ defaultValues });
+  const { file, trial, consent } = useStore(form.store, (state) => state.values);
+  const setFile = (value: File | null) => form.setFieldValue("file", value);
+  const setTrial = (value: string) => form.setFieldValue("trial", value);
+  const setConsent = (value: boolean) => form.setFieldValue("consent", value);
+  const [tried, setTried] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [phase, setPhase] = useReducer((_current: Phase, next: Phase) => next, "idle");
+  const [problem, setProblem] = useReducer(
+    (_current: string | null, next: string | null) => next,
+    null,
+  );
+  const [startedAt, setStartedAt] = useReducer((_current: number, next: number) => next, 0);
   const busy = phase !== "idle" && phase !== "checking";
-
-  useEffect(() => {
-    // reCAPTCHA の script はこの画面を開いたときだけ読み込む。失敗は送るときに知らせる
-    loadRecaptcha(siteKey).catch(() => undefined);
-  }, [siteKey]);
-
-  useEffect(() => {
-    if (!busy) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [busy]);
+  useRecaptcha(siteKey);
+  const { now, setNow } = useReportReadingProgress(busy);
 
   async function choose(next: File | undefined) {
     setFile(null);

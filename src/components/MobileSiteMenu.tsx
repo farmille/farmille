@@ -2,7 +2,7 @@
 
 import { Dialog as BaseDialog } from "@base-ui/react/dialog";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useReducer } from "react";
 
 import { css, cva } from "../../styled-system/css";
 import { BrandMark } from "./BrandMark";
@@ -168,8 +168,8 @@ type MobileSiteMenuProps = {
 
 /** SP ヘッダーの右端に置くメニュー。PC ヘッダーと同じサイトメニューとアカウントの項目を、深い緑の面に並べる。 */
 export function MobileSiteMenu({ links, member }: MobileSiteMenuProps) {
-  const [open, setOpen] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
+  const [open, setOpen] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [signedIn, setSignedIn] = useReducer((_current: boolean, next: boolean) => next, false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const isMember = member ?? signedIn;
   // 同じ画面へのリンクでは画面が切り替わらないので、押したら自分で閉じる

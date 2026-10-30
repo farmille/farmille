@@ -5,17 +5,13 @@ import { Button } from "@/components/Button";
 import { css, cx } from "../../../styled-system/css";
 import { TourEndButton } from "./TourEndButton";
 import { TourLabel } from "./TourLabel";
+import { bottomSpaceStyle, dockStyle, riseStyle, sentenceStyle, sentences } from "./tour-motion";
 import {
-  bottomSpaceStyle,
-  dockStyle,
-  riseStyle,
-  sentenceStyle,
-  sentences,
   useBottomSpace,
   useCardHandoff,
   useEntered,
   useHandoff,
-} from "./tour-motion";
+} from "@/lib/hooks/use-onboarding-motion";
 
 const scrimStyle = css({
   position: "fixed",

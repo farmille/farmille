@@ -1,6 +1,7 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import Script from "next/script";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { Toaster } from "@/components/Toaster";
 import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
@@ -45,11 +46,13 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body>
-        {/* 中身が短い画面でも、フッターを画面の下端より上へ上げない */}
-        <div className={css({ minH: "dvh" })}>{children}</div>
-        <SiteFooter />
-        <OnboardingTour />
-        <Toaster />
+        <NuqsAdapter>
+          {/* 中身が短い画面でも、フッターを画面の下端より上へ上げない */}
+          <div className={css({ minH: "dvh" })}>{children}</div>
+          <SiteFooter />
+          <OnboardingTour />
+          <Toaster />
+        </NuqsAdapter>
       </body>
       <Script id="adobe-fonts" strategy="afterInteractive">
         {adobeFontsLoader}

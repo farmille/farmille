@@ -3,7 +3,7 @@
 import { Icon } from "@/components/Icon";
 
 import { css } from "../../../styled-system/css";
-import { useEntered } from "./tour-motion";
+import { useEntered } from "@/lib/hooks/use-onboarding-motion";
 
 const boxStyle = css({
   position: "fixed",

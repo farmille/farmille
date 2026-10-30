@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
+import { useHomeReveal } from "@/lib/hooks/use-home-reveal";
 
 import { cva, cx, type RecipeVariantProps } from "../../../styled-system/css";
-
-/** 要素の上端が画面の下から 12% 入ったところで現す。 */
-const ROOT_MARGIN = "0px 0px -12% 0px";
 
 /**
  * 隠すのは JS が動く環境だけにし、data-revealed が付いたら元の位置へ戻す。
@@ -49,23 +47,7 @@ type RevealProps = NonNullable<RecipeVariantProps<typeof revealRecipe>> & {
  * 子孫は `_revealedWithin` の条件で同じ合図を受け取り、下線や文字の動きを続けられる。
  */
 export function Reveal({ effect, delay, className, children }: RevealProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [revealed, setRevealed] = useState(false);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (element === null) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        setRevealed(true);
-        observer.disconnect();
-      },
-      { rootMargin: ROOT_MARGIN },
-    );
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
+  const { ref, revealed } = useHomeReveal();
 
   return (
     <div

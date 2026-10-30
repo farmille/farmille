@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState, useState, type ReactNode } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+
+import { useActionState, type ReactNode } from "react";
 
 import { signupAction } from "@/app/signup/actions";
 import {
@@ -53,7 +55,8 @@ export function SignupForm({
   const [state, formAction] = useActionState(signupAction, initialAuthFormState);
   const values = submittedValuesOf(state);
   // パスワードはサーバーから返さず控えにも残さないので、送信後のフォームの reset で消えないよう画面で持つ
-  const [password, setPassword] = useState("");
+  const form = useForm({ defaultValues: { password: "" } });
+  const password = useStore(form.store, (state) => state.values.password);
 
   return (
     <Form
@@ -164,7 +167,7 @@ export function SignupForm({
         requirement="required"
         autoComplete="new-password"
         minLength={PASSWORD_MIN_LENGTH}
-        onChange={(event) => setPassword(event.target.value)}
+        onChange={(event) => form.setFieldValue("password", event.target.value)}
         placeholder="••••••••"
         revealable
         type="password"

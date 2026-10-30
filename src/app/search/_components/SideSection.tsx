@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useContext, useState, type ReactNode } from "react";
+import { Fragment, useContext, useReducer, type ReactNode } from "react";
 
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
 import { Input } from "@/components/form";
@@ -53,7 +53,7 @@ export function SideSection({
   children: ReactNode;
 }) {
   const focus = useContext(FilterFocusContext);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useReducer((_query: string, next: string) => next, "");
   const keyword = normalize(query.trim());
   const hits =
     filter && keyword

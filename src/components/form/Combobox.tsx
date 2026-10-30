@@ -1,8 +1,10 @@
 "use client";
 
+import { useForm, useStore } from "@tanstack/react-form";
+
 import { Combobox as BaseCombobox } from "@base-ui/react/combobox";
 import type { BaseUIEvent } from "@base-ui/react/types";
-import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useMemo, useRef, type KeyboardEvent } from "react";
 
 import { chipRecipe } from "@/components/Chip";
 import { Icon } from "@/components/Icon";
@@ -225,7 +227,9 @@ function MultipleCombobox({
 }: ComboboxCommonProps & MultipleProps) {
   const required = useFieldRequired();
   const enterGuard = useEnterGuard();
-  const [uncontrolled, setUncontrolled] = useState<readonly Option[]>(defaultValue ?? []);
+  const initial: readonly Option[] = defaultValue ?? [];
+  const form = useForm({ defaultValues: { selection: initial } });
+  const uncontrolled = useStore(form.store, (state) => state.values.selection);
   const current = value ?? uncontrolled;
   // Base UI は値の参照が変わるたびに Form のエラーを消す
   const selected = useMemo(() => [...current], [current]);
@@ -246,7 +250,7 @@ function MultipleCombobox({
       onInputValueChange={onInputValueChange}
       onItemHighlighted={enterGuard.onItemHighlighted}
       onValueChange={(next) => {
-        setUncontrolled(next);
+        form.setFieldValue("selection", next);
         onValueChange?.(next);
       }}
       required={required}

@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition, type ReactNode } from "react";
+import { useReducer, type ReactNode } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useReportMaterialSearch } from "@/lib/hooks/use-report-material-search";
 
 import { Checkbox, Input, Notice, SearchInput, Select } from "@/components/form";
 import { DialogClose, Dialog } from "@/components/Dialog";
@@ -10,7 +12,6 @@ import { ToggleGroup } from "@/components/ToggleGroup";
 import {
   findOtherReportForMaterialAction,
   getReportMaterialClassificationsAction,
-  searchReportMaterialsAction,
 } from "@/app/materials/[id]/report/new/actions";
 import { APPLICATION_TIMINGS } from "@/lib/material-page-editor";
 import { PREFECTURES } from "@/lib/prefectures";
@@ -238,53 +239,47 @@ export function ReportPageProperties({
   authorName: string;
   onMessage: (message: string) => void;
 }) {
-  const [picker, setPicker] = useState<Picker>("");
-  const [query, setQuery] = useState("");
-  const [materials, setMaterials] = useState<PostingMaterial[]>([]);
-  const [materialChecks] = useState(latestRequests);
+  const [picker, setPicker] = useReducer((_current: Picker, next: Picker) => next, "");
+  const searchForm = useForm({ defaultValues: { query: "" } });
+  const query = useStore(searchForm.store, (state) => state.values.query);
+  const setQuery = (value: string) => searchForm.setFieldValue("query", value);
+  const { materials, clearMaterials } = useReportMaterialSearch(
+    picker === "material",
+    query,
+    onMessage,
+  );
+  const [materialChecks] = useReducer(
+    (current: ReturnType<typeof latestRequests>) => current,
+    null,
+    latestRequests,
+  );
   const closeMaterialPicker = () => {
     materialChecks.cancel();
     setPicker("");
   };
   // 選んだ資材に同じ利用者の下書きか確認中のレポートがあって、切り替えなかった資材
-  const [blocked, setBlocked] = useState<{
-    material: PostingMaterial;
-    report: "draft" | "pending";
-  } | null>(null);
-  // 資材ごとの登録作物と効果。資材を選び直したら、その資材の分を読み込んで足す
-  const [classes, setClasses] = useState(
+  const [blocked, setBlocked] = useReducer(
+    (
+      _current: { material: PostingMaterial; report: "draft" | "pending" } | null,
+      next: { material: PostingMaterial; report: "draft" | "pending" } | null,
+    ) => next,
+    null,
+  );
+  const [classes, addClasses] = useReducer(
+    (
+      current: Map<string, { cropIds: string[]; effectNames: string[] }>,
+      next: { id: string; data: { cropIds: string[]; effectNames: string[] } },
+    ) => new Map(current).set(next.id, next.data),
+    null,
     () =>
       new Map([[pageMaterialId, { cropIds: materialCropIds, effectNames: materialEffectNames }]]),
   );
-  const [, startSearch] = useTransition();
-
-  useEffect(() => {
-    const text = query.trim();
-    if (picker !== "material" || !text) return;
-    let active = true;
-    const timer = setTimeout(() => {
-      startSearch(async () => {
-        try {
-          const result = await searchReportMaterialsAction(text);
-          if (!active) return;
-          if (result.ok) setMaterials(result.data.slice(0, 20));
-          else onMessage("資材を検索できませんでした。");
-        } catch {
-          if (active) onMessage("資材を検索できませんでした。通信状態を確認してください。");
-        }
-      });
-    }, 250);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [picker, query, onMessage]);
 
   async function loadClasses(materialId: string) {
     if (classes.has(materialId)) return;
     try {
       const result = await getReportMaterialClassificationsAction(materialId);
-      if (result.ok) setClasses((current) => new Map(current).set(materialId, result.data));
+      if (result.ok) addClasses({ id: materialId, data: result.data });
       else onMessage("選んだ資材の登録作物と効果を読み込めませんでした。");
     } catch {
       onMessage("選んだ資材の登録作物と効果を読み込めませんでした。通信状態を確認してください。");
@@ -321,7 +316,7 @@ export function ReportPageProperties({
     if (next === "crop" || next === "purpose") void loadClasses(input.materialId);
     setBlocked(null);
     setQuery("");
-    setMaterials([]);
+    clearMaterials();
     setPicker(next);
   }
 

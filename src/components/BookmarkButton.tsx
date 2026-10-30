@@ -1,7 +1,7 @@
 "use client";
 
 import { Toggle } from "@base-ui/react/toggle";
-import { useState, useTransition } from "react";
+import { useReducer, useTransition } from "react";
 import { Icon } from "./Icon";
 import { css } from "../../styled-system/css";
 
@@ -12,7 +12,7 @@ type BookmarkButtonProps = {
 
 /** 保存処理が成功した状態だけを表示する。送信中の連打を防ぐ。 */
 export function BookmarkButton({ saved, action }: BookmarkButtonProps) {
-  const [isSaved, setSaved] = useState(saved);
+  const [isSaved, setSaved] = useReducer((_current: boolean, next: boolean) => next, saved);
   const [pending, startTransition] = useTransition();
   return (
     <Toggle

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useReducer } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button, EmptyState, MaterialCard } from "@/components";
@@ -47,8 +47,18 @@ type SavedListProps = {
 
 export function SavedList({ items }: SavedListProps) {
   const router = useRouter();
-  const [selected, setSelected] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [{ selected, error }, toggle] = useReducer(
+    (state: { selected: string[]; error: string | null }, materialId: string) => {
+      if (state.selected.includes(materialId)) {
+        return { selected: state.selected.filter((id) => id !== materialId), error: null };
+      }
+      if (state.selected.length >= COMPARE_MATERIAL_LIMITS.max) {
+        return { ...state, error: `比較は最大${COMPARE_MATERIAL_LIMITS.max}件までです。` };
+      }
+      return { selected: [...state.selected, materialId], error: null };
+    },
+    { selected: [], error: null },
+  );
 
   const selectedCount = selected.length;
   const canCompare =
@@ -67,20 +77,6 @@ export function SavedList({ items }: SavedListProps) {
     }
     return `${selectedCount}件を比較できます。`;
   }, [items.length, selectedCount]);
-
-  function toggle(materialId: string): void {
-    setError(null);
-    setSelected((current) => {
-      if (current.includes(materialId)) {
-        return current.filter((id) => id !== materialId);
-      }
-      if (current.length >= COMPARE_MATERIAL_LIMITS.max) {
-        setError(`比較は最大${COMPARE_MATERIAL_LIMITS.max}件までです。`);
-        return current;
-      }
-      return [...current, materialId];
-    });
-  }
 
   function goCompare(): void {
     if (!canCompare) return;

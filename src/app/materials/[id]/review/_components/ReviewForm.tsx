@@ -2,8 +2,10 @@
 
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
-import { startTransition, useActionState, useEffect, useId, useMemo, useState } from "react";
+import { startTransition, useActionState, useId, useMemo, useReducer } from "react";
 import * as v from "valibot";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useReviewPhotoCleanup, useReviewPhotoPreviews } from "@/lib/hooks/use-review-photos";
 
 import {
   createReviewAction,
@@ -57,6 +59,12 @@ type ReviewFormValues = {
   body: string;
   pesticideAck: boolean;
   photos: ReviewPhoto[];
+};
+
+type ReviewInput = Pick<ReviewFormValues, "rating" | "body"> & {
+  cropIds: readonly string[];
+  pendingPhotos: PendingPhoto[];
+  removedPhotoIds: string[];
 };
 
 type ReviewFormBaseProps = {
@@ -262,54 +270,33 @@ export function ReviewForm({
       ? createReviewAction.bind(null, material.id)
       : updateReviewAction.bind(null, material.id, reviewId);
   const [state, formAction, actionPending] = useActionState(action, initialActionState);
-  const [cropIds, setCropIds] = useState<readonly string[]>(initialValues.cropIds);
-  const [rating, setRating] = useState(initialValues.rating);
-  // form action の後に React が未制御の入力を初期値へ戻すため、本文は state で保持してエラー時も消さない。
-  const [body, setBody] = useState(initialValues.body);
-  const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>([]);
-  // 編集時に×で削除を選んだ既存写真。保存するまでは消さず、取り消せる
-  const [removedPhotoIds, setRemovedPhotoIds] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const initialInput: ReviewInput = {
+    cropIds: initialValues.cropIds,
+    rating: initialValues.rating,
+    body: initialValues.body,
+    pendingPhotos: [],
+    removedPhotoIds: [],
+  };
+  // Reactはaction後に未制御入力をresetするため、エラー時も本文が残るよう入力値を保持する。
+  const form = useForm({ defaultValues: initialInput });
+  const { cropIds, rating, body, pendingPhotos, removedPhotoIds } = useStore(
+    form.store,
+    (state) => state.values,
+  );
+  const [uploading, setUploading] = useReducer((_: boolean, next: boolean) => next, false);
+  const [localError, setLocalError] = useReducer(
+    (_: string | null, next: string | null) => next,
+    null,
+  );
   const isPending = uploading || actionPending;
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   const pesticideCheck = PESTICIDE_CHECK[pesticideRegistration];
   // 上限を超えて貼り付けた分は入力欄が黙って切り捨てるので、上限に達したことを知らせる
   const bodyFull = body.length >= bodyMaxLength;
 
-  useEffect(() => {
-    if (state.status === "idle") return;
-    const settledState = state;
-
-    let cancelled = false;
-
-    async function finishAction() {
-      if (settledState.cleanupPaths !== undefined && settledState.cleanupPaths.length > 0) {
-        const { error } = await supabase.storage
-          .from("review-photos")
-          .remove(settledState.cleanupPaths);
-        if (error !== null && !cancelled) {
-          setLocalError(
-            "一時アップロードした写真を削除できませんでした。再送信せずお待ちください。",
-          );
-        }
-      }
-    }
-
-    void finishAction();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [state, supabase]);
-
+  useReviewPhotoCleanup(state, supabase, setLocalError);
   const pendingPreviewUrls = pendingPhotos.map((photo) => photo.previewUrl).join("\n");
-  useEffect(() => {
-    const urls = pendingPreviewUrls.length === 0 ? [] : pendingPreviewUrls.split("\n");
-    return () => {
-      for (const url of urls) URL.revokeObjectURL(url);
-    };
-  }, [pendingPreviewUrls]);
+  useReviewPhotoPreviews(pendingPreviewUrls);
 
   function addPhotos(files: FileList | null) {
     if (files === null) return;
@@ -333,17 +320,17 @@ export function ReviewForm({
     }
 
     setLocalError(null);
-    setPendingPhotos((current) => [...current, ...additions]);
+    form.setFieldValue("pendingPhotos", (current) => [...current, ...additions]);
   }
 
   // 写真のファイルはブラウザの仕様で戻せないので、選び直してもらう
   function restore(restored: RestoredFields) {
     const restoredCropIds = restored.get("cropIds");
-    if (restoredCropIds !== undefined) setCropIds(restoredCropIds);
+    if (restoredCropIds !== undefined) form.setFieldValue("cropIds", restoredCropIds);
     const restoredRating = v.safeParse(RestoredRatingSchema, restored.get("rating")?.[0]);
-    if (restoredRating.success) setRating(restoredRating.output);
+    if (restoredRating.success) form.setFieldValue("rating", restoredRating.output);
     const restoredBody = restored.get("body")?.[0];
-    if (restoredBody !== undefined) setBody(restoredBody);
+    if (restoredBody !== undefined) form.setFieldValue("body", restoredBody);
   }
 
   async function submit(formData: FormData) {
@@ -411,11 +398,15 @@ export function ReviewForm({
         crops={crops}
         targetCropIds={targetCropIds}
         value={cropIds}
-        onValueChange={setCropIds}
+        onValueChange={(value) => form.setFieldValue("cropIds", value)}
       />
 
       <Fieldset legend="総合評価" name="rating" requirement="required">
-        <StarRating mode="input" value={rating} onChange={setRating} />
+        <StarRating
+          mode="input"
+          value={rating}
+          onChange={(value) => form.setFieldValue("rating", value)}
+        />
       </Fieldset>
 
       <Field
@@ -435,7 +426,7 @@ export function ReviewForm({
           size="lg"
           value={body}
           maxLength={bodyMaxLength}
-          onChange={(event) => setBody(event.target.value)}
+          onChange={(event) => form.setFieldValue("body", event.target.value)}
           placeholder="自由に記入してください"
           aria-describedby={`${bodyCountId} review-body-example`}
         />
@@ -487,7 +478,7 @@ export function ReviewForm({
                     aria-label={`${photoName}を削除する`}
                     aria-pressed={removed}
                     onClick={() =>
-                      setRemovedPhotoIds((current) =>
+                      form.setFieldValue("removedPhotoIds", (current) =>
                         removed ? current.filter((id) => id !== photo.id) : [...current, photo.id],
                       )
                     }
@@ -527,7 +518,9 @@ export function ReviewForm({
                   className={photoRemoveStyle}
                   aria-label={`${initialValues.photos.length + index + 1}枚目の写真を外す`}
                   onClick={() =>
-                    setPendingPhotos((current) => current.filter((item) => item.key !== photo.key))
+                    form.setFieldValue("pendingPhotos", (current) =>
+                      current.filter((item) => item.key !== photo.key),
+                    )
                   }
                 >
                   <Icon name="close" />
@@ -538,7 +531,7 @@ export function ReviewForm({
                 className={photoCaptionStyle}
                 value={photo.caption}
                 onChange={(event) => {
-                  setPendingPhotos((current) =>
+                  form.setFieldValue("pendingPhotos", (current) =>
                     current.map((item) =>
                       item.key === photo.key ? { ...item, caption: event.target.value } : item,
                     ),

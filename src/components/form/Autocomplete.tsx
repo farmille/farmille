@@ -1,7 +1,7 @@
 "use client";
 
 import { Autocomplete as BaseAutocomplete } from "@base-ui/react/autocomplete";
-import { useRef, useState, type ReactNode, type Ref } from "react";
+import { useRef, useReducer, type ReactNode, type Ref } from "react";
 
 import { Icon } from "@/components/Icon";
 import { optionRecipe, popupPositionerStyle, popupRecipe } from "@/components/popup";
@@ -73,7 +73,10 @@ function AutocompleteBody({
   const required = useFieldRequired();
   const highlighted = useRef(false);
   const filter = BaseAutocomplete.useFilter();
-  const [requestedOpen, setRequestedOpen] = useState(false);
+  const [requestedOpen, setRequestedOpen] = useReducer(
+    (_current: boolean, next: boolean) => next,
+    false,
+  );
   const query = value.trim();
   const visible =
     filterMode === "preFiltered" || query === ""

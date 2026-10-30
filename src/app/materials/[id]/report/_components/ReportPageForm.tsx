@@ -1,6 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useReducer, useRef, useTransition } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
+import { useReportMediaHistory } from "@/lib/hooks/use-report-media-history";
 import { useRouter } from "next/navigation";
 
 import {
@@ -9,7 +12,7 @@ import {
 } from "@/app/materials/[id]/report/new/actions";
 import { Button } from "@/components/Button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { Checkbox, Notice, Textarea, usePersistedInput } from "@/components/form";
+import { Checkbox, Notice, Textarea } from "@/components/form";
 import { persistKey, removePersisted } from "@/components/form/persisted-input";
 import { Icon } from "@/components/Icon";
 import { toast } from "@/components/Toaster";
@@ -60,7 +63,13 @@ import {
   type ReportPageNumericItem,
 } from "./report-page-state";
 import { docHeadingRecipe, requirementMark } from "./report-page-styles";
-import { useReportLeaveWarning } from "./use-report-leave-warning";
+import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
+
+type PdfReadingStatus = {
+  remaining: PdfReadingResult["remaining"];
+  marks: PdfReadingField[];
+  checkRequired: boolean;
+};
 
 const bar = css({
   position: "sticky",
@@ -238,53 +247,111 @@ export function ReportPageForm({
    * PDF読み取りの入口に出す残り回数・reCAPTCHA のサイトキーと、この下書きの最新の読み取りで入った欄。
    * checkRequired は、読み取りの値を元のPDFと照らし合わせた確認を提出に求めるか。
    */
-  pdfReading: {
+  pdfReading: PdfReadingStatus & {
     siteKey: string | null;
-    remaining: number | null;
-    marks: PdfReadingField[];
-    checkRequired: boolean;
   };
 }) {
   const router = useRouter();
-  const [input, setInput] = useState(() => {
-    // ページ版では数値のグラフを手で作らないので、新しいレポートは入れ方を選ぶ前の調査項目から始める
-    const base = draft ?? { ...createBlankUsageReport(material.id), measurements: [] };
-    const named = withAutoPlotNames(base, base, material.name);
-    return { ...named, prefectureCode: named.prefectureCode ?? registeredAddress.prefectureCode };
+  const [initialInput] = useReducer(
+    (value: UsageReportInput) => value,
+    null,
+    () => {
+      // ページ版では数値のグラフを手で作らないので、新しいレポートは入れ方を選ぶ前の調査項目から始める
+      const base = draft ?? { ...createBlankUsageReport(material.id), measurements: [] };
+      const named = withAutoPlotNames(base, base, material.name);
+      return { ...named, prefectureCode: named.prefectureCode ?? registeredAddress.prefectureCode };
+    },
+  );
+  const form = useForm({
+    defaultValues: {
+      input: initialInput,
+      items: itemsFromInput(initialInput),
+      acks: { timing: false, privacy: false },
+    },
   });
-  const [items, setItems] = useState<ReportPageItem[]>(() => itemsFromInput(input));
-  const [acks, setAcks] = useState<ReportPageAcks>({ timing: false, privacy: false });
+  const { input, items, acks } = useStore(form.store, (state) => state.values);
+  const setInput = useCallback(
+    (next: UsageReportInput | ((current: UsageReportInput) => UsageReportInput)) =>
+      form.setFieldValue("input", next),
+    [form],
+  );
+  const setItems = useCallback(
+    (next: ReportPageItem[] | ((current: ReportPageItem[]) => ReportPageItem[])) =>
+      form.setFieldValue("items", next),
+    [form],
+  );
+  const setAcks = (next: (current: ReportPageAcks) => ReportPageAcks) =>
+    form.setFieldValue("acks", next);
   const payload = inputWithItems(input, items);
-  const [saved, setSaved] = useState(() => JSON.stringify(payload));
-  const [currentMaterial, setCurrentMaterial] = useState(material);
-  const [tried, setTried] = useState(false);
-  const [failure, setFailure] = useState<string | null>(null);
-  const [preview, setPreview] = useState(false);
-  const [leaving, setLeaving] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [fileItem, setFileItem] = useState<{ item: ReportPageItem; isNew: boolean } | null>(null);
-  const [numericItem, setNumericItem] = useState<ReportPageNumericItem | null>(null);
-  const [readingOpen, setReadingOpen] = useState(false);
-  const [readMarks, setReadMarks] = useState(pdfReading.marks);
-  const [checkRequired, setCheckRequired] = useState(pdfReading.checkRequired);
-  const [remaining, setRemaining] = useState(pdfReading.remaining);
+  const [saved, setSaved] = useReducer(
+    (_current: string, next: string) => next,
+    payload,
+    JSON.stringify,
+  );
+  const [currentMaterial, setCurrentMaterial] = useReducer(
+    (_current: ReportMaterialSummary, next: ReportMaterialSummary) => next,
+    material,
+  );
+  const [tried, setTried] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [failure, setFailure] = useReducer(
+    (_current: string | null, next: string | null) => next,
+    null,
+  );
+  const [preview, setPreview] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [leaving, setLeaving] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [submitted, setSubmitted] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [fileItem, setFileItem] = useReducer(
+    (
+      _current: { item: ReportPageItem; isNew: boolean } | null,
+      next: { item: ReportPageItem; isNew: boolean } | null,
+    ) => next,
+    null,
+  );
+  const [numericItem, setNumericItem] = useReducer(
+    (_current: ReportPageNumericItem | null, next: ReportPageNumericItem | null) => next,
+    null,
+  );
+  const [readingOpen, setReadingOpen] = useReducer(
+    (_current: boolean, next: boolean) => next,
+    false,
+  );
+  const [{ marks: readMarks, checkRequired, remaining }, recordReading] = useReducer(
+    (current: PdfReadingStatus, result: PdfReadingResult): PdfReadingStatus => {
+      const remaining = result.remaining ?? current.remaining;
+      if (result.ok) return { remaining, marks: result.marks, checkRequired: true };
+      const adopted = result.savedDraft?.saved === "read";
+      return {
+        remaining,
+        marks: adopted ? [] : current.marks,
+        checkRequired: current.checkRequired || result.pdfValuesCheckRequired || adopted,
+      };
+    },
+    {
+      marks: pdfReading.marks,
+      checkRequired: pdfReading.checkRequired,
+      remaining: pdfReading.remaining,
+    },
+  );
   const [pending, startTransition] = useTransition();
   // 連打で保存・提出が二重に送られないよう、送信中は ref で止める（state の disabled は次の描画まで効かない）
   const sending = useRef(false);
   // この画面の入力に入った画像。保存の前に外れた分は、保存のあとにサーバーが置き場から消す
-  const shownMedia = useRef(new Set<string>());
+  const shownMedia = useReportMediaHistory(payload.media);
   const dirty = JSON.stringify(payload) !== saved;
   const reportPath = `/materials/${material.id}/report/new`;
 
   const update = useCallback(
-    (next: (current: UsageReportInput) => UsageReportInput) => setInput((current) => next(current)),
-    [],
+    (next: (current: UsageReportInput) => UsageReportInput) => setInput(next),
+    [setInput],
   );
   // 区を変えたら、数値の調査項目のグラフの行も区にそろえる
-  const changePlots = useCallback((next: UsageReportInput) => {
-    setInput(next);
-    setItems((current) => itemsWithPlots(current, next.plots));
-  }, []);
+  const changePlots = useCallback(
+    (next: UsageReportInput) => {
+      setInput(next);
+      setItems((current) => itemsWithPlots(current, next.plots));
+    },
+    [setInput, setItems],
+  );
   // 失敗は画面の下の欄に残し、スマホでも気づけるよう通知でも出す
   const showError = useCallback((message: string) => {
     setFailure(message);
@@ -310,10 +377,6 @@ export function ReportPageForm({
       setInput(backup.input);
       setItems(itemsFromInput(backup.input));
     },
-  });
-
-  useEffect(() => {
-    for (const media of payload.media) shownMedia.current.add(media.url);
   });
 
   useReportLeaveWarning(dirty && !submitted);
@@ -395,22 +458,19 @@ export function ReportPageForm({
   }
 
   // 読み取った値はサーバーの下書きに保存済みなので、画面の入力と保存済みの控えをまとめて置き換える
-  function adoptRead(next: UsageReportInput, marks: PdfReadingField[]) {
+  function adoptRead(next: UsageReportInput) {
     const nextItems = itemsFromInput(next);
     setInput(next);
     setItems(nextItems);
     setSaved(JSON.stringify(inputWithItems(next, nextItems)));
-    setReadMarks(marks);
-    setCheckRequired(true);
   }
 
   function applyReading(result: PdfReadingResult) {
-    if (result.remaining !== null) setRemaining(result.remaining);
+    recordReading(result);
     // 読み取りの間は編集できないので、外した画像は読み取りに渡したときのまま
     if (result.ok || result.savedDraft !== null)
       forgetDropped(droppedMedia(inputWithItems(input, items)));
     if (!result.ok) {
-      if (result.pdfValuesCheckRequired) setCheckRequired(true);
       // 失敗しても、サーバーの下書きを保存した分には揃える（揃えないと次の保存が競合する）
       const draft = result.savedDraft;
       if (draft?.saved === "input" || draft?.saved === "partial") {
@@ -421,10 +481,10 @@ export function ReportPageForm({
           setSaved(JSON.stringify({ ...inputWithItems(input, items), ...stamp }));
       }
       // 値は入ったが根拠の記録に失敗したので、印は出さない（文言はダイアログに出したまま）
-      if (draft?.saved === "read") adoptRead(draft.input, []);
+      if (draft?.saved === "read") adoptRead(draft.input);
       return;
     }
-    adoptRead(result.input, result.marks);
+    adoptRead(result.input);
     setFailure(null);
     setReadingOpen(false);
     toast("PDF読み取りの内容を下書きに保存しました。元のPDFと照らし合わせて確かめてください。", {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState, type ComponentProps } from "react";
+import { useReducer, type ComponentProps } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 import { css } from "../../../styled-system/css";
@@ -19,7 +19,7 @@ const searchSuggestions: Option[] = [
 ];
 
 function StatefulAutocomplete(args: ComponentProps<typeof Autocomplete>) {
-  const [value, setValue] = useState(args.value);
+  const [value, setValue] = useReducer((_current: string, next: string) => next, args.value);
   return (
     <Autocomplete
       {...args}

@@ -1,5 +1,7 @@
 "use client";
-import { useState, useTransition } from "react";
+
+import { useForm, useStore } from "@tanstack/react-form";
+import { useReducer, useTransition } from "react";
 import * as v from "valibot";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components";
@@ -14,16 +16,23 @@ export function ExpressionReviewForm({
   versionId: string;
   kind?: "material" | "profile";
 }) {
-  const [note, setNote] = useState("");
-  const [recordedNote, setRecordedNote] = useState("");
-  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const form = useForm({ defaultValues: { note: "" } });
+  const note = useStore(form.store, (state) => state.values.note);
+  const [recordedNote, setRecordedNote] = useReducer((_state: string, next: string) => next, "");
+  const [result, setResult] = useReducer(
+    (
+      _state: { ok: boolean; message: string } | null,
+      next: { ok: boolean; message: string } | null,
+    ) => next,
+    null,
+  );
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   usePersistedInput({
     name: "expression-review",
     schema: v.string(),
     unsaved: note === recordedNote ? null : note,
-    restore: setNote,
+    restore: (value) => form.setFieldValue("note", value),
   });
   function submit(publish: boolean) {
     startTransition(async () => {
@@ -42,7 +51,7 @@ export function ExpressionReviewForm({
       <Textarea
         description="メーカーにも表示されます。修正を求める場合は、該当箇所と理由を記入してください。"
         label="確認メモ・修正が必要な箇所"
-        onChange={(event) => setNote(event.target.value)}
+        onChange={(event) => form.setFieldValue("note", event.target.value)}
         rows={4}
         value={note}
       />

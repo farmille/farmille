@@ -1,21 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import {
-  AppRouterContext,
-  type AppRouterInstance,
-} from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { expect, it, vi } from "vitest";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
+import { expect, it } from "vitest";
 import { SearchResults } from "./SearchResults";
 import { storyCatalog } from "./story-fixtures";
 
-const router = {
-  push: vi.fn(),
-  replace: vi.fn(),
-  back: vi.fn(),
-  forward: vi.fn(),
-  refresh: vi.fn(),
-  prefetch: vi.fn(),
-  bfcacheId: "test",
-} satisfies AppRouterInstance;
 it.each([
   ["reviews", ["根張りエース", "海藻アミノ 有機一番", "植物活力液"]],
   ["rating", ["海藻アミノ 有機一番", "根張りエース", "植物活力液"]],
@@ -30,7 +18,7 @@ it.each([
     })),
   };
   render(
-    <AppRouterContext.Provider value={router}>
+    <NuqsTestingAdapter>
       <SearchResults
         catalog={catalog}
         filters={[]}
@@ -42,7 +30,7 @@ it.each([
         keywordMatches={undefined}
         logic=""
       />
-    </AppRouterContext.Provider>,
+    </NuqsTestingAdapter>,
   );
   expect(
     screen

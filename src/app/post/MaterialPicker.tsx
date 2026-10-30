@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useReducer } from "react";
 
 import { NoImage, Stars } from "@/app/materials/[id]/_components/CardParts";
 import { buttonRecipe } from "@/components/Button";
@@ -130,7 +130,10 @@ function MaterialThumb({ src, size }: { src: string | null; size: number }) {
 }
 
 export function MaterialPicker({ materials, query, postType }: MaterialPickerProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useReducer(
+    (_state: string | null, next: string | null) => next,
+    null,
+  );
   const selected = materials.find(({ id }) => id === selectedId) ?? null;
 
   return (

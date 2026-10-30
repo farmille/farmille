@@ -2,6 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import oxlint from "eslint-plugin-oxlint";
+import stateManagement from "./scripts/eslint/state-management.mjs";
 
 import { tokens } from "./src/theme/tokens.ts";
 
@@ -112,6 +113,11 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   ...oxlint.configs["flat/recommended"],
+  {
+    files: ["**/*.{js,mjs,cjs,jsx,ts,tsx}"],
+    plugins: { farmille: stateManagement },
+    rules: { "farmille/state-management": "error" },
+  },
   {
     // アイコンは共通 Icon 経由で使う。
     rules: {

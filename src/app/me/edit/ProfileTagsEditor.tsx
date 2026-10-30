@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+
+import { useReducer } from "react";
 
 import { Button } from "@/components/Button";
 import { Chip } from "@/components/Chip";
@@ -34,6 +36,13 @@ const addRow = css({
 
 const normalize = (text: string) => text.normalize("NFKC").toLocaleLowerCase();
 
+type ProfileTagSelection = {
+  cropQuery: string;
+  crops: readonly Option[];
+  affiliation: string;
+  affiliations: readonly string[];
+};
+
 export function ProfileTagsEditor({
   details,
   options,
@@ -43,21 +52,30 @@ export function ProfileTagsEditor({
 }) {
   const restoredCropIds = useRestoredField("cropIds");
   const restoredAffiliations = useRestoredField("affiliations");
-  const [cropQuery, setCropQuery] = useState("");
-  const [crops, setCrops] = useState<readonly Option[]>(() =>
-    restoredCropIds === undefined
-      ? details.crops.map((crop) => ({ value: crop.id, label: crop.name }))
-      : restoredCropIds.flatMap((id) =>
-          options.crops
-            .filter((crop) => crop.id === id)
-            .map((crop) => ({ value: crop.id, label: crop.name })),
-        ),
+  // TanStack Formは未編集のdefaultValues変更を取り込むため、復元した初期値を固定する。
+  const [initialValues] = useReducer(
+    (current: ProfileTagSelection) => current,
+    null,
+    (): ProfileTagSelection => ({
+      cropQuery: "",
+      crops:
+        restoredCropIds === undefined
+          ? details.crops.map((crop) => ({ value: crop.id, label: crop.name }))
+          : restoredCropIds.flatMap((id) =>
+              options.crops
+                .filter((crop) => crop.id === id)
+                .map((crop) => ({ value: crop.id, label: crop.name })),
+            ),
+      affiliation: "",
+      affiliations: restoredAffiliations ?? details.affiliations,
+    }),
   );
-  const [affiliation, setAffiliation] = useState("");
-  const [affiliations, setAffiliations] = useState<readonly string[]>(
-    restoredAffiliations ?? details.affiliations,
+  const form = useForm({ defaultValues: initialValues });
+  const { cropQuery, crops, affiliation, affiliations } = useStore(
+    form.store,
+    (state) => state.values,
   );
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useReducer((_state: string, next: string) => next, "");
   const query = normalize(cropQuery);
   const available = options.crops.filter(
     (crop) =>
@@ -73,8 +91,8 @@ export function ProfileTagsEditor({
       setMessage(`所属は${AFFILIATION_LIMIT}件まで登録できます。`);
       return;
     }
-    if (!affiliations.includes(value)) setAffiliations([...affiliations, value]);
-    setAffiliation("");
+    if (!affiliations.includes(value)) form.setFieldValue("affiliations", [...affiliations, value]);
+    form.setFieldValue("affiliation", "");
     setMessage("");
   }
 
@@ -97,8 +115,8 @@ export function ProfileTagsEditor({
           inputValue={cropQuery}
           max={CROP_LIMIT}
           multiple
-          onInputValueChange={setCropQuery}
-          onValueChange={setCrops}
+          onInputValueChange={(value) => form.setFieldValue("cropQuery", value)}
+          onValueChange={(value) => form.setFieldValue("crops", value)}
           options={available.slice(0, CROP_SUGGESTION_LIMIT).map((crop) => ({
             value: crop.id,
             label: crop.name,
@@ -121,7 +139,12 @@ export function ProfileTagsEditor({
                 <Chip
                   category="所属"
                   key={name}
-                  onRemove={() => setAffiliations(affiliations.filter((value) => value !== name))}
+                  onRemove={() =>
+                    form.setFieldValue(
+                      "affiliations",
+                      affiliations.filter((value) => value !== name),
+                    )
+                  }
                   removeLabel={`${name}を削除`}
                 >
                   {name}
@@ -141,7 +164,7 @@ export function ProfileTagsEditor({
               maxLength={100}
               onPick={(option) => addAffiliation(option.value)}
               onSubmitText={addAffiliation}
-              onValueChange={setAffiliation}
+              onValueChange={(value) => form.setFieldValue("affiliation", value)}
               options={options.affiliations
                 .filter(
                   (name) =>

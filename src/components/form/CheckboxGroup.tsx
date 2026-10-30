@@ -1,8 +1,10 @@
 "use client";
 
+import { useForm, useStore } from "@tanstack/react-form";
+
 import { Checkbox as BaseCheckbox } from "@base-ui/react/checkbox";
 import { CheckboxGroup as BaseCheckboxGroup } from "@base-ui/react/checkbox-group";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { Icon } from "@/components/Icon";
 import { cx } from "../../../styled-system/css";
@@ -60,8 +62,15 @@ function CheckboxGroupBody<V extends string>({
   className,
 }: CheckboxGroupBodyProps<V>) {
   const { inRoot } = useFieldContext();
-  const [uncontrolled, setUncontrolled] = useState<readonly V[]>(defaultValue ?? []);
-  const current = value ?? uncontrolled;
+  const initial = (defaultValue ?? []).map((value) => String(value));
+  const form = useForm({ defaultValues: { selection: initial } });
+  const uncontrolled = useStore(form.store, (state) => state.values.selection);
+  const picked = useMemo(
+    () =>
+      options.filter((option) => uncontrolled.includes(option.value)).map((option) => option.value),
+    [options, uncontrolled],
+  );
+  const current = value ?? picked;
   // Base UI は value の参照が変わるたびに Form のエラーを消す
   const groupValue = useMemo(() => [...current], [current]);
   const full = limit !== undefined && current.length >= limit;
@@ -70,7 +79,10 @@ function CheckboxGroupBody<V extends string>({
     const picked = options
       .filter((option) => next.includes(option.value))
       .map((option) => option.value);
-    setUncontrolled(picked);
+    form.setFieldValue(
+      "selection",
+      picked.map((value) => String(value)),
+    );
     onValueChange?.(picked);
   }
 

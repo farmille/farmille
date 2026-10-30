@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useReducer } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 import * as v from "valibot";
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { evidenceMimeSchema, evidencePurposeSchema } from "@/lib/company-application";
@@ -40,11 +41,13 @@ export function EvidenceFields({
   onBusy: (busy: boolean) => void;
   onCount?: (count: number) => void;
 }) {
-  const [files, setFiles] = useState<EvidenceFile[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const initialFiles: EvidenceFile[] = [];
+  const form = useForm({ defaultValues: { files: initialFiles } });
+  const files = useStore(form.store, (state) => state.values.files);
+  const [busy, setBusy] = useReducer((_state: boolean, next: boolean) => next, false);
+  const [error, setError] = useReducer((_state: string, next: string) => next, "");
   function update(next: EvidenceFile[]) {
-    setFiles(next);
+    form.setFieldValue("files", next);
     onCount?.(next.length);
   }
   async function upload(selected: FileList | null) {

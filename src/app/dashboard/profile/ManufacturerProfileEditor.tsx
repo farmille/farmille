@@ -1,18 +1,12 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useReducer, useTransition } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
+import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
 import { SellerHeader } from "@/app/sellers/[id]/_components/SellerHeader";
 import { Button } from "@/components";
-import {
-  Field,
-  FileInput,
-  FormActions,
-  Input,
-  Notice,
-  Textarea,
-  usePersistedInput,
-} from "@/components/form";
+import { Field, FileInput, FormActions, Input, Notice, Textarea } from "@/components/form";
 import { materialPageStack } from "@/components/materials/MaterialPageContent";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import {
@@ -61,11 +55,25 @@ export function ManufacturerProfileEditor({
   expectedVersion: string | null;
   pendingVersion: string | null;
 }) {
-  const [content, setContent] = useState(initialContent);
-  const [savedContent, setSavedContent] = useState(() => JSON.stringify(initialContent));
-  const [versionId, setVersionId] = useState(expectedVersion);
-  const [preview, setPreview] = useState(false);
-  const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
+  const form = useForm({ defaultValues: { content: initialContent } });
+  const content = useStore(form.store, (state) => state.values.content);
+  const [savedContent, setSavedContent] = useReducer(
+    (_: string, next: string) => next,
+    initialContent,
+    JSON.stringify,
+  );
+  const [versionId, setVersionId] = useReducer(
+    (_: string | null, next: string | null) => next,
+    expectedVersion,
+  );
+  const [preview, setPreview] = useReducer((_: boolean, next: boolean) => next, false);
+  const [message, setMessage] = useReducer(
+    (
+      _: { tone: "success" | "error"; text: string } | null,
+      next: { tone: "success" | "error"; text: string } | null,
+    ) => next,
+    null,
+  );
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   usePersistedInput({
@@ -74,7 +82,7 @@ export function ManufacturerProfileEditor({
     unsaved: pendingVersion || JSON.stringify(content) === savedContent ? null : content,
     // 表現確認中は編集できないので、保存前の入力を戻さない
     restore: (restored) => {
-      if (!pendingVersion) setContent(restored);
+      if (!pendingVersion) form.setFieldValue("content", restored);
     },
   });
   function save(submit: boolean) {
@@ -129,14 +137,14 @@ export function ManufacturerProfileEditor({
                 const file = event.target.files?.[0];
                 if (!file) return;
                 startTransition(async () => {
-                  const form = new FormData();
-                  form.set("logo", file);
-                  const result = await uploadLogo(form);
+                  const logoData = new FormData();
+                  logoData.set("logo", file);
+                  const result = await uploadLogo(logoData);
                   if (!result.ok) {
                     setMessage({ tone: "error", text: result.message });
                     return;
                   }
-                  setContent((current) => ({ ...current, logoUrl: result.url }));
+                  form.setFieldValue("content", (current) => ({ ...current, logoUrl: result.url }));
                   setMessage({
                     tone: "success",
                     text: "ロゴをアップロードしました。下書き保存または表現確認への送信をしてください。",
@@ -161,7 +169,7 @@ export function ManufacturerProfileEditor({
                     size="sm"
                     variant="ghost"
                     disabled={pending}
-                    onClick={() => setContent({ ...content, logoUrl: "" })}
+                    onClick={() => form.setFieldValue("content", { ...content, logoUrl: "" })}
                   >
                     ロゴを外す
                   </Button>
@@ -175,14 +183,18 @@ export function ManufacturerProfileEditor({
             label="会社紹介"
             rows={7}
             value={content.profileText}
-            onChange={(event) => setContent({ ...content, profileText: event.target.value })}
+            onChange={(event) =>
+              form.setFieldValue("content", { ...content, profileText: event.target.value })
+            }
             disabled={pending}
           />
           <Input
             label="公式サイトURL"
             type="url"
             value={content.websiteUrl}
-            onChange={(event) => setContent({ ...content, websiteUrl: event.target.value })}
+            onChange={(event) =>
+              form.setFieldValue("content", { ...content, websiteUrl: event.target.value })
+            }
             disabled={pending}
           />
         </>

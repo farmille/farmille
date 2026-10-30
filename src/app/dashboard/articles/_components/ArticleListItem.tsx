@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useReducer, useTransition } from "react";
 
 import { Badge, Button, ConfirmDialog, SurfaceCard, buttonRecipe } from "@/components";
 import { Notice } from "@/components/form";
@@ -36,7 +36,10 @@ type ArticleListItemProps = {
 export function ArticleListItem({ article }: ArticleListItemProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [state, setState] = useState<SellerArticleFormState>({ status: "idle" });
+  const [state, setState] = useReducer(
+    (_: SellerArticleFormState, next: SellerArticleFormState) => next,
+    { status: "idle" },
+  );
   const isPublished = article.status === "published";
 
   function toggleStatus(): void {

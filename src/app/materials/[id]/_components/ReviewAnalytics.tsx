@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
-import { trackReviewSubmitted } from "@/lib/analytics/events";
+import { useReviewAnalytics } from "@/lib/hooks/use-review-analytics";
 
 export function ReviewAnalytics({
   materialId,
@@ -11,13 +9,7 @@ export function ReviewAnalytics({
   materialId: string;
   submitted: boolean;
 }) {
-  const tracked = useRef(false);
-
-  useEffect(() => {
-    if (!submitted || tracked.current) return;
-    tracked.current = true;
-    trackReviewSubmitted(materialId);
-  }, [materialId, submitted]);
+  useReviewAnalytics(materialId, submitted);
 
   return null;
 }

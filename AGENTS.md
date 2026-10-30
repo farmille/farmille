@@ -11,6 +11,7 @@ BS資材（生物・微生物農業資材）の農家レビュープラットフ
 | 作業 | 読む資料 |
 | --- | --- |
 | 機能の調査・追加・変更・レビュー | `docs/rebuild/*-SPEC.md`の対象仕様 |
+| 状態・フォーム・URL同期・Effectの設計・変更・レビュー | [状態管理規約](docs/state-management.md) |
 | コード・DB・UI・依存・設定・テストの設計・変更・レビュー | [コーディング規約](CODING_STANDARDS.md)の「共通」と、作業に該当する節 |
 | PRの作成・更新 | [コーディング規約](CODING_STANDARDS.md)の「PRを作成・更新する」 |
 | 用語・画面表記の変更 | [用語集](GLOSSARY.md)、[UIの表記](docs/ui-terminology.md) |

@@ -3,7 +3,7 @@
 import { Input as BaseInput } from "@base-ui/react/input";
 import {
   useRef,
-  useState,
+  useReducer,
   type ChangeEvent,
   type ComponentPropsWithRef,
   type FocusEvent,
@@ -132,7 +132,10 @@ export function Input({ check, ...props }: InputProps) {
 
 /** 欄を離れたときの確認。確かめている間に入力し直したら、古い値の結果は出さない。 */
 function useBlurCheck(check: InputProps["check"]) {
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [error, setError] = useReducer(
+    (_current: string | undefined, next: string | undefined) => next,
+    undefined,
+  );
   const current = useRef("");
   return {
     error,
@@ -166,7 +169,7 @@ function InputBody({
   const normalize = blurNormalizer(type);
   const { required, name } = useFieldContext();
   const restored = useRestoredText(rest.name ?? name);
-  const [shown, setShown] = useState(false);
+  const [shown, toggleShown] = useReducer((current: boolean) => !current, false);
   const state = revealState[shown ? "visible" : "hidden"];
   const input = (
     <BaseInput
@@ -206,7 +209,7 @@ function InputBody({
         aria-label={state.label}
         className={revealButton}
         disabled={disabled}
-        onClick={() => setShown((current) => !current)}
+        onClick={() => toggleShown()}
         type="button"
       >
         <Icon name={state.icon} size="sm" />

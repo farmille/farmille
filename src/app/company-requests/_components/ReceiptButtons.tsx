@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useReducer } from "react";
 import { useRouter } from "next/navigation";
 import { css } from "../../../../styled-system/css";
 import { Button } from "@/components";
@@ -8,8 +8,14 @@ import { retryApplicationMail } from "../actions";
 import { errorMessageJa } from "@/server/errors";
 export function ReceiptButtons({ id, sent }: { id: string; sent: boolean }) {
   const router = useRouter();
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<{ tone: "success" | "error"; text: string } | null>(null);
+  const [busy, setBusy] = useReducer((_state: boolean, next: boolean) => next, false);
+  const [message, setMessage] = useReducer(
+    (
+      _state: { tone: "success" | "error"; text: string } | null,
+      next: { tone: "success" | "error"; text: string } | null,
+    ) => next,
+    null,
+  );
   async function retry() {
     setBusy(true);
     try {

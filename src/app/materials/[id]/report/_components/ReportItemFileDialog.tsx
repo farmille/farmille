@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useReducer } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 
 import { Button } from "@/components/Button";
@@ -44,11 +45,15 @@ type DraftImage = {
   preview: string;
   url: string | null;
   dirty: boolean;
-  canvas: HTMLCanvasElement | null;
-  original: HTMLCanvasElement | null;
 };
 
-import { useReportLeaveWarning } from "./use-report-leave-warning";
+type ImageCanvases = { canvas: HTMLCanvasElement; original: HTMLCanvasElement };
+type CanvasEvent =
+  | { type: "keep"; id: string; value: ImageCanvases }
+  | { type: "remove"; id: string }
+  | { type: "saved"; id: string; previousId: string; value: ImageCanvases };
+
+import { useReportLeaveWarning } from "@/lib/hooks/use-report-leave-warning";
 
 const lead = css({ m: "0", textStyle: "supporting", color: "text.default" });
 
@@ -135,7 +140,7 @@ function previewOf(canvas: HTMLCanvasElement) {
 }
 
 function fromSaved(image: ReportPageImage): DraftImage {
-  return { ...image, preview: image.url, dirty: false, canvas: null, original: null };
+  return { ...image, preview: image.url, dirty: false };
 }
 
 /**
@@ -164,27 +169,61 @@ export function ReportItemFileDialog({
 }) {
   // 項目ごとに呼び出し側が作り直す（key）ので、最初の状態はその項目の画像
   const saved = reportPageItemImages(item);
-  const [images, setImages] = useState<DraftImage[]>(() => saved.map(fromSaved));
-  const [open, setOpen] = useState(true);
+  const form = useForm({ defaultValues: { images: saved.map(fromSaved) } });
+  const images = useStore(form.store, (state) => state.values.images);
+  const [canvases, changeCanvas] = useReducer(
+    (current: Map<string, ImageCanvases>, event: CanvasEvent) => {
+      const next = new Map(current);
+      if (event.type === "remove") {
+        next.delete(event.id);
+      } else {
+        if (event.type === "saved") next.delete(event.previousId);
+        next.set(event.id, event.value);
+      }
+      return next;
+    },
+    new Map<string, ImageCanvases>(),
+  );
+  const setImages = (next: DraftImage[] | ((previous: DraftImage[]) => DraftImage[])) =>
+    form.setFieldValue("images", next);
+  const [open, setOpen] = useReducer((_current: boolean, next: boolean) => next, true);
   // 進み具合（読み込み中など）と、追加できなかった理由は分けて持つ。理由は次のファイルの読み込みで消さない
-  const [message, setMessage] = useState("");
-  const [rejected, setRejected] = useState<string[]>([]);
+  const [message, setMessage] = useReducer((_current: string, next: string) => next, "");
+  const [rejected, changeRejected] = useReducer(
+    (current: string[], action: { type: "clear" } | { type: "reject"; message: string }) =>
+      action.type === "clear" ? [] : [...current, action.message],
+    [],
+  );
   // 保存中に消す・題を変える・編集すると、保存を始めたときの画像で閉じて黙って失われるので、保存中は操作を止める
-  const [saving, setSaving] = useState(false);
-  const [asking, setAsking] = useState(false);
-  const [editing, setEditing] = useState<DraftImage | null>(null);
-  const [pdf, setPdf] = useState<{
-    doc: PDFDocumentProxy;
-    name: string;
-    resolve: (pages: number[]) => void;
-    max: number;
-  } | null>(null);
+  const [saving, setSaving] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [asking, setAsking] = useReducer((_current: boolean, next: boolean) => next, false);
+  const [editing, setEditing] = useReducer(
+    (_current: DraftImage | null, next: DraftImage | null) => next,
+    null,
+  );
+  const [pdf, setPdf] = useReducer(
+    (
+      _current: {
+        doc: PDFDocumentProxy;
+        name: string;
+        resolve: (pages: number[]) => void;
+        max: number;
+      } | null,
+      next: {
+        doc: PDFDocumentProxy;
+        name: string;
+        resolve: (pages: number[]) => void;
+        max: number;
+      } | null,
+    ) => next,
+    null,
+  );
   const live = useRef(true);
   const committing = useRef(false);
   // このポップアップで上げた画像。ページに入れずに捨てたら、公開の置き場からその場で消す
   const uploaded = useRef<{ url: string; path: string }[]>([]);
   // 読み込み中に次のファイルを選ぶと、枚数の上限の判定を同時に通り抜けるので、終わるまで選択欄を止める
-  const [reading, setReading] = useState(false);
+  const [reading, setReading] = useReducer((_current: boolean, next: boolean) => next, false);
   const readingNow = useRef(false);
   // 読み込み中に増えた枚数も数えるため、追加を始めた時の枚数から ref で数える
   const count = useRef(0);
@@ -202,16 +241,16 @@ export function ReportItemFileDialog({
   function add(canvas: HTMLCanvasElement) {
     if (!live.current) return;
     count.current += 1;
+    const id = crypto.randomUUID();
+    changeCanvas({ type: "keep", id, value: { canvas, original: canvas } });
     setImages((previous) => [
       ...previous,
       {
-        id: crypto.randomUUID(),
+        id,
         caption: "",
         preview: previewOf(canvas),
         url: null,
         dirty: true,
-        canvas,
-        original: canvas,
       },
     ]);
   }
@@ -230,8 +269,8 @@ export function ReportItemFileDialog({
 
   async function readFiles(files: File[]) {
     count.current = images.length;
-    setRejected([]);
-    const reject = (text: string) => setRejected((previous) => [...previous, text]);
+    changeRejected({ type: "clear" });
+    const reject = (text: string) => changeRejected({ type: "reject", message: text });
     for (const file of files) {
       if (!live.current) return;
       if (count.current >= imageLimit) {
@@ -303,7 +342,7 @@ export function ReportItemFileDialog({
   }
 
   async function startEdit(image: DraftImage) {
-    if (image.canvas !== null) {
+    if (canvases.has(image.id)) {
       setEditing(image);
       return;
     }
@@ -311,9 +350,8 @@ export function ReportItemFileDialog({
     setMessage("画像を読み込んでいます…");
     try {
       const canvas = await canvasFromUrl(image.url);
-      const loaded = { ...image, canvas, original: canvas };
-      setImages((previous) => previous.map((x) => (x.id === image.id ? loaded : x)));
-      setEditing(loaded);
+      changeCanvas({ type: "keep", id: image.id, value: { canvas, original: canvas } });
+      setEditing(image);
       setMessage("");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "画像を読み込めませんでした。");
@@ -328,12 +366,14 @@ export function ReportItemFileDialog({
     let current = images;
     try {
       for (const [index, image] of current.entries()) {
-        if (!image.dirty || image.canvas === null) continue;
+        const resource = canvases.get(image.id);
+        if (!image.dirty || resource === undefined) continue;
         setMessage(`画像を保存しています（${index + 1}/${current.length}）…`);
         // 保存はいつも新しい名前で行う（途中で失敗した画像を送り直しても、同じ名前とぶつからない）
         const id = crypto.randomUUID();
-        const { url, path } = await uploadReportImage(image.canvas, userId, reportId, id);
+        const { url, path } = await uploadReportImage(resource.canvas, userId, reportId, id);
         uploaded.current.push({ url, path });
+        changeCanvas({ type: "saved", id, previousId: image.id, value: resource });
         // 保存できた画像はすぐ控える。あとの画像で失敗しても、押し直したときに送り直さない
         current = current.map((x) =>
           x.id === image.id ? { ...x, id, url, dirty: false, preview: x.preview } : x,
@@ -431,7 +471,10 @@ export function ReportItemFileDialog({
               className={removeButton}
               aria-label={`${index + 1}枚目の画像を削除`}
               disabled={saving}
-              onClick={() => setImages((previous) => previous.filter((x) => x.id !== image.id))}
+              onClick={() => {
+                changeCanvas({ type: "remove", id: image.id });
+                setImages((previous) => previous.filter((x) => x.id !== image.id));
+              }}
             >
               <Icon name="close" size="sm" />
             </button>
@@ -534,16 +577,23 @@ export function ReportItemFileDialog({
       <ReportImageEditor
         key={editing === null ? "editor" : `editor:${editing.id}:${editing.preview.length}`}
         open={editing !== null}
-        original={editing?.original ?? null}
-        current={editing?.canvas ?? null}
+        original={editing === null ? null : (canvases.get(editing.id)?.original ?? null)}
+        current={editing === null ? null : (canvases.get(editing.id)?.canvas ?? null)}
         onCancel={() => setEditing(null)}
         onDone={(canvas) => {
           const target = editing;
           setEditing(null);
-          if (target === null || canvas === target.canvas) return;
+          if (target === null) return;
+          const resource = canvases.get(target.id);
+          if (canvas === resource?.canvas) return;
+          changeCanvas({
+            type: "keep",
+            id: target.id,
+            value: { canvas, original: resource?.original ?? canvas },
+          });
           setImages((previous) =>
             previous.map((x) =>
-              x.id === target.id ? { ...x, canvas, dirty: true, preview: previewOf(canvas) } : x,
+              x.id === target.id ? { ...x, dirty: true, preview: previewOf(canvas) } : x,
             ),
           );
         }}

@@ -1,5 +1,7 @@
 "use client";
-import { useRef, useState, useTransition } from "react";
+
+import { useForm, useStore } from "@tanstack/react-form";
+import { useRef, useReducer, useTransition } from "react";
 
 import { buttonRecipe } from "@/components/Button";
 import { Field, Fieldset, Input, Select, useRestoredText } from "@/components/form";
@@ -35,10 +37,15 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
   const restoredPostal = useRestoredText("postalCode");
   const restoredPrefecture = useRestoredText("prefectureCode");
   const restoredCityStreet = useRestoredText("cityStreet");
-  const [postal, setPostal] = useState(restoredPostal ?? values.postalCode ?? "");
-  const [prefecture, setPrefecture] = useState(restoredPrefecture ?? values.prefectureCode ?? "");
-  const [cityStreet, setCityStreet] = useState(restoredCityStreet ?? values.cityStreet ?? "");
-  const [message, setMessage] = useState("");
+  const form = useForm({
+    defaultValues: {
+      postal: restoredPostal ?? values.postalCode ?? "",
+      prefecture: restoredPrefecture ?? values.prefectureCode ?? "",
+      cityStreet: restoredCityStreet ?? values.cityStreet ?? "",
+    },
+  });
+  const { postal, prefecture, cityStreet } = useStore(form.store, (state) => state.values);
+  const [message, setMessage] = useReducer((_state: string, next: string) => next, "");
   const [pending, startTransition] = useTransition();
   const requestVersion = useRef(0);
   const lastAutofill = useRef("");
@@ -58,7 +65,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
         setMessage("複数の市区町村が該当します。都道府県と市区町村・番地を入力してください。");
         return;
       }
-      setPrefecture(String(fill.prefectureCode));
+      form.setFieldValue("prefecture", String(fill.prefectureCode));
       if (fill.status === "many-towns") {
         setMessage(
           "複数の町名が該当します。都道府県を入力しました。市区町村・番地を入力してください。",
@@ -68,7 +75,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
       const next = fill.status === "town" ? fill.city + fill.town : fill.city;
       if (cityStreet === "" || cityStreet === lastAutofill.current) {
         lastAutofill.current = next;
-        setCityStreet(next);
+        form.setFieldValue("cityStreet", next);
       }
       setMessage("");
     });
@@ -102,7 +109,8 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
             onChange={(event) => {
               requestVersion.current++;
               const value = event.target.value.normalize("NFKC").replaceAll("-", "");
-              setPostal(
+              form.setFieldValue(
+                "postal",
                 /^\d{7}$/.test(value)
                   ? `${value.slice(0, 3)}-${value.slice(3)}`
                   : event.target.value,
@@ -131,7 +139,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
         className={css({ maxW: "56" })}
         onValueChange={(value) => {
           requestVersion.current++;
-          setPrefecture(value ?? "");
+          form.setFieldValue("prefecture", value ?? "");
         }}
         options={PREFECTURE_OPTIONS}
         placeholder="選択してください"
@@ -148,7 +156,7 @@ export function PostalAddressFields({ values }: { values: Record<string, string>
         onChange={(event) => {
           requestVersion.current++;
           lastAutofill.current = "";
-          setCityStreet(event.target.value);
+          form.setFieldValue("cityStreet", event.target.value);
         }}
         placeholder="水戸市久が原978-6"
         value={cityStreet}

@@ -1,13 +1,13 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState, type FormEvent } from "react";
+import { useReducer, type FormEvent } from "react";
 import { describe, expect, it } from "vitest";
 
 import { Form } from "./Form";
 import { Input } from "./Input";
 
 function ControlledEmail() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useReducer((_current: string, next: string) => next, "");
   return (
     <>
       <Input

@@ -3,13 +3,18 @@
 import { createAuthBrowserClient } from "@/lib/auth/browser";
 import { OptimizedImage as Image } from "@/components/OptimizedImage";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useForm, useStore } from "@tanstack/react-form";
+import { usePersistedInput } from "@/lib/hooks/use-form-persisted-input";
+import {
+  useArticleCreatedNavigation,
+  useArticleMarkdownPreview,
+  useArticleSearchFocus,
+} from "@/lib/hooks/use-article-editor";
 import {
   useActionState,
-  useEffect,
   useMemo,
   useRef,
-  useState,
+  useReducer,
   useTransition,
   type ChangeEvent,
 } from "react";
@@ -28,9 +33,7 @@ import {
   Input,
   Notice,
   Textarea,
-  usePersistedInput,
 } from "@/components/form";
-import { renderMarkdownToHtml } from "@/lib/markdown/render";
 import { errorMessageJa } from "@/server/errors";
 import type { SellerArticleMaterial } from "@/server/queries/seller-articles";
 import { css, cx } from "../../../../../styled-system/css";
@@ -112,23 +115,46 @@ export function ArticleForm({
   initialStatus = "draft",
   initialMaterials = [],
 }: ArticleFormProps) {
-  const router = useRouter();
   const materialSearchRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const bodyImageInputRef = useRef<HTMLInputElement>(null);
   const statusInputRef = useRef<HTMLInputElement>(null);
-  const [title, setTitle] = useState(initialTitle);
-  const [body, setBody] = useState(initialBody);
-  const [heroImageUrl, setHeroImageUrl] = useState(initialHeroImageUrl ?? "");
-  const [materials, setMaterials] = useState<SellerArticleMaterial[]>(initialMaterials);
-  const [editorTab, setEditorTab] = useState<"write" | "preview">("write");
-  const [previewHtml, setPreviewHtml] = useState("");
-  const [materialQuery, setMaterialQuery] = useState("");
-  const [materialHits, setMaterialHits] = useState<SellerArticleMaterial[]>([]);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const form = useForm({
+    defaultValues: {
+      title: initialTitle,
+      body: initialBody,
+      heroImageUrl: initialHeroImageUrl ?? "",
+      materials: initialMaterials,
+      materialQuery: "",
+    },
+  });
+  const { title, body, heroImageUrl, materials, materialQuery } = useStore(
+    form.store,
+    (state) => state.values,
+  );
+  const [editorTab, setEditorTab] = useReducer(
+    (_: "write" | "preview", next: "write" | "preview") => next,
+    "write",
+  );
+  const previewHtml = useArticleMarkdownPreview(body, editorTab);
+  const [materialHits, updateMaterialHits] = useReducer(
+    (
+      current: SellerArticleMaterial[],
+      action: { type: "replace"; items: SellerArticleMaterial[] } | { type: "remove"; id: string },
+    ) =>
+      action.type === "replace" ? action.items : current.filter((item) => item.id !== action.id),
+    [],
+  );
+  const [uploadError, setUploadError] = useReducer(
+    (_: string | null, next: string | null) => next,
+    null,
+  );
+  const [uploading, setUploading] = useReducer((_: boolean, next: boolean) => next, false);
   const [searchPending, startSearch] = useTransition();
-  const [materialListOpen, setMaterialListOpen] = useState(false);
+  const [materialListOpen, setMaterialListOpen] = useReducer(
+    (_: boolean, next: boolean) => next,
+    false,
+  );
 
   const boundAction =
     mode === "create" ? createArticleAction : updateArticleAction.bind(null, articleId);
@@ -143,8 +169,15 @@ export function ArticleForm({
     () => ({ title, body, heroImageUrl, materials }),
     [title, body, heroImageUrl, materials],
   );
-  const [savedInput, setSavedInput] = useState(() => JSON.stringify(input));
-  const [settledState, setSettledState] = useState(state);
+  const [savedInput, setSavedInput] = useReducer(
+    (_: string, next: string) => next,
+    input,
+    JSON.stringify,
+  );
+  const [settledState, setSettledState] = useReducer(
+    (_: SellerArticleFormState, next: SellerArticleFormState) => next,
+    state,
+  );
   if (state !== settledState) {
     setSettledState(state);
     if (state.status === "success") setSavedInput(JSON.stringify(input));
@@ -155,33 +188,15 @@ export function ArticleForm({
     schema: ArticleInputSchema,
     unsaved: pending || JSON.stringify(input) === savedInput ? null : input,
     restore: (saved) => {
-      setTitle(saved.title);
-      setBody(saved.body);
-      setHeroImageUrl(saved.heroImageUrl);
-      setMaterials(saved.materials);
+      form.setFieldValue("title", saved.title);
+      form.setFieldValue("body", saved.body);
+      form.setFieldValue("heroImageUrl", saved.heroImageUrl);
+      form.setFieldValue("materials", saved.materials);
     },
   });
 
-  useEffect(() => {
-    if (state.status === "success" && state.articleId !== undefined && mode === "create") {
-      router.replace(`/dashboard/articles/${state.articleId}/edit`);
-    }
-  }, [mode, router, state]);
-
-  useEffect(() => {
-    if (editorTab !== "preview") return;
-    let cancelled = false;
-    void renderMarkdownToHtml(body).then((html) => {
-      if (!cancelled) setPreviewHtml(html);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [body, editorTab]);
-
-  useEffect(() => {
-    if (!searchPending && materialHits.length > 0) materialSearchRef.current?.focus();
-  }, [materialHits, searchPending]);
+  useArticleCreatedNavigation(state, mode);
+  useArticleSearchFocus(materialSearchRef, materialHits, searchPending);
 
   async function uploadArticleImage(file: File): Promise<string | null> {
     if (!isImageFile(file)) {
@@ -221,7 +236,7 @@ export function ArticleForm({
     setUploading(true);
     const url = await uploadArticleImage(file);
     setUploading(false);
-    if (url !== null) setHeroImageUrl(url);
+    if (url !== null) form.setFieldValue("heroImageUrl", url);
   }
 
   async function handleBodyImageChange(event: ChangeEvent<HTMLInputElement>): Promise<void> {
@@ -237,14 +252,14 @@ export function ArticleForm({
     const textarea = bodyRef.current;
     const markdown = `\n\n![画像](${url})\n\n`;
     if (textarea === null) {
-      setBody((current) => `${current}${markdown}`);
+      form.setFieldValue("body", (current) => `${current}${markdown}`);
       return;
     }
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const next = `${body.slice(0, start)}${markdown}${body.slice(end)}`;
-    setBody(next);
+    form.setFieldValue("body", next);
     requestAnimationFrame(() => {
       textarea.focus();
       const cursor = start + markdown.length;
@@ -255,7 +270,7 @@ export function ArticleForm({
   function handleMaterialSearch(): void {
     const q = materialQuery.trim();
     if (q.length === 0) {
-      setMaterialHits([]);
+      updateMaterialHits({ type: "replace", items: [] });
       return;
     }
 
@@ -263,25 +278,25 @@ export function ArticleForm({
       const result = await searchMaterialsAction(q);
       if (!result.ok) {
         setUploadError(result.message);
-        setMaterialHits([]);
+        updateMaterialHits({ type: "replace", items: [] });
         return;
       }
       setUploadError(null);
       const hits = result.items.filter((item) => !materials.some((m) => m.id === item.id));
-      setMaterialHits(hits);
+      updateMaterialHits({ type: "replace", items: hits });
       setMaterialListOpen(hits.length > 0);
     });
   }
 
   function addMaterial(material: SellerArticleMaterial): void {
-    setMaterials((current) =>
+    form.setFieldValue("materials", (current) =>
       current.some((item) => item.id === material.id) ? current : [...current, material],
     );
-    setMaterialHits((current) => current.filter((item) => item.id !== material.id));
+    updateMaterialHits({ type: "remove", id: material.id });
   }
 
   function removeMaterial(materialId: string): void {
-    setMaterials((current) => current.filter((item) => item.id !== materialId));
+    form.setFieldValue("materials", (current) => current.filter((item) => item.id !== materialId));
   }
 
   function submitWithStatus(status: "draft" | "published"): void {
@@ -315,7 +330,7 @@ export function ArticleForm({
           label="タイトル"
           name="title"
           requirement="required"
-          onChange={(event) => setTitle(event.target.value)}
+          onChange={(event) => form.setFieldValue("title", event.target.value)}
           placeholder="高温期の活用ガイド"
           value={title}
         />
@@ -355,7 +370,7 @@ export function ArticleForm({
               />
               <Button
                 disabled={busy}
-                onClick={() => setHeroImageUrl("")}
+                onClick={() => form.setFieldValue("heroImageUrl", "")}
                 size="sm"
                 type="button"
                 variant="ghost"
@@ -400,7 +415,7 @@ export function ArticleForm({
                       label={null}
                       className={css({ mt: "3", minH: "[220px]" })}
                       name="body"
-                      onChange={(event) => setBody(event.target.value)}
+                      onChange={(event) => form.setFieldValue("body", event.target.value)}
                       placeholder={
                         "見出しや箇条書きを Markdown で書けます。\n画像は「画像を挿入」から追加できます。"
                       }
@@ -465,8 +480,8 @@ export function ArticleForm({
           }}
           onSubmitText={handleMaterialSearch}
           onValueChange={(value) => {
-            setMaterialQuery(value);
-            setMaterialHits([]);
+            form.setFieldValue("materialQuery", value);
+            updateMaterialHits({ type: "replace", items: [] });
           }}
           open={materialListOpen}
           options={materialHits.map((material) => ({

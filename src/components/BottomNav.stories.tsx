@@ -26,7 +26,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // 非ログイン（中央の投稿ボタンあり）で active 各値を網羅する。
-// getSessionUser は preview.ts の sb.mock で __mocks__ 実装に差し替わっており、
+// getSessionUser は preview.tsx の sb.mock で __mocks__ 実装に差し替わっており、
 // コンポーネントと同じインスタンスを mocked() 経由で操作する。
 
 export const ActiveHome: Story = {

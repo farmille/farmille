@@ -3,7 +3,8 @@ import { createElement } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { MaterialCard } from "@/components/MaterialCard";
-import { HomeMaterialMarquee, easeRate } from "./HomeMaterialMarquee";
+import { HomeMaterialMarquee } from "./HomeMaterialMarquee";
+import { easeRate } from "@/lib/hooks/use-home-material-marquee";
 
 afterEach(cleanup);
 

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { useState } from "react";
+import { useReducer } from "react";
 import { fn } from "storybook/test";
 
 import { Fieldset } from "./form/Fieldset";
@@ -99,7 +99,7 @@ export const InputFull: Story = {
 };
 
 function RatingInput() {
-  const [value, setValue] = useState(3);
+  const [value, setValue] = useReducer((_current: number, next: number) => next, 3);
   return <StarRating mode="input" value={value} onChange={setValue} />;
 }
 export const Interactive: Story = {
@@ -108,7 +108,7 @@ export const Interactive: Story = {
 };
 
 function ReviewRating({ error }: { error?: string }) {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useReducer((_current: number, next: number) => next, 0);
   return (
     <Fieldset error={error} legend="総合評価" name="rating" requirement="required">
       <StarRating mode="input" value={value} onChange={setValue} />

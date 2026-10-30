@@ -13,7 +13,7 @@
 ## サーバー処理を変更する
 
 - ドメインロジック・Supabaseのテーブル/RPCアクセス・`SUPABASE_SECRET_KEY`の参照は`src/server/`に置く。画面・クライアント部品・Server Actionsから`.from()`・`.rpc()`を直接呼ばない。クライアントからの`auth.*`・`storage.*`利用は可。
-- 画面の読み取りはServer Componentsから`src/server/`を呼ぶ。変更はServer ActionsかRoute Handlersで行い、クライアントの状態は入力フォームとトグルに限る。
+- 画面の読み取りはServer Componentsから`src/server/`を呼ぶ。変更はServer ActionsかRoute Handlersで行う。クライアントの状態は[状態管理規約](docs/state-management.md)に沿って局所化する。
 - `src/app/api/`のRoute HandlersはフォームPOST・Webhook・外部からの呼び出しに使う。
 - エラーレスポンスは`{ok: false, error: "<code>"}`に揃え、日本語文言は`src/server/errors.ts`で管理する。例外は握り潰さず、画面では404・403・500を出し分ける。`error.tsx`・`not-found.tsx`を置く。
 
@@ -28,6 +28,10 @@
 ## UIを変更する
 
 画面のデータ取得・更新、状態、エラー表示を変える場合は、[サーバー処理](#サーバー処理を変更する)も読む。
+
+### 状態管理
+
+[状態管理規約](docs/state-management.md)に従い、状態の所有者と破棄するタイミングを決める。フォーム入力はTanStack Form、局所的なUI状態は`useReducer`で扱う。`useState`は使わない。`useEffect`・`useLayoutEffect`は`src/lib/hooks/`の用途別カスタムフック内でだけ使う。Story・テストにも同じ規則を適用する。
 
 ### 共通部品
 

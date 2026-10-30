@@ -20,7 +20,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// getSessionUser は preview.ts の sb.mock で __mocks__ 実装に差し替わっており、
+// getSessionUser は preview.tsx の sb.mock で __mocks__ 実装に差し替わっており、
 // コンポーネントと同じインスタンスを mocked() 経由で操作する。
 
 // placement="container"（既定）：デコレーターの相対枠の下端に absolute 配置される。

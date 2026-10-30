@@ -1,7 +1,8 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
-import { useState, type FormEvent } from "react";
+import { useReducer, type FormEvent } from "react";
+import { useForm, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import * as v from "valibot";
 
@@ -114,16 +115,24 @@ export function CompanyApplicationForm({
 }) {
   const router = useRouter();
   const defaultTarget = kind === "registration" ? "new" : "existing";
-  const [rows, setRows] = useState<ItemRow[]>([{ id: intentId, target: defaultTarget }]);
-  const [counts, setCounts] = useState<Map<string, number>>(new Map());
-  const [uploads, setUploads] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const initialRows: ItemRow[] = [{ id: intentId, target: defaultTarget }];
+  const form = useForm({ defaultValues: { rows: initialRows } });
+  const rows = useStore(form.store, (state) => state.values.rows);
+  const [counts, countEvidence] = useReducer(
+    (previous: Map<string, number>, entry: { key: string; count: number }) =>
+      new Map(previous).set(entry.key, entry.count),
+    new Map<string, number>(),
+  );
+  const [uploads, onBusy] = useReducer(
+    (count: number, busy: boolean) => count + (busy ? 1 : -1),
+    0,
+  );
+  const [submitting, setSubmitting] = useReducer((_state: boolean, next: boolean) => next, false);
+  const [error, setError] = useReducer((_state: string, next: string) => next, "");
   const copy = applicationCopy[kind];
   const titles = SECTION_TITLES[kind];
-  const onBusy = (busy: boolean) => setUploads((count) => count + (busy ? 1 : -1));
   function countFiles(key: string, count: number) {
-    setCounts((previous) => new Map(previous).set(key, count));
+    countEvidence({ key, count });
   }
   // 資材の欄の名前は行 ID を含むので、控えの行 ID で行を作り直してから欄に値を戻す。添付資料は付け直してもらう
   function restoreRows(restored: RestoredFields) {
@@ -133,7 +142,7 @@ export function CompanyApplicationForm({
       const target = v.safeParse(TargetSchema, restored.get(`${id}.target`)?.[0]);
       return [{ id, target: target.success ? target.output : defaultTarget }];
     });
-    if (restoredRows.length > 0) setRows(restoredRows);
+    if (restoredRows.length > 0) form.setFieldValue("rows", restoredRows);
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -216,9 +225,13 @@ export function CompanyApplicationForm({
               kind={kind}
               onBusy={onBusy}
               onCount={countFiles}
-              onRemove={() => setRows((previous) => previous.filter((item) => item.id !== row.id))}
+              onRemove={() =>
+                form.setFieldValue("rows", (previous) =>
+                  previous.filter((item) => item.id !== row.id),
+                )
+              }
               onTarget={(target) =>
-                setRows((previous) =>
+                form.setFieldValue("rows", (previous) =>
                   previous.map((item) => (item.id === row.id ? { ...item, target } : item)),
                 )
               }
@@ -234,7 +247,7 @@ export function CompanyApplicationForm({
           <Button
             disabled={rows.length >= 100 || submitting}
             onClick={() =>
-              setRows((previous) => [
+              form.setFieldValue("rows", (previous) => [
                 ...previous,
                 { id: crypto.randomUUID(), target: defaultTarget },
               ])

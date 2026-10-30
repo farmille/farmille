@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useReducer } from "react";
 
 import { sellerApplyAction } from "@/app/sellers/apply/actions";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/Collapsible";
@@ -21,7 +21,10 @@ export function SellerApplyForm() {
   const values = submittedValuesOf(state);
   const hadInvite =
     state.status === "error" && values.inviteCode !== undefined && values.inviteCode.length > 0;
-  const [inviteOpen, setInviteOpen] = useState(hadInvite);
+  const [inviteOpen, setInviteOpen] = useReducer(
+    (_state: boolean, next: boolean) => next,
+    hadInvite,
+  );
 
   return (
     <Form action={formAction} errors={fieldErrorsOf(state)} persist="seller-apply">
