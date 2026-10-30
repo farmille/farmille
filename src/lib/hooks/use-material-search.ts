@@ -51,11 +51,7 @@ function reduceSearchText(state: SearchText, action: SearchTextAction): SearchTe
 
 const DEBOUNCE_MS = 300;
 
-export function useMaterialSearch(
-  initialQuery: string,
-  selected: SelectedSearchFilter[],
-  sort: MaterialSortParam,
-) {
+export function useMaterialSearch(initialQuery: string, sort: MaterialSortParam) {
   const [{ text: query, synced }, dispatch] = useReducer(reduceSearchText, {
     text: initialQuery,
     synced: initialQuery,
@@ -82,10 +78,8 @@ export function useMaterialSearch(
     if (composing.current || value.trim() === initialQuery) return;
     timer.current = setTimeout(() => {
       dispatch({ type: "request", text: value });
-      void setSearch(
-        { filters: encodeFiltersQuery(selected), sort, q: value.trim() },
-        { history: "replace" },
-      );
+      // 待っている間に変わった絞り込みと並び順を戻さないよう、検索語だけを書き換える。
+      void setSearch({ q: value.trim() }, { history: "replace" });
     }, DEBOUNCE_MS);
   };
 

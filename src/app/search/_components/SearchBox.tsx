@@ -56,7 +56,7 @@ const categoryLabelRecipe = cva({
 
 export function SearchBox({ initialQuery, selected, sort, catalog }: SearchBoxProps) {
   const { query, isPending, setQuery, onCompositionStart, onCompositionEndCapture, navigate } =
-    useMaterialSearch(initialQuery, selected, sort);
+    useMaterialSearch(initialQuery, sort);
 
   const selectedKeys = useMemo(() => new Set(selected.map(selectedFilterKey)), [selected]);
 

@@ -1,7 +1,9 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { useQueryStates } from "nuqs";
 import { NuqsTestingAdapter, type UrlUpdateEvent } from "nuqs/adapters/testing";
 import type { ReactElement, ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { materialSearchParsers } from "@/lib/search-query-state";
 import { SearchBox } from "./SearchBox";
 
 const onUrlUpdate = vi.fn<(event: UrlUpdateEvent) => void>();
@@ -9,7 +11,9 @@ const onUrlUpdate = vi.fn<(event: UrlUpdateEvent) => void>();
 function renderSearch(element: ReactElement) {
   return render(element, {
     wrapper: ({ children }: { children: ReactNode }) => (
-      <NuqsTestingAdapter onUrlUpdate={onUrlUpdate}>{children}</NuqsTestingAdapter>
+      <NuqsTestingAdapter hasMemory onUrlUpdate={onUrlUpdate}>
+        {children}
+      </NuqsTestingAdapter>
     ),
   });
 }
@@ -20,6 +24,16 @@ const props = {
   sort: "reviews" as const,
   catalog: { filters: [], makers: [], materials: [{ name: "トマト資材", aliases: [] }] },
 };
+
+function SortToNewest() {
+  const [, setSearch] = useQueryStates(materialSearchParsers);
+
+  return (
+    <button type="button" onClick={() => void setSearch({ sort: "newest" })}>
+      新着順
+    </button>
+  );
+}
 
 const advanceSearch = () =>
   act(async () => {
@@ -54,6 +68,18 @@ describe("資材の入力検索", () => {
         options: expect.objectContaining({ history: "replace", shallow: false, scroll: false }),
       }),
     );
+  });
+  it("入力を待つ間に変えた並び順を戻さない", async () => {
+    renderSearch(
+      <>
+        <SearchBox {...props} />
+        <SortToNewest />
+      </>,
+    );
+    fireEvent.change(searchInput(), { target: { value: "トマト" } });
+    fireEvent.click(screen.getByRole("button", { name: "新着順" }));
+    await advanceSearch();
+    expect(onUrlUpdate.mock.lastCall?.[0].queryString).toBe("?sort=newest&q=トマト");
   });
   it("日本語変換の途中では検索しない", async () => {
     renderSearch(<SearchBox {...props} />);
